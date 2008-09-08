@@ -86,16 +86,16 @@ static double distance(const NeighborJoining *nj, unsigned long i,
   return distance;
 }
 
-static void updatertab(double *rtab, Bittab *nodetab, unsigned long activenodes,
+static void updatertab(double *rtab, GT_Bittab *nodetab, unsigned long activenodes,
                        NeighborJoining *nj)
 {
   unsigned long i, j;
   for (i = 0; i < nj->numofnodes; i++) {
-    if (bittab_bit_is_set(nodetab, i)) {
+    if (gt_bittab_bit_is_set(nodetab, i)) {
       /* in this case r[i] needs to be calculated */
       rtab[i] = 0.0; /* reset r[i] */
       for (j = 0; j < nj->numofnodes; j++) {
-        if ((j != i) && (bittab_bit_is_set(nodetab, j)))
+        if ((j != i) && (gt_bittab_bit_is_set(nodetab, j)))
           rtab[i] += distance(nj, i, j);
       }
       rtab[i] /= (activenodes - 2);
@@ -108,13 +108,13 @@ static void neighborjoining_compute(NeighborJoining *nj)
   unsigned long i, j, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG, step,
                 newnodenum = nj->num_of_taxa,
                 activenodes; /* |L| */
-  Bittab *nodetab; /* L */
+  GT_Bittab *nodetab; /* L */
   double mindist, *rtab;
 
   /* init node tab */
-  nodetab = bittab_new(nj->numofnodes);
+  nodetab = gt_bittab_new(nj->numofnodes);
   for (i = 0; i < nj->num_of_taxa; i++)
-    bittab_set_bit(nodetab, i);
+    gt_bittab_set_bit(nodetab, i);
   activenodes = nj->num_of_taxa;
 
   /* init the r table */
@@ -127,10 +127,10 @@ static void neighborjoining_compute(NeighborJoining *nj)
     /* determine two nodes for which the distance is minimal */
     mindist = DBL_MAX;
     for (i = 1; i < nj->numofnodes; i++) {
-      if (bittab_bit_is_set(nodetab, i)) {
+      if (gt_bittab_bit_is_set(nodetab, i)) {
         /* this node exists, check the distances */
         for (j = 0; j < i; j++) {
-          if (bittab_bit_is_set(nodetab, j) &&
+          if (gt_bittab_bit_is_set(nodetab, j) &&
               nj->nodes[i].distances[j] - (rtab[i] + rtab[j]) < mindist) {
             /* update minimum distance */
             mindist = nj->nodes[i].distances[j] - (rtab[i] + rtab[j]);
@@ -144,9 +144,9 @@ static void neighborjoining_compute(NeighborJoining *nj)
     /* add new node to L and remove the daughters */
     assert(min_i != UNDEF_ULONG);
     assert(min_j != UNDEF_ULONG);
-    bittab_set_bit(nodetab, newnodenum);
-    bittab_unset_bit(nodetab, min_i);
-    bittab_unset_bit(nodetab, min_j);
+    gt_bittab_set_bit(nodetab, newnodenum);
+    gt_bittab_unset_bit(nodetab, min_i);
+    gt_bittab_unset_bit(nodetab, min_j);
     activenodes--;
 
     /* save the new node */
@@ -159,7 +159,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
 
     /* update the distances */
     for (i = 0; i < newnodenum; i++) {
-      if (bittab_bit_is_set(nodetab, i)) {
+      if (gt_bittab_bit_is_set(nodetab, i)) {
         nj->nodes[newnodenum].distances[i] =
           (distance(nj, i, min_i) + distance(nj, i, min_j) -
            nj->nodes[min_i].distances[min_j]) / 2;
@@ -170,7 +170,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
 
   /* now only two nodes are active, save them and the distance between them */
   for (i = 0; i < nj->numofnodes; i++) {
-    if (bittab_bit_is_set(nodetab, i)) {
+    if (gt_bittab_bit_is_set(nodetab, i)) {
       nj->finalnodeA = i;
       break;
     }
@@ -178,7 +178,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
   nj->finalnodeB = nj->numofnodes - 1;
   nj->finaldist  = nj->nodes[nj->finalnodeB].distances[nj->finalnodeA];
 
-  bittab_delete(nodetab);
+  gt_bittab_delete(nodetab);
   gt_free(rtab);
 }
 

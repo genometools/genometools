@@ -28,19 +28,19 @@
 #define NUM_OF_TESTS    50
 #define MAX_SIZE        1024
 
-struct Bittab {
+struct GT_Bittab {
   unsigned long *tabptr,
                 tabsize,
                 num_of_bits;
 };
 
-Bittab* bittab_new(unsigned long num_of_bits)
+GT_Bittab* gt_bittab_new(unsigned long num_of_bits)
 {
-  Bittab *b;
+  GT_Bittab *b;
 
   assert(num_of_bits);
 
-  b = gt_malloc(sizeof (Bittab));
+  b = gt_malloc(sizeof (GT_Bittab));
   b->num_of_bits = num_of_bits;
 
   if (num_of_bits / (8UL * sizeof (unsigned long)))
@@ -53,21 +53,21 @@ Bittab* bittab_new(unsigned long num_of_bits)
   return b;
 }
 
-void bittab_set_bit(Bittab *b, unsigned long bit)
+void gt_bittab_set_bit(GT_Bittab *b, unsigned long bit)
 {
   assert(b && bit < b->num_of_bits);
   b->tabptr[(bit >> 3) / sizeof (unsigned long)] |=
     1UL << (bit & (8UL * sizeof (unsigned long) - 1));
 }
 
-void bittab_unset_bit(Bittab *b, unsigned long bit)
+void gt_bittab_unset_bit(GT_Bittab *b, unsigned long bit)
 {
   assert(b && bit < b->num_of_bits);
   b->tabptr[(bit >> 3) / sizeof (unsigned long)] &=
     ~(1UL << (bit & (8UL * sizeof (unsigned long) - 1)));
 }
 
-void bittab_complement(Bittab *dest, const Bittab *src)
+void gt_bittab_complement(GT_Bittab *dest, const GT_Bittab *src)
 {
   unsigned long i;
 
@@ -77,14 +77,14 @@ void bittab_complement(Bittab *dest, const Bittab *src)
     dest->tabptr[i] = ~src->tabptr[i];
 
   /* the ``last'' bittab gets special treatment to prevent that unused bits
-     become set. this could disturb subsequent bittab_count_set_bits() calls. */
+     become set. this could disturb subsequent gt_bittab_count_set_bits() calls. */
   dest->tabptr[src->tabsize - 1] = ~src->tabptr[src->tabsize - 1] &
                                    (~0UL >> (- src->num_of_bits +
                                              src->tabsize * 8UL *
                                              sizeof (unsigned long)));
 }
 
-void bittab_equal(Bittab *dest, const Bittab *src)
+void gt_bittab_equal(GT_Bittab *dest, const GT_Bittab *src)
 {
   unsigned long i;
   assert(dest && src && dest->num_of_bits == src->num_of_bits);
@@ -92,7 +92,7 @@ void bittab_equal(Bittab *dest, const Bittab *src)
     dest->tabptr[i] = src->tabptr[i];
 }
 
-void bittab_and(Bittab *dest, const Bittab *src1, const Bittab *src2)
+void gt_bittab_and(GT_Bittab *dest, const GT_Bittab *src1, const GT_Bittab *src2)
 {
   unsigned long i;
   assert(dest && src1 && src2);
@@ -102,7 +102,7 @@ void bittab_and(Bittab *dest, const Bittab *src1, const Bittab *src2)
     dest->tabptr[i] = src1->tabptr[i] & src2->tabptr[i];
 }
 
-void bittab_or(Bittab *dest, const Bittab *src1, const Bittab *src2)
+void gt_bittab_or(GT_Bittab *dest, const GT_Bittab *src1, const GT_Bittab *src2)
 {
   unsigned long i;
   assert(dest && src1 && src2);
@@ -112,9 +112,9 @@ void bittab_or(Bittab *dest, const Bittab *src1, const Bittab *src2)
     dest->tabptr[i] = src1->tabptr[i] | src2->tabptr[i];
 }
 
-void bittab_nand(Bittab *dest,
-                  const Bittab *minuend,
-                  const Bittab *subtrahend)
+void gt_bittab_nand(GT_Bittab *dest,
+                  const GT_Bittab *minuend,
+                  const GT_Bittab *subtrahend)
 {
   unsigned long i;
   assert(dest && minuend && subtrahend);
@@ -124,7 +124,7 @@ void bittab_nand(Bittab *dest,
     dest->tabptr[i] = minuend->tabptr[i] & ~subtrahend->tabptr[i];
 }
 
-void bittab_and_equal(Bittab *dest, const Bittab *src)
+void gt_bittab_and_equal(GT_Bittab *dest, const GT_Bittab *src)
 {
   unsigned long i;
   assert(dest && src);
@@ -133,7 +133,7 @@ void bittab_and_equal(Bittab *dest, const Bittab *src)
     dest->tabptr[i] &= src->tabptr[i];
 }
 
-void bittab_or_equal(Bittab *dest, const Bittab *src)
+void gt_bittab_or_equal(GT_Bittab *dest, const GT_Bittab *src)
 {
   unsigned long i;
   assert(dest && src);
@@ -142,7 +142,7 @@ void bittab_or_equal(Bittab *dest, const Bittab *src)
     dest->tabptr[i] |= src->tabptr[i];
 }
 
-void bittab_shift_left_equal(Bittab *b)
+void gt_bittab_shift_left_equal(GT_Bittab *b)
 {
   unsigned long i, new_carry, old_carry = 0;
   assert(b);
@@ -153,7 +153,7 @@ void bittab_shift_left_equal(Bittab *b)
   }
 }
 
-void bittab_shift_right_equal(Bittab *b)
+void gt_bittab_shift_right_equal(GT_Bittab *b)
 {
   unsigned long i, new_carry, old_carry = 0;
   assert(b);
@@ -164,7 +164,7 @@ void bittab_shift_right_equal(Bittab *b)
   }
 }
 
-void bittab_unset(Bittab *b)
+void gt_bittab_unset(GT_Bittab *b)
 {
   unsigned long i;
   assert(b);
@@ -172,15 +172,15 @@ void bittab_unset(Bittab *b)
     b->tabptr[i] = 0;
 }
 
-void bittab_get_all_bitnums(const Bittab *b, GT_Array *bitnums)
+void gt_bittab_get_all_bitnums(const GT_Bittab *b, GT_Array *bitnums)
 {
   unsigned long i;
   assert(b && bitnums);
   for (i = 0; i < b->num_of_bits; i++)
-    if (bittab_bit_is_set(b, i)) gt_array_add(bitnums, i);
+    if (gt_bittab_bit_is_set(b, i)) gt_array_add(bitnums, i);
 }
 
-bool bittab_bit_is_set(const Bittab *b, unsigned long bit)
+bool gt_bittab_bit_is_set(const GT_Bittab *b, unsigned long bit)
 {
   assert(b && bit < b->num_of_bits);
   if (b->tabptr[(bit >> 3) / sizeof (unsigned long)] &
@@ -190,7 +190,7 @@ bool bittab_bit_is_set(const Bittab *b, unsigned long bit)
   return false;
 }
 
-bool bittab_is_true(const Bittab *b)
+bool gt_bittab_is_true(const GT_Bittab *b)
 {
   unsigned long i;
   assert(b);
@@ -201,7 +201,7 @@ bool bittab_is_true(const Bittab *b)
   return false;
 }
 
-bool bittab_cmp(const Bittab *b1, const Bittab *b2)
+bool gt_bittab_cmp(const GT_Bittab *b1, const GT_Bittab *b2)
 {
   unsigned long i;
   assert(b1 && b2 && b1->num_of_bits == b2->num_of_bits);
@@ -212,18 +212,18 @@ bool bittab_cmp(const Bittab *b1, const Bittab *b2)
   return true;
 }
 
-unsigned long bittab_size(Bittab *b)
+unsigned long gt_bittab_size(GT_Bittab *b)
 {
   assert(b);
   return b->num_of_bits;
 }
 
-unsigned long bittab_get_first_bitnum(const Bittab *b)
+unsigned long gt_bittab_get_first_bitnum(const GT_Bittab *b)
 {
   unsigned long i, rval = UNDEF_ULONG;
   assert(b);
   for (i = 0; i < b->num_of_bits; i++)
-    if (bittab_bit_is_set(b, i)) {
+    if (gt_bittab_bit_is_set(b, i)) {
       rval = i;
       break;
     }
@@ -232,20 +232,20 @@ unsigned long bittab_get_first_bitnum(const Bittab *b)
   return rval;
 }
 
-unsigned long bittab_get_last_bitnum(const Bittab *b)
+unsigned long gt_bittab_get_last_bitnum(const GT_Bittab *b)
 {
   assert(b);
   return b->num_of_bits;
 }
 
-unsigned long bittab_get_next_bitnum(const Bittab *b, unsigned long curnum)
+unsigned long gt_bittab_get_next_bitnum(const GT_Bittab *b, unsigned long curnum)
 {
   unsigned long i, rval = UNDEF_ULONG;
 
   assert(b);
   assert(curnum < b->num_of_bits);
   for (i = curnum + 1; i < b->num_of_bits; i++)
-    if (bittab_bit_is_set(b, i)) {
+    if (gt_bittab_bit_is_set(b, i)) {
       rval = i;
       break;
     }
@@ -254,7 +254,7 @@ unsigned long bittab_get_next_bitnum(const Bittab *b, unsigned long curnum)
   return rval;
 }
 
-unsigned long bittab_count_set_bits(Bittab *b)
+unsigned long gt_bittab_count_set_bits(GT_Bittab *b)
 {
   static const unsigned char bits_in_char[256] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2,
                                                    2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
@@ -290,7 +290,7 @@ unsigned long bittab_count_set_bits(Bittab *b)
   return counter;
 }
 
-void bittab_show(const Bittab *b, FILE *outfp)
+void gt_bittab_show(const GT_Bittab *b, FILE *outfp)
 {
   unsigned long i;
   assert(b && outfp);
@@ -300,7 +300,7 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
   /* actual bits */
   for (i = 0; i < b->num_of_bits; i++) {
-    if (bittab_bit_is_set(b, i))
+    if (gt_bittab_bit_is_set(b, i))
       (void) putc('1', outfp);
     else
       (void) putc('0', outfp);
@@ -308,165 +308,165 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
-int bittab_example(GT_UNUSED GT_Error *err)
+int gt_bittab_example(GT_UNUSED GT_Error *err)
 {
   unsigned long bit;
-  Bittab *b;
+  GT_Bittab *b;
   gt_error_check(err);
 
-  b = bittab_new(32);
-  bittab_set_bit(b, 8);
-  bittab_set_bit(b, 16);
-  bittab_set_bit(b, 24);
+  b = gt_bittab_new(32);
+  gt_bittab_set_bit(b, 8);
+  gt_bittab_set_bit(b, 16);
+  gt_bittab_set_bit(b, 24);
 
   /* a typical iterator loop */
-  for (bit  = bittab_get_first_bitnum(b);
-       bit != bittab_get_last_bitnum(b);
-       bit  = bittab_get_next_bitnum(b, bit)) {
+  for (bit  = gt_bittab_get_first_bitnum(b);
+       bit != gt_bittab_get_last_bitnum(b);
+       bit  = gt_bittab_get_next_bitnum(b, bit)) {
     /* ... */
   }
 
-  bittab_delete(b);
+  gt_bittab_delete(b);
 
   return 0;
 }
 
-int bittab_unit_test(GT_Error *err)
+int gt_bittab_unit_test(GT_Error *err)
 {
   unsigned long i, j, size, bit, counter;
-  Bittab *b, *tmp, *and;
+  GT_Bittab *b, *tmp, *and;
   FILE *fp;
   int had_err = 0;
   gt_error_check(err);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     size = rand_max(MAX_SIZE) + 1;
-    b = bittab_new(size);
-    tmp = bittab_new(size);
-    and = bittab_new(size);
-    ensure(had_err, bittab_size(b) == size);
+    b = gt_bittab_new(size);
+    tmp = gt_bittab_new(size);
+    and = gt_bittab_new(size);
+    ensure(had_err, gt_bittab_size(b) == size);
 
     for (j = 0; j < size && !had_err; j++) {
       counter = 0;
-      for (bit  = bittab_get_first_bitnum(b);
-           bit != bittab_get_last_bitnum(b);
-           bit  = bittab_get_next_bitnum(b, bit)) {
+      for (bit  = gt_bittab_get_first_bitnum(b);
+           bit != gt_bittab_get_last_bitnum(b);
+           bit  = gt_bittab_get_next_bitnum(b, bit)) {
         counter++;
       }
       ensure(had_err, counter == j);
 
-      ensure(had_err, bittab_count_set_bits(b) == j);
-      ensure(had_err, !bittab_bit_is_set(b, j));
-      bittab_set_bit(b, j);
-      ensure(had_err, bittab_bit_is_set(b, j));
+      ensure(had_err, gt_bittab_count_set_bits(b) == j);
+      ensure(had_err, !gt_bittab_bit_is_set(b, j));
+      gt_bittab_set_bit(b, j);
+      ensure(had_err, gt_bittab_bit_is_set(b, j));
 
-      bittab_complement(tmp, b);
-      ensure(had_err, bittab_count_set_bits(tmp) == size - j - 1);
-      ensure(had_err, !bittab_cmp(b, tmp));
-      bittab_and(and, b, tmp);
-      ensure(had_err, bittab_count_set_bits(and) == 0);
+      gt_bittab_complement(tmp, b);
+      ensure(had_err, gt_bittab_count_set_bits(tmp) == size - j - 1);
+      ensure(had_err, !gt_bittab_cmp(b, tmp));
+      gt_bittab_and(and, b, tmp);
+      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
-      bittab_unset(and);
-      bittab_equal(and, b);
-      bittab_or_equal(and, tmp);
-      ensure(had_err, bittab_size(and) == size);
+      gt_bittab_unset(and);
+      gt_bittab_equal(and, b);
+      gt_bittab_or_equal(and, tmp);
+      ensure(had_err, gt_bittab_size(and) == size);
 
-      bittab_equal(and, b);
-      ensure(had_err, bittab_count_set_bits(and) == j + 1);
-      bittab_and_equal(and, tmp);
-      ensure(had_err, bittab_count_set_bits(and) == 0);
+      gt_bittab_equal(and, b);
+      ensure(had_err, gt_bittab_count_set_bits(and) == j + 1);
+      gt_bittab_and_equal(and, tmp);
+      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
-      bittab_complement(tmp, tmp);
-      ensure(had_err, bittab_cmp(b, tmp));
+      gt_bittab_complement(tmp, tmp);
+      ensure(had_err, gt_bittab_cmp(b, tmp));
     }
 
-    ensure(had_err, bittab_count_set_bits(b) == size);
-    bittab_complement(tmp, b);
-    ensure(had_err, bittab_count_set_bits(tmp) == 0);
+    ensure(had_err, gt_bittab_count_set_bits(b) == size);
+    gt_bittab_complement(tmp, b);
+    ensure(had_err, gt_bittab_count_set_bits(tmp) == 0);
 
     for (j = 0; j < size && !had_err; j++) {
-      bittab_unset_bit(b, j);
-      ensure(had_err, !bittab_bit_is_set(b, j));
-      ensure(had_err, bittab_count_set_bits(b) == size - j - 1);
+      gt_bittab_unset_bit(b, j);
+      ensure(had_err, !gt_bittab_bit_is_set(b, j));
+      ensure(had_err, gt_bittab_count_set_bits(b) == size - j - 1);
 
-      bittab_complement(tmp, b);
-      ensure(had_err, !bittab_cmp(b, tmp));
-      ensure(had_err, bittab_count_set_bits(tmp) == j + 1);
-      bittab_and(and, b, tmp);
-      ensure(had_err, bittab_count_set_bits(and) == 0);
+      gt_bittab_complement(tmp, b);
+      ensure(had_err, !gt_bittab_cmp(b, tmp));
+      ensure(had_err, gt_bittab_count_set_bits(tmp) == j + 1);
+      gt_bittab_and(and, b, tmp);
+      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
-      bittab_unset(and);
-      bittab_equal(and, b);
-      bittab_or_equal(and, tmp);
-      ensure(had_err, bittab_size(and) == size);
+      gt_bittab_unset(and);
+      gt_bittab_equal(and, b);
+      gt_bittab_or_equal(and, tmp);
+      ensure(had_err, gt_bittab_size(and) == size);
 
-      bittab_equal(and, b);
-      ensure(had_err, bittab_count_set_bits(and) == size - j - 1);
-      bittab_and_equal(and, tmp);
-      ensure(had_err, bittab_count_set_bits(and) == 0);
+      gt_bittab_equal(and, b);
+      ensure(had_err, gt_bittab_count_set_bits(and) == size - j - 1);
+      gt_bittab_and_equal(and, tmp);
+      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
-      bittab_complement(tmp, tmp);
-      ensure(had_err, bittab_cmp(b, tmp));
+      gt_bittab_complement(tmp, tmp);
+      ensure(had_err, gt_bittab_cmp(b, tmp));
     }
 
-    bittab_delete(b);
-    bittab_delete(tmp);
-    bittab_delete(and);
+    gt_bittab_delete(b);
+    gt_bittab_delete(tmp);
+    gt_bittab_delete(and);
   }
 
-  /* test bittab_show */
+  /* test gt_bittab_show */
   fp = fa_xfopen("/dev/null", "w");
-  b = bittab_new(80);
+  b = gt_bittab_new(80);
   for (i = 0; i < 80; i++) {
     if (i % 2)
-      bittab_set_bit(b, i);
+      gt_bittab_set_bit(b, i);
   }
-  bittab_show(b, fp);
-  bittab_delete(b);
+  gt_bittab_show(b, fp);
+  gt_bittab_delete(b);
   fa_xfclose(fp);
 
-  /* test bittab_shift_left_equal() */
-  b = bittab_new(125);
-  bittab_set_bit(b, 0);
-  bittab_set_bit(b, 32);
-  bittab_set_bit(b, 64);
-  bittab_set_bit(b, 77);
-  bittab_set_bit(b, 96);
-  bittab_set_bit(b, 123);
-  ensure(had_err, bittab_count_set_bits(b) == 6);
-  bittab_shift_left_equal(b);
-  ensure(had_err, bittab_count_set_bits(b) == 6);
-  ensure(had_err, bittab_bit_is_set(b, 1));
-  ensure(had_err, bittab_bit_is_set(b, 33));
-  ensure(had_err, bittab_bit_is_set(b, 65));
-  ensure(had_err, bittab_bit_is_set(b, 78));
-  ensure(had_err, bittab_bit_is_set(b, 97));
-  ensure(had_err, bittab_bit_is_set(b, 124));
-  bittab_delete(b);
+  /* test gt_bittab_shift_left_equal() */
+  b = gt_bittab_new(125);
+  gt_bittab_set_bit(b, 0);
+  gt_bittab_set_bit(b, 32);
+  gt_bittab_set_bit(b, 64);
+  gt_bittab_set_bit(b, 77);
+  gt_bittab_set_bit(b, 96);
+  gt_bittab_set_bit(b, 123);
+  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  gt_bittab_shift_left_equal(b);
+  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  ensure(had_err, gt_bittab_bit_is_set(b, 1));
+  ensure(had_err, gt_bittab_bit_is_set(b, 33));
+  ensure(had_err, gt_bittab_bit_is_set(b, 65));
+  ensure(had_err, gt_bittab_bit_is_set(b, 78));
+  ensure(had_err, gt_bittab_bit_is_set(b, 97));
+  ensure(had_err, gt_bittab_bit_is_set(b, 124));
+  gt_bittab_delete(b);
 
-  /* test bittab_shift_right_equal() */
-  b = bittab_new(125);
-  bittab_set_bit(b, 1);
-  bittab_set_bit(b, 33);
-  bittab_set_bit(b, 65);
-  bittab_set_bit(b, 77);
-  bittab_set_bit(b, 97);
-  bittab_set_bit(b, 124);
-  ensure(had_err, bittab_count_set_bits(b) == 6);
-  bittab_shift_right_equal(b);
-  ensure(had_err, bittab_count_set_bits(b) == 6);
-  ensure(had_err, bittab_bit_is_set(b, 0));
-  ensure(had_err, bittab_bit_is_set(b, 32));
-  ensure(had_err, bittab_bit_is_set(b, 64));
-  ensure(had_err, bittab_bit_is_set(b, 76));
-  ensure(had_err, bittab_bit_is_set(b, 96));
-  ensure(had_err, bittab_bit_is_set(b, 123));
-  bittab_delete(b);
+  /* test gt_bittab_shift_right_equal() */
+  b = gt_bittab_new(125);
+  gt_bittab_set_bit(b, 1);
+  gt_bittab_set_bit(b, 33);
+  gt_bittab_set_bit(b, 65);
+  gt_bittab_set_bit(b, 77);
+  gt_bittab_set_bit(b, 97);
+  gt_bittab_set_bit(b, 124);
+  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  gt_bittab_shift_right_equal(b);
+  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  ensure(had_err, gt_bittab_bit_is_set(b, 0));
+  ensure(had_err, gt_bittab_bit_is_set(b, 32));
+  ensure(had_err, gt_bittab_bit_is_set(b, 64));
+  ensure(had_err, gt_bittab_bit_is_set(b, 76));
+  ensure(had_err, gt_bittab_bit_is_set(b, 96));
+  ensure(had_err, gt_bittab_bit_is_set(b, 123));
+  gt_bittab_delete(b);
 
   return had_err;
 }
 
-void bittab_delete(Bittab *b)
+void gt_bittab_delete(GT_Bittab *b)
 {
   if (!b) return;
   gt_free(b->tabptr);

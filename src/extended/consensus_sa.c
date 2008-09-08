@@ -276,20 +276,20 @@ static bool contains(const ConsensusSA *csa,
   return false;
 }
 
-static void compute_C(Bittab **C, const ConsensusSA *csa)
+static void compute_C(GT_Bittab **C, const ConsensusSA *csa)
 {
   unsigned long sa, sa_1;
   assert(csa);
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
       if (contains(csa, sa, sa_1))
-        bittab_set_bit(C[sa], sa_1);
+        gt_bittab_set_bit(C[sa], sa_1);
     }
-    assert(bittab_bit_is_set(C[sa], sa));
+    assert(gt_bittab_bit_is_set(C[sa], sa));
   }
 }
 
-static void compute_left_or_right(Bittab **left_or_right,
+static void compute_left_or_right(GT_Bittab **left_or_right,
                                   const ConsensusSA *csa,
                                   bool (*cmp_func) (const ConsensusSA *csa,
                                                     unsigned long sa_1,
@@ -300,7 +300,7 @@ static void compute_left_or_right(Bittab **left_or_right,
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
       if (cmp_func(csa, sa, sa_1) && compatible(csa, sa, sa_1))
-        bittab_set_bit(left_or_right[sa], sa_1);
+        gt_bittab_set_bit(left_or_right[sa], sa_1);
     }
   }
 }
@@ -329,44 +329,44 @@ static bool is_left_of(const ConsensusSA *csa,
   return false;
 }
 
-static void compute_left(Bittab **left, const ConsensusSA *csa)
+static void compute_left(GT_Bittab **left, const ConsensusSA *csa)
 {
   assert(csa);
   compute_left_or_right(left, csa, is_right_of);
 }
 
-static void compute_right(Bittab **right, const ConsensusSA *csa)
+static void compute_right(GT_Bittab **right, const ConsensusSA *csa)
 {
   assert(csa);
   compute_left_or_right(right, csa, is_left_of);
 }
 
-static void compute_L(Bittab **L, Bittab **C, Bittab **left,
+static void compute_L(GT_Bittab **L, GT_Bittab **C, GT_Bittab **left,
                       unsigned long number_of_sas)
 {
   unsigned long sa, sa_1, sa_2, sa_1_size = 0, sa_2_size;
-  Bittab *tmpset = bittab_new(number_of_sas);
+  GT_Bittab *tmpset = gt_bittab_new(number_of_sas);
 
   for (sa = 0; sa < number_of_sas; sa++) {
     sa_1 = UNDEF_ULONG;
 
-    if (!bittab_is_true(left[sa])) {
+    if (!gt_bittab_is_true(left[sa])) {
       /* bittab is empty */
-      bittab_equal(L[sa], C[sa]);
+      gt_bittab_equal(L[sa], C[sa]);
     }
     else {
-      for (sa_2  = bittab_get_first_bitnum(left[sa]);
-           sa_2 != bittab_get_last_bitnum(left[sa]);
-           sa_2  = bittab_get_next_bitnum(left[sa], sa_2)) {
+      for (sa_2  = gt_bittab_get_first_bitnum(left[sa]);
+           sa_2 != gt_bittab_get_last_bitnum(left[sa]);
+           sa_2  = gt_bittab_get_next_bitnum(left[sa], sa_2)) {
         if (sa_1 == UNDEF_ULONG) {
           sa_1 = sa_2;
 
-          bittab_or(tmpset, L[sa_1], C[sa]);
-          sa_1_size = bittab_count_set_bits(tmpset);
+          gt_bittab_or(tmpset, L[sa_1], C[sa]);
+          sa_1_size = gt_bittab_count_set_bits(tmpset);
         }
         else {
-          bittab_or(tmpset, L[sa_2], C[sa]);
-          sa_2_size = bittab_count_set_bits(tmpset);
+          gt_bittab_or(tmpset, L[sa_2], C[sa]);
+          sa_2_size = gt_bittab_count_set_bits(tmpset);
 
           if (sa_2_size > sa_1_size) {
             sa_1      = sa_2;
@@ -376,39 +376,39 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
       }
 
       assert(sa_1 != UNDEF_ULONG);
-      bittab_or(L[sa], L[sa_1], C[sa]);
+      gt_bittab_or(L[sa], L[sa_1], C[sa]);
     }
   }
-  bittab_delete(tmpset);
+  gt_bittab_delete(tmpset);
 }
 
-static void compute_R(Bittab **R, Bittab **C, Bittab **right,
+static void compute_R(GT_Bittab **R, GT_Bittab **C, GT_Bittab **right,
                       unsigned long number_of_sas)
 {
   unsigned long sa_1, sa_2, sa_1_size = 0, sa_2_size;
   long sa;
-  Bittab *tmpset = bittab_new(number_of_sas);
+  GT_Bittab *tmpset = gt_bittab_new(number_of_sas);
 
   for (sa = number_of_sas-1; sa >= 0; sa--) {
     sa_1 = UNDEF_ULONG;
 
-    if (!bittab_is_true(right[sa])) {
+    if (!gt_bittab_is_true(right[sa])) {
       /* bittab is empty */
-      bittab_equal(R[sa], C[sa]);
+      gt_bittab_equal(R[sa], C[sa]);
     }
     else {
-      for (sa_2  = bittab_get_first_bitnum(right[sa]);
-           sa_2 != bittab_get_last_bitnum(right[sa]);
-           sa_2  = bittab_get_next_bitnum(right[sa], sa_2)) {
+      for (sa_2  = gt_bittab_get_first_bitnum(right[sa]);
+           sa_2 != gt_bittab_get_last_bitnum(right[sa]);
+           sa_2  = gt_bittab_get_next_bitnum(right[sa], sa_2)) {
         if (sa_1 == UNDEF_ULONG) {
           sa_1 = sa_2;
 
-          bittab_or(tmpset, R[sa_1], C[sa]);
-          sa_1_size = bittab_count_set_bits(tmpset);
+          gt_bittab_or(tmpset, R[sa_1], C[sa]);
+          sa_1_size = gt_bittab_count_set_bits(tmpset);
         }
         else {
-          bittab_or(tmpset, R[sa_2], C[sa]);
-          sa_2_size = bittab_count_set_bits(tmpset);
+          gt_bittab_or(tmpset, R[sa_2], C[sa]);
+          sa_2_size = gt_bittab_count_set_bits(tmpset);
 
           if (sa_2_size > sa_1_size) {
             sa_1      = sa_2;
@@ -417,29 +417,29 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
         }
       }
       assert(sa_1 != UNDEF_ULONG);
-      bittab_or(R[sa], R[sa_1], C[sa]);
+      gt_bittab_or(R[sa], R[sa_1], C[sa]);
     }
   }
-  bittab_delete(tmpset);
+  gt_bittab_delete(tmpset);
 }
 
 #ifndef NDEBUG
-static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa)
+static bool splice_form_is_valid(GT_Bittab *SA_p, const ConsensusSA *csa)
 {
-  Bittab *SA_p_complement; /* SA \ SA_p */
+  GT_Bittab *SA_p_complement; /* SA \ SA_p */
   unsigned long sa, sa_prime;
   bool incompatible_found, valid = true;
 
-  SA_p_complement = bittab_new(csa->number_of_sas);
-  bittab_complement(SA_p_complement, SA_p);
+  SA_p_complement = gt_bittab_new(csa->number_of_sas);
+  gt_bittab_complement(SA_p_complement, SA_p);
 
-  for (sa_prime  = bittab_get_first_bitnum(SA_p_complement);
-       sa_prime != bittab_get_last_bitnum(SA_p_complement);
-       sa_prime  = bittab_get_next_bitnum(SA_p_complement, sa_prime)) {
+  for (sa_prime  = gt_bittab_get_first_bitnum(SA_p_complement);
+       sa_prime != gt_bittab_get_last_bitnum(SA_p_complement);
+       sa_prime  = gt_bittab_get_next_bitnum(SA_p_complement, sa_prime)) {
     incompatible_found = false;
-    for (sa  = bittab_get_first_bitnum(SA_p);
-         sa != bittab_get_last_bitnum(SA_p);
-         sa  = bittab_get_next_bitnum(SA_p, sa)) {
+    for (sa  = gt_bittab_get_first_bitnum(SA_p);
+         sa != gt_bittab_get_last_bitnum(SA_p);
+         sa  = gt_bittab_get_next_bitnum(SA_p, sa)) {
       if (!compatible(csa, sa, sa_prime)) {
         incompatible_found = true;
         break;
@@ -447,7 +447,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa)
     }
     if (!incompatible_found) { valid = false; break; }
   }
-  bittab_delete(SA_p_complement);
+  gt_bittab_delete(SA_p_complement);
   return valid;
 }
 #endif
@@ -456,30 +456,30 @@ static void compute_csas(ConsensusSA *csa)
 {
   unsigned long i, sa_i, sa_i_size = 0, sa_prime, sa_prime_size;
   GT_Array *splice_form;
-  Bittab **C, **left, **right, **L, **R, *U_i, *SA_i, *SA_prime;
+  GT_Bittab **C, **left, **right, **L, **R, *U_i, *SA_i, *SA_prime;
 #ifndef NDEBUG
   unsigned long u_i_size, u_i_minus_1_size;
   assert(csa && csa->set_of_sas);
 #endif
 
   /* init sets */
-  C     = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  left  = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  right = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  L     = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  R     = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  C     = gt_malloc(sizeof (GT_Bittab*) * csa->number_of_sas);
+  left  = gt_malloc(sizeof (GT_Bittab*) * csa->number_of_sas);
+  right = gt_malloc(sizeof (GT_Bittab*) * csa->number_of_sas);
+  L     = gt_malloc(sizeof (GT_Bittab*) * csa->number_of_sas);
+  R     = gt_malloc(sizeof (GT_Bittab*) * csa->number_of_sas);
 
   for (i = 0; i < csa->number_of_sas; i++) {
-    C[i]     = bittab_new(csa->number_of_sas);
-    left[i]  = bittab_new(csa->number_of_sas);
-    right[i] = bittab_new(csa->number_of_sas);
-    L[i]     = bittab_new(csa->number_of_sas);
-    R[i]     = bittab_new(csa->number_of_sas);
+    C[i]     = gt_bittab_new(csa->number_of_sas);
+    left[i]  = gt_bittab_new(csa->number_of_sas);
+    right[i] = gt_bittab_new(csa->number_of_sas);
+    L[i]     = gt_bittab_new(csa->number_of_sas);
+    R[i]     = gt_bittab_new(csa->number_of_sas);
   }
 
-  U_i      = bittab_new(csa->number_of_sas);
-  SA_i     = bittab_new(csa->number_of_sas);
-  SA_prime = bittab_new(csa->number_of_sas);
+  U_i      = gt_bittab_new(csa->number_of_sas);
+  SA_i     = gt_bittab_new(csa->number_of_sas);
+  SA_prime = gt_bittab_new(csa->number_of_sas);
 
   splice_form = gt_array_new(sizeof (unsigned long));
 
@@ -492,29 +492,29 @@ static void compute_csas(ConsensusSA *csa)
 
   /* U_0 = SA */
   for (i = 0; i < csa->number_of_sas; i++)
-    bittab_set_bit(U_i, i);
+    gt_bittab_set_bit(U_i, i);
 
 #ifndef NDEBUG
   /* preparation for assertion below */
-  u_i_minus_1_size = bittab_count_set_bits(U_i);
+  u_i_minus_1_size = gt_bittab_count_set_bits(U_i);
 #endif
-  while (bittab_is_true(U_i)) {
+  while (gt_bittab_is_true(U_i)) {
     sa_i = UNDEF_ULONG;
-    for (sa_prime  = bittab_get_first_bitnum(U_i);
-         sa_prime != bittab_get_last_bitnum(U_i);
-         sa_prime  = bittab_get_next_bitnum(U_i, sa_prime)) {
+    for (sa_prime  = gt_bittab_get_first_bitnum(U_i);
+         sa_prime != gt_bittab_get_last_bitnum(U_i);
+         sa_prime  = gt_bittab_get_next_bitnum(U_i, sa_prime)) {
       if (sa_i == UNDEF_ULONG) {
         sa_i = sa_prime;
-        bittab_or(SA_i, L[sa_i], R[sa_i]);
-        sa_i_size = bittab_count_set_bits(SA_i);
+        gt_bittab_or(SA_i, L[sa_i], R[sa_i]);
+        sa_i_size = gt_bittab_count_set_bits(SA_i);
       }
       else {
-        bittab_or(SA_prime, L[sa_prime], R[sa_prime]);
-        sa_prime_size = bittab_count_set_bits(SA_prime);
+        gt_bittab_or(SA_prime, L[sa_prime], R[sa_prime]);
+        sa_prime_size = gt_bittab_count_set_bits(SA_prime);
         if (sa_prime_size > sa_i_size) {
           sa_i = sa_prime;
           sa_i_size = sa_prime_size;
-          bittab_equal(SA_i, SA_prime);
+          gt_bittab_equal(SA_i, SA_prime);
         }
       }
     }
@@ -525,17 +525,17 @@ static void compute_csas(ConsensusSA *csa)
     /* process splice form */
     if (csa->process_splice_form) {
       gt_array_reset(splice_form);
-      bittab_get_all_bitnums(SA_i, splice_form);
+      gt_bittab_get_all_bitnums(SA_i, splice_form);
       csa->process_splice_form(splice_form, csa->set_of_sas, csa->number_of_sas,
                                csa->size_of_sa, csa->userdata);
     }
 
     /* U_i = U_i-1 \ SA_i */
-    bittab_nand(U_i, U_i, SA_i);
+    gt_bittab_nand(U_i, U_i, SA_i);
 
 #ifndef NDEBUG
     /* ensure that |U_i| < |U_i-1| */
-    u_i_size = bittab_count_set_bits(U_i);
+    u_i_size = gt_bittab_count_set_bits(U_i);
     assert(u_i_size < u_i_minus_1_size);
     u_i_minus_1_size = u_i_size;
 #endif
@@ -543,20 +543,20 @@ static void compute_csas(ConsensusSA *csa)
 
   /* free sets */
   for (i = 0; i < csa->number_of_sas; i++) {
-    bittab_delete(C[i]);
-    bittab_delete(left[i]);
-    bittab_delete(right[i]);
-    bittab_delete(L[i]);
-    bittab_delete(R[i]);
+    gt_bittab_delete(C[i]);
+    gt_bittab_delete(left[i]);
+    gt_bittab_delete(right[i]);
+    gt_bittab_delete(L[i]);
+    gt_bittab_delete(R[i]);
   }
   gt_free(C);
   gt_free(left);
   gt_free(right);
   gt_free(L);
   gt_free(R);
-  bittab_delete(U_i);
-  bittab_delete(SA_i);
-  bittab_delete(SA_prime);
+  gt_bittab_delete(U_i);
+  gt_bittab_delete(SA_i);
+  gt_bittab_delete(SA_prime);
   gt_array_delete(splice_form);
 }
 

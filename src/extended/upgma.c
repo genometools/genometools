@@ -94,12 +94,12 @@ static void upggt_compute(UPGMA *upgma)
   unsigned long i, j, k, step, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG,
                 newclusternum = upgma->num_of_taxa; /* denoted 'l' in script */
   double mindist;
-  Bittab *clustertab;
+  GT_Bittab *clustertab;
 
   /* init cluster tab */
-  clustertab = bittab_new(upgma->num_of_clusters);
+  clustertab = gt_bittab_new(upgma->num_of_clusters);
   for (i = 0; i < upgma->num_of_taxa; i++)
-    bittab_set_bit(clustertab, i);
+    gt_bittab_set_bit(clustertab, i);
 
   /* the clustering takes num_of_taxa - 1 steps */
   for (step = 0; step < upgma->num_of_taxa - 1; step++)
@@ -107,10 +107,10 @@ static void upggt_compute(UPGMA *upgma)
     /* determine two clusters for which the distance is minimal */
     mindist = DBL_MAX;
     for (i = 0; i < upgma->num_of_clusters; i++) {
-      if (bittab_bit_is_set(clustertab, i)) {
+      if (gt_bittab_bit_is_set(clustertab, i)) {
         /* this cluster exists, check the distances */
         for (j = 0; j < i; j++) {
-          if (bittab_bit_is_set(clustertab, j) &&
+          if (gt_bittab_bit_is_set(clustertab, j) &&
               upgma->clusters[i].distances[j] < mindist) {
             /* update minimum distance */
             mindist = upgma->clusters[i].distances[j];
@@ -122,9 +122,9 @@ static void upggt_compute(UPGMA *upgma)
     }
 
     /* define new cluster and remove old ones */
-    bittab_set_bit(clustertab, newclusternum);
-    bittab_unset_bit(clustertab, min_i);
-    bittab_unset_bit(clustertab, min_j);
+    gt_bittab_set_bit(clustertab, newclusternum);
+    gt_bittab_unset_bit(clustertab, min_i);
+    gt_bittab_unset_bit(clustertab, min_j);
 
     if (upgma->clusters[min_i].height > upgma->clusters[min_j].height) {
       upgma->clusters[newclusternum].leftdaughter  = min_i;
@@ -140,7 +140,7 @@ static void upggt_compute(UPGMA *upgma)
                                                  .clustersize;
     upgma->clusters[newclusternum].height      = mindist / 2;
     for (k = 0; k < newclusternum; k++) {
-      if (bittab_bit_is_set(clustertab, k)) {
+      if (gt_bittab_bit_is_set(clustertab, k)) {
         upgma->clusters[newclusternum].distances[k] =
           (distance(upgma, k, min_i) *
            upgma->clusters[min_i].clustersize
@@ -154,7 +154,7 @@ static void upggt_compute(UPGMA *upgma)
     newclusternum++;
   }
 
-  bittab_delete(clustertab);
+  gt_bittab_delete(clustertab);
 }
 
 UPGMA* upggt_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc)

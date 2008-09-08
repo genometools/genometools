@@ -22,14 +22,14 @@
 
 static void* bsearch_generic(GT_Array *members, const void *key, const void *base,
                              size_t nmemb, size_t size, GT_CompareWithData compar,
-                             void *data, Bittab *b)
+                             void *data, GT_Bittab *b)
 {
   char *baseptr = (char *)base, *tmp_ptr,
    *ptr; /* the current element we consider */
   int limit, rval;
 
   assert(key && size && compar);
-  assert(!b || bittab_size(b) == nmemb);
+  assert(!b || gt_bittab_size(b) == nmemb);
 
   /* the actual binary search */
   for (limit = nmemb; limit != 0; limit >>= 1) {
@@ -41,14 +41,14 @@ static void* bsearch_generic(GT_Array *members, const void *key, const void *bas
       else
         return ptr; /* because we got no <members> array */
       if (b)
-        bittab_set_bit(b, (ptr - (char *)base) / size); /* mark found element */
+        gt_bittab_set_bit(b, (ptr - (char *)base) / size); /* mark found element */
       /* looking left for equal elements */
       for (tmp_ptr = ptr - size;
            tmp_ptr >= (char *)base && !compar(key, tmp_ptr, data);
            tmp_ptr -= size) {
         gt_array_add(members, tmp_ptr);
         if (b)
-          bittab_set_bit(
+          gt_bittab_set_bit(
             b, (tmp_ptr - (char *)base) / size); /* mark found element */
       }
       /* looking right for equal elements */
@@ -57,7 +57,7 @@ static void* bsearch_generic(GT_Array *members, const void *key, const void *bas
            tmp_ptr += size) {
         gt_array_add(members, tmp_ptr);
         if (b)
-          bittab_set_bit(
+          gt_bittab_set_bit(
             b, (tmp_ptr - (char *)base) / size); /* mark found element */
       }
       return ptr;
@@ -85,7 +85,7 @@ void bsearch_all(GT_Array *members, const void *key, const void *base,
 
 void bsearch_all_mark(GT_Array *members, const void *key, const void *base,
                       size_t nmemb, size_t size, GT_CompareWithData compar,
-                      void *data, Bittab *b)
+                      void *data, GT_Bittab *b)
 {
   assert(members);
   bsearch_generic(members, key, base, nmemb, size, compar, data, b);
@@ -111,7 +111,7 @@ int bsearch_unit_test(GT_Error *err)
 {
   GT_Array *elements, *members;
   int key, element, *member_ptr;
-  Bittab *b;
+  GT_Bittab *b;
   int had_err = 0;
 
   gt_error_check(err);
@@ -228,7 +228,7 @@ int bsearch_unit_test(GT_Error *err)
 
   /* test bsearch_all_mark() with large case */
   gt_array_reset(members);
-  b = bittab_new(gt_array_size(elements));
+  b = gt_bittab_new(gt_array_size(elements));
   bsearch_all_mark(members, &key, gt_array_get_space(elements),
                    gt_array_size(elements), sizeof (int), cmp, NULL, b);
   ensure(had_err, gt_array_size(members) == 3); /* three members found */
@@ -239,15 +239,15 @@ int bsearch_unit_test(GT_Error *err)
   member_ptr = *(int**) gt_array_get(members, 2);
   ensure(had_err, *member_ptr == -3);
   /* the correct elements are marked (and only these) */
-  ensure(had_err, bittab_bit_is_set(b, 2));
-  ensure(had_err, bittab_bit_is_set(b, 3));
-  ensure(had_err, bittab_bit_is_set(b, 4));
-  ensure(had_err, bittab_count_set_bits(b) == 3);
+  ensure(had_err, gt_bittab_bit_is_set(b, 2));
+  ensure(had_err, gt_bittab_bit_is_set(b, 3));
+  ensure(had_err, gt_bittab_bit_is_set(b, 4));
+  ensure(had_err, gt_bittab_count_set_bits(b) == 3);
 
   /* free */
   gt_array_delete(elements);
   gt_array_delete(members);
-  bittab_delete(b);
+  gt_bittab_delete(b);
 
   return had_err;
 }

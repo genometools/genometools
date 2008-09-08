@@ -271,7 +271,7 @@ void gt_canvas_delete(GT_Canvas *c)
   if (c->g)
     gt_graphics_delete(c->g);
   if (c->bt)
-    bittab_delete(c->bt);
+    gt_bittab_delete(c->bt);
   gt_free(c);
 }
 
@@ -369,7 +369,7 @@ int gt_canvas_visit_line_pre(GT_Canvas *canvas, GT_Line *line)
 {
   int had_err = 0;
   assert(canvas && line);
-  canvas->bt = bittab_new(canvas->width);
+  canvas->bt = gt_bittab_new(canvas->width);
   if (gt_line_has_captions(line))
     canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
   return had_err;
@@ -388,7 +388,7 @@ int gt_canvas_visit_line_post(GT_Canvas *canvas, GT_UNUSED GT_Line *line)
     canvas->y += tmp;
   else
     canvas->y += BAR_VSPACE_DEFAULT;
-  bittab_delete(canvas->bt);
+  gt_bittab_delete(canvas->bt);
   canvas->bt = NULL;
   return had_err;
 }
@@ -565,14 +565,14 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
 
   if (draw_range.end-draw_range.start <= 1.1)
   {
-    if (bittab_bit_is_set(canvas->bt, (unsigned long) draw_range.start))
+    if (gt_bittab_bit_is_set(canvas->bt, (unsigned long) draw_range.start))
       return had_err;
     gt_graphics_draw_vertical_line(canvas->g,
                                 draw_range.start,
                                 canvas->y,
                                 elem_color,
                                 bar_height);
-    bittab_set_bit(canvas->bt, (unsigned long) draw_range.start);
+    gt_bittab_set_bit(canvas->bt, (unsigned long) draw_range.start);
   }
 
   /* register coordinates in GT_ImageInfo object if available */

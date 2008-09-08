@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the Bittab class to Lua:
+/* exports the GT_Bittab class to Lua:
 
    -- Returns a bittab with <num_of_bits> many bits.
    function bittab_new(num_of_bits)

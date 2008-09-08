@@ -18,66 +18,66 @@
 #include "core/ma.h"
 #include "extended/transcript_bittabs.h"
 
-struct TranscriptBittabs {
-  Bittab *bittab_all,
-         *bittab_single,
-         *bittab_initial,
-         *bittab_internal,
-         *bittab_terminal;
+struct TranscriptGT_Bittabs {
+  GT_Bittab *gt_bittab_all,
+         *gt_bittab_single,
+         *gt_bittab_initial,
+         *gt_bittab_internal,
+         *gt_bittab_terminal;
 };
 
-TranscriptBittabs* transcript_bittabs_new(unsigned long size_all,
+TranscriptGT_Bittabs* transcript_bittabs_new(unsigned long size_all,
                                           unsigned long size_single,
                                           unsigned long size_initial,
                                           unsigned long size_internal,
                                           unsigned long size_terminal)
 {
-  TranscriptBittabs *tb = gt_calloc(1, sizeof (TranscriptBittabs));
-  if (size_all) tb->bittab_all = bittab_new(size_all);
-  if (size_single) tb->bittab_single = bittab_new(size_single);
-  if (size_initial) tb->bittab_initial = bittab_new(size_initial);
-  if (size_internal) tb->bittab_internal = bittab_new(size_internal);
-  if (size_terminal) tb->bittab_terminal = bittab_new(size_all);
+  TranscriptGT_Bittabs *tb = gt_calloc(1, sizeof (TranscriptGT_Bittabs));
+  if (size_all) tb->gt_bittab_all = gt_bittab_new(size_all);
+  if (size_single) tb->gt_bittab_single = gt_bittab_new(size_single);
+  if (size_initial) tb->gt_bittab_initial = gt_bittab_new(size_initial);
+  if (size_internal) tb->gt_bittab_internal = gt_bittab_new(size_internal);
+  if (size_terminal) tb->gt_bittab_terminal = gt_bittab_new(size_all);
   return tb;
 }
 
-Bittab* transcript_bittabs_get_all(const TranscriptBittabs *tb)
+GT_Bittab* transcript_bittabs_get_all(const TranscriptGT_Bittabs *tb)
 {
   assert(tb);
-  return tb->bittab_all;
+  return tb->gt_bittab_all;
 }
 
-Bittab* transcript_bittabs_get_single(const TranscriptBittabs *tb)
+GT_Bittab* transcript_bittabs_get_single(const TranscriptGT_Bittabs *tb)
 {
   assert(tb);
-  return tb->bittab_single;
+  return tb->gt_bittab_single;
 }
 
-Bittab* transcript_bittabs_get_initial(const TranscriptBittabs *tb)
+GT_Bittab* transcript_bittabs_get_initial(const TranscriptGT_Bittabs *tb)
 {
   assert(tb);
-  return tb->bittab_initial;
+  return tb->gt_bittab_initial;
 }
 
-Bittab* transcript_bittabs_get_internal(const TranscriptBittabs *tb)
+GT_Bittab* transcript_bittabs_get_internal(const TranscriptGT_Bittabs *tb)
 {
   assert(tb);
-  return tb->bittab_internal;
+  return tb->gt_bittab_internal;
 }
 
-Bittab* transcript_bittabs_get_terminal(const TranscriptBittabs *tb)
+GT_Bittab* transcript_bittabs_get_terminal(const TranscriptGT_Bittabs *tb)
 {
   assert(tb);
-  return tb->bittab_terminal;
+  return tb->gt_bittab_terminal;
 }
 
-void transcript_bittabs_delete(TranscriptBittabs *tb)
+void transcript_bittabs_delete(TranscriptGT_Bittabs *tb)
 {
   if (!tb) return;
-  bittab_delete(tb->bittab_all);
-  bittab_delete(tb->bittab_single);
-  bittab_delete(tb->bittab_initial);
-  bittab_delete(tb->bittab_internal);
-  bittab_delete(tb->bittab_terminal);
+  gt_bittab_delete(tb->gt_bittab_all);
+  gt_bittab_delete(tb->gt_bittab_single);
+  gt_bittab_delete(tb->gt_bittab_initial);
+  gt_bittab_delete(tb->gt_bittab_internal);
+  gt_bittab_delete(tb->gt_bittab_terminal);
   gt_free(tb);
 }

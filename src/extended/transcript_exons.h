@@ -46,7 +46,7 @@ void               transcript_exons_sort(const TranscriptExons*);
 TranscriptCounts*  transcript_exons_uniq_in_place_count(TranscriptExons*);
 
 bool               transcript_exons_are_sorted(const TranscriptExons*);
-TranscriptBittabs* transcript_exons_create_bittabs(const TranscriptExons*);
+TranscriptGT_Bittabs* transcript_exons_create_bittabs(const TranscriptExons*);
 
 void               transcript_exons_delete(TranscriptExons*);
 

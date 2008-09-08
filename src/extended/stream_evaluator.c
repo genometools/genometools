@@ -77,7 +77,7 @@ typedef struct {
                 FP_mRNA_nucleotides_reverse,
                 FP_CDS_nucleotides_forward,
                 FP_CDS_nucleotides_reverse;
-  Bittab *real_mRNA_nucleotides_forward,
+  GT_Bittab *real_mRNA_nucleotides_forward,
          *pred_mRNA_nucleotides_forward,
          *real_mRNA_nucleotides_reverse,
          *pred_mRNA_nucleotides_reverse,
@@ -95,7 +95,7 @@ typedef struct {
          *overlapped_mRNAs_forward,
          *overlapped_mRNAs_reverse,
          *overlapped_LTRs;
-  TranscriptBittabs *mRNA_exon_bittabs_forward,
+  TranscriptGT_Bittabs *mRNA_exon_bittabs_forward,
                     *mRNA_exon_bittabs_reverse,
                     *CDS_exon_bittabs_forward,
                     *CDS_exon_bittabs_reverse;
@@ -146,14 +146,14 @@ static Slot* slot_new(bool nuceval, GT_Range range)
   s->CDS_exons_reverse = transcript_exons_new();
   if (nuceval) {
     s->real_range = range;
-    s->real_mRNA_nucleotides_forward = bittab_new(length);
-    s->pred_mRNA_nucleotides_forward = bittab_new(length);
-    s->real_mRNA_nucleotides_reverse = bittab_new(length);
-    s->pred_mRNA_nucleotides_reverse = bittab_new(length);
-    s->real_CDS_nucleotides_forward = bittab_new(length);
-    s->pred_CDS_nucleotides_forward = bittab_new(length);
-    s->real_CDS_nucleotides_reverse = bittab_new(length);
-    s->pred_CDS_nucleotides_reverse = bittab_new(length);
+    s->real_mRNA_nucleotides_forward = gt_bittab_new(length);
+    s->pred_mRNA_nucleotides_forward = gt_bittab_new(length);
+    s->real_mRNA_nucleotides_reverse = gt_bittab_new(length);
+    s->pred_mRNA_nucleotides_reverse = gt_bittab_new(length);
+    s->real_CDS_nucleotides_forward = gt_bittab_new(length);
+    s->pred_CDS_nucleotides_forward = gt_bittab_new(length);
+    s->real_CDS_nucleotides_reverse = gt_bittab_new(length);
+    s->pred_CDS_nucleotides_reverse = gt_bittab_new(length);
   }
   s->used_mRNA_exons_forward = transcript_used_exons_new();
   s->used_mRNA_exons_reverse = transcript_used_exons_new();
@@ -189,24 +189,24 @@ static void slot_delete(Slot *s)
   transcript_counts_delete(s->mRNA_counts_reverse);
   transcript_counts_delete(s->CDS_counts_forward);
   transcript_counts_delete(s->CDS_counts_reverse);
-  bittab_delete(s->real_mRNA_nucleotides_forward);
-  bittab_delete(s->pred_mRNA_nucleotides_forward);
-  bittab_delete(s->real_mRNA_nucleotides_reverse);
-  bittab_delete(s->pred_mRNA_nucleotides_reverse);
-  bittab_delete(s->real_CDS_nucleotides_forward);
-  bittab_delete(s->pred_CDS_nucleotides_forward);
-  bittab_delete(s->real_CDS_nucleotides_reverse);
-  bittab_delete(s->pred_CDS_nucleotides_reverse);
-  bittab_delete(s->true_genes_forward);
-  bittab_delete(s->true_genes_reverse);
-  bittab_delete(s->true_mRNAs_forward);
-  bittab_delete(s->true_mRNAs_reverse);
-  bittab_delete(s->true_LTRs);
-  bittab_delete(s->overlapped_genes_forward);
-  bittab_delete(s->overlapped_genes_reverse);
-  bittab_delete(s->overlapped_mRNAs_forward);
-  bittab_delete(s->overlapped_mRNAs_reverse);
-  bittab_delete(s->overlapped_LTRs);
+  gt_bittab_delete(s->real_mRNA_nucleotides_forward);
+  gt_bittab_delete(s->pred_mRNA_nucleotides_forward);
+  gt_bittab_delete(s->real_mRNA_nucleotides_reverse);
+  gt_bittab_delete(s->pred_mRNA_nucleotides_reverse);
+  gt_bittab_delete(s->real_CDS_nucleotides_forward);
+  gt_bittab_delete(s->pred_CDS_nucleotides_forward);
+  gt_bittab_delete(s->real_CDS_nucleotides_reverse);
+  gt_bittab_delete(s->pred_CDS_nucleotides_reverse);
+  gt_bittab_delete(s->true_genes_forward);
+  gt_bittab_delete(s->true_genes_reverse);
+  gt_bittab_delete(s->true_mRNAs_forward);
+  gt_bittab_delete(s->true_mRNAs_reverse);
+  gt_bittab_delete(s->true_LTRs);
+  gt_bittab_delete(s->overlapped_genes_forward);
+  gt_bittab_delete(s->overlapped_genes_reverse);
+  gt_bittab_delete(s->overlapped_mRNAs_forward);
+  gt_bittab_delete(s->overlapped_mRNAs_reverse);
+  gt_bittab_delete(s->overlapped_LTRs);
   transcript_bittabs_delete(s->mRNA_exon_bittabs_forward);
   transcript_bittabs_delete(s->mRNA_exon_bittabs_reverse);
   transcript_bittabs_delete(s->CDS_exon_bittabs_forward);
@@ -326,36 +326,36 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value, void *dat
 
   /* init true bittabs */
   s->true_genes_forward = gt_array_size(s->genes_forward)
-                          ? bittab_new(gt_array_size(s->genes_forward))
+                          ? gt_bittab_new(gt_array_size(s->genes_forward))
                           : NULL;
   s->true_genes_reverse = gt_array_size(s->genes_reverse)
-                          ? bittab_new(gt_array_size(s->genes_reverse))
+                          ? gt_bittab_new(gt_array_size(s->genes_reverse))
                           : NULL;
   s->true_mRNAs_forward = gt_array_size(s->mRNAs_forward)
-                          ? bittab_new(gt_array_size(s->mRNAs_forward))
+                          ? gt_bittab_new(gt_array_size(s->mRNAs_forward))
                           : NULL;
   s->true_mRNAs_reverse = gt_array_size(s->mRNAs_reverse)
-                          ? bittab_new(gt_array_size(s->mRNAs_reverse))
+                          ? gt_bittab_new(gt_array_size(s->mRNAs_reverse))
                           : NULL;
   s->true_LTRs          = gt_array_size(s->LTRs)
-                          ? bittab_new(gt_array_size(s->LTRs))
+                          ? gt_bittab_new(gt_array_size(s->LTRs))
                           : NULL;
 
   /* init overlap bittabs */
   s->overlapped_genes_forward = gt_array_size(s->genes_forward)
-                                ? bittab_new(gt_array_size(s->genes_forward))
+                                ? gt_bittab_new(gt_array_size(s->genes_forward))
                                 : NULL;
   s->overlapped_genes_reverse = gt_array_size(s->genes_reverse)
-                                ? bittab_new(gt_array_size(s->genes_reverse))
+                                ? gt_bittab_new(gt_array_size(s->genes_reverse))
                                 : NULL;
   s->overlapped_mRNAs_forward = gt_array_size(s->mRNAs_forward)
-                                ? bittab_new(gt_array_size(s->mRNAs_forward))
+                                ? gt_bittab_new(gt_array_size(s->mRNAs_forward))
                                 : NULL;
   s->overlapped_mRNAs_reverse = gt_array_size(s->mRNAs_reverse)
-                                ? bittab_new(gt_array_size(s->mRNAs_reverse))
+                                ? gt_bittab_new(gt_array_size(s->mRNAs_reverse))
                                 : NULL;
   s->overlapped_LTRs          = gt_array_size(s->LTRs)
-                                ? bittab_new(gt_array_size(s->LTRs))
+                                ? gt_bittab_new(gt_array_size(s->LTRs))
                                 : NULL;
 
   /* init bittabs (for collapsed exons) */
@@ -397,7 +397,7 @@ static void add_real_exon(TranscriptExons *te, GT_Range range, GT_GenomeNode *gn
   }
 }
 
-static void add_nucleotide_exon(Bittab *nucleotides, GT_Range range,
+static void add_nucleotide_exon(GT_Bittab *nucleotides, GT_Range range,
                                 GT_Range real_range,
                                 unsigned long *FP)
 {
@@ -406,7 +406,7 @@ static void add_nucleotide_exon(Bittab *nucleotides, GT_Range range,
   for (i = range.start; i <= range.end; i++) {
     if (gt_range_within(real_range, i)) {
       assert(i >= real_range.start);
-      bittab_set_bit(nucleotides, i - real_range.start);
+      gt_bittab_set_bit(nucleotides, i - real_range.start);
     }
     else {
       assert(FP);
@@ -736,8 +736,8 @@ static void determine_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
                                 GT_Array *exons_reverse,
                                 GT_Array *true_exons_forward,
                                 GT_Array *true_exons_reverse,
-                                Bittab *true_exons_forward_collapsed,
-                                Bittab *true_exons_reverse_collapsed,
+                                GT_Bittab *true_exons_forward_collapsed,
+                                GT_Bittab *true_exons_reverse_collapsed,
                                 Evaluator *exon_evaluator,
                                 Evaluator *exon_evaluator_collapsed)
 {
@@ -762,8 +762,8 @@ static void determine_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
       else
         mark_and_show_false_exon(gn, exondiff);
       if (true_exons_forward_collapsed &&
-          !bittab_bit_is_set(true_exons_forward_collapsed, num)) {
-        bittab_set_bit(true_exons_forward_collapsed, num);
+          !gt_bittab_bit_is_set(true_exons_forward_collapsed, num)) {
+        gt_bittab_set_bit(true_exons_forward_collapsed, num);
         evaluator_add_true(exon_evaluator_collapsed);
       }
     }
@@ -777,8 +777,8 @@ static void determine_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
       else
         mark_and_show_false_exon(gn, exondiff);
       if (true_exons_reverse_collapsed &&
-          !bittab_bit_is_set(true_exons_reverse_collapsed, num)) {
-        bittab_set_bit(true_exons_reverse_collapsed, num);
+          !gt_bittab_bit_is_set(true_exons_reverse_collapsed, num)) {
+        gt_bittab_set_bit(true_exons_reverse_collapsed, num);
         evaluator_add_true(exon_evaluator_collapsed);
       }
     }
@@ -793,8 +793,8 @@ static void store_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
                             TranscriptExons *exons_reverse,
                             TranscriptCounts *counts_forward,
                             TranscriptCounts *counts_reverse,
-                            TranscriptBittabs *exon_bittabs_forward,
-                            TranscriptBittabs *exon_bittabs_reverse,
+                            TranscriptGT_Bittabs *exon_bittabs_forward,
+                            TranscriptGT_Bittabs *exon_bittabs_reverse,
                             TranscriptEvaluators *exon_evaluators,
                             TranscriptEvaluators *exon_evaluators_collapsed)
 {
@@ -906,8 +906,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               if (predicted_strand == GT_STRAND_FORWARD) {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->genes_forward);
-                if (!bittab_bit_is_set(info->slot->true_genes_forward, num)) {
-                  bittab_set_bit(info->slot->true_genes_forward, num);
+                if (!gt_bittab_bit_is_set(info->slot->true_genes_forward, num)) {
+                  gt_bittab_set_bit(info->slot->true_genes_forward, num);
                   evaluator_add_true(info->gene_evaluator);
                   /*@loopbreak@*/
                   break;
@@ -916,8 +916,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               else {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->genes_reverse);
-                if (!bittab_bit_is_set(info->slot->true_genes_reverse, num)) {
-                  bittab_set_bit(info->slot->true_genes_reverse, num);
+                if (!gt_bittab_bit_is_set(info->slot->true_genes_reverse, num)) {
+                  gt_bittab_set_bit(info->slot->true_genes_reverse, num);
                   evaluator_add_true(info->gene_evaluator);
                   /*@loopbreak@*/
                   break;
@@ -975,8 +975,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               if (predicted_strand == GT_STRAND_FORWARD) {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->mRNAs_forward);
-                if (!bittab_bit_is_set(info->slot->true_mRNAs_forward, num)) {
-                  bittab_set_bit(info->slot->true_mRNAs_forward, num);
+                if (!gt_bittab_bit_is_set(info->slot->true_mRNAs_forward, num)) {
+                  gt_bittab_set_bit(info->slot->true_mRNAs_forward, num);
                   evaluator_add_true(info->mRNA_evaluator);
                   /*@loopbreak@*/
                   break;
@@ -985,8 +985,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               else {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->mRNAs_reverse);
-                if (!bittab_bit_is_set(info->slot->true_mRNAs_reverse, num)) {
-                  bittab_set_bit(info->slot->true_mRNAs_reverse, num);
+                if (!gt_bittab_bit_is_set(info->slot->true_mRNAs_reverse, num)) {
+                  gt_bittab_set_bit(info->slot->true_mRNAs_reverse, num);
                   evaluator_add_true(info->mRNA_evaluator);
                   /*@loopbreak@*/
                   break;
@@ -1031,8 +1031,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
       for (i = 0; i < gt_array_size(real_genome_nodes); i++) {
         real_gn = *(GT_GenomeNode***) gt_array_get(real_genome_nodes, i);
         num = real_gn - (GT_GenomeNode**) gt_array_get_space(info->slot->LTRs);
-        if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
-          bittab_set_bit(info->slot->true_LTRs, num);
+        if (!gt_bittab_bit_is_set(info->slot->true_LTRs, num)) {
+          gt_bittab_set_bit(info->slot->true_LTRs, num);
           evaluator_add_true(info->LTR_evaluator);
           /*@loopbreak@*/
           break;
@@ -1145,50 +1145,50 @@ int determine_missing_features(GT_UNUSED void *key, void *value, void *data,
   gt_error_check(err);
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
-    se->missing_genes += bittab_size(slot->overlapped_genes_forward) -
-                         bittab_count_set_bits(slot->overlapped_genes_forward);
+    se->missing_genes += gt_bittab_size(slot->overlapped_genes_forward) -
+                         gt_bittab_count_set_bits(slot->overlapped_genes_forward);
   }
   if (slot->overlapped_genes_reverse) {
-    se->missing_genes += bittab_size(slot->overlapped_genes_reverse) -
-                         bittab_count_set_bits(slot->overlapped_genes_reverse);
+    se->missing_genes += gt_bittab_size(slot->overlapped_genes_reverse) -
+                         gt_bittab_count_set_bits(slot->overlapped_genes_reverse);
   }
   if (slot->overlapped_mRNAs_forward) {
-    se->missing_mRNAs += bittab_size(slot->overlapped_mRNAs_forward) -
-                         bittab_count_set_bits(slot->overlapped_mRNAs_forward);
+    se->missing_mRNAs += gt_bittab_size(slot->overlapped_mRNAs_forward) -
+                         gt_bittab_count_set_bits(slot->overlapped_mRNAs_forward);
   }
   if (slot->overlapped_mRNAs_reverse) {
-    se->missing_mRNAs += bittab_size(slot->overlapped_mRNAs_reverse) -
-                         bittab_count_set_bits(slot->overlapped_mRNAs_reverse);
+    se->missing_mRNAs += gt_bittab_size(slot->overlapped_mRNAs_reverse) -
+                         gt_bittab_count_set_bits(slot->overlapped_mRNAs_reverse);
   }
   if (slot->overlapped_LTRs) {
-    se->missing_LTRs  += bittab_size(slot->overlapped_LTRs) -
-                         bittab_count_set_bits(slot->overlapped_LTRs);
+    se->missing_LTRs  += gt_bittab_size(slot->overlapped_LTRs) -
+                         gt_bittab_count_set_bits(slot->overlapped_LTRs);
   }
   return 0;
 }
 
-static void add_nucleotide_values(NucEval *nucleotides, Bittab *real,
-                                  Bittab *pred, Bittab *tmp, const char *level)
+static void add_nucleotide_values(NucEval *nucleotides, GT_Bittab *real,
+                                  GT_Bittab *pred, GT_Bittab *tmp, const char *level)
 {
   assert(nucleotides && real && pred && tmp);
   if (log_enabled()) {
     log_log(level);
     log_log("reality:");
-    bittab_show(real, log_fp());
+    gt_bittab_show(real, log_fp());
     log_log("prediction:");
-    bittab_show(pred, log_fp());
+    gt_bittab_show(pred, log_fp());
   }
   /* real & pred = TP */
-  bittab_and(tmp, real, pred);
-  nucleotides->TP += bittab_count_set_bits(tmp);
+  gt_bittab_and(tmp, real, pred);
+  nucleotides->TP += gt_bittab_count_set_bits(tmp);
   /* ~real & pred = FP */;
-  bittab_complement(tmp, real);
-  bittab_and_equal(tmp, pred);
-  nucleotides->FP += bittab_count_set_bits(tmp);
+  gt_bittab_complement(tmp, real);
+  gt_bittab_and_equal(tmp, pred);
+  nucleotides->FP += gt_bittab_count_set_bits(tmp);
   /* real & ~pred = FN */
-  bittab_complement(tmp, pred);
-  bittab_and_equal(tmp, real);
-  nucleotides->FN += bittab_count_set_bits(tmp);
+  gt_bittab_complement(tmp, pred);
+  gt_bittab_and_equal(tmp, real);
+  nucleotides->FN += gt_bittab_count_set_bits(tmp);
 }
 
 int compute_nucleotides_values(GT_UNUSED void *key, void *value, void *data,
@@ -1196,7 +1196,7 @@ int compute_nucleotides_values(GT_UNUSED void *key, void *value, void *data,
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
-  Bittab *tmp;
+  GT_Bittab *tmp;
   gt_error_check(err);
   assert(key && value && data);
   /* add ``out of range'' FPs */
@@ -1205,7 +1205,7 @@ int compute_nucleotides_values(GT_UNUSED void *key, void *value, void *data,
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_forward;
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_reverse;
   /* add other values */
-  tmp = bittab_new(gt_range_length(slot->real_range));
+  tmp = gt_bittab_new(gt_range_length(slot->real_range));
   add_nucleotide_values(&se->mRNA_nucleotides,
                         slot->real_mRNA_nucleotides_forward,
                         slot->pred_mRNA_nucleotides_forward, tmp,
@@ -1222,7 +1222,7 @@ int compute_nucleotides_values(GT_UNUSED void *key, void *value, void *data,
                         slot->real_CDS_nucleotides_reverse,
                         slot->pred_CDS_nucleotides_reverse, tmp,
                         "CDS reverse");
-  bittab_delete(tmp);
+  gt_bittab_delete(tmp);
   return 0;
 }
 

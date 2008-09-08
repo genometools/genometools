@@ -125,7 +125,7 @@ void string_matching_shift_and(const char *s, unsigned long n,
                                const char *p, unsigned long m,
                                ProcessMatch process_match, void *data)
 {
-  Bittab *D, *B[UCHAR_MAX] = { NULL };
+  GT_Bittab *D, *B[UCHAR_MAX] = { NULL };
   unsigned long i, j;
   assert(s && p);
   if (m > n || !m || !n) /* no match possible */
@@ -133,27 +133,27 @@ void string_matching_shift_and(const char *s, unsigned long n,
   /* preprocessing */
   for (j = 0; j < m; j++) {
     if (!B[(unsigned) p[j]])
-      B[(unsigned) p[j]] = bittab_new(m);
-    bittab_set_bit(B[(unsigned) p[j]], j);
+      B[(unsigned) p[j]] = gt_bittab_new(m);
+    gt_bittab_set_bit(B[(unsigned) p[j]], j);
   }
   /* searching */
-  D = bittab_new(m);
+  D = gt_bittab_new(m);
   for (i = 0; i < n; i++) {
-    bittab_shift_left_equal(D);
-    bittab_set_bit(D, 0);
+    gt_bittab_shift_left_equal(D);
+    gt_bittab_set_bit(D, 0);
     if (B[(unsigned) s[i]])
-      bittab_and_equal(D, B[(unsigned) s[i]]);
+      gt_bittab_and_equal(D, B[(unsigned) s[i]]);
     else
-      bittab_unset(D);
-    if (bittab_bit_is_set(D, m - 1) && process_match) {
+      gt_bittab_unset(D);
+    if (gt_bittab_bit_is_set(D, m - 1) && process_match) {
       if (process_match(i - m + 1, data))
         break;
     }
   }
   /* free */
   for (i = 0; i < UCHAR_MAX; i++)
-    bittab_delete(B[i]);
-  bittab_delete(D);
+    gt_bittab_delete(B[i]);
+  gt_bittab_delete(D);
 }
 
 void string_matching_brute_force(const char *s, unsigned long n,

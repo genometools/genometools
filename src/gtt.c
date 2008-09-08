@@ -154,8 +154,8 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "array2dim example", array2dim_example);
   hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
   hashmap_add(unit_tests, "bit pack string module", bitPackString_unit_test);
-  hashmap_add(unit_tests, "bittab class", bittab_unit_test);
-  hashmap_add(unit_tests, "bittab example", bittab_example);
+  hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
+  hashmap_add(unit_tests, "bittab example", gt_bittab_example);
   hashmap_add(unit_tests, "bsearch module", bsearch_unit_test);
   hashmap_add(unit_tests, "countingsort module", countingsort_unit_test);
   hashmap_add(unit_tests, "cstr table class", cstr_table_unit_test);

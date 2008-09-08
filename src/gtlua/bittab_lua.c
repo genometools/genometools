@@ -24,95 +24,95 @@
 
 #define BITTAB_METATABLE  "GenomeTools.bittab"
 #define check_bittab(L, POS) \
-        (Bittab**) luaL_checkudata(L, POS, BITTAB_METATABLE)
+        (GT_Bittab**) luaL_checkudata(L, POS, BITTAB_METATABLE)
 
 static int bittab_lua_new(lua_State *L)
 {
   long num_of_bits;
-  Bittab **bittab;
+  GT_Bittab **bittab;
   assert(L);
   num_of_bits = luaL_checklong(L, 1);
   luaL_argcheck(L, num_of_bits > 0, 1, "must be > 0");
-  bittab = lua_newuserdata(L, sizeof (Bittab*));
+  bittab = lua_newuserdata(L, sizeof (GT_Bittab*));
   assert(bittab);
-  *bittab = bittab_new(num_of_bits);
+  *bittab = gt_bittab_new(num_of_bits);
   luaL_getmetatable(L, BITTAB_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
 }
 
-static void get_bittab_and_bit(lua_State *L, Bittab ***bittab, long *bit)
+static void get_bittab_and_bit(lua_State *L, GT_Bittab ***bittab, long *bit)
 {
   *bittab = check_bittab(L, 1);
   *bit = luaL_checklong(L, 2);
   luaL_argcheck(L, *bit >= 0, 2, "bit number too small");
-  luaL_argcheck(L, *bit < bittab_size(**bittab), 2, "bit number too large");
+  luaL_argcheck(L, *bit < gt_bittab_size(**bittab), 2, "bit number too large");
 }
 
-static void get_two_bittabs(lua_State *L, Bittab ***bt1, Bittab ***bt2)
+static void get_two_bittabs(lua_State *L, GT_Bittab ***bt1, GT_Bittab ***bt2)
 {
  *bt1 = check_bittab(L, 1);
  *bt2 = check_bittab(L, 2);
- luaL_argcheck(L, bittab_size(**bt1) == bittab_size(**bt2), 1, "bittabs have "
-               "different sizes");
+ luaL_argcheck(L, gt_bittab_size(**bt1) == gt_bittab_size(**bt2), 1,
+               "bittabs have different sizes");
 }
 
 static int bittab_lua_set_bit(lua_State *L)
 {
-  Bittab **bittab;
+  GT_Bittab **bittab;
   long bit;
   get_bittab_and_bit(L, &bittab, &bit);
-  bittab_set_bit(*bittab, bit);
+  gt_bittab_set_bit(*bittab, bit);
   return 0;
 }
 
 static int bittab_lua_unset_bit(lua_State *L)
 {
-  Bittab **bittab;
+  GT_Bittab **bittab;
   long bit;
   get_bittab_and_bit(L, &bittab, &bit);
-  bittab_unset_bit(*bittab, bit);
+  gt_bittab_unset_bit(*bittab, bit);
   return 0;
 }
 
 static int bittab_lua_complement(lua_State *L)
 {
-  Bittab **dest, **src;
+  GT_Bittab **dest, **src;
   get_two_bittabs(L, &dest, &src);
-  bittab_complement(*dest, *src);
+  gt_bittab_complement(*dest, *src);
   return 0;
 }
 
 static int bittab_lua_equal(lua_State *L)
 {
-  Bittab **dest, **src;
+  GT_Bittab **dest, **src;
   get_two_bittabs(L, &dest, &src);
-  bittab_equal(*dest, *src);
+  gt_bittab_equal(*dest, *src);
   return 0;
 }
 
 static int bittab_lua_and_equal(lua_State *L)
 {
-  Bittab **dest, **src;
+  GT_Bittab **dest, **src;
   get_two_bittabs(L, &dest, &src);
-  bittab_and_equal(*dest, *src);
+  gt_bittab_and_equal(*dest, *src);
   return 0;
 }
 
 static int bittab_lua_bit_is_set(lua_State *L)
 {
-  Bittab **bittab;
+  GT_Bittab **bittab;
   long bit;
   get_bittab_and_bit(L, &bittab, &bit);
-  lua_pushboolean(L, bittab_bit_is_set(*bittab, bit));
+  lua_pushboolean(L, gt_bittab_bit_is_set(*bittab, bit));
   return 1;
 }
 
 static int bittab_lua_delete(lua_State *L)
 {
-  Bittab **bittab;
+  GT_Bittab **bittab;
   bittab = check_bittab(L, 1);
-  bittab_delete(*bittab);
+  gt_bittab_delete(*bittab);
   return 0;
 }
 

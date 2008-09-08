@@ -136,7 +136,7 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
   (because it is not possible to find a word with a sufficient score on this
   branch).
 */
-static void add_q_word_to_env(Bittab *V, Pos *pos, const char *qgram_rest,
+static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
                               char *current_word, long *max_cumul_scores,
                               Alpha *alpha, unsigned long q,
                               unsigned long q_rest, long k, long current_score,
@@ -149,7 +149,7 @@ static void add_q_word_to_env(Bittab *V, Pos *pos, const char *qgram_rest,
       unsigned long qgram_code = qgram_encode(current_word, q,
                                               alpha_size(alpha));
       /* set V[qgram_code] */
-      bittab_set_bit(V, qgram_code);
+      gt_bittab_set_bit(V, qgram_code);
       /* store position */
       pos_add(pos, qgram_code, position);
     }
@@ -174,7 +174,7 @@ static void add_q_word_to_env(Bittab *V, Pos *pos, const char *qgram_rest,
   <V> and the set of position lists <pos>, for the encoded word <w> of length
   <wlen>.
 */
-static void compute_env(Bittab *V, Pos *pos, const char *w, unsigned long wlen,
+static void compute_env(GT_Bittab *V, Pos *pos, const char *w, unsigned long wlen,
                         Alpha *alpha, unsigned long q, long k,
                         const ScoreMatrix *score_matrix)
 {
@@ -208,7 +208,7 @@ static void compute_env(Bittab *V, Pos *pos, const char *w, unsigned long wlen,
 struct BlastEnv {
   Alpha *alpha;
   unsigned long q;
-  Bittab *V; /* The vector V of r^q bits. */
+  GT_Bittab *V; /* The vector V of r^q bits. */
   Pos *pos;  /* The set of position lists. If a bit in <V> is set then <pos>
                 contains the corresponding position list for that code. */
 };
@@ -225,7 +225,7 @@ BlastEnv* blast_env_new(const char *w, unsigned long wlen, Alpha *alpha,
   be->q = q;
   /* if <w> is long enough fill the Blast environment */
   if (wlen >= q) {
-    be->V = bittab_new(pow(alpha_size(alpha), q));
+    be->V = gt_bittab_new(pow(alpha_size(alpha), q));
     be->pos = pos_new();
     compute_env(be->V, be->pos, w, wlen, alpha, q, k, score_matrix);
   }
@@ -237,7 +237,7 @@ void blast_env_delete(BlastEnv *be)
   if (!be) return;
   alpha_delete(be->alpha);
   pos_delete(be->pos);
-  bittab_delete(be->V);
+  gt_bittab_delete(be->V);
   gt_free(be);
 }
 
@@ -253,9 +253,9 @@ void blast_env_show(const BlastEnv *be)
   qgram = gt_malloc(sizeof (char) * (be->q+1));
   qgram[be->q] = '\0';
   /* iterate over all codes which have a position list */
-  for (code  = bittab_get_first_bitnum(be->V);
-       code != bittab_get_last_bitnum(be->V);
-       code  = bittab_get_next_bitnum(be->V, code)) {
+  for (code  = gt_bittab_get_first_bitnum(be->V);
+       code != gt_bittab_get_last_bitnum(be->V);
+       code  = gt_bittab_get_next_bitnum(be->V, code)) {
     position_list = pos_get(be->pos, code);
     assert(position_list);
     assert(gt_array_size(position_list)); /* contains at least one position */
