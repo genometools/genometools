@@ -27,6 +27,6 @@
   occurs.
 */
 
-BZFILE* ebzopen(const char *path, const char *mode, GT_Error*);
+BZFILE* gt_ebzopen(const char *path, const char *mode, GT_Error*);
 
 #endif

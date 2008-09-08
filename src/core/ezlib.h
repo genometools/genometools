@@ -27,6 +27,6 @@
   occurs.
 */
 
-gzFile egzopen(const char *path, const char *mode, GT_Error*);
+gzFile gt_egzopen(const char *path, const char *mode, GT_Error*);
 
 #endif

@@ -89,13 +89,13 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   fileinfo->line = line;
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      fp = x ? xfopen(path, mode) : efopen(path, mode, err);
+      fp = x ? xfopen(path, mode) : gt_efopen(path, mode, err);
       break;
     case GFM_GZIP:
-      fp = x ? xgzopen(path, mode) : egzopen(path, mode, err);
+      fp = x ? xgzopen(path, mode) : gt_egzopen(path, mode, err);
       break;
     case GFM_BZIP2:
-      fp = x ? xbzopen(path, mode) : ebzopen(path, mode, err);
+      fp = x ? xbzopen(path, mode) : gt_ebzopen(path, mode, err);
       break;
     default: assert(0);
   }
