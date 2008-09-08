@@ -254,7 +254,7 @@ SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
   {
     Seqpos searchPos = pos;
     struct seqRange *searchRes =
-      bsearch_data(&searchPos, rangeList->ranges, rangeList->numRanges,
+      gt_bsearch_data(&searchPos, rangeList->ranges, rangeList->numRanges,
                    sizeof (struct seqRange), posSeqRangeOverlapCompare,
                    rangeList);
     if (searchRes)
@@ -351,7 +351,7 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
   {
     Seqpos searchPos = pos;
     struct seqRange *searchRes =
-      bsearch_data(&searchPos, rangeList->ranges + 1, rangeList->numRanges - 1,
+      gt_bsearch_data(&searchPos, rangeList->ranges + 1, rangeList->numRanges - 1,
                    sizeof (struct seqRange), posSeqRangeNextCompare, rangeList);
     if (searchRes && hint)
       *hint = searchRes - rangeList->ranges;

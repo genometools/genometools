@@ -24,22 +24,22 @@
 
 /* similar interface to bsearch(3), except that the GT_CompareWithData
    function gets an additional <data> pointer */
-void* bsearch_data(const void *key, const void *base, size_t nmemb, size_t size,
+void* gt_bsearch_data(const void *key, const void *base, size_t nmemb, size_t size,
                    GT_CompareWithData, void *data);
 
-/* similar interface to bsearch_data(), except that all members which compare as
+/* similar interface to gt_bsearch_data(), except that all members which compare as
    equal are stored in the <members> array. The order in which the elements
    are added is undefined */
-void  bsearch_all(GT_Array *members, const void *key, const void *base,
+void  gt_bsearch_all(GT_Array *members, const void *key, const void *base,
                   size_t nmemb, size_t size, GT_CompareWithData, void *data);
 
-/* similar interface to bsearch_all(). Additionally, if a bittab is given (which
+/* similar interface to gt_bsearch_all(). Additionally, if a bittab is given (which
    must be of size <nmemb>), the bits corresponding to the found elements are
    marked (i.e., set) */
-void  bsearch_all_mark(GT_Array *members, const void *key, const void *base,
+void  gt_bsearch_all_mark(GT_Array *members, const void *key, const void *base,
                        size_t nmemb, size_t size, GT_CompareWithData,
                        void *data, GT_Bittab*);
 
-int   bsearch_unit_test(GT_Error*);
+int   gt_bsearch_unit_test(GT_Error*);
 
 #endif

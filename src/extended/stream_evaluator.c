@@ -885,7 +885,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
     switch (predicted_strand) {
       case GT_STRAND_FORWARD:
       case GT_STRAND_REVERSE:
-        bsearch_all_mark(real_genome_nodes, &gn,
+        gt_bsearch_all_mark(real_genome_nodes, &gn,
                          predicted_strand == GT_STRAND_FORWARD
                          ? gt_array_get_space(info->slot->genes_forward)
                          : gt_array_get_space(info->slot->genes_reverse),
@@ -954,7 +954,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
     switch (predicted_strand) {
       case GT_STRAND_FORWARD:
       case GT_STRAND_REVERSE:
-        bsearch_all_mark(real_genome_nodes, &gn,
+        gt_bsearch_all_mark(real_genome_nodes, &gn,
                          predicted_strand == GT_STRAND_FORWARD
                          ? gt_array_get_space(info->slot->mRNAs_forward)
                          : gt_array_get_space(info->slot->mRNAs_reverse),
@@ -1021,7 +1021,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
     /* store predicted LTR */
     evaluator_add_predicted(info->LTR_evaluator, 1);
     /* determine true LTR */
-    bsearch_all_mark(real_genome_nodes, &gn,
+    gt_bsearch_all_mark(real_genome_nodes, &gn,
                      gt_array_get_space(info->slot->LTRs),
                      gt_array_size(info->slot->LTRs), sizeof (GT_GenomeNode*),
                      (GT_CompareWithData) gt_genome_node_compare_delta,
