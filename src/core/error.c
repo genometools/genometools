@@ -71,7 +71,7 @@ void gt_error_set_progname(GT_Error *err, const char *progname)
 {
   assert(err && progname);
   gt_free(err->progname);
-  err->progname = cstr_dup(progname);
+  err->progname = gt_cstr_dup(progname);
 }
 
 const char* gt_error_get_progname(const GT_Error *err)

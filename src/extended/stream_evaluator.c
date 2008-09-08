@@ -1269,7 +1269,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       {
         slot = slot_new(se->nuceval, gt_genome_node_get_range(gn));
         hashmap_add(se->slots,
-                    cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))), slot);
+                    gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))), slot);
       }
       assert(slot);
     }

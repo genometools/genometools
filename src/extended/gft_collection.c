@@ -45,7 +45,7 @@ void gft_collection_add(GFTCollection *gftc, const char *type,
                          GT_FeatureType *gft)
 {
   assert(gftc && type && gft);
-  hashmap_add(gftc->gt_genome_feature_types, cstr_dup(type), gft);
+  hashmap_add(gftc->gt_genome_feature_types, gt_cstr_dup(type), gft);
 }
 
 GT_FeatureType* gft_collection_get(GFTCollection *gftc, const char *type)

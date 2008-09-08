@@ -63,7 +63,7 @@ void feature_info_add(FeatureInfo *fi, const char *id, GT_GenomeNode *gf)
 {
   assert(fi && id && gf);
   assert(!gt_genome_feature_is_pseudo((GT_GenomeFeature*) gf));
-  hashmap_add(fi->id_to_genome_node, cstr_dup(id), gt_genome_node_ref(gf));
+  hashmap_add(fi->id_to_genome_node, gt_cstr_dup(id), gt_genome_node_ref(gf));
 }
 
 GT_GenomeNode* feature_info_get_pseudo_parent(const FeatureInfo *fi,
@@ -78,7 +78,7 @@ void feature_info_add_pseudo_parent(FeatureInfo *fi, const char *id,
 {
   assert(fi && id && pseudo_parent);
   assert(gt_genome_feature_is_pseudo((GT_GenomeFeature*) pseudo_parent));
-  hashmap_add(fi->id_to_pseudo_parent, cstr_dup(id),
+  hashmap_add(fi->id_to_pseudo_parent, gt_cstr_dup(id),
               gt_genome_node_ref(pseudo_parent));
 }
 
@@ -102,7 +102,7 @@ static GT_GenomeNode* find_root(const FeatureInfo *fi, const char *id)
   /* get feature */
   delim = strchr(id, ';');
   if (delim) {
-    char *first_parent = cstr_dup_nt(id, delim - id);
+    char *first_parent = gt_cstr_dup_nt(id, delim - id);
     this_feature = hashmap_get(fi->id_to_genome_node, first_parent);
     parent_pseudo_feature = hashmap_get(fi->id_to_pseudo_parent, first_parent);
     gt_free(first_parent);

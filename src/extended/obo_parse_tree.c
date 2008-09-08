@@ -70,8 +70,8 @@ static void obo_header_add(OBOHeader *obo_header,
   OBOHeaderEntry *entry;
   assert(obo_header && tag && value);
   entry = gt_malloc(sizeof *entry);
-  entry->tag = cstr_dup(tag);
-  entry->value = cstr_dup(value);
+  entry->tag = gt_cstr_dup(tag);
+  entry->value = gt_cstr_dup(value);
   gt_array_add(obo_header->content, entry);
 }
 
@@ -113,7 +113,7 @@ static OBOStanza* obo_stanza_new(const char *type, unsigned long line,
                                  GT_Str *filename)
 {
   OBOStanza *obo_stanza = gt_malloc(sizeof *obo_stanza);
-  obo_stanza->type = cstr_dup(type);
+  obo_stanza->type = gt_cstr_dup(type);
   obo_stanza->content = hashmap_new(HASH_STRING, gt_free_func, gt_free_func);
   obo_stanza->line = line;
   obo_stanza->filename = gt_str_ref(filename);
@@ -135,7 +135,7 @@ static void obo_stanza_add(OBOStanza *obo_stanza,
   assert(obo_stanza && tag && value);
   /* XXX: currently duplicate tags are silently skipped */
   if (!hashmap_get(obo_stanza->content, tag))
-    hashmap_add(obo_stanza->content, cstr_dup(tag), cstr_dup(value));
+    hashmap_add(obo_stanza->content, gt_cstr_dup(tag), gt_cstr_dup(value));
 }
 
 static const char* obo_stanza_get_type(const OBOStanza *obo_stanza)

@@ -464,7 +464,7 @@ void freeAlphabet(Alphabet **alpha)
           assert(progname != NULL);
           prog = gt_str_new();
           gt_str_append_cstr_nt(prog, progname,
-                             cstr_length_up_to_char(progname, ' '));
+                                gt_cstr_length_up_to_char(progname, ' '));
           transpath = gtdata_get_path(gt_str_get(prog), err);
           gt_str_delete(prog);
           gt_str_append_cstr(transpath, "/trans/");

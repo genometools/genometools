@@ -98,8 +98,8 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
       tool = toolbox_get_tool(dev_toolbox, argv[parsed_args]);
       assert(tool);
     }
-    nargv = cstr_array_prefix_first(argv + parsed_args,
-                                    gt_error_get_progname(err));
+    nargv = gt_cstr_array_prefix_first(argv + parsed_args,
+                                       gt_error_get_progname(err));
     gt_error_set_progname(err, nargv[0]);
     if (toolfunc)
       had_err = toolfunc(argc - parsed_args , (const char**) nargv, err);
@@ -108,7 +108,7 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* free */
-  cstr_array_delete(nargv);
+  gt_cstr_array_delete(nargv);
 
   return had_err;
 }

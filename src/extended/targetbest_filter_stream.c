@@ -51,7 +51,7 @@ static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
                             GT_GenomeFeature *feature, GT_Str *key)
 {
   gt_dlist_add(trees, feature);
-  hashmap_add(target_to_elem, cstr_dup(gt_str_get(key)), gt_dlist_last(trees));
+  hashmap_add(target_to_elem, gt_cstr_dup(gt_str_get(key)), gt_dlist_last(trees));
 }
 
 static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,

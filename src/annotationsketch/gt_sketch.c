@@ -289,7 +289,8 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
 
     /* find and load style file */
     prog = gt_str_new();
-    gt_str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '));
+    gt_str_append_cstr_nt(prog, argv[0],
+                          gt_cstr_length_up_to_char(argv[0], ' '));
     gt_style_file = gtdata_get_path(gt_str_get(prog), err);
     gt_str_delete(prog);
     gt_str_append_cstr(gt_style_file, "/sketch/default.style");

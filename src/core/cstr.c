@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/xansi.h"
 
-char* cstr_dup(const char *cstr)
+char* gt_cstr_dup(const char *cstr)
 {
   size_t size;
   char *copy;
@@ -32,7 +32,7 @@ char* cstr_dup(const char *cstr)
   return copy;
 }
 
-char* cstr_dup_nt(const char *cstr, unsigned long length)
+char* gt_cstr_dup_nt(const char *cstr, unsigned long length)
 {
   char *copy;
   assert(cstr);
@@ -42,7 +42,7 @@ char* cstr_dup_nt(const char *cstr, unsigned long length)
   return copy;
 }
 
-void cstr_rep(char *cstr, char f, char t)
+void gt_cstr_rep(char *cstr, char f, char t)
 {
   char *cc;
   assert(cstr);
@@ -54,7 +54,7 @@ void cstr_rep(char *cstr, char f, char t)
   }
 }
 
-void cstr_show(const char *cstr, unsigned long length, FILE *fp)
+void gt_cstr_show(const char *cstr, unsigned long length, FILE *fp)
 {
   unsigned long i;
   assert(cstr && fp);
@@ -62,7 +62,7 @@ void cstr_show(const char *cstr, unsigned long length, FILE *fp)
     xfputc(cstr[i], fp);
 }
 
-unsigned long cstr_length_up_to_char(const char *cstr, char c)
+unsigned long gt_cstr_length_up_to_char(const char *cstr, char c)
 {
   char *suffix;
   assert(cstr);

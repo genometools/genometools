@@ -83,7 +83,7 @@ void lua_export_metatable(lua_State *L, const char *metatable_desc)
 {
   char *dot, *mt;
   assert(L && metatable_desc);
-  mt = cstr_dup(metatable_desc);
+  mt = gt_cstr_dup(metatable_desc);
   dot = strchr(mt, '.');
   assert(dot);
   *dot = '_';

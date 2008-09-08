@@ -203,8 +203,8 @@ hashmap_test(HashType hash_type)
     {
       hm = hashmap_new(hash_type, gt_free_func, gt_free_func);
 
-      hashmap_add(hm, cstr_dup(s1), cstr_dup(s2));
-      hashmap_add(hm, cstr_dup(s2), cstr_dup(s1));
+      hashmap_add(hm, gt_cstr_dup(s1), gt_cstr_dup(s2));
+      hashmap_add(hm, gt_cstr_dup(s2), gt_cstr_dup(s1));
       my_ensure(had_err, !strcmp(hashmap_get(hm, s1), s2));
       my_ensure(had_err, !strcmp(hashmap_get(hm, s2), s1));
       hashmap_remove(hm, s1); /* remove first element */

@@ -30,7 +30,7 @@ SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)
   SSplicedAlignment *sa;
   assert(id);
   sa = gt_malloc(sizeof *sa);
-  sa->id = cstr_dup(id);
+  sa->id = gt_cstr_dup(id);
   sa->forward = forward;
   sa->exons = gt_array_new(sizeof (GT_Range));
   return sa;

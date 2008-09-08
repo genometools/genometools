@@ -55,11 +55,11 @@ static void proc_gt_env_options(void)
   env_options = getenv("GT_ENV_OPTIONS");
   if (!env_options)
     return;
-  env_options = cstr_dup(env_options); /* make writeable copy */
+  env_options = gt_cstr_dup(env_options); /* make writeable copy */
   splitter = splitter_new();
   splitter_split(splitter, env_options, strlen(env_options), ' ');
   argc = splitter_size(splitter);
-  argv = cstr_array_preprend((const char**) splitter_get_tokens(splitter),
+  argv = gt_cstr_array_preprend((const char**) splitter_get_tokens(splitter),
                              "env");
   argc++;
   /* parse options contained in $GT_ENV_OPTIONS */
@@ -75,7 +75,7 @@ static void proc_gt_env_options(void)
   gt_error_delete(err);
   gt_free(env_options);
   splitter_delete(splitter);
-  cstr_array_delete(argv);
+  gt_cstr_array_delete(argv);
 }
 
 void gt_allocators_init(void)

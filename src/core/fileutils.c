@@ -107,7 +107,7 @@ int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
   /* 'file' has no dirname -> scan $PATH */
   pathvariable = getenv("PATH");
   if (pathvariable)
-    pathvariable = cstr_dup(pathvariable); /* make writeable copy */
+    pathvariable = gt_cstr_dup(pathvariable); /* make writeable copy */
   else {
     gt_error_set(err, "environment variable $PATH is not defined");
     had_err = -1;

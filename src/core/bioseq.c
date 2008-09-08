@@ -179,7 +179,7 @@ static int proc_description(const char *description, unsigned long length,
   char *description_cstr;
   gt_error_check(err);
   if (info->bs->use_stdin) {
-    description_cstr = cstr_dup(description);
+    description_cstr = gt_cstr_dup(description);
     gt_array_add(info->bs->descriptions, description_cstr);
   }
   else {
@@ -267,7 +267,7 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
     switch (line_number % 3) {
       case 1:
         /* process description */
-        description = cstr_dup(gt_str_get(index_line));
+        description = gt_cstr_dup(gt_str_get(index_line));
         gt_array_add(bs->descriptions, description);
         break;
       case 2:

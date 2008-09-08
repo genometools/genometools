@@ -100,7 +100,7 @@ static int extracttarget_from_seqfiles(const char *target,
   assert(target && seqfiles);
   splitter = splitter_new();
   unescaped_target = gt_str_new();
-  escaped_target = cstr_dup(target);
+  escaped_target = gt_cstr_dup(target);
   splitter_split(splitter, escaped_target, strlen(escaped_target), ',');
   for (i = 0; !had_err && i < splitter_size(splitter); i++) {
     Splitter *blank_splitter;

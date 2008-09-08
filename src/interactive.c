@@ -152,10 +152,10 @@ static int loadline(lua_State *L, GetLine *gl) {
     char *line;
     int rval;
     /* save complete line in history */
-    line = cstr_dup(lua_tostring(L, 1));
-    cstr_rep(line, '\n', ' '); /* replace all newlines in <line> with blanks,
-                                  because otherwise gl_append_history() would
-                                  truncate <line> at the first newline */
+    line = gt_cstr_dup(lua_tostring(L, 1));
+    gt_cstr_rep(line, '\n', ' '); /* replace all newlines in <line> with blanks,
+                                     because otherwise gl_append_history() would
+                                     truncate <line> at the first newline */
     rval = gl_append_history(gl, line);
     assert(!rval);
     gt_free(line);

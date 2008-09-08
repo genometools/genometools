@@ -389,7 +389,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         /* sequence region is not already defined -> define it */
         rangeptr = gt_malloc(sizeof (GT_Range));
         *rangeptr = range;
-        hashmap_add(parser->gt_sequence_region_to_range, cstr_dup(seqname),
+        hashmap_add(parser->gt_sequence_region_to_range, gt_cstr_dup(seqname),
                     rangeptr);
       }
 
@@ -490,7 +490,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                                              gene_id))) {
         transcript_id_hash = hashmap_new(HASH_STRING, gt_free_func,
                                          (GT_FreeFunc) gt_array_delete);
-        hashmap_add(parser->gene_id_hash, cstr_dup(gene_id),
+        hashmap_add(parser->gene_id_hash, gt_cstr_dup(gene_id),
                     transcript_id_hash);
       }
       assert(transcript_id_hash);
@@ -498,7 +498,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       if (!(gt_genome_node_array = hashmap_get(transcript_id_hash,
                                             transcript_id))) {
         gt_genome_node_array = gt_array_new(sizeof (GT_GenomeNode*));
-        hashmap_add(transcript_id_hash, cstr_dup(transcript_id),
+        hashmap_add(transcript_id_hash, gt_cstr_dup(transcript_id),
                     gt_genome_node_array);
       }
       assert(gt_genome_node_array);
@@ -507,14 +507,14 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       if (transcript_name && !hashmap_get(parser->transcript_id_to_name_mapping,
                              transcript_id)) {
         hashmap_add(parser->transcript_id_to_name_mapping,
-                    cstr_dup(transcript_id),
-                    cstr_dup(transcript_name));
+                    gt_cstr_dup(transcript_id),
+                    gt_cstr_dup(transcript_name));
       }
       if (gene_name && !hashmap_get(parser->gene_id_to_name_mapping,
                                     gene_id)) {
         hashmap_add(parser->gene_id_to_name_mapping,
-                    cstr_dup(gene_id),
-                    cstr_dup(gene_name));
+                    gt_cstr_dup(gene_id),
+                    gt_cstr_dup(gene_name));
       }
 
       /* get seqid */

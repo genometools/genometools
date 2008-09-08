@@ -41,7 +41,7 @@ Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
   /* alloc */
   m = gt_malloc(sizeof (Mapping));
   m->mapping_file = gt_str_ref(mapping_file);
-  m->global = cstr_dup(global_name);
+  m->global = gt_cstr_dup(global_name);
   m->type = type;
   /* create new lua state (i.e., interpreter) */
   m->L = luaL_newstate();

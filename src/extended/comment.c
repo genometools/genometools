@@ -83,7 +83,7 @@ GT_GenomeNode* gt_comment_new(const char *comment)
   GT_GenomeNode *gn = gt_genome_node_create(gt_comment_class());
   GT_Comment *c = gt_comment_cast(gn);
   assert(comment);
-  c->comment = cstr_dup(comment);
+  c->comment = gt_cstr_dup(comment);
   c->gt_comment_str = gt_str_new_cstr("");
   return gn;
 }

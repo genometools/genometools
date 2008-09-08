@@ -89,9 +89,9 @@ int gt_qgramdist(int argc, const char **argv, GT_Error *err)
         seq_2 = gt_bioseq_get_seq(gt_bioseq_2, j);
         dist = qgramdist(seq_1, seq_2, q);
         printf("qgramdist_%u_(", q);
-        cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
+        gt_cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
         xputchar(',');
-        cstr_show(seq_get_orig(seq_2), seq_length(seq_2), stdout);
+        gt_cstr_show(seq_get_orig(seq_2), seq_length(seq_2), stdout);
         printf(")=%lu\n", dist);
       }
     }

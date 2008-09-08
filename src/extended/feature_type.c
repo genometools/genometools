@@ -34,7 +34,7 @@ GT_FeatureType* gt_feature_type_construct(GT_TypeFactory
   assert(feature_type_factory && type);
   gft = gt_calloc(1, sizeof *gft);
   gft->feature_type_factory = feature_type_factory;
-  gft->type = cstr_dup(type);
+  gft->type = gt_cstr_dup(type);
   return gft;
 }
 

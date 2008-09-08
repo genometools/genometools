@@ -115,8 +115,8 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
           genfile_delete(genfile);
           return NULL;
         }
-        genfile->orig_path = cstr_dup(path);
-        genfile->orig_mode = cstr_dup(path);
+        genfile->orig_path = gt_cstr_dup(path);
+        genfile->orig_mode = gt_cstr_dup(path);
         break;
       default: assert(0);
     }
@@ -146,8 +146,8 @@ GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
         break;
       case GFM_BZIP2:
         genfile->fileptr.bzfile = fa_xbzopen(path, mode);
-        genfile->orig_path = cstr_dup(path);
-        genfile->orig_mode = cstr_dup(path);
+        genfile->orig_path = gt_cstr_dup(path);
+        genfile->orig_mode = gt_cstr_dup(path);
         break;
       default: assert(0);
     }

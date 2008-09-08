@@ -181,8 +181,8 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
          strlen(one_liner) && isupper((int) one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
-  op->synopsis = cstr_dup(synopsis);
-  op->one_liner = cstr_dup(one_liner);
+  op->synopsis = gt_cstr_dup(synopsis);
+  op->one_liner = gt_cstr_dup(one_liner);
   op->options = gt_array_new(sizeof (Option*));
   op->hooks = NULL;
   op->parser_called = false;
@@ -403,7 +403,7 @@ static int show_help(OptionParser *op, OptionType optiontype, GT_Error *err)
   if (!had_err) {
     if (op->refer_to_manual) {
       printf("\nFor detailed information, please refer to the manual of%s.",
-             op->progname + cstr_length_up_to_char(op->progname, ' '));
+             op->progname + gt_cstr_length_up_to_char(op->progname, ' '));
     }
     printf("\nReport bugs to %s.\n",
            op->mailaddress ? op->mailaddress : MAILADDRESS);
@@ -611,7 +611,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
   assert(op);
   assert(!op->parser_called); /* to avoid multiple adding of common options */
 
-  op->progname = cstr_dup(argv[0]);
+  op->progname = gt_cstr_dup(argv[0]);
 
   /* add common options */
   has_extended_options = has_extended_option(op->options);

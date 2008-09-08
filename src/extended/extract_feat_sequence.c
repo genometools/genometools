@@ -103,11 +103,12 @@ int extract_feat_sequence(GT_Str *sequence, GT_GenomeNode *gn,
       assert(range.end <= raw_sequence_length);
       had_err = region_mapping_get_raw_sequence(region_mapping,
                                                 &raw_sequence,
-                                                gt_genome_node_get_seqid(gn), err);
+                                                gt_genome_node_get_seqid(gn),
+                                                err);
     }
     if (!had_err) {
       gt_str_append_cstr_nt(sequence, raw_sequence + range.start - 1,
-                         gt_range_length(range));
+                            gt_range_length(range));
       if (gt_genome_feature_get_strand(gf) == GT_STRAND_REVERSE) {
         had_err = reverse_complement(gt_str_get(sequence), gt_str_length(sequence),
                                      err);

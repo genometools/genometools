@@ -297,7 +297,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
-        nargv = cstr_array_prefix_first(argv, gt_error_get_progname(err));
+        nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
         lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
@@ -321,7 +321,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
         tool = toolbox_get_tool(gtr->tools, argv[0]);
         assert(tool);
       }
-      nargv = cstr_array_prefix_first(argv, gt_error_get_progname(err));
+      nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
       gt_error_set_progname(err, nargv[0]);
       if (toolfunc)
         had_err = toolfunc(argc, (const char**) nargv, err);
@@ -329,7 +329,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
         had_err = tool_run(tool, argc, (const char**) nargv, err);
     }
   }
-  cstr_array_delete(nargv);
+  gt_cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
     showshortversion(gt_error_get_progname(err));
     lua_set_arg(gtr->L, gt_error_get_progname(err), argv);

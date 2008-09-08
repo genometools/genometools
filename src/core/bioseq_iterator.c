@@ -34,14 +34,14 @@ GT_BioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
   assert(sequence_files);
   bsi = gt_calloc(1, sizeof *bsi);
   bsi->seqfile_counter = seqfile_counter ? seqfile_counter : 1 /* for stdin */;
-  bsi->sequence_files = cstr_array_dup(sequence_files);
+  bsi->sequence_files = gt_cstr_array_dup(sequence_files);
   return bsi;
 }
 
 void gt_bioseq_iterator_delete(GT_BioseqIterator *bsi)
 {
   if (!bsi) return;
-  cstr_array_delete(bsi->sequence_files);
+  gt_cstr_array_delete(bsi->sequence_files);
   gt_free(bsi);
 }
 

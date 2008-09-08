@@ -623,7 +623,7 @@ static int layout_tracks(void *key, void *value, void *data,
     block = *(GT_Block**) gt_array_get(list, i);
     gt_track_insert_block(track, block);
   }
-  hashmap_add(tti->dia->tracks, cstr_dup(gt_str_get(gt_track_key)), track);
+  hashmap_add(tti->dia->tracks, gt_cstr_dup(gt_str_get(gt_track_key)), track);
   gt_str_delete(gt_track_key);
   return 0;
 }

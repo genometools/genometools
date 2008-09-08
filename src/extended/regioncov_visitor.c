@@ -77,7 +77,7 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
   regioncov_visitor = regioncov_visitor_cast(gv);
   rangelist = gt_array_new(sizeof (GT_Range));
   hashmap_add(regioncov_visitor->region2rangelist,
-              cstr_dup(gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr))),
+              gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr))),
               rangelist);
   return 0;
 }

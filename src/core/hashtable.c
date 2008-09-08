@@ -718,8 +718,8 @@ static inline void
 cstr_cstr_elem_dup(struct ht_elem_2cstr *elem,
                    const char *key_template, const char *value_template)
 {
-  elem->key = cstr_dup(key_template);
-  elem->value = cstr_dup(value_template);
+  elem->key = gt_cstr_dup(key_template);
+  elem->value = gt_cstr_dup(value_template);
 }
 
 static int

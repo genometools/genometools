@@ -53,7 +53,7 @@ void cstr_table_add(CstrTable *table, const char *cstr)
   int rval;
   assert(table && cstr);
   assert(!cstr_table_get(table, cstr));
-  dup = cstr_dup(cstr);
+  dup = gt_cstr_dup(cstr);
   rval = hashtable_add(table->strings, &dup);
   assert(rval == 1);
 }

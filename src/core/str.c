@@ -191,7 +191,7 @@ GT_Str* gt_str_clone(const GT_Str *s)
   assert(s);
   s_copy = gt_malloc(sizeof *s_copy);
   s->cstr[s->length] = '\0';
-  s_copy->cstr = cstr_dup(s->cstr);
+  s_copy->cstr = gt_cstr_dup(s->cstr);
   s_copy->length = s_copy->allocated = s->length;
   s_copy->reference_count = 0;
   return s_copy;

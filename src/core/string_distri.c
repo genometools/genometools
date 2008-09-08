@@ -47,7 +47,7 @@ void string_distri_add(StringDistri *sd, const char *key)
   assert(sd && key);
   valueptr = cstr_ul_hashmap_get(sd->hashdist, key);
   if (!valueptr) {
-    cstr_ul_hashmap_add(sd->hashdist, cstr_dup(key), 1);
+    cstr_ul_hashmap_add(sd->hashdist, gt_cstr_dup(key), 1);
   }
   else
     (*valueptr)++;

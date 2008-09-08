@@ -184,7 +184,7 @@ static int parse_target_attribute(const char *value, GT_Str *target_id,
   assert(value && filename);
   splitter = splitter_new();
   unescaped_target = gt_str_new();
-  escaped_target = cstr_dup(value);
+  escaped_target = gt_cstr_dup(value);
   splitter_split(splitter, escaped_target, strlen(escaped_target), ' ');
   num_of_tokens = splitter_size(splitter);
   if (!(num_of_tokens == 3 || num_of_tokens == 4)) {
@@ -237,7 +237,7 @@ int gff3parser_parse_target_attributes(const char *values,
   int had_err = 0;
   gt_error_check(err);
   assert(values && filename);
-  targets = cstr_dup(values);
+  targets = gt_cstr_dup(values);
   splitter = splitter_new();
   splitter_split(splitter, targets, strlen(targets), ',');
   if (num_of_targets)

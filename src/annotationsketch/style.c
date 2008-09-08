@@ -100,7 +100,7 @@ int gt_style_load_file(GT_Style *sty, const char *filename, GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
   assert(sty && sty->L && filename);
-  sty->filename = cstr_dup(filename);
+  sty->filename = gt_cstr_dup(filename);
   if (gt_style_get_verbose(sty))
     fprintf(stderr, "Trying to load style file: %s...\n", filename);
   if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {

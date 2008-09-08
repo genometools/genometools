@@ -26,7 +26,7 @@ typedef struct GT_StrArray GT_StrArray;
 GT_StrArray*  gt_strarray_new(void);
 GT_StrArray*  gt_strarray_new_file(const char *path);
 void          gt_strarray_add_cstr(GT_StrArray*, const char*);
-void          gt_strarray_add_cstr_nt(GT_StrArray*, const char*, unsigned long);
+void          gt_strarray_add_gt_cstr_nt(GT_StrArray*, const char*, unsigned long);
 void          gt_strarray_add(GT_StrArray*, const GT_Str*);
 const char*   gt_strarray_get(const GT_StrArray*, unsigned long strnum);
 /* Returns an internal GT_Str pointer (i.e., _not_ a new reference!). */
