@@ -370,9 +370,9 @@ int gt_interval_tree_unit_test(GT_UNUSED GT_Error *err)
     unsigned long start;
     GT_Range *rng;
     rng  = gt_calloc(1, sizeof (GT_Range));
-    start = rand_max(gt_range_max_basepos);
+    start = gt_rand_max(gt_range_max_basepos);
     rng->start = start;
-    rng->end = start + rand_max(width);
+    rng->end = start + gt_rand_max(width);
     gt_array_add(arr, rng);
   }
 
@@ -393,9 +393,9 @@ int gt_interval_tree_unit_test(GT_UNUSED GT_Error *err)
   /* perform test queries */
   for (i = 0; i < num_samples && !had_err; i++)
   {
-    unsigned long start = rand_max(gt_range_max_basepos);
+    unsigned long start = gt_rand_max(gt_range_max_basepos);
     qrange.start = start;
-    qrange.end = start + rand_max(width);
+    qrange.end = start + gt_rand_max(width);
     res = gt_interval_tree_find_first_overlapping(it, qrange.start, qrange.end);
     if (res)
     {
@@ -424,9 +424,9 @@ int gt_interval_tree_unit_test(GT_UNUSED GT_Error *err)
   /* test searching for all overlapping intervals */
   for (i = 0; i < num_find_all_samples && !had_err; i++)
   {
-    unsigned long start = rand_max(gt_range_max_basepos);
+    unsigned long start = gt_rand_max(gt_range_max_basepos);
     qrange.start = start;
-    qrange.end = start + rand_max(query_width);
+    qrange.end = start + gt_rand_max(query_width);
     GT_Array *res = gt_array_new(sizeof (GT_Range*));
     gt_interval_tree_find_all_overlapping(it, qrange.start, qrange.end, res);
     if (res)

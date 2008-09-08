@@ -23,13 +23,13 @@ int gt_drawing_range_compare(GT_DrawingRange range_a, GT_DrawingRange range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
-  if (double_equals_double(range_a.start, range_b.start)
-        && double_equals_double(range_a.end, range_b.end))
+  if (gt_double_equals_double(range_a.start, range_b.start) &&
+      gt_double_equals_double(range_a.end, range_b.end))
     return 0; /* range_a == range_b */
 
   if ((range_a.start < range_b.start) ||
-      (double_equals_double(range_a.start, range_b.start)
-         && (range_a.end < range_b.end)))
+      (gt_double_equals_double(range_a.start, range_b.start)
+       && (range_a.end < range_b.end)))
     return -1; /* range_a < range_b */
 
   return 1; /* range_a > range_b */

@@ -54,7 +54,7 @@
 #include <sys/time.h> /* for gettimeofday() */
 
 #include "yarandom.h"
-# undef ya_rand_init
+# undef gt_ya_rand_init
 
 /* The following 'random' numbers are taken from CRC, 18th Edition, page 622.
    Each array element was taken from the corresponding line in the table,
@@ -79,7 +79,7 @@ static unsigned int a[VectorSize] = {
 static int i1, i2;
 
 unsigned int
-ya_random (void)
+gt_ya_random (void)
 {
   register int ret = a[i1] + a[i2];
   a[i1] = ret;
@@ -89,7 +89,7 @@ ya_random (void)
 }
 
 unsigned int
-ya_rand_init(unsigned int seed)
+gt_ya_rand_init(unsigned int seed)
 {
   unsigned int generated_seed;
   int i;

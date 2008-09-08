@@ -102,7 +102,7 @@ bool markov_chain_is_valid(const MarkovChain *mc)
     double sum_of_probabilities = 0.0;
     for (j = 0; j < mc->num_of_states; j++)
       sum_of_probabilities += markov_chain_get_transition_prob(mc, i, j);
-    if (!double_equals_one(sum_of_probabilities))
+    if (!gt_double_equals_one(sum_of_probabilities))
       return false;
   }
   return true;

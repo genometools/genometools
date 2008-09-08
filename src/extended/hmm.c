@@ -198,7 +198,7 @@ static bool hmm_has_valid_initial_state_probs(const HMM *hmm)
   for (state = 0; state < hmm->num_of_states; state++)
     sum_of_probabilities += hmm_get_initial_state_probability(hmm, state);
 
-  return double_equals_one(sum_of_probabilities);
+  return gt_double_equals_one(sum_of_probabilities);
 }
 
 static bool hmm_has_valid_emissions(const HMM *hmm)
@@ -212,7 +212,7 @@ static bool hmm_has_valid_emissions(const HMM *hmm)
     sum_of_probabilities = 0.0;
     for (symbol = 0; symbol < hmm->num_of_symbols; symbol++)
       sum_of_probabilities += hmm_get_emission_probability(hmm, state, symbol);
-    if (!double_equals_one(sum_of_probabilities))
+    if (!gt_double_equals_one(sum_of_probabilities))
       return false;
   }
   return true;
@@ -232,7 +232,7 @@ static bool hmm_has_valid_states(const HMM *hmm)
                                                              state_2);
 
     }
-    if (!double_equals_one(sum_of_probabilities))
+    if (!gt_double_equals_one(sum_of_probabilities))
       return false;
   }
 
@@ -257,7 +257,7 @@ void hmm_init_random(HMM *hmm)
   /* initialize initial state probabilities in random fashion */
   cumulative_prob = 0.0;
   for (i = 0; i < hmm->num_of_states - 1; i++) {
-    random_value = rand_max_double(1.0 - cumulative_prob);
+    random_value = gt_rand_max_double(1.0 - cumulative_prob);
     hmm_set_initial_state_probability(hmm, i, random_value);
     cumulative_prob += random_value;
   }
@@ -268,7 +268,7 @@ void hmm_init_random(HMM *hmm)
   for (i = 0; i < hmm->num_of_states; i++) {
     cumulative_prob = 0.0;
     for (j = 0; j < hmm->num_of_states - 1; j++) {
-      random_value = rand_max_double(1.0 - cumulative_prob);
+      random_value = gt_rand_max_double(1.0 - cumulative_prob);
       hmm_set_transition_probability(hmm, i, j, random_value);
       cumulative_prob += random_value;
     }
@@ -280,7 +280,7 @@ void hmm_init_random(HMM *hmm)
   for (i = 0; i < hmm->num_of_states; i++) {
     cumulative_prob = 0.0;
     for (j = 0; j < hmm->num_of_symbols - 1; j++) {
-      random_value = rand_max_double(1.0 - cumulative_prob);
+      random_value = gt_rand_max_double(1.0 - cumulative_prob);
       hmm_set_emission_probability(hmm, i, j, random_value);
       cumulative_prob += random_value;
     }
@@ -383,8 +383,8 @@ static void compute_forward_table(double **f, const HMM *hmm,
       for (previous_row = 1; previous_row < hmm->num_of_states;
            previous_row++) {
         /* XXX: replace the logsum() call with a tabulated version */
-        tmp_prob = logsum(tmp_prob, f[previous_row][column-1] +
-                                    hmm->transition_prob[previous_row][row]);
+        tmp_prob = gt_logsum(tmp_prob, f[previous_row][column-1] +
+                                       hmm->transition_prob[previous_row][row]);
       }
       f[row][column] += tmp_prob;
     }
@@ -408,7 +408,7 @@ double hmm_forward(const HMM* hmm, const unsigned int *emissions,
   P = f[0][num_of_emissions-1];
   for (i = 1; i < hmm->num_of_states; i++) {
     /* XXX: replace the logsum() call with a tabulated version */
-    P = logsum(P, f[i][num_of_emissions-1]);
+    P = gt_logsum(P, f[i][num_of_emissions-1]);
   }
 
   gt_array2dim_delete(f);
@@ -438,9 +438,9 @@ static void compute_backward_table(double **b, const HMM *hmm,
                  b[0][column+1];
       for (next_row = 1; next_row < hmm->num_of_states; next_row++) {
         /* XXX: replace the logsum() call with a tabulated version */
-        tmp_prob = logsum(tmp_prob, hmm->transition_prob[row][next_row] +
-                          hmm->emission_prob[next_row][emissions[column+1]] +
-                          b[next_row][column+1]);
+        tmp_prob = gt_logsum(tmp_prob, hmm->transition_prob[row][next_row] +
+                             hmm->emission_prob[next_row][emissions[column+1]] +
+                             b[next_row][column+1]);
       }
       b[row][column] = tmp_prob;
     }
@@ -465,8 +465,8 @@ double hmm_backward(const HMM* hmm, const unsigned int *emissions,
       b[0][0];
   for (i = 1; i < hmm->num_of_states; i++) {
     /* XXX: replace the logsum() call with a tabulated version */
-    P = logsum(P, hmm->initial_state_prob[i] +
-                  hmm->emission_prob[i][emissions[0]] + b[i][0]);
+    P = gt_logsum(P, hmm->initial_state_prob[i] +
+                     hmm->emission_prob[i][emissions[0]] + b[i][0]);
   }
 
   gt_array2dim_delete(b);
@@ -483,7 +483,7 @@ void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
   assert(hmm);
 
   /* determine initial state */
-  random_value = rand_0_to_1();
+  random_value = gt_rand_0_to_1();
   cumulative_prob = 0.0;
   for (state = 0; state < hmm->num_of_states - 1; state++) {
     cumulative_prob += hmm_get_initial_state_probability(hmm, state);
@@ -494,7 +494,7 @@ void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
   /* emit loop */
   for (i = 0; i < num_of_emissions; i++) {
     /* emit character */
-    random_value = rand_0_to_1();
+    random_value = gt_rand_0_to_1();
     cumulative_prob = 0.0;
     for (symbol = 0; symbol < hmm->num_of_symbols - 1; symbol++) {
       cumulative_prob += hmm_get_emission_probability(hmm, state, symbol);
@@ -504,7 +504,7 @@ void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
     if (proc_emission)
       proc_emission(symbol, data);
     /* go to next state */
-    random_value = rand_0_to_1();
+    random_value = gt_rand_0_to_1();
     cumulative_prob = 0.0;
     for (next_state = 0; next_state < hmm->num_of_states - 1; next_state++) {
       cumulative_prob += hmm_get_transition_probability(hmm, state, next_state);
@@ -613,18 +613,21 @@ int hmm_unit_test(GT_Error *err)
       encoded_seq[j] = gt_alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
-                                exp(hmm_backward(fair_hmm, encoded_seq, len))));
+           gt_double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+                                   exp(hmm_backward(fair_hmm, encoded_seq,
+                                                    len))));
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
-                                exp(hmm_backward(loaded_hmm, encoded_seq, len)))
-                               );
+           gt_double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq,
+                                                   len)),
+                                   exp(hmm_backward(loaded_hmm, encoded_seq,
+                                                    len))));
   }
 
   gt_free(encoded_seq);
   gt_alpha_delete(alpha);
-  ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(had_err, gt_double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(had_err, gt_double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm),
+                                          0.0));
   hmm_delete(loaded_hmm);
   hmm_delete(fair_hmm);
 
@@ -642,18 +645,21 @@ int hmm_unit_test(GT_Error *err)
     }
     /* XXX: remove exp() calls */
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
-                                exp(hmm_backward(fair_hmm, encoded_seq, len))));
+           gt_double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+                                   exp(hmm_backward(fair_hmm, encoded_seq,
+                                                    len))));
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
-                                exp(hmm_backward(loaded_hmm, encoded_seq, len)))
-                               );
+           gt_double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq,
+                                                   len)),
+                                   exp(hmm_backward(loaded_hmm, encoded_seq,
+                                                    len))));
   }
 
   gt_free(encoded_seq);
   gt_alpha_delete(alpha);
-  ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(had_err, gt_double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(had_err, gt_double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm),
+                                          0.0));
   hmm_delete(loaded_hmm);
   hmm_delete(fair_hmm);
 

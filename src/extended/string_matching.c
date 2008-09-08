@@ -224,13 +224,13 @@ int string_matching_unit_test(GT_Error *err)
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
     unsigned long j, n, m;
     /* generate random string and pattern */
-    n = rand_max(MAX_STRING_LENGTH);
-    m = rand_max(MAX_PATTERN_LENGTH);
+    n = gt_rand_max(MAX_STRING_LENGTH);
+    m = gt_rand_max(MAX_PATTERN_LENGTH);
     for (j = 0; j < n; j++)
-      s[j] = rand_char();
+      s[j] = gt_rand_char();
     s[n] = '\0';
     for (j = 0; j < m; j++)
-      p[j] = rand_char();
+      p[j] = gt_rand_char();
     p[m] = '\0';
     /* matching (first match) */
     brute_force_match = UNDEF_ULONG;

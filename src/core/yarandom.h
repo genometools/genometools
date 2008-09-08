@@ -21,11 +21,11 @@
 #undef frand
 #undef RAND_MAX
 
-extern unsigned int ya_random (void);
-extern unsigned int ya_rand_init (unsigned int);
+extern unsigned int gt_ya_random (void);
+extern unsigned int gt_ya_rand_init (unsigned int);
 
 #define RAND_MAX   0x7FFFFFFF
-#define random()   ((long) (ya_random() & RAND_MAX))
+#define random()   ((long) (gt_ya_random() & RAND_MAX))
 
 /*#define srandom(i) ya_rand_init(0)*/
 

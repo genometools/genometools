@@ -242,9 +242,9 @@ int gt_dlist_unit_test(GT_Error *err)
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     /* construct the random elements for the list */
-    size = rand_max(MAX_SIZE);
+    size = gt_rand_max(MAX_SIZE);
     for (j = 0; j < size; j++) {
-      elems[j] = rand_max(INT_MAX);
+      elems[j] = gt_rand_max(INT_MAX);
       elems_backup[j] = elems[j];
     }
 

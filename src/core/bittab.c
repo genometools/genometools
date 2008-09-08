@@ -340,7 +340,7 @@ int gt_bittab_unit_test(GT_Error *err)
   gt_error_check(err);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
-    size = rand_max(MAX_SIZE) + 1;
+    size = gt_rand_max(MAX_SIZE) + 1;
     b = gt_bittab_new(size);
     tmp = gt_bittab_new(size);
     and = gt_bittab_new(size);

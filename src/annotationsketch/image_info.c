@@ -104,13 +104,13 @@ int gt_image_info_unit_test(GT_Error *err)
   {
     const GT_RecMap* rm;
     unsigned long rbase;
-    rbase = rand_max(10);
-    GT_Range r = {rbase,rbase+rand_max(20)};
+    rbase = gt_rand_max(10);
+    GT_Range r = {rbase,rbase+gt_rand_max(20)};
     gfs[i] = gt_genome_feature_new(seqid, gft, r, GT_STRAND_FORWARD);
-    rms[i] = gt_recmap_new(rand_max_double(100.0),
-                           rand_max_double(100.0),
-                           rand_max_double(100.0),
-                           rand_max_double(100.0),
+    rms[i] = gt_recmap_new(gt_rand_max_double(100.0),
+                           gt_rand_max_double(100.0),
+                           gt_rand_max_double(100.0),
+                           gt_rand_max_double(100.0),
                            (GT_GenomeFeature*) /* XXX */ gfs[i]);
     gt_image_info_add_recmap(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);

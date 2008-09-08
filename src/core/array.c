@@ -279,7 +279,7 @@ int gt_array_unit_test(GT_Error *err)
   int_array_test = gt_malloc(MAX_SIZE * sizeof (int));
 
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
-    size = rand_max(MAX_SIZE);
+    size = gt_rand_max(MAX_SIZE);
 
     gt_array_reset(char_array);
     gt_array_set_size(int_array, 0);
@@ -288,8 +288,8 @@ int gt_array_unit_test(GT_Error *err)
     ensure(had_err, gt_array_size(int_array) == 0);
 
     for (i = 0; !had_err && i < size; i++) {
-      cc = rand_max(CHAR_MAX);
-      ci = rand_max(INT_MAX);
+      cc = gt_rand_max(CHAR_MAX);
+      ci = gt_rand_max(INT_MAX);
 
       gt_array_add(char_array, cc);
       gt_array_add(int_array, ci);

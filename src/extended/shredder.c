@@ -69,7 +69,7 @@ static const char* generate_fragment(Shredder *shredder,
     const char *frag;
     seqlen = gt_bioseq_get_sequence_length(shredder->bioseq, shredder->seqnum);
     fraglen = (shredder->maxlength == shredder->minlength
-               ? 0 : rand_max(shredder->maxlength - shredder->minlength))
+               ? 0 : gt_rand_max(shredder->maxlength - shredder->minlength))
               + shredder->minlength;
     assert(fraglen >= shredder->minlength);
     frag = gt_bioseq_get_sequence(shredder->bioseq, shredder->seqnum)
@@ -103,7 +103,7 @@ const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
   assert(shredder && fragment_length);
   while ((frag = generate_fragment(shredder, fragment_length, desc))) {
     if (shredder->sample_probability == 1.0 ||
-        rand_0_to_1() <= shredder->sample_probability) {
+        gt_rand_0_to_1() <= shredder->sample_probability) {
       return frag;
     }
   }

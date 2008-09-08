@@ -275,7 +275,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
   assert(gtr);
   if (gtr->debug)
     enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
-  gtr->seed = ya_rand_init(gtr->seed);
+  gtr->seed = gt_ya_rand_init(gtr->seed);
   gt_log_log("seed=%u", gtr->seed);
   if (gtr->check64bit)
     return check64bit();

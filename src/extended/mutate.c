@@ -46,7 +46,8 @@ static char* mutate_description(const char *description, unsigned int rate)
 static char random_character(GT_Alpha *alpha, bool upper_case)
 {
   /* we do not want to get wildcard characters */
-  char random_char = gt_alpha_decode(alpha, rand_max(gt_alpha_size(alpha) - 1 - 1));
+  char random_char = gt_alpha_decode(alpha,
+                                     gt_rand_max(gt_alpha_size(alpha) - 1 - 1));
   if (upper_case)
     return toupper(random_char);
   return tolower(random_char);
@@ -70,9 +71,9 @@ static char* mutate_seq(const char *seq, unsigned long len, GT_Alpha *alpha,
       was_upper = true;
     else
       was_upper = false;
-    if (rand_0_to_1() <= mutate_prob) {
+    if (gt_rand_0_to_1() <= mutate_prob) {
       /* mutate */
-      rand_prob = rand_0_to_1();
+      rand_prob = gt_rand_0_to_1();
       if (rand_prob <= 0.8) {
         /* substitution (80% probability) */
         mutated_seq[j++] = random_character(alpha, was_upper);

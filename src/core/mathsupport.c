@@ -23,28 +23,28 @@
 
 #define EPSILON  0.0000000000001
 
-double logsum(double p1, double p2)
+double gt_logsum(double p1, double p2)
 {
   if (p1 > p2)
     return (p1-p2 > 50.0) ? p1 : p1 + log(1.0 + exp(p2-p1));
   return (p2-p1 > 50.0) ? p2 : p2 + log(1.0 + exp(p1-p2));
 }
 
-bool double_equals_one(double d)
+bool gt_double_equals_one(double d)
 {
   if (fabs(1.0 - d) <= EPSILON)
     return true;
   return false;
 }
 
-bool double_equals_double(double d1, double d2)
+bool gt_double_equals_double(double d1, double d2)
 {
   if (fabs(d1 - d2) <= EPSILON)
     return true;
   return false;
 }
 
-unsigned long rand_max(unsigned long maximal_value)
+unsigned long gt_rand_max(unsigned long maximal_value)
 {
   unsigned long r;
   assert(maximal_value);
@@ -53,7 +53,7 @@ unsigned long rand_max(unsigned long maximal_value)
   return r;
 }
 
-double rand_max_double(double maximal_value)
+double gt_rand_max_double(double maximal_value)
 {
   double r;
   assert(maximal_value);
@@ -62,7 +62,7 @@ double rand_max_double(double maximal_value)
   return r;
 }
 
-double rand_0_to_1(void)
+double gt_rand_0_to_1(void)
 {
   double r;
   r = (double) random() / RAND_MAX;
@@ -70,11 +70,11 @@ double rand_0_to_1(void)
   return r;
 }
 
-char rand_char(void)
+char gt_rand_char(void)
 {
   int offset;
   char c;
-  offset = rand_max(25);
+  offset = gt_rand_max(25);
   c = 97 + offset;
   assert(c >= 'a' && c <= 'z');
   return c;
