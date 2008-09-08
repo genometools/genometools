@@ -44,9 +44,9 @@
 
 typedef struct {
   GT_StrArray *md5_fingerprints;
-} BioseqFingerprints;
+} GT_BioseqFingerprints;
 
-struct Bioseq {
+struct GT_Bioseq {
   bool use_stdin;
   GT_Str *sequence_file;
   Seq **seqs;
@@ -56,7 +56,7 @@ struct Bioseq {
   size_t raw_sequence_length,
          allocated;
   GT_Alpha *alpha;
-  BioseqFingerprints *fingerprints;
+  GT_BioseqFingerprints *fingerprints;
 };
 
 static bool read_fingerprints(GT_StrArray *md5_fingerprints,
@@ -91,13 +91,13 @@ static bool read_fingerprints(GT_StrArray *md5_fingerprints,
   return reading_succeeded;
 }
 
-static void add_fingerprints(GT_StrArray *md5_fingerprints, Bioseq *bs)
+static void add_fingerprints(GT_StrArray *md5_fingerprints, GT_Bioseq *bs)
 {
   unsigned long i;
   assert(md5_fingerprints && bs);
-  for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
-    char *md5 = md5_fingerprint(bioseq_get_sequence(bs, i),
-                                bioseq_get_sequence_length(bs, i));
+  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
+    char *md5 = md5_fingerprint(gt_bioseq_get_sequence(bs, i),
+                                gt_bioseq_get_sequence_length(bs, i));
     gt_strarray_add_cstr(md5_fingerprints, md5);
     gt_free(md5);
   }
@@ -123,9 +123,9 @@ static void write_fingerprints(GT_StrArray *md5_fingerprints,
   fa_xfclose(fingerprints_file);
 }
 
-static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
+static GT_BioseqFingerprints* gt_bioseq_fingerprints_new(GT_Bioseq *bs)
 {
-  BioseqFingerprints *bsf;
+  GT_BioseqFingerprints *bsf;
   bool reading_succeeded = false;
   GT_Str *fingerprints_filename;
   assert(bs);
@@ -140,7 +140,7 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
        modified in the meantime */
     reading_succeeded = read_fingerprints(bsf->md5_fingerprints,
                                           fingerprints_filename,
-                                          bioseq_number_of_sequences(bs));
+                                          gt_bioseq_number_of_sequences(bs));
   }
   if (!reading_succeeded) {
     add_fingerprints(bsf->md5_fingerprints, bs);
@@ -151,14 +151,14 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
   return bsf;
 }
 
-static void bioseq_fingerprints_delete(BioseqFingerprints *bsf)
+static void gt_bioseq_fingerprints_delete(GT_BioseqFingerprints *bsf)
 {
   if (!bsf) return;
   gt_strarray_delete(bsf->md5_fingerprints);
   gt_free(bsf);
 }
 
-static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
+static const char* gt_bioseq_fingerprints_get(GT_BioseqFingerprints *bsf,
                                            unsigned long idx)
 {
   assert(bsf);
@@ -166,16 +166,16 @@ static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
 }
 
 typedef struct {
-  FILE *bioseq_index,
-       *bioseq_raw;
+  FILE *gt_bioseq_index,
+       *gt_bioseq_raw;
   unsigned long offset;
-  Bioseq *bs;
-} Construct_bioseq_files_info;
+  GT_Bioseq *bs;
+} Construct_gt_bioseq_files_info;
 
 static int proc_description(const char *description, unsigned long length,
                             void *data, GT_UNUSED GT_Error *err)
 {
-  Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
+  Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
   char *description_cstr;
   gt_error_check(err);
   if (info->bs->use_stdin) {
@@ -184,8 +184,8 @@ static int proc_description(const char *description, unsigned long length,
   }
   else {
     if (length)
-      xfputs(description, info->bioseq_index);
-    xfputc('\n', info->bioseq_index);
+      xfputs(description, info->gt_bioseq_index);
+    xfputc('\n', info->gt_bioseq_index);
   }
   return 0;
 }
@@ -193,7 +193,7 @@ static int proc_description(const char *description, unsigned long length,
 static int proc_sequence_part(const char *seqpart, unsigned long length,
                               void *data, GT_UNUSED GT_Error *err)
 {
-  Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
+  Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
   gt_error_check(err);
   assert(seqpart);
   if (info->bs->use_stdin) {
@@ -206,14 +206,14 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
     info->bs->raw_sequence_length += length;
   }
   else
-    xfputs(seqpart, info->bioseq_raw);
+    xfputs(seqpart, info->gt_bioseq_raw);
   return 0;
 }
 
 static int proc_sequence_length(unsigned long sequence_length, void *data,
                                 GT_UNUSED GT_Error *err)
 {
-  Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
+  Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
   GT_Range range;
   gt_error_check(err);
   if (info->bs->use_stdin) {
@@ -222,32 +222,32 @@ static int proc_sequence_length(unsigned long sequence_length, void *data,
     gt_array_add(info->bs->sequence_ranges, range);
   }
   else {
-    fprintf(info->bioseq_index, "%lu\n", info->offset);
+    fprintf(info->gt_bioseq_index, "%lu\n", info->offset);
     assert(sequence_length);
-    fprintf(info->bioseq_index, "%lu\n", info->offset + sequence_length - 1);
+    fprintf(info->gt_bioseq_index, "%lu\n", info->offset + sequence_length - 1);
   }
   info->offset += sequence_length;
   return 0;
 }
 
 /* this global variables are necessary for the signal handler below */
-static Construct_bioseq_files_info bioseq_files_info;
-static const char *bioseq_index_filename,
-                  *bioseq_raw_filename;
+static Construct_gt_bioseq_files_info gt_bioseq_files_info;
+static const char *gt_bioseq_index_filename,
+                  *gt_bioseq_raw_filename;
 
 /* removes the incomplete bioseq files */
-static void remove_bioseq_files(int sigraised)
+static void remove_gt_bioseq_files(int sigraised)
 {
   /* we don't care if fclose() succeeds, xunlink() will take care of it */
-  (void) fclose(bioseq_files_info.bioseq_index);
-  (void) fclose(bioseq_files_info.bioseq_raw);
-  xunlink(bioseq_index_filename);
-  xunlink(bioseq_raw_filename);
+  (void) fclose(gt_bioseq_files_info.gt_bioseq_index);
+  (void) fclose(gt_bioseq_files_info.gt_bioseq_raw);
+  xunlink(gt_bioseq_index_filename);
+  xunlink(gt_bioseq_raw_filename);
   (void) xsignal(sigraised, SIG_DFL);
   xraise(sigraised);
 }
 
-static int fill_bioseq(Bioseq *bs, const char *index_filename,
+static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
                        const char *raw_filename, GT_Error *err)
 {
   FILE *index_file;
@@ -309,8 +309,8 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   return had_err;
 }
 
-static int construct_bioseq_files(Bioseq *bs, GT_Str *bioseq_index_file,
-                                  GT_Str *bioseq_raw_file,
+static int construct_gt_bioseq_files(GT_Bioseq *bs, GT_Str *gt_bioseq_index_file,
+                                  GT_Str *gt_bioseq_raw_file,
                                   FastaReaderType fasta_reader_type, GT_Error *err)
 {
   FastaReader *fasta_reader = NULL;
@@ -321,18 +321,18 @@ static int construct_bioseq_files(Bioseq *bs, GT_Str *bioseq_index_file,
 
   /* open files & init */
   if (!bs->use_stdin) {
-    bioseq_files_info.bioseq_index = fa_xfopen((const char *)
-                                               gt_str_get(bioseq_index_file), "w");
-    bioseq_files_info.bioseq_raw = fa_xfopen(gt_str_get(bioseq_raw_file), "w");
+    gt_bioseq_files_info.gt_bioseq_index = fa_xfopen((const char *)
+                                               gt_str_get(gt_bioseq_index_file), "w");
+    gt_bioseq_files_info.gt_bioseq_raw = fa_xfopen(gt_str_get(gt_bioseq_raw_file), "w");
   }
-  bioseq_files_info.offset = 0;
-  bioseq_files_info.bs = bs;
+  gt_bioseq_files_info.offset = 0;
+  gt_bioseq_files_info.bs = bs;
 
   /* register the signal handler to remove incomplete files upon termination */
   if (!bs->use_stdin) {
-    bioseq_index_filename = gt_str_get(bioseq_index_file);
-    bioseq_raw_filename = gt_str_get(bioseq_raw_file);
-    sig_register_all(remove_bioseq_files);
+    gt_bioseq_index_filename = gt_str_get(gt_bioseq_index_file);
+    gt_bioseq_raw_filename = gt_str_get(gt_bioseq_raw_file);
+    sig_register_all(remove_gt_bioseq_files);
   }
 
   /* read fasta file */
@@ -350,7 +350,7 @@ static int construct_bioseq_files(Bioseq *bs, GT_Str *bioseq_index_file,
     default: assert(0);
   }
   had_err = fasta_reader_run(fasta_reader, proc_description, proc_sequence_part,
-                             proc_sequence_length, &bioseq_files_info, err);
+                             proc_sequence_length, &gt_bioseq_files_info, err);
   fasta_reader_delete(fasta_reader);
 
   /* unregister the signal handler */
@@ -359,67 +359,67 @@ static int construct_bioseq_files(Bioseq *bs, GT_Str *bioseq_index_file,
 
   /* close files */
   if (!bs->use_stdin) {
-    fa_xfclose(bioseq_files_info.bioseq_index);
-    fa_xfclose(bioseq_files_info.bioseq_raw);
+    fa_xfclose(gt_bioseq_files_info.gt_bioseq_index);
+    fa_xfclose(gt_bioseq_files_info.gt_bioseq_raw);
     if (had_err) {
-      xunlink(bioseq_index_filename);
-      xunlink(bioseq_raw_filename);
+      xunlink(gt_bioseq_index_filename);
+      xunlink(gt_bioseq_raw_filename);
     }
   }
 
   return had_err;
 }
 
-static int bioseq_fill(Bioseq *bs, bool recreate,
+static int gt_bioseq_fill(GT_Bioseq *bs, bool recreate,
                        FastaReaderType fasta_reader_type, GT_Error *err)
 {
-  GT_Str *bioseq_index_file = NULL,
-      *bioseq_raw_file = NULL;
+  GT_Str *gt_bioseq_index_file = NULL,
+      *gt_bioseq_raw_file = NULL;
   int had_err = 0;
 
   assert(!bs->raw_sequence);
 
   /* construct file names */
   if (!bs->use_stdin) {
-    bioseq_index_file = gt_str_clone(bs->sequence_file);
-    gt_str_append_cstr(bioseq_index_file, GT_BIOSEQ_INDEX);
-    bioseq_raw_file = gt_str_clone(bs->sequence_file);
-    gt_str_append_cstr(bioseq_raw_file, GT_BIOSEQ_RAW);
+    gt_bioseq_index_file = gt_str_clone(bs->sequence_file);
+    gt_str_append_cstr(gt_bioseq_index_file, GT_BIOSEQ_INDEX);
+    gt_bioseq_raw_file = gt_str_clone(bs->sequence_file);
+    gt_str_append_cstr(gt_bioseq_raw_file, GT_BIOSEQ_RAW);
   }
 
   /* construct the bioseq files if necessary */
   if (recreate || bs->use_stdin ||
-      !file_exists(gt_str_get(bioseq_index_file)) ||
-      !file_exists(gt_str_get(bioseq_raw_file)) ||
-      file_is_newer(gt_str_get(bs->sequence_file), gt_str_get(bioseq_index_file)) ||
-      file_is_newer(gt_str_get(bs->sequence_file), gt_str_get(bioseq_raw_file))) {
-    had_err = construct_bioseq_files(bs, bioseq_index_file, bioseq_raw_file,
+      !file_exists(gt_str_get(gt_bioseq_index_file)) ||
+      !file_exists(gt_str_get(gt_bioseq_raw_file)) ||
+      file_is_newer(gt_str_get(bs->sequence_file), gt_str_get(gt_bioseq_index_file)) ||
+      file_is_newer(gt_str_get(bs->sequence_file), gt_str_get(gt_bioseq_raw_file))) {
+    had_err = construct_gt_bioseq_files(bs, gt_bioseq_index_file, gt_bioseq_raw_file,
                                      fasta_reader_type, err);
   }
 
   if (!had_err && !bs->use_stdin) {
     /* fill the bioseq */
-    had_err = fill_bioseq(bs, gt_str_get(bioseq_index_file),
-                          gt_str_get(bioseq_raw_file), err);
+    had_err = fill_bioseq(bs, gt_str_get(gt_bioseq_index_file),
+                          gt_str_get(gt_bioseq_raw_file), err);
   }
 
   /* free */
-  gt_str_delete(bioseq_index_file);
-  gt_str_delete(bioseq_raw_file);
+  gt_str_delete(gt_bioseq_index_file);
+  gt_str_delete(gt_bioseq_raw_file);
 
   return had_err;
 }
 
-static Bioseq* bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
+static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
                                                  bool recreate,
                                                  FastaReaderType
                                                  fasta_reader_type,
                                                  GT_Error *err)
 {
-  Bioseq *bs;
+  GT_Bioseq *bs;
   int had_err = 0;
   gt_error_check(err);
-  bs = gt_calloc(1, sizeof (Bioseq));
+  bs = gt_calloc(1, sizeof (GT_Bioseq));
   if (!strcmp(gt_str_get(sequence_file), "-"))
     bs->use_stdin = true;
   if (!bs->use_stdin && !file_exists(gt_str_get(sequence_file))) {
@@ -431,60 +431,60 @@ static Bioseq* bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
     bs->sequence_file = gt_str_ref(sequence_file);
     bs->descriptions = gt_array_new(sizeof (char*));
     bs->sequence_ranges = gt_array_new(sizeof (GT_Range));
-    had_err = bioseq_fill(bs, recreate, fasta_reader_type, err);
+    had_err = gt_bioseq_fill(bs, recreate, fasta_reader_type, err);
   }
   if (had_err) {
-    bioseq_delete(bs);
+    gt_bioseq_delete(bs);
     return NULL;
   }
   return bs;
 }
 
-Bioseq* bioseq_new(const char *sequence_file, GT_Error *err)
+GT_Bioseq* gt_bioseq_new(const char *sequence_file, GT_Error *err)
 {
-  Bioseq *bs;
+  GT_Bioseq *bs;
   GT_Str *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
-  bs = bioseq_new_with_recreate_and_type(seqfile, false, FASTA_READER_REC, err);
+  bs = gt_bioseq_new_with_recreate_and_type(seqfile, false, FASTA_READER_REC, err);
   gt_str_delete(seqfile);
   return bs;
 }
 
-Bioseq* bioseq_new_recreate(const char *sequence_file, GT_Error *err)
+GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GT_Error *err)
 {
-  Bioseq *bs;
+  GT_Bioseq *bs;
   GT_Str *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
-  bs = bioseq_new_with_recreate_and_type(seqfile, true, FASTA_READER_REC, err);
+  bs = gt_bioseq_new_with_recreate_and_type(seqfile, true, FASTA_READER_REC, err);
   gt_str_delete(seqfile);
   return bs;
 }
 
-Bioseq* bioseq_new_str(GT_Str *sequence_file, GT_Error *err)
+GT_Bioseq* gt_bioseq_new_str(GT_Str *sequence_file, GT_Error *err)
 {
-  return bioseq_new_with_recreate_and_type(sequence_file, false,
+  return gt_bioseq_new_with_recreate_and_type(sequence_file, false,
                                            FASTA_READER_REC, err);
 }
 
-Bioseq* bioseq_new_with_fasta_reader(const char *sequence_file,
+GT_Bioseq* gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                      FastaReaderType fasta_reader, GT_Error *err)
 {
-  Bioseq *bs;
+  GT_Bioseq *bs;
   GT_Str *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
-  bs = bioseq_new_with_recreate_and_type(seqfile, true, fasta_reader, err);
+  bs = gt_bioseq_new_with_recreate_and_type(seqfile, true, fasta_reader, err);
   gt_str_delete(seqfile);
   return bs;
 }
 
-void bioseq_delete(Bioseq *bs)
+void gt_bioseq_delete(GT_Bioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
-  bioseq_fingerprints_delete(bs->fingerprints);
+  gt_bioseq_fingerprints_delete(bs->fingerprints);
   gt_str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < gt_array_size(bs->descriptions); i++)
@@ -503,16 +503,16 @@ void bioseq_delete(Bioseq *bs)
   gt_free(bs);
 }
 
-static void determine_gt_alpha_if_necessary(Bioseq *bs)
+static void determine_gt_alpha_if_necessary(GT_Bioseq *bs)
 {
   assert(bs);
   if (!bs->alpha) {
-    bs->alpha = gt_alpha_guess(bioseq_get_raw_sequence(bs),
-                            bioseq_get_raw_sequence_length(bs));
+    bs->alpha = gt_alpha_guess(gt_bioseq_get_raw_sequence(bs),
+                            gt_bioseq_get_raw_sequence_length(bs));
   }
 }
 
-GT_Alpha* bioseq_get_alpha(Bioseq *bs)
+GT_Alpha* gt_bioseq_get_alpha(GT_Bioseq *bs)
 {
   assert(bs);
   determine_gt_alpha_if_necessary(bs);
@@ -520,7 +520,7 @@ GT_Alpha* bioseq_get_alpha(Bioseq *bs)
   return bs->alpha;
 }
 
-Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
+Seq* gt_bioseq_get_seq(GT_Bioseq *bs, unsigned long idx)
 {
   assert(bs);
   assert(idx < gt_array_size(bs->descriptions));
@@ -528,21 +528,21 @@ Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
     bs->seqs = gt_calloc(gt_array_size(bs->descriptions), sizeof (Seq*));
   determine_gt_alpha_if_necessary(bs);
   if (!bs->seqs[idx]) {
-    bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),
-                            bioseq_get_sequence_length(bs, idx),
+    bs->seqs[idx] = seq_new(gt_bioseq_get_sequence(bs, idx),
+                            gt_bioseq_get_sequence_length(bs, idx),
                             bs->alpha);
-    seq_set_description(bs->seqs[idx], bioseq_get_description(bs, idx));
+    seq_set_description(bs->seqs[idx], gt_bioseq_get_description(bs, idx));
   }
   return bs->seqs[idx];
 }
 
-const char* bioseq_get_description(Bioseq *bs, unsigned long idx)
+const char* gt_bioseq_get_description(GT_Bioseq *bs, unsigned long idx)
 {
   assert(bs);
   return *(char**) gt_array_get(bs->descriptions, idx);
 }
 
-const char* bioseq_get_sequence(Bioseq *bs, unsigned long idx)
+const char* gt_bioseq_get_sequence(GT_Bioseq *bs, unsigned long idx)
 {
   GT_Range sequence_range;
   assert(bs);
@@ -550,22 +550,22 @@ const char* bioseq_get_sequence(Bioseq *bs, unsigned long idx)
   return bs->raw_sequence + sequence_range.start;
 }
 
-const char* bioseq_get_raw_sequence(Bioseq *bs)
+const char* gt_bioseq_get_raw_sequence(GT_Bioseq *bs)
 {
   assert(bs);
   return bs->raw_sequence;
 }
 
-const char* bioseq_get_md5_fingerprint(Bioseq *bs, unsigned long idx)
+const char* gt_bioseq_get_md5_fingerprint(GT_Bioseq *bs, unsigned long idx)
 {
-  assert(bs && idx < bioseq_number_of_sequences(bs));
+  assert(bs && idx < gt_bioseq_number_of_sequences(bs));
   if (!bs->fingerprints)
-    bs->fingerprints = bioseq_fingerprints_new(bs);
-  assert(bioseq_fingerprints_get(bs->fingerprints, idx));
-  return bioseq_fingerprints_get(bs->fingerprints, idx);
+    bs->fingerprints = gt_bioseq_fingerprints_new(bs);
+  assert(gt_bioseq_fingerprints_get(bs->fingerprints, idx));
+  return gt_bioseq_fingerprints_get(bs->fingerprints, idx);
 }
 
-unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
+unsigned long gt_bioseq_get_sequence_length(GT_Bioseq *bs, unsigned long idx)
 {
   GT_Range sequence_range;
   assert(bs);
@@ -573,43 +573,43 @@ unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
   return gt_range_length(sequence_range);
 }
 
-unsigned long bioseq_get_raw_sequence_length(Bioseq *bs)
+unsigned long gt_bioseq_get_raw_sequence_length(GT_Bioseq *bs)
 {
   assert(bs);
   return bs->raw_sequence_length;
 }
 
-unsigned long bioseq_number_of_sequences(Bioseq *bs)
+unsigned long gt_bioseq_number_of_sequences(GT_Bioseq *bs)
 {
   assert(bs);
   return gt_array_size(bs->descriptions);
 }
 
-void bioseq_show_as_fasta(Bioseq *bs, unsigned long width)
+void gt_bioseq_show_as_fasta(GT_Bioseq *bs, unsigned long width)
 {
   unsigned long i;
 
   assert(bs);
 
-  for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
-    fasta_show_entry(bioseq_get_description(bs, i), bioseq_get_sequence(bs, i),
-                     bioseq_get_sequence_length(bs, i), width);
+  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
+    fasta_show_entry(gt_bioseq_get_description(bs, i), gt_bioseq_get_sequence(bs, i),
+                     gt_bioseq_get_sequence_length(bs, i), width);
   }
 }
 
-void bioseq_show_sequence_as_fasta(Bioseq *bs, unsigned long seqnum,
+void gt_bioseq_show_sequence_as_fasta(GT_Bioseq *bs, unsigned long seqnum,
                                    unsigned long width)
 {
   assert(bs);
-  assert(seqnum < bioseq_number_of_sequences(bs));
+  assert(seqnum < gt_bioseq_number_of_sequences(bs));
 
-  fasta_show_entry(bioseq_get_description(bs, seqnum),
-                   bioseq_get_sequence(bs, seqnum),
-                   bioseq_get_sequence_length(bs, seqnum), width);
+  fasta_show_entry(gt_bioseq_get_description(bs, seqnum),
+                   gt_bioseq_get_sequence(bs, seqnum),
+                   gt_bioseq_get_sequence_length(bs, seqnum), width);
 
 }
 
-void bioseq_show_gc_content(Bioseq *bs)
+void gt_bioseq_show_gc_content(GT_Bioseq *bs)
 {
   GT_Alpha *dna_alpha;
   assert(bs);
@@ -618,35 +618,35 @@ void bioseq_show_gc_content(Bioseq *bs)
   if (gt_alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
     printf("showing GC-content for sequence file \"%s\"\n",
            gt_str_get(bs->sequence_file));
-    gc_content_show(bioseq_get_raw_sequence(bs),
-                    bioseq_get_raw_sequence_length(bs), bs->alpha);
+    gc_content_show(gt_bioseq_get_raw_sequence(bs),
+                    gt_bioseq_get_raw_sequence_length(bs), bs->alpha);
   }
   gt_alpha_delete(dna_alpha);
 }
 
-void bioseq_show_stat(Bioseq *bs)
+void gt_bioseq_show_stat(GT_Bioseq *bs)
 {
   unsigned long i, num_of_seqs;
   assert(bs);
-  num_of_seqs = bioseq_number_of_sequences(bs);
+  num_of_seqs = gt_bioseq_number_of_sequences(bs);
   printf("showing statistics for sequence file \"%s\"\n",
          gt_str_get(bs->sequence_file));
   printf("number of sequences: %lu\n", num_of_seqs);
-  printf("total length: %lu\n", bioseq_get_raw_sequence_length(bs));
+  printf("total length: %lu\n", gt_bioseq_get_raw_sequence_length(bs));
   for (i = 0; i < num_of_seqs; i++) {
     printf("sequence #%lu length: %lu\n", i+1,
-           bioseq_get_sequence_length(bs, i));
+           gt_bioseq_get_sequence_length(bs, i));
   }
 }
 
-void bioseq_show_seqlengthdistri(Bioseq *bs)
+void gt_bioseq_show_seqlengthdistri(GT_Bioseq *bs)
 {
   DiscDistri *d;
   unsigned long i;
   assert(bs);
   d = disc_distri_new();
-  for (i = 0; i < bioseq_number_of_sequences(bs); i++)
-    disc_distri_add(d, bioseq_get_sequence_length(bs, i));
+  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++)
+    disc_distri_add(d, gt_bioseq_get_sequence_length(bs, i));
   printf("sequence length distribution:\n");
   disc_distri_show(d);
   disc_distri_delete(d);

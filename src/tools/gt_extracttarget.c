@@ -73,7 +73,7 @@ static OptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
 }
 
 typedef struct {
-  Bioseq *bioseq;
+  GT_Bioseq *bioseq;
   unsigned long seqnum;
 } TargetInfo;
 
@@ -81,9 +81,9 @@ static bool show_target(GT_UNUSED unsigned long pos, void *data)
 {
   TargetInfo *ti = data;
   assert(ti);
-  fasta_show_entry(bioseq_get_description(ti->bioseq, ti->seqnum),
-                   bioseq_get_sequence(ti->bioseq, ti->seqnum),
-                   bioseq_get_sequence_length(ti->bioseq, ti->seqnum), 0);
+  fasta_show_entry(gt_bioseq_get_description(ti->bioseq, ti->seqnum),
+                   gt_bioseq_get_sequence(ti->bioseq, ti->seqnum),
+                   gt_bioseq_get_sequence_length(ti->bioseq, ti->seqnum), 0);
   return true;
 }
 
@@ -114,21 +114,21 @@ static int extracttarget_from_seqfiles(const char *target,
       unsigned long j;
       for (j = 0; j < gt_strarray_size(seqfiles); j++) {
         unsigned long k;
-        Bioseq *bioseq;
-        if (!(bioseq =  bioseq_new(gt_strarray_get(seqfiles, j), err))) {
+        GT_Bioseq *bioseq;
+        if (!(bioseq =  gt_bioseq_new(gt_strarray_get(seqfiles, j), err))) {
           had_err = -1;
           break;
         }
-        for (k = 0; k < bioseq_number_of_sequences(bioseq); k++) {
+        for (k = 0; k < gt_bioseq_number_of_sequences(bioseq); k++) {
           TargetInfo target_info;
-          const char *desc = bioseq_get_description(bioseq, k);
+          const char *desc = gt_bioseq_get_description(bioseq, k);
           target_info.bioseq = bioseq;
           target_info.seqnum = k;
           string_matching_bmh(desc, strlen(desc), gt_str_get(unescaped_target),
                               gt_str_length(unescaped_target), show_target,
                               &target_info);
         }
-        bioseq_delete(bioseq);
+        gt_bioseq_delete(bioseq);
       }
     }
     splitter_delete(blank_splitter);

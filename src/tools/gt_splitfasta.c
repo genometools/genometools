@@ -99,35 +99,35 @@ static int split_description(const char *filename, GT_Str *splitdesc, bool force
                              GT_Error *err)
 {
   unsigned long i;
-  Bioseq *bioseq;
+  GT_Bioseq *bioseq;
   GT_Str *descname;
   int had_err = 0;
   gt_error_check(err);
   assert(filename && splitdesc && gt_str_length(splitdesc));
 
   descname = gt_str_new();
-  if (!(bioseq = bioseq_new(filename, err)))
+  if (!(bioseq = gt_bioseq_new(filename, err)))
     had_err = -1;
 
-  for (i = 0; !had_err && i < bioseq_number_of_sequences(bioseq); i++) {
+  for (i = 0; !had_err && i < gt_bioseq_number_of_sequences(bioseq); i++) {
     GenFile *outfp;
     gt_str_reset(descname);
     gt_str_append_str(descname, splitdesc);
     gt_str_append_char(descname, '/');
-    gt_str_append_cstr(descname, bioseq_get_description(bioseq, i));
+    gt_str_append_cstr(descname, gt_bioseq_get_description(bioseq, i));
     gt_str_append_cstr(descname, file_suffix(filename));
     if (!(outfp = genfile_xopen_forcecheck(gt_str_get(descname), "w", force,
                                            err))) {
       had_err = -1;
       break;
     }
-    fasta_show_entry_generic(bioseq_get_description(bioseq, i),
-                             bioseq_get_sequence(bioseq, i),
-                             bioseq_get_sequence_length(bioseq, i), 0, outfp);
+    fasta_show_entry_generic(gt_bioseq_get_description(bioseq, i),
+                             gt_bioseq_get_sequence(bioseq, i),
+                             gt_bioseq_get_sequence_length(bioseq, i), 0, outfp);
     genfile_close(outfp);
   }
 
-  bioseq_delete(bioseq);
+  gt_bioseq_delete(bioseq);
   gt_str_delete(descname);
 
   return had_err;

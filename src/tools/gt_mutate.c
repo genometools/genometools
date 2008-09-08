@@ -62,31 +62,31 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
                             void *tool_arguments, GT_Error *err)
 {
   MutateArguments *arguments = tool_arguments;
-  BioseqIterator *bsi;
+  GT_BioseqIterator *bsi;
   unsigned long i;
-  Bioseq *bioseq;
+  GT_Bioseq *bioseq;
   Seq *mutated_seq;
   int had_err;
 
   gt_error_check(err);
   assert(arguments);
 
-  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+  bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
-  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
-    for (i = 0; i < bioseq_number_of_sequences(bioseq); i++) {
-      mutated_seq = mutate(bioseq_get_description(bioseq, i),
-                           bioseq_get_sequence(bioseq, i),
-                           bioseq_get_sequence_length(bioseq, i),
-                           bioseq_get_alpha(bioseq), arguments->rate);
+  while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
+    for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
+      mutated_seq = mutate(gt_bioseq_get_description(bioseq, i),
+                           gt_bioseq_get_sequence(bioseq, i),
+                           gt_bioseq_get_sequence_length(bioseq, i),
+                           gt_bioseq_get_alpha(bioseq), arguments->rate);
       fasta_show_entry(seq_get_description(mutated_seq),
                        seq_get_orig(mutated_seq), seq_length(mutated_seq), 0);
       seq_delete(mutated_seq);
     }
-    bioseq_delete(bioseq);
+    gt_bioseq_delete(bioseq);
   }
 
-  bioseq_iterator_delete(bsi);
+  gt_bioseq_iterator_delete(bsi);
 
   return had_err;
 }

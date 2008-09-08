@@ -234,7 +234,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
   int had_err = 0,
       parsed_args = 0;
 
-  /* Variablen/Zeiger zur Erstellung des Hashes fuer die Bioseq-Strukturen
+  /* Variablen/Zeiger zur Erstellung des Hashes fuer die GT_Bioseq-Strukturen
    */
   unsigned long *querynum,
    *hitnum = NULL,
@@ -280,9 +280,9 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
       return 0;
   }
 
-  /* Bioseqstruktur des Query-DNA-FASTA-File wird erzeugt */
-  parsestruct.queryseq = bioseq_new(argv[parsed_args + 1], err);
-  /* Erstellung der Bioseq-Struktur fehlerhaft -> Fehlercode setzen */
+  /* GT_Bioseqstruktur des Query-DNA-FASTA-File wird erzeugt */
+  parsestruct.queryseq = gt_bioseq_new(argv[parsed_args + 1], err);
+  /* Erstellung der GT_Bioseq-Struktur fehlerhaft -> Fehlercode setzen */
   if (!parsestruct.queryseq)
   {
     had_err = -1;
@@ -290,15 +290,15 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
   /* nur wenn die Hitfile-Bool-Option auf true gesetzt ist (File
      vorhanden) und der Fehlercode nicht gesetzt ist, muss die
-     Bioseq-Struktur auch fuer die Hits erstellt werden */
+     GT_Bioseq-Struktur auch fuer die Hits erstellt werden */
   if (ARGUMENTS(hitfile_bool) && !had_err)
   {
-    /* Bioseqstruktur des Hit-DNA-FASTA-File wird erzeugt */
-    parsestruct.hitseq = bioseq_new(argv[parsed_args + 2], err);
-    /* Erstellung der Bioseq-Struktur fehlerhaft -> Fehlercode setzen */
+    /* GT_Bioseqstruktur des Hit-DNA-FASTA-File wird erzeugt */
+    parsestruct.hitseq = gt_bioseq_new(argv[parsed_args + 2], err);
+    /* Erstellung der GT_Bioseq-Struktur fehlerhaft -> Fehlercode setzen */
     if (!parsestruct.hitseq)
     {
-      bioseq_delete(parsestruct.queryseq);
+      gt_bioseq_delete(parsestruct.queryseq);
       had_err = -1;
     }
   }
@@ -427,24 +427,24 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
     gt_str_set(parsestruct.xmlfile, argv[parsed_args]);
 
     /* Anzahl der Query-DNA-Eintraege */
-    nrofseq = bioseq_number_of_sequences(parsestruct.queryseq);
+    nrofseq = gt_bioseq_number_of_sequences(parsestruct.queryseq);
     /* Speicherbereich reservieren fuer Zeiger auf die Indices der
-       Query-DNA-Eintraege in der Bioseq-Struktur */
+       Query-DNA-Eintraege in der GT_Bioseq-Struktur */
     querynum = gt_calloc(nrofseq, sizeof (unsigned long));
     /* Hash erzeugen - Eintraege: Key - Query-FASTA-Def; Value - Zeiger
-       auf deren Indices in der Bioseq - Struktur */
+       auf deren Indices in der GT_Bioseq - Struktur */
     parsestruct.queryhash = cstr_nofree_ulp_hashmap_new();
 
     for (loop_index = 0; loop_index < nrofseq; loop_index++)
     {
-      /* Descriptions der Bioseq-Struktur werden nacheinander
+      /* Descriptions der GT_Bioseq-Struktur werden nacheinander
          abgearbeitet */
       descr_ptr_query =
-        (char *) bioseq_get_description(parsestruct.queryseq, loop_index);
-      /* Position in der Bioseq in den Speicher querynum schreiben */
+        (char *) gt_bioseq_get_description(parsestruct.queryseq, loop_index);
+      /* Position in der GT_Bioseq in den Speicher querynum schreiben */
       querynum[loop_index] = loop_index;
 
-      /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
+      /* Dem aktuellen Schluessel Zeige auf die Position in der GT_Bioseq
          zuordnen */
       if (!cstr_nofree_ulp_hashmap_get(parsestruct.queryhash, descr_ptr_query))
         cstr_nofree_ulp_hashmap_add(parsestruct.queryhash, descr_ptr_query,
@@ -452,17 +452,17 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
     }
 
     /* nur wenn die Option hitfile_bool auf TRUE gesetzt ist, muss die
-       Bioseq-Struktur bzw. die Hash-Tabelle auch fuer die Hits erzeugt
+       GT_Bioseq-Struktur bzw. die Hash-Tabelle auch fuer die Hits erzeugt
        werden; Erzeugung inkl. Hash wie beim Query-DNA-FASTA-File */
     if (ARGUMENTS(hitfile_bool))
     {
       /* Anzahl der Hit-DNA-Eintraege */
-      nrofseq = bioseq_number_of_sequences(parsestruct.hitseq);
+      nrofseq = gt_bioseq_number_of_sequences(parsestruct.hitseq);
       /* Speicherbereich reservieren fuer Zeiger auf die Indices der
-         Hit-DNA-Eintraege in der Bioseq-Struktur */
+         Hit-DNA-Eintraege in der GT_Bioseq-Struktur */
       hitnum = gt_calloc(nrofseq, sizeof (unsigned long));
       /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile; Value - Zeiger
-         auf deren Indices in der Bioseq - Struktur */
+         auf deren Indices in der GT_Bioseq - Struktur */
       parsestruct.hithash = cstr_nofree_ulp_hashmap_new();
 
       /* Hit-Fasta-File zeilenweise abarbeiten */
@@ -470,11 +470,11 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
       {
         /* Der Schluessel ist die Hit-FASTA-Zeile */
         descr_ptr_hit =
-          (char *) bioseq_get_description(parsestruct.hitseq, loop_index);
-        /* Position in der Bioseq in den Speicher hitnum schreiben */
+          (char *) gt_bioseq_get_description(parsestruct.hitseq, loop_index);
+        /* Position in der GT_Bioseq in den Speicher hitnum schreiben */
         hitnum[loop_index] = loop_index;
 
-        /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
+        /* Dem aktuellen Schluessel Zeige auf die Position in der GT_Bioseq
            zuordnen */
         if (!cstr_nofree_ulp_hashmap_get(parsestruct.hithash, descr_ptr_hit))
           cstr_nofree_ulp_hashmap_add(parsestruct.hithash, descr_ptr_hit,
@@ -565,7 +565,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
         if (!had_err)
         {
-          parsestruct.hitseq = bioseq_new(argv[parsed_args + 2], err);
+          parsestruct.hitseq = gt_bioseq_new(argv[parsed_args + 2], err);
 
           if (!parsestruct.hitseq)
           {
@@ -574,13 +574,13 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
           if (!had_err)
           {
             /* Anzahl der Hit-DNA-Eintraege */
-            nrofseq = bioseq_number_of_sequences(parsestruct.hitseq);
+            nrofseq = gt_bioseq_number_of_sequences(parsestruct.hitseq);
             /* Speicherbereich reservieren fuer Zeiger auf die Indices der
-               Hit-DNA-Eintraege in der Bioseq-Struktur */
+               Hit-DNA-Eintraege in der GT_Bioseq-Struktur */
             hitnum = gt_calloc(nrofseq, sizeof (unsigned long));
             /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile;
                Value - Zeiger
-               auf deren Indices in der Bioseq - Struktur */
+               auf deren Indices in der GT_Bioseq - Struktur */
             parsestruct.hithash = cstr_nofree_ulp_hashmap_new();
 
             /* Hit-Fasta-File zeilenweise abarbeiten */
@@ -588,11 +588,11 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
             {
               /* Der Schluessel ist die Hit-FASTA-Zeile */
               descr_ptr_hit =
-              (char *) bioseq_get_description(parsestruct.hitseq, loop_index);
-              /* Position in der Bioseq in den Speicher hitnum schreiben */
+              (char *) gt_bioseq_get_description(parsestruct.hitseq, loop_index);
+              /* Position in der GT_Bioseq in den Speicher hitnum schreiben */
               hitnum[loop_index] = loop_index;
 
-             /* Dem aktuellen Schluessel Zeige auf die Position in der Bioseq
+             /* Dem aktuellen Schluessel Zeige auf die Position in der GT_Bioseq
                 zuordnen */
               if (!cstr_nofree_ulp_hashmap_get(parsestruct.hithash,
                                               descr_ptr_hit))
@@ -676,10 +676,10 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
     hashtable_delete(parsestruct.resulthits);
 
     hashtable_delete(parsestruct.hithash);
-    bioseq_delete(parsestruct.hitseq);
+    gt_bioseq_delete(parsestruct.hitseq);
     gt_free(hitnum);
 
-    bioseq_delete(parsestruct.queryseq);
+    gt_bioseq_delete(parsestruct.queryseq);
   }
 
   gt_str_delete(ARGUMENTS(curl_fcgi_db));

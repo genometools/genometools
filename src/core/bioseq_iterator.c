@@ -20,17 +20,17 @@
 #include "core/cstr_array.h"
 #include "core/ma.h"
 
-struct BioseqIterator {
+struct GT_BioseqIterator {
   int current_file,
       seqfile_counter;
   char **sequence_files;
   bool stdin_was_used;
 };
 
-BioseqIterator* bioseq_iterator_new(int seqfile_counter,
+GT_BioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
                                     const char **sequence_files)
 {
-  BioseqIterator *bsi;
+  GT_BioseqIterator *bsi;
   assert(sequence_files);
   bsi = gt_calloc(1, sizeof *bsi);
   bsi->seqfile_counter = seqfile_counter ? seqfile_counter : 1 /* for stdin */;
@@ -38,14 +38,14 @@ BioseqIterator* bioseq_iterator_new(int seqfile_counter,
   return bsi;
 }
 
-void bioseq_iterator_delete(BioseqIterator *bsi)
+void gt_bioseq_iterator_delete(GT_BioseqIterator *bsi)
 {
   if (!bsi) return;
   cstr_array_delete(bsi->sequence_files);
   gt_free(bsi);
 }
 
-int bioseq_iterator_next(BioseqIterator *bsi, Bioseq **bioseq, GT_Error *err)
+int gt_bioseq_iterator_next(GT_BioseqIterator *bsi, GT_Bioseq **bioseq, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -62,9 +62,9 @@ int bioseq_iterator_next(BioseqIterator *bsi, Bioseq **bioseq, GT_Error *err)
     }
     if (!had_err) {
       if (bsi->sequence_files[bsi->current_file])
-        *bioseq = bioseq_new(bsi->sequence_files[bsi->current_file], err);
+        *bioseq = gt_bioseq_new(bsi->sequence_files[bsi->current_file], err);
       else
-        *bioseq = bioseq_new("-", err);
+        *bioseq = gt_bioseq_new("-", err);
       if (*bioseq)
         bsi->current_file++;
       else

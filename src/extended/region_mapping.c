@@ -29,7 +29,7 @@ struct RegionMapping {
       *sequence_file, /* the (current) sequence file */
       *sequence_name; /* the (current) sequence name */
   Mapping *mapping;
-  Bioseq *bioseq; /* the current bioseq */
+  GT_Bioseq *bioseq; /* the current bioseq */
   unsigned int reference_count;
 };
 
@@ -75,7 +75,7 @@ static GT_Str* region_mapping_map(RegionMapping *rm, const char *sequence_region
     return mapping_map_string(rm->mapping, sequence_region, err);
 }
 
-static int update_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid, GT_Error *err)
+static int update_gt_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -91,8 +91,8 @@ static int update_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid, GT_Error
       else
         gt_str_reset(rm->sequence_name);
       gt_str_append_str(rm->sequence_name, seqid);
-      bioseq_delete(rm->bioseq);
-      rm->bioseq = bioseq_new_str(rm->sequence_file, err);
+      gt_bioseq_delete(rm->bioseq);
+      rm->bioseq = gt_bioseq_new_str(rm->sequence_file, err);
       if (!rm->bioseq)
         had_err = -1;
     }
@@ -106,9 +106,9 @@ int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
   int had_err = 0;
   gt_error_check(err);
   assert(rm && seqid);
-  had_err = update_bioseq_if_necessary(rm, seqid, err);
+  had_err = update_gt_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
-    *raw = bioseq_get_raw_sequence(rm->bioseq);
+    *raw = gt_bioseq_get_raw_sequence(rm->bioseq);
   return had_err;
 }
 
@@ -119,9 +119,9 @@ int region_mapping_get_raw_sequence_length(RegionMapping *rm,
   int had_err = 0;
   gt_error_check(err);
   assert(rm && seqid);
-  had_err = update_bioseq_if_necessary(rm, seqid, err);
+  had_err = update_gt_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
-    *length = bioseq_get_raw_sequence_length(rm->bioseq);
+    *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
   return had_err;
 }
 
@@ -136,6 +136,6 @@ void region_mapping_delete(RegionMapping *rm)
   gt_str_delete(rm->sequence_file);
   gt_str_delete(rm->sequence_name);
   mapping_delete(rm->mapping);
-  bioseq_delete(rm->bioseq);
+  gt_bioseq_delete(rm->bioseq);
   gt_free(rm);
 }

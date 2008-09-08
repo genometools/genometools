@@ -22,18 +22,18 @@
    This simple class allows to parse fasta files and store them in a fashion
    which is conveniently accessible.
 
-   It implements a subset of the behavior of the Bioseq class which can be found
+   It implements a subset of the behavior of the GT_Bioseq class which can be found
    in GenomeTools, but with much fewer dependencies and considerably reduced
    funcionality. It serves mainly educational purposes and should be easily
    understandable.
 */
-typedef struct SimpleBioseq SimpleBioseq;
+typedef struct SimpleGT_Bioseq SimpleGT_Bioseq;
 
-SimpleBioseq* simple_bioseq_new(const char *fasta_file);
-void          simple_bioseq_delete(SimpleBioseq*);
-const char*   simple_bioseq_get_description(SimpleBioseq*, unsigned long);
-const char*   simple_bioseq_get_sequence(SimpleBioseq*, unsigned long index);
-unsigned long simple_bioseq_get_sequence_length(SimpleBioseq*, unsigned long);
-unsigned long simple_bioseq_number_of_sequences(SimpleBioseq*);
+SimpleGT_Bioseq* simple_gt_bioseq_new(const char *fasta_file);
+void          simple_gt_bioseq_delete(SimpleGT_Bioseq*);
+const char*   simple_gt_bioseq_get_description(SimpleGT_Bioseq*, unsigned long);
+const char*   simple_gt_bioseq_get_sequence(SimpleGT_Bioseq*, unsigned long index);
+unsigned long simple_gt_bioseq_get_sequence_length(SimpleGT_Bioseq*, unsigned long);
+unsigned long simple_gt_bioseq_number_of_sequences(SimpleGT_Bioseq*);
 
 #endif

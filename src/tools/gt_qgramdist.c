@@ -44,7 +44,7 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
 
 int gt_qgramdist(int argc, const char **argv, GT_Error *err)
 {
-  Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
+  GT_Bioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
   unsigned long i, j, dist;
   Seq *seq_1, *seq_2;
   int parsed_args, had_err = 0;
@@ -73,20 +73,20 @@ int gt_qgramdist(int argc, const char **argv, GT_Error *err)
 
   /* init */
   if (!had_err) {
-    bioseq_1 = bioseq_new(argv[parsed_args], err);
-    if (!bioseq_1)
+    gt_bioseq_1 = gt_bioseq_new(argv[parsed_args], err);
+    if (!gt_bioseq_1)
       had_err = -1;
     if (!had_err) {
-      bioseq_2 = bioseq_new(argv[parsed_args+1], err);
-      if (!bioseq_2)
+      gt_bioseq_2 = gt_bioseq_new(argv[parsed_args+1], err);
+      if (!gt_bioseq_2)
         had_err = -1;
     }
 
     /* compute q-gram distance for all sequence combinations */
-    for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-      for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-        seq_1 = bioseq_get_seq(bioseq_1, i);
-        seq_2 = bioseq_get_seq(bioseq_2, j);
+    for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
+      for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
+        seq_1 = gt_bioseq_get_seq(gt_bioseq_1, i);
+        seq_2 = gt_bioseq_get_seq(gt_bioseq_2, j);
         dist = qgramdist(seq_1, seq_2, q);
         printf("qgramdist_%u_(", q);
         cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
@@ -98,8 +98,8 @@ int gt_qgramdist(int argc, const char **argv, GT_Error *err)
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
+  gt_bioseq_delete(gt_bioseq_2);
+  gt_bioseq_delete(gt_bioseq_1);
 
   return had_err;
 }

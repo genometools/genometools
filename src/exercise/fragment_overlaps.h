@@ -31,7 +31,7 @@ typedef struct {
 
 /* Create a new fragment overlaps object which stores the overlaps between the
    given <fragments> (if they are equal or larger than <minlength). */
-FragmentOverlaps* fragment_overlaps_new(Bioseq *fragments,
+FragmentOverlaps* fragment_overlaps_new(GT_Bioseq *fragments,
                                         unsigned long minlength);
 void              fragment_overlaps_delete(FragmentOverlaps*);
 void              fragment_overlaps_sort(FragmentOverlaps*);

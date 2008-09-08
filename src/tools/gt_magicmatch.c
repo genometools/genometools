@@ -73,13 +73,13 @@ static OptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static void translate_sequence_file(Bioseq *bs)
+static void translate_sequence_file(GT_Bioseq *bs)
 {
   unsigned long i;
   assert(bs);
-  for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
-    printf("%s\t%s\n", bioseq_get_md5_fingerprint(bs, i),
-                       bioseq_get_description(bs, i));
+  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
+    printf("%s\t%s\n", gt_bioseq_get_md5_fingerprint(bs, i),
+                       gt_bioseq_get_description(bs, i));
   }
 }
 
@@ -88,7 +88,7 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                                 GT_Error *err)
 {
   MagicMatchArguments *arguments = tool_arguments;
-  Bioseq *bioseq;
+  GT_Bioseq *bioseq;
   unsigned long i;
   int had_err = 0;
 
@@ -97,11 +97,11 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 
   if (arguments->translate) {
     for (i = 0; !had_err && i < gt_strarray_size(arguments->seqfiles); i++) {
-      if (!(bioseq = bioseq_new(gt_strarray_get(arguments->seqfiles, i), err)))
+      if (!(bioseq = gt_bioseq_new(gt_strarray_get(arguments->seqfiles, i), err)))
         had_err = -1;
       if (!had_err)
         translate_sequence_file(bioseq);
-      bioseq_delete(bioseq);
+      gt_bioseq_delete(bioseq);
     }
   }
 

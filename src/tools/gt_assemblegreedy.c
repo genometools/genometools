@@ -71,14 +71,14 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
                                  GT_Error *err)
 {
   AssemblegreedyArguments *arguments = tool_arguments;
-  Bioseq *fragments;
+  GT_Bioseq *fragments;
   int had_err = 0;
 
   gt_error_check(err);
   assert(arguments);
 
   /* init */
-  fragments = bioseq_new(argv[parsed_args], err);
+  fragments = gt_bioseq_new(argv[parsed_args], err);
   if (!fragments)
      had_err = -1;
 
@@ -103,7 +103,7 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
   }
 
   /* free */
-  bioseq_delete(fragments);
+  gt_bioseq_delete(fragments);
 
   return had_err;
 }

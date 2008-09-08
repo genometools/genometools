@@ -35,19 +35,19 @@ static int gt_fastaparser_runner(GT_UNUSED int argc, const char **argv,
                                  GT_UNUSED GT_Error *err)
 {
   unsigned long i;
-  SimpleBioseq *simple_bioseq;
+  SimpleGT_Bioseq *simple_bioseq;
 
   gt_error_check(err);
 
-  simple_bioseq = simple_bioseq_new(argv[parsed_args]);
-  for (i = 0; i < simple_bioseq_number_of_sequences(simple_bioseq); i++) {
+  simple_bioseq = simple_gt_bioseq_new(argv[parsed_args]);
+  for (i = 0; i < simple_gt_bioseq_number_of_sequences(simple_bioseq); i++) {
     printf("%c%s\n%s\n", FASTA_SEPARATOR,
-           simple_bioseq_get_description(simple_bioseq, i),
-           simple_bioseq_get_sequence(simple_bioseq, i));
+           simple_gt_bioseq_get_description(simple_bioseq, i),
+           simple_gt_bioseq_get_sequence(simple_bioseq, i));
     printf("sequence #%lu length: %lu\n", i,
-           simple_bioseq_get_sequence_length(simple_bioseq, i));
+           simple_gt_bioseq_get_sequence_length(simple_bioseq, i));
   }
-  simple_bioseq_delete(simple_bioseq);
+  simple_gt_bioseq_delete(simple_bioseq);
 
   return 0;
 }

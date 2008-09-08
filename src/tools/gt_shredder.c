@@ -91,9 +91,9 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
                               int parsed_args, void *tool_arguments, GT_Error *err)
 {
   ShredderArguments *arguments = tool_arguments;
-  BioseqIterator *bsi;
+  GT_BioseqIterator *bsi;
   unsigned long i;
-  Bioseq *bioseq;
+  GT_Bioseq *bioseq;
   int had_err;
   GT_Str *desc;
 
@@ -102,10 +102,10 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
 
   /* init */
   desc = gt_str_new();
-  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+  bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
   /* shredder */
-  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
+  while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < arguments->coverage; i++) {
       Shredder *shredder;
       unsigned long fragment_length;
@@ -120,11 +120,11 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
       }
       shredder_delete(shredder);
     }
-    bioseq_delete(bioseq);
+    gt_bioseq_delete(bioseq);
   }
 
   /* free */
-  bioseq_iterator_delete(bsi);
+  gt_bioseq_iterator_delete(bsi);
   gt_str_delete(desc);
 
   return had_err;

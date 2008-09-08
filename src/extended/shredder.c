@@ -20,7 +20,7 @@
 #include "extended/shredder.h"
 
 struct Shredder {
-  Bioseq *bioseq;
+  GT_Bioseq *bioseq;
   unsigned long minlength,
                 maxlength,
                 overlap,
@@ -29,7 +29,7 @@ struct Shredder {
   double sample_probability;
 };
 
-Shredder* shredder_new(Bioseq *bioseq, unsigned long minlength,
+Shredder* shredder_new(GT_Bioseq *bioseq, unsigned long minlength,
                                        unsigned long maxlength)
 {
   Shredder *shredder = gt_calloc(1, sizeof *shredder);
@@ -64,21 +64,21 @@ static const char* generate_fragment(Shredder *shredder,
                                      unsigned long *fragment_length, GT_Str *desc)
 {
   assert(shredder && fragment_length);
-  if (shredder->seqnum < bioseq_number_of_sequences(shredder->bioseq)) {
+  if (shredder->seqnum < gt_bioseq_number_of_sequences(shredder->bioseq)) {
     unsigned long seqlen, fraglen;
     const char *frag;
-    seqlen = bioseq_get_sequence_length(shredder->bioseq, shredder->seqnum);
+    seqlen = gt_bioseq_get_sequence_length(shredder->bioseq, shredder->seqnum);
     fraglen = (shredder->maxlength == shredder->minlength
                ? 0 : rand_max(shredder->maxlength - shredder->minlength))
               + shredder->minlength;
     assert(fraglen >= shredder->minlength);
-    frag = bioseq_get_sequence(shredder->bioseq, shredder->seqnum)
+    frag = gt_bioseq_get_sequence(shredder->bioseq, shredder->seqnum)
            + shredder->pos;
     if (shredder->pos + fraglen > seqlen)
       fraglen = seqlen - shredder->pos;
     *fragment_length = fraglen;
     gt_str_reset(desc);
-    gt_str_append_cstr(desc, bioseq_get_description(shredder->bioseq,
+    gt_str_append_cstr(desc, gt_bioseq_get_description(shredder->bioseq,
                                                  shredder->seqnum));
     assert(shredder->pos + fraglen <= seqlen);
     if (shredder->pos + fraglen == seqlen) { /* last fragment */

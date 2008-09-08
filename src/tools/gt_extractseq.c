@@ -137,26 +137,26 @@ static int gt_extractseq_arguments_check(GT_UNUSED int argc, void *tool_argument
   return 0;
 }
 
-static int extractseq_pos(GenFile *outfp, Bioseq *bs, unsigned long frompos,
+static int extractseq_pos(GenFile *outfp, GT_Bioseq *bs, unsigned long frompos,
                           unsigned long topos, unsigned long width, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
   assert(bs);
-  if (topos > bioseq_get_raw_sequence_length(bs)) {
+  if (topos > gt_bioseq_get_raw_sequence_length(bs)) {
     gt_error_set(err,
               "argument %lu to option '-%s' is larger than sequence length %lu",
-              topos, TOPOS_OPTION_STR, bioseq_get_raw_sequence_length(bs));
+              topos, TOPOS_OPTION_STR, gt_bioseq_get_raw_sequence_length(bs));
     had_err = -1;
   }
   if (!had_err) {
-    fasta_show_entry_generic(NULL, bioseq_get_raw_sequence(bs) + frompos - 1,
+    fasta_show_entry_generic(NULL, gt_bioseq_get_raw_sequence(bs) + frompos - 1,
                              topos - frompos + 1, width, outfp);
   }
   return had_err;
 }
 
-static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
+static int extractseq_match(GenFile *outfp, GT_Bioseq *bs, const char *pattern,
                             unsigned long width, GT_Error *err)
 {
   const char *desc;
@@ -167,13 +167,13 @@ static int extractseq_match(GenFile *outfp, Bioseq *bs, const char *pattern,
   gt_error_check(err);
   assert(bs && pattern);
 
-  for (i = 0; !had_err && i < bioseq_number_of_sequences(bs); i++) {
-    desc = bioseq_get_description(bs, i);
+  for (i = 0; !had_err && i < gt_bioseq_number_of_sequences(bs); i++) {
+    desc = gt_bioseq_get_description(bs, i);
     assert(desc);
     had_err = grep(&match, pattern, desc, err);
     if (!had_err && match) {
-      fasta_show_entry_generic(desc, bioseq_get_sequence(bs, i),
-                               bioseq_get_sequence_length(bs, i), width, outfp);
+      fasta_show_entry_generic(desc, gt_bioseq_get_sequence(bs, i),
+                               gt_bioseq_get_sequence_length(bs, i), width, outfp);
     }
   }
 
@@ -220,10 +220,10 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
                             arguments->outfp, err);
   }
   else {
-    BioseqIterator *bsi;
-    Bioseq *bs;
-    bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
-    while (!had_err && !(had_err = bioseq_iterator_next(bsi, &bs, err)) && bs) {
+    GT_BioseqIterator *bsi;
+    GT_Bioseq *bs;
+    bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+    while (!had_err && !(had_err = gt_bioseq_iterator_next(bsi, &bs, err)) && bs) {
       if (arguments->frompos) {
         had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
                                  arguments->topos, arguments->width, err);
@@ -233,9 +233,9 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
                                    gt_str_get(arguments->pattern),
                                    arguments->width, err);
       }
-      bioseq_delete(bs);
+      gt_bioseq_delete(bs);
     }
-    bioseq_iterator_delete(bsi);
+    gt_bioseq_iterator_delete(bsi);
   }
   return had_err;
 }

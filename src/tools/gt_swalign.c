@@ -65,7 +65,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
                              GT_Error *err)
 {
   SWAlignArguments *arguments = tool_arguments;
-  Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
+  GT_Bioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
   ScoreFunction *score_function = NULL;
   ScoreMatrix *scorematrix;
   unsigned long i, j;
@@ -80,21 +80,21 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   if (scorematrix) {
     score_function = score_function_new(scorematrix, arguments->indelscore,
                                                    arguments->indelscore);
-    bioseq_1 = bioseq_new(argv[parsed_args+1], err);
-    if (!bioseq_1)
+    gt_bioseq_1 = gt_bioseq_new(argv[parsed_args+1], err);
+    if (!gt_bioseq_1)
       had_err = -1;
     if (!had_err) {
-      bioseq_2 = bioseq_new(argv[parsed_args+2], err);
-      if (!bioseq_2)
+      gt_bioseq_2 = gt_bioseq_new(argv[parsed_args+2], err);
+      if (!gt_bioseq_2)
         had_err = -1;
     }
 
     if (!had_err) {
       /* aligning all sequence combinations */
-      for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-        for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-          a = swalign(bioseq_get_seq(bioseq_1, i),
-                      bioseq_get_seq(bioseq_2, j), score_function);
+      for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
+        for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
+          a = swalign(gt_bioseq_get_seq(gt_bioseq_1, i),
+                      gt_bioseq_get_seq(gt_bioseq_2, j), score_function);
           if (a) {
             alignment_show(a, stdout);
             xputchar('\n');
@@ -106,8 +106,8 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
+  gt_bioseq_delete(gt_bioseq_2);
+  gt_bioseq_delete(gt_bioseq_1);
   score_function_delete(score_function);
 
   return had_err;

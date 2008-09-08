@@ -26,17 +26,17 @@ struct FragmentOverlaps{
   GT_Array *overlaps;
 };
 
-static void determine_overlaps(GT_Array *overlaps, Bioseq *fragments,
+static void determine_overlaps(GT_Array *overlaps, GT_Bioseq *fragments,
                                unsigned long i, unsigned long j,
                                unsigned long minlength)
 {
   unsigned long cpl; /* common prefix length */
   Overlap overlap;
   assert(overlaps && fragments && i != j);
-  cpl = string_matching_kmp(bioseq_get_sequence(fragments, i),
-                            bioseq_get_sequence_length(fragments, i),
-                            bioseq_get_sequence(fragments, j),
-                            bioseq_get_sequence_length(fragments, j),
+  cpl = string_matching_kmp(gt_bioseq_get_sequence(fragments, i),
+                            gt_bioseq_get_sequence_length(fragments, i),
+                            gt_bioseq_get_sequence(fragments, j),
+                            gt_bioseq_get_sequence_length(fragments, j),
                             NULL, NULL);
   if (cpl >= minlength) {
     overlap.start = i;
@@ -44,10 +44,10 @@ static void determine_overlaps(GT_Array *overlaps, Bioseq *fragments,
     overlap.end = j;
     gt_array_add(overlaps, overlap);
   }
-  cpl = string_matching_kmp(bioseq_get_sequence(fragments, j),
-                            bioseq_get_sequence_length(fragments, j),
-                            bioseq_get_sequence(fragments, i),
-                            bioseq_get_sequence_length(fragments, i),
+  cpl = string_matching_kmp(gt_bioseq_get_sequence(fragments, j),
+                            gt_bioseq_get_sequence_length(fragments, j),
+                            gt_bioseq_get_sequence(fragments, i),
+                            gt_bioseq_get_sequence_length(fragments, i),
                             NULL, NULL);
   if (cpl >= minlength) {
     overlap.start = j;
@@ -57,7 +57,7 @@ static void determine_overlaps(GT_Array *overlaps, Bioseq *fragments,
   }
 }
 
-FragmentOverlaps* fragment_overlaps_new(Bioseq *fragments,
+FragmentOverlaps* fragment_overlaps_new(GT_Bioseq *fragments,
                                         unsigned long minlength)
 {
   FragmentOverlaps *fo;
@@ -65,8 +65,8 @@ FragmentOverlaps* fragment_overlaps_new(Bioseq *fragments,
   assert(fragments);
   fo = gt_malloc(sizeof *fo);
   fo->overlaps = gt_array_new(sizeof (Overlap));
-  for (i = 0; i < bioseq_number_of_sequences(fragments); i++) {
-    for (j = i + 1; j < bioseq_number_of_sequences(fragments); j++)
+  for (i = 0; i < gt_bioseq_number_of_sequences(fragments); i++) {
+    for (j = i + 1; j < gt_bioseq_number_of_sequences(fragments); j++)
       determine_overlaps(fo->overlaps, fragments, i, j, minlength);
   }
   return fo;

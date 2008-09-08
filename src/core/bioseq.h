@@ -23,52 +23,52 @@
 #include "core/seq.h"
 #include "core/str.h"
 
-/* Bioseq file endings */
+/* GT_Bioseq file endings */
 #define GT_BIOSEQ_INDEX        ".gt_bsi"
 #define GT_BIOSEQ_RAW          ".gt_bsr"
 #define GT_BIOSEQ_FINGERPRINTS ".gt_bsf"
 
-typedef struct Bioseq Bioseq;
+typedef struct GT_Bioseq GT_Bioseq;
 
 /* Construct a new bioseq object (and create the bioseq files, if necessary). */
-Bioseq*       bioseq_new(const char *sequence_file, GT_Error*);
+GT_Bioseq*       gt_bioseq_new(const char *sequence_file, GT_Error*);
 /* Construct a new bioseq object (and always create the the bioseq files). */
-Bioseq*       bioseq_new_recreate(const char *sequence_file, GT_Error*);
-Bioseq*       bioseq_new_str(GT_Str* sequence_file, GT_Error*);
+GT_Bioseq*       gt_bioseq_new_recreate(const char *sequence_file, GT_Error*);
+GT_Bioseq*       gt_bioseq_new_str(GT_Str* sequence_file, GT_Error*);
 /* Construct a new bioseq object (and always create the bioseq files)
    with a certain <fasta_reader>. */
-Bioseq*       bioseq_new_with_fasta_reader(const char *sequence_file,
+GT_Bioseq*       gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                            FastaReaderType fasta_reader,
                                            GT_Error*);
-void          bioseq_delete(Bioseq*);
-GT_Alpha*        bioseq_get_alpha(Bioseq*);
-Seq*          bioseq_get_seq(Bioseq*, unsigned long);
-const char*   bioseq_get_description(Bioseq*, unsigned long);
+void          gt_bioseq_delete(GT_Bioseq*);
+GT_Alpha*        gt_bioseq_get_alpha(GT_Bioseq*);
+Seq*          gt_bioseq_get_seq(GT_Bioseq*, unsigned long);
+const char*   gt_bioseq_get_description(GT_Bioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
-const char*   bioseq_get_sequence(Bioseq*, unsigned long index);
-const char*   bioseq_get_raw_sequence(Bioseq*);
+const char*   gt_bioseq_get_sequence(GT_Bioseq*, unsigned long index);
+const char*   gt_bioseq_get_raw_sequence(GT_Bioseq*);
 /* Return MD5 fingerprint of sequence with given <index>. */
-const char*   bioseq_get_md5_fingerprint(Bioseq*, unsigned long index);
-unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
-unsigned long bioseq_get_raw_sequence_length(Bioseq*);
-unsigned long bioseq_number_of_sequences(Bioseq*);
+const char*   gt_bioseq_get_md5_fingerprint(GT_Bioseq*, unsigned long index);
+unsigned long gt_bioseq_get_sequence_length(GT_Bioseq*, unsigned long);
+unsigned long gt_bioseq_get_raw_sequence_length(GT_Bioseq*);
+unsigned long gt_bioseq_number_of_sequences(GT_Bioseq*);
 
 /* Shows a bioseq on stdout (in fasta format).
    If width is != 0 the sequences are formatted accordingly. */
-void bioseq_show_as_fasta(Bioseq*, unsigned long width);
+void gt_bioseq_show_as_fasta(GT_Bioseq*, unsigned long width);
 
 /* Shows a sequence with number ``seqnum'' from a bioseq on stdout (in fasta
    format). If width is != 0 the sequences are formatted accordingly. */
-void bioseq_show_sequence_as_fasta(Bioseq*, unsigned long seqnum,
+void gt_bioseq_show_sequence_as_fasta(GT_Bioseq*, unsigned long seqnum,
                                    unsigned long width);
 
 /* Shows GC-content on stdout (for DNA files). */
-void bioseq_show_gc_content(Bioseq*);
+void gt_bioseq_show_gc_content(GT_Bioseq*);
 
 /* Shows bioseq statistics (on stdout). */
-void bioseq_show_stat(Bioseq*);
+void gt_bioseq_show_stat(GT_Bioseq*);
 
 /* Shows bioseq sequence length distribution (on stdout). */
-void bioseq_show_seqlengthdistri(Bioseq*);
+void gt_bioseq_show_seqlengthdistri(GT_Bioseq*);
 
 #endif

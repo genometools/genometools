@@ -23,10 +23,10 @@
 
 typedef struct GreedyAssembly GreedyAssembly;
 
-GreedyAssembly* greedy_assembly_new(Bioseq *fragments,
+GreedyAssembly* greedy_assembly_new(GT_Bioseq *fragments,
                                     FragmentOverlaps *sorted_overlaps);
 void            greedy_assembly_delete(GreedyAssembly*);
-void            greedy_assembly_show(const GreedyAssembly*, Bioseq *fragments);
+void            greedy_assembly_show(const GreedyAssembly*, GT_Bioseq *fragments);
 void            greedy_assembly_show_path(const GreedyAssembly*);
 
 #endif

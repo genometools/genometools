@@ -20,15 +20,15 @@
 
 #include "core/bioseq.h"
 
-typedef struct BioseqIterator BioseqIterator;
+typedef struct GT_BioseqIterator GT_BioseqIterator;
 
-/* Create a new BioseqIterator for <seqfile_counter> many <sequence_files>.
+/* Create a new GT_BioseqIterator for <seqfile_counter> many <sequence_files>.
    If <seqfile_counter> is 0 use stdin as the only sequence file. */
-BioseqIterator* bioseq_iterator_new(int seqfile_counter,
+GT_BioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
                                     const char **sequence_files);
-void            bioseq_iterator_delete(BioseqIterator*);
+void            gt_bioseq_iterator_delete(GT_BioseqIterator*);
 /* Assign the next <bioseq> if it is available or NULL otherwise.
    Returns -1 in case of failure or 0 otherwise. */
-int             bioseq_iterator_next(BioseqIterator*, Bioseq **bioseq, GT_Error*);
+int             gt_bioseq_iterator_next(GT_BioseqIterator*, GT_Bioseq **bioseq, GT_Error*);
 
 #endif

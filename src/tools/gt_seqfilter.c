@@ -71,8 +71,8 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
                                void *tool_arguments, GT_Error *err)
 {
   SeqFilterArguments *arguments = tool_arguments;
-  BioseqIterator *bsi;
-  Bioseq *bioseq;
+  GT_BioseqIterator *bsi;
+  GT_Bioseq *bioseq;
   unsigned long i;
   unsigned long long duplicates = 0, num_of_sequences = 0;
   int had_err = 0;
@@ -80,23 +80,23 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   gt_error_check(err);
   assert(tool_arguments);
 
-  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+  bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
-  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
-    for (i = 0; i < bioseq_number_of_sequences(bioseq); i++) {
+  while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
+    for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
       if ((arguments->minlength == UNDEF_ULONG ||
-           bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
+           gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
           (arguments->maxlength == UNDEF_ULONG ||
-           bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength)) {
-        fasta_show_entry(bioseq_get_description(bioseq, i),
-                         bioseq_get_sequence(bioseq, i),
-                         bioseq_get_sequence_length(bioseq, i), 0);
+           gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength)) {
+        fasta_show_entry(gt_bioseq_get_description(bioseq, i),
+                         gt_bioseq_get_sequence(bioseq, i),
+                         gt_bioseq_get_sequence_length(bioseq, i), 0);
       }
       else
         duplicates++;
       num_of_sequences++;
     }
-    bioseq_delete(bioseq);
+    gt_bioseq_delete(bioseq);
   }
 
   /* show statistics */
@@ -106,7 +106,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
             ((double) duplicates / num_of_sequences) * 100.0);
   }
 
-  bioseq_iterator_delete(bsi);
+  gt_bioseq_iterator_delete(bsi);
 
   return had_err;
 }

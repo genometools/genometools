@@ -39,30 +39,30 @@ static int gt_linearalign_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, GT_UNUSED void *tool_arguments,
                                  GT_Error *err)
 {
-  Bioseq *bioseq_1, *bioseq_2 = NULL;
+  GT_Bioseq *gt_bioseq_1, *gt_bioseq_2 = NULL;
   unsigned long i, j;
   int had_err = 0;
   Alignment *a;
   gt_error_check(err);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args], err);
-  if (!bioseq_1)
+  gt_bioseq_1 = gt_bioseq_new(argv[parsed_args], err);
+  if (!gt_bioseq_1)
     had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
-    if (!bioseq_2)
+    gt_bioseq_2 = gt_bioseq_new(argv[parsed_args+1], err);
+    if (!gt_bioseq_2)
       had_err = -1;
   }
 
   /* aligning all sequence combinations */
   if (!had_err) {
-    for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-      for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-        a = linearalign(bioseq_get_sequence(bioseq_1, i),
-                        bioseq_get_sequence_length(bioseq_1, i),
-                        bioseq_get_sequence(bioseq_2, j),
-                        bioseq_get_sequence_length(bioseq_2, j));
+    for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
+      for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
+        a = linearalign(gt_bioseq_get_sequence(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence_length(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence(gt_bioseq_2, j),
+                        gt_bioseq_get_sequence_length(gt_bioseq_2, j));
         alignment_show(a, stdout);
         xputchar('\n');
         alignment_delete(a);
@@ -71,8 +71,8 @@ static int gt_linearalign_runner(GT_UNUSED int argc, const char **argv,
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
+  gt_bioseq_delete(gt_bioseq_2);
+  gt_bioseq_delete(gt_bioseq_1);
 
   return had_err;
 }

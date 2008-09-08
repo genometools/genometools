@@ -178,7 +178,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GT_Error *err)
 {
   FingerprintArguments *arguments = tool_arguments;
-  Bioseq *bs;
+  GT_Bioseq *bs;
   StringDistri *sd;
   unsigned long i, j;
   int had_err = 0;
@@ -189,25 +189,25 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
 
   /* process sequence files */
   for (i = parsed_args; !had_err && i < argc; i++) {
-    if (!(bs = bioseq_new(argv[i], err)))
+    if (!(bs = gt_bioseq_new(argv[i], err)))
       had_err = -1;
     if (!had_err) {
-      for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
+      for (j = 0; j < gt_bioseq_number_of_sequences(bs); j++) {
         if (gt_str_length(arguments->checklist) || arguments->show_duplicates)
-          string_distri_add(sd, bioseq_get_md5_fingerprint(bs, j));
+          string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
         else if (gt_str_length(arguments->extract)) {
-          if (!strcmp(bioseq_get_md5_fingerprint(bs, j),
+          if (!strcmp(gt_bioseq_get_md5_fingerprint(bs, j),
                       gt_str_get(arguments->extract))) {
-            fasta_show_entry(bioseq_get_description(bs, j),
-                             bioseq_get_sequence(bs, j),
-                             bioseq_get_sequence_length(bs, j), 0);
+            fasta_show_entry(gt_bioseq_get_description(bs, j),
+                             gt_bioseq_get_sequence(bs, j),
+                             gt_bioseq_get_sequence_length(bs, j), 0);
           }
         }
         else
-          xputs(bioseq_get_md5_fingerprint(bs, j));
+          xputs(gt_bioseq_get_md5_fingerprint(bs, j));
       }
     }
-    bioseq_delete(bs);
+    gt_bioseq_delete(bs);
   }
 
   if (!had_err) {

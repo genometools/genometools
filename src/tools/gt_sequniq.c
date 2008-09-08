@@ -86,7 +86,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GT_Error *err)
 {
   SequniqArguments *arguments = tool_arguments;
-  Bioseq *bs;
+  GT_Bioseq *bs;
   StringDistri *sd;
   unsigned long long duplicates = 0, num_of_sequences = 0;
   GT_StrArray *files;
@@ -104,15 +104,15 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   if (!arguments->seqit) {
     unsigned long i, j;
     for (i = parsed_args; !had_err && i < argc; i++) {
-      if (!(bs = bioseq_new(argv[i], err)))
+      if (!(bs = gt_bioseq_new(argv[i], err)))
         had_err = -1;
       if (!had_err) {
-        for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
-          if (!string_distri_get(sd, bioseq_get_md5_fingerprint(bs, j))) {
-            string_distri_add(sd, bioseq_get_md5_fingerprint(bs, j));
-            fasta_show_entry_generic(bioseq_get_description(bs, j),
-                                     bioseq_get_sequence(bs, j),
-                                     bioseq_get_sequence_length(bs, j), 0,
+        for (j = 0; j < gt_bioseq_number_of_sequences(bs); j++) {
+          if (!string_distri_get(sd, gt_bioseq_get_md5_fingerprint(bs, j))) {
+            string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
+            fasta_show_entry_generic(gt_bioseq_get_description(bs, j),
+                                     gt_bioseq_get_sequence(bs, j),
+                                     gt_bioseq_get_sequence_length(bs, j), 0,
                                      arguments->outfp);
           }
           else
@@ -120,7 +120,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
           num_of_sequences++;
         }
       }
-      bioseq_delete(bs);
+      gt_bioseq_delete(bs);
     }
   }
   else {
