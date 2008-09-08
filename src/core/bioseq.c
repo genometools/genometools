@@ -619,8 +619,8 @@ void gt_bioseq_show_gc_content(GT_Bioseq *bs)
   if (gt_alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
     printf("showing GC-content for sequence file \"%s\"\n",
            gt_str_get(bs->sequence_file));
-    gc_content_show(gt_bioseq_get_raw_sequence(bs),
-                    gt_bioseq_get_raw_sequence_length(bs), bs->alpha);
+    gt_gc_content_show(gt_bioseq_get_raw_sequence(bs),
+                       gt_bioseq_get_raw_sequence_length(bs), bs->alpha);
   }
   gt_alpha_delete(dna_alpha);
 }

@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "core/gc_content.h"
 
-void gc_content_show(const char *seq, unsigned long len, GT_Alpha *alpha)
+void gt_gc_content_show(const char *seq, unsigned long len, GT_Alpha *alpha)
 {
   unsigned long i,
                 gc = 0, /* number of G/C bases */
