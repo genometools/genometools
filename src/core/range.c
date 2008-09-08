@@ -271,8 +271,8 @@ void ranges_sort(GT_Array *ranges)
 void ranges_sort_by_length_stable(GT_Array *ranges)
 {
   assert(ranges);
-  msort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GT_Range),
-        (GT_Compare) gt_range_compare_by_length_ptr);
+  gt_msort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GT_Range),
+           (GT_Compare) gt_range_compare_by_length_ptr);
 }
 
 bool ranges_are_sorted(const GT_Array *ranges)

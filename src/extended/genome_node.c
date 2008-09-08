@@ -702,15 +702,14 @@ void gt_genome_node_rec_delete(GT_GenomeNode *gn)
 
 void genome_nodes_sort(GT_Array *nodes)
 {
-  qsort(gt_array_get_space(nodes), gt_array_size(nodes), sizeof (GT_GenomeNode*),
-        (GT_Compare) gt_genome_node_compare);
+  qsort(gt_array_get_space(nodes), gt_array_size(nodes),
+        sizeof (GT_GenomeNode*), (GT_Compare) gt_genome_node_compare);
 }
 
 void genome_nodes_sort_stable(GT_Array *nodes)
 {
-  msort(gt_array_get_space(nodes), gt_array_size(nodes), sizeof (GT_GenomeNode*),
-        (GT_Compare) gt_genome_node_compare);
-
+  gt_msort(gt_array_get_space(nodes), gt_array_size(nodes),
+           sizeof (GT_GenomeNode*), (GT_Compare) gt_genome_node_compare);
 }
 
 bool genome_nodes_are_equal_sequence_regions(GT_GenomeNode *gn_a, GT_GenomeNode *gn_b)
