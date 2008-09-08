@@ -20,11 +20,11 @@
 
 /* high level wrapper module for the allocators (memory & files) */
 
-void allocators_init(void);
-/* registers exit function which calls allocators_clean() */
-void allocators_reg_atexit_func(void);
+void gt_allocators_init(void);
+/* registers exit function which calls gt_allocators_clean() */
+void gt_allocators_reg_atexit_func(void);
 /* returns 0 if no memory map, file pointer, or memory has been leaked and a
    value != 0 otherwise */
-int  allocators_clean(void);
+int  gt_allocators_clean(void);
 
 #endif

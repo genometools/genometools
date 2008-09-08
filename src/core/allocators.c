@@ -78,7 +78,7 @@ static void proc_gt_env_options(void)
   cstr_array_delete(argv);
 }
 
-void allocators_init(void)
+void gt_allocators_init(void)
 {
   const char *bookkeeping;
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
@@ -88,17 +88,17 @@ void allocators_init(void)
     warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
 }
 
-static void allocators_atexit_func(void)
+static void gt_allocators_atexit_func(void)
 {
-  (void) allocators_clean();
+  (void) gt_allocators_clean();
 }
 
-void allocators_reg_atexit_func(void)
+void gt_allocators_reg_atexit_func(void)
 {
-  xatexit(allocators_atexit_func);
+  xatexit(gt_allocators_atexit_func);
 }
 
-int allocators_clean(void)
+int gt_allocators_clean(void)
 {
   int fa_fptr_rval, fa_mmap_rval, gt_rval;
   if (spacepeak) {

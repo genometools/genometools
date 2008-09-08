@@ -26,7 +26,7 @@ int tooldriver(int(*tool)(int argc, const char **argv, GT_Error*),
 {
   GT_Error *err;
   int had_err;
-  allocators_init();
+  gt_allocators_init();
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   had_err = tool(argc, (const char**) argv, err);
@@ -35,7 +35,7 @@ int tooldriver(int(*tool)(int argc, const char **argv, GT_Error*),
     assert(had_err);
   }
   gt_error_delete(err);
-  if (allocators_clean())
+  if (gt_allocators_clean())
     return 2; /* programmer error */
   if (had_err)
     return EXIT_FAILURE;
@@ -47,7 +47,7 @@ int toolobjdriver(ToolConstructor tool_constructor, int argc, char *argv[])
   Tool *tool;
   GT_Error *err;
   int had_err;
-  allocators_init();
+  gt_allocators_init();
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   tool = tool_constructor();
@@ -58,7 +58,7 @@ int toolobjdriver(ToolConstructor tool_constructor, int argc, char *argv[])
     assert(had_err);
   }
   gt_error_delete(err);
-  if (allocators_clean())
+  if (gt_allocators_clean())
     return 2; /* programmer error */
   if (had_err)
     return EXIT_FAILURE;
