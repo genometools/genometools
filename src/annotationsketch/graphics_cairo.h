@@ -27,10 +27,10 @@
 typedef struct GT_GraphicsCairo GT_GraphicsCairo;
 
 const GT_GraphicsClass* gt_graphics_cairo_class(void);
-GT_Graphics*            gt_graphics_cairo_new(GT_GT_GraphicsOutType type,
-                                        unsigned int width,
-                                        unsigned int height);
+GT_Graphics*            gt_graphics_cairo_new(GT_GraphicsOutType type,
+                                              unsigned int width,
+                                              unsigned int height);
 GT_Graphics*            gt_graphics_cairo_new_from_context(cairo_t *context,
-                                                     unsigned int width,
-                                                     unsigned int height);
+                                                           unsigned int width,
+                                                           unsigned int height);
 #endif

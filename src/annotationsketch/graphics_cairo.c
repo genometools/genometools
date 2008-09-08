@@ -39,7 +39,7 @@ struct GT_GraphicsCairo {
   cairo_t *cr;
   cairo_surface_t *surf;
   GT_Str *outbuf;
-  GT_GT_GraphicsOutType type;
+  GT_GraphicsOutType type;
   double margin_x, margin_y, height, width;
   bool from_context;
 };
@@ -56,7 +56,7 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
-void gt_graphics_cairo_initialize(GT_Graphics *gg, GT_GT_GraphicsOutType type,
+void gt_graphics_cairo_initialize(GT_Graphics *gg, GT_GraphicsOutType type,
                                unsigned int width, unsigned int height)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
@@ -557,8 +557,8 @@ const GT_GraphicsClass* gt_graphics_cairo_class(void)
   return &gt_graphics_class;
 }
 
-GT_Graphics* gt_graphics_cairo_new(GT_GT_GraphicsOutType type,
-                             unsigned int width, unsigned int height)
+GT_Graphics* gt_graphics_cairo_new(GT_GraphicsOutType type,
+                                   unsigned int width, unsigned int height)
 {
   GT_Graphics *g;
   g = gt_graphics_create(gt_graphics_cairo_class());

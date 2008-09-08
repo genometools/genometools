@@ -33,17 +33,19 @@ typedef struct GT_Element GT_Element;
 GT_Element*           gt_element_new(GT_GenomeNode*);
 /* Creates an empty GT_Element object. GT_Range and type have to be set afterwards. */
 GT_Element*           gt_element_new_empty(void);
-GT_Range           gt_element_get_range(const GT_Element*);
-void               gt_element_set_range(GT_Element*, GT_Range);
-GT_DrawingRange       gt_element_calculate_drawing_range(GT_Element*, GT_Canvas*);
+GT_Range              gt_element_get_range(const GT_Element*);
+void                  gt_element_set_range(GT_Element*, GT_Range);
+GT_DrawingRange       gt_element_calculate_drawing_range(GT_Element*,
+                                                         GT_Canvas*);
 GT_GenomeFeatureType* gt_element_get_type(const GT_Element*);
-void               gt_element_set_type(GT_Element*, GT_GenomeFeatureType*);
+void                  gt_element_set_type(GT_Element*, GT_GenomeFeatureType*);
 GT_Strand             gt_element_get_strand(const GT_Element*);
 GT_GenomeNode*        gt_element_get_node_ref(const GT_Element*);
-bool               gt_element_is_marked(const GT_Element*);
-bool               elements_are_equal(const GT_Element*, const GT_Element*);
-int                gt_element_sketch(GT_Element*, GT_Canvas*);
-int                gt_element_unit_test(GT_Error*);
-void               gt_element_delete(GT_Element* element);
+bool                  gt_element_is_marked(const GT_Element*);
+bool                  gt_elements_are_equal(const GT_Element*,
+                                            const GT_Element*);
+int                   gt_element_sketch(GT_Element*, GT_Canvas*);
+int                   gt_element_unit_test(GT_Error*);
+void                  gt_element_delete(GT_Element* element);
 
 #endif

@@ -55,10 +55,11 @@ void      gt_graphics_draw_text(GT_Graphics*, double x, double y, const char*);
 #define   gt_graphics_draw_text_left(g,x,y,t) \
           gt_graphics_draw_text(g,x,y,t);
 void      gt_graphics_draw_text_centered(GT_Graphics*, double x, double y,
+                                         const char*);
+void      gt_graphics_draw_text_right(GT_Graphics*, double x, double y,
                                       const char*);
-void      gt_graphics_draw_text_right(GT_Graphics*, double x, double y, const char*);
-void      gt_graphics_draw_colored_text(GT_Graphics*, double x, double y, GT_Color,
-                                     const char*);
+void      gt_graphics_draw_colored_text(GT_Graphics*, double x, double y,
+                                        GT_Color, const char*);
 double    gt_graphics_get_text_height(GT_Graphics*);
 double    gt_graphics_get_text_width(GT_Graphics*, const char *text);
 void      gt_graphics_set_font(GT_Graphics *g, const char *family,
@@ -69,21 +70,22 @@ double    gt_graphics_get_image_height(GT_Graphics*);
    in the graphics.
    <margin_x> denotes the Margin to the left and right, in pixels.
    <margin_y> denotes the Margin to the top and bottom, in pixels. */
-void      gt_graphics_set_margins(GT_Graphics*, double margin_x, double margin_y);
+void      gt_graphics_set_margins(GT_Graphics*, double margin_x,
+                                  double margin_y);
 void      gt_graphics_draw_horizontal_line(GT_Graphics*, double x, double y,
                                         double width);
 /* Draws a vertical line beginning at the given coordinates downwards. */
 void      gt_graphics_draw_vertical_line(GT_Graphics*, double x, double y,
-                                      GT_Color color, double length);
+                                         GT_Color color, double length);
 void      gt_graphics_draw_box(GT_Graphics*, double x, double y, double width,
                             double height, GT_Color fill_color,
                             ArrowStatus arrow_status, double arrow_width,
                             double stroke_width, GT_Color stroke_color,
                             bool dashed);
-void      gt_graphics_draw_dashes(GT_Graphics*, double x, double y, double width,
-                               double height, ArrowStatus arrow_status,
-                               double arrow_width, double stroke_width,
-                               GT_Color stroke_color);
+void      gt_graphics_draw_dashes(GT_Graphics*, double x, double y,
+                                  double width, double height,
+                                  ArrowStatus arrow_status, double arrow_width,
+                                  double stroke_width, GT_Color stroke_color);
 /* Draws a caret (^) style glyph. */
 void      gt_graphics_draw_caret(GT_Graphics*, double x, double y, double width,
                               double height, ArrowStatus arrow_status,
@@ -94,9 +96,10 @@ void      gt_graphics_draw_rectangle(GT_Graphics*, double x, double y,
                                   bool outlined, GT_Color outgt_line_color,
                                   double outgt_line_width, double width);
 void      gt_graphics_draw_arrowhead(GT_Graphics*, double x, double y, GT_Color,
-                                  ArrowStatus);
+                                     ArrowStatus);
 /* Write out the Graphic to the given file with <filename>. */
-int       gt_graphics_save_to_file(const GT_Graphics*, const char *filename, GT_Error*);
+int       gt_graphics_save_to_file(const GT_Graphics*, const char *filename,
+                                   GT_Error*);
 /* Write out the Graphic to the given <stream>. */
 void      gt_graphics_save_to_stream(const GT_Graphics*, GT_Str *stream);
 

@@ -37,9 +37,10 @@ struct GT_CanvasCairoContext {
 };
 
 #define canvas_cairo_context_cast(C)\
-        gt_canvas_cast(canvas_cairo_context_class(), C)
+        gt_canvas_cast(gt_canvas_cairo_context_class(), C)
 
-int canvas_cairo_context_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
+int gt_canvas_cairo_context_visit_diagram_pre(GT_Canvas *canvas,
+                                              GT_Diagram *dia)
 {
   double margins;
 
@@ -69,7 +70,8 @@ int canvas_cairo_context_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
   return 0;
 }
 
-int canvas_cairo_context_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
+int gt_canvas_cairo_context_visit_diagram_post(GT_Canvas *canvas,
+                                               GT_Diagram *dia)
 {
   int had_err = 0;
 
@@ -96,23 +98,23 @@ int canvas_cairo_context_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
   return had_err;
 }
 
-const GT_CanvasClass* canvas_cairo_context_class(void)
+const GT_CanvasClass* gt_canvas_cairo_context_class(void)
 {
   static const GT_CanvasClass canvas_class =
     { sizeof (GT_CanvasCairoContext),
-      canvas_cairo_context_visit_diagram_pre,
-      canvas_cairo_context_visit_diagram_post,
+      gt_canvas_cairo_context_visit_diagram_pre,
+      gt_canvas_cairo_context_visit_diagram_post,
       NULL };
   return &canvas_class;
 }
 
-GT_Canvas* canvas_cairo_context_new(GT_Style *sty, cairo_t *context,
-                                    unsigned long width, GT_ImageInfo *ii)
+GT_Canvas* gt_canvas_cairo_context_new(GT_Style *sty, cairo_t *context,
+                                       unsigned long width, GT_ImageInfo *ii)
 {
   GT_Canvas *canvas;
   GT_CanvasCairoContext *ccc;
   assert(sty && width > 0);
-  canvas = gt_canvas_create(canvas_cairo_context_class());
+  canvas = gt_canvas_create(gt_canvas_cairo_context_class());
   canvas->sty = sty;
   canvas->ii = ii;
   canvas->width = width;

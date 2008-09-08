@@ -30,7 +30,7 @@ typedef struct GT_CanvasCairoContext GT_CanvasCairoContext;
 /* Create a new Canvas object tied to the cairo_t <context> and <width>
    using the style given in <style>. The optional <image_info> is filled when
    the created Canvas object is used to render a Diagram object. */
-GT_Canvas* canvas_cairo_context_new(GT_Style *style, cairo_t *context,
-                                    unsigned long width,
-                                    GT_ImageInfo *image_info);
+GT_Canvas* gt_canvas_cairo_context_new(GT_Style *style, cairo_t *context,
+                                       unsigned long width,
+                                       GT_ImageInfo *image_info);
 #endif

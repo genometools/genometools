@@ -24,6 +24,6 @@ typedef enum {
   GT_GRAPHICS_PNG,
   GT_GRAPHICS_PS,
   GT_GRAPHICS_SVG
-} GT_GT_GraphicsOutType;
+} GT_GraphicsOutType;
 
 #endif
