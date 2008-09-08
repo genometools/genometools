@@ -91,6 +91,26 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
 </ul>
 <h2>Sole functions</h2>
+<code>translate_dna(dna)</code>
+<p>
+Returns translated <code>dna</code>.
+</p>
+<hr>
+<code>gff3_visitor_new()</code>
+<p>
+Returns a new GFF3 visitor.
+</p>
+<hr>
+<code>ranges_sort(range_array)</code>
+<p>
+Returns an array containing the ranges from array <code>range_array</code> in sorted order.
+</p>
+<hr>
+<code>ranges_are_sorted(range_array)</code>
+<p>
+Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
+</p>
+<hr>
 <code>genome_feature_new(type, range, strand)</code>
 <p>
 Returns a new genome feature refering to sequence with id <code>seqid</code> of <code>type</code> spanning <code>range</code> on <code>strand</code>.
@@ -154,26 +174,6 @@ Returns a new GFF3 input stream object for <code>filename</code>. The file <code
 <code>gff3_out_stream_new(genome_stream)</code>
 <p>
 Returns a new GFF3 output stream which pulls its features from <code>genome_stream</code>.
-</p>
-<hr>
-<code>gff3_visitor_new()</code>
-<p>
-Returns a new GFF3 visitor.
-</p>
-<hr>
-<code>ranges_sort(range_array)</code>
-<p>
-Returns an array containing the ranges from array <code>range_array</code> in sorted order.
-</p>
-<hr>
-<code>ranges_are_sorted(range_array)</code>
-<p>
-Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
-</p>
-<hr>
-<code>translate_dna(dna)</code>
-<p>
-Returns translated <code>dna</code>.
 </p>
 <hr>
 <code>reload()</code>
@@ -578,7 +578,7 @@ Show result of <code>stream_evaluator</code> on stdout.
 <div id="footer">
 Copyright &copy; 2008
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2008-09-05
+Last update: 2008-09-08
 </div>
 </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">

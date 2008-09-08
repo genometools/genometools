@@ -69,17 +69,23 @@ img {
 pre {
   line-height: 1.3em;
 }
+pre.code {
+  line-height: 1.3em;
+  background-color: #F4F4F4;
+  padding: 15px;
+}
 
 /* Figure environment for library documentation. */
 div.figure {
   position: relative;
   width: 650px;
-  margin: 0 auto;
+  margin: 20px;
   background-color: white;
+  line-height: 1em;
 }
 div.figure p {
   text-align: center;
-  font-style: italic;
+/*  font-style: italic; */
   font-size: smaller;
   text-indent: 0;
   margin:0px;

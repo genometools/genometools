@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   diagram = diagram_new(feature_index, seqid, &range, style);
 
   /* create canvas */
-  canvas = canvas_cairo_file_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
+  canvas = canvas_cairo_file_new(style, GRAPHICS_PNG, 600 /* width */, NULL);
 
   /* sketch diagram on canvas */
   diagram_sketch(diagram, canvas);

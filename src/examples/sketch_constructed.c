@@ -88,7 +88,7 @@ static void draw_example_features(Array *features, const char *style_file,
   diagram = diagram_new_from_array(features, &range, style);
 
   /* create canvas */
-  canvas = canvas_cairo_file_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
+  canvas = canvas_cairo_file_new(style, GRAPHICS_PNG, 600 /* width */, NULL);
 
   /* sketch diagram on canvas */
   diagram_sketch(diagram, canvas);
