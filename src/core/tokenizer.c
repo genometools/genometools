@@ -24,12 +24,12 @@
 #include "core/xtmpfile.h"
 
 struct Tokenizer {
-  IO *io;
+  GT_IO *io;
   bool skip_comment_lines;
   GT_Str *token; /* the current token */
 };
 
-Tokenizer* tokenizer_new(IO *io)
+Tokenizer* tokenizer_new(GT_IO *io)
 {
   Tokenizer *t;
   assert(io);
@@ -51,17 +51,17 @@ GT_Str* tokenizer_get_token(Tokenizer *t)
 
   /* if we have no current token, get it if possible */
   if (!t->token) {
-    if (t->skip_comment_lines && io_line_start(t->io)) {
-      if ((io_get_char(t->io, &c) != -1)) {
+    if (t->skip_comment_lines && gt_io_line_start(t->io)) {
+      if ((gt_io_get_char(t->io, &c) != -1)) {
         if (c == '#') {
-          while ((io_get_char(t->io, &c) != -1) && c != '\n'); /* skipping */
+          while ((gt_io_get_char(t->io, &c) != -1) && c != '\n'); /* skipping */
           c = EOF;
         }
         else
-          io_unget_char(t->io, c);
+          gt_io_unget_char(t->io, c);
       }
     }
-    while ((io_get_char(t->io, &c) != -1) && c == ' '); /* skip blanks */
+    while ((gt_io_get_char(t->io, &c) != -1) && c == ' '); /* skip blanks */
     do {
       if (c != EOF) {
         if (!t->token)
@@ -70,7 +70,7 @@ GT_Str* tokenizer_get_token(Tokenizer *t)
           break;
         gt_str_append_char(t->token, c);
       }
-    } while ((io_get_char(t->io, &c) != -1) && c != ' ' && c != '\n');
+    } while ((gt_io_get_char(t->io, &c) != -1) && c != ' ' && c != '\n');
     if (c == '\n' && c != EOF) {
       assert(t->token);
       gt_str_append_char(t->token, c);
@@ -98,7 +98,7 @@ bool tokenizer_has_token(Tokenizer *t)
 bool tokenizer_line_start(const Tokenizer *t)
 {
   assert(t);
-  return io_line_start(t->io);
+  return gt_io_line_start(t->io);
 }
 
 void tokenizer_next_token(Tokenizer *t)
@@ -111,13 +111,13 @@ void tokenizer_next_token(Tokenizer *t)
 unsigned long tokenizer_get_line_number(const Tokenizer *t)
 {
   assert(t);
-  return io_get_line_number(t->io);
+  return gt_io_get_line_number(t->io);
 }
 
 const char* tokenizer_get_filename(const Tokenizer *t)
 {
   assert(t);
-  return io_get_filename(t->io);
+  return gt_io_get_filename(t->io);
 }
 
 int tokenizer_unit_test(GT_Error *err)
@@ -134,7 +134,7 @@ int tokenizer_unit_test(GT_Error *err)
   tmpfp = gt_xtmpfp(tmpfilename);
   fprintf(tmpfp, "# comment line\n");
   gt_xfclose(tmpfp);
-  t = tokenizer_new(io_new(gt_str_get(tmpfilename), "r"));
+  t = tokenizer_new(gt_io_new(gt_str_get(tmpfilename), "r"));
   tokenizer_skip_comment_lines(t);
   ensure(had_err, !tokenizer_has_token(t));
   tokenizer_delete(t);
@@ -144,7 +144,7 @@ int tokenizer_unit_test(GT_Error *err)
   tmpfp = gt_xtmpfp(tmpfilename);
   fprintf(tmpfp, " a bb ccc\ndddd -5");
   gt_xfclose(tmpfp);
-  t = tokenizer_new(io_new(gt_str_get(tmpfilename), "r"));
+  t = tokenizer_new(gt_io_new(gt_str_get(tmpfilename), "r"));
 
   token = tokenizer_get_token(t);
   ensure(had_err, !strcmp(gt_str_get(token), "a"));
@@ -182,7 +182,7 @@ int tokenizer_unit_test(GT_Error *err)
 void tokenizer_delete(Tokenizer *t)
 {
   if (!t) return;
-  io_delete(t->io);
+  gt_io_delete(t->io);
   gt_str_delete(t->token);
   gt_free(t);
 }

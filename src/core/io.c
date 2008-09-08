@@ -22,19 +22,19 @@
 #include "core/io.h"
 #include "core/ma.h"
 
-struct IO {
+struct GT_IO {
   GT_GenFile *fp;
   GT_Str *path;
   unsigned long line_number;
   bool line_start;
 };
 
-IO* io_new(const char *path, const char *mode)
+GT_IO* gt_io_new(const char *path, const char *mode)
 {
-  IO *io;
+  GT_IO *io;
   assert(mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
-  io = gt_malloc(sizeof (IO));
+  io = gt_malloc(sizeof *io);
   io->fp = gt_genfile_xopen(path, mode);
   io->path = path ? gt_str_new_cstr(path) : gt_str_new_cstr("stdin");
   io->line_number = 1;
@@ -42,7 +42,7 @@ IO* io_new(const char *path, const char *mode)
   return io;
 }
 
-int io_get_char(IO *io, char *c)
+int gt_io_get_char(GT_IO *io, char *c)
 {
   int cc;
   assert(io && c);
@@ -59,64 +59,64 @@ int io_get_char(IO *io, char *c)
   return 0;
 }
 
-void io_unget_char(IO *io, char c)
+void gt_io_unget_char(GT_IO *io, char c)
 {
   assert(io);
   gt_genfile_unget_char(io->fp, c);
 }
 
-bool io_line_start(const IO *io)
+bool gt_io_line_start(const GT_IO *io)
 {
   assert(io);
   return io->line_start;
 }
 
-bool io_has_char(IO *io)
+bool gt_io_has_char(GT_IO *io)
 {
   int rval;
   char c = 0;
   assert(io);
-  rval = io_get_char(io, &c);
-  io_unget_char(io, c);
+  rval = gt_io_get_char(io, &c);
+  gt_io_unget_char(io, c);
   return rval ? false : true;
 }
 
-char io_peek(IO *io)
+char gt_io_peek(GT_IO *io)
 {
   char c;
   assert(io);
-  io_get_char(io, &c);
-  io_unget_char(io, c);
+  gt_io_get_char(io, &c);
+  gt_io_unget_char(io, c);
   return c;
 }
 
-char io_next(IO *io)
+char gt_io_next(GT_IO *io)
 {
   char c;
   assert(io);
-  io_get_char(io, &c);
+  gt_io_get_char(io, &c);
   return c;
 }
 
-unsigned long io_get_line_number(const IO *io)
+unsigned long gt_io_get_line_number(const GT_IO *io)
 {
   assert(io);
   return io->line_number;
 }
 
-const char* io_get_filename(const IO *io)
+const char* gt_io_get_filename(const GT_IO *io)
 {
   assert(io && io->path);
   return gt_str_get(io->path);
 }
 
-GT_Str* io_get_filename_str(const IO *io)
+GT_Str* gt_io_get_filename_str(const GT_IO *io)
 {
   assert(io && io->path);
   return io->path;
 }
 
-void io_delete(IO *io)
+void gt_io_delete(GT_IO *io)
 {
   if (!io) return;
   gt_genfile_close(io->fp);

@@ -164,7 +164,7 @@ static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
   assert(sm && path && sm->alpha);
-  tz = tokenizer_new(io_new(path, "r"));
+  tz = tokenizer_new(gt_io_new(path, "r"));
   index_to_gt_alpha_char_mapping = gt_array_new(sizeof (char));
   tokenizer_skip_comment_lines(tz);
   had_err = parse_alphabet_line(index_to_gt_alpha_char_mapping, tz, err);

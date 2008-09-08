@@ -24,7 +24,7 @@
 
 typedef struct Tokenizer Tokenizer;
 
-Tokenizer*    tokenizer_new(IO*); /* takes ownership */
+Tokenizer*    tokenizer_new(GT_IO*); /* takes ownership */
 /* activates the skipping of comment lines in the tokenizer (lines starting
    with '#') */
 void          tokenizer_skip_comment_lines(Tokenizer*);

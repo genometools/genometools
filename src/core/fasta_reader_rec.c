@@ -23,56 +23,56 @@
 
 struct GT_FastaReaderRec {
   const GT_FastaReader parent_instance;
-  IO *seqio;
+  GT_IO *seqio;
 };
 
 #define gt_fasta_reader_rec_cast(FR)\
         gt_fasta_reader_cast(gt_fasta_reader_rec_class(), FR)
 
-static int parse_fasta_description(GT_Str *description, IO *seqio, GT_Error *err)
+static int parse_fasta_description(GT_Str *description, GT_IO *seqio,
+                                   GT_Error *err)
 {
   int rval;
   char cc;
   gt_error_check(err);
   assert(description && seqio);
-  rval = io_get_char(seqio, &cc);
+  rval = gt_io_get_char(seqio, &cc);
   assert(!rval); /* was checked earlier */
   /* make sure we got a proper fasta description */
   if (cc != FASTA_SEPARATOR) {
     gt_error_set(err, "the first character of fasta file \"%s\" has to be '%c'",
-              io_get_filename(seqio), FASTA_SEPARATOR);
-
+                 gt_io_get_filename(seqio), FASTA_SEPARATOR);
     return -1;
   }
   /* read description */
-  while (!io_get_char(seqio, &cc) && cc != '\n')
+  while (!gt_io_get_char(seqio, &cc) && cc != '\n')
     gt_str_append_char(description, cc);
   return 0;
 }
 
-static int parse_fasta_sequence(GT_Str *sequence, IO *seqio, GT_Error *err)
+static int parse_fasta_sequence(GT_Str *sequence, GT_IO *seqio, GT_Error *err)
 {
   char cc;
   gt_error_check(err);
   assert(sequence && seqio);
   assert(!gt_str_length(sequence));
   /* read sequence */
-  while (!io_get_char(seqio, &cc) && cc != FASTA_SEPARATOR) {
+  while (!gt_io_get_char(seqio, &cc) && cc != FASTA_SEPARATOR) {
     if (cc != '\n' && cc != ' ')
       gt_str_append_char(sequence, cc);
   }
   if (!gt_str_length(sequence)) {
     gt_error_set(err, "empty sequence given in line %lu",
-              io_get_line_number(seqio));
+              gt_io_get_line_number(seqio));
     return -1;
   }
   if (cc == FASTA_SEPARATOR)
-    io_unget_char(seqio, FASTA_SEPARATOR);
+    gt_io_unget_char(seqio, FASTA_SEPARATOR);
   return 0;
 }
 
-static int parse_fasta_entry(GT_Str *description, GT_Str *sequence, IO *seqio,
-                             GT_Error *err)
+static int parse_fasta_entry(GT_Str *description, GT_Str *sequence,
+                             GT_IO *seqio, GT_Error *err)
 {
   int had_err;
   gt_error_check(err);
@@ -102,13 +102,13 @@ static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
   sequence    = gt_str_new();
 
   /* make sure file is not empty */
-  if (!io_has_char(fr->seqio)) {
-    gt_error_set(err, "sequence file \"%s\" is empty", io_get_filename(fr->seqio));
+  if (!gt_io_has_char(fr->seqio)) {
+    gt_error_set(err, "sequence file \"%s\" is empty", gt_io_get_filename(fr->seqio));
     had_err = -1;
   }
 
   /* parse file */
-  while (!had_err && io_has_char(fr->seqio)) {
+  while (!had_err && gt_io_has_char(fr->seqio)) {
     /* reset */
     gt_str_reset(description);
     gt_str_reset(sequence);
@@ -139,7 +139,7 @@ static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
 static void gt_fasta_reader_rec_free(GT_FastaReader *fr)
 {
   GT_FastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
-  io_delete(gt_fasta_reader_rec->seqio);
+  gt_io_delete(gt_fasta_reader_rec->seqio);
 }
 
 const GT_FastaReaderClass* gt_fasta_reader_rec_class(void)
@@ -154,7 +154,7 @@ GT_FastaReader* gt_fasta_reader_rec_new(GT_Str *sequence_filename)
 {
   GT_FastaReader *fr = gt_fasta_reader_create(gt_fasta_reader_rec_class());
   GT_FastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
-  gt_fasta_reader_rec->seqio = io_new(sequence_filename
+  gt_fasta_reader_rec->seqio = gt_io_new(sequence_filename
                                    ? gt_str_get(sequence_filename) : NULL,
                                    "r");
   return fr;
