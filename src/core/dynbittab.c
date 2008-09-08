@@ -21,15 +21,15 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 
-struct DynBittab {
+struct GT_DynBittab {
   unsigned long *tabptr,
                 tabsize,
                 num_of_bits;
 };
 
-DynBittab* dynbittab_new(void)
+GT_DynBittab* gt_dynbittab_new(void)
 {
-  return gt_calloc(1, sizeof (DynBittab));
+  return gt_calloc(1, sizeof (GT_DynBittab));
 }
 
 static unsigned long determine_tabsize(unsigned long num_of_bits)
@@ -39,7 +39,7 @@ static unsigned long determine_tabsize(unsigned long num_of_bits)
   return 1UL;
 }
 
-void dynbittab_set_bit(DynBittab *b, unsigned long bit)
+void gt_dynbittab_set_bit(GT_DynBittab *b, unsigned long bit)
 {
   unsigned long new_tabsize;
   assert(b);
@@ -58,7 +58,7 @@ void dynbittab_set_bit(DynBittab *b, unsigned long bit)
     1UL << (bit & (8UL * sizeof (unsigned long) - 1));
 }
 
-void dynbittab_unset_bit(DynBittab *b, unsigned long bit)
+void gt_dynbittab_unset_bit(GT_DynBittab *b, unsigned long bit)
 {
   assert(b);
   if (bit < b->num_of_bits) {
@@ -67,7 +67,7 @@ void dynbittab_unset_bit(DynBittab *b, unsigned long bit)
   }
 }
 
-bool dynbittab_bit_is_set(const DynBittab *b, unsigned long bit)
+bool gt_dynbittab_bit_is_set(const GT_DynBittab *b, unsigned long bit)
 {
   assert(b);
   if (bit < b->num_of_bits &&
@@ -78,62 +78,62 @@ bool dynbittab_bit_is_set(const DynBittab *b, unsigned long bit)
   return false;
 }
 
-int dynbittab_unit_test(GT_Error *err)
+int gt_dynbittab_unit_test(GT_Error *err)
 {
   unsigned long i;
-  DynBittab *b;
+  GT_DynBittab *b;
   int had_err = 0;
 
-  b = dynbittab_new();
+  b = gt_dynbittab_new();
   for (i = 0; !had_err && i < 256; i++) {
-    ensure(had_err, !dynbittab_bit_is_set(b, i));
+    ensure(had_err, !gt_dynbittab_bit_is_set(b, i));
   }
   if (!had_err) {
-    dynbittab_set_bit(b, 0);
-    dynbittab_set_bit(b, 32);
-    dynbittab_set_bit(b, 64);
-    dynbittab_set_bit(b, 77);
-    dynbittab_set_bit(b, 96);
-    dynbittab_set_bit(b, 123);
+    gt_dynbittab_set_bit(b, 0);
+    gt_dynbittab_set_bit(b, 32);
+    gt_dynbittab_set_bit(b, 64);
+    gt_dynbittab_set_bit(b, 77);
+    gt_dynbittab_set_bit(b, 96);
+    gt_dynbittab_set_bit(b, 123);
   }
-  ensure(had_err, dynbittab_bit_is_set(b, 0));
-  ensure(had_err, dynbittab_bit_is_set(b, 32));
-  ensure(had_err, dynbittab_bit_is_set(b, 64));
-  ensure(had_err, dynbittab_bit_is_set(b, 77));
-  ensure(had_err, dynbittab_bit_is_set(b, 96));
-  ensure(had_err, dynbittab_bit_is_set(b, 123));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 0));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 32));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 64));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 77));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 96));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 123));
   for (i = 124; !had_err && i < 256; i++) {
-    ensure(had_err, !dynbittab_bit_is_set(b, i));
+    ensure(had_err, !gt_dynbittab_bit_is_set(b, i));
   }
-  dynbittab_delete(b);
+  gt_dynbittab_delete(b);
 
-  b = dynbittab_new();
+  b = gt_dynbittab_new();
   for (i = 0; !had_err && i < 256; i++) {
-    ensure(had_err, !dynbittab_bit_is_set(b, i));
+    ensure(had_err, !gt_dynbittab_bit_is_set(b, i));
   }
   if (!had_err) {
-    dynbittab_set_bit(b, 1);
-    dynbittab_set_bit(b, 33);
-    dynbittab_set_bit(b, 65);
-    dynbittab_set_bit(b, 77);
-    dynbittab_set_bit(b, 97);
-    dynbittab_set_bit(b, 124);
+    gt_dynbittab_set_bit(b, 1);
+    gt_dynbittab_set_bit(b, 33);
+    gt_dynbittab_set_bit(b, 65);
+    gt_dynbittab_set_bit(b, 77);
+    gt_dynbittab_set_bit(b, 97);
+    gt_dynbittab_set_bit(b, 124);
   }
-  ensure(had_err, dynbittab_bit_is_set(b, 1));
-  ensure(had_err, dynbittab_bit_is_set(b, 33));
-  ensure(had_err, dynbittab_bit_is_set(b, 65));
-  ensure(had_err, dynbittab_bit_is_set(b, 77));
-  ensure(had_err, dynbittab_bit_is_set(b, 97));
-  ensure(had_err, dynbittab_bit_is_set(b, 124));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 1));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 33));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 65));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 77));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 97));
+  ensure(had_err, gt_dynbittab_bit_is_set(b, 124));
   for (i = 125; !had_err && i < 256; i++) {
-    ensure(had_err, !dynbittab_bit_is_set(b, i));
+    ensure(had_err, !gt_dynbittab_bit_is_set(b, i));
   }
-  dynbittab_delete(b);
+  gt_dynbittab_delete(b);
 
   return had_err;
 }
 
-void dynbittab_delete(DynBittab *b)
+void gt_dynbittab_delete(GT_DynBittab *b)
 {
   if (!b) return;
   gt_free(b->tabptr);

@@ -22,13 +22,13 @@
 #include "core/error.h"
 
 /* a bittab which grows on demand */
-typedef struct DynBittab DynBittab;
+typedef struct GT_DynBittab GT_DynBittab;
 
-DynBittab*    dynbittab_new(void);
-void          dynbittab_set_bit(DynBittab*, unsigned long);
-void          dynbittab_unset_bit(DynBittab*, unsigned long);
-bool          dynbittab_bit_is_set(const DynBittab*, unsigned long);
-int           dynbittab_unit_test(GT_Error*);
-void          dynbittab_delete(DynBittab*);
+GT_DynBittab* gt_dynbittab_new(void);
+void          gt_dynbittab_set_bit(GT_DynBittab*, unsigned long);
+void          gt_dynbittab_unset_bit(GT_DynBittab*, unsigned long);
+bool          gt_dynbittab_bit_is_set(const GT_DynBittab*, unsigned long);
+int           gt_dynbittab_unit_test(GT_Error*);
+void          gt_dynbittab_delete(GT_DynBittab*);
 
 #endif
