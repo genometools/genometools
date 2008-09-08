@@ -40,7 +40,7 @@ struct GT_Canvas {
   GT_Style *sty;
   bool show_track_captions;
   Bittab *bt;
-  Graphics *g;
+  GT_Graphics *g;
   GT_ImageInfo *ii;
 };
 

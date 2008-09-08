@@ -42,64 +42,64 @@ typedef enum
   WEIGHT_BOLD
 } FontWeight;
 
-typedef struct GraphicsClass GraphicsClass;
-typedef struct Graphics Graphics;
+typedef struct GT_GraphicsClass GT_GraphicsClass;
+typedef struct GT_Graphics GT_Graphics;
 
 #include "annotationsketch/color.h"
 #include "core/str.h"
 #include "core/error.h"
 
-/* Create a new Graphics object, which is an abstraction of a drawing surface on
+/* Create a new GT_Graphics object, which is an abstraction of a drawing surface on
    which several relevant primitives can be drawn. */
-void      graphics_draw_text(Graphics*, double x, double y, const char*);
-#define   graphics_draw_text_left(g,x,y,t) \
-          graphics_draw_text(g,x,y,t);
-void      graphics_draw_text_centered(Graphics*, double x, double y,
+void      gt_graphics_draw_text(GT_Graphics*, double x, double y, const char*);
+#define   gt_graphics_draw_text_left(g,x,y,t) \
+          gt_graphics_draw_text(g,x,y,t);
+void      gt_graphics_draw_text_centered(GT_Graphics*, double x, double y,
                                       const char*);
-void      graphics_draw_text_right(Graphics*, double x, double y, const char*);
-void      graphics_draw_colored_text(Graphics*, double x, double y, GT_Color,
+void      gt_graphics_draw_text_right(GT_Graphics*, double x, double y, const char*);
+void      gt_graphics_draw_colored_text(GT_Graphics*, double x, double y, GT_Color,
                                      const char*);
-double    graphics_get_text_height(Graphics*);
-double    graphics_get_text_width(Graphics*, const char *text);
-void      graphics_set_font(Graphics *g, const char *family,
+double    gt_graphics_get_text_height(GT_Graphics*);
+double    gt_graphics_get_text_width(GT_Graphics*, const char *text);
+void      gt_graphics_set_font(GT_Graphics *g, const char *family,
                             FontSlant slant, FontWeight weight);
-double    graphics_get_image_width(Graphics*);
-double    graphics_get_image_height(Graphics*);
+double    gt_graphics_get_image_width(GT_Graphics*);
+double    gt_graphics_get_image_height(GT_Graphics*);
 /* Set margins (space to the image boundaries that are clear of elements)
    in the graphics.
    <margin_x> denotes the Margin to the left and right, in pixels.
    <margin_y> denotes the Margin to the top and bottom, in pixels. */
-void      graphics_set_margins(Graphics*, double margin_x, double margin_y);
-void      graphics_draw_horizontal_line(Graphics*, double x, double y,
+void      gt_graphics_set_margins(GT_Graphics*, double margin_x, double margin_y);
+void      gt_graphics_draw_horizontal_line(GT_Graphics*, double x, double y,
                                         double width);
 /* Draws a vertical line beginning at the given coordinates downwards. */
-void      graphics_draw_vertical_line(Graphics*, double x, double y,
+void      gt_graphics_draw_vertical_line(GT_Graphics*, double x, double y,
                                       GT_Color color, double length);
-void      graphics_draw_box(Graphics*, double x, double y, double width,
+void      gt_graphics_draw_box(GT_Graphics*, double x, double y, double width,
                             double height, GT_Color fill_color,
                             ArrowStatus arrow_status, double arrow_width,
                             double stroke_width, GT_Color stroke_color,
                             bool dashed);
-void      graphics_draw_dashes(Graphics*, double x, double y, double width,
+void      gt_graphics_draw_dashes(GT_Graphics*, double x, double y, double width,
                                double height, ArrowStatus arrow_status,
                                double arrow_width, double stroke_width,
                                GT_Color stroke_color);
 /* Draws a caret (^) style glyph. */
-void      graphics_draw_caret(Graphics*, double x, double y, double width,
+void      gt_graphics_draw_caret(GT_Graphics*, double x, double y, double width,
                               double height, ArrowStatus arrow_status,
                               double arrow_width,  double stroke_width,
                               GT_Color stroke_color);
-void      graphics_draw_rectangle(Graphics*, double x, double y,
+void      gt_graphics_draw_rectangle(GT_Graphics*, double x, double y,
                                   bool filled, GT_Color fill_color,
                                   bool outlined, GT_Color outgt_line_color,
                                   double outgt_line_width, double width);
-void      graphics_draw_arrowhead(Graphics*, double x, double y, GT_Color,
+void      gt_graphics_draw_arrowhead(GT_Graphics*, double x, double y, GT_Color,
                                   ArrowStatus);
 /* Write out the Graphic to the given file with <filename>. */
-int       graphics_save_to_file(const Graphics*, const char *filename, GT_Error*);
+int       gt_graphics_save_to_file(const GT_Graphics*, const char *filename, GT_Error*);
 /* Write out the Graphic to the given <stream>. */
-void      graphics_save_to_stream(const Graphics*, GT_Str *stream);
+void      gt_graphics_save_to_stream(const GT_Graphics*, GT_Str *stream);
 
-void      graphics_delete(Graphics*);
+void      gt_graphics_delete(GT_Graphics*);
 
 #endif

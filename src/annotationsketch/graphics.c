@@ -20,16 +20,16 @@
 #include "core/unused_api.h"
 #include "annotationsketch/graphics_rep.h"
 
-Graphics* graphics_create(const GraphicsClass *gc)
+GT_Graphics* gt_graphics_create(const GT_GraphicsClass *gc)
 {
-  Graphics *g;
+  GT_Graphics *g;
   assert(gc && gc->size);
   g = gt_calloc(1, gc->size);
   g->c_class = gc;
   return g;
 }
 
-void graphics_delete(Graphics *g)
+void gt_graphics_delete(GT_Graphics *g)
 {
   if (!g) return;
   assert(g->c_class);
@@ -38,90 +38,90 @@ void graphics_delete(Graphics *g)
   gt_free(g);
 }
 
-void* graphics_cast(GT_UNUSED const GraphicsClass *gc,
-                    Graphics *g)
+void* gt_graphics_cast(GT_UNUSED const GT_GraphicsClass *gc,
+                    GT_Graphics *g)
 {
   assert(gc && g && g->c_class == gc);
   return g;
 }
 
-void graphics_draw_text(Graphics *g, double x, double y, const char* txt)
+void gt_graphics_draw_text(GT_Graphics *g, double x, double y, const char* txt)
 {
   assert(g && g->c_class && txt);
   g->c_class->draw_text(g, x, y, txt);
 }
 
-void graphics_draw_text_centered(Graphics *g, double x, double y, const char *t)
+void gt_graphics_draw_text_centered(GT_Graphics *g, double x, double y, const char *t)
 {
   assert(g && g->c_class && t);
   g->c_class->draw_text_centered(g, x, y, t);
 }
 
-void graphics_draw_text_right(Graphics *g, double x, double y, const char *txt)
+void gt_graphics_draw_text_right(GT_Graphics *g, double x, double y, const char *txt)
 {
   assert(g && g->c_class && txt);
   g->c_class->draw_text_right(g, x, y, txt);
 }
 
-void graphics_draw_colored_text(Graphics *g, double x, double y, GT_Color col,
+void gt_graphics_draw_colored_text(GT_Graphics *g, double x, double y, GT_Color col,
                                 const char *txt)
 {
   assert(g && g->c_class && txt);
   g->c_class->draw_colored_text(g, x, y, col, txt);
 }
 
-double graphics_get_text_height(Graphics *g)
+double gt_graphics_get_text_height(GT_Graphics *g)
 {
   assert(g && g->c_class);
   return g->c_class->get_text_height(g);
 }
 
-double graphics_get_text_width(Graphics *g, const char *txt)
+double gt_graphics_get_text_width(GT_Graphics *g, const char *txt)
 {
   assert(g && g->c_class && txt);
   return g->c_class->get_text_width(g, txt);
 }
 
-void graphics_set_font(Graphics *g, const char *family,
+void gt_graphics_set_font(GT_Graphics *g, const char *family,
                        FontSlant slant, FontWeight weight)
 {
   assert(g && g->c_class && family);
   g->c_class->set_font(g, family, slant, weight);
 }
 
-double graphics_get_image_height(Graphics *g)
+double gt_graphics_get_image_height(GT_Graphics *g)
 {
   assert(g && g->c_class);
   return g->c_class->get_image_height(g);
 }
 
-double graphics_get_image_width(Graphics *g)
+double gt_graphics_get_image_width(GT_Graphics *g)
 {
   assert(g && g->c_class);
   return g->c_class->get_image_width(g);
 }
 
-void graphics_set_margins(Graphics *g, double margin_x, double margin_y)
+void gt_graphics_set_margins(GT_Graphics *g, double margin_x, double margin_y)
 {
   assert(g && g->c_class);
   g->c_class->set_margins(g, margin_x, margin_y);
 }
 
-void graphics_draw_horizontal_line(Graphics *g, double x, double y,
+void gt_graphics_draw_horizontal_line(GT_Graphics *g, double x, double y,
                                    double width)
 {
   assert(g && g->c_class);
   g->c_class->draw_horizontal_line(g, x, y, width);
 }
 
-void graphics_draw_vertical_line(Graphics *g, double x, double y,
+void gt_graphics_draw_vertical_line(GT_Graphics *g, double x, double y,
                                  GT_Color color, double length)
 {
   assert(g && g->c_class);
   g->c_class->draw_vertical_line(g, x, y, color, length);
 }
 
-void graphics_draw_box(Graphics *g, double x, double y, double width,
+void gt_graphics_draw_box(GT_Graphics *g, double x, double y, double width,
                        double height, GT_Color fill_color,
                        ArrowStatus arrow_status, double arrow_width,
                        double stroke_width, GT_Color stroke_color,
@@ -132,7 +132,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
                        arrow_width, stroke_width, stroke_color, dashed);
 }
 
-void graphics_draw_dashes(Graphics *g, double x, double y, double width,
+void gt_graphics_draw_dashes(GT_Graphics *g, double x, double y, double width,
                           double height, ArrowStatus arrow_status,
                           double arrow_width, double stroke_width,
                           GT_Color stroke_color)
@@ -142,7 +142,7 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
                           stroke_width, stroke_color);
 }
 
-void graphics_draw_caret(Graphics *g, double x, double y, double width,
+void gt_graphics_draw_caret(GT_Graphics *g, double x, double y, double width,
                          double height, ArrowStatus arrow_status,
                          double arrow_width,  double stroke_width,
                          GT_Color stroke_color)
@@ -152,7 +152,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
                          stroke_width, stroke_color);
 }
 
-void graphics_draw_rectangle(Graphics *g, double x, double y,
+void gt_graphics_draw_rectangle(GT_Graphics *g, double x, double y,
                              bool filled, GT_Color fill_color, bool outlined,
                              GT_Color outline_color, double outline_width,
                              double width)
@@ -162,21 +162,21 @@ void graphics_draw_rectangle(Graphics *g, double x, double y,
                              outline_color, outline_width, width);
 }
 
-void graphics_draw_arrowhead(Graphics *g, double x, double y, GT_Color col,
+void gt_graphics_draw_arrowhead(GT_Graphics *g, double x, double y, GT_Color col,
                              ArrowStatus arrow_status)
 {
   assert(g && g->c_class);
   g->c_class->draw_arrowhead(g, x, y, col, arrow_status);
 }
 
-int graphics_save_to_file(const Graphics *g, const char *filename,
+int gt_graphics_save_to_file(const GT_Graphics *g, const char *filename,
                           GT_Error *err)
 {
   assert(g && g->c_class);
   return g->c_class->save_to_file(g, filename, err);
 }
 
-void graphics_save_to_stream(const Graphics *g, GT_Str *stream)
+void gt_graphics_save_to_stream(const GT_Graphics *g, GT_Str *stream)
 {
   assert(g && g->c_class);
   return g->c_class->save_to_stream(g, stream);

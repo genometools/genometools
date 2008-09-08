@@ -57,10 +57,10 @@ int canvas_cairo_context_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
   canvas->viewrange = gt_diagram_get_range(dia);
   if (canvas->g)
   {
-    graphics_delete(canvas->g);
+    gt_graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = graphics_cairo_new(GT_GRAPHICS_PNG, canvas->width, 1);
+  canvas->g = gt_graphics_cairo_new(GT_GRAPHICS_PNG, canvas->width, 1);
 
   /* calculate scaling factor */
   canvas->factor = ((double) canvas->width
@@ -82,13 +82,13 @@ int canvas_cairo_context_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
     gt_image_info_set_height(canvas->ii, canvas->height);
   if (canvas->g)
   {
-    graphics_delete(canvas->g);
+    gt_graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = graphics_cairo_new_from_context(
+  canvas->g = gt_graphics_cairo_new_from_context(
                                  ((GT_CanvasCairoContext*) canvas)->context,
                                  canvas->width, canvas->height);
-  graphics_set_margins(canvas->g, canvas->margins, 0);
+  gt_graphics_set_margins(canvas->g, canvas->margins, 0);
 
   /* Add ruler/scale to the image */
   gt_canvas_draw_ruler(canvas);

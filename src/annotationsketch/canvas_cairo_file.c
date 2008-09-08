@@ -34,7 +34,7 @@
 
 struct GT_CanvasCairoFile {
   const GT_Canvas parent_instance;
-  GT_GraphicsOutType type;
+  GT_GT_GraphicsOutType type;
 };
 
 #define canvas_cairo_file_cast(C)\
@@ -58,10 +58,10 @@ int gt_canvas_cairo_file_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
   canvas->viewrange = gt_diagram_get_range(dia);
   if (canvas->g)
   {
-    graphics_delete(canvas->g);
+    gt_graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = graphics_cairo_new(((GT_CanvasCairoFile*) canvas)->type,
+  canvas->g = gt_graphics_cairo_new(((GT_CanvasCairoFile*) canvas)->type,
                                   canvas->width, 1);
 
   /* calculate scaling factor */
@@ -84,12 +84,12 @@ int gt_canvas_cairo_file_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
     gt_image_info_set_height(canvas->ii, canvas->height);
   if (canvas->g)
   {
-    graphics_delete(canvas->g);
+    gt_graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = graphics_cairo_new(((GT_CanvasCairoFile*) canvas)->type,
+  canvas->g = gt_graphics_cairo_new(((GT_CanvasCairoFile*) canvas)->type,
                                  canvas->width, canvas->height);
-  graphics_set_margins(canvas->g, canvas->margins, 0);
+  gt_graphics_set_margins(canvas->g, canvas->margins, 0);
 
   /* Add ruler/scale to the image */
   gt_canvas_draw_ruler(canvas);
@@ -105,7 +105,7 @@ int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas, const char *filenam
   assert(canvas && filename && err);
   /* write out result file */
   if (c->g)
-    had_err = graphics_save_to_file(c->g, filename, err);
+    had_err = gt_graphics_save_to_file(c->g, filename, err);
   else
   {
     /* XXX: shouldn't this be an assertion? */
@@ -124,7 +124,7 @@ int gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas, GT_Str *stream)
 
   /* write out result file */
   if (c->g)
-    graphics_save_to_stream(c->g, stream);
+    gt_graphics_save_to_stream(c->g, stream);
 
   return had_err;
 }
@@ -139,7 +139,7 @@ const GT_CanvasClass* gt_canvas_cairo_file_class(void)
   return &canvas_class;
 }
 
-GT_Canvas* gt_canvas_cairo_file_new(GT_Style *sty, GT_GraphicsOutType type,
+GT_Canvas* gt_canvas_cairo_file_new(GT_Style *sty, GT_GT_GraphicsOutType type,
                                     unsigned long width, GT_ImageInfo *ii)
 {
   GT_Canvas *canvas;

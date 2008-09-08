@@ -24,7 +24,7 @@
 #include "annotationsketch/style_api.h"
 
 /* Implements the Canvas interface.
-   This Canvas uses the GraphicsCairo class.  */
+   This Canvas uses the GT_GraphicsCairo class.  */
 typedef struct GT_CanvasCairoContext GT_CanvasCairoContext;
 
 /* Create a new Canvas object tied to the cairo_t <context> and <width>

@@ -105,7 +105,7 @@ double gt_canvas_get_text_width(GT_Canvas *canvas, const char *text)
 {
   assert(canvas);
   if (!text) return 0.0;
-  return graphics_get_text_width(canvas->g, text);
+  return gt_graphics_get_text_width(canvas->g, text);
 }
 
 static double convert_point(GT_Canvas *canvas, long pos)
@@ -205,13 +205,13 @@ void gt_canvas_draw_ruler(GT_Canvas *canvas)
   for (tick = vmajor; tick <= canvas->viewrange.end; tick += step)
   {
     if (tick < canvas->viewrange.start) continue;
-    graphics_draw_vertical_line(canvas->g,
+    gt_graphics_draw_vertical_line(canvas->g,
                                 convert_point(canvas, tick),
                                 30,
                                 rulercol,
                                 10);
     format_ruler_label(str, tick, BUFSIZ);
-    graphics_draw_text_centered(canvas->g,
+    gt_graphics_draw_text_centered(canvas->g,
                                 convert_point(canvas, tick),
                                 20,
                                 str);
@@ -224,13 +224,13 @@ void gt_canvas_draw_ruler(GT_Canvas *canvas)
       if (tick < canvas->viewrange.start) continue;
       if (showgrid)
       {
-        graphics_draw_vertical_line(canvas->g,
+        gt_graphics_draw_vertical_line(canvas->g,
                                     convert_point(canvas, tick),
                                     40,
                                     gridcol,
                                     canvas->height-40-15);
       }
-      graphics_draw_vertical_line(canvas->g,
+      gt_graphics_draw_vertical_line(canvas->g,
                                   convert_point(canvas, tick),
                                   35,
                                   rulercol,
@@ -238,16 +238,16 @@ void gt_canvas_draw_ruler(GT_Canvas *canvas)
     }
   }
   /* draw ruler line */
-  graphics_draw_horizontal_line(canvas->g,
+  gt_graphics_draw_horizontal_line(canvas->g,
                                 canvas->margins,
                                 40,
                                 canvas->width-2*margins);
   /* put 3' and 5' captions at the ends */
-  graphics_draw_text_centered(canvas->g,
+  gt_graphics_draw_text_centered(canvas->g,
                               canvas->margins-10,
                               45-(TOY_TEXT_HEIGHT/2),
                               "5'");
-  graphics_draw_text_centered(canvas->g,
+  gt_graphics_draw_text_centered(canvas->g,
                               canvas->width-canvas->margins+10,
                               45-(TOY_TEXT_HEIGHT/2),
                               "3'");
@@ -269,7 +269,7 @@ void gt_canvas_delete(GT_Canvas *c)
   if (c->c_class->free)
     c->c_class->free(c);
   if (c->g)
-    graphics_delete(c->g);
+    gt_graphics_delete(c->g);
   if (c->bt)
     bittab_delete(c->bt);
   gt_free(c);
@@ -318,7 +318,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
   if (canvas->show_track_captions)
   {
     /* draw track title */
-    graphics_draw_colored_text(canvas->g,
+    gt_graphics_draw_colored_text(canvas->g,
                                canvas->margins,
                                canvas->y,
                                color,
@@ -340,9 +340,9 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
         msg = "(%lu blocks not shown due to exceeded line limit)";
         snprintf(buf, BUFSIZ, msg, exceeded);
       }
-      width = graphics_get_text_width(canvas->g,
+      width = gt_graphics_get_text_width(canvas->g,
                                       gt_str_get(gt_track_get_title(track)));
-      graphics_draw_colored_text(canvas->g,
+      gt_graphics_draw_colored_text(canvas->g,
                                  canvas->margins+width+10.0,
                                  canvas->y,
                                  red,
@@ -432,7 +432,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
     caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
-      graphics_draw_text(canvas->g,
+      gt_graphics_draw_text(canvas->g,
                          MAX(canvas->margins, draw_range.start),
                          canvas->y -CAPTION_BAR_SPACE_DEFAULT,
                          caption);
@@ -450,7 +450,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
     gt_style_get_color(canvas->sty, gt_genome_feature_type_get_cstr(btype),
                            "stroke", &strokecolor,
                            gt_block_get_top_level_feature(block));
-    graphics_draw_box(canvas->g,
+    gt_graphics_draw_box(canvas->g,
                       draw_range.start,
                       canvas->y,
                       draw_range.end-draw_range.start+1,
@@ -463,13 +463,13 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
                       true);
     /* draw arrowheads at clipped margins */
     if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-        graphics_draw_arrowhead(canvas->g,
+        gt_graphics_draw_arrowhead(canvas->g,
                                 canvas->margins-10,
                                 canvas->y+((bar_height-8)/2),
                                 grey,
                                 ARROW_LEFT);
     if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-        graphics_draw_arrowhead(canvas->g,
+        gt_graphics_draw_arrowhead(canvas->g,
                                 canvas->width-canvas->margins+10,
                                 canvas->y+((bar_height-8)/2),
                                 grey,
@@ -491,7 +491,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
                      &strokecolor, NULL);
 
   /* draw parent block boundaries */
-  graphics_draw_dashes(canvas->g,
+  gt_graphics_draw_dashes(canvas->g,
                        draw_range.start,
                        canvas->y,
                        draw_range.end - draw_range.start,
@@ -567,7 +567,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   {
     if (bittab_bit_is_set(canvas->bt, (unsigned long) draw_range.start))
       return had_err;
-    graphics_draw_vertical_line(canvas->g,
+    gt_graphics_draw_vertical_line(canvas->g,
                                 draw_range.start,
                                 canvas->y,
                                 elem_color,
@@ -604,7 +604,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
 
   if (strcmp(gt_str_get(style), "box")==0)
   {
-    graphics_draw_box(canvas->g,
+    gt_graphics_draw_box(canvas->g,
                       elem_start,
                       canvas->y,
                       elem_width,
@@ -618,7 +618,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   }
   else if (strcmp(gt_str_get(style), "caret")==0)
   {
-    graphics_draw_caret(canvas->g,
+    gt_graphics_draw_caret(canvas->g,
                         elem_start,
                         canvas->y,
                         elem_width,
@@ -630,7 +630,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   }
   else if (strcmp(gt_str_get(style), "dashes")==0)
   {
-    graphics_draw_dashes(canvas->g,
+    gt_graphics_draw_dashes(canvas->g,
                          elem_start,
                          canvas->y,
                          elem_width,
@@ -642,14 +642,14 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   }
   else if (strcmp(gt_str_get(style), "line")==0)
   {
-    graphics_draw_horizontal_line(canvas->g,
+    gt_graphics_draw_horizontal_line(canvas->g,
                                   elem_start,
                                   canvas->y,
                                   elem_width);
   }
   else
   {
-     graphics_draw_box(canvas->g,
+     gt_graphics_draw_box(canvas->g,
                        elem_start,
                        canvas->y,
                        elem_width,
@@ -665,13 +665,13 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
 
   /* draw arrowheads at clipped margins */
   if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-      graphics_draw_arrowhead(canvas->g,
+      gt_graphics_draw_arrowhead(canvas->g,
                               canvas->margins-10,
                               canvas->y+((bar_height-8)/2),
                               grey,
                               ARROW_LEFT);
   if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-      graphics_draw_arrowhead(canvas->g,
+      gt_graphics_draw_arrowhead(canvas->g,
                               canvas->width-canvas->margins+10,
                               canvas->y+((bar_height-8)/2),
                               grey,
