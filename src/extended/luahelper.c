@@ -32,7 +32,7 @@ int lua_set_modules_path(lua_State *L, GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
   assert(L);
-  if (!(modules_path = gtdata_get_path(gt_error_get_progname(err), err)))
+  if (!(modules_path = gt_get_gtdata_path(gt_error_get_progname(err), err)))
     had_err = -1;
   if (!had_err) {
     external_modules_path = gt_str_clone(modules_path);

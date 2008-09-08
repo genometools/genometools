@@ -43,7 +43,7 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused, GT_Error *err
   prog = gt_cstr_dup(progname); /* create modifiable copy for splitter */
   splitter = splitter_new();
   splitter_split(splitter, prog, strlen(prog), ' ');
-  doc_file = gtdata_get_path(splitter_get_token(splitter, 0), err);
+  doc_file = gt_get_gtdata_path(splitter_get_token(splitter, 0), err);
   if (!doc_file)
     had_err = -1;
 

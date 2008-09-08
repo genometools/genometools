@@ -21,6 +21,6 @@
 #include "core/str.h"
 
 /* get the path to the gtdata/ directory (including it) for the given <prog> */
-GT_Str* gtdata_get_path(const char *prog, GT_Error*);
+GT_Str* gt_get_gtdata_path(const char *prog, GT_Error*);
 
 #endif

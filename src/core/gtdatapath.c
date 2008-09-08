@@ -28,7 +28,7 @@
 #define GTDATADIR "/gtdata"
 #define UPDIR     "/.."
 
-GT_Str* gtdata_get_path(const char *prog, GT_Error *err)
+GT_Str* gt_get_gtdata_path(const char *prog, GT_Error *err)
 {
   GT_Str *path;
   int had_err = 0;

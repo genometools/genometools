@@ -95,7 +95,7 @@ GTR* gtr_new(GT_Error *err)
       had_err = -1;
   }
   if (!had_err) {
-    if (!(style_file = gtdata_get_path(gt_error_get_progname(err), err)))
+    if (!(style_file = gt_get_gtdata_path(gt_error_get_progname(err), err)))
       had_err = -1;
   }
   if (!had_err) {
