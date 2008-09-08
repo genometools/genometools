@@ -570,8 +570,8 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
   assert(get_genomic_range && get_strand && get_exons);
   assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
                               get_genomic_range));
-  log_log("-from %lu", get_genomic_range(set_of_sas).start);
-  log_log("csa number_of_sas=%lu", number_of_sas);
+  gt_log_log("-from %lu", get_genomic_range(set_of_sas).start);
+  gt_log_log("csa number_of_sas=%lu", number_of_sas);
 
   /* init */
   csa.set_of_sas          = set_of_sas;
@@ -586,5 +586,5 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
   /* computation */
   compute_csas(&csa);
 
-  log_log("csa finished");
+  gt_log_log("csa finished");
 }

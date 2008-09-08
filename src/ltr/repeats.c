@@ -119,10 +119,10 @@ int simpleexactselfmatchstore (
 
       if ( seqnum1 == seqnum2 )
       {
-        log_log("accepted:\n");
-        log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-        log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-        log_log("i: %lu\n", i);
+        gt_log_log("accepted:\n");
+        gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+        gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+        gt_log_log("i: %lu\n", i);
         samecontig = true;
         contignumber = seqnum1;
         break;
@@ -139,10 +139,10 @@ int simpleexactselfmatchstore (
 
     GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats,
                        Repeat, 10);
-    log_log("maximal repeat pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-    log_log("maximal repeat pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-    log_log("len: " FormatSeqpos "\n", PRINTSeqposcast(len));
-    log_log("seq number: %lu\n\n", contignumber);
+    gt_log_log("maximal repeat pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+    gt_log_log("maximal repeat pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+    gt_log_log("len: " FormatSeqpos "\n", PRINTSeqposcast(len));
+    gt_log_log("seq number: %lu\n\n", contignumber);
     nextfreerepeatptr->pos1 = pos1;
     nextfreerepeatptr->offset = tmp;
     nextfreerepeatptr->len = len;

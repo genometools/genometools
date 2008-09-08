@@ -374,7 +374,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
          * to improve orthogonality */
         break;
       default:
-        log_log("Invalid encoding request.\n");
+        gt_log_log("Invalid encoding request.\n");
         newBlockEncIdxSeqErrRet();
         break;
       }
@@ -418,7 +418,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
 #if EIS_DEBUG > 1
         for (i = 0; i < blockMapAlphabetSize; ++i)
         {
-          log_log("symCount[%"PRIuSymbol"]="FormatSeqpos"\n", (Symbol)i,
+          gt_log_log("symCount[%"PRIuSymbol"]="FormatSeqpos"\n", (Symbol)i,
                   stats->symbolDistributionTable[i]);
         }
 #endif /* EIS_DEBUG > 1 */
@@ -437,7 +437,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
 #ifdef EIS_DEBUG
           for (i = 0; i < blockMapAlphabetSize; ++i)
           {
-            log_log("bitsPerSymSum[%"PRIuSymbol"]=%u\n", (Symbol)i,
+            gt_log_log("bitsPerSymSum[%"PRIuSymbol"]=%u\n", (Symbol)i,
                     newSeqIdx->partialSymSumBits[i]);
           }
 #endif  /* EIS_DEBUG */
@@ -445,7 +445,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
             = newSeqIdx->partialSymSumBitsSums[blockMapAlphabetSize - 1]
             + newSeqIdx->partialSymSumBits[blockMapAlphabetSize - 1];
 #ifdef EIS_DEBUG
-          log_log("symSumBits total: %u\n", newSeqIdx->symSumBits);
+          gt_log_log("symSumBits total: %u\n", newSeqIdx->symSumBits);
 #endif  /* EIS_DEBUG */
         }
       }
@@ -465,7 +465,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
             regionSymCount += stats->symbolDistributionTable[i];
         regionsEstimate = regionSymCount/20;
 #ifdef EIS_DEBUG
-        log_log("Expected "FormatSeqpos" symbols to encode in regions.\n",
+        gt_log_log("Expected "FormatSeqpos" symbols to encode in regions.\n",
                 regionSymCount);
 #endif
       }
@@ -779,7 +779,7 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
       + (seqIdx->partialSymSumBits[i] = seqIdx->bitsPerSeqpos);
   seqIdx->symSumBits = blockMapAlphabetSize * seqIdx->bitsPerSeqpos;
 #ifdef EIS_DEBUG
-  log_log("symSumBits=%u, blockMapAlphabetSize=%u\n",
+  gt_log_log("symSumBits=%u, blockMapAlphabetSize=%u\n",
           seqIdx->symSumBits, seqIdx->blockMapAlphabetSize);
 #endif
   assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerSeqpos
@@ -2188,7 +2188,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
             newSeqIdx->partialSymSumBits[0]= *(uint32_t *)(buf + offset + 8);
             newSeqIdx->partialSymSumBitsSums[0] = 0;
 #ifdef EIS_DEBUG
-            log_log("partialSymSumBits[0]=%u\n",
+            gt_log_log("partialSymSumBits[0]=%u\n",
                     newSeqIdx->partialSymSumBits[0]);
 #endif
             for (i = 1; i < blockMapAlphabetSize; ++i)
@@ -2196,7 +2196,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
               newSeqIdx->partialSymSumBits[i]
                 = *(uint32_t *)(buf + offset + 8 + 4*i);
 #ifdef EIS_DEBUG
-              log_log("partialSymSumBits[%"PRIuSymbol"]=%u\n",
+              gt_log_log("partialSymSumBits[%"PRIuSymbol"]=%u\n",
                       (Symbol)i, newSeqIdx->partialSymSumBits[i]);
 #endif
               newSeqIdx->partialSymSumBitsSums[i] =
@@ -2241,7 +2241,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
         }
         else
         {
-          log_log("Unknown header field: %4s\n", buf + offset);
+          gt_log_log("Unknown header field: %4s\n", buf + offset);
           loadBlockEncIdxSeqErrRet();
         }
       }
@@ -2277,7 +2277,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
         /*< FIXME: insert proper code to process ranges */
         break;
       default:
-        log_log("Invalid encoding request.\n");
+        gt_log_log("Invalid encoding request.\n");
         loadBlockEncIdxSeqErrRet();
         break;
       }
@@ -2501,7 +2501,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   assert(seqIdx && fp && hint);
   if (bucketBasePos(seqIdx, bucketNum) >= EISLength(&seqIdx->baseClass))
   {
-    log_log("warning: querying bucket "FormatSeqpos
+    gt_log_log("warning: querying bucket "FormatSeqpos
             " beyond end of sequence!\n", bucketNum);
     bucketNum = lastBucket;
   }

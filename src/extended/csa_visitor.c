@@ -90,7 +90,7 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
   }
   else {
     /* end of cluster -> process it */
-    log_log("process cluster");
+    gt_log_log("process cluster");
     csa_visitor->buffered_feature = gf;
     csa_visitor_process_cluster(gv, false);
     csa_visitor->first_range = csa_visitor->second_range;

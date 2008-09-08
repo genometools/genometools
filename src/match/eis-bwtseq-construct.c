@@ -169,7 +169,7 @@ createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
   BWTSeq *bwtSeq = NULL;
   if (!sa->longest.defined)
   {
-    log_log("error: position of null-rotation/longest suffix not available"
+    gt_log_log("error: position of null-rotation/longest suffix not available"
             " for project %s\n", gt_str_get(params->projectName));
   }
   else

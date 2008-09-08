@@ -48,7 +48,7 @@ int gt_bitpackarray_unit_test(GT_Error *err)
     else
       mask = ~((~(uint32_t)0)<<bits);
 
-    log_log("numRnd=%lu\n", (long unsigned)numRnd);
+    gt_log_log("numRnd=%lu\n", (long unsigned)numRnd);
     randSrc = gt_malloc(sizeof (uint32_t)*numRnd);
     bitStore = bitpackarray_new(bits, numRnd);
     randCmp = gt_malloc(sizeof (uint32_t)*numRnd);
@@ -64,7 +64,7 @@ int gt_bitpackarray_unit_test(GT_Error *err)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-        log_log("bsStoreUInt32/bitpackarray_get_uint32: "
+        gt_log_log("bsStoreUInt32/bitpackarray_get_uint32: "
                 "Expected %"PRIu32", got %"PRIu32", i = %lu, bits=%u\n",
                 v & mask, r, (unsigned long)i, bits);
         gt_free(randSrc);
@@ -77,7 +77,7 @@ int gt_bitpackarray_unit_test(GT_Error *err)
   gt_free(randCmp);
   bitpackarray_delete(bitStore);
   }
-  log_log("bitpackarray_store_uint32/bitpackarray_get_uint32: passed\n");
+  gt_log_log("bitpackarray_store_uint32/bitpackarray_get_uint32: passed\n");
   {
     uint64_t *randSrc = NULL; /*< create random ints here for input as bit
                         *  store */
@@ -117,7 +117,7 @@ int gt_bitpackarray_unit_test(GT_Error *err)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-        log_log("bsStoreUInt64/bitpackarray_get_uint64: "
+        gt_log_log("bsStoreUInt64/bitpackarray_get_uint64: "
                 "Expected %llu, got %llu, i = %lu, bits=%u\n",
                 (unsigned long long)(v & mask),
                 (unsigned long long)r, (unsigned long)i, bits);
@@ -131,6 +131,6 @@ int gt_bitpackarray_unit_test(GT_Error *err)
     gt_free(randCmp);
     bitpackarray_delete(bitStore);
   }
-  log_log("bitpackarray_store_uint64/bitpackarray_get_uint64: passed\n");
+  gt_log_log("bitpackarray_store_uint64/bitpackarray_get_uint64: passed\n");
   return had_err;
 }

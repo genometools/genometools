@@ -99,7 +99,7 @@ static long overlapcost(Fragment *fragments,
   if (GETSTOREDSTARTPOINT(2, j) <= GETSTOREDENDPOINT(2, i))
     overlaplength += GETSTOREDENDPOINT(2, i) - GETSTOREDSTARTPOINT(2, j) + 1;
 
-  log_log("overlap total  (#%lu, #%lu)=%lu", i, j, overlaplength);
+  gt_log_log("overlap total  (#%lu, #%lu)=%lu", i, j, overlaplength);
 
   return overlaplength;
 }
@@ -204,11 +204,11 @@ static void bruteforcechainingscores(Chaininfo *chaininfo,
         }
         if (combinable) {
           score  = chaininfo[leftfrag].score;
-          log_log("try to combined fragments #%lu and #%lu", leftfrag,
+          gt_log_log("try to combined fragments #%lu and #%lu", leftfrag,
                   rightfrag);
-          log_log("score (before overlap subtraction)=%lu", score);
+          gt_log_log("score (before overlap subtraction)=%lu", score);
           score -= overlapcost(fragments, leftfrag, rightfrag);
-          log_log("score (after overlap subtraction)=%lu", score);
+          gt_log_log("score (after overlap subtraction)=%lu", score);
 
           if (score > 0) {
             score += weightright;
@@ -218,12 +218,12 @@ static void bruteforcechainingscores(Chaininfo *chaininfo,
             score = weightright;
             previous = UNDEFPREVIOUS;
           }
-          log_log("score (after using weightright)=%lu", score);
+          gt_log_log("score (after using weightright)=%lu", score);
           if (!localmaxfrag.defined || localmaxfrag.maxscore < score) {
             localmaxfrag.maxscore = score;
             localmaxfrag.maxfragnum = previous;
             localmaxfrag.defined = true;
-            log_log("localmaxfrag defined");
+            gt_log_log("localmaxfrag defined");
           }
         }
       }
@@ -382,13 +382,13 @@ static void findmaximalscores_withoverlaps(Chain *chain, Chaininfo *chaininfo,
   gt_array_delete(startfragments);
 }
 
-static void log_fragments(Fragment *fragments, unsigned long num_of_fragments)
+static void gt_log_fragments(Fragment *fragments, unsigned long num_of_fragments)
 {
   unsigned long i;
-  log_log("show chaining fragments");
+  gt_log_log("show chaining fragments");
   for (i = 0; i < num_of_fragments; i++) {
     Fragment *frag = fragments + i;
-    log_log("#%lu: s1=%lu, s1=%lu, l1=%lu, s2=%lu, e2=%lu, l2=%lu, w=%lu", i,
+    gt_log_log("#%lu: s1=%lu, s1=%lu, l1=%lu, s2=%lu, e2=%lu, l2=%lu, w=%lu", i,
             frag->startpos1, frag->endpos1, frag->endpos1 - frag->startpos1 + 1,
             frag->startpos2, frag->endpos2, frag->endpos2 - frag->startpos2 + 1,
             frag->weight);
@@ -407,8 +407,8 @@ static void globalchaining_generic(bool maxscore_chains,
   Chain *chain;
   chain = chain_new();
   chaininfo = gt_malloc(sizeof (Chaininfo) * num_of_fragments);
-  if (log_enabled())
-    log_fragments(fragments, num_of_fragments);
+  if (gt_log_enabled())
+    gt_log_fragments(fragments, num_of_fragments);
   if (num_of_fragments > 1) {
     /* compute chains */
     if (!maxscore_chains) {

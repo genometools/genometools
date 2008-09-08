@@ -823,7 +823,7 @@ BWTSeqInitLocateHandling(BWTSeq *bwtSeq,
   if (!readLocateInfoHeader(seqIdx, &locHeader)
       || !locHeader.locateInterval)
   {
-    log_log("Index does not contain locate information.\n"
+    gt_log_log("Index does not contain locate information.\n"
             "Localization of matches will not be supported!");
     bwtSeq->locateSampleInterval = 0;
     bwtSeq->featureToggles = BWTBaseFeatures;

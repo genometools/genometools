@@ -66,7 +66,7 @@ struct compList
                                  *   concatenated together */
   unsigned bitsPerCount,        /**< bits required to hold one value 0..q */
     bitsPerSymbol,              /**< bits for each symbol */
-    compositionIdxBits,         /**< log_2 of numcompositions */
+    compositionIdxBits,         /**< gt_log_2 of numcompositions */
     maxPermIdxBits;             /**< maximum bit length of permutation
                                  *   indices */
 };

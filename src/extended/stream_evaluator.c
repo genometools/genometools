@@ -1171,12 +1171,12 @@ static void add_nucleotide_values(NucEval *nucleotides, GT_Bittab *real,
                                   GT_Bittab *pred, GT_Bittab *tmp, const char *level)
 {
   assert(nucleotides && real && pred && tmp);
-  if (log_enabled()) {
-    log_log(level);
-    log_log("reality:");
-    gt_bittab_show(real, log_fp());
-    log_log("prediction:");
-    gt_bittab_show(pred, log_fp());
+  if (gt_log_enabled()) {
+    gt_log_log(level);
+    gt_log_log("reality:");
+    gt_bittab_show(real, gt_log_fp());
+    gt_log_log("prediction:");
+    gt_bittab_show(pred, gt_log_fp());
   }
   /* real & pred = TP */
   gt_bittab_and(tmp, real, pred);

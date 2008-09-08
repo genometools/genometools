@@ -116,88 +116,88 @@ enum {
 static inline size_t
 bitElemsAllocSize(BitOffset numBits);
 /**
- * \brief Computes \f$\log_2v + 1\f$, where \f$v\f$ is of unsigned
+ * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 8-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
  * @param val value to compute log2 of.
- * @return \f$\lfloor{}log_2v\rfloor + 1\f$
+ * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 static inline int
 requiredUInt8Bits(uint8_t val);
 /**
- * \brief Computes \f$\log_2v + 1\f$, where \f$v\f$ is of unsigned
+ * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 16-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
  * @param val value to compute log2 of.
- * @return \f$\lfloor{}log_2v\rfloor + 1\f$
+ * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 static inline int
 requiredUInt16Bits(uint16_t val);
 /**
- * \brief Computes \f$\log_2v + 1\f$, where \f$v\f$ is of unsigned
+ * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 32-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
  * @param val value to compute log2 of.
- * @return \f$\lfloor{}log_2v\rfloor + 1\f$
+ * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 extern int
 requiredUInt32Bits(uint32_t val);
 /**
- * \brief Computes \f$\log_2v + 1\f$, where \f$v\f$ is of unsigned
+ * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 64-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
  * @param val value to compute log2 of.
- * @return \f$\lfloor{}log_2v\rfloor + 1\f$
+ * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 extern int
 requiredUInt64Bits(uint64_t val);
 /**
- * \brief Computes \f$\log_2v + 2\f$, where \f$v\f$ is of signed 8-bit
+ * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed 8-bit
  * type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
  * @param v value to compute log2 of.
- * @return \f$\lfloor{}|log_2v|\rfloor + 2\f$. Special case: INT8_MIN
+ * @return \f$\lfloor{}|gt_log_2v|\rfloor + 2\f$. Special case: INT8_MIN
  * is representable in 8 bits although
- * \f[\left\lfloor{}log_2\left|-(2^{7})\right|\right\rfloor + 2 = 9.\f]
+ * \f[\left\lfloor{}gt_log_2\left|-(2^{7})\right|\right\rfloor + 2 = 9.\f]
  */
 static inline int
 requiredInt8Bits(int8_t v);
 /**
- * \brief Computes \f$\log_2v + 2\f$, where \f$v\f$ is of signed
+ * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed
  * 16-bit type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
  * @param v value to compute log2 of.
- * @return \f$\lfloor{}|log_2v|\rfloor + 2\f$. Special case: INT16_MIN
+ * @return \f$\lfloor{}|gt_log_2v|\rfloor + 2\f$. Special case: INT16_MIN
  * is representable in 16 bits although
- * \f[\left\lfloor{}log_2\left|-(2^{15})\right|\right\rfloor + 2 = 17.\f]
+ * \f[\left\lfloor{}gt_log_2\left|-(2^{15})\right|\right\rfloor + 2 = 17.\f]
  */
 static inline int
 requiredInt16Bits(int16_t v);
 /**
- * \brief Computes \f$\log_2v + 2\f$, where \f$v\f$ is of signed
+ * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed
  * 32-bit type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
  * @param v value to compute log2 of.
- * @return \f$\lfloor{}|log_2v|\rfloor + 2\f$. Special case: INT32_MIN
+ * @return \f$\lfloor{}|gt_log_2v|\rfloor + 2\f$. Special case: INT32_MIN
  * is representable in 32 bits although
- * \f[\left\lfloor{}log_2\left|-(2^{31})\right|\right\rfloor + 2 = 33.\f]
+ * \f[\left\lfloor{}gt_log_2\left|-(2^{31})\right|\right\rfloor + 2 = 33.\f]
  */
 static inline int
 requiredInt32Bits(int32_t v);
 /**
- * \brief Computes \f$\log_2v + 2\f$, where \f$v\f$ is of signed
+ * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed
  * 64-bit type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
  * @param v value to compute log2 of.
- * @return \f$\left\lfloor{}log_2|v|\right\rfloor + 2\f$
+ * @return \f$\left\lfloor{}gt_log_2|v|\right\rfloor + 2\f$
  * (Special case: INT64_MIN is representable in 64 bits)
  */
 static inline int

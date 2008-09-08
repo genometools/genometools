@@ -23,27 +23,27 @@
 static bool logging = false;
 static FILE *logfp = NULL;
 
-void log_enable(void)
+void gt_log_enable(void)
 {
   logfp = stderr;
   logging = true;
 }
 
-bool log_enabled(void)
+bool gt_log_enabled(void)
 {
   return logging;
 }
 
-void log_log(const char *format, ...)
+void gt_log_log(const char *format, ...)
 {
   va_list ap;
   if (!logging) return;
   va_start(ap, format);
-  log_vlog(format, ap);
+  gt_log_vlog(format, ap);
   va_end(ap);
 }
 
-void log_vlog(const char *format, va_list ap)
+void gt_log_vlog(const char *format, va_list ap)
 {
   if (!logging) return;
   assert(logfp);
@@ -52,13 +52,13 @@ void log_vlog(const char *format, va_list ap)
   (void) putc('\n', logfp);
 }
 
-FILE* log_fp(void)
+FILE* gt_log_fp(void)
 {
   assert(logging);
   return logfp;
 }
 
-void log_set_fp(FILE *fp)
+void gt_log_set_fp(FILE *fp)
 {
   assert(logging);
   logfp = fp;

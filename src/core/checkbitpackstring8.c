@@ -86,7 +86,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
   int had_err = 0;
   offset = offsetStart = random()%(sizeof (uint8_t) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS + 1);
-  log_log("offset=%lu, numRnd=%lu\n",
+  gt_log_log("offset=%lu, numRnd=%lu\n",
           (long unsigned)offsetStart, (long unsigned)numRnd);
   {
     BitOffset numBits = sizeof (uint8_t) * CHAR_BIT * numRnd + offsetStart;
@@ -96,7 +96,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
     randCmp = gt_malloc(sizeof (uint8_t)*numRnd);
   }
   /* first test unsigned types */
-  log_log("bsStoreUInt8/bsGetUInt8: ");
+  gt_log_log("bsStoreUInt8/bsGetUInt8: ");
   for (i = 0; i < numRnd; ++i)
   {
 #if 8 > 32 && LONG_BIT < 8
@@ -117,13 +117,13 @@ bitPackStringInt8_unit_test(GT_Error *err)
     ensure(had_err, r == v);
     if (had_err)
     {
-      log_log("Expected %"PRIu8", got %"PRIu8", i = %lu\n",
+      gt_log_log("Expected %"PRIu8", got %"PRIu8", i = %lu\n",
               v, r, (unsigned long)i);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-  log_log("passed\n");
+  gt_log_log("passed\n");
   if (numRnd > 0)
   {
     uint8_t v = randSrc[0], r = 0;
@@ -132,7 +132,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
     uint8_t mask = ~(uint8_t)0;
     if (numBits < 8)
       mask = ~(mask << numBits);
-    log_log("bsSetBit, bsClearBit, bsToggleBit, bsGetBit: ");
+    gt_log_log("bsSetBit, bsClearBit, bsToggleBit, bsGetBit: ");
     while (v)
     {
       int lowBit = v & 1;
@@ -140,7 +140,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, lowBit == (r = bsGetBit(bitStore, --i)));
       if (had_err)
       {
-        log_log("Expected %d, got %d, i = %llu\n",
+        gt_log_log("Expected %d, got %d, i = %llu\n",
                 lowBit, (int)r, (unsigned long long)i);
         freeResourcesAndReturn(had_err);
       }
@@ -162,7 +162,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
     ensure(had_err, r == v);
     if (had_err)
     {
-      log_log("Expected %"PRIu8", got %"PRIu8"\n", v, r);
+      gt_log_log("Expected %"PRIu8", got %"PRIu8"\n", v, r);
       freeResourcesAndReturn(had_err);
     }
     for (i = 0; i < numBits; ++i)
@@ -171,14 +171,14 @@ bitPackStringInt8_unit_test(GT_Error *err)
     ensure(had_err, r == (v = (~v & mask)));
     if (had_err)
     {
-      log_log("Expected %"PRIu8", got %"PRIu8"\n", v, r);
+      gt_log_log("Expected %"PRIu8", got %"PRIu8"\n", v, r);
       freeResourcesAndReturn(had_err);
     }
-    log_log("passed\n");
+    gt_log_log("passed\n");
   }
   if (numRnd > 1)
   {
-    log_log("bsCompare: ");
+    gt_log_log("bsCompare: ");
     {
       uint8_t v0 = randSrc[0];
       int bits0 = requiredUInt8Bits(v0);
@@ -199,7 +199,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
                                    bitStore, offset + bits0, bits1)));
         if (had_err)
         {
-          log_log("Expected v0 %s v1, got v0 %s v1,\n for v0=%"
+          gt_log_log("Expected v0 %s v1, got v0 %s v1,\n for v0=%"
                   PRIu8" and v1=%"PRIu8",\n"
                   "i = %lu, bits0=%u, bits1=%u\n",
                   (v0 > v1?">":(v0 < v1?"<":"==")),
@@ -213,9 +213,9 @@ bitPackStringInt8_unit_test(GT_Error *err)
         r0 = r1;
       }
     }
-    log_log("passed\n");
+    gt_log_log("passed\n");
   }
-  log_log("bsStoreUniformUInt8Array/bsGetUInt8: ");
+  gt_log_log("bsStoreUniformUInt8Array/bsGetUInt8: ");
   {
     unsigned numBits = random()%8 + 1;
     uint8_t mask = ~(uint8_t)0;
@@ -230,14 +230,14 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRIu8", got %"PRIu8",\n"
+        gt_log_log("Expected %"PRIu8", got %"PRIu8",\n"
                 "i = %lu, bits=%u\n", v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-    log_log("passed\n");
-    log_log("bsStoreUniformUInt8Array/bsGetUniformUInt8Array: ");
+    gt_log_log("passed\n");
+    gt_log_log("bsStoreUniformUInt8Array/bsGetUniformUInt8Array: ");
     bsGetUniformUInt8Array(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -247,7 +247,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log( "Expected %"PRIu8", got %"PRIu8",\n"
+        gt_log_log( "Expected %"PRIu8", got %"PRIu8",\n"
                 " i = %lu, bits=%u\n",
                 v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
@@ -261,16 +261,16 @@ bitPackStringInt8_unit_test(GT_Error *err)
                                  numBits, 1, &r);
       if (r != v)
       {
-        log_log("Expected %"PRIu8", got %"PRIu8","
+        gt_log_log("Expected %"PRIu8", got %"PRIu8","
                 " one value extraction\n",
                 v, r);
         freeResourcesAndReturn(had_err);
       }
     }
-    log_log(" passed\n");
+    gt_log_log(" passed\n");
   }
   /* int types */
-  log_log("bsStoreInt8/bsGetInt8: ");
+  gt_log_log("bsStoreInt8/bsGetInt8: ");
   for (i = 0; i < numRnd; ++i)
   {
     int8_t v = (int8_t)randSrc[i];
@@ -287,15 +287,15 @@ bitPackStringInt8_unit_test(GT_Error *err)
     ensure(had_err, r == v);
     if (had_err)
     {
-      log_log("Expected %"PRId8", got %"PRId8",\n"
+      gt_log_log("Expected %"PRId8", got %"PRId8",\n"
                   "i = %lu, bits=%u\n",
                   v, r, (unsigned long)i, bits);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-  log_log("passed\n");
-  log_log("bsStoreUniformInt8Array/bsGetInt8: ");
+  gt_log_log("passed\n");
+  gt_log_log("bsStoreUniformInt8Array/bsGetInt8: ");
   {
     unsigned numBits = random()%8 + 1;
     int8_t mask = ~(int8_t)0;
@@ -312,15 +312,15 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId8", got %"PRId8",\n"
+        gt_log_log("Expected %"PRId8", got %"PRId8",\n"
                     "i = %lu, numBits=%u\n",
                     v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-    log_log("passed\n");
-    log_log("bsStoreUniformInt8Array/bsGetUniformInt8Array: ");
+    gt_log_log("passed\n");
+    gt_log_log("bsStoreUniformInt8Array/bsGetUniformInt8Array: ");
     bsGetUniformInt8Array(bitStore, offset = offsetStart,
                               numBits, numRnd, (int8_t *)randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -331,7 +331,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId8", got %"PRId8", i = %lu\n",
+        gt_log_log("Expected %"PRId8", got %"PRId8", i = %lu\n",
                 v, r, (unsigned long)i);
         freeResourcesAndReturn(had_err);
       }
@@ -346,16 +346,16 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId8", got %"PRId8
+        gt_log_log("Expected %"PRId8", got %"PRId8
                 ", one value extraction\n",
                 v, r);
         freeResourcesAndReturn(had_err);
       }
     }
-    log_log("passed\n");
+    gt_log_log("passed\n");
   }
 
-  log_log("bsStoreNonUniformUInt8Array/bsGetUInt8: ");
+  gt_log_log("bsStoreNonUniformUInt8Array/bsGetUInt8: ");
   {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
@@ -374,15 +374,15 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRIu8", got %"PRIu8",\n"
+        gt_log_log("Expected %"PRIu8", got %"PRIu8",\n"
                 "i = %lu, bits=%u\n",
                 v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-    log_log("passed\n");
-    log_log("bsStoreNonUniformUInt8Array/"
+    gt_log_log("passed\n");
+    gt_log_log("bsStoreNonUniformUInt8Array/"
             "bsGetNonUniformUInt8Array: ");
     bsGetNonUniformUInt8Array(bitStore, offset = offsetStart,
                                    numRnd, bitsTotal, numBitsList, randCmp);
@@ -396,7 +396,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log( "Expected %"PRIu8", got %"PRIu8",\n"
+        gt_log_log( "Expected %"PRIu8", got %"PRIu8",\n"
                 " i = %lu, bits=%u\n",
                 v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
@@ -413,17 +413,17 @@ bitPackStringInt8_unit_test(GT_Error *err)
                                      numBitsList, &r);
       if (r != v)
       {
-        log_log("Expected %"PRIu8", got %"PRIu8", "
+        gt_log_log("Expected %"PRIu8", got %"PRIu8", "
                 " one value extraction\n",
                 v, r);
         freeResourcesAndReturn(had_err);
       }
     }
-    log_log(" passed\n");
+    gt_log_log(" passed\n");
     gt_free(numBitsList);
     numBitsList = NULL;
   }
-  log_log("bsNonStoreUniformInt8Array/bsGetInt8: ");
+  gt_log_log("bsNonStoreUniformInt8Array/bsGetInt8: ");
   {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
@@ -443,15 +443,15 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId8", got %"PRId8",\n"
+        gt_log_log("Expected %"PRId8", got %"PRId8",\n"
                     "i = %lu, numBits=%u\n",
                     v, r, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-    log_log("passed\n");
-    log_log("bsStoreNonUniformInt8Array/"
+    gt_log_log("passed\n");
+    gt_log_log("bsStoreNonUniformInt8Array/"
             "bsGetNonUniformInt8Array: ");
     bsGetNonUniformInt8Array(bitStore, offset = offsetStart, numRnd,
                                    bitsTotal, numBitsList,
@@ -467,7 +467,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId8", got %"PRId8", i = %lu\n",
+        gt_log_log("Expected %"PRId8", got %"PRId8", i = %lu\n",
                 v, r, (unsigned long)i);
         freeResourcesAndReturn(had_err);
       }
@@ -485,20 +485,20 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, r == v);
       if (had_err)
       {
-        log_log("Expected %"PRId8", got %"PRId8
+        gt_log_log("Expected %"PRId8", got %"PRId8
                 ", one value extraction\n",
                 v, r);
         freeResourcesAndReturn(had_err);
       }
     }
-    log_log("passed\n");
+    gt_log_log("passed\n");
     gt_free(numBitsList);
     numBitsList = NULL;
   }
 
   if (numRnd > 0)
   {
-    log_log("bsCopy: ");
+    gt_log_log("bsCopy: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
@@ -533,7 +533,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
                        bitStoreCopy, destOffset, numCopyBits) == 0);
       if (had_err)
       {
-        log_log("Expected equality on bitstrings\n"
+        gt_log_log("Expected equality on bitstrings\n"
                     "offset = %llu, destOffset = %llu,"
                     " numCopyBits=%llu\n",
                     (unsigned long long)offset,
@@ -542,12 +542,12 @@ bitPackStringInt8_unit_test(GT_Error *err)
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
       }
-      log_log("passed\n");
+      gt_log_log("passed\n");
     }
   }
   if (numRnd > 0)
   {
-    log_log("bsClear: ");
+    gt_log_log("bsClear: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numResetValues, resetStart;
@@ -584,7 +584,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
           ensure(had_err, r == v);
           if (had_err)
           {
-            log_log( "Expected %"PRId8", got %"PRId8",\n"
+            gt_log_log( "Expected %"PRId8", got %"PRId8",\n"
                      "i = %lu, numBits=%u\n",
                      v, r, (unsigned long)i, numBits);
             freeResourcesAndReturn(had_err);
@@ -597,7 +597,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
           ensure(had_err, r == cmpVal);
           if (had_err)
           {
-            log_log("Expected %"PRId8", got %"PRId8",\n"
+            gt_log_log("Expected %"PRId8", got %"PRId8",\n"
                     "i = %lu, numBits=%u\n",
                     cmpVal, r, (unsigned long)i, numBits);
             freeResourcesAndReturn(had_err);
@@ -611,7 +611,7 @@ bitPackStringInt8_unit_test(GT_Error *err)
           ensure(had_err, r == v);
           if (had_err)
           {
-            log_log("Expected %"PRId8", got %"PRId8",\n"
+            gt_log_log("Expected %"PRId8", got %"PRId8",\n"
                     "i = %lu, numBits=%u\n",
                     v, r, (unsigned long)i, numBits);
             freeResourcesAndReturn(had_err);
@@ -620,11 +620,11 @@ bitPackStringInt8_unit_test(GT_Error *err)
         }
       }
     }
-    log_log("passed\n");
+    gt_log_log("passed\n");
   }
   if (numRnd > 0)
   {
-    log_log("bs1BitsCount: ");
+    gt_log_log("bs1BitsCount: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numCountValues, countStart;
@@ -658,14 +658,14 @@ bitPackStringInt8_unit_test(GT_Error *err)
       ensure(had_err, bitCountRef == bitCountCmp);
       if (had_err)
       {
-        log_log("Expected %llu, got %llu,\n"
+        gt_log_log("Expected %llu, got %llu,\n"
                 "numBits=%u\n", (unsigned long long)bitCountRef,
                 (unsigned long long)bitCountCmp, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-    log_log("passed\n");
+    gt_log_log("passed\n");
   }
   freeResourcesAndReturn(had_err);
 }

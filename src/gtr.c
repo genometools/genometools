@@ -253,14 +253,14 @@ static int run_tests(GTR *gtr, GT_Error *err)
 
 static void enable_logging(const char *debugfp, FILE **logfp)
 {
-  log_enable();
+  gt_log_enable();
   if (!strcmp(debugfp, "stdout"))
-    log_set_fp(stdout);
+    gt_log_set_fp(stdout);
   else if (!strcmp(debugfp, "stderr"))
-    log_set_fp(stderr);
+    gt_log_set_fp(stderr);
   else {
     *logfp = gt_xfopen(debugfp, "w");
-    log_set_fp(*logfp);
+    gt_log_set_fp(*logfp);
   }
 }
 
@@ -276,7 +276,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
   if (gtr->debug)
     enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
   gtr->seed = ya_rand_init(gtr->seed);
-  log_log("seed=%u", gtr->seed);
+  gt_log_log("seed=%u", gtr->seed);
   if (gtr->check64bit)
     return check64bit();
   if (gtr->test)

@@ -23,27 +23,27 @@
 #include <stdio.h>
 
 /* enable logging */
-void log_enable(void);
+void gt_log_enable(void);
 
 /* returns true if logging is enabled, false otherwise */
-bool log_enabled(void);
+bool gt_log_enabled(void);
 
 /* Prints the log message obtained from format and following parameters
    according if logging is enabled. The logging output is prefixed with the
    string "debug: " and finished by a newline.  */
-void  log_log(const char *format, ...)
+void  gt_log_log(const char *format, ...)
   __attribute__ ((format (printf, 1, 2)));
 
 /* Prints the log message obtained from format and following parameter according
-   to if logging is enabled analog to log_log(). But in contrast to
-   log_log() log_vlog() does not accept individual arguments but a single
+   to if logging is enabled analog to gt_log_log(). But in contrast to
+   gt_log_log() gt_log_vlog() does not accept individual arguments but a single
    va_list argument instead. */
-void  log_vlog(const char *format, va_list);
+void  gt_log_vlog(const char *format, va_list);
 
 /* Return logging file pointer. */
-FILE* log_fp(void);
+FILE* gt_log_fp(void);
 
 /* Set logging file pointer to <fp>. */
-void  log_set_fp(FILE *fp);
+void  gt_log_set_fp(FILE *fp);
 
 #endif

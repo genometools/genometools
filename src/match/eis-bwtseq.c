@@ -90,10 +90,10 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
 #ifdef EIS_DEBUG
-    log_log("count[alphabetSize]="FormatSeqpos
+    gt_log_log("count[alphabetSize]="FormatSeqpos
             ", len="FormatSeqpos"\n", count[alphabetSize], len);
     for (i = 0; i <= alphabetSize; ++i)
-      log_log("count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
+      gt_log_log("count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
 #endif
     assert(count[alphabetSize] == len);
   }

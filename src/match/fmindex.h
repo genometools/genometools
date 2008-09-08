@@ -97,10 +97,10 @@ typedef struct
            bsize,            /* size of block */
            bsizehalve,       /* DIV2(fm->bsize) */
            superbsize,       /* size of superblock */
-           log2bsize,        /* log_{2}(bsize) */
-           log2superbsize,   /* log_{2}(superbsize) */
+           log2bsize,        /* gt_log_{2}(bsize) */
+           log2superbsize,   /* gt_log_{2}(superbsize) */
            log2superbsizeminuslog2bsize, /* log{2}(superbsize)-log{2}(bsize) */
-           log2markdist,     /* log_{2}(markdist) */
+           log2markdist,     /* gt_log_{2}(markdist) */
            suffixlength;     /* len of suffix for which buckets are computed*/
   unsigned long sizeofindex; /* size of the fmindex in bytes */
   Seqpos nofblocks,          /* number of blocks (bwtlength/bsize + 1) */

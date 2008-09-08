@@ -94,10 +94,10 @@ static char* mutate_seq(const char *seq, unsigned long len, GT_Alpha *alpha,
       mutated_seq[j++] = seq[i]; /* keep original character */
   }
   mutated_seq[j] = '\0'; /* terminate */
-  log_log("total number of mutation events: %lu", total_events);
-  log_log("number of substitution events: %lu", substitution_events);
-  log_log("number of insertion events: %lu", insertion_events);
-  log_log("number of deletion events: %lu", deletion_events);
+  gt_log_log("total number of mutation events: %lu", total_events);
+  gt_log_log("number of substitution events: %lu", substitution_events);
+  gt_log_log("number of insertion events: %lu", insertion_events);
+  gt_log_log("number of deletion events: %lu", deletion_events);
   return mutated_seq;
 }
 

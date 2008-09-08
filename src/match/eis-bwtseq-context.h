@@ -34,7 +34,7 @@ typedef struct BWTSeqContextRetrieverFactory BWTSeqContextRetrieverFactory;
  * @param seqLen length of sequence to build context map for
  * @param mapIntervalLog2 unless equal to CTX_MAP_ILOG_NOMAP or
  * CTX_MAP_ILOG_AUTOSIZE compute map with interval 1<<mapIntervalLog2.
- * If equal CTX_MAP_ILOG_AUTOSIZE, uses @f$log_2\mathrm{seqLen}@f$.
+ * If equal CTX_MAP_ILOG_AUTOSIZE, uses @f$gt_log_2\mathrm{seqLen}@f$.
  */
 extern BWTSeqContextRetrieverFactory *
 newBWTSeqContextRetrieverFactory(Seqpos seqLen,
