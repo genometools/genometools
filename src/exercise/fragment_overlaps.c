@@ -94,12 +94,13 @@ void fragment_overlaps_sort(FragmentOverlaps *fo)
   num_of_overlaps = gt_array_size(fo->overlaps);
   sorted_overlaps = gt_malloc(sizeof (Overlap) * num_of_overlaps);
   /* sort overlaps by weight */
-  countingsort(sorted_overlaps, gt_array_get_space(fo->overlaps),
-               gt_array_elem_size(fo->overlaps), gt_array_size(fo->overlaps),
-               countingsort_get_max(gt_array_get_space(fo->overlaps),
-                                    gt_array_elem_size(fo->overlaps),
-                                    gt_array_size(fo->overlaps), NULL, get_weight),
-               NULL, get_weight);
+  gt_countingsort(sorted_overlaps, gt_array_get_space(fo->overlaps),
+                  gt_array_elem_size(fo->overlaps), gt_array_size(fo->overlaps),
+                  gt_countingsort_get_max(gt_array_get_space(fo->overlaps),
+                                          gt_array_elem_size(fo->overlaps),
+                                          gt_array_size(fo->overlaps), NULL,
+                                          get_weight),
+                  NULL, get_weight);
   gt_array_reset(fo->overlaps);
   for (i = 0; i < num_of_overlaps; i++)
     gt_array_add(fo->overlaps, sorted_overlaps[i]);

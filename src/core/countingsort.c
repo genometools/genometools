@@ -23,9 +23,9 @@
 #include "core/unused_api.h"
 #include "core/xansi.h"
 
-void countingsort(void *out, const void *in, size_t elem_size,
-                  unsigned long size, unsigned long max_elemvalue, void *data,
-                  GetElemvalue get_elemvalue)
+void gt_countingsort(void *out, const void *in, size_t elem_size,
+                     unsigned long size, unsigned long max_elemvalue,
+                     void *data, GetElemvalue get_elemvalue)
 {
   unsigned long i, k, *c;
   assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
@@ -55,9 +55,9 @@ void countingsort(void *out, const void *in, size_t elem_size,
   gt_free(c);
 }
 
-unsigned long countingsort_get_max(const void *in, size_t elem_size,
-                                   unsigned long size, void *data,
-                                   GetElemvalue get_elemvalue)
+unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
+                                      unsigned long size, void *data,
+                                      GetElemvalue get_elemvalue)
 {
   unsigned long i, value, max_value = 0;
   for (i = 0; i < size; i++) {
@@ -74,15 +74,16 @@ static unsigned long get_int(const void *elem, GT_UNUSED void *data)
   return *(unsigned int*) elem;
 }
 
-int countingsort_unit_test(GT_Error *err)
+int gt_countingsort_unit_test(GT_Error *err)
 {
   unsigned int numbers[]        = { 1, 2, 1, 2, 0 }, numbers_out[5],
                sorted_numbers[] = { 0, 1, 1, 2, 2 };
   int had_err = 0;
   gt_error_check(err);
-  countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
-               countingsort_get_max(numbers, sizeof (unsigned int), 5, NULL,
-                                    get_int), NULL,  get_int);
+  gt_countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
+                  gt_countingsort_get_max(numbers, sizeof (unsigned int), 5,
+                                          NULL, get_int),
+                  NULL,  get_int);
   ensure(had_err,
          !memcmp(sorted_numbers, numbers_out, sizeof (unsigned int) * 5));
   return had_err;

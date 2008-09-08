@@ -36,15 +36,15 @@ typedef unsigned long (*GetElemvalue)(const void *elem, void *data);
    <max_elemvalue> denotes the maximum value an element can have.
    <get_elemvalue> should return an integer value for the given element <elem>.
 */
-void          countingsort(void *out, const void *in, size_t elem_size,
-                           unsigned long size, unsigned long max_elemvalue,
-                           void *data, GetElemvalue get_elemvalue);
+void          gt_countingsort(void *out, const void *in, size_t elem_size,
+                              unsigned long size, unsigned long max_elemvalue,
+                              void *data, GetElemvalue get_elemvalue);
 
 /* If <max_elemvalue> is not known, it can be determined with this function. */
-unsigned long countingsort_get_max(const void *in, size_t elem_size,
-                                   unsigned long size, void *data,
-                                   GetElemvalue get_elemvalue);
+unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
+                                      unsigned long size, void *data,
+                                      GetElemvalue get_elemvalue);
 
-int           countingsort_unit_test(GT_Error*);
+int           gt_countingsort_unit_test(GT_Error*);
 
 #endif

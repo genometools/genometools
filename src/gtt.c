@@ -157,7 +157,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
   hashmap_add(unit_tests, "bittab example", gt_bittab_example);
   hashmap_add(unit_tests, "bsearch module", gt_bsearch_unit_test);
-  hashmap_add(unit_tests, "countingsort module", countingsort_unit_test);
+  hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
   hashmap_add(unit_tests, "cstr table class", cstr_table_unit_test);
   hashmap_add(unit_tests, "disc distri class", disc_distri_unit_test);
   hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
