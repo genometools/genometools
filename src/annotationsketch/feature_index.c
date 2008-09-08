@@ -43,14 +43,14 @@ struct GT_FeatureIndex {
 };
 
 typedef struct {
-  IntervalTree *features;
+  GT_IntervalTree *features;
   GT_SequenceRegion *region;
   GT_Range dyn_range;
 } RegionInfo;
 
 static void region_info_delete(RegionInfo *info)
 {
-  interval_tree_delete(info->features);
+  gt_interval_tree_delete(info->features);
   if (info->region)
     gt_genome_node_delete((GT_GenomeNode*)info->region);
   gt_free(info);
@@ -82,7 +82,7 @@ void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
   if (!hashmap_get(fi->regions, seqid)) {
     info = gt_malloc(sizeof (RegionInfo));
     info->region = (GT_SequenceRegion*) gt_genome_node_ref((GT_GenomeNode*) sr);
-    info->features = interval_tree_new((GT_FreeFunc) gt_genome_node_rec_delete);
+    info->features = gt_interval_tree_new((GT_FreeFunc) gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
@@ -114,7 +114,7 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
   {
     info = gt_calloc(1, sizeof (RegionInfo));
     info->region = NULL;
-    info->features = interval_tree_new((GT_FreeFunc) gt_genome_node_rec_delete);
+    info->features = gt_interval_tree_new((GT_FreeFunc) gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
@@ -123,9 +123,9 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
   }
 
   /* add node to the appropriate array in the hashtable */
-  IntervalTreeNode *new_node = interval_tree_node_new(gn, node_range.start,
+  GT_IntervalTreeNode *new_node = gt_interval_tree_node_new(gn, node_range.start,
                                                       node_range.end);
-  interval_tree_insert(info->features, new_node);
+  gt_interval_tree_insert(info->features, new_node);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
@@ -160,10 +160,10 @@ int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
   return had_err;
 }
 
-static int collect_features_from_itree(IntervalTreeNode *node, void *data)
+static int collect_features_from_itree(GT_IntervalTreeNode *node, void *data)
 {
   GT_Array *a = (GT_Array*) data;
-  GT_GenomeNode *gn = (GT_GenomeNode*) interval_tree_node_get_data(node);
+  GT_GenomeNode *gn = (GT_GenomeNode*) gt_interval_tree_node_get_data(node);
   gt_array_add(a, gn);
   return 0;
 }
@@ -178,7 +178,7 @@ GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
   a = gt_array_new(sizeof (GT_GenomeFeature*));
   ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
   if (ri)
-    had_err = interval_tree_traverse(ri->features,
+    had_err = gt_interval_tree_traverse(ri->features,
                                      collect_features_from_itree,
                                      a);
   assert(!had_err);   /* collect_features_from_itree() is sane */
@@ -207,7 +207,7 @@ int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi,
     gt_error_set(err, "feature index does not contain the given sequence id");
     return -1;
   }
-  interval_tree_find_all_overlapping(ri->features, qry_range.start,
+  gt_interval_tree_find_all_overlapping(ri->features, qry_range.start,
                                      qry_range.end, results);
   gt_array_sort(results, gt_genome_node_cmp_range_start);
   return 0;

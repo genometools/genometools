@@ -24,57 +24,57 @@
 #include "core/unused_api.h"
 #include <string.h>
 
-typedef enum IntervalTreeNodeColor {
+typedef enum GT_IntervalTreeNodeColor {
   BLACK,
   RED
-} IntervalTreeNodeColor ;
+} GT_IntervalTreeNodeColor ;
 
-struct IntervalTree {
-  IntervalTreeNode *root;
+struct GT_IntervalTree {
+  GT_IntervalTreeNode *root;
   unsigned long size;
   GT_FreeFunc free_func;
 };
 
-struct IntervalTreeNode {
-  IntervalTreeNode *parent, *left, *right;
+struct GT_IntervalTreeNode {
+  GT_IntervalTreeNode *parent, *left, *right;
   void *data;
-  IntervalTreeNodeColor color;
+  GT_IntervalTreeNodeColor color;
   unsigned long low, high, max;
 };
 
-IntervalTreeNode* interval_tree_node_new(void *data,
+GT_IntervalTreeNode* gt_interval_tree_node_new(void *data,
                                          unsigned long low,
                                          unsigned long high)
 {
-  IntervalTreeNode* n;
-  n = gt_calloc(1, sizeof (IntervalTreeNode));
+  GT_IntervalTreeNode* n;
+  n = gt_calloc(1, sizeof (GT_IntervalTreeNode));
   n->low = low;
   n->high = high;
   n->data = data;
   return n;
 }
 
-IntervalTree* interval_tree_new(GT_FreeFunc func)
+GT_IntervalTree* gt_interval_tree_new(GT_FreeFunc func)
 {
-  IntervalTree *it;
-  it = gt_calloc(1, sizeof (IntervalTree));
+  GT_IntervalTree *it;
+  it = gt_calloc(1, sizeof (GT_IntervalTree));
   it->free_func = func;
   return it;
 }
 
-unsigned long interval_tree_size(IntervalTree *it)
+unsigned long gt_interval_tree_size(GT_IntervalTree *it)
 {
   assert(it);
   return it->size;
 }
 
-void* interval_tree_node_get_data(IntervalTreeNode *n)
+void* gt_interval_tree_node_get_data(GT_IntervalTreeNode *n)
 {
   assert(n);
   return n->data;
 }
 
-void interval_tree_node_delete(IntervalTree *it, IntervalTreeNode *n)
+void gt_interval_tree_node_delete(GT_IntervalTree *it, GT_IntervalTreeNode *n)
 {
   if (!n) return;
   if (n->data && it->free_func)
@@ -82,19 +82,19 @@ void interval_tree_node_delete(IntervalTree *it, IntervalTreeNode *n)
   gt_free(n);
 }
 
-static void interval_tree_node_rec_delete(IntervalTree *it, IntervalTreeNode *n)
+static void gt_interval_tree_node_rec_delete(GT_IntervalTree *it, GT_IntervalTreeNode *n)
 {
   if (!n) return;
-  interval_tree_node_rec_delete(it, n->left);
-  interval_tree_node_rec_delete(it, n->right);
-  interval_tree_node_delete(it, n);
+  gt_interval_tree_node_rec_delete(it, n->left);
+  gt_interval_tree_node_rec_delete(it, n->right);
+  gt_interval_tree_node_delete(it, n);
 }
 
-static IntervalTreeNode* interval_tree_search_internal(IntervalTreeNode *node,
+static GT_IntervalTreeNode* gt_interval_tree_search_internal(GT_IntervalTreeNode *node,
                                                        unsigned long low,
                                                        unsigned long high)
 {
-  IntervalTreeNode *x;
+  GT_IntervalTreeNode *x;
   x = node;
   while (x && !(low <= x->high && x->low <= high)) {
     if (x->left && x->left->max >= low)
@@ -105,67 +105,67 @@ static IntervalTreeNode* interval_tree_search_internal(IntervalTreeNode *node,
   return x;
 }
 
-IntervalTreeNode* interval_tree_find_first_overlapping(IntervalTree *it,
+GT_IntervalTreeNode* gt_interval_tree_find_first_overlapping(GT_IntervalTree *it,
                                                        unsigned long low,
                                                        unsigned long high)
 {
   assert(it);
   if (!it->root)
     return NULL;
-  return interval_tree_search_internal(it->root, low, high);
+  return gt_interval_tree_search_internal(it->root, low, high);
 }
 
-static int interval_tree_traverse_internal(IntervalTreeNode *node,
-                                           IntervalTreeIteratorFunc func,
+static int gt_interval_tree_traverse_internal(GT_IntervalTreeNode *node,
+                                           GT_IntervalTreeIteratorFunc func,
                                            void *data)
 {
   int had_err = 0;
   if (!node) return 0;
   if (!had_err)
-    had_err = interval_tree_traverse_internal(node->left, func, data);
+    had_err = gt_interval_tree_traverse_internal(node->left, func, data);
   if (!had_err)
-    had_err = interval_tree_traverse_internal(node->right, func, data);
+    had_err = gt_interval_tree_traverse_internal(node->right, func, data);
   if (!had_err)
     had_err = func(node, data);
   return had_err;
 }
 
-int interval_tree_traverse(IntervalTree *it, IntervalTreeIteratorFunc func,
+int gt_interval_tree_traverse(GT_IntervalTree *it, GT_IntervalTreeIteratorFunc func,
                            void *data)
 {
   if (!it->root)
     return 0;
-  return interval_tree_traverse_internal(it->root, func, data);
+  return gt_interval_tree_traverse_internal(it->root, func, data);
 }
 
-static void interval_tree_find_all_internal(IntervalTreeNode *node,
+static void gt_interval_tree_find_all_internal(GT_IntervalTreeNode *node,
                                             unsigned long low,
                                             unsigned long high, GT_Array *a)
 {
-  IntervalTreeNode* x;
+  GT_IntervalTreeNode* x;
   if (!node) return;
   x = node;
   if (low <= x->high && x->low <= high)
     gt_array_add(a, x->data);
   /* recursively search left and right subtrees */
   if (x->left && low <= x->left->max)
-    interval_tree_find_all_internal(x->left, low, high, a);
+    gt_interval_tree_find_all_internal(x->left, low, high, a);
   if (x->right && low <= x->right->max)
-    interval_tree_find_all_internal(x->right, low, high, a);
+    gt_interval_tree_find_all_internal(x->right, low, high, a);
 }
 
-void interval_tree_find_all_overlapping(IntervalTree *it, unsigned long start,
+void gt_interval_tree_find_all_overlapping(GT_IntervalTree *it, unsigned long start,
                                         unsigned long end, GT_Array* a)
 {
   assert(it && a && start <= end);
   if (!it->root) return;
-  interval_tree_find_all_internal(it->root, start, end, a);
+  gt_interval_tree_find_all_internal(it->root, start, end, a);
 }
 
-static void interval_tree_left_rotate(IntervalTreeNode **root,
-                                      IntervalTreeNode *x)
+static void gt_interval_tree_left_rotate(GT_IntervalTreeNode **root,
+                                      GT_IntervalTreeNode *x)
 {
-  IntervalTreeNode *y;
+  GT_IntervalTreeNode *y;
   y = x->right;
   x->right = y->left;
   if (y->left)
@@ -194,10 +194,10 @@ static void interval_tree_left_rotate(IntervalTreeNode **root,
     y->max = y->right->max;
 }
 
-static void interval_tree_right_rotate(IntervalTreeNode **root,
-                                       IntervalTreeNode *y)
+static void gt_interval_tree_right_rotate(GT_IntervalTreeNode **root,
+                                       GT_IntervalTreeNode *y)
 {
-  IntervalTreeNode *x;
+  GT_IntervalTreeNode *x;
   x = y->left;
   y->left = x->right;
   if (x->right)
@@ -227,9 +227,9 @@ static void interval_tree_right_rotate(IntervalTreeNode **root,
 }
 
 /* this is the insert routine from Cormen et al, p. 280*/
-static void tree_insert(IntervalTreeNode **root, IntervalTreeNode *z)
+static void tree_insert(GT_IntervalTreeNode **root, GT_IntervalTreeNode *z)
 {
-  IntervalTreeNode *x, *y;
+  GT_IntervalTreeNode *x, *y;
   y = NULL;
   x = *root;
   z->max = z->high;
@@ -257,10 +257,10 @@ static void tree_insert(IntervalTreeNode **root, IntervalTreeNode *z)
 }
 
 /* this is the fixup routine from Cormen et al, p. 281*/
-static void interval_tree_insert_internal(IntervalTreeNode **root,
-                                          IntervalTreeNode *z)
+static void gt_interval_tree_insert_internal(GT_IntervalTreeNode **root,
+                                          GT_IntervalTreeNode *z)
 {
-  IntervalTreeNode* y;
+  GT_IntervalTreeNode* y;
   tree_insert(root, z);
   z->color = RED;
   while (z != *root && z->parent->color == RED)
@@ -280,11 +280,11 @@ static void interval_tree_insert_internal(IntervalTreeNode **root,
         if (z == z->parent->right)
         {
           z = z->parent;
-          interval_tree_left_rotate(root, z);
+          gt_interval_tree_left_rotate(root, z);
         }
         z->parent->color = BLACK;
         z->parent->parent->color = RED;
-        interval_tree_right_rotate(root, z->parent->parent);
+        gt_interval_tree_right_rotate(root, z->parent->parent);
       }
     }
     else
@@ -302,31 +302,31 @@ static void interval_tree_insert_internal(IntervalTreeNode **root,
         if (z == z->parent->left)
         {
           z = z->parent;
-          interval_tree_right_rotate(root, z);
+          gt_interval_tree_right_rotate(root, z);
         }
         z->parent->color = BLACK;
         z->parent->parent->color = RED;
-        interval_tree_left_rotate(root, z->parent->parent);
+        gt_interval_tree_left_rotate(root, z->parent->parent);
       }
     }
   }
   (*root)->color = BLACK;
 }
 
-void interval_tree_insert(IntervalTree *it, IntervalTreeNode *n)
+void gt_interval_tree_insert(GT_IntervalTree *it, GT_IntervalTreeNode *n)
 {
   assert(it && n);
   if (!it->root)
   {
     it->root = n;
-  } else interval_tree_insert_internal(&(it->root), n);
+  } else gt_interval_tree_insert_internal(&(it->root), n);
   it->size++;
 }
 
-void interval_tree_delete(IntervalTree *it)
+void gt_interval_tree_delete(GT_IntervalTree *it)
 {
   if (!it) return;
-  interval_tree_node_rec_delete(it, it->root);
+  gt_interval_tree_node_rec_delete(it, it->root);
   gt_free(it);
 }
 
@@ -347,10 +347,10 @@ static int gt_range_ptr_compare(const void *r1p, const void *r2p)
   return ret;
 }
 
-int interval_tree_unit_test(GT_UNUSED GT_Error *err)
+int gt_interval_tree_unit_test(GT_UNUSED GT_Error *err)
 {
-  IntervalTree *it = NULL;
-  IntervalTreeNode *res = NULL;
+  GT_IntervalTree *it = NULL;
+  GT_IntervalTreeNode *res = NULL;
   int had_err = 0, i = 0;
   int num_testranges = 3000;
   int num_samples = 300000;
@@ -376,19 +376,19 @@ int interval_tree_unit_test(GT_UNUSED GT_Error *err)
     gt_array_add(arr, rng);
   }
 
-  it = interval_tree_new(gt_free_func);
+  it = gt_interval_tree_new(gt_free_func);
 
   /* insert ranges */
   for (i = 0; i < num_testranges && !had_err; i++)
   {
-    IntervalTreeNode *new_node;
+    GT_IntervalTreeNode *new_node;
     GT_Range *rng;
     rng = *(GT_Range**) gt_array_get(arr, i);
-    new_node = interval_tree_node_new(rng, rng->start, rng->end);
-    interval_tree_insert(it, new_node);
+    new_node = gt_interval_tree_node_new(rng, rng->start, rng->end);
+    gt_interval_tree_insert(it, new_node);
   }
 
-  ensure(had_err, interval_tree_size(it) == num_testranges);
+  ensure(had_err, gt_interval_tree_size(it) == num_testranges);
 
   /* perform test queries */
   for (i = 0; i < num_samples && !had_err; i++)
@@ -396,11 +396,11 @@ int interval_tree_unit_test(GT_UNUSED GT_Error *err)
     unsigned long start = rand_max(gt_range_max_basepos);
     qrange.start = start;
     qrange.end = start + rand_max(width);
-    res = interval_tree_find_first_overlapping(it, qrange.start, qrange.end);
+    res = gt_interval_tree_find_first_overlapping(it, qrange.start, qrange.end);
     if (res)
     {
       /* we have a hit, check if really overlapping */
-      res_rng = (GT_Range*) interval_tree_node_get_data(res);
+      res_rng = (GT_Range*) gt_interval_tree_node_get_data(res);
       ensure(had_err, gt_range_overlap(qrange, *res_rng));
     } else {
       /* no hit, check whether there really is no overlapping
@@ -428,7 +428,7 @@ int interval_tree_unit_test(GT_UNUSED GT_Error *err)
     qrange.start = start;
     qrange.end = start + rand_max(query_width);
     GT_Array *res = gt_array_new(sizeof (GT_Range*));
-    interval_tree_find_all_overlapping(it, qrange.start, qrange.end, res);
+    gt_interval_tree_find_all_overlapping(it, qrange.start, qrange.end, res);
     if (res)
     {
       /* generate reference overlapping interval list by linear search */
@@ -454,6 +454,6 @@ int interval_tree_unit_test(GT_UNUSED GT_Error *err)
     gt_array_delete(res);
   }
   gt_array_delete(arr);
-  interval_tree_delete(it);
+  gt_interval_tree_delete(it);
   return had_err;
 }

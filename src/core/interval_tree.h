@@ -26,33 +26,34 @@
    Cormen et al., Introduction to Algorithms, 2nd edition, MIT Press,
    Cambridge, MA, USA, 2001 */
 
-typedef struct IntervalTree IntervalTree;
-typedef struct IntervalTreeNode IntervalTreeNode;
+typedef struct GT_IntervalTree GT_IntervalTree;
+typedef struct GT_IntervalTreeNode GT_IntervalTreeNode;
 
-typedef int (*IntervalTreeIteratorFunc)(IntervalTreeNode*, void*);
+typedef int (*GT_IntervalTreeIteratorFunc)(GT_IntervalTreeNode*, void*);
 
 /* transfers ownership of <data> to interval tree
-   if IntervalTreeDataFreeFunc is given */
-IntervalTreeNode* interval_tree_node_new(void *data,
-                                         unsigned long low,
-                                         unsigned long high);
-void*             interval_tree_node_get_data(IntervalTreeNode* n);
+   if GT_IntervalTreeDataFreeFunc is given */
+GT_IntervalTreeNode* gt_interval_tree_node_new(void *data,
+                                               unsigned long low,
+                                               unsigned long high);
+void*                gt_interval_tree_node_get_data(GT_IntervalTreeNode* n);
 
-IntervalTree*     interval_tree_new(GT_FreeFunc);
-unsigned long     interval_tree_size(IntervalTree*);
-IntervalTreeNode* interval_tree_find_first_overlapping(IntervalTree*,
-                                                       unsigned long start,
-                                                       unsigned long end);
-void              interval_tree_insert(IntervalTree*, IntervalTreeNode*);
+GT_IntervalTree*     gt_interval_tree_new(GT_FreeFunc);
+unsigned long        gt_interval_tree_size(GT_IntervalTree*);
+GT_IntervalTreeNode* gt_interval_tree_find_first_overlapping(GT_IntervalTree*,
+                                                            unsigned long start,
+                                                            unsigned long end);
+void                 gt_interval_tree_insert(GT_IntervalTree*,
+                                             GT_IntervalTreeNode*);
 /* collects data pointers of all overlapping nodes in array */
-void              interval_tree_find_all_overlapping(IntervalTree*,
-                                                     unsigned long start,
-                                                     unsigned long end,
-                                                     GT_Array*);
-int               interval_tree_traverse(IntervalTree *it,
-                                         IntervalTreeIteratorFunc func,
-                                         void *data);
-void              interval_tree_delete(IntervalTree*);
-int               interval_tree_unit_test(GT_Error*);
+void              gt_interval_tree_find_all_overlapping(GT_IntervalTree*,
+                                                        unsigned long start,
+                                                        unsigned long end,
+                                                        GT_Array*);
+int               gt_interval_tree_traverse(GT_IntervalTree *it,
+                                            GT_IntervalTreeIteratorFunc func,
+                                            void *data);
+void              gt_interval_tree_delete(GT_IntervalTree*);
+int               gt_interval_tree_unit_test(GT_Error*);
 
 #endif
