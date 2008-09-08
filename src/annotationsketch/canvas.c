@@ -273,7 +273,7 @@ void canvas_delete(Canvas *c)
   ma_free(c);
 }
 
-void* canvas_cast(const CanvasClass *cc,
+void* canvas_cast(UNUSED const CanvasClass *cc,
                   Canvas *c)
 {
   assert(cc && c && c->c_class == cc);

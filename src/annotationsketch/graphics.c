@@ -38,7 +38,7 @@ void graphics_delete(Graphics *g)
   ma_free(g);
 }
 
-void* graphics_cast(const GraphicsClass *gc,
+void* graphics_cast(UNUSED const GraphicsClass *gc,
                     Graphics *g)
 {
   assert(gc && g && g->c_class == gc);
