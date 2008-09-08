@@ -596,7 +596,8 @@ SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${wildcard ${CURDIR}/src/libgtltr/*.c}\
-                                ${SKTOOLS}}}}
+                                ${SKTOOLS}}}}\
+     obj/redblack.splint
 
 scgt:
 	src_check src/match/*
@@ -616,9 +617,14 @@ obj/%.splint: ${CURDIR}/src/tools/%.c
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
-obj/%.splint: ${CURDIR}/src/libgtltr/%.c
+obj/%.splint: ${CURDIR}/src/ltr/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.splint: ${CURDIR}/src/extended/%.c
+	@echo "splint $<"
+	@splint -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.prepro: ${CURDIR}/src/match/%.c
