@@ -64,7 +64,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
 
   /* Speicherreservierung fuer die Path-Matrix - Groesse entsprechend der
      CombinedScore-Matrix */
-  array2dim_calloc(path_matrix, 7, contig_len);
+  gt_array2dim_calloc(path_matrix, 7, contig_len);
 
   gt_error_check(err);
 
@@ -158,7 +158,7 @@ int mg_computepath(CombinedScoreMatrixEntry **combinedscore_matrix,
                                        hit_information,
                                        parsestruct_ptr, err);
 
-  array2dim_delete(path_matrix);
+  gt_array2dim_delete(path_matrix);
 
   return had_err;
 }

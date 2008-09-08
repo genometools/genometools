@@ -79,7 +79,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   contig_len = gt_str_length(MATRIXSTRUCT(query_dna));
 
   /* Speicherplatzreservierung fuer die Combined-Score Matrix */
-  array2dim_calloc(combinedscore_matrix, 7, contig_len);
+  gt_array2dim_calloc(combinedscore_matrix, 7, contig_len);
 
   /* Erstellen der GT_Arrays fuer die Hit-Nummer fuer jeden Matrix-Eintrag
      Ueber die Hit-Nummer erfolgt die Zuordnung zu den entsprechenden
@@ -304,7 +304,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     }
   }
 
-  array2dim_delete(combinedscore_matrix);
+  gt_array2dim_delete(combinedscore_matrix);
 
   gt_strarray_delete(hit_information.hit_gi);
   gt_strarray_delete(hit_information.hit_def);

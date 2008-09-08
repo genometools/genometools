@@ -61,7 +61,7 @@ int gt_multilcp(int argc, const char **argv, GT_Error *err)
   }
   multilcptab = multilcp_compute(seq1, len1, seq2, len2);
   multilcp_show(multilcptab, len1, len2);
-  array2dim_delete(multilcptab);
+  gt_array2dim_delete(multilcptab);
 
   return 0;
 }

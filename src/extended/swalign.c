@@ -97,7 +97,7 @@ static Alignment* smith_waterman_align(const char *u_orig, const char *v_orig,
   Coordinate alignment_start, alignment_end = { UNDEF_ULONG, UNDEF_ULONG };
   DPentry **dptable;
   Alignment *a = NULL;
-  array2dim_calloc(dptable, u_len+1, v_len+1);
+  gt_array2dim_calloc(dptable, u_len+1, v_len+1);
   fillDPtable(dptable, u_enc, u_len, v_enc, v_len, scores, deletion_score,
               insertion_score, &alignment_end);
   assert(alignment_end.x != UNDEF_ULONG);
@@ -118,7 +118,7 @@ static Alignment* smith_waterman_align(const char *u_orig, const char *v_orig,
                        v_orig + alignment_start.y,
                        alignment_end.y - alignment_start.y + 1);
   }
-  array2dim_delete(dptable);
+  gt_array2dim_delete(dptable);
   return a;
 }
 

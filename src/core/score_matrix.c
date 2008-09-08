@@ -38,7 +38,7 @@ ScoreMatrix* score_matrix_new(GT_Alpha *alpha)
   sm = gt_malloc(sizeof (ScoreMatrix));
   sm->alpha = gt_alpha_ref(alpha);
   sm->dimension = gt_alpha_size(alpha);
-  array2dim_calloc(sm->scores, sm->dimension, sm->dimension);
+  gt_array2dim_calloc(sm->scores, sm->dimension, sm->dimension);
   return sm;
 }
 
@@ -265,6 +265,6 @@ void score_matrix_delete(ScoreMatrix *sm)
 {
   if (!sm) return;
   gt_alpha_delete(sm->alpha);
-  array2dim_delete(sm->scores);
+  gt_array2dim_delete(sm->scores);
   gt_free(sm);
 }

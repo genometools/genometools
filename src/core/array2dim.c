@@ -19,14 +19,14 @@
 #include "core/unused_api.h"
 
 /* example usage of the array2dim macros */
-int array2dim_example(GT_UNUSED GT_Error *err)
+int gt_array2dim_example(GT_UNUSED GT_Error *err)
 {
   double **a2dim;
   int i, j;
   gt_error_check(err);
 
   /* create a 10 x 20 double array */
-  array2dim_malloc(a2dim, 10, 20);
+  gt_array2dim_malloc(a2dim, 10, 20);
 
   /* ... (use array a2dim in conventional way via a2dim[row][column]) */
   for (i = 1; i < 10; i++) {
@@ -35,7 +35,7 @@ int array2dim_example(GT_UNUSED GT_Error *err)
   }
 
   /* free */
-  array2dim_delete(a2dim);
+  gt_array2dim_delete(a2dim);
 
   return 0;
 }

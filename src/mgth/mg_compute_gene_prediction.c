@@ -129,7 +129,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
     /* Matrix-Score der aktuellen Zeile entspricht dem Max-Wert */
     if (path_matrix[row_index][contig_len - 1].score == max_lastcolumn)
     {
-      array2dim_calloc(regionmatrix, 7, 1);
+      gt_array2dim_calloc(regionmatrix, 7, 1);
       /* frame-counter zaehlt die Auftritts-haeufigkeiten der einzelnen
          Frames im opt. Pfad */
       frame_counter = gt_calloc(7, sizeof (unsigned long));
@@ -197,7 +197,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
           gt_array_delete(regionmatrix[row_idx][0].to);
         }
       }
-      array2dim_delete(regionmatrix);
+      gt_array2dim_delete(regionmatrix);
       gt_free(frame_counter);
     }
   }

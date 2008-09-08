@@ -42,7 +42,8 @@ MarkovChain* markov_chain_new(const char *states)
   mc = gt_malloc(sizeof *mc);
   mc->alpha = gt_alpha_new();
   mc->num_of_states = strlen(states);
-  array2dim_malloc(mc->transition_prob, mc->num_of_states, mc->num_of_states);
+  gt_array2dim_malloc(mc->transition_prob, mc->num_of_states,
+                      mc->num_of_states);
   /* set alphabet */
   characters[1] = '\0';
   for (i = 0 ; i < mc->num_of_states; i++) {
@@ -61,7 +62,7 @@ MarkovChain* markov_chain_new(const char *states)
 void markov_chain_delete(MarkovChain *mc)
 {
   if (!mc) return;
-  array2dim_delete(mc->transition_prob);
+  gt_array2dim_delete(mc->transition_prob);
   gt_alpha_delete(mc->alpha);
   gt_free(mc);
 }
