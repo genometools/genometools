@@ -20,50 +20,50 @@
 #include "core/score_function.h"
 #include "core/xansi.h"
 
-struct ScoreFunction {
+struct GT_ScoreFunction {
   ScoreMatrix *sm;
   int deletion_score,
       insertion_score;
 };
 
-ScoreFunction* score_function_new(ScoreMatrix *sm, int deletion_score,
+GT_ScoreFunction* gt_score_function_new(ScoreMatrix *sm, int deletion_score,
                                  int insertion_score)
 {
-  ScoreFunction *sf;
+  GT_ScoreFunction *sf;
   assert(sm);
-  sf = gt_malloc(sizeof (ScoreFunction));
+  sf = gt_malloc(sizeof (GT_ScoreFunction));
   sf->sm = sm;
   sf->deletion_score = deletion_score;
   sf->insertion_score = insertion_score;
   return sf;
 }
 
-int score_function_get_score(const ScoreFunction *sf,
+int gt_score_function_get_score(const GT_ScoreFunction *sf,
                             unsigned int idx1, unsigned int idx2)
 {
   assert(sf);
   return score_matrix_get_score(sf->sm, idx1, idx2);
 }
 
-const int** score_function_get_scores(const ScoreFunction *sf)
+const int** gt_score_function_get_scores(const GT_ScoreFunction *sf)
 {
   assert(sf);
   return score_matrix_get_scores(sf->sm);
 }
 
-int score_function_get_deletion_score(const ScoreFunction *sf)
+int gt_score_function_get_deletion_score(const GT_ScoreFunction *sf)
 {
   assert(sf);
   return sf->deletion_score;
 }
 
-int score_function_get_insertion_score(const ScoreFunction *sf)
+int gt_score_function_get_insertion_score(const GT_ScoreFunction *sf)
 {
   assert(sf);
   return sf->insertion_score;
 }
 
-void score_function_delete(ScoreFunction *sf)
+void gt_score_function_delete(GT_ScoreFunction *sf)
 {
   if (!sf) return;
   score_matrix_delete(sf->sm);

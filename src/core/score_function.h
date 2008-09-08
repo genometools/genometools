@@ -20,15 +20,15 @@
 
 #include "core/score_matrix.h"
 
-typedef struct ScoreFunction ScoreFunction;
+typedef struct GT_ScoreFunction GT_ScoreFunction;
 
-ScoreFunction* score_function_new(ScoreMatrix*, /* takes ownership  */
+GT_ScoreFunction* gt_score_function_new(ScoreMatrix*, /* takes ownership  */
                                  int deletion_score, int insertion_score);
-int            score_function_get_score(const ScoreFunction*,
+int            gt_score_function_get_score(const GT_ScoreFunction*,
                                        unsigned int, unsigned int);
-const int**    score_function_get_scores(const ScoreFunction*);
-int            score_function_get_deletion_score(const ScoreFunction*);
-int            score_function_get_insertion_score(const ScoreFunction*);
-void           score_function_delete(ScoreFunction*);
+const int**    gt_score_function_get_scores(const GT_ScoreFunction*);
+int            gt_score_function_get_deletion_score(const GT_ScoreFunction*);
+int            gt_score_function_get_insertion_score(const GT_ScoreFunction*);
+void           gt_score_function_delete(GT_ScoreFunction*);
 
 #endif

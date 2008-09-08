@@ -66,7 +66,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
 {
   SWAlignArguments *arguments = tool_arguments;
   GT_Bioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
-  ScoreFunction *score_function = NULL;
+  GT_ScoreFunction *score_function = NULL;
   ScoreMatrix *scorematrix;
   unsigned long i, j;
   int had_err = 0;
@@ -78,7 +78,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   /* XXX: make this more flexible */
   scorematrix  = score_matrix_new_read_protein(argv[parsed_args], err);
   if (scorematrix) {
-    score_function = score_function_new(scorematrix, arguments->indelscore,
+    score_function = gt_score_function_new(scorematrix, arguments->indelscore,
                                                    arguments->indelscore);
     gt_bioseq_1 = gt_bioseq_new(argv[parsed_args+1], err);
     if (!gt_bioseq_1)
@@ -108,7 +108,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   /* free */
   gt_bioseq_delete(gt_bioseq_2);
   gt_bioseq_delete(gt_bioseq_1);
-  score_function_delete(score_function);
+  gt_score_function_delete(score_function);
 
   return had_err;
 }
