@@ -461,7 +461,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       {
         fmindex->longestsuffixpos = longest.valueseqpos;
       }
-      fa_xfclose(outbwt);
+      gt_xfclose(outbwt);
       wraptEmissionmergedesa(&emmesa);
     }
   }

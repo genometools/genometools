@@ -35,7 +35,7 @@
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,suffix);
-  fp = fa_fopen(gt_str_get(tmpfilename),mode,err);
+  fp = gt_fopen(gt_str_get(tmpfilename),mode,err);
   gt_str_delete(tmpfilename);
   return fp;
 }

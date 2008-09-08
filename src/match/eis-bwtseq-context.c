@@ -72,7 +72,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
   newFactory->constructionComplete = false;
   newFactory->mapTableDBSPath = gt_str_new();
   fp = newFactory->mapTableDiskBackingStore
-    = fa_xtmpfp_generic(newFactory->mapTableDBSPath,
+    = gt_xtmpfp_generic(newFactory->mapTableDBSPath,
                         TMPFP_AUTOREMOVE | TMPFP_OPENBINARY);
   {
     off_t backingStoreSize = numMapEntries(seqLen, mapIntervalLog2), i;
@@ -105,7 +105,7 @@ newBWTSeqContextRetrieverFactory(Seqpos seqLen, short mapIntervalLog2)
 static void
 destructBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 {
-  fa_xfclose(factory->mapTableDiskBackingStore);
+  gt_xfclose(factory->mapTableDiskBackingStore);
   gt_str_delete(factory->mapTableDBSPath);
 }
 
@@ -278,7 +278,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         /* write header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = fa_fopen(gt_str_get(mapName), "w+b", NULL)))
+        if (!(mapFile = gt_fopen(gt_str_get(mapName), "w+b", NULL)))
           break;
         bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
         bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
@@ -298,7 +298,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         /* read header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = fa_fopen(gt_str_get(mapName), "rb", NULL)))
+        if (!(mapFile = gt_fopen(gt_str_get(mapName), "rb", NULL)))
           break;
         if (fread(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
           break;
@@ -312,12 +312,12 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         }
       }
     }
-    mapMap = fa_mmap_generic_fd(fileno(mapFile), mapSize, 0, createMapFile,
+    mapMap = gt_mmap_generic_fd(fileno(mapFile), mapSize, 0, createMapFile,
                                 false);
     newBWTSeqCR->revMap = (newBWTSeqCR->revMapMMap = mapMap) + headerSize;
   } while (0);
   if (mapName) gt_str_delete(mapName);
-  if (mapFile) fa_xfclose(mapFile);
+  if (mapFile) gt_xfclose(mapFile);
   return mapMap != NULL;
 }
 
@@ -367,7 +367,7 @@ extern void
 deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 {
   assert(bwtSeqCR);
-  fa_xmunmap(bwtSeqCR->revMapMMap);
+  gt_xmunmap(bwtSeqCR->revMapMMap);
   gt_free(bwtSeqCR);
 }
 

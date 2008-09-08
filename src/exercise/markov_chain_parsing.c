@@ -171,8 +171,8 @@ MarkovChain* markov_chain_parse(const char *filename, GT_Error *err)
   MarkovChain *mc;
   FILE *fp;
   gt_error_check(err);
-  fp = fa_xfopen(filename, "r");
+  fp = gt_xfopen(filename, "r");
   mc = parse_markov_chain_file(fp, filename, err);
-  fa_xfclose(fp);
+  gt_xfclose(fp);
   return mc;
 }

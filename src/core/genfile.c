@@ -96,21 +96,21 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
   if (path) {
     switch (genfilemode) {
       case GFM_UNCOMPRESSED:
-        genfile->fileptr.file = fa_fopen(path, mode, err);
+        genfile->fileptr.file = gt_fopen(path, mode, err);
         if (!genfile->fileptr.file) {
           genfile_delete(genfile);
           return NULL;
         }
         break;
       case GFM_GZIP:
-        genfile->fileptr.gzfile = fa_gzopen(path, mode, err);
+        genfile->fileptr.gzfile = gt_gzopen(path, mode, err);
         if (!genfile->fileptr.gzfile) {
           genfile_delete(genfile);
           return NULL;
         }
         break;
       case GFM_BZIP2:
-        genfile->fileptr.bzfile = fa_bzopen(path, mode, err);
+        genfile->fileptr.bzfile = gt_bzopen(path, mode, err);
         if (!genfile->fileptr.bzfile) {
           genfile_delete(genfile);
           return NULL;
@@ -139,13 +139,13 @@ GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
   if (path) {
     switch (genfilemode) {
       case GFM_UNCOMPRESSED:
-        genfile->fileptr.file = fa_xfopen(path, mode);
+        genfile->fileptr.file = gt_xfopen(path, mode);
         break;
       case GFM_GZIP:
-        genfile->fileptr.gzfile = fa_xgzopen(path, mode);
+        genfile->fileptr.gzfile = gt_xgzopen(path, mode);
         break;
       case GFM_BZIP2:
-        genfile->fileptr.bzfile = fa_xbzopen(path, mode);
+        genfile->fileptr.bzfile = gt_xbzopen(path, mode);
         genfile->orig_path = gt_cstr_dup(path);
         genfile->orig_mode = gt_cstr_dup(path);
         break;
@@ -380,13 +380,13 @@ void genfile_close(GenFile *genfile)
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
         if (!genfile->is_stdin)
-          fa_fclose(genfile->fileptr.file);
+          gt_fclose(genfile->fileptr.file);
       break;
     case GFM_GZIP:
-        fa_gzclose(genfile->fileptr.gzfile);
+        gt_gzclose(genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
-        fa_bzclose(genfile->fileptr.bzfile);
+        gt_bzclose(genfile->fileptr.bzfile);
       break;
     default: assert(0);
   }

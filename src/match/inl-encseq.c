@@ -50,7 +50,7 @@ int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error *er
       haserr = true;
     }
   }
-  fa_xfclose(fp);
+  gt_xfclose(fp);
   return haserr ? -1 : 0;
 }
 
@@ -68,7 +68,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   }
   if (encseq->mappedfile)
   {
-    fa_xmunmap((void *) encseq->plainseq);
+    gt_xmunmap((void *) encseq->plainseq);
   }
   FREESPACE(*encseqptr);
 }
@@ -179,7 +179,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,TISTABFILESUFFIX);
-  encseq->plainseq = fa_mmap_read(gt_str_get(tmpfilename),
+  encseq->plainseq = gt_mmap_read(gt_str_get(tmpfilename),
                                   (size_t *) &encseq->totallength);
   gt_str_delete(tmpfilename);
   encseq->hasownmemory = false;

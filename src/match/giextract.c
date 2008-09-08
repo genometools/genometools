@@ -142,7 +142,7 @@ static Giquery *readginumberfile(bool verbose,
     gt_error_set(err,"empty file \"%s\" not allowed",gt_str_get(ginumberfile));
     return NULL;
   }
-  fp = fa_fopen(gt_str_get(ginumberfile),"r",err);
+  fp = gt_fopen(gt_str_get(ginumberfile),"r",err);
   if (fp == NULL)
   {
     return NULL;
@@ -187,7 +187,7 @@ static Giquery *readginumberfile(bool verbose,
       break;
     }
   }
-  fa_fclose(fp);
+  gt_fclose(fp);
   if (haserr)
   {
     gt_free(giqueries);

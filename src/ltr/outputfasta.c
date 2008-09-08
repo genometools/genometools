@@ -199,7 +199,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   const char *destab = NULL;
   int had_err;
 
-  formatout = fa_xfopen(innerregion
+  formatout = gt_xfopen(innerregion
                         ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
                         : gt_str_get(lo->str_fastaoutputfilename),
                         "w");
@@ -229,7 +229,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                        showpredictionfastasequence, err);
 
   gt_free(descendtab);
-  fa_xfclose(formatout);
+  gt_xfclose(formatout);
 
   return 0;
 }

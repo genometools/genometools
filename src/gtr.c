@@ -259,7 +259,7 @@ static void enable_logging(const char *debugfp, FILE **logfp)
   else if (!strcmp(debugfp, "stderr"))
     log_set_fp(stderr);
   else {
-    *logfp = fa_xfopen(debugfp, "w");
+    *logfp = gt_xfopen(debugfp, "w");
     log_set_fp(*logfp);
   }
 }
@@ -283,8 +283,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
     return run_tests(gtr, err);
   if (gt_str_length(gtr->testspacepeak)) {
     mem = gt_malloc(1 << 26); /* alloc 64 MB */;
-    map = fa_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
-    fa_xmunmap(map);
+    map = gt_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
+    gt_xmunmap(map);
     gt_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {
@@ -343,7 +343,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
 void gtr_delete(GTR *gtr)
 {
   if (!gtr) return;
-  fa_fclose(gtr->logfp);
+  gt_fclose(gtr->logfp);
   gt_str_delete(gtr->testspacepeak);
   gt_str_delete(gtr->debugfp);
   toolbox_delete(gtr->tools);

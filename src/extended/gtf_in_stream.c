@@ -86,7 +86,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   /* open input file */
   if (filename)
-    fpin = fa_xfopen(filename, "r");
+    fpin = gt_xfopen(filename, "r");
   else
     fpin = stdin;
 
@@ -98,7 +98,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   /* close input file, if necessary */
   if (filename)
-    fa_xfclose(fpin);
+    gt_xfclose(fpin);
 
   /* free */
   gtf_parser_delete(gtf_parser);

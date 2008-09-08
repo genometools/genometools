@@ -52,7 +52,7 @@ static int initNameandFILE(NameandFILE *nf,
   gt_error_check(err);
   nf->outfilename = gt_str_clone(outindex);
   gt_str_append_cstr(nf->outfilename,suffix);
-  nf->fp = fa_fopen(gt_str_get(nf->outfilename),"wb",err);
+  nf->fp = gt_fopen(gt_str_get(nf->outfilename),"wb",err);
   if (nf->fp == NULL)
   {
     return -1;
@@ -62,7 +62,7 @@ static int initNameandFILE(NameandFILE *nf,
 
 static void freeNameandFILE(NameandFILE *nf)
 {
-  fa_xfclose(nf->fp);
+  gt_xfclose(nf->fp);
   gt_str_delete(nf->outfilename);
 }
 

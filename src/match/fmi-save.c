@@ -52,7 +52,7 @@ static int writefmascii (const GT_Str *indexname,
   fprintf (fmafp, "lengthofspecialsuffix=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.lengthofspecialsuffix));
   fprintf (fmafp, "suffixlength=%u\n", fm->suffixlength);
-  fa_xfclose(fmafp);
+  gt_xfclose(fmafp);
   return 0;
 }
 
@@ -72,7 +72,7 @@ static int writefmdata (const GT_Str *indexname,
   {
     return -2;
   }
-  fa_xfclose(fp);
+  gt_xfclose(fp);
   return 0;
 }
 

@@ -71,7 +71,7 @@ int makeindexfilecopy(const GT_Str *destindex,
       }
     }
   }
-  fa_xfclose(fpdest);
-  fa_xfclose(fpsource);
+  gt_xfclose(fpdest);
+  gt_xfclose(fpsource);
   return haserr ? -1 : 0;
 }

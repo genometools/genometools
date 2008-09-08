@@ -768,7 +768,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                *(FILE**) option->value = fa_xfopen(argv[argnum], "w");
+                *(FILE**) option->value = gt_xfopen(argv[argnum], "w");
                 option_parsed = true;
               }
               break;

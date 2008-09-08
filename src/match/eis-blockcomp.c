@@ -1708,7 +1708,7 @@ openOnDiskData(const GT_Str *projectName, struct onDiskBlockCompIdx *idx,
 {
   GT_Str *bdxName = gt_str_clone(projectName);
   gt_str_append_cstr(bdxName, ".bdx");
-  idx->idxFP = fa_fopen(gt_str_get(bdxName), mode, NULL);
+  idx->idxFP = gt_fopen(gt_str_get(bdxName), mode, NULL);
   gt_str_delete(bdxName);
   if (!idx->idxFP)
     return 0;
@@ -1735,9 +1735,9 @@ static void
 destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx)
 {
   if (idx->idxMMap)
-    fa_xmunmap(idx->idxMMap);
+    gt_xmunmap(idx->idxMMap);
   if (idx->idxFP)
-    fa_xfclose(idx->idxFP);
+    gt_xfclose(idx->idxFP);
 }
 
 static inline void
@@ -2333,7 +2333,7 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
 {
   size_t len = idxData->rangeEncPos - idxData->cwDataPos;
   assert(idxData && idxData->idxFP && idxData->idxMMap == NULL);
-  idxData->idxMMap = fa_mmap_generic_fd(fileno(idxData->idxFP), len,
+  idxData->idxMMap = gt_mmap_generic_fd(fileno(idxData->idxFP), len,
                                         idxData->cwDataPos, false, false);
   return idxData->idxMMap != NULL;
 }

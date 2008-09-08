@@ -28,37 +28,37 @@
 /* the file allocator module */
 
 /* functions for normal file pointer */
-#define fa_fopen(path, mode, err)\
-        fa_fopen_func(path, mode, __FILE__, __LINE__, err)
-FILE*   fa_fopen_func(const char *path, const char *mode, const char*, int,
+#define gt_fopen(path, mode, err)\
+        gt_fopen_func(path, mode, __FILE__, __LINE__, err)
+FILE*   gt_fopen_func(const char *path, const char *mode, const char*, int,
                       GT_Error*);
-#define fa_xfopen(path, mode)\
-        fa_xfopen_func(path, mode, __FILE__, __LINE__)
-FILE*   fa_xfopen_func(const char *path, const char *mode, const char*, int);
-void    fa_fclose(FILE *stream);
-void    fa_xfclose(FILE *stream);
+#define gt_xfopen(path, mode)\
+        gt_xfopen_func(path, mode, __FILE__, __LINE__)
+FILE*   gt_xfopen_func(const char *path, const char *mode, const char*, int);
+void    gt_fclose(FILE *stream);
+void    gt_xfclose(FILE *stream);
 
 /* functions for gzip file pointer */
-#define fa_gzopen(path, mode, err)\
-        fa_gzopen_func(path, mode, __FILE__, __LINE__, err)
-gzFile  fa_gzopen_func(const char *path, const char *mode, const char*, int,
+#define gt_gzopen(path, mode, err)\
+        gt_gzopen_func(path, mode, __FILE__, __LINE__, err)
+gzFile  gt_gzopen_func(const char *path, const char *mode, const char*, int,
                        GT_Error*);
-#define fa_xgzopen(path, mode)\
-        fa_xgzopen_func(path, mode, __FILE__, __LINE__)
-gzFile  fa_xgzopen_func(const char *path, const char *mode, const char*, int);
-void    fa_gzclose(gzFile stream);
-void    fa_xgzclose(gzFile stream);
+#define gt_xgzopen(path, mode)\
+        gt_xgzopen_func(path, mode, __FILE__, __LINE__)
+gzFile  gt_xgzopen_func(const char *path, const char *mode, const char*, int);
+void    gt_gzclose(gzFile stream);
+void    gt_xgzclose(gzFile stream);
 
 /* functions for bzip2 file pointer */
-#define fa_bzopen(path, mode, err)\
-        fa_bzopen_func(path, mode, __FILE__, __LINE__, err)
-BZFILE* fa_bzopen_func(const char *path, const char *mode, const char*, int,
+#define gt_bzopen(path, mode, err)\
+        gt_bzopen_func(path, mode, __FILE__, __LINE__, err)
+BZFILE* gt_bzopen_func(const char *path, const char *mode, const char*, int,
                        GT_Error*);
-#define fa_xbzopen(path, mode)\
-        fa_xbzopen_func(path, mode, __FILE__, __LINE__)
-BZFILE* fa_xbzopen_func(const char *path, const char *mode, const char*, int);
-void    fa_bzclose(BZFILE *stream);
-void    fa_xbzclose(BZFILE *stream);
+#define gt_xbzopen(path, mode)\
+        gt_xbzopen_func(path, mode, __FILE__, __LINE__)
+BZFILE* gt_xbzopen_func(const char *path, const char *mode, const char*, int);
+void    gt_bzclose(BZFILE *stream);
+void    gt_xbzclose(BZFILE *stream);
 
 /* create a tmp file optionally using template analogous to mkstemp(3) */
 enum tmpfp_flags
@@ -73,38 +73,38 @@ enum tmpfp_flags
   TMPFP_OPENBINARY    = 1 << 2, /**< use stdio mode "w+b", "w+" otherwise */
   TMPFP_DEFAULT_FLAGS = 0,
 };
-#define fa_xtmpfp_generic(template, flags) \
-        fa_xtmpfp_generic_func(template, TMPFP_DEFAULT_FLAGS, \
+#define gt_xtmpfp_generic(template, flags) \
+        gt_xtmpfp_generic_func(template, TMPFP_DEFAULT_FLAGS, \
                                __FILE__, __LINE__)
-FILE*   fa_xtmpfp_generic_func(GT_Str *template, int flags, const char*, int);
-#define fa_xtmpfp(template)\
-        fa_xtmpfp_generic(template, TMPFP_DEFAULT_FLAGS)
+FILE*   gt_xtmpfp_generic_func(GT_Str *template, int flags, const char*, int);
+#define gt_xtmpfp(template)\
+        gt_xtmpfp_generic(template, TMPFP_DEFAULT_FLAGS)
 
 /* memory map functions */
-#define fa_mmap_read(path, len)\
-        fa_mmap_read_func(path, len, __FILE__, __LINE__)
-void*   fa_mmap_read_func(const char *path, size_t *len, const char*, int);
-#define fa_mmap_write(path, len)\
-        fa_mmap_write_func(path, len, __FILE__, __LINE__)
-void*   fa_mmap_write_func(const char *path, size_t *len, const char*, int);
-#define fa_xmmap_read(path, len)\
-        fa_xmmap_read_func(path, len, __FILE__, __LINE__)
-void*   fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
-#define fa_xmmap_write(path, len)\
-        fa_xmmap_write_func(path, len, __FILE__, __LINE__)
-void*   fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
-void    fa_xmunmap(void *addr);
-#define fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail) \
-  fa_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail,  \
+#define gt_mmap_read(path, len)\
+        gt_mmap_read_func(path, len, __FILE__, __LINE__)
+void*   gt_mmap_read_func(const char *path, size_t *len, const char*, int);
+#define gt_mmap_write(path, len)\
+        gt_mmap_write_func(path, len, __FILE__, __LINE__)
+void*   gt_mmap_write_func(const char *path, size_t *len, const char*, int);
+#define gt_xmmap_read(path, len)\
+        gt_xmmap_read_func(path, len, __FILE__, __LINE__)
+void*   gt_xmmap_read_func(const char *path, size_t *len, const char*, int);
+#define gt_xmmap_write(path, len)\
+        gt_xmmap_write_func(path, len, __FILE__, __LINE__)
+void*   gt_xmmap_write_func(const char *path, size_t *len, const char*, int);
+void    gt_xmunmap(void *addr);
+#define gt_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail) \
+  gt_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail,  \
                           __FILE__, __LINE__)
-void*   fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+void*   gt_mmap_generic_fd_func(int fd, size_t len, size_t offset,
                                 bool mapwritable, bool hard_fail,
                                 const char *filename, int line);
 /* check if all allocated file pointer have been released, prints to stderr */
-int     fa_check_fptr_leak(void);
+int     gt_fa_check_fptr_leak(void);
 /* check if all allocated memory maps have been freed, prints to stderr */
-int     fa_check_mmap_leak(void);
-void    fa_show_space_peak(FILE*);
-void    fa_clean(void);
+int     gt_fa_check_mmap_leak(void);
+void    gt_fa_show_space_peak(FILE*);
+void    gt_fa_clean(void);
 
 #endif

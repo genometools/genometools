@@ -50,7 +50,7 @@ static int outal1file(const GT_Str *indexname,const Alphabet *alpha,GT_Error *er
   if (!haserr)
   {
     outputalphabet(al1fp,alpha);
-    fa_xfclose(al1fp);
+    gt_xfclose(al1fp);
   }
   return haserr ? -1 : 0;
 }

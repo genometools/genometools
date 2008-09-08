@@ -97,7 +97,7 @@ void pckbuckettable_free(Pckbuckettable *pckbt)
     gt_free(pckbt->mbtab[0]);
   } else
   {
-    fa_xmunmap(pckbt->mapptr);
+    gt_xmunmap(pckbt->mapptr);
   }
   pckbt->mbtab[0] = NULL;
   gt_free(pckbt->mbtab);
@@ -231,7 +231,7 @@ int pckbucket2file(const GT_Str *indexname,const Pckbuckettable *pckbuckettable,
   xfwrite(&seqposmaxdepth,sizeof (Seqpos),(size_t) 1,fp);
   xfwrite(pckbuckettable->mbtab[0],sizeof (Matchbound),
           (size_t) pckbuckettable->maxnumofvalues,fp);
-  fa_fclose(fp);
+  gt_fclose(fp);
   return 0;
 }
 
@@ -261,7 +261,7 @@ Pckbuckettable *mappckbuckettable(const GT_Str *indexname,
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,PCKBUCKETTABLE);
-  mapptr = fa_mmap_read(gt_str_get(tmpfilename),&numofbytes);
+  mapptr = gt_mmap_read(gt_str_get(tmpfilename),&numofbytes);
   if (mapptr == NULL)
   {
     gt_error_set(err,"could not map datafile %s",gt_str_get(tmpfilename));

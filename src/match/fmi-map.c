@@ -130,7 +130,7 @@ void freefmindex(Fmindex *fmindex)
 {
   if (fmindex->mappedptr != NULL)
   {
-    fa_xmunmap(fmindex->mappedptr);
+    gt_xmunmap(fmindex->mappedptr);
   }
   if (fmindex->bwtformatching != NULL)
   {
@@ -194,7 +194,7 @@ int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
       haserr = true;
     }
   }
-  fa_xfclose(fpin);
+  gt_xfclose(fpin);
   if (!haserr)
   {
     fmindex->bwtformatching = mapbwtencoding(indexname,verboseinfo,err);

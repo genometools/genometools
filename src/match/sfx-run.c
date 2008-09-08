@@ -570,9 +570,9 @@ static int runsuffixerator(bool doesa,
       }
     }
   }
-  fa_fclose(outfileinfo.outfpsuftab);
-  fa_fclose(outfileinfo.outfpbwttab);
-  fa_fclose(outfileinfo.outfpbcktab);
+  gt_fclose(outfileinfo.outfpsuftab);
+  gt_fclose(outfileinfo.outfpbwttab);
+  gt_fclose(outfileinfo.outfpbcktab);
   if (!haserr)
   {
     Seqpos numoflargelcpvalues,

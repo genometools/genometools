@@ -122,7 +122,7 @@ int sspliced_alignment_parse(GT_Array *spliced_alignments, const char *filename,
   gt_error_check(err);
 
   line = gt_str_new();
-  input_file = fa_xfopen(filename, "r");
+  input_file = gt_xfopen(filename, "r");
 
   while (!had_err && gt_str_read_next_line(line, input_file) != EOF) {
     /* parse input line and save result in spliced alignment */
@@ -135,7 +135,7 @@ int sspliced_alignment_parse(GT_Array *spliced_alignments, const char *filename,
     }
   }
 
-  fa_xfclose(input_file);
+  gt_xfclose(input_file);
   gt_str_delete(line);
   return had_err;
 }

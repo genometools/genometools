@@ -238,7 +238,7 @@ static void *genericmaponlytable(const GT_Str *indexname,const char *suffix,
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,suffix);
-  ptr = fa_mmap_read(gt_str_get(tmpfilename),numofbytes);
+  ptr = gt_mmap_read(gt_str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
     gt_error_set(err,"cannot map file \"%s\": %s",gt_str_get(tmpfilename),
@@ -278,7 +278,7 @@ static void *genericmaptable(const GT_Str *indexname,
   }
   if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
   {
-    fa_xmunmap(ptr);
+    gt_xmunmap(ptr);
     return NULL;
   }
   return ptr;
@@ -323,7 +323,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   {
     haserr = true;
   }
-  fa_xfclose(fp);
+  gt_xfclose(fp);
   return haserr;
 }
 
@@ -351,23 +351,23 @@ static bool scanal1file(Suffixarray *suffixarray,const GT_Str *indexname,
 
 void freesuffixarray(Suffixarray *suffixarray)
 {
-  fa_xmunmap((void *) suffixarray->suftab);
+  gt_xmunmap((void *) suffixarray->suftab);
   suffixarray->suftab = NULL;
-  fa_xmunmap((void *) suffixarray->lcptab);
+  gt_xmunmap((void *) suffixarray->lcptab);
   suffixarray->lcptab = NULL;
-  fa_xmunmap((void *) suffixarray->llvtab);
+  gt_xmunmap((void *) suffixarray->llvtab);
   suffixarray->llvtab = NULL;
-  fa_xmunmap((void *) suffixarray->bwttab);
+  gt_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  fa_xmunmap((void *) suffixarray->destab);
+  gt_xmunmap((void *) suffixarray->destab);
   suffixarray->destab = NULL;
-  fa_xfclose(suffixarray->suftabstream.fp);
+  gt_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
-  fa_xfclose(suffixarray->lcptabstream.fp);
+  gt_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
-  fa_xfclose(suffixarray->llvtabstream.fp);
+  gt_xfclose(suffixarray->llvtabstream.fp);
   suffixarray->llvtabstream.fp = NULL;
-  fa_xfclose(suffixarray->bwttabstream.fp);
+  gt_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
   if (suffixarray->alpha != NULL)
   {

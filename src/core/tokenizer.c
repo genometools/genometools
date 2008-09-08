@@ -131,9 +131,9 @@ int tokenizer_unit_test(GT_Error *err)
 
   /* empty file (except comment line) */
   tmpfilename = gt_str_new();
-  tmpfp = fa_xtmpfp(tmpfilename);
+  tmpfp = gt_xtmpfp(tmpfilename);
   fprintf(tmpfp, "# comment line\n");
-  fa_xfclose(tmpfp);
+  gt_xfclose(tmpfp);
   t = tokenizer_new(io_new(gt_str_get(tmpfilename), "r"));
   tokenizer_skip_comment_lines(t);
   ensure(had_err, !tokenizer_has_token(t));
@@ -141,9 +141,9 @@ int tokenizer_unit_test(GT_Error *err)
   xremove(gt_str_get(tmpfilename));
 
   /* larger test */
-  tmpfp = fa_xtmpfp(tmpfilename);
+  tmpfp = gt_xtmpfp(tmpfilename);
   fprintf(tmpfp, " a bb ccc\ndddd -5");
-  fa_xfclose(tmpfp);
+  gt_xfclose(tmpfp);
   t = tokenizer_new(io_new(gt_str_get(tmpfilename), "r"));
 
   token = tokenizer_get_token(t);

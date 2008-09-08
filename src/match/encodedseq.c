@@ -530,7 +530,7 @@ int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error *er
     }
   }
   FREESPACE(encseq->satcharptr);
-  fa_xfclose(fp);
+  gt_xfclose(fp);
   return haserr ? -1 : 0;
 }
 
@@ -654,7 +654,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   }
   if (encseq->mappedptr != NULL)
   {
-    fa_xmunmap(encseq->mappedptr);
+    gt_xmunmap(encseq->mappedptr);
   } else
   {
     FREESPACE(encseq->characterdistribution);
@@ -1870,7 +1870,7 @@ static int readsatfromfile(const GT_Str *indexname,GT_Error *err)
       haserr = true;
     }
   }
-  fa_xfclose(fp);
+  gt_xfclose(fp);
   return haserr ? -1 : cc;
 }
 

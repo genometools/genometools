@@ -415,7 +415,7 @@ int gt_bittab_unit_test(GT_Error *err)
   }
 
   /* test gt_bittab_show */
-  fp = fa_xfopen("/dev/null", "w");
+  fp = gt_xfopen("/dev/null", "w");
   b = gt_bittab_new(80);
   for (i = 0; i < 80; i++) {
     if (i % 2)
@@ -423,7 +423,7 @@ int gt_bittab_unit_test(GT_Error *err)
   }
   gt_bittab_show(b, fp);
   gt_bittab_delete(b);
-  fa_xfclose(fp);
+  gt_xfclose(fp);
 
   /* test gt_bittab_shift_left_equal() */
   b = gt_bittab_new(125);

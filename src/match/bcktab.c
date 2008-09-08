@@ -322,7 +322,7 @@ void freebcktab(Bcktab **bcktab)
   /* showbcktab(bcktabptr); */
   if (bcktabptr->mappedptr != NULL) /* use mapped file */
   {
-    fa_xmunmap(bcktabptr->mappedptr);
+    gt_xmunmap(bcktabptr->mappedptr);
     bcktabptr->mappedptr = NULL;
     bcktabptr->leftborder = NULL;
     bcktabptr->countspecialcodes = NULL;
