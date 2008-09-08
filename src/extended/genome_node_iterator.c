@@ -41,7 +41,7 @@ GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *gn)
 {
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *child_feature;
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   assert(gn);
   gni = gt_genome_node_iterator_new_base(gn);
   if (gt_genome_node_cast(gt_genome_feature_class(), gn) &&
@@ -63,7 +63,7 @@ GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *gn)
 static void add_children_to_stack(GT_Array *node_stack, GT_GenomeNode *gn)
 {
   GT_GenomeNode *child;
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   assert(node_stack && gn && gn->children);
   /* add the children backwards to traverse in order */
   for (dlistelem = dlist_last(gn->children); dlistelem != NULL;

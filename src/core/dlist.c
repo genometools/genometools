@@ -27,41 +27,41 @@
 #define NUM_OF_TESTS  100
 #define MAX_SIZE      1024
 
-struct Dlist {
+struct GT_Dlist {
   GT_Compare cmp_func;
-  Dlistelem *first,
+  GT_Dlistelem *first,
             *last;
   unsigned long size;
 };
 
-struct Dlistelem {
-  Dlistelem *previous,
+struct GT_Dlistelem {
+  GT_Dlistelem *previous,
             *next;
   void *data;
 };
 
-Dlist* dlist_new(GT_Compare cmp_func)
+GT_Dlist* dlist_new(GT_Compare cmp_func)
 {
-  Dlist *dlist = ma_calloc(1, sizeof (Dlist));
+  GT_Dlist *dlist = ma_calloc(1, sizeof (GT_Dlist));
   dlist->cmp_func = cmp_func;
   return dlist;
 }
 
-Dlistelem* dlist_first(const Dlist *dlist)
+GT_Dlistelem* dlist_first(const GT_Dlist *dlist)
 {
   assert(dlist);
   return dlist->first;
 }
 
-Dlistelem* dlist_last(const Dlist *dlist)
+GT_Dlistelem* dlist_last(const GT_Dlist *dlist)
 {
   assert(dlist);
   return dlist->last;
 }
 
-Dlistelem* dlist_find(const Dlist *dlist, void *new_data)
+GT_Dlistelem* dlist_find(const GT_Dlist *dlist, void *new_data)
 {
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   void *old_data;
   assert(dlist);
   for (dlistelem = dlist_first(dlist); dlistelem != NULL;
@@ -75,16 +75,16 @@ Dlistelem* dlist_find(const Dlist *dlist, void *new_data)
   return NULL;
 }
 
-unsigned long dlist_size(const Dlist *dlist)
+unsigned long dlist_size(const GT_Dlist *dlist)
 {
   return dlist ? dlist->size : 0;
 }
 
-void dlist_add(Dlist *dlist, void *data)
+void dlist_add(GT_Dlist *dlist, void *data)
 {
-  Dlistelem *oldelem, *newelem;
+  GT_Dlistelem *oldelem, *newelem;
   assert(dlist); /* data can be null */
-  newelem = ma_calloc(1, sizeof (Dlistelem));
+  newelem = ma_calloc(1, sizeof (GT_Dlistelem));
   newelem->data = data;
 
   if (!dlist->first) {
@@ -140,7 +140,7 @@ void dlist_add(Dlist *dlist, void *data)
   dlist->size++;
 }
 
-void dlist_remove(Dlist *dlist, Dlistelem *dlistelem)
+void dlist_remove(GT_Dlist *dlist, GT_Dlistelem *dlistelem)
 {
   assert(dlist && dlistelem);
   assert(!dlistelem->previous || dlistelem->previous->next == dlistelem);
@@ -164,8 +164,8 @@ static int intcompare(const void *a, const void *b)
 
 int dlist_example(GT_UNUSED GT_Error *err)
 {
-  Dlistelem *dlistelem;
-  Dlist *dlist;
+  GT_Dlistelem *dlistelem;
+  GT_Dlist *dlist;
   void *data;
   int elem = 1984;
   gt_error_check(err);
@@ -189,8 +189,8 @@ int dlist_example(GT_UNUSED GT_Error *err)
 
 int dlist_unit_test(GT_Error *err)
 {
-  Dlist *dlist;
-  Dlistelem *dlistelem;
+  GT_Dlist *dlist;
+  GT_Dlistelem *dlistelem;
   int i, j, size, *data,
       elem_a = 7,
       elem_b = 6,
@@ -340,9 +340,9 @@ int dlist_unit_test(GT_Error *err)
   return had_err;
 }
 
-void dlist_delete(Dlist *dlist)
+void dlist_delete(GT_Dlist *dlist)
 {
-  Dlistelem *elem;
+  GT_Dlistelem *elem;
   if (!dlist) return;
   elem = dlist->first;
   while (elem) {
@@ -353,19 +353,19 @@ void dlist_delete(Dlist *dlist)
   ma_free(dlist);
 }
 
-Dlistelem* dlistelem_next(const Dlistelem *dlistelem)
+GT_Dlistelem* dlistelem_next(const GT_Dlistelem *dlistelem)
 {
   assert(dlistelem);
   return dlistelem->next;
 }
 
-Dlistelem* dlistelem_previous(const Dlistelem *dlistelem)
+GT_Dlistelem* dlistelem_previous(const GT_Dlistelem *dlistelem)
 {
   assert(dlistelem);
   return dlistelem->previous;
 }
 
-void* dlistelem_get_data(const Dlistelem *dlistelem)
+void* dlistelem_get_data(const GT_Dlistelem *dlistelem)
 {
   assert(dlistelem);
   return dlistelem->data;

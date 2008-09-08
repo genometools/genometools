@@ -20,7 +20,7 @@
 #include "extended/transcript_used_exons.h"
 
 struct TranscriptUsedExons {
-  Dlist *used_exons_all,
+  GT_Dlist *used_exons_all,
         *used_exons_single,
         *used_exons_initial,
         *used_exons_internal,
@@ -38,39 +38,39 @@ TranscriptUsedExons* transcript_used_exons_new(void)
   return tue;
 }
 
-Dlist* transcript_used_exons_get_all(TranscriptUsedExons *tue)
+GT_Dlist* transcript_used_exons_get_all(TranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_all;
 }
 
-Dlist* transcript_used_exons_get_single(TranscriptUsedExons *tue)
+GT_Dlist* transcript_used_exons_get_single(TranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_single;
 }
 
-Dlist* transcript_used_exons_get_initial(TranscriptUsedExons *tue)
+GT_Dlist* transcript_used_exons_get_initial(TranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_initial;
 }
 
-Dlist* transcript_used_exons_get_internal(TranscriptUsedExons *tue)
+GT_Dlist* transcript_used_exons_get_internal(TranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_internal;
 }
 
-Dlist* transcript_used_exons_get_terminal(TranscriptUsedExons *tue)
+GT_Dlist* transcript_used_exons_get_terminal(TranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_terminal;
 }
 
-static void used_dlist_delete(Dlist *used_list)
+static void used_dlist_delete(GT_Dlist *used_list)
 {
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   for (dlistelem = dlist_first(used_list); dlistelem != NULL;
        dlistelem = dlistelem_next(dlistelem)) {
     ma_free(dlistelem_get_data(dlistelem));

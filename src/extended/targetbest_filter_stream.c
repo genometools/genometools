@@ -29,9 +29,9 @@ struct TargetbestFilterStream
 {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
-  Dlist *trees;
-  Dlistelem *next;
-  Hashmap *target_to_elem; /* maps the target ids to Dlist elements */
+  GT_Dlist *trees;
+  GT_Dlistelem *next;
+  Hashmap *target_to_elem; /* maps the target ids to GT_Dlist elements */
   bool in_stream_processed;
 };
 
@@ -47,14 +47,14 @@ static void build_key(GT_Str *key, GT_GenomeFeature *feature, GT_Str *target_id)
   gt_str_append_str(key, target_id);
 }
 
-static void include_feature(Dlist *trees, Hashmap *target_to_elem,
+static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
                             GT_GenomeFeature *feature, GT_Str *key)
 {
   dlist_add(trees, feature);
   hashmap_add(target_to_elem, cstr_dup(gt_str_get(key)), dlist_last(trees));
 }
 
-static void remove_elem(Dlistelem *elem, Dlist *trees,
+static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
                         Hashmap *target_to_elem, GT_Str *key)
 {
   GT_GenomeNode *node = dlistelem_get_data(elem);
@@ -63,19 +63,19 @@ static void remove_elem(Dlistelem *elem, Dlist *trees,
   hashmap_remove(target_to_elem, gt_str_get(key));
 }
 
-static void replace_previous_elem(Dlistelem *previous_elem,
-                                  GT_GenomeFeature *current_feature, Dlist *trees,
+static void replace_previous_elem(GT_Dlistelem *previous_elem,
+                                  GT_GenomeFeature *current_feature, GT_Dlist *trees,
                                   Hashmap *target_to_elem, GT_Str *key)
 {
   remove_elem(previous_elem, trees, target_to_elem, key);
   include_feature(trees, target_to_elem, current_feature, key);
 }
 
-static void filter_targetbest(GT_GenomeFeature *current_feature, Dlist *trees,
+static void filter_targetbest(GT_GenomeFeature *current_feature, GT_Dlist *trees,
                               Hashmap *target_to_elem)
 {
   unsigned long num_of_targets;
-  Dlistelem *previous_elem;
+  GT_Dlistelem *previous_elem;
   GT_Str *first_target_id;
   const char *target;
   int had_err;

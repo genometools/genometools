@@ -25,7 +25,7 @@
 #include "annotationsketch/element.h"
 
 struct GT_Block {
-  Dlist *elements;
+  GT_Dlist *elements;
   GT_Range range;
   GT_Str *caption;
   bool show_caption;
@@ -200,7 +200,7 @@ unsigned long gt_block_get_size(const GT_Block *block)
 int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
 {
  int had_err = 0;
- Dlistelem *delem;
+ GT_Dlistelem *delem;
  assert(block && canvas);
  /* if resulting block was too short,
     do not traverse this feature tree further */
@@ -288,7 +288,7 @@ int gt_block_unit_test(GT_Error *err)
 
 void gt_block_delete(GT_Block *block)
 {
-  Dlistelem *delem;
+  GT_Dlistelem *delem;
   if (!block) return;
   if (block->reference_count) {
     block->reference_count--;

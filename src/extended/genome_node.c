@@ -204,7 +204,7 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
   GT_Array *node_stack = NULL, *list_of_children;
   Queue *node_queue = NULL;
   GT_GenomeNode *gn, *gn_ref, *child_feature;
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   unsigned long i;
   Hashtable *traversed_nodes = NULL;
   bool has_node_with_multiple_parents = false;
@@ -373,7 +373,7 @@ int gt_genome_node_traverse_direct_children(GT_GenomeNode *gn,
                                          GT_GenomeNodeTraverseFunc traverse,
                                          GT_Error *err)
 {
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   int had_err = 0;
   gt_error_check(err);
   if (!gn || !traverse)
@@ -484,7 +484,7 @@ void gt_genome_node_is_part_of_genome_node(GT_GenomeNode *parent, GT_GenomeNode 
 
 static int remove_leaf(GT_GenomeNode *node, void *data, GT_UNUSED GT_Error *err)
 {
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   GT_GenomeNode *child, *leaf = (GT_GenomeNode*) data;
   gt_error_check(err);
   if (node != leaf && node->children) {
@@ -552,7 +552,7 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GT_GenomeNode *parent
                                                         GT_GenomeNode *child)
 {
   GT_Array *children_ranges;
-  Dlistelem *dlistelem;
+  GT_Dlistelem *dlistelem;
   GT_GenomeFeature *gf = NULL, *child_gf;
   GT_Range range;
   bool rval;
