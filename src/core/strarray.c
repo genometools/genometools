@@ -57,7 +57,7 @@ void gt_strarray_add_cstr(GT_StrArray *sa, const char *cstr)
   gt_array_add(sa->strings, str);
 }
 
-void gt_strarray_add_gt_cstr_nt(GT_StrArray *sa, const char *cstr,
+void gt_strarray_add_cstr_nt(GT_StrArray *sa, const char *cstr,
                              unsigned long length)
 {
   GT_Str *str;

@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_STRAND_H
-#define GT_STRAND_H
+#ifndef STRAND_H
+#define STRAND_H
 
 typedef enum {
   GT_STRAND_FORWARD, /* '+' */
