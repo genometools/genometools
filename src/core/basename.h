@@ -16,37 +16,37 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GETBASENAME_H
-#define GETBASENAME_H
+#ifndef BASENAME_H
+#define BASENAME_H
 
 /*
-  This module implements the function getbasename() according to the
+  This module implements the function gt_basename() according to the
   specifications in
   http://www.unix-systems.org/onlinepubs/7908799/xsh/basename.html
   and
   http://www.opengroup.org/onlinepubs/009695399/
 
-  getbasename() is equivalent to the function basename(3) which
+  gt_basename() is equivalent to the function basename(3) which
   is available on most unix systems, but in different libraries and
   with slightly different functionality.
 
-  getbasename() takes the pathname pointed to by <path> and returns a pointer to
+  gt_basename() takes the pathname pointed to by <path> and returns a pointer to
   the final component of the pathname, deleting any trailing '/' characters.
 
-  If <path> consists entirely of the '/' character,  then getbasename() returns
+  If <path> consists entirely of the '/' character,  then gt_basename() returns
   a pointer to the string "/".
 
-  If <path> is a null pointer or points to an empty string, getbasename()
+  If <path> is a null pointer or points to an empty string, gt_basename()
   returns a pointer to the string ".".
 
-  See the implementation of getbasename_unit_test() for additional examples.
+  See the implementation of gt_basename_unit_test() for additional examples.
 
   The caller is responsible for freeing the received pointer!
 */
 
 #include "core/error.h"
 
-char* getbasename(const char *path);
-int   getbasename_unit_test(GT_Error*);
+char* gt_basename(const char *path);
+int   gt_basename_unit_test(GT_Error*);
 
 #endif

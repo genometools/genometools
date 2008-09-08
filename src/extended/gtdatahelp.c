@@ -22,7 +22,7 @@
 #include "lualib.h"
 #include "core/cstr.h"
 #include "core/fileutils.h"
-#include "core/getbasename.h"
+#include "core/basename.h"
 #include "core/gtdatapath.h"
 #include "core/ma.h"
 #include "core/splitter.h"
@@ -64,7 +64,7 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused, GT_Error *err
     /* finish creating doc_file */
     if (splitter_size(splitter) == 1) {
       /* special case for `gt` */
-      bn = getbasename(progname);
+      bn = gt_basename(progname);
       gt_str_append_cstr(doc_file, bn);
       gt_free(bn);
     }

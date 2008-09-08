@@ -18,6 +18,7 @@
 #include "gtt.h"
 #include "core/array.h"
 #include "core/array2dim.h"
+#include "core/basename.h"
 #include "core/bitpackarray.h"
 #include "core/bitpackstring.h"
 #include "core/bittab.h"
@@ -27,7 +28,6 @@
 #include "core/disc_distri.h"
 #include "core/dlist.h"
 #include "core/dynbittab.h"
-#include "core/getbasename.h"
 #include "core/grep.h"
 #include "core/hashmap.h"
 #include "core/hashtable.h"
@@ -152,6 +152,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "array class", gt_array_unit_test);
   hashmap_add(unit_tests, "array example", gt_array_example);
   hashmap_add(unit_tests, "array2dim example", gt_array2dim_example);
+  hashmap_add(unit_tests, "basename module", gt_basename_unit_test);
   hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
   hashmap_add(unit_tests, "bit pack string module", bitPackString_unit_test);
   hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
@@ -167,7 +168,6 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "genome feature class", gt_genome_feature_unit_test);
   hashmap_add(unit_tests, "genome node iterator example",
               gt_genome_node_iterator_example);
-  hashmap_add(unit_tests, "getbasename module", getbasename_unit_test);
   hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
   hashmap_add(unit_tests, "grep module", grep_unit_test);
   hashmap_add(unit_tests, "hashmap class", hashmap_unit_test);

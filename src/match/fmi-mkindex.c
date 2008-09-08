@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/getbasename.h"
+#include "core/basename.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "divmodmul.h"
@@ -105,8 +105,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
       {
         char *basenameptr;
 
-        basenameptr = getbasename(gt_strarray_get(mkfmcallinfo->indexnametab,
-                                                  0));
+        basenameptr = gt_basename(gt_strarray_get(mkfmcallinfo->indexnametab,
+                                  0));
         gt_str_set(mkfmcallinfo->outfmindex,basenameptr);
         gt_free(basenameptr);
       }

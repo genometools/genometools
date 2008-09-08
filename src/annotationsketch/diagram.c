@@ -25,9 +25,9 @@
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
+#include "core/basename.h"
 #include "core/cstr.h"
 #include "core/ensure.h"
-#include "core/getbasename.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/str.h"
@@ -597,7 +597,7 @@ static int layout_tracks(void *key, void *value, void *data,
      generated graphic. this might lead to ``collapsed'' tracks, if two files
      with different paths have the same basename. */
   block = *(GT_Block**) gt_array_get(list, 0);
-  filename = getbasename(gt_genome_node_get_filename(
+  filename = gt_basename(gt_genome_node_get_filename(
                                         gt_block_get_top_level_feature(block)));
   gt_track_key = gt_track_key_new(filename, gft);
   gt_free(filename);

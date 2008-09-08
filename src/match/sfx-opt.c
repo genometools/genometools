@@ -18,7 +18,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/error.h"
-#include "core/getbasename.h"
+#include "core/basename.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/str.h"
@@ -274,7 +274,7 @@ static OPrval parse_options(int *parsed_args,
           {
             char *basenameptr;
 
-            basenameptr = getbasename(gt_strarray_get(so->filenametab,0));
+            basenameptr = gt_basename(gt_strarray_get(so->filenametab,0));
             gt_str_set(so->str_indexname,basenameptr);
             gt_free(basenameptr);
           }
@@ -282,7 +282,7 @@ static OPrval parse_options(int *parsed_args,
         {
           char *basenameptr;
 
-          basenameptr = getbasename(gt_str_get(so->str_inputindex));
+          basenameptr = gt_basename(gt_str_get(so->str_inputindex));
           gt_str_set(so->str_indexname,basenameptr);
           gt_free(basenameptr);
         }

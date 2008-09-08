@@ -18,10 +18,10 @@
 
 #include <string.h>
 #include "core/ensure.h"
-#include "core/getbasename.h"
+#include "core/basename.h"
 #include "core/ma.h"
 
-char *getbasename(const char *path)
+char *gt_basename(const char *path)
 {
   char *sbuf, *c;
   bool foundother = false;
@@ -55,66 +55,66 @@ char *getbasename(const char *path)
   return sbuf;
 }
 
-int getbasename_unit_test(GT_Error *err)
+int gt_basename_unit_test(GT_Error *err)
 {
   char *bn;
   int had_err = 0;
   gt_error_check(err);
 
-  bn = getbasename("/usr/lib");
+  bn = gt_basename("/usr/lib");
   ensure(had_err, !strcmp(bn, "lib"));
   gt_free(bn);
 
   if (!had_err) {
-    bn = getbasename("/usr/");
+    bn = gt_basename("/usr/");
     ensure(had_err, !strcmp(bn, "usr"));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename("usr");
+    bn = gt_basename("usr");
     ensure(had_err, !strcmp(bn, "usr"));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename("/");
+    bn = gt_basename("/");
     ensure(had_err, !strcmp(bn, "/"));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename("///");
+    bn = gt_basename("///");
     ensure(had_err, !strcmp(bn, "/"));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename("//usr//lib//");
+    bn = gt_basename("//usr//lib//");
     ensure(had_err, !strcmp(bn, "lib"));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename(NULL);
+    bn = gt_basename(NULL);
     ensure(had_err, !strcmp(bn, "."));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename("");
+    bn = gt_basename("");
     ensure(had_err, !strcmp(bn, "."));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename(".");
+    bn = gt_basename(".");
     ensure(had_err, !strcmp(bn, "."));
     gt_free(bn);
   }
 
   if (!had_err) {
-    bn = getbasename("..");
+    bn = gt_basename("..");
     ensure(had_err, !strcmp(bn, ".."));
     gt_free(bn);
   }
