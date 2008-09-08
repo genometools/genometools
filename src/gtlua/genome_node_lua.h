@@ -28,7 +28,7 @@
    function gt_genome_feature_new(type, range, strand)
 
    -- Returns a new sequence region for sequence id <seqid> spanning <range>.
-   function gt_sequence_regionnew(seqid, range)
+   function gt_sequence_region_new(seqid, range)
 
    -- Returns the filenname of <genome_node>.
 

@@ -59,7 +59,7 @@ typedef struct {
   GT_Array *genome_features; /* the genome features which belong to this reagion */
 } AutomaticGT_SequenceRegion;
 
-static AutomaticGT_SequenceRegion* automatic_gt_sequence_regionnew(void)
+static AutomaticGT_SequenceRegion* automatic_gt_sequence_region_new(void)
 {
   AutomaticGT_SequenceRegion *auto_sr;
   auto_sr = gt_malloc(sizeof (AutomaticGT_SequenceRegion));
@@ -67,7 +67,7 @@ static AutomaticGT_SequenceRegion* automatic_gt_sequence_regionnew(void)
   return auto_sr;
 }
 
-static void automatic_gt_sequence_regiondelete(AutomaticGT_SequenceRegion *auto_sr)
+static void automatic_gt_sequence_region_delete(AutomaticGT_SequenceRegion *auto_sr)
 {
   unsigned long i;
   if (!auto_sr) return;
@@ -84,7 +84,7 @@ typedef struct {
   unsigned int line_number;
 } SimpleGT_SequenceRegion;
 
-static SimpleGT_SequenceRegion* simple_gt_sequence_regionnew(const char *seqid,
+static SimpleGT_SequenceRegion* simple_gt_sequence_region_new(const char *seqid,
                                                         GT_Range range,
                                                         unsigned int
                                                         line_number)
@@ -96,7 +96,7 @@ static SimpleGT_SequenceRegion* simple_gt_sequence_regionnew(const char *seqid,
   return ssr;
 }
 
-static void simple_gt_sequence_regiondelete(SimpleGT_SequenceRegion *ssr)
+static void simple_gt_sequence_region_delete(SimpleGT_SequenceRegion *ssr)
 {
   if (!ssr) return;
   gt_str_delete(ssr->seqid_str);
@@ -111,11 +111,11 @@ GFF3Parser* gff3parser_new(bool checkids,
   parser = gt_malloc(sizeof (GFF3Parser));
   parser->feature_info = feature_info_new();
   parser->seqid_to_ssr_mapping = hashmap_new(
-    HASH_STRING, NULL, (GT_FreeFunc) simple_gt_sequence_regiondelete);
+    HASH_STRING, NULL, (GT_FreeFunc) simple_gt_sequence_region_delete);
   parser->source_to_str_mapping = hashmap_new(HASH_STRING, NULL,
                                               (GT_FreeFunc) gt_str_delete);
   parser->undefined_sequence_regions = hashmap_new(
-    HASH_STRING, NULL, (GT_FreeFunc) automatic_gt_sequence_regiondelete);
+    HASH_STRING, NULL, (GT_FreeFunc) automatic_gt_sequence_region_delete);
   parser->incomplete_node = false;
   parser->checkids = checkids;
   parser->tidy = false;
@@ -275,9 +275,9 @@ static int get_seqid_str(GT_Str **seqid_str, const char *seqid, GT_Range range,
               "previously introduced with a \"%s\" line, create such a line "
               "automatically", seqid, line_number, filename,
               GFF_SEQUENCE_REGION);
-      *auto_sr = automatic_gt_sequence_regionnew();
+      *auto_sr = automatic_gt_sequence_region_new();
       *seqid_str = gt_str_new_cstr(seqid);
-      (*auto_sr)->sequence_region = gt_sequence_regionnew(*seqid_str, range);
+      (*auto_sr)->sequence_region = gt_sequence_region_new(*seqid_str, range);
       hashmap_add(parser->undefined_sequence_regions, gt_str_get(*seqid_str),
                   *auto_sr);
     }
@@ -1271,13 +1271,13 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
         had_err = -1;
       }
       else {
-        ssr = simple_gt_sequence_regionnew(seqid, range, line_number);
+        ssr = simple_gt_sequence_region_new(seqid, range, line_number);
         hashmap_add(parser->seqid_to_ssr_mapping, gt_str_get(ssr->seqid_str), ssr);
       }
     }
     if (!had_err) {
       assert(ssr);
-      gn = gt_sequence_regionnew(ssr->seqid_str, range);
+      gn = gt_sequence_region_new(ssr->seqid_str, range);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
       queue_add(genome_nodes, gn);
     }

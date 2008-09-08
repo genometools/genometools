@@ -27,67 +27,67 @@ struct GT_SequenceRegion
   GT_Range range;
 };
 
-#define gt_sequence_regioncast(GN)\
-        gt_genome_node_cast(gt_sequence_regionclass(), GN)
+#define gt_sequence_region_cast(GN)\
+        gt_genome_node_cast(gt_sequence_region_class(), GN)
 
-static void gt_sequence_regionfree(GT_GenomeNode *gn)
+static void gt_sequence_region_free(GT_GenomeNode *gn)
 {
-  GT_SequenceRegion *sr = gt_sequence_regioncast(gn);
+  GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   assert(sr && sr->seqid);
   gt_str_delete(sr->seqid);
 }
 
-static GT_Str* gt_sequence_regionget_seqid(GT_GenomeNode *gn)
+static GT_Str* gt_sequence_region_get_seqid(GT_GenomeNode *gn)
 {
-  GT_SequenceRegion *sr = gt_sequence_regioncast(gn);
+  GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   return sr->seqid;
 }
 
-static GT_Range gt_sequence_regionget_range(GT_GenomeNode *gn)
+static GT_Range gt_sequence_region_get_range(GT_GenomeNode *gn)
 {
-  GT_SequenceRegion *sr = gt_sequence_regioncast(gn);
+  GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   return sr->range;
 }
 
-static void gt_sequence_regionset_range(GT_GenomeNode *gn, GT_Range range)
+static void gt_sequence_region_set_range(GT_GenomeNode *gn, GT_Range range)
 {
-  GT_SequenceRegion *sr = gt_sequence_regioncast(gn);
+  GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   sr->range = range;
 }
 
-static void gt_sequence_regionchange_seqid(GT_GenomeNode *gn, GT_Str *seqid)
+static void gt_sequence_region_change_seqid(GT_GenomeNode *gn, GT_Str *seqid)
 {
-  GT_SequenceRegion *sr = gt_sequence_regioncast(gn);
+  GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   assert(sr && seqid);
   gt_str_delete(sr->seqid);
   sr->seqid = gt_str_ref(seqid);
 }
 
-static int gt_sequence_regionaccept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int gt_sequence_region_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
 {
   GT_SequenceRegion *sr;
   gt_error_check(err);
-  sr = gt_sequence_regioncast(gn);
+  sr = gt_sequence_region_cast(gn);
   return genome_visitor_visit_sequence_region(gv, sr, err);
 }
 
-const GT_GenomeNodeClass* gt_sequence_regionclass()
+const GT_GenomeNodeClass* gt_sequence_region_class()
 {
   static const GT_GenomeNodeClass gnc = { sizeof (GT_SequenceRegion),
-                                       gt_sequence_regionfree,
-                                       gt_sequence_regionget_seqid,
-                                       gt_sequence_regionget_seqid,
-                                       gt_sequence_regionget_range,
-                                       gt_sequence_regionset_range,
-                                       gt_sequence_regionchange_seqid,
-                                       gt_sequence_regionaccept };
+                                       gt_sequence_region_free,
+                                       gt_sequence_region_get_seqid,
+                                       gt_sequence_region_get_seqid,
+                                       gt_sequence_region_get_range,
+                                       gt_sequence_region_set_range,
+                                       gt_sequence_region_change_seqid,
+                                       gt_sequence_region_accept };
   return &gnc;
 }
 
-GT_GenomeNode* gt_sequence_regionnew(GT_Str *seqid, GT_Range range)
+GT_GenomeNode* gt_sequence_region_new(GT_Str *seqid, GT_Range range)
 {
-  GT_GenomeNode *gn = gt_genome_node_create(gt_sequence_regionclass());
-  GT_SequenceRegion *sr = gt_sequence_regioncast(gn);
+  GT_GenomeNode *gn = gt_genome_node_create(gt_sequence_region_class());
+  GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   assert(seqid);
   sr->seqid = gt_str_ref(seqid);
   sr->range = range;
@@ -100,8 +100,8 @@ void sequence_regions_consolidate(GT_GenomeNode *gn_a, GT_GenomeNode *gn_b)
 
   assert(gn_a);
   assert(gn_b);
-  assert(gt_genome_node_cast(gt_sequence_regionclass(), gn_a));
-  assert(gt_genome_node_cast(gt_sequence_regionclass(), gn_b));
+  assert(gt_genome_node_cast(gt_sequence_region_class(), gn_a));
+  assert(gt_genome_node_cast(gt_sequence_region_class(), gn_b));
   assert(!gt_str_cmp(gt_genome_node_get_seqid(gn_a), gt_genome_node_get_seqid(gn_b)));
 
   gt_range_a = gt_genome_node_get_range(gn_a);

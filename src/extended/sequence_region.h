@@ -24,8 +24,8 @@ typedef struct GT_SequenceRegion GT_SequenceRegion;
 #include "core/str.h"
 #include "extended/genome_node.h"
 
-const GT_GenomeNodeClass* gt_sequence_regionclass(void);
-GT_GenomeNode*            gt_sequence_regionnew(GT_Str *seqid, GT_Range range);
+const GT_GenomeNodeClass* gt_sequence_region_class(void);
+GT_GenomeNode*            gt_sequence_region_new(GT_Str *seqid, GT_Range range);
 void                   sequence_regions_consolidate(GT_GenomeNode*, GT_GenomeNode*);
 
 #endif

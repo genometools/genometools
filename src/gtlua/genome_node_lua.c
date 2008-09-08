@@ -60,7 +60,7 @@ static int gt_genome_feature_lua_new(lua_State *L)
   return 1;
 }
 
-static int gt_sequence_regionlua_new(lua_State *L)
+static int gt_sequence_region_lua_new(lua_State *L)
 {
   GT_GenomeNode **sr;
   const char *seqid;
@@ -73,7 +73,7 @@ static int gt_sequence_regionlua_new(lua_State *L)
   /* construct object */
   sr = lua_newuserdata(L, sizeof (GT_GenomeNode*));
   seqid_str = gt_str_new_cstr(seqid);
-  *sr = gt_sequence_regionnew(seqid_str, *range);
+  *sr = gt_sequence_region_new(seqid_str, *range);
   gt_str_delete(seqid_str);
   assert(*sr);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -314,7 +314,7 @@ static int gt_genome_node_lua_delete(lua_State *L)
 
 static const struct luaL_Reg gt_genome_node_lib_f [] = {
   { "gt_genome_feature_new", gt_genome_feature_lua_new },
-  { "gt_sequence_regionnew", gt_sequence_regionlua_new },
+  { "gt_sequence_region_new", gt_sequence_region_lua_new },
   { NULL, NULL }
 };
 

@@ -59,7 +59,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *er
           gt_array_add(cs->gt_genome_node_buffer, node);
         else
           break;
-        if (!(gt_genome_node_cast(gt_sequence_regionclass(), node)))
+        if (!(gt_genome_node_cast(gt_sequence_region_class(), node)))
           break; /* no more sequence regions */
       }
     }
