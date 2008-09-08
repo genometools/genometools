@@ -74,7 +74,8 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   gt_error_check(err);
   assert(arguments);
 
-  if (!(score_matrix = gt_score_matrix_new_read_protein(argv[parsed_args], err)))
+  score_matrix = gt_score_matrix_new_read_protein(argv[parsed_args], err);
+  if (!score_matrix)
     had_err = -1;
 
   if (!had_err) {

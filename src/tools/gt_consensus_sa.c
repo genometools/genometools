@@ -62,7 +62,8 @@ static void process_splice_form(GT_Array *spliced_alignments_in_form,
   for (i = 0; i < gt_array_size(spliced_alignments_in_form); i++) {
     if (i)
       xputchar(',');
-    printf("%lu", *((unsigned long*) gt_array_get(spliced_alignments_in_form, i)));
+    printf("%lu",
+           *((unsigned long*) gt_array_get(spliced_alignments_in_form, i)));
   }
   printf("]\n");
 }
@@ -79,8 +80,8 @@ static OptionParser* gt_consensus_sa_option_parser_new(GT_UNUSED
 }
 
 static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
-                                  int parsed_args, GT_UNUSED void *tool_arguments,
-                                  GT_Error *err)
+                                  int parsed_args,
+                                  GT_UNUSED void *tool_arguments, GT_Error *err)
 {
   GT_Array *spliced_alignments;
   SSplicedAlignment *sa;
@@ -95,7 +96,8 @@ static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* sort spliced alignments */
-    qsort(gt_array_get_space(spliced_alignments), gt_array_size(spliced_alignments),
+    qsort(gt_array_get_space(spliced_alignments),
+          gt_array_size(spliced_alignments),
           gt_array_elem_size(spliced_alignments),
           (GT_Compare) sspliced_alignment_compare_ptr);
 

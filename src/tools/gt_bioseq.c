@@ -62,8 +62,8 @@ static OptionParser* gt_gt_bioseq_option_parser_new(void *tool_arguments)
                          "sequence_file(s) (if necessary).");
 
   /* -recreate */
-  option_recreate = option_new_bool("recreate", "recreate GT_Biosequence files, "
-                                    "even if they exist already",
+  option_recreate = option_new_bool("recreate", "recreate GT_Biosequence "
+                                    "files, even if they exist already",
                                     &arguments->recreate, false);
   option_parser_add_option(op, option_recreate);
 
@@ -176,7 +176,7 @@ static int gt_gt_bioseq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err && arguments->showseqnum != UNDEF_ULONG) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
         gt_error_set(err, "argument '%lu' to option '-showseqnum' is too "
-                       "large. The GT_Biosequence contains only '%lu' sequences.",
+                     "large. The GT_Biosequence contains only '%lu' sequences.",
                   arguments->showseqnum, gt_bioseq_number_of_sequences(bioseq));
         had_err = -1;
       }

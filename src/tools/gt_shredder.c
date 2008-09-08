@@ -88,7 +88,8 @@ static int gt_shredder_arguments_check(GT_UNUSED int rest_argc,
 }
 
 static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
-                              int parsed_args, void *tool_arguments, GT_Error *err)
+                              int parsed_args, void *tool_arguments,
+                              GT_Error *err)
 {
   ShredderArguments *arguments = tool_arguments;
   GT_BioseqIterator *bsi;

@@ -97,8 +97,10 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 
   if (arguments->translate) {
     for (i = 0; !had_err && i < gt_strarray_size(arguments->seqfiles); i++) {
-      if (!(bioseq = gt_bioseq_new(gt_strarray_get(arguments->seqfiles, i), err)))
+      if (!(bioseq = gt_bioseq_new(gt_strarray_get(arguments->seqfiles, i),
+                                   err))) {
         had_err = -1;
+      }
       if (!had_err)
         translate_sequence_file(bioseq);
       gt_bioseq_delete(bioseq);

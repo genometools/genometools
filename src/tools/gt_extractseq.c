@@ -122,8 +122,8 @@ static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_extractseq_arguments_check(GT_UNUSED int argc, void *tool_arguments,
-                                         GT_Error *err)
+static int gt_extractseq_arguments_check(GT_UNUSED int argc,
+                                         void *tool_arguments, GT_Error *err)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   gt_error_check(err);
@@ -137,8 +137,9 @@ static int gt_extractseq_arguments_check(GT_UNUSED int argc, void *tool_argument
   return 0;
 }
 
-static int extractseq_pos(GT_GenFile *outfp, GT_Bioseq *bs, unsigned long frompos,
-                          unsigned long topos, unsigned long width, GT_Error *err)
+static int extractseq_pos(GT_GenFile *outfp, GT_Bioseq *bs,
+                          unsigned long frompos, unsigned long topos,
+                          unsigned long width, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -157,8 +158,9 @@ static int extractseq_pos(GT_GenFile *outfp, GT_Bioseq *bs, unsigned long frompo
   return had_err;
 }
 
-static int extractseq_match(GT_GenFile *outfp, GT_Bioseq *bs, const char *pattern,
-                            unsigned long width, GT_Error *err)
+static int extractseq_match(GT_GenFile *outfp, GT_Bioseq *bs,
+                            const char *pattern, unsigned long width,
+                            GT_Error *err)
 {
   const char *desc;
   unsigned long i;
@@ -225,7 +227,8 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
     GT_BioseqIterator *bsi;
     GT_Bioseq *bs;
     bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
-    while (!had_err && !(had_err = gt_bioseq_iterator_next(bsi, &bs, err)) && bs) {
+    while (!had_err &&
+           !(had_err = gt_bioseq_iterator_next(bsi, &bs, err)) && bs) {
       if (arguments->frompos) {
         had_err = extractseq_pos(arguments->outfp, bs, arguments->frompos,
                                  arguments->topos, arguments->width, err);

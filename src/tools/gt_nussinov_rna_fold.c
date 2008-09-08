@@ -24,20 +24,22 @@
 #include "core/xansi.h"
 #include "tools/gt_nussinov_rna_fold.h"
 
-#define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                  \
-        if (!had_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {   \
-          gt_error_set(err, "argument for alpha(%c,%c) must be non-positive "     \
-                         "integer", CHAR_1, CHAR_2);                           \
-          had_err = -1;                                                        \
-        }                                                                      \
-        if (!had_err) {                                                        \
-          gt_score_matrix_set_score(energy_function, gt_alpha_encode(dna_alpha,      \
-                                CHAR_1), gt_alpha_encode(dna_alpha, CHAR_2),      \
-                                rval);                                         \
-          gt_score_matrix_set_score(energy_function, gt_alpha_encode(dna_alpha,      \
-                                CHAR_2), gt_alpha_encode(dna_alpha, CHAR_1),      \
-                                rval);                                         \
-       }
+#define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                 \
+        if (!had_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {  \
+          gt_error_set(err, "argument for alpha(%c,%c) must be non-positive " \
+                         "integer", CHAR_1, CHAR_2);                          \
+          had_err = -1;                                                       \
+        }                                                                     \
+        if (!had_err) {                                                       \
+          gt_score_matrix_set_score(energy_function,                          \
+                                    gt_alpha_encode(dna_alpha, CHAR_1),       \
+                                    gt_alpha_encode(dna_alpha, CHAR_2),       \
+                                rval);                                        \
+          gt_score_matrix_set_score(energy_function,                          \
+                                    gt_alpha_encode(dna_alpha, CHAR_2),       \
+                                    gt_alpha_encode(dna_alpha, CHAR_1),       \
+                                    rval);                                    \
+        }
 
 static int computeEentry(unsigned long i, unsigned long j, int **E,
                          char *rna_sequence, GT_ScoreMatrix *energy_function)

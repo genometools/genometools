@@ -134,8 +134,9 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                            "(i.e., features without parents) with exactly one "
                            "target attribute have the same target_id, keep "
                            "only the feature with the best score. If "
-                           "-"TARGETGT_STRAND_OPT" is used at the same time, this "
-                           "option is applied after -"TARGETGT_STRAND_OPT".\n"
+                           "-"TARGETGT_STRAND_OPT" is used at the same time, "
+                           "this option is applied after "
+                           "-"TARGETGT_STRAND_OPT".\n"
                            "Memory consumption is O(file_size).",
                            &arguments->targetbest, false);
   option_parser_add_option(op, option);
@@ -216,8 +217,8 @@ static int process_gt_strand_arg(GT_Str *gt_strand_char, GT_Strand *strand,
   return had_err;
 }
 
-static int gt_filter_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
-                                     GT_Error *err)
+static int gt_filter_arguments_check(GT_UNUSED int rest_argc,
+                                     void *tool_arguments, GT_Error *err)
 {
   FilterArguments *arguments = tool_arguments;
   int had_err;

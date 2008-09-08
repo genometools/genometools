@@ -88,7 +88,8 @@ int gt_upgma(int argc, const char **argv, GT_Error *err)
     if (!bioseq)
       had_err = -1;
     if (!had_err)
-      upgma = upggt_new(gt_bioseq_number_of_sequences(bioseq), bioseq, distfunc);
+      upgma = upggt_new(gt_bioseq_number_of_sequences(bioseq), bioseq,
+                        distfunc);
   }
 
   if (!had_err)

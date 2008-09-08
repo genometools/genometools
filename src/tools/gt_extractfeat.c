@@ -99,8 +99,8 @@ static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_extractfeat_arguments_check(GT_UNUSED int argc, void *tool_arguments,
-                                          GT_Error *err)
+static int gt_extractfeat_arguments_check(GT_UNUSED int argc,
+                                          void *tool_arguments, GT_Error *err)
 {
   ExtractFeatArguments *arguments = tool_arguments;
   int had_err = 0;

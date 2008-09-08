@@ -139,16 +139,19 @@ static OPrval parse_options(int *parsed_args,
 
           if (gt_strarray_size(charlistlen) != 2UL)
           {
-            gt_error_set(err, "option -a requires charlist and length argument");
+            gt_error_set(err,
+                         "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
-          pw->charlistlen->charlist = gt_str_ref(gt_strarray_get_str(charlistlen,
+          pw->charlistlen->charlist =
+            gt_str_ref(gt_strarray_get_str(charlistlen,
                                                                   0));
           if (sscanf(gt_strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
               readint < 1L)
           {
-            gt_error_set(err, "option -a requires charlist and length argument");
+            gt_error_set(err,
+                         "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           pw->charlistlen->len = (unsigned long) readint;
@@ -156,7 +159,8 @@ static OPrval parse_options(int *parsed_args,
         {
           if (!option_is_set(optiontext))
           {
-            gt_error_set(err, "use exactly one of the options -ss, -ff, -a, -t");
+            gt_error_set(err,
+                         "use exactly one of the options -ss, -ff, -a, -t");
             oprval = OPTIONPARSER_ERROR;
           }
         }

@@ -31,7 +31,8 @@ static OptionParser* gt_fastaparser_option_parser_new(GT_UNUSED
 }
 
 static int gt_fastaparser_runner(GT_UNUSED int argc, const char **argv,
-                                 int parsed_args, GT_UNUSED void *tool_arguments,
+                                 int parsed_args,
+                                 GT_UNUSED void *tool_arguments,
                                  GT_UNUSED GT_Error *err)
 {
   unsigned long i;

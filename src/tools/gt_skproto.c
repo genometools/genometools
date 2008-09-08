@@ -28,7 +28,8 @@
 
 #define MAX_LINE_LENGTH  80
 
-static OptionParser* gt_skproto_option_parser_new(GT_UNUSED void *tool_arguments)
+static OptionParser* gt_skproto_option_parser_new(GT_UNUSED
+                                                  void *tool_arguments)
 {
   return option_parser_new("[C-file ...]",
                            "Extract Header-File from C-file(s).");
@@ -83,7 +84,8 @@ static void removecomments(GT_Str *line, int *incomment)
         break;
       }
       else if (!strncmp(gt_str_get(line) + pos, "/*", (size_t) 2) &&
-               (pos + 2 >= gt_str_length(line) || gt_str_get(line)[pos+2] != '@')) {
+               (pos + 2 >= gt_str_length(line) ||
+                gt_str_get(line)[pos+2] != '@')) {
         *incomment=1;
         pos+=2;
       }

@@ -64,7 +64,8 @@ static OptionParser* gt_template_option_parser_new(void *tool_arguments)
 }
 
 static int gt_template_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments, GT_UNUSED GT_Error *err)
+                                       void *tool_arguments,
+                                       GT_UNUSED GT_Error *err)
 {
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;

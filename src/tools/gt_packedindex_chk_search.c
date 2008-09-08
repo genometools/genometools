@@ -202,14 +202,15 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = !match))
             {
-              gt_error_set(err, "matches of packedindex expired before mmsearch!");
+              gt_error_set(err,
+                           "matches of packedindex expired before mmsearch!");
               break;
             }
             if ((had_err = matchPos != dbstart))
             {
-              gt_error_set(err, "packedindex match doesn't equal mmsearch match "
-                        "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
-                        matchPos, dbstart);
+              gt_error_set(err, "packedindex match doesn't equal mmsearch "
+                           "match result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
+                           matchPos, dbstart);
             }
           }
           if (!had_err)

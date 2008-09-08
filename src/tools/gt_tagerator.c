@@ -231,7 +231,8 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
     }
     if (arguments->maxintervalwidth == 0)
     {
-      gt_error_set(err,"if option -e is not used then option -maxocc is required");
+      gt_error_set(err,
+                   "if option -e is not used then option -maxocc is required");
       return -1;
     }
   } else
