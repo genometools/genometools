@@ -18,7 +18,7 @@ static gboolean on_expose_event(GtkWidget *widget,
   cairo_t *cr;
 
   Canvas *canvas = NULL;
-  if(!d || widget->allocation.width <= 30) return FALSE;
+  if (!d || widget->allocation.width <= 30) return FALSE;
   lastwidth = widget->allocation.width;
   if (ii) image_info_delete(ii);
 
@@ -32,7 +32,7 @@ static gboolean on_expose_event(GtkWidget *widget,
                       widget->allocation.width,
                       image_info_get_height(ii));
 
-  if(lastwidth != widget->allocation.width)
+  if (lastwidth != widget->allocation.width)
     canvas_delete(canvas);
   return FALSE;
 }
@@ -194,4 +194,3 @@ int main(int argc, char *argv[])
   diagram_delete(d);
   return 0;
 }
-

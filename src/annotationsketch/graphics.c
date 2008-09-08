@@ -107,7 +107,8 @@ void graphics_set_margins(Graphics *g, double margin_x, double margin_y)
   g->c_class->set_margins(g, margin_x, margin_y);
 }
 
-void graphics_draw_horizontal_line(Graphics *g, double x, double y, double width)
+void graphics_draw_horizontal_line(Graphics *g, double x, double y,
+                                   double width)
 {
   assert(g && g->c_class);
   g->c_class->draw_horizontal_line(g, x, y, width);

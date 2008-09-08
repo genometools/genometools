@@ -119,7 +119,7 @@
 #include "extended/redblack.h"
 
 #define CHECKREDBLACKRETCODE\
-        if(retcode < 0 || retcode == 1)\
+        if (retcode < 0 || retcode == 1)\
         {\
           return retcode;\
         }
@@ -434,21 +434,21 @@ Keytype rbt_find (const Keytype key,
 #define CHECKNODESTACKSPACE\
         if (nextfreestack == stacksize)\
         {\
-          allocsize = sizeof(RBTnode **) * \
+          allocsize = sizeof (RBTnode **) * \
                       (stacksize + STACKSPACEINCREMENT);\
           nodestack = ma_realloc((stacksize == STATICSTACKSPACE) ? NULL :\
                                                                 nodestack,\
                                  allocsize);\
-          if(stacksize == STATICSTACKSPACE)\
+          if (stacksize == STATICSTACKSPACE)\
           {\
             memcpy(nodestack,&staticstack[0],\
-                   sizeof(RBTnode **) * STATICSTACKSPACE);\
+                   sizeof (RBTnode **) * STATICSTACKSPACE);\
           }\
           stacksize += STACKSPACEINCREMENT;\
         }
 
 #define DELETENODESTACKSPACE\
-        if(stacksize > STATICSTACKSPACE)\
+        if (stacksize > STATICSTACKSPACE)\
         {\
           ma_free(nodestack);\
         }

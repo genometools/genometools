@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GRAPHICS_CAIRO_CONTEXT_H
-#define GRAPHICS_CAIRO_CONTEXT_H
+#ifndef CANVAS_CAIRO_CONTEXT_H
+#define CANVAS_CAIRO_CONTEXT_H
 
 #include <cairo.h>
 #include "annotationsketch/canvas.h"
