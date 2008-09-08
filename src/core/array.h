@@ -32,13 +32,14 @@ int           gt_array_cmp(const GT_Array  *array_a, const GT_Array *array_b);
    <info> and <err> are passed to <array_processor>.
    If <array_processor> returns a value != 0, the iteration is stopped and the
    return value of <array_processor> is returned. */
-int           gt_array_iterate(GT_Array *array, GT_ArrayProcessor gt_array_processor,
-                            void *info, GT_Error *err);
+int           gt_array_iterate(GT_Array *array,
+                               GT_ArrayProcessor array_processor,
+                               void *info, GT_Error *err);
 /* Similar to <array_iterate>, except that the <array> is traversed in reverse
    order. */
 int           gt_array_iterate_reverse(GT_Array *array,
-                                    GT_ArrayProcessor gt_array_processor, void *info,
-                                    GT_Error *err);
+                                       GT_ArrayProcessor array_processor,
+                                       void *info, GT_Error *err);
 int           gt_array_example(GT_Error*);
 int           gt_array_unit_test(GT_Error*);
 

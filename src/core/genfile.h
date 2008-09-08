@@ -50,15 +50,16 @@ const char* gt_genfilemode_suffix(GT_GenFileMode mode);
    without '.gz' or '.bz2' suffixes. */
 size_t      gt_genfile_basename_length(const char *path);
 
-/* Create a new GT_GenFile object and open the underlying file handle, returns NULL
-   and sets <err> if the file <path> could not be opened. */
-GT_GenFile*    gt_genfile_open(GT_GenFileMode, const char *path, const char *mode,
-                         GT_Error*);
+/* Create a new GT_GenFile object and open the underlying file handle, returns
+   NULL and sets <err> if the file <path> could not be opened. */
+GT_GenFile*    gt_genfile_open(GT_GenFileMode, const char *path,
+                               const char *mode, GT_Error*);
 
-/* Create a new GT_GenFile object and open the underlying file handle, abort if the
-   file <path> does not exist, the GT_GenFileMode has to be given explicitly. */
+/* Create a new GT_GenFile object and open the underlying file handle, abort if
+   the file <path> does not exist. The GT_GenFileMode has to be given
+   explicitly. */
 GT_GenFile*    gt_genfile_xopen_w_gfmode(GT_GenFileMode, const char *path,
-                                   const char *mode);
+                                         const char *mode);
 
 /* Create a new GT_GenFile object and open the underlying file handle. Aborts if
    the file <path> could not be opened. The GT_GenFileMode is determined

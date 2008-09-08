@@ -136,8 +136,8 @@ int gt_parse_range(GT_Range *range, const char *start, const char *end,
   errno = 0;
   end_val = strtol(end, &ep, 10);
   if (end[0] == '\0' || *ep != '\0') {
-    gt_error_set(err, "could not parse number '%s' on line %u in file '%s'", end,
-              line_number, filename);
+    gt_error_set(err, "could not parse number '%s' on line %u in file '%s'",
+                 end, line_number, filename);
     return -1;
   }
   if (errno == ERANGE && (end_val == LONG_MAX || end_val == LONG_MIN)) {
@@ -165,8 +165,9 @@ int gt_parse_range(GT_Range *range, const char *start, const char *end,
   return 0;
 }
 
-int gt_parse_score(bool *score_is_defined, float *score_value, const char *score,
-                unsigned int line_number, const char *filename, GT_Error *err)
+int gt_parse_score(bool *score_is_defined, float *score_value,
+                   const char *score, unsigned int line_number,
+                   const char *filename, GT_Error *err)
 {
   int rval;
 
@@ -176,8 +177,8 @@ int gt_parse_score(bool *score_is_defined, float *score_value, const char *score
   if (strlen(score) == 1 && score[0] == '.')
     *score_is_defined = false;
   else if ((rval = sscanf(score, "%f", score_value)) != 1) {
-    gt_error_set(err, "could not parse score '%s' on line %u in file '%s'", score,
-              line_number, filename);
+    gt_error_set(err, "could not parse score '%s' on line %u in file '%s'",
+                 score, line_number, filename);
     return -1;
   }
   else
@@ -199,8 +200,9 @@ int gt_parse_strand(GT_Strand *gt_strand_value, const char *strand,
     return -1;
   }
   if (strspn(strand, GT_STRAND_CHARS) != 1) {
-    gt_error_set(err, "strand '%s' on line %u in file '%s' not a valid character "
-              "from the set '%s'", strand, line_number, filename, GT_STRAND_CHARS);
+    gt_error_set(err, "strand '%s' on line %u in file '%s' not a valid "
+                 "character from the set '%s'", strand, line_number, filename,
+                 GT_STRAND_CHARS);
     *gt_strand_value = GT_STRAND_UNKNOWN;
     return -1;
   }
@@ -232,7 +234,8 @@ int gt_parse_phase(Phase *phase_value, const char *phase,
 }
 
 int gt_parse_int_line(int *int_value, const char *integer,
-                   unsigned int line_number, const char *filename, GT_Error *err)
+                      unsigned int line_number, const char *filename,
+                      GT_Error *err)
 {
   int rval;
 

@@ -66,7 +66,8 @@ void          option_parser_set_max_args(OptionParser*, unsigned int);
 void          option_parser_set_min_max_args(OptionParser*, unsigned int,
                                                             unsigned int);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
-                                  const char **argv, ShowVersionFunc, GT_Error*);
+                                  const char **argv, ShowVersionFunc,
+                                  GT_Error*);
 void          option_parser_delete(OptionParser*);
 
 /* the options
@@ -145,10 +146,11 @@ Option*        option_new_ulong_min_max(const char *option_str,
 Option*        option_new_range(const char *option_str, const char *description,
                                 GT_Range *value, GT_Range *default_value);
 Option*        option_new_gt_range_min_max(const char *option_str,
-                                        const char *description, GT_Range *value,
-                                        GT_Range *default_value,
-                                        unsigned long min_value,
-                                        unsigned long max_value);
+                                           const char *description,
+                                           GT_Range *value,
+                                           GT_Range *default_value,
+                                           unsigned long min_value,
+                                           unsigned long max_value);
 Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  GT_Str *value, const char *default_value);

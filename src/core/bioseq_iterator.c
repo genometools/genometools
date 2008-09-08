@@ -45,7 +45,8 @@ void gt_bioseq_iterator_delete(GT_BioseqIterator *bsi)
   gt_free(bsi);
 }
 
-int gt_bioseq_iterator_next(GT_BioseqIterator *bsi, GT_Bioseq **bioseq, GT_Error *err)
+int gt_bioseq_iterator_next(GT_BioseqIterator *bsi, GT_Bioseq **bioseq,
+                            GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);

@@ -77,7 +77,8 @@ void gt_bittab_complement(GT_Bittab *dest, const GT_Bittab *src)
     dest->tabptr[i] = ~src->tabptr[i];
 
   /* the ``last'' bittab gets special treatment to prevent that unused bits
-     become set. this could disturb subsequent gt_bittab_count_set_bits() calls. */
+     become set. this could disturb subsequent gt_bittab_count_set_bits() calls.
+   */
   dest->tabptr[src->tabsize - 1] = ~src->tabptr[src->tabsize - 1] &
                                    (~0UL >> (- src->num_of_bits +
                                              src->tabsize * 8UL *
@@ -92,7 +93,8 @@ void gt_bittab_equal(GT_Bittab *dest, const GT_Bittab *src)
     dest->tabptr[i] = src->tabptr[i];
 }
 
-void gt_bittab_and(GT_Bittab *dest, const GT_Bittab *src1, const GT_Bittab *src2)
+void gt_bittab_and(GT_Bittab *dest, const GT_Bittab *src1,
+                   const GT_Bittab *src2)
 {
   unsigned long i;
   assert(dest && src1 && src2);
@@ -238,7 +240,8 @@ unsigned long gt_bittab_get_last_bitnum(const GT_Bittab *b)
   return b->num_of_bits;
 }
 
-unsigned long gt_bittab_get_next_bitnum(const GT_Bittab *b, unsigned long curnum)
+unsigned long gt_bittab_get_next_bitnum(const GT_Bittab *b,
+                                        unsigned long curnum)
 {
   unsigned long i, rval = UNDEF_ULONG;
 

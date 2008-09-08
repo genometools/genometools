@@ -48,7 +48,8 @@ int gt_fasta_reader_run(GT_FastaReader *fr,
                           proc_sequence_length, data, err);
 }
 
-void* gt_fasta_reader_cast(GT_UNUSED const GT_FastaReaderClass *frc, GT_FastaReader *fr)
+void* gt_fasta_reader_cast(GT_UNUSED const GT_FastaReaderClass *frc,
+                           GT_FastaReader *fr)
 {
   assert(frc && fr && fr->c_class == frc);
   return fr;

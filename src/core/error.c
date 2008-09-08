@@ -22,9 +22,9 @@
 #include "core/xansi.h"
 
 struct GT_Error {
-  char gt_error_string[BUFSIZ],
+  char error_string[BUFSIZ],
        *progname;
-  bool gt_error_is_set;
+  bool error_is_set;
 };
 
 GT_Error* gt_error_new(void)
@@ -44,27 +44,27 @@ void gt_error_set(GT_Error *err, const char *format, ...)
 void gt_error_vset(GT_Error *err, const char *format, va_list ap)
 {
   assert(err && format);
-  err->gt_error_is_set = true;
-  (void) vsnprintf(err->gt_error_string, sizeof (err->gt_error_string), format, ap);
+  err->error_is_set = true;
+  (void) vsnprintf(err->error_string, sizeof (err->error_string), format, ap);
 }
 
 bool gt_error_is_set(const GT_Error *err)
 {
   assert(err);
-  return err->gt_error_is_set;
+  return err->error_is_set;
 }
 
 void gt_error_unset(GT_Error *err)
 {
   assert(err);
-  err->gt_error_is_set = false;
-  err->gt_error_string[0] = '\0';
+  err->error_is_set = false;
+  err->error_string[0] = '\0';
 }
 
 const char* gt_error_get(const GT_Error *err)
 {
-  assert(err && err->gt_error_is_set);
-  return err->gt_error_string;
+  assert(err && err->error_is_set);
+  return err->error_string;
 }
 
 void gt_error_set_progname(GT_Error *err, const char *progname)

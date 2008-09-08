@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_FASTA_READER_H
-#define GT_FASTA_READER_H
+#ifndef FASTA_READER_H
+#define FASTA_READER_H
 
 #include <stdbool.h>
 #include "core/error.h"
@@ -33,14 +33,15 @@ typedef enum {
 
 /* gets called for each description (the start of a fasta entry) */
 typedef int (*GT_FastaReaderProcDescription)(const char *description,
-                                          unsigned long length, void *data,
-                                          GT_Error*);
+                                             unsigned long length, void *data,
+                                             GT_Error*);
 /* gets called for each sequence part of a fasta entry */
 typedef int (*GT_FastaReaderProcSequencePart)(const char *seqpart,
-                                           unsigned long length, void *data,
-                                           GT_Error*);
+                                              unsigned long length, void *data,
+                                              GT_Error*);
 /* gets called after a fasta entry has been read */
-typedef int (*GT_FastaReaderProcSequenceLength)(unsigned long, void *data, GT_Error*);
+typedef int (*GT_FastaReaderProcSequenceLength)(unsigned long, void *data,
+                                                GT_Error*);
 
 /* construct a new fasta reader for the file named <sequence_filename>, pass
    NULL to read from stdin */

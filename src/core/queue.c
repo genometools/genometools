@@ -196,8 +196,8 @@ void gt_queue_remove(GT_Queue *q, void *elem)
   }
 }
 
-int gt_queue_iterate(GT_Queue *q, GT_QueueProcessor gt_queue_processor, void *info,
-                  GT_Error *err)
+int gt_queue_iterate(GT_Queue *q, GT_QueueProcessor gt_queue_processor,
+                     void *info, GT_Error *err)
 {
   long i;
   int rval;
@@ -216,15 +216,15 @@ int gt_queue_iterate(GT_Queue *q, GT_QueueProcessor gt_queue_processor, void *in
           return rval;
       }
       for (i = 0; i < q->back; i++) {
-        if ((rval = gt_queue_processor(q->contents + i, info, err))) return rval;
+        if ((rval = gt_queue_processor(q->contents+i, info, err))) return rval;
       }
     }
   }
   return 0;
 }
 
-int gt_queue_iterate_reverse(GT_Queue *q, GT_QueueProcessor gt_queue_processor, void *info,
-                          GT_Error *err)
+int gt_queue_iterate_reverse(GT_Queue *q, GT_QueueProcessor gt_queue_processor,
+                             void *info, GT_Error *err)
 {
   long i;
   int rval;
@@ -282,7 +282,8 @@ static int check_gt_queue_reverse(void **elem, void *info, GT_Error *err)
   return had_err;
 }
 
-static int fail_func(GT_UNUSED void **elem, GT_UNUSED void *info, GT_UNUSED GT_Error *err)
+static int fail_func(GT_UNUSED void **elem, GT_UNUSED void *info,
+                     GT_UNUSED GT_Error *err)
 {
   return -1;
 }

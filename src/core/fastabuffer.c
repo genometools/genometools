@@ -57,7 +57,8 @@ GT_FastaBuffer* gt_fastabuffer_new(const GT_StrArray *filenametab,
   return fb;
 }
 
-static inline int ownbuffergt_genfile_getc(GT_FastaBuffer *fb,GT_GenFile *inputstream)
+static inline int ownbuffergt_genfile_getc(GT_FastaBuffer *fb,
+                                           GT_GenFile *inputstream)
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {
@@ -145,7 +146,8 @@ static int advancefastabufferstate(GT_FastaBuffer *fb, GT_Error *err)
             if (currentchar == NEWLINESYMBOL)
             {
               STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
-              gt_queue_add(fb->descptr, gt_cstr_dup(fb->headerbuffer.spacechar));
+              gt_queue_add(fb->descptr,
+                           gt_cstr_dup(fb->headerbuffer.spacechar));
               fb->headerbuffer.nextfreechar = 0;
             } else
             {

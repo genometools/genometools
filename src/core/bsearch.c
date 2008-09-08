@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,9 +20,10 @@
 #include "core/ensure.h"
 #include "core/unused_api.h"
 
-static void* gt_bsearch_generic(GT_Array *members, const void *key, const void *base,
-                             size_t nmemb, size_t size, GT_CompareWithData compar,
-                             void *data, GT_Bittab *b)
+static void* bsearch_generic(GT_Array *members, const void *key,
+                             const void *base, size_t nmemb, size_t size,
+                             GT_CompareWithData compar, void *data,
+                             GT_Bittab *b)
 {
   char *baseptr = (char *)base, *tmp_ptr,
    *ptr; /* the current element we consider */
@@ -40,8 +41,10 @@ static void* gt_bsearch_generic(GT_Array *members, const void *key, const void *
         gt_array_add(members, ptr);
       else
         return ptr; /* because we got no <members> array */
-      if (b)
-        gt_bittab_set_bit(b, (ptr - (char *)base) / size); /* mark found element */
+      if (b) {
+        /* mark found element */
+        gt_bittab_set_bit(b, (ptr - (char *)base) / size);
+      }
       /* looking left for equal elements */
       for (tmp_ptr = ptr - size;
            tmp_ptr >= (char *)base && !compar(key, tmp_ptr, data);
@@ -70,25 +73,26 @@ static void* gt_bsearch_generic(GT_Array *members, const void *key, const void *
   return NULL;
 }
 
-void* gt_bsearch_data(const void *key, const void *base, size_t nmemb, size_t size,
-                   GT_CompareWithData compar, void *data)
+void* gt_bsearch_data(const void *key, const void *base, size_t nmemb,
+                      size_t size, GT_CompareWithData compar, void *data)
 {
-  return gt_bsearch_generic(NULL, key, base, nmemb, size, compar, data, NULL);
+  return bsearch_generic(NULL, key, base, nmemb, size, compar, data, NULL);
 }
 
 void gt_bsearch_all(GT_Array *members, const void *key, const void *base,
-                 size_t nmemb, size_t size, GT_CompareWithData compar, void *data)
+                    size_t nmemb, size_t size, GT_CompareWithData compar,
+                    void *data)
 {
   assert(members);
-  gt_bsearch_generic(members, key, base, nmemb, size, compar, data, NULL);
+  bsearch_generic(members, key, base, nmemb, size, compar, data, NULL);
 }
 
 void gt_bsearch_all_mark(GT_Array *members, const void *key, const void *base,
-                      size_t nmemb, size_t size, GT_CompareWithData compar,
-                      void *data, GT_Bittab *b)
+                         size_t nmemb, size_t size, GT_CompareWithData compar,
+                         void *data, GT_Bittab *b)
 {
   assert(members);
-  gt_bsearch_generic(members, key, base, nmemb, size, compar, data, b);
+  bsearch_generic(members, key, base, nmemb, size, compar, data, b);
 }
 
 static int cmp(const void *a_ptr, const void *b_ptr, GT_UNUSED void *unused)
@@ -105,8 +109,8 @@ static int cmp(const void *a_ptr, const void *b_ptr, GT_UNUSED void *unused)
 }
 
 /* XXX: This unit test could be done much better by filling an array randomly,
-   sorting it, and comparing gt_bsearch_all() against a brute force implementation.
-*/
+   sorting it, and comparing gt_bsearch_all() against a brute force
+   implementation.  */
 int gt_bsearch_unit_test(GT_Error *err)
 {
   GT_Array *elements, *members;
@@ -120,29 +124,31 @@ int gt_bsearch_unit_test(GT_Error *err)
   members = gt_array_new(sizeof (int*));
 
   /* the empty case */
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, !gt_array_size(members)); /* no member found */
   ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
-                                gt_array_size(elements), sizeof (int), cmp, NULL));
+                                   gt_array_size(elements), sizeof (int), cmp,
+                                   NULL));
 
   /* 1 element */
   key = 7;
   element = 7;
   gt_array_add(elements, element);
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, gt_array_size(members) == 1); /* one member found */
   member_ptr = *(int**) gt_array_get(members, 0);
   ensure(had_err, *member_ptr == element);
   member_ptr = gt_bsearch_data(&key, gt_array_get_space(elements),
-                            gt_array_size(elements), sizeof (int), cmp, NULL);
+                               gt_array_size(elements), sizeof (int), cmp,
+                               NULL);
   ensure(had_err, *member_ptr == element);
 
   key = -7;
   gt_array_reset(members);
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, !gt_array_size(members)); /* no member found */
 
   /* 2 elements */
@@ -150,31 +156,33 @@ int gt_bsearch_unit_test(GT_Error *err)
   gt_array_reset(members);
   gt_array_add(elements, element);
   ensure(had_err, gt_array_size(elements) == 2);
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, gt_array_size(members) == 2); /* two members found */
   member_ptr = *(int**) gt_array_get(members, 0);
   ensure(had_err, *member_ptr == element);
   member_ptr = *(int**) gt_array_get(members, 1);
   ensure(had_err, *member_ptr == element);
   ensure(had_err, gt_bsearch_data(&key, gt_array_get_space(elements),
-                               gt_array_size(elements), sizeof (int), cmp, NULL));
+                                  gt_array_size(elements), sizeof (int), cmp,
+                                  NULL));
 
   key = -7;
   gt_array_reset(members);
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, !gt_array_size(members)); /* no member found */
   ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
-                                gt_array_size(elements), sizeof (int), cmp, NULL));
+                                   gt_array_size(elements), sizeof (int), cmp,
+                                   NULL));
 
   /* 3 elements */
   key = 7;
   gt_array_reset(members);
   gt_array_add(elements, element);
   ensure(had_err, gt_array_size(elements) == 3);
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, gt_array_size(members) == 3); /* three members found */
   member_ptr = *(int**) gt_array_get(members, 0);
   ensure(had_err, *member_ptr == element);
@@ -183,15 +191,17 @@ int gt_bsearch_unit_test(GT_Error *err)
   member_ptr = *(int**) gt_array_get(members, 2);
   ensure(had_err, *member_ptr == element);
   ensure(had_err, gt_bsearch_data(&key, gt_array_get_space(elements),
-                               gt_array_size(elements), sizeof (int), cmp, NULL));
+                                  gt_array_size(elements), sizeof (int), cmp,
+                                  NULL));
 
   key = -7;
   gt_array_reset(members);
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, !gt_array_size(members)); /* no member found */
   ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
-                                gt_array_size(elements), sizeof (int), cmp, NULL));
+                                   gt_array_size(elements), sizeof (int), cmp,
+                                   NULL));
 
   /* large case: -10 -5 -3 -3 -3 0 1 2 3 */
   gt_array_reset(elements);
@@ -214,8 +224,8 @@ int gt_bsearch_unit_test(GT_Error *err)
   ensure(had_err, gt_array_size(elements) == 9);
   key = -3;
   gt_array_reset(members);
-  gt_bsearch_all(members, &key, gt_array_get_space(elements), gt_array_size(elements),
-              sizeof (int), cmp, NULL);
+  gt_bsearch_all(members, &key, gt_array_get_space(elements),
+                 gt_array_size(elements), sizeof (int), cmp, NULL);
   ensure(had_err, gt_array_size(members) == 3); /* three members found */
   member_ptr = *(int**) gt_array_get(members, 0);
   ensure(had_err, *member_ptr == -3);
@@ -223,8 +233,9 @@ int gt_bsearch_unit_test(GT_Error *err)
   ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) gt_array_get(members, 2);
   ensure(had_err, *member_ptr == -3);
-  ensure(had_err, gt_bsearch_data(&key, gt_array_get_space(elements),
-                               gt_array_size(elements), sizeof (int), cmp, NULL));
+  ensure(had_err,
+         gt_bsearch_data(&key, gt_array_get_space(elements),
+                         gt_array_size(elements), sizeof (int), cmp,NULL));
 
   /* test gt_bsearch_all_mark() with large case */
   gt_array_reset(members);

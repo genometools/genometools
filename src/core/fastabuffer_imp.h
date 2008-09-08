@@ -50,7 +50,8 @@ struct GT_FastaBuffer
 
 int advanceformatbufferstate(GT_FastaBuffer *fb, GT_Error*);
 
-static inline int gt_fastabuffer_next(GT_FastaBuffer *fb,Uchar *val, GT_Error *err)
+static inline int gt_fastabuffer_next(GT_FastaBuffer *fb,Uchar *val,
+                                      GT_Error *err)
 {
   if (fb->nextread >= fb->nextfree)
   {

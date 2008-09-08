@@ -23,10 +23,12 @@
 /* Return copy of <gt_cstr_array>. */
 char**        gt_cstr_array_dup(const char **gt_cstr_array);
 /* Use p and a blank as prefix for gt_cstr_array[0] and return the result. */
-char**        gt_cstr_array_prefix_first(const char **gt_cstr_array, const char *p);
+char**        gt_cstr_array_prefix_first(const char **gt_cstr_array,
+                                         const char *p);
 char**        gt_cstr_array_preprend(const char **gt_cstr_array, const char *p);
 void          gt_cstr_array_show(char **gt_cstr_array, FILE*);
-void          gt_cstr_array_show_genfile(const char **gt_cstr_array, GT_GenFile*);
+void          gt_cstr_array_show_genfile(const char **gt_cstr_array,
+                                         GT_GenFile*);
 unsigned long gt_cstr_array_size(const char **gt_cstr_array); /* O(n) */
 void          gt_cstr_array_delete(char **gt_cstr_array);
 

@@ -32,14 +32,16 @@ struct GT_FastaReaderSeqIt {
         gt_fasta_reader_cast(gt_fasta_reader_seqit_class(), FR)
 
 static int gt_fasta_reader_seqit_run(GT_FastaReader *fasta_reader,
-                                  GT_FastaReaderProcDescription proc_description,
-                                  GT_FastaReaderProcSequencePart
-                                  proc_sequence_part,
-                                  GT_FastaReaderProcSequenceLength
-                                  proc_sequence_length,
-                                  void *data, GT_Error *err)
+                                     GT_FastaReaderProcDescription
+                                     proc_description,
+                                     GT_FastaReaderProcSequencePart
+                                     proc_sequence_part,
+                                     GT_FastaReaderProcSequenceLength
+                                     proc_sequence_length,
+                                     void *data, GT_Error *err)
 {
-  GT_FastaReaderSeqIt *gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fasta_reader);
+  GT_FastaReaderSeqIt *gt_fasta_reader_seqit =
+    gt_fasta_reader_seqit_cast(fasta_reader);
   const Uchar *sequence;
   unsigned long len;
   char *desc;
@@ -95,8 +97,8 @@ GT_FastaReader* gt_fasta_reader_seqit_new(GT_Str *sequence_filename)
   gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);
   gt_fasta_reader_seqit->filenametab = gt_strarray_new();
   gt_strarray_add_cstr(gt_fasta_reader_seqit->filenametab,
-                    gt_str_get(sequence_filename));
-  gt_fasta_reader_seqit->seqit = seqiterator_new(gt_fasta_reader_seqit->filenametab,
-                                              NULL, true);
+                       gt_str_get(sequence_filename));
+  gt_fasta_reader_seqit->seqit = seqiterator_new(gt_fasta_reader_seqit
+                                                 ->filenametab, NULL, true);
   return fr;
 }

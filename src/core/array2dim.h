@@ -30,7 +30,7 @@
             (ARRAY2DIM)[gt_a2d_i] = (ARRAY2DIM)[gt_a2d_i-1] + (COLUMNS);       \
         }
 
-#define gt_array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS)                            \
+#define gt_array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS)                         \
         {                                                                     \
           unsigned long gt_a2d_i;                                             \
           ARRAY2DIM = gt_malloc(sizeof *ARRAY2DIM * (ROWS));                  \

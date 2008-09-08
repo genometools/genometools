@@ -44,8 +44,8 @@ static int determine_outfp(void *data, GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
   assert(ofi);
-  if (!gt_str_length(ofi->output_filename)) /* no output file given -> use stdin */
-    *ofi->outfp = NULL;
+  if (!gt_str_length(ofi->output_filename))
+    *ofi->outfp = NULL; /* no output file given -> use stdin */
   else { /* outputfile given -> create generic file pointer */
     assert(!(ofi->gzip && ofi->bzip2));
     if (ofi->gzip)
@@ -62,16 +62,19 @@ static int determine_outfp(void *data, GT_Error *err)
       warning("output file '%s' doesn't have correct suffix '%s', appending "
               "it", gt_str_get(ofi->output_filename),
               gt_genfilemode_suffix(genfilemode));
-      gt_str_append_cstr(ofi->output_filename, gt_genfilemode_suffix(genfilemode));
+      gt_str_append_cstr(ofi->output_filename,
+                         gt_genfilemode_suffix(genfilemode));
     }
     if (!ofi->force && file_exists(gt_str_get(ofi->output_filename))) {
         gt_error_set(err, "file \"%s\" exists already, use option -%s to "
-                  "overwrite", gt_str_get(ofi->output_filename), FORCE_OPT_CSTR);
+                     "overwrite", gt_str_get(ofi->output_filename),
+                     FORCE_OPT_CSTR);
         had_err = -1;
     }
     if (!had_err) {
       *ofi->outfp = gt_genfile_xopen_w_gfmode(genfilemode,
-                                           gt_str_get(ofi->output_filename), "w");
+                                              gt_str_get(ofi->output_filename),
+                                              "w");
       assert(*ofi->outfp);
     }
   }

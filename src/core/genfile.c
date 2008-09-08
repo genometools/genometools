@@ -129,8 +129,8 @@ GT_GenFile* gt_genfile_open(GT_GenFileMode genfilemode, const char *path,
   return genfile;
 }
 
-GT_GenFile* gt_genfile_xopen_w_gfmode(GT_GenFileMode genfilemode, const char *path,
-                                const char *mode)
+GT_GenFile* gt_genfile_xopen_w_gfmode(GT_GenFileMode genfilemode,
+                                      const char *path, const char *mode)
 {
   GT_GenFile *genfile;
   assert(mode);
@@ -264,7 +264,8 @@ void gt_genfile_xprintf(GT_GenFile *genfile, const char *format, ...)
   va_list va;
   va_start(va, format);
   if (xvprintf(genfile, format, va) < 0) {
-    fprintf(stderr, "gt_genfile_xprintf(): xvprintf() returned negative value\n");
+    fprintf(stderr,
+            "gt_genfile_xprintf(): xvprintf() returned negative value\n");
     exit(EXIT_FAILURE);
   }
   va_end(va);

@@ -142,7 +142,8 @@ unsigned int gt_alpha_encode(const GT_Alpha *a, char c)
   return a->character_to_code_map[(int) c];
 }
 
-void gt_alpha_decode_seq(const GT_Alpha *a, char *out, char *in, unsigned long length)
+void gt_alpha_decode_seq(const GT_Alpha *a, char *out, char *in,
+                         unsigned long length)
 {
   unsigned long i;
   assert(a && out && in);
@@ -152,7 +153,8 @@ void gt_alpha_decode_seq(const GT_Alpha *a, char *out, char *in, unsigned long l
   }
 }
 
-void gt_alpha_encode_seq(const GT_Alpha *a, char *out, char *in, unsigned long length)
+void gt_alpha_encode_seq(const GT_Alpha *a, char *out, char *in,
+                         unsigned long length)
 {
   unsigned long i;
   assert(a && out && in);

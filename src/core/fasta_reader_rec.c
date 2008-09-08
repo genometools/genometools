@@ -84,10 +84,13 @@ static int parse_fasta_entry(GT_Str *description, GT_Str *sequence,
 }
 
 static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
-                                GT_FastaReaderProcDescription proc_description,
-                                GT_FastaReaderProcSequencePart proc_sequence_part,
-                                GT_FastaReaderProcSequenceLength
-                                proc_sequence_length, void *data, GT_Error *err)
+                                   GT_FastaReaderProcDescription
+                                   proc_description,
+                                   GT_FastaReaderProcSequencePart
+                                   proc_sequence_part,
+                                   GT_FastaReaderProcSequenceLength
+                                   proc_sequence_length, void *data,
+                                   GT_Error *err)
 {
   GT_FastaReaderRec *fr = gt_fasta_reader_rec_cast(fasta_reader);
   GT_Str *description, *sequence;
@@ -103,7 +106,8 @@ static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
 
   /* make sure file is not empty */
   if (!gt_io_has_char(fr->seqio)) {
-    gt_error_set(err, "sequence file \"%s\" is empty", gt_io_get_filename(fr->seqio));
+    gt_error_set(err, "sequence file \"%s\" is empty",
+                 gt_io_get_filename(fr->seqio));
     had_err = -1;
   }
 
@@ -118,12 +122,12 @@ static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
 
     /* process entry */
     if (!had_err && proc_description) {
-      had_err = proc_description(gt_str_get(description), gt_str_length(description),
-                                 data, err);
+      had_err = proc_description(gt_str_get(description),
+                                 gt_str_length(description), data, err);
     }
     if (!had_err && proc_sequence_part) {
-      had_err = proc_sequence_part(gt_str_get(sequence), gt_str_length(sequence),
-                                   data, err);
+      had_err = proc_sequence_part(gt_str_get(sequence),
+                                   gt_str_length(sequence), data, err);
     }
     if (!had_err && proc_sequence_length)
       had_err = proc_sequence_length(gt_str_length(sequence), data, err);

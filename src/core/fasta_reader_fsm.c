@@ -36,11 +36,13 @@ typedef enum {
         gt_fasta_reader_cast(gt_fasta_reader_fsm_class(), FR)
 
 static int gt_fasta_reader_fsm_run(GT_FastaReader *fasta_reader,
-                                GT_FastaReaderProcDescription proc_description,
-                                GT_FastaReaderProcSequencePart proc_sequence_part,
-                                GT_FastaReaderProcSequenceLength
-                                proc_sequence_length,
-                                void *data, GT_Error *err)
+                                   GT_FastaReaderProcDescription
+                                   proc_description,
+                                   GT_FastaReaderProcSequencePart
+                                   proc_sequence_part,
+                                   GT_FastaReaderProcSequenceLength
+                                   proc_sequence_length,
+                                   void *data, GT_Error *err)
 {
   GT_FastaReaderFSM *fr = gt_fasta_reader_fsm_cast(fasta_reader);
   unsigned char cc;
@@ -97,8 +99,8 @@ static int gt_fasta_reader_fsm_run(GT_FastaReader *fasta_reader,
         if (cc == FASTA_SEPARATOR) {
           if (!sequence_length) {
             assert(line_counter);
-            gt_error_set(err, "empty sequence after description given in line %lu",
-                      line_counter - 1);
+            gt_error_set(err, "empty sequence after description given in line "
+                              "%lu", line_counter - 1);
             had_err = -1;
             break;
           }
@@ -160,8 +162,8 @@ static int gt_fasta_reader_fsm_run(GT_FastaReader *fasta_reader,
       case READING_SEQUENCE:
         if (!sequence_length) {
           assert(line_counter);
-          gt_error_set(err, "empty sequence after description given in line %lu",
-                    line_counter - 1);
+          gt_error_set(err, "empty sequence after description given in line "
+                            "%lu", line_counter - 1);
           had_err = -1;
         }
         else {
@@ -204,8 +206,8 @@ GT_FastaReader* gt_fasta_reader_fsm_new(GT_Str *sequence_filename)
   GT_FastaReaderFSM *gt_fasta_reader_fsm = gt_fasta_reader_fsm_cast(fr);
   gt_fasta_reader_fsm->sequence_filename = gt_str_ref(sequence_filename);
   if (sequence_filename) {
-    gt_fasta_reader_fsm->sequence_file = gt_genfile_xopen(gt_str_get(sequence_filename),
-                                                    "r");
+    gt_fasta_reader_fsm->sequence_file =
+      gt_genfile_xopen(gt_str_get(sequence_filename), "r");
   }
   else
     gt_fasta_reader_fsm->sequence_filename = gt_str_new_cstr("stdin");

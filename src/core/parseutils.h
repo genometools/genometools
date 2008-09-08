@@ -50,8 +50,9 @@ int gt_parse_range(GT_Range*, const char *start, const char *end,
 /* Sets <score_is_defined> to false if !strcmp(score, ".").
    Otherwise <score_is_defined> is set to true and the parsed score is stored
    in <score_value>. */
-int gt_parse_score(bool *score_is_defined, float *score_value, const char *score,
-                unsigned int line_number, const char *filename, GT_Error*);
+int gt_parse_score(bool *score_is_defined, float *score_value,
+                   const char *score, unsigned int line_number,
+                   const char *filename, GT_Error*);
 
 int gt_parse_strand(GT_Strand*, const char *strand,
                  unsigned int line_number, const char *filename, GT_Error*);

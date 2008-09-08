@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_FASTA_READER_REP_H
-#define GT_FASTA_READER_REP_H
+#ifndef FASTA_READER_REP_H
+#define FASTA_READER_REP_H
 
 #include <stdio.h>
 #include "core/fasta_reader.h"
