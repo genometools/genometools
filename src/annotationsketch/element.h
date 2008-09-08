@@ -31,13 +31,14 @@ typedef struct GT_Element GT_Element;
 
 /* Creates a complete new GT_Element object. */
 GT_Element*           gt_element_new(GT_GenomeNode*);
-/* Creates an empty GT_Element object. GT_Range and type have to be set afterwards. */
+/* Creates an empty GT_Element object.
+   Range and type have to be set afterwards. */
 GT_Element*           gt_element_new_empty(void);
 GT_Range              gt_element_get_range(const GT_Element*);
 void                  gt_element_set_range(GT_Element*, GT_Range);
 GT_DrawingRange       gt_element_calculate_drawing_range(GT_Element*,
                                                          GT_Canvas*);
-GT_FeatureType* gt_element_get_type(const GT_Element*);
+GT_FeatureType*       gt_element_get_type(const GT_Element*);
 void                  gt_element_set_type(GT_Element*, GT_FeatureType*);
 GT_Strand             gt_element_get_strand(const GT_Element*);
 GT_GenomeNode*        gt_element_get_node_ref(const GT_Element*);

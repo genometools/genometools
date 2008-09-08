@@ -22,7 +22,8 @@
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/line_breaker.h"
 
-/* Implements the GT_LineBreaker interface; breaks GT_Lines if captions overlap. */
+/* Implements the GT_LineBreaker interface; breaks GT_Lines if captions
+   overlap. */
 typedef struct GT_LineBreakerCaptions GT_LineBreakerCaptions;
 
 const GT_LineBreakerClass* gt_line_breaker_captions_class(void);

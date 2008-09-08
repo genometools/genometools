@@ -21,7 +21,8 @@
 #include "core/range.h"
 #include "annotationsketch/line_breaker.h"
 
-/* Implements the GT_LineBreaker interface; breaks GT_Lines if base ranges overlap. */
+/* Implements the GT_LineBreaker interface; breaks GT_Lines if base ranges
+   overlap. */
 typedef struct GT_LineBreakerBases GT_LineBreakerBases;
 
 const GT_LineBreakerClass* gt_line_breaker_bases_class(void);

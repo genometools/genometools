@@ -60,7 +60,8 @@ GT_FeatureIndex* gt_feature_index_new(void)
 {
   GT_FeatureIndex *fi;
   fi = gt_calloc(1, sizeof (GT_FeatureIndex));
-  fi->regions = hashmap_new(HASH_STRING, NULL, (GT_FreeFunc) region_info_delete);
+  fi->regions = hashmap_new(HASH_STRING, NULL,
+                            (GT_FreeFunc) region_info_delete);
   return fi;
 }
 
@@ -90,7 +91,8 @@ void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
   }
 }
 
-void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi, GT_GenomeFeature *gf)
+void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
+                                         GT_GenomeFeature *gf)
 {
   GT_GenomeNode *gn;
   char* seqid;
@@ -191,9 +193,10 @@ static int gt_genome_node_cmp_range_start(const void *v1, const void *v2)
   return gt_genome_node_compare(&n1, &n2);
 }
 
-int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi, GT_Array *results,
-                                         const char *seqid, GT_Range qry_range,
-                                         GT_Error *err)
+int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi,
+                                            GT_Array *results,
+                                            const char *seqid,
+                                            GT_Range qry_range, GT_Error *err)
 {
   RegionInfo *ri;
   gt_error_check(err);
@@ -216,7 +219,8 @@ const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex *fi)
   return fi->firstseqid;
 }
 
-int store_seqid(void *key, GT_UNUSED void *value, void *data, GT_UNUSED GT_Error *err)
+static int store_seqid(void *key, GT_UNUSED void *value, void *data,
+                       GT_UNUSED GT_Error *err)
 {
   GT_StrArray *seqids = (GT_StrArray*) data;
   const char *seqid = (const char*) key;

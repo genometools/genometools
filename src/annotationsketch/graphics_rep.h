@@ -38,13 +38,14 @@ struct GT_GraphicsClass {
   void    (*draw_vertical_line)(GT_Graphics*, double, double, GT_Color, double);
   void    (*draw_box)(GT_Graphics*, double, double, double, double, GT_Color,
                       ArrowStatus, double, double, GT_Color, bool);
-  void    (*draw_dashes)(GT_Graphics*, double, double, double, double, ArrowStatus,
-                         double, double, GT_Color);
-  void    (*draw_caret)(GT_Graphics*, double, double, double, double, ArrowStatus,
-                        double, double, GT_Color);
+  void    (*draw_dashes)(GT_Graphics*, double, double, double, double,
+                         ArrowStatus, double, double, GT_Color);
+  void    (*draw_caret)(GT_Graphics*, double, double, double, double,
+                        ArrowStatus, double, double, GT_Color);
   void    (*draw_rectangle)(GT_Graphics*, double, double, bool, GT_Color, bool,
                             GT_Color, double, double);
-  void    (*draw_arrowhead)(GT_Graphics*, double, double, GT_Color, ArrowStatus);
+  void    (*draw_arrowhead)(GT_Graphics*, double, double, GT_Color,
+                            ArrowStatus);
   int     (*save_to_file)(const GT_Graphics*, const char*, GT_Error*);
   void    (*save_to_stream)(const GT_Graphics*, GT_Str*);
   void    (*free)(GT_Graphics*);

@@ -235,11 +235,11 @@ double gt_graphics_cairo_get_text_height(GT_Graphics *gg)
   return ext.height;
 }
 
-void gt_graphics_cairo_draw_box(GT_Graphics *gg, double x, double y, double width,
-                             double height, GT_Color fill_color,
-                             ArrowStatus arrow_status, double arrow_width,
-                             double stroke_width, GT_Color stroke_color,
-                             bool dashed)
+void gt_graphics_cairo_draw_box(GT_Graphics *gg, double x, double y,
+                                double width, double height,
+                                GT_Color fill_color, ArrowStatus arrow_status,
+                                double arrow_width, double stroke_width,
+                                GT_Color stroke_color, bool dashed)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);

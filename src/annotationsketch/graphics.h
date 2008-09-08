@@ -49,8 +49,8 @@ typedef struct GT_Graphics GT_Graphics;
 #include "core/str.h"
 #include "core/error.h"
 
-/* Create a new GT_Graphics object, which is an abstraction of a drawing surface on
-   which several relevant primitives can be drawn. */
+/* Create a new GT_Graphics object, which is an abstraction of a drawing
+   surface on which several relevant primitives can be drawn. */
 void      gt_graphics_draw_text(GT_Graphics*, double x, double y, const char*);
 #define   gt_graphics_draw_text_left(g,x,y,t) \
           gt_graphics_draw_text(g,x,y,t);

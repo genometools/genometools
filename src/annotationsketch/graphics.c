@@ -51,20 +51,22 @@ void gt_graphics_draw_text(GT_Graphics *g, double x, double y, const char* txt)
   g->c_class->draw_text(g, x, y, txt);
 }
 
-void gt_graphics_draw_text_centered(GT_Graphics *g, double x, double y, const char *t)
+void gt_graphics_draw_text_centered(GT_Graphics *g, double x, double y,
+                                    const char *t)
 {
   assert(g && g->c_class && t);
   g->c_class->draw_text_centered(g, x, y, t);
 }
 
-void gt_graphics_draw_text_right(GT_Graphics *g, double x, double y, const char *txt)
+void gt_graphics_draw_text_right(GT_Graphics *g, double x, double y,
+                                 const char *txt)
 {
   assert(g && g->c_class && txt);
   g->c_class->draw_text_right(g, x, y, txt);
 }
 
-void gt_graphics_draw_colored_text(GT_Graphics *g, double x, double y, GT_Color col,
-                                const char *txt)
+void gt_graphics_draw_colored_text(GT_Graphics *g, double x, double y,
+                                   GT_Color col, const char *txt)
 {
   assert(g && g->c_class && txt);
   g->c_class->draw_colored_text(g, x, y, col, txt);
@@ -162,16 +164,17 @@ void gt_graphics_draw_rectangle(GT_Graphics *g, double x, double y,
                              outline_color, outline_width, width);
 }
 
-void gt_graphics_draw_arrowhead(GT_Graphics *g, double x, double y, GT_Color col,
-                             ArrowStatus arrow_status)
+void gt_graphics_draw_arrowhead(GT_Graphics *g, double x, double y,
+                                GT_Color col, ArrowStatus arrow_status)
 {
   assert(g && g->c_class);
   g->c_class->draw_arrowhead(g, x, y, col, arrow_status);
 }
 
 int gt_graphics_save_to_file(const GT_Graphics *g, const char *filename,
-                          GT_Error *err)
+                             GT_Error *err)
 {
+  gt_error_check(err);
   assert(g && g->c_class);
   return g->c_class->save_to_file(g, filename, err);
 }

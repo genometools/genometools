@@ -49,20 +49,22 @@ void gt_line_breaker_delete(GT_LineBreaker *lb)
   gt_free(lb);
 }
 
-bool gt_line_breaker_gt_line_is_occupied(GT_LineBreaker *lb, GT_Line *line, GT_Block *block)
+bool gt_line_breaker_gt_line_is_occupied(GT_LineBreaker *lb, GT_Line *line,
+                                         GT_Block *block)
 {
   assert(lb && lb->c_class && line && block);
   return lb->c_class->is_occupied(lb, line, block);
 }
 
-void gt_line_breaker_register_block(GT_LineBreaker *lb, GT_Line *line, GT_Block *block)
+void gt_line_breaker_register_block(GT_LineBreaker *lb, GT_Line *line,
+                                    GT_Block *block)
 {
   assert(lb && lb->c_class && line && block);
   lb->c_class->register_block(lb, line, block);
 }
 
 void* gt_line_breaker_cast(GT_UNUSED const GT_LineBreakerClass *lbc,
-                        GT_LineBreaker *lb)
+                           GT_LineBreaker *lb)
 {
   assert(lbc && lb && lb->c_class == lbc);
   return lb;

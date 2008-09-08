@@ -37,7 +37,8 @@ static void feature_visitor_free(GenomeVisitor *gv)
   gt_feature_index_delete(feature_visitor->feature_index);
 }
 
-static int feature_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
+static int feature_visitor_genome_feature(GenomeVisitor *gv,
+                                          GT_GenomeFeature *gf,
                                           GT_UNUSED GT_Error *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);

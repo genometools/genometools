@@ -89,6 +89,7 @@ GT_LineBreaker* gt_line_breaker_bases_new()
   GT_LineBreaker *lb;
   lb = gt_line_breaker_create(gt_line_breaker_bases_class());
   lbb = gt_line_breaker_bases_cast(lb);
-  lbb->itrees = hashmap_new(HASH_DIRECT, NULL, (GT_FreeFunc) interval_tree_delete);
+  lbb->itrees = hashmap_new(HASH_DIRECT, NULL,
+                            (GT_FreeFunc) interval_tree_delete);
   return lb;
 }

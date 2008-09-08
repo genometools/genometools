@@ -160,7 +160,8 @@ static bool get_caption_display_status(GT_Diagram *d, GT_FeatureType *gft)
   return *status;
 }
 
-static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *parent)
+static void add_to_current(GT_Diagram *d, GT_GenomeNode *node,
+                           GT_GenomeNode *parent)
 {
   NodeInfoGT_Element *ni;
   GT_Block *block;
@@ -203,11 +204,13 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
   gt_block_set_caption(block, caption);
   /* insert node into block */
   gt_block_insert_element(block, node);
-  bt = blocktuple_new(gt_genome_feature_get_type((GT_GenomeFeature*) node), block);
+  bt = blocktuple_new(gt_genome_feature_get_type((GT_GenomeFeature*) node),
+                      block);
   gt_array_add(ni->blocktuples, bt);
 }
 
-static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* parent)
+static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node,
+                          GT_GenomeNode* parent)
 {
   GT_Block *block = NULL;
   NodeInfoGT_Element *par_ni, *ni;
@@ -223,7 +226,8 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
 
   /* try to find the right block to insert */
   block = find_block_for_type(par_ni,
-                              gt_genome_feature_get_type((GT_GenomeFeature*) node));
+                              gt_genome_feature_get_type((GT_GenomeFeature*)
+                                                         node));
   /* no fitting block was found, create a new one */
   if (block == NULL) {
     GT_BlockTuple *bt;
@@ -248,7 +252,8 @@ static void add_to_parent(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode* par
     }
     gt_block_set_caption(block, caption);
     /* add block to nodeinfo */
-    bt = blocktuple_new(gt_genome_feature_get_type((GT_GenomeFeature*) node), block);
+    bt = blocktuple_new(gt_genome_feature_get_type((GT_GenomeFeature*) node),
+                                                   block);
     gt_array_add(par_ni->blocktuples, bt);
   }
   /* now we have a block to insert into */
@@ -271,7 +276,8 @@ static void add_recursive(GT_Diagram *d, GT_GenomeNode *node,
     GT_BlockTuple *bt;
     /* try to find the right block to insert */
     block = find_block_for_type(ni,
-                                gt_genome_feature_get_type((GT_GenomeFeature*) node));
+                                gt_genome_feature_get_type((GT_GenomeFeature*)
+                                                           node));
     if (block == NULL) {
       block = gt_block_new_from_node(node);
       bt = blocktuple_new(gt_genome_feature_get_type((GT_GenomeFeature*) node),
@@ -292,7 +298,8 @@ static void add_recursive(GT_Diagram *d, GT_GenomeNode *node,
   }
 }
 
-static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *parent)
+static void process_node(GT_Diagram *d, GT_GenomeNode *node,
+                         GT_GenomeNode *parent)
 {
   GT_Range elem_range;
   bool *collapse, do_not_overlap=false;
@@ -328,8 +335,10 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
 
   }
   /* check if this type is to be displayed */
-  if (max_show_width != UNDEF_ULONG && gt_range_length(d->range) > max_show_width)
+  if (max_show_width != UNDEF_ULONG &&
+      gt_range_length(d->range) > max_show_width) {
     return;
+  }
   if (parent && par_max_show_width != UNDEF_ULONG
         && gt_range_length(d->range) > par_max_show_width)
     parent = NULL;
@@ -371,20 +380,22 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
   assert(hashmap_get(d->nodeinfo, node));
 }
 
-static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value, void *data,
-                                  GT_UNUSED GT_Error *err)
+static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value,
+                                     void *data, GT_UNUSED GT_Error *err)
 {
   GT_TracklineInfo *add = (GT_TracklineInfo*) data;
   add->total_lines += gt_track_get_number_of_lines((GT_Track*) value);
   add->total_captionlines += gt_track_get_number_of_lines_with_captions(
-                                                               (GT_Track*) value);
+                                                             (GT_Track*) value);
   return 0;
 }
 
-static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children, GT_Error* e)
+static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children,
+                       GT_Error *err)
 {
   NodeTraverseInfo* gt_genome_node_info;
   gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
+  gt_error_check(err);
   int had_err;
   if (gt_genome_node_has_children(gn))
   {
@@ -392,7 +403,7 @@ static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children, GT_Erro
     process_node(gt_genome_node_info->diagram, gn, gt_genome_node_info->parent);
     gt_genome_node_info->parent = gn;
     had_err = gt_genome_node_traverse_direct_children(gn, gt_genome_node_info,
-                                                   visit_child, e);
+                                                   visit_child, err);
     assert(!had_err); /* visit_child() is sane */
     gt_genome_node_info->parent = oldparent;
   }
@@ -437,7 +448,8 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
 }
 
 /* Traverse a genome node graph with depth first search. */
-static void traverse_genome_nodes(GT_GenomeNode *gn, void *gt_genome_node_children)
+static void traverse_genome_nodes(GT_GenomeNode *gn,
+                                  void *gt_genome_node_children)
 {
   NodeTraverseInfo* gt_genome_node_info;
   int had_err;
@@ -471,8 +483,8 @@ static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
     traverse_genome_nodes(current_root, &gt_genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
-  had_err = hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks,
-                                      diagram, (GT_Compare) gt_genome_node_cmp, NULL);
+  had_err = hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks, diagram,
+                                    (GT_Compare) gt_genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
 
   /* clear caches */
@@ -490,15 +502,16 @@ static int blocklist_delete(void *value)
   return 0;
 }
 
-static GT_Diagram* gt_diagram_new_generic(GT_Array *features, const GT_Range *range,
-                                    GT_Style *style)
+static GT_Diagram* gt_diagram_new_generic(GT_Array *features,
+                                          const GT_Range *range,
+                                          GT_Style *style)
 {
   GT_Diagram *diagram;
   diagram = gt_malloc(sizeof (GT_Diagram));
   diagram->tracks = hashmap_new(HASH_STRING, gt_free_func,
                                 (GT_FreeFunc) gt_track_delete);
   diagram->blocks = hashmap_new(HASH_DIRECT, NULL,
-                                  (GT_FreeFunc) blocklist_delete);
+                                (GT_FreeFunc) blocklist_delete);
   diagram->nodeinfo = hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->style = style;

@@ -19,32 +19,32 @@
 #include "core/mathsupport.h"
 #include "annotationsketch/drawing_range.h"
 
-int gt_drawing_range_compare(GT_DrawingRange gt_range_a, GT_DrawingRange gt_range_b)
+int gt_drawing_range_compare(GT_DrawingRange range_a, GT_DrawingRange range_b)
 {
-  assert(gt_range_a.start <= gt_range_a.end && gt_range_b.start <= gt_range_b.end);
+  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
-  if (double_equals_double(gt_range_a.start, gt_range_b.start)
-        && double_equals_double(gt_range_a.end, gt_range_b.end))
-    return 0; /* gt_range_a == gt_range_b */
+  if (double_equals_double(range_a.start, range_b.start)
+        && double_equals_double(range_a.end, range_b.end))
+    return 0; /* range_a == range_b */
 
-  if ((gt_range_a.start < gt_range_b.start) ||
-      (double_equals_double(gt_range_a.start, gt_range_b.start)
-         && (gt_range_a.end < gt_range_b.end)))
-    return -1; /* gt_range_a < gt_range_b */
+  if ((range_a.start < range_b.start) ||
+      (double_equals_double(range_a.start, range_b.start)
+         && (range_a.end < range_b.end)))
+    return -1; /* range_a < range_b */
 
-  return 1; /* gt_range_a > gt_range_b */
+  return 1; /* range_a > range_b */
 }
 
-bool gt_drawing_range_overlap(GT_DrawingRange gt_range_a, GT_DrawingRange gt_range_b)
+bool gt_drawing_range_overlap(GT_DrawingRange range_a, GT_DrawingRange range_b)
 {
-  if (gt_range_a.start <= gt_range_b.end && gt_range_a.end >= gt_range_b.start)
+  if (range_a.start <= range_b.end && range_a.end >= range_b.start)
     return true;
   return false;
 }
 
-bool gt_drawing_range_contains(GT_DrawingRange gt_range_a, GT_DrawingRange gt_range_b)
+bool gt_drawing_range_contains(GT_DrawingRange range_a, GT_DrawingRange range_b)
 {
-  if (gt_range_a.start <= gt_range_b.start && gt_range_a.end >= gt_range_b.end)
+  if (range_a.start <= range_b.start && range_a.end >= range_b.end)
     return true;
   return false;
 }
