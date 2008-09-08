@@ -47,7 +47,7 @@
 int luaopen_range(lua_State*);
 
 /* push a GT_Range to Lua, returns 1 (number of elements pushed) */
-int gt_range_lua_push(lua_State*, GT_Range);
+int gt_lua_range_push(lua_State*, GT_Range);
 
 #define RANGE_METATABLE  "GenomeTools.range"
 #define check_range(L, POS) \

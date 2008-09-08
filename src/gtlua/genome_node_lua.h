@@ -25,10 +25,10 @@
 
    -- Returns a new genome feature refering to sequence with id <seqid> of
    -- <type> spanning <range> on <strand>.
-   function gt_genome_feature_new(type, range, strand)
+   function genome_feature_new(type, range, strand)
 
    -- Returns a new sequence region for sequence id <seqid> spanning <range>.
-   function gt_sequence_region_new(seqid, range)
+   function sequence_region_new(seqid, range)
 
    -- Returns the filenname of <genome_node>.
 
@@ -90,7 +90,7 @@
 int luaopen_genome_node(lua_State*);
 
 /* push a GT_GenomeNode to Lua, takes ownership! */
-void gt_genome_node_lua_push(lua_State*, GT_GenomeNode*);
+void gt_lua_genome_node_push(lua_State*, GT_GenomeNode*);
 
 #define GENOME_NODE_METATABLE  "GenomeTools.genome_node"
 #define check_genome_node(L, POS) \

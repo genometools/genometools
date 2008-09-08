@@ -62,7 +62,7 @@ static int genome_stream_lua_next_tree(lua_State *L)
   if (genome_stream_next_tree(*gs, &gn, err))
     return lua_gt_error(L, err); /* handle error */
   else if (gn)
-    gt_genome_node_lua_push(L, gn);
+    gt_lua_genome_node_push(L, gn);
   else
     lua_pushnil(L);
   gt_error_delete(err);

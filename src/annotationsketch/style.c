@@ -194,7 +194,7 @@ bool gt_style_get_color(const GT_Style *sty, const char *section,
   if (lua_isfunction(sty->L, -1) && gn)
   {
     GT_GenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
-    gt_genome_node_lua_push(sty->L, gn_lua);
+    gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
       lua_pop(sty->L, 3);
@@ -282,7 +282,7 @@ bool gt_style_get_str(const GT_Style *sty, const char *section,
   if (lua_isfunction(sty->L, -1) && gn)
   {
     GT_GenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
-    gt_genome_node_lua_push(sty->L, gn_lua);
+    gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
       lua_pop(sty->L, 3);
@@ -333,7 +333,7 @@ bool gt_style_get_num(const GT_Style *sty, const char *section, const char *key,
   if (lua_isfunction(sty->L, -1) && gn)
   {
     GT_GenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
-    gt_genome_node_lua_push(sty->L, gn_lua);
+    gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
       lua_pop(sty->L, 3);
