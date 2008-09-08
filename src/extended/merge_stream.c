@@ -63,7 +63,7 @@ int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
           assert(i != j);
           if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
                                                       ms->buffer[j])) {
-            sequence_regions_consolidate(ms->buffer[i], ms->buffer[j]);
+            gt_sequence_regions_consolidate(ms->buffer[i], ms->buffer[j]);
             gt_genome_node_rec_delete(ms->buffer[j]);
             ms->buffer[j] = NULL;
           }

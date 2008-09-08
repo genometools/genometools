@@ -26,6 +26,7 @@ typedef struct GT_SequenceRegion GT_SequenceRegion;
 
 const GT_GenomeNodeClass* gt_sequence_region_class(void);
 GT_GenomeNode*            gt_sequence_region_new(GT_Str *seqid, GT_Range range);
-void                   sequence_regions_consolidate(GT_GenomeNode*, GT_GenomeNode*);
+void                      gt_sequence_regions_consolidate(GT_GenomeNode*,
+                                                          GT_GenomeNode*);
 
 #endif

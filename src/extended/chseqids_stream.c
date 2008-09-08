@@ -84,11 +84,12 @@ int chseqids_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *er
     if (!had_err)
       genome_nodes_sort(cs->gt_genome_node_buffer);
     /* consolidate them */
-    for (i = 1; !had_err && i + 1 < gt_array_size(cs->gt_genome_node_buffer); i++) {
+    for (i = 1; !had_err && i + 1 < gt_array_size(cs->gt_genome_node_buffer);
+         i++) {
       gn_a = gt_array_get(cs->gt_genome_node_buffer, i-1);
       gn_b = gt_array_get(cs->gt_genome_node_buffer, i);
       if (genome_nodes_are_equal_sequence_regions(*gn_a, *gn_b)) {
-        sequence_regions_consolidate(*gn_b, *gn_a);
+        gt_sequence_regions_consolidate(*gn_b, *gn_a);
         gt_genome_node_rec_delete(*gn_a);
         *gn_a = NULL;
       }
