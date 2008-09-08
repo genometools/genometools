@@ -97,12 +97,13 @@ int gt_canvas_cairo_file_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
   return had_err;
 }
 
-int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas, const char *filename,
-                              GT_Error *err)
+int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
+                                 const char *filename, GT_Error *err)
 {
   int had_err = 0;
   GT_Canvas *c = (GT_Canvas*) canvas;
-  assert(canvas && filename && err);
+  gt_error_check(err);
+  assert(canvas && filename);
   /* write out result file */
   if (c->g)
     had_err = gt_graphics_save_to_file(c->g, filename, err);

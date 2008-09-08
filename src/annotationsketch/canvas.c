@@ -307,7 +307,8 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
 
   assert(canvas && track);
 
-  gt_style_get_color(canvas->sty, "format", "gt_track_title_color", &color, NULL);
+  gt_style_get_color(canvas->sty, "format", "gt_track_title_color", &color,
+                     NULL);
 
   /* debug */
   if (gt_style_get_verbose(canvas->sty)) {

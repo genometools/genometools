@@ -87,7 +87,8 @@ static GT_BlockTuple* blocktuple_new(GT_GenomeFeatureType *gft, GT_Block *block)
   return bt;
 }
 
-static NodeInfoGT_Element* get_or_create_node_info(GT_Diagram *d, GT_GenomeNode *node)
+static NodeInfoGT_Element* get_or_create_node_info(GT_Diagram *d,
+                                                   GT_GenomeNode *node)
 {
   NodeInfoGT_Element *ni;
   assert(d && node);
