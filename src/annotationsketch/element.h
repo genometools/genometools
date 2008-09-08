@@ -35,7 +35,7 @@ GT_Element*           gt_element_new(GT_GenomeNode*);
 GT_Element*           gt_element_new_empty(void);
 GT_Range           gt_element_get_range(const GT_Element*);
 void               gt_element_set_range(GT_Element*, GT_Range);
-DrawingRange       gt_element_calculate_drawing_range(GT_Element*, GT_Canvas*);
+GT_DrawingRange       gt_element_calculate_drawing_range(GT_Element*, GT_Canvas*);
 GT_GenomeFeatureType* gt_element_get_type(const GT_Element*);
 void               gt_element_set_type(GT_Element*, GT_GenomeFeatureType*);
 GT_Strand             gt_element_get_strand(const GT_Element*);

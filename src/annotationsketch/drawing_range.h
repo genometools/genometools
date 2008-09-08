@@ -24,11 +24,11 @@ typedef struct
 {
   double start, end;
   int clip;
-} DrawingRange;
+} GT_DrawingRange;
 
-int    drawing_range_compare(DrawingRange, DrawingRange);
-bool   drawing_range_overlap(DrawingRange, DrawingRange);
-bool   drawing_range_contains(DrawingRange, DrawingRange);
-double drawing_range_length(DrawingRange);
+int    gt_drawing_range_compare(GT_DrawingRange, GT_DrawingRange);
+bool   gt_drawing_range_overlap(GT_DrawingRange, GT_DrawingRange);
+bool   gt_drawing_range_contains(GT_DrawingRange, GT_DrawingRange);
+double gt_drawing_range_length(GT_DrawingRange);
 
 #endif

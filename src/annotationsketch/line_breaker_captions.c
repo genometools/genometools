@@ -30,18 +30,18 @@ struct GT_LineBreakerCaptions {
 #define gt_line_breaker_captions_cast(LB)\
         gt_line_breaker_cast(gt_line_breaker_captions_class(), LB)
 
-static DrawingRange calculate_drawing_range(GT_LineBreakerCaptions *lcb,
+static GT_DrawingRange calculate_drawing_range(GT_LineBreakerCaptions *lcb,
                                             GT_Block* block)
 {
   double textwidth = 0.0;
-  DrawingRange drange;
+  GT_DrawingRange drange;
   assert(block && lcb);
   drange = gt_canvas_convert_coords(lcb->canvas, gt_block_get_range(block));
   if (gt_block_get_caption(block))
   {
     textwidth = gt_canvas_get_text_width(lcb->canvas,
                                       gt_str_get(gt_block_get_caption(block)));
-  if (textwidth > drawing_range_length(drange))
+  if (textwidth > gt_drawing_range_length(drange))
     drange.end = drange.start + textwidth;
   }
   return drange;
@@ -51,7 +51,7 @@ bool gt_line_breaker_captions_is_gt_line_occupied(GT_LineBreaker* lb,
                                             GT_Line *line,
                                             GT_Block *block)
 {
-  DrawingRange dr;
+  GT_DrawingRange dr;
   GT_LineBreakerCaptions *lbcap;
   unsigned long *num;
   assert(lb && block && line);
@@ -67,7 +67,7 @@ void gt_line_breaker_captions_register_block(GT_LineBreaker *lb,
                                           GT_Line *line,
                                           GT_Block *block)
 {
-  DrawingRange dr;
+  GT_DrawingRange dr;
   GT_LineBreakerCaptions *lbcap;
   unsigned long *num;
   assert(lb && block && line);
