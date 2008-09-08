@@ -636,8 +636,8 @@ static void preparethispart(Sfxiterator *sfi,
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
   if (sfi->part == 0 && mtime == NULL)
   {
-    progressbar_start(&sfi->bucketiterstep,
-                      (unsigned long long) sfi->numofallcodes);
+    gt_progressbar_start(&sfi->bucketiterstep,
+                         (unsigned long long) sfi->numofallcodes);
   }
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
@@ -824,7 +824,7 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   {
     if (mtime == NULL)
     {
-      progressbar_stop();
+      gt_progressbar_stop();
     }
     return NULL;
   }

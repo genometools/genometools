@@ -124,9 +124,9 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
                ? gt_strarray_get(is->files, is->next_file-1) : "stdin");
       }
       if (!had_err && is->fpin && is->be_verbose) {
-        progressbar_start(&is->line_number,
-                          file_number_of_lines(gt_strarray_get(is->files,
-                                                            is->next_file-1)));
+        gt_progressbar_start(&is->line_number,
+                            file_number_of_lines(gt_strarray_get(is->files,
+                                                             is->next_file-1)));
       }
     }
 
@@ -151,7 +151,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
 
     if (status_code == EOF) {
       /* end of current file */
-      if (is->be_verbose) progressbar_stop();
+      if (is->be_verbose) gt_progressbar_stop();
       gt_genfile_close(is->fpin);
       is->fpin = NULL;
       is->file_is_open = false;

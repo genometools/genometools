@@ -126,7 +126,7 @@ static int testfullscan(const GT_StrArray *filenametab,
 
   gt_error_check(err);
   totallength = getencseqtotallength(encseq);
-  progressbar_start(&fullscanpbar,(unsigned long long) totallength);
+  gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
     fb = gt_fastabuffer_new(filenametab,
@@ -190,7 +190,7 @@ static int testfullscan(const GT_StrArray *filenametab,
     }
     fullscanpbar++;
   }
-  progressbar_stop();
+  gt_progressbar_stop();
   if (!haserr)
   {
     if (pos != totallength)

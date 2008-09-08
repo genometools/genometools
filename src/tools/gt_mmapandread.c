@@ -71,10 +71,10 @@ int gt_mmapandread(int argc, const char **argv, GT_Error *err)
       /* read file */
       printf("reading file \"%s\"\n", argv[i]);
       j = 0;
-      progressbar_start(&j, (unsigned long long) sb.st_size);
+      gt_progressbar_start(&j, (unsigned long long) sb.st_size);
       for (; j < (unsigned long long) sb.st_size; j++)
         byte |= (unsigned int) ((char*) map)[j];
-      progressbar_stop();
+      gt_progressbar_stop();
 
       /* unmap file */
       xmunmap(map, sb.st_size);

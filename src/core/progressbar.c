@@ -196,8 +196,8 @@ static void sig_winch(GT_UNUSED int sigraised)
   window_resized = 1;
 }
 
-void progressbar_start(const unsigned long long *current_computation,
-                       unsigned long long number_of_computations)
+void gt_progressbar_start(const unsigned long long *current_computation,
+                          unsigned long long number_of_computations)
 {
   computation_counter = current_computation;
   last_computation = number_of_computations;
@@ -213,7 +213,7 @@ void progressbar_start(const unsigned long long *current_computation,
   (void) alarm(UPDATE_INTERVAL);               /* set alarm */
 }
 
-void progressbar_stop(void)
+void gt_progressbar_stop(void)
 {
   (void) alarm(0); /* reset alarm */
   if (!output_is_possible())

@@ -222,10 +222,10 @@ int gt_seqiterator(int argc, const char **argv, GT_Error *err)
   }
   if (seqiteroptions.verbose)
   {
-    progressbar_start(seqiterator_getcurrentcounter(seqit, (unsigned long long)
-                                                           totalsize),
-                                                           (unsigned long long)
-                                                           totalsize);
+    gt_progressbar_start(seqiterator_getcurrentcounter(seqit,
+                                                       (unsigned long long)
+                                                       totalsize),
+                         (unsigned long long) totalsize);
   }
   while (true)
   {
@@ -258,7 +258,7 @@ int gt_seqiterator(int argc, const char **argv, GT_Error *err)
   }
   if (seqiteroptions.verbose)
   {
-    progressbar_stop();
+    gt_progressbar_stop();
   }
   seqiterator_delete(seqit);
   gt_strarray_delete(files);

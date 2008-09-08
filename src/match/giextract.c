@@ -328,10 +328,11 @@ int extractginumbers(bool verbose,
   seqit = seqiterator_new(referencefiletab, NULL, true);
   if (verbose)
   {
-    progressbar_start(seqiterator_getcurrentcounter(seqit, (unsigned long long)
-                                                           totalsize),
-                                                           (unsigned long long)
-                                                           totalsize);
+    gt_progressbar_start(seqiterator_getcurrentcounter(seqit,
+                                                       (unsigned long long)
+                                                       totalsize),
+                                                       (unsigned long long)
+                                                       totalsize);
   }
   while (had_err != -1 && countmarkhit < numofqueries)
   {
@@ -421,7 +422,7 @@ int extractginumbers(bool verbose,
   gt_free(headerbufferspace);
   if (verbose)
   {
-    progressbar_stop();
+    gt_progressbar_stop();
   }
   outputnonmarked(giqueries,numofqueries);
   gt_free(giqueries);
