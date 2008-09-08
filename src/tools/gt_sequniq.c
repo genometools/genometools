@@ -141,7 +141,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       char *md5;
       if ((seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
         break;
-      md5 = md5_fingerprint((const char*) sequence, (unsigned long) len);
+      md5 = gt_md5_fingerprint((const char*) sequence, (unsigned long) len);
       if (!string_distri_get(sd, md5)) {
         string_distri_add(sd, md5);
         gt_fasta_show_entry_generic(desc, (const char*) sequence, len, 0,

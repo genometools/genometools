@@ -96,8 +96,8 @@ static void add_fingerprints(GT_StrArray *md5_fingerprints, GT_Bioseq *bs)
   unsigned long i;
   assert(md5_fingerprints && bs);
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
-    char *md5 = md5_fingerprint(gt_bioseq_get_sequence(bs, i),
-                                gt_bioseq_get_sequence_length(bs, i));
+    char *md5 = gt_md5_fingerprint(gt_bioseq_get_sequence(bs, i),
+                                   gt_bioseq_get_sequence_length(bs, i));
     gt_strarray_add_cstr(md5_fingerprints, md5);
     gt_free(md5);
   }

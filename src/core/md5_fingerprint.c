@@ -21,7 +21,7 @@
 #include "core/md5_fingerprint.h"
 #include "core/safearith.h"
 
-char *md5_fingerprint(const char *sequence, unsigned long seqlen)
+char* gt_md5_fingerprint(const char *sequence, unsigned long seqlen)
 {
   unsigned char output[16];
   char  *upper, *fingerprint;
