@@ -35,7 +35,7 @@
 
 typedef struct GTF_parser GTF_parser;
 
-GTF_parser* gtf_parser_new(GT_FeatureTypeFactory*);
+GTF_parser* gtf_parser_new(GT_TypeFactory*);
 int         gtf_parser_parse(GTF_parser*, Queue *genome_nodes,
                              GT_Str *filenamestr, FILE*, unsigned int be_tolerant,
                              GT_Error*);

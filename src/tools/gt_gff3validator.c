@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/feature_type_factory_obo.h"
+#include "extended/type_factory_obo.h"
 #include "tools/gt_gff3validator.h"
 
 typedef struct {
@@ -63,7 +63,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
                                    void *tool_arguments, GT_Error *err)
 {
   GFF3ValidatorArguments *arguments = tool_arguments;
-  GT_FeatureTypeFactory *ftf = NULL;
+  GT_TypeFactory *ftf = NULL;
   GenomeStream *gff3_in_stream;
   GT_GenomeNode *gn;
   int had_err = 0;
@@ -78,7 +78,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* set different type checker if necessary */
   if (gt_str_length(arguments->typecheck)) {
-    if (!(ftf = gt_feature_type_factory_obo_new(gt_str_get(arguments->typecheck),
+    if (!(ftf = gt_type_factory_obo_new(gt_str_get(arguments->typecheck),
                                              err))) {
         had_err = -1;
     }
@@ -99,7 +99,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* free */
   genome_stream_delete(gff3_in_stream);
-  gt_feature_type_factory_delete(ftf);
+  gt_type_factory_delete(ftf);
 
   return had_err;
 }

@@ -19,24 +19,24 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "extended/genome_feature_type_imp.h"
-#include "extended/feature_type_factory_any.h"
-#include "extended/feature_type_factory_rep.h"
+#include "extended/type_factory_any.h"
+#include "extended/type_factory_rep.h"
 
-struct GT_FeatureTypeFactoryAny {
-  const GT_FeatureTypeFactory parent_instance;
+struct GT_TypeFactoryAny {
+  const GT_TypeFactory parent_instance;
 };
 
-#define gt_feature_type_factory_any_cast(FTF)\
-        gt_feature_type_factory_cast(gt_feature_type_factory_any_class(), FTF)
+#define gt_type_factory_any_cast(FTF)\
+        gt_type_factory_cast(gt_type_factory_any_class(), FTF)
 
 static GT_GenomeFeatureType*
-gt_feature_type_factory_any_create_gft(GT_FeatureTypeFactory *ftf,
+gt_type_factory_any_create_gft(GT_TypeFactory *ftf,
                                         const char *type)
 {
-  GT_FeatureTypeFactoryAny *ftfa;
+  GT_TypeFactoryAny *ftfa;
   GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
-  ftfa = gt_feature_type_factory_any_cast(ftf);
+  ftfa = gt_type_factory_any_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
     gft = gt_genome_feature_type_construct(ftf, type);
     gft_collection_add(ftf->used_types, type, gft);
@@ -44,20 +44,20 @@ gt_feature_type_factory_any_create_gft(GT_FeatureTypeFactory *ftf,
   return gft;
 }
 
-const GT_FeatureTypeFactoryClass* gt_feature_type_factory_any_class(void)
+const GT_TypeFactoryClass* gt_type_factory_any_class(void)
 {
-  static const GT_FeatureTypeFactoryClass gt_feature_type_factory_class =
-    { sizeof (GT_FeatureTypeFactoryAny),
-      gt_feature_type_factory_any_create_gft,
+  static const GT_TypeFactoryClass gt_type_factory_class =
+    { sizeof (GT_TypeFactoryAny),
+      gt_type_factory_any_create_gft,
       NULL };
-  return &gt_feature_type_factory_class;
+  return &gt_type_factory_class;
 }
 
-GT_FeatureTypeFactory* gt_feature_type_factory_any_new(void)
+GT_TypeFactory* gt_type_factory_any_new(void)
 {
-  GT_FeatureTypeFactoryAny *ftfa;
-  GT_FeatureTypeFactory *ftf;
-  ftf = gt_feature_type_factory_create(gt_feature_type_factory_any_class());
-  ftfa = gt_feature_type_factory_any_cast(ftf);
+  GT_TypeFactoryAny *ftfa;
+  GT_TypeFactory *ftf;
+  ftf = gt_type_factory_create(gt_type_factory_any_class());
+  ftfa = gt_type_factory_any_cast(ftf);
   return ftf;
 }

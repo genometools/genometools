@@ -50,7 +50,7 @@ struct GFF3Parser {
        fasta_parsing; /* parser is in FASTA parsing mode */
   long offset;
   Mapping *offset_mapping;
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
   unsigned int last_terminator; /* line number of the last terminator */
 };
 
@@ -104,7 +104,7 @@ static void simple_gt_sequence_region_delete(SimpleGT_SequenceRegion *ssr)
 }
 
 GFF3Parser* gff3parser_new(bool checkids,
-                           GT_FeatureTypeFactory *feature_type_factory)
+                           GT_TypeFactory *feature_type_factory)
 {
   GFF3Parser *parser;
   assert(feature_type_factory);
@@ -1006,7 +1006,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* parse the feature type */
   if (!had_err &&
-      !(gft = gt_feature_type_factory_create_gft(parser->feature_type_factory,
+      !(gft = gt_type_factory_create_gft(parser->feature_type_factory,
                                               type))) {
     gt_error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid one",
               type, line_number, filename);

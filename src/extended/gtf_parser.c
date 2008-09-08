@@ -41,7 +41,7 @@ struct GTF_parser {
           *source_to_str_mapping,
           *gene_id_to_name_mapping,
           *transcript_id_to_name_mapping;
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
 };
 
 typedef struct {
@@ -83,7 +83,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
   return -1;
 }
 
-GTF_parser* gtf_parser_new(GT_FeatureTypeFactory *feature_type_factory)
+GTF_parser* gtf_parser_new(GT_TypeFactory *feature_type_factory)
 {
   GTF_parser *parser = gt_malloc(sizeof (GTF_parser));
   parser->gt_sequence_region_to_range = hashmap_new(HASH_STRING,
@@ -365,12 +365,12 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         case GTF_CDS:
         case GTF_stop_codon:
           gff_feature_type =
-            gt_feature_type_factory_create_gft(parser->feature_type_factory,
+            gt_type_factory_create_gft(parser->feature_type_factory,
                                             gft_CDS);
           break;
         case GTF_exon:
           gff_feature_type =
-            gt_feature_type_factory_create_gft(parser->feature_type_factory,
+            gt_type_factory_create_gft(parser->feature_type_factory,
                                             gft_exon);
       }
       assert(gff_feature_type);

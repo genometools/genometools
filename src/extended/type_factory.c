@@ -18,12 +18,12 @@
 #include <assert.h>
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/feature_type_factory_rep.h"
+#include "extended/type_factory_rep.h"
 
-GT_FeatureTypeFactory* gt_feature_type_factory_create(const GT_FeatureTypeFactoryClass
+GT_TypeFactory* gt_type_factory_create(const GT_TypeFactoryClass
                                                 *ftfc)
 {
-  GT_FeatureTypeFactory *ftf;
+  GT_TypeFactory *ftf;
   assert(ftfc && ftfc->size);
   ftf = gt_calloc(1, ftfc->size);
   ftf->c_class = ftfc;
@@ -31,26 +31,26 @@ GT_FeatureTypeFactory* gt_feature_type_factory_create(const GT_FeatureTypeFactor
   return ftf;
 }
 
-GT_FeatureTypeFactory* gt_feature_type_factory_ref(GT_FeatureTypeFactory *ftf)
+GT_TypeFactory* gt_type_factory_ref(GT_TypeFactory *ftf)
 {
   assert(ftf);
   ftf->reference_count++;
   return ftf;
 }
 
-GT_GenomeFeatureType* gt_feature_type_factory_create_gft(GT_FeatureTypeFactory *ftf,
+GT_GenomeFeatureType* gt_type_factory_create_gft(GT_TypeFactory *ftf,
                                                    const char *type)
 {
   assert(ftf && ftf->c_class && ftf->c_class->create_gft);
   return ftf->c_class->create_gft(ftf, type);
 }
 
-GT_StrArray* gt_feature_type_factory_get_used_types(const GT_FeatureTypeFactory *ftf)
+GT_StrArray* gt_type_factory_get_used_types(const GT_TypeFactory *ftf)
 {
   return gft_collection_get_types(ftf->used_types);
 }
 
-void gt_feature_type_factory_delete(GT_FeatureTypeFactory *ftf)
+void gt_type_factory_delete(GT_TypeFactory *ftf)
 {
   if (!ftf) return;
   if (ftf->reference_count) {
@@ -64,8 +64,8 @@ void gt_feature_type_factory_delete(GT_FeatureTypeFactory *ftf)
   gt_free(ftf);
 }
 
-void* gt_feature_type_factory_cast(GT_UNUSED const GT_FeatureTypeFactoryClass *ftfc,
-                                GT_FeatureTypeFactory *ftf)
+void* gt_type_factory_cast(GT_UNUSED const GT_TypeFactoryClass *ftfc,
+                                GT_TypeFactory *ftf)
 {
   assert(ftfc && ftf && ftf->c_class == ftfc);
   return ftf;

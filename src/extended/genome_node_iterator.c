@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/genome_node_rep.h"
-#include "extended/feature_type_factory_builtin.h"
+#include "extended/type_factory_builtin.h"
 
 struct GT_GenomeNodeIterator {
   GT_GenomeNode *gn;
@@ -100,10 +100,10 @@ GT_GenomeNode* gt_genome_node_iterator_next(GT_GenomeNodeIterator *gni)
 
 int gt_genome_node_iterator_example(GT_UNUSED GT_Error *err)
 {
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *gn, *node;
-  feature_type_factory = gt_feature_type_factory_builtin_new();
+  feature_type_factory = gt_type_factory_builtin_new();
   gn = gt_genome_feature_new_standard_gene(feature_type_factory);
 
   /* an example genome node iterator use case */
@@ -114,7 +114,7 @@ int gt_genome_node_iterator_example(GT_UNUSED GT_Error *err)
   gt_genome_node_iterator_delete(gni);
 
   gt_genome_node_rec_delete(gn);
-  gt_feature_type_factory_delete(feature_type_factory);
+  gt_type_factory_delete(feature_type_factory);
   return 0;
 }
 

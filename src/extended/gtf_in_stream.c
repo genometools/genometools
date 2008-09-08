@@ -18,16 +18,16 @@
 #include <assert.h>
 #include "core/fa.h"
 #include "core/unused_api.h"
-#include "extended/feature_type_factory_builtin.h"
 #include "extended/genome_stream_rep.h"
 #include "extended/gtf_in_stream.h"
 #include "extended/gtf_parser.h"
+#include "extended/type_factory_builtin.h"
 
 struct GTFInStream
 {
   const GenomeStream parent_instance;
   Queue *gt_genome_node_buffer;
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
 };
 
 #define gtf_in_stream_cast(GS)\
@@ -53,7 +53,7 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
 static void gtf_in_stream_free(GenomeStream *gs)
 {
   GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
-  gt_feature_type_factory_delete(gtf_in_stream->feature_type_factory);
+  gt_type_factory_delete(gtf_in_stream->feature_type_factory);
   queue_delete(gtf_in_stream->gt_genome_node_buffer);
 }
 
@@ -80,7 +80,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
   gtf_in_stream->gt_genome_node_buffer = queue_new();
-  gtf_in_stream->feature_type_factory = gt_feature_type_factory_builtin_new();
+  gtf_in_stream->feature_type_factory = gt_type_factory_builtin_new();
 
   gtf_parser = gtf_parser_new(gtf_in_stream->feature_type_factory);
 

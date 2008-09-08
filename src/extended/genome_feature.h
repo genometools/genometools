@@ -24,10 +24,10 @@ typedef struct GT_GenomeFeature GT_GenomeFeature;
 #include "core/range.h"
 #include "core/phase.h"
 #include "core/strand.h"
-#include "extended/feature_type_factory.h"
 #include "extended/genome_node.h"
 #include "extended/genome_feature_type.h"
 #include "extended/transcript_feature_type.h"
+#include "extended/type_factory.h"
 
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
@@ -37,7 +37,7 @@ GT_GenomeNode*            gt_genome_feature_new(GT_Str *seqid, GT_GenomeFeatureT
                                           GT_Strand);
 GT_GenomeNode*            gt_genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
-GT_GenomeNode*            gt_genome_feature_new_standard_gene(GT_FeatureTypeFactory*);
+GT_GenomeNode*            gt_genome_feature_new_standard_gene(GT_TypeFactory*);
 const char*            gt_genome_feature_get_source(GT_GenomeFeature*);
 const char*            gt_genome_feature_get_attribute(GT_GenomeNode *gn,
                                                     const char *attr_name);

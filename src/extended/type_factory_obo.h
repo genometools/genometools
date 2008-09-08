@@ -18,13 +18,13 @@
 #ifndef FEATURE_TYPE_FACTORY_OBO_H
 #define FEATURE_TYPE_FACTORY_OBO_H
 
-#include "extended/feature_type_factory.h"
+#include "extended/type_factory.h"
 
-/* Implements the GT_FeatureTypeFactory interface with types from an OBO file. */
-typedef struct GT_FeatureTypeFactoryOBO GT_FeatureTypeFactoryOBO;
+/* Implements the GT_TypeFactory interface with types from an OBO file. */
+typedef struct GT_TypeFactoryOBO GT_TypeFactoryOBO;
 
-const GT_FeatureTypeFactoryClass* gt_feature_type_factory_obo_class(void);
-GT_FeatureTypeFactory*            gt_feature_type_factory_obo_new(const char
+const GT_TypeFactoryClass* gt_type_factory_obo_class(void);
+GT_TypeFactory*            gt_type_factory_obo_new(const char
                                                             *obo_file_path,
                                                             GT_Error*);
 

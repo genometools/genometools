@@ -24,11 +24,11 @@
 #include "gtlua/annotationsketch_lua.h"
 #endif
 
-/* key used to store the GT_FeatureTypeFactory object in the Lua registry */
-#define FEATURE_TYPE_FACTORY_KEY gt_feature_type_factory_create_gft
+/* key used to store the GT_TypeFactory object in the Lua registry */
+#define FEATURE_TYPE_FACTORY_KEY gt_type_factory_create_gft
 
 void lua_put_feature_type_factory_in_registry(lua_State *L,
-                                              GT_FeatureTypeFactory
+                                              GT_TypeFactory
                                               *feature_type_factory)
 {
   assert(L && feature_type_factory);
@@ -37,9 +37,9 @@ void lua_put_feature_type_factory_in_registry(lua_State *L,
   lua_rawset(L, LUA_REGISTRYINDEX); /* store feature type factory in registry */
 }
 
-GT_FeatureTypeFactory* lua_get_feature_type_factory_from_registry(lua_State *L)
+GT_TypeFactory* lua_get_feature_type_factory_from_registry(lua_State *L)
 {
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
   assert(L);
   lua_pushlightuserdata(L, FEATURE_TYPE_FACTORY_KEY);
   lua_rawget(L, LUA_REGISTRYINDEX);

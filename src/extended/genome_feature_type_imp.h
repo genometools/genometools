@@ -19,11 +19,11 @@
 #define GENOME_FEATURE_TYPE_IMP_H
 
 #include <stdbool.h>
-#include "extended/feature_type_factory.h"
+#include "extended/type_factory.h"
 
-GT_GenomeFeatureType* gt_genome_feature_type_construct(GT_FeatureTypeFactory*,
+GT_GenomeFeatureType* gt_genome_feature_type_construct(GT_TypeFactory*,
                                                  const char *type);
-void               gt_genome_feature_type_delete(GT_GenomeFeatureType*);
-GT_FeatureTypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType*);
+void            gt_genome_feature_type_delete(GT_GenomeFeatureType*);
+GT_TypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType*);
 
 #endif

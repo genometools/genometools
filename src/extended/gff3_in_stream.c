@@ -20,10 +20,10 @@
 #include "core/fileutils.h"
 #include "core/progressbar.h"
 #include "core/strarray.h"
-#include "extended/feature_type_factory_any.h"
 #include "extended/genome_stream_rep.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_parser.h"
+#include "extended/type_factory_any.h"
 
 struct GFF3InStream
 {
@@ -40,7 +40,7 @@ struct GFF3InStream
   GenFile *fpin;
   unsigned long long line_number;
   Queue *gt_genome_node_buffer;
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
   GFF3Parser *gff3_parser;
 };
 
@@ -193,7 +193,7 @@ static void gff3_in_stream_free(GenomeStream *gs)
   queue_delete(gff3_in_stream->gt_genome_node_buffer);
   gff3parser_delete(gff3_in_stream->gff3_parser);
   if (gff3_in_stream->own_factory)
-    gt_feature_type_factory_delete(gff3_in_stream->feature_type_factory);
+    gt_type_factory_delete(gff3_in_stream->feature_type_factory);
   genfile_close(gff3_in_stream->fpin);
 }
 
@@ -222,7 +222,7 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
   gff3_in_stream->gt_genome_node_buffer     = queue_new();
-  gff3_in_stream->feature_type_factory   = gt_feature_type_factory_any_new();
+  gff3_in_stream->feature_type_factory   = gt_type_factory_any_new();
   gff3_in_stream->own_factory            = true;
   gff3_in_stream->checkids               = checkids;
   gff3_in_stream->gff3_parser            = gff3parser_new(checkids,
@@ -233,14 +233,14 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
 }
 
 void gff3_in_stream_set_feature_type_factory(GenomeStream *gs,
-                                             GT_FeatureTypeFactory
+                                             GT_TypeFactory
                                              *feature_type_factory)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
   gff3parser_delete(is->gff3_parser);
   if (is->own_factory) {
-    gt_feature_type_factory_delete(is->feature_type_factory);
+    gt_type_factory_delete(is->feature_type_factory);
     is->own_factory = false;
   }
   is->gff3_parser = gff3parser_new(is->checkids, feature_type_factory);
@@ -251,7 +251,7 @@ GT_StrArray* gff3_in_stream_get_used_types(GenomeStream *gs)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
-  return gt_feature_type_factory_get_used_types(is->feature_type_factory);
+  return gt_type_factory_get_used_types(is->feature_type_factory);
 }
 
 void gff3_in_stream_set_offset(GenomeStream *gs, long offset)

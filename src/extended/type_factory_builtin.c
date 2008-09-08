@@ -22,15 +22,15 @@
 #include "core/ma.h"
 #include "extended/compare.h"
 #include "extended/genome_feature_type_imp.h"
-#include "extended/feature_type_factory_builtin.h"
-#include "extended/feature_type_factory_rep.h"
+#include "extended/type_factory_builtin.h"
+#include "extended/type_factory_rep.h"
 
-struct GT_FeatureTypeFactoryBuiltin {
-  const GT_FeatureTypeFactory parent_instance;
+struct GT_TypeFactoryBuiltin {
+  const GT_TypeFactory parent_instance;
 };
 
-#define gt_feature_type_factory_builtin_cast(FTF)\
-        gt_feature_type_factory_cast(gt_feature_type_factory_builtin_class(), FTF)
+#define gt_type_factory_builtin_cast(FTF)\
+        gt_type_factory_cast(gt_type_factory_builtin_class(), FTF)
 
 static const char *gt_genome_feature_type_strings[] = { "CDS",
                                                      "EST_match",
@@ -72,13 +72,13 @@ static const char* find_type(const char *gft_string)
 }
 
 static GT_GenomeFeatureType*
-gt_feature_type_factory_builtin_create_gft(GT_FeatureTypeFactory *ftf,
+gt_type_factory_builtin_create_gft(GT_TypeFactory *ftf,
                                         const char *type)
 {
-  GT_FeatureTypeFactoryBuiltin *ftfb;
+  GT_TypeFactoryBuiltin *ftfb;
   GT_GenomeFeatureType *gft = NULL;
   assert(ftf && type);
-  ftfb = gt_feature_type_factory_builtin_cast(ftf);
+  ftfb = gt_type_factory_builtin_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
     if ((find_type(type))) {
       gft = gt_genome_feature_type_construct(ftf, type);
@@ -88,20 +88,20 @@ gt_feature_type_factory_builtin_create_gft(GT_FeatureTypeFactory *ftf,
   return gft;
 }
 
-const GT_FeatureTypeFactoryClass* gt_feature_type_factory_builtin_class(void)
+const GT_TypeFactoryClass* gt_type_factory_builtin_class(void)
 {
-  static const GT_FeatureTypeFactoryClass gt_feature_type_factory_class =
-    { sizeof (GT_FeatureTypeFactoryBuiltin),
-      gt_feature_type_factory_builtin_create_gft,
+  static const GT_TypeFactoryClass gt_type_factory_class =
+    { sizeof (GT_TypeFactoryBuiltin),
+      gt_type_factory_builtin_create_gft,
       NULL };
-  return &gt_feature_type_factory_class;
+  return &gt_type_factory_class;
 }
 
-GT_FeatureTypeFactory* gt_feature_type_factory_builtin_new(void)
+GT_TypeFactory* gt_type_factory_builtin_new(void)
 {
-  GT_FeatureTypeFactoryBuiltin *ftfb;
-  GT_FeatureTypeFactory *ftf;
-  ftf = gt_feature_type_factory_create(gt_feature_type_factory_builtin_class());
-  ftfb = gt_feature_type_factory_builtin_cast(ftf);
+  GT_TypeFactoryBuiltin *ftfb;
+  GT_TypeFactory *ftf;
+  ftf = gt_type_factory_create(gt_type_factory_builtin_class());
+  ftfb = gt_type_factory_builtin_cast(ftf);
   return ftf;
 }

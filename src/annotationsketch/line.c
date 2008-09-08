@@ -20,7 +20,7 @@
 #include "core/interval_tree.h"
 #include "core/ma.h"
 #include "core/range.h"
-#include "extended/feature_type_factory_builtin.h"
+#include "extended/type_factory_builtin.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/line.h"
 #include "annotationsketch/style.h"
@@ -75,7 +75,7 @@ int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
 
 int gt_line_unit_test(GT_Error *err)
 {
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
   GT_GenomeFeatureType *type;
   GT_Range r1, r2, r3, r4, r_parent;
   GT_Array* blocks;
@@ -90,7 +90,7 @@ int gt_line_unit_test(GT_Error *err)
   const char* bar = "bar";
   const char* blub = "blub";
 
-  feature_type_factory = gt_feature_type_factory_builtin_new();
+  feature_type_factory = gt_type_factory_builtin_new();
 
   r_parent.start = 10UL;
   r_parent.end = 80UL;
@@ -111,13 +111,13 @@ int gt_line_unit_test(GT_Error *err)
   seqid2 = gt_str_new_cstr("test2");
   seqid3 = gt_str_new_cstr("foo");
 
-  type = gt_feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  type = gt_type_factory_create_gft(feature_type_factory, gft_gene);
   parent = gt_genome_feature_new(seqid1, type, r_parent, GT_STRAND_FORWARD);
-  type = gt_feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  type = gt_type_factory_create_gft(feature_type_factory, gft_exon);
   gn1 = gt_genome_feature_new(seqid3, type, r1, GT_STRAND_FORWARD);
   gn2 = gt_genome_feature_new(seqid3, type, r2, GT_STRAND_FORWARD);
   gn3 = gt_genome_feature_new(seqid2, type, r3, GT_STRAND_FORWARD);
-  type = gt_feature_type_factory_create_gft(feature_type_factory,
+  type = gt_type_factory_create_gft(feature_type_factory,
                                          gft_TF_binding_site);
   gn4 = gt_genome_feature_new(seqid3, type, r4, GT_STRAND_FORWARD);
 
@@ -159,7 +159,7 @@ int gt_line_unit_test(GT_Error *err)
   gt_genome_node_delete(gn2);
   gt_genome_node_delete(gn3);
   gt_genome_node_delete(gn4);
-  gt_feature_type_factory_delete(feature_type_factory);
+  gt_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

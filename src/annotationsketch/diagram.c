@@ -17,18 +17,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr.h"
-#include "core/ensure.h"
-#include "core/getbasename.h"
-#include "core/hashmap.h"
-#include "core/ma.h"
-#include "core/str.h"
-#include "core/undef.h"
-#include "core/unused_api.h"
-#include "extended/feature_type_factory_builtin.h"
-#include "extended/genome_node.h"
-#include "extended/genome_feature.h"
-#include "extended/genome_feature_type.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
@@ -37,6 +25,18 @@
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
+#include "core/cstr.h"
+#include "core/ensure.h"
+#include "core/getbasename.h"
+#include "core/hashmap.h"
+#include "core/ma.h"
+#include "core/str.h"
+#include "core/undef.h"
+#include "core/unused_api.h"
+#include "extended/genome_node.h"
+#include "extended/genome_feature.h"
+#include "extended/genome_feature_type.h"
+#include "extended/type_factory_builtin.h"
 
 /* used to separate a filename from the type in a track name */
 #define FILENAME_TYPE_SEPARATOR  '|'
@@ -645,7 +645,7 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
 
 int gt_diagram_unit_test(GT_Error *err)
 {
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
   GT_GenomeFeatureType *gene_type, *exon_type, *CDS_type;
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
@@ -659,10 +659,10 @@ int gt_diagram_unit_test(GT_Error *err)
   GT_Canvas *canvas = NULL;
   gt_error_check(err);
 
-  feature_type_factory = gt_feature_type_factory_builtin_new();
-  gene_type = gt_feature_type_factory_create_gft(feature_type_factory, gft_gene);
-  exon_type = gt_feature_type_factory_create_gft(feature_type_factory, gft_exon);
-  CDS_type = gt_feature_type_factory_create_gft(feature_type_factory, gft_CDS);
+  feature_type_factory = gt_type_factory_builtin_new();
+  gene_type = gt_type_factory_create_gft(feature_type_factory, gft_gene);
+  exon_type = gt_type_factory_create_gft(feature_type_factory, gft_exon);
+  CDS_type = gt_type_factory_create_gft(feature_type_factory, gft_CDS);
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -821,7 +821,7 @@ int gt_diagram_unit_test(GT_Error *err)
   gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
-  gt_feature_type_factory_delete(feature_type_factory);
+  gt_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

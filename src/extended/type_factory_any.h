@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_TYPE_FACTORY_BUILTIN_H
-#define FEATURE_TYPE_FACTORY_BUILTIN_H
+#ifndef FEATURE_TYPE_FACTORY_ANY_H
+#define FEATURE_TYPE_FACTORY_ANY_H
 
-#include "extended/feature_type_factory.h"
+#include "extended/type_factory.h"
 
-/* Implements the GT_FeatureTypeFactory interface with built-in types. */
-typedef struct GT_FeatureTypeFactoryBuiltin GT_FeatureTypeFactoryBuiltin;
+/* Implements the GT_TypeFactory interface with any types. */
+typedef struct GT_TypeFactoryAny GT_TypeFactoryAny;
 
-const GT_FeatureTypeFactoryClass* gt_feature_type_factory_builtin_class(void);
-GT_FeatureTypeFactory*            gt_feature_type_factory_builtin_new();
+const GT_TypeFactoryClass* gt_type_factory_any_class(void);
+GT_TypeFactory*            gt_type_factory_any_new();
 
 #endif

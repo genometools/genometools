@@ -5,33 +5,33 @@ static GT_Array* create_example_features(void)
   GT_Array *features;
   GT_GenomeNode *forward_gene, *reverse_gene, *exon, *intron; /* features */
   GT_Str *seqid; /* holds the sequence id the features refer to */
-  GT_FeatureTypeFactory *type_factory; /* used the create feature types */
+  GT_TypeFactory *type_factory; /* used the create feature types */
   GT_GenomeFeatureType *type; /* hold a feature type */
   GT_Range range; /* used to define intervals on the genomic sequence */
 
   /* construct the example features */
   features = gt_array_new(sizeof (GT_GenomeNode*));
-  type_factory = gt_feature_type_factory_any_new();
+  type_factory = gt_type_factory_any_new();
   seqid = gt_str_new_cstr("chromosome_21");
 
   /* construct a gene on the forward strand with two exons */
-  type = gt_feature_type_factory_create_gft(type_factory, "gene");
+  type = gt_type_factory_create_gft(type_factory, "gene");
   range.start = 100; range.end = 900;
   forward_gene = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
 
-  type = gt_feature_type_factory_create_gft(type_factory, "exon");
+  type = gt_type_factory_create_gft(type_factory, "exon");
   range.start = 100; range.end = 200;
   exon = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   /* exon belongs to forward gene */
   gt_genome_node_is_part_of_genome_node(forward_gene, exon);
 
-  type = gt_feature_type_factory_create_gft(type_factory, "intron");
+  type = gt_type_factory_create_gft(type_factory, "intron");
   range.start = 201; range.end = 799;
   intron = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   /* intron belongs to forward gene */
   gt_genome_node_is_part_of_genome_node(forward_gene, intron);
 
-  type = gt_feature_type_factory_create_gft(type_factory, "exon");
+  type = gt_type_factory_create_gft(type_factory, "exon");
   range.start = 800; range.end = 900;
   exon = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   /* exon belongs to forward gene */
@@ -42,11 +42,11 @@ static GT_Array* create_example_features(void)
 
   /* construct a single-exon gene on the reverse strand
      (within the intron of the forward strand gene) */
-  type = gt_feature_type_factory_create_gft(type_factory, "gene");
+  type = gt_type_factory_create_gft(type_factory, "gene");
   range.start = 400; range.end = 600;
   reverse_gene = gt_genome_feature_new(seqid, type, range, GT_STRAND_REVERSE);
 
-  type = gt_feature_type_factory_create_gft(type_factory, "exon");
+  type = gt_type_factory_create_gft(type_factory, "exon");
   range.start = 400; range.end = 600;
   exon = gt_genome_feature_new(seqid, type, range, GT_STRAND_REVERSE);
   /* exon belongs to reverse gene */
@@ -57,7 +57,7 @@ static GT_Array* create_example_features(void)
 
   /* free */
   gt_str_delete(seqid);
-  gt_feature_type_factory_delete(type_factory);
+  gt_type_factory_delete(type_factory);
 
   return features;
 }

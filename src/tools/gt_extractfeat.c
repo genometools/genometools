@@ -19,10 +19,10 @@
 #include "core/option.h"
 #include "core/unused_api.h"
 #include "extended/extract_feat_stream.h"
-#include "extended/feature_type_factory_any.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtdatahelp.h"
 #include "extended/seqid2file.h"
+#include "extended/type_factory_any.h"
 #include "tools/gt_extractfeat.h"
 
 typedef struct {
@@ -33,7 +33,7 @@ typedef struct {
       *seqfile,
       *regionmapping;
   GT_GenomeFeatureType *type;
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
 } ExtractFeatArguments;
 
 static void* gt_extractfeat_arguments_new(void)
@@ -42,7 +42,7 @@ static void* gt_extractfeat_arguments_new(void)
   arguments->typestr = gt_str_new();
   arguments->seqfile = gt_str_new();
   arguments->regionmapping = gt_str_new();
-  arguments->feature_type_factory = gt_feature_type_factory_any_new();
+  arguments->feature_type_factory = gt_type_factory_any_new();
   return arguments;
 }
 
@@ -50,7 +50,7 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
 {
   ExtractFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_feature_type_factory_delete(arguments->feature_type_factory);
+  gt_type_factory_delete(arguments->feature_type_factory);
   gt_str_delete(arguments->regionmapping);
   gt_str_delete(arguments->seqfile);
   gt_str_delete(arguments->typestr);
@@ -110,7 +110,7 @@ static int gt_extractfeat_arguments_check(GT_UNUSED int argc, void *tool_argumen
 
   /* determine type and make sure it is a valid one */
   if (!(arguments->type =
-          gt_feature_type_factory_create_gft(arguments->feature_type_factory,
+          gt_type_factory_create_gft(arguments->feature_type_factory,
                                           gt_str_get(arguments->typestr)))) {
     gt_error_set(err, "\"%s\" is not a valid feature type",
               gt_str_get(arguments->typestr));

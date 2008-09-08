@@ -27,7 +27,7 @@ typedef struct GFF3InStream GFF3InStream;
 const GenomeStreamClass* gff3_in_stream_class(void);
 /* Does not take ownership of <feature_type_factory>. */
 void                     gff3_in_stream_set_feature_type_factory(GenomeStream*,
-                                                         GT_FeatureTypeFactory
+                                                         GT_TypeFactory
                                                          *feature_type_factory);
 /* Returns a GT_StrArray which contains all type names in alphabetical order
    which have been parsed by this stream.

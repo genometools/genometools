@@ -18,12 +18,12 @@
 #ifndef GT_LUA_H
 #define GT_LUA_H
 
-#include "extended/feature_type_factory.h"
 #include "lua.h"
+#include "extended/type_factory.h"
 
 void                lua_put_feature_type_factory_in_registry(lua_State*,
-                                                           GT_FeatureTypeFactory*);
-GT_FeatureTypeFactory* lua_get_feature_type_factory_from_registry(lua_State*);
+                                                           GT_TypeFactory*);
+GT_TypeFactory* lua_get_feature_type_factory_from_registry(lua_State*);
 int                 luaopen_gt(lua_State*); /* open all GenomeTools libraries in
                                                Lua state */
 

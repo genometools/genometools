@@ -17,12 +17,12 @@
 */
 
 #include <string.h>
+#include "annotationsketch/block.h"
+#include "annotationsketch/element.h"
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "extended/feature_type_factory_builtin.h"
-#include "annotationsketch/block.h"
-#include "annotationsketch/element.h"
+#include "extended/type_factory_builtin.h"
 
 struct GT_Block {
   GT_Dlist *elements;
@@ -216,7 +216,7 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
 
 int gt_block_unit_test(GT_Error *err)
 {
-  GT_FeatureTypeFactory *feature_type_factory;
+  GT_TypeFactory *feature_type_factory;
   GT_GenomeFeatureType *gft;
   GT_Range r1, r2, r_temp, b_range;
   GT_Strand s;
@@ -227,7 +227,7 @@ int gt_block_unit_test(GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
 
-  feature_type_factory = gt_feature_type_factory_builtin_new();
+  feature_type_factory = gt_type_factory_builtin_new();
   seqid = gt_str_new_cstr("seqid");
   caption1 = gt_str_new_cstr("foo");
   caption2 = gt_str_new_cstr("bar");
@@ -238,9 +238,9 @@ int gt_block_unit_test(GT_Error *err)
   r2.start = 40UL;
   r2.end = 50UL;
 
-  gft = gt_feature_type_factory_create_gft(feature_type_factory, gft_gene);
+  gft = gt_type_factory_create_gft(feature_type_factory, gft_gene);
   gn1 = gt_genome_feature_new(seqid, gft, r1, GT_STRAND_FORWARD);
-  gft = gt_feature_type_factory_create_gft(feature_type_factory, gft_exon);
+  gft = gt_type_factory_create_gft(feature_type_factory, gft_exon);
   gn2 = gt_genome_feature_new(seqid, gft, r2, GT_STRAND_FORWARD);
 
   e1 = gt_element_new(gn1);
@@ -281,7 +281,7 @@ int gt_block_unit_test(GT_Error *err)
   gt_block_delete(b);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
-  gt_feature_type_factory_delete(feature_type_factory);
+  gt_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

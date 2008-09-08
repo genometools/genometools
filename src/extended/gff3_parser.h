@@ -32,7 +32,7 @@
 
 typedef struct GFF3Parser GFF3Parser;
 
-GFF3Parser* gff3parser_new(bool checkids, GT_FeatureTypeFactory*);
+GFF3Parser* gff3parser_new(bool checkids, GT_TypeFactory*);
 void        gff3parser_set_offset(GFF3Parser*, long);
 int         gff3parser_set_offsetfile(GFF3Parser*, GT_Str*, GT_Error*);
 void        gff3parser_enable_tidy_mode(GFF3Parser*);

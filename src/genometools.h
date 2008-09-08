@@ -32,8 +32,8 @@
 #include "core/unused_api.h"
 
 /* the extended module */
-#include "extended/feature_type_factory_any.h"
 #include "extended/sequence_region_api.h"
+#include "extended/type_factory_any.h" /* XXX */
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
