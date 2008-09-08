@@ -39,10 +39,10 @@ p:set_name(name)
 f = File:new("src/core/fasta_separator.h")
 p:add(f)
 
-f = File:new("src/core/fptr.h")
+f = File:new("src/core/fptr_api.h")
 p:add(f)
 
-f = File:new("src/core/unused.h")
+f = File:new("src/core/unused_api.h")
 p:add(f)
 
 f = File:new("src/core/undef.h")

@@ -36,14 +36,14 @@ p = Project:new(gt_home)
 p:set_name(name)
 
 -- add all dependencies
-f = File:new("src/core/fptr.h")
+f = File:new("src/core/fptr_api.h")
 f:bare_includes()
 p:add(f)
 
 f = File:new("src/core/undef.h")
 p:add(f)
 
-f = File:new("src/core/unused.h")
+f = File:new("src/core/unused_api.h")
 p:add(f)
 
 m = Module:new("src/core/xansi")
@@ -154,9 +154,9 @@ p:add(testsuite)
 prog = Program:new("consensus_sa")
 prog:add_include('<stdio.h>')
 prog:add_include('<stdlib.h>')
-prog:add_include('"array.h"')
+prog:add_include('"array_api.h"')
 prog:add_include('"error.h"')
-prog:add_include('"fptr.h"')
+prog:add_include('"fptr_api.h"')
 prog:add_include('"sspliced_alignment.h"')
 prog:add_include('"sspliced_alignment_parsing.h"')
 

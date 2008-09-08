@@ -43,13 +43,13 @@ f:remove_example()
 f:ma2xansi()
 p:add(f)
 
-f = File:new("src/core/fptr.h")
+f = File:new("src/core/fptr_api.h")
 p:add(f)
 
 f = File:new("src/core/minmax.h")
 p:add(f)
 
-f = File:new("src/core/unused.h")
+f = File:new("src/core/unused_api.h")
 p:add(f)
 
 m = Module:new("src/core/xansi")
