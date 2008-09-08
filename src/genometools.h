@@ -28,6 +28,7 @@
 #include "core/fptr_api.h"
 #include "core/ma_api.h"
 #include "core/range_api.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 
 /* the extended module */

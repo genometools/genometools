@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include "annotationsketch/color_api.h"
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* Holds AnnotationSketch style information. */
 typedef struct GT_Style GT_Style;
