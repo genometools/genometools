@@ -25,41 +25,41 @@
 
 /* Parse integer from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
-int parse_int(int *out, const char *nptr);
+int gt_parse_int(int *out, const char *nptr);
 
 /* Parse unsigned integer from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
-int parse_uint(unsigned int *out, const char *nptr);
+int gt_parse_uint(unsigned int *out, const char *nptr);
 
 /* Parse long from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
-int parse_long(long *out, const char *nptr);
+int gt_parse_long(long *out, const char *nptr);
 
 /* Parse unsigned long from <nptr> and store result in <out>.
    returns 0 upon success and -1 upon failure. */
-int parse_ulong(unsigned long *out, const char *nptr);
+int gt_parse_ulong(unsigned long *out, const char *nptr);
 
 /* Parse double from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
-int parse_double(double *out, const char *nptr);
+int gt_parse_double(double *out, const char *nptr);
 
 /* Enforces that <start> <= <end>. */
-int parse_range(GT_Range*, const char *start, const char *end,
+int gt_parse_range(GT_Range*, const char *start, const char *end,
                 unsigned int line_number, const char *filename, GT_Error*);
 
 /* Sets <score_is_defined> to false if !strcmp(score, ".").
    Otherwise <score_is_defined> is set to true and the parsed score is stored
    in <score_value>. */
-int parse_score(bool *score_is_defined, float *score_value, const char *score,
+int gt_parse_score(bool *score_is_defined, float *score_value, const char *score,
                 unsigned int line_number, const char *filename, GT_Error*);
 
-int parse_strand(GT_Strand*, const char *strand,
+int gt_parse_strand(GT_Strand*, const char *strand,
                  unsigned int line_number, const char *filename, GT_Error*);
 
-int parse_phase(Phase*, const char *phase,
+int gt_parse_phase(Phase*, const char *phase,
                unsigned int line_number, const char *filename, GT_Error*);
 
-int parse_int_line(int*, const char *integer,
+int gt_parse_int_line(int*, const char *integer,
                    unsigned int line_number, const char *filename, GT_Error*);
 
 #endif

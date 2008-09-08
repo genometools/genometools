@@ -376,7 +376,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(gff_feature_type);
 
       /* parse the range */
-      had_err = parse_range(&range, start, end, line_number, filename, err);
+      had_err = gt_parse_range(&range, start, end, line_number, filename, err);
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
@@ -394,16 +394,16 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
 
       /* parse the score */
-      had_err = parse_score(&score_is_defined, &score_value, score, line_number,
+      had_err = gt_parse_score(&score_is_defined, &score_value, score, line_number,
                             filename, err);
       HANDLE_ERROR;
 
       /* parse the strand */
-      had_err = parse_strand(&gt_strand_value, strand, line_number, filename, err);
+      had_err = gt_parse_strand(&gt_strand_value, strand, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the frame */
-      had_err = parse_phase(&phase_value, frame, line_number, filename, err);
+      had_err = gt_parse_phase(&phase_value, frame, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the attributes */

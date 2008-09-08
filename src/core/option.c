@@ -717,7 +717,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (parse_double(&double_value, argv[argnum])) {
+                if (gt_parse_double(&double_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be "
                                  "floating-point number",
                             gt_str_get(option->option_str));
@@ -778,7 +778,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (parse_int(&int_value, argv[argnum])) {
+                if (gt_parse_int(&int_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
                                  "integer", gt_str_get(option->option_str));
                   had_err = -1;
@@ -816,7 +816,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (parse_uint(&uint_value, argv[argnum])) {
+                if (gt_parse_uint(&uint_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
                                  "non-negative integer <= %u",
                             gt_str_get(option->option_str), UINT_MAX);
@@ -854,7 +854,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (parse_long(&long_value, argv[argnum])) {
+                if (gt_parse_long(&long_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
                                  "integer", gt_str_get(option->option_str));
                   had_err = -1;
@@ -874,7 +874,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
+                if (gt_parse_long(&long_value, argv[argnum]) || long_value < 0) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
                                  "non-negative integer",
                             gt_str_get(option->option_str));
@@ -916,7 +916,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
+                if (gt_parse_long(&long_value, argv[argnum]) || long_value < 0) {
                   gt_error_set(err, "first argument to option \"-%s\" must be a "
                                  "non-negative integer",
                             gt_str_get(option->option_str));
@@ -942,7 +942,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
               }
               if (!had_err) {
                 argnum++;
-                if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
+                if (gt_parse_long(&long_value, argv[argnum]) || long_value < 0) {
                   gt_error_set(err, "second argument to option \"-%s\" must be a "
                                  "non-negative integer",
                             gt_str_get(option->option_str));

@@ -272,7 +272,7 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
         break;
       case 2:
         /* process sequence start */
-        if (parse_ulong(&range.start, gt_str_get(index_line))) {
+        if (gt_parse_ulong(&range.start, gt_str_get(index_line))) {
           gt_error_set(err, "could not parse bioseq start in line %lu of file "
                          "\"%s\"", line_number, index_filename);
           had_err = -1;
@@ -280,7 +280,7 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
         break;
       case 0:
         /* process sequence end */
-        if (parse_ulong(&range.end, gt_str_get(index_line))) {
+        if (gt_parse_ulong(&range.end, gt_str_get(index_line))) {
           gt_error_set(err,
                     "could not parse bioseq end in line %lu of file \"%s\"",
                     line_number, index_filename);

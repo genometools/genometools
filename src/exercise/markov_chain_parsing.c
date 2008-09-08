@@ -85,7 +85,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
     had_err = read_next_line(line, fp, filename, err);
 
   /* parse number of states */
-  if (!had_err && parse_int(&num_of_states, gt_str_get(line))) {
+  if (!had_err && gt_parse_int(&num_of_states, gt_str_get(line))) {
     gt_error_set(err, "could not parse number of states from file \"%s\"",
               filename);
     had_err = -1;
@@ -138,9 +138,9 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
       }
     }
     for (j = 0; !had_err && j < num_of_states; j++) {
-      if (parse_double(&transition_prob, splitter_get_token(splitter, j))) {
-        gt_error_set(err, "could not parse transition probability %lu on line %lu "
-                       "from file \"%s\"", j + 1, 5 + i + 1, filename);
+      if (gt_parse_double(&transition_prob, splitter_get_token(splitter, j))) {
+        gt_error_set(err, "could not parse transition probability %lu on line "
+                          "%lu from file \"%s\"", j + 1, 5 + i + 1, filename);
         had_err = -1;
       }
       if (!had_err) /* store transition probability */

@@ -23,7 +23,7 @@
 #include "core/parseutils.h"
 #include "core/undef.h"
 
-int parse_int(int *out, const char *nptr)
+int gt_parse_int(int *out, const char *nptr)
 {
   long lval;
   char *ep;
@@ -40,7 +40,7 @@ int parse_int(int *out, const char *nptr)
   return 0;
 }
 
-int parse_uint(unsigned int *out, const char *nptr)
+int gt_parse_uint(unsigned int *out, const char *nptr)
 {
   unsigned long ulval;
   char *ep;
@@ -56,7 +56,7 @@ int parse_uint(unsigned int *out, const char *nptr)
   return 0;
 }
 
-int parse_long(long *out, const char *nptr)
+int gt_parse_long(long *out, const char *nptr)
 {
   long lval;
   char *ep;
@@ -71,7 +71,7 @@ int parse_long(long *out, const char *nptr)
   return 0;
 }
 
-int parse_ulong(unsigned long *out, const char *nptr)
+int gt_parse_ulong(unsigned long *out, const char *nptr)
 {
   unsigned long ulval;
   char *ep;
@@ -86,7 +86,7 @@ int parse_ulong(unsigned long *out, const char *nptr)
   return 0;
 }
 
-int parse_double(double *out, const char *nptr)
+int gt_parse_double(double *out, const char *nptr)
 {
   double dval;
   char *ep;
@@ -101,7 +101,7 @@ int parse_double(double *out, const char *nptr)
   return 0;
 }
 
-int parse_range(GT_Range *range, const char *start, const char *end,
+int gt_parse_range(GT_Range *range, const char *start, const char *end,
                 unsigned int line_number, const char *filename, GT_Error *err)
 {
   long start_val, end_val;
@@ -165,7 +165,7 @@ int parse_range(GT_Range *range, const char *start, const char *end,
   return 0;
 }
 
-int parse_score(bool *score_is_defined, float *score_value, const char *score,
+int gt_parse_score(bool *score_is_defined, float *score_value, const char *score,
                 unsigned int line_number, const char *filename, GT_Error *err)
 {
   int rval;
@@ -186,7 +186,7 @@ int parse_score(bool *score_is_defined, float *score_value, const char *score,
   return 0;
 }
 
-int parse_strand(GT_Strand *gt_strand_value, const char *strand,
+int gt_parse_strand(GT_Strand *gt_strand_value, const char *strand,
                  unsigned int line_number, const char *filename, GT_Error *err)
 {
   assert(strand && filename);
@@ -208,7 +208,7 @@ int parse_strand(GT_Strand *gt_strand_value, const char *strand,
   return 0;
 }
 
-int parse_phase(Phase *phase_value, const char *phase,
+int gt_parse_phase(Phase *phase_value, const char *phase,
                 unsigned int line_number, const char *filename, GT_Error *err)
 {
   assert(phase && filename);
@@ -230,7 +230,7 @@ int parse_phase(Phase *phase_value, const char *phase,
   return 0;
 }
 
-int parse_int_line(int *int_value, const char *integer,
+int gt_parse_int_line(int *int_value, const char *integer,
                    unsigned int line_number, const char *filename, GT_Error *err)
 {
   int rval;

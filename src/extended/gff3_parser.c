@@ -169,7 +169,8 @@ static int add_offset_if_necessary(GT_Range *range, GFF3Parser *parser,
 }
 
 static int parse_target_attribute(const char *value, GT_Str *target_id,
-                                  GT_Range *target_range, GT_Strand *target_strand,
+                                  GT_Range *target_range,
+                                  GT_Strand *target_strand,
                                   const char *filename,
                                   unsigned int line_number, GT_Error *err)
 {
@@ -201,7 +202,7 @@ static int parse_target_attribute(const char *value, GT_Str *target_id,
   if (!had_err && target_id) gt_str_append_str(target_id, unescaped_target);
   /* parse target range */
   if (!had_err) {
-    had_err = parse_range(&parsed_range, splitter_get_token(splitter, 1),
+    had_err = gt_parse_range(&parsed_range, splitter_get_token(splitter, 1),
                           splitter_get_token(splitter, 2), line_number,
                           filename, err);
   }
@@ -209,7 +210,7 @@ static int parse_target_attribute(const char *value, GT_Str *target_id,
   /* parse target strand (if given) */
   if (!had_err) {
     if (splitter_size(splitter) == 4) {
-      had_err = parse_strand(&parsed_strand, splitter_get_token(splitter, 3),
+      had_err = gt_parse_strand(&parsed_strand, splitter_get_token(splitter, 3),
                              line_number, filename, err);
       if (!had_err && target_strand)
         *target_strand = parsed_strand;
@@ -824,7 +825,7 @@ static int check_multi_feature_constrains(GT_GenomeNode *new_gf,
   return had_err;
 }
 
-static int parse_attributes(char *attributes, GT_GenomeNode *genome_feature,
+static int gt_parse_attributes(char *attributes, GT_GenomeNode *genome_feature,
                             bool *is_child, GFF3Parser *parser,
                             Queue *genome_nodes,
                             AutomaticGT_SequenceRegion *auto_sr,
@@ -956,7 +957,7 @@ static void set_source(GT_GenomeNode *genome_feature, const char *source,
   gt_genome_feature_set_source(genome_feature, source_str);
 }
 
-static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
+static int gt_parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                    char *line, size_t line_length,
                                    GT_Str *filenamestr, unsigned int line_number,
                                    GT_Error *err)
@@ -1015,7 +1016,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* parse the range */
   if (!had_err)
-    had_err = parse_range(&range, start, end, line_number, filename, err);
+    had_err = gt_parse_range(&range, start, end, line_number, filename, err);
   if (!had_err && range.start == 0) {
       gt_error_set(err, "illegal feature start 0 on line %u in file \"%s\" "
                    "(GFF3 files are 1-based)", line_number, filename);
@@ -1026,17 +1027,17 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* parse the score */
   if (!had_err) {
-    had_err = parse_score(&score_is_defined, &score_value, score, line_number,
+    had_err = gt_parse_score(&score_is_defined, &score_value, score, line_number,
                           filename, err);
   }
 
   /* parse the strand */
   if (!had_err)
-    had_err = parse_strand(&gt_strand_value, strand, line_number, filename, err);
+    had_err = gt_parse_strand(&gt_strand_value, strand, line_number, filename, err);
 
   /* parse the phase */
   if (!had_err)
-    had_err = parse_phase(&phase_value, phase, line_number, filename, err);
+    had_err = gt_parse_phase(&phase_value, phase, line_number, filename, err);
 
   /* get seqid */
   if (!had_err) {
@@ -1056,7 +1057,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 
   /* parse the attributes */
   if (!had_err) {
-    had_err = parse_attributes(attributes, genome_feature, &is_child, parser,
+    had_err = gt_parse_attributes(attributes, genome_feature, &is_child, parser,
                                genome_nodes, auto_sr, filename, line_number,
                                err);
   }
@@ -1084,7 +1085,7 @@ static int parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
   return had_err;
 }
 
-static int parse_first_gff3_line(const char *line, const char *filename,
+static int gt_parse_first_gff3_line(const char *line, const char *filename,
                                  GT_Error *err)
 {
   int version, had_err = 0;
@@ -1100,7 +1101,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
     /* skip blanks */
     while (line[0] == ' ')
       line++;
-    had_err = parse_int_line(&version, line, 1, filename, err);
+    had_err = gt_parse_int_line(&version, line, 1, filename, err);
   }
   if (!had_err && version != GFF_VERSION) {
     gt_error_set(err, "GFF version %d does not equal required version %u ",
@@ -1110,7 +1111,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   return had_err;
 }
 
-static int parse_fasta_entry(Queue *genome_nodes, const char *line,
+static int gt_parse_fasta_entry(Queue *genome_nodes, const char *line,
                              GT_Str *filename, unsigned int line_number,
                              GT_GenFile *fpin, GT_Error *err)
 {
@@ -1161,7 +1162,7 @@ static int add_auto_sr_to_queue(GT_UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
+static int gt_parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                 char *line, size_t line_length,
                                 GT_Str *filenamestr, unsigned int line_number,
                                 GT_Error *err)
@@ -1242,7 +1243,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
       }
     }
     if (!had_err) {
-      had_err = parse_range(&range, seqstart, tmpline, line_number, filename,
+      had_err = gt_parse_range(&range, seqstart, tmpline, line_number, filename,
                             err);
     }
     if (!had_err  && range.start == 0) {
@@ -1321,7 +1322,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
     (*line_number)++;
 
     if (*line_number == 1) {
-      if ((had_err = parse_first_gff3_line(line, filename, err)))
+      if ((had_err = gt_parse_first_gff3_line(line, filename, err)))
         break;
     }
     else if (line_length == 0) {
@@ -1335,12 +1336,12 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
                                   add_auto_sr_to_queue, genome_nodes, NULL);
         assert(!had_err); /* add_auto_sr_to_queue() is sane */
       }
-      had_err = parse_fasta_entry(genome_nodes, line, filenamestr, *line_number,
+      had_err = gt_parse_fasta_entry(genome_nodes, line, filenamestr, *line_number,
                                   fpin, err);
       break;
     }
     else if (line[0] == '#') {
-      had_err = parse_meta_gff3_line(parser, genome_nodes, line, line_length,
+      had_err = gt_parse_meta_gff3_line(parser, genome_nodes, line, line_length,
                                      filenamestr, *line_number, err);
       if (had_err ||
           (!parser->incomplete_node && queue_size(genome_nodes))) {
@@ -1348,7 +1349,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
       }
     }
     else {
-      had_err = parse_regular_gff3_line(parser, genome_nodes, line, line_length,
+      had_err = gt_parse_regular_gff3_line(parser, genome_nodes, line, line_length,
                                         filenamestr, *line_number, err);
       if (had_err || (!parser->incomplete_node && queue_size(genome_nodes)))
         break;
