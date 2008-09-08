@@ -59,7 +59,7 @@ int gt_translate(int argc, const char **argv, GT_Error *err)
   seqlen = strlen(seq);
 
   if (seqlen >= 3) {
-    translate_all_frames(&frame1, &frame2, &frame3, seq, seqlen);
+    gt_translate_all_frames(&frame1, &frame2, &frame3, seq, seqlen);
     printf("frame1: %s\nframe2: %s\nframe3: %s\n", frame1, frame2, frame3);
   }
 

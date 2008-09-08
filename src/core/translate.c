@@ -20,8 +20,8 @@
 #include "core/ma.h"
 #include "core/translate.h"
 
-void translate_dna(GT_Str *protein, const char *dnaseq, unsigned long dnalen,
-                   unsigned int frame)
+void gt_translate_dna(GT_Str *protein, const char *dnaseq, unsigned long dnalen,
+                      unsigned int frame)
 {
   const char *dnaptr;
   assert(protein && !gt_str_length(protein) && dnaseq && frame < 3);
@@ -48,8 +48,8 @@ static int encode(char nucleotide)
   return GT_T_CODE;
 }
 
-void translate_all_frames(char **frame1, char **frame2, char **frame3,
-                          const char *dna_sequence, unsigned long seqlen)
+void gt_translate_all_frames(char **frame1, char **frame2, char **frame3,
+                             const char *dna_sequence, unsigned long seqlen)
 {
   unsigned long i, frame1len, frame2len, frame3len;
   int codon;

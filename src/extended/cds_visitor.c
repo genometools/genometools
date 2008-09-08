@@ -99,9 +99,9 @@ static GT_Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
   pr_2 = gt_str_new();
   orfs = gt_array_new(sizeof (GT_Range));
 
-  translate_dna(pr_0, splicedseq_get(ss), splicedseq_length(ss), 0);
-  translate_dna(pr_1, splicedseq_get(ss), splicedseq_length(ss), 1);
-  translate_dna(pr_2, splicedseq_get(ss), splicedseq_length(ss), 2);
+  gt_translate_dna(pr_0, splicedseq_get(ss), splicedseq_length(ss), 0);
+  gt_translate_dna(pr_1, splicedseq_get(ss), splicedseq_length(ss), 1);
+  gt_translate_dna(pr_2, splicedseq_get(ss), splicedseq_length(ss), 2);
   gt_determine_ORFs(orfs, 0, gt_str_get(pr_0), gt_str_length(pr_0));
   gt_determine_ORFs(orfs, 1, gt_str_get(pr_1), gt_str_length(pr_1));
   gt_determine_ORFs(orfs, 2, gt_str_get(pr_2), gt_str_length(pr_2));
