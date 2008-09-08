@@ -82,7 +82,8 @@ void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
   if (!hashmap_get(fi->regions, seqid)) {
     info = gt_malloc(sizeof (RegionInfo));
     info->region = (GT_SequenceRegion*) gt_genome_node_ref((GT_GenomeNode*) sr);
-    info->features = gt_interval_tree_new((GT_FreeFunc) gt_genome_node_rec_delete);
+    info->features = gt_interval_tree_new((GT_FreeFunc)
+                                          gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
@@ -114,7 +115,8 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
   {
     info = gt_calloc(1, sizeof (RegionInfo));
     info->region = NULL;
-    info->features = gt_interval_tree_new((GT_FreeFunc) gt_genome_node_rec_delete);
+    info->features = gt_interval_tree_new((GT_FreeFunc)
+                                          gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
@@ -123,8 +125,9 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
   }
 
   /* add node to the appropriate array in the hashtable */
-  GT_IntervalTreeNode *new_node = gt_interval_tree_node_new(gn, node_range.start,
-                                                      node_range.end);
+  GT_IntervalTreeNode *new_node = gt_interval_tree_node_new(gn,
+                                                            node_range.start,
+                                                            node_range.end);
   gt_interval_tree_insert(info->features, new_node);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
@@ -136,27 +139,27 @@ int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
 {
   GenomeStream *gff3_in_stream;
   GT_GenomeNode *gn;
-  Queue *queue;
+  GT_Queue *queue;
   int had_err = 0;
   gt_error_check(err);
   assert(feature_index && gff3file);
-  queue = queue_new();
+  queue = gt_queue_new();
   gff3_in_stream = gff3_in_stream_new_unsorted(1, &gff3file, false, false);
   while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn)
-    queue_add(queue, gn);
+    gt_queue_add(queue, gn);
   if (!had_err) {
     GenomeVisitor *feature_visitor = feature_visitor_new(feature_index);
-    while (queue_size(queue)) {
-      gn = queue_get(queue);
+    while (gt_queue_size(queue)) {
+      gn = gt_queue_get(queue);
       had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
       assert(!had_err); /* cannot happen */
     }
     genome_visitor_delete(feature_visitor);
   }
   genome_stream_delete(gff3_in_stream);
-  while (queue_size(queue))
-    gt_genome_node_rec_delete(queue_get(queue));
-  queue_delete(queue);
+  while (gt_queue_size(queue))
+    gt_genome_node_rec_delete(gt_queue_get(queue));
+  gt_queue_delete(queue);
   return had_err;
 }
 

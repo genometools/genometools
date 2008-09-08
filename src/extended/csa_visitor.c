@@ -28,7 +28,7 @@
 
 struct CSAVisitor {
   const GenomeVisitor parent_instance;
-  Queue *gt_genome_node_buffer;
+  GT_Queue *gt_genome_node_buffer;
   unsigned long join_length;
   GT_Array *cluster;
   GT_GenomeFeature *buffered_feature;
@@ -45,7 +45,7 @@ struct CSAVisitor {
 static void csa_visitor_free(GenomeVisitor *gv)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  queue_delete(csa_visitor->gt_genome_node_buffer);
+  gt_queue_delete(csa_visitor->gt_genome_node_buffer);
   gt_array_delete(csa_visitor->cluster);
   gt_str_delete(csa_visitor->gt_csa_source_str);
 }
@@ -105,7 +105,7 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GT_GenomeNode *gn,
   CSAVisitor *csa_visitor;
   gt_error_check(err);
   csa_visitor = csa_visitor_cast(gv);
-  queue_add(csa_visitor->gt_genome_node_buffer, gn);
+  gt_queue_add(csa_visitor->gt_genome_node_buffer, gn);
   return 0;
 }
 
@@ -141,7 +141,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
 {
   GenomeVisitor *gv = genome_visitor_create(csa_visitor_class());
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  csa_visitor->gt_genome_node_buffer = queue_new();
+  csa_visitor->gt_genome_node_buffer = gt_queue_new();
   csa_visitor->join_length = join_length;
   csa_visitor->cluster = gt_array_new(sizeof (GT_GenomeFeature*));
   csa_visitor->buffered_feature = NULL;
@@ -152,14 +152,14 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
 unsigned long csa_visitor_node_buffer_size(GenomeVisitor *gv)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  return queue_size(csa_visitor->gt_genome_node_buffer);
+  return gt_queue_size(csa_visitor->gt_genome_node_buffer);
 }
 
 GT_GenomeNode* csa_visitor_get_node(GenomeVisitor *gv)
 {
   CSAVisitor *csa_visitor;
   csa_visitor = csa_visitor_cast(gv);
-  return queue_get(csa_visitor->gt_genome_node_buffer);
+  return gt_queue_get(csa_visitor->gt_genome_node_buffer);
 }
 
 static GT_Range get_genomic_range(const void *sa)
@@ -425,7 +425,7 @@ static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
   return gene_feature;
 }
 
-static void process_csa_genes(Queue *gt_genome_node_buffer, GT_Array *csa_genes,
+static void process_csa_genes(GT_Queue *gt_genome_node_buffer, GT_Array *csa_genes,
                               GT_Str *gt_csa_source_str,
                               GT_FeatureType *gene_type,
                               GT_FeatureType *mRNA_type,
@@ -438,7 +438,7 @@ static void process_csa_genes(Queue *gt_genome_node_buffer, GT_Array *csa_genes,
                                                    gt_array_get(csa_genes, i),
                                                    gt_csa_source_str, gene_type,
                                                    mRNA_type, exon_type);
-    queue_add(gt_genome_node_buffer, gene_feature);
+    gt_queue_add(gt_genome_node_buffer, gene_feature);
   }
 }
 

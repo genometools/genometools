@@ -45,7 +45,7 @@ struct GTF_parser {
 };
 
 typedef struct {
-  Queue *genome_nodes;
+  GT_Queue *genome_nodes;
   GT_Array *mRNAs;
   Hashmap *gene_id_to_name_mapping,
           *transcript_id_to_name_mapping;
@@ -108,13 +108,13 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   GT_Str *seqid;
   GT_Range range;
   GT_GenomeNode *gn;
-  Queue *genome_nodes = (Queue*) data;
+  GT_Queue *genome_nodes = (GT_Queue*) data;
   gt_error_check(err);
   assert(key && value && data);
   seqid = gt_str_new_cstr(key);
   range = *(GT_Range*) value;
   gn = gt_sequence_region_new(seqid, range);
-  queue_add(genome_nodes, gn);
+  gt_queue_add(genome_nodes, gn);
   gt_str_delete(seqid);
   return 0;
 }
@@ -193,7 +193,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 {
   Hashmap *transcript_id_hash = (Hashmap*) value;
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
-  Queue *genome_nodes = cinfo->genome_nodes;
+  GT_Queue *genome_nodes = cinfo->genome_nodes;
   const char *gname;
   GT_Array *mRNAs = gt_array_new(sizeof (GT_GenomeNode*));
   GT_GenomeNode *gene_node, *gn;
@@ -242,7 +242,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
     }
 
     /* store the gene */
-    queue_add(genome_nodes, gene_node);
+    gt_queue_add(genome_nodes, gene_node);
 
     /* free */
     gt_array_delete(mRNAs);
@@ -251,7 +251,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
+int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
                      GT_Str *filenamestr, FILE *fpin, unsigned int be_tolerant,
                      GT_Error *err)
 {
@@ -327,7 +327,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       /* storing comment */
       gn = gt_comment_new(line+1);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
-      queue_add(genome_nodes, gn);
+      gt_queue_add(genome_nodes, gn);
     }
     else {
       /* process tab delimited GTF line */

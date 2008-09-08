@@ -30,7 +30,7 @@ typedef struct GT_FastaBuffer GT_FastaBuffer;
 GT_FastaBuffer* gt_fastabuffer_new(const GT_StrArray *filenametab,
                              const Uchar *symbolmap, bool plainformat,
                              Filelengthvalues **filelengthtab,
-                             Queue *descptr,
+                             GT_Queue *descptr,
                              unsigned long *characterdistribution);
 static int   gt_fastabuffer_next(GT_FastaBuffer*, Uchar *val, GT_Error*);
 void         gt_fastabuffer_delete(GT_FastaBuffer*);

@@ -21,32 +21,33 @@
 #include <stdio.h>
 #include "core/error.h"
 
-typedef struct Queue Queue;
+typedef struct GT_Queue GT_Queue;
 
-typedef int (*QueueProcessor)(void **elem, void *info, GT_Error*);
+typedef int (*GT_QueueProcessor)(void **elem, void *info, GT_Error*);
 
-Queue*        queue_new(void);
-void          queue_delete(Queue*);
-void          queue_delete_with_contents(Queue*);
-void          queue_add(Queue*, void*);
-void*         queue_get(Queue*);
-void*         queue_head(Queue*);
+GT_Queue*     gt_queue_new(void);
+void          gt_queue_delete(GT_Queue*);
+void          gt_queue_delete_with_contents(GT_Queue*);
+void          gt_queue_add(GT_Queue*, void*);
+void*         gt_queue_get(GT_Queue*);
+void*         gt_queue_head(GT_Queue*);
 /* Remove <elem> from <queue> (<elem> has to be in <queue>).
-   Thereby <queue> is traversed in reverse order, leading to O(queue_size)
+   Thereby <queue> is traversed in reverse order, leading to O(gt_queue_size)
    worst-case running time. */
-void          queue_remove(Queue *queue, void *elem);
-/* Iterate over all elements in <queue> and call <queue_processor> with them.
+void          gt_queue_remove(GT_Queue *queue, void *elem);
+/* Iterate over all elements in <queue> and call <gt_queue_processor> with them.
    <info> and <err> are passed to <queue_processor>.
    If <queue_processor> returns a value != 0, the iteration is stopped and the
    return value of <queue_processor> is returned. */
-int           queue_iterate(Queue *queue, QueueProcessor queue_processor,
-                            void *info, GT_Error *err);
-/* Similar to <queue_iterate>, except that the <queue> is traversed in reverse
-   order. */
-int           queue_iterate_reverse(Queue *queue,
-                                    QueueProcessor queue_processor, void *info,
-                                    GT_Error *err);
-unsigned long queue_size(const Queue*);
-int           queue_unit_test(GT_Error*);
+int           gt_queue_iterate(GT_Queue *queue,
+                               GT_QueueProcessor queue_processor,
+                               void *info, GT_Error *err);
+/* Similar to <gt_queue_iterate>, except that the <queue> is traversed in
+   reverse order. */
+int           gt_queue_iterate_reverse(GT_Queue *queue,
+                                       GT_QueueProcessor queue_processor,
+                                       void *info, GT_Error *err);
+unsigned long gt_queue_size(const GT_Queue*);
+int           gt_queue_unit_test(GT_Error*);
 
 #endif

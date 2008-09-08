@@ -22,7 +22,7 @@
 #include "core/queue.h"
 #include "core/unused_api.h"
 
-struct Queue
+struct GT_Queue
 {
   void **contents;
   long front, /* f */
@@ -59,35 +59,35 @@ struct Queue
             b
 */
 
-Queue* queue_new(void)
+GT_Queue* gt_queue_new(void)
 {
-  return gt_calloc(1, sizeof (Queue));
+  return gt_calloc(1, sizeof (GT_Queue));
 }
 
-static void queue_wrap(Queue *q, bool free_contents)
+static void queue_wrap(GT_Queue *q, bool free_contents)
 {
   assert(q);
   if (free_contents) {
-    while (queue_size(q))
-      gt_free(queue_get(q));
+    while (gt_queue_size(q))
+      gt_free(gt_queue_get(q));
   }
   gt_free(q->contents);
   gt_free(q);
 }
 
-void queue_delete(Queue *q)
+void gt_queue_delete(GT_Queue *q)
 {
   if (!q) return;
   queue_wrap(q, false);
 }
 
-void queue_delete_with_contents(Queue *q)
+void gt_queue_delete_with_contents(GT_Queue *q)
 {
   if (!q) return;
   queue_wrap(q, true);
 }
 
-static void check_space(Queue *q)
+static void check_space(GT_Queue *q)
 {
   if (!q->allocated) { /* empty queue without allocated memory */
     q->contents = gt_dynalloc(q->contents, &q->allocated, sizeof (void*));
@@ -119,17 +119,17 @@ static void check_space(Queue *q)
   }
 }
 
-void queue_add(Queue *q, void *contents)
+void gt_queue_add(GT_Queue *q, void *contents)
 {
   assert(q);
   check_space(q);
   q->contents[q->back++] = contents;
 }
 
-void* queue_get(Queue *q)
+void* gt_queue_get(GT_Queue *q)
 {
   void *contents;
-  assert(q && queue_size(q));
+  assert(q && gt_queue_size(q));
   /* get contents */
   contents = q->contents[q->front++];
   /* adjust indices */
@@ -140,16 +140,16 @@ void* queue_get(Queue *q)
   return contents;
 }
 
-void* queue_head(Queue *q)
+void* gt_queue_head(GT_Queue *q)
 {
-  assert(q && queue_size(q));
+  assert(q && gt_queue_size(q));
   return q->contents[q->front];
 }
 
-void queue_remove(Queue *q, void *elem)
+void gt_queue_remove(GT_Queue *q, void *elem)
 {
   long i, elemidx;
-  assert(q &&  queue_size(q));
+  assert(q &&  gt_queue_size(q));
   if (q->front < q->back) { /* no wraparound */
     for (i = q->back-1; i >= q->front; i--) {
       if (q->contents[i] == elem)
@@ -196,61 +196,61 @@ void queue_remove(Queue *q, void *elem)
   }
 }
 
-int queue_iterate(Queue *q, QueueProcessor queue_processor, void *info,
+int gt_queue_iterate(GT_Queue *q, GT_QueueProcessor gt_queue_processor, void *info,
                   GT_Error *err)
 {
   long i;
   int rval;
   gt_error_check(err);
-  assert(q && queue_processor);
-  if (queue_size(q)) {
+  assert(q && gt_queue_processor);
+  if (gt_queue_size(q)) {
     if (q->front < q->back) { /* no wraparound */
       for (i = q->front; i < q->back; i++) {
-        if ((rval = queue_processor(q->contents + i, info, err)))
+        if ((rval = gt_queue_processor(q->contents + i, info, err)))
           return rval;
       }
     }
     else { /* wraparound */
       for (i = q->front; i < q->size; i++) {
-        if ((rval = queue_processor(q->contents + i, info, err)))
+        if ((rval = gt_queue_processor(q->contents + i, info, err)))
           return rval;
       }
       for (i = 0; i < q->back; i++) {
-        if ((rval = queue_processor(q->contents + i, info, err))) return rval;
+        if ((rval = gt_queue_processor(q->contents + i, info, err))) return rval;
       }
     }
   }
   return 0;
 }
 
-int queue_iterate_reverse(Queue *q, QueueProcessor queue_processor, void *info,
+int gt_queue_iterate_reverse(GT_Queue *q, GT_QueueProcessor gt_queue_processor, void *info,
                           GT_Error *err)
 {
   long i;
   int rval;
   gt_error_check(err);
-  assert(q && queue_processor);
-  if (queue_size(q)) {
+  assert(q && gt_queue_processor);
+  if (gt_queue_size(q)) {
     if (q->front < q->back) { /* no wraparound */
       for (i = q->back-1; i >= q->front; i--) {
-        if ((rval = queue_processor(q->contents + i, info, err)))
+        if ((rval = gt_queue_processor(q->contents + i, info, err)))
           return rval;
       }
     }
     else { /* wraparound */
       for (i = q->back-1; i >= 0; i--) {
-        if ((rval = queue_processor(q->contents + i, info, err)))
+        if ((rval = gt_queue_processor(q->contents + i, info, err)))
           return rval;
       }
       for (i = q->size-1; i >= q->front; i--) {
-        if ((rval = queue_processor(q->contents +i, info, err))) return rval;
+        if ((rval = gt_queue_processor(q->contents +i, info, err))) return rval;
       }
     }
   }
   return 0;
 }
 
-unsigned long queue_size(const Queue *q)
+unsigned long gt_queue_size(const GT_Queue *q)
 {
   assert(q);
   if ((q->front < q->back) || ((q->front == 0) && (q->back == 0)))
@@ -270,7 +270,7 @@ static int check_queue(void **elem, void *info, GT_Error *err)
   return had_err;
 }
 
-static int check_queue_reverse(void **elem, void *info, GT_Error *err)
+static int check_gt_queue_reverse(void **elem, void *info, GT_Error *err)
 {
   long *check_counter_reverse = info;
   int had_err = 0;
@@ -287,212 +287,212 @@ static int fail_func(GT_UNUSED void **elem, GT_UNUSED void *info, GT_UNUSED GT_E
   return -1;
 }
 
-int queue_unit_test(GT_Error *err)
+int gt_queue_unit_test(GT_Error *err)
 {
   long check_counter = 0, check_counter_reverse = 1023;
   unsigned long i;
   int had_err = 0;
-  Queue *q;
+  GT_Queue *q;
 
   gt_error_check(err);
 
   /* without wraparound */
-  q = queue_new();
-  ensure(had_err, !queue_size(q));
+  q = gt_queue_new();
+  ensure(had_err, !gt_queue_size(q));
   for (i = 0; !had_err && i < 1024; i++) {
-    queue_add(q, (void*) i);
-    ensure(had_err, queue_size(q) == i + 1);
+    gt_queue_add(q, (void*) i);
+    ensure(had_err, gt_queue_size(q) == i + 1);
   }
   if (!had_err)
-    had_err = queue_iterate(q, check_queue, &check_counter, err);
+    had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
   if (!had_err) {
-    had_err = queue_iterate_reverse(q, check_queue_reverse,
+    had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
                                     &check_counter_reverse, err);
   }
-  ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-  ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+  ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
+  ensure(had_err, gt_queue_iterate_reverse(q, fail_func, NULL, NULL));
   if (!had_err) {
-    queue_remove(q, (void*) 0);
-    ensure(had_err, queue_size(q) == 1023);
+    gt_queue_remove(q, (void*) 0);
+    ensure(had_err, gt_queue_size(q) == 1023);
   }
   for (i = 1; !had_err && i < 1024; i++) {
-    ensure(had_err, queue_head(q) == (void*) i);
-    ensure(had_err, queue_get(q) == (void*) i);
-    ensure(had_err, queue_size(q) == 1024 - i - 1);
+    ensure(had_err, gt_queue_head(q) == (void*) i);
+    ensure(had_err, gt_queue_get(q) == (void*) i);
+    ensure(had_err, gt_queue_size(q) == 1024 - i - 1);
   }
-  ensure(had_err, !queue_size(q));
-  queue_delete(q);
+  ensure(had_err, !gt_queue_size(q));
+  gt_queue_delete(q);
 
   /* with wraparound (without full queue) */
   if (!had_err) {
-    q = queue_new();
-    ensure(had_err, !queue_size(q));
+    q = gt_queue_new();
+    ensure(had_err, !gt_queue_size(q));
     for (i = 0; !had_err && i < 1024; i++) {
-      queue_add(q, (void*) i);
-      ensure(had_err, queue_size(q) == i + 1);
+      gt_queue_add(q, (void*) i);
+      ensure(had_err, gt_queue_size(q) == i + 1);
     }
     check_counter = 0;
     check_counter_reverse = 1023;
     if (!had_err)
-      had_err = queue_iterate(q, check_queue, &check_counter, err);
-    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+      had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
+    ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, gt_queue_iterate_reverse(q, fail_func, NULL, NULL));
     if (!had_err) {
-      had_err = queue_iterate_reverse(q, check_queue_reverse,
+      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
                                       &check_counter_reverse, err);
     }
     for (i = 0; !had_err && i < 512; i++) {
-      ensure(had_err, queue_head(q) == (void*) i);
-      ensure(had_err, queue_get(q) == (void*) i);
-      ensure(had_err, queue_size(q) == 1024 - i - 1);
+      ensure(had_err, gt_queue_head(q) == (void*) i);
+      ensure(had_err, gt_queue_get(q) == (void*) i);
+      ensure(had_err, gt_queue_size(q) == 1024 - i - 1);
     }
     for (i = 0; !had_err && i < 512; i++) {
-      queue_add(q, (void*) (i + 1024));
-      ensure(had_err, queue_size(q) == 512 + i + 1);
+      gt_queue_add(q, (void*) (i + 1024));
+      ensure(had_err, gt_queue_size(q) == 512 + i + 1);
     }
     check_counter = 512;
     check_counter_reverse = 1535;
     if (!had_err)
-      had_err = queue_iterate(q, check_queue, &check_counter, err);
+      had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
     if (!had_err) {
-      had_err = queue_iterate_reverse(q, check_queue_reverse,
+      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
                                       &check_counter_reverse, err);
     }
-    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+    ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, gt_queue_iterate_reverse(q, fail_func, NULL, NULL));
     if (!had_err) {
-      queue_remove(q, (void*) 512);
-      ensure(had_err, queue_size(q) == 1023);
+      gt_queue_remove(q, (void*) 512);
+      ensure(had_err, gt_queue_size(q) == 1023);
     }
     for (i = 1; !had_err && i < 1024; i++) {
-      ensure(had_err, queue_head(q) == (void*) (512 + i));
-      ensure(had_err, queue_get(q) == (void*) (512 + i));
-      ensure(had_err, queue_size(q) == 1024 - i - 1);
+      ensure(had_err, gt_queue_head(q) == (void*) (512 + i));
+      ensure(had_err, gt_queue_get(q) == (void*) (512 + i));
+      ensure(had_err, gt_queue_size(q) == 1024 - i - 1);
     }
-    ensure(had_err, !queue_size(q));
-    queue_delete(q);
+    ensure(had_err, !gt_queue_size(q));
+    gt_queue_delete(q);
   }
 
   /* with wraparound (with full queue) */
   if (!had_err) {
-    q = queue_new();
-    ensure(had_err, !queue_size(q));
+    q = gt_queue_new();
+    ensure(had_err, !gt_queue_size(q));
     for (i = 0; !had_err && i < 1024; i++) {
-      queue_add(q, (void*) i);
-      ensure(had_err, queue_size(q) == i + 1);
+      gt_queue_add(q, (void*) i);
+      ensure(had_err, gt_queue_size(q) == i + 1);
     }
     check_counter = 0;
     check_counter_reverse = 1023;
     if (!had_err)
-      had_err = queue_iterate(q, check_queue, &check_counter, err);
+      had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
     if (!had_err) {
-      had_err = queue_iterate_reverse(q, check_queue_reverse,
+      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
                                       &check_counter_reverse, err);
     }
-    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+    ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, gt_queue_iterate_reverse(q, fail_func, NULL, NULL));
     for (i = 0; !had_err && i < 512; i++) {
-      ensure(had_err, queue_head(q) == (void*) i);
-      ensure(had_err, queue_get(q) == (void*) i);
-      ensure(had_err, queue_size(q) == 1024 - i - 1);
+      ensure(had_err, gt_queue_head(q) == (void*) i);
+      ensure(had_err, gt_queue_get(q) == (void*) i);
+      ensure(had_err, gt_queue_size(q) == 1024 - i - 1);
     }
     for (i = 0; !had_err && i < 1024; i++) {
-      queue_add(q, (void*) (i + 1024));
-      ensure(had_err, queue_size(q) == 512 + i + 1);
+      gt_queue_add(q, (void*) (i + 1024));
+      ensure(had_err, gt_queue_size(q) == 512 + i + 1);
     }
     check_counter = 512;
     check_counter_reverse = 2047;
     if (!had_err)
-      had_err = queue_iterate(q, check_queue, &check_counter, err);
+      had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
     if (!had_err) {
-      had_err = queue_iterate_reverse(q, check_queue_reverse,
+      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
                                       &check_counter_reverse, err);
     }
-    ensure(had_err, queue_iterate(q, fail_func, NULL, NULL));
-    ensure(had_err, queue_iterate_reverse(q, fail_func, NULL, NULL));
+    ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
+    ensure(had_err, gt_queue_iterate_reverse(q, fail_func, NULL, NULL));
     if (!had_err) {
-      queue_remove(q, (void*) 512);
-      ensure(had_err, queue_size(q) == 1535);
+      gt_queue_remove(q, (void*) 512);
+      ensure(had_err, gt_queue_size(q) == 1535);
     }
     for (i = 1; !had_err && i < 1536; i++) {
-      ensure(had_err, queue_head(q) == (void*) (512 + i));
-      ensure(had_err, queue_get(q) == (void*) (512 + i));
-      ensure(had_err, queue_size(q) == 1536 - i - 1);
+      ensure(had_err, gt_queue_head(q) == (void*) (512 + i));
+      ensure(had_err, gt_queue_get(q) == (void*) (512 + i));
+      ensure(had_err, gt_queue_size(q) == 1536 - i - 1);
     }
-    ensure(had_err, !queue_size(q));
-    queue_delete(q);
+    ensure(had_err, !gt_queue_size(q));
+    gt_queue_delete(q);
   }
 
   /* test a corner case */
   if (!had_err) {
-    q = queue_new();
-    queue_add(q, (void*) 1);
-    ensure(had_err, queue_size(q) == 1);
+    q = gt_queue_new();
+    gt_queue_add(q, (void*) 1);
+    ensure(had_err, gt_queue_size(q) == 1);
     if (!had_err)
-      queue_add(q, (void*) 1);
-    ensure(had_err, queue_size(q) == 2);
-    ensure(had_err, queue_get(q));
-    ensure(had_err, queue_size(q) == 1);
+      gt_queue_add(q, (void*) 1);
+    ensure(had_err, gt_queue_size(q) == 2);
+    ensure(had_err, gt_queue_get(q));
+    ensure(had_err, gt_queue_size(q) == 1);
     if (!had_err)
-      queue_add(q, (void*) 1);
-    ensure(had_err, queue_size(q) == 2);
-    ensure(had_err, queue_get(q));
-    ensure(had_err, queue_size(q) == 1);
+      gt_queue_add(q, (void*) 1);
+    ensure(had_err, gt_queue_size(q) == 2);
+    ensure(had_err, gt_queue_get(q));
+    ensure(had_err, gt_queue_size(q) == 1);
     if (!had_err)
-      queue_add(q, (void*) 1);
-    ensure(had_err, queue_size(q) == 2);
-    ensure(had_err, queue_get(q));
-    ensure(had_err, queue_size(q) == 1);
-    ensure(had_err, queue_get(q));
-    ensure(had_err, queue_size(q) == 0);
+      gt_queue_add(q, (void*) 1);
+    ensure(had_err, gt_queue_size(q) == 2);
+    ensure(had_err, gt_queue_get(q));
+    ensure(had_err, gt_queue_size(q) == 1);
+    ensure(had_err, gt_queue_get(q));
+    ensure(had_err, gt_queue_size(q) == 0);
     if (!had_err)
-      queue_add(q, (void*) 1);
-    ensure(had_err, queue_size(q) == 1);
-    ensure(had_err, queue_get(q));
-    ensure(had_err, queue_size(q) == 0);
-    queue_delete(q);
+      gt_queue_add(q, (void*) 1);
+    ensure(had_err, gt_queue_size(q) == 1);
+    ensure(had_err, gt_queue_get(q));
+    ensure(had_err, gt_queue_size(q) == 0);
+    gt_queue_delete(q);
   }
 
-  /* queue_remove() corner case */
+  /* gt_queue_remove() corner case */
   if (!had_err) {
-    q = queue_new();
-    queue_add(q, (void*) 1);
-    ensure(had_err, queue_size(q) == 1);
-    queue_remove(q, (void*) 1);
-    ensure(had_err, queue_size(q) == 0);
-    queue_delete(q);
+    q = gt_queue_new();
+    gt_queue_add(q, (void*) 1);
+    ensure(had_err, gt_queue_size(q) == 1);
+    gt_queue_remove(q, (void*) 1);
+    ensure(had_err, gt_queue_size(q) == 0);
+    gt_queue_delete(q);
   }
 
-  /* queue_remove() corner case */
+  /* gt_queue_remove() corner case */
   if (!had_err) {
-    q = queue_new();
-    queue_add(q, (void*) 0);
-    queue_add(q, (void*) 1);
-    queue_add(q, (void*) 2);
-    queue_add(q, (void*) 3);
-    ensure(had_err, queue_get(q) == (void*) 0);
-    ensure(had_err, queue_get(q) == (void*) 1);
-    queue_add(q, (void*) 4);
-    queue_add(q, (void*) 5);
-    queue_remove(q, (void*) 4);
-    queue_remove(q, (void*) 2);
-    queue_remove(q, (void*) 5);
-    queue_remove(q, (void*) 3);
-    ensure(had_err, queue_size(q) == 0);
-    queue_delete(q);
+    q = gt_queue_new();
+    gt_queue_add(q, (void*) 0);
+    gt_queue_add(q, (void*) 1);
+    gt_queue_add(q, (void*) 2);
+    gt_queue_add(q, (void*) 3);
+    ensure(had_err, gt_queue_get(q) == (void*) 0);
+    ensure(had_err, gt_queue_get(q) == (void*) 1);
+    gt_queue_add(q, (void*) 4);
+    gt_queue_add(q, (void*) 5);
+    gt_queue_remove(q, (void*) 4);
+    gt_queue_remove(q, (void*) 2);
+    gt_queue_remove(q, (void*) 5);
+    gt_queue_remove(q, (void*) 3);
+    ensure(had_err, gt_queue_size(q) == 0);
+    gt_queue_delete(q);
   }
 
   /* delete with contents */
   if (!had_err) {
-    q = queue_new();
-    ensure(had_err, !queue_size(q));
+    q = gt_queue_new();
+    ensure(had_err, !gt_queue_size(q));
     if (!had_err)
-      queue_add(q, gt_calloc(1, 16));
-    ensure(had_err, queue_size(q) == 1);
+      gt_queue_add(q, gt_calloc(1, 16));
+    ensure(had_err, gt_queue_size(q) == 1);
     if (!had_err)
-      queue_add(q, gt_calloc(1, 32));
-    ensure(had_err, queue_size(q) == 2);
-    queue_delete_with_contents(q);
+      gt_queue_add(q, gt_calloc(1, 32));
+    ensure(had_err, gt_queue_size(q) == 2);
+    gt_queue_delete_with_contents(q);
   }
 
   return had_err;

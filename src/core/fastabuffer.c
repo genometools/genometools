@@ -29,7 +29,7 @@ GT_FastaBuffer* gt_fastabuffer_new(const GT_StrArray *filenametab,
                              const Uchar *symbolmap,
                              bool plainformat,
                              Filelengthvalues **filelengthtab,
-                             Queue *descptr,
+                             GT_Queue *descptr,
                              unsigned long *characterdistribution)
 {
   GT_FastaBuffer *fb;
@@ -145,7 +145,7 @@ static int advancefastabufferstate(GT_FastaBuffer *fb, GT_Error *err)
             if (currentchar == NEWLINESYMBOL)
             {
               STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
-              queue_add(fb->descptr, gt_cstr_dup(fb->headerbuffer.spacechar));
+              gt_queue_add(fb->descptr, gt_cstr_dup(fb->headerbuffer.spacechar));
               fb->headerbuffer.nextfreechar = 0;
             } else
             {

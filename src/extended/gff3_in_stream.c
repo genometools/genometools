@@ -39,7 +39,7 @@ struct GFF3InStream
        own_factory;
   GT_GenFile *fpin;
   unsigned long long line_number;
-  Queue *genome_node_buffer;
+  GT_Queue *genome_node_buffer;
   GT_TypeFactory *feature_type_factory;
   GFF3Parser *gff3_parser;
 };
@@ -79,14 +79,14 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
 
   gt_error_check(err);
 
-  if (queue_size(is->genome_node_buffer) > 1) {
+  if (gt_queue_size(is->genome_node_buffer) > 1) {
     /* we still have at least two nodes in the buffer -> serve from there */
-    *gn = queue_get(is->genome_node_buffer);
+    *gn = gt_queue_get(is->genome_node_buffer);
     return 0;
   }
 
   /* the buffer is empty or has one element */
-  assert(queue_size(is->genome_node_buffer) <= 1);
+  assert(gt_queue_size(is->genome_node_buffer) <= 1);
 
   for (;;) {
     /* open file if necessary */
@@ -161,23 +161,23 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
       continue;
     }
 
-    assert(queue_size(is->genome_node_buffer));
+    assert(gt_queue_size(is->genome_node_buffer));
 
     /* make sure the parsed nodes are sorted */
-    if (is->ensure_sorting && queue_size(is->genome_node_buffer) > 1) {
+    if (is->ensure_sorting && gt_queue_size(is->genome_node_buffer) > 1) {
       GT_GenomeNode *last_node = NULL;
       /* a sorted stream can have at most one input file */
       assert(gt_strarray_size(is->files) == 0 ||
              gt_strarray_size(is->files) == 1);
-      had_err = queue_iterate(is->genome_node_buffer, buffer_is_sorted,
+      had_err = gt_queue_iterate(is->genome_node_buffer, buffer_is_sorted,
                               &last_node, err);
     }
     if (!had_err) {
-      *gn = queue_get(is->genome_node_buffer);
+      *gn = gt_queue_get(is->genome_node_buffer);
     }
     return had_err;
   }
-  assert(!queue_size(is->genome_node_buffer));
+  assert(!gt_queue_size(is->genome_node_buffer));
   *gn = NULL;
   return had_err;
 }
@@ -187,9 +187,9 @@ static void gff3_in_stream_free(GenomeStream *gs)
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
   gt_strarray_delete(gff3_in_stream->files);
   gt_str_delete(gff3_in_stream->stdinstr);
-  while (queue_size(gff3_in_stream->genome_node_buffer))
-    gt_genome_node_rec_delete(queue_get(gff3_in_stream->genome_node_buffer));
-  queue_delete(gff3_in_stream->genome_node_buffer);
+  while (gt_queue_size(gff3_in_stream->genome_node_buffer))
+    gt_genome_node_rec_delete(gt_queue_get(gff3_in_stream->genome_node_buffer));
+  gt_queue_delete(gff3_in_stream->genome_node_buffer);
   gff3parser_delete(gff3_in_stream->gff3_parser);
   if (gff3_in_stream->own_factory)
     gt_type_factory_delete(gff3_in_stream->feature_type_factory);
@@ -220,7 +220,7 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
   gff3_in_stream->file_is_open           = false;
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
-  gff3_in_stream->genome_node_buffer     = queue_new();
+  gff3_in_stream->genome_node_buffer     = gt_queue_new();
   gff3_in_stream->feature_type_factory   = gt_type_factory_any_new();
   gff3_in_stream->own_factory            = true;
   gff3_in_stream->checkids               = checkids;

@@ -160,10 +160,10 @@ struct addLocateInfoState
     bitsPerOrigRank;
   const SpecialsRankLookup *sprTable;
   int featureToggles;
-  size_t revMapQueueSize;
-  struct seqRevMapEntry *revMapQueue;
-  size_t origRanksQueueSize;
-  Seqpos *origRanksQueue;
+  size_t revMapGT_QueueSize;
+  struct seqRevMapEntry *revMapGT_Queue;
+  size_t origRanksGT_QueueSize;
+  Seqpos *origRanksGT_Queue;
   BWTSeqContextRetrieverFactory *ctxFactory;
 };
 
@@ -282,11 +282,11 @@ initAddLocateInfoState(struct addLocateInfoState *state,
       state->bitsPerOrigPos = requiredSeqposBits(lastPos/locateInterval);
     else
       state->bitsPerOrigPos = requiredSeqposBits(lastPos);
-    state->origRanksQueueSize = state->revMapQueueSize = aggregationExpVal;
-    state->revMapQueue = gt_malloc(sizeof (state->revMapQueue[0])
-                                   * state->revMapQueueSize);
-    state->origRanksQueue = gt_malloc(sizeof (state->origRanksQueue[0])
-                                      * state->origRanksQueueSize);
+    state->origRanksGT_QueueSize = state->revMapGT_QueueSize = aggregationExpVal;
+    state->revMapGT_Queue = gt_malloc(sizeof (state->revMapGT_Queue[0])
+                                   * state->revMapGT_QueueSize);
+    state->origRanksGT_Queue = gt_malloc(sizeof (state->origRanksGT_Queue[0])
+                                      * state->origRanksGT_QueueSize);
     state->bitsPerOrigRank = bitsPerOrigRank;
     /* if there are rank sorted symbols, but no rank sorting is
      * available, extra locate marks will be inserted, at most every
@@ -322,9 +322,9 @@ initAddLocateInfoState(struct addLocateInfoState *state,
   {
     state->extraLocMarksUpperBound = 0;
     state->bitsPerOrigPos = state->bitsPerOrigRank = 0;
-    state->origRanksQueueSize = state->revMapQueueSize = 0;
-    state->origRanksQueue = NULL;
-    state->revMapQueue = NULL;
+    state->origRanksGT_QueueSize = state->revMapGT_QueueSize = 0;
+    state->origRanksGT_Queue = NULL;
+    state->revMapGT_Queue = NULL;
   }
   state->ctxFactory = ctxFactory;
 }
@@ -332,8 +332,8 @@ initAddLocateInfoState(struct addLocateInfoState *state,
 static void
 destructAddLocateInfoState(struct addLocateInfoState *state)
 {
-  gt_free(state->revMapQueue);
-  gt_free(state->origRanksQueue);
+  gt_free(state->revMapGT_Queue);
+  gt_free(state->origRanksGT_Queue);
 }
 
 static inline int
@@ -392,24 +392,24 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
   assert(varDest && cbState);
   locateInterval = state->locateInterval;
   /* 0. resize caches if necessary */
-  if (locateInterval && len > state->revMapQueueSize)
+  if (locateInterval && len > state->revMapGT_QueueSize)
   {
-    state->revMapQueue = gt_realloc(state->revMapQueue,
-                                    len * sizeof (state->revMapQueue[0]));
-    state->revMapQueueSize = len;
+    state->revMapGT_Queue = gt_realloc(state->revMapGT_Queue,
+                                    len * sizeof (state->revMapGT_Queue[0]));
+    state->revMapGT_QueueSize = len;
   }
-  if (state->sprTable && len > state->origRanksQueueSize)
+  if (state->sprTable && len > state->origRanksGT_QueueSize)
   {
-    state->origRanksQueue = gt_realloc(state->origRanksQueue,
-                                       len * sizeof (state->origRanksQueue[0]));
-    state->origRanksQueueSize = len;
+    state->origRanksGT_Queue = gt_realloc(state->origRanksGT_Queue,
+                                       len * sizeof (state->origRanksGT_Queue[0]));
+    state->origRanksGT_QueueSize = len;
   }
   bitsPerBWTPos = requiredSeqposBits(len - 1);
   bitsPerOrigPos = state->bitsPerOrigPos;
   bitsPerOrigRank = state->bitsPerOrigRank;
   {
     Seqpos i, mapVal;
-    size_t revMapQueueLen = 0, origRanksQueueLen = 0;
+    size_t revMapGT_QueueLen = 0, origRanksGT_QueueLen = 0;
     int reversiblySorted = state->featureToggles & BWTReversiblySorted,
       locateBitmap = state->featureToggles & BWTLocateBitmap;
     /* read len suffix array indices from suftab */
@@ -434,10 +434,10 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
         if (!(mapVal % locateInterval) || insertExtraLocateMark)
         {
           /* 1.c.1 enter index into cache */
-          state->revMapQueue[revMapQueueLen].bwtPos = i;
-          state->revMapQueue[revMapQueueLen].origPos
+          state->revMapGT_Queue[revMapGT_QueueLen].bwtPos = i;
+          state->revMapGT_Queue[revMapGT_QueueLen].origPos
             = reversiblySorted ? mapVal/state->locateInterval : mapVal;
-          ++revMapQueueLen;
+          ++revMapGT_QueueLen;
           /* 1.c.2 mark position in bwt sequence */
           if (locateBitmap)
             bsSetBit(cwDest, cwOffset + i);
@@ -459,7 +459,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
                 alphabet, MRAEncMapSymbol(alphabet, BWTSym))]
             == SORTMODE_RANK)
         {
-          state->origRanksQueue[origRanksQueueLen++] =
+          state->origRanksGT_Queue[origRanksGT_QueueLen++] =
             specialsRank(state->sprTable,
                          mapVal != 0 ? mapVal - 1 : state->seqLen - 1);
         }
@@ -469,7 +469,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
         BWTSCRFMapAdvance(state->ctxFactory, &mapVal, 1);
       }
     }
-    /* 2. copy revMapQueue into output */
+    /* 2. copy revMapGT_Queue into output */
     if (locateInterval)
     {
       int locateCount = state->featureToggles & BWTLocateCount;
@@ -477,31 +477,31 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       {
         unsigned bitsPerCount = requiredSeqposBits(len);
         bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerCount,
-                      revMapQueueLen);
+                      revMapGT_QueueLen);
         bitsWritten += bitsPerCount;
       }
-      for (i = 0; i < revMapQueueLen; ++i)
+      for (i = 0; i < revMapGT_QueueLen; ++i)
       {
         if (locateCount)
         {
           bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerBWTPos,
-                        state->revMapQueue[i].bwtPos);
+                        state->revMapGT_Queue[i].bwtPos);
           bitsWritten += bitsPerBWTPos;
         }
         bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerOrigPos,
-                      state->revMapQueue[i].origPos);
+                      state->revMapGT_Queue[i].origPos);
         bitsWritten += bitsPerOrigPos;
       }
     }
     if (bitsPerOrigRank)
     {
       unsigned bitsPerOrigRank = state->bitsPerOrigRank;
-      if (origRanksQueueLen)
+      if (origRanksGT_QueueLen)
       {
         bsStoreUniformSeqposArray(varDest, varOffset + bitsWritten,
-                                  bitsPerOrigRank, origRanksQueueLen,
-                                  state->origRanksQueue);
-        bitsWritten += bitsPerOrigRank * origRanksQueueLen;
+                                  bitsPerOrigRank, origRanksGT_QueueLen,
+                                  state->origRanksGT_Queue);
+        bitsWritten += bitsPerOrigRank * origRanksGT_QueueLen;
       }
     }
   }

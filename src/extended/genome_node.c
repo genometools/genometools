@@ -202,7 +202,7 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
                                           GT_Error *err)
 {
   GT_Array *node_stack = NULL, *list_of_children;
-  Queue *node_queue = NULL;
+  GT_Queue *node_queue = NULL;
   GT_GenomeNode *gn, *gn_ref, *child_feature;
   GT_Dlistelem *dlistelem;
   unsigned long i;
@@ -233,18 +233,18 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
     assert(gt_array_size(node_stack));
   }
   else {
-    node_queue = queue_new();
+    node_queue = gt_queue_new();
     if (!with_pseudo && gt_genome_node_cast(gt_genome_feature_class(), genome_node) &&
         gt_genome_feature_is_pseudo((GT_GenomeFeature*) genome_node)) {
       for (dlistelem = gt_dlist_first(genome_node->children); dlistelem != NULL;
            dlistelem = gt_dlistelem_next(dlistelem)) {
         child_feature = (GT_GenomeNode*) gt_dlistelem_get_data(dlistelem);
-        queue_add(node_queue, child_feature);
+        gt_queue_add(node_queue, child_feature);
       }
     }
     else
-      queue_add(node_queue, genome_node);
-    assert(queue_size(node_queue));
+      gt_queue_add(node_queue, genome_node);
+    assert(gt_queue_size(node_queue));
   }
   list_of_children = gt_array_new(sizeof (GT_GenomeNode*));
 
@@ -256,11 +256,11 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
     traversed_nodes = hashtable_new(node_hashtype);
   }
 
-  while ((depth_first ? gt_array_size(node_stack) : queue_size(node_queue))) {
+  while ((depth_first ? gt_array_size(node_stack) : gt_queue_size(node_queue))) {
     if (depth_first)
       gn = *(GT_GenomeNode**) gt_array_pop(node_stack);
     else
-      gn = queue_get(node_queue);
+      gn = gt_queue_get(node_queue);
     gt_array_reset(list_of_children);
     if (gn->children) {
       /* a backup of the children array is necessary if traverse() frees the
@@ -297,7 +297,7 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
         if (depth_first)
           gt_array_add(node_stack, child_feature);
         else
-          queue_add(node_queue, child_feature);
+          gt_queue_add(node_queue, child_feature);
         if (traverse_only_once)
           hashtable_add(traversed_nodes, &child_feature);
       }
@@ -322,7 +322,7 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
     hashtable_delete(traversed_nodes);
   gt_array_delete(list_of_children);
   gt_array_delete(node_stack);
-  queue_delete(node_queue);
+  gt_queue_delete(node_queue);
 
   return had_err;
 }

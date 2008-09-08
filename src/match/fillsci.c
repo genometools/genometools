@@ -154,7 +154,7 @@ int fasta2sequencekeyvalues(
   DiscDistri *distspralen = NULL;
   unsigned long idx;
   bool haserr = false;
-  Queue *descqueue = NULL;
+  GT_Queue *descqueue = NULL;
   char *desc;
   FILE *desfp = NULL;
 
@@ -166,7 +166,7 @@ int fasta2sequencekeyvalues(
 
   if (withdestab)
   {
-    descqueue = queue_new();
+    descqueue = gt_queue_new();
     desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",err);
     if (desfp == NULL)
     {
@@ -203,7 +203,7 @@ int fasta2sequencekeyvalues(
       {
         if (desfp != NULL && charcode == (Uchar) SEPARATOR)
         {
-          desc = queue_get(descqueue);
+          desc = gt_queue_get(descqueue);
           if (fputs(desc,desfp) == EOF)
           {
             gt_error_set(err,"cannot write description to file %s.%s",
@@ -249,7 +249,7 @@ int fasta2sequencekeyvalues(
   {
     if (desfp != NULL)
     {
-      desc = queue_get(descqueue);
+      desc = gt_queue_get(descqueue);
       if (fputs(desc,desfp) == EOF)
       {
         gt_error_set(err,"cannot write description to file %s.%s",
@@ -268,7 +268,7 @@ int fasta2sequencekeyvalues(
   gt_xfclose(desfp);
   disc_distri_delete(distspralen);
   gt_fastabuffer_delete(fb);
-  queue_delete_with_contents(descqueue);
+  gt_queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
 }
 

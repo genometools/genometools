@@ -28,7 +28,7 @@ struct SeqIterator
   GT_FastaBuffer *fb;
   const GT_StrArray *filenametab;
   const Uchar *symbolmap;
-  Queue *descptr;
+  GT_Queue *descptr;
   ArrayUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;
@@ -43,7 +43,7 @@ SeqIterator* seqiterator_new(const GT_StrArray *filenametab,
   SeqIterator *seqit;
   seqit = gt_malloc(sizeof (SeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
-  seqit->descptr = queue_new();
+  seqit->descptr = gt_queue_new();
   seqit->fb = gt_fastabuffer_new(filenametab,
                               symbolmap,
                               false,
@@ -100,7 +100,7 @@ int seqiterator_next(SeqIterator *seqit,
         haserr = true;
         break;
       }
-      *desc = queue_get(seqit->descptr);
+      *desc = gt_queue_get(seqit->descptr);
       *len = seqit->sequencebuffer.nextfreeUchar;
       if (seqit->withsequence)
       {
@@ -126,7 +126,7 @@ int seqiterator_next(SeqIterator *seqit,
   }
   if (!haserr && seqit->sequencebuffer.nextfreeUchar > 0)
   {
-    *desc = queue_get(seqit->descptr);
+    *desc = gt_queue_get(seqit->descptr);
     if (seqit->withsequence)
     {
       /* make sure the outgoing sequence is '\0' terminated */
@@ -160,7 +160,7 @@ const unsigned long long *seqiterator_getcurrentcounter(SeqIterator *seqit,
 void seqiterator_delete(SeqIterator *seqit)
 {
   if (!seqit) return;
-  queue_delete_with_contents(seqit->descptr);
+  gt_queue_delete_with_contents(seqit->descptr);
   gt_fastabuffer_delete(seqit->fb);
   FREEARRAY(&seqit->sequencebuffer, Uchar);
   seqit->currentread = seqit->maxread;
