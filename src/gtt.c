@@ -169,7 +169,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "genome node iterator example",
               gt_genome_node_iterator_example);
   hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
-  hashmap_add(unit_tests, "grep module", grep_unit_test);
+  hashmap_add(unit_tests, "grep module", gt_grep_unit_test);
   hashmap_add(unit_tests, "hashmap class", hashmap_unit_test);
   hashmap_add(unit_tests, "hashtable class", hashtable_unit_test);
   hashmap_add(unit_tests, "hmm class", hmm_unit_test);

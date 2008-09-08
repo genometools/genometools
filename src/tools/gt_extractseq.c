@@ -171,7 +171,7 @@ static int extractseq_match(GT_GenFile *outfp, GT_Bioseq *bs, const char *patter
   for (i = 0; !had_err && i < gt_bioseq_number_of_sequences(bs); i++) {
     desc = gt_bioseq_get_description(bs, i);
     assert(desc);
-    had_err = grep(&match, pattern, desc, err);
+    had_err = gt_grep(&match, pattern, desc, err);
     if (!had_err && match) {
       gt_fasta_show_entry_generic(desc, gt_bioseq_get_sequence(bs, i),
                                   gt_bioseq_get_sequence_length(bs, i), width,

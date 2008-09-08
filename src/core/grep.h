@@ -27,7 +27,7 @@
 #include "core/error.h"
 
 /* Sets <match> to true if <pattern> matches <line>, to false otherwise. */
-int  grep(bool *match, const char *pattern, const char *line, GT_Error*);
-int  grep_unit_test(GT_Error*);
+int  gt_grep(bool *match, const char *pattern, const char *line, GT_Error*);
+int  gt_grep_unit_test(GT_Error*);
 
 #endif
