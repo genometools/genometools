@@ -41,7 +41,7 @@ typedef struct {
 
 static void* gt_extractseq_arguments_new(void)
 {
-  ExtractSeqArguments *arguments = ma_calloc(1, sizeof *arguments);
+  ExtractSeqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->pattern = gt_str_new();
   arguments->ginum = gt_str_new();
   arguments->ofi = outputfileinfo_new();
@@ -56,7 +56,7 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
   outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->ginum);
   gt_str_delete(arguments->pattern);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)

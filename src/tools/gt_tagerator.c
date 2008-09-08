@@ -46,7 +46,7 @@
 
 static void *gt_tagerator_arguments_new(void)
 {
-  return ma_malloc(sizeof (TageratorOptions));
+  return gt_malloc(sizeof (TageratorOptions));
 }
 
 static void gt_tagerator_arguments_delete(void *tool_arguments)
@@ -60,7 +60,7 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->esaindexname);
   gt_str_delete(arguments->pckindexname);
   gt_strarray_delete(arguments->tagfiles);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)

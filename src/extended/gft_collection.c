@@ -28,9 +28,9 @@ struct GFTCollection {
 
 GFTCollection* gft_collection_new(void)
 {
-  GFTCollection *gftc = ma_malloc(sizeof (GFTCollection));
+  GFTCollection *gftc = gt_malloc(sizeof (GFTCollection));
   gftc->gt_genome_feature_types = hashmap_new(
-    HASH_STRING, ma_free_func, (GT_FreeFunc)gt_genome_feature_type_delete);
+    HASH_STRING, gt_free_func, (GT_FreeFunc)gt_genome_feature_type_delete);
   return gftc;
 }
 
@@ -38,7 +38,7 @@ void gft_collection_delete(GFTCollection *gftc)
 {
   if (!gftc) return;
   hashmap_delete(gftc->gt_genome_feature_types);
-  ma_free(gftc);
+  gt_free(gftc);
 }
 
 void gft_collection_add(GFTCollection *gftc, const char *type,

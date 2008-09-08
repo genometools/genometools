@@ -25,8 +25,8 @@ typedef struct UPGMA UPGMA;
 
 typedef double (*UPGMADistFunc)(unsigned long, unsigned long, void *data);
 
-UPGMA* upgma_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc);
-void   upgma_show_tree(const UPGMA*, FILE*);
-void   upgma_delete(UPGMA*);
+UPGMA* upggt_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc);
+void   upggt_show_tree(const UPGMA*, FILE*);
+void   upggt_delete(UPGMA*);
 
 #endif

@@ -11,9 +11,9 @@ Charatpos *newCharatpos(unsigned long patternlength,unsigned int alphasize)
 {
   Charatpos *catpos;
 
-  catpos = ma_malloc(sizeof(*catpos));
-  catpos->endindex = ma_malloc(sizeof(unsigned long) * alphasize);
-  catpos->positions = ma_malloc(sizeof(unsigned long) * patternlength);
+  catpos = gt_malloc(sizeof(*catpos));
+  catpos->endindex = gt_malloc(sizeof(unsigned long) * alphasize);
+  catpos->positions = gt_malloc(sizeof(unsigned long) * patternlength);
   return catpos;
 }
 
@@ -52,9 +52,9 @@ Charatpos *reinitCharatpos(Charatpos *catpos,
 void wrapCharatpos(Charatpos **catposptr)
 {
   Charatpos *catpos = *catposptr;
-  ma_free(catpos->endindex);
-  ma_free(catpos->positions);
-  ma_free(catpos);
+  gt_free(catpos->endindex);
+  gt_free(catpos->positions);
+  gt_free(catpos);
   *catposptr = NULL;
 }
 

@@ -32,7 +32,7 @@ typedef struct
 
 static void *gt_prebwt_arguments_new(void)
 {
-  return ma_malloc(sizeof (Prebwtoptions));
+  return gt_malloc(sizeof (Prebwtoptions));
 }
 
 static void gt_prebwt_arguments_delete(void *tool_arguments)
@@ -44,7 +44,7 @@ static void gt_prebwt_arguments_delete(void *tool_arguments)
     return;
   }
   gt_str_delete(arguments->indexname);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_prebwt_option_parser_new(void *tool_arguments)

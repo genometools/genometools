@@ -115,7 +115,7 @@ static inline struct extBitsRetrieval *
 newExtBitsRetrieval()
 {
   struct extBitsRetrieval *retval
-    = ma_malloc(sizeof (struct extBitsRetrieval));
+    = gt_malloc(sizeof (struct extBitsRetrieval));
   initExtBitsRetrieval(retval);
   return retval;
 }
@@ -124,16 +124,16 @@ static inline void
 destructExtBitsRetrieval(struct extBitsRetrieval *r)
 {
   if ((r->flags & EBRF_PERSISTENT_CWBITS) && r->cwPart)
-    ma_free(r->cwPart);
+    gt_free(r->cwPart);
   if ((r->flags & EBRF_PERSISTENT_VARBITS) && r->varPart)
-    ma_free(r->varPart);
+    gt_free(r->varPart);
 }
 
 static inline void
 deleteExtBitsRetrieval(struct extBitsRetrieval *r)
 {
   destructExtBitsRetrieval(r);
-  ma_free(r);
+  gt_free(r);
 }
 
 static inline FILE *

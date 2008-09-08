@@ -463,11 +463,11 @@ static void compute_csas(ConsensusSA *csa)
 #endif
 
   /* init sets */
-  C     = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  left  = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  right = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  L     = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
-  R     = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  C     = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  left  = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  right = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  L     = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  R     = gt_malloc(sizeof (Bittab*) * csa->number_of_sas);
 
   for (i = 0; i < csa->number_of_sas; i++) {
     C[i]     = bittab_new(csa->number_of_sas);
@@ -549,11 +549,11 @@ static void compute_csas(ConsensusSA *csa)
     bittab_delete(L[i]);
     bittab_delete(R[i]);
   }
-  ma_free(C);
-  ma_free(left);
-  ma_free(right);
-  ma_free(L);
-  ma_free(R);
+  gt_free(C);
+  gt_free(left);
+  gt_free(right);
+  gt_free(L);
+  gt_free(R);
   bittab_delete(U_i);
   bittab_delete(SA_i);
   bittab_delete(SA_prime);

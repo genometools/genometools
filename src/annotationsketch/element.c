@@ -52,7 +52,7 @@ GT_Element* gt_element_new(GT_GenomeNode *gn)
 
 GT_Element* gt_element_new_empty(void)
 {
-  return ma_calloc(1, sizeof (GT_Element));
+  return gt_calloc(1, sizeof (GT_Element));
 }
 
 DrawingRange gt_element_calculate_drawing_range(GT_Element *element,
@@ -183,5 +183,5 @@ void gt_element_delete(GT_Element *element)
   if (!element) return;
   if (element->gn)
     gt_genome_node_delete(element->gn);
-  ma_free(element);
+  gt_free(element);
 }

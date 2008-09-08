@@ -31,7 +31,7 @@ char *getbasename(const char *path)
     pathlen = strlen(path);
   else
     pathlen = 0;
-  sbuf = ma_malloc(sizeof (char) * (pathlen + 2));
+  sbuf = gt_malloc(sizeof (char) * (pathlen + 2));
   if (path == NULL || *path == '\0') {
     strcpy(sbuf, ".");
     return sbuf;
@@ -63,60 +63,60 @@ int getbasename_unit_test(GT_Error *err)
 
   bn = getbasename("/usr/lib");
   ensure(had_err, !strcmp(bn, "lib"));
-  ma_free(bn);
+  gt_free(bn);
 
   if (!had_err) {
     bn = getbasename("/usr/");
     ensure(had_err, !strcmp(bn, "usr"));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("usr");
     ensure(had_err, !strcmp(bn, "usr"));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("/");
     ensure(had_err, !strcmp(bn, "/"));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("///");
     ensure(had_err, !strcmp(bn, "/"));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("//usr//lib//");
     ensure(had_err, !strcmp(bn, "lib"));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename(NULL);
     ensure(had_err, !strcmp(bn, "."));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("");
     ensure(had_err, !strcmp(bn, "."));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename(".");
     ensure(had_err, !strcmp(bn, "."));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("..");
     ensure(had_err, !strcmp(bn, ".."));
-    ma_free(bn);
+    gt_free(bn);
   }
 
   return had_err;

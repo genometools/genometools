@@ -35,7 +35,7 @@ ScoreMatrix* score_matrix_new(Alpha *alpha)
 {
   ScoreMatrix *sm;
   assert(alpha);
-  sm = ma_malloc(sizeof (ScoreMatrix));
+  sm = gt_malloc(sizeof (ScoreMatrix));
   sm->alpha = alpha_ref(alpha);
   sm->dimension = alpha_size(alpha);
   array2dim_calloc(sm->scores, sm->dimension, sm->dimension);
@@ -266,5 +266,5 @@ void score_matrix_delete(ScoreMatrix *sm)
   if (!sm) return;
   alpha_delete(sm->alpha);
   array2dim_delete(sm->scores);
-  ma_free(sm);
+  gt_free(sm);
 }

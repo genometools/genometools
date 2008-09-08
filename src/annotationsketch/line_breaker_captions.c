@@ -74,7 +74,7 @@ void gt_line_breaker_captions_register_block(GT_LineBreaker *lb,
   lbcap = gt_line_breaker_captions_cast(lb);
   if (!(num = hashmap_get(lbcap->linepositions, line)))
   {
-    num = ma_malloc(sizeof (unsigned long));
+    num = gt_malloc(sizeof (unsigned long));
     hashmap_add(lbcap->linepositions, line, num);
   }
   dr = calculate_drawing_range(lbcap, block);
@@ -107,6 +107,6 @@ GT_LineBreaker* gt_line_breaker_captions_new(GT_Canvas *canvas)
   lb = gt_line_breaker_create(gt_line_breaker_captions_class());
   lbcap = gt_line_breaker_captions_cast(lb);
   lbcap->canvas = canvas;
-  lbcap->linepositions = hashmap_new(HASH_DIRECT, NULL, ma_free_func);
+  lbcap->linepositions = hashmap_new(HASH_DIRECT, NULL, gt_free_func);
   return lb;
 }

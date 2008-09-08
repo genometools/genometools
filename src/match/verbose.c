@@ -57,13 +57,13 @@ Verboseinfo *newverboseinfo(bool verbose)
 {
   Verboseinfo *v;
 
-  v = ma_malloc(sizeof (Verboseinfo));
+  v = gt_malloc(sizeof (Verboseinfo));
   v->beverbose = verbose;
   return v;
 }
 
 void freeverboseinfo(Verboseinfo **v)
 {
-  ma_free(*v);
+  gt_free(*v);
   *v = NULL;
 }

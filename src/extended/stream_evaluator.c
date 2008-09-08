@@ -133,7 +133,7 @@ typedef struct {
 static Slot* slot_new(bool nuceval, GT_Range range)
 {
   unsigned long length;
-  Slot *s = ma_calloc(1, sizeof (Slot));
+  Slot *s = gt_calloc(1, sizeof (Slot));
   length = gt_range_length(range);
   s->genes_forward = gt_array_new(sizeof (GT_GenomeNode*));
   s->genes_reverse = gt_array_new(sizeof (GT_GenomeNode*));
@@ -215,20 +215,20 @@ static void slot_delete(Slot *s)
   transcript_used_exons_delete(s->used_mRNA_exons_reverse);
   transcript_used_exons_delete(s->used_CDS_exons_forward);
   transcript_used_exons_delete(s->used_CDS_exons_reverse);
-  ma_free(s);
+  gt_free(s);
 }
 
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       GenomeStream *prediction, bool nuceval,
                                       bool evalLTR, unsigned long LTRdelta)
 {
-  StreamEvaluator *evaluator = ma_calloc(1, sizeof (StreamEvaluator));
+  StreamEvaluator *evaluator = gt_calloc(1, sizeof (StreamEvaluator));
   evaluator->reality = genome_stream_ref(reality);
   evaluator->prediction = genome_stream_ref(prediction);
   evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
-  evaluator->slots = hashmap_new(HASH_STRING, ma_free_func,
+  evaluator->slots = hashmap_new(HASH_STRING, gt_free_func,
                                  (GT_FreeFunc) slot_delete);
   evaluator->gene_evaluator = evaluator_new();
   evaluator->mRNA_evaluator = evaluator_new();
@@ -679,7 +679,7 @@ static void add_predicted_collapsed(GT_Dlist *used_exons, GT_Range *predicted_ra
 {
   GT_Range *used_range;
   if (!gt_dlist_find(used_exons, predicted_range)) {
-    used_range = ma_malloc(sizeof (GT_Range));
+    used_range = gt_malloc(sizeof (GT_Range));
     used_range->start = predicted_range->start;
     used_range->end = predicted_range->end;
     gt_dlist_add(used_exons, used_range);
@@ -1485,5 +1485,5 @@ void stream_evaluator_delete(StreamEvaluator *se)
   transcript_evaluators_delete(se->mRNA_exon_evaluators_collapsed);
   transcript_evaluators_delete(se->CDS_exon_evaluators);
   transcript_evaluators_delete(se->CDS_exon_evaluators_collapsed);
-  ma_free(se);
+  gt_free(se);
 }

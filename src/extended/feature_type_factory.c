@@ -25,7 +25,7 @@ GT_FeatureTypeFactory* gt_feature_type_factory_create(const GT_FeatureTypeFactor
 {
   GT_FeatureTypeFactory *ftf;
   assert(ftfc && ftfc->size);
-  ftf = ma_calloc(1, ftfc->size);
+  ftf = gt_calloc(1, ftfc->size);
   ftf->c_class = ftfc;
   ftf->used_types = gft_collection_new();
   return ftf;
@@ -61,7 +61,7 @@ void gt_feature_type_factory_delete(GT_FeatureTypeFactory *ftf)
   if (ftf->c_class->free)
     ftf->c_class->free(ftf);
   gft_collection_delete(ftf->used_types);
-  ma_free(ftf);
+  gt_free(ftf);
 }
 
 void* gt_feature_type_factory_cast(GT_UNUSED const GT_FeatureTypeFactoryClass *ftfc,

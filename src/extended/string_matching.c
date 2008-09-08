@@ -61,7 +61,7 @@ static unsigned long* compute_prefixtab(const char *p, unsigned long m)
   unsigned long i, vlen = 0, *prefixtab;
   char b;
   assert(p);
-  prefixtab = ma_malloc(sizeof (unsigned long) * (m+1));
+  prefixtab = gt_malloc(sizeof (unsigned long) * (m+1));
   prefixtab[0] = UNDEF_ULONG; /* paranoia */
   if (m)
     prefixtab[1] = 0;
@@ -117,7 +117,7 @@ unsigned long string_matching_kmp(const char *s, unsigned long n,
   /* do not miss match at the last possible position */
   if (cpl == m && process_match)
     process_match(j, data);
-  ma_free(prefixtab);
+  gt_free(prefixtab);
   return cpl;
 }
 

@@ -63,9 +63,9 @@ int gt_translate(int argc, const char **argv, GT_Error *err)
     printf("frame1: %s\nframe2: %s\nframe3: %s\n", frame1, frame2, frame3);
   }
 
-  ma_free(frame1);
-  ma_free(frame2);
-  ma_free(frame3);
+  gt_free(frame1);
+  gt_free(frame2);
+  gt_free(frame3);
 
   return 0;
 }

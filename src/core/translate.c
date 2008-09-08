@@ -61,9 +61,9 @@ void translate_all_frames(char **frame1, char **frame2, char **frame3,
   frame1len = seqlen / 3;
   frame2len = (seqlen - 1) / 3;
   frame3len = (seqlen - 2) / 3;
-  (*frame1) = ma_malloc(frame1len + 1);
-  (*frame2) = ma_malloc(frame2len + 1);
-  (*frame3) = ma_malloc(frame3len + 1);
+  (*frame1) = gt_malloc(frame1len + 1);
+  (*frame2) = gt_malloc(frame2len + 1);
+  (*frame3) = gt_malloc(frame3len + 1);
 
   /* encode first two nucleotides */
   codon = (encode(dna_sequence[0]) << 2) | encode(dna_sequence[1]);

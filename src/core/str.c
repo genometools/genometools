@@ -33,8 +33,8 @@ struct GT_Str {
 
 GT_Str* gt_str_new(void)
 {
-  GT_Str *s = ma_malloc(sizeof *s);      /* create new string object */
-  s->cstr = ma_calloc(1, sizeof (char)); /* init string with '\0' */
+  GT_Str *s = gt_malloc(sizeof *s);      /* create new string object */
+  s->cstr = gt_calloc(1, sizeof (char)); /* init string with '\0' */
   s->length = 0;                         /* set the initial length */
   s->allocated = 1;                      /* set allocated space */
   s->reference_count = 0;                /* set reference count */
@@ -189,7 +189,7 @@ GT_Str* gt_str_clone(const GT_Str *s)
 {
   GT_Str *s_copy;
   assert(s);
-  s_copy = ma_malloc(sizeof *s_copy);
+  s_copy = gt_malloc(sizeof *s_copy);
   s->cstr[s->length] = '\0';
   s_copy->cstr = cstr_dup(s->cstr);
   s_copy->length = s_copy->allocated = s->length;
@@ -339,6 +339,6 @@ void gt_str_delete(GT_Str *s)
     s->reference_count--;   /* decrement the reference counter */
     return;                 /* return without freeing the object */
   }
-  ma_free(s->cstr);         /* free the stored the C string */
-  ma_free(s);               /* free the actual string object */
+  gt_free(s->cstr);         /* free the stored the C string */
+  gt_free(s);               /* free the actual string object */
 }

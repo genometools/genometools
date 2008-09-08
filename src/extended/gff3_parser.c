@@ -62,7 +62,7 @@ typedef struct {
 static AutomaticGT_SequenceRegion* automatic_gt_sequence_regionnew(void)
 {
   AutomaticGT_SequenceRegion *auto_sr;
-  auto_sr = ma_malloc(sizeof (AutomaticGT_SequenceRegion));
+  auto_sr = gt_malloc(sizeof (AutomaticGT_SequenceRegion));
   auto_sr->genome_features = gt_array_new(sizeof (GT_GenomeFeature*));
   return auto_sr;
 }
@@ -75,7 +75,7 @@ static void automatic_gt_sequence_regiondelete(AutomaticGT_SequenceRegion *auto_
   for (i = 0; i < gt_array_size(auto_sr->genome_features); i++)
     gt_genome_node_delete(*(GT_GenomeNode**) gt_array_get(auto_sr->genome_features, i));
   gt_array_delete(auto_sr->genome_features);
-  ma_free(auto_sr);
+  gt_free(auto_sr);
 }
 
 typedef struct {
@@ -89,7 +89,7 @@ static SimpleGT_SequenceRegion* simple_gt_sequence_regionnew(const char *seqid,
                                                         unsigned int
                                                         line_number)
 {
-  SimpleGT_SequenceRegion *ssr = ma_malloc(sizeof *ssr);
+  SimpleGT_SequenceRegion *ssr = gt_malloc(sizeof *ssr);
   ssr->seqid_str = gt_str_new_cstr(seqid);
   ssr->range = range;
   ssr->line_number = line_number;
@@ -100,7 +100,7 @@ static void simple_gt_sequence_regiondelete(SimpleGT_SequenceRegion *ssr)
 {
   if (!ssr) return;
   gt_str_delete(ssr->seqid_str);
-  ma_free(ssr);
+  gt_free(ssr);
 }
 
 GFF3Parser* gff3parser_new(bool checkids,
@@ -108,7 +108,7 @@ GFF3Parser* gff3parser_new(bool checkids,
 {
   GFF3Parser *parser;
   assert(feature_type_factory);
-  parser = ma_malloc(sizeof (GFF3Parser));
+  parser = gt_malloc(sizeof (GFF3Parser));
   parser->feature_info = feature_info_new();
   parser->seqid_to_ssr_mapping = hashmap_new(
     HASH_STRING, NULL, (GT_FreeFunc) simple_gt_sequence_regiondelete);
@@ -217,7 +217,7 @@ static int parse_target_attribute(const char *value, GT_Str *target_id,
     else if (target_strand)
       *target_strand = GT_NUM_OF_STRAND_TYPES; /* undefined */
   }
-  ma_free(escaped_target);
+  gt_free(escaped_target);
   gt_str_delete(unescaped_target);
   splitter_delete(splitter);
   return had_err;
@@ -249,7 +249,7 @@ int gff3parser_parse_target_attributes(const char *values,
                                      i ? NULL : first_target_strand, filename,
                                      line_number, err);
   }
-  ma_free(targets);
+  gt_free(targets);
   splitter_delete(splitter);
   return had_err;
 }
@@ -1395,5 +1395,5 @@ void gff3parser_delete(GFF3Parser *parser)
   hashmap_delete(parser->source_to_str_mapping);
   hashmap_delete(parser->undefined_sequence_regions);
   mapping_delete(parser->offset_mapping);
-  ma_free(parser);
+  gt_free(parser);
 }

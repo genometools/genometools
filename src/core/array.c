@@ -40,7 +40,7 @@ struct GT_Array {
 
 GT_Array* gt_array_new(size_t size_of_elem)
 {
-  GT_Array *a = ma_calloc(1, sizeof (GT_Array));
+  GT_Array *a = gt_calloc(1, sizeof (GT_Array));
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
   return a;
@@ -50,8 +50,8 @@ GT_Array* gt_array_clone(const GT_Array *a)
 {
   GT_Array *a_copy;
   assert(a);
-  a_copy = ma_malloc(sizeof (GT_Array));
-  a_copy->space = ma_malloc(a->next_free * a->size_of_elem);
+  a_copy = gt_malloc(sizeof (GT_Array));
+  a_copy->space = gt_malloc(a->next_free * a->size_of_elem);
   memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
   a_copy->next_free = a_copy->allocated = a->next_free;
   a_copy->size_of_elem = a->size_of_elem;
@@ -108,7 +108,7 @@ void gt_array_reverse(GT_Array *a)
 {
   char *front, *back, *tmp;
   assert(a);
-  tmp = ma_malloc(a->size_of_elem);
+  tmp = gt_malloc(a->size_of_elem);
   for (front = a->space,
        back = (char*) a->space + (a->next_free-1) * a->size_of_elem;
        front < back;
@@ -117,7 +117,7 @@ void gt_array_reverse(GT_Array *a)
     memcpy(front, back, a->size_of_elem);
     memcpy(back, tmp, a->size_of_elem);
   }
-  ma_free(tmp);
+  gt_free(tmp);
 }
 
 void* gt_array_get_space(const GT_Array *a)
@@ -275,8 +275,8 @@ int gt_array_unit_test(GT_Error *err)
 
   char_array = gt_array_new(sizeof (char));
   int_array = gt_array_new(sizeof (int));
-  char_array_test = ma_malloc((MAX_SIZE + 1) * sizeof (char));
-  int_array_test = ma_malloc(MAX_SIZE * sizeof (int));
+  char_array_test = gt_malloc((MAX_SIZE + 1) * sizeof (char));
+  int_array_test = gt_malloc(MAX_SIZE * sizeof (int));
 
   for (i = 0; !had_err && i < NUM_OF_TESTS; i++) {
     size = rand_max(MAX_SIZE);
@@ -382,8 +382,8 @@ int gt_array_unit_test(GT_Error *err)
 
   gt_array_delete(char_array);
   gt_array_delete(int_array);
-  ma_free(char_array_test);
-  ma_free(int_array_test);
+  gt_free(char_array_test);
+  gt_free(int_array_test);
 
   return had_err;
 }
@@ -395,6 +395,6 @@ void gt_array_delete(GT_Array *a)
     a->reference_count--;
     return;
   }
-  ma_free(a->space);
-  ma_free(a);
+  gt_free(a->space);
+  gt_free(a);
 }

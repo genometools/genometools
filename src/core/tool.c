@@ -38,7 +38,7 @@ Tool* tool_new(ToolArgumentsNew tool_arguments_new,
   /* <tool_arguments_new> and <tool_arguments_delete> imply each other */
   assert(( tool_arguments_new &&  tool_arguments_delete) ||
          (!tool_arguments_new && !tool_arguments_delete));
-  tool = ma_malloc(sizeof *tool);
+  tool = gt_malloc(sizeof *tool);
   tool->tool_arguments_new = tool_arguments_new;
   tool->tool_arguments_delete = tool_arguments_delete;
   tool->tool_option_parser_new = tool_option_parser_new;
@@ -99,5 +99,5 @@ int tool_run(Tool *tool, int argc, const char **argv, GT_Error *err)
 void  tool_delete(Tool *tool)
 {
   if (!tool) return;
-  ma_free(tool);
+  gt_free(tool);
 }

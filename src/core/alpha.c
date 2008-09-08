@@ -40,7 +40,7 @@ struct Alpha {
 
 Alpha* alpha_new(void)
 {
-  Alpha *a = ma_calloc(1, sizeof (Alpha));
+  Alpha *a = gt_calloc(1, sizeof (Alpha));
   memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
   memset(a->character_to_code_map, UNDEF_UCHAR, UCHAR_MAX);
   return a;
@@ -188,5 +188,5 @@ void alpha_delete(Alpha *a)
 {
   if (!a) return;
   if (a->reference_count) { a->reference_count--; return; }
-  ma_free(a);
+  gt_free(a);
 }

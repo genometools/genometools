@@ -33,14 +33,14 @@ typedef struct {
 
 static void* gt_swalign_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (SWAlignArguments));
+  return gt_calloc(1, sizeof (SWAlignArguments));
 }
 
 static void gt_swalign_arguments_delete(void *tool_arguments)
 {
   SWAlignArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_swalign_opion_parser_new(void *tool_arguments)

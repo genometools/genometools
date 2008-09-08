@@ -30,14 +30,14 @@ typedef struct {
 
 static void* gt_align_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (AlignArguments));
+  return gt_calloc(1, sizeof (AlignArguments));
 }
 
 static void gt_align_arguments_delete(void *tool_arguments)
 {
   AlignArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_align_option_parser_new(void *tool_arguments)

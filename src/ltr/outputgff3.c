@@ -233,6 +233,6 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  ma_free(descendtab);
+  gt_free(descendtab);
   fa_xfclose(fp);
 }

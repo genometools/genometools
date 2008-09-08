@@ -117,7 +117,7 @@ destructSATaggedXltorStateList(
   {
     struct saTaggedXltorStateLE *prev = next;
     next = next->next;
-    ma_free(prev);
+    gt_free(prev);
   }
 }
 
@@ -127,7 +127,7 @@ addSuffixarrayXltor(struct saTaggedXltorStateList *saXltorStateList,
                     union saXltorState saXltorState)
 {
   struct saTaggedXltorStateLE *newSAXltorState;
-  newSAXltorState = ma_malloc(sizeof (*newSAXltorState));
+  newSAXltorState = gt_malloc(sizeof (*newSAXltorState));
   newSAXltorState->state.typeTag = request;
   newSAXltorState->state.state = saXltorState;
   newSAXltorState->next = saXltorStateList->stateList;

@@ -29,7 +29,7 @@ struct TranscriptUsedExons {
 
 TranscriptUsedExons* transcript_used_exons_new(void)
 {
-  TranscriptUsedExons *tue = ma_malloc(sizeof (TranscriptUsedExons));
+  TranscriptUsedExons *tue = gt_malloc(sizeof (TranscriptUsedExons));
   tue->used_exons_all = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
   tue->used_exons_single = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
   tue->used_exons_initial = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
@@ -73,7 +73,7 @@ static void used_gt_dlist_delete(GT_Dlist *used_list)
   GT_Dlistelem *dlistelem;
   for (dlistelem = gt_dlist_first(used_list); dlistelem != NULL;
        dlistelem = gt_dlistelem_next(dlistelem)) {
-    ma_free(gt_dlistelem_get_data(dlistelem));
+    gt_free(gt_dlistelem_get_data(dlistelem));
   }
   gt_dlist_delete(used_list);
 }
@@ -86,5 +86,5 @@ void transcript_used_exons_delete(TranscriptUsedExons *tue)
   used_gt_dlist_delete(tue->used_exons_initial);
   used_gt_dlist_delete(tue->used_exons_internal);
   used_gt_dlist_delete(tue->used_exons_terminal);
-  ma_free(tue);
+  gt_free(tue);
 }

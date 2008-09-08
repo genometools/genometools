@@ -283,9 +283,9 @@ initAddLocateInfoState(struct addLocateInfoState *state,
     else
       state->bitsPerOrigPos = requiredSeqposBits(lastPos);
     state->origRanksQueueSize = state->revMapQueueSize = aggregationExpVal;
-    state->revMapQueue = ma_malloc(sizeof (state->revMapQueue[0])
+    state->revMapQueue = gt_malloc(sizeof (state->revMapQueue[0])
                                    * state->revMapQueueSize);
-    state->origRanksQueue = ma_malloc(sizeof (state->origRanksQueue[0])
+    state->origRanksQueue = gt_malloc(sizeof (state->origRanksQueue[0])
                                       * state->origRanksQueueSize);
     state->bitsPerOrigRank = bitsPerOrigRank;
     /* if there are rank sorted symbols, but no rank sorting is
@@ -332,8 +332,8 @@ initAddLocateInfoState(struct addLocateInfoState *state,
 static void
 destructAddLocateInfoState(struct addLocateInfoState *state)
 {
-  ma_free(state->revMapQueue);
-  ma_free(state->origRanksQueue);
+  gt_free(state->revMapQueue);
+  gt_free(state->origRanksQueue);
 }
 
 static inline int
@@ -394,13 +394,13 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
   /* 0. resize caches if necessary */
   if (locateInterval && len > state->revMapQueueSize)
   {
-    state->revMapQueue = ma_realloc(state->revMapQueue,
+    state->revMapQueue = gt_realloc(state->revMapQueue,
                                     len * sizeof (state->revMapQueue[0]));
     state->revMapQueueSize = len;
   }
   if (state->sprTable && len > state->origRanksQueueSize)
   {
-    state->origRanksQueue = ma_realloc(state->origRanksQueue,
+    state->origRanksQueue = gt_realloc(state->origRanksQueue,
                                        len * sizeof (state->origRanksQueue[0]));
     state->origRanksQueueSize = len;
   }

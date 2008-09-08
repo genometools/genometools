@@ -38,7 +38,7 @@ RegionMapping* region_mapping_new_mapping(GT_Str *mapping_filename, GT_Error *er
   RegionMapping *rm;
   gt_error_check(err);
   assert(mapping_filename);
-  rm = ma_calloc(1, sizeof (RegionMapping));
+  rm = gt_calloc(1, sizeof (RegionMapping));
   rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
                             err);
   if (!rm->mapping) {
@@ -52,7 +52,7 @@ RegionMapping* region_mapping_new_seqfile(GT_Str *sequence_filename)
 {
   RegionMapping *rm;
   assert(sequence_filename);
-  rm = ma_calloc(1, sizeof (RegionMapping));
+  rm = gt_calloc(1, sizeof (RegionMapping));
   rm->sequence_filename = gt_str_ref(sequence_filename);
   return rm;
 }
@@ -137,5 +137,5 @@ void region_mapping_delete(RegionMapping *rm)
   gt_str_delete(rm->sequence_name);
   mapping_delete(rm->mapping);
   bioseq_delete(rm->bioseq);
-  ma_free(rm);
+  gt_free(rm);
 }

@@ -38,7 +38,7 @@ typedef struct {
 
 static void* gt_extractfeat_arguments_new(void)
 {
-  ExtractFeatArguments *arguments = ma_calloc(1, sizeof *arguments);
+  ExtractFeatArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->typestr = gt_str_new();
   arguments->seqfile = gt_str_new();
   arguments->regionmapping = gt_str_new();
@@ -54,7 +54,7 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->regionmapping);
   gt_str_delete(arguments->seqfile);
   gt_str_delete(arguments->typestr);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)

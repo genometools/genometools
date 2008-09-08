@@ -53,7 +53,7 @@ typedef struct {
 
 static void* gt_filter_arguments_new(void)
 {
-  FilterArguments *arguments = ma_calloc(1, sizeof *arguments);
+  FilterArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqid = gt_str_new();
   arguments->typefilter = gt_str_new();
   arguments->gt_strand_char = gt_str_new();
@@ -74,7 +74,7 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->gt_strand_char);
   gt_str_delete(arguments->typefilter);
   gt_str_delete(arguments->seqid);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_filter_option_parser_new(void *tool_arguments)

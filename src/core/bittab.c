@@ -40,7 +40,7 @@ Bittab* bittab_new(unsigned long num_of_bits)
 
   assert(num_of_bits);
 
-  b = ma_malloc(sizeof (Bittab));
+  b = gt_malloc(sizeof (Bittab));
   b->num_of_bits = num_of_bits;
 
   if (num_of_bits / (8UL * sizeof (unsigned long)))
@@ -48,7 +48,7 @@ Bittab* bittab_new(unsigned long num_of_bits)
   else
     b->tabsize = 1UL;
 
-  b->tabptr = ma_calloc(b->tabsize, sizeof (unsigned long));
+  b->tabptr = gt_calloc(b->tabsize, sizeof (unsigned long));
 
   return b;
 }
@@ -469,6 +469,6 @@ int bittab_unit_test(GT_Error *err)
 void bittab_delete(Bittab *b)
 {
   if (!b) return;
-  ma_free(b->tabptr);
-  ma_free(b);
+  gt_free(b->tabptr);
+  gt_free(b);
 }

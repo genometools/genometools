@@ -31,7 +31,7 @@ static GT_GenomeNodeIterator* gt_genome_node_iterator_new_base(GT_GenomeNode *gn
 {
   GT_GenomeNodeIterator *gni;
   assert(gn);
-  gni = ma_malloc(sizeof *gni);
+  gni = gt_malloc(sizeof *gni);
   gni->gn = gt_genome_node_rec_ref(gn);
   gni->node_stack = gt_array_new(sizeof (GT_GenomeNode*));
   return gni;
@@ -123,5 +123,5 @@ void gt_genome_node_iterator_delete(GT_GenomeNodeIterator *gni)
   if (!gni) return;
   gt_genome_node_rec_delete(gni->gn);
   gt_array_delete(gni->node_stack);
-  ma_free(gni);
+  gt_free(gni);
 }

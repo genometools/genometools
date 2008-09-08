@@ -37,8 +37,8 @@ UnionFind* union_find_new(unsigned long num_of_elems)
   UnionFind *uf;
   unsigned long i;
   assert(num_of_elems);
-  uf = ma_malloc(sizeof *uf);
-  uf->elems = ma_calloc(sizeof (UnionFindElement), num_of_elems);
+  uf = gt_malloc(sizeof *uf);
+  uf->elems = gt_calloc(sizeof (UnionFindElement), num_of_elems);
   for (i = 0; i < num_of_elems; i++)
     uf->elems[i].parent = i;
   uf->num_of_elems = num_of_elems;
@@ -48,8 +48,8 @@ UnionFind* union_find_new(unsigned long num_of_elems)
 void union_find_delete(UnionFind *uf)
 {
   if (!uf) return;
-  ma_free(uf->elems);
-  ma_free(uf);
+  gt_free(uf->elems);
+  gt_free(uf);
 }
 
 unsigned long union_find_find(UnionFind *uf, unsigned long elem)

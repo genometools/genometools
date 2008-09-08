@@ -33,7 +33,7 @@ typedef struct {
 
 static void* gt_csa_arguments_new(void)
 {
-  CSAArguments *arguments = ma_calloc(1, sizeof *arguments);
+  CSAArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -44,7 +44,7 @@ static void gt_csa_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_csa_option_parser_new(void *tool_arguments)

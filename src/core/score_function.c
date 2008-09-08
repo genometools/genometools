@@ -31,7 +31,7 @@ ScoreFunction* score_function_new(ScoreMatrix *sm, int deletion_score,
 {
   ScoreFunction *sf;
   assert(sm);
-  sf = ma_malloc(sizeof (ScoreFunction));
+  sf = gt_malloc(sizeof (ScoreFunction));
   sf->sm = sm;
   sf->deletion_score = deletion_score;
   sf->insertion_score = insertion_score;
@@ -67,5 +67,5 @@ void score_function_delete(ScoreFunction *sf)
 {
   if (!sf) return;
   score_matrix_delete(sf->sm);
-  ma_free(sf);
+  gt_free(sf);
 }

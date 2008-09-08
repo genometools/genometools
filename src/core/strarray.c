@@ -26,7 +26,7 @@ struct GT_StrArray {
 
 GT_StrArray* gt_strarray_new(void)
 {
-  GT_StrArray *sa = ma_malloc(sizeof *sa);
+  GT_StrArray *sa = gt_malloc(sizeof *sa);
   sa->strings = gt_array_new(sizeof (GT_Str*));
   return sa;
 }
@@ -109,5 +109,5 @@ void gt_strarray_delete(GT_StrArray *sa)
   for (i = 0; i < gt_array_size(sa->strings); i++)
     gt_str_delete(*(GT_Str**) gt_array_get(sa->strings, i));
   gt_array_delete(sa->strings);
-  ma_free(sa);
+  gt_free(sa);
 }

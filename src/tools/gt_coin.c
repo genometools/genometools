@@ -55,7 +55,7 @@ int gt_coin(int argc, const char **argv, GT_Error *err)
 
   /* save sequence */
   num_of_emissions = strlen(argv[1]);
-  emissions = ma_malloc(sizeof (unsigned int) * num_of_emissions);
+  emissions = gt_malloc(sizeof (unsigned int) * num_of_emissions);
   for (i = 0; i < num_of_emissions; i++) {
     emissions[i] = toupper(argv[1][i]);
     switch (emissions[i]) {
@@ -77,7 +77,7 @@ int gt_coin(int argc, const char **argv, GT_Error *err)
     hmm = coin_hmm_loaded();
 
     /* decoding */
-    state_sequence = ma_malloc(sizeof (unsigned int) * num_of_emissions);
+    state_sequence = gt_malloc(sizeof (unsigned int) * num_of_emissions);
     hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
 
     /* print most probable state sequence state sequence */
@@ -97,8 +97,8 @@ int gt_coin(int argc, const char **argv, GT_Error *err)
 
   /* free */
   hmm_delete(hmm);
-  ma_free(emissions);
-  ma_free(state_sequence);
+  gt_free(emissions);
+  gt_free(state_sequence);
 
   return had_err;
 }

@@ -83,7 +83,7 @@ initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
 extern SuffixarrayFileInterface *
 newSuffixarrayFileInterface(Suffixarray *sa, Seqpos seqLen)
 {
-  SuffixarrayFileInterface *sai = ma_malloc(sizeof (*sai));
+  SuffixarrayFileInterface *sai = gt_malloc(sizeof (*sai));
   initSuffixarrayFileInterface(sai, seqLen, sa);
   return sai;
 }
@@ -99,7 +99,7 @@ extern void
 deleteSuffixarrayFileInterface(SuffixarrayFileInterface *sai)
 {
   destructSuffixarrayFileInterface(sai);
-  ma_free(sai);
+  gt_free(sai);
 }
 
 static size_t

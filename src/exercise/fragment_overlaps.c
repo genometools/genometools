@@ -63,7 +63,7 @@ FragmentOverlaps* fragment_overlaps_new(Bioseq *fragments,
   FragmentOverlaps *fo;
   unsigned long i, j;
   assert(fragments);
-  fo = ma_malloc(sizeof *fo);
+  fo = gt_malloc(sizeof *fo);
   fo->overlaps = gt_array_new(sizeof (Overlap));
   for (i = 0; i < bioseq_number_of_sequences(fragments); i++) {
     for (j = i + 1; j < bioseq_number_of_sequences(fragments); j++)
@@ -76,7 +76,7 @@ void fragment_overlaps_delete(FragmentOverlaps *fo)
 {
   if (!fo) return;
   gt_array_delete(fo->overlaps);
-  ma_free(fo);
+  gt_free(fo);
 }
 
 static unsigned long get_weight(const void *elem, GT_UNUSED void *data)
@@ -92,7 +92,7 @@ void fragment_overlaps_sort(FragmentOverlaps *fo)
   unsigned long i, num_of_overlaps;
   assert(fo);
   num_of_overlaps = gt_array_size(fo->overlaps);
-  sorted_overlaps = ma_malloc(sizeof (Overlap) * num_of_overlaps);
+  sorted_overlaps = gt_malloc(sizeof (Overlap) * num_of_overlaps);
   /* sort overlaps by weight */
   countingsort(sorted_overlaps, gt_array_get_space(fo->overlaps),
                gt_array_elem_size(fo->overlaps), gt_array_size(fo->overlaps),
@@ -103,7 +103,7 @@ void fragment_overlaps_sort(FragmentOverlaps *fo)
   gt_array_reset(fo->overlaps);
   for (i = 0; i < num_of_overlaps; i++)
     gt_array_add(fo->overlaps, sorted_overlaps[i]);
-  ma_free(sorted_overlaps);
+  gt_free(sorted_overlaps);
 }
 
 bool fragment_overlaps_are_sorted(const FragmentOverlaps *fo)

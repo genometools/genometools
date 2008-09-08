@@ -28,7 +28,7 @@ char** cstr_array_dup(const char **cstr_array)
   char **copy;
   assert(cstr_array);
   while (cstr_array[size++]);
-  copy = ma_malloc(size * sizeof *copy);
+  copy = gt_malloc(size * sizeof *copy);
   for (i = 0; i < size - 1; i++)
     copy[i] = cstr_dup(cstr_array[i]);
   copy[size-1] = NULL;
@@ -41,9 +41,9 @@ char** cstr_array_prefix_first(const char **cstr_array, const char *p)
   char **a;
   assert(cstr_array && p);
   a_len = cstr_array_size(cstr_array);
-  a = ma_malloc(sizeof (char*) * (a_len + 1));
+  a = gt_malloc(sizeof (char*) * (a_len + 1));
   f_len = strlen(p) + strlen(cstr_array[0]) + 2; /* blank + '\0' */
-  a[0] = ma_malloc(sizeof (char) * f_len);
+  a[0] = gt_malloc(sizeof (char) * f_len);
   (void) snprintf(a[0], f_len, "%s %s", p, cstr_array[0]);
   for (i = 1; i < a_len; i++)
     a[i] = cstr_dup(cstr_array[i]);
@@ -57,7 +57,7 @@ char** cstr_array_preprend(const char **cstr_array, const char *p)
   char **a;
   assert(cstr_array && p);
   a_len = cstr_array_size(cstr_array);
-  a = ma_malloc(sizeof (char*) * (a_len + 2));
+  a = gt_malloc(sizeof (char*) * (a_len + 2));
   a[0] = cstr_dup(p);
   for (i = 0; i < a_len; i++)
     a[i+1] = cstr_dup(cstr_array[i]);
@@ -102,6 +102,6 @@ void cstr_array_delete(char **cstr_array)
   unsigned long i = 0;
   if (!cstr_array) return;
   while (cstr_array[i])
-    ma_free(cstr_array[i++]);
-  ma_free(cstr_array);
+    gt_free(cstr_array[i++]);
+  gt_free(cstr_array);
 }

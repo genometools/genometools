@@ -28,7 +28,7 @@ struct TranscriptEvaluators {
 
 TranscriptEvaluators* transcript_evaluators_new(void)
 {
-  TranscriptEvaluators *te = ma_malloc(sizeof (TranscriptEvaluators));
+  TranscriptEvaluators *te = gt_malloc(sizeof (TranscriptEvaluators));
   te->exon_evaluator_all = evaluator_new();
   te->exon_evaluator_single = evaluator_new();
   te->exon_evaluator_initial = evaluator_new();
@@ -91,5 +91,5 @@ void transcript_evaluators_delete(TranscriptEvaluators *te)
   evaluator_delete(te->exon_evaluator_initial);
   evaluator_delete(te->exon_evaluator_internal);
   evaluator_delete(te->exon_evaluator_terminal);
-  ma_free(te);
+  gt_free(te);
 }

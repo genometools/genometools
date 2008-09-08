@@ -32,7 +32,7 @@ struct DiscDistri {
 
 DiscDistri* disc_distri_new(void)
 {
-  return ma_calloc(1, sizeof (DiscDistri));
+  return gt_calloc(1, sizeof (DiscDistri));
 }
 
 void disc_distri_add(DiscDistri *d, unsigned long key)
@@ -180,5 +180,5 @@ void disc_distri_delete(DiscDistri *d)
 {
   if (!d) return;
   hashtable_delete(d->hashdist);
-  ma_free(d);
+  gt_free(d);
 }

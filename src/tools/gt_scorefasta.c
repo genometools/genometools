@@ -31,14 +31,14 @@ typedef struct {
 
 static void* gt_scorefasta_arguments_new(void)
 {
-  return ma_malloc(sizeof (ScorefastaArguments));
+  return gt_malloc(sizeof (ScorefastaArguments));
 }
 
 static void gt_scorefasta_arguments_delete(void *tool_arguments)
 {
   ScorefastaArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
@@ -70,8 +70,8 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
   /* store database sequence u and query sequence w */
   ulen = strlen(argv[parsed_args]);
   wlen = strlen(argv[parsed_args+1]);
-  u = ma_malloc(ulen+1);
-  w = ma_malloc(wlen+1);
+  u = gt_malloc(ulen+1);
+  w = gt_malloc(wlen+1);
   strcpy(u, argv[parsed_args]);
   strcpy(w, argv[parsed_args+1]);
 
@@ -87,8 +87,8 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
 
   /* free space */
   alpha_delete(alpha);
-  ma_free(u);
-  ma_free(w);
+  gt_free(u);
+  gt_free(w);
 
   return 0;
 }

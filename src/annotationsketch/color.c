@@ -20,7 +20,7 @@
 
 GT_Color* gt_color_new(double red, double green, double blue)
 {
-  GT_Color *color = ma_malloc(sizeof *color);
+  GT_Color *color = gt_malloc(sizeof *color);
   color->red = red;
   color->green = green;
   color->blue = blue;
@@ -45,5 +45,5 @@ bool gt_color_equals(const GT_Color *c1, const GT_Color *c2)
 void gt_color_delete(GT_Color *color)
 {
   if (!color) return;
-  ma_free(color);
+  gt_free(color);
 }

@@ -29,14 +29,14 @@ typedef struct {
 
 static void* gt_mutate_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (MutateArguments));
+  return gt_calloc(1, sizeof (MutateArguments));
 }
 
 static void gt_mutate_arguments_delete(void *tool_arguments)
 {
   MutateArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_mutate_option_parser_new(void *tool_arguments)

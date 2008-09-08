@@ -64,7 +64,7 @@ static void removecomments(GT_Str *line, int *incomment)
   if (!line || !gt_str_length(line))
     return;
 
-  buffer = ma_malloc((size_t) gt_str_length(line) + 1);
+  buffer = gt_malloc((size_t) gt_str_length(line) + 1);
 
   /* remove comments, except for those used for splint: */
   while (pos < gt_str_length(line)) {
@@ -100,7 +100,7 @@ static void removecomments(GT_Str *line, int *incomment)
   /* copy back into line */
   memcpy(gt_str_get(line), buffer, (size_t) (bufpos + 1));
   gt_str_set_length(line, bufpos);
-  ma_free(buffer);
+  gt_free(buffer);
 }
 
 static void skproto(const char *filename, FILE *fpin)

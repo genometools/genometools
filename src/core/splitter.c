@@ -32,7 +32,7 @@ struct Splitter {
 
 Splitter* splitter_new(void)
 {
-  return ma_calloc(1, sizeof (Splitter));
+  return gt_calloc(1, sizeof (Splitter));
 }
 
 void splitter_split(Splitter *s, char *string, unsigned long length,
@@ -165,6 +165,6 @@ int splitter_unit_test(GT_Error *err)
 void splitter_delete(Splitter *s)
 {
   if (!s) return;
-  ma_free(s->tokens);
-  ma_free(s);
+  gt_free(s->tokens);
+  gt_free(s);
 }

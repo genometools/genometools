@@ -151,7 +151,7 @@ static Giquery *readginumberfile(bool verbose,
   {
     printf("# opened gi-queryfile \"%s\"\n",gt_str_get(ginumberfile));
   }
-  giqueries = ma_malloc(sizeof (*giqueries) * (*numofqueries));
+  giqueries = gt_malloc(sizeof (*giqueries) * (*numofqueries));
   for (linenum = 0; !feof(fp); linenum++)
   {
     if (fscanf(fp,FormatScanint64_t " %ld %ld\n",
@@ -190,7 +190,7 @@ static Giquery *readginumberfile(bool verbose,
   fa_fclose(fp);
   if (haserr)
   {
-    ma_free(giqueries);
+    gt_free(giqueries);
     return NULL;
   }
   qsort(giqueries,(size_t) *numofqueries,sizeof (*giqueries),
@@ -377,7 +377,7 @@ int extractginumbers(bool verbose,
           if (headerbuffersize < headerlength + EXTRABUF + 1)
           {
             headerbuffersize = headerlength + EXTRABUF + 1;
-            headerbufferspace = ma_realloc(headerbufferspace,
+            headerbufferspace = gt_realloc(headerbufferspace,
                                            sizeof (*headerbufferspace)
                                            * headerbuffersize);
           }
@@ -417,15 +417,15 @@ int extractginumbers(bool verbose,
              len);
 #endif
     }
-    ma_free(desc);
+    gt_free(desc);
   }
-  ma_free(headerbufferspace);
+  gt_free(headerbufferspace);
   if (verbose)
   {
     progressbar_stop();
   }
   outputnonmarked(giqueries,numofqueries);
-  ma_free(giqueries);
+  gt_free(giqueries);
   seqiterator_delete(seqit);
   return had_err;
 }

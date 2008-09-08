@@ -26,7 +26,7 @@ typedef struct {
 
 static void* gt_template_arguments_new(void)
 {
-  TemplateArguments *arguments = ma_calloc(1, sizeof *arguments);
+  TemplateArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->str_option_template = gt_str_new();
   return arguments;
 }
@@ -36,7 +36,7 @@ static void gt_template_arguments_delete(void *tool_arguments)
   TemplateArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->str_option_template);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_template_option_parser_new(void *tool_arguments)

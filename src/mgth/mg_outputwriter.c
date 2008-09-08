@@ -692,7 +692,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
              Stringende-Zeichen */
           contig_seq_diff = to - from + 2;
 
-          contig_seq = ma_malloc(contig_seq_diff*sizeof (char));
+          contig_seq = gt_malloc(contig_seq_diff*sizeof (char));
           /* kopieren von contig_seq_diff-1 Zeichen */
           (void) snprintf(contig_seq, contig_seq_diff, "%s",
                           contig_seq_ptr + from);
@@ -727,7 +727,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 
             if (hit_ptr == NULL)
             {
-              hit_ptr = ma_calloc(hitcounter, sizeof (unsigned long));
+              hit_ptr = gt_calloc(hitcounter, sizeof (unsigned long));
             }
             /* Abfragen aller Hit-Nummern fuer jede Position */
             for (hit_index = 0; hit_index < hit_numbers; hit_index++)
@@ -796,11 +796,11 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                     MEMORY_SIZE + parsestruct_ptr->hits_memory;
 
                   HITSTRUCT(hitsnum) =
-                    ma_realloc(hitsnum_tmp,
+                    gt_realloc(hitsnum_tmp,
                                parsestruct_ptr->hits_memory *
                                sizeof (unsigned long));
                   HITSTRUCT(memory) =
-                    ma_realloc(memory_tmp,
+                    gt_realloc(memory_tmp,
                                parsestruct_ptr->hits_memory *
                                sizeof (unsigned long));
 
@@ -886,8 +886,8 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
               break;
           }
 
-          ma_free(hit_ptr);
-          ma_free(contig_seq);
+          gt_free(hit_ptr);
+          gt_free(contig_seq);
           hit_ptr = NULL;
           gt_str_reset(as_seq);
         }
@@ -1147,7 +1147,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
 
       as_seq_start = gt_str_new();
 
-      contig_seq_tri = ma_malloc(4*sizeof (char));
+      contig_seq_tri = gt_malloc(4*sizeof (char));
 
       /* DNA-Basen-Triplet einlesen */
       contig_seq_tri[0] = tolower(contig_seq[startpoint - 3]);
@@ -1269,7 +1269,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
       }
       gt_str_reset(as_seq_start);
       gt_str_delete(as_seq_start);
-      ma_free(contig_seq_tri);
+      gt_free(contig_seq_tri);
     }
 
     if (current_frame < 0)

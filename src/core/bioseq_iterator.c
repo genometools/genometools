@@ -32,7 +32,7 @@ BioseqIterator* bioseq_iterator_new(int seqfile_counter,
 {
   BioseqIterator *bsi;
   assert(sequence_files);
-  bsi = ma_calloc(1, sizeof *bsi);
+  bsi = gt_calloc(1, sizeof *bsi);
   bsi->seqfile_counter = seqfile_counter ? seqfile_counter : 1 /* for stdin */;
   bsi->sequence_files = cstr_array_dup(sequence_files);
   return bsi;
@@ -42,7 +42,7 @@ void bioseq_iterator_delete(BioseqIterator *bsi)
 {
   if (!bsi) return;
   cstr_array_delete(bsi->sequence_files);
-  ma_free(bsi);
+  gt_free(bsi);
 }
 
 int bioseq_iterator_next(BioseqIterator *bsi, Bioseq **bioseq, GT_Error *err)

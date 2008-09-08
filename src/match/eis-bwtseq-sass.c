@@ -83,8 +83,8 @@ deleteBWTSeqSASS(struct SASeqSrc *baseClass)
 {
   destructSASeqSrc(baseClass);
   ListDo(BWTSeqReaderState, SASS2BWTSASS(baseClass)->readerStateList,
-         ma_free(p));
-  ma_free(SASS2BWTSASS(baseClass));
+         gt_free(p));
+  gt_free(SASS2BWTSASS(baseClass));
 }
 
 static size_t
@@ -113,7 +113,7 @@ BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
 {
   struct BWTSASeqSrc *newBWTSASeqSrc;
   assert(bwtSeq);
-  newBWTSASeqSrc = ma_malloc(sizeof (*newBWTSASeqSrc));
+  newBWTSASeqSrc = gt_malloc(sizeof (*newBWTSASeqSrc));
   {
     RandomSeqAccessor origSeqAccess;
     if (ctxMap)
@@ -197,7 +197,7 @@ BWTSASSMakeBWTReader(GT_UNUSED BWTSASeqSrc *bwtSASeqSrc, BWTSeqReaderState *stat
 static BWTSeqReaderState *
 BWTSeqSASSAddReaderState(BWTSASeqSrc *bwtSASeqSrc)
 {
-  BWTSeqReaderState *newReader = ma_malloc(sizeof (*newReader));
+  BWTSeqReaderState *newReader = gt_malloc(sizeof (*newReader));
   assert(bwtSASeqSrc);
   newReader->backLink = bwtSASeqSrc;
   newReader->nextReadPos = 0;

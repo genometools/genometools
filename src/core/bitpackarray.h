@@ -49,13 +49,13 @@ typedef struct BitPackArray BitPackArray;
 static inline BitPackArray *
 bitpackarray_new(unsigned bits, BitOffset numValues)
 {
-  BitPackArray *newBPA = ma_malloc(sizeof (*newBPA));
+  BitPackArray *newBPA = gt_malloc(sizeof (*newBPA));
   if (newBPA)
   {
-    if (!(newBPA->store = ma_malloc(bitElemsAllocSize(bits*numValues)
+    if (!(newBPA->store = gt_malloc(bitElemsAllocSize(bits*numValues)
                                     * sizeof (BitElem))))
     {
-      ma_free(newBPA);
+      gt_free(newBPA);
       return NULL;
     }
     newBPA->bitsPerElem = bits;
@@ -68,8 +68,8 @@ static inline void
 bitpackarray_delete(BitPackArray *bpa)
 {
   if (!bpa) return;
-  ma_free(bpa->store);
-  ma_free(bpa);
+  gt_free(bpa->store);
+  gt_free(bpa);
 }
 
 /**

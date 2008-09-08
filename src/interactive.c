@@ -158,7 +158,7 @@ static int loadline(lua_State *L, GetLine *gl) {
                                   truncate <line> at the first newline */
     rval = gl_append_history(gl, line);
     assert(!rval);
-    ma_free(line);
+    gt_free(line);
   }
   lua_remove(L, 1);  /* remove line */
 #endif

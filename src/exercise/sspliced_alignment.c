@@ -29,7 +29,7 @@ SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)
 {
   SSplicedAlignment *sa;
   assert(id);
-  sa = ma_malloc(sizeof *sa);
+  sa = gt_malloc(sizeof *sa);
   sa->id = cstr_dup(id);
   sa->forward = forward;
   sa->exons = gt_array_new(sizeof (GT_Range));
@@ -40,8 +40,8 @@ void sspliced_alignment_delete(SSplicedAlignment *sa)
 {
   if (!sa) return;
   gt_array_delete(sa->exons);
-  ma_free(sa->id);
-  ma_free(sa);
+  gt_free(sa->id);
+  gt_free(sa);
 }
 
 bool sspliced_alignment_is_forward(const SSplicedAlignment *sa)

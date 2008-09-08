@@ -27,7 +27,7 @@ char* cstr_dup(const char *cstr)
   char *copy;
   assert(cstr);
   size = strlen(cstr) + 1;
-  copy = ma_malloc(size);
+  copy = gt_malloc(size);
   memcpy(copy, cstr, size);
   return copy;
 }
@@ -36,7 +36,7 @@ char* cstr_dup_nt(const char *cstr, unsigned long length)
 {
   char *copy;
   assert(cstr);
-  copy = ma_malloc(length+1);
+  copy = gt_malloc(length+1);
   memcpy(copy, cstr, length);
   copy[length] = '\0';
   return copy;

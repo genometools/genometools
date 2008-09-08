@@ -41,7 +41,7 @@ allocSpecialsRankTable(const Encodedsequence *encseq, Seqpos lastSeqPos,
   struct specialsRankLookup *ranker;
   Seqpos numSamples = (lastSeqPos >> sampleIntervalLog2) + 1;
 
-  ranker = ma_malloc(offsetAlign(sizeof (*ranker), sizeof (Seqpos))
+  ranker = gt_malloc(offsetAlign(sizeof (*ranker), sizeof (Seqpos))
                      + numSamples * sizeof (Seqpos));
   rankTable = &ranker->implementationData.sampleTable;
   rankTable->rankSumSamples
@@ -61,7 +61,7 @@ static inline struct specialsRankLookup *
 allocEmptySpecialsRankLookup(const Encodedsequence *encseq, Seqpos lastSeqPos)
 {
   struct specialsRankLookup *ranker;
-  ranker = ma_malloc(sizeof (*ranker));
+  ranker = gt_malloc(sizeof (*ranker));
   ranker->implementationData.lastSeqPos = lastSeqPos;
   ranker->rankFunc = specialsRankFromTermPos;
   ranker->encseq = encseq;
@@ -146,7 +146,7 @@ deleteSpecialsRankLookup(SpecialsRankLookup *ranker)
   if (ranker->rankFunc == specialsRankFromSampleTable)
     freeEncodedsequencescanstate(
       &ranker->implementationData.sampleTable.scanState);
-  ma_free(ranker);
+  gt_free(ranker);
 }
 
 static Seqpos

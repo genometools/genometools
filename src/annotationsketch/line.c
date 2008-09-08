@@ -33,7 +33,7 @@ struct GT_Line {
 GT_Line* gt_line_new(void)
 {
   GT_Line *line;
-  line = ma_malloc(sizeof (GT_Line));
+  line = gt_malloc(sizeof (GT_Line));
   line->blocks = gt_array_new(sizeof (GT_Block*));
   line->has_captions = false;
   return line;
@@ -171,5 +171,5 @@ void gt_line_delete(GT_Line *line)
   for (i = 0; i < gt_array_size(line->blocks); i++)
     gt_block_delete(*(GT_Block**) gt_array_get(line->blocks, i));
   gt_array_delete(line->blocks);
-  ma_free(line);
+  gt_free(line);
 }

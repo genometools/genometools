@@ -255,7 +255,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GT_Error *err)
   }
 
   /* free */
-  ma_free(rna_sequence);
+  gt_free(rna_sequence);
   score_matrix_delete(energy_function);
   alpha_delete(dna_alpha);
 

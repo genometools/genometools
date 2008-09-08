@@ -29,7 +29,7 @@ struct GT_Error {
 
 GT_Error* gt_error_new(void)
 {
-  return ma_calloc(1, sizeof (GT_Error));
+  return gt_calloc(1, sizeof (GT_Error));
 }
 
 void gt_error_set(GT_Error *err, const char *format, ...)
@@ -70,7 +70,7 @@ const char* gt_error_get(const GT_Error *err)
 void gt_error_set_progname(GT_Error *err, const char *progname)
 {
   assert(err && progname);
-  ma_free(err->progname);
+  gt_free(err->progname);
   err->progname = cstr_dup(progname);
 }
 
@@ -83,6 +83,6 @@ const char* gt_error_get_progname(const GT_Error *err)
 void gt_error_delete(GT_Error *err)
 {
   if (!err) return;
-  ma_free(err->progname);
-  ma_free(err);
+  gt_free(err->progname);
+  gt_free(err);
 }

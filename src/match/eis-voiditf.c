@@ -47,7 +47,7 @@ Bwtseqpositioniterator *newBwtseqpositioniterator(const void *voidbwtseq,
 {
   Bwtseqpositioniterator *bspi;
 
-  bspi = ma_malloc(sizeof (*bspi));
+  bspi = gt_malloc(sizeof (*bspi));
   initExtBitsRetrieval(&bspi->extBits);
   bspi->bwtseq = (const BWTSeq *) voidbwtseq;
   bspi->currentbound = lowerbound;
@@ -94,7 +94,7 @@ bool nextBwtseqpositionwithoutSEPiterator(Seqpos *pos,
 void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi)
 {
   destructExtBitsRetrieval(&(*bspi)->extBits);
-  ma_free(*bspi);
+  gt_free(*bspi);
   *bspi = NULL;
 }
 
@@ -110,7 +110,7 @@ Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtseq,
 {
   Bwtseqcontextiterator *bsci;
 
-  bsci = ma_malloc(sizeof (*bsci));
+  bsci = gt_malloc(sizeof (*bsci));
   initExtBitsRetrieval(&bsci->extBits);
   bsci->bwtseq = (const BWTSeq *) voidbwtseq;
   bsci->bound = bound;
@@ -144,7 +144,7 @@ Uchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci)
 void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
 {
   destructExtBitsRetrieval(&(*bsci)->extBits);
-  ma_free(*bsci);
+  gt_free(*bsci);
   *bsci = NULL;
 }
 

@@ -236,14 +236,14 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
     if (newSeqIdx->rangeEncs)                                           \
       deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
     if (newSeqIdx->extHeaderPos)                                        \
-      ma_free(newSeqIdx->extHeaderPos);                                 \
+      gt_free(newSeqIdx->extHeaderPos);                                 \
     if (newSeqIdx->partialSymSumBits)                                   \
-      ma_free(newSeqIdx->partialSymSumBits);                            \
+      gt_free(newSeqIdx->partialSymSumBits);                            \
     if (newSeqIdx->extHeaderPos)                                        \
-      ma_free(newSeqIdx->extHeaderPos);                                 \
-    if (newSeqIdx) ma_free(newSeqIdx);                                  \
+      gt_free(newSeqIdx->extHeaderPos);                                 \
+    if (newSeqIdx) gt_free(newSeqIdx);                                  \
     if (modesCopy)                                                      \
-      ma_free(modesCopy);                                               \
+      gt_free(modesCopy);                                               \
     if (blockMapAlphabet) MRAEncDelete(blockMapAlphabet);               \
     if (rangeMapAlphabet) MRAEncDelete(rangeMapAlphabet);               \
     return NULL;                                                        \
@@ -310,9 +310,9 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
   destructAppendState(&aState);                         \
   deletePartialSymSums(buck);                           \
   deletePartialSymSums(buckLast);                       \
-  ma_free(compositionPreAlloc);                         \
-  ma_free(permCompBSPreAlloc);                          \
-  ma_free(block);                                       \
+  gt_free(compositionPreAlloc);                         \
+  gt_free(permCompBSPreAlloc);                          \
+  gt_free(block);                                       \
   break
 
 extern EISeq *
@@ -346,7 +346,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
   assert((biFunc && biVarBits) || (biFunc == NULL && biVarBits == NULL));
   gt_error_check(err);
 
-  newSeqIdx = ma_calloc(sizeof (struct blockCompositionSeq), 1);
+  newSeqIdx = gt_calloc(sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->bucketBlocks = bucketBlocks;
   newSeqIdx->bitsPerSeqpos = requiredSeqposBits((newSeqIdx->baseClass.seqLen
                                                  = totalLen) - 1);
@@ -356,7 +356,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
       MRAEncGetNumRanges(alphabet);
     totalAlphabetSize = MRAEncGetSize(alphabet);
     blockMapAlphabetSize = 0;
-    newSeqIdx->modes = modesCopy = ma_malloc(sizeof (int) * numAlphabetRanges);
+    newSeqIdx->modes = modesCopy = gt_malloc(sizeof (int) * numAlphabetRanges);
     for (range = 0; range < numAlphabetRanges; ++range)
     {
       modesCopy[range] = modes[range];
@@ -391,14 +391,14 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
            == totalAlphabetSize - blockMapAlphabetSize);
   }
   newSeqIdx->partialSymSumBits
-    = ma_malloc(sizeof (newSeqIdx->partialSymSumBits[0])
+    = gt_malloc(sizeof (newSeqIdx->partialSymSumBits[0])
                 * blockMapAlphabetSize * 2);
   newSeqIdx->partialSymSumBitsSums
     = newSeqIdx->partialSymSumBits + blockMapAlphabetSize;
   if (stats)
   {
     Seqpos *symCounts;
-    symCounts = ma_malloc(sizeof (symCounts[0]) * blockMapAlphabetSize);
+    symCounts = gt_malloc(sizeof (symCounts[0]) * blockMapAlphabetSize);
     switch (stats->sourceAlphaType)
     {
     case sourceUInt8:
@@ -473,7 +473,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
     default:
       symSumBitsDefaultSetup(newSeqIdx);
     }
-    ma_free(symCounts);
+    gt_free(symCounts);
   }
   else
   {
@@ -531,11 +531,11 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
         unsigned *compositionPreAlloc;
         BitString permCompBSPreAlloc;
         partialSymSum *buck, *buckLast;
-        block = ma_malloc(sizeof (Symbol) * blockSize);
-        compositionPreAlloc = ma_malloc(sizeof (compositionPreAlloc[0])
+        block = gt_malloc(sizeof (Symbol) * blockSize);
+        compositionPreAlloc = gt_malloc(sizeof (compositionPreAlloc[0])
                                         * blockMapAlphabetSize);
         permCompBSPreAlloc =
-          ma_malloc(bitElemsAllocSize(bitsPerComposition + bitsPerPermutation)
+          gt_malloc(bitElemsAllocSize(bitsPerComposition + bitsPerPermutation)
                     * sizeof (BitElem));
         buck = newPartialSymSums(totalAlphabetSize);
         buckLast = newPartialSymSums(totalAlphabetSize);
@@ -655,9 +655,9 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
           deletePartialSymSums(buckLast);
         }
         /* 4. dealloc resources no longer required */
-        ma_free(compositionPreAlloc);
-        ma_free(permCompBSPreAlloc);
-        ma_free(block);
+        gt_free(compositionPreAlloc);
+        gt_free(permCompBSPreAlloc);
+        gt_free(block);
       }
     } while (0);
     /* close bwttab and suffix array */
@@ -673,16 +673,16 @@ deleteBlockEncIdxSeq(struct encIdxSeq *seq)
   struct blockCompositionSeq *bseq;
   assert(seq && seq->classInfo == &blockCompositionSeqClass);
   bseq = encIdxSeq2blockCompositionSeq(seq);
-  ma_free(bseq->extHeaderPos);
-  ma_free(bseq->partialSymSumBits);
+  gt_free(bseq->extHeaderPos);
+  gt_free(bseq->partialSymSumBits);
   destructOnDiskBlockCompIdx(&bseq->externalData);
   destructCompositionList(&bseq->compositionTable);
   MRAEncDelete(bseq->baseClass.alphabet);
   MRAEncDelete(bseq->rangeMapAlphabet);
   MRAEncDelete(bseq->blockMapAlphabet);
   deleteSeqRangeList(bseq->rangeEncs);
-  ma_free(bseq->modes);
-  ma_free(bseq);
+  gt_free(bseq->modes);
+  gt_free(bseq);
 }
 
 #define USE_SBLOCK_CACHE
@@ -756,7 +756,7 @@ static struct superBlock *
 newEmptySuperBlock(const struct blockCompositionSeq *seqIdx)
 {
   struct superBlock *sBlock;
-  sBlock = ma_malloc(superBlockMemSize(seqIdx));
+  sBlock = gt_malloc(superBlockMemSize(seqIdx));
   initEmptySuperBlock(sBlock, seqIdx);
   return sBlock;
 }
@@ -764,7 +764,7 @@ newEmptySuperBlock(const struct blockCompositionSeq *seqIdx)
 static void
 deleteSuperBlock(struct superBlock *sBlock)
 {
-  ma_free(sBlock);
+  gt_free(sBlock);
 }
 
 static inline void
@@ -1000,7 +1000,7 @@ initSuperBlockSeqCache(struct seqCache *sBlockCache,
   superBlockSize = superBlockMemSize(seqIdx);
   sBlockCache->numEntries = numEntries;
   {
-    void *temp = ma_malloc((sizeof (Seqpos) + superBlockSize
+    void *temp = gt_malloc((sizeof (Seqpos) + superBlockSize
                            + sizeof (void *)) * numEntries);
     sBlockCache->cachedPos = temp;
     sBlockCache->entriesPtr = (void **)((char *)temp
@@ -1023,7 +1023,7 @@ initSuperBlockSeqCache(struct seqCache *sBlockCache,
 static void
 destructSuperBlockSeqCache(struct seqCache *sBlockCache)
 {
-  ma_free(sBlockCache->cachedPos);
+  gt_free(sBlockCache->cachedPos);
 }
 
 static inline int
@@ -1128,7 +1128,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
   if (blockPA)
     block = blockPA;
   else
-    block = ma_calloc(sizeof (Symbol), blockSize);
+    block = gt_calloc(sizeof (Symbol), blockSize);
   walkCompIndicesPrefix(seqIdx, sBlock, blockNum % seqIdx->bucketBlocks,
                         cwIdxMemOffset, , varDataMemOffset);
   unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
@@ -1349,7 +1349,7 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
     {
       if (!(retval->flags & EBRF_PERSISTENT_CWBITS))
       {
-          retval->varPart = ma_malloc(superBlockCWMaxReadSize(seqIdx));
+          retval->varPart = gt_malloc(superBlockCWMaxReadSize(seqIdx));
       }
       memcpy(retval->cwPart, sBlock->cwData,
              superBlockCWMaxReadSize(seqIdx));
@@ -1357,7 +1357,7 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
     else
     {
       if (retval->flags & EBRF_PERSISTENT_CWBITS)
-        ma_free(retval->cwPart);
+        gt_free(retval->cwPart);
       retval->cwPart = sBlock->cwData;
     }
     if (EBRF_RETRIEVE_VARBITS)
@@ -1368,7 +1368,7 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
       {
         if (!(retval->flags & EBRF_PERSISTENT_VARBITS))
         {
-          retval->varPart = ma_malloc(superBlockVarMaxReadSize(seqIdx));
+          retval->varPart = gt_malloc(superBlockVarMaxReadSize(seqIdx));
         }
         memcpy(retval->varPart, sBlock->varData,
                superBlockVarMaxReadSize(seqIdx));
@@ -1376,14 +1376,14 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
       else
       {
         if (retval->flags & EBRF_PERSISTENT_VARBITS)
-          ma_free(retval->varPart);
+          gt_free(retval->varPart);
         retval->varPart = sBlock->varData;
       }
     }
     else
     {
       if (retval->flags & EBRF_PERSISTENT_VARBITS)
-        ma_free(retval->varPart);
+        gt_free(retval->varPart);
       retval->varPart = NULL;
       retval->varOffset = 0;
     }
@@ -1586,13 +1586,13 @@ blockCompSeqGet(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint)
 static inline partialSymSum *
 newPartialSymSums(AlphabetRangeSize alphabetSize)
 {
-  return ma_calloc(alphabetSize, sizeof (Seqpos));
+  return gt_calloc(alphabetSize, sizeof (Seqpos));
 }
 
 static inline void
 deletePartialSymSums(partialSymSum *sums)
 {
-  ma_free(sums);
+  gt_free(sums);
 }
 
 static inline void
@@ -1748,9 +1748,9 @@ initAppendState(struct appendState *aState,
     permCacheLen = superBlockVarMaxBits(seqIdx) + bitElemBits - 1;
   aState->compCacheLen = compCacheLen;
   aState->permCacheLen = permCacheLen;
-  aState->compCache = ma_calloc(sizeof (BitElem),
+  aState->compCache = gt_calloc(sizeof (BitElem),
                                 bitElemsAllocSize(compCacheLen));
-  aState->permCache = ma_calloc(sizeof (BitElem),
+  aState->permCache = gt_calloc(sizeof (BitElem),
                                 bitElemsAllocSize(permCacheLen));
   aState->cwMemPos = cwPreCompIdxBits(seqIdx);
   aState->cwDiskOffset = aState->varMemPos = aState->cwMemOldBits =
@@ -1760,8 +1760,8 @@ initAppendState(struct appendState *aState,
 static void
 destructAppendState(struct appendState *aState)
 {
-  ma_free(aState->permCache);
-  ma_free(aState->compCache);
+  gt_free(aState->permCache);
+  gt_free(aState->compCache);
 }
 
 /**
@@ -1939,7 +1939,7 @@ static inline void
 appendExtHeaderPos(struct extHeaderPos **headerList, size_t numHeaders,
                    off_t pos, uint32_t headerID)
 {
-  *headerList = ma_realloc(*headerList,
+  *headerList = gt_realloc(*headerList,
                            sizeof (**headerList) * (numHeaders + 1));
   (*headerList)[numHeaders].pos = pos;
   (*headerList)[numHeaders].headerID = headerID;
@@ -1958,7 +1958,7 @@ writeExtIdxHeader(FILE *fp, uint16_t headerID, size_t len,
 
 #define writeIdxHeaderErrRet(retval)            \
   do {                                          \
-    ma_free(buf);                               \
+    gt_free(buf);                               \
     return 0;                                   \
   } while (0)
 /**
@@ -1981,7 +1981,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   assert(seqIdx && err);
   fp = seqIdx->externalData.idxFP;
   bufLen = blockEncIdxSeqHeaderLength(seqIdx, 0, NULL);
-  buf = ma_malloc(bufLen);
+  buf = gt_malloc(bufLen);
   /* account for ext headers */
   len = roundUp(bufLen, HEADER_PAGESIZE_ROUNDUP);
   /* 1. 4 identifier bytes at offset 0 */
@@ -2072,7 +2072,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     assert(offset >= ftello(fp));
   }
   assert(seqIdx->externalData.cwDataPos == len);
-  ma_free(buf);
+  gt_free(buf);
   return len;
 }
 
@@ -2085,14 +2085,14 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     if (newSeqIdx->rangeEncs)                                           \
       deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
     if (newSeqIdx->extHeaderPos)                                        \
-      ma_free(newSeqIdx->extHeaderPos);                                 \
-    if (buf) ma_free(buf);                                              \
+      gt_free(newSeqIdx->extHeaderPos);                                 \
+    if (buf) gt_free(buf);                                              \
     if (alphabet) MRAEncDelete(alphabet);                               \
     if (modesCopy)                                                      \
-      ma_free(modesCopy);                                               \
-    if (blockMapAlphabet) ma_free(blockMapAlphabet);                    \
-    if (rangeMapAlphabet) ma_free(rangeMapAlphabet);                    \
-    if (newSeqIdx) ma_free(newSeqIdx);                                  \
+      gt_free(modesCopy);                                               \
+    if (blockMapAlphabet) gt_free(blockMapAlphabet);                    \
+    if (rangeMapAlphabet) gt_free(rangeMapAlphabet);                    \
+    if (newSeqIdx) gt_free(newSeqIdx);                                  \
     return NULL;                                                        \
   } while (0)
 
@@ -2107,7 +2107,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
   int *modesCopy = NULL;
   char *buf = NULL;
   assert(projectName && err);
-  newSeqIdx = ma_calloc(sizeof (struct blockCompositionSeq), 1);
+  newSeqIdx = gt_calloc(sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->baseClass.seqLen = totalLen;
   newSeqIdx->baseClass.alphabet = alphabet;
   newSeqIdx->baseClass.classInfo = &blockCompositionSeqClass;
@@ -2116,13 +2116,13 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
     loadBlockEncIdxSeqErrRet();
   {
     size_t offset = HEADER_ID_BLOCK_LEN;
-    buf = ma_malloc(HEADER_ID_BLOCK_LEN);
+    buf = gt_malloc(HEADER_ID_BLOCK_LEN);
     if (fread(buf, HEADER_ID_BLOCK_LEN, 1, newSeqIdx->externalData.idxFP) != 1)
       loadBlockEncIdxSeqErrRet();
     if (strcmp(buf, bdxHeader)!= 0)
       loadBlockEncIdxSeqErrRet();
     newSeqIdx->externalData.cwDataPos = headerLen = *(uint32_t *)(buf + 4);
-    buf = ma_realloc(buf, headerLen);
+    buf = gt_realloc(buf, headerLen);
     if (fread(buf + HEADER_ID_BLOCK_LEN, headerLen - HEADER_ID_BLOCK_LEN,
              1, newSeqIdx->externalData.idxFP) != 1)
       loadBlockEncIdxSeqErrRet();
@@ -2153,7 +2153,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
           size_t numModes = newSeqIdx->numModes
             = *(uint32_t *)(buf + (offset += 4));
           offset += 4;
-          modesCopy = newSeqIdx->modes = ma_malloc(sizeof (int) * numModes);
+          modesCopy = newSeqIdx->modes = gt_malloc(sizeof (int) * numModes);
           size_t j;
           for (j = 0; j < numModes; ++j)
           {
@@ -2179,7 +2179,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
           size_t i;
           Symbol blockMapAlphabetSize = *(uint32_t *)(buf + offset + 4);
           newSeqIdx->partialSymSumBits
-            = ma_malloc(sizeof (newSeqIdx->partialSymSumBits[0])
+            = gt_malloc(sizeof (newSeqIdx->partialSymSumBits[0])
                         * blockMapAlphabetSize * 2);
           newSeqIdx->partialSymSumBitsSums
             = newSeqIdx->partialSymSumBits + blockMapAlphabetSize;
@@ -2294,7 +2294,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
   if (!newSeqIdx->partialSymSumBits && blockMapAlphabetSize)
   {
     newSeqIdx->partialSymSumBits
-      = ma_malloc(sizeof (newSeqIdx->partialSymSumBits[0])
+      = gt_malloc(sizeof (newSeqIdx->partialSymSumBits[0])
                   * blockMapAlphabetSize * 2);
     newSeqIdx->partialSymSumBitsSums
       = newSeqIdx->partialSymSumBits + blockMapAlphabetSize;
@@ -2324,7 +2324,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
       loadBlockEncIdxSeqErrRet();
   }
   tryMMapOfIndex(&newSeqIdx->externalData);
-  ma_free(buf);
+  gt_free(buf);
   return &newSeqIdx->baseClass;
 }
 
@@ -2455,7 +2455,7 @@ newBlockCompSeqHint(const struct encIdxSeq *seq)
   const struct blockCompositionSeq *seqIdx;
   assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
-  hintret = ma_malloc(sizeof (union EISHint));
+  hintret = gt_malloc(sizeof (union EISHint));
   SRLInitListSearchHint(seqIdx->rangeEncs, &hintret->bcHint.rangeHint);
   /* FIXME: make cache size user-configurable */
   initSuperBlockSeqCache(&hintret->bcHint.sBlockCache, seqIdx, 32);
@@ -2469,7 +2469,7 @@ deleteBlockCompSeqHint(struct encIdxSeq *seq, union EISHint *hint)
   assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(seq);
   destructSuperBlockSeqCache(&hint->bcHint.sBlockCache);
-  ma_free(hint);
+  gt_free(hint);
 }
 
 static int
@@ -2526,7 +2526,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
 #else
     sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL);
 #endif
-    block = ma_malloc(sizeof (block[0]) * seqIdx->blockSize);
+    block = gt_malloc(sizeof (block[0]) * seqIdx->blockSize);
     for (i = 0; i < blockMapAlphabetSize; ++i)
     {
       if (flags & BUCKET_PRINT_BITSIZES)
@@ -2569,7 +2569,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
       outCount += printBlock(block, blockSize, fp);
       fputs("\n", fp);
       i++; , varDataMemOffset);
-    ma_free(block);
+    gt_free(block);
     if (flags & BUCKET_PRINT_BITSTRING)
     {
       for (i = 0; i < blockMapAlphabetSize; ++i)

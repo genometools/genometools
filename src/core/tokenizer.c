@@ -33,7 +33,7 @@ Tokenizer* tokenizer_new(IO *io)
 {
   Tokenizer *t;
   assert(io);
-  t = ma_calloc(1, sizeof (Tokenizer));
+  t = gt_calloc(1, sizeof (Tokenizer));
   t->io = io;
   return t;
 }
@@ -184,5 +184,5 @@ void tokenizer_delete(Tokenizer *t)
   if (!t) return;
   io_delete(t->io);
   gt_str_delete(t->token);
-  ma_free(t);
+  gt_free(t);
 }

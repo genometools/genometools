@@ -29,7 +29,7 @@ struct Evaluator {
 
 Evaluator* evaluator_new(void)
 {
-  return ma_calloc(1, sizeof (Evaluator));
+  return gt_calloc(1, sizeof (Evaluator));
 }
 
 void evaluator_add_true(Evaluator *evaluator)
@@ -162,5 +162,5 @@ int evaluator_unit_test(GT_Error *err)
 void evaluator_delete(Evaluator *evaluator)
 {
   if (!evaluator) return;
-  ma_free(evaluator);
+  gt_free(evaluator);
 }

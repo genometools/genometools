@@ -132,7 +132,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
       array2dim_calloc(regionmatrix, 7, 1);
       /* frame-counter zaehlt die Auftritts-haeufigkeiten der einzelnen
          Frames im opt. Pfad */
-      frame_counter = ma_calloc(7, sizeof (unsigned long));
+      frame_counter = gt_calloc(7, sizeof (unsigned long));
       real_frame_score = 0;
 
       for (row_idx = 0; row_idx < 7; row_idx++)
@@ -198,7 +198,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
         }
       }
       array2dim_delete(regionmatrix);
-      ma_free(frame_counter);
+      gt_free(frame_counter);
     }
   }
   gt_array_delete(frame_path_array);

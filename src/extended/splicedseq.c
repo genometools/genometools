@@ -31,7 +31,7 @@ struct Splicedseq {
 
 Splicedseq* splicedseq_new(void)
 {
-  Splicedseq *ss = ma_malloc(sizeof (Splicedseq));
+  Splicedseq *ss = gt_malloc(sizeof (Splicedseq));
   ss->splicedseq = gt_str_new();
   ss->positionmapping = gt_array_new(sizeof (unsigned long));
   ss->forward = true;
@@ -145,5 +145,5 @@ void splicedseq_delete(Splicedseq *ss)
   if (!ss) return;
   gt_str_delete(ss->splicedseq);
   gt_array_delete(ss->positionmapping);
-  ma_free(ss);
+  gt_free(ss);
 }

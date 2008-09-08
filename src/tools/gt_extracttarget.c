@@ -36,7 +36,7 @@ typedef struct {
 
 static void* gt_extracttarget_arguments_new(void)
 {
-  ExtractTargetArguments *arguments = ma_calloc(1, sizeof *arguments);
+  ExtractTargetArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqfiles = gt_strarray_new();
   return arguments;
 }
@@ -46,7 +46,7 @@ static void gt_extracttarget_arguments_delete(void *tool_arguments)
   ExtractTargetArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_strarray_delete(arguments->seqfiles);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
@@ -133,7 +133,7 @@ static int extracttarget_from_seqfiles(const char *target,
     }
     splitter_delete(blank_splitter);
   }
-  ma_free(escaped_target);
+  gt_free(escaped_target);
   gt_str_delete(unescaped_target);
   splitter_delete(splitter);
   return had_err;

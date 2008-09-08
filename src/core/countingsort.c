@@ -31,7 +31,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
   assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
 
   /* allocate count array */
-  c = ma_calloc(sizeof (unsigned long), max_elemvalue + 1);
+  c = gt_calloc(sizeof (unsigned long), max_elemvalue + 1);
 
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
@@ -52,7 +52,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
     c[k]--;
   }
 
-  ma_free(c);
+  gt_free(c);
 }
 
 unsigned long countingsort_get_max(const void *in, size_t elem_size,

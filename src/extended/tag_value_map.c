@@ -35,7 +35,7 @@ TagValueMap tag_value_map_new(const char *tag, const char *value)
   tag_len = strlen(tag);
   value_len = strlen(value);
   assert(tag_len && value_len);
-  map = ma_malloc((tag_len + 1 + value_len + 1 + 1) * sizeof *map);
+  map = gt_malloc((tag_len + 1 + value_len + 1 + 1) * sizeof *map);
   memcpy(map, tag, tag_len + 1);
   memcpy(map + tag_len + 1, value, value_len + 1);
   map[tag_len + 1 + value_len + 1] = '\0';
@@ -45,7 +45,7 @@ TagValueMap tag_value_map_new(const char *tag, const char *value)
 void tag_value_map_delete(TagValueMap map)
 {
   if (!map) return;
-  ma_free(map);
+  gt_free(map);
 }
 
 /* Stores map length in <map_len> if the return value equals NULL (i.e., if not
@@ -86,7 +86,7 @@ void tag_value_map_add(TagValueMap *map, const char *tag, const char *value)
   tag_already_used = get_value(*map, tag, &map_len);
   assert(!tag_already_used); /* map does not contain the given <tag> already */
   /* allocate additional space */
-  *map = ma_realloc(*map, map_len + tag_len + 1 + value_len + 1 + 1);
+  *map = gt_realloc(*map, map_len + tag_len + 1 + value_len + 1 + 1);
   /* store new tag/value pair */
   memcpy(*map + map_len, tag, tag_len + 1);
   memcpy(*map + map_len + tag_len + 1, value, value_len + 1);

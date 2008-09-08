@@ -33,7 +33,7 @@ struct GT_ImageInfo {
 GT_ImageInfo* gt_image_info_new()
 {
   GT_ImageInfo *ii;
-  ii = ma_calloc(1, sizeof (GT_ImageInfo));
+  ii = gt_calloc(1, sizeof (GT_ImageInfo));
   ii->recmaps = gt_array_new(sizeof (GT_RecMap*));
   assert(ii->recmaps);
   return ii;
@@ -49,7 +49,7 @@ void gt_image_info_delete(GT_ImageInfo *ii)
     gt_recmap_delete(rm);
   }
   gt_array_delete(ii->recmaps);
-  ma_free(ii);
+  gt_free(ii);
 }
 
 void gt_image_info_add_recmap(GT_ImageInfo *ii, GT_RecMap *rm)

@@ -31,12 +31,12 @@ newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
                 enum SRLFeatures features)
 {
   struct seqRangeList *newList;
-  newList = ma_malloc(sizeof (struct seqRangeList));
+  newList = gt_malloc(sizeof (struct seqRangeList));
   newList->numRanges = 0;
   newList->numRangesStorable = rangesStartNum;
-  newList->ranges = ma_malloc(sizeof (newList->ranges[0]) * rangesStartNum);
+  newList->ranges = gt_malloc(sizeof (newList->ranges[0]) * rangesStartNum);
   if (features & SRL_PARTIAL_SYMBOL_SUMS)
-    newList->partialSymSums = ma_malloc(sizeof (Seqpos)
+    newList->partialSymSums = gt_malloc(sizeof (Seqpos)
                                         * MRAEncGetSize(alphabet)
                                         * rangesStartNum);
   else
@@ -55,12 +55,12 @@ void
 SRLCompact(struct seqRangeList *rangeList)
 {
   assert(rangeList);
-  rangeList->ranges = ma_realloc(rangeList->ranges,
+  rangeList->ranges = gt_realloc(rangeList->ranges,
                                  sizeof (rangeList->ranges[0])
                                  * rangeList->numRanges);
   if (rangeList->partialSymSums)
     rangeList->partialSymSums =
-      ma_realloc(rangeList->partialSymSums, sizeof (Seqpos)
+      gt_realloc(rangeList->partialSymSums, sizeof (Seqpos)
                  * MRAEncGetSize(rangeList->alphabet)
                  * rangeList->numRanges);
   rangeList->numRangesStorable = rangeList->numRanges;
@@ -71,10 +71,10 @@ deleteSeqRangeList(struct seqRangeList *rangeList)
 {
   assert(rangeList);
   if (rangeList->ranges)
-    ma_free(rangeList->ranges);
+    gt_free(rangeList->ranges);
   if (rangeList->partialSymSums)
-    ma_free(rangeList->partialSymSums);
-  ma_free(rangeList);
+    gt_free(rangeList->partialSymSums);
+  gt_free(rangeList);
 }
 
 void
@@ -95,11 +95,11 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
     if (numRanges + numNewRanges > rangeList->numRangesStorable)
     {
       size_t newSize = numRanges + 2 * numNewRanges;
-      rangeList->ranges = ma_realloc(rangeList->ranges,
+      rangeList->ranges = gt_realloc(rangeList->ranges,
                                      sizeof (struct seqRange) * newSize);
       if (rangeList->partialSymSums)
         rangeList->partialSymSums =
-          ma_realloc(rangeList->partialSymSums, sizeof (Seqpos)
+          gt_realloc(rangeList->partialSymSums, sizeof (Seqpos)
                      * numSyms * newSize);
       rangeList->numRangesStorable = newSize;
     }
@@ -470,7 +470,7 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
   struct seqRangeList *newRangeList;
   size_t numRanges;
   assert(fp && err);
-  newRangeList = ma_malloc(sizeof (struct seqRangeList));
+  newRangeList = gt_malloc(sizeof (struct seqRangeList));
   newRangeList->alphabet = alphabet;
   newRangeList->symBits = requiredSymbolBits(MRAEncGetSize(alphabet) - 1);
   if (newRangeList->symBits)
@@ -481,7 +481,7 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
   xfread(&(newRangeList->numRanges), sizeof (newRangeList->numRanges), 1, fp);
   numRanges = newRangeList->numRanges;
   newRangeList->partialSymSums = NULL;
-  newRangeList->ranges = ma_malloc(sizeof (struct seqRange) *
+  newRangeList->ranges = gt_malloc(sizeof (struct seqRange) *
                                    (newRangeList->numRangesStorable
                                    = numRanges));
   xfread(newRangeList->ranges, sizeof (struct seqRange), numRanges, fp);
@@ -490,7 +490,7 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
     Seqpos *partialSymSums;
     size_t numSyms = MRAEncGetSize(alphabet), i;
     newRangeList->partialSymSums = partialSymSums =
-      ma_malloc(sizeof (Seqpos) * MRAEncGetSize(alphabet) * numRanges);
+      gt_malloc(sizeof (Seqpos) * MRAEncGetSize(alphabet) * numRanges);
     memset(partialSymSums, 0, sizeof (Seqpos) * numSyms);
     for (i = 1; i < numRanges; ++i)
     {

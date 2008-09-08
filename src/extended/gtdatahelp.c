@@ -66,7 +66,7 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused, GT_Error *err
       /* special case for `gt` */
       bn = getbasename(progname);
       gt_str_append_cstr(doc_file, bn);
-      ma_free(bn);
+      gt_free(bn);
     }
     else {
       /* general case for the tools */
@@ -86,7 +86,7 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused, GT_Error *err
   if (L) lua_close(L);
   gt_str_delete(doc_file);
   splitter_delete(splitter);
-  ma_free(prog);
+  gt_free(prog);
 
   return had_err;
 }

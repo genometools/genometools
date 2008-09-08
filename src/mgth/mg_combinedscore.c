@@ -104,10 +104,10 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   for (i = 0; i < hit_counter; i++)
   {
     /* Speicherplatz fuer die Hilfszeilen wird reserviert */
-    matrix_row = ma_calloc(contig_len, sizeof (double));
-    count_row = ma_calloc(contig_len, sizeof (unsigned long));
-    contig_seq_tri = ma_calloc(4, sizeof (char));
-    hit_seq_tri = ma_calloc(4, sizeof (char));
+    matrix_row = gt_calloc(contig_len, sizeof (double));
+    count_row = gt_calloc(contig_len, sizeof (unsigned long));
+    contig_seq_tri = gt_calloc(4, sizeof (char));
+    hit_seq_tri = gt_calloc(4, sizeof (char));
 
     /* Zeiger auf die Proteinsequenzen von Hit und Query */
     contig_as_ptr = gt_strarray_get(MATRIXSTRUCT(hsp_qseq), i);
@@ -154,7 +154,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
     }
 
     /* Speicherplatreservierung fuer die Query-DNA-Seq. */
-    contig_seq = ma_calloc(contig_seq_diff, sizeof (char));
+    contig_seq = gt_calloc(contig_seq_diff, sizeof (char));
     /* kopieren von contig_seq_diff-1 Zeichen */
     (void) snprintf(contig_seq, contig_seq_diff, "%s",
                     contig_seq_ptr +
@@ -162,7 +162,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 
     /* die laenge der Hit-Sequenz kann max. der Laenge der QueryDNA Seq
        entsprechen */
-    hit_seq = ma_calloc(hit_seq_diff, sizeof (char));
+    hit_seq = gt_calloc(hit_seq_diff, sizeof (char));
     /* kopieren von hit_seq_diff-1 Zeichen */
     (void) snprintf(hit_seq, hit_seq_diff, "%s",
                     gt_strarray_get(MATRIXSTRUCT(hit_dna), i));
@@ -252,21 +252,21 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
                       count_row, contig_seq, hit_seq, &hit_information);
         }
       }
-      ma_free(contig_seq);
-      ma_free(hit_seq);
-      ma_free(contig_seq_tri);
-      ma_free(hit_seq_tri);
-      ma_free(matrix_row);
-      ma_free(count_row);
+      gt_free(contig_seq);
+      gt_free(hit_seq);
+      gt_free(contig_seq_tri);
+      gt_free(hit_seq_tri);
+      gt_free(matrix_row);
+      gt_free(count_row);
     }
     else
     {
-      ma_free(contig_seq);
-      ma_free(hit_seq);
-      ma_free(contig_seq_tri);
-      ma_free(hit_seq_tri);
-      ma_free(matrix_row);
-      ma_free(count_row);
+      gt_free(contig_seq);
+      gt_free(hit_seq);
+      gt_free(contig_seq_tri);
+      gt_free(hit_seq_tri);
+      gt_free(matrix_row);
+      gt_free(count_row);
 
       break;
     }

@@ -73,7 +73,7 @@ static void proc_gt_env_options(void)
     case OPTIONPARSER_REQUESTS_EXIT: break;
   }
   gt_error_delete(err);
-  ma_free(env_options);
+  gt_free(env_options);
   splitter_delete(splitter);
   cstr_array_delete(argv);
 }
@@ -82,7 +82,7 @@ void allocators_init(void)
 {
   const char *bookkeeping;
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
-  ma_init(bookkeeping && !strcmp(bookkeeping, "on"));
+  gt_ma_init(bookkeeping && !strcmp(bookkeeping, "on"));
   proc_gt_env_options();
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
@@ -100,15 +100,15 @@ void allocators_reg_atexit_func(void)
 
 int allocators_clean(void)
 {
-  int fa_fptr_rval, fa_mmap_rval, ma_rval;
+  int fa_fptr_rval, fa_mmap_rval, gt_rval;
   if (spacepeak) {
-    ma_show_space_peak(stdout);
+    gt_ma_show_space_peak(stdout);
     fa_show_space_peak(stdout);
   }
   fa_fptr_rval = fa_check_fptr_leak();
   fa_mmap_rval = fa_check_mmap_leak();
   fa_clean();
-  ma_rval = ma_check_space_leak();
-  ma_clean();
-  return fa_fptr_rval || fa_mmap_rval || ma_rval;
+  gt_rval = gt_ma_check_space_leak();
+  gt_ma_clean();
+  return fa_fptr_rval || fa_mmap_rval || gt_rval;
 }

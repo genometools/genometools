@@ -34,7 +34,7 @@ typedef struct {
 
 static void* gt_splitfasta_arguments_new(void)
 {
-  SplitfastaArguments *arguments = ma_calloc(1, sizeof *arguments);
+  SplitfastaArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->splitdesc = gt_str_new();
   return arguments;
 }
@@ -44,7 +44,7 @@ void gt_splitfasta_arguments_delete(void *tool_arguments)
   SplitfastaArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->splitdesc);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)

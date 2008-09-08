@@ -41,7 +41,7 @@ SeqIterator* seqiterator_new(const GT_StrArray *filenametab,
                              bool withsequence)
 {
   SeqIterator *seqit;
-  seqit = ma_malloc(sizeof (SeqIterator));
+  seqit = gt_malloc(sizeof (SeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
   seqit->descptr = queue_new();
   seqit->fb = fastabuffer_new(filenametab,
@@ -164,5 +164,5 @@ void seqiterator_delete(SeqIterator *seqit)
   fastabuffer_delete(seqit->fb);
   FREEARRAY(&seqit->sequencebuffer, Uchar);
   seqit->currentread = seqit->maxread;
-  ma_free(seqit);
+  gt_free(seqit);
 }

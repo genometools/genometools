@@ -81,7 +81,7 @@ static GT_BlockTuple* blocktuple_new(GT_GenomeFeatureType *gft, GT_Block *block)
 {
   GT_BlockTuple *bt;
   assert(block);
-  bt = ma_malloc(sizeof (GT_BlockTuple));
+  bt = gt_malloc(sizeof (GT_BlockTuple));
   bt->gft = gft;
   bt->block = block;
   return bt;
@@ -93,7 +93,7 @@ static NodeInfoGT_Element* get_or_create_node_info(GT_Diagram *d, GT_GenomeNode 
   assert(d && node);
   ni = hashmap_get(d->nodeinfo, node);
   if (ni == NULL) {
-    NodeInfoGT_Element *new_ni = ma_malloc(sizeof (NodeInfoGT_Element));
+    NodeInfoGT_Element *new_ni = gt_malloc(sizeof (NodeInfoGT_Element));
     new_ni->blocktuples = gt_array_new(sizeof (GT_BlockTuple*));
     hashmap_add(d->nodeinfo, node, new_ni);
     ni = new_ni;
@@ -138,7 +138,7 @@ static bool get_caption_display_status(GT_Diagram *d, GT_GenomeFeatureType *gft)
   {
     unsigned long threshold;
     double tmp;
-    status = ma_malloc(sizeof (bool*));
+    status = gt_malloc(sizeof (bool*));
     if (!gt_style_get_bool(d->style, "format", "show_block_captions", status,
                            NULL))
       *status = true;
@@ -337,7 +337,7 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
   if ((collapse = (bool*) hashmap_get(d->collapsingtypes,
                                         feature_type)) == NULL)
   {
-    collapse = ma_malloc(sizeof (bool));
+    collapse = gt_malloc(sizeof (bool));
     if (!gt_style_get_bool(d->style, feature_type, "collapse_to_parent",
                         collapse, NULL))
       *collapse = false;
@@ -428,10 +428,10 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
     }
     assert(list);
     gt_array_add(list, bt->block);
-    ma_free(bt);
+    gt_free(bt);
   }
   gt_array_delete(ni->blocktuples);
-  ma_free(ni);
+  gt_free(ni);
   return 0;
 }
 
@@ -460,9 +460,9 @@ static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
   gt_genome_node_children.diagram = diagram;
 
   /* initialise caches */
-  diagram->collapsingtypes = hashmap_new(HASH_STRING, NULL, ma_free_func);
+  diagram->collapsingtypes = hashmap_new(HASH_STRING, NULL, gt_free_func);
   diagram->caption_display_status = hashmap_new(HASH_DIRECT,
-                                                  NULL, ma_free_func);
+                                                  NULL, gt_free_func);
 
   /* do node traversal for each root feature */
   for (i = 0; i < gt_array_size(features); i++) {
@@ -493,8 +493,8 @@ static GT_Diagram* gt_diagram_new_generic(GT_Array *features, const GT_Range *ra
                                     GT_Style *style)
 {
   GT_Diagram *diagram;
-  diagram = ma_malloc(sizeof (GT_Diagram));
-  diagram->tracks = hashmap_new(HASH_STRING, ma_free_func,
+  diagram = gt_malloc(sizeof (GT_Diagram));
+  diagram->tracks = hashmap_new(HASH_STRING, gt_free_func,
                                 (GT_FreeFunc) gt_track_delete);
   diagram->blocks = hashmap_new(HASH_DIRECT, NULL,
                                   (GT_FreeFunc) blocklist_delete);
@@ -586,7 +586,7 @@ static int layout_tracks(void *key, void *value, void *data,
   filename = getbasename(gt_genome_node_get_filename(
                                         gt_block_get_top_level_feature(block)));
   gt_track_key = gt_track_key_new(filename, gft);
-  ma_free(filename);
+  gt_free(filename);
   type = gt_genome_feature_type_get_cstr(gft);
 
   if (!gt_style_get_bool(tti->dia->style, "format", "split_lines", &split,
@@ -831,5 +831,5 @@ void gt_diagram_delete(GT_Diagram *diagram)
   hashmap_delete(diagram->tracks);
   hashmap_delete(diagram->blocks);
   hashmap_delete(diagram->nodeinfo);
-  ma_free(diagram);
+  gt_free(diagram);
 }

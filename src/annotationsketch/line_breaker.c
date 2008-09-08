@@ -24,7 +24,7 @@ GT_LineBreaker* gt_line_breaker_create(const GT_LineBreakerClass *lbc)
 {
   GT_LineBreaker *lb;
   assert(lbc && lbc->size);
-  lb = ma_calloc(1, lbc->size);
+  lb = gt_calloc(1, lbc->size);
   lb->c_class = lbc;
   return lb;
 }
@@ -46,7 +46,7 @@ void gt_line_breaker_delete(GT_LineBreaker *lb)
   assert(lb->c_class);
   if (lb->c_class->free)
     lb->c_class->free(lb);
-  ma_free(lb);
+  gt_free(lb);
 }
 
 bool gt_line_breaker_gt_line_is_occupied(GT_LineBreaker *lb, GT_Line *line, GT_Block *block)

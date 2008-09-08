@@ -139,8 +139,8 @@ static unsigned long computeCtab(const char *u, unsigned long ulen,
                 *Rtabcolumn,  /* a column of the row index table */
                 dist;
 
-  EDtabcolumn = ma_malloc(sizeof (unsigned long) * (ulen + 1));
-  Rtabcolumn  = ma_malloc(sizeof (unsigned long) * (ulen + 1));
+  EDtabcolumn = gt_malloc(sizeof (unsigned long) * (ulen + 1));
+  Rtabcolumn  = gt_malloc(sizeof (unsigned long) * (ulen + 1));
 
   if (vlen == 1) {
     Ctab[1] = ulen;
@@ -153,8 +153,8 @@ static unsigned long computeCtab(const char *u, unsigned long ulen,
     determineCtab0(Ctab, v[0], u);
   }
 
-  ma_free(Rtabcolumn);
-  ma_free(EDtabcolumn);
+  gt_free(Rtabcolumn);
+  gt_free(EDtabcolumn);
 
   return dist;
 }
@@ -194,10 +194,10 @@ Alignment* linearalign(const char *u, unsigned long ulen,
   unsigned long *Ctab, dist;
   Alignment *alignment;
   assert(u && ulen && v && vlen);
-  Ctab = ma_malloc(sizeof (unsigned long) * (vlen + 1));
+  Ctab = gt_malloc(sizeof (unsigned long) * (vlen + 1));
   dist = computeCtab(u, ulen, v, vlen, Ctab);
   alignment = reconstructalignment(Ctab, u, ulen, v, vlen);
   assert(dist == alignment_eval(alignment));
-  ma_free(Ctab);
+  gt_free(Ctab);
   return alignment;
 }

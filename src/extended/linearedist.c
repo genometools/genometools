@@ -45,9 +45,9 @@ unsigned long linearedist(const char *u, unsigned long n,
                           const char *v, unsigned long m)
 {
   unsigned long *dptable, edist;
-  dptable = ma_malloc(sizeof (unsigned long) * (MIN(n,m) + 1));
+  dptable = gt_malloc(sizeof (unsigned long) * (MIN(n,m) + 1));
   fillDPtable(dptable, n <= m ? u : v, MIN(n,m), n <= m ? v : u, MAX(n,m));
   edist = dptable[MIN(n,m)];
-  ma_free(dptable);
+  gt_free(dptable);
   return edist;
 }

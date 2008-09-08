@@ -73,7 +73,7 @@ GT_Block* gt_block_ref(GT_Block *block)
 
 GT_Block* gt_block_new(void)
 {
-  GT_Block *block = ma_calloc(1, sizeof (GT_Block));
+  GT_Block *block = gt_calloc(1, sizeof (GT_Block));
   block->elements = gt_dlist_new(elemcmp);
   block->caption = NULL;
   block->show_caption = true;
@@ -304,5 +304,5 @@ void gt_block_delete(GT_Block *block)
   gt_dlist_delete(block->elements);
   if (block->top_level_feature)
     gt_genome_node_delete(block->top_level_feature);
-  ma_free(block);
+  gt_free(block);
 }

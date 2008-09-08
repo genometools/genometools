@@ -38,7 +38,7 @@ GT_Track* gt_track_new(GT_Str *title, unsigned long max_num_lines, bool split,
 {
   GT_Track *track;
   assert(title && lb);
-  track = ma_calloc(1, sizeof (GT_Track));
+  track = gt_calloc(1, sizeof (GT_Track));
   assert(track);
   track->title = gt_str_ref(title);
   track->lines = gt_array_new(sizeof (GT_Line*));
@@ -205,5 +205,5 @@ void gt_track_delete(GT_Track *track)
     gt_line_delete(*(GT_Line**) gt_array_get(track->lines, i));
   gt_array_delete(track->lines);
   gt_str_delete(track->title);
-  ma_free(track);
+  gt_free(track);
 }

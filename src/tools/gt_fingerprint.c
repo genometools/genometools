@@ -35,7 +35,7 @@ typedef struct {
 
 static void* gt_fingerprint_arguments_new(void)
 {
-  FingerprintArguments *arguments = ma_calloc(1, sizeof *arguments);
+  FingerprintArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->checklist = gt_str_new();
   arguments->extract = gt_str_new();
   return arguments;
@@ -47,7 +47,7 @@ static void gt_fingerprint_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->extract);
   gt_str_delete(arguments->checklist);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_fingerprint_option_parser_new(GT_UNUSED

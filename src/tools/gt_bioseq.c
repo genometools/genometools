@@ -35,7 +35,7 @@ typedef struct {
 
 static void* gt_bioseq_arguments_new(void)
 {
-  BioseqArguments *arguments = ma_calloc(1, sizeof *arguments);
+  BioseqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->reader = gt_str_new();
   return arguments;
 }
@@ -45,7 +45,7 @@ static void gt_bioseq_arguments_delete(void *tool_arguments)
   BioseqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->reader);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_bioseq_option_parser_new(void *tool_arguments)

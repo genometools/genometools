@@ -181,6 +181,6 @@ GenomeStream* targetbest_filter_stream_new(GenomeStream *in_stream)
   tfs->in_stream = genome_stream_ref(in_stream);
   tfs->in_stream_processed = false;
   tfs->trees = gt_dlist_new(NULL);
-  tfs->target_to_elem = hashmap_new(HASH_STRING, ma_free_func, NULL);
+  tfs->target_to_elem = hashmap_new(HASH_STRING, gt_free_func, NULL);
   return gs;
 }

@@ -62,7 +62,7 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
   unsigned int idx;
   Pckbuckettable *pckbt;
 
-  pckbt = ma_malloc(sizeof(Pckbuckettable));
+  pckbt = gt_malloc(sizeof(Pckbuckettable));
   pckbt->basepower = initbasepower(numofchars,maxdepth);
   pckbt->numofchars = numofchars;
   pckbt->maxdepth = maxdepth;
@@ -72,11 +72,11 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
     /*printf("basepower[%u]=%lu\n",idx,pckbt->basepower[idx]); */
     pckbt->maxnumofvalues += pckbt->basepower[idx];
   }
-  pckbt->mbtab = ma_malloc(sizeof(Matchbound *) * (maxdepth+1));
+  pckbt->mbtab = gt_malloc(sizeof(Matchbound *) * (maxdepth+1));
   if (writemode)
   {
     pckbt->mapptr = NULL;
-    pckbt->mbtab[0] = ma_malloc(sizeof(Matchbound) * pckbt->maxnumofvalues);
+    pckbt->mbtab[0] = gt_malloc(sizeof(Matchbound) * pckbt->maxnumofvalues);
     /*
     printf("allocated = %u * %lu\n",sizeof(Matchbound),pckbt->maxnumofvalues);
     */
@@ -94,17 +94,17 @@ void pckbuckettable_free(Pckbuckettable *pckbt)
 {
   if (pckbt->mapptr == NULL)
   {
-    ma_free(pckbt->mbtab[0]);
+    gt_free(pckbt->mbtab[0]);
   } else
   {
     fa_xmunmap(pckbt->mapptr);
   }
   pckbt->mbtab[0] = NULL;
-  ma_free(pckbt->mbtab);
+  gt_free(pckbt->mbtab);
   pckbt->mbtab = NULL;
-  ma_free(pckbt->basepower);
+  gt_free(pckbt->basepower);
   pckbt->basepower = NULL;
-  ma_free(pckbt);
+  gt_free(pckbt);
 }
 
 static void storeBoundsatdepth(Pckbuckettable *pckbt,
@@ -167,8 +167,8 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   child.depth = 0;
   child.code = (Codetype) 0;
   STOREINARRAY(&stack,Boundsatdepth,128,child);
-  rangeOccs = ma_malloc(sizeof(*rangeOccs) * MULT2(numofchars));
-  tmpmbtab = ma_malloc(sizeof(*tmpmbtab) * numofchars);
+  rangeOccs = gt_malloc(sizeof(*rangeOccs) * MULT2(numofchars));
+  tmpmbtab = gt_malloc(sizeof(*tmpmbtab) * numofchars);
   pckbt = allocandinitpckbuckettable(numofchars,maxdepth,true);
   while (stack.nextfreeBoundsatdepth > 0)
   {
@@ -206,8 +206,8 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
     }
   }
   FREEARRAY(&stack,Boundsatdepth);
-  ma_free(rangeOccs);
-  ma_free(tmpmbtab);
+  gt_free(rangeOccs);
+  gt_free(tmpmbtab);
   printf("filled: %lu (%.2f)\n",pckbt->numofvalues,
                         (double) pckbt->numofvalues/pckbt->maxnumofvalues);
   return pckbt;

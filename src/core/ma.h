@@ -25,24 +25,24 @@
 
 /* the memory allocator module */
 
-void          ma_init(bool bookkeeping);
-#define       ma_malloc(size)\
-              ma_malloc_mem(size, __FILE__, __LINE__)
-void*         ma_malloc_mem(size_t size, const char*, int);
-#define       ma_calloc(nmemb, size)\
-              ma_calloc_mem(nmemb, size, __FILE__, __LINE__)
-void*         ma_calloc_mem(size_t nmemb, size_t size, const char*, int);
-#define       ma_realloc(ptr, size)\
-              ma_realloc_mem(ptr, size, __FILE__, __LINE__)
-void*         ma_realloc_mem(void *ptr, size_t size, const char*, int);
-#define       ma_free(ptr)\
-              ma_free_mem(ptr, __FILE__, __LINE__)
-void          ma_free_mem(void *ptr, const char*, int);
-void          ma_free_func(void *ptr);
-unsigned long ma_get_space_peak(void); /* in bytes */
-void          ma_show_space_peak(FILE*);
+void          gt_ma_init(bool bookkeeping);
+#define       gt_malloc(size)\
+              gt_malloc_mem(size, __FILE__, __LINE__)
+void*         gt_malloc_mem(size_t size, const char*, int);
+#define       gt_calloc(nmemb, size)\
+              gt_calloc_mem(nmemb, size, __FILE__, __LINE__)
+void*         gt_calloc_mem(size_t nmemb, size_t size, const char*, int);
+#define       gt_realloc(ptr, size)\
+              gt_realloc_mem(ptr, size, __FILE__, __LINE__)
+void*         gt_realloc_mem(void *ptr, size_t size, const char*, int);
+#define       gt_free(ptr)\
+              gt_free_mem(ptr, __FILE__, __LINE__)
+void          gt_free_mem(void *ptr, const char*, int);
+void          gt_free_func(void *ptr);
+unsigned long gt_ma_get_space_peak(void); /* in bytes */
+void          gt_ma_show_space_peak(FILE*);
 /* check if all allocated memory has been freed, prints to stderr */
-int           ma_check_space_leak(void);
-void          ma_clean(void);
+int           gt_ma_check_space_leak(void);
+void          gt_ma_clean(void);
 
 #endif

@@ -106,11 +106,11 @@ extern void
 destructSeqReaderSet(SeqReaderSet *readerSet)
 {
   assert(readerSet);
-  ListDo(struct seqReaderState, readerSet->consumerList, ma_free(p));
+  ListDo(struct seqReaderState, readerSet->consumerList, gt_free(p));
   if (readerSet->autoConsumerList)
-    ma_free(readerSet->autoConsumerList);
+    gt_free(readerSet->autoConsumerList);
   if (readerSet->seqDataBacklog)
-    ma_free(readerSet->seqDataBacklog);
+    gt_free(readerSet->seqDataBacklog);
 }
 
 extern SeqDataReader
@@ -121,7 +121,7 @@ seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
   SeqDataReader reader;
   struct seqReaderState *state;
   assert(readerSet);
-  state = ma_malloc(sizeof (*state));
+  state = gt_malloc(sizeof (*state));
   state->readerSet = readerSet;
   state->id = availId;
   state->xltor = xltor;
@@ -145,7 +145,7 @@ seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
   assert(readerSet);
   {
     struct seqSinkState *temp;
-    if (!(temp = ma_realloc(readerSet->autoConsumerList,
+    if (!(temp = gt_realloc(readerSet->autoConsumerList,
                             sizeof (*temp) * (availId + 1))))
       return false;
     readerSet->autoConsumerList = temp;
@@ -301,7 +301,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
       {
         size_t newSize = readerSet->backlogLen + copyLen;
         readerSet->seqDataBacklog
-          = ma_realloc(readerSet->seqDataBacklog, readerSet->backlogElemSize
+          = gt_realloc(readerSet->seqDataBacklog, readerSet->backlogElemSize
                        * newSize);
         readerSet->backlogSize = newSize;
       }

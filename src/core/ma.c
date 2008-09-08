@@ -46,7 +46,7 @@ static void free_MAInfo(MAInfo *mainfo)
   free(mainfo);
 }
 
-void ma_init(bool bookkeeping)
+void gt_ma_init(bool bookkeeping)
 {
   assert(!ma);
   ma = xcalloc(1, sizeof (MA));
@@ -72,11 +72,11 @@ static void subtract_size(MA *ma, unsigned long size)
   ma->current_size -= size;
 }
 
-void* ma_malloc_mem(size_t size, const char *filename, int line)
+void* gt_malloc_mem(size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
-  if (!ma) ma_init(false);
+  if (!ma) gt_ma_init(false);
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -93,11 +93,11 @@ void* ma_malloc_mem(size_t size, const char *filename, int line)
   return xmalloc(size);
 }
 
-void* ma_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
+void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
-  if (!ma) ma_init(false);
+  if (!ma) gt_ma_init(false);
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -114,11 +114,11 @@ void* ma_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
   return xcalloc(nmemb, size);
 }
 
-void* ma_realloc_mem(void *ptr, size_t size, const char *filename, int line)
+void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
-  if (!ma) ma_init(false);
+  if (!ma) gt_ma_init(false);
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -141,7 +141,7 @@ void* ma_realloc_mem(void *ptr, size_t size, const char *filename, int line)
   return xrealloc(ptr, size);
 }
 
-void ma_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
+void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
 {
   MAInfo *mainfo;
   assert(ma);
@@ -166,10 +166,10 @@ void ma_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
     free(ptr);
 }
 
-void ma_free_func(void *ptr)
+void gt_free_func(void *ptr)
 {
   if (!ptr) return;
-  ma_free(ptr);
+  gt_free(ptr);
 }
 
 static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
@@ -188,20 +188,20 @@ static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-unsigned long ma_get_space_peak(void)
+unsigned long gt_ma_get_space_peak(void)
 {
   assert(ma);
   return ma->max_size;
 }
 
-void ma_show_space_peak(FILE *fp)
+void gt_ma_show_space_peak(FILE *fp)
 {
   assert(ma);
   fprintf(fp, "# space peak in megabytes: %.2f\n",
           (double) ma->max_size / (1 << 20));
 }
 
-int ma_check_space_leak(void)
+int gt_ma_check_space_leak(void)
 {
   CheckSpaceLeakInfo info;
   int had_err;
@@ -215,7 +215,7 @@ int ma_check_space_leak(void)
   return 0;
 }
 
-void ma_clean(void)
+void gt_ma_clean(void)
 {
   assert(ma);
   ma->bookkeeping = false;

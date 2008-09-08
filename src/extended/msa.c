@@ -33,7 +33,7 @@ MSA* msa_new(const char *MSA_filename, GT_Error *err)
   int had_err = 0;
   MSA *msa;
   gt_error_check(err);
-  msa = ma_malloc(sizeof (MSA));
+  msa = gt_malloc(sizeof (MSA));
   msa->bs = bioseq_new(MSA_filename, err);
   if (!msa->bs)
     had_err = -1;
@@ -69,7 +69,7 @@ static char** get_msa_array(Bioseq *bs)
   unsigned long i;
   char **msa;
   assert(bs);
-  msa = ma_malloc(sizeof (const char*) * bioseq_number_of_sequences(bs));
+  msa = gt_malloc(sizeof (const char*) * bioseq_number_of_sequences(bs));
   for (i = 0; i < bioseq_number_of_sequences(bs); i++)
     msa[i] = (char*) bioseq_get_sequence(bs, i);
   return msa;
@@ -93,7 +93,7 @@ static char* get_consensus(unsigned long **count, unsigned long seqlen)
   unsigned long col, c, max_count;
   char *consensus, consensus_char = GAPSYMBOL;
   assert(count);
-  consensus = ma_malloc(sizeof (char) * seqlen);
+  consensus = gt_malloc(sizeof (char) * seqlen);
   for (col = 0; col < seqlen; col++) {
     max_count = 0;
     for (c = 0; c < UCHAR_MAX; c++) {
@@ -133,9 +133,9 @@ unsigned long msa_consensus_distance(const MSA *msa)
   }
 
   /* free */
-  ma_free(consensus);
+  gt_free(consensus);
   array2dim_delete(count);
-  ma_free(msa_array);
+  gt_free(msa_array);
 
   return dist;
 }
@@ -161,7 +161,7 @@ unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
     }
   }
 
-  ma_free(msa_array);
+  gt_free(msa_array);
   return sum;
 }
 
@@ -175,5 +175,5 @@ void msa_delete(MSA *msa)
 {
   if (!msa) return;
   bioseq_delete(msa->bs);
-  ma_free(msa);
+  gt_free(msa);
 }

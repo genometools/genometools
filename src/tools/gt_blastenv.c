@@ -32,14 +32,14 @@ typedef struct {
 
 static void* gt_blastenv_arguments_new(void)
 {
-  return ma_malloc(sizeof (ScorefastaArguments));
+  return gt_malloc(sizeof (ScorefastaArguments));
 }
 
 static void gt_blastenv_arguments_delete(void *tool_arguments)
 {
   ScorefastaArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
@@ -80,7 +80,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err) {
     /* store query sequence w */
     wlen = strlen(argv[parsed_args+1]);
-    w = ma_malloc(wlen+1);
+    w = gt_malloc(wlen+1);
     strcpy(w, argv[parsed_args+1]);
 
     /* assign protein alphabet */
@@ -99,7 +99,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   blast_env_delete(blast_env);
   score_matrix_delete(score_matrix);
   alpha_delete(alpha);
-  ma_free(w);
+  gt_free(w);
 
   return had_err;
 }

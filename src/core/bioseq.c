@@ -99,7 +99,7 @@ static void add_fingerprints(GT_StrArray *md5_fingerprints, Bioseq *bs)
     char *md5 = md5_fingerprint(bioseq_get_sequence(bs, i),
                                 bioseq_get_sequence_length(bs, i));
     gt_strarray_add_cstr(md5_fingerprints, md5);
-    ma_free(md5);
+    gt_free(md5);
   }
 }
 
@@ -129,7 +129,7 @@ static BioseqFingerprints* bioseq_fingerprints_new(Bioseq *bs)
   bool reading_succeeded = false;
   GT_Str *fingerprints_filename;
   assert(bs);
-  bsf = ma_calloc(1, sizeof *bsf);
+  bsf = gt_calloc(1, sizeof *bsf);
   bsf->md5_fingerprints = gt_strarray_new();
   fingerprints_filename = gt_str_clone(bs->sequence_file);
   gt_str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
@@ -155,7 +155,7 @@ static void bioseq_fingerprints_delete(BioseqFingerprints *bsf)
 {
   if (!bsf) return;
   gt_strarray_delete(bsf->md5_fingerprints);
-  ma_free(bsf);
+  gt_free(bsf);
 }
 
 static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
@@ -419,7 +419,7 @@ static Bioseq* bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
   Bioseq *bs;
   int had_err = 0;
   gt_error_check(err);
-  bs = ma_calloc(1, sizeof (Bioseq));
+  bs = gt_calloc(1, sizeof (Bioseq));
   if (!strcmp(gt_str_get(sequence_file), "-"))
     bs->use_stdin = true;
   if (!bs->use_stdin && !file_exists(gt_str_get(sequence_file))) {
@@ -489,18 +489,18 @@ void bioseq_delete(Bioseq *bs)
   if (bs->seqs) {
     for (i = 0; i < gt_array_size(bs->descriptions); i++)
       seq_delete(bs->seqs[i]);
-    ma_free(bs->seqs);
+    gt_free(bs->seqs);
   }
   for (i = 0; i < gt_array_size(bs->descriptions); i++)
-    ma_free(*(char**) gt_array_get(bs->descriptions, i));
+    gt_free(*(char**) gt_array_get(bs->descriptions, i));
   gt_array_delete(bs->descriptions);
   gt_array_delete(bs->sequence_ranges);
   if (bs->use_stdin)
-    ma_free(bs->raw_sequence);
+    gt_free(bs->raw_sequence);
   else
     fa_xmunmap(bs->raw_sequence);
   alpha_delete(bs->alpha);
-  ma_free(bs);
+  gt_free(bs);
 }
 
 static void determine_alpha_if_necessary(Bioseq *bs)
@@ -525,7 +525,7 @@ Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
   assert(bs);
   assert(idx < gt_array_size(bs->descriptions));
   if (!bs->seqs)
-    bs->seqs = ma_calloc(gt_array_size(bs->descriptions), sizeof (Seq*));
+    bs->seqs = gt_calloc(gt_array_size(bs->descriptions), sizeof (Seq*));
   determine_alpha_if_necessary(bs);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),

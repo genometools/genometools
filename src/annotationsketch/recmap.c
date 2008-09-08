@@ -22,7 +22,7 @@
 GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
                          GT_GenomeFeature *gf)
 {
-  GT_RecMap *rm = ma_malloc(sizeof *rm);
+  GT_RecMap *rm = gt_malloc(sizeof *rm);
   rm->nw_x = nw_x;
   rm->nw_y = nw_y;
   rm->se_x = se_x;
@@ -80,5 +80,5 @@ void gt_recmap_delete(GT_RecMap *rm)
 {
   if (!rm) return;
   gt_genome_node_delete((GT_GenomeNode*) rm->gf);
-  ma_free(rm);
+  gt_free(rm);
 }

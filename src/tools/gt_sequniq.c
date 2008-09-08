@@ -38,7 +38,7 @@ typedef struct {
 
 static void* gt_sequniq_arguments_new(void)
 {
-  SequniqArguments *arguments = ma_calloc(1, sizeof *arguments);
+  SequniqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
@@ -49,7 +49,7 @@ static void gt_sequniq_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
@@ -150,8 +150,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       else
         duplicates++;
       num_of_sequences++;
-      ma_free(desc);
-      ma_free(md5);
+      gt_free(desc);
+      gt_free(md5);
     }
     if (arguments->verbose)
       progressbar_stop();

@@ -69,7 +69,7 @@
         if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
-          (A)->space##TYPE = ma_realloc_mem((A)->space##TYPE,\
+          (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
                                             sizeof (TYPE) *\
                                             (A)->allocated##TYPE,\
                                             __FILE__, __LINE__);\
@@ -84,7 +84,7 @@
         if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
-          (A)->space##TYPE = ma_realloc_mem((A)->space##TYPE,\
+          (A)->space##TYPE = gt_realloc_mem((A)->space##TYPE,\
                                             sizeof (TYPE) *\
                                             (A)->allocated##TYPE,\
                                             __FILE__, __LINE__);\
@@ -116,7 +116,7 @@
 #define FREEARRAY(A,TYPE)\
         if ((A)->space##TYPE != NULL)\
         {\
-          ma_free((A)->space##TYPE);\
+          gt_free((A)->space##TYPE);\
         }
 
 /*

@@ -33,7 +33,7 @@ FastaBuffer* fastabuffer_new(const GT_StrArray *filenametab,
                              unsigned long *characterdistribution)
 {
   FastaBuffer *fb;
-  fb = ma_calloc(1, sizeof (FastaBuffer));
+  fb = gt_calloc(1, sizeof (FastaBuffer));
   fb->plainformat = plainformat;
   fb->filenum = 0;
   fb->firstoverallseq = true;
@@ -46,7 +46,7 @@ FastaBuffer* fastabuffer_new(const GT_StrArray *filenametab,
   fb->lastspeciallength = 0;
   fb->descptr = descptr;
   if (filelengthtab) {
-    *filelengthtab = ma_calloc(gt_strarray_size(filenametab),
+    *filelengthtab = gt_calloc(gt_strarray_size(filenametab),
                                sizeof (Filelengthvalues));
     fb->filelengthtab = *filelengthtab;
   }
@@ -317,5 +317,5 @@ void fastabuffer_delete(FastaBuffer *fb)
   if (!fb) return;
   genfile_close(fb->inputstream);
   FREEARRAY(&fb->headerbuffer, char);
-  ma_free(fb);
+  gt_free(fb);
 }

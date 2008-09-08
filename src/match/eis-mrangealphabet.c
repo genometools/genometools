@@ -44,7 +44,7 @@ newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
     rEIOffset  +  sizeof (newAlpha->baseClass.rangeEndIndices[0]) * numRanges,
     sizeof (newAlpha->baseClass.symbolsPerRange[0]));
   AlphabetRangeID i;
-  if ((newAlpha = ma_calloc(
+  if ((newAlpha = gt_calloc(
          sPROffset
          + sizeof (newAlpha->baseClass.symbolsPerRange[0]) * numRanges,
          1)))
@@ -76,10 +76,10 @@ newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
     if (newAlpha)
     {
       if (newAlpha->baseClass.symbolsPerRange)
-        ma_free(newAlpha->baseClass.symbolsPerRange);
+        gt_free(newAlpha->baseClass.symbolsPerRange);
       if (newAlpha->baseClass.rangeEndIndices)
-        ma_free(newAlpha->baseClass.rangeEndIndices);
-      ma_free(newAlpha);
+        gt_free(newAlpha->baseClass.rangeEndIndices);
+      gt_free(newAlpha);
     }
     return NULL;
   }
@@ -93,7 +93,7 @@ MRAEncGTAlphaNew(const Alphabet *alpha)
   uint8_t *mappings;
   MRAEnc *result;
   uint32_t numSyms = getmapsizeAlphabet(alpha);
-  mappings = ma_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
+  mappings = gt_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
   memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
   {
     /* handle regular symbols */
@@ -106,7 +106,7 @@ MRAEncGTAlphaNew(const Alphabet *alpha)
   mappings[WILDCARD] = numSyms - 1;
   symsPerRange[1] = 1;
   result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings);
-  ma_free(mappings);
+  gt_free(mappings);
   return result;
 }
 
@@ -122,12 +122,12 @@ MRAEncCopy(const MRAEnc *alpha)
       const MRAEncUInt8 *srcAlpha = constMRAEnc2MRAEncUInt8(alpha);
       int numRanges = alpha->numRanges;
       assert(numRanges > 0);
-      if ((newAlpha = ma_calloc(sizeof (MRAEncUInt8), 1))
+      if ((newAlpha = gt_calloc(sizeof (MRAEncUInt8), 1))
           && (newAlpha->baseClass.rangeEndIndices =
-              ma_malloc(sizeof (newAlpha->baseClass.rangeEndIndices[0])
+              gt_malloc(sizeof (newAlpha->baseClass.rangeEndIndices[0])
                         * numRanges))
           && (newAlpha->baseClass.symbolsPerRange =
-              ma_malloc(sizeof (newAlpha->baseClass.rangeEndIndices[0])
+              gt_malloc(sizeof (newAlpha->baseClass.rangeEndIndices[0])
                         * numRanges)))
       {
         newAlpha->baseClass.encType = sourceUInt8;
@@ -147,10 +147,10 @@ MRAEncCopy(const MRAEnc *alpha)
         if (newAlpha)
         {
           if (newAlpha->baseClass.symbolsPerRange)
-            ma_free(newAlpha->baseClass.symbolsPerRange);
+            gt_free(newAlpha->baseClass.symbolsPerRange);
           if (newAlpha->baseClass.rangeEndIndices)
-            ma_free(newAlpha->baseClass.rangeEndIndices);
-          ma_free(newAlpha);
+            gt_free(newAlpha->baseClass.rangeEndIndices);
+          gt_free(newAlpha);
         }
         return NULL;
       }
@@ -187,9 +187,9 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
       AlphabetRangeSize *newRanges, sym;
       AlphabetRangeID range, numRanges = MRAEncGetNumRanges(srcAlpha);
       ui8alpha = constMRAEnc2MRAEncUInt8(srcAlpha);
-      mappings = ma_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
+      mappings = gt_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
       memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
-      newRanges = ma_malloc(sizeof (newRanges[0]) * numRanges);
+      newRanges = gt_malloc(sizeof (newRanges[0]) * numRanges);
       sym = 0;
       destSym = 0;
       for (range = 0; range < numRanges; ++range)
@@ -209,8 +209,8 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
       }
       newAlpha = newMultiRangeAlphabetEncodingUInt8(numRanges, newRanges,
                                                     mappings);
-      ma_free(mappings);
-      ma_free(newRanges);
+      gt_free(mappings);
+      gt_free(newRanges);
     }
     break;
   default:
@@ -375,7 +375,7 @@ MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha)
     MRAEncUInt8 *ui8alpha;
   case sourceUInt8:
     ui8alpha = MRAEnc2MRAEncUInt8(mralpha);
-    ma_free(ui8alpha);
+    gt_free(ui8alpha);
     break;
   default:
     abort();

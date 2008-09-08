@@ -171,8 +171,8 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
 
 static void *apm_allocatedfsconstinfo(unsigned int alphasize)
 {
-  Matchtaskinfo *mti = ma_malloc(sizeof(Matchtaskinfo));
-  mti->eqsvector = ma_malloc(sizeof(*mti->eqsvector) * alphasize);
+  Matchtaskinfo *mti = gt_malloc(sizeof(Matchtaskinfo));
+  mti->eqsvector = gt_malloc(sizeof(*mti->eqsvector) * alphasize);
   return mti;
 }
 
@@ -180,8 +180,8 @@ static void apm_freedfsconstinfo(void **dfsconstinfo)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
 
-  ma_free(mti->eqsvector);
-  ma_free(mti);
+  gt_free(mti->eqsvector);
+  gt_free(mti);
   *dfsconstinfo = NULL;
 }
 

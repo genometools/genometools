@@ -72,9 +72,9 @@ void msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
              int (*compar)(void *, const void *, const void *))
 {
   void *buf;
-  buf = ma_malloc(size * nmemb);
+  buf = gt_malloc(size * nmemb);
   msort_r_withbuf (base, nmemb, size, comparinfo, compar, buf);
-  ma_free(buf);
+  gt_free(buf);
 }
 
 int non_r_cmpfunc(void *compar, const void *a, const void *b)

@@ -50,7 +50,7 @@ typedef struct {
 Alignment* alignment_new(void)
 {
   Alignment *a;
-  a = ma_calloc(1, sizeof (Alignment));
+  a = gt_calloc(1, sizeof (Alignment));
   a->eops = gt_array_new(sizeof (Multieop));
   return a;
 }
@@ -327,5 +327,5 @@ void alignment_delete(Alignment *a)
 {
   if (!a) return;
   gt_array_delete(a->eops);
-  ma_free(a);
+  gt_free(a);
 }

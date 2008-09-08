@@ -26,7 +26,7 @@ CSAGene* csa_gene_new(CSASpliceForm *splice_form)
 {
   CSAGene *gene;
   assert(splice_form);
-  gene = ma_malloc(sizeof *gene);
+  gene = gt_malloc(sizeof *gene);
   gene->splice_forms = gt_array_new(sizeof (CSASpliceForm*));
   gt_array_add(gene->splice_forms, splice_form);
   return gene;
@@ -39,7 +39,7 @@ void csa_gene_delete(CSAGene *gene)
   for (i = 0; i < gt_array_size(gene->splice_forms); i++)
     csa_splice_form_delete(*(CSASpliceForm**) gt_array_get(gene->splice_forms, i));
   gt_array_delete(gene->splice_forms);
-  ma_free(gene);
+  gt_free(gene);
 }
 
 void csa_gene_add_splice_form(CSAGene *gene, CSASpliceForm *splice_form)

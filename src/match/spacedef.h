@@ -48,7 +48,7 @@
 #else
 #define ALLOCASSIGNSPACEGENERIC(FILENAME,LINENUM,V,S,T,N)\
         assert(sizeof(*(V)) == sizeof (T));\
-        V = ma_realloc_mem(S, sizeof (T) * (N), FILENAME,\
+        V = gt_realloc_mem(S, sizeof (T) * (N), FILENAME,\
                            LINENUM)
 
 #define ALLOCASSIGNSPACE(V,S,T,N)\
@@ -63,7 +63,7 @@
 #define FREESPACE(P)\
         if ((P) != NULL)\
         {\
-          ma_free(P);\
+          gt_free(P);\
           P = NULL;\
         }
 

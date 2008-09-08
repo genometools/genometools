@@ -30,10 +30,10 @@ struct FeatureInfo {
 
 FeatureInfo* feature_info_new(void)
 {
-  FeatureInfo *fi = ma_malloc(sizeof *fi);
-  fi->id_to_genome_node = hashmap_new(HASH_STRING, ma_free_func,
+  FeatureInfo *fi = gt_malloc(sizeof *fi);
+  fi->id_to_genome_node = hashmap_new(HASH_STRING, gt_free_func,
                                       (GT_FreeFunc) gt_genome_node_delete);
-  fi->id_to_pseudo_parent = hashmap_new(HASH_STRING, ma_free_func,
+  fi->id_to_pseudo_parent = hashmap_new(HASH_STRING, gt_free_func,
                                         (GT_FreeFunc) gt_genome_node_delete);
   return fi;
 }
@@ -43,7 +43,7 @@ void feature_info_delete(FeatureInfo *fi)
   if (!fi) return;
   hashmap_delete(fi->id_to_genome_node);
   hashmap_delete(fi->id_to_pseudo_parent);
-  ma_free(fi);
+  gt_free(fi);
 }
 
 void feature_info_reset(FeatureInfo *fi)
@@ -105,7 +105,7 @@ static GT_GenomeNode* find_root(const FeatureInfo *fi, const char *id)
     char *first_parent = cstr_dup_nt(id, delim - id);
     this_feature = hashmap_get(fi->id_to_genome_node, first_parent);
     parent_pseudo_feature = hashmap_get(fi->id_to_pseudo_parent, first_parent);
-    ma_free(first_parent);
+    gt_free(first_parent);
   }
   else {
     this_feature = hashmap_get(fi->id_to_genome_node, id);

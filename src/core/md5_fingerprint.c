@@ -28,12 +28,12 @@ char *md5_fingerprint(const char *sequence, unsigned long seqlen)
   unsigned long i;
   /* XXX: this could be done more memory efficient by applying md5 to a reused
      buffer */
-  upper = ma_malloc(seqlen * sizeof (char));
+  upper = gt_malloc(seqlen * sizeof (char));
   for (i = 0; i < seqlen; i++)
     upper[i] = toupper(sequence[i]);
   md5(upper, safe_cast2long(seqlen), (char*) output);
-  ma_free(upper);
-  fingerprint = ma_calloc(33, sizeof (char));
+  gt_free(upper);
+  fingerprint = gt_calloc(33, sizeof (char));
   snprintf(fingerprint, 33,
            "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
            output[0], output[1], output[2], output[3], output[4], output[5],

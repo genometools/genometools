@@ -27,7 +27,7 @@ struct CstrTable {
 
 static void free_cstr_table_entry(void *cstr_entry)
 {
-  ma_free(*(char**) cstr_entry);
+  gt_free(*(char**) cstr_entry);
 }
 
 CstrTable* cstr_table_new()
@@ -35,7 +35,7 @@ CstrTable* cstr_table_new()
   HashElemInfo cstr_table = {
     ht_cstr_elem_hash, { free_cstr_table_entry }, sizeof (char*),
     ht_cstr_elem_cmp, NULL, NULL };
-  CstrTable *table = ma_malloc(sizeof *table);
+  CstrTable *table = gt_malloc(sizeof *table);
   table->strings = hashtable_new(cstr_table);
   return table;
 }
@@ -44,7 +44,7 @@ void cstr_table_delete(CstrTable *table)
 {
   if (!table) return;
   hashtable_delete(table->strings);
-  ma_free(table);
+  gt_free(table);
 }
 
 void cstr_table_add(CstrTable *table, const char *cstr)

@@ -49,9 +49,9 @@ int gt_bitpackarray_unit_test(GT_Error *err)
       mask = ~((~(uint32_t)0)<<bits);
 
     log_log("numRnd=%lu\n", (long unsigned)numRnd);
-    randSrc = ma_malloc(sizeof (uint32_t)*numRnd);
+    randSrc = gt_malloc(sizeof (uint32_t)*numRnd);
     bitStore = bitpackarray_new(bits, numRnd);
-    randCmp = ma_malloc(sizeof (uint32_t)*numRnd);
+    randCmp = gt_malloc(sizeof (uint32_t)*numRnd);
     for (i = 0; i < numRnd; ++i)
     {
       uint32_t v = randSrc[i] = random();
@@ -67,14 +67,14 @@ int gt_bitpackarray_unit_test(GT_Error *err)
         log_log("bsStoreUInt32/bitpackarray_get_uint32: "
                 "Expected %"PRIu32", got %"PRIu32", i = %lu, bits=%u\n",
                 v & mask, r, (unsigned long)i, bits);
-        ma_free(randSrc);
-        ma_free(randCmp);
+        gt_free(randSrc);
+        gt_free(randCmp);
         bitpackarray_delete(bitStore);
         return had_err;
       }
     }
-  ma_free(randSrc);
-  ma_free(randCmp);
+  gt_free(randSrc);
+  gt_free(randCmp);
   bitpackarray_delete(bitStore);
   }
   log_log("bitpackarray_store_uint32/bitpackarray_get_uint32: passed\n");
@@ -91,16 +91,16 @@ int gt_bitpackarray_unit_test(GT_Error *err)
       mask = ~(uint64_t)0;
     else
       mask = ~((~(uint64_t)0)<<bits);
-    ensure(had_err, (randSrc = ma_malloc(sizeof (uint64_t)*numRnd))
+    ensure(had_err, (randSrc = gt_malloc(sizeof (uint64_t)*numRnd))
            && (bitStore = bitpackarray_new(bits, numRnd))
-           && (randCmp = ma_malloc(sizeof (uint64_t)*numRnd)));
+           && (randCmp = gt_malloc(sizeof (uint64_t)*numRnd)));
     if (had_err)
     {
       perror("Storage allocations failed");
       if (randSrc)
-        ma_free(randSrc);
+        gt_free(randSrc);
       if (randCmp)
-        ma_free(randCmp);
+        gt_free(randCmp);
       if (bitStore)
         bitpackarray_delete(bitStore);
       return had_err;
@@ -121,14 +121,14 @@ int gt_bitpackarray_unit_test(GT_Error *err)
                 "Expected %llu, got %llu, i = %lu, bits=%u\n",
                 (unsigned long long)(v & mask),
                 (unsigned long long)r, (unsigned long)i, bits);
-        ma_free(randSrc);
-        ma_free(randCmp);
+        gt_free(randSrc);
+        gt_free(randCmp);
         bitpackarray_delete(bitStore);
         return had_err;
       }
     }
-    ma_free(randSrc);
-    ma_free(randCmp);
+    gt_free(randSrc);
+    gt_free(randCmp);
     bitpackarray_delete(bitStore);
   }
   log_log("bitpackarray_store_uint64/bitpackarray_get_uint64: passed\n");

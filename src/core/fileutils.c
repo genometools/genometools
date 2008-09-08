@@ -137,7 +137,7 @@ int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
   }
 
   /* free */
-  ma_free(pathvariable);
+  gt_free(pathvariable);
   splitter_delete(splitter);
 
   return had_err;

@@ -91,7 +91,7 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
   GenFile *genfile;
   gt_error_check(err);
   assert(mode);
-  genfile = ma_calloc(1, sizeof (GenFile));
+  genfile = gt_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
   if (path) {
     switch (genfilemode) {
@@ -134,7 +134,7 @@ GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
 {
   GenFile *genfile;
   assert(mode);
-  genfile = ma_calloc(1, sizeof (GenFile));
+  genfile = gt_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
   if (path) {
     switch (genfilemode) {
@@ -170,7 +170,7 @@ GenFile* genfile_new(FILE *fp)
 {
   GenFile *genfile;
   assert(fp);
-  genfile = ma_calloc(1, sizeof (GenFile));
+  genfile = gt_calloc(1, sizeof (GenFile));
   genfile->mode = GFM_UNCOMPRESSED;
   genfile->fileptr.file = fp;
   return genfile;
@@ -369,9 +369,9 @@ void genfile_xrewind(GenFile *genfile)
 void genfile_delete(GenFile *genfile)
 {
   if (!genfile) return;
-  ma_free(genfile->orig_path);
-  ma_free(genfile->orig_mode);
-  ma_free(genfile);
+  gt_free(genfile->orig_path);
+  gt_free(genfile->orig_mode);
+  gt_free(genfile);
 }
 
 void genfile_close(GenFile *genfile)

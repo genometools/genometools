@@ -375,7 +375,7 @@ Keytype rbt_search (const Keytype key,
     p_r = r;
   }
 
-  newnode = (RBTnode *) ma_malloc (sizeof (RBTnode));
+  newnode = (RBTnode *) gt_malloc (sizeof (RBTnode));
   *nextp = newnode;                    /* link new node to old */
   newnode->key = key;                  /* initialize new node */
   newnode->red = true;
@@ -436,7 +436,7 @@ Keytype rbt_find (const Keytype key,
         {\
           allocsize = sizeof (RBTnode **) * \
                       (stacksize + STACKSPACEINCREMENT);\
-          nodestack = ma_realloc((stacksize == STATICSTACKSPACE) ? NULL :\
+          nodestack = gt_realloc((stacksize == STATICSTACKSPACE) ? NULL :\
                                                                 nodestack,\
                                  allocsize);\
           if (stacksize == STATICSTACKSPACE)\
@@ -450,7 +450,7 @@ Keytype rbt_find (const Keytype key,
 #define DELETENODESTACKSPACE\
         if (stacksize > STATICSTACKSPACE)\
         {\
-          ma_free(nodestack);\
+          gt_free(nodestack);\
         }
 
 /**
@@ -754,7 +754,7 @@ int rbt_delete (const Keytype key,
       r->red = false;
     }
   }
-  ma_free (unchained);
+  gt_free (unchained);
   DELETENODESTACKSPACE;
   return 0;
 }
@@ -1174,7 +1174,7 @@ static void redblacktreedestroyrecurse (bool dofreekey,
   {
     if (freekey == NULL)
     {
-      ma_free ((void *) root->key);
+      gt_free ((void *) root->key);
     }
     else
     {
@@ -1184,7 +1184,7 @@ static void redblacktreedestroyrecurse (bool dofreekey,
   /*
      Free the node itself.
    */
-  ma_free (root);
+  gt_free (root);
 }
 
 void rbt_destroy (bool dofreekey,

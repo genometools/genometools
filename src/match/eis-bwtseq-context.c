@@ -97,7 +97,7 @@ extern BWTSeqContextRetrieverFactory *
 newBWTSeqContextRetrieverFactory(Seqpos seqLen, short mapIntervalLog2)
 {
   BWTSeqContextRetrieverFactory *newFactory;
-  newFactory = ma_malloc(sizeof (*newFactory));
+  newFactory = gt_malloc(sizeof (*newFactory));
   initBWTSeqContextRetrieverFactory(newFactory, seqLen, mapIntervalLog2);
   return newFactory;
 }
@@ -113,7 +113,7 @@ extern void
 deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 {
   destructBWTSeqContextRetrieverFactory(factory);
-  ma_free(factory);
+  gt_free(factory);
 }
 
 static inline void
@@ -198,7 +198,7 @@ BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
   BWTSeqContextRetriever *newBWTSeqCR;
   assert(factory && projectName);
   bitsPerSeqpos = requiredSeqposBits(factory->seqLen - 1);
-  newBWTSeqCR = ma_malloc(sizeof (*newBWTSeqCR));
+  newBWTSeqCR = gt_malloc(sizeof (*newBWTSeqCR));
   newBWTSeqCR->mapIntervalLog2 = mapIntervalLog2 = factory->mapIntervalLog2;
   newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
   newBWTSeqCR->bwtSeq = bwtSeq;
@@ -207,7 +207,7 @@ BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
   if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, factory->seqLen,
                        projectName, true, newBWTSeqCR))
   {
-    ma_free(newBWTSeqCR);
+    gt_free(newBWTSeqCR);
     return NULL;
   }
   readBS2Map(factory, newBWTSeqCR);
@@ -331,7 +331,7 @@ BWTSeqCRLoad(const BWTSeq *bwtSeq, const GT_Str *projectName,
   assert(bwtSeq && projectName);
   seqLen = BWTSeqLength(bwtSeq);
   bitsPerSeqpos = requiredSeqposBits(seqLen - 1);
-  newBWTSeqCR = ma_malloc(sizeof (*newBWTSeqCR));
+  newBWTSeqCR = gt_malloc(sizeof (*newBWTSeqCR));
   newBWTSeqCR->bitsPerSeqpos = bitsPerSeqpos;
   newBWTSeqCR->bwtSeq = bwtSeq;
   if (mapIntervalLog2 != CTX_MAP_ILOG_AUTOSIZE)
@@ -339,7 +339,7 @@ BWTSeqCRLoad(const BWTSeq *bwtSeq, const GT_Str *projectName,
     if (!BWTSeqCRMapOpen(mapIntervalLog2, bitsPerSeqpos, seqLen,
                          projectName, false, newBWTSeqCR))
     {
-      ma_free(newBWTSeqCR);
+      gt_free(newBWTSeqCR);
       return NULL;
     }
   }
@@ -353,7 +353,7 @@ BWTSeqCRLoad(const BWTSeq *bwtSeq, const GT_Str *projectName,
       ++mapIntervalLog2;
     if (!newBWTSeqCR->revMap)
     {
-      ma_free(newBWTSeqCR);
+      gt_free(newBWTSeqCR);
       return NULL;
     }
   }
@@ -368,7 +368,7 @@ deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 {
   assert(bwtSeqCR);
   fa_xmunmap(bwtSeqCR->revMapMMap);
-  ma_free(bwtSeqCR);
+  gt_free(bwtSeqCR);
 }
 
 extern void

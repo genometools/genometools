@@ -78,8 +78,8 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
   UnionFind *uf;
   assert(ga && sorted_overlaps);
   /* init */
-  inedges = ma_calloc(sizeof *inedges, ga->num_of_fragments);
-  outedges = ma_calloc(sizeof *inedges, ga->num_of_fragments);
+  inedges = gt_calloc(sizeof *inedges, ga->num_of_fragments);
+  outedges = gt_calloc(sizeof *inedges, ga->num_of_fragments);
   uf = union_find_new(ga->num_of_fragments);
   current_edge = fragment_overlaps_size(sorted_overlaps);
   /* process given edges */
@@ -105,8 +105,8 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
   assert(ga->first_fragment != UNDEF_ULONG);
   assert(selected + 1 == ga->num_of_fragments);
   union_find_delete(uf);
-  ma_free(outedges);
-  ma_free(inedges);
+  gt_free(outedges);
+  gt_free(inedges);
 }
 
 GreedyAssembly* greedy_assembly_new(Bioseq *fragments,
@@ -115,11 +115,11 @@ GreedyAssembly* greedy_assembly_new(Bioseq *fragments,
   GreedyAssembly *ga;
   assert(fragments && sorted_overlaps);
   assert(fragment_overlaps_are_sorted(sorted_overlaps));
-  ga = ma_malloc(sizeof *ga);
+  ga = gt_malloc(sizeof *ga);
   ga->first_fragment = UNDEF_ULONG;
   ga->num_of_fragments = bioseq_number_of_sequences(fragments);
-  ga->next_fragment = ma_calloc(ga->num_of_fragments, sizeof (unsigned long));
-  ga->overlap = ma_calloc(ga->num_of_fragments, sizeof (unsigned long));
+  ga->next_fragment = gt_calloc(ga->num_of_fragments, sizeof (unsigned long));
+  ga->overlap = gt_calloc(ga->num_of_fragments, sizeof (unsigned long));
   assemble(ga, sorted_overlaps);
   return ga;
 }
@@ -127,9 +127,9 @@ GreedyAssembly* greedy_assembly_new(Bioseq *fragments,
 void greedy_assembly_delete(GreedyAssembly *ga)
 {
   if (!ga) return;
-  ma_free(ga->overlap);
-  ma_free(ga->next_fragment);
-  ma_free(ga);
+  gt_free(ga->overlap);
+  gt_free(ga->next_fragment);
+  gt_free(ga);
 }
 
 typedef void (*ProcFragment)(unsigned long fragnum, unsigned long overlap,

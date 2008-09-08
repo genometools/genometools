@@ -160,7 +160,7 @@ static void processastretches(const DiscDistri *distastretch,
   astretchinfo.maxvalue = 0;
   astretchinfo.minkey = 10UL;
   disc_distri_foreach(distastretch,showastretches,&astretchinfo);
-  astretchinfo.mmercount = ma_malloc(sizeof(*astretchinfo.mmercount) *
+  astretchinfo.mmercount = gt_malloc(sizeof(*astretchinfo.mmercount) *
                                     (astretchinfo.maxvalue+1));
   memset(astretchinfo.mmercount,0,sizeof (*astretchinfo.mmercount) *
                                   (astretchinfo.maxvalue+1));
@@ -172,7 +172,7 @@ static void processastretches(const DiscDistri *distastretch,
     /*@end@*/
   }
   assert(astretchinfo.sumA == countA);
-  ma_free(astretchinfo.mmercount);
+  gt_free(astretchinfo.mmercount);
 }
 
 int gt_seqiterator(int argc, const char **argv, GT_Error *err)
@@ -250,7 +250,7 @@ int gt_seqiterator(int argc, const char **argv, GT_Error *err)
     {
       countA += accumulateastretch(distastretch,sequence,len);
     }
-    ma_free(desc);
+    gt_free(desc);
     if (had_err != 1)
     {
       break;

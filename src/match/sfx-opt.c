@@ -276,7 +276,7 @@ static OPrval parse_options(int *parsed_args,
 
             basenameptr = getbasename(gt_strarray_get(so->filenametab,0));
             gt_str_set(so->str_indexname,basenameptr);
-            ma_free(basenameptr);
+            gt_free(basenameptr);
           }
         } else
         {
@@ -284,7 +284,7 @@ static OPrval parse_options(int *parsed_args,
 
           basenameptr = getbasename(gt_str_get(so->str_inputindex));
           gt_str_set(so->str_indexname,basenameptr);
-          ma_free(basenameptr);
+          gt_free(basenameptr);
         }
       }
     }

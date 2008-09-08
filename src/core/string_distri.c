@@ -29,13 +29,13 @@ struct StringDistri {
 
 DECLARE_HASHMAP(char *, cstr, unsigned long, ul, static, inline)
 DEFINE_HASHMAP(char *, cstr, unsigned long, ul, ht_cstr_elem_hash,
-               ht_cstr_elem_cmp, ma_free, NULL_DESTRUCTOR, static,
+               ht_cstr_elem_cmp, gt_free, NULL_DESTRUCTOR, static,
                inline)
 
 StringDistri* string_distri_new(void)
 {
   StringDistri *sd;
-  sd = ma_malloc(sizeof *sd);
+  sd = gt_malloc(sizeof *sd);
   sd->hashdist = cstr_ul_hashmap_new();
   sd->num_of_occurrences = 0;
   return sd;
@@ -114,5 +114,5 @@ void string_distri_delete(StringDistri *sd)
 {
   if (!sd) return;
   hashtable_delete(sd->hashdist);
-  ma_free(sd);
+  gt_free(sd);
 }

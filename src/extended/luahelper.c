@@ -88,7 +88,7 @@ void lua_export_metatable(lua_State *L, const char *metatable_desc)
   assert(dot);
   *dot = '_';
   lua_setglobal(L, mt);
-  ma_free(mt);
+  gt_free(mt);
 }
 
 void lua_push_strarray_as_table(lua_State *L, GT_StrArray *sa)

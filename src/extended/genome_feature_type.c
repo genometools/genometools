@@ -32,7 +32,7 @@ GT_GenomeFeatureType* gt_genome_feature_type_construct(GT_FeatureTypeFactory
 {
   GT_GenomeFeatureType *gft;
   assert(feature_type_factory && type);
-  gft = ma_calloc(1, sizeof *gft);
+  gft = gt_calloc(1, sizeof *gft);
   gft->feature_type_factory = feature_type_factory;
   gft->type = cstr_dup(type);
   return gft;
@@ -48,8 +48,8 @@ GT_GenomeFeatureType* gt_genome_feature_type_create_gft(GT_GenomeFeatureType *gf
 void gt_genome_feature_type_delete(GT_GenomeFeatureType *gft)
 {
   if (!gft) return;
-  ma_free(gft->type);
-  ma_free(gft);
+  gt_free(gft->type);
+  gt_free(gft);
 }
 
 bool gt_genome_feature_type_is(GT_GenomeFeatureType *gft, const char *type)

@@ -29,7 +29,7 @@ struct TranscriptExons {
 
 TranscriptExons* transcript_exons_new(void)
 {
-  TranscriptExons *te = ma_malloc(sizeof (TranscriptExons));
+  TranscriptExons *te = gt_malloc(sizeof (TranscriptExons));
   te->exon_array_all = gt_array_new(sizeof (GT_Range));
   te->exon_array_single = gt_array_new(sizeof (GT_Range));
   te->exon_array_initial = gt_array_new(sizeof (GT_Range));
@@ -126,5 +126,5 @@ void transcript_exons_delete(TranscriptExons *te)
   gt_array_delete(te->exon_array_initial);
   gt_array_delete(te->exon_array_internal);
   gt_array_delete(te->exon_array_terminal);
-  ma_free(te);
+  gt_free(te);
 }

@@ -28,7 +28,7 @@ struct Chain {
 Chain* chain_new(void)
 {
   Chain *chain;
-  chain = ma_calloc(1, sizeof *chain);
+  chain = gt_calloc(1, sizeof *chain);
   chain->fragments = gt_array_new(sizeof (unsigned long));
   return chain;
 }
@@ -84,5 +84,5 @@ void chain_delete(Chain *chain)
 {
   if (!chain) return;
   gt_array_delete(chain->fragments);
-  ma_free(chain);
+  gt_free(chain);
 }

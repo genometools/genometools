@@ -49,7 +49,7 @@ typedef struct {
 
 static void* gt_gff3_arguments_new(void)
 {
-  GFF3Arguments *arguments = ma_calloc(1, sizeof *arguments);
+  GFF3Arguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->offsetfile = gt_str_new();
   arguments->typecheck = gt_str_new();
   arguments->ofi = outputfileinfo_new();
@@ -64,7 +64,7 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->typecheck);
   gt_str_delete(arguments->offsetfile);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)

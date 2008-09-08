@@ -99,7 +99,7 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   regioncov_visitor->max_feature_dist = max_feature_dist;
   regioncov_visitor->region2rangelist = hashmap_new(HASH_STRING,
-                                                    ma_free_func,
+                                                    gt_free_func,
                                                     (GT_FreeFunc) gt_array_delete);
   return gv;
 }

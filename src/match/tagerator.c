@@ -517,7 +517,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
       showmatchinfo.alphasize = (unsigned int) (mapsize-1);
       showmatchinfo.tagptr = &twl.transformedtag[0];
       showmatchinfo.alpha = suffixarray.alpha;
-      showmatchinfo.eqsvector = ma_malloc(sizeof(*showmatchinfo.eqsvector) *
+      showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
     }
@@ -577,7 +577,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
       {
         if (retval < 0)
         {
-          ma_free(desc);
+          gt_free(desc);
         }
         break;
       }
@@ -590,7 +590,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
                          err) != 0)
       {
         haserr = true;
-        ma_free(desc);
+        gt_free(desc);
         break;
       }
       twl.rcdir = false;
@@ -609,7 +609,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
                    (int) twl.taglen,(int) twl.taglen,currenttag,twl.taglen,
                    tageratoroptions->maxdistance);
         haserr = true;
-        ma_free(desc);
+        gt_free(desc);
         break;
       }
       assert(tageratoroptions->maxdistance < 0 ||
@@ -639,7 +639,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
           }
         }
       }
-      ma_free(desc);
+      gt_free(desc);
     }
   }
   FREEARRAY(&storeonline,Simplematch);
@@ -654,7 +654,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
   }
   seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);
-  ma_free(showmatchinfo.eqsvector);
+  gt_free(showmatchinfo.eqsvector);
   if (packedindex != NULL)
   {
     deletevoidBWTSeq(packedindex);

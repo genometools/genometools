@@ -406,13 +406,13 @@ static void globalchaining_generic(bool maxscore_chains,
   Chaininfo *chaininfo;
   Chain *chain;
   chain = chain_new();
-  chaininfo = ma_malloc(sizeof (Chaininfo) * num_of_fragments);
+  chaininfo = gt_malloc(sizeof (Chaininfo) * num_of_fragments);
   if (log_enabled())
     log_fragments(fragments, num_of_fragments);
   if (num_of_fragments > 1) {
     /* compute chains */
     if (!maxscore_chains) {
-      overlapinfo = ma_malloc(sizeof (Overlapinfo) * num_of_fragments);
+      overlapinfo = gt_malloc(sizeof (Overlapinfo) * num_of_fragments);
       initoverlapinfo(overlapinfo, fragments, num_of_fragments);
     }
     bruteforcechainingscores(chaininfo, max_gap_width, fragments,
@@ -425,7 +425,7 @@ static void globalchaining_generic(bool maxscore_chains,
       findmaximalscores_withoverlaps(chain, chaininfo, fragments,
                                      num_of_fragments, seqlen1, mincoverage,
                                      chainprocessor, cpinfo, overlapinfo);
-      ma_free(overlapinfo);
+      gt_free(overlapinfo);
     }
   }
   else {
@@ -435,7 +435,7 @@ static void globalchaining_generic(bool maxscore_chains,
       chainprocessor(chain, fragments, cpinfo);
     }
   }
-  ma_free(chaininfo);
+  gt_free(chaininfo);
   chain_delete(chain);
 }
 

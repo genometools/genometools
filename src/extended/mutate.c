@@ -36,7 +36,7 @@ static char* mutate_description(const char *description, unsigned int rate)
                             + 3  /* for the rate */
                             + 1  /* terminal ']' */
                             + 1; /* terminal '\n' */
-  mutated_description = ma_malloc(sizeof (char) * mutated_description_len);
+  mutated_description = gt_malloc(sizeof (char) * mutated_description_len);
   rval = snprintf(mutated_description, mutated_description_len, "%s%s%u]",
                   description, MUTATED_DESC_PRIMER, rate);
   assert(rval < mutated_description_len);
@@ -64,7 +64,7 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
   assert(rate <= 100);
   mutate_prob = (double) rate / 100.0;
   allocated = len * 2; /* XXX: possibly reduce this memory consumption */
-  mutated_seq = ma_malloc(sizeof (char) * allocated);
+  mutated_seq = gt_malloc(sizeof (char) * allocated);
   for (i = 0, j = 0; i < len; i++) {
     if (isupper(seq[i]))
       was_upper = true;

@@ -49,7 +49,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
   nj->numofnodes = 2 * num_of_taxa - 2;
   nj->finalnodeA = UNDEF_ULONG;
   nj->finalnodeB = UNDEF_ULONG;
-  nj->nodes      = ma_malloc(sizeof (NJnode) * nj->numofnodes);
+  nj->nodes      = gt_malloc(sizeof (NJnode) * nj->numofnodes);
 
   for (i = 0; i < nj->numofnodes; i++) {
     nj->nodes[i].leftdaughter  = UNDEF_ULONG;
@@ -58,7 +58,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
     nj->nodes[i].rightdist     = UNDEF_DOUBLE;
 
     if (i > 0) {
-      nj->nodes[i].distances = ma_malloc(sizeof (double) * i);
+      nj->nodes[i].distances = gt_malloc(sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data);
@@ -118,7 +118,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
   activenodes = nj->num_of_taxa;
 
   /* init the r table */
-  rtab = ma_malloc(sizeof (double) * nj->numofnodes);
+  rtab = gt_malloc(sizeof (double) * nj->numofnodes);
 
   /* the neighbor joining takes num_of_taxa - 2 steps */
   for (step = 0; step < nj->num_of_taxa - 2; step++) {
@@ -179,7 +179,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
   nj->finaldist  = nj->nodes[nj->finalnodeB].distances[nj->finalnodeA];
 
   bittab_delete(nodetab);
-  ma_free(rtab);
+  gt_free(rtab);
 }
 
 NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
@@ -187,7 +187,7 @@ NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
 {
   NeighborJoining *nj;
   assert(num_of_taxa && distfunc);
-  nj = ma_malloc(sizeof (NeighborJoining));
+  nj = gt_malloc(sizeof (NeighborJoining));
   neighborjoining_init(nj, num_of_taxa, data, distfunc);
   neighborjoining_compute(nj);
   return nj;
@@ -225,7 +225,7 @@ void neighborjoining_delete(NeighborJoining *nj)
   unsigned long i;
   if (!nj) return;
   for (i = 1; i < nj->numofnodes; i++)
-    ma_free(nj->nodes[i].distances);
-  ma_free(nj->nodes);
-  ma_free(nj);
+    gt_free(nj->nodes[i].distances);
+  gt_free(nj->nodes);
+  gt_free(nj);
 }

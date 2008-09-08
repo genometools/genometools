@@ -32,7 +32,7 @@ struct OutputFileInfo {
 OutputFileInfo* outputfileinfo_new(void)
 {
   OutputFileInfo *ofi;
-  ofi = ma_malloc(sizeof (OutputFileInfo));
+  ofi = gt_malloc(sizeof (OutputFileInfo));
   ofi->output_filename = gt_str_new();
   return ofi;
 }
@@ -114,5 +114,5 @@ void outputfileinfo_delete(OutputFileInfo *ofi)
 {
   if (!ofi) return;
   gt_str_delete(ofi->output_filename);
-  ma_free(ofi);
+  gt_free(ofi);
 }

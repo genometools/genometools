@@ -34,20 +34,20 @@ typedef struct {
 
 Toolinfo* toolinfo_new(void)
 {
-  return ma_calloc(1, sizeof (Toolinfo));
+  return gt_calloc(1, sizeof (Toolinfo));
 }
 
 void toolinfo_delete(Toolinfo *toolinfo)
 {
   if (!toolinfo) return;
   tool_delete(toolinfo->tool);
-  ma_free(toolinfo);
+  gt_free(toolinfo);
 }
 
 Toolbox* toolbox_new(void)
 {
   Toolbox *tb;
-  tb = ma_malloc(sizeof (Toolbox));
+  tb = gt_malloc(sizeof (Toolbox));
   tb->tools = hashmap_new(HASH_STRING, NULL, (GT_FreeFunc) toolinfo_delete);
   return tb;
 }
@@ -125,5 +125,5 @@ void toolbox_delete(Toolbox *tb)
 {
   if (!tb) return;
   hashmap_delete(tb->tools);
-  ma_free(tb);
+  gt_free(tb);
 }

@@ -72,13 +72,13 @@ GT_Style* gt_style_new(bool verbose, GT_Error *err)
 {
   GT_Style *sty;
   gt_error_check(err);
-  sty = ma_calloc(1, sizeof (GT_Style));
+  sty = gt_calloc(1, sizeof (GT_Style));
   sty->filename = NULL;
   sty->verbose = verbose;
   sty->L = luaL_newstate();
   if (!sty->L) {
     gt_error_set(err, "out of memory (cannot create new Lua state)");
-    ma_free(sty);
+    gt_free(sty);
     return NULL;
   }
   else
@@ -89,7 +89,7 @@ GT_Style* gt_style_new(bool verbose, GT_Error *err)
 GT_Style* gt_style_new_with_state(lua_State *L)
 {
   GT_Style *sty;
-  sty = ma_calloc(1, sizeof (GT_Style));
+  sty = gt_calloc(1, sizeof (GT_Style));
   sty->L = L;
   return sty;
 }
@@ -571,8 +571,8 @@ int gt_style_unit_test(GT_Error *err)
 void gt_style_delete_without_state(GT_Style *sty)
 {
   if (!sty) return;
-  ma_free(sty->filename);
-  ma_free(sty);
+  gt_free(sty->filename);
+  gt_free(sty);
 }
 
 void gt_style_delete(GT_Style *sty)

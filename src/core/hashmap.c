@@ -46,7 +46,7 @@ hm_elem_free(void *elem, void *table_data)
 extern Hashmap *
 hashmap_new(HashType keyhashtype, GT_FreeFunc keyfree, GT_FreeFunc valuefree)
 {
-  struct hm_freefuncs *ff = ma_malloc(sizeof (*ff));
+  struct hm_freefuncs *ff = gt_malloc(sizeof (*ff));
   ff->keyfree = keyfree;
   ff->valuefree = valuefree;
   switch (keyhashtype)
@@ -55,7 +55,7 @@ hashmap_new(HashType keyhashtype, GT_FreeFunc keyfree, GT_FreeFunc valuefree)
     {
       HashElemInfo hm_directkey_eleminfo = {
         ht_ptr_elem_hash, { .free_elem_with_data = hm_elem_free },
-        sizeof (struct map_entry), ht_ptr_elem_cmp, ff, ma_free_func
+        sizeof (struct map_entry), ht_ptr_elem_cmp, ff, gt_free_func
       };
       return hashtable_new(hm_directkey_eleminfo);
     }
@@ -63,7 +63,7 @@ hashmap_new(HashType keyhashtype, GT_FreeFunc keyfree, GT_FreeFunc valuefree)
     {
       HashElemInfo hm_strkey_eleminfo = {
         ht_cstr_elem_hash, { .free_elem_with_data = hm_elem_free },
-        sizeof (struct map_entry), ht_cstr_elem_cmp, ff, ma_free_func
+        sizeof (struct map_entry), ht_cstr_elem_cmp, ff, gt_free_func
       };
       return hashtable_new(hm_strkey_eleminfo);
     }
@@ -201,7 +201,7 @@ hashmap_test(HashType hash_type)
      */
     if (hash_type == HASH_STRING)
     {
-      hm = hashmap_new(hash_type, ma_free_func, ma_free_func);
+      hm = hashmap_new(hash_type, gt_free_func, gt_free_func);
 
       hashmap_add(hm, cstr_dup(s1), cstr_dup(s2));
       hashmap_add(hm, cstr_dup(s2), cstr_dup(s1));

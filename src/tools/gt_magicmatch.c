@@ -30,7 +30,7 @@ typedef struct {
 
 static void* gt_magicmatch_arguments_new(void)
 {
-  MagicMatchArguments *arguments = ma_calloc(1, sizeof *arguments);
+  MagicMatchArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqfiles = gt_strarray_new();
   return arguments;
 }
@@ -40,7 +40,7 @@ static void gt_magicmatch_arguments_delete(void *tool_arguments)
   MagicMatchArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_strarray_delete(arguments->seqfiles);
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)

@@ -181,7 +181,7 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
   struct seqStats *stats = NULL;
   unsigned i, mapSize;
   Seqpos regularSymsSum = 0;
-  stats = ma_malloc(offsetAlign(sizeof (*stats), sizeof (Seqpos))
+  stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (Seqpos))
                     + (UINT8_MAX + 1) * sizeof (Seqpos));
   stats->sourceAlphaType = sourceUInt8;
   stats->symbolDistributionTable =
@@ -200,14 +200,14 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
 static void
 deleteSeqStats(struct seqStats *stats)
 {
-  ma_free(stats);
+  gt_free(stats);
 }
 
 #define newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
     if (sfxi->stats)                             \
       deleteSeqStats(sfxi->stats);               \
-    if (sfxi) ma_free(sfxi);                    \
+    if (sfxi) gt_free(sfxi);                    \
     sfxi = NULL;                                 \
   } while (0)
 
@@ -231,7 +231,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
   sfxInterface *sfxi = NULL;
   gt_error_check(err);
 
-  sfxi = ma_calloc(1, sizeof (*sfxi));
+  sfxi = gt_calloc(1, sizeof (*sfxi));
   {
     RandomSeqAccessor origSeqAccess = { SfxIGetOrigSeq, sfxi };
     initSASeqSrc(&sfxi->baseClass, length, SfxIBaseRequest2XltorFunc, NULL,
@@ -288,7 +288,7 @@ deleteSfxInterface(sfxInterface *sfxi)
   destructSASeqSrc(&sfxi->baseClass);
   freeSfxiterator(&sfxi->sfi);
   deleteSeqStats(sfxi->stats);
-  ma_free(sfxi);
+  gt_free(sfxi);
 }
 
 extern const Alphabet *

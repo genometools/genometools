@@ -25,7 +25,7 @@ GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc)
 {
   GenomeVisitor *gv;
   assert(gvc && gvc->size);
-  gv = ma_calloc(1, gvc->size);
+  gv = gt_calloc(1, gvc->size);
   gv->c_class = gvc;
   return gv;
 }
@@ -80,5 +80,5 @@ void genome_visitor_delete(GenomeVisitor *gv)
   assert(gv->c_class);
   if (gv->c_class->free)
     gv->c_class->free(gv);
-  ma_free(gv);
+  gt_free(gv);
 }

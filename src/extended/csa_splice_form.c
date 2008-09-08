@@ -31,7 +31,7 @@ CSASpliceForm* csa_splice_form_new(void *spliced_alignment,
 {
   CSASpliceForm *splice_form;
   assert(spliced_alignment && get_strand);
-  splice_form = ma_malloc(sizeof (*splice_form));
+  splice_form = gt_malloc(sizeof (*splice_form));
   splice_form->spliced_alignments = gt_array_new(sizeof (void*));
   gt_array_add(splice_form->spliced_alignments, spliced_alignment);
   splice_form->get_genomic_range = get_genomic_range;
@@ -43,7 +43,7 @@ void csa_splice_form_delete(CSASpliceForm *splice_form)
 {
   if (!splice_form) return;
   gt_array_delete(splice_form->spliced_alignments);
-  ma_free(splice_form);
+  gt_free(splice_form);
 }
 
 #ifndef NDEBUG

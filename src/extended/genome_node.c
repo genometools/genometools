@@ -149,7 +149,7 @@ GT_GenomeNode* gt_genome_node_create(const GT_GenomeNodeClass *gnc)
 {
   GT_GenomeNode *gn;
   assert(gnc && gnc->size);
-  gn                  = ma_malloc(gnc->size);
+  gn                  = gt_malloc(gnc->size);
   gn->c_class         = gnc;
   gn->filename        = NULL; /* means the node is generated */
   gn->line_number     = 0;
@@ -680,7 +680,7 @@ void gt_genome_node_delete(GT_GenomeNode *gn)
   if (gn->c_class->free) gn->c_class->free(gn);
   gt_str_delete(gn->filename);
   gt_dlist_delete(gn->children);
-  ma_free(gn);
+  gt_free(gn);
 }
 
 static int free_genome_node(GT_GenomeNode *gn, GT_UNUSED void *data,

@@ -30,14 +30,14 @@ typedef struct {
 
 static void* gt_assemblegreedy_arguments_new(void)
 {
-  return ma_malloc(sizeof (AssemblegreedyArguments));
+  return gt_malloc(sizeof (AssemblegreedyArguments));
 }
 
 static void gt_assemblegreedy_arguments_delete(void *tool_arguments)
 {
   AssemblegreedyArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)

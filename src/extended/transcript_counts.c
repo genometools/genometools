@@ -28,7 +28,7 @@ struct TranscriptCounts {
 
 TranscriptCounts* transcript_counts_new(void)
 {
-  TranscriptCounts *tc = ma_calloc(1, sizeof (TranscriptCounts));
+  TranscriptCounts *tc = gt_calloc(1, sizeof (TranscriptCounts));
   return tc;
 }
 
@@ -100,5 +100,5 @@ void transcript_counts_delete(TranscriptCounts *tc)
   gt_array_delete(tc->exon_array_initial);
   gt_array_delete(tc->exon_array_internal);
   gt_array_delete(tc->exon_array_terminal);
-  ma_free(tc);
+  gt_free(tc);
 }

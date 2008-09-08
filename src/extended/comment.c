@@ -37,7 +37,7 @@ static void gt_comment_free(GT_GenomeNode *gn)
 {
   GT_Comment *c = gt_comment_cast(gn);
   assert(c && c->comment);
-  ma_free(c->comment);
+  gt_free(c->comment);
   gt_str_delete(c->gt_comment_str);
 }
 

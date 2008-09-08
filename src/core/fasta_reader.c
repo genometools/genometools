@@ -23,7 +23,7 @@ FastaReader* fasta_reader_create(const FastaReaderClass *frc)
 {
   FastaReader *fr;
   assert(frc && frc->size);
-  fr = ma_calloc(1, frc->size);
+  fr = gt_calloc(1, frc->size);
   fr->c_class = frc;
   return fr;
 }
@@ -33,7 +33,7 @@ void fasta_reader_delete(FastaReader *fr)
   if (!fr) return;
   assert(fr->c_class && fr->c_class->free);
   fr->c_class->free(fr);
-  ma_free(fr);
+  gt_free(fr);
 }
 
 int fasta_reader_run(FastaReader *fr,

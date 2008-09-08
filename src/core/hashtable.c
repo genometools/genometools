@@ -102,7 +102,7 @@ ht_reinit(Hashtable *ht, HashElemInfo table_info, unsigned short size_log,
   ht->table_info = table_info;
   ht->table_size_log = size_log;
   ht->table_mask = (table_size = 1 << size_log) - 1;
-  ht->table = ma_realloc(ht->table, table_info.elem_size * table_size);
+  ht->table = gt_realloc(ht->table, table_info.elem_size * table_size);
   ht->high_fill_mul = high_mul;
   ht->high_fill
     = (unsigned long long)ht->high_fill_mul * table_size / FILL_DIVISOR;
@@ -111,7 +111,7 @@ ht_reinit(Hashtable *ht, HashElemInfo table_info, unsigned short size_log,
     = (unsigned long long)ht->low_fill_mul * table_size / FILL_DIVISOR;
   {
     uint32_t i;
-    ht->links.table = ma_realloc(ht->links.table,
+    ht->links.table = gt_realloc(ht->links.table,
                                  sizeof (*(ht->links.table)) * table_size);
     for (i = 0; i < table_size; ++i)
       ht->links.table[i] = free_mark;
@@ -133,15 +133,15 @@ ht_init(Hashtable *ht, HashElemInfo table_info, unsigned short size_log,
 static void
 ht_destruct(Hashtable *ht)
 {
-  ma_free(ht->table);
-  ma_free(ht->links.table);
+  gt_free(ht->table);
+  gt_free(ht->links.table);
 }
 
 extern Hashtable *
 hashtable_new_with_start_size(HashElemInfo table_info, unsigned short size_log)
 {
   Hashtable *ht;
-  ht = ma_malloc(sizeof (*ht));
+  ht = gt_malloc(sizeof (*ht));
   ht_init(ht, table_info, size_log, DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
   return ht;
 }
@@ -557,7 +557,7 @@ hashtable_delete(Hashtable *ht)
     ht_destruct(ht);
     if (ht->table_info.table_data_free)
       ht->table_info.table_data_free(ht->table_info.table_data);
-    ma_free(ht);
+    gt_free(ht);
   }
 }
 
@@ -704,8 +704,8 @@ ht_2ptr_elem_free(void *elem)
 {
   struct ht_elem_2cstr *p = elem;
   assert(elem);
-  ma_free(p->key);
-  ma_free(p->value);
+  gt_free(p->key);
+  gt_free(p->value);
 }
 
 #define my_ensure(err_state, predicate)         \

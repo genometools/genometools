@@ -24,7 +24,7 @@ Graphics* graphics_create(const GraphicsClass *gc)
 {
   Graphics *g;
   assert(gc && gc->size);
-  g = ma_calloc(1, gc->size);
+  g = gt_calloc(1, gc->size);
   g->c_class = gc;
   return g;
 }
@@ -35,7 +35,7 @@ void graphics_delete(Graphics *g)
   assert(g->c_class);
   if (g->c_class->free)
     g->c_class->free(g);
-  ma_free(g);
+  gt_free(g);
 }
 
 void* graphics_cast(GT_UNUSED const GraphicsClass *gc,

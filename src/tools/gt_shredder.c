@@ -34,14 +34,14 @@ typedef struct {
 
 static void* gt_shredder_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (ShredderArguments));
+  return gt_calloc(1, sizeof (ShredderArguments));
 }
 
 static void gt_shredder_arguments_delete(void *tool_arguments)
 {
   ShredderArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)

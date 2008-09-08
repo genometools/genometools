@@ -64,11 +64,11 @@ genBitCount(uint32_t v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
-    ma_free(numBitsList);              \
-    ma_free(randSrc);                  \
-    ma_free(randCmp);                  \
-    ma_free(bitStore);                 \
-    ma_free(bitStoreCopy);             \
+    gt_free(numBitsList);              \
+    gt_free(randSrc);                  \
+    gt_free(randCmp);                  \
+    gt_free(bitStore);                 \
+    gt_free(bitStoreCopy);             \
     return retval;                     \
   } while (0)
 
@@ -90,10 +90,10 @@ bitPackStringInt32_unit_test(GT_Error *err)
           (long unsigned)offsetStart, (long unsigned)numRnd);
   {
     BitOffset numBits = sizeof (uint32_t) * CHAR_BIT * numRnd + offsetStart;
-    randSrc = ma_malloc(sizeof (uint32_t)*numRnd);
-    bitStore = ma_malloc(bitElemsAllocSize(numBits) * sizeof (BitElem));
-    bitStoreCopy = ma_calloc(bitElemsAllocSize(numBits), sizeof (BitElem));
-    randCmp = ma_malloc(sizeof (uint32_t)*numRnd);
+    randSrc = gt_malloc(sizeof (uint32_t)*numRnd);
+    bitStore = gt_malloc(bitElemsAllocSize(numBits) * sizeof (BitElem));
+    bitStoreCopy = gt_calloc(bitElemsAllocSize(numBits), sizeof (BitElem));
+    randCmp = gt_malloc(sizeof (uint32_t)*numRnd);
   }
   /* first test unsigned types */
   log_log("bsStoreUInt32/bsGetUInt32: ");
@@ -358,7 +358,7 @@ bitPackStringInt32_unit_test(GT_Error *err)
   log_log("bsStoreNonUniformUInt32Array/bsGetUInt32: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%32 + 1);
     offset = offsetStart;
@@ -420,13 +420,13 @@ bitPackStringInt32_unit_test(GT_Error *err)
       }
     }
     log_log(" passed\n");
-    ma_free(numBitsList);
+    gt_free(numBitsList);
     numBitsList = NULL;
   }
   log_log("bsNonStoreUniformInt32Array/bsGetInt32: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%32 + 1);
     offset = offsetStart;
@@ -492,7 +492,7 @@ bitPackStringInt32_unit_test(GT_Error *err)
       }
     }
     log_log("passed\n");
-    ma_free(numBitsList);
+    gt_free(numBitsList);
     numBitsList = NULL;
   }
 

@@ -30,7 +30,7 @@ typedef struct {
 
 static void* gt_seqfilter_arguments_new(void)
 {
-  SeqFilterArguments *arguments = ma_calloc(1, sizeof *arguments);
+  SeqFilterArguments *arguments = gt_calloc(1, sizeof *arguments);
   return arguments;
 }
 
@@ -38,7 +38,7 @@ static void gt_seqfilter_arguments_delete(void *tool_arguments)
 {
   SeqFilterArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
 static OptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)

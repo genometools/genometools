@@ -32,7 +32,7 @@ struct Shredder {
 Shredder* shredder_new(Bioseq *bioseq, unsigned long minlength,
                                        unsigned long maxlength)
 {
-  Shredder *shredder = ma_calloc(1, sizeof *shredder);
+  Shredder *shredder = gt_calloc(1, sizeof *shredder);
   assert(bioseq && minlength && minlength <= maxlength);
   shredder->bioseq = bioseq;
   shredder->minlength = minlength;
@@ -44,7 +44,7 @@ Shredder* shredder_new(Bioseq *bioseq, unsigned long minlength,
 void shredder_delete(Shredder *shredder)
 {
   if (!shredder) return;
-  ma_free(shredder);
+  gt_free(shredder);
 }
 
 void shredder_set_overlap(Shredder *shredder, unsigned long overlap)

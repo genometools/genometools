@@ -34,9 +34,9 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
   assert(alpha_is_compatible_with_alpha(alpha_a, alpha_b));
   alphasize_to_the_power_of_q = pow(alpha_size(alpha_a), q);
 
-  seq_a_profile = ma_calloc(alphasize_to_the_power_of_q,
+  seq_a_profile = gt_calloc(alphasize_to_the_power_of_q,
                             sizeof (unsigned long));
-  seq_b_profile = ma_calloc(alphasize_to_the_power_of_q,
+  seq_b_profile = gt_calloc(alphasize_to_the_power_of_q,
                             sizeof (unsigned long));
 
   seq_a_qgrams = gt_array_new(sizeof (unsigned long));
@@ -64,8 +64,8 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
 
   gt_array_delete(seq_b_qgrams);
   gt_array_delete(seq_a_qgrams);
-  ma_free(seq_b_profile);
-  ma_free(seq_a_profile);
+  gt_free(seq_b_profile);
+  gt_free(seq_a_profile);
 
   return dist;
 }

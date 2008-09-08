@@ -61,11 +61,11 @@ genBitCount(@uOpType@ v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
-    ma_free(numBitsList);              \
-    ma_free(randSrc);                  \
-    ma_free(randCmp);                  \
-    ma_free(bitStore);                 \
-    ma_free(bitStoreCopy);             \
+    gt_free(numBitsList);              \
+    gt_free(randSrc);                  \
+    gt_free(randCmp);                  \
+    gt_free(bitStore);                 \
+    gt_free(bitStoreCopy);             \
     return retval;                     \
   } while (0)
 
@@ -87,10 +87,10 @@ bitPackString@iTypeTag@_unit_test(GT_Error *err)
           (long unsigned)offsetStart, (long unsigned)numRnd);
   {
     BitOffset numBits = sizeof (@uOpType@) * CHAR_BIT * numRnd + offsetStart;
-    randSrc = ma_malloc(sizeof (@uOpType@)*numRnd);
-    bitStore = ma_malloc(bitElemsAllocSize(numBits) * sizeof (BitElem));
-    bitStoreCopy = ma_calloc(bitElemsAllocSize(numBits), sizeof (BitElem));
-    randCmp = ma_malloc(sizeof (@uOpType@)*numRnd);
+    randSrc = gt_malloc(sizeof (@uOpType@)*numRnd);
+    bitStore = gt_malloc(bitElemsAllocSize(numBits) * sizeof (BitElem));
+    bitStoreCopy = gt_calloc(bitElemsAllocSize(numBits), sizeof (BitElem));
+    randCmp = gt_malloc(sizeof (@uOpType@)*numRnd);
   }
   /* first test unsigned types */
   log_log("bsStore@uTypeTag@/bsGet@uTypeTag@: ");
@@ -355,7 +355,7 @@ bitPackString@iTypeTag@_unit_test(GT_Error *err)
   log_log("bsStoreNonUniform@uTypeTag@Array/bsGet@uTypeTag@: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
     offset = offsetStart;
@@ -417,13 +417,13 @@ bitPackString@iTypeTag@_unit_test(GT_Error *err)
       }
     }
     log_log(" passed\n");
-    ma_free(numBitsList);
+    gt_free(numBitsList);
     numBitsList = NULL;
   }
   log_log("bsNonStoreUniform@iTypeTag@Array/bsGet@iTypeTag@: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = ma_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
     offset = offsetStart;
@@ -489,7 +489,7 @@ bitPackString@iTypeTag@_unit_test(GT_Error *err)
       }
     }
     log_log("passed\n");
-    ma_free(numBitsList);
+    gt_free(numBitsList);
     numBitsList = NULL;
   }
 

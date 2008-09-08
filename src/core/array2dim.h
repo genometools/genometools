@@ -24,8 +24,8 @@
 #define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS)                             \
         {                                                                      \
           unsigned long a2d_i;                                                 \
-          ARRAY2DIM = ma_malloc(sizeof *ARRAY2DIM * (ROWS));                   \
-          (ARRAY2DIM)[0] = ma_malloc(sizeof **ARRAY2DIM * (ROWS) * (COLUMNS)); \
+          ARRAY2DIM = gt_malloc(sizeof *ARRAY2DIM * (ROWS));                   \
+          (ARRAY2DIM)[0] = gt_malloc(sizeof **ARRAY2DIM * (ROWS) * (COLUMNS)); \
           for (a2d_i = 1; a2d_i < (ROWS); a2d_i++)                             \
             (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);             \
         }
@@ -33,8 +33,8 @@
 #define array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS)                            \
         {                                                                     \
           unsigned long a2d_i;                                                \
-          ARRAY2DIM = ma_malloc(sizeof *ARRAY2DIM * (ROWS));                  \
-          (ARRAY2DIM)[0] = ma_calloc((ROWS) * (COLUMNS), sizeof **ARRAY2DIM); \
+          ARRAY2DIM = gt_malloc(sizeof *ARRAY2DIM * (ROWS));                  \
+          (ARRAY2DIM)[0] = gt_calloc((ROWS) * (COLUMNS), sizeof **ARRAY2DIM); \
           for (a2d_i = 1; a2d_i < (ROWS); a2d_i++)                            \
             (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);            \
         }
@@ -42,7 +42,7 @@
 int     array2dim_example(GT_Error*);
 
 #define array2dim_delete(ARRAY2DIM)                                       \
-        ma_free((ARRAY2DIM)[0]);                                          \
-        ma_free(ARRAY2DIM);
+        gt_free((ARRAY2DIM)[0]);                                          \
+        gt_free(ARRAY2DIM);
 
 #endif

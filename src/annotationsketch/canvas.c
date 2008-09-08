@@ -257,7 +257,7 @@ GT_Canvas* gt_canvas_create(const GT_CanvasClass *cc)
 {
   GT_Canvas *c;
   assert(cc && cc->size);
-  c = ma_calloc(1, cc->size);
+  c = gt_calloc(1, cc->size);
   c->c_class = cc;
   return c;
 }
@@ -272,7 +272,7 @@ void gt_canvas_delete(GT_Canvas *c)
     graphics_delete(c->g);
   if (c->bt)
     bittab_delete(c->bt);
-  ma_free(c);
+  gt_free(c);
 }
 
 void* gt_canvas_cast(GT_UNUSED const GT_CanvasClass *cc, GT_Canvas *c)

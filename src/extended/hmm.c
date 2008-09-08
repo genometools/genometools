@@ -55,8 +55,8 @@ HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
   assert(num_of_states && num_of_symbols);
 
   /* alloc */
-  hmm = ma_malloc(sizeof *hmm);
-  hmm->initial_state_prob = ma_malloc(sizeof (double) * num_of_states);
+  hmm = gt_malloc(sizeof *hmm);
+  hmm->initial_state_prob = gt_malloc(sizeof (double) * num_of_states);
   array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states);
   array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols);
 
@@ -605,7 +605,7 @@ int hmm_unit_test(GT_Error *err)
   loaded_hmm = coin_hmm_loaded();
   alpha = coin_hmm_alpha();
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
-  encoded_seq = ma_malloc(sizeof (int) * strlen(coin_tosses[size-1]));
+  encoded_seq = gt_malloc(sizeof (int) * strlen(coin_tosses[size-1]));
 
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(coin_tosses[i]);
@@ -621,7 +621,7 @@ int hmm_unit_test(GT_Error *err)
                                );
   }
 
-  ma_free(encoded_seq);
+  gt_free(encoded_seq);
   alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
@@ -633,7 +633,7 @@ int hmm_unit_test(GT_Error *err)
   loaded_hmm = dice_hmm_loaded();
   alpha = dice_hmm_alpha();
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
-  encoded_seq = ma_malloc(sizeof (int) * strlen(dice_rolls[size-1]));
+  encoded_seq = gt_malloc(sizeof (int) * strlen(dice_rolls[size-1]));
 
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(dice_rolls[i]);
@@ -650,7 +650,7 @@ int hmm_unit_test(GT_Error *err)
                                );
   }
 
-  ma_free(encoded_seq);
+  gt_free(encoded_seq);
   alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
@@ -663,8 +663,8 @@ int hmm_unit_test(GT_Error *err)
 void hmm_delete(HMM *hmm)
 {
   if (!hmm) return;
-  ma_free(hmm->initial_state_prob);
+  gt_free(hmm->initial_state_prob);
   array2dim_delete(hmm->transition_prob);
   array2dim_delete(hmm->emission_prob);
-  ma_free(hmm);
+  gt_free(hmm);
 }

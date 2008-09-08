@@ -29,7 +29,7 @@ struct DynBittab {
 
 DynBittab* dynbittab_new(void)
 {
-  return ma_calloc(1, sizeof (DynBittab));
+  return gt_calloc(1, sizeof (DynBittab));
 }
 
 static unsigned long determine_tabsize(unsigned long num_of_bits)
@@ -46,7 +46,7 @@ void dynbittab_set_bit(DynBittab *b, unsigned long bit)
   /* make sure tab is large enough */
   if (bit >= b->num_of_bits) {
     if ((new_tabsize = determine_tabsize(bit + 1)) > b->tabsize) {
-      b->tabptr = ma_realloc(b->tabptr, new_tabsize * sizeof (unsigned long));
+      b->tabptr = gt_realloc(b->tabptr, new_tabsize * sizeof (unsigned long));
       memset(b->tabptr + b->tabsize, 0,
              (new_tabsize - b->tabsize) * sizeof (unsigned long));
       b->tabsize = new_tabsize;
@@ -136,6 +136,6 @@ int dynbittab_unit_test(GT_Error *err)
 void dynbittab_delete(DynBittab *b)
 {
   if (!b) return;
-  ma_free(b->tabptr);
-  ma_free(b);
+  gt_free(b->tabptr);
+  gt_free(b);
 }

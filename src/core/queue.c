@@ -61,7 +61,7 @@ struct Queue
 
 Queue* queue_new(void)
 {
-  return ma_calloc(1, sizeof (Queue));
+  return gt_calloc(1, sizeof (Queue));
 }
 
 static void queue_wrap(Queue *q, bool free_contents)
@@ -69,10 +69,10 @@ static void queue_wrap(Queue *q, bool free_contents)
   assert(q);
   if (free_contents) {
     while (queue_size(q))
-      ma_free(queue_get(q));
+      gt_free(queue_get(q));
   }
-  ma_free(q->contents);
-  ma_free(q);
+  gt_free(q->contents);
+  gt_free(q);
 }
 
 void queue_delete(Queue *q)
@@ -487,10 +487,10 @@ int queue_unit_test(GT_Error *err)
     q = queue_new();
     ensure(had_err, !queue_size(q));
     if (!had_err)
-      queue_add(q, ma_calloc(1, 16));
+      queue_add(q, gt_calloc(1, 16));
     ensure(had_err, queue_size(q) == 1);
     if (!had_err)
-      queue_add(q, ma_calloc(1, 32));
+      queue_add(q, gt_calloc(1, 32));
     ensure(had_err, queue_size(q) == 2);
     queue_delete_with_contents(q);
   }

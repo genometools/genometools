@@ -39,7 +39,7 @@ Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
   gt_error_check(err);
   assert(mapping_file && global_name);
   /* alloc */
-  m = ma_malloc(sizeof (Mapping));
+  m = gt_malloc(sizeof (Mapping));
   m->mapping_file = gt_str_ref(mapping_file);
   m->global = cstr_dup(global_name);
   m->type = type;
@@ -208,7 +208,7 @@ void mapping_delete(Mapping *m)
 {
   if (!m) return;
   gt_str_delete(m->mapping_file);
-  ma_free(m->global);
+  gt_free(m->global);
   if (m->L) lua_close(m->L);
-  ma_free(m);
+  gt_free(m);
 }

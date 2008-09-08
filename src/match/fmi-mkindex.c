@@ -108,7 +108,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
         basenameptr = getbasename(gt_strarray_get(mkfmcallinfo->indexnametab,
                                                   0));
         gt_str_set(mkfmcallinfo->outfmindex,basenameptr);
-        ma_free(basenameptr);
+        gt_free(basenameptr);
       }
     }
   }

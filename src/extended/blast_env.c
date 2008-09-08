@@ -38,7 +38,7 @@ DECLARE_SAFE_DEREF(GT_Array *,array)
 /* Return a new Pos object. */
 Pos* pos_new(void)
 {
-  Pos *pos = ma_malloc(sizeof *pos);
+  Pos *pos = gt_malloc(sizeof *pos);
   pos->mapping = ul_array_hashmap_new();
   return pos;
 }
@@ -48,7 +48,7 @@ void pos_delete(Pos *pos)
 {
   if (!pos) return;
   hashtable_delete(pos->mapping);
-  ma_free(pos);
+  gt_free(pos);
 }
 
 /* Add <position> to position list for <code>. */
@@ -87,8 +87,8 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
   unsigned long i;
 
   dimension = score_matrix_get_dimension(score_matrix);
-  max_matrix_scores = ma_malloc(sizeof (long) * dimension);
-  max_pos_scores = ma_malloc(sizeof (long) * wlen);
+  max_matrix_scores = gt_malloc(sizeof (long) * dimension);
+  max_pos_scores = gt_malloc(sizeof (long) * wlen);
   /* fill maximal matrix scores */
   for (i = 0; i < dimension; i++) {
     unsigned long j;
@@ -104,7 +104,7 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
   for (i = 0; i < wlen; i++)
     max_pos_scores[i] = max_matrix_scores[(int) w[i]];
   /* free */
-  ma_free(max_matrix_scores);
+  gt_free(max_matrix_scores);
 
   return max_pos_scores;
 }
@@ -182,11 +182,11 @@ static void compute_env(Bittab *V, Pos *pos, const char *w, unsigned long wlen,
   unsigned long i;
   char *current_word;
   /* prepare space for current word */
-  current_word = ma_malloc(sizeof (char) * (q+1));
+  current_word = gt_malloc(sizeof (char) * (q+1));
   current_word[q] = '\0';
   /* prepare data for lookahead */
   max_pos_scores = compute_max_pos_scores(w, wlen, score_matrix);
-  max_cumul_scores = ma_malloc(sizeof (long) * q);
+  max_cumul_scores = gt_malloc(sizeof (long) * q);
   /* add all words to <blast_env> */
   for (i = 0; i < wlen - q + 1; i++) {
     long j;
@@ -199,9 +199,9 @@ static void compute_env(Bittab *V, Pos *pos, const char *w, unsigned long wlen,
                       k, 0, i, score_matrix);
   }
   /* free */
-  ma_free(max_cumul_scores);
-  ma_free(max_pos_scores);
-  ma_free(current_word);
+  gt_free(max_cumul_scores);
+  gt_free(max_pos_scores);
+  gt_free(current_word);
 }
 
 /* the actual class implementation */
@@ -220,7 +220,7 @@ BlastEnv* blast_env_new(const char *w, unsigned long wlen, Alpha *alpha,
   BlastEnv *be;
   assert(w && alpha && q && score_matrix);
   assert(alpha_size(alpha) == score_matrix_get_dimension(score_matrix));
-  be = ma_calloc(1, sizeof *be);
+  be = gt_calloc(1, sizeof *be);
   be->alpha = alpha_ref(alpha);
   be->q = q;
   /* if <w> is long enough fill the Blast environment */
@@ -238,7 +238,7 @@ void blast_env_delete(BlastEnv *be)
   alpha_delete(be->alpha);
   pos_delete(be->pos);
   bittab_delete(be->V);
-  ma_free(be);
+  gt_free(be);
 }
 
 void blast_env_show(const BlastEnv *be)
@@ -250,7 +250,7 @@ void blast_env_show(const BlastEnv *be)
   if (!be->pos)
     return; /* nothing to do */
   assert(be->V && be->alpha);
-  qgram = ma_malloc(sizeof (char) * (be->q+1));
+  qgram = gt_malloc(sizeof (char) * (be->q+1));
   qgram[be->q] = '\0';
   /* iterate over all codes which have a position list */
   for (code  = bittab_get_first_bitnum(be->V);
@@ -266,5 +266,5 @@ void blast_env_show(const BlastEnv *be)
     }
     xputchar('\n');
   }
-  ma_free(qgram);
+  gt_free(qgram);
 }

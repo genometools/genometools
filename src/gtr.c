@@ -70,7 +70,7 @@ GTR* gtr_new(GT_Error *err)
 #ifndef WITHOUT_CAIRO
   GT_Str *style_file = NULL;
 #endif
-  gtr = ma_calloc(1, sizeof (GTR));
+  gtr = gt_calloc(1, sizeof (GTR));
   gtr->debugfp = gt_str_new();
   gtr->testspacepeak = gt_str_new();
   gtr->L = luaL_newstate();
@@ -110,7 +110,7 @@ GTR* gtr_new(GT_Error *err)
   gt_str_delete(style_file);
 #endif
   if (had_err) {
-    ma_free(gtr);
+    gt_free(gtr);
     return NULL;
   }
   return gtr;
@@ -282,10 +282,10 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
   if (gtr->test)
     return run_tests(gtr, err);
   if (gt_str_length(gtr->testspacepeak)) {
-    mem = ma_malloc(1 << 26); /* alloc 64 MB */;
+    mem = gt_malloc(1 << 26); /* alloc 64 MB */;
     map = fa_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
     fa_xmunmap(map);
-    ma_free(mem);
+    gt_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {
     gt_error_set(err, "neither tool nor script specified; option -help lists "
@@ -353,5 +353,5 @@ void gtr_delete(GTR *gtr)
 #ifndef WITHOUT_CAIRO
   gt_style_delete_without_state(gtr->style);
 #endif
-  ma_free(gtr);
+  gt_free(gtr);
 }

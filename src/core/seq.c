@@ -33,7 +33,7 @@ Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha)
 {
   Seq *s;
   assert(seq && seqalpha);
-  s = ma_calloc(1, sizeof (Seq));
+  s = gt_calloc(1, sizeof (Seq));
   s->seq = (char*) seq;
   s->seqlen = seqlen;
   s->seqalpha = alpha_ref(seqalpha);
@@ -57,7 +57,7 @@ void seq_set_description_own(Seq *s, char *desc)
 {
   assert(s);
   if (s->description && s->own_description)
-    ma_free(s->description);
+    gt_free(s->description);
   s->description = desc;
   s->own_description = true;
 }
@@ -78,7 +78,7 @@ const char* seq_get_encoded(Seq *s)
 {
   assert(s);
   if (!s->encoded_seq) {
-    s->encoded_seq = ma_malloc(sizeof (char) * (s->seqlen+1));
+    s->encoded_seq = gt_malloc(sizeof (char) * (s->seqlen+1));
     alpha_encode_seq(s->seqalpha, s->encoded_seq, (char*) s->seq, s->seqlen);
     s->encoded_seq[s->seqlen] = '\0';
   }
@@ -101,10 +101,10 @@ void seq_delete(Seq *s)
 {
   if (!s) return;
   if (s->own_seq)
-    ma_free(s->seq);
+    gt_free(s->seq);
   if (s->own_description)
-    ma_free(s->description);
-  ma_free(s->encoded_seq);
+    gt_free(s->description);
+  gt_free(s->encoded_seq);
   alpha_delete(s->seqalpha);
-  ma_free(s);
+  gt_free(s);
 }

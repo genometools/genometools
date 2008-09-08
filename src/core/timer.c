@@ -36,7 +36,7 @@ struct Timer {
 Timer* timer_new(void)
 {
   Timer *t;
-  t = ma_malloc(sizeof (Timer));
+  t = gt_malloc(sizeof (Timer));
   t->state = TIMER_RUNNING;
   return t;
 }
@@ -96,5 +96,5 @@ void timer_show(Timer *t, FILE *fp)
 void timer_del(Timer *t)
 {
   if (!t) return;
-  ma_free(t);
+  gt_free(t);
 }

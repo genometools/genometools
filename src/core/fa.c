@@ -58,18 +58,18 @@ typedef struct {
 
 static void free_FAFileInfo(FAFileInfo *fileinfo)
 {
-  ma_free(fileinfo);
+  gt_free(fileinfo);
 }
 
 static void free_FAMapInfo(FAMapInfo *mapinfo)
 {
-  ma_free(mapinfo);
+  gt_free(mapinfo);
 }
 
 static void fa_init(void)
 {
   assert(!fa);
-  fa = ma_calloc(1, sizeof (FA));
+  fa = gt_calloc(1, sizeof (FA));
   fa->file_pointer = hashmap_new(HASH_DIRECT, NULL,
                                  (GT_FreeFunc) free_FAFileInfo);
   fa->memory_maps = hashmap_new(HASH_DIRECT, NULL,
@@ -84,7 +84,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   FAFileInfo *fileinfo;
   gt_error_check(err);
   assert(fa && path && mode);
-  fileinfo = ma_malloc(sizeof (FAFileInfo));
+  fileinfo = gt_malloc(sizeof (FAFileInfo));
   fileinfo->filename = filename;
   fileinfo->line = line;
   switch (genfilemode) {
@@ -102,7 +102,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   if (fp)
     hashmap_add(fa->file_pointer, fp, fileinfo);
   else
-    ma_free(fileinfo);
+    gt_free(fileinfo);
   return fp;
 }
 
@@ -298,7 +298,7 @@ FILE* fa_xtmpfp_generic_func(GT_Str *template_arg, int flags,
   }
   {
     FAFileInfo *fileinfo;
-    fileinfo = ma_malloc(sizeof (FAFileInfo));
+    fileinfo = gt_malloc(sizeof (FAFileInfo));
     fileinfo->filename = filename;
     fileinfo->line = line;
     hashmap_add(fa->file_pointer, fp, fileinfo);
@@ -315,7 +315,7 @@ void* fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   FAMapInfo *mapinfo;
   void *map;
   assert(fa);
-  mapinfo = ma_malloc(sizeof (FAMapInfo));
+  mapinfo = gt_malloc(sizeof (FAMapInfo));
   mapinfo->filename = filename;
   mapinfo->line = line;
   mapinfo->len = len;
@@ -338,7 +338,7 @@ void* fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
       fa->max_size = fa->current_size;
   }
   else
-    ma_free(mapinfo);
+    gt_free(mapinfo);
   return map;
 }
 
@@ -490,6 +490,6 @@ void fa_clean(void)
   if (!fa) return;
   hashmap_delete(fa->file_pointer);
   hashmap_delete(fa->memory_maps);
-  ma_free(fa);
+  gt_free(fa);
   fa = NULL;
 }

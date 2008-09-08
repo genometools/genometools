@@ -32,14 +32,14 @@ typedef struct {
 
 static void* gt_affinealign_arguments_new(void)
 {
-  return ma_malloc(sizeof (Costs));
+  return gt_malloc(sizeof (Costs));
 }
 
 static void gt_affinealign_arguments_delete(void *tool_arguments)
 {
   Costs *costs = tool_arguments;
   if (!costs) return;
-  ma_free(costs);
+  gt_free(costs);
 }
 
 static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)

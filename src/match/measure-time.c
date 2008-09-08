@@ -30,7 +30,7 @@ Measuretime *inittheclock(const char *event)
 {
   Measuretime *mtime;
 
-  mtime = ma_malloc(sizeof (Measuretime));
+  mtime = gt_malloc(sizeof (Measuretime));
   mtime->startclock = clock();
   mtime->overalltime = 0;
   mtime->eventdescription = event;
@@ -51,7 +51,7 @@ void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent)
     fprintf(fp,"# TIME overall %.2f\n",
                 (double) mtime->overalltime/(double) CLOCKS_PER_SEC);
     (void) fflush(fp);
-    ma_free(mtime);
+    gt_free(mtime);
   } else
   {
     mtime->startclock = stopclock;

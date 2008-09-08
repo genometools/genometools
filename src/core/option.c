@@ -117,7 +117,7 @@ struct Option {
 static Option *option_new(const char *option_str, const char *description,
                           void *value)
 {
-  Option *o = ma_calloc(1, sizeof (Option));
+  Option *o = gt_calloc(1, sizeof (Option));
   assert(option_str && strlen(option_str));
   assert("an option string should not start with '-', this is added "
          "automatically"  && option_str[0] != '-');
@@ -175,7 +175,7 @@ Option* option_ref(Option *o)
 
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
 {
-  OptionParser *op = ma_malloc(sizeof (OptionParser));
+  OptionParser *op = gt_malloc(sizeof (OptionParser));
   assert(synopsis && one_liner);
   assert("one_liner must have upper case letter at start and '.' at end" &&
          strlen(one_liner) && isupper((int) one_liner[0]));
@@ -1083,14 +1083,14 @@ void option_parser_delete(OptionParser *op)
 {
   unsigned long i;
   if (!op) return;
-  ma_free(op->progname);
-  ma_free(op->synopsis);
-  ma_free(op->one_liner);
+  gt_free(op->progname);
+  gt_free(op->synopsis);
+  gt_free(op->one_liner);
   for (i = 0; i < gt_array_size(op->options); i++)
     option_delete(*(Option**) gt_array_get(op->options, i));
   gt_array_delete(op->options);
   gt_array_delete(op->hooks);
-  ma_free(op);
+  gt_free(op);
 }
 
 Option* option_new_outputfile(FILE **outfp)
@@ -1480,5 +1480,5 @@ void option_delete(Option *o)
     gt_array_delete(*(GT_Array**) gt_array_get(o->implications, i));
   gt_array_delete(o->implications);
   gt_array_delete(o->exclusions);
-  ma_free(o);
+  gt_free(o);
 }

@@ -34,7 +34,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
 
   /* preprocess function h */
   hsize = pow(alphabet_size, q);
-  h = ma_malloc(sizeof(GT_Array*) * hsize);
+  h = gt_malloc(sizeof(GT_Array*) * hsize);
   for (i = 0; i < hsize; i++)
     h[i] = gt_array_new(sizeof (unsigned long));
 
@@ -57,7 +57,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
   /* final phase */
 
   /* init count */
-  count = ma_calloc((ulen + wlen + 1), sizeof *count);
+  count = gt_calloc((ulen + wlen + 1), sizeof *count);
 
   /* compute code of first q-gram in u */
   code = qgram_encode(u, q, alphabet_size);
@@ -82,10 +82,10 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
   }
 
   /* free space */
-  ma_free(count);
+  gt_free(count);
   for (i = 0; i < hsize; i++)
     gt_array_delete(h[i]);
-  ma_free(h);
+  gt_free(h);
 
   return maxcount;
 }

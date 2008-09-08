@@ -44,7 +44,7 @@ typedef struct {
 
 static OBOHeader* obo_header_new(void)
 {
-  OBOHeader *obo_header = ma_malloc(sizeof *obo_header);
+  OBOHeader *obo_header = gt_malloc(sizeof *obo_header);
   obo_header->content = gt_array_new(sizeof (OBOHeaderEntry*));
   return obo_header;
 }
@@ -56,12 +56,12 @@ static void obo_header_delete(OBOHeader *obo_header)
   for (i = 0; i < gt_array_size(obo_header->content); i++) {
     OBOHeaderEntry *entry = *(OBOHeaderEntry**)
                             gt_array_get(obo_header->content, i);
-    ma_free(entry->value);
-    ma_free(entry->tag);
-    ma_free(entry);
+    gt_free(entry->value);
+    gt_free(entry->tag);
+    gt_free(entry);
   }
   gt_array_delete(obo_header->content);
-  ma_free(obo_header);
+  gt_free(obo_header);
 }
 
 static void obo_header_add(OBOHeader *obo_header,
@@ -69,7 +69,7 @@ static void obo_header_add(OBOHeader *obo_header,
 {
   OBOHeaderEntry *entry;
   assert(obo_header && tag && value);
-  entry = ma_malloc(sizeof *entry);
+  entry = gt_malloc(sizeof *entry);
   entry->tag = cstr_dup(tag);
   entry->value = cstr_dup(value);
   gt_array_add(obo_header->content, entry);
@@ -112,9 +112,9 @@ typedef struct {
 static OBOStanza* obo_stanza_new(const char *type, unsigned long line,
                                  GT_Str *filename)
 {
-  OBOStanza *obo_stanza = ma_malloc(sizeof *obo_stanza);
+  OBOStanza *obo_stanza = gt_malloc(sizeof *obo_stanza);
   obo_stanza->type = cstr_dup(type);
-  obo_stanza->content = hashmap_new(HASH_STRING, ma_free_func, ma_free_func);
+  obo_stanza->content = hashmap_new(HASH_STRING, gt_free_func, gt_free_func);
   obo_stanza->line = line;
   obo_stanza->filename = gt_str_ref(filename);
   return obo_stanza;
@@ -125,8 +125,8 @@ static void obo_stanza_delete(OBOStanza *obo_stanza)
   if (!obo_stanza) return;
   gt_str_delete(obo_stanza->filename);
   hashmap_delete(obo_stanza->content);
-  ma_free(obo_stanza->type);
-  ma_free(obo_stanza);
+  gt_free(obo_stanza->type);
+  gt_free(obo_stanza);
 }
 
 static void obo_stanza_add(OBOStanza *obo_stanza,
@@ -497,7 +497,7 @@ OBOParseTree* obo_parse_tree_new(const char *obo_file_path, GT_Error *err)
   gt_error_check(err);
   assert(obo_file_path);
   obo_file = io_new(obo_file_path, "r");
-  obo_parse_tree = ma_malloc(sizeof *obo_parse_tree);
+  obo_parse_tree = gt_malloc(sizeof *obo_parse_tree);
   obo_parse_tree->obo_header = obo_header_new();
   obo_parse_tree->stanzas = gt_array_new(sizeof (OBOStanza*));
   if (parse_obo_file(obo_parse_tree, obo_file, err)) {
@@ -517,7 +517,7 @@ void obo_parse_tree_delete(OBOParseTree *obo_parse_tree)
     obo_stanza_delete(*(OBOStanza**) gt_array_get(obo_parse_tree->stanzas, i));
   gt_array_delete(obo_parse_tree->stanzas);
   obo_header_delete(obo_parse_tree->obo_header);
-  ma_free(obo_parse_tree);
+  gt_free(obo_parse_tree);
 }
 
 const char* obo_parse_tree_get_stanza_type(const OBOParseTree *obo_parse_tree,

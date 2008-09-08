@@ -42,7 +42,7 @@ struct GT_Dlistelem {
 
 GT_Dlist* gt_dlist_new(GT_Compare cmp_func)
 {
-  GT_Dlist *dlist = ma_calloc(1, sizeof (GT_Dlist));
+  GT_Dlist *dlist = gt_calloc(1, sizeof (GT_Dlist));
   dlist->cmp_func = cmp_func;
   return dlist;
 }
@@ -84,7 +84,7 @@ void gt_dlist_add(GT_Dlist *dlist, void *data)
 {
   GT_Dlistelem *oldelem, *newelem;
   assert(dlist); /* data can be null */
-  newelem = ma_calloc(1, sizeof (GT_Dlistelem));
+  newelem = gt_calloc(1, sizeof (GT_Dlistelem));
   newelem->data = data;
 
   if (!dlist->first) {
@@ -154,7 +154,7 @@ void gt_dlist_remove(GT_Dlist *dlist, GT_Dlistelem *dlistelem)
   if (dlistelem == dlist->last)
     dlist->last = dlistelem->previous;
   dlist->size--;
-  ma_free(dlistelem);
+  gt_free(dlistelem);
 }
 
 static int intcompare(const void *a, const void *b)
@@ -346,11 +346,11 @@ void gt_dlist_delete(GT_Dlist *dlist)
   if (!dlist) return;
   elem = dlist->first;
   while (elem) {
-    ma_free(elem->previous);
+    gt_free(elem->previous);
     elem = elem->next;
   }
-  ma_free(dlist->last);
-  ma_free(dlist);
+  gt_free(dlist->last);
+  gt_free(dlist);
 }
 
 GT_Dlistelem* gt_dlistelem_next(const GT_Dlistelem *dlistelem)

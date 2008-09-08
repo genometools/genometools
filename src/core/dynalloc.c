@@ -42,7 +42,7 @@ void* gt_dynalloc(void *ptr, size_t *allocated, size_t size)
     }
   }
   assert(size_to_alloc);
-  rptr = ma_realloc(ptr, size_to_alloc);
+  rptr = gt_realloc(ptr, size_to_alloc);
   *allocated = size_to_alloc;
   return rptr;
 }

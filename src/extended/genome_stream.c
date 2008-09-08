@@ -26,7 +26,7 @@ GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
 {
   GenomeStream *gs;
   assert(gsc && gsc->size);
-  gs = ma_calloc(1, gsc->size);
+  gs = gt_calloc(1, gsc->size);
   gs->c_class = gsc;
   gs->ensure_sorting = ensure_sorting;
   return gs;
@@ -49,7 +49,7 @@ void genome_stream_delete(GenomeStream *gs)
   assert(gs->c_class);
   if (gs->c_class->free) gs->c_class->free(gs);
   gt_genome_node_rec_delete(gs->buffer);
-  ma_free(gs);
+  gt_free(gs);
 }
 
 int genome_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)

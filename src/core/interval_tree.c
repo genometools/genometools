@@ -47,7 +47,7 @@ IntervalTreeNode* interval_tree_node_new(void *data,
                                          unsigned long high)
 {
   IntervalTreeNode* n;
-  n = ma_calloc(1, sizeof (IntervalTreeNode));
+  n = gt_calloc(1, sizeof (IntervalTreeNode));
   n->low = low;
   n->high = high;
   n->data = data;
@@ -57,7 +57,7 @@ IntervalTreeNode* interval_tree_node_new(void *data,
 IntervalTree* interval_tree_new(GT_FreeFunc func)
 {
   IntervalTree *it;
-  it = ma_calloc(1, sizeof (IntervalTree));
+  it = gt_calloc(1, sizeof (IntervalTree));
   it->free_func = func;
   return it;
 }
@@ -79,7 +79,7 @@ void interval_tree_node_delete(IntervalTree *it, IntervalTreeNode *n)
   if (!n) return;
   if (n->data && it->free_func)
     it->free_func(n->data);
-  ma_free(n);
+  gt_free(n);
 }
 
 static void interval_tree_node_rec_delete(IntervalTree *it, IntervalTreeNode *n)
@@ -327,7 +327,7 @@ void interval_tree_delete(IntervalTree *it)
 {
   if (!it) return;
   interval_tree_node_rec_delete(it, it->root);
-  ma_free(it);
+  gt_free(it);
 }
 
 static int gt_range_ptr_compare(const void *r1p, const void *r2p)
@@ -369,14 +369,14 @@ int interval_tree_unit_test(GT_UNUSED GT_Error *err)
   {
     unsigned long start;
     GT_Range *rng;
-    rng  = ma_calloc(1, sizeof (GT_Range));
+    rng  = gt_calloc(1, sizeof (GT_Range));
     start = rand_max(gt_range_max_basepos);
     rng->start = start;
     rng->end = start + rand_max(width);
     gt_array_add(arr, rng);
   }
 
-  it = interval_tree_new(ma_free_func);
+  it = interval_tree_new(gt_free_func);
 
   /* insert ranges */
   for (i = 0; i < num_testranges && !had_err; i++)

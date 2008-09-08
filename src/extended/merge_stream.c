@@ -102,7 +102,7 @@ static void merge_stream_free(GenomeStream *gs)
   for (i = 0; i < gt_array_size(ms->genome_streams); i++)
     genome_stream_delete(*(GenomeStream**) gt_array_get(ms->genome_streams, i));
   gt_array_delete(ms->genome_streams);
-  ma_free(ms->buffer);
+  gt_free(ms->buffer);
 }
 
 const GenomeStreamClass* merge_stream_class(void)
@@ -133,6 +133,6 @@ GenomeStream* merge_stream_new(const GT_Array *genome_streams)
                                   gt_array_get(genome_streams, i));
     gt_array_add(ms->genome_streams, in_stream);
   }
-  ms->buffer = ma_calloc(gt_array_size(genome_streams), sizeof (GT_GenomeNode*));
+  ms->buffer = gt_calloc(gt_array_size(genome_streams), sizeof (GT_GenomeNode*));
   return gs;
 }

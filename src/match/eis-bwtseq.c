@@ -124,13 +124,13 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
                                 sizeof (enum rangeSortMode));
   totalSize = rangeSortOffset + sizeof (enum rangeSortMode)
     * MRAEncGetNumRanges(alphabet);
-  bwtSeq = ma_malloc(totalSize);
+  bwtSeq = gt_malloc(totalSize);
   counts = (Seqpos *)((char  *)bwtSeq + countsOffset);
   rangeSort = (enum rangeSortMode *)((char *)bwtSeq + rangeSortOffset);
   if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts, rangeSort,
                                defaultRangeSort))
   {
-    ma_free(bwtSeq);
+    gt_free(bwtSeq);
     bwtSeq = NULL;
   }
   return bwtSeq;
@@ -142,7 +142,7 @@ deleteBWTSeq(BWTSeq *bwtSeq)
   MRAEncDelete(bwtSeq->alphabet);
   deleteEISHint(bwtSeq->seqIdx, bwtSeq->hint);
   deleteEncIdxSeq(bwtSeq->seqIdx);
-  ma_free(bwtSeq);
+  gt_free(bwtSeq);
 }
 
 static inline void
@@ -378,12 +378,12 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 {
   struct BWTSeqExactMatchesIterator *iter;
   assert(bwtSeq && query);
-  iter = ma_malloc(sizeof (*iter));
+  iter = gt_malloc(sizeof (*iter));
   if (initEMIterator(iter, bwtSeq, query, queryLen,forward))
     return iter;
   else
   {
-    ma_free(iter);
+    gt_free(iter);
     return NULL;
   }
 }
@@ -406,7 +406,7 @@ destructEMIterator(struct BWTSeqExactMatchesIterator *iter)
 void
 deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
 {
-  ma_free(iter);
+  gt_free(iter);
 }
 
 Seqpos
@@ -590,7 +590,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GT_Str *projectName,
                              MAX_CONTEXT_LEN),
           numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
                          MAX(2, seqLen/CONTEXT_INTERVAL));
-        Symbol *contextBuf = ma_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
+        Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
         Encodedsequencescanstate *esr = newEncodedsequencescanstate();
         for (i = 0; i < numTries && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
         {
@@ -635,7 +635,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GT_Str *projectName,
         if (retval == VERIFY_BWTSEQ_NO_ERROR)
           fputs("Context regeneration completed successfully.\n", stderr);
         freeEncodedsequencescanstate(&esr);
-        ma_free(contextBuf);
+        gt_free(contextBuf);
       }
       deleteBWTSeqCR(bwtSeqCR);
     }
