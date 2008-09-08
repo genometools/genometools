@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,31 +20,31 @@
 #include <assert.h>
 #include "core/codon.h"
 
-const char aminos[] = "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRR"
-                      "IIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
+const char gt_aminos[] = "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRR"
+                         "IIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
 
-char codon2amino(char n0, char n1, char n2)
+char gt_codon2amino(char n0, char n1, char n2)
 {
   unsigned int code = 0;
 
   switch (n0) {
     case 'A':
     case 'a':
-      code = A_CODE << 4;
+      code = GT_A_CODE << 4;
       break;
     case 'C':
     case 'c':
-      code = C_CODE << 4;
+      code = GT_C_CODE << 4;
      break;
     case 'G':
     case 'g':
-      code = G_CODE << 4;
+      code = GT_G_CODE << 4;
       break;
     case 'T':
     case 't':
     case 'U':
     case 'u':
-      code = T_CODE << 4;
+      code = GT_T_CODE << 4;
       break;
     default: assert(0); /* XXX */
   }
@@ -52,21 +52,21 @@ char codon2amino(char n0, char n1, char n2)
   switch (n1) {
     case 'A':
     case 'a':
-      code += A_CODE << 2;
+      code += GT_A_CODE << 2;
       break;
     case 'C':
     case 'c':
-      code += C_CODE << 2;
+      code += GT_C_CODE << 2;
       break;
     case 'G':
     case 'g':
-      code += G_CODE << 2;
+      code += GT_G_CODE << 2;
       break;
     case 'T':
     case 't':
     case 'U':
     case 'u':
-      code += T_CODE << 2;
+      code += GT_T_CODE << 2;
       break;
     default: assert(0); /* XXX */
   }
@@ -74,24 +74,24 @@ char codon2amino(char n0, char n1, char n2)
   switch (n2) {
     case 'A':
     case 'a':
-      code += A_CODE;
+      code += GT_A_CODE;
       break;
     case 'C':
     case 'c':
-      code += C_CODE;
+      code += GT_C_CODE;
       break;
     case 'G':
     case 'g':
-      code += G_CODE;
+      code += GT_G_CODE;
       break;
     case 'T':
     case 't':
     case 'U':
     case 'u':
-      code += T_CODE;
+      code += GT_T_CODE;
       break;
     default: assert(0); /* XXX */
   }
 
-  return aminos[code];
+  return gt_aminos[code];
 }

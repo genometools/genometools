@@ -34,11 +34,11 @@ void determine_ORFs(GT_Array *ranges, unsigned int framenum,
   for (i = 0; i < framelen; i++) {
     if (orf.start == UNDEF_ULONG) {
       if (frame[i] == START_AMINO)
-        orf.start = i * CODONLENGTH + framenum;
+        orf.start = i * GT_CODON_LENGTH + framenum;
     }
     else {
       if (frame[i] == STOP_AMINO) {
-        orf.end = i * CODONLENGTH + framenum + 2;
+        orf.end = i * GT_CODON_LENGTH + framenum + 2;
         gt_array_add(ranges, orf);
         orf.start = UNDEF_ULONG;
       }

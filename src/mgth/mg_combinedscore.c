@@ -223,11 +223,11 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 
               /* Bestimmen der AS der jeweiligen Triplets */
               contig_as =
-                codon2amino(contig_triplet[0], contig_triplet[1],
-                            contig_triplet[2]);
+                gt_codon2amino(contig_triplet[0], contig_triplet[1],
+                               contig_triplet[2]);
               hit_as =
-                codon2amino(hit_triplet[0], hit_triplet[1],
-                            hit_triplet[2]);
+                gt_codon2amino(hit_triplet[0], hit_triplet[1],
+                               hit_triplet[2]);
             }
           }
 

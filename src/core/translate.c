@@ -27,7 +27,8 @@ void translate_dna(GT_Str *protein, const char *dnaseq, unsigned long dnalen,
   assert(protein && !gt_str_length(protein) && dnaseq && frame < 3);
   /* translate the DNA in forward direction */
   for (dnaptr = dnaseq + frame; dnaptr < dnaseq + dnalen - 2; dnaptr += 3) {
-    gt_str_append_char(protein, codon2amino(*dnaptr, *(dnaptr+1), *(dnaptr+2)));
+    gt_str_append_char(protein,
+                       gt_codon2amino(*dnaptr, *(dnaptr+1), *(dnaptr+2)));
   }
 }
 
@@ -36,15 +37,15 @@ static int encode(char nucleotide)
   switch (nucleotide) {
     case 'A':
     case 'a':
-      return A_CODE;
+      return GT_A_CODE;
     case 'C':
     case 'c':
-      return C_CODE;
+      return GT_C_CODE;
     case 'G':
     case 'g':
-      return G_CODE;
+      return GT_G_CODE;
   }
-  return T_CODE;
+  return GT_T_CODE;
 }
 
 void translate_all_frames(char **frame1, char **frame2, char **frame3,
@@ -74,15 +75,15 @@ void translate_all_frames(char **frame1, char **frame2, char **frame3,
     codon = ((codon << 2) | encode(dna_sequence[i+2])) & 0x3f; /* 0..0111111 */
 
     /* store amino acid in appropriate frame */
-    switch (i % CODONLENGTH) {
+    switch (i % GT_CODON_LENGTH) {
       case 0:
-        (*frame1)[i/CODONLENGTH] = aminos[codon];
+        (*frame1)[i/GT_CODON_LENGTH] = gt_aminos[codon];
         break;
       case 1:
-        (*frame2)[i/CODONLENGTH] = aminos[codon];
+        (*frame2)[i/GT_CODON_LENGTH] = gt_aminos[codon];
         break;
       case 2:
-        (*frame3)[i/CODONLENGTH] = aminos[codon];
+        (*frame3)[i/GT_CODON_LENGTH] = gt_aminos[codon];
     }
   }
 
