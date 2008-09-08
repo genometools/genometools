@@ -32,7 +32,7 @@ int luaopen_gtext(lua_State *L)
   luaopen_cds_stream(L);
   luaopen_csa_stream(L);
   luaopen_genome_node(L);
-  luaopen_gt_genome_node_iterator(L);
+  luaopen_genome_node_iterator(L);
   luaopen_genome_stream(L);
   luaopen_genome_visitor(L);
   luaopen_region_mapping(L);

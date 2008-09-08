@@ -47,7 +47,7 @@ static bool nodes_are_equal_feature_trees(GT_GenomeNode *first_node,
          gf_a && gf_b;
          gf_a = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_a),
          gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b)) {
-      if (!gf_b || !genome_features_are_similar(gf_a, gf_b))
+      if (!gf_b || !gt_genome_features_are_similar(gf_a, gf_b))
         break;
     }
     gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b);
@@ -67,12 +67,16 @@ static bool uniq(GT_GenomeNode **first_node, GT_GenomeNode **second_node)
   assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     if ((first_score_is_defined =
-           gt_genome_feature_score_is_defined((GT_GenomeFeature*) *first_node))) {
-      first_score = gt_genome_feature_get_score((GT_GenomeFeature*) *first_node);
+           gt_genome_feature_score_is_defined((GT_GenomeFeature*)
+                                              *first_node))) {
+      first_score = gt_genome_feature_get_score((GT_GenomeFeature*)
+                                                *first_node);
     }
     if ((second_score_is_defined =
-           gt_genome_feature_score_is_defined((GT_GenomeFeature*) *second_node))) {
-      second_score = gt_genome_feature_get_score((GT_GenomeFeature*) *second_node);
+           gt_genome_feature_score_is_defined((GT_GenomeFeature*)
+                                              *second_node))) {
+      second_score = gt_genome_feature_get_score((GT_GenomeFeature*)
+                                                 *second_node);
     }
     if ((!first_score_is_defined && !second_score_is_defined) ||
         (first_score_is_defined && !second_score_is_defined) ||
@@ -92,7 +96,8 @@ static bool uniq(GT_GenomeNode **first_node, GT_GenomeNode **second_node)
   return false;
 }
 
-static int uniq_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
+static int uniq_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+                                 GT_Error *err)
 {
   UniqStream *us;
   int had_err;

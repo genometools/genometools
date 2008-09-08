@@ -108,7 +108,8 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
 }
 
 static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
-                                                 GT_GenomeFeature *gf, GT_Error *err)
+                                                 GT_GenomeFeature *gf,
+                                                 GT_Error *err)
 {
   SpliceSiteInfoVisitor *ssiv;
   GT_GenomeNodeIterator *gni;

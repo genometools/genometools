@@ -166,17 +166,25 @@ static void slot_delete(Slot *s)
 {
   unsigned long i;
   assert(s);
-  for (i = 0; i < gt_array_size(s->genes_forward); i++)
-    gt_genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->genes_forward, i));
+  for (i = 0; i < gt_array_size(s->genes_forward); i++) {
+    gt_genome_node_rec_delete(*(GT_GenomeNode**)
+                              gt_array_get(s->genes_forward, i));
+  }
   gt_array_delete(s->genes_forward);
-  for (i = 0; i < gt_array_size(s->genes_reverse); i++)
-    gt_genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->genes_reverse, i));
+  for (i = 0; i < gt_array_size(s->genes_reverse); i++) {
+    gt_genome_node_rec_delete(*(GT_GenomeNode**)
+                              gt_array_get(s->genes_reverse, i));
+  }
   gt_array_delete(s->genes_reverse);
-  for (i = 0; i < gt_array_size(s->mRNAs_forward); i++)
-    gt_genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->mRNAs_forward, i));
+  for (i = 0; i < gt_array_size(s->mRNAs_forward); i++) {
+    gt_genome_node_rec_delete(*(GT_GenomeNode**)
+                              gt_array_get(s->mRNAs_forward, i));
+  }
   gt_array_delete(s->mRNAs_forward);
-  for (i = 0; i < gt_array_size(s->mRNAs_reverse); i++)
-    gt_genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->mRNAs_reverse, i));
+  for (i = 0; i < gt_array_size(s->mRNAs_reverse); i++) {
+    gt_genome_node_rec_delete(*(GT_GenomeNode**)
+                              gt_array_get(s->mRNAs_reverse, i));
+  }
   gt_array_delete(s->mRNAs_reverse);
   for (i = 0; i < gt_array_size(s->LTRs); i++)
     gt_genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(s->LTRs, i));
@@ -240,8 +248,8 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   return evaluator;
 }
 
-static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value, void *data,
-                                     GT_UNUSED GT_Error *err)
+static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value,
+                                     void *data, GT_UNUSED GT_Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
@@ -271,15 +279,15 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value, void *dat
                                     s->CDS_exons_reverse);
 
   /* sort genes */
-  genome_nodes_sort(s->genes_forward);
-  genome_nodes_sort(s->genes_reverse);
+  gt_genome_nodes_sort(s->genes_forward);
+  gt_genome_nodes_sort(s->genes_reverse);
 
   /* sort mRNAs */
-  genome_nodes_sort(s->mRNAs_forward);
-  genome_nodes_sort(s->mRNAs_reverse);
+  gt_genome_nodes_sort(s->mRNAs_forward);
+  gt_genome_nodes_sort(s->mRNAs_reverse);
 
   /* sort LTRs */
-  genome_nodes_sort(s->LTRs);
+  gt_genome_nodes_sort(s->LTRs);
 
   /* sort exons */
   transcript_exons_sort(s->mRNA_exons_forward);
@@ -308,15 +316,15 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value, void *dat
                                     s->CDS_exons_reverse);
 
   /* make sure that the genes are sorted */
-  assert(genome_nodes_are_sorted(s->genes_forward));
-  assert(genome_nodes_are_sorted(s->genes_reverse));
+  assert(gt_genome_nodes_are_sorted(s->genes_forward));
+  assert(gt_genome_nodes_are_sorted(s->genes_reverse));
 
   /* make sure that the mRNAs are sorted */
-  assert(genome_nodes_are_sorted(s->mRNAs_forward));
-  assert(genome_nodes_are_sorted(s->mRNAs_reverse));
+  assert(gt_genome_nodes_are_sorted(s->mRNAs_forward));
+  assert(gt_genome_nodes_are_sorted(s->mRNAs_reverse));
 
   /* make sure that the LTRs are sorted */
-  assert(genome_nodes_are_sorted(s->LTRs));
+  assert(gt_genome_nodes_are_sorted(s->LTRs));
 
   /* make sure that the exons are sorted */
   assert(transcript_exons_are_sorted(s->mRNA_exons_forward));
@@ -371,7 +379,8 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value, void *dat
   return 0;
 }
 
-static void add_real_exon(TranscriptExons *te, GT_Range range, GT_GenomeNode *gn)
+static void add_real_exon(TranscriptExons *te, GT_Range range,
+                          GT_GenomeNode *gn)
 {
   assert(te);
   gt_array_add(transcript_exons_get_all(te), range);
@@ -380,7 +389,8 @@ static void add_real_exon(TranscriptExons *te, GT_Range range, GT_GenomeNode *gn
       warning("type of feature (single, initial, internal, or terminal) given "
               "on line %u in file \"%s\" could not be determined, because the "
               "feature has no Parent attribute. Treating it as single.",
-              gt_genome_node_get_line_number(gn), gt_genome_node_get_filename(gn));
+              gt_genome_node_get_line_number(gn),
+              gt_genome_node_get_filename(gn));
       /*@fallthrough@*/
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       gt_array_add(transcript_exons_get_single(te), range);
@@ -415,7 +425,8 @@ static void add_nucleotide_exon(GT_Bittab *nucleotides, GT_Range range,
   }
 }
 
-static int process_real_feature(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
+static int process_real_feature(GT_GenomeNode *gn, void *data,
+                                GT_UNUSED GT_Error *err)
 {
   ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
   GT_GenomeNode *gn_ref;
@@ -573,7 +584,8 @@ typedef struct {
         *mRNAs;
 } Store_gene_feature_info;
 
-static int store_gene_feature(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
+static int store_gene_feature(GT_GenomeNode *gn, void *data,
+                              GT_UNUSED GT_Error *err)
 {
   GT_GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
@@ -627,8 +639,8 @@ static bool genes_are_equal(GT_GenomeNode *gn_1, GT_GenomeNode *gn_2)
   /* compare mRNAs, if necessary */
   if (equal && gt_array_size(mRNAs_1) == gt_array_size(mRNAs_2)) {
     /* sort mRNAs */
-    genome_nodes_sort(mRNAs_1);
-    genome_nodes_sort(mRNAs_2);
+    gt_genome_nodes_sort(mRNAs_1);
+    gt_genome_nodes_sort(mRNAs_2);
     for (i = 0; i < gt_array_size(mRNAs_1); i++) {
       assert(equal);
       equal = mRNAs_are_equal(*(GT_GenomeNode**) gt_array_get(mRNAs_1, i),
@@ -656,7 +668,8 @@ static void store_predicted_exon(TranscriptEvaluators *te, GT_GenomeNode *gn)
       warning("type of feature (single, initial, internal, or terminal) given "
               "on line %u in file \"%s\" could not be determined, because the "
               "feature has no Parent attribute. Treating it as single.",
-              gt_genome_node_get_line_number(gn), gt_genome_node_get_filename(gn));
+              gt_genome_node_get_line_number(gn),
+              gt_genome_node_get_filename(gn));
       /*@fallthrough@*/
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       evaluator_add_predicted(transcript_evaluators_get_single(te), 1);
@@ -674,7 +687,8 @@ static void store_predicted_exon(TranscriptEvaluators *te, GT_GenomeNode *gn)
 }
 
 /* adds exon only if necessary */
-static void add_predicted_collapsed(GT_Dlist *used_exons, GT_Range *predicted_range,
+static void add_predicted_collapsed(GT_Dlist *used_exons,
+                                    GT_Range *predicted_range,
                                     Evaluator *exon_evaluator_collapsed)
 {
   GT_Range *used_range;
@@ -906,7 +920,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               if (predicted_strand == GT_STRAND_FORWARD) {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->genes_forward);
-                if (!gt_bittab_bit_is_set(info->slot->true_genes_forward, num)) {
+                if (!gt_bittab_bit_is_set(info->slot->true_genes_forward,
+                                          num)) {
                   gt_bittab_set_bit(info->slot->true_genes_forward, num);
                   evaluator_add_true(info->gene_evaluator);
                   /*@loopbreak@*/
@@ -916,7 +931,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               else {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->genes_reverse);
-                if (!gt_bittab_bit_is_set(info->slot->true_genes_reverse, num)) {
+                if (!gt_bittab_bit_is_set(info->slot->true_genes_reverse,
+                                          num)) {
                   gt_bittab_set_bit(info->slot->true_genes_reverse, num);
                   evaluator_add_true(info->gene_evaluator);
                   /*@loopbreak@*/
@@ -975,7 +991,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               if (predicted_strand == GT_STRAND_FORWARD) {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->mRNAs_forward);
-                if (!gt_bittab_bit_is_set(info->slot->true_mRNAs_forward, num)) {
+                if (!gt_bittab_bit_is_set(info->slot->true_mRNAs_forward,
+                                          num)) {
                   gt_bittab_set_bit(info->slot->true_mRNAs_forward, num);
                   evaluator_add_true(info->mRNA_evaluator);
                   /*@loopbreak@*/
@@ -985,7 +1002,8 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
               else {
                 num = real_gn - (GT_GenomeNode**)
                       gt_array_get_space(info->slot->mRNAs_reverse);
-                if (!gt_bittab_bit_is_set(info->slot->true_mRNAs_reverse, num)) {
+                if (!gt_bittab_bit_is_set(info->slot->true_mRNAs_reverse,
+                                          num)) {
                   gt_bittab_set_bit(info->slot->true_mRNAs_reverse, num);
                   evaluator_add_true(info->mRNA_evaluator);
                   /*@loopbreak@*/
@@ -1145,20 +1163,24 @@ int determine_missing_features(GT_UNUSED void *key, void *value, void *data,
   gt_error_check(err);
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
-    se->missing_genes += gt_bittab_size(slot->overlapped_genes_forward) -
-                         gt_bittab_count_set_bits(slot->overlapped_genes_forward);
+    se->missing_genes +=
+      gt_bittab_size(slot->overlapped_genes_forward) -
+      gt_bittab_count_set_bits(slot->overlapped_genes_forward);
   }
   if (slot->overlapped_genes_reverse) {
-    se->missing_genes += gt_bittab_size(slot->overlapped_genes_reverse) -
-                         gt_bittab_count_set_bits(slot->overlapped_genes_reverse);
+    se->missing_genes +=
+      gt_bittab_size(slot->overlapped_genes_reverse) -
+      gt_bittab_count_set_bits(slot->overlapped_genes_reverse);
   }
   if (slot->overlapped_mRNAs_forward) {
-    se->missing_mRNAs += gt_bittab_size(slot->overlapped_mRNAs_forward) -
-                         gt_bittab_count_set_bits(slot->overlapped_mRNAs_forward);
+    se->missing_mRNAs +=
+      gt_bittab_size(slot->overlapped_mRNAs_forward) -
+      gt_bittab_count_set_bits(slot->overlapped_mRNAs_forward);
   }
   if (slot->overlapped_mRNAs_reverse) {
-    se->missing_mRNAs += gt_bittab_size(slot->overlapped_mRNAs_reverse) -
-                         gt_bittab_count_set_bits(slot->overlapped_mRNAs_reverse);
+    se->missing_mRNAs +=
+      gt_bittab_size(slot->overlapped_mRNAs_reverse) -
+      gt_bittab_count_set_bits(slot->overlapped_mRNAs_reverse);
   }
   if (slot->overlapped_LTRs) {
     se->missing_LTRs  += gt_bittab_size(slot->overlapped_LTRs) -
@@ -1168,7 +1190,8 @@ int determine_missing_features(GT_UNUSED void *key, void *value, void *data,
 }
 
 static void add_nucleotide_values(NucEval *nucleotides, GT_Bittab *real,
-                                  GT_Bittab *pred, GT_Bittab *tmp, const char *level)
+                                  GT_Bittab *pred, GT_Bittab *tmp,
+                                  const char *level)
 {
   assert(nucleotides && real && pred && tmp);
   if (gt_log_enabled()) {
@@ -1265,11 +1288,13 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     sr = gt_genome_node_cast(gt_sequence_region_class(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
-      if (!(slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)))))
+      if (!(slot = hashmap_get(se->slots,
+                               gt_str_get(gt_genome_node_get_seqid(gn)))))
       {
         slot = slot_new(se->nuceval, gt_genome_node_get_range(gn));
         hashmap_add(se->slots,
-                    gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))), slot);
+                    gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))),
+                    slot);
       }
       assert(slot);
     }

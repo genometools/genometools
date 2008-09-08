@@ -40,7 +40,8 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
   gt_array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
-static int mergefeat_in_children(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
+static int mergefeat_in_children(GT_GenomeNode *gn, void *data,
+                                 GT_UNUSED GT_Error *err)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GT_GenomeFeature *previous_feature, *current_feature;
@@ -49,11 +50,12 @@ static int mergefeat_in_children(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Err
   current_feature = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(current_feature);
   if ((previous_feature = hashmap_get(v->hm, gt_feature_type_get_cstr(
-                                  gt_genome_feature_get_type(current_feature))))) {
+                               gt_genome_feature_get_type(current_feature))))) {
     /* previous feature found -> check if merging is necessary */
     assert(gt_genome_feature_get_type(previous_feature) ==
            gt_genome_feature_get_type(current_feature));
-    previous_range = gt_genome_node_get_range((GT_GenomeNode*) previous_feature);
+    previous_range = gt_genome_node_get_range((GT_GenomeNode*)
+                                              previous_feature);
     current_range = gt_genome_node_get_range((GT_GenomeNode*) current_feature);
     assert(gt_range_compare(previous_range, current_range) <= 0); /* sorted */
     if (previous_range.end + 1 == current_range.start) {
@@ -61,7 +63,8 @@ static int mergefeat_in_children(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Err
       gt_genome_feature_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
       gt_genome_feature_unset_score(previous_feature);
-      assert(!gt_genome_node_number_of_children((GT_GenomeNode*) current_feature));
+      assert(!gt_genome_node_number_of_children((GT_GenomeNode*)
+                                                current_feature));
       gt_array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */

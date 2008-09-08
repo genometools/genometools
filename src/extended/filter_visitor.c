@@ -69,7 +69,8 @@ static bool filter_contain_range(GT_GenomeFeature *gf, GT_Range contain_range)
 {
   assert(gf);
   if (contain_range.start != UNDEF_ULONG &&
-      !gt_range_contains(contain_range, gt_genome_node_get_range((GT_GenomeNode*) gf))) {
+      !gt_range_contains(contain_range,
+                         gt_genome_node_get_range((GT_GenomeNode*) gf))) {
     return true;
   }
   return false;
@@ -79,7 +80,8 @@ static bool filter_overlap_range(GT_GenomeFeature *gf, GT_Range overlap_range)
 {
   assert(gf);
   if (overlap_range.start != UNDEF_ULONG &&
-      !gt_range_overlap(overlap_range, gt_genome_node_get_range((GT_GenomeNode*) gf))) {
+      !gt_range_overlap(overlap_range,
+                        gt_genome_node_get_range((GT_GenomeNode*) gf))) {
     return true;
   }
   return false;
@@ -135,7 +137,8 @@ static bool filter_min_average_ssp(GT_GenomeFeature *gf, double minaveragessp)
   return false;
 }
 
-static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
+static int filter_visitor_genome_feature(GenomeVisitor *gv,
+                                         GT_GenomeFeature *gf,
                                          GT_UNUSED GT_Error *err)
 {
   FilterVisitor *fv;
@@ -143,7 +146,8 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf
   gt_error_check(err);
   fv = filter_visitor_cast(gv);
   fv->current_feature++;
-  if (!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are equal */
+  if (!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are
+                                      equal */
       !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GT_GenomeNode*) gf))) {
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
@@ -202,7 +206,8 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf
   return 0;
 }
 
-static int filter_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
+static int filter_visitor_sequence_region(GenomeVisitor *gv,
+                                          GT_SequenceRegion *sr,
                                           GT_UNUSED GT_Error *err)
 {
   FilterVisitor *filter_visitor;
@@ -259,7 +264,8 @@ const GenomeVisitorClass* filter_visitor_class()
 }
 
 GenomeVisitor* filter_visitor_new(GT_Str *seqid, GT_Str *typefilter,
-                                  GT_Range contain_range, GT_Range overlap_range,
+                                  GT_Range contain_range,
+                                  GT_Range overlap_range,
                                   GT_Strand strand, GT_Strand targetstrand,
                                   bool has_CDS, unsigned long max_gene_length,
                                   unsigned long max_gene_num,

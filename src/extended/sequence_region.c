@@ -63,7 +63,8 @@ static void gt_sequence_region_change_seqid(GT_GenomeNode *gn, GT_Str *seqid)
   sr->seqid = gt_str_ref(seqid);
 }
 
-static int gt_sequence_region_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int gt_sequence_region_accept(GT_GenomeNode *gn, GenomeVisitor *gv,
+                                     GT_Error *err)
 {
   GT_SequenceRegion *sr;
   gt_error_check(err);

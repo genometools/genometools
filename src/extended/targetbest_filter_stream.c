@@ -51,7 +51,8 @@ static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
                             GT_GenomeFeature *feature, GT_Str *key)
 {
   gt_dlist_add(trees, feature);
-  hashmap_add(target_to_elem, gt_cstr_dup(gt_str_get(key)), gt_dlist_last(trees));
+  hashmap_add(target_to_elem, gt_cstr_dup(gt_str_get(key)),
+              gt_dlist_last(trees));
 }
 
 static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
@@ -64,15 +65,16 @@ static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
 }
 
 static void replace_previous_elem(GT_Dlistelem *previous_elem,
-                                  GT_GenomeFeature *current_feature, GT_Dlist *trees,
-                                  Hashmap *target_to_elem, GT_Str *key)
+                                  GT_GenomeFeature *current_feature,
+                                  GT_Dlist *trees, Hashmap *target_to_elem,
+                                  GT_Str *key)
 {
   remove_elem(previous_elem, trees, target_to_elem, key);
   include_feature(trees, target_to_elem, current_feature, key);
 }
 
-static void filter_targetbest(GT_GenomeFeature *current_feature, GT_Dlist *trees,
-                              Hashmap *target_to_elem)
+static void filter_targetbest(GT_GenomeFeature *current_feature,
+                              GT_Dlist *trees, Hashmap *target_to_elem)
 {
   unsigned long num_of_targets;
   GT_Dlistelem *previous_elem;
@@ -114,8 +116,8 @@ static void filter_targetbest(GT_GenomeFeature *current_feature, GT_Dlist *trees
   gt_str_delete(first_target_id);
 }
 
-static int targetbest_filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
-                                              GT_Error *err)
+static int targetbest_filter_stream_next_tree(GenomeStream *gs,
+                                              GT_GenomeNode **gn, GT_Error *err)
 {
   TargetbestFilterStream *tfs;
   GT_GenomeNode *node;

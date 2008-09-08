@@ -30,8 +30,8 @@ struct MergefeatStreamSorted {
 #define mergefeat_stream_sorted_cast(GS)\
         genome_stream_cast(mergefeat_stream_sorted_class(), GS)
 
-static int mergefeat_stream_sorted_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
-                                             GT_Error *err)
+static int mergefeat_stream_sorted_next_tree(GenomeStream *gs,
+                                             GT_GenomeNode **gn, GT_Error *err)
 {
   MergefeatStreamSorted *mfs;
   gt_error_check(err);

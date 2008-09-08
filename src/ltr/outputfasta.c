@@ -108,7 +108,9 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
 }
 
 static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
-                    Seqpos len, GT_UNUSED GT_Str *str_indexfilename, GT_Error *err)
+                                       Seqpos len,
+                                       GT_UNUSED GT_Str *str_indexfilename,
+                                       GT_Error *err)
 {
   unsigned long i, desclen;
   const char *desptr;

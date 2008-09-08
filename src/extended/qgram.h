@@ -21,8 +21,8 @@
 #include "core/alpha.h"
 #include "core/array.h"
 
-/* Encodes a word <w> of length <q> over an alphabet of size <gt_alpha_size> as a
-   unique number. */
+/* Encodes a word <w> of length <q> over an alphabet of size <alphabet_size> as
+   a unique number. */
 unsigned long qgram_encode(const char *w, unsigned long q,
                            unsigned long alphabet_size);
 

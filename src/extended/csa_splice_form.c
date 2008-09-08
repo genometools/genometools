@@ -21,13 +21,13 @@
 
 struct CSASpliceForm {
   GT_Array *spliced_alignments;
-  GetGenomicGT_RangeFunc get_genomic_range;
-  GetGT_StrandFunc get_strand;
+  GetGenomicRangeFunc get_genomic_range;
+  GetStrandFunc get_strand;
 };
 
 CSASpliceForm* csa_splice_form_new(void *spliced_alignment,
-                                   GetGenomicGT_RangeFunc get_genomic_range,
-                                   GetGT_StrandFunc get_strand)
+                                   GetGenomicRangeFunc get_genomic_range,
+                                   GetStrandFunc get_strand)
 {
   CSASpliceForm *splice_form;
   assert(spliced_alignment && get_strand);
@@ -102,7 +102,8 @@ GT_Strand csa_splice_form_strand(const CSASpliceForm *splice_form)
 {
   assert(splice_form);
   return splice_form->get_strand(*(void**)
-                                 gt_array_get(splice_form->spliced_alignments, 0));
+                                 gt_array_get(splice_form->spliced_alignments,
+                                              0));
 }
 
 void* csa_splice_form_get_representative(const CSASpliceForm *splice_form)

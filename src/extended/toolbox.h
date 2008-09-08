@@ -36,7 +36,7 @@ bool     toolbox_has_tool(const Toolbox*, const char *toolname); /*deprecated */
 void     toolbox_add(Toolbox*, const char *toolname, Toolfunc); /* deprecated */
 Toolfunc toolbox_get(const Toolbox*, const char *toolname); /* deprecated */
 /* shows all tools except tools with toolname ``dev'' */
-int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, GT_Error*);
+int      toolbox_show(const char *progname, void *toolbox, GT_Error*);
 void     toolbox_delete(Toolbox*);
 
 #endif

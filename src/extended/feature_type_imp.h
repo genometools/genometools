@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_FEATURE_TYPE_IMP_H
-#define GENOME_FEATURE_TYPE_IMP_H
+#ifndef FEATURE_TYPE_IMP_H
+#define FEATURE_TYPE_IMP_H
 
 #include <stdbool.h>
 #include "extended/type_factory.h"

@@ -27,9 +27,10 @@ typedef struct GT_GenomeNodeIterator GT_GenomeNodeIterator;
 GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *genome_node);
 /* Return a new genome node iterator which iterates over all direct children of
    <genome_node> (without <genome_node> itself). */
-GT_GenomeNodeIterator* gt_genome_node_iterator_new_direct(GT_GenomeNode *genome_node);
+GT_GenomeNodeIterator* gt_genome_node_iterator_new_direct(GT_GenomeNode
+                                                          *genome_node);
 GT_GenomeNode*         gt_genome_node_iterator_next(GT_GenomeNodeIterator*);
-int                 gt_genome_node_iterator_example(GT_Error *);
-void                gt_genome_node_iterator_delete(GT_GenomeNodeIterator*);
+int                    gt_genome_node_iterator_example(GT_Error *);
+void                   gt_genome_node_iterator_delete(GT_GenomeNodeIterator*);
 
 #endif

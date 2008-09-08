@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_TYPE_FACTORY_REP_H
-#define FEATURE_TYPE_FACTORY_REP_H
+#ifndef TYPE_FACTORY_REP_H
+#define TYPE_FACTORY_REP_H
 
 #include <stdio.h>
 #include "extended/feature_type.h"

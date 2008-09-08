@@ -43,7 +43,8 @@ static void cds_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(cds_visitor->region_mapping);
 }
 
-static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err)
+static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data,
+                                    GT_Error *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GT_GenomeFeature *gf;
@@ -60,13 +61,14 @@ static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err
       (gt_genome_feature_get_strand(gf) == GT_STRAND_FORWARD ||
        gt_genome_feature_get_strand(gf) == GT_STRAND_REVERSE)) {
     had_err = region_mapping_get_raw_sequence(v->region_mapping, &raw_sequence,
-                                              gt_genome_node_get_seqid(gn), err);
+                                              gt_genome_node_get_seqid(gn),
+                                              err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
       assert(range.start && range.end); /* 1-based coordinates */
       had_err = region_mapping_get_raw_sequence_length(v->region_mapping,
                                                        &raw_sequence_length,
-                                                      gt_genome_node_get_seqid(gn),
+                                                   gt_genome_node_get_seqid(gn),
                                                        err);
     }
     if (!had_err) {
@@ -78,7 +80,8 @@ static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err
   return had_err;
 }
 
-static int extract_spliced_seq(GT_GenomeNode *gn, CDSVisitor *visitor, GT_Error *err)
+static int extract_spliced_seq(GT_GenomeNode *gn, CDSVisitor *visitor,
+                               GT_Error *err)
 {
   gt_error_check(err);
   assert(gn && visitor);
@@ -130,9 +133,9 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
                            ? orf.end : orf.start) + 1;
   cds_type = gt_genome_feature_create_gft((GT_GenomeFeature*) gn, gft_CDS);
   assert(cds_type);
-  cds_feature = gt_genome_feature_new(gt_genome_node_get_seqid(gn), cds_type, cds,
-                                   gt_genome_feature_get_strand((GT_GenomeFeature*)
-                                                             gn));
+  cds_feature = gt_genome_feature_new(gt_genome_node_get_seqid(gn), cds_type,
+                                      cds,
+                          gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
   gt_genome_feature_set_source(cds_feature, v->source);
   gt_genome_feature_set_phase(cds_feature, GT_PHASE_ZERO);
   /* all CDS features in between */
@@ -151,8 +154,9 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
                                  ? orf.start : orf.end) + 1;
       cds.end = splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                                ? orf.end : orf.start) + 1;
-      cds_feature = gt_genome_feature_new(gt_genome_node_get_seqid(gn), cds_type, cds,
-                                gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
+      cds_feature = gt_genome_feature_new(gt_genome_node_get_seqid(gn),
+                                          cds_type, cds,
+                          gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
       gt_genome_feature_set_source(cds_feature, v->source);
       /* XXX correct this */
       gt_genome_feature_set_phase(cds_feature, (Phase)

@@ -115,7 +115,8 @@ static int map_table(Mapping *m, GT_Str **stroutput, long *integeroutput,
         /* make sure global[input] is a string */
         if (!(lua_isstring(m->L, -1))) {
           gt_error_set(err, "%s[%s] is not a string (defined in \"%s\")",
-                    m->global, input, gt_str_get(m->mapping_file)); had_err = -1;
+                        m->global, input, gt_str_get(m->mapping_file));
+          had_err = -1;
         }
         if (!had_err)
           *stroutput = gt_str_new_cstr(lua_tostring(m->L, -1));
@@ -124,7 +125,8 @@ static int map_table(Mapping *m, GT_Str **stroutput, long *integeroutput,
         /* make sure global[input] is an integer */
         if (!(lua_isnumber(m->L, -1))) {
           gt_error_set(err, "%s[%s] is not an integer (defined in \"%s\")",
-                    m->global, input, gt_str_get(m->mapping_file)); had_err = -1;
+                       m->global, input, gt_str_get(m->mapping_file));
+          had_err = -1;
         }
         if (!had_err)
           *integeroutput = lua_tointeger(m->L, -1);
@@ -198,7 +200,8 @@ GT_Str* mapping_map_string(Mapping *m, const char *input, GT_Error *err)
   return output;
 }
 
-int mapping_map_integer(Mapping *m, long *output, const char *input, GT_Error *err)
+int mapping_map_integer(Mapping *m, long *output, const char *input,
+                        GT_Error *err)
 {
   gt_error_check(err);
   return map_generic(m, NULL, output, input, err);

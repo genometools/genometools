@@ -57,7 +57,8 @@ static GT_Range gt_comment_get_range(GT_UNUSED GT_GenomeNode *gn)
   return range;
 }
 
-static int gt_comment_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+static int gt_comment_accept(GT_GenomeNode *gn, GenomeVisitor *gv,
+                             GT_Error *err)
 {
   GT_Comment *c;
   gt_error_check(err);

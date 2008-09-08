@@ -382,7 +382,8 @@ static void findmaximalscores_withoverlaps(Chain *chain, Chaininfo *chaininfo,
   gt_array_delete(startfragments);
 }
 
-static void gt_log_fragments(Fragment *fragments, unsigned long num_of_fragments)
+static void gt_log_fragments(Fragment *fragments,
+                             unsigned long num_of_fragments)
 {
   unsigned long i;
   gt_log_log("show chaining fragments");

@@ -139,8 +139,10 @@ int simpleexactselfmatchstore (
 
     GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats,
                        Repeat, 10);
-    gt_log_log("maximal repeat pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-    gt_log_log("maximal repeat pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+    gt_log_log("maximal repeat pos1: " FormatSeqpos "\n",
+               PRINTSeqposcast(pos1));
+    gt_log_log("maximal repeat pos2: " FormatSeqpos "\n",
+               PRINTSeqposcast(pos2));
     gt_log_log("len: " FormatSeqpos "\n", PRINTSeqposcast(len));
     gt_log_log("seq number: %lu\n\n", contignumber);
     nextfreerepeatptr->pos1 = pos1;
@@ -154,7 +156,8 @@ int simpleexactselfmatchstore (
 
 int subsimpleexactselfmatchstore(void *info, unsigned long len, Seqpos dbstart,
                                  GT_UNUSED uint64_t queryoffset,
-                                 unsigned long querystart, GT_UNUSED GT_Error *err)
+                                 unsigned long querystart,
+                                 GT_UNUSED GT_Error *err)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;

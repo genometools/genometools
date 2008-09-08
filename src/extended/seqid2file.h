@@ -25,7 +25,8 @@
 void           seqid2file_options(OptionParser*, GT_Str *seqfile,
                                   GT_Str *regionmapping);
 
-RegionMapping* seqid2file_regionmapping_new(GT_Str *seqfile, GT_Str *regionmapping,
+RegionMapping* seqid2file_regionmapping_new(GT_Str *seqfile,
+                                            GT_Str *regionmapping,
                                             GT_Error*);
 
 #endif

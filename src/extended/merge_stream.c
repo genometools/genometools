@@ -61,8 +61,8 @@ int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
       for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
         for (j = i+1; j < gt_array_size(ms->genome_streams); j++) {
           assert(i != j);
-          if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
-                                                      ms->buffer[j])) {
+          if (gt_genome_nodes_are_equal_sequence_regions(ms->buffer[i],
+                                                         ms->buffer[j])) {
             gt_sequence_regions_consolidate(ms->buffer[i], ms->buffer[j]);
             gt_genome_node_rec_delete(ms->buffer[j]);
             ms->buffer[j] = NULL;
@@ -133,6 +133,7 @@ GenomeStream* merge_stream_new(const GT_Array *genome_streams)
                                   gt_array_get(genome_streams, i));
     gt_array_add(ms->genome_streams, in_stream);
   }
-  ms->buffer = gt_calloc(gt_array_size(genome_streams), sizeof (GT_GenomeNode*));
+  ms->buffer = gt_calloc(gt_array_size(genome_streams),
+                         sizeof (GT_GenomeNode*));
   return gs;
 }

@@ -251,17 +251,18 @@ static int expect(GT_IO *obo_file, char expected_char, GT_Error *err)
     }
     if (expected_char == END_OF_FILE) {
       gt_error_set(err, "file \"%s\": line %lu: expected end-of-file, got '%c'",
-                gt_io_get_filename(obo_file), gt_io_get_line_number(obo_file), cc);
+                   gt_io_get_filename(obo_file),
+                   gt_io_get_line_number(obo_file), cc);
     }
     else if ((cc == CARRIAGE_RETURN) || (cc == END_OF_LINE)) {
       gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got "
-                "newline", gt_io_get_filename(obo_file),
-                gt_io_get_line_number(obo_file), expected_char);
+                   "newline", gt_io_get_filename(obo_file),
+                   gt_io_get_line_number(obo_file), expected_char);
     }
     else {
-      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got '%c'",
-                gt_io_get_filename(obo_file), gt_io_get_line_number(obo_file),
-                expected_char, cc);
+      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got "
+                   "'%c'", gt_io_get_filename(obo_file),
+                   gt_io_get_line_number(obo_file), expected_char, cc);
     }
     return -1;
   }
@@ -388,8 +389,10 @@ static int header(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
     gt_str_reset(tag);
     gt_str_reset(value);
     had_err = tag_line(obo_file, tag, value, err);
-    if (!had_err)
-      obo_header_add(obo_parse_tree->obo_header, gt_str_get(tag), gt_str_get(value));
+    if (!had_err) {
+      obo_header_add(obo_parse_tree->obo_header, gt_str_get(tag),
+                     gt_str_get(value));
+    }
   } while (!had_err && any_char(obo_file, false));
   if (!had_err) {
     had_err = obo_header_validate(obo_parse_tree->obo_header,
@@ -435,7 +438,8 @@ static int stanza(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
                                            gt_io_get_filename_str(obo_file));
     obo_parse_tree_add_stanza(obo_parse_tree, obo_stanza);
     while (!had_err &&
-           (any_char(obo_file, false) || gt_io_peek(obo_file) == COMMENT_CHAR)) {
+           (any_char(obo_file, false) ||
+            gt_io_peek(obo_file) == COMMENT_CHAR)) {
       gt_str_reset(tag);
       gt_str_reset(value);
       if (gt_io_peek(obo_file) == COMMENT_CHAR)

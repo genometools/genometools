@@ -132,7 +132,8 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
   gff3_output_leading(gf, gff3_visitor->outfp);
 
   /* show unique id part of attributes */
-  if ((id = hashmap_get(gff3_visitor->gt_genome_feature_to_unique_id_str, gn))) {
+  if ((id = hashmap_get(gff3_visitor->gt_genome_feature_to_unique_id_str,
+                        gn))) {
     gt_genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, gt_str_get(id));
     part_shown = true;
   }
@@ -240,9 +241,10 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
                                           store_ids, true, err);
   if (!had_err) {
     if (gt_genome_node_is_tree((GT_GenomeNode*) gf)) {
-      had_err = gt_genome_node_traverse_children((GT_GenomeNode*) gf, gff3_visitor,
-                                              gff3_show_genome_feature, true,
-                                              err);
+      had_err = gt_genome_node_traverse_children((GT_GenomeNode*) gf,
+                                                 gff3_visitor,
+                                                 gff3_show_genome_feature, true,
+                                                 err);
     }
     else {
       /* got a DAG -> traverse bin breadth first fashion to make sure that the
@@ -266,7 +268,8 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
   return had_err;
 }
 
-static int gff3_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
+static int gff3_visitor_sequence_region(GenomeVisitor *gv,
+                                        GT_SequenceRegion *sr,
                                         GT_UNUSED GT_Error *err)
 {
   GFF3Visitor *gff3_visitor;
@@ -277,10 +280,11 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr
   assert(!gt_genome_node_has_children((GT_GenomeNode*) sr));
 
   gff3_version_string(gv);
-  gt_genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n", GFF_SEQUENCE_REGION,
-                  gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr)),
-                  gt_genome_node_get_start((GT_GenomeNode*) sr),
-                  gt_genome_node_get_end((GT_GenomeNode*) sr));
+  gt_genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n",
+                     GFF_SEQUENCE_REGION,
+                     gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr)),
+                     gt_genome_node_get_start((GT_GenomeNode*) sr),
+                     gt_genome_node_get_end((GT_GenomeNode*) sr));
   return 0;
 }
 

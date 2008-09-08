@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_TYPE_FACTORY_H
-#define FEATURE_TYPE_FACTORY_H
+#ifndef TYPE_FACTORY_H
+#define TYPE_FACTORY_H
 
 /* The GT_TypeFactory interface. Implementations of the GT_TypeFactory
    interface are used to create GT_GenomeFeatureTypes.

@@ -33,7 +33,8 @@ struct RegionMapping {
   unsigned int reference_count;
 };
 
-RegionMapping* region_mapping_new_mapping(GT_Str *mapping_filename, GT_Error *err)
+RegionMapping* region_mapping_new_mapping(GT_Str *mapping_filename,
+                                          GT_Error *err)
 {
   RegionMapping *rm;
   gt_error_check(err);
@@ -64,8 +65,8 @@ RegionMapping* region_mapping_ref(RegionMapping *rm)
   return rm;
 }
 
-static GT_Str* region_mapping_map(RegionMapping *rm, const char *sequence_region,
-                               GT_Error *err)
+static GT_Str* region_mapping_map(RegionMapping *rm,
+                                  const char *sequence_region, GT_Error *err)
 {
   gt_error_check(err);
   assert(rm && sequence_region);
@@ -75,7 +76,8 @@ static GT_Str* region_mapping_map(RegionMapping *rm, const char *sequence_region
     return mapping_map_string(rm->mapping, sequence_region, err);
 }
 
-static int update_gt_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid, GT_Error *err)
+static int update_gt_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid,
+                                         GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);

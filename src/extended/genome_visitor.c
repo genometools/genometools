@@ -37,7 +37,8 @@ void* genome_visitor_cast(GT_UNUSED const GenomeVisitorClass *gvc,
   return gv;
 }
 
-int genome_visitor_visit_comment(GenomeVisitor *gv, GT_Comment *c, GT_Error *err)
+int genome_visitor_visit_comment(GenomeVisitor *gv, GT_Comment *c,
+                                 GT_Error *err)
 {
   gt_error_check(err);
   assert(gv && c && gv->c_class);
@@ -54,7 +55,8 @@ int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
   return gv->c_class->genome_feature(gv, gf, err);
 }
 
-int genome_visitor_visit_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
+int genome_visitor_visit_sequence_region(GenomeVisitor *gv,
+                                         GT_SequenceRegion *sr,
                                          GT_Error *err)
 {
   gt_error_check(err);

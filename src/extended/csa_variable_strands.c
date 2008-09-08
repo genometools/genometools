@@ -22,8 +22,8 @@
 
 typedef struct {
   GT_Array *splice_forms;
-  GetGenomicGT_RangeFunc get_genomic_range;
-  GetGT_StrandFunc get_strand;
+  GetGenomicRangeFunc get_genomic_range;
+  GetStrandFunc get_strand;
 } StoreSpliceFormInfo;
 
 static void store_splice_form(GT_Array *spliced_alignments_in_form,
@@ -35,7 +35,8 @@ static void store_splice_form(GT_Array *spliced_alignments_in_form,
   CSASpliceForm *splice_form;
   unsigned long i, sa;
   assert(info);
-  assert(spliced_alignments_in_form && gt_array_size(spliced_alignments_in_form));
+  assert(spliced_alignments_in_form &&
+         gt_array_size(spliced_alignments_in_form));
   sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, 0);
   splice_form = csa_splice_form_new((char*) set_of_sas + sa * size_of_sa,
                                     info->get_genomic_range, info->get_strand);
@@ -53,7 +54,8 @@ static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
   assert(genes && splice_forms);
   /* put splice forms into appropirate genes */
   for (i = 0; i < gt_array_size(splice_forms); i++) {
-    CSASpliceForm *splice_form = *(CSASpliceForm**) gt_array_get(splice_forms, i);
+    CSASpliceForm *splice_form = *(CSASpliceForm**)
+                                 gt_array_get(splice_forms, i);
     switch (csa_splice_form_strand(splice_form)) {
       case GT_STRAND_FORWARD:
         if (!forward_gene)
@@ -93,8 +95,9 @@ static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
 GT_Array* csa_variable_strands(const void *set_of_sas,
                                unsigned long number_of_sas,
                                size_t size_of_sa,
-                               GetGenomicGT_RangeFunc get_genomic_range,
-                               GetGT_StrandFunc get_strand, GetExonsFunc get_exons)
+                               GetGenomicRangeFunc get_genomic_range,
+                               GetStrandFunc get_strand,
+                               GetExonsFunc get_exons)
 {
   StoreSpliceFormInfo info;
   GT_Array *genes;

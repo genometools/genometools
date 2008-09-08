@@ -47,7 +47,8 @@ static void genemergeprocessing(ParseStruct *, RegionStruct **, GT_Error *);
    Parameter: Zeiger auf ParseStruct, Zeiger auf RegionStruct,
               der "reale" Leserahmen
    Returnwert: void */
-static int frameshiftprocessing(ParseStruct *, RegionStruct **, short, GT_Error *);
+static int frameshiftprocessing(ParseStruct *, RegionStruct **, short,
+                                GT_Error *);
 
 /* Funktion zur Ueberpruefung von Sequenzbereichen auf beinhaltende
    Stop-Codons

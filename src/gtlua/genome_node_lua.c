@@ -217,7 +217,8 @@ static int gt_genome_node_lua_is_part_of_genome_node(lua_State *L)
   GT_GenomeNode **parent, **child;
   parent = check_genome_node(L, 1);
   child  = check_genome_node(L, 2);
-  gt_genome_node_is_part_of_genome_node(*parent, gt_genome_node_rec_ref(*child));
+  gt_genome_node_is_part_of_genome_node(*parent,
+                                        gt_genome_node_rec_ref(*child));
   return 0;
 }
 

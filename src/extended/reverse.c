@@ -32,7 +32,8 @@ static int complement(char *reverse_char, char dna_char, GT_Error *err)
     case 't': *reverse_char = 'a'; return 0;
     case 'n': *reverse_char = 'n'; return 0;
     default:
-      gt_error_set(err, "complement of DNA character '%c' not defined", dna_char);
+      gt_error_set(err, "complement of DNA character '%c' not defined",
+                   dna_char);
       return -1;
   }
 }

@@ -27,7 +27,7 @@ struct GT_GenomeNodeIterator {
   bool direct;
 };
 
-static GT_GenomeNodeIterator* gt_genome_node_iterator_new_base(GT_GenomeNode *gn)
+static GT_GenomeNodeIterator* genome_node_iterator_new_base(GT_GenomeNode *gn)
 {
   GT_GenomeNodeIterator *gni;
   assert(gn);
@@ -43,7 +43,7 @@ GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *gn)
   GT_GenomeNode *child_feature;
   GT_Dlistelem *dlistelem;
   assert(gn);
-  gni = gt_genome_node_iterator_new_base(gn);
+  gni = genome_node_iterator_new_base(gn);
   if (gt_genome_node_cast(gt_genome_feature_class(), gn) &&
       gt_genome_feature_is_pseudo((GT_GenomeFeature*) gn)) {
     /* add the children backwards to traverse in order */
@@ -77,7 +77,7 @@ GT_GenomeNodeIterator* gt_genome_node_iterator_new_direct(GT_GenomeNode *gn)
 {
   GT_GenomeNodeIterator *gni;
   assert(gn);
-  gni = gt_genome_node_iterator_new_base(gn);
+  gni = genome_node_iterator_new_base(gn);
   if (gn->children)
     add_children_to_stack(gni->node_stack, gn);
   gni->direct = true;

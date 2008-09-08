@@ -158,7 +158,8 @@ static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
     unsigned int i;
     /* enumerate all possible characters (at this node) */
     for (i = 0; i < gt_alpha_size(alpha); i++) {
-      long char_score = gt_score_matrix_get_score(score_matrix, qgram_rest[0], i);
+      long char_score = gt_score_matrix_get_score(score_matrix, qgram_rest[0],
+                                                  i);
       assert(i < CHAR_MAX);
       current_word[q - q_rest] = i;
       /* recursive call (descend into branch) */
@@ -174,9 +175,9 @@ static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
   <V> and the set of position lists <pos>, for the encoded word <w> of length
   <wlen>.
 */
-static void compute_env(GT_Bittab *V, Pos *pos, const char *w, unsigned long wlen,
-                        GT_Alpha *alpha, unsigned long q, long k,
-                        const GT_ScoreMatrix *score_matrix)
+static void compute_env(GT_Bittab *V, Pos *pos, const char *w,
+                        unsigned long wlen, GT_Alpha *alpha, unsigned long q,
+                        long k, const GT_ScoreMatrix *score_matrix)
 {
   long *max_pos_scores, *max_cumul_scores;
   unsigned long i;

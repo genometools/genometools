@@ -83,7 +83,8 @@ bool genome_stream_is_sorted(GenomeStream *gs)
   return gs->ensure_sorting;
 }
 
-void* genome_stream_cast(GT_UNUSED const GenomeStreamClass *gsc, GenomeStream *gs)
+void* genome_stream_cast(GT_UNUSED const GenomeStreamClass *gsc,
+                         GenomeStream *gs)
 {
   assert(gsc && gs && gs->c_class == gsc);
   return gs;

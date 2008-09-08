@@ -25,10 +25,13 @@ typedef struct GT_SequenceNode GT_SequenceNode;
 #include "extended/genome_node.h"
 
 const GT_GenomeNodeClass* gt_sequence_node_class(void);
+/* Takes ownership of <sequence>. */
 GT_GenomeNode*            gt_sequence_node_new(const char *description,
-                                         GT_Str *sequence); /* takes ownership */
-const char*            gt_sequence_node_get_description(const GT_SequenceNode*);
-const char*            gt_sequence_node_get_sequence(const GT_SequenceNode*);
-unsigned long          gt_sequence_node_get_sequence_length(const GT_SequenceNode*);
+                                               GT_Str *sequence);
+const char*               gt_sequence_node_get_description(const
+                                                           GT_SequenceNode*);
+const char*               gt_sequence_node_get_sequence(const GT_SequenceNode*);
+unsigned long             gt_sequence_node_get_sequence_length(const
+                                                              GT_SequenceNode*);
 
 #endif

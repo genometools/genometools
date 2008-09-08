@@ -420,13 +420,14 @@ static void XMLCALL endElement(void *data, const char *name)
           /* Speichern des Hit-from Wertes in der matrix_info Struktur
              innerhalb der parsestruct-Struktur */
           gt_strarray_add_cstr(MATRIXSTRUCT(hit_from),
-                            gt_str_get(PARSESTRUCT(buf_ptr)));
+                               gt_str_get(PARSESTRUCT(buf_ptr)));
         }
         else
         {
           gt_genfile_xprintf(HITFILEOUT, "%s ",
-                          gt_str_get(PARSESTRUCT(hit_gi_nr_tmp)));
-          gt_genfile_xprintf(HITFILEOUT, "%s ", gt_str_get(PARSESTRUCT(buf_ptr)));
+                             gt_str_get(PARSESTRUCT(hit_gi_nr_tmp)));
+          gt_genfile_xprintf(HITFILEOUT, "%s ",
+                             gt_str_get(PARSESTRUCT(buf_ptr)));
         }
       }
       /* Hit-to XML-Tag - Bearbeitung siehe Hit-from-Tag */
@@ -442,7 +443,8 @@ static void XMLCALL endElement(void *data, const char *name)
         }
         else
         {
-          gt_genfile_xprintf(HITFILEOUT, "%s \n", gt_str_get(PARSESTRUCT(buf_ptr)));
+          gt_genfile_xprintf(HITFILEOUT, "%s \n",
+                             gt_str_get(PARSESTRUCT(buf_ptr)));
         }
       }
       /* Query-Frame XML-Tag; bei der Berechnung der Combined-Scores

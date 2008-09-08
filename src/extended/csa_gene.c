@@ -37,7 +37,8 @@ void csa_gene_delete(CSAGene *gene)
   unsigned long i;
   if (!gene) return;
   for (i = 0; i < gt_array_size(gene->splice_forms); i++)
-    csa_splice_form_delete(*(CSASpliceForm**) gt_array_get(gene->splice_forms, i));
+    csa_splice_form_delete(*(CSASpliceForm**) gt_array_get(gene->splice_forms,
+                                                           i));
   gt_array_delete(gene->splice_forms);
   gt_free(gene);
 }
@@ -72,7 +73,8 @@ GT_Range csa_gene_genomic_range(const CSAGene *gene)
   gene_range.end = 0UL;
   for (i = 0; i < gt_array_size(gene->splice_forms); i++) {
     tmp_range = csa_splice_form_genomic_range(*(CSASpliceForm**)
-                                              gt_array_get(gene->splice_forms, i));
+                                              gt_array_get(gene->splice_forms,
+                                                           i));
     if (tmp_range.start < gene_range.start)
       gene_range.start = tmp_range.start;
     if (tmp_range.end > gene_range.end)
@@ -92,5 +94,6 @@ void* csa_gene_get_representative(const CSAGene *gene)
 {
   assert(gene);
   return csa_splice_form_get_representative(*(CSASpliceForm**)
-                                            gt_array_get(gene->splice_forms, 0));
+                                            gt_array_get(gene->splice_forms,
+                                                         0));
 }

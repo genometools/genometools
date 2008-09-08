@@ -35,7 +35,7 @@
 #define TRANSCRIPT_NAME_ATTRIBUTE "transcript_name"
 
 struct GTF_parser {
-  Hashmap *gt_sequence_region_to_range, /* map from sequence regions to ranges */
+  Hashmap *sequence_region_to_range, /* map from sequence regions to ranges */
           *gene_id_hash, /* map from gene_id to transcript_id hash */
           *seqid_to_str_mapping,
           *source_to_str_mapping,
@@ -86,7 +86,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 GTF_parser* gtf_parser_new(GT_TypeFactory *feature_type_factory)
 {
   GTF_parser *parser = gt_malloc(sizeof (GTF_parser));
-  parser->gt_sequence_region_to_range = hashmap_new(HASH_STRING,
+  parser->sequence_region_to_range = hashmap_new(HASH_STRING,
                                                  gt_free_func, gt_free_func);
   parser->gene_id_hash = hashmap_new(HASH_STRING, gt_free_func,
                                      (GT_FreeFunc) hashmap_delete);
@@ -145,10 +145,10 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   for (i = 1; i < gt_array_size(gt_genome_node_array); i++) {
     gn = *(GT_GenomeNode**) gt_array_get(gt_genome_node_array, i);
     mRNA_range = gt_range_join(mRNA_range, gt_genome_node_get_range(gn));
-    /* XXX: an error check is necessary here, otherwise gt_strand_join() can cause
-       a failed assertion */
+    /* XXX: an error check is necessary here, otherwise gt_strand_join() can
+       cause a failed assertion */
     mRNA_strand = gt_strand_join(mRNA_strand,
-                              gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
+                          gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
     if (gt_str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
       gt_error_set(err, "The features on lines %u and %u refer to different "
                 "genomic sequences (``seqname''), although they have the same "
@@ -163,16 +163,16 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   if (!had_err) {
     GT_FeatureType *mRNA_type;
     mRNA_type = gt_genome_feature_create_gft(*(GT_GenomeFeature**)
-                                          gt_array_get_first(gt_genome_node_array),
-                                          gft_mRNA);
+                                       gt_array_get_first(gt_genome_node_array),
+                                             gft_mRNA);
     assert(mRNA_type);
     mRNA_node = gt_genome_feature_new(mRNA_seqid, mRNA_type, mRNA_range,
                                    mRNA_strand);
 
     if ((tname = hashmap_get(cinfo->transcript_id_to_name_mapping,
-                              (const char*) key)))
-    {
-      gt_genome_feature_add_attribute((GT_GenomeFeature*) mRNA_node, "Name", tname);
+                              (const char*) key))) {
+      gt_genome_feature_add_attribute((GT_GenomeFeature*) mRNA_node, "Name",
+                                      tname);
     }
 
     /* register children */
@@ -220,7 +220,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       gn = *(GT_GenomeNode**) gt_array_get(mRNAs, i);
       gene_range = gt_range_join(gene_range, gt_genome_node_get_range(gn));
       gene_strand = gt_strand_join(gene_strand,
-                                gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
+                          gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
       assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
@@ -230,9 +230,9 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
                                    gene_strand);
 
     if ((gname = hashmap_get(cinfo->gene_id_to_name_mapping,
-                              (const char*) key)))
-    {
-      gt_genome_feature_add_attribute((GT_GenomeFeature*) gene_node, "Name", gname);
+                              (const char*) key))) {
+      gt_genome_feature_add_attribute((GT_GenomeFeature*) gene_node, "Name",
+                                      gname);
     }
 
     /* register children */
@@ -380,8 +380,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
-      if ((rangeptr = hashmap_get(parser->gt_sequence_region_to_range,
-                                  seqname))) {
+      if ((rangeptr = hashmap_get(parser->sequence_region_to_range, seqname))) {
         /* sequence region is already defined -> update range */
         *rangeptr = gt_range_join(range, *rangeptr);
       }
@@ -389,17 +388,18 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
         /* sequence region is not already defined -> define it */
         rangeptr = gt_malloc(sizeof (GT_Range));
         *rangeptr = range;
-        hashmap_add(parser->gt_sequence_region_to_range, gt_cstr_dup(seqname),
+        hashmap_add(parser->sequence_region_to_range, gt_cstr_dup(seqname),
                     rangeptr);
       }
 
       /* parse the score */
-      had_err = gt_parse_score(&score_is_defined, &score_value, score, line_number,
-                            filename, err);
+      had_err = gt_parse_score(&score_is_defined, &score_value, score,
+                               line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the strand */
-      had_err = gt_parse_strand(&gt_strand_value, strand, line_number, filename, err);
+      had_err = gt_parse_strand(&gt_strand_value, strand, line_number, filename,
+                               err);
       HANDLE_ERROR;
 
       /* parse the frame */
@@ -419,8 +419,9 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
         /* look for the two mandatory attributes */
         if (strncmp(token, GENE_ID_ATTRIBUTE, strlen(GENE_ID_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(GENE_ID_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
-                      "file \"%s\"", GENE_ID_ATTRIBUTE, line_number, filename);
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu "
+                         "in file \"%s\"", GENE_ID_ATTRIBUTE, line_number,
+                         filename);
             had_err = -1;
           }
           HANDLE_ERROR;
@@ -429,9 +430,9 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
         else if (strncmp(token, TRANSCRIPT_ID_ATTRIBUTE,
                          strlen(TRANSCRIPT_ID_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(TRANSCRIPT_ID_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
-                      "file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE, line_number,
-                      filename);
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu "
+                         "in file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE, line_number,
+                         filename);
             had_err = -1;
           }
           HANDLE_ERROR;
@@ -440,9 +441,9 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
         else if (strncmp(token, GENE_NAME_ATTRIBUTE,
                          strlen(GENE_NAME_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(GENE_NAME_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
-                      "file \"%s\"", GENE_NAME_ATTRIBUTE, line_number,
-                      filename);
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu "
+                         "in file \"%s\"", GENE_NAME_ATTRIBUTE, line_number,
+                         filename);
             had_err = -1;
           }
           HANDLE_ERROR;
@@ -456,9 +457,9 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
         else if (strncmp(token, TRANSCRIPT_NAME_ATTRIBUTE,
                          strlen(TRANSCRIPT_NAME_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(TRANSCRIPT_NAME_ATTRIBUTE)) {
-            gt_error_set(err, "missing value to attribute \"%s\" on line %lu in "
-                      "file \"%s\"", TRANSCRIPT_NAME_ATTRIBUTE, line_number,
-                      filename);
+            gt_error_set(err, "missing value to attribute \"%s\" on line %lu "
+                         "in file \"%s\"", TRANSCRIPT_NAME_ATTRIBUTE,
+                         line_number, filename);
             had_err = -1;
           }
           HANDLE_ERROR;
@@ -527,7 +528,8 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
       assert(seqid_str);
 
       /* construct the new feature */
-      gn = gt_genome_feature_new(seqid_str, gff_feature_type, range, gt_strand_value);
+      gn = gt_genome_feature_new(seqid_str, gff_feature_type, range,
+                                 gt_strand_value);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set source */
@@ -552,7 +554,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
 
   /* process all comments features */
   if (!had_err) {
-    had_err = hashmap_foreach(parser->gt_sequence_region_to_range,
+    had_err = hashmap_foreach(parser->sequence_region_to_range,
                               construct_sequence_regions, genome_nodes, NULL);
     assert(!had_err); /* construct_sequence_regions() is sane */
   }
@@ -577,7 +579,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
 void gtf_parser_delete(GTF_parser *parser)
 {
   if (!parser) return;
-  hashmap_delete(parser->gt_sequence_region_to_range);
+  hashmap_delete(parser->sequence_region_to_range);
   hashmap_delete(parser->gene_id_hash);
   hashmap_delete(parser->seqid_to_str_mapping);
   hashmap_delete(parser->source_to_str_mapping);

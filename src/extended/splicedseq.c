@@ -59,7 +59,8 @@ char* splicedseq_get(const Splicedseq *ss)
 
 bool splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss && gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
+  assert(ss &&
+         gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
   assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
   if (ss->forward && pos + 1 < gt_array_size(ss->positionmapping) &&
       *(unsigned long*) gt_array_get(ss->positionmapping, pos) + 1 !=
@@ -76,7 +77,8 @@ bool splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 
 unsigned long splicedseq_map(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss && gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
+  assert(ss &&
+         gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
   assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
   return *(unsigned long*) gt_array_get(ss->positionmapping, pos);
 }

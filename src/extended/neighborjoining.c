@@ -86,8 +86,8 @@ static double distance(const NeighborJoining *nj, unsigned long i,
   return distance;
 }
 
-static void updatertab(double *rtab, GT_Bittab *nodetab, unsigned long activenodes,
-                       NeighborJoining *nj)
+static void updatertab(double *rtab, GT_Bittab *nodetab,
+                       unsigned long activenodes, NeighborJoining *nj)
 {
   unsigned long i, j;
   for (i = 0; i < nj->numofnodes; i++) {

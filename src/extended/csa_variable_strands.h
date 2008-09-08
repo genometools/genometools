@@ -33,7 +33,7 @@
 /* Returns an array of CSAGenes. */
 GT_Array* csa_variable_strands(const void *set_of_sas,
                                unsigned long number_of_sas,
-                               size_t size_of_sa, GetGenomicGT_RangeFunc,
-                               GetGT_StrandFunc, GetExonsFunc);
+                               size_t size_of_sa, GetGenomicRangeFunc,
+                               GetStrandFunc, GetExonsFunc);
 
 #endif

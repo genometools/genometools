@@ -27,8 +27,8 @@ typedef struct {
   const void *set_of_sas;
   unsigned long number_of_sas;
   size_t size_of_sa;
-  GetGenomicGT_RangeFunc get_genomic_range;
-  GetGT_StrandFunc get_strand;
+  GetGenomicRangeFunc get_genomic_range;
+  GetStrandFunc get_strand;
   GetExonsFunc get_exons;
   ProcessSpliceFormFunc process_splice_form;
   void *userdata;
@@ -37,7 +37,7 @@ typedef struct {
 #ifndef NDEBUG
 static bool set_of_sas_is_sorted(const void *set_of_sas,
                                  unsigned long number_of_sas,
-                                 size_t size_of_sa, GetGenomicGT_RangeFunc
+                                 size_t size_of_sa, GetGenomicRangeFunc
                                  get_genomic_range)
 {
   GT_Range gt_range_a, gt_range_b;
@@ -113,7 +113,7 @@ static bool compatible(const ConsensusSA *csa,
                        unsigned long sa_1, unsigned long sa_2)
 {
   GT_Array *exons_sa_1, *exons_sa_2;
-  GT_Range gt_range_sa_1, gt_range_sa_2;
+  GT_Range range_sa_1, range_sa_2;
   unsigned long i, j, num_of_exons_1, num_of_exons_2,
                 start_1 = UNDEF_ULONG, start_2 = UNDEF_ULONG;
   bool start_values_set = false;
@@ -129,10 +129,10 @@ static bool compatible(const ConsensusSA *csa,
   exons_sa_2 = gt_array_new(sizeof (GT_Range));
 
   /* get ranges */
-  gt_range_sa_1 = extract_genomic_range(csa, sa_1);
-  gt_range_sa_2 = extract_genomic_range(csa, sa_2);
+  range_sa_1 = extract_genomic_range(csa, sa_1);
+  range_sa_2 = extract_genomic_range(csa, sa_2);
 
-  if (!gt_range_overlap(gt_range_sa_1, gt_range_sa_2)) {
+  if (!gt_range_overlap(range_sa_1, range_sa_2)) {
     gt_array_delete(exons_sa_1);
     gt_array_delete(exons_sa_2);
     return false;
@@ -178,10 +178,10 @@ static bool compatible(const ConsensusSA *csa,
   }
 
   while (start_1 < num_of_exons_1 && start_2 < num_of_exons_2) {
-    gt_range_sa_1 = *((GT_Range*) gt_array_get(exons_sa_1, start_1));
-    gt_range_sa_2 = *((GT_Range*) gt_array_get(exons_sa_2, start_2));
+    range_sa_1 = *((GT_Range*) gt_array_get(exons_sa_1, start_1));
+    range_sa_2 = *((GT_Range*) gt_array_get(exons_sa_2, start_2));
 
-    if (gt_range_overlap(gt_range_sa_1, gt_range_sa_2)) {
+    if (gt_range_overlap(range_sa_1, range_sa_2)) {
       /* analyze acceptor sites */
 
       /* see if at least one exon has a acceptor site (on the left).
@@ -192,21 +192,21 @@ static bool compatible(const ConsensusSA *csa,
           has_acceptor_site(exons_sa_2, start_2)) {
         if (has_acceptor_site(exons_sa_1, start_1) &&
             has_acceptor_site(exons_sa_2, start_2) &&
-            gt_range_sa_1.start!= gt_range_sa_2.start) {
+            range_sa_1.start!= range_sa_2.start) {
           /* the acceptor sites are different */
           gt_array_delete(exons_sa_1);
           gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_acceptor_site(exons_sa_1, start_1) &&
-                 gt_range_sa_2.start + fuzzlength < gt_range_sa_1.start) {
+                 range_sa_2.start + fuzzlength < range_sa_1.start) {
           /* not within fuzzlength */
           gt_array_delete(exons_sa_1);
           gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_acceptor_site(exons_sa_2, start_2) &&
-                 gt_range_sa_1.start + fuzzlength < gt_range_sa_2.start) {
+                 range_sa_1.start + fuzzlength < range_sa_2.start) {
           /* not within fuzzlength */
           gt_array_delete(exons_sa_1);
           gt_array_delete(exons_sa_2);
@@ -223,21 +223,21 @@ static bool compatible(const ConsensusSA *csa,
           has_donor_site(exons_sa_2, start_2)) {
         if (has_donor_site(exons_sa_1, start_1) &&
             has_donor_site(exons_sa_2, start_2) &&
-            gt_range_sa_1.end != gt_range_sa_2.end) {
+            range_sa_1.end != range_sa_2.end) {
           /* the donor sites are different */
           gt_array_delete(exons_sa_1);
           gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_donor_site(exons_sa_1, start_1) &&
-                 gt_range_sa_2.end - fuzzlength > gt_range_sa_1.end) {
+                 range_sa_2.end - fuzzlength > range_sa_1.end) {
           /* not within fuzzlength */
           gt_array_delete(exons_sa_1);
           gt_array_delete(exons_sa_2);
           return false;
         }
         else if (has_donor_site(exons_sa_2, start_2) &&
-                 gt_range_sa_1.end - fuzzlength > gt_range_sa_2.end) {
+                 range_sa_1.end - fuzzlength > range_sa_2.end) {
           /* not within fuzzlength */
           gt_array_delete(exons_sa_1);
           gt_array_delete(exons_sa_2);
@@ -264,14 +264,14 @@ static bool compatible(const ConsensusSA *csa,
 static bool contains(const ConsensusSA *csa,
                      unsigned long sa_1, unsigned long sa_2)
 {
-  GT_Range gt_range_sa_1, gt_range_sa_2;
+  GT_Range range_sa_1, range_sa_2;
   assert(csa);
 
   /* get ranges */
-  gt_range_sa_1 = extract_genomic_range(csa, sa_1);
-  gt_range_sa_2 = extract_genomic_range(csa, sa_2);
+  range_sa_1 = extract_genomic_range(csa, sa_1);
+  range_sa_2 = extract_genomic_range(csa, sa_2);
 
-  if (gt_range_contains(gt_range_sa_1, gt_range_sa_2) && compatible(csa, sa_1, sa_2))
+  if (gt_range_contains(range_sa_1, range_sa_2) && compatible(csa, sa_1, sa_2))
     return true;
   return false;
 }
@@ -308,11 +308,11 @@ static void compute_left_or_right(GT_Bittab **left_or_right,
 static bool is_right_of(const ConsensusSA *csa,
                         unsigned long sa_1, unsigned long sa_2)
 {
-  GT_Range gt_range_sa_1, gt_range_sa_2;
+  GT_Range range_sa_1, range_sa_2;
   assert(csa);
-  gt_range_sa_1 = extract_genomic_range(csa, sa_1);
-  gt_range_sa_2 = extract_genomic_range(csa, sa_2);
-  if (gt_range_sa_1.start  > gt_range_sa_2.start && gt_range_sa_1.end > gt_range_sa_2.end)
+  range_sa_1 = extract_genomic_range(csa, sa_1);
+  range_sa_2 = extract_genomic_range(csa, sa_2);
+  if (range_sa_1.start  > range_sa_2.start && range_sa_1.end > range_sa_2.end)
     return true;
   return false;
 }
@@ -320,11 +320,11 @@ static bool is_right_of(const ConsensusSA *csa,
 static bool is_left_of(const ConsensusSA *csa,
                        unsigned long sa_1, unsigned long sa_2)
 {
-  GT_Range gt_range_sa_1, gt_range_sa_2;
+  GT_Range range_sa_1, range_sa_2;
   assert(csa);
-  gt_range_sa_1 = extract_genomic_range(csa, sa_1);
-  gt_range_sa_2 = extract_genomic_range(csa, sa_2);
-  if (gt_range_sa_1.start  < gt_range_sa_2.start && gt_range_sa_1.end < gt_range_sa_2.end)
+  range_sa_1 = extract_genomic_range(csa, sa_1);
+  range_sa_2 = extract_genomic_range(csa, sa_2);
+  if (range_sa_1.start  < range_sa_2.start && range_sa_1.end < range_sa_2.end)
     return true;
   return false;
 }
@@ -561,8 +561,8 @@ static void compute_csas(ConsensusSA *csa)
 }
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
-                  size_t size_of_sa, GetGenomicGT_RangeFunc get_genomic_range,
-                  GetGT_StrandFunc get_strand, GetExonsFunc get_exons,
+                  size_t size_of_sa, GetGenomicRangeFunc get_genomic_range,
+                  GetStrandFunc get_strand, GetExonsFunc get_exons,
                   ProcessSpliceFormFunc process_splice_form, void *userdata)
 {
   ConsensusSA csa;

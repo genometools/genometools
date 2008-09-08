@@ -137,7 +137,8 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
                   : is->stdinstr;
     /* read two nodes */
     had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
-                                            is->genome_node_buffer, filenamestr,                                            &is->line_number, is->fpin, err);
+                                            is->genome_node_buffer, filenamestr,
+                                            &is->line_number, is->fpin, err);
     if (had_err)
       break;
     if (status_code != EOF) {
@@ -260,7 +261,8 @@ void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
-int gff3_in_stream_set_offsetfile(GenomeStream *gs, GT_Str *offsetfile, GT_Error *err)
+int gff3_in_stream_set_offsetfile(GenomeStream *gs, GT_Str *offsetfile,
+                                  GT_Error *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);

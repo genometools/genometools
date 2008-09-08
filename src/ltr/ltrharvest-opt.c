@@ -56,7 +56,8 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
   }
   if (lo->gff3output)
   {
-    printf("#   outputfile gff3 format: %s\n", gt_str_get(lo->str_gff3filename));
+    printf("#   outputfile gff3 format: %s\n",
+           gt_str_get(lo->str_gff3filename));
   }
   printf("#   xdropbelowscore: %d\n", lo->xdropbelowscore);
   printf("#   similaritythreshold: %.2f\n", lo->similaritythreshold);

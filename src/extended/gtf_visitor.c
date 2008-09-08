@@ -46,7 +46,8 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   gt_array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c, GT_UNUSED GT_Error *err)
+static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
+                               GT_UNUSED GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   gt_error_check(err);
@@ -55,7 +56,8 @@ static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c, GT_UNUSED GT_Er
   return 0;
 }
 
-static int save_exon_node(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
+static int save_exon_node(GT_GenomeNode *gn, void *data,
+                          GT_UNUSED GT_Error *err)
 {
   GTFVisitor *gtf_visitor;
   gt_error_check(err);
@@ -135,7 +137,8 @@ static int gtf_show_genome_feature(GT_GenomeNode *gn, void *data, GT_Error *err)
       warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
               "\"%s\")",
               gt_feature_type_get_cstr(gt_genome_feature_get_type(gf)),
-              gt_genome_node_get_line_number(gn), gt_genome_node_get_filename(gn));
+              gt_genome_node_get_line_number(gn),
+              gt_genome_node_get_filename(gn));
   }
   return had_err;
 }

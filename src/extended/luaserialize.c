@@ -71,7 +71,8 @@ static int format_scalar(lua_State *L, GT_Str *out, int index, bool table_key,
   return had_err;
 }
 
-static int parse_table(lua_State *L, GT_Str *out, int index, int level, GT_Error *err)
+static int parse_table(lua_State *L, GT_Str *out, int index, int level,
+                       GT_Error *err)
 {
   int rval, had_err = 0;
   gt_error_check(err);
@@ -151,8 +152,9 @@ int lua_serializer_unit_test(GT_Error *err)
     gt_str_append_cstr(outstr, "config = {\n");
     lua_table_to_str(L, outstr, -1, err);
     gt_str_append_cstr(outstr, "}");
-    had_err = luaL_loadbuffer(L, gt_str_get(outstr), gt_str_length(outstr), "t2") ||
-                lua_pcall(L, 0, 0, 0);
+    had_err = luaL_loadbuffer(L, gt_str_get(outstr),
+                              gt_str_length(outstr), "t2") ||
+              lua_pcall(L, 0, 0, 0);
     if (!had_err)
     {
       ensure(had_err, gt_str_length(outstr) > 0);

@@ -511,13 +511,15 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
     if (file_exists(gt_str_get(outputfilename)))
     {
-      parsestruct.fp_outputfile = gt_genfile_xopen(gt_str_get(outputfilename), "w+");
+      parsestruct.fp_outputfile = gt_genfile_xopen(gt_str_get(outputfilename),
+                                                   "w+");
       gt_genfile_close(parsestruct.fp_outputfile);
     }
 
     /* Der Name des Outputfiles wird den eingegebenen Optionen entnommen
        oder der default-Wert output.txt verwendet */
-    parsestruct.fp_outputfile = gt_genfile_xopen(gt_str_get(outputfilename), "a+");
+    parsestruct.fp_outputfile = gt_genfile_xopen(gt_str_get(outputfilename),
+                                                 "a+");
 
     if (!ARGUMENTS(hitfile_bool))
     {
@@ -533,7 +535,8 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
       }
 
       /* Datei fuer die GI-Nr. des XML-Files  */
-      parsestruct.fp_giexp_file = gt_genfile_xopen(gt_str_get(gi_numbers_txt), "w+");
+      parsestruct.fp_giexp_file = gt_genfile_xopen(gt_str_get(gi_numbers_txt),
+                                                   "w+");
 
       had_err = mg_xmlparser(parsestruct_ptr, fp_xmlfile, err);
 
@@ -588,7 +591,8 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
             {
               /* Der Schluessel ist die Hit-FASTA-Zeile */
               descr_ptr_hit =
-              (char *) gt_bioseq_get_description(parsestruct.hitseq, loop_index);
+              (char *) gt_bioseq_get_description(parsestruct.hitseq,
+                                                 loop_index);
               /* Position in der GT_Bioseq in den Speicher hitnum schreiben */
               hitnum[loop_index] = loop_index;
 

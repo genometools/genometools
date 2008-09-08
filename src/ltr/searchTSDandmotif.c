@@ -756,8 +756,8 @@ int findcorrectboundaries(
   /* second: 3'-border of left LTR and 5'-border of right LTR */
   if ( lo->motif.allowedmismatches < (unsigned int)4 )
   {
-    gt_log_log("second: searching for motif only around 3'border of left LTR and "
-            "5'-border of right LTR...\n");
+    gt_log_log("second: searching for motif only around 3'border of left LTR "
+               "and 5'-border of right LTR...\n");
     searchformotifonlyinside(lo,
         boundaries,
         ssar,
