@@ -311,9 +311,9 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
 
 static int construct_gt_bioseq_files(GT_Bioseq *bs, GT_Str *gt_bioseq_index_file,
                                   GT_Str *gt_bioseq_raw_file,
-                                  FastaReaderType fasta_reader_type, GT_Error *err)
+                                  GT_FastaReaderType gt_fasta_reader_type, GT_Error *err)
 {
-  FastaReader *fasta_reader = NULL;
+  GT_FastaReader *fasta_reader = NULL;
   GT_Str *sequence_filename;
   int had_err;
 
@@ -337,21 +337,21 @@ static int construct_gt_bioseq_files(GT_Bioseq *bs, GT_Str *gt_bioseq_index_file
 
   /* read fasta file */
   sequence_filename = bs->use_stdin ? NULL : bs->sequence_file;
-  switch (fasta_reader_type) {
-    case FASTA_READER_REC:
-      fasta_reader = fasta_reader_rec_new(sequence_filename);
+  switch (gt_fasta_reader_type) {
+    case GT_FASTA_READER_REC:
+      fasta_reader = gt_fasta_reader_rec_new(sequence_filename);
       break;
-    case FASTA_READER_FSM:
-      fasta_reader = fasta_reader_fsm_new(sequence_filename);
+    case GT_FASTA_READER_FSM:
+      fasta_reader = gt_fasta_reader_fsm_new(sequence_filename);
       break;
-    case FASTA_READER_SEQIT:
-      fasta_reader = fasta_reader_seqit_new(sequence_filename);
+    case GT_FASTA_READER_SEQIT:
+      fasta_reader = gt_fasta_reader_seqit_new(sequence_filename);
       break;
     default: assert(0);
   }
-  had_err = fasta_reader_run(fasta_reader, proc_description, proc_sequence_part,
+  had_err = gt_fasta_reader_run(fasta_reader, proc_description, proc_sequence_part,
                              proc_sequence_length, &gt_bioseq_files_info, err);
-  fasta_reader_delete(fasta_reader);
+  gt_fasta_reader_delete(fasta_reader);
 
   /* unregister the signal handler */
   if (!bs->use_stdin)
@@ -371,7 +371,7 @@ static int construct_gt_bioseq_files(GT_Bioseq *bs, GT_Str *gt_bioseq_index_file
 }
 
 static int gt_bioseq_fill(GT_Bioseq *bs, bool recreate,
-                       FastaReaderType fasta_reader_type, GT_Error *err)
+                       GT_FastaReaderType gt_fasta_reader_type, GT_Error *err)
 {
   GT_Str *gt_bioseq_index_file = NULL,
       *gt_bioseq_raw_file = NULL;
@@ -394,7 +394,7 @@ static int gt_bioseq_fill(GT_Bioseq *bs, bool recreate,
       file_is_newer(gt_str_get(bs->sequence_file), gt_str_get(gt_bioseq_index_file)) ||
       file_is_newer(gt_str_get(bs->sequence_file), gt_str_get(gt_bioseq_raw_file))) {
     had_err = construct_gt_bioseq_files(bs, gt_bioseq_index_file, gt_bioseq_raw_file,
-                                     fasta_reader_type, err);
+                                     gt_fasta_reader_type, err);
   }
 
   if (!had_err && !bs->use_stdin) {
@@ -412,8 +412,8 @@ static int gt_bioseq_fill(GT_Bioseq *bs, bool recreate,
 
 static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
                                                  bool recreate,
-                                                 FastaReaderType
-                                                 fasta_reader_type,
+                                                 GT_FastaReaderType
+                                                 gt_fasta_reader_type,
                                                  GT_Error *err)
 {
   GT_Bioseq *bs;
@@ -431,7 +431,7 @@ static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
     bs->sequence_file = gt_str_ref(sequence_file);
     bs->descriptions = gt_array_new(sizeof (char*));
     bs->sequence_ranges = gt_array_new(sizeof (GT_Range));
-    had_err = gt_bioseq_fill(bs, recreate, fasta_reader_type, err);
+    had_err = gt_bioseq_fill(bs, recreate, gt_fasta_reader_type, err);
   }
   if (had_err) {
     gt_bioseq_delete(bs);
@@ -446,7 +446,7 @@ GT_Bioseq* gt_bioseq_new(const char *sequence_file, GT_Error *err)
   GT_Str *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
-  bs = gt_bioseq_new_with_recreate_and_type(seqfile, false, FASTA_READER_REC, err);
+  bs = gt_bioseq_new_with_recreate_and_type(seqfile, false, GT_FASTA_READER_REC, err);
   gt_str_delete(seqfile);
   return bs;
 }
@@ -457,7 +457,7 @@ GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GT_Error *err)
   GT_Str *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
-  bs = gt_bioseq_new_with_recreate_and_type(seqfile, true, FASTA_READER_REC, err);
+  bs = gt_bioseq_new_with_recreate_and_type(seqfile, true, GT_FASTA_READER_REC, err);
   gt_str_delete(seqfile);
   return bs;
 }
@@ -465,11 +465,11 @@ GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GT_Error *err)
 GT_Bioseq* gt_bioseq_new_str(GT_Str *sequence_file, GT_Error *err)
 {
   return gt_bioseq_new_with_recreate_and_type(sequence_file, false,
-                                           FASTA_READER_REC, err);
+                                           GT_FASTA_READER_REC, err);
 }
 
 GT_Bioseq* gt_bioseq_new_with_fasta_reader(const char *sequence_file,
-                                     FastaReaderType fasta_reader, GT_Error *err)
+                                     GT_FastaReaderType fasta_reader, GT_Error *err)
 {
   GT_Bioseq *bs;
   GT_Str *seqfile;

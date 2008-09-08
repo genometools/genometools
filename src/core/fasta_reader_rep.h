@@ -15,27 +15,27 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_READER_REP_H
-#define FASTA_READER_REP_H
+#ifndef GT_FASTA_READER_REP_H
+#define GT_FASTA_READER_REP_H
 
 #include <stdio.h>
 #include "core/fasta_reader.h"
 
-struct FastaReaderClass
+struct GT_FastaReaderClass
 {
   size_t size;
-  int  (*run)(FastaReader*, FastaReaderProcDescription,
-              FastaReaderProcSequencePart, FastaReaderProcSequenceLength,
+  int  (*run)(GT_FastaReader*, GT_FastaReaderProcDescription,
+              GT_FastaReaderProcSequencePart, GT_FastaReaderProcSequenceLength,
               void *data, GT_Error*);
-  void (*free)(FastaReader*);
+  void (*free)(GT_FastaReader*);
 };
 
-struct FastaReader
+struct GT_FastaReader
 {
-  const FastaReaderClass *c_class;
+  const GT_FastaReaderClass *c_class;
 };
 
-FastaReader* fasta_reader_create(const FastaReaderClass*);
-void*        fasta_reader_cast(const FastaReaderClass*, FastaReader*);
+GT_FastaReader* gt_fasta_reader_create(const GT_FastaReaderClass*);
+void*        gt_fasta_reader_cast(const GT_FastaReaderClass*, GT_FastaReader*);
 
 #endif

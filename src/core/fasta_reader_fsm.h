@@ -15,17 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_READER_FSM_H
-#define FASTA_READER_FSM_H
+#ifndef GT_FASTA_READER_FSM_H
+#define GT_FASTA_READER_FSM_H
 
 #include "core/fasta_reader.h"
 #include "core/str.h"
 
 /* implements the ``fasta reader'' interface with a finite state machine
    (for educational purposes, the recursive descent parser is much faster) */
-typedef struct FastaReaderFSM FastaReaderFSM;
+typedef struct GT_FastaReaderFSM GT_FastaReaderFSM;
 
-const FastaReaderClass* fasta_reader_fsm_class(void);
-FastaReader*            fasta_reader_fsm_new(GT_Str *sequence_filename);
+const GT_FastaReaderClass* gt_fasta_reader_fsm_class(void);
+GT_FastaReader*            gt_fasta_reader_fsm_new(GT_Str *sequence_filename);
 
 #endif

@@ -21,13 +21,13 @@
 #include "core/fasta_separator.h"
 #include "core/io.h"
 
-struct FastaReaderRec {
-  const FastaReader parent_instance;
+struct GT_FastaReaderRec {
+  const GT_FastaReader parent_instance;
   IO *seqio;
 };
 
-#define fasta_reader_rec_cast(FR)\
-        fasta_reader_cast(fasta_reader_rec_class(), FR)
+#define gt_fasta_reader_rec_cast(FR)\
+        gt_fasta_reader_cast(gt_fasta_reader_rec_class(), FR)
 
 static int parse_fasta_description(GT_Str *description, IO *seqio, GT_Error *err)
 {
@@ -83,13 +83,13 @@ static int parse_fasta_entry(GT_Str *description, GT_Str *sequence, IO *seqio,
   return had_err;
 }
 
-static int fasta_reader_rec_run(FastaReader *fasta_reader,
-                                FastaReaderProcDescription proc_description,
-                                FastaReaderProcSequencePart proc_sequence_part,
-                                FastaReaderProcSequenceLength
+static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
+                                GT_FastaReaderProcDescription proc_description,
+                                GT_FastaReaderProcSequencePart proc_sequence_part,
+                                GT_FastaReaderProcSequenceLength
                                 proc_sequence_length, void *data, GT_Error *err)
 {
-  FastaReaderRec *fr = fasta_reader_rec_cast(fasta_reader);
+  GT_FastaReaderRec *fr = gt_fasta_reader_rec_cast(fasta_reader);
   GT_Str *description, *sequence;
   int had_err = 0;
   gt_error_check(err);
@@ -136,25 +136,25 @@ static int fasta_reader_rec_run(FastaReader *fasta_reader,
   return had_err;
 }
 
-static void fasta_reader_rec_free(FastaReader *fr)
+static void gt_fasta_reader_rec_free(GT_FastaReader *fr)
 {
-  FastaReaderRec *fasta_reader_rec = fasta_reader_rec_cast(fr);
-  io_delete(fasta_reader_rec->seqio);
+  GT_FastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
+  io_delete(gt_fasta_reader_rec->seqio);
 }
 
-const FastaReaderClass* fasta_reader_rec_class(void)
+const GT_FastaReaderClass* gt_fasta_reader_rec_class(void)
 {
-  static const FastaReaderClass frc = { sizeof (FastaReaderRec),
-                                        fasta_reader_rec_run,
-                                        fasta_reader_rec_free };
+  static const GT_FastaReaderClass frc = { sizeof (GT_FastaReaderRec),
+                                        gt_fasta_reader_rec_run,
+                                        gt_fasta_reader_rec_free };
   return &frc;
 }
 
-FastaReader* fasta_reader_rec_new(GT_Str *sequence_filename)
+GT_FastaReader* gt_fasta_reader_rec_new(GT_Str *sequence_filename)
 {
-  FastaReader *fr = fasta_reader_create(fasta_reader_rec_class());
-  FastaReaderRec *fasta_reader_rec = fasta_reader_rec_cast(fr);
-  fasta_reader_rec->seqio = io_new(sequence_filename
+  GT_FastaReader *fr = gt_fasta_reader_create(gt_fasta_reader_rec_class());
+  GT_FastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
+  gt_fasta_reader_rec->seqio = io_new(sequence_filename
                                    ? gt_str_get(sequence_filename) : NULL,
                                    "r");
   return fr;

@@ -15,16 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_READER_SEQIT_H
-#define FASTA_READER_SEQIT_H
+#ifndef GT_FASTA_READER_SEQIT_H
+#define GT_FASTA_READER_SEQIT_H
 
 #include "core/fasta_reader.h"
 #include "core/str.h"
 
 /* implements the ``fasta reader'' interface via the sequence iterator class */
-typedef struct FastaReaderSeqIt FastaReaderSeqIt;
+typedef struct GT_FastaReaderSeqIt GT_FastaReaderSeqIt;
 
-const FastaReaderClass* fasta_reader_seqit_class(void);
-FastaReader*            fasta_reader_seqit_new(GT_Str *sequence_filename);
+const GT_FastaReaderClass* gt_fasta_reader_seqit_class(void);
+GT_FastaReader*            gt_fasta_reader_seqit_new(GT_Str *sequence_filename);
 
 #endif

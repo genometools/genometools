@@ -15,39 +15,39 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_READER_H
-#define FASTA_READER_H
+#ifndef GT_FASTA_READER_H
+#define GT_FASTA_READER_H
 
 #include <stdbool.h>
 #include "core/error.h"
 
 /* the ``fasta reader'' interface */
-typedef struct FastaReaderClass FastaReaderClass;
-typedef struct FastaReader FastaReader;
+typedef struct GT_FastaReaderClass GT_FastaReaderClass;
+typedef struct GT_FastaReader GT_FastaReader;
 
 typedef enum {
-  FASTA_READER_REC,
-  FASTA_READER_FSM,
-  FASTA_READER_SEQIT
-} FastaReaderType;
+  GT_FASTA_READER_REC,
+  GT_FASTA_READER_FSM,
+  GT_FASTA_READER_SEQIT
+} GT_FastaReaderType;
 
 /* gets called for each description (the start of a fasta entry) */
-typedef int (*FastaReaderProcDescription)(const char *description,
+typedef int (*GT_FastaReaderProcDescription)(const char *description,
                                           unsigned long length, void *data,
                                           GT_Error*);
 /* gets called for each sequence part of a fasta entry */
-typedef int (*FastaReaderProcSequencePart)(const char *seqpart,
+typedef int (*GT_FastaReaderProcSequencePart)(const char *seqpart,
                                            unsigned long length, void *data,
                                            GT_Error*);
 /* gets called after a fasta entry has been read */
-typedef int (*FastaReaderProcSequenceLength)(unsigned long, void *data, GT_Error*);
+typedef int (*GT_FastaReaderProcSequenceLength)(unsigned long, void *data, GT_Error*);
 
 /* construct a new fasta reader for the file named <sequence_filename>, pass
    NULL to read from stdin */
-int          fasta_reader_run(FastaReader*, FastaReaderProcDescription,
-                              FastaReaderProcSequencePart,
-                              FastaReaderProcSequenceLength, void *data,
+int          gt_fasta_reader_run(GT_FastaReader*, GT_FastaReaderProcDescription,
+                              GT_FastaReaderProcSequencePart,
+                              GT_FastaReaderProcSequenceLength, void *data,
                               GT_Error*);
-void         fasta_reader_delete(FastaReader*);
+void         gt_fasta_reader_delete(GT_FastaReader*);
 
 #endif

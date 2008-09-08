@@ -22,24 +22,24 @@
 #include "core/seqiterator.h"
 #include "core/strarray.h"
 
-struct FastaReaderSeqIt {
-  const FastaReader parent_instance;
+struct GT_FastaReaderSeqIt {
+  const GT_FastaReader parent_instance;
   GT_StrArray *filenametab;
   SeqIterator *seqit;
 };
 
-#define fasta_reader_seqit_cast(FR)\
-        fasta_reader_cast(fasta_reader_seqit_class(), FR)
+#define gt_fasta_reader_seqit_cast(FR)\
+        gt_fasta_reader_cast(gt_fasta_reader_seqit_class(), FR)
 
-static int fasta_reader_seqit_run(FastaReader *fasta_reader,
-                                  FastaReaderProcDescription proc_description,
-                                  FastaReaderProcSequencePart
+static int gt_fasta_reader_seqit_run(GT_FastaReader *fasta_reader,
+                                  GT_FastaReaderProcDescription proc_description,
+                                  GT_FastaReaderProcSequencePart
                                   proc_sequence_part,
-                                  FastaReaderProcSequenceLength
+                                  GT_FastaReaderProcSequenceLength
                                   proc_sequence_length,
                                   void *data, GT_Error *err)
 {
-  FastaReaderSeqIt *fasta_reader_seqit = fasta_reader_seqit_cast(fasta_reader);
+  GT_FastaReaderSeqIt *gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fasta_reader);
   const Uchar *sequence;
   unsigned long len;
   char *desc;
@@ -49,7 +49,7 @@ static int fasta_reader_seqit_run(FastaReader *fasta_reader,
   /* at least one function has to be defined */
   assert(proc_description || proc_sequence_part || proc_sequence_length);
 
-  while ((rval = seqiterator_next(fasta_reader_seqit->seqit, &sequence, &len,
+  while ((rval = seqiterator_next(gt_fasta_reader_seqit->seqit, &sequence, &len,
                                   &desc, err))) {
     if (rval < 0) {
       had_err = -1;
@@ -71,32 +71,32 @@ static int fasta_reader_seqit_run(FastaReader *fasta_reader,
   return had_err;
 }
 
-static void fasta_reader_seqit_free(FastaReader *fr)
+static void gt_fasta_reader_seqit_free(GT_FastaReader *fr)
 {
-  FastaReaderSeqIt *fasta_reader_seqit = fasta_reader_seqit_cast(fr);
-  gt_strarray_delete(fasta_reader_seqit->filenametab);
-  seqiterator_delete(fasta_reader_seqit->seqit);
+  GT_FastaReaderSeqIt *gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);
+  gt_strarray_delete(gt_fasta_reader_seqit->filenametab);
+  seqiterator_delete(gt_fasta_reader_seqit->seqit);
 }
 
-const FastaReaderClass* fasta_reader_seqit_class(void)
+const GT_FastaReaderClass* gt_fasta_reader_seqit_class(void)
 {
-  static const FastaReaderClass frc = { sizeof (FastaReaderSeqIt),
-                                        fasta_reader_seqit_run,
-                                        fasta_reader_seqit_free };
+  static const GT_FastaReaderClass frc = { sizeof (GT_FastaReaderSeqIt),
+                                        gt_fasta_reader_seqit_run,
+                                        gt_fasta_reader_seqit_free };
   return &frc;
 }
 
-FastaReader* fasta_reader_seqit_new(GT_Str *sequence_filename)
+GT_FastaReader* gt_fasta_reader_seqit_new(GT_Str *sequence_filename)
 {
-  FastaReader *fr;
-  FastaReaderSeqIt *fasta_reader_seqit;
+  GT_FastaReader *fr;
+  GT_FastaReaderSeqIt *gt_fasta_reader_seqit;
   assert(sequence_filename);
-  fr = fasta_reader_create(fasta_reader_seqit_class());
-  fasta_reader_seqit = fasta_reader_seqit_cast(fr);
-  fasta_reader_seqit->filenametab = gt_strarray_new();
-  gt_strarray_add_cstr(fasta_reader_seqit->filenametab,
+  fr = gt_fasta_reader_create(gt_fasta_reader_seqit_class());
+  gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);
+  gt_fasta_reader_seqit->filenametab = gt_strarray_new();
+  gt_strarray_add_cstr(gt_fasta_reader_seqit->filenametab,
                     gt_str_get(sequence_filename));
-  fasta_reader_seqit->seqit = seqiterator_new(fasta_reader_seqit->filenametab,
+  gt_fasta_reader_seqit->seqit = seqiterator_new(gt_fasta_reader_seqit->filenametab,
                                               NULL, true);
   return fr;
 }

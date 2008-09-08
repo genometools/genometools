@@ -15,16 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_READER_REC_H
-#define FASTA_READER_REC_H
+#ifndef GT_FASTA_READER_REC_H
+#define GT_FASTA_READER_REC_H
 
 #include "core/fasta_reader.h"
 #include "core/str.h"
 
 /* implements the ``fasta reader'' interface with a recursive descent parser */
-typedef struct FastaReaderRec FastaReaderRec;
+typedef struct GT_FastaReaderRec GT_FastaReaderRec;
 
-const FastaReaderClass* fasta_reader_rec_class(void);
-FastaReader*            fasta_reader_rec_new(GT_Str *sequence_filename);
+const GT_FastaReaderClass* gt_fasta_reader_rec_class(void);
+GT_FastaReader*            gt_fasta_reader_rec_new(GT_Str *sequence_filename);
 
 #endif

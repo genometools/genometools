@@ -144,18 +144,18 @@ static int gt_gt_bioseq_runner(int argc, const char **argv, int parsed_args,
 {
   GT_BioseqArguments *arguments = tool_arguments;
   GT_Bioseq *bioseq;
-  FastaReaderType reader_type = FASTA_READER_REC;
+  GT_FastaReaderType reader_type = GT_FASTA_READER_REC;
   int arg = parsed_args, had_err = 0;
   gt_error_check(err);
   assert(tool_arguments);
 
   /* determine fasta reader type */
   if (!strcmp(gt_str_get(arguments->reader), "rec"))
-    reader_type = FASTA_READER_REC;
+    reader_type = GT_FASTA_READER_REC;
   else if (!strcmp(gt_str_get(arguments->reader), "fsm"))
-    reader_type = FASTA_READER_FSM;
+    reader_type = GT_FASTA_READER_FSM;
   else if (!strcmp(gt_str_get(arguments->reader), "seqit"))
-    reader_type = FASTA_READER_SEQIT;
+    reader_type = GT_FASTA_READER_SEQIT;
   else {
     assert(0); /* cannot happen */
   }

@@ -19,8 +19,8 @@
 #include "core/fasta_reader_rep.h"
 #include "core/fasta_separator.h"
 
-struct FastaReaderFSM {
-  const FastaReader parent_instance;
+struct GT_FastaReaderFSM {
+  const GT_FastaReader parent_instance;
   GT_Str *sequence_filename;
   GenFile *sequence_file;
 };
@@ -30,21 +30,21 @@ typedef enum {
   READING_DESCRIPTION,
   READING_SEQUENCE_AFTER_NEWLINE,
   READING_SEQUENCE
-} FastaReaderState;
+} GT_FastaReaderState;
 
-#define fasta_reader_fsm_cast(FR)\
-        fasta_reader_cast(fasta_reader_fsm_class(), FR)
+#define gt_fasta_reader_fsm_cast(FR)\
+        gt_fasta_reader_cast(gt_fasta_reader_fsm_class(), FR)
 
-static int fasta_reader_fsm_run(FastaReader *fasta_reader,
-                                FastaReaderProcDescription proc_description,
-                                FastaReaderProcSequencePart proc_sequence_part,
-                                FastaReaderProcSequenceLength
+static int gt_fasta_reader_fsm_run(GT_FastaReader *fasta_reader,
+                                GT_FastaReaderProcDescription proc_description,
+                                GT_FastaReaderProcSequencePart proc_sequence_part,
+                                GT_FastaReaderProcSequenceLength
                                 proc_sequence_length,
                                 void *data, GT_Error *err)
 {
-  FastaReaderFSM *fr = fasta_reader_fsm_cast(fasta_reader);
+  GT_FastaReaderFSM *fr = gt_fasta_reader_fsm_cast(fasta_reader);
   unsigned char cc;
-  FastaReaderState state = EXPECTING_SEPARATOR;
+  GT_FastaReaderState state = EXPECTING_SEPARATOR;
   unsigned long sequence_length = 0, line_counter = 1;
   GT_Str *description, *sequence;
   int had_err = 0;
@@ -183,31 +183,31 @@ static int fasta_reader_fsm_run(FastaReader *fasta_reader,
   return had_err;
 }
 
-static void fasta_reader_fsm_free(FastaReader *fr)
+static void gt_fasta_reader_fsm_free(GT_FastaReader *fr)
 {
-  FastaReaderFSM *fasta_reader_fsm = fasta_reader_fsm_cast(fr);
-  gt_str_delete(fasta_reader_fsm->sequence_filename);
-  genfile_close(fasta_reader_fsm->sequence_file);
+  GT_FastaReaderFSM *gt_fasta_reader_fsm = gt_fasta_reader_fsm_cast(fr);
+  gt_str_delete(gt_fasta_reader_fsm->sequence_filename);
+  genfile_close(gt_fasta_reader_fsm->sequence_file);
 }
 
-const FastaReaderClass* fasta_reader_fsm_class(void)
+const GT_FastaReaderClass* gt_fasta_reader_fsm_class(void)
 {
-  static const FastaReaderClass frc = { sizeof (FastaReaderFSM),
-                                        fasta_reader_fsm_run,
-                                        fasta_reader_fsm_free };
+  static const GT_FastaReaderClass frc = { sizeof (GT_FastaReaderFSM),
+                                        gt_fasta_reader_fsm_run,
+                                        gt_fasta_reader_fsm_free };
   return &frc;
 }
 
-FastaReader* fasta_reader_fsm_new(GT_Str *sequence_filename)
+GT_FastaReader* gt_fasta_reader_fsm_new(GT_Str *sequence_filename)
 {
-  FastaReader *fr = fasta_reader_create(fasta_reader_fsm_class());
-  FastaReaderFSM *fasta_reader_fsm = fasta_reader_fsm_cast(fr);
-  fasta_reader_fsm->sequence_filename = gt_str_ref(sequence_filename);
+  GT_FastaReader *fr = gt_fasta_reader_create(gt_fasta_reader_fsm_class());
+  GT_FastaReaderFSM *gt_fasta_reader_fsm = gt_fasta_reader_fsm_cast(fr);
+  gt_fasta_reader_fsm->sequence_filename = gt_str_ref(sequence_filename);
   if (sequence_filename) {
-    fasta_reader_fsm->sequence_file = genfile_xopen(gt_str_get(sequence_filename),
+    gt_fasta_reader_fsm->sequence_file = genfile_xopen(gt_str_get(sequence_filename),
                                                     "r");
   }
   else
-    fasta_reader_fsm->sequence_filename = gt_str_new_cstr("stdin");
+    gt_fasta_reader_fsm->sequence_filename = gt_str_new_cstr("stdin");
   return fr;
 }
