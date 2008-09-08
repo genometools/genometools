@@ -26,21 +26,21 @@ struct Seq {
   unsigned long seqlen;
   bool own_seq,
        own_description;
-  Alpha *seqalpha;
+  GT_Alpha *seqalpha;
 };
 
-Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha)
+Seq* seq_new(const char *seq, unsigned long seqlen, GT_Alpha *seqalpha)
 {
   Seq *s;
   assert(seq && seqalpha);
   s = gt_calloc(1, sizeof (Seq));
   s->seq = (char*) seq;
   s->seqlen = seqlen;
-  s->seqalpha = alpha_ref(seqalpha);
+  s->seqalpha = gt_alpha_ref(seqalpha);
   return s;
 }
 
-Seq* seq_new_own(char* seq, unsigned long seqlen, Alpha *seqalpha)
+Seq* seq_new_own(char* seq, unsigned long seqlen, GT_Alpha *seqalpha)
 {
   Seq *s = seq_new(seq, seqlen, seqalpha);
   s->own_seq = true;
@@ -79,13 +79,13 @@ const char* seq_get_encoded(Seq *s)
   assert(s);
   if (!s->encoded_seq) {
     s->encoded_seq = gt_malloc(sizeof (char) * (s->seqlen+1));
-    alpha_encode_seq(s->seqalpha, s->encoded_seq, (char*) s->seq, s->seqlen);
+    gt_alpha_encode_seq(s->seqalpha, s->encoded_seq, (char*) s->seq, s->seqlen);
     s->encoded_seq[s->seqlen] = '\0';
   }
   return s->encoded_seq;
 }
 
-const Alpha* seq_get_alpha(const Seq *s)
+const GT_Alpha* seq_get_alpha(const Seq *s)
 {
   assert(s);
   return s->seqalpha;
@@ -105,6 +105,6 @@ void seq_delete(Seq *s)
   if (s->own_description)
     gt_free(s->description);
   gt_free(s->encoded_seq);
-  alpha_delete(s->seqalpha);
+  gt_alpha_delete(s->seqalpha);
   gt_free(s);
 }

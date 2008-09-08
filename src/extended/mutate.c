@@ -43,16 +43,16 @@ static char* mutate_description(const char *description, unsigned int rate)
   return mutated_description;
 }
 
-static char random_character(Alpha *alpha, bool upper_case)
+static char random_character(GT_Alpha *alpha, bool upper_case)
 {
   /* we do not want to get wildcard characters */
-  char random_char = alpha_decode(alpha, rand_max(alpha_size(alpha) - 1 - 1));
+  char random_char = gt_alpha_decode(alpha, rand_max(gt_alpha_size(alpha) - 1 - 1));
   if (upper_case)
     return toupper(random_char);
   return tolower(random_char);
 }
 
-static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
+static char* mutate_seq(const char *seq, unsigned long len, GT_Alpha *alpha,
                         unsigned int rate)
 {
   unsigned long i, j, allocated, substitution_events = 0, insertion_events = 0,
@@ -102,7 +102,7 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
 }
 
 Seq* mutate(const char *description, const char *orig_seq, unsigned long len,
-            Alpha *alpha, unsigned int rate)
+            GT_Alpha *alpha, unsigned int rate)
 {
   char *mutated_description, *mutated_seq;
   Seq *seq;

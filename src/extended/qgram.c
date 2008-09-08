@@ -37,30 +37,30 @@ unsigned long qgram_encode(const char *w, unsigned long q,
 unsigned long qgram_step(unsigned long current_code, char previous, char next,
                          unsigned long alphabet_size,
                          unsigned long
-                         alpha_size_raised_to_the_power_of_q_minus_1)
+                         gt_alpha_size_raised_to_the_power_of_q_minus_1)
 
 {
   unsigned long next_code;
   next_code = (current_code - previous *
-               alpha_size_raised_to_the_power_of_q_minus_1) * alphabet_size +
+               gt_alpha_size_raised_to_the_power_of_q_minus_1) * alphabet_size +
               next;
   return next_code;
 }
 
 void qgram_compute(GT_Array *qgrams, const char *encoded_seq,
-                   unsigned long seqlen, unsigned long alpha_size,
+                   unsigned long seqlen, unsigned long gt_alpha_size,
                    unsigned int q)
 {
-  unsigned long i, code, alpha_size_raised_to_the_power_of_q_minus_1;
-  assert(qgrams && encoded_seq && alpha_size && q);
+  unsigned long i, code, gt_alpha_size_raised_to_the_power_of_q_minus_1;
+  assert(qgrams && encoded_seq && gt_alpha_size && q);
   if (seqlen >= q) {
-    alpha_size_raised_to_the_power_of_q_minus_1 = pow(alpha_size, q-1);
-    code = qgram_encode(encoded_seq, q, alpha_size);
+    gt_alpha_size_raised_to_the_power_of_q_minus_1 = pow(gt_alpha_size, q-1);
+    code = qgram_encode(encoded_seq, q, gt_alpha_size);
     gt_array_add(qgrams, code);
     i = 0;
     while (i + q < seqlen) {
-      code = qgram_step(code, encoded_seq[i], encoded_seq[i+q], alpha_size,
-                        alpha_size_raised_to_the_power_of_q_minus_1);
+      code = qgram_step(code, encoded_seq[i], encoded_seq[i+q], gt_alpha_size,
+                        gt_alpha_size_raised_to_the_power_of_q_minus_1);
       gt_array_add(qgrams, code);
       i++;
     }
@@ -68,15 +68,15 @@ void qgram_compute(GT_Array *qgrams, const char *encoded_seq,
 }
 
 void qgram_decode(char *qgram, unsigned long code, unsigned long q,
-                  Alpha *alpha)
+                  GT_Alpha *alpha)
 {
   unsigned int alphabet_size, c = 0;
   unsigned long i;
   assert(qgram && q && alpha);
-  alphabet_size = alpha_size(alpha);
+  alphabet_size = gt_alpha_size(alpha);
   for (i = q; i > 0; i--) {
     c = code % alphabet_size;
     code = (code - c) / alphabet_size;
-    qgram[i-1] = alpha_decode(alpha, c);
+    qgram[i-1] = gt_alpha_decode(alpha, c);
   }
 }

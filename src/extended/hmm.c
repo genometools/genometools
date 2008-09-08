@@ -594,7 +594,7 @@ int hmm_unit_test(GT_Error *err)
                                 "6435353336233121625364414432335163243633665562"
                                 "466662632666612355245242" };
   unsigned int *encoded_seq;
-  Alpha *alpha;
+  GT_Alpha *alpha;
   size_t i, j, len, size;
   HMM *fair_hmm, *loaded_hmm;
   int had_err = 0;
@@ -610,7 +610,7 @@ int hmm_unit_test(GT_Error *err)
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(coin_tosses[i]);
     for (j = 0; j < len; j++)
-      encoded_seq[j] = alpha_encode(alpha, coin_tosses[i][j]);
+      encoded_seq[j] = gt_alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
     ensure(had_err,
            double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
@@ -622,7 +622,7 @@ int hmm_unit_test(GT_Error *err)
   }
 
   gt_free(encoded_seq);
-  alpha_delete(alpha);
+  gt_alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_delete(loaded_hmm);
@@ -638,7 +638,7 @@ int hmm_unit_test(GT_Error *err)
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(dice_rolls[i]);
     for (j = 0; j < len; j++) {
-      encoded_seq[j] = alpha_encode(alpha, dice_rolls[i][j]);
+      encoded_seq[j] = gt_alpha_encode(alpha, dice_rolls[i][j]);
     }
     /* XXX: remove exp() calls */
     ensure(had_err,
@@ -651,7 +651,7 @@ int hmm_unit_test(GT_Error *err)
   }
 
   gt_free(encoded_seq);
-  alpha_delete(alpha);
+  gt_alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_delete(loaded_hmm);

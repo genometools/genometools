@@ -41,7 +41,7 @@ Bioseq*       bioseq_new_with_fasta_reader(const char *sequence_file,
                                            FastaReaderType fasta_reader,
                                            GT_Error*);
 void          bioseq_delete(Bioseq*);
-Alpha*        bioseq_get_alpha(Bioseq*);
+GT_Alpha*        bioseq_get_alpha(Bioseq*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */

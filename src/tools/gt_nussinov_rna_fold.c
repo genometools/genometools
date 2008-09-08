@@ -31,11 +31,11 @@
           had_err = -1;                                                        \
         }                                                                      \
         if (!had_err) {                                                        \
-          score_matrix_set_score(energy_function, alpha_encode(dna_alpha,      \
-                                CHAR_1), alpha_encode(dna_alpha, CHAR_2),      \
+          score_matrix_set_score(energy_function, gt_alpha_encode(dna_alpha,      \
+                                CHAR_1), gt_alpha_encode(dna_alpha, CHAR_2),      \
                                 rval);                                         \
-          score_matrix_set_score(energy_function, alpha_encode(dna_alpha,      \
-                                CHAR_2), alpha_encode(dna_alpha, CHAR_1),      \
+          score_matrix_set_score(energy_function, gt_alpha_encode(dna_alpha,      \
+                                CHAR_2), gt_alpha_encode(dna_alpha, CHAR_1),      \
                                 rval);                                         \
        }
 
@@ -139,7 +139,7 @@ static void traceback(unsigned long i, unsigned long j, int **E,
 static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
                               unsigned int l_min, unsigned int verbose,
                               ScoreMatrix *energy_function,
-                              Alpha *dna_alpha, FILE *fp)
+                              GT_Alpha *dna_alpha, FILE *fp)
 {
   unsigned long i;
   int **E;
@@ -147,7 +147,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   if (verbose) {
     fprintf(fp, "fold the following RNA sequence with Nussinov Algorithm:\n");
     for (i = 0; i < rna_length; i++) {
-      xfputc(alpha_decode(dna_alpha, rna_sequence[i]), fp);
+      xfputc(gt_alpha_decode(dna_alpha, rna_sequence[i]), fp);
     }
     xfputc('\n', fp);
     fprintf(fp, "length of RNA sequence = %lu\n", rna_length);
@@ -155,16 +155,16 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
     fprintf(fp, "l_min =  %u\n", l_min);
     fprintf(fp, "alpha(G,C) = alpha(C,G) = %d\n",
             score_matrix_get_score(energy_function,
-                                   alpha_encode(dna_alpha, 'G'),
-                                   alpha_encode(dna_alpha, 'C')));
+                                   gt_alpha_encode(dna_alpha, 'G'),
+                                   gt_alpha_encode(dna_alpha, 'C')));
     fprintf(fp, "alpha(A,U) = alpha(U,A) = %d\n",
             score_matrix_get_score(energy_function,
-                                   alpha_encode(dna_alpha, 'A'),
-                                   alpha_encode(dna_alpha, 'U')));
+                                   gt_alpha_encode(dna_alpha, 'A'),
+                                   gt_alpha_encode(dna_alpha, 'U')));
     fprintf(fp, "alpha(G,U) = alpha(U,G) = %d\n",
             score_matrix_get_score(energy_function,
-                                   alpha_encode(dna_alpha, 'U'),
-                                   alpha_encode(dna_alpha, 'G')));
+                                   gt_alpha_encode(dna_alpha, 'U'),
+                                   gt_alpha_encode(dna_alpha, 'G')));
     fprintf(fp, "all other alpha values have been set to infinity\n");
   }
 
@@ -207,7 +207,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GT_Error *err)
   unsigned int l_min = 0;
   char *rna_sequence = NULL;
   int parsed_args, rval, had_err = 0;
-  Alpha *dna_alpha;
+  GT_Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
   gt_error_check(err);
 
@@ -220,12 +220,12 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GT_Error *err)
   assert(parsed_args == 1);
 
   /* set DNA alphabet */
-  dna_alpha = alpha_new_dna();
+  dna_alpha = gt_alpha_new_dna();
   energy_function = score_matrix_new(dna_alpha);
 
   /* init the energy function */
-  for (i = 0; i < alpha_size(dna_alpha); i++) {
-    for (j = 0; j < alpha_size(dna_alpha); j++) {
+  for (i = 0; i < gt_alpha_size(dna_alpha); i++) {
+    for (j = 0; j < gt_alpha_size(dna_alpha); j++) {
       score_matrix_set_score(energy_function, i, j, INT_MAX);
     }
   }
@@ -247,7 +247,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GT_Error *err)
     /* save RNA sequence */
     rna_length = strlen(argv[5]);
     rna_sequence = cstr_dup(argv[5]);
-    alpha_encode_seq(dna_alpha, rna_sequence, rna_sequence, rna_length);
+    gt_alpha_encode_seq(dna_alpha, rna_sequence, rna_sequence, rna_length);
 
     /* fold RNA sequence with Nussinov algorithm */
     nussinov_rna_fold(rna_sequence, rna_length, l_min, 1, energy_function,
@@ -257,7 +257,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GT_Error *err)
   /* free */
   gt_free(rna_sequence);
   score_matrix_delete(energy_function);
-  alpha_delete(dna_alpha);
+  gt_alpha_delete(dna_alpha);
 
   return had_err;
 }

@@ -62,7 +62,7 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
   ScorefastaArguments *arguments = tool_arguments;
   unsigned long ulen, wlen;
   char *u, *w;
-  Alpha *alpha;
+  GT_Alpha *alpha;
 
   gt_error_check(err);
   assert(arguments);
@@ -76,17 +76,17 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
   strcpy(w, argv[parsed_args+1]);
 
   /* assign DNA alphabet */
-  alpha = alpha_new_dna();
+  alpha = gt_alpha_new_dna();
 
   /* transform u and w according to DNA alphabet */
-  alpha_encode_seq(alpha, u, u, ulen);
-  alpha_encode_seq(alpha, w, w, wlen);
+  gt_alpha_encode_seq(alpha, u, u, ulen);
+  gt_alpha_encode_seq(alpha, w, w, wlen);
 
   printf("scorefasta=%lu\n", scorefasta(u, ulen, w, wlen, arguments->q,
-                                        alpha_size(alpha)));
+                                        gt_alpha_size(alpha)));
 
   /* free space */
-  alpha_delete(alpha);
+  gt_alpha_delete(alpha);
   gt_free(u);
   gt_free(w);
 

@@ -26,31 +26,31 @@
 #include "core/xansi.h"
 
 struct ScoreMatrix {
-  Alpha *alpha;
+  GT_Alpha *alpha;
   unsigned int dimension;
   int **scores;
 };
 
-ScoreMatrix* score_matrix_new(Alpha *alpha)
+ScoreMatrix* score_matrix_new(GT_Alpha *alpha)
 {
   ScoreMatrix *sm;
   assert(alpha);
   sm = gt_malloc(sizeof (ScoreMatrix));
-  sm->alpha = alpha_ref(alpha);
-  sm->dimension = alpha_size(alpha);
+  sm->alpha = gt_alpha_ref(alpha);
+  sm->dimension = gt_alpha_size(alpha);
   array2dim_calloc(sm->scores, sm->dimension, sm->dimension);
   return sm;
 }
 
-static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
+static int parse_alphabet_line(GT_Array *index_to_gt_alpha_char_mapping,
                                Tokenizer *tz, GT_Error *err)
 {
   GT_Str *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   gt_error_check(err);
-  assert(index_to_alpha_char_mapping && tz);
-  assert(!gt_array_size(index_to_alpha_char_mapping));
+  assert(index_to_gt_alpha_char_mapping && tz);
+  assert(!gt_array_size(index_to_gt_alpha_char_mapping));
   while ((token = tokenizer_get_token(tz))) {
     if (gt_str_length(token) > 2) {
       gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
@@ -76,7 +76,7 @@ static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
       assert(!had_err);
       return 0;
     }
-    gt_array_add(index_to_alpha_char_mapping, amino_acid);
+    gt_array_add(index_to_gt_alpha_char_mapping, amino_acid);
     if (gt_str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
         gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
@@ -94,7 +94,7 @@ static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
     tokenizer_next_token(tz);
   }
   if (!had_err) {
-    if (!gt_array_size(index_to_alpha_char_mapping)) {
+    if (!gt_array_size(index_to_gt_alpha_char_mapping)) {
       gt_error_set(err, "could not parse a single alphabet character in file "
                 "'%s' (file empty or directory?)", tokenizer_get_filename(tz));
     had_err = -1;
@@ -105,14 +105,14 @@ static int parse_alphabet_line(GT_Array *index_to_alpha_char_mapping,
 }
 
 static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
-                            GT_Array *index_to_alpha_char_mapping,
+                            GT_Array *index_to_gt_alpha_char_mapping,
                             char *parsed_characters, GT_Error *err)
 {
   unsigned int i = 0;
   char amino_acid;
   int score, had_err = 0;
   GT_Str *token;
-  assert(sm && tz && index_to_alpha_char_mapping);
+  assert(sm && tz && index_to_gt_alpha_char_mapping);
   gt_error_check(err);
   token = tokenizer_get_token(tz);
   assert(token);
@@ -141,9 +141,9 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
       if (had_err)
         break;
       score_matrix_set_score(sm,
-                             alpha_encode(sm->alpha, amino_acid),
-                             alpha_encode(sm->alpha, *(char*)
-                             gt_array_get(index_to_alpha_char_mapping, i)), score);
+                             gt_alpha_encode(sm->alpha, amino_acid),
+                             gt_alpha_encode(sm->alpha, *(char*)
+                             gt_array_get(index_to_gt_alpha_char_mapping, i)), score);
       i++;
       gt_str_delete(token);
       tokenizer_next_token(tz);
@@ -158,19 +158,19 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
 static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
 {
   Tokenizer *tz;
-  GT_Array *index_to_alpha_char_mapping;
+  GT_Array *index_to_gt_alpha_char_mapping;
   unsigned int parsed_score_lines = 0;
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   gt_error_check(err);
   assert(sm && path && sm->alpha);
   tz = tokenizer_new(io_new(path, "r"));
-  index_to_alpha_char_mapping = gt_array_new(sizeof (char));
+  index_to_gt_alpha_char_mapping = gt_array_new(sizeof (char));
   tokenizer_skip_comment_lines(tz);
-  had_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, err);
+  had_err = parse_alphabet_line(index_to_gt_alpha_char_mapping, tz, err);
   if (!had_err) {
     while (tokenizer_has_token(tz)) {
-      had_err = parse_score_line(sm, tz, index_to_alpha_char_mapping,
+      had_err = parse_score_line(sm, tz, index_to_gt_alpha_char_mapping,
                                  parsed_characters, err);
       if (had_err)
         break;
@@ -180,12 +180,12 @@ static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
 
   /* check the number of parsed score lines */
   if (!had_err &&
-      parsed_score_lines != gt_array_size(index_to_alpha_char_mapping)) {
+      parsed_score_lines != gt_array_size(index_to_gt_alpha_char_mapping)) {
     gt_error_set(err, "the score matrix given in '%s' is not symmetric", path);
     had_err = -1;
   }
 
-  gt_array_delete(index_to_alpha_char_mapping);
+  gt_array_delete(index_to_gt_alpha_char_mapping);
   tokenizer_delete(tz);
 
   return had_err;
@@ -193,7 +193,7 @@ static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
 
 ScoreMatrix* score_matrix_new_read_protein(const char *path, GT_Error *err)
 {
-  Alpha *protein_alpha;
+  GT_Alpha *protein_alpha;
   ScoreMatrix *sm;
   int had_err;
 
@@ -201,9 +201,9 @@ ScoreMatrix* score_matrix_new_read_protein(const char *path, GT_Error *err)
   assert(path);
 
   /* create score matrix */
-  protein_alpha = alpha_new_protein();
+  protein_alpha = gt_alpha_new_protein();
   sm = score_matrix_new(protein_alpha);
-  alpha_delete(protein_alpha);
+  gt_alpha_delete(protein_alpha);
 
   /* parse matrix file */
   had_err = parse_score_matrix(sm, path, err);
@@ -249,13 +249,13 @@ void score_matrix_show(const ScoreMatrix *sm, FILE *fp)
   assert(sm && fp);
   /* show alphabet line */
   xfputc(' ', fp);
-  for (i = 0; i < alpha_size(sm->alpha); i++)
-    fprintf(fp, "  %c", alpha_decode(sm->alpha, i));
+  for (i = 0; i < gt_alpha_size(sm->alpha); i++)
+    fprintf(fp, "  %c", gt_alpha_decode(sm->alpha, i));
   xfputc('\n', fp);
   /* show score lines */
-  for (i = 0; i < alpha_size(sm->alpha); i++) {
-    xfputc(alpha_decode(sm->alpha, i), fp);
-    for (j = 0; j < alpha_size(sm->alpha); j++)
+  for (i = 0; i < gt_alpha_size(sm->alpha); i++) {
+    xfputc(gt_alpha_decode(sm->alpha, i), fp);
+    for (j = 0; j < gt_alpha_size(sm->alpha); j++)
       fprintf(fp, " %2d", score_matrix_get_score(sm, i, j));
     xfputc('\n', fp);
   }
@@ -264,7 +264,7 @@ void score_matrix_show(const ScoreMatrix *sm, FILE *fp)
 void score_matrix_delete(ScoreMatrix *sm)
 {
   if (!sm) return;
-  alpha_delete(sm->alpha);
+  gt_alpha_delete(sm->alpha);
   array2dim_delete(sm->scores);
   gt_free(sm);
 }

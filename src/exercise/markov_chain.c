@@ -27,7 +27,7 @@
 #define MINUSINFINITY   -99999.0
 
 struct MarkovChain {
-  Alpha *alpha;
+  GT_Alpha *alpha;
   unsigned long num_of_states;
   double **transition_prob; /* log values */
 };
@@ -40,14 +40,14 @@ MarkovChain* markov_chain_new(const char *states)
   assert(states && strlen(states));
   /* alloc */
   mc = gt_malloc(sizeof *mc);
-  mc->alpha = alpha_new();
+  mc->alpha = gt_alpha_new();
   mc->num_of_states = strlen(states);
   array2dim_malloc(mc->transition_prob, mc->num_of_states, mc->num_of_states);
   /* set alphabet */
   characters[1] = '\0';
   for (i = 0 ; i < mc->num_of_states; i++) {
     characters[0] = states[i];
-    alpha_add_mapping(mc->alpha, characters);
+    gt_alpha_add_mapping(mc->alpha, characters);
   }
   /* init */
   for (i = 0; i < mc->num_of_states; i++) {
@@ -62,7 +62,7 @@ void markov_chain_delete(MarkovChain *mc)
 {
   if (!mc) return;
   array2dim_delete(mc->transition_prob);
-  alpha_delete(mc->alpha);
+  gt_alpha_delete(mc->alpha);
   gt_free(mc);
 }
 
@@ -118,19 +118,19 @@ int markov_chain_compute_prob(const MarkovChain *mc, double *prob,
   gt_error_check(err);
   assert(mc && sequence);
   assert(markov_chain_is_valid(mc));
-  if (!alpha_char_is_valid(mc->alpha, sequence[0])) {
+  if (!gt_alpha_char_is_valid(mc->alpha, sequence[0])) {
     gt_error_set(err, "'%c' is not valid sequence character", sequence[0]);
     had_err = -1;
   }
   if (!had_err)
-    last_code = alpha_encode(mc->alpha, sequence[0]);
+    last_code = gt_alpha_encode(mc->alpha, sequence[0]);
   for (i = 1; !had_err && i < seqlen; i++) {
-    if (!alpha_char_is_valid(mc->alpha, sequence[i])) {
+    if (!gt_alpha_char_is_valid(mc->alpha, sequence[i])) {
       gt_error_set(err, "'%c' is not valid sequence character", sequence[i]);
       had_err = -1;
       break;
     }
-    cur_code = alpha_encode(mc->alpha, sequence[i]);
+    cur_code = gt_alpha_encode(mc->alpha, sequence[i]);
     if (mc->transition_prob[last_code][cur_code] == MINUSINFINITY) {
       logP = MINUSINFINITY;
       break;

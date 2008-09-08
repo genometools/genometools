@@ -31,25 +31,25 @@
 #define ALPHA_GUESS_MAX_LENGTH       5000
 #define ALPHA_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZ*-"
 
-struct Alpha {
+struct GT_Alpha {
   unsigned char code_to_character_map[UCHAR_MAX];
   unsigned int character_to_code_map[UCHAR_MAX],
                map_size,
                reference_count;
 };
 
-Alpha* alpha_new(void)
+GT_Alpha* gt_alpha_new(void)
 {
-  Alpha *a = gt_calloc(1, sizeof (Alpha));
+  GT_Alpha *a = gt_calloc(1, sizeof (GT_Alpha));
   memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
   memset(a->character_to_code_map, UNDEF_UCHAR, UCHAR_MAX);
   return a;
 }
 
-Alpha* alpha_new_dna(void)
+GT_Alpha* gt_alpha_new_dna(void)
 {
   unsigned int i;
-  Alpha *a = alpha_new();
+  GT_Alpha *a = gt_alpha_new();
 
   /* fill the code to character map */
   a->code_to_character_map[0] = 'a';
@@ -73,10 +73,10 @@ Alpha* alpha_new_dna(void)
   return a;
 }
 
-Alpha* alpha_new_protein(void)
+GT_Alpha* gt_alpha_new_protein(void)
 {
   unsigned int i;
-  Alpha *a = alpha_new();
+  GT_Alpha *a = gt_alpha_new();
 
   /* fill the code to character map */
   for (i = 0; PROTEIN_CHARACTERS_UPPERCASE[i] != '\0'; i++)
@@ -97,25 +97,25 @@ Alpha* alpha_new_protein(void)
   return a;
 }
 
-Alpha* alpha_guess(const char *seq, unsigned long seqlen)
+GT_Alpha* gt_alpha_guess(const char *seq, unsigned long seqlen)
 {
   unsigned long i;
   assert(seq && seqlen);
   for (i = 0; i < seqlen && i < ALPHA_GUESS_MAX_LENGTH; i++) {
     if (strchr(ALPHA_GUESS_PROTEIN_CHARS, seq[i]))
-      return alpha_new_protein();
+      return gt_alpha_new_protein();
   }
-  return alpha_new_dna();
+  return gt_alpha_new_dna();
 }
 
-Alpha* alpha_ref(Alpha *a)
+GT_Alpha* gt_alpha_ref(GT_Alpha *a)
 {
   assert(a);
   a->reference_count++;
   return a;
 }
 
-void alpha_add_mapping(Alpha *a, const char *characters)
+void gt_alpha_add_mapping(GT_Alpha *a, const char *characters)
 {
   size_t i, num_of_characters;
   assert(a && characters && a->map_size < UCHAR_MAX-1);
@@ -128,21 +128,21 @@ void alpha_add_mapping(Alpha *a, const char *characters)
   a->map_size++;
 }
 
-char alpha_decode(const Alpha *a, unsigned int c)
+char gt_alpha_decode(const GT_Alpha *a, unsigned int c)
 {
   assert(a);
   assert(a->code_to_character_map[c] != UNDEF_UCHAR);
   return a->code_to_character_map[c];
 }
 
-unsigned int alpha_encode(const Alpha *a, char c)
+unsigned int gt_alpha_encode(const GT_Alpha *a, char c)
 {
   assert(a);
   assert(a->character_to_code_map[(int) c] != UNDEF_UCHAR);
   return a->character_to_code_map[(int) c];
 }
 
-void alpha_decode_seq(const Alpha *a, char *out, char *in, unsigned long length)
+void gt_alpha_decode_seq(const GT_Alpha *a, char *out, char *in, unsigned long length)
 {
   unsigned long i;
   assert(a && out && in);
@@ -152,7 +152,7 @@ void alpha_decode_seq(const Alpha *a, char *out, char *in, unsigned long length)
   }
 }
 
-void alpha_encode_seq(const Alpha *a, char *out, char *in, unsigned long length)
+void gt_alpha_encode_seq(const GT_Alpha *a, char *out, char *in, unsigned long length)
 {
   unsigned long i;
   assert(a && out && in);
@@ -162,29 +162,29 @@ void alpha_encode_seq(const Alpha *a, char *out, char *in, unsigned long length)
   }
 }
 
-bool alpha_char_is_valid(const Alpha *a, char c)
+bool gt_alpha_char_is_valid(const GT_Alpha *a, char c)
 {
   if (a->character_to_code_map[(int) c] == UNDEF_CHAR)
     return false;
   return true;
 }
 
-bool alpha_is_compatible_with_alpha(const Alpha *alpha_a,
-                                            const Alpha *alpha_b)
+bool gt_alpha_is_compatible_with_alpha(const GT_Alpha *gt_alpha_a,
+                                            const GT_Alpha *gt_alpha_b)
 {
-  assert(alpha_a && alpha_b);
-  if (alpha_a->map_size == alpha_b->map_size)
+  assert(gt_alpha_a && gt_alpha_b);
+  if (gt_alpha_a->map_size == gt_alpha_b->map_size)
     return true;
   return false;
 }
 
-unsigned int alpha_size(const Alpha *a)
+unsigned int gt_alpha_size(const GT_Alpha *a)
 {
   assert(a);
   return a->map_size;
 }
 
-void alpha_delete(Alpha *a)
+void gt_alpha_delete(GT_Alpha *a)
 {
   if (!a) return;
   if (a->reference_count) { a->reference_count--; return; }

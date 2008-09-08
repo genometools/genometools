@@ -22,15 +22,15 @@
 
 #define ALPHA_METATABLE  "GenomeTools.alpha"
 #define check_alpha(L, POS) \
-        (Alpha**) luaL_checkudata(L, POS, ALPHA_METATABLE)
+        (GT_Alpha**) luaL_checkudata(L, POS, ALPHA_METATABLE)
 
 static int alpha_lua_new_protein(lua_State *L)
 {
-  Alpha **alpha;
+  GT_Alpha **alpha;
   assert(L);
-  alpha = lua_newuserdata(L, sizeof (Alpha*));
+  alpha = lua_newuserdata(L, sizeof (GT_Alpha*));
   assert(alpha);
-  *alpha = alpha_new_protein();
+  *alpha = gt_alpha_new_protein();
   assert(*alpha);
   luaL_getmetatable(L, ALPHA_METATABLE);
   lua_setmetatable(L, -2);
@@ -39,33 +39,33 @@ static int alpha_lua_new_protein(lua_State *L)
 
 static int alpha_lua_decode(lua_State *L)
 {
-  Alpha **alpha;
+  GT_Alpha **alpha;
   unsigned int code;
   char character;
   alpha = check_alpha(L, 1);
   code = luaL_checkinteger(L, 2);
   /* XXX: too restrictive, does not consider wildcards */
-  luaL_argcheck(L, code < alpha_size(*alpha), 2, "invalid code");
-  character = alpha_decode(*alpha, code);
+  luaL_argcheck(L, code < gt_alpha_size(*alpha), 2, "invalid code");
+  character = gt_alpha_decode(*alpha, code);
   lua_pushlstring(L, &character, 1);
   return 1;
 }
 
 static int alpha_lua_size(lua_State *L)
 {
-  Alpha **alpha;
+  GT_Alpha **alpha;
   unsigned int size;
   alpha = check_alpha(L, 1);
-  size = alpha_size(*alpha);
+  size = gt_alpha_size(*alpha);
   lua_pushinteger(L, size);
   return 1;
 }
 
 static int alpha_lua_delete(lua_State *L)
 {
-  Alpha **alpha;
+  GT_Alpha **alpha;
   alpha = check_alpha(L, 1);
-  alpha_delete(*alpha);
+  gt_alpha_delete(*alpha);
   return 0;
 }
 

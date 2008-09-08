@@ -55,7 +55,7 @@ struct Bioseq {
   char *raw_sequence;
   size_t raw_sequence_length,
          allocated;
-  Alpha *alpha;
+  GT_Alpha *alpha;
   BioseqFingerprints *fingerprints;
 };
 
@@ -499,23 +499,23 @@ void bioseq_delete(Bioseq *bs)
     gt_free(bs->raw_sequence);
   else
     fa_xmunmap(bs->raw_sequence);
-  alpha_delete(bs->alpha);
+  gt_alpha_delete(bs->alpha);
   gt_free(bs);
 }
 
-static void determine_alpha_if_necessary(Bioseq *bs)
+static void determine_gt_alpha_if_necessary(Bioseq *bs)
 {
   assert(bs);
   if (!bs->alpha) {
-    bs->alpha = alpha_guess(bioseq_get_raw_sequence(bs),
+    bs->alpha = gt_alpha_guess(bioseq_get_raw_sequence(bs),
                             bioseq_get_raw_sequence_length(bs));
   }
 }
 
-Alpha* bioseq_get_alpha(Bioseq *bs)
+GT_Alpha* bioseq_get_alpha(Bioseq *bs)
 {
   assert(bs);
-  determine_alpha_if_necessary(bs);
+  determine_gt_alpha_if_necessary(bs);
   assert(bs->alpha);
   return bs->alpha;
 }
@@ -526,7 +526,7 @@ Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
   assert(idx < gt_array_size(bs->descriptions));
   if (!bs->seqs)
     bs->seqs = gt_calloc(gt_array_size(bs->descriptions), sizeof (Seq*));
-  determine_alpha_if_necessary(bs);
+  determine_gt_alpha_if_necessary(bs);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),
                             bioseq_get_sequence_length(bs, idx),
@@ -611,17 +611,17 @@ void bioseq_show_sequence_as_fasta(Bioseq *bs, unsigned long seqnum,
 
 void bioseq_show_gc_content(Bioseq *bs)
 {
-  Alpha *dna_alpha;
+  GT_Alpha *dna_alpha;
   assert(bs);
-  determine_alpha_if_necessary(bs);
-  dna_alpha = alpha_new_dna();
-  if (alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
+  determine_gt_alpha_if_necessary(bs);
+  dna_alpha = gt_alpha_new_dna();
+  if (gt_alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
     printf("showing GC-content for sequence file \"%s\"\n",
            gt_str_get(bs->sequence_file));
     gc_content_show(bioseq_get_raw_sequence(bs),
                     bioseq_get_raw_sequence_length(bs), bs->alpha);
   }
-  alpha_delete(dna_alpha);
+  gt_alpha_delete(dna_alpha);
 }
 
 void bioseq_show_stat(Bioseq *bs)

@@ -25,14 +25,14 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
 {
   unsigned long i, alphasize_to_the_power_of_q, *seq_a_profile, *seq_b_profile,
                 dist = 0;
-  const Alpha *alpha_a, *alpha_b;
+  const GT_Alpha *gt_alpha_a, *gt_alpha_b;
   GT_Array *seq_a_qgrams, *seq_b_qgrams;
 
   assert(seq_a && seq_b);
-  alpha_a = seq_get_alpha(seq_a);
-  alpha_b = seq_get_alpha(seq_b);
-  assert(alpha_is_compatible_with_alpha(alpha_a, alpha_b));
-  alphasize_to_the_power_of_q = pow(alpha_size(alpha_a), q);
+  gt_alpha_a = seq_get_alpha(seq_a);
+  gt_alpha_b = seq_get_alpha(seq_b);
+  assert(gt_alpha_is_compatible_with_alpha(gt_alpha_a, gt_alpha_b));
+  alphasize_to_the_power_of_q = pow(gt_alpha_size(gt_alpha_a), q);
 
   seq_a_profile = gt_calloc(alphasize_to_the_power_of_q,
                             sizeof (unsigned long));
@@ -43,10 +43,10 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
   seq_b_qgrams = gt_array_new(sizeof (unsigned long));
 
   qgram_compute(seq_a_qgrams, seq_get_encoded(seq_a), seq_length(seq_a),
-                alpha_size(alpha_a), q);
+                gt_alpha_size(gt_alpha_a), q);
   assert(gt_array_size(seq_a_qgrams) == seq_length(seq_a) - q + 1);
   qgram_compute(seq_b_qgrams, seq_get_encoded(seq_b), seq_length(seq_b),
-                alpha_size(alpha_b), q);
+                gt_alpha_size(gt_alpha_b), q);
   assert(gt_array_size(seq_b_qgrams) == seq_length(seq_b) - q + 1);
 
   for (i = 0; i < gt_array_size(seq_a_qgrams); i++)

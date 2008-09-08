@@ -21,7 +21,7 @@
 #include "core/alpha.h"
 #include "core/array.h"
 
-/* Encodes a word <w> of length <q> over an alphabet of size <alpha_size> as a
+/* Encodes a word <w> of length <q> over an alphabet of size <gt_alpha_size> as a
    unique number. */
 unsigned long qgram_encode(const char *w, unsigned long q,
                            unsigned long alphabet_size);
@@ -30,17 +30,17 @@ unsigned long qgram_encode(const char *w, unsigned long q,
 unsigned long qgram_step(unsigned long current_code, char previous, char next,
                          unsigned long alphabet_size,
                          unsigned long
-                         alpha_size_raised_to_the_power_of_q_minus_1);
+                         gt_alpha_size_raised_to_the_power_of_q_minus_1);
 
 /* Computes all q-grams of the given <encoded_seq> (over an alphabet of size
-   <alpha_size>) and stores them in the array <qgrams>. */
+   <gt_alpha_size>) and stores them in the array <qgrams>. */
 void          qgram_compute(GT_Array *qgrams, const char *encoded_seq,
-                            unsigned long seqlen, unsigned long alpha_size,
+                            unsigned long seqlen, unsigned long gt_alpha_size,
                             unsigned int q);
 
 /* Decode <code> (which encodes a qgram of length <q> over alphabet <alpha) and
    store the resulting string in <qgram>. */
 void          qgram_decode(char *qgram, unsigned long code, unsigned long q,
-                           Alpha *alpha);
+                           GT_Alpha *alpha);
 
 #endif

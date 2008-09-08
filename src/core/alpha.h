@@ -22,25 +22,26 @@
 #include <stdio.h>
 
 /* the alphabet class */
-typedef struct Alpha Alpha; /* XXX: Alpha -> Alphabet */
+typedef struct GT_Alpha GT_Alpha; /* XXX: GT_Alpha -> GT_Alphabet */
 
-Alpha*       alpha_new(void);
-Alpha*       alpha_new_dna(void);
-Alpha*       alpha_new_protein(void);
-Alpha*       alpha_guess(const char *seq, unsigned long seqlen);
-Alpha*       alpha_ref(Alpha*);
-/* add the mapping of all given characters to the alphabet, the first character
-   is the result of subsequent alpha_decode() calls  */
-void         alpha_add_mapping(Alpha*, const char *characters);
-char         alpha_decode(const Alpha*, unsigned int);
-unsigned int alpha_encode(const Alpha*, char);
-void         alpha_decode_seq(const Alpha*, char *out, char *in,
-                              unsigned long length); /* in can be == out */
-void         alpha_encode_seq(const Alpha*, char *out, char *in,
-                              unsigned long length); /* in can be == out */
-bool         alpha_char_is_valid(const Alpha*, char);
-bool         alpha_is_compatible_with_alpha(const Alpha*, const Alpha*);
-unsigned int alpha_size(const Alpha*);
-void         alpha_delete(Alpha*);
+GT_Alpha*    gt_alpha_new(void);
+GT_Alpha*    gt_alpha_new_dna(void);
+GT_Alpha*    gt_alpha_new_protein(void);
+GT_Alpha*    gt_alpha_guess(const char *seq, unsigned long seqlen);
+GT_Alpha*    gt_alpha_ref(GT_Alpha*);
+/* add the mapping of all given characters to the alphabet, the first
+   character is the result of subsequent gt_alpha_decode() calls  */
+void         gt_alpha_add_mapping(GT_Alpha*, const char *characters);
+char         gt_alpha_decode(const GT_Alpha*, unsigned int);
+unsigned int gt_alpha_encode(const GT_Alpha*, char);
+void         gt_alpha_decode_seq(const GT_Alpha*, char *out, char *in,
+                                 unsigned long length); /* in can be == out */
+void         gt_alpha_encode_seq(const GT_Alpha*, char *out, char *in,
+                                 unsigned long length); /* in can be == out */
+bool         gt_alpha_char_is_valid(const GT_Alpha*, char);
+bool         gt_alpha_is_compatible_with_alpha(const GT_Alpha*,
+                                               const GT_Alpha*);
+unsigned int gt_alpha_size(const GT_Alpha*);
+void         gt_alpha_delete(GT_Alpha*);
 
 #endif

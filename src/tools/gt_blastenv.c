@@ -68,7 +68,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   BlastEnv *blast_env = NULL;
   unsigned long wlen;
   char *w = NULL;
-  Alpha *alpha = NULL;
+  GT_Alpha *alpha = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -84,10 +84,10 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
     strcpy(w, argv[parsed_args+1]);
 
     /* assign protein alphabet */
-    alpha = alpha_new_protein();
+    alpha = gt_alpha_new_protein();
 
     /* transform w according to protein alphabet */
-    alpha_encode_seq(alpha, w, w, wlen);
+    gt_alpha_encode_seq(alpha, w, w, wlen);
 
     /* construct and show BlastP environment */
     blast_env = blast_env_new(w, wlen, alpha, arguments->q, arguments->k,
@@ -98,7 +98,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   /* free space */
   blast_env_delete(blast_env);
   score_matrix_delete(score_matrix);
-  alpha_delete(alpha);
+  gt_alpha_delete(alpha);
   gt_free(w);
 
   return had_err;
