@@ -89,7 +89,7 @@ static void draw_example_features(GT_Array *features, const char *style_file,
   diagram = gt_diagram_new_from_array(features, &range, style);
 
   /* create canvas */
-  canvas = gt_canvas_cairo_file_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
+  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 800, NULL);
 
   /* sketch diagram on canvas */
   gt_diagram_sketch(diagram, canvas);

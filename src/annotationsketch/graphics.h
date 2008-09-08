@@ -19,6 +19,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include "annotationsketch/graphics_api.h"
 #include "core/str.h"
 
 typedef enum
@@ -40,13 +41,6 @@ typedef enum
   WEIGHT_NORMAL,
   WEIGHT_BOLD
 } FontWeight;
-
-typedef enum {
-  GRAPHICS_PDF,
-  GRAPHICS_PNG,
-  GRAPHICS_PS,
-  GRAPHICS_SVG
-} GraphicsOutType;
 
 typedef struct GraphicsClass GraphicsClass;
 typedef struct Graphics Graphics;

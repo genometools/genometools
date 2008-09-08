@@ -36,11 +36,12 @@
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
 #include "annotationsketch/canvas_api.h"
-#include "annotationsketch/canvas_cairo_context.h"
-#include "annotationsketch/canvas_cairo_file.h"
+#include "annotationsketch/canvas_cairo_context_api.h"
+#include "annotationsketch/canvas_cairo_file_api.h"
 #include "annotationsketch/color_api.h"
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"
+#include "annotationsketch/graphics_api.h"
 #include "annotationsketch/image_info_api.h"
 #include "annotationsketch/recmap_api.h"
 #include "annotationsketch/style_api.h"

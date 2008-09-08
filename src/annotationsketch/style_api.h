@@ -20,8 +20,8 @@
 #define STYLE_API_H
 
 #include <stdbool.h>
-#include "annotationsketch/color.h"
-#include "core/error.h"
+#include "annotationsketch/color_api.h"
+#include "core/error_api.h"
 #include "core/str.h"
 
 /* Holds AnnotationSketch style information. */

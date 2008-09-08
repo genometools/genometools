@@ -723,7 +723,7 @@ int gt_diagram_unit_test(GT_Error *err)
 
   if (!had_err)
   {
-    canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PNG, 600, NULL);
+    canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PNG, 600, NULL);
     gt_diagram_sketch(dia, canvas);
   }
 

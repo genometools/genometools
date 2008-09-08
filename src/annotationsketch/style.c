@@ -21,6 +21,8 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+#include "annotationsketch/color.h"
+#include "annotationsketch/style.h"
 #include "core/cstr.h"
 #include "core/ensure.h"
 #include "core/ma.h"
@@ -28,7 +30,6 @@
 #include "core/warning.h"
 #include "extended/luahelper.h"
 #include "extended/luaserialize.h"
-#include "annotationsketch/style.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/gt_lua.h"
 

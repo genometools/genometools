@@ -303,14 +303,22 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
     /* create and write image file */
     d = gt_diagram_new(features, seqid, &qry_range, sty);
     ii = gt_image_info_new();
-    if (strcmp(gt_str_get(arguments.format),"pdf")==0)
-      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PDF, arguments.width, ii);
-    else if (strcmp(gt_str_get(arguments.format),"ps")==0)
-      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PS, arguments.width, ii);
-    else if (strcmp(gt_str_get(arguments.format),"svg")==0)
-      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_SVG, arguments.width, ii);
-    else
-      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PNG, arguments.width, ii);
+    if (strcmp(gt_str_get(arguments.format),"pdf")==0) {
+      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PDF, arguments.width,
+                                        ii);
+    }
+    else if (strcmp(gt_str_get(arguments.format),"ps")==0) {
+      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PS, arguments.width,
+                                        ii);
+    }
+    else if (strcmp(gt_str_get(arguments.format),"svg")==0) {
+      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_SVG, arguments.width,
+                                        ii);
+    }
+    else {
+      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PNG, arguments.width,
+                                        ii);
+    }
     gt_diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;

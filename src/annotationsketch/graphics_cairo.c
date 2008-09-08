@@ -39,7 +39,7 @@ struct GraphicsCairo {
   cairo_t *cr;
   cairo_surface_t *surf;
   GT_Str *outbuf;
-  GraphicsOutType type;
+  GT_GraphicsOutType type;
   double margin_x, margin_y, height, width;
   bool from_context;
 };
@@ -56,14 +56,14 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
-void graphics_cairo_initialize(Graphics *gg, GraphicsOutType type,
+void graphics_cairo_initialize(Graphics *gg, GT_GraphicsOutType type,
                                unsigned int width, unsigned int height)
 {
   GraphicsCairo *g = graphics_cairo_cast(gg);
   g->outbuf = gt_str_new();
   switch (type)
   {
-    case GRAPHICS_PDF:
+    case GT_GRAPHICS_PDF:
 #ifdef CAIRO_HAS_PDF_SURFACE
       g->surf = cairo_pdf_surface_create_for_stream(str_write_func,
                                                     g->outbuf,
@@ -71,7 +71,7 @@ void graphics_cairo_initialize(Graphics *gg, GraphicsOutType type,
                                                     height);
 #endif
       break;
-    case GRAPHICS_PS:
+    case GT_GRAPHICS_PS:
 #ifdef CAIRO_HAS_PS_SURFACE
       g->surf = cairo_ps_surface_create_for_stream(str_write_func,
                                                    g->outbuf,
@@ -79,7 +79,7 @@ void graphics_cairo_initialize(Graphics *gg, GraphicsOutType type,
                                                    height);
 #endif
       break;
-    case GRAPHICS_SVG:
+    case GT_GRAPHICS_SVG:
 #ifdef CAIRO_HAS_SVG_SURFACE
       g->surf = cairo_svg_surface_create_for_stream(str_write_func,
                                                     g->outbuf,
@@ -87,7 +87,7 @@ void graphics_cairo_initialize(Graphics *gg, GraphicsOutType type,
                                                     height);
 #endif
       break;
-    case GRAPHICS_PNG:
+    case GT_GRAPHICS_PNG:
     default:
       g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
       break;
@@ -481,7 +481,7 @@ int graphics_cairo_save_to_file(const Graphics *gg, const char *filename,
     return 0;
   switch (g->type)
   {
-    case GRAPHICS_PNG:
+    case GT_GRAPHICS_PNG:
       rval = cairo_surface_write_to_png(g->surf, filename);
       assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
       if (rval == CAIRO_STATUS_WRITE_ERROR)
@@ -557,7 +557,7 @@ const GraphicsClass* graphics_cairo_class(void)
   return &graphics_class;
 }
 
-Graphics* graphics_cairo_new(GraphicsOutType type,
+Graphics* graphics_cairo_new(GT_GraphicsOutType type,
                              unsigned int width, unsigned int height)
 {
   Graphics *g;

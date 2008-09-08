@@ -25,7 +25,7 @@
 #include "gtlua/canvas_lua.h"
 #include "gtlua/image_info_lua.h"
 
-static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
+static int canvas_lua_new_generic(lua_State *L, GT_GraphicsOutType t)
 {
   GT_Canvas **canvas;
   GT_ImageInfo **ii;
@@ -51,22 +51,22 @@ static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
 
 static int canvas_lua_new_pdf(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GRAPHICS_PDF);
+  return canvas_lua_new_generic(L, GT_GRAPHICS_PDF);
 }
 
 static int canvas_lua_new_png(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GRAPHICS_PNG);
+  return canvas_lua_new_generic(L, GT_GRAPHICS_PNG);
 }
 
 static int canvas_lua_new_svg(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GRAPHICS_SVG);
+  return canvas_lua_new_generic(L, GT_GRAPHICS_SVG);
 }
 
 static int canvas_lua_new_ps(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GRAPHICS_PS);
+  return canvas_lua_new_generic(L, GT_GRAPHICS_PS);
 }
 
 static int canvas_lua_to_file(lua_State *L)

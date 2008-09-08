@@ -27,7 +27,7 @@
 typedef struct GraphicsCairo GraphicsCairo;
 
 const GraphicsClass* graphics_cairo_class(void);
-Graphics*            graphics_cairo_new(GraphicsOutType type,
+Graphics*            graphics_cairo_new(GT_GraphicsOutType type,
                                         unsigned int width,
                                         unsigned int height);
 Graphics*            graphics_cairo_new_from_context(cairo_t *context,

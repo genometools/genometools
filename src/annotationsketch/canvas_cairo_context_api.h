@@ -21,6 +21,7 @@
 #include <cairo.h>
 #include "annotationsketch/canvas_api.h"
 #include "annotationsketch/image_info_api.h"
+#include "annotationsketch/style_api.h"
 
 /* Implements the Canvas interface.
    This Canvas uses the GraphicsCairo class.  */

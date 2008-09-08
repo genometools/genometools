@@ -19,7 +19,7 @@
 #define CANVAS_CAIRO_FILE_API_H
 
 #include "annotationsketch/canvas_api.h"
-#include "annotationsketch/graphics.h"
+#include "annotationsketch/graphics_api.h"
 #include "annotationsketch/image_info_api.h"
 #include "annotationsketch/style_api.h"
 
@@ -31,7 +31,7 @@ typedef struct GT_CanvasCairoFile GT_CanvasCairoFile;
    configuration given in <style>. The optional <image_info> is filled when
    the created Canvas object is used to render a Diagram object. */
 GT_Canvas* gt_canvas_cairo_file_new(GT_Style *style,
-                                    GraphicsOutType output_type,
+                                    GT_GraphicsOutType output_type,
                                     unsigned long width,
                                     GT_ImageInfo *image_info);
 /* Write rendered <canvas> to file with name <filename>. */

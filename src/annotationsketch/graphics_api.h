@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,18 +16,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef IMAGE_INFO_API_H
-#define IMAGE_INFO_API_H
+#ifndef GRAPHICS_API_H
+#define GRAPHICS_API_H
 
-#include "annotationsketch/recmap_api.h"
-#include "core/error_api.h"
-
-typedef struct GT_ImageInfo GT_ImageInfo;
-
-GT_ImageInfo*    gt_image_info_new();
-unsigned int     gt_image_info_get_height(GT_ImageInfo*);
-unsigned long    gt_image_info_num_of_recmaps(GT_ImageInfo*);
-const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
-void             gt_image_info_delete(GT_ImageInfo*);
+typedef enum {
+  GT_GRAPHICS_PDF,
+  GT_GRAPHICS_PNG,
+  GT_GRAPHICS_PS,
+  GT_GRAPHICS_SVG
+} GT_GraphicsOutType;
 
 #endif

@@ -60,7 +60,7 @@ int canvas_cairo_context_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
     graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = graphics_cairo_new(GRAPHICS_PNG, canvas->width, 1);
+  canvas->g = graphics_cairo_new(GT_GRAPHICS_PNG, canvas->width, 1);
 
   /* calculate scaling factor */
   canvas->factor = ((double) canvas->width
