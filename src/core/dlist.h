@@ -26,10 +26,10 @@
 typedef struct GT_Dlist GT_Dlist;
 typedef struct GT_Dlistelem GT_Dlistelem;
 
-GT_Dlist*        gt_dlist_new(GT_Compare);
-GT_Dlistelem*    gt_dlist_first(const GT_Dlist*);
-GT_Dlistelem*    gt_dlist_last(const GT_Dlist*);
-GT_Dlistelem*    gt_dlist_find(const GT_Dlist*, void*); /* O(n) */
+GT_Dlist*     gt_dlist_new(GT_Compare);
+GT_Dlistelem* gt_dlist_first(const GT_Dlist*);
+GT_Dlistelem* gt_dlist_last(const GT_Dlist*);
+GT_Dlistelem* gt_dlist_find(const GT_Dlist*, void*); /* O(n) */
 unsigned long gt_dlist_size(const GT_Dlist*);
 /* Usually O(n) (O(1) if data is added in sorted order). */
 void          gt_dlist_add(GT_Dlist*, void *data);
@@ -39,8 +39,8 @@ int           gt_dlist_example(GT_Error*);
 int           gt_dlist_unit_test(GT_Error*);
 void          gt_dlist_delete(GT_Dlist*);
 
-GT_Dlistelem*    gt_dlistelem_next(const GT_Dlistelem*);
-GT_Dlistelem*    gt_dlistelem_previous(const GT_Dlistelem*);
+GT_Dlistelem* gt_dlistelem_next(const GT_Dlistelem*);
+GT_Dlistelem* gt_dlistelem_previous(const GT_Dlistelem*);
 void*         gt_dlistelem_get_data(const GT_Dlistelem*);
 
 #endif

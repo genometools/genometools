@@ -212,13 +212,15 @@ int gt_dlist_unit_test(GT_Error *err)
   dlist = gt_dlist_new(intcompare);
   gt_dlist_add(dlist, &elem_a);
   ensure(had_err, gt_dlist_size(dlist) == 1);
-  ensure(had_err, elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  ensure(had_err,
+         elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
   gt_dlist_delete(dlist);
 
   dlist = gt_dlist_new(NULL);
   gt_dlist_add(dlist, &elem_a);
   ensure(had_err, gt_dlist_size(dlist) == 1);
-  ensure(had_err, elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  ensure(had_err,
+         elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
   gt_dlist_delete(dlist);
 
   /* boundary case: dlist containing two elements */
@@ -226,14 +228,16 @@ int gt_dlist_unit_test(GT_Error *err)
   gt_dlist_add(dlist, &elem_a);
   gt_dlist_add(dlist, &elem_b);
   ensure(had_err, gt_dlist_size(dlist) == 2);
-  ensure(had_err, elem_b == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  ensure(had_err,
+         elem_b == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
   gt_dlist_delete(dlist);
 
   dlist = gt_dlist_new(NULL);
   gt_dlist_add(dlist, &elem_a);
   gt_dlist_add(dlist, &elem_b);
   ensure(had_err, gt_dlist_size(dlist) == 2);
-  ensure(had_err, elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  ensure(had_err,
+         elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
   gt_dlist_delete(dlist);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
@@ -269,7 +273,8 @@ int gt_dlist_unit_test(GT_Error *err)
     for (j = 0; j < size; j++) {
       dlistelem = gt_dlist_find(dlist, elems_backup + j);
       ensure(had_err, dlistelem);
-      ensure(had_err, *(int*) gt_dlistelem_get_data(dlistelem) == elems_backup[j]);
+      ensure(had_err,
+             *(int*) gt_dlistelem_get_data(dlistelem) == elems_backup[j]);
     }
     /* remove first element */
     if (gt_dlist_size(dlist)) {
