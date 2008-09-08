@@ -15,13 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQUENCE_REGION_H
-#define SEQUENCE_REGION_H
+#ifndef SEQUENCE_REGION_API_H
+#define SEQUENCE_REGION_API_H
 
-#include "extended/sequence_region_api.h"
+/* implements the ``genome node'' interface */
+typedef struct GT_SequenceRegion GT_SequenceRegion;
 
-const GT_GenomeNodeClass* gt_sequence_region_class(void);
-void                      gt_sequence_regions_consolidate(GT_GenomeNode*,
-                                                          GT_GenomeNode*);
+#include "extended/genome_node.h"
+#include "core/str_api.h"
+
+GT_GenomeNode*            gt_sequence_region_new(GT_Str *seqid, GT_Range range);
 
 #endif

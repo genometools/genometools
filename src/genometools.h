@@ -33,6 +33,7 @@
 
 /* the extended module */
 #include "extended/feature_type_factory_any.h"
+#include "extended/sequence_region_api.h"
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */

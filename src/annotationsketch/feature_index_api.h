@@ -21,7 +21,7 @@
 #ifndef FEATURE_INDEX_API_H
 #define FEATURE_INDEX_API_H
 
-#include "extended/sequence_region.h"
+#include "extended/sequence_region_api.h"
 
 typedef struct GT_FeatureIndex GT_FeatureIndex;
 
