@@ -30,7 +30,8 @@
 
 #define TISTABFILESUFFIX ".tis"
 
-int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error *err)
+int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,
+                    GT_Error *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -94,7 +95,8 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
   FREESPACE(*esr);
 }
 
-static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,GT_Error *err)
+static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,
+                        GT_Error *err)
 {
   Seqpos pos;
   int retval;

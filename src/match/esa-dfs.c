@@ -104,7 +104,8 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   /*
                   Integrate these functions later:
                   int(*processcompletenode)(Dfsinfo *,Dfsstate *,GT_Error *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,GT_Error *),
+                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,
+                                           GT_Error *),
                   int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
                                             Seqpos,Dfsstate *,GT_Error *),
                   */

@@ -71,7 +71,7 @@ typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, GT_Error *err);
+availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, GT_Error*);
 
 /**
  * \brief Creates an encoded indexed sequence object of the BWT

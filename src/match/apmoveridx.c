@@ -213,7 +213,8 @@ static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
                                              GT_UNUSED Seqpos leftbound,
                                              GT_UNUSED Seqpos rightbound,
                                              Seqpos width,
-                                             GT_UNUSED unsigned long currentdepth,
+                                             GT_UNUSED
+                                             unsigned long currentdepth,
                                              void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;

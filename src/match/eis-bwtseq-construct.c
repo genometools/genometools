@@ -27,7 +27,8 @@
 #include "match/eis-encidxseq-construct.h"
 
 extern BWTSeq *
-availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity, GT_Error *err)
+availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
+            GT_Error *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
@@ -72,9 +73,9 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
       if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
                             params->projectName, verbosity, err))
       {
-        gt_error_set(err, "suffix array project %s does not hold required suffix"
-                  " array (.suf) and encoded sequence (.esq) information!",
-                  gt_str_get(params->projectName));
+        gt_error_set(err, "suffix array project %s does not hold required "
+                     "suffix array (.suf) and encoded sequence (.esq) "
+                     "information!", gt_str_get(params->projectName));
         break;
       }
     }

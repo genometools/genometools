@@ -402,7 +402,8 @@ static void assignProteinalphabet(Alphabet *alpha)
 }
 
 static int assignProteinorDNAalphabet(Alphabet *alpha,
-                                      const GT_StrArray *filenametab,GT_Error *err)
+                                      const GT_StrArray *filenametab,
+                                      GT_Error *err)
 {
   int retval;
 

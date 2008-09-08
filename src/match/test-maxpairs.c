@@ -197,7 +197,8 @@ static int orderSubstringmatch(const void *a,const void *b)
   return 0;
 }
 
-static int showSubstringmatch(void *a, GT_UNUSED void *info, GT_UNUSED GT_Error *err)
+static int showSubstringmatch(void *a, GT_UNUSED void *info,
+                              GT_UNUSED GT_Error *err)
 {
   Substringmatch *m = (Substringmatch *) a;
 

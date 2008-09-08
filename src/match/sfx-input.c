@@ -36,7 +36,8 @@
 #include "esa-map.pr"
 #include "fillsci.pr"
 
-static int outal1file(const GT_Str *indexname,const Alphabet *alpha,GT_Error *err)
+static int outal1file(const GT_Str *indexname,const Alphabet *alpha,
+                      GT_Error *err)
 {
   FILE *al1fp;
   bool haserr = false;

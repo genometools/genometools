@@ -507,7 +507,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
-int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error *err)
+int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,
+                    GT_Error *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -866,7 +867,8 @@ static Uchar delivercharViauint32tablesSpecialrange(
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fb,GT_Error *err)
+static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fb,
+                        GT_Error *err)
 {
   Seqpos pos;
   int retval;

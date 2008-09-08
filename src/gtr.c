@@ -310,8 +310,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GT_Error *err)
       }
       else {
         /* neither tool nor script found */
-        gt_error_set(err, "neither tool nor script '%s' found; option -help lists "
-                       "possible tools", argv[0]);
+        gt_error_set(err, "neither tool nor script '%s' found; option -help "
+                          "lists possible tools", argv[0]);
         had_err = -1;
       }
     }

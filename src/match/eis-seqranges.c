@@ -163,8 +163,9 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
 }
 
 void
-SRLinsertNewRange(GT_UNUSED struct seqRangeList *rangeList, GT_UNUSED Seqpos pos,
-                  GT_UNUSED Seqpos len, GT_UNUSED Symbol esym)
+SRLinsertNewRange(GT_UNUSED struct seqRangeList *rangeList,
+                  GT_UNUSED Seqpos pos, GT_UNUSED Seqpos len,
+                  GT_UNUSED Symbol esym)
 {
   assert(rangeList);
   abort();
@@ -351,8 +352,9 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
   {
     Seqpos searchPos = pos;
     struct seqRange *searchRes =
-      gt_bsearch_data(&searchPos, rangeList->ranges + 1, rangeList->numRanges - 1,
-                   sizeof (struct seqRange), posSeqRangeNextCompare, rangeList);
+      gt_bsearch_data(&searchPos, rangeList->ranges + 1,
+                      rangeList->numRanges - 1, sizeof (struct seqRange),
+                      posSeqRangeNextCompare, rangeList);
     if (searchRes && hint)
       *hint = searchRes - rangeList->ranges;
     return searchRes;

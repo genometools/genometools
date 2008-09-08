@@ -237,9 +237,10 @@ int analyzeuintline(const GT_Str *indexname,
           {
             if (retval == 1)
             {
-              gt_error_set(err,"bigvalue " Formatuint64_t " does not fit into %s",
-                            PRINTuint64_tcast(smallorbigint.bigvalue),
-                            rikptr->keystring);
+              gt_error_set(err,
+                           "bigvalue " Formatuint64_t " does not fit into %s",
+                           PRINTuint64_tcast(smallorbigint.bigvalue),
+                           rikptr->keystring);
               haserr = true;
               break;
             }

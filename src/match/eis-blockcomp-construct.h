@@ -34,7 +34,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GT_Str *projectName,
                      headerWriteFunc *extHeaderCallbacks,
                      void **headerCBData,
                      bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                     varExtBitsEstimator biVarBits, void *cbState, GT_Error *err);
+                     varExtBitsEstimator biVarBits, void *cbState,
+                     GT_Error *err);
 
 /**
  * @brief Load previously written block encoded sequence

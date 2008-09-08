@@ -177,12 +177,12 @@ static Giquery *readginumberfile(bool verbose,
     if (!COMPLETE(giqueries[linenum]) &&
         giqueries[linenum].frompos > giqueries[linenum].topos)
     {
-      gt_error_set(err,"file \"%s\", line %lu: illegal format: second value %lu "
-                    "is larger than third value %lu",
-                  gt_str_get(ginumberfile),
-                  linenum+1,
-                  giqueries[linenum].frompos,
-                  giqueries[linenum].topos);
+      gt_error_set(err, "file \"%s\", line %lu: illegal format: second value "
+                   "%lu is larger than third value %lu",
+                   gt_str_get(ginumberfile),
+                   linenum+1,
+                   giqueries[linenum].frompos,
+                   giqueries[linenum].topos);
       haserr = true;
       break;
     }

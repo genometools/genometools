@@ -83,7 +83,8 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     unsigned int linenum;
 
     currentline = gt_str_new();
-    for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
+    for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF;
+         linenum++)
     {
       if (analyzeuintline(indexname,
                          FMASCIIFILESUFFIX,

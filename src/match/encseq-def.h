@@ -151,7 +151,7 @@ uint64_t detsizeencseq(int kind,
 /* the functions with exactly the same interface for both implementation of
    encodedsequences */
 
-int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error *err);
+int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,GT_Error*);
 
 Encodedsequencescanstate *newEncodedsequencescanstate(void);
 
