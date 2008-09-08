@@ -29,20 +29,17 @@ typedef struct GT_TypeFactoryClass GT_TypeFactoryClass;
 typedef struct GT_TypeFactory GT_TypeFactory;
 
 #include "core/strarray.h"
-#include "extended/genome_feature_type.h"
+#include "extended/feature_type.h"
 
 /* Return a new reference to <feature_type_factory>. */
-GT_TypeFactory* gt_type_factory_ref(GT_TypeFactory
-                                             *feature_type_factory);
+GT_TypeFactory* gt_type_factory_ref(GT_TypeFactory *feature_type_factory);
 /* Uses the factory to create a new genome feature type object of the given
    <type>. Returns NULL, if <type> is not a valid type. */
-GT_GenomeFeatureType*  gt_type_factory_create_gft(GT_TypeFactory*,
-                                                    const char *type);
+GT_FeatureType* gt_type_factory_create_gft(GT_TypeFactory*, const char *type);
 /* Returns a GT_StrArray which contains all type names in alphabetical order
    which have been created by this factory.
    The caller is responsible to free it! */
-GT_StrArray*           gt_type_factory_get_used_types(const
-                                                        GT_TypeFactory*);
-void                gt_type_factory_delete(GT_TypeFactory*);
+GT_StrArray*    gt_type_factory_get_used_types(const GT_TypeFactory*);
+void            gt_type_factory_delete(GT_TypeFactory*);
 
 #endif

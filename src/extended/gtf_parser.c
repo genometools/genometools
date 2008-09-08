@@ -161,7 +161,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   }
 
   if (!had_err) {
-    GT_GenomeFeatureType *mRNA_type;
+    GT_FeatureType *mRNA_type;
     mRNA_type = gt_genome_feature_create_gft(*(GT_GenomeFeature**)
                                           gt_array_get_first(gt_genome_node_array),
                                           gft_mRNA);
@@ -208,7 +208,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   cinfo->mRNAs = mRNAs;
   had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, cinfo, err);
   if (!had_err) {
-    GT_GenomeFeatureType *gene_type;
+    GT_FeatureType *gene_type;
     assert(gt_array_size(mRNAs)); /* at least one mRNA constructed */
 
     /* determine the range and the strand of the gene */
@@ -285,7 +285,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GT_Array *gt_genome_node_array;
   ConstructionInfo cinfo;
   GTF_feature_type gtf_feature_type;
-  GT_GenomeFeatureType *gff_feature_type = NULL;
+  GT_FeatureType *gff_feature_type = NULL;
   const char *filename;
   bool score_is_defined;
   int had_err = 0;

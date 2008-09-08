@@ -26,7 +26,7 @@ typedef struct GT_Track GT_Track;
 #include "annotationsketch/line.h"
 #include "annotationsketch/line_breaker.h"
 #include "core/array.h"
-#include "extended/genome_feature_type.h"
+#include "extended/feature_type.h"
 #include "extended/genome_node.h"
 
 GT_Track*        gt_track_new(GT_Str *title, unsigned long max_num_lines,

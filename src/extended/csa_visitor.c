@@ -209,7 +209,7 @@ static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
                                          GT_Str *seqid,
                                          GT_Str *gt_csa_source_str,
                                          GT_Strand gene_strand,
-                                         GT_GenomeFeatureType *exon_type)
+                                         GT_FeatureType *exon_type)
 {
   GT_Array *exons_from_sa;
   unsigned long i,
@@ -354,8 +354,8 @@ static void mRNA_set_target_attribute(GT_GenomeFeature *mRNA_feature,
 
 static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
                                        GT_Str *gt_csa_source_str,
-                                       GT_GenomeFeatureType *mRNA_type,
-                                       GT_GenomeFeatureType *exon_type)
+                                       GT_FeatureType *mRNA_type,
+                                       GT_FeatureType *exon_type)
 {
   GT_GenomeNode *mRNA_feature;
   GT_Array *exon_nodes;
@@ -399,9 +399,9 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 
 static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
                                        GT_Str *gt_csa_source_str,
-                                       GT_GenomeFeatureType *gene_type,
-                                       GT_GenomeFeatureType *mRNA_type,
-                                       GT_GenomeFeatureType *exon_type)
+                                       GT_FeatureType *gene_type,
+                                       GT_FeatureType *mRNA_type,
+                                       GT_FeatureType *exon_type)
 {
   GT_GenomeNode *gene_feature, *mRNA_feature;
   unsigned long i;
@@ -427,9 +427,9 @@ static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
 
 static void process_csa_genes(Queue *gt_genome_node_buffer, GT_Array *csa_genes,
                               GT_Str *gt_csa_source_str,
-                              GT_GenomeFeatureType *gene_type,
-                              GT_GenomeFeatureType *mRNA_type,
-                              GT_GenomeFeatureType *exon_type)
+                              GT_FeatureType *gene_type,
+                              GT_FeatureType *mRNA_type,
+                              GT_FeatureType *exon_type)
 {
   unsigned long i;
   assert(csa_genes);
@@ -446,7 +446,7 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   GT_GenomeFeature *first_feature;
-  GT_GenomeFeatureType *gene_type, *mRNA_type, *exon_type;
+  GT_FeatureType *gene_type, *mRNA_type, *exon_type;
   GT_Array *csa_genes;
   unsigned long i;
 

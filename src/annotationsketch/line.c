@@ -76,7 +76,7 @@ int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
 int gt_line_unit_test(GT_Error *err)
 {
   GT_TypeFactory *feature_type_factory;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_Range r1, r2, r3, r4, r_parent;
   GT_Array* blocks;
   GT_Str *seqid1, *seqid2, *seqid3;

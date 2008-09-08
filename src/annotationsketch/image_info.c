@@ -87,7 +87,7 @@ int gt_image_info_unit_test(GT_Error *err)
   GT_RecMap* rms[20];
   GT_GenomeNode* gfs[20];
   GT_TypeFactory *ftf;
-  GT_GenomeFeatureType *gft;
+  GT_FeatureType *gft;
   GT_ImageInfo *ii;
   unsigned long i;
   GT_Str *seqid;

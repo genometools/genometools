@@ -19,7 +19,7 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/genome_feature_type_imp.h"
+#include "extended/feature_type_imp.h"
 #include "extended/gft_collection.h"
 
 struct GFTCollection {
@@ -30,7 +30,7 @@ GFTCollection* gft_collection_new(void)
 {
   GFTCollection *gftc = gt_malloc(sizeof (GFTCollection));
   gftc->gt_genome_feature_types = hashmap_new(
-    HASH_STRING, gt_free_func, (GT_FreeFunc)gt_genome_feature_type_delete);
+    HASH_STRING, gt_free_func, (GT_FreeFunc)gt_feature_type_delete);
   return gftc;
 }
 
@@ -42,13 +42,13 @@ void gft_collection_delete(GFTCollection *gftc)
 }
 
 void gft_collection_add(GFTCollection *gftc, const char *type,
-                         GT_GenomeFeatureType *gft)
+                         GT_FeatureType *gft)
 {
   assert(gftc && type && gft);
   hashmap_add(gftc->gt_genome_feature_types, cstr_dup(type), gft);
 }
 
-GT_GenomeFeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
+GT_FeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
 {
   assert(gftc && type);
   return hashmap_get(gftc->gt_genome_feature_types, type);

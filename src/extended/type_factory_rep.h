@@ -19,14 +19,14 @@
 #define FEATURE_TYPE_FACTORY_REP_H
 
 #include <stdio.h>
-#include "extended/genome_feature_type.h"
+#include "extended/feature_type.h"
 #include "extended/gft_collection.h"
 #include "extended/type_factory.h"
 
 struct GT_TypeFactoryClass {
   size_t size;
-  GT_GenomeFeatureType* (*create_gft)(GT_TypeFactory*, const char *type);
-  void               (*free)(GT_TypeFactory*);
+  GT_FeatureType* (*create_gft)(GT_TypeFactory*, const char *type);
+  void            (*free)(GT_TypeFactory*);
 };
 
 struct GT_TypeFactory {

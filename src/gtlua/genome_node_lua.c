@@ -30,7 +30,7 @@ static int gt_genome_feature_lua_new(lua_State *L)
 {
   GT_TypeFactory *feature_type_factory;
   GT_GenomeNode **gf;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_Range *range;
   GT_Strand strand;
   const char *seqid, *type_str, *gt_strand_str;
@@ -263,7 +263,7 @@ static int gt_genome_feature_lua_get_type(lua_State *L)
   /* make sure we get a genome feature */
   gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  lua_pushstring(L, gt_genome_feature_type_get_cstr(gt_genome_feature_get_type(gf)));
+  lua_pushstring(L, gt_feature_type_get_cstr(gt_genome_feature_get_type(gf)));
   return 1;
 }
 
@@ -273,7 +273,7 @@ static int gt_genome_feature_lua_extract_sequence(lua_State *L)
   GT_GenomeNode **gn;
   GT_GenomeFeature *gf;
   const char *typestr;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   bool join;
   RegionMapping **region_mapping;
   GT_Str *sequence;

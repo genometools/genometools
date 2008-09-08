@@ -25,7 +25,7 @@
 
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   bool join,
        translate;
   unsigned long fastaseq_counter;
@@ -42,12 +42,12 @@ static void extract_feat_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
-static void construct_description(GT_Str *description, GT_GenomeFeatureType *type,
+static void construct_description(GT_Str *description, GT_FeatureType *type,
                                   unsigned long counter, bool join,
                                   bool translate)
 {
   assert(!gt_str_length(description));
-  gt_str_append_cstr(description, gt_genome_feature_type_get_cstr(type));
+  gt_str_append_cstr(description, gt_feature_type_get_cstr(type));
   gt_str_append_char(description, '_');
   gt_str_append_ulong(description, counter);
   if (join)
@@ -119,7 +119,7 @@ const GenomeVisitorClass* extract_feat_visitor_class()
 }
 
 GenomeVisitor* extract_feat_visitor_new(RegionMapping *rm,
-                                        GT_GenomeFeatureType *type, bool join,
+                                        GT_FeatureType *type, bool join,
                                         bool translate)
 {
   GenomeVisitor *gv;

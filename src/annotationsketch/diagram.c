@@ -33,9 +33,9 @@
 #include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "extended/feature_type.h"
 #include "extended/genome_node.h"
 #include "extended/genome_feature.h"
-#include "extended/genome_feature_type.h"
 #include "extended/type_factory_builtin.h"
 
 /* used to separate a filename from the type in a track name */
@@ -57,7 +57,7 @@ struct GT_Diagram {
 
 /* holds a GT_Block with associated type */
 typedef struct {
-  GT_GenomeFeatureType *gft;
+  GT_FeatureType *gft;
   GT_Block *block;
 } GT_BlockTuple;
 
@@ -77,7 +77,7 @@ typedef struct {
   GT_Diagram *dia;
 } GT_TrackTraverseInfo;
 
-static GT_BlockTuple* blocktuple_new(GT_GenomeFeatureType *gft, GT_Block *block)
+static GT_BlockTuple* blocktuple_new(GT_FeatureType *gft, GT_Block *block)
 {
   GT_BlockTuple *bt;
   assert(block);
@@ -103,7 +103,7 @@ static NodeInfoGT_Element* get_or_create_node_info(GT_Diagram *d,
 }
 
 static GT_Block* find_block_for_type(NodeInfoGT_Element* ni,
-                                     GT_GenomeFeatureType *gft)
+                                     GT_FeatureType *gft)
 {
   GT_Block *block = NULL;
   unsigned long i;
@@ -129,7 +129,7 @@ static const char* get_node_name_or_id(GT_GenomeNode *gn)
   return ret;
 }
 
-static bool get_caption_display_status(GT_Diagram *d, GT_GenomeFeatureType *gft)
+static bool get_caption_display_status(GT_Diagram *d, GT_FeatureType *gft)
 {
   assert(d && gft);
   bool *status;
@@ -145,7 +145,7 @@ static bool get_caption_display_status(GT_Diagram *d, GT_GenomeFeatureType *gft)
       *status = true;
     if (*status)
     {
-      if (gt_style_get_num(d->style, gt_genome_feature_type_get_cstr(gft),
+      if (gt_style_get_num(d->style, gt_feature_type_get_cstr(gft),
                          "max_capt_show_width", &tmp, NULL))
         threshold = tmp;
       else
@@ -178,7 +178,7 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pa
 
   caption = gt_str_new();
   if (!gt_style_get_str(d->style,
-                     gt_genome_feature_type_get_cstr(
+                     gt_feature_type_get_cstr(
                          gt_genome_feature_get_type((GT_GenomeFeature*) node)),
                      "block_caption",
                      caption,
@@ -303,10 +303,10 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node, GT_GenomeNode *pare
 
   assert(d && node);
 
-  feature_type = gt_genome_feature_type_get_cstr(
+  feature_type = gt_feature_type_get_cstr(
                         gt_genome_feature_get_type((GT_GenomeFeature*) node));
   if (parent)
-    parent_gft = gt_genome_feature_type_get_cstr(
+    parent_gft = gt_feature_type_get_cstr(
                         gt_genome_feature_get_type((GT_GenomeFeature*) parent));
 
   /* discard elements that do not overlap with visible range */
@@ -401,12 +401,12 @@ static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children, GT_Erro
   return 0;
 }
 
-static GT_Str* gt_track_key_new(const char *filename, GT_GenomeFeatureType *type)
+static GT_Str* gt_track_key_new(const char *filename, GT_FeatureType *type)
 {
   GT_Str *gt_track_key;
   gt_track_key = gt_str_new_cstr(filename);
   gt_str_append_char(gt_track_key, FILENAME_TYPE_SEPARATOR);
-  gt_str_append_cstr(gt_track_key, gt_genome_feature_type_get_cstr(type));
+  gt_str_append_cstr(gt_track_key, gt_feature_type_get_cstr(type));
   return gt_track_key;
 }
 
@@ -568,7 +568,7 @@ static int layout_tracks(void *key, void *value, void *data,
   unsigned long i, max;
   GT_Track *track;
   GT_TrackTraverseInfo *tti = (GT_TrackTraverseInfo*) data;
-  GT_GenomeFeatureType *gft = (GT_GenomeFeatureType*) key;
+  GT_FeatureType *gft = (GT_FeatureType*) key;
   GT_Array *list = (GT_Array*) value;
   char *filename;
   GT_Str *gt_track_key;
@@ -588,7 +588,7 @@ static int layout_tracks(void *key, void *value, void *data,
                                         gt_block_get_top_level_feature(block)));
   gt_track_key = gt_track_key_new(filename, gft);
   gt_free(filename);
-  type = gt_genome_feature_type_get_cstr(gft);
+  type = gt_feature_type_get_cstr(gft);
 
   if (!gt_style_get_bool(tti->dia->style, "format", "split_lines", &split,
                          NULL)) {
@@ -646,7 +646,7 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
 int gt_diagram_unit_test(GT_Error *err)
 {
   GT_TypeFactory *feature_type_factory;
-  GT_GenomeFeatureType *gene_type, *exon_type, *CDS_type;
+  GT_FeatureType *gene_type, *exon_type, *CDS_type;
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range r1, r2, r3, r4, r5, dr1, rs;

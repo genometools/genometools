@@ -30,7 +30,7 @@ struct GT_Block {
   GT_Str *caption;
   bool show_caption;
   GT_Strand strand;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_GenomeNode *top_level_feature;
   unsigned long reference_count;
 };
@@ -41,13 +41,13 @@ static int elemcmp(const void *a, const void *b)
   GT_Element *elem_a = (GT_Element*) a;
   GT_Element *elem_b = (GT_Element*) b;
 
-  GT_GenomeFeatureType *ta = gt_element_get_type(elem_a);
-  GT_GenomeFeatureType *tb = gt_element_get_type(elem_b);
+  GT_FeatureType *ta = gt_element_get_type(elem_a);
+  GT_FeatureType *tb = gt_element_get_type(elem_b);
 
   if (ta == tb)
     return 0;
-  else if (strcmp(gt_genome_feature_type_get_cstr(ta),
-                  gt_genome_feature_type_get_cstr(tb)) < 0) {
+  else if (strcmp(gt_feature_type_get_cstr(ta),
+                  gt_feature_type_get_cstr(tb)) < 0) {
     return 1;
   }
   return -1;
@@ -179,13 +179,13 @@ GT_Strand gt_block_get_strand(const GT_Block *block)
   return block->strand;
 }
 
-void gt_block_set_type(GT_Block *block, GT_GenomeFeatureType *type)
+void gt_block_set_type(GT_Block *block, GT_FeatureType *type)
 {
   assert(block);
   block->type = type;
 }
 
-GT_GenomeFeatureType* gt_block_get_type(const GT_Block *block)
+GT_FeatureType* gt_block_get_type(const GT_Block *block)
 {
   assert(block);
   return block->type;
@@ -217,7 +217,7 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
 int gt_block_unit_test(GT_Error *err)
 {
   GT_TypeFactory *feature_type_factory;
-  GT_GenomeFeatureType *gft;
+  GT_FeatureType *gft;
   GT_Range r1, r2, r_temp, b_range;
   GT_Strand s;
   GT_GenomeNode *gn1, *gn2;

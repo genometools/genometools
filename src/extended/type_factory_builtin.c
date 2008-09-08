@@ -21,7 +21,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "extended/compare.h"
-#include "extended/genome_feature_type_imp.h"
+#include "extended/feature_type_imp.h"
 #include "extended/type_factory_builtin.h"
 #include "extended/type_factory_rep.h"
 
@@ -71,17 +71,16 @@ static const char* find_type(const char *gft_string)
   return NULL;
 }
 
-static GT_GenomeFeatureType*
-gt_type_factory_builtin_create_gft(GT_TypeFactory *ftf,
-                                        const char *type)
+static GT_FeatureType* gt_type_factory_builtin_create_gft(GT_TypeFactory *ftf,
+                                                          const char *type)
 {
   GT_TypeFactoryBuiltin *ftfb;
-  GT_GenomeFeatureType *gft = NULL;
+  GT_FeatureType *gft = NULL;
   assert(ftf && type);
   ftfb = gt_type_factory_builtin_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
     if ((find_type(type))) {
-      gft = gt_genome_feature_type_construct(ftf, type);
+      gft = gt_feature_type_construct(ftf, type);
       gft_collection_add(ftf->used_types, type, gft);
     }
   }

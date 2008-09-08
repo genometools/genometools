@@ -44,7 +44,7 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
   assert(current_feature);
   if (gt_genome_feature_has_type(current_feature, gft_exon)) {
     if (v->previous_exon_feature) {
-      GT_GenomeFeatureType *intron_type;
+      GT_FeatureType *intron_type;
       /* determine intron range */
       previous_range = gt_genome_node_get_range((GT_GenomeNode*)
                                              v->previous_exon_feature);

@@ -32,7 +32,7 @@ typedef struct {
   GT_Str *typestr,
       *seqfile,
       *regionmapping;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_TypeFactory *feature_type_factory;
 } ExtractFeatArguments;
 

@@ -170,19 +170,19 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
 
 static GT_Str* create_unique_id(GFF3Visitor *gff3_visitor, GT_GenomeFeature *gf)
 {
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_Str *id;
   assert(gff3_visitor && gf);
   type = gt_genome_feature_get_type(gf);
 
   /* increase id counter */
   string_distri_add(gff3_visitor->id_counter,
-                   gt_genome_feature_type_get_cstr(type));
+                   gt_feature_type_get_cstr(type));
 
   /* build id string */
-  id = gt_str_new_cstr(gt_genome_feature_type_get_cstr(type));
+  id = gt_str_new_cstr(gt_feature_type_get_cstr(type));
   gt_str_append_ulong(id, string_distri_get(gff3_visitor->id_counter,
-                                        gt_genome_feature_type_get_cstr(type)));
+                                        gt_feature_type_get_cstr(type)));
   /* store (unique) id */
   hashmap_add(gff3_visitor->gt_genome_feature_to_unique_id_str, gf, id);
 

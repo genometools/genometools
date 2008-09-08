@@ -24,8 +24,8 @@ typedef struct GT_GenomeFeature GT_GenomeFeature;
 #include "core/range.h"
 #include "core/phase.h"
 #include "core/strand.h"
+#include "extended/feature_type.h"
 #include "extended/genome_node.h"
-#include "extended/genome_feature_type.h"
 #include "extended/transcript_feature_type.h"
 #include "extended/type_factory.h"
 
@@ -33,7 +33,7 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
 const GT_GenomeNodeClass* gt_genome_feature_class(void);
-GT_GenomeNode*            gt_genome_feature_new(GT_Str *seqid, GT_GenomeFeatureType*, GT_Range,
+GT_GenomeNode*            gt_genome_feature_new(GT_Str *seqid, GT_FeatureType*, GT_Range,
                                           GT_Strand);
 GT_GenomeNode*            gt_genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
@@ -43,8 +43,8 @@ const char*            gt_genome_feature_get_attribute(GT_GenomeNode *gn,
                                                     const char *attr_name);
 /* Return a GT_StrArray containing the used attribute names. */
 GT_StrArray*              gt_genome_feature_get_attribute_list(GT_GenomeFeature*);
-GT_GenomeFeatureType*     gt_genome_feature_get_type(GT_GenomeFeature*);
-GT_GenomeFeatureType*     gt_genome_feature_create_gft(GT_GenomeFeature*, const char*);
+GT_FeatureType*     gt_genome_feature_get_type(GT_GenomeFeature*);
+GT_FeatureType*     gt_genome_feature_create_gft(GT_GenomeFeature*, const char*);
 bool                   gt_genome_feature_has_type(GT_GenomeFeature*, const char*);
 bool                   gt_genome_feature_score_is_defined(const GT_GenomeFeature*);
 bool                   gt_genome_feature_is_multi(const GT_GenomeFeature*);

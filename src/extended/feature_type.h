@@ -20,10 +20,10 @@
 
 #include <stdbool.h>
 
-/* The GT_GenomeFeatureType represents the feature type mainly used in
+/* The GT_FeatureType represents the feature type mainly used in
    GT_GenomeFeatures and corresponds to the type column in GFF3 files.
-   To create new GT_GenomeFeatureTypes a GT_TypeFactory or an already existing
-   GT_GenomeFeatureType (which internally uses the GT_TypeFactory it was
+   To create new GT_FeatureTypes a GT_TypeFactory or an already existing
+   GT_FeatureType (which internally uses the GT_TypeFactory it was
    created from) should be used!
 */
 
@@ -49,11 +49,11 @@
 #define gft_three_prime_splice_site  "three_prime_splice_site"
 #define gft_transcript               "transcript"
 
-typedef struct GT_GenomeFeatureType GT_GenomeFeatureType;
+typedef struct GT_FeatureType GT_FeatureType;
 
-GT_GenomeFeatureType* gt_genome_feature_type_create_gft(GT_GenomeFeatureType*,
+GT_FeatureType* gt_feature_type_create_gft(GT_FeatureType*,
                                                   const char *type);
-bool               gt_genome_feature_type_is(GT_GenomeFeatureType*, const char *type);
-const char*        gt_genome_feature_type_get_cstr(const GT_GenomeFeatureType*);
+bool               gt_feature_type_is(GT_FeatureType*, const char *type);
+const char*        gt_feature_type_get_cstr(const GT_FeatureType*);
 
 #endif

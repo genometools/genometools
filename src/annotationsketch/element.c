@@ -23,12 +23,12 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/strand.h"
+#include "extended/feature_type.h"
 #include "extended/genome_feature.h"
-#include "extended/genome_feature_type.h"
 #include "extended/type_factory_builtin.h"
 
 struct GT_Element {
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_Strand strand;
   GT_GenomeNode *gn;
   GT_Range range;
@@ -75,13 +75,13 @@ void gt_element_set_range(GT_Element *element, GT_Range r)
   element->range = r;
 }
 
-GT_GenomeFeatureType* gt_element_get_type(const GT_Element *element)
+GT_FeatureType* gt_element_get_type(const GT_Element *element)
 {
   assert(element);
   return element->type;
 }
 
-void gt_element_set_type(GT_Element *element, GT_GenomeFeatureType *type)
+void gt_element_set_type(GT_Element *element, GT_FeatureType *type)
 {
   assert(element);
   element->type = type;
@@ -123,7 +123,7 @@ GT_GenomeNode* gt_element_get_node_ref(const GT_Element *elem)
 int gt_element_unit_test(GT_Error *err)
 {
   GT_TypeFactory *feature_type_factory;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
   GT_Element *e, *e2, *e3;

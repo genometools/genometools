@@ -23,9 +23,9 @@
 #include "core/ma.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "extended/feature_type.h"
+#include "extended/feature_type_imp.h"
 #include "extended/genome_feature.h"
-#include "extended/genome_feature_type.h"
-#include "extended/genome_feature_type_imp.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/genome_node_rep.h"
 #include "extended/tag_value_map.h"
@@ -51,7 +51,7 @@ struct GT_GenomeFeature
   GT_Str *seqid,
       *source;
   GT_TypeFactory *ftf;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_Range range;
   float score;
   TagValueMap attributes; /* stores the attributes; created on demand */
@@ -169,7 +169,7 @@ static void set_transcriptfeaturetype(GT_GenomeNode *gn, TranscriptFeatureType t
   gn->bit_field |= tft << TRANSCRIPT_FEATURE_TYPE_OFFSET;
 }
 
-GT_GenomeNode* gt_genome_feature_new(GT_Str *seqid, GT_GenomeFeatureType *type, GT_Range range,
+GT_GenomeNode* gt_genome_feature_new(GT_Str *seqid, GT_FeatureType *type, GT_Range range,
                                GT_Strand strand)
 {
   GT_GenomeNode *gn;
@@ -180,7 +180,7 @@ GT_GenomeNode* gt_genome_feature_new(GT_Str *seqid, GT_GenomeFeatureType *type, 
   gf = gt_genome_feature_cast(gn);
   gf->seqid     = gt_str_ref(seqid);
   gf->source    = NULL;
-  gf->ftf       = gt_type_factory_ref(gt_genome_feature_type_get_ftf(type));
+  gf->ftf       = gt_type_factory_ref(gt_feature_type_get_ftf(type));
   gf->type      = type;
   gf->score     = UNDEF_FLOAT;
   gf->range     = range;
@@ -211,7 +211,7 @@ GT_GenomeNode* gt_genome_feature_new_pseudo(GT_GenomeFeature *gf)
 GT_GenomeNode* gt_genome_feature_new_standard_gene(GT_TypeFactory *ftf)
 {
   GT_GenomeNode *gn, *child, *grandchild;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_Range range;
   GT_Str *seqid;
   seqid = gt_str_new_cstr("ctg123");
@@ -302,23 +302,23 @@ const char* gt_genome_feature_get_source(GT_GenomeFeature *gf)
   return gf->source ? gt_str_get(gf->source) : ".";
 }
 
-GT_GenomeFeatureType* gt_genome_feature_get_type(GT_GenomeFeature *gf)
+GT_FeatureType* gt_genome_feature_get_type(GT_GenomeFeature *gf)
 {
   assert(gf);
   return gf->type;
 }
 
-GT_GenomeFeatureType* gt_genome_feature_create_gft(GT_GenomeFeature *gf,
+GT_FeatureType* gt_genome_feature_create_gft(GT_GenomeFeature *gf,
                                              const char *type)
 {
   assert(gf && type);
-  return gt_genome_feature_type_create_gft(gf->type, type);
+  return gt_feature_type_create_gft(gf->type, type);
 }
 
 bool gt_genome_feature_has_type(GT_GenomeFeature *gf, const char *type)
 {
   assert(gf && type);
-  return gt_genome_feature_type_is(gf->type, type);
+  return gt_feature_type_is(gf->type, type);
 }
 
 bool gt_genome_feature_score_is_defined(const GT_GenomeFeature *gf)
@@ -633,7 +633,7 @@ bool genome_features_are_similar(GT_GenomeFeature *gf_a, GT_GenomeFeature *gf_b)
 int gt_genome_feature_unit_test(GT_Error *err)
 {
   GT_TypeFactory *feature_type_factory;
-  GT_GenomeFeatureType *type;
+  GT_FeatureType *type;
   GT_GenomeNode *gf;
   GT_Range range;
   GT_Str *seqid;

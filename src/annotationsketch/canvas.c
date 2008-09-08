@@ -444,11 +444,11 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   if (!gt_block_has_only_one_fullsize_element(block)
        && draw_range.end-draw_range.start < min_len_block)
   {
-    GT_GenomeFeatureType *btype = gt_block_get_type(block);
-    gt_style_get_color(canvas->sty, gt_genome_feature_type_get_cstr(btype),
+    GT_FeatureType *btype = gt_block_get_type(block);
+    gt_style_get_color(canvas->sty, gt_feature_type_get_cstr(btype),
                            "fill", &fillcolor,
                            gt_block_get_top_level_feature(block));
-    gt_style_get_color(canvas->sty, gt_genome_feature_type_get_cstr(btype),
+    gt_style_get_color(canvas->sty, gt_feature_type_get_cstr(btype),
                            "stroke", &strokecolor,
                            gt_block_get_top_level_feature(block));
     gt_graphics_draw_box(canvas->g,
@@ -521,7 +521,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   if (!gt_range_overlap(elem_range, canvas->viewrange))
     return -1;
 
-  type = gt_genome_feature_type_get_cstr(gt_element_get_type(elem));
+  type = gt_feature_type_get_cstr(gt_element_get_type(elem));
   grey.red = grey.green = grey.blue = .85;
   if (!gt_style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;

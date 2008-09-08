@@ -18,19 +18,19 @@
 #include <assert.h>
 #include "core/cstr.h"
 #include "core/ma.h"
-#include "extended/genome_feature_type.h"
+#include "extended/feature_type.h"
 #include "extended/type_factory.h"
 
-struct GT_GenomeFeatureType {
+struct GT_FeatureType {
   GT_TypeFactory *feature_type_factory;
   char *type;
 };
 
-GT_GenomeFeatureType* gt_genome_feature_type_construct(GT_TypeFactory
+GT_FeatureType* gt_feature_type_construct(GT_TypeFactory
                                                  *feature_type_factory,
                                                  const char *type)
 {
-  GT_GenomeFeatureType *gft;
+  GT_FeatureType *gft;
   assert(feature_type_factory && type);
   gft = gt_calloc(1, sizeof *gft);
   gft->feature_type_factory = feature_type_factory;
@@ -38,34 +38,34 @@ GT_GenomeFeatureType* gt_genome_feature_type_construct(GT_TypeFactory
   return gft;
 }
 
-GT_GenomeFeatureType* gt_genome_feature_type_create_gft(GT_GenomeFeatureType *gft,
+GT_FeatureType* gt_feature_type_create_gft(GT_FeatureType *gft,
                                                   const char *type)
 {
   assert(gft && type);
   return gt_type_factory_create_gft(gft->feature_type_factory, type);
 }
 
-void gt_genome_feature_type_delete(GT_GenomeFeatureType *gft)
+void gt_feature_type_delete(GT_FeatureType *gft)
 {
   if (!gft) return;
   gt_free(gft->type);
   gt_free(gft);
 }
 
-bool gt_genome_feature_type_is(GT_GenomeFeatureType *gft, const char *type)
+bool gt_feature_type_is(GT_FeatureType *gft, const char *type)
 {
   if (gft == gt_type_factory_create_gft(gft->feature_type_factory, type))
     return true;
   return false;
 }
 
-const char* gt_genome_feature_type_get_cstr(const GT_GenomeFeatureType *gft)
+const char* gt_feature_type_get_cstr(const GT_FeatureType *gft)
 {
   assert(gft);
   return gft->type;
 }
 
-GT_TypeFactory* gt_genome_feature_type_get_ftf(const GT_GenomeFeatureType *gft)
+GT_TypeFactory* gt_feature_type_get_ftf(const GT_FeatureType *gft)
 {
   assert(gft);
   return gft->feature_type_factory;
