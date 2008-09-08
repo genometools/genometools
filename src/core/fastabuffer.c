@@ -25,15 +25,15 @@
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'
 
-FastaBuffer* fastabuffer_new(const GT_StrArray *filenametab,
+GT_FastaBuffer* gt_fastabuffer_new(const GT_StrArray *filenametab,
                              const Uchar *symbolmap,
                              bool plainformat,
                              Filelengthvalues **filelengthtab,
                              Queue *descptr,
                              unsigned long *characterdistribution)
 {
-  FastaBuffer *fb;
-  fb = gt_calloc(1, sizeof (FastaBuffer));
+  GT_FastaBuffer *fb;
+  fb = gt_calloc(1, sizeof (GT_FastaBuffer));
   fb->plainformat = plainformat;
   fb->filenum = 0;
   fb->firstoverallseq = true;
@@ -57,7 +57,7 @@ FastaBuffer* fastabuffer_new(const GT_StrArray *filenametab,
   return fb;
 }
 
-static inline int ownbuffergenfile_getc(FastaBuffer *fb,GenFile *inputstream)
+static inline int ownbuffergenfile_getc(GT_FastaBuffer *fb,GenFile *inputstream)
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {
@@ -73,7 +73,7 @@ static inline int ownbuffergenfile_getc(FastaBuffer *fb,GenFile *inputstream)
   return fb->inputbuffer[fb->currentinpos++];
 }
 
-static int advancefastabufferstate(FastaBuffer *fb, GT_Error *err)
+static int advancefastabufferstate(GT_FastaBuffer *fb, GT_Error *err)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
@@ -225,7 +225,7 @@ static int advancefastabufferstate(FastaBuffer *fb, GT_Error *err)
   return 0;
 }
 
-static int advancePlainbufferstate(FastaBuffer *fb, GT_Error *err)
+static int advancePlainbufferstate(GT_FastaBuffer *fb, GT_Error *err)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileread = 0;
@@ -302,7 +302,7 @@ static int advancePlainbufferstate(FastaBuffer *fb, GT_Error *err)
   return 0;
 }
 
-int advanceformatbufferstate(FastaBuffer *fb, GT_Error *err)
+int advanceformatbufferstate(GT_FastaBuffer *fb, GT_Error *err)
 {
   gt_error_check(err);
   if (fb->plainformat)
@@ -312,7 +312,7 @@ int advanceformatbufferstate(FastaBuffer *fb, GT_Error *err)
   return advancefastabufferstate(fb, err);
 }
 
-void fastabuffer_delete(FastaBuffer *fb)
+void gt_fastabuffer_delete(GT_FastaBuffer *fb)
 {
   if (!fb) return;
   genfile_close(fb->inputstream);

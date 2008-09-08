@@ -487,12 +487,12 @@ int getfastastreamkmers(
   Streamstate spwp;
   Uchar charcode;
   bool haserr = false;
-  FastaBuffer *fb;
+  GT_FastaBuffer *fb;
   int retval;
 
   gt_error_check(err);
   initstreamstate(&spwp,numofchars,kmersize);
-  fb = fastabuffer_new(filenametab,
+  fb = gt_fastabuffer_new(filenametab,
                        symbolmap,
                        plainformat,
                        NULL,
@@ -500,7 +500,7 @@ int getfastastreamkmers(
                        NULL);
   for (currentposition = 0; /* Nothing */; currentposition++)
   {
-    retval = fastabuffer_next(fb,&charcode,err);
+    retval = gt_fastabuffer_next(fb,&charcode,err);
     if (retval < 0)
     {
       haserr = true;
@@ -513,7 +513,7 @@ int getfastastreamkmers(
     shiftrightwithchar(processkmercode,processkmercodeinfo,
                        &spwp,currentposition,charcode);
   }
-  fastabuffer_delete(fb);
+  gt_fastabuffer_delete(fb);
   if (!haserr)
   {
     doovershoot(&spwp,

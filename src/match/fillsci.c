@@ -145,7 +145,7 @@ int fasta2sequencekeyvalues(
         Verboseinfo *verboseinfo,
         GT_Error *err)
 {
-  FastaBuffer *fb = NULL;
+  GT_FastaBuffer *fb = NULL;
   Uchar charcode;
   Seqpos pos = 0;
   int retval;
@@ -175,7 +175,7 @@ int fasta2sequencekeyvalues(
   }
   if (!haserr)
   {
-    fb = fastabuffer_new(filenametab,
+    fb = gt_fastabuffer_new(filenametab,
                          getsymbolmapAlphabet(alpha),
                          plainformat,
                          filelengthtab,
@@ -184,7 +184,7 @@ int fasta2sequencekeyvalues(
     distspralen = disc_distri_new();
     for (pos = 0; /* Nothing */; pos++)
     {
-      retval = fastabuffer_next(fb,&charcode,err);
+      retval = gt_fastabuffer_next(fb,&charcode,err);
       if (retval < 0)
       {
         haserr = true;
@@ -267,7 +267,7 @@ int fasta2sequencekeyvalues(
   }
   gt_xfclose(desfp);
   disc_distri_delete(distspralen);
-  fastabuffer_delete(fb);
+  gt_fastabuffer_delete(fb);
   queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
 }

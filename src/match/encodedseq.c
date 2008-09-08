@@ -189,7 +189,7 @@ typedef uint32_t Uint32;
 typedef struct
 {
   const char *funcname;
-  int(*function)(Encodedsequence *,FastaBuffer *,GT_Error *);
+  int(*function)(Encodedsequence *,GT_FastaBuffer *,GT_Error *);
 } Fillencposfunc;
 
 typedef struct
@@ -866,7 +866,7 @@ static Uchar delivercharViauint32tablesSpecialrange(
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,GT_Error *err)
+static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fb,GT_Error *err)
 {
   Seqpos pos;
   int retval;
@@ -877,7 +877,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,GT_Error *err)
   encseq->plainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fb,&cc,err);
+    retval = gt_fastabuffer_next(fb,&cc,err);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -893,7 +893,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,GT_Error *err)
 }
 
 static int fillbitaccesstab(Encodedsequence *encseq,
-                            FastaBuffer *fb,
+                            GT_FastaBuffer *fb,
                             GT_Error *err)
 {
   Uchar cc;
@@ -906,7 +906,7 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   INITBITTAB(encseq->specialbits,encseq->totallength);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fb,&cc,err);
+    retval = gt_fastabuffer_next(fb,&cc,err);
     if (retval < 0)
     {
       return -1;
@@ -2003,7 +2003,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
-  FastaBuffer *fb = NULL;
+  GT_FastaBuffer *fb = NULL;
 
   gt_error_check(err);
   retcode = determinesattype(totallength,
@@ -2030,7 +2030,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     encseq->mappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
     assert(filenametab != NULL);
-    fb = fastabuffer_new(filenametab,
+    fb = gt_fastabuffer_new(filenametab,
                          plainformat ? NULL : getsymbolmapAlphabet(alphabet),
                          plainformat,
                          NULL,
@@ -2051,7 +2051,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   {
     freeEncodedsequence(&encseq);
   }
-  fastabuffer_delete(fb);
+  gt_fastabuffer_delete(fb);
   return haserr ? NULL : encseq;
 }
 

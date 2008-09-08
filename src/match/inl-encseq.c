@@ -94,7 +94,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
   FREESPACE(*esr);
 }
 
-static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
+static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,GT_Error *err)
 {
   Seqpos pos;
   int retval;
@@ -107,7 +107,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
   encseq->hasspecialcharacters = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fbs,&cc,err);
+    retval = gt_fastabuffer_next(fbs,&cc,err);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -143,11 +143,11 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
                                                   GT_Error *err)
 {
   Encodedsequence *encseq;
-  FastaBuffer *fb = NULL;
+  GT_FastaBuffer *fb = NULL;
   bool haserr = false;
 
   gt_error_check(err);
-  fb = fastabuffer_new(filenametab,
+  fb = gt_fastabuffer_new(filenametab,
                        plainformat ? NULL : getsymbolmapAlphabet(alphabet),
                        plainformat,
                        NULL,
@@ -160,7 +160,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,GT_Error *err)
     freeEncodedsequence(&encseq);
     haserr = true;
   }
-  fastabuffer_delete(fb);
+  gt_fastabuffer_delete(fb);
   return haserr ? NULL : encseq;
 }
 

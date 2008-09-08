@@ -28,11 +28,11 @@ int guessifproteinsequencestream(const GT_StrArray *filenametab,GT_Error *err)
   unsigned int countnonbases = 0,
                currentposition;
   Uchar currentchar;
-  FastaBuffer *fb;
+  GT_FastaBuffer *fb;
   int retval;
 
   gt_error_check(err);
-  fb = fastabuffer_new(filenametab,
+  fb = gt_fastabuffer_new(filenametab,
                        NULL,
                        false,
                        NULL,
@@ -41,10 +41,10 @@ int guessifproteinsequencestream(const GT_StrArray *filenametab,GT_Error *err)
   for (currentposition = 0; currentposition < 1000U;
        currentposition++)
   {
-    retval = fastabuffer_next(fb,&currentchar,err);
+    retval = gt_fastabuffer_next(fb,&currentchar,err);
     if (retval < 0)
     {
-      fastabuffer_delete(fb);
+      gt_fastabuffer_delete(fb);
       return -1;
     }
     if (retval == 0)
@@ -69,7 +69,7 @@ int guessifproteinsequencestream(const GT_StrArray *filenametab,GT_Error *err)
       break;
     }
   }
-  fastabuffer_delete(fb);
+  gt_fastabuffer_delete(fb);
   if (countnonbases > 0)
   {
     return 1;

@@ -118,7 +118,7 @@ static int testfullscan(const GT_StrArray *filenametab,
 {
   Seqpos pos, totallength;
   Uchar ccscan = 0, ccra, ccsr;
-  FastaBuffer *fb = NULL;
+  GT_FastaBuffer *fb = NULL;
   int retval;
   bool haserr = false;
   Encodedsequencescanstate *esr;
@@ -129,7 +129,7 @@ static int testfullscan(const GT_StrArray *filenametab,
   progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
-    fb = fastabuffer_new(filenametab,
+    fb = gt_fastabuffer_new(filenametab,
                          symbolmap,
                          false,
                          NULL,
@@ -142,7 +142,7 @@ static int testfullscan(const GT_StrArray *filenametab,
   {
     if (filenametab != NULL && readmode == Forwardmode)
     {
-      retval = fastabuffer_next(fb,&ccscan,err);
+      retval = gt_fastabuffer_next(fb,&ccscan,err);
       if (retval < 0)
       {
         haserr = true;
@@ -201,7 +201,7 @@ static int testfullscan(const GT_StrArray *filenametab,
     }
   }
   freeEncodedsequencescanstate(&esr);
-  fastabuffer_delete(fb);
+  gt_fastabuffer_delete(fb);
   return haserr ? -1 : 0;
 }
 

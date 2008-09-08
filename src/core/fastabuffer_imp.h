@@ -23,7 +23,7 @@
 #define OUTPUTFILEBUFFERSIZE 4096
 #define INPUTFILEBUFFERSIZE  4096
 
-struct FastaBuffer
+struct GT_FastaBuffer
 {
   unsigned int filenum;
   uint64_t linenum;
@@ -48,9 +48,9 @@ struct FastaBuffer
   Arraychar headerbuffer;
 };
 
-int advanceformatbufferstate(FastaBuffer *fb, GT_Error*);
+int advanceformatbufferstate(GT_FastaBuffer *fb, GT_Error*);
 
-static inline int fastabuffer_next(FastaBuffer *fb,Uchar *val, GT_Error *err)
+static inline int gt_fastabuffer_next(GT_FastaBuffer *fb,Uchar *val, GT_Error *err)
 {
   if (fb->nextread >= fb->nextfree)
   {
