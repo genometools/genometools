@@ -198,9 +198,9 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
         else if (gt_str_length(arguments->extract)) {
           if (!strcmp(gt_bioseq_get_md5_fingerprint(bs, j),
                       gt_str_get(arguments->extract))) {
-            fasta_show_entry(gt_bioseq_get_description(bs, j),
-                             gt_bioseq_get_sequence(bs, j),
-                             gt_bioseq_get_sequence_length(bs, j), 0);
+            gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
+                                gt_bioseq_get_sequence(bs, j),
+                                gt_bioseq_get_sequence_length(bs, j), 0);
           }
         }
         else

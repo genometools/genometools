@@ -387,10 +387,9 @@ int extractginumbers(bool verbose,
                             " complete %s",
                             PRINTuint64_tcast(referenceginumber),
                             desc);
-            fasta_show_entry_generic(headerbufferspace,
-                                     (const char *) sequence,
-                                     len,
-                                     width, outfp);
+            gt_fasta_show_entry_generic(headerbufferspace,
+                                        (const char *) sequence,
+                                        len, width, outfp);
           } else
           {
             (void) snprintf(headerbufferspace,headerbuffersize,Formatuint64_t
@@ -399,13 +398,13 @@ int extractginumbers(bool verbose,
                             giqueries[ginumberhit].frompos,
                             giqueries[ginumberhit].topos,
                             desc);
-            fasta_show_entry_generic(headerbufferspace,
-                                     (const char *) (sequence +
-                                                     giqueries[ginumberhit].
-                                                     frompos - 1),
-                                     giqueries[ginumberhit].topos -
-                                     giqueries[ginumberhit].frompos+1,
-                                     width, outfp);
+            gt_fasta_show_entry_generic(headerbufferspace,
+                                        (const char *) (sequence +
+                                                        giqueries[ginumberhit].
+                                                        frompos - 1),
+                                        giqueries[ginumberhit].topos -
+                                        giqueries[ginumberhit].frompos+1,
+                                        width, outfp);
           }
           giqueries[ginumberhit].markhit = true;
           countmarkhit++;

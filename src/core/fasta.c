@@ -19,16 +19,17 @@
 #include "core/fasta_separator.h"
 #include "core/xansi.h"
 
-void fasta_show_entry(const char *description, const char *sequence,
-                      unsigned long sequence_length, unsigned long width)
+void gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width)
 {
   assert(sequence);
-  fasta_show_entry_generic(description, sequence, sequence_length, width, NULL);
+  gt_fasta_show_entry_generic(description, sequence, sequence_length, width,
+                              NULL);
 }
 
-void fasta_show_entry_generic(const char *description, const char *sequence,
-                              unsigned long sequence_length,
-                              unsigned long width, GenFile *outfp)
+void gt_fasta_show_entry_generic(const char *description, const char *sequence,
+                                 unsigned long sequence_length,
+                                 unsigned long width, GenFile *outfp)
 {
   unsigned long i, current_length;
   assert(sequence);

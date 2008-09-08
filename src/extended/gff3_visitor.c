@@ -295,10 +295,10 @@ static int gff3_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
     genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_FASTA_DIRECTIVE);
     gff3_visitor->fasta_directive_shown = true;
   }
-  fasta_show_entry_generic(gt_sequence_node_get_description(sn),
-                           gt_sequence_node_get_sequence(sn),
-                           gt_sequence_node_get_sequence_length(sn),
-                           gff3_visitor->fasta_width, gff3_visitor->outfp);
+  gt_fasta_show_entry_generic(gt_sequence_node_get_description(sn),
+                              gt_sequence_node_get_sequence(sn),
+                              gt_sequence_node_get_sequence_length(sn),
+                              gff3_visitor->fasta_width, gff3_visitor->outfp);
   return 0;
 }
 

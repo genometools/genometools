@@ -116,7 +116,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
       shredder_set_sample_probability(shredder, arguments->sample_probability);
       while ((fragment = shredder_shred(shredder, &fragment_length, desc))) {
         gt_str_append_cstr(desc, " [shreddered fragment]");
-        fasta_show_entry(gt_str_get(desc), fragment, fragment_length, 0);
+        gt_fasta_show_entry(gt_str_get(desc), fragment, fragment_length, 0);
       }
       shredder_delete(shredder);
     }

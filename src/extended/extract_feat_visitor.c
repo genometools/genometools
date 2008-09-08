@@ -61,13 +61,13 @@ static void show_entry(GT_Str *description, GT_Str *sequence, bool translate)
   if (translate) {
     GT_Str *protein = gt_str_new();
     translate_dna(protein, gt_str_get(sequence), gt_str_length(sequence), 0);
-    fasta_show_entry(gt_str_get(description), gt_str_get(protein),
-                     gt_str_length(protein), 0);
+    gt_fasta_show_entry(gt_str_get(description), gt_str_get(protein),
+                        gt_str_length(protein), 0);
     gt_str_delete(protein);
   }
   else {
-    fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
-                     gt_str_length(sequence), 0);
+    gt_fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
+                        gt_str_length(sequence), 0);
   }
 }
 

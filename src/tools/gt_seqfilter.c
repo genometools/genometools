@@ -88,9 +88,9 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
            gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
           (arguments->maxlength == UNDEF_ULONG ||
            gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength)) {
-        fasta_show_entry(gt_bioseq_get_description(bioseq, i),
-                         gt_bioseq_get_sequence(bioseq, i),
-                         gt_bioseq_get_sequence_length(bioseq, i), 0);
+        gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
+                            gt_bioseq_get_sequence(bioseq, i),
+                            gt_bioseq_get_sequence_length(bioseq, i), 0);
       }
       else
         duplicates++;

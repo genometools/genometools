@@ -150,8 +150,9 @@ static int extractseq_pos(GenFile *outfp, GT_Bioseq *bs, unsigned long frompos,
     had_err = -1;
   }
   if (!had_err) {
-    fasta_show_entry_generic(NULL, gt_bioseq_get_raw_sequence(bs) + frompos - 1,
-                             topos - frompos + 1, width, outfp);
+    gt_fasta_show_entry_generic(NULL,
+                                gt_bioseq_get_raw_sequence(bs) + frompos - 1,
+                                topos - frompos + 1, width, outfp);
   }
   return had_err;
 }
@@ -172,8 +173,9 @@ static int extractseq_match(GenFile *outfp, GT_Bioseq *bs, const char *pattern,
     assert(desc);
     had_err = grep(&match, pattern, desc, err);
     if (!had_err && match) {
-      fasta_show_entry_generic(desc, gt_bioseq_get_sequence(bs, i),
-                               gt_bioseq_get_sequence_length(bs, i), width, outfp);
+      gt_fasta_show_entry_generic(desc, gt_bioseq_get_sequence(bs, i),
+                                  gt_bioseq_get_sequence_length(bs, i), width,
+                                  outfp);
     }
   }
 

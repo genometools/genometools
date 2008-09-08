@@ -110,10 +110,10 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
         for (j = 0; j < gt_bioseq_number_of_sequences(bs); j++) {
           if (!string_distri_get(sd, gt_bioseq_get_md5_fingerprint(bs, j))) {
             string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
-            fasta_show_entry_generic(gt_bioseq_get_description(bs, j),
-                                     gt_bioseq_get_sequence(bs, j),
-                                     gt_bioseq_get_sequence_length(bs, j), 0,
-                                     arguments->outfp);
+            gt_fasta_show_entry_generic(gt_bioseq_get_description(bs, j),
+                                        gt_bioseq_get_sequence(bs, j),
+                                        gt_bioseq_get_sequence_length(bs, j), 0,
+                                        arguments->outfp);
           }
           else
             duplicates++;
@@ -144,8 +144,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       md5 = md5_fingerprint((const char*) sequence, (unsigned long) len);
       if (!string_distri_get(sd, md5)) {
         string_distri_add(sd, md5);
-        fasta_show_entry_generic(desc, (const char*) sequence, len, 0,
-                                 arguments->outfp);
+        gt_fasta_show_entry_generic(desc, (const char*) sequence, len, 0,
+                                    arguments->outfp);
       }
       else
         duplicates++;
