@@ -24,8 +24,8 @@
 #define START_AMINO 'M'
 #define STOP_AMINO  '*'
 
-void determine_ORFs(GT_Array *ranges, unsigned int framenum,
-                    const char *frame, unsigned long framelen)
+void gt_determine_ORFs(GT_Array *ranges, unsigned int framenum,
+                       const char *frame, unsigned long framelen)
 {
   unsigned long i;
   GT_Range orf;
