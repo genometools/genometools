@@ -74,7 +74,7 @@ GT_Block* gt_block_ref(GT_Block *block)
 GT_Block* gt_block_new(void)
 {
   GT_Block *block = ma_calloc(1, sizeof (GT_Block));
-  block->elements = dlist_new(elemcmp);
+  block->elements = gt_dlist_new(elemcmp);
   block->caption = NULL;
   block->show_caption = true;
   block->strand = GT_STRAND_UNKNOWN;
@@ -101,7 +101,7 @@ void gt_block_insert_element(GT_Block *block, GT_GenomeNode *gn)
   if (!block->top_level_feature)
     block->top_level_feature = gt_genome_node_ref(gn);
   element = gt_element_new(gn);
-  dlist_add(block->elements, element);
+  gt_dlist_add(block->elements, element);
 }
 
 GT_GenomeNode* gt_block_get_top_level_feature(const GT_Block *block)
@@ -132,11 +132,11 @@ bool gt_block_has_only_one_fullsize_element(const GT_Block *block)
 {
   bool ret = false;
   assert(block);
-  if (dlist_size(block->elements) == 1UL) {
+  if (gt_dlist_size(block->elements) == 1UL) {
     GT_Range elem_range, block_range;
-    assert(dlist_first(block->elements) == dlist_last(block->elements));
+    assert(gt_dlist_first(block->elements) == gt_dlist_last(block->elements));
     elem_range = gt_element_get_range(
-                   dlistelem_get_data(dlist_first(block->elements)));
+                   gt_dlistelem_get_data(gt_dlist_first(block->elements)));
     block_range = gt_block_get_range(block);
     ret = (gt_range_compare(block_range, elem_range) == 0);
   }
@@ -194,7 +194,7 @@ GT_GenomeFeatureType* gt_block_get_type(const GT_Block *block)
 unsigned long gt_block_get_size(const GT_Block *block)
 {
   assert(block && block->elements);
-  return dlist_size(block->elements);
+  return gt_dlist_size(block->elements);
 }
 
 int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
@@ -206,9 +206,9 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
     do not traverse this feature tree further */
  if (-1 == gt_canvas_visit_block(canvas, block))
    return had_err;
- for (delem = dlist_first(block->elements); delem;
-      delem = dlistelem_next(delem)) {
-    GT_Element* elem = (GT_Element*) dlistelem_get_data(delem);
+ for (delem = gt_dlist_first(block->elements); delem;
+      delem = gt_dlistelem_next(delem)) {
+    GT_Element* elem = (GT_Element*) gt_dlistelem_get_data(delem);
     gt_element_sketch(elem, canvas);
   }
   return had_err;
@@ -294,14 +294,14 @@ void gt_block_delete(GT_Block *block)
     block->reference_count--;
     return;
   }
-  for (delem = dlist_first(block->elements); delem;
-       delem = dlistelem_next(delem)) {
-    GT_Element* elem = (GT_Element*) dlistelem_get_data(delem);
+  for (delem = gt_dlist_first(block->elements); delem;
+       delem = gt_dlistelem_next(delem)) {
+    GT_Element* elem = (GT_Element*) gt_dlistelem_get_data(delem);
     gt_element_delete(elem);
   }
   if (block->caption)
     gt_str_delete(block->caption);
-  dlist_delete(block->elements);
+  gt_dlist_delete(block->elements);
   if (block->top_level_feature)
     gt_genome_node_delete(block->top_level_feature);
   ma_free(block);

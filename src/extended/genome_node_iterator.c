@@ -47,9 +47,9 @@ GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *gn)
   if (gt_genome_node_cast(gt_genome_feature_class(), gn) &&
       gt_genome_feature_is_pseudo((GT_GenomeFeature*) gn)) {
     /* add the children backwards to traverse in order */
-    for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
-         dlistelem = dlistelem_previous(dlistelem)) {
-      child_feature = (GT_GenomeNode*) dlistelem_get_data(dlistelem);
+    for (dlistelem = gt_dlist_last(gn->children); dlistelem != NULL;
+         dlistelem = gt_dlistelem_previous(dlistelem)) {
+      child_feature = (GT_GenomeNode*) gt_dlistelem_get_data(dlistelem);
       gt_array_add(gni->node_stack, child_feature);
     }
   }
@@ -66,9 +66,9 @@ static void add_children_to_stack(GT_Array *node_stack, GT_GenomeNode *gn)
   GT_Dlistelem *dlistelem;
   assert(node_stack && gn && gn->children);
   /* add the children backwards to traverse in order */
-  for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
-       dlistelem = dlistelem_previous(dlistelem)) {
-    child = dlistelem_get_data(dlistelem);
+  for (dlistelem = gt_dlist_last(gn->children); dlistelem != NULL;
+       dlistelem = gt_dlistelem_previous(dlistelem)) {
+    child = gt_dlistelem_get_data(dlistelem);
     gt_array_add(node_stack, child);
   }
 }

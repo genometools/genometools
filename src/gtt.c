@@ -160,8 +160,8 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "countingsort module", countingsort_unit_test);
   hashmap_add(unit_tests, "cstr table class", cstr_table_unit_test);
   hashmap_add(unit_tests, "disc distri class", disc_distri_unit_test);
-  hashmap_add(unit_tests, "dlist class", dlist_unit_test);
-  hashmap_add(unit_tests, "dlist example", dlist_example);
+  hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
+  hashmap_add(unit_tests, "dlist example", gt_dlist_example);
   hashmap_add(unit_tests, "dynamic bittab class", dynbittab_unit_test);
   hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
   hashmap_add(unit_tests, "genome feature class", gt_genome_feature_unit_test);

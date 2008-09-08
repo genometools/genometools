@@ -222,9 +222,9 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
     if (!with_pseudo && gt_genome_node_cast(gt_genome_feature_class(), genome_node) &&
         gt_genome_feature_is_pseudo((GT_GenomeFeature*) genome_node)) {
       /* add the children backwards to traverse in order */
-      for (dlistelem = dlist_last(genome_node->children); dlistelem != NULL;
-           dlistelem = dlistelem_previous(dlistelem)) {
-        child_feature = (GT_GenomeNode*) dlistelem_get_data(dlistelem);
+      for (dlistelem = gt_dlist_last(genome_node->children); dlistelem != NULL;
+           dlistelem = gt_dlistelem_previous(dlistelem)) {
+        child_feature = (GT_GenomeNode*) gt_dlistelem_get_data(dlistelem);
         gt_array_add(node_stack, child_feature);
       }
     }
@@ -236,9 +236,9 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
     node_queue = queue_new();
     if (!with_pseudo && gt_genome_node_cast(gt_genome_feature_class(), genome_node) &&
         gt_genome_feature_is_pseudo((GT_GenomeFeature*) genome_node)) {
-      for (dlistelem = dlist_first(genome_node->children); dlistelem != NULL;
-           dlistelem = dlistelem_next(dlistelem)) {
-        child_feature = (GT_GenomeNode*) dlistelem_get_data(dlistelem);
+      for (dlistelem = gt_dlist_first(genome_node->children); dlistelem != NULL;
+           dlistelem = gt_dlistelem_next(dlistelem)) {
+        child_feature = (GT_GenomeNode*) gt_dlistelem_get_data(dlistelem);
         queue_add(node_queue, child_feature);
       }
     }
@@ -265,9 +265,9 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
     if (gn->children) {
       /* a backup of the children array is necessary if traverse() frees the
          node */
-      for (dlistelem = dlist_first(gn->children); dlistelem != NULL;
-           dlistelem = dlistelem_next(dlistelem)) {
-        child_feature = (GT_GenomeNode*) dlistelem_get_data(dlistelem);
+      for (dlistelem = gt_dlist_first(gn->children); dlistelem != NULL;
+           dlistelem = gt_dlistelem_next(dlistelem)) {
+        child_feature = (GT_GenomeNode*) gt_dlistelem_get_data(dlistelem);
         gt_array_add(list_of_children, child_feature);
       }
     }
@@ -379,9 +379,9 @@ int gt_genome_node_traverse_direct_children(GT_GenomeNode *gn,
   if (!gn || !traverse)
     return 0;
   if (gn->children) {
-    for (dlistelem = dlist_first(gn->children); dlistelem != NULL;
-         dlistelem = dlistelem_next(dlistelem)) {
-      had_err = traverse((GT_GenomeNode*) dlistelem_get_data(dlistelem),
+    for (dlistelem = gt_dlist_first(gn->children); dlistelem != NULL;
+         dlistelem = gt_dlistelem_next(dlistelem)) {
+      had_err = traverse((GT_GenomeNode*) gt_dlistelem_get_data(dlistelem),
                           traverse_func_data, err);
       if (had_err)
         break;
@@ -407,7 +407,7 @@ unsigned int gt_genome_node_get_line_number(const GT_GenomeNode *gn)
 unsigned long gt_genome_node_number_of_children(const GT_GenomeNode *gn)
 {
   assert(gn);
-  return dlist_size(gn->children);
+  return gt_dlist_size(gn->children);
 }
 
 GT_Str* gt_genome_node_get_seqid(GT_GenomeNode *gn)
@@ -474,8 +474,8 @@ void gt_genome_node_is_part_of_genome_node(GT_GenomeNode *parent, GT_GenomeNode 
 #endif
   /* create children list on demand */
   if (!parent->children)
-    parent->children = dlist_new((GT_Compare) gt_genome_node_cmp);
-  dlist_add(parent->children, child); /* XXX: check for circles */
+    parent->children = gt_dlist_new((GT_Compare) gt_genome_node_cmp);
+  gt_dlist_add(parent->children, child); /* XXX: check for circles */
   /* update tree status of <parent> */
   set_tree_status(&parent->bit_field, TREE_STATUS_UNDETERMINED);
   /* update parent info of <child> */
@@ -488,11 +488,11 @@ static int remove_leaf(GT_GenomeNode *node, void *data, GT_UNUSED GT_Error *err)
   GT_GenomeNode *child, *leaf = (GT_GenomeNode*) data;
   gt_error_check(err);
   if (node != leaf && node->children) {
-    for (dlistelem = dlist_first(node->children); dlistelem != NULL;
-         dlistelem = dlistelem_next(dlistelem)) {
-      child = (GT_GenomeNode*) dlistelem_get_data(dlistelem);
+    for (dlistelem = gt_dlist_first(node->children); dlistelem != NULL;
+         dlistelem = gt_dlistelem_next(dlistelem)) {
+      child = (GT_GenomeNode*) gt_dlistelem_get_data(dlistelem);
       if (child == leaf) {
-        dlist_remove(node->children, dlistelem);
+        gt_dlist_remove(node->children, dlistelem);
         break;
       }
     }
@@ -543,7 +543,7 @@ bool gt_genome_node_contains_marked(GT_GenomeNode *gn)
 bool gt_genome_node_has_children(GT_GenomeNode *gn)
 {
   assert(gn);
-  if (!gn->children || dlist_size(gn->children) == 0)
+  if (!gn->children || gt_dlist_size(gn->children) == 0)
     return false;
   return true;
 }
@@ -568,14 +568,14 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GT_GenomeNode *parent
   /* get children ranges */
   children_ranges = gt_array_new(sizeof (GT_Range));
   assert(parent->children);
-  for (dlistelem = dlist_first(parent->children); dlistelem != NULL;
-       dlistelem = dlistelem_next(dlistelem)) {
+  for (dlistelem = gt_dlist_first(parent->children); dlistelem != NULL;
+       dlistelem = gt_dlistelem_next(dlistelem)) {
     if (!gf ||
         ((child_gf = gt_genome_node_cast(gt_genome_feature_class(),
-                                      dlistelem_get_data(dlistelem))) &&
+                                      gt_dlistelem_get_data(dlistelem))) &&
          gt_genome_feature_get_type(gf) == gt_genome_feature_get_type(child_gf))) {
       range = gt_genome_node_get_range((GT_GenomeNode*)
-                                    dlistelem_get_data(dlistelem));
+                                    gt_dlistelem_get_data(dlistelem));
       gt_array_add(children_ranges, range);
     }
   }
@@ -679,7 +679,7 @@ void gt_genome_node_delete(GT_GenomeNode *gn)
   assert(gn->c_class);
   if (gn->c_class->free) gn->c_class->free(gn);
   gt_str_delete(gn->filename);
-  dlist_delete(gn->children);
+  gt_dlist_delete(gn->children);
   ma_free(gn);
 }
 

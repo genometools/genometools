@@ -50,16 +50,16 @@ static void build_key(GT_Str *key, GT_GenomeFeature *feature, GT_Str *target_id)
 static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
                             GT_GenomeFeature *feature, GT_Str *key)
 {
-  dlist_add(trees, feature);
-  hashmap_add(target_to_elem, cstr_dup(gt_str_get(key)), dlist_last(trees));
+  gt_dlist_add(trees, feature);
+  hashmap_add(target_to_elem, cstr_dup(gt_str_get(key)), gt_dlist_last(trees));
 }
 
 static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
                         Hashmap *target_to_elem, GT_Str *key)
 {
-  GT_GenomeNode *node = dlistelem_get_data(elem);
+  GT_GenomeNode *node = gt_dlistelem_get_data(elem);
   gt_genome_node_rec_delete(node);
-  dlist_remove(trees, elem);
+  gt_dlist_remove(trees, elem);
   hashmap_remove(target_to_elem, gt_str_get(key));
 }
 
@@ -96,7 +96,7 @@ static void filter_targetbest(GT_GenomeFeature *current_feature, GT_Dlist *trees
       include_feature(trees, target_to_elem, current_feature, key);
     }
     else {
-      GT_GenomeFeature *previous_feature = dlistelem_get_data(previous_elem);
+      GT_GenomeFeature *previous_feature = gt_dlistelem_get_data(previous_elem);
       /* element with this target_id included already -> compare them */
       if (gt_genome_feature_get_score(current_feature) >
           gt_genome_feature_get_score(previous_feature)) {
@@ -110,7 +110,7 @@ static void filter_targetbest(GT_GenomeFeature *current_feature, GT_Dlist *trees
     gt_str_delete(key);
   }
   else
-    dlist_add(trees, current_feature);
+    gt_dlist_add(trees, current_feature);
   gt_str_delete(first_target_id);
 }
 
@@ -132,17 +132,17 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **
                           tfs->target_to_elem);
       }
       else
-        dlist_add(tfs->trees, node);
+        gt_dlist_add(tfs->trees, node);
     }
-    tfs->next = dlist_first(tfs->trees);
+    tfs->next = gt_dlist_first(tfs->trees);
     tfs->in_stream_processed = true;
   }
 
   if (!had_err) {
     assert(tfs->in_stream_processed);
     if (tfs->next) {
-      *gn = dlistelem_get_data(tfs->next);
-      tfs->next = dlistelem_next(tfs->next);
+      *gn = gt_dlistelem_get_data(tfs->next);
+      tfs->next = gt_dlistelem_next(tfs->next);
     }
     else
       *gn = NULL;
@@ -155,9 +155,9 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **
 static void targetbest_filter_stream_free(GenomeStream *gs)
 {
   TargetbestFilterStream *tfs = targetbest_filter_stream_cast(gs);
-  for (; tfs->next != NULL; tfs->next = dlistelem_next(tfs->next))
-    gt_genome_node_rec_delete(dlistelem_get_data(tfs->next));
-  dlist_delete(tfs->trees);
+  for (; tfs->next != NULL; tfs->next = gt_dlistelem_next(tfs->next))
+    gt_genome_node_rec_delete(gt_dlistelem_get_data(tfs->next));
+  gt_dlist_delete(tfs->trees);
   hashmap_delete(tfs->target_to_elem);
   genome_stream_delete(tfs->in_stream);
 }
@@ -180,7 +180,7 @@ GenomeStream* targetbest_filter_stream_new(GenomeStream *in_stream)
   tfs = targetbest_filter_stream_cast(gs);
   tfs->in_stream = genome_stream_ref(in_stream);
   tfs->in_stream_processed = false;
-  tfs->trees = dlist_new(NULL);
+  tfs->trees = gt_dlist_new(NULL);
   tfs->target_to_elem = hashmap_new(HASH_STRING, ma_free_func, NULL);
   return gs;
 }

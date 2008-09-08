@@ -40,33 +40,33 @@ struct GT_Dlistelem {
   void *data;
 };
 
-GT_Dlist* dlist_new(GT_Compare cmp_func)
+GT_Dlist* gt_dlist_new(GT_Compare cmp_func)
 {
   GT_Dlist *dlist = ma_calloc(1, sizeof (GT_Dlist));
   dlist->cmp_func = cmp_func;
   return dlist;
 }
 
-GT_Dlistelem* dlist_first(const GT_Dlist *dlist)
+GT_Dlistelem* gt_dlist_first(const GT_Dlist *dlist)
 {
   assert(dlist);
   return dlist->first;
 }
 
-GT_Dlistelem* dlist_last(const GT_Dlist *dlist)
+GT_Dlistelem* gt_dlist_last(const GT_Dlist *dlist)
 {
   assert(dlist);
   return dlist->last;
 }
 
-GT_Dlistelem* dlist_find(const GT_Dlist *dlist, void *new_data)
+GT_Dlistelem* gt_dlist_find(const GT_Dlist *dlist, void *new_data)
 {
   GT_Dlistelem *dlistelem;
   void *old_data;
   assert(dlist);
-  for (dlistelem = dlist_first(dlist); dlistelem != NULL;
-       dlistelem = dlistelem_next(dlistelem)) {
-    old_data = dlistelem_get_data(dlistelem);
+  for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
+       dlistelem = gt_dlistelem_next(dlistelem)) {
+    old_data = gt_dlistelem_get_data(dlistelem);
     if (dlist->cmp_func && !dlist->cmp_func(old_data, new_data))
       return dlistelem;
     else if (old_data == new_data)
@@ -75,12 +75,12 @@ GT_Dlistelem* dlist_find(const GT_Dlist *dlist, void *new_data)
   return NULL;
 }
 
-unsigned long dlist_size(const GT_Dlist *dlist)
+unsigned long gt_dlist_size(const GT_Dlist *dlist)
 {
   return dlist ? dlist->size : 0;
 }
 
-void dlist_add(GT_Dlist *dlist, void *data)
+void gt_dlist_add(GT_Dlist *dlist, void *data)
 {
   GT_Dlistelem *oldelem, *newelem;
   assert(dlist); /* data can be null */
@@ -140,7 +140,7 @@ void dlist_add(GT_Dlist *dlist, void *data)
   dlist->size++;
 }
 
-void dlist_remove(GT_Dlist *dlist, GT_Dlistelem *dlistelem)
+void gt_dlist_remove(GT_Dlist *dlist, GT_Dlistelem *dlistelem)
 {
   assert(dlist && dlistelem);
   assert(!dlistelem->previous || dlistelem->previous->next == dlistelem);
@@ -162,7 +162,7 @@ static int intcompare(const void *a, const void *b)
   return *(int*) a - *(int*) b;
 }
 
-int dlist_example(GT_UNUSED GT_Error *err)
+int gt_dlist_example(GT_UNUSED GT_Error *err)
 {
   GT_Dlistelem *dlistelem;
   GT_Dlist *dlist;
@@ -170,24 +170,24 @@ int dlist_example(GT_UNUSED GT_Error *err)
   int elem = 1984;
   gt_error_check(err);
 
-  dlist = dlist_new(NULL);
-  dlist_add(dlist, &elem);
-  dlist_add(dlist, &elem);
-  dlist_add(dlist, &elem);
+  dlist = gt_dlist_new(NULL);
+  gt_dlist_add(dlist, &elem);
+  gt_dlist_add(dlist, &elem);
+  gt_dlist_add(dlist, &elem);
 
   /* a typical iterator loop */
-  for (dlistelem = dlist_first(dlist); dlistelem != NULL;
-       dlistelem = dlistelem_next(dlistelem)) {
-    data = dlistelem_get_data(dlistelem);
+  for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
+       dlistelem = gt_dlistelem_next(dlistelem)) {
+    data = gt_dlistelem_get_data(dlistelem);
     /* do something with data */
   }
 
-  dlist_delete(dlist);
+  gt_dlist_delete(dlist);
 
   return 0;
 }
 
-int dlist_unit_test(GT_Error *err)
+int gt_dlist_unit_test(GT_Error *err)
 {
   GT_Dlist *dlist;
   GT_Dlistelem *dlistelem;
@@ -200,41 +200,41 @@ int dlist_unit_test(GT_Error *err)
   gt_error_check(err);
 
   /* boundary case: empty dlist */
-  dlist = dlist_new(intcompare);
-  ensure(had_err, !dlist_size(dlist));
-  dlist_delete(dlist);
+  dlist = gt_dlist_new(intcompare);
+  ensure(had_err, !gt_dlist_size(dlist));
+  gt_dlist_delete(dlist);
 
-  dlist = dlist_new(NULL);
-  ensure(had_err, !dlist_size(dlist));
-  dlist_delete(dlist);
+  dlist = gt_dlist_new(NULL);
+  ensure(had_err, !gt_dlist_size(dlist));
+  gt_dlist_delete(dlist);
 
   /* boundary case: dlist containing one element */
-  dlist = dlist_new(intcompare);
-  dlist_add(dlist, &elem_a);
-  ensure(had_err, dlist_size(dlist) == 1);
-  ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist = gt_dlist_new(intcompare);
+  gt_dlist_add(dlist, &elem_a);
+  ensure(had_err, gt_dlist_size(dlist) == 1);
+  ensure(had_err, elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  gt_dlist_delete(dlist);
 
-  dlist = dlist_new(NULL);
-  dlist_add(dlist, &elem_a);
-  ensure(had_err, dlist_size(dlist) == 1);
-  ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist = gt_dlist_new(NULL);
+  gt_dlist_add(dlist, &elem_a);
+  ensure(had_err, gt_dlist_size(dlist) == 1);
+  ensure(had_err, elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  gt_dlist_delete(dlist);
 
   /* boundary case: dlist containing two elements */
-  dlist = dlist_new(intcompare);
-  dlist_add(dlist, &elem_a);
-  dlist_add(dlist, &elem_b);
-  ensure(had_err, dlist_size(dlist) == 2);
-  ensure(had_err, elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist = gt_dlist_new(intcompare);
+  gt_dlist_add(dlist, &elem_a);
+  gt_dlist_add(dlist, &elem_b);
+  ensure(had_err, gt_dlist_size(dlist) == 2);
+  ensure(had_err, elem_b == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  gt_dlist_delete(dlist);
 
-  dlist = dlist_new(NULL);
-  dlist_add(dlist, &elem_a);
-  dlist_add(dlist, &elem_b);
-  ensure(had_err, dlist_size(dlist) == 2);
-  ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist = gt_dlist_new(NULL);
+  gt_dlist_add(dlist, &elem_a);
+  gt_dlist_add(dlist, &elem_b);
+  ensure(had_err, gt_dlist_size(dlist) == 2);
+  ensure(had_err, elem_a == *(int*) gt_dlistelem_get_data(gt_dlist_first(dlist)));
+  gt_dlist_delete(dlist);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     /* construct the random elements for the list */
@@ -248,99 +248,99 @@ int dlist_unit_test(GT_Error *err)
     qsort(elems_backup, size, sizeof (int), intcompare);
 
     /* test with compare function */
-    dlist = dlist_new(intcompare);
-    ensure(had_err, !dlist_size(dlist));
+    dlist = gt_dlist_new(intcompare);
+    ensure(had_err, !gt_dlist_size(dlist));
     for (j = 0; j < size && !had_err; j++) {
-      dlist_add(dlist, elems + j);
-      ensure(had_err, dlist_size(dlist) == j+1);
+      gt_dlist_add(dlist, elems + j);
+      ensure(had_err, gt_dlist_size(dlist) == j+1);
 
-      for (dlistelem = dlist_first(dlist); dlistelem != NULL;
-           dlistelem = dlistelem_next(dlistelem)) {
+      for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
+           dlistelem = gt_dlistelem_next(dlistelem)) {
       }
     }
     j = 0;
-    for (dlistelem = dlist_first(dlist); dlistelem != NULL;
-         dlistelem = dlistelem_next(dlistelem)) {
-      data = dlistelem_get_data(dlistelem);
+    for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
+         dlistelem = gt_dlistelem_next(dlistelem)) {
+      data = gt_dlistelem_get_data(dlistelem);
       ensure(had_err, *data == elems_backup[j]);
       j++;
     }
-    /* test dlist_find() */
+    /* test gt_dlist_find() */
     for (j = 0; j < size; j++) {
-      dlistelem = dlist_find(dlist, elems_backup + j);
+      dlistelem = gt_dlist_find(dlist, elems_backup + j);
       ensure(had_err, dlistelem);
-      ensure(had_err, *(int*) dlistelem_get_data(dlistelem) == elems_backup[j]);
+      ensure(had_err, *(int*) gt_dlistelem_get_data(dlistelem) == elems_backup[j]);
     }
     /* remove first element */
-    if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_first(dlist));
-      if (dlist_size(dlist)) {
-        data = dlistelem_get_data(dlist_first(dlist));
+    if (gt_dlist_size(dlist)) {
+      gt_dlist_remove(dlist, gt_dlist_first(dlist));
+      if (gt_dlist_size(dlist)) {
+        data = gt_dlistelem_get_data(gt_dlist_first(dlist));
         ensure(had_err, *data == elems_backup[1]);
       }
     }
     /* remove last element */
-    if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_last(dlist));
-      if (dlist_size(dlist)) {
-        data = dlistelem_get_data(dlist_last(dlist));
+    if (gt_dlist_size(dlist)) {
+      gt_dlist_remove(dlist, gt_dlist_last(dlist));
+      if (gt_dlist_size(dlist)) {
+        data = gt_dlistelem_get_data(gt_dlist_last(dlist));
         ensure(had_err, *data == elems_backup[size - 2]);
       }
     }
     /* XXX: fix this */
 #if 0
     /* remove middle element */
-    if (dlist_size(dlist) >= 2) {
-      dlistelem = dlist_first(dlist);
-      for (j = 1; j < dlist_size(dlist) / 2; j++)
-        dlistelem = dlistelem_next(dlistelem);
-      dlist_remove(dlist, dlistelem);
-      dlistelem = dlist_first(dlist);
-      for (j = 1; j < dlist_size(dlist) / 2 + 1; j++)
-        dlistelem = dlistelem_next(dlistelem);
-      data = dlistelem_get_data(dlist_last(dlist));
+    if (gt_dlist_size(dlist) >= 2) {
+      dlistelem = gt_dlist_first(dlist);
+      for (j = 1; j < gt_dlist_size(dlist) / 2; j++)
+        dlistelem = gt_dlistelem_next(dlistelem);
+      gt_dlist_remove(dlist, dlistelem);
+      dlistelem = gt_dlist_first(dlist);
+      for (j = 1; j < gt_dlist_size(dlist) / 2 + 1; j++)
+        dlistelem = gt_dlistelem_next(dlistelem);
+      data = gt_dlistelem_get_data(gt_dlist_last(dlist));
       ensure(had_err, *data == elems_backup[size / 2 + 1]);
     }
 #endif
-    dlist_delete(dlist);
+    gt_dlist_delete(dlist);
 
     /* test without compare function */
-    dlist = dlist_new(NULL);
-    ensure(had_err, !dlist_size(dlist));
+    dlist = gt_dlist_new(NULL);
+    ensure(had_err, !gt_dlist_size(dlist));
     for (j = 0; j < size && !had_err; j++) {
-      dlist_add(dlist, elems + j);
-      ensure(had_err, dlist_size(dlist) == j+1);
+      gt_dlist_add(dlist, elems + j);
+      ensure(had_err, gt_dlist_size(dlist) == j+1);
     }
     j = 0;
-    for (dlistelem = dlist_first(dlist); dlistelem != NULL;
-         dlistelem = dlistelem_next(dlistelem)) {
-      data = dlistelem_get_data(dlistelem);
+    for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
+         dlistelem = gt_dlistelem_next(dlistelem)) {
+      data = gt_dlistelem_get_data(dlistelem);
       ensure(had_err, *data == elems[j]);
       j++;
     }
     /* remove first element */
-    if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_first(dlist));
-      if (dlist_size(dlist)) {
-        data = dlistelem_get_data(dlist_first(dlist));
+    if (gt_dlist_size(dlist)) {
+      gt_dlist_remove(dlist, gt_dlist_first(dlist));
+      if (gt_dlist_size(dlist)) {
+        data = gt_dlistelem_get_data(gt_dlist_first(dlist));
         ensure(had_err, *data == elems[1]);
       }
     }
     /* remove last element */
-    if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_last(dlist));
-      if (dlist_size(dlist)) {
-        data = dlistelem_get_data(dlist_last(dlist));
+    if (gt_dlist_size(dlist)) {
+      gt_dlist_remove(dlist, gt_dlist_last(dlist));
+      if (gt_dlist_size(dlist)) {
+        data = gt_dlistelem_get_data(gt_dlist_last(dlist));
         ensure(had_err, *data == elems[size - 2]);
       }
     }
-    dlist_delete(dlist);
+    gt_dlist_delete(dlist);
   }
 
   return had_err;
 }
 
-void dlist_delete(GT_Dlist *dlist)
+void gt_dlist_delete(GT_Dlist *dlist)
 {
   GT_Dlistelem *elem;
   if (!dlist) return;
@@ -353,19 +353,19 @@ void dlist_delete(GT_Dlist *dlist)
   ma_free(dlist);
 }
 
-GT_Dlistelem* dlistelem_next(const GT_Dlistelem *dlistelem)
+GT_Dlistelem* gt_dlistelem_next(const GT_Dlistelem *dlistelem)
 {
   assert(dlistelem);
   return dlistelem->next;
 }
 
-GT_Dlistelem* dlistelem_previous(const GT_Dlistelem *dlistelem)
+GT_Dlistelem* gt_dlistelem_previous(const GT_Dlistelem *dlistelem)
 {
   assert(dlistelem);
   return dlistelem->previous;
 }
 
-void* dlistelem_get_data(const GT_Dlistelem *dlistelem)
+void* gt_dlistelem_get_data(const GT_Dlistelem *dlistelem)
 {
   assert(dlistelem);
   return dlistelem->data;

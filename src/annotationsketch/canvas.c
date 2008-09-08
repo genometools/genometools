@@ -528,10 +528,10 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   }
 
   if ((strand == GT_STRAND_REVERSE || strand == GT_STRAND_BOTH)
-         /*&& delem == dlist_first(elems)*/)
+         /*&& delem == gt_dlist_first(elems)*/)
     arrow_status = ARROW_LEFT;
   if ((strand == GT_STRAND_FORWARD || strand == GT_STRAND_BOTH)
-         /*&& dlistelem_next(delem) == NULL*/)
+         /*&& gt_dlistelem_next(delem) == NULL*/)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
   if (gt_style_get_verbose(canvas->sty))

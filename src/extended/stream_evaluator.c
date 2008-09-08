@@ -678,11 +678,11 @@ static void add_predicted_collapsed(GT_Dlist *used_exons, GT_Range *predicted_ra
                                     Evaluator *exon_evaluator_collapsed)
 {
   GT_Range *used_range;
-  if (!dlist_find(used_exons, predicted_range)) {
+  if (!gt_dlist_find(used_exons, predicted_range)) {
     used_range = ma_malloc(sizeof (GT_Range));
     used_range->start = predicted_range->start;
     used_range->end = predicted_range->end;
-    dlist_add(used_exons, used_range);
+    gt_dlist_add(used_exons, used_range);
     evaluator_add_predicted(exon_evaluator_collapsed, 1);
   }
 }
