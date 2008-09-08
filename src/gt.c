@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,7 +27,8 @@ int main(int argc, char *argv[])
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   if (!(gtr = gtr_new(err))) {
-    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err), gt_error_get(err));
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
+            gt_error_get(err));
     return EXIT_FAILURE;
   }
   gtr_register_components(gtr);
@@ -44,7 +45,8 @@ int main(int argc, char *argv[])
       rval = 0; /* everything went fine */
   }
   if (gt_error_is_set(err)) {
-    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err), gt_error_get(err));
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
+            gt_error_get(err));
     assert(rval);
   }
   gtr_delete(gtr);
