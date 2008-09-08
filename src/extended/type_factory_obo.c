@@ -26,7 +26,7 @@
 
 struct GT_TypeFactoryOBO {
   const GT_TypeFactory parent_instance;
-  CstrTable *gt_genome_feature_types;
+  GT_CstrTable *gt_genome_feature_types;
 };
 
 #define gt_type_factory_obo_cast(FTF)\
@@ -35,7 +35,7 @@ struct GT_TypeFactoryOBO {
 static void gt_type_factory_obo_free(GT_TypeFactory *ftf)
 {
   GT_TypeFactoryOBO *ftfo = gt_type_factory_obo_cast(ftf);
-  cstr_table_delete(ftfo->gt_genome_feature_types);
+  gt_cstr_table_delete(ftfo->gt_genome_feature_types);
 }
 
 static GT_FeatureType* gt_type_factory_obo_create_gft(GT_TypeFactory *ftf,
@@ -46,7 +46,7 @@ static GT_FeatureType* gt_type_factory_obo_create_gft(GT_TypeFactory *ftf,
   assert(ftf && type);
   ftfo = gt_type_factory_obo_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
-    if (cstr_table_get(ftfo->gt_genome_feature_types, type)) {
+    if (gt_cstr_table_get(ftfo->gt_genome_feature_types, type)) {
       gft = gt_feature_type_construct(ftf, type);
       gft_collection_add(ftf->used_types, type, gft);
     }
@@ -73,8 +73,8 @@ static void add_gt_genome_feature_from_tree(GT_TypeFactoryOBO *ftfo,
   value = obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
                                           stanza_key);
   /* do not add values multiple times (possible for "name" values) */
-  if (!cstr_table_get(ftfo->gt_genome_feature_types, value))
-    cstr_table_add(ftfo->gt_genome_feature_types, value);
+  if (!gt_cstr_table_get(ftfo->gt_genome_feature_types, value))
+    gt_cstr_table_add(ftfo->gt_genome_feature_types, value);
 }
 
 static int create_genome_features(GT_TypeFactoryOBO *ftfo,
@@ -111,7 +111,7 @@ GT_TypeFactory* gt_type_factory_obo_new(const char *obo_file_path,
   assert(obo_file_path);
   ftf = gt_type_factory_create(gt_type_factory_obo_class());
   ftfo = gt_type_factory_obo_cast(ftf);
-  ftfo->gt_genome_feature_types = cstr_table_new();
+  ftfo->gt_genome_feature_types = gt_cstr_table_new();
   if (create_genome_features(ftfo, obo_file_path, err)) {
     gt_type_factory_delete(ftf);
     return NULL;
