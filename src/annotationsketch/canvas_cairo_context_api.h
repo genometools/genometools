@@ -15,11 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CANVAS_CAIRO_FILE_H
-#define CANVAS_CAIRO_FILE_H
+#ifndef CANVAS_CAIRO_CONTEXT_API_H
+#define CANVAS_CAIRO_CONTEXT_API_H
 
-#include "annotationsketch/canvas_cairo_file_api.h"
+#include <cairo.h>
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/image_info.h"
 
-const GT_CanvasClass* gt_canvas_cairo_file_class(void);
+/* Implements the Canvas interface.
+   This Canvas uses the GraphicsCairo class.  */
+typedef struct GT_CanvasCairoContext GT_CanvasCairoContext;
 
+/* Create a new Canvas object tied to the cairo_t <context> and <width>
+   using the style given in <style>. The optional <image_info> is filled when
+   the created Canvas object is used to render a Diagram object. */
+GT_Canvas* canvas_cairo_context_new(GT_Style *style, cairo_t *context,
+                                    unsigned long width,
+                                    GT_ImageInfo *image_info);
 #endif

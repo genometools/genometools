@@ -20,16 +20,8 @@
 
 #include <cairo.h>
 #include "annotationsketch/canvas.h"
-
-/* Implements the Canvas interface.
-   This Canvas uses the GraphicsCairo class.  */
-typedef struct GT_CanvasCairoContext GT_CanvasCairoContext;
+#include "annotationsketch/canvas_cairo_context_api.h"
 
 const GT_CanvasClass* gt_canvas_cairo_context_class(void);
-/* Create a new Canvas object tied to the cairo_t <context> and <width>
-   using the style given in <style>. The optional <image_info> is filled when
-   the created Canvas object is used to render a Diagram object. */
-GT_Canvas* canvas_cairo_context_new(GT_Style *style, cairo_t *context,
-                                    unsigned long width,
-                                    GT_ImageInfo *image_info);
+
 #endif

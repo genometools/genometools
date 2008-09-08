@@ -34,8 +34,9 @@
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
-#include "annotationsketch/canvas.h" /* XXX */
-#include "annotationsketch/canvas_cairo_file.h" /* XXX */
+#include "annotationsketch/canvas_api.h"
+#include "annotationsketch/canvas_cairo_context.h"
+#include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/color_api.h"
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"

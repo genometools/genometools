@@ -15,11 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CANVAS_CAIRO_FILE_H
-#define CANVAS_CAIRO_FILE_H
+#ifndef CANVAS_API_H
+#define CANVAS_API_H
 
-#include "annotationsketch/canvas_cairo_file_api.h"
+typedef struct GT_Canvas GT_Canvas;
 
-const GT_CanvasClass* gt_canvas_cairo_file_class(void);
+/* Returns the height of the given <canvas>. */
+unsigned long gt_canvas_get_height(GT_Canvas *canvas);
+/* Delete the given <canvas>. */
+void          gt_canvas_delete(GT_Canvas *canvas);
 
 #endif

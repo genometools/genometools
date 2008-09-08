@@ -19,8 +19,8 @@
 #define CANVAS_H
 
 typedef struct GT_CanvasClass GT_CanvasClass;
-typedef struct GT_Canvas GT_Canvas;
 
+#include "annotationsketch/canvas_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/drawing_range.h"
@@ -33,8 +33,6 @@ void          gt_canvas_draw_ruler(GT_Canvas *canvas);
 /* Returns a pixel-based range for a nucleotide-based range
    using the scaling factor defined for the given <canvas> */
 DrawingRange  gt_canvas_convert_coords(GT_Canvas *canvas, GT_Range);
-/* Returns the height of the given <canvas>. */
-unsigned long gt_canvas_get_height(GT_Canvas *canvas);
 /* Returns rendered width in pixels of the given text. */
 double        gt_canvas_get_text_width(GT_Canvas*, const char *text);
 /* Callback function for Diagram rendering. */
@@ -53,7 +51,5 @@ int           gt_canvas_visit_line_post(GT_Canvas*, GT_Line*);
 int           gt_canvas_visit_block(GT_Canvas*, GT_Block*);
 /* Callback function for Diagram rendering. */
 int           gt_canvas_visit_element(GT_Canvas*, GT_Element*);
-/* Delete the given <canvas>. */
-void          gt_canvas_delete(GT_Canvas *canvas);
 
 #endif
