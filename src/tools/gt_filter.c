@@ -48,7 +48,7 @@ typedef struct {
          max_gene_score,
          min_average_splice_site_prob;
   OutputFileInfo *ofi;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 } FilterArguments;
 
 static void* gt_filter_arguments_new(void)
@@ -68,7 +68,7 @@ static void gt_filter_arguments_delete(void *tool_arguments)
 {
   FilterArguments *arguments = tool_arguments;
   if (!arguments) return;
-  genfile_close(arguments->outfp);
+  gt_genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->targetgt_strand_char);
   gt_str_delete(arguments->gt_strand_char);

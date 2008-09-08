@@ -36,7 +36,7 @@ typedef struct {
                 topos,
                 width;
   OutputFileInfo *ofi;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 } ExtractSeqArguments;
 
 static void* gt_extractseq_arguments_new(void)
@@ -52,7 +52,7 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
 {
   ExtractSeqArguments *arguments = tool_arguments;
   if (!arguments) return;
-  genfile_close(arguments->outfp);
+  gt_genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->ginum);
   gt_str_delete(arguments->pattern);
@@ -137,7 +137,7 @@ static int gt_extractseq_arguments_check(GT_UNUSED int argc, void *tool_argument
   return 0;
 }
 
-static int extractseq_pos(GenFile *outfp, GT_Bioseq *bs, unsigned long frompos,
+static int extractseq_pos(GT_GenFile *outfp, GT_Bioseq *bs, unsigned long frompos,
                           unsigned long topos, unsigned long width, GT_Error *err)
 {
   int had_err = 0;
@@ -157,7 +157,7 @@ static int extractseq_pos(GenFile *outfp, GT_Bioseq *bs, unsigned long frompos,
   return had_err;
 }
 
-static int extractseq_match(GenFile *outfp, GT_Bioseq *bs, const char *pattern,
+static int extractseq_match(GT_GenFile *outfp, GT_Bioseq *bs, const char *pattern,
                             unsigned long width, GT_Error *err)
 {
   const char *desc;
@@ -183,7 +183,7 @@ static int extractseq_match(GenFile *outfp, GT_Bioseq *bs, const char *pattern,
 }
 
 static int process_ginum(GT_Str *ginum, int argc, const char **argv,
-                         unsigned long width, GenFile *outfp, GT_Error *err)
+                         unsigned long width, GT_GenFile *outfp, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);

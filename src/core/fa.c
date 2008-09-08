@@ -77,7 +77,7 @@ static void fa_init(void)
 }
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
-                              GenFileMode genfilemode, bool x,
+                              GT_GenFileMode genfilemode, bool x,
                               const char *filename, int line, GT_Error *err)
 {
   void  *fp = NULL;
@@ -106,7 +106,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   return fp;
 }
 
-static void fclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
+static void fclose_generic(void *stream, GT_GenFileMode genfilemode, FA *fa)
 {
   FAFileInfo *fileinfo;
   assert(stream && fa);
@@ -127,7 +127,7 @@ static void fclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
   }
 }
 
-static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
+static void xfclose_generic(void *stream, GT_GenFileMode genfilemode, FA *fa)
 {
   FAFileInfo *fileinfo;
   assert(stream && fa);

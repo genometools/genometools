@@ -23,7 +23,7 @@
 #include "core/ma.h"
 
 struct IO {
-  GenFile *fp;
+  GT_GenFile *fp;
   GT_Str *path;
   unsigned long line_number;
   bool line_start;
@@ -35,7 +35,7 @@ IO* io_new(const char *path, const char *mode)
   assert(mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = gt_malloc(sizeof (IO));
-  io->fp = genfile_xopen(path, mode);
+  io->fp = gt_genfile_xopen(path, mode);
   io->path = path ? gt_str_new_cstr(path) : gt_str_new_cstr("stdin");
   io->line_number = 1;
   io->line_start = true;
@@ -46,7 +46,7 @@ int io_get_char(IO *io, char *c)
 {
   int cc;
   assert(io && c);
-  cc = genfile_xfgetc(io->fp);
+  cc = gt_genfile_xfgetc(io->fp);
   if (cc == '\n') {
     io->line_number++;
     io->line_start = true;
@@ -62,7 +62,7 @@ int io_get_char(IO *io, char *c)
 void io_unget_char(IO *io, char c)
 {
   assert(io);
-  genfile_unget_char(io->fp, c);
+  gt_genfile_unget_char(io->fp, c);
 }
 
 bool io_line_start(const IO *io)
@@ -119,7 +119,7 @@ GT_Str* io_get_filename_str(const IO *io)
 void io_delete(IO *io)
 {
   if (!io) return;
-  genfile_close(io->fp);
+  gt_genfile_close(io->fp);
   gt_str_delete(io->path);
   gt_free(io);
 }

@@ -23,7 +23,7 @@
 #include "extended/merge_stream.h"
 #include "tools/gt_merge.h"
 
-static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
+static OPrval parse_options(int *parsed_args, GT_GenFile **outfp, int argc,
                             const char **argv, GT_Error *err)
 {
   OptionParser *op;
@@ -49,7 +49,7 @@ int gt_merge(int argc, const char **argv, GT_Error *err)
   GT_GenomeNode *gn;
   unsigned long i;
   int parsed_args, had_err;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 
   /* option parsing */
   switch (parse_options(&parsed_args, &outfp, argc, argv, err)) {
@@ -95,7 +95,7 @@ int gt_merge(int argc, const char **argv, GT_Error *err)
   for (i = 0; i < gt_array_size(genome_streams); i++)
     genome_stream_delete(*(GenomeStream**) gt_array_get(genome_streams, i));
   gt_array_delete(genome_streams);
-  genfile_close(outfp);
+  gt_genfile_close(outfp);
 
   return had_err;
 }

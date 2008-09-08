@@ -282,45 +282,45 @@ static void output_header_txt(const ParseStruct *parsestruct_ptr)
   if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
     /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "\nMetagenomethreader Result %d.%d.%d\n\n",
                     tmstamp->tm_mday, tmstamp->tm_mon + 1,
                     tmstamp->tm_year + 1900);
   }
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "\nParametereinstellungen\n Synonymic Value: %.4f\n ",
                   ARGUMENTSSTRUCT(synonomic_value));
-  genfile_xprintf(FILEPOINTEROUT, "Nonsynonymic Value: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Nonsynonymic Value: %.4f\n ",
                   ARGUMENTSSTRUCT(nonsynonomic_value));
-  genfile_xprintf(FILEPOINTEROUT, "Blasthit-End Value: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Blasthit-End Value: %.4f\n ",
                   ARGUMENTSSTRUCT(blasthit_end_value));
-  genfile_xprintf(FILEPOINTEROUT, "Query-Stopcodon-Value: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Query-Stopcodon-Value: %.4f\n ",
                   ARGUMENTSSTRUCT(stopcodon_queryseq));
-  genfile_xprintf(FILEPOINTEROUT, "Hit-Stopcodon-Value: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Hit-Stopcodon-Value: %.4f\n ",
                   ARGUMENTSSTRUCT(stopcodon_hitseq));
-  genfile_xprintf(FILEPOINTEROUT, "Frameshift-Span: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Frameshift-Span: %.4f\n ",
                   ARGUMENTSSTRUCT(frameshift_span));
-  genfile_xprintf(FILEPOINTEROUT, "Prediction-Span: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Prediction-Span: %.4f\n ",
                   ARGUMENTSSTRUCT(prediction_span));
-  genfile_xprintf(FILEPOINTEROUT, "Leavegene-Value: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Leavegene-Value: %.4f\n ",
                   ARGUMENTSSTRUCT(leavegene_value));
-  genfile_xprintf(FILEPOINTEROUT, "Curl-DB: %s\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Curl-DB: %s\n ",
                   gt_str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
-  genfile_xprintf(FILEPOINTEROUT, "Output-Filename: %s\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Output-Filename: %s\n ",
                   gt_str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
-  genfile_xprintf(FILEPOINTEROUT, "Output-Fileformat: %d\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Output-Fileformat: %d\n ",
                   ARGUMENTSSTRUCT(outputfile_format));
-  genfile_xprintf(FILEPOINTEROUT, "Hitfile (yes=1/no=0): %d\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Hitfile (yes=1/no=0): %d\n ",
                   ARGUMENTSSTRUCT(hitfile_bool));
-  genfile_xprintf(FILEPOINTEROUT, "Min Protein-Length (>=15): %lu\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Min Protein-Length (>=15): %lu\n ",
                   ARGUMENTSSTRUCT(min_as));
-  genfile_xprintf(FILEPOINTEROUT, "Min Result-Percentage: %.4f\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Min Result-Percentage: %.4f\n ",
                   ARGUMENTSSTRUCT(percent_value));
-  genfile_xprintf(FILEPOINTEROUT, "Extended-Modus (yes=1/no=0): %d\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Extended-Modus (yes=1/no=0): %d\n ",
                   ARGUMENTSSTRUCT(extended_mode));
-  genfile_xprintf(FILEPOINTEROUT, "Homology-Modus (yes=1/no=0): %d\n ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Homology-Modus (yes=1/no=0): %d\n ",
                   ARGUMENTSSTRUCT(homology_mode));
-  genfile_xprintf(FILEPOINTEROUT, "Codon-Modus (yes=1/no=0): %d\n\n",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Codon-Modus (yes=1/no=0): %d\n\n",
                   ARGUMENTSSTRUCT(codon_mode));
 }
 
@@ -332,151 +332,151 @@ static void output_header_html(const ParseStruct *parsestruct_ptr)
   tmstamp = today();
 
   /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<!DOCTYPE html PUBLIC \"-/""/W3C/""/DTD XHTML 1.0 "
                   "Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/"
                   "xhtml1-transitional.dtd\">");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<html xmlns=\"http://www.w3.org/1999/xhtml\" "
                   "xml:lang=\"de\" lang=\"de\">");
-  genfile_xprintf(FILEPOINTEROUT, "<head>");
+  gt_genfile_xprintf(FILEPOINTEROUT, "<head>");
   if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "<title>Metagenomethreader Result %d.%d.%d</title>",
                     tmstamp->tm_mday, tmstamp->tm_mon + 1,
                     tmstamp->tm_year + 1900);
   }
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "<meta http-equiv=\"Content-type\" content=\"text/html; "
                     "charset=iso-8859-1\"/>");
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "<link rel=\"stylesheet\" type=\"text/css\" "
                     "href=\"styles.css\" media=\"all\"/>");
-    genfile_xprintf(FILEPOINTEROUT, "</head>");
-    genfile_xprintf(FILEPOINTEROUT, "<body>");
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT, "</head>");
+    gt_genfile_xprintf(FILEPOINTEROUT, "<body>");
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "<table border=\"0\" width=\"800\" cellspacing=\"1\" "
                     "cellpadding=\"2\">");
   if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "<tr><td width=\"200\"><font class=\"font_header\">"
                     "Metagenomethreader Result %d.%d.%d</font><br><br></td>"
                     "<td></td></tr>",
                     tmstamp->tm_mday, tmstamp->tm_mon + 1,
                     tmstamp->tm_year + 1900);
   }
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Parametereinstellungen</font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\"></font></td></tr>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Synonymic Value: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(synonomic_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Non-Synonymic Value: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(nonsynonomic_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Blast-Hit-End Value: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(blasthit_end_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Query Stop-Codon Value: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(stopcodon_queryseq));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Hit Stop-Codon Value: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(stopcodon_hitseq));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Frameshift-Span: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(frameshift_span));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Prediction-Span: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(prediction_span));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Leavegene-Value: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(leavegene_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">cURL-DB: "
                   "</font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%s</font></td></tr>",
                   gt_str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Output-Filename: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%s</font></td></tr>",
                   gt_str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Output-Fileformat<br>(1/2/3): </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td valign=\"top\"><font class=\"class\">%d</font>"
                   "</td></tr>",
                   ARGUMENTSSTRUCT(outputfile_format));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">Hitfile<br>"
                   "(yes=1/no=0): </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td valign=\"top\"><font class=\"class\">%d</font>"
                   "</td></tr>",
                   ARGUMENTSSTRUCT(hitfile_bool));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Min-Protein-Length<br>(>=15): </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td valign=\"top\"><font class=\"class\">%lu</font>"
                   "</td></tr>",
                   ARGUMENTSSTRUCT(min_as));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Min-Result-Percentage: </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"class\">%.4f</font></td></tr>",
                   ARGUMENTSSTRUCT(percent_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Extended-Modus<br>(yes=1/no=0): </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td valign=\"top\"><font class=\"class\">%d</font>"
                   "</td></tr>",
                   ARGUMENTSSTRUCT(extended_mode));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Homology-Modus<br>(yes=1/no=0): </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td valign=\"top\"><font class=\"class\">%d</font>"
                   "</td></tr>",
                   ARGUMENTSSTRUCT(homology_mode));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td width=\"200\"><font class=\"class\">"
                   "Codon-Modus<br>(1/2/3): </font></td>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td valign=\"top\"><font class=\"class\">%d</font>"
                   "</td></tr>",
                   ARGUMENTSSTRUCT(codon_mode));
@@ -490,122 +490,122 @@ static void output_header_xml(const ParseStruct *parsestruct_ptr)
   tmstamp = today();
 
   /* Headerbereich schreiben inkl. Auflistung der Parametereinstellugen */
-  genfile_xprintf(FILEPOINTEROUT, "<?xml version=\"1.0\"?>\n");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT, "<?xml version=\"1.0\"?>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<!DOCTYPE BlastOutput PUBLIC \"-/""/NCBI/""/NCBI "
                   "BlastOutput/EN\" \"NCBI_BlastOutput.dtd\">\n");
-  genfile_xprintf(FILEPOINTEROUT, "<MetagenomethreaderOutput>\n");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT, "<MetagenomethreaderOutput>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "  <MetagenomethreaderOutput_title>Metagenomethreader"
                   "</MetagenomethreaderOutput_title>\n");
 
   if (!ARGUMENTSSTRUCT(testmodus_mode))
   {
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "  <MetagenomethreaderOutput_date>Result %d.%d.%d"
                     "</MetagenomethreaderOutput_date>\n",
                     tmstamp->tm_mday, tmstamp->tm_mon + 1,
                     tmstamp->tm_year + 1900);
   }
-  genfile_xprintf(FILEPOINTEROUT, "  <MetagenomethreaderOutput_param>\n");
-  genfile_xprintf(FILEPOINTEROUT, "    <Parameters>\n");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT, "  <MetagenomethreaderOutput_param>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "    <Parameters>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_syn>%.4f</Parameters_syn>\n",
                   ARGUMENTSSTRUCT(synonomic_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_nonsyn>%.4f</Parameters_nonsyn>\n",
                   ARGUMENTSSTRUCT(nonsynonomic_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_blastend>%.4f"
                   "</Parameters_blastend>\n",
                   ARGUMENTSSTRUCT(blasthit_end_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_stopcodon-query>%.4f"
                   "</Parameters_stopcodon-query>\n",
                   ARGUMENTSSTRUCT(stopcodon_queryseq));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_stopcodon-hit>%.4f"
                   "</Parameters_stopcodon-hit>\n",
                   ARGUMENTSSTRUCT(stopcodon_hitseq));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_frameshift>%.4f"
                   "</Parameters_frameshift>\n",
                   ARGUMENTSSTRUCT(frameshift_span));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_prediction>%.4f"
                   "</Parameters_prediction>\n",
                   ARGUMENTSSTRUCT(prediction_span));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_leavegene>%.4f"
                   "</Parameters_leavegene>\n",
                   ARGUMENTSSTRUCT(leavegene_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_curl-db>%s"
                   "</Parameters_curl-db>\n",
                   gt_str_get(ARGUMENTSSTRUCT(curl_fcgi_db)));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_output-file>%s"
                   "</Parameters_output-file>\n",
                   gt_str_get(ARGUMENTSSTRUCT(outputtextfile_name)));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_output-format>%d"
                   "</Parameters_output-format>\n",
                   ARGUMENTSSTRUCT(outputfile_format));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_hitfile>%d</Parameters_hitfile>\n",
                   ARGUMENTSSTRUCT(hitfile_bool));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_min-as>%lu</Parameters_min-as>\n",
                   ARGUMENTSSTRUCT(min_as));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_min_resultpercentage>%.4f"
                   "</Parameters_min_resultpercentage>\n",
                   ARGUMENTSSTRUCT(percent_value));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_extended_modus>%d"
                   "</Parameters_extended_modus>\n",
                   ARGUMENTSSTRUCT(extended_mode));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_homology_modus>%d"
                   "</Parameters_homology_modus>\n",
                   ARGUMENTSSTRUCT(homology_mode));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Parameters_codon_modus>%d"
                   "</Parameters_codon_modus>\n",
                   ARGUMENTSSTRUCT(codon_mode));
-  genfile_xprintf(FILEPOINTEROUT, "    </Parameters>\n");
-  genfile_xprintf(FILEPOINTEROUT, "  </MetagenomethreaderOutput_param>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "    </Parameters>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "  </MetagenomethreaderOutput_param>\n");
 }
 
 static void output_querydna_txt(const ParseStruct *parsestruct_ptr)
 {
   /* schreiben des Query-DNA Headers inkl. Query-Def. und Query-Sequenz */
-  genfile_xprintf(FILEPOINTEROUT, "Query-DNA-Entry-Section\n\n");
-  genfile_xprintf(FILEPOINTEROUT, "Query-DNA-Def: %s\n",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Query-DNA-Entry-Section\n\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "Query-DNA-Def: %s\n",
                   gt_str_get(MATRIXSTRUCT(query_def)));
-  genfile_xprintf(FILEPOINTEROUT, "Query_DNA-Sequence:\n%s\n",
+  gt_genfile_xprintf(FILEPOINTEROUT, "Query_DNA-Sequence:\n%s\n",
                   gt_str_get(MATRIXSTRUCT(query_dna)));
-  genfile_xprintf(FILEPOINTEROUT, "\nCoding-DNA-Entry-Section\n\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "\nCoding-DNA-Entry-Section\n\n");
 }
 
 static void output_querydna_html(const ParseStruct *parsestruct_ptr)
 {
   /* schreiben des Query-DNA Headers inkl. Query-Def. und Query-Sequenz */
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td colspan=\"2\"><font class=\"font_header\"><br>"
                   "<br>Query-DNA-Entry-Section<br><br></font></td></tr>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td><font class=\"class\">Query-DNA-Def</font></td>"
                   "<td><font class=\"class\">%s</font></td></tr>",
                   gt_str_get(MATRIXSTRUCT(query_def)));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td colspan=\"2\"><font class=\"class\">"
                   "Query_DNA-Sequence</font></td></tr>");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
                   "</td></tr>",
                   gt_str_get(MATRIXSTRUCT(query_dna)));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td colspan=\"2\"><br><font class=\"class\">"
                   "Coding-DNA-Entry-Section</font></td></tr>");
 }
@@ -613,16 +613,16 @@ static void output_querydna_html(const ParseStruct *parsestruct_ptr)
 static void output_querydna_xml(const ParseStruct *parsestruct_ptr)
 {
   /* schreiben des Query-DNA Headers inkl. Query-Def. und Query-Sequenz */
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "  <MetagenomethreaderOutput_iterations>\n");
-  genfile_xprintf(FILEPOINTEROUT, "  <Iteration>\n");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT, "  <Iteration>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "    <Iteration_query-def>%s</Iteration_query-def>\n",
                   gt_str_get(MATRIXSTRUCT(query_def)));
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "    <Iteration_query-dna>%s</Iteration_query-dna>\n",
                   gt_str_get(MATRIXSTRUCT(query_dna)));
-  genfile_xprintf(FILEPOINTEROUT, "    <Iteration_hits>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "    <Iteration_hits>\n");
 }
 
 static void output_hitdna(ParseStruct *parsestruct_ptr,
@@ -874,15 +874,15 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
           {
               /* Ausgabe Coding-DNA-Header - txt */
             case 1:
-              genfile_xprintf(FILEPOINTEROUT, "\n\n");
+              gt_genfile_xprintf(FILEPOINTEROUT, "\n\n");
               break;
               /* Ausgabe Coding-DNA-Header - html */
             case 2:
               break;
               /* Ausgabe Coding-DNA-Header - xml */
             case 3:
-              genfile_xprintf(FILEPOINTEROUT, "        </Hit_infos>\n");
-              genfile_xprintf(FILEPOINTEROUT, "      </Hit>\n");
+              gt_genfile_xprintf(FILEPOINTEROUT, "        </Hit_infos>\n");
+              gt_genfile_xprintf(FILEPOINTEROUT, "      </Hit>\n");
               break;
           }
 
@@ -906,40 +906,40 @@ static void print_codingheader(const ParseStruct *parsestruct_ptr,
   {
       /* Ausgabe Coding-DNA-Header - txt */
     case 1:
-      genfile_xprintf(FILEPOINTEROUT, "Coding-DNA: \n");
-      genfile_xprintf(FILEPOINTEROUT, "%s\n", contig_seq);
-      genfile_xprintf(FILEPOINTEROUT, "Protein-Seq: ");
-      genfile_xprintf(FILEPOINTEROUT, "%s\n", gt_str_get(as_seq));
-      genfile_xprintf(FILEPOINTEROUT, "Hit-Information Section\n");
+      gt_genfile_xprintf(FILEPOINTEROUT, "Coding-DNA: \n");
+      gt_genfile_xprintf(FILEPOINTEROUT, "%s\n", contig_seq);
+      gt_genfile_xprintf(FILEPOINTEROUT, "Protein-Seq: ");
+      gt_genfile_xprintf(FILEPOINTEROUT, "%s\n", gt_str_get(as_seq));
+      gt_genfile_xprintf(FILEPOINTEROUT, "Hit-Information Section\n");
       break;
       /* Ausgabe Coding-DNA-Header - html */
     case 2:
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"font_header\"><br>"
                       "Coding-DNA</font></td></tr>");
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
                       "</td></tr>",
                       contig_seq);
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"font_header\">"
                       "Protein-Sequence</font></td></tr>");
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"class\">%s</font>"
                       "</td></tr>", gt_str_get(as_seq));
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"font_header\">"
                       "Hit-Information Section</font></td></tr>");
       break;
       /* Ausgabe Coding-DNA-Header - xml */
     case 3:
-      genfile_xprintf(FILEPOINTEROUT, "      <Hit>\n");
-      genfile_xprintf(FILEPOINTEROUT, "        <Hit_dna>%s</Hit_dna>\n",
+      gt_genfile_xprintf(FILEPOINTEROUT, "      <Hit>\n");
+      gt_genfile_xprintf(FILEPOINTEROUT, "        <Hit_dna>%s</Hit_dna>\n",
                       contig_seq);
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "        <Hit_protein-seq>%s</Hit_protein-seq>\n",
                       gt_str_get(as_seq));
-      genfile_xprintf(FILEPOINTEROUT, "        <Hit_infos>\n");
+      gt_genfile_xprintf(FILEPOINTEROUT, "        <Hit_infos>\n");
       break;
   }
 }
@@ -953,58 +953,58 @@ static void print_hitinformation(const ParseStruct *parsestruct_ptr,
   {
       /* txt */
     case 1:
-      genfile_xprintf(FILEPOINTEROUT, "gi-nr: gi|%s ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "gi-nr: gi|%s ",
                       gt_strarray_get(hit_information->hit_gi, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "gi_def: %s ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "gi_def: %s ",
                       gt_strarray_get(hit_information->hit_def, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "hsp_num: %s ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "hsp_num: %s ",
                       gt_strarray_get(hit_information->hit_hsp_nr,
                                    seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "from: %s ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "from: %s ",
                       gt_strarray_get(hit_information->hit_from, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "to: %s\n",
+      gt_genfile_xprintf(FILEPOINTEROUT, "to: %s\n",
                       gt_strarray_get(hit_information->hit_to, seq_index));
       break;
       /* html */
     case 2:
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "<tr><td colspan=\"2\"><font class=\"class\">gi-nr: ");
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "<a href=\"http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi"
                       "?db=nuccore&id=%s\">",
                       gt_strarray_get(hit_information->hit_gi, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "gi|%s</a>  ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "gi|%s</a>  ",
                       gt_strarray_get(hit_information->hit_gi, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "gi_def: %s ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "gi_def: %s ",
                       gt_strarray_get(hit_information->hit_def, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "hsp_num: %s ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "hsp_num: %s ",
                       gt_strarray_get(hit_information->hit_hsp_nr,
                                    seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "from: %s ",
+      gt_genfile_xprintf(FILEPOINTEROUT, "from: %s ",
                       gt_strarray_get(hit_information->hit_from, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "to: %s</font></td></tr>",
+      gt_genfile_xprintf(FILEPOINTEROUT, "to: %s</font></td></tr>",
                       gt_strarray_get(hit_information->hit_to, seq_index));
       break;
       /* xml */
     case 3:
-      genfile_xprintf(FILEPOINTEROUT, "          <Infos>\n");
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT, "          <Infos>\n");
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_gi-nr>gi|%s</Infos_gi-nr>\n",
                       gt_strarray_get(hit_information->hit_gi, seq_index));
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_gi-def>%s</Infos_gi-def>\n",
                       gt_strarray_get(hit_information->hit_def, seq_index));
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_hsp-num>%s</Infos_hsp-num>\n",
                       gt_strarray_get(hit_information->hit_hsp_nr,
                                    seq_index));
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_from>%s</Infos_from>\n",
                       gt_strarray_get(hit_information->hit_from, seq_index));
-      genfile_xprintf(FILEPOINTEROUT,
+      gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_to>%s</Infos_to>\n",
                       gt_strarray_get(hit_information->hit_to, seq_index));
-      genfile_xprintf(FILEPOINTEROUT, "          </Infos>\n");
+      gt_genfile_xprintf(FILEPOINTEROUT, "          </Infos>\n");
       break;
   }
 }
@@ -1012,10 +1012,10 @@ static void print_hitinformation(const ParseStruct *parsestruct_ptr,
 static void output_statistics_txt(const ParseStruct *parsestruct_ptr)
 {
   /* schreiben des Query-DNA Headers inkl. Query-Def. und Query-Sequenz */
-  genfile_xprintf(FILEPOINTEROUT, "%-8.4f   ",
+  gt_genfile_xprintf(FILEPOINTEROUT, "%-8.4f   ",
                   ((double) *(HITSTRUCT(hitsnum) + HITSTRUCT(stat_pos)) /
                    (double) HITSTRUCT(hitsnumber)) * 100);
-  genfile_xprintf(FILEPOINTEROUT, "%s\n",
+  gt_genfile_xprintf(FILEPOINTEROUT, "%s\n",
                   gt_strarray_get(HITSTRUCT(hits_statistic),
                                *(HITSTRUCT(memory) +
                                  HITSTRUCT(stat_pos))));
@@ -1023,11 +1023,11 @@ static void output_statistics_txt(const ParseStruct *parsestruct_ptr)
 
 static void output_statistics_html(const ParseStruct *parsestruct_ptr)
 {
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<tr><td align=\"right\" width=\"50\">%-8.4f </td>",
                   ((float) *(HITSTRUCT(hitsnum) + HITSTRUCT(stat_pos)) /
                    (float) HITSTRUCT(hitsnumber)) * 100);
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"font_header\"> %s</font></td></tr>",
                   gt_strarray_get(HITSTRUCT(hits_statistic),
                                *(HITSTRUCT(memory) +
@@ -1036,32 +1036,32 @@ static void output_statistics_html(const ParseStruct *parsestruct_ptr)
 
 static void output_statistics_xml(const ParseStruct *parsestruct_ptr)
 {
-  genfile_xprintf(FILEPOINTEROUT, "    <Statistics>\n");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT, "    <Statistics>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Statistics_percent>%-8.4f</Statistics_percent>\n",
                   ((double) *(HITSTRUCT(hitsnum) + HITSTRUCT(stat_pos)) /
                    (double) HITSTRUCT(hitsnumber)) * 100);
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Statistics_gi-def>%s</Statistics_gi-def>\n",
                   gt_strarray_get(HITSTRUCT(hits_statistic),
                                *(HITSTRUCT(memory) +
                                  HITSTRUCT(stat_pos))));
-  genfile_xprintf(FILEPOINTEROUT, "    </Statistics>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "    </Statistics>\n");
 }
 
 static void output_footer_html(const ParseStruct *parsestruct_ptr)
 {
   /* Schreiben des HTML-Footers */
-  genfile_xprintf(FILEPOINTEROUT, "</td></tr></table>");
-  genfile_xprintf(FILEPOINTEROUT, "</table>\n</body>\n</html>");
+  gt_genfile_xprintf(FILEPOINTEROUT, "</td></tr></table>");
+  gt_genfile_xprintf(FILEPOINTEROUT, "</table>\n</body>\n</html>");
 }
 
 static void output_footer_xml(const ParseStruct *parsestruct_ptr)
 {
   /* Schreiben des HTML-Footers */
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "  </MetagenomethreaderOutput_statistics>\n");
-  genfile_xprintf(FILEPOINTEROUT, "</MetagenomethreaderOutput>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "</MetagenomethreaderOutput>\n");
 }
 
 static int as_coding(const ParseStruct *parsestruct_ptr,
@@ -1302,21 +1302,21 @@ static void output_statistics_header(const ParseStruct *parsestruct_ptr)
   /* Statistik-Bereich-Header schreiben */
   if (ARGUMENTSSTRUCT(outputfile_format) == 3)
   {
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "  <MetagenomethreaderOutput_statistics>\n");
   }
   else if (ARGUMENTSSTRUCT(outputfile_format) == 2)
   {
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "<tr><td colspan=\"2\"><table cellspacing=\"1\" "
                     "cellpadding=\"3\">");
-    genfile_xprintf(FILEPOINTEROUT,
+    gt_genfile_xprintf(FILEPOINTEROUT,
                     "<tr><td colspan=\"2\"><font class=\"font_header\"><br><br>"
                     "Statistic-Section<br><br></font></td></tr>");
   }
   else
   {
-    genfile_xprintf(FILEPOINTEROUT, "Statistic-Section\n\n");
+    gt_genfile_xprintf(FILEPOINTEROUT, "Statistic-Section\n\n");
   }
 }
 
@@ -1368,8 +1368,8 @@ static short check_startcodon(const ParseStruct *parsestruct_ptr,
 
 static void output_close_iteration_xml(const ParseStruct *parsestruct_ptr)
 {
-  genfile_xprintf(FILEPOINTEROUT, "    </Iteration_hits>\n");
-  genfile_xprintf(FILEPOINTEROUT, "  </Iteration>\n");
-  genfile_xprintf(FILEPOINTEROUT,
+  gt_genfile_xprintf(FILEPOINTEROUT, "    </Iteration_hits>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT, "  </Iteration>\n");
+  gt_genfile_xprintf(FILEPOINTEROUT,
                   "  </MetagenomethreaderOutput_iterations>\n");
 }

@@ -188,19 +188,19 @@ int mg_curl(ParseStruct *parsestruct_ptr,
         /* das Hit-Sequenz-File wird geschrieben; die erste Zeile eines
            Eintrages ist die Hit-GI-Def, an die durch ein Leerzeichen
            getrennt die Hsp-Num des jeweiligen Hits angehaengt wird */
-        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, ">%s ",
+        gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, ">%s ",
                         gt_strarray_get(MATRIXSTRUCT(hit_num), hit_counter));
-        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
+        gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
                         gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
-        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
+        gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
                         gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
-        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
+        gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
                         gt_strarray_get(MATRIXSTRUCT(fasta_row), hit_counter));
-        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
+        gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
                         gt_strarray_get(MATRIXSTRUCT(hit_gi_def), hit_counter));
 
         /* nach dem GI-Def Eintrag folgt in der naechsten Zeile die Sequenz */
-        genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
+        gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
                         gt_str_get(seq_var));
       }
       else

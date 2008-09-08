@@ -37,7 +37,7 @@ struct GFF3Visitor {
   Hashmap *gt_genome_feature_to_id_array,
             *gt_genome_feature_to_unique_id_str;
   unsigned long fasta_width;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 };
 
 typedef struct {
@@ -47,7 +47,7 @@ typedef struct {
 
 typedef struct {
   bool *attribute_shown;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 } ShowAttributeInfo;
 
 #define gff3_visitor_cast(GV)\
@@ -58,7 +58,7 @@ static void gff3_version_string(GenomeVisitor *gv)
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
-    genfile_xprintf(gff3_visitor->outfp, "%s   %u\n", GFF_VERSION_PREFIX,
+    gt_genfile_xprintf(gff3_visitor->outfp, "%s   %u\n", GFF_VERSION_PREFIX,
                     GFF_VERSION);
     gff3_visitor->version_string_shown = true;
   }
@@ -81,7 +81,7 @@ static int gff3_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && c);
   gff3_version_string(gv);
-  genfile_xprintf(gff3_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
+  gt_genfile_xprintf(gff3_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
   return 0;
 }
 
@@ -107,10 +107,10 @@ static void show_attribute(const char *attr_name, const char *attr_value,
   assert(attr_name && attr_value && info);
   if (strcmp(attr_name, ID_STRING) && strcmp(attr_name, PARENT_STRING)) {
     if (*info->attribute_shown)
-      genfile_xfputc(';', info->outfp);
+      gt_genfile_xfputc(';', info->outfp);
     else
       *info->attribute_shown = true;
-    genfile_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
+    gt_genfile_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
   }
 }
 
@@ -133,7 +133,7 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
 
   /* show unique id part of attributes */
   if ((id = hashmap_get(gff3_visitor->gt_genome_feature_to_unique_id_str, gn))) {
-    genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, gt_str_get(id));
+    gt_genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, gt_str_get(id));
     part_shown = true;
   }
 
@@ -142,12 +142,12 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
                                   gn);
   if (gt_array_size(parent_features)) {
     if (part_shown)
-      genfile_xfputc(';', gff3_visitor->outfp);
-    genfile_xprintf(gff3_visitor->outfp, "%s=", PARENT_STRING);
+      gt_genfile_xfputc(';', gff3_visitor->outfp);
+    gt_genfile_xprintf(gff3_visitor->outfp, "%s=", PARENT_STRING);
     for (i = 0; i < gt_array_size(parent_features); i++) {
       if (i)
-        genfile_xfputc(',', gff3_visitor->outfp);
-      genfile_xprintf(gff3_visitor->outfp, "%s",
+        gt_genfile_xfputc(',', gff3_visitor->outfp);
+      gt_genfile_xprintf(gff3_visitor->outfp, "%s",
                       *(char**) gt_array_get(parent_features, i));
     }
     part_shown = true;
@@ -160,10 +160,10 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
 
   /* show dot if no attributes have been shown */
   if (!part_shown)
-    genfile_xfputc('.', gff3_visitor->outfp);
+    gt_genfile_xfputc('.', gff3_visitor->outfp);
 
   /* show terminal newline */
-  genfile_xfputc('\n', gff3_visitor->outfp);
+  gt_genfile_xfputc('\n', gff3_visitor->outfp);
 
   return 0;
 }
@@ -261,7 +261,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
   if (gt_genome_node_has_children((GT_GenomeNode*) gf))
-    genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_TERMINATOR);
+    gt_genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_TERMINATOR);
 
   return had_err;
 }
@@ -277,7 +277,7 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr
   assert(!gt_genome_node_has_children((GT_GenomeNode*) sr));
 
   gff3_version_string(gv);
-  genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n", GFF_SEQUENCE_REGION,
+  gt_genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n", GFF_SEQUENCE_REGION,
                   gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr)),
                   gt_genome_node_get_start((GT_GenomeNode*) sr),
                   gt_genome_node_get_end((GT_GenomeNode*) sr));
@@ -292,7 +292,7 @@ static int gff3_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sn);
   if (!gff3_visitor->fasta_directive_shown) {
-    genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_FASTA_DIRECTIVE);
+    gt_genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_FASTA_DIRECTIVE);
     gff3_visitor->fasta_directive_shown = true;
   }
   gt_fasta_show_entry_generic(gt_sequence_node_get_description(sn),
@@ -313,7 +313,7 @@ const GenomeVisitorClass* gff3_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* gff3_visitor_new(GenFile *outfp)
+GenomeVisitor* gff3_visitor_new(GT_GenFile *outfp)
 {
   GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class());
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);

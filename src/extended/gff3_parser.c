@@ -1112,7 +1112,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
 
 static int parse_fasta_entry(Queue *genome_nodes, const char *line,
                              GT_Str *filename, unsigned int line_number,
-                             GenFile *fpin, GT_Error *err)
+                             GT_GenFile *fpin, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -1125,9 +1125,9 @@ static int parse_fasta_entry(Queue *genome_nodes, const char *line,
     GT_GenomeNode *sequence_node;
     GT_Str *sequence = gt_str_new();
     int cc;
-    while ((cc = genfile_xfgetc(fpin)) != EOF) {
+    while ((cc = gt_genfile_xfgetc(fpin)) != EOF) {
       if (cc == '>') {
-        genfile_unget_char(fpin, cc);
+        gt_genfile_unget_char(fpin, cc);
         break;
       }
       if (cc != '\n' && cc != '\r' && cc != ' ')
@@ -1300,7 +1300,7 @@ static int parse_meta_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
 int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
                                   Queue *genome_nodes, GT_Str *filenamestr,
                                   unsigned long long *line_number,
-                                  GenFile *fpin, GT_Error *err)
+                                  GT_GenFile *fpin, GT_Error *err)
 {
   size_t line_length;
   GT_Str *line_buffer;

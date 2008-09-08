@@ -69,7 +69,7 @@ static void flag_delete(unsigned short *, unsigned short *, char);
    Returnwert: void */
 static void check_counter(unsigned short *, char);
 
-int mg_xmlparser(ParseStruct *parsestruct_ptr, GenFile * fp_xmlfile,
+int mg_xmlparser(ParseStruct *parsestruct_ptr, GT_GenFile * fp_xmlfile,
                  GT_Error * err)
 {
   int had_err = 0;
@@ -424,9 +424,9 @@ static void XMLCALL endElement(void *data, const char *name)
         }
         else
         {
-          genfile_xprintf(HITFILEOUT, "%s ",
+          gt_genfile_xprintf(HITFILEOUT, "%s ",
                           gt_str_get(PARSESTRUCT(hit_gi_nr_tmp)));
-          genfile_xprintf(HITFILEOUT, "%s ", gt_str_get(PARSESTRUCT(buf_ptr)));
+          gt_genfile_xprintf(HITFILEOUT, "%s ", gt_str_get(PARSESTRUCT(buf_ptr)));
         }
       }
       /* Hit-to XML-Tag - Bearbeitung siehe Hit-from-Tag */
@@ -442,7 +442,7 @@ static void XMLCALL endElement(void *data, const char *name)
         }
         else
         {
-          genfile_xprintf(HITFILEOUT, "%s \n", gt_str_get(PARSESTRUCT(buf_ptr)));
+          gt_genfile_xprintf(HITFILEOUT, "%s \n", gt_str_get(PARSESTRUCT(buf_ptr)));
         }
       }
       /* Query-Frame XML-Tag; bei der Berechnung der Combined-Scores

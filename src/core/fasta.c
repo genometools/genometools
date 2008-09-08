@@ -29,20 +29,20 @@ void gt_fasta_show_entry(const char *description, const char *sequence,
 
 void gt_fasta_show_entry_generic(const char *description, const char *sequence,
                                  unsigned long sequence_length,
-                                 unsigned long width, GenFile *outfp)
+                                 unsigned long width, GT_GenFile *outfp)
 {
   unsigned long i, current_length;
   assert(sequence);
-  genfile_xfputc(FASTA_SEPARATOR, outfp);
+  gt_genfile_xfputc(FASTA_SEPARATOR, outfp);
   if (description)
-    genfile_xfputs(description, outfp);
-  genfile_xfputc('\n', outfp);
+    gt_genfile_xfputs(description, outfp);
+  gt_genfile_xfputc('\n', outfp);
   for (i = 0, current_length = 0; i < sequence_length; i++, current_length++) {
     if (width && current_length == width) {
-      genfile_xfputc('\n', outfp);
+      gt_genfile_xfputc('\n', outfp);
       current_length = 0;
     }
-    genfile_xfputc(sequence[i], outfp);
+    gt_genfile_xfputc(sequence[i], outfp);
   }
-  genfile_xfputc('\n', outfp);
+  gt_genfile_xfputc('\n', outfp);
 }

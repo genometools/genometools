@@ -26,7 +26,7 @@ struct OutputFileInfo {
   bool gzip,
        bzip2,
        force;
-  GenFile **outfp;
+  GT_GenFile **outfp;
 };
 
 OutputFileInfo* outputfileinfo_new(void)
@@ -40,7 +40,7 @@ OutputFileInfo* outputfileinfo_new(void)
 static int determine_outfp(void *data, GT_Error *err)
 {
   OutputFileInfo *ofi = (OutputFileInfo*) data;
-  GenFileMode genfilemode;
+  GT_GenFileMode genfilemode;
   int had_err = 0;
   gt_error_check(err);
   assert(ofi);
@@ -57,12 +57,12 @@ static int determine_outfp(void *data, GT_Error *err)
     if (genfilemode != GFM_UNCOMPRESSED &&
         strcmp(gt_str_get(ofi->output_filename) +
                gt_str_length(ofi->output_filename) -
-               strlen(genfilemode_suffix(genfilemode)),
-               genfilemode_suffix(genfilemode))) {
+               strlen(gt_genfilemode_suffix(genfilemode)),
+               gt_genfilemode_suffix(genfilemode))) {
       warning("output file '%s' doesn't have correct suffix '%s', appending "
               "it", gt_str_get(ofi->output_filename),
-              genfilemode_suffix(genfilemode));
-      gt_str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode));
+              gt_genfilemode_suffix(genfilemode));
+      gt_str_append_cstr(ofi->output_filename, gt_genfilemode_suffix(genfilemode));
     }
     if (!ofi->force && file_exists(gt_str_get(ofi->output_filename))) {
         gt_error_set(err, "file \"%s\" exists already, use option -%s to "
@@ -70,7 +70,7 @@ static int determine_outfp(void *data, GT_Error *err)
         had_err = -1;
     }
     if (!had_err) {
-      *ofi->outfp = genfile_xopen_w_gfmode(genfilemode,
+      *ofi->outfp = gt_genfile_xopen_w_gfmode(genfilemode,
                                            gt_str_get(ofi->output_filename), "w");
       assert(*ofi->outfp);
     }
@@ -78,7 +78,7 @@ static int determine_outfp(void *data, GT_Error *err)
   return had_err;
 }
 
-void outputfile_register_options(OptionParser *op, GenFile **outfp,
+void outputfile_register_options(OptionParser *op, GT_GenFile **outfp,
                                  OutputFileInfo *ofi)
 {
   Option *opto, *optgzip, *optbzip2, *optforce;

@@ -193,7 +193,7 @@ typedef struct
   GT_Array *value_tmp;
   GT_Bioseq *queryseq,
    *hitseq;
-  GenFile *fp_outputfile,
+  GT_GenFile *fp_outputfile,
    *fp_blasthit_file,
    *fp_giexp_file;
   Hashtable *queryhash,

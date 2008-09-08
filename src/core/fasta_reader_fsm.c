@@ -22,7 +22,7 @@
 struct GT_FastaReaderFSM {
   const GT_FastaReader parent_instance;
   GT_Str *sequence_filename;
-  GenFile *sequence_file;
+  GT_GenFile *sequence_file;
 };
 
 typedef enum {
@@ -61,10 +61,10 @@ static int gt_fasta_reader_fsm_run(GT_FastaReader *fasta_reader,
 
   /* rewind sequence file (to allow multiple calls) */
   if (fr->sequence_file)
-    genfile_xrewind(fr->sequence_file);
+    gt_genfile_xrewind(fr->sequence_file);
 
   /* reading */
-  while (!had_err && genfile_xread(fr->sequence_file, &cc, 1) != 0) {
+  while (!had_err && gt_genfile_xread(fr->sequence_file, &cc, 1) != 0) {
     switch (state) {
       case EXPECTING_SEPARATOR:
         if (cc != FASTA_SEPARATOR) {
@@ -187,7 +187,7 @@ static void gt_fasta_reader_fsm_free(GT_FastaReader *fr)
 {
   GT_FastaReaderFSM *gt_fasta_reader_fsm = gt_fasta_reader_fsm_cast(fr);
   gt_str_delete(gt_fasta_reader_fsm->sequence_filename);
-  genfile_close(gt_fasta_reader_fsm->sequence_file);
+  gt_genfile_close(gt_fasta_reader_fsm->sequence_file);
 }
 
 const GT_FastaReaderClass* gt_fasta_reader_fsm_class(void)
@@ -204,7 +204,7 @@ GT_FastaReader* gt_fasta_reader_fsm_new(GT_Str *sequence_filename)
   GT_FastaReaderFSM *gt_fasta_reader_fsm = gt_fasta_reader_fsm_cast(fr);
   gt_fasta_reader_fsm->sequence_filename = gt_str_ref(sequence_filename);
   if (sequence_filename) {
-    gt_fasta_reader_fsm->sequence_file = genfile_xopen(gt_str_get(sequence_filename),
+    gt_fasta_reader_fsm->sequence_file = gt_genfile_xopen(gt_str_get(sequence_filename),
                                                     "r");
   }
   else

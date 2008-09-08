@@ -44,7 +44,7 @@ typedef struct {
       *typecheck;
   unsigned long width;
   OutputFileInfo *ofi;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 } GFF3Arguments;
 
 static void* gt_gff3_arguments_new(void)
@@ -60,7 +60,7 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
 {
   GFF3Arguments *arguments = tool_arguments;
   if (!arguments) return;
-  genfile_close(arguments->outfp);
+  gt_genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->typecheck);
   gt_str_delete(arguments->offsetfile);

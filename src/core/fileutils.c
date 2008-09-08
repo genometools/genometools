@@ -53,13 +53,13 @@ bool file_is_newer(const char *a, const char *b)
 unsigned long file_number_of_lines(const char *path)
 {
   unsigned long number_of_lines = 0;
-  GenFile *fp;
+  GT_GenFile *fp;
   int cc;
   assert(path);
-  fp = genfile_xopen(path, "r");
-  while ((cc = genfile_xfgetc(fp)) != EOF)
+  fp = gt_genfile_xopen(path, "r");
+  while ((cc = gt_genfile_xfgetc(fp)) != EOF)
     if (cc == '\n') number_of_lines++;
-  genfile_close(fp);
+  gt_genfile_close(fp);
   return number_of_lines;
 }
 
@@ -67,7 +67,7 @@ const char* file_suffix(const char *path)
 {
   const char *suffixptr;
   assert(path);
-  suffixptr = path + genfile_basename_length(path) - 1;
+  suffixptr = path + gt_genfile_basename_length(path) - 1;
   while (suffixptr > path) {
     if (*suffixptr == '/')
       return "";
@@ -148,14 +148,14 @@ off_t files_estimate_total_size(const GT_StrArray *filenames)
   unsigned long filenum;
   off_t totalsize = 0;
   struct stat sb;
-  GenFileMode gfm;
+  GT_GenFileMode gfm;
   int fd;
 
   for (filenum = 0; filenum < gt_strarray_size(filenames); filenum++)
   {
     fd = xopen(gt_strarray_get(filenames,filenum), O_RDONLY, 0);
     xfstat(fd, &sb);
-    gfm = genfilemode_determine(gt_strarray_get(filenames,filenum));
+    gfm = gt_genfilemode_determine(gt_strarray_get(filenames,filenum));
     if (gfm == GFM_UNCOMPRESSED)
     {
       totalsize += sb.st_size;

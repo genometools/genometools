@@ -37,7 +37,7 @@ struct GFF3InStream
        be_verbose,
        checkids,
        own_factory;
-  GenFile *fpin;
+  GT_GenFile *fpin;
   unsigned long long line_number;
   Queue *gt_genome_node_buffer;
   GT_TypeFactory *feature_type_factory;
@@ -102,12 +102,12 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
             had_err = -1;
             break;
           }
-          is->fpin = genfile_xopen(NULL, "r");
+          is->fpin = gt_genfile_xopen(NULL, "r");
           is->file_is_open = true;
           is->stdin_argument = true;
         }
         else {
-          is->fpin = genfile_xopen(gt_strarray_get(is->files, is->next_file),
+          is->fpin = gt_genfile_xopen(gt_strarray_get(is->files, is->next_file),
                                    "r");
           is->file_is_open = true;
         }
@@ -153,7 +153,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
     if (status_code == EOF) {
       /* end of current file */
       if (is->be_verbose) progressbar_stop();
-      genfile_close(is->fpin);
+      gt_genfile_close(is->fpin);
       is->fpin = NULL;
       is->file_is_open = false;
       gff3parser_reset(is->gff3_parser);
@@ -194,7 +194,7 @@ static void gff3_in_stream_free(GenomeStream *gs)
   gff3parser_delete(gff3_in_stream->gff3_parser);
   if (gff3_in_stream->own_factory)
     gt_type_factory_delete(gff3_in_stream->feature_type_factory);
-  genfile_close(gff3_in_stream->fpin);
+  gt_genfile_close(gff3_in_stream->fpin);
 }
 
 const GenomeStreamClass* gff3_in_stream_class(void)

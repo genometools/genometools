@@ -57,11 +57,11 @@ GT_FastaBuffer* gt_fastabuffer_new(const GT_StrArray *filenametab,
   return fb;
 }
 
-static inline int ownbuffergenfile_getc(GT_FastaBuffer *fb,GenFile *inputstream)
+static inline int ownbuffergt_genfile_getc(GT_FastaBuffer *fb,GT_GenFile *inputstream)
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {
-    fb->currentfillpos = genfile_xread(inputstream,
+    fb->currentfillpos = gt_genfile_xread(inputstream,
                                        fb->inputbuffer,
                                        (size_t) INPUTFILEBUFFERSIZE);
     if (fb->currentfillpos == 0)
@@ -106,17 +106,17 @@ static int advancefastabufferstate(GT_FastaBuffer *fb, GT_Error *err)
       currentfileadd = 0;
       currentfileread = 0;
       fb->linenum = (uint64_t) 1;
-      fb->inputstream = genfile_xopen(gt_strarray_get(fb->filenametab,
+      fb->inputstream = gt_genfile_xopen(gt_strarray_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
                                        "rb");
       fb->currentinpos = 0;
       fb->currentfillpos = 0;
     } else
     {
-      currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
+      currentchar = ownbuffergt_genfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
-        genfile_close(fb->inputstream);
+        gt_genfile_close(fb->inputstream);
         fb->inputstream = NULL;
         if (fb->filelengthtab != NULL)
         {
@@ -259,17 +259,17 @@ static int advancePlainbufferstate(GT_FastaBuffer *fb, GT_Error *err)
       fb->nextfile = false;
       fb->firstseqinfile = true;
       currentfileread = 0;
-      fb->inputstream = genfile_xopen(gt_strarray_get(fb->filenametab,
+      fb->inputstream = gt_genfile_xopen(gt_strarray_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
                                       "rb");
       fb->currentinpos = 0;
       fb->currentfillpos = 0;
     } else
     {
-      currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
+      currentchar = ownbuffergt_genfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
-        genfile_close(fb->inputstream);
+        gt_genfile_close(fb->inputstream);
         fb->inputstream = NULL;
         if (fb->filelengthtab != NULL)
         {
@@ -315,7 +315,7 @@ int advanceformatbufferstate(GT_FastaBuffer *fb, GT_Error *err)
 void gt_fastabuffer_delete(GT_FastaBuffer *fb)
 {
   if (!fb) return;
-  genfile_close(fb->inputstream);
+  gt_genfile_close(fb->inputstream);
   FREEARRAY(&fb->headerbuffer, char);
   gt_free(fb);
 }

@@ -25,7 +25,7 @@
 
 typedef struct {
   bool verbose;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 } UniqArguments;
 
 static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
@@ -96,7 +96,7 @@ int gt_uniq(int argc, const char **argv, GT_Error *err)
   genome_stream_delete(gff3_out_stream);
   genome_stream_delete(uniq_stream);
   genome_stream_delete(gff3_in_stream);
-  genfile_close(arguments.outfp);
+  gt_genfile_close(arguments.outfp);
 
   return had_err;
 }

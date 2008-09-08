@@ -77,16 +77,16 @@ void gt_cstr_array_show(char **gt_cstr_array, FILE *fp)
   xfputc('\n', fp);
 }
 
-void gt_cstr_array_show_genfile(const char **gt_cstr_array, GenFile *fp)
+void gt_cstr_array_show_genfile(const char **gt_cstr_array, GT_GenFile *fp)
 {
   unsigned long i = 0;
   while (gt_cstr_array[i]) {
     if (i)
-      genfile_xfputc(' ', fp);
-    genfile_xfputs(gt_cstr_array[i], fp);
+      gt_genfile_xfputc(' ', fp);
+    gt_genfile_xfputs(gt_cstr_array[i], fp);
     i++;
   }
-  genfile_xfputc('\n', fp);
+  gt_genfile_xfputc('\n', fp);
 }
 
 unsigned long gt_cstr_array_size(const char **gt_cstr_array)

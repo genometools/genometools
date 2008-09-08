@@ -474,7 +474,7 @@ int gt_graphics_cairo_save_to_file(const GT_Graphics *gg, const char *filename,
   const GT_GraphicsCairo *g = (const GT_GraphicsCairo*) gg;
   cairo_status_t rval;
   gt_error_check(err);
-  GenFile *outfile;
+  GT_GenFile *outfile;
   assert(g && filename);
   /* do nothing if no surface was created */
   if (g->from_context)
@@ -495,12 +495,12 @@ int gt_graphics_cairo_save_to_file(const GT_Graphics *gg, const char *filename,
       cairo_show_page(g->cr);
       cairo_surface_flush(g->surf);
       cairo_surface_finish(g->surf);
-      outfile = genfile_open(GFM_UNCOMPRESSED, filename, "w+", err);
+      outfile = gt_genfile_open(GFM_UNCOMPRESSED, filename, "w+", err);
       if (outfile)
       {
-        genfile_xwrite(outfile, gt_str_get_mem(g->outbuf),
+        gt_genfile_xwrite(outfile, gt_str_get_mem(g->outbuf),
                        gt_str_length(g->outbuf));
-        genfile_close(outfile);
+        gt_genfile_close(outfile);
       } else return -1;
       break;
   }

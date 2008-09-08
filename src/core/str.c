@@ -230,13 +230,13 @@ int gt_str_read_next_line(GT_Str *s, FILE *fpin)
   }
 }
 
-int gt_str_read_next_line_generic(GT_Str *s, GenFile *fpin)
+int gt_str_read_next_line_generic(GT_Str *s, GT_GenFile *fpin)
 {
   int cc;
   char c;
   assert(s);
   for (;;) {
-    cc = genfile_xfgetc(fpin);
+    cc = gt_genfile_xfgetc(fpin);
     if (cc == EOF)
       return EOF;
     if (cc == '\n') {

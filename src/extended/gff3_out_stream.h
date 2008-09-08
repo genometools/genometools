@@ -24,7 +24,7 @@
 typedef struct GFF3OutStream GFF3OutStream;
 
 const GenomeStreamClass* gff3_out_stream_class(void);
-GenomeStream*            gff3_out_stream_new(GenomeStream*, GenFile*);
+GenomeStream*            gff3_out_stream_new(GenomeStream*, GT_GenFile*);
 void                     gff3_out_stream_set_fasta_width(GenomeStream*,
                                                          unsigned long);
 

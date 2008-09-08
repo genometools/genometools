@@ -32,7 +32,7 @@ struct GTFVisitor {
                 transcript_id;
   GT_Array *exon_features,
         *CDS_features;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 };
 
 #define gtf_visitor_cast(GV)\
@@ -51,7 +51,7 @@ static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c, GT_UNUSED GT_Er
   GTFVisitor *gtf_visitor;
   gt_error_check(err);
   gtf_visitor = gtf_visitor_cast(gv);
-  genfile_xprintf(gtf_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
+  gt_genfile_xprintf(gtf_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
   return 0;
 }
 
@@ -90,7 +90,7 @@ static int gtf_show_transcript(GT_GenomeNode *gn, GTFVisitor *gtf_visitor,
     for (i = 0; i < gt_array_size(gtf_visitor->exon_features); i++) {
       gf = *(GT_GenomeFeature**) gt_array_get(gtf_visitor->exon_features, i);
       gff3_output_leading(gf, gtf_visitor->outfp);
-      genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
+      gt_genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
                       gtf_visitor->gene_id, gtf_visitor->transcript_id);
     }
@@ -108,7 +108,7 @@ static int gtf_show_transcript(GT_GenomeNode *gn, GTFVisitor *gtf_visitor,
     for (i = 0; i < gt_array_size(gtf_visitor->CDS_features); i++) {
       gf = *(GT_GenomeFeature**) gt_array_get(gtf_visitor->CDS_features, i);
       gff3_output_leading(gf, gtf_visitor->outfp);
-      genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
+      gt_genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
                       gtf_visitor->gene_id, gtf_visitor->transcript_id);
     }
@@ -163,7 +163,7 @@ const GenomeVisitorClass* gtf_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* gtf_visitor_new(GenFile *outfp)
+GenomeVisitor* gtf_visitor_new(GT_GenFile *outfp)
 {
   GenomeVisitor *gv = genome_visitor_create(gtf_visitor_class());
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);

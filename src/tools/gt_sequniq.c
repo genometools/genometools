@@ -33,7 +33,7 @@ typedef struct {
   bool seqit,
        verbose;
   OutputFileInfo *ofi;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 } SequniqArguments;
 
 static void* gt_sequniq_arguments_new(void)
@@ -47,7 +47,7 @@ static void gt_sequniq_arguments_delete(void *tool_arguments)
 {
   SequniqArguments *arguments = tool_arguments;
   if (!arguments) return;
-  genfile_close(arguments->outfp);
+  gt_genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }

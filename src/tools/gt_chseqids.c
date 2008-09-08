@@ -30,7 +30,7 @@
 typedef struct {
   bool sort,
        verbose;
-  GenFile *outfp;
+  GT_GenFile *outfp;
 } ChseqidsArguments;
 
 static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
@@ -121,7 +121,7 @@ int gt_chseqids(int argc, const char **argv, GT_Error *err)
   genome_stream_delete(chseqids_stream);
   genome_stream_delete(sort_stream);
   genome_stream_delete(gff3_in_stream);
-  genfile_close(arguments.outfp);
+  gt_genfile_close(arguments.outfp);
 
   return had_err;
 }
