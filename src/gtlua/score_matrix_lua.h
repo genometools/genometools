@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the ScoreMatrix class to Lua:
+/* exports the GT_ScoreMatrix class to Lua:
 
    -- Returns a new protein score matrix object which has been read from file
    -- <path>.

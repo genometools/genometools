@@ -21,12 +21,12 @@
 #include "core/xansi.h"
 
 struct GT_ScoreFunction {
-  ScoreMatrix *sm;
+  GT_ScoreMatrix *sm;
   int deletion_score,
       insertion_score;
 };
 
-GT_ScoreFunction* gt_score_function_new(ScoreMatrix *sm, int deletion_score,
+GT_ScoreFunction* gt_score_function_new(GT_ScoreMatrix *sm, int deletion_score,
                                  int insertion_score)
 {
   GT_ScoreFunction *sf;
@@ -42,13 +42,13 @@ int gt_score_function_get_score(const GT_ScoreFunction *sf,
                             unsigned int idx1, unsigned int idx2)
 {
   assert(sf);
-  return score_matrix_get_score(sf->sm, idx1, idx2);
+  return gt_score_matrix_get_score(sf->sm, idx1, idx2);
 }
 
 const int** gt_score_function_get_scores(const GT_ScoreFunction *sf)
 {
   assert(sf);
-  return score_matrix_get_scores(sf->sm);
+  return gt_score_matrix_get_scores(sf->sm);
 }
 
 int gt_score_function_get_deletion_score(const GT_ScoreFunction *sf)
@@ -66,6 +66,6 @@ int gt_score_function_get_insertion_score(const GT_ScoreFunction *sf)
 void gt_score_function_delete(GT_ScoreFunction *sf)
 {
   if (!sf) return;
-  score_matrix_delete(sf->sm);
+  gt_score_matrix_delete(sf->sm);
   gt_free(sf);
 }

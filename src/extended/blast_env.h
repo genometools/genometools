@@ -31,7 +31,7 @@ typedef struct BlastEnv BlastEnv;
 */
 BlastEnv* blast_env_new(const char *w, unsigned long wlen, GT_Alpha *alpha,
                         unsigned long q, long k,
-                        const ScoreMatrix *score_matrix);
+                        const GT_ScoreMatrix *score_matrix);
 
 /* Delete the Blast environment <blast_env>. */
 void      blast_env_delete(BlastEnv*);

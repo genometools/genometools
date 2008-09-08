@@ -67,7 +67,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   SWAlignArguments *arguments = tool_arguments;
   GT_Bioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
   GT_ScoreFunction *score_function = NULL;
-  ScoreMatrix *scorematrix;
+  GT_ScoreMatrix *scorematrix;
   unsigned long i, j;
   int had_err = 0;
   Alignment *a;
@@ -76,7 +76,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
 
   /* init */
   /* XXX: make this more flexible */
-  scorematrix  = score_matrix_new_read_protein(argv[parsed_args], err);
+  scorematrix  = gt_score_matrix_new_read_protein(argv[parsed_args], err);
   if (scorematrix) {
     score_function = gt_score_function_new(scorematrix, arguments->indelscore,
                                                    arguments->indelscore);

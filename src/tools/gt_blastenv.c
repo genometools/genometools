@@ -64,7 +64,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
                               GT_Error *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
-  ScoreMatrix *score_matrix;
+  GT_ScoreMatrix *score_matrix;
   BlastEnv *blast_env = NULL;
   unsigned long wlen;
   char *w = NULL;
@@ -74,7 +74,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   gt_error_check(err);
   assert(arguments);
 
-  if (!(score_matrix = score_matrix_new_read_protein(argv[parsed_args], err)))
+  if (!(score_matrix = gt_score_matrix_new_read_protein(argv[parsed_args], err)))
     had_err = -1;
 
   if (!had_err) {
@@ -97,7 +97,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
 
   /* free space */
   blast_env_delete(blast_env);
-  score_matrix_delete(score_matrix);
+  gt_score_matrix_delete(score_matrix);
   gt_alpha_delete(alpha);
   gt_free(w);
 

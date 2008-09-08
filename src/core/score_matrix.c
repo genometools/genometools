@@ -25,17 +25,17 @@
 #include "core/undef.h"
 #include "core/xansi.h"
 
-struct ScoreMatrix {
+struct GT_ScoreMatrix {
   GT_Alpha *alpha;
   unsigned int dimension;
   int **scores;
 };
 
-ScoreMatrix* score_matrix_new(GT_Alpha *alpha)
+GT_ScoreMatrix* gt_score_matrix_new(GT_Alpha *alpha)
 {
-  ScoreMatrix *sm;
+  GT_ScoreMatrix *sm;
   assert(alpha);
-  sm = gt_malloc(sizeof (ScoreMatrix));
+  sm = gt_malloc(sizeof (GT_ScoreMatrix));
   sm->alpha = gt_alpha_ref(alpha);
   sm->dimension = gt_alpha_size(alpha);
   gt_array2dim_calloc(sm->scores, sm->dimension, sm->dimension);
@@ -104,7 +104,7 @@ static int parse_alphabet_line(GT_Array *index_to_gt_alpha_char_mapping,
   return had_err;
 }
 
-static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
+static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
                             GT_Array *index_to_gt_alpha_char_mapping,
                             char *parsed_characters, GT_Error *err)
 {
@@ -140,7 +140,7 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
                                   tokenizer_get_filename(tz), err);
       if (had_err)
         break;
-      score_matrix_set_score(sm,
+      gt_score_matrix_set_score(sm,
                              gt_alpha_encode(sm->alpha, amino_acid),
                              gt_alpha_encode(sm->alpha, *(char*)
                              gt_array_get(index_to_gt_alpha_char_mapping, i)), score);
@@ -155,7 +155,7 @@ static int parse_score_line(ScoreMatrix *sm, Tokenizer *tz,
 }
 
 /* the score matrix parser */
-static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
+static int parse_score_matrix(GT_ScoreMatrix *sm, const char *path, GT_Error *err)
 {
   Tokenizer *tz;
   GT_Array *index_to_gt_alpha_char_mapping;
@@ -191,10 +191,10 @@ static int parse_score_matrix(ScoreMatrix *sm, const char *path, GT_Error *err)
   return had_err;
 }
 
-ScoreMatrix* score_matrix_new_read_protein(const char *path, GT_Error *err)
+GT_ScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GT_Error *err)
 {
   GT_Alpha *protein_alpha;
-  ScoreMatrix *sm;
+  GT_ScoreMatrix *sm;
   int had_err;
 
   gt_error_check(err);
@@ -202,26 +202,26 @@ ScoreMatrix* score_matrix_new_read_protein(const char *path, GT_Error *err)
 
   /* create score matrix */
   protein_alpha = gt_alpha_new_protein();
-  sm = score_matrix_new(protein_alpha);
+  sm = gt_score_matrix_new(protein_alpha);
   gt_alpha_delete(protein_alpha);
 
   /* parse matrix file */
   had_err = parse_score_matrix(sm, path, err);
 
   if (had_err) {
-    score_matrix_delete(sm);
+    gt_score_matrix_delete(sm);
     return NULL;
   }
   return sm;
 }
 
-unsigned int score_matrix_get_dimension(const ScoreMatrix *sm)
+unsigned int gt_score_matrix_get_dimension(const GT_ScoreMatrix *sm)
 {
   assert(sm);
   return sm->dimension;
 }
 
-int score_matrix_get_score(const ScoreMatrix *sm,
+int gt_score_matrix_get_score(const GT_ScoreMatrix *sm,
                           unsigned int idx1, unsigned int idx2)
 {
   assert(sm);
@@ -229,7 +229,7 @@ int score_matrix_get_score(const ScoreMatrix *sm,
   return sm->scores[idx1][idx2];
 }
 
-void score_matrix_set_score(ScoreMatrix *sm,
+void gt_score_matrix_set_score(GT_ScoreMatrix *sm,
                            unsigned int idx1, unsigned int idx2, int score)
 {
   assert(sm);
@@ -237,13 +237,13 @@ void score_matrix_set_score(ScoreMatrix *sm,
   sm->scores[idx1][idx2] = score;
 }
 
-const int** score_matrix_get_scores(const ScoreMatrix *sm)
+const int** gt_score_matrix_get_scores(const GT_ScoreMatrix *sm)
 {
   assert(sm);
   return (const int**) sm->scores;
 }
 
-void score_matrix_show(const ScoreMatrix *sm, FILE *fp)
+void gt_score_matrix_show(const GT_ScoreMatrix *sm, FILE *fp)
 {
   unsigned i, j;
   assert(sm && fp);
@@ -256,12 +256,12 @@ void score_matrix_show(const ScoreMatrix *sm, FILE *fp)
   for (i = 0; i < gt_alpha_size(sm->alpha); i++) {
     xfputc(gt_alpha_decode(sm->alpha, i), fp);
     for (j = 0; j < gt_alpha_size(sm->alpha); j++)
-      fprintf(fp, " %2d", score_matrix_get_score(sm, i, j));
+      fprintf(fp, " %2d", gt_score_matrix_get_score(sm, i, j));
     xfputc('\n', fp);
   }
 }
 
-void score_matrix_delete(ScoreMatrix *sm)
+void gt_score_matrix_delete(GT_ScoreMatrix *sm)
 {
   if (!sm) return;
   gt_alpha_delete(sm->alpha);

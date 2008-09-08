@@ -80,13 +80,13 @@ GT_Array* pos_get(Pos *pos, unsigned long code)
   Returns an array of length <wlen> which has to be freed by the caller.
 */
 static long* compute_max_pos_scores(const char *w, unsigned long wlen,
-                                    const ScoreMatrix *score_matrix)
+                                    const GT_ScoreMatrix *score_matrix)
 {
   long score, max_score, *max_matrix_scores, *max_pos_scores;
   unsigned int dimension;
   unsigned long i;
 
-  dimension = score_matrix_get_dimension(score_matrix);
+  dimension = gt_score_matrix_get_dimension(score_matrix);
   max_matrix_scores = gt_malloc(sizeof (long) * dimension);
   max_pos_scores = gt_malloc(sizeof (long) * wlen);
   /* fill maximal matrix scores */
@@ -94,7 +94,7 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
     unsigned long j;
     max_score = LONG_MIN;
     for (j = 0; j < dimension; j++) {
-      score = score_matrix_get_score(score_matrix, i, j);
+      score = gt_score_matrix_get_score(score_matrix, i, j);
       if (score > max_score)
         max_score = score;
     }
@@ -141,7 +141,7 @@ static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
                               GT_Alpha *alpha, unsigned long q,
                               unsigned long q_rest, long k, long current_score,
                               unsigned long position,
-                              const ScoreMatrix *score_matrix)
+                              const GT_ScoreMatrix *score_matrix)
 {
   assert(V && pos && qgram_rest && alpha);
   if (q_rest == 0) {
@@ -158,7 +158,7 @@ static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
     unsigned int i;
     /* enumerate all possible characters (at this node) */
     for (i = 0; i < gt_alpha_size(alpha); i++) {
-      long char_score = score_matrix_get_score(score_matrix, qgram_rest[0], i);
+      long char_score = gt_score_matrix_get_score(score_matrix, qgram_rest[0], i);
       assert(i < CHAR_MAX);
       current_word[q - q_rest] = i;
       /* recursive call (descend into branch) */
@@ -176,7 +176,7 @@ static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
 */
 static void compute_env(GT_Bittab *V, Pos *pos, const char *w, unsigned long wlen,
                         GT_Alpha *alpha, unsigned long q, long k,
-                        const ScoreMatrix *score_matrix)
+                        const GT_ScoreMatrix *score_matrix)
 {
   long *max_pos_scores, *max_cumul_scores;
   unsigned long i;
@@ -215,11 +215,11 @@ struct BlastEnv {
 
 BlastEnv* blast_env_new(const char *w, unsigned long wlen, GT_Alpha *alpha,
                         unsigned long q, long k,
-                        const ScoreMatrix *score_matrix)
+                        const GT_ScoreMatrix *score_matrix)
 {
   BlastEnv *be;
   assert(w && alpha && q && score_matrix);
-  assert(gt_alpha_size(alpha) == score_matrix_get_dimension(score_matrix));
+  assert(gt_alpha_size(alpha) == gt_score_matrix_get_dimension(score_matrix));
   be = gt_calloc(1, sizeof *be);
   be->alpha = gt_alpha_ref(alpha);
   be->q = q;

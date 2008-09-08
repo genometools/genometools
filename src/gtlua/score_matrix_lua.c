@@ -22,19 +22,19 @@
 
 #define SCOREMATRIX_METATABLE  "GenomeTools.score_matrix"
 #define check_score_matrix(L, POS) \
-        (ScoreMatrix**) luaL_checkudata(L, POS, SCOREMATRIX_METATABLE)
+        (GT_ScoreMatrix**) luaL_checkudata(L, POS, SCOREMATRIX_METATABLE)
 
 static int score_matrix_lua_new_read_protein(lua_State *L)
 {
-  ScoreMatrix **sm;
+  GT_ScoreMatrix **sm;
   const char *path;
   GT_Error *err;
   assert(L);
   path = luaL_checkstring(L, 1);
-  sm = lua_newuserdata(L, sizeof (ScoreMatrix*));
+  sm = lua_newuserdata(L, sizeof (GT_ScoreMatrix*));
   assert(sm);
   err = gt_error_new();
-  if (!(*sm = score_matrix_new_read_protein(path, err)))
+  if (!(*sm = gt_score_matrix_new_read_protein(path, err)))
     return lua_gt_error(L, err); /* handle error */
   gt_error_delete(err);
   assert(*sm);
@@ -45,17 +45,17 @@ static int score_matrix_lua_new_read_protein(lua_State *L)
 
 static int score_matrix_lua_get_dimension(lua_State *L)
 {
-  ScoreMatrix **sm;
+  GT_ScoreMatrix **sm;
   unsigned int dimension;
   sm = check_score_matrix(L, 1);
-  dimension = score_matrix_get_dimension(*sm);
+  dimension = gt_score_matrix_get_dimension(*sm);
   lua_pushinteger(L, dimension);
   return 1;
 }
 
 static int score_matrix_lua_get_score(lua_State *L)
 {
-  ScoreMatrix **sm;
+  GT_ScoreMatrix **sm;
   int idx1, idx2;
   int score;
   sm = check_score_matrix(L, 1);
@@ -63,18 +63,20 @@ static int score_matrix_lua_get_score(lua_State *L)
   idx2 = luaL_checkint(L, 3);
   luaL_argcheck(L, idx1 >= 0, 2, "idx1 too small");
   luaL_argcheck(L, idx2 >= 0, 3, "idx2 too small");
-  luaL_argcheck(L, idx1 < score_matrix_get_dimension(*sm), 2, "idx1 too large");
-  luaL_argcheck(L, idx2 < score_matrix_get_dimension(*sm), 3, "idx2 too large");
-  score = score_matrix_get_score(*sm, idx1, idx2);
+  luaL_argcheck(L, idx1 < gt_score_matrix_get_dimension(*sm), 2,
+                "idx1 too large");
+  luaL_argcheck(L, idx2 < gt_score_matrix_get_dimension(*sm), 3,
+                "idx2 too large");
+  score = gt_score_matrix_get_score(*sm, idx1, idx2);
   lua_pushinteger(L, score);
   return 1;
 }
 
 static int score_matrix_lua_delete(lua_State *L)
 {
-  ScoreMatrix **sm;
+  GT_ScoreMatrix **sm;
   sm = check_score_matrix(L, 1);
-  score_matrix_delete(*sm);
+  gt_score_matrix_delete(*sm);
   return 0;
 }
 
