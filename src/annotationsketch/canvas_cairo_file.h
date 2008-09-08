@@ -19,6 +19,7 @@
 #define CANVAS_CAIRO_FILE_H
 
 #include "annotationsketch/canvas_cairo_file_api.h"
+#include "annotationsketch/canvas.h"
 
 const GT_CanvasClass* gt_canvas_cairo_file_class(void);
 

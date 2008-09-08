@@ -219,12 +219,12 @@ int gt_block_unit_test(GT_Error *err)
   GT_FeatureTypeFactory *feature_type_factory;
   GT_GenomeFeatureType *gft;
   GT_Range r1, r2, r_temp, b_range;
-  int had_err = 0;
   GT_Strand s;
   GT_GenomeNode *gn1, *gn2;
   GT_Element *e1, *e2;
   GT_Block * b;
   GT_Str *seqid, *caption1, *caption2;
+  int had_err = 0;
   gt_error_check(err);
 
   feature_type_factory = gt_feature_type_factory_builtin_new();

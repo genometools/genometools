@@ -310,8 +310,10 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
   gt_style_get_color(canvas->sty, "format", "gt_track_title_color", &color, NULL);
 
   /* debug */
-  if (gt_style_get_verbose(canvas->sty))
-    fprintf(stderr, "processing track %s\n", gt_str_get(gt_track_get_title(track)));
+  if (gt_style_get_verbose(canvas->sty)) {
+    fprintf(stderr, "processing track %s\n",
+            gt_str_get(gt_track_get_title(track)));
+  }
 
   if (canvas->show_track_captions)
   {

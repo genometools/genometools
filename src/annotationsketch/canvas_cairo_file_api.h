@@ -18,9 +18,10 @@
 #ifndef CANVAS_CAIRO_FILE_API_H
 #define CANVAS_CAIRO_FILE_API_H
 
-#include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_api.h"
 #include "annotationsketch/graphics.h"
-#include "annotationsketch/image_info.h"
+#include "annotationsketch/image_info_api.h"
+#include "annotationsketch/style_api.h"
 
 /* Implements the Canvas interface.
    This Canvas uses the GraphicsCairo class.  */
