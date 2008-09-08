@@ -471,7 +471,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         }
       }
 
-      /* check for the manadatory attributes */
+      /* check for the mandatory attributes */
       if (!gene_id) {
         gt_error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
                   GENE_ID_ATTRIBUTE, line_number, filename);
@@ -540,8 +540,6 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(source_str);
       gt_genome_feature_set_source(gn, source_str);
 
-      if (score_is_defined)
-        gt_genome_feature_set_score((GT_GenomeFeature*) gn, score_value);
       if (score_is_defined)
         gt_genome_feature_set_score((GT_GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)

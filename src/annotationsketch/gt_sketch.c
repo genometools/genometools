@@ -30,6 +30,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_stream.h"
@@ -303,13 +304,13 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
     d = gt_diagram_new(features, seqid, &qry_range, sty);
     ii = gt_image_info_new();
     if (strcmp(gt_str_get(arguments.format),"pdf")==0)
-      canvas = gt_canvas_new(sty, GRAPHICS_PDF, arguments.width, ii);
+      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PDF, arguments.width, ii);
     else if (strcmp(gt_str_get(arguments.format),"ps")==0)
-      canvas = gt_canvas_new(sty, GRAPHICS_PS, arguments.width, ii);
+      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PS, arguments.width, ii);
     else if (strcmp(gt_str_get(arguments.format),"svg")==0)
-      canvas = gt_canvas_new(sty, GRAPHICS_SVG, arguments.width, ii);
+      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_SVG, arguments.width, ii);
     else
-      canvas = gt_canvas_new(sty, GRAPHICS_PNG, arguments.width, ii);
+      canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PNG, arguments.width, ii);
     gt_diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
@@ -323,7 +324,8 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
         printf("%s, %s\n", buf, gt_genome_feature_type_get_cstr(type));
       }
     }
-    had_err = gt_canvas_to_file(canvas, file, err);
+    had_err = gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, file,
+                                           err);
   }
 
   /* free */

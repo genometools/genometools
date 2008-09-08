@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <assert.h>
 #include <math.h>
 #include <string.h>
-#include "core/bittab.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -25,8 +25,10 @@
 #include "core/unused_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_rep.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/line.h"
+#include "annotationsketch/style.h"
 
 #define MARGINS_DEFAULT           10
 #define BAR_HEIGHT_DEFAULT        15
@@ -42,18 +44,6 @@
 #define HEADER_SPACE              70
 #define FOOTER_SPACE              20
 
-struct GT_Canvas {
-  GT_Range viewrange;
-  double factor, y, margins;
-  unsigned long width, height;
-  GT_Style *sty;
-  bool show_gt_track_captions;
-  Bittab *bt;
-  Graphics *g;
-  GraphicsOutType type;
-  GT_ImageInfo *ii;
-};
-
 typedef enum
 {
   CLIPPED_RIGHT,
@@ -63,7 +53,7 @@ typedef enum
 } ClipType;
 
 /* Calculate the final height of the image to be created. */
-static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
+unsigned long gt_canvas_calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
 {
   GT_TracklineInfo lines;
   double tmp;
@@ -90,7 +80,7 @@ static unsigned long calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
   height += lines.total_captionlines * (TOY_TEXT_HEIGHT
                                           + CAPTION_BAR_SPACE_DEFAULT);
   /* add track caption height and spacer */
-  if (canvas->show_gt_track_captions)
+  if (canvas->show_track_captions)
   {
     if (gt_style_get_num(canvas->sty, "format", "gt_track_vspace", &tmp, NULL))
       height += gt_diagram_get_number_of_tracks(dia)
@@ -159,7 +149,7 @@ DrawingRange gt_canvas_convert_coords(GT_Canvas *canvas, GT_Range node_range)
 }
 
 /* Formats a given position number for short display in the ruler. */
-static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
+void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 {
   assert(txt);
   double fpos;
@@ -182,7 +172,7 @@ static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 }
 
 /* Renders a ruler with dynamic scale labeling and optional grid. */
-static void draw_ruler(GT_Canvas *canvas)
+void gt_canvas_draw_ruler(GT_Canvas *canvas)
 {
   double step, minorstep, vmajor, vminor, margins;
   long base_length, tick;
@@ -263,19 +253,32 @@ static void draw_ruler(GT_Canvas *canvas)
                               "3'");
 }
 
-GT_Canvas* gt_canvas_new(GT_Style *sty, GraphicsOutType type,
-                   unsigned long width, GT_ImageInfo *ii)
+GT_Canvas* gt_canvas_create(const GT_CanvasClass *cc)
 {
-  assert(sty && width > 0);
-  GT_Canvas *canvas;
-  canvas = ma_calloc(1, sizeof (GT_Canvas));
-  canvas->sty = sty;
-  canvas->ii = ii;
-  canvas->width = width;
-  canvas->bt = NULL;
-  canvas->type = type;
-  canvas->y = 0.5; /* 0.5 displacement to eliminate fuzzy horizontal lines */
-  return canvas;
+  GT_Canvas *c;
+  assert(cc && cc->size);
+  c = ma_calloc(1, cc->size);
+  c->c_class = cc;
+  return c;
+}
+
+void gt_canvas_delete(GT_Canvas *c)
+{
+  if (!c) return;
+  assert(c->c_class);
+  if (c->c_class->free)
+    c->c_class->free(c);
+  if (c->g)
+    graphics_delete(c->g);
+  if (c->bt)
+    bittab_delete(c->bt);
+  ma_free(c);
+}
+
+void* gt_canvas_cast(GT_UNUSED const GT_CanvasClass *cc, GT_Canvas *c)
+{
+  assert(cc && c && c->c_class == cc);
+  return c;
 }
 
 unsigned long gt_canvas_get_height(GT_Canvas *canvas)
@@ -284,62 +287,19 @@ unsigned long gt_canvas_get_height(GT_Canvas *canvas)
   return canvas->height;
 }
 
-int gt_canvas_visit_gt_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
+int gt_canvas_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram* diagram)
 {
-  double margins;
-
-  assert(canvas && dia);
-
-  if (gt_style_get_num(canvas->sty, "format", "margins", &margins, NULL))
-    canvas->margins = margins;
-  else
-    canvas->margins = MARGINS_DEFAULT;
-
-  if (!gt_style_get_bool(canvas->sty, "format", "show_gt_track_captions",
-                       &canvas->show_gt_track_captions, NULL))
-    canvas->show_gt_track_captions = true;
-
-  canvas->viewrange = gt_diagram_get_range(dia);
-  if (canvas->g)
-  {
-    graphics_delete(canvas->g);
-    canvas->g = NULL;
-  }
-  canvas->g = graphics_new(canvas->type, canvas->width, 1);
-
-  /* calculate scaling factor */
-  canvas->factor = ((double) canvas->width
-                     -(2*canvas->margins))
-                    / gt_range_length(canvas->viewrange);
-  return 0;
+  assert(canvas && diagram);
+  return canvas->c_class->visit_diagram_pre(canvas, diagram);
 }
 
-int gt_canvas_visit_gt_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
+int gt_canvas_visit_diagram_post(GT_Canvas *canvas, GT_Diagram* diagram)
 {
-  int had_err = 0;
-
-  assert(canvas && dia);
-
-  /* set initial image-specific values */
-  canvas->y += HEADER_SPACE;
-  canvas->height = calculate_height(canvas, dia);
-  if (canvas->ii)
-    gt_image_info_set_height(canvas->ii, canvas->height);
-  if (canvas->g)
-  {
-    graphics_delete(canvas->g);
-    canvas->g = NULL;
-  }
-  canvas->g = graphics_new(canvas->type, canvas->width, canvas->height);
-  graphics_set_margins(canvas->g, canvas->margins, 0);
-
-  /* Add ruler/scale to the image */
-  draw_ruler(canvas);
-
-  return had_err;
+  assert(canvas && diagram);
+  return canvas->c_class->visit_diagram_post(canvas, diagram);
 }
 
-int gt_canvas_visit_gt_track_pre(GT_Canvas *canvas, GT_Track *track)
+int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
 {
   int had_err = 0;
   unsigned long exceeded;
@@ -353,7 +313,7 @@ int gt_canvas_visit_gt_track_pre(GT_Canvas *canvas, GT_Track *track)
   if (gt_style_get_verbose(canvas->sty))
     fprintf(stderr, "processing track %s\n", gt_str_get(gt_track_get_title(track)));
 
-  if (canvas->show_gt_track_captions)
+  if (canvas->show_track_captions)
   {
     /* draw track title */
     graphics_draw_colored_text(canvas->g,
@@ -391,7 +351,7 @@ int gt_canvas_visit_gt_track_pre(GT_Canvas *canvas, GT_Track *track)
   return had_err;
 }
 
-int gt_canvas_visit_gt_track_post(GT_Canvas *canvas, GT_UNUSED GT_Track *track)
+int gt_canvas_visit_track_post(GT_Canvas *canvas, GT_UNUSED GT_Track *track)
 {
   double vspace;
   assert(canvas && track);
@@ -403,7 +363,7 @@ int gt_canvas_visit_gt_track_post(GT_Canvas *canvas, GT_UNUSED GT_Track *track)
   return 0;
 }
 
-int gt_canvas_visit_gt_line_pre(GT_Canvas *canvas, GT_Line *line)
+int gt_canvas_visit_line_pre(GT_Canvas *canvas, GT_Line *line)
 {
   int had_err = 0;
   assert(canvas && line);
@@ -413,7 +373,7 @@ int gt_canvas_visit_gt_line_pre(GT_Canvas *canvas, GT_Line *line)
   return had_err;
 }
 
-int gt_canvas_visit_gt_line_post(GT_Canvas *canvas, GT_UNUSED GT_Line *line)
+int gt_canvas_visit_line_post(GT_Canvas *canvas, GT_UNUSED GT_Line *line)
 {
   int had_err = 0;
   double tmp;
@@ -715,44 +675,4 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
                               grey,
                               ARROW_RIGHT);
   return had_err;
-}
-
-int gt_canvas_to_file(GT_Canvas *canvas, const char *filename, GT_Error *err)
-{
-  int had_err = 0;
-  assert(canvas && filename && err);
-
-  /* write out result file */
-  if (canvas->g)
-    had_err = graphics_save_to_file(canvas->g, filename, err);
-  else
-  {
-    gt_error_set(err, "No graphics has been created yet!");
-    had_err = -1;
-  }
-
-  return had_err;
-}
-
-int gt_canvas_to_stream(GT_Canvas *canvas, GT_Str *stream)
-{
-  int had_err = 0;
-  assert(canvas && stream);
-
-  /* write out result file */
-  if (canvas->g)
-    graphics_save_to_stream(canvas->g, stream);
-
-  return had_err;
-}
-
-void gt_canvas_delete(GT_Canvas *canvas)
-{
-  if (!canvas) return;
-  if (canvas->g)
-    graphics_delete(canvas->g);
-  if (canvas->bt)
-    bittab_delete(canvas->bt);
-  ma_free(canvas);
-  canvas = NULL;
 }

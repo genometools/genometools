@@ -46,6 +46,7 @@
 #include "extended/string_matching.h"
 #include "extended/tag_value_map.h"
 #include "extended/union_find.h"
+#include "extended/redblack.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chseqids.h"
@@ -91,6 +92,7 @@
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/track.h"
 #include "annotationsketch/recmap.h"
+#include "annotationsketch/style.h"
 #endif
 
 Toolbox* gtt_tools(void)
@@ -175,6 +177,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "Lua serializer module", lua_serializer_unit_test);
   hashmap_add(unit_tests, "queue class", queue_unit_test);
   hashmap_add(unit_tests, "range class", gt_range_unit_test);
+  hashmap_add(unit_tests, "red-black tree class", rbt_unit_test);
   hashmap_add(unit_tests, "safearith module", safearith_unit_test);
   hashmap_add(unit_tests, "safearith example", safearith_example);
   hashmap_add(unit_tests, "splicedseq class", splicedseq_unit_test);

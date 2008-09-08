@@ -38,7 +38,7 @@ fi
 
 makecompilerflags()
 {
-  printf "all:\n\t\${MAKE} curses=no"
+  printf "all:\n\t\${MAKE} curses=no cairo=no"
   if test $3 -eq 1
   then
     printf " CC='ccache icc'"

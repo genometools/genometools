@@ -21,6 +21,7 @@
 #define DIAGRAM_API_H
 
 #include "annotationsketch/feature_index.h"
+#include "annotationsketch/style_api.h"
 
 typedef struct GT_Diagram GT_Diagram;
 

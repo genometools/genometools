@@ -46,14 +46,16 @@ int main(int argc, char *argv[])
   diagram = gt_diagram_new(feature_index, seqid, &range, style);
 
   /* create canvas */
-  canvas = gt_canvas_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
+  canvas = gt_canvas_cairo_file_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
 
   /* sketch diagram on canvas */
   gt_diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
-  if (gt_canvas_to_file(canvas, output_file, err))
+  if (gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, output_file,
+                                   err)) {
     handle_error(err);
+  }
 
   /* free */
   gt_canvas_delete(canvas);

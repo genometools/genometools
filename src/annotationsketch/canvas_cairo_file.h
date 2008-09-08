@@ -15,28 +15,30 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CANVAS_API_H
-#define CANVAS_API_H
+#ifndef CANVAS_CAIRO_FILE_H
+#define CANVAS_CAIRO_FILE_H
 
+#include "annotationsketch/canvas.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/image_info.h"
-#include "annotationsketch/style.h"
 
-typedef struct GT_Canvas GT_Canvas;
+/* Implements the Canvas interface.
+   This Canvas uses the GraphicsCairo class.  */
+typedef struct GT_CanvasCairoFile GT_CanvasCairoFile;
 
-/* Create a new GT_Canvas object with given <output_type> and <width> using the
+const GT_CanvasClass* gt_canvas_cairo_file_class(void);
+/* Create a new Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when
-   the created GT_Canvas object is used to render a GT_Diagram object. */
-GT_Canvas*    gt_canvas_new(GT_Style *style, GraphicsOutType output_type,
-                            unsigned long width, GT_ImageInfo *image_info);
-/* Returns the height of the given <canvas>. */
-unsigned long gt_canvas_get_height(GT_Canvas *canvas);
+   the created Canvas object is used to render a Diagram object. */
+GT_Canvas* gt_canvas_cairo_file_new(GT_Style *style,
+                                    GraphicsOutType output_type,
+                                    unsigned long width,
+                                    GT_ImageInfo *image_info);
 /* Write rendered <canvas> to file with name <filename>. */
-int           gt_canvas_to_file(GT_Canvas *canvas, const char *filename,
-                                GT_Error*);
+int     gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
+                                     const char *filename, GT_Error *err);
 /* Append rendered <canvas> to given <stream>. */
-int           gt_canvas_to_stream(GT_Canvas *canvas, GT_Str *stream);
-/* Delete the given <canvas>. */
-void          gt_canvas_delete(GT_Canvas *canvas);
+int     gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas,
+                                       GT_Str *stream);
 
 #endif

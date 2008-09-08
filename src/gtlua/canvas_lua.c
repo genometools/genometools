@@ -18,7 +18,7 @@
 #ifndef WITHOUT_CAIRO
 
 #include "lauxlib.h"
-#include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/luastyle.h"
 #include "core/error.h"
 #include "extended/luahelper.h"
@@ -38,11 +38,11 @@ static int canvas_lua_new_generic(lua_State *L, GraphicsOutType t)
   assert(canvas);
   /* if a imageinfo object is passed, it must be correct type */
   if (lua_isnil(L, 2))
-    *canvas = gt_canvas_new(style, t, width, NULL);
+    *canvas = gt_canvas_cairo_file_new(style, t, width, NULL);
   else
   {
     ii = check_imageinfo(L, 2);
-   *canvas = gt_canvas_new(style, t, width, *ii);
+   *canvas = gt_canvas_cairo_file_new(style, t, width, *ii);
   }
   luaL_getmetatable(L, CANVAS_METATABLE);
   lua_setmetatable(L, -2);
@@ -72,6 +72,7 @@ static int canvas_lua_new_ps(lua_State *L)
 static int canvas_lua_to_file(lua_State *L)
 {
   GT_Canvas **canvas;
+  GT_CanvasCairoFile *ccf;
   GT_Error *err;
   const char *fn;
   int had_err = 0;
@@ -79,7 +80,8 @@ static int canvas_lua_to_file(lua_State *L)
   canvas = check_canvas(L, 1);
   fn = luaL_checkstring(L, 2);
   assert(canvas);
-  had_err = gt_canvas_to_file(*canvas, fn, err);
+  ccf = (GT_CanvasCairoFile*) *canvas;
+  had_err = gt_canvas_cairo_file_to_file(ccf, fn, err);
   if (had_err)
     return lua_gt_error(L, err);
   gt_error_delete(err);

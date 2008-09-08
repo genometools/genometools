@@ -398,49 +398,49 @@ obj/gt_config.h:
 	    -e 's/^/#define GT_CPPFLAGS "/'; \
 	  echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
 
-bitpackstringop_Dependencies=src/libgtcore/bitpackstringop.template \
-	 src/libgtcore/bitpackstringvectorreadop.gen \
-	 src/libgtcore/bitpackstringvectorwriteop.gen \
+bitpackstringop_Dependencies=src/core/bitpackstringop.template \
+	 src/core/bitpackstringvectorreadop.gen \
+	 src/core/bitpackstringvectorwriteop.gen \
 	 scripts/template2c.pl
 
-src/libgtcore/bitpackstringop8.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop8.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 8 $<
 
-src/libgtcore/checkbitpackstring8.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring8.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 8 $<
 
-src/libgtcore/bitpackstringop16.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop16.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 16 $<
 
-src/libgtcore/checkbitpackstring16.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring16.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 16 $<
 
-src/libgtcore/bitpackstringop32.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop32.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 32 $<
 
-src/libgtcore/checkbitpackstring32.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring32.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 32 $<
 
-src/libgtcore/bitpackstringop64.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop64.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 64 $<
 
-src/libgtcore/checkbitpackstring64.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring64.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 64 $<
 
-src/libgtcore/checkbitpackstring-int.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring-int.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $<
 
@@ -472,7 +472,7 @@ obj/%.o: %.cpp
 	@$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
 	  -MT $@
 
-obj/src/libgtcore/versionfunc.o: obj/gt_config.h
+obj/src/core/versionfunc.o: obj/gt_config.h
 
 # read dependencies
 -include $(GTMAIN_DEP) \
@@ -585,8 +585,8 @@ cflags:
 splint: obj/gt_config.h
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) \
 	$(CURDIR)/src/*.c \
-        $(CURDIR)/src/libgtcore/*.c \
-        $(CURDIR)/src/libgtext/*.c \
+        $(CURDIR)/src/core/*.c \
+        $(CURDIR)/src/extended/*.c \
         $(CURDIR)/src/tools/*.c
 
 EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}\
@@ -599,7 +599,8 @@ SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${wildcard ${CURDIR}/src/libgtltr/*.c}\
-                                ${SKTOOLS}}}}
+                                ${SKTOOLS}}}}\
+     obj/redblack.splint
 
 scgt:
 	src_check src/match/*
@@ -619,9 +620,14 @@ obj/%.splint: ${CURDIR}/src/tools/%.c
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
-obj/%.splint: ${CURDIR}/src/libgtltr/%.c
+obj/%.splint: ${CURDIR}/src/ltr/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.splint: ${CURDIR}/src/extended/%.c
+	@echo "splint $<"
+	@splint -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.prepro: ${CURDIR}/src/match/%.c
@@ -643,6 +649,9 @@ test: all
 clean:
 	rm -rf obj
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
+
+gtkviewer:
+	$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) `pkg-config --cflags --libs gtk+-2.0 glib` -lgenometools src/examples/gtkviewer.c
 
 cleanup: clean
 	rm -rf lib bin

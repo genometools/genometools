@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/unused.h"
+#include "core/unused_api.h"
 
 void
 bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
@@ -139,7 +139,7 @@ bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
 
 void
 bsStoreNonUniform@uTypeTag@Array(
-  BitString str, BitOffset offset, UNUSED size_t numValues,
+  BitString str, BitOffset offset, GT_UNUSED size_t numValues,
   BitOffset totalBitsLeft, unsigned numBitsList[], const @ValueType@ val[])
 {
   /* idea: read as much as possible from val in each iteration,

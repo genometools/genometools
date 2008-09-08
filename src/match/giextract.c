@@ -33,10 +33,6 @@
 #define COMPLETE(VALUE)\
         ((VALUE).frompos == 1UL && (VALUE).topos == 0)
 
-/*
-  XXX move this to the libgtcore.
-*/
-
 #define EXTRABUF 128
 
 #define CHECKPOSITIVE(VAL,FORMAT,WHICH)\

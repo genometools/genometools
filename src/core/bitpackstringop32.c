@@ -156,8 +156,6 @@ bsStoreUInt32(BitString str, BitOffset offset,
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unused_api.h"
-
 void
 bsGetUniformUInt32Array(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
@@ -645,8 +643,6 @@ bsStoreNonUniformUInt32Array(
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-
-#include "core/unused_api.h"
 
 void
 bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,

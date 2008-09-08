@@ -63,13 +63,13 @@ int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
 {
   int i = 0;
   assert(line && canvas);
-  gt_canvas_visit_gt_line_pre(canvas, line);
+  gt_canvas_visit_line_pre(canvas, line);
   for (i = 0; i < gt_array_size(line->blocks); i++) {
     GT_Block *block;
     block = *(GT_Block**) gt_array_get(line->blocks, i);
     gt_block_sketch(block, canvas);
   }
-  gt_canvas_visit_gt_line_post(canvas, line);
+  gt_canvas_visit_line_post(canvas, line);
   return 0;
 }
 

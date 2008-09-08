@@ -1,8 +1,9 @@
 #!/bin/sh
 
-egrep "$@" src/libgtmatch/*\
-           src/libgtltr/*\
-           src/*.[ch]\
+egrep "$@" src/match/*\
+           src/ltr/*\
+           src/mgth/*\
            src/tools/*.[ch]\
+           src/*.[ch]\
            scripts/*\
            testsuite/*.rb

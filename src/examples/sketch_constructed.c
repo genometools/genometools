@@ -40,7 +40,7 @@ static GT_Array* create_example_features(void)
   /* store forward gene in feature array */
   gt_array_add(features, forward_gene);
 
-  /* construt a single-exon gene on the reverse strand
+  /* construct a single-exon gene on the reverse strand
      (within the intron of the forward strand gene) */
   type = gt_feature_type_factory_create_gft(type_factory, "gene");
   range.start = 400; range.end = 600;
@@ -89,14 +89,16 @@ static void draw_example_features(GT_Array *features, const char *style_file,
   diagram = gt_diagram_new_from_array(features, &range, style);
 
   /* create canvas */
-  canvas = gt_canvas_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
+  canvas = gt_canvas_cairo_file_new(style, GRAPHICS_PNG, 800 /* width */, NULL);
 
   /* sketch diagram on canvas */
   gt_diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
-  if (gt_canvas_to_file(canvas, output_file, err))
+  if (gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, output_file,
+                                   err)) {
     handle_error(err);
+  }
 
   /* free */
   gt_canvas_delete(canvas);

@@ -16,7 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-localpath=src/libgtmatch
+localpath=src/match
 
 if test "XX${GT_ENV_OPTIONS}" != "XX"
 then

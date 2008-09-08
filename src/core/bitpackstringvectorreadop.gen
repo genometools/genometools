@@ -14,8 +14,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/unused.h"
-
 void
 bsGetUniform@uTypeTag@Array@VecOpName@(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,

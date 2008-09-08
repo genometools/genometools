@@ -30,10 +30,12 @@
 #include "extended/genome_feature.h"
 #include "extended/genome_feature_type.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/line_breaker_bases.h"
+#include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
 
 /* used to separate a filename from the type in a track name */
@@ -137,8 +139,8 @@ static bool get_caption_display_status(GT_Diagram *d, GT_GenomeFeatureType *gft)
     unsigned long threshold;
     double tmp;
     status = ma_malloc(sizeof (bool*));
-    if (!gt_style_get_bool(d->style, "format", "show_block_captions",
-                       status, NULL))
+    if (!gt_style_get_bool(d->style, "format", "show_block_captions", status,
+                           NULL))
       *status = true;
     if (*status)
     {
@@ -629,11 +631,11 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
   GT_TrackTraverseInfo tti;
   tti.dia = dia;
   tti.canvas = canvas;
-  gt_canvas_visit_gt_diagram_pre(canvas, dia);
+  gt_canvas_visit_diagram_pre(canvas, dia);
   hashmap_reset(dia->tracks);
   dia->nof_tracks = 0;
   (void) hashmap_foreach(dia->blocks, layout_tracks, &tti, NULL);
-  gt_canvas_visit_gt_diagram_post(canvas, dia);
+  gt_canvas_visit_diagram_post(canvas, dia);
   had_err = hashmap_foreach_in_key_order(dia->tracks, render_tracks,
                                          &tti, NULL);
 
@@ -721,7 +723,7 @@ int gt_diagram_unit_test(GT_Error *err)
 
   if (!had_err)
   {
-    canvas = gt_canvas_new(sty, GRAPHICS_PNG, 600, NULL);
+    canvas = gt_canvas_cairo_file_new(sty, GRAPHICS_PNG, 600, NULL);
     gt_diagram_sketch(dia, canvas);
   }
 

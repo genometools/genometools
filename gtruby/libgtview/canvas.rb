@@ -22,27 +22,27 @@ require 'libgtcore/str'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "Canvas* canvas_new(Config*, int, unsigned int, "+
-                             "ImageInfo*)"
-  extern "int canvas_to_file(Canvas*, const char*, Error*)"
-  extern "int canvas_to_stream(Canvas*, Str*)"
+  extern "Canvas* canvas_cairo_file_new(Config*, int, unsigned int, "+
+                                       "ImageInfo*)"
+  extern "int canvas_cairo_file_to_file(CanvasCairoFile*, const char*, Error*)"
+  extern "int canvas_cairo_file_to_stream(CanvasCairoFile*, Str*)"
   extern "void canvas_delete(Canvas*)"
 
   class Canvas
     def initialize(config, width, ii)
-      @canvas = GT.canvas_new(config.config, 1, width, ii.to_ptr)
+      @canvas = GT.canvas_cairo_file_new(config.config, 1, width, ii.to_ptr)
       @canvas.free = GT::symbol("canvas_delete", "0P")
     end
 
     def to_file(filename)
       err = GT::Error.new()
-      rval = GT.canvas_to_file(@canvas, filename, err.to_ptr)
+      rval = GT.canvas_cairo_file_to_file(@canvas, filename, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def to_stream()
       str = GT::Str.new(nil)
-      GT.canvas_to_stream(@canvas, str.to_ptr)
+      GT.canvas_cairo_file_to_stream(@canvas, str.to_ptr)
       str.get_mem.to_s(str.length)
     end
 

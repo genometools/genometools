@@ -48,15 +48,15 @@ typedef enum {
   GRAPHICS_SVG
 } GraphicsOutType;
 
+typedef struct GraphicsClass GraphicsClass;
 typedef struct Graphics Graphics;
 
 #include "annotationsketch/color.h"
+#include "core/str.h"
 #include "core/error.h"
 
 /* Create a new Graphics object, which is an abstraction of a drawing surface on
    which several relevant primitives can be drawn. */
-Graphics* graphics_new(GraphicsOutType, unsigned int width,
-                       unsigned int height);
 void      graphics_draw_text(Graphics*, double x, double y, const char*);
 #define   graphics_draw_text_left(g,x,y,t) \
           graphics_draw_text(g,x,y,t);

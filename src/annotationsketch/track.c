@@ -136,10 +136,10 @@ int gt_track_sketch(GT_Track* track, GT_Canvas *canvas)
 {
   int i = 0;
   assert(track && canvas);
-  gt_canvas_visit_gt_track_pre(canvas, track);
+  gt_canvas_visit_track_pre(canvas, track);
   for (i = 0; i < gt_array_size(track->lines); i++)
     gt_line_sketch(*(GT_Line**) gt_array_get(track->lines, i), canvas);
-  gt_canvas_visit_gt_track_post(canvas, track);
+  gt_canvas_visit_track_post(canvas, track);
   return 0;
 }
 
