@@ -57,7 +57,8 @@ int gt_block_compare(const GT_Block *block1, const GT_Block *block2)
 {
   int ret;
   assert(block1 && block2);
-  ret = gt_range_compare(gt_block_get_range(block1), gt_block_get_range(block2));
+  ret = gt_range_compare(gt_block_get_range(block1),
+                         gt_block_get_range(block2));
   if (ret == 0 && block1 != block2)
     ret = (block1 < block2 ? -1 : 1);
   return ret;
