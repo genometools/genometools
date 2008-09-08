@@ -19,14 +19,14 @@
 #include <string.h>
 #include "core/phase.h"
 
-Phase phase_get(char phase_char)
+Phase gt_phase_get(char phase_char)
 {
-  assert(strchr(PHASECHARS, phase_char));
+  assert(strchr(GT_PHASE_CHARS, phase_char));
   switch (phase_char) {
-    case '0': return PHASE_ZERO;
-    case '1': return PHASE_ONE;
-    case '2': return PHASE_TWO;
+    case '0': return GT_PHASE_ZERO;
+    case '1': return GT_PHASE_ONE;
+    case '2': return GT_PHASE_TWO;
     default : assert(0); /*@fallthrough@*/
-    case '.': return PHASE_UNDEFINED;
+    case '.': return GT_PHASE_UNDEFINED;
   }
 }

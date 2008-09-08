@@ -19,15 +19,15 @@
 #define PHASE_H
 
 typedef enum {
-  PHASE_ZERO,     /* '0' */
-  PHASE_ONE,      /* '1' */
-  PHASE_TWO,      /* '2' */
-  PHASE_UNDEFINED /* '.' */
+  GT_PHASE_ZERO,     /* '0' */
+  GT_PHASE_ONE,      /* '1' */
+  GT_PHASE_TWO,      /* '2' */
+  GT_PHASE_UNDEFINED /* '.' */
 } Phase;
 
-#define PHASECHARS "012."
+#define GT_PHASE_CHARS "012."
 
 /* an assertion will fail if <phase_char> is not a valid one */
-Phase phase_get(char phase_char);
+Phase gt_phase_get(char phase_char);
 
 #endif

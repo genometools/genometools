@@ -1062,9 +1062,11 @@ static int gt_parse_regular_gff3_line(GFF3Parser *parser, Queue *genome_nodes,
                                err);
   }
 
-  if (!had_err && score_is_defined)
-    gt_genome_feature_set_score((GT_GenomeFeature*) genome_feature, score_value);
-  if (!had_err && phase_value != PHASE_UNDEFINED)
+  if (!had_err && score_is_defined) {
+    gt_genome_feature_set_score((GT_GenomeFeature*) genome_feature,
+                                score_value);
+  }
+  if (!had_err && phase_value != GT_PHASE_UNDEFINED)
     gt_genome_feature_set_phase(genome_feature, phase_value);
 
   if (!had_err) {

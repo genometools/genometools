@@ -185,7 +185,7 @@ GT_GenomeNode* gt_genome_feature_new(GT_Str *seqid, GT_FeatureType *type, GT_Ran
   gf->score     = UNDEF_FLOAT;
   gf->range     = range;
   gn->bit_field |= strand << GT_STRAND_OFFSET;
-  gt_genome_feature_set_phase(gn, PHASE_UNDEFINED);
+  gt_genome_feature_set_phase(gn, GT_PHASE_UNDEFINED);
   set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   gf->attributes     = NULL;
   gf->representative = NULL;

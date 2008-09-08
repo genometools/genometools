@@ -41,5 +41,5 @@ void gff3_output_leading(GT_GenomeFeature *gf, GT_GenFile *outfp)
     gt_genfile_xfputc('.', outfp);
   gt_genfile_xprintf(outfp, "\t%c\t%c\t",
                   GT_STRAND_CHARS[gt_genome_feature_get_strand(gf)],
-                  PHASECHARS[gt_genome_feature_get_phase(gf)]);
+                  GT_PHASE_CHARS[gt_genome_feature_get_phase(gf)]);
 }

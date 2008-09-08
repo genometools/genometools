@@ -215,18 +215,19 @@ int gt_parse_phase(Phase *phase_value, const char *phase,
   gt_error_check(err);
 
   if (strlen(phase) != 1) {
-    gt_error_set(err, "phase '%s' not one character long on line %u in file '%s'",
-              phase, line_number, filename);
-    *phase_value = PHASE_UNDEFINED;
+    gt_error_set(err, "phase '%s' not one character long on line %u in file "
+                 "'%s'", phase, line_number, filename);
+    *phase_value = GT_PHASE_UNDEFINED;
     return -1;
   }
-  if (strspn(phase, PHASECHARS) != 1) {
-    gt_error_set(err, "phase '%s' on line %u in file '%s' not a valid character "
-              "from the set '%s'", phase, line_number, filename, PHASECHARS);
-    *phase_value = PHASE_UNDEFINED;
+  if (strspn(phase, GT_PHASE_CHARS) != 1) {
+    gt_error_set(err, "phase '%s' on line %u in file '%s' not a valid "
+                "character from the set '%s'", phase, line_number, filename,
+                GT_PHASE_CHARS);
+    *phase_value = GT_PHASE_UNDEFINED;
     return -1;
   }
-  *phase_value = phase_get(phase[0]);
+  *phase_value = gt_phase_get(phase[0]);
   return 0;
 }
 

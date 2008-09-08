@@ -134,7 +134,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
                                    gt_genome_feature_get_strand((GT_GenomeFeature*)
                                                              gn));
   gt_genome_feature_set_source(cds_feature, v->source);
-  gt_genome_feature_set_phase(cds_feature, PHASE_ZERO);
+  gt_genome_feature_set_phase(cds_feature, GT_PHASE_ZERO);
   /* all CDS features in between */
   for (i = strand == GT_STRAND_FORWARD ? orf.start : orf.end;
        strand == GT_STRAND_FORWARD ? i < orf.end : i > orf.start;
