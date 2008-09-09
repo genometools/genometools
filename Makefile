@@ -537,6 +537,10 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/examples/sketch_parsed gtdata/sketch/default.style \
           testdata/standard_gene_with_introns_as_tree.gff3 \
           www/genometools.org/htdocs/images/parsed.png
+	bin/examples/sketch_parsed \
+	  www/genometools.org/htdocs/annotationsketch/callbacks.style \
+          www/genometools.org/htdocs/annotationsketch/callback_examples_with_score.gff3 \
+	  www/genometools.org/htdocs/images/callbacks.png
 	bin/examples/sketch_constructed gtdata/sketch/default.style \
 	  www/genometools.org/htdocs/images/constructed.png
 	sed -nf scripts/incl.sed \
