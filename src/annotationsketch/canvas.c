@@ -22,6 +22,7 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/range.h"
+#include "core/str.h"
 #include "core/unused_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
@@ -149,26 +150,54 @@ GT_DrawingRange gt_canvas_convert_coords(GT_Canvas *canvas, GT_Range node_range)
 }
 
 /* Formats a given position number for short display in the ruler. */
-void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
+static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 {
   assert(txt);
   double fpos;
+  int logval;
+  GT_Str *formatstring;
+
+  logval = (int) floor(log10(pos));
+  formatstring = gt_str_new_cstr("%.");
+
   if (pos > 1000000000)
   {
     fpos = (double) pos / 1000000000;
-    (void) snprintf(txt, buflen, "%.2fG", fpos);
+    while (pos % 10 == 0)
+    {
+      pos /= 10;
+      logval--;
+    }
+    gt_str_append_ulong(formatstring, (unsigned long) logval);
+    gt_str_append_cstr(formatstring, "fG");
+    (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
   }
   else if (pos > 1000000)
   {
     fpos = (double) pos / 1000000;
-    (void) snprintf(txt, buflen, "%.2fM", fpos);
+    while (pos % 10 == 0)
+    {
+      pos /= 10;
+      logval--;
+    }
+    gt_str_append_ulong(formatstring, (unsigned long) logval);
+    gt_str_append_cstr(formatstring, "fM");
+    (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
   }
   else if (pos > 1000)
   {
     fpos = (double) pos / 1000;
-    (void) snprintf(txt, buflen, "%.2fK", fpos);
+    while (pos % 10 == 0)
+    {
+      pos /= 10;
+      logval--;
+    }
+    gt_str_append_ulong(formatstring, (unsigned long) logval);
+    gt_str_append_cstr(formatstring, "fK");
+    (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
   } else
     (void) snprintf(txt, buflen, "%li", pos);
+  gt_str_delete(formatstring);
 }
 
 /* Renders a ruler with dynamic scale labeling and optional grid. */
