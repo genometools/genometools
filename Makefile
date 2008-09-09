@@ -531,9 +531,20 @@ release:
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
 	git push --tags origin master
 
-docs: bin/gt
+docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
         > www/genometools.org/htdocs/docs.html
+	bin/examples/sketch_parsed gtdata/sketch/default.style \
+          testdata/standard_gene_with_introns_as_tree.gff3 \
+          www/genometools.org/htdocs/images/parsed.png
+	bin/examples/sketch_constructed gtdata/sketch/default.style \
+	  www/genometools.org/htdocs/images/constructed.png
+	sed -nf scripts/incl.sed \
+	  www/genometools.org/htdocs/annotationsketch_tmpl.html | \
+          sed 'N;N;s/\n//' > /tmp/tmp.sed 
+	sed -f /tmp/tmp.sed \
+	  www/genometools.org/htdocs/annotationsketch_tmpl.html > \
+	  www/genometools.org/htdocs/annotationsketch.html
 
 manuals:
 	$(MAKE) -C $(CURDIR)/doc/manuals

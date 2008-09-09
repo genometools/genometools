@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   diagram = gt_diagram_new(feature_index, seqid, &range, style);
 
   /* create canvas */
-  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 800, NULL);
+  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, NULL);
 
   /* sketch diagram on canvas */
   gt_diagram_sketch(diagram, canvas);
