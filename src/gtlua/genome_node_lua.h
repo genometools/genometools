@@ -25,13 +25,12 @@
 
    -- Returns a new genome feature refering to sequence with id <seqid> of
    -- <type> spanning <range> on <strand>.
-   function genome_feature_new(type, range, strand)
+   function genome_feature_new(seqid, type, range, strand)
 
    -- Returns a new sequence region for sequence id <seqid> spanning <range>.
    function sequence_region_new(seqid, range)
 
    -- Returns the filenname of <genome_node>.
-
    function genome_node:get_filename()
 
    -- Returns the range of <genome_node>.

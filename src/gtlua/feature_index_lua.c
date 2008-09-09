@@ -47,6 +47,21 @@ static int feature_index_lua_add_sequence_region(lua_State *L)
   return 0;
 }
 
+static int feature_index_lua_add_gff3file(lua_State *L)
+{
+  GT_FeatureIndex **fi;
+  const char *filename;
+  GT_Error *err;
+  assert(L);
+  fi = check_feature_index(L, 1);
+  filename = luaL_checkstring(L, 2);
+  err = gt_error_new();
+  if (gt_feature_index_add_gff3file(*fi, filename, err))
+    return lua_gt_error(L, err);
+  gt_error_delete(err);
+  return 0;
+}
+
 static int feature_index_lua_add_genome_feature(lua_State *L)
 {
   GT_FeatureIndex **fi;
@@ -172,6 +187,7 @@ static const struct luaL_Reg feature_index_lib_f [] = {
 static const struct luaL_Reg feature_index_lib_m [] = {
   { "add_sequence_region", feature_index_lua_add_sequence_region },
   { "add_genome_feature", feature_index_lua_add_genome_feature },
+  { "add_gff3file", feature_index_lua_add_gff3file },
   { "get_features_for_seqid", feature_index_lua_get_features_for_seqid },
   { "get_features_for_range", feature_index_lua_get_features_for_range },
   { "get_first_seqid", feature_index_lua_get_first_seqid },

@@ -26,6 +26,11 @@
    -- <feature_index> in the given <range> of the sequence region with sequence
    -- ID <seqid>.
    function diagram_new(feature_index, range, seqid)
+
+   -- Return a diagram object which contains the genome nodes given in
+   -- <array>. The range <range> determines the visible region and should
+   -- include the nodes in <array>.
+   function diagram_new_from_array(array, range)
 */
 int luaopen_diagram(lua_State*);
 

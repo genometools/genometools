@@ -84,13 +84,13 @@ In the final phase, the <em>Diagram</em> object is used as a blueprint to create
 image of a given type and size, considering user-defined options.
 
 Rendering logic is implemented in the <em>Canvas</em> class, whose methods are called while traversal of the <em>Diagram</em> structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. In contrast, rendering backend-aware subclasses of the <em>Canvas</em> are closely tied to a specific implementation of the <em>Graphics</em> interface, which provides methods to draw a number of primitives to a
-drawing surface abstraction. It wraps around the low-level graphics library and allows for easy extension or replacement of the graphics back-end. Currently, there are <em>Graphics</em> implementations for the <a href="http://cairographics.org">Cairo</a> 2D graphics library (<em>GraphicsCairo</em>) and two <em>Canvas</em> subclasses providing access to the image file formats supported by Cairo (<em>CanvasCairoFile</em>) and to arbitrary Cairo contexts (<em>CanvasCairoContext</em>, which directly accesses a <a href="http://cairographics.org/manual/cairo-cairo-t.html"><tt>cairo_t</tt></a>). It should be possible to create custom implementations to integrate other rendering engines.
+drawing surface abstraction. It wraps around the low-level graphics library and allows for easy extension or replacement of the graphics back-end. Currently, there are <em>Graphics</em> implementations for the <a href="http://cairographics.org">Cairo</a> 2D graphics library (<em>GraphicsCairo</em>) and two <em>Canvas</em> subclasses providing access to the image file formats supported by Cairo (<em>CanvasCairoFile</em>) and to arbitrary Cairo contexts (<em>CanvasCairoContext</em>, which directly accesses a <a href="http://cairographics.org/manual/cairo-cairo-t.html"><tt>cairo_t</tt></a>). This class can be used, for example, to directly draw <em>AnnotationSketch</em> output in any graphical environment which is supported by Cairo (see <a href="http://www.cairographics.org/manual/Surfaces.html"> list of supported surface types</a>).
 </p>
 
 <a name="collapsing"></a>
 <h3>Collapsing</h3>
 <p>
-By default, features are grouped by their SO type, resulting in one track per type.
+By default, features are grouped by the Sequence Ontology type associated with them, resulting in one track per type.
 To obtain a shorter yet concise output, tracks for parent types in the feature graph can be enabled to contain all the features of their child types. The features with the given type are then drawn on top of their parent features (e.g. all <em>exon</em> and <em>intron</em> features are placed into their parent <em>mRNA</em> or <em>gene</em> track). This process is called <em>collapsing</em>. Collapsing can be enabled by setting the <tt>collapse_to_parent</tt> option for the respective child type to <tt>true</tt>, e.g. the following options:
 </p>
 <pre class="code">
@@ -123,8 +123,8 @@ would lead to all features of there types collapsing into the <em>mRNA</em> trac
 <div style="clear:both;"></div>
 </div>
 <div class="figure">
-<p><a name="fig5"></a><img src="images/collapsing.png" alt="[collapsed/uncollapsed views]"></p>
-<p><b>Figure 5:</b> Example image of the <em>cnn</em> and <em>cbs</em> genes from <em>Drosophila melanogaster</em> (Ensembl release 50, positions 9326816--9341000 on chromosome arm 2L) as drawn by <em>AnnotationSketch</em>. (a) shows a collapsed view in which all <em>exon</em>, <em>intron</em> and <em>CDS</em> types are collapsed into their parent type's track. In contrast, (b) shows the <em>cbs</em> gene with all collapsing options set to <tt>false</tt>, resulting in each type being drawn in its own track.</p>
+<p><a name="fig5"></a><a style="background-color: white; border: none;" href="images/cnn_large.png"><img src="images/collapsing.png" alt="[collapsed/uncollapsed views]"></a></p>
+<p><b>Figure 5:</b>(click to enlarge) Example image of the <em>cnn</em> and <em>cbs</em> genes from <em>Drosophila melanogaster</em> (<a href="http://www.ensembl.org/Drosophila_melanogaster/contigview?region=2R&vc_start=9326816&vc_end=9341000">Ensembl release 50, positions 9326816--9341000 on chromosome arm 2R</a>) as drawn by <em>AnnotationSketch</em>. (a) shows a collapsed view in which all <em>exon</em>, <em>intron</em> and <em>CDS</em> types are collapsed into their parent type's track. In contrast, (b) shows the <em>cbs</em> gene with all collapsing options set to <tt>false</tt>, resulting in each type being drawn in its own track.</p>
 </div>
 
 <a name="styles"></a>
@@ -215,14 +215,24 @@ The following code examples (in C and Lua) illustrate how to produce an image fr
 <a name="examples-generated"></a>
 <h3>Using <em>AnnotationSketch</em> to draw user-generated annotations</h3>
 The following C code example illustrates how to produce an image from annotation graphs created by user code.
-See <tt>src/examples/sketch_constructed.c</tt> in the source distribution. The result is shown in Fig. <a href="#fig8">8</a>.
+ The result is shown in Fig. <a href="#fig8">8</a>.
 <div class="figure">
   <p><a name="fig8"></a><img src="images/constructed.png" alt="[Example rendering from user-generated annotations]"></p>
   <p><b>Figure 8: </b>Example rendering of user-generated annotations with default style.</p>
 </div>
+
+<h4>C code</h4>
+(See <tt>src/examples/sketch_constructed.c</tt> in the source distribution.)
 <pre class="code">
 <!--#include file="src/examples/sketch_constructed.c"-->
 </pre>
+
+<h4>Lua code</h4>
+(See <tt>gtscripts/sketch_constructed.lua</tt> in the source distribution.)
+<pre class="code">
+<!--#include file="gtscripts/sketch_constructed.lua"-->
+</pre>
+
 
 <a name="api"></a>
 <h2>API Reference</h2>

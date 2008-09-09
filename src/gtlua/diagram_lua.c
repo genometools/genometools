@@ -54,6 +54,69 @@ static int diagram_lua_new(lua_State *L)
   return 1;
 }
 
+static GT_Array* genome_node_table_to_array(lua_State *L)
+{
+  lua_Integer i = 1;
+  GT_Array *nodes;
+  GT_GenomeNode **gn;
+  const char *msg;
+  bool error;
+  /* make sure we got a table as first argument */
+  luaL_checktype(L, 1, LUA_TTABLE);
+  /* traverse table and save the ranges */
+  nodes = gt_array_new(sizeof (GT_GenomeNode*));
+  lua_pushinteger(L, i);
+  lua_gettable(L, 1);
+  while (!lua_isnil(L, -1)) {
+    error = false;
+    gn = lua_touserdata(L, -1);
+    if (gn && lua_getmetatable(L, -1)) {
+      lua_getfield(L, LUA_REGISTRYINDEX, GENOME_NODE_METATABLE);
+      if (lua_rawequal(L, -1, -2)) {
+        lua_pop(L, 2); /* remove both metatables */
+        gt_array_add(nodes, *gn);
+      }
+      else
+        error = true;
+    }
+    else
+      error = true;
+    if (error) {
+      /* we have a non-GenomeNode in the table */
+      msg = lua_pushfstring(L, "expected %s as type of table entry %d",
+                            GENOME_NODE_METATABLE, i);
+      gt_array_delete(nodes);
+      lua_error(L);
+    }
+    i++;
+    lua_pop(L, 1); /* pop last result */
+    lua_pushinteger(L, i);
+    lua_gettable(L, 1);
+  }
+  return nodes;
+}
+
+static int diagram_lua_new_from_array(lua_State *L)
+{
+  GT_Diagram **diagram;
+  GT_Array *nodes;
+  GT_Range *range;
+  GT_Style *style;
+  /* get array */
+  nodes = genome_node_table_to_array(L);
+  /* get range */
+  range = check_range(L, 2);
+  /* create diagram */
+  style = lua_get_style_from_registry(L);
+  diagram = lua_newuserdata(L, sizeof (GT_Diagram*));
+  assert(diagram);
+  *diagram = gt_diagram_new_from_array(nodes, range, style);
+  luaL_getmetatable(L, DIAGRAM_METATABLE);
+  lua_setmetatable(L, -2);
+  gt_array_delete(nodes);
+  return 1;
+}
+
 static int diagram_lua_sketch(lua_State *L)
 {
   GT_Diagram **diagram;
@@ -73,6 +136,7 @@ static int diagram_lua_delete(lua_State *L)
 
 static const struct luaL_Reg diagram_lib_f [] = {
   { "diagram_new", diagram_lua_new },
+  { "diagram_new_from_array", diagram_lua_new_from_array },
   { NULL, NULL }
 };
 

@@ -25,6 +25,10 @@
    -- Returns a new <feature_index> object.
    function feature_index_new()
 
+   -- Add all features from all sequence regions contained in <gff3file> to
+   -- <feature_index>.
+   function feature_index:add_gff3file(gff3file)
+
    -- Add <sequence_region> to <feature_index>.
    function feature_index:add_sequence_region(sequence_region)
 

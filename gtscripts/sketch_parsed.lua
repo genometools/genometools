@@ -1,25 +1,25 @@
 function usage()
-  io.stderr:write(string.format("Usage: %s PNG_file GFF3_file\n", arg[0]))
+  io.stderr:write(string.format("Usage: %s Style_file PNG_file GFF3_file\n", arg[0]))
   io.stderr:write("Create PNG representation of GFF3 annotation file.\n")
   os.exit(1)
 end
 
-if #arg == 2 then
-  pngfile  = arg[1]
-  gff3file = arg[2]
+if #arg == 3 then
+  stylefile = arg[1]
+  pngfile   = arg[2]
+  gff3file  = arg[3]
 else
   usage()
 end
 
-in_stream = gt.gff3_in_stream_new_sorted(gff3file)
+-- load style file
+dofile(stylefile)
+
+-- create feature index
 feature_index = gt.feature_index_new()
-feature_stream = gt.feature_stream_new(in_stream, feature_index)
-in_stream = nil; collectgarbage()
-gn = feature_stream:next_tree()
--- fill feature index
-while (gn) do
-  gn = feature_stream:next_tree()
-end
+
+-- add GFF3 file to index
+feature_index:add_gff3file(gff3file)
 
 -- create diagram for first sequence ID in feature index
 seqid = feature_index:get_first_seqid()
@@ -31,5 +31,6 @@ canvas = gt.canvas_new_png(600, nil)
 
 -- sketch diagram on canvas
 diagram:sketch(canvas)
+
 -- write canvas to file
 canvas:to_file(pngfile)

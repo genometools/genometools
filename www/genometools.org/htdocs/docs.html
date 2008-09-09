@@ -111,7 +111,7 @@ Returns an array containing the ranges from array <code>range_array</code> in so
 Returns true if the ranges in array <code>range_array</code> are sorted, false otherwise.
 </p>
 <hr>
-<code>genome_feature_new(type, range, strand)</code>
+<code>genome_feature_new(seqid, type, range, strand)</code>
 <p>
 Returns a new genome feature refering to sequence with id <code>seqid</code> of <code>type</code> spanning <code>range</code> on <code>strand</code>.
 </p>
@@ -338,11 +338,21 @@ Creates an image file with the given <code>filename</code> which contains the co
 Return a diagram object which contains the genome nodes given in <code>feature_index</code> in the given <code>range</code> of the sequence region with sequence ID <code>seqid</code>.
 </p>
 <hr>
+<code>diagram_new_from_array(array, range)</code>
+<p>
+Return a diagram object which contains the genome nodes given in <code>array</code>. The range <code>range</code> determines the visible region and should include the nodes in <code>array</code>.
+</p>
+<hr>
 <a name="FeatureIndex"></a>
 <h2>Class FeatureIndex</h2>
 <code>feature_index_new()</code>
 <p>
 Returns a new <code>feature_index</code> object.
+</p>
+<hr>
+<code>feature_index:add_gff3file(gff3file)</code>
+<p>
+Add all features from all sequence regions contained in <code>gff3file</code> to <code>feature_index</code>.
 </p>
 <hr>
 <code>feature_index:add_sequence_region(sequence_region)</code>
