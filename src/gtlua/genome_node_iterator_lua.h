@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the GT_GenomeNodeIterator class to Lua:
+/* exports the GenomeNodeIterator class to Lua:
 
    -- Returns a new genome node iterator which performs a depth-first traversel
    -- of <genome_node> (including <genome_node> itself).

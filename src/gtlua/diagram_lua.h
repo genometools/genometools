@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the GT_Diagram class to Lua:
+/* exports the Diagram class to Lua:
 
    -- Return a diagram object which contains the genome nodes given in
    -- <feature_index> in the given <range> of the sequence region with sequence

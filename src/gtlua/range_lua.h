@@ -21,7 +21,7 @@
 #include "lua.h"
 #include "core/range.h"
 
-/* exports the GT_Range class to Lua:
+/* exports the Range class to Lua:
 
    -- Returns a new range object with start <startpos> and end <endpos>.
    -- <startpos> must be smaller or equal than <endpos>.

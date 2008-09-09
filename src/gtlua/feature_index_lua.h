@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the GT_FeatureIndex class to Lua:
+/* exports the FeatureIndex class to Lua:
 
    -- Returns a new <feature_index> object.
    function feature_index_new()
@@ -47,7 +47,7 @@
 
    -- Returns the range covered by features of sequence ID <seqid> in
    -- <feature_index>.
-   function feature_index:get_gt_range_for_seqid(seqid)
+   function feature_index:get_range_for_seqid(seqid)
 */
 int luaopen_feature_index(lua_State*);
 

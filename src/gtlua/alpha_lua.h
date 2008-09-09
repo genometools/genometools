@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the GT_Alpha class to Lua:
+/* exports the Alpha class to Lua:
 
    -- Returns a new protein alphabet.
    function alpha_new_protein()

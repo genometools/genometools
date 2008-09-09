@@ -21,7 +21,7 @@
 #include "lua.h"
 #include "extended/genome_node.h"
 
-/* exports the GT_GenomeNode interface and its implementors to Lua:
+/* exports the GenomeNode interface and its implementors to Lua:
 
    -- Returns a new genome feature refering to sequence with id <seqid> of
    -- <type> spanning <range> on <strand>.

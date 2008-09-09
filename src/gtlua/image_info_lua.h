@@ -22,12 +22,12 @@
 
 /* exports the Imageinfo class to Lua:
 
-   -- returns a new GT_ImageInfo object.
+   -- returns a new ImageInfo object.
    function imageinfo_new()
 
    -- returns an array of tables with the fields "nw_x","nw_y","se_x","se_y" and
    -- "feature_ref" with the top left and bottom right coordinates in pixels or
-   -- points and a GT_GenomeNode reference per element drawn.
+   -- points and a GenomeNode reference per element drawn.
    function imageinfo:get_recmaps()
 */
 int luaopen_imageinfo(lua_State*);
