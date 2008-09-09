@@ -3,11 +3,11 @@
 #include <gdk/gdkkeysyms.h>
 #include "genometools.h"
 
-Canvas *canvas = NULL;
-Diagram *d = NULL;
-Style *sty = NULL;
-ImageInfo* ii = NULL;
-Error *err = NULL;
+GT_Canvas *canvas = NULL;
+GT_Diagram *d = NULL;
+GT_Style *sty = NULL;
+GT_ImageInfo* ii = NULL;
+GT_Error *err = NULL;
 GtkWidget *area;
 gint lastwidth;
 
@@ -17,23 +17,23 @@ static gboolean on_expose_event(GtkWidget *widget,
 {
   cairo_t *cr;
 
-  Canvas *canvas = NULL;
+  GT_Canvas *canvas = NULL;
   if (!d || widget->allocation.width <= 30) return FALSE;
   lastwidth = widget->allocation.width;
-  if (ii) image_info_delete(ii);
+  if (ii) gt_image_info_delete(ii);
 
-  ii = image_info_new();
+  ii = gt_image_info_new();
   /* render image */
   cr = gdk_cairo_create(GTK_LAYOUT(widget)->bin_window);
-  canvas = canvas_cairo_context_new(sty, cr, widget->allocation.width, ii);
-  diagram_sketch(d, canvas);
+  canvas = gt_canvas_cairo_context_new(sty, cr, widget->allocation.width, ii);
+  gt_diagram_sketch(d, canvas);
   /* resize GtkLayout widget to new image height */
   gtk_layout_set_size(GTK_LAYOUT(widget),
                       widget->allocation.width,
-                      image_info_get_height(ii));
+                      gt_image_info_get_height(ii));
 
   if (lastwidth != widget->allocation.width)
-    canvas_delete(canvas);
+    gt_canvas_delete(canvas);
   return FALSE;
 }
 
@@ -55,34 +55,26 @@ open_file(GtkWidget *widget,  gpointer user_data)
   {
     char *filename;
     const char *seqid;
-    GenomeNode *gn = NULL;
-    FeatureIndex *features = NULL;
-    Range qry_range;
-    GenomeStream *gff3_in_stream = NULL,
-                 *feature_stream = NULL;
+    GT_GenomeNode *gn = NULL;
+    GT_FeatureIndex *features = NULL;
+    GT_Range qry_range;
     int had_err = 0;
-    error_unset(err);
+    gt_error_unset(err);
     /* file given, load GFF file */
     filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-    features = feature_index_new();
-    gff3_in_stream = gff3_in_stream_new_sorted(filename, 0);
-    feature_stream = feature_stream_new(gff3_in_stream, features);
-    while (!(had_err = genome_stream_next_tree(feature_stream, &gn, err))
-            && gn)
-    {
-      genome_node_rec_delete(gn);
-    }
-    genome_stream_delete(feature_stream);
-    genome_stream_delete(gff3_in_stream);
+    features = gt_feature_index_new();
+    gt_feature_index_add_gff3file(features,
+                                  filename,
+                                  err);
 
-    if (!had_err)
+    if (!gt_error_is_set(err))
     {
       GtkWidget *w = GTK_WIDGET(area);
       GtkListStore *store;
-      seqid = feature_index_get_first_seqid(features);
-      qry_range = feature_index_get_range_for_seqid(features, seqid);
-      diagram_delete(d);
-      d = diagram_new(features, seqid, &qry_range, sty);
+      seqid = gt_feature_index_get_first_seqid(features);
+      gt_feature_index_get_range_for_seqid(features, &qry_range, seqid);
+      gt_diagram_delete(d);
+      d = gt_diagram_new(features, seqid, &qry_range, sty);
       lastwidth = 0;
       gtk_widget_queue_draw_area (w, 0, 0, w->allocation.width,
                                   w->allocation.height);
@@ -97,7 +89,7 @@ open_file(GtkWidget *widget,  gpointer user_data)
                                         GTK_MESSAGE_ERROR,
                                         GTK_BUTTONS_OK,
                                         "Error loading file '%s' : %s",
-                                        filename, error_get(err));
+                                        filename, gt_error_get(err));
       gtk_dialog_run(GTK_DIALOG(edialog));
       gtk_widget_destroy (edialog);
     }
@@ -127,9 +119,9 @@ int main(int argc, char *argv[])
 
   gtk_init(&argc, &argv);
 
-  err = error_new();
-  sty = style_new(0, err);
-  style_load_file(sty, "gtdata/sketch/default.style", err);
+  err = gt_error_new();
+  sty = gt_style_new(0, err);
+  gt_style_load_file(sty, "gtdata/sketch/default.style", err);
 
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_default_size (GTK_WINDOW (window), 700, 598);
@@ -189,8 +181,8 @@ int main(int argc, char *argv[])
   gtk_widget_show_all(window);
   gtk_main();
 
-  error_delete(err);
-  style_delete(sty);
-  diagram_delete(d);
+  gt_error_delete(err);
+  gt_style_delete(sty);
+  gt_diagram_delete(d);
   return 0;
 }
