@@ -24,21 +24,21 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   typealias "bool", "ibool"
-  extern "const GenomeNodeClass* genome_feature_class(void)"
-  extern "void* genome_node_cast(const GenomeNodeClass*, GenomeNode*)"
-  extern "GenomeFeatureType* genome_feature_get_type(GenomeFeature*)"
-  extern "int genome_feature_get_strand(GenomeFeature*)"
-  extern "int genome_feature_get_phase(GenomeFeature*)"
-  extern "float genome_feature_get_score(GenomeFeature*)"
-  extern "bool genome_feature_score_is_defined(const GenomeFeature*)"
-  extern "const char* genome_feature_type_get_cstr(const GenomeFeatureType*)"
-  extern "const char* genome_feature_get_attribute(GenomeNode*,const char*)"
-  extern "void genome_feature_foreach_attribute(GenomeFeature*, void*, void*)"
+  extern "const GT_GenomeNodeClass* gt_genome_feature_class(void)"
+  extern "void* gt_genome_node_cast(const GT_GenomeNodeClass*, GT_GenomeNode*)"
+  extern "GT_FeatureType* gt_genome_feature_get_type(GT_GenomeFeature*)"
+  extern "int gt_genome_feature_get_strand(GT_GenomeFeature*)"
+  extern "int gt_genome_feature_get_phase(GT_GenomeFeature*)"
+  extern "float gt_genome_feature_get_score(GT_GenomeFeature*)"
+  extern "bool gt_genome_feature_score_is_defined(const GT_GenomeFeature*)"
+  extern "const char* gt_feature_type_get_cstr(const GT_FeatureType*)"
+  extern "const char* gt_genome_feature_get_attribute(GT_GenomeNode*,const char*)"
+  extern "void gt_genome_feature_foreach_attribute(GT_GenomeFeature*, void*, void*)"
 
   #callback to populate attribute list
   def collect_attrib(tag, val, data)
-    GT.strarray_add_cstr(data, tag)
-    GT.strarray_add_cstr(data, val)
+    GT.gt_strarray_add_cstr(data, tag)
+    GT.gt_strarray_add_cstr(data, val)
   end
   COLLECTFUNC = callback "void collect_attrib(const char*, const char*, void*)"
 
@@ -47,7 +47,7 @@ module GT
     def initialize(gn, single=false)
       super(gn, single)
       attribs = GT::StrArray.new
-      GT.genome_feature_foreach_attribute(@genome_node, COLLECTFUNC, attribs)
+      GT.gt_genome_feature_foreach_attribute(@genome_node, COLLECTFUNC, attribs)
       attr_a = attribs.to_a
       @attribs = {}
       while not attr_a.empty? do
@@ -56,20 +56,20 @@ module GT
     end
 
     def get_type
-      GT.genome_feature_type_get_cstr(GT.genome_feature_get_type(@genome_node))
+      GT.gt_feature_type_get_cstr(GT.gt_genome_feature_get_type(@genome_node))
     end
 
     def get_strand
-      GT.genome_feature_get_strand(@genome_node)
+      GT.gt_genome_feature_get_strand(@genome_node)
     end
 
     def get_phase
-      GT.genome_feature_get_phase(@genome_node)
+      GT.gt_genome_feature_get_phase(@genome_node)
     end
 
     def get_score
-      if GT.genome_feature_score_is_defined(@genome_node) then
-        GT.genome_feature_get_score(@genome_node)
+      if GT.gt_genome_feature_score_is_defined(@genome_node) then
+        GT.gt_genome_feature_get_score(@genome_node)
       else
         nil
       end

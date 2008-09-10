@@ -21,10 +21,10 @@ require 'libgtcore/range'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "Diagram* diagram_new(FeatureIndex*, const char*, const Range*, " +
-                              "Config*)"
-  extern "int diagram_sketch(Diagram*, Canvas*)"
-  extern "void diagram_delete(Diagram*)"
+  extern "GT_Diagram* gt_diagram_new(GT_FeatureIndex*, const char*, const GT_Range*, " +
+                                 "GT_Style*)"
+  extern "int gt_diagram_sketch(GT_Diagram*, GT_Canvas*)"
+  extern "void gt_diagram_delete(GT_Diagram*)"
 
   class Diagram
     attr_reader :diagram
@@ -32,13 +32,13 @@ module GT
       if range.start > range.end
         GT.gterror("range.start > range.end")
       end
-      @diagram = GT.diagram_new(feature_index.feature_index, seqid, range,
-                                config.config)
-      @diagram.free = GT::symbol("diagram_delete", "0P")
+      @diagram = GT.gt_diagram_new(feature_index.feature_index, seqid, range,
+                                   config.config)
+      @diagram.free = GT::symbol("gt_diagram_delete", "0P")
     end
 
     def sketch(canvas)
-      return GT.diagram_sketch(@diagram, canvas.to_ptr)
+      return GT.gt_diagram_sketch(@diagram, canvas.to_ptr)
     end
   end
 end

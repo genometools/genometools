@@ -21,35 +21,35 @@ require 'gthelper'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "int genome_node_accept(GenomeNode*, GenomeVisitor*, Error*)"
-  extern "GenomeNode* genome_node_rec_ref(GenomeNode*)"
-  extern "GenomeNode* genome_node_ref(GenomeNode*)"
-  extern "unsigned long genome_node_get_start(GenomeNode*)"
-  extern "unsigned long genome_node_get_end(GenomeNode*)"
-  extern "const char* genome_node_get_filename(GenomeNode*)"
-  extern "void genome_node_rec_delete(GenomeNode*)"
-  extern "void genome_node_delete(GenomeNode*)"
+  extern "int gt_genome_node_accept(GT_GenomeNode*, GenomeVisitor*, Error*)"
+  extern "GT_GenomeNode* gt_genome_node_rec_ref(GT_GenomeNode*)"
+  extern "GT_GenomeNode* gt_genome_node_ref(GT_GenomeNode*)"
+  extern "unsigned long gt_genome_node_get_start(GT_GenomeNode*)"
+  extern "unsigned long gt_genome_node_get_end(GT_GenomeNode*)"
+  extern "const char* gt_genome_node_get_filename(GT_GenomeNode*)"
+  extern "void gt_genome_node_rec_delete(GT_GenomeNode*)"
+  extern "void gt_genome_node_delete(GT_GenomeNode*)"
 
   class GenomeNode
     attr_reader :genome_node
     def initialize(node_ptr, single=false)
       # use 'single' if not referencing root nodes
       if single then
-        @genome_node = GT.genome_node_ref(node_ptr)
-        @genome_node.free = GT::symbol("genome_node_delete", "0P")
+        @genome_node = GT.gt_genome_node_ref(node_ptr)
+        @genome_node.free = GT::symbol("gt_genome_node_delete", "0P")
       else
         @genome_node = node_ptr
-        @genome_node.free = GT::symbol("genome_node_rec_delete", "0P")
+        @genome_node.free = GT::symbol("gt_genome_node_rec_delete", "0P")
       end
     end
 
     def get_range
-      (GT::genome_node_get_start(@genome_node)..\
-        GT::genome_node_get_end(@genome_node))
+      (GT::gt_genome_node_get_start(@genome_node)..\
+        GT::gt_genome_node_get_end(@genome_node))
     end
 
     def get_filename
-      GT.genome_node_get_filename(@genome_node)
+      GT.gt_genome_node_get_filename(@genome_node)
     end
 
     def to_ptr
@@ -58,8 +58,8 @@ module GT
 
     def accept(visitor)
       err = GT::Error.new()
-      rval = GT.genome_node_accept(@genome_node, visitor.genome_visitor,
-                                   err.to_ptr)
+      rval = GT.gt_genome_node_accept(@genome_node, visitor.genome_visitor,
+                                      err.to_ptr)
       if rval != 0
         GT.gterror(err)
       end

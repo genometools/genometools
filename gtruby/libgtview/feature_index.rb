@@ -24,31 +24,31 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   typealias "bool", "ibool"
-  extern "FeatureIndex* feature_index_new()"
-  extern "void feature_index_delete(FeatureIndex*)"
-  extern "Array* feature_index_get_features_for_seqid(FeatureIndex*, const " +
+  extern "GT_FeatureIndex* gt_feature_index_new()"
+  extern "void gt_feature_index_delete(GT_FeatureIndex*)"
+  extern "GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex*, const " +
                                                      "char*)"
-  extern "const char* feature_index_get_first_seqid(const FeatureIndex*)"
-  extern "StrArray* feature_index_get_seqids(const FeatureIndex*)"
-  extern "void feature_index_get_rangeptr_for_seqid(FeatureIndex*, Range*, " +
+  extern "const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex*)"
+  extern "GT_StrArray* gt_feature_index_get_seqids(const GT_FeatureIndex*)"
+  extern "void gt_feature_index_get_range_for_seqid(GT_FeatureIndex*, GT_Range*, " +
                                                    "const char*)"
-  extern "bool feature_index_has_seqid(const FeatureIndex*, const char*)"
-  extern "void feature_index_delete(FeatureIndex*)"
+  extern "bool gt_feature_index_has_seqid(const GT_FeatureIndex*, const char*)"
+  extern "void gt_feature_index_delete(GT_FeatureIndex*)"
 
   class FeatureIndex
     attr_reader :feature_index
     def initialize
-      @feature_index = GT.feature_index_new()
-      @feature_index.free = GT::symbol("feature_index_delete", "0P")
+      @feature_index = GT.gt_feature_index_new()
+      @feature_index.free = GT::symbol("gt_feature_index_delete", "0P")
     end
 
     def get_features_for_seqid(seqid)
-      rval = GT.feature_index_get_features_for_seqid(@feature_index, seqid)
+      rval = GT.gt_feature_index_get_features_for_seqid(@feature_index, seqid)
       if rval then
         a = GT::Array.new(rval)
         result = []
         1.upto(a.size) do |i|
-          result.push(GT::GenomeNode.new(GT.genome_node_rec_ref(a.get(i-1))))
+          result.push(GT::GenomeNode.new(GT.gt_genome_node_rec_ref(a.get(i-1))))
         end
         result
       else
@@ -57,19 +57,19 @@ module GT
     end
 
     def get_first_seqid
-      GT.feature_index_get_first_seqid(@feature_index)
+      GT.gt_feature_index_get_first_seqid(@feature_index)
     end
 
     def get_seqids
-      GT::StrArray.new(GT.feature_index_get_seqids(@feature_index)).to_a
+      GT::StrArray.new(GT.gt_feature_index_get_seqids(@feature_index)).to_a
     end
 
     def get_range_for_seqid(seqid)
-      if not GT.feature_index_has_seqid(@feature_index, seqid)
+      if not GT.gt_feature_index_has_seqid(@feature_index, seqid)
         GT.gterror("feature_index does not contain seqid")
       end
       range = GT::Range.malloc
-      GT.feature_index_get_rangeptr_for_seqid(@feature_index, range, seqid)
+      GT.gt_feature_index_get_range_for_seqid(@feature_index, range, seqid)
       range
     end
   end

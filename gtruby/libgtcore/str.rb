@@ -20,37 +20,37 @@ require 'gtdlload'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "Str* str_new()"
-  extern "Str* str_new_cstr(const char*)"
-  extern "void* str_get_mem(const Str*)"
-  extern "void str_append_str(Str*, const Str*)"
+  extern "GT_Str* gt_str_new()"
+  extern "GT_Str* gt_str_new_cstr(const char*)"
+  extern "void* gt_str_get_mem(const GT_Str*)"
+  extern "void gt_str_append_str(GT_Str*, const GT_Str*)"
   # we declare the return value as const char* instead of char*, because
   # otherwise dl/import wrongly assumes that it has responsibility for the
   # returned memory region (which leads to a double free())
-  extern "const char* str_get(const Str*)"
-  extern "unsigned long str_length(const Str*)"
-  extern "void str_delete(Str*)"
+  extern "const char* gt_str_get(const GT_Str*)"
+  extern "unsigned long gt_str_length(const GT_Str*)"
+  extern "void gt_str_delete(GT_Str*)"
 
   class Str
     def initialize(cstr)
       if cstr
-        @str = GT.str_new_cstr(cstr)
+        @str = GT.gt_str_new_cstr(cstr)
       else
-        @str = GT.str_new()
+        @str = GT.gt_str_new()
       end
-      @str.free = GT::symbol("str_delete", "0P")
+      @str.free = GT::symbol("gt_str_delete", "0P")
     end
 
     def append_str(str)
-      GT.str_append_str(@str, str)
+      GT.gt_str_append_str(@str, str)
     end
 
     def to_s
-      GT.str_get(@str)
+      GT.gt_str_get(@str)
     end
 
     def get_mem
-      GT.str_get_mem(@str)
+      GT.gt_str_get_mem(@str)
     end
 
     def to_ptr
@@ -58,7 +58,7 @@ module GT
     end
 
     def length
-      GT.str_length(@str)
+      GT.gt_str_length(@str)
     end
   end
 end

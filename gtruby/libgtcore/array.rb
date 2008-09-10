@@ -20,22 +20,22 @@ require 'gtdlload'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "unsigned long array_size(const Array*)"
-  extern "void* array_get(const Array*, unsigned long)"
-  extern "void array_delete(Array*)"
+  extern "unsigned long gt_array_size(const GT_Array*)"
+  extern "void* gt_array_get(const GT_Array*, unsigned long)"
+  extern "void gt_array_delete(GT_Array*)"
 
   class Array
     def initialize(array_ptr)
       @array = array_ptr
-      @array.free = GT::symbol("array_delete", "0P")
+      @array.free = GT::symbol("gt_array_delete", "0P")
     end
 
     def get(idx)
-      GT.array_get(@array, idx).ptr
+      GT.gt_array_get(@array, idx).ptr
     end
 
     def size
-      GT.array_size(@array)
+      GT.gt_array_size(@array)
     end
   end
 end
