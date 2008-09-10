@@ -23,13 +23,13 @@
 /* A table of C-strings. */
 typedef struct GT_CstrTable GT_CstrTable;
 
-GT_CstrTable*  gt_cstr_table_new();
-void        gt_cstr_table_delete(GT_CstrTable*);
+GT_CstrTable* gt_cstr_table_new();
+void          gt_cstr_table_delete(GT_CstrTable*);
 /* Add <cstr> to <table>. */
-void        gt_cstr_table_add(GT_CstrTable *table, const char *cstr);
+void          gt_cstr_table_add(GT_CstrTable *table, const char *cstr);
 /* If a C-string equal to <cstr> is contained in <table>, it is returned.
    Otherwise NULL is returned. */
-const char* gt_cstr_table_get(const GT_CstrTable *table, const char *cstr);
-int         gt_cstr_table_unit_test(GT_Error*);
+const char*   gt_cstr_table_get(const GT_CstrTable *table, const char *cstr);
+int           gt_cstr_table_unit_test(GT_Error*);
 
 #endif
