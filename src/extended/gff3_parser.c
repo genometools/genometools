@@ -1113,16 +1113,24 @@ static int parse_regular_gff3_line(GFF3Parser *parser, GT_Queue *genome_nodes,
   return had_err;
 }
 
-static int gt_parse_first_gff3_line(const char *line, const char *filename,
-                                 GT_Error *err)
+static int parse_first_gff3_line(const char *line, const char *filename,
+                                 bool tidy, GT_Error *err)
 {
   int version, had_err = 0;
   gt_error_check(err);
   assert(line && filename);
   if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
-    gt_error_set(err, "line 1 in file \"%s\" does not begin with \"%s\"",
-                 filename, GFF_VERSION_PREFIX);
-    had_err = -1;
+    if (tidy) {
+      warning("line 1 in file \"%s\" does not begin with \"%s\", create \"%s "
+              "%d\" line automaticallly", filename, GFF_VERSION_PREFIX,
+              GFF_VERSION_PREFIX, GFF_VERSION);
+      return 0;
+    }
+    else {
+      gt_error_set(err, "line 1 in file \"%s\" does not begin with \"%s\"",
+                   filename, GFF_VERSION_PREFIX);
+      had_err = -1;
+    }
   }
   if (!had_err) {
     line += strlen(GFF_VERSION_PREFIX);
@@ -1136,6 +1144,8 @@ static int gt_parse_first_gff3_line(const char *line, const char *filename,
               version, GFF_VERSION);
     had_err = -1;
   }
+  if (!had_err)
+    return 1;
   return had_err;
 }
 
@@ -1353,10 +1363,16 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *parser,
     (*line_number)++;
 
     if (*line_number == 1) {
-      if ((had_err = gt_parse_first_gff3_line(line, filename, err)))
+      had_err = parse_first_gff3_line(line, filename, parser->tidy, err);
+      if (had_err == -1) /* error */
         break;
+      if (had_err == 1) { /* line processed */
+        gt_str_reset(line_buffer);
+        continue;
+      }
+      assert(had_err == 0); /* line not processed */
     }
-    else if (line_length == 0) {
+    if (line_length == 0) {
       warning("skipping blank line %llu in file \"%s\"", *line_number,
               filename);
     }

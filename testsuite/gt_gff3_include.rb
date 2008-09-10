@@ -678,6 +678,20 @@ Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}undefined_parent.gff3"
 end
 
+Name "gt gff3 missing gff3 header"
+Keywords "gt_gff3 missing_gff3_header"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}missing_gff3_header.gff3", :retval => 1)
+  grep $last_stderr, "does not begin with"
+end
+
+Name "gt gff3 missing gff3 header (-tidy)"
+Keywords "gt_gff3 missing_gff3_header"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}missing_gff3_header.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
