@@ -24,7 +24,7 @@
 typedef int (*GT_ArrayProcessor)(void *elem, void *info, GT_Error*);
 
 GT_Array*     gt_array_ref(GT_Array*);
-/* GT_Compare the content of <array_a> with the content of <array_b>.
+/* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
 int           gt_array_cmp(const GT_Array  *array_a, const GT_Array *array_b);
