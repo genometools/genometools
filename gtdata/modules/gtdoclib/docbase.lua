@@ -39,10 +39,11 @@ function DocBase:add_class(classname, be_verbose)
   self.classes[classname] = self.classes[classname] or {}
 end
 
-function DocBase:add_method(funcname, funcargs, comment, be_verbose)
+function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
   assert(funcname and funcargs and comment)
   local desc = {}
   -- remove ``GenomeTools_'' prefix which is used to extend exported C classes
+  desc.rval = funcret
   desc.name = string.gsub(funcname, "^GenomeTools_", "")
   desc.args = funcargs
   desc.comment = comment
@@ -50,10 +51,11 @@ function DocBase:add_method(funcname, funcargs, comment, be_verbose)
     print("method added: " .. desc.name)
   end
   local classname
+  --[[ XXX remove this stuff?
   -- check if function is a constructor
   classname = string.match(desc.name, "^(%a[%a%d_]*)_new[%a%d_]*")
   if not classname then
-    -- check if function name starts with an upper-case letter and is a method
+    -- check if function name starts with a letter and is a method
     classname = string.match(desc.name, "^(%a[%a%d_]*):")
   end
   -- transform classname, if necessary
@@ -63,6 +65,18 @@ function DocBase:add_method(funcname, funcargs, comment, be_verbose)
     classname = string.gsub(classname, "^%a", string.upper)
     classname = string.gsub(classname, "_%a", string.upper)
     classname = string.gsub(classname, "_", "")
+  end
+  ]]
+  funcname = "^" .. string.gsub(funcname, "_", "")
+  for class_to_search in pairs(self.classes) do
+    local class_to_match = string.lower(string.gsub(class_to_search, "_", ""))
+    if be_verbose then
+      print("match class: " .. class_to_match .. funcname)
+    end
+    if string.match(funcname, class_to_match) then
+      classname = class_to_search
+      break
+    end
   end
   if be_verbose and classname then
     print("classname found: " .. classname)
@@ -75,9 +89,15 @@ function DocBase:add_method(funcname, funcargs, comment, be_verbose)
   end
 end
 
-local function method_keyword(ast)
+local function method_keyword(ast, be_verbose)
   for i, keyword in ipairs(ast) do
+    if be_verbose then
+      print("Try: " .. keyword)
+    end
     if keyword == "function" then
+      if be_verbose then
+        print("Return: " .. i)
+      end
       return i
     end
   end
@@ -99,20 +119,25 @@ function DocBase:process_ast(ast, be_verbose)
         self["add_" .. ast[1]](self, ast[2], be_verbose)
         break
       elseif keyword == "comment" then
-        local funcpos = method_keyword(ast)
+        local funcpos = method_keyword(ast, be_verbose)
         local complete_comment = ""
         if funcpos > 0 then
           assert(funcpos > 2)
-          assert(#ast == funcpos + 2)
+          assert(#ast == funcpos + 3)
+          if be_verbose then
+            print("function found!")
+          end
           if ast[2] == "undefined" then
             w.warning("undefined comment")
           else
             complete_comment = table.concat(ast, "", 2, funcpos-1)
             complete_comment = string.strip(complete_comment)
           end
-            self:add_method(ast[funcpos+1], ast[funcpos+2], complete_comment,
-                            be_verbose)
+            self:add_method(ast[funcpos+1], ast[funcpos+2], ast[funcpos+3],
+                            complete_comment, be_verbose)
           break
+        elseif be_verbose then
+          print("no function found!")
         end
       end
     end

@@ -18,19 +18,24 @@
 require 'gtdoclib'
 
 function usage()
-  io.stderr:write(string.format("Usage: [-html | -v] %s gt_home\n", arg[0]))
+  io.stderr:write(string.format("Usage: [-html] [-lua] [-v] %s gt_home\n",
+                  arg[0]))
   io.stderr:write("Generate documentation for the GenomeTools home directory " ..
                   "gt_home.\n")
   os.exit(1)
 end
 
 local be_verbose    = false
+local in_mode       = "C"
 local out_mode      = "txt"
 
 if #arg >= 1 then
   while #arg >= 1 and string.match(arg[1], "^-") do
     if string.match(arg[1], "^-h") then
       out_mode = "html"
+      table.remove(arg, 1)
+    elseif string.match(arg[1], "^-l") then
+      in_mode = "Lua"
       table.remove(arg, 1)
     elseif string.match(arg[1], "^-v") then
       be_verbose = true
@@ -48,45 +53,64 @@ end
 
 local template_path = gt_home .. "/gtdata/modules/gtdoclib/"
 
-local export = { "src/gtlua",
-                 "gtdata/modules/gtlua.lua",
-                 "gtdata/modules/gtlua" }
+local export_C   = { "src/core/array_api.h" }
+
+local export_Lua = { "src/gtlua",
+                     "gtdata/modules/gtlua.lua",
+                     "gtdata/modules/gtlua" }
 
 local doc_parser      = DocParser:new()
 local doc_base        = DocBase:new()
 
-local function show_rec_array(array)
+local function show_rec_array(array, depth)
   assert(array)
   for _, v in ipairs(array) do
     if type(v) == "table" then
-      show_rec_array(v)
+      print("<edge>")
+      show_rec_array(v, depth + 2)
     else
-      print(v)
+      local indent = string.rep(".", depth)
+      print(string.format("%s%s", indent, v))
     end
   end
 end
 
-local function process_file(filename, be_verbose)
+local function process_file(filename, be_verbose, is_lua)
   assert(filename)
-  if is_header(filename) or is_lua_file(filename) then
-    local ast = doc_parser:parse(filename, be_verbose)
+  if (is_lua and (is_header(filename) or is_lua_file(filename))) or
+     (not is_lua and is_api_header(filename)) then
+    local ast = doc_parser:parse(filename, be_verbose, is_lua)
     if be_verbose then
       print("showing ast:")
-      show_rec_array(ast)
+      show_rec_array(ast, 0)
     end
     doc_base:process_ast(ast, be_verbose)
   end
 end
+
+local export = nil
+local is_lua = nil
+
+if in_mode == "C" then
+  export = export_C
+  is_lua = false
+else
+  assert(in_mode == "Lua")
+  export = export_Lua
+  is_lua = true
+end
+
+assert(export)
 
 for _, v in ipairs(export) do
   local filename = gt_home .. "/" .. v
   if is_dir(filename) then
     for f in lfs.dir(filename) do
       local filename = filename .. "/" .. f
-      process_file(filename, be_verbose)
+      process_file(filename, be_verbose, is_lua)
     end
   else
-    process_file(filename, be_verbose)
+    process_file(filename, be_verbose, is_lua)
   end
 end
 
@@ -96,7 +120,13 @@ if out_mode == "txt" then
   doc_base:accept(doc_visitor)
 else
   assert(out_mode == "html")
-  doc_visitor = DocVisitorHTML:new(template_path)
+  local header
+  if in_mode == "C" then
+    header = "libgenometools_header.lp"
+  else
+    header = "gtscript_header.lp"
+  end
+  doc_visitor = DocVisitorHTML:new(template_path, header)
   doc_visitor:show_header()
   doc_base:accept(doc_visitor)
   doc_visitor:show_footer()

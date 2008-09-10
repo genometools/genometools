@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>gtscript documentation</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a id="current" href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+<div id="main">
+<h1><i>GenomeTools</i> C API</h1>
+<p>
+This document describes the <i>GenomeTools</i> C API (<tt>libgenometools</tt>).
+</p>
+<h2>Classes</h2>
+<ul>
+
+  <li><a href="#GT_Array">GT_Array</a>
+
+</ul>
+<a name="GT_Array"></a>
+<h2>Class GT_Array</h2>
+<code>GT_Array* gt_array_new(size_t size_of_elem)</code>
+<p>
+Return a new <code>GT_Array</code> whose elements have the size <code>size_of_elem</code>.
+</p>
+<hr>
+<code>GT_Array* gt_array_clone(const GT_Array *array)</code>
+<p>
+Return a clone of <code>array</code>.
+</p>
+<hr>
+<code>void* gt_array_get(const GT_Array *array, unsigned long index)</code>
+<p>
+Return pointer to element number <code>index</code> of <code>array</code>.
+</p>
+<hr>
+<code>void* gt_array_get_first(const GT_Array *array)</code>
+<p>
+Return pointer to first element of <code>array</code>.
+</p>
+<hr>
+<code>void* gt_array_get_last(const GT_Array *array)</code>
+<p>
+Return pointer to last element of <code>array</code>.
+</p>
+<hr>
+<code>void* gt_array_pop(GT_Array *array)</code>
+<p>
+Return pointer to last element of <code>array</code> and remove it from <code>array</code>.
+</p>
+<hr>
+<code>void* gt_array_get_space(const GT_Array *array)</code>
+<p>
+Return pointer to the internal space of <code>array</code> where the elements are stored
+</p>
+<hr>
+<code>void gt_array_rem(GT_Array *array, unsigned long index)</code>
+<p>
+Remove element with number <code>index</code> from <code>array</code> in O(<code>gt_array_size()</code>) time.
+</p>
+<hr>
+<code>int gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b)</code>
+<p>
+Compare the content of <code>array_a</code> with the content of <code>array_b</code>.
+   <code>array_a</code> and <code>array_b</code> must have the same <code>gt_array_size()</code> and
+   <code>gt_array_elem_size()</code>.
+</p>
+<hr>
+<code>void gt_array_delete(GT_Array *array)</code>
+<p>
+Delete <code>array</code>.
+</p>
+<hr>
+<div id="footer">
+Copyright &copy; 2008
+<a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
+Last update: 2008-09-10
+</div>
+</div>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-301256-4";
+urchinTracker();
+</script>
+</body>
+</html>

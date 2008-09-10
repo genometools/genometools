@@ -23,12 +23,13 @@ DocVisitorHTML = {}
 
 local template_dir
 
-function DocVisitorHTML:new(template_path)
-  assert(template_path)
+function DocVisitorHTML:new(template_path, header)
+  assert(template_path and header)
   template_dir = template_path
   o = {}
   setmetatable(o, self)
   self.__index = self
+  o.header = header
   return o
 end
 
@@ -49,7 +50,7 @@ local function codify(str)
 end
 
 function DocVisitorHTML:show_header()
-  include("header.lp")
+  include(self.header)
 end
 
 function DocVisitorHTML:visit_classes(classes)
@@ -74,7 +75,13 @@ end
 
 function DocVisitorHTML:visit_method(desc)
   assert(desc)
-  include("method.lp", { name = desc.name, args = desc.args,
+  local name
+  if desc.rval then
+    name = desc.rval .. " " .. desc.name
+  else
+    name = desc.rval
+  end
+  include("method.lp", { name = name, args = desc.args,
                          comment = codify(desc.comment) })
 end
 

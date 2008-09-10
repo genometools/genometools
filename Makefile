@@ -533,6 +533,8 @@ release:
 
 docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
+        > www/genometools.org/htdocs/libgenometools.html
+	bin/gt gtscripts/gtdoc.lua -lua -html $(CURDIR) \
         > www/genometools.org/htdocs/docs.html
 	bin/examples/sketch_parsed gtdata/sketch/default.style \
           www/genometools.org/htdocs/images/parsed.png \

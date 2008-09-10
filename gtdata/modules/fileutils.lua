@@ -54,7 +54,7 @@ end
 
 local function is_regular_file_with_ending(filename, ending)
   assert(filename and ending)
-  local pattern = "%." .. ending .. "$"
+  local pattern = "%" .. ending .. "$"
   if string.find(filename, pattern) and is_regular_file(filename) then
     return true
   else
@@ -65,11 +65,17 @@ end
 -- returns true if file with <filename> is a header file, false otherwise
 function is_header(filename)
   assert(filename)
-  return is_regular_file_with_ending(filename, "h")
+  return is_regular_file_with_ending(filename, ".h")
+end
+
+-- returns true if file with <filename> is an API header file, false otherwise
+function is_api_header(filename)
+  assert(filename)
+  return is_regular_file_with_ending(filename, "_api.h")
 end
 
 -- returns true if file with <filename> is a Lua file, false otherwise
 function is_lua_file(filename)
   assert(filename)
-  return is_regular_file_with_ending(filename, "lua")
+  return is_regular_file_with_ending(filename, ".lua")
 end

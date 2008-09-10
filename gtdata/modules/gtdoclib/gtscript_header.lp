@@ -12,6 +12,7 @@
 <li><a href="pub/">Download</a></li>
 <li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
 <li><a href="design.html">Design</a></li>
+<li><a href="libgenometools.html">C API</a></li>
 <li><a id="current" href="docs.html"><tt>gtscript</tt> docs</a></li>
 <li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="license.html">License</a></li>

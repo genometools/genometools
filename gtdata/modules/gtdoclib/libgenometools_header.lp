@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>The AnnotationSketch module</title>
+<title>gtscript documentation</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
@@ -12,27 +12,14 @@
 <li><a href="pub/">Download</a></li>
 <li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
 <li><a href="design.html">Design</a></li>
+<li><a id="current" href="libgenometools.html">C API</a></li>
 <li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
 <li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="license.html">License</a></li>
 </ul>
 </div>
-
-
 <div id="main">
-<h1><em>GenomeTools</em> API reference</h1>
-
-<p>Coming soon.</p>
-
-<div id="footer">
-Copyright &copy; 2007-2008 Sascha Steinbiss. Last update: 2008-09-09
-</div>
-</div>
-<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
-</script>
-<script type="text/javascript">
-_uacct = "UA-301256-4";
-urchinTracker();
-</script>
-</body>
-</html>
+<h1><i>GenomeTools</i> C API</h1>
+<p>
+This document describes the <i>GenomeTools</i> C API (<tt>libgenometools</tt>).
+</p>
