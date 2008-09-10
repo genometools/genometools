@@ -22,6 +22,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/splitter.h"
+#include "core/symbol.h"
 #include "core/versionfunc.h"
 #include "core/warning.h"
 #include "core/xansi.h"
@@ -108,6 +109,7 @@ int gt_allocators_clean(void)
   fa_fptr_rval = gt_fa_check_fptr_leak();
   fa_mmap_rval = gt_fa_check_mmap_leak();
   gt_fa_clean();
+  gt_symbol_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
   return fa_fptr_rval || fa_mmap_rval || gt_rval;
