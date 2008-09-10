@@ -27,8 +27,8 @@ module GT
   extern "GT_ImageInfo* gt_image_info_new()"
   extern "unsigned int gt_image_info_get_height(GT_ImageInfo*)"
   extern "unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo*)"
-  extern "void gt_image_info_fill_recmap(GT_ImageInfo*, GT_RecMap*, " +
-                                        "unsigned long)"
+  extern "const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo*, " +
+                                                   "unsigned long)"
   extern "void gt_image_info_delete(GT_ImageInfo*)"
 
   class ImageInfo
@@ -50,10 +50,12 @@ module GT
       if @hotspots.nil? then
         @hotspots = []
         0.upto(self.num_of_recmaps()-1) do |i|
-          rm = GT::RecMap.malloc
-          GT.gt_image_info_fill_recmap(@image_info, rm, i)
-          gf = GT::GenomeFeature.new(rm.gn, true)  #refcount only this GF!
-          @hotspots.push([rm.nw_x.to_i, rm.nw_y.to_i, rm.se_x.to_i, rm.se_y.to_i, gf])
+          rm = GT::RecMap.new(GT.gt_image_info_get_recmap(@image_info, i))
+          @hotspots.push([rm.get_northwest_x.to_i, \
+                          rm.get_northwest_y.to_i, \
+                          rm.get_southeast_x.to_i, \
+                          rm.get_southeast_y.to_i, \
+                          rm.get_genome_feature])
         end
         @hotspots.sort!{|hs1,hs2| hs1[2]-hs1[0]+1 <=> hs2[2]-hs2[0]+1}
       end
