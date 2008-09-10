@@ -26,8 +26,11 @@ module GT
   typealias "bool", "ibool"
   extern "GT_FeatureIndex* gt_feature_index_new()"
   extern "void gt_feature_index_delete(GT_FeatureIndex*)"
-  extern "GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex*, const " +
-                                                     "char*)"
+  extern "int gt_feature_index_add_gff3file(GT_FeatureIndex*, " +
+                                           "const char*, " +
+                                           "GT_Error*)"
+  extern "GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex*, " +
+                                                           "const char*)"
   extern "const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex*)"
   extern "GT_StrArray* gt_feature_index_get_seqids(const GT_FeatureIndex*)"
   extern "void gt_feature_index_get_range_for_seqid(GT_FeatureIndex*, GT_Range*, " +
@@ -54,6 +57,13 @@ module GT
       else
         nil
       end
+    end
+
+    def add_gff3file(filename)
+      err = GT::Error.new()
+      rval = GT.gt_feature_index_add_gff3file(@feature_index, filename, \
+                                              err.to_ptr)
+      if rval != 0 then GT.gterror(err) end
     end
 
     def get_first_seqid
