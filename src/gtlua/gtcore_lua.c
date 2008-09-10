@@ -23,7 +23,7 @@
 #include "gtlua/score_matrix_lua.h"
 #include "gtlua/translate_lua.h"
 
-int luaopen_gtcore(lua_State *L)
+int gt_lua_open_core(lua_State *L)
 {
   assert(L);
   luaopen_alpha(L);

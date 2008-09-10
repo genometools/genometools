@@ -27,9 +27,8 @@
 /* key used to store the GT_TypeFactory object in the Lua registry */
 #define FEATURE_TYPE_FACTORY_KEY gt_type_factory_create_gft
 
-void lua_put_feature_type_factory_in_registry(lua_State *L,
-                                              GT_TypeFactory
-                                              *feature_type_factory)
+void gt_lua_put_type_factory_in_registry(lua_State *L,
+                                         GT_TypeFactory *feature_type_factory)
 {
   assert(L && feature_type_factory);
   lua_pushlightuserdata(L, FEATURE_TYPE_FACTORY_KEY); /* push the key */
@@ -37,7 +36,7 @@ void lua_put_feature_type_factory_in_registry(lua_State *L,
   lua_rawset(L, LUA_REGISTRYINDEX); /* store feature type factory in registry */
 }
 
-GT_TypeFactory* lua_get_feature_type_factory_from_registry(lua_State *L)
+GT_TypeFactory* gt_lua_get_type_factory_from_registry(lua_State *L)
 {
   GT_TypeFactory *feature_type_factory;
   assert(L);
@@ -49,13 +48,13 @@ GT_TypeFactory* lua_get_feature_type_factory_from_registry(lua_State *L)
   return feature_type_factory;
 }
 
-int luaopen_gt(lua_State *L)
+int gt_lua_openlib(lua_State *L)
 {
   assert(L);
-  luaopen_gtcore(L); /* open core library */
-  luaopen_gtext(L);  /* open extended library */
+  gt_lua_open_core(L); /* open core */
+  gt_lua_open_extended(L); /* open extended */
 #ifndef WITHOUT_CAIRO
-  luaopen_annotationsketch(L); /* open annotationsketch library */
+  gt_lua_open_annotationsketch(L); /* open annotationsketch */
 #endif
   return 1;
 }

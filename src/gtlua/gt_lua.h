@@ -21,10 +21,10 @@
 #include "lua.h"
 #include "extended/type_factory.h"
 
-void                lua_put_feature_type_factory_in_registry(lua_State*,
-                                                           GT_TypeFactory*);
-GT_TypeFactory* lua_get_feature_type_factory_from_registry(lua_State*);
-int                 luaopen_gt(lua_State*); /* open all GenomeTools libraries in
-                                               Lua state */
+void                gt_lua_put_type_factory_in_registry(lua_State*,
+                                                        GT_TypeFactory*);
+GT_TypeFactory*     gt_lua_get_type_factory_from_registry(lua_State*);
+/* Open GenomeTools library in Lua state <L>. */
+int                 gt_lua_openlib(lua_State *L);
 
 #endif

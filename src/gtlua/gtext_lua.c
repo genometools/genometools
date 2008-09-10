@@ -26,7 +26,7 @@
 #include "gtlua/region_mapping_lua.h"
 #include "gtlua/stream_evaluator_lua.h"
 
-int luaopen_gtext(lua_State *L)
+int gt_lua_open_extended(lua_State *L)
 {
   assert(L);
   luaopen_cds_stream(L);

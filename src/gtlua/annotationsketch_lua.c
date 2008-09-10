@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,7 +24,7 @@
 #include "gtlua/image_info_lua.h"
 #include "gtlua/annotationsketch_lua.h"
 
-int luaopen_annotationsketch(lua_State *L)
+int gt_lua_open_annotationsketch(lua_State *L)
 {
   assert(L);
   luaopen_canvas(L);

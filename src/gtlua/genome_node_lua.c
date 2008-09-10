@@ -28,7 +28,7 @@
 
 static int genome_feature_lua_new(lua_State *L)
 {
-  GT_TypeFactory *feature_type_factory;
+  GT_TypeFactory *type_factory;
   GT_GenomeNode **gf;
   GT_FeatureType *type;
   GT_Range *range;
@@ -40,9 +40,9 @@ static int genome_feature_lua_new(lua_State *L)
   /* get/check parameters */
   seqid = luaL_checkstring(L, 1);
   type_str = luaL_checkstring(L, 2);
-  feature_type_factory = lua_get_feature_type_factory_from_registry(L);
-  assert(feature_type_factory);
-  type = gt_type_factory_create_gft(feature_type_factory, type_str);
+  type_factory = gt_lua_get_type_factory_from_registry(L);
+  assert(type_factory);
+  type = gt_type_factory_create_gft(type_factory, type_str);
   luaL_argcheck(L, type, 2, "invalid feature type");
   range = check_range(L, 3);
   strand_str = luaL_checklstring(L, 4, &length);
@@ -270,7 +270,7 @@ static int genome_feature_lua_get_type(lua_State *L)
 
 static int genome_feature_lua_extract_sequence(lua_State *L)
 {
-  GT_TypeFactory *feature_type_factory;
+  GT_TypeFactory *type_factory;
   GT_GenomeNode **gn;
   GT_GenomeFeature *gf;
   const char *typestr;
@@ -284,9 +284,9 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   typestr = lua_tostring(L, 2);
-  feature_type_factory = lua_get_feature_type_factory_from_registry(L);
-  assert(feature_type_factory);
-  type = gt_type_factory_create_gft(feature_type_factory, typestr);
+  type_factory = gt_lua_get_type_factory_from_registry(L);
+  assert(type_factory);
+  type = gt_type_factory_create_gft(type_factory, typestr);
   luaL_argcheck(L, type, 2, "not a valid type");
   join = lua_toboolean(L, 3);
   region_mapping = check_region_mapping(L, 4);
