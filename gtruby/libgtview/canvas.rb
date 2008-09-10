@@ -31,7 +31,11 @@ module GT
 
   class Canvas
     def initialize(style, width, ii)
-      @canvas = GT.gt_canvas_cairo_file_new(style.config, 1, width, ii.to_ptr)
+      if ii.nil? then
+        @canvas = GT.gt_canvas_cairo_file_new(style.config, 1, width, GT::NULL)
+      else
+        @canvas = GT.gt_canvas_cairo_file_new(style.config, 1, width, ii.to_ptr)
+      end
       @canvas.free = GT::symbol("gt_canvas_delete", "0P")
     end
 
