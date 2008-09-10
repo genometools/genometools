@@ -23,7 +23,8 @@
 
 typedef struct GT_Array GT_Array;
 
-GT_Array*     gt_array_new(size_t);
+/* Return a new <GT_Array> whose elements have the size <size_of_elem>. */
+GT_Array*     gt_array_new(size_t size_of_elem);
 GT_Array*     gt_array_clone(const GT_Array*);
 void*         gt_array_get(const GT_Array*, unsigned long);
 void*         gt_array_get_first(const GT_Array*);
