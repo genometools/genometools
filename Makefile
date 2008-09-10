@@ -387,7 +387,7 @@ bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
-obj/gt_config.h:
+obj/gt_config.h: VERSION
 	@echo '[create $@]'
 	@test -d $(@D) || mkdir -p $(@D)
 	@(echo '#define GT_BUILT $(BUILDSTAMP)' ;\
