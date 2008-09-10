@@ -162,7 +162,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                           void *tool_arguments, GT_Error *err)
 {
-  GT_TypeFactory *ftf = NULL;
+  GT_TypeFactory *type_factory = NULL;
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,
                *mergefeat_stream = NULL,
@@ -186,16 +186,16 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* set different type checker if necessary */
   if (arguments->typecheck_built_in) {
-      ftf = gt_type_factory_builtin_new();
-      gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
+      type_factory = gt_type_factory_builtin_new();
+      gff3_in_stream_set_type_factory(gff3_in_stream, type_factory);
   }
   if (gt_str_length(arguments->typecheck)) {
-    if (!(ftf = gt_type_factory_obo_new(gt_str_get(arguments->typecheck),
-                                             err))) {
-        had_err = -1;
-    }
+    type_factory = gt_type_factory_obo_new(gt_str_get(arguments->typecheck),
+                                           err);
+    if (!type_factory)
+      had_err = -1;
     if (!had_err)
-      gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
+      gff3_in_stream_set_type_factory(gff3_in_stream, type_factory);
   }
 
   /* set offset (if necessary) */
@@ -252,7 +252,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   genome_stream_delete(mergefeat_stream);
   genome_stream_delete(add_introns_stream);
   genome_stream_delete(gff3_in_stream);
-  gt_type_factory_delete(ftf);
+  gt_type_factory_delete(type_factory);
 
   return had_err;
 }

@@ -40,8 +40,8 @@ struct GFF3InStream
   GT_GenFile *fpin;
   unsigned long long line_number;
   GT_Queue *genome_node_buffer;
-  GT_TypeFactory *feature_type_factory;
-  GFF3Parser *gff3_parser;
+  GT_TypeFactory *type_factory;
+  GT_GFF3Parser *gff3_parser;
 };
 
 #define gff3_in_stream_cast(GS)\
@@ -136,16 +136,17 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
                   ? gt_strarray_get_str(is->files, is->next_file-1)
                   : is->stdinstr;
     /* read two nodes */
-    had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
-                                            is->genome_node_buffer, filenamestr,
-                                            &is->line_number, is->fpin, err);
+    had_err = gt_gff3_parser_parse_genome_nodes(is->gff3_parser, &status_code,
+                                                is->genome_node_buffer,
+                                                filenamestr, &is->line_number,
+                                                is->fpin, err);
     if (had_err)
       break;
     if (status_code != EOF) {
-      had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
-                                              is->genome_node_buffer,
-                                              filenamestr, &is->line_number,
-                                              is->fpin, err);
+      had_err = gt_gff3_parser_parse_genome_nodes(is->gff3_parser, &status_code,
+                                                  is->genome_node_buffer,
+                                                  filenamestr, &is->line_number,
+                                                  is->fpin, err);
       if (had_err)
         break;
     }
@@ -156,7 +157,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
       gt_genfile_close(is->fpin);
       is->fpin = NULL;
       is->file_is_open = false;
-      gff3parser_reset(is->gff3_parser);
+      gt_gff3_parser_reset(is->gff3_parser);
       if (!gt_strarray_size(is->files))
         break;
       continue;
@@ -191,9 +192,9 @@ static void gff3_in_stream_free(GenomeStream *gs)
   while (gt_queue_size(gff3_in_stream->genome_node_buffer))
     gt_genome_node_rec_delete(gt_queue_get(gff3_in_stream->genome_node_buffer));
   gt_queue_delete(gff3_in_stream->genome_node_buffer);
-  gff3parser_delete(gff3_in_stream->gff3_parser);
+  gt_gff3_parser_delete(gff3_in_stream->gff3_parser);
   if (gff3_in_stream->own_factory)
-    gt_type_factory_delete(gff3_in_stream->feature_type_factory);
+    gt_type_factory_delete(gff3_in_stream->type_factory);
   gt_genfile_close(gff3_in_stream->fpin);
 }
 
@@ -212,53 +213,52 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
 {
   GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
                                           ensure_sorting);
-  GFF3InStream *gff3_in_stream           = gff3_in_stream_cast(gs);
-  gff3_in_stream->next_file              = 0;
-  gff3_in_stream->files                  = files;
-  gff3_in_stream->stdinstr               = gt_str_new_cstr("stdin");
-  gff3_in_stream->ensure_sorting         = ensure_sorting;
-  gff3_in_stream->stdin_argument         = false;
-  gff3_in_stream->file_is_open           = false;
-  gff3_in_stream->fpin                   = NULL;
-  gff3_in_stream->line_number            = 0;
-  gff3_in_stream->genome_node_buffer     = gt_queue_new();
-  gff3_in_stream->feature_type_factory   = gt_type_factory_any_new();
-  gff3_in_stream->own_factory            = true;
-  gff3_in_stream->checkids               = checkids;
-  gff3_in_stream->gff3_parser            = gff3parser_new(checkids,
+  GFF3InStream *gff3_in_stream       = gff3_in_stream_cast(gs);
+  gff3_in_stream->next_file          = 0;
+  gff3_in_stream->files              = files;
+  gff3_in_stream->stdinstr           = gt_str_new_cstr("stdin");
+  gff3_in_stream->ensure_sorting     = ensure_sorting;
+  gff3_in_stream->stdin_argument     = false;
+  gff3_in_stream->file_is_open       = false;
+  gff3_in_stream->fpin               = NULL;
+  gff3_in_stream->line_number        = 0;
+  gff3_in_stream->genome_node_buffer = gt_queue_new();
+  gff3_in_stream->type_factory       = gt_type_factory_any_new();
+  gff3_in_stream->own_factory        = true;
+  gff3_in_stream->checkids           = checkids;
+  gff3_in_stream->gff3_parser        = gt_gff3_parser_new(checkids,
                                                           gff3_in_stream
-                                                        ->feature_type_factory);
-  gff3_in_stream->be_verbose             = be_verbose;
+                                                          ->type_factory);
+  gff3_in_stream->be_verbose         = be_verbose;
   return gs;
 }
 
-void gff3_in_stream_set_feature_type_factory(GenomeStream *gs,
-                                             GT_TypeFactory
-                                             *feature_type_factory)
+void gff3_in_stream_set_type_factory(GenomeStream *gs,
+                                     GT_TypeFactory *type_factory)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
-  gff3parser_delete(is->gff3_parser);
+  gt_gff3_parser_delete(is->gff3_parser);
   if (is->own_factory) {
-    gt_type_factory_delete(is->feature_type_factory);
+    gt_type_factory_delete(is->type_factory);
     is->own_factory = false;
   }
-  is->gff3_parser = gff3parser_new(is->checkids, feature_type_factory);
-  is->feature_type_factory = feature_type_factory;
+  is->gff3_parser = gt_gff3_parser_new(is->checkids, type_factory);
+  is->type_factory = type_factory;
 }
 
 GT_StrArray* gff3_in_stream_get_used_types(GenomeStream *gs)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
-  return gt_type_factory_get_used_types(is->feature_type_factory);
+  return gt_type_factory_get_used_types(is->type_factory);
 }
 
 void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
-  gff3parser_set_offset(is->gff3_parser, offset);
+  gt_gff3_parser_set_offset(is->gff3_parser, offset);
 }
 
 int gff3_in_stream_set_offsetfile(GenomeStream *gs, GT_Str *offsetfile,
@@ -266,14 +266,14 @@ int gff3_in_stream_set_offsetfile(GenomeStream *gs, GT_Str *offsetfile,
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
-  return gff3parser_set_offsetfile(is->gff3_parser, offsetfile, err);
+  return gt_gff3_parser_set_offsetfile(is->gff3_parser, offsetfile, err);
 }
 
 void gff3_in_stream_enable_tidy_mode(GenomeStream *gs)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
-  gff3parser_enable_tidy_mode(is->gff3_parser);
+  gt_gff3_parser_enable_tidy_mode(is->gff3_parser);
 }
 
 GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,

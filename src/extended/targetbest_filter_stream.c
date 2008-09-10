@@ -86,9 +86,9 @@ static void filter_targetbest(GT_GenomeFeature *current_feature,
                                         TARGET_STRING);
   assert(target);
   first_target_id = gt_str_new();
-  had_err = gff3parser_parse_target_attributes(target, &num_of_targets,
-                                               first_target_id, NULL, NULL, "",
-                                               0, NULL);
+  had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
+                                                   first_target_id, NULL, NULL,
+                                                   "", 0, NULL);
   assert(!had_err);
   if (num_of_targets == 1) {
     GT_Str *key = gt_str_new();

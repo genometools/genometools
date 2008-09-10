@@ -106,9 +106,9 @@ static bool filter_targetstrand(GT_GenomeFeature *gf, GT_Strand targetstrand)
     unsigned long num_of_targets;
     GT_Strand parsed_strand;
     int had_err;
-    had_err = gff3parser_parse_target_attributes(target, &num_of_targets, NULL,
-                                                 NULL, &parsed_strand, "", 0,
-                                                 NULL);
+    had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
+                                                     NULL, NULL, &parsed_strand,
+                                                     "", 0, NULL);
     assert(!had_err);
     if (num_of_targets == 1 && parsed_strand != GT_NUM_OF_STRAND_TYPES &&
         parsed_strand != targetstrand) {

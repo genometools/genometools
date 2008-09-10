@@ -19,6 +19,7 @@
 #define GFF3_PARSER_H
 
 #include "core/queue.h"
+#include "extended/type_factory.h"
 
 #define GFF_VERSION         3
 #define GFF_VERSION_PREFIX  "##gff-version"
@@ -30,27 +31,33 @@
 #define PARENT_STRING       "Parent"
 #define TARGET_STRING       "Target"
 
-typedef struct GFF3Parser GFF3Parser;
+typedef struct GT_GFF3Parser GT_GFF3Parser;
 
-GFF3Parser* gff3parser_new(bool checkids, GT_TypeFactory*);
-void        gff3parser_set_offset(GFF3Parser*, long);
-int         gff3parser_set_offsetfile(GFF3Parser*, GT_Str*, GT_Error*);
-void        gff3parser_enable_tidy_mode(GFF3Parser*);
-int         gff3parser_parse_target_attributes(const char *values,
-                                               unsigned long *num_of_targets,
-                                               GT_Str *first_target_id,
-                                               GT_Range *first_target_range,
-                                               GT_Strand *first_target_strand,
-                                               const char *filename,
-                                               unsigned int line_number,
-                                               GT_Error*);
-int         gff3parser_parse_genome_nodes(int *status_code, GFF3Parser*,
-                                          GT_Queue *genome_nodes,
-                                          GT_Str *filenamestr,
-                                          unsigned long long *line_number,
-                                          GT_GenFile *fpin, GT_Error*);
-/* resets the GFF3 parser (necessary if the processed input file is switched) */
-void        gff3parser_reset(GFF3Parser*);
-void        gff3parser_delete(GFF3Parser*);
+GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeFactory*);
+void           gt_gff3_parser_set_offset(GT_GFF3Parser*, long);
+int            gt_gff3_parser_set_offsetfile(GT_GFF3Parser*, GT_Str*,
+                                             GT_Error*);
+void           gt_gff3_parser_enable_tidy_mode(GT_GFF3Parser*);
+int            gt_gff3_parser_parse_target_attributes(const char *values,
+                                                      unsigned long
+                                                      *num_of_targets,
+                                                      GT_Str *first_target_id,
+                                                      GT_Range
+                                                      *first_target_range,
+                                                      GT_Strand
+                                                      *first_target_strand,
+                                                      const char *filename,
+                                                      unsigned int line_number,
+                                                      GT_Error*);
+int            gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser*,
+                                                 int *status_code,
+                                                 GT_Queue *genome_nodes,
+                                                 GT_Str *filenamestr,
+                                                 unsigned long long
+                                                 *line_number,
+                                                 GT_GenFile *fpin, GT_Error*);
+/* Reset the GFF3 parser (necessary if the processed input file is switched). */
+void           gt_gff3_parser_reset(GT_GFF3Parser*);
+void           gt_gff3_parser_delete(GT_GFF3Parser*);
 
 #endif

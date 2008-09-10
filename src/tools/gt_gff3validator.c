@@ -63,7 +63,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
                                    void *tool_arguments, GT_Error *err)
 {
   GFF3ValidatorArguments *arguments = tool_arguments;
-  GT_TypeFactory *ftf = NULL;
+  GT_TypeFactory *type_factory = NULL;
   GenomeStream *gff3_in_stream;
   GT_GenomeNode *gn;
   int had_err = 0;
@@ -78,12 +78,12 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* set different type checker if necessary */
   if (gt_str_length(arguments->typecheck)) {
-    if (!(ftf = gt_type_factory_obo_new(gt_str_get(arguments->typecheck),
-                                             err))) {
-        had_err = -1;
-    }
+    type_factory = gt_type_factory_obo_new(gt_str_get(arguments->typecheck),
+                                           err);
+    if (!type_factory)
+      had_err = -1;
     if (!had_err)
-      gff3_in_stream_set_feature_type_factory(gff3_in_stream, ftf);
+      gff3_in_stream_set_type_factory(gff3_in_stream, type_factory);
   }
 
   /* pull the features through the stream and free them afterwards */
@@ -99,7 +99,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* free */
   genome_stream_delete(gff3_in_stream);
-  gt_type_factory_delete(ftf);
+  gt_type_factory_delete(type_factory);
 
   return had_err;
 }

@@ -33,7 +33,7 @@ typedef struct {
       *seqfile,
       *regionmapping;
   GT_FeatureType *type;
-  GT_TypeFactory *feature_type_factory;
+  GT_TypeFactory *type_factory;
 } ExtractFeatArguments;
 
 static void* gt_extractfeat_arguments_new(void)
@@ -42,7 +42,7 @@ static void* gt_extractfeat_arguments_new(void)
   arguments->typestr = gt_str_new();
   arguments->seqfile = gt_str_new();
   arguments->regionmapping = gt_str_new();
-  arguments->feature_type_factory = gt_type_factory_any_new();
+  arguments->type_factory = gt_type_factory_any_new();
   return arguments;
 }
 
@@ -50,7 +50,7 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
 {
   ExtractFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_type_factory_delete(arguments->feature_type_factory);
+  gt_type_factory_delete(arguments->type_factory);
   gt_str_delete(arguments->regionmapping);
   gt_str_delete(arguments->seqfile);
   gt_str_delete(arguments->typestr);
@@ -110,8 +110,8 @@ static int gt_extractfeat_arguments_check(GT_UNUSED int argc,
 
   /* determine type and make sure it is a valid one */
   if (!(arguments->type =
-          gt_type_factory_create_gft(arguments->feature_type_factory,
-                                          gt_str_get(arguments->typestr)))) {
+          gt_type_factory_create_gft(arguments->type_factory,
+                                     gt_str_get(arguments->typestr)))) {
     gt_error_set(err, "\"%s\" is not a valid feature type",
               gt_str_get(arguments->typestr));
     had_err = -1;
@@ -137,8 +137,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
     /* create gff3 input stream */
     gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                                arguments->verbose);
-    gff3_in_stream_set_feature_type_factory(gff3_in_stream,
-                                            arguments->feature_type_factory);
+    gff3_in_stream_set_type_factory(gff3_in_stream, arguments->type_factory);
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments->seqfile,
