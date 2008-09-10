@@ -25,17 +25,26 @@ typedef struct GT_Array GT_Array;
 
 /* Return a new <GT_Array> whose elements have the size <size_of_elem>. */
 GT_Array*     gt_array_new(size_t size_of_elem);
-GT_Array*     gt_array_clone(const GT_Array*);
-void*         gt_array_get(const GT_Array*, unsigned long);
-void*         gt_array_get_first(const GT_Array*);
-void*         gt_array_get_last(const GT_Array*);
-void*         gt_array_pop(GT_Array*);
-void*         gt_array_get_space(const GT_Array*);
+/* Return a clone of <array>. */
+GT_Array*     gt_array_clone(const GT_Array *array);
+/* Return pointer to element number <index> of <array>. */
+void*         gt_array_get(const GT_Array *array, unsigned long index);
+/* Return pointer to first element of <array>. */
+void*         gt_array_get_first(const GT_Array *array);
+/* Return pointer to last element of <array>. */
+void*         gt_array_get_last(const GT_Array *array);
+/* Return pointer to last element of <array> and remove it from <array>. */
+void*         gt_array_pop(GT_Array *array);
+/* Return pointer to the internal space of <array> where the elements are stored
+ */
+void*         gt_array_get_space(const GT_Array *array);
 #define       gt_array_add(a, elem)\
               gt_array_add_elem(a, &(elem), sizeof (elem))
 void          gt_array_add_elem(GT_Array*, void*, size_t);
 void          gt_array_add_array(GT_Array*, const GT_Array*);
-void          gt_array_rem(GT_Array*, unsigned long); /* O(n) */
+/* Remove element with number <index> from <array> in O(<gt_array_size()>) time.
+ */
+void          gt_array_rem(GT_Array *array, unsigned long index);
 void          gt_array_reverse(GT_Array*);
 void          gt_array_set_size(GT_Array*, unsigned long);
 void          gt_array_reset(GT_Array*);
@@ -46,6 +55,7 @@ void          gt_array_sort(GT_Array*, GT_Compare compar);
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
 int           gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b);
-void          gt_array_delete(GT_Array*);
+/* Delete <array>. */
+void          gt_array_delete(GT_Array *array);
 
 #endif
