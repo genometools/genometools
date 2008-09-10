@@ -213,7 +213,7 @@ static void handle_error(GT_Error *err)
 
 int main(int argc, char *argv[])
 {
-  const char *style_file, *gff3_file, *output_file, *seqid;
+  const char *style_file, *png_file, *gff3_file, *seqid;
   GT_Style *style;
   GT_FeatureIndex *feature_index;
   GT_Range range;
@@ -222,13 +222,13 @@ int main(int argc, char *argv[])
   GT_Error *err = gt_error_new();
 
   if (argc != 4) {
-    fprintf(stderr, "Usage: %s style_file GFF3_file output_file\n", argv[0]);
+    fprintf(stderr, "Usage: %s style_file PNG_file GFF3_file\n", argv[0]);
     return EXIT_FAILURE;
   }
 
   style_file = argv[1];
-  gff3_file = argv[2];
-  output_file = argv[3];
+  png_file = argv[2];
+  gff3_file = argv[3];
 
   /* create style */
   if (!(style = gt_style_new(false, err)))
@@ -257,10 +257,8 @@ int main(int argc, char *argv[])
   gt_diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
-  if (gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, output_file,
-                                   err)) {
+  if (gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, png_file, err))
     handle_error(err);
-  }
 
   /* free */
   gt_canvas_delete(canvas);
@@ -283,21 +281,21 @@ function usage()
 end
 
 if #arg == 3 then
-  stylefile = arg[1]
-  pngfile   = arg[2]
-  gff3file  = arg[3]
+  style_file = arg[1]
+  png_file   = arg[2]
+  gff3_file  = arg[3]
 else
   usage()
 end
 
 -- load style file
-dofile(stylefile)
+dofile(style_file)
 
 -- create feature index
 feature_index = gt.feature_index_new()
 
 -- add GFF3 file to index
-feature_index:add_gff3file(gff3file)
+feature_index:add_gff3file(gff3_file)
 
 -- create diagram for first sequence ID in feature index
 seqid = feature_index:get_first_seqid()
@@ -311,7 +309,7 @@ canvas = gt.canvas_new_png(600, nil)
 diagram:sketch(canvas)
 
 -- write canvas to file
-canvas:to_file(pngfile)
+canvas:to_file(png_file)
 </pre>
 
 <a name="examples-generated"></a>
@@ -351,19 +349,19 @@ static GT_Array* create_example_features(void)
   range.start = 100; range.end = 200;
   exon = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   /* exon belongs to forward gene */
-  gt_genome_node_is_part_of_genome_node(forward_gene, exon);
+  gt_genome_node_add_child(forward_gene, exon);
 
   type = gt_type_factory_create_gft(type_factory, "intron");
   range.start = 201; range.end = 799;
   intron = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   /* intron belongs to forward gene */
-  gt_genome_node_is_part_of_genome_node(forward_gene, intron);
+  gt_genome_node_add_child(forward_gene, intron);
 
   type = gt_type_factory_create_gft(type_factory, "exon");
   range.start = 800; range.end = 900;
   exon = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
   /* exon belongs to forward gene */
-  gt_genome_node_is_part_of_genome_node(forward_gene, exon);
+  gt_genome_node_add_child(forward_gene, exon);
 
   /* store forward gene in feature array */
   gt_array_add(features, forward_gene);
@@ -378,7 +376,7 @@ static GT_Array* create_example_features(void)
   range.start = 400; range.end = 600;
   exon = gt_genome_feature_new(seqid, type, range, GT_STRAND_REVERSE);
   /* exon belongs to reverse gene */
-  gt_genome_node_is_part_of_genome_node(reverse_gene, exon);
+  gt_genome_node_add_child(reverse_gene, exon);
 
   /* store reverse gene in feature array */
   gt_array_add(features, reverse_gene);
@@ -471,14 +469,14 @@ function usage()
 end
 
 if #arg == 2 then
-  stylefile = arg[1]
-  pngfile   = arg[2]
+  style_file = arg[1]
+  png_file   = arg[2]
 else
   usage()
 end
 
 -- load style file
-dofile(stylefile)
+dofile(style_file)
 
 -- construct the example features
 seqid = "chromosome_21"
@@ -487,18 +485,18 @@ nodes = {}
 -- construct a gene on the forward strand with two exons
 gene   = gt.genome_feature_new(seqid, "gene", gt.range_new(100, 900), "+")
 exon   = gt.genome_feature_new(seqid, "exon", gt.range_new(100, 200), "+")
-gene:is_part_of_genome_node(exon)
+gene:add_child(exon)
 intron = gt.genome_feature_new(seqid, "intron", gt.range_new(201, 799), "+")
-gene:is_part_of_genome_node(intron)
+gene:add_child(intron)
 exon   = gt.genome_feature_new(seqid, "exon", gt.range_new(800, 900), "+")
-gene:is_part_of_genome_node(exon)
+gene:add_child(exon)
 nodes[1] = gene
 
 -- construct a single-exon gene on the reverse strand
 -- (within the intron of the forward strand gene)
 reverse_gene = gt.genome_feature_new(seqid, "gene", gt.range_new(400, 600), "-")
 reverse_exon = gt.genome_feature_new(seqid, "exon", gt.range_new(400, 600), "-")
-reverse_gene:is_part_of_genome_node(reverse_exon)
+reverse_gene:add_child(reverse_exon)
 nodes[2] = reverse_gene
 
 -- create diagram
@@ -511,7 +509,7 @@ canvas = gt.canvas_new_png(600, nil)
 diagram:sketch(canvas)
 
 -- write canvas to file
-canvas:to_file(pngfile)
+canvas:to_file(png_file)
 </pre>
 
 

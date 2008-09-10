@@ -212,13 +212,12 @@ static int genome_node_lua_accept(lua_State *L)
   return 0;
 }
 
-static int genome_node_lua_is_part_of_genome_node(lua_State *L)
+static int genome_node_lua_add_child(lua_State *L)
 {
   GT_GenomeNode **parent, **child;
   parent = check_genome_node(L, 1);
   child  = check_genome_node(L, 2);
-  gt_genome_node_is_part_of_genome_node(*parent,
-                                        gt_genome_node_rec_ref(*child));
+  gt_genome_node_add_child(*parent, gt_genome_node_rec_ref(*child));
   return 0;
 }
 
@@ -330,7 +329,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_attribute", genome_feature_lua_get_attribute },
   { "get_exons", genome_feature_lua_get_exons },
   { "accept", genome_node_lua_accept },
-  { "is_part_of_genome_node", genome_node_lua_is_part_of_genome_node },
+  { "add_child", genome_node_lua_add_child },
   { "mark", genome_node_lua_mark },
   { "is_marked", genome_node_lua_is_marked },
   { "contains_marked", genome_node_lua_contains_marked },

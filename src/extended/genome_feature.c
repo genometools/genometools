@@ -228,72 +228,72 @@ GT_GenomeNode* gt_genome_feature_new_standard_gene(GT_TypeFactory *ftf)
   range.start = 1000; range.end = 1012;
   type = gt_type_factory_create_gft(ftf, gft_TF_binding_site);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(gn, child);
+  gt_genome_node_add_child(gn, child);
 
   /* first mRNA */
   range.start = 1050; range.end = 9000;
   type = gt_type_factory_create_gft(ftf, gft_mRNA);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(gn, child);
+  gt_genome_node_add_child(gn, child);
 
   range.start = 1050; range.end = 1500;
   type = gt_type_factory_create_gft(ftf, gft_exon);
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 3000; range.end = 3902;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 5000; range.end = 5500;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 7000; range.end = 9000;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   /* second mRNA */
   range.start = 1050; range.end = 9000;
   type = gt_type_factory_create_gft(ftf, gft_mRNA);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(gn, child);
+  gt_genome_node_add_child(gn, child);
 
   range.start = 1050; range.end = 1500;
   type = gt_type_factory_create_gft(ftf, gft_exon);
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 5000; range.end = 5500;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 7000; range.end = 9000;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   /* third mRNA */
   range.start = 1300; range.end = 9000;
   type = gt_type_factory_create_gft(ftf, gft_mRNA);
   child = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(gn, child);
+  gt_genome_node_add_child(gn, child);
 
   range.start = 1300; range.end = 1500;
   type = gt_type_factory_create_gft(ftf, gft_exon);
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 3000; range.end = 3902;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 5000; range.end = 5500;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   range.start = 7000; range.end = 9000;
   grandchild = gt_genome_feature_new(seqid, type, range, GT_STRAND_FORWARD);
-  gt_genome_node_is_part_of_genome_node(child, grandchild);
+  gt_genome_node_add_child(child, grandchild);
 
   gt_str_delete(seqid);
   return gn;

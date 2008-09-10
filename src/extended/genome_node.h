@@ -61,9 +61,9 @@ GT_Range       gt_genome_node_get_range(GT_GenomeNode*);
 void           gt_genome_node_set_range(GT_GenomeNode*, GT_Range);
 void           gt_genome_node_change_seqid(GT_GenomeNode*, GT_Str*);
 int            gt_genome_node_accept(GT_GenomeNode*, GenomeVisitor*, GT_Error*);
-/* <parent> takes ownership of <child> */
-void           gt_genome_node_is_part_of_genome_node(GT_GenomeNode *parent,
-                                                     GT_GenomeNode *child);
+/* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
+void           gt_genome_node_add_child(GT_GenomeNode *parent,
+                                        GT_GenomeNode *child);
 /* does not free the leaf, do not use during traversal! */
 void           gt_genome_node_remove_leaf(GT_GenomeNode *tree,
                                           GT_GenomeNode *leafn);

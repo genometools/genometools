@@ -398,7 +398,7 @@ static void gt_genome_node_is_part_of_pseudo_node(GT_GenomeNode *pseudo_node,
          gt_genome_feature_is_pseudo((GT_GenomeFeature*) pseudo_node));
   assert(child && !gt_genome_feature_is_pseudo((GT_GenomeFeature*) child));
   assert(feature_info);
-  gt_genome_node_is_part_of_genome_node(pseudo_node, child);
+  gt_genome_node_add_child(pseudo_node, child);
   id = gt_genome_feature_get_attribute(child, ID_STRING);
   assert(id);
   feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
@@ -442,14 +442,14 @@ static int store_id(const char *id, GT_GenomeNode *genome_feature,
             gt_genome_node_is_part_of_pseudo_node(pseudo_node, gn,
                                                parser->feature_info);
             replace_node(gn, pseudo_node, genome_nodes, auto_sr);
-            gt_genome_node_is_part_of_genome_node(pseudo_node, genome_feature);
+            gt_genome_node_add_child(pseudo_node, genome_feature);
             *is_child = true;
           }
         }
         else {
           assert(pseudo_parent);
           update_pseudo_node_range(pseudo_parent, genome_feature);
-          gt_genome_node_is_part_of_genome_node(pseudo_parent, genome_feature);
+          gt_genome_node_add_child(pseudo_parent, genome_feature);
           *is_child = true;
         }
       }
@@ -514,7 +514,7 @@ static GT_GenomeNode* merge_pseudo_roots(GT_GenomeNode *pseudo_a,
   /* add children of pseudo node b to pseudo node a */
   gni = gt_genome_node_iterator_new_direct(pseudo_b);
   while ((child = gt_genome_node_iterator_next(gni))) {
-    gt_genome_node_is_part_of_genome_node(pseudo_a, child);
+    gt_genome_node_add_child(pseudo_a, child);
     feature_info_replace_pseudo_parent(feature_info, child, pseudo_a);
   }
   gt_genome_node_iterator_delete(gni);
@@ -651,7 +651,7 @@ static int process_parent_attr(char *parent_attr, GT_GenomeNode *genome_feature,
     }
     else {
       assert(parser->incomplete_node);
-      gt_genome_node_is_part_of_genome_node(parent_gf, genome_feature);
+      gt_genome_node_add_child(parent_gf, genome_feature);
       *is_child = true;
       gt_strarray_add_cstr(valid_parents, parent);
     }

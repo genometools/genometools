@@ -467,8 +467,7 @@ int gt_genome_node_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
   return gn->c_class->accept(gn, gv, err);
 }
 
-void gt_genome_node_is_part_of_genome_node(GT_GenomeNode *parent,
-                                           GT_GenomeNode *child)
+void gt_genome_node_add_child(GT_GenomeNode *parent, GT_GenomeNode *child)
 {
   assert(parent && child);
   /* <parent> and <child> have the same seqid */

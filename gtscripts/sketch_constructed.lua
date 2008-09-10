@@ -4,14 +4,14 @@ function usage()
 end
 
 if #arg == 2 then
-  stylefile = arg[1]
-  pngfile   = arg[2]
+  style_file = arg[1]
+  png_file   = arg[2]
 else
   usage()
 end
 
 -- load style file
-dofile(stylefile)
+dofile(style_file)
 
 -- construct the example features
 seqid = "chromosome_21"
@@ -20,18 +20,18 @@ nodes = {}
 -- construct a gene on the forward strand with two exons
 gene   = gt.genome_feature_new(seqid, "gene", gt.range_new(100, 900), "+")
 exon   = gt.genome_feature_new(seqid, "exon", gt.range_new(100, 200), "+")
-gene:is_part_of_genome_node(exon)
+gene:add_child(exon)
 intron = gt.genome_feature_new(seqid, "intron", gt.range_new(201, 799), "+")
-gene:is_part_of_genome_node(intron)
+gene:add_child(intron)
 exon   = gt.genome_feature_new(seqid, "exon", gt.range_new(800, 900), "+")
-gene:is_part_of_genome_node(exon)
+gene:add_child(exon)
 nodes[1] = gene
 
 -- construct a single-exon gene on the reverse strand
 -- (within the intron of the forward strand gene)
 reverse_gene = gt.genome_feature_new(seqid, "gene", gt.range_new(400, 600), "-")
 reverse_exon = gt.genome_feature_new(seqid, "exon", gt.range_new(400, 600), "-")
-reverse_gene:is_part_of_genome_node(reverse_exon)
+reverse_gene:add_child(reverse_exon)
 nodes[2] = reverse_gene
 
 -- create diagram
@@ -44,4 +44,4 @@ canvas = gt.canvas_new_png(600, nil)
 diagram:sketch(canvas)
 
 -- write canvas to file
-canvas:to_file(pngfile)
+canvas:to_file(png_file)

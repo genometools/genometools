@@ -67,18 +67,32 @@ Test do
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
 end
 
-Name "sketch_constructed"
+Name "sketch_constructed (C)"
 Keywords "gt_sketch annotationsketch"
 Test do
   run_test "#{$bin}examples/sketch_constructed " +
            "#{$cur}/gtdata/sketch/default.style sketch_constructed.png"
 end
 
-Name "sketch_parsed"
+Name "sketch_parsed (C)"
 Keywords "gt_sketch annotationsketch"
 Test do
   run_test "#{$bin}examples/sketch_parsed " +
-           "#{$cur}/gtdata/sketch/default.style " +
-           "#{$testdata}standard_gene_with_introns_as_tree.gff3 " +
-           "sketch_parsed.png"
+           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " +
+           "#{$testdata}standard_gene_with_introns_as_tree.gff3 "
+end
+
+Name "sketch_constructed (Lua)"
+Keywords "gt_sketch annotationsketch"
+Test do
+  run_test "#{$bin}gt #{$cur}gtscripts/sketch_constructed.lua " +
+           "#{$cur}/gtdata/sketch/default.style sketch_constructed.png"
+end
+
+Name "sketch_parsed (Lua)"
+Keywords "gt_sketch annotationsketch"
+Test do
+  run_test "#{$bin}gt #{$cur}gtscripts/sketch_parsed.lua " +
+           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " +
+           "#{$testdata}standard_gene_with_introns_as_tree.gff3"
 end

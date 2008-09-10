@@ -394,9 +394,8 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 
   /* add exon features to mRNA feature */
   for (i = 0; i < gt_array_size(exon_nodes); i++) {
-    gt_genome_node_is_part_of_genome_node(mRNA_feature,
-                                       *(GT_GenomeNode**)
-                                       gt_array_get(exon_nodes, i));
+    gt_genome_node_add_child(mRNA_feature,
+                             *(GT_GenomeNode**) gt_array_get(exon_nodes, i));
   }
 
   gt_array_delete(exon_nodes);
@@ -427,7 +426,7 @@ static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
     CSASpliceForm *csa_splice_form = csa_gene_get_splice_form(csa_gene, i);
     mRNA_feature = create_mRNA_feature(csa_splice_form, gt_csa_source_str,
                                        mRNA_type, exon_type);
-    gt_genome_node_is_part_of_genome_node(gene_feature, mRNA_feature);
+    gt_genome_node_add_child(gene_feature, mRNA_feature);
   }
 
   return gene_feature;

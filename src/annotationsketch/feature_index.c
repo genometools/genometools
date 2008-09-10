@@ -313,10 +313,10 @@ int gt_feature_index_unit_test(GT_Error *err)
   cds1 = gt_genome_feature_new(seqid2, type, r5, GT_STRAND_UNKNOWN);
 
   /* Determine the structure of our feature tree */
-  gt_genome_node_is_part_of_genome_node(gn1, ex1);
-  gt_genome_node_is_part_of_genome_node(gn1, ex2);
-  gt_genome_node_is_part_of_genome_node(gn2, ex3);
-  gt_genome_node_is_part_of_genome_node(gn2, cds1);
+  gt_genome_node_add_child(gn1, ex1);
+  gt_genome_node_add_child(gn1, ex2);
+  gt_genome_node_add_child(gn2, ex3);
+  gt_genome_node_add_child(gn2, cds1);
 
   /* create a new feature index on which we can perform some tests */
   fi = gt_feature_index_new();

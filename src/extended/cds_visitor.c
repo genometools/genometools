@@ -145,7 +145,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
     if (splicedseq_pos_is_border(v->splicedseq, i)) {
       gt_genome_feature_set_end((GT_GenomeFeature*) cds_feature,
                              splicedseq_map(v->splicedseq, i) + 1);
-      gt_genome_node_is_part_of_genome_node(gn, cds_feature);
+      gt_genome_node_add_child(gn, cds_feature);
       if (strand == GT_STRAND_FORWARD)
         orf.start = i + 1;
       else
@@ -168,7 +168,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
                          splicedseq_map(v->splicedseq,
                                         strand == GT_STRAND_FORWARD
                                         ? orf.end : orf.start) + 1);
-  gt_genome_node_is_part_of_genome_node(gn, cds_feature);
+  gt_genome_node_add_child(gn, cds_feature);
 }
 
 static void create_CDS_features_for_longest_ORF(GT_Array *orfs, CDSVisitor *v,

@@ -5,21 +5,21 @@ function usage()
 end
 
 if #arg == 3 then
-  stylefile = arg[1]
-  pngfile   = arg[2]
-  gff3file  = arg[3]
+  style_file = arg[1]
+  png_file   = arg[2]
+  gff3_file  = arg[3]
 else
   usage()
 end
 
 -- load style file
-dofile(stylefile)
+dofile(style_file)
 
 -- create feature index
 feature_index = gt.feature_index_new()
 
 -- add GFF3 file to index
-feature_index:add_gff3file(gff3file)
+feature_index:add_gff3file(gff3_file)
 
 -- create diagram for first sequence ID in feature index
 seqid = feature_index:get_first_seqid()
@@ -33,4 +33,4 @@ canvas = gt.canvas_new_png(600, nil)
 diagram:sketch(canvas)
 
 -- write canvas to file
-canvas:to_file(pngfile)
+canvas:to_file(png_file)

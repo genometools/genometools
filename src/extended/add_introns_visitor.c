@@ -73,8 +73,7 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
       assert(intron_type);
       intron_node = gt_genome_feature_new(parent_seqid, intron_type,
                                           intron_range, intron_strand);
-      gt_genome_node_is_part_of_genome_node((GT_GenomeNode*) v->parent_feature,
-                                         intron_node);
+      gt_genome_node_add_child((GT_GenomeNode*) v->parent_feature, intron_node);
     }
     v->previous_exon_feature = current_feature;
   }
