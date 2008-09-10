@@ -85,6 +85,11 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                                 &arguments->sort, false);
   option_parser_add_option(op, sort_option);
 
+  /* -tidy */
+  option = option_new_bool("tidy", "try to tidy the GFF3 files up during "
+                           "parsing", &arguments->tidy, false);
+  option_parser_add_option(op, option);
+
   /* -checkids */
   option = option_new_bool("checkids", "make sure the ID attributes are unique "
                            "within the scope of each GFF3_file, as required by "
@@ -134,12 +139,6 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option_is_development_option(built_in_option);
   option_parser_add_option(op, built_in_option);
   option_exclude(typecheck_option, built_in_option);
-
-  /* -tidy */
-  option = option_new_bool("tidy", "try to tidy the file", &arguments->tidy,
-                           false);
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose);
