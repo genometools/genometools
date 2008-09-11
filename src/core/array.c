@@ -40,7 +40,7 @@ struct GT_Array {
 
 GT_Array* gt_array_new(size_t size_of_elem)
 {
-  GT_Array *a = gt_calloc(1, sizeof (GT_Array));
+  GT_Array *a = gt_calloc(1, sizeof *a);
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
   return a;
