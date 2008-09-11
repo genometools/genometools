@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include "core/fptr_api.h"
 
+/* Objects of the <GT_Array> class grow on demand. */
 typedef struct GT_Array GT_Array;
 
 /* Return a new <GT_Array> whose elements have the size <size_of_elem>. */
