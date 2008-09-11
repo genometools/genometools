@@ -23,7 +23,7 @@ struct GT_SequenceNode
 {
   const GT_GenomeNode parent_instance;
   GT_Str *description,
-      *sequence;
+         *sequence;
 };
 
 #define gt_sequence_node_cast(GN)\
