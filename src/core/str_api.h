@@ -22,7 +22,7 @@
 #include "core/error_api.h"
 #include "core/genfile.h"
 
-/* the string class, string objects are strings which grow on demand */
+/* Objects of the <GT_Str> class are strings which grow on demand. */
 typedef struct GT_Str GT_Str;
 
 GT_Str*       gt_str_new(void);
