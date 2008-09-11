@@ -79,9 +79,11 @@ local Ifndef = lpeg.P("#ifndef") * Whitespace * Character^1 * Newline
 local Define = lpeg.P("#define") * Whitespace * Character^1 * Newline
 local Endif = lpeg.P("#endif") * Newline^0
 local Include = lpeg.P("#include") * (Any - Newline)^1 * Newline
-local ClassTypedef = lpeg.Ct(lpeg.P("typedef struct") * Space *
-                             lpeg.Cc("class") * Character^1 * Space *
-                             lpeg.C(Character^1) * OptionalSpace *
+local ClassTypedef = lpeg.Ct(lpeg.Cc("class") *
+                             (CCommentStart * lpeg.C((Any - CCommentEnd)^0) *
+                               CCommentEnd)^0 * Newline^0 *
+                             lpeg.P("typedef struct") * Space * Character^1 *
+                             Space * lpeg.C(Character^1) * OptionalSpace *
                              Semicolon)
 local Typedef = lpeg.P("typedef struct") * (Any - Semicolon)^1 * Semicolon
 local Function = lpeg.Cc("function") * lpeg.C(Character^1) * Space *
@@ -116,7 +118,7 @@ LuaCGrammar = LuaCGrammar * -1
 local CGrammar = lpeg.P{ Start,
   -- Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0 * Endif);
   Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0);
-  Elem = ExportCDefine + ExportCMethod + Space + Include + ClassTypedef +
+  Elem = ClassTypedef + ExportCDefine + ExportCMethod + Space + Include +
          lpeg.C(Typedef) + CCode;
 }
 CGrammar = CGrammar * -1

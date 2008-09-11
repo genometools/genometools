@@ -25,18 +25,20 @@ DocBase = {}
 function DocBase:new()
   o = {}
   o.classes   = {}
+  o.classcomments = {}
   o.solefuncs = {}
   setmetatable(o, self)
   self.__index = self
   return o
 end
 
-function DocBase:add_class(classname, be_verbose)
+function DocBase:add_class(classname, comments, be_verbose)
   assert(classname)
   if be_verbose then
     print("class added: " .. classname)
   end
   self.classes[classname] = self.classes[classname] or {}
+  self.classcomments[classname] = comments
 end
 
 function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
@@ -115,8 +117,17 @@ function DocBase:process_ast(ast, be_verbose)
         print("keyword: " .. keyword)
       end
       if keyword == "class" then
-        assert(#ast == 2)
-        self["add_" .. ast[1]](self, ast[2], be_verbose)
+        local comments
+        if #ast > 2 then
+          comments = {}
+          for i = 2, #ast - 1 do
+            if be_verbose then
+              print("add class comment: " .. ast[i])
+            end
+            comments[#comments + 1] = ast[i]
+          end
+        end
+        self["add_" .. ast[1]](self, ast[#ast], comments, be_verbose)
         break
       elseif keyword == "comment" then
         local funcpos = method_keyword(ast, be_verbose)
@@ -167,7 +178,7 @@ function DocBase:accept(visitor)
   end
   -- visit each class
   for _, classname in ipairs(sorted_classes) do
-    visitor:visit_class(classname)
+    visitor:visit_class(classname, self.classcomments[classname])
     -- visit methods for class
     for _, method in ipairs(self.classes[classname]) do
       visitor:visit_method(method)

@@ -58,9 +58,15 @@ function DocVisitorHTML:visit_classes(classes)
   include("classes.lp", { classes = classes })
 end
 
-function DocVisitorHTML:visit_class(classname)
+function DocVisitorHTML:visit_class(classname, comments)
   assert(classname)
   include("class.lp", { classname = classname })
+  if comments then
+    for i, _ in ipairs(comments) do
+      comments[i] = codify(comments[i])
+    end
+  include("class_comments.lp", { comments = comments })
+  end
 end
 
 local sole_function_visited = false

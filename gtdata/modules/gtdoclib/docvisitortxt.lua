@@ -26,9 +26,12 @@ function DocVisitorTxt:new()
   return o
 end
 
-function DocVisitorTxt:visit_class(classname)
+function DocVisitorTxt:visit_class(classname, comments)
   assert(classname)
   io.write(string.format("class: %s\n", classname))
+  if comments then
+    print("comments: " .. table.concat(comments))
+  end
 end
 
 function DocVisitorTxt:visit_method(desc)
