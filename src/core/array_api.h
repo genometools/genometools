@@ -24,7 +24,8 @@
 /* Objects of the <GT_Array> class grow on demand. */
 typedef struct GT_Array GT_Array;
 
-/* Return a new <GT_Array> whose elements have the size <size_of_elem>. */
+/* Return a new <GT_Array*> object whose elements have the size
+   <size_of_elem>. */
 GT_Array*     gt_array_new(size_t size_of_elem);
 /* Increase the reference count for <array> and return it.
    If <array> is <NULL>, <NULL> is returned without any side effects. */
