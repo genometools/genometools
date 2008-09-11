@@ -94,9 +94,9 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
 </ul>
 <h2>Sole functions</h2>
-<code> genome_feature_new(seqid, type, range, strand)</code>
+<code> genome_feature_new(seqid, type, startpos, endpos, strand)</code>
 <p>
-Returns a new genome feature refering to sequence with id <code>seqid</code> of <code>type</code> spanning <code>range</code> on <code>strand</code>.
+Create a new genome feature on sequence with ID <code>seqid</code> and type <code>type</code> which lies from <code>startpos</code> to <code>end</code> on strand <code>strand</code>. <code>startpos</code> and <code>endpos</code> always refer to the forward strand, therefore <code>startpos</code> has to bo smaller or equal than <code>endpos</code>.
 </p>
 <hr>
 <code> sequence_region_new(seqid, range)</code>
