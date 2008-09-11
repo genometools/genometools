@@ -124,7 +124,8 @@ GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker *type_checker)
   parser->fasta_parsing = false;
   parser->offset = UNDEF_LONG;
   parser->offset_mapping = NULL;
-  parser->type_checker = gt_type_checker_ref(type_checker);
+  parser->type_checker = type_checker ? gt_type_checker_ref(type_checker)
+                                      : NULL;
   parser->last_terminator = 0;
   return parser;
 }
