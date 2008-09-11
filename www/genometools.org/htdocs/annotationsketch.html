@@ -476,7 +476,7 @@ reverse_gene:add_child(reverse_exon)
 nodes[2] = reverse_gene
 
 -- create diagram
-diagram = gt.diagram_new_from_array(nodes, gt.range_new(1, 1000))
+diagram = gt.diagram_new_from_array(nodes, 1, 1000)
 
 -- create canvas
 canvas = gt.canvas_new_png(600, nil)

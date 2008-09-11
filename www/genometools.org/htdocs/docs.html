@@ -326,9 +326,9 @@ Creates an image file with the given <code>filename</code> which contains the co
 Return a diagram object which contains the genome nodes given in <code>feature_index</code> in the given <code>range</code> of the sequence region with sequence ID <code>seqid</code>.
 </p>
 <hr>
-<code> diagram_new_from_array(array, range)</code>
+<code> diagram_new_from_array(array, startpos, endpos)</code>
 <p>
-Return a diagram object which contains the genome nodes given in <code>array</code>. The range <code>range</code> determines the visible region and should include the nodes in <code>array</code>.
+Return a diagram object which contains the genome nodes given in <code>array</code>. The range from <code>startpos</code> to <code>endpos</code> determines the visible region and should include the nodes in <code>array</code>.
 </p>
 <hr>
 <a name="FeatureIndex"></a>
