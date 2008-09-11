@@ -23,12 +23,13 @@ require 'fileutils'
 DocParser = {}
 
 -- Common Lexical Elements
-local Any           = lpeg.P(1)
-local Newline       = lpeg.S("\n")
-local Whitespace    = lpeg.S(" \t\n")
-local OptionalSpace = Whitespace^0
-local Space         = Whitespace^1
-local Semicolon     = lpeg.S(";")
+local Any             = lpeg.P(1)
+local Newline         = lpeg.S("\n")
+local Whitespace      = lpeg.S(" \t\n")
+local OptionalSpace   = Whitespace^0
+local Space           = Whitespace^1
+local Semicolon       = lpeg.S(";")
+local DefineSeparator = lpeg.S("\\")
 
 -- Lexical Elements of Lua
 local LuaLongCommentStart  = lpeg.P("--[[")
@@ -88,7 +89,12 @@ local Function = lpeg.Cc("function") * lpeg.C(Character^1) * Space *
                  lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") * Semicolon
 local ExportedComment = lpeg.Cc("comment") * CCommentStart *
                         lpeg.C((Any - CCommentEnd)^0) * CCommentEnd
+local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
+                       lpeg.C(lpeg.P(Any - lpeg.P("("))^1) * lpeg.P("(") *
+                       lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
+                       OptionalSpace * DefineSeparator
 local ExportCMethod = lpeg.Ct(ExportedComment * Newline^0 * Function)
+local ExportCDefine = lpeg.Ct(ExportedComment * Newline^0 * ExportedDefine)
 
 -- Lua Grammar
 local Elem, Start = lpeg.V"Elem", lpeg.V"Start"
@@ -110,7 +116,7 @@ LuaCGrammar = LuaCGrammar * -1
 local CGrammar = lpeg.P{ Start,
   -- Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0 * Endif);
   Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0);
-  Elem = ExportCMethod + Space + Include + ClassTypedef +
+  Elem = ExportCDefine + ExportCMethod + Space + Include + ClassTypedef +
          lpeg.C(Typedef) + CCode;
 }
 CGrammar = CGrammar * -1
