@@ -39,3 +39,11 @@ function DocVisitorTxt:visit_method(desc)
   io.write(string.format("method:\n%s\n%s(%s)\n", desc.comment, desc.name,
            desc.args))
 end
+
+function DocVisitorTxt:visit_index(names)
+  assert(names)
+  print("index:")
+  for _, name in ipairs(names) do
+    print(name)
+  end
+end

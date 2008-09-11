@@ -21,5 +21,9 @@
 <div id="main">
 <h1><i>GenomeTools</i> C API</h1>
 <p>
-This document describes the <i>GenomeTools</i> C API (<tt>libgenometools</tt>).
+This document describes the <i>GenomeTools</i> C API (that is, all public interfaces which are part of <tt>libgenometools</tt>).
+</p>
+<p>
+See the <a href="#Index">index</a> for an alphabetical list of all available
+interfaces.
 </p>

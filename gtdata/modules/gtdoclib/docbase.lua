@@ -157,6 +157,7 @@ end
 
 function DocBase:accept(visitor)
   assert(visitor)
+  local method_names = {}
   -- visit all classes
   local sorted_classes = {}
   for classname in pairs(self.classes) do
@@ -175,6 +176,7 @@ function DocBase:accept(visitor)
     else
       visitor:visit_method(funcdesc)
     end
+    method_names[#method_names + 1] = funcdesc.name
   end
   -- visit each class
   for _, classname in ipairs(sorted_classes) do
@@ -182,6 +184,12 @@ function DocBase:accept(visitor)
     -- visit methods for class
     for _, method in ipairs(self.classes[classname]) do
       visitor:visit_method(method)
+      method_names[#method_names + 1] = method.name
     end
+  end
+  -- visit all method names (for index construction)
+  if visitor.visit_index then
+    table.sort(method_names)
+    visitor:visit_index(method_names)
   end
 end

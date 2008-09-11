@@ -32,6 +32,10 @@ The parts of the <i>GenomeTools</i> C libraries exported to Lua (the
 its APIs, please refer to the <a href="http://www.lua.org/manual/5.1/">Lua
 reference manual</a>.
 </p>
+<p>
+See the <a href="#Index">index</a> for an alphabetical list of all available
+interfaces.
+</p>
 <h2>Notes</h2>
 <ul>
 <li>

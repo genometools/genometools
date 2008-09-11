@@ -89,13 +89,20 @@ end
 function DocVisitorHTML:visit_method(desc)
   assert(desc)
   local name
+  local prototype = desc.name
   if desc.rval then
     name = desc.rval .. " " .. desc.name
   else
     name = desc.rval
   end
   include("method.lp", { name = name, args = desc.args,
-                         comment = codify(desc.comment) })
+                         comment = codify(desc.comment),
+                         prototype = prototype })
+end
+
+function DocVisitorHTML:visit_index(names)
+  assert(names)
+  include("index.lp", { names = names })
 end
 
 function DocVisitorHTML:show_footer()
