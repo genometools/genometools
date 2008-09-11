@@ -39,10 +39,15 @@ void*         gt_array_pop(GT_Array *array);
 /* Return pointer to the internal space of <array> where the elements are
    stored.  */
 void*         gt_array_get_space(const GT_Array *array);
-#define       gt_array_add(a, elem)\
-              gt_array_add_elem(a, &(elem), sizeof (elem))
+/* Add element <elem> to <array>. The size of <elem> must equal the given
+   element size when the <array> was created and is determined automatically
+   with the <sizeof> operator. */
+#define       gt_array_add(array, elem) \
+              gt_array_add_elem(array, &(elem), sizeof (elem))
 /* Add element <elem> with size <size_of_elem> to <array>. <size_of_elem> must
-   equal the given element size when the <array> was created. */
+   equal the given element size when the <array> was created. Usually, this
+   method is not used directly and the macro <gt_array_add()> is used
+   instead. */
 void          gt_array_add_elem(GT_Array *array, void *elem,
                                 size_t size_of_elem);
 /* Add all elements of array <src> to the array <dest>. The element sizes of
