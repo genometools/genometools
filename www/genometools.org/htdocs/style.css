@@ -8,7 +8,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 66%;
   text-align: center;
   margin-top: 20px;
-  background-color: #EEEEEE;
+  background-color: #DDDDDD;
 }
 img {
   border-style: solid;
@@ -71,7 +71,7 @@ pre {
 }
 pre.code {
   line-height: 1.3em;
-  background-color: #F4F4F4;
+  background-color: #DDDDDD;
   padding: 15px;
 }
 
