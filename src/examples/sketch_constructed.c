@@ -12,13 +12,10 @@ static GT_Array* create_example_features(void)
 
   /* construct a gene on the forward strand with two exons */
   gene = gt_genome_feature_new(seqid, "gene", 100, 900, GT_STRAND_FORWARD);
-
   exon = gt_genome_feature_new(seqid, "exon", 100, 200, GT_STRAND_FORWARD);
   gt_genome_node_add_child(gene, exon);
-
   intron = gt_genome_feature_new(seqid, "intron", 201, 799, GT_STRAND_FORWARD);
   gt_genome_node_add_child(gene, intron);
-
   exon = gt_genome_feature_new(seqid, "exon", 800, 900, GT_STRAND_FORWARD);
   gt_genome_node_add_child(gene, exon);
 
@@ -28,7 +25,6 @@ static GT_Array* create_example_features(void)
   /* construct a single-exon gene on the reverse strand
      (within the intron of the forward strand gene) */
   gene = gt_genome_feature_new(seqid, "gene", 400, 600, GT_STRAND_REVERSE);
-
   exon = gt_genome_feature_new(seqid, "exon", 400, 600, GT_STRAND_REVERSE);
   gt_genome_node_add_child(gene, exon);
 
