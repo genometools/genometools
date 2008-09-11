@@ -18,6 +18,7 @@
 #ifndef GFF3_PARSER_H
 #define GFF3_PARSER_H
 
+#include "core/cstr_table.h"
 #include "core/queue.h"
 #include "extended/type_factory.h"
 
@@ -52,6 +53,7 @@ int            gt_gff3_parser_parse_target_attributes(const char *values,
 int            gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser*,
                                                  int *status_code,
                                                  GT_Queue *genome_nodes,
+                                                 GT_CstrTable *used_types,
                                                  GT_Str *filenamestr,
                                                  unsigned long long
                                                  *line_number,

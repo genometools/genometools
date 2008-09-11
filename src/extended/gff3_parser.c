@@ -981,7 +981,8 @@ static void set_source(GT_GenomeNode *genome_feature, const char *source,
 }
 
 static int parse_regular_gff3_line(GT_GFF3Parser *parser,
-                                   GT_Queue *genome_nodes, char *line,
+                                   GT_Queue *genome_nodes,
+                                   GT_CstrTable *used_types, char *line,
                                    size_t line_length, GT_Str *filenamestr,
                                    unsigned int line_number, GT_Error *err)
 {
@@ -1028,11 +1029,15 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
   }
 
   /* parse the feature type */
-  if (!had_err && parser->type_factory &&
-      !gt_type_factory_create_gft(parser->type_factory, type)) {
-    gt_error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid "
-                 "one", type, line_number, filename);
-    had_err = -1;
+  if (!had_err) {
+    if (parser->type_factory &&
+        !gt_type_factory_create_gft(parser->type_factory, type)) {
+      gt_error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid "
+                   "one", type, line_number, filename);
+      had_err = -1;
+    }
+    else if (!gt_cstr_table_get(used_types, type))
+      gt_cstr_table_add(used_types, type);
   }
 
   /* parse the range */
@@ -1339,6 +1344,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GT_Queue *genome_nodes,
 
 int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
                                       GT_Queue *genome_nodes,
+                                      GT_CstrTable *used_types,
                                       GT_Str *filenamestr,
                                       unsigned long long *line_number,
                                       GT_GenFile *fpin, GT_Error *err)
@@ -1396,8 +1402,9 @@ int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
       }
     }
     else {
-      had_err = parse_regular_gff3_line(parser, genome_nodes, line, line_length,
-                                        filenamestr, *line_number, err);
+      had_err = parse_regular_gff3_line(parser, genome_nodes, used_types, line,
+                                        line_length, filenamestr, *line_number,
+                                        err);
       if (had_err || (!parser->incomplete_node && gt_queue_size(genome_nodes)))
         break;
     }

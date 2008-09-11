@@ -27,7 +27,6 @@ GT_TypeFactory* gt_type_factory_create(const GT_TypeFactoryClass
   assert(ftfc && ftfc->size);
   ftf = gt_calloc(1, ftfc->size);
   ftf->c_class = ftfc;
-  ftf->used_types = gt_cstr_table_new();
   return ftf;
 }
 
@@ -44,11 +43,6 @@ const char* gt_type_factory_create_gft(GT_TypeFactory *ftf, const char *type)
   return ftf->c_class->create_gft(ftf, type);
 }
 
-GT_StrArray* gt_type_factory_get_used_types(const GT_TypeFactory *ftf)
-{
-  return gt_cstr_table_get_all(ftf->used_types);
-}
-
 void gt_type_factory_delete(GT_TypeFactory *ftf)
 {
   if (!ftf) return;
@@ -59,7 +53,6 @@ void gt_type_factory_delete(GT_TypeFactory *ftf)
   assert(ftf->c_class);
   if (ftf->c_class->free)
     ftf->c_class->free(ftf);
-  gt_cstr_table_delete(ftf->used_types);
   gt_free(ftf);
 }
 

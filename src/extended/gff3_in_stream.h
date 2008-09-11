@@ -29,10 +29,11 @@ const GenomeStreamClass* gff3_in_stream_class(void);
 void                     gff3_in_stream_set_type_factory(GenomeStream*,
                                                          GT_TypeFactory
                                                          *type_factory);
-/* Returns a GT_StrArray which contains all type names in alphabetical order
-   which have been parsed by this stream.
+/* Returns a <GT_StrArray*> which contains all type names in alphabetical order
+   which have been parsed by <gff3_in_stream>.
    The caller is responsible to free it! */
-GT_StrArray*             gff3_in_stream_get_used_types(GenomeStream*);
+GT_StrArray*             gff3_in_stream_get_used_types(GenomeStream
+                                                       *gff3_in_stream);
 void                     gff3_in_stream_set_offset(GenomeStream*, long);
 int                      gff3_in_stream_set_offsetfile(GenomeStream*, GT_Str*,
                                                        GT_Error*);

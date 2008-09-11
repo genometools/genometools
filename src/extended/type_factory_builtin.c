@@ -70,20 +70,12 @@ static const char* find_type(const char *gft_string)
   return NULL;
 }
 
-static const char* gt_type_factory_builtin_create_gft(GT_TypeFactory *ftf,
+static const char* gt_type_factory_builtin_create_gft(GT_UNUSED
+                                                      GT_TypeFactory *ftf,
                                                       const char *type)
 {
-  GT_TypeFactoryBuiltin *ftfb;
-  const char *gft = NULL;
   assert(ftf && type);
-  ftfb = gt_type_factory_builtin_cast(ftf);
-  if (!(gft = gt_cstr_table_get(ftf->used_types, type))) {
-    if ((find_type(type))) {
-      gt_cstr_table_add(ftf->used_types, type);
-      return type;
-    }
-  }
-  return gft;
+  return find_type(type);
 }
 
 const GT_TypeFactoryClass* gt_type_factory_builtin_class(void)

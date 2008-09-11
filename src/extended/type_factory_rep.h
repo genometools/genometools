@@ -31,7 +31,6 @@ struct GT_TypeFactoryClass {
 
 struct GT_TypeFactory {
   const GT_TypeFactoryClass *c_class;
-  GT_CstrTable *used_types;
   unsigned int reference_count;
 };
 

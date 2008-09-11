@@ -41,16 +41,9 @@ static const char* gt_type_factory_obo_create_gft(GT_TypeFactory *ftf,
                                                   const char *type)
 {
   GT_TypeFactoryOBO *ftfo;
-  const char *gft;
   assert(ftf && type);
   ftfo = gt_type_factory_obo_cast(ftf);
-  if (!(gft = gt_cstr_table_get(ftf->used_types, type))) {
-    if (gt_cstr_table_get(ftfo->gt_genome_feature_types, type)) {
-      gt_cstr_table_add(ftf->used_types, type);
-      return type;
-    }
-  }
-  return gft;
+  return gt_cstr_table_get(ftfo->gt_genome_feature_types, type);
 }
 
 const GT_TypeFactoryClass* gt_type_factory_obo_class(void)
