@@ -23,7 +23,6 @@
 #include "extended/genome_stream_rep.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_parser.h"
-#include "extended/type_factory_any.h"
 
 struct GFF3InStream
 {
@@ -35,8 +34,7 @@ struct GFF3InStream
        stdin_argument,
        file_is_open,
        be_verbose,
-       checkids,
-       own_factory;
+       checkids;
   GT_GenFile *fpin;
   unsigned long long line_number;
   GT_Queue *genome_node_buffer;
@@ -193,8 +191,6 @@ static void gff3_in_stream_free(GenomeStream *gs)
     gt_genome_node_rec_delete(gt_queue_get(gff3_in_stream->genome_node_buffer));
   gt_queue_delete(gff3_in_stream->genome_node_buffer);
   gt_gff3_parser_delete(gff3_in_stream->gff3_parser);
-  if (gff3_in_stream->own_factory)
-    gt_type_factory_delete(gff3_in_stream->type_factory);
   gt_genfile_close(gff3_in_stream->fpin);
 }
 
@@ -223,8 +219,7 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
   gff3_in_stream->fpin               = NULL;
   gff3_in_stream->line_number        = 0;
   gff3_in_stream->genome_node_buffer = gt_queue_new();
-  gff3_in_stream->type_factory       = gt_type_factory_any_new();
-  gff3_in_stream->own_factory        = true;
+  gff3_in_stream->type_factory       = NULL;
   gff3_in_stream->checkids           = checkids;
   gff3_in_stream->gff3_parser        = gt_gff3_parser_new(checkids,
                                                           gff3_in_stream
@@ -239,10 +234,6 @@ void gff3_in_stream_set_type_factory(GenomeStream *gs,
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
   gt_gff3_parser_delete(is->gff3_parser);
-  if (is->own_factory) {
-    gt_type_factory_delete(is->type_factory);
-    is->own_factory = false;
-  }
   is->gff3_parser = gt_gff3_parser_new(is->checkids, type_factory);
   is->type_factory = type_factory;
 }

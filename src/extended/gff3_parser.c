@@ -110,7 +110,6 @@ static void simple_sequence_region_delete(SimpleGT_SequenceRegion *ssr)
 GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeFactory *type_factory)
 {
   GT_GFF3Parser *parser;
-  assert(type_factory);
   parser = gt_malloc(sizeof *parser);
   parser->feature_info = feature_info_new();
   parser->seqid_to_ssr_mapping = hashmap_new(
@@ -987,7 +986,6 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
                                    unsigned int line_number, GT_Error *err)
 {
   GT_GenomeNode *gn = NULL, *genome_feature = NULL;
-  const char *gft = NULL;
   Splitter *splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
   GT_Str *seqid_str = NULL;
@@ -1030,8 +1028,8 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
   }
 
   /* parse the feature type */
-  if (!had_err &&
-      !(gft = gt_type_factory_create_gft(parser->type_factory, type))) {
+  if (!had_err && parser->type_factory &&
+      !gt_type_factory_create_gft(parser->type_factory, type)) {
     gt_error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid "
                  "one", type, line_number, filename);
     had_err = -1;
@@ -1072,7 +1070,7 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
 
   /* create the feature */
   if (!had_err) {
-    genome_feature = gt_genome_feature_new(seqid_str, gft, range,
+    genome_feature = gt_genome_feature_new(seqid_str, type, range,
                                            gt_strand_value);
     gt_genome_node_set_origin(genome_feature, filenamestr, line_number);
   }
