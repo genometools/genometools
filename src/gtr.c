@@ -37,7 +37,6 @@
 #include "core/yarandom.h"
 #include "extended/gtdatahelp.h"
 #include "extended/luahelper.h"
-#include "extended/type_factory_builtin.h"
 #include "gtlua/gt_lua.h"
 
 #ifndef WITHOUT_CAIRO
@@ -56,7 +55,6 @@ struct GTR {
   Toolbox *tools;
   Hashmap *unit_tests;
   lua_State *L;
-  GT_TypeFactory *type_factory; /* for gtlua */
 #ifndef WITHOUT_CAIRO
   GT_Style *style;
 #endif
@@ -79,8 +77,6 @@ GTR* gtr_new(GT_Error *err)
     had_err = -1;
   }
   if (!had_err) {
-    gtr->type_factory = gt_type_factory_builtin_new();
-    gt_lua_put_type_factory_in_registry(gtr->L, gtr->type_factory);
     luaL_openlibs(gtr->L);    /* open the standard libraries */
     gt_lua_openlib(gtr->L);   /* open the GenomeTools library */
     luaopen_lfs(gtr->L);      /* open Lua filesystem */
@@ -348,7 +344,6 @@ void gtr_delete(GTR *gtr)
   gt_str_delete(gtr->debugfp);
   toolbox_delete(gtr->tools);
   hashmap_delete(gtr->unit_tests);
-  gt_type_factory_delete(gtr->type_factory);
   if (gtr->L) lua_close(gtr->L);
 #ifndef WITHOUT_CAIRO
   gt_style_delete_without_state(gtr->style);

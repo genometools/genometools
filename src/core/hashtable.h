@@ -36,7 +36,7 @@ enum iterator_op
 };
 
 typedef enum iterator_op (*Elemvisitfunc)(void *elem, void *data,
-                                             GT_Error *err);
+                                          GT_Error *err);
 
 typedef void (*FreeFuncWData)(void *elem, void *table_data);
 

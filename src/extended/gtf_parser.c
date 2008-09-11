@@ -161,13 +161,8 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   }
 
   if (!had_err) {
-    GT_FeatureType *mRNA_type;
-    mRNA_type = gt_genome_feature_create_gft(*(GT_GenomeFeature**)
-                                       gt_array_get_first(gt_genome_node_array),
-                                             gft_mRNA);
-    assert(mRNA_type);
-    mRNA_node = gt_genome_feature_new(mRNA_seqid, mRNA_type, mRNA_range,
-                                   mRNA_strand);
+    mRNA_node = gt_genome_feature_new(mRNA_seqid, gft_mRNA, mRNA_range,
+                                      mRNA_strand);
 
     if ((tname = hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key))) {
@@ -208,7 +203,6 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   cinfo->mRNAs = mRNAs;
   had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, cinfo, err);
   if (!had_err) {
-    GT_FeatureType *gene_type;
     assert(gt_array_size(mRNAs)); /* at least one mRNA constructed */
 
     /* determine the range and the strand of the gene */
@@ -224,10 +218,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_type = gt_genome_feature_create_gft((GT_GenomeFeature*) gn, gft_gene);
-    assert(gene_type);
-    gene_node = gt_genome_feature_new(gene_seqid, gene_type, gene_range,
-                                   gene_strand);
+    gene_node = gt_genome_feature_new(gene_seqid, gft_gene, gene_range,
+                                      gene_strand);
 
     if ((gname = hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key))) {
@@ -285,7 +277,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
   GT_Array *gt_genome_node_array;
   ConstructionInfo cinfo;
   GTF_feature_type gtf_feature_type;
-  GT_FeatureType *gff_feature_type = NULL;
+  const char *gff_feature_type = NULL;
   const char *filename;
   bool score_is_defined;
   int had_err = 0;

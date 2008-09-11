@@ -44,7 +44,6 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
   assert(current_feature);
   if (gt_genome_feature_has_type(current_feature, gft_exon)) {
     if (v->previous_exon_feature) {
-      GT_FeatureType *intron_type;
       /* determine intron range */
       previous_range = gt_genome_node_get_range((GT_GenomeNode*)
                                              v->previous_exon_feature);
@@ -69,9 +68,7 @@ static int add_introns_in_children(GT_GenomeNode *gn, void *data,
              gt_genome_node_get_seqid((GT_GenomeNode*) current_feature)));
 
       /* create intron */
-      intron_type = gt_genome_feature_create_gft(current_feature, gft_intron);
-      assert(intron_type);
-      intron_node = gt_genome_feature_new(parent_seqid, intron_type,
+      intron_node = gt_genome_feature_new(parent_seqid, gft_intron,
                                           intron_range, intron_strand);
       gt_genome_node_add_child((GT_GenomeNode*) v->parent_feature, intron_node);
     }

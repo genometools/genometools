@@ -19,7 +19,6 @@
 #include "core/cstr.h"
 #include "core/cstr_table.h"
 #include "core/ma.h"
-#include "extended/feature_type_imp.h"
 #include "extended/obo_parse_tree.h"
 #include "extended/type_factory_obo.h"
 #include "extended/type_factory_rep.h"
@@ -38,17 +37,17 @@ static void gt_type_factory_obo_free(GT_TypeFactory *ftf)
   gt_cstr_table_delete(ftfo->gt_genome_feature_types);
 }
 
-static GT_FeatureType* gt_type_factory_obo_create_gft(GT_TypeFactory *ftf,
-                                                      const char *type)
+static const char* gt_type_factory_obo_create_gft(GT_TypeFactory *ftf,
+                                                  const char *type)
 {
   GT_TypeFactoryOBO *ftfo;
-  GT_FeatureType *gft;
+  const char *gft;
   assert(ftf && type);
   ftfo = gt_type_factory_obo_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
     if (gt_cstr_table_get(ftfo->gt_genome_feature_types, type)) {
-      gft = gt_feature_type_construct(ftf, type);
-      gft_collection_add(ftf->used_types, type, gft);
+      gft_collection_add(ftf->used_types, type);
+      return type;
     }
   }
   return gft;

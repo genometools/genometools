@@ -33,19 +33,17 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
 const GT_GenomeNodeClass* gt_genome_feature_class(void);
-GT_GenomeNode*        gt_genome_feature_new(GT_Str *seqid, GT_FeatureType*,
+GT_GenomeNode*        gt_genome_feature_new(GT_Str *seqid, const char *type,
                                             GT_Range, GT_Strand);
 GT_GenomeNode*        gt_genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
-GT_GenomeNode*        gt_genome_feature_new_standard_gene(GT_TypeFactory*);
+GT_GenomeNode*        gt_genome_feature_new_standard_gene(void);
 const char*           gt_genome_feature_get_source(GT_GenomeFeature*);
 const char*           gt_genome_feature_get_attribute(GT_GenomeNode *gn,
                                                       const char *attr_name);
 /* Return a GT_StrArray containing the used attribute names. */
 GT_StrArray*          gt_genome_feature_get_attribute_list(GT_GenomeFeature*);
-GT_FeatureType*       gt_genome_feature_get_type(GT_GenomeFeature*);
-GT_FeatureType*       gt_genome_feature_create_gft(GT_GenomeFeature*,
-                                                   const char*);
+const char*           gt_genome_feature_get_type(GT_GenomeFeature*);
 bool                  gt_genome_feature_has_type(GT_GenomeFeature*,
                                                  const char*);
 bool                  gt_genome_feature_score_is_defined(const

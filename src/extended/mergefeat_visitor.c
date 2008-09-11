@@ -49,8 +49,8 @@ static int mergefeat_in_children(GT_GenomeNode *gn, void *data,
   gt_error_check(err);
   current_feature = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(current_feature);
-  if ((previous_feature = hashmap_get(v->hm, gt_feature_type_get_cstr(
-                               gt_genome_feature_get_type(current_feature))))) {
+  if ((previous_feature =
+        hashmap_get(v->hm, gt_genome_feature_get_type(current_feature)))) {
     /* previous feature found -> check if merging is necessary */
     assert(gt_genome_feature_get_type(previous_feature) ==
            gt_genome_feature_get_type(current_feature));
@@ -68,12 +68,11 @@ static int mergefeat_in_children(GT_GenomeNode *gn, void *data,
       gt_array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */
-    hashmap_remove(v->hm, (char*) gt_feature_type_get_cstr(
-                     gt_genome_feature_get_type(previous_feature)));
+    hashmap_remove(v->hm, gt_genome_feature_get_type(previous_feature));
   }
   /* add current feature */
-  hashmap_add(v->hm, (char*) gt_feature_type_get_cstr(
-                gt_genome_feature_get_type(current_feature)), current_feature);
+  hashmap_add(v->hm, (char*) gt_genome_feature_get_type(current_feature),
+              current_feature);
   return 0;
 }
 

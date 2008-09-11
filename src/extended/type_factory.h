@@ -35,7 +35,7 @@ typedef struct GT_TypeFactory GT_TypeFactory;
 GT_TypeFactory* gt_type_factory_ref(GT_TypeFactory *feature_type_factory);
 /* Uses the factory to create a new genome feature type object of the given
    <type>. Returns NULL, if <type> is not a valid type. */
-GT_FeatureType* gt_type_factory_create_gft(GT_TypeFactory*, const char *type);
+const char*     gt_type_factory_create_gft(GT_TypeFactory*, const char *type);
 /* Returns a GT_StrArray which contains all type names in alphabetical order
    which have been created by this factory.
    The caller is responsible to free it! */

@@ -36,7 +36,6 @@
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 #include "extended/genome_feature.h"
-#include "extended/type_factory_builtin.h"
 
 /* used to separate a filename from the type in a track name */
 #define FILENAME_TYPE_SEPARATOR  '|'
@@ -57,7 +56,7 @@ struct GT_Diagram {
 
 /* holds a GT_Block with associated type */
 typedef struct {
-  GT_FeatureType *gft;
+  const char *gft;
   GT_Block *block;
 } GT_BlockTuple;
 
@@ -77,7 +76,7 @@ typedef struct {
   GT_Diagram *dia;
 } GT_TrackTraverseInfo;
 
-static GT_BlockTuple* blocktuple_new(GT_FeatureType *gft, GT_Block *block)
+static GT_BlockTuple* blocktuple_new(const char *gft, GT_Block *block)
 {
   GT_BlockTuple *bt;
   assert(block);
@@ -103,7 +102,7 @@ static NodeInfoGT_Element* get_or_create_node_info(GT_Diagram *d,
 }
 
 static GT_Block* find_block_for_type(NodeInfoGT_Element* ni,
-                                     GT_FeatureType *gft)
+                                     const char *gft)
 {
   GT_Block *block = NULL;
   unsigned long i;
@@ -129,7 +128,7 @@ static const char* get_node_name_or_id(GT_GenomeNode *gn)
   return ret;
 }
 
-static bool get_caption_display_status(GT_Diagram *d, GT_FeatureType *gft)
+static bool get_caption_display_status(GT_Diagram *d, const char *gft)
 {
   assert(d && gft);
   bool *status;
@@ -145,8 +144,7 @@ static bool get_caption_display_status(GT_Diagram *d, GT_FeatureType *gft)
       *status = true;
     if (*status)
     {
-      if (gt_style_get_num(d->style, gt_feature_type_get_cstr(gft),
-                         "max_capt_show_width", &tmp, NULL))
+      if (gt_style_get_num(d->style, gft, "max_capt_show_width", &tmp, NULL))
         threshold = tmp;
       else
         threshold = UNDEF_ULONG;
@@ -155,7 +153,7 @@ static bool get_caption_display_status(GT_Diagram *d, GT_FeatureType *gft)
       else
         *status = (gt_range_length(d->range) <= threshold);
     }
-    hashmap_add(d->caption_display_status, gft, status);
+    hashmap_add(d->caption_display_status, (void*) gft, status);
   }
   return *status;
 }
@@ -179,11 +177,10 @@ static void add_to_current(GT_Diagram *d, GT_GenomeNode *node,
 
   caption = gt_str_new();
   if (!gt_style_get_str(d->style,
-                     gt_feature_type_get_cstr(
-                         gt_genome_feature_get_type((GT_GenomeFeature*) node)),
-                     "block_caption",
-                     caption,
-                     node))
+                        gt_genome_feature_get_type((GT_GenomeFeature*) node),
+                        "block_caption",
+                        caption,
+                        node))
   {
     nnid_p = get_node_name_or_id(parent);
     nnid_n = get_node_name_or_id(node);
@@ -310,11 +307,9 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node,
 
   assert(d && node);
 
-  feature_type = gt_feature_type_get_cstr(
-                        gt_genome_feature_get_type((GT_GenomeFeature*) node));
+  feature_type = gt_genome_feature_get_type((GT_GenomeFeature*) node);
   if (parent)
-    parent_gft = gt_feature_type_get_cstr(
-                        gt_genome_feature_get_type((GT_GenomeFeature*) parent));
+    parent_gft = gt_genome_feature_get_type((GT_GenomeFeature*) parent);
 
   /* discard elements that do not overlap with visible range */
   elem_range = gt_genome_node_get_range(node);
@@ -351,7 +346,7 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node,
     if (!gt_style_get_bool(d->style, feature_type, "collapse_to_parent",
                         collapse, NULL))
       *collapse = false;
-    hashmap_add(d->collapsingtypes, (char*) feature_type, collapse);
+    hashmap_add(d->collapsingtypes, (void*) feature_type, collapse);
   }
 
   /* check if direct children overlap */
@@ -412,12 +407,12 @@ static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children,
   return 0;
 }
 
-static GT_Str* gt_track_key_new(const char *filename, GT_FeatureType *type)
+static GT_Str* gt_track_key_new(const char *filename, const char *type)
 {
   GT_Str *gt_track_key;
   gt_track_key = gt_str_new_cstr(filename);
   gt_str_append_char(gt_track_key, FILENAME_TYPE_SEPARATOR);
-  gt_str_append_cstr(gt_track_key, gt_feature_type_get_cstr(type));
+  gt_str_append_cstr(gt_track_key, type);
   return gt_track_key;
 }
 
@@ -436,7 +431,7 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
     if (!list)
     {
       list = gt_array_new(sizeof (GT_Block*));
-      hashmap_add(diagram->blocks, bt->gft, list);
+      hashmap_add(diagram->blocks, (void*) bt->gft, list);
     }
     assert(list);
     gt_array_add(list, bt->block);
@@ -581,15 +576,14 @@ static int layout_tracks(void *key, void *value, void *data,
   unsigned long i, max;
   GT_Track *track;
   GT_TrackTraverseInfo *tti = (GT_TrackTraverseInfo*) data;
-  GT_FeatureType *gft = (GT_FeatureType*) key;
   GT_Array *list = (GT_Array*) value;
   char *filename;
   GT_Str *gt_track_key;
-  const char *type;
+  const char *type = key;
   GT_Block *block;
   bool split;
   double tmp;
-  assert(gft && list);
+  assert(type && list);
 
   /* to get a deterministic layout, we sort the GT_Blocks for each type */
   gt_array_sort(list, blocklist_block_compare);
@@ -599,9 +593,8 @@ static int layout_tracks(void *key, void *value, void *data,
   block = *(GT_Block**) gt_array_get(list, 0);
   filename = gt_basename(gt_genome_node_get_filename(
                                         gt_block_get_top_level_feature(block)));
-  gt_track_key = gt_track_key_new(filename, gft);
+  gt_track_key = gt_track_key_new(filename, type);
   gt_free(filename);
-  type = gt_feature_type_get_cstr(gft);
 
   if (!gt_style_get_bool(tti->dia->style, "format", "split_lines", &split,
                          NULL)) {
@@ -658,8 +651,6 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
 
 int gt_diagram_unit_test(GT_Error *err)
 {
-  GT_TypeFactory *feature_type_factory;
-  GT_FeatureType *gene_type, *exon_type, *CDS_type;
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range r1, r2, r3, r4, r5, dr1, rs;
@@ -671,11 +662,6 @@ int gt_diagram_unit_test(GT_Error *err)
   GT_Array *features;
   GT_Canvas *canvas = NULL;
   gt_error_check(err);
-
-  feature_type_factory = gt_type_factory_builtin_new();
-  gene_type = gt_type_factory_create_gft(feature_type_factory, gft_gene);
-  exon_type = gt_type_factory_create_gft(feature_type_factory, gft_exon);
-  CDS_type = gt_type_factory_create_gft(feature_type_factory, gft_CDS);
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -692,17 +678,17 @@ int gt_diagram_unit_test(GT_Error *err)
   sr1 = (GT_SequenceRegion*) gt_sequence_region_new(seqid1, rs);
   sr2 = (GT_SequenceRegion*) gt_sequence_region_new(seqid2, rs);
 
-  gn1 = gt_genome_feature_new(seqid1, gene_type, r1, GT_STRAND_UNKNOWN);
+  gn1 = gt_genome_feature_new(seqid1, gft_gene, r1, GT_STRAND_UNKNOWN);
 
-  gn2 = gt_genome_feature_new(seqid2, gene_type, r4, GT_STRAND_UNKNOWN);
+  gn2 = gt_genome_feature_new(seqid2, gft_gene, r4, GT_STRAND_UNKNOWN);
 
-  ex1 = gt_genome_feature_new(seqid1, exon_type, r2, GT_STRAND_UNKNOWN);
+  ex1 = gt_genome_feature_new(seqid1, gft_exon, r2, GT_STRAND_UNKNOWN);
 
-  ex2 = gt_genome_feature_new(seqid1, exon_type, r3, GT_STRAND_UNKNOWN);
+  ex2 = gt_genome_feature_new(seqid1, gft_exon, r3, GT_STRAND_UNKNOWN);
 
-  ex3 = gt_genome_feature_new(seqid2, exon_type, r4, GT_STRAND_UNKNOWN);
+  ex3 = gt_genome_feature_new(seqid2, gft_exon, r4, GT_STRAND_UNKNOWN);
 
-  cds1 = gt_genome_feature_new(seqid2, CDS_type, r5, GT_STRAND_UNKNOWN);
+  cds1 = gt_genome_feature_new(seqid2, gft_CDS, r5, GT_STRAND_UNKNOWN);
 
   /* determine the structure of our feature tree */
   gt_genome_node_add_child(gn1, ex1);
@@ -744,7 +730,7 @@ int gt_diagram_unit_test(GT_Error *err)
   if (!had_err &&
       !gt_style_get_bool(dia->style, "gene", "collapse_to_parent", false, NULL))
   {
-    gt_track_key = gt_track_key_new("generated", gene_type);
+    gt_track_key = gt_track_key_new("generated", gft_gene);
     ensure(had_err, hashmap_get(dia->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
@@ -752,7 +738,7 @@ int gt_diagram_unit_test(GT_Error *err)
   if (!had_err &&
       !gt_style_get_bool(dia->style, "exon", "collapse_to_parent", false, NULL))
   {
-    gt_track_key = gt_track_key_new("generated", exon_type);
+    gt_track_key = gt_track_key_new("generated", gft_exon);
     ensure(had_err, hashmap_get(dia->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
@@ -770,7 +756,7 @@ int gt_diagram_unit_test(GT_Error *err)
                          NULL))
   {
     gt_diagram_sketch(dia2, canvas);
-    gt_track_key = gt_track_key_new("generated", gene_type);
+    gt_track_key = gt_track_key_new("generated", gft_gene);
     ensure(had_err, hashmap_get(dia2->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
@@ -779,7 +765,7 @@ int gt_diagram_unit_test(GT_Error *err)
       !gt_style_get_bool(dia2->style, "exon", "collapse_to_parent", false,
                          NULL))
   {
-    gt_track_key = gt_track_key_new("generated", exon_type);
+    gt_track_key = gt_track_key_new("generated", gft_exon);
     ensure(had_err, hashmap_get(dia2->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
@@ -787,7 +773,7 @@ int gt_diagram_unit_test(GT_Error *err)
   if (!had_err &&
       !gt_style_get_bool(dia2->style, "CDS", "collapse_to_parent", false, NULL))
   {
-    gt_track_key = gt_track_key_new("generated", CDS_type);
+    gt_track_key = gt_track_key_new("generated", gft_CDS);
     ensure(had_err, hashmap_get(dia2->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
@@ -805,7 +791,7 @@ int gt_diagram_unit_test(GT_Error *err)
                          NULL))
   {
     gt_diagram_sketch(dia3, canvas);
-    gt_track_key = gt_track_key_new("generated", gene_type);
+    gt_track_key = gt_track_key_new("generated", gft_gene);
     ensure(had_err, hashmap_get(dia3->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
@@ -814,7 +800,7 @@ int gt_diagram_unit_test(GT_Error *err)
       !gt_style_get_bool(dia3->style, "exon", "collapse_to_parent", false,
                          NULL))
   {
-    gt_track_key = gt_track_key_new("generated", exon_type);
+    gt_track_key = gt_track_key_new("generated", gft_exon);
     ensure(had_err, hashmap_get(dia3->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
@@ -834,7 +820,6 @@ int gt_diagram_unit_test(GT_Error *err)
   gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
-  gt_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

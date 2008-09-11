@@ -25,8 +25,8 @@
 
 struct GT_TypeFactoryClass {
   size_t size;
-  GT_FeatureType* (*create_gft)(GT_TypeFactory*, const char *type);
-  void            (*free)(GT_TypeFactory*);
+  const char* (*create_gft)(GT_TypeFactory*, const char *type);
+  void        (*free)(GT_TypeFactory*);
 };
 
 struct GT_TypeFactory {

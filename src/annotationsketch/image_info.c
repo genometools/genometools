@@ -23,7 +23,6 @@
 #include "core/range.h"
 #include "core/strand.h"
 #include "core/unused_api.h"
-#include "extended/type_factory_builtin.h"
 
 struct GT_ImageInfo {
   GT_Array* recmaps;
@@ -86,8 +85,6 @@ int gt_image_info_unit_test(GT_Error *err)
 {
   GT_RecMap* rms[20];
   GT_GenomeNode* gfs[20];
-  GT_TypeFactory *ftf;
-  GT_FeatureType *gft;
   GT_ImageInfo *ii;
   unsigned long i;
   GT_Str *seqid;
@@ -97,8 +94,6 @@ int gt_image_info_unit_test(GT_Error *err)
 
   seqid = gt_str_new_cstr("seqid");
   ii = gt_image_info_new();
-  ftf = gt_type_factory_builtin_new();
-  gft = gt_type_factory_create_gft(ftf, "gene");
 
   for (i=0;i<20;i++)
   {
@@ -106,7 +101,7 @@ int gt_image_info_unit_test(GT_Error *err)
     unsigned long rbase;
     rbase = gt_rand_max(10);
     GT_Range r = {rbase,rbase+gt_rand_max(20)};
-    gfs[i] = gt_genome_feature_new(seqid, gft, r, GT_STRAND_FORWARD);
+    gfs[i] = gt_genome_feature_new(seqid, gft_gene, r, GT_STRAND_FORWARD);
     rms[i] = gt_recmap_new(gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
@@ -120,7 +115,6 @@ int gt_image_info_unit_test(GT_Error *err)
   }
 
   gt_image_info_delete(ii);
-  gt_type_factory_delete(ftf);
   gt_str_delete(seqid);
 
   return had_err;

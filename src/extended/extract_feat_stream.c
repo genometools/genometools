@@ -68,8 +68,7 @@ const GenomeStreamClass* extract_feat_stream_class(void)
 }
 
 GenomeStream* extract_feat_stream_new(GenomeStream *in_stream,
-                                      RegionMapping *rm,
-                                      GT_FeatureType *type,
+                                      RegionMapping *rm, const char *type,
                                       bool join, bool translate)
 {
   GenomeStream *gs = genome_stream_create(extract_feat_stream_class(), true);

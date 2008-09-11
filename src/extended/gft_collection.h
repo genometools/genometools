@@ -26,14 +26,12 @@ typedef struct GFTCollection GFTCollection;
 
 GFTCollection*     gft_collection_new(void);
 void               gft_collection_delete(GFTCollection*);
-/* Takes ownership of <gft>. */
-void               gft_collection_add(GFTCollection*, const char *type,
-                                      GT_FeatureType *gft);
-GT_FeatureType* gft_collection_get(GFTCollection*, const char *type);
+void               gft_collection_add(GFTCollection*, const char *type);
+const char*        gft_collection_get(GFTCollection*, const char *type);
 /* Returns a GT_StrArray which contains all type names in alphabetical order
    which are stored in this collection.
    The caller is responsible to free it! */
-GT_StrArray*          gft_collection_get_types(const GFTCollection
+GT_StrArray*       gft_collection_get_types(const GFTCollection
                                             *gft_collection);
 
 #endif

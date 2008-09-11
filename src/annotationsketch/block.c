@@ -22,7 +22,6 @@
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "extended/type_factory_builtin.h"
 
 struct GT_Block {
   GT_Dlist *elements;
@@ -30,7 +29,7 @@ struct GT_Block {
   GT_Str *caption;
   bool show_caption;
   GT_Strand strand;
-  GT_FeatureType *type;
+  const char *type;
   GT_GenomeNode *top_level_feature;
   unsigned long reference_count;
 };
@@ -38,18 +37,17 @@ struct GT_Block {
 /* GT_Compare function used to insert GT_Elements into dlist, order by type */
 static int elemcmp(const void *a, const void *b)
 {
+  const char *type_a, *type_b;
   GT_Element *elem_a = (GT_Element*) a;
   GT_Element *elem_b = (GT_Element*) b;
 
-  GT_FeatureType *ta = gt_element_get_type(elem_a);
-  GT_FeatureType *tb = gt_element_get_type(elem_b);
+  type_a = gt_element_get_type(elem_a);
+  type_b = gt_element_get_type(elem_b);
 
-  if (ta == tb)
+  if (type_a == type_b)
     return 0;
-  else if (strcmp(gt_feature_type_get_cstr(ta),
-                  gt_feature_type_get_cstr(tb)) < 0) {
+  if (strcmp(type_a, type_b) < 0)
     return 1;
-  }
   return -1;
 }
 
@@ -179,13 +177,13 @@ GT_Strand gt_block_get_strand(const GT_Block *block)
   return block->strand;
 }
 
-void gt_block_set_type(GT_Block *block, GT_FeatureType *type)
+void gt_block_set_type(GT_Block *block, const char *type)
 {
   assert(block);
   block->type = type;
 }
 
-GT_FeatureType* gt_block_get_type(const GT_Block *block)
+const char* gt_block_get_type(const GT_Block *block)
 {
   assert(block);
   return block->type;
@@ -216,8 +214,6 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
 
 int gt_block_unit_test(GT_Error *err)
 {
-  GT_TypeFactory *feature_type_factory;
-  GT_FeatureType *gft;
   GT_Range r1, r2, r_temp, b_range;
   GT_Strand s;
   GT_GenomeNode *gn1, *gn2;
@@ -227,7 +223,6 @@ int gt_block_unit_test(GT_Error *err)
   int had_err = 0;
   gt_error_check(err);
 
-  feature_type_factory = gt_type_factory_builtin_new();
   seqid = gt_str_new_cstr("seqid");
   caption1 = gt_str_new_cstr("foo");
   caption2 = gt_str_new_cstr("bar");
@@ -238,10 +233,8 @@ int gt_block_unit_test(GT_Error *err)
   r2.start = 40UL;
   r2.end = 50UL;
 
-  gft = gt_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = gt_genome_feature_new(seqid, gft, r1, GT_STRAND_FORWARD);
-  gft = gt_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn2 = gt_genome_feature_new(seqid, gft, r2, GT_STRAND_FORWARD);
+  gn1 = gt_genome_feature_new(seqid, gft_gene, r1, GT_STRAND_FORWARD);
+  gn2 = gt_genome_feature_new(seqid, gft_exon, r2, GT_STRAND_FORWARD);
 
   e1 = gt_element_new(gn1);
   e2 = gt_element_new(gn2);
@@ -281,7 +274,6 @@ int gt_block_unit_test(GT_Error *err)
   gt_block_delete(b);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
-  gt_type_factory_delete(feature_type_factory);
 
   return had_err;
 }

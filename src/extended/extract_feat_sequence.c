@@ -20,7 +20,7 @@
 #include "extended/region_mapping.h"
 #include "extended/reverse.h"
 
-static int extract_join_feature(GT_GenomeNode *gn, GT_FeatureType *type,
+static int extract_join_feature(GT_GenomeNode *gn, const char *type,
                                 RegionMapping *region_mapping, GT_Str *sequence,
                                 bool *reverse_strand, GT_Error *err)
 {
@@ -34,7 +34,7 @@ static int extract_join_feature(GT_GenomeNode *gn, GT_FeatureType *type,
   gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(gf);
 
-  if (gt_genome_feature_get_type(gf) == type) {
+  if (gt_genome_feature_has_type(gf, type)) {
     had_err = region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
                                               gt_genome_node_get_seqid(gn),
                                               err);
@@ -57,9 +57,9 @@ static int extract_join_feature(GT_GenomeNode *gn, GT_FeatureType *type,
   return had_err;
 }
 
-int extract_feat_sequence(GT_Str *sequence, GT_GenomeNode *gn,
-                          GT_FeatureType *type, bool join,
-                          RegionMapping *region_mapping, GT_Error *err)
+int extract_feat_sequence(GT_Str *sequence, GT_GenomeNode *gn, const char *type,
+                          bool join, RegionMapping *region_mapping,
+                          GT_Error *err)
 {
   GT_GenomeFeature *gf;
   GT_Range range;

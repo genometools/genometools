@@ -18,7 +18,6 @@
 #include "core/cstr.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
-#include "extended/feature_type_imp.h"
 #include "extended/type_factory_any.h"
 #include "extended/type_factory_rep.h"
 
@@ -29,16 +28,16 @@ struct GT_TypeFactoryAny {
 #define gt_type_factory_any_cast(FTF)\
         gt_type_factory_cast(gt_type_factory_any_class(), FTF)
 
-static GT_FeatureType* gt_type_factory_any_create_gft(GT_TypeFactory *ftf,
-                                                      const char *type)
+static const char* gt_type_factory_any_create_gft(GT_TypeFactory *ftf,
+                                                  const char *type)
 {
   GT_TypeFactoryAny *ftfa;
-  GT_FeatureType *gft = NULL;
+  const char *gft = NULL;
   assert(ftf && type);
   ftfa = gt_type_factory_any_cast(ftf);
   if (!(gft = gft_collection_get(ftf->used_types, type))) {
-    gft = gt_feature_type_construct(ftf, type);
-    gft_collection_add(ftf->used_types, type, gft);
+    gft_collection_add(ftf->used_types, type);
+    return type;
   }
   return gft;
 }

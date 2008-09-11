@@ -28,22 +28,16 @@
 
 static int genome_feature_lua_new(lua_State *L)
 {
-  GT_TypeFactory *type_factory;
   GT_GenomeNode **gf;
-  GT_FeatureType *type;
   GT_Range *range;
   GT_Strand strand;
-  const char *seqid, *type_str, *strand_str;
+  const char *seqid, *type, *strand_str;
   size_t length;
   GT_Str *seqid_str;
   assert(L);
   /* get/check parameters */
   seqid = luaL_checkstring(L, 1);
-  type_str = luaL_checkstring(L, 2);
-  type_factory = gt_lua_get_type_factory_from_registry(L);
-  assert(type_factory);
-  type = gt_type_factory_create_gft(type_factory, type_str);
-  luaL_argcheck(L, type, 2, "invalid feature type");
+  type = luaL_checkstring(L, 2);
   range = check_range(L, 3);
   strand_str = luaL_checklstring(L, 4, &length);
   luaL_argcheck(L, length == 1, 4, "strand string must have length 1");
@@ -263,17 +257,15 @@ static int genome_feature_lua_get_type(lua_State *L)
   /* make sure we get a genome feature */
   gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  lua_pushstring(L, gt_feature_type_get_cstr(gt_genome_feature_get_type(gf)));
+  lua_pushstring(L, gt_genome_feature_get_type(gf));
   return 1;
 }
 
 static int genome_feature_lua_extract_sequence(lua_State *L)
 {
-  GT_TypeFactory *type_factory;
   GT_GenomeNode **gn;
   GT_GenomeFeature *gf;
-  const char *typestr;
-  GT_FeatureType *type;
+  const char *type;
   bool join;
   RegionMapping **region_mapping;
   GT_Str *sequence;
@@ -282,11 +274,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   /* make sure we get a genome feature */
   gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  typestr = lua_tostring(L, 2);
-  type_factory = gt_lua_get_type_factory_from_registry(L);
-  assert(type_factory);
-  type = gt_type_factory_create_gft(type_factory, typestr);
-  luaL_argcheck(L, type, 2, "not a valid type");
+  type = luaL_checkstring(L, 2);
   join = lua_toboolean(L, 3);
   region_mapping = check_region_mapping(L, 4);
   err = gt_error_new();

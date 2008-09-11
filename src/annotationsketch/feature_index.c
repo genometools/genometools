@@ -31,7 +31,6 @@
 #include "core/range.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "extended/type_factory_builtin.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 
@@ -267,8 +266,6 @@ bool gt_feature_index_has_seqid(const GT_FeatureIndex *fi, const char *seqid)
 
 int gt_feature_index_unit_test(GT_Error *err)
 {
-  GT_TypeFactory *feature_type_factory;
-  GT_FeatureType *type;
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range r1, r2, r3, r4, r5, check_range, rs;
@@ -278,8 +275,6 @@ int gt_feature_index_unit_test(GT_Error *err)
   GT_Array *features = NULL;
   int had_err = 0;
   gt_error_check(err);
-
-  feature_type_factory = gt_type_factory_builtin_new();
 
   /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -297,20 +292,12 @@ int gt_feature_index_unit_test(GT_Error *err)
   sr2 = (GT_SequenceRegion*) gt_sequence_region_new(seqid2, rs);
 
   /* generate a new genome feature */
-  type = gt_type_factory_create_gft(feature_type_factory, gft_gene);
-  gn1 = gt_genome_feature_new(seqid1, type, r1, GT_STRAND_UNKNOWN);
-
-  gn2 = gt_genome_feature_new(seqid2, type, r4, GT_STRAND_UNKNOWN);
-
-  type = gt_type_factory_create_gft(feature_type_factory, gft_exon);
-  ex1 = gt_genome_feature_new(seqid1, type, r2, GT_STRAND_UNKNOWN);
-
-  ex2 = gt_genome_feature_new(seqid1, type, r3, GT_STRAND_UNKNOWN);
-
-  ex3 = gt_genome_feature_new(seqid2, type, r4, GT_STRAND_UNKNOWN);
-
-  type = gt_type_factory_create_gft(feature_type_factory, gft_CDS);
-  cds1 = gt_genome_feature_new(seqid2, type, r5, GT_STRAND_UNKNOWN);
+  gn1 = gt_genome_feature_new(seqid1, gft_gene, r1, GT_STRAND_UNKNOWN);
+  gn2 = gt_genome_feature_new(seqid2, gft_gene, r4, GT_STRAND_UNKNOWN);
+  ex1 = gt_genome_feature_new(seqid1, gft_exon, r2, GT_STRAND_UNKNOWN);
+  ex2 = gt_genome_feature_new(seqid1, gft_exon, r3, GT_STRAND_UNKNOWN);
+  ex3 = gt_genome_feature_new(seqid2, gft_exon, r4, GT_STRAND_UNKNOWN);
+  cds1 = gt_genome_feature_new(seqid2, gft_CDS, r5, GT_STRAND_UNKNOWN);
 
   /* Determine the structure of our feature tree */
   gt_genome_node_add_child(gn1, ex1);
@@ -398,7 +385,6 @@ int gt_feature_index_unit_test(GT_Error *err)
   gt_genome_node_rec_delete((GT_GenomeNode*) sr2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
-  gt_type_factory_delete(feature_type_factory);
   return had_err;
 }
 

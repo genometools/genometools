@@ -325,12 +325,10 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
       unsigned long i;
       const GT_RecMap *rm;
       for (i = 0; i < gt_image_info_num_of_recmaps(ii) ;i++) {
-        GT_FeatureType *type;
         char buf[BUFSIZ];
         rm = gt_image_info_get_recmap(ii, i);
         gt_recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
-        type = gt_genome_feature_get_type(rm->gf);
-        printf("%s, %s\n", buf, gt_feature_type_get_cstr(type));
+        printf("%s, %s\n", buf, gt_genome_feature_get_type(rm->gf));
       }
     }
     had_err = gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, file,

@@ -136,7 +136,7 @@ static int gtf_show_genome_feature(GT_GenomeNode *gn, void *data, GT_Error *err)
              gt_genome_feature_has_type(gf, gft_exon))) {
       warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
               "\"%s\")",
-              gt_feature_type_get_cstr(gt_genome_feature_get_type(gf)),
+              gt_genome_feature_get_type(gf),
               gt_genome_node_get_line_number(gn),
               gt_genome_node_get_filename(gn));
   }

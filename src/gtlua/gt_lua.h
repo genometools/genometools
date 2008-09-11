@@ -19,11 +19,7 @@
 #define GT_LUA_H
 
 #include "lua.h"
-#include "extended/type_factory.h"
 
-void                gt_lua_put_type_factory_in_registry(lua_State*,
-                                                        GT_TypeFactory*);
-GT_TypeFactory*     gt_lua_get_type_factory_from_registry(lua_State*);
 /* Open GenomeTools library in Lua state <L>. */
 int                 gt_lua_openlib(lua_State *L);
 

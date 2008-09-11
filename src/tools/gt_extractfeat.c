@@ -22,27 +22,23 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gtdatahelp.h"
 #include "extended/seqid2file.h"
-#include "extended/type_factory_any.h"
 #include "tools/gt_extractfeat.h"
 
 typedef struct {
   bool join,
        translate,
        verbose;
-  GT_Str *typestr,
-      *seqfile,
-      *regionmapping;
-  GT_FeatureType *type;
-  GT_TypeFactory *type_factory;
+  GT_Str *type,
+         *seqfile,
+         *regionmapping;
 } ExtractFeatArguments;
 
 static void* gt_extractfeat_arguments_new(void)
 {
   ExtractFeatArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->typestr = gt_str_new();
+  arguments->type = gt_str_new();
   arguments->seqfile = gt_str_new();
   arguments->regionmapping = gt_str_new();
-  arguments->type_factory = gt_type_factory_any_new();
   return arguments;
 }
 
@@ -50,10 +46,9 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
 {
   ExtractFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_type_factory_delete(arguments->type_factory);
   gt_str_delete(arguments->regionmapping);
   gt_str_delete(arguments->seqfile);
-  gt_str_delete(arguments->typestr);
+  gt_str_delete(arguments->type);
   gt_free(arguments);
 }
 
@@ -70,7 +65,7 @@ static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
 
   /* -type */
   option = option_new_string("type", "set type of features to extract",
-                             arguments->typestr, NULL);
+                             arguments->type, NULL);
   option_is_mandatory(option);
   option_parser_add_option(op, option);
 
@@ -99,27 +94,6 @@ static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_extractfeat_arguments_check(GT_UNUSED int argc,
-                                          void *tool_arguments, GT_Error *err)
-{
-  ExtractFeatArguments *arguments = tool_arguments;
-  int had_err = 0;
-
-  gt_error_check(err);
-  assert(arguments);
-
-  /* determine type and make sure it is a valid one */
-  if (!(arguments->type =
-          gt_type_factory_create_gft(arguments->type_factory,
-                                     gt_str_get(arguments->typestr)))) {
-    gt_error_set(err, "\"%s\" is not a valid feature type",
-              gt_str_get(arguments->typestr));
-    had_err = -1;
-  }
-
-  return had_err;
-}
-
 static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
                                  GT_Error *err)
@@ -137,7 +111,6 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
     /* create gff3 input stream */
     gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                                arguments->verbose);
-    gff3_in_stream_set_type_factory(gff3_in_stream, arguments->type_factory);
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments->seqfile,
@@ -149,7 +122,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err) {
     /* create extract feature stream */
     extract_feat_stream = extract_feat_stream_new(gff3_in_stream, regionmapping,
-                                                  arguments->type,
+                                                  gt_str_get(arguments->type),
                                                   arguments->join,
                                                   arguments->translate);
 
@@ -172,6 +145,6 @@ Tool* gt_extractfeat(void)
   return tool_new(gt_extractfeat_arguments_new,
                   gt_extractfeat_arguments_delete,
                   gt_extractfeat_option_parser_new,
-                  gt_extractfeat_arguments_check,
+                  NULL,
                   gt_extractfeat_runner);
 }

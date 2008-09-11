@@ -38,8 +38,7 @@ GT_TypeFactory* gt_type_factory_ref(GT_TypeFactory *ftf)
   return ftf;
 }
 
-GT_FeatureType* gt_type_factory_create_gft(GT_TypeFactory *ftf,
-                                           const char *type)
+const char* gt_type_factory_create_gft(GT_TypeFactory *ftf, const char *type)
 {
   assert(ftf && ftf->c_class && ftf->c_class->create_gft);
   return ftf->c_class->create_gft(ftf, type);

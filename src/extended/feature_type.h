@@ -20,13 +20,6 @@
 
 #include <stdbool.h>
 
-/* The GT_FeatureType represents the feature type mainly used in
-   GT_GenomeFeatures and corresponds to the type column in GFF3 files.
-   To create new GT_FeatureTypes a GT_TypeFactory or an already existing
-   GT_FeatureType (which internally uses the GT_TypeFactory it was
-   created from) should be used!
-*/
-
 /* Some predefined (genome feature) type strings. */
 #define gft_CDS                      "CDS"
 #define gft_EST_match                "EST_match"
@@ -48,12 +41,5 @@
 #define gft_three_prime_UTR          "three_prime_UTR"
 #define gft_three_prime_splice_site  "three_prime_splice_site"
 #define gft_transcript               "transcript"
-
-typedef struct GT_FeatureType GT_FeatureType;
-
-GT_FeatureType* gt_feature_type_create_gft(GT_FeatureType*,
-                                                  const char *type);
-bool               gt_feature_type_is(GT_FeatureType*, const char *type);
-const char*        gt_feature_type_get_cstr(const GT_FeatureType*);
 
 #endif

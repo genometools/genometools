@@ -16,61 +16,43 @@
 */
 
 #include "core/cstr.h"
-#include "core/hashmap.h"
+#include "core/cstr_table.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/feature_type_imp.h"
 #include "extended/gft_collection.h"
 
 struct GFTCollection {
-  Hashmap *gt_genome_feature_types;
+  GT_CstrTable *genome_feature_types;
 };
 
 GFTCollection* gft_collection_new(void)
 {
   GFTCollection *gftc = gt_malloc(sizeof (GFTCollection));
-  gftc->gt_genome_feature_types = hashmap_new(
-    HASH_STRING, gt_free_func, (GT_FreeFunc)gt_feature_type_delete);
+  gftc->genome_feature_types = gt_cstr_table_new();
   return gftc;
 }
 
 void gft_collection_delete(GFTCollection *gftc)
 {
   if (!gftc) return;
-  hashmap_delete(gftc->gt_genome_feature_types);
+  gt_cstr_table_delete(gftc->genome_feature_types);
   gt_free(gftc);
 }
 
-void gft_collection_add(GFTCollection *gftc, const char *type,
-                         GT_FeatureType *gft)
-{
-  assert(gftc && type && gft);
-  hashmap_add(gftc->gt_genome_feature_types, gt_cstr_dup(type), gft);
-}
-
-GT_FeatureType* gft_collection_get(GFTCollection *gftc, const char *type)
+void gft_collection_add(GFTCollection *gftc, const char *type)
 {
   assert(gftc && type);
-  return hashmap_get(gftc->gt_genome_feature_types, type);
+  gt_cstr_table_add(gftc->genome_feature_types, type);
 }
 
-static int store_type(void *key, GT_UNUSED void *value, void *data,
-                      GT_UNUSED GT_Error *err)
+const char* gft_collection_get(GFTCollection *gftc, const char *type)
 {
-  GT_StrArray *types = data;
-  assert(key && types);
-  gt_strarray_add_cstr(types, key);
-  return 0;
+  assert(gftc && type);
+  return gt_cstr_table_get(gftc->genome_feature_types, type);
 }
 
 GT_StrArray* gft_collection_get_types(const GFTCollection *gftc)
 {
-  GT_StrArray *types;
-  int had_err;
   assert(gftc);
-  types = gt_strarray_new();
-  had_err = hashmap_foreach_in_key_order(gftc->gt_genome_feature_types,
-                                         store_type, types, NULL);
-  assert(!had_err);
-  return types;
+  return gt_cstr_table_get_all(gftc->genome_feature_types);
 }

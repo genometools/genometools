@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "core/fasta.h"
+#include "core/symbol.h"
 #include "core/translate.h"
 #include "extended/extract_feat_sequence.h"
 #include "extended/extract_feat_visitor.h"
@@ -25,7 +26,7 @@
 
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;
-  GT_FeatureType *type;
+  const char *type;
   bool join,
        translate;
   unsigned long fastaseq_counter;
@@ -42,12 +43,12 @@ static void extract_feat_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
-static void construct_description(GT_Str *description, GT_FeatureType *type,
+static void construct_description(GT_Str *description, const char *type,
                                   unsigned long counter, bool join,
                                   bool translate)
 {
   assert(!gt_str_length(description));
-  gt_str_append_cstr(description, gt_feature_type_get_cstr(type));
+  gt_str_append_cstr(description, type);
   gt_str_append_char(description, '_');
   gt_str_append_ulong(description, counter);
   if (join)
@@ -119,16 +120,15 @@ const GenomeVisitorClass* extract_feat_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* extract_feat_visitor_new(RegionMapping *rm,
-                                        GT_FeatureType *type, bool join,
-                                        bool translate)
+GenomeVisitor* extract_feat_visitor_new(RegionMapping *rm, const char *type,
+                                        bool join, bool translate)
 {
   GenomeVisitor *gv;
   ExtractFeatVisitor *efv;
   assert(rm);
   gv = genome_visitor_create(extract_feat_visitor_class());
   efv= extract_feat_visitor_cast(gv);
-  efv->type = type;
+  efv->type = gt_symbol(type);
   efv->join = join;
   efv->translate = translate;
   efv->fastaseq_counter = 0;

@@ -25,10 +25,9 @@
 #include "core/strand.h"
 #include "extended/feature_type.h"
 #include "extended/genome_feature.h"
-#include "extended/type_factory_builtin.h"
 
 struct GT_Element {
-  GT_FeatureType *type;
+  const char *type;
   GT_Strand strand;
   GT_GenomeNode *gn;
   GT_Range range;
@@ -75,13 +74,13 @@ void gt_element_set_range(GT_Element *element, GT_Range r)
   element->range = r;
 }
 
-GT_FeatureType* gt_element_get_type(const GT_Element *element)
+const char* gt_element_get_type(const GT_Element *element)
 {
   assert(element);
   return element->type;
 }
 
-void gt_element_set_type(GT_Element *element, GT_FeatureType *type)
+void gt_element_set_type(GT_Element *element, const char *type)
 {
   assert(element);
   element->type = type;
@@ -122,16 +121,12 @@ GT_GenomeNode* gt_element_get_node_ref(const GT_Element *elem)
 
 int gt_element_unit_test(GT_Error *err)
 {
-  GT_TypeFactory *feature_type_factory;
-  GT_FeatureType *type;
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
   GT_Element *e, *e2, *e3;
   GT_Str *seqid;
   int had_err = 0;
   gt_error_check(err);
-
-  feature_type_factory = gt_type_factory_builtin_new();
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -140,9 +135,8 @@ int gt_element_unit_test(GT_Error *err)
   r2.end = 50UL;
 
   seqid = gt_str_new_cstr("seqid");
-  type = gt_type_factory_create_gft(feature_type_factory, gft_exon);
-  gn = gt_genome_feature_new(seqid, type, r1, GT_STRAND_BOTH);
-  gn2 = gt_genome_feature_new(seqid, type, r2, GT_STRAND_BOTH);
+  gn = gt_genome_feature_new(seqid, gft_exon, r1, GT_STRAND_BOTH);
+  gn2 = gt_genome_feature_new(seqid, gft_exon, r2, GT_STRAND_BOTH);
 
   e = gt_element_new(gn);
   e2 = gt_element_new(gn);
@@ -154,12 +148,11 @@ int gt_element_unit_test(GT_Error *err)
   ensure(had_err, (1 == gt_range_compare(r2, r_temp)));
 
   /* tests gt_element_get_type and gt_element_set_type*/
-  ensure(had_err, (type == gt_element_get_type(e)));
-  type = gt_type_factory_create_gft(feature_type_factory, gft_intron);
-  ensure(had_err, (type != gt_element_get_type(e)));
-  gt_element_set_type(e, type);
-  ensure(had_err, (type == gt_element_get_type(e)));
-  gt_element_set_type(e2, type);
+  ensure(had_err, !strcmp(gft_exon, gt_element_get_type(e)));
+  ensure(had_err, strcmp(gft_intron, gt_element_get_type(e)));
+  gt_element_set_type(e, gft_intron);
+  ensure(had_err, !strcmp(gft_intron, gt_element_get_type(e)));
+  gt_element_set_type(e2, gft_intron);
 
   /* tests elements_are_equal */
   ensure(had_err, elements_are_equal(e, e2));
@@ -171,7 +164,6 @@ int gt_element_unit_test(GT_Error *err)
   gt_element_delete(e3);
   gt_genome_node_delete(gn);
   gt_genome_node_delete(gn2);
-  gt_type_factory_delete(feature_type_factory);
   gt_str_delete(seqid);
 
   return had_err;
