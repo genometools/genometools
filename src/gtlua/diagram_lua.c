@@ -100,17 +100,21 @@ static int diagram_lua_new_from_array(lua_State *L)
 {
   GT_Diagram **diagram;
   GT_Array *nodes;
-  GT_Range *range;
+  GT_Range range;
   GT_Style *style;
   /* get array */
   nodes = genome_node_table_to_array(L);
   /* get range */
-  range = check_range(L, 2);
+  range.start = luaL_checklong(L, 2);
+  range.end   = luaL_checklong(L, 3);
+  luaL_argcheck(L, range.start > 0, 2, "must be > 0");
+  luaL_argcheck(L, range.end > 0, 3, "must be > 0");
+  luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
   /* create diagram */
   style = lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GT_Diagram*));
   assert(diagram);
-  *diagram = gt_diagram_new_from_array(nodes, range, style);
+  *diagram = gt_diagram_new_from_array(nodes, &range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   gt_array_delete(nodes);
@@ -145,7 +149,7 @@ static const struct luaL_Reg diagram_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_diagram(lua_State *L)
+int gt_lua_open_diagram(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, DIAGRAM_METATABLE);

@@ -28,7 +28,7 @@ int gt_lua_open_annotationsketch(lua_State *L)
 {
   assert(L);
   luaopen_canvas(L);
-  luaopen_diagram(L);
+  gt_lua_open_diagram(L);
   luaopen_feature_index(L);
   luaopen_feature_stream(L);
   luaopen_feature_visitor(L);
