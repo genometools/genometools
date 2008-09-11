@@ -19,8 +19,8 @@
 #define TYPE_FACTORY_REP_H
 
 #include <stdio.h>
+#include "core/cstr_table.h"
 #include "extended/feature_type.h"
-#include "extended/gft_collection.h"
 #include "extended/type_factory.h"
 
 struct GT_TypeFactoryClass {
@@ -31,12 +31,12 @@ struct GT_TypeFactoryClass {
 
 struct GT_TypeFactory {
   const GT_TypeFactoryClass *c_class;
-  GFTCollection *used_types;
+  GT_CstrTable *used_types;
   unsigned int reference_count;
 };
 
 GT_TypeFactory* gt_type_factory_create(const GT_TypeFactoryClass*);
-void*               gt_type_factory_cast(const GT_TypeFactoryClass*,
-                                              GT_TypeFactory*);
+void*           gt_type_factory_cast(const GT_TypeFactoryClass*,
+                                     GT_TypeFactory*);
 
 #endif

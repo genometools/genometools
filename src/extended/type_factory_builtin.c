@@ -77,9 +77,9 @@ static const char* gt_type_factory_builtin_create_gft(GT_TypeFactory *ftf,
   const char *gft = NULL;
   assert(ftf && type);
   ftfb = gt_type_factory_builtin_cast(ftf);
-  if (!(gft = gft_collection_get(ftf->used_types, type))) {
+  if (!(gft = gt_cstr_table_get(ftf->used_types, type))) {
     if ((find_type(type))) {
-      gft_collection_add(ftf->used_types, type);
+      gt_cstr_table_add(ftf->used_types, type);
       return type;
     }
   }
