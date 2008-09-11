@@ -15,17 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_FACTORY_OBO_H
-#define TYPE_FACTORY_OBO_H
+#ifndef TYPE_CHECKER_BUILTIN_H
+#define TYPE_CHECKER_BUILTIN_H
 
-#include "extended/type_factory.h"
+#include "extended/type_checker.h"
 
-/* Implements the GT_TypeFactory interface with types from an OBO file. */
-typedef struct GT_TypeFactoryOBO GT_TypeFactoryOBO;
+/* Implements the GT_TypeChecker interface with built-in types. */
+typedef struct GT_TypeCheckerBuiltin GT_TypeCheckerBuiltin;
 
-const GT_TypeFactoryClass* gt_type_factory_obo_class(void);
-GT_TypeFactory*            gt_type_factory_obo_new(const char
-                                                            *obo_file_path,
-                                                            GT_Error*);
+const GT_TypeCheckerClass* gt_type_checker_builtin_class(void);
+GT_TypeChecker*            gt_type_checker_builtin_new();
 
 #endif

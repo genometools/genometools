@@ -15,22 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_FACTORY_H
-#define TYPE_FACTORY_H
+#ifndef TYPE_CHECKER_OBO_H
+#define TYPE_CHECKER_OBO_H
 
-/* The GT_TypeFactory interface. */
+#include "extended/type_checker.h"
 
-typedef struct GT_TypeFactoryClass GT_TypeFactoryClass;
-typedef struct GT_TypeFactory GT_TypeFactory;
+/* Implements the GT_TypeChecker interface with types from an OBO file. */
+typedef struct GT_TypeCheckerOBO GT_TypeCheckerOBO;
 
-#include "core/strarray.h"
-#include "extended/feature_type.h"
-
-/* Return a new reference to <feature_type_factory>. */
-GT_TypeFactory* gt_type_factory_ref(GT_TypeFactory *feature_type_factory);
-/* Uses the factory to create a new genome feature type object of the given
-   <type>. Returns NULL, if <type> is not a valid type. */
-const char*     gt_type_factory_create_gft(GT_TypeFactory*, const char *type);
-void            gt_type_factory_delete(GT_TypeFactory*);
+const GT_TypeCheckerClass* gt_type_checker_obo_class(void);
+GT_TypeChecker*            gt_type_checker_obo_new(const char *obo_file_path,
+                                                   GT_Error*);
 
 #endif

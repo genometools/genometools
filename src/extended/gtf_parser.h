@@ -19,6 +19,7 @@
 #define GTF_PARSER_H
 
 #include "core/queue.h"
+#include "extended/type_checker.h"
 
 /* This is a parser for gth GTF2.2 Gene Annotation Format as described at
    http://genes.cs.wustl.edu/GTF22.html
@@ -35,7 +36,7 @@
 
 typedef struct GTF_parser GTF_parser;
 
-GTF_parser* gtf_parser_new(GT_TypeFactory*);
+GTF_parser* gtf_parser_new(GT_TypeChecker*);
 int         gtf_parser_parse(GTF_parser*, GT_Queue *genome_nodes,
                              GT_Str *filenamestr, FILE*,
                              unsigned int be_tolerant, GT_Error*);

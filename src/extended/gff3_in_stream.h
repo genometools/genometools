@@ -20,14 +20,15 @@
 
 #include <stdio.h>
 #include "extended/genome_stream.h"
+#include "extended/type_checker.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct GFF3InStream GFF3InStream;
 
 const GenomeStreamClass* gff3_in_stream_class(void);
-void                     gff3_in_stream_set_type_factory(GenomeStream*,
-                                                         GT_TypeFactory
-                                                         *type_factory);
+void                     gff3_in_stream_set_type_checker(GenomeStream*,
+                                                         GT_TypeChecker
+                                                         *type_checker);
 /* Returns a <GT_StrArray*> which contains all type names in alphabetical order
    which have been parsed by <gff3_in_stream>.
    The caller is responsible to free it! */

@@ -15,15 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_FACTORY_BUILTIN_H
-#define TYPE_FACTORY_BUILTIN_H
+#ifndef TYPE_CHECKER_H
+#define TYPE_CHECKER_H
 
-#include "extended/type_factory.h"
+/* The GT_TypeChecker interface. */
 
-/* Implements the GT_TypeFactory interface with built-in types. */
-typedef struct GT_TypeFactoryBuiltin GT_TypeFactoryBuiltin;
+typedef struct GT_TypeCheckerClass GT_TypeCheckerClass;
+typedef struct GT_TypeChecker GT_TypeChecker;
 
-const GT_TypeFactoryClass* gt_type_factory_builtin_class(void);
-GT_TypeFactory*            gt_type_factory_builtin_new();
+#include "core/strarray.h"
+#include "extended/feature_type.h"
+
+/* Return a new reference to <type_checker>. */
+GT_TypeChecker* gt_type_checker_ref(GT_TypeChecker *type_checker);
+/* Returns <true> if <type> is a valid type, <false> otherwise. */
+bool            gt_type_checker_is_valid(GT_TypeChecker*, const char *type);
+void            gt_type_checker_delete(GT_TypeChecker*);
 
 #endif

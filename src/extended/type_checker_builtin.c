@@ -21,15 +21,15 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "extended/compare.h"
-#include "extended/type_factory_builtin.h"
-#include "extended/type_factory_rep.h"
+#include "extended/type_checker_builtin.h"
+#include "extended/type_checker_rep.h"
 
-struct GT_TypeFactoryBuiltin {
-  const GT_TypeFactory parent_instance;
+struct GT_TypeCheckerBuiltin {
+  const GT_TypeChecker parent_instance;
 };
 
-#define gt_type_factory_builtin_cast(FTF)\
-        gt_type_factory_cast(gt_type_factory_builtin_class(), FTF)
+#define gt_type_checker_builtin_cast(FTF)\
+        gt_type_checker_cast(gt_type_checker_builtin_class(), FTF)
 
 static const char *gt_genome_feature_type_strings[] = { "CDS",
                                                      "EST_match",
@@ -70,28 +70,28 @@ static const char* find_type(const char *gft_string)
   return NULL;
 }
 
-static const char* gt_type_factory_builtin_create_gft(GT_UNUSED
-                                                      GT_TypeFactory *ftf,
-                                                      const char *type)
+static bool gt_type_checker_builtin_create_gft(GT_UNUSED GT_TypeChecker
+                                               *type_checker,
+                                               const char *type)
 {
-  assert(ftf && type);
-  return find_type(type);
+  assert(type_checker && type);
+  return find_type(type) ? true : false;
 }
 
-const GT_TypeFactoryClass* gt_type_factory_builtin_class(void)
+const GT_TypeCheckerClass* gt_type_checker_builtin_class(void)
 {
-  static const GT_TypeFactoryClass gt_type_factory_class =
-    { sizeof (GT_TypeFactoryBuiltin),
-      gt_type_factory_builtin_create_gft,
+  static const GT_TypeCheckerClass gt_type_checker_class =
+    { sizeof (GT_TypeCheckerBuiltin),
+      gt_type_checker_builtin_create_gft,
       NULL };
-  return &gt_type_factory_class;
+  return &gt_type_checker_class;
 }
 
-GT_TypeFactory* gt_type_factory_builtin_new(void)
+GT_TypeChecker* gt_type_checker_builtin_new(void)
 {
-  GT_TypeFactoryBuiltin *ftfb;
-  GT_TypeFactory *ftf;
-  ftf = gt_type_factory_create(gt_type_factory_builtin_class());
-  ftfb = gt_type_factory_builtin_cast(ftf);
-  return ftf;
+  GT_TypeCheckerBuiltin *type_checker_builtin;
+  GT_TypeChecker *type_checker;
+  type_checker = gt_type_checker_create(gt_type_checker_builtin_class());
+  type_checker_builtin = gt_type_checker_builtin_cast(type_checker);
+  return type_checker;
 }

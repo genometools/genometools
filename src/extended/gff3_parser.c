@@ -50,7 +50,7 @@ struct GT_GFF3Parser {
        fasta_parsing; /* parser is in FASTA parsing mode */
   long offset;
   Mapping *offset_mapping;
-  GT_TypeFactory *type_factory;
+  GT_TypeChecker *type_checker;
   unsigned int last_terminator; /* line number of the last terminator */
 };
 
@@ -107,7 +107,7 @@ static void simple_sequence_region_delete(SimpleGT_SequenceRegion *ssr)
   gt_free(ssr);
 }
 
-GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeFactory *type_factory)
+GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker *type_checker)
 {
   GT_GFF3Parser *parser;
   parser = gt_malloc(sizeof *parser);
@@ -124,7 +124,7 @@ GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeFactory *type_factory)
   parser->fasta_parsing = false;
   parser->offset = UNDEF_LONG;
   parser->offset_mapping = NULL;
-  parser->type_factory = gt_type_factory_ref(type_factory);
+  parser->type_checker = gt_type_checker_ref(type_checker);
   parser->last_terminator = 0;
   return parser;
 }
@@ -1030,8 +1030,8 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
 
   /* parse the feature type */
   if (!had_err) {
-    if (parser->type_factory &&
-        !gt_type_factory_create_gft(parser->type_factory, type)) {
+    if (parser->type_checker &&
+        !gt_type_checker_is_valid(parser->type_checker, type)) {
       gt_error_set(err, "type \"%s\" on line %u in file \"%s\" is not a valid "
                    "one", type, line_number, filename);
       had_err = -1;
@@ -1450,6 +1450,6 @@ void gt_gff3_parser_delete(GT_GFF3Parser *parser)
   hashmap_delete(parser->source_to_str_mapping);
   hashmap_delete(parser->undefined_sequence_regions);
   mapping_delete(parser->offset_mapping);
-  gt_type_factory_delete(parser->type_factory);
+  gt_type_checker_delete(parser->type_checker);
   gt_free(parser);
 }

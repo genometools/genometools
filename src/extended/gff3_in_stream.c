@@ -230,13 +230,13 @@ static GenomeStream* gff3_in_stream_new(GT_StrArray *files,
   return gs;
 }
 
-void gff3_in_stream_set_type_factory(GenomeStream *gs,
-                                     GT_TypeFactory *type_factory)
+void gff3_in_stream_set_type_checker(GenomeStream *gs,
+                                     GT_TypeChecker *type_checker)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
   gt_gff3_parser_delete(is->gff3_parser);
-  is->gff3_parser = gt_gff3_parser_new(is->checkids, type_factory);
+  is->gff3_parser = gt_gff3_parser_new(is->checkids, type_checker);
 }
 
 GT_StrArray* gff3_in_stream_get_used_types(GenomeStream *gs)

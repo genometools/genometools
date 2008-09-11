@@ -24,10 +24,10 @@ typedef struct GT_GenomeFeature GT_GenomeFeature;
 #include "core/range.h"
 #include "core/phase.h"
 #include "core/strand.h"
+#include "core/strarray.h"
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
-#include "extended/type_factory.h"
 
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);

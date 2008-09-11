@@ -15,27 +15,27 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_FACTORY_REP_H
-#define TYPE_FACTORY_REP_H
+#ifndef TYPE_CHECKER_REP_H
+#define TYPE_CHECKER_REP_H
 
 #include <stdio.h>
 #include "core/cstr_table.h"
 #include "extended/feature_type.h"
-#include "extended/type_factory.h"
+#include "extended/type_checker.h"
 
-struct GT_TypeFactoryClass {
+struct GT_TypeCheckerClass {
   size_t size;
-  const char* (*create_gft)(GT_TypeFactory*, const char *type);
-  void        (*free)(GT_TypeFactory*);
+  bool  (*is_valid)(GT_TypeChecker*, const char *type);
+  void  (*free)(GT_TypeChecker*);
 };
 
-struct GT_TypeFactory {
-  const GT_TypeFactoryClass *c_class;
+struct GT_TypeChecker {
+  const GT_TypeCheckerClass *c_class;
   unsigned int reference_count;
 };
 
-GT_TypeFactory* gt_type_factory_create(const GT_TypeFactoryClass*);
-void*           gt_type_factory_cast(const GT_TypeFactoryClass*,
-                                     GT_TypeFactory*);
+GT_TypeChecker* gt_type_checker_create(const GT_TypeCheckerClass*);
+void*           gt_type_checker_cast(const GT_TypeCheckerClass*,
+                                     GT_TypeChecker*);
 
 #endif

@@ -41,7 +41,7 @@ struct GTF_parser {
           *source_to_str_mapping,
           *gene_id_to_name_mapping,
           *transcript_id_to_name_mapping;
-  GT_TypeFactory *feature_type_factory;
+  GT_TypeChecker *type_checker;
 };
 
 typedef struct {
@@ -83,7 +83,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
   return -1;
 }
 
-GTF_parser* gtf_parser_new(GT_TypeFactory *feature_type_factory)
+GTF_parser* gtf_parser_new(GT_TypeChecker *type_checker)
 {
   GTF_parser *parser = gt_malloc(sizeof (GTF_parser));
   parser->sequence_region_to_range = hashmap_new(HASH_STRING,
@@ -98,7 +98,7 @@ GTF_parser* gtf_parser_new(GT_TypeFactory *feature_type_factory)
                                                 gt_free_func);
   parser->transcript_id_to_name_mapping = hashmap_new(HASH_STRING, gt_free_func,
                                                       gt_free_func);
-  parser->feature_type_factory = feature_type_factory;
+  parser->type_checker = type_checker;
   return parser;
 }
 
@@ -277,7 +277,8 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
   GT_Array *gt_genome_node_array;
   ConstructionInfo cinfo;
   GTF_feature_type gtf_feature_type;
-  const char *gff_feature_type = NULL;
+  bool gff_type_is_valid = false;
+  const char *type = NULL;
   const char *filename;
   bool score_is_defined;
   int had_err = 0;
@@ -356,16 +357,16 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
       switch (gtf_feature_type) {
         case GTF_CDS:
         case GTF_stop_codon:
-          gff_feature_type =
-            gt_type_factory_create_gft(parser->feature_type_factory,
-                                            gft_CDS);
+          gff_type_is_valid = gt_type_checker_is_valid(parser->type_checker,
+                                                       gft_CDS);
+          type = gft_CDS;
           break;
         case GTF_exon:
-          gff_feature_type =
-            gt_type_factory_create_gft(parser->feature_type_factory,
-                                            gft_exon);
+          gff_type_is_valid = gt_type_checker_is_valid(parser->type_checker,
+                                                       gft_exon);
+          type = gft_exon;
       }
-      assert(gff_feature_type);
+      assert(gff_type_is_valid);
 
       /* parse the range */
       had_err = gt_parse_range(&range, start, end, line_number, filename, err);
@@ -520,8 +521,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
       assert(seqid_str);
 
       /* construct the new feature */
-      gn = gt_genome_feature_new(seqid_str, gff_feature_type, range,
-                                 gt_strand_value);
+      gn = gt_genome_feature_new(seqid_str, type, range, gt_strand_value);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set source */

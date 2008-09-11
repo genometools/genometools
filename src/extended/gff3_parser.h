@@ -20,7 +20,7 @@
 
 #include "core/cstr_table.h"
 #include "core/queue.h"
-#include "extended/type_factory.h"
+#include "extended/type_checker.h"
 
 #define GFF_VERSION         3
 #define GFF_VERSION_PREFIX  "##gff-version"
@@ -34,7 +34,7 @@
 
 typedef struct GT_GFF3Parser GT_GFF3Parser;
 
-GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeFactory*);
+GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker*);
 void           gt_gff3_parser_set_offset(GT_GFF3Parser*, long);
 int            gt_gff3_parser_set_offsetfile(GT_GFF3Parser*, GT_Str*,
                                              GT_Error*);
