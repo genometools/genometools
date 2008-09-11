@@ -22,7 +22,6 @@
 #include "core/genfile.h"
 #include "core/str_api.h"
 
-GT_Str*       gt_str_ref(GT_Str*);
 /* never returns NULL, not always '\0' terminated */
 void*         gt_str_get_mem(const GT_Str*);
 int           gt_str_read_next_line_generic(GT_Str*, GT_GenFile*);

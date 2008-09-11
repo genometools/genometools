@@ -28,6 +28,8 @@ This document describes the <i>GenomeTools</i> C API (<tt>libgenometools</tt>).
 
   <li><a href="#GT_Array">GT_Array</a>
 
+  <li><a href="#GT_Str">GT_Str</a>
+
 </ul>
 <a name="GT_Array"></a>
 <h2>Class GT_Array</h2>
@@ -37,7 +39,8 @@ This document describes the <i>GenomeTools</i> C API (<tt>libgenometools</tt>).
 <hr>
 <code>GT_Array* gt_array_new(size_t size_of_elem)</code>
 <p>
-Return a new <code>GT_Array</code> whose elements have the size <code>size_of_elem</code>.
+Return a new <code>GT_Array*</code> object whose elements have the size
+   <code>size_of_elem</code>.
 </p>
 <hr>
 <code>GT_Array* gt_array_ref(GT_Array *array)</code>
@@ -148,6 +151,109 @@ Compare the content of <code>array_a</code> with the content of <code>array_b</c
 <code>void gt_array_delete(GT_Array *array)</code>
 <p>
 Decrease the reference count for <code>array</code> or delete it, if this was the last
+   reference.
+</p>
+<hr>
+<a name="GT_Str"></a>
+<h2>Class GT_Str</h2>
+
+<p> Objects of the <code>GT_Str</code> class are strings which grow on demand. </p>
+
+<hr>
+<code>GT_Str* gt_str_new(void)</code>
+<p>
+Return an empty <code>GT_Str*</code> object.
+</p>
+<hr>
+<code>GT_Str* gt_str_new_cstr(const char *cstr)</code>
+<p>
+Return a new <code>GT_Str*</code> object whose content is set to <code>cstr</code>.
+</p>
+<hr>
+<code>GT_Str* gt_str_clone(const GT_Str *str)</code>
+<p>
+Return a clone of <code>str</code>.
+</p>
+<hr>
+<code>GT_Str* gt_str_ref(GT_Str *str)</code>
+<p>
+Increase the reference count for <code>str</code> and return it.
+   If <code>str</code> is <code>NULL</code>, <code>NULL</code> is returned without any side effects.
+</p>
+<hr>
+<code>char* gt_str_get(const GT_Str *str)</code>
+<p>
+Return the content of <code>str</code>.  Never returns NULL, and the content is always
+   <code>\0</code>-terminated
+</p>
+<hr>
+<code>void gt_str_set(GT_Str *str, const char *cstr)</code>
+<p>
+Set the content of <code>str</code> to <code>cstr</code>.
+</p>
+<hr>
+<code>void gt_str_append_str(GT_Str *dest, const GT_Str *src)</code>
+<p>
+Append the string <code>src</code> to <code>dest</code>.
+</p>
+<hr>
+<code>void gt_str_append_cstr(GT_Str *str, const char *cstr)</code>
+<p>
+Append the <code>\0</code>-terminated <code>cstr</code> to <code>str</code>.
+</p>
+<hr>
+<code>void gt_str_append_cstr_nt(GT_Str *str,
+                                    const char *cstr, unsigned long length)</code>
+<p>
+Append the non <code>\0</code>-terminated <code>cstr</code> with given <code>length</code> to <code>str</code>.
+</p>
+<hr>
+<code>void gt_str_append_char(GT_Str *str, char c)</code>
+<p>
+Append character <code>c</code> to <code>str</code>.
+</p>
+<hr>
+<code>void gt_str_append_double(GT_Str*, double d, int precision)</code>
+<p>
+Append double <code>d</code> to <code>str</code> with given <code>precision</code>.
+</p>
+<hr>
+<code>void gt_str_append_ulong(GT_Str*, unsigned long ulong)</code>
+<p>
+Append <code>ulong</code> to <code>str</code>.
+</p>
+<hr>
+<code>void gt_str_set_length(GT_Str*, unsigned long)</code>
+<p>
+Set length of <code>str</code> to <code>length</code>. <code>length</code> must be smaller than
+   <code>gt_str_length(str)</code>.
+</p>
+<hr>
+<code>void gt_str_reset(GT_Str *str)</code>
+<p>
+Reset <code>str</code> to length 0.
+</p>
+<hr>
+<code>int gt_str_cmp(const GT_Str *str1, const GT_Str *str2)</code>
+<p>
+Compare <code>str1</code> and <code>str2</code> and return the result (similar to <code>strcmp(3)</code>).
+</p>
+<hr>
+<code>int gt_str_read_next_line(GT_Str *str, FILE *fpin)</code>
+<p>
+Read the next line from file pointer <code>fpin</code> and store the result in <code>str</code>
+   (without the terminal newline). If the end of file <code>fpin</code> is reached, <code>EOF</code>
+   is returned, otherwise 0.
+</p>
+<hr>
+<code>unsigned long gt_str_length(const GT_Str *str)</code>
+<p>
+Return the length of <code>str</code>. If <code>str</code> is <code>NULL</code>, 0 is returned.
+</p>
+<hr>
+<code>void gt_str_delete(GT_Str *str)</code>
+<p>
+Decrease the reference count for <code>str</code> or delete it, if this was the last
    reference.
 </p>
 <hr>

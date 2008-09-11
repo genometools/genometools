@@ -25,25 +25,48 @@
 /* Objects of the <GT_Str> class are strings which grow on demand. */
 typedef struct GT_Str GT_Str;
 
+/* Return an empty <GT_Str*> object. */
 GT_Str*       gt_str_new(void);
-GT_Str*       gt_str_new_cstr(const char*);
-GT_Str*       gt_str_clone(const GT_Str*);
-GT_Str*       gt_str_ref(GT_Str*);
-/* never returns NULL, always '\0' terminated */
-char*         gt_str_get(const GT_Str*);
-void          gt_str_set(GT_Str*, const char*);
-void          gt_str_append_str(GT_Str*, const GT_Str*);
-void          gt_str_append_cstr(GT_Str*, const char*);
-/* appends an unterminated cstr */
-void          gt_str_append_cstr_nt(GT_Str*, const char*, unsigned long);
-void          gt_str_append_char(GT_Str*, char);
-void          gt_str_append_double(GT_Str*, double, int precision);
-void          gt_str_append_ulong(GT_Str*, unsigned long);
+/* Return a new <GT_Str*> object whose content is set to <cstr>. */
+GT_Str*       gt_str_new_cstr(const char *cstr);
+/* Return a clone of <str>. */
+GT_Str*       gt_str_clone(const GT_Str *str);
+/* Increase the reference count for <str> and return it.
+   If <str> is <NULL>, <NULL> is returned without any side effects. */
+GT_Str*       gt_str_ref(GT_Str *str);
+/* Return the content of <str>.  Never returns NULL, and the content is always
+   <\0>-terminated */
+char*         gt_str_get(const GT_Str *str);
+/* Set the content of <str> to <cstr>. */
+void          gt_str_set(GT_Str *str, const char *cstr);
+/* Append the string <src> to <dest>. */
+void          gt_str_append_str(GT_Str *dest, const GT_Str *src);
+/* Append the <\0>-terminated <cstr> to <str>. */
+void          gt_str_append_cstr(GT_Str *str, const char *cstr);
+/* Append the non <\0>-terminated <cstr> with given <length> to <str>. */
+void          gt_str_append_cstr_nt(GT_Str *str,
+                                    const char *cstr, unsigned long length);
+/* Append character <c> to <str>. */
+void          gt_str_append_char(GT_Str *str, char c);
+/* Append double <d> to <str> with given <precision>. */
+void          gt_str_append_double(GT_Str*, double d, int precision);
+/* Append <ulong> to <str>. */
+void          gt_str_append_ulong(GT_Str*, unsigned long ulong);
+/* Set length of <str> to <length>. <length> must be smaller than
+   <gt_str_length(str)>. */
 void          gt_str_set_length(GT_Str*, unsigned long);
-void          gt_str_reset(GT_Str*);
-int           gt_str_cmp(const GT_Str*, const GT_Str*);
-int           gt_str_read_next_line(GT_Str*, FILE*);
-unsigned long gt_str_length(const GT_Str*);
-void          gt_str_delete(GT_Str*);
+/* Reset <str> to length 0. */
+void          gt_str_reset(GT_Str *str);
+/* Compare <str1> and <str2> and return the result (similar to <strcmp(3)>). */
+int           gt_str_cmp(const GT_Str *str1, const GT_Str *str2);
+/* Read the next line from file pointer <fpin> and store the result in <str>
+   (without the terminal newline). If the end of file <fpin> is reached, <EOF>
+   is returned, otherwise 0. */
+int           gt_str_read_next_line(GT_Str *str, FILE *fpin);
+/* Return the length of <str>. If <str> is <NULL>, 0 is returned. */
+unsigned long gt_str_length(const GT_Str *str);
+/* Decrease the reference count for <str> or delete it, if this was the last
+   reference. */
+void          gt_str_delete(GT_Str *str);
 
 #endif

@@ -53,7 +53,8 @@ end
 
 local template_path = gt_home .. "/gtdata/modules/gtdoclib/"
 
-local export_C   = { "src/core/array_api.h" }
+local export_C   = { "src/core/array_api.h",
+                     "src/core/str_api.h" }
 
 local export_Lua = { "src/gtlua",
                      "gtdata/modules/gtlua.lua",
