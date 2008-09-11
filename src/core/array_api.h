@@ -27,7 +27,8 @@ typedef struct GT_Array GT_Array;
 GT_Array*     gt_array_new(size_t size_of_elem);
 /* Return a clone of <array>. */
 GT_Array*     gt_array_clone(const GT_Array *array);
-/* Return pointer to element number <index> of <array>. */
+/* Return pointer to element number <index> of <array>. <index> has to be
+   smaller than <gt_array_size(array)>. */
 void*         gt_array_get(const GT_Array *array, unsigned long index);
 /* Return pointer to first element of <array>. */
 void*         gt_array_get_first(const GT_Array *array);
@@ -35,22 +36,35 @@ void*         gt_array_get_first(const GT_Array *array);
 void*         gt_array_get_last(const GT_Array *array);
 /* Return pointer to last element of <array> and remove it from <array>. */
 void*         gt_array_pop(GT_Array *array);
-/* Return pointer to the internal space of <array> where the elements are stored
- */
+/* Return pointer to the internal space of <array> where the elements are
+   stored.  */
 void*         gt_array_get_space(const GT_Array *array);
 #define       gt_array_add(a, elem)\
               gt_array_add_elem(a, &(elem), sizeof (elem))
-void          gt_array_add_elem(GT_Array*, void*, size_t);
-void          gt_array_add_array(GT_Array*, const GT_Array*);
-/* Remove element with number <index> from <array> in O(<gt_array_size()>) time.
- */
+/* Add element <elem> with size <size_of_elem> to <array>. <size_of_elem> must
+   equal the given element size when the <array> was created. */
+void          gt_array_add_elem(GT_Array *array, void *elem,
+                                size_t size_of_elem);
+/* Add all elements of array <src> to the array <dest>. The element sizes of
+   both arrays must be equal. */
+void          gt_array_add_array(GT_Array *dest, const GT_Array *src);
+/* Remove element with number <index> from <array> in O(<gt_array_size(array)>)
+   time. <index> has to be smaller than <gt_array_size(array)>. */
 void          gt_array_rem(GT_Array *array, unsigned long index);
-void          gt_array_reverse(GT_Array*);
-void          gt_array_set_size(GT_Array*, unsigned long);
-void          gt_array_reset(GT_Array*);
-size_t        gt_array_elem_size(const GT_Array*);
-unsigned long gt_array_size(const GT_Array*);
-void          gt_array_sort(GT_Array*, GT_Compare compar);
+/* Reverse the order of the elements in <array>. */
+void          gt_array_reverse(GT_Array *array);
+/* Set the size of <array> to <size>. <size> must be smaller than
+   <gt_array_size(array)>. */
+void          gt_array_set_size(GT_Array *array, unsigned long size);
+/* Reset the <array>. That is, afterwards the array has size 0. */
+void          gt_array_reset(GT_Array *array);
+/* Return the size of the elements stored in <array>. */
+size_t        gt_array_elem_size(const GT_Array *array);
+/* Return the number of elements in <array>. If <array> equals <NULL>, 0 is
+   returned. */
+unsigned long gt_array_size(const GT_Array *array);
+/* Sort <array> with the given compare function <compar>. */
+void          gt_array_sort(GT_Array *array, GT_Compare compar);
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
