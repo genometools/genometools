@@ -161,8 +161,8 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   }
 
   if (!had_err) {
-    mRNA_node = gt_genome_feature_new(mRNA_seqid, gft_mRNA, mRNA_range,
-                                      mRNA_strand);
+    mRNA_node = gt_genome_feature_new(mRNA_seqid, gft_mRNA, mRNA_range.start,
+                                      mRNA_range.end, mRNA_strand);
 
     if ((tname = hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key))) {
@@ -218,8 +218,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_node = gt_genome_feature_new(gene_seqid, gft_gene, gene_range,
-                                      gene_strand);
+    gene_node = gt_genome_feature_new(gene_seqid, gft_gene, gene_range.start,
+                                      gene_range.end, gene_strand);
 
     if ((gname = hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key))) {
@@ -521,7 +521,8 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
       assert(seqid_str);
 
       /* construct the new feature */
-      gn = gt_genome_feature_new(seqid_str, type, range, gt_strand_value);
+      gn = gt_genome_feature_new(seqid_str, type, range.start, range.end,
+                                 gt_strand_value);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set source */

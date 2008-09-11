@@ -268,7 +268,7 @@ int gt_feature_index_unit_test(GT_Error *err)
 {
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
-  GT_Range r1, r2, r3, r4, r5, check_range, rs;
+  GT_Range check_range, rs;
   GT_Str *seqid1, *seqid2;
   GT_StrArray *seqids = NULL;
   GT_SequenceRegion *sr1, *sr2;
@@ -277,11 +277,6 @@ int gt_feature_index_unit_test(GT_Error *err)
   gt_error_check(err);
 
   /* generating some ranges */
-  r1.start=100UL; r1.end=1000UL;
-  r2.start=100UL; r2.end=300UL;
-  r3.start=500UL; r3.end=1000UL;
-  r4.start=600UL; r4.end=1200UL;
-  r5.start=600UL; r5.end=1000UL;
   rs.start=100UL; rs.end=1200UL;
 
   /* generating sequnce ids as C-strings */
@@ -292,12 +287,12 @@ int gt_feature_index_unit_test(GT_Error *err)
   sr2 = (GT_SequenceRegion*) gt_sequence_region_new(seqid2, rs);
 
   /* generate a new genome feature */
-  gn1 = gt_genome_feature_new(seqid1, gft_gene, r1, GT_STRAND_UNKNOWN);
-  gn2 = gt_genome_feature_new(seqid2, gft_gene, r4, GT_STRAND_UNKNOWN);
-  ex1 = gt_genome_feature_new(seqid1, gft_exon, r2, GT_STRAND_UNKNOWN);
-  ex2 = gt_genome_feature_new(seqid1, gft_exon, r3, GT_STRAND_UNKNOWN);
-  ex3 = gt_genome_feature_new(seqid2, gft_exon, r4, GT_STRAND_UNKNOWN);
-  cds1 = gt_genome_feature_new(seqid2, gft_CDS, r5, GT_STRAND_UNKNOWN);
+  gn1 = gt_genome_feature_new(seqid1, gft_gene, 100, 1000, GT_STRAND_UNKNOWN);
+  gn2 = gt_genome_feature_new(seqid2, gft_gene, 600, 1200, GT_STRAND_UNKNOWN);
+  ex1 = gt_genome_feature_new(seqid1, gft_exon, 100, 300, GT_STRAND_UNKNOWN);
+  ex2 = gt_genome_feature_new(seqid1, gft_exon, 500, 1000, GT_STRAND_UNKNOWN);
+  ex3 = gt_genome_feature_new(seqid2, gft_exon, 600, 1200 , GT_STRAND_UNKNOWN);
+  cds1 = gt_genome_feature_new(seqid2, gft_CDS, 600, 1200, GT_STRAND_UNKNOWN);
 
   /* Determine the structure of our feature tree */
   gt_genome_node_add_child(gn1, ex1);

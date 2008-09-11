@@ -135,8 +135,9 @@ int gt_element_unit_test(GT_Error *err)
   r2.end = 50UL;
 
   seqid = gt_str_new_cstr("seqid");
-  gn = gt_genome_feature_new(seqid, gft_exon, r1, GT_STRAND_BOTH);
-  gn2 = gt_genome_feature_new(seqid, gft_exon, r2, GT_STRAND_BOTH);
+  gn = gt_genome_feature_new(seqid, gft_exon, r1.start, r1.end, GT_STRAND_BOTH);
+  gn2 = gt_genome_feature_new(seqid, gft_exon, r2.start, r2.end,
+                             GT_STRAND_BOTH);
 
   e = gt_element_new(gn);
   e2 = gt_element_new(gn);

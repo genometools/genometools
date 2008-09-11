@@ -74,7 +74,7 @@ int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
 
 int gt_line_unit_test(GT_Error *err)
 {
-  GT_Range r1, r2, r3, r4, r_parent;
+  GT_Range r1, r2;
   GT_Array* blocks;
   GT_Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;
@@ -87,30 +87,23 @@ int gt_line_unit_test(GT_Error *err)
   const char* bar = "bar";
   const char* blub = "blub";
 
-  r_parent.start = 10UL;
-  r_parent.end = 80UL;
+  r1.start = 10;
+  r1.end = 50;
 
-  r1.start = 10UL;
-  r1.end = 50UL;
-
-  r2.start = 51UL;
-  r2.end = 80UL;
-
-  r3.start = 70UL;
-  r3.end = 100UL;
-
-  r4.start = 10UL;
-  r4.end = 20UL;
+  r2.start = 51;
+  r2.end = 80;
 
   seqid1 = gt_str_new_cstr("test1");
   seqid2 = gt_str_new_cstr("test2");
   seqid3 = gt_str_new_cstr("foo");
 
-  parent = gt_genome_feature_new(seqid1, gft_gene, r_parent, GT_STRAND_FORWARD);
-  gn1 = gt_genome_feature_new(seqid3, gft_exon, r1, GT_STRAND_FORWARD);
-  gn2 = gt_genome_feature_new(seqid3, gft_exon, r2, GT_STRAND_FORWARD);
-  gn3 = gt_genome_feature_new(seqid2, gft_exon, r3, GT_STRAND_FORWARD);
-  gn4 = gt_genome_feature_new(seqid3, gft_TF_binding_site, r4,
+  parent = gt_genome_feature_new(seqid1, gft_gene, 10, 80, GT_STRAND_FORWARD);
+  gn1 = gt_genome_feature_new(seqid3, gft_exon, r1.start, r1.end,
+                              GT_STRAND_FORWARD);
+  gn2 = gt_genome_feature_new(seqid3, gft_exon, r2.start, r2.end,
+                             GT_STRAND_FORWARD);
+  gn3 = gt_genome_feature_new(seqid2, gft_exon, 70, 100, GT_STRAND_FORWARD);
+  gn4 = gt_genome_feature_new(seqid3, gft_TF_binding_site, 10, 20,
                               GT_STRAND_FORWARD);
 
   l1 = gt_line_new();

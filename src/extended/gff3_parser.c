@@ -1076,8 +1076,8 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
 
   /* create the feature */
   if (!had_err) {
-    genome_feature = gt_genome_feature_new(seqid_str, type, range,
-                                           gt_strand_value);
+    genome_feature = gt_genome_feature_new(seqid_str, type, range.start,
+                                           range.end, gt_strand_value);
     gt_genome_node_set_origin(genome_feature, filenamestr, line_number);
   }
 

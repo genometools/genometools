@@ -46,7 +46,8 @@ static int genome_feature_lua_new(lua_State *L)
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GT_GenomeNode*));
   seqid_str = gt_str_new_cstr(seqid);
-  *gf = gt_genome_feature_new(seqid_str, type, *range, strand);
+  *gf = gt_genome_feature_new(seqid_str, type, range->start, range->end,
+                              strand);
   gt_str_delete(seqid_str);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);

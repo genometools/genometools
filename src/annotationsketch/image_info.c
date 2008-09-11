@@ -100,8 +100,9 @@ int gt_image_info_unit_test(GT_Error *err)
     const GT_RecMap* rm;
     unsigned long rbase;
     rbase = gt_rand_max(10);
-    GT_Range r = {rbase,rbase+gt_rand_max(20)};
-    gfs[i] = gt_genome_feature_new(seqid, gft_gene, r, GT_STRAND_FORWARD);
+    GT_Range r = { rbase, rbase + gt_rand_max(20)};
+    gfs[i] = gt_genome_feature_new(seqid, gft_gene, r.start, r.end,
+                                   GT_STRAND_FORWARD);
     rms[i] = gt_recmap_new(gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),

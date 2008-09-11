@@ -233,8 +233,10 @@ int gt_block_unit_test(GT_Error *err)
   r2.start = 40UL;
   r2.end = 50UL;
 
-  gn1 = gt_genome_feature_new(seqid, gft_gene, r1, GT_STRAND_FORWARD);
-  gn2 = gt_genome_feature_new(seqid, gft_exon, r2, GT_STRAND_FORWARD);
+  gn1 = gt_genome_feature_new(seqid, gft_gene, r1.start, r1.end,
+                              GT_STRAND_FORWARD);
+  gn2 = gt_genome_feature_new(seqid, gft_exon, r2.start, r2.end,
+                              GT_STRAND_FORWARD);
 
   e1 = gt_element_new(gn1);
   e2 = gt_element_new(gn2);

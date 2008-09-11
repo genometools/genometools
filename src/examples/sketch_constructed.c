@@ -3,48 +3,37 @@
 static GT_Array* create_example_features(void)
 {
   GT_Array *features;
-  GT_GenomeNode *forward_gene, *reverse_gene, *exon, *intron; /* features */
+  GT_GenomeNode *gene, *exon, *intron; /* features */
   GT_Str *seqid; /* holds the sequence id the features refer to */
-  GT_Range range; /* used to define intervals on the genomic sequence */
 
   /* construct the example features */
   features = gt_array_new(sizeof (GT_GenomeNode*));
   seqid = gt_str_new_cstr("chromosome_21");
 
   /* construct a gene on the forward strand with two exons */
-  range.start = 100; range.end = 900;
-  forward_gene = gt_genome_feature_new(seqid, "gene", range, GT_STRAND_FORWARD);
+  gene = gt_genome_feature_new(seqid, "gene", 100, 900, GT_STRAND_FORWARD);
 
-  range.start = 100; range.end = 200;
-  exon = gt_genome_feature_new(seqid, "exon", range, GT_STRAND_FORWARD);
-  /* exon belongs to forward gene */
-  gt_genome_node_add_child(forward_gene, exon);
+  exon = gt_genome_feature_new(seqid, "exon", 100, 200, GT_STRAND_FORWARD);
+  gt_genome_node_add_child(gene, exon);
 
-  range.start = 201; range.end = 799;
-  intron = gt_genome_feature_new(seqid, "intron", range, GT_STRAND_FORWARD);
-  /* intron belongs to forward gene */
-  gt_genome_node_add_child(forward_gene, intron);
+  intron = gt_genome_feature_new(seqid, "intron", 201, 799, GT_STRAND_FORWARD);
+  gt_genome_node_add_child(gene, intron);
 
-  range.start = 800; range.end = 900;
-  exon = gt_genome_feature_new(seqid, "exon", range, GT_STRAND_FORWARD);
-  /* exon belongs to forward gene */
-  gt_genome_node_add_child(forward_gene, exon);
+  exon = gt_genome_feature_new(seqid, "exon", 800, 900, GT_STRAND_FORWARD);
+  gt_genome_node_add_child(gene, exon);
 
   /* store forward gene in feature array */
-  gt_array_add(features, forward_gene);
+  gt_array_add(features, gene);
 
   /* construct a single-exon gene on the reverse strand
      (within the intron of the forward strand gene) */
-  range.start = 400; range.end = 600;
-  reverse_gene = gt_genome_feature_new(seqid, "gene", range, GT_STRAND_REVERSE);
+  gene = gt_genome_feature_new(seqid, "gene", 400, 600, GT_STRAND_REVERSE);
 
-  range.start = 400; range.end = 600;
-  exon = gt_genome_feature_new(seqid, "exon", range, GT_STRAND_REVERSE);
-  /* exon belongs to reverse gene */
-  gt_genome_node_add_child(reverse_gene, exon);
+  exon = gt_genome_feature_new(seqid, "exon", 400, 600, GT_STRAND_REVERSE);
+  gt_genome_node_add_child(gene, exon);
 
   /* store reverse gene in feature array */
-  gt_array_add(features, reverse_gene);
+  gt_array_add(features, gene);
 
   /* free */
   gt_str_delete(seqid);

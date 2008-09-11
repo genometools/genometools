@@ -170,19 +170,21 @@ static void set_transcriptfeaturetype(GT_GenomeNode *gn,
 }
 
 GT_GenomeNode* gt_genome_feature_new(GT_Str *seqid, const char *type,
-                                     GT_Range range, GT_Strand strand)
+                                     unsigned long start, unsigned long end,
+                                     GT_Strand strand)
 {
   GT_GenomeNode *gn;
   GT_GenomeFeature *gf;
   assert(seqid && type);
-  assert(range.start <= range.end);
+  assert(start <= end);
   gn = gt_genome_node_create(gt_genome_feature_class());
   gf = gt_genome_feature_cast(gn);
-  gf->seqid     = gt_str_ref(seqid);
-  gf->source    = NULL;
-  gf->type      = gt_symbol(type);
-  gf->score     = UNDEF_FLOAT;
-  gf->range     = range;
+  gf->seqid       = gt_str_ref(seqid);
+  gf->source      = NULL;
+  gf->type        = gt_symbol(type);
+  gf->score       = UNDEF_FLOAT;
+  gf->range.start = start;
+  gf->range.end   = end;
   gn->bit_field |= strand << GT_STRAND_OFFSET;
   gt_genome_feature_set_phase(gn, GT_PHASE_UNDEFINED);
   set_transcriptfeaturetype(gn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
@@ -195,11 +197,12 @@ GT_GenomeNode* gt_genome_feature_new_pseudo(GT_GenomeFeature *gf)
 {
   GT_GenomeFeature *pf;
   GT_GenomeNode *pn;
+  GT_Range range;
   assert(gf);
+  range = gt_genome_feature_get_range((GT_GenomeNode*) gf),
   pn = gt_genome_feature_new(gt_genome_feature_get_seqid((GT_GenomeNode*) gf),
-                          gt_genome_feature_get_type(gf),
-                          gt_genome_feature_get_range((GT_GenomeNode*) gf),
-                          gt_genome_feature_get_strand(gf));
+                            gt_genome_feature_get_type(gf), range.start,
+                            range.end, gt_genome_feature_get_strand(gf));
   pf = gt_genome_feature_cast(pn);
   pf->type = NULL; /* pseudo features do not have a type */
   gt_genome_feature_set_source(pn, gf->source);
@@ -210,77 +213,71 @@ GT_GenomeNode* gt_genome_feature_new_pseudo(GT_GenomeFeature *gf)
 GT_GenomeNode* gt_genome_feature_new_standard_gene(void)
 {
   GT_GenomeNode *gn, *child, *grandchild;
-  GT_Range range;
   GT_Str *seqid;
   seqid = gt_str_new_cstr("ctg123");
 
   /* gene */
-  range.start = 1000; range.end = 9000;
-  gn = gt_genome_feature_new(seqid, gft_gene, range, GT_STRAND_FORWARD);
+  gn = gt_genome_feature_new(seqid, gft_gene, 1000, 9000, GT_STRAND_FORWARD);
 
   /* TF binding site */
-  range.start = 1000; range.end = 1012;
-  child = gt_genome_feature_new(seqid, gft_TF_binding_site, range,
+  child = gt_genome_feature_new(seqid, gft_TF_binding_site, 1000, 1012,
                                 GT_STRAND_FORWARD);
   gt_genome_node_add_child(gn, child);
 
   /* first mRNA */
-  range.start = 1050; range.end = 9000;
-  child = gt_genome_feature_new(seqid, gft_mRNA, range, GT_STRAND_FORWARD);
+  child = gt_genome_feature_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
   gt_genome_node_add_child(gn, child);
 
-  range.start = 1050; range.end = 1500;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 1050, 1500,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 3000; range.end = 3902;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 3000, 3902,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 5000; range.end = 5500;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 5000, 5500,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 7000; range.end = 9000;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 7000, 9000,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
   /* second mRNA */
-  range.start = 1050; range.end = 9000;
-  child = gt_genome_feature_new(seqid, gft_mRNA, range, GT_STRAND_FORWARD);
+  child = gt_genome_feature_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
   gt_genome_node_add_child(gn, child);
 
-  range.start = 1050; range.end = 1500;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 1050, 1500,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 5000; range.end = 5500;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 5000, 5500,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 7000; range.end = 9000;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 7000, 9000,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
   /* third mRNA */
-  range.start = 1300; range.end = 9000;
-  child = gt_genome_feature_new(seqid, gft_mRNA, range, GT_STRAND_FORWARD);
+  child = gt_genome_feature_new(seqid, gft_mRNA, 1300, 9000, GT_STRAND_FORWARD);
   gt_genome_node_add_child(gn, child);
 
-  range.start = 1300; range.end = 1500;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 1300, 1500,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 3000; range.end = 3902;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 3000, 3902,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 5000; range.end = 5500;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 5000, 5500,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
-  range.start = 7000; range.end = 9000;
-  grandchild = gt_genome_feature_new(seqid, gft_exon, range, GT_STRAND_FORWARD);
+  grandchild = gt_genome_feature_new(seqid, gft_exon, 7000, 9000,
+                                     GT_STRAND_FORWARD);
   gt_genome_node_add_child(child, grandchild);
 
   gt_str_delete(seqid);
@@ -626,16 +623,13 @@ bool gt_genome_features_are_similar(GT_GenomeFeature *gf_a,
 int gt_genome_feature_unit_test(GT_Error *err)
 {
   GT_GenomeNode *gf;
-  GT_Range range;
   GT_Str *seqid;
   int had_err = 0;
 
   gt_error_check(err);
 
   seqid = gt_str_new_cstr("seqid");
-  range.start = 1;
-  range.end = 1000;
-  gf = gt_genome_feature_new(seqid, gft_gene, range, GT_STRAND_FORWARD);
+  gf = gt_genome_feature_new(seqid, gft_gene, 1, 1000, GT_STRAND_FORWARD);
 
   ensure(had_err, !gt_genome_feature_score_is_defined((GT_GenomeFeature*) gf));
 

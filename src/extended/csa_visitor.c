@@ -297,13 +297,12 @@ static void add_sa_to_exon_feature_array(GT_Array *exon_nodes,
 
   /* add remaining exons */
   for (i = exons_from_sa_index; i < gt_array_size(exons_from_sa); i++) {
+    GT_Range range;
     exons_from_sa_feature = *(GT_GenomeFeature**)
                             gt_array_get(exons_from_sa, i);
-    new_feature =
-      gt_genome_feature_new(seqid, gft_exon,
-                            gt_genome_node_get_range((GT_GenomeNode*)
-                                                     exons_from_sa_feature),
-                            gene_strand);
+    range = gt_genome_node_get_range((GT_GenomeNode*) exons_from_sa_feature),
+    new_feature = gt_genome_feature_new(seqid, gft_exon, range.start, range.end,
+                                        gene_strand);
     if (gt_genome_feature_score_is_defined(exons_from_sa_feature)) {
       gt_genome_feature_set_score((GT_GenomeFeature*) new_feature,
                             gt_genome_feature_get_score(exons_from_sa_feature));
@@ -364,18 +363,19 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
   GT_GenomeNode *mRNA_feature;
   GT_Array *exon_nodes;
   unsigned long i;
+  GT_Range range;
   GT_Strand strand;
   GT_Str *seqid;
   assert(csa_splice_form && gt_csa_source_str);
 
   /* create the mRNA feature itself */
-  strand = csa_splice_form_strand(csa_splice_form),
   seqid = gt_genome_node_get_seqid(*(GT_GenomeNode**)
                                csa_splice_form_get_representative(
                                                               csa_splice_form));
-  mRNA_feature = gt_genome_feature_new(seqid, gft_mRNA,
-                                 csa_splice_form_genomic_range(csa_splice_form),
-                                    csa_splice_form_strand(csa_splice_form));
+  range = csa_splice_form_genomic_range(csa_splice_form),
+  strand = csa_splice_form_strand(csa_splice_form),
+  mRNA_feature = gt_genome_feature_new(seqid, gft_mRNA, range.start, range.end,
+                                       strand);
   gt_genome_feature_set_source(mRNA_feature, gt_csa_source_str);
   mRNA_set_target_attribute((GT_GenomeFeature*) mRNA_feature, csa_splice_form);
 
@@ -404,14 +404,16 @@ static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
                                           GT_Str *gt_csa_source_str)
 {
   GT_GenomeNode *gene_feature, *mRNA_feature;
+  GT_Range range;
   unsigned long i;
   assert(csa_gene && gt_csa_source_str);
 
   /* create top-level gene feature */
+  range = csa_gene_genomic_range(csa_gene),
   gene_feature =
     gt_genome_feature_new(gt_genome_node_get_seqid(*(GT_GenomeNode**)
                                          csa_gene_get_representative(csa_gene)),
-                          gft_gene, csa_gene_genomic_range(csa_gene),
+                          gft_gene, range.start, range.end,
                           csa_gene_strand(csa_gene));
   gt_genome_feature_set_source(gene_feature, gt_csa_source_str);
 
