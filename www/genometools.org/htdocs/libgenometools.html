@@ -31,9 +31,19 @@ This document describes the <i>GenomeTools</i> C API (<tt>libgenometools</tt>).
 </ul>
 <a name="GT_Array"></a>
 <h2>Class GT_Array</h2>
+
+<p> Objects of the <code>GT_Array</code> class grow on demand. </p>
+
+<hr>
 <code>GT_Array* gt_array_new(size_t size_of_elem)</code>
 <p>
 Return a new <code>GT_Array</code> whose elements have the size <code>size_of_elem</code>.
+</p>
+<hr>
+<code>GT_Array* gt_array_ref(GT_Array *array)</code>
+<p>
+Increase the reference count for <code>array</code> and return it.
+   If <code>array</code> is <code>NULL</code>, <code>NULL</code> is returned without any side effects.
 </p>
 <hr>
 <code>GT_Array* gt_array_clone(const GT_Array *array)</code>
@@ -137,7 +147,8 @@ Compare the content of <code>array_a</code> with the content of <code>array_b</c
 <hr>
 <code>void gt_array_delete(GT_Array *array)</code>
 <p>
-Delete <code>array</code>.
+Decrease the reference count for <code>array</code> or delete it, if this was the last
+   reference.
 </p>
 <hr>
 <div id="footer">
