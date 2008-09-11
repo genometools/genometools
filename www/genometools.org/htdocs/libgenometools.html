@@ -43,7 +43,8 @@ Return a clone of <code>array</code>.
 <hr>
 <code>void* gt_array_get(const GT_Array *array, unsigned long index)</code>
 <p>
-Return pointer to element number <code>index</code> of <code>array</code>.
+Return pointer to element number <code>index</code> of <code>array</code>. <code>index</code> has to be
+   smaller than <code>gt_array_size(array)</code>.
 </p>
 <hr>
 <code>void* gt_array_get_first(const GT_Array *array)</code>
@@ -63,12 +64,68 @@ Return pointer to last element of <code>array</code> and remove it from <code>ar
 <hr>
 <code>void* gt_array_get_space(const GT_Array *array)</code>
 <p>
-Return pointer to the internal space of <code>array</code> where the elements are stored
+Return pointer to the internal space of <code>array</code> where the elements are
+   stored.
+</p>
+<hr>
+<code>#define gt_array_add(array, elem)</code>
+<p>
+Add element <code>elem</code> to <code>array</code>. The size of <code>elem</code> must equal the given
+   element size when the <code>array</code> was created and is determined automatically
+   with the <code>sizeof</code> operator.
+</p>
+<hr>
+<code>void gt_array_add_elem(GT_Array *array, void *elem,
+                                size_t size_of_elem)</code>
+<p>
+Add element <code>elem</code> with size <code>size_of_elem</code> to <code>array</code>. <code>size_of_elem</code> must
+   equal the given element size when the <code>array</code> was created. Usually, this
+   method is not used directly and the macro <code>gt_array_add()</code> is used
+   instead.
+</p>
+<hr>
+<code>void gt_array_add_array(GT_Array *dest, const GT_Array *src)</code>
+<p>
+Add all elements of array <code>src</code> to the array <code>dest</code>. The element sizes of
+   both arrays must be equal.
 </p>
 <hr>
 <code>void gt_array_rem(GT_Array *array, unsigned long index)</code>
 <p>
-Remove element with number <code>index</code> from <code>array</code> in O(<code>gt_array_size()</code>) time.
+Remove element with number <code>index</code> from <code>array</code> in O(<code>gt_array_size(array)</code>)
+   time. <code>index</code> has to be smaller than <code>gt_array_size(array)</code>.
+</p>
+<hr>
+<code>void gt_array_reverse(GT_Array *array)</code>
+<p>
+Reverse the order of the elements in <code>array</code>.
+</p>
+<hr>
+<code>void gt_array_set_size(GT_Array *array, unsigned long size)</code>
+<p>
+Set the size of <code>array</code> to <code>size</code>. <code>size</code> must be smaller than
+   <code>gt_array_size(array)</code>.
+</p>
+<hr>
+<code>void gt_array_reset(GT_Array *array)</code>
+<p>
+Reset the <code>array</code>. That is, afterwards the array has size 0.
+</p>
+<hr>
+<code>size_t gt_array_elem_size(const GT_Array *array)</code>
+<p>
+Return the size of the elements stored in <code>array</code>.
+</p>
+<hr>
+<code>unsigned long gt_array_size(const GT_Array *array)</code>
+<p>
+Return the number of elements in <code>array</code>. If <code>array</code> equals <code>NULL</code>, 0 is
+   returned.
+</p>
+<hr>
+<code>void gt_array_sort(GT_Array *array, GT_Compare compar)</code>
+<p>
+Sort <code>array</code> with the given compare function <code>compar</code>.
 </p>
 <hr>
 <code>int gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b)</code>
