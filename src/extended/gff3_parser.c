@@ -1369,6 +1369,7 @@ int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
         break;
       if (had_err == 1) { /* line processed */
         gt_str_reset(line_buffer);
+        had_err = 0;
         continue;
       }
       assert(had_err == 0); /* line not processed */
