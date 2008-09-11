@@ -33,7 +33,7 @@ GT_Array*     gt_array_ref(GT_Array *array);
 /* Return a clone of <array>. */
 GT_Array*     gt_array_clone(const GT_Array *array);
 /* Return pointer to element number <index> of <array>. <index> has to be
-   smaller than <gt_array_size(array)>. */
+   equal than <gt_array_size(array)>. */
 void*         gt_array_get(const GT_Array *array, unsigned long index);
 /* Return pointer to first element of <array>. */
 void*         gt_array_get_first(const GT_Array *array);
@@ -63,7 +63,7 @@ void          gt_array_add_array(GT_Array *dest, const GT_Array *src);
 void          gt_array_rem(GT_Array *array, unsigned long index);
 /* Reverse the order of the elements in <array>. */
 void          gt_array_reverse(GT_Array *array);
-/* Set the size of <array> to <size>. <size> must be smaller than
+/* Set the size of <array> to <size>. <size> must be smaller or equal than
    <gt_array_size(array)>. */
 void          gt_array_set_size(GT_Array *array, unsigned long size);
 /* Reset the <array>. That is, afterwards the array has size 0. */

@@ -52,9 +52,9 @@ void          gt_str_append_char(GT_Str *str, char c);
 void          gt_str_append_double(GT_Str*, double d, int precision);
 /* Append <ulong> to <str>. */
 void          gt_str_append_ulong(GT_Str*, unsigned long ulong);
-/* Set length of <str> to <length>. <length> must be smaller than
+/* Set length of <str> to <length>. <length> must be smaller or equal than
    <gt_str_length(str)>. */
-void          gt_str_set_length(GT_Str*, unsigned long);
+void          gt_str_set_length(GT_Str*, unsigned long length);
 /* Reset <str> to length 0. */
 void          gt_str_reset(GT_Str *str);
 /* Compare <str1> and <str2> and return the result (similar to <strcmp(3)>). */

@@ -163,7 +163,7 @@ unsigned long gt_str_length(const GT_Str *s)
 
 void gt_str_set_length(GT_Str *s, unsigned long length)
 {
-  assert(s && length < s->length);
+  assert(s && length <= s->length);
   s->length = length;
 }
 
