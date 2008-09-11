@@ -88,7 +88,8 @@ local ClassTypedef = lpeg.Ct(lpeg.Cc("class") *
 local Typedef = lpeg.P("typedef struct") * (Any - Semicolon)^1 * Semicolon
 local Function = lpeg.Cc("function") * lpeg.C(Character^1) * Space *
                  lpeg.C(lpeg.P(Any - lpeg.P("("))^1) * lpeg.P("(") *
-                 lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") * Semicolon
+                 lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
+                 (Any - Semicolon)^0 * Semicolon
 local ExportedComment = lpeg.Cc("comment") * CCommentStart *
                         lpeg.C((Any - CCommentEnd)^0) * CCommentEnd
 local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *

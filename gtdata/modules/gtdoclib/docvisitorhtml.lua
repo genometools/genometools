@@ -46,7 +46,14 @@ end
 local function codify(str)
   assert(str)
   local res = string.gsub(str, "<(.-)>", "<code>%1</code>")
-  return string.gsub(res, " ([%a_][%a%d_%.]-%(%))", " <code>%1</code>")
+  res = string.gsub(res, " ([%a_][%a%d_%.]-%(%))", " <code>%1</code>")
+  res = string.gsub(res, "___(.-)___", "<strong>%1</strong>")
+  return string.gsub(res, "__(.-)__", "<em>%1</em>")
+end
+
+local function paragraphify(str)
+  assert(str)
+  return string.gsub(str, "\n\n", "</p><p>")
 end
 
 function DocVisitorHTML:show_header()
@@ -63,7 +70,7 @@ function DocVisitorHTML:visit_class(classname, comments)
   include("class.lp", { classname = classname })
   if comments then
     for i, _ in ipairs(comments) do
-      comments[i] = codify(comments[i])
+      comments[i] = paragraphify(codify(comments[i]))
     end
   include("class_comments.lp", { comments = comments })
   end
