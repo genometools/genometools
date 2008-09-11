@@ -26,6 +26,9 @@ typedef struct GT_Array GT_Array;
 
 /* Return a new <GT_Array> whose elements have the size <size_of_elem>. */
 GT_Array*     gt_array_new(size_t size_of_elem);
+/* Increase the reference count for <array> and return it.
+   If <array> is <NULL>, <NULL> is returned without any side effects. */
+GT_Array*     gt_array_ref(GT_Array *array);
 /* Return a clone of <array>. */
 GT_Array*     gt_array_clone(const GT_Array *array);
 /* Return pointer to element number <index> of <array>. <index> has to be
@@ -75,7 +78,8 @@ void          gt_array_sort(GT_Array *array, GT_Compare compar);
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
 int           gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b);
-/* Delete <array>. */
+/* Decrease the reference count for <array> or delete it, if this was the last
+   reference. */
 void          gt_array_delete(GT_Array *array);
 
 #endif

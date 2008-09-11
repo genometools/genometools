@@ -23,7 +23,6 @@
 
 typedef int (*GT_ArrayProcessor)(void *elem, void *info, GT_Error*);
 
-GT_Array*     gt_array_ref(GT_Array*);
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
