@@ -29,7 +29,7 @@
 static int genome_feature_lua_new(lua_State *L)
 {
   GT_GenomeNode **gf;
-  GT_Range *range;
+  unsigned long startpos, endpos;
   GT_Strand strand;
   const char *seqid, *type, *strand_str;
   size_t length;
@@ -38,16 +38,19 @@ static int genome_feature_lua_new(lua_State *L)
   /* get/check parameters */
   seqid = luaL_checkstring(L, 1);
   type = luaL_checkstring(L, 2);
-  range = check_range(L, 3);
-  strand_str = luaL_checklstring(L, 4, &length);
-  luaL_argcheck(L, length == 1, 4, "strand string must have length 1");
+  startpos = luaL_checklong(L, 3);
+  endpos   = luaL_checklong(L, 4);
+  luaL_argcheck(L, startpos > 0, 3, "must be > 0");
+  luaL_argcheck(L, endpos > 0, 4, "must be > 0");
+  luaL_argcheck(L, startpos <= endpos, 3, "must be <= endpos");
+  strand_str = luaL_checklstring(L, 5, &length);
+  luaL_argcheck(L, length == 1, 5, "strand string must have length 1");
   luaL_argcheck(L, (strand = gt_strand_get(strand_str[0])) !=
-                    GT_NUM_OF_STRAND_TYPES, 4, "invalid strand");
+                    GT_NUM_OF_STRAND_TYPES, 5, "invalid strand");
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GT_GenomeNode*));
   seqid_str = gt_str_new_cstr(seqid);
-  *gf = gt_genome_feature_new(seqid_str, type, range->start, range->end,
-                              strand);
+  *gf = gt_genome_feature_new(seqid_str, type, startpos, endpos, strand);
   gt_str_delete(seqid_str);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -328,7 +331,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_genome_node(lua_State *L)
+int gt_lua_open_genome_node(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, GENOME_NODE_METATABLE);

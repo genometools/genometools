@@ -31,7 +31,7 @@ int gt_lua_open_extended(lua_State *L)
   assert(L);
   luaopen_cds_stream(L);
   luaopen_csa_stream(L);
-  luaopen_genome_node(L);
+  gt_lua_open_genome_node(L);
   luaopen_genome_node_iterator(L);
   luaopen_genome_stream(L);
   luaopen_genome_visitor(L);

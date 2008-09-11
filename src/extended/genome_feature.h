@@ -33,9 +33,9 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
 const GT_GenomeNodeClass* gt_genome_feature_class(void);
-/* Create an new <GT_GenomeFeature*> with sequence ID <seqid> and type <type>
+/* Create an new <GT_GenomeFeature*> on sequence with ID <seqid> and type <type>
    which lies from <start> to <end> on strand <strand>.
-   <start> and <end> always refer to the forward strand, therefore <strand> has
+   <start> and <end> always refer to the forward strand, therefore <start> has
    to be smaller or equal than <end>. */
 GT_GenomeNode*        gt_genome_feature_new(GT_Str *seqid, const char *type,
                                             unsigned long start,

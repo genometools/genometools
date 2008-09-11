@@ -23,9 +23,11 @@
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
-   -- Returns a new genome feature refering to sequence with id <seqid> of
-   -- <type> spanning <range> on <strand>.
-   function genome_feature_new(seqid, type, range, strand)
+   -- Create a new genome feature on sequence with ID <seqid> and type <type>
+   -- which lies from <startpos> to <end> on strand <strand>.
+   -- <startpos> and <endpos> always refer to the forward strand, therefore
+   -- <startpos> has to bo smaller or equal than <endpos>.
+   function genome_feature_new(seqid, type, startpos, endpos, strand)
 
    -- Returns a new sequence region for sequence id <seqid> spanning <range>.
    function sequence_region_new(seqid, range)
@@ -86,9 +88,9 @@
    -- If none of the above applies nil is returned.
    function genome_feature:extract_sequence(type, join, region_mapping)
 */
-int luaopen_genome_node(lua_State*);
+int gt_lua_open_genome_node(lua_State*);
 
-/* push a GT_GenomeNode to Lua, takes ownership! */
+/* Push a <GT_GenomeNode*> to Lua, takes ownership! */
 void gt_lua_genome_node_push(lua_State*, GT_GenomeNode*);
 
 #define GENOME_NODE_METATABLE  "GenomeTools.genome_node"
