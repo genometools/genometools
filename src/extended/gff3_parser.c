@@ -124,7 +124,7 @@ GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeFactory *type_factory)
   parser->fasta_parsing = false;
   parser->offset = UNDEF_LONG;
   parser->offset_mapping = NULL;
-  parser->type_factory = type_factory;
+  parser->type_factory = gt_type_factory_ref(type_factory);
   parser->last_terminator = 0;
   return parser;
 }
@@ -1450,5 +1450,6 @@ void gt_gff3_parser_delete(GT_GFF3Parser *parser)
   hashmap_delete(parser->source_to_str_mapping);
   hashmap_delete(parser->undefined_sequence_regions);
   mapping_delete(parser->offset_mapping);
+  gt_type_factory_delete(parser->type_factory);
   gt_free(parser);
 }

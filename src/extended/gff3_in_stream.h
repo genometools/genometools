@@ -25,7 +25,6 @@
 typedef struct GFF3InStream GFF3InStream;
 
 const GenomeStreamClass* gff3_in_stream_class(void);
-/* Does not take ownership of <type_factory>. */
 void                     gff3_in_stream_set_type_factory(GenomeStream*,
                                                          GT_TypeFactory
                                                          *type_factory);
