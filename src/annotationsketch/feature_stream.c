@@ -23,7 +23,7 @@
 struct FeatureStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *feature_visitor;
+  GtNodeVisitor *feature_visitor;
 };
 
 #define feature_stream_cast(GS)\
@@ -46,7 +46,7 @@ static void feature_stream_free(GtNodeStream *gs)
 {
   FeatureStream *feature_stream = feature_stream_cast(gs);
   gt_node_stream_delete(feature_stream->in_stream);
-  genome_visitor_delete(feature_stream->feature_visitor);
+  gt_node_visitor_delete(feature_stream->feature_visitor);
 }
 
 const GtNodeStreamClass* feature_stream_class(void)

@@ -20,11 +20,11 @@
 #include "core/translate.h"
 #include "core/undef.h"
 #include "extended/cds_visitor.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 #include "extended/splicedseq.h"
 
 struct CDSVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   GtStr *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
@@ -32,9 +32,9 @@ struct CDSVisitor {
 };
 
 #define cds_visitor_cast(GV)\
-        genome_visitor_cast(cds_visitor_class(), GV)
+        gt_node_visitor_cast(cds_visitor_class(), GV)
 
-static void cds_visitor_free(GenomeVisitor *gv)
+static void cds_visitor_free(GtNodeVisitor *gv)
 {
   CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
@@ -207,7 +207,7 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   return had_err;
 }
 
-static int cds_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
+static int cds_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
                                       GtError *err)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
@@ -217,9 +217,9 @@ static int cds_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
 
 }
 
-const GenomeVisitorClass* cds_visitor_class()
+const GtNodeVisitorClass* cds_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (CDSVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (CDSVisitor),
                                           cds_visitor_free,
                                           NULL,
                                           cds_visitor_genome_feature,
@@ -228,12 +228,12 @@ const GenomeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(RegionMapping *region_mapping, GtStr *source)
+GtNodeVisitor* cds_visitor_new(RegionMapping *region_mapping, GtStr *source)
 {
-  GenomeVisitor *gv;
+  GtNodeVisitor *gv;
   CDSVisitor *cds_visitor;
   assert(region_mapping);
-  gv = genome_visitor_create(cds_visitor_class());
+  gv = gt_node_visitor_create(cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->source = gt_str_ref(source);
   cds_visitor->splicedseq = splicedseq_new();

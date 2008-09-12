@@ -45,7 +45,7 @@ static int stream_evaluator_lua_new(lua_State *L)
 static int stream_evaluator_lua_evaluate(lua_State *L)
 {
   StreamEvaluator **stream_evaluator;
-  GenomeVisitor **genome_visitor;
+  GtNodeVisitor **genome_visitor;
   GtError *err;
   stream_evaluator = check_stream_evaluator(L);
   if (lua_gettop(L) >= 2) {

@@ -21,9 +21,9 @@
 /* implements the ``genome visitor'' interface */
 typedef struct GTFVisitor GTFVisitor;
 
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 
-const GenomeVisitorClass* gtf_visitor_class(void);
-GenomeVisitor*            gtf_visitor_new(GtGenFile*);
+const GtNodeVisitorClass* gtf_visitor_class(void);
+GtNodeVisitor*            gtf_visitor_new(GtGenFile*);
 
 #endif

@@ -21,25 +21,25 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 #include "extended/regioncov_visitor.h"
 
 struct RegionCovVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   unsigned long max_feature_dist;
   Hashmap *region2rangelist;
 };
 
 #define regioncov_visitor_cast(GV)\
-        genome_visitor_cast(regioncov_visitor_class(), GV)
+        gt_node_visitor_cast(regioncov_visitor_class(), GV)
 
-static void regioncov_visitor_free(GenomeVisitor *gv)
+static void regioncov_visitor_free(GtNodeVisitor *gv)
 {
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   hashmap_delete(regioncov_visitor->region2rangelist);
 }
 
-static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
+static int regioncov_visitor_genome_feature(GtNodeVisitor *gv,
                                             GtFeatureNode *gf,
                                             GT_UNUSED GtError *err)
 {
@@ -68,7 +68,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
   return 0;
 }
 
-static int regioncov_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+static int regioncov_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
                                          GT_UNUSED GtError *err)
 {
   RegionCovVisitor *regioncov_visitor;
@@ -83,9 +83,9 @@ static int regioncov_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-const GenomeVisitorClass* regioncov_visitor_class()
+const GtNodeVisitorClass* regioncov_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (RegionCovVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (RegionCovVisitor),
                                           regioncov_visitor_free,
                                           NULL,
                                           regioncov_visitor_genome_feature,
@@ -94,9 +94,9 @@ const GenomeVisitorClass* regioncov_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
+GtNodeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
 {
-  GenomeVisitor *gv = genome_visitor_create(regioncov_visitor_class());
+  GtNodeVisitor *gv = gt_node_visitor_create(regioncov_visitor_class());
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   regioncov_visitor->max_feature_dist = max_feature_dist;
   regioncov_visitor->region2rangelist = hashmap_new(HASH_STRING,
@@ -126,7 +126,7 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
   return 0;
 }
 
-void regioncov_visitor_show_coverage(GenomeVisitor *gv)
+void regioncov_visitor_show_coverage(GtNodeVisitor *gv)
 {
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   int had_err;

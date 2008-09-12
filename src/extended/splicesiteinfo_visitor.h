@@ -22,12 +22,12 @@
 typedef struct SpliceSiteInfoVisitor SpliceSiteInfoVisitor;
 
 #include <stdbool.h>
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
-const GenomeVisitorClass* splicesiteinfo_visitor_class(void);
+const GtNodeVisitorClass* splicesiteinfo_visitor_class(void);
 /* takes ownership of <rm> */
-GenomeVisitor*            splicesiteinfo_visitor_new(RegionMapping *rm);
-bool                      splicesiteinfo_visitor_show(GenomeVisitor*);
+GtNodeVisitor*            splicesiteinfo_visitor_new(RegionMapping *rm);
+bool                      splicesiteinfo_visitor_show(GtNodeVisitor*);
 
 #endif

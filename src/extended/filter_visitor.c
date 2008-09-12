@@ -21,11 +21,11 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/filter_visitor.h"
-#include "extended/genome_visitor_rep.h"
 #include "extended/gff3_parser.h"
+#include "extended/node_visitor_rep.h"
 
 struct FilterVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   GtQueue *gt_genome_node_buffer;
   GtStr *seqid,
       *typefilter;
@@ -45,9 +45,9 @@ struct FilterVisitor {
 };
 
 #define filter_visitor_cast(GV)\
-        genome_visitor_cast(filter_visitor_class(), GV)
+        gt_node_visitor_cast(filter_visitor_class(), GV)
 
-static void filter_visitor_free(GenomeVisitor *gv)
+static void filter_visitor_free(GtNodeVisitor *gv)
 {
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   gt_queue_delete(filter_visitor->gt_genome_node_buffer);
@@ -55,7 +55,7 @@ static void filter_visitor_free(GenomeVisitor *gv)
   gt_str_delete(filter_visitor->typefilter);
 }
 
-static int filter_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
+static int filter_visitor_comment(GtNodeVisitor *gv, GtCommentNode *c,
                                   GT_UNUSED GtError *err)
 {
   FilterVisitor *filter_visitor;
@@ -137,7 +137,7 @@ static bool filter_min_average_ssp(GtFeatureNode *gf, double minaveragessp)
   return false;
 }
 
-static int filter_visitor_genome_feature(GenomeVisitor *gv,
+static int filter_visitor_genome_feature(GtNodeVisitor *gv,
                                          GtFeatureNode *gf,
                                          GT_UNUSED GtError *err)
 {
@@ -206,7 +206,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv,
   return 0;
 }
 
-static int filter_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+static int filter_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
                                       GT_UNUSED GtError *err)
 {
   FilterVisitor *filter_visitor;
@@ -235,7 +235,7 @@ static int filter_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-static int filter_visitor_sequence_node(GenomeVisitor *gv, GtSequenceNode *sn,
+static int filter_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
                                         GT_UNUSED GtError *err)
 {
   FilterVisitor *filter_visitor;
@@ -251,9 +251,9 @@ static int filter_visitor_sequence_node(GenomeVisitor *gv, GtSequenceNode *sn,
   return 0;
 }
 
-const GenomeVisitorClass* filter_visitor_class()
+const GtNodeVisitorClass* filter_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (FilterVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (FilterVisitor),
                                           filter_visitor_free,
                                           filter_visitor_comment,
                                           filter_visitor_genome_feature,
@@ -262,7 +262,7 @@ const GenomeVisitorClass* filter_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* filter_visitor_new(GtStr *seqid, GtStr *typefilter,
+GtNodeVisitor* filter_visitor_new(GtStr *seqid, GtStr *typefilter,
                                   GtRange contain_range,
                                   GtRange overlap_range,
                                   GtStrand strand, GtStrand targetstrand,
@@ -272,7 +272,7 @@ GenomeVisitor* filter_visitor_new(GtStr *seqid, GtStr *typefilter,
                                   double min_average_splice_site_prob,
                                   unsigned long feature_num)
 {
-  GenomeVisitor *gv = genome_visitor_create(filter_visitor_class());
+  GtNodeVisitor *gv = gt_node_visitor_create(filter_visitor_class());
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   filter_visitor->gt_genome_node_buffer = gt_queue_new();
   filter_visitor->seqid = gt_str_ref(seqid);
@@ -292,13 +292,13 @@ GenomeVisitor* filter_visitor_new(GtStr *seqid, GtStr *typefilter,
   return gv;
 }
 
-unsigned long filter_visitor_node_buffer_size(GenomeVisitor *gv)
+unsigned long filter_visitor_node_buffer_size(GtNodeVisitor *gv)
 {
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   return gt_queue_size(filter_visitor->gt_genome_node_buffer);
 }
 
-GtGenomeNode* filter_visitor_get_node(GenomeVisitor *gv)
+GtGenomeNode* filter_visitor_get_node(GtNodeVisitor *gv)
 {
   FilterVisitor *filter_visitor;
   filter_visitor = filter_visitor_cast(gv);

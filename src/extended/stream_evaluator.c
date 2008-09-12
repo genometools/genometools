@@ -1250,7 +1250,7 @@ int compute_nucleotides_values(GT_UNUSED void *key, void *value, void *data,
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
-                              GenomeVisitor *gv, GtError *err)
+                              GtNodeVisitor *gv, GtError *err)
 {
   GtGenomeNode *gn;
   GtFeatureNode *gf;

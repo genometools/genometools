@@ -22,7 +22,7 @@
 struct GTFOutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *gtf_visitor;
+  GtNodeVisitor *gtf_visitor;
 };
 
 #define gtf_out_stream_cast(GS)\
@@ -44,7 +44,7 @@ static int gtf_out_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 static void gtf_out_stream_free(GtNodeStream *gs)
 {
   GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
-  genome_visitor_delete(gtf_out_stream->gtf_visitor);
+  gt_node_visitor_delete(gtf_out_stream->gtf_visitor);
   gt_node_stream_delete(gtf_out_stream->in_stream);
 }
 

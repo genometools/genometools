@@ -22,12 +22,12 @@
 #include "core/unused_api.h"
 #include "extended/csa_variable_strands.h"
 #include "extended/csa_visitor.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 
 #define GT_CSA_SOURCE_TAG "gt csa"
 
 struct CSAVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   GtQueue *gt_genome_node_buffer;
   unsigned long join_length;
   GtArray *cluster;
@@ -40,9 +40,9 @@ struct CSAVisitor {
 };
 
 #define csa_visitor_cast(GV)\
-        genome_visitor_cast(csa_visitor_class(), GV)
+        gt_node_visitor_cast(csa_visitor_class(), GV)
 
-static void csa_visitor_free(GenomeVisitor *gv)
+static void csa_visitor_free(GtNodeVisitor *gv)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   gt_queue_delete(csa_visitor->gt_genome_node_buffer);
@@ -50,7 +50,7 @@ static void csa_visitor_free(GenomeVisitor *gv)
   gt_str_delete(csa_visitor->gt_csa_source_str);
 }
 
-static int csa_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
+static int csa_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
                                       GT_UNUSED GtError *err)
 {
   CSAVisitor *csa_visitor;
@@ -99,7 +99,7 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
   return 0;
 }
 
-static int csa_visitor_default_func(GenomeVisitor *gv, GtGenomeNode *gn,
+static int csa_visitor_default_func(GtNodeVisitor *gv, GtGenomeNode *gn,
                                     GT_UNUSED GtError *err)
 {
   CSAVisitor *csa_visitor;
@@ -109,27 +109,27 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GtGenomeNode *gn,
   return 0;
 }
 
-static int csa_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
+static int csa_visitor_comment(GtNodeVisitor *gv, GtCommentNode *c,
                                GtError *err)
 {
   return csa_visitor_default_func(gv, (GtGenomeNode*) c, err);
 }
 
-static int csa_visitor_sequence_region(GenomeVisitor *gv, GtRegionNode *rn,
+static int csa_visitor_sequence_region(GtNodeVisitor *gv, GtRegionNode *rn,
                                        GtError *err)
 {
   return csa_visitor_default_func(gv, (GtGenomeNode*) rn, err);
 }
 
-static int csa_visitor_sequence_node(GenomeVisitor *gv, GtSequenceNode *sn,
+static int csa_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
                                      GtError *err)
 {
   return csa_visitor_default_func(gv, (GtGenomeNode*) sn, err);
 }
 
-const GenomeVisitorClass* csa_visitor_class()
+const GtNodeVisitorClass* csa_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (CSAVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (CSAVisitor),
                                           csa_visitor_free,
                                           csa_visitor_comment,
                                           csa_visitor_genome_feature,
@@ -138,9 +138,9 @@ const GenomeVisitorClass* csa_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* csa_visitor_new(unsigned long join_length)
+GtNodeVisitor* csa_visitor_new(unsigned long join_length)
 {
-  GenomeVisitor *gv = genome_visitor_create(csa_visitor_class());
+  GtNodeVisitor *gv = gt_node_visitor_create(csa_visitor_class());
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   csa_visitor->gt_genome_node_buffer = gt_queue_new();
   csa_visitor->join_length = join_length;
@@ -150,13 +150,13 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
   return gv;
 }
 
-unsigned long csa_visitor_node_buffer_size(GenomeVisitor *gv)
+unsigned long csa_visitor_node_buffer_size(GtNodeVisitor *gv)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   return gt_queue_size(csa_visitor->gt_genome_node_buffer);
 }
 
-GtGenomeNode* csa_visitor_get_node(GenomeVisitor *gv)
+GtGenomeNode* csa_visitor_get_node(GtNodeVisitor *gv)
 {
   CSAVisitor *csa_visitor;
   csa_visitor = csa_visitor_cast(gv);
@@ -442,7 +442,7 @@ static void process_csa_genes(GtQueue *gt_genome_node_buffer,
   }
 }
 
-void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster)
+void csa_visitor_process_cluster(GtNodeVisitor *gv, bool final_cluster)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   GtFeatureNode *first_feature;

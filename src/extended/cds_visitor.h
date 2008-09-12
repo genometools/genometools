@@ -21,10 +21,10 @@
 /* implements the ``genome visitor'' interface */
 typedef struct CDSVisitor CDSVisitor;
 
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
-const GenomeVisitorClass* cds_visitor_class(void);
-GenomeVisitor*            cds_visitor_new(RegionMapping*, GtStr *source);
+const GtNodeVisitorClass* cds_visitor_class(void);
+GtNodeVisitor*            cds_visitor_new(RegionMapping*, GtStr *source);
 
 #endif

@@ -466,7 +466,7 @@ void gt_genome_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
   gn->c_class->change_seqid(gn, seqid);
 }
 
-int gt_genome_node_accept(GtGenomeNode *gn, GenomeVisitor *gv, GtError *err)
+int gt_genome_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv, GtError *err)
 {
   gt_error_check(err);
   assert(gn && gv && gn->c_class && gn->c_class->accept);

@@ -21,9 +21,9 @@
 /* implements the ``genome visitor'' interface */
 typedef struct MergefeatVisitor MergefeatVisitor;
 
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 
-const GenomeVisitorClass* mergefeat_visitor_class(void);
-GenomeVisitor*            mergefeat_visitor_new(void);
+const GtNodeVisitorClass* mergefeat_visitor_class(void);
+GtNodeVisitor*            mergefeat_visitor_new(void);
 
 #endif

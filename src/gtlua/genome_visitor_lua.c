@@ -22,10 +22,10 @@
 
 static int gff3_visitor_lua_new(lua_State *L)
 {
-  GenomeVisitor **gv;
+  GtNodeVisitor **gv;
   assert(L);
   /* construct object */
-  gv = lua_newuserdata(L, sizeof (GenomeVisitor*));
+  gv = lua_newuserdata(L, sizeof (GtNodeVisitor*));
   *gv = gff3_visitor_new(NULL);
   assert(*gv);
   luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
@@ -33,14 +33,14 @@ static int gff3_visitor_lua_new(lua_State *L)
   return 1;
 }
 
-static int genome_visitor_lua_delete(lua_State *L)
+static int gt_node_visitor_lua_delete(lua_State *L)
 {
-  GenomeVisitor **gv = check_genome_visitor(L, 1);
-  genome_visitor_delete(*gv);
+  GtNodeVisitor **gv = check_genome_visitor(L, 1);
+  gt_node_visitor_delete(*gv);
   return 0;
 }
 
-static const struct luaL_Reg genome_visitor_lib_f [] = {
+static const struct luaL_Reg gt_node_visitor_lib_f [] = {
   { "gff3_visitor_new", gff3_visitor_lua_new },
   { NULL, NULL }
 };
@@ -54,9 +54,9 @@ int luaopen_genome_visitor(lua_State *L)
   lua_setfield(L, -2, "__index");
   /* set its _gc field */
   lua_pushstring(L, "__gc");
-  lua_pushcfunction(L, genome_visitor_lua_delete);
+  lua_pushcfunction(L, gt_node_visitor_lua_delete);
   lua_settable(L, -3);
   /* register functions */
-  luaL_register(L, "gt", genome_visitor_lib_f);
+  luaL_register(L, "gt", gt_node_visitor_lib_f);
   return 1;
 }

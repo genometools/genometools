@@ -24,7 +24,7 @@ struct ExtractFeatStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *extract_feat_visitor;
+  GtNodeVisitor *extract_feat_visitor;
 };
 
 #define extract_feat_stream_cast(GS)\
@@ -55,7 +55,7 @@ static int extract_feat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 static void extract_feat_stream_free(GtNodeStream *gs)
 {
   ExtractFeatStream *extract_feat_stream = extract_feat_stream_cast(gs);
-  genome_visitor_delete(extract_feat_stream->extract_feat_visitor);
+  gt_node_visitor_delete(extract_feat_stream->extract_feat_visitor);
   gt_node_stream_delete(extract_feat_stream->in_stream);
 }
 

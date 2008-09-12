@@ -19,25 +19,25 @@
 #include "core/assert.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 
-GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc)
+GtNodeVisitor* gt_node_visitor_create(const GtNodeVisitorClass *gvc)
 {
-  GenomeVisitor *gv;
+  GtNodeVisitor *gv;
   gt_assert(gvc && gvc->size);
   gv = gt_calloc(1, gvc->size);
   gv->c_class = gvc;
   return gv;
 }
 
-void* genome_visitor_cast(GT_UNUSED const GenomeVisitorClass *gvc,
-                          GenomeVisitor *gv)
+void* gt_node_visitor_cast(GT_UNUSED const GtNodeVisitorClass *gvc,
+                          GtNodeVisitor *gv)
 {
   gt_assert(gvc && gv && gv->c_class == gvc);
   return gv;
 }
 
-int genome_visitor_visit_comment_node(GenomeVisitor *gv, GtCommentNode *cn,
+int gt_node_visitor_visit_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
                                       GtError *err)
 {
   gt_error_check(err);
@@ -47,7 +47,7 @@ int genome_visitor_visit_comment_node(GenomeVisitor *gv, GtCommentNode *cn,
   return 0;
 }
 
-int genome_visitor_visit_feature_node(GenomeVisitor *gv, GtFeatureNode *gf,
+int gt_node_visitor_visit_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
                                       GtError *err)
 {
   gt_error_check(err);
@@ -55,7 +55,7 @@ int genome_visitor_visit_feature_node(GenomeVisitor *gv, GtFeatureNode *gf,
   return gv->c_class->feature_node(gv, gf, err);
 }
 
-int genome_visitor_visit_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+int gt_node_visitor_visit_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
                                      GtError *err)
 {
   gt_error_check(err);
@@ -65,7 +65,7 @@ int genome_visitor_visit_region_node(GenomeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-int genome_visitor_visit_sequence_node(GenomeVisitor *gv, GtSequenceNode *sn,
+int gt_node_visitor_visit_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
                                        GtError *err)
 {
   gt_error_check(err);
@@ -75,7 +75,7 @@ int genome_visitor_visit_sequence_node(GenomeVisitor *gv, GtSequenceNode *sn,
   return 0;
 }
 
-void genome_visitor_delete(GenomeVisitor *gv)
+void gt_node_visitor_delete(GtNodeVisitor *gv)
 {
   if (!gv) return;
   gt_assert(gv->c_class);

@@ -23,7 +23,7 @@
 struct AddIntronsStream{
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *add_introns_visitor;
+  GtNodeVisitor *add_introns_visitor;
 };
 
 #define add_introns_stream_cast(GS)\
@@ -45,7 +45,7 @@ static int add_introns_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 static void add_introns_stream_free(GtNodeStream *gs)
 {
   AddIntronsStream *ais = add_introns_stream_cast(gs);
-  genome_visitor_delete(ais->add_introns_visitor);
+  gt_node_visitor_delete(ais->add_introns_visitor);
   gt_node_stream_delete(ais->in_stream);
 }
 

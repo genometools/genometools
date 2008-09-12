@@ -17,27 +17,27 @@
 
 #include <assert.h>
 #include "core/unused_api.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 #include "extended/region_node.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_visitor.h"
 
 struct FeatureVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
         GtFeatureIndex *feature_index;
 };
 
 #define feature_visitor_cast(GV)\
-        genome_visitor_cast(feature_visitor_class(), GV)
+        gt_node_visitor_cast(feature_visitor_class(), GV)
 
-static void feature_visitor_free(GenomeVisitor *gv)
+static void feature_visitor_free(GtNodeVisitor *gv)
 {
   FeatureVisitor *feature_visitor = feature_visitor_cast(gv);
   assert(feature_visitor);
   gt_feature_index_delete(feature_visitor->feature_index);
 }
 
-static int feature_visitor_genome_feature(GenomeVisitor *gv,
+static int feature_visitor_genome_feature(GtNodeVisitor *gv,
                                           GtFeatureNode *gf,
                                           GT_UNUSED GtError *err)
 {
@@ -47,7 +47,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv,
   return 0;
 }
 
-static int feature_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+static int feature_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
                                        GT_UNUSED GtError *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
@@ -56,9 +56,9 @@ static int feature_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-const GenomeVisitorClass* feature_visitor_class()
+const GtNodeVisitorClass* feature_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (FeatureVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (FeatureVisitor),
                                           feature_visitor_free,
                                           NULL,
                                           feature_visitor_genome_feature,
@@ -67,12 +67,12 @@ const GenomeVisitorClass* feature_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* feature_visitor_new(GtFeatureIndex *fi)
+GtNodeVisitor* feature_visitor_new(GtFeatureIndex *fi)
 {
-  GenomeVisitor *gv;
+  GtNodeVisitor *gv;
   FeatureVisitor *feature_visitor;
   assert(fi != NULL);
-  gv = genome_visitor_create(feature_visitor_class());
+  gv = gt_node_visitor_create(feature_visitor_class());
   feature_visitor = feature_visitor_cast(gv);
   feature_visitor->feature_index = gt_feature_index_ref(fi);
   assert(feature_visitor != NULL);

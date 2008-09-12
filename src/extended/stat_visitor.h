@@ -21,14 +21,14 @@
 /* implements the ``genome visitor'' interface, gathers statistics */
 typedef struct StatVisitor StatVisitor;
 
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 
-const GenomeVisitorClass* stat_visitor_class(void);
-GenomeVisitor*            stat_visitor_new(bool gene_length_distri,
+const GtNodeVisitorClass* stat_visitor_class(void);
+GtNodeVisitor*            stat_visitor_new(bool gene_length_distri,
                                            bool gene_score_distri,
                                            bool exon_length_distri,
                                            bool exon_number_distri,
                                            bool intron_length_distri);
-void                      stat_visitor_show_stats(GenomeVisitor*);
+void                      stat_visitor_show_stats(GtNodeVisitor*);
 
 #endif

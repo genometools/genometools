@@ -23,7 +23,7 @@
 struct MergefeatStreamUnsorted {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *mergefeat_visitor;
+  GtNodeVisitor *mergefeat_visitor;
 };
 
 #define mergefeat_stream_unsorted_cast(GS)\
@@ -46,7 +46,7 @@ static int mergefeat_stream_unsorted_next_tree(GtNodeStream *gs,
 static void mergefeat_stream_unsorted_free(GtNodeStream *gs)
 {
   MergefeatStreamUnsorted *mfs = mergefeat_stream_unsorted_cast(gs);
-  genome_visitor_delete(mfs->mergefeat_visitor);
+  gt_node_visitor_delete(mfs->mergefeat_visitor);
 }
 
 const GtNodeStreamClass* mergefeat_stream_unsorted_class(void)

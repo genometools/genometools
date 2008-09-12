@@ -25,7 +25,7 @@ struct FilterStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *filter_visitor; /* the actual work is done in the visitor */
+  GtNodeVisitor *filter_visitor; /* the actual work is done in the visitor */
 };
 
 #define filter_stream_cast(GS)\
@@ -66,7 +66,7 @@ static int filter_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 static void filter_stream_free(GtNodeStream *gs)
 {
   FilterStream *fs = filter_stream_cast(gs);
-  genome_visitor_delete(fs->filter_visitor);
+  gt_node_visitor_delete(fs->filter_visitor);
   gt_node_stream_delete(fs->in_stream);
 }
 

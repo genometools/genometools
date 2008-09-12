@@ -15,27 +15,25 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_VISITOR_REP_H
-#define GENOME_VISITOR_REP_H
+#ifndef NODE_VISITOR_H
+#define NODE_VISITOR_H
 
-#include <stdio.h>
-#include "extended/genome_visitor.h"
+/* the ``genome visitor'' interface, a visitor for genome nodes */
+typedef struct GtNodeVisitorClass GtNodeVisitorClass;
+typedef struct GtNodeVisitor GtNodeVisitor;
 
-/* the ``genome visitor'' interface */
-struct GenomeVisitorClass {
-  size_t size;
-  void (*free)(GenomeVisitor*);
-  int  (*comment_node)(GenomeVisitor*, GtCommentNode*, GtError*);
-  int  (*feature_node)(GenomeVisitor*, GtFeatureNode*, GtError*);
-  int  (*region_node)(GenomeVisitor*, GtRegionNode*, GtError*);
-  int  (*sequence_node)(GenomeVisitor*, GtSequenceNode*, GtError*);
-};
+#include "extended/comment_node.h"
+#include "extended/feature_node.h"
+#include "extended/region_node.h"
+#include "extended/sequence_node.h"
 
-struct GenomeVisitor {
-  const GenomeVisitorClass *c_class;
-};
-
-GenomeVisitor* genome_visitor_create(const GenomeVisitorClass*);
-void*          genome_visitor_cast(const GenomeVisitorClass*, GenomeVisitor*);
+int  gt_node_visitor_visit_comment_node(GtNodeVisitor*, GtCommentNode*,
+                                        GtError*);
+int  gt_node_visitor_visit_feature_node(GtNodeVisitor*, GtFeatureNode*,
+                                        GtError*);
+int  gt_node_visitor_visit_region_node(GtNodeVisitor*, GtRegionNode*, GtError*);
+int  gt_node_visitor_visit_sequence_node(GtNodeVisitor*, GtSequenceNode*,
+                                         GtError*);
+void gt_node_visitor_delete(GtNodeVisitor *gv);
 
 #endif

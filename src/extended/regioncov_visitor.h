@@ -21,10 +21,10 @@
 /* implements the ``genome visitor'' interface */
 typedef struct RegionCovVisitor RegionCovVisitor;
 
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 
-const GenomeVisitorClass* regioncov_visitor_class(void);
-GenomeVisitor*            regioncov_visitor_new(unsigned long max_feature_dist);
-void                      regioncov_visitor_show_coverage(GenomeVisitor*);
+const GtNodeVisitorClass* regioncov_visitor_class(void);
+GtNodeVisitor*            regioncov_visitor_new(unsigned long max_feature_dist);
+void                      regioncov_visitor_show_coverage(GtNodeVisitor*);
 
 #endif

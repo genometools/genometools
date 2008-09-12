@@ -146,13 +146,13 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
     gt_queue_add(queue, gn);
   if (!had_err) {
-    GenomeVisitor *feature_visitor = feature_visitor_new(feature_index);
+    GtNodeVisitor *feature_visitor = feature_visitor_new(feature_index);
     while (gt_queue_size(queue)) {
       gn = gt_queue_get(queue);
       had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
       assert(!had_err); /* cannot happen */
     }
-    genome_visitor_delete(feature_visitor);
+    gt_node_visitor_delete(feature_visitor);
   }
   gt_node_stream_delete(gff3_in_stream);
   while (gt_queue_size(queue))

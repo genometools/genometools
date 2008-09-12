@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the FeatureVisitor class (which implements the GenomeVisitor)
+/* exports the FeatureVisitor class (which implements the GtNodeVisitor)
    interface to Lua:
 
    -- Returns a new feature visitor object over <feature_index>. That is, all

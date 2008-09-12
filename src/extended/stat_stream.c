@@ -24,7 +24,7 @@ struct StatStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *stat_visitor;
+  GtNodeVisitor *stat_visitor;
   unsigned long number_of_trees;
 };
 
@@ -53,7 +53,7 @@ static int stat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 static void stat_stream_free(GtNodeStream *gs)
 {
   StatStream *stat_stream = stat_stream_cast(gs);
-  genome_visitor_delete(stat_stream->stat_visitor);
+  gt_node_visitor_delete(stat_stream->stat_visitor);
   gt_node_stream_delete(stat_stream->in_stream);
 }
 

@@ -24,7 +24,7 @@ struct SpliceSiteInfoStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *splice_site_info_visitor;
+  GtNodeVisitor *splice_site_info_visitor;
 };
 
 #define splice_site_info_stream_cast(GS)\
@@ -55,7 +55,7 @@ static int splice_site_info_stream_next_tree(GtNodeStream *gs,
 static void splice_site_info_stream_free(GtNodeStream *gs)
 {
   SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
-  genome_visitor_delete(ssis->splice_site_info_visitor);
+  gt_node_visitor_delete(ssis->splice_site_info_visitor);
   gt_node_stream_delete(ssis->in_stream);
 }
 

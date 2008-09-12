@@ -18,15 +18,15 @@
 #include "lauxlib.h"
 #include "annotationsketch/feature_visitor.h"
 #include "extended/luahelper.h"
-#include "gtlua/genome_visitor_lua.h"
 #include "gtlua/feature_index_lua.h"
 #include "gtlua/feature_visitor_lua.h"
+#include "gtlua/genome_visitor_lua.h"
 
 static int feature_visitor_lua_new(lua_State *L)
 {
-  GenomeVisitor **feature_visitor;
+  GtNodeVisitor **feature_visitor;
   GtFeatureIndex **feature_index;
-  feature_visitor = lua_newuserdata(L, sizeof (GenomeVisitor*));
+  feature_visitor = lua_newuserdata(L, sizeof (GtNodeVisitor*));
   assert(feature_visitor);
   feature_index = check_feature_index(L, 1);
   *feature_visitor = feature_visitor_new(*feature_index);

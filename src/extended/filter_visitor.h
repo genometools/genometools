@@ -21,12 +21,12 @@
 /* implements the ``genome visitor'' interface */
 typedef struct FilterVisitor FilterVisitor;
 
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 
-const GenomeVisitorClass* filter_visitor_class(void);
+const GtNodeVisitorClass* filter_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have
    strand <strand>. */
-GenomeVisitor*            filter_visitor_new(GtStr *seqid, GtStr *typefilter,
+GtNodeVisitor*            filter_visitor_new(GtStr *seqid, GtStr *typefilter,
                                              GtRange contain_range,
                                              GtRange overlap_range,
                                              GtStrand strand,
@@ -39,7 +39,7 @@ GenomeVisitor*            filter_visitor_new(GtStr *seqid, GtStr *typefilter,
                                              double
                                              min_average_splice_site_prob,
                                              unsigned long feature_num);
-unsigned long             filter_visitor_node_buffer_size(GenomeVisitor*);
-GtGenomeNode*               filter_visitor_get_node(GenomeVisitor*);
+unsigned long             filter_visitor_node_buffer_size(GtNodeVisitor*);
+GtGenomeNode*               filter_visitor_get_node(GtNodeVisitor*);
 
 #endif

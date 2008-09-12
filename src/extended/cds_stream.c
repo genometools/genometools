@@ -23,7 +23,7 @@ struct CDSStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *cds_visitor;
+  GtNodeVisitor *cds_visitor;
 };
 
 #define cds_stream_cast(GS)\
@@ -45,7 +45,7 @@ static int cds_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 static void cds_stream_free(GtNodeStream *gs)
 {
   CDSStream *cds_stream = cds_stream_cast(gs);
-  genome_visitor_delete(cds_stream->cds_visitor);
+  gt_node_visitor_delete(cds_stream->cds_visitor);
   gt_node_stream_delete(cds_stream->in_stream);
 }
 

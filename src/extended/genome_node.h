@@ -26,7 +26,7 @@ typedef struct GtGenomeNode GtGenomeNode;
 #include "core/phase.h"
 #include "core/range.h"
 #include "core/str.h"
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 
 typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
 
@@ -61,7 +61,7 @@ unsigned long  gt_genome_node_get_end(GtGenomeNode*);
 GtRange       gt_genome_node_get_range(GtGenomeNode*);
 void           gt_genome_node_set_range(GtGenomeNode*, GtRange);
 void           gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
-int            gt_genome_node_accept(GtGenomeNode*, GenomeVisitor*, GtError*);
+int            gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
 /* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
 void           gt_genome_node_add_child(GtGenomeNode *parent,
                                         GtGenomeNode *child);

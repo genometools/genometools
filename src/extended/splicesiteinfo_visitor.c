@@ -25,12 +25,12 @@
 #include "core/warning.h"
 #include "core/xansi.h"
 #include "extended/genome_node_iterator.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 #include "extended/splicesiteinfo_visitor.h"
 #include "extended/reverse.h"
 
 struct SpliceSiteInfoVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   RegionMapping *region_mapping;
   StringDistri *splicesites,
                *donorsites,
@@ -40,9 +40,9 @@ struct SpliceSiteInfoVisitor {
 };
 
 #define splicesiteinfo_visitor_cast(GV)\
-        genome_visitor_cast(splicesiteinfo_visitor_class(), GV)
+        gt_node_visitor_cast(splicesiteinfo_visitor_class(), GV)
 
-static void splicesiteinfo_visitor_free(GenomeVisitor *gv)
+static void splicesiteinfo_visitor_free(GtNodeVisitor *gv)
 {
   SpliceSiteInfoVisitor *splicesiteinfo_visitor;
   assert(gv);
@@ -107,7 +107,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   return had_err;
 }
 
-static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
+static int splicesiteinfo_visitor_genome_feature(GtNodeVisitor *gv,
                                                  GtFeatureNode *gf,
                                                  GtError *err)
 {
@@ -127,9 +127,9 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
   return had_err;
 }
 
-const GenomeVisitorClass* splicesiteinfo_visitor_class()
+const GtNodeVisitorClass* splicesiteinfo_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (SpliceSiteInfoVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (SpliceSiteInfoVisitor),
                                           splicesiteinfo_visitor_free,
                                           NULL,
                                           splicesiteinfo_visitor_genome_feature,
@@ -138,12 +138,12 @@ const GenomeVisitorClass* splicesiteinfo_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* splicesiteinfo_visitor_new(RegionMapping *rm)
+GtNodeVisitor* splicesiteinfo_visitor_new(RegionMapping *rm)
 {
-  GenomeVisitor *gv;
+  GtNodeVisitor *gv;
   SpliceSiteInfoVisitor *ssiv;
   assert(rm);
-  gv = genome_visitor_create(splicesiteinfo_visitor_class());
+  gv = gt_node_visitor_create(splicesiteinfo_visitor_class());
   ssiv = splicesiteinfo_visitor_cast(gv);
   ssiv->region_mapping = rm;
   ssiv->splicesites = string_distri_new();
@@ -171,7 +171,7 @@ static void showsinglesite(const char *string, unsigned long occurrences,
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
 }
 
-bool splicesiteinfo_visitor_show(GenomeVisitor *gv)
+bool splicesiteinfo_visitor_show(GtNodeVisitor *gv)
 {
   SpliceSiteInfoVisitor *ssiv;
   assert(gv);

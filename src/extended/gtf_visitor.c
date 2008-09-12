@@ -22,12 +22,12 @@
 #include "core/unused_api.h"
 #include "core/warning.h"
 #include "extended/genome_node.h"
-#include "extended/genome_visitor_rep.h"
 #include "extended/gff3_output.h"
 #include "extended/gtf_visitor.h"
+#include "extended/node_visitor_rep.h"
 
 struct GTFVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   unsigned long gene_id,
                 transcript_id;
   GtArray *exon_features,
@@ -36,9 +36,9 @@ struct GTFVisitor {
 };
 
 #define gtf_visitor_cast(GV)\
-        genome_visitor_cast(gtf_visitor_class(), GV)
+        gt_node_visitor_cast(gtf_visitor_class(), GV)
 
-static void gtf_visitor_free(GenomeVisitor *gv)
+static void gtf_visitor_free(GtNodeVisitor *gv)
 {
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   assert(gtf_visitor);
@@ -46,7 +46,7 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   gt_array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
+static int gtf_visitor_comment(GtNodeVisitor *gv, GtCommentNode *c,
                                GT_UNUSED GtError *err)
 {
   GTFVisitor *gtf_visitor;
@@ -144,7 +144,7 @@ static int gtf_show_genome_feature(GtGenomeNode *gn, void *data, GtError *err)
   return had_err;
 }
 
-static int gtf_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
+static int gtf_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
                                       GtError *err)
 {
   GTFVisitor *gtf_visitor;
@@ -156,9 +156,9 @@ static int gtf_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
   return had_err;
 }
 
-const GenomeVisitorClass* gtf_visitor_class()
+const GtNodeVisitorClass* gtf_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (GTFVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (GTFVisitor),
                                           gtf_visitor_free,
                                           gtf_visitor_comment,
                                           gtf_visitor_genome_feature,
@@ -167,9 +167,9 @@ const GenomeVisitorClass* gtf_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* gtf_visitor_new(GtGenFile *outfp)
+GtNodeVisitor* gtf_visitor_new(GtGenFile *outfp)
 {
-  GenomeVisitor *gv = genome_visitor_create(gtf_visitor_class());
+  GtNodeVisitor *gv = gt_node_visitor_create(gtf_visitor_class());
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   gtf_visitor->gene_id = 0;
   gtf_visitor->exon_features = gt_array_new(sizeof (GtGenomeNode*));

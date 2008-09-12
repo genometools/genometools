@@ -22,12 +22,12 @@
 typedef struct ExtractFeatVisitor ExtractFeatVisitor;
 
 #include <stdbool.h>
-#include "extended/genome_visitor.h"
+#include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
-const GenomeVisitorClass* extract_feat_visitor_class(void);
+const GtNodeVisitorClass* extract_feat_visitor_class(void);
 /* takes ownership of <rm> */
-GenomeVisitor*            extract_feat_visitor_new(RegionMapping *rm,
+GtNodeVisitor*            extract_feat_visitor_new(RegionMapping *rm,
                                                    const char*, bool join,
                                                    bool translate);
 

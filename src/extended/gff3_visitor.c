@@ -24,13 +24,13 @@
 #include "core/unused_api.h"
 #include "core/string_distri.h"
 #include "extended/genome_node.h"
-#include "extended/genome_visitor_rep.h"
 #include "extended/gff3_output.h"
 #include "extended/gff3_parser.h"
 #include "extended/gff3_visitor.h"
+#include "extended/node_visitor_rep.h"
 
 struct GFF3Visitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   bool version_string_shown,
        fasta_directive_shown;
   StringDistri *id_counter;
@@ -51,9 +51,9 @@ typedef struct {
 } ShowAttributeInfo;
 
 #define gff3_visitor_cast(GV)\
-        genome_visitor_cast(gff3_visitor_class(), GV)
+        gt_node_visitor_cast(gff3_visitor_class(), GV)
 
-static void gff3_version_string(GenomeVisitor *gv)
+static void gff3_version_string(GtNodeVisitor *gv)
 {
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
@@ -64,7 +64,7 @@ static void gff3_version_string(GenomeVisitor *gv)
   }
 }
 
-static void gff3_visitor_free(GenomeVisitor *gv)
+static void gff3_visitor_free(GtNodeVisitor *gv)
 {
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
@@ -73,7 +73,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   hashmap_delete(gff3_visitor->gt_feature_node_to_unique_id_str);
 }
 
-static int gff3_visitor_comment_node(GenomeVisitor *gv, GtCommentNode *cn,
+static int gff3_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
                                      GT_UNUSED GtError *err)
 {
   GFF3Visitor *gff3_visitor;
@@ -227,7 +227,7 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
   return had_err;
 }
 
-static int gff3_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
+static int gff3_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
                                        GtError *err)
 {
   GFF3Visitor *gff3_visitor;
@@ -268,7 +268,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
   return had_err;
 }
 
-static int gff3_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+static int gff3_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
                                     GT_UNUSED GtError *err)
 {
   GFF3Visitor *gff3_visitor;
@@ -287,7 +287,7 @@ static int gff3_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-static int gff3_visitor_sequence_node(GenomeVisitor *gv, GtSequenceNode *sn,
+static int gff3_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
                                       GT_UNUSED GtError *err)
 {
   GFF3Visitor *gff3_visitor;
@@ -305,9 +305,9 @@ static int gff3_visitor_sequence_node(GenomeVisitor *gv, GtSequenceNode *sn,
   return 0;
 }
 
-const GenomeVisitorClass* gff3_visitor_class()
+const GtNodeVisitorClass* gff3_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (GFF3Visitor),
+  static const GtNodeVisitorClass gvc = { sizeof (GFF3Visitor),
                                           gff3_visitor_free,
                                           gff3_visitor_comment_node,
                                           gff3_visitor_genome_feature,
@@ -316,9 +316,9 @@ const GenomeVisitorClass* gff3_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* gff3_visitor_new(GtGenFile *outfp)
+GtNodeVisitor* gff3_visitor_new(GtGenFile *outfp)
 {
-  GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class());
+  GtNodeVisitor *gv = gt_node_visitor_create(gff3_visitor_class());
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = false;
   gff3_visitor->fasta_directive_shown = false;
@@ -332,7 +332,7 @@ GenomeVisitor* gff3_visitor_new(GtGenFile *outfp)
   return gv;
 }
 
-void gff3_visitor_set_fasta_width(GenomeVisitor *gv, unsigned long fasta_width)
+void gff3_visitor_set_fasta_width(GtNodeVisitor *gv, unsigned long fasta_width)
 {
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gv);

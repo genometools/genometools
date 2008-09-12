@@ -53,7 +53,7 @@ static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
 
 int gt_regioncov(int argc, const char **argv, GtError *err)
 {
-  GenomeVisitor *regioncov_visitor;
+  GtNodeVisitor *regioncov_visitor;
   GtNodeStream *gff3_in_stream;
   GtGenomeNode *gn;
   RegionCovArguments arguments;
@@ -88,7 +88,7 @@ int gt_regioncov(int argc, const char **argv, GtError *err)
     regioncov_visitor_show_coverage(regioncov_visitor);
 
   /* free */
-  genome_visitor_delete(regioncov_visitor);
+  gt_node_visitor_delete(regioncov_visitor);
   gt_node_stream_delete(gff3_in_stream);
 
   return had_err;

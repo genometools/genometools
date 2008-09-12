@@ -134,13 +134,13 @@ void gt_feature_node_set_phase(GtGenomeNode *gn, Phase phase)
   gn->bit_field |= phase << PHASE_OFFSET;
 }
 
-static int gt_feature_node_accept(GtGenomeNode *gn, GenomeVisitor *gv,
+static int gt_feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
                                   GtError *err)
 {
   GtFeatureNode *gf;
   gt_error_check(err);
   gf = gt_feature_node_cast(gn);
-  return genome_visitor_visit_feature_node(gv, gf, err);
+  return gt_node_visitor_visit_feature_node(gv, gf, err);
 }
 
 const GtGenomeNodeClass* gt_feature_node_class()

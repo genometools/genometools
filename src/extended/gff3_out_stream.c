@@ -22,7 +22,7 @@
 struct GFF3OutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *gff3_visitor;
+  GtNodeVisitor *gff3_visitor;
 };
 
 #define gff3_out_stream_cast(GS)\
@@ -45,7 +45,7 @@ static void gff3_out_stream_free(GtNodeStream *gs)
 {
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gt_node_stream_delete(gff3_out_stream->in_stream);
-  genome_visitor_delete(gff3_out_stream->gff3_visitor);
+  gt_node_visitor_delete(gff3_out_stream->gff3_visitor);
 }
 
 const GtNodeStreamClass* gff3_out_stream_class(void)

@@ -200,7 +200,7 @@ static int genome_feature_lua_set_source(lua_State *L)
 static int genome_node_lua_accept(lua_State *L)
 {
   GtGenomeNode **gn;
-  GenomeVisitor **gv;
+  GtNodeVisitor **gv;
   GtError *err;
   gn = check_genome_node(L, 1);
   gv = check_genome_visitor(L, 2);

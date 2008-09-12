@@ -22,10 +22,10 @@
 #include "extended/extract_feat_sequence.h"
 #include "extended/extract_feat_visitor.h"
 #include "extended/genome_node_iterator.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 
 struct ExtractFeatVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   const char *type;
   bool join,
        translate;
@@ -34,9 +34,9 @@ struct ExtractFeatVisitor {
 };
 
 #define extract_feat_visitor_cast(GV)\
-        genome_visitor_cast(extract_feat_visitor_class(), GV)
+        gt_node_visitor_cast(extract_feat_visitor_class(), GV)
 
-static void extract_feat_visitor_free(GenomeVisitor *gv)
+static void extract_feat_visitor_free(GtNodeVisitor *gv)
 {
   ExtractFeatVisitor *extract_feat_visitor = extract_feat_visitor_cast(gv);
   assert(extract_feat_visitor);
@@ -72,7 +72,7 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate)
   }
 }
 
-static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
+static int extract_feat_visitor_genome_feature(GtNodeVisitor *gv,
                                                GtFeatureNode *gf,
                                                GtError *err)
 {
@@ -109,9 +109,9 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   return had_err;
 }
 
-const GenomeVisitorClass* extract_feat_visitor_class()
+const GtNodeVisitorClass* extract_feat_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (ExtractFeatVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (ExtractFeatVisitor),
                                           extract_feat_visitor_free,
                                           NULL,
                                           extract_feat_visitor_genome_feature,
@@ -120,13 +120,13 @@ const GenomeVisitorClass* extract_feat_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* extract_feat_visitor_new(RegionMapping *rm, const char *type,
+GtNodeVisitor* extract_feat_visitor_new(RegionMapping *rm, const char *type,
                                         bool join, bool translate)
 {
-  GenomeVisitor *gv;
+  GtNodeVisitor *gv;
   ExtractFeatVisitor *efv;
   assert(rm);
-  gv = genome_visitor_create(extract_feat_visitor_class());
+  gv = gt_node_visitor_create(extract_feat_visitor_class());
   efv= extract_feat_visitor_cast(gv);
   efv->type = gt_symbol(type);
   efv->join = join;

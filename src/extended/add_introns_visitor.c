@@ -19,16 +19,16 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/add_introns_visitor.h"
-#include "extended/genome_visitor_rep.h"
+#include "extended/node_visitor_rep.h"
 
 struct AddIntronsVisitor {
-  const GenomeVisitor parent_instance;
+  const GtNodeVisitor parent_instance;
   GtFeatureNode *parent_feature,
                 *previous_exon_feature;
 };
 
 #define add_introns_visitor_cast(GV)\
-        genome_visitor_cast(add_introns_visitor_class(), GV)
+        gt_node_visitor_cast(add_introns_visitor_class(), GV)
 
 static int add_introns_in_children(GtGenomeNode *gn, void *data,
                                    GT_UNUSED GtError *err)
@@ -92,7 +92,7 @@ static int add_introns_if_necessary(GtGenomeNode *gn, void *data,
                                               err);
 }
 
-static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
+static int add_introns_visitor_genome_feature(GtNodeVisitor *gv,
                                               GtFeatureNode *gf,
                                               GtError *err)
 {
@@ -103,9 +103,9 @@ static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
                                        add_introns_if_necessary, false, err);
 }
 
-const GenomeVisitorClass* add_introns_visitor_class()
+const GtNodeVisitorClass* add_introns_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof (AddIntronsVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (AddIntronsVisitor),
                                           NULL,
                                           NULL,
                                           add_introns_visitor_genome_feature,
@@ -114,7 +114,7 @@ const GenomeVisitorClass* add_introns_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* add_introns_visitor_new(void)
+GtNodeVisitor* add_introns_visitor_new(void)
 {
-  return genome_visitor_create(add_introns_visitor_class());
+  return gt_node_visitor_create(add_introns_visitor_class());
 }

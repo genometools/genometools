@@ -24,7 +24,7 @@
 struct CSAStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GenomeVisitor *csa_visitor; /* the actual work is done in the visitor */
+  GtNodeVisitor *csa_visitor; /* the actual work is done in the visitor */
 };
 
 #define csa_stream_cast(GS)\
@@ -72,7 +72,7 @@ int csa_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 static void csa_stream_free(GtNodeStream *gs)
 {
   CSAStream *cs = csa_stream_cast(gs);
-  genome_visitor_delete(cs->csa_visitor);
+  gt_node_visitor_delete(cs->csa_visitor);
   gt_node_stream_delete(cs->in_stream);
 }
 
