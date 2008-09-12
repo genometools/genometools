@@ -63,7 +63,7 @@ static int sequence_region_lua_new(lua_State *L)
   GT_GenomeNode **sr;
   const char *seqid;
   GtStr *seqid_str;
-  GT_Range *range;
+  GtRange *range;
   assert(L);
   /* get_check parameters */
   seqid = luaL_checkstring(L, 1);

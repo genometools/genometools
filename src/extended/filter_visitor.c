@@ -29,7 +29,7 @@ struct FilterVisitor {
   GT_Queue *gt_genome_node_buffer;
   GtStr *seqid,
       *typefilter;
-  GT_Range contain_range,
+  GtRange contain_range,
         overlap_range;
   GtStrand strand,
          targetstrand;
@@ -65,7 +65,7 @@ static int filter_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
   return 0;
 }
 
-static bool filter_contain_range(GT_GenomeFeature *gf, GT_Range contain_range)
+static bool filter_contain_range(GT_GenomeFeature *gf, GtRange contain_range)
 {
   assert(gf);
   if (contain_range.start != UNDEF_ULONG &&
@@ -76,7 +76,7 @@ static bool filter_contain_range(GT_GenomeFeature *gf, GT_Range contain_range)
   return false;
 }
 
-static bool filter_overlap_range(GT_GenomeFeature *gf, GT_Range overlap_range)
+static bool filter_overlap_range(GT_GenomeFeature *gf, GtRange overlap_range)
 {
   assert(gf);
   if (overlap_range.start != UNDEF_ULONG &&
@@ -217,7 +217,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv,
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
                gt_genome_node_get_seqid((GT_GenomeNode*) sr))) {
     if (filter_visitor->contain_range.start != UNDEF_ULONG) {
-      GT_Range range = gt_genome_node_get_range((GT_GenomeNode*) sr);
+      GtRange range = gt_genome_node_get_range((GT_GenomeNode*) sr);
       if (gt_range_overlap(range, filter_visitor->contain_range)) {
         /* an overlapping contain range was defined -> update range  */
         range.start = MAX(range.start, filter_visitor->contain_range.start);
@@ -264,8 +264,8 @@ const GenomeVisitorClass* filter_visitor_class()
 }
 
 GenomeVisitor* filter_visitor_new(GtStr *seqid, GtStr *typefilter,
-                                  GT_Range contain_range,
-                                  GT_Range overlap_range,
+                                  GtRange contain_range,
+                                  GtRange overlap_range,
                                   GtStrand strand, GtStrand targetstrand,
                                   bool has_CDS, unsigned long max_gene_length,
                                   unsigned long max_gene_num,

@@ -49,9 +49,9 @@ static GtStr* gt_comment_get_idstr(GT_GenomeNode *gn)
   return c->gt_comment_str;
 }
 
-static GT_Range gt_comment_get_range(GT_UNUSED GT_GenomeNode *gn)
+static GtRange gt_comment_get_range(GT_UNUSED GT_GenomeNode *gn)
 {
-  GT_Range range;
+  GtRange range;
   range.start = 0;
   range.end = 0;
   return range;

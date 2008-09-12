@@ -78,9 +78,9 @@ unsigned long csa_splice_form_num_of_sas(const CSASpliceForm *splice_form)
   return gt_array_size(splice_form->spliced_alignments);
 }
 
-GT_Range csa_splice_form_genomic_range(const CSASpliceForm *splice_form)
+GtRange csa_splice_form_genomic_range(const CSASpliceForm *splice_form)
 {
-  GT_Range splice_form_range, tmp_range;
+  GtRange splice_form_range, tmp_range;
   unsigned long i;
   assert(splice_form);
   splice_form_range.start = ~0UL;

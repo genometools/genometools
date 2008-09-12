@@ -29,7 +29,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
 {
   long leftpos, rightpos;
   unsigned long i = 0;
-  GT_Range exon;
+  GtRange exon;
   GtStr *id;
   int had_err = 0;
   gt_error_check(err);

@@ -26,8 +26,8 @@ typedef struct FilterStream FilterStream;
 const GenomeStreamClass* filter_stream_class(void);
 GenomeStream*            filter_stream_new(GenomeStream*,
                                            GtStr *seqid, GtStr *typefilter,
-                                           GT_Range contain_range,
-                                           GT_Range overlap_range,
+                                           GtRange contain_range,
+                                           GtRange overlap_range,
                                            GtStrand strand,
                                            GtStrand targetstrand,
                                            bool has_CDS,

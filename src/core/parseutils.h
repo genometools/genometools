@@ -44,7 +44,7 @@ int gt_parse_ulong(unsigned long *out, const char *nptr);
 int gt_parse_double(double *out, const char *nptr);
 
 /* Enforces that <start> <= <end>. */
-int gt_parse_range(GT_Range*, const char *start, const char *end,
+int gt_parse_range(GtRange*, const char *start, const char *end,
                 unsigned int line_number, const char *filename, GtError*);
 
 /* Sets <score_is_defined> to false if !strcmp(score, ".").

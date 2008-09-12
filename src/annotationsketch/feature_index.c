@@ -44,7 +44,7 @@ struct GT_FeatureIndex {
 typedef struct {
   GT_IntervalTree *features;
   GT_SequenceRegion *region;
-  GT_Range dyn_range;
+  GtRange dyn_range;
 } RegionInfo;
 
 static void region_info_delete(RegionInfo *info)
@@ -96,7 +96,7 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
 {
   GT_GenomeNode *gn;
   char* seqid;
-  GT_Range node_range;
+  GtRange node_range;
   RegionInfo *info;
 
   assert(fi && gf);
@@ -109,7 +109,7 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
 
   /* If the seqid was encountered for the first time, no sequence
      region nodes have been visited before. We therefore must create a new
-     index entry and maintain our own GT_Range. */
+     index entry and maintain our own GtRange. */
   if (!info)
   {
     info = gt_calloc(1, sizeof (RegionInfo));
@@ -198,7 +198,7 @@ static int gt_genome_node_cmp_range_start(const void *v1, const void *v2)
 int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi,
                                             GtArray *results,
                                             const char *seqid,
-                                            GT_Range qry_range, GtError *err)
+                                            GtRange qry_range, GtError *err)
 {
   RegionInfo *ri;
   gt_error_check(err);
@@ -242,7 +242,7 @@ GtStrArray* gt_feature_index_get_seqids(const GT_FeatureIndex *fi)
   return seqids;
 }
 
-void gt_feature_index_get_range_for_seqid(GT_FeatureIndex *fi, GT_Range *range,
+void gt_feature_index_get_range_for_seqid(GT_FeatureIndex *fi, GtRange *range,
                                           const char *seqid)
 {
   RegionInfo *info;
@@ -268,7 +268,7 @@ int gt_feature_index_unit_test(GtError *err)
 {
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
-  GT_Range check_range, rs;
+  GtRange check_range, rs;
   GtStr *seqid1, *seqid2;
   GtStrArray *seqids = NULL;
   GT_SequenceRegion *sr1, *sr2;

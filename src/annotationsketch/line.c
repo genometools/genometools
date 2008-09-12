@@ -74,7 +74,7 @@ int gt_line_sketch(GtLine *line, GtCanvas *canvas)
 
 int gt_line_unit_test(GtError *err)
 {
-  GT_Range r1, r2;
+  GtRange r1, r2;
   GtArray* blocks;
   GtStr *seqid1, *seqid2, *seqid3;
   int had_err = 0;

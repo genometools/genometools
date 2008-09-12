@@ -33,7 +33,7 @@ static int diagram_lua_new(lua_State *L)
 {
   GT_Diagram **diagram;
   GT_FeatureIndex **feature_index;
-  GT_Range *range;
+  GtRange *range;
   const char *seqid;
   GtStyle *style;
   /* get feature index */
@@ -100,7 +100,7 @@ static int diagram_lua_new_from_array(lua_State *L)
 {
   GT_Diagram **diagram;
   GtArray *nodes;
-  GT_Range range;
+  GtRange range;
   GtStyle *style;
   /* get array */
   nodes = genome_node_table_to_array(L);

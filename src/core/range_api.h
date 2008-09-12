@@ -24,17 +24,17 @@
 typedef struct {
   unsigned long start,
                 end;
-} GT_Range;
+} GtRange;
 
-int           gt_range_compare(GT_Range, GT_Range);
-int           gt_range_compare_ptr(const GT_Range*, const GT_Range*);
-int           gt_range_compare_with_delta(GT_Range, GT_Range,
+int           gt_range_compare(GtRange, GtRange);
+int           gt_range_compare_ptr(const GtRange*, const GtRange*);
+int           gt_range_compare_with_delta(GtRange, GtRange,
                                           unsigned long delta);
-bool          gt_range_overlap(GT_Range, GT_Range);
-bool          gt_range_contains(GT_Range, GT_Range);
-bool          gt_range_within(GT_Range, unsigned long);
-GT_Range      gt_range_join(GT_Range, GT_Range);
-GT_Range      gt_range_offset(GT_Range, long offset);
-unsigned long gt_range_length(GT_Range);
+bool          gt_range_overlap(GtRange, GtRange);
+bool          gt_range_contains(GtRange, GtRange);
+bool          gt_range_within(GtRange, unsigned long);
+GtRange      gt_range_join(GtRange, GtRange);
+GtRange      gt_range_offset(GtRange, long offset);
+unsigned long gt_range_length(GtRange);
 
 #endif

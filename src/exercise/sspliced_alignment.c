@@ -32,7 +32,7 @@ SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)
   sa = gt_malloc(sizeof *sa);
   sa->id = gt_cstr_dup(id);
   sa->forward = forward;
-  sa->exons = gt_array_new(sizeof (GT_Range));
+  sa->exons = gt_array_new(sizeof (GtRange));
   return sa;
 }
 
@@ -50,7 +50,7 @@ bool sspliced_alignment_is_forward(const SSplicedAlignment *sa)
   return sa->forward;
 }
 
-void sspliced_alignment_add_exon(SSplicedAlignment *sa, GT_Range exon)
+void sspliced_alignment_add_exon(SSplicedAlignment *sa, GtRange exon)
 {
   assert(sa);
   gt_array_add(sa->exons, exon);
@@ -62,24 +62,24 @@ unsigned long sspliced_alignment_num_of_exons(const SSplicedAlignment *sa)
   return gt_array_size(sa->exons);
 }
 
-GT_Range sspliced_alignment_get_exon(const SSplicedAlignment *sa,
+GtRange sspliced_alignment_get_exon(const SSplicedAlignment *sa,
                                   unsigned long exon_number)
 {
   assert(sa);
-  return *(GT_Range*) gt_array_get(sa->exons, exon_number);
+  return *(GtRange*) gt_array_get(sa->exons, exon_number);
 }
 
-GT_Range sspliced_alignment_genomic_range(const SSplicedAlignment *sa)
+GtRange sspliced_alignment_genomic_range(const SSplicedAlignment *sa)
 {
-  GT_Range range;
+  GtRange range;
   assert(sa);
   assert(gt_array_size(sa->exons));
-  range.start = ((GT_Range*) gt_array_get_first(sa->exons))->start;
-  range.end   = ((GT_Range*) gt_array_get_last(sa->exons))->end;
+  range.start = ((GtRange*) gt_array_get_first(sa->exons))->start;
+  range.end   = ((GtRange*) gt_array_get_last(sa->exons))->end;
   return range;
 }
 
-static int range_compare_long_first(GT_Range range_a, GT_Range range_b)
+static int range_compare_long_first(GtRange range_a, GtRange range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
@@ -96,7 +96,7 @@ static int range_compare_long_first(GT_Range range_a, GT_Range range_b)
 int sspliced_alignment_compare_ptr(const SSplicedAlignment **sa_a,
                                    const SSplicedAlignment **sa_b)
 {
-  GT_Range range_a, range_b;
+  GtRange range_a, range_b;
   range_a = sspliced_alignment_genomic_range(*sa_a);
   range_b = sspliced_alignment_genomic_range(*sa_b);
   return range_compare_long_first(range_a, range_b);

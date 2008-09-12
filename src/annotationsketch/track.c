@@ -147,7 +147,7 @@ int gt_track_unit_test(GtError *err)
 {
   int had_err = 0;
   GtBlock *b1, *b2, *b3, *b4;
-  GT_Range r1, r2, r3, r4;
+  GtRange r1, r2, r3, r4;
   GtTrack *track;
   GtStr *title;
   gt_error_check(err);

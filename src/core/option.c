@@ -83,7 +83,7 @@ struct Option {
     unsigned int ui;
     long l;
     unsigned long ul;
-    GT_Range r;
+    GtRange r;
     const char *s;
   } default_value;
   const char** domain;
@@ -943,7 +943,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                   had_err = -1;
                 }
                 else
-                  ((GT_Range*) option->value)->start = long_value;
+                  ((GtRange*) option->value)->start = long_value;
               }
               /* parse second argument */
               if (!had_err) {
@@ -971,16 +971,16 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                   had_err = -1;
                 }
                 else
-                  ((GT_Range*) option->value)->end = long_value;
+                  ((GtRange*) option->value)->end = long_value;
               }
               /* check arguments */
-              if (!had_err && (((GT_Range*) option->value)->start >
-                               ((GT_Range*) option->value)->end)) {
+              if (!had_err && (((GtRange*) option->value)->start >
+                               ((GtRange*) option->value)->end)) {
                 gt_error_set(err, "first argument %lu to option \"-%s\" must "
                              "be <= than second argument %lu",
-                             ((GT_Range*) option->value)->start,
+                             ((GtRange*) option->value)->start,
                              gt_str_get(option->option_str),
-                             ((GT_Range*) option->value)->end);
+                             ((GtRange*) option->value)->end);
                 had_err = -1;
               }
               if (!had_err)
@@ -1304,7 +1304,7 @@ Option *option_new_ulong_min_max(const char *option_str,
 }
 
 Option* option_new_range(const char *option_str, const char *description,
-                         GT_Range *value, GT_Range *default_value)
+                         GtRange *value, GtRange *default_value)
 {
   Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_RANGE;
@@ -1316,8 +1316,8 @@ Option* option_new_range(const char *option_str, const char *description,
 }
 
 Option* option_new_gt_range_min_max(const char *option_str,
-                                 const char *description, GT_Range *value,
-                                 GT_Range *default_value,
+                                 const char *description, GtRange *value,
+                                 GtRange *default_value,
                                  unsigned long min_value,
                                  unsigned long max_value)
 {

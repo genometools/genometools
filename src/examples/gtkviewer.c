@@ -57,7 +57,7 @@ open_file(GtkWidget *widget,  gpointer user_data)
     const char *seqid;
     GT_GenomeNode *gn = NULL;
     GT_FeatureIndex *features = NULL;
-    GT_Range qry_range;
+    GtRange qry_range;
     int had_err = 0;
     gt_error_unset(err);
     /* file given, load GFF file */

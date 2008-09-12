@@ -25,7 +25,7 @@
 
 struct GtBlock {
   GT_Dlist *elements;
-  GT_Range range;
+  GtRange range;
   GtStr *caption;
   bool show_caption;
   GtStrand strand;
@@ -108,19 +108,19 @@ GT_GenomeNode* gt_block_get_top_level_feature(const GtBlock *block)
   return block->top_level_feature;
 }
 
-GT_Range gt_block_get_range(const GtBlock *block)
+GtRange gt_block_get_range(const GtBlock *block)
 {
    assert(block);
    return block->range;
 }
 
-GT_Range* gt_block_get_range_ptr(const GtBlock *block)
+GtRange* gt_block_get_range_ptr(const GtBlock *block)
 {
    assert(block);
-   return (GT_Range*) &(block->range);
+   return (GtRange*) &(block->range);
 }
 
-void gt_block_set_range(GtBlock *block, GT_Range r)
+void gt_block_set_range(GtBlock *block, GtRange r)
 {
   assert(block && r.start <= r.end);
   block->range = r;
@@ -131,7 +131,7 @@ bool gt_block_has_only_one_fullsize_element(const GtBlock *block)
   bool ret = false;
   assert(block);
   if (gt_dlist_size(block->elements) == 1UL) {
-    GT_Range elem_range, block_range;
+    GtRange elem_range, block_range;
     assert(gt_dlist_first(block->elements) == gt_dlist_last(block->elements));
     elem_range = gt_element_get_range(
                    gt_dlistelem_get_data(gt_dlist_first(block->elements)));
@@ -214,7 +214,7 @@ int gt_block_sketch(GtBlock *block, GtCanvas *canvas)
 
 int gt_block_unit_test(GtError *err)
 {
-  GT_Range r1, r2, r_temp, b_range;
+  GtRange r1, r2, r_temp, b_range;
   GtStrand s;
   GT_GenomeNode *gn1, *gn2;
   GtElement *e1, *e2;

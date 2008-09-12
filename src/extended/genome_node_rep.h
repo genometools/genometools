@@ -29,8 +29,8 @@ struct GT_GenomeNodeClass
   void     (*free)(GT_GenomeNode*);
   GtStr*  (*get_seqid)(GT_GenomeNode*);
   GtStr*  (*get_idstr)(GT_GenomeNode*);
-  GT_Range (*get_range)(GT_GenomeNode*);
-  void     (*set_range)(GT_GenomeNode*, GT_Range);
+  GtRange (*get_range)(GT_GenomeNode*);
+  void     (*set_range)(GT_GenomeNode*, GtRange);
   void     (*change_seqid)(GT_GenomeNode*, GtStr*);
   int      (*accept)(GT_GenomeNode*, GenomeVisitor*, GtError*);
 };

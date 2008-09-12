@@ -106,13 +106,13 @@ static int construct_sequence_regions(void *key, void *value, void *data,
                                       GT_UNUSED GtError *err)
 {
   GtStr *seqid;
-  GT_Range range;
+  GtRange range;
   GT_GenomeNode *gn;
   GT_Queue *genome_nodes = (GT_Queue*) data;
   gt_error_check(err);
   assert(key && value && data);
   seqid = gt_str_new_cstr(key);
-  range = *(GT_Range*) value;
+  range = *(GtRange*) value;
   gn = gt_sequence_region_new(seqid, range);
   gt_queue_add(genome_nodes, gn);
   gt_str_delete(seqid);
@@ -128,7 +128,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   GT_GenomeNode *mRNA_node, *first_node, *gn;
   const char *tname;
   GtStrand mRNA_strand;
-  GT_Range mRNA_range;
+  GtRange mRNA_range;
   GtStr *mRNA_seqid;
   unsigned long i;
   int had_err = 0;
@@ -193,7 +193,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   GtArray *mRNAs = gt_array_new(sizeof (GT_GenomeNode*));
   GT_GenomeNode *gene_node, *gn;
   GtStrand gene_strand;
-  GT_Range gene_range;
+  GtRange gene_range;
   GtStr *gene_seqid;
   unsigned long i;
   int had_err = 0;
@@ -252,7 +252,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
   size_t line_length;
   unsigned long i, line_number = 0;
   GT_GenomeNode *gn;
-  GT_Range range, *rangeptr;
+  GtRange range, *rangeptr;
   Phase phase_value;
   GtStrand gt_strand_value;
   Splitter *splitter, *attribute_splitter;
@@ -379,7 +379,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
       }
       else {
         /* sequence region is not already defined -> define it */
-        rangeptr = gt_malloc(sizeof (GT_Range));
+        rangeptr = gt_malloc(sizeof (GtRange));
         *rangeptr = range;
         hashmap_add(parser->sequence_region_to_range, gt_cstr_dup(seqname),
                     rangeptr);

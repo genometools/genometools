@@ -338,12 +338,12 @@ static int range_ptr_compare(const void *r1p, const void *r2p)
 {
   int ret;
   assert(r1p && r2p);
-  ret = gt_range_compare(**(GT_Range**) r1p,**(GT_Range**) r2p);
+  ret = gt_range_compare(**(GtRange**) r1p,**(GtRange**) r2p);
   /* It could be that two identical ranges with different pointers are
      present. If so, compare pointers instead to get a canonical ordering. */
-  if (ret == 0 && *(GT_Range**) r1p != *(GT_Range**) r2p)
+  if (ret == 0 && *(GtRange**) r1p != *(GtRange**) r2p)
   {
-    if (*(GT_Range**) r1p < *(GT_Range**) r2p)
+    if (*(GtRange**) r1p < *(GtRange**) r2p)
       ret = -1;
     else
       ret = 1;
@@ -363,17 +363,17 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
   int width = 700;
   int query_width = 5000;
 
-  GT_Range *res_rng = NULL, qrange;
+  GtRange *res_rng = NULL, qrange;
   GtArray *arr;
 
-  arr = gt_array_new(sizeof (GT_Range*));
+  arr = gt_array_new(sizeof (GtRange*));
 
   /* generate test ranges */
   for (i = 0;i<num_testranges;i++)
   {
     unsigned long start;
-    GT_Range *rng;
-    rng  = gt_calloc(1, sizeof (GT_Range));
+    GtRange *rng;
+    rng  = gt_calloc(1, sizeof (GtRange));
     start = gt_rand_max(gt_range_max_basepos);
     rng->start = start;
     rng->end = start + gt_rand_max(width);
@@ -386,8 +386,8 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
   for (i = 0; i < num_testranges && !had_err; i++)
   {
     GT_IntervalTreeNode *new_node;
-    GT_Range *rng;
-    rng = *(GT_Range**) gt_array_get(arr, i);
+    GtRange *rng;
+    rng = *(GtRange**) gt_array_get(arr, i);
     new_node = gt_interval_tree_node_new(rng, rng->start, rng->end);
     gt_interval_tree_insert(it, new_node);
   }
@@ -404,17 +404,17 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     if (res)
     {
       /* we have a hit, check if really overlapping */
-      res_rng = (GT_Range*) gt_interval_tree_node_get_data(res);
+      res_rng = (GtRange*) gt_interval_tree_node_get_data(res);
       ensure(had_err, gt_range_overlap(qrange, *res_rng));
     } else {
       /* no hit, check whether there really is no overlapping
          interval in tree */
-      GT_Range *this_rng;
+      GtRange *this_rng;
       unsigned long j;
       bool found = false;
       for (j = 0; j < gt_array_size(arr); j++)
       {
-        this_rng = *(GT_Range**) gt_array_get(arr, j);
+        this_rng = *(GtRange**) gt_array_get(arr, j);
         if (gt_range_overlap(*this_rng, qrange))
         {
           found = true;
@@ -431,18 +431,18 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     unsigned long start = gt_rand_max(gt_range_max_basepos);
     qrange.start = start;
     qrange.end = start + gt_rand_max(query_width);
-    GtArray *res = gt_array_new(sizeof (GT_Range*));
+    GtArray *res = gt_array_new(sizeof (GtRange*));
     gt_interval_tree_find_all_overlapping(it, qrange.start, qrange.end, res);
     if (res)
     {
       /* generate reference overlapping interval list by linear search */
       GtArray *ref;
       unsigned long j;
-      ref = gt_array_new(sizeof (GT_Range*));
+      ref = gt_array_new(sizeof (GtRange*));
       for (j = 0; j < gt_array_size(arr); j++)
       {
-        GT_Range *this_rng;
-        this_rng = *(GT_Range**) gt_array_get(arr, j);
+        GtRange *this_rng;
+        this_rng = *(GtRange**) gt_array_get(arr, j);
         if (gt_range_overlap(*this_rng, qrange))
         {
           gt_array_add(ref, this_rng);

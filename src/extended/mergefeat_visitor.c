@@ -45,7 +45,7 @@ static int mergefeat_in_children(GT_GenomeNode *gn, void *data,
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GT_GenomeFeature *previous_feature, *current_feature;
-  GT_Range previous_range, current_range;
+  GtRange previous_range, current_range;
   gt_error_check(err);
   current_feature = gt_genome_node_cast(gt_genome_feature_class(), gn);
   assert(current_feature);

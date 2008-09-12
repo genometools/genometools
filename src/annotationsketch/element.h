@@ -34,8 +34,8 @@ GtElement*           gt_element_new(GT_GenomeNode*);
 /* Creates an empty GtElement object.
    Range and type have to be set afterwards. */
 GtElement*           gt_element_new_empty(void);
-GT_Range              gt_element_get_range(const GtElement*);
-void                  gt_element_set_range(GtElement*, GT_Range);
+GtRange              gt_element_get_range(const GtElement*);
+void                  gt_element_set_range(GtElement*, GtRange);
 GT_DrawingRange       gt_element_calculate_drawing_range(GtElement*,
                                                          GtCanvas*);
 const char*           gt_element_get_type(const GtElement*);

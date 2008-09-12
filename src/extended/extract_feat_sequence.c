@@ -27,7 +27,7 @@ static int extract_join_feature(GT_GenomeNode *gn, const char *type,
   const char *raw_sequence;
   unsigned long raw_sequence_length;
   GT_GenomeFeature *gf;
-  GT_Range range;
+  GtRange range;
   int had_err = 0;
 
   gt_error_check(err);
@@ -62,7 +62,7 @@ int extract_feat_sequence(GtStr *sequence, GT_GenomeNode *gn, const char *type,
                           GtError *err)
 {
   GT_GenomeFeature *gf;
-  GT_Range range;
+  GtRange range;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
   int had_err = 0;

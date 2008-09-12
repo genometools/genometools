@@ -43,7 +43,7 @@ int            gt_gff3_parser_parse_target_attributes(const char *values,
                                                       unsigned long
                                                       *num_of_targets,
                                                       GtStr *first_target_id,
-                                                      GT_Range
+                                                      GtRange
                                                       *first_target_range,
                                                       GtStrand
                                                       *first_target_strand,

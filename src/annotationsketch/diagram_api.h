@@ -28,10 +28,10 @@ typedef struct GT_Diagram GT_Diagram;
 /* Create a new GT_Diagram object representing the genome nodes in
    <feature_index> in region <seqid> overlapping with <range>. */
 GT_Diagram* gt_diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
-                           const GT_Range*, GtStyle*);
-GT_Diagram* gt_diagram_new_from_array(GtArray *features, const GT_Range*,
+                           const GtRange*, GtStyle*);
+GT_Diagram* gt_diagram_new_from_array(GtArray *features, const GtRange*,
                                       GtStyle*);
-GT_Range    gt_diagram_get_range(GT_Diagram*);
+GtRange    gt_diagram_get_range(GT_Diagram*);
 /* Render <diagram> on the given <canvas>. */
 int         gt_diagram_sketch(GT_Diagram *diagram, GtCanvas *canvas);
 void        gt_diagram_delete(GT_Diagram*);

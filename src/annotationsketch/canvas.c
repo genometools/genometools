@@ -118,7 +118,7 @@ static double convert_point(GtCanvas *canvas, long pos)
 
 /* Converts base range <node_range> into a pixel range.
    If the range exceeds visibility boundaries, clipping info is set. */
-GT_DrawingRange gt_canvas_convert_coords(GtCanvas *canvas, GT_Range node_range)
+GT_DrawingRange gt_canvas_convert_coords(GtCanvas *canvas, GtRange node_range)
 {
   GT_DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
@@ -426,7 +426,7 @@ int gt_canvas_visit_line_post(GtCanvas *canvas, GT_UNUSED GtLine *line)
 int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
-  GT_Range block_range;
+  GtRange block_range;
   GT_DrawingRange draw_range;
   GtColor grey, fillcolor, strokecolor;
   double bar_height, min_len_block, arrow_width, stroke_width;
@@ -534,7 +534,7 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
 int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
-  GT_Range elem_range = gt_element_get_range(elem);
+  GtRange elem_range = gt_element_get_range(elem);
   GT_DrawingRange draw_range;
   double elem_start, elem_width, stroke_width, bar_height, arrow_width;
   GtColor elem_color, grey, fill_color;

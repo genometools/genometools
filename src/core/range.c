@@ -24,7 +24,7 @@
 #include "core/safearith.h"
 #include "core/undef.h"
 
-int gt_range_compare(GT_Range range_a, GT_Range range_b)
+int gt_range_compare(GtRange range_a, GtRange range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
@@ -38,12 +38,12 @@ int gt_range_compare(GT_Range range_a, GT_Range range_b)
   return 1; /* range_a > range_b */
 }
 
-int gt_range_compare_ptr(const GT_Range *range_a, const GT_Range *range_b)
+int gt_range_compare_ptr(const GtRange *range_a, const GtRange *range_b)
 {
   return gt_range_compare(*range_a, *range_b);
 }
 
-int gt_range_compare_with_delta(GT_Range range_a, GT_Range range_b,
+int gt_range_compare_with_delta(GtRange range_a, GtRange range_b,
                                 unsigned long delta)
 {
   unsigned long start_min, start_max, end_min, end_max;
@@ -65,8 +65,8 @@ int gt_range_compare_with_delta(GT_Range range_a, GT_Range range_b,
   return 1; /* range_a > range_b */
 }
 
-int gt_range_compare_by_length_ptr(const GT_Range *range_a,
-                                   const GT_Range *range_b)
+int gt_range_compare_by_length_ptr(const GtRange *range_a,
+                                   const GtRange *range_b)
 {
   unsigned long range_a_length, range_b_length;
   assert(range_a && range_b);
@@ -79,7 +79,7 @@ int gt_range_compare_by_length_ptr(const GT_Range *range_a,
   return 1;
 }
 
-bool gt_range_overlap(GT_Range range_a, GT_Range range_b)
+bool gt_range_overlap(GtRange range_a, GtRange range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
@@ -88,7 +88,7 @@ bool gt_range_overlap(GT_Range range_a, GT_Range range_b)
   return false;
 }
 
-bool gt_range_contains(GT_Range range_a, GT_Range range_b)
+bool gt_range_contains(GtRange range_a, GtRange range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
@@ -97,7 +97,7 @@ bool gt_range_contains(GT_Range range_a, GT_Range range_b)
   return false;
 }
 
-bool gt_range_within(GT_Range range, unsigned long point)
+bool gt_range_within(GtRange range, unsigned long point)
 {
   assert(range.start <= range.end);
 
@@ -106,9 +106,9 @@ bool gt_range_within(GT_Range range, unsigned long point)
   return false;
 }
 
-GT_Range gt_range_join(GT_Range range_a, GT_Range range_b)
+GtRange gt_range_join(GtRange range_a, GtRange range_b)
 {
-  GT_Range r;
+  GtRange r;
 
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
@@ -118,9 +118,9 @@ GT_Range gt_range_join(GT_Range range_a, GT_Range range_b)
   return r;
 }
 
-GT_Range gt_range_offset(GT_Range range, long offset)
+GtRange gt_range_offset(GtRange range, long offset)
 {
-  GT_Range transformed_range = { 0, 0 };
+  GtRange transformed_range = { 0, 0 };
   assert(range.start <= range.end);
   safe_add(transformed_range.start, range.start, offset);
   safe_add(transformed_range.end, range.end, offset);
@@ -128,9 +128,9 @@ GT_Range gt_range_offset(GT_Range range, long offset)
   return transformed_range;
 }
 
-GT_Range gt_range_reorder(GT_Range range)
+GtRange gt_range_reorder(GtRange range)
 {
-  GT_Range ordered_range;
+  GtRange ordered_range;
   if (range.start <= range.end)
     return range;
   ordered_range.start = range.end;
@@ -138,7 +138,7 @@ GT_Range gt_range_reorder(GT_Range range)
   return ordered_range;
 }
 
-unsigned long gt_range_length(GT_Range range)
+unsigned long gt_range_length(GtRange range)
 {
   assert(range.start <= range.end);
   return range.end - range.start + 1;
@@ -146,7 +146,7 @@ unsigned long gt_range_length(GT_Range range)
 
 int gt_range_unit_test(GtError *err)
 {
-  static GT_Range ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
+  static GtRange ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
                                 { 620957, 621056 }, { 620957, 621056 },
                                 { 625234, 625253 }, { 625500, 625655 },
                                 { 625533, 625655 }, { 625533, 625655 },
@@ -192,8 +192,8 @@ int gt_range_unit_test(GtError *err)
                   sizeof (counts)     / sizeof (counts[0]));
 
   /* test ranges_uniq() */
-  ranges = gt_array_new(sizeof (GT_Range));
-  tmp_ranges = gt_array_new(sizeof (GT_Range));
+  ranges = gt_array_new(sizeof (GtRange));
+  tmp_ranges = gt_array_new(sizeof (GtRange));
   for (i = 0; i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !had_err; i++)
     gt_array_add(ranges, ranges_in[i]);
   ranges_uniq(tmp_ranges, ranges);
@@ -203,9 +203,9 @@ int gt_range_unit_test(GtError *err)
                   sizeof (ranges_out) / sizeof (ranges_out[0]));
   for (i = 0; i < gt_array_size(tmp_ranges) && !had_err; i++) {
     ensure(had_err, ranges_out[i].start ==
-                    (*(GT_Range*) gt_array_get(tmp_ranges, i)).start);
+                    (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
     ensure(had_err, ranges_out[i].end ==
-                    (*(GT_Range*) gt_array_get(tmp_ranges, i)).end);
+                    (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
 
   /* test ranges_uniq_in_place() */
@@ -214,9 +214,9 @@ int gt_range_unit_test(GtError *err)
   ranges_uniq_in_place(tmp_ranges);
   for (i = 0; i < gt_array_size(tmp_ranges) && !had_err; i++) {
     ensure(had_err, ranges_out[i].start ==
-                    (*(GT_Range*) gt_array_get(tmp_ranges, i)).start);
+                    (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
     ensure(had_err, ranges_out[i].end ==
-                    (*(GT_Range*) gt_array_get(tmp_ranges, i)).end);
+                    (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
 
   /* test ranges_uniq_count() */
@@ -227,9 +227,9 @@ int gt_range_unit_test(GtError *err)
   for (i = 0; i < gt_array_size(ctr) && !had_err; i++) {
     ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
     ensure(had_err, ranges_out[i].start ==
-                    (*(GT_Range*) gt_array_get(tmp_ranges, i)).start);
+                    (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
     ensure(had_err, ranges_out[i].end ==
-                    (*(GT_Range*) gt_array_get(tmp_ranges, i)).end);
+                    (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
   gt_array_delete(ctr);
 
@@ -240,15 +240,15 @@ int gt_range_unit_test(GtError *err)
   for (i = 0; i < gt_array_size(ctr) && !had_err; i++) {
     ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
     ensure(had_err,
-           ranges_out[i].start == (*(GT_Range*) gt_array_get(ranges, i)).start);
+           ranges_out[i].start == (*(GtRange*) gt_array_get(ranges, i)).start);
     ensure(had_err,
-           ranges_out[i].end == (*(GT_Range*) gt_array_get(ranges, i)).end);
+           ranges_out[i].end == (*(GtRange*) gt_array_get(ranges, i)).end);
   }
   gt_array_delete(ctr);
 
   /* test gt_range_reorder() */
   if (!had_err) {
-    GT_Range range = { 1, 100 };
+    GtRange range = { 1, 100 };
     range = gt_range_reorder(range);
     ensure(had_err, range.start == 1 && range.end == 100);
     range.start = 100;
@@ -266,14 +266,14 @@ int gt_range_unit_test(GtError *err)
 void ranges_sort(GtArray *ranges)
 {
   assert(ranges);
-  qsort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GT_Range),
+  qsort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GtRange),
         (GT_Compare) gt_range_compare_ptr);
 }
 
 void ranges_sort_by_length_stable(GtArray *ranges)
 {
   assert(ranges);
-  gt_msort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GT_Range),
+  gt_msort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GtRange),
            (GT_Compare) gt_range_compare_by_length_ptr);
 }
 
@@ -284,8 +284,8 @@ bool ranges_are_sorted(const GtArray *ranges)
   assert(ranges);
 
   for (i = 1; i < gt_array_size(ranges); i++) {
-    if (gt_range_compare(*(GT_Range*) gt_array_get(ranges, i-1),
-                      *(GT_Range*) gt_array_get(ranges, i)) == 1) {
+    if (gt_range_compare(*(GtRange*) gt_array_get(ranges, i-1),
+                      *(GtRange*) gt_array_get(ranges, i)) == 1) {
       return false;
     }
   }
@@ -299,8 +299,8 @@ bool ranges_do_not_overlap(const GtArray *ranges)
   assert(ranges && gt_array_size(ranges));
 
   for (i = 1; i < gt_array_size(ranges); i++) {
-    if (gt_range_overlap(*(GT_Range*) gt_array_get(ranges, i-1),
-                      *(GT_Range*) gt_array_get(ranges, i))) {
+    if (gt_range_overlap(*(GtRange*) gt_array_get(ranges, i-1),
+                      *(GtRange*) gt_array_get(ranges, i))) {
       return false;
     }
   }
@@ -315,7 +315,7 @@ bool ranges_are_sorted_and_do_not_overlap(const GtArray *ranges)
 bool ranges_are_equal(const GtArray *ranges_1, const GtArray *ranges_2)
 {
   unsigned long i;
-  GT_Range gt_range_1, gt_range_2;
+  GtRange gt_range_1, gt_range_2;
 
   assert(ranges_are_sorted(ranges_1) && ranges_are_sorted(ranges_2));
 
@@ -323,8 +323,8 @@ bool ranges_are_equal(const GtArray *ranges_1, const GtArray *ranges_2)
     return false;
 
   for (i = 0; i < gt_array_size(ranges_1); i++) {
-    gt_range_1 = *(GT_Range*) gt_array_get(ranges_1, i);
-    gt_range_2 = *(GT_Range*) gt_array_get(ranges_2, i);
+    gt_range_1 = *(GtRange*) gt_array_get(ranges_1, i);
+    gt_range_2 = *(GtRange*) gt_array_get(ranges_2, i);
     if (gt_range_compare(gt_range_1, gt_range_2))
       return false;
   }
@@ -337,14 +337,14 @@ static GtArray* generic_ranges_uniq(GtArray *out_ranges,
 {
   unsigned long i, *ctr_ptr, ctr = 1;
   GtArray *count_array = NULL;
-  GT_Range cur  = { UNDEF_ULONG, UNDEF_ULONG },
+  GtRange cur  = { UNDEF_ULONG, UNDEF_ULONG },
         prev = { UNDEF_ULONG, UNDEF_ULONG };
   assert(out_ranges && in_ranges);
   assert(ranges_are_sorted(in_ranges));
   if (count)
     count_array = gt_array_new(sizeof (unsigned long));
   for (i = 0; i < gt_array_size(in_ranges); i++) {
-    cur = *(GT_Range*) gt_array_get(in_ranges, i);
+    cur = *(GtRange*) gt_array_get(in_ranges, i);
     if (!i) {
       gt_array_add(out_ranges, cur);
       if (count)
@@ -372,7 +372,7 @@ static GtArray* generic_ranges_uniq_in_place(GtArray *ranges, bool count)
 {
   GtArray *out_ranges, *count_array;
   assert(ranges);
-  out_ranges = gt_array_new(sizeof (GT_Range));
+  out_ranges = gt_array_new(sizeof (GtRange));
   count_array = generic_ranges_uniq(out_ranges, ranges, count);
   gt_array_reset(ranges);
   gt_array_add_array(ranges, out_ranges); /* XXX: could be more efficient

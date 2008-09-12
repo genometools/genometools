@@ -28,7 +28,7 @@ void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
                        const char *frame, unsigned long framelen)
 {
   unsigned long i;
-  GT_Range orf;
+  GtRange orf;
   assert(ranges && framenum < 3 && frame);
   orf.start = UNDEF_ULONG;
   for (i = 0; i < framelen; i++) {

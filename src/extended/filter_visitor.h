@@ -27,8 +27,8 @@ const GenomeVisitorClass* filter_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have
    strand <strand>. */
 GenomeVisitor*            filter_visitor_new(GtStr *seqid, GtStr *typefilter,
-                                             GT_Range contain_range,
-                                             GT_Range overlap_range,
+                                             GtRange contain_range,
+                                             GtRange overlap_range,
                                              GtStrand strand,
                                              GtStrand targetstrand,
                                              bool has_CDS,

@@ -30,7 +30,7 @@ struct GtElement {
   const char *type;
   GtStrand strand;
   GT_GenomeNode *gn;
-  GT_Range range;
+  GtRange range;
   GT_DrawingRange drange;
   bool mark;
 };
@@ -62,13 +62,13 @@ GT_DrawingRange gt_element_calculate_drawing_range(GtElement *element,
   return element->drange;
 }
 
-GT_Range gt_element_get_range(const GtElement *element)
+GtRange gt_element_get_range(const GtElement *element)
 {
   assert(element);
   return element->range;
 }
 
-void gt_element_set_range(GtElement *element, GT_Range r)
+void gt_element_set_range(GtElement *element, GtRange r)
 {
   assert(element);
   element->range = r;
@@ -121,7 +121,7 @@ GT_GenomeNode* gt_element_get_node_ref(const GtElement *elem)
 
 int gt_element_unit_test(GtError *err)
 {
-  GT_Range r1, r2, r_temp;
+  GtRange r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
   GtElement *e, *e2, *e3;
   GtStr *seqid;

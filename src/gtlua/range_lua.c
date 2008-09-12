@@ -22,13 +22,13 @@
 static int range_lua_new(lua_State *L)
 {
   unsigned long startpos, endpos;
-  GT_Range *range;
+  GtRange *range;
   startpos = luaL_checklong(L, 1);
   endpos   = luaL_checklong(L, 2);
   luaL_argcheck(L, startpos > 0, 1, "must be > 0");
   luaL_argcheck(L, endpos > 0, 2, "must be > 0");
   luaL_argcheck(L, startpos <= endpos, 1, "must be <= endpos");
-  range = lua_newuserdata(L, sizeof (GT_Range));
+  range = lua_newuserdata(L, sizeof (GtRange));
   range->start = startpos;
   range->end   = endpos;
   luaL_getmetatable(L, RANGE_METATABLE);
@@ -38,21 +38,21 @@ static int range_lua_new(lua_State *L)
 
 static int range_lua_get_start(lua_State *L)
 {
-  GT_Range *range = check_range(L, 1);
+  GtRange *range = check_range(L, 1);
   lua_pushinteger(L, range->start);
   return 1;
 }
 
 static int range_lua_get_end(lua_State *L)
 {
-  GT_Range *range = check_range(L, 1);
+  GtRange *range = check_range(L, 1);
   lua_pushinteger(L, range->end);
   return 1;
 }
 
 static int range_lua_overlap(lua_State *L)
 {
-  GT_Range *range_a, *range_b;
+  GtRange *range_a, *range_b;
   range_a = check_range(L, 1);
   range_b = check_range(L, 2);
   lua_pushboolean(L, gt_range_overlap(*range_a, *range_b));
@@ -63,13 +63,13 @@ static GtArray* range_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
   GtArray *ranges;
-  GT_Range *range;
+  GtRange *range;
   const char *msg;
   bool error;
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);
   /* traverse table and save the ranges */
-  ranges = gt_array_new(sizeof (GT_Range));
+  ranges = gt_array_new(sizeof (GtRange));
   lua_pushinteger(L, i);
   lua_gettable(L, 1);
   while (!lua_isnil(L, -1)) {
@@ -108,7 +108,7 @@ static void push_range_array_as_table(lua_State *L, GtArray *ranges)
     lua_newtable(L);
     for (i = 0; i < gt_array_size(ranges); i++) {
       lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
-      gt_lua_range_push(L, *(GT_Range*) gt_array_get(ranges, i));
+      gt_lua_range_push(L, *(GtRange*) gt_array_get(ranges, i));
       lua_rawset(L, -3);
     }
   }
@@ -165,11 +165,11 @@ int luaopen_range(lua_State *L)
   return 1;
 }
 
-int gt_lua_range_push(lua_State *L, GT_Range inrange)
+int gt_lua_range_push(lua_State *L, GtRange inrange)
 {
-  GT_Range *outrange;
+  GtRange *outrange;
   assert(L);
-  outrange = lua_newuserdata(L, sizeof (GT_Range));
+  outrange = lua_newuserdata(L, sizeof (GtRange));
   *outrange = inrange;
   luaL_getmetatable(L, RANGE_METATABLE);
   lua_setmetatable(L, -2);

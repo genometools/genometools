@@ -28,7 +28,7 @@ void           csa_gene_delete(CSAGene*);
 void           csa_gene_add_splice_form(CSAGene*, CSASpliceForm*);
 CSASpliceForm* csa_gene_get_splice_form(const CSAGene*, unsigned long);
 unsigned long  csa_gene_num_of_splice_forms(const CSAGene*);
-GT_Range          csa_gene_genomic_range(const CSAGene*);
+GtRange          csa_gene_genomic_range(const CSAGene*);
 GtStrand         csa_gene_strand(const CSAGene*);
 void*          csa_gene_get_representative(const CSAGene*);
 

@@ -57,8 +57,8 @@ GtStr*        gt_genome_node_get_seqid(GT_GenomeNode*);
 GtStr*        gt_genome_node_get_idstr(GT_GenomeNode*);
 unsigned long  gt_genome_node_get_start(GT_GenomeNode*);
 unsigned long  gt_genome_node_get_end(GT_GenomeNode*);
-GT_Range       gt_genome_node_get_range(GT_GenomeNode*);
-void           gt_genome_node_set_range(GT_GenomeNode*, GT_Range);
+GtRange       gt_genome_node_get_range(GT_GenomeNode*);
+void           gt_genome_node_set_range(GT_GenomeNode*, GtRange);
 void           gt_genome_node_change_seqid(GT_GenomeNode*, GtStr*);
 int            gt_genome_node_accept(GT_GenomeNode*, GenomeVisitor*, GtError*);
 /* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/

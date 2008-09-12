@@ -34,7 +34,7 @@ struct GtCanvasClass {
 
 struct GtCanvas {
   const GtCanvasClass *c_class;
-  GT_Range viewrange;
+  GtRange viewrange;
   double factor, y, margins;
   unsigned long width, height;
   GtStyle *sty;

@@ -144,11 +144,11 @@ Option*        option_new_ulong_min_max(const char *option_str,
 /* if <default_value> equals NULL, UNDEF_LONG will be used as default for
    range->start and range->end */
 Option*        option_new_range(const char *option_str, const char *description,
-                                GT_Range *value, GT_Range *default_value);
+                                GtRange *value, GtRange *default_value);
 Option*        option_new_gt_range_min_max(const char *option_str,
                                            const char *description,
-                                           GT_Range *value,
-                                           GT_Range *default_value,
+                                           GtRange *value,
+                                           GtRange *default_value,
                                            unsigned long min_value,
                                            unsigned long max_value);
 Option*        option_new_string(const char *option_str,

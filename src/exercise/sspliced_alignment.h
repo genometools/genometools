@@ -27,11 +27,11 @@ typedef struct SSplicedAlignment SSplicedAlignment;
 SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward);
 void               sspliced_alignment_delete(SSplicedAlignment*);
 bool               sspliced_alignment_is_forward(const SSplicedAlignment*);
-void               sspliced_alignment_add_exon(SSplicedAlignment*, GT_Range);
+void               sspliced_alignment_add_exon(SSplicedAlignment*, GtRange);
 unsigned long      sspliced_alignment_num_of_exons(const SSplicedAlignment*);
-GT_Range              sspliced_alignment_get_exon(const SSplicedAlignment*,
+GtRange              sspliced_alignment_get_exon(const SSplicedAlignment*,
                                                unsigned long exon_number);
-GT_Range              sspliced_alignment_genomic_range(const SSplicedAlignment*);
+GtRange              sspliced_alignment_genomic_range(const SSplicedAlignment*);
 int                sspliced_alignment_compare_ptr(const SSplicedAlignment**,
                                                   const SSplicedAlignment**);
 

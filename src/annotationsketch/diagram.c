@@ -51,7 +51,7 @@ struct GT_Diagram {
   Hashmap *collapsingtypes, *caption_display_status;
   int nof_tracks;
   GtStyle *style;
-  GT_Range range;
+  GtRange range;
 };
 
 /* holds a GtBlock with associated type */
@@ -298,7 +298,7 @@ static void add_recursive(GT_Diagram *d, GT_GenomeNode *node,
 static void process_node(GT_Diagram *d, GT_GenomeNode *node,
                          GT_GenomeNode *parent)
 {
-  GT_Range elem_range;
+  GtRange elem_range;
   bool *collapse, do_not_overlap=false;
   const char *feature_type = NULL, *parent_gft = NULL;
   double tmp;
@@ -498,7 +498,7 @@ static int blocklist_delete(void *value)
 }
 
 static GT_Diagram* gt_diagram_new_generic(GtArray *features,
-                                          const GT_Range *range,
+                                          const GtRange *range,
                                           GtStyle *style)
 {
   GT_Diagram *diagram;
@@ -516,7 +516,7 @@ static GT_Diagram* gt_diagram_new_generic(GtArray *features,
 }
 
 GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
-                           const GT_Range *range, GtStyle *style)
+                           const GtRange *range, GtStyle *style)
 {
   GT_Diagram *diagram;
   int had_err = 0;
@@ -530,14 +530,14 @@ GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
   return diagram;
 }
 
-GT_Diagram* gt_diagram_new_from_array(GtArray *features, const GT_Range *range,
+GT_Diagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
                                 GtStyle *style)
 {
   assert(features && range && style);
   return gt_diagram_new_generic(features, range, style);
 }
 
-GT_Range gt_diagram_get_range(GT_Diagram* diagram)
+GtRange gt_diagram_get_range(GT_Diagram* diagram)
 {
   assert(diagram);
   return diagram->range;
@@ -653,7 +653,7 @@ int gt_diagram_unit_test(GtError *err)
 {
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
-  GT_Range dr1, rs;
+  GtRange dr1, rs;
   GtStr *seqid1, *seqid2, *gt_track_key;
   GT_SequenceRegion *sr1, *sr2;
   int had_err=0;
@@ -693,7 +693,7 @@ int gt_diagram_unit_test(GtError *err)
   gt_feature_index_add_genome_feature(fi, (GT_GenomeFeature*) gn1);
   gt_feature_index_add_genome_feature(fi, (GT_GenomeFeature*) gn2);
 
-  /* set the GT_Range for the diagram */
+  /* set the GtRange for the diagram */
   dr1.start = 400UL;
   dr1.end   = 900UL;
 

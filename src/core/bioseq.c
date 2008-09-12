@@ -214,7 +214,7 @@ static int proc_sequence_length(unsigned long sequence_length, void *data,
                                 GT_UNUSED GtError *err)
 {
   Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
-  GT_Range range;
+  GtRange range;
   gt_error_check(err);
   if (info->bs->use_stdin) {
     range.start = info->offset;
@@ -254,7 +254,7 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
   GtStr *index_line;
   unsigned long line_number = 1;
   char *description;
-  GT_Range range;
+  GtRange range;
   int had_err = 0;
 
   gt_error_check(err);
@@ -437,7 +437,7 @@ static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
   if (!had_err) {
     bs->sequence_file = gt_str_ref(sequence_file);
     bs->descriptions = gt_array_new(sizeof (char*));
-    bs->sequence_ranges = gt_array_new(sizeof (GT_Range));
+    bs->sequence_ranges = gt_array_new(sizeof (GtRange));
     had_err = gt_bioseq_fill(bs, recreate, gt_fasta_reader_type, err);
   }
   if (had_err) {
@@ -554,9 +554,9 @@ const char* gt_bioseq_get_description(GT_Bioseq *bs, unsigned long idx)
 
 const char* gt_bioseq_get_sequence(GT_Bioseq *bs, unsigned long idx)
 {
-  GT_Range sequence_range;
+  GtRange sequence_range;
   assert(bs);
-  sequence_range = *(GT_Range*) gt_array_get(bs->sequence_ranges, idx);
+  sequence_range = *(GtRange*) gt_array_get(bs->sequence_ranges, idx);
   return bs->raw_sequence + sequence_range.start;
 }
 
@@ -577,9 +577,9 @@ const char* gt_bioseq_get_md5_fingerprint(GT_Bioseq *bs, unsigned long idx)
 
 unsigned long gt_bioseq_get_sequence_length(GT_Bioseq *bs, unsigned long idx)
 {
-  GT_Range sequence_range;
+  GtRange sequence_range;
   assert(bs);
-  sequence_range = *(GT_Range*) gt_array_get(bs->sequence_ranges, idx);
+  sequence_range = *(GtRange*) gt_array_get(bs->sequence_ranges, idx);
   return gt_range_length(sequence_range);
 }
 

@@ -42,9 +42,9 @@ static GtStr* gt_sequence_node_get_seqid(GT_GenomeNode *gn)
   return sn->description;
 }
 
-static GT_Range gt_sequence_node_get_range(GT_UNUSED GT_GenomeNode *gn)
+static GtRange gt_sequence_node_get_range(GT_UNUSED GT_GenomeNode *gn)
 {
-  GT_Range range;
+  GtRange range;
   range.start = 0;
   range.end = 0;
   return range;

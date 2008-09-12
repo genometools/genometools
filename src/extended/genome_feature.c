@@ -50,7 +50,7 @@ struct GT_GenomeFeature
   GtStr *seqid,
          *source;
   const char *type;
-  GT_Range range;
+  GtRange range;
   float score;
   TagValueMap attributes; /* stores the attributes; created on demand */
   GT_GenomeFeature *representative;
@@ -104,13 +104,13 @@ static GtStr* gt_genome_feature_get_seqid(GT_GenomeNode *gn)
   return gf->seqid;
 }
 
-static GT_Range gt_genome_feature_get_range(GT_GenomeNode *gn)
+static GtRange gt_genome_feature_get_range(GT_GenomeNode *gn)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   return gf->range;
 }
 
-static void gt_genome_feature_set_range(GT_GenomeNode *gn, GT_Range range)
+static void gt_genome_feature_set_range(GT_GenomeNode *gn, GtRange range)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   gf->range = range;
@@ -197,7 +197,7 @@ GT_GenomeNode* gt_genome_feature_new_pseudo(GT_GenomeFeature *gf)
 {
   GT_GenomeFeature *pf;
   GT_GenomeNode *pn;
-  GT_Range range;
+  GtRange range;
   assert(gf);
   range = gt_genome_feature_get_range((GT_GenomeNode*) gf),
   pn = gt_genome_feature_new(gt_genome_feature_get_seqid((GT_GenomeNode*) gf),
