@@ -23,11 +23,11 @@
 typedef struct TranscriptUsedExons TranscriptUsedExons;
 
 TranscriptUsedExons* transcript_used_exons_new(void);
-GT_Dlist*            transcript_used_exons_get_all(TranscriptUsedExons*);
-GT_Dlist*            transcript_used_exons_get_single(TranscriptUsedExons*);
-GT_Dlist*            transcript_used_exons_get_initial(TranscriptUsedExons*);
-GT_Dlist*            transcript_used_exons_get_internal(TranscriptUsedExons*);
-GT_Dlist*            transcript_used_exons_get_terminal(TranscriptUsedExons*);
+GtDlist*            transcript_used_exons_get_all(TranscriptUsedExons*);
+GtDlist*            transcript_used_exons_get_single(TranscriptUsedExons*);
+GtDlist*            transcript_used_exons_get_initial(TranscriptUsedExons*);
+GtDlist*            transcript_used_exons_get_internal(TranscriptUsedExons*);
+GtDlist*            transcript_used_exons_get_terminal(TranscriptUsedExons*);
 void                 transcript_used_exons_delete(TranscriptUsedExons*);
 
 #endif

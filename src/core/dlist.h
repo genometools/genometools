@@ -23,24 +23,24 @@
 
 /* A double-linked list which is sorted according to a qsort(3)-like compare
    function (if one was supplied to the constructor). */
-typedef struct GT_Dlist GT_Dlist;
-typedef struct GT_Dlistelem GT_Dlistelem;
+typedef struct GtDlist GtDlist;
+typedef struct GtDlistelem GtDlistelem;
 
-GT_Dlist*     gt_dlist_new(GT_Compare);
-GT_Dlistelem* gt_dlist_first(const GT_Dlist*);
-GT_Dlistelem* gt_dlist_last(const GT_Dlist*);
-GT_Dlistelem* gt_dlist_find(const GT_Dlist*, void*); /* O(n) */
-unsigned long gt_dlist_size(const GT_Dlist*);
+GtDlist*     gt_dlist_new(GT_Compare);
+GtDlistelem* gt_dlist_first(const GtDlist*);
+GtDlistelem* gt_dlist_last(const GtDlist*);
+GtDlistelem* gt_dlist_find(const GtDlist*, void*); /* O(n) */
+unsigned long gt_dlist_size(const GtDlist*);
 /* Usually O(n) (O(1) if data is added in sorted order). */
-void          gt_dlist_add(GT_Dlist*, void *data);
+void          gt_dlist_add(GtDlist*, void *data);
 /* Remove <dlistelem> from <dlist> and free it. */
-void          gt_dlist_remove(GT_Dlist *dlist, GT_Dlistelem *dlistelem);
+void          gt_dlist_remove(GtDlist *dlist, GtDlistelem *dlistelem);
 int           gt_dlist_example(GtError*);
 int           gt_dlist_unit_test(GtError*);
-void          gt_dlist_delete(GT_Dlist*);
+void          gt_dlist_delete(GtDlist*);
 
-GT_Dlistelem* gt_dlistelem_next(const GT_Dlistelem*);
-GT_Dlistelem* gt_dlistelem_previous(const GT_Dlistelem*);
-void*         gt_dlistelem_get_data(const GT_Dlistelem*);
+GtDlistelem* gt_dlistelem_next(const GtDlistelem*);
+GtDlistelem* gt_dlistelem_previous(const GtDlistelem*);
+void*         gt_dlistelem_get_data(const GtDlistelem*);
 
 #endif

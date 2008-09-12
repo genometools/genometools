@@ -687,7 +687,7 @@ static void store_predicted_exon(TranscriptEvaluators *te, GtGenomeNode *gn)
 }
 
 /* adds exon only if necessary */
-static void add_predicted_collapsed(GT_Dlist *used_exons,
+static void add_predicted_collapsed(GtDlist *used_exons,
                                     GtRange *predicted_range,
                                     Evaluator *exon_evaluator_collapsed)
 {

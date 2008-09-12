@@ -39,7 +39,7 @@ struct GtGenomeNode
 {
   const GtGenomeNodeClass *c_class;
   GtStr *filename;
-  GT_Dlist *children;
+  GtDlist *children;
   unsigned int line_number,
                reference_count,
                bit_field; /* uses the first 5 bits:

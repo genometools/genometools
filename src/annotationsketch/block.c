@@ -24,7 +24,7 @@
 #include "core/ma.h"
 
 struct GtBlock {
-  GT_Dlist *elements;
+  GtDlist *elements;
   GtRange range;
   GtStr *caption;
   bool show_caption;
@@ -198,7 +198,7 @@ unsigned long gt_block_get_size(const GtBlock *block)
 int gt_block_sketch(GtBlock *block, GtCanvas *canvas)
 {
  int had_err = 0;
- GT_Dlistelem *delem;
+ GtDlistelem *delem;
  assert(block && canvas);
  /* if resulting block was too short,
     do not traverse this feature tree further */
@@ -282,7 +282,7 @@ int gt_block_unit_test(GtError *err)
 
 void gt_block_delete(GtBlock *block)
 {
-  GT_Dlistelem *delem;
+  GtDlistelem *delem;
   if (!block) return;
   if (block->reference_count) {
     block->reference_count--;

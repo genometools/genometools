@@ -29,9 +29,9 @@ struct TargetbestFilterStream
 {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
-  GT_Dlist *trees;
-  GT_Dlistelem *next;
-  Hashmap *target_to_elem; /* maps the target ids to GT_Dlist elements */
+  GtDlist *trees;
+  GtDlistelem *next;
+  Hashmap *target_to_elem; /* maps the target ids to GtDlist elements */
   bool in_stream_processed;
 };
 
@@ -47,7 +47,7 @@ static void build_key(GtStr *key, GtGenomeFeature *feature, GtStr *target_id)
   gt_str_append_str(key, target_id);
 }
 
-static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
+static void include_feature(GtDlist *trees, Hashmap *target_to_elem,
                             GtGenomeFeature *feature, GtStr *key)
 {
   gt_dlist_add(trees, feature);
@@ -55,7 +55,7 @@ static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
               gt_dlist_last(trees));
 }
 
-static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
+static void remove_elem(GtDlistelem *elem, GtDlist *trees,
                         Hashmap *target_to_elem, GtStr *key)
 {
   GtGenomeNode *node = gt_dlistelem_get_data(elem);
@@ -64,9 +64,9 @@ static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
   hashmap_remove(target_to_elem, gt_str_get(key));
 }
 
-static void replace_previous_elem(GT_Dlistelem *previous_elem,
+static void replace_previous_elem(GtDlistelem *previous_elem,
                                   GtGenomeFeature *current_feature,
-                                  GT_Dlist *trees, Hashmap *target_to_elem,
+                                  GtDlist *trees, Hashmap *target_to_elem,
                                   GtStr *key)
 {
   remove_elem(previous_elem, trees, target_to_elem, key);
@@ -74,10 +74,10 @@ static void replace_previous_elem(GT_Dlistelem *previous_elem,
 }
 
 static void filter_targetbest(GtGenomeFeature *current_feature,
-                              GT_Dlist *trees, Hashmap *target_to_elem)
+                              GtDlist *trees, Hashmap *target_to_elem)
 {
   unsigned long num_of_targets;
-  GT_Dlistelem *previous_elem;
+  GtDlistelem *previous_elem;
   GtStr *first_target_id;
   const char *target;
   int had_err;
