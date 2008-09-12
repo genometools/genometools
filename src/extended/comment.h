@@ -21,12 +21,12 @@
 #include "core/error.h"
 
 /* implements the ``genome node'' interface */
-typedef struct GT_Comment GT_Comment;
+typedef struct GtCommentNode GtCommentNode;
 
 #include "extended/genome_node.h"
 
 const GtGenomeNodeClass* gt_comment_class(void);
 GtGenomeNode*            gt_comment_new(const char *comment);
-const char*               gt_comment_get_comment(const GT_Comment*);
+const char*               gt_comment_get_comment(const GtCommentNode*);
 
 #endif

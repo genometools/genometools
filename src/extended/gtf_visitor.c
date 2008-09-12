@@ -46,7 +46,7 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   gt_array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
+static int gtf_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
                                GT_UNUSED GtError *err)
 {
   GTFVisitor *gtf_visitor;

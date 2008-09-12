@@ -109,7 +109,8 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GtGenomeNode *gn,
   return 0;
 }
 
-static int csa_visitor_comment(GenomeVisitor *gv, GT_Comment *c, GtError *err)
+static int csa_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
+                               GtError *err)
 {
   return csa_visitor_default_func(gv, (GtGenomeNode*) c, err);
 }

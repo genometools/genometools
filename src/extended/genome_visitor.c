@@ -37,7 +37,7 @@ void* genome_visitor_cast(GT_UNUSED const GenomeVisitorClass *gvc,
   return gv;
 }
 
-int genome_visitor_visit_comment(GenomeVisitor *gv, GT_Comment *c,
+int genome_visitor_visit_comment(GenomeVisitor *gv, GtCommentNode *c,
                                  GtError *err)
 {
   gt_error_check(err);

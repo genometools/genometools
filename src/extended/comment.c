@@ -23,7 +23,7 @@
 #include "extended/comment.h"
 #include "extended/genome_node_rep.h"
 
-struct GT_Comment
+struct GtCommentNode
 {
   const GtGenomeNode parent_instance;
   char *comment;
@@ -35,7 +35,7 @@ struct GT_Comment
 
 static void gt_comment_free(GtGenomeNode *gn)
 {
-  GT_Comment *c = gt_comment_cast(gn);
+  GtCommentNode *c = gt_comment_cast(gn);
   assert(c && c->comment);
   gt_free(c->comment);
   gt_str_delete(c->gt_comment_str);
@@ -43,7 +43,7 @@ static void gt_comment_free(GtGenomeNode *gn)
 
 static GtStr* gt_comment_get_idstr(GtGenomeNode *gn)
 {
-  GT_Comment *c;
+  GtCommentNode *c;
   assert(gn);
   c = gt_comment_cast(gn);
   return c->gt_comment_str;
@@ -60,7 +60,7 @@ static GtRange gt_comment_get_range(GT_UNUSED GtGenomeNode *gn)
 static int gt_comment_accept(GtGenomeNode *gn, GenomeVisitor *gv,
                              GtError *err)
 {
-  GT_Comment *c;
+  GtCommentNode *c;
   gt_error_check(err);
   c = gt_comment_cast(gn);
   return genome_visitor_visit_comment(gv, c, err);
@@ -68,7 +68,7 @@ static int gt_comment_accept(GtGenomeNode *gn, GenomeVisitor *gv,
 
 const GtGenomeNodeClass* gt_comment_class()
 {
-  static const GtGenomeNodeClass gnc = { sizeof (GT_Comment),
+  static const GtGenomeNodeClass gnc = { sizeof (GtCommentNode),
                                        gt_comment_free,
                                        NULL,
                                        gt_comment_get_idstr,
@@ -82,14 +82,14 @@ const GtGenomeNodeClass* gt_comment_class()
 GtGenomeNode* gt_comment_new(const char *comment)
 {
   GtGenomeNode *gn = gt_genome_node_create(gt_comment_class());
-  GT_Comment *c = gt_comment_cast(gn);
+  GtCommentNode *c = gt_comment_cast(gn);
   assert(comment);
   c->comment = gt_cstr_dup(comment);
   c->gt_comment_str = gt_str_new_cstr("");
   return gn;
 }
 
-const char* gt_comment_get_comment(const GT_Comment *c)
+const char* gt_comment_get_comment(const GtCommentNode *c)
 {
   assert(c && c->comment);
   return c->comment;

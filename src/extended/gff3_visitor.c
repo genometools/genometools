@@ -73,7 +73,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   hashmap_delete(gff3_visitor->gt_genome_feature_to_unique_id_str);
 }
 
-static int gff3_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
+static int gff3_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
                                 GT_UNUSED GtError *err)
 {
   GFF3Visitor *gff3_visitor;
