@@ -30,12 +30,11 @@ typedef struct GtFeatureIndex GtFeatureIndex;
 GtFeatureIndex* gt_feature_index_new(void);
 void             gt_feature_index_add_region_node(GtFeatureIndex*,
                                                   GtRegionNode*);
-/* Add <genome_feature> to <feature_index>, associating it with a sequence
+/* Add <feature_node> to <feature_index>, associating it with a sequence
    region denoted by its identifier string. */
-void             gt_feature_index_add_genome_feature(GtFeatureIndex
-                                                     *feature_index,
-                                                     GtFeatureNode
-                                                     *genome_feature);
+void             gt_feature_index_add_feature_node(GtFeatureIndex
+                                                   *feature_index,
+                                                   GtFeatureNode *feature_node);
 /* Add all features contained in <gff3file> to <feature_index>, if <gff3file> is
    valid. Otherwise, <feature_index> is not changed and <err> is set. */
 int              gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,

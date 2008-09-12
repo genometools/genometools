@@ -83,8 +83,8 @@ void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
   }
 }
 
-void gt_feature_index_memory_add_genome_feature(GtFeatureIndex *gfi,
-                                                GtFeatureNode *gf)
+void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
+                                              GtFeatureNode *gf)
 {
   GtGenomeNode *gn;
   char* seqid;
@@ -291,7 +291,7 @@ const GtFeatureIndexClass* gt_feature_index_memory_class(void)
   static const GtFeatureIndexClass gt_feature_index_class =
     { sizeof (GtFeatureIndexMemory),
       gt_feature_index_memory_add_region_node,
-      gt_feature_index_memory_add_genome_feature,
+      gt_feature_index_memory_add_feature_node,
       gt_feature_index_memory_add_gff3file,
       gt_feature_index_memory_get_features_for_seqid,
       gt_feature_index_memory_get_features_for_range,
@@ -384,7 +384,7 @@ int gt_feature_index_memory_unit_test(GtError *err)
      datastructures are not empty anymore. As we have added one genome_feature
      to every sequence region the size has to be one. */
   if (!had_err) {
-    gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn1);
+    gt_feature_index_add_feature_node(fi, (GtFeatureNode*) gn1);
     features = gt_feature_index_get_features_for_seqid(fi, "test1");
   }
   ensure(had_err, gt_array_size(features) == 1UL);
@@ -392,7 +392,7 @@ int gt_feature_index_memory_unit_test(GtError *err)
   features = NULL;
 
   if (!had_err) {
-    gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn2);
+    gt_feature_index_add_feature_node(fi, (GtFeatureNode*) gn2);
     features = gt_feature_index_get_features_for_seqid(fi, "test2");
   }
   ensure(had_err, gt_array_size(features) == 1UL);

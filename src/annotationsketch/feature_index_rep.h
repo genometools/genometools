@@ -24,7 +24,7 @@
 struct GtFeatureIndexClass {
   size_t size;
   void        (*add_region_node)(GtFeatureIndex*, GtRegionNode*);
-  void        (*add_genome_feature)(GtFeatureIndex*, GtFeatureNode*);
+  void        (*add_feature_node)(GtFeatureIndex*, GtFeatureNode*);
   int         (*add_gff3file)(GtFeatureIndex*, const char*, GtError*);
   GtArray*    (*get_features_for_seqid)(GtFeatureIndex*, const char*);
   int         (*get_features_for_range)(GtFeatureIndex*, GtArray*, const char*,

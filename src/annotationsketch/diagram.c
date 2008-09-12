@@ -803,8 +803,8 @@ int gt_diagram_unit_test(GtError *err)
   fi = gt_feature_index_memory_new();
 
   /* add features to every sequence region */
-  gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn1);
-  gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn2);
+  gt_feature_index_add_feature_node(fi, (GtFeatureNode*) gn1);
+  gt_feature_index_add_feature_node(fi, (GtFeatureNode*) gn2);
 
   /* set the GtRange for the diagram */
   dr1.start = 400UL;

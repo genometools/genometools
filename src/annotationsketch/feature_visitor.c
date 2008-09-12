@@ -37,13 +37,12 @@ static void feature_visitor_free(GtNodeVisitor *gv)
   gt_feature_index_delete(feature_visitor->feature_index);
 }
 
-static int feature_visitor_genome_feature(GtNodeVisitor *gv,
-                                          GtFeatureNode *gf,
-                                          GT_UNUSED GtError *err)
+static int feature_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *fn,
+                                        GT_UNUSED GtError *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   gt_error_check(err);
-  gt_feature_index_add_genome_feature(v->feature_index, gf);
+  gt_feature_index_add_feature_node(v->feature_index, fn);
   return 0;
 }
 
@@ -61,7 +60,7 @@ const GtNodeVisitorClass* feature_visitor_class()
   static const GtNodeVisitorClass gvc = { sizeof (FeatureVisitor),
                                           feature_visitor_free,
                                           NULL,
-                                          feature_visitor_genome_feature,
+                                          feature_visitor_feature_node,
                                           feature_visitor_region_node,
                                           NULL };
   return &gvc;

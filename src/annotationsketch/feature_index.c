@@ -55,11 +55,10 @@ void gt_feature_index_add_region_node(GtFeatureIndex *fi, GtRegionNode *rn)
   fi->c_class->add_region_node(fi, rn);
 }
 
-void gt_feature_index_add_genome_feature(GtFeatureIndex *fi,
-                                         GtFeatureNode *fn)
+void gt_feature_index_add_feature_node(GtFeatureIndex *fi, GtFeatureNode *fn)
 {
   assert(fi && fi->c_class && fn);
-  fi->c_class->add_genome_feature(fi, fn);
+  fi->c_class->add_feature_node(fi, fn);
 }
 
 int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
