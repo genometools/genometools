@@ -148,11 +148,11 @@ static int genome_feature_lua_get_attribute(lua_State *L)
   GtGenomeNode **gn = check_genome_node(L, 1);
   const char *attr = NULL, *attrval = NULL;
   attr = luaL_checkstring(L, 2);
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
-  luaL_argcheck(L, gf, 1, "not a genome feature");
-  attrval = gt_feature_node_get_attribute(*gn, attr);
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  attrval = gt_feature_node_get_attribute(fn, attr);
   if (attrval)
     lua_pushstring(L, attrval);
   else

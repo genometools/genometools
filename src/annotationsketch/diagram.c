@@ -160,8 +160,8 @@ static const char* get_node_name_or_id(GtFeatureNode *gn)
 {
   const char *ret;
   if (!gn) return NULL;
-  if (!(ret = gt_feature_node_get_attribute((GtGenomeNode*) gn, "Name"))) {
-    if (!(ret = gt_feature_node_get_attribute((GtGenomeNode*) gn, "ID")))
+  if (!(ret = gt_feature_node_get_attribute(gn, "Name"))) {
+    if (!(ret = gt_feature_node_get_attribute(gn, "ID")))
       ret = NULL;
   }
   return ret;

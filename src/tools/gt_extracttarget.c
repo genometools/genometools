@@ -148,9 +148,10 @@ static int extracttarget_from_node(GtGenomeNode *gn, GtStrArray *seqfiles,
   assert(gn && seqfiles);
   if (gt_genome_node_cast(gt_feature_node_class(), gn)) {
     const char *target;
-    GtGenomeNode *child;
+    GtFeatureNode *child;
     gni = gt_genome_node_iterator_new(gn);
-    while (!had_err && (child = gt_genome_node_iterator_next(gni))) {
+    while (!had_err && /* XXX remove cast */
+           (child = (GtFeatureNode*) gt_genome_node_iterator_next(gni))) {
       if ((target = gt_feature_node_get_attribute(child, "Target")))
         had_err = extracttarget_from_seqfiles(target, seqfiles, err);
     }

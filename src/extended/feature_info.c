@@ -53,20 +53,21 @@ void feature_info_reset(FeatureInfo *fi)
   hashmap_reset(fi->id_to_pseudo_parent);
 }
 
-GtGenomeNode* feature_info_get(const FeatureInfo *fi, const char *id)
+GtFeatureNode* feature_info_get(const FeatureInfo *fi, const char *id)
 {
   assert(fi && id);
   return hashmap_get(fi->id_to_genome_node, id);
 }
 
-void feature_info_add(FeatureInfo *fi, const char *id, GtGenomeNode *gf)
+void feature_info_add(FeatureInfo *fi, const char *id, GtFeatureNode *fn)
 {
-  assert(fi && id && gf);
-  assert(!gt_feature_node_is_pseudo((GtFeatureNode*) gf));
-  hashmap_add(fi->id_to_genome_node, gt_cstr_dup(id), gt_genome_node_ref(gf));
+  assert(fi && id && fn);
+  assert(!gt_feature_node_is_pseudo((GtFeatureNode*) fn));
+  hashmap_add(fi->id_to_genome_node, gt_cstr_dup(id),
+              gt_genome_node_ref((GtGenomeNode*) fn));
 }
 
-GtGenomeNode* feature_info_get_pseudo_parent(const FeatureInfo *fi,
+GtFeatureNode* feature_info_get_pseudo_parent(const FeatureInfo *fi,
                                            const char *id)
 {
   assert(fi && id);
@@ -74,16 +75,16 @@ GtGenomeNode* feature_info_get_pseudo_parent(const FeatureInfo *fi,
 }
 
 void feature_info_add_pseudo_parent(FeatureInfo *fi, const char *id,
-                                    GtGenomeNode *pseudo_parent)
+                                    GtFeatureNode *pseudo_parent)
 {
   assert(fi && id && pseudo_parent);
   assert(gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_parent));
   hashmap_add(fi->id_to_pseudo_parent, gt_cstr_dup(id),
-              gt_genome_node_ref(pseudo_parent));
+              gt_genome_node_ref((GtGenomeNode*) pseudo_parent));
 }
 
-void feature_info_replace_pseudo_parent(FeatureInfo *fi, GtGenomeNode *child,
-                                        GtGenomeNode *new_pseudo_parent)
+void feature_info_replace_pseudo_parent(FeatureInfo *fi, GtFeatureNode *child,
+                                        GtFeatureNode *new_pseudo_parent)
 {
   const char *id;
   assert(fi && child && new_pseudo_parent);
@@ -94,10 +95,10 @@ void feature_info_replace_pseudo_parent(FeatureInfo *fi, GtGenomeNode *child,
   feature_info_add_pseudo_parent(fi, id, new_pseudo_parent);
 }
 
-static GtGenomeNode* find_root(const FeatureInfo *fi, const char *id)
+static GtFeatureNode* find_root(const FeatureInfo *fi, const char *id)
 {
   const char *delim, *parents;
-  GtGenomeNode *this_feature, *parent_pseudo_feature;
+  GtFeatureNode *this_feature, *parent_pseudo_feature;
   assert(fi && id);
   /* get feature */
   delim = strchr(id, ';');
@@ -121,7 +122,7 @@ static GtGenomeNode* find_root(const FeatureInfo *fi, const char *id)
   return this_feature;
 }
 
-GtGenomeNode* feature_info_find_root(const FeatureInfo *fi, const char *id)
+GtFeatureNode* feature_info_find_root(const FeatureInfo *fi, const char *id)
 {
   assert(fi && id);
   assert(feature_info_get(fi, id));
