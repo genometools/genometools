@@ -20,18 +20,18 @@ require 'gtdlload'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "Error* error_new()"
-  extern "const char* error_get(const Error*)"
-  extern "void error_delete(Error*)"
+  extern "GT_Error* gt_error_new()"
+  extern "const char* gt_error_get(const GT_Error*)"
+  extern "void gt_error_delete(GT_Error*)"
 
   class Error
     def initialize
-      @error = GT.error_new()
-      @error.free = GT::symbol("error_delete", "0P")
+      @error = GT.gt_error_new()
+      @error.free = GT::symbol("gt_error_delete", "0P")
     end
 
     def get
-      GT.error_get(@error)
+      GT.gt_error_get(@error)
     end
 
     def to_ptr

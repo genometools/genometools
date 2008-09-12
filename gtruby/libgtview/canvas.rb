@@ -22,27 +22,32 @@ require 'libgtcore/str'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "Canvas* canvas_cairo_file_new(Config*, int, unsigned int, "+
-                                       "ImageInfo*)"
-  extern "int canvas_cairo_file_to_file(CanvasCairoFile*, const char*, Error*)"
-  extern "int canvas_cairo_file_to_stream(CanvasCairoFile*, Str*)"
-  extern "void canvas_delete(Canvas*)"
+  extern "GT_Canvas* gt_canvas_cairo_file_new(GT_Style*, int, unsigned int, "+
+                                          "GT_ImageInfo*)"
+  extern "int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile*, const char*, " +
+                                       "GT_Error*)"
+  extern "int gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile*, GT_Str*)"
+  extern "void gt_canvas_delete(GT_Canvas*)"
 
   class Canvas
-    def initialize(config, width, ii)
-      @canvas = GT.canvas_cairo_file_new(config.config, 1, width, ii.to_ptr)
-      @canvas.free = GT::symbol("canvas_delete", "0P")
+    def initialize(style, width, ii)
+      if ii.nil? then
+        @canvas = GT.gt_canvas_cairo_file_new(style.config, 1, width, GT::NULL)
+      else
+        @canvas = GT.gt_canvas_cairo_file_new(style.config, 1, width, ii.to_ptr)
+      end
+      @canvas.free = GT::symbol("gt_canvas_delete", "0P")
     end
 
     def to_file(filename)
       err = GT::Error.new()
-      rval = GT.canvas_cairo_file_to_file(@canvas, filename, err.to_ptr)
+      rval = GT.gt_canvas_cairo_file_to_file(@canvas, filename, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def to_stream()
       str = GT::Str.new(nil)
-      GT.canvas_cairo_file_to_stream(@canvas, str.to_ptr)
+      GT.gt_canvas_cairo_file_to_stream(@canvas, str.to_ptr)
       str.get_mem.to_s(str.length)
     end
 

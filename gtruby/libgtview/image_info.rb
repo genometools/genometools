@@ -24,35 +24,38 @@ require 'libgtview/recmap'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "ImageInfo* image_info_new()"
-  extern "unsigned int image_info_get_height(ImageInfo*)"
-  extern "unsigned long image_info_num_of_recmaps(ImageInfo*)"
-  extern "void image_info_get_recmap_ptr(ImageInfo*, RecMap*, unsigned long)"
-  extern "void image_info_delete(ImageInfo*)"
+  extern "GT_ImageInfo* gt_image_info_new()"
+  extern "unsigned int gt_image_info_get_height(GT_ImageInfo*)"
+  extern "unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo*)"
+  extern "const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo*, " +
+                                                   "unsigned long)"
+  extern "void gt_image_info_delete(GT_ImageInfo*)"
 
   class ImageInfo
     attr_reader :image_info
     def initialize()
-      @image_info = GT.image_info_new()
-      @image_info.free = GT::symbol("image_info_delete", "0P")
+      @image_info = GT.gt_image_info_new()
+      @image_info.free = GT::symbol("gt_image_info_delete", "0P")
     end
 
     def get_height()
-      GT.image_info_get_height(@image_info)
+      GT.gt_image_info_get_height(@image_info)
     end
 
     def num_of_recmaps()
-      GT.image_info_num_of_recmaps(@image_info)
+      GT.gt_image_info_num_of_recmaps(@image_info)
     end
 
     def each_hotspot()
       if @hotspots.nil? then
         @hotspots = []
-        rm = GT::RecMap.malloc
         0.upto(self.num_of_recmaps()-1) do |i|
-          GT.image_info_get_recmap_ptr(@image_info, rm, i)
-          gf = GT::GenomeFeature.new(rm.gn, true)  #refcount only this GF!
-          @hotspots.push([rm.nw_x.to_i, rm.nw_y.to_i, rm.se_x.to_i, rm.se_y.to_i, gf])
+          rm = GT::RecMap.new(GT.gt_image_info_get_recmap(@image_info, i))
+          @hotspots.push([rm.get_northwest_x.to_i, \
+                          rm.get_northwest_y.to_i, \
+                          rm.get_southeast_x.to_i, \
+                          rm.get_southeast_y.to_i, \
+                          rm.get_genome_feature])
         end
         @hotspots.sort!{|hs1,hs2| hs1[2]-hs1[0]+1 <=> hs2[2]-hs2[0]+1}
       end

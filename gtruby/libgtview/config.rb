@@ -40,51 +40,51 @@ module GT
   # a NULL pointer
   NULL = DL::PtrData.new(0)
 
-  extern "Style* style_new(bool, Error*)"
-  extern "int style_load_file(Style*, const char*, Error*)"
-  extern "int style_load_str(Style*, Str*, Error*)"
-  extern "int style_to_str(const Style*, Str*, Error*)"
-  extern "bool style_get_color(Style*, const char*, const char*, Color*, " +
-                               "GenomeNode*)"
-  extern "void style_set_color(Style*, const char*, const char*, Color*)"
-  extern "bool style_get_str(const Style*, const char*, " +
-                             "const char*, Str*, GenomeNode*)"
-  extern "void style_set_str(Style*, const char*, const char*, Str*)"
-  extern "bool style_get_num(const Style*, const char*, " +
-                             "const char*, double*, GenomeNode*)"
-  extern "void style_set_num(Style*, const char*, const char*, double)"
-  extern "bool style_get_bool(const Style*, const char*, " +
-                               "const char*, bool*, GenomeNode*)"
-  extern "void style_set_bool(Style*, const char*, const char*, bool)"
-  extern "void style_unset(Style*, const char*, const char*)"
-  extern "void style_delete(Style*)"
+  extern "GT_Style* gt_style_new(bool, GT_Error*)"
+  extern "int gt_style_load_file(GT_Style*, const char*, GT_Error*)"
+  extern "int gt_style_load_str(GT_Style*, GT_Str*, GT_Error*)"
+  extern "int gt_style_to_str(const GT_Style*, GT_Str*, GT_Error*)"
+  extern "bool gt_style_get_color(GT_Style*, const char*, const char*, GT_Color*, " +
+                                 "GenomeNode*)"
+  extern "void gt_style_set_color(GT_Style*, const char*, const char*, GT_Color*)"
+  extern "bool gt_style_get_str(const GT_Style*, const char*, " +
+                               "const char*, GT_Str*, GT_GenomeNode*)"
+  extern "void gt_style_set_str(GT_Style*, const char*, const char*, GT_Str*)"
+  extern "bool gt_style_get_num(const GT_Style*, const char*, " +
+                               "const char*, double*, GT_GenomeNode*)"
+  extern "void gt_style_set_num(GT_Style*, const char*, const char*, double)"
+  extern "bool gt_style_get_bool(const GT_Style*, const char*, " +
+                                "const char*, bool*, GT_GenomeNode*)"
+  extern "void gt_style_set_bool(GT_Style*, const char*, const char*, bool)"
+  extern "void gt_style_unset(GT_Style*, const char*, const char*)"
+  extern "void gt_style_delete(GT_Style*)"
 
   class Config
     attr_reader :config
     def initialize
       err = GT::Error.new()
-      @config = GT.style_new(false, err.to_ptr)
+      @config = GT.gt_style_new(false, err.to_ptr)
       if not @config then GT.gterror(err) end
-      @config.free = GT::symbol("style_delete", "0P")
+      @config.free = GT::symbol("gt_style_delete", "0P")
     end
 
     def load_file(filename)
       err = GT::Error.new()
-      rval = GT.style_load_file(@config, filename, err.to_ptr)
+      rval = GT.gt_style_load_file(@config, filename, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def load_str(str)
       err = GT::Error.new()
       str = GT::Str.new(str)
-      rval = GT.style_load_str(@config, str.to_ptr, err.to_ptr)
+      rval = GT.gt_style_load_str(@config, str.to_ptr, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def to_str()
       err = GT::Error.new()
       str = GT::Str.new(nil)
-      if GT.style_to_str(@config, str.to_ptr, err.to_ptr) == 0
+      if GT.gt_style_to_str(@config, str.to_ptr, err.to_ptr) == 0
         str.to_s
       else
         GT.gterror(err)
@@ -100,7 +100,7 @@ module GT
 
     def get_color(section, key, gn = GT::NULL)
       color = GT::Color.malloc
-      if GT.style_get_color(@config, section, key, color, gn)
+      if GT.gt_style_get_color(@config, section, key, color, gn)
         color
       else
         nil
@@ -108,12 +108,12 @@ module GT
     end
 
     def set_color(section, key, color)
-      GT.style_set_color(@config, section, key, color)
+      GT.gt_style_set_color(@config, section, key, color)
     end
 
     def get_cstr(section, key, gn = GT::NULL)
       str = GT::Str.new(nil)
-      if GT.style_get_str(@config, section, key, str, gn)
+      if GT.gt_style_get_str(@config, section, key, str, gn)
         str.to_s
       else
         nil
@@ -122,12 +122,12 @@ module GT
 
     def set_cstr(section, key, value)
       str = GT::Str.new(value)
-      GT.style_set_str(@config, section, key, str)
+      GT.gt_style_set_str(@config, section, key, str)
     end
 
     def get_num(section, key, gn = GT::NULL)
       double = DoubleArg.malloc
-      if GT.style_get_num(@config, section, key, double, gn)
+      if GT.gt_style_get_num(@config, section, key, double, gn)
         double.val
       else
         nil
@@ -136,12 +136,12 @@ module GT
 
     def set_num(section, key, number)
       num = number.to_f
-      GT.style_set_num(@config, section, key, num)
+      GT.gt_style_set_num(@config, section, key, num)
     end
 
     def get_bool(section, key, gn = GT::NULL)
       bool = BoolArg.malloc
-      if GT.style_get_bool(@config, section, key, bool, gn)
+      if GT.gt_style_get_bool(@config, section, key, bool, gn)
         bool.val
       else
         nil
@@ -149,11 +149,11 @@ module GT
     end
 
     def set_bool(section, key, val)
-      GT.style_set_bool(@config, section, key, val)
+      GT.gt_style_set_bool(@config, section, key, val)
     end
 
     def unset(section, key)
-      GT.style_unset(@config, section, key)
+      GT.gt_style_unset(@config, section, key)
     end
   end
 end

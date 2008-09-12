@@ -160,7 +160,7 @@ static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
   logval = (int) floor(log10(pos));
   formatstring = gt_str_new_cstr("%.");
 
-  if (pos > 1000000000)
+  if (pos >= 1000000000)
   {
     fpos = (double) pos / 1000000000;
     while (pos % 10 == 0)
@@ -172,7 +172,7 @@ static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
     gt_str_append_cstr(formatstring, "fG");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
   }
-  else if (pos > 1000000)
+  else if (pos >= 1000000)
   {
     fpos = (double) pos / 1000000;
     while (pos % 10 == 0)
@@ -184,7 +184,7 @@ static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
     gt_str_append_cstr(formatstring, "fM");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos);
   }
-  else if (pos > 1000)
+  else if (pos >= 1000)
   {
     fpos = (double) pos / 1000;
     while (pos % 10 == 0)

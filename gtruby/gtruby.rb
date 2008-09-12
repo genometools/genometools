@@ -23,5 +23,5 @@ require 'libgtext'
 require 'libgtview'
 
 # to allow for memory bookkeeping analog to `gt` binary
-GT::allocators_init()
-GT::allocators_reg_atexit_func()
+GT::gt_allocators_init()
+GT::gt_allocators_reg_atexit_func()

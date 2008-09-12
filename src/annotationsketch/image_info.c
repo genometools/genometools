@@ -81,6 +81,19 @@ const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
   return *(GT_RecMap**) gt_array_get(ii->recmaps, n);
 }
 
+void gt_image_info_fill_recmap(GT_ImageInfo* ii, GT_RecMap* rm, unsigned long n)
+{
+  const GT_RecMap* tmp;
+  assert(ii && rm);
+  tmp = gt_image_info_get_recmap(ii, n);
+  rm->nw_x = tmp->nw_x;
+  rm->nw_y = tmp->nw_y;
+  rm->se_x = tmp->se_x;
+  rm->se_y = tmp->se_y;
+  rm->gf = tmp->gf;
+  rm->has_omitted_children = tmp->has_omitted_children;
+}
+
 int gt_image_info_unit_test(GT_Error *err)
 {
   GT_RecMap* rms[20];

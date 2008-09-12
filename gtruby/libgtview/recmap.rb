@@ -15,16 +15,48 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'dl/struct'
+require 'gtdlload'
+require 'gthelper'
 
 module GT
+  extend DL::Importable
   typealias "bool", "ibool"
-  RecMap = struct [
-    "double nw_x",
-    "double nw_y",
-    "double se_x",
-    "double se_y",
-    "GenomeNode *gn",
-    "bool has_omitted_children"
-  ]
+
+  extern "double gt_recmap_get_northwest_x(const GT_RecMap*)"
+  extern "double gt_recmap_get_northwest_y(const GT_RecMap*)"
+  extern "double gt_recmap_get_southeast_x(const GT_RecMap*)"
+  extern "double gt_recmap_get_southeast_y(const GT_RecMap*)"
+  extern "const GT_GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap*)"
+  extern "bool gt_recmap_has_omitted_children(const GT_RecMap*)"
+
+  class RecMap
+    def initialize(rm)
+      @rm = rm
+    end
+
+    def get_northwest_x
+      GT::gt_recmap_get_northwest_x(@rm)
+    end
+
+    def get_northwest_y
+      GT::gt_recmap_get_northwest_y(@rm)
+    end
+
+    def get_southeast_x
+      GT::gt_recmap_get_southeast_x(@rm)
+    end
+
+    def get_southeast_y
+      GT::gt_recmap_get_southeast_y(@rm)
+    end
+
+    def get_genome_feature
+      #refcount only this GenomeFeature!
+      GT::GenomeFeature.new(GT::gt_recmap_get_genome_feature(@rm), true)
+    end
+
+    def has_omitted_children
+      GT::gt_recmap_has_omitted_children(@gn)
+    end
+  end
 end

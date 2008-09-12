@@ -54,7 +54,7 @@ three visualization  <em>phases</em>.
 </div>
 
 
-<h3>Phase I: Feature selection</h3>
+<h3>Phase 1: Feature selection</h3>
 <p>
 The GFF3 input data are parsed into a directed acyclic graph (<em>annotation graph</em>, see Fig. <a href="#fig2">2</a> for an example) whose nodes are single features (lines from the GFF3 file). Edges represent the <em>part-of</em> relationships between
 groups of genomic features according to the
@@ -70,7 +70,7 @@ Each top-level node is then registered into a persistent <em>FeatureIndex</em> o
 <p>
 Alternatively, annotation graphs can be built by the user by creating each node explicitly and then connecting the nodes in a way such that the relationships are reflected in the graph structure (see <a href="#examples-generated">example section</a> for example code).
 </p>
-<h3>Phase II: Layout</h3>
+<h3>Phase 2: Layout</h3>
 <p>
 The next step consists of processing the features (given via a <em>FeatureIndex</em> or a simple array of top level nodes) into a structural <em>Diagram</em> object which first builds <em>blocks</em> from features by grouping and overlaying them semantically according to several options (see <a href="#collapsing">Collapsing</a>). During image generation, the <em>Block</em> objects are distributed into <em>Line</em> (each containing non-overlapping blocks) and <em>Track</em> objects (containing all lines of a given type). <em>Tracks</em> and <em>Lines</em> are contained within the <em>Diagram</em> object and correspond to particular building blocks of the resulting diagram (see Fig. <a href="fig3">3</a>). The overall layout of the diagram tries to keep the amount of vertical space as compact as possible. How new <em>Lines</em> are created depends on the chosen  implementation of the <em>LineBreaker</em> interface, by default a <em>Block</em> is pushed into a new <em>Line</em> when either the <em>Block</em> or its caption overlaps with another one.
 </p>
@@ -79,19 +79,19 @@ The next step consists of processing the features (given via a <em>FeatureIndex<
   <p><a name="fig3"></a><img src="images/diagram.png" alt="[Diagram]"></p>
   <p><b>Figure 3: </b>The components of the <em>Diagram</em> class reflect sections of the resulting image.</p>
 </div>
-<h3>Phase III: Rendering</h3>
+<h3>Phase 3: Rendering</h3>
 <p>
 In the final phase, the <em>Diagram</em> object is used as a blueprint to create an
 image of a given type and size, considering user-defined options.
 
-Rendering logic is implemented in the <em>Canvas</em> class, whose methods are called while traversal of the <em>Diagram</em> structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. In contrast, rendering backend-aware subclasses of the <em>Canvas</em> are closely tied to a specific implementation of the <em>Graphics</em> interface, which provides methods to draw a number of primitives to a
+Rendering logic is implemented in the <em>Canvas</em> class, whose methods are called while traversal of the <em>Diagram</em> structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering backend-dependent subclasses of <em>Canvas</em> are closely tied to a specific implementation of the <em>Graphics</em> interface, which provides methods to draw a number of primitives to a
 drawing surface abstraction. It wraps around the low-level graphics library and allows for easy extension or replacement of the graphics back-end. Currently, there are <em>Graphics</em> implementations for the <a href="http://cairographics.org">Cairo</a> 2D graphics library (<em>GraphicsCairo</em>) and two <em>Canvas</em> subclasses providing access to the image file formats supported by Cairo (<em>CanvasCairoFile</em>) and to arbitrary Cairo contexts (<em>CanvasCairoContext</em>, which directly accesses a <a href="http://cairographics.org/manual/cairo-cairo-t.html"><tt>cairo_t</tt></a>). This class can be used, for example, to directly draw <em>AnnotationSketch</em> output in any graphical environment which is supported by Cairo (see <a href="http://www.cairographics.org/manual/Surfaces.html"> list of supported surface types</a>).
 </p>
 
 <a name="collapsing"></a>
 <h3>Collapsing</h3>
 <p>
-By default, features are grouped by the Sequence Ontology type associated with them, resulting in one track per type.
+By default, <em>Lines</em> are grouped by the Sequence Ontology type associated with the top-level elements of their <em>Blocks</em>, resulting in one track per type.
 To obtain a shorter yet concise output, tracks for parent types in the feature graph can be enabled to contain all the features of their child types. The features with the given type are then drawn on top of their parent features (e.g. all <em>exon</em> and <em>intron</em> features are placed into their parent <em>mRNA</em> or <em>gene</em> track). This process is called <em>collapsing</em>. Collapsing can be enabled by setting the <tt>collapse_to_parent</tt> option for the respective child type to <tt>true</tt>, e.g. the following options:
 </p>
 <pre class="code">
@@ -202,15 +202,21 @@ The following code examples (in C and Lua) illustrate how to produce an image fr
 </div>
 
 <h4>C code</h4>
-(See <tt>src/examples/sketch_parsed.c</tt> in the source distribution.)
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=src/examples/sketch_parsed.c;hb=HEAD"><tt>src/examples/sketch_parsed.c</tt></a> in the source distribution.)
 <pre class="code">
 <!--#include file="src/examples/sketch_parsed.c"-->
 </pre>
 
 <h4>Lua code</h4>
-(See <tt>gtscripts/sketch_parsed.lua</tt> in the source distribution. This example can be run by the command line <tt>gt gtscripts/sketch_parsed.lua &lt;style_file&gt; &lt;PNG_file&gt; &lt;GFF3_file&gt;</tt>)
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=gtscripts/sketch_parsed.lua;hb=HEAD"><tt>gtscripts/sketch_parsed.lua</tt></a> in the source distribution. This example can be run by the command line <tt>gt gtscripts/sketch_parsed.lua &lt;style_file&gt; &lt;PNG_file&gt; &lt;GFF3_file&gt;</tt>)
 <pre class="code">
 <!--#include file="gtscripts/sketch_parsed.lua"-->
+</pre>
+
+<h4>Ruby code</h4>
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=gtruby/sketch_parsed.rb;hb=HEAD"><tt>gtruby/sketch_parsed.rb</tt></a> in the source distribution.)
+<pre class="code">
+<!--#include file="gtruby/sketch_parsed.rb"-->
 </pre>
 
 <a name="examples-generated"></a>
@@ -223,13 +229,13 @@ The following C code example illustrates how to produce an image from annotation
 </div>
 
 <h4>C code</h4>
-(See <tt>src/examples/sketch_constructed.c</tt> in the source distribution.)
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=src/examples/sketch_constructed.c;hb=HEAD"><tt>src/examples/sketch_constructed.c</tt></a> in the source distribution.)
 <pre class="code">
 <!--#include file="src/examples/sketch_constructed.c"-->
 </pre>
 
 <h4>Lua code</h4>
-(See <tt>gtscripts/sketch_constructed.lua</tt> in the source distribution.  This example can be run by the command line <tt>gt gtscripts/sketch_parsed.lua &lt;style_file&gt; &lt;PNG_file&gt;</tt>)
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=gtscripts/sketch_constructed.lua;hb=HEAD"><tt>gtscripts/sketch_constructed.lua</tt></a> in the source distribution.  This example can be run by the command line <tt>gt gtscripts/sketch_constructed.lua &lt;style_file&gt; &lt;PNG_file&gt;</tt>)
 <pre class="code">
 <!--#include file="gtscripts/sketch_constructed.lua"-->
 </pre>
