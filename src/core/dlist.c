@@ -28,7 +28,7 @@
 #define MAX_SIZE      1024
 
 struct GtDlist {
-  GT_Compare cmp_func;
+  GtCompare cmp_func;
   GtDlistelem *first,
             *last;
   unsigned long size;
@@ -40,7 +40,7 @@ struct GtDlistelem {
   void *data;
 };
 
-GtDlist* gt_dlist_new(GT_Compare cmp_func)
+GtDlist* gt_dlist_new(GtCompare cmp_func)
 {
   GtDlist *dlist = gt_calloc(1, sizeof (GtDlist));
   dlist->cmp_func = cmp_func;

@@ -83,7 +83,7 @@ GtStrArray* gt_cstr_table_get_all(const GT_CstrTable *table)
   assert(table);
   cstrs = gt_strarray_new();
   had_err = hashtable_foreach_ordered(table->strings, store_type, cstrs,
-                                      (GT_Compare) strcmp, NULL);
+                                      (GtCompare) strcmp, NULL);
   assert(!had_err);
   return cstrs;
 }

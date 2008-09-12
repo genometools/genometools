@@ -37,7 +37,7 @@ void       hashmap_add(Hashmap*, void*, void*);
 void       hashmap_remove(Hashmap*, const void*);
 /* iterate over the hashmap in key order given by compare function <cmp> */
 int        hashmap_foreach_ordered(Hashmap*, Mapentryvisitfunc, void *data,
-                                     GT_Compare cmp, GtError*);
+                                     GtCompare cmp, GtError*);
 int        hashmap_foreach(Hashmap*, Mapentryvisitfunc, void*, GtError*);
 /* iterate over the hashmap elements in
  * - alphabetical order, requires that HashType was specified as HASH_STRING

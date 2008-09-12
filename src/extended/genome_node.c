@@ -481,7 +481,7 @@ void gt_genome_node_add_child(GtGenomeNode *parent, GtGenomeNode *child)
 #endif
   /* create children list on demand */
   if (!parent->children)
-    parent->children = gt_dlist_new((GT_Compare) gt_genome_node_cmp);
+    parent->children = gt_dlist_new((GtCompare) gt_genome_node_cmp);
   gt_dlist_add(parent->children, child); /* XXX: check for circles */
   /* update tree status of <parent> */
   set_tree_status(&parent->bit_field, TREE_STATUS_UNDETERMINED);
@@ -715,13 +715,13 @@ void gt_genome_node_rec_delete(GtGenomeNode *gn)
 void gt_genome_nodes_sort(GtArray *nodes)
 {
   qsort(gt_array_get_space(nodes), gt_array_size(nodes),
-        sizeof (GtGenomeNode*), (GT_Compare) gt_genome_node_compare);
+        sizeof (GtGenomeNode*), (GtCompare) gt_genome_node_compare);
 }
 
 void gt_genome_nodes_sort_stable(GtArray *nodes)
 {
   gt_msort(gt_array_get_space(nodes), gt_array_size(nodes),
-           sizeof (GtGenomeNode*), (GT_Compare) gt_genome_node_compare);
+           sizeof (GtGenomeNode*), (GtCompare) gt_genome_node_compare);
 }
 
 bool gt_genome_nodes_are_equal_sequence_regions(GtGenomeNode *gn_a,

@@ -25,8 +25,8 @@
    greater 0 if *a > * b.
    Do not count on these functions to return -1, 0, or 1!
  */
-typedef int  (*GT_Compare)(const void *a, const void *b);
-typedef int  (*GT_CompareWithData)(const void*, const void*, void *data);
+typedef int  (*GtCompare)(const void *a, const void *b);
+typedef int  (*GtCompareWithData)(const void*, const void*, void *data);
 typedef void (*GT_FreeFunc)(void*);
 
 #endif

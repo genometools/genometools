@@ -479,7 +479,7 @@ static void gt_diagram_build(GT_Diagram *diagram, GtArray *features)
   }
   /* collect blocks from nodeinfo structures and create the tracks */
   had_err = hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks, diagram,
-                                    (GT_Compare) gt_genome_node_cmp, NULL);
+                                    (GtCompare) gt_genome_node_cmp, NULL);
   assert(!had_err); /* collect_blocks() is sane */
 
   /* clear caches */

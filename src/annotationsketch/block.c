@@ -34,7 +34,7 @@ struct GtBlock {
   unsigned long reference_count;
 };
 
-/* GT_Compare function used to insert GtElements into dlist, order by type */
+/* GtCompare function used to insert GtElements into dlist, order by type */
 static int elemcmp(const void *a, const void *b)
 {
   const char *type_a, *type_b;

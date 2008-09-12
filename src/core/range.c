@@ -267,14 +267,14 @@ void ranges_sort(GtArray *ranges)
 {
   assert(ranges);
   qsort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GtRange),
-        (GT_Compare) gt_range_compare_ptr);
+        (GtCompare) gt_range_compare_ptr);
 }
 
 void ranges_sort_by_length_stable(GtArray *ranges)
 {
   assert(ranges);
   gt_msort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GtRange),
-           (GT_Compare) gt_range_compare_by_length_ptr);
+           (GtCompare) gt_range_compare_by_length_ptr);
 }
 
 bool ranges_are_sorted(const GtArray *ranges)

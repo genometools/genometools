@@ -30,11 +30,11 @@ struct TranscriptUsedExons {
 TranscriptUsedExons* transcript_used_exons_new(void)
 {
   TranscriptUsedExons *tue = gt_malloc(sizeof (TranscriptUsedExons));
-  tue->used_exons_all = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
-  tue->used_exons_single = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
-  tue->used_exons_initial = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
-  tue->used_exons_internal = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
-  tue->used_exons_terminal = gt_dlist_new((GT_Compare) gt_range_compare_ptr);
+  tue->used_exons_all = gt_dlist_new((GtCompare) gt_range_compare_ptr);
+  tue->used_exons_single = gt_dlist_new((GtCompare) gt_range_compare_ptr);
+  tue->used_exons_initial = gt_dlist_new((GtCompare) gt_range_compare_ptr);
+  tue->used_exons_internal = gt_dlist_new((GtCompare) gt_range_compare_ptr);
+  tue->used_exons_terminal = gt_dlist_new((GtCompare) gt_range_compare_ptr);
   return tue;
 }
 

@@ -86,7 +86,7 @@ static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
     /* sort exon features */
     qsort(gt_array_get_space(gtf_visitor->exon_features),
           gt_array_size(gtf_visitor->exon_features), sizeof (GtGenomeNode*),
-          (GT_Compare) gt_genome_node_compare);
+          (GtCompare) gt_genome_node_compare);
     /* show exon features */
     gtf_visitor->transcript_id++;
     for (i = 0; i < gt_array_size(gtf_visitor->exon_features); i++) {
@@ -101,7 +101,7 @@ static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
     /* sort CDS features */
     qsort(gt_array_get_space(gtf_visitor->CDS_features),
           gt_array_size(gtf_visitor->CDS_features), sizeof (GtGenomeNode*),
-          (GT_Compare) gt_genome_node_compare);
+          (GtCompare) gt_genome_node_compare);
     /* show start_codon feature */
     gf = *(GtGenomeFeature**) gt_array_get(gtf_visitor->CDS_features, 0);
     /* XXX: to be done */

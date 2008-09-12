@@ -26,7 +26,7 @@
 typedef struct GtDlist GtDlist;
 typedef struct GtDlistelem GtDlistelem;
 
-GtDlist*     gt_dlist_new(GT_Compare);
+GtDlist*     gt_dlist_new(GtCompare);
 GtDlistelem* gt_dlist_first(const GtDlist*);
 GtDlistelem* gt_dlist_last(const GtDlist*);
 GtDlistelem* gt_dlist_find(const GtDlist*, void*); /* O(n) */

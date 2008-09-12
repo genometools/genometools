@@ -62,7 +62,7 @@ static OptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
                          "in sequence_file(s).");
 
   /* -check */
-  check_option = option_new_filename("check", "GT_Compare all fingerprints "
+  check_option = option_new_filename("check", "GtCompare all fingerprints "
                                      "contained in the given checklist file "
                                      "with checksums in given "
                                      "sequence_files(s). The comparison is "

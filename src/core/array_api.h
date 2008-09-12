@@ -74,7 +74,7 @@ size_t        gt_array_elem_size(const GtArray *array);
    returned. */
 unsigned long gt_array_size(const GtArray *array);
 /* Sort <array> with the given compare function <compar>. */
-void          gt_array_sort(GtArray *array, GT_Compare compar);
+void          gt_array_sort(GtArray *array, GtCompare compar);
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */

@@ -410,7 +410,7 @@ ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
 
 extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
-                          GT_Compare cmp, GtError *err)
+                          GtCompare cmp, GtError *err)
 {
   GtArray *hash_entries;
   void *elem;
@@ -428,7 +428,7 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
   if (!had_err) {
     size_t hash_size;
     gt_qsort_r(gt_array_get_space(hash_entries), gt_array_size(hash_entries),
-               gt_array_elem_size(hash_entries), data, (GT_CompareWithData)cmp);
+               gt_array_elem_size(hash_entries), data, (GtCompareWithData)cmp);
     hash_size = gt_array_size(hash_entries);
     assert(hash_size == hashtable_fill(ht));
     for (i = 0; !had_err && i < hash_size; i++) {

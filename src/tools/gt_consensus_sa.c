@@ -99,7 +99,7 @@ static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
     qsort(gt_array_get_space(spliced_alignments),
           gt_array_size(spliced_alignments),
           gt_array_elem_size(spliced_alignments),
-          (GT_Compare) sspliced_alignment_compare_ptr);
+          (GtCompare) sspliced_alignment_compare_ptr);
 
     /* compute the consensus spliced alignments */
     consensus_sa(gt_array_get_space(spliced_alignments),

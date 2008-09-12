@@ -765,7 +765,7 @@ static void determine_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                               predicted_strand == GT_STRAND_FORWARD
                               ? gt_array_size(exons_forward)
                               : gt_array_size(exons_reverse), sizeof (GtRange),
-                              (GT_Compare) gt_range_compare_ptr))) {
+                              (GtCompare) gt_range_compare_ptr))) {
     if (predicted_strand == GT_STRAND_FORWARD) {
       num = actual_range - (GtRange*) gt_array_get_space(exons_forward);
       ctr_ptr = gt_array_get(true_exons_forward, num);
@@ -907,7 +907,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
                          ? gt_array_size(info->slot->genes_forward)
                          : gt_array_size(info->slot->genes_reverse),
                          sizeof (GtGenomeNode*),
-                         (GT_CompareWithData) gt_genome_node_compare_with_data,
+                         (GtCompareWithData) gt_genome_node_compare_with_data,
                          NULL,
                          predicted_strand == GT_STRAND_FORWARD
                          ? info->slot->overlapped_genes_forward
@@ -978,7 +978,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
                          ? gt_array_size(info->slot->mRNAs_forward)
                          : gt_array_size(info->slot->mRNAs_reverse),
                          sizeof (GtGenomeNode*),
-                         (GT_CompareWithData) gt_genome_node_compare_with_data,
+                         (GtCompareWithData) gt_genome_node_compare_with_data,
                          NULL,
                          predicted_strand == GT_STRAND_FORWARD
                          ? info->slot->overlapped_mRNAs_forward
@@ -1042,7 +1042,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
     gt_bsearch_all_mark(real_genome_nodes, &gn,
                      gt_array_get_space(info->slot->LTRs),
                      gt_array_size(info->slot->LTRs), sizeof (GtGenomeNode*),
-                     (GT_CompareWithData) gt_genome_node_compare_delta,
+                     (GtCompareWithData) gt_genome_node_compare_delta,
                      &info->LTRdelta, info->slot->overlapped_LTRs);
 
     if (gt_array_size(real_genome_nodes)) {

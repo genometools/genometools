@@ -101,7 +101,7 @@ struct hashiteration_state
 {
   Mapentryvisitfunc visit;
   void *data;
-  GT_Compare keycmp;
+  GtCompare keycmp;
 };
 
 static int
@@ -110,7 +110,7 @@ hashmap_cmp(const void *elemA, const void *elemB, void *data)
   const struct map_entry *entryA = elemA,
     *entryB = elemB;
   struct hashiteration_state *dip = data;
-  return ((GT_CompareWithData)dip->keycmp)(entryA->key, entryB->key,
+  return ((GtCompareWithData)dip->keycmp)(entryA->key, entryB->key,
                                         dip->data);
 }
 
@@ -126,11 +126,11 @@ hashmap_visit(void *elem, void *data, GtError *err)
 /* iterate over the hashmap in key order given by compare function <cmp> */
 extern int
 hashmap_foreach_ordered(Hashmap *hm, Mapentryvisitfunc visit, void *data,
-                        GT_Compare cmp, GtError *err)
+                        GtCompare cmp, GtError *err)
 {
   struct hashiteration_state state = { visit, data, cmp};
   return hashtable_foreach_ordered(hm, hashmap_visit, &state,
-                                   (GT_Compare)hashmap_cmp, err);
+                                   (GtCompare)hashmap_cmp, err);
 }
 
 extern int

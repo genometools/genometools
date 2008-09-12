@@ -173,7 +173,7 @@ void gt_array_reset(GtArray *a)
   a->next_free = 0;
 }
 
-void gt_array_sort(GtArray *a, GT_Compare compar)
+void gt_array_sort(GtArray *a, GtCompare compar)
 {
   assert(a && compar);
   qsort(a->space, a->next_free, a->size_of_elem, compar);

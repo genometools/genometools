@@ -54,7 +54,7 @@ struct HashElemInfo
                                         * used for the individual
                                         * destructors or set to NULL */
   size_t elem_size;
-  GT_Compare cmp;
+  GtCompare cmp;
   void *table_data;             /**< per table data, passed to
                                  * free_elem_with_data */
   GT_FreeFunc table_data_free;     /**< called on hashtable_delete with
@@ -80,7 +80,7 @@ int        hashtable_remove(Hashtable*, const void *elem);
  */
 extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
-                          GT_Compare cmp, GtError *err);
+                          GtCompare cmp, GtError *err);
 /**
  * @brief iterate over the hashtable in implementation-defined order
  * @return 0 => no error, -1 => error occured
