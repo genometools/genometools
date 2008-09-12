@@ -110,7 +110,7 @@ bool gt_feature_index_has_seqid(const GtFeatureIndex *fi, const char *seqid)
   return fi->c_class->has_seqid(fi, seqid);
 }
 
-void* gt_feature_index_cast(const GtFeatureIndexClass *fic,
+void* gt_feature_index_cast(GT_UNUSED const GtFeatureIndexClass *fic,
                             GtFeatureIndex *fi)
 {
   assert(fic && fi && fi->c_class == fic);
