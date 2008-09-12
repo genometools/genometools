@@ -31,7 +31,7 @@
 
 static int diagram_lua_new(lua_State *L)
 {
-  GT_Diagram **diagram;
+  GtDiagram **diagram;
   GtFeatureIndex **feature_index;
   GtRange *range;
   const char *seqid;
@@ -46,7 +46,7 @@ static int diagram_lua_new(lua_State *L)
   range = check_range(L, 3);
   /* create diagram */
   style = lua_get_style_from_registry(L);
-  diagram = lua_newuserdata(L, sizeof (GT_Diagram*));
+  diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   assert(diagram);
   *diagram = gt_diagram_new(*feature_index, seqid, range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
@@ -98,7 +98,7 @@ static GtArray* genome_node_table_to_array(lua_State *L)
 
 static int diagram_lua_new_from_array(lua_State *L)
 {
-  GT_Diagram **diagram;
+  GtDiagram **diagram;
   GtArray *nodes;
   GtRange range;
   GtStyle *style;
@@ -112,7 +112,7 @@ static int diagram_lua_new_from_array(lua_State *L)
   luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
   /* create diagram */
   style = lua_get_style_from_registry(L);
-  diagram = lua_newuserdata(L, sizeof (GT_Diagram*));
+  diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   assert(diagram);
   *diagram = gt_diagram_new_from_array(nodes, &range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
@@ -123,7 +123,7 @@ static int diagram_lua_new_from_array(lua_State *L)
 
 static int diagram_lua_sketch(lua_State *L)
 {
-  GT_Diagram **diagram;
+  GtDiagram **diagram;
   GtCanvas **canvas;
   diagram = check_diagram(L,1);
   canvas = check_canvas(L,2);
@@ -132,7 +132,7 @@ static int diagram_lua_sketch(lua_State *L)
 
 static int diagram_lua_delete(lua_State *L)
 {
-  GT_Diagram **diagram;
+  GtDiagram **diagram;
   diagram = check_diagram(L, 1);
   gt_diagram_delete(*diagram);
   return 0;

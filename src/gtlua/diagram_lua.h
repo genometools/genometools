@@ -36,6 +36,6 @@ int gt_lua_open_diagram(lua_State*);
 
 #define DIAGRAM_METATABLE  "GenomeTools.diagram"
 #define check_diagram(L, POS) \
-              (GT_Diagram**) luaL_checkudata(L, POS, DIAGRAM_METATABLE)
+              (GtDiagram**) luaL_checkudata(L, POS, DIAGRAM_METATABLE)
 
 #endif

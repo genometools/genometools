@@ -4,7 +4,7 @@
 #include "genometools.h"
 
 GtCanvas *canvas = NULL;
-GT_Diagram *d = NULL;
+GtDiagram *d = NULL;
 GtStyle *sty = NULL;
 GT_ImageInfo* ii = NULL;
 GtError *err = NULL;

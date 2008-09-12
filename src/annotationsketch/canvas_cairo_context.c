@@ -40,7 +40,7 @@ struct GtCanvasCairoContext {
         gt_canvas_cast(gt_canvas_cairo_context_class(), C)
 
 int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
-                                              GT_Diagram *dia)
+                                              GtDiagram *dia)
 {
   double margins;
 
@@ -71,7 +71,7 @@ int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
 }
 
 int gt_canvas_cairo_context_visit_diagram_post(GtCanvas *canvas,
-                                               GT_Diagram *dia)
+                                               GtDiagram *dia)
 {
   int had_err = 0;
 

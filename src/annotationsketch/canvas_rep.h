@@ -27,8 +27,8 @@
 
 struct GtCanvasClass {
   size_t size;
-  int           (*visit_diagram_pre)(GtCanvas*, GT_Diagram*);
-  int           (*visit_diagram_post)(GtCanvas*, GT_Diagram*);
+  int           (*visit_diagram_pre)(GtCanvas*, GtDiagram*);
+  int           (*visit_diagram_post)(GtCanvas*, GtDiagram*);
   void          (*free)(GtCanvas*);
 };
 

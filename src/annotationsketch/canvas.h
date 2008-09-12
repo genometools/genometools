@@ -27,7 +27,7 @@ typedef struct GtCanvasClass GtCanvasClass;
 #include "annotationsketch/element.h"
 #include "annotationsketch/track.h"
 
-unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GT_Diagram *dia);
+unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia);
 void          gt_canvas_draw_ruler(GtCanvas *canvas);
 
 /* Returns a pixel-based range for a nucleotide-based range
@@ -36,9 +36,9 @@ GtDrawingRange  gt_canvas_convert_coords(GtCanvas *canvas, GtRange);
 /* Returns rendered width in pixels of the given text. */
 double        gt_canvas_get_text_width(GtCanvas*, const char *text);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_diagram_pre(GtCanvas*, GT_Diagram*);
+int           gt_canvas_visit_diagram_pre(GtCanvas*, GtDiagram*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_diagram_post(GtCanvas*, GT_Diagram*);
+int           gt_canvas_visit_diagram_post(GtCanvas*, GtDiagram*);
 /* Callback function for Diagram rendering. */
 int           gt_canvas_visit_track_pre(GtCanvas*, GtTrack*);
 /* Callback function for Diagram rendering. */

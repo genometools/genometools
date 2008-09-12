@@ -54,7 +54,7 @@ typedef enum
 } ClipType;
 
 /* Calculate the final height of the image to be created. */
-unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GT_Diagram *dia)
+unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
 {
   GtTracklineInfo lines;
   double tmp;
@@ -316,13 +316,13 @@ unsigned long gt_canvas_get_height(GtCanvas *canvas)
   return canvas->height;
 }
 
-int gt_canvas_visit_diagram_pre(GtCanvas *canvas, GT_Diagram* diagram)
+int gt_canvas_visit_diagram_pre(GtCanvas *canvas, GtDiagram* diagram)
 {
   assert(canvas && diagram);
   return canvas->c_class->visit_diagram_pre(canvas, diagram);
 }
 
-int gt_canvas_visit_diagram_post(GtCanvas *canvas, GT_Diagram* diagram)
+int gt_canvas_visit_diagram_post(GtCanvas *canvas, GtDiagram* diagram)
 {
   assert(canvas && diagram);
   return canvas->c_class->visit_diagram_post(canvas, diagram);

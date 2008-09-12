@@ -48,7 +48,7 @@ static void draw_example_features(GtArray *features, const char *style_file,
 {
   GtRange range = { 1, 1000 }; /* the genomic range to draw */
   GtStyle *style;
-  GT_Diagram *diagram;
+  GtDiagram *diagram;
   GtCanvas *canvas;
   GtError *err = gt_error_new();
 

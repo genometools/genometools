@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
   GtStyle *style;
   GtFeatureIndex *feature_index;
   GtRange range;
-  GT_Diagram *diagram;
+  GtDiagram *diagram;
   GtCanvas *canvas;
   GtError *err = gt_error_new();
 

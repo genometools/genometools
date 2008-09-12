@@ -40,7 +40,7 @@
 /* used to separate a filename from the type in a track name */
 #define FILENAME_TYPE_SEPARATOR  '|'
 
-struct GT_Diagram {
+struct GtDiagram {
   /* GtTracks indexed by track keys */
   Hashmap *tracks;
   /* GtBlock lists indexed by track keys */
@@ -68,12 +68,12 @@ typedef struct {
 
 typedef struct {
   GtGenomeNode *parent;
-  GT_Diagram *diagram;
+  GtDiagram *diagram;
 } NodeTraverseInfo;
 
 typedef struct {
   GtCanvas *canvas;
-  GT_Diagram *dia;
+  GtDiagram *dia;
 } GtTrackTraverseInfo;
 
 static GtBlockTuple* blocktuple_new(const char *gft, GtBlock *block)
@@ -86,7 +86,7 @@ static GtBlockTuple* blocktuple_new(const char *gft, GtBlock *block)
   return bt;
 }
 
-static NodeInfoElement* get_or_create_node_info(GT_Diagram *d,
+static NodeInfoElement* get_or_create_node_info(GtDiagram *d,
                                                    GtGenomeNode *node)
 {
   NodeInfoElement *ni;
@@ -128,7 +128,7 @@ static const char* get_node_name_or_id(GtGenomeNode *gn)
   return ret;
 }
 
-static bool get_caption_display_status(GT_Diagram *d, const char *gft)
+static bool get_caption_display_status(GtDiagram *d, const char *gft)
 {
   assert(d && gft);
   bool *status;
@@ -158,7 +158,7 @@ static bool get_caption_display_status(GT_Diagram *d, const char *gft)
   return *status;
 }
 
-static void add_to_current(GT_Diagram *d, GtGenomeNode *node,
+static void add_to_current(GtDiagram *d, GtGenomeNode *node,
                            GtGenomeNode *parent)
 {
   NodeInfoElement *ni;
@@ -206,7 +206,7 @@ static void add_to_current(GT_Diagram *d, GtGenomeNode *node,
   gt_array_add(ni->blocktuples, bt);
 }
 
-static void add_to_parent(GT_Diagram *d, GtGenomeNode *node,
+static void add_to_parent(GtDiagram *d, GtGenomeNode *node,
                           GtGenomeNode* parent)
 {
   GtBlock *block = NULL;
@@ -257,7 +257,7 @@ static void add_to_parent(GT_Diagram *d, GtGenomeNode *node,
   gt_block_insert_element(block, node);
 }
 
-static void add_recursive(GT_Diagram *d, GtGenomeNode *node,
+static void add_recursive(GtDiagram *d, GtGenomeNode *node,
                           GtGenomeNode* parent, GtGenomeNode *original_node)
 {
   NodeInfoElement *ni;
@@ -295,7 +295,7 @@ static void add_recursive(GT_Diagram *d, GtGenomeNode *node,
   }
 }
 
-static void process_node(GT_Diagram *d, GtGenomeNode *node,
+static void process_node(GtDiagram *d, GtGenomeNode *node,
                          GtGenomeNode *parent)
 {
   GtRange elem_range;
@@ -421,7 +421,7 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
                           GT_UNUSED GtError *err)
 {
   NodeInfoElement *ni = (NodeInfoElement*) value;
-  GT_Diagram *diagram = (GT_Diagram*) data;
+  GtDiagram *diagram = (GtDiagram*) data;
   unsigned long i = 0;
 
   for (i = 0; i < gt_array_size(ni->blocktuples); i++) {
@@ -460,7 +460,7 @@ static void traverse_genome_nodes(GtGenomeNode *gn,
   }
 }
 
-static void gt_diagram_build(GT_Diagram *diagram, GtArray *features)
+static void gt_diagram_build(GtDiagram *diagram, GtArray *features)
 {
   unsigned long i = 0;
   int had_err;
@@ -497,12 +497,12 @@ static int blocklist_delete(void *value)
   return 0;
 }
 
-static GT_Diagram* gt_diagram_new_generic(GtArray *features,
+static GtDiagram* gt_diagram_new_generic(GtArray *features,
                                           const GtRange *range,
                                           GtStyle *style)
 {
-  GT_Diagram *diagram;
-  diagram = gt_malloc(sizeof (GT_Diagram));
+  GtDiagram *diagram;
+  diagram = gt_malloc(sizeof (GtDiagram));
   diagram->tracks = hashmap_new(HASH_STRING, gt_free_func,
                                 (GtFree) gt_track_delete);
   diagram->blocks = hashmap_new(HASH_DIRECT, NULL,
@@ -515,10 +515,10 @@ static GT_Diagram* gt_diagram_new_generic(GtArray *features,
   return diagram;
 }
 
-GT_Diagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
+GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
                            const GtRange *range, GtStyle *style)
 {
-  GT_Diagram *diagram;
+  GtDiagram *diagram;
   int had_err = 0;
   GtArray *features = gt_array_new(sizeof (GtGenomeNode*));
   assert(features && seqid && range && style);
@@ -530,26 +530,26 @@ GT_Diagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
   return diagram;
 }
 
-GT_Diagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
+GtDiagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
                                 GtStyle *style)
 {
   assert(features && range && style);
   return gt_diagram_new_generic(features, range, style);
 }
 
-GtRange gt_diagram_get_range(GT_Diagram* diagram)
+GtRange gt_diagram_get_range(GtDiagram* diagram)
 {
   assert(diagram);
   return diagram->range;
 }
 
-Hashmap* gt_diagram_get_tracks(const GT_Diagram *diagram)
+Hashmap* gt_diagram_get_tracks(const GtDiagram *diagram)
 {
   assert(diagram);
   return diagram->tracks;
 }
 
-void gt_diagram_get_lineinfo(const GT_Diagram *diagram, GtTracklineInfo *tli)
+void gt_diagram_get_lineinfo(const GtDiagram *diagram, GtTracklineInfo *tli)
 {
   int had_err;
   assert(diagram);
@@ -558,7 +558,7 @@ void gt_diagram_get_lineinfo(const GT_Diagram *diagram, GtTracklineInfo *tli)
   assert(!had_err); /* gt_diagram_add_tracklines() is sane */
 }
 
-int gt_diagram_get_number_of_tracks(const GT_Diagram *diagram)
+int gt_diagram_get_number_of_tracks(const GtDiagram *diagram)
 {
   assert(diagram);
   return diagram->nof_tracks;
@@ -632,7 +632,7 @@ static int render_tracks(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-int gt_diagram_sketch(GT_Diagram *dia, GtCanvas *canvas)
+int gt_diagram_sketch(GtDiagram *dia, GtCanvas *canvas)
 {
   int had_err = 0;
   GtTrackTraverseInfo tti;
@@ -658,7 +658,7 @@ int gt_diagram_unit_test(GtError *err)
   GtSequenceRegion *sr1, *sr2;
   int had_err=0;
   GtStyle *sty = NULL;
-  GT_Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
+  GtDiagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
   GtArray *features;
   GtCanvas *canvas = NULL;
   gt_error_check(err);
@@ -814,7 +814,7 @@ int gt_diagram_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_diagram_delete(GT_Diagram *diagram)
+void gt_diagram_delete(GtDiagram *diagram)
 {
   if (!diagram) return;
   hashmap_delete(diagram->tracks);
