@@ -33,8 +33,8 @@ int           gt_range_compare_with_delta(GtRange, GtRange,
 bool          gt_range_overlap(GtRange, GtRange);
 bool          gt_range_contains(GtRange, GtRange);
 bool          gt_range_within(GtRange, unsigned long);
-GtRange      gt_range_join(GtRange, GtRange);
-GtRange      gt_range_offset(GtRange, long offset);
+GtRange       gt_range_join(GtRange, GtRange);
+GtRange       gt_range_offset(GtRange, long offset);
 unsigned long gt_range_length(GtRange);
 
 #endif
