@@ -18,12 +18,12 @@
 #ifndef STREAM_EVALUATOR_H
 #define STREAM_EVALUATOR_H
 
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 typedef struct StreamEvaluator StreamEvaluator;
 
-StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
-                                      GenomeStream *prediction, bool nuceval,
+StreamEvaluator* stream_evaluator_new(GtNodeStream *reality,
+                                      GtNodeStream *prediction, bool nuceval,
                                       bool evalLTR, unsigned long LTRdelta);
 /* if <gv> is not NULL, it visits all nodes from reality and the prediction */
 int              stream_evaluator_evaluate(StreamEvaluator*, bool verbose,

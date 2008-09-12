@@ -18,12 +18,12 @@
 #include "core/assert.h"
 #include "core/unused_api.h"
 #include "extended/chseqids_stream.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 #include "extended/mapping.h"
 
 struct ChseqidsStream {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   Mapping *chseqids_mapping;
   GtArray *gt_genome_node_buffer;
   unsigned long buffer_index;
@@ -31,7 +31,7 @@ struct ChseqidsStream {
 };
 
 #define chseqids_stream_cast(GS)\
-        genome_stream_cast(chseqids_stream_class(), GS)
+        gt_node_stream_cast(chseqids_stream_class(), GS)
 
 static int change_sequence_id(GtGenomeNode *gn, void *data,
                               GT_UNUSED GtError *err)
@@ -43,7 +43,7 @@ static int change_sequence_id(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+int chseqids_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                               GtError *err)
 {
   ChseqidsStream *cs;
@@ -56,7 +56,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
 
   if (!cs->sequence_regions_processed) {
     while (!had_err) {
-      if (!(had_err = genome_stream_next(cs->in_stream, &node, err))) {
+      if (!(had_err = gt_node_stream_next(cs->in_stream, &node, err))) {
         if (node)
           gt_array_add(cs->gt_genome_node_buffer, node);
         else
@@ -113,7 +113,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   }
 
   if (!had_err)
-    had_err = genome_stream_next(cs->in_stream, gn, err);
+    had_err = gt_node_stream_next(cs->in_stream, gn, err);
   if (!had_err && *gn) {
     if (gt_genome_node_get_seqid(*gn)) {
       changed_seqid = mapping_map_string(cs->chseqids_mapping,
@@ -131,7 +131,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void chseqids_stream_free(GenomeStream *gs)
+static void chseqids_stream_free(GtNodeStream *gs)
 {
   ChseqidsStream *cs;
   unsigned long i;
@@ -143,32 +143,32 @@ static void chseqids_stream_free(GenomeStream *gs)
                            gt_array_get(cs->gt_genome_node_buffer, i));
   }
   gt_array_delete(cs->gt_genome_node_buffer);
-  genome_stream_delete(cs->in_stream);
+  gt_node_stream_delete(cs->in_stream);
 }
 
-const GenomeStreamClass* chseqids_stream_class(void)
+const GtNodeStreamClass* chseqids_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (ChseqidsStream),
+  static const GtNodeStreamClass gsc = { sizeof (ChseqidsStream),
                                          chseqids_stream_next_tree,
                                          chseqids_stream_free };
   return &gsc;
 }
 
-GenomeStream* chseqids_stream_new(GenomeStream *in_stream,
+GtNodeStream* chseqids_stream_new(GtNodeStream *in_stream,
                                   GtStr *chseqids_file, GtError *err)
 {
-  GenomeStream *gs;
+  GtNodeStream *gs;
   ChseqidsStream *cs;
   gt_error_check(err);
   gt_assert(in_stream && chseqids_file);
-  gt_assert(genome_stream_is_sorted(in_stream));
-  gs = genome_stream_create(chseqids_stream_class(), false);
+  gt_assert(gt_node_stream_is_sorted(in_stream));
+  gs = gt_node_stream_create(chseqids_stream_class(), false);
   cs = chseqids_stream_cast(gs);
-  cs->in_stream = genome_stream_ref(in_stream);
+  cs->in_stream = gt_node_stream_ref(in_stream);
   cs->chseqids_mapping = mapping_new(chseqids_file, "chseqids",
                                      MAPPINGTYPE_STRING, err);
   if (!cs->chseqids_mapping) {
-    genome_stream_delete(gs);
+    gt_node_stream_delete(gs);
     return NULL;
   }
   cs->gt_genome_node_buffer = gt_array_new(sizeof (GtGenomeNode*));

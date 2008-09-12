@@ -20,14 +20,14 @@
 
 #include <stdio.h>
 #include "annotationsketch/feature_index.h"
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct FeatureStream FeatureStream;
 
-const GenomeStreamClass* feature_stream_class(void);
+const GtNodeStreamClass* feature_stream_class(void);
 
 /* create a FeatureStream which writes to GtFeatureIndex */
-GenomeStream*            feature_stream_new(GenomeStream*, GtFeatureIndex*);
+GtNodeStream*            feature_stream_new(GtNodeStream*, GtFeatureIndex*);
 
 #endif

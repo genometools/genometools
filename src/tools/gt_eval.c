@@ -83,7 +83,7 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
 
 int gt_eval(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *reality_stream,
+  GtNodeStream *reality_stream,
                *prediction_stream;
   StreamEvaluator *evaluator;
   EvalArguments arguments;
@@ -120,8 +120,8 @@ int gt_eval(int argc, const char **argv, GtError *err)
 
   /* free */
   stream_evaluator_delete(evaluator);
-  genome_stream_delete(prediction_stream);
-  genome_stream_delete(reality_stream);
+  gt_node_stream_delete(prediction_stream);
+  gt_node_stream_delete(reality_stream);
 
   return had_err;
 }

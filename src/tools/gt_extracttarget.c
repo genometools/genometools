@@ -164,7 +164,7 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
                                    GtError *err)
 {
   ExtractTargetArguments *arguments = tool_arguments;
-  GenomeStream *gff3_in_stream;
+  GtNodeStream *gff3_in_stream;
   GtGenomeNode *gn;
   int had_err;
 
@@ -174,12 +174,12 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
   gff3_in_stream = gff3_in_stream_new_unsorted(1, argv + parsed_args, false,
                                                false);
 
-  while (!(had_err = genome_stream_next(gff3_in_stream, &gn, err)) && gn) {
+  while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn) {
     had_err = extracttarget_from_node(gn, arguments->seqfiles, err);
     gt_genome_node_rec_delete(gn);
   }
 
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }

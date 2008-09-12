@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the FeatureStream class (which implements the GenomeStream) interface
+/* exports the FeatureStream class (which implements the GtNodeStream) interface
    to Lua:
 
    -- Returns a new feature stream object (a genome stream) over <feature_index>

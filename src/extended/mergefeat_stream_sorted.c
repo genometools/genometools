@@ -16,50 +16,50 @@
 */
 
 #include <assert.h>
-#include "extended/genome_stream_rep.h"
 #include "extended/mergefeat_stream_sorted.h"
 #include "extended/mergefeat_stream_unsorted.h"
+#include "extended/node_stream_rep.h"
 #include "extended/sort_stream.h"
 
 struct MergefeatStreamSorted {
-  const GenomeStream parent_instance;
-  GenomeStream *mergefeat_stream_unsorted,
+  const GtNodeStream parent_instance;
+  GtNodeStream *mergefeat_stream_unsorted,
                *sort_stream;
 };
 
 #define mergefeat_stream_sorted_cast(GS)\
-        genome_stream_cast(mergefeat_stream_sorted_class(), GS)
+        gt_node_stream_cast(mergefeat_stream_sorted_class(), GS)
 
-static int mergefeat_stream_sorted_next_tree(GenomeStream *gs,
+static int mergefeat_stream_sorted_next_tree(GtNodeStream *gs,
                                              GtGenomeNode **gn, GtError *err)
 {
   MergefeatStreamSorted *mfs;
   gt_error_check(err);
   mfs = mergefeat_stream_sorted_cast(gs);
-  return genome_stream_next(mfs->sort_stream, gn, err);
+  return gt_node_stream_next(mfs->sort_stream, gn, err);
 }
 
-static void mergefeat_stream_sorted_free(GenomeStream *gs)
+static void mergefeat_stream_sorted_free(GtNodeStream *gs)
 {
   MergefeatStreamSorted *mfs = mergefeat_stream_sorted_cast(gs);
-  genome_stream_delete(mfs->mergefeat_stream_unsorted);
-  genome_stream_delete(mfs->sort_stream);
+  gt_node_stream_delete(mfs->mergefeat_stream_unsorted);
+  gt_node_stream_delete(mfs->sort_stream);
 }
 
-const GenomeStreamClass* mergefeat_stream_sorted_class(void)
+const GtNodeStreamClass* mergefeat_stream_sorted_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (MergefeatStreamSorted),
+  static const GtNodeStreamClass gsc = { sizeof (MergefeatStreamSorted),
                                          mergefeat_stream_sorted_next_tree,
                                          mergefeat_stream_sorted_free };
   return &gsc;
 }
 
-GenomeStream* mergefeat_stream_sorted_new(GenomeStream *in_stream)
+GtNodeStream* mergefeat_stream_sorted_new(GtNodeStream *in_stream)
 {
-  GenomeStream *gs = genome_stream_create(mergefeat_stream_sorted_class(),
+  GtNodeStream *gs = gt_node_stream_create(mergefeat_stream_sorted_class(),
                                           true);
   MergefeatStreamSorted *mfs = mergefeat_stream_sorted_cast(gs);
-  assert(in_stream && genome_stream_is_sorted(in_stream));
+  assert(in_stream && gt_node_stream_is_sorted(in_stream));
   mfs->mergefeat_stream_unsorted = mergefeat_stream_unsorted_new(in_stream);
   mfs->sort_stream = sort_stream_new(mfs->mergefeat_stream_unsorted);
   return gs;

@@ -19,14 +19,14 @@
 #define CHSEQIDS_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct ChseqidsStream ChseqidsStream;
 
-const GenomeStreamClass* chseqids_stream_class(void);
+const GtNodeStreamClass* chseqids_stream_class(void);
 /* returns NULL upon error */
-GenomeStream*            chseqids_stream_new(GenomeStream*,
+GtNodeStream*            chseqids_stream_new(GtNodeStream*,
                                              GtStr *chseqids_file, GtError*);
 
 #endif

@@ -19,12 +19,12 @@
 #define MERGE_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct MergeStream MergeStream;
 
-const GenomeStreamClass* merge_stream_class(void);
-GenomeStream*            merge_stream_new(const GtArray *genome_streams);
+const GtNodeStreamClass* merge_stream_class(void);
+GtNodeStream*            merge_stream_new(const GtArray *genome_streams);
 
 #endif

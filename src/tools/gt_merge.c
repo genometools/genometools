@@ -42,7 +42,7 @@ static OPrval parse_options(int *parsed_args, GtGenFile **outfp, int argc,
 
 int gt_merge(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream,
+  GtNodeStream *gff3_in_stream,
                 *merge_stream,
                 *gff3_out_stream;
   GtArray *genome_streams;
@@ -59,7 +59,7 @@ int gt_merge(int argc, const char **argv, GtError *err)
   }
 
   /* alloc */
-  genome_streams = gt_array_new(sizeof (GenomeStream*));
+  genome_streams = gt_array_new(sizeof (GtNodeStream*));
 
   /* XXX: check for multiple specification of '-' */
 
@@ -84,16 +84,16 @@ int gt_merge(int argc, const char **argv, GtError *err)
   gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next(gff3_out_stream, &gn, err)) &&
+  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
          gn) {
     gt_genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(merge_stream);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(merge_stream);
   for (i = 0; i < gt_array_size(genome_streams); i++)
-    genome_stream_delete(*(GenomeStream**) gt_array_get(genome_streams, i));
+    gt_node_stream_delete(*(GtNodeStream**) gt_array_get(genome_streams, i));
   gt_array_delete(genome_streams);
   gt_genfile_close(outfp);
 

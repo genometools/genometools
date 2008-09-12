@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the CSAStream class (which implements the GenomeStream) interface
+/* exports the CSAStream class (which implements the GtNodeStream) interface
    to Lua:
 
    -- Returns a new CSA (consensus spliced alignment) stream object (a genome

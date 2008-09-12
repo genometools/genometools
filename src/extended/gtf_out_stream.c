@@ -15,53 +15,53 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/genome_stream_rep.h"
 #include "extended/gtf_out_stream.h"
 #include "extended/gtf_visitor.h"
+#include "extended/node_stream_rep.h"
 
 struct GTFOutStream {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GenomeVisitor *gtf_visitor;
 };
 
 #define gtf_out_stream_cast(GS)\
-        genome_stream_cast(gtf_out_stream_class(), GS);
+        gt_node_stream_cast(gtf_out_stream_class(), GS);
 
-static int gtf_out_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int gtf_out_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                     GtError *err)
 {
   GTFOutStream *gtf_out_stream;
   int had_err;
   gt_error_check(err);
   gtf_out_stream = gtf_out_stream_cast(gs);
-  had_err = genome_stream_next(gtf_out_stream->in_stream, gn, err);
+  had_err = gt_node_stream_next(gtf_out_stream->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, gtf_out_stream->gtf_visitor, err);
   return had_err;
 }
 
-static void gtf_out_stream_free(GenomeStream *gs)
+static void gtf_out_stream_free(GtNodeStream *gs)
 {
   GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
   genome_visitor_delete(gtf_out_stream->gtf_visitor);
-  genome_stream_delete(gtf_out_stream->in_stream);
+  gt_node_stream_delete(gtf_out_stream->in_stream);
 }
 
-const GenomeStreamClass* gtf_out_stream_class(void)
+const GtNodeStreamClass* gtf_out_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (GTFOutStream),
+  static const GtNodeStreamClass gsc = { sizeof (GTFOutStream),
                                          gtf_out_stream_next_tree,
                                          gtf_out_stream_free };
   return &gsc;
 }
 
-GenomeStream* gtf_out_stream_new(GenomeStream *in_stream, GtGenFile *outfp)
+GtNodeStream* gtf_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)
 {
-  GenomeStream *gs = genome_stream_create(gtf_out_stream_class(),
-                                          genome_stream_is_sorted(in_stream));
+  GtNodeStream *gs = gt_node_stream_create(gtf_out_stream_class(),
+                                          gt_node_stream_is_sorted(in_stream));
   GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
-  gtf_out_stream->in_stream = genome_stream_ref(in_stream);
+  gtf_out_stream->in_stream = gt_node_stream_ref(in_stream);
   gtf_out_stream->gtf_visitor = gtf_visitor_new(outfp);
   return gs;
 }

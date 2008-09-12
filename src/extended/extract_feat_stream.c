@@ -18,26 +18,26 @@
 #include <assert.h>
 #include "extended/extract_feat_stream.h"
 #include "extended/extract_feat_visitor.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 
 struct ExtractFeatStream
 {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GenomeVisitor *extract_feat_visitor;
 };
 
 #define extract_feat_stream_cast(GS)\
-        genome_stream_cast(extract_feat_stream_class(), GS)
+        gt_node_stream_cast(extract_feat_stream_class(), GS)
 
-static int extract_feat_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int extract_feat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                          GtError *err)
 {
   ExtractFeatStream *efs;
   int had_err;
   gt_error_check(err);
   efs = extract_feat_stream_cast(gs);
-  had_err = genome_stream_next(efs->in_stream, gn, err);
+  had_err = gt_node_stream_next(efs->in_stream, gn, err);
   if (!had_err) {
     assert(efs->extract_feat_visitor);
     if (*gn) {
@@ -52,28 +52,28 @@ static int extract_feat_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void extract_feat_stream_free(GenomeStream *gs)
+static void extract_feat_stream_free(GtNodeStream *gs)
 {
   ExtractFeatStream *extract_feat_stream = extract_feat_stream_cast(gs);
   genome_visitor_delete(extract_feat_stream->extract_feat_visitor);
-  genome_stream_delete(extract_feat_stream->in_stream);
+  gt_node_stream_delete(extract_feat_stream->in_stream);
 }
 
-const GenomeStreamClass* extract_feat_stream_class(void)
+const GtNodeStreamClass* extract_feat_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (ExtractFeatStream),
+  static const GtNodeStreamClass gsc = { sizeof (ExtractFeatStream),
                                          extract_feat_stream_next_tree,
                                          extract_feat_stream_free };
   return &gsc;
 }
 
-GenomeStream* extract_feat_stream_new(GenomeStream *in_stream,
+GtNodeStream* extract_feat_stream_new(GtNodeStream *in_stream,
                                       RegionMapping *rm, const char *type,
                                       bool join, bool translate)
 {
-  GenomeStream *gs = genome_stream_create(extract_feat_stream_class(), true);
+  GtNodeStream *gs = gt_node_stream_create(extract_feat_stream_class(), true);
   ExtractFeatStream *efs = extract_feat_stream_cast(gs);
-  efs->in_stream = genome_stream_ref(in_stream);
+  efs->in_stream = gt_node_stream_ref(in_stream);
   efs->extract_feat_visitor = extract_feat_visitor_new(rm, type, join,
                                                        translate);
   return gs;

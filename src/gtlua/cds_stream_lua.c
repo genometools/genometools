@@ -24,11 +24,11 @@
 
 static int cds_stream_lua_new(lua_State *L)
 {
-  GenomeStream **cds_stream, **in_stream;
+  GtNodeStream **cds_stream, **in_stream;
   RegionMapping **region_mapping;
   in_stream = check_genome_stream(L, 1);
   region_mapping = check_region_mapping(L, 2);
-  cds_stream = lua_newuserdata(L, sizeof (GenomeStream*));
+  cds_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
   assert(cds_stream);
   *cds_stream = cds_stream_new(*in_stream, region_mapping_ref(*region_mapping),
                                "gtscript");

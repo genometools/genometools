@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "core/fileutils.h"
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "extended/luahelper.h"
@@ -26,14 +26,14 @@
 
 static int gff3_in_stream_lua_new_sorted(lua_State *L)
 {
-  GenomeStream **gs;
+  GtNodeStream **gs;
   const char *filename;
   assert(L);
   /* get/check parameters */
   filename = luaL_checkstring(L, 1);
   luaL_argcheck(L, file_exists(filename), 1, "file does not exist");
   /* construct object */
-  gs = lua_newuserdata(L, sizeof (GenomeStream*));
+  gs = lua_newuserdata(L, sizeof (GtNodeStream*));
   *gs = gff3_in_stream_new_sorted(filename, false);
   assert(*gs);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
@@ -43,10 +43,10 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 
 static int gff3_out_stream_lua_new(lua_State *L)
 {
-  GenomeStream **out_stream, **in_stream = check_genome_stream(L, 1);
+  GtNodeStream **out_stream, **in_stream = check_genome_stream(L, 1);
   assert(L);
   /* construct object */
-  out_stream = lua_newuserdata(L, sizeof (GenomeStream*));
+  out_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
   *out_stream = gff3_out_stream_new(*in_stream, NULL);
   assert(*out_stream);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
@@ -54,12 +54,12 @@ static int gff3_out_stream_lua_new(lua_State *L)
   return 1;
 }
 
-static int genome_stream_lua_next_tree(lua_State *L)
+static int gt_node_stream_lua_next_tree(lua_State *L)
 {
-  GenomeStream **gs = check_genome_stream(L, 1);
+  GtNodeStream **gs = check_genome_stream(L, 1);
   GtGenomeNode *gn;
   GtError *err = gt_error_new();
-  if (genome_stream_next(*gs, &gn, err))
+  if (gt_node_stream_next(*gs, &gn, err))
     return lua_gt_error(L, err); /* handle error */
   else if (gn)
     gt_lua_genome_node_push(L, gn);
@@ -69,21 +69,21 @@ static int genome_stream_lua_next_tree(lua_State *L)
   return 1;
 }
 
-static int genome_stream_lua_delete(lua_State *L)
+static int gt_node_stream_lua_delete(lua_State *L)
 {
-  GenomeStream **gs = check_genome_stream(L, 1);
-  genome_stream_delete(*gs);
+  GtNodeStream **gs = check_genome_stream(L, 1);
+  gt_node_stream_delete(*gs);
   return 0;
 }
 
-static const struct luaL_Reg genome_stream_lib_f [] = {
+static const struct luaL_Reg gt_node_stream_lib_f [] = {
   { "gff3_in_stream_new_sorted", gff3_in_stream_lua_new_sorted },
   { "gff3_out_stream_new", gff3_out_stream_lua_new },
   { NULL, NULL }
 };
 
-static const struct luaL_Reg genome_stream_lib_m [] = {
-  { "next_tree", genome_stream_lua_next_tree },
+static const struct luaL_Reg gt_node_stream_lib_m [] = {
+  { "next_tree", gt_node_stream_lua_next_tree },
   { NULL, NULL }
 };
 
@@ -96,10 +96,10 @@ int luaopen_genome_stream(lua_State *L)
   lua_setfield(L, -2, "__index");
   /* set its _gc field */
   lua_pushstring(L, "__gc");
-  lua_pushcfunction(L, genome_stream_lua_delete);
+  lua_pushcfunction(L, gt_node_stream_lua_delete);
   lua_settable(L, -3);
   /* register functions */
-  luaL_register(L, NULL, genome_stream_lib_m);
-  luaL_register(L, "gt", genome_stream_lib_f);
+  luaL_register(L, NULL, gt_node_stream_lib_m);
+  luaL_register(L, "gt", gt_node_stream_lib_f);
   return 1;
 }

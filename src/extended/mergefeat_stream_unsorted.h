@@ -19,12 +19,12 @@
 #define MERGEFEAT_STREAM_UNSORTED_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct MergefeatStreamUnsorted MergefeatStreamUnsorted;
 
-const GenomeStreamClass* mergefeat_stream_unsorted_class(void);
-GenomeStream*            mergefeat_stream_unsorted_new(GenomeStream*);
+const GtNodeStreamClass* mergefeat_stream_unsorted_class(void);
+GtNodeStream*            mergefeat_stream_unsorted_new(GtNodeStream*);
 
 #endif

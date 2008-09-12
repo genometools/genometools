@@ -19,31 +19,31 @@
 #define GFF3_IN_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 #include "extended/type_checker.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct GFF3InStream GFF3InStream;
 
-const GenomeStreamClass* gff3_in_stream_class(void);
-void                     gff3_in_stream_set_type_checker(GenomeStream*,
+const GtNodeStreamClass* gff3_in_stream_class(void);
+void                     gff3_in_stream_set_type_checker(GtNodeStream*,
                                                          GT_TypeChecker
                                                          *type_checker);
 /* Returns a <GtStrArray*> which contains all type names in alphabetical order
    which have been parsed by <gff3_in_stream>.
    The caller is responsible to free it! */
-GtStrArray*              gff3_in_stream_get_used_types(GenomeStream
+GtStrArray*              gff3_in_stream_get_used_types(GtNodeStream
                                                        *gff3_in_stream);
-void                     gff3_in_stream_set_offset(GenomeStream*, long);
-int                      gff3_in_stream_set_offsetfile(GenomeStream*, GtStr*,
+void                     gff3_in_stream_set_offset(GtNodeStream*, long);
+int                      gff3_in_stream_set_offsetfile(GtNodeStream*, GtStr*,
                                                        GtError*);
-void                     gff3_in_stream_enable_tidy_mode(GenomeStream*);
-GenomeStream*            gff3_in_stream_new_unsorted(int num_of_files,
+void                     gff3_in_stream_enable_tidy_mode(GtNodeStream*);
+GtNodeStream*            gff3_in_stream_new_unsorted(int num_of_files,
                                                      const char **filenames,
                                                      bool be_verbose,
                                                      bool checkids);
 /* filename == NULL -> use stdin */
-GenomeStream*            gff3_in_stream_new_sorted(const char *filename,
+GtNodeStream*            gff3_in_stream_new_sorted(const char *filename,
                                                    bool be_verbose);
 
 #endif

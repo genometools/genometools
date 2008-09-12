@@ -19,18 +19,18 @@
 #define SPLICE_SITE_INFO_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 #include "extended/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct SpliceSiteInfoStream SpliceSiteInfoStream;
 
-const GenomeStreamClass* splice_site_info_stream_class(void);
+const GtNodeStreamClass* splice_site_info_stream_class(void);
 
 /* create a SpliceSiteInfoStream, takes ownership of RegionMapping  */
-GenomeStream*            splice_site_info_stream_new(GenomeStream*,
+GtNodeStream*            splice_site_info_stream_new(GtNodeStream*,
                                                      RegionMapping*);
 /* returns if an intron has been processed, false otherwise */
-bool                     splice_site_info_stream_show(GenomeStream*);
+bool                     splice_site_info_stream_show(GtNodeStream*);
 
 #endif

@@ -82,7 +82,7 @@ static OPrval parse_options(int *parsed_args, StatArguments *arguments,
 
 int gt_stat(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream, *stat_stream;
+  GtNodeStream *gff3_in_stream, *stat_stream;
   GtGenomeNode *gn;
   int parsed_args, had_err;
   StatArguments arguments;
@@ -110,7 +110,7 @@ int gt_stat(int argc, const char **argv, GtError *err)
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
-  while (!(had_err = genome_stream_next(stat_stream, &gn, err)) && gn) {
+  while (!(had_err = gt_node_stream_next(stat_stream, &gn, err)) && gn) {
     gt_genome_node_rec_delete(gn);
   }
 
@@ -119,8 +119,8 @@ int gt_stat(int argc, const char **argv, GtError *err)
     stat_stream_show_stats(stat_stream);
 
   /* free */
-  genome_stream_delete(stat_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(stat_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }

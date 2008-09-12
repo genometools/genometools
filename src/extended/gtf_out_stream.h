@@ -18,12 +18,12 @@
 #ifndef GTF_OUT_STREAM_H
 #define GTF_OUT_STREAM_H
 
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct GTFOutStream GTFOutStream;
 
-const GenomeStreamClass* gtf_out_stream_class(void);
-GenomeStream*            gtf_out_stream_new(GenomeStream*, GtGenFile*);
+const GtNodeStreamClass* gtf_out_stream_class(void);
+GtNodeStream*            gtf_out_stream_new(GtNodeStream*, GtGenFile*);
 
 #endif

@@ -135,7 +135,7 @@ void gt_feature_index_add_genome_feature(GtFeatureIndex *fi,
 int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
                                const char *gff3file, GtError *err)
 {
-  GenomeStream *gff3_in_stream;
+  GtNodeStream *gff3_in_stream;
   GtGenomeNode *gn;
   GtQueue *queue;
   int had_err = 0;
@@ -143,7 +143,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
   assert(feature_index && gff3file);
   queue = gt_queue_new();
   gff3_in_stream = gff3_in_stream_new_unsorted(1, &gff3file, false, false);
-  while (!(had_err = genome_stream_next(gff3_in_stream, &gn, err)) && gn)
+  while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
     gt_queue_add(queue, gn);
   if (!had_err) {
     GenomeVisitor *feature_visitor = feature_visitor_new(feature_index);
@@ -154,7 +154,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
     }
     genome_visitor_delete(feature_visitor);
   }
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_in_stream);
   while (gt_queue_size(queue))
     gt_genome_node_rec_delete(gt_queue_get(queue));
   gt_queue_delete(queue);

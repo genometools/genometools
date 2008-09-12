@@ -18,18 +18,18 @@
 #include <assert.h>
 #include "core/undef.h"
 #include "extended/genome_node_iterator.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 #include "extended/uniq_stream.h"
 
 struct UniqStream{
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GtGenomeNode *first_node,
              *second_node;
 };
 
 #define uniq_stream_cast(GS)\
-        genome_stream_cast(uniq_stream_class(), GS)
+        gt_node_stream_cast(uniq_stream_class(), GS)
 
 static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
                                           GtGenomeNode *second_node)
@@ -96,7 +96,7 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
   return false;
 }
 
-static int uniq_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int uniq_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                  GtError *err)
 {
   UniqStream *us;
@@ -108,7 +108,7 @@ static int uniq_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                function is called */
   if (!us->first_node) {
     /* both buffers are empty */
-    had_err = genome_stream_next(us->in_stream, &us->first_node, err);
+    had_err = gt_node_stream_next(us->in_stream, &us->first_node, err);
     if (had_err)
       return had_err;
     if (!us->first_node) {
@@ -120,7 +120,7 @@ static int uniq_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   /* uniq loop */
   for (;;) {
     assert(us->first_node && !us->second_node);
-    had_err = genome_stream_next(us->in_stream, &us->second_node, err);
+    had_err = gt_node_stream_next(us->in_stream, &us->second_node, err);
     if (!had_err && us->second_node) {
       if (!uniq(&us->first_node, &us->second_node))
         break; /* no uniq possible */
@@ -140,29 +140,29 @@ static int uniq_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void uniq_stream_free(GenomeStream *gs)
+static void uniq_stream_free(GtNodeStream *gs)
 {
   UniqStream *us = uniq_stream_cast(gs);
   gt_genome_node_rec_delete(us->first_node);
   gt_genome_node_rec_delete(us->second_node);
-  genome_stream_delete(us->in_stream);
+  gt_node_stream_delete(us->in_stream);
 }
 
-const GenomeStreamClass* uniq_stream_class(void)
+const GtNodeStreamClass* uniq_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (UniqStream),
+  static const GtNodeStreamClass gsc = { sizeof (UniqStream),
                                          uniq_stream_next_tree,
                                          uniq_stream_free };
   return &gsc;
 }
 
-GenomeStream* uniq_stream_new(GenomeStream *in_stream)
+GtNodeStream* uniq_stream_new(GtNodeStream *in_stream)
 {
-  GenomeStream *gs;
+  GtNodeStream *gs;
   UniqStream *us;
-  assert(in_stream && genome_stream_is_sorted(in_stream));
-  gs = genome_stream_create(uniq_stream_class(), true);
+  assert(in_stream && gt_node_stream_is_sorted(in_stream));
+  gs = gt_node_stream_create(uniq_stream_class(), true);
   us = uniq_stream_cast(gs);
-  us->in_stream = genome_stream_ref(in_stream);
+  us->in_stream = gt_node_stream_ref(in_stream);
   return gs;
 }

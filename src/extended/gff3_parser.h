@@ -20,6 +20,8 @@
 
 #include "core/cstr_table.h"
 #include "core/queue.h"
+#include "core/range.h"
+#include "core/strand.h"
 #include "extended/type_checker.h"
 
 #define GFF_VERSION         3

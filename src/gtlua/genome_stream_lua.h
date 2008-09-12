@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the GenomeStream interface and its implementors of libgtext to Lua:
+/* exports the GtNodeStream interface and its implementors of libgtext to Lua:
 
    -- Returns a new GFF3 input stream object for <filename>. The file <filename>
    -- has to be a sorted GFF3 file.
@@ -37,6 +37,6 @@ int luaopen_genome_stream(lua_State*);
 
 #define GENOME_STREAM_METATABLE  "GenomeTools.genome_stream"
 #define check_genome_stream(L, POS) \
-          (GenomeStream**) luaL_checkudata(L, POS, GENOME_STREAM_METATABLE)
+          (GtNodeStream**) luaL_checkudata(L, POS, GENOME_STREAM_METATABLE)
 
 #endif

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,29 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_STREAM_REP_H
-#define GENOME_STREAM_REP_H
+#ifndef NODE_STREAM_H
+#define NODE_STREAM_H
 
-#include <stdio.h>
-#include "extended/genome_stream.h"
+#include <stdbool.h>
 
-struct GenomeStreamClass
-{
-  size_t size;
-  int  (*next_tree)(GenomeStream*, GtGenomeNode**, GtError*);
-  void (*free)(GenomeStream*);
-};
+#include "extended/genome_node.h"
 
-struct GenomeStream
-{
-  const GenomeStreamClass *c_class;
-  GtGenomeNode *buffer;
-  bool ensure_sorting;
-  unsigned int reference_count;
-};
+/* the ``genome stream'' interface */
+typedef struct GtNodeStreamClass GtNodeStreamClass;
+typedef struct GtNodeStream GtNodeStream;
 
-GenomeStream*  genome_stream_create(const GenomeStreamClass*,
-                                    bool ensure_sorting);
-void*          genome_stream_cast(const GenomeStreamClass*, GenomeStream*);
+GtNodeStream* gt_node_stream_ref(GtNodeStream*);
+int           gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*);
+bool          gt_node_stream_is_sorted(GtNodeStream*);
+void          gt_node_stream_delete(GtNodeStream*);
 
 #endif

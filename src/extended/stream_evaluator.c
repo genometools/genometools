@@ -36,7 +36,7 @@ typedef struct {
 } NucEval;
 
 struct StreamEvaluator {
-  GenomeStream *reality,
+  GtNodeStream *reality,
                *prediction;
   bool nuceval, evalLTR;
   unsigned long LTRdelta;
@@ -226,13 +226,13 @@ static void slot_delete(Slot *s)
   gt_free(s);
 }
 
-StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
-                                      GenomeStream *prediction, bool nuceval,
+StreamEvaluator* stream_evaluator_new(GtNodeStream *reality,
+                                      GtNodeStream *prediction, bool nuceval,
                                       bool evalLTR, unsigned long LTRdelta)
 {
   StreamEvaluator *evaluator = gt_calloc(1, sizeof (StreamEvaluator));
-  evaluator->reality = genome_stream_ref(reality);
-  evaluator->prediction = genome_stream_ref(prediction);
+  evaluator->reality = gt_node_stream_ref(reality);
+  evaluator->prediction = gt_node_stream_ref(prediction);
   evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
@@ -1283,7 +1283,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   predicted_info.wrong_LTRs  = &se->wrong_LTRs;
 
   /* process the reality stream completely */
-  while (!(had_err = genome_stream_next(se->reality, &gn, err)) && gn) {
+  while (!(had_err = gt_node_stream_next(se->reality, &gn, err)) && gn) {
     if (gt_region_node_try_cast(gn)) {
       /* each sequence region gets its own ``slot'' */
       if (!(slot = hashmap_get(se->slots,
@@ -1322,7 +1322,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* process the prediction stream */
   if (!had_err) {
-    while (!(had_err = genome_stream_next(se->prediction, &gn, err)) &&
+    while (!(had_err = gt_node_stream_next(se->prediction, &gn, err)) &&
            gn) {
       /* we consider only genome features */
       if ((gf = gt_feature_node_try_cast(gn))) {
@@ -1496,8 +1496,8 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
 void stream_evaluator_delete(StreamEvaluator *se)
 {
   if (!se) return;
-  genome_stream_delete(se->reality);
-  genome_stream_delete(se->prediction);
+  gt_node_stream_delete(se->reality);
+  gt_node_stream_delete(se->prediction);
   hashmap_delete(se->slots);
   evaluator_delete(se->gene_evaluator);
   evaluator_delete(se->mRNA_evaluator);

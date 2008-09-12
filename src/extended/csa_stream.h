@@ -19,15 +19,15 @@
 #define CSA_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 #define DEFAULT_JOIN_LENGTH 300
 
 /* implements the ``genome_stream'' interface */
 typedef struct CSAStream CSAStream;
 
-const GenomeStreamClass* csa_stream_class(void);
-GenomeStream*            csa_stream_new(GenomeStream*,
+const GtNodeStreamClass* csa_stream_class(void);
+GtNodeStream*            csa_stream_new(GtNodeStream*,
                                         unsigned long join_length);
 
 #endif

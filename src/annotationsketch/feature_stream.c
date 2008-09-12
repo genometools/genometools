@@ -18,52 +18,52 @@
 #include "annotationsketch/feature_stream.h"
 #include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/feature_index.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 
 struct FeatureStream {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GenomeVisitor *feature_visitor;
 };
 
 #define feature_stream_cast(GS)\
-        genome_stream_cast(feature_stream_class(), GS)
+        gt_node_stream_cast(feature_stream_class(), GS)
 
-static int feature_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int feature_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                     GtError *err)
 {
   FeatureStream *feature_stream;
   int had_err;
   gt_error_check(err);
   feature_stream = feature_stream_cast(gs);
-  had_err = genome_stream_next(feature_stream->in_stream, gn, err);
+  had_err = gt_node_stream_next(feature_stream->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, feature_stream->feature_visitor, err);
   return had_err;
 }
 
-static void feature_stream_free(GenomeStream *gs)
+static void feature_stream_free(GtNodeStream *gs)
 {
   FeatureStream *feature_stream = feature_stream_cast(gs);
-  genome_stream_delete(feature_stream->in_stream);
+  gt_node_stream_delete(feature_stream->in_stream);
   genome_visitor_delete(feature_stream->feature_visitor);
 }
 
-const GenomeStreamClass* feature_stream_class(void)
+const GtNodeStreamClass* feature_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (FeatureStream),
+  static const GtNodeStreamClass gsc = { sizeof (FeatureStream),
                                          feature_stream_next_tree,
                                          feature_stream_free };
   return &gsc;
 }
 
-GenomeStream* feature_stream_new(GenomeStream *in_stream, GtFeatureIndex *fi)
+GtNodeStream* feature_stream_new(GtNodeStream *in_stream, GtFeatureIndex *fi)
 {
-  GenomeStream *gs;
+  GtNodeStream *gs;
   FeatureStream *feature_stream;
-  gs = genome_stream_create(feature_stream_class(), false);
+  gs = gt_node_stream_create(feature_stream_class(), false);
   feature_stream = feature_stream_cast(gs);
-  feature_stream->in_stream = genome_stream_ref(in_stream);
+  feature_stream->in_stream = gt_node_stream_ref(in_stream);
   feature_stream->feature_visitor = feature_visitor_new(fi);
   return gs;
 }

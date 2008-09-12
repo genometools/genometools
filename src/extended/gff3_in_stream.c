@@ -21,13 +21,13 @@
 #include "core/fileutils.h"
 #include "core/progressbar.h"
 #include "core/strarray.h"
-#include "extended/genome_stream_rep.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_parser.h"
+#include "extended/node_stream_rep.h"
 
 struct GFF3InStream
 {
-  const GenomeStream parent_instance;
+  const GtNodeStream parent_instance;
   unsigned long next_file;
   GtStrArray *files;
   GtStr *stdinstr;
@@ -44,7 +44,7 @@ struct GFF3InStream
 };
 
 #define gff3_in_stream_cast(GS)\
-        genome_stream_cast(gff3_in_stream_class(), GS)
+        gt_node_stream_cast(gff3_in_stream_class(), GS)
 
 static int buffer_is_sorted(void **elem, void *info, GtError *err)
 {
@@ -69,7 +69,7 @@ static int buffer_is_sorted(void **elem, void *info, GtError *err)
   return 0;
 }
 
-static int gff3_in_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int gff3_in_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                     GtError *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
@@ -185,7 +185,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void gff3_in_stream_free(GenomeStream *gs)
+static void gff3_in_stream_free(GtNodeStream *gs)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
   gt_strarray_delete(gff3_in_stream->files);
@@ -198,20 +198,20 @@ static void gff3_in_stream_free(GenomeStream *gs)
   gt_genfile_close(gff3_in_stream->fpin);
 }
 
-const GenomeStreamClass* gff3_in_stream_class(void)
+const GtNodeStreamClass* gff3_in_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (GFF3InStream),
+  static const GtNodeStreamClass gsc = { sizeof (GFF3InStream),
                                          gff3_in_stream_next_tree,
                                          gff3_in_stream_free };
   return &gsc;
 }
 
 /* takes ownership of <files> */
-static GenomeStream* gff3_in_stream_new(GtStrArray *files,
+static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
                                         bool ensure_sorting, bool be_verbose,
                                         bool checkids)
 {
-  GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
+  GtNodeStream *gs = gt_node_stream_create(gff3_in_stream_class(),
                                           ensure_sorting);
   GFF3InStream *gff3_in_stream       = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file          = 0;
@@ -230,7 +230,7 @@ static GenomeStream* gff3_in_stream_new(GtStrArray *files,
   return gs;
 }
 
-void gff3_in_stream_set_type_checker(GenomeStream *gs,
+void gff3_in_stream_set_type_checker(GtNodeStream *gs,
                                      GT_TypeChecker *type_checker)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
@@ -239,21 +239,21 @@ void gff3_in_stream_set_type_checker(GenomeStream *gs,
   is->gff3_parser = gt_gff3_parser_new(is->checkids, type_checker);
 }
 
-GtStrArray* gff3_in_stream_get_used_types(GenomeStream *gs)
+GtStrArray* gff3_in_stream_get_used_types(GtNodeStream *gs)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
   return gt_cstr_table_get_all(is->used_types);
 }
 
-void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
+void gff3_in_stream_set_offset(GtNodeStream *gs, long offset)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
   gt_gff3_parser_set_offset(is->gff3_parser, offset);
 }
 
-int gff3_in_stream_set_offsetfile(GenomeStream *gs, GtStr *offsetfile,
+int gff3_in_stream_set_offsetfile(GtNodeStream *gs, GtStr *offsetfile,
                                   GtError *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
@@ -261,14 +261,14 @@ int gff3_in_stream_set_offsetfile(GenomeStream *gs, GtStr *offsetfile,
   return gt_gff3_parser_set_offsetfile(is->gff3_parser, offsetfile, err);
 }
 
-void gff3_in_stream_enable_tidy_mode(GenomeStream *gs)
+void gff3_in_stream_enable_tidy_mode(GtNodeStream *gs)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);
   gt_gff3_parser_enable_tidy_mode(is->gff3_parser);
 }
 
-GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
+GtNodeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                           const char **filenames,
                                           bool be_verbose, bool checkids)
 {
@@ -279,7 +279,7 @@ GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
   return gff3_in_stream_new(files, false, be_verbose, checkids);
 }
 
-GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose)
+GtNodeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose)
 {
   GtStrArray *files = gt_strarray_new();
   if (filename)

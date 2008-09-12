@@ -80,7 +80,7 @@ static OptionParser* gt_csa_option_parser_new(void *tool_arguments)
 static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GtError *err)
 {
-  GenomeStream *gff3_in_stream,
+  GtNodeStream *gff3_in_stream,
                *csa_stream,
                *gff3_out_stream;
   GtGenomeNode *gn;
@@ -98,15 +98,15 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next(gff3_out_stream, &gn, err)) &&
+  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
          gn) {
     gt_genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(csa_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(csa_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }

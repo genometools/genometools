@@ -17,57 +17,57 @@
 
 #include "extended/cds_stream.h"
 #include "extended/cds_visitor.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 
 struct CDSStream
 {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GenomeVisitor *cds_visitor;
 };
 
 #define cds_stream_cast(GS)\
-        genome_stream_cast(cds_stream_class(), GS)
+        gt_node_stream_cast(cds_stream_class(), GS)
 
-static int cds_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int cds_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                 GtError *err)
 {
   CDSStream *cds_stream;
   int had_err;
   gt_error_check(err);
   cds_stream = cds_stream_cast(gs);
-  had_err = genome_stream_next(cds_stream->in_stream, gn, err);
+  had_err = gt_node_stream_next(cds_stream->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, cds_stream->cds_visitor, err);
   return had_err;
 }
 
-static void cds_stream_free(GenomeStream *gs)
+static void cds_stream_free(GtNodeStream *gs)
 {
   CDSStream *cds_stream = cds_stream_cast(gs);
   genome_visitor_delete(cds_stream->cds_visitor);
-  genome_stream_delete(cds_stream->in_stream);
+  gt_node_stream_delete(cds_stream->in_stream);
 }
 
-const GenomeStreamClass* cds_stream_class(void)
+const GtNodeStreamClass* cds_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (CDSStream),
+  static const GtNodeStreamClass gsc = { sizeof (CDSStream),
                                          cds_stream_next_tree,
                                          cds_stream_free };
   return &gsc;
 }
 
-GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
+GtNodeStream* cds_stream_new(GtNodeStream *in_stream, RegionMapping *rm,
                              const char *source)
 {
-  GenomeStream *gs;
+  GtNodeStream *gs;
   CDSStream *cds_stream;
   GtStr *source_str;
   int had_err = 0;
-  gs = genome_stream_create(cds_stream_class(), true);
+  gs = gt_node_stream_create(cds_stream_class(), true);
   cds_stream = cds_stream_cast(gs);
   source_str = gt_str_new_cstr(source);
-  cds_stream->in_stream = genome_stream_ref(in_stream);
+  cds_stream->in_stream = gt_node_stream_ref(in_stream);
   cds_stream->cds_visitor = cds_visitor_new(rm, source_str);
   if (!cds_stream->cds_visitor)
     had_err = -1;
