@@ -31,7 +31,7 @@ struct GtElement {
   GtStrand strand;
   GtGenomeNode *gn;
   GtRange range;
-  GT_DrawingRange drange;
+  GtDrawingRange drange;
   bool mark;
 };
 
@@ -54,7 +54,7 @@ GtElement* gt_element_new_empty(void)
   return gt_calloc(1, sizeof (GtElement));
 }
 
-GT_DrawingRange gt_element_calculate_drawing_range(GtElement *element,
+GtDrawingRange gt_element_calculate_drawing_range(GtElement *element,
                                              GtCanvas *canvas)
 {
   assert(element && canvas);

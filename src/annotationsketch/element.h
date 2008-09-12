@@ -36,7 +36,7 @@ GtElement*           gt_element_new(GtGenomeNode*);
 GtElement*           gt_element_new_empty(void);
 GtRange              gt_element_get_range(const GtElement*);
 void                  gt_element_set_range(GtElement*, GtRange);
-GT_DrawingRange       gt_element_calculate_drawing_range(GtElement*,
+GtDrawingRange       gt_element_calculate_drawing_range(GtElement*,
                                                          GtCanvas*);
 const char*           gt_element_get_type(const GtElement*);
 void                  gt_element_set_type(GtElement*, const char *type);

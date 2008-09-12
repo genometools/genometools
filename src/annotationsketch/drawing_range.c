@@ -19,7 +19,7 @@
 #include "core/mathsupport.h"
 #include "annotationsketch/drawing_range.h"
 
-int gt_drawing_range_compare(GT_DrawingRange range_a, GT_DrawingRange range_b)
+int gt_drawing_range_compare(GtDrawingRange range_a, GtDrawingRange range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
@@ -35,21 +35,21 @@ int gt_drawing_range_compare(GT_DrawingRange range_a, GT_DrawingRange range_b)
   return 1; /* range_a > range_b */
 }
 
-bool gt_drawing_range_overlap(GT_DrawingRange range_a, GT_DrawingRange range_b)
+bool gt_drawing_range_overlap(GtDrawingRange range_a, GtDrawingRange range_b)
 {
   if (range_a.start <= range_b.end && range_a.end >= range_b.start)
     return true;
   return false;
 }
 
-bool gt_drawing_range_contains(GT_DrawingRange range_a, GT_DrawingRange range_b)
+bool gt_drawing_range_contains(GtDrawingRange range_a, GtDrawingRange range_b)
 {
   if (range_a.start <= range_b.start && range_a.end >= range_b.end)
     return true;
   return false;
 }
 
-double gt_drawing_range_length(GT_DrawingRange range)
+double gt_drawing_range_length(GtDrawingRange range)
 {
   return range.end - range.start;
 }
