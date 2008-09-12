@@ -25,7 +25,7 @@
 static int feature_visitor_lua_new(lua_State *L)
 {
   GenomeVisitor **feature_visitor;
-  GT_FeatureIndex **feature_index;
+  GtFeatureIndex **feature_index;
   feature_visitor = lua_newuserdata(L, sizeof (GenomeVisitor*));
   assert(feature_visitor);
   feature_index = check_feature_index(L, 1);

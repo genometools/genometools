@@ -27,7 +27,7 @@ typedef struct GT_Diagram GT_Diagram;
 
 /* Create a new GT_Diagram object representing the genome nodes in
    <feature_index> in region <seqid> overlapping with <range>. */
-GT_Diagram* gt_diagram_new(GT_FeatureIndex *feature_index, const char *seqid,
+GT_Diagram* gt_diagram_new(GtFeatureIndex *feature_index, const char *seqid,
                            const GtRange*, GtStyle*);
 GT_Diagram* gt_diagram_new_from_array(GtArray *features, const GtRange*,
                                       GtStyle*);

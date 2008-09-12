@@ -24,8 +24,8 @@
 
 static int feature_index_lua_new(lua_State *L)
 {
-  GT_FeatureIndex **feature_index;
-  feature_index = lua_newuserdata(L, sizeof (GT_FeatureIndex*));
+  GtFeatureIndex **feature_index;
+  feature_index = lua_newuserdata(L, sizeof (GtFeatureIndex*));
   assert(feature_index);
   *feature_index = gt_feature_index_new();
   luaL_getmetatable(L, FEATURE_INDEX_METATABLE);
@@ -35,7 +35,7 @@ static int feature_index_lua_new(lua_State *L)
 
 static int feature_index_lua_add_sequence_region(lua_State *L)
 {
-  GT_FeatureIndex **fi;
+  GtFeatureIndex **fi;
   GtGenomeNode **gn;
   GT_SequenceRegion *sr;
   assert(L);
@@ -49,7 +49,7 @@ static int feature_index_lua_add_sequence_region(lua_State *L)
 
 static int feature_index_lua_add_gff3file(lua_State *L)
 {
-  GT_FeatureIndex **fi;
+  GtFeatureIndex **fi;
   const char *filename;
   GtError *err;
   assert(L);
@@ -64,7 +64,7 @@ static int feature_index_lua_add_gff3file(lua_State *L)
 
 static int feature_index_lua_add_genome_feature(lua_State *L)
 {
-  GT_FeatureIndex **fi;
+  GtFeatureIndex **fi;
   GtGenomeNode **gn;
   GtGenomeFeature *gf;
   GtStr *seqid;
@@ -100,7 +100,7 @@ static void push_features_as_table(lua_State *L, GtArray *features)
 
 static int feature_index_lua_get_features_for_seqid(lua_State *L)
 {
-  GT_FeatureIndex **feature_index;
+  GtFeatureIndex **feature_index;
   const char *seqid;
   GtArray *features;
   feature_index = check_feature_index(L, 1);
@@ -113,7 +113,7 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
 
 static int feature_index_lua_get_features_for_range(lua_State *L)
 {
-  GT_FeatureIndex **feature_index;
+  GtFeatureIndex **feature_index;
   const char *seqid;
   GtRange *range;
   GtArray *features;
@@ -135,7 +135,7 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
 
 static int feature_index_lua_get_first_seqid(lua_State *L)
 {
-  GT_FeatureIndex **feature_index;
+  GtFeatureIndex **feature_index;
   const char *seqid;
   feature_index = check_feature_index(L, 1);
   seqid = gt_feature_index_get_first_seqid(*feature_index);
@@ -148,7 +148,7 @@ static int feature_index_lua_get_first_seqid(lua_State *L)
 
 static int feature_index_lua_get_seqids(lua_State *L)
 {
-  GT_FeatureIndex **feature_index;
+  GtFeatureIndex **feature_index;
   GtStrArray *seqids;
   feature_index = check_feature_index(L, 1);
   seqids = gt_feature_index_get_seqids(*feature_index);
@@ -161,7 +161,7 @@ static int feature_index_lua_get_seqids(lua_State *L)
 
 static int feature_index_lua_get_range_for_seqid(lua_State *L)
 {
-  GT_FeatureIndex **feature_index;
+  GtFeatureIndex **feature_index;
   const char *seqid;
   GtRange range;
   feature_index = check_feature_index(L, 1);
@@ -174,7 +174,7 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
 
 static int feature_index_lua_delete(lua_State *L)
 {
-  GT_FeatureIndex **feature_index = check_feature_index(L, 1);
+  GtFeatureIndex **feature_index = check_feature_index(L, 1);
   gt_feature_index_delete(*feature_index);
   return 0;
 }

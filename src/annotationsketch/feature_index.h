@@ -23,7 +23,7 @@
 
 #include "annotationsketch/feature_index_api.h"
 
-GT_FeatureIndex* gt_feature_index_ref(GT_FeatureIndex*);
+GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex*);
 int              gt_feature_index_unit_test(GtError*);
 
 #endif

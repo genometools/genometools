@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
   const char *style_file, *png_file, *gff3_file, *seqid;
   GtStyle *style;
-  GT_FeatureIndex *feature_index;
+  GtFeatureIndex *feature_index;
   GtRange range;
   GT_Diagram *diagram;
   GtCanvas *canvas;

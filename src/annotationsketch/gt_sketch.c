@@ -173,7 +173,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
                *last_stream;
   AnnotationSketchArguments arguments;
   GtGenomeNode *gn = NULL;
-  GT_FeatureIndex *features = NULL;
+  GtFeatureIndex *features = NULL;
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
   GtRange qry_range, sequence_region_range;

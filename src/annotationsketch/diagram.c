@@ -515,7 +515,7 @@ static GT_Diagram* gt_diagram_new_generic(GtArray *features,
   return diagram;
 }
 
-GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
+GT_Diagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
                            const GtRange *range, GtStyle *style)
 {
   GT_Diagram *diagram;
@@ -652,7 +652,7 @@ int gt_diagram_sketch(GT_Diagram *dia, GtCanvas *canvas)
 int gt_diagram_unit_test(GtError *err)
 {
   GtGenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
-  GT_FeatureIndex *fi;
+  GtFeatureIndex *fi;
   GtRange dr1, rs;
   GtStr *seqid1, *seqid2, *gt_track_key;
   GT_SequenceRegion *sr1, *sr2;

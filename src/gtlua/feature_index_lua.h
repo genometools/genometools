@@ -57,6 +57,6 @@ int luaopen_feature_index(lua_State*);
 
 #define FEATURE_INDEX_METATABLE  "GenomeTools.feature_index"
 #define check_feature_index(L, POS) \
-          (GT_FeatureIndex**) luaL_checkudata(L, POS, FEATURE_INDEX_METATABLE)
+          (GtFeatureIndex**) luaL_checkudata(L, POS, FEATURE_INDEX_METATABLE)
 
 #endif

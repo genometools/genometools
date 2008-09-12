@@ -24,7 +24,7 @@
 
 struct FeatureVisitor {
   const GenomeVisitor parent_instance;
-        GT_FeatureIndex *feature_index;
+        GtFeatureIndex *feature_index;
 };
 
 #define feature_visitor_cast(GV)\
@@ -68,7 +68,7 @@ const GenomeVisitorClass* feature_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* feature_visitor_new(GT_FeatureIndex *fi)
+GenomeVisitor* feature_visitor_new(GtFeatureIndex *fi)
 {
   GenomeVisitor *gv;
   FeatureVisitor *feature_visitor;
