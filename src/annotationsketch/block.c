@@ -19,6 +19,7 @@
 #include <string.h>
 #include "annotationsketch/block.h"
 #include "annotationsketch/element.h"
+#include "core/cstr.h"
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
@@ -30,7 +31,7 @@ struct GtBlock {
   bool show_caption;
   GtStrand strand;
   const char *type;
-  GtGenomeNode *top_level_feature;
+  GtGenomeFeature *top_level_feature;
   unsigned long reference_count;
 };
 
@@ -80,29 +81,76 @@ GtBlock* gt_block_new(void)
   return block;
 }
 
-GtBlock* gt_block_new_from_node(GtGenomeNode *node)
+GtBlock* gt_block_new_from_node(GtGenomeFeature *node)
 {
   GtBlock *block;
   assert(node);
   block = gt_block_new();
-  block->range = gt_genome_node_get_range(node);
-  block->strand = gt_genome_feature_get_strand((GtGenomeFeature*) node);
-  block->type = gt_genome_feature_get_type((GtGenomeFeature*) node);
-  block->top_level_feature = gt_genome_node_ref(node);
+  block->range = gt_genome_node_get_range((GtGenomeNode*) node);
+  block->strand = gt_genome_feature_get_strand(node);
+  block->type = gt_genome_feature_get_type(node);
+  block->top_level_feature = (GtGenomeFeature*)
+                                   gt_genome_node_ref((GtGenomeNode*) node);
   return block;
 }
 
-void gt_block_insert_element(GtBlock *block, GtGenomeNode *gn)
+
+void gt_block_insert_element(GtBlock *block, GtGenomeFeature *gf)
 {
   GtElement *element;
-  assert(block && gn);
+  assert(block && gf);
   if (!block->top_level_feature)
-    block->top_level_feature = gt_genome_node_ref(gn);
-  element = gt_element_new(gn);
+    block->top_level_feature = (GtGenomeFeature*)
+                                    gt_genome_node_ref((GtGenomeNode*) gf);
+  element = gt_element_new(gf);
   gt_dlist_add(block->elements, element);
 }
 
-GtGenomeNode* gt_block_get_top_level_feature(const GtBlock *block)
+void gt_block_merge(GtBlock *b1, GtBlock *b2)
+{
+  GtDlistelem *delem;
+  unsigned int oldsize;
+  assert(b1 && b2);
+  oldsize = gt_block_get_size(b1) + gt_block_get_size(b2);
+  for (delem = gt_dlist_first(b2->elements); delem;
+       delem = gt_dlistelem_next(delem))
+  {
+    GtElement *elem;
+    elem = (GtElement*) gt_dlistelem_get_data(delem);
+    assert(elem);
+    gt_dlist_add(b1->elements, gt_element_ref(elem));
+  }
+  assert(gt_block_get_size(b1) == oldsize);
+}
+
+GtBlock* gt_block_clone(GtBlock *block)
+{
+  GtBlock* newblock;
+  GtDlistelem *delem;
+  assert(block);
+  newblock = gt_block_new();
+  for (delem = gt_dlist_first(block->elements); delem;
+       delem = gt_dlistelem_next(delem))
+  {
+    GtElement *elem;
+    elem = (GtElement*) gt_dlistelem_get_data(delem);
+    assert(elem);
+    gt_dlist_add(newblock->elements, gt_element_ref(elem));
+  }
+  assert(gt_block_get_size(newblock) == gt_block_get_size(block));
+  newblock->caption = gt_str_ref(block->caption);
+  newblock->type = block->type;
+  newblock->range.start = block->range.start;
+  newblock->range.end = block->range.end;
+  newblock->show_caption = block->show_caption;
+  newblock->strand = block->strand;
+  newblock->top_level_feature = (GtGenomeFeature*)
+                                   gt_genome_node_ref((GtGenomeNode*)
+                                                block->top_level_feature);
+  return newblock;
+}
+
+GtGenomeFeature* gt_block_get_top_level_feature(const GtBlock *block)
 {
   assert(block);
   return block->top_level_feature;
@@ -238,16 +286,16 @@ int gt_block_unit_test(GtError *err)
   gn2 = gt_genome_feature_new(seqid, gft_exon, r2.start, r2.end,
                               GT_STRAND_FORWARD);
 
-  e1 = gt_element_new(gn1);
-  e2 = gt_element_new(gn2);
+  e1 = gt_element_new((GtGenomeFeature*) gn1);
+  e2 = gt_element_new((GtGenomeFeature*) gn2);
 
   b = gt_block_new();
 
   /* test gt_block_insert_elements */
   ensure(had_err, (0UL == gt_block_get_size(b)));
-  gt_block_insert_element(b, gn1);
+  gt_block_insert_element(b, (GtGenomeFeature*) gn1);
   ensure(had_err, (1UL == gt_block_get_size(b)));
-  gt_block_insert_element(b, gn2);
+  gt_block_insert_element(b, (GtGenomeFeature*) gn2);
   ensure(had_err, (2UL == gt_block_get_size(b)));
 
   /* test gt_block_set_range & gt_block_get_range */
@@ -297,6 +345,6 @@ void gt_block_delete(GtBlock *block)
     gt_str_delete(block->caption);
   gt_dlist_delete(block->elements);
   if (block->top_level_feature)
-    gt_genome_node_delete(block->top_level_feature);
+    gt_genome_node_delete((GtGenomeNode*) block->top_level_feature);
   gt_free(block);
 }

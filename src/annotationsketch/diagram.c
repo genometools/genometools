@@ -22,7 +22,6 @@
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/line_breaker_captions.h"
-#include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
 #include "core/basename.h"
@@ -40,8 +39,11 @@
 /* used to separate a filename from the type in a track name */
 #define FILENAME_TYPE_SEPARATOR  '|'
 
+/* used to index non-multiline-feature blocks */
+#define UNDEF_REPR               (void*)"UNDEF"
+
 struct GtDiagram {
-  /* GtTracks indexed by track keys */
+  /* GT_Tracks indexed by track keys */
   Hashmap *tracks;
   /* GtBlock lists indexed by track keys */
   Hashmap *blocks;
@@ -57,17 +59,25 @@ struct GtDiagram {
 /* holds a GtBlock with associated type */
 typedef struct {
   const char *gft;
+  GtGenomeFeature *rep;
   GtBlock *block;
 } GtBlockTuple;
 
 /* a node in the reverse lookup structure used for collapsing */
 typedef struct {
-  GtGenomeNode *parent;
-  GtArray *blocktuples;
+  GtGenomeFeature *parent;
+  Hashmap *type_index;
+  GtStrArray *types;
 } NodeInfoElement;
 
 typedef struct {
-  GtGenomeNode *parent;
+  Hashmap *rep_index;
+  GtArray *blocktuples;
+  bool must_merge;
+} PerTypeInfo;
+
+typedef struct {
+  GtGenomeFeature *parent;
   GtDiagram *diagram;
 } NodeTraverseInfo;
 
@@ -76,53 +86,83 @@ typedef struct {
   GtDiagram *dia;
 } GtTrackTraverseInfo;
 
-static GtBlockTuple* blocktuple_new(const char *gft, GtBlock *block)
+static GtBlockTuple* blocktuple_new(const char *gft,
+                                     GtGenomeFeature *rep,
+                                     GtBlock *block)
 {
   GtBlockTuple *bt;
   assert(block);
-  bt = gt_malloc(sizeof (GtBlockTuple));
+  bt = gt_calloc(1, sizeof (GtBlockTuple));
   bt->gft = gft;
+  bt->rep = rep;
   bt->block = block;
   return bt;
 }
 
-static NodeInfoElement* get_or_create_node_info(GtDiagram *d,
-                                                   GtGenomeNode *node)
+static NodeInfoElement* nodeinfo_get(GtDiagram *d,
+                                     GtGenomeFeature *node)
 {
   NodeInfoElement *ni;
   assert(d && node);
-  ni = hashmap_get(d->nodeinfo, node);
-  if (ni == NULL) {
-    NodeInfoElement *new_ni = gt_malloc(sizeof (NodeInfoElement));
-    new_ni->blocktuples = gt_array_new(sizeof (GtBlockTuple*));
-    hashmap_add(d->nodeinfo, node, new_ni);
-    ni = new_ni;
+  if(!(ni = hashmap_get(d->nodeinfo, node))) {
+    ni = gt_calloc(1, sizeof (NodeInfoElement));
+    ni->type_index  = hashmap_new(HASH_STRING, NULL,
+                                  gt_free_func);
+    ni->types       = gt_strarray_new();
+    hashmap_add(d->nodeinfo, node, ni);
   }
   return ni;
 }
 
-static GtBlock* find_block_for_type(NodeInfoElement* ni,
-                                     const char *gft)
+static GtBlock* nodeinfo_find_block(NodeInfoElement* ni,
+                                    const char *gft,
+                                    GtGenomeFeature *gf)
 {
-  GtBlock *block = NULL;
-  unsigned long i;
+  PerTypeInfo *type_struc = NULL;
+  GtBlockTuple *bt = NULL;
   assert(ni);
-  for (i = 0; i < gt_array_size(ni->blocktuples); i++) {
-    GtBlockTuple *bt = *(GtBlockTuple**) gt_array_get(ni->blocktuples, i);
-    if (bt->gft == gft) {
-      block = bt->block;
-      break;
-    }
-  }
-  return block;
+  if(!(type_struc = hashmap_get(ni->type_index, gft)))
+    return NULL;
+  if(!(bt = hashmap_get(type_struc->rep_index, gf)))
+    return NULL;
+  assert(bt);
+  return bt->block;
 }
 
-static const char* get_node_name_or_id(GtGenomeNode *gn)
+static void nodeinfo_add_block(NodeInfoElement *ni,
+                               const char *gft,
+                               GtGenomeFeature *rep,
+                               GtBlock *block)
+{
+  GtBlockTuple *bt;
+  PerTypeInfo *type_struc = NULL;
+  assert(ni && !nodeinfo_find_block(ni, gft, rep));
+  bt = blocktuple_new(gft, rep, block);
+  if (!(ni->type_index))
+  {
+    ni->type_index  = hashmap_new(HASH_STRING, NULL,
+                                  gt_free_func);
+  }
+  if (!(type_struc = hashmap_get(ni->type_index, gft)))
+  {
+    type_struc = gt_calloc(1, sizeof (PerTypeInfo));
+    type_struc->rep_index = hashmap_new(HASH_DIRECT, NULL, NULL);
+    type_struc->blocktuples = gt_array_new(sizeof (GtBlockTuple*));
+    hashmap_add(ni->type_index, (char*) gft, type_struc);
+    gt_strarray_add_cstr(ni->types, gft);
+  }
+  hashmap_add(type_struc->rep_index, rep, bt);
+  if (rep != UNDEF_REPR)
+    type_struc->must_merge = true;
+  gt_array_add(type_struc->blocktuples, bt);
+}
+
+static const char* get_node_name_or_id(GtGenomeFeature *gn)
 {
   const char *ret;
   if (!gn) return NULL;
-  if (!(ret = gt_genome_feature_get_attribute(gn, "Name"))) {
-    if (!(ret = gt_genome_feature_get_attribute(gn, "ID")))
+  if (!(ret = gt_genome_feature_get_attribute((GtGenomeNode*) gn, "Name"))) {
+    if (!(ret = gt_genome_feature_get_attribute((GtGenomeNode*) gn, "ID")))
       ret = NULL;
   }
   return ret;
@@ -132,7 +172,6 @@ static bool get_caption_display_status(GtDiagram *d, const char *gft)
 {
   assert(d && gft);
   bool *status;
-
   status = (bool*) hashmap_get(d->caption_display_status, gft);
   if (!status)
   {
@@ -158,26 +197,48 @@ static bool get_caption_display_status(GtDiagram *d, const char *gft)
   return *status;
 }
 
-static void add_to_current(GtDiagram *d, GtGenomeNode *node,
-                           GtGenomeNode *parent)
+static void assign_block_caption(GtDiagram *d,
+                                 GtGenomeFeature *node,
+                                 GtGenomeFeature *parent,
+                                 GtBlock *block)
 {
-  NodeInfoElement *ni;
-  GtBlock *block;
-  GtBlockTuple *bt;
+  const char *nnid_p = NULL, *nnid_n = NULL;
   GtStr *caption = NULL;
+  nnid_p = get_node_name_or_id(parent);
+  nnid_n = get_node_name_or_id(node);
+  if ((nnid_p || nnid_n) && get_caption_display_status(d,
+                                          gt_genome_feature_get_type(node)))
+  {
+    caption = gt_str_new_cstr("");
+    if (parent) {
+      if (gt_genome_node_has_children((GtGenomeNode*) parent))
+        gt_str_append_cstr(caption, nnid_p);
+      else
+        gt_str_append_cstr(caption, "-");
+      gt_str_append_cstr(caption, "/");
+    }
+    if (nnid_n)
+      gt_str_append_cstr(caption, nnid_n);
+  }
+  gt_block_set_caption(block, caption);
+}
+
+static void add_to_current(GtDiagram *d, GtGenomeFeature *node,
+                           GtGenomeFeature *parent)
+{
+  GtBlock *block;
+  NodeInfoElement *ni;
+  GtStr *caption;
   const char *nnid_p = NULL, *nnid_n = NULL;
   assert(d && node);
-
-  /* Lookup node info and set itself as parent */
-  ni = get_or_create_node_info(d, node);
+  /* Get nodeinfo element and set itself as parent */
+  ni = nodeinfo_get(d, node);
   ni->parent = node;
   /* create new GtBlock tuple and add to node info */
   block = gt_block_new_from_node(node);
-  /* assign block caption */
-
   caption = gt_str_new();
   if (!gt_style_get_str(d->style,
-                        gt_genome_feature_get_type((GtGenomeFeature*) node),
+                        gt_genome_feature_get_type(node),
                         "block_caption",
                         caption,
                         node))
@@ -185,10 +246,10 @@ static void add_to_current(GtDiagram *d, GtGenomeNode *node,
     nnid_p = get_node_name_or_id(parent);
     nnid_n = get_node_name_or_id(node);
     if ((nnid_p || nnid_n) && get_caption_display_status(d,
-                  gt_genome_feature_get_type((GtGenomeFeature*) node)))
+                  gt_genome_feature_get_type(node)))
     {
       if (parent) {
-        if (gt_genome_node_has_children(parent))
+        if (gt_genome_node_has_children((GtGenomeNode*) parent))
           gt_str_append_cstr(caption, nnid_p);
         else
           gt_str_append_cstr(caption, "-");
@@ -199,87 +260,85 @@ static void add_to_current(GtDiagram *d, GtGenomeNode *node,
     }
   }
   gt_block_set_caption(block, caption);
-  /* insert node into block */
   gt_block_insert_element(block, node);
-  bt = blocktuple_new(gt_genome_feature_get_type((GtGenomeFeature*) node),
-                      block);
-  gt_array_add(ni->blocktuples, bt);
+  nodeinfo_add_block(ni,
+                     gt_genome_feature_get_type(node),
+                     UNDEF_REPR, block);
 }
 
-static void add_to_parent(GtDiagram *d, GtGenomeNode *node,
-                          GtGenomeNode* parent)
+static void add_to_parent(GtDiagram *d, GtGenomeFeature *node,
+                          GtGenomeFeature *parent)
 {
   GtBlock *block = NULL;
   NodeInfoElement *par_ni, *ni;
-  const char *nnid_p = NULL, *nnid_n = NULL;
-
   assert(d && node);
-
   if (!parent) return;
-
-  par_ni = get_or_create_node_info(d, parent);
-  ni = get_or_create_node_info(d, node);
+  par_ni = nodeinfo_get(d, parent);
+  ni = nodeinfo_get(d, node);
   ni->parent = parent;
-
-  /* try to find the right block to insert */
-  block = find_block_for_type(par_ni,
-                              gt_genome_feature_get_type((GtGenomeFeature*)
-                                                         node));
-  /* no fitting block was found, create a new one */
-  if (block == NULL) {
-    GtBlockTuple *bt;
-    GtStr *caption = NULL;
+  block = nodeinfo_find_block(par_ni,
+                              gt_genome_feature_get_type(node),
+                              parent);
+  if (!block) {
     block = gt_block_new_from_node(parent);
-    /* assign block caption */
-    nnid_p = get_node_name_or_id(parent);
-    nnid_n = get_node_name_or_id(node);
-    if ((nnid_p || nnid_n) && get_caption_display_status(d,
-                  gt_genome_feature_get_type((GtGenomeFeature*) node)))
-    {
-      caption = gt_str_new_cstr("");
-      if (parent) {
-        if (gt_genome_node_has_children(parent))
-          gt_str_append_cstr(caption, nnid_p);
-        else
-          gt_str_append_cstr(caption, "-");
-        gt_str_append_cstr(caption, "/");
-      }
-      if (nnid_n)
-        gt_str_append_cstr(caption, nnid_n);
-    }
-    gt_block_set_caption(block, caption);
-    /* add block to nodeinfo */
-    bt = blocktuple_new(gt_genome_feature_get_type((GtGenomeFeature*) node),
-                                                   block);
-    gt_array_add(par_ni->blocktuples, bt);
+    assign_block_caption(d, node, parent, block);
+    nodeinfo_add_block(par_ni,
+                     gt_genome_feature_get_type((GtGenomeFeature*) node),
+                     parent,
+                     block);
   }
-  /* now we have a block to insert into */
+  assert(block);
   gt_block_insert_element(block, node);
 }
 
-static void add_recursive(GtDiagram *d, GtGenomeNode *node,
-                          GtGenomeNode* parent, GtGenomeNode *original_node)
+static void add_to_rep(GtDiagram *d, GtGenomeFeature *node,
+                       GtGenomeFeature* parent)
+{
+  GtBlock *block = NULL;
+  GtGenomeFeature *rep = UNDEF_REPR;
+  NodeInfoElement *ni;
+  assert(d && node && gt_genome_feature_is_multi(node));
+  rep = gt_genome_feature_get_multi_representative(node);
+  ni = nodeinfo_get(d, rep);
+
+  block = nodeinfo_find_block(ni,
+                              gt_genome_feature_get_type(node),
+                              rep);
+  if (!block) {
+    block = gt_block_new_from_node(parent);
+    assign_block_caption(d, node, parent, block);
+    nodeinfo_add_block(ni, gt_genome_feature_get_type(node),
+                     rep, block);
+  }
+  assert(block);
+  gt_block_insert_element(block, node);
+}
+
+static void add_recursive(GtDiagram *d, GtGenomeFeature *node,
+                          GtGenomeFeature* parent,
+                          GtGenomeFeature *original_node)
 {
   NodeInfoElement *ni;
-
+  GtGenomeFeature *rep = UNDEF_REPR;
   assert(d && node && original_node);
   if (!parent) return;
-
-  ni = get_or_create_node_info(d, node);
-
+  ni = nodeinfo_get(d, node);
+  if (gt_genome_feature_is_multi(original_node))
+  {
+    rep = gt_genome_feature_get_multi_representative(original_node);
+  }
   /* end of recursion, insert into target block */
   if (parent == node) {
     GtBlock *block ;
-    GtBlockTuple *bt;
-    /* try to find the right block to insert */
-    block = find_block_for_type(ni,
-                                gt_genome_feature_get_type((GtGenomeFeature*)
-                                                           node));
-    if (block == NULL) {
+    block = nodeinfo_find_block(ni,
+                                gt_genome_feature_get_type(node),
+                                rep);
+    if (!block) {
       block = gt_block_new_from_node(node);
-      bt = blocktuple_new(gt_genome_feature_get_type((GtGenomeFeature*) node),
-                          block);
-      gt_array_add(ni->blocktuples, bt);
+      nodeinfo_add_block(ni,
+                         gt_genome_feature_get_type(node),
+                         rep,
+                         block);
     }
     gt_block_insert_element(block, original_node);
   }
@@ -288,18 +347,18 @@ static void add_recursive(GtDiagram *d, GtGenomeNode *node,
     NodeInfoElement *parent_ni;
     /* set up reverse entry */
     ni->parent = parent;
-    /* recursively call with parent node and its parent */
     parent_ni = hashmap_get(d->nodeinfo, parent);
     if (parent_ni)
       add_recursive(d, parent, parent_ni->parent, original_node);
   }
 }
 
-static void process_node(GtDiagram *d, GtGenomeNode *node,
-                         GtGenomeNode *parent)
+static void process_node(GtDiagram *d, GtGenomeFeature *node,
+                         GtGenomeFeature *parent)
 {
   GtRange elem_range;
-  bool *collapse, do_not_overlap=false;
+  bool *collapse;
+  bool do_not_overlap=false;
   const char *feature_type = NULL, *parent_gft = NULL;
   double tmp;
   unsigned long max_show_width = UNDEF_ULONG,
@@ -307,12 +366,12 @@ static void process_node(GtDiagram *d, GtGenomeNode *node,
 
   assert(d && node);
 
-  feature_type = gt_genome_feature_get_type((GtGenomeFeature*) node);
+  feature_type = gt_genome_feature_get_type(node);
   if (parent)
-    parent_gft = gt_genome_feature_get_type((GtGenomeFeature*) parent);
+    parent_gft = gt_genome_feature_get_type(parent);
 
   /* discard elements that do not overlap with visible range */
-  elem_range = gt_genome_node_get_range(node);
+  elem_range = gt_genome_node_get_range((GtGenomeNode*) node);
   if (!gt_range_overlap(d->range, elem_range))
     return;
 
@@ -349,30 +408,43 @@ static void process_node(GtDiagram *d, GtGenomeNode *node,
     hashmap_add(d->collapsingtypes, (void*) feature_type, collapse);
   }
 
-  /* check if direct children overlap */
+   /* check if direct children overlap */
   if (parent)
     do_not_overlap =
-      gt_genome_node_direct_children_do_not_overlap_st(parent, node);
+      gt_genome_node_direct_children_do_not_overlap_st((GtGenomeNode*) parent,
+                                                       (GtGenomeNode*) node);
 
   /* decide how to continue: */
-  if (*collapse && parent) {
-    /* collapsing features recursively search their target blocks */
+  if (*collapse && parent)
+  {
     add_recursive(d, node, parent, node);
   }
-  else if (do_not_overlap
-            && gt_genome_node_number_of_children(parent) > 1)
+  else if (!(*collapse)
+             && gt_genome_feature_is_multi(node))
   {
-    /* group non-overlapping child nodes of a non-collapsing type by parent */
+    add_to_rep(d, node, parent);
+  }
+  else if (!(*collapse)
+             && do_not_overlap
+             && gt_genome_node_number_of_children((GtGenomeNode*) parent) > 1)
+  {
     add_to_parent(d, node, parent);
   }
-  else {
-    /* nodes that belong into their own track and block */
+  else
+  {
     add_to_current(d, node, parent);
   }
 
   /* we can now assume that this node has been processed into the reverse
      lookup structure */
-  assert(hashmap_get(d->nodeinfo, node));
+  if (gt_genome_feature_is_multi(node))
+  {
+    GtGenomeFeature *rep;
+    rep = gt_genome_feature_get_multi_representative((GtGenomeFeature*) node);
+    assert(hashmap_get(d->nodeinfo, rep));
+  }
+  else
+    assert(hashmap_get(d->nodeinfo, node));
 }
 
 static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value,
@@ -385,7 +457,7 @@ static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value,
   return 0;
 }
 
-static int visit_child(GtGenomeNode* gn, void* gt_genome_node_children,
+static int visit_child(GtGenomeNode* gn, void *gt_genome_node_children,
                        GtError *err)
 {
   NodeTraverseInfo* gt_genome_node_info;
@@ -394,16 +466,20 @@ static int visit_child(GtGenomeNode* gn, void* gt_genome_node_children,
   int had_err;
   if (gt_genome_node_has_children(gn))
   {
-    GtGenomeNode *oldparent = gt_genome_node_info->parent;
-    process_node(gt_genome_node_info->diagram, gn, gt_genome_node_info->parent);
-    gt_genome_node_info->parent = gn;
-    had_err = gt_genome_node_traverse_direct_children(gn, gt_genome_node_info,
-                                                   visit_child, err);
+    GtGenomeFeature *oldparent = gt_genome_node_info->parent;
+    process_node(gt_genome_node_info->diagram, (GtGenomeFeature*) gn,
+                 gt_genome_node_info->parent);
+    gt_genome_node_info->parent = (GtGenomeFeature*) gn;
+    had_err = gt_genome_node_traverse_direct_children(gn,
+                                                      gt_genome_node_info,
+                                                      visit_child,
+                                                      err);
     assert(!had_err); /* visit_child() is sane */
     gt_genome_node_info->parent = oldparent;
   }
   else
-    process_node(gt_genome_node_info->diagram, gn, gt_genome_node_info->parent);
+    process_node(gt_genome_node_info->diagram, (GtGenomeFeature*)gn,
+                 gt_genome_node_info->parent);
   return 0;
 }
 
@@ -422,28 +498,61 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
 {
   NodeInfoElement *ni = (NodeInfoElement*) value;
   GtDiagram *diagram = (GtDiagram*) data;
+  GtBlock *block = NULL;
   unsigned long i = 0;
-
-  for (i = 0; i < gt_array_size(ni->blocktuples); i++) {
+  for (i = 0; i < gt_strarray_size(ni->types); i++) {
+    const char *type;
+    unsigned long j;
     GtArray *list;
-    GtBlockTuple *bt = *(GtBlockTuple**) gt_array_get(ni->blocktuples, i);
-    list = (GtArray*) hashmap_get(diagram->blocks, bt->gft);
-    if (!list)
+    PerTypeInfo *type_struc = NULL;
+    GtBlock* mainblock = NULL;
+    type = gt_strarray_get(ni->types, i);
+    type_struc = hashmap_get(ni->type_index, type);
+    assert(type_struc);
+    for (j=0; j<gt_array_size(type_struc->blocktuples); j++)
     {
-      list = gt_array_new(sizeof (GtBlock*));
-      hashmap_add(diagram->blocks, (void*) bt->gft, list);
+      GtBlockTuple *bt;
+      bt  = *(GtBlockTuple**) gt_array_get(type_struc->blocktuples, j);
+      if (bt->rep == UNDEF_REPR && type_struc->must_merge)
+      {
+        block = mainblock = gt_block_ref(bt->block);
+        gt_block_delete(mainblock);
+        gt_free(bt);
+        continue;
+      }
+      else
+      {
+        if (mainblock)
+        {
+          block = gt_block_clone(mainblock);
+          gt_block_merge(block, bt->block);
+          gt_block_delete(bt->block);
+        } else
+            block = bt->block;
+      }
+      assert(block);
+      list = (GtArray*) hashmap_get(diagram->blocks, bt->gft);
+      if (!list)
+      {
+        list = gt_array_new(sizeof (GtBlock*));
+        hashmap_add(diagram->blocks, (void*) bt->gft, list);
+      }
+      assert(list);
+      gt_array_add(list, block);
+      gt_free(bt);
     }
-    assert(list);
-    gt_array_add(list, bt->block);
-    gt_free(bt);
+    gt_array_delete(type_struc->blocktuples);
+    hashmap_delete(type_struc->rep_index);
+    gt_block_delete(mainblock);
   }
-  gt_array_delete(ni->blocktuples);
+  hashmap_delete(ni->type_index);
+  gt_strarray_delete(ni->types);
   gt_free(ni);
   return 0;
 }
 
 /* Traverse a genome node graph with depth first search. */
-static void traverse_genome_nodes(GtGenomeNode *gn,
+static void traverse_genome_nodes(GtGenomeFeature *gn,
                                   void *gt_genome_node_children)
 {
   NodeTraverseInfo* gt_genome_node_info;
@@ -452,10 +561,11 @@ static void traverse_genome_nodes(GtGenomeNode *gn,
   gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
   gt_genome_node_info->parent = gn;
   /* handle root nodes */
-  process_node(gt_genome_node_info->diagram, gn, NULL);
-  if (gt_genome_node_has_children(gn)) {
-    had_err = gt_genome_node_traverse_direct_children(gn, gt_genome_node_info,
-                                                   visit_child, NULL);
+  process_node(gt_genome_node_info->diagram, (GtGenomeFeature*)gn, NULL);
+  if (gt_genome_node_has_children((GtGenomeNode*) gn)) {
+    had_err = gt_genome_node_traverse_direct_children((GtGenomeNode*)gn,
+                                                      gt_genome_node_info,
+                                                      visit_child, NULL);
     assert(!had_err); /* visit_child() is sane */
   }
 }
@@ -474,7 +584,8 @@ static void gt_diagram_build(GtDiagram *diagram, GtArray *features)
 
   /* do node traversal for each root feature */
   for (i = 0; i < gt_array_size(features); i++) {
-    GtGenomeNode *current_root = *(GtGenomeNode**) gt_array_get(features,i);
+    GtGenomeFeature *current_root = *(GtGenomeFeature**)
+                                                 gt_array_get(features,i);
     traverse_genome_nodes(current_root, &gt_genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
@@ -592,7 +703,8 @@ static int layout_tracks(void *key, void *value, void *data,
      with different paths have the same basename. */
   block = *(GtBlock**) gt_array_get(list, 0);
   filename = gt_basename(gt_genome_node_get_filename(
-                                        gt_block_get_top_level_feature(block)));
+                                     (GtGenomeNode*)
+                                       gt_block_get_top_level_feature(block)));
   gt_track_key = gt_track_key_new(filename, type);
   gt_free(filename);
 

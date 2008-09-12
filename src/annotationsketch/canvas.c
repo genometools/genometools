@@ -475,9 +475,9 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
   {
     const char *btype = gt_block_get_type(block);
     gt_style_get_color(canvas->sty, btype, "fill", &fillcolor,
-                           gt_block_get_top_level_feature(block));
+                     (GtGenomeFeature*) gt_block_get_top_level_feature(block));
     gt_style_get_color(canvas->sty, btype, "stroke", &strokecolor,
-                           gt_block_get_top_level_feature(block));
+                     (GtGenomeFeature*) gt_block_get_top_level_feature(block));
     gt_graphics_draw_box(canvas->g,
                       draw_range.start,
                       canvas->y,

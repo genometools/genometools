@@ -31,26 +31,28 @@ typedef struct GtBlock GtBlock;
 #include "core/array.h"
 #include "extended/genome_node.h"
 
-GtBlock*             gt_block_new(void);
+GtBlock*              gt_block_new(void);
 /* Create a new GtBlock object, setting block parameters (such as strand,
    range) from a given <node> template. */
-GtBlock*             gt_block_new_from_node(GtGenomeNode *node);
-GtBlock*             gt_block_ref(GtBlock*);
+GtBlock*              gt_block_new_from_node(GtGenomeFeature *node);
+GtBlock*              gt_block_ref(GtBlock*);
 /* Insert <node> into block. */
-void                  gt_block_insert_element(GtBlock*, GtGenomeNode *node);
-GtRange              gt_block_get_range(const GtBlock*);
-GtRange*             gt_block_get_range_ptr(const GtBlock *block);
+void                  gt_block_insert_element(GtBlock*, GtGenomeFeature *node);
+GtRange               gt_block_get_range(const GtBlock*);
+GtRange*              gt_block_get_range_ptr(const GtBlock *block);
 void                  gt_block_set_range(GtBlock*, GtRange r);
 /* Checks whether a GtBlock is occupied completely by a single element. */
 bool                  gt_block_has_only_one_fullsize_element(const GtBlock*);
+void                  gt_block_merge(GtBlock*, GtBlock*);
+GtBlock*              gt_block_clone(GtBlock*);
 /* Set whether a block caption should be displayed or not. */
 void                  gt_block_set_caption_visibility(GtBlock*, bool);
 bool                  gt_block_caption_is_visible(const GtBlock*);
 void                  gt_block_set_caption(GtBlock*, GtStr*);
-GtStr*               gt_block_get_caption(const GtBlock*);
+GtStr*                gt_block_get_caption(const GtBlock*);
 void                  gt_block_set_strand(GtBlock*, GtStrand);
-GtGenomeNode*        gt_block_get_top_level_feature(const GtBlock*);
-GtStrand             gt_block_get_strand(const GtBlock*);
+GtGenomeFeature*      gt_block_get_top_level_feature(const GtBlock*);
+GtStrand              gt_block_get_strand(const GtBlock*);
 void                  gt_block_set_type(GtBlock*, const char *type);
 const char*           gt_block_get_type(const GtBlock*);
 unsigned long         gt_block_get_size(const GtBlock*);

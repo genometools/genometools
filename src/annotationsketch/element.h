@@ -30,18 +30,19 @@ typedef struct GtElement GtElement;
 #include "extended/genome_node.h"
 
 /* Creates a complete new GtElement object. */
-GtElement*           gt_element_new(GtGenomeNode*);
-/* Creates an empty GtElement object.
+GtElement*           gt_element_new(GtGenomeFeature*);
+GtElement*           gt_element_ref(GtElement*);
+/* Creates an empty GT_Element object.
    Range and type have to be set afterwards. */
 GtElement*           gt_element_new_empty(void);
 GtRange              gt_element_get_range(const GtElement*);
 void                  gt_element_set_range(GtElement*, GtRange);
 GtDrawingRange       gt_element_calculate_drawing_range(GtElement*,
-                                                         GtCanvas*);
+                                                        GtCanvas*);
 const char*           gt_element_get_type(const GtElement*);
 void                  gt_element_set_type(GtElement*, const char *type);
 GtStrand             gt_element_get_strand(const GtElement*);
-GtGenomeNode*        gt_element_get_node_ref(const GtElement*);
+GtGenomeFeature*     gt_element_get_node_ref(const GtElement*);
 bool                  gt_element_is_marked(const GtElement*);
 bool                  gt_elements_are_equal(const GtElement*,
                                             const GtElement*);
