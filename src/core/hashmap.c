@@ -29,7 +29,7 @@ struct map_entry
 
 struct hm_freefuncs
 {
-  GT_FreeFunc keyfree, valuefree;
+  GtFree keyfree, valuefree;
 };
 
 static void
@@ -44,7 +44,7 @@ hm_elem_free(void *elem, void *table_data)
 }
 
 extern Hashmap *
-hashmap_new(HashType keyhashtype, GT_FreeFunc keyfree, GT_FreeFunc valuefree)
+hashmap_new(HashType keyhashtype, GtFree keyfree, GtFree valuefree)
 {
   struct hm_freefuncs *ff = gt_malloc(sizeof (*ff));
   ff->keyfree = keyfree;

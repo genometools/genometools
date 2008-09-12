@@ -71,9 +71,9 @@ static void fa_init(void)
   assert(!fa);
   fa = gt_calloc(1, sizeof (FA));
   fa->file_pointer = hashmap_new(HASH_DIRECT, NULL,
-                                 (GT_FreeFunc) free_FAFileInfo);
+                                 (GtFree) free_FAFileInfo);
   fa->memory_maps = hashmap_new(HASH_DIRECT, NULL,
-                                (GT_FreeFunc) free_FAMapInfo);
+                                (GtFree) free_FAMapInfo);
 }
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,

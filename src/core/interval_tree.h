@@ -38,7 +38,7 @@ GtIntervalTreeNode* gt_interval_tree_node_new(void *data,
                                                unsigned long high);
 void*                gt_interval_tree_node_get_data(GtIntervalTreeNode* n);
 
-GtIntervalTree*     gt_interval_tree_new(GT_FreeFunc);
+GtIntervalTree*     gt_interval_tree_new(GtFree);
 unsigned long        gt_interval_tree_size(GtIntervalTree*);
 GtIntervalTreeNode* gt_interval_tree_find_first_overlapping(GtIntervalTree*,
                                                             unsigned long start,

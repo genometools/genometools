@@ -89,11 +89,11 @@ GTF_parser* gtf_parser_new(GT_TypeChecker *type_checker)
   parser->sequence_region_to_range = hashmap_new(HASH_STRING,
                                                  gt_free_func, gt_free_func);
   parser->gene_id_hash = hashmap_new(HASH_STRING, gt_free_func,
-                                     (GT_FreeFunc) hashmap_delete);
+                                     (GtFree) hashmap_delete);
   parser->seqid_to_str_mapping = hashmap_new(HASH_STRING, NULL,
-                                             (GT_FreeFunc) gt_str_delete);
+                                             (GtFree) gt_str_delete);
   parser->source_to_str_mapping = hashmap_new(HASH_STRING, NULL,
-                                              (GT_FreeFunc) gt_str_delete);
+                                              (GtFree) gt_str_delete);
   parser->gene_id_to_name_mapping = hashmap_new(HASH_STRING, gt_free_func,
                                                 gt_free_func);
   parser->transcript_id_to_name_mapping = hashmap_new(HASH_STRING, gt_free_func,
@@ -483,7 +483,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
       if (!(transcript_id_hash = hashmap_get(parser->gene_id_hash,
                                              gene_id))) {
         transcript_id_hash = hashmap_new(HASH_STRING, gt_free_func,
-                                         (GT_FreeFunc) gt_array_delete);
+                                         (GtFree) gt_array_delete);
         hashmap_add(parser->gene_id_hash, gt_cstr_dup(gene_id),
                     transcript_id_hash);
       }

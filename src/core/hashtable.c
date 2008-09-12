@@ -725,7 +725,7 @@ cstr_cstr_elem_dup(struct ht_elem_2cstr *elem,
 static int
 hashtable_test(HashElemInfo table_info)
 {
-  GT_FreeFunc orig_free_elem = table_info.free_op.free_elem;
+  GtFree orig_free_elem = table_info.free_op.free_elem;
   char *s1 = "foo", *s2 = "bar";
   Hashtable *ht;
   int had_err = 0;

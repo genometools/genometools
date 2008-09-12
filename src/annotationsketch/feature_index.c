@@ -60,7 +60,7 @@ GtFeatureIndex* gt_feature_index_new(void)
   GtFeatureIndex *fi;
   fi = gt_calloc(1, sizeof (GtFeatureIndex));
   fi->regions = hashmap_new(HASH_STRING, NULL,
-                            (GT_FreeFunc) region_info_delete);
+                            (GtFree) region_info_delete);
   return fi;
 }
 
@@ -81,7 +81,7 @@ void gt_feature_index_add_sequence_region(GtFeatureIndex *fi,
   if (!hashmap_get(fi->regions, seqid)) {
     info = gt_malloc(sizeof (RegionInfo));
     info->region = (GtSequenceRegion*) gt_genome_node_ref((GtGenomeNode*) sr);
-    info->features = gt_interval_tree_new((GT_FreeFunc)
+    info->features = gt_interval_tree_new((GtFree)
                                           gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
@@ -114,7 +114,7 @@ void gt_feature_index_add_genome_feature(GtFeatureIndex *fi,
   {
     info = gt_calloc(1, sizeof (RegionInfo));
     info->region = NULL;
-    info->features = gt_interval_tree_new((GT_FreeFunc)
+    info->features = gt_interval_tree_new((GtFree)
                                           gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;

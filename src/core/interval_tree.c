@@ -32,7 +32,7 @@ typedef enum GtIntervalTreeNodeColor {
 struct GtIntervalTree {
   GtIntervalTreeNode *root;
   unsigned long size;
-  GT_FreeFunc free_func;
+  GtFree free_func;
 };
 
 struct GtIntervalTreeNode {
@@ -54,7 +54,7 @@ GtIntervalTreeNode* gt_interval_tree_node_new(void *data,
   return n;
 }
 
-GtIntervalTree* gt_interval_tree_new(GT_FreeFunc func)
+GtIntervalTree* gt_interval_tree_new(GtFree func)
 {
   GtIntervalTree *it;
   it = gt_calloc(1, sizeof (GtIntervalTree));

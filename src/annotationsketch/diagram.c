@@ -504,9 +504,9 @@ static GT_Diagram* gt_diagram_new_generic(GtArray *features,
   GT_Diagram *diagram;
   diagram = gt_malloc(sizeof (GT_Diagram));
   diagram->tracks = hashmap_new(HASH_STRING, gt_free_func,
-                                (GT_FreeFunc) gt_track_delete);
+                                (GtFree) gt_track_delete);
   diagram->blocks = hashmap_new(HASH_DIRECT, NULL,
-                                (GT_FreeFunc) blocklist_delete);
+                                (GtFree) blocklist_delete);
   diagram->nodeinfo = hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->style = style;

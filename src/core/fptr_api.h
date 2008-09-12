@@ -27,6 +27,6 @@
  */
 typedef int  (*GtCompare)(const void *a, const void *b);
 typedef int  (*GtCompareWithData)(const void*, const void*, void *data);
-typedef void (*GT_FreeFunc)(void*);
+typedef void (*GtFree)(void*);
 
 #endif

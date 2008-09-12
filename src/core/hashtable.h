@@ -48,7 +48,7 @@ struct HashElemInfo
   HashFunc keyhash;
   union
   {
-    GT_FreeFunc free_elem;
+    GtFree free_elem;
     FreeFuncWData free_elem_with_data;
   } free_op;                           /**< either of these can be
                                         * used for the individual
@@ -57,7 +57,7 @@ struct HashElemInfo
   GtCompare cmp;
   void *table_data;             /**< per table data, passed to
                                  * free_elem_with_data */
-  GT_FreeFunc table_data_free;     /**< called on hashtable_delete with
+  GtFree table_data_free;     /**< called on hashtable_delete with
                                      * table_data as argument if != NULL */
 };
 
