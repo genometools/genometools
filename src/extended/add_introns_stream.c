@@ -36,7 +36,7 @@ static int add_introns_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   int had_err;
   gt_error_check(err);
   ais = add_introns_stream_cast(gs);
-  had_err = genome_stream_next_tree(ais->in_stream, gn, err);
+  had_err = genome_stream_next(ais->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, ais->add_introns_visitor, err);
   return had_err;

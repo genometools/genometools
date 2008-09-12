@@ -108,7 +108,7 @@ static int uniq_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                function is called */
   if (!us->first_node) {
     /* both buffers are empty */
-    had_err = genome_stream_next_tree(us->in_stream, &us->first_node, err);
+    had_err = genome_stream_next(us->in_stream, &us->first_node, err);
     if (had_err)
       return had_err;
     if (!us->first_node) {
@@ -120,7 +120,7 @@ static int uniq_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   /* uniq loop */
   for (;;) {
     assert(us->first_node && !us->second_node);
-    had_err = genome_stream_next_tree(us->in_stream, &us->second_node, err);
+    had_err = genome_stream_next(us->in_stream, &us->second_node, err);
     if (!had_err && us->second_node) {
       if (!uniq(&us->first_node, &us->second_node))
         break; /* no uniq possible */

@@ -110,7 +110,7 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+    while (!(had_err = genome_stream_next(gff3_out_stream, &gn, err)) &&
            gn) {
       gt_genome_node_rec_delete(gn);
     }

@@ -126,7 +126,7 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs,
   tfs = targetbest_filter_stream_cast(gs);
 
   if (!tfs->in_stream_processed) {
-    while (!(had_err = genome_stream_next_tree(tfs->in_stream, &node, err)) &&
+    while (!(had_err = genome_stream_next(tfs->in_stream, &node, err)) &&
            node) {
       if (gt_feature_node_try_cast(node) &&
           gt_feature_node_get_attribute(node, "Target")) {

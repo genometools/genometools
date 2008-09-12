@@ -174,7 +174,7 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
   gff3_in_stream = gff3_in_stream_new_unsorted(1, argv + parsed_args, false,
                                                false);
 
-  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn) {
+  while (!(had_err = genome_stream_next(gff3_in_stream, &gn, err)) && gn) {
     had_err = extracttarget_from_node(gn, arguments->seqfiles, err);
     gt_genome_node_rec_delete(gn);
   }

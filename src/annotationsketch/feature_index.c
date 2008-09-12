@@ -143,7 +143,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
   assert(feature_index && gff3file);
   queue = gt_queue_new();
   gff3_in_stream = gff3_in_stream_new_unsorted(1, &gff3file, false, false);
-  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn)
+  while (!(had_err = genome_stream_next(gff3_in_stream, &gn, err)) && gn)
     gt_queue_add(queue, gn);
   if (!had_err) {
     GenomeVisitor *feature_visitor = feature_visitor_new(feature_index);

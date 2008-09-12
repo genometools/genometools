@@ -46,7 +46,7 @@ int merge_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
   /* fill buffers */
   for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
     if (!ms->buffer[i]) {
-      had_err = genome_stream_next_tree(*(GenomeStream**)
+      had_err = genome_stream_next(*(GenomeStream**)
                                         gt_array_get(ms->genome_streams, i),
                                         ms->buffer + i, err);
       if (had_err)

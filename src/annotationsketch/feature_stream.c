@@ -36,7 +36,7 @@ static int feature_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   int had_err;
   gt_error_check(err);
   feature_stream = feature_stream_cast(gs);
-  had_err = genome_stream_next_tree(feature_stream->in_stream, gn, err);
+  had_err = genome_stream_next(feature_stream->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, feature_stream->feature_visitor, err);
   return had_err;

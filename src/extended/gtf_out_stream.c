@@ -35,7 +35,7 @@ static int gtf_out_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   int had_err;
   gt_error_check(err);
   gtf_out_stream = gtf_out_stream_cast(gs);
-  had_err = genome_stream_next_tree(gtf_out_stream->in_stream, gn, err);
+  had_err = genome_stream_next(gtf_out_stream->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, gtf_out_stream->gtf_visitor, err);
   return had_err;

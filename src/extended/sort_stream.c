@@ -41,7 +41,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   sort_stream = sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {
-    while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, &node,
+    while (!(had_err = genome_stream_next(sort_stream->in_stream, &node,
                                                err)) && node) {
       gt_array_add(sort_stream->trees, node);
     }

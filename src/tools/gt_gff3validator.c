@@ -88,7 +88,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) &&
+    while (!(had_err = genome_stream_next(gff3_in_stream, &gn, err)) &&
            gn) {
       gt_genome_node_rec_delete(gn);
     }

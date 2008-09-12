@@ -243,7 +243,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     feature_stream = feature_stream_new(last_stream, features);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(feature_stream, &gn, err)) &&
+    while (!(had_err = genome_stream_next(feature_stream, &gn, err)) &&
            gn) {
       gt_genome_node_rec_delete(gn);
     }

@@ -98,7 +98,7 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+  while (!(had_err = genome_stream_next(gff3_out_stream, &gn, err)) &&
          gn) {
     gt_genome_node_rec_delete(gn);
   }

@@ -56,7 +56,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
 
   if (!cs->sequence_regions_processed) {
     while (!had_err) {
-      if (!(had_err = genome_stream_next_tree(cs->in_stream, &node, err))) {
+      if (!(had_err = genome_stream_next(cs->in_stream, &node, err))) {
         if (node)
           gt_array_add(cs->gt_genome_node_buffer, node);
         else
@@ -113,7 +113,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   }
 
   if (!had_err)
-    had_err = genome_stream_next_tree(cs->in_stream, gn, err);
+    had_err = genome_stream_next(cs->in_stream, gn, err);
   if (!had_err && *gn) {
     if (gt_genome_node_get_seqid(*gn)) {
       changed_seqid = mapping_map_string(cs->chseqids_mapping,

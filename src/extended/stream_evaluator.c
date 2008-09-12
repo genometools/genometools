@@ -1283,7 +1283,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   predicted_info.wrong_LTRs  = &se->wrong_LTRs;
 
   /* process the reality stream completely */
-  while (!(had_err = genome_stream_next_tree(se->reality, &gn, err)) && gn) {
+  while (!(had_err = genome_stream_next(se->reality, &gn, err)) && gn) {
     if (gt_region_node_try_cast(gn)) {
       /* each sequence region gets its own ``slot'' */
       if (!(slot = hashmap_get(se->slots,
@@ -1322,7 +1322,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* process the prediction stream */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(se->prediction, &gn, err)) &&
+    while (!(had_err = genome_stream_next(se->prediction, &gn, err)) &&
            gn) {
       /* we consider only genome features */
       if ((gf = gt_feature_node_try_cast(gn))) {

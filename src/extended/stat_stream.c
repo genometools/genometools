@@ -38,7 +38,7 @@ static int stat_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   int had_err;
   gt_error_check(err);
   stat_stream = stat_stream_cast(gs);
-  had_err = genome_stream_next_tree(stat_stream->in_stream, gn, err);
+  had_err = genome_stream_next(stat_stream->in_stream, gn, err);
   if (!had_err) {
     assert(stat_stream->stat_visitor);
     if (*gn) {
