@@ -32,7 +32,7 @@ int  genome_visitor_visit_comment_node(GenomeVisitor*, GtCommentNode*,
 int  genome_visitor_visit_genome_feature(GenomeVisitor*, GtGenomeFeature*,
                                          GtError*);
 int  genome_visitor_visit_region_node(GenomeVisitor*, GtRegionNode*, GtError*);
-int  genome_visitor_visit_sequence_node(GenomeVisitor*, GT_SequenceNode*,
+int  genome_visitor_visit_sequence_node(GenomeVisitor*, GtSequenceNode*,
                                         GtError*);
 void genome_visitor_delete(GenomeVisitor *gv);
 
