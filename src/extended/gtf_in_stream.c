@@ -33,7 +33,7 @@ struct GTFInStream
 #define gtf_in_stream_cast(GS)\
         genome_stream_cast(gtf_in_stream_class(), GS)
 
-static int gtf_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+static int gtf_in_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                    GT_UNUSED GtError *err)
 {
   GTFInStream *is;

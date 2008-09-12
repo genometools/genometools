@@ -26,7 +26,7 @@ typedef struct CSAVisitor CSAVisitor;
 const GenomeVisitorClass* csa_visitor_class(void);
 GenomeVisitor*            csa_visitor_new(unsigned long join_length);
 unsigned long             csa_visitor_node_buffer_size(GenomeVisitor*);
-GT_GenomeNode*               csa_visitor_get_node(GenomeVisitor*);
+GtGenomeNode*               csa_visitor_get_node(GenomeVisitor*);
 void                      csa_visitor_process_cluster(GenomeVisitor*,
                                                       bool final_cluster);
 

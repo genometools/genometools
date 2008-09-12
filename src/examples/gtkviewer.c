@@ -55,7 +55,7 @@ open_file(GtkWidget *widget,  gpointer user_data)
   {
     char *filename;
     const char *seqid;
-    GT_GenomeNode *gn = NULL;
+    GtGenomeNode *gn = NULL;
     GT_FeatureIndex *features = NULL;
     GtRange qry_range;
     int had_err = 0;

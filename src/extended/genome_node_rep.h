@@ -23,21 +23,21 @@
 #include "extended/genome_node.h"
 
 /* the ``genome node'' interface */
-struct GT_GenomeNodeClass
+struct GtGenomeNodeClass
 {
   size_t size;
-  void     (*free)(GT_GenomeNode*);
-  GtStr*  (*get_seqid)(GT_GenomeNode*);
-  GtStr*  (*get_idstr)(GT_GenomeNode*);
-  GtRange (*get_range)(GT_GenomeNode*);
-  void     (*set_range)(GT_GenomeNode*, GtRange);
-  void     (*change_seqid)(GT_GenomeNode*, GtStr*);
-  int      (*accept)(GT_GenomeNode*, GenomeVisitor*, GtError*);
+  void     (*free)(GtGenomeNode*);
+  GtStr*  (*get_seqid)(GtGenomeNode*);
+  GtStr*  (*get_idstr)(GtGenomeNode*);
+  GtRange (*get_range)(GtGenomeNode*);
+  void     (*set_range)(GtGenomeNode*, GtRange);
+  void     (*change_seqid)(GtGenomeNode*, GtStr*);
+  int      (*accept)(GtGenomeNode*, GenomeVisitor*, GtError*);
 };
 
-struct GT_GenomeNode
+struct GtGenomeNode
 {
-  const GT_GenomeNodeClass *c_class;
+  const GtGenomeNodeClass *c_class;
   GtStr *filename;
   GT_Dlist *children;
   unsigned int line_number,
@@ -54,6 +54,6 @@ struct GT_GenomeNode
 #define TREE_STATUS_OFFSET    3
 #define TREE_STATUS_MASK      0x3
 
-GT_GenomeNode* gt_genome_node_create(const GT_GenomeNodeClass*);
+GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass*);
 
 #endif

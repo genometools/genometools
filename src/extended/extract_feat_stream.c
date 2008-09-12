@@ -30,7 +30,7 @@ struct ExtractFeatStream
 #define extract_feat_stream_cast(GS)\
         genome_stream_cast(extract_feat_stream_class(), GS)
 
-static int extract_feat_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+static int extract_feat_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                          GtError *err)
 {
   ExtractFeatStream *efs;

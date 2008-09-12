@@ -43,7 +43,7 @@ static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
 int gt_gtf_to_gff3(int argc, const char **argv, GtError *err)
 {
   GenomeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   int parsed_args, had_err = 0;
   bool be_tolerant;
   gt_error_check(err);

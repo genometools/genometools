@@ -97,7 +97,7 @@ void gt_image_info_fill_recmap(GT_ImageInfo* ii, GtRecMap* rm, unsigned long n)
 int gt_image_info_unit_test(GtError *err)
 {
   GtRecMap* rms[20];
-  GT_GenomeNode* gfs[20];
+  GtGenomeNode* gfs[20];
   GT_ImageInfo *ii;
   unsigned long i;
   GtStr *seqid;
@@ -125,7 +125,7 @@ int gt_image_info_unit_test(GtError *err)
     ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);
     ensure(had_err, rm->gf == rms[i]->gf);
-    gt_genome_node_delete((GT_GenomeNode*) gfs[i]);
+    gt_genome_node_delete((GtGenomeNode*) gfs[i]);
   }
 
   gt_image_info_delete(ii);

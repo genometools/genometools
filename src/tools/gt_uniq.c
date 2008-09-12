@@ -66,7 +66,7 @@ int gt_uniq(int argc, const char **argv, GtError *err)
                *uniq_stream = NULL,
                *gff3_out_stream = NULL;
   UniqArguments arguments;
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   int parsed_args, had_err;
   gt_error_check(err);
 

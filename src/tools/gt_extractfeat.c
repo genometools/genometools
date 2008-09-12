@@ -99,7 +99,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                  GtError *err)
 {
   GenomeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   ExtractFeatArguments *arguments = tool_arguments;
   RegionMapping *regionmapping;
   int had_err = 0;

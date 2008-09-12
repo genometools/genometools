@@ -28,7 +28,7 @@ struct GFF3OutStream {
 #define gff3_out_stream_cast(GS)\
         genome_stream_cast(gff3_out_stream_class(), GS);
 
-static int gff3_out_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+static int gff3_out_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                      GtError *err)
 {
   GFF3OutStream *gff3_out_stream;

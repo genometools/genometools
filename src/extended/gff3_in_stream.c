@@ -48,12 +48,12 @@ struct GFF3InStream
 
 static int buffer_is_sorted(void **elem, void *info, GtError *err)
 {
-  GT_GenomeNode *current_node, **last_node;
+  GtGenomeNode *current_node, **last_node;
 
   gt_error_check(err);
   assert(elem && info);
 
-  current_node = *(GT_GenomeNode**) elem,
+  current_node = *(GtGenomeNode**) elem,
   last_node = info;
 
   if (*last_node && gt_genome_node_compare(last_node, &current_node) > 0) {
@@ -69,7 +69,7 @@ static int buffer_is_sorted(void **elem, void *info, GtError *err)
   return 0;
 }
 
-static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+static int gff3_in_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                     GtError *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
@@ -168,7 +168,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
 
     /* make sure the parsed nodes are sorted */
     if (is->ensure_sorting && gt_queue_size(is->genome_node_buffer) > 1) {
-      GT_GenomeNode *last_node = NULL;
+      GtGenomeNode *last_node = NULL;
       /* a sorted stream can have at most one input file */
       assert(gt_strarray_size(is->files) == 0 ||
              gt_strarray_size(is->files) == 1);

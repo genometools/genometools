@@ -24,9 +24,9 @@ typedef struct GT_SequenceNode GT_SequenceNode;
 #include "core/str.h"
 #include "extended/genome_node.h"
 
-const GT_GenomeNodeClass* gt_sequence_node_class(void);
+const GtGenomeNodeClass* gt_sequence_node_class(void);
 /* Takes ownership of <sequence>. */
-GT_GenomeNode*            gt_sequence_node_new(const char *description,
+GtGenomeNode*            gt_sequence_node_new(const char *description,
                                                GtStr *sequence);
 const char*               gt_sequence_node_get_description(const
                                                            GT_SequenceNode*);

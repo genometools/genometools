@@ -34,10 +34,10 @@ typedef struct GtBlock GtBlock;
 GtBlock*             gt_block_new(void);
 /* Create a new GtBlock object, setting block parameters (such as strand,
    range) from a given <node> template. */
-GtBlock*             gt_block_new_from_node(GT_GenomeNode *node);
+GtBlock*             gt_block_new_from_node(GtGenomeNode *node);
 GtBlock*             gt_block_ref(GtBlock*);
 /* Insert <node> into block. */
-void                  gt_block_insert_element(GtBlock*, GT_GenomeNode *node);
+void                  gt_block_insert_element(GtBlock*, GtGenomeNode *node);
 GtRange              gt_block_get_range(const GtBlock*);
 GtRange*             gt_block_get_range_ptr(const GtBlock *block);
 void                  gt_block_set_range(GtBlock*, GtRange r);
@@ -49,7 +49,7 @@ bool                  gt_block_caption_is_visible(const GtBlock*);
 void                  gt_block_set_caption(GtBlock*, GtStr*);
 GtStr*               gt_block_get_caption(const GtBlock*);
 void                  gt_block_set_strand(GtBlock*, GtStrand);
-GT_GenomeNode*        gt_block_get_top_level_feature(const GtBlock*);
+GtGenomeNode*        gt_block_get_top_level_feature(const GtBlock*);
 GtStrand             gt_block_get_strand(const GtBlock*);
 void                  gt_block_set_type(GtBlock*, const char *type);
 const char*           gt_block_get_type(const GtBlock*);

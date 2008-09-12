@@ -83,7 +83,7 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   GenomeStream *gff3_in_stream,
                *csa_stream,
                *gff3_out_stream;
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   CSAArguments *arguments = tool_arguments;
   int had_err;
 

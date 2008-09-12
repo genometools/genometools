@@ -28,19 +28,19 @@ GtStyle*      gt_style_new_with_state(lua_State*);
 /* Retrieves a color value from the GtStyle for <key>.
    If not set, false is returned and a default color is written. */
 bool           gt_style_get_color(const GtStyle*, const char *section,
-                                  const char *key, GtColor*, GT_GenomeNode*);
+                                  const char *key, GtColor*, GtGenomeNode*);
 /* Retrieve string value of <key> in <section>.
    If not set, false is returned. */
 bool           gt_style_get_str(const GtStyle*, const char *section,
-                                const char *key, GtStr*, GT_GenomeNode*);
+                                const char *key, GtStr*, GtGenomeNode*);
 /* Retrieve numeric value of <key> in <section>.
    If not set, false is returned.*/
 bool           gt_style_get_num(const GtStyle*, const char *section,
-                                const char *key, double*, GT_GenomeNode*);
+                                const char *key, double*, GtGenomeNode*);
 /* Retrieve boolean value of <key> in <section>.
    If not set, false is returned.*/
 bool           gt_style_get_bool(const GtStyle*, const char *section,
-                                 const char *key, bool*, GT_GenomeNode*);
+                                 const char *key, bool*, GtGenomeNode*);
 int            gt_style_unit_test(GtError*);
 /* Deletes a GtStyle object but leaves the internal Lua state intact. */
 void           gt_style_delete_without_state(GtStyle*);

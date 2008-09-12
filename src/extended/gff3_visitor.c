@@ -85,7 +85,7 @@ static int gff3_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
   return 0;
 }
 
-static int add_id(GT_GenomeNode *gn, void *data, GT_UNUSED GtError *err)
+static int add_id(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
 {
   Add_id_info *info = (Add_id_info*) data;
   GtArray *parent_features = NULL;
@@ -114,7 +114,7 @@ static void show_attribute(const char *attr_name, const char *attr_value,
   }
 }
 
-static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
+static int gff3_show_genome_feature(GtGenomeNode *gn, void *data,
                                     GT_UNUSED GtError *err)
 {
   bool part_shown = false;
@@ -189,7 +189,7 @@ static GtStr* create_unique_id(GFF3Visitor *gff3_visitor, GT_GenomeFeature *gf)
   return id;
 }
 
-static int store_ids(GT_GenomeNode *gn, void *data, GtError *err)
+static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
 {
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
@@ -236,11 +236,11 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
 
   gff3_version_string(gv);
 
-  had_err = gt_genome_node_traverse_children((GT_GenomeNode*) gf, gff3_visitor,
+  had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf, gff3_visitor,
                                           store_ids, true, err);
   if (!had_err) {
-    if (gt_genome_node_is_tree((GT_GenomeNode*) gf)) {
-      had_err = gt_genome_node_traverse_children((GT_GenomeNode*) gf,
+    if (gt_genome_node_is_tree((GtGenomeNode*) gf)) {
+      had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf,
                                                  gff3_visitor,
                                                  gff3_show_genome_feature, true,
                                                  err);
@@ -248,7 +248,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
     else {
       /* got a DAG -> traverse bin breadth first fashion to make sure that the
          'Parent' attributes are shown in correct order */
-      had_err = gt_genome_node_traverse_children_breadth((GT_GenomeNode*) gf,
+      had_err = gt_genome_node_traverse_children_breadth((GtGenomeNode*) gf,
                                                       gff3_visitor,
                                                       gff3_show_genome_feature,
                                                       true, err);
@@ -261,7 +261,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
 
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
-  if (gt_genome_node_has_children((GT_GenomeNode*) gf))
+  if (gt_genome_node_has_children((GtGenomeNode*) gf))
     gt_genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_TERMINATOR);
 
   return had_err;
@@ -276,14 +276,14 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv,
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sr);
   /* a sequence region has no children */
-  assert(!gt_genome_node_has_children((GT_GenomeNode*) sr));
+  assert(!gt_genome_node_has_children((GtGenomeNode*) sr));
 
   gff3_version_string(gv);
   gt_genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n",
                      GFF_SEQUENCE_REGION,
-                     gt_str_get(gt_genome_node_get_seqid((GT_GenomeNode*) sr)),
-                     gt_genome_node_get_start((GT_GenomeNode*) sr),
-                     gt_genome_node_get_end((GT_GenomeNode*) sr));
+                     gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) sr)),
+                     gt_genome_node_get_start((GtGenomeNode*) sr),
+                     gt_genome_node_get_end((GtGenomeNode*) sr));
   return 0;
 }
 

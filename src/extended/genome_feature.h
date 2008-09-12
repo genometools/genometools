@@ -32,20 +32,20 @@ typedef struct GT_GenomeFeature GT_GenomeFeature;
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
 
-const GT_GenomeNodeClass* gt_genome_feature_class(void);
+const GtGenomeNodeClass* gt_genome_feature_class(void);
 /* Create an new <GT_GenomeFeature*> on sequence with ID <seqid> and type <type>
    which lies from <start> to <end> on strand <strand>.
    <start> and <end> always refer to the forward strand, therefore <start> has
    to be smaller or equal than <end>. */
-GT_GenomeNode*        gt_genome_feature_new(GtStr *seqid, const char *type,
+GtGenomeNode*        gt_genome_feature_new(GtStr *seqid, const char *type,
                                             unsigned long start,
                                             unsigned long end,
                                             GtStrand strand);
-GT_GenomeNode*        gt_genome_feature_new_pseudo(GT_GenomeFeature*);
+GtGenomeNode*        gt_genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
-GT_GenomeNode*        gt_genome_feature_new_standard_gene(void);
+GtGenomeNode*        gt_genome_feature_new_standard_gene(void);
 const char*           gt_genome_feature_get_source(GT_GenomeFeature*);
-const char*           gt_genome_feature_get_attribute(GT_GenomeNode *gn,
+const char*           gt_genome_feature_get_attribute(GtGenomeNode *gn,
                                                       const char *attr_name);
 /* Return a GtStrArray containing the used attribute names. */
 GtStrArray*          gt_genome_feature_get_attribute_list(GT_GenomeFeature*);
@@ -72,9 +72,9 @@ void                  gt_genome_feature_determine_transcripttypes(
                                                              GT_GenomeFeature*);
 TranscriptFeatureType gt_genome_feature_get_transcriptfeaturetype(
                                                              GT_GenomeFeature*);
-void                  gt_genome_feature_set_source(GT_GenomeNode*,
+void                  gt_genome_feature_set_source(GtGenomeNode*,
                                                    GtStr *source);
-void                  gt_genome_feature_set_phase(GT_GenomeNode*, Phase);
+void                  gt_genome_feature_set_phase(GtGenomeNode*, Phase);
 void                  gt_genome_feature_set_end(GT_GenomeFeature*,
                                                 unsigned long);
 void                  gt_genome_feature_set_score(GT_GenomeFeature*, float);

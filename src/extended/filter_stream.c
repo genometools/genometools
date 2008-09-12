@@ -31,7 +31,7 @@ struct FilterStream
 #define filter_stream_cast(GS)\
         genome_stream_cast(filter_stream_class(), GS);
 
-static int filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+static int filter_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                    GtError *err)
 {
   FilterStream *fs;

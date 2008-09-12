@@ -58,13 +58,13 @@ static GtArray* genome_node_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
   GtArray *nodes;
-  GT_GenomeNode **gn;
+  GtGenomeNode **gn;
   const char *msg;
   bool error;
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);
   /* traverse table and save the ranges */
-  nodes = gt_array_new(sizeof (GT_GenomeNode*));
+  nodes = gt_array_new(sizeof (GtGenomeNode*));
   lua_pushinteger(L, i);
   lua_gettable(L, 1);
   while (!lua_isnil(L, -1)) {

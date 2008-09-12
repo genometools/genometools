@@ -25,8 +25,8 @@ typedef struct GT_Comment GT_Comment;
 
 #include "extended/genome_node.h"
 
-const GT_GenomeNodeClass* gt_comment_class(void);
-GT_GenomeNode*            gt_comment_new(const char *comment);
+const GtGenomeNodeClass* gt_comment_class(void);
+GtGenomeNode*            gt_comment_new(const char *comment);
 const char*               gt_comment_get_comment(const GT_Comment*);
 
 #endif

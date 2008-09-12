@@ -24,18 +24,18 @@
 struct UniqStream{
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
-  GT_GenomeNode *first_node,
+  GtGenomeNode *first_node,
              *second_node;
 };
 
 #define uniq_stream_cast(GS)\
         genome_stream_cast(uniq_stream_class(), GS)
 
-static bool nodes_are_equal_feature_trees(GT_GenomeNode *first_node,
-                                          GT_GenomeNode *second_node)
+static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
+                                          GtGenomeNode *second_node)
 {
   bool equal = false;
-  GT_GenomeNodeIterator *gni_a, *gni_b;
+  GtGenomeNodeIterator *gni_a, *gni_b;
   GT_GenomeFeature *gf_a, *gf_b;
   gf_a = gt_genome_node_cast(gt_genome_feature_class(), first_node);
   gf_b = gt_genome_node_cast(gt_genome_feature_class(), second_node);
@@ -60,7 +60,7 @@ static bool nodes_are_equal_feature_trees(GT_GenomeNode *first_node,
   return false;
 }
 
-static bool uniq(GT_GenomeNode **first_node, GT_GenomeNode **second_node)
+static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
 {
   bool first_score_is_defined, second_score_is_defined;
   float first_score = 0.0, second_score;
@@ -96,7 +96,7 @@ static bool uniq(GT_GenomeNode **first_node, GT_GenomeNode **second_node)
   return false;
 }
 
-static int uniq_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+static int uniq_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                  GtError *err)
 {
   UniqStream *us;

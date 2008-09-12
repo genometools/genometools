@@ -30,7 +30,7 @@ struct CSAStream {
 #define csa_stream_cast(GS)\
         genome_stream_cast(csa_stream_class(), GS)
 
-int csa_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GtError *err)
+int csa_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   CSAStream *cs;
   int had_err;

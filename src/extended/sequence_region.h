@@ -20,8 +20,8 @@
 
 #include "extended/sequence_region_api.h"
 
-const GT_GenomeNodeClass* gt_sequence_region_class(void);
-void                      gt_sequence_regions_consolidate(GT_GenomeNode*,
-                                                          GT_GenomeNode*);
+const GtGenomeNodeClass* gt_sequence_region_class(void);
+void                      gt_sequence_regions_consolidate(GtGenomeNode*,
+                                                          GtGenomeNode*);
 
 #endif

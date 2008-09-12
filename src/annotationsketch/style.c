@@ -175,7 +175,7 @@ static int gt_style_find_section_for_getting(const GtStyle *sty,
 }
 
 bool gt_style_get_color(const GtStyle *sty, const char *section,
-                     const char *key, GtColor *color, GT_GenomeNode *gn)
+                     const char *key, GtColor *color, GtGenomeNode *gn)
 {
   int i = 0;
   assert(sty && section && key && color);
@@ -193,7 +193,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1) && gn)
   {
-    GT_GenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
+    GtGenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
     gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
@@ -265,7 +265,7 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_str(const GtStyle *sty, const char *section,
-                     const char *key, GtStr *text, GT_GenomeNode *gn)
+                     const char *key, GtStr *text, GtGenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section);
@@ -281,7 +281,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1) && gn)
   {
-    GT_GenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
+    GtGenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
     gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
@@ -316,7 +316,7 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
-                    double *val, GT_UNUSED GT_GenomeNode *gn)
+                    double *val, GT_UNUSED GtGenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section && val);
@@ -332,7 +332,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1) && gn)
   {
-    GT_GenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
+    GtGenomeNode *gn_lua = gt_genome_node_rec_ref(gn);
     gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
@@ -367,7 +367,7 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_bool(const GtStyle *sty, const char *section,
-                       const char *key, bool *val, GT_UNUSED GT_GenomeNode *gn)
+                       const char *key, bool *val, GT_UNUSED GtGenomeNode *gn)
 {
   int i = 0;
   assert(sty && key && section);

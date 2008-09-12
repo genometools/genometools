@@ -63,7 +63,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
   GenomeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *splice_site_info_stream = NULL;
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   SpliceSiteInfoArguments arguments;
   RegionMapping *regionmapping;
   int parsed_args, had_err = 0;

@@ -70,7 +70,7 @@ static bool filter_contain_range(GT_GenomeFeature *gf, GtRange contain_range)
   assert(gf);
   if (contain_range.start != UNDEF_ULONG &&
       !gt_range_contains(contain_range,
-                         gt_genome_node_get_range((GT_GenomeNode*) gf))) {
+                         gt_genome_node_get_range((GtGenomeNode*) gf))) {
     return true;
   }
   return false;
@@ -81,7 +81,7 @@ static bool filter_overlap_range(GT_GenomeFeature *gf, GtRange overlap_range)
   assert(gf);
   if (overlap_range.start != UNDEF_ULONG &&
       !gt_range_overlap(overlap_range,
-                        gt_genome_node_get_range((GT_GenomeNode*) gf))) {
+                        gt_genome_node_get_range((GtGenomeNode*) gf))) {
     return true;
   }
   return false;
@@ -101,7 +101,7 @@ static bool filter_targetstrand(GT_GenomeFeature *gf, GtStrand targetstrand)
   const char *target;
   assert(gf);
   if (targetstrand != GT_NUM_OF_STRAND_TYPES &&
-      (target = gt_genome_feature_get_attribute((GT_GenomeNode*) gf,
+      (target = gt_genome_feature_get_attribute((GtGenomeNode*) gf,
                                              TARGET_STRING))) {
     unsigned long num_of_targets;
     GtStrand parsed_strand;
@@ -148,12 +148,12 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv,
   fv->current_feature++;
   if (!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are
                                       equal */
-      !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GT_GenomeNode*) gf))) {
+      !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GtGenomeNode*) gf))) {
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (gf && gt_genome_feature_has_type(gf, gft_gene)) {
       if (fv->max_gene_length != UNDEF_ULONG &&
-          gt_range_length(gt_genome_node_get_range((GT_GenomeNode*) gf)) >
+          gt_range_length(gt_genome_node_get_range((GtGenomeNode*) gf)) >
           fv->max_gene_length) {
         filter_node = true;
       }
@@ -199,7 +199,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv,
     filter_node = filter_min_average_ssp(gf, fv->min_average_splice_site_prob);
 
   if (filter_node)
-    gt_genome_node_rec_delete((GT_GenomeNode*) gf);
+    gt_genome_node_rec_delete((GtGenomeNode*) gf);
   else
     gt_queue_add(fv->gt_genome_node_buffer, gf);
 
@@ -215,24 +215,24 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv,
   filter_visitor = filter_visitor_cast(gv);
   if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
-               gt_genome_node_get_seqid((GT_GenomeNode*) sr))) {
+               gt_genome_node_get_seqid((GtGenomeNode*) sr))) {
     if (filter_visitor->contain_range.start != UNDEF_ULONG) {
-      GtRange range = gt_genome_node_get_range((GT_GenomeNode*) sr);
+      GtRange range = gt_genome_node_get_range((GtGenomeNode*) sr);
       if (gt_range_overlap(range, filter_visitor->contain_range)) {
         /* an overlapping contain range was defined -> update range  */
         range.start = MAX(range.start, filter_visitor->contain_range.start);
         range.end = MIN(range.end, filter_visitor->contain_range.end);
-        gt_genome_node_set_range((GT_GenomeNode*) sr, range);
+        gt_genome_node_set_range((GtGenomeNode*) sr, range);
         gt_queue_add(filter_visitor->gt_genome_node_buffer, sr);
       }
       else /* contain range does not overlap with <sr> range -> delete <sr> */
-        gt_genome_node_delete((GT_GenomeNode*) sr);
+        gt_genome_node_delete((GtGenomeNode*) sr);
     }
     else
       gt_queue_add(filter_visitor->gt_genome_node_buffer, sr);
   }
   else
-    gt_genome_node_rec_delete((GT_GenomeNode*) sr);
+    gt_genome_node_rec_delete((GtGenomeNode*) sr);
   return 0;
 }
 
@@ -244,11 +244,11 @@ static int filter_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
   filter_visitor = filter_visitor_cast(gv);
   if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
-               gt_genome_node_get_seqid((GT_GenomeNode*) sn))) {
+               gt_genome_node_get_seqid((GtGenomeNode*) sn))) {
     gt_queue_add(filter_visitor->gt_genome_node_buffer, sn);
   }
   else
-    gt_genome_node_rec_delete((GT_GenomeNode*) sn);
+    gt_genome_node_rec_delete((GtGenomeNode*) sn);
   return 0;
 }
 
@@ -299,7 +299,7 @@ unsigned long filter_visitor_node_buffer_size(GenomeVisitor *gv)
   return gt_queue_size(filter_visitor->gt_genome_node_buffer);
 }
 
-GT_GenomeNode* filter_visitor_get_node(GenomeVisitor *gv)
+GtGenomeNode* filter_visitor_get_node(GenomeVisitor *gv)
 {
   FilterVisitor *filter_visitor;
   filter_visitor = filter_visitor_cast(gv);

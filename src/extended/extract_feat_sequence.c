@@ -20,7 +20,7 @@
 #include "extended/region_mapping.h"
 #include "extended/reverse.h"
 
-static int extract_join_feature(GT_GenomeNode *gn, const char *type,
+static int extract_join_feature(GtGenomeNode *gn, const char *type,
                                 RegionMapping *region_mapping, GtStr *sequence,
                                 bool *reverse_strand, GtError *err)
 {
@@ -57,7 +57,7 @@ static int extract_join_feature(GT_GenomeNode *gn, const char *type,
   return had_err;
 }
 
-int extract_feat_sequence(GtStr *sequence, GT_GenomeNode *gn, const char *type,
+int extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn, const char *type,
                           bool join, RegionMapping *region_mapping,
                           GtError *err)
 {
@@ -72,8 +72,8 @@ int extract_feat_sequence(GtStr *sequence, GT_GenomeNode *gn, const char *type,
   assert(gf);
 
   if (join) {
-    GT_GenomeNodeIterator *gni;
-    GT_GenomeNode *child;
+    GtGenomeNodeIterator *gni;
+    GtGenomeNode *child;
     bool reverse_strand = false;
     /* in this case we have to traverse the children */
     gni = gt_genome_node_iterator_new_direct(gn);

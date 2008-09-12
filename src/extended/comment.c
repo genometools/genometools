@@ -25,7 +25,7 @@
 
 struct GT_Comment
 {
-  const GT_GenomeNode parent_instance;
+  const GtGenomeNode parent_instance;
   char *comment;
   GtStr *gt_comment_str; /* used in gt_comment_get_idstr() */
 };
@@ -33,7 +33,7 @@ struct GT_Comment
 #define gt_comment_cast(GN)\
         gt_genome_node_cast(gt_comment_class(), GN)
 
-static void gt_comment_free(GT_GenomeNode *gn)
+static void gt_comment_free(GtGenomeNode *gn)
 {
   GT_Comment *c = gt_comment_cast(gn);
   assert(c && c->comment);
@@ -41,7 +41,7 @@ static void gt_comment_free(GT_GenomeNode *gn)
   gt_str_delete(c->gt_comment_str);
 }
 
-static GtStr* gt_comment_get_idstr(GT_GenomeNode *gn)
+static GtStr* gt_comment_get_idstr(GtGenomeNode *gn)
 {
   GT_Comment *c;
   assert(gn);
@@ -49,7 +49,7 @@ static GtStr* gt_comment_get_idstr(GT_GenomeNode *gn)
   return c->gt_comment_str;
 }
 
-static GtRange gt_comment_get_range(GT_UNUSED GT_GenomeNode *gn)
+static GtRange gt_comment_get_range(GT_UNUSED GtGenomeNode *gn)
 {
   GtRange range;
   range.start = 0;
@@ -57,7 +57,7 @@ static GtRange gt_comment_get_range(GT_UNUSED GT_GenomeNode *gn)
   return range;
 }
 
-static int gt_comment_accept(GT_GenomeNode *gn, GenomeVisitor *gv,
+static int gt_comment_accept(GtGenomeNode *gn, GenomeVisitor *gv,
                              GtError *err)
 {
   GT_Comment *c;
@@ -66,9 +66,9 @@ static int gt_comment_accept(GT_GenomeNode *gn, GenomeVisitor *gv,
   return genome_visitor_visit_comment(gv, c, err);
 }
 
-const GT_GenomeNodeClass* gt_comment_class()
+const GtGenomeNodeClass* gt_comment_class()
 {
-  static const GT_GenomeNodeClass gnc = { sizeof (GT_Comment),
+  static const GtGenomeNodeClass gnc = { sizeof (GT_Comment),
                                        gt_comment_free,
                                        NULL,
                                        gt_comment_get_idstr,
@@ -79,9 +79,9 @@ const GT_GenomeNodeClass* gt_comment_class()
   return &gnc;
 }
 
-GT_GenomeNode* gt_comment_new(const char *comment)
+GtGenomeNode* gt_comment_new(const char *comment)
 {
-  GT_GenomeNode *gn = gt_genome_node_create(gt_comment_class());
+  GtGenomeNode *gn = gt_genome_node_create(gt_comment_class());
   GT_Comment *c = gt_comment_cast(gn);
   assert(comment);
   c->comment = gt_cstr_dup(comment);

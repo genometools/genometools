@@ -24,14 +24,14 @@
 struct GenomeStreamClass
 {
   size_t size;
-  int  (*next_tree)(GenomeStream*, GT_GenomeNode**, GtError*);
+  int  (*next_tree)(GenomeStream*, GtGenomeNode**, GtError*);
   void (*free)(GenomeStream*);
 };
 
 struct GenomeStream
 {
   const GenomeStreamClass *c_class;
-  GT_GenomeNode *buffer;
+  GtGenomeNode *buffer;
   bool ensure_sorting;
   unsigned int reference_count;
 };

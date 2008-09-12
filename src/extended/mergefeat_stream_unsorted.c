@@ -30,7 +30,7 @@ struct MergefeatStreamUnsorted {
         genome_stream_cast(mergefeat_stream_unsorted_class(), GS)
 
 static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
-                                               GT_GenomeNode **gn,
+                                               GtGenomeNode **gn,
                                                GtError *err)
 {
   MergefeatStreamUnsorted *mfs;

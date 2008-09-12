@@ -3,11 +3,11 @@
 static GtArray* create_example_features(void)
 {
   GtArray *features;
-  GT_GenomeNode *gene, *exon, *intron; /* features */
+  GtGenomeNode *gene, *exon, *intron; /* features */
   GtStr *seqid; /* holds the sequence id the features refer to */
 
   /* construct the example features */
-  features = gt_array_new(sizeof (GT_GenomeNode*));
+  features = gt_array_new(sizeof (GtGenomeNode*));
   seqid = gt_str_new_cstr("chromosome_21");
 
   /* construct a gene on the forward strand with two exons */
@@ -86,7 +86,7 @@ static void delete_example_features(GtArray *features)
 {
   unsigned long i;
   for (i = 0; i < gt_array_size(features); i++)
-    gt_genome_node_rec_delete(*(GT_GenomeNode**) gt_array_get(features, i));
+    gt_genome_node_rec_delete(*(GtGenomeNode**) gt_array_get(features, i));
   gt_array_delete(features);
 }
 

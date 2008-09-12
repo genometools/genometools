@@ -78,7 +78,7 @@ int gt_line_unit_test(GtError *err)
   GtArray* blocks;
   GtStr *seqid1, *seqid2, *seqid3;
   int had_err = 0;
-  GT_GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
+  GtGenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
   GtLine *l1, *l2;
   GtBlock *b1, *b2;
   gt_error_check(err);

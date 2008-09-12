@@ -53,7 +53,7 @@ static void splicesiteinfo_visitor_free(GenomeVisitor *gv)
   string_distri_delete(splicesiteinfo_visitor->acceptorsites);
 }
 
-static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
+static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                           GtError *err)
 {
   const char *sequence;
@@ -112,13 +112,13 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
                                                  GtError *err)
 {
   SpliceSiteInfoVisitor *ssiv;
-  GT_GenomeNodeIterator *gni;
-  GT_GenomeNode *node;
+  GtGenomeNodeIterator *gni;
+  GtGenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
   ssiv = splicesiteinfo_visitor_cast(gv);
   assert(ssiv->region_mapping);
-  gni = gt_genome_node_iterator_new((GT_GenomeNode*) gf);
+  gni = gt_genome_node_iterator_new((GtGenomeNode*) gf);
   while (!had_err && (node = gt_genome_node_iterator_next(gni))) {
     if (gt_genome_feature_has_type((GT_GenomeFeature*) node, gft_intron))
       had_err = process_intron(ssiv, node, err);

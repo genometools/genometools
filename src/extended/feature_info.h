@@ -25,16 +25,16 @@ typedef struct FeatureInfo FeatureInfo;
 FeatureInfo*   feature_info_new();
 void           feature_info_delete(FeatureInfo*);
 void           feature_info_reset(FeatureInfo*);
-GT_GenomeNode* feature_info_get(const FeatureInfo*, const char *id);
-void           feature_info_add(FeatureInfo*, const char *id, GT_GenomeNode*);
-GT_GenomeNode* feature_info_get_pseudo_parent(const FeatureInfo*,
+GtGenomeNode* feature_info_get(const FeatureInfo*, const char *id);
+void           feature_info_add(FeatureInfo*, const char *id, GtGenomeNode*);
+GtGenomeNode* feature_info_get_pseudo_parent(const FeatureInfo*,
                                               const char *id);
 void           feature_info_add_pseudo_parent(FeatureInfo*, const char *id,
-                                              GT_GenomeNode *pseudo_parent);
+                                              GtGenomeNode *pseudo_parent);
 void           feature_info_replace_pseudo_parent(FeatureInfo*,
-                                                  GT_GenomeNode *child,
-                                                  GT_GenomeNode
+                                                  GtGenomeNode *child,
+                                                  GtGenomeNode
                                                   *new_pseudo_parent);
-GT_GenomeNode* feature_info_find_root(const FeatureInfo*, const char *id);
+GtGenomeNode* feature_info_find_root(const FeatureInfo*, const char *id);
 
 #endif

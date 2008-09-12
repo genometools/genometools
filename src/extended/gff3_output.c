@@ -21,9 +21,9 @@
 
 void gff3_output_leading(GT_GenomeFeature *gf, GT_GenFile *outfp)
 {
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   assert(gf);
-  gn = (GT_GenomeNode*) gf;
+  gn = (GtGenomeNode*) gf;
   gt_genfile_xprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t",
                      gt_str_get(gt_genome_node_get_seqid(gn)),
                      gt_genome_feature_get_source(gf),

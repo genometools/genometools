@@ -77,7 +77,7 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
 {
   GenomeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
                *gff3_out_stream = NULL;
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   ChseqidsArguments arguments;
   GtStr *chseqids;
   int parsed_args, had_err = 0;

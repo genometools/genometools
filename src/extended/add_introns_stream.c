@@ -29,7 +29,7 @@ struct AddIntronsStream{
 #define add_introns_stream_cast(GS)\
         genome_stream_cast(add_introns_stream_class(), GS)
 
-static int add_introns_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
+static int add_introns_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
                                         GtError *err)
 {
   AddIntronsStream *ais;

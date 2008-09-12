@@ -43,7 +43,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(cds_visitor->region_mapping);
 }
 
-static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data,
+static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
                                     GtError *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
@@ -80,7 +80,7 @@ static int extract_cds_if_necessary(GT_GenomeNode *gn, void *data,
   return had_err;
 }
 
-static int extract_spliced_seq(GT_GenomeNode *gn, CDSVisitor *visitor,
+static int extract_spliced_seq(GtGenomeNode *gn, CDSVisitor *visitor,
                                GtError *err)
 {
   gt_error_check(err);
@@ -117,9 +117,9 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 }
 
 static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
-                                        GT_GenomeNode *gn)
+                                        GtGenomeNode *gn)
 {
-  GT_GenomeNode *cds_feature;
+  GtGenomeNode *cds_feature;
   unsigned long i;
   GtRange cds;
   GtStrand strand = gt_genome_feature_get_strand((GT_GenomeFeature*) gn);
@@ -169,7 +169,7 @@ static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
 }
 
 static void create_CDS_features_for_longest_ORF(GtArray *orfs, CDSVisitor *v,
-                                                GT_GenomeNode *gn)
+                                                GtGenomeNode *gn)
 {
   if (gt_array_size(orfs)) {
     /* sort ORFs according to length */
@@ -180,7 +180,7 @@ static void create_CDS_features_for_longest_ORF(GtArray *orfs, CDSVisitor *v,
   }
 }
 
-static int add_cds_if_necessary(GT_GenomeNode *gn, void *data, GtError *err)
+static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GT_GenomeFeature *gf;
@@ -212,7 +212,7 @@ static int cds_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
 {
   CDSVisitor *v = cds_visitor_cast(gv);
   gt_error_check(err);
-  return gt_genome_node_traverse_children((GT_GenomeNode*) gf, v,
+  return gt_genome_node_traverse_children((GtGenomeNode*) gf, v,
                                        add_cds_if_necessary, false, err);
 
 }

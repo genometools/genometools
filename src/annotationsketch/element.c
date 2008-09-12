@@ -29,13 +29,13 @@
 struct GtElement {
   const char *type;
   GtStrand strand;
-  GT_GenomeNode *gn;
+  GtGenomeNode *gn;
   GtRange range;
   GT_DrawingRange drange;
   bool mark;
 };
 
-GtElement* gt_element_new(GT_GenomeNode *gn)
+GtElement* gt_element_new(GtGenomeNode *gn)
 {
   GtElement *element;
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
@@ -113,7 +113,7 @@ int gt_element_sketch(GtElement *elem, GtCanvas *canvas)
   return had_err;
 }
 
-GT_GenomeNode* gt_element_get_node_ref(const GtElement *elem)
+GtGenomeNode* gt_element_get_node_ref(const GtElement *elem)
 {
   assert(elem);
   return elem->gn;
@@ -122,7 +122,7 @@ GT_GenomeNode* gt_element_get_node_ref(const GtElement *elem)
 int gt_element_unit_test(GtError *err)
 {
   GtRange r1, r2, r_temp;
-  GT_GenomeNode *gn, *gn2;
+  GtGenomeNode *gn, *gn2;
   GtElement *e, *e2, *e3;
   GtStr *seqid;
   int had_err = 0;
