@@ -15,14 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_INDEX_H
-#define FEATURE_INDEX_H
+#ifndef FEATURE_INDEX_MEMORY_H
+#define FEATURE_INDEX_MEMORY_H
 
-/* The GtFeatureIndex interface. */
-typedef struct GtFeatureIndexClass GtFeatureIndexClass;
+#include "annotationsketch/feature_index_memory_api.h"
+#include "annotationsketch/feature_index.h"
 
-#include "annotationsketch/feature_index_api.h"
-
-GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex*);
+const GtFeatureIndexClass* gt_feature_index_memory_class(void);
+int                        gt_feature_index_memory_unit_test(GtError*);
 
 #endif

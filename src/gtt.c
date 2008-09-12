@@ -88,6 +88,7 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_index_memory.h"
 #include "annotationsketch/gt_sketch.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/track.h"
@@ -192,7 +193,8 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "style class", gt_style_unit_test);
   hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
   hashmap_add(unit_tests, "element class", gt_element_unit_test);
-  hashmap_add(unit_tests, "feature index class", gt_feature_index_unit_test);
+  hashmap_add(unit_tests, "memory feature index class",
+              gt_feature_index_memory_unit_test);
   hashmap_add(unit_tests, "imageinfo class", gt_image_info_unit_test);
   hashmap_add(unit_tests, "line class", gt_line_unit_test);
   hashmap_add(unit_tests, "track class", gt_track_unit_test);

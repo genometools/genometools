@@ -20,7 +20,7 @@
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
-#include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_index_memory_api.h"
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
@@ -800,7 +800,7 @@ int gt_diagram_unit_test(GtError *err)
   gt_genome_node_add_child(gn2, cds1);
 
   /* create a new feature index on which we can perform some tests */
-  fi = gt_feature_index_new();
+  fi = gt_feature_index_memory_new();
 
   /* add features to every sequence region */
   gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn1);
