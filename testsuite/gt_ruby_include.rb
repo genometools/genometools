@@ -1,4 +1,4 @@
-if $arguments["libannotationsketch"] then
+if not $arguments["nocairo"] then
   Name "gtruby: genome_stream bindings (output stream)"
   Keywords "gt_ruby"
   Test do
@@ -23,13 +23,13 @@ if $arguments["libannotationsketch"] then
     run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
   end
 
-  Name "gtruby: libannotationsketch bindings (valid gff3 file)"
+  Name "gtruby: AnnotationSketch bindings (valid gff3 file)"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/view.rb test.png #{$testdata}gff3_file_1_short.txt"
   end
 
-  Name "gtruby: libannotationsketch bindings (corrupt gff3 file)"
+  Name "gtruby: AnnotationSketch bindings (corrupt gff3 file)"
   Keywords "gt_ruby"
   Test do
     run_ruby("#{$testdata}gtruby/view.rb test.png #{$testdata}corrupt.gff3",
@@ -37,7 +37,7 @@ if $arguments["libannotationsketch"] then
     grep $last_stderr, "GenomeTools error"
   end
 
-  Name "gtruby: libannotationsketch bindings (nonexistent gff3 file)"
+  Name "gtruby: AnnotationSketch bindings (nonexistent gff3 file)"
   Keywords "gt_ruby"
   Test do
     run_ruby("#{$testdata}gtruby/view.rb test.png #{$testdata}nonexistent_file",
@@ -45,13 +45,13 @@ if $arguments["libannotationsketch"] then
     grep $last_stderr, "GenomeTools error"
   end
 
-  Name "gtruby: libannotationsketch bindings (PNG stream)"
+  Name "gtruby: AnnotationSketch bindings (PNG stream)"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/view_stream.rb test.png #{$testdata}gff3_file_1_short.txt"
   end
 
-  Name "gtruby: libannotationsketch bindings (config)"
+  Name "gtruby: AnnotationSketch bindings (config)"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/config.rb #{$cur}/gtdata/sketch/default.style"
