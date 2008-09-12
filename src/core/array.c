@@ -22,6 +22,7 @@
 #include "core/dynalloc.h"
 #include "core/ensure.h"
 #include "core/ma.h"
+#include "core/msort.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/unused_api.h"
@@ -177,6 +178,12 @@ void gt_array_sort(GtArray *a, GtCompare compar)
 {
   assert(a && compar);
   qsort(a->space, a->next_free, a->size_of_elem, compar);
+}
+
+void gt_array_sort_stable(GtArray *a, GtCompare compar)
+{
+  assert(a && compar);
+  gt_msort(a->space, a->next_free, a->size_of_elem, compar);
 }
 
 int gt_array_cmp(const GtArray *array_a, const GtArray *array_b)

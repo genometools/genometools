@@ -29,6 +29,7 @@
 #include "core/ensure.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
+#include "core/msort.h"
 #include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
@@ -103,7 +104,7 @@ static NodeInfoElement* nodeinfo_get(GtDiagram *d,
 {
   NodeInfoElement *ni;
   assert(d && node);
-  if(!(ni = hashmap_get(d->nodeinfo, node))) {
+  if (!(ni = hashmap_get(d->nodeinfo, node))) {
     ni = gt_calloc(1, sizeof (NodeInfoElement));
     ni->type_index  = hashmap_new(HASH_STRING, NULL,
                                   gt_free_func);
@@ -120,9 +121,9 @@ static GtBlock* nodeinfo_find_block(NodeInfoElement* ni,
   PerTypeInfo *type_struc = NULL;
   GtBlockTuple *bt = NULL;
   assert(ni);
-  if(!(type_struc = hashmap_get(ni->type_index, gft)))
+  if (!(type_struc = hashmap_get(ni->type_index, gft)))
     return NULL;
-  if(!(bt = hashmap_get(type_struc->rep_index, gf)))
+  if (!(bt = hashmap_get(type_struc->rep_index, gf)))
     return NULL;
   assert(bt);
   return bt->block;
@@ -696,7 +697,7 @@ static int layout_tracks(void *key, void *value, void *data,
   assert(type && list);
 
   /* to get a deterministic layout, we sort the GtBlocks for each type */
-  gt_array_sort(list, blocklist_block_compare);
+  gt_array_sort_stable(list, blocklist_block_compare);
   /* we take the basename of the filename to have nicer output in the
      generated graphic. this might lead to ``collapsed'' tracks, if two files
      with different paths have the same basename. */
