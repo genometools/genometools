@@ -25,7 +25,7 @@ module GT
   gtdlload "libgenometools"
   typealias "bool", "ibool"
   extern "GenomeStream* gff3_in_stream_new_sorted(const char *, bool)"
-  extern "StrArray* gff3_in_stream_get_used_types(GenomeStream*)"
+  extern "GtStrArray* gff3_in_stream_get_used_types(GenomeStream*)"
 
   class GFF3InStream
     include GenomeStream

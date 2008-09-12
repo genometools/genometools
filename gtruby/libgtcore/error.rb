@@ -20,9 +20,9 @@ require 'gtdlload'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_Error* gt_error_new()"
-  extern "const char* gt_error_get(const GT_Error*)"
-  extern "void gt_error_delete(GT_Error*)"
+  extern "GtError* gt_error_new()"
+  extern "const char* gt_error_get(const GtError*)"
+  extern "void gt_error_delete(GtError*)"
 
   class Error
     def initialize

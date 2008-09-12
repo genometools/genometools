@@ -23,7 +23,7 @@ require 'libgtext/genome_node'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "int genome_stream_next_tree(GenomeStream*, GenomeNode**, Env*)"
+  extern "int genome_stream_next_tree(GenomeStream*, GtGenomeNode**, GtError*)"
 
   module GenomeStream
     def next_tree

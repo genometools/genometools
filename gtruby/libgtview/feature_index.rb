@@ -24,19 +24,19 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   typealias "bool", "ibool"
-  extern "GT_FeatureIndex* gt_feature_index_new()"
-  extern "void gt_feature_index_delete(GT_FeatureIndex*)"
-  extern "int gt_feature_index_add_gff3file(GT_FeatureIndex*, " +
+  extern "GtFeatureIndex* gt_feature_index_new()"
+  extern "void gt_feature_index_delete(GtFeatureIndex*)"
+  extern "int gt_feature_index_add_gff3file(GtFeatureIndex*, " +
                                            "const char*, " +
-                                           "GT_Error*)"
-  extern "GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex*, " +
-                                                           "const char*)"
-  extern "const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex*)"
-  extern "GT_StrArray* gt_feature_index_get_seqids(const GT_FeatureIndex*)"
-  extern "void gt_feature_index_get_range_for_seqid(GT_FeatureIndex*, GT_Range*, " +
-                                                   "const char*)"
-  extern "bool gt_feature_index_has_seqid(const GT_FeatureIndex*, const char*)"
-  extern "void gt_feature_index_delete(GT_FeatureIndex*)"
+                                           "GtError*)"
+  extern "GtArray* gt_feature_index_get_features_for_seqid(Gt_FeatureIndex*, " +
+                                                          "const char*)"
+  extern "const char* gt_feature_index_get_first_seqid(const GtFeatureIndex*)"
+  extern "GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex*)"
+  extern "void gt_feature_index_get_range_for_seqid(GtFeatureIndex*, " +
+                                                   "GtRange*, const char*)"
+  extern "bool gt_feature_index_has_seqid(const GtFeatureIndex*, const char*)"
+  extern "void gt_feature_index_delete(GtFeatureIndex*)"
 
   class FeatureIndex
     attr_reader :feature_index

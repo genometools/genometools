@@ -24,16 +24,17 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   typealias "bool", "ibool"
-  extern "const GT_GenomeNodeClass* gt_genome_feature_class(void)"
-  extern "void* gt_genome_node_cast(const GT_GenomeNodeClass*, GT_GenomeNode*)"
-  extern "GT_FeatureType* gt_genome_feature_get_type(GT_GenomeFeature*)"
-  extern "int gt_genome_feature_get_strand(GT_GenomeFeature*)"
-  extern "int gt_genome_feature_get_phase(GT_GenomeFeature*)"
-  extern "float gt_genome_feature_get_score(GT_GenomeFeature*)"
-  extern "bool gt_genome_feature_score_is_defined(const GT_GenomeFeature*)"
-  extern "const char* gt_feature_type_get_cstr(const GT_FeatureType*)"
-  extern "const char* gt_genome_feature_get_attribute(GT_GenomeNode*,const char*)"
-  extern "void gt_genome_feature_foreach_attribute(GT_GenomeFeature*, void*, void*)"
+  extern "const GtGenomeNodeClass* gt_genome_feature_class(void)"
+  extern "void* gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*)"
+  extern "const char* gt_genome_feature_get_type(Gt_GenomeFeature*)"
+  extern "int gt_genome_feature_get_strand(GtGenomeFeature*)"
+  extern "int gt_genome_feature_get_phase(GtGenomeFeature*)"
+  extern "float gt_genome_feature_get_score(GtGenomeFeature*)"
+  extern "bool gt_genome_feature_score_is_defined(const GtGenomeFeature*)"
+  extern "const char* gt_genome_feature_get_attribute(GtGenomeNode*, " +
+                                                     "const char*)"
+  extern "void gt_genome_feature_foreach_attribute(GtGenomeFeature*, void*, " +
+                                                  "void*)"
 
   #callback to populate attribute list
   def collect_attrib(tag, val, data)
