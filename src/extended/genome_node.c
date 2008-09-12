@@ -15,14 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <stdarg.h>
+#include "core/assert.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/msort.h"
 #include "core/queue.h"
 #include "core/unused_api.h"
 #include "extended/genome_node_rep.h"
+#include "extended/region_node_api.h"
 
 typedef enum {
   NO_PARENT,
@@ -45,9 +46,9 @@ static int compare_gt_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
   void *sr_a, *sr_b, *sn_a, *sn_b;
 
-  /* sequence regions first */
-  sr_a = gt_genome_node_cast(gt_sequence_region_class(), gn_a);
-  sr_b = gt_genome_node_cast(gt_sequence_region_class(), gn_b);
+  /* region nodes first */
+  sr_a = gt_region_node_try_cast(gn_a);
+  sr_b = gt_region_node_try_cast(gn_b);
 
   if (sr_a && !sr_b)
     return -1;
@@ -55,8 +56,8 @@ static int compare_gt_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
     return 1;
 
   /* sequence nodes last */
-  sn_a = gt_genome_node_cast(gt_sequence_node_class(), gn_a);
-  sn_b = gt_genome_node_cast(gt_sequence_node_class(), gn_b);
+  sn_a = gt_sequence_node_try_cast(gn_a);
+  sn_b = gt_sequence_node_try_cast(gn_b);
 
   if (sn_a && !sn_b)
     return 1;
@@ -70,17 +71,17 @@ int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
   int rval;
   assert(gn_a && gn_b);
-  /* ensure that sequence regions come first and sequence nodes come last,
+  /* ensure that region nodes come first and sequence nodes come last,
      otherwise we don't get a valid GFF3 stream */
   if ((rval = compare_gt_genome_node_type(gn_a, gn_b)))
     return rval;
 
   if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),
-                      gt_genome_node_get_idstr(gn_b)))) {
+                         gt_genome_node_get_idstr(gn_b)))) {
     return rval;
   }
   return gt_range_compare(gt_genome_node_get_range(gn_a),
-                       gt_genome_node_get_range(gn_b));
+                          gt_genome_node_get_range(gn_b));
 }
 
 static int compare_genome_nodes_with_delta(GtGenomeNode *gn_a,
@@ -172,7 +173,13 @@ void gt_genome_node_set_origin(GtGenomeNode *gn,
 
 void* gt_genome_node_cast(const GtGenomeNodeClass *gnc, GtGenomeNode *gn)
 {
-  assert(gnc && gn);
+  gt_assert(gnc && gn && gn->c_class == gnc);
+  return gn;
+}
+
+void* gt_genome_node_try_cast(const GtGenomeNodeClass *gnc, GtGenomeNode *gn)
+{
+  gt_assert(gnc && gn);
   if (gn->c_class == gnc)
     return gn;
   return NULL;
@@ -220,8 +227,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
 
   if (depth_first) {
     node_stack = gt_array_new(sizeof (GtGenomeNode*));
-    if (!with_pseudo &&
-        gt_genome_node_cast(gt_genome_feature_class(), genome_node) &&
+    if (!with_pseudo && gt_genome_feature_try_cast(genome_node) &&
         gt_genome_feature_is_pseudo((GtGenomeFeature*) genome_node)) {
       /* add the children backwards to traverse in order */
       for (dlistelem = gt_dlist_last(genome_node->children); dlistelem != NULL;
@@ -236,8 +242,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
   }
   else {
     node_queue = gt_queue_new();
-    if (!with_pseudo &&
-        gt_genome_node_cast(gt_genome_feature_class(), genome_node) &&
+    if (!with_pseudo && gt_genome_feature_try_cast(genome_node) &&
         gt_genome_feature_is_pseudo((GtGenomeFeature*) genome_node)) {
       for (dlistelem = gt_dlist_first(genome_node->children); dlistelem != NULL;
            dlistelem = gt_dlistelem_next(dlistelem)) {
@@ -469,14 +474,14 @@ int gt_genome_node_accept(GtGenomeNode *gn, GenomeVisitor *gv, GtError *err)
 
 void gt_genome_node_add_child(GtGenomeNode *parent, GtGenomeNode *child)
 {
-  assert(parent && child);
+  gt_assert(parent && child);
   /* <parent> and <child> have the same seqid */
-  assert(!gt_str_cmp(gt_genome_node_get_seqid(parent),
-                     gt_genome_node_get_seqid(child)));
+  gt_assert(!gt_str_cmp(gt_genome_node_get_seqid(parent),
+                        gt_genome_node_get_seqid(child)));
 #ifndef NDEBUG
-  if (gt_genome_node_cast(gt_genome_feature_class(), child)) {
+  if (gt_genome_feature_try_cast(child)) {
     /* pseudo-features have to be top-level */
-    assert(!gt_genome_feature_is_pseudo((GtGenomeFeature*) child));
+    gt_assert(!gt_genome_feature_is_pseudo((GtGenomeFeature*) child));
   }
 #endif
   /* create children list on demand */
@@ -571,7 +576,7 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GtGenomeNode
   assert(parent);
 
   if (child)
-    gf = gt_genome_node_cast(gt_genome_feature_class(), child);
+    gf = gt_genome_feature_try_cast(child);
 
   if (!parent->children)
     return true;
@@ -582,8 +587,8 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GtGenomeNode
   for (dlistelem = gt_dlist_first(parent->children); dlistelem != NULL;
        dlistelem = gt_dlistelem_next(dlistelem)) {
     if (!gf ||
-        ((child_gf = gt_genome_node_cast(gt_genome_feature_class(),
-                                      gt_dlistelem_get_data(dlistelem))) &&
+        ((child_gf =
+            gt_genome_feature_try_cast(gt_dlistelem_get_data(dlistelem))) &&
          gt_genome_feature_get_type(gf) ==
          gt_genome_feature_get_type(child_gf))) {
       range = gt_genome_node_get_range((GtGenomeNode*)
@@ -724,16 +729,16 @@ void gt_genome_nodes_sort_stable(GtArray *nodes)
            sizeof (GtGenomeNode*), (GtCompare) gt_genome_node_compare);
 }
 
-bool gt_genome_nodes_are_equal_sequence_regions(GtGenomeNode *gn_a,
-                                                GtGenomeNode *gn_b)
+bool gt_genome_nodes_are_equal_region_nodes(GtGenomeNode *gn_a,
+                                            GtGenomeNode *gn_b)
 {
   void *sr_a, *sr_b;
 
-  sr_a = gn_a ? gt_genome_node_cast(gt_sequence_region_class(), gn_a) : NULL;
-  sr_b = gn_b ? gt_genome_node_cast(gt_sequence_region_class(), gn_b) : NULL;
+  sr_a = gn_a ? gt_region_node_try_cast(gn_a) : NULL;
+  sr_b = gn_b ? gt_region_node_try_cast(gn_b) : NULL;
 
   if (sr_a && sr_b && !gt_str_cmp(gt_genome_node_get_seqid(gn_a),
-                               gt_genome_node_get_seqid(gn_b))) {
+                                  gt_genome_node_get_seqid(gn_b))) {
     return true;
   }
   return false;

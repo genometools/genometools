@@ -1253,7 +1253,6 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                               GenomeVisitor *gv, GtError *err)
 {
   GtGenomeNode *gn;
-  GtSequenceRegion *sr;
   GtGenomeFeature *gf;
   Slot *slot;
   ProcessRealFeatureInfo real_info;
@@ -1285,8 +1284,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* process the reality stream completely */
   while (!(had_err = genome_stream_next_tree(se->reality, &gn, err)) && gn) {
-    sr = gt_genome_node_cast(gt_sequence_region_class(), gn);
-    if (sr) {
+    if (gt_region_node_try_cast(gn)) {
       /* each sequence region gets its own ``slot'' */
       if (!(slot = hashmap_get(se->slots,
                                gt_str_get(gt_genome_node_get_seqid(gn)))))
@@ -1298,9 +1296,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       }
       assert(slot);
     }
-    gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
     /* we consider only genome features */
-    if (gf) {
+    if ((gf = gt_genome_feature_try_cast(gn))) {
       /* each sequence must have its own ``slot'' at this point */
       slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
       assert(slot);
@@ -1327,9 +1324,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   if (!had_err) {
     while (!(had_err = genome_stream_next_tree(se->prediction, &gn, err)) &&
            gn) {
-      gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
       /* we consider only genome features */
-      if (gf) {
+      if ((gf = gt_genome_feature_try_cast(gn))) {
         /* get (real) slot */
         slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
         if (slot) {

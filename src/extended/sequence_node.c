@@ -26,9 +26,6 @@ struct GT_SequenceNode
          *sequence;
 };
 
-#define gt_sequence_node_cast(GN)\
-        gt_genome_node_cast(gt_sequence_node_class(), GN)
-
 static void gt_sequence_node_free(GtGenomeNode *gn)
 {
   GT_SequenceNode *sn = gt_sequence_node_cast(gn);

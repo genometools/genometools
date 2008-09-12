@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <string.h>
+#include "core/assert.h"
 #include "core/cstr.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
@@ -65,7 +65,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 {
   void *result;
 
-  assert(type && feature_string);
+  gt_assert(type && feature_string);
 
   result = bsearch(&feature_string,
                    GTF_feature_type_strings,
@@ -110,10 +110,10 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   GtGenomeNode *gn;
   GtQueue *genome_nodes = (GtQueue*) data;
   gt_error_check(err);
-  assert(key && value && data);
+  gt_assert(key && value && data);
   seqid = gt_str_new_cstr(key);
   range = *(GtRange*) value;
-  gn = gt_sequence_region_new(seqid, range);
+  gn = gt_region_node_new(seqid, range.start, range.end);
   gt_queue_add(genome_nodes, gn);
   gt_str_delete(seqid);
   return 0;
@@ -134,8 +134,9 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(key && value && data);
-  assert(gt_array_size(gt_genome_node_array)); /* at least one node in array */
+  gt_assert(key && value && data);
+   /* at least one node in array */
+  gt_assert(gt_array_size(gt_genome_node_array));
 
   /* determine the range and the strand of the mRNA */
   first_node = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, 0);
@@ -199,11 +200,11 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(key && value && data);
+  gt_assert(key && value && data);
   cinfo->mRNAs = mRNAs;
   had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, cinfo, err);
   if (!had_err) {
-    assert(gt_array_size(mRNAs)); /* at least one mRNA constructed */
+    gt_assert(gt_array_size(mRNAs)); /* at least one mRNA constructed */
 
     /* determine the range and the strand of the gene */
     gn = *(GtGenomeNode**) gt_array_get(mRNAs, 0);
@@ -215,7 +216,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       gene_range = gt_range_join(gene_range, gt_genome_node_get_range(gn));
       gene_strand = gt_strand_join(gene_strand,
                           gt_genome_feature_get_strand((GtGenomeFeature*) gn));
-      assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
+      gt_assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
     gene_node = gt_genome_feature_new(gene_seqid, gft_gene, gene_range.start,
@@ -283,7 +284,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
   bool score_is_defined;
   int had_err = 0;
 
-  assert(parser && genome_nodes && fpin);
+  gt_assert(parser && genome_nodes && fpin);
   gt_error_check(err);
 
   filename = gt_str_get(filenamestr);
@@ -366,7 +367,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
                                                        gft_exon);
           type = gft_exon;
       }
-      assert(gff_type_is_valid);
+      gt_assert(gff_type_is_valid);
 
       /* parse the range */
       had_err = gt_parse_range(&range, start, end, line_number, filename, err);
@@ -487,7 +488,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
         hashmap_add(parser->gene_id_hash, gt_cstr_dup(gene_id),
                     transcript_id_hash);
       }
-      assert(transcript_id_hash);
+      gt_assert(transcript_id_hash);
 
       if (!(gt_genome_node_array = hashmap_get(transcript_id_hash,
                                             transcript_id))) {
@@ -495,7 +496,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
         hashmap_add(transcript_id_hash, gt_cstr_dup(transcript_id),
                     gt_genome_node_array);
       }
-      assert(gt_genome_node_array);
+      gt_assert(gt_genome_node_array);
 
       /* save optional gene_name and transcript_name attributes */
       if (transcript_name && !hashmap_get(parser->transcript_id_to_name_mapping,
@@ -518,7 +519,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
         hashmap_add(parser->seqid_to_str_mapping, gt_str_get(seqid_str),
                     seqid_str);
       }
-      assert(seqid_str);
+      gt_assert(seqid_str);
 
       /* construct the new feature */
       gn = gt_genome_feature_new(seqid_str, type, range.start, range.end,
@@ -532,7 +533,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
         hashmap_add(parser->source_to_str_mapping, gt_str_get(source_str),
                     source_str);
       }
-      assert(source_str);
+      gt_assert(source_str);
       gt_genome_feature_set_source(gn, source_str);
 
       if (score_is_defined)
@@ -549,7 +550,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
   if (!had_err) {
     had_err = hashmap_foreach(parser->sequence_region_to_range,
                               construct_sequence_regions, genome_nodes, NULL);
-    assert(!had_err); /* construct_sequence_regions() is sane */
+    gt_assert(!had_err); /* construct_sequence_regions() is sane */
   }
 
   /* process all genome_features */

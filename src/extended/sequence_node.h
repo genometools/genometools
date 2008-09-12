@@ -34,4 +34,10 @@ const char*               gt_sequence_node_get_sequence(const GT_SequenceNode*);
 unsigned long             gt_sequence_node_get_sequence_length(const
                                                               GT_SequenceNode*);
 
+#define gt_sequence_node_cast(genome_node) \
+        gt_genome_node_cast(gt_sequence_node_class(), genome_node)
+
+#define gt_sequence_node_try_cast(genome_node) \
+        gt_genome_node_try_cast(gt_sequence_node_class(), genome_node)
+
 #endif

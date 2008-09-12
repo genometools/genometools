@@ -21,13 +21,13 @@
 #ifndef FEATURE_INDEX_API_H
 #define FEATURE_INDEX_API_H
 
-#include "extended/sequence_region_api.h"
+#include "extended/region_node_api.h"
 
 typedef struct GtFeatureIndex GtFeatureIndex;
 
 GtFeatureIndex* gt_feature_index_new(void);
-void             gt_feature_index_add_sequence_region(GtFeatureIndex*,
-                                                      GtSequenceRegion*);
+void             gt_feature_index_add_region_node(GtFeatureIndex*,
+                                                  GtRegionNode*);
 /* Add <genome_feature> to <feature_index>, associating it with a sequence
    region denoted by its identifier string. */
 void             gt_feature_index_add_genome_feature(GtFeatureIndex

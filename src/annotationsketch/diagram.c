@@ -655,7 +655,7 @@ int gt_diagram_unit_test(GtError *err)
   GtFeatureIndex *fi;
   GtRange dr1, rs;
   GtStr *seqid1, *seqid2, *gt_track_key;
-  GtSequenceRegion *sr1, *sr2;
+  GtRegionNode *rn1, *rn2;
   int had_err=0;
   GtStyle *sty = NULL;
   GtDiagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
@@ -670,8 +670,8 @@ int gt_diagram_unit_test(GtError *err)
   seqid1 = gt_str_new_cstr("test1");
   seqid2 = gt_str_new_cstr("test2");
 
-  sr1 = (GtSequenceRegion*) gt_sequence_region_new(seqid1, rs);
-  sr2 = (GtSequenceRegion*) gt_sequence_region_new(seqid2, rs);
+  rn1 = (GtRegionNode*) gt_region_node_new(seqid1, rs.start, rs.end);
+  rn2 = (GtRegionNode*) gt_region_node_new(seqid2, rs.start, rs.end);
 
   gn1 = gt_genome_feature_new(seqid1, gft_gene, 100, 1000, GT_STRAND_UNKNOWN);
   gn2 = gt_genome_feature_new(seqid2, gft_gene, 600, 1200, GT_STRAND_UNKNOWN);
@@ -806,8 +806,8 @@ int gt_diagram_unit_test(GtError *err)
   gt_feature_index_delete(fi);
   gt_genome_node_rec_delete(gn1);
   gt_genome_node_rec_delete(gn2);
-  gt_genome_node_rec_delete((GtGenomeNode*) sr1);
-  gt_genome_node_rec_delete((GtGenomeNode*) sr2);
+  gt_genome_node_rec_delete((GtGenomeNode*) rn1);
+  gt_genome_node_rec_delete((GtGenomeNode*) rn2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
 

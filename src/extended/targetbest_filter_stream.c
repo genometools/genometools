@@ -128,7 +128,7 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs,
   if (!tfs->in_stream_processed) {
     while (!(had_err = genome_stream_next_tree(tfs->in_stream, &node, err)) &&
            node) {
-      if (gt_genome_node_cast(gt_genome_feature_class(), node) &&
+      if (gt_genome_feature_try_cast(node) &&
           gt_genome_feature_get_attribute(node, "Target")) {
         filter_targetbest((GtGenomeFeature*) node, tfs->trees,
                           tfs->target_to_elem);

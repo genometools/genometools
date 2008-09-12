@@ -16,6 +16,7 @@
 */
 
 #include "lauxlib.h"
+#include "core/assert.h"
 #include "extended/extract_feat_sequence.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_output.h"
@@ -34,7 +35,7 @@ static int genome_feature_lua_new(lua_State *L)
   const char *seqid, *type, *strand_str;
   size_t length;
   GtStr *seqid_str;
-  assert(L);
+  gt_assert(L);
   /* get/check parameters */
   seqid = luaL_checkstring(L, 1);
   type = luaL_checkstring(L, 2);
@@ -52,7 +53,7 @@ static int genome_feature_lua_new(lua_State *L)
   seqid_str = gt_str_new_cstr(seqid);
   *gf = gt_genome_feature_new(seqid_str, type, startpos, endpos, strand);
   gt_str_delete(seqid_str);
-  assert(*gf);
+  gt_assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -60,20 +61,20 @@ static int genome_feature_lua_new(lua_State *L)
 
 static int sequence_region_lua_new(lua_State *L)
 {
-  GtGenomeNode **sr;
+  GtGenomeNode **rn;
   const char *seqid;
   GtStr *seqid_str;
   GtRange *range;
-  assert(L);
+  gt_assert(L);
   /* get_check parameters */
   seqid = luaL_checkstring(L, 1);
   range = check_range(L, 2);
   /* construct object */
-  sr = lua_newuserdata(L, sizeof (GtGenomeNode*));
+  rn = lua_newuserdata(L, sizeof (GtGenomeNode*));
   seqid_str = gt_str_new_cstr(seqid);
-  *sr = gt_sequence_region_new(seqid_str, *range);
+  *rn = gt_region_node_new(seqid_str, range->start, range->end);
   gt_str_delete(seqid_str);
-  assert(*sr);
+  gt_assert(*rn);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -333,7 +334,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
 
 int gt_lua_open_genome_node(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, GENOME_NODE_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
@@ -352,7 +353,7 @@ int gt_lua_open_genome_node(lua_State *L)
 void gt_lua_genome_node_push(lua_State *L, GtGenomeNode *gn)
 {
   GtGenomeNode **gn_lua;
-  assert(L && gn);
+  gt_assert(L && gn);
   gn_lua = lua_newuserdata(L, sizeof (GtGenomeNode**));
   *gn_lua = gn;
   luaL_getmetatable(L, GENOME_NODE_METATABLE);

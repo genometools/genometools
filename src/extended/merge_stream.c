@@ -20,7 +20,7 @@
 #include "core/undef.h"
 #include "extended/genome_stream_rep.h"
 #include "extended/merge_stream.h"
-#include "extended/sequence_region.h"
+#include "extended/region_node.h"
 
 struct MergeStream {
   const GenomeStream parent_instance;
@@ -61,9 +61,10 @@ int merge_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
       for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
         for (j = i+1; j < gt_array_size(ms->genome_streams); j++) {
           assert(i != j);
-          if (gt_genome_nodes_are_equal_sequence_regions(ms->buffer[i],
-                                                         ms->buffer[j])) {
-            gt_sequence_regions_consolidate(ms->buffer[i], ms->buffer[j]);
+          if (gt_genome_nodes_are_equal_region_nodes(ms->buffer[i],
+                                                     ms->buffer[j])) {
+            gt_region_node_consolidate(gt_region_node_cast(ms->buffer[i]),
+                                       gt_region_node_cast(ms->buffer[j]));
             gt_genome_node_rec_delete(ms->buffer[j]);
             ms->buffer[j] = NULL;
           }

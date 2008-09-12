@@ -37,13 +37,13 @@
 struct GtFeatureIndex {
   Hashmap *regions;
   char *firstseqid;
-  unsigned int nof_sequence_regions,
+  unsigned int nof_region_nodes,
                reference_count;
 };
 
 typedef struct {
   GtIntervalTree *features;
-  GtSequenceRegion *region;
+  GtRegionNode *region;
   GtRange dyn_range;
 } RegionInfo;
 
@@ -71,22 +71,21 @@ GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex *fi)
   return fi;
 }
 
-void gt_feature_index_add_sequence_region(GtFeatureIndex *fi,
-                                          GtSequenceRegion *sr)
+void gt_feature_index_add_region_node(GtFeatureIndex *fi, GtRegionNode *rn)
 {
   char *seqid;
   RegionInfo *info;
-  assert(fi && sr);
-  seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) sr));
+  assert(fi && rn);
+  seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn));
   if (!hashmap_get(fi->regions, seqid)) {
     info = gt_malloc(sizeof (RegionInfo));
-    info->region = (GtSequenceRegion*) gt_genome_node_ref((GtGenomeNode*) sr);
+    info->region = (GtRegionNode*) gt_genome_node_ref((GtGenomeNode*) rn);
     info->features = gt_interval_tree_new((GtFree)
                                           gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
-    if (fi->nof_sequence_regions++ == 0)
+    if (fi->nof_region_nodes++ == 0)
       fi->firstseqid = seqid;
   }
 }
@@ -119,7 +118,7 @@ void gt_feature_index_add_genome_feature(GtFeatureIndex *fi,
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashmap_add(fi->regions, seqid, info);
-    if (fi->nof_sequence_regions++ == 0)
+    if (fi->nof_region_nodes++ == 0)
       fi->firstseqid = seqid;
   }
 
@@ -271,7 +270,7 @@ int gt_feature_index_unit_test(GtError *err)
   GtRange check_range, rs;
   GtStr *seqid1, *seqid2;
   GtStrArray *seqids = NULL;
-  GtSequenceRegion *sr1, *sr2;
+  GtRegionNode *rn1, *rn2;
   GtArray *features = NULL;
   int had_err = 0;
   gt_error_check(err);
@@ -283,8 +282,8 @@ int gt_feature_index_unit_test(GtError *err)
   seqid1 = gt_str_new_cstr("test1");
   seqid2 = gt_str_new_cstr("test2");
 
-  sr1 = (GtSequenceRegion*) gt_sequence_region_new(seqid1, rs);
-  sr2 = (GtSequenceRegion*) gt_sequence_region_new(seqid2, rs);
+  rn1 = (GtRegionNode*) gt_region_node_new(seqid1, rs.start, rs.end);
+  rn2 = (GtRegionNode*) gt_region_node_new(seqid2, rs.start, rs.end);
 
   /* generate a new genome feature */
   gn1 = gt_genome_feature_new(seqid1, gft_gene, 100, 1000, GT_STRAND_UNKNOWN);
@@ -308,7 +307,7 @@ int gt_feature_index_unit_test(GtError *err)
   ensure(had_err, !gt_feature_index_has_seqid(fi, "test2"));
 
   /* add a sequence region directly and check if it has been added */
-  gt_feature_index_add_sequence_region(fi, sr1);
+  gt_feature_index_add_region_node(fi, rn1);
   ensure(had_err, gt_feature_index_has_seqid(fi, "test1"));
   ensure(had_err, !gt_feature_index_has_seqid(fi, "test2"));
 
@@ -376,8 +375,8 @@ int gt_feature_index_unit_test(GtError *err)
   gt_feature_index_delete(fi);
   gt_genome_node_rec_delete(gn1);
   gt_genome_node_rec_delete(gn2);
-  gt_genome_node_rec_delete((GtGenomeNode*) sr1);
-  gt_genome_node_rec_delete((GtGenomeNode*) sr2);
+  gt_genome_node_rec_delete((GtGenomeNode*) rn1);
+  gt_genome_node_rec_delete((GtGenomeNode*) rn2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
   return had_err;

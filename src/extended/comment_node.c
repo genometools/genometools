@@ -63,7 +63,7 @@ static int comment_node_accept(GtGenomeNode *gn, GenomeVisitor *gv,
   GtCommentNode *c;
   gt_error_check(err);
   c = gt_comment_node_cast(gn);
-  return genome_visitor_visit_comment(gv, c, err);
+  return genome_visitor_visit_comment_node(gv, c, err);
 }
 
 const GtGenomeNodeClass* gt_comment_node_class()

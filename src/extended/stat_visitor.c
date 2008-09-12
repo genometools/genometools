@@ -134,16 +134,15 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GtGenomeFeature *gf,
                                        compute_statistics, false, err);
 }
 
-static int stat_visitor_sequence_region(GenomeVisitor *gv,
-                                        GtSequenceRegion *sr,
-                                        GT_UNUSED GtError *err)
+static int stat_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+                                    GT_UNUSED GtError *err)
 {
   StatVisitor *stat_visitor;
   gt_error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   stat_visitor->number_of_sequence_regions++;
   stat_visitor->total_length_of_sequence_regions +=
-    gt_range_length(gt_genome_node_get_range((GtGenomeNode*) sr));
+    gt_range_length(gt_genome_node_get_range((GtGenomeNode*) rn));
   return 0;
 }
 
@@ -153,7 +152,7 @@ const GenomeVisitorClass* stat_visitor_class()
                                           stat_visitor_free,
                                           NULL,
                                           stat_visitor_genome_feature,
-                                          stat_visitor_sequence_region,
+                                          stat_visitor_region_node,
                                           NULL };
   return &gvc;
 }

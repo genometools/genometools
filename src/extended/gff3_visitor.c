@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "core/assert.h"
 #include "core/fasta.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
@@ -73,16 +73,16 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   hashmap_delete(gff3_visitor->gt_genome_feature_to_unique_id_str);
 }
 
-static int gff3_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
-                                GT_UNUSED GtError *err)
+static int gff3_visitor_comment_node(GenomeVisitor *gv, GtCommentNode *cn,
+                                     GT_UNUSED GtError *err)
 {
   GFF3Visitor *gff3_visitor;
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
-  assert(gv && c);
+  assert(gv && cn);
   gff3_version_string(gv);
   gt_genfile_xprintf(gff3_visitor->outfp, "#%s\n",
-                     gt_comment_node_get_comment(c));
+                     gt_comment_node_get_comment(cn));
   return 0;
 }
 
@@ -268,23 +268,22 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GtGenomeFeature *gf,
   return had_err;
 }
 
-static int gff3_visitor_sequence_region(GenomeVisitor *gv,
-                                        GtSequenceRegion *sr,
-                                        GT_UNUSED GtError *err)
+static int gff3_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+                                    GT_UNUSED GtError *err)
 {
   GFF3Visitor *gff3_visitor;
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
-  assert(gv && sr);
+  gt_assert(gv && rn);
   /* a sequence region has no children */
-  assert(!gt_genome_node_has_children((GtGenomeNode*) sr));
+  gt_assert(!gt_genome_node_has_children((GtGenomeNode*) rn));
 
   gff3_version_string(gv);
   gt_genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n",
                      GFF_SEQUENCE_REGION,
-                     gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) sr)),
-                     gt_genome_node_get_start((GtGenomeNode*) sr),
-                     gt_genome_node_get_end((GtGenomeNode*) sr));
+                     gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)),
+                     gt_genome_node_get_start((GtGenomeNode*) rn),
+                     gt_genome_node_get_end((GtGenomeNode*) rn));
   return 0;
 }
 
@@ -310,9 +309,9 @@ const GenomeVisitorClass* gff3_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (GFF3Visitor),
                                           gff3_visitor_free,
-                                          gff3_visitor_comment,
+                                          gff3_visitor_comment_node,
                                           gff3_visitor_genome_feature,
-                                          gff3_visitor_sequence_region,
+                                          gff3_visitor_region_node,
                                           gff3_visitor_sequence_node };
   return &gvc;
 }

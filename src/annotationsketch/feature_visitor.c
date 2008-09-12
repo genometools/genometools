@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "core/unused_api.h"
 #include "extended/genome_visitor_rep.h"
-#include "extended/sequence_region.h"
+#include "extended/region_node.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_visitor.h"
 
@@ -47,13 +47,12 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv,
   return 0;
 }
 
-static int feature_visitor_sequence_region(GenomeVisitor *gv,
-                                           GtSequenceRegion *sr,
-                                           GT_UNUSED GtError *err)
+static int feature_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+                                       GT_UNUSED GtError *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   gt_error_check(err);
-  gt_feature_index_add_sequence_region(v->feature_index, sr);
+  gt_feature_index_add_region_node(v->feature_index, rn);
   return 0;
 }
 
@@ -63,7 +62,7 @@ const GenomeVisitorClass* feature_visitor_class()
                                           feature_visitor_free,
                                           NULL,
                                           feature_visitor_genome_feature,
-                                          feature_visitor_sequence_region,
+                                          feature_visitor_region_node,
                                           NULL };
   return &gvc;
 }

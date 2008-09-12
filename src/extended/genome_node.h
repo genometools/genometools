@@ -33,9 +33,10 @@ typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
 void           gt_genome_node_set_origin(GtGenomeNode*,
                                          GtStr *filename,
                                          unsigned int line_number);
-GtGenomeNode* gt_genome_node_ref(GtGenomeNode*);
-GtGenomeNode* gt_genome_node_rec_ref(GtGenomeNode*);
+GtGenomeNode*  gt_genome_node_ref(GtGenomeNode*);
+GtGenomeNode*  gt_genome_node_rec_ref(GtGenomeNode*);
 void*          gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*);
+void*          gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 /* perform depth first traversal of the given genome node */
 int            gt_genome_node_traverse_children(GtGenomeNode*, void*,
                                                 GtGenomeNodeTraverseFunc,
@@ -101,8 +102,8 @@ void           gt_genome_node_rec_delete(GtGenomeNode*);
 
 void           gt_genome_nodes_sort(GtArray*);
 void           gt_genome_nodes_sort_stable(GtArray*);
-bool           gt_genome_nodes_are_equal_sequence_regions(GtGenomeNode*,
-                                                          GtGenomeNode*);
+bool           gt_genome_nodes_are_equal_region_nodes(GtGenomeNode*,
+                                                      GtGenomeNode*);
 bool           gt_genome_nodes_are_sorted(const GtArray*);
 
 #endif

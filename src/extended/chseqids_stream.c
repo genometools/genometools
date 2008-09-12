@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/unused_api.h"
 #include "extended/chseqids_stream.h"
 #include "extended/genome_stream_rep.h"
@@ -61,7 +61,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
           gt_array_add(cs->gt_genome_node_buffer, node);
         else
           break;
-        if (!(gt_genome_node_cast(gt_sequence_region_class(), node)))
+        if (!gt_region_node_try_cast(node))
           break; /* no more sequence regions */
       }
     }
@@ -90,8 +90,9 @@ int chseqids_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
          i++) {
       gn_a = gt_array_get(cs->gt_genome_node_buffer, i-1);
       gn_b = gt_array_get(cs->gt_genome_node_buffer, i);
-      if (gt_genome_nodes_are_equal_sequence_regions(*gn_a, *gn_b)) {
-        gt_sequence_regions_consolidate(*gn_b, *gn_a);
+      if (gt_genome_nodes_are_equal_region_nodes(*gn_a, *gn_b)) {
+        gt_region_node_consolidate(gt_region_node_cast(*gn_b),
+                                   gt_region_node_cast(*gn_a));
         gt_genome_node_rec_delete(*gn_a);
         *gn_a = NULL;
       }
@@ -159,8 +160,8 @@ GenomeStream* chseqids_stream_new(GenomeStream *in_stream,
   GenomeStream *gs;
   ChseqidsStream *cs;
   gt_error_check(err);
-  assert(in_stream && chseqids_file);
-  assert(genome_stream_is_sorted(in_stream));
+  gt_assert(in_stream && chseqids_file);
+  gt_assert(genome_stream_is_sorted(in_stream));
   gs = genome_stream_create(chseqids_stream_class(), false);
   cs = chseqids_stream_cast(gs);
   cs->in_stream = genome_stream_ref(in_stream);

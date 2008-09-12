@@ -37,13 +37,13 @@ static int feature_index_lua_add_sequence_region(lua_State *L)
 {
   GtFeatureIndex **fi;
   GtGenomeNode **gn;
-  GtSequenceRegion *sr;
+  GtRegionNode *rn;
   assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
-  sr = gt_genome_node_cast(gt_sequence_region_class(), *gn);
-  luaL_argcheck(L, sr, 2, "not a sequence region");
-  gt_feature_index_add_sequence_region(*fi, sr);
+  rn = gt_region_node_try_cast(*gn);
+  luaL_argcheck(L, rn, 2, "not a region node");
+  gt_feature_index_add_region_node(*fi, rn);
   return 0;
 }
 

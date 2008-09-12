@@ -36,7 +36,7 @@
 #include "extended/gff3_escaping.h"
 #include "extended/gff3_parser.h"
 #include "extended/mapping.h"
-#include "extended/sequence_region.h"
+#include "extended/region_node.h"
 
 struct GT_GFF3Parser {
   FeatureInfo *feature_info;
@@ -283,7 +283,8 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
               GFF_SEQUENCE_REGION);
       *auto_sr = automatic_sequence_region_new();
       *seqid_str = gt_str_new_cstr(seqid);
-      (*auto_sr)->sequence_region = gt_sequence_region_new(*seqid_str, range);
+      (*auto_sr)->sequence_region = gt_region_node_new(*seqid_str, range.start,
+                                                                   range.end);
       hashmap_add(parser->undefined_sequence_regions, gt_str_get(*seqid_str),
                   *auto_sr);
     }
@@ -1323,7 +1324,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
     }
     if (!had_err) {
       assert(ssr);
-      gn = gt_sequence_region_new(ssr->seqid_str, range);
+      gn = gt_region_node_new(ssr->seqid_str, range.start, range.end);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
       gt_queue_add(genome_nodes, gn);
     }

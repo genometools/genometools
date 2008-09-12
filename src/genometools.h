@@ -32,7 +32,7 @@
 #include "core/unused_api.h"
 
 /* the extended module */
-#include "extended/sequence_region_api.h"
+#include "extended/region_node_api.h"
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */

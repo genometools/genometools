@@ -206,33 +206,32 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv,
   return 0;
 }
 
-static int filter_visitor_sequence_region(GenomeVisitor *gv,
-                                          GtSequenceRegion *sr,
-                                          GT_UNUSED GtError *err)
+static int filter_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+                                      GT_UNUSED GtError *err)
 {
   FilterVisitor *filter_visitor;
   gt_error_check(err);
   filter_visitor = filter_visitor_cast(gv);
   if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
-               gt_genome_node_get_seqid((GtGenomeNode*) sr))) {
+               gt_genome_node_get_seqid((GtGenomeNode*) rn))) {
     if (filter_visitor->contain_range.start != UNDEF_ULONG) {
-      GtRange range = gt_genome_node_get_range((GtGenomeNode*) sr);
+      GtRange range = gt_genome_node_get_range((GtGenomeNode*) rn);
       if (gt_range_overlap(range, filter_visitor->contain_range)) {
         /* an overlapping contain range was defined -> update range  */
         range.start = MAX(range.start, filter_visitor->contain_range.start);
         range.end = MIN(range.end, filter_visitor->contain_range.end);
-        gt_genome_node_set_range((GtGenomeNode*) sr, range);
-        gt_queue_add(filter_visitor->gt_genome_node_buffer, sr);
+        gt_genome_node_set_range((GtGenomeNode*) rn, range);
+        gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
       }
-      else /* contain range does not overlap with <sr> range -> delete <sr> */
-        gt_genome_node_delete((GtGenomeNode*) sr);
+      else /* contain range does not overlap with <rn> range -> delete <rn> */
+        gt_genome_node_delete((GtGenomeNode*) rn);
     }
     else
-      gt_queue_add(filter_visitor->gt_genome_node_buffer, sr);
+      gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
   }
   else
-    gt_genome_node_rec_delete((GtGenomeNode*) sr);
+    gt_genome_node_rec_delete((GtGenomeNode*) rn);
   return 0;
 }
 
@@ -258,7 +257,7 @@ const GenomeVisitorClass* filter_visitor_class()
                                           filter_visitor_free,
                                           filter_visitor_comment,
                                           filter_visitor_genome_feature,
-                                          filter_visitor_sequence_region,
+                                          filter_visitor_region_node,
                                           filter_visitor_sequence_node };
   return &gvc;
 }

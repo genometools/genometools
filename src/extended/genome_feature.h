@@ -96,4 +96,10 @@ bool                  gt_genome_features_are_similar(GtGenomeFeature*,
                                                      GtGenomeFeature*);
 int                   gt_genome_feature_unit_test(GtError*);
 
+#define gt_genome_feature_cast(genome_node) \
+        gt_genome_node_cast(gt_genome_feature_class(), genome_node)
+
+#define gt_genome_feature_try_cast(genome_node) \
+        gt_genome_node_try_cast(gt_genome_feature_class(), genome_node)
+
 #endif

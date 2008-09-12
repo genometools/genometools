@@ -61,9 +61,6 @@ typedef struct {
         *cds_features;
 } SaveExonAndCDSInfo;
 
-#define gt_genome_feature_cast(GN)\
-        gt_genome_node_cast(gt_genome_feature_class(), GN)
-
 static void gt_genome_feature_free(GtGenomeNode *gn)
 {
   GtGenomeFeature *gf = gt_genome_feature_cast(gn);

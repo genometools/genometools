@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/cstr.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
@@ -51,7 +51,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
   ranges = hashmap_get(regioncov_visitor->region2rangelist,
                        gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
                                                            gf)));
-  assert(ranges);
+  gt_assert(ranges);
   new_range = gt_genome_node_get_range((GtGenomeNode*) gf);
   if (!gt_array_size(ranges))
     gt_array_add(ranges, new_range);
@@ -68,9 +68,8 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
   return 0;
 }
 
-static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
-                                             GtSequenceRegion *sr,
-                                             GT_UNUSED GtError *err)
+static int regioncov_visitor_region_node(GenomeVisitor *gv, GtRegionNode *rn,
+                                         GT_UNUSED GtError *err)
 {
   RegionCovVisitor *regioncov_visitor;
   GtArray *rangelist;
@@ -79,7 +78,7 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
   rangelist = gt_array_new(sizeof (GtRange));
   hashmap_add(regioncov_visitor->region2rangelist,
               gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
-                                                              sr))),
+                                                              rn))),
               rangelist);
   return 0;
 }
@@ -90,7 +89,7 @@ const GenomeVisitorClass* regioncov_visitor_class()
                                           regioncov_visitor_free,
                                           NULL,
                                           regioncov_visitor_genome_feature,
-                                          regioncov_visitor_sequence_region,
+                                          regioncov_visitor_region_node,
                                           NULL };
   return &gvc;
 }
@@ -114,10 +113,10 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
   GtArray *rangelist;
   GtRange *rangeptr;
   gt_error_check(err);
-  assert(key && value);
+  gt_assert(key && value);
   rangelist = (GtArray*) value;
   if (gt_array_size(rangelist)) {
-    assert(ranges_are_sorted_and_do_not_overlap(rangelist));
+    gt_assert(ranges_are_sorted_and_do_not_overlap(rangelist));
     printf("%s:\n", (char*) key);
     for (i = 0; i < gt_array_size(rangelist); i++) {
       rangeptr = gt_array_get(rangelist, i);
@@ -133,5 +132,5 @@ void regioncov_visitor_show_coverage(GenomeVisitor *gv)
   int had_err;
   had_err = hashmap_foreach_in_key_order(regioncov_visitor->region2rangelist,
                                          show_rangelist, NULL, NULL);
-  assert(!had_err); /* show_rangelist() is sane */
+  gt_assert(!had_err); /* show_rangelist() is sane */
 }

@@ -115,10 +115,10 @@ static int csa_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
   return csa_visitor_default_func(gv, (GtGenomeNode*) c, err);
 }
 
-static int csa_visitor_sequence_region(GenomeVisitor *gv, GtSequenceRegion *sr,
+static int csa_visitor_sequence_region(GenomeVisitor *gv, GtRegionNode *rn,
                                        GtError *err)
 {
-  return csa_visitor_default_func(gv, (GtGenomeNode*) sr, err);
+  return csa_visitor_default_func(gv, (GtGenomeNode*) rn, err);
 }
 
 static int csa_visitor_sequence_node(GenomeVisitor *gv, GT_SequenceNode *sn,
