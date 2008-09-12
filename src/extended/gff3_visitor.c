@@ -275,9 +275,6 @@ static int gff3_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   gt_assert(gv && rn);
-  /* a sequence region has no children */
-  gt_assert(!gt_genome_node_has_children((GtGenomeNode*) rn));
-
   gff3_version_string(gv);
   gt_genfile_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n",
                      GFF_SEQUENCE_REGION,

@@ -15,34 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_NODE_REP_H
-#define GENOME_NODE_REP_H
+#ifndef FEATURE_NODE_REP_H
+#define FEATURE_NODE_REP_H
 
-#include <stdio.h>
-#include "core/dlist.h"
-#include "extended/genome_node.h"
+#include "extended/genome_node_rep.h"
+#include "extended/tag_value_map.h"
 
-/* the ``genome node'' interface */
-struct GtGenomeNodeClass
-{
-  size_t size;
-  void     (*free)(GtGenomeNode*);
-  GtStr*  (*get_seqid)(GtGenomeNode*);
-  GtStr*  (*get_idstr)(GtGenomeNode*);
-  GtRange (*get_range)(GtGenomeNode*);
-  void     (*set_range)(GtGenomeNode*, GtRange);
-  void     (*change_seqid)(GtGenomeNode*, GtStr*);
-  int      (*accept)(GtGenomeNode*, GtNodeVisitor*, GtError*);
+struct GtFeatureNode {
+  const GtGenomeNode parent_instance;
+  GtStr *seqid,
+        *source;
+  const char *type;
+  GtRange range;
+  float score;
+  TagValueMap attributes; /* stores the attributes; created on demand */
+  unsigned int bit_field;
+  GtDlist *children;
+  GtFeatureNode *representative;
 };
-
-struct GtGenomeNode
-{
-  const GtGenomeNodeClass *c_class;
-  GtStr *filename;
-  unsigned int line_number,
-               reference_count;
-};
-
-GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass*);
 
 #endif

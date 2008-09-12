@@ -15,86 +15,91 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/assert.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/genome_node_iterator.h"
-#include "extended/genome_node_rep.h"
+#include "extended/feature_node_rep.h"
 
 struct GtGenomeNodeIterator {
   GtGenomeNode *gn;
-  GtArray *node_stack;
+  GtArray *feature_stack;
   bool direct;
 };
 
 static GtGenomeNodeIterator* genome_node_iterator_new_base(GtGenomeNode *gn)
 {
   GtGenomeNodeIterator *gni;
-  assert(gn);
+  gt_assert(gn);
   gni = gt_malloc(sizeof *gni);
   gni->gn = gt_genome_node_rec_ref(gn);
-  gni->node_stack = gt_array_new(sizeof (GtGenomeNode*));
+  gni->feature_stack = gt_array_new(sizeof (GtFeatureNode*));
   return gni;
 }
 
 GtGenomeNodeIterator* gt_genome_node_iterator_new(GtGenomeNode *gn)
 {
+  GtFeatureNode *fn;
   GtGenomeNodeIterator *gni;
   GtGenomeNode *child_feature;
   GtDlistelem *dlistelem;
-  assert(gn);
+  gt_assert(gn);
+  fn = gt_feature_node_cast(gn); /* XXX */
   gni = genome_node_iterator_new_base(gn);
   if (gt_genome_node_cast(gt_feature_node_class(), gn) &&
       gt_feature_node_is_pseudo((GtFeatureNode*) gn)) {
     /* add the children backwards to traverse in order */
-    for (dlistelem = gt_dlist_last(gn->children); dlistelem != NULL;
+    for (dlistelem = gt_dlist_last(fn->children); dlistelem != NULL;
          dlistelem = gt_dlistelem_previous(dlistelem)) {
       child_feature = (GtGenomeNode*) gt_dlistelem_get_data(dlistelem);
-      gt_array_add(gni->node_stack, child_feature);
+      gt_array_add(gni->feature_stack, child_feature);
     }
   }
   else
-    gt_array_add(gni->node_stack, gni->gn);
-  assert(gt_array_size(gni->node_stack));
+    gt_array_add(gni->feature_stack, gni->gn);
+  gt_assert(gt_array_size(gni->feature_stack));
   gni->direct = false;
   return gni;
 }
 
-static void add_children_to_stack(GtArray *node_stack, GtGenomeNode *gn)
+static void add_children_to_stack(GtArray *feature_stack, GtFeatureNode *fn)
 {
   GtGenomeNode *child;
   GtDlistelem *dlistelem;
-  assert(node_stack && gn && gn->children);
+  gt_assert(feature_stack && fn && fn->children);
   /* add the children backwards to traverse in order */
-  for (dlistelem = gt_dlist_last(gn->children); dlistelem != NULL;
+  for (dlistelem = gt_dlist_last(fn->children); dlistelem != NULL;
        dlistelem = gt_dlistelem_previous(dlistelem)) {
     child = gt_dlistelem_get_data(dlistelem);
-    gt_array_add(node_stack, child);
+    gt_array_add(feature_stack, child);
   }
 }
 
 GtGenomeNodeIterator* gt_genome_node_iterator_new_direct(GtGenomeNode *gn)
 {
+  GtFeatureNode *fn;
   GtGenomeNodeIterator *gni;
-  assert(gn);
+  gt_assert(gn);
   gni = genome_node_iterator_new_base(gn);
-  if (gn->children)
-    add_children_to_stack(gni->node_stack, gn);
+  fn = gt_feature_node_cast(gn); /* XXX */
+  if (fn->children)
+    add_children_to_stack(gni->feature_stack, fn);
   gni->direct = true;
   return gni;
 }
 
 GtGenomeNode* gt_genome_node_iterator_next(GtGenomeNodeIterator *gni)
 {
-  GtGenomeNode *gn;
-  assert(gni);
-  if (!gt_array_size(gni->node_stack))
+  GtFeatureNode *fn;
+  gt_assert(gni);
+  if (!gt_array_size(gni->feature_stack))
     return NULL;
   /* pop */
-  gn = *(GtGenomeNode**) gt_array_pop(gni->node_stack);
+  fn = *(GtFeatureNode**) gt_array_pop(gni->feature_stack);
   /* push children on stack */
-  if (!gni->direct && gn->children)
-    add_children_to_stack(gni->node_stack, gn);
-  return gn;
+  if (!gni->direct && fn->children)
+    add_children_to_stack(gni->feature_stack, fn);
+  return (GtGenomeNode*) fn; /* XXX */
 }
 
 int gt_genome_node_iterator_example(GT_UNUSED GtError *err)
@@ -118,6 +123,6 @@ void gt_genome_node_iterator_delete(GtGenomeNodeIterator *gni)
 {
   if (!gni) return;
   gt_genome_node_rec_delete(gni->gn);
-  gt_array_delete(gni->node_stack);
+  gt_array_delete(gni->feature_stack);
   gt_free(gni);
 }
