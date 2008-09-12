@@ -42,6 +42,7 @@
 #include "annotationsketch/color_api.h"
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"
+#include "annotationsketch/feature_index_memory_api.h"
 #include "annotationsketch/graphics_api.h"
 #include "annotationsketch/image_info_api.h"
 #include "annotationsketch/recmap_api.h"

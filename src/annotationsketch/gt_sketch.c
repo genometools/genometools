@@ -32,7 +32,7 @@
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
-#include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_index_memory_api.h"
 #include "annotationsketch/feature_stream.h"
 #include "annotationsketch/gt_sketch.h"
 #include "annotationsketch/image_info.h"
@@ -218,7 +218,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* create feature index */
-    features = gt_feature_index_new();
+    features = gt_feature_index_memory_new();
     parsed_args++;
 
     /* create a gff3 input stream */

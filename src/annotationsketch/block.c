@@ -59,7 +59,8 @@ int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
   ret = gt_range_compare(gt_block_get_range(block1),
                          gt_block_get_range(block2));
   if (ret == 0 && block1 != block2)
-    ret = (block1 < block2 ? -1 : 1);
+    ret = strcmp(gt_str_get(gt_block_get_caption(block1)),
+                 gt_str_get(gt_block_get_caption(block2)));
   return ret;
 }
 

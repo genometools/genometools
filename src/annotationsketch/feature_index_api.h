@@ -21,6 +21,8 @@
 #ifndef FEATURE_INDEX_API_H
 #define FEATURE_INDEX_API_H
 
+#include "core/range.h"
+#include "core/strarray.h"
 #include "extended/region_node_api.h"
 
 typedef struct GtFeatureIndex GtFeatureIndex;

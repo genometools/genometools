@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     handle_error(err);
 
   /* create feature index */
-  feature_index = gt_feature_index_new();
+  feature_index = gt_feature_index_memory_new();
 
   /* add GFF3 file to index */
   if (gt_feature_index_add_gff3file(feature_index, gff3_file, err))

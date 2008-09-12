@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Malte Mader <mmader@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Malte Mader <mmader@zbh.uni-hamburg.de>
+  Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,7 +20,7 @@
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
-#include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_index_memory_api.h"
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
@@ -29,6 +29,7 @@
 #include "core/ensure.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
+#include "core/msort.h"
 #include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
@@ -696,7 +697,7 @@ static int layout_tracks(void *key, void *value, void *data,
   assert(type && list);
 
   /* to get a deterministic layout, we sort the GtBlocks for each type */
-  gt_array_sort(list, blocklist_block_compare);
+  gt_array_sort_stable(list, blocklist_block_compare);
   /* we take the basename of the filename to have nicer output in the
      generated graphic. this might lead to ``collapsed'' tracks, if two files
      with different paths have the same basename. */
@@ -708,7 +709,8 @@ static int layout_tracks(void *key, void *value, void *data,
   gt_free(filename);
 
   if (!gt_style_get_bool(tti->dia->style, "format", "split_lines", &split,
-                         NULL)) {
+                         NULL))
+  {
     split = true;
   }
   if (split)
@@ -798,7 +800,7 @@ int gt_diagram_unit_test(GtError *err)
   gt_genome_node_add_child(gn2, cds1);
 
   /* create a new feature index on which we can perform some tests */
-  fi = gt_feature_index_new();
+  fi = gt_feature_index_memory_new();
 
   /* add features to every sequence region */
   gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn1);

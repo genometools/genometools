@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "annotationsketch/feature_index.h"
+#include "annotationsketch/feature_index_memory_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/feature_index_lua.h"
 #include "gtlua/genome_node_lua.h"
@@ -27,7 +27,7 @@ static int feature_index_lua_new(lua_State *L)
   GtFeatureIndex **feature_index;
   feature_index = lua_newuserdata(L, sizeof (GtFeatureIndex*));
   assert(feature_index);
-  *feature_index = gt_feature_index_new();
+  *feature_index = gt_feature_index_memory_new();
   luaL_getmetatable(L, FEATURE_INDEX_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

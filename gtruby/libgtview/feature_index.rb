@@ -24,7 +24,7 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   typealias "bool", "ibool"
-  extern "GtFeatureIndex* gt_feature_index_new()"
+  extern "GtFeatureIndex* gt_feature_index_memory_new()"
   extern "void gt_feature_index_delete(GtFeatureIndex*)"
   extern "int gt_feature_index_add_gff3file(GtFeatureIndex*, " +
                                            "const char*, " +
