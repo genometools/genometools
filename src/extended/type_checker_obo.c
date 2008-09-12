@@ -25,7 +25,7 @@
 
 struct GT_TypeCheckerOBO {
   const GT_TypeChecker parent_instance;
-  GtCstrTable *gt_genome_feature_types;
+  GtCstrTable *gt_feature_node_types;
 };
 
 #define gt_type_checker_obo_cast(FTF)\
@@ -34,7 +34,7 @@ struct GT_TypeCheckerOBO {
 static void gt_type_checker_obo_free(GT_TypeChecker *tc)
 {
   GT_TypeCheckerOBO *tco = gt_type_checker_obo_cast(tc);
-  gt_cstr_table_delete(tco->gt_genome_feature_types);
+  gt_cstr_table_delete(tco->gt_feature_node_types);
 }
 
 static bool gt_type_checker_obo_is_valid(GT_TypeChecker *tc, const char *type)
@@ -42,7 +42,7 @@ static bool gt_type_checker_obo_is_valid(GT_TypeChecker *tc, const char *type)
   GT_TypeCheckerOBO *tco;
   assert(tc && type);
   tco = gt_type_checker_obo_cast(tc);
-  return gt_cstr_table_get(tco->gt_genome_feature_types, type) ? true : false;
+  return gt_cstr_table_get(tco->gt_feature_node_types, type) ? true : false;
 }
 
 const GT_TypeCheckerClass* gt_type_checker_obo_class(void)
@@ -54,7 +54,7 @@ const GT_TypeCheckerClass* gt_type_checker_obo_class(void)
   return &gt_type_checker_class;
 }
 
-static void add_gt_genome_feature_from_tree(GT_TypeCheckerOBO *tco,
+static void add_gt_feature_node_from_tree(GT_TypeCheckerOBO *tco,
                                             OBOParseTree *obo_parse_tree,
                                             unsigned long stanza_num,
                                             const char *stanza_key)
@@ -64,8 +64,8 @@ static void add_gt_genome_feature_from_tree(GT_TypeCheckerOBO *tco,
   value = obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
                                           stanza_key);
   /* do not add values multiple times (possible for "name" values) */
-  if (!gt_cstr_table_get(tco->gt_genome_feature_types, value))
-    gt_cstr_table_add(tco->gt_genome_feature_types, value);
+  if (!gt_cstr_table_get(tco->gt_feature_node_types, value))
+    gt_cstr_table_add(tco->gt_feature_node_types, value);
 }
 
 static int create_genome_features(GT_TypeCheckerOBO *tco,
@@ -82,8 +82,8 @@ static int create_genome_features(GT_TypeCheckerOBO *tco,
           obo_parse_tree_get_stanza_value(obo_parse_tree, i, "is_obsolete");
         /* do not add obsolete types */
         if (!is_obsolete || strcmp(is_obsolete, "true")) {
-          add_gt_genome_feature_from_tree(tco, obo_parse_tree, i, "id");
-          add_gt_genome_feature_from_tree(tco, obo_parse_tree, i, "name");
+          add_gt_feature_node_from_tree(tco, obo_parse_tree, i, "id");
+          add_gt_feature_node_from_tree(tco, obo_parse_tree, i, "name");
         }
       }
     }
@@ -102,7 +102,7 @@ GT_TypeChecker* gt_type_checker_obo_new(const char *obo_file_path,
   assert(obo_file_path);
   tc = gt_type_checker_create(gt_type_checker_obo_class());
   tco = gt_type_checker_obo_cast(tc);
-  tco->gt_genome_feature_types = gt_cstr_table_new();
+  tco->gt_feature_node_types = gt_cstr_table_new();
   if (create_genome_features(tco, obo_file_path, err)) {
     gt_type_checker_delete(tc);
     return NULL;

@@ -23,7 +23,7 @@
 
 struct AddIntronsVisitor {
   const GenomeVisitor parent_instance;
-  GtGenomeFeature *parent_feature,
+  GtFeatureNode *parent_feature,
                 *previous_exon_feature;
 };
 
@@ -34,15 +34,15 @@ static int add_introns_in_children(GtGenomeNode *gn, void *data,
                                    GT_UNUSED GtError *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
-  GtGenomeFeature *current_feature;
+  GtFeatureNode *current_feature;
   GtGenomeNode *intron_node;
   GtRange previous_range, current_range, intron_range;
   GtStrand previous_strand, current_strand, intron_strand;
   GtStr *parent_seqid;
   gt_error_check(err);
-  current_feature = gt_genome_node_cast(gt_genome_feature_class(), gn);
+  current_feature = gt_genome_node_cast(gt_feature_node_class(), gn);
   assert(current_feature);
-  if (gt_genome_feature_has_type(current_feature, gft_exon)) {
+  if (gt_feature_node_has_type(current_feature, gft_exon)) {
     if (v->previous_exon_feature) {
       /* determine intron range */
       previous_range = gt_genome_node_get_range((GtGenomeNode*)
@@ -53,8 +53,8 @@ static int add_introns_in_children(GtGenomeNode *gn, void *data,
       intron_range.end = current_range.start - 1;
 
       /* determine intron strand */
-      previous_strand = gt_genome_feature_get_strand(v->previous_exon_feature);
-      current_strand = gt_genome_feature_get_strand(current_feature);
+      previous_strand = gt_feature_node_get_strand(v->previous_exon_feature);
+      current_strand = gt_feature_node_get_strand(current_feature);
       assert(previous_strand == current_strand);
       intron_strand = previous_strand;
 
@@ -68,7 +68,7 @@ static int add_introns_in_children(GtGenomeNode *gn, void *data,
              gt_genome_node_get_seqid((GtGenomeNode*) current_feature)));
 
       /* create intron */
-      intron_node = gt_genome_feature_new(parent_seqid, gft_intron,
+      intron_node = gt_feature_node_new(parent_seqid, gft_intron,
                                           intron_range.start, intron_range.end,
                                           intron_strand);
       gt_genome_node_add_child((GtGenomeNode*) v->parent_feature, intron_node);
@@ -82,9 +82,9 @@ static int add_introns_if_necessary(GtGenomeNode *gn, void *data,
                                     GtError *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   gt_error_check(err);
-  gf = gt_genome_node_cast(gt_genome_feature_class(), gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), gn);
   assert(gf);
   v->parent_feature = gf;
   v->previous_exon_feature = NULL;
@@ -93,7 +93,7 @@ static int add_introns_if_necessary(GtGenomeNode *gn, void *data,
 }
 
 static int add_introns_visitor_genome_feature(GenomeVisitor *gv,
-                                              GtGenomeFeature *gf,
+                                              GtFeatureNode *gf,
                                               GtError *err)
 {
   AddIntronsVisitor *v;

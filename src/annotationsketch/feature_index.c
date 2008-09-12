@@ -91,7 +91,7 @@ void gt_feature_index_add_region_node(GtFeatureIndex *fi, GtRegionNode *rn)
 }
 
 void gt_feature_index_add_genome_feature(GtFeatureIndex *fi,
-                                         GtGenomeFeature *gf)
+                                         GtFeatureNode *gf)
 {
   GtGenomeNode *gn;
   char* seqid;
@@ -176,7 +176,7 @@ GtArray* gt_feature_index_get_features_for_seqid(GtFeatureIndex *fi,
   int had_err = 0;
   GtArray *a;
   assert(fi && seqid);
-  a = gt_array_new(sizeof (GtGenomeFeature*));
+  a = gt_array_new(sizeof (GtFeatureNode*));
   ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
   if (ri)
     had_err = gt_interval_tree_traverse(ri->features,
@@ -286,12 +286,12 @@ int gt_feature_index_unit_test(GtError *err)
   rn2 = (GtRegionNode*) gt_region_node_new(seqid2, rs.start, rs.end);
 
   /* generate a new genome feature */
-  gn1 = gt_genome_feature_new(seqid1, gft_gene, 100, 1000, GT_STRAND_UNKNOWN);
-  gn2 = gt_genome_feature_new(seqid2, gft_gene, 600, 1200, GT_STRAND_UNKNOWN);
-  ex1 = gt_genome_feature_new(seqid1, gft_exon, 100, 300, GT_STRAND_UNKNOWN);
-  ex2 = gt_genome_feature_new(seqid1, gft_exon, 500, 1000, GT_STRAND_UNKNOWN);
-  ex3 = gt_genome_feature_new(seqid2, gft_exon, 600, 1200 , GT_STRAND_UNKNOWN);
-  cds1 = gt_genome_feature_new(seqid2, gft_CDS, 600, 1200, GT_STRAND_UNKNOWN);
+  gn1 = gt_feature_node_new(seqid1, gft_gene, 100, 1000, GT_STRAND_UNKNOWN);
+  gn2 = gt_feature_node_new(seqid2, gft_gene, 600, 1200, GT_STRAND_UNKNOWN);
+  ex1 = gt_feature_node_new(seqid1, gft_exon, 100, 300, GT_STRAND_UNKNOWN);
+  ex2 = gt_feature_node_new(seqid1, gft_exon, 500, 1000, GT_STRAND_UNKNOWN);
+  ex3 = gt_feature_node_new(seqid2, gft_exon, 600, 1200 , GT_STRAND_UNKNOWN);
+  cds1 = gt_feature_node_new(seqid2, gft_CDS, 600, 1200, GT_STRAND_UNKNOWN);
 
   /* Determine the structure of our feature tree */
   gt_genome_node_add_child(gn1, ex1);
@@ -333,7 +333,7 @@ int gt_feature_index_unit_test(GtError *err)
      datastructures are not empty anymore. As we have added one genome_feature
      to every sequence region the size has to be one. */
   if (!had_err) {
-    gt_feature_index_add_genome_feature(fi, (GtGenomeFeature*) gn1);
+    gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn1);
     features = gt_feature_index_get_features_for_seqid(fi, "test1");
   }
   ensure(had_err, gt_array_size(features) == 1UL);
@@ -341,7 +341,7 @@ int gt_feature_index_unit_test(GtError *err)
   features = NULL;
 
   if (!had_err) {
-    gt_feature_index_add_genome_feature(fi, (GtGenomeFeature*) gn2);
+    gt_feature_index_add_genome_feature(fi, (GtFeatureNode*) gn2);
     features = gt_feature_index_get_features_for_seqid(fi, "test2");
   }
   ensure(had_err, gt_array_size(features) == 1UL);

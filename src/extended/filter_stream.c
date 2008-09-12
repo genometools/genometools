@@ -16,9 +16,9 @@
 */
 
 #include <assert.h>
+#include "extended/feature_node.h"
 #include "extended/filter_stream.h"
 #include "extended/filter_visitor.h"
-#include "extended/genome_feature.h"
 #include "extended/genome_stream_rep.h"
 
 struct FilterStream

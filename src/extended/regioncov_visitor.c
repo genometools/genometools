@@ -40,7 +40,7 @@ static void regioncov_visitor_free(GenomeVisitor *gv)
 }
 
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
-                                            GtGenomeFeature *gf,
+                                            GtFeatureNode *gf,
                                             GT_UNUSED GtError *err)
 {
   GtRange *old_gt_range_ptr, old_range, new_range;

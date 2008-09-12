@@ -36,21 +36,21 @@ static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
 {
   bool equal = false;
   GtGenomeNodeIterator *gni_a, *gni_b;
-  GtGenomeFeature *gf_a, *gf_b;
-  gf_a = gt_genome_node_cast(gt_genome_feature_class(), first_node);
-  gf_b = gt_genome_node_cast(gt_genome_feature_class(), second_node);
+  GtFeatureNode *gf_a, *gf_b;
+  gf_a = gt_genome_node_cast(gt_feature_node_class(), first_node);
+  gf_b = gt_genome_node_cast(gt_feature_node_class(), second_node);
   if (gf_a && gf_b) {
     gni_a = gt_genome_node_iterator_new(first_node);
     gni_b = gt_genome_node_iterator_new(second_node);
-    for (gf_a = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_b);
+    for (gf_a = (GtFeatureNode*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GtFeatureNode*) gt_genome_node_iterator_next(gni_b);
          gf_a && gf_b;
-         gf_a = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_b)) {
+         gf_a = (GtFeatureNode*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GtFeatureNode*) gt_genome_node_iterator_next(gni_b)) {
       if (!gf_b || !gt_genome_features_are_similar(gf_a, gf_b))
         break;
     }
-    gf_b = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_b);
+    gf_b = (GtFeatureNode*) gt_genome_node_iterator_next(gni_b);
     if (!gf_a && !gf_b)
       equal = true;
     gt_genome_node_iterator_delete(gni_a);
@@ -67,15 +67,15 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
   assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     if ((first_score_is_defined =
-           gt_genome_feature_score_is_defined((GtGenomeFeature*)
+           gt_feature_node_score_is_defined((GtFeatureNode*)
                                               *first_node))) {
-      first_score = gt_genome_feature_get_score((GtGenomeFeature*)
+      first_score = gt_feature_node_get_score((GtFeatureNode*)
                                                 *first_node);
     }
     if ((second_score_is_defined =
-           gt_genome_feature_score_is_defined((GtGenomeFeature*)
+           gt_feature_node_score_is_defined((GtFeatureNode*)
                                               *second_node))) {
-      second_score = gt_genome_feature_get_score((GtGenomeFeature*)
+      second_score = gt_feature_node_get_score((GtFeatureNode*)
                                                  *second_node);
     }
     if ((!first_score_is_defined && !second_score_is_defined) ||

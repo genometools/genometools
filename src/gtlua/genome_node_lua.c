@@ -51,7 +51,7 @@ static int genome_feature_lua_new(lua_State *L)
   /* construct object */
   gf = lua_newuserdata(L, sizeof (GtGenomeNode*));
   seqid_str = gt_str_new_cstr(seqid);
-  *gf = gt_genome_feature_new(seqid_str, type, startpos, endpos, strand);
+  *gf = gt_feature_node_new(seqid_str, type, startpos, endpos, strand);
   gt_str_delete(seqid_str);
   gt_assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -107,12 +107,12 @@ static int genome_node_lua_get_seqid(lua_State *L)
 static int genome_feature_lua_get_strand(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   char strand_char[2];
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  strand_char[0] = GT_STRAND_CHARS[gt_genome_feature_get_strand(gf)];
+  strand_char[0] = GT_STRAND_CHARS[gt_feature_node_get_strand(gf)];
   strand_char[1] = '\0';
   lua_pushstring(L, strand_char);
   return 1;
@@ -121,23 +121,23 @@ static int genome_feature_lua_get_strand(lua_State *L)
 static int genome_feature_lua_get_source(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  lua_pushstring(L, gt_genome_feature_get_source(gf));
+  lua_pushstring(L, gt_feature_node_get_source(gf));
   return 1;
 }
 
 static int genome_feature_lua_get_score(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  if (gt_genome_feature_score_is_defined(gf))
-    lua_pushnumber(L, gt_genome_feature_get_score(gf));
+  if (gt_feature_node_score_is_defined(gf))
+    lua_pushnumber(L, gt_feature_node_get_score(gf));
   else
     lua_pushnil(L);
   return 1;
@@ -148,11 +148,11 @@ static int genome_feature_lua_get_attribute(lua_State *L)
   GtGenomeNode **gn = check_genome_node(L, 1);
   const char *attr = NULL, *attrval = NULL;
   attr = luaL_checkstring(L, 2);
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  attrval = gt_genome_feature_get_attribute(*gn, attr);
+  attrval = gt_feature_node_get_attribute(*gn, attr);
   if (attrval)
     lua_pushstring(L, attrval);
   else
@@ -165,11 +165,11 @@ static int genome_feature_lua_get_exons(lua_State *L)
   GtGenomeNode **gn = check_genome_node(L, 1);
   GtArray *exons = gt_array_new(sizeof (GtGenomeNode*));
   unsigned long i = 0;
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  gt_genome_feature_get_exons(gf, exons);
+  gt_feature_node_get_exons(gf, exons);
   lua_newtable(L);
   for (i = 0; i < gt_array_size(exons); i++) {
     lua_pushnumber(L, i+1);
@@ -186,13 +186,13 @@ static int genome_feature_lua_set_source(lua_State *L)
   const char *source;
   GtStr *source_str;
   GtGenomeNode **gn = check_genome_node(L, 1);
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   source = luaL_checkstring(L, 2);
   source_str = gt_str_new_cstr(source);
-  gt_genome_feature_set_source(*gn, source_str);
+  gt_feature_node_set_source(*gn, source_str);
   gt_str_delete(source_str);
   return 0;
 }
@@ -245,10 +245,10 @@ static int genome_node_lua_contains_marked(lua_State *L)
 static int genome_feature_lua_output_leading(lua_State *L)
 {
   GtGenomeNode **gn;
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   gff3_output_leading(gf, NULL);
   return 0;
@@ -257,19 +257,19 @@ static int genome_feature_lua_output_leading(lua_State *L)
 static int genome_feature_lua_get_type(lua_State *L)
 {
   GtGenomeNode **gn;
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
-  lua_pushstring(L, gt_genome_feature_get_type(gf));
+  lua_pushstring(L, gt_feature_node_get_type(gf));
   return 1;
 }
 
 static int genome_feature_lua_extract_sequence(lua_State *L)
 {
   GtGenomeNode **gn;
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   const char *type;
   bool join;
   RegionMapping **region_mapping;
@@ -277,7 +277,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   GtError *err;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
-  gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);
+  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
   luaL_argcheck(L, gf, 1, "not a genome feature");
   type = luaL_checkstring(L, 2);
   join = lua_toboolean(L, 3);

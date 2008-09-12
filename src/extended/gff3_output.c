@@ -19,22 +19,22 @@
 #include "core/undef.h"
 #include "extended/gff3_output.h"
 
-void gff3_output_leading(GtGenomeFeature *gf, GtGenFile *outfp)
+void gff3_output_leading(GtFeatureNode *gf, GtGenFile *outfp)
 {
   GtGenomeNode *gn;
   assert(gf);
   gn = (GtGenomeNode*) gf;
   gt_genfile_xprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t",
                      gt_str_get(gt_genome_node_get_seqid(gn)),
-                     gt_genome_feature_get_source(gf),
-                     gt_genome_feature_get_type(gf),
+                     gt_feature_node_get_source(gf),
+                     gt_feature_node_get_type(gf),
                      gt_genome_node_get_start(gn),
                      gt_genome_node_get_end(gn));
-  if (gt_genome_feature_score_is_defined(gf))
-    gt_genfile_xprintf(outfp, "%.3g", gt_genome_feature_get_score(gf));
+  if (gt_feature_node_score_is_defined(gf))
+    gt_genfile_xprintf(outfp, "%.3g", gt_feature_node_get_score(gf));
   else
     gt_genfile_xfputc('.', outfp);
   gt_genfile_xprintf(outfp, "\t%c\t%c\t",
-                     GT_STRAND_CHARS[gt_genome_feature_get_strand(gf)],
-                     GT_PHASE_CHARS[gt_genome_feature_get_phase(gf)]);
+                     GT_STRAND_CHARS[gt_feature_node_get_strand(gf)],
+                     GT_PHASE_CHARS[gt_feature_node_get_phase(gf)]);
 }

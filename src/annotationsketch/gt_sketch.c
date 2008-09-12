@@ -328,7 +328,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
         char buf[BUFSIZ];
         rm = gt_image_info_get_recmap(ii, i);
         gt_recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
-        printf("%s, %s\n", buf, gt_genome_feature_get_type(rm->gf));
+        printf("%s, %s\n", buf, gt_feature_node_get_type(rm->gf));
       }
     }
     had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, file,

@@ -31,7 +31,7 @@ struct GT_TypeCheckerBuiltin {
 #define gt_type_checker_builtin_cast(FTF)\
         gt_type_checker_cast(gt_type_checker_builtin_class(), FTF)
 
-static const char *gt_genome_feature_type_strings[] = { "CDS",
+static const char *gt_feature_node_type_strings[] = { "CDS",
                                                      "EST_match",
                                                      "LTR_retrotransposon",
                                                      "SNP",
@@ -60,9 +60,9 @@ static const char* find_type(const char *gft_string)
   assert(gft_string);
   assert(strcmp(gft_string, "undefined")); /* do not convert undefined string */
   result = bsearch(&gft_string,
-                   gt_genome_feature_type_strings,
-                   sizeof (gt_genome_feature_type_strings) /
-                   sizeof (gt_genome_feature_type_strings[0]),
+                   gt_feature_node_type_strings,
+                   sizeof (gt_feature_node_type_strings) /
+                   sizeof (gt_feature_node_type_strings[0]),
                    sizeof (char*),
                    compare);
   if (result)

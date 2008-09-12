@@ -141,7 +141,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   /* determine the range and the strand of the mRNA */
   first_node = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, 0);
   mRNA_range = gt_genome_node_get_range(first_node);
-  mRNA_strand = gt_genome_feature_get_strand((GtGenomeFeature*) first_node);
+  mRNA_strand = gt_feature_node_get_strand((GtFeatureNode*) first_node);
   mRNA_seqid = gt_genome_node_get_seqid(first_node);
   for (i = 1; i < gt_array_size(gt_genome_node_array); i++) {
     gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
@@ -149,7 +149,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
     /* XXX: an error check is necessary here, otherwise gt_strand_join() can
        cause a failed assertion */
     mRNA_strand = gt_strand_join(mRNA_strand,
-                          gt_genome_feature_get_strand((GtGenomeFeature*) gn));
+                          gt_feature_node_get_strand((GtFeatureNode*) gn));
     if (gt_str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
       gt_error_set(err, "The features on lines %u and %u refer to different "
                 "genomic sequences (``seqname''), although they have the same "
@@ -162,12 +162,12 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   }
 
   if (!had_err) {
-    mRNA_node = gt_genome_feature_new(mRNA_seqid, gft_mRNA, mRNA_range.start,
+    mRNA_node = gt_feature_node_new(mRNA_seqid, gft_mRNA, mRNA_range.start,
                                       mRNA_range.end, mRNA_strand);
 
     if ((tname = hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key))) {
-      gt_genome_feature_add_attribute((GtGenomeFeature*) mRNA_node, "Name",
+      gt_feature_node_add_attribute((GtFeatureNode*) mRNA_node, "Name",
                                       tname);
     }
 
@@ -209,22 +209,22 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
     /* determine the range and the strand of the gene */
     gn = *(GtGenomeNode**) gt_array_get(mRNAs, 0);
     gene_range = gt_genome_node_get_range(gn);
-    gene_strand = gt_genome_feature_get_strand((GtGenomeFeature*) gn);
+    gene_strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
     gene_seqid = gt_genome_node_get_seqid(gn);
     for (i = 1; i < gt_array_size(mRNAs); i++) {
       gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
       gene_range = gt_range_join(gene_range, gt_genome_node_get_range(gn));
       gene_strand = gt_strand_join(gene_strand,
-                          gt_genome_feature_get_strand((GtGenomeFeature*) gn));
+                          gt_feature_node_get_strand((GtFeatureNode*) gn));
       gt_assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_node = gt_genome_feature_new(gene_seqid, gft_gene, gene_range.start,
+    gene_node = gt_feature_node_new(gene_seqid, gft_gene, gene_range.start,
                                       gene_range.end, gene_strand);
 
     if ((gname = hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key))) {
-      gt_genome_feature_add_attribute((GtGenomeFeature*) gene_node, "Name",
+      gt_feature_node_add_attribute((GtFeatureNode*) gene_node, "Name",
                                       gname);
     }
 
@@ -522,7 +522,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
       gt_assert(seqid_str);
 
       /* construct the new feature */
-      gn = gt_genome_feature_new(seqid_str, type, range.start, range.end,
+      gn = gt_feature_node_new(seqid_str, type, range.start, range.end,
                                  gt_strand_value);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
 
@@ -534,12 +534,12 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
                     source_str);
       }
       gt_assert(source_str);
-      gt_genome_feature_set_source(gn, source_str);
+      gt_feature_node_set_source(gn, source_str);
 
       if (score_is_defined)
-        gt_genome_feature_set_score((GtGenomeFeature*) gn, score_value);
+        gt_feature_node_set_score((GtFeatureNode*) gn, score_value);
       if (phase_value != GT_PHASE_UNDEFINED)
-        gt_genome_feature_set_phase(gn, phase_value);
+        gt_feature_node_set_phase(gn, phase_value);
       gt_array_add(gt_genome_node_array, gn);
     }
 

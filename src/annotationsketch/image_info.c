@@ -114,13 +114,13 @@ int gt_image_info_unit_test(GtError *err)
     unsigned long rbase;
     rbase = gt_rand_max(10);
     GtRange r = { rbase, rbase + gt_rand_max(20)};
-    gfs[i] = gt_genome_feature_new(seqid, gft_gene, r.start, r.end,
+    gfs[i] = gt_feature_node_new(seqid, gft_gene, r.start, r.end,
                                    GT_STRAND_FORWARD);
     rms[i] = gt_recmap_new(gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
-                           (GtGenomeFeature*) /* XXX */ gfs[i]);
+                           (GtFeatureNode*) /* XXX */ gfs[i]);
     gt_image_info_add_recmap(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);

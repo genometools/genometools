@@ -23,8 +23,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/strand.h"
-#include "extended/feature_type.h"
-#include "extended/genome_feature.h"
+#include "extended/feature_node.h"
 
 struct GtElement {
   const char *type;
@@ -38,12 +37,12 @@ struct GtElement {
 GtElement* gt_element_new(GtGenomeNode *gn)
 {
   GtElement *element;
-  GtGenomeFeature *gf = (GtGenomeFeature*) gn;
+  GtFeatureNode *gf = (GtFeatureNode*) gn;
   assert(gn);
   element = gt_element_new_empty();
-  gt_element_set_type(element, gt_genome_feature_get_type(gf));
+  gt_element_set_type(element, gt_feature_node_get_type(gf));
   gt_element_set_range(element, gt_genome_node_get_range(gn));
-  element->strand = gt_genome_feature_get_strand(gf);
+  element->strand = gt_feature_node_get_strand(gf);
   element->mark = gt_genome_node_is_marked(gn);
   element->gn = gt_genome_node_ref(gn);
   return element;
@@ -135,8 +134,8 @@ int gt_element_unit_test(GtError *err)
   r2.end = 50UL;
 
   seqid = gt_str_new_cstr("seqid");
-  gn = gt_genome_feature_new(seqid, gft_exon, r1.start, r1.end, GT_STRAND_BOTH);
-  gn2 = gt_genome_feature_new(seqid, gft_exon, r2.start, r2.end,
+  gn = gt_feature_node_new(seqid, gft_exon, r1.start, r1.end, GT_STRAND_BOTH);
+  gn2 = gt_feature_node_new(seqid, gft_exon, r2.start, r2.end,
                              GT_STRAND_BOTH);
 
   e = gt_element_new(gn);

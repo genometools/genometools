@@ -64,9 +64,9 @@ static int save_exon_node(GtGenomeNode *gn, void *data,
   gt_error_check(err);
   assert(gn && data);
   gtf_visitor = (GTFVisitor*) data;
-  if (gt_genome_feature_has_type((GtGenomeFeature*) gn, gft_exon))
+  if (gt_feature_node_has_type((GtFeatureNode*) gn, gft_exon))
     gt_array_add(gtf_visitor->exon_features, gn);
-  else if (gt_genome_feature_has_type((GtGenomeFeature*) gn, gft_CDS))
+  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gft_CDS))
     gt_array_add(gtf_visitor->CDS_features, gn);
   return 0;
 }
@@ -74,7 +74,7 @@ static int save_exon_node(GtGenomeNode *gn, void *data,
 static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
                                GtError *err)
 {
-  GtGenomeFeature *gf;
+  GtFeatureNode *gf;
   unsigned long i;
   int had_err;
   gt_error_check(err);
@@ -91,7 +91,7 @@ static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
     /* show exon features */
     gtf_visitor->transcript_id++;
     for (i = 0; i < gt_array_size(gtf_visitor->exon_features); i++) {
-      gf = *(GtGenomeFeature**) gt_array_get(gtf_visitor->exon_features, i);
+      gf = *(GtFeatureNode**) gt_array_get(gtf_visitor->exon_features, i);
       gff3_output_leading(gf, gtf_visitor->outfp);
       gt_genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
@@ -104,12 +104,12 @@ static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
           gt_array_size(gtf_visitor->CDS_features), sizeof (GtGenomeNode*),
           (GtCompare) gt_genome_node_compare);
     /* show start_codon feature */
-    gf = *(GtGenomeFeature**) gt_array_get(gtf_visitor->CDS_features, 0);
+    gf = *(GtFeatureNode**) gt_array_get(gtf_visitor->CDS_features, 0);
     /* XXX: to be done */
 
     /* show CDS features */
     for (i = 0; i < gt_array_size(gtf_visitor->CDS_features); i++) {
-      gf = *(GtGenomeFeature**) gt_array_get(gtf_visitor->CDS_features, i);
+      gf = *(GtFeatureNode**) gt_array_get(gtf_visitor->CDS_features, i);
       gff3_output_leading(gf, gtf_visitor->outfp);
       gt_genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
@@ -123,28 +123,28 @@ static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
 static int gtf_show_genome_feature(GtGenomeNode *gn, void *data, GtError *err)
 {
   GTFVisitor *gtf_visitor = (GTFVisitor*) data;
-  GtGenomeFeature *gf = (GtGenomeFeature*) gn;
+  GtFeatureNode *gf = (GtFeatureNode*) gn;
   int had_err = 0;
-  if (gt_genome_feature_has_type(gf, gft_gene)) {
+  if (gt_feature_node_has_type(gf, gft_gene)) {
       gtf_visitor->gene_id++;
       gtf_visitor->transcript_id = 0;
       had_err = gtf_show_transcript(gn, gtf_visitor, err);
   }
-  else if (gt_genome_feature_has_type(gf, gft_mRNA)) {
+  else if (gt_feature_node_has_type(gf, gft_mRNA)) {
     had_err = gtf_show_transcript(gn, gtf_visitor, err);
   }
-  else if (!(gt_genome_feature_has_type(gf, gft_CDS) ||
-             gt_genome_feature_has_type(gf, gft_exon))) {
+  else if (!(gt_feature_node_has_type(gf, gft_CDS) ||
+             gt_feature_node_has_type(gf, gft_exon))) {
       warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
               "\"%s\")",
-              gt_genome_feature_get_type(gf),
+              gt_feature_node_get_type(gf),
               gt_genome_node_get_line_number(gn),
               gt_genome_node_get_filename(gn));
   }
   return had_err;
 }
 
-static int gtf_visitor_genome_feature(GenomeVisitor *gv, GtGenomeFeature *gf,
+static int gtf_visitor_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
                                       GtError *err)
 {
   GTFVisitor *gtf_visitor;

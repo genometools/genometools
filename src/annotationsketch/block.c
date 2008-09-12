@@ -86,8 +86,8 @@ GtBlock* gt_block_new_from_node(GtGenomeNode *node)
   assert(node);
   block = gt_block_new();
   block->range = gt_genome_node_get_range(node);
-  block->strand = gt_genome_feature_get_strand((GtGenomeFeature*) node);
-  block->type = gt_genome_feature_get_type((GtGenomeFeature*) node);
+  block->strand = gt_feature_node_get_strand((GtFeatureNode*) node);
+  block->type = gt_feature_node_get_type((GtFeatureNode*) node);
   block->top_level_feature = gt_genome_node_ref(node);
   return block;
 }
@@ -233,9 +233,9 @@ int gt_block_unit_test(GtError *err)
   r2.start = 40UL;
   r2.end = 50UL;
 
-  gn1 = gt_genome_feature_new(seqid, gft_gene, r1.start, r1.end,
+  gn1 = gt_feature_node_new(seqid, gft_gene, r1.start, r1.end,
                               GT_STRAND_FORWARD);
-  gn2 = gt_genome_feature_new(seqid, gft_exon, r2.start, r2.end,
+  gn2 = gt_feature_node_new(seqid, gft_exon, r2.start, r2.end,
                               GT_STRAND_FORWARD);
 
   e1 = gt_element_new(gn1);
