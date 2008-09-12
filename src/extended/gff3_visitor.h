@@ -24,7 +24,7 @@ typedef struct GFF3Visitor GFF3Visitor;
 #include "extended/genome_visitor.h"
 
 const GenomeVisitorClass* gff3_visitor_class(void);
-GenomeVisitor*            gff3_visitor_new(GT_GenFile*);
+GenomeVisitor*            gff3_visitor_new(GtGenFile*);
 void                      gff3_visitor_set_fasta_width(GenomeVisitor*,
                                                        unsigned long);
 

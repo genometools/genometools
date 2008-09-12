@@ -77,7 +77,7 @@ void gt_cstr_array_show(char **gt_cstr_array, FILE *fp)
   xfputc('\n', fp);
 }
 
-void gt_cstr_array_show_genfile(const char **gt_cstr_array, GT_GenFile *fp)
+void gt_cstr_array_show_genfile(const char **gt_cstr_array, GtGenFile *fp)
 {
   unsigned long i = 0;
   while (gt_cstr_array[i]) {

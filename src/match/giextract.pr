@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 int extractginumbers(bool verbose,
-                     GT_GenFile *outfp,
+                     GtGenFile *outfp,
                      unsigned long width,
                      const GtStr *ginumberfile,
                      GtStrArray *referencefiletab,

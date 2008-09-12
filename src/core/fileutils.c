@@ -53,7 +53,7 @@ bool file_is_newer(const char *a, const char *b)
 unsigned long file_number_of_lines(const char *path)
 {
   unsigned long number_of_lines = 0;
-  GT_GenFile *fp;
+  GtGenFile *fp;
   int cc;
   assert(path);
   fp = gt_genfile_xopen(path, "r");
@@ -148,7 +148,7 @@ off_t files_estimate_total_size(const GtStrArray *filenames)
   unsigned long filenum;
   off_t totalsize = 0;
   struct stat sb;
-  GT_GenFileMode gfm;
+  GtGenFileMode gfm;
   int fd;
 
   for (filenum = 0; filenum < gt_strarray_size(filenames); filenum++)

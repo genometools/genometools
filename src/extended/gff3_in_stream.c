@@ -36,7 +36,7 @@ struct GFF3InStream
        file_is_open,
        be_verbose,
        checkids;
-  GT_GenFile *fpin;
+  GtGenFile *fpin;
   unsigned long long line_number;
   GT_Queue *genome_node_buffer;
   GT_GFF3Parser *gff3_parser;

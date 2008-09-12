@@ -57,7 +57,7 @@ int            gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser*,
                                                  GtStr *filenamestr,
                                                  unsigned long long
                                                  *line_number,
-                                                 GT_GenFile *fpin, GtError*);
+                                                 GtGenFile *fpin, GtError*);
 /* Reset the GFF3 parser (necessary if the processed input file is switched). */
 void           gt_gff3_parser_reset(GT_GFF3Parser*);
 void           gt_gff3_parser_delete(GT_GFF3Parser*);

@@ -84,7 +84,7 @@ static unsigned long buf_contains_separator(char *buf)
   return 0;
 }
 
-static GT_GenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
+static GtGenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
                                             bool force, GtError *err)
 {
   if (!force && file_exists(path)) {
@@ -110,7 +110,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
     had_err = -1;
 
   for (i = 0; !had_err && i < gt_bioseq_number_of_sequences(bioseq); i++) {
-    GT_GenFile *outfp;
+    GtGenFile *outfp;
     gt_str_reset(descname);
     gt_str_append_str(descname, splitdesc);
     gt_str_append_char(descname, '/');
@@ -138,7 +138,7 @@ static int split_fasta_file(const char *filename,
                             unsigned long max_filesize_in_bytes, bool force,
                             GtError *err)
 {
-  GT_GenFile *srcfp = NULL, *destfp = NULL;
+  GtGenFile *srcfp = NULL, *destfp = NULL;
   GtStr *destfilename = NULL;
   unsigned long filenum = 0, bytecount = 0, separator_pos;
   int read_bytes, had_err = 0;

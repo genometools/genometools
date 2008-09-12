@@ -82,7 +82,7 @@ void disc_distri_show(const DiscDistri *d)
 typedef struct {
   double cumulative_probability;
   unsigned long long num_of_occurrences;
-  GT_GenFile *genfile;
+  GtGenFile *genfile;
 } ShowValueInfo;
 
 static enum iterator_op
@@ -103,7 +103,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
   return CONTINUE_ITERATION;
 }
 
-void disc_distri_show_generic(const DiscDistri *d, GT_GenFile *genfile)
+void disc_distri_show_generic(const DiscDistri *d, GtGenFile *genfile)
 {
   ShowValueInfo showvalueinfo;
   int rval;

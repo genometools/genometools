@@ -34,7 +34,7 @@ GtStrArray* gt_strarray_new(void)
 GtStrArray* gt_strarray_new_file(const char *path)
 {
   GtStrArray *filecontent;
-  GT_GenFile *fpin;
+  GtGenFile *fpin;
   GtStr *line;
   fpin = gt_genfile_xopen(path, "r");
   assert(fpin);

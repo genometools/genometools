@@ -474,7 +474,7 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
   const GtGraphicsCairo *g = (const GtGraphicsCairo*) gg;
   cairo_status_t rval;
   gt_error_check(err);
-  GT_GenFile *outfile;
+  GtGenFile *outfile;
   assert(g && filename);
   /* do nothing if no surface was created */
   if (g->from_context)

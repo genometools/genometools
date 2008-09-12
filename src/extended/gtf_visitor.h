@@ -24,6 +24,6 @@ typedef struct GTFVisitor GTFVisitor;
 #include "extended/genome_visitor.h"
 
 const GenomeVisitorClass* gtf_visitor_class(void);
-GenomeVisitor*            gtf_visitor_new(GT_GenFile*);
+GenomeVisitor*            gtf_visitor_new(GtGenFile*);
 
 #endif

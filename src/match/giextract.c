@@ -298,7 +298,7 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
 }
 
 int extractginumbers(bool verbose,
-                     GT_GenFile *outfp,
+                     GtGenFile *outfp,
                      unsigned long width,
                      const GtStr *ginumberfile,
                      GtStrArray *referencefiletab,

@@ -19,7 +19,7 @@
 #include "core/undef.h"
 #include "extended/gff3_output.h"
 
-void gff3_output_leading(GtGenomeFeature *gf, GT_GenFile *outfp)
+void gff3_output_leading(GtGenomeFeature *gf, GtGenFile *outfp)
 {
   GtGenomeNode *gn;
   assert(gf);

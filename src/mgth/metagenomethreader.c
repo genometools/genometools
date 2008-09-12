@@ -245,8 +245,8 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
   GtStr *outputfilename;
 
-  /* GT_GenFile Zeiger auf die XML-Datei mit den Blast-Hits */
-  GT_GenFile *fp_xmlfile;
+  /* GtGenFile Zeiger auf die XML-Datei mit den Blast-Hits */
+  GtGenFile *fp_xmlfile;
 
   /* Anlegen der Parser-Array-Struktur, ueber den der Austausch von
      Informationen Parsestruct parsestruct; zwischen den

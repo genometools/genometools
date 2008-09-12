@@ -24,6 +24,6 @@
 typedef struct GTFOutStream GTFOutStream;
 
 const GenomeStreamClass* gtf_out_stream_class(void);
-GenomeStream*            gtf_out_stream_new(GenomeStream*, GT_GenFile*);
+GenomeStream*            gtf_out_stream_new(GenomeStream*, GtGenFile*);
 
 #endif

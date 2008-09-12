@@ -28,7 +28,7 @@ typedef struct {
   bool verbose;
   unsigned long join_length;
   OutputFileInfo *ofi;
-  GT_GenFile *outfp;
+  GtGenFile *outfp;
 } CSAArguments;
 
 static void* gt_csa_arguments_new(void)

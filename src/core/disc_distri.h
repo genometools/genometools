@@ -34,7 +34,7 @@ void               disc_distri_add_multi(DiscDistri*, unsigned long,
                                         unsigned long long);
 unsigned long long disc_distri_get(const DiscDistri*, unsigned long);
 void               disc_distri_show(const DiscDistri*); /* on stdout */
-void               disc_distri_show_generic(const DiscDistri*, GT_GenFile*);
+void               disc_distri_show_generic(const DiscDistri*, GtGenFile*);
 void               disc_distri_foreach(const DiscDistri*, DiscDistriIterFunc,
                                       void *data);
 int                disc_distri_unit_test(GtError*);

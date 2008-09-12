@@ -69,7 +69,7 @@ static void flag_delete(unsigned short *, unsigned short *, char);
    Returnwert: void */
 static void check_counter(unsigned short *, char);
 
-int mg_xmlparser(ParseStruct *parsestruct_ptr, GT_GenFile * fp_xmlfile,
+int mg_xmlparser(ParseStruct *parsestruct_ptr, GtGenFile * fp_xmlfile,
                  GtError * err)
 {
   int had_err = 0;

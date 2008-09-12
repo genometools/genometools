@@ -23,7 +23,7 @@
 #include "core/ma.h"
 
 struct GT_IO {
-  GT_GenFile *fp;
+  GtGenFile *fp;
   GtStr *path;
   unsigned long line_number;
   bool line_start;

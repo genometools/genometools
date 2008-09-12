@@ -56,7 +56,7 @@ const GenomeStreamClass* gtf_out_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* gtf_out_stream_new(GenomeStream *in_stream, GT_GenFile *outfp)
+GenomeStream* gtf_out_stream_new(GenomeStream *in_stream, GtGenFile *outfp)
 {
   GenomeStream *gs = genome_stream_create(gtf_out_stream_class(),
                                           genome_stream_is_sorted(in_stream));

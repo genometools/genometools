@@ -36,7 +36,7 @@ typedef struct {
                 topos,
                 width;
   OutputFileInfo *ofi;
-  GT_GenFile *outfp;
+  GtGenFile *outfp;
 } ExtractSeqArguments;
 
 static void* gt_extractseq_arguments_new(void)
@@ -137,7 +137,7 @@ static int gt_extractseq_arguments_check(GT_UNUSED int argc,
   return 0;
 }
 
-static int extractseq_pos(GT_GenFile *outfp, GT_Bioseq *bs,
+static int extractseq_pos(GtGenFile *outfp, GT_Bioseq *bs,
                           unsigned long frompos, unsigned long topos,
                           unsigned long width, GtError *err)
 {
@@ -158,7 +158,7 @@ static int extractseq_pos(GT_GenFile *outfp, GT_Bioseq *bs,
   return had_err;
 }
 
-static int extractseq_match(GT_GenFile *outfp, GT_Bioseq *bs,
+static int extractseq_match(GtGenFile *outfp, GT_Bioseq *bs,
                             const char *pattern, unsigned long width,
                             GtError *err)
 {
@@ -185,7 +185,7 @@ static int extractseq_match(GT_GenFile *outfp, GT_Bioseq *bs,
 }
 
 static int process_ginum(GtStr *ginum, int argc, const char **argv,
-                         unsigned long width, GT_GenFile *outfp, GtError *err)
+                         unsigned long width, GtGenFile *outfp, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);

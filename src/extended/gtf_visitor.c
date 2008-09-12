@@ -32,7 +32,7 @@ struct GTFVisitor {
                 transcript_id;
   GtArray *exon_features,
         *CDS_features;
-  GT_GenFile *outfp;
+  GtGenFile *outfp;
 };
 
 #define gtf_visitor_cast(GV)\
@@ -166,7 +166,7 @@ const GenomeVisitorClass* gtf_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* gtf_visitor_new(GT_GenFile *outfp)
+GenomeVisitor* gtf_visitor_new(GtGenFile *outfp)
 {
   GenomeVisitor *gv = genome_visitor_create(gtf_visitor_class());
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);

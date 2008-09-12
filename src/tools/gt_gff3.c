@@ -44,7 +44,7 @@ typedef struct {
       *typecheck;
   unsigned long width;
   OutputFileInfo *ofi;
-  GT_GenFile *outfp;
+  GtGenFile *outfp;
 } GFF3Arguments;
 
 static void* gt_gff3_arguments_new(void)

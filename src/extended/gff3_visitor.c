@@ -37,7 +37,7 @@ struct GFF3Visitor {
   Hashmap *gt_genome_feature_to_id_array,
             *gt_genome_feature_to_unique_id_str;
   unsigned long fasta_width;
-  GT_GenFile *outfp;
+  GtGenFile *outfp;
 };
 
 typedef struct {
@@ -47,7 +47,7 @@ typedef struct {
 
 typedef struct {
   bool *attribute_shown;
-  GT_GenFile *outfp;
+  GtGenFile *outfp;
 } ShowAttributeInfo;
 
 #define gff3_visitor_cast(GV)\
@@ -316,7 +316,7 @@ const GenomeVisitorClass* gff3_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* gff3_visitor_new(GT_GenFile *outfp)
+GenomeVisitor* gff3_visitor_new(GtGenFile *outfp)
 {
   GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class());
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);

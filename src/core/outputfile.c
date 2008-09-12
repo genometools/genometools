@@ -26,7 +26,7 @@ struct OutputFileInfo {
   bool gzip,
        bzip2,
        force;
-  GT_GenFile **outfp;
+  GtGenFile **outfp;
 };
 
 OutputFileInfo* outputfileinfo_new(void)
@@ -40,7 +40,7 @@ OutputFileInfo* outputfileinfo_new(void)
 static int determine_outfp(void *data, GtError *err)
 {
   OutputFileInfo *ofi = (OutputFileInfo*) data;
-  GT_GenFileMode genfilemode;
+  GtGenFileMode genfilemode;
   int had_err = 0;
   gt_error_check(err);
   assert(ofi);
@@ -81,7 +81,7 @@ static int determine_outfp(void *data, GtError *err)
   return had_err;
 }
 
-void outputfile_register_options(OptionParser *op, GT_GenFile **outfp,
+void outputfile_register_options(OptionParser *op, GtGenFile **outfp,
                                  OutputFileInfo *ofi)
 {
   Option *opto, *optgzip, *optbzip2, *optforce;
