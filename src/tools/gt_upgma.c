@@ -43,7 +43,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 
 static double distfunc(unsigned long i, unsigned long j, void *data)
 {
-  GT_Bioseq *bioseq= (GT_Bioseq*) data;
+  GtBioseq *bioseq= (GtBioseq*) data;
   return linearedist(gt_bioseq_get_sequence(bioseq, i),
                      gt_bioseq_get_sequence_length(bioseq, i),
                      gt_bioseq_get_sequence(bioseq, j),
@@ -66,7 +66,7 @@ int gt_upgma(int argc, const char **argv, GtError *err)
 {
   bool use_hard_coded_example = false;
   int parsed_args, had_err = 0;
-  GT_Bioseq *bioseq = NULL;
+  GtBioseq *bioseq = NULL;
   UPGMA *upgma = NULL;
   gt_error_check(err);
 

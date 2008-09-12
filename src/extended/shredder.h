@@ -24,7 +24,7 @@ typedef struct Shredder Shredder;
 
 /* Create new Shredder for sequences in <bioseq>. The produced fragments will
    have at least length <minlength> and at most length <maxlength>. */
-Shredder*   shredder_new(GT_Bioseq *bioseq, unsigned long minlength,
+Shredder*   shredder_new(GtBioseq *bioseq, unsigned long minlength,
                                          unsigned long maxlength);
 void        shredder_delete(Shredder*);
 /* Set the <overlap> between shredded fragments, the default is 0. */

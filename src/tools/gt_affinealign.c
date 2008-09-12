@@ -68,7 +68,7 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
                                  GtError *err)
 {
-  GT_Bioseq *gt_bioseq_1, *gt_bioseq_2 = NULL;
+  GtBioseq *gt_bioseq_1, *gt_bioseq_2 = NULL;
   unsigned long i, j;
   int had_err = 0;
   Alignment *a;

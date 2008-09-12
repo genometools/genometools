@@ -20,17 +20,17 @@
 #include "core/cstr_array.h"
 #include "core/ma.h"
 
-struct GT_BioseqIterator {
+struct GtBioseqIterator {
   int current_file,
       seqfile_counter;
   char **sequence_files;
   bool stdin_was_used;
 };
 
-GT_BioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
+GtBioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
                                     const char **sequence_files)
 {
-  GT_BioseqIterator *bsi;
+  GtBioseqIterator *bsi;
   assert(sequence_files);
   bsi = gt_calloc(1, sizeof *bsi);
   bsi->seqfile_counter = seqfile_counter ? seqfile_counter : 1 /* for stdin */;
@@ -38,14 +38,14 @@ GT_BioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
   return bsi;
 }
 
-void gt_bioseq_iterator_delete(GT_BioseqIterator *bsi)
+void gt_bioseq_iterator_delete(GtBioseqIterator *bsi)
 {
   if (!bsi) return;
   gt_cstr_array_delete(bsi->sequence_files);
   gt_free(bsi);
 }
 
-int gt_bioseq_iterator_next(GT_BioseqIterator *bsi, GT_Bioseq **bioseq,
+int gt_bioseq_iterator_next(GtBioseqIterator *bsi, GtBioseq **bioseq,
                             GtError *err)
 {
   int had_err = 0;

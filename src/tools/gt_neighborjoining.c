@@ -43,7 +43,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 
 static double distfunc(unsigned long i, unsigned long j, void *data)
 {
-  GT_Bioseq *bioseq= (GT_Bioseq*) data;
+  GtBioseq *bioseq= (GtBioseq*) data;
   return linearedist(gt_bioseq_get_sequence(bioseq, i),
                      gt_bioseq_get_sequence_length(bioseq, i),
                      gt_bioseq_get_sequence(bioseq, j),
@@ -65,7 +65,7 @@ static double exampledistfunc(unsigned long i, unsigned long j,
 int gt_neighborjoining(int argc, const char **argv, GtError *err)
 {
   bool use_hard_coded_example = false;
-  GT_Bioseq *bioseq = NULL;
+  GtBioseq *bioseq = NULL;
   NeighborJoining *nj = NULL;
   int parsed_args, had_err = 0;
   gt_error_check(err);

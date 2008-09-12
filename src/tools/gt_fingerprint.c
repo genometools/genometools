@@ -178,7 +178,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GtError *err)
 {
   FingerprintArguments *arguments = tool_arguments;
-  GT_Bioseq *bs;
+  GtBioseq *bs;
   StringDistri *sd;
   unsigned long i, j;
   int had_err = 0;

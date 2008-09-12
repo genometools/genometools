@@ -86,7 +86,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
   SequniqArguments *arguments = tool_arguments;
-  GT_Bioseq *bs;
+  GtBioseq *bs;
   StringDistri *sd;
   unsigned long long duplicates = 0, num_of_sequences = 0;
   GtStrArray *files;

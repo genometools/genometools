@@ -191,7 +191,7 @@ typedef struct
    *fasta_row,
    *result_hits;
   GtArray *value_tmp;
-  GT_Bioseq *queryseq,
+  GtBioseq *queryseq,
    *hitseq;
   GtGenFile *fp_outputfile,
    *fp_blasthit_file,

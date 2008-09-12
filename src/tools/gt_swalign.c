@@ -65,7 +65,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
                              GtError *err)
 {
   SWAlignArguments *arguments = tool_arguments;
-  GT_Bioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
+  GtBioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
   GT_ScoreFunction *score_function = NULL;
   GT_ScoreMatrix *scorematrix;
   unsigned long i, j;

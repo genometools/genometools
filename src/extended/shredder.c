@@ -20,7 +20,7 @@
 #include "extended/shredder.h"
 
 struct Shredder {
-  GT_Bioseq *bioseq;
+  GtBioseq *bioseq;
   unsigned long minlength,
                 maxlength,
                 overlap,
@@ -29,7 +29,7 @@ struct Shredder {
   double sample_probability;
 };
 
-Shredder* shredder_new(GT_Bioseq *bioseq, unsigned long minlength,
+Shredder* shredder_new(GtBioseq *bioseq, unsigned long minlength,
                                        unsigned long maxlength)
 {
   Shredder *shredder = gt_calloc(1, sizeof *shredder);

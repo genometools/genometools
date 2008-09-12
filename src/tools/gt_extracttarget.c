@@ -73,7 +73,7 @@ static OptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
 }
 
 typedef struct {
-  GT_Bioseq *bioseq;
+  GtBioseq *bioseq;
   unsigned long seqnum;
 } TargetInfo;
 
@@ -114,7 +114,7 @@ static int extracttarget_from_seqfiles(const char *target,
       unsigned long j;
       for (j = 0; j < gt_strarray_size(seqfiles); j++) {
         unsigned long k;
-        GT_Bioseq *bioseq;
+        GtBioseq *bioseq;
         if (!(bioseq =  gt_bioseq_new(gt_strarray_get(seqfiles, j), err))) {
           had_err = -1;
           break;

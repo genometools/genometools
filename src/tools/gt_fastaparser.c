@@ -36,7 +36,7 @@ static int gt_fastaparser_runner(GT_UNUSED int argc, const char **argv,
                                  GT_UNUSED GtError *err)
 {
   unsigned long i;
-  SimpleGT_Bioseq *simple_bioseq;
+  SimpleGtBioseq *simple_bioseq;
 
   gt_error_check(err);
 

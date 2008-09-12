@@ -109,7 +109,7 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
   gt_free(inedges);
 }
 
-GreedyAssembly* greedy_assembly_new(GT_Bioseq *fragments,
+GreedyAssembly* greedy_assembly_new(GtBioseq *fragments,
                                     FragmentOverlaps *sorted_overlaps)
 {
   GreedyAssembly *ga;
@@ -151,7 +151,7 @@ static void greedy_assembly_show_generic(const GreedyAssembly *ga,
 static void show_assembly_part(unsigned long fragnum, unsigned long overlap,
                                void *data)
 {
-  GT_Bioseq *fragments = data;
+  GtBioseq *fragments = data;
   unsigned long i, fraglen;
   const char *frag;
   assert(fragments);
@@ -161,7 +161,7 @@ static void show_assembly_part(unsigned long fragnum, unsigned long overlap,
     xputchar(frag[i]);
 }
 
-void greedy_assembly_show(const GreedyAssembly *ga, GT_Bioseq *fragments)
+void greedy_assembly_show(const GreedyAssembly *ga, GtBioseq *fragments)
 {
   printf("%cAssembled sequence\n", FASTA_SEPARATOR);
   greedy_assembly_show_generic(ga, show_assembly_part, fragments);

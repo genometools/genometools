@@ -62,9 +62,9 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
                             void *tool_arguments, GtError *err)
 {
   MutateArguments *arguments = tool_arguments;
-  GT_BioseqIterator *bsi;
+  GtBioseqIterator *bsi;
   unsigned long i;
-  GT_Bioseq *bioseq;
+  GtBioseq *bioseq;
   Seq *mutated_seq;
   int had_err;
 

@@ -137,7 +137,7 @@ static int gt_extractseq_arguments_check(GT_UNUSED int argc,
   return 0;
 }
 
-static int extractseq_pos(GtGenFile *outfp, GT_Bioseq *bs,
+static int extractseq_pos(GtGenFile *outfp, GtBioseq *bs,
                           unsigned long frompos, unsigned long topos,
                           unsigned long width, GtError *err)
 {
@@ -158,7 +158,7 @@ static int extractseq_pos(GtGenFile *outfp, GT_Bioseq *bs,
   return had_err;
 }
 
-static int extractseq_match(GtGenFile *outfp, GT_Bioseq *bs,
+static int extractseq_match(GtGenFile *outfp, GtBioseq *bs,
                             const char *pattern, unsigned long width,
                             GtError *err)
 {
@@ -224,8 +224,8 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
                             arguments->outfp, err);
   }
   else {
-    GT_BioseqIterator *bsi;
-    GT_Bioseq *bs;
+    GtBioseqIterator *bsi;
+    GtBioseq *bs;
     bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
     while (!had_err &&
            !(had_err = gt_bioseq_iterator_next(bsi, &bs, err)) && bs) {

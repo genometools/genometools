@@ -31,18 +31,18 @@ typedef struct {
   unsigned long showseqnum,
                 width;
   GtStr *reader;
-} GT_BioseqArguments;
+} GtBioseqArguments;
 
 static void* gt_gt_bioseq_arguments_new(void)
 {
-  GT_BioseqArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtBioseqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->reader = gt_str_new();
   return arguments;
 }
 
 static void gt_gt_bioseq_arguments_delete(void *tool_arguments)
 {
-  GT_BioseqArguments *arguments = tool_arguments;
+  GtBioseqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->reader);
   gt_free(arguments);
@@ -50,7 +50,7 @@ static void gt_gt_bioseq_arguments_delete(void *tool_arguments)
 
 static OptionParser* gt_gt_bioseq_option_parser_new(void *tool_arguments)
 {
-  GT_BioseqArguments *arguments = tool_arguments;
+  GtBioseqArguments *arguments = tool_arguments;
   Option *option, *option_recreate, *option_showfasta, *option_showseqnum,
          *option_width, *option_stat, *option_reader;
   OptionParser *op;
@@ -58,11 +58,11 @@ static OptionParser* gt_gt_bioseq_option_parser_new(void *tool_arguments)
   assert(arguments);
 
   op = option_parser_new("[option ...] sequence_file [...]",
-                         "Construct the GT_Biosequence files for the given "
+                         "Construct the GtBiosequence files for the given "
                          "sequence_file(s) (if necessary).");
 
   /* -recreate */
-  option_recreate = option_new_bool("recreate", "recreate GT_Biosequence "
+  option_recreate = option_new_bool("recreate", "recreate GtBiosequence "
                                     "files, even if they exist already",
                                     &arguments->recreate, false);
   option_parser_add_option(op, option_recreate);
@@ -127,7 +127,7 @@ static OptionParser* gt_gt_bioseq_option_parser_new(void *tool_arguments)
 static int gt_gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
                                      GtError *err)
 {
-  GT_BioseqArguments *arguments = tool_arguments;
+  GtBioseqArguments *arguments = tool_arguments;
   gt_error_check(err);
   assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
@@ -142,8 +142,8 @@ static int gt_gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
 static int gt_gt_bioseq_runner(int argc, const char **argv, int parsed_args,
                             void *tool_arguments, GtError *err)
 {
-  GT_BioseqArguments *arguments = tool_arguments;
-  GT_Bioseq *bioseq;
+  GtBioseqArguments *arguments = tool_arguments;
+  GtBioseq *bioseq;
   GT_FastaReaderType reader_type = GT_FASTA_READER_REC;
   int arg = parsed_args, had_err = 0;
   gt_error_check(err);
@@ -176,7 +176,7 @@ static int gt_gt_bioseq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err && arguments->showseqnum != UNDEF_ULONG) {
       if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
         gt_error_set(err, "argument '%lu' to option '-showseqnum' is too "
-                     "large. The GT_Biosequence contains only '%lu' sequences.",
+                     "large. The GtBiosequence contains only '%lu' sequences.",
                   arguments->showseqnum, gt_bioseq_number_of_sequences(bioseq));
         had_err = -1;
       }

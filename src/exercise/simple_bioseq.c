@@ -27,7 +27,7 @@ typedef struct {
          *sequence;
 } FastaEntry;
 
-struct SimpleGT_Bioseq {
+struct SimpleGtBioseq {
   GtArray *entries;
 };
 
@@ -99,9 +99,9 @@ static void parse_fasta_file(GtArray *entries, const char *fasta_file)
   xfclose(fp);
 }
 
-SimpleGT_Bioseq* simple_gt_bioseq_new(const char *fasta_file)
+SimpleGtBioseq* simple_gt_bioseq_new(const char *fasta_file)
 {
-  SimpleGT_Bioseq *sbs;
+  SimpleGtBioseq *sbs;
   assert(fasta_file);
   sbs = xmalloc(sizeof *sbs);
   sbs->entries = gt_array_new(sizeof (FastaEntry));
@@ -109,7 +109,7 @@ SimpleGT_Bioseq* simple_gt_bioseq_new(const char *fasta_file)
   return sbs;
 }
 
-void simple_gt_bioseq_delete(SimpleGT_Bioseq *sbs)
+void simple_gt_bioseq_delete(SimpleGtBioseq *sbs)
 {
   unsigned long i;
   if (!sbs) return;
@@ -122,27 +122,27 @@ void simple_gt_bioseq_delete(SimpleGT_Bioseq *sbs)
   free(sbs);
 }
 
-const char* simple_gt_bioseq_get_description(SimpleGT_Bioseq *sbs,
+const char* simple_gt_bioseq_get_description(SimpleGtBioseq *sbs,
                                           unsigned long index)
 {
   assert(sbs);
   return gt_str_get(((FastaEntry*) gt_array_get(sbs->entries, index))->description);
 }
 
-const char* simple_gt_bioseq_get_sequence(SimpleGT_Bioseq *sbs, unsigned long index)
+const char* simple_gt_bioseq_get_sequence(SimpleGtBioseq *sbs, unsigned long index)
 {
   assert(sbs);
   return gt_str_get(((FastaEntry*) gt_array_get(sbs->entries, index))->sequence);
 }
 
-unsigned long simple_gt_bioseq_get_sequence_length(SimpleGT_Bioseq *sbs,
+unsigned long simple_gt_bioseq_get_sequence_length(SimpleGtBioseq *sbs,
                                                 unsigned long index)
 {
   assert(sbs);
   return gt_str_length(((FastaEntry*) gt_array_get(sbs->entries, index))->sequence);
 }
 
-unsigned long simple_gt_bioseq_number_of_sequences(SimpleGT_Bioseq *sbs)
+unsigned long simple_gt_bioseq_number_of_sequences(SimpleGtBioseq *sbs)
 {
   assert(sbs);
   return gt_array_size(sbs->entries);

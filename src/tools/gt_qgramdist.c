@@ -44,7 +44,7 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
 
 int gt_qgramdist(int argc, const char **argv, GtError *err)
 {
-  GT_Bioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
+  GtBioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
   unsigned long i, j, dist;
   Seq *seq_1, *seq_2;
   int parsed_args, had_err = 0;

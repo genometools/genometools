@@ -26,7 +26,7 @@ struct FragmentOverlaps{
   GtArray *overlaps;
 };
 
-static void determine_overlaps(GtArray *overlaps, GT_Bioseq *fragments,
+static void determine_overlaps(GtArray *overlaps, GtBioseq *fragments,
                                unsigned long i, unsigned long j,
                                unsigned long minlength)
 {
@@ -57,7 +57,7 @@ static void determine_overlaps(GtArray *overlaps, GT_Bioseq *fragments,
   }
 }
 
-FragmentOverlaps* fragment_overlaps_new(GT_Bioseq *fragments,
+FragmentOverlaps* fragment_overlaps_new(GtBioseq *fragments,
                                         unsigned long minlength)
 {
   FragmentOverlaps *fo;

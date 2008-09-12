@@ -92,9 +92,9 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
                               GtError *err)
 {
   ShredderArguments *arguments = tool_arguments;
-  GT_BioseqIterator *bsi;
+  GtBioseqIterator *bsi;
   unsigned long i;
-  GT_Bioseq *bioseq;
+  GtBioseq *bioseq;
   int had_err;
   GtStr *desc;
 

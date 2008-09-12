@@ -71,7 +71,7 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
                                  GtError *err)
 {
   AssemblegreedyArguments *arguments = tool_arguments;
-  GT_Bioseq *fragments;
+  GtBioseq *fragments;
   int had_err = 0;
 
   gt_error_check(err);

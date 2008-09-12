@@ -29,7 +29,7 @@ struct RegionMapping {
       *sequence_file, /* the (current) sequence file */
       *sequence_name; /* the (current) sequence name */
   Mapping *mapping;
-  GT_Bioseq *bioseq; /* the current bioseq */
+  GtBioseq *bioseq; /* the current bioseq */
   unsigned int reference_count;
 };
 

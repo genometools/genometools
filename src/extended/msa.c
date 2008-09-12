@@ -24,7 +24,7 @@
 #define GAPSYMBOL '-'
 
 struct MSA {
-  GT_Bioseq *bs;
+  GtBioseq *bs;
 };
 
 MSA* msa_new(const char *MSA_filename, GtError *err)
@@ -64,7 +64,7 @@ MSA* msa_new(const char *MSA_filename, GtError *err)
   return msa;
 }
 
-static char** get_msa_array(GT_Bioseq *bs)
+static char** get_msa_array(GtBioseq *bs)
 {
   unsigned long i;
   char **msa;

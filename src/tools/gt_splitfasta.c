@@ -99,7 +99,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
                              bool force, GtError *err)
 {
   unsigned long i;
-  GT_Bioseq *bioseq;
+  GtBioseq *bioseq;
   GtStr *descname;
   int had_err = 0;
   gt_error_check(err);

@@ -73,7 +73,7 @@ static OptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static void translate_sequence_file(GT_Bioseq *bs)
+static void translate_sequence_file(GtBioseq *bs)
 {
   unsigned long i;
   assert(bs);
@@ -88,7 +88,7 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                                 GtError *err)
 {
   MagicMatchArguments *arguments = tool_arguments;
-  GT_Bioseq *bioseq;
+  GtBioseq *bioseq;
   unsigned long i;
   int had_err = 0;
 
