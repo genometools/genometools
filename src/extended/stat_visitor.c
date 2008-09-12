@@ -135,7 +135,7 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GtGenomeFeature *gf,
 }
 
 static int stat_visitor_sequence_region(GenomeVisitor *gv,
-                                        GT_SequenceRegion *sr,
+                                        GtSequenceRegion *sr,
                                         GT_UNUSED GtError *err)
 {
   StatVisitor *stat_visitor;

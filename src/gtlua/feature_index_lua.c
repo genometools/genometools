@@ -37,7 +37,7 @@ static int feature_index_lua_add_sequence_region(lua_State *L)
 {
   GtFeatureIndex **fi;
   GtGenomeNode **gn;
-  GT_SequenceRegion *sr;
+  GtSequenceRegion *sr;
   assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);

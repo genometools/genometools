@@ -86,21 +86,21 @@ typedef struct {
   GtStr *seqid_str;
   GtRange range;
   unsigned int line_number;
-} SimpleGT_SequenceRegion;
+} SimpleGtSequenceRegion;
 
-static SimpleGT_SequenceRegion* simple_sequence_region_new(const char *seqid,
+static SimpleGtSequenceRegion* simple_sequence_region_new(const char *seqid,
                                                         GtRange range,
                                                         unsigned int
                                                         line_number)
 {
-  SimpleGT_SequenceRegion *ssr = gt_malloc(sizeof *ssr);
+  SimpleGtSequenceRegion *ssr = gt_malloc(sizeof *ssr);
   ssr->seqid_str = gt_str_new_cstr(seqid);
   ssr->range = range;
   ssr->line_number = line_number;
   return ssr;
 }
 
-static void simple_sequence_region_delete(SimpleGT_SequenceRegion *ssr)
+static void simple_sequence_region_delete(SimpleGtSequenceRegion *ssr)
 {
   if (!ssr) return;
   gt_str_delete(ssr->seqid_str);
@@ -265,7 +265,7 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
                          GT_GFF3Parser *parser, const char *filename,
                          unsigned int line_number, GtError *err)
 {
-  SimpleGT_SequenceRegion *ssr;
+  SimpleGtSequenceRegion *ssr;
   int had_err = 0;
 
   gt_error_check(err);
@@ -1213,7 +1213,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GT_Queue *genome_nodes,
   char *tmpline, *tmplineend, *seqstart, *seqid = NULL;
   GtGenomeNode *gn;
   GtStr *changed_seqid = NULL;
-  SimpleGT_SequenceRegion *ssr = NULL;
+  SimpleGtSequenceRegion *ssr = NULL;
   GtRange range;
   const char *filename;
   int had_err = 0;

@@ -48,7 +48,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv,
 }
 
 static int feature_visitor_sequence_region(GenomeVisitor *gv,
-                                           GT_SequenceRegion *sr,
+                                           GtSequenceRegion *sr,
                                            GT_UNUSED GtError *err)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);

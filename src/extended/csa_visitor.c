@@ -114,7 +114,7 @@ static int csa_visitor_comment(GenomeVisitor *gv, GT_Comment *c, GtError *err)
   return csa_visitor_default_func(gv, (GtGenomeNode*) c, err);
 }
 
-static int csa_visitor_sequence_region(GenomeVisitor *gv, GT_SequenceRegion *sr,
+static int csa_visitor_sequence_region(GenomeVisitor *gv, GtSequenceRegion *sr,
                                        GtError *err)
 {
   return csa_visitor_default_func(gv, (GtGenomeNode*) sr, err);

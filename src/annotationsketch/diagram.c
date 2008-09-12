@@ -655,7 +655,7 @@ int gt_diagram_unit_test(GtError *err)
   GtFeatureIndex *fi;
   GtRange dr1, rs;
   GtStr *seqid1, *seqid2, *gt_track_key;
-  GT_SequenceRegion *sr1, *sr2;
+  GtSequenceRegion *sr1, *sr2;
   int had_err=0;
   GtStyle *sty = NULL;
   GT_Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
@@ -670,8 +670,8 @@ int gt_diagram_unit_test(GtError *err)
   seqid1 = gt_str_new_cstr("test1");
   seqid2 = gt_str_new_cstr("test2");
 
-  sr1 = (GT_SequenceRegion*) gt_sequence_region_new(seqid1, rs);
-  sr2 = (GT_SequenceRegion*) gt_sequence_region_new(seqid2, rs);
+  sr1 = (GtSequenceRegion*) gt_sequence_region_new(seqid1, rs);
+  sr2 = (GtSequenceRegion*) gt_sequence_region_new(seqid2, rs);
 
   gn1 = gt_genome_feature_new(seqid1, gft_gene, 100, 1000, GT_STRAND_UNKNOWN);
   gn2 = gt_genome_feature_new(seqid2, gft_gene, 600, 1200, GT_STRAND_UNKNOWN);

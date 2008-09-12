@@ -27,7 +27,7 @@ typedef struct GtFeatureIndex GtFeatureIndex;
 
 GtFeatureIndex* gt_feature_index_new(void);
 void             gt_feature_index_add_sequence_region(GtFeatureIndex*,
-                                                      GT_SequenceRegion*);
+                                                      GtSequenceRegion*);
 /* Add <genome_feature> to <feature_index>, associating it with a sequence
    region denoted by its identifier string. */
 void             gt_feature_index_add_genome_feature(GtFeatureIndex

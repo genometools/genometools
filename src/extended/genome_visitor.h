@@ -30,7 +30,7 @@ typedef struct GenomeVisitor GenomeVisitor;
 int  genome_visitor_visit_comment(GenomeVisitor*, GT_Comment*, GtError*);
 int  genome_visitor_visit_genome_feature(GenomeVisitor*, GtGenomeFeature*,
                                          GtError*);
-int  genome_visitor_visit_sequence_region(GenomeVisitor*, GT_SequenceRegion*,
+int  genome_visitor_visit_sequence_region(GenomeVisitor*, GtSequenceRegion*,
                                           GtError*);
 int  genome_visitor_visit_sequence_node(GenomeVisitor*, GT_SequenceNode*,
                                         GtError*);

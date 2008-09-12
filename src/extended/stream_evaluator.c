@@ -1253,7 +1253,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                               GenomeVisitor *gv, GtError *err)
 {
   GtGenomeNode *gn;
-  GT_SequenceRegion *sr;
+  GtSequenceRegion *sr;
   GtGenomeFeature *gf;
   Slot *slot;
   ProcessRealFeatureInfo real_info;
