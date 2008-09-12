@@ -21,16 +21,16 @@
 #include <cairo.h>
 #include "annotationsketch/graphics.h"
 
-/* Implements the GT_Graphics interface.
+/* Implements the GtGraphics interface.
    This implementation uses the Cairo 2D vector graphics library as a
    drawing back-end. */
-typedef struct GT_GraphicsCairo GT_GraphicsCairo;
+typedef struct GtGraphicsCairo GtGraphicsCairo;
 
-const GT_GraphicsClass* gt_graphics_cairo_class(void);
-GT_Graphics*            gt_graphics_cairo_new(GT_GraphicsOutType type,
+const GtGraphicsClass* gt_graphics_cairo_class(void);
+GtGraphics*            gt_graphics_cairo_new(GtGraphicsOutType type,
                                               unsigned int width,
                                               unsigned int height);
-GT_Graphics*            gt_graphics_cairo_new_from_context(cairo_t *context,
+GtGraphics*            gt_graphics_cairo_new_from_context(cairo_t *context,
                                                            unsigned int width,
                                                            unsigned int height);
 #endif

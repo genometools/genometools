@@ -34,7 +34,7 @@
 
 struct GtCanvasCairoFile {
   const GtCanvas parent_instance;
-  GT_GraphicsOutType type;
+  GtGraphicsOutType type;
 };
 
 #define canvas_cairo_file_cast(C)\
@@ -140,7 +140,7 @@ const GtCanvasClass* gt_canvas_cairo_file_class(void)
   return &canvas_class;
 }
 
-GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GT_GraphicsOutType type,
+GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,
                                     unsigned long width, GtImageInfo *ii)
 {
   GtCanvas *canvas;

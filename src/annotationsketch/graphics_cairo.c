@@ -34,12 +34,12 @@
 #include "annotationsketch/graphics_cairo.h"
 #include "annotationsketch/graphics_rep.h"
 
-struct GT_GraphicsCairo {
-  const GT_Graphics parent_instance;
+struct GtGraphicsCairo {
+  const GtGraphics parent_instance;
   cairo_t *cr;
   cairo_surface_t *surf;
   GtStr *outbuf;
-  GT_GraphicsOutType type;
+  GtGraphicsOutType type;
   double margin_x, margin_y, height, width;
   bool from_context;
 };
@@ -56,10 +56,10 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
-void gt_graphics_cairo_initialize(GT_Graphics *gg, GT_GraphicsOutType type,
+void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
                                unsigned int width, unsigned int height)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   g->outbuf = gt_str_new();
   switch (type)
   {
@@ -107,20 +107,20 @@ void gt_graphics_cairo_initialize(GT_Graphics *gg, GT_GraphicsOutType type,
   g->type = type;
 }
 
-void gt_graphics_cairo_set_font(GT_Graphics *gg, const char *family,
+void gt_graphics_cairo_set_font(GtGraphics *gg, const char *family,
                              FontSlant slant, FontWeight weight)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g && family);
   cairo_select_font_face(g->cr, family,
                          (cairo_font_slant_t) slant,
                          (cairo_font_weight_t) weight);
 }
 
-void gt_graphics_cairo_draw_text(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
                               const char *text)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
   assert(g && text);
   cairo_text_extents(g->cr, text, &ext);
@@ -131,10 +131,10 @@ void gt_graphics_cairo_draw_text(GT_Graphics *gg, double x, double y,
   cairo_show_text(g->cr, text);
 }
 
-void gt_graphics_cairo_draw_text_centered(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
                                        const char *text)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
   assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
@@ -145,10 +145,10 @@ void gt_graphics_cairo_draw_text_centered(GT_Graphics *gg, double x, double y,
   cairo_show_text(g->cr, text);
 }
 
-void gt_graphics_cairo_draw_text_right(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_text_right(GtGraphics *gg, double x, double y,
                                     const char *text)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
   assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
@@ -159,53 +159,53 @@ void gt_graphics_cairo_draw_text_right(GT_Graphics *gg, double x, double y,
   cairo_show_text(g->cr, text);
 }
 
-void gt_graphics_cairo_draw_colored_text(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_colored_text(GtGraphics *gg, double x, double y,
                                       GtColor color, const char *text)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g && text);
   cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
 }
 
-double gt_graphics_cairo_get_image_height(GT_Graphics *gg)
+double gt_graphics_cairo_get_image_height(GtGraphics *gg)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   return g->height;
 }
 
-double gt_graphics_cairo_get_image_width(GT_Graphics *gg)
+double gt_graphics_cairo_get_image_width(GtGraphics *gg)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   return g->width;
 }
 
-void gt_graphics_cairo_set_margins(GT_Graphics *gg, double margin_x,
+void gt_graphics_cairo_set_margins(GtGraphics *gg, double margin_x,
                                 double margin_y)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   g->margin_x = margin_x;
   g->margin_y = margin_y;
 }
 
-void gt_graphics_cairo_draw_horizontal_line(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_horizontal_line(GtGraphics *gg, double x, double y,
                                          double width)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   cairo_move_to(g->cr, x, y);
   cairo_rel_line_to(g->cr, width, 0);
   cairo_stroke(g->cr);
 }
 
-void gt_graphics_cairo_draw_vertical_line(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
                                        GtColor color, double length)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   cairo_save(g->cr);
   cairo_move_to(g->cr, x, y);
@@ -216,9 +216,9 @@ void gt_graphics_cairo_draw_vertical_line(GT_Graphics *gg, double x, double y,
   cairo_restore(g->cr);
 }
 
-double gt_graphics_cairo_get_text_width(GT_Graphics *gg, const char* text)
+double gt_graphics_cairo_get_text_width(GtGraphics *gg, const char* text)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
   assert(g);
   /* get text extents */
@@ -226,22 +226,22 @@ double gt_graphics_cairo_get_text_width(GT_Graphics *gg, const char* text)
   return ext.width;
 }
 
-double gt_graphics_cairo_get_text_height(GT_Graphics *gg)
+double gt_graphics_cairo_get_text_height(GtGraphics *gg)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_font_extents_t ext;
   assert(g);
   cairo_font_extents(g->cr, &ext);
   return ext.height;
 }
 
-void gt_graphics_cairo_draw_box(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
                                 double width, double height,
                                 GtColor fill_color, ArrowStatus arrow_status,
                                 double arrow_width, double stroke_width,
                                 GtColor stroke_color, bool dashed)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   double dashes[]={2.0};
   /* save cairo context */
@@ -295,12 +295,12 @@ void gt_graphics_cairo_draw_box(GT_Graphics *gg, double x, double y,
    cairo_restore(g->cr);
 }
 
-void gt_graphics_cairo_draw_dashes(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
                                 double width, double height,
                                 ArrowStatus arrow_status, double arrow_width,
                                 double stroke_width, GtColor stroke_color)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   double dashes[] = {3.0};
   assert(g);
   /* save cairo context */
@@ -344,12 +344,12 @@ void gt_graphics_cairo_draw_dashes(GT_Graphics *gg, double x, double y,
   cairo_restore(g->cr);
 }
 
-void gt_graphics_cairo_draw_caret(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_caret(GtGraphics *gg, double x, double y,
                                double width,double height,
                                ArrowStatus arrow_status, double arrow_width,
                                double stroke_width, GtColor stroke_color)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
@@ -403,12 +403,12 @@ void gt_graphics_cairo_draw_caret(GT_Graphics *gg, double x, double y,
    cairo_restore(g->cr);
 }
 
-void gt_graphics_cairo_draw_rectangle(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_rectangle(GtGraphics *gg, double x, double y,
                                    bool filled, GtColor fill_color,
                                    bool outlined, GtColor outline_color,
                                    double outline_width, double width)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
@@ -431,10 +431,10 @@ void gt_graphics_cairo_draw_rectangle(GT_Graphics *gg, double x, double y,
   cairo_restore(g->cr);
 }
 
-void gt_graphics_cairo_draw_arrowhead(GT_Graphics *gg, double x, double y,
+void gt_graphics_cairo_draw_arrowhead(GtGraphics *gg, double x, double y,
                                    GtColor color, ArrowStatus arrow_status)
 {
-  GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   double arrow_height = 8, arrow_width = 5;
   assert(g);
   /* save cairo context */
@@ -468,10 +468,10 @@ void gt_graphics_cairo_draw_arrowhead(GT_Graphics *gg, double x, double y,
   cairo_restore(g->cr);
 }
 
-int gt_graphics_cairo_save_to_file(const GT_Graphics *gg, const char *filename,
+int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
                                 GtError *err)
 {
-  const GT_GraphicsCairo *g = (const GT_GraphicsCairo*) gg;
+  const GtGraphicsCairo *g = (const GtGraphicsCairo*) gg;
   cairo_status_t rval;
   gt_error_check(err);
   GT_GenFile *outfile;
@@ -507,9 +507,9 @@ int gt_graphics_cairo_save_to_file(const GT_Graphics *gg, const char *filename,
   return 0;
 }
 
-void gt_graphics_cairo_save_to_stream(const GT_Graphics *gg, GtStr *stream)
+void gt_graphics_cairo_save_to_stream(const GtGraphics *gg, GtStr *stream)
 {
-  const GT_GraphicsCairo *g = (const GT_GraphicsCairo*) gg;
+  const GtGraphicsCairo *g = (const GtGraphicsCairo*) gg;
   cairo_status_t rval;
   assert(g && stream);
   /* do nothing if no surface was created */
@@ -518,10 +518,10 @@ void gt_graphics_cairo_save_to_stream(const GT_Graphics *gg, GtStr *stream)
   assert(rval == CAIRO_STATUS_SUCCESS); /* str_write_func() is sane */
 }
 
-void gt_graphics_cairo_delete(GT_Graphics *gg)
+void gt_graphics_cairo_delete(GtGraphics *gg)
 {
   if (!gg) return;
-  GT_GraphicsCairo *g = (GT_GraphicsCairo*) gg;
+  GtGraphicsCairo *g = (GtGraphicsCairo*) gg;
   if (g->surf);
     cairo_surface_destroy(g->surf); /* reference counted */
   if (!g->from_context) /* do not attempt to destroy foreign contexts */
@@ -530,10 +530,10 @@ void gt_graphics_cairo_delete(GT_Graphics *gg)
     gt_str_delete(g->outbuf);
 }
 
-const GT_GraphicsClass* gt_graphics_cairo_class(void)
+const GtGraphicsClass* gt_graphics_cairo_class(void)
 {
-  static const GT_GraphicsClass gt_graphics_class =
-    { sizeof (GT_GraphicsCairo),
+  static const GtGraphicsClass gt_graphics_class =
+    { sizeof (GtGraphicsCairo),
       gt_graphics_cairo_draw_text,
       gt_graphics_cairo_draw_text_centered,
       gt_graphics_cairo_draw_text_right,
@@ -557,21 +557,21 @@ const GT_GraphicsClass* gt_graphics_cairo_class(void)
   return &gt_graphics_class;
 }
 
-GT_Graphics* gt_graphics_cairo_new(GT_GraphicsOutType type,
+GtGraphics* gt_graphics_cairo_new(GtGraphicsOutType type,
                                    unsigned int width, unsigned int height)
 {
-  GT_Graphics *g;
+  GtGraphics *g;
   g = gt_graphics_create(gt_graphics_cairo_class());
   gt_graphics_cairo_initialize(gt_graphics_cairo_cast(g), type, width, height);
   return g;
 }
 
-GT_Graphics* gt_graphics_cairo_new_from_context(cairo_t *context,
+GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
                                           unsigned int width,
                                           unsigned int height)
 {
-  GT_Graphics *g;
-  GT_GraphicsCairo *gc;
+  GtGraphics *g;
+  GtGraphicsCairo *gc;
   g = gt_graphics_create(gt_graphics_cairo_class());
   gc = gt_graphics_cairo_cast(g);
   gc->width = width;

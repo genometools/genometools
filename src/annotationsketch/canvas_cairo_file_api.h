@@ -24,14 +24,14 @@
 #include "annotationsketch/style_api.h"
 
 /* Implements the Canvas interface.
-   This Canvas uses the GT_GraphicsCairo class.  */
+   This Canvas uses the GtGraphicsCairo class.  */
 typedef struct GtCanvasCairoFile GtCanvasCairoFile;
 
 /* Create a new Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when
    the created Canvas object is used to render a Diagram object. */
 GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
-                                    GT_GraphicsOutType output_type,
+                                    GtGraphicsOutType output_type,
                                     unsigned long width,
                                     GtImageInfo *image_info);
 /* Write rendered <canvas> to file with name <filename>. */

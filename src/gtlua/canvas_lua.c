@@ -25,7 +25,7 @@
 #include "gtlua/canvas_lua.h"
 #include "gtlua/image_info_lua.h"
 
-static int canvas_lua_new_generic(lua_State *L, GT_GraphicsOutType t)
+static int canvas_lua_new_generic(lua_State *L, GtGraphicsOutType t)
 {
   GtCanvas **canvas;
   GtImageInfo **ii;

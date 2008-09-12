@@ -21,42 +21,42 @@
 #include <stdio.h>
 #include "annotationsketch/graphics.h"
 
-struct GT_GraphicsClass {
+struct GtGraphicsClass {
   size_t size;
-  void    (*draw_text)(GT_Graphics*, double, double, const char*);
-  void    (*draw_text_centered)(GT_Graphics*, double, double, const char*);
-  void    (*draw_text_right)(GT_Graphics*, double, double, const char*);
-  void    (*draw_colored_text)(GT_Graphics*, double, double, GtColor,
+  void    (*draw_text)(GtGraphics*, double, double, const char*);
+  void    (*draw_text_centered)(GtGraphics*, double, double, const char*);
+  void    (*draw_text_right)(GtGraphics*, double, double, const char*);
+  void    (*draw_colored_text)(GtGraphics*, double, double, GtColor,
                                const char*);
-  double  (*get_text_height)(GT_Graphics*);
-  double  (*get_text_width)(GT_Graphics*, const char*);
-  void    (*set_font)(GT_Graphics*, const char*, FontSlant, FontWeight);
-  double  (*get_image_width)(GT_Graphics*);
-  double  (*get_image_height)(GT_Graphics*);
-  void    (*set_margins)(GT_Graphics*, double, double);
-  void    (*draw_horizontal_line)(GT_Graphics*, double, double, double);
-  void    (*draw_vertical_line)(GT_Graphics*, double, double, GtColor, double);
-  void    (*draw_box)(GT_Graphics*, double, double, double, double, GtColor,
+  double  (*get_text_height)(GtGraphics*);
+  double  (*get_text_width)(GtGraphics*, const char*);
+  void    (*set_font)(GtGraphics*, const char*, FontSlant, FontWeight);
+  double  (*get_image_width)(GtGraphics*);
+  double  (*get_image_height)(GtGraphics*);
+  void    (*set_margins)(GtGraphics*, double, double);
+  void    (*draw_horizontal_line)(GtGraphics*, double, double, double);
+  void    (*draw_vertical_line)(GtGraphics*, double, double, GtColor, double);
+  void    (*draw_box)(GtGraphics*, double, double, double, double, GtColor,
                       ArrowStatus, double, double, GtColor, bool);
-  void    (*draw_dashes)(GT_Graphics*, double, double, double, double,
+  void    (*draw_dashes)(GtGraphics*, double, double, double, double,
                          ArrowStatus, double, double, GtColor);
-  void    (*draw_caret)(GT_Graphics*, double, double, double, double,
+  void    (*draw_caret)(GtGraphics*, double, double, double, double,
                         ArrowStatus, double, double, GtColor);
-  void    (*draw_rectangle)(GT_Graphics*, double, double, bool, GtColor, bool,
+  void    (*draw_rectangle)(GtGraphics*, double, double, bool, GtColor, bool,
                             GtColor, double, double);
-  void    (*draw_arrowhead)(GT_Graphics*, double, double, GtColor,
+  void    (*draw_arrowhead)(GtGraphics*, double, double, GtColor,
                             ArrowStatus);
-  int     (*save_to_file)(const GT_Graphics*, const char*, GtError*);
-  void    (*save_to_stream)(const GT_Graphics*, GtStr*);
-  void    (*free)(GT_Graphics*);
+  int     (*save_to_file)(const GtGraphics*, const char*, GtError*);
+  void    (*save_to_stream)(const GtGraphics*, GtStr*);
+  void    (*free)(GtGraphics*);
 };
 
-struct GT_Graphics {
-  const GT_GraphicsClass *c_class;
+struct GtGraphics {
+  const GtGraphicsClass *c_class;
   unsigned int reference_count;
 };
 
-GT_Graphics* gt_graphics_create(const GT_GraphicsClass*);
-void*     gt_graphics_cast(const GT_GraphicsClass*, GT_Graphics*);
+GtGraphics* gt_graphics_create(const GtGraphicsClass*);
+void*     gt_graphics_cast(const GtGraphicsClass*, GtGraphics*);
 
 #endif
