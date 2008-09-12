@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include "core/error_api.h"
-#include "core/genfile.h"
 
 /* Objects of the <GT_Str> class are strings which grow on demand. */
 typedef struct GT_Str GT_Str;
@@ -59,10 +58,6 @@ void          gt_str_set_length(GT_Str*, unsigned long length);
 void          gt_str_reset(GT_Str *str);
 /* Compare <str1> and <str2> and return the result (similar to <strcmp(3)>). */
 int           gt_str_cmp(const GT_Str *str1, const GT_Str *str2);
-/* Read the next line from file pointer <fpin> and store the result in <str>
-   (without the terminal newline). If the end of file <fpin> is reached, <EOF>
-   is returned, otherwise 0. */
-int           gt_str_read_next_line(GT_Str *str, FILE *fpin);
 /* Return the length of <str>. If <str> is <NULL>, 0 is returned. */
 unsigned long gt_str_length(const GT_Str *str);
 /* Decrease the reference count for <str> or delete it, if this was the last
