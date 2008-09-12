@@ -109,7 +109,7 @@ const GtCanvasClass* gt_canvas_cairo_context_class(void)
 }
 
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
-                                       unsigned long width, GT_ImageInfo *ii)
+                                       unsigned long width, GtImageInfo *ii)
 {
   GtCanvas *canvas;
   GtCanvasCairoContext *ccc;

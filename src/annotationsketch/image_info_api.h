@@ -21,14 +21,14 @@
 #include "annotationsketch/recmap_api.h"
 #include "core/error_api.h"
 
-typedef struct GT_ImageInfo GT_ImageInfo;
+typedef struct GtImageInfo GtImageInfo;
 
-GT_ImageInfo*    gt_image_info_new();
-unsigned int     gt_image_info_get_height(GT_ImageInfo*);
-unsigned long    gt_image_info_num_of_recmaps(GT_ImageInfo*);
-const GtRecMap* gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
-void             gt_image_info_fill_recmap(GT_ImageInfo*, GtRecMap*,
+GtImageInfo*    gt_image_info_new();
+unsigned int     gt_image_info_get_height(GtImageInfo*);
+unsigned long    gt_image_info_num_of_recmaps(GtImageInfo*);
+const GtRecMap* gt_image_info_get_recmap(GtImageInfo*, unsigned long);
+void             gt_image_info_fill_recmap(GtImageInfo*, GtRecMap*,
                                            unsigned long);
-void             gt_image_info_delete(GT_ImageInfo*);
+void             gt_image_info_delete(GtImageInfo*);
 
 #endif

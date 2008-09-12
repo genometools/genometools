@@ -33,7 +33,7 @@ typedef struct GtCanvasCairoFile GtCanvasCairoFile;
 GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
                                     GT_GraphicsOutType output_type,
                                     unsigned long width,
-                                    GT_ImageInfo *image_info);
+                                    GtImageInfo *image_info);
 /* Write rendered <canvas> to file with name <filename>. */
 int     gt_canvas_cairo_file_to_file(GtCanvasCairoFile *canvas,
                                      const char *filename, GtError *err);

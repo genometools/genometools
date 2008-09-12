@@ -41,7 +41,7 @@ struct GtCanvas {
   bool show_track_captions;
   GtBittab *bt;
   GT_Graphics *g;
-  GT_ImageInfo *ii;
+  GtImageInfo *ii;
 };
 
 GtCanvas* gt_canvas_create(const GtCanvasClass*);

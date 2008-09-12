@@ -32,5 +32,5 @@ typedef struct GtCanvasCairoContext GtCanvasCairoContext;
    the created Canvas object is used to render a Diagram object. */
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
                                        unsigned long width,
-                                       GT_ImageInfo *image_info);
+                                       GtImageInfo *image_info);
 #endif

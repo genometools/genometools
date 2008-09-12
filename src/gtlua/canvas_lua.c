@@ -28,7 +28,7 @@
 static int canvas_lua_new_generic(lua_State *L, GT_GraphicsOutType t)
 {
   GtCanvas **canvas;
-  GT_ImageInfo **ii;
+  GtImageInfo **ii;
   unsigned int width;
   GtStyle *style;
   width = luaL_checkint(L, 1);

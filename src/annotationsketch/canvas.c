@@ -502,7 +502,7 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
                                 canvas->y+((bar_height-8)/2),
                                 grey,
                                 ARROW_RIGHT);
-    /* register coordinates in GT_ImageInfo object if available */
+    /* register coordinates in GtImageInfo object if available */
     if (canvas->ii)
     {
       GtRecMap *rm = gt_recmap_new(draw_range.start, canvas->y,
@@ -603,7 +603,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
     gt_bittab_set_bit(canvas->bt, (unsigned long) draw_range.start);
   }
 
-  /* register coordinates in GT_ImageInfo object if available */
+  /* register coordinates in GtImageInfo object if available */
   if (canvas->ii)
   {
     GtRecMap *rm = gt_recmap_new(elem_start, canvas->y,

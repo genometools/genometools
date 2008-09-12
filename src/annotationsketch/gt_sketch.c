@@ -182,7 +182,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   GtStr *gt_style_file = NULL;
   GtStr *prog;
   GT_Diagram *d = NULL;
-  GT_ImageInfo* ii = NULL;
+  GtImageInfo* ii = NULL;
   GtCanvas *canvas = NULL;
 
   gt_error_check(err);

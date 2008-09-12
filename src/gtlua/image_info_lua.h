@@ -34,6 +34,6 @@ int luaopen_imageinfo(lua_State*);
 
 #define IMAGEINFO_METATABLE  "GenomeTools.imageinfo"
 #define check_imageinfo(L, POS) \
-              (GT_ImageInfo**) luaL_checkudata(L, POS, IMAGEINFO_METATABLE)
+              (GtImageInfo**) luaL_checkudata(L, POS, IMAGEINFO_METATABLE)
 
 #endif

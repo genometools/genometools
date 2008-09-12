@@ -22,9 +22,9 @@
 #include "annotationsketch/recmap.h"
 #include "core/error.h"
 
-void gt_image_info_set_height(GT_ImageInfo*, unsigned int);
+void gt_image_info_set_height(GtImageInfo*, unsigned int);
 /* Takes ownership of <recmap>. */
-void gt_image_info_add_recmap(GT_ImageInfo*, GtRecMap *recmap);
+void gt_image_info_add_recmap(GtImageInfo*, GtRecMap *recmap);
 int  gt_image_info_unit_test(GtError*);
 
 #endif

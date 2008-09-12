@@ -24,21 +24,21 @@
 #include "core/strand.h"
 #include "core/unused_api.h"
 
-struct GT_ImageInfo {
+struct GtImageInfo {
   GtArray* recmaps;
   unsigned int height;
 };
 
-GT_ImageInfo* gt_image_info_new()
+GtImageInfo* gt_image_info_new()
 {
-  GT_ImageInfo *ii;
-  ii = gt_calloc(1, sizeof (GT_ImageInfo));
+  GtImageInfo *ii;
+  ii = gt_calloc(1, sizeof (GtImageInfo));
   ii->recmaps = gt_array_new(sizeof (GtRecMap*));
   assert(ii->recmaps);
   return ii;
 }
 
-void gt_image_info_delete(GT_ImageInfo *ii)
+void gt_image_info_delete(GtImageInfo *ii)
 {
   unsigned long i;
   if (!ii) return;
@@ -51,37 +51,37 @@ void gt_image_info_delete(GT_ImageInfo *ii)
   gt_free(ii);
 }
 
-void gt_image_info_add_recmap(GT_ImageInfo *ii, GtRecMap *rm)
+void gt_image_info_add_recmap(GtImageInfo *ii, GtRecMap *rm)
 {
   assert(ii && rm);
   gt_array_add(ii->recmaps, rm);
 }
 
-void gt_image_info_set_height(GT_ImageInfo *ii, unsigned int height)
+void gt_image_info_set_height(GtImageInfo *ii, unsigned int height)
 {
   assert(ii);
   ii->height = height;
 }
 
-unsigned int gt_image_info_get_height(GT_ImageInfo *ii)
+unsigned int gt_image_info_get_height(GtImageInfo *ii)
 {
   assert(ii);
   return ii->height;
 }
 
-unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo *ii)
+unsigned long gt_image_info_num_of_recmaps(GtImageInfo *ii)
 {
   assert(ii);
   return gt_array_size(ii->recmaps);
 }
 
-const GtRecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
+const GtRecMap* gt_image_info_get_recmap(GtImageInfo *ii, unsigned long n)
 {
   assert(ii);
   return *(GtRecMap**) gt_array_get(ii->recmaps, n);
 }
 
-void gt_image_info_fill_recmap(GT_ImageInfo* ii, GtRecMap* rm, unsigned long n)
+void gt_image_info_fill_recmap(GtImageInfo* ii, GtRecMap* rm, unsigned long n)
 {
   const GtRecMap* tmp;
   assert(ii && rm);
@@ -98,7 +98,7 @@ int gt_image_info_unit_test(GtError *err)
 {
   GtRecMap* rms[20];
   GtGenomeNode* gfs[20];
-  GT_ImageInfo *ii;
+  GtImageInfo *ii;
   unsigned long i;
   GtStr *seqid;
   int had_err = 0;
