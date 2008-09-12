@@ -27,25 +27,32 @@
 
 struct GtElement {
   const char *type;
+  unsigned long refcount;
   GtStrand strand;
-  GtGenomeNode *gn;
+  GtFeatureNode *gn;
   GtRange range;
   GtDrawingRange drange;
   bool mark;
 };
 
-GtElement* gt_element_new(GtGenomeNode *gn)
+GtElement* gt_element_new(GtFeatureNode *gf)
 {
   GtElement *element;
-  GtFeatureNode *gf = (GtFeatureNode*) gn;
-  assert(gn);
+  assert(gf);
   element = gt_element_new_empty();
   gt_element_set_type(element, gt_feature_node_get_type(gf));
-  gt_element_set_range(element, gt_genome_node_get_range(gn));
+  gt_element_set_range(element, gt_genome_node_get_range((GtGenomeNode*) gf));
   element->strand = gt_feature_node_get_strand(gf);
-  element->mark = gt_genome_node_is_marked(gn);
-  element->gn = gt_genome_node_ref(gn);
+  element->mark = gt_genome_node_is_marked((GtGenomeNode*) gf);
+  element->gn = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) gf);
   return element;
+}
+
+GtElement* gt_element_ref(GtElement *elem)
+{
+  assert(elem);
+  elem->refcount++;
+  return elem;
 }
 
 GtElement* gt_element_new_empty(void)
@@ -112,7 +119,7 @@ int gt_element_sketch(GtElement *elem, GtCanvas *canvas)
   return had_err;
 }
 
-GtGenomeNode* gt_element_get_node_ref(const GtElement *elem)
+GtFeatureNode* gt_element_get_node_ref(const GtElement *elem)
 {
   assert(elem);
   return elem->gn;
@@ -138,9 +145,9 @@ int gt_element_unit_test(GtError *err)
   gn2 = gt_feature_node_new(seqid, gft_exon, r2.start, r2.end,
                              GT_STRAND_BOTH);
 
-  e = gt_element_new(gn);
-  e2 = gt_element_new(gn);
-  e3 = gt_element_new(gn2);
+  e = gt_element_new((GtFeatureNode*) gn);
+  e2 = gt_element_new((GtFeatureNode*)gn);
+  e3 = gt_element_new((GtFeatureNode*)gn2);
 
   /* tests gt_element_get_range */
   r_temp = gt_element_get_range(e);
@@ -173,7 +180,11 @@ int gt_element_unit_test(GtError *err)
 void gt_element_delete(GtElement *element)
 {
   if (!element) return;
+  if (element->refcount) {
+    element->refcount--;
+    return;
+  }
   if (element->gn)
-    gt_genome_node_delete(element->gn);
+    gt_genome_node_delete((GtGenomeNode*) element->gn);
   gt_free(element);
 }

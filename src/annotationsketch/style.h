@@ -24,25 +24,25 @@
 #include "extended/genome_node.h"
 
 /* Creates a GtStyle object wich reuses the given Lua state. */
-GtStyle*      gt_style_new_with_state(lua_State*);
-/* Retrieves a color value from the GtStyle for <key>.
+GtStyle*       gt_style_new_with_state(lua_State*);
+/* Retrieves a color value from the GtFeatureNode for <key>.
    If not set, false is returned and a default color is written. */
 bool           gt_style_get_color(const GtStyle*, const char *section,
-                                  const char *key, GtColor*, GtGenomeNode*);
+                                  const char *key, GtColor*, GtFeatureNode*);
 /* Retrieve string value of <key> in <section>.
    If not set, false is returned. */
 bool           gt_style_get_str(const GtStyle*, const char *section,
-                                const char *key, GtStr*, GtGenomeNode*);
+                                const char *key, GtStr*, GtFeatureNode*);
 /* Retrieve numeric value of <key> in <section>.
    If not set, false is returned.*/
 bool           gt_style_get_num(const GtStyle*, const char *section,
-                                const char *key, double*, GtGenomeNode*);
+                                const char *key, double*, GtFeatureNode*);
 /* Retrieve boolean value of <key> in <section>.
    If not set, false is returned.*/
 bool           gt_style_get_bool(const GtStyle*, const char *section,
-                                 const char *key, bool*, GtGenomeNode*);
+                                 const char *key, bool*, GtFeatureNode*);
 int            gt_style_unit_test(GtError*);
-/* Deletes a GtStyle object but leaves the internal Lua state intact. */
+/* Deletes a GT_Style object but leaves the internal Lua state intact. */
 void           gt_style_delete_without_state(GtStyle*);
 
 #endif

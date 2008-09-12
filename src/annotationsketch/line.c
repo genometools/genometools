@@ -118,8 +118,8 @@ int gt_line_unit_test(GtError *err)
   b1 = gt_block_new();
   b2 = gt_block_new();
 
-  gt_block_insert_element(b1, gn1);
-  gt_block_insert_element(b2, gn2);
+  gt_block_insert_element(b1, (GtFeatureNode*) gn1);
+  gt_block_insert_element(b2, (GtFeatureNode*) gn2);
   gt_block_set_range(b1, r1);
   gt_block_set_range(b2, r2);
 
