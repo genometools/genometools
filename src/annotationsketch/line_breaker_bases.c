@@ -35,7 +35,7 @@ bool gt_line_breaker_bases_is_gt_line_occupied(GtLineBreaker* lb,
 {
   GtLineBreakerBases *lbb;
   GtRange r;
-  GT_IntervalTree *t;
+  GtIntervalTree *t;
   assert(lb && block && line);
   r = gt_block_get_range(block);
   lbb = gt_line_breaker_bases_cast(lb);
@@ -50,8 +50,8 @@ void gt_line_breaker_bases_register_block(GtLineBreaker *lb,
                                        GtBlock *block)
 {
   GtLineBreakerBases *lbb;
-  GT_IntervalTree *t;
-  GT_IntervalTreeNode *new_node;
+  GtIntervalTree *t;
+  GtIntervalTreeNode *new_node;
   GtRange *rng;
   assert(lb && block && line);
   lbb = gt_line_breaker_bases_cast(lb);

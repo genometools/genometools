@@ -42,7 +42,7 @@ struct GT_FeatureIndex {
 };
 
 typedef struct {
-  GT_IntervalTree *features;
+  GtIntervalTree *features;
   GT_SequenceRegion *region;
   GtRange dyn_range;
 } RegionInfo;
@@ -124,7 +124,7 @@ void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
   }
 
   /* add node to the appropriate array in the hashtable */
-  GT_IntervalTreeNode *new_node = gt_interval_tree_node_new(gn,
+  GtIntervalTreeNode *new_node = gt_interval_tree_node_new(gn,
                                                             node_range.start,
                                                             node_range.end);
   gt_interval_tree_insert(info->features, new_node);
@@ -162,7 +162,7 @@ int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
   return had_err;
 }
 
-static int collect_features_from_itree(GT_IntervalTreeNode *node, void *data)
+static int collect_features_from_itree(GtIntervalTreeNode *node, void *data)
 {
   GtArray *a = (GtArray*) data;
   GtGenomeNode *gn = (GtGenomeNode*) gt_interval_tree_node_get_data(node);
