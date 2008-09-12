@@ -31,6 +31,7 @@ typedef struct GtFeatureNode GtFeatureNode;
 
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
+typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
 /* Create an new <GtFeatureNode*> on sequence with ID <seqid> and type <type>
@@ -56,8 +57,7 @@ bool                  gt_feature_node_score_is_defined(const
                                                          GtFeatureNode*);
 bool                  gt_feature_node_is_multi(const GtFeatureNode*);
 bool                  gt_feature_node_is_pseudo(const GtFeatureNode*);
-void                  gt_feature_node_make_multi_representative(const
-                                                             GtFeatureNode*);
+void                  gt_feature_node_make_multi_representative(GtFeatureNode*);
 void                  gt_feature_node_set_multi_representative(
                                                              GtFeatureNode*,
                                                              GtFeatureNode*);
@@ -95,6 +95,54 @@ double                gt_feature_node_average_splice_site_prob(const
 bool                  gt_genome_features_are_similar(GtFeatureNode*,
                                                      GtFeatureNode*);
 int                   gt_feature_node_unit_test(GtError*);
+
+GtGenomeNode*  gt_genome_node_rec_ref(GtGenomeNode*);
+
+/* perform depth first traversal of the given genome node */
+int           gt_genome_node_traverse_children(GtGenomeNode*, void*,
+                                               GtGenomeNodeTraverseFunc,
+                                               bool traverse_only_once,
+GtError*);
+/* perform breadth first traversal of the given genome node  */
+int           gt_genome_node_traverse_children_breadth(GtGenomeNode*, void*,
+                                                       GtGenomeNodeTraverseFunc,
+                                                       bool traverse_only_once,
+                                                       GtError*);
+int           gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
+                                                      GtGenomeNodeTraverseFunc,
+                                                      GtError*);
+unsigned long gt_genome_node_number_of_children(const GtGenomeNode*);
+/* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
+void           gt_genome_node_add_child(GtGenomeNode *parent,
+                                        GtGenomeNode *child);
+/* does not free the leaf, do not use during traversal! */
+void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
+                                          GtGenomeNode *leafn);
+void           gt_genome_node_mark(GtGenomeNode*);
+/* returns true if the (top-level) node is marked */
+bool           gt_genome_node_is_marked(const GtGenomeNode*);
+
+/* returns true if the given node graph contains a marked node */
+bool           gt_genome_node_contains_marked(GtGenomeNode*);
+bool           gt_genome_node_has_children(GtGenomeNode*);
+bool           gt_genome_node_direct_children_do_not_overlap(GtGenomeNode*);
+/* returns true if all direct childred of <parent> with the same type (s.t.) as
+   <child> do not overlap */
+bool           gt_genome_node_direct_children_do_not_overlap_st(GtGenomeNode
+                                                                *parent,
+                                                                GtGenomeNode
+                                                                *child);
+bool           gt_genome_node_is_tree(GtGenomeNode*);
+/* returns true if the genome node overlaps at least one of the nodes given in
+   the array. O(gt_array_size) */
+bool           gt_genome_node_overlaps_nodes(GtGenomeNode*, GtArray*);
+/* similar interface to gt_genome_node_overlaps_nodes(). Aditionally, if a
+   bittab is given (which must have the same size as the array), the bits
+   corresponding to overlapped nodes are marked (i.e., set) */
+bool           gt_genome_node_overlaps_nodes_mark(GtGenomeNode*, GtArray*,
+                                                  GtBittab*);
+
+void           gt_genome_node_rec_delete(GtGenomeNode*);
 
 #define gt_feature_node_cast(genome_node) \
         gt_genome_node_cast(gt_feature_node_class(), genome_node)

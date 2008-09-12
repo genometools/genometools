@@ -442,7 +442,7 @@ static int store_id(const char *id, GtGenomeNode *genome_feature,
             GtGenomeNode *pseudo_node =
               gt_feature_node_new_pseudo((GtFeatureNode*) gn);
             gt_genome_node_is_part_of_pseudo_node(pseudo_node, gn,
-                                               parser->feature_info);
+                                                  parser->feature_info);
             replace_node(gn, pseudo_node, genome_nodes, auto_sr);
             gt_genome_node_add_child(pseudo_node, genome_feature);
             *is_child = true;
@@ -483,7 +483,7 @@ static GtArray* find_roots(GtStrArray *parents, FeatureInfo *feature_info)
   roots = gt_array_new(sizeof (GtGenomeNode*));
   for (i = 0; i < gt_strarray_size(parents); i++) {
     GtGenomeNode *root = feature_info_find_root(feature_info,
-                                              gt_strarray_get(parents, i));
+                                                gt_strarray_get(parents, i));
     gt_array_add(roots, root);
   }
   return roots;
@@ -503,10 +503,10 @@ static bool roots_differ(GtArray *roots)
 }
 
 static GtGenomeNode* merge_pseudo_roots(GtGenomeNode *pseudo_a,
-                                      GtGenomeNode *pseudo_b,
-                                      FeatureInfo *feature_info,
-                                      GtQueue *genome_nodes,
-                                      AutomaticSequenceRegion *auto_sr)
+                                        GtGenomeNode *pseudo_b,
+                                        FeatureInfo *feature_info,
+                                        GtQueue *genome_nodes,
+                                        AutomaticSequenceRegion *auto_sr)
 {
   GtGenomeNodeIterator *gni;
   GtGenomeNode *child;
@@ -527,10 +527,10 @@ static GtGenomeNode* merge_pseudo_roots(GtGenomeNode *pseudo_a,
 }
 
 static GtGenomeNode* add_node_to_pseudo_node(GtGenomeNode *pseudo_node,
-                                           GtGenomeNode *normal_node,
-                                           FeatureInfo *feature_info,
-                                           GtQueue *genome_nodes,
-                                           AutomaticSequenceRegion *auto_sr)
+                                             GtGenomeNode *normal_node,
+                                             FeatureInfo *feature_info,
+                                             GtQueue *genome_nodes,
+                                             AutomaticSequenceRegion *auto_sr)
 {
   assert(pseudo_node &&
          gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_node));
@@ -543,10 +543,10 @@ static GtGenomeNode* add_node_to_pseudo_node(GtGenomeNode *pseudo_node,
 }
 
 static GtGenomeNode* create_pseudo_node(GtGenomeNode *node_a,
-                                         GtGenomeNode *node_b,
-                                         FeatureInfo *feature_info,
-                                         GtQueue *genome_nodes,
-                                         AutomaticSequenceRegion *auto_sr)
+                                        GtGenomeNode *node_b,
+                                        FeatureInfo *feature_info,
+                                        GtQueue *genome_nodes,
+                                        AutomaticSequenceRegion *auto_sr)
 {
   GtGenomeNode *pseudo_node;
   assert(node_a && !gt_feature_node_is_pseudo((GtFeatureNode*) node_a));
@@ -561,10 +561,10 @@ static GtGenomeNode* create_pseudo_node(GtGenomeNode *node_a,
 }
 
 static GtGenomeNode* join_root_pair(GtGenomeNode *root_a,
-                                     GtGenomeNode *root_b,
-                                     FeatureInfo *feature_info,
-                                     GtQueue *genome_nodes,
-                                     AutomaticSequenceRegion *auto_sr)
+                                    GtGenomeNode *root_b,
+                                    FeatureInfo *feature_info,
+                                    GtQueue *genome_nodes,
+                                    AutomaticSequenceRegion *auto_sr)
 {
   bool root_a_is_pseudo, root_b_is_pseudo;
   GtGenomeNode *master_root;

@@ -38,7 +38,7 @@ static int change_sequence_id(GtGenomeNode *gn, void *data,
 {
   GtStr *changed_seqid = data;
   gt_error_check(err);
-  assert(changed_seqid);
+  gt_assert(changed_seqid);
   gt_genome_node_change_seqid(gn, changed_seqid);
   return 0;
 }
@@ -48,6 +48,7 @@ int chseqids_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 {
   ChseqidsStream *cs;
   GtGenomeNode *node, **gn_a, **gn_b;
+  GtFeatureNode *feature_node;
   GtStr *changed_seqid;
   unsigned long i;
   int rval, had_err = 0;
@@ -73,9 +74,14 @@ int chseqids_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
         if  ((changed_seqid = mapping_map_string(cs->chseqids_mapping,
                                      gt_str_get(gt_genome_node_get_seqid(node)),
                                                  err))) {
-          rval = gt_genome_node_traverse_children(node, changed_seqid,
-                                               change_sequence_id, true, err);
-          assert(!rval); /* change_sequence_id() is sane */
+          if ((feature_node = gt_feature_node_try_cast(node))) {
+            rval = gt_genome_node_traverse_children(node, changed_seqid,
+                                                    change_sequence_id, true,
+                                                    err);
+            gt_assert(!rval); /* change_sequence_id() is sane */
+          }
+          else
+            gt_genome_node_change_seqid(node, changed_seqid);
           gt_str_delete(changed_seqid);
         }
         else
@@ -119,11 +125,15 @@ int chseqids_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
       changed_seqid = mapping_map_string(cs->chseqids_mapping,
                                       gt_str_get(gt_genome_node_get_seqid(*gn)),
                                          err);
-      assert(changed_seqid); /* is always defined, because an undefined mapping
-                                would be catched earlier */
-      rval = gt_genome_node_traverse_children(*gn, changed_seqid,
-                                           change_sequence_id, true, err);
-      assert(!rval); /* change_sequence_id() is sane */
+      gt_assert(changed_seqid); /* is always defined, because an undefined
+                                   mapping would be catched earlier */
+      if ((feature_node = gt_feature_node_try_cast(*gn))) {
+        rval = gt_genome_node_traverse_children(*gn, changed_seqid,
+                                                change_sequence_id, true, err);
+        gt_assert(!rval); /* change_sequence_id() is sane */
+      }
+      else
+        gt_genome_node_change_seqid(*gn, changed_seqid);
       gt_str_delete(changed_seqid);
     }
   }

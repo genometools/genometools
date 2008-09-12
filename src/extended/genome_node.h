@@ -28,82 +28,35 @@ typedef struct GtGenomeNode GtGenomeNode;
 #include "core/str.h"
 #include "extended/node_visitor.h"
 
-typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
-
-void           gt_genome_node_set_origin(GtGenomeNode*,
-                                         GtStr *filename,
-                                         unsigned int line_number);
-GtGenomeNode*  gt_genome_node_ref(GtGenomeNode*);
-GtGenomeNode*  gt_genome_node_rec_ref(GtGenomeNode*);
-void*          gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*);
-void*          gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
-/* perform depth first traversal of the given genome node */
-int            gt_genome_node_traverse_children(GtGenomeNode*, void*,
-                                                GtGenomeNodeTraverseFunc,
-                                                bool traverse_only_once,
-                                                GtError*);
-/* perform breadth first traversal of the given genome node  */
-int            gt_genome_node_traverse_children_breadth(GtGenomeNode*, void*,
-                                                      GtGenomeNodeTraverseFunc,
-                                                        bool traverse_only_once,
-                                                        GtError*);
-int            gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
-                                                      GtGenomeNodeTraverseFunc,
-                                                       GtError*);
-const char*    gt_genome_node_get_filename(const GtGenomeNode*);
-unsigned int   gt_genome_node_get_line_number(const GtGenomeNode*);
-unsigned long  gt_genome_node_number_of_children(const GtGenomeNode*);
+void          gt_genome_node_set_origin(GtGenomeNode*, GtStr *filename,
+                                        unsigned int line_number);
+GtGenomeNode* gt_genome_node_ref(GtGenomeNode*);
+void*         gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*);
+void*         gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
+const char*   gt_genome_node_get_filename(const GtGenomeNode*);
+unsigned int  gt_genome_node_get_line_number(const GtGenomeNode*);
 GtStr*        gt_genome_node_get_seqid(GtGenomeNode*);
 /* used to sort nodes */
 GtStr*        gt_genome_node_get_idstr(GtGenomeNode*);
-unsigned long  gt_genome_node_get_start(GtGenomeNode*);
-unsigned long  gt_genome_node_get_end(GtGenomeNode*);
+unsigned long gt_genome_node_get_start(GtGenomeNode*);
+unsigned long gt_genome_node_get_end(GtGenomeNode*);
 GtRange       gt_genome_node_get_range(GtGenomeNode*);
-void           gt_genome_node_set_range(GtGenomeNode*, GtRange);
-void           gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
-int            gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
-/* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
-void           gt_genome_node_add_child(GtGenomeNode *parent,
-                                        GtGenomeNode *child);
-/* does not free the leaf, do not use during traversal! */
-void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
-                                          GtGenomeNode *leafn);
-void           gt_genome_node_mark(GtGenomeNode*);
-/* returns true if the (top-level) node is marked */
-bool           gt_genome_node_is_marked(const GtGenomeNode*);
-/* returns true if the given node graph contains a marked node */
-bool           gt_genome_node_contains_marked(GtGenomeNode*);
-bool           gt_genome_node_has_children(GtGenomeNode*);
-bool           gt_genome_node_direct_children_do_not_overlap(GtGenomeNode*);
-/* returns true if all direct childred of <parent> with the same type (s.t.) as
-   <child> do not overlap */
-bool           gt_genome_node_direct_children_do_not_overlap_st(GtGenomeNode
-                                                                *parent,
-                                                                GtGenomeNode
-                                                                *child);
-bool           gt_genome_node_is_tree(GtGenomeNode*);
-/* returns true if the genome node overlaps at least one of the nodes given in
-   the array. O(gt_array_size) */
-bool           gt_genome_node_overlaps_nodes(GtGenomeNode*, GtArray*);
-/* similar interface to gt_genome_node_overlaps_nodes(). Aditionally, if a
-   bittab is given (which must have the same size as the array), the bits
-   corresponding to overlapped nodes are marked (i.e., set) */
-bool           gt_genome_node_overlaps_nodes_mark(GtGenomeNode*, GtArray*,
-                                                  GtBittab*);
-int            gt_genome_node_cmp(GtGenomeNode*, GtGenomeNode*);
-int            gt_genome_node_compare(GtGenomeNode**, GtGenomeNode**);
-int            gt_genome_node_compare_with_data(GtGenomeNode**,
-                                                GtGenomeNode**, void *unused);
+void          gt_genome_node_set_range(GtGenomeNode*, GtRange);
+void          gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
+int           gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
+int           gt_genome_node_cmp(GtGenomeNode*, GtGenomeNode*);
+int           gt_genome_node_compare(GtGenomeNode**, GtGenomeNode**);
+int           gt_genome_node_compare_with_data(GtGenomeNode**, GtGenomeNode**,
+                                               void *unused);
 /* <delta> has to point to a variable of type unsigned long */
-int            gt_genome_node_compare_delta(GtGenomeNode**, GtGenomeNode**,
-                                            void *delta);
-void           gt_genome_node_delete(GtGenomeNode*);
-void           gt_genome_node_rec_delete(GtGenomeNode*);
+int           gt_genome_node_compare_delta(GtGenomeNode**, GtGenomeNode**,
+                                           void *delta);
+void          gt_genome_node_delete(GtGenomeNode*);
 
-void           gt_genome_nodes_sort(GtArray*);
-void           gt_genome_nodes_sort_stable(GtArray*);
-bool           gt_genome_nodes_are_equal_region_nodes(GtGenomeNode*,
-                                                      GtGenomeNode*);
-bool           gt_genome_nodes_are_sorted(const GtArray*);
+void          gt_genome_nodes_sort(GtArray*);
+void          gt_genome_nodes_sort_stable(GtArray*);
+bool          gt_genome_nodes_are_equal_region_nodes(GtGenomeNode*,
+                                                     GtGenomeNode*);
+bool          gt_genome_nodes_are_sorted(const GtArray*);
 
 #endif
