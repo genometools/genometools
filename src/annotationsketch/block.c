@@ -94,7 +94,6 @@ GtBlock* gt_block_new_from_node(GtFeatureNode *node)
   return block;
 }
 
-
 void gt_block_insert_element(GtBlock *block, GtFeatureNode *gf)
 {
   GtElement *element;

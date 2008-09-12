@@ -103,7 +103,7 @@ static NodeInfoElement* nodeinfo_get(GtDiagram *d,
 {
   NodeInfoElement *ni;
   assert(d && node);
-  if(!(ni = hashmap_get(d->nodeinfo, node))) {
+  if (!(ni = hashmap_get(d->nodeinfo, node))) {
     ni = gt_calloc(1, sizeof (NodeInfoElement));
     ni->type_index  = hashmap_new(HASH_STRING, NULL,
                                   gt_free_func);
@@ -120,9 +120,9 @@ static GtBlock* nodeinfo_find_block(NodeInfoElement* ni,
   PerTypeInfo *type_struc = NULL;
   GtBlockTuple *bt = NULL;
   assert(ni);
-  if(!(type_struc = hashmap_get(ni->type_index, gft)))
+  if (!(type_struc = hashmap_get(ni->type_index, gft)))
     return NULL;
-  if(!(bt = hashmap_get(type_struc->rep_index, gf)))
+  if (!(bt = hashmap_get(type_struc->rep_index, gf)))
     return NULL;
   assert(bt);
   return bt->block;
