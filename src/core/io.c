@@ -22,16 +22,16 @@
 #include "core/io.h"
 #include "core/ma.h"
 
-struct GT_IO {
+struct GtIO {
   GtGenFile *fp;
   GtStr *path;
   unsigned long line_number;
   bool line_start;
 };
 
-GT_IO* gt_io_new(const char *path, const char *mode)
+GtIO* gt_io_new(const char *path, const char *mode)
 {
-  GT_IO *io;
+  GtIO *io;
   assert(mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = gt_malloc(sizeof *io);
@@ -42,7 +42,7 @@ GT_IO* gt_io_new(const char *path, const char *mode)
   return io;
 }
 
-int gt_io_get_char(GT_IO *io, char *c)
+int gt_io_get_char(GtIO *io, char *c)
 {
   int cc;
   assert(io && c);
@@ -59,19 +59,19 @@ int gt_io_get_char(GT_IO *io, char *c)
   return 0;
 }
 
-void gt_io_unget_char(GT_IO *io, char c)
+void gt_io_unget_char(GtIO *io, char c)
 {
   assert(io);
   gt_genfile_unget_char(io->fp, c);
 }
 
-bool gt_io_line_start(const GT_IO *io)
+bool gt_io_line_start(const GtIO *io)
 {
   assert(io);
   return io->line_start;
 }
 
-bool gt_io_has_char(GT_IO *io)
+bool gt_io_has_char(GtIO *io)
 {
   int rval;
   char c = 0;
@@ -81,7 +81,7 @@ bool gt_io_has_char(GT_IO *io)
   return rval ? false : true;
 }
 
-char gt_io_peek(GT_IO *io)
+char gt_io_peek(GtIO *io)
 {
   char c;
   assert(io);
@@ -90,7 +90,7 @@ char gt_io_peek(GT_IO *io)
   return c;
 }
 
-char gt_io_next(GT_IO *io)
+char gt_io_next(GtIO *io)
 {
   char c;
   assert(io);
@@ -98,25 +98,25 @@ char gt_io_next(GT_IO *io)
   return c;
 }
 
-unsigned long gt_io_get_line_number(const GT_IO *io)
+unsigned long gt_io_get_line_number(const GtIO *io)
 {
   assert(io);
   return io->line_number;
 }
 
-const char* gt_io_get_filename(const GT_IO *io)
+const char* gt_io_get_filename(const GtIO *io)
 {
   assert(io && io->path);
   return gt_str_get(io->path);
 }
 
-GtStr* gt_io_get_filename_str(const GT_IO *io)
+GtStr* gt_io_get_filename_str(const GtIO *io)
 {
   assert(io && io->path);
   return io->path;
 }
 
-void gt_io_delete(GT_IO *io)
+void gt_io_delete(GtIO *io)
 {
   if (!io) return;
   gt_genfile_close(io->fp);

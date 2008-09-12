@@ -24,12 +24,12 @@
 #include "core/xtmpfile.h"
 
 struct Tokenizer {
-  GT_IO *io;
+  GtIO *io;
   bool skip_comment_lines;
   GtStr *token; /* the current token */
 };
 
-Tokenizer* tokenizer_new(GT_IO *io)
+Tokenizer* tokenizer_new(GtIO *io)
 {
   Tokenizer *t;
   assert(io);

@@ -23,20 +23,20 @@
 #include "core/str.h"
 
 /* the I/O class */
-typedef struct GT_IO GT_IO;
+typedef struct GtIO GtIO;
 
-GT_IO*        gt_io_new(const char *path, const char *mode);
+GtIO*        gt_io_new(const char *path, const char *mode);
 /* Returns -1 if no char is left, 0 otherwise. */
-int           gt_io_get_char(GT_IO*, char*);
+int           gt_io_get_char(GtIO*, char*);
 /* Can only be used once at a time.*/
-void          gt_io_unget_char(GT_IO*, char);
-bool          gt_io_line_start(const GT_IO*);
-bool          gt_io_has_char(GT_IO*);
-char          gt_io_peek(GT_IO*);
-char          gt_io_next(GT_IO*);
-unsigned long gt_io_get_line_number(const GT_IO*);
-const char*   gt_io_get_filename(const GT_IO*);
-GtStr*       gt_io_get_filename_str(const GT_IO*);
-void          gt_io_delete(GT_IO*);
+void          gt_io_unget_char(GtIO*, char);
+bool          gt_io_line_start(const GtIO*);
+bool          gt_io_has_char(GtIO*);
+char          gt_io_peek(GtIO*);
+char          gt_io_next(GtIO*);
+unsigned long gt_io_get_line_number(const GtIO*);
+const char*   gt_io_get_filename(const GtIO*);
+GtStr*       gt_io_get_filename_str(const GtIO*);
+void          gt_io_delete(GtIO*);
 
 #endif

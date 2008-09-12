@@ -23,13 +23,13 @@
 
 struct GtFastaReaderRec {
   const GtFastaReader parent_instance;
-  GT_IO *seqio;
+  GtIO *seqio;
 };
 
 #define gt_fasta_reader_rec_cast(FR)\
         gt_fasta_reader_cast(gt_fasta_reader_rec_class(), FR)
 
-static int parse_fasta_description(GtStr *description, GT_IO *seqio,
+static int parse_fasta_description(GtStr *description, GtIO *seqio,
                                    GtError *err)
 {
   int rval;
@@ -50,7 +50,7 @@ static int parse_fasta_description(GtStr *description, GT_IO *seqio,
   return 0;
 }
 
-static int parse_fasta_sequence(GtStr *sequence, GT_IO *seqio, GtError *err)
+static int parse_fasta_sequence(GtStr *sequence, GtIO *seqio, GtError *err)
 {
   char cc;
   gt_error_check(err);
@@ -72,7 +72,7 @@ static int parse_fasta_sequence(GtStr *sequence, GT_IO *seqio, GtError *err)
 }
 
 static int parse_fasta_entry(GtStr *description, GtStr *sequence,
-                             GT_IO *seqio, GtError *err)
+                             GtIO *seqio, GtError *err)
 {
   int had_err;
   gt_error_check(err);
