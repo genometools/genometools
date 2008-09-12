@@ -231,7 +231,7 @@ GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
 
 GtGenomeNode* gt_feature_node_new_standard_gene(void)
 {
-  GtGenomeNode *gn, *child, *grandchild;
+  GtGenomeNode *gn, *child, *grandch;
   GtStr *seqid;
   seqid = gt_str_new_cstr("ctg123");
 
@@ -241,63 +241,41 @@ GtGenomeNode* gt_feature_node_new_standard_gene(void)
   /* TF binding site */
   child = gt_feature_node_new(seqid, gft_TF_binding_site, 1000, 1012,
                                 GT_STRAND_FORWARD);
-  gt_genome_node_add_child(gn, child);
+  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
 
   /* first mRNA */
   child = gt_feature_node_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
-  gt_genome_node_add_child(gn, child);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 1050, 1500,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 3000, 3902,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 5000, 5500,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 7000, 9000,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
+  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
+  grandch = gt_feature_node_new(seqid, gft_exon, 1050, 1500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 3000, 3902, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 5000, 5500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 7000, 9000, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
 
   /* second mRNA */
   child = gt_feature_node_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
-  gt_genome_node_add_child(gn, child);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 1050, 1500,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 5000, 5500,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 7000, 9000,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
+  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
+  grandch = gt_feature_node_new(seqid, gft_exon, 1050, 1500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 5000, 5500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 7000, 9000, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
 
   /* third mRNA */
   child = gt_feature_node_new(seqid, gft_mRNA, 1300, 9000, GT_STRAND_FORWARD);
-  gt_genome_node_add_child(gn, child);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 1300, 1500,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 3000, 3902,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 5000, 5500,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
-
-  grandchild = gt_feature_node_new(seqid, gft_exon, 7000, 9000,
-                                     GT_STRAND_FORWARD);
-  gt_genome_node_add_child(child, grandchild);
+  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
+  grandch = gt_feature_node_new(seqid, gft_exon, 1300, 1500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 3000, 3902, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 5000, 5500, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
+  grandch = gt_feature_node_new(seqid, gft_exon, 7000, 9000, GT_STRAND_FORWARD);
+  gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
 
   gt_str_delete(seqid);
   return gn;
@@ -915,29 +893,22 @@ unsigned long gt_genome_node_number_of_children(const GtGenomeNode *gn)
   return gt_dlist_size(fn->children);
 }
 
-void gt_genome_node_add_child(GtGenomeNode *parent, GtGenomeNode *child)
+void gt_feature_node_add_child(GtFeatureNode *parent, GtFeatureNode *child)
 {
-  GtFeatureNode *parent_feature, *child_feature;
   gt_assert(parent && child);
-  parent_feature = gt_feature_node_cast(parent); /* XXX */
-  child_feature  = gt_feature_node_cast(child); /* XXX */
   /* <parent> and <child> have the same seqid */
-  gt_assert(!gt_str_cmp(gt_genome_node_get_seqid(parent),
-                        gt_genome_node_get_seqid(child)));
-#ifndef NDEBUG
-  if (gt_feature_node_try_cast(child)) {
-    /* pseudo-features have to be top-level */
-    gt_assert(!gt_feature_node_is_pseudo((GtFeatureNode*) child));
-  }
-#endif
+  gt_assert(!gt_str_cmp(gt_genome_node_get_seqid((GtGenomeNode*) parent),
+                        gt_genome_node_get_seqid((GtGenomeNode*) child)));
+  /* pseudo-features have to be top-level */
+  gt_assert(!gt_feature_node_is_pseudo((GtFeatureNode*) child));
   /* create children list on demand */
-  if (!parent_feature->children)
-    parent_feature->children = gt_dlist_new((GtCompare) gt_genome_node_cmp);
-  gt_dlist_add(parent_feature->children, child); /* XXX: check for circles */
+  if (!parent->children)
+    parent->children = gt_dlist_new((GtCompare) gt_genome_node_cmp);
+  gt_dlist_add(parent->children, child); /* XXX: check for circles */
   /* update tree status of <parent> */
-  set_tree_status(&parent_feature->bit_field, TREE_STATUS_UNDETERMINED);
+  set_tree_status(&parent->bit_field, TREE_STATUS_UNDETERMINED);
   /* update parent info of <child> */
-  add_parent(&child_feature->bit_field);
+  add_parent(&child->bit_field);
 }
 
 static int remove_leaf(GtGenomeNode *node, void *data, GT_UNUSED GtError *err)

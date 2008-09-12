@@ -174,7 +174,8 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
     /* register children */
     for (i = 0; i < gt_array_size(gt_genome_node_array); i++) {
       gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
-      gt_genome_node_add_child(mRNA_node, gn);
+      gt_feature_node_add_child((GtFeatureNode*) mRNA_node,
+                                (GtFeatureNode*) gn);
     }
 
     /* store the mRNA */
@@ -231,7 +232,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
     /* register children */
     for (i = 0; i < gt_array_size(mRNAs); i++) {
       gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
-      gt_genome_node_add_child(gene_node, gn);
+      gt_feature_node_add_child((GtFeatureNode*) gene_node,
+                                (GtFeatureNode*) gn);
     }
 
     /* store the gene */

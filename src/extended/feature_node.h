@@ -113,8 +113,8 @@ int           gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
                                                       GtError*);
 unsigned long gt_genome_node_number_of_children(const GtGenomeNode*);
 /* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
-void           gt_genome_node_add_child(GtGenomeNode *parent,
-                                        GtGenomeNode *child);
+void           gt_feature_node_add_child(GtFeatureNode *parent,
+                                         GtFeatureNode *child);
 /* does not free the leaf, do not use during traversal! */
 void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
                                           GtGenomeNode *leafn);

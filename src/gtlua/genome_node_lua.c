@@ -214,9 +214,15 @@ static int genome_node_lua_accept(lua_State *L)
 static int genome_node_lua_add_child(lua_State *L)
 {
   GtGenomeNode **parent, **child;
+  GtFeatureNode *pf, *cf;
   parent = check_genome_node(L, 1);
   child  = check_genome_node(L, 2);
-  gt_genome_node_add_child(*parent, gt_genome_node_rec_ref(*child));
+  pf = gt_feature_node_try_cast(*parent);
+  luaL_argcheck(L, pf, 1, "not a feature node");
+  cf = gt_feature_node_try_cast(*child);
+  luaL_argcheck(L, cf, 2, "not a feature node");
+  gt_feature_node_add_child(pf, (GtFeatureNode*)
+                                gt_genome_node_rec_ref((GtGenomeNode*) cf));
   return 0;
 }
 

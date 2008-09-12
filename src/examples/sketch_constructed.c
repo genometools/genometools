@@ -13,11 +13,11 @@ static GtArray* create_example_features(void)
   /* construct a gene on the forward strand with two exons */
   gene = gt_feature_node_new(seqid, "gene", 100, 900, GT_STRAND_FORWARD);
   exon = gt_feature_node_new(seqid, "exon", 100, 200, GT_STRAND_FORWARD);
-  gt_genome_node_add_child(gene, exon);
+  gt_feature_node_add_child((GtFeatureNode*) gene, (GtFeatureNode*) exon);
   intron = gt_feature_node_new(seqid, "intron", 201, 799, GT_STRAND_FORWARD);
-  gt_genome_node_add_child(gene, intron);
+  gt_feature_node_add_child((GtFeatureNode*) gene, (GtFeatureNode*) intron);
   exon = gt_feature_node_new(seqid, "exon", 800, 900, GT_STRAND_FORWARD);
-  gt_genome_node_add_child(gene, exon);
+  gt_feature_node_add_child((GtFeatureNode*) gene, (GtFeatureNode*) exon);
 
   /* store forward gene in feature array */
   gt_array_add(features, gene);
@@ -26,7 +26,7 @@ static GtArray* create_example_features(void)
      (within the intron of the forward strand gene) */
   gene = gt_feature_node_new(seqid, "gene", 400, 600, GT_STRAND_REVERSE);
   exon = gt_feature_node_new(seqid, "exon", 400, 600, GT_STRAND_REVERSE);
-  gt_genome_node_add_child(gene, exon);
+  gt_feature_node_add_child((GtFeatureNode*) gene, (GtFeatureNode*) exon);
 
   /* store reverse gene in feature array */
   gt_array_add(features, gene);

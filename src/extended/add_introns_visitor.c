@@ -34,8 +34,7 @@ static int add_introns_in_children(GtGenomeNode *gn, void *data,
                                    GT_UNUSED GtError *err)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
-  GtFeatureNode *current_feature;
-  GtGenomeNode *intron_node;
+  GtFeatureNode *current_feature, *intron_node;
   GtRange previous_range, current_range, intron_range;
   GtStrand previous_strand, current_strand, intron_strand;
   GtStr *parent_seqid;
@@ -68,10 +67,11 @@ static int add_introns_in_children(GtGenomeNode *gn, void *data,
              gt_genome_node_get_seqid((GtGenomeNode*) current_feature)));
 
       /* create intron */
-      intron_node = gt_feature_node_new(parent_seqid, gft_intron,
-                                          intron_range.start, intron_range.end,
-                                          intron_strand);
-      gt_genome_node_add_child((GtGenomeNode*) v->parent_feature, intron_node);
+      intron_node = (GtFeatureNode*)
+                    gt_feature_node_new(parent_seqid, gft_intron,
+                                        intron_range.start, intron_range.end,
+                                        intron_strand);
+      gt_feature_node_add_child(v->parent_feature, intron_node);
     }
     v->previous_exon_feature = current_feature;
   }
