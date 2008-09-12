@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COMMENT_H
-#define COMMENT_H
+#ifndef COMMENT_NODE_H
+#define COMMENT_NODE_H
 
 #include "core/error.h"
 
@@ -25,8 +25,8 @@ typedef struct GtCommentNode GtCommentNode;
 
 #include "extended/genome_node.h"
 
-const GtGenomeNodeClass* gt_comment_class(void);
-GtGenomeNode*            gt_comment_new(const char *comment);
-const char*               gt_comment_get_comment(const GtCommentNode*);
+const GtGenomeNodeClass* gt_comment_node_class(void);
+GtGenomeNode*            gt_comment_node_new(const char *comment);
+const char*              gt_comment_node_get_comment(const GtCommentNode*);
 
 #endif

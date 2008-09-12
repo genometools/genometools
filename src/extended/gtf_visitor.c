@@ -52,7 +52,8 @@ static int gtf_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
   GTFVisitor *gtf_visitor;
   gt_error_check(err);
   gtf_visitor = gtf_visitor_cast(gv);
-  gt_genfile_xprintf(gtf_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
+  gt_genfile_xprintf(gtf_visitor->outfp, "#%s\n",
+                     gt_comment_node_get_comment(c));
   return 0;
 }
 

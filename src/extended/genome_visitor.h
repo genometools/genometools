@@ -22,7 +22,7 @@
 typedef struct GenomeVisitorClass GenomeVisitorClass;
 typedef struct GenomeVisitor GenomeVisitor;
 
-#include "extended/comment.h"
+#include "extended/comment_node.h"
 #include "extended/genome_feature.h"
 #include "extended/sequence_region.h"
 #include "extended/sequence_node.h"

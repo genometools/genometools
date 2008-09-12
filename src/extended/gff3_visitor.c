@@ -81,7 +81,8 @@ static int gff3_visitor_comment(GenomeVisitor *gv, GtCommentNode *c,
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && c);
   gff3_version_string(gv);
-  gt_genfile_xprintf(gff3_visitor->outfp, "#%s\n", gt_comment_get_comment(c));
+  gt_genfile_xprintf(gff3_visitor->outfp, "#%s\n",
+                     gt_comment_node_get_comment(c));
   return 0;
 }
 

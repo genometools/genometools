@@ -28,7 +28,7 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/warning.h"
-#include "extended/comment.h"
+#include "extended/comment_node.h"
 #include "extended/feature_info.h"
 #include "extended/genome_feature.h"
 #include "extended/genome_node.h"
@@ -1225,7 +1225,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
 
   if (line_length == 1 || line[1] != '#') {
     /* storing comment */
-    gn = gt_comment_new(line+1);
+    gn = gt_comment_node_new(line+1);
     gt_genome_node_set_origin(gn, filenamestr, line_number);
     gt_queue_add(genome_nodes, gn);
   }
