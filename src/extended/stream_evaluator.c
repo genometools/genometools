@@ -77,7 +77,7 @@ typedef struct {
                 FP_mRNA_nucleotides_reverse,
                 FP_CDS_nucleotides_forward,
                 FP_CDS_nucleotides_reverse;
-  GT_Bittab *real_mRNA_nucleotides_forward,
+  GtBittab *real_mRNA_nucleotides_forward,
          *pred_mRNA_nucleotides_forward,
          *real_mRNA_nucleotides_reverse,
          *pred_mRNA_nucleotides_reverse,
@@ -95,7 +95,7 @@ typedef struct {
          *overlapped_mRNAs_forward,
          *overlapped_mRNAs_reverse,
          *overlapped_LTRs;
-  TranscriptGT_Bittabs *mRNA_exon_bittabs_forward,
+  TranscriptGtBittabs *mRNA_exon_bittabs_forward,
                     *mRNA_exon_bittabs_reverse,
                     *CDS_exon_bittabs_forward,
                     *CDS_exon_bittabs_reverse;
@@ -407,7 +407,7 @@ static void add_real_exon(TranscriptExons *te, GT_Range range,
   }
 }
 
-static void add_nucleotide_exon(GT_Bittab *nucleotides, GT_Range range,
+static void add_nucleotide_exon(GtBittab *nucleotides, GT_Range range,
                                 GT_Range real_range,
                                 unsigned long *FP)
 {
@@ -750,8 +750,8 @@ static void determine_true_exon(GT_GenomeNode *gn, GtStrand predicted_strand,
                                 GtArray *exons_reverse,
                                 GtArray *true_exons_forward,
                                 GtArray *true_exons_reverse,
-                                GT_Bittab *true_exons_forward_collapsed,
-                                GT_Bittab *true_exons_reverse_collapsed,
+                                GtBittab *true_exons_forward_collapsed,
+                                GtBittab *true_exons_reverse_collapsed,
                                 Evaluator *exon_evaluator,
                                 Evaluator *exon_evaluator_collapsed)
 {
@@ -807,8 +807,8 @@ static void store_true_exon(GT_GenomeNode *gn, GtStrand predicted_strand,
                             TranscriptExons *exons_reverse,
                             TranscriptCounts *counts_forward,
                             TranscriptCounts *counts_reverse,
-                            TranscriptGT_Bittabs *exon_bittabs_forward,
-                            TranscriptGT_Bittabs *exon_bittabs_reverse,
+                            TranscriptGtBittabs *exon_bittabs_forward,
+                            TranscriptGtBittabs *exon_bittabs_reverse,
                             TranscriptEvaluators *exon_evaluators,
                             TranscriptEvaluators *exon_evaluators_collapsed)
 {
@@ -1189,8 +1189,8 @@ int determine_missing_features(GT_UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static void add_nucleotide_values(NucEval *nucleotides, GT_Bittab *real,
-                                  GT_Bittab *pred, GT_Bittab *tmp,
+static void add_nucleotide_values(NucEval *nucleotides, GtBittab *real,
+                                  GtBittab *pred, GtBittab *tmp,
                                   const char *level)
 {
   assert(nucleotides && real && pred && tmp);
@@ -1219,7 +1219,7 @@ int compute_nucleotides_values(GT_UNUSED void *key, void *value, void *data,
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
-  GT_Bittab *tmp;
+  GtBittab *tmp;
   gt_error_check(err);
   assert(key && value && data);
   /* add ``out of range'' FPs */

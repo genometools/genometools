@@ -18,21 +18,21 @@
 #include "core/ma.h"
 #include "extended/transcript_bittabs.h"
 
-struct TranscriptGT_Bittabs {
-  GT_Bittab *gt_bittab_all,
+struct TranscriptGtBittabs {
+  GtBittab *gt_bittab_all,
          *gt_bittab_single,
          *gt_bittab_initial,
          *gt_bittab_internal,
          *gt_bittab_terminal;
 };
 
-TranscriptGT_Bittabs* transcript_bittabs_new(unsigned long size_all,
+TranscriptGtBittabs* transcript_bittabs_new(unsigned long size_all,
                                           unsigned long size_single,
                                           unsigned long size_initial,
                                           unsigned long size_internal,
                                           unsigned long size_terminal)
 {
-  TranscriptGT_Bittabs *tb = gt_calloc(1, sizeof (TranscriptGT_Bittabs));
+  TranscriptGtBittabs *tb = gt_calloc(1, sizeof (TranscriptGtBittabs));
   if (size_all) tb->gt_bittab_all = gt_bittab_new(size_all);
   if (size_single) tb->gt_bittab_single = gt_bittab_new(size_single);
   if (size_initial) tb->gt_bittab_initial = gt_bittab_new(size_initial);
@@ -41,37 +41,37 @@ TranscriptGT_Bittabs* transcript_bittabs_new(unsigned long size_all,
   return tb;
 }
 
-GT_Bittab* transcript_bittabs_get_all(const TranscriptGT_Bittabs *tb)
+GtBittab* transcript_bittabs_get_all(const TranscriptGtBittabs *tb)
 {
   assert(tb);
   return tb->gt_bittab_all;
 }
 
-GT_Bittab* transcript_bittabs_get_single(const TranscriptGT_Bittabs *tb)
+GtBittab* transcript_bittabs_get_single(const TranscriptGtBittabs *tb)
 {
   assert(tb);
   return tb->gt_bittab_single;
 }
 
-GT_Bittab* transcript_bittabs_get_initial(const TranscriptGT_Bittabs *tb)
+GtBittab* transcript_bittabs_get_initial(const TranscriptGtBittabs *tb)
 {
   assert(tb);
   return tb->gt_bittab_initial;
 }
 
-GT_Bittab* transcript_bittabs_get_internal(const TranscriptGT_Bittabs *tb)
+GtBittab* transcript_bittabs_get_internal(const TranscriptGtBittabs *tb)
 {
   assert(tb);
   return tb->gt_bittab_internal;
 }
 
-GT_Bittab* transcript_bittabs_get_terminal(const TranscriptGT_Bittabs *tb)
+GtBittab* transcript_bittabs_get_terminal(const TranscriptGtBittabs *tb)
 {
   assert(tb);
   return tb->gt_bittab_terminal;
 }
 
-void transcript_bittabs_delete(TranscriptGT_Bittabs *tb)
+void transcript_bittabs_delete(TranscriptGtBittabs *tb)
 {
   if (!tb) return;
   gt_bittab_delete(tb->gt_bittab_all);

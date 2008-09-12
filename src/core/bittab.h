@@ -22,43 +22,43 @@
 #include <stdio.h>
 #include "core/array.h"
 
-typedef struct GT_Bittab GT_Bittab;
+typedef struct GtBittab GtBittab;
 
-GT_Bittab*    gt_bittab_new(unsigned long num_of_bits);
-void          gt_bittab_set_bit(GT_Bittab*, unsigned long);
-void          gt_bittab_unset_bit(GT_Bittab*, unsigned long);
+GtBittab*    gt_bittab_new(unsigned long num_of_bits);
+void          gt_bittab_set_bit(GtBittab*, unsigned long);
+void          gt_bittab_unset_bit(GtBittab*, unsigned long);
 /* a = ~b */
-void          gt_bittab_complement(GT_Bittab*, const GT_Bittab*);
+void          gt_bittab_complement(GtBittab*, const GtBittab*);
 /* a = b */
-void          gt_bittab_equal(GT_Bittab*, const GT_Bittab*);
+void          gt_bittab_equal(GtBittab*, const GtBittab*);
 /* a = b & c */
-void          gt_bittab_and(GT_Bittab*, const GT_Bittab*, const GT_Bittab*);
+void          gt_bittab_and(GtBittab*, const GtBittab*, const GtBittab*);
 /* a = b | c */
-void          gt_bittab_or(GT_Bittab*, const GT_Bittab*, const GT_Bittab*);
+void          gt_bittab_or(GtBittab*, const GtBittab*, const GtBittab*);
 /* a = b & ~c */
-void          gt_bittab_nand(GT_Bittab*, const GT_Bittab*, const GT_Bittab*);
+void          gt_bittab_nand(GtBittab*, const GtBittab*, const GtBittab*);
 /* a &= b */
-void          gt_bittab_and_equal(GT_Bittab*, const GT_Bittab*);
+void          gt_bittab_and_equal(GtBittab*, const GtBittab*);
 /* a |= b */
-void          gt_bittab_or_equal(GT_Bittab*, const GT_Bittab*);
+void          gt_bittab_or_equal(GtBittab*, const GtBittab*);
 /* a <<= 1 */
-void          gt_bittab_shift_left_equal(GT_Bittab*);
+void          gt_bittab_shift_left_equal(GtBittab*);
 /* a >>= 1 */
-void          gt_bittab_shift_right_equal(GT_Bittab*);
+void          gt_bittab_shift_right_equal(GtBittab*);
 /* a = 0 */
-void          gt_bittab_unset(GT_Bittab*);
-void          gt_bittab_show(const GT_Bittab*, FILE*);
-void          gt_bittab_get_all_bitnums(const GT_Bittab*, GtArray*);
-bool          gt_bittab_bit_is_set(const GT_Bittab*, unsigned long);
-bool          gt_bittab_is_true(const GT_Bittab*);
-bool          gt_bittab_cmp(const GT_Bittab*, const GT_Bittab*);
-unsigned long gt_bittab_get_first_bitnum(const GT_Bittab*);
-unsigned long gt_bittab_get_last_bitnum(const GT_Bittab*);
-unsigned long gt_bittab_get_next_bitnum(const GT_Bittab*, unsigned long);
-unsigned long gt_bittab_count_set_bits(GT_Bittab*);
-unsigned long gt_bittab_size(GT_Bittab*);
+void          gt_bittab_unset(GtBittab*);
+void          gt_bittab_show(const GtBittab*, FILE*);
+void          gt_bittab_get_all_bitnums(const GtBittab*, GtArray*);
+bool          gt_bittab_bit_is_set(const GtBittab*, unsigned long);
+bool          gt_bittab_is_true(const GtBittab*);
+bool          gt_bittab_cmp(const GtBittab*, const GtBittab*);
+unsigned long gt_bittab_get_first_bitnum(const GtBittab*);
+unsigned long gt_bittab_get_last_bitnum(const GtBittab*);
+unsigned long gt_bittab_get_next_bitnum(const GtBittab*, unsigned long);
+unsigned long gt_bittab_count_set_bits(GtBittab*);
+unsigned long gt_bittab_size(GtBittab*);
 int           gt_bittab_example(GtError*);
 int           gt_bittab_unit_test(GtError*);
-void          gt_bittab_delete(GT_Bittab*);
+void          gt_bittab_delete(GtBittab*);
 
 #endif

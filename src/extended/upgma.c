@@ -94,7 +94,7 @@ static void upggt_compute(UPGMA *upgma)
   unsigned long i, j, k, step, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG,
                 newclusternum = upgma->num_of_taxa; /* denoted 'l' in script */
   double mindist;
-  GT_Bittab *clustertab;
+  GtBittab *clustertab;
 
   /* init cluster tab */
   clustertab = gt_bittab_new(upgma->num_of_clusters);

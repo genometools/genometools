@@ -23,7 +23,7 @@
 static void* bsearch_generic(GtArray *members, const void *key,
                              const void *base, size_t nmemb, size_t size,
                              GT_CompareWithData compar, void *data,
-                             GT_Bittab *b)
+                             GtBittab *b)
 {
   char *baseptr = (char *)base, *tmp_ptr,
    *ptr; /* the current element we consider */
@@ -89,7 +89,7 @@ void gt_bsearch_all(GtArray *members, const void *key, const void *base,
 
 void gt_bsearch_all_mark(GtArray *members, const void *key, const void *base,
                          size_t nmemb, size_t size, GT_CompareWithData compar,
-                         void *data, GT_Bittab *b)
+                         void *data, GtBittab *b)
 {
   assert(members);
   bsearch_generic(members, key, base, nmemb, size, compar, data, b);
@@ -115,7 +115,7 @@ int gt_bsearch_unit_test(GtError *err)
 {
   GtArray *elements, *members;
   int key, element, *member_ptr;
-  GT_Bittab *b;
+  GtBittab *b;
   int had_err = 0;
 
   gt_error_check(err);

@@ -86,7 +86,7 @@ static double distance(const NeighborJoining *nj, unsigned long i,
   return distance;
 }
 
-static void updatertab(double *rtab, GT_Bittab *nodetab,
+static void updatertab(double *rtab, GtBittab *nodetab,
                        unsigned long activenodes, NeighborJoining *nj)
 {
   unsigned long i, j;
@@ -108,7 +108,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
   unsigned long i, j, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG, step,
                 newnodenum = nj->num_of_taxa,
                 activenodes; /* |L| */
-  GT_Bittab *nodetab; /* L */
+  GtBittab *nodetab; /* L */
   double mindist, *rtab;
 
   /* init node tab */

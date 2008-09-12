@@ -21,30 +21,30 @@
 #include "core/bittab.h"
 
 /* a container class for transcript bittabs */
-typedef struct TranscriptGT_Bittabs TranscriptGT_Bittabs;
+typedef struct TranscriptGtBittabs TranscriptGtBittabs;
 
 /* create an empy container */
-TranscriptGT_Bittabs* transcript_bittabs_new(unsigned long size_all,
+TranscriptGtBittabs* transcript_bittabs_new(unsigned long size_all,
                                              unsigned long size_single,
                                              unsigned long size_initial,
                                              unsigned long size_internal,
                                              unsigned long size_terminal);
 
 /* return the bittab for all exons */
-GT_Bittab*         transcript_bittabs_get_all(const TranscriptGT_Bittabs*);
+GtBittab*         transcript_bittabs_get_all(const TranscriptGtBittabs*);
 
 /* return the bittab for single exons */
-GT_Bittab*         transcript_bittabs_get_single(const TranscriptGT_Bittabs*);
+GtBittab*         transcript_bittabs_get_single(const TranscriptGtBittabs*);
 
 /* return the bittab for initial exons */
-GT_Bittab*         transcript_bittabs_get_initial(const TranscriptGT_Bittabs*);
+GtBittab*         transcript_bittabs_get_initial(const TranscriptGtBittabs*);
 
 /* return the bittab for internal exons */
-GT_Bittab*         transcript_bittabs_get_internal(const TranscriptGT_Bittabs*);
+GtBittab*         transcript_bittabs_get_internal(const TranscriptGtBittabs*);
 
 /* return the bittab for terminal exons */
-GT_Bittab*         transcript_bittabs_get_terminal(const TranscriptGT_Bittabs*);
+GtBittab*         transcript_bittabs_get_terminal(const TranscriptGtBittabs*);
 
-void               transcript_bittabs_delete(TranscriptGT_Bittabs*);
+void               transcript_bittabs_delete(TranscriptGtBittabs*);
 
 #endif

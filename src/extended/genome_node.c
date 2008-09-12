@@ -637,7 +637,7 @@ bool gt_genome_node_overlaps_nodes(GT_GenomeNode *gn, GtArray *nodes)
 }
 
 bool gt_genome_node_overlaps_nodes_mark(GT_GenomeNode *gn, GtArray *nodes,
-                                             GT_Bittab *b)
+                                             GtBittab *b)
 {
   unsigned long i;
   GT_GenomeNode *node;

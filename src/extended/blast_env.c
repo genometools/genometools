@@ -136,7 +136,7 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
   (because it is not possible to find a word with a sufficient score on this
   branch).
 */
-static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
+static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
                               char *current_word, long *max_cumul_scores,
                               GT_Alpha *alpha, unsigned long q,
                               unsigned long q_rest, long k, long current_score,
@@ -175,7 +175,7 @@ static void add_q_word_to_env(GT_Bittab *V, Pos *pos, const char *qgram_rest,
   <V> and the set of position lists <pos>, for the encoded word <w> of length
   <wlen>.
 */
-static void compute_env(GT_Bittab *V, Pos *pos, const char *w,
+static void compute_env(GtBittab *V, Pos *pos, const char *w,
                         unsigned long wlen, GT_Alpha *alpha, unsigned long q,
                         long k, const GT_ScoreMatrix *score_matrix)
 {
@@ -209,7 +209,7 @@ static void compute_env(GT_Bittab *V, Pos *pos, const char *w,
 struct BlastEnv {
   GT_Alpha *alpha;
   unsigned long q;
-  GT_Bittab *V; /* The vector V of r^q bits. */
+  GtBittab *V; /* The vector V of r^q bits. */
   Pos *pos;  /* The set of position lists. If a bit in <V> is set then <pos>
                 contains the corresponding position list for that code. */
 };

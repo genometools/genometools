@@ -88,7 +88,7 @@ bool           gt_genome_node_overlaps_nodes(GT_GenomeNode*, GtArray*);
    bittab is given (which must have the same size as the array), the bits
    corresponding to overlapped nodes are marked (i.e., set) */
 bool           gt_genome_node_overlaps_nodes_mark(GT_GenomeNode*, GtArray*,
-                                                  GT_Bittab*);
+                                                  GtBittab*);
 int            gt_genome_node_cmp(GT_GenomeNode*, GT_GenomeNode*);
 int            gt_genome_node_compare(GT_GenomeNode**, GT_GenomeNode**);
 int            gt_genome_node_compare_with_data(GT_GenomeNode**,

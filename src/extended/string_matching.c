@@ -125,7 +125,7 @@ void string_matching_shift_and(const char *s, unsigned long n,
                                const char *p, unsigned long m,
                                ProcessMatch process_match, void *data)
 {
-  GT_Bittab *D, *B[UCHAR_MAX] = { NULL };
+  GtBittab *D, *B[UCHAR_MAX] = { NULL };
   unsigned long i, j;
   assert(s && p);
   if (m > n || !m || !n) /* no match possible */

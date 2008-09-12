@@ -38,7 +38,7 @@ void  gt_bsearch_all(GtArray *members, const void *key, const void *base,
    elements are marked (i.e., set). */
 void  gt_bsearch_all_mark(GtArray *members, const void *key, const void *base,
                           size_t nmemb, size_t size, GT_CompareWithData,
-                          void *data, GT_Bittab*);
+                          void *data, GtBittab*);
 
 int   gt_bsearch_unit_test(GtError*);
 
