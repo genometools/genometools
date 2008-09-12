@@ -19,16 +19,16 @@
 #include "core/ma.h"
 #include "annotationsketch/color.h"
 
-GT_Color* gt_color_new(double red, double green, double blue)
+GtColor* gt_color_new(double red, double green, double blue)
 {
-  GT_Color *color = gt_malloc(sizeof *color);
+  GtColor *color = gt_malloc(sizeof *color);
   color->red = red;
   color->green = green;
   color->blue = blue;
   return color;
 }
 
-void gt_color_set(GT_Color *color, double red, double green, double blue)
+void gt_color_set(GtColor *color, double red, double green, double blue)
 {
   assert(color);
   color->red = red;
@@ -36,14 +36,14 @@ void gt_color_set(GT_Color *color, double red, double green, double blue)
   color->blue = blue;
 }
 
-bool gt_color_equals(const GT_Color *c1, const GT_Color *c2)
+bool gt_color_equals(const GtColor *c1, const GtColor *c2)
 {
   assert(c1 && c2);
   return ((c1->red == c2->red) && (c1->green == c2->green) &&
           (c1->blue == c2->blue));
 }
 
-void gt_color_delete(GT_Color *color)
+void gt_color_delete(GtColor *color)
 {
   if (!color) return;
   gt_free(color);

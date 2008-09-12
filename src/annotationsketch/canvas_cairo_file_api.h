@@ -25,20 +25,20 @@
 
 /* Implements the Canvas interface.
    This Canvas uses the GT_GraphicsCairo class.  */
-typedef struct GT_CanvasCairoFile GT_CanvasCairoFile;
+typedef struct GtCanvasCairoFile GtCanvasCairoFile;
 
 /* Create a new Canvas object with given <output_type> and <width> using the
    configuration given in <style>. The optional <image_info> is filled when
    the created Canvas object is used to render a Diagram object. */
-GT_Canvas* gt_canvas_cairo_file_new(GT_Style *style,
+GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
                                     GT_GraphicsOutType output_type,
                                     unsigned long width,
                                     GT_ImageInfo *image_info);
 /* Write rendered <canvas> to file with name <filename>. */
-int     gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
+int     gt_canvas_cairo_file_to_file(GtCanvasCairoFile *canvas,
                                      const char *filename, GtError *err);
 /* Append rendered <canvas> to given <stream>. */
-int     gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas,
+int     gt_canvas_cairo_file_to_stream(GtCanvasCairoFile *canvas,
                                        GtStr *stream);
 
 #endif

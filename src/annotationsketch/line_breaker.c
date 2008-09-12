@@ -20,23 +20,23 @@
 #include "core/unused_api.h"
 #include "annotationsketch/line_breaker_rep.h"
 
-GT_LineBreaker* gt_line_breaker_create(const GT_LineBreakerClass *lbc)
+GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass *lbc)
 {
-  GT_LineBreaker *lb;
+  GtLineBreaker *lb;
   assert(lbc && lbc->size);
   lb = gt_calloc(1, lbc->size);
   lb->c_class = lbc;
   return lb;
 }
 
-GT_LineBreaker* gt_line_breaker_ref(GT_LineBreaker *lb)
+GtLineBreaker* gt_line_breaker_ref(GtLineBreaker *lb)
 {
   assert(lb);
   lb->reference_count++;
   return lb;
 }
 
-void gt_line_breaker_delete(GT_LineBreaker *lb)
+void gt_line_breaker_delete(GtLineBreaker *lb)
 {
   if (!lb) return;
   if (lb->reference_count) {
@@ -49,22 +49,22 @@ void gt_line_breaker_delete(GT_LineBreaker *lb)
   gt_free(lb);
 }
 
-bool gt_line_breaker_gt_line_is_occupied(GT_LineBreaker *lb, GT_Line *line,
-                                         GT_Block *block)
+bool gt_line_breaker_gt_line_is_occupied(GtLineBreaker *lb, GtLine *line,
+                                         GtBlock *block)
 {
   assert(lb && lb->c_class && line && block);
   return lb->c_class->is_occupied(lb, line, block);
 }
 
-void gt_line_breaker_register_block(GT_LineBreaker *lb, GT_Line *line,
-                                    GT_Block *block)
+void gt_line_breaker_register_block(GtLineBreaker *lb, GtLine *line,
+                                    GtBlock *block)
 {
   assert(lb && lb->c_class && line && block);
   lb->c_class->register_block(lb, line, block);
 }
 
-void* gt_line_breaker_cast(GT_UNUSED const GT_LineBreakerClass *lbc,
-                           GT_LineBreaker *lb)
+void* gt_line_breaker_cast(GT_UNUSED const GtLineBreakerClass *lbc,
+                           GtLineBreaker *lb)
 {
   assert(lbc && lb && lb->c_class == lbc);
   return lb;

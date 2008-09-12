@@ -23,13 +23,13 @@
 #include "annotationsketch/diagram_api.h"
 #include "core/hashmap.h"
 
-typedef struct GT_TracklineInfo {
+typedef struct GtTracklineInfo {
   unsigned long total_lines,
                 total_captionlines;
-} GT_TracklineInfo;
+} GtTracklineInfo;
 
 Hashmap*    gt_diagram_get_tracks(const GT_Diagram*);
-void        gt_diagram_get_lineinfo(const GT_Diagram*, GT_TracklineInfo*);
+void        gt_diagram_get_lineinfo(const GT_Diagram*, GtTracklineInfo*);
 int         gt_diagram_get_number_of_tracks(const GT_Diagram*);
 int         gt_diagram_unit_test(GtError*);
 

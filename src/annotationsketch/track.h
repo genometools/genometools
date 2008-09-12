@@ -20,7 +20,7 @@
 #define TRACK_H
 
 /* A track has a title and a type und contains line objects. */
-typedef struct GT_Track GT_Track;
+typedef struct GtTrack GtTrack;
 
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/line.h"
@@ -29,15 +29,15 @@ typedef struct GT_Track GT_Track;
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 
-GT_Track*        gt_track_new(GtStr *title, unsigned long max_num_lines,
-                        bool split_lines, GT_LineBreaker*);
-void          gt_track_insert_block(GT_Track*, GT_Block*);
-GtStr*       gt_track_get_title(const GT_Track*);
-unsigned long gt_track_get_number_of_lines(const GT_Track*);
-unsigned long gt_track_get_number_of_lines_with_captions(const GT_Track *track);
-unsigned long gt_track_get_number_of_discarded_blocks(GT_Track *track);
-int           gt_track_sketch(GT_Track*, GT_Canvas*);
+GtTrack*        gt_track_new(GtStr *title, unsigned long max_num_lines,
+                        bool split_lines, GtLineBreaker*);
+void          gt_track_insert_block(GtTrack*, GtBlock*);
+GtStr*       gt_track_get_title(const GtTrack*);
+unsigned long gt_track_get_number_of_lines(const GtTrack*);
+unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track);
+unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track);
+int           gt_track_sketch(GtTrack*, GtCanvas*);
 int           gt_track_unit_test(GtError*);
-void          gt_track_delete(GT_Track*);
+void          gt_track_delete(GtTrack*);
 
 #endif

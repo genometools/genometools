@@ -18,11 +18,11 @@
 #ifndef CANVAS_API_H
 #define CANVAS_API_H
 
-typedef struct GT_Canvas GT_Canvas;
+typedef struct GtCanvas GtCanvas;
 
 /* Returns the height of the given <canvas>. */
-unsigned long gt_canvas_get_height(GT_Canvas *canvas);
+unsigned long gt_canvas_get_height(GtCanvas *canvas);
 /* Delete the given <canvas>. */
-void          gt_canvas_delete(GT_Canvas *canvas);
+void          gt_canvas_delete(GtCanvas *canvas);
 
 #endif

@@ -9,11 +9,11 @@ static void handle_error(GtError *err)
 int main(int argc, char *argv[])
 {
   const char *style_file, *png_file, *gff3_file, *seqid;
-  GT_Style *style;
+  GtStyle *style;
   GT_FeatureIndex *feature_index;
   GT_Range range;
   GT_Diagram *diagram;
-  GT_Canvas *canvas;
+  GtCanvas *canvas;
   GtError *err = gt_error_new();
 
   if (argc != 4) {
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   gt_diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
-  if (gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, png_file, err))
+  if (gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, png_file, err))
     handle_error(err);
 
   /* free */

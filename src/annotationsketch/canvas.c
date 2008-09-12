@@ -54,9 +54,9 @@ typedef enum
 } ClipType;
 
 /* Calculate the final height of the image to be created. */
-unsigned long gt_canvas_calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
+unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GT_Diagram *dia)
 {
-  GT_TracklineInfo lines;
+  GtTracklineInfo lines;
   double tmp;
   unsigned long height;
   unsigned long gt_line_height;
@@ -102,14 +102,14 @@ unsigned long gt_canvas_calculate_height(GT_Canvas *canvas, GT_Diagram *dia)
   return height;
 }
 
-double gt_canvas_get_text_width(GT_Canvas *canvas, const char *text)
+double gt_canvas_get_text_width(GtCanvas *canvas, const char *text)
 {
   assert(canvas);
   if (!text) return 0.0;
   return gt_graphics_get_text_width(canvas->g, text);
 }
 
-static double convert_point(GT_Canvas *canvas, long pos)
+static double convert_point(GtCanvas *canvas, long pos)
 {
   return (double) ((canvas->factor *
                       MAX(0,(pos-(long) canvas->viewrange.start)))
@@ -118,7 +118,7 @@ static double convert_point(GT_Canvas *canvas, long pos)
 
 /* Converts base range <node_range> into a pixel range.
    If the range exceeds visibility boundaries, clipping info is set. */
-GT_DrawingRange gt_canvas_convert_coords(GT_Canvas *canvas, GT_Range node_range)
+GT_DrawingRange gt_canvas_convert_coords(GtCanvas *canvas, GT_Range node_range)
 {
   GT_DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
@@ -201,11 +201,11 @@ static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 }
 
 /* Renders a ruler with dynamic scale labeling and optional grid. */
-void gt_canvas_draw_ruler(GT_Canvas *canvas)
+void gt_canvas_draw_ruler(GtCanvas *canvas)
 {
   double step, minorstep, vmajor, vminor, margins;
   long base_length, tick;
-  GT_Color rulercol, gridcol;
+  GtColor rulercol, gridcol;
   char str[BUFSIZ];
   bool showgrid;
 
@@ -282,16 +282,16 @@ void gt_canvas_draw_ruler(GT_Canvas *canvas)
                               "3'");
 }
 
-GT_Canvas* gt_canvas_create(const GT_CanvasClass *cc)
+GtCanvas* gt_canvas_create(const GtCanvasClass *cc)
 {
-  GT_Canvas *c;
+  GtCanvas *c;
   assert(cc && cc->size);
   c = gt_calloc(1, cc->size);
   c->c_class = cc;
   return c;
 }
 
-void gt_canvas_delete(GT_Canvas *c)
+void gt_canvas_delete(GtCanvas *c)
 {
   if (!c) return;
   assert(c->c_class);
@@ -304,35 +304,35 @@ void gt_canvas_delete(GT_Canvas *c)
   gt_free(c);
 }
 
-void* gt_canvas_cast(GT_UNUSED const GT_CanvasClass *cc, GT_Canvas *c)
+void* gt_canvas_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
 {
   assert(cc && c && c->c_class == cc);
   return c;
 }
 
-unsigned long gt_canvas_get_height(GT_Canvas *canvas)
+unsigned long gt_canvas_get_height(GtCanvas *canvas)
 {
   assert(canvas);
   return canvas->height;
 }
 
-int gt_canvas_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram* diagram)
+int gt_canvas_visit_diagram_pre(GtCanvas *canvas, GT_Diagram* diagram)
 {
   assert(canvas && diagram);
   return canvas->c_class->visit_diagram_pre(canvas, diagram);
 }
 
-int gt_canvas_visit_diagram_post(GT_Canvas *canvas, GT_Diagram* diagram)
+int gt_canvas_visit_diagram_post(GtCanvas *canvas, GT_Diagram* diagram)
 {
   assert(canvas && diagram);
   return canvas->c_class->visit_diagram_post(canvas, diagram);
 }
 
-int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
+int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track)
 {
   int had_err = 0;
   unsigned long exceeded;
-  GT_Color color;
+  GtColor color;
 
   assert(canvas && track);
 
@@ -360,7 +360,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
       char buf[BUFSIZ];
       const char *msg;
       double width;
-      GT_Color red;
+      GtColor red;
       red.red   = 0.7;
       red.green = red.blue  = 0.4;
       if (exceeded == 1)
@@ -383,7 +383,7 @@ int gt_canvas_visit_track_pre(GT_Canvas *canvas, GT_Track *track)
   return had_err;
 }
 
-int gt_canvas_visit_track_post(GT_Canvas *canvas, GT_UNUSED GT_Track *track)
+int gt_canvas_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track)
 {
   double vspace;
   assert(canvas && track);
@@ -395,7 +395,7 @@ int gt_canvas_visit_track_post(GT_Canvas *canvas, GT_UNUSED GT_Track *track)
   return 0;
 }
 
-int gt_canvas_visit_line_pre(GT_Canvas *canvas, GT_Line *line)
+int gt_canvas_visit_line_pre(GtCanvas *canvas, GtLine *line)
 {
   int had_err = 0;
   assert(canvas && line);
@@ -405,7 +405,7 @@ int gt_canvas_visit_line_pre(GT_Canvas *canvas, GT_Line *line)
   return had_err;
 }
 
-int gt_canvas_visit_line_post(GT_Canvas *canvas, GT_UNUSED GT_Line *line)
+int gt_canvas_visit_line_post(GtCanvas *canvas, GT_UNUSED GtLine *line)
 {
   int had_err = 0;
   double tmp;
@@ -423,12 +423,12 @@ int gt_canvas_visit_line_post(GT_Canvas *canvas, GT_UNUSED GT_Line *line)
   return had_err;
 }
 
-int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
+int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
   GT_Range block_range;
   GT_DrawingRange draw_range;
-  GT_Color grey, fillcolor, strokecolor;
+  GtColor grey, fillcolor, strokecolor;
   double bar_height, min_len_block, arrow_width, stroke_width;
   const char* caption;
   GtStrand strand;
@@ -505,7 +505,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
     /* register coordinates in GT_ImageInfo object if available */
     if (canvas->ii)
     {
-      GT_RecMap *rm = gt_recmap_new(draw_range.start, canvas->y,
+      GtRecMap *rm = gt_recmap_new(draw_range.start, canvas->y,
                                     draw_range.end, canvas->y+bar_height,
                                     (GT_GenomeFeature*) /* XXX */
                                     gt_block_get_top_level_feature(block));
@@ -531,13 +531,13 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   return had_err;
 }
 
-int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
+int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
   GT_Range elem_range = gt_element_get_range(elem);
   GT_DrawingRange draw_range;
   double elem_start, elem_width, stroke_width, bar_height, arrow_width;
-  GT_Color elem_color, grey, fill_color;
+  GtColor elem_color, grey, fill_color;
   const char *type;
   GtStr *style;
   GtStrand strand = gt_element_get_strand(elem);
@@ -606,7 +606,7 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   /* register coordinates in GT_ImageInfo object if available */
   if (canvas->ii)
   {
-    GT_RecMap *rm = gt_recmap_new(elem_start, canvas->y,
+    GtRecMap *rm = gt_recmap_new(elem_start, canvas->y,
                                   elem_start+elem_width, canvas->y+bar_height,
                                   (GT_GenomeFeature*) /* XXX */
                                   gt_element_get_node_ref(elem));

@@ -21,7 +21,7 @@
 
 /* A block has a range, a caption, a parent caption, a strand, and a type and it
    contains element objects. */
-typedef struct GT_Block GT_Block;
+typedef struct GtBlock GtBlock;
 
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/diagram.h"
@@ -31,32 +31,32 @@ typedef struct GT_Block GT_Block;
 #include "core/array.h"
 #include "extended/genome_node.h"
 
-GT_Block*             gt_block_new(void);
-/* Create a new GT_Block object, setting block parameters (such as strand,
+GtBlock*             gt_block_new(void);
+/* Create a new GtBlock object, setting block parameters (such as strand,
    range) from a given <node> template. */
-GT_Block*             gt_block_new_from_node(GT_GenomeNode *node);
-GT_Block*             gt_block_ref(GT_Block*);
+GtBlock*             gt_block_new_from_node(GT_GenomeNode *node);
+GtBlock*             gt_block_ref(GtBlock*);
 /* Insert <node> into block. */
-void                  gt_block_insert_element(GT_Block*, GT_GenomeNode *node);
-GT_Range              gt_block_get_range(const GT_Block*);
-GT_Range*             gt_block_get_range_ptr(const GT_Block *block);
-void                  gt_block_set_range(GT_Block*, GT_Range r);
-/* Checks whether a GT_Block is occupied completely by a single element. */
-bool                  gt_block_has_only_one_fullsize_element(const GT_Block*);
+void                  gt_block_insert_element(GtBlock*, GT_GenomeNode *node);
+GT_Range              gt_block_get_range(const GtBlock*);
+GT_Range*             gt_block_get_range_ptr(const GtBlock *block);
+void                  gt_block_set_range(GtBlock*, GT_Range r);
+/* Checks whether a GtBlock is occupied completely by a single element. */
+bool                  gt_block_has_only_one_fullsize_element(const GtBlock*);
 /* Set whether a block caption should be displayed or not. */
-void                  gt_block_set_caption_visibility(GT_Block*, bool);
-bool                  gt_block_caption_is_visible(const GT_Block*);
-void                  gt_block_set_caption(GT_Block*, GtStr*);
-GtStr*               gt_block_get_caption(const GT_Block*);
-void                  gt_block_set_strand(GT_Block*, GtStrand);
-GT_GenomeNode*        gt_block_get_top_level_feature(const GT_Block*);
-GtStrand             gt_block_get_strand(const GT_Block*);
-void                  gt_block_set_type(GT_Block*, const char *type);
-const char*           gt_block_get_type(const GT_Block*);
-unsigned long         gt_block_get_size(const GT_Block*);
-int                   gt_block_sketch(GT_Block*, GT_Canvas*);
-int                   gt_block_compare(const GT_Block*, const GT_Block*);
+void                  gt_block_set_caption_visibility(GtBlock*, bool);
+bool                  gt_block_caption_is_visible(const GtBlock*);
+void                  gt_block_set_caption(GtBlock*, GtStr*);
+GtStr*               gt_block_get_caption(const GtBlock*);
+void                  gt_block_set_strand(GtBlock*, GtStrand);
+GT_GenomeNode*        gt_block_get_top_level_feature(const GtBlock*);
+GtStrand             gt_block_get_strand(const GtBlock*);
+void                  gt_block_set_type(GtBlock*, const char *type);
+const char*           gt_block_get_type(const GtBlock*);
+unsigned long         gt_block_get_size(const GtBlock*);
+int                   gt_block_sketch(GtBlock*, GtCanvas*);
+int                   gt_block_compare(const GtBlock*, const GtBlock*);
 int                   gt_block_unit_test(GtError*);
-void                  gt_block_delete(GT_Block*);
+void                  gt_block_delete(GtBlock*);
 
 #endif

@@ -3,9 +3,9 @@
 #include <gdk/gdkkeysyms.h>
 #include "genometools.h"
 
-GT_Canvas *canvas = NULL;
+GtCanvas *canvas = NULL;
 GT_Diagram *d = NULL;
-GT_Style *sty = NULL;
+GtStyle *sty = NULL;
 GT_ImageInfo* ii = NULL;
 GtError *err = NULL;
 GtkWidget *area;
@@ -17,7 +17,7 @@ static gboolean on_expose_event(GtkWidget *widget,
 {
   cairo_t *cr;
 
-  GT_Canvas *canvas = NULL;
+  GtCanvas *canvas = NULL;
   if (!d || widget->allocation.width <= 30) return FALSE;
   lastwidth = widget->allocation.width;
   if (ii) gt_image_info_delete(ii);

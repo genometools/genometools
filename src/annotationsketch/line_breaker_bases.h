@@ -21,11 +21,11 @@
 #include "core/range.h"
 #include "annotationsketch/line_breaker.h"
 
-/* Implements the GT_LineBreaker interface; breaks GT_Lines if base ranges
+/* Implements the GtLineBreaker interface; breaks GtLines if base ranges
    overlap. */
-typedef struct GT_LineBreakerBases GT_LineBreakerBases;
+typedef struct GtLineBreakerBases GtLineBreakerBases;
 
-const GT_LineBreakerClass* gt_line_breaker_bases_class(void);
-GT_LineBreaker*            gt_line_breaker_bases_new();
+const GtLineBreakerClass* gt_line_breaker_bases_class(void);
+GtLineBreaker*            gt_line_breaker_bases_new();
 
 #endif

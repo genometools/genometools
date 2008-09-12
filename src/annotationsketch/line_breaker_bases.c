@@ -21,19 +21,19 @@
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/line_breaker_rep.h"
 
-struct GT_LineBreakerBases {
-  const GT_LineBreaker parent_instance;
+struct GtLineBreakerBases {
+  const GtLineBreaker parent_instance;
   Hashmap *itrees;
 };
 
 #define gt_line_breaker_bases_cast(LB)\
         gt_line_breaker_cast(gt_line_breaker_bases_class(), LB)
 
-bool gt_line_breaker_bases_is_gt_line_occupied(GT_LineBreaker* lb,
-                                         GT_Line *line,
-                                         GT_Block *block)
+bool gt_line_breaker_bases_is_gt_line_occupied(GtLineBreaker* lb,
+                                         GtLine *line,
+                                         GtBlock *block)
 {
-  GT_LineBreakerBases *lbb;
+  GtLineBreakerBases *lbb;
   GT_Range r;
   GT_IntervalTree *t;
   assert(lb && block && line);
@@ -45,11 +45,11 @@ bool gt_line_breaker_bases_is_gt_line_occupied(GT_LineBreaker* lb,
     return (gt_interval_tree_find_first_overlapping(t, r.start, r.end));
 }
 
-void gt_line_breaker_bases_register_block(GT_LineBreaker *lb,
-                                       GT_Line *line,
-                                       GT_Block *block)
+void gt_line_breaker_bases_register_block(GtLineBreaker *lb,
+                                       GtLine *line,
+                                       GtBlock *block)
 {
-  GT_LineBreakerBases *lbb;
+  GtLineBreakerBases *lbb;
   GT_IntervalTree *t;
   GT_IntervalTreeNode *new_node;
   GT_Range *rng;
@@ -65,28 +65,28 @@ void gt_line_breaker_bases_register_block(GT_LineBreaker *lb,
   gt_interval_tree_insert(t, new_node);
 }
 
-void gt_line_breaker_bases_delete(GT_LineBreaker *lb)
+void gt_line_breaker_bases_delete(GtLineBreaker *lb)
 {
-  GT_LineBreakerBases *lbb;
+  GtLineBreakerBases *lbb;
   if (!lb) return;
   lbb = gt_line_breaker_bases_cast(lb);
   hashmap_delete(lbb->itrees);
 }
 
-const GT_LineBreakerClass* gt_line_breaker_bases_class(void)
+const GtLineBreakerClass* gt_line_breaker_bases_class(void)
 {
-  static const GT_LineBreakerClass gt_line_breaker_class =
-    { sizeof (GT_LineBreakerBases),
+  static const GtLineBreakerClass gt_line_breaker_class =
+    { sizeof (GtLineBreakerBases),
       gt_line_breaker_bases_is_gt_line_occupied,
       gt_line_breaker_bases_register_block,
       gt_line_breaker_bases_delete };
   return &gt_line_breaker_class;
 }
 
-GT_LineBreaker* gt_line_breaker_bases_new()
+GtLineBreaker* gt_line_breaker_bases_new()
 {
-  GT_LineBreakerBases *lbb;
-  GT_LineBreaker *lb;
+  GtLineBreakerBases *lbb;
+  GtLineBreaker *lb;
   lb = gt_line_breaker_create(gt_line_breaker_bases_class());
   lbb = gt_line_breaker_bases_cast(lb);
   lbb->itrees = hashmap_new(HASH_DIRECT, NULL,

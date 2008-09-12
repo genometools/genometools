@@ -22,6 +22,6 @@
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/canvas_cairo_context_api.h"
 
-const GT_CanvasClass* gt_canvas_cairo_context_class(void);
+const GtCanvasClass* gt_canvas_cairo_context_class(void);
 
 #endif

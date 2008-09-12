@@ -25,12 +25,12 @@
 
 /* Implements the Canvas interface.
    This Canvas uses the GT_GraphicsCairo class.  */
-typedef struct GT_CanvasCairoContext GT_CanvasCairoContext;
+typedef struct GtCanvasCairoContext GtCanvasCairoContext;
 
 /* Create a new Canvas object tied to the cairo_t <context> and <width>
    using the style given in <style>. The optional <image_info> is filled when
    the created Canvas object is used to render a Diagram object. */
-GT_Canvas* gt_canvas_cairo_context_new(GT_Style *style, cairo_t *context,
+GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
                                        unsigned long width,
                                        GT_ImageInfo *image_info);
 #endif

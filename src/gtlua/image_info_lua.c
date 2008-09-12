@@ -76,7 +76,7 @@ static int imageinfo_lua_num_of_recmaps(lua_State *L)
   return 0;
 }
 
-static void push_recmap_as_table(lua_State *L, const GT_RecMap *rm)
+static void push_recmap_as_table(lua_State *L, const GtRecMap *rm)
 {
   assert(rm);
   lua_newtable(L);

@@ -47,9 +47,9 @@ static void draw_example_features(GtArray *features, const char *style_file,
                                   const char *output_file)
 {
   GT_Range range = { 1, 1000 }; /* the genomic range to draw */
-  GT_Style *style;
+  GtStyle *style;
   GT_Diagram *diagram;
-  GT_Canvas *canvas;
+  GtCanvas *canvas;
   GtError *err = gt_error_new();
 
   /* create style */
@@ -70,7 +70,7 @@ static void draw_example_features(GtArray *features, const char *style_file,
   gt_diagram_sketch(diagram, canvas);
 
   /* write canvas to file */
-  if (gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, output_file,
+  if (gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, output_file,
                                    err)) {
     handle_error(err);
   }

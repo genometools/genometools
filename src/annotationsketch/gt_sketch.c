@@ -178,12 +178,12 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   const char *file, *seqid = NULL;
   GT_Range qry_range, sequence_region_range;
   GtArray *results = NULL;
-  GT_Style *sty = NULL;
+  GtStyle *sty = NULL;
   GtStr *gt_style_file = NULL;
   GtStr *prog;
   GT_Diagram *d = NULL;
   GT_ImageInfo* ii = NULL;
-  GT_Canvas *canvas = NULL;
+  GtCanvas *canvas = NULL;
 
   gt_error_check(err);
 
@@ -323,7 +323,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     gt_diagram_sketch(d, canvas);
     if (arguments.showrecmaps) {
       unsigned long i;
-      const GT_RecMap *rm;
+      const GtRecMap *rm;
       for (i = 0; i < gt_image_info_num_of_recmaps(ii) ;i++) {
         char buf[BUFSIZ];
         rm = gt_image_info_get_recmap(ii, i);
@@ -331,7 +331,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
         printf("%s, %s\n", buf, gt_genome_feature_get_type(rm->gf));
       }
     }
-    had_err = gt_canvas_cairo_file_to_file((GT_CanvasCairoFile*) canvas, file,
+    had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, file,
                                            err);
   }
 

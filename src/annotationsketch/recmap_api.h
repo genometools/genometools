@@ -20,13 +20,13 @@
 
 #include "extended/genome_feature.h"
 
-typedef struct GT_RecMap GT_RecMap;
+typedef struct GtRecMap GtRecMap;
 
-double                  gt_recmap_get_northwest_x(const GT_RecMap*);
-double                  gt_recmap_get_northwest_y(const GT_RecMap*);
-double                  gt_recmap_get_southeast_x(const GT_RecMap*);
-double                  gt_recmap_get_southeast_y(const GT_RecMap*);
-const GT_GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap*);
-bool                    gt_recmap_has_omitted_children(const GT_RecMap*);
+double                  gt_recmap_get_northwest_x(const GtRecMap*);
+double                  gt_recmap_get_northwest_y(const GtRecMap*);
+double                  gt_recmap_get_southeast_x(const GtRecMap*);
+double                  gt_recmap_get_southeast_y(const GtRecMap*);
+const GT_GenomeFeature* gt_recmap_get_genome_feature(const GtRecMap*);
+bool                    gt_recmap_has_omitted_children(const GtRecMap*);
 
 #endif

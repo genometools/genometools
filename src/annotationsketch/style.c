@@ -33,7 +33,7 @@
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/gt_lua.h"
 
-struct GT_Style
+struct GtStyle
 {
   lua_State *L;
   char *filename;
@@ -69,11 +69,11 @@ static void luaL_opensecurelibs(lua_State *L)
   }
 }
 
-GT_Style* gt_style_new(bool verbose, GtError *err)
+GtStyle* gt_style_new(bool verbose, GtError *err)
 {
-  GT_Style *sty;
+  GtStyle *sty;
   gt_error_check(err);
-  sty = gt_calloc(1, sizeof (GT_Style));
+  sty = gt_calloc(1, sizeof (GtStyle));
   sty->filename = NULL;
   sty->verbose = verbose;
   sty->L = luaL_newstate();
@@ -87,15 +87,15 @@ GT_Style* gt_style_new(bool verbose, GtError *err)
   return sty;
 }
 
-GT_Style* gt_style_new_with_state(lua_State *L)
+GtStyle* gt_style_new_with_state(lua_State *L)
 {
-  GT_Style *sty;
-  sty = gt_calloc(1, sizeof (GT_Style));
+  GtStyle *sty;
+  sty = gt_calloc(1, sizeof (GtStyle));
   sty->L = L;
   return sty;
 }
 
-int gt_style_load_file(GT_Style *sty, const char *filename, GtError *err)
+int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -119,7 +119,7 @@ int gt_style_load_file(GT_Style *sty, const char *filename, GtError *err)
   return had_err;
 }
 
-void gt_style_reload(GT_Style *sty)
+void gt_style_reload(GtStyle *sty)
 {
   int rval;
   assert(sty && sty->filename);
@@ -130,7 +130,7 @@ void gt_style_reload(GT_Style *sty)
 /* Searches for <section> inside the style table, creating it if it does not
    exist and finally pushing it on the Lua stack (at the top).
    Returns the total number of items pushed on the stack by this function. */
-static int gt_style_find_section_for_setting(GT_Style* sty, const char *section)
+static int gt_style_find_section_for_setting(GtStyle* sty, const char *section)
 {
   int depth = 0;
   assert(sty && section);
@@ -154,7 +154,7 @@ static int gt_style_find_section_for_setting(GT_Style* sty, const char *section)
 
 /* Searches for <section> inside the style table, returning -1 if it is not
    found. Otherwise the number of items pushed onto the stack is returned. */
-static int gt_style_find_section_for_getting(const GT_Style *sty,
+static int gt_style_find_section_for_getting(const GtStyle *sty,
                                           const char *section)
 {
   int depth = 0;
@@ -174,8 +174,8 @@ static int gt_style_find_section_for_getting(const GT_Style *sty,
   return depth;
 }
 
-bool gt_style_get_color(const GT_Style *sty, const char *section,
-                     const char *key, GT_Color *color, GT_GenomeNode *gn)
+bool gt_style_get_color(const GtStyle *sty, const char *section,
+                     const char *key, GtColor *color, GT_GenomeNode *gn)
 {
   int i = 0;
   assert(sty && section && key && color);
@@ -239,8 +239,8 @@ bool gt_style_get_color(const GT_Style *sty, const char *section,
   return true;
 }
 
-void gt_style_set_color(GT_Style *sty, const char *section, const char *key,
-                        const GT_Color *color)
+void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
+                        const GtColor *color)
 {
   int i = 0;
   assert(sty && section && key && color);
@@ -264,7 +264,7 @@ void gt_style_set_color(GT_Style *sty, const char *section, const char *key,
   lua_pop(sty->L, i);
 }
 
-bool gt_style_get_str(const GT_Style *sty, const char *section,
+bool gt_style_get_str(const GtStyle *sty, const char *section,
                      const char *key, GtStr *text, GT_GenomeNode *gn)
 {
   int i = 0;
@@ -303,7 +303,7 @@ bool gt_style_get_str(const GT_Style *sty, const char *section,
   return true;
 }
 
-void gt_style_set_str(GT_Style *sty, const char *section, const char *key,
+void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
                      GtStr *str)
 {
   int i = 0;
@@ -315,7 +315,7 @@ void gt_style_set_str(GT_Style *sty, const char *section, const char *key,
   lua_pop(sty->L, i);
 }
 
-bool gt_style_get_num(const GT_Style *sty, const char *section, const char *key,
+bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
                     double *val, GT_UNUSED GT_GenomeNode *gn)
 {
   int i = 0;
@@ -354,7 +354,7 @@ bool gt_style_get_num(const GT_Style *sty, const char *section, const char *key,
   return true;
 }
 
-void gt_style_set_num(GT_Style *sty, const char *section, const char *key,
+void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
                     double number)
 {
   int i = 0;
@@ -366,7 +366,7 @@ void gt_style_set_num(GT_Style *sty, const char *section, const char *key,
   lua_pop(sty->L, i);
 }
 
-bool gt_style_get_bool(const GT_Style *sty, const char *section,
+bool gt_style_get_bool(const GtStyle *sty, const char *section,
                        const char *key, bool *val, GT_UNUSED GT_GenomeNode *gn)
 {
   int i = 0;
@@ -392,7 +392,7 @@ bool gt_style_get_bool(const GT_Style *sty, const char *section,
   return true;
 }
 
-void gt_style_set_bool(GT_Style *sty, const char *section, const char *key,
+void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
                      bool flag)
 {
   int i = 0;
@@ -404,7 +404,7 @@ void gt_style_set_bool(GT_Style *sty, const char *section, const char *key,
   lua_pop(sty->L, i);
 }
 
-void gt_style_unset(GT_Style *sty, const char *section, const char *key)
+void gt_style_unset(GtStyle *sty, const char *section, const char *key)
 {
   assert(sty && section && key);
   lua_getglobal(sty->L, "style");
@@ -420,13 +420,13 @@ void gt_style_unset(GT_Style *sty, const char *section, const char *key)
   }
 }
 
-bool gt_style_get_verbose(const GT_Style *sty)
+bool gt_style_get_verbose(const GtStyle *sty)
 {
   assert(sty);
   return sty->verbose;
 }
 
-int gt_style_to_str(const GT_Style *sty, GtStr *outstr, GtError *err)
+int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -444,7 +444,7 @@ int gt_style_to_str(const GT_Style *sty, GtStr *outstr, GtError *err)
   return had_err;
 }
 
-int gt_style_load_str(GT_Style *sty, GtStr *instr, GtError *err)
+int gt_style_load_str(GtStyle *sty, GtStr *instr, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -458,11 +458,11 @@ int gt_style_load_str(GT_Style *sty, GtStr *instr, GtError *err)
   return had_err;
 }
 
-GT_Style* gt_style_clone(const GT_Style *sty, GtError *err)
+GtStyle* gt_style_clone(const GtStyle *sty, GtError *err)
 {
   int had_err = 0;
   GtStr *sty_buffer = gt_str_new();
-  GT_Style *new_sty;
+  GtStyle *new_sty;
   assert(sty);
   if (!(new_sty = gt_style_new(gt_style_get_verbose(sty), err)))
     had_err = -1;
@@ -477,12 +477,12 @@ GT_Style* gt_style_clone(const GT_Style *sty, GtError *err)
 int gt_style_unit_test(GtError *err)
 {
   int had_err = 0;
-  GT_Style *sty = NULL, *new_sty = NULL;
+  GtStyle *sty = NULL, *new_sty = NULL;
   bool val;
   GtStr *test1   = gt_str_new_cstr("mRNA"),
       *str     = gt_str_new(),
       *sty_buffer = gt_str_new();
-  GT_Color col1, col2, col, defcol, tmpcol;
+  GtColor col1, col2, col, defcol, tmpcol;
   double num;
   gt_error_check(err);
 
@@ -542,7 +542,7 @@ int gt_style_unit_test(GtError *err)
     gt_str_set(str, "");
   ensure(had_err, (strcmp(gt_str_get(str),"")==0));
 
-  /* clone a GT_Style object */
+  /* clone a GtStyle object */
   new_sty = gt_style_clone(sty, err);
   gt_error_check(err);
   if (!gt_error_is_set(err))
@@ -569,14 +569,14 @@ int gt_style_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_style_delete_without_state(GT_Style *sty)
+void gt_style_delete_without_state(GtStyle *sty)
 {
   if (!sty) return;
   gt_free(sty->filename);
   gt_free(sty);
 }
 
-void gt_style_delete(GT_Style *sty)
+void gt_style_delete(GtStyle *sty)
 {
   if (!sty) return;
   if (sty->L) lua_close(sty->L);

@@ -160,7 +160,7 @@ void gt_graphics_cairo_draw_text_right(GT_Graphics *gg, double x, double y,
 }
 
 void gt_graphics_cairo_draw_colored_text(GT_Graphics *gg, double x, double y,
-                                      GT_Color color, const char *text)
+                                      GtColor color, const char *text)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g && text);
@@ -203,7 +203,7 @@ void gt_graphics_cairo_draw_horizontal_line(GT_Graphics *gg, double x, double y,
 }
 
 void gt_graphics_cairo_draw_vertical_line(GT_Graphics *gg, double x, double y,
-                                       GT_Color color, double length)
+                                       GtColor color, double length)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
@@ -237,9 +237,9 @@ double gt_graphics_cairo_get_text_height(GT_Graphics *gg)
 
 void gt_graphics_cairo_draw_box(GT_Graphics *gg, double x, double y,
                                 double width, double height,
-                                GT_Color fill_color, ArrowStatus arrow_status,
+                                GtColor fill_color, ArrowStatus arrow_status,
                                 double arrow_width, double stroke_width,
-                                GT_Color stroke_color, bool dashed)
+                                GtColor stroke_color, bool dashed)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
@@ -298,7 +298,7 @@ void gt_graphics_cairo_draw_box(GT_Graphics *gg, double x, double y,
 void gt_graphics_cairo_draw_dashes(GT_Graphics *gg, double x, double y,
                                 double width, double height,
                                 ArrowStatus arrow_status, double arrow_width,
-                                double stroke_width, GT_Color stroke_color)
+                                double stroke_width, GtColor stroke_color)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
   double dashes[] = {3.0};
@@ -347,7 +347,7 @@ void gt_graphics_cairo_draw_dashes(GT_Graphics *gg, double x, double y,
 void gt_graphics_cairo_draw_caret(GT_Graphics *gg, double x, double y,
                                double width,double height,
                                ArrowStatus arrow_status, double arrow_width,
-                               double stroke_width, GT_Color stroke_color)
+                               double stroke_width, GtColor stroke_color)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
   assert(g);
@@ -404,8 +404,8 @@ void gt_graphics_cairo_draw_caret(GT_Graphics *gg, double x, double y,
 }
 
 void gt_graphics_cairo_draw_rectangle(GT_Graphics *gg, double x, double y,
-                                   bool filled, GT_Color fill_color,
-                                   bool outlined, GT_Color outline_color,
+                                   bool filled, GtColor fill_color,
+                                   bool outlined, GtColor outline_color,
                                    double outline_width, double width)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
@@ -432,7 +432,7 @@ void gt_graphics_cairo_draw_rectangle(GT_Graphics *gg, double x, double y,
 }
 
 void gt_graphics_cairo_draw_arrowhead(GT_Graphics *gg, double x, double y,
-                                   GT_Color color, ArrowStatus arrow_status)
+                                   GtColor color, ArrowStatus arrow_status)
 {
   GT_GraphicsCairo *g = gt_graphics_cairo_cast(gg);
   double arrow_height = 8, arrow_width = 5;

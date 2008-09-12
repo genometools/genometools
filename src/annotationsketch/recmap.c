@@ -19,10 +19,10 @@
 #include "extended/genome_node.h"
 #include "annotationsketch/recmap.h"
 
-GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
+GtRecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
                          GT_GenomeFeature *gf)
 {
-  GT_RecMap *rm = gt_malloc(sizeof *rm);
+  GtRecMap *rm = gt_malloc(sizeof *rm);
   rm->nw_x = nw_x;
   rm->nw_y = nw_y;
   rm->se_x = se_x;
@@ -32,43 +32,43 @@ GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
   return rm;
 }
 
-double gt_recmap_get_northwest_x(const GT_RecMap *rm)
+double gt_recmap_get_northwest_x(const GtRecMap *rm)
 {
   assert(rm);
   return rm->nw_x;
 }
 
-double gt_recmap_get_northwest_y(const GT_RecMap *rm)
+double gt_recmap_get_northwest_y(const GtRecMap *rm)
 {
   assert(rm);
   return rm->nw_y;
 }
 
-double gt_recmap_get_southeast_x(const GT_RecMap *rm)
+double gt_recmap_get_southeast_x(const GtRecMap *rm)
 {
   assert(rm);
   return rm->se_x;
 }
 
-double gt_recmap_get_southeast_y(const GT_RecMap *rm)
+double gt_recmap_get_southeast_y(const GtRecMap *rm)
 {
   assert(rm);
   return rm->se_y;
 }
 
-const GT_GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap *rm)
+const GT_GenomeFeature* gt_recmap_get_genome_feature(const GtRecMap *rm)
 {
   assert(rm);
   return rm->gf;
 }
 
-bool gt_recmap_has_omitted_children(const GT_RecMap *rm)
+bool gt_recmap_has_omitted_children(const GtRecMap *rm)
 {
   assert(rm);
   return rm->has_omitted_children;
 }
 
-int gt_recmap_format_html_imagemap_coords(const GT_RecMap *rm, char *buf,
+int gt_recmap_format_html_imagemap_coords(const GtRecMap *rm, char *buf,
                                           size_t n)
 {
   assert(rm && buf);
@@ -76,7 +76,7 @@ int gt_recmap_format_html_imagemap_coords(const GT_RecMap *rm, char *buf,
                                                  rm->se_x, rm->se_y);
 }
 
-void gt_recmap_delete(GT_RecMap *rm)
+void gt_recmap_delete(GtRecMap *rm)
 {
   if (!rm) return;
   gt_genome_node_delete((GT_GenomeNode*) rm->gf);

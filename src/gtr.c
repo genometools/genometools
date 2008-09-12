@@ -56,7 +56,7 @@ struct GTR {
   Hashmap *unit_tests;
   lua_State *L;
 #ifndef WITHOUT_CAIRO
-  GT_Style *style;
+  GtStyle *style;
 #endif
   FILE *logfp;
 };

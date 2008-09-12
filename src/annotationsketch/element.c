@@ -26,7 +26,7 @@
 #include "extended/feature_type.h"
 #include "extended/genome_feature.h"
 
-struct GT_Element {
+struct GtElement {
   const char *type;
   GtStrand strand;
   GT_GenomeNode *gn;
@@ -35,9 +35,9 @@ struct GT_Element {
   bool mark;
 };
 
-GT_Element* gt_element_new(GT_GenomeNode *gn)
+GtElement* gt_element_new(GT_GenomeNode *gn)
 {
-  GT_Element *element;
+  GtElement *element;
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   assert(gn);
   element = gt_element_new_empty();
@@ -49,55 +49,55 @@ GT_Element* gt_element_new(GT_GenomeNode *gn)
   return element;
 }
 
-GT_Element* gt_element_new_empty(void)
+GtElement* gt_element_new_empty(void)
 {
-  return gt_calloc(1, sizeof (GT_Element));
+  return gt_calloc(1, sizeof (GtElement));
 }
 
-GT_DrawingRange gt_element_calculate_drawing_range(GT_Element *element,
-                                             GT_Canvas *canvas)
+GT_DrawingRange gt_element_calculate_drawing_range(GtElement *element,
+                                             GtCanvas *canvas)
 {
   assert(element && canvas);
   element->drange = gt_canvas_convert_coords(canvas, element->range);
   return element->drange;
 }
 
-GT_Range gt_element_get_range(const GT_Element *element)
+GT_Range gt_element_get_range(const GtElement *element)
 {
   assert(element);
   return element->range;
 }
 
-void gt_element_set_range(GT_Element *element, GT_Range r)
+void gt_element_set_range(GtElement *element, GT_Range r)
 {
   assert(element);
   element->range = r;
 }
 
-const char* gt_element_get_type(const GT_Element *element)
+const char* gt_element_get_type(const GtElement *element)
 {
   assert(element);
   return element->type;
 }
 
-void gt_element_set_type(GT_Element *element, const char *type)
+void gt_element_set_type(GtElement *element, const char *type)
 {
   assert(element);
   element->type = type;
 }
 
-GtStrand gt_element_get_strand(const GT_Element *element)
+GtStrand gt_element_get_strand(const GtElement *element)
 {
   assert(element);
   return element->strand;
 }
-bool gt_element_is_marked(const GT_Element *element)
+bool gt_element_is_marked(const GtElement *element)
 {
   assert(element);
   return element->mark;
 }
 
-bool elements_are_equal(const GT_Element *e1, const GT_Element *e2)
+bool elements_are_equal(const GtElement *e1, const GtElement *e2)
 {
   assert(e1 && e2);
   if (e1->type == e2->type && !gt_range_compare(e1->range, e2->range))
@@ -105,7 +105,7 @@ bool elements_are_equal(const GT_Element *e1, const GT_Element *e2)
   return false;
 }
 
-int gt_element_sketch(GT_Element *elem, GT_Canvas *canvas)
+int gt_element_sketch(GtElement *elem, GtCanvas *canvas)
 {
   int had_err = 0;
   assert(elem && canvas);
@@ -113,7 +113,7 @@ int gt_element_sketch(GT_Element *elem, GT_Canvas *canvas)
   return had_err;
 }
 
-GT_GenomeNode* gt_element_get_node_ref(const GT_Element *elem)
+GT_GenomeNode* gt_element_get_node_ref(const GtElement *elem)
 {
   assert(elem);
   return elem->gn;
@@ -123,7 +123,7 @@ int gt_element_unit_test(GtError *err)
 {
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
-  GT_Element *e, *e2, *e3;
+  GtElement *e, *e2, *e3;
   GtStr *seqid;
   int had_err = 0;
   gt_error_check(err);
@@ -171,7 +171,7 @@ int gt_element_unit_test(GtError *err)
 
 }
 
-void gt_element_delete(GT_Element *element)
+void gt_element_delete(GtElement *element)
 {
   if (!element) return;
   if (element->gn)

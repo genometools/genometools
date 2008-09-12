@@ -24,21 +24,21 @@
 #include "annotationsketch/line.h"
 #include "annotationsketch/style.h"
 
-struct GT_Line {
+struct GtLine {
   bool has_captions;
   GtArray *blocks;
 };
 
-GT_Line* gt_line_new(void)
+GtLine* gt_line_new(void)
 {
-  GT_Line *line;
-  line = gt_malloc(sizeof (GT_Line));
-  line->blocks = gt_array_new(sizeof (GT_Block*));
+  GtLine *line;
+  line = gt_malloc(sizeof (GtLine));
+  line->blocks = gt_array_new(sizeof (GtBlock*));
   line->has_captions = false;
   return line;
 }
 
-void gt_line_insert_block(GT_Line *line, GT_Block *block)
+void gt_line_insert_block(GtLine *line, GtBlock *block)
 {
   assert(line && block);
   if (!line->has_captions && gt_block_get_caption(block) != NULL)
@@ -46,26 +46,26 @@ void gt_line_insert_block(GT_Line *line, GT_Block *block)
   gt_array_add(line->blocks, block);
 }
 
-bool gt_line_has_captions(const GT_Line *line)
+bool gt_line_has_captions(const GtLine *line)
 {
   assert(line);
   return line->has_captions;
 }
 
-GtArray* gt_line_get_blocks(GT_Line* line)
+GtArray* gt_line_get_blocks(GtLine* line)
 {
   assert(line);
   return line->blocks;
 }
 
-int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
+int gt_line_sketch(GtLine *line, GtCanvas *canvas)
 {
   int i = 0;
   assert(line && canvas);
   gt_canvas_visit_line_pre(canvas, line);
   for (i = 0; i < gt_array_size(line->blocks); i++) {
-    GT_Block *block;
-    block = *(GT_Block**) gt_array_get(line->blocks, i);
+    GtBlock *block;
+    block = *(GtBlock**) gt_array_get(line->blocks, i);
     gt_block_sketch(block, canvas);
   }
   gt_canvas_visit_line_post(canvas, line);
@@ -79,8 +79,8 @@ int gt_line_unit_test(GtError *err)
   GtStr *seqid1, *seqid2, *seqid3;
   int had_err = 0;
   GT_GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
-  GT_Line *l1, *l2;
-  GT_Block *b1, *b2;
+  GtLine *l1, *l2;
+  GtBlock *b1, *b2;
   gt_error_check(err);
 
   const char* foo = "foo";
@@ -148,12 +148,12 @@ int gt_line_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_line_delete(GT_Line *line)
+void gt_line_delete(GtLine *line)
 {
   unsigned long i;
   if (!line) return;
   for (i = 0; i < gt_array_size(line->blocks); i++)
-    gt_block_delete(*(GT_Block**) gt_array_get(line->blocks, i));
+    gt_block_delete(*(GtBlock**) gt_array_get(line->blocks, i));
   gt_array_delete(line->blocks);
   gt_free(line);
 }

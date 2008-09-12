@@ -51,6 +51,6 @@ int luaopen_canvas(lua_State*);
 
 #define CANVAS_METATABLE  "GenomeTools.canvas"
 #define check_canvas(L, POS) \
-              (GT_Canvas**) luaL_checkudata(L, POS, CANVAS_METATABLE)
+              (GtCanvas**) luaL_checkudata(L, POS, CANVAS_METATABLE)
 
 #endif

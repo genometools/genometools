@@ -20,11 +20,11 @@
 
 #include <stdbool.h>
 
-typedef struct GT_Color GT_Color;
+typedef struct GtColor GtColor;
 
-GT_Color* gt_color_new(double red, double green, double blue);
-void      gt_color_set(GT_Color*, double red, double green, double blue);
-bool      gt_color_equals(const GT_Color*, const GT_Color*);
-void      gt_color_delete(GT_Color*);
+GtColor* gt_color_new(double red, double green, double blue);
+void      gt_color_set(GtColor*, double red, double green, double blue);
+bool      gt_color_equals(const GtColor*, const GtColor*);
+void      gt_color_delete(GtColor*);
 
 #endif

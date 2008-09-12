@@ -20,7 +20,7 @@
 
 #include "annotationsketch/recmap_api.h"
 
-struct GT_RecMap {
+struct GtRecMap {
   double nw_x,
          nw_y,
          se_x,
@@ -29,10 +29,10 @@ struct GT_RecMap {
   bool has_omitted_children;
 };
 
-GT_RecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
+GtRecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
                          GT_GenomeFeature*);
-int        gt_recmap_format_html_imagemap_coords(const GT_RecMap*, char*,
+int        gt_recmap_format_html_imagemap_coords(const GtRecMap*, char*,
                                                  size_t);
-void       gt_recmap_delete(GT_RecMap*);
+void       gt_recmap_delete(GtRecMap*);
 
 #endif

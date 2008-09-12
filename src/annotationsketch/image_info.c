@@ -33,7 +33,7 @@ GT_ImageInfo* gt_image_info_new()
 {
   GT_ImageInfo *ii;
   ii = gt_calloc(1, sizeof (GT_ImageInfo));
-  ii->recmaps = gt_array_new(sizeof (GT_RecMap*));
+  ii->recmaps = gt_array_new(sizeof (GtRecMap*));
   assert(ii->recmaps);
   return ii;
 }
@@ -44,14 +44,14 @@ void gt_image_info_delete(GT_ImageInfo *ii)
   if (!ii) return;
   for (i=0;i<gt_image_info_num_of_recmaps(ii);i++)
   {
-    GT_RecMap *rm = *(GT_RecMap**) gt_array_get(ii->recmaps, i);
+    GtRecMap *rm = *(GtRecMap**) gt_array_get(ii->recmaps, i);
     gt_recmap_delete(rm);
   }
   gt_array_delete(ii->recmaps);
   gt_free(ii);
 }
 
-void gt_image_info_add_recmap(GT_ImageInfo *ii, GT_RecMap *rm)
+void gt_image_info_add_recmap(GT_ImageInfo *ii, GtRecMap *rm)
 {
   assert(ii && rm);
   gt_array_add(ii->recmaps, rm);
@@ -75,15 +75,15 @@ unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo *ii)
   return gt_array_size(ii->recmaps);
 }
 
-const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
+const GtRecMap* gt_image_info_get_recmap(GT_ImageInfo *ii, unsigned long n)
 {
   assert(ii);
-  return *(GT_RecMap**) gt_array_get(ii->recmaps, n);
+  return *(GtRecMap**) gt_array_get(ii->recmaps, n);
 }
 
-void gt_image_info_fill_recmap(GT_ImageInfo* ii, GT_RecMap* rm, unsigned long n)
+void gt_image_info_fill_recmap(GT_ImageInfo* ii, GtRecMap* rm, unsigned long n)
 {
-  const GT_RecMap* tmp;
+  const GtRecMap* tmp;
   assert(ii && rm);
   tmp = gt_image_info_get_recmap(ii, n);
   rm->nw_x = tmp->nw_x;
@@ -96,7 +96,7 @@ void gt_image_info_fill_recmap(GT_ImageInfo* ii, GT_RecMap* rm, unsigned long n)
 
 int gt_image_info_unit_test(GtError *err)
 {
-  GT_RecMap* rms[20];
+  GtRecMap* rms[20];
   GT_GenomeNode* gfs[20];
   GT_ImageInfo *ii;
   unsigned long i;
@@ -110,7 +110,7 @@ int gt_image_info_unit_test(GtError *err)
 
   for (i=0;i<20;i++)
   {
-    const GT_RecMap* rm;
+    const GtRecMap* rm;
     unsigned long rbase;
     rbase = gt_rand_max(10);
     GT_Range r = { rbase, rbase + gt_rand_max(20)};

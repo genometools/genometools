@@ -26,7 +26,7 @@ struct GT_GraphicsClass {
   void    (*draw_text)(GT_Graphics*, double, double, const char*);
   void    (*draw_text_centered)(GT_Graphics*, double, double, const char*);
   void    (*draw_text_right)(GT_Graphics*, double, double, const char*);
-  void    (*draw_colored_text)(GT_Graphics*, double, double, GT_Color,
+  void    (*draw_colored_text)(GT_Graphics*, double, double, GtColor,
                                const char*);
   double  (*get_text_height)(GT_Graphics*);
   double  (*get_text_width)(GT_Graphics*, const char*);
@@ -35,16 +35,16 @@ struct GT_GraphicsClass {
   double  (*get_image_height)(GT_Graphics*);
   void    (*set_margins)(GT_Graphics*, double, double);
   void    (*draw_horizontal_line)(GT_Graphics*, double, double, double);
-  void    (*draw_vertical_line)(GT_Graphics*, double, double, GT_Color, double);
-  void    (*draw_box)(GT_Graphics*, double, double, double, double, GT_Color,
-                      ArrowStatus, double, double, GT_Color, bool);
+  void    (*draw_vertical_line)(GT_Graphics*, double, double, GtColor, double);
+  void    (*draw_box)(GT_Graphics*, double, double, double, double, GtColor,
+                      ArrowStatus, double, double, GtColor, bool);
   void    (*draw_dashes)(GT_Graphics*, double, double, double, double,
-                         ArrowStatus, double, double, GT_Color);
+                         ArrowStatus, double, double, GtColor);
   void    (*draw_caret)(GT_Graphics*, double, double, double, double,
-                        ArrowStatus, double, double, GT_Color);
-  void    (*draw_rectangle)(GT_Graphics*, double, double, bool, GT_Color, bool,
-                            GT_Color, double, double);
-  void    (*draw_arrowhead)(GT_Graphics*, double, double, GT_Color,
+                        ArrowStatus, double, double, GtColor);
+  void    (*draw_rectangle)(GT_Graphics*, double, double, bool, GtColor, bool,
+                            GtColor, double, double);
+  void    (*draw_arrowhead)(GT_Graphics*, double, double, GtColor,
                             ArrowStatus);
   int     (*save_to_file)(const GT_Graphics*, const char*, GtError*);
   void    (*save_to_stream)(const GT_Graphics*, GtStr*);

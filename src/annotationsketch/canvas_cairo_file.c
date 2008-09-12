@@ -32,15 +32,15 @@
 #define MARGINS_DEFAULT           10
 #define HEADER_SPACE              70
 
-struct GT_CanvasCairoFile {
-  const GT_Canvas parent_instance;
+struct GtCanvasCairoFile {
+  const GtCanvas parent_instance;
   GT_GraphicsOutType type;
 };
 
 #define canvas_cairo_file_cast(C)\
         gt_canvas_cast(gt_canvas_cairo_file_class(), C)
 
-int gt_canvas_cairo_file_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
+int gt_canvas_cairo_file_visit_diagram_pre(GtCanvas *canvas, GT_Diagram *dia)
 {
   double margins;
 
@@ -61,7 +61,7 @@ int gt_canvas_cairo_file_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
     gt_graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = gt_graphics_cairo_new(((GT_CanvasCairoFile*) canvas)->type,
+  canvas->g = gt_graphics_cairo_new(((GtCanvasCairoFile*) canvas)->type,
                                   canvas->width, 1);
 
   /* calculate scaling factor */
@@ -71,7 +71,7 @@ int gt_canvas_cairo_file_visit_diagram_pre(GT_Canvas *canvas, GT_Diagram *dia)
   return 0;
 }
 
-int gt_canvas_cairo_file_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
+int gt_canvas_cairo_file_visit_diagram_post(GtCanvas *canvas, GT_Diagram *dia)
 {
   int had_err = 0;
 
@@ -87,7 +87,7 @@ int gt_canvas_cairo_file_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
     gt_graphics_delete(canvas->g);
     canvas->g = NULL;
   }
-  canvas->g = gt_graphics_cairo_new(((GT_CanvasCairoFile*) canvas)->type,
+  canvas->g = gt_graphics_cairo_new(((GtCanvasCairoFile*) canvas)->type,
                                  canvas->width, canvas->height);
   gt_graphics_set_margins(canvas->g, canvas->margins, 0);
 
@@ -97,11 +97,11 @@ int gt_canvas_cairo_file_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
   return had_err;
 }
 
-int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
+int gt_canvas_cairo_file_to_file(GtCanvasCairoFile *canvas,
                                  const char *filename, GtError *err)
 {
   int had_err = 0;
-  GT_Canvas *c = (GT_Canvas*) canvas;
+  GtCanvas *c = (GtCanvas*) canvas;
   gt_error_check(err);
   assert(canvas && filename);
   /* write out result file */
@@ -117,10 +117,10 @@ int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
   return had_err;
 }
 
-int gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas, GtStr *stream)
+int gt_canvas_cairo_file_to_stream(GtCanvasCairoFile *canvas, GtStr *stream)
 {
   int had_err = 0;
-  GT_Canvas *c = (GT_Canvas*) canvas;
+  GtCanvas *c = (GtCanvas*) canvas;
   assert(canvas && stream);
 
   /* write out result file */
@@ -130,21 +130,21 @@ int gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas, GtStr *stream)
   return had_err;
 }
 
-const GT_CanvasClass* gt_canvas_cairo_file_class(void)
+const GtCanvasClass* gt_canvas_cairo_file_class(void)
 {
-  static const GT_CanvasClass canvas_class =
-    { sizeof (GT_CanvasCairoFile),
+  static const GtCanvasClass canvas_class =
+    { sizeof (GtCanvasCairoFile),
       gt_canvas_cairo_file_visit_diagram_pre,
       gt_canvas_cairo_file_visit_diagram_post,
       NULL };
   return &canvas_class;
 }
 
-GT_Canvas* gt_canvas_cairo_file_new(GT_Style *sty, GT_GraphicsOutType type,
+GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GT_GraphicsOutType type,
                                     unsigned long width, GT_ImageInfo *ii)
 {
-  GT_Canvas *canvas;
-  GT_CanvasCairoFile *ccf;
+  GtCanvas *canvas;
+  GtCanvasCairoFile *ccf;
   assert(sty && width > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_file_class());
   canvas->sty = sty;

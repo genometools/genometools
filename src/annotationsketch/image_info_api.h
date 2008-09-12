@@ -26,8 +26,8 @@ typedef struct GT_ImageInfo GT_ImageInfo;
 GT_ImageInfo*    gt_image_info_new();
 unsigned int     gt_image_info_get_height(GT_ImageInfo*);
 unsigned long    gt_image_info_num_of_recmaps(GT_ImageInfo*);
-const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
-void             gt_image_info_fill_recmap(GT_ImageInfo*, GT_RecMap*,
+const GtRecMap* gt_image_info_get_recmap(GT_ImageInfo*, unsigned long);
+void             gt_image_info_fill_recmap(GT_ImageInfo*, GtRecMap*,
                                            unsigned long);
 void             gt_image_info_delete(GT_ImageInfo*);
 

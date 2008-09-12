@@ -25,26 +25,26 @@
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/image_info.h"
 
-struct GT_CanvasClass {
+struct GtCanvasClass {
   size_t size;
-  int           (*visit_diagram_pre)(GT_Canvas*, GT_Diagram*);
-  int           (*visit_diagram_post)(GT_Canvas*, GT_Diagram*);
-  void          (*free)(GT_Canvas*);
+  int           (*visit_diagram_pre)(GtCanvas*, GT_Diagram*);
+  int           (*visit_diagram_post)(GtCanvas*, GT_Diagram*);
+  void          (*free)(GtCanvas*);
 };
 
-struct GT_Canvas {
-  const GT_CanvasClass *c_class;
+struct GtCanvas {
+  const GtCanvasClass *c_class;
   GT_Range viewrange;
   double factor, y, margins;
   unsigned long width, height;
-  GT_Style *sty;
+  GtStyle *sty;
   bool show_track_captions;
   GT_Bittab *bt;
   GT_Graphics *g;
   GT_ImageInfo *ii;
 };
 
-GT_Canvas* gt_canvas_create(const GT_CanvasClass*);
-void*      gt_canvas_cast(const GT_CanvasClass*, GT_Canvas*);
+GtCanvas* gt_canvas_create(const GtCanvasClass*);
+void*      gt_canvas_cast(const GtCanvasClass*, GtCanvas*);
 
 #endif

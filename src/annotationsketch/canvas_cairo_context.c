@@ -31,15 +31,15 @@
 #define MARGINS_DEFAULT           10
 #define HEADER_SPACE              70
 
-struct GT_CanvasCairoContext {
-  const GT_Canvas parent_instance;
+struct GtCanvasCairoContext {
+  const GtCanvas parent_instance;
   cairo_t *context;
 };
 
 #define canvas_cairo_context_cast(C)\
         gt_canvas_cast(gt_canvas_cairo_context_class(), C)
 
-int gt_canvas_cairo_context_visit_diagram_pre(GT_Canvas *canvas,
+int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
                                               GT_Diagram *dia)
 {
   double margins;
@@ -70,7 +70,7 @@ int gt_canvas_cairo_context_visit_diagram_pre(GT_Canvas *canvas,
   return 0;
 }
 
-int gt_canvas_cairo_context_visit_diagram_post(GT_Canvas *canvas,
+int gt_canvas_cairo_context_visit_diagram_post(GtCanvas *canvas,
                                                GT_Diagram *dia)
 {
   int had_err = 0;
@@ -88,7 +88,7 @@ int gt_canvas_cairo_context_visit_diagram_post(GT_Canvas *canvas,
     canvas->g = NULL;
   }
   canvas->g = gt_graphics_cairo_new_from_context(
-                                 ((GT_CanvasCairoContext*) canvas)->context,
+                                 ((GtCanvasCairoContext*) canvas)->context,
                                  canvas->width, canvas->height);
   gt_graphics_set_margins(canvas->g, canvas->margins, 0);
 
@@ -98,21 +98,21 @@ int gt_canvas_cairo_context_visit_diagram_post(GT_Canvas *canvas,
   return had_err;
 }
 
-const GT_CanvasClass* gt_canvas_cairo_context_class(void)
+const GtCanvasClass* gt_canvas_cairo_context_class(void)
 {
-  static const GT_CanvasClass canvas_class =
-    { sizeof (GT_CanvasCairoContext),
+  static const GtCanvasClass canvas_class =
+    { sizeof (GtCanvasCairoContext),
       gt_canvas_cairo_context_visit_diagram_pre,
       gt_canvas_cairo_context_visit_diagram_post,
       NULL };
   return &canvas_class;
 }
 
-GT_Canvas* gt_canvas_cairo_context_new(GT_Style *sty, cairo_t *context,
+GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
                                        unsigned long width, GT_ImageInfo *ii)
 {
-  GT_Canvas *canvas;
-  GT_CanvasCairoContext *ccc;
+  GtCanvas *canvas;
+  GtCanvasCairoContext *ccc;
   assert(sty && width > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_context_class());
   canvas->sty = sty;

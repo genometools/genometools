@@ -20,7 +20,7 @@
 #define ELEMENT_H
 
 /* An element has a type, a range and a config object. */
-typedef struct GT_Element GT_Element;
+typedef struct GtElement GtElement;
 
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/drawing_range.h"
@@ -29,24 +29,24 @@ typedef struct GT_Element GT_Element;
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 
-/* Creates a complete new GT_Element object. */
-GT_Element*           gt_element_new(GT_GenomeNode*);
-/* Creates an empty GT_Element object.
+/* Creates a complete new GtElement object. */
+GtElement*           gt_element_new(GT_GenomeNode*);
+/* Creates an empty GtElement object.
    Range and type have to be set afterwards. */
-GT_Element*           gt_element_new_empty(void);
-GT_Range              gt_element_get_range(const GT_Element*);
-void                  gt_element_set_range(GT_Element*, GT_Range);
-GT_DrawingRange       gt_element_calculate_drawing_range(GT_Element*,
-                                                         GT_Canvas*);
-const char*           gt_element_get_type(const GT_Element*);
-void                  gt_element_set_type(GT_Element*, const char *type);
-GtStrand             gt_element_get_strand(const GT_Element*);
-GT_GenomeNode*        gt_element_get_node_ref(const GT_Element*);
-bool                  gt_element_is_marked(const GT_Element*);
-bool                  gt_elements_are_equal(const GT_Element*,
-                                            const GT_Element*);
-int                   gt_element_sketch(GT_Element*, GT_Canvas*);
+GtElement*           gt_element_new_empty(void);
+GT_Range              gt_element_get_range(const GtElement*);
+void                  gt_element_set_range(GtElement*, GT_Range);
+GT_DrawingRange       gt_element_calculate_drawing_range(GtElement*,
+                                                         GtCanvas*);
+const char*           gt_element_get_type(const GtElement*);
+void                  gt_element_set_type(GtElement*, const char *type);
+GtStrand             gt_element_get_strand(const GtElement*);
+GT_GenomeNode*        gt_element_get_node_ref(const GtElement*);
+bool                  gt_element_is_marked(const GtElement*);
+bool                  gt_elements_are_equal(const GtElement*,
+                                            const GtElement*);
+int                   gt_element_sketch(GtElement*, GtCanvas*);
 int                   gt_element_unit_test(GtError*);
-void                  gt_element_delete(GT_Element* element);
+void                  gt_element_delete(GtElement* element);
 
 #endif

@@ -35,7 +35,7 @@ static int diagram_lua_new(lua_State *L)
   GT_FeatureIndex **feature_index;
   GT_Range *range;
   const char *seqid;
-  GT_Style *style;
+  GtStyle *style;
   /* get feature index */
   feature_index = check_feature_index(L, 1);
   /* get seqid */
@@ -101,7 +101,7 @@ static int diagram_lua_new_from_array(lua_State *L)
   GT_Diagram **diagram;
   GtArray *nodes;
   GT_Range range;
-  GT_Style *style;
+  GtStyle *style;
   /* get array */
   nodes = genome_node_table_to_array(L);
   /* get range */
@@ -124,7 +124,7 @@ static int diagram_lua_new_from_array(lua_State *L)
 static int diagram_lua_sketch(lua_State *L)
 {
   GT_Diagram **diagram;
-  GT_Canvas **canvas;
+  GtCanvas **canvas;
   diagram = check_diagram(L,1);
   canvas = check_canvas(L,2);
   return gt_diagram_sketch(*diagram, *canvas);

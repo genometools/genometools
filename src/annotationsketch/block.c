@@ -23,7 +23,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 
-struct GT_Block {
+struct GtBlock {
   GT_Dlist *elements;
   GT_Range range;
   GtStr *caption;
@@ -34,12 +34,12 @@ struct GT_Block {
   unsigned long reference_count;
 };
 
-/* GT_Compare function used to insert GT_Elements into dlist, order by type */
+/* GT_Compare function used to insert GtElements into dlist, order by type */
 static int elemcmp(const void *a, const void *b)
 {
   const char *type_a, *type_b;
-  GT_Element *elem_a = (GT_Element*) a;
-  GT_Element *elem_b = (GT_Element*) b;
+  GtElement *elem_a = (GtElement*) a;
+  GtElement *elem_b = (GtElement*) b;
 
   type_a = gt_element_get_type(elem_a);
   type_b = gt_element_get_type(elem_b);
@@ -51,7 +51,7 @@ static int elemcmp(const void *a, const void *b)
   return -1;
 }
 
-int gt_block_compare(const GT_Block *block1, const GT_Block *block2)
+int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
 {
   int ret;
   assert(block1 && block2);
@@ -62,16 +62,16 @@ int gt_block_compare(const GT_Block *block1, const GT_Block *block2)
   return ret;
 }
 
-GT_Block* gt_block_ref(GT_Block *block)
+GtBlock* gt_block_ref(GtBlock *block)
 {
   assert(block);
   block->reference_count++;
   return block;
 }
 
-GT_Block* gt_block_new(void)
+GtBlock* gt_block_new(void)
 {
-  GT_Block *block = gt_calloc(1, sizeof (GT_Block));
+  GtBlock *block = gt_calloc(1, sizeof (GtBlock));
   block->elements = gt_dlist_new(elemcmp);
   block->caption = NULL;
   block->show_caption = true;
@@ -80,9 +80,9 @@ GT_Block* gt_block_new(void)
   return block;
 }
 
-GT_Block* gt_block_new_from_node(GT_GenomeNode *node)
+GtBlock* gt_block_new_from_node(GT_GenomeNode *node)
 {
-  GT_Block *block;
+  GtBlock *block;
   assert(node);
   block = gt_block_new();
   block->range = gt_genome_node_get_range(node);
@@ -92,9 +92,9 @@ GT_Block* gt_block_new_from_node(GT_GenomeNode *node)
   return block;
 }
 
-void gt_block_insert_element(GT_Block *block, GT_GenomeNode *gn)
+void gt_block_insert_element(GtBlock *block, GT_GenomeNode *gn)
 {
-  GT_Element *element;
+  GtElement *element;
   assert(block && gn);
   if (!block->top_level_feature)
     block->top_level_feature = gt_genome_node_ref(gn);
@@ -102,31 +102,31 @@ void gt_block_insert_element(GT_Block *block, GT_GenomeNode *gn)
   gt_dlist_add(block->elements, element);
 }
 
-GT_GenomeNode* gt_block_get_top_level_feature(const GT_Block *block)
+GT_GenomeNode* gt_block_get_top_level_feature(const GtBlock *block)
 {
   assert(block);
   return block->top_level_feature;
 }
 
-GT_Range gt_block_get_range(const GT_Block *block)
+GT_Range gt_block_get_range(const GtBlock *block)
 {
    assert(block);
    return block->range;
 }
 
-GT_Range* gt_block_get_range_ptr(const GT_Block *block)
+GT_Range* gt_block_get_range_ptr(const GtBlock *block)
 {
    assert(block);
    return (GT_Range*) &(block->range);
 }
 
-void gt_block_set_range(GT_Block *block, GT_Range r)
+void gt_block_set_range(GtBlock *block, GT_Range r)
 {
   assert(block && r.start <= r.end);
   block->range = r;
 }
 
-bool gt_block_has_only_one_fullsize_element(const GT_Block *block)
+bool gt_block_has_only_one_fullsize_element(const GtBlock *block)
 {
   bool ret = false;
   assert(block);
@@ -141,61 +141,61 @@ bool gt_block_has_only_one_fullsize_element(const GT_Block *block)
   return ret;
 }
 
-void gt_block_set_caption_visibility(GT_Block *block, bool val)
+void gt_block_set_caption_visibility(GtBlock *block, bool val)
 {
   assert(block);
   block->show_caption = val;
 }
 
-bool gt_block_caption_is_visible(const GT_Block *block)
+bool gt_block_caption_is_visible(const GtBlock *block)
 {
   assert(block);
   return (block->caption && block->show_caption);
 }
 
-void gt_block_set_caption(GT_Block *block, GtStr *caption)
+void gt_block_set_caption(GtBlock *block, GtStr *caption)
 {
   assert(block);
   block->caption = caption;
 }
 
-GtStr* gt_block_get_caption(const GT_Block *block)
+GtStr* gt_block_get_caption(const GtBlock *block)
 {
   assert(block);
   return block->caption;
 }
 
-void gt_block_set_strand(GT_Block *block, GtStrand strand)
+void gt_block_set_strand(GtBlock *block, GtStrand strand)
 {
   assert(block);
   block->strand = strand;
 }
 
-GtStrand gt_block_get_strand(const GT_Block *block)
+GtStrand gt_block_get_strand(const GtBlock *block)
 {
   assert(block);
   return block->strand;
 }
 
-void gt_block_set_type(GT_Block *block, const char *type)
+void gt_block_set_type(GtBlock *block, const char *type)
 {
   assert(block);
   block->type = type;
 }
 
-const char* gt_block_get_type(const GT_Block *block)
+const char* gt_block_get_type(const GtBlock *block)
 {
   assert(block);
   return block->type;
 }
 
-unsigned long gt_block_get_size(const GT_Block *block)
+unsigned long gt_block_get_size(const GtBlock *block)
 {
   assert(block && block->elements);
   return gt_dlist_size(block->elements);
 }
 
-int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
+int gt_block_sketch(GtBlock *block, GtCanvas *canvas)
 {
  int had_err = 0;
  GT_Dlistelem *delem;
@@ -206,7 +206,7 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
    return had_err;
  for (delem = gt_dlist_first(block->elements); delem;
       delem = gt_dlistelem_next(delem)) {
-    GT_Element* elem = (GT_Element*) gt_dlistelem_get_data(delem);
+    GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
     gt_element_sketch(elem, canvas);
   }
   return had_err;
@@ -217,8 +217,8 @@ int gt_block_unit_test(GtError *err)
   GT_Range r1, r2, r_temp, b_range;
   GtStrand s;
   GT_GenomeNode *gn1, *gn2;
-  GT_Element *e1, *e2;
-  GT_Block * b;
+  GtElement *e1, *e2;
+  GtBlock * b;
   GtStr *seqid, *caption1, *caption2;
   int had_err = 0;
   gt_error_check(err);
@@ -280,7 +280,7 @@ int gt_block_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_block_delete(GT_Block *block)
+void gt_block_delete(GtBlock *block)
 {
   GT_Dlistelem *delem;
   if (!block) return;
@@ -290,7 +290,7 @@ void gt_block_delete(GT_Block *block)
   }
   for (delem = gt_dlist_first(block->elements); delem;
        delem = gt_dlistelem_next(delem)) {
-    GT_Element* elem = (GT_Element*) gt_dlistelem_get_data(delem);
+    GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
     gt_element_delete(elem);
   }
   if (block->caption)

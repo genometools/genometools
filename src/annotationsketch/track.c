@@ -25,39 +25,39 @@
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
 
-struct GT_Track {
+struct GtTrack {
   GtStr *title;
   unsigned long max_num_lines, discarded_blocks;
-  GT_LineBreaker *lb;
+  GtLineBreaker *lb;
   bool split;
   GtArray *lines;
 };
 
-GT_Track* gt_track_new(GtStr *title, unsigned long max_num_lines, bool split,
-                 GT_LineBreaker *lb)
+GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines, bool split,
+                 GtLineBreaker *lb)
 {
-  GT_Track *track;
+  GtTrack *track;
   assert(title && lb);
-  track = gt_calloc(1, sizeof (GT_Track));
+  track = gt_calloc(1, sizeof (GtTrack));
   assert(track);
   track->title = gt_str_ref(title);
-  track->lines = gt_array_new(sizeof (GT_Line*));
+  track->lines = gt_array_new(sizeof (GtLine*));
   track->max_num_lines = max_num_lines;
   track->split = split;
   track->lb = lb;
   return track;
 }
 
-static GT_Line* get_next_free_line(GT_Track *track, GT_Block *block)
+static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
 {
   unsigned long i;
-  GT_Line* line;
+  GtLine* line;
 
   assert(track);
 
   /* find unoccupied line -- may need optimisation */
   for (i = 0; i < gt_array_size(track->lines); i++) {
-    line = *(GT_Line**) gt_array_get(track->lines, i);
+    line = *(GtLine**) gt_array_get(track->lines, i);
     if (!gt_line_breaker_gt_line_is_occupied(track->lb, line, block))
       return line;
   }
@@ -77,7 +77,7 @@ static GT_Line* get_next_free_line(GT_Track *track, GT_Block *block)
       gt_array_add(track->lines, line);
     }
     else
-      line = *(GT_Line**) gt_array_get(track->lines, 0);
+      line = *(GtLine**) gt_array_get(track->lines, 0);
     assert(gt_array_size(track->lines) == 1);
   }
   else
@@ -89,15 +89,15 @@ static GT_Line* get_next_free_line(GT_Track *track, GT_Block *block)
   return line;
 }
 
-unsigned long gt_track_get_number_of_discarded_blocks(GT_Track *track)
+unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track)
 {
   assert(track);
   return track->discarded_blocks;
 }
 
-void gt_track_insert_block(GT_Track *track, GT_Block *block)
+void gt_track_insert_block(GtTrack *track, GtBlock *block)
 {
-  GT_Line *line;
+  GtLine *line;
 
   assert(track && block);
   line = get_next_free_line(track, block);
@@ -109,36 +109,36 @@ void gt_track_insert_block(GT_Track *track, GT_Block *block)
   } else gt_block_delete(block);
 }
 
-GtStr* gt_track_get_title(const GT_Track *track)
+GtStr* gt_track_get_title(const GtTrack *track)
 {
   assert(track && track->title);
   return track->title;
 }
 
-unsigned long gt_track_get_number_of_lines(const GT_Track *track)
+unsigned long gt_track_get_number_of_lines(const GtTrack *track)
 {
   assert(track);
   return gt_array_size(track->lines);
 }
 
-unsigned long gt_track_get_number_of_lines_with_captions(const GT_Track *track)
+unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track)
 {
   unsigned long i = 0, nof_tracks = 0;
   assert(track);
   for (i = 0; i < gt_array_size(track->lines); i++) {
-    if (gt_line_has_captions(*(GT_Line**) gt_array_get(track->lines, i)))
+    if (gt_line_has_captions(*(GtLine**) gt_array_get(track->lines, i)))
       nof_tracks++;
   }
   return nof_tracks;
 }
 
-int gt_track_sketch(GT_Track* track, GT_Canvas *canvas)
+int gt_track_sketch(GtTrack* track, GtCanvas *canvas)
 {
   int i = 0;
   assert(track && canvas);
   gt_canvas_visit_track_pre(canvas, track);
   for (i = 0; i < gt_array_size(track->lines); i++)
-    gt_line_sketch(*(GT_Line**) gt_array_get(track->lines, i), canvas);
+    gt_line_sketch(*(GtLine**) gt_array_get(track->lines, i), canvas);
   gt_canvas_visit_track_post(canvas, track);
   return 0;
 }
@@ -146,12 +146,12 @@ int gt_track_sketch(GT_Track* track, GT_Canvas *canvas)
 int gt_track_unit_test(GtError *err)
 {
   int had_err = 0;
-  GT_Block *b1, *b2, *b3, *b4;
+  GtBlock *b1, *b2, *b3, *b4;
   GT_Range r1, r2, r3, r4;
-  GT_Track *track;
+  GtTrack *track;
   GtStr *title;
   gt_error_check(err);
-  GT_LineBreaker *lb;
+  GtLineBreaker *lb;
 
   title = gt_str_new_cstr("test");
 
@@ -195,14 +195,14 @@ int gt_track_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_track_delete(GT_Track *track)
+void gt_track_delete(GtTrack *track)
 {
   unsigned long i;
   if (!track) return;
   if (track->lb)
     gt_line_breaker_delete(track->lb);
   for (i = 0; i < gt_array_size(track->lines); i++)
-    gt_line_delete(*(GT_Line**) gt_array_get(track->lines, i));
+    gt_line_delete(*(GtLine**) gt_array_get(track->lines, i));
   gt_array_delete(track->lines);
   gt_str_delete(track->title);
   gt_free(track);

@@ -66,7 +66,7 @@ void gt_graphics_draw_text_right(GT_Graphics *g, double x, double y,
 }
 
 void gt_graphics_draw_colored_text(GT_Graphics *g, double x, double y,
-                                   GT_Color col, const char *txt)
+                                   GtColor col, const char *txt)
 {
   assert(g && g->c_class && txt);
   g->c_class->draw_colored_text(g, x, y, col, txt);
@@ -117,16 +117,16 @@ void gt_graphics_draw_horizontal_line(GT_Graphics *g, double x, double y,
 }
 
 void gt_graphics_draw_vertical_line(GT_Graphics *g, double x, double y,
-                                 GT_Color color, double length)
+                                 GtColor color, double length)
 {
   assert(g && g->c_class);
   g->c_class->draw_vertical_line(g, x, y, color, length);
 }
 
 void gt_graphics_draw_box(GT_Graphics *g, double x, double y, double width,
-                       double height, GT_Color fill_color,
+                       double height, GtColor fill_color,
                        ArrowStatus arrow_status, double arrow_width,
-                       double stroke_width, GT_Color stroke_color,
+                       double stroke_width, GtColor stroke_color,
                        bool dashed)
 {
   assert(g && g->c_class);
@@ -137,7 +137,7 @@ void gt_graphics_draw_box(GT_Graphics *g, double x, double y, double width,
 void gt_graphics_draw_dashes(GT_Graphics *g, double x, double y, double width,
                           double height, ArrowStatus arrow_status,
                           double arrow_width, double stroke_width,
-                          GT_Color stroke_color)
+                          GtColor stroke_color)
 {
   assert(g && g->c_class);
   g->c_class->draw_dashes(g, x, y, width, height, arrow_status, arrow_width,
@@ -147,7 +147,7 @@ void gt_graphics_draw_dashes(GT_Graphics *g, double x, double y, double width,
 void gt_graphics_draw_caret(GT_Graphics *g, double x, double y, double width,
                          double height, ArrowStatus arrow_status,
                          double arrow_width,  double stroke_width,
-                         GT_Color stroke_color)
+                         GtColor stroke_color)
 {
   assert(g && g->c_class);
   g->c_class->draw_caret(g, x, y, width, height, arrow_status, arrow_width,
@@ -155,8 +155,8 @@ void gt_graphics_draw_caret(GT_Graphics *g, double x, double y, double width,
 }
 
 void gt_graphics_draw_rectangle(GT_Graphics *g, double x, double y,
-                             bool filled, GT_Color fill_color, bool outlined,
-                             GT_Color outline_color, double outline_width,
+                             bool filled, GtColor fill_color, bool outlined,
+                             GtColor outline_color, double outline_width,
                              double width)
 {
   assert(g && g->c_class);
@@ -165,7 +165,7 @@ void gt_graphics_draw_rectangle(GT_Graphics *g, double x, double y,
 }
 
 void gt_graphics_draw_arrowhead(GT_Graphics *g, double x, double y,
-                                GT_Color col, ArrowStatus arrow_status)
+                                GtColor col, ArrowStatus arrow_status)
 {
   assert(g && g->c_class);
   g->c_class->draw_arrowhead(g, x, y, col, arrow_status);

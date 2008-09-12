@@ -21,20 +21,20 @@
 #include <stdio.h>
 #include "annotationsketch/line_breaker.h"
 
-struct GT_LineBreakerClass {
+struct GtLineBreakerClass {
   size_t size;
-  bool    (*is_occupied)(GT_LineBreaker*, GT_Line*, GT_Block*);
-  void (*register_block)(GT_LineBreaker*, GT_Line*, GT_Block*);
-  void           (*free)(GT_LineBreaker*);
+  bool    (*is_occupied)(GtLineBreaker*, GtLine*, GtBlock*);
+  void (*register_block)(GtLineBreaker*, GtLine*, GtBlock*);
+  void           (*free)(GtLineBreaker*);
 };
 
-struct GT_LineBreaker {
-  const GT_LineBreakerClass *c_class;
+struct GtLineBreaker {
+  const GtLineBreakerClass *c_class;
   unsigned int reference_count;
 };
 
-GT_LineBreaker* gt_line_breaker_create(const GT_LineBreakerClass*);
-void*        gt_line_breaker_cast(const GT_LineBreakerClass*,
-                               GT_LineBreaker*);
+GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass*);
+void*        gt_line_breaker_cast(const GtLineBreakerClass*,
+                               GtLineBreaker*);
 
 #endif
