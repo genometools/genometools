@@ -22,33 +22,33 @@
 #include "core/error.h"
 
 /* the ``fasta reader'' interface */
-typedef struct GT_FastaReaderClass GT_FastaReaderClass;
-typedef struct GT_FastaReader GT_FastaReader;
+typedef struct GtFastaReaderClass GtFastaReaderClass;
+typedef struct GtFastaReader GtFastaReader;
 
 typedef enum {
   GT_FASTA_READER_REC,
   GT_FASTA_READER_FSM,
   GT_FASTA_READER_SEQIT
-} GT_FastaReaderType;
+} GtFastaReaderType;
 
 /* gets called for each description (the start of a fasta entry) */
-typedef int (*GT_FastaReaderProcDescription)(const char *description,
+typedef int (*GtFastaReaderProcDescription)(const char *description,
                                              unsigned long length, void *data,
                                              GtError*);
 /* gets called for each sequence part of a fasta entry */
-typedef int (*GT_FastaReaderProcSequencePart)(const char *seqpart,
+typedef int (*GtFastaReaderProcSequencePart)(const char *seqpart,
                                               unsigned long length, void *data,
                                               GtError*);
 /* gets called after a fasta entry has been read */
-typedef int (*GT_FastaReaderProcSequenceLength)(unsigned long, void *data,
+typedef int (*GtFastaReaderProcSequenceLength)(unsigned long, void *data,
                                                 GtError*);
 
 /* construct a new fasta reader for the file named <sequence_filename>, pass
    NULL to read from stdin */
-int          gt_fasta_reader_run(GT_FastaReader*, GT_FastaReaderProcDescription,
-                              GT_FastaReaderProcSequencePart,
-                              GT_FastaReaderProcSequenceLength, void *data,
+int          gt_fasta_reader_run(GtFastaReader*, GtFastaReaderProcDescription,
+                              GtFastaReaderProcSequencePart,
+                              GtFastaReaderProcSequenceLength, void *data,
                               GtError*);
-void         gt_fasta_reader_delete(GT_FastaReader*);
+void         gt_fasta_reader_delete(GtFastaReader*);
 
 #endif

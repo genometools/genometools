@@ -118,7 +118,7 @@ static int testfullscan(const GtStrArray *filenametab,
 {
   Seqpos pos, totallength;
   Uchar ccscan = 0, ccra, ccsr;
-  GT_FastaBuffer *fb = NULL;
+  GtFastaBuffer *fb = NULL;
   int retval;
   bool haserr = false;
   Encodedsequencescanstate *esr;

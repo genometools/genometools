@@ -21,8 +21,8 @@
 #include "core/fasta_separator.h"
 #include "core/io.h"
 
-struct GT_FastaReaderRec {
-  const GT_FastaReader parent_instance;
+struct GtFastaReaderRec {
+  const GtFastaReader parent_instance;
   GT_IO *seqio;
 };
 
@@ -83,16 +83,16 @@ static int parse_fasta_entry(GtStr *description, GtStr *sequence,
   return had_err;
 }
 
-static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
-                                   GT_FastaReaderProcDescription
+static int gt_fasta_reader_rec_run(GtFastaReader *fasta_reader,
+                                   GtFastaReaderProcDescription
                                    proc_description,
-                                   GT_FastaReaderProcSequencePart
+                                   GtFastaReaderProcSequencePart
                                    proc_sequence_part,
-                                   GT_FastaReaderProcSequenceLength
+                                   GtFastaReaderProcSequenceLength
                                    proc_sequence_length, void *data,
                                    GtError *err)
 {
-  GT_FastaReaderRec *fr = gt_fasta_reader_rec_cast(fasta_reader);
+  GtFastaReaderRec *fr = gt_fasta_reader_rec_cast(fasta_reader);
   GtStr *description, *sequence;
   int had_err = 0;
   gt_error_check(err);
@@ -140,24 +140,24 @@ static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
   return had_err;
 }
 
-static void gt_fasta_reader_rec_free(GT_FastaReader *fr)
+static void gt_fasta_reader_rec_free(GtFastaReader *fr)
 {
-  GT_FastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
+  GtFastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
   gt_io_delete(gt_fasta_reader_rec->seqio);
 }
 
-const GT_FastaReaderClass* gt_fasta_reader_rec_class(void)
+const GtFastaReaderClass* gt_fasta_reader_rec_class(void)
 {
-  static const GT_FastaReaderClass frc = { sizeof (GT_FastaReaderRec),
+  static const GtFastaReaderClass frc = { sizeof (GtFastaReaderRec),
                                         gt_fasta_reader_rec_run,
                                         gt_fasta_reader_rec_free };
   return &frc;
 }
 
-GT_FastaReader* gt_fasta_reader_rec_new(GtStr *sequence_filename)
+GtFastaReader* gt_fasta_reader_rec_new(GtStr *sequence_filename)
 {
-  GT_FastaReader *fr = gt_fasta_reader_create(gt_fasta_reader_rec_class());
-  GT_FastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
+  GtFastaReader *fr = gt_fasta_reader_create(gt_fasta_reader_rec_class());
+  GtFastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);
   gt_fasta_reader_rec->seqio = gt_io_new(sequence_filename
                                    ? gt_str_get(sequence_filename) : NULL,
                                    "r");

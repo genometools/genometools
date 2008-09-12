@@ -145,7 +145,7 @@ int fasta2sequencekeyvalues(
         Verboseinfo *verboseinfo,
         GtError *err)
 {
-  GT_FastaBuffer *fb = NULL;
+  GtFastaBuffer *fb = NULL;
   Uchar charcode;
   Seqpos pos = 0;
   int retval;

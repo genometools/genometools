@@ -487,7 +487,7 @@ int getfastastreamkmers(
   Streamstate spwp;
   Uchar charcode;
   bool haserr = false;
-  GT_FastaBuffer *fb;
+  GtFastaBuffer *fb;
   int retval;
 
   gt_error_check(err);

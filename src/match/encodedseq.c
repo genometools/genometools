@@ -189,7 +189,7 @@ typedef uint32_t Uint32;
 typedef struct
 {
   const char *funcname;
-  int(*function)(Encodedsequence *,GT_FastaBuffer *,GtError *);
+  int(*function)(Encodedsequence *,GtFastaBuffer *,GtError *);
 } Fillencposfunc;
 
 typedef struct
@@ -867,7 +867,7 @@ static Uchar delivercharViauint32tablesSpecialrange(
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fb,
+static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fb,
                         GtError *err)
 {
   Seqpos pos;
@@ -895,7 +895,7 @@ static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fb,
 }
 
 static int fillbitaccesstab(Encodedsequence *encseq,
-                            GT_FastaBuffer *fb,
+                            GtFastaBuffer *fb,
                             GtError *err)
 {
   Uchar cc;
@@ -2005,7 +2005,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
-  GT_FastaBuffer *fb = NULL;
+  GtFastaBuffer *fb = NULL;
 
   gt_error_check(err);
   retcode = determinesattype(totallength,

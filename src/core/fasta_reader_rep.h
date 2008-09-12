@@ -21,21 +21,21 @@
 #include <stdio.h>
 #include "core/fasta_reader.h"
 
-struct GT_FastaReaderClass
+struct GtFastaReaderClass
 {
   size_t size;
-  int  (*run)(GT_FastaReader*, GT_FastaReaderProcDescription,
-              GT_FastaReaderProcSequencePart, GT_FastaReaderProcSequenceLength,
+  int  (*run)(GtFastaReader*, GtFastaReaderProcDescription,
+              GtFastaReaderProcSequencePart, GtFastaReaderProcSequenceLength,
               void *data, GtError*);
-  void (*free)(GT_FastaReader*);
+  void (*free)(GtFastaReader*);
 };
 
-struct GT_FastaReader
+struct GtFastaReader
 {
-  const GT_FastaReaderClass *c_class;
+  const GtFastaReaderClass *c_class;
 };
 
-GT_FastaReader* gt_fasta_reader_create(const GT_FastaReaderClass*);
-void*        gt_fasta_reader_cast(const GT_FastaReaderClass*, GT_FastaReader*);
+GtFastaReader* gt_fasta_reader_create(const GtFastaReaderClass*);
+void*        gt_fasta_reader_cast(const GtFastaReaderClass*, GtFastaReader*);
 
 #endif

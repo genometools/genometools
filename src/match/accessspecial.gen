@@ -16,7 +16,7 @@
 */
 
 static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
-                                      GT_FastaBuffer *fb,
+                                      GtFastaBuffer *fb,
                                       GtError *err)
 {
   Uchar cc;

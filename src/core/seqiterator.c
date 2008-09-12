@@ -25,7 +25,7 @@
 
 struct SeqIterator
 {
-  GT_FastaBuffer *fb;
+  GtFastaBuffer *fb;
   const GtStrArray *filenametab;
   const Uchar *symbolmap;
   GtQueue *descptr;

@@ -22,8 +22,8 @@
 #include "core/seqiterator.h"
 #include "core/strarray.h"
 
-struct GT_FastaReaderSeqIt {
-  const GT_FastaReader parent_instance;
+struct GtFastaReaderSeqIt {
+  const GtFastaReader parent_instance;
   GtStrArray *filenametab;
   SeqIterator *seqit;
 };
@@ -31,16 +31,16 @@ struct GT_FastaReaderSeqIt {
 #define gt_fasta_reader_seqit_cast(FR)\
         gt_fasta_reader_cast(gt_fasta_reader_seqit_class(), FR)
 
-static int gt_fasta_reader_seqit_run(GT_FastaReader *fasta_reader,
-                                     GT_FastaReaderProcDescription
+static int gt_fasta_reader_seqit_run(GtFastaReader *fasta_reader,
+                                     GtFastaReaderProcDescription
                                      proc_description,
-                                     GT_FastaReaderProcSequencePart
+                                     GtFastaReaderProcSequencePart
                                      proc_sequence_part,
-                                     GT_FastaReaderProcSequenceLength
+                                     GtFastaReaderProcSequenceLength
                                      proc_sequence_length,
                                      void *data, GtError *err)
 {
-  GT_FastaReaderSeqIt *gt_fasta_reader_seqit =
+  GtFastaReaderSeqIt *gt_fasta_reader_seqit =
     gt_fasta_reader_seqit_cast(fasta_reader);
   const Uchar *sequence;
   unsigned long len;
@@ -73,25 +73,25 @@ static int gt_fasta_reader_seqit_run(GT_FastaReader *fasta_reader,
   return had_err;
 }
 
-static void gt_fasta_reader_seqit_free(GT_FastaReader *fr)
+static void gt_fasta_reader_seqit_free(GtFastaReader *fr)
 {
-  GT_FastaReaderSeqIt *gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);
+  GtFastaReaderSeqIt *gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);
   gt_strarray_delete(gt_fasta_reader_seqit->filenametab);
   seqiterator_delete(gt_fasta_reader_seqit->seqit);
 }
 
-const GT_FastaReaderClass* gt_fasta_reader_seqit_class(void)
+const GtFastaReaderClass* gt_fasta_reader_seqit_class(void)
 {
-  static const GT_FastaReaderClass frc = { sizeof (GT_FastaReaderSeqIt),
+  static const GtFastaReaderClass frc = { sizeof (GtFastaReaderSeqIt),
                                         gt_fasta_reader_seqit_run,
                                         gt_fasta_reader_seqit_free };
   return &frc;
 }
 
-GT_FastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
+GtFastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
 {
-  GT_FastaReader *fr;
-  GT_FastaReaderSeqIt *gt_fasta_reader_seqit;
+  GtFastaReader *fr;
+  GtFastaReaderSeqIt *gt_fasta_reader_seqit;
   assert(sequence_filename);
   fr = gt_fasta_reader_create(gt_fasta_reader_seqit_class());
   gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);

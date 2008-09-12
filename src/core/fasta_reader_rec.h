@@ -22,9 +22,9 @@
 #include "core/str.h"
 
 /* implements the ``fasta reader'' interface with a recursive descent parser */
-typedef struct GT_FastaReaderRec GT_FastaReaderRec;
+typedef struct GtFastaReaderRec GtFastaReaderRec;
 
-const GT_FastaReaderClass* gt_fasta_reader_rec_class(void);
-GT_FastaReader*            gt_fasta_reader_rec_new(GtStr *sequence_filename);
+const GtFastaReaderClass* gt_fasta_reader_rec_class(void);
+GtFastaReader*            gt_fasta_reader_rec_new(GtStr *sequence_filename);
 
 #endif

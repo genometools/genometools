@@ -19,16 +19,16 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 
-GT_FastaReader* gt_fasta_reader_create(const GT_FastaReaderClass *frc)
+GtFastaReader* gt_fasta_reader_create(const GtFastaReaderClass *frc)
 {
-  GT_FastaReader *fr;
+  GtFastaReader *fr;
   assert(frc && frc->size);
   fr = gt_calloc(1, frc->size);
   fr->c_class = frc;
   return fr;
 }
 
-void gt_fasta_reader_delete(GT_FastaReader *fr)
+void gt_fasta_reader_delete(GtFastaReader *fr)
 {
   if (!fr) return;
   assert(fr->c_class && fr->c_class->free);
@@ -36,10 +36,10 @@ void gt_fasta_reader_delete(GT_FastaReader *fr)
   gt_free(fr);
 }
 
-int gt_fasta_reader_run(GT_FastaReader *fr,
-                     GT_FastaReaderProcDescription proc_description,
-                     GT_FastaReaderProcSequencePart proc_sequence_part,
-                     GT_FastaReaderProcSequenceLength proc_sequence_length,
+int gt_fasta_reader_run(GtFastaReader *fr,
+                     GtFastaReaderProcDescription proc_description,
+                     GtFastaReaderProcSequencePart proc_sequence_part,
+                     GtFastaReaderProcSequenceLength proc_sequence_length,
                      void *data, GtError *err)
 {
   gt_error_check(err);
@@ -48,8 +48,8 @@ int gt_fasta_reader_run(GT_FastaReader *fr,
                           proc_sequence_length, data, err);
 }
 
-void* gt_fasta_reader_cast(GT_UNUSED const GT_FastaReaderClass *frc,
-                           GT_FastaReader *fr)
+void* gt_fasta_reader_cast(GT_UNUSED const GtFastaReaderClass *frc,
+                           GtFastaReader *fr)
 {
   assert(frc && fr && fr->c_class == frc);
   return fr;

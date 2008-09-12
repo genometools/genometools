@@ -38,7 +38,7 @@ GtBioseq*       gt_bioseq_new_str(GtStr* sequence_file, GtError*);
 /* Construct a new bioseq object (and always create the bioseq files)
    with a certain <fasta_reader>. */
 GtBioseq*       gt_bioseq_new_with_fasta_reader(const char *sequence_file,
-                                           GT_FastaReaderType fasta_reader,
+                                           GtFastaReaderType fasta_reader,
                                            GtError*);
 void          gt_bioseq_delete(GtBioseq*);
 GtAlpha*        gt_bioseq_get_alpha(GtBioseq*);

@@ -25,15 +25,15 @@
 #include "core/strarray.h"
 #include "core/symboldef.h"
 
-typedef struct GT_FastaBuffer GT_FastaBuffer;
+typedef struct GtFastaBuffer GtFastaBuffer;
 
-GT_FastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
+GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
                              const Uchar *symbolmap, bool plainformat,
                              Filelengthvalues **filelengthtab,
                              GtQueue *descptr,
                              unsigned long *characterdistribution);
-static int   gt_fastabuffer_next(GT_FastaBuffer*, Uchar *val, GtError*);
-void         gt_fastabuffer_delete(GT_FastaBuffer*);
+static int   gt_fastabuffer_next(GtFastaBuffer*, Uchar *val, GtError*);
+void         gt_fastabuffer_delete(GtFastaBuffer*);
 
 #include "fastabuffer_imp.h"
 

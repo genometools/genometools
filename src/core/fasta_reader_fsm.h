@@ -23,9 +23,9 @@
 
 /* implements the ``fasta reader'' interface with a finite state machine
    (for educational purposes, the recursive descent parser is much faster) */
-typedef struct GT_FastaReaderFSM GT_FastaReaderFSM;
+typedef struct GtFastaReaderFSM GtFastaReaderFSM;
 
-const GT_FastaReaderClass* gt_fasta_reader_fsm_class(void);
-GT_FastaReader*            gt_fasta_reader_fsm_new(GtStr *sequence_filename);
+const GtFastaReaderClass* gt_fasta_reader_fsm_class(void);
+GtFastaReader*            gt_fasta_reader_fsm_new(GtStr *sequence_filename);
 
 #endif

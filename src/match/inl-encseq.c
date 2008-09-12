@@ -95,7 +95,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
   FREESPACE(*esr);
 }
 
-static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,
+static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fbs,
                         GtError *err)
 {
   Seqpos pos;
@@ -145,7 +145,7 @@ static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,
                                                   GtError *err)
 {
   Encodedsequence *encseq;
-  GT_FastaBuffer *fb = NULL;
+  GtFastaBuffer *fb = NULL;
   bool haserr = false;
 
   gt_error_check(err);

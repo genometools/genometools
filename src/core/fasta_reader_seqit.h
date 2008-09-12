@@ -22,9 +22,9 @@
 #include "core/str.h"
 
 /* implements the ``fasta reader'' interface via the sequence iterator class */
-typedef struct GT_FastaReaderSeqIt GT_FastaReaderSeqIt;
+typedef struct GtFastaReaderSeqIt GtFastaReaderSeqIt;
 
-const GT_FastaReaderClass* gt_fasta_reader_seqit_class(void);
-GT_FastaReader*            gt_fasta_reader_seqit_new(GtStr *sequence_filename);
+const GtFastaReaderClass* gt_fasta_reader_seqit_class(void);
+GtFastaReader*            gt_fasta_reader_seqit_new(GtStr *sequence_filename);
 
 #endif
