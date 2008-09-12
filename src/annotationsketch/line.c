@@ -109,11 +109,11 @@ int gt_line_unit_test(GtError *err)
   l1 = gt_line_new();
   l2 = gt_line_new();
 
-  gt_genome_feature_add_attribute((GT_GenomeFeature*) parent, "Name", foo);
-  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn1, "Name", bar);
-  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn2, "Name", bar);
-  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn3, "Name", blub);
-  gt_genome_feature_add_attribute((GT_GenomeFeature*) gn4, "Name", bar);
+  gt_genome_feature_add_attribute((GtGenomeFeature*) parent, "Name", foo);
+  gt_genome_feature_add_attribute((GtGenomeFeature*) gn1, "Name", bar);
+  gt_genome_feature_add_attribute((GtGenomeFeature*) gn2, "Name", bar);
+  gt_genome_feature_add_attribute((GtGenomeFeature*) gn3, "Name", blub);
+  gt_genome_feature_add_attribute((GtGenomeFeature*) gn4, "Name", bar);
 
   b1 = gt_block_new();
   b2 = gt_block_new();

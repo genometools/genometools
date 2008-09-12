@@ -56,7 +56,7 @@ static int add_exon_number(GtGenomeNode *gn, void *data,
                            GT_UNUSED GtError *err)
 {
   StatVisitor *stat_visitor = (StatVisitor*) data;
-  GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
+  GtGenomeFeature *gf = (GtGenomeFeature*) gn;
   gt_error_check(err);
   assert(stat_visitor && gf);
   if (gt_genome_feature_has_type(gf, gft_exon))
@@ -67,12 +67,12 @@ static int add_exon_number(GtGenomeNode *gn, void *data,
 static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
 {
   StatVisitor *stat_visitor;
-  GT_GenomeFeature *gf;
+  GtGenomeFeature *gf;
   int rval;
   gt_error_check(err);
   assert(data);
   stat_visitor = (StatVisitor*) data;
-  gf = (GT_GenomeFeature*) gn;
+  gf = (GtGenomeFeature*) gn;
   if (gt_genome_feature_has_type(gf, gft_gene)) {
     stat_visitor->number_of_genes++;
     if (gt_genome_feature_has_CDS(gf))
@@ -124,7 +124,7 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
   return 0;
 }
 
-static int stat_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
+static int stat_visitor_genome_feature(GenomeVisitor *gv, GtGenomeFeature *gf,
                                        GtError *err)
 {
   StatVisitor *stat_visitor;

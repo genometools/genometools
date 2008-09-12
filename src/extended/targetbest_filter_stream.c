@@ -38,7 +38,7 @@ struct TargetbestFilterStream
 #define targetbest_filter_stream_cast(GS)\
         genome_stream_cast(targetbest_filter_stream_class(), GS);
 
-static void build_key(GtStr *key, GT_GenomeFeature *feature, GtStr *target_id)
+static void build_key(GtStr *key, GtGenomeFeature *feature, GtStr *target_id)
 {
   assert(key && feature && target_id);
   gt_str_reset(key);
@@ -48,7 +48,7 @@ static void build_key(GtStr *key, GT_GenomeFeature *feature, GtStr *target_id)
 }
 
 static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
-                            GT_GenomeFeature *feature, GtStr *key)
+                            GtGenomeFeature *feature, GtStr *key)
 {
   gt_dlist_add(trees, feature);
   hashmap_add(target_to_elem, gt_cstr_dup(gt_str_get(key)),
@@ -65,7 +65,7 @@ static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
 }
 
 static void replace_previous_elem(GT_Dlistelem *previous_elem,
-                                  GT_GenomeFeature *current_feature,
+                                  GtGenomeFeature *current_feature,
                                   GT_Dlist *trees, Hashmap *target_to_elem,
                                   GtStr *key)
 {
@@ -73,7 +73,7 @@ static void replace_previous_elem(GT_Dlistelem *previous_elem,
   include_feature(trees, target_to_elem, current_feature, key);
 }
 
-static void filter_targetbest(GT_GenomeFeature *current_feature,
+static void filter_targetbest(GtGenomeFeature *current_feature,
                               GT_Dlist *trees, Hashmap *target_to_elem)
 {
   unsigned long num_of_targets;
@@ -98,7 +98,7 @@ static void filter_targetbest(GT_GenomeFeature *current_feature,
       include_feature(trees, target_to_elem, current_feature, key);
     }
     else {
-      GT_GenomeFeature *previous_feature = gt_dlistelem_get_data(previous_elem);
+      GtGenomeFeature *previous_feature = gt_dlistelem_get_data(previous_elem);
       /* element with this target_id included already -> compare them */
       if (gt_genome_feature_get_score(current_feature) >
           gt_genome_feature_get_score(previous_feature)) {
@@ -130,7 +130,7 @@ static int targetbest_filter_stream_next_tree(GenomeStream *gs,
            node) {
       if (gt_genome_node_cast(gt_genome_feature_class(), node) &&
           gt_genome_feature_get_attribute(node, "Target")) {
-        filter_targetbest((GT_GenomeFeature*) node, tfs->trees,
+        filter_targetbest((GtGenomeFeature*) node, tfs->trees,
                           tfs->target_to_elem);
       }
       else

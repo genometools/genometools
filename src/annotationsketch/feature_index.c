@@ -92,7 +92,7 @@ void gt_feature_index_add_sequence_region(GT_FeatureIndex *fi,
 }
 
 void gt_feature_index_add_genome_feature(GT_FeatureIndex *fi,
-                                         GT_GenomeFeature *gf)
+                                         GtGenomeFeature *gf)
 {
   GtGenomeNode *gn;
   char* seqid;
@@ -177,7 +177,7 @@ GtArray* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
   int had_err = 0;
   GtArray *a;
   assert(fi && seqid);
-  a = gt_array_new(sizeof (GT_GenomeFeature*));
+  a = gt_array_new(sizeof (GtGenomeFeature*));
   ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
   if (ri)
     had_err = gt_interval_tree_traverse(ri->features,
@@ -334,7 +334,7 @@ int gt_feature_index_unit_test(GtError *err)
      datastructures are not empty anymore. As we have added one genome_feature
      to every sequence region the size has to be one. */
   if (!had_err) {
-    gt_feature_index_add_genome_feature(fi, (GT_GenomeFeature*) gn1);
+    gt_feature_index_add_genome_feature(fi, (GtGenomeFeature*) gn1);
     features = gt_feature_index_get_features_for_seqid(fi, "test1");
   }
   ensure(had_err, gt_array_size(features) == 1UL);
@@ -342,7 +342,7 @@ int gt_feature_index_unit_test(GtError *err)
   features = NULL;
 
   if (!had_err) {
-    gt_feature_index_add_genome_feature(fi, (GT_GenomeFeature*) gn2);
+    gt_feature_index_add_genome_feature(fi, (GtGenomeFeature*) gn2);
     features = gt_feature_index_get_features_for_seqid(fi, "test2");
   }
   ensure(had_err, gt_array_size(features) == 1UL);

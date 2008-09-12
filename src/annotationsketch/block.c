@@ -86,8 +86,8 @@ GtBlock* gt_block_new_from_node(GtGenomeNode *node)
   assert(node);
   block = gt_block_new();
   block->range = gt_genome_node_get_range(node);
-  block->strand = gt_genome_feature_get_strand((GT_GenomeFeature*) node);
-  block->type = gt_genome_feature_get_type((GT_GenomeFeature*) node);
+  block->strand = gt_genome_feature_get_strand((GtGenomeFeature*) node);
+  block->type = gt_genome_feature_get_type((GtGenomeFeature*) node);
   block->top_level_feature = gt_genome_node_ref(node);
   return block;
 }

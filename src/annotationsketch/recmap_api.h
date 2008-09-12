@@ -26,7 +26,7 @@ double                  gt_recmap_get_northwest_x(const GtRecMap*);
 double                  gt_recmap_get_northwest_y(const GtRecMap*);
 double                  gt_recmap_get_southeast_x(const GtRecMap*);
 double                  gt_recmap_get_southeast_y(const GtRecMap*);
-const GT_GenomeFeature* gt_recmap_get_genome_feature(const GtRecMap*);
+const GtGenomeFeature* gt_recmap_get_genome_feature(const GtRecMap*);
 bool                    gt_recmap_has_omitted_children(const GtRecMap*);
 
 #endif

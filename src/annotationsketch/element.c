@@ -38,7 +38,7 @@ struct GtElement {
 GtElement* gt_element_new(GtGenomeNode *gn)
 {
   GtElement *element;
-  GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
+  GtGenomeFeature *gf = (GtGenomeFeature*) gn;
   assert(gn);
   element = gt_element_new_empty();
   gt_element_set_type(element, gt_genome_feature_get_type(gf));

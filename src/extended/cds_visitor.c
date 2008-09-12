@@ -47,7 +47,7 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
                                     GtError *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
-  GT_GenomeFeature *gf;
+  GtGenomeFeature *gf;
   GtRange range;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
@@ -122,7 +122,7 @@ static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
   GtGenomeNode *cds_feature;
   unsigned long i;
   GtRange cds;
-  GtStrand strand = gt_genome_feature_get_strand((GT_GenomeFeature*) gn);
+  GtStrand strand = gt_genome_feature_get_strand((GtGenomeFeature*) gn);
 
   assert(gt_range_length(orf) >= 3);
   /* the first CDS feature */
@@ -132,7 +132,7 @@ static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
                            ? orf.end : orf.start) + 1;
   cds_feature = gt_genome_feature_new(gt_genome_node_get_seqid(gn), gft_CDS,
                                       cds.start, cds.end,
-                          gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
+                          gt_genome_feature_get_strand((GtGenomeFeature*) gn));
   gt_genome_feature_set_source(cds_feature, v->source);
   gt_genome_feature_set_phase(cds_feature, GT_PHASE_ZERO);
   /* all CDS features in between */
@@ -140,7 +140,7 @@ static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
        strand == GT_STRAND_FORWARD ? i < orf.end : i > orf.start;
        strand == GT_STRAND_FORWARD ? i++ : i--) {
     if (splicedseq_pos_is_border(v->splicedseq, i)) {
-      gt_genome_feature_set_end((GT_GenomeFeature*) cds_feature,
+      gt_genome_feature_set_end((GtGenomeFeature*) cds_feature,
                              splicedseq_map(v->splicedseq, i) + 1);
       gt_genome_node_add_child(gn, cds_feature);
       if (strand == GT_STRAND_FORWARD)
@@ -153,7 +153,7 @@ static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
                                ? orf.end : orf.start) + 1;
       cds_feature = gt_genome_feature_new(gt_genome_node_get_seqid(gn),
                                           gft_CDS, cds.start, cds.end,
-                          gt_genome_feature_get_strand((GT_GenomeFeature*) gn));
+                          gt_genome_feature_get_strand((GtGenomeFeature*) gn));
       gt_genome_feature_set_source(cds_feature, v->source);
       /* XXX correct this */
       gt_genome_feature_set_phase(cds_feature, (Phase)
@@ -161,7 +161,7 @@ static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
     }
   }
   /* set the end of the last CDS feature and store it */
-  gt_genome_feature_set_end((GT_GenomeFeature*) cds_feature,
+  gt_genome_feature_set_end((GtGenomeFeature*) cds_feature,
                          splicedseq_map(v->splicedseq,
                                         strand == GT_STRAND_FORWARD
                                         ? orf.end : orf.start) + 1);
@@ -183,7 +183,7 @@ static void create_CDS_features_for_longest_ORF(GtArray *orfs, CDSVisitor *v,
 static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 {
   CDSVisitor *v = (CDSVisitor*) data;
-  GT_GenomeFeature *gf;
+  GtGenomeFeature *gf;
   int had_err;
 
   gt_error_check(err);
@@ -207,7 +207,7 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   return had_err;
 }
 
-static int cds_visitor_genome_feature(GenomeVisitor *gv, GT_GenomeFeature *gf,
+static int cds_visitor_genome_feature(GenomeVisitor *gv, GtGenomeFeature *gf,
                                       GtError *err)
 {
   CDSVisitor *v = cds_visitor_cast(gv);

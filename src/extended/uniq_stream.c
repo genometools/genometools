@@ -36,21 +36,21 @@ static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
 {
   bool equal = false;
   GtGenomeNodeIterator *gni_a, *gni_b;
-  GT_GenomeFeature *gf_a, *gf_b;
+  GtGenomeFeature *gf_a, *gf_b;
   gf_a = gt_genome_node_cast(gt_genome_feature_class(), first_node);
   gf_b = gt_genome_node_cast(gt_genome_feature_class(), second_node);
   if (gf_a && gf_b) {
     gni_a = gt_genome_node_iterator_new(first_node);
     gni_b = gt_genome_node_iterator_new(second_node);
-    for (gf_a = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b);
+    for (gf_a = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_b);
          gf_a && gf_b;
-         gf_a = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b)) {
+         gf_a = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_a),
+         gf_b = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_b)) {
       if (!gf_b || !gt_genome_features_are_similar(gf_a, gf_b))
         break;
     }
-    gf_b = (GT_GenomeFeature*) gt_genome_node_iterator_next(gni_b);
+    gf_b = (GtGenomeFeature*) gt_genome_node_iterator_next(gni_b);
     if (!gf_a && !gf_b)
       equal = true;
     gt_genome_node_iterator_delete(gni_a);
@@ -67,15 +67,15 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
   assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     if ((first_score_is_defined =
-           gt_genome_feature_score_is_defined((GT_GenomeFeature*)
+           gt_genome_feature_score_is_defined((GtGenomeFeature*)
                                               *first_node))) {
-      first_score = gt_genome_feature_get_score((GT_GenomeFeature*)
+      first_score = gt_genome_feature_get_score((GtGenomeFeature*)
                                                 *first_node);
     }
     if ((second_score_is_defined =
-           gt_genome_feature_score_is_defined((GT_GenomeFeature*)
+           gt_genome_feature_score_is_defined((GtGenomeFeature*)
                                               *second_node))) {
-      second_score = gt_genome_feature_get_score((GT_GenomeFeature*)
+      second_score = gt_genome_feature_get_score((GtGenomeFeature*)
                                                  *second_node);
     }
     if ((!first_score_is_defined && !second_score_is_defined) ||

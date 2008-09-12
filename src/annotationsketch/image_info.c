@@ -120,7 +120,7 @@ int gt_image_info_unit_test(GtError *err)
                            gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
                            gt_rand_max_double(100.0),
-                           (GT_GenomeFeature*) /* XXX */ gfs[i]);
+                           (GtGenomeFeature*) /* XXX */ gfs[i]);
     gt_image_info_add_recmap(ii, rms[i]);
     ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
     ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);

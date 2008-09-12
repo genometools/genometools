@@ -507,7 +507,7 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
     {
       GtRecMap *rm = gt_recmap_new(draw_range.start, canvas->y,
                                     draw_range.end, canvas->y+bar_height,
-                                    (GT_GenomeFeature*) /* XXX */
+                                    (GtGenomeFeature*) /* XXX */
                                     gt_block_get_top_level_feature(block));
       gt_image_info_add_recmap(canvas->ii, rm);
       rm->has_omitted_children = true;
@@ -608,7 +608,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   {
     GtRecMap *rm = gt_recmap_new(elem_start, canvas->y,
                                   elem_start+elem_width, canvas->y+bar_height,
-                                  (GT_GenomeFeature*) /* XXX */
+                                  (GtGenomeFeature*) /* XXX */
                                   gt_element_get_node_ref(elem));
     gt_image_info_add_recmap(canvas->ii, rm);
   }

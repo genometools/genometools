@@ -222,7 +222,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
     node_stack = gt_array_new(sizeof (GtGenomeNode*));
     if (!with_pseudo &&
         gt_genome_node_cast(gt_genome_feature_class(), genome_node) &&
-        gt_genome_feature_is_pseudo((GT_GenomeFeature*) genome_node)) {
+        gt_genome_feature_is_pseudo((GtGenomeFeature*) genome_node)) {
       /* add the children backwards to traverse in order */
       for (dlistelem = gt_dlist_last(genome_node->children); dlistelem != NULL;
            dlistelem = gt_dlistelem_previous(dlistelem)) {
@@ -238,7 +238,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
     node_queue = gt_queue_new();
     if (!with_pseudo &&
         gt_genome_node_cast(gt_genome_feature_class(), genome_node) &&
-        gt_genome_feature_is_pseudo((GT_GenomeFeature*) genome_node)) {
+        gt_genome_feature_is_pseudo((GtGenomeFeature*) genome_node)) {
       for (dlistelem = gt_dlist_first(genome_node->children); dlistelem != NULL;
            dlistelem = gt_dlistelem_next(dlistelem)) {
         child_feature = (GtGenomeNode*) gt_dlistelem_get_data(dlistelem);
@@ -476,7 +476,7 @@ void gt_genome_node_add_child(GtGenomeNode *parent, GtGenomeNode *child)
 #ifndef NDEBUG
   if (gt_genome_node_cast(gt_genome_feature_class(), child)) {
     /* pseudo-features have to be top-level */
-    assert(!gt_genome_feature_is_pseudo((GT_GenomeFeature*) child));
+    assert(!gt_genome_feature_is_pseudo((GtGenomeFeature*) child));
   }
 #endif
   /* create children list on demand */
@@ -564,7 +564,7 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GtGenomeNode
 {
   GtArray *children_ranges;
   GT_Dlistelem *dlistelem;
-  GT_GenomeFeature *gf = NULL, *child_gf;
+  GtGenomeFeature *gf = NULL, *child_gf;
   GtRange range;
   bool rval;
 
