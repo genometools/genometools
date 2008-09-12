@@ -238,7 +238,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                            void *tool_arguments, GtError *err)
 {
   FilterArguments *arguments = tool_arguments;
-  GenomeStream *gff3_in_stream, *filter_stream,
+  GtNodeStream *gff3_in_stream, *filter_stream,
                *targetbest_filter_stream = NULL, *gff3_out_stream;
   GtGenomeNode *gn;
   int had_err;
@@ -277,16 +277,16 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                         arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
          gn) {
     gt_genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(filter_stream);
-  genome_stream_delete(targetbest_filter_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(filter_stream);
+  gt_node_stream_delete(targetbest_filter_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }

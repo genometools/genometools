@@ -15,13 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQUENCE_REGION_H
-#define SEQUENCE_REGION_H
+#ifndef NODE_STREAM_H
+#define NODE_STREAM_H
 
-#include "extended/sequence_region_api.h"
+#include <stdbool.h>
 
-const GtGenomeNodeClass* gt_sequence_region_class(void);
-void                      gt_sequence_regions_consolidate(GtGenomeNode*,
-                                                          GtGenomeNode*);
+#include "extended/genome_node.h"
+
+/* the ``genome stream'' interface */
+typedef struct GtNodeStreamClass GtNodeStreamClass;
+typedef struct GtNodeStream GtNodeStream;
+
+GtNodeStream* gt_node_stream_ref(GtNodeStream*);
+int           gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*);
+bool          gt_node_stream_is_sorted(GtNodeStream*);
+void          gt_node_stream_delete(GtNodeStream*);
 
 #endif

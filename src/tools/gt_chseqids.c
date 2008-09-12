@@ -75,7 +75,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
 
 int gt_chseqids(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
+  GtNodeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
                *gff3_out_stream = NULL;
   GtGenomeNode *gn;
   ChseqidsArguments arguments;
@@ -110,17 +110,17 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+    while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
            gn) {
       gt_genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(chseqids_stream);
-  genome_stream_delete(sort_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(chseqids_stream);
+  gt_node_stream_delete(sort_stream);
+  gt_node_stream_delete(gff3_in_stream);
   gt_genfile_close(arguments.outfp);
 
   return had_err;

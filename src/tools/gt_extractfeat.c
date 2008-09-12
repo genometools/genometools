@@ -98,7 +98,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
                                  GtError *err)
 {
-  GenomeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
+  GtNodeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
   GtGenomeNode *gn;
   ExtractFeatArguments *arguments = tool_arguments;
   RegionMapping *regionmapping;
@@ -127,15 +127,15 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                                   arguments->translate);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(extract_feat_stream, &gn,
+    while (!(had_err = gt_node_stream_next(extract_feat_stream, &gn,
                                                err)) && gn) {
       gt_genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(extract_feat_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(extract_feat_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }

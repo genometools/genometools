@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,10 @@
 #ifndef GFF3_OUTPUT_H
 #define GFF3_OUTPUT_H
 
-#include "extended/genome_feature.h"
+#include "extended/feature_node.h"
 
 /* output the leading part of a genome feature in GFF3 format (i.e., the part
    up to the attributes) */
-void gff3_output_leading(GtGenomeFeature *gf, GtGenFile*);
+void gff3_output_leading(GtFeatureNode*, GtGenFile*);
 
 #endif

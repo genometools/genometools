@@ -19,16 +19,16 @@
 #define EXTRACT_FEAT_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 #include "extended/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct ExtractFeatStream ExtractFeatStream;
 
-const GenomeStreamClass* extract_feat_stream_class(void);
+const GtNodeStreamClass* extract_feat_stream_class(void);
 
 /* create a ExtractFeatStream, takes ownership of RegionMapping  */
-GenomeStream*            extract_feat_stream_new(GenomeStream*, RegionMapping*,
+GtNodeStream*            extract_feat_stream_new(GtNodeStream*, RegionMapping*,
                                                  const char *type, bool join,
                                                  bool translate);
 

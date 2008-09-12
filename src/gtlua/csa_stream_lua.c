@@ -23,7 +23,7 @@
 
 static int csa_stream_lua_new(lua_State *L)
 {
-  GenomeStream **csa_stream, **in_stream;
+  GtNodeStream **csa_stream, **in_stream;
   long join_length;
   in_stream = check_genome_stream(L, 1);
   if (lua_gettop(L) >= 2) {
@@ -32,7 +32,7 @@ static int csa_stream_lua_new(lua_State *L)
   }
   else
     join_length = DEFAULT_JOIN_LENGTH;
-  csa_stream = lua_newuserdata(L, sizeof (GenomeStream*));
+  csa_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
   assert(csa_stream);
   *csa_stream = csa_stream_new(*in_stream, join_length);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);

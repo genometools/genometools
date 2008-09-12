@@ -16,28 +16,28 @@
 */
 
 #include <assert.h>
+#include "extended/node_stream_rep.h"
 #include "extended/splice_site_info_stream.h"
 #include "extended/splicesiteinfo_visitor.h"
-#include "extended/genome_stream_rep.h"
 
 struct SpliceSiteInfoStream
 {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GenomeVisitor *splice_site_info_visitor;
 };
 
 #define splice_site_info_stream_cast(GS)\
-        genome_stream_cast(splice_site_info_stream_class(), GS)
+        gt_node_stream_cast(splice_site_info_stream_class(), GS)
 
-static int splice_site_info_stream_next_tree(GenomeStream *gs,
+static int splice_site_info_stream_next_tree(GtNodeStream *gs,
                                              GtGenomeNode **gn, GtError *err)
 {
   SpliceSiteInfoStream *ssis;
   int had_err;
   gt_error_check(err);
   ssis = splice_site_info_stream_cast(gs);
-  had_err = genome_stream_next_tree(ssis->in_stream, gn, err);
+  had_err = gt_node_stream_next(ssis->in_stream, gn, err);
   if (!had_err) {
     assert(ssis->splice_site_info_visitor);
     if (*gn) {
@@ -52,33 +52,33 @@ static int splice_site_info_stream_next_tree(GenomeStream *gs,
   return had_err;
 }
 
-static void splice_site_info_stream_free(GenomeStream *gs)
+static void splice_site_info_stream_free(GtNodeStream *gs)
 {
   SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
   genome_visitor_delete(ssis->splice_site_info_visitor);
-  genome_stream_delete(ssis->in_stream);
+  gt_node_stream_delete(ssis->in_stream);
 }
 
-const GenomeStreamClass* splice_site_info_stream_class(void)
+const GtNodeStreamClass* splice_site_info_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (SpliceSiteInfoStream),
+  static const GtNodeStreamClass gsc = { sizeof (SpliceSiteInfoStream),
                                          splice_site_info_stream_next_tree,
                                          splice_site_info_stream_free };
   return &gsc;
 }
 
-GenomeStream* splice_site_info_stream_new(GenomeStream *in_stream,
+GtNodeStream* splice_site_info_stream_new(GtNodeStream *in_stream,
                                           RegionMapping *rm)
 {
-  GenomeStream *gs = genome_stream_create(splice_site_info_stream_class(),
+  GtNodeStream *gs = gt_node_stream_create(splice_site_info_stream_class(),
                                           false);
   SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
-  ssis->in_stream = genome_stream_ref(in_stream);
+  ssis->in_stream = gt_node_stream_ref(in_stream);
   ssis->splice_site_info_visitor = splicesiteinfo_visitor_new(rm);
   return gs;
 }
 
-bool splice_site_info_stream_show(GenomeStream *gs)
+bool splice_site_info_stream_show(GtNodeStream *gs)
 {
   SpliceSiteInfoStream *ssis;
   assert(gs);

@@ -15,21 +15,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_STREAM_H
-#define GENOME_STREAM_H
+#ifndef NODE_STREAM_REP_H
+#define NODE_STREAM_REP_H
 
-#include <stdbool.h>
+#include <stdio.h>
+#include "extended/node_stream.h"
 
-#include "extended/genome_node.h"
+struct GtNodeStreamClass
+{
+  size_t size;
+  int  (*next_tree)(GtNodeStream*, GtGenomeNode**, GtError*);
+  void (*free)(GtNodeStream*);
+};
 
-/* the ``genome stream'' interface */
-typedef struct GenomeStreamClass GenomeStreamClass;
-typedef struct GenomeStream GenomeStream;
+struct GtNodeStream
+{
+  const GtNodeStreamClass *c_class;
+  GtGenomeNode *buffer;
+  bool ensure_sorting;
+  unsigned int reference_count;
+};
 
-GenomeStream* genome_stream_ref(GenomeStream*);
-int           genome_stream_next_tree(GenomeStream*, GtGenomeNode**,
-                                      GtError*);
-bool          genome_stream_is_sorted(GenomeStream*);
-void          genome_stream_delete(GenomeStream*);
+GtNodeStream*  gt_node_stream_create(const GtNodeStreamClass*,
+                                    bool ensure_sorting);
+void*          gt_node_stream_cast(const GtNodeStreamClass*, GtNodeStream*);
 
 #endif

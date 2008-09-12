@@ -31,7 +31,7 @@ struct GtBlock {
   bool show_caption;
   GtStrand strand;
   const char *type;
-  GtGenomeFeature *top_level_feature;
+  GtFeatureNode *top_level_feature;
   unsigned long reference_count;
 };
 
@@ -81,26 +81,26 @@ GtBlock* gt_block_new(void)
   return block;
 }
 
-GtBlock* gt_block_new_from_node(GtGenomeFeature *node)
+GtBlock* gt_block_new_from_node(GtFeatureNode *node)
 {
   GtBlock *block;
   assert(node);
   block = gt_block_new();
   block->range = gt_genome_node_get_range((GtGenomeNode*) node);
-  block->strand = gt_genome_feature_get_strand(node);
-  block->type = gt_genome_feature_get_type(node);
-  block->top_level_feature = (GtGenomeFeature*)
+  block->strand = gt_feature_node_get_strand(node);
+  block->type = gt_feature_node_get_type(node);
+  block->top_level_feature = (GtFeatureNode*)
                                    gt_genome_node_ref((GtGenomeNode*) node);
   return block;
 }
 
 
-void gt_block_insert_element(GtBlock *block, GtGenomeFeature *gf)
+void gt_block_insert_element(GtBlock *block, GtFeatureNode *gf)
 {
   GtElement *element;
   assert(block && gf);
   if (!block->top_level_feature)
-    block->top_level_feature = (GtGenomeFeature*)
+    block->top_level_feature = (GtFeatureNode*)
                                     gt_genome_node_ref((GtGenomeNode*) gf);
   element = gt_element_new(gf);
   gt_dlist_add(block->elements, element);
@@ -144,13 +144,13 @@ GtBlock* gt_block_clone(GtBlock *block)
   newblock->range.end = block->range.end;
   newblock->show_caption = block->show_caption;
   newblock->strand = block->strand;
-  newblock->top_level_feature = (GtGenomeFeature*)
+  newblock->top_level_feature = (GtFeatureNode*)
                                    gt_genome_node_ref((GtGenomeNode*)
                                                 block->top_level_feature);
   return newblock;
 }
 
-GtGenomeFeature* gt_block_get_top_level_feature(const GtBlock *block)
+GtFeatureNode* gt_block_get_top_level_feature(const GtBlock *block)
 {
   assert(block);
   return block->top_level_feature;
@@ -281,21 +281,21 @@ int gt_block_unit_test(GtError *err)
   r2.start = 40UL;
   r2.end = 50UL;
 
-  gn1 = gt_genome_feature_new(seqid, gft_gene, r1.start, r1.end,
+  gn1 = gt_feature_node_new(seqid, gft_gene, r1.start, r1.end,
                               GT_STRAND_FORWARD);
-  gn2 = gt_genome_feature_new(seqid, gft_exon, r2.start, r2.end,
+  gn2 = gt_feature_node_new(seqid, gft_exon, r2.start, r2.end,
                               GT_STRAND_FORWARD);
 
-  e1 = gt_element_new((GtGenomeFeature*) gn1);
-  e2 = gt_element_new((GtGenomeFeature*) gn2);
+  e1 = gt_element_new((GtFeatureNode*) gn1);
+  e2 = gt_element_new((GtFeatureNode*) gn2);
 
   b = gt_block_new();
 
   /* test gt_block_insert_elements */
   ensure(had_err, (0UL == gt_block_get_size(b)));
-  gt_block_insert_element(b, (GtGenomeFeature*) gn1);
+  gt_block_insert_element(b, (GtFeatureNode*) gn1);
   ensure(had_err, (1UL == gt_block_get_size(b)));
-  gt_block_insert_element(b, (GtGenomeFeature*) gn2);
+  gt_block_insert_element(b, (GtFeatureNode*) gn2);
   ensure(had_err, (2UL == gt_block_get_size(b)));
 
   /* test gt_block_set_range & gt_block_get_range */

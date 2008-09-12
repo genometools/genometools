@@ -15,18 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COMMENT_H
-#define COMMENT_H
+#ifndef REGION_NODE_H
+#define REGION_NODE_H
 
-#include "core/error.h"
+#include "extended/region_node_api.h"
 
-/* implements the ``genome node'' interface */
-typedef struct GtCommentNode GtCommentNode;
-
-#include "extended/genome_node.h"
-
-const GtGenomeNodeClass* gt_comment_class(void);
-GtGenomeNode*            gt_comment_new(const char *comment);
-const char*               gt_comment_get_comment(const GtCommentNode*);
+void                     gt_region_node_consolidate(GtRegionNode*,
+                                                    GtRegionNode*);
 
 #endif

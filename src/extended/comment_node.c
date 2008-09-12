@@ -20,36 +20,36 @@
 #include "core/cstr.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/comment.h"
+#include "extended/comment_node.h"
 #include "extended/genome_node_rep.h"
 
 struct GtCommentNode
 {
   const GtGenomeNode parent_instance;
   char *comment;
-  GtStr *gt_comment_str; /* used in gt_comment_get_idstr() */
+  GtStr *comment_str; /* used in gt_comment_node_get_idstr() */
 };
 
-#define gt_comment_cast(GN)\
-        gt_genome_node_cast(gt_comment_class(), GN)
+#define gt_comment_node_cast(comment_node) \
+        gt_genome_node_cast(gt_comment_node_class(), comment_node)
 
-static void gt_comment_free(GtGenomeNode *gn)
+static void comment_node_free(GtGenomeNode *gn)
 {
-  GtCommentNode *c = gt_comment_cast(gn);
+  GtCommentNode *c = gt_comment_node_cast(gn);
   assert(c && c->comment);
   gt_free(c->comment);
-  gt_str_delete(c->gt_comment_str);
+  gt_str_delete(c->comment_str);
 }
 
-static GtStr* gt_comment_get_idstr(GtGenomeNode *gn)
+static GtStr* comment_node_get_idstr(GtGenomeNode *gn)
 {
   GtCommentNode *c;
   assert(gn);
-  c = gt_comment_cast(gn);
-  return c->gt_comment_str;
+  c = gt_comment_node_cast(gn);
+  return c->comment_str;
 }
 
-static GtRange gt_comment_get_range(GT_UNUSED GtGenomeNode *gn)
+static GtRange comment_node_get_range(GT_UNUSED GtGenomeNode *gn)
 {
   GtRange range;
   range.start = 0;
@@ -57,39 +57,39 @@ static GtRange gt_comment_get_range(GT_UNUSED GtGenomeNode *gn)
   return range;
 }
 
-static int gt_comment_accept(GtGenomeNode *gn, GenomeVisitor *gv,
-                             GtError *err)
+static int comment_node_accept(GtGenomeNode *gn, GenomeVisitor *gv,
+                               GtError *err)
 {
   GtCommentNode *c;
   gt_error_check(err);
-  c = gt_comment_cast(gn);
-  return genome_visitor_visit_comment(gv, c, err);
+  c = gt_comment_node_cast(gn);
+  return genome_visitor_visit_comment_node(gv, c, err);
 }
 
-const GtGenomeNodeClass* gt_comment_class()
+const GtGenomeNodeClass* gt_comment_node_class()
 {
   static const GtGenomeNodeClass gnc = { sizeof (GtCommentNode),
-                                       gt_comment_free,
-                                       NULL,
-                                       gt_comment_get_idstr,
-                                       gt_comment_get_range,
-                                       NULL,
-                                       NULL,
-                                       gt_comment_accept };
+                                         comment_node_free,
+                                         NULL,
+                                         comment_node_get_idstr,
+                                         comment_node_get_range,
+                                         NULL,
+                                         NULL,
+                                         comment_node_accept };
   return &gnc;
 }
 
-GtGenomeNode* gt_comment_new(const char *comment)
+GtGenomeNode* gt_comment_node_new(const char *comment)
 {
-  GtGenomeNode *gn = gt_genome_node_create(gt_comment_class());
-  GtCommentNode *c = gt_comment_cast(gn);
+  GtGenomeNode *gn = gt_genome_node_create(gt_comment_node_class());
+  GtCommentNode *c = gt_comment_node_cast(gn);
   assert(comment);
   c->comment = gt_cstr_dup(comment);
-  c->gt_comment_str = gt_str_new_cstr("");
+  c->comment_str = gt_str_new_cstr("");
   return gn;
 }
 
-const char* gt_comment_get_comment(const GtCommentNode *c)
+const char* gt_comment_node_get_comment(const GtCommentNode *c)
 {
   assert(c && c->comment);
   return c->comment;

@@ -146,12 +146,12 @@ static int extracttarget_from_node(GtGenomeNode *gn, GtStrArray *seqfiles,
   int had_err = 0;
   gt_error_check(err);
   assert(gn && seqfiles);
-  if (gt_genome_node_cast(gt_genome_feature_class(), gn)) {
+  if (gt_genome_node_cast(gt_feature_node_class(), gn)) {
     const char *target;
     GtGenomeNode *child;
     gni = gt_genome_node_iterator_new(gn);
     while (!had_err && (child = gt_genome_node_iterator_next(gni))) {
-      if ((target = gt_genome_feature_get_attribute(child, "Target")))
+      if ((target = gt_feature_node_get_attribute(child, "Target")))
         had_err = extracttarget_from_seqfiles(target, seqfiles, err);
     }
     gt_genome_node_iterator_delete(gni);
@@ -164,7 +164,7 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
                                    GtError *err)
 {
   ExtractTargetArguments *arguments = tool_arguments;
-  GenomeStream *gff3_in_stream;
+  GtNodeStream *gff3_in_stream;
   GtGenomeNode *gn;
   int had_err;
 
@@ -174,12 +174,12 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
   gff3_in_stream = gff3_in_stream_new_unsorted(1, argv + parsed_args, false,
                                                false);
 
-  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn) {
+  while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn) {
     had_err = extracttarget_from_node(gn, arguments->seqfiles, err);
     gt_genome_node_rec_delete(gn);
   }
 
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }

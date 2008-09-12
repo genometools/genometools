@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,29 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_STREAM_REP_H
-#define GENOME_STREAM_REP_H
+#ifndef COMMENT_NODE_H
+#define COMMENT_NODE_H
 
-#include <stdio.h>
-#include "extended/genome_stream.h"
+#include "core/error.h"
 
-struct GenomeStreamClass
-{
-  size_t size;
-  int  (*next_tree)(GenomeStream*, GtGenomeNode**, GtError*);
-  void (*free)(GenomeStream*);
-};
+/* implements the ``genome node'' interface */
+typedef struct GtCommentNode GtCommentNode;
 
-struct GenomeStream
-{
-  const GenomeStreamClass *c_class;
-  GtGenomeNode *buffer;
-  bool ensure_sorting;
-  unsigned int reference_count;
-};
+#include "extended/genome_node.h"
 
-GenomeStream*  genome_stream_create(const GenomeStreamClass*,
-                                    bool ensure_sorting);
-void*          genome_stream_cast(const GenomeStreamClass*, GenomeStream*);
+const GtGenomeNodeClass* gt_comment_node_class(void);
+GtGenomeNode*            gt_comment_node_new(const char *comment);
+const char*              gt_comment_node_get_comment(const GtCommentNode*);
 
 #endif

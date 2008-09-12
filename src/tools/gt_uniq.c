@@ -62,7 +62,7 @@ static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
 
 int gt_uniq(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream,
+  GtNodeStream *gff3_in_stream,
                *uniq_stream = NULL,
                *gff3_out_stream = NULL;
   UniqArguments arguments;
@@ -89,13 +89,13 @@ int gt_uniq(int argc, const char **argv, GtError *err)
   gff3_out_stream = gff3_out_stream_new(uniq_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) && gn)
+  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) && gn)
     gt_genome_node_rec_delete(gn);
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(uniq_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(uniq_stream);
+  gt_node_stream_delete(gff3_in_stream);
   gt_genfile_close(arguments.outfp);
 
   return had_err;

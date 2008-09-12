@@ -19,12 +19,12 @@
 #define ADD_INTRONS_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct AddIntronsStream AddIntronsStream;
 
-const GenomeStreamClass* add_introns_stream_class(void);
-GenomeStream*            add_introns_stream_new(GenomeStream*);
+const GtNodeStreamClass* add_introns_stream_class(void);
+GtNodeStream*            add_introns_stream_new(GtNodeStream*);
 
 #endif

@@ -18,12 +18,12 @@
 #ifndef TARGETBEST_FILTER_STREAM_H
 #define TARGETBEST_FILTER_STREAM_H
 
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct TargetbestFilterStream TargetbestFilterStream;
 
-const GenomeStreamClass* targetbest_filter_stream_class(void);
-GenomeStream*            targetbest_filter_stream_new(GenomeStream*);
+const GtNodeStreamClass* targetbest_filter_stream_class(void);
+GtNodeStream*            targetbest_filter_stream_new(GtNodeStream*);
 
 #endif

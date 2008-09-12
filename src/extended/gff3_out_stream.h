@@ -18,14 +18,14 @@
 #ifndef GFF3_OUT_STREAM_H
 #define GFF3_OUT_STREAM_H
 
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct GFF3OutStream GFF3OutStream;
 
-const GenomeStreamClass* gff3_out_stream_class(void);
-GenomeStream*            gff3_out_stream_new(GenomeStream*, GtGenFile*);
-void                     gff3_out_stream_set_fasta_width(GenomeStream*,
+const GtNodeStreamClass* gff3_out_stream_class(void);
+GtNodeStream*            gff3_out_stream_new(GtNodeStream*, GtGenFile*);
+void                     gff3_out_stream_set_fasta_width(GtNodeStream*,
                                                          unsigned long);
 
 #endif

@@ -37,7 +37,7 @@
 #include "core/tokenizer.h"
 #include "extended/alignment.h"
 #include "extended/evaluator.h"
-#include "extended/genome_feature.h"
+#include "extended/feature_node.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/gff3_escaping.h"
 #include "extended/hmm.h"
@@ -165,7 +165,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "dlist example", gt_dlist_example);
   hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
   hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
-  hashmap_add(unit_tests, "genome feature class", gt_genome_feature_unit_test);
+  hashmap_add(unit_tests, "genome feature class", gt_feature_node_unit_test);
   hashmap_add(unit_tests, "genome node iterator example",
               gt_genome_node_iterator_example);
   hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);

@@ -19,12 +19,12 @@
 #include <stdarg.h>
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 
-GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
+GtNodeStream* gt_node_stream_create(const GtNodeStreamClass *gsc,
                                    bool ensure_sorting)
 {
-  GenomeStream *gs;
+  GtNodeStream *gs;
   assert(gsc && gsc->size);
   gs = gt_calloc(1, gsc->size);
   gs->c_class = gsc;
@@ -32,14 +32,14 @@ GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
   return gs;
 }
 
-GenomeStream* genome_stream_ref(GenomeStream *gs)
+GtNodeStream* gt_node_stream_ref(GtNodeStream *gs)
 {
   assert(gs);
   gs->reference_count++;
   return gs;
 }
 
-void genome_stream_delete(GenomeStream *gs)
+void gt_node_stream_delete(GtNodeStream *gs)
 {
   if (!gs) return;
   if (gs->reference_count) {
@@ -52,7 +52,7 @@ void genome_stream_delete(GenomeStream *gs)
   gt_free(gs);
 }
 
-int genome_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
+int gt_node_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   GtGenomeNode *new_node = NULL;
   int had_err = 0;
@@ -77,14 +77,14 @@ int genome_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-bool genome_stream_is_sorted(GenomeStream *gs)
+bool gt_node_stream_is_sorted(GtNodeStream *gs)
 {
   assert(gs);
   return gs->ensure_sorting;
 }
 
-void* genome_stream_cast(GT_UNUSED const GenomeStreamClass *gsc,
-                         GenomeStream *gs)
+void* gt_node_stream_cast(GT_UNUSED const GtNodeStreamClass *gsc,
+                         GtNodeStream *gs)
 {
   assert(gsc && gs && gs->c_class == gsc);
   return gs;

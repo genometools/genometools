@@ -19,30 +19,27 @@
 #include "extended/sequence_node.h"
 #include "extended/genome_node_rep.h"
 
-struct GT_SequenceNode
+struct GtSequenceNode
 {
   const GtGenomeNode parent_instance;
   GtStr *description,
-         *sequence;
+        *sequence;
 };
 
-#define gt_sequence_node_cast(GN)\
-        gt_genome_node_cast(gt_sequence_node_class(), GN)
-
-static void gt_sequence_node_free(GtGenomeNode *gn)
+static void sequence_node_free(GtGenomeNode *gn)
 {
-  GT_SequenceNode *sn = gt_sequence_node_cast(gn);
+  GtSequenceNode *sn = gt_sequence_node_cast(gn);
   gt_str_delete(sn->sequence);
   gt_str_delete(sn->description);
 }
 
-static GtStr* gt_sequence_node_get_seqid(GtGenomeNode *gn)
+static GtStr* sequence_node_get_seqid(GtGenomeNode *gn)
 {
-  GT_SequenceNode *sn = gt_sequence_node_cast(gn);
+  GtSequenceNode *sn = gt_sequence_node_cast(gn);
   return sn->description;
 }
 
-static GtRange gt_sequence_node_get_range(GT_UNUSED GtGenomeNode *gn)
+static GtRange sequence_node_get_range(GT_UNUSED GtGenomeNode *gn)
 {
   GtRange range;
   range.start = 0;
@@ -50,18 +47,18 @@ static GtRange gt_sequence_node_get_range(GT_UNUSED GtGenomeNode *gn)
   return range;
 }
 
-static void gt_sequence_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
+static void sequence_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
 {
-  GT_SequenceNode *sn = gt_sequence_node_cast(gn);
+  GtSequenceNode *sn = gt_sequence_node_cast(gn);
   assert(sn && seqid);
   gt_str_delete(sn->description);
   sn->description = gt_str_ref(seqid);
 }
 
-static int gt_sequence_node_accept(GtGenomeNode *gn, GenomeVisitor *gv,
-                                   GtError *err)
+static int sequence_node_accept(GtGenomeNode *gn, GenomeVisitor *gv,
+                                GtError *err)
 {
-  GT_SequenceNode *sn;
+  GtSequenceNode *sn;
   gt_error_check(err);
   sn = gt_sequence_node_cast(gn);
   return genome_visitor_visit_sequence_node(gv, sn, err);
@@ -69,40 +66,40 @@ static int gt_sequence_node_accept(GtGenomeNode *gn, GenomeVisitor *gv,
 
 const GtGenomeNodeClass* gt_sequence_node_class()
 {
-  static const GtGenomeNodeClass gnc = { sizeof (GT_SequenceNode),
-                                       gt_sequence_node_free,
-                                       gt_sequence_node_get_seqid,
-                                       gt_sequence_node_get_seqid,
-                                       gt_sequence_node_get_range,
-                                       NULL,
-                                       gt_sequence_node_change_seqid,
-                                       gt_sequence_node_accept };
+  static const GtGenomeNodeClass gnc = { sizeof (GtSequenceNode),
+                                         sequence_node_free,
+                                         sequence_node_get_seqid,
+                                         sequence_node_get_seqid,
+                                         sequence_node_get_range,
+                                         NULL,
+                                         sequence_node_change_seqid,
+                                         sequence_node_accept };
   return &gnc;
 }
 
 GtGenomeNode* gt_sequence_node_new(const char *description, GtStr *sequence)
 {
   GtGenomeNode *gn = gt_genome_node_create(gt_sequence_node_class());
-  GT_SequenceNode *sn = gt_sequence_node_cast(gn);
+  GtSequenceNode *sn = gt_sequence_node_cast(gn);
   assert(description && sequence);
   sn->description = gt_str_new_cstr(description);
   sn->sequence = sequence;
   return gn;
 }
 
-const char* gt_sequence_node_get_description(const GT_SequenceNode *sn)
+const char* gt_sequence_node_get_description(const GtSequenceNode *sn)
 {
   assert(sn);
   return gt_str_get(sn->description);
 }
 
-const char* gt_sequence_node_get_sequence(const GT_SequenceNode *sn)
+const char* gt_sequence_node_get_sequence(const GtSequenceNode *sn)
 {
   assert(sn);
   return gt_str_get(sn->sequence);
 }
 
-unsigned long gt_sequence_node_get_sequence_length(const GT_SequenceNode *sn)
+unsigned long gt_sequence_node_get_sequence_length(const GtSequenceNode *sn)
 {
   assert(sn);
   return gt_str_length(sn->sequence);

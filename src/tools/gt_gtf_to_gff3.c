@@ -42,7 +42,7 @@ static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
 
 int gt_gtf_to_gff3(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
+  GtNodeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
   GtGenomeNode *gn;
   int parsed_args, had_err = 0;
   bool be_tolerant;
@@ -66,15 +66,15 @@ int gt_gtf_to_gff3(int argc, const char **argv, GtError *err)
     gff3_out_stream = gff3_out_stream_new(gtf_in_stream, NULL);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+    while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
            gn) {
       gt_genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(gtf_in_stream);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(gtf_in_stream);
 
   return had_err;
 }

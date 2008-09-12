@@ -25,10 +25,10 @@
 struct GenomeVisitorClass {
   size_t size;
   void (*free)(GenomeVisitor*);
-  int  (*comment)(GenomeVisitor*, GtCommentNode*, GtError*);
-  int  (*genome_feature)(GenomeVisitor*, GtGenomeFeature*, GtError*);
-  int  (*sequence_region)(GenomeVisitor*, GtSequenceRegion*, GtError*);
-  int  (*sequence_node)(GenomeVisitor*, GT_SequenceNode*, GtError*);
+  int  (*comment_node)(GenomeVisitor*, GtCommentNode*, GtError*);
+  int  (*feature_node)(GenomeVisitor*, GtFeatureNode*, GtError*);
+  int  (*region_node)(GenomeVisitor*, GtRegionNode*, GtError*);
+  int  (*sequence_node)(GenomeVisitor*, GtSequenceNode*, GtError*);
 };
 
 struct GenomeVisitor {

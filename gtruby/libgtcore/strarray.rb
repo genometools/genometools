@@ -20,11 +20,11 @@ require 'gtdlload'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_StrArray* gt_strarray_new()"
-  extern "void gt_strarray_add_cstr(GT_StrArray*, const char*)"
-  extern "const char* gt_strarray_get(const GT_StrArray*, unsigned long)"
-  extern "unsigned long gt_strarray_size(const GT_StrArray*)"
-  extern "void gt_strarray_delete(GT_StrArray*)"
+  extern "GtStrArray* gt_strarray_new()"
+  extern "void gt_strarray_add_cstr(GtStrArray*, const char*)"
+  extern "const char* gt_strarray_get(const GtStrArray*, unsigned long)"
+  extern "unsigned long gt_strarray_size(const GtStrArray*)"
+  extern "void gt_strarray_delete(GtStrArray*)"
 
   class StrArray
     attr_reader :strarray

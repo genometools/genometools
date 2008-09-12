@@ -97,29 +97,29 @@ int gt_line_unit_test(GtError *err)
   seqid2 = gt_str_new_cstr("test2");
   seqid3 = gt_str_new_cstr("foo");
 
-  parent = gt_genome_feature_new(seqid1, gft_gene, 10, 80, GT_STRAND_FORWARD);
-  gn1 = gt_genome_feature_new(seqid3, gft_exon, r1.start, r1.end,
+  parent = gt_feature_node_new(seqid1, gft_gene, 10, 80, GT_STRAND_FORWARD);
+  gn1 = gt_feature_node_new(seqid3, gft_exon, r1.start, r1.end,
                               GT_STRAND_FORWARD);
-  gn2 = gt_genome_feature_new(seqid3, gft_exon, r2.start, r2.end,
+  gn2 = gt_feature_node_new(seqid3, gft_exon, r2.start, r2.end,
                              GT_STRAND_FORWARD);
-  gn3 = gt_genome_feature_new(seqid2, gft_exon, 70, 100, GT_STRAND_FORWARD);
-  gn4 = gt_genome_feature_new(seqid3, gft_TF_binding_site, 10, 20,
+  gn3 = gt_feature_node_new(seqid2, gft_exon, 70, 100, GT_STRAND_FORWARD);
+  gn4 = gt_feature_node_new(seqid3, gft_TF_binding_site, 10, 20,
                               GT_STRAND_FORWARD);
 
   l1 = gt_line_new();
   l2 = gt_line_new();
 
-  gt_genome_feature_add_attribute((GtGenomeFeature*) parent, "Name", foo);
-  gt_genome_feature_add_attribute((GtGenomeFeature*) gn1, "Name", bar);
-  gt_genome_feature_add_attribute((GtGenomeFeature*) gn2, "Name", bar);
-  gt_genome_feature_add_attribute((GtGenomeFeature*) gn3, "Name", blub);
-  gt_genome_feature_add_attribute((GtGenomeFeature*) gn4, "Name", bar);
+  gt_feature_node_add_attribute((GtFeatureNode*) parent, "Name", foo);
+  gt_feature_node_add_attribute((GtFeatureNode*) gn1, "Name", bar);
+  gt_feature_node_add_attribute((GtFeatureNode*) gn2, "Name", bar);
+  gt_feature_node_add_attribute((GtFeatureNode*) gn3, "Name", blub);
+  gt_feature_node_add_attribute((GtFeatureNode*) gn4, "Name", bar);
 
   b1 = gt_block_new();
   b2 = gt_block_new();
 
-  gt_block_insert_element(b1, (GtGenomeFeature*) gn1);
-  gt_block_insert_element(b2, (GtGenomeFeature*) gn2);
+  gt_block_insert_element(b1, (GtFeatureNode*) gn1);
+  gt_block_insert_element(b2, (GtFeatureNode*) gn2);
   gt_block_set_range(b1, r1);
   gt_block_set_range(b2, r2);
 

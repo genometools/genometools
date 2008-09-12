@@ -19,16 +19,16 @@
 #define CDS_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 #include "extended/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct CDSStream CDSStream;
 
-const GenomeStreamClass* cds_stream_class(void);
+const GtNodeStreamClass* cds_stream_class(void);
 
 /* create a CDSSTream, takes ownership of RegionMapping */
-GenomeStream*            cds_stream_new(GenomeStream*, RegionMapping*,
+GtNodeStream*            cds_stream_new(GtNodeStream*, RegionMapping*,
                                         const char *source);
 
 #endif

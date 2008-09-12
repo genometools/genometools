@@ -166,7 +166,7 @@ static OPrval parse_options(int *parsed_args,
 
 int gt_sketch(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream = NULL,
+  GtNodeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
                *feature_stream = NULL,
@@ -243,15 +243,15 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     feature_stream = feature_stream_new(last_stream, features);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(feature_stream, &gn, err)) &&
+    while (!(had_err = gt_node_stream_next(feature_stream, &gn, err)) &&
            gn) {
       gt_genome_node_rec_delete(gn);
     }
 
-    genome_stream_delete(feature_stream);
-    genome_stream_delete(gff3_out_stream);
-    genome_stream_delete(add_introns_stream);
-    genome_stream_delete(gff3_in_stream);
+    gt_node_stream_delete(feature_stream);
+    gt_node_stream_delete(gff3_out_stream);
+    gt_node_stream_delete(add_introns_stream);
+    gt_node_stream_delete(gff3_in_stream);
   }
 
   /* if seqid is empty, take first one added to index */
@@ -328,7 +328,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
         char buf[BUFSIZ];
         rm = gt_image_info_get_recmap(ii, i);
         gt_recmap_format_html_imagemap_coords(rm, buf, BUFSIZ);
-        printf("%s, %s\n", buf, gt_genome_feature_get_type(rm->gf));
+        printf("%s, %s\n", buf, gt_feature_node_get_type(rm->gf));
       }
     }
     had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, file,

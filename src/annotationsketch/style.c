@@ -175,7 +175,7 @@ static int gt_style_find_section_for_getting(const GtStyle *sty,
 }
 
 bool gt_style_get_color(const GtStyle *sty, const char *section,
-                     const char *key, GtColor *color, GtGenomeFeature *gn)
+                     const char *key, GtColor *color, GtFeatureNode *gn)
 {
   int i = 0;
   assert(sty && section && key && color);
@@ -265,7 +265,7 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_str(const GtStyle *sty, const char *section,
-                     const char *key, GtStr *text, GtGenomeFeature *gn)
+                     const char *key, GtStr *text, GtFeatureNode *gn)
 {
   int i = 0;
   assert(sty && key && section);
@@ -316,7 +316,7 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
-                    double *val, GT_UNUSED GtGenomeFeature *gn)
+                    double *val, GT_UNUSED GtFeatureNode *gn)
 {
   int i = 0;
   assert(sty && key && section && val);
@@ -368,7 +368,7 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
 
 bool gt_style_get_bool(const GtStyle *sty, const char *section,
                        const char *key, bool *val,
-                       GT_UNUSED GtGenomeFeature *gn)
+                       GT_UNUSED GtFeatureNode *gn)
 {
   int i = 0;
   assert(sty && key && section);

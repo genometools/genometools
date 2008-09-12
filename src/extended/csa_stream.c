@@ -19,18 +19,18 @@
 #include "extended/csa_stream.h"
 #include "extended/csa_visitor.h"
 #include "extended/consensus_sa.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 
 struct CSAStream {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GenomeVisitor *csa_visitor; /* the actual work is done in the visitor */
 };
 
 #define csa_stream_cast(GS)\
-        genome_stream_cast(csa_stream_class(), GS)
+        gt_node_stream_cast(csa_stream_class(), GS)
 
-int csa_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
+int csa_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   CSAStream *cs;
   int had_err;
@@ -44,7 +44,7 @@ int csa_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(had_err = genome_stream_next_tree(cs->in_stream, gn, err)) && *gn) {
+  while (!(had_err = gt_node_stream_next(cs->in_stream, gn, err)) && *gn) {
     assert(*gn && !had_err);
     had_err = gt_genome_node_accept(*gn, cs->csa_visitor, err);
     if (had_err)
@@ -69,27 +69,27 @@ int csa_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void csa_stream_free(GenomeStream *gs)
+static void csa_stream_free(GtNodeStream *gs)
 {
   CSAStream *cs = csa_stream_cast(gs);
   genome_visitor_delete(cs->csa_visitor);
-  genome_stream_delete(cs->in_stream);
+  gt_node_stream_delete(cs->in_stream);
 }
 
-const GenomeStreamClass* csa_stream_class(void)
+const GtNodeStreamClass* csa_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (CSAStream),
+  static const GtNodeStreamClass gsc = { sizeof (CSAStream),
                                          csa_stream_next_tree,
                                          csa_stream_free };
   return &gsc;
 }
 
-GenomeStream* csa_stream_new(GenomeStream *in_stream, unsigned long join_length)
+GtNodeStream* csa_stream_new(GtNodeStream *in_stream, unsigned long join_length)
 {
-  GenomeStream *gs = genome_stream_create(csa_stream_class(),
-                                          genome_stream_is_sorted(in_stream));
+  GtNodeStream *gs = gt_node_stream_create(csa_stream_class(),
+                                          gt_node_stream_is_sorted(in_stream));
   CSAStream *cs = csa_stream_cast(gs);
-  cs->in_stream = genome_stream_ref(in_stream);
+  cs->in_stream = gt_node_stream_ref(in_stream);
   cs->csa_visitor = csa_visitor_new(join_length);
   return gs;
 }

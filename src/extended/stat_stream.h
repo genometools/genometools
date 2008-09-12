@@ -19,19 +19,19 @@
 #define STAT_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct StatStream StatStream;
 
-const GenomeStreamClass* stat_stream_class(void);
+const GtNodeStreamClass* stat_stream_class(void);
 
-GenomeStream*            stat_stream_new(GenomeStream*,
+GtNodeStream*            stat_stream_new(GtNodeStream*,
                                          bool gene_length_distri,
                                          bool gene_score_distri,
                                          bool exon_length_distri,
                                          bool exon_number_distri,
                                          bool intron_length_distri);
-void                     stat_stream_show_stats(GenomeStream*);
+void                     stat_stream_show_stats(GtNodeStream*);
 
 #endif

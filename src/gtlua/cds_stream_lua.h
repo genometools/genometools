@@ -20,7 +20,7 @@
 
 #include "lua.h"
 
-/* exports the CDSStream class (which implements the GenomeStream) interface
+/* exports the CDSStream class (which implements the GtNodeStream) interface
    to Lua:
 
    -- Returns a new CDS (coding sequence) stream object (a genome stream) which

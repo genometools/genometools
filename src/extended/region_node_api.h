@@ -15,15 +15,27 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQUENCE_REGION_API_H
-#define SEQUENCE_REGION_API_H
+#ifndef REGION_NODE_API_H
+#define REGION_NODE_API_H
 
 /* implements the ``genome node'' interface */
-typedef struct GtSequenceRegion GtSequenceRegion;
+typedef struct GtRegionNode GtRegionNode;
 
 #include "extended/genome_node.h"
 #include "core/str_api.h"
 
-GtGenomeNode* gt_sequence_region_new(GtStr *seqid, GtRange range);
+const GtGenomeNodeClass* gt_region_node_class(void);
+
+/* Create a new <GtRegionNode*> representing sequence with ID <seqid> from
+   base position <start> to base position <end> (1-based).
+   <start> has to be smaller or equal than <end>. */
+GtGenomeNode* gt_region_node_new(GtStr *seqid, unsigned long start,
+                                               unsigned long end);
+
+#define       gt_region_node_cast(genome_node) \
+              gt_genome_node_cast(gt_region_node_class(), genome_node)
+
+#define       gt_region_node_try_cast(genome_node) \
+              gt_genome_node_try_cast(gt_region_node_class(), genome_node)
 
 #endif

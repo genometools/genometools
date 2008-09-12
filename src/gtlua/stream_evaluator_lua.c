@@ -31,7 +31,7 @@
 static int stream_evaluator_lua_new(lua_State *L)
 {
   StreamEvaluator **stream_evaluator;
-  GenomeStream **reality_stream, **prediction_stream;
+  GtNodeStream **reality_stream, **prediction_stream;
   reality_stream = check_genome_stream(L, 1);
   prediction_stream = check_genome_stream(L, 2);
   stream_evaluator = lua_newuserdata(L, sizeof (StreamEvaluator*));

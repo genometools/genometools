@@ -18,13 +18,13 @@
 #ifndef FILTER_STREAM_H
 #define FILTER_STREAM_H
 
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct FilterStream FilterStream;
 
-const GenomeStreamClass* filter_stream_class(void);
-GenomeStream*            filter_stream_new(GenomeStream*,
+const GtNodeStreamClass* filter_stream_class(void);
+GtNodeStream*            filter_stream_new(GtNodeStream*,
                                            GtStr *seqid, GtStr *typefilter,
                                            GtRange contain_range,
                                            GtRange overlap_range,

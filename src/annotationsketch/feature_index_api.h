@@ -21,25 +21,25 @@
 #ifndef FEATURE_INDEX_API_H
 #define FEATURE_INDEX_API_H
 
-#include "extended/sequence_region_api.h"
+#include "extended/region_node_api.h"
 
 typedef struct GtFeatureIndex GtFeatureIndex;
 
 GtFeatureIndex* gt_feature_index_new(void);
-void             gt_feature_index_add_sequence_region(GtFeatureIndex*,
-                                                      GtSequenceRegion*);
+void             gt_feature_index_add_region_node(GtFeatureIndex*,
+                                                  GtRegionNode*);
 /* Add <genome_feature> to <feature_index>, associating it with a sequence
    region denoted by its identifier string. */
 void             gt_feature_index_add_genome_feature(GtFeatureIndex
                                                      *feature_index,
-                                                     GtGenomeFeature
+                                                     GtFeatureNode
                                                      *genome_feature);
 /* Add all features contained in <gff3file> to <feature_index>, if <gff3file> is
    valid. Otherwise, <feature_index> is not changed and <err> is set. */
 int              gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
                                                const char *gff3file,
                                                GtError *err);
-/* Returns an array of GtGenomeFeatures associated with a given sequence region
+/* Returns an array of GtFeatureNodes associated with a given sequence region
    identifier <seqid>. */
 GtArray*        gt_feature_index_get_features_for_seqid(GtFeatureIndex*,
                                                          const char *seqid);

@@ -19,12 +19,12 @@
 #define UNIQ_STREAM_H
 
 #include <stdio.h>
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct UniqStream UniqStream;
 
-const GenomeStreamClass* uniq_stream_class(void);
-GenomeStream*            uniq_stream_new(GenomeStream*);
+const GtNodeStreamClass* uniq_stream_class(void);
+GtNodeStream*            uniq_stream_new(GtNodeStream*);
 
 #endif

@@ -22,17 +22,17 @@
 typedef struct GenomeVisitorClass GenomeVisitorClass;
 typedef struct GenomeVisitor GenomeVisitor;
 
-#include "extended/comment.h"
-#include "extended/genome_feature.h"
-#include "extended/sequence_region.h"
+#include "extended/comment_node.h"
+#include "extended/feature_node.h"
+#include "extended/region_node.h"
 #include "extended/sequence_node.h"
 
-int  genome_visitor_visit_comment(GenomeVisitor*, GtCommentNode*, GtError*);
-int  genome_visitor_visit_genome_feature(GenomeVisitor*, GtGenomeFeature*,
-                                         GtError*);
-int  genome_visitor_visit_sequence_region(GenomeVisitor*, GtSequenceRegion*,
-                                          GtError*);
-int  genome_visitor_visit_sequence_node(GenomeVisitor*, GT_SequenceNode*,
+int  genome_visitor_visit_comment_node(GenomeVisitor*, GtCommentNode*,
+                                        GtError*);
+int  genome_visitor_visit_feature_node(GenomeVisitor*, GtFeatureNode*,
+                                       GtError*);
+int  genome_visitor_visit_region_node(GenomeVisitor*, GtRegionNode*, GtError*);
+int  genome_visitor_visit_sequence_node(GenomeVisitor*, GtSequenceNode*,
                                         GtError*);
 void genome_visitor_delete(GenomeVisitor *gv);
 

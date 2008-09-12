@@ -18,12 +18,12 @@
 #ifndef SORT_STREAM_H
 #define SORT_STREAM_H
 
-#include "extended/genome_stream.h"
+#include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct SortStream SortStream;
 
-const GenomeStreamClass* sort_stream_class(void);
-GenomeStream*            sort_stream_new(GenomeStream*);
+const GtNodeStreamClass* sort_stream_class(void);
+GtNodeStream*            sort_stream_new(GtNodeStream*);
 
 #endif

@@ -16,22 +16,22 @@
 */
 
 #include <assert.h>
+#include "extended/feature_node.h"
 #include "extended/filter_stream.h"
 #include "extended/filter_visitor.h"
-#include "extended/genome_feature.h"
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 
 struct FilterStream
 {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   GenomeVisitor *filter_visitor; /* the actual work is done in the visitor */
 };
 
 #define filter_stream_cast(GS)\
-        genome_stream_cast(filter_stream_class(), GS);
+        gt_node_stream_cast(filter_stream_class(), GS);
 
-static int filter_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int filter_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                    GtError *err)
 {
   FilterStream *fs;
@@ -47,7 +47,7 @@ static int filter_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(had_err = genome_stream_next_tree(fs->in_stream, gn, err)) && *gn) {
+  while (!(had_err = gt_node_stream_next(fs->in_stream, gn, err)) && *gn) {
     assert(*gn && !had_err);
     had_err = gt_genome_node_accept(*gn, fs->filter_visitor, err);
     if (had_err)
@@ -63,22 +63,22 @@ static int filter_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void filter_stream_free(GenomeStream *gs)
+static void filter_stream_free(GtNodeStream *gs)
 {
   FilterStream *fs = filter_stream_cast(gs);
   genome_visitor_delete(fs->filter_visitor);
-  genome_stream_delete(fs->in_stream);
+  gt_node_stream_delete(fs->in_stream);
 }
 
-const GenomeStreamClass* filter_stream_class(void)
+const GtNodeStreamClass* filter_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (FilterStream),
+  static const GtNodeStreamClass gsc = { sizeof (FilterStream),
                                          filter_stream_next_tree,
                                          filter_stream_free };
   return &gsc;
 }
 
-GenomeStream* filter_stream_new(GenomeStream *in_stream,
+GtNodeStream* filter_stream_new(GtNodeStream *in_stream,
                                 GtStr *seqid, GtStr *typefilter,
                                 GtRange contain_range, GtRange overlap_range,
                                 GtStrand strand, GtStrand targetstrand,
@@ -88,11 +88,11 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 double min_average_splice_site_prob,
                                 unsigned long feature_num)
 {
-  GenomeStream *gs = genome_stream_create(filter_stream_class(),
-                                          genome_stream_is_sorted(in_stream));
+  GtNodeStream *gs = gt_node_stream_create(filter_stream_class(),
+                                          gt_node_stream_is_sorted(in_stream));
   FilterStream *filter_stream = filter_stream_cast(gs);
   assert(in_stream);
-  filter_stream->in_stream = genome_stream_ref(in_stream);
+  filter_stream->in_stream = gt_node_stream_ref(in_stream);
   filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter,
                                                      contain_range,
                                                      overlap_range, strand,

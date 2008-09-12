@@ -163,7 +163,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                           void *tool_arguments, GtError *err)
 {
   GT_TypeChecker *type_checker = NULL;
-  GenomeStream *gff3_in_stream,
+  GtNodeStream *gff3_in_stream,
                *sort_stream = NULL,
                *mergefeat_stream = NULL,
                *add_introns_stream = NULL,
@@ -240,18 +240,18 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+    while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
            gn) {
       gt_genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(sort_stream);
-  genome_stream_delete(mergefeat_stream);
-  genome_stream_delete(add_introns_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(sort_stream);
+  gt_node_stream_delete(mergefeat_stream);
+  gt_node_stream_delete(add_introns_stream);
+  gt_node_stream_delete(gff3_in_stream);
   gt_type_checker_delete(type_checker);
 
   return had_err;

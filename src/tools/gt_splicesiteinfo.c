@@ -60,7 +60,7 @@ static OPrval parse_options(int *parsed_args,
 
 int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream = NULL,
+  GtNodeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *splice_site_info_stream = NULL;
   GtGenomeNode *gn;
@@ -109,7 +109,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                                                           regionmapping);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(splice_site_info_stream, &gn,
+    while (!(had_err = gt_node_stream_next(splice_site_info_stream, &gn,
                                                err)) && gn) {
       gt_genome_node_rec_delete(gn);
     }
@@ -123,9 +123,9 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
   }
 
   /* free */
-  genome_stream_delete(splice_site_info_stream);
-  genome_stream_delete(add_introns_stream);
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(splice_site_info_stream);
+  gt_node_stream_delete(add_introns_stream);
+  gt_node_stream_delete(gff3_in_stream);
   gt_str_delete(arguments.regionmapping);
   gt_str_delete(arguments.seqfile);
 

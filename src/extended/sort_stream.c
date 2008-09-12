@@ -16,22 +16,22 @@
 */
 
 #include <assert.h>
-#include "extended/genome_stream_rep.h"
+#include "extended/node_stream_rep.h"
 #include "extended/sort_stream.h"
 
 struct SortStream
 {
-  const GenomeStream parent_instance;
-  GenomeStream *in_stream;
+  const GtNodeStream parent_instance;
+  GtNodeStream *in_stream;
   unsigned long idx;
   GtArray *trees;
   bool sorted;
 };
 
 #define sort_stream_cast(GS)\
-        genome_stream_cast(sort_stream_class(), GS);
+        gt_node_stream_cast(sort_stream_class(), GS);
 
-static int sort_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int sort_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                  GtError *err)
 {
   SortStream *sort_stream;
@@ -41,7 +41,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   sort_stream = sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {
-    while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, &node,
+    while (!(had_err = gt_node_stream_next(sort_stream->in_stream, &node,
                                                err)) && node) {
       gt_array_add(sort_stream->trees, node);
     }
@@ -69,7 +69,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void sort_stream_free(GenomeStream *gs)
+static void sort_stream_free(GtNodeStream *gs)
 {
   unsigned long i;
   SortStream *sort_stream = sort_stream_cast(gs);
@@ -78,23 +78,23 @@ static void sort_stream_free(GenomeStream *gs)
                               gt_array_get(sort_stream->trees, i));
   }
   gt_array_delete(sort_stream->trees);
-  genome_stream_delete(sort_stream->in_stream);
+  gt_node_stream_delete(sort_stream->in_stream);
 }
 
-const GenomeStreamClass* sort_stream_class(void)
+const GtNodeStreamClass* sort_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (SortStream),
+  static const GtNodeStreamClass gsc = { sizeof (SortStream),
                                          sort_stream_next_tree,
                                          sort_stream_free };
   return &gsc;
 }
 
-GenomeStream* sort_stream_new(GenomeStream *in_stream)
+GtNodeStream* sort_stream_new(GtNodeStream *in_stream)
 {
-  GenomeStream *gs = genome_stream_create(sort_stream_class(), true);
+  GtNodeStream *gs = gt_node_stream_create(sort_stream_class(), true);
   SortStream *sort_stream = sort_stream_cast(gs);
   assert(in_stream);
-  sort_stream->in_stream = genome_stream_ref(in_stream);
+  sort_stream->in_stream = gt_node_stream_ref(in_stream);
   sort_stream->sorted = false;
   sort_stream->idx = 0;
   sort_stream->trees = gt_array_new(sizeof (GtGenomeNode*));

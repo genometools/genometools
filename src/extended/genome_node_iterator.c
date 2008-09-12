@@ -43,8 +43,8 @@ GtGenomeNodeIterator* gt_genome_node_iterator_new(GtGenomeNode *gn)
   GtDlistelem *dlistelem;
   assert(gn);
   gni = genome_node_iterator_new_base(gn);
-  if (gt_genome_node_cast(gt_genome_feature_class(), gn) &&
-      gt_genome_feature_is_pseudo((GtGenomeFeature*) gn)) {
+  if (gt_genome_node_cast(gt_feature_node_class(), gn) &&
+      gt_feature_node_is_pseudo((GtFeatureNode*) gn)) {
     /* add the children backwards to traverse in order */
     for (dlistelem = gt_dlist_last(gn->children); dlistelem != NULL;
          dlistelem = gt_dlistelem_previous(dlistelem)) {
@@ -101,7 +101,7 @@ int gt_genome_node_iterator_example(GT_UNUSED GtError *err)
 {
   GtGenomeNodeIterator *gni;
   GtGenomeNode *gn, *node;
-  gn = gt_genome_feature_new_standard_gene();
+  gn = gt_feature_node_new_standard_gene();
 
   /* an example genome node iterator use case */
   gni = gt_genome_node_iterator_new(gn);

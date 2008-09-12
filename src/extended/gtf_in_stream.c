@@ -18,22 +18,22 @@
 #include <assert.h>
 #include "core/fa.h"
 #include "core/unused_api.h"
-#include "extended/genome_stream_rep.h"
 #include "extended/gtf_in_stream.h"
 #include "extended/gtf_parser.h"
+#include "extended/node_stream_rep.h"
 #include "extended/type_checker_builtin.h"
 
 struct GTFInStream
 {
-  const GenomeStream parent_instance;
+  const GtNodeStream parent_instance;
   GtQueue *gt_genome_node_buffer;
   GT_TypeChecker *type_checker;
 };
 
 #define gtf_in_stream_cast(GS)\
-        genome_stream_cast(gtf_in_stream_class(), GS)
+        gt_node_stream_cast(gtf_in_stream_class(), GS)
 
-static int gtf_in_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
+static int gtf_in_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                    GT_UNUSED GtError *err)
 {
   GTFInStream *is;
@@ -50,25 +50,25 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GtGenomeNode **gn,
   return 0;
 }
 
-static void gtf_in_stream_free(GenomeStream *gs)
+static void gtf_in_stream_free(GtNodeStream *gs)
 {
   GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
   gt_type_checker_delete(gtf_in_stream->type_checker);
   gt_queue_delete(gtf_in_stream->gt_genome_node_buffer);
 }
 
-const GenomeStreamClass* gtf_in_stream_class(void)
+const GtNodeStreamClass* gtf_in_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (GTFInStream),
+  static const GtNodeStreamClass gsc = { sizeof (GTFInStream),
                                          gtf_in_stream_next_tree,
                                          gtf_in_stream_free };
   return &gsc;
 }
 
-GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
+GtNodeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
                                 GtError *err)
 {
-  GenomeStream *gs;
+  GtNodeStream *gs;
   GTFInStream *gtf_in_stream;
   GTF_parser *gtf_parser;
   GtStr *filenamestr;
@@ -77,7 +77,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   gt_error_check(err);
 
-  gs = genome_stream_create(gtf_in_stream_class(), false);
+  gs = gt_node_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
   gtf_in_stream->gt_genome_node_buffer = gt_queue_new();
   gtf_in_stream->type_checker = gt_type_checker_builtin_new();
@@ -104,7 +104,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   gtf_parser_delete(gtf_parser);
 
   if (had_err) {
-    genome_stream_delete(gs);
+    gt_node_stream_delete(gs);
     return NULL;
   }
   return gs;
