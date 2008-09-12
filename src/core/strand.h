@@ -24,12 +24,12 @@ typedef enum {
   GT_STRAND_BOTH,    /* '.' */
   GT_STRAND_UNKNOWN, /* '?' */
   GT_NUM_OF_STRAND_TYPES
-} GT_Strand;
+} GtStrand;
 
 #define GT_STRAND_CHARS "+-.?"
 
 /* Returns NUM_OF_GT_STRAND_TYPES if <strand_char> is not a valid one. */
-GT_Strand gt_strand_get(char strand_char);
-GT_Strand gt_strand_join(GT_Strand, GT_Strand);
+GtStrand gt_strand_get(char strand_char);
+GtStrand gt_strand_join(GtStrand, GtStrand);
 
 #endif

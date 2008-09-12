@@ -26,7 +26,7 @@
 struct Tokenizer {
   GT_IO *io;
   bool skip_comment_lines;
-  GT_Str *token; /* the current token */
+  GtStr *token; /* the current token */
 };
 
 Tokenizer* tokenizer_new(GT_IO *io)
@@ -44,7 +44,7 @@ void tokenizer_skip_comment_lines(Tokenizer *t)
   t->skip_comment_lines = true;
 }
 
-GT_Str* tokenizer_get_token(Tokenizer *t)
+GtStr* tokenizer_get_token(Tokenizer *t)
 {
   char c = EOF;
   assert(t);
@@ -85,7 +85,7 @@ GT_Str* tokenizer_get_token(Tokenizer *t)
 bool tokenizer_has_token(Tokenizer *t)
 {
   bool has_token = false;
-  GT_Str *token;
+  GtStr *token;
   assert(t);
   token = tokenizer_get_token(t);
   if (token) {
@@ -122,10 +122,10 @@ const char* tokenizer_get_filename(const Tokenizer *t)
 
 int tokenizer_unit_test(GT_Error *err)
 {
-  GT_Str *tmpfilename;
+  GtStr *tmpfilename;
   Tokenizer *t;
   FILE *tmpfp;
-  GT_Str *token;
+  GtStr *token;
   int had_err = 0;
   gt_error_check(err);
 

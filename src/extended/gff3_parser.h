@@ -36,16 +36,16 @@ typedef struct GT_GFF3Parser GT_GFF3Parser;
 
 GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker*);
 void           gt_gff3_parser_set_offset(GT_GFF3Parser*, long);
-int            gt_gff3_parser_set_offsetfile(GT_GFF3Parser*, GT_Str*,
+int            gt_gff3_parser_set_offsetfile(GT_GFF3Parser*, GtStr*,
                                              GT_Error*);
 void           gt_gff3_parser_enable_tidy_mode(GT_GFF3Parser*);
 int            gt_gff3_parser_parse_target_attributes(const char *values,
                                                       unsigned long
                                                       *num_of_targets,
-                                                      GT_Str *first_target_id,
+                                                      GtStr *first_target_id,
                                                       GT_Range
                                                       *first_target_range,
-                                                      GT_Strand
+                                                      GtStrand
                                                       *first_target_strand,
                                                       const char *filename,
                                                       unsigned int line_number,
@@ -54,7 +54,7 @@ int            gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser*,
                                                  int *status_code,
                                                  GT_Queue *genome_nodes,
                                                  GT_CstrTable *used_types,
-                                                 GT_Str *filenamestr,
+                                                 GtStr *filenamestr,
                                                  unsigned long long
                                                  *line_number,
                                                  GT_GenFile *fpin, GT_Error*);

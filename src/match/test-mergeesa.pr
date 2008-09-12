@@ -1,8 +1,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int performtheindexmerging(const GT_Str *storeindex,
-                           const GT_StrArray *indexnametab,
+int performtheindexmerging(const GtStr *storeindex,
+                           const GtStrArray *indexnametab,
                            Verboseinfo *verboseinfo,
                            GT_Error *err);
 

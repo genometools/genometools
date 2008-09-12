@@ -34,7 +34,7 @@ typedef struct
   Encodedsequence *encseq;
   unsigned long *characterdistribution;
   Readmode readmode;
-  GT_StrArray *filenametab;
+  GtStrArray *filenametab;
   void *voidptr2suffixarray;
 } Sfxseqinfo;
 
@@ -45,7 +45,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                          GT_Error *err);
 
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
-                        const GT_Str *indexname,
+                        const GtStr *indexname,
                         Verboseinfo *verboseinfo,
                         GT_Error *err);
 

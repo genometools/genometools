@@ -47,7 +47,7 @@
 struct GT_GenomeFeature
 {
   const GT_GenomeNode parent_instance;
-  GT_Str *seqid,
+  GtStr *seqid,
          *source;
   const char *type;
   GT_Range range;
@@ -85,20 +85,20 @@ const char* gt_genome_feature_get_attribute(GT_GenomeNode *gn,
 static void store_attribute(const char *attr_name,
                             GT_UNUSED const char *attr_value, void *data)
 {
-  GT_StrArray *list = data;
+  GtStrArray *list = data;
   assert(attr_name && attr_value && data);
   gt_strarray_add_cstr(list, attr_name);
 }
 
-GT_StrArray* gt_genome_feature_get_attribute_list(GT_GenomeFeature *gf)
+GtStrArray* gt_genome_feature_get_attribute_list(GT_GenomeFeature *gf)
 {
-  GT_StrArray *list = gt_strarray_new();
+  GtStrArray *list = gt_strarray_new();
   if (gf->attributes)
     tag_value_map_foreach(gf->attributes, store_attribute, list);
   return list;
 }
 
-static GT_Str* gt_genome_feature_get_seqid(GT_GenomeNode *gn)
+static GtStr* gt_genome_feature_get_seqid(GT_GenomeNode *gn)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   return gf->seqid;
@@ -116,7 +116,7 @@ static void gt_genome_feature_set_range(GT_GenomeNode *gn, GT_Range range)
   gf->range = range;
 }
 
-static void gt_genome_feature_change_seqid(GT_GenomeNode *gn, GT_Str *seqid)
+static void gt_genome_feature_change_seqid(GT_GenomeNode *gn, GtStr *seqid)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   assert(gf && seqid);
@@ -124,7 +124,7 @@ static void gt_genome_feature_change_seqid(GT_GenomeNode *gn, GT_Str *seqid)
   gf->seqid = gt_str_ref(seqid);
 }
 
-void gt_genome_feature_set_source(GT_GenomeNode *gn, GT_Str *source)
+void gt_genome_feature_set_source(GT_GenomeNode *gn, GtStr *source)
 {
   GT_GenomeFeature *gf = gt_genome_feature_cast(gn);
   assert(gf && source && !gf->source);
@@ -169,9 +169,9 @@ static void set_transcriptfeaturetype(GT_GenomeNode *gn,
   gn->bit_field |= tft << TRANSCRIPT_FEATURE_TYPE_OFFSET;
 }
 
-GT_GenomeNode* gt_genome_feature_new(GT_Str *seqid, const char *type,
+GT_GenomeNode* gt_genome_feature_new(GtStr *seqid, const char *type,
                                      unsigned long start, unsigned long end,
-                                     GT_Strand strand)
+                                     GtStrand strand)
 {
   GT_GenomeNode *gn;
   GT_GenomeFeature *gf;
@@ -213,7 +213,7 @@ GT_GenomeNode* gt_genome_feature_new_pseudo(GT_GenomeFeature *gf)
 GT_GenomeNode* gt_genome_feature_new_standard_gene(void)
 {
   GT_GenomeNode *gn, *child, *grandchild;
-  GT_Str *seqid;
+  GtStr *seqid;
   seqid = gt_str_new_cstr("ctg123");
 
   /* gene */
@@ -377,7 +377,7 @@ float gt_genome_feature_get_score(GT_GenomeFeature *gf)
   return gf->score;
 }
 
-GT_Strand gt_genome_feature_get_strand(GT_GenomeFeature *gf)
+GtStrand gt_genome_feature_get_strand(GT_GenomeFeature *gf)
 {
   GT_GenomeNode *gn = (GT_GenomeNode*) gf;
   assert(gf);
@@ -623,7 +623,7 @@ bool gt_genome_features_are_similar(GT_GenomeFeature *gf_a,
 int gt_genome_feature_unit_test(GT_Error *err)
 {
   GT_GenomeNode *gf;
-  GT_Str *seqid;
+  GtStr *seqid;
   int had_err = 0;
 
   gt_error_check(err);

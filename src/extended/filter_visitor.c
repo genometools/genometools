@@ -27,11 +27,11 @@
 struct FilterVisitor {
   const GenomeVisitor parent_instance;
   GT_Queue *gt_genome_node_buffer;
-  GT_Str *seqid,
+  GtStr *seqid,
       *typefilter;
   GT_Range contain_range,
         overlap_range;
-  GT_Strand strand,
+  GtStrand strand,
          targetstrand;
   bool has_CDS;
   unsigned long max_gene_length,
@@ -87,7 +87,7 @@ static bool filter_overlap_range(GT_GenomeFeature *gf, GT_Range overlap_range)
   return false;
 }
 
-static bool filter_strand(GT_GenomeFeature *gf, GT_Strand strand)
+static bool filter_strand(GT_GenomeFeature *gf, GtStrand strand)
 {
   assert(gf);
   if (strand != GT_NUM_OF_STRAND_TYPES &&
@@ -96,7 +96,7 @@ static bool filter_strand(GT_GenomeFeature *gf, GT_Strand strand)
   return false;
 }
 
-static bool filter_targetstrand(GT_GenomeFeature *gf, GT_Strand targetstrand)
+static bool filter_targetstrand(GT_GenomeFeature *gf, GtStrand targetstrand)
 {
   const char *target;
   assert(gf);
@@ -104,7 +104,7 @@ static bool filter_targetstrand(GT_GenomeFeature *gf, GT_Strand targetstrand)
       (target = gt_genome_feature_get_attribute((GT_GenomeNode*) gf,
                                              TARGET_STRING))) {
     unsigned long num_of_targets;
-    GT_Strand parsed_strand;
+    GtStrand parsed_strand;
     int had_err;
     had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
                                                      NULL, NULL, &parsed_strand,
@@ -263,10 +263,10 @@ const GenomeVisitorClass* filter_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* filter_visitor_new(GT_Str *seqid, GT_Str *typefilter,
+GenomeVisitor* filter_visitor_new(GtStr *seqid, GtStr *typefilter,
                                   GT_Range contain_range,
                                   GT_Range overlap_range,
-                                  GT_Strand strand, GT_Strand targetstrand,
+                                  GtStrand strand, GtStrand targetstrand,
                                   bool has_CDS, unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score, double max_gene_score,

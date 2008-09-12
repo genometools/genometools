@@ -28,16 +28,16 @@
 
 typedef struct
 {
-  GT_Str *charlist;
+  GtStr *charlist;
   unsigned long len;
 } Charlistlen;
 
 typedef struct
 {
-  GT_StrArray *strings,
+  GtStrArray *strings,
            *files;
   Charlistlen *charlistlen;
-  GT_Str *text;
+  GtStr *text;
 } Cmppairwiseopt;
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
@@ -77,7 +77,7 @@ static OPrval parse_options(int *parsed_args,
          *optionfiles,
          *optioncharlistlen,
          *optiontext;
-  GT_StrArray *charlistlen;
+  GtStrArray *charlistlen;
   OPrval oprval;
 
   gt_error_check(err);

@@ -75,9 +75,9 @@ static GT_Range extract_genomic_range(const ConsensusSA *csa, unsigned long sa)
   return csa->get_genomic_range((char*) csa->set_of_sas + csa->size_of_sa * sa);
 }
 
-static GT_Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
+static GtStrand extract_strand(const ConsensusSA *csa, unsigned long sa)
 {
-  GT_Strand strand;
+  GtStrand strand;
   assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
   strand = csa->get_strand((char*) csa->set_of_sas + csa->size_of_sa * sa);
   assert(strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE); /* XXX */

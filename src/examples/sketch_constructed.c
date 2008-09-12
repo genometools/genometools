@@ -4,7 +4,7 @@ static GtArray* create_example_features(void)
 {
   GtArray *features;
   GT_GenomeNode *gene, *exon, *intron; /* features */
-  GT_Str *seqid; /* holds the sequence id the features refer to */
+  GtStr *seqid; /* holds the sequence id the features refer to */
 
   /* construct the example features */
   features = gt_array_new(sizeof (GT_GenomeNode*));

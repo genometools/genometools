@@ -37,7 +37,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 int gt_guessprot(int argc, const char **argv, GT_Error *err)
 {
   int i, parsed_args, retval;
-  GT_StrArray *filenametab;
+  GtStrArray *filenametab;
 
   gt_error_check(err);
 

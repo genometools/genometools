@@ -845,7 +845,7 @@ static int check_coding(ParseStruct *parsestruct_ptr,
   short current_frame = 0,
     found = 0;
 
-  GT_Str *query_seq;
+  GtStr *query_seq;
 
   char *contig_seq_ptr = NULL,
     contig_seq_tri[4] = { '\0', '\0', '\0', '\0' };

@@ -25,7 +25,7 @@
 
 typedef struct SeqIterator SeqIterator;
 
-SeqIterator* seqiterator_new(const GT_StrArray *filenametab,
+SeqIterator* seqiterator_new(const GtStrArray *filenametab,
                              const Uchar *symbolmap, bool withsequence);
 int          seqiterator_next(SeqIterator*, const Uchar **sequence,
                               unsigned long *len, char **desc, GT_Error*);

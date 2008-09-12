@@ -43,12 +43,12 @@
 #include "core/xposix.h"
 
 typedef struct {
-  GT_StrArray *md5_fingerprints;
+  GtStrArray *md5_fingerprints;
 } GT_BioseqFingerprints;
 
 struct GT_Bioseq {
   bool use_stdin;
-  GT_Str *sequence_file;
+  GtStr *sequence_file;
   Seq **seqs;
   GtArray *descriptions,
         *sequence_ranges;
@@ -59,8 +59,8 @@ struct GT_Bioseq {
   GT_BioseqFingerprints *fingerprints;
 };
 
-static bool read_fingerprints(GT_StrArray *md5_fingerprints,
-                              GT_Str  *fingerprints_filename,
+static bool read_fingerprints(GtStrArray *md5_fingerprints,
+                              GtStr  *fingerprints_filename,
                               unsigned long num_of_seqs)
 {
   bool reading_succeeded = true;
@@ -73,7 +73,7 @@ static bool read_fingerprints(GT_StrArray *md5_fingerprints,
     reading_succeeded = false;
   /* reading file (each line contains a single MD5 sum) */
   if (reading_succeeded) {
-    GT_Str *line = gt_str_new();
+    GtStr *line = gt_str_new();
     while (gt_str_read_next_line(line, fingerprint_file) != EOF) {
       gt_strarray_add(md5_fingerprints, line);
       gt_str_reset(line);
@@ -91,7 +91,7 @@ static bool read_fingerprints(GT_StrArray *md5_fingerprints,
   return reading_succeeded;
 }
 
-static void add_fingerprints(GT_StrArray *md5_fingerprints, GT_Bioseq *bs)
+static void add_fingerprints(GtStrArray *md5_fingerprints, GT_Bioseq *bs)
 {
   unsigned long i;
   assert(md5_fingerprints && bs);
@@ -103,7 +103,7 @@ static void add_fingerprints(GT_StrArray *md5_fingerprints, GT_Bioseq *bs)
   }
 }
 
-static void strarray_dump_to_file(GT_StrArray *sa, FILE *outfp)
+static void strarray_dump_to_file(GtStrArray *sa, FILE *outfp)
 {
   unsigned long i;
   assert(sa && outfp);
@@ -113,8 +113,8 @@ static void strarray_dump_to_file(GT_StrArray *sa, FILE *outfp)
   }
 }
 
-static void write_fingerprints(GT_StrArray *md5_fingerprints,
-                               GT_Str *fingerprints_filename)
+static void write_fingerprints(GtStrArray *md5_fingerprints,
+                               GtStr *fingerprints_filename)
 {
   FILE *fingerprints_file;
   assert(md5_fingerprints && fingerprints_filename);
@@ -127,7 +127,7 @@ static GT_BioseqFingerprints* gt_bioseq_fingerprints_new(GT_Bioseq *bs)
 {
   GT_BioseqFingerprints *bsf;
   bool reading_succeeded = false;
-  GT_Str *fingerprints_filename;
+  GtStr *fingerprints_filename;
   assert(bs);
   bsf = gt_calloc(1, sizeof *bsf);
   bsf->md5_fingerprints = gt_strarray_new();
@@ -251,7 +251,7 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
                        const char *raw_filename, GT_Error *err)
 {
   FILE *index_file;
-  GT_Str *index_line;
+  GtStr *index_line;
   unsigned long line_number = 1;
   char *description;
   GT_Range range;
@@ -310,13 +310,13 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
   return had_err;
 }
 
-static int construct_bioseq_files(GT_Bioseq *bs, GT_Str *gt_bioseq_index_file,
-                                  GT_Str *gt_bioseq_raw_file,
+static int construct_bioseq_files(GT_Bioseq *bs, GtStr *gt_bioseq_index_file,
+                                  GtStr *gt_bioseq_raw_file,
                                   GT_FastaReaderType gt_fasta_reader_type,
                                   GT_Error *err)
 {
   GT_FastaReader *fasta_reader = NULL;
-  GT_Str *sequence_filename;
+  GtStr *sequence_filename;
   int had_err;
 
   gt_error_check(err);
@@ -377,7 +377,7 @@ static int construct_bioseq_files(GT_Bioseq *bs, GT_Str *gt_bioseq_index_file,
 static int gt_bioseq_fill(GT_Bioseq *bs, bool recreate,
                        GT_FastaReaderType gt_fasta_reader_type, GT_Error *err)
 {
-  GT_Str *gt_bioseq_index_file = NULL,
+  GtStr *gt_bioseq_index_file = NULL,
          *gt_bioseq_raw_file = NULL;
   int had_err = 0;
 
@@ -417,7 +417,7 @@ static int gt_bioseq_fill(GT_Bioseq *bs, bool recreate,
   return had_err;
 }
 
-static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
+static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
                                                  bool recreate,
                                                  GT_FastaReaderType
                                                  gt_fasta_reader_type,
@@ -450,7 +450,7 @@ static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GT_Str *sequence_file,
 GT_Bioseq* gt_bioseq_new(const char *sequence_file, GT_Error *err)
 {
   GT_Bioseq *bs;
-  GT_Str *seqfile;
+  GtStr *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
   bs = gt_bioseq_new_with_recreate_and_type(seqfile, false, GT_FASTA_READER_REC,
@@ -462,7 +462,7 @@ GT_Bioseq* gt_bioseq_new(const char *sequence_file, GT_Error *err)
 GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GT_Error *err)
 {
   GT_Bioseq *bs;
-  GT_Str *seqfile;
+  GtStr *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
   bs = gt_bioseq_new_with_recreate_and_type(seqfile, true, GT_FASTA_READER_REC,
@@ -471,7 +471,7 @@ GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GT_Error *err)
   return bs;
 }
 
-GT_Bioseq* gt_bioseq_new_str(GT_Str *sequence_file, GT_Error *err)
+GT_Bioseq* gt_bioseq_new_str(GtStr *sequence_file, GT_Error *err)
 {
   return gt_bioseq_new_with_recreate_and_type(sequence_file, false,
                                            GT_FASTA_READER_REC, err);
@@ -482,7 +482,7 @@ GT_Bioseq* gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                            GT_Error *err)
 {
   GT_Bioseq *bs;
-  GT_Str *seqfile;
+  GtStr *seqfile;
   gt_error_check(err);
   seqfile = gt_str_new_cstr(sequence_file);
   bs = gt_bioseq_new_with_recreate_and_type(seqfile, true, fasta_reader, err);

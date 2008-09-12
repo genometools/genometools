@@ -29,7 +29,7 @@ struct GT_FastaReaderRec {
 #define gt_fasta_reader_rec_cast(FR)\
         gt_fasta_reader_cast(gt_fasta_reader_rec_class(), FR)
 
-static int parse_fasta_description(GT_Str *description, GT_IO *seqio,
+static int parse_fasta_description(GtStr *description, GT_IO *seqio,
                                    GT_Error *err)
 {
   int rval;
@@ -50,7 +50,7 @@ static int parse_fasta_description(GT_Str *description, GT_IO *seqio,
   return 0;
 }
 
-static int parse_fasta_sequence(GT_Str *sequence, GT_IO *seqio, GT_Error *err)
+static int parse_fasta_sequence(GtStr *sequence, GT_IO *seqio, GT_Error *err)
 {
   char cc;
   gt_error_check(err);
@@ -71,7 +71,7 @@ static int parse_fasta_sequence(GT_Str *sequence, GT_IO *seqio, GT_Error *err)
   return 0;
 }
 
-static int parse_fasta_entry(GT_Str *description, GT_Str *sequence,
+static int parse_fasta_entry(GtStr *description, GtStr *sequence,
                              GT_IO *seqio, GT_Error *err)
 {
   int had_err;
@@ -93,7 +93,7 @@ static int gt_fasta_reader_rec_run(GT_FastaReader *fasta_reader,
                                    GT_Error *err)
 {
   GT_FastaReaderRec *fr = gt_fasta_reader_rec_cast(fasta_reader);
-  GT_Str *description, *sequence;
+  GtStr *description, *sequence;
   int had_err = 0;
   gt_error_check(err);
 
@@ -154,7 +154,7 @@ const GT_FastaReaderClass* gt_fasta_reader_rec_class(void)
   return &frc;
 }
 
-GT_FastaReader* gt_fasta_reader_rec_new(GT_Str *sequence_filename)
+GT_FastaReader* gt_fasta_reader_rec_new(GtStr *sequence_filename)
 {
   GT_FastaReader *fr = gt_fasta_reader_create(gt_fasta_reader_rec_class());
   GT_FastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);

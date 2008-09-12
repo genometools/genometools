@@ -95,7 +95,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-loadBWTSeq(const GT_Str *projectName, int BWTOptFlags, Verboseinfo *verbosity,
+loadBWTSeq(const GtStr *projectName, int BWTOptFlags, Verboseinfo *verbosity,
            GT_Error *err);
 
 /**
@@ -370,7 +370,7 @@ enum verifyBWTSeqFlags
  * @param fp dots printed to this file
  */
 extern enum verifyBWTSeqErrCode
-BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GT_Str *projectName,
+BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
                       int checkFlags,
                       unsigned long tickPrint, FILE *fp,
                       Verboseinfo *verbosity, GT_Error *err);

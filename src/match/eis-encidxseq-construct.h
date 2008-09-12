@@ -62,7 +62,7 @@
  */
 extern EISeq *
 createEncIdxSeqFromSfxI(sfxInterface *si,
-                        const GT_Str *projectName,
+                        const GtStr *projectName,
                         const struct seqBaseParam *params,
                         size_t numExtHeaders, const uint16_t *headerIDs,
                         const uint32_t *extHeaderSizes,
@@ -102,7 +102,7 @@ createEncIdxSeqFromSfxI(sfxInterface *si,
  */
 extern EISeq *
 createEncIdxSeqFromSA(Suffixarray *sa,
-                      Seqpos totalLen, const GT_Str *projectName,
+                      Seqpos totalLen, const GtStr *projectName,
                       const struct seqBaseParam *params,
                       size_t numExtHeaders, const uint16_t *headerIDs,
                       const uint32_t *extHeaderSizes,
@@ -145,7 +145,7 @@ createEncIdxSeqFromSA(Suffixarray *sa,
  */
 extern EISeq *
 createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
-                       const GT_Str *projectName,
+                       const GtStr *projectName,
                        const struct seqBaseParam *params,
                        size_t numExtHeaders, const uint16_t *headerIDs,
                        const uint32_t *extHeaderSizes,
@@ -180,7 +180,7 @@ createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
  * @return new encoded indexed sequence object reference
  */
 extern EISeq *
-createEncIdxSeq(const GT_Str *projectName,
+createEncIdxSeq(const GtStr *projectName,
                 const struct seqBaseParam *params,
                 size_t numExtHeaders, const uint16_t *headerIDs,
                 const uint32_t *extHeaderSizes,
@@ -203,7 +203,7 @@ createEncIdxSeq(const GT_Str *projectName,
  */
 extern EISeq *
 loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
-                   const GT_Str *projectName,
+                   const GtStr *projectName,
                    enum seqBaseEncoding encType, int features, GT_Error *err);
 
 /**
@@ -215,12 +215,12 @@ loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
  * @return new encoded indexed sequence object reference
  */
 extern EISeq *
-loadEncIdxSeq(const GT_Str *projectName,
+loadEncIdxSeq(const GtStr *projectName,
               enum seqBaseEncoding encType, int features,
               Verboseinfo *verbosity, GT_Error *err);
 
 extern EISeq *
-createEncIdxSeqGen(Seqpos totalLen, const GT_Str *projectName,
+createEncIdxSeqGen(Seqpos totalLen, const GtStr *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,
                    const struct seqBaseParam *params,

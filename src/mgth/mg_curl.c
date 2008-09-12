@@ -88,7 +88,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
   /* noch keine Daten eingetragen bzw. abgespeichert */
   memorystruct.size = 0;
 
-  /* Zwischenspeicher fuer die Sequnezinformation, da die GT_StrArray-Klasse
+  /* Zwischenspeicher fuer die Sequnezinformation, da die GtStrArray-Klasse
      keine Funktion zum begrenzten Einfuegen eines Strings zur Verfuegung
      stellt; setzen des ersten Teils der HTTP-Adresse */
   seq_var = gt_str_new();
@@ -182,7 +182,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
         /* seq_len Zeichen werden in die Hilfsvariable seq_var kopiert */
         gt_str_append_cstr_nt(seq_var, seq_pos + 16, seq_len);
 
-        /* Die Sequenz in seq_var wird in das GT_StrArray hit_dna kopiert */
+        /* Die Sequenz in seq_var wird in das GtStrArray hit_dna kopiert */
         gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), gt_str_get(seq_var));
 
         /* das Hit-Sequenz-File wird geschrieben; die erste Zeile eines

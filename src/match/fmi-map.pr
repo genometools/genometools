@@ -1,11 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-bool fmindexexists(const GT_Str *indexname);
+bool fmindexexists(const GtStr *indexname);
 
 void freefmindex(Fmindex *fmindex);
 
-int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
+int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                 Verboseinfo *verboseinfo,GT_Error *err);
 
 #ifdef __cplusplus

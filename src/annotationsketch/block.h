@@ -46,11 +46,11 @@ bool                  gt_block_has_only_one_fullsize_element(const GT_Block*);
 /* Set whether a block caption should be displayed or not. */
 void                  gt_block_set_caption_visibility(GT_Block*, bool);
 bool                  gt_block_caption_is_visible(const GT_Block*);
-void                  gt_block_set_caption(GT_Block*, GT_Str*);
-GT_Str*               gt_block_get_caption(const GT_Block*);
-void                  gt_block_set_strand(GT_Block*, GT_Strand);
+void                  gt_block_set_caption(GT_Block*, GtStr*);
+GtStr*               gt_block_get_caption(const GT_Block*);
+void                  gt_block_set_strand(GT_Block*, GtStrand);
 GT_GenomeNode*        gt_block_get_top_level_feature(const GT_Block*);
-GT_Strand             gt_block_get_strand(const GT_Block*);
+GtStrand             gt_block_get_strand(const GT_Block*);
 void                  gt_block_set_type(GT_Block*, const char *type);
 const char*           gt_block_get_type(const GT_Block*);
 unsigned long         gt_block_get_size(const GT_Block*);

@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/strand.h"
 
-GT_Strand gt_strand_get(char strand_char)
+GtStrand gt_strand_get(char strand_char)
 {
   switch (strand_char) {
     case '+': return GT_STRAND_FORWARD;
@@ -30,7 +30,7 @@ GT_Strand gt_strand_get(char strand_char)
   }
 }
 
-GT_Strand gt_strand_join(GT_Strand strand_a, GT_Strand strand_b)
+GtStrand gt_strand_join(GtStrand strand_a, GtStrand strand_b)
 {
   switch (strand_b) {
     case GT_STRAND_FORWARD:

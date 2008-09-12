@@ -105,7 +105,7 @@ GTF_parser* gtf_parser_new(GT_TypeChecker *type_checker)
 static int construct_sequence_regions(void *key, void *value, void *data,
                                       GT_UNUSED GT_Error *err)
 {
-  GT_Str *seqid;
+  GtStr *seqid;
   GT_Range range;
   GT_GenomeNode *gn;
   GT_Queue *genome_nodes = (GT_Queue*) data;
@@ -127,9 +127,9 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
         *mRNAs = (GtArray*) cinfo->mRNAs;
   GT_GenomeNode *mRNA_node, *first_node, *gn;
   const char *tname;
-  GT_Strand mRNA_strand;
+  GtStrand mRNA_strand;
   GT_Range mRNA_range;
-  GT_Str *mRNA_seqid;
+  GtStr *mRNA_seqid;
   unsigned long i;
   int had_err = 0;
 
@@ -192,9 +192,9 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   const char *gname;
   GtArray *mRNAs = gt_array_new(sizeof (GT_GenomeNode*));
   GT_GenomeNode *gene_node, *gn;
-  GT_Strand gene_strand;
+  GtStrand gene_strand;
   GT_Range gene_range;
-  GT_Str *gene_seqid;
+  GtStr *gene_seqid;
   unsigned long i;
   int had_err = 0;
 
@@ -244,17 +244,17 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 }
 
 int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
-                     GT_Str *filenamestr, FILE *fpin, unsigned int be_tolerant,
+                     GtStr *filenamestr, FILE *fpin, unsigned int be_tolerant,
                      GT_Error *err)
 {
-  GT_Str *seqid_str, *source_str, *line_buffer;
+  GtStr *seqid_str, *source_str, *line_buffer;
   char *line;
   size_t line_length;
   unsigned long i, line_number = 0;
   GT_GenomeNode *gn;
   GT_Range range, *rangeptr;
   Phase phase_value;
-  GT_Strand gt_strand_value;
+  GtStrand gt_strand_value;
   Splitter *splitter, *attribute_splitter;
   float score_value;
   char *seqname,

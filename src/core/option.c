@@ -72,7 +72,7 @@ struct OptionParser {
 
 struct Option {
   OptionType option_type;
-  GT_Str *option_str,
+  GtStr *option_str,
       *description;
   void *value;
   union {
@@ -422,7 +422,7 @@ static bool optional_arg(Option *o, int argnum, int argc, const char **argv)
   return false;
 }
 
-static int check_missing_argument(int argnum, int argc, GT_Str *option,
+static int check_missing_argument(int argnum, int argc, GtStr *option,
                                   GT_Error *err)
 {
   gt_error_check(err);
@@ -456,7 +456,7 @@ static int check_option_implications(OptionParser *op, GT_Error *err)
   GtArray *implied_option_array;
   Option *o, *implied_option;
   unsigned int option_set;
-  GT_Str *gt_error_str;
+  GtStr *gt_error_str;
   gt_error_check(err);
 
   for (i = 0; i < gt_array_size(op->options); i++) {
@@ -609,7 +609,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
   bool has_extended_options, option_parsed;
   long long_value;
   int minus_offset, had_err = 0;
-  GT_Str *gt_error_str;
+  GtStr *gt_error_str;
 
   gt_error_check(err);
   assert(op);
@@ -1331,7 +1331,7 @@ Option* option_new_gt_range_min_max(const char *option_str,
 }
 
 Option* option_new_string(const char *option_str, const char *description,
-                          GT_Str *value, const char *default_value)
+                          GtStr *value, const char *default_value)
 {
   Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_STRING;
@@ -1341,7 +1341,7 @@ Option* option_new_string(const char *option_str, const char *description,
 }
 
 Option* option_new_stringarray(const char *option_str,
-                               const char *description, GT_StrArray *value)
+                               const char *description, GtStrArray *value)
 {
   Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_STRINGARRAY;
@@ -1352,7 +1352,7 @@ Option* option_new_stringarray(const char *option_str,
    later on (e.g., for CGI scripts), but for now the are implemented in the same
    way */
 Option* option_new_filename(const char *option_str, const char *description,
-                            GT_Str *filename)
+                            GtStr *filename)
 {
   return option_new_string(option_str, description, filename, NULL);
 }
@@ -1362,13 +1362,13 @@ Option* option_new_filename(const char *option_str, const char *description,
    implemented in the same way */
 Option* option_new_filenamearray(const char *option_str,
                                  const char *description,
-                                 GT_StrArray *filenames)
+                                 GtStrArray *filenames)
 {
   return option_new_stringarray(option_str, description, filenames);
 }
 
 Option* option_new_choice(const char *option_str, const char *description,
-                          GT_Str *value, const char *default_value,
+                          GtStr *value, const char *default_value,
                           const char **domain)
 {
   Option *o;

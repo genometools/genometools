@@ -153,19 +153,19 @@ Option*        option_new_gt_range_min_max(const char *option_str,
                                            unsigned long max_value);
 Option*        option_new_string(const char *option_str,
                                  const char *description,
-                                 GT_Str *value, const char *default_value);
+                                 GtStr *value, const char *default_value);
 Option*        option_new_stringarray(const char *option_str,
-                                      const char *description, GT_StrArray*);
+                                      const char *description, GtStrArray*);
 /* add an option which allows only arguments given in the NULL terminated
    <domain> (<default_value> must be an entry of <domain> or NULL) */
 Option*        option_new_choice(const char *option_str,
-                                 const char *description, GT_Str *value,
+                                 const char *description, GtStr *value,
                                  const char *default_value,
                                  const char **domain);
 Option*        option_new_filename(const char *option_str,
-                                   const char *description, GT_Str*);
+                                   const char *description, GtStr*);
 Option*        option_new_filenamearray(const char *option_str,
-                                        const char *description, GT_StrArray*);
+                                        const char *description, GtStrArray*);
 Option*        option_ref(Option*);
 const char*    option_get_name(const Option *o);
 void           option_is_mandatory(Option*);

@@ -31,7 +31,7 @@
 #include "tools/gt_extracttarget.h"
 
 typedef struct {
-  GT_StrArray *seqfiles;
+  GtStrArray *seqfiles;
 } ExtractTargetArguments;
 
 static void* gt_extracttarget_arguments_new(void)
@@ -88,10 +88,10 @@ static bool show_target(GT_UNUSED unsigned long pos, void *data)
 }
 
 static int extracttarget_from_seqfiles(const char *target,
-                                       GT_StrArray *seqfiles,
+                                       GtStrArray *seqfiles,
                                        GT_Error *err)
 {
-  GT_Str *unescaped_target;
+  GtStr *unescaped_target;
   char *escaped_target;
   Splitter *splitter;
   unsigned long i;
@@ -139,7 +139,7 @@ static int extracttarget_from_seqfiles(const char *target,
   return had_err;
 }
 
-static int extracttarget_from_node(GT_GenomeNode *gn, GT_StrArray *seqfiles,
+static int extracttarget_from_node(GT_GenomeNode *gn, GtStrArray *seqfiles,
                                    GT_Error *err)
 {
   GT_GenomeNodeIterator *gni;

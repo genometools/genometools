@@ -28,7 +28,7 @@
 
 int lua_set_modules_path(lua_State *L, GT_Error *err)
 {
-  GT_Str *modules_path = NULL, *external_modules_path = NULL,
+  GtStr *modules_path = NULL, *external_modules_path = NULL,
          *package_path = NULL;
   int had_err = 0;
   gt_error_check(err);
@@ -92,7 +92,7 @@ void lua_export_metatable(lua_State *L, const char *metatable_desc)
   gt_free(mt);
 }
 
-void lua_push_strarray_as_table(lua_State *L, GT_StrArray *sa)
+void lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
 {
   unsigned long i;
   assert(L && sa);

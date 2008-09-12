@@ -81,7 +81,7 @@ const char *EISIntegrityCheckResultStrings[] =
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
 extern enum EISIntegrityCheckResults
-EISVerifyIntegrity(EISeq *seqIdx, const GT_Str *projectName, Seqpos skip,
+EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
                    Verboseinfo *verbosity, GT_Error *err)
 {

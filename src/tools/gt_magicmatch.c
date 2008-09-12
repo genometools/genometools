@@ -24,7 +24,7 @@
 #include "tools/gt_magicmatch.h"
 
 typedef struct {
-  GT_StrArray *seqfiles;
+  GtStrArray *seqfiles;
   bool translate;
 } MagicMatchArguments;
 

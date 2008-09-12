@@ -34,7 +34,7 @@ struct CSAVisitor {
   GT_GenomeFeature *buffered_feature;
   GT_Range first_range,
         second_range;
-  GT_Str *first_str,
+  GtStr *first_str,
       *second_str,
       *gt_csa_source_str;
 };
@@ -169,7 +169,7 @@ static GT_Range get_genomic_range(const void *sa)
   return gt_genome_node_get_range((GT_GenomeNode*) gf);
 }
 
-static GT_Strand get_strand(const void *sa)
+static GtStrand get_strand(const void *sa)
 {
   GT_GenomeFeature *gf = *(GT_GenomeFeature**) sa;
   assert(gf && gt_genome_feature_has_type(gf, gft_gene));
@@ -206,9 +206,9 @@ static void get_exons(GtArray *exon_ranges, const void *sa)
 
 static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
                                          GT_GenomeFeature *sa,
-                                         GT_Str *seqid,
-                                         GT_Str *gt_csa_source_str,
-                                         GT_Strand gene_strand)
+                                         GtStr *seqid,
+                                         GtStr *gt_csa_source_str,
+                                         GtStrand gene_strand)
 {
   GtArray *exons_from_sa;
   unsigned long i,
@@ -337,7 +337,7 @@ static void mRNA_set_target_attribute(GT_GenomeFeature *mRNA_feature,
                                       const CSASpliceForm *csa_splice_form)
 {
   unsigned long i;
-  GT_Str *targets;
+  GtStr *targets;
   assert(mRNA_feature && csa_splice_form);
   targets = gt_str_new();
   for (i = 0; i < csa_splice_form_num_of_sas(csa_splice_form); i++) {
@@ -358,14 +358,14 @@ static void mRNA_set_target_attribute(GT_GenomeFeature *mRNA_feature,
 }
 
 static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
-                                          GT_Str *gt_csa_source_str)
+                                          GtStr *gt_csa_source_str)
 {
   GT_GenomeNode *mRNA_feature;
   GtArray *exon_nodes;
   unsigned long i;
   GT_Range range;
-  GT_Strand strand;
-  GT_Str *seqid;
+  GtStrand strand;
+  GtStr *seqid;
   assert(csa_splice_form && gt_csa_source_str);
 
   /* create the mRNA feature itself */
@@ -401,7 +401,7 @@ static GT_GenomeNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 }
 
 static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
-                                          GT_Str *gt_csa_source_str)
+                                          GtStr *gt_csa_source_str)
 {
   GT_GenomeNode *gene_feature, *mRNA_feature;
   GT_Range range;
@@ -429,7 +429,7 @@ static GT_GenomeNode* create_gene_feature(CSAGene *csa_gene,
 
 static void process_csa_genes(GT_Queue *gt_genome_node_buffer,
                               GtArray *csa_genes,
-                              GT_Str *gt_csa_source_str)
+                              GtStr *gt_csa_source_str)
 {
   unsigned long i;
   assert(csa_genes);

@@ -4,7 +4,7 @@ extern "C" {
 int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err);
 
 int initEmissionmergedesa(Emissionmergedesa *emmesa,
-                          const GT_StrArray *indexnametab,
+                          const GtStrArray *indexnametab,
                           unsigned int demand,
                           Verboseinfo *verboseinfo,
                           GT_Error *err);

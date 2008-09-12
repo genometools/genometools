@@ -26,14 +26,14 @@
 #include "annotationsketch/track.h"
 
 struct GT_Track {
-  GT_Str *title;
+  GtStr *title;
   unsigned long max_num_lines, discarded_blocks;
   GT_LineBreaker *lb;
   bool split;
   GtArray *lines;
 };
 
-GT_Track* gt_track_new(GT_Str *title, unsigned long max_num_lines, bool split,
+GT_Track* gt_track_new(GtStr *title, unsigned long max_num_lines, bool split,
                  GT_LineBreaker *lb)
 {
   GT_Track *track;
@@ -109,7 +109,7 @@ void gt_track_insert_block(GT_Track *track, GT_Block *block)
   } else gt_block_delete(block);
 }
 
-GT_Str* gt_track_get_title(const GT_Track *track)
+GtStr* gt_track_get_title(const GT_Track *track)
 {
   assert(track && track->title);
   return track->title;
@@ -149,7 +149,7 @@ int gt_track_unit_test(GT_Error *err)
   GT_Block *b1, *b2, *b3, *b4;
   GT_Range r1, r2, r3, r4;
   GT_Track *track;
-  GT_Str *title;
+  GtStr *title;
   gt_error_check(err);
   GT_LineBreaker *lb;
 

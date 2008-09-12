@@ -135,8 +135,8 @@
 */
 
 static int readsymbolmapfromlines(Alphabet *alpha,
-                                  const GT_Str *mapfile,
-                                  const GT_StrArray *lines,
+                                  const GtStr *mapfile,
+                                  const GtStrArray *lines,
                                   GT_Error *err)
 {
   char cc;
@@ -270,10 +270,10 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   \texttt{alpha}.
 */
 
-static int readsymbolmap(Alphabet *alpha,const GT_Str *mapfile,GT_Error *err)
+static int readsymbolmap(Alphabet *alpha,const GtStr *mapfile,GT_Error *err)
 {
   bool haserr = false;
-  GT_StrArray *lines;
+  GtStrArray *lines;
 
   gt_error_check(err);
   lines = gt_strarray_new_file(gt_str_get(mapfile));
@@ -402,7 +402,7 @@ static void assignProteinalphabet(Alphabet *alpha)
 }
 
 static int assignProteinorDNAalphabet(Alphabet *alpha,
-                                      const GT_StrArray *filenametab,
+                                      const GtStrArray *filenametab,
                                       GT_Error *err)
 {
   int retval;
@@ -432,8 +432,8 @@ void freeAlphabet(Alphabet **alpha)
 
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
-                                         const GT_Str *smapfile,
-                                         const GT_StrArray *filenametab,
+                                         const GtStr *smapfile,
+                                         const GtStrArray *filenametab,
                                          GT_Error *err)
 {
   Alphabet *alpha;
@@ -455,11 +455,11 @@ void freeAlphabet(Alphabet **alpha)
     {
       if (gt_str_length(smapfile) > 0)
       {
-        GT_Str *transpath = NULL;
+        GtStr *transpath = NULL;
 
         if (!file_exists(gt_str_get(smapfile)))
         {
-          GT_Str *prog;
+          GtStr *prog;
           const char *progname = gt_error_get_progname(err);
 
           assert(progname != NULL);

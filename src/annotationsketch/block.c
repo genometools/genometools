@@ -26,9 +26,9 @@
 struct GT_Block {
   GT_Dlist *elements;
   GT_Range range;
-  GT_Str *caption;
+  GtStr *caption;
   bool show_caption;
-  GT_Strand strand;
+  GtStrand strand;
   const char *type;
   GT_GenomeNode *top_level_feature;
   unsigned long reference_count;
@@ -153,25 +153,25 @@ bool gt_block_caption_is_visible(const GT_Block *block)
   return (block->caption && block->show_caption);
 }
 
-void gt_block_set_caption(GT_Block *block, GT_Str *caption)
+void gt_block_set_caption(GT_Block *block, GtStr *caption)
 {
   assert(block);
   block->caption = caption;
 }
 
-GT_Str* gt_block_get_caption(const GT_Block *block)
+GtStr* gt_block_get_caption(const GT_Block *block)
 {
   assert(block);
   return block->caption;
 }
 
-void gt_block_set_strand(GT_Block *block, GT_Strand strand)
+void gt_block_set_strand(GT_Block *block, GtStrand strand)
 {
   assert(block);
   block->strand = strand;
 }
 
-GT_Strand gt_block_get_strand(const GT_Block *block)
+GtStrand gt_block_get_strand(const GT_Block *block)
 {
   assert(block);
   return block->strand;
@@ -215,11 +215,11 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
 int gt_block_unit_test(GT_Error *err)
 {
   GT_Range r1, r2, r_temp, b_range;
-  GT_Strand s;
+  GtStrand s;
   GT_GenomeNode *gn1, *gn2;
   GT_Element *e1, *e2;
   GT_Block * b;
-  GT_Str *seqid, *caption1, *caption2;
+  GtStr *seqid, *caption1, *caption2;
   int had_err = 0;
   gt_error_check(err);
 

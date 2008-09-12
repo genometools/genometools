@@ -1,8 +1,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int outprjfile(const GT_Str *indexname,
-               const GT_StrArray *filenametab,
+int outprjfile(const GtStr *indexname,
+               const GtStrArray *filenametab,
                Readmode readmode,
                const Filelengthvalues *filelengthtab,
                Seqpos totallength,

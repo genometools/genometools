@@ -139,7 +139,7 @@ static int assigncorrecttype(Mapspecification *mapspec,
 int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,
-                        const GT_Str *tmpfilename,
+                        const GtStr *tmpfilename,
                         unsigned long expectedsize,
                         GT_Error *err)
 {

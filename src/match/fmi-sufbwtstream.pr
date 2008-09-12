@@ -4,8 +4,8 @@ extern "C" {
 int sufbwt2fmindex(Fmindex *fmindex,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
-                   const GT_Str *outfmindex,
-                   const GT_StrArray *indexnametab,
+                   const GtStr *outfmindex,
+                   const GtStrArray *indexnametab,
                    bool storeindexpos,
                    Verboseinfo *verboseinfo,
                    GT_Error *err);

@@ -24,7 +24,7 @@
 
 struct GT_IO {
   GT_GenFile *fp;
-  GT_Str *path;
+  GtStr *path;
   unsigned long line_number;
   bool line_start;
 };
@@ -110,7 +110,7 @@ const char* gt_io_get_filename(const GT_IO *io)
   return gt_str_get(io->path);
 }
 
-GT_Str* gt_io_get_filename_str(const GT_IO *io)
+GtStr* gt_io_get_filename_str(const GT_IO *io)
 {
   assert(io && io->path);
   return io->path;

@@ -44,7 +44,7 @@ static char *forbid[] = {
   "/*@unused@*/ static"
 };
 
-static unsigned char forbiddenstring(GT_Str *line)
+static unsigned char forbiddenstring(GtStr *line)
 {
   size_t slen, i;
   for (i = 0; i < sizeof (forbid) / sizeof (forbid[0]); i++) {
@@ -57,7 +57,7 @@ static unsigned char forbiddenstring(GT_Str *line)
   return 0;
 }
 
-static void removecomments(GT_Str *line, int *incomment)
+static void removecomments(GtStr *line, int *incomment)
 {
   unsigned char *buffer;
   unsigned long pos=0, bufpos=0;
@@ -108,7 +108,7 @@ static void removecomments(GT_Str *line, int *incomment)
 static void skproto(const char *filename, FILE *fpin)
 {
   int linenum = 0, startfunction = 1, incomment = 0;
-  GT_Str *line;
+  GtStr *line;
 
   assert(filename && fpin);
 

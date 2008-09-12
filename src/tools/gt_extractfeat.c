@@ -28,7 +28,7 @@ typedef struct {
   bool join,
        translate,
        verbose;
-  GT_Str *type,
+  GtStr *type,
          *seqfile,
          *regionmapping;
 } ExtractFeatArguments;

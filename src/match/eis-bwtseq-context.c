@@ -36,7 +36,7 @@ struct BWTSeqContextRetrieverFactory
   bool constructionComplete;
   unsigned short mapIntervalLog2;
   FILE *mapTableDiskBackingStore;
-  GT_Str *mapTableDBSPath;
+  GtStr *mapTableDBSPath;
 };
 
 #define die(msg) die_func(msg, __FILE__, __LINE__)
@@ -187,12 +187,12 @@ readBS2Map(BWTSeqContextRetrieverFactory *factory,
 
 static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
-                Seqpos seqLen, const GT_Str *projectName, bool createMapFile,
+                Seqpos seqLen, const GtStr *projectName, bool createMapFile,
                 BWTSeqContextRetriever *newBWTSeqCR);
 
 extern BWTSeqContextRetriever *
 BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
-           const GT_Str *projectName)
+           const GtStr *projectName)
 {
   unsigned short bitsPerSeqpos, mapIntervalLog2;
   BWTSeqContextRetriever *newBWTSeqCR;
@@ -255,12 +255,12 @@ enum {
 
 static inline bool
 BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
-                Seqpos seqLen, const GT_Str *projectName, bool createMapFile,
+                Seqpos seqLen, const GtStr *projectName, bool createMapFile,
                 BWTSeqContextRetriever *newBWTSeqCR)
 {
   FILE *mapFile = NULL;
   BitString mapMap = NULL;
-  GT_Str *mapName = NULL;
+  GtStr *mapName = NULL;
   assert(projectName);
   do {
     size_t headerBitElems = bitElemsAllocSize(2 * HEADER_ENTRY_BITS),
@@ -322,7 +322,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
 }
 
 extern BWTSeqContextRetriever *
-BWTSeqCRLoad(const BWTSeq *bwtSeq, const GT_Str *projectName,
+BWTSeqCRLoad(const BWTSeq *bwtSeq, const GtStr *projectName,
              short mapIntervalLog2)
 {
   Seqpos seqLen;

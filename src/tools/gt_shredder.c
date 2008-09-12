@@ -96,7 +96,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
   unsigned long i;
   GT_Bioseq *bioseq;
   int had_err;
-  GT_Str *desc;
+  GtStr *desc;
 
   gt_error_check(err);
   assert(arguments);

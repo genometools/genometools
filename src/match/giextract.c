@@ -122,7 +122,7 @@ static unsigned long remdupsgiqueries(Giquery *giqueries,
 
 static Giquery *readginumberfile(bool verbose,
                                  unsigned long *numofqueries,
-                                 const GT_Str *ginumberfile,
+                                 const GtStr *ginumberfile,
                                  GT_Error *err)
 {
   FILE *fp;
@@ -300,8 +300,8 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
 int extractginumbers(bool verbose,
                      GT_GenFile *outfp,
                      unsigned long width,
-                     const GT_Str *ginumberfile,
-                     GT_StrArray *referencefiletab,
+                     const GtStr *ginumberfile,
+                     GtStrArray *referencefiletab,
                      GT_Error *err)
 {
   SeqIterator *seqit;

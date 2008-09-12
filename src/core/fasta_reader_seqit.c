@@ -24,7 +24,7 @@
 
 struct GT_FastaReaderSeqIt {
   const GT_FastaReader parent_instance;
-  GT_StrArray *filenametab;
+  GtStrArray *filenametab;
   SeqIterator *seqit;
 };
 
@@ -88,7 +88,7 @@ const GT_FastaReaderClass* gt_fasta_reader_seqit_class(void)
   return &frc;
 }
 
-GT_FastaReader* gt_fasta_reader_seqit_new(GT_Str *sequence_filename)
+GT_FastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
 {
   GT_FastaReader *fr;
   GT_FastaReaderSeqIt *gt_fasta_reader_seqit;

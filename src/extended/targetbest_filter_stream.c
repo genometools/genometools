@@ -38,7 +38,7 @@ struct TargetbestFilterStream
 #define targetbest_filter_stream_cast(GS)\
         genome_stream_cast(targetbest_filter_stream_class(), GS);
 
-static void build_key(GT_Str *key, GT_GenomeFeature *feature, GT_Str *target_id)
+static void build_key(GtStr *key, GT_GenomeFeature *feature, GtStr *target_id)
 {
   assert(key && feature && target_id);
   gt_str_reset(key);
@@ -48,7 +48,7 @@ static void build_key(GT_Str *key, GT_GenomeFeature *feature, GT_Str *target_id)
 }
 
 static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
-                            GT_GenomeFeature *feature, GT_Str *key)
+                            GT_GenomeFeature *feature, GtStr *key)
 {
   gt_dlist_add(trees, feature);
   hashmap_add(target_to_elem, gt_cstr_dup(gt_str_get(key)),
@@ -56,7 +56,7 @@ static void include_feature(GT_Dlist *trees, Hashmap *target_to_elem,
 }
 
 static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
-                        Hashmap *target_to_elem, GT_Str *key)
+                        Hashmap *target_to_elem, GtStr *key)
 {
   GT_GenomeNode *node = gt_dlistelem_get_data(elem);
   gt_genome_node_rec_delete(node);
@@ -67,7 +67,7 @@ static void remove_elem(GT_Dlistelem *elem, GT_Dlist *trees,
 static void replace_previous_elem(GT_Dlistelem *previous_elem,
                                   GT_GenomeFeature *current_feature,
                                   GT_Dlist *trees, Hashmap *target_to_elem,
-                                  GT_Str *key)
+                                  GtStr *key)
 {
   remove_elem(previous_elem, trees, target_to_elem, key);
   include_feature(trees, target_to_elem, current_feature, key);
@@ -78,7 +78,7 @@ static void filter_targetbest(GT_GenomeFeature *current_feature,
 {
   unsigned long num_of_targets;
   GT_Dlistelem *previous_elem;
-  GT_Str *first_target_id;
+  GtStr *first_target_id;
   const char *target;
   int had_err;
   assert(current_feature && trees);
@@ -91,7 +91,7 @@ static void filter_targetbest(GT_GenomeFeature *current_feature,
                                                    "", 0, NULL);
   assert(!had_err);
   if (num_of_targets == 1) {
-    GT_Str *key = gt_str_new();
+    GtStr *key = gt_str_new();
     build_key(key, current_feature, first_target_id);
     if (!(previous_elem = hashmap_get(target_to_elem, gt_str_get(key)))) {
       /* element with this target_id not included yet -> include it */

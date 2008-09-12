@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/translate.h"
 
-void gt_translate_dna(GT_Str *protein, const char *dnaseq, unsigned long dnalen,
+void gt_translate_dna(GtStr *protein, const char *dnaseq, unsigned long dnalen,
                       unsigned int frame)
 {
   const char *dnaptr;

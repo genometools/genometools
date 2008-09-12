@@ -51,8 +51,8 @@ typedef struct
                       maxlength;
   unsigned int showmode;
   bool verifywitnesspos;
-  GT_Str *indexname;
-  GT_StrArray *queryfilenames;
+  GtStr *indexname;
+  GtStrArray *queryfilenames;
   Indextype indextype;
 } Gfmsubcallinfo;
 
@@ -66,7 +66,7 @@ static OPrval parsegfmsub(bool doms,
   Option *optionmin, *optionmax, *optionoutput, *optionfmindex,
          *optionesaindex, *optionpckindex, *optionquery, *optionverify;
   OPrval oprval;
-  GT_StrArray *flagsoutputoption;
+  GtStrArray *flagsoutputoption;
   int parsed_args;
   Optionargmodedesc msgfmsubmodedesctable[] =
   {

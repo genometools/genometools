@@ -37,18 +37,18 @@ const GT_GenomeNodeClass* gt_genome_feature_class(void);
    which lies from <start> to <end> on strand <strand>.
    <start> and <end> always refer to the forward strand, therefore <start> has
    to be smaller or equal than <end>. */
-GT_GenomeNode*        gt_genome_feature_new(GT_Str *seqid, const char *type,
+GT_GenomeNode*        gt_genome_feature_new(GtStr *seqid, const char *type,
                                             unsigned long start,
                                             unsigned long end,
-                                            GT_Strand strand);
+                                            GtStrand strand);
 GT_GenomeNode*        gt_genome_feature_new_pseudo(GT_GenomeFeature*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GT_GenomeNode*        gt_genome_feature_new_standard_gene(void);
 const char*           gt_genome_feature_get_source(GT_GenomeFeature*);
 const char*           gt_genome_feature_get_attribute(GT_GenomeNode *gn,
                                                       const char *attr_name);
-/* Return a GT_StrArray containing the used attribute names. */
-GT_StrArray*          gt_genome_feature_get_attribute_list(GT_GenomeFeature*);
+/* Return a GtStrArray containing the used attribute names. */
+GtStrArray*          gt_genome_feature_get_attribute_list(GT_GenomeFeature*);
 const char*           gt_genome_feature_get_type(GT_GenomeFeature*);
 bool                  gt_genome_feature_has_type(GT_GenomeFeature*,
                                                  const char*);
@@ -64,7 +64,7 @@ void                  gt_genome_feature_set_multi_representative(
 GT_GenomeFeature*     gt_genome_feature_get_multi_representative(
                                                              GT_GenomeFeature*);
 float                 gt_genome_feature_get_score(GT_GenomeFeature*);
-GT_Strand             gt_genome_feature_get_strand(GT_GenomeFeature*);
+GtStrand             gt_genome_feature_get_strand(GT_GenomeFeature*);
 Phase                 gt_genome_feature_get_phase(GT_GenomeFeature*);
 void                  gt_genome_feature_get_exons(GT_GenomeFeature*,
                                                   GtArray *exon_features);
@@ -73,7 +73,7 @@ void                  gt_genome_feature_determine_transcripttypes(
 TranscriptFeatureType gt_genome_feature_get_transcriptfeaturetype(
                                                              GT_GenomeFeature*);
 void                  gt_genome_feature_set_source(GT_GenomeNode*,
-                                                   GT_Str *source);
+                                                   GtStr *source);
 void                  gt_genome_feature_set_phase(GT_GenomeNode*, Phase);
 void                  gt_genome_feature_set_end(GT_GenomeFeature*,
                                                 unsigned long);

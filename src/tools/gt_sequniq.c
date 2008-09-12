@@ -89,7 +89,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   GT_Bioseq *bs;
   StringDistri *sd;
   unsigned long long duplicates = 0, num_of_sequences = 0;
-  GT_StrArray *files;
+  GtStrArray *files;
   int had_err = 0;
   SeqIterator *seqit;
   const Uchar *sequence;

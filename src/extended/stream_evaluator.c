@@ -744,7 +744,7 @@ static void mark_and_show_false_exon(GT_GenomeNode *gn, bool exondiff)
   }
 }
 
-static void determine_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
+static void determine_true_exon(GT_GenomeNode *gn, GtStrand predicted_strand,
                                 bool exondiff, GT_Range *predicted_range,
                                 GtArray *exons_forward,
                                 GtArray *exons_reverse,
@@ -801,7 +801,7 @@ static void determine_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
     mark_and_show_false_exon(gn, exondiff);
 }
 
-static void store_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
+static void store_true_exon(GT_GenomeNode *gn, GtStrand predicted_strand,
                             GT_Range *predicted_range, bool exondiff,
                             TranscriptExons *exons_forward,
                             TranscriptExons *exons_reverse,
@@ -881,7 +881,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
   ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
   GT_Range predicted_range;
   unsigned long i, num;
-  GT_Strand predicted_strand;
+  GtStrand predicted_strand;
   GtArray *real_genome_nodes;
   GT_GenomeNode **real_gn;
 

@@ -38,7 +38,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 static void remove_pattern_in_current_dir(const char *pattern)
 {
   char **files_to_remove;
-  GT_Str *path;
+  GtStr *path;
   glob_t g;
 
   path = gt_str_new_cstr("./*");

@@ -123,7 +123,7 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
   GtArray *parent_features = NULL;
   ShowAttributeInfo info;
   unsigned long i;
-  GT_Str *id;
+  GtStr *id;
 
   gt_error_check(err);
   assert(gn && gf && gff3_visitor);
@@ -169,10 +169,10 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
   return 0;
 }
 
-static GT_Str* create_unique_id(GFF3Visitor *gff3_visitor, GT_GenomeFeature *gf)
+static GtStr* create_unique_id(GFF3Visitor *gff3_visitor, GT_GenomeFeature *gf)
 {
   const char *type;
-  GT_Str *id;
+  GtStr *id;
   assert(gff3_visitor && gf);
   type = gt_genome_feature_get_type(gf);
 
@@ -195,7 +195,7 @@ static int store_ids(GT_GenomeNode *gn, void *data, GT_Error *err)
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
   Add_id_info add_id_info;
   int had_err = 0;
-  GT_Str *id;
+  GtStr *id;
 
   gt_error_check(err);
   assert(gn && gf && gff3_visitor);

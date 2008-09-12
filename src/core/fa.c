@@ -260,11 +260,11 @@ void gt_xbzclose(BZFILE *stream)
 
 static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";
 
-FILE* gt_xtmpfp_generic_func(GT_Str *template_arg, int flags,
+FILE* gt_xtmpfp_generic_func(GtStr *template_arg, int flags,
                              const char *filename, int line)
 {
   FILE *fp;
-  GT_Str *template;
+  GtStr *template;
   if (!fa) fa_init();
   assert(fa);
   if (flags & TMPFP_USETEMPLATE)

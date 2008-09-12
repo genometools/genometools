@@ -43,7 +43,7 @@ extern int
 gt_packedindex_mkctxmap(int argc, const char *argv[], GT_Error *err)
 {
   struct mkCtxMapOptions params;
-  GT_Str *projectName = NULL;
+  GtStr *projectName = NULL;
   Verboseinfo *verbosity = NULL;
   BWTSeq *bwtSeq = NULL;
   SASeqSrc *src;

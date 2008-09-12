@@ -33,13 +33,13 @@ typedef struct {
   bool verbose,
        has_CDS,
        targetbest;
-  GT_Str *seqid,
+  GtStr *seqid,
       *typefilter,
       *gt_strand_char,
       *targetgt_strand_char;
   GT_Range contain_range,
         overlap_range;
-  GT_Strand strand,
+  GtStrand strand,
          targetstrand;
   unsigned long max_gene_length,
                 max_gene_num,
@@ -198,13 +198,13 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int process_gt_strand_arg(GT_Str *gt_strand_char, GT_Strand *strand,
+static int process_gt_strand_arg(GtStr *gt_strand_char, GtStrand *strand,
                               const char *optstr, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
   if (gt_str_length(gt_strand_char)) {
-    GT_Strand tmpstrand = gt_strand_get(gt_str_get(gt_strand_char)[0]);
+    GtStrand tmpstrand = gt_strand_get(gt_str_get(gt_strand_char)[0]);
     if ((gt_str_length(gt_strand_char) > 1) ||
         (tmpstrand == GT_NUM_OF_STRAND_TYPES)) {
       gt_error_set(err, "argument to option -%s must be one of '"

@@ -215,7 +215,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
 
 #define PCKBUCKETTABLE ".pbt"
 
-int pckbucket2file(const GT_Str *indexname,const Pckbuckettable *pckbuckettable,
+int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
                    GT_Error *err)
 {
   FILE *fp;
@@ -235,9 +235,9 @@ int pckbucket2file(const GT_Str *indexname,const Pckbuckettable *pckbuckettable,
   return 0;
 }
 
-bool pckbuckettableexists(const GT_Str *indexname)
+bool pckbuckettableexists(const GtStr *indexname)
 {
-  GT_Str *tmpfilename;
+  GtStr *tmpfilename;
   bool retval;
 
   tmpfilename = gt_str_clone(indexname);
@@ -247,11 +247,11 @@ bool pckbuckettableexists(const GT_Str *indexname)
   return retval;
 }
 
-Pckbuckettable *mappckbuckettable(const GT_Str *indexname,
+Pckbuckettable *mappckbuckettable(const GtStr *indexname,
                                   unsigned int numofchars,
                                   GT_Error *err)
 {
-  GT_Str *tmpfilename;
+  GtStr *tmpfilename;
   size_t numofbytes;
   bool haserr = false;
   void *mapptr;

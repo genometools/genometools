@@ -43,7 +43,7 @@ static void extract_feat_visitor_free(GenomeVisitor *gv)
   region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
-static void construct_description(GT_Str *description, const char *type,
+static void construct_description(GtStr *description, const char *type,
                                   unsigned long counter, bool join,
                                   bool translate)
 {
@@ -57,10 +57,10 @@ static void construct_description(GT_Str *description, const char *type,
     gt_str_append_cstr(description, " (translated)");
 }
 
-static void show_entry(GT_Str *description, GT_Str *sequence, bool translate)
+static void show_entry(GtStr *description, GtStr *sequence, bool translate)
 {
   if (translate) {
-    GT_Str *protein = gt_str_new();
+    GtStr *protein = gt_str_new();
     gt_translate_dna(protein, gt_str_get(sequence), gt_str_length(sequence), 0);
     gt_fasta_show_entry(gt_str_get(description), gt_str_get(protein),
                         gt_str_length(protein), 0);
@@ -79,7 +79,7 @@ static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
   ExtractFeatVisitor *efv;
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *gn;
-  GT_Str *description,
+  GtStr *description,
       *sequence;
   int had_err = 0;
   gt_error_check(err);

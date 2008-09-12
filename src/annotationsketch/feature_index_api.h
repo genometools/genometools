@@ -53,9 +53,9 @@ int              gt_feature_index_get_features_for_range(GT_FeatureIndex
 /* Returns the first sequence region identifier added to <feature_index>. */
 const char*      gt_feature_index_get_first_seqid(const GT_FeatureIndex
                                                   *feature_index);
-/* Returns a GT_StrArray of all sequence region identifiers contained in
+/* Returns a GtStrArray of all sequence region identifiers contained in
    <feature_index> (in alphabetical order). */
-GT_StrArray*     gt_feature_index_get_seqids(const GT_FeatureIndex
+GtStrArray*     gt_feature_index_get_seqids(const GT_FeatureIndex
                                              *feature_index);
 void             gt_feature_index_get_range_for_seqid(GT_FeatureIndex*,
                                                       GT_Range*,

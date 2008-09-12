@@ -179,7 +179,7 @@ int gt_graphics_save_to_file(const GT_Graphics *g, const char *filename,
   return g->c_class->save_to_file(g, filename, err);
 }
 
-void gt_graphics_save_to_stream(const GT_Graphics *g, GT_Str *stream)
+void gt_graphics_save_to_stream(const GT_Graphics *g, GtStr *stream)
 {
   assert(g && g->c_class);
   return g->c_class->save_to_stream(g, stream);

@@ -79,7 +79,7 @@ int gt_chseqids(int argc, const char **argv, GT_Error *err)
                *gff3_out_stream = NULL;
   GT_GenomeNode *gn;
   ChseqidsArguments arguments;
-  GT_Str *chseqids;
+  GtStr *chseqids;
   int parsed_args, had_err = 0;
 
   gt_error_check(err);

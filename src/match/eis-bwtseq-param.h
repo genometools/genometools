@@ -65,7 +65,7 @@ struct bwtParam
                                    * -2: inactive,
                                    * see enum ctxMapSize
                                    */
-  const GT_Str *projectName;         /**< base file name to derive name
+  const GtStr *projectName;         /**< base file name to derive name
                                    *   of suffixerator project from*/
 };
 
@@ -145,7 +145,7 @@ struct bwtOptions
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
                            int defaultOptimizationFlags,
-                           const GT_Str *projectName);
+                           const GtStr *projectName);
 
 /**
  * @brief Compute the options for BWT seqence index construction from

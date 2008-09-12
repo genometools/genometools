@@ -35,7 +35,7 @@
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
-bool fmindexexists(const GT_Str *indexname)
+bool fmindexexists(const GtStr *indexname)
 {
   if (!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX))
   {
@@ -50,7 +50,7 @@ bool fmindexexists(const GT_Str *indexname)
 
 static int scanfmafileviafileptr(Fmindex *fmindex,
                                  bool *storeindexpos,
-                                 const GT_Str *indexname,
+                                 const GtStr *indexname,
                                  FILE *fpin,
                                  Verboseinfo *verboseinfo,
                                  GT_Error *err)
@@ -79,7 +79,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
-    GT_Str *currentline;
+    GtStr *currentline;
     unsigned int linenum;
 
     currentline = gt_str_new();
@@ -143,7 +143,7 @@ void freefmindex(Fmindex *fmindex)
   }
 }
 
-static Encodedsequence *mapbwtencoding(const GT_Str *indexname,
+static Encodedsequence *mapbwtencoding(const GtStr *indexname,
                                        Verboseinfo *verboseinfo,
                                        GT_Error *err)
 {
@@ -168,7 +168,7 @@ static Encodedsequence *mapbwtencoding(const GT_Str *indexname,
   return suffixarray.encseq;
 }
 
-int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
+int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                 Verboseinfo *verboseinfo,GT_Error *err)
 {
   FILE *fpin = NULL;
@@ -206,7 +206,7 @@ int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
   }
   if (!haserr)
   {
-    GT_Str *tmpfilename;
+    GtStr *tmpfilename;
 
     fmindex->specpos.nextfreePairBwtidx
       = (unsigned long) determinenumberofspecialstostore(
@@ -228,7 +228,7 @@ int mapfmindex (Fmindex *fmindex,const GT_Str *indexname,
   }
   if (!haserr)
   {
-    GT_Str *tmpfilename;
+    GtStr *tmpfilename;
 
     computefmkeyvalues (fmindex,
                         fmindex->bwtlength,

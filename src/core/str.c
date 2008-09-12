@@ -24,16 +24,16 @@
 #include "core/str.h"
 #include "core/xansi.h"
 
-struct GT_Str {
+struct GtStr {
   char *cstr;           /* the actual string (always '\0' terminated) */
   unsigned long length; /* currently used length (without trailing '\0') */
   size_t allocated;     /* currently allocated memory */
   unsigned int reference_count;
 };
 
-GT_Str* gt_str_new(void)
+GtStr* gt_str_new(void)
 {
-  GT_Str *s = gt_malloc(sizeof *s);      /* create new string object */
+  GtStr *s = gt_malloc(sizeof *s);      /* create new string object */
   s->cstr = gt_calloc(1, sizeof (char)); /* init string with '\0' */
   s->length = 0;                         /* set the initial length */
   s->allocated = 1;                      /* set allocated space */
@@ -41,15 +41,15 @@ GT_Str* gt_str_new(void)
   return s;                              /* return new string object */
 }
 
-GT_Str* gt_str_new_cstr(const char *cstr)
+GtStr* gt_str_new_cstr(const char *cstr)
 {
-  GT_Str *s = gt_str_new();
+  GtStr *s = gt_str_new();
   if (cstr)
     gt_str_append_cstr(s, cstr);
   return s;
 }
 
-void gt_str_set(GT_Str *s, const char *cstr)
+void gt_str_set(GtStr *s, const char *cstr)
 {
   size_t cstrlen;
   char *sptr;
@@ -66,7 +66,7 @@ void gt_str_set(GT_Str *s, const char *cstr)
   }
 }
 
-void gt_str_append_str(GT_Str *dest, const GT_Str* src)
+void gt_str_append_str(GtStr *dest, const GtStr* src)
 {
   assert(dest && src);
   dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
@@ -75,7 +75,7 @@ void gt_str_append_str(GT_Str *dest, const GT_Str* src)
   dest->length += src->length;
 }
 
-void gt_str_append_cstr(GT_Str *dest, const char *cstr)
+void gt_str_append_cstr(GtStr *dest, const char *cstr)
 {
   size_t cstrlen;
   char *destptr;
@@ -89,7 +89,7 @@ void gt_str_append_cstr(GT_Str *dest, const char *cstr)
   dest->length += cstrlen;
 }
 
-void gt_str_append_cstr_nt(GT_Str *dest, const char *cstr, unsigned long length)
+void gt_str_append_cstr_nt(GtStr *dest, const char *cstr, unsigned long length)
 {
   assert(dest && cstr);
   dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
@@ -99,7 +99,7 @@ void gt_str_append_cstr_nt(GT_Str *dest, const char *cstr, unsigned long length)
 }
 
 /* inspired by D. J. Bernstein's fmt_ulong() */
-void gt_str_append_ulong(GT_Str *dest, unsigned long u)
+void gt_str_append_ulong(GtStr *dest, unsigned long u)
 {
   unsigned int ulength = 1;
   unsigned long q = u;
@@ -123,7 +123,7 @@ void gt_str_append_ulong(GT_Str *dest, unsigned long u)
   dest->length += ulength;
 }
 
-void gt_str_append_char(GT_Str *dest, char c)
+void gt_str_append_char(GtStr *dest, char c)
 {
   assert(dest);
   if (dest->length + 2 > dest->allocated) {
@@ -133,7 +133,7 @@ void gt_str_append_char(GT_Str *dest, char c)
   dest->cstr[dest->length++] = c;
 }
 
-void gt_str_append_double(GT_Str *dest, double d, int precision)
+void gt_str_append_double(GtStr *dest, double d, int precision)
 {
   char buf[BUFSIZ];
   int rval;
@@ -143,38 +143,38 @@ void gt_str_append_double(GT_Str *dest, double d, int precision)
   gt_str_append_cstr(dest, buf);
 }
 
-char* gt_str_get(const GT_Str *s)
+char* gt_str_get(const GtStr *s)
 {
   assert(s);
   s->cstr[s->length] = '\0';
   return s->cstr;
 }
 
-void* gt_str_get_mem(const GT_Str *s)
+void* gt_str_get_mem(const GtStr *s)
 {
   assert(s);
   return s->cstr;
 }
 
-unsigned long gt_str_length(const GT_Str *s)
+unsigned long gt_str_length(const GtStr *s)
 {
   return s ? s->length : 0;
 }
 
-void gt_str_set_length(GT_Str *s, unsigned long length)
+void gt_str_set_length(GtStr *s, unsigned long length)
 {
   assert(s && length <= s->length);
   s->length = length;
 }
 
-void gt_str_reset(GT_Str *s)
+void gt_str_reset(GtStr *s)
 {
   assert(s);
   s->length = 0;
 }
 
 /* does not handle embedded \0's */
-int gt_str_cmp(const GT_Str *s1, const GT_Str *s2)
+int gt_str_cmp(const GtStr *s1, const GtStr *s2)
 {
   assert(s1 && s2);
   if (s1 == s2)
@@ -185,9 +185,9 @@ int gt_str_cmp(const GT_Str *s1, const GT_Str *s2)
   return strcmp(s1->cstr, s2->cstr);
 }
 
-GT_Str* gt_str_clone(const GT_Str *s)
+GtStr* gt_str_clone(const GtStr *s)
 {
-  GT_Str *s_copy;
+  GtStr *s_copy;
   assert(s);
   s_copy = gt_malloc(sizeof *s_copy);
   s->cstr[s->length] = '\0';
@@ -197,14 +197,14 @@ GT_Str* gt_str_clone(const GT_Str *s)
   return s_copy;
 }
 
-GT_Str* gt_str_ref(GT_Str *s)
+GtStr* gt_str_ref(GtStr *s)
 {
   if (!s) return NULL;
   s->reference_count++; /* increase the reference counter */
   return s;
 }
 
-int gt_str_read_next_line(GT_Str *s, FILE *fpin)
+int gt_str_read_next_line(GtStr *s, FILE *fpin)
 {
   int cc;
   char c;
@@ -230,7 +230,7 @@ int gt_str_read_next_line(GT_Str *s, FILE *fpin)
   }
 }
 
-int gt_str_read_next_line_generic(GT_Str *s, GT_GenFile *fpin)
+int gt_str_read_next_line_generic(GtStr *s, GT_GenFile *fpin)
 {
   int cc;
   char c;
@@ -258,7 +258,7 @@ int gt_str_read_next_line_generic(GT_Str *s, GT_GenFile *fpin)
 
 int gt_str_unit_test(GT_Error *err)
 {
-  GT_Str *s, *s1, *s2;
+  GtStr *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */
   int had_err = 0;
   gt_error_check(err);
@@ -332,7 +332,7 @@ int gt_str_unit_test(GT_Error *err)
   return had_err;
 }
 
-void gt_str_delete(GT_Str *s)
+void gt_str_delete(GtStr *s)
 {
   if (!s) return;           /* return without action if 's' is NULL */
   if (s->reference_count) { /* there are multiple references to this string */

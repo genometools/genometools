@@ -40,7 +40,7 @@ GT_DrawingRange       gt_element_calculate_drawing_range(GT_Element*,
                                                          GT_Canvas*);
 const char*           gt_element_get_type(const GT_Element*);
 void                  gt_element_set_type(GT_Element*, const char *type);
-GT_Strand             gt_element_get_strand(const GT_Element*);
+GtStrand             gt_element_get_strand(const GT_Element*);
 GT_GenomeNode*        gt_element_get_node_ref(const GT_Element*);
 bool                  gt_element_is_marked(const GT_Element*);
 bool                  gt_elements_are_equal(const GT_Element*,

@@ -29,10 +29,10 @@ typedef struct GT_Track GT_Track;
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 
-GT_Track*        gt_track_new(GT_Str *title, unsigned long max_num_lines,
+GT_Track*        gt_track_new(GtStr *title, unsigned long max_num_lines,
                         bool split_lines, GT_LineBreaker*);
 void          gt_track_insert_block(GT_Track*, GT_Block*);
-GT_Str*       gt_track_get_title(const GT_Track*);
+GtStr*       gt_track_get_title(const GT_Track*);
 unsigned long gt_track_get_number_of_lines(const GT_Track*);
 unsigned long gt_track_get_number_of_lines_with_captions(const GT_Track *track);
 unsigned long gt_track_get_number_of_discarded_blocks(GT_Track *track);

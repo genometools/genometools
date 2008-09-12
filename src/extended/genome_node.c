@@ -162,7 +162,7 @@ GT_GenomeNode* gt_genome_node_create(const GT_GenomeNodeClass *gnc)
 }
 
 void gt_genome_node_set_origin(GT_GenomeNode *gn,
-                            GT_Str *filename, unsigned int line_number)
+                            GtStr *filename, unsigned int line_number)
 {
   assert(gn && filename && line_number);
   gt_str_delete(gn->filename);
@@ -416,7 +416,7 @@ unsigned long gt_genome_node_number_of_children(const GT_GenomeNode *gn)
   return gt_dlist_size(gn->children);
 }
 
-GT_Str* gt_genome_node_get_seqid(GT_GenomeNode *gn)
+GtStr* gt_genome_node_get_seqid(GT_GenomeNode *gn)
 {
   assert(gn && gn->c_class);
   if (gn->c_class->get_seqid)
@@ -424,7 +424,7 @@ GT_Str* gt_genome_node_get_seqid(GT_GenomeNode *gn)
   return NULL;
 }
 
-GT_Str* gt_genome_node_get_idstr(GT_GenomeNode *gn)
+GtStr* gt_genome_node_get_idstr(GT_GenomeNode *gn)
 {
   assert(gn && gn->c_class && gn->c_class->get_idstr);
   return gn->c_class->get_idstr(gn);
@@ -454,7 +454,7 @@ void gt_genome_node_set_range(GT_GenomeNode *gn, GT_Range range)
   gn->c_class->set_range(gn, range);
 }
 
-void gt_genome_node_change_seqid(GT_GenomeNode *gn, GT_Str *seqid)
+void gt_genome_node_change_seqid(GT_GenomeNode *gn, GtStr *seqid)
 {
   assert(gn && gn->c_class && gn->c_class->change_seqid && seqid);
   gn->c_class->change_seqid(gn, seqid);
@@ -644,7 +644,7 @@ bool gt_genome_node_overlaps_nodes_mark(GT_GenomeNode *gn, GtArray *nodes,
   GT_Range gn_range;
   bool rval = false;
 #ifndef NDEBUG
-  GT_Str *gn_id;
+  GtStr *gn_id;
   assert(gn && nodes);
   assert(!b || gt_bittab_size(b) == gt_array_size(nodes));
   gn_id = gt_genome_node_get_idstr(gn);

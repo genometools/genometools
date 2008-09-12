@@ -23,7 +23,7 @@
 #include "core/ensure.h"
 #include "extended/luaserialize.h"
 
-static int format_scalar(lua_State *L, GT_Str *out, int index, bool table_key,
+static int format_scalar(lua_State *L, GtStr *out, int index, bool table_key,
                          GT_Error *err)
 {
   int had_err = 0;
@@ -71,7 +71,7 @@ static int format_scalar(lua_State *L, GT_Str *out, int index, bool table_key,
   return had_err;
 }
 
-static int parse_table(lua_State *L, GT_Str *out, int index, int level,
+static int parse_table(lua_State *L, GtStr *out, int index, int level,
                        GT_Error *err)
 {
   int rval, had_err = 0;
@@ -106,7 +106,7 @@ static int parse_table(lua_State *L, GT_Str *out, int index, int level,
   return had_err;
 }
 
-int lua_table_to_str(lua_State *L, GT_Str *out, int index, GT_Error *err)
+int lua_table_to_str(lua_State *L, GtStr *out, int index, GT_Error *err)
 {
   gt_error_check(err);
   assert(L && out && lua_istable(L, index));
@@ -117,7 +117,7 @@ int lua_serializer_unit_test(GT_Error *err)
 {
   int had_err = 0;
   lua_State *L;
-  GT_Str *outstr  = gt_str_new();
+  GtStr *outstr  = gt_str_new();
   const char testtable[] = "config =\n"
   "{\n"
   "  gene = {\n"

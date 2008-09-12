@@ -25,7 +25,7 @@
 #include "extended/region_mapping.h"
 
 struct RegionMapping {
-  GT_Str *sequence_filename,
+  GtStr *sequence_filename,
       *sequence_file, /* the (current) sequence file */
       *sequence_name; /* the (current) sequence name */
   Mapping *mapping;
@@ -33,7 +33,7 @@ struct RegionMapping {
   unsigned int reference_count;
 };
 
-RegionMapping* region_mapping_new_mapping(GT_Str *mapping_filename,
+RegionMapping* region_mapping_new_mapping(GtStr *mapping_filename,
                                           GT_Error *err)
 {
   RegionMapping *rm;
@@ -49,7 +49,7 @@ RegionMapping* region_mapping_new_mapping(GT_Str *mapping_filename,
   return rm;
 }
 
-RegionMapping* region_mapping_new_seqfile(GT_Str *sequence_filename)
+RegionMapping* region_mapping_new_seqfile(GtStr *sequence_filename)
 {
   RegionMapping *rm;
   assert(sequence_filename);
@@ -65,7 +65,7 @@ RegionMapping* region_mapping_ref(RegionMapping *rm)
   return rm;
 }
 
-static GT_Str* region_mapping_map(RegionMapping *rm,
+static GtStr* region_mapping_map(RegionMapping *rm,
                                   const char *sequence_region, GT_Error *err)
 {
   gt_error_check(err);
@@ -76,7 +76,7 @@ static GT_Str* region_mapping_map(RegionMapping *rm,
     return mapping_map_string(rm->mapping, sequence_region, err);
 }
 
-static int update_gt_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid,
+static int update_gt_bioseq_if_necessary(RegionMapping *rm, GtStr *seqid,
                                          GT_Error *err)
 {
   int had_err = 0;
@@ -103,7 +103,7 @@ static int update_gt_bioseq_if_necessary(RegionMapping *rm, GT_Str *seqid,
 }
 
 int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
-                                    GT_Str *seqid, GT_Error *err)
+                                    GtStr *seqid, GT_Error *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -115,7 +115,7 @@ int region_mapping_get_raw_sequence(RegionMapping *rm, const char **raw,
 }
 
 int region_mapping_get_raw_sequence_length(RegionMapping *rm,
-                                           unsigned long *length, GT_Str *seqid,
+                                           unsigned long *length, GtStr *seqid,
                                            GT_Error *err)
 {
   int had_err = 0;

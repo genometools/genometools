@@ -26,7 +26,7 @@
 #include "tools/gt_splicesiteinfo.h"
 
 typedef struct {
-  GT_Str *seqfile,
+  GtStr *seqfile,
       *regionmapping;
   bool addintrons;
 } SpliceSiteInfoArguments;

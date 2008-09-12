@@ -67,7 +67,7 @@ static int feature_index_lua_add_genome_feature(lua_State *L)
   GT_FeatureIndex **fi;
   GT_GenomeNode **gn;
   GT_GenomeFeature *gf;
-  GT_Str *seqid;
+  GtStr *seqid;
   assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
@@ -149,7 +149,7 @@ static int feature_index_lua_get_first_seqid(lua_State *L)
 static int feature_index_lua_get_seqids(lua_State *L)
 {
   GT_FeatureIndex **feature_index;
-  GT_StrArray *seqids;
+  GtStrArray *seqids;
   feature_index = check_feature_index(L, 1);
   seqids = gt_feature_index_get_seqids(*feature_index);
   assert(seqids);

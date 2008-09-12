@@ -31,8 +31,8 @@
 typedef struct
 {
   bool noindexpos;
-  GT_StrArray *indexnametab;
-  GT_Str *leveldesc,
+  GtStrArray *indexnametab;
+  GtStr *leveldesc,
       *outfmindex;
 } Mkfmcallinfo;
 

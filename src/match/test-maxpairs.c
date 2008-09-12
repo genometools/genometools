@@ -22,7 +22,7 @@
 #include "verbose-def.h"
 #include "seqpos-def.h"
 
-int testmaxpairs(GT_UNUSED const GT_Str *indexname,
+int testmaxpairs(GT_UNUSED const GtStr *indexname,
                  GT_UNUSED unsigned long samples,
                  GT_UNUSED unsigned int minlength,
                  GT_UNUSED Seqpos substringlength,
@@ -210,7 +210,7 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
   return 0;
 }
 
-int testmaxpairs(const GT_Str *indexname,
+int testmaxpairs(const GtStr *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,

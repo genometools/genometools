@@ -90,7 +90,7 @@ DECLAREARRAYSTRUCT(LTRboundaries);
 /* The datatype Motif stores information about the specified motif. */
 typedef struct
 {
-  GT_Str *str_motif;
+  GtStr *str_motif;
   Uchar firstleft, /* first character of left motif instance */
         secondleft,    /* second character of left motif instance */
         firstright,    /* first character of right motif instance */

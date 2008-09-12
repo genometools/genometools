@@ -474,7 +474,7 @@ void getencseqkmers(
 }
 
 int getfastastreamkmers(
-        const GT_StrArray *filenametab,
+        const GtStrArray *filenametab,
         void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
         void *processkmercodeinfo,
         unsigned int numofchars,

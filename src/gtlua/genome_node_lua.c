@@ -30,10 +30,10 @@ static int genome_feature_lua_new(lua_State *L)
 {
   GT_GenomeNode **gf;
   unsigned long startpos, endpos;
-  GT_Strand strand;
+  GtStrand strand;
   const char *seqid, *type, *strand_str;
   size_t length;
-  GT_Str *seqid_str;
+  GtStr *seqid_str;
   assert(L);
   /* get/check parameters */
   seqid = luaL_checkstring(L, 1);
@@ -62,7 +62,7 @@ static int sequence_region_lua_new(lua_State *L)
 {
   GT_GenomeNode **sr;
   const char *seqid;
-  GT_Str *seqid_str;
+  GtStr *seqid_str;
   GT_Range *range;
   assert(L);
   /* get_check parameters */
@@ -94,7 +94,7 @@ static int genome_node_lua_get_range(lua_State *L)
 
 static int genome_node_lua_get_seqid(lua_State *L)
 {
-  GT_Str *seqid;
+  GtStr *seqid;
   GT_GenomeNode **gn = check_genome_node(L, 1);
   if ((seqid = gt_genome_node_get_seqid(*gn)))
     lua_pushstring(L, gt_str_get(seqid));
@@ -183,7 +183,7 @@ static int genome_feature_lua_get_exons(lua_State *L)
 static int genome_feature_lua_set_source(lua_State *L)
 {
   const char *source;
-  GT_Str *source_str;
+  GtStr *source_str;
   GT_GenomeNode **gn = check_genome_node(L, 1);
   GT_GenomeFeature *gf;
   /* make sure we get a genome feature */
@@ -272,7 +272,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   const char *type;
   bool join;
   RegionMapping **region_mapping;
-  GT_Str *sequence;
+  GtStr *sequence;
   GT_Error *err;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */

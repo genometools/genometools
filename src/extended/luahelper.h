@@ -27,7 +27,7 @@ int  lua_set_modules_path(lua_State*, GT_Error*);
 void lua_set_arg(lua_State*, const char *argv_0, const char **argv);
 void lua_export_metatable(lua_State*, const char *metatable_desc);
 
-void lua_push_strarray_as_table(lua_State*, GT_StrArray*);
+void lua_push_strarray_as_table(lua_State*, GtStrArray*);
 
 /* Propagate the error given in <err> (which must be set) to <L>.
    Takes ownership of the error and deletes it. */

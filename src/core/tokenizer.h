@@ -29,7 +29,7 @@ Tokenizer*    tokenizer_new(GT_IO*); /* takes ownership */
    with '#') */
 void          tokenizer_skip_comment_lines(Tokenizer*);
 /* returns the current token */
-GT_Str*       tokenizer_get_token(Tokenizer*);
+GtStr*       tokenizer_get_token(Tokenizer*);
 bool          tokenizer_has_token(Tokenizer*);
 bool          tokenizer_line_start(const Tokenizer*);
 void          tokenizer_next_token(Tokenizer*); /* go to the next token */

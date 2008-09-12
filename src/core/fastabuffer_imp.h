@@ -41,7 +41,7 @@ struct GT_FastaBuffer
   ssize_t currentinpos, currentfillpos;
   uint64_t lastspeciallength;
   Filelengthvalues *filelengthtab;
-  const GT_StrArray *filenametab;
+  const GtStrArray *filenametab;
   const Uchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;

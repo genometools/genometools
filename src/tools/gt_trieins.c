@@ -42,7 +42,7 @@ static OPrval parse_options(bool *onlyins,int *parsed_args,
 
 int gt_trieins(int argc, const char **argv, GT_Error *err)
 {
-  GT_Str *indexname;
+  GtStr *indexname;
   bool haserr = false;
   int parsed_args;
   bool onlyins = false;

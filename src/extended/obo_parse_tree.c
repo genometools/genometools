@@ -106,11 +106,11 @@ typedef struct {
   char *type;
   Hashmap *content;
   unsigned long line;
-  GT_Str *filename;
+  GtStr *filename;
 } OBOStanza;
 
 static OBOStanza* obo_stanza_new(const char *type, unsigned long line,
-                                 GT_Str *filename)
+                                 GtStr *filename)
 {
   OBOStanza *obo_stanza = gt_malloc(sizeof *obo_stanza);
   obo_stanza->type = gt_cstr_dup(type);
@@ -325,7 +325,7 @@ static bool ignored_line(GT_IO *obo_file, GT_Error *err)
   return gt_comment_line(obo_file, err);
 }
 
-static int proc_any_char(GT_IO *obo_file, GT_Str *capture, bool be_permissive,
+static int proc_any_char(GT_IO *obo_file, GtStr *capture, bool be_permissive,
                          GT_Error *err)
 {
   gt_error_check(err);
@@ -351,7 +351,7 @@ static int proc_any_char(GT_IO *obo_file, GT_Str *capture, bool be_permissive,
   return 0;
 }
 
-static int tag_line(GT_IO *obo_file, GT_Str *tag, GT_Str *value, GT_Error *err)
+static int tag_line(GT_IO *obo_file, GtStr *tag, GtStr *value, GT_Error *err)
 {
   int had_err;
   gt_error_check(err);
@@ -379,7 +379,7 @@ static int tag_line(GT_IO *obo_file, GT_Str *tag, GT_Str *value, GT_Error *err)
 
 static int header(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
 {
-  GT_Str *tag, *value;
+  GtStr *tag, *value;
   int had_err;
   gt_error_check(err);
   assert(obo_parse_tree && obo_file);
@@ -403,7 +403,7 @@ static int header(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
   return had_err;
 }
 
-static int stanza_line(GT_IO *obo_file, GT_Str *type, GT_Error *err)
+static int stanza_line(GT_IO *obo_file, GtStr *type, GT_Error *err)
 {
   int had_err;
   gt_error_check(err);
@@ -425,7 +425,7 @@ static int stanza(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
 {
   unsigned long stanza_line_number;
   int had_err;
-  GT_Str *type, *tag, *value;
+  GtStr *type, *tag, *value;
   gt_error_check(err);
   assert(obo_parse_tree && obo_file);
   type = gt_str_new();

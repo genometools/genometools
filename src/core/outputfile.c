@@ -22,7 +22,7 @@
 #include "core/warning.h"
 
 struct OutputFileInfo {
-  GT_Str *output_filename;
+  GtStr *output_filename;
   bool gzip,
        bzip2,
        force;

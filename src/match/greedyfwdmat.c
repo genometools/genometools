@@ -209,7 +209,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
                               Seqpos totallength,
                               Greedygmatchforwardfunction gmatchforward,
                               const Alphabet *alphabet,
-                              const GT_StrArray *queryfilenames,
+                              const GtStrArray *queryfilenames,
                               Definedunsignedlong minlength,
                               Definedunsignedlong maxlength,
                               bool showsequence,
@@ -278,7 +278,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const Seqpos *countspecialcodes,
                           const Alphabet *alphabet,
                           unsigned int prefixlength,
-                          const GT_StrArray *queryfilenames,
+                          const GtStrArray *queryfilenames,
                           GT_Error *err)
 {
   Substriter *substriter;
@@ -363,7 +363,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const Seqpos *countspecialcodes,
                           const Alphabet *alphabet,
                           unsigned int prefixlength,
-                          const GT_StrArray *queryfilenames,
+                          const GtStrArray *queryfilenames,
                           GT_Error *err)
 {
   SeqIterator *seqit;

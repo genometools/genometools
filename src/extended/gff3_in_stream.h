@@ -29,13 +29,13 @@ const GenomeStreamClass* gff3_in_stream_class(void);
 void                     gff3_in_stream_set_type_checker(GenomeStream*,
                                                          GT_TypeChecker
                                                          *type_checker);
-/* Returns a <GT_StrArray*> which contains all type names in alphabetical order
+/* Returns a <GtStrArray*> which contains all type names in alphabetical order
    which have been parsed by <gff3_in_stream>.
    The caller is responsible to free it! */
-GT_StrArray*             gff3_in_stream_get_used_types(GenomeStream
+GtStrArray*             gff3_in_stream_get_used_types(GenomeStream
                                                        *gff3_in_stream);
 void                     gff3_in_stream_set_offset(GenomeStream*, long);
-int                      gff3_in_stream_set_offsetfile(GenomeStream*, GT_Str*,
+int                      gff3_in_stream_set_offsetfile(GenomeStream*, GtStr*,
                                                        GT_Error*);
 void                     gff3_in_stream_enable_tidy_mode(GenomeStream*);
 GenomeStream*            gff3_in_stream_new_unsorted(int num_of_files,

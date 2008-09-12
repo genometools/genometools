@@ -26,11 +26,11 @@ typedef struct FilterVisitor FilterVisitor;
 const GenomeVisitorClass* filter_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have
    strand <strand>. */
-GenomeVisitor*            filter_visitor_new(GT_Str *seqid, GT_Str *typefilter,
+GenomeVisitor*            filter_visitor_new(GtStr *seqid, GtStr *typefilter,
                                              GT_Range contain_range,
                                              GT_Range overlap_range,
-                                             GT_Strand strand,
-                                             GT_Strand targetstrand,
+                                             GtStrand strand,
+                                             GtStrand targetstrand,
                                              bool has_CDS,
                                              unsigned long max_gene_length,
                                              unsigned long max_gene_num,

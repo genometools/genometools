@@ -36,7 +36,7 @@ char          gt_io_peek(GT_IO*);
 char          gt_io_next(GT_IO*);
 unsigned long gt_io_get_line_number(const GT_IO*);
 const char*   gt_io_get_filename(const GT_IO*);
-GT_Str*       gt_io_get_filename_str(const GT_IO*);
+GtStr*       gt_io_get_filename_str(const GT_IO*);
 void          gt_io_delete(GT_IO*);
 
 #endif

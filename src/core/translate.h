@@ -20,7 +20,7 @@
 
 #include "core/str.h"
 
-void gt_translate_dna(GT_Str*, const char*, unsigned long, unsigned int frame);
+void gt_translate_dna(GtStr*, const char*, unsigned long, unsigned int frame);
 
 /* Translate <dna_sequence> of length <seqlen> in all three reading frames.
    The translations are stored in <frame1>, <frame2>, and <frame3>.

@@ -62,7 +62,7 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
 {
   GenomeStream *gs;
   CDSStream *cds_stream;
-  GT_Str *source_str;
+  GtStr *source_str;
   int had_err = 0;
   gs = genome_stream_create(cds_stream_class(), true);
   cds_stream = cds_stream_cast(gs);

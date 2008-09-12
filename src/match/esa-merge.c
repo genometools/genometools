@@ -53,13 +53,13 @@ static void fillandinsert(Mergertrierep *trierep,
 static int inputthesequences(Alphabet **alpha,
                              Seqpos *nextpostable,
                              Suffixarray *suffixarraytable,
-                             const GT_StrArray *indexnametab,
+                             const GtStrArray *indexnametab,
                              unsigned int demand,
                              Verboseinfo *verboseinfo,
                              GT_Error *err)
 {
   unsigned long idx;
-  GT_Str *indexname;
+  GtStr *indexname;
   Seqpos totallength;
 
   gt_error_check(err);
@@ -247,7 +247,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err)
 }
 
 int initEmissionmergedesa(Emissionmergedesa *emmesa,
-                          const GT_StrArray *indexnametab,
+                          const GtStrArray *indexnametab,
                           unsigned int demand,
                           Verboseinfo *verboseinfo,
                           GT_Error *err)

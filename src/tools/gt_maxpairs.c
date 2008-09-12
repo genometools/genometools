@@ -36,8 +36,8 @@ typedef struct
   unsigned int userdefinedleastlength;
   unsigned long samples;
   bool scanfile;
-  GT_Str *indexname;
-  GT_StrArray *queryfiles;
+  GtStr *indexname;
+  GtStrArray *queryfiles;
 } Maxpairsoptions;
 
 static int simpleexactselfmatchoutput(GT_UNUSED void *info,

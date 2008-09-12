@@ -26,7 +26,7 @@
 struct SeqIterator
 {
   GT_FastaBuffer *fb;
-  const GT_StrArray *filenametab;
+  const GtStrArray *filenametab;
   const Uchar *symbolmap;
   GT_Queue *descptr;
   ArrayUchar sequencebuffer;
@@ -36,7 +36,7 @@ struct SeqIterator
                      maxread;
 };
 
-SeqIterator* seqiterator_new(const GT_StrArray *filenametab,
+SeqIterator* seqiterator_new(const GtStrArray *filenametab,
                              const Uchar *symbolmap,
                              bool withsequence)
 {

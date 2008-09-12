@@ -45,7 +45,7 @@ GT_ScoreMatrix* gt_score_matrix_new(GT_Alpha *alpha)
 static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
                                Tokenizer *tz, GT_Error *err)
 {
-  GT_Str *token;
+  GtStr *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   gt_error_check(err);
@@ -111,7 +111,7 @@ static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
   unsigned int i = 0;
   char amino_acid;
   int score, had_err = 0;
-  GT_Str *token;
+  GtStr *token;
   assert(sm && tz && index_to_gt_alpha_char_mapping);
   gt_error_check(err);
   token = tokenizer_get_token(tz);

@@ -27,7 +27,7 @@
 #ifdef INLINEDSequentialsuffixarrayreader
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
-                                  const GT_Str *indexname,
+                                  const GtStr *indexname,
                                   unsigned int demand,
                                   /*@unused@*/ Sequentialaccesstype seqactype,
                                   GT_Error *err)
@@ -108,7 +108,7 @@ Readmode readmodeSequentialsuffixarrayreader(
 };
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
-                                        const GT_Str *indexname,
+                                        const GtStr *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
                                         GT_Error *err)

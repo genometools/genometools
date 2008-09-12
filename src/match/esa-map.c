@@ -51,7 +51,7 @@
 
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Seqpos *totallength,
-                                 const GT_Str *indexname,
+                                 const GtStr *indexname,
                                  Verboseinfo *verboseinfo,
                                  FILE *fpin,
                                  GT_Error *err)
@@ -64,7 +64,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   GtArray *riktab;
-  GT_Str *currentline;
+  GtStr *currentline;
 
   gt_error_check(err);
   riktab = gt_array_new(sizeofReadintkeys());
@@ -228,10 +228,10 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   return haserr ? -1 : 0;
 }
 
-static void *genericmaponlytable(const GT_Str *indexname,const char *suffix,
+static void *genericmaponlytable(const GtStr *indexname,const char *suffix,
                                  size_t *numofbytes,GT_Error *err)
 {
-  GT_Str *tmpfilename;
+  GtStr *tmpfilename;
   void *ptr;
   bool haserr = false;
 
@@ -264,7 +264,7 @@ static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
   return 0;
 }
 
-static void *genericmaptable(const GT_Str *indexname,
+static void *genericmaptable(const GtStr *indexname,
                              const char *suffix,
                              Seqpos expectedunits,size_t sizeofunit,
                              GT_Error *err)
@@ -305,7 +305,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
 }
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
-                        const GT_Str *indexname,Verboseinfo *verboseinfo,
+                        const GtStr *indexname,Verboseinfo *verboseinfo,
                         GT_Error *err)
 {
   bool haserr = false;
@@ -327,10 +327,10 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   return haserr;
 }
 
-static bool scanal1file(Suffixarray *suffixarray,const GT_Str *indexname,
+static bool scanal1file(Suffixarray *suffixarray,const GtStr *indexname,
                         GT_Error *err)
 {
-  GT_Str *tmpfilename;
+  GtStr *tmpfilename;
   bool haserr = false;
 
   gt_error_check(err);
@@ -387,7 +387,7 @@ static int inputsuffixarray(bool map,
                             Suffixarray *suffixarray,
                             Seqpos *totallength,
                             unsigned int demand,
-                            const GT_Str *indexname,
+                            const GtStr *indexname,
                             Verboseinfo *verboseinfo,
                             GT_Error *err)
 {
@@ -549,7 +549,7 @@ static int inputsuffixarray(bool map,
 int streamsuffixarray(Suffixarray *suffixarray,
                       Seqpos *totallength,
                       unsigned int demand,
-                      const GT_Str *indexname,
+                      const GtStr *indexname,
                       Verboseinfo *verboseinfo,
                       GT_Error *err)
 {
@@ -566,7 +566,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
 int mapsuffixarray(Suffixarray *suffixarray,
                    Seqpos *totallength,
                    unsigned int demand,
-                   const GT_Str *indexname,
+                   const GtStr *indexname,
                    Verboseinfo *verboseinfo,
                    GT_Error *err)
 {

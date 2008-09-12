@@ -224,16 +224,16 @@ const char* gt_feature_index_get_first_seqid(const GT_FeatureIndex *fi)
 static int store_seqid(void *key, GT_UNUSED void *value, void *data,
                        GT_UNUSED GT_Error *err)
 {
-  GT_StrArray *seqids = (GT_StrArray*) data;
+  GtStrArray *seqids = (GtStrArray*) data;
   const char *seqid = (const char*) key;
   assert(seqids && seqid);
   gt_strarray_add_cstr(seqids, seqid);
   return 0;
 }
 
-GT_StrArray* gt_feature_index_get_seqids(const GT_FeatureIndex *fi)
+GtStrArray* gt_feature_index_get_seqids(const GT_FeatureIndex *fi)
 {
-  GT_StrArray* seqids;
+  GtStrArray* seqids;
   int rval;
   assert(fi);
   seqids = gt_strarray_new();
@@ -269,8 +269,8 @@ int gt_feature_index_unit_test(GT_Error *err)
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;
   GT_Range check_range, rs;
-  GT_Str *seqid1, *seqid2;
-  GT_StrArray *seqids = NULL;
+  GtStr *seqid1, *seqid2;
+  GtStrArray *seqids = NULL;
   GT_SequenceRegion *sr1, *sr2;
   GtArray *features = NULL;
   int had_err = 0;

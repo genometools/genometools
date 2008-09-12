@@ -155,7 +155,7 @@ static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
   assert(txt);
   double fpos;
   int logval;
-  GT_Str *formatstring;
+  GtStr *formatstring;
 
   logval = (int) floor(log10(pos));
   formatstring = gt_str_new_cstr("%.");
@@ -431,7 +431,7 @@ int gt_canvas_visit_block(GT_Canvas *canvas, GT_Block *block)
   GT_Color grey, fillcolor, strokecolor;
   double bar_height, min_len_block, arrow_width, stroke_width;
   const char* caption;
-  GT_Strand strand;
+  GtStrand strand;
 
   assert(canvas && block);
 
@@ -539,8 +539,8 @@ int gt_canvas_visit_element(GT_Canvas *canvas, GT_Element *elem)
   double elem_start, elem_width, stroke_width, bar_height, arrow_width;
   GT_Color elem_color, grey, fill_color;
   const char *type;
-  GT_Str *style;
-  GT_Strand strand = gt_element_get_strand(elem);
+  GtStr *style;
+  GtStrand strand = gt_element_get_strand(elem);
 
   assert(canvas && elem);
 

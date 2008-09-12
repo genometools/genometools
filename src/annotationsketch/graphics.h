@@ -101,7 +101,7 @@ void      gt_graphics_draw_arrowhead(GT_Graphics*, double x, double y, GT_Color,
 int       gt_graphics_save_to_file(const GT_Graphics*, const char *filename,
                                    GT_Error*);
 /* Write out the Graphic to the given <stream>. */
-void      gt_graphics_save_to_stream(const GT_Graphics*, GT_Str *stream);
+void      gt_graphics_save_to_stream(const GT_Graphics*, GtStr *stream);
 
 void      gt_graphics_delete(GT_Graphics*);
 

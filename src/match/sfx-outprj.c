@@ -40,7 +40,7 @@
                 PRINTSeqposcast(specialcharinfo->VAL))
 
 static void showprjinfo(FILE *outprj,
-                        const GT_StrArray *filenametab,
+                        const GtStrArray *filenametab,
                         Readmode readmode,
                         const Filelengthvalues *filelengthtab,
                         Seqpos totallength,
@@ -94,8 +94,8 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
 
-int outprjfile(const GT_Str *indexname,
-               const GT_StrArray *filenametab,
+int outprjfile(const GtStr *indexname,
+               const GtStrArray *filenametab,
                Readmode readmode,
                const Filelengthvalues *filelengthtab,
                Seqpos totallength,

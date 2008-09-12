@@ -21,7 +21,7 @@
 
 typedef struct {
   bool bool_option_template;
-  GT_Str  *str_option_template;
+  GtStr  *str_option_template;
 } TemplateArguments;
 
 static void* gt_template_arguments_new(void)

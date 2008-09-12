@@ -31,9 +31,9 @@ void          gt_cstr_table_add(GT_CstrTable *table, const char *cstr);
 /* If a C-string equal to <cstr> is contained in <table>, it is returned.
    Otherwise NULL is returned. */
 const char*   gt_cstr_table_get(const GT_CstrTable *table, const char *cstr);
-/* Return a <GT_StrArray*> which contains all <cstr>s added to <table> in
+/* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
-GT_StrArray*  gt_cstr_table_get_all(const GT_CstrTable *table);
+GtStrArray*  gt_cstr_table_get_all(const GT_CstrTable *table);
 int           gt_cstr_table_unit_test(GT_Error*);
 
 #endif

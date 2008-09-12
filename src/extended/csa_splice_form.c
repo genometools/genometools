@@ -98,7 +98,7 @@ GT_Range csa_splice_form_genomic_range(const CSASpliceForm *splice_form)
   return splice_form_range;
 }
 
-GT_Strand csa_splice_form_strand(const CSASpliceForm *splice_form)
+GtStrand csa_splice_form_strand(const CSASpliceForm *splice_form)
 {
   assert(splice_form);
   return splice_form->get_strand(*(void**)

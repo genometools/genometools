@@ -29,7 +29,7 @@
 
 typedef struct {
   bool verbose;
-  GT_Str *seqfile,
+  GtStr *seqfile,
       *regionmapping;
 } CDSArguments;
 

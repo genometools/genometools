@@ -90,7 +90,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 typedef struct
 {
-  GT_StrArray *filenametab;
+  GtStrArray *filenametab;
   Filelengthvalues *filelengthtab;
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;

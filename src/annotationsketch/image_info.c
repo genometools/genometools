@@ -100,7 +100,7 @@ int gt_image_info_unit_test(GT_Error *err)
   GT_GenomeNode* gfs[20];
   GT_ImageInfo *ii;
   unsigned long i;
-  GT_Str *seqid;
+  GtStr *seqid;
   int had_err = 0;
   assert(err);
   gt_error_check(err);

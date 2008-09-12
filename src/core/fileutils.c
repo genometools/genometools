@@ -78,7 +78,7 @@ const char* file_suffix(const char *path)
   return suffixptr;
 }
 
-void file_dirname(GT_Str *path, const char *file)
+void file_dirname(GtStr *path, const char *file)
 {
   long i;
   gt_str_reset(path);
@@ -90,7 +90,7 @@ void file_dirname(GT_Str *path, const char *file)
     gt_str_append_cstr_nt(path, file, i);
 }
 
-int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
+int file_find_in_path(GtStr *path, const char *file, GT_Error *err)
 {
   char *pathvariable, *pathcomponent = NULL;
   Splitter *splitter = NULL;
@@ -143,7 +143,7 @@ int file_find_in_path(GT_Str *path, const char *file, GT_Error *err)
   return had_err;
 }
 
-off_t files_estimate_total_size(const GT_StrArray *filenames)
+off_t files_estimate_total_size(const GtStrArray *filenames)
 {
   unsigned long filenum;
   off_t totalsize = 0;

@@ -36,7 +36,7 @@
 #include "esa-map.pr"
 #include "fillsci.pr"
 
-static int outal1file(const GT_Str *indexname,const Alphabet *alpha,
+static int outal1file(const GtStr *indexname,const Alphabet *alpha,
                       GT_Error *err)
 {
   FILE *al1fp;
@@ -162,7 +162,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
 }
 
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
-                        const GT_Str *indexname,
+                        const GtStr *indexname,
                         Verboseinfo *verboseinfo,
                         GT_Error *err)
 {

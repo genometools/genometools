@@ -38,7 +38,7 @@ struct GT_GraphicsCairo {
   const GT_Graphics parent_instance;
   cairo_t *cr;
   cairo_surface_t *surf;
-  GT_Str *outbuf;
+  GtStr *outbuf;
   GT_GraphicsOutType type;
   double margin_x, margin_y, height, width;
   bool from_context;
@@ -50,7 +50,7 @@ struct GT_GraphicsCairo {
 static cairo_status_t str_write_func(void *closure, const unsigned char *data,
                                      unsigned int length)
 {
-  GT_Str *stream = closure;
+  GtStr *stream = closure;
   assert(stream);
   gt_str_append_cstr_nt(stream, (char*) data, length);
   return CAIRO_STATUS_SUCCESS;
@@ -507,7 +507,7 @@ int gt_graphics_cairo_save_to_file(const GT_Graphics *gg, const char *filename,
   return 0;
 }
 
-void gt_graphics_cairo_save_to_stream(const GT_Graphics *gg, GT_Str *stream)
+void gt_graphics_cairo_save_to_stream(const GT_Graphics *gg, GtStr *stream)
 {
   const GT_GraphicsCairo *g = (const GT_GraphicsCairo*) gg;
   cairo_status_t rval;

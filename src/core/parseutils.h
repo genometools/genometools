@@ -54,7 +54,7 @@ int gt_parse_score(bool *score_is_defined, float *score_value,
                    const char *score, unsigned int line_number,
                    const char *filename, GT_Error*);
 
-int gt_parse_strand(GT_Strand*, const char *strand,
+int gt_parse_strand(GtStrand*, const char *strand,
                  unsigned int line_number, const char *filename, GT_Error*);
 
 int gt_parse_phase(Phase*, const char *phase,

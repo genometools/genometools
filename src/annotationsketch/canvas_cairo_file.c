@@ -117,7 +117,7 @@ int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
   return had_err;
 }
 
-int gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas, GT_Str *stream)
+int gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas, GtStr *stream)
 {
   int had_err = 0;
   GT_Canvas *c = (GT_Canvas*) canvas;

@@ -40,7 +40,7 @@ typedef struct {
        typecheck_built_in,
        tidy;
   long offset;
-  GT_Str *offsetfile,
+  GtStr *offsetfile,
       *typecheck;
   unsigned long width;
   OutputFileInfo *ofi;

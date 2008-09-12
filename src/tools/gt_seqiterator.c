@@ -177,7 +177,7 @@ static void processastretches(const DiscDistri *distastretch,
 
 int gt_seqiterator(int argc, const char **argv, GT_Error *err)
 {
-  GT_StrArray *files;
+  GtStrArray *files;
   SeqIterator *seqit;
   const Uchar *sequence;
   char *desc;

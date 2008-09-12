@@ -71,7 +71,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   GenomeStream *gs;
   GTFInStream *gtf_in_stream;
   GTF_parser *gtf_parser;
-  GT_Str *filenamestr;
+  GtStr *filenamestr;
   int had_err;
   FILE *fpin;
 

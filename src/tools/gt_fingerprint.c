@@ -29,7 +29,7 @@
 
 typedef struct {
   bool show_duplicates;
-  GT_Str *checklist,
+  GtStr *checklist,
       *extract;
 } FingerprintArguments;
 
@@ -112,7 +112,7 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
 {
   bool comparisons_failed = false, use_stdin = false;
   FILE *checkfile;
-  GT_Str *line;
+  GtStr *line;
   gt_error_check(err);
   assert(sd && checklist);
   if (!strcmp(checklist, "-"))

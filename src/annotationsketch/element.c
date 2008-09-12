@@ -28,7 +28,7 @@
 
 struct GT_Element {
   const char *type;
-  GT_Strand strand;
+  GtStrand strand;
   GT_GenomeNode *gn;
   GT_Range range;
   GT_DrawingRange drange;
@@ -86,7 +86,7 @@ void gt_element_set_type(GT_Element *element, const char *type)
   element->type = type;
 }
 
-GT_Strand gt_element_get_strand(const GT_Element *element)
+GtStrand gt_element_get_strand(const GT_Element *element)
 {
   assert(element);
   return element->strand;
@@ -124,7 +124,7 @@ int gt_element_unit_test(GT_Error *err)
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;
   GT_Element *e, *e2, *e3;
-  GT_Str *seqid;
+  GtStr *seqid;
   int had_err = 0;
   gt_error_check(err);
 

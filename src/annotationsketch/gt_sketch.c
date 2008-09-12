@@ -43,7 +43,7 @@ typedef struct {
        verbose,
        addintrons,
        showrecmaps;
-  GT_Str *seqid, *format;
+  GtStr *seqid, *format;
   unsigned long start,
                 end;
   unsigned int width;
@@ -179,8 +179,8 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   GT_Range qry_range, sequence_region_range;
   GtArray *results = NULL;
   GT_Style *sty = NULL;
-  GT_Str *gt_style_file = NULL;
-  GT_Str *prog;
+  GtStr *gt_style_file = NULL;
+  GtStr *prog;
   GT_Diagram *d = NULL;
   GT_ImageInfo* ii = NULL;
   GT_Canvas *canvas = NULL;

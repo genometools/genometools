@@ -109,7 +109,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
 
 static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                                        Seqpos len,
-                                       GT_UNUSED GT_Str *str_indexfilename,
+                                       GT_UNUSED GtStr *str_indexfilename,
                                        GT_Error *err)
 {
   unsigned long i, desclen;
@@ -148,7 +148,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
 static int overallpredictionsequences(const LTRharvestoptions *lo,
     bool innerregion,
     void *applyinfo,
-    int(*apply)(Fastaoutinfo *,Seqpos, Seqpos, GT_Str*, GT_Error *err),
+    int(*apply)(Fastaoutinfo *,Seqpos, Seqpos, GtStr*, GT_Error *err),
     GT_Error *err)
 {
   unsigned long i;

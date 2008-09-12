@@ -507,7 +507,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
-int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,
+int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
                     GT_Error *err)
 {
   FILE *fp;
@@ -536,12 +536,12 @@ int flushencseqfile(const GT_Str *indexname,Encodedsequence *encseq,
 }
 
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
-                                     const GT_Str *indexname,
+                                     const GtStr *indexname,
                                      Verboseinfo *verboseinfo,
                                      GT_Error *err)
 {
   bool haserr = false;
-  GT_Str *tmpfilename;
+  GtStr *tmpfilename;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
@@ -1841,7 +1841,7 @@ static Encodedsequence *determineencseqkeyvalues(
   return encseq;
 }
 
-static int readsatfromfile(const GT_Str *indexname,GT_Error *err)
+static int readsatfromfile(const GtStr *indexname,GT_Error *err)
 {
   FILE *fp;
   int cc = 0;
@@ -1989,7 +1989,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
           = encodedseqfunctab[(int) sat].delivercharnospecial.funcname
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
-                                                  const GT_StrArray
+                                                  const GtStrArray
                                                   *filenametab,
                                                   bool plainformat,
                                                   Seqpos totallength,
@@ -2058,7 +2058,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 }
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
-                                               const GT_Str *indexname,
+                                               const GtStr *indexname,
                                                Seqpos totallength,
                                                Seqpos specialranges,
                                                unsigned int mapsize,

@@ -37,7 +37,7 @@ typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct Bcktab Bcktab;
 
-Bcktab *mapbcktab(const GT_Str *indexname,
+Bcktab *mapbcktab(const GtStr *indexname,
                   Seqpos totallength,
                   unsigned int numofchars,
                   unsigned int prefixlength,

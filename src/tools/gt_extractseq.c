@@ -30,7 +30,7 @@
 #define TOPOS_OPTION_STR    "topos"
 
 typedef struct {
-  GT_Str *pattern,
+  GtStr *pattern,
       *ginum;
   unsigned long frompos,
                 topos,
@@ -184,7 +184,7 @@ static int extractseq_match(GT_GenFile *outfp, GT_Bioseq *bs,
   return had_err;
 }
 
-static int process_ginum(GT_Str *ginum, int argc, const char **argv,
+static int process_ginum(GtStr *ginum, int argc, const char **argv,
                          unsigned long width, GT_GenFile *outfp, GT_Error *err)
 {
   int had_err = 0;
@@ -197,7 +197,7 @@ static int process_ginum(GT_Str *ginum, int argc, const char **argv,
   }
 
   if (!had_err) {
-    GT_StrArray *referencefiletab;
+    GtStrArray *referencefiletab;
     int i;
     referencefiletab = gt_strarray_new();
     for (i = 0; i < argc; i++)

@@ -25,7 +25,7 @@
 
 struct CDSVisitor {
   const GenomeVisitor parent_instance;
-  GT_Str *source;
+  GtStr *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
   RegionMapping *region_mapping;
@@ -93,7 +93,7 @@ static int extract_spliced_seq(GT_GenomeNode *gn, CDSVisitor *visitor,
 
 static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 {
-  GT_Str *pr_0, *pr_1, *pr_2;
+  GtStr *pr_0, *pr_1, *pr_2;
   GtArray *orfs;
   assert(ss);
 
@@ -122,7 +122,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
   GT_GenomeNode *cds_feature;
   unsigned long i;
   GT_Range cds;
-  GT_Strand strand = gt_genome_feature_get_strand((GT_GenomeFeature*) gn);
+  GtStrand strand = gt_genome_feature_get_strand((GT_GenomeFeature*) gn);
 
   assert(gt_range_length(orf) >= 3);
   /* the first CDS feature */
@@ -228,7 +228,7 @@ const GenomeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(RegionMapping *region_mapping, GT_Str *source)
+GenomeVisitor* cds_visitor_new(RegionMapping *region_mapping, GtStr *source)
 {
   GenomeVisitor *gv;
   CDSVisitor *cds_visitor;

@@ -24,14 +24,14 @@
 #include "extended/mapping.h"
 
 struct Mapping {
-  GT_Str *mapping_file;
+  GtStr *mapping_file;
   char *global;
   MappingType type;
   lua_State *L;
   bool is_table;
 };
 
-Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
+Mapping* mapping_new(GtStr *mapping_file, const char *global_name,
                      MappingType type, GT_Error *err)
 {
   Mapping *m;
@@ -94,7 +94,7 @@ Mapping* mapping_new(GT_Str *mapping_file, const char *global_name,
   return m;
 }
 
-static int map_table(Mapping *m, GT_Str **stroutput, long *integeroutput,
+static int map_table(Mapping *m, GtStr **stroutput, long *integeroutput,
                      const char *input, GT_Error *err)
 {
   int had_err = 0;
@@ -137,7 +137,7 @@ static int map_table(Mapping *m, GT_Str **stroutput, long *integeroutput,
   return had_err;
 }
 
-static int map_function(Mapping *m, GT_Str **stroutput, long *integeroutput,
+static int map_function(Mapping *m, GtStr **stroutput, long *integeroutput,
                         const char *input, GT_Error *err)
 {
   int had_err = 0;
@@ -180,7 +180,7 @@ static int map_function(Mapping *m, GT_Str **stroutput, long *integeroutput,
   return had_err;
 }
 
-static int map_generic(Mapping *m, GT_Str **stroutput, long *integeroutput,
+static int map_generic(Mapping *m, GtStr **stroutput, long *integeroutput,
                        const char *input, GT_Error *err)
 {
   gt_error_check(err);
@@ -192,9 +192,9 @@ static int map_generic(Mapping *m, GT_Str **stroutput, long *integeroutput,
   return map_function(m, stroutput, integeroutput, input, err);
 }
 
-GT_Str* mapping_map_string(Mapping *m, const char *input, GT_Error *err)
+GtStr* mapping_map_string(Mapping *m, const char *input, GT_Error *err)
 {
-  GT_Str *output = NULL;
+  GtStr *output = NULL;
   gt_error_check(err);
   map_generic(m, &output, NULL, input, err);
   return output;

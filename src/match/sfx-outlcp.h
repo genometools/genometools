@@ -26,7 +26,7 @@
 #include "seqpos-def.h"
 #include "bcktab.h"
 
-Outlcpinfo *newlcpoutinfo(const GT_Str *indexname,
+Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           Seqpos totallength,

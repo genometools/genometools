@@ -25,7 +25,7 @@
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'
 
-GT_FastaBuffer* gt_fastabuffer_new(const GT_StrArray *filenametab,
+GT_FastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
                              const Uchar *symbolmap,
                              bool plainformat,
                              Filelengthvalues **filelengthtab,

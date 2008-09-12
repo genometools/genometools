@@ -21,7 +21,7 @@
 
 static EISeq *
 createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
-                            const GT_Str *projectName,
+                            const GtStr *projectName,
                             const struct seqBaseParam *params,
                             size_t numExtHeaders, const uint16_t *headerIDs,
                             const uint32_t *extHeaderSizes,
@@ -32,7 +32,7 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
                             GT_Error *err);
 
 extern EISeq *
-createEncIdxSeq(const GT_Str *projectName,
+createEncIdxSeq(const GtStr *projectName,
                 const struct seqBaseParam *params,
                 size_t numExtHeaders, const uint16_t *headerIDs,
                 const uint32_t *extHeaderSizes,
@@ -62,7 +62,7 @@ createEncIdxSeq(const GT_Str *projectName,
 
 extern EISeq *
 createEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
-                      const GT_Str *projectName,
+                      const GtStr *projectName,
                       const struct seqBaseParam *params,
                       size_t numExtHeaders, const uint16_t *headerIDs,
                       const uint32_t *extHeaderSizes,
@@ -86,7 +86,7 @@ createEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
 
 extern EISeq *
 createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
-                       const GT_Str *projectName,
+                       const GtStr *projectName,
                        const struct seqBaseParam *params,
                        size_t numExtHeaders, const uint16_t *headerIDs,
                        const uint32_t *extHeaderSizes,
@@ -106,7 +106,7 @@ createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
 
 extern EISeq *
 createEncIdxSeqFromSfxI(sfxInterface *sfxi,
-                        const GT_Str *projectName,
+                        const GtStr *projectName,
                         const struct seqBaseParam *params,
                         size_t numExtHeaders, const uint16_t *headerIDs,
                         const uint32_t *extHeaderSizes,
@@ -126,7 +126,7 @@ createEncIdxSeqFromSfxI(sfxInterface *sfxi,
 
 static EISeq *
 createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
-                            const GT_Str *projectName,
+                            const GtStr *projectName,
                             const struct seqBaseParam *params,
                             size_t numExtHeaders, const uint16_t *headerIDs,
                             const uint32_t *extHeaderSizes,
@@ -156,7 +156,7 @@ createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
 }
 
 extern EISeq *
-createEncIdxSeqGen(Seqpos totalLen, const GT_Str *projectName,
+createEncIdxSeqGen(Seqpos totalLen, const GtStr *projectName,
                    MRAEnc *alphabet, const struct seqStats *stats,
                    SeqDataReader seqGenerator,
                    const struct seqBaseParam *params,
@@ -186,7 +186,7 @@ createEncIdxSeqGen(Seqpos totalLen, const GT_Str *projectName,
 
 extern struct encIdxSeq *
 loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
-                   const GT_Str *projectName,
+                   const GtStr *projectName,
                    enum seqBaseEncoding encType, int features, GT_Error *err)
 {
   MRAEnc *alphabet;
@@ -209,7 +209,7 @@ loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
 }
 
 extern EISeq *
-loadEncIdxSeq(const GT_Str *projectName,
+loadEncIdxSeq(const GtStr *projectName,
               enum seqBaseEncoding encType, int features,
               Verboseinfo *verbosity, GT_Error *err)
 {

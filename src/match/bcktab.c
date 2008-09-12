@@ -248,11 +248,11 @@ int bcktab2file(FILE *fp,const Bcktab *bcktab,GT_Error *err)
 }
 
 static int fillbcktabmapspecstartptr(Bcktab *bcktab,
-                                     const GT_Str *indexname,
+                                     const GtStr *indexname,
                                      GT_Error *err)
 {
   bool haserr = false;
-  GT_Str *tmpfilename;
+  GtStr *tmpfilename;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
@@ -270,7 +270,7 @@ static int fillbcktabmapspecstartptr(Bcktab *bcktab,
   return haserr ? -1 : 0;
 }
 
-Bcktab *mapbcktab(const GT_Str *indexname,
+Bcktab *mapbcktab(const GtStr *indexname,
                   Seqpos totallength,
                   unsigned int numofchars,
                   unsigned int prefixlength,

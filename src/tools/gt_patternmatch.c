@@ -37,7 +37,7 @@ typedef struct
 {
   unsigned long minpatternlen, maxpatternlen, numofsamples;
   bool showpatt, usebcktab, immediate;
-  GT_Str *indexname;
+  GtStr *indexname;
 } Pmatchoptions;
 
 static void comparemmsis(const MMsearchiterator *mmsi1,

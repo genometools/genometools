@@ -132,11 +132,11 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
 }
 
 int fasta2sequencekeyvalues(
-        const GT_Str *indexname,
+        const GtStr *indexname,
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
-        const GT_StrArray *filenametab,
+        const GtStrArray *filenametab,
         Filelengthvalues **filelengthtab,
         const Alphabet *alpha,
         bool plainformat,

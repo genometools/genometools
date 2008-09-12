@@ -69,17 +69,17 @@ const char* gt_cstr_table_get(const GT_CstrTable *table, const char *cstr)
 static enum iterator_op store_type(void *elem, void *data,
                                    GT_UNUSED GT_Error *err)
 {
-  GT_StrArray *types = data;
+  GtStrArray *types = data;
   gt_error_check(err);
   assert(elem && types);
   gt_strarray_add_cstr(types, elem);
   return CONTINUE_ITERATION;
 }
 
-GT_StrArray* gt_cstr_table_get_all(const GT_CstrTable *table)
+GtStrArray* gt_cstr_table_get_all(const GT_CstrTable *table)
 {
   int had_err;
-  GT_StrArray *cstrs;
+  GtStrArray *cstrs;
   assert(table);
   cstrs = gt_strarray_new();
   had_err = hashtable_foreach_ordered(table->strings, store_type, cstrs,

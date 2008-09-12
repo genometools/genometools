@@ -27,6 +27,6 @@ typedef struct ChseqidsStream ChseqidsStream;
 const GenomeStreamClass* chseqids_stream_class(void);
 /* returns NULL upon error */
 GenomeStream*            chseqids_stream_new(GenomeStream*,
-                                             GT_Str *chseqids_file, GT_Error*);
+                                             GtStr *chseqids_file, GT_Error*);
 
 #endif

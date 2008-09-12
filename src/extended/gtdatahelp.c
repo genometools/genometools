@@ -33,7 +33,7 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
                      GT_Error *err)
 {
   Splitter *splitter;
-  GT_Str *doc_file;
+  GtStr *doc_file;
   lua_State *L = NULL;
   char *prog, *bn;
   int had_err = 0;

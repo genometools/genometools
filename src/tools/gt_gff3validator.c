@@ -21,7 +21,7 @@
 #include "tools/gt_gff3validator.h"
 
 typedef struct {
-  GT_Str *typecheck;
+  GtStr *typecheck;
 } GFF3ValidatorArguments;
 
 static void* gt_gff3validator_arguments_new(void)

@@ -37,7 +37,7 @@
 */
 
 typedef GT_Range  (*GetGenomicRangeFunc)(const void *sa);
-typedef GT_Strand (*GetStrandFunc)(const void *sa);
+typedef GtStrand (*GetStrandFunc)(const void *sa);
 typedef void   (*GetExonsFunc)(GtArray *exon_ranges, const void *sa);
 typedef void   (*ProcessSpliceFormFunc)(GtArray *spliced_alignments_in_form,
                                         const void *set_of_sas,

@@ -22,7 +22,7 @@
 #include "match/test-mergeesa.pr"
 #include "tools/gt_mergeesa.h"
 
-static OPrval parse_options(GT_Str *indexname,GT_StrArray *indexnametab,
+static OPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
                             int *parsed_args, int argc,
                             const char **argv, GT_Error *err)
 {
@@ -54,8 +54,8 @@ static OPrval parse_options(GT_Str *indexname,GT_StrArray *indexnametab,
 
 int gt_mergeesa(int argc, const char **argv, GT_Error *err)
 {
-  GT_Str *storeindex;
-  GT_StrArray *indexnametab;
+  GtStr *storeindex;
+  GtStrArray *indexnametab;
   bool haserr = false;
   int parsed_args;
 

@@ -23,7 +23,7 @@
 struct GT_SequenceRegion
 {
   const GT_GenomeNode parent_instance;
-  GT_Str *seqid;
+  GtStr *seqid;
   GT_Range range;
 };
 
@@ -37,7 +37,7 @@ static void gt_sequence_region_free(GT_GenomeNode *gn)
   gt_str_delete(sr->seqid);
 }
 
-static GT_Str* gt_sequence_region_get_seqid(GT_GenomeNode *gn)
+static GtStr* gt_sequence_region_get_seqid(GT_GenomeNode *gn)
 {
   GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   return sr->seqid;
@@ -55,7 +55,7 @@ static void gt_sequence_region_set_range(GT_GenomeNode *gn, GT_Range range)
   sr->range = range;
 }
 
-static void gt_sequence_region_change_seqid(GT_GenomeNode *gn, GT_Str *seqid)
+static void gt_sequence_region_change_seqid(GT_GenomeNode *gn, GtStr *seqid)
 {
   GT_SequenceRegion *sr = gt_sequence_region_cast(gn);
   assert(sr && seqid);
@@ -85,7 +85,7 @@ const GT_GenomeNodeClass* gt_sequence_region_class()
   return &gnc;
 }
 
-GT_GenomeNode* gt_sequence_region_new(GT_Str *seqid, GT_Range range)
+GT_GenomeNode* gt_sequence_region_new(GtStr *seqid, GT_Range range)
 {
   GT_GenomeNode *gn = gt_genome_node_create(gt_sequence_region_class());
   GT_SequenceRegion *sr = gt_sequence_region_cast(gn);

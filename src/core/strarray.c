@@ -20,22 +20,22 @@
 #include "core/ma.h"
 #include "core/strarray.h"
 
-struct GT_StrArray {
+struct GtStrArray {
   GtArray *strings;
 };
 
-GT_StrArray* gt_strarray_new(void)
+GtStrArray* gt_strarray_new(void)
 {
-  GT_StrArray *sa = gt_malloc(sizeof *sa);
-  sa->strings = gt_array_new(sizeof (GT_Str*));
+  GtStrArray *sa = gt_malloc(sizeof *sa);
+  sa->strings = gt_array_new(sizeof (GtStr*));
   return sa;
 }
 
-GT_StrArray* gt_strarray_new_file(const char *path)
+GtStrArray* gt_strarray_new_file(const char *path)
 {
-  GT_StrArray *filecontent;
+  GtStrArray *filecontent;
   GT_GenFile *fpin;
-  GT_Str *line;
+  GtStr *line;
   fpin = gt_genfile_xopen(path, "r");
   assert(fpin);
   line = gt_str_new();
@@ -49,65 +49,65 @@ GT_StrArray* gt_strarray_new_file(const char *path)
   return filecontent;
 }
 
-void gt_strarray_add_cstr(GT_StrArray *sa, const char *cstr)
+void gt_strarray_add_cstr(GtStrArray *sa, const char *cstr)
 {
-  GT_Str *str;
+  GtStr *str;
   assert(sa && cstr);
   str = gt_str_new_cstr(cstr);
   gt_array_add(sa->strings, str);
 }
 
-void gt_strarray_add_cstr_nt(GT_StrArray *sa, const char *cstr,
+void gt_strarray_add_cstr_nt(GtStrArray *sa, const char *cstr,
                              unsigned long length)
 {
-  GT_Str *str;
+  GtStr *str;
   assert(sa && cstr);
   str = gt_str_new();
   gt_str_append_cstr_nt(str, cstr, length);
   gt_array_add(sa->strings, str);
 }
 
-void gt_strarray_add(GT_StrArray *sa, const GT_Str *str)
+void gt_strarray_add(GtStrArray *sa, const GtStr *str)
 {
-  GT_Str *clone;
+  GtStr *clone;
   assert(sa && str);
   clone = gt_str_clone(str);
   gt_array_add(sa->strings, clone);
 }
 
-const char* gt_strarray_get(const GT_StrArray *sa, unsigned long strnum)
+const char* gt_strarray_get(const GtStrArray *sa, unsigned long strnum)
 {
   assert(sa && strnum < gt_array_size(sa->strings));
-  return gt_str_get(*(GT_Str**) gt_array_get(sa->strings, strnum));
+  return gt_str_get(*(GtStr**) gt_array_get(sa->strings, strnum));
 }
 
-GT_Str* gt_strarray_get_str(const GT_StrArray *sa, unsigned long strnum)
+GtStr* gt_strarray_get_str(const GtStrArray *sa, unsigned long strnum)
 {
   assert(sa && strnum < gt_array_size(sa->strings));
-  return *(GT_Str**) gt_array_get(sa->strings, strnum);
+  return *(GtStr**) gt_array_get(sa->strings, strnum);
 }
 
-void gt_strarray_set_size(GT_StrArray *sa, unsigned long size)
+void gt_strarray_set_size(GtStrArray *sa, unsigned long size)
 {
   unsigned long i;
   assert(sa && size <= gt_array_size(sa->strings));
   for (i = size; i < gt_array_size(sa->strings); i++)
-    gt_str_delete(*(GT_Str**) gt_array_get(sa->strings, i));
+    gt_str_delete(*(GtStr**) gt_array_get(sa->strings, i));
   gt_array_set_size(sa->strings, size);
 }
 
-unsigned long gt_strarray_size(const GT_StrArray *sa)
+unsigned long gt_strarray_size(const GtStrArray *sa)
 {
   assert(sa);
   return gt_array_size(sa->strings);
 }
 
-void gt_strarray_delete(GT_StrArray *sa)
+void gt_strarray_delete(GtStrArray *sa)
 {
   unsigned long i;
   if (!sa) return;
   for (i = 0; i < gt_array_size(sa->strings); i++)
-    gt_str_delete(*(GT_Str**) gt_array_get(sa->strings, i));
+    gt_str_delete(*(GtStr**) gt_array_get(sa->strings, i));
   gt_array_delete(sa->strings);
   gt_free(sa);
 }
