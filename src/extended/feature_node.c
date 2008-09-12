@@ -82,10 +82,9 @@ static void gt_feature_node_free(GtGenomeNode *gn)
   gt_dlist_delete(fn->children);
 }
 
-const char* gt_feature_node_get_attribute(GtGenomeNode *gn,
-                                            const char *attr_name)
+const char* gt_feature_node_get_attribute(GtFeatureNode *fn,
+                                          const char *attr_name)
 {
-  GtFeatureNode *fn = gt_feature_node_cast(gn);
   if (!fn->attributes)
     return NULL;
   return tag_value_map_get(fn->attributes, attr_name);

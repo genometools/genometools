@@ -82,8 +82,7 @@ static void filter_targetbest(GtFeatureNode *current_feature,
   const char *target;
   int had_err;
   assert(current_feature && trees);
-  target = gt_feature_node_get_attribute((GtGenomeNode*) current_feature,
-                                        TARGET_STRING);
+  target = gt_feature_node_get_attribute(current_feature, TARGET_STRING);
   assert(target);
   first_target_id = gt_str_new();
   had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
@@ -129,7 +128,7 @@ static int targetbest_filter_stream_next_tree(GtNodeStream *gs,
     while (!(had_err = gt_node_stream_next(tfs->in_stream, &node, err)) &&
            node) {
       if (gt_feature_node_try_cast(node) &&
-          gt_feature_node_get_attribute(node, "Target")) {
+          gt_feature_node_get_attribute((GtFeatureNode*) node, "Target")) {
         filter_targetbest((GtFeatureNode*) node, tfs->trees,
                           tfs->target_to_elem);
       }

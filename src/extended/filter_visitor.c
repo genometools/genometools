@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/assert.h"
 #include "core/minmax.h"
 #include "core/queue.h"
 #include "core/undef.h"
@@ -67,7 +68,7 @@ static int filter_visitor_comment(GtNodeVisitor *gv, GtCommentNode *c,
 
 static bool filter_contain_range(GtFeatureNode *gf, GtRange contain_range)
 {
-  assert(gf);
+  gt_assert(gf);
   if (contain_range.start != UNDEF_ULONG &&
       !gt_range_contains(contain_range,
                          gt_genome_node_get_range((GtGenomeNode*) gf))) {
@@ -78,7 +79,7 @@ static bool filter_contain_range(GtFeatureNode *gf, GtRange contain_range)
 
 static bool filter_overlap_range(GtFeatureNode *gf, GtRange overlap_range)
 {
-  assert(gf);
+  gt_assert(gf);
   if (overlap_range.start != UNDEF_ULONG &&
       !gt_range_overlap(overlap_range,
                         gt_genome_node_get_range((GtGenomeNode*) gf))) {
@@ -89,27 +90,26 @@ static bool filter_overlap_range(GtFeatureNode *gf, GtRange overlap_range)
 
 static bool filter_strand(GtFeatureNode *gf, GtStrand strand)
 {
-  assert(gf);
+  gt_assert(gf);
   if (strand != GT_NUM_OF_STRAND_TYPES &&
       gt_feature_node_get_strand(gf) != strand)
     return true;
   return false;
 }
 
-static bool filter_targetstrand(GtFeatureNode *gf, GtStrand targetstrand)
+static bool filter_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
 {
   const char *target;
-  assert(gf);
+  gt_assert(fn);
   if (targetstrand != GT_NUM_OF_STRAND_TYPES &&
-      (target = gt_feature_node_get_attribute((GtGenomeNode*) gf,
-                                             TARGET_STRING))) {
+      (target = gt_feature_node_get_attribute(fn, TARGET_STRING))) {
     unsigned long num_of_targets;
     GtStrand parsed_strand;
     int had_err;
     had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
                                                      NULL, NULL, &parsed_strand,
                                                      "", 0, NULL);
-    assert(!had_err);
+    gt_assert(!had_err);
     if (num_of_targets == 1 && parsed_strand != GT_NUM_OF_STRAND_TYPES &&
         parsed_strand != targetstrand) {
       return true;
@@ -120,7 +120,7 @@ static bool filter_targetstrand(GtFeatureNode *gf, GtStrand targetstrand)
 
 static bool filter_has_CDS(GtFeatureNode *gf, bool has_CDS)
 {
-  assert(gf);
+  gt_assert(gf);
   if (has_CDS && !gt_feature_node_has_CDS(gf))
     return true;
   return false;
@@ -128,7 +128,7 @@ static bool filter_has_CDS(GtFeatureNode *gf, bool has_CDS)
 
 static bool filter_min_average_ssp(GtFeatureNode *gf, double minaveragessp)
 {
-  assert(gf);
+  gt_assert(gf);
   if (minaveragessp != UNDEF_DOUBLE &&
       gt_feature_node_has_splice_site(gf) &&
       gt_feature_node_average_splice_site_prob(gf) < minaveragessp) {

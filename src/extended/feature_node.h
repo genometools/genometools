@@ -46,8 +46,8 @@ GtGenomeNode*        gt_feature_node_new_pseudo(GtFeatureNode*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GtGenomeNode*        gt_feature_node_new_standard_gene(void);
 const char*           gt_feature_node_get_source(GtFeatureNode*);
-const char*           gt_feature_node_get_attribute(GtGenomeNode *gn,
-                                                      const char *attr_name);
+const char*           gt_feature_node_get_attribute(GtFeatureNode *feature_node,
+                                                    const char *attr_name);
 /* Return a GtStrArray containing the used attribute names. */
 GtStrArray*          gt_feature_node_get_attribute_list(GtFeatureNode*);
 const char*           gt_feature_node_get_type(GtFeatureNode*);

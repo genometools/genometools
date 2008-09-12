@@ -342,7 +342,7 @@ static void mRNA_set_target_attribute(GtFeatureNode *mRNA_feature,
   assert(mRNA_feature && csa_splice_form);
   targets = gt_str_new();
   for (i = 0; i < csa_splice_form_num_of_sas(csa_splice_form); i++) {
-    GtGenomeNode *sa = *(GtGenomeNode**)
+    GtFeatureNode *sa = *(GtFeatureNode**)
                         csa_splice_form_get_sa(csa_splice_form, i);
     if (gt_feature_node_get_attribute(sa, "Target")) {
       if (gt_str_length(targets))
