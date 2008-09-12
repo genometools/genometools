@@ -57,7 +57,7 @@ struct GT_GFF3Parser {
 typedef struct {
   GT_GenomeNode *sequence_region; /* the automatically created sequence
                                      region */
-  GT_Array *genome_features; /* the genome features which belong to this
+  GtArray *genome_features; /* the genome features which belong to this
                                 region */
 } AutomaticSequenceRegion;
 
@@ -346,7 +346,7 @@ static void replace_node(GT_GenomeNode *node_to_replace,
      is near the end of the queue */
   if (auto_sr) {
     rval = gt_array_iterate_reverse(auto_sr->genome_features,
-                                    (GT_ArrayProcessor) replace_func,
+                                    (GtArrayProcessor) replace_func,
                                     &replace_info, NULL);
     assert(rval == 1);
   }
@@ -474,9 +474,9 @@ static int store_id(const char *id, GT_GenomeNode *genome_feature,
   return had_err;
 }
 
-static GT_Array* find_roots(GT_StrArray *parents, FeatureInfo *feature_info)
+static GtArray* find_roots(GT_StrArray *parents, FeatureInfo *feature_info)
 {
-  GT_Array *roots;
+  GtArray *roots;
   unsigned long i;
   assert(parents);
   roots = gt_array_new(sizeof (GT_GenomeNode*));
@@ -488,7 +488,7 @@ static GT_Array* find_roots(GT_StrArray *parents, FeatureInfo *feature_info)
   return roots;
 }
 
-static bool roots_differ(GT_Array *roots)
+static bool roots_differ(GtArray *roots)
 {
   GT_GenomeNode *first_root;
   unsigned long i;
@@ -589,7 +589,7 @@ static GT_GenomeNode* join_root_pair(GT_GenomeNode *root_a,
   return master_root;
 }
 
-static void join_roots(GT_Array *roots, FeatureInfo *feature_info,
+static void join_roots(GtArray *roots, FeatureInfo *feature_info,
                        GT_Queue *genome_nodes, AutomaticSequenceRegion *auto_sr)
 {
   GT_GenomeNode *master_root;
@@ -666,7 +666,7 @@ static int process_parent_attr(char *parent_attr, GT_GenomeNode *genome_feature,
 
   /* make sure all (valid) parents have the same (pseudo-)root */
   if (!had_err && gt_strarray_size(valid_parents) >= 2) {
-    GT_Array *roots = find_roots(valid_parents, parser->feature_info);
+    GtArray *roots = find_roots(valid_parents, parser->feature_info);
     if (roots_differ(roots))
         join_roots(roots, parser->feature_info, genome_nodes, auto_sr);
     gt_array_delete(roots);

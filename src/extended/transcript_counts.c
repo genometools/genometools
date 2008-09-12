@@ -19,7 +19,7 @@
 #include "extended/transcript_counts.h"
 
 struct TranscriptCounts {
-  GT_Array *exon_array_all,
+  GtArray *exon_array_all,
         *exon_array_single,
         *exon_array_initial,
         *exon_array_internal,
@@ -32,61 +32,61 @@ TranscriptCounts* transcript_counts_new(void)
   return tc;
 }
 
-GT_Array* transcript_counts_get_all(const TranscriptCounts *tc)
+GtArray* transcript_counts_get_all(const TranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_all;
 }
 
-void transcript_counts_set_all(TranscriptCounts *tc, GT_Array *counts)
+void transcript_counts_set_all(TranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_all = counts;
 }
 
-GT_Array* transcript_counts_get_single(const TranscriptCounts *tc)
+GtArray* transcript_counts_get_single(const TranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_single;
 }
 
-void transcript_counts_set_single(TranscriptCounts *tc, GT_Array *counts)
+void transcript_counts_set_single(TranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_single = counts;
 }
 
-GT_Array* transcript_counts_get_initial(const TranscriptCounts *tc)
+GtArray* transcript_counts_get_initial(const TranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_initial;
 }
 
-void transcript_counts_set_initial(TranscriptCounts *tc, GT_Array *counts)
+void transcript_counts_set_initial(TranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_initial = counts;
 }
 
-GT_Array* transcript_counts_get_internal(const TranscriptCounts *tc)
+GtArray* transcript_counts_get_internal(const TranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_internal;
 }
 
-void transcript_counts_set_internal(TranscriptCounts *tc, GT_Array *counts)
+void transcript_counts_set_internal(TranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_internal = counts;
 }
 
-GT_Array* transcript_counts_get_terminal(const TranscriptCounts *tc)
+GtArray* transcript_counts_get_terminal(const TranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_terminal;
 }
 
-void transcript_counts_set_terminal(TranscriptCounts *tc, GT_Array *counts)
+void transcript_counts_set_terminal(TranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_terminal = counts;

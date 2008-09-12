@@ -81,7 +81,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
   /* Speicherplatzreservierung fuer die Combined-Score Matrix */
   gt_array2dim_calloc(combinedscore_matrix, 7, contig_len);
 
-  /* Erstellen der GT_Arrays fuer die Hit-Nummer fuer jeden Matrix-Eintrag
+  /* Erstellen der GtArrays fuer die Hit-Nummer fuer jeden Matrix-Eintrag
      Ueber die Hit-Nummer erfolgt die Zuordnung zu den entsprechenden
      Blast-Hits in der Hit-Information-Struktur */
   for (k = 0; k < 7; k++)

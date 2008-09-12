@@ -185,7 +185,7 @@ static bool store_first_match(unsigned long pos, void *data)
 
 static bool store_match(unsigned long pos, void *data)
 {
-  GT_Array *positions = data;
+  GtArray *positions = data;
   assert(positions);
   gt_array_add(positions, pos);
   return false;
@@ -194,7 +194,7 @@ static bool store_match(unsigned long pos, void *data)
 int string_matching_unit_test(GT_Error *err)
 {
   char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1], *text = "foo";
-  GT_Array *brute_force_matches,
+  GtArray *brute_force_matches,
         *bmh_matches,
         *kmp_matches,
         *shift_and_matches;

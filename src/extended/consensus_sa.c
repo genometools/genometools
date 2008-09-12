@@ -84,7 +84,7 @@ static GT_Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
   return strand;
 }
 
-static void extract_exons(const ConsensusSA *csa, GT_Array *exon_ranges,
+static void extract_exons(const ConsensusSA *csa, GtArray *exon_ranges,
                           unsigned long sa)
 {
   assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
@@ -93,7 +93,7 @@ static void extract_exons(const ConsensusSA *csa, GT_Array *exon_ranges,
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
 
-static bool has_donor_site(GT_Array *gene, unsigned long exon)
+static bool has_donor_site(GtArray *gene, unsigned long exon)
 {
   assert(exon < gt_array_size(gene));
   if (exon == gt_array_size(gene) - 1)
@@ -101,7 +101,7 @@ static bool has_donor_site(GT_Array *gene, unsigned long exon)
   return true;
 }
 
-static bool has_acceptor_site(GT_UNUSED GT_Array *gene, unsigned long exon)
+static bool has_acceptor_site(GT_UNUSED GtArray *gene, unsigned long exon)
 {
   assert(exon < gt_array_size(gene));
   if (exon == 0)
@@ -112,7 +112,7 @@ static bool has_acceptor_site(GT_UNUSED GT_Array *gene, unsigned long exon)
 static bool compatible(const ConsensusSA *csa,
                        unsigned long sa_1, unsigned long sa_2)
 {
-  GT_Array *exons_sa_1, *exons_sa_2;
+  GtArray *exons_sa_1, *exons_sa_2;
   GT_Range range_sa_1, range_sa_2;
   unsigned long i, j, num_of_exons_1, num_of_exons_2,
                 start_1 = UNDEF_ULONG, start_2 = UNDEF_ULONG;
@@ -455,7 +455,7 @@ static bool splice_form_is_valid(GT_Bittab *SA_p, const ConsensusSA *csa)
 static void compute_csas(ConsensusSA *csa)
 {
   unsigned long i, sa_i, sa_i_size = 0, sa_prime, sa_prime_size;
-  GT_Array *splice_form;
+  GtArray *splice_form;
   GT_Bittab **C, **left, **right, **L, **R, *U_i, *SA_i, *SA_prime;
 #ifndef NDEBUG
   unsigned long u_i_size, u_i_minus_1_size;

@@ -22,7 +22,7 @@
 struct SSplicedAlignment {
   char *id;
   bool forward;
-  GT_Array *exons; /* the exon ranges */
+  GtArray *exons; /* the exon ranges */
 };
 
 SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)

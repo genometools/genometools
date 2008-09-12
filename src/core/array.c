@@ -30,7 +30,7 @@
 #define NUM_OF_TESTS    100
 #define MAX_SIZE        1024
 
-struct GT_Array {
+struct GtArray {
   void *space;
   unsigned long next_free;
   size_t allocated,
@@ -38,19 +38,19 @@ struct GT_Array {
   unsigned int reference_count;
 };
 
-GT_Array* gt_array_new(size_t size_of_elem)
+GtArray* gt_array_new(size_t size_of_elem)
 {
-  GT_Array *a = gt_calloc(1, sizeof *a);
+  GtArray *a = gt_calloc(1, sizeof *a);
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
   return a;
 }
 
-GT_Array* gt_array_clone(const GT_Array *a)
+GtArray* gt_array_clone(const GtArray *a)
 {
-  GT_Array *a_copy;
+  GtArray *a_copy;
   assert(a);
-  a_copy = gt_malloc(sizeof (GT_Array));
+  a_copy = gt_malloc(sizeof (GtArray));
   a_copy->space = gt_malloc(a->next_free * a->size_of_elem);
   memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
   a_copy->next_free = a_copy->allocated = a->next_free;
@@ -59,38 +59,38 @@ GT_Array* gt_array_clone(const GT_Array *a)
   return a_copy;
 }
 
-GT_Array* gt_array_ref(GT_Array *a)
+GtArray* gt_array_ref(GtArray *a)
 {
   if (!a) return NULL;
   a->reference_count++;
   return a;
 }
 
-void* gt_array_get(const GT_Array *a, unsigned long idx)
+void* gt_array_get(const GtArray *a, unsigned long idx)
 {
   assert(a && idx < a->next_free);
   return (char*) a->space + idx * a->size_of_elem;
 }
 
-void* gt_array_get_first(const GT_Array *a)
+void* gt_array_get_first(const GtArray *a)
 {
   return gt_array_get(a, 0);
 }
 
-void* gt_array_get_last(const GT_Array *a)
+void* gt_array_get_last(const GtArray *a)
 {
   assert(a->next_free);
   return gt_array_get(a, a->next_free-1);
 }
 
-void* gt_array_pop(GT_Array *a)
+void* gt_array_pop(GtArray *a)
 {
   assert(a && a->next_free);
   a->next_free--;
   return (char*) a->space + a->next_free * a->size_of_elem;
 }
 
-void gt_array_rem(GT_Array *a, unsigned long idx)
+void gt_array_rem(GtArray *a, unsigned long idx)
 {
   unsigned long i;
   assert(a && idx < a->next_free);
@@ -104,7 +104,7 @@ void gt_array_rem(GT_Array *a, unsigned long idx)
   a->next_free--;
 }
 
-void gt_array_reverse(GT_Array *a)
+void gt_array_reverse(GtArray *a)
 {
   char *front, *back, *tmp;
   assert(a);
@@ -120,13 +120,13 @@ void gt_array_reverse(GT_Array *a)
   gt_free(tmp);
 }
 
-void* gt_array_get_space(const GT_Array *a)
+void* gt_array_get_space(const GtArray *a)
 {
   assert(a);
   return a->space;
 }
 
-void gt_array_add_elem(GT_Array *a, void *elem, size_t size_of_elem)
+void gt_array_add_elem(GtArray *a, void *elem, size_t size_of_elem)
 {
   assert(a && elem);
   assert(a->size_of_elem == size_of_elem);
@@ -141,7 +141,7 @@ void gt_array_add_elem(GT_Array *a, void *elem, size_t size_of_elem)
   a->next_free++;
 }
 
-void gt_array_add_array(GT_Array *dest, const GT_Array *src)
+void gt_array_add_array(GtArray *dest, const GtArray *src)
 {
   unsigned long i;
   assert(dest && src && dest->size_of_elem == src->size_of_elem);
@@ -149,37 +149,37 @@ void gt_array_add_array(GT_Array *dest, const GT_Array *src)
     gt_array_add_elem(dest, gt_array_get(src, i), src->size_of_elem);
 }
 
-size_t gt_array_elem_size(const GT_Array *a)
+size_t gt_array_elem_size(const GtArray *a)
 {
   assert(a);
   return a->size_of_elem;
 }
 
-unsigned long gt_array_size(const GT_Array *a)
+unsigned long gt_array_size(const GtArray *a)
 {
   return a ? a->next_free : 0;
 }
 
-void gt_array_set_size(GT_Array *a, unsigned long size)
+void gt_array_set_size(GtArray *a, unsigned long size)
 {
   assert(a);
   assert(size <= a->next_free);
   a->next_free = size;
 }
 
-void gt_array_reset(GT_Array *a)
+void gt_array_reset(GtArray *a)
 {
   assert(a);
   a->next_free = 0;
 }
 
-void gt_array_sort(GT_Array *a, GT_Compare compar)
+void gt_array_sort(GtArray *a, GT_Compare compar)
 {
   assert(a && compar);
   qsort(a->space, a->next_free, a->size_of_elem, compar);
 }
 
-int gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b)
+int gt_array_cmp(const GtArray *array_a, const GtArray *array_b)
 {
   assert(gt_array_size(array_a) == gt_array_size(array_b));
   assert(gt_array_elem_size(array_a) == gt_array_elem_size(array_b));
@@ -187,7 +187,7 @@ int gt_array_cmp(const GT_Array *array_a, const GT_Array *array_b)
                 array_a->size_of_elem * array_a->next_free);
 }
 
-int gt_array_iterate(GT_Array *a, GT_ArrayProcessor array_processor, void *info,
+int gt_array_iterate(GtArray *a, GtArrayProcessor array_processor, void *info,
                   GT_Error *err)
 {
   unsigned long idx;
@@ -201,7 +201,7 @@ int gt_array_iterate(GT_Array *a, GT_ArrayProcessor array_processor, void *info,
   return 0;
 }
 
-int gt_array_iterate_reverse(GT_Array *a, GT_ArrayProcessor array_processor,
+int gt_array_iterate_reverse(GtArray *a, GtArrayProcessor array_processor,
                              void *info, GT_Error *err)
 {
   unsigned long idx;
@@ -238,7 +238,7 @@ static int iterate_fail_func(GT_UNUSED void *value, GT_UNUSED void *info,
 int gt_array_example(GT_UNUSED GT_Error *err)
 {
   unsigned long i;
-  GT_Array *a;
+  GtArray *a;
 
   gt_error_check(err);
 
@@ -259,7 +259,7 @@ int gt_array_example(GT_UNUSED GT_Error *err)
 
 int gt_array_unit_test(GT_Error *err)
 {
-  GT_Array *char_array, *int_array, *a = NULL, *aref, *aclone;
+  GtArray *char_array, *int_array, *a = NULL, *aref, *aclone;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
@@ -394,7 +394,7 @@ int gt_array_unit_test(GT_Error *err)
   return had_err;
 }
 
-void gt_array_delete(GT_Array *a)
+void gt_array_delete(GtArray *a)
 {
   if (!a) return;
   if (a->reference_count) {

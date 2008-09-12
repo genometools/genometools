@@ -174,7 +174,7 @@ void gt_bittab_unset(GT_Bittab *b)
     b->tabptr[i] = 0;
 }
 
-void gt_bittab_get_all_bitnums(const GT_Bittab *b, GT_Array *bitnums)
+void gt_bittab_get_all_bitnums(const GT_Bittab *b, GtArray *bitnums)
 {
   unsigned long i;
   assert(b && bitnums);

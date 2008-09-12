@@ -91,10 +91,10 @@ static int extract_spliced_seq(GT_GenomeNode *gn, CDSVisitor *visitor,
                                               extract_cds_if_necessary, err);
 }
 
-static GT_Array* determine_ORFs_for_all_three_frames(Splicedseq *ss)
+static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 {
   GT_Str *pr_0, *pr_1, *pr_2;
-  GT_Array *orfs;
+  GtArray *orfs;
   assert(ss);
 
   pr_0 = gt_str_new();
@@ -168,7 +168,7 @@ static void create_CDS_features_for_ORF(GT_Range orf, CDSVisitor *v,
   gt_genome_node_add_child(gn, cds_feature);
 }
 
-static void create_CDS_features_for_longest_ORF(GT_Array *orfs, CDSVisitor *v,
+static void create_CDS_features_for_longest_ORF(GtArray *orfs, CDSVisitor *v,
                                                 GT_GenomeNode *gn)
 {
   if (gt_array_size(orfs)) {
@@ -192,7 +192,7 @@ static int add_cds_if_necessary(GT_GenomeNode *gn, void *data, GT_Error *err)
 
   had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
-    GT_Array *orfs;
+    GtArray *orfs;
 
     if (gt_genome_feature_get_strand(gf) == GT_STRAND_REVERSE) {
       if (splicedseq_reverse(v->splicedseq, err))

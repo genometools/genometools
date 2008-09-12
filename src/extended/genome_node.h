@@ -83,11 +83,11 @@ bool           gt_genome_node_direct_children_do_not_overlap_st(GT_GenomeNode
 bool           gt_genome_node_is_tree(GT_GenomeNode*);
 /* returns true if the genome node overlaps at least one of the nodes given in
    the array. O(gt_array_size) */
-bool           gt_genome_node_overlaps_nodes(GT_GenomeNode*, GT_Array*);
+bool           gt_genome_node_overlaps_nodes(GT_GenomeNode*, GtArray*);
 /* similar interface to gt_genome_node_overlaps_nodes(). Aditionally, if a
    bittab is given (which must have the same size as the array), the bits
    corresponding to overlapped nodes are marked (i.e., set) */
-bool           gt_genome_node_overlaps_nodes_mark(GT_GenomeNode*, GT_Array*,
+bool           gt_genome_node_overlaps_nodes_mark(GT_GenomeNode*, GtArray*,
                                                   GT_Bittab*);
 int            gt_genome_node_cmp(GT_GenomeNode*, GT_GenomeNode*);
 int            gt_genome_node_compare(GT_GenomeNode**, GT_GenomeNode**);
@@ -99,10 +99,10 @@ int            gt_genome_node_compare_delta(GT_GenomeNode**, GT_GenomeNode**,
 void           gt_genome_node_delete(GT_GenomeNode*);
 void           gt_genome_node_rec_delete(GT_GenomeNode*);
 
-void           gt_genome_nodes_sort(GT_Array*);
-void           gt_genome_nodes_sort_stable(GT_Array*);
+void           gt_genome_nodes_sort(GtArray*);
+void           gt_genome_nodes_sort_stable(GtArray*);
 bool           gt_genome_nodes_are_equal_sequence_regions(GT_GenomeNode*,
                                                           GT_GenomeNode*);
-bool           gt_genome_nodes_are_sorted(const GT_Array*);
+bool           gt_genome_nodes_are_sorted(const GtArray*);
 
 #endif

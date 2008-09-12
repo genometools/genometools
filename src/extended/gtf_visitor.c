@@ -30,7 +30,7 @@ struct GTFVisitor {
   const GenomeVisitor parent_instance;
   unsigned long gene_id,
                 transcript_id;
-  GT_Array *exon_features,
+  GtArray *exon_features,
         *CDS_features;
   GT_GenFile *outfp;
 };

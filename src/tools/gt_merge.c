@@ -45,7 +45,7 @@ int gt_merge(int argc, const char **argv, GT_Error *err)
   GenomeStream *gff3_in_stream,
                 *merge_stream,
                 *gff3_out_stream;
-  GT_Array *genome_streams;
+  GtArray *genome_streams;
   GT_GenomeNode *gn;
   unsigned long i;
   int parsed_args, had_err;

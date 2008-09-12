@@ -21,12 +21,12 @@
 #include "extended/csa_variable_strands.h"
 
 typedef struct {
-  GT_Array *splice_forms;
+  GtArray *splice_forms;
   GetGenomicRangeFunc get_genomic_range;
   GetStrandFunc get_strand;
 } StoreSpliceFormInfo;
 
-static void store_splice_form(GT_Array *spliced_alignments_in_form,
+static void store_splice_form(GtArray *spliced_alignments_in_form,
                               const void *set_of_sas,
                               GT_UNUSED unsigned long number_of_sas,
                               size_t size_of_sa, void *data)
@@ -47,7 +47,7 @@ static void store_splice_form(GT_Array *spliced_alignments_in_form,
   gt_array_add(info->splice_forms, splice_form);
 }
 
-static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
+static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
 {
   CSAGene *forward_gene = NULL, *reverse_gene = NULL;
   unsigned long i;
@@ -92,7 +92,7 @@ static void process_splice_forms(GT_Array *genes, GT_Array *splice_forms)
     gt_array_add(genes, reverse_gene);
 }
 
-GT_Array* csa_variable_strands(const void *set_of_sas,
+GtArray* csa_variable_strands(const void *set_of_sas,
                                unsigned long number_of_sas,
                                size_t size_of_sa,
                                GetGenomicRangeFunc get_genomic_range,
@@ -100,7 +100,7 @@ GT_Array* csa_variable_strands(const void *set_of_sas,
                                GetExonsFunc get_exons)
 {
   StoreSpliceFormInfo info;
-  GT_Array *genes;
+  GtArray *genes;
   assert(set_of_sas && number_of_sas && size_of_sa);
   assert(get_genomic_range && get_strand && get_exons);
 

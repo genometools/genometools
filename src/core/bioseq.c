@@ -50,7 +50,7 @@ struct GT_Bioseq {
   bool use_stdin;
   GT_Str *sequence_file;
   Seq **seqs;
-  GT_Array *descriptions,
+  GtArray *descriptions,
         *sequence_ranges;
   char *raw_sequence;
   size_t raw_sequence_length,

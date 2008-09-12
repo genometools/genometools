@@ -63,7 +63,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
-  GT_Array *riktab;
+  GtArray *riktab;
   GT_Str *currentline;
 
   gt_error_check(err);

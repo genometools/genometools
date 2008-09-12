@@ -60,14 +60,14 @@ typedef struct
 {
   double matrix_score;
   unsigned long count;
-  GT_Array *hit_number;
+  GtArray *hit_number;
 } CombinedScoreMatrixEntry;
 
 /* Struktur zur Speicherung der Bereichsgrenzen kodierender Abschnitte */
 typedef struct
 {
-  GT_Array *from;
-  GT_Array *to;
+  GtArray *from;
+  GtArray *to;
 } RegionStruct;
 
 /* Strukturdefinition fuer die Struktur zur Speicherung ausschliesslich
@@ -117,7 +117,7 @@ typedef struct
    XML-File und den DNA-Informationen von Query und Hit */
 typedef struct
 {
-  GT_Array *query_frame,
+  GtArray *query_frame,
    *hit_frame,
    *query_from,
    *query_to;
@@ -190,7 +190,7 @@ typedef struct
    *hit_gi_nr_tmp,
    *fasta_row,
    *result_hits;
-  GT_Array *value_tmp;
+  GtArray *value_tmp;
   GT_Bioseq *queryseq,
    *hitseq;
   GT_GenFile *fp_outputfile,

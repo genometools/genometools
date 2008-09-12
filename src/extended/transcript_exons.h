@@ -27,19 +27,19 @@ typedef struct TranscriptExons TranscriptExons;
 TranscriptExons*   transcript_exons_new(void);
 
 /* return the exon array for all exons */
-GT_Array*          transcript_exons_get_all(const TranscriptExons*);
+GtArray*          transcript_exons_get_all(const TranscriptExons*);
 
 /* return the exon array for single exons */
-GT_Array*          transcript_exons_get_single(const TranscriptExons*);
+GtArray*          transcript_exons_get_single(const TranscriptExons*);
 
 /* return the exon array for initial exons */
-GT_Array*          transcript_exons_get_initial(const TranscriptExons*);
+GtArray*          transcript_exons_get_initial(const TranscriptExons*);
 
 /* return the exon array for internal exons */
-GT_Array*          transcript_exons_get_internal(const TranscriptExons*);
+GtArray*          transcript_exons_get_internal(const TranscriptExons*);
 
 /* return the exon array for terminal exons */
-GT_Array*          transcript_exons_get_terminal(const TranscriptExons*);
+GtArray*          transcript_exons_get_terminal(const TranscriptExons*);
 
 void               transcript_exons_sort(const TranscriptExons*);
 

@@ -202,7 +202,7 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
                                           bool depth_first, bool with_pseudo,
                                           GT_Error *err)
 {
-  GT_Array *node_stack = NULL, *list_of_children;
+  GtArray *node_stack = NULL, *list_of_children;
   GT_Queue *node_queue = NULL;
   GT_GenomeNode *gn, *gn_ref, *child_feature;
   GT_Dlistelem *dlistelem;
@@ -562,7 +562,7 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GT_GenomeNode
                                                            GT_GenomeNode
                                                            *child)
 {
-  GT_Array *children_ranges;
+  GtArray *children_ranges;
   GT_Dlistelem *dlistelem;
   GT_GenomeFeature *gf = NULL, *child_gf;
   GT_Range range;
@@ -631,12 +631,12 @@ bool gt_genome_node_is_tree(GT_GenomeNode *gn)
   return status;
 }
 
-bool gt_genome_node_overlaps_nodes(GT_GenomeNode *gn, GT_Array *nodes)
+bool gt_genome_node_overlaps_nodes(GT_GenomeNode *gn, GtArray *nodes)
 {
   return gt_genome_node_overlaps_nodes_mark(gn, nodes, NULL);
 }
 
-bool gt_genome_node_overlaps_nodes_mark(GT_GenomeNode *gn, GT_Array *nodes,
+bool gt_genome_node_overlaps_nodes_mark(GT_GenomeNode *gn, GtArray *nodes,
                                              GT_Bittab *b)
 {
   unsigned long i;
@@ -712,13 +712,13 @@ void gt_genome_node_rec_delete(GT_GenomeNode *gn)
   assert(!had_err); /* cannot happen, free_genome_node() is sane */
 }
 
-void gt_genome_nodes_sort(GT_Array *nodes)
+void gt_genome_nodes_sort(GtArray *nodes)
 {
   qsort(gt_array_get_space(nodes), gt_array_size(nodes),
         sizeof (GT_GenomeNode*), (GT_Compare) gt_genome_node_compare);
 }
 
-void gt_genome_nodes_sort_stable(GT_Array *nodes)
+void gt_genome_nodes_sort_stable(GtArray *nodes)
 {
   gt_msort(gt_array_get_space(nodes), gt_array_size(nodes),
            sizeof (GT_GenomeNode*), (GT_Compare) gt_genome_node_compare);
@@ -739,7 +739,7 @@ bool gt_genome_nodes_are_equal_sequence_regions(GT_GenomeNode *gn_a,
   return false;
 }
 
-bool gt_genome_nodes_are_sorted(const GT_Array *nodes)
+bool gt_genome_nodes_are_sorted(const GtArray *nodes)
 {
   unsigned long i;
   assert(nodes);

@@ -25,7 +25,7 @@
 
 struct Splicedseq {
   GT_Str *splicedseq;
-  GT_Array *positionmapping;
+  GtArray *positionmapping;
   bool forward;
 };
 

@@ -22,7 +22,7 @@
 
 struct GT_GenomeNodeIterator {
   GT_GenomeNode *gn;
-  GT_Array *node_stack;
+  GtArray *node_stack;
   bool direct;
 };
 
@@ -59,7 +59,7 @@ GT_GenomeNodeIterator* gt_genome_node_iterator_new(GT_GenomeNode *gn)
   return gni;
 }
 
-static void add_children_to_stack(GT_Array *node_stack, GT_GenomeNode *gn)
+static void add_children_to_stack(GtArray *node_stack, GT_GenomeNode *gn)
 {
   GT_GenomeNode *child;
   GT_Dlistelem *dlistelem;

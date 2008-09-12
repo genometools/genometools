@@ -1,8 +1,8 @@
 #include "genometools.h"
 
-static GT_Array* create_example_features(void)
+static GtArray* create_example_features(void)
 {
-  GT_Array *features;
+  GtArray *features;
   GT_GenomeNode *gene, *exon, *intron; /* features */
   GT_Str *seqid; /* holds the sequence id the features refer to */
 
@@ -43,7 +43,7 @@ static void handle_error(GT_Error *err)
   exit(EXIT_FAILURE);
 }
 
-static void draw_example_features(GT_Array *features, const char *style_file,
+static void draw_example_features(GtArray *features, const char *style_file,
                                   const char *output_file)
 {
   GT_Range range = { 1, 1000 }; /* the genomic range to draw */
@@ -82,7 +82,7 @@ static void draw_example_features(GT_Array *features, const char *style_file,
   gt_error_delete(err);
 }
 
-static void delete_example_features(GT_Array *features)
+static void delete_example_features(GtArray *features)
 {
   unsigned long i;
   for (i = 0; i < gt_array_size(features); i++)
@@ -92,7 +92,7 @@ static void delete_example_features(GT_Array *features)
 
 int main(int argc, char *argv[])
 {
-  GT_Array *features; /* stores the created example features */
+  GtArray *features; /* stores the created example features */
 
   if (argc != 3) {
     fprintf(stderr, "Usage: %s style_file output_file\n", argv[0]);

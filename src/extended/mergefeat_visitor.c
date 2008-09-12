@@ -26,7 +26,7 @@ struct MergefeatVisitor {
   const GenomeVisitor parent_instance;
   GT_GenomeNode *current_tree;
   Hashmap *hm; /* type -> previous node */
-  GT_Array *nodes_to_remove;
+  GtArray *nodes_to_remove;
 };
 
 #define mergefeat_visitor_cast(GV)\

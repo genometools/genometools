@@ -80,7 +80,7 @@ static int storemaxmatchquery(void *info,
                               unsigned long querystart,
                               GT_UNUSED GT_Error *err)
 {
-  GT_Array *tab = (GT_Array *) info;
+  GtArray *tab = (GtArray *) info;
   Substringmatch subm;
 
   subm.len = len;
@@ -93,7 +93,7 @@ static int storemaxmatchquery(void *info,
 
 typedef struct
 {
-  GT_Array *results;
+  GtArray *results;
   Seqpos dblen;
   unsigned long *markpos,
                 numofquerysequences,
@@ -222,7 +222,7 @@ int testmaxpairs(const GT_Str *indexname,
   Uchar *dbseq, *query;
   bool haserr = false;
   unsigned long s;
-  GT_Array *tabmaxquerymatches;
+  GtArray *tabmaxquerymatches;
   Maxmatchselfinfo maxmatchselfinfo;
 
   showverbose(verboseinfo,"draw %lu samples",samples);

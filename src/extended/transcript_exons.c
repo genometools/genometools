@@ -20,7 +20,7 @@
 #include "extended/transcript_exons.h"
 
 struct TranscriptExons {
-  GT_Array *exon_array_all,
+  GtArray *exon_array_all,
         *exon_array_single,
         *exon_array_initial,
         *exon_array_internal,
@@ -38,31 +38,31 @@ TranscriptExons* transcript_exons_new(void)
   return te;
 }
 
-GT_Array* transcript_exons_get_all(const TranscriptExons *te)
+GtArray* transcript_exons_get_all(const TranscriptExons *te)
 {
   assert(te);
   return te->exon_array_all;
 }
 
-GT_Array* transcript_exons_get_single(const TranscriptExons *te)
+GtArray* transcript_exons_get_single(const TranscriptExons *te)
 {
   assert(te);
   return te->exon_array_single;
 }
 
-GT_Array* transcript_exons_get_initial(const TranscriptExons *te)
+GtArray* transcript_exons_get_initial(const TranscriptExons *te)
 {
   assert(te);
   return te->exon_array_initial;
 }
 
-GT_Array* transcript_exons_get_internal(const TranscriptExons *te)
+GtArray* transcript_exons_get_internal(const TranscriptExons *te)
 {
   assert(te);
   return te->exon_array_internal;
 }
 
-GT_Array* transcript_exons_get_terminal(const TranscriptExons *te)
+GtArray* transcript_exons_get_terminal(const TranscriptExons *te)
 {
   assert(te);
   return te->exon_array_terminal;
@@ -81,7 +81,7 @@ void transcript_exons_sort(const TranscriptExons *te)
 TranscriptCounts* transcript_exons_uniq_in_place_count(TranscriptExons *te)
 {
   TranscriptCounts *tc;
-  GT_Array *counts;
+  GtArray *counts;
   assert(te);
   tc = transcript_counts_new();
   counts = ranges_uniq_in_place_count(te->exon_array_all);

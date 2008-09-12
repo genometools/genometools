@@ -39,7 +39,7 @@ typedef struct {
 } OBOHeaderEntry;
 
 typedef struct {
-  GT_Array *content;
+  GtArray *content;
 } OBOHeader;
 
 static OBOHeader* obo_header_new(void)
@@ -153,7 +153,7 @@ static const char* obo_stanza_get_value(const OBOStanza *obo_stanza,
 
 struct OBOParseTree {
   OBOHeader *obo_header;
-  GT_Array *stanzas;
+  GtArray *stanzas;
 };
 
 static void obo_parse_tree_add_stanza(OBOParseTree *obo_parse_tree,

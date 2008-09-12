@@ -38,7 +38,7 @@ static GT_Strand get_strand(const void *sa)
   return GT_STRAND_REVERSE;
 }
 
-static void get_exons(GT_Array *exon_ranges, const void *sa)
+static void get_exons(GtArray *exon_ranges, const void *sa)
 {
   SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
   GT_Range exon;
@@ -50,7 +50,7 @@ static void get_exons(GT_Array *exon_ranges, const void *sa)
   }
 }
 
-static void process_splice_form(GT_Array *spliced_alignments_in_form,
+static void process_splice_form(GtArray *spliced_alignments_in_form,
                                 GT_UNUSED const void *set_of_sas,
                                 GT_UNUSED unsigned long number_of_sas,
                                 GT_UNUSED size_t size_of_sa,
@@ -83,7 +83,7 @@ static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
                                   int parsed_args,
                                   GT_UNUSED void *tool_arguments, GT_Error *err)
 {
-  GT_Array *spliced_alignments;
+  GtArray *spliced_alignments;
   SSplicedAlignment *sa;
   unsigned long i;
   int had_err = 0;

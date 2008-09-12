@@ -21,7 +21,7 @@
 #include "extended/chain.h"
 
 struct Chain {
-  GT_Array *fragments;
+  GtArray *fragments;
   long score;
 };
 

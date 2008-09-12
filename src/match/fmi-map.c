@@ -56,7 +56,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                                  GT_Error *err)
 {
   bool haserr = false;
-  GT_Array *riktab;
+  GtArray *riktab;
   unsigned int intstoreindexpos;
 
   gt_error_check(err);

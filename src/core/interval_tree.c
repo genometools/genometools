@@ -143,7 +143,7 @@ int gt_interval_tree_traverse(GT_IntervalTree *it,
 
 static void interval_tree_find_all_internal(GT_IntervalTreeNode *node,
                                             unsigned long low,
-                                            unsigned long high, GT_Array *a)
+                                            unsigned long high, GtArray *a)
 {
   GT_IntervalTreeNode* x;
   if (!node) return;
@@ -159,7 +159,7 @@ static void interval_tree_find_all_internal(GT_IntervalTreeNode *node,
 
 void gt_interval_tree_find_all_overlapping(GT_IntervalTree *it,
                                            unsigned long start,
-                                           unsigned long end, GT_Array* a)
+                                           unsigned long end, GtArray* a)
 {
   assert(it && a && start <= end);
   if (!it->root) return;
@@ -364,7 +364,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GT_Error *err)
   int query_width = 5000;
 
   GT_Range *res_rng = NULL, qrange;
-  GT_Array *arr;
+  GtArray *arr;
 
   arr = gt_array_new(sizeof (GT_Range*));
 
@@ -431,12 +431,12 @@ int gt_interval_tree_unit_test(GT_UNUSED GT_Error *err)
     unsigned long start = gt_rand_max(gt_range_max_basepos);
     qrange.start = start;
     qrange.end = start + gt_rand_max(query_width);
-    GT_Array *res = gt_array_new(sizeof (GT_Range*));
+    GtArray *res = gt_array_new(sizeof (GT_Range*));
     gt_interval_tree_find_all_overlapping(it, qrange.start, qrange.end, res);
     if (res)
     {
       /* generate reference overlapping interval list by linear search */
-      GT_Array *ref;
+      GtArray *ref;
       unsigned long j;
       ref = gt_array_new(sizeof (GT_Range*));
       for (j = 0; j < gt_array_size(arr); j++)

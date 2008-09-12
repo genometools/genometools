@@ -41,13 +41,13 @@ int              gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
                                                GT_Error *err);
 /* Returns an array of GT_GenomeFeatures associated with a given sequence region
    identifier <seqid>. */
-GT_Array*        gt_feature_index_get_features_for_seqid(GT_FeatureIndex*,
+GtArray*        gt_feature_index_get_features_for_seqid(GT_FeatureIndex*,
                                                          const char *seqid);
 /* Look up genome features in <feature_index> for sequence region <seqid> in
    <range> and store them in <results>. */
 int              gt_feature_index_get_features_for_range(GT_FeatureIndex
                                                          *feature_index,
-                                                         GT_Array *results,
+                                                         GtArray *results,
                                                          const char *seqid,
                                                          GT_Range, GT_Error*);
 /* Returns the first sequence region identifier added to <feature_index>. */

@@ -47,7 +47,7 @@ unsigned long qgram_step(unsigned long current_code, char previous, char next,
   return next_code;
 }
 
-void qgram_compute(GT_Array *qgrams, const char *encoded_seq,
+void qgram_compute(GtArray *qgrams, const char *encoded_seq,
                    unsigned long seqlen, unsigned long gt_alpha_size,
                    unsigned int q)
 {

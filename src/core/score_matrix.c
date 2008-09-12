@@ -42,7 +42,7 @@ GT_ScoreMatrix* gt_score_matrix_new(GT_Alpha *alpha)
   return sm;
 }
 
-static int parse_alphabet_line(GT_Array *index_to_gt_alpha_char_mapping,
+static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
                                Tokenizer *tz, GT_Error *err)
 {
   GT_Str *token;
@@ -105,7 +105,7 @@ static int parse_alphabet_line(GT_Array *index_to_gt_alpha_char_mapping,
 }
 
 static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
-                            GT_Array *index_to_gt_alpha_char_mapping,
+                            GtArray *index_to_gt_alpha_char_mapping,
                             char *parsed_characters, GT_Error *err)
 {
   unsigned int i = 0;
@@ -161,7 +161,7 @@ static int parse_score_matrix(GT_ScoreMatrix *sm, const char *path,
                               GT_Error *err)
 {
   Tokenizer *tz;
-  GT_Array *index_to_gt_alpha_char_mapping;
+  GtArray *index_to_gt_alpha_char_mapping;
   unsigned int parsed_score_lines = 0;
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;

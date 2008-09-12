@@ -59,10 +59,10 @@ static int range_lua_overlap(lua_State *L)
   return 1;
 }
 
-static GT_Array* range_table_to_array(lua_State *L)
+static GtArray* range_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
-  GT_Array *ranges;
+  GtArray *ranges;
   GT_Range *range;
   const char *msg;
   bool error;
@@ -101,7 +101,7 @@ static GT_Array* range_table_to_array(lua_State *L)
   return ranges;
 }
 
-static void push_range_array_as_table(lua_State *L, GT_Array *ranges)
+static void push_range_array_as_table(lua_State *L, GtArray *ranges)
 {
   unsigned long i;
   if (ranges && gt_array_size(ranges)) {
@@ -118,7 +118,7 @@ static void push_range_array_as_table(lua_State *L, GT_Array *ranges)
 
 static int ranges_lua_sort(lua_State *L)
 {
-  GT_Array *ranges;
+  GtArray *ranges;
   ranges = range_table_to_array(L);
   ranges_sort(ranges);
   push_range_array_as_table(L, ranges);
@@ -128,7 +128,7 @@ static int ranges_lua_sort(lua_State *L)
 
 static int ranges_lua_are_sorted(lua_State *L)
 {
-  GT_Array *ranges;
+  GtArray *ranges;
   bool are_sorted;
   ranges = range_table_to_array(L);
   are_sorted = ranges_are_sorted(ranges);

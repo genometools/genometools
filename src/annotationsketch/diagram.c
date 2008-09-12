@@ -63,7 +63,7 @@ typedef struct {
 /* a node in the reverse lookup structure used for collapsing */
 typedef struct {
   GT_GenomeNode *parent;
-  GT_Array *blocktuples;
+  GtArray *blocktuples;
 } NodeInfoElement;
 
 typedef struct {
@@ -425,9 +425,9 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
   unsigned long i = 0;
 
   for (i = 0; i < gt_array_size(ni->blocktuples); i++) {
-    GT_Array *list;
+    GtArray *list;
     GT_BlockTuple *bt = *(GT_BlockTuple**) gt_array_get(ni->blocktuples, i);
-    list = (GT_Array*) hashmap_get(diagram->blocks, bt->gft);
+    list = (GtArray*) hashmap_get(diagram->blocks, bt->gft);
     if (!list)
     {
       list = gt_array_new(sizeof (GT_Block*));
@@ -460,7 +460,7 @@ static void traverse_genome_nodes(GT_GenomeNode *gn,
   }
 }
 
-static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
+static void gt_diagram_build(GT_Diagram *diagram, GtArray *features)
 {
   unsigned long i = 0;
   int had_err;
@@ -490,14 +490,14 @@ static void gt_diagram_build(GT_Diagram *diagram, GT_Array *features)
 static int blocklist_delete(void *value)
 {
   unsigned long i;
-  GT_Array *a = (GT_Array*) value;
+  GtArray *a = (GtArray*) value;
   for (i = 0; i < gt_array_size(a); i++)
     gt_block_delete(*(GT_Block**) gt_array_get(a, i));
   gt_array_delete(a);
   return 0;
 }
 
-static GT_Diagram* gt_diagram_new_generic(GT_Array *features,
+static GT_Diagram* gt_diagram_new_generic(GtArray *features,
                                           const GT_Range *range,
                                           GT_Style *style)
 {
@@ -520,7 +520,7 @@ GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
 {
   GT_Diagram *diagram;
   int had_err = 0;
-  GT_Array *features = gt_array_new(sizeof (GT_GenomeNode*));
+  GtArray *features = gt_array_new(sizeof (GT_GenomeNode*));
   assert(features && seqid && range && style);
   had_err = gt_feature_index_get_features_for_range(fi, features, seqid, *range,
                                                  NULL);
@@ -530,7 +530,7 @@ GT_Diagram* gt_diagram_new(GT_FeatureIndex *fi, const char *seqid,
   return diagram;
 }
 
-GT_Diagram* gt_diagram_new_from_array(GT_Array *features, const GT_Range *range,
+GT_Diagram* gt_diagram_new_from_array(GtArray *features, const GT_Range *range,
                                 GT_Style *style)
 {
   assert(features && range && style);
@@ -576,7 +576,7 @@ static int layout_tracks(void *key, void *value, void *data,
   unsigned long i, max;
   GT_Track *track;
   GT_TrackTraverseInfo *tti = (GT_TrackTraverseInfo*) data;
-  GT_Array *list = (GT_Array*) value;
+  GtArray *list = (GtArray*) value;
   char *filename;
   GT_Str *gt_track_key;
   const char *type = key;
@@ -659,7 +659,7 @@ int gt_diagram_unit_test(GT_Error *err)
   int had_err=0;
   GT_Style *sty = NULL;
   GT_Diagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
-  GT_Array *features;
+  GtArray *features;
   GT_Canvas *canvas = NULL;
   gt_error_check(err);
 

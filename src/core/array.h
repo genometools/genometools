@@ -21,23 +21,23 @@
 #include "core/array_api.h"
 #include "core/error.h"
 
-typedef int (*GT_ArrayProcessor)(void *elem, void *info, GT_Error*);
+typedef int (*GtArrayProcessor)(void *elem, void *info, GT_Error*);
 
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */
-int           gt_array_cmp(const GT_Array  *array_a, const GT_Array *array_b);
+int           gt_array_cmp(const GtArray  *array_a, const GtArray *array_b);
 /* Iterate over all elements in <array> and call <array_processor> with them.
    <info> and <err> are passed to <array_processor>.
    If <array_processor> returns a value != 0, the iteration is stopped and the
    return value of <array_processor> is returned. */
-int           gt_array_iterate(GT_Array *array,
-                               GT_ArrayProcessor array_processor,
+int           gt_array_iterate(GtArray *array,
+                               GtArrayProcessor array_processor,
                                void *info, GT_Error *err);
 /* Similar to <array_iterate>, except that the <array> is traversed in reverse
    order. */
-int           gt_array_iterate_reverse(GT_Array *array,
-                                       GT_ArrayProcessor array_processor,
+int           gt_array_iterate_reverse(GtArray *array,
+                                       GtArrayProcessor array_processor,
                                        void *info, GT_Error *err);
 int           gt_array_example(GT_Error*);
 int           gt_array_unit_test(GT_Error*);

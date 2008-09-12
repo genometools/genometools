@@ -20,7 +20,7 @@
 #include "extended/csa_splice_form.h"
 
 struct CSASpliceForm {
-  GT_Array *spliced_alignments;
+  GtArray *spliced_alignments;
   GetGenomicRangeFunc get_genomic_range;
   GetStrandFunc get_strand;
 };

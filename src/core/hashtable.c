@@ -394,13 +394,13 @@ ht_remove(Hashtable *ht, const void *elem)
 struct hash_to_array_data
 {
   size_t elem_size;
-  GT_Array *hash_entries;
+  GtArray *hash_entries;
 };
 
 static enum iterator_op
 ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GT_Error *err)
 {
-  GT_Array *hash_entries;
+  GtArray *hash_entries;
   assert(elem && data);
   hash_entries = ((struct hash_to_array_data *)data)->hash_entries;
   gt_array_add_elem(hash_entries, elem,
@@ -412,7 +412,7 @@ extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
                           GT_Compare cmp, GT_Error *err)
 {
-  GT_Array *hash_entries;
+  GtArray *hash_entries;
   void *elem;
   unsigned long i;
   int had_err;

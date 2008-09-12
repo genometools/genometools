@@ -21,7 +21,7 @@
 #include "core/strarray.h"
 
 struct GT_StrArray {
-  GT_Array *strings;
+  GtArray *strings;
 };
 
 GT_StrArray* gt_strarray_new(void)

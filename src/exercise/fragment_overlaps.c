@@ -23,10 +23,10 @@
 #include "extended/string_matching.h"
 
 struct FragmentOverlaps{
-  GT_Array *overlaps;
+  GtArray *overlaps;
 };
 
-static void determine_overlaps(GT_Array *overlaps, GT_Bioseq *fragments,
+static void determine_overlaps(GtArray *overlaps, GT_Bioseq *fragments,
                                unsigned long i, unsigned long j,
                                unsigned long minlength)
 {

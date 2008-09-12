@@ -274,7 +274,7 @@ static int compareSequencerange(const void *a,const void *b)
 
 int checkspecialrangesfast(const Encodedsequence *encseq)
 {
-  GT_Array *rangesforward, *rangesbackward;
+  GtArray *rangesforward, *rangesbackward;
   bool haserr = false;
   Specialrangeiterator *sri;
   Sequencerange range;

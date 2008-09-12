@@ -21,7 +21,7 @@
 #include "core/array.h"
 
 /* the determined ORFs include the start and the stop codon */
-void gt_determine_ORFs(GT_Array *ranges, unsigned int framenum,
+void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
                        const char *frame, unsigned long framelen);
 
 #endif

@@ -57,7 +57,7 @@ struct GT_GenomeFeature
 };
 
 typedef struct {
-  GT_Array *exon_features,
+  GtArray *exon_features,
         *cds_features;
 } SaveExonAndCDSInfo;
 
@@ -394,7 +394,7 @@ Phase gt_genome_feature_get_phase(GT_GenomeFeature *gf)
 static int save_exon(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   GT_GenomeFeature *gf;
-  GT_Array *exon_features = (GT_Array*) data;
+  GtArray *exon_features = (GtArray*) data;
   gt_error_check(err);
   gf = (GT_GenomeFeature*) gn;
   assert(gf && exon_features);
@@ -404,7 +404,7 @@ static int save_exon(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
   return 0;
 }
 
-void gt_genome_feature_get_exons(GT_GenomeFeature *gf, GT_Array *exon_features)
+void gt_genome_feature_get_exons(GT_GenomeFeature *gf, GtArray *exon_features)
 {
   int had_err;
   assert(gf && exon_features && !gt_array_size(exon_features));
@@ -428,7 +428,7 @@ static int save_exons_and_cds(GT_GenomeNode *gn, void *data,
   return 0;
 }
 
-static void set_transcript_types(GT_Array *features)
+static void set_transcript_types(GtArray *features)
 {
   GT_GenomeNode *gn;
   unsigned long i;

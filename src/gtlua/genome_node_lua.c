@@ -162,7 +162,7 @@ static int genome_feature_lua_get_attribute(lua_State *L)
 static int genome_feature_lua_get_exons(lua_State *L)
 {
   GT_GenomeNode **gn = check_genome_node(L, 1);
-  GT_Array *exons = gt_array_new(sizeof (GT_GenomeNode*));
+  GtArray *exons = gt_array_new(sizeof (GT_GenomeNode*));
   unsigned long i = 0;
   GT_GenomeFeature *gf;
   /* make sure we get a genome feature */

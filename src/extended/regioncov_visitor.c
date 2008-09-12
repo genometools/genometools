@@ -44,7 +44,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
                                             GT_UNUSED GT_Error *err)
 {
   GT_Range *old_gt_range_ptr, old_range, new_range;
-  GT_Array *ranges;
+  GtArray *ranges;
   RegionCovVisitor *regioncov_visitor;
   gt_error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
@@ -73,7 +73,7 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
                                              GT_UNUSED GT_Error *err)
 {
   RegionCovVisitor *regioncov_visitor;
-  GT_Array *rangelist;
+  GtArray *rangelist;
   gt_error_check(err);
   regioncov_visitor = regioncov_visitor_cast(gv);
   rangelist = gt_array_new(sizeof (GT_Range));
@@ -111,11 +111,11 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
                           GT_UNUSED GT_Error *err)
 {
   unsigned long i;
-  GT_Array *rangelist;
+  GtArray *rangelist;
   GT_Range *rangeptr;
   gt_error_check(err);
   assert(key && value);
-  rangelist = (GT_Array*) value;
+  rangelist = (GtArray*) value;
   if (gt_array_size(rangelist)) {
     assert(ranges_are_sorted_and_do_not_overlap(rangelist));
     printf("%s:\n", (char*) key);

@@ -49,7 +49,7 @@ void                 gt_interval_tree_insert(GT_IntervalTree*,
 void              gt_interval_tree_find_all_overlapping(GT_IntervalTree*,
                                                         unsigned long start,
                                                         unsigned long end,
-                                                        GT_Array*);
+                                                        GtArray*);
 int               gt_interval_tree_traverse(GT_IntervalTree *it,
                                             GT_IntervalTreeIteratorFunc func,
                                             void *data);

@@ -54,10 +54,10 @@ static int diagram_lua_new(lua_State *L)
   return 1;
 }
 
-static GT_Array* genome_node_table_to_array(lua_State *L)
+static GtArray* genome_node_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
-  GT_Array *nodes;
+  GtArray *nodes;
   GT_GenomeNode **gn;
   const char *msg;
   bool error;
@@ -99,7 +99,7 @@ static GT_Array* genome_node_table_to_array(lua_State *L)
 static int diagram_lua_new_from_array(lua_State *L)
 {
   GT_Diagram **diagram;
-  GT_Array *nodes;
+  GtArray *nodes;
   GT_Range range;
   GT_Style *style;
   /* get array */

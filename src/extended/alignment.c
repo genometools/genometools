@@ -31,7 +31,7 @@ struct Alignment {
              *v;
   unsigned long ulen,
                 vlen;
-  GT_Array *eops;
+  GtArray *eops;
 };
 
 typedef enum {

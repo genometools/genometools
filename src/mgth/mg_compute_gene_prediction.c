@@ -21,7 +21,7 @@
 /* Funktion zur Berechnung der Start-Stop Informationen der genkodierenden
    Bereiche sowie deren Leserahmen
    Parameter: row, column, max-Wert der letzten Spalte der Opt-Path-Matrix,
-              Path-Matrix, CombinedScore-Matrix, GT_Array des opt. Pfades
+              Path-Matrix, CombinedScore-Matrix, GtArray des opt. Pfades
               (Leserahmen), Hit-Information, Zeiger auf ParseStruct, Zeiger
               auf RegionStruct, Zeiger auf den Speicherbereich zum
               Abspeichern der beteiligten Hits an einem Ergebnis
@@ -31,7 +31,7 @@ static void gene_prediction(unsigned short,
                             double,
                             PathMatrixEntry **,
                             CombinedScoreMatrixEntry **,
-                            GT_Array *,
+                            GtArray *,
                             HitInformation *,
                             ParseStruct *,
                             RegionStruct **, unsigned long *, GT_Error *);
@@ -60,25 +60,25 @@ static int check_coding(ParseStruct *,
 
 /* Funktion zum sortierten Einfuegen neuer Bereichsgrenzen kodierender
    Abschnitte in das real-Frame-Array
-   Parameter: Zeiger auf RegionStruct-Struktur, GT_Arrays mit den From- und
+   Parameter: Zeiger auf RegionStruct-Struktur, GtArrays mit den From- und
               To-Werten des real-Frames,Arrays mit den From- und To-Werten
               der einzufuegenden Abschnitte, Index des Real-Frames,Index
               des tmp-Frames, real-Frame, Zeilenindex;
    Returnwert: void */
 static void merge_array(RegionStruct **,
-                        GT_Array *,
-                        GT_Array *,
-                        GT_Array *,
-                        GT_Array *,
+                        GtArray *,
+                        GtArray *,
+                        GtArray *,
+                        GtArray *,
                         unsigned long,
                         unsigned long, short, unsigned short);
 
-/* Funktion zum sortierten der GT_Arrays mit den neu einzufuegenden
+/* Funktion zum sortierten der GtArrays mit den neu einzufuegenden
    Bereichsgrenzen
-   Parameter: GT_Arrays der sortierten From- und To-Werte, GT_Arrays mit den
-              From- und To-Werten der zu sortierenden GT_Arrays;
+   Parameter: GtArrays der sortierten From- und To-Werte, GtArrays mit den
+              From- und To-Werten der zu sortierenden GtArrays;
    Returnwert: void */
-static void sort_realtmp(GT_Array *, GT_Array *, GT_Array *, GT_Array *);
+static void sort_realtmp(GtArray *, GtArray *, GtArray *, GtArray *);
 
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry
                                **combinedscore_matrix,
@@ -106,8 +106,8 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
   /* Struktur zur Speicherung der kodierenden Bereiche (from-to - Werte) */
   RegionStruct **regionmatrix;
 
-  /* GT_Array fuer das Speichern der Frames des optimalen Pfades */
-  GT_Array *frame_path_array;
+  /* GtArray fuer das Speichern der Frames des optimalen Pfades */
+  GtArray *frame_path_array;
   frame_path_array = gt_array_new(sizeof (unsigned short));
 
   gt_error_check(err);
@@ -213,7 +213,7 @@ static void gene_prediction(unsigned short row,
                             PathMatrixEntry **path_matrix,
                             CombinedScoreMatrixEntry
                             **combinedscore_matrix,
-                            GT_Array * frame_path_array,
+                            GtArray * frame_path_array,
                             HitInformation *hit_information,
                             ParseStruct *parsestruct_ptr,
                             RegionStruct **regionmatrix,
@@ -510,14 +510,14 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
   long min_value,
     min_value_tmp = LONG_MAX;
 
-  GT_Array *tmp_from;
-  GT_Array *tmp_to;
-  GT_Array *real_from;
-  GT_Array *real_to;
-  GT_Array *real_fromtmp;
-  GT_Array *real_totmp;
-  GT_Array *realfrom;
-  GT_Array *realto;
+  GtArray *tmp_from;
+  GtArray *tmp_to;
+  GtArray *real_from;
+  GtArray *real_to;
+  GtArray *real_fromtmp;
+  GtArray *real_totmp;
+  GtArray *realfrom;
+  GtArray *realto;
 
   gt_error_check(err);
 
@@ -633,7 +633,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 
       if (!had_err)
       {
-        /* die from- to-Grenzen des zu vergleichenden GT_Arrays werden
+        /* die from- to-Grenzen des zu vergleichenden GtArrays werden
            aktualisiert */
         gt_array_delete(regionmatrix[row_index][0].from);
         gt_array_delete(regionmatrix[row_index][0].to);
@@ -654,7 +654,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
     arraysize_tmp = gt_array_size(real_fromtmp);
 
     /* Falls im tmp-Array Eintraege vorhanden sind, sind diese in das
-       GT_Array der kodierenden Abschnitte der realen-Frames einzutragen */
+       GtArray der kodierenden Abschnitte der realen-Frames einzutragen */
     if (arraysize_tmp > 0)
     {
       /* sortieren der neu einzutragenden kodierenden Abschnitte anhand
@@ -666,13 +666,13 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
       gt_array_reverse(realfrom);
       gt_array_reverse(realto);
 
-      /* sortiertes einfuegen der neuen Bereichsgrenzen in das GT_Array
+      /* sortiertes einfuegen der neuen Bereichsgrenzen in das GtArray
          bestehender kodierender Bereiche des realen Frames */
       merge_array(regionmatrix,
                   real_from,
                   real_to, realfrom, realto, 0, 0, real_frame, row_index);
 
-      /* aktualisieren der Bereichsgrenzen im GT_Array des realen-Frames */
+      /* aktualisieren der Bereichsgrenzen im GtArray des realen-Frames */
       gt_array_delete(regionmatrix[real_frame][0].from);
       gt_array_delete(regionmatrix[real_frame][0].to);
 
@@ -705,8 +705,8 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
     from_tmp_next,
     to_tmp_real,
     function_stop = 0;
-  GT_Array *tmp_from;
-  GT_Array *tmp_to;
+  GtArray *tmp_from;
+  GtArray *tmp_to;
 
   gt_error_check(err);
 
@@ -932,10 +932,10 @@ static int check_coding(ParseStruct *parsestruct_ptr,
 }
 
 static void merge_array(RegionStruct **regionmatrix,
-                        GT_Array * real_from_ar,
-                        GT_Array * real_to_ar,
-                        GT_Array * real_fromtmp,
-                        GT_Array * real_totmp,
+                        GtArray * real_from_ar,
+                        GtArray * real_to_ar,
+                        GtArray * real_fromtmp,
+                        GtArray * real_totmp,
                         unsigned long real_index,
                         unsigned long tmp_index,
                         short real_frame, unsigned short row_index)
@@ -945,7 +945,7 @@ static void merge_array(RegionStruct **regionmatrix,
     tmp_from,
     tmp_to;
 
-  /* Fall 1: Eintraege im GT_Array des realen Frames sind abgearbeitet,
+  /* Fall 1: Eintraege im GtArray des realen Frames sind abgearbeitet,
      Eintraege im tmp-Array noch nicht */
   if (!(real_index < gt_array_size(regionmatrix[real_frame][0].from))
       && tmp_index < gt_array_size(real_fromtmp))
@@ -972,7 +972,7 @@ static void merge_array(RegionStruct **regionmatrix,
       }
     }
   }
-  /* Fall 2: Eintraege im GT_Array des realen Frames sind noch nicht
+  /* Fall 2: Eintraege im GtArray des realen Frames sind noch nicht
      abgearbeitet, Eintraege im tmp-Array abgearbeitet */
   else if (!(tmp_index < gt_array_size(real_fromtmp))
            && real_index < gt_array_size(regionmatrix[real_frame][0].from))
@@ -1007,7 +1007,7 @@ static void merge_array(RegionStruct **regionmatrix,
       }
     }
   }
-  /* Fall 3: Es sind noch Eintraege in beiden GT_Arrays vorhanden */
+  /* Fall 3: Es sind noch Eintraege in beiden GtArrays vorhanden */
   else if ((tmp_index < gt_array_size(real_fromtmp))
            && real_index < gt_array_size(regionmatrix[real_frame][0].from))
   {
@@ -1088,9 +1088,9 @@ static void merge_array(RegionStruct **regionmatrix,
   }
 }
 
-static void sort_realtmp(GT_Array * realfrom,
-                         GT_Array * realto,
-                         GT_Array * real_fromtmp, GT_Array * real_totmp)
+static void sort_realtmp(GtArray * realfrom,
+                         GtArray * realto,
+                         GtArray * real_fromtmp, GtArray * real_totmp)
 {
   unsigned long index_outer,
     index_inner,
@@ -1100,12 +1100,12 @@ static void sort_realtmp(GT_Array * realfrom,
     from_tmp = 0,
     to_tmp = 0;
 
-  /* durchlaufen des GT_Arrays mit einer aeusseren und einer inneren Schleife
+  /* durchlaufen des GtArrays mit einer aeusseren und einer inneren Schleife
    */
   for (index_outer = 0; index_outer < gt_array_size(real_fromtmp);
        index_outer++)
   {
-    /* die innere Schleife bestimmt den naechsten maximalen Wert im GT_Array */
+    /* die innere Schleife bestimmt den naechsten maximalen Wert im GtArray */
     for (index_inner = 0; index_inner < gt_array_size(real_fromtmp);
          index_inner++)
     {

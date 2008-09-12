@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "core/array.h"
 
-int array_compare(const GT_Array *a,const GT_Array *b,
+int array_compare(const GtArray *a,const GtArray *b,
                   int(*compar)(const void *, const void *))
 {
   unsigned long idx, size_a, size_b;

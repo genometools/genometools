@@ -335,7 +335,7 @@ static void findmaximalscores_withoverlaps(Chain *chain, Chaininfo *chaininfo,
                                            Overlapinfo *overlapinfo)
 {
   unsigned long i, startfrag;
-  GT_Array *startfragments;
+  GtArray *startfragments;
 
   assert(seqlen1 != UNDEF_ULONG);
   assert(mincoverage != UNDEF_DOUBLE);

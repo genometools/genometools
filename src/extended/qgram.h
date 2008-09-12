@@ -34,7 +34,7 @@ unsigned long qgram_step(unsigned long current_code, char previous, char next,
 
 /* Computes all q-grams of the given <encoded_seq> (over an alphabet of size
    <gt_alpha_size>) and stores them in the array <qgrams>. */
-void          qgram_compute(GT_Array *qgrams, const char *encoded_seq,
+void          qgram_compute(GtArray *qgrams, const char *encoded_seq,
                             unsigned long seqlen, unsigned long gt_alpha_size,
                             unsigned int q);
 

@@ -24,7 +24,7 @@
 
 struct MergeStream {
   const GenomeStream parent_instance;
-  GT_Array *genome_streams;
+  GtArray *genome_streams;
   GT_GenomeNode **buffer;
 };
 
@@ -113,7 +113,7 @@ const GenomeStreamClass* merge_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* merge_stream_new(const GT_Array *genome_streams)
+GenomeStream* merge_stream_new(const GtArray *genome_streams)
 {
   GenomeStream *in_stream,
                *gs = genome_stream_create(merge_stream_class(), true);

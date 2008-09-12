@@ -59,7 +59,7 @@ struct StreamEvaluator {
 };
 
 typedef struct {
-  GT_Array *genes_forward,
+  GtArray *genes_forward,
         *genes_reverse,
         *mRNAs_forward,
         *mRNAs_reverse,
@@ -532,7 +532,7 @@ static int process_real_feature(GT_GenomeNode *gn, void *data,
 
 static int store_exon(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
-  GT_Array *exons = (GT_Array*) data;
+  GtArray *exons = (GtArray*) data;
   GT_Range range;
   GT_GenomeFeature *gf;
   gt_error_check(err);
@@ -547,7 +547,7 @@ static int store_exon(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 
 static bool mRNAs_are_equal(GT_GenomeNode *gn_1, GT_GenomeNode *gn_2)
 {
-  GT_Array *exons_1, *exons_2;
+  GtArray *exons_1, *exons_2;
   bool equal;
   int had_err;
 
@@ -580,7 +580,7 @@ static bool mRNAs_are_equal(GT_GenomeNode *gn_1, GT_GenomeNode *gn_2)
 }
 
 typedef struct {
-  GT_Array *exons,
+  GtArray *exons,
         *mRNAs;
 } Store_gene_feature_info;
 
@@ -605,7 +605,7 @@ static int store_gene_feature(GT_GenomeNode *gn, void *data,
 
 static bool genes_are_equal(GT_GenomeNode *gn_1, GT_GenomeNode *gn_2)
 {
-  GT_Array *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
+  GtArray *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
   Store_gene_feature_info info;
   unsigned long i;
   bool equal;
@@ -746,10 +746,10 @@ static void mark_and_show_false_exon(GT_GenomeNode *gn, bool exondiff)
 
 static void determine_true_exon(GT_GenomeNode *gn, GT_Strand predicted_strand,
                                 bool exondiff, GT_Range *predicted_range,
-                                GT_Array *exons_forward,
-                                GT_Array *exons_reverse,
-                                GT_Array *true_exons_forward,
-                                GT_Array *true_exons_reverse,
+                                GtArray *exons_forward,
+                                GtArray *exons_reverse,
+                                GtArray *true_exons_forward,
+                                GtArray *true_exons_reverse,
                                 GT_Bittab *true_exons_forward_collapsed,
                                 GT_Bittab *true_exons_reverse_collapsed,
                                 Evaluator *exon_evaluator,
@@ -882,7 +882,7 @@ static int process_predicted_feature(GT_GenomeNode *gn, void *data,
   GT_Range predicted_range;
   unsigned long i, num;
   GT_Strand predicted_strand;
-  GT_Array *real_genome_nodes;
+  GtArray *real_genome_nodes;
   GT_GenomeNode **real_gn;
 
   gt_error_check(err);

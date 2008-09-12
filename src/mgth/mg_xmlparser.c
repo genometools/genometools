@@ -163,7 +163,7 @@ static void XMLCALL startElement(void *data, const char *name,
   if (!PARSESTRUCT(had_err))
   {
     /* Vergleich des aktuellen XML-Tags mit dem aktuellen Tag-Namen im
-       jew. GT_Array bei Uebereinstimmung wird das jeweilige Flag gesetzt */
+       jew. GtArray bei Uebereinstimmung wird das jeweilige Flag gesetzt */
     if (strcmp
         (name,
          gt_strarray_get(PARSESTRUCT(query_array),
@@ -398,7 +398,7 @@ static void XMLCALL endElement(void *data, const char *name)
         /* Der Query-from Wert wird als Long-Wert gespeichert, dazu
            zunaechst Umwandlung des Strings mittels atol */
         ulong_numb_buf = atol(gt_str_get(PARSESTRUCT(buf_ptr)));
-        /* Der Query-from Wert wird zum GT_Array query_from hinzugefuegt */
+        /* Der Query-from Wert wird zum GtArray query_from hinzugefuegt */
         gt_array_add_elem(MATRIXSTRUCT(query_from), &ulong_numb_buf,
                        sizeof (unsigned long));
       }

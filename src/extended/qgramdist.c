@@ -26,7 +26,7 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
   unsigned long i, alphasize_to_the_power_of_q, *seq_a_profile, *seq_b_profile,
                 dist = 0;
   const GT_Alpha *gt_alpha_a, *gt_alpha_b;
-  GT_Array *seq_a_qgrams, *seq_b_qgrams;
+  GtArray *seq_a_qgrams, *seq_b_qgrams;
 
   assert(seq_a && seq_b);
   gt_alpha_a = seq_get_alpha(seq_a);

@@ -25,7 +25,7 @@ struct ChseqidsStream {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   Mapping *chseqids_mapping;
-  GT_Array *gt_genome_node_buffer;
+  GtArray *gt_genome_node_buffer;
   unsigned long buffer_index;
   bool sequence_regions_processed;
 };

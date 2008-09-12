@@ -27,24 +27,24 @@ typedef struct TranscriptCounts TranscriptCounts;
 TranscriptCounts* transcript_counts_new(void);
 
 /* return the count array for all exons */
-GT_Array*         transcript_counts_get_all(const TranscriptCounts*);
-void              transcript_counts_set_all(TranscriptCounts*, GT_Array*);
+GtArray*         transcript_counts_get_all(const TranscriptCounts*);
+void              transcript_counts_set_all(TranscriptCounts*, GtArray*);
 
 /* return the count array for single exons */
-GT_Array*         transcript_counts_get_single(const TranscriptCounts*);
-void              transcript_counts_set_single(TranscriptCounts*, GT_Array*);
+GtArray*         transcript_counts_get_single(const TranscriptCounts*);
+void              transcript_counts_set_single(TranscriptCounts*, GtArray*);
 
 /* return the count array for initial exons */
-GT_Array*         transcript_counts_get_initial(const TranscriptCounts*);
-void              transcript_counts_set_initial(TranscriptCounts*, GT_Array*);
+GtArray*         transcript_counts_get_initial(const TranscriptCounts*);
+void              transcript_counts_set_initial(TranscriptCounts*, GtArray*);
 
 /* return the count array for internal exons */
-GT_Array*         transcript_counts_get_internal(const TranscriptCounts*);
-void              transcript_counts_set_internal(TranscriptCounts*, GT_Array*);
+GtArray*         transcript_counts_get_internal(const TranscriptCounts*);
+void              transcript_counts_set_internal(TranscriptCounts*, GtArray*);
 
 /* return the count array for terminal exons */
-GT_Array*         transcript_counts_get_terminal(const TranscriptCounts*);
-void              transcript_counts_set_terminal(TranscriptCounts*, GT_Array*);
+GtArray*         transcript_counts_get_terminal(const TranscriptCounts*);
+void              transcript_counts_set_terminal(TranscriptCounts*, GtArray*);
 
 void              transcript_counts_delete(TranscriptCounts*);
 

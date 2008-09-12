@@ -30,7 +30,7 @@ struct GT_Track {
   unsigned long max_num_lines, discarded_blocks;
   GT_LineBreaker *lb;
   bool split;
-  GT_Array *lines;
+  GtArray *lines;
 };
 
 GT_Track* gt_track_new(GT_Str *title, unsigned long max_num_lines, bool split,

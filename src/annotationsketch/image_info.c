@@ -25,7 +25,7 @@
 #include "core/unused_api.h"
 
 struct GT_ImageInfo {
-  GT_Array* recmaps;
+  GtArray* recmaps;
   unsigned int height;
 };
 

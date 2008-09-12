@@ -26,7 +26,7 @@
 
 struct GT_Line {
   bool has_captions;
-  GT_Array *blocks;
+  GtArray *blocks;
 };
 
 GT_Line* gt_line_new(void)
@@ -52,7 +52,7 @@ bool gt_line_has_captions(const GT_Line *line)
   return line->has_captions;
 }
 
-GT_Array* gt_line_get_blocks(GT_Line* line)
+GtArray* gt_line_get_blocks(GT_Line* line)
 {
   assert(line);
   return line->blocks;
@@ -75,7 +75,7 @@ int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
 int gt_line_unit_test(GT_Error *err)
 {
   GT_Range r1, r2;
-  GT_Array* blocks;
+  GtArray* blocks;
   GT_Str *seqid1, *seqid2, *seqid3;
   int had_err = 0;
   GT_GenomeNode *parent, *gn1, *gn2, *gn3, *gn4;

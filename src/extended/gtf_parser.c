@@ -46,7 +46,7 @@ struct GTF_parser {
 
 typedef struct {
   GT_Queue *genome_nodes;
-  GT_Array *mRNAs;
+  GtArray *mRNAs;
   Hashmap *gene_id_to_name_mapping,
           *transcript_id_to_name_mapping;
 } ConstructionInfo;
@@ -123,8 +123,8 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
                            GT_Error *err)
 {
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
-  GT_Array *gt_genome_node_array = (GT_Array*) value,
-        *mRNAs = (GT_Array*) cinfo->mRNAs;
+  GtArray *gt_genome_node_array = (GtArray*) value,
+        *mRNAs = (GtArray*) cinfo->mRNAs;
   GT_GenomeNode *mRNA_node, *first_node, *gn;
   const char *tname;
   GT_Strand mRNA_strand;
@@ -190,7 +190,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
   GT_Queue *genome_nodes = cinfo->genome_nodes;
   const char *gname;
-  GT_Array *mRNAs = gt_array_new(sizeof (GT_GenomeNode*));
+  GtArray *mRNAs = gt_array_new(sizeof (GT_GenomeNode*));
   GT_GenomeNode *gene_node, *gn;
   GT_Strand gene_strand;
   GT_Range gene_range;
@@ -274,7 +274,7 @@ int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
        **tokens;
   Hashmap *transcript_id_hash; /* map from transcript id to array of genome
                                     nodes */
-  GT_Array *gt_genome_node_array;
+  GtArray *gt_genome_node_array;
   ConstructionInfo cinfo;
   GTF_feature_type gtf_feature_type;
   bool gff_type_is_valid = false;

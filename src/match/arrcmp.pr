@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int array_compare(const GT_Array *a,const GT_Array *b,
+int array_compare(const GtArray *a,const GtArray *b,
                   int(*compar)(const void *, const void *));
 
 #ifdef __cplusplus

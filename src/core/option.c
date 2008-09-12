@@ -59,7 +59,7 @@ struct OptionParser {
   char *progname,
        *synopsis,
        *one_liner;
-  GT_Array *options,
+  GtArray *options,
         *hooks;
   bool parser_called,
        refer_to_manual;
@@ -107,7 +107,7 @@ struct Option {
        is_extended_option,
        is_development_option,
        argument_is_optional;
-  GT_Array *implications, /* contains option arrays, from each array at least
+  GtArray *implications, /* contains option arrays, from each array at least
                              one option needs to be set */
         *exclusions;
   const Option *mandatory_either_option;
@@ -453,7 +453,7 @@ static int check_mandatory_options(OptionParser *op, GT_Error *err)
 static int check_option_implications(OptionParser *op, GT_Error *err)
 {
   unsigned long i, j, k, l;
-  GT_Array *implied_option_array;
+  GtArray *implied_option_array;
   Option *o, *implied_option;
   unsigned int option_set;
   GT_Str *gt_error_str;
@@ -463,7 +463,7 @@ static int check_option_implications(OptionParser *op, GT_Error *err)
     o = *(Option**) gt_array_get(op->options, i);
     if (o->implications && o->is_set) {
       for (j = 0; j < gt_array_size(o->implications); j++) {
-        implied_option_array = *(GT_Array**) gt_array_get(o->implications, j);
+        implied_option_array = *(GtArray**) gt_array_get(o->implications, j);
         assert(gt_array_size(implied_option_array));
         if (gt_array_size(implied_option_array) == 1) {
           /* special case: option implies exactly one option */
@@ -560,7 +560,7 @@ static int check_mandatory_either_options(OptionParser *op, GT_Error *err)
   return 0;
 }
 
-static bool has_extended_option(GT_Array *options)
+static bool has_extended_option(GtArray *options)
 {
   unsigned long i;
   Option *option;
@@ -1428,10 +1428,10 @@ void option_is_development_option(Option *o)
 
 void option_imply(Option *o, const Option *implied_option)
 {
-  GT_Array *option_array;
+  GtArray *option_array;
   assert(o && implied_option);
   if (!o->implications)
-    o->implications = gt_array_new(sizeof (GT_Array*));
+    o->implications = gt_array_new(sizeof (GtArray*));
   option_array = gt_array_new(sizeof (Option*));
   gt_array_add(option_array, implied_option);
   gt_array_add(o->implications, option_array);
@@ -1439,10 +1439,10 @@ void option_imply(Option *o, const Option *implied_option)
 
 void option_imply_either_2(Option *o, const Option *io1, const Option *io2)
 {
-  GT_Array *option_array;
+  GtArray *option_array;
   assert(o && io1 && io2);
   if (!o->implications)
-    o->implications = gt_array_new(sizeof (GT_Array*));
+    o->implications = gt_array_new(sizeof (GtArray*));
   option_array = gt_array_new(sizeof (Option*));
   gt_array_add(option_array, io1);
   gt_array_add(option_array, io2);
@@ -1489,7 +1489,7 @@ void option_delete(Option *o)
   gt_str_delete(o->option_str);
   gt_str_delete(o->description);
   for (i = 0; i < gt_array_size(o->implications); i++)
-    gt_array_delete(*(GT_Array**) gt_array_get(o->implications, i));
+    gt_array_delete(*(GtArray**) gt_array_get(o->implications, i));
   gt_array_delete(o->implications);
   gt_array_delete(o->exclusions);
   gt_free(o);

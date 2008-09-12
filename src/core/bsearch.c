@@ -20,7 +20,7 @@
 #include "core/ensure.h"
 #include "core/unused_api.h"
 
-static void* bsearch_generic(GT_Array *members, const void *key,
+static void* bsearch_generic(GtArray *members, const void *key,
                              const void *base, size_t nmemb, size_t size,
                              GT_CompareWithData compar, void *data,
                              GT_Bittab *b)
@@ -79,7 +79,7 @@ void* gt_bsearch_data(const void *key, const void *base, size_t nmemb,
   return bsearch_generic(NULL, key, base, nmemb, size, compar, data, NULL);
 }
 
-void gt_bsearch_all(GT_Array *members, const void *key, const void *base,
+void gt_bsearch_all(GtArray *members, const void *key, const void *base,
                     size_t nmemb, size_t size, GT_CompareWithData compar,
                     void *data)
 {
@@ -87,7 +87,7 @@ void gt_bsearch_all(GT_Array *members, const void *key, const void *base,
   bsearch_generic(members, key, base, nmemb, size, compar, data, NULL);
 }
 
-void gt_bsearch_all_mark(GT_Array *members, const void *key, const void *base,
+void gt_bsearch_all_mark(GtArray *members, const void *key, const void *base,
                          size_t nmemb, size_t size, GT_CompareWithData compar,
                          void *data, GT_Bittab *b)
 {
@@ -113,7 +113,7 @@ static int cmp(const void *a_ptr, const void *b_ptr, GT_UNUSED void *unused)
    implementation.  */
 int gt_bsearch_unit_test(GT_Error *err)
 {
-  GT_Array *elements, *members;
+  GtArray *elements, *members;
   int key, element, *member_ptr;
   GT_Bittab *b;
   int had_err = 0;

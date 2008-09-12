@@ -67,7 +67,7 @@ float                 gt_genome_feature_get_score(GT_GenomeFeature*);
 GT_Strand             gt_genome_feature_get_strand(GT_GenomeFeature*);
 Phase                 gt_genome_feature_get_phase(GT_GenomeFeature*);
 void                  gt_genome_feature_get_exons(GT_GenomeFeature*,
-                                                  GT_Array *exon_features);
+                                                  GtArray *exon_features);
 void                  gt_genome_feature_determine_transcripttypes(
                                                              GT_GenomeFeature*);
 TranscriptFeatureType gt_genome_feature_get_transcriptfeaturetype(

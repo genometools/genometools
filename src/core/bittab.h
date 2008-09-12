@@ -48,7 +48,7 @@ void          gt_bittab_shift_right_equal(GT_Bittab*);
 /* a = 0 */
 void          gt_bittab_unset(GT_Bittab*);
 void          gt_bittab_show(const GT_Bittab*, FILE*);
-void          gt_bittab_get_all_bitnums(const GT_Bittab*, GT_Array*);
+void          gt_bittab_get_all_bitnums(const GT_Bittab*, GtArray*);
 bool          gt_bittab_bit_is_set(const GT_Bittab*, unsigned long);
 bool          gt_bittab_is_true(const GT_Bittab*);
 bool          gt_bittab_cmp(const GT_Bittab*, const GT_Bittab*);

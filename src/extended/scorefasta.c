@@ -24,7 +24,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
                          const char *w, unsigned long wlen,
                          unsigned long q, unsigned long alphabet_size)
 {
-  GT_Array **h;
+  GtArray **h;
   unsigned long i, j, code, hsize, r_raised_to_the_power_of_q_minus_1,
                 *count, maxcount = 0;
 
@@ -34,7 +34,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
 
   /* preprocess function h */
   hsize = pow(alphabet_size, q);
-  h = gt_malloc(sizeof(GT_Array*) * hsize);
+  h = gt_malloc(sizeof(GtArray*) * hsize);
   for (i = 0; i < hsize; i++)
     h[i] = gt_array_new(sizeof (unsigned long));
 

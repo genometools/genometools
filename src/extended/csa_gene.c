@@ -19,7 +19,7 @@
 #include "extended/csa_gene.h"
 
 struct CSAGene {
-  GT_Array *splice_forms;
+  GtArray *splice_forms;
 };
 
 CSAGene* csa_gene_new(CSASpliceForm *splice_form)

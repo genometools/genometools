@@ -30,13 +30,13 @@ void* gt_bsearch_data(const void *key, const void *base, size_t nmemb,
 /* Similar interface to gt_bsearch_data(), except that all members which
    compare as equal are stored in the <members> array. The order in which the
    elements are added is undefined. */
-void  gt_bsearch_all(GT_Array *members, const void *key, const void *base,
+void  gt_bsearch_all(GtArray *members, const void *key, const void *base,
                      size_t nmemb, size_t size, GT_CompareWithData, void *data);
 
 /* Similar interface to gt_bsearch_all(). Additionally, if a bittab is given
    (which must be of size <nmemb>), the bits corresponding to the found
    elements are marked (i.e., set). */
-void  gt_bsearch_all_mark(GT_Array *members, const void *key, const void *base,
+void  gt_bsearch_all_mark(GtArray *members, const void *key, const void *base,
                           size_t nmemb, size_t size, GT_CompareWithData,
                           void *data, GT_Bittab*);
 

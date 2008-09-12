@@ -164,18 +164,18 @@ int gt_feature_index_add_gff3file(GT_FeatureIndex *feature_index,
 
 static int collect_features_from_itree(GT_IntervalTreeNode *node, void *data)
 {
-  GT_Array *a = (GT_Array*) data;
+  GtArray *a = (GtArray*) data;
   GT_GenomeNode *gn = (GT_GenomeNode*) gt_interval_tree_node_get_data(node);
   gt_array_add(a, gn);
   return 0;
 }
 
-GT_Array* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
+GtArray* gt_feature_index_get_features_for_seqid(GT_FeatureIndex *fi,
                                                   const char *seqid)
 {
   RegionInfo *ri;
   int had_err = 0;
-  GT_Array *a;
+  GtArray *a;
   assert(fi && seqid);
   a = gt_array_new(sizeof (GT_GenomeFeature*));
   ri = (RegionInfo*) hashmap_get(fi->regions, seqid);
@@ -196,7 +196,7 @@ static int gt_genome_node_cmp_range_start(const void *v1, const void *v2)
 }
 
 int gt_feature_index_get_features_for_range(GT_FeatureIndex *fi,
-                                            GT_Array *results,
+                                            GtArray *results,
                                             const char *seqid,
                                             GT_Range qry_range, GT_Error *err)
 {
@@ -272,7 +272,7 @@ int gt_feature_index_unit_test(GT_Error *err)
   GT_Str *seqid1, *seqid2;
   GT_StrArray *seqids = NULL;
   GT_SequenceRegion *sr1, *sr2;
-  GT_Array *features = NULL;
+  GtArray *features = NULL;
   int had_err = 0;
   gt_error_check(err);
 

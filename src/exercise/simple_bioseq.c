@@ -28,7 +28,7 @@ typedef struct {
 } FastaEntry;
 
 struct SimpleGT_Bioseq {
-  GT_Array *entries;
+  GtArray *entries;
 };
 
 static bool has_char(FILE *fp)
@@ -74,7 +74,7 @@ static void parse_fasta_sequence(GT_Str *sequence, FILE *fp,
     xungetc(FASTA_SEPARATOR, fp);
 }
 
-static void parse_fasta_entry(GT_Array *entries, FILE *fp, const char *fasta_file)
+static void parse_fasta_entry(GtArray *entries, FILE *fp, const char *fasta_file)
 {
   FastaEntry new_entry;
   assert(entries && fp && fasta_file);
@@ -85,7 +85,7 @@ static void parse_fasta_entry(GT_Array *entries, FILE *fp, const char *fasta_fil
   gt_array_add(entries, new_entry);
 }
 
-static void parse_fasta_file(GT_Array *entries, const char *fasta_file)
+static void parse_fasta_file(GtArray *entries, const char *fasta_file)
 {
   FILE *fp;
   assert(entries && fasta_file);

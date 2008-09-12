@@ -29,11 +29,11 @@ typedef struct {
   Hashtable *mapping;
 } Pos;
 
-DECLARE_HASHMAP(unsigned long, ul, GT_Array *, array, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, GT_Array *, array, ht_ul_elem_hash,
+DECLARE_HASHMAP(unsigned long, ul, GtArray *, array, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, GtArray *, array, ht_ul_elem_hash,
                ht_ul_elem_cmp, NULL_DESTRUCTOR, gt_array_delete, static,
                inline)
-DECLARE_SAFE_DEREF(GT_Array *,array)
+DECLARE_SAFE_DEREF(GtArray *,array)
 
 /* Return a new Pos object. */
 Pos* pos_new(void)
@@ -54,7 +54,7 @@ void pos_delete(Pos *pos)
 /* Add <position> to position list for <code>. */
 void pos_add(Pos *pos, unsigned long code, unsigned long position)
 {
-  GT_Array *position_list;
+  GtArray *position_list;
   assert(pos && pos->mapping);
   position_list = array_safe_deref(ul_array_hashmap_get(pos->mapping, code));
   if (!position_list) {
@@ -67,7 +67,7 @@ void pos_add(Pos *pos, unsigned long code, unsigned long position)
 }
 
 /* Get position list for <code>. */
-GT_Array* pos_get(Pos *pos, unsigned long code)
+GtArray* pos_get(Pos *pos, unsigned long code)
 {
   assert(pos && pos->mapping);
   return array_safe_deref(ul_array_hashmap_get(pos->mapping, code));
@@ -245,7 +245,7 @@ void blast_env_delete(BlastEnv *be)
 void blast_env_show(const BlastEnv *be)
 {
   unsigned long i, code;
-  GT_Array *position_list;
+  GtArray *position_list;
   char *qgram;
   assert(be);
   if (!be->pos)

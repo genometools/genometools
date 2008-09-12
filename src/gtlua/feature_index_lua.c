@@ -81,7 +81,7 @@ static int feature_index_lua_add_genome_feature(lua_State *L)
   return 0;
 }
 
-static void push_features_as_table(lua_State *L, GT_Array *features)
+static void push_features_as_table(lua_State *L, GtArray *features)
 {
   unsigned long i;
   if (features && gt_array_size(features)) {
@@ -102,7 +102,7 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
 {
   GT_FeatureIndex **feature_index;
   const char *seqid;
-  GT_Array *features;
+  GtArray *features;
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
   features = gt_feature_index_get_features_for_seqid(*feature_index, seqid);
@@ -116,7 +116,7 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
   GT_FeatureIndex **feature_index;
   const char *seqid;
   GT_Range *range;
-  GT_Array *features;
+  GtArray *features;
   int had_err;
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);

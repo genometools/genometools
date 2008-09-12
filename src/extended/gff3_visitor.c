@@ -88,7 +88,7 @@ static int gff3_visitor_comment(GenomeVisitor *gv, GT_Comment *c,
 static int add_id(GT_GenomeNode *gn, void *data, GT_UNUSED GT_Error *err)
 {
   Add_id_info *info = (Add_id_info*) data;
-  GT_Array *parent_features = NULL;
+  GtArray *parent_features = NULL;
   gt_error_check(err);
   assert(gn && info && info->gt_genome_feature_to_id_array && info->id);
   parent_features = hashmap_get(info->gt_genome_feature_to_id_array, gn);
@@ -120,7 +120,7 @@ static int gff3_show_genome_feature(GT_GenomeNode *gn, void *data,
   bool part_shown = false;
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   GT_GenomeFeature *gf = (GT_GenomeFeature*) gn;
-  GT_Array *parent_features = NULL;
+  GtArray *parent_features = NULL;
   ShowAttributeInfo info;
   unsigned long i;
   GT_Str *id;

@@ -24,7 +24,7 @@ struct SortStream
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   unsigned long idx;
-  GT_Array *trees;
+  GtArray *trees;
   bool sorted;
 };
 

@@ -177,7 +177,7 @@ int gt_sketch(int argc, const char **argv, GT_Error *err)
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
   GT_Range qry_range, sequence_region_range;
-  GT_Array *results = NULL;
+  GtArray *results = NULL;
   GT_Style *sty = NULL;
   GT_Str *gt_style_file = NULL;
   GT_Str *prog;
