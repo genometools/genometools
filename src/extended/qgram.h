@@ -41,6 +41,6 @@ void          qgram_compute(GtArray *qgrams, const char *encoded_seq,
 /* Decode <code> (which encodes a qgram of length <q> over alphabet <alpha) and
    store the resulting string in <qgram>. */
 void          qgram_decode(char *qgram, unsigned long code, unsigned long q,
-                           GT_Alpha *alpha);
+                           GtAlpha *alpha);
 
 #endif

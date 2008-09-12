@@ -31,25 +31,25 @@
 #define ALPHA_GUESS_MAX_LENGTH       5000
 #define ALPHA_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZ*-"
 
-struct GT_Alpha {
+struct GtAlpha {
   unsigned char code_to_character_map[UCHAR_MAX];
   unsigned int character_to_code_map[UCHAR_MAX],
                map_size,
                reference_count;
 };
 
-GT_Alpha* gt_alpha_new(void)
+GtAlpha* gt_alpha_new(void)
 {
-  GT_Alpha *a = gt_calloc(1, sizeof (GT_Alpha));
+  GtAlpha *a = gt_calloc(1, sizeof (GtAlpha));
   memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
   memset(a->character_to_code_map, UNDEF_UCHAR, UCHAR_MAX);
   return a;
 }
 
-GT_Alpha* gt_alpha_new_dna(void)
+GtAlpha* gt_alpha_new_dna(void)
 {
   unsigned int i;
-  GT_Alpha *a = gt_alpha_new();
+  GtAlpha *a = gt_alpha_new();
 
   /* fill the code to character map */
   a->code_to_character_map[0] = 'a';
@@ -73,10 +73,10 @@ GT_Alpha* gt_alpha_new_dna(void)
   return a;
 }
 
-GT_Alpha* gt_alpha_new_protein(void)
+GtAlpha* gt_alpha_new_protein(void)
 {
   unsigned int i;
-  GT_Alpha *a = gt_alpha_new();
+  GtAlpha *a = gt_alpha_new();
 
   /* fill the code to character map */
   for (i = 0; PROTEIN_CHARACTERS_UPPERCASE[i] != '\0'; i++)
@@ -97,7 +97,7 @@ GT_Alpha* gt_alpha_new_protein(void)
   return a;
 }
 
-GT_Alpha* gt_alpha_guess(const char *seq, unsigned long seqlen)
+GtAlpha* gt_alpha_guess(const char *seq, unsigned long seqlen)
 {
   unsigned long i;
   assert(seq && seqlen);
@@ -108,14 +108,14 @@ GT_Alpha* gt_alpha_guess(const char *seq, unsigned long seqlen)
   return gt_alpha_new_dna();
 }
 
-GT_Alpha* gt_alpha_ref(GT_Alpha *a)
+GtAlpha* gt_alpha_ref(GtAlpha *a)
 {
   assert(a);
   a->reference_count++;
   return a;
 }
 
-void gt_alpha_add_mapping(GT_Alpha *a, const char *characters)
+void gt_alpha_add_mapping(GtAlpha *a, const char *characters)
 {
   size_t i, num_of_characters;
   assert(a && characters && a->map_size < UCHAR_MAX-1);
@@ -128,21 +128,21 @@ void gt_alpha_add_mapping(GT_Alpha *a, const char *characters)
   a->map_size++;
 }
 
-char gt_alpha_decode(const GT_Alpha *a, unsigned int c)
+char gt_alpha_decode(const GtAlpha *a, unsigned int c)
 {
   assert(a);
   assert(a->code_to_character_map[c] != UNDEF_UCHAR);
   return a->code_to_character_map[c];
 }
 
-unsigned int gt_alpha_encode(const GT_Alpha *a, char c)
+unsigned int gt_alpha_encode(const GtAlpha *a, char c)
 {
   assert(a);
   assert(a->character_to_code_map[(int) c] != UNDEF_UCHAR);
   return a->character_to_code_map[(int) c];
 }
 
-void gt_alpha_decode_seq(const GT_Alpha *a, char *out, char *in,
+void gt_alpha_decode_seq(const GtAlpha *a, char *out, char *in,
                          unsigned long length)
 {
   unsigned long i;
@@ -153,7 +153,7 @@ void gt_alpha_decode_seq(const GT_Alpha *a, char *out, char *in,
   }
 }
 
-void gt_alpha_encode_seq(const GT_Alpha *a, char *out, char *in,
+void gt_alpha_encode_seq(const GtAlpha *a, char *out, char *in,
                          unsigned long length)
 {
   unsigned long i;
@@ -164,15 +164,15 @@ void gt_alpha_encode_seq(const GT_Alpha *a, char *out, char *in,
   }
 }
 
-bool gt_alpha_char_is_valid(const GT_Alpha *a, char c)
+bool gt_alpha_char_is_valid(const GtAlpha *a, char c)
 {
   if (a->character_to_code_map[(int) c] == UNDEF_CHAR)
     return false;
   return true;
 }
 
-bool gt_alpha_is_compatible_with_alpha(const GT_Alpha *gt_alpha_a,
-                                            const GT_Alpha *gt_alpha_b)
+bool gt_alpha_is_compatible_with_alpha(const GtAlpha *gt_alpha_a,
+                                            const GtAlpha *gt_alpha_b)
 {
   assert(gt_alpha_a && gt_alpha_b);
   if (gt_alpha_a->map_size == gt_alpha_b->map_size)
@@ -180,13 +180,13 @@ bool gt_alpha_is_compatible_with_alpha(const GT_Alpha *gt_alpha_a,
   return false;
 }
 
-unsigned int gt_alpha_size(const GT_Alpha *a)
+unsigned int gt_alpha_size(const GtAlpha *a)
 {
   assert(a);
   return a->map_size;
 }
 
-void gt_alpha_delete(GT_Alpha *a)
+void gt_alpha_delete(GtAlpha *a)
 {
   if (!a) return;
   if (a->reference_count) { a->reference_count--; return; }

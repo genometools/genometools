@@ -594,7 +594,7 @@ int hmm_unit_test(GtError *err)
                                 "6435353336233121625364414432335163243633665562"
                                 "466662632666612355245242" };
   unsigned int *encoded_seq;
-  GT_Alpha *alpha;
+  GtAlpha *alpha;
   size_t i, j, len, size;
   HMM *fair_hmm, *loaded_hmm;
   int had_err = 0;

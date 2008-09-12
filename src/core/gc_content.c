@@ -18,14 +18,14 @@
 #include <assert.h>
 #include "core/gc_content.h"
 
-void gt_gc_content_show(const char *seq, unsigned long len, GT_Alpha *alpha)
+void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha)
 {
   unsigned long i,
                 gc = 0, /* number of G/C bases */
                 at = 0, /* number of A/T bases */
                 n  = 0; /* number of N   bases */
   unsigned int a_code, c_code, g_code, t_code, n_code, cc;
-  GT_Alpha *dna_alpha;
+  GtAlpha *dna_alpha;
   assert(seq && alpha);
   dna_alpha = gt_alpha_new_dna();
   assert(gt_alpha_is_compatible_with_alpha(alpha, dna_alpha));

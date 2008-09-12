@@ -24,10 +24,10 @@ typedef struct Seq Seq;
 
 /* Stores <seq> pointer. */
 Seq*          seq_new(const char *seq, unsigned long seqlen,
-                      GT_Alpha *seqalpha);
+                      GtAlpha *seqalpha);
 /* Takes ownership of <seq>. */
 Seq*          seq_new_own(char *seq, unsigned long seqlen,
-                          GT_Alpha *seqalpha);
+                          GtAlpha *seqalpha);
 /* Stores <desc> pointer. */
 void            seq_set_description(Seq*, const char *desc);
 /* Takes ownership of <desc>. */
@@ -36,7 +36,7 @@ void            seq_set_description(Seq*, const char *desc);
 const char*     seq_get_description(Seq*);
 const char*     seq_get_orig(const Seq*); /* not '\0' terminated */
 const char*     seq_get_encoded(Seq*);
-const GT_Alpha* seq_get_alpha(const Seq*);
+const GtAlpha* seq_get_alpha(const Seq*);
 unsigned long   seq_length(const Seq*);
 void            seq_delete(Seq*);
 

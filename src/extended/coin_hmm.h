@@ -35,6 +35,6 @@ typedef enum {
 
 HMM*   coin_hmm_loaded(void);
 HMM*   coin_hmm_fair(void);
-GT_Alpha* coin_hmm_alpha(void);
+GtAlpha* coin_hmm_alpha(void);
 
 #endif

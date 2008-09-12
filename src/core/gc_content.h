@@ -22,6 +22,6 @@
 
 /* show the GC-content for sequence <seq> with length <len> on stdout. <alpha>
    has to be compatible with a DNA alphabet */
-void gt_gc_content_show(const char *seq, unsigned long len, GT_Alpha *alpha);
+void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha);
 
 #endif

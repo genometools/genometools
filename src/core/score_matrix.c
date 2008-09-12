@@ -26,12 +26,12 @@
 #include "core/xansi.h"
 
 struct GT_ScoreMatrix {
-  GT_Alpha *alpha;
+  GtAlpha *alpha;
   unsigned int dimension;
   int **scores;
 };
 
-GT_ScoreMatrix* gt_score_matrix_new(GT_Alpha *alpha)
+GT_ScoreMatrix* gt_score_matrix_new(GtAlpha *alpha)
 {
   GT_ScoreMatrix *sm;
   assert(alpha);
@@ -197,7 +197,7 @@ static int parse_score_matrix(GT_ScoreMatrix *sm, const char *path,
 GT_ScoreMatrix* gt_score_matrix_new_read_protein(const char *path,
                                                  GtError *err)
 {
-  GT_Alpha *protein_alpha;
+  GtAlpha *protein_alpha;
   GT_ScoreMatrix *sm;
   int had_err;
 

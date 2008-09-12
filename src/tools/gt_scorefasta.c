@@ -62,7 +62,7 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
   ScorefastaArguments *arguments = tool_arguments;
   unsigned long ulen, wlen;
   char *u, *w;
-  GT_Alpha *alpha;
+  GtAlpha *alpha;
 
   gt_error_check(err);
   assert(arguments);

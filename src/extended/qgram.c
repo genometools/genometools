@@ -68,7 +68,7 @@ void qgram_compute(GtArray *qgrams, const char *encoded_seq,
 }
 
 void qgram_decode(char *qgram, unsigned long code, unsigned long q,
-                  GT_Alpha *alpha)
+                  GtAlpha *alpha)
 {
   unsigned int alphabet_size, c = 0;
   unsigned long i;

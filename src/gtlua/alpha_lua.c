@@ -22,13 +22,13 @@
 
 #define ALPHA_METATABLE  "GenomeTools.alpha"
 #define check_alpha(L, POS) \
-        (GT_Alpha**) luaL_checkudata(L, POS, ALPHA_METATABLE)
+        (GtAlpha**) luaL_checkudata(L, POS, ALPHA_METATABLE)
 
 static int alpha_lua_new_protein(lua_State *L)
 {
-  GT_Alpha **alpha;
+  GtAlpha **alpha;
   assert(L);
-  alpha = lua_newuserdata(L, sizeof (GT_Alpha*));
+  alpha = lua_newuserdata(L, sizeof (GtAlpha*));
   assert(alpha);
   *alpha = gt_alpha_new_protein();
   assert(*alpha);
@@ -39,7 +39,7 @@ static int alpha_lua_new_protein(lua_State *L)
 
 static int alpha_lua_decode(lua_State *L)
 {
-  GT_Alpha **alpha;
+  GtAlpha **alpha;
   unsigned int code;
   char character;
   alpha = check_alpha(L, 1);
@@ -53,7 +53,7 @@ static int alpha_lua_decode(lua_State *L)
 
 static int alpha_lua_size(lua_State *L)
 {
-  GT_Alpha **alpha;
+  GtAlpha **alpha;
   unsigned int size;
   alpha = check_alpha(L, 1);
   size = gt_alpha_size(*alpha);
@@ -63,7 +63,7 @@ static int alpha_lua_size(lua_State *L)
 
 static int alpha_lua_delete(lua_State *L)
 {
-  GT_Alpha **alpha;
+  GtAlpha **alpha;
   alpha = check_alpha(L, 1);
   gt_alpha_delete(*alpha);
   return 0;

@@ -22,26 +22,26 @@
 #include <stdio.h>
 
 /* the alphabet class */
-typedef struct GT_Alpha GT_Alpha; /* XXX: GT_Alpha -> GT_Alphabet */
+typedef struct GtAlpha GtAlpha; /* XXX: GtAlpha -> GtAlphabet */
 
-GT_Alpha*    gt_alpha_new(void);
-GT_Alpha*    gt_alpha_new_dna(void);
-GT_Alpha*    gt_alpha_new_protein(void);
-GT_Alpha*    gt_alpha_guess(const char *seq, unsigned long seqlen);
-GT_Alpha*    gt_alpha_ref(GT_Alpha*);
+GtAlpha*    gt_alpha_new(void);
+GtAlpha*    gt_alpha_new_dna(void);
+GtAlpha*    gt_alpha_new_protein(void);
+GtAlpha*    gt_alpha_guess(const char *seq, unsigned long seqlen);
+GtAlpha*    gt_alpha_ref(GtAlpha*);
 /* add the mapping of all given characters to the alphabet, the first
    character is the result of subsequent gt_alpha_decode() calls  */
-void         gt_alpha_add_mapping(GT_Alpha*, const char *characters);
-char         gt_alpha_decode(const GT_Alpha*, unsigned int);
-unsigned int gt_alpha_encode(const GT_Alpha*, char);
-void         gt_alpha_decode_seq(const GT_Alpha*, char *out, char *in,
+void         gt_alpha_add_mapping(GtAlpha*, const char *characters);
+char         gt_alpha_decode(const GtAlpha*, unsigned int);
+unsigned int gt_alpha_encode(const GtAlpha*, char);
+void         gt_alpha_decode_seq(const GtAlpha*, char *out, char *in,
                                  unsigned long length); /* in can be == out */
-void         gt_alpha_encode_seq(const GT_Alpha*, char *out, char *in,
+void         gt_alpha_encode_seq(const GtAlpha*, char *out, char *in,
                                  unsigned long length); /* in can be == out */
-bool         gt_alpha_char_is_valid(const GT_Alpha*, char);
-bool         gt_alpha_is_compatible_with_alpha(const GT_Alpha*,
-                                               const GT_Alpha*);
-unsigned int gt_alpha_size(const GT_Alpha*);
-void         gt_alpha_delete(GT_Alpha*);
+bool         gt_alpha_char_is_valid(const GtAlpha*, char);
+bool         gt_alpha_is_compatible_with_alpha(const GtAlpha*,
+                                               const GtAlpha*);
+unsigned int gt_alpha_size(const GtAlpha*);
+void         gt_alpha_delete(GtAlpha*);
 
 #endif

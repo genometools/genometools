@@ -55,7 +55,7 @@ struct GT_Bioseq {
   char *raw_sequence;
   size_t raw_sequence_length,
          allocated;
-  GT_Alpha *alpha;
+  GtAlpha *alpha;
   GT_BioseqFingerprints *fingerprints;
 };
 
@@ -522,7 +522,7 @@ static void determine_gt_alpha_if_necessary(GT_Bioseq *bs)
   }
 }
 
-GT_Alpha* gt_bioseq_get_alpha(GT_Bioseq *bs)
+GtAlpha* gt_bioseq_get_alpha(GT_Bioseq *bs)
 {
   assert(bs);
   determine_gt_alpha_if_necessary(bs);
@@ -622,7 +622,7 @@ void gt_bioseq_show_sequence_as_fasta(GT_Bioseq *bs, unsigned long seqnum,
 
 void gt_bioseq_show_gc_content(GT_Bioseq *bs)
 {
-  GT_Alpha *dna_alpha;
+  GtAlpha *dna_alpha;
   assert(bs);
   determine_gt_alpha_if_necessary(bs);
   dna_alpha = gt_alpha_new_dna();

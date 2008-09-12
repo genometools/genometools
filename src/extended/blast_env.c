@@ -138,7 +138,7 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
 */
 static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
                               char *current_word, long *max_cumul_scores,
-                              GT_Alpha *alpha, unsigned long q,
+                              GtAlpha *alpha, unsigned long q,
                               unsigned long q_rest, long k, long current_score,
                               unsigned long position,
                               const GT_ScoreMatrix *score_matrix)
@@ -176,7 +176,7 @@ static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
   <wlen>.
 */
 static void compute_env(GtBittab *V, Pos *pos, const char *w,
-                        unsigned long wlen, GT_Alpha *alpha, unsigned long q,
+                        unsigned long wlen, GtAlpha *alpha, unsigned long q,
                         long k, const GT_ScoreMatrix *score_matrix)
 {
   long *max_pos_scores, *max_cumul_scores;
@@ -207,14 +207,14 @@ static void compute_env(GtBittab *V, Pos *pos, const char *w,
 
 /* the actual class implementation */
 struct BlastEnv {
-  GT_Alpha *alpha;
+  GtAlpha *alpha;
   unsigned long q;
   GtBittab *V; /* The vector V of r^q bits. */
   Pos *pos;  /* The set of position lists. If a bit in <V> is set then <pos>
                 contains the corresponding position list for that code. */
 };
 
-BlastEnv* blast_env_new(const char *w, unsigned long wlen, GT_Alpha *alpha,
+BlastEnv* blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
                         unsigned long q, long k,
                         const GT_ScoreMatrix *score_matrix)
 {

@@ -80,9 +80,9 @@ HMM* dice_hmm_fair(void)
   return hmm;
 }
 
-GT_Alpha* dice_hmm_alpha(void)
+GtAlpha* dice_hmm_alpha(void)
 {
-  GT_Alpha *a = gt_alpha_new();
+  GtAlpha *a = gt_alpha_new();
   gt_alpha_add_mapping(a, "1");
   gt_alpha_add_mapping(a, "2");
   gt_alpha_add_mapping(a, "3");

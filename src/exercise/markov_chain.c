@@ -27,7 +27,7 @@
 #define MINUSINFINITY   -99999.0
 
 struct MarkovChain {
-  GT_Alpha *alpha;
+  GtAlpha *alpha;
   unsigned long num_of_states;
   double **transition_prob; /* log values */
 };

@@ -26,10 +26,10 @@ struct Seq {
   unsigned long seqlen;
   bool own_seq,
        own_description;
-  GT_Alpha *seqalpha;
+  GtAlpha *seqalpha;
 };
 
-Seq* seq_new(const char *seq, unsigned long seqlen, GT_Alpha *seqalpha)
+Seq* seq_new(const char *seq, unsigned long seqlen, GtAlpha *seqalpha)
 {
   Seq *s;
   assert(seq && seqalpha);
@@ -40,7 +40,7 @@ Seq* seq_new(const char *seq, unsigned long seqlen, GT_Alpha *seqalpha)
   return s;
 }
 
-Seq* seq_new_own(char* seq, unsigned long seqlen, GT_Alpha *seqalpha)
+Seq* seq_new_own(char* seq, unsigned long seqlen, GtAlpha *seqalpha)
 {
   Seq *s = seq_new(seq, seqlen, seqalpha);
   s->own_seq = true;
@@ -85,7 +85,7 @@ const char* seq_get_encoded(Seq *s)
   return s->encoded_seq;
 }
 
-const GT_Alpha* seq_get_alpha(const Seq *s)
+const GtAlpha* seq_get_alpha(const Seq *s)
 {
   assert(s);
   return s->seqalpha;

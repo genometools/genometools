@@ -29,7 +29,7 @@ typedef struct BlastEnv BlastEnv;
    scores.
    Returns a new BlastEnv object.
 */
-BlastEnv* blast_env_new(const char *w, unsigned long wlen, GT_Alpha *alpha,
+BlastEnv* blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
                         unsigned long q, long k,
                         const GT_ScoreMatrix *score_matrix);
 

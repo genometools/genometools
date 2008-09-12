@@ -62,9 +62,9 @@ HMM* coin_hmm_fair(void)
   return hmm;
 }
 
-GT_Alpha* coin_hmm_alpha(void)
+GtAlpha* coin_hmm_alpha(void)
 {
-  GT_Alpha *a = gt_alpha_new();
+  GtAlpha *a = gt_alpha_new();
   gt_alpha_add_mapping(a, "Hh");
   gt_alpha_add_mapping(a, "Tt");
   assert(gt_alpha_size(a) == 2);

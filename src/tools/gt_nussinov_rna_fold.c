@@ -141,7 +141,7 @@ static void traceback(unsigned long i, unsigned long j, int **E,
 static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
                               unsigned int l_min, unsigned int verbose,
                               GT_ScoreMatrix *energy_function,
-                              GT_Alpha *dna_alpha, FILE *fp)
+                              GtAlpha *dna_alpha, FILE *fp)
 {
   unsigned long i;
   int **E;
@@ -209,7 +209,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GtError *err)
   unsigned int l_min = 0;
   char *rna_sequence = NULL;
   int parsed_args, rval, had_err = 0;
-  GT_Alpha *dna_alpha;
+  GtAlpha *dna_alpha;
   GT_ScoreMatrix *energy_function; /* alpha */
   gt_error_check(err);
 

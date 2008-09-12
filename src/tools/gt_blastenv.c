@@ -68,7 +68,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   BlastEnv *blast_env = NULL;
   unsigned long wlen;
   char *w = NULL;
-  GT_Alpha *alpha = NULL;
+  GtAlpha *alpha = NULL;
   int had_err = 0;
 
   gt_error_check(err);
