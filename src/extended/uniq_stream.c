@@ -37,8 +37,8 @@ static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
   bool equal = false;
   GtGenomeNodeIterator *gni_a, *gni_b;
   GtFeatureNode *gf_a, *gf_b;
-  gf_a = gt_genome_node_cast(gt_feature_node_class(), first_node);
-  gf_b = gt_genome_node_cast(gt_feature_node_class(), second_node);
+  gf_a = gt_feature_node_try_cast(first_node);
+  gf_b = gt_feature_node_try_cast(second_node);
   if (gf_a && gf_b) {
     gni_a = gt_genome_node_iterator_new(first_node);
     gni_b = gt_genome_node_iterator_new(second_node);
