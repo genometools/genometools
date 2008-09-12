@@ -983,7 +983,7 @@ static void set_source(GtGenomeNode *genome_feature, const char *source,
 
 static int parse_regular_gff3_line(GT_GFF3Parser *parser,
                                    GtQueue *genome_nodes,
-                                   GT_CstrTable *used_types, char *line,
+                                   GtCstrTable *used_types, char *line,
                                    size_t line_length, GtStr *filenamestr,
                                    unsigned int line_number, GtError *err)
 {
@@ -1345,7 +1345,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
 
 int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
                                       GtQueue *genome_nodes,
-                                      GT_CstrTable *used_types,
+                                      GtCstrTable *used_types,
                                       GtStr *filenamestr,
                                       unsigned long long *line_number,
                                       GtGenFile *fpin, GtError *err)

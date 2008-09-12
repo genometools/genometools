@@ -19,7 +19,7 @@
 #include "core/cstr_table.h"
 #include "core/symbol.h"
 
-static GT_CstrTable *symbols = NULL;
+static GtCstrTable *symbols = NULL;
 
 const char* gt_symbol(const char *cstr)
 {

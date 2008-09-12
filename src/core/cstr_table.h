@@ -22,18 +22,18 @@
 #include "core/strarray.h"
 
 /* A table of C-strings. */
-typedef struct GT_CstrTable GT_CstrTable;
+typedef struct GtCstrTable GtCstrTable;
 
-GT_CstrTable* gt_cstr_table_new();
-void          gt_cstr_table_delete(GT_CstrTable*);
+GtCstrTable* gt_cstr_table_new();
+void          gt_cstr_table_delete(GtCstrTable*);
 /* Add <cstr> to <table>. */
-void          gt_cstr_table_add(GT_CstrTable *table, const char *cstr);
+void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
 /* If a C-string equal to <cstr> is contained in <table>, it is returned.
    Otherwise NULL is returned. */
-const char*   gt_cstr_table_get(const GT_CstrTable *table, const char *cstr);
+const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
-GtStrArray*  gt_cstr_table_get_all(const GT_CstrTable *table);
+GtStrArray*  gt_cstr_table_get_all(const GtCstrTable *table);
 int           gt_cstr_table_unit_test(GtError*);
 
 #endif

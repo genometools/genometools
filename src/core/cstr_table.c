@@ -21,7 +21,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 
-struct GT_CstrTable {
+struct GtCstrTable {
   Hashtable *strings;
 };
 
@@ -30,24 +30,24 @@ static void free_gt_cstr_table_entry(void *cstr_entry)
   gt_free(*(char**) cstr_entry);
 }
 
-GT_CstrTable* gt_cstr_table_new()
+GtCstrTable* gt_cstr_table_new()
 {
   HashElemInfo cstr_table = {
     ht_cstr_elem_hash, { free_gt_cstr_table_entry }, sizeof (char*),
     ht_cstr_elem_cmp, NULL, NULL };
-  GT_CstrTable *table = gt_malloc(sizeof *table);
+  GtCstrTable *table = gt_malloc(sizeof *table);
   table->strings = hashtable_new(cstr_table);
   return table;
 }
 
-void gt_cstr_table_delete(GT_CstrTable *table)
+void gt_cstr_table_delete(GtCstrTable *table)
 {
   if (!table) return;
   hashtable_delete(table->strings);
   gt_free(table);
 }
 
-void gt_cstr_table_add(GT_CstrTable *table, const char *cstr)
+void gt_cstr_table_add(GtCstrTable *table, const char *cstr)
 {
   char *dup;
   int rval;
@@ -58,7 +58,7 @@ void gt_cstr_table_add(GT_CstrTable *table, const char *cstr)
   assert(rval == 1);
 }
 
-const char* gt_cstr_table_get(const GT_CstrTable *table, const char *cstr)
+const char* gt_cstr_table_get(const GtCstrTable *table, const char *cstr)
 {
   const char **entry;
   assert(table && cstr);
@@ -76,7 +76,7 @@ static enum iterator_op store_type(void *elem, void *data,
   return CONTINUE_ITERATION;
 }
 
-GtStrArray* gt_cstr_table_get_all(const GT_CstrTable *table)
+GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
 {
   int had_err;
   GtStrArray *cstrs;
@@ -90,7 +90,7 @@ GtStrArray* gt_cstr_table_get_all(const GT_CstrTable *table)
 
 int gt_cstr_table_unit_test(GtError *err)
 {
-  GT_CstrTable *table;
+  GtCstrTable *table;
   int had_err = 0;
   gt_error_check(err);
   table = gt_cstr_table_new();

@@ -53,7 +53,7 @@ int            gt_gff3_parser_parse_target_attributes(const char *values,
 int            gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser*,
                                                  int *status_code,
                                                  GtQueue *genome_nodes,
-                                                 GT_CstrTable *used_types,
+                                                 GtCstrTable *used_types,
                                                  GtStr *filenamestr,
                                                  unsigned long long
                                                  *line_number,

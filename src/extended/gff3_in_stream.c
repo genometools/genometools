@@ -40,7 +40,7 @@ struct GFF3InStream
   unsigned long long line_number;
   GtQueue *genome_node_buffer;
   GT_GFF3Parser *gff3_parser;
-  GT_CstrTable *used_types;
+  GtCstrTable *used_types;
 };
 
 #define gff3_in_stream_cast(GS)\

@@ -25,7 +25,7 @@
 
 struct GT_TypeCheckerOBO {
   const GT_TypeChecker parent_instance;
-  GT_CstrTable *gt_genome_feature_types;
+  GtCstrTable *gt_genome_feature_types;
 };
 
 #define gt_type_checker_obo_cast(FTF)\
