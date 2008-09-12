@@ -21,6 +21,6 @@
 #include "core/error.h"
 
 int parseargsandcallsuffixerator(bool doesa,int argc,
-                                 const char **argv,GT_Error *err);
+                                 const char **argv,GtError *err);
 
 #endif

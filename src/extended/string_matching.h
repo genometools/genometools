@@ -44,6 +44,6 @@ void string_matching_brute_force(const char *s, unsigned long n,
                                  const char *p, unsigned long m,
                                  ProcessMatch, void *data);
 
-int  string_matching_unit_test(GT_Error*);
+int  string_matching_unit_test(GtError*);
 
 #endif

@@ -19,7 +19,7 @@
 #define SEARCHTSDANDMOTIF_H
 
 int findcorrectboundaries(LTRharvestoptions *lo, LTRboundaries *boundaries,
-    Sequentialsuffixarrayreader *ssar, const Seqpos *markpos, GT_Error *err);
+    Sequentialsuffixarrayreader *ssar, const Seqpos *markpos, GtError *err);
 
 int searchformotifonlyinside(LTRharvestoptions *lo,
                              LTRboundaries *boundaries,
@@ -27,6 +27,6 @@ int searchformotifonlyinside(LTRharvestoptions *lo,
                              const Seqpos *markpos,
                              unsigned int *motifmismatchesleftLTR,
                              unsigned int *motifmismatchesrightLTR,
-                             GT_Error *err);
+                             GtError *err);
 
 #endif

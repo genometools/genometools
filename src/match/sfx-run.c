@@ -73,7 +73,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int numofchars,
                            const Encodedsequence *encseq,
                            const Suffixeratoroptions *so,
-                           GT_Error *err)
+                           GtError *err)
 {
   bool haserr = false;
 
@@ -115,7 +115,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
                        const Seqpos *suftab,
                        Readmode readmode,
                        Seqpos numberofsuffixes,
-                       GT_Error *err)
+                       GtError *err)
 {
   bool haserr = false;
 
@@ -196,7 +196,7 @@ static int suffixeratorwithoutput(
                  const Sfxstrategy *sfxstrategy,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
-                 GT_Error *err)
+                 GtError *err)
 {
   const Seqpos *suftabptr;
   Seqpos numberofsuffixes;
@@ -291,7 +291,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                                 unsigned int numofchars,
                                 Seqpos totallength,
                                 Verboseinfo *verboseinfo,
-                                GT_Error *err)
+                                GtError *err)
 {
   bool haserr = false;
 
@@ -360,7 +360,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                                        unsigned int prefixlength,
                                        Sfxseqinfo *sfxseqinfo,
                                        const Sfxstrategy *sfxstrategy,
-                                       GT_Error *err)
+                                       GtError *err)
 {
   sfxInterface *si;
   BWTSeq *bwtSeq;
@@ -418,7 +418,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
 static int runsuffixerator(bool doesa,
                            const Suffixeratoroptions *so,
                            Verboseinfo *verboseinfo,
-                           GT_Error *err)
+                           GtError *err)
 {
   Measuretime *mtime = NULL;
   Outfileinfo outfileinfo;
@@ -625,7 +625,7 @@ static int runsuffixerator(bool doesa,
 }
 
 int parseargsandcallsuffixerator(bool doesa,int argc,
-                                 const char **argv,GT_Error *err)
+                                 const char **argv,GtError *err)
 {
   Suffixeratoroptions so;
   int retval;

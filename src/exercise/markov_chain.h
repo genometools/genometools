@@ -34,6 +34,6 @@ double       markov_chain_get_transition_prob(const MarkovChain*,
 bool         markov_chain_is_valid(const MarkovChain*);
 int          markov_chain_compute_prob(const MarkovChain*, double *prob,
                                        const char *sequence,
-                                       unsigned long seqlen, GT_Error*);
+                                       unsigned long seqlen, GtError*);
 
 #endif

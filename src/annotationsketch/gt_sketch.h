@@ -21,6 +21,6 @@
 #define GT_SKETCH_H
 
 /* the AnnotationSketch tool */
-int gt_sketch(int argc, const char **argv, GT_Error*);
+int gt_sketch(int argc, const char **argv, GtError*);
 
 #endif

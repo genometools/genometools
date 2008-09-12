@@ -49,7 +49,7 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
 int flushfmindex2file(FILE *fp,
                       Fmindex *fmindex,
                       bool storeindexpos,
-                      GT_Error *err)
+                      GtError *err)
 {
   Fmindexwithoptions fmwithoptions;
 
@@ -63,7 +63,7 @@ int flushfmindex2file(FILE *fp,
 int fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
                           const GtStr *tmpfilename,
-                          GT_Error *err)
+                          GtError *err)
 {
   Fmindexwithoptions fmwithoptions;
 

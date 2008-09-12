@@ -199,7 +199,7 @@ typedef struct
   Hashtable *queryhash,
    *hithash,
    *resulthits;
-  GT_Error *err;
+  GtError *err;
   int had_err;
   unsigned short def_flag,
     hit_flag,
@@ -224,9 +224,9 @@ DECLARE_SAFE_DEREF(unsigned long *, ulp)
 
 /* Funktion, mit der der Metagenomethreader gestartet wird
    Parameter: Anzahl der Kommandozeilenargumente, Zeiger auf die
-              Kommandozeilenargumente, GT_Error-Variable
+              Kommandozeilenargumente, GtError-Variable
    Returnwert: Fehlercode */
-int metagenomethreader(int argc, const char **argv, GT_Error *);
+int metagenomethreader(int argc, const char **argv, GtError *);
 
 /* Funktion zur Ueberpruefung auf ein Stop-Codon
    Parameter:  Zeiger auf ein Triplet von Zeichen
@@ -238,15 +238,15 @@ short check_stopcodon(char *);
    Parameter:  Zeiger auf StringArray (Sequenzen der Treffer zu einer
                Hit-GI-Nr), String-Zeiger auf die Hit-GI-Nr, String-Zeiger
                auf Hit-From und String-Zeiger auf den Hit-To String,
-               GT_Error-Variable
+               GtError-Variable
    Returnwert: void */
-int mg_curl(ParseStruct *, unsigned long, GT_Error *);
+int mg_curl(ParseStruct *, unsigned long, GtError *);
 
 /* Funktion zur Berechnung der Combined-Scores
    Parameter: Zeiger auf die Parsestruct; Anzahl der Hits zur betrachteten
-              Hit-GI-Nr; GT_Error-Variable
+              Hit-GI-Nr; GtError-Variable
    Returnwert: void */
-int mg_combinedscore(ParseStruct *, unsigned long, GT_Error *);
+int mg_combinedscore(ParseStruct *, unsigned long, GtError *);
 
 /* Funktion zur Ausgabe der berechneten Ergebnisse
    Parameter:  Zeiger auf ParseStruct-Struktur, CombinedScore-Matrix,
@@ -255,7 +255,7 @@ int mg_combinedscore(ParseStruct *, unsigned long, GT_Error *);
    Returnwert: void */
 void mg_outputwriter(ParseStruct *,
                      CombinedScoreMatrixEntry **,
-                     HitInformation *, RegionStruct **, char, GT_Error *);
+                     HitInformation *, RegionStruct **, char, GtError *);
 
 /* Funktion zur Bestimmung der zu einem Lesereahmen gehoerigen Matrix-Zeile
    Parameter: aktueller Leserahmen
@@ -268,8 +268,8 @@ short get_matrix_row(long);
 short get_current_frame(long);
 
 /* Funktion zur Berechnung des reversen Komplements
-   Parameter: Zeiger auf eine Seq., Seq-Laenge, GT_Error-Variable
+   Parameter: Zeiger auf eine Seq., Seq-Laenge, GtError-Variable
    Returnwert: had_err */
-int mg_reverse_complement(char *, unsigned long, GT_Error *);
+int mg_reverse_complement(char *, unsigned long, GtError *);
 
 #endif

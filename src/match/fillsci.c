@@ -143,7 +143,7 @@ int fasta2sequencekeyvalues(
         bool withdestab,
         unsigned long *characterdistribution,
         Verboseinfo *verboseinfo,
-        GT_Error *err)
+        GtError *err)
 {
   GT_FastaBuffer *fb = NULL;
   Uchar charcode;

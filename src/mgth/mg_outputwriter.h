@@ -28,5 +28,5 @@
    Returnwert: void */
 void mg_outputwriter(ParseStruct *,
                      CombinedScoreMatrixEntry **,
-                     HitInformation *, RegionStruct **, char, GT_Error *);
+                     HitInformation *, RegionStruct **, char, GtError *);
 #endif

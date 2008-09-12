@@ -24,6 +24,6 @@
 #include "ltrharvest-opt.h"
 
 int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, GT_Error *err);
+                  const Seqpos *markpos, GtError *err);
 
 #endif

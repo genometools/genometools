@@ -24,7 +24,7 @@
 #include "tools/gt_coin.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GT_Error *err)
+                            GtError *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -38,7 +38,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_coin(int argc, const char **argv, GT_Error *err)
+int gt_coin(int argc, const char **argv, GtError *err)
 {
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
   int parsed_args, had_err = 0;

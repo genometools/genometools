@@ -50,9 +50,9 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            unsigned int minlength,
                            int (*processmaxmatch)(void *,unsigned long,
                                                   Seqpos,uint64_t,
-                                                  unsigned long,GT_Error *),
+                                                  unsigned long,GtError *),
                            void *processmaxmatchinfo,
-                           GT_Error *err);
+                           GtError *err);
 
 int callenumquerymatches(const GtStr *indexname,
                          const GtStrArray *queryfiles,
@@ -60,10 +60,10 @@ int callenumquerymatches(const GtStr *indexname,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                 uint64_t,unsigned long,
-                                                GT_Error *),
+                                                GtError *),
                          void *processmaxmatchinfo,
                          Verboseinfo *verboseinfo,
-                         GT_Error *err);
+                         GtError *err);
 
 int sarrquerysubstringmatch(const Uchar *dbseq,
                             Seqpos dblen,
@@ -73,10 +73,10 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             const Alphabet *alpha,
                             int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                    uint64_t,unsigned long,
-                                                   GT_Error *),
+                                                   GtError *),
                             void *processmaxmatchinfo,
                             Verboseinfo *verboseinfo,
-                            GT_Error *err);
+                            GtError *err);
 
 Seqpos countmmsearchiterator(const MMsearchiterator *mmsi);
 

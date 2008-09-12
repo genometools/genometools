@@ -83,7 +83,7 @@ const char *EISIntegrityCheckResultStrings[] =
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
-                   Verboseinfo *verbosity, GT_Error *err)
+                   Verboseinfo *verbosity, GtError *err)
 {
   FILE *bwtFP;
   Seqpos pos = 0;

@@ -40,7 +40,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const Encodedsequence *encseq,
                                             unsigned int alphasize,
-                                            GT_Error *err)
+                                            GtError *err)
 {
   Enumpatterniterator *epi = NULL;
   unsigned long i;

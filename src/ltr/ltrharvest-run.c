@@ -37,7 +37,7 @@
 #include "match/esa-maxpairs.pr"
 #include "match/pos2seqnum.pr"
 
-static int runltrharvest(LTRharvestoptions *lo, GT_Error *err)
+static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 {
   Sequentialsuffixarrayreader *ssar; /* suffix array */
   Seqpos *markpos = NULL;
@@ -185,7 +185,7 @@ static int runltrharvest(LTRharvestoptions *lo, GT_Error *err)
   return had_err ? -1 : 0;
 }
 
-int parseargsandcallltrharvest(int argc,const char *argv[],GT_Error *err)
+int parseargsandcallltrharvest(int argc,const char *argv[],GtError *err)
 {
   LTRharvestoptions lo;
   int had_err = 0;

@@ -54,6 +54,6 @@ int               gt_interval_tree_traverse(GT_IntervalTree *it,
                                             GT_IntervalTreeIteratorFunc func,
                                             void *data);
 void              gt_interval_tree_delete(GT_IntervalTree*);
-int               gt_interval_tree_unit_test(GT_Error*);
+int               gt_interval_tree_unit_test(GtError*);
 
 #endif

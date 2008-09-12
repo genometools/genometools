@@ -24,7 +24,7 @@
 
 static OPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
                             int *parsed_args, int argc,
-                            const char **argv, GT_Error *err)
+                            const char **argv, GtError *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -52,7 +52,7 @@ static OPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
   return oprval;
 }
 
-int gt_mergeesa(int argc, const char **argv, GT_Error *err)
+int gt_mergeesa(int argc, const char **argv, GtError *err)
 {
   GtStr *storeindex;
   GtStrArray *indexnametab;

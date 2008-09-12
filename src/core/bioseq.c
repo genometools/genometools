@@ -173,7 +173,7 @@ typedef struct {
 } Construct_gt_bioseq_files_info;
 
 static int proc_description(const char *description, unsigned long length,
-                            void *data, GT_UNUSED GT_Error *err)
+                            void *data, GT_UNUSED GtError *err)
 {
   Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
   char *description_cstr;
@@ -191,7 +191,7 @@ static int proc_description(const char *description, unsigned long length,
 }
 
 static int proc_sequence_part(const char *seqpart, unsigned long length,
-                              void *data, GT_UNUSED GT_Error *err)
+                              void *data, GT_UNUSED GtError *err)
 {
   Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
   gt_error_check(err);
@@ -211,7 +211,7 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
 }
 
 static int proc_sequence_length(unsigned long sequence_length, void *data,
-                                GT_UNUSED GT_Error *err)
+                                GT_UNUSED GtError *err)
 {
   Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
   GT_Range range;
@@ -248,7 +248,7 @@ static void remove_gt_bioseq_files(int sigraised)
 }
 
 static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
-                       const char *raw_filename, GT_Error *err)
+                       const char *raw_filename, GtError *err)
 {
   FILE *index_file;
   GtStr *index_line;
@@ -313,7 +313,7 @@ static int fill_bioseq(GT_Bioseq *bs, const char *index_filename,
 static int construct_bioseq_files(GT_Bioseq *bs, GtStr *gt_bioseq_index_file,
                                   GtStr *gt_bioseq_raw_file,
                                   GT_FastaReaderType gt_fasta_reader_type,
-                                  GT_Error *err)
+                                  GtError *err)
 {
   GT_FastaReader *fasta_reader = NULL;
   GtStr *sequence_filename;
@@ -375,7 +375,7 @@ static int construct_bioseq_files(GT_Bioseq *bs, GtStr *gt_bioseq_index_file,
 }
 
 static int gt_bioseq_fill(GT_Bioseq *bs, bool recreate,
-                       GT_FastaReaderType gt_fasta_reader_type, GT_Error *err)
+                       GT_FastaReaderType gt_fasta_reader_type, GtError *err)
 {
   GtStr *gt_bioseq_index_file = NULL,
          *gt_bioseq_raw_file = NULL;
@@ -421,7 +421,7 @@ static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
                                                  bool recreate,
                                                  GT_FastaReaderType
                                                  gt_fasta_reader_type,
-                                                 GT_Error *err)
+                                                 GtError *err)
 {
   GT_Bioseq *bs;
   int had_err = 0;
@@ -447,7 +447,7 @@ static GT_Bioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
   return bs;
 }
 
-GT_Bioseq* gt_bioseq_new(const char *sequence_file, GT_Error *err)
+GT_Bioseq* gt_bioseq_new(const char *sequence_file, GtError *err)
 {
   GT_Bioseq *bs;
   GtStr *seqfile;
@@ -459,7 +459,7 @@ GT_Bioseq* gt_bioseq_new(const char *sequence_file, GT_Error *err)
   return bs;
 }
 
-GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GT_Error *err)
+GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GtError *err)
 {
   GT_Bioseq *bs;
   GtStr *seqfile;
@@ -471,7 +471,7 @@ GT_Bioseq* gt_bioseq_new_recreate(const char *sequence_file, GT_Error *err)
   return bs;
 }
 
-GT_Bioseq* gt_bioseq_new_str(GtStr *sequence_file, GT_Error *err)
+GT_Bioseq* gt_bioseq_new_str(GtStr *sequence_file, GtError *err)
 {
   return gt_bioseq_new_with_recreate_and_type(sequence_file, false,
                                            GT_FASTA_READER_REC, err);
@@ -479,7 +479,7 @@ GT_Bioseq* gt_bioseq_new_str(GtStr *sequence_file, GT_Error *err)
 
 GT_Bioseq* gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                            GT_FastaReaderType fasta_reader,
-                                           GT_Error *err)
+                                           GtError *err)
 {
   GT_Bioseq *bs;
   GtStr *seqfile;

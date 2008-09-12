@@ -69,7 +69,7 @@ static void add_gt_genome_feature_from_tree(GT_TypeCheckerOBO *tco,
 }
 
 static int create_genome_features(GT_TypeCheckerOBO *tco,
-                                  const char *obo_file_path, GT_Error *err)
+                                  const char *obo_file_path, GtError *err)
 {
   OBOParseTree *obo_parse_tree;
   unsigned long i;
@@ -94,7 +94,7 @@ static int create_genome_features(GT_TypeCheckerOBO *tco,
 }
 
 GT_TypeChecker* gt_type_checker_obo_new(const char *obo_file_path,
-                                        GT_Error *err)
+                                        GtError *err)
 {
   GT_TypeCheckerOBO *tco;
   GT_TypeChecker *tc;

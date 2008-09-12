@@ -19,6 +19,6 @@
 #define GT_TRANSLATE_H
 
 /* the translate tool */
-int gt_translate(int argc, const char **argv, GT_Error*);
+int gt_translate(int argc, const char **argv, GtError*);
 
 #endif

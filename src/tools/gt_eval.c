@@ -31,7 +31,7 @@ typedef struct {
 } EvalArguments;
 
 static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
-                            int argc, const char **argv, GT_Error *err)
+                            int argc, const char **argv, GtError *err)
 {
   OptionParser *op;
   Option *option, *ltroption, *ltrdeltaoption;
@@ -81,7 +81,7 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
   return oprval;
 }
 
-int gt_eval(int argc, const char **argv, GT_Error *err)
+int gt_eval(int argc, const char **argv, GtError *err)
 {
   GenomeStream *reality_stream,
                *prediction_stream;

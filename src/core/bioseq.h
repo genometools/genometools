@@ -31,15 +31,15 @@
 typedef struct GT_Bioseq GT_Bioseq;
 
 /* Construct a new bioseq object (and create the bioseq files, if necessary). */
-GT_Bioseq*       gt_bioseq_new(const char *sequence_file, GT_Error*);
+GT_Bioseq*       gt_bioseq_new(const char *sequence_file, GtError*);
 /* Construct a new bioseq object (and always create the the bioseq files). */
-GT_Bioseq*       gt_bioseq_new_recreate(const char *sequence_file, GT_Error*);
-GT_Bioseq*       gt_bioseq_new_str(GtStr* sequence_file, GT_Error*);
+GT_Bioseq*       gt_bioseq_new_recreate(const char *sequence_file, GtError*);
+GT_Bioseq*       gt_bioseq_new_str(GtStr* sequence_file, GtError*);
 /* Construct a new bioseq object (and always create the bioseq files)
    with a certain <fasta_reader>. */
 GT_Bioseq*       gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                            GT_FastaReaderType fasta_reader,
-                                           GT_Error*);
+                                           GtError*);
 void          gt_bioseq_delete(GT_Bioseq*);
 GT_Alpha*        gt_bioseq_get_alpha(GT_Bioseq*);
 Seq*          gt_bioseq_get_seq(GT_Bioseq*, unsigned long);

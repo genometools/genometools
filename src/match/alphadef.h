@@ -35,7 +35,7 @@ typedef struct Alphabet Alphabet;
                                          bool isprotein,
                                          const GtStr *smapfile,
                                          const GtStrArray *filenametab,
-                                         GT_Error *err);
+                                         GtError *err);
 
 const Uchar *getsymbolmapAlphabet(const Alphabet *alpha);
 

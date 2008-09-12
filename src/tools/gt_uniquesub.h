@@ -19,6 +19,6 @@
 #define GT_UNIQUESUB_H
 
 /* the uniquesub tool */
-int gt_uniquesub(int argc, const char **argv, GT_Error*);
+int gt_uniquesub(int argc, const char **argv, GtError*);
 
 #endif

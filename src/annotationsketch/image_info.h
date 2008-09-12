@@ -25,6 +25,6 @@
 void gt_image_info_set_height(GT_ImageInfo*, unsigned int);
 /* Takes ownership of <recmap>. */
 void gt_image_info_add_recmap(GT_ImageInfo*, GT_RecMap *recmap);
-int  gt_image_info_unit_test(GT_Error*);
+int  gt_image_info_unit_test(GtError*);
 
 #endif

@@ -37,7 +37,7 @@ unsigned long gt_track_get_number_of_lines(const GT_Track*);
 unsigned long gt_track_get_number_of_lines_with_captions(const GT_Track *track);
 unsigned long gt_track_get_number_of_discarded_blocks(GT_Track *track);
 int           gt_track_sketch(GT_Track*, GT_Canvas*);
-int           gt_track_unit_test(GT_Error*);
+int           gt_track_unit_test(GtError*);
 void          gt_track_delete(GT_Track*);
 
 #endif

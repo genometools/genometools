@@ -56,7 +56,7 @@ bool   hmm_is_valid(const HMM*);
 /* returns the RMSD of two HMMs */
 double hmm_rmsd(const HMM*, const HMM*);
 void   hmm_show(const HMM*, FILE*);
-int    hmm_unit_test(GT_Error*);
+int    hmm_unit_test(GtError*);
 void   hmm_delete(HMM*);
 
 #endif

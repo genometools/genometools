@@ -27,7 +27,7 @@
 /*@null@*/ FILE *opensfxfile(const GtStr *indexname,
                              const char *suffix,
                              const char *mode,
-                             GT_Error *err)
+                             GtError *err)
 {
   GtStr *tmpfilename;
   FILE *fp;

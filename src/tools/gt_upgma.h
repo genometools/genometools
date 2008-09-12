@@ -19,6 +19,6 @@
 #define GT_UPGMA_H
 
 /* the UPGMA tool */
-int gt_upgma(int argc, const char **argv, GT_Error*);
+int gt_upgma(int argc, const char **argv, GtError*);
 
 #endif

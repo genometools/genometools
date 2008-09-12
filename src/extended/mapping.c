@@ -32,7 +32,7 @@ struct Mapping {
 };
 
 Mapping* mapping_new(GtStr *mapping_file, const char *global_name,
-                     MappingType type, GT_Error *err)
+                     MappingType type, GtError *err)
 {
   Mapping *m;
   int had_err = 0;
@@ -95,7 +95,7 @@ Mapping* mapping_new(GtStr *mapping_file, const char *global_name,
 }
 
 static int map_table(Mapping *m, GtStr **stroutput, long *integeroutput,
-                     const char *input, GT_Error *err)
+                     const char *input, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -138,7 +138,7 @@ static int map_table(Mapping *m, GtStr **stroutput, long *integeroutput,
 }
 
 static int map_function(Mapping *m, GtStr **stroutput, long *integeroutput,
-                        const char *input, GT_Error *err)
+                        const char *input, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -181,7 +181,7 @@ static int map_function(Mapping *m, GtStr **stroutput, long *integeroutput,
 }
 
 static int map_generic(Mapping *m, GtStr **stroutput, long *integeroutput,
-                       const char *input, GT_Error *err)
+                       const char *input, GtError *err)
 {
   gt_error_check(err);
   assert(m && input);
@@ -192,7 +192,7 @@ static int map_generic(Mapping *m, GtStr **stroutput, long *integeroutput,
   return map_function(m, stroutput, integeroutput, input, err);
 }
 
-GtStr* mapping_map_string(Mapping *m, const char *input, GT_Error *err)
+GtStr* mapping_map_string(Mapping *m, const char *input, GtError *err)
 {
   GtStr *output = NULL;
   gt_error_check(err);
@@ -201,7 +201,7 @@ GtStr* mapping_map_string(Mapping *m, const char *input, GT_Error *err)
 }
 
 int mapping_map_integer(Mapping *m, long *output, const char *input,
-                        GT_Error *err)
+                        GtError *err)
 {
   gt_error_check(err);
   return map_generic(m, NULL, output, input, err);

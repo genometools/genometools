@@ -43,10 +43,10 @@ struct chkIndexOptions
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *param, GT_Error *err);
+                     struct chkIndexOptions *param, GtError *err);
 
 extern int
-gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
+gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
 {
   struct encIdxSeq *seq;
   struct chkIndexOptions params;
@@ -101,7 +101,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], GT_Error *err)
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *params, GT_Error *err)
+                     struct chkIndexOptions *params, GtError *err)
 {
   OptionParser *op;
   Option *option;

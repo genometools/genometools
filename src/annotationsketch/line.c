@@ -72,7 +72,7 @@ int gt_line_sketch(GT_Line *line, GT_Canvas *canvas)
   return 0;
 }
 
-int gt_line_unit_test(GT_Error *err)
+int gt_line_unit_test(GtError *err)
 {
   GT_Range r1, r2;
   GtArray* blocks;

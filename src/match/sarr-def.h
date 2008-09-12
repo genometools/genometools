@@ -65,7 +65,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
                                                   TYPE ## Bufferedfile *buf,\
-                                                  GT_Error *err)\
+                                                  GtError *err)\
         {\
           if (buf->nextread >= buf->nextfree)\
           {\

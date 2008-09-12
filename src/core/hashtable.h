@@ -36,7 +36,7 @@ enum iterator_op
 };
 
 typedef enum iterator_op (*Elemvisitfunc)(void *elem, void *data,
-                                          GT_Error *err);
+                                          GtError *err);
 
 typedef void (*FreeFuncWData)(void *elem, void *table_data);
 
@@ -80,23 +80,23 @@ int        hashtable_remove(Hashtable*, const void *elem);
  */
 extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
-                          GT_Compare cmp, GT_Error *err);
+                          GT_Compare cmp, GtError *err);
 /**
  * @brief iterate over the hashtable in implementation-defined order
  * @return 0 => no error, -1 => error occured
  */
 extern int
 hashtable_foreach(Hashtable *ht, Elemvisitfunc iter, void *data,
-                  GT_Error *err);
+                  GtError *err);
 /* iterate over the hashtable in default order. Requires that the hashtable
    was constructed with an ordering compare function. */
 extern int
 hashtable_foreach_in_default_order(Hashtable*, Elemvisitfunc, void *data,
-                                   GT_Error *err);
+                                   GtError *err);
 size_t
 hashtable_fill(Hashtable *);
 void       hashtable_reset(Hashtable*);
-int        hashtable_unit_test(GT_Error*);
+int        hashtable_unit_test(GtError*);
 void       hashtable_delete(Hashtable*);
 
 /*

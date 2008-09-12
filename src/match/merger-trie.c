@@ -243,7 +243,7 @@ static void checkmergertrie2(Mergertrierep *trierep,
 }
 
 void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
-                     unsigned int maxleafnum,GT_Error *err)
+                     unsigned int maxleafnum,GtError *err)
 {
   gt_error_check(err);
   if (trierep->root != NULL)

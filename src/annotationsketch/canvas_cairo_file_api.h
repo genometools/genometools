@@ -36,7 +36,7 @@ GT_Canvas* gt_canvas_cairo_file_new(GT_Style *style,
                                     GT_ImageInfo *image_info);
 /* Write rendered <canvas> to file with name <filename>. */
 int     gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
-                                     const char *filename, GT_Error *err);
+                                     const char *filename, GtError *err);
 /* Append rendered <canvas> to given <stream>. */
 int     gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile *canvas,
                                        GtStr *stream);

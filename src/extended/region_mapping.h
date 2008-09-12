@@ -23,14 +23,14 @@
 /* maps a sequence-region to a sequence file */
 typedef struct RegionMapping RegionMapping;
 
-RegionMapping* region_mapping_new_mapping(GtStr *mapping_filename, GT_Error*);
+RegionMapping* region_mapping_new_mapping(GtStr *mapping_filename, GtError*);
 RegionMapping* region_mapping_new_seqfile(GtStr *sequence_filename);
 RegionMapping* region_mapping_ref(RegionMapping*);
 int            region_mapping_get_raw_sequence(RegionMapping*, const char**,
-                                               GtStr *seqid, GT_Error*);
+                                               GtStr *seqid, GtError*);
 int            region_mapping_get_raw_sequence_length(RegionMapping*,
                                                       unsigned long*,
-                                                      GtStr *seqid, GT_Error*);
+                                                      GtStr *seqid, GtError*);
 void           region_mapping_delete(RegionMapping*);
 
 #endif

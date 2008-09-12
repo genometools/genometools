@@ -144,7 +144,7 @@ unsigned long gt_range_length(GT_Range range)
   return range.end - range.start + 1;
 }
 
-int gt_range_unit_test(GT_Error *err)
+int gt_range_unit_test(GtError *err)
 {
   static GT_Range ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
                                 { 620957, 621056 }, { 620957, 621056 },

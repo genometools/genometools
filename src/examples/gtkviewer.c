@@ -7,7 +7,7 @@ GT_Canvas *canvas = NULL;
 GT_Diagram *d = NULL;
 GT_Style *sty = NULL;
 GT_ImageInfo* ii = NULL;
-GT_Error *err = NULL;
+GtError *err = NULL;
 GtkWidget *area;
 gint lastwidth;
 

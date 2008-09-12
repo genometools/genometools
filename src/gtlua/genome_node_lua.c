@@ -200,7 +200,7 @@ static int genome_node_lua_accept(lua_State *L)
 {
   GT_GenomeNode **gn;
   GenomeVisitor **gv;
-  GT_Error *err;
+  GtError *err;
   gn = check_genome_node(L, 1);
   gv = check_genome_visitor(L, 2);
   err = gt_error_new();
@@ -273,7 +273,7 @@ static int genome_feature_lua_extract_sequence(lua_State *L)
   bool join;
   RegionMapping **region_mapping;
   GtStr *sequence;
-  GT_Error *err;
+  GtError *err;
   gn = check_genome_node(L, 1);
   /* make sure we get a genome feature */
   gf = gt_genome_node_cast(gt_genome_feature_class(), *gn);

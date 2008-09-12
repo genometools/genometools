@@ -30,7 +30,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                   const GtStr *indexname,
                                   unsigned int demand,
                                   /*@unused@*/ Sequentialaccesstype seqactype,
-                                  GT_Error *err)
+                                  GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
   Seqpos totallength;
@@ -67,7 +67,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              /*@unused@*/ GT_Error *err)
+                              /*@unused@*/ GtError *err)
 {
   *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
   return 1;
@@ -111,7 +111,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         const GtStr *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
-                                        GT_Error *err)
+                                        GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
   Seqpos totallength;
@@ -194,7 +194,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 
 int nextSequentiallcpvalue(Seqpos *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
-                           GT_Error *err)
+                           GtError *err)
 {
   Uchar tmpsmalllcpvalue;
   int retval;
@@ -270,7 +270,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              GT_Error *err)
+                              GtError *err)
 {
   if (ssar->seqactype == SEQ_scan)
   {

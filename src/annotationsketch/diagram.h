@@ -31,6 +31,6 @@ typedef struct GT_TracklineInfo {
 Hashmap*    gt_diagram_get_tracks(const GT_Diagram*);
 void        gt_diagram_get_lineinfo(const GT_Diagram*, GT_TracklineInfo*);
 int         gt_diagram_get_number_of_tracks(const GT_Diagram*);
-int         gt_diagram_unit_test(GT_Error*);
+int         gt_diagram_unit_test(GtError*);
 
 #endif

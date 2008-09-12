@@ -30,7 +30,7 @@
 #include "extended/gtdatahelp.h"
 
 int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
-                     GT_Error *err)
+                     GtError *err)
 {
   Splitter *splitter;
   GtStr *doc_file;

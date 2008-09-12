@@ -191,7 +191,7 @@ static bool store_match(unsigned long pos, void *data)
   return false;
 }
 
-int string_matching_unit_test(GT_Error *err)
+int string_matching_unit_test(GtError *err)
 {
   char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1], *text = "foo";
   GtArray *brute_force_matches,

@@ -212,7 +212,7 @@ int gt_block_sketch(GT_Block *block, GT_Canvas *canvas)
   return had_err;
 }
 
-int gt_block_unit_test(GT_Error *err)
+int gt_block_unit_test(GtError *err)
 {
   GT_Range r1, r2, r_temp, b_range;
   GtStrand s;

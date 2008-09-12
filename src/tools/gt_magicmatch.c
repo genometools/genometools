@@ -85,7 +85,7 @@ static void translate_sequence_file(GT_Bioseq *bs)
 
 static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                                 GT_UNUSED int parsed_args, void *tool_arguments,
-                                GT_Error *err)
+                                GtError *err)
 {
   MagicMatchArguments *arguments = tool_arguments;
   GT_Bioseq *bioseq;

@@ -113,7 +113,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
                                  unsigned long numofrecords,
                                  Seqpos totalwidth,
                                  Seqpos position,
-                                 GT_Error *err)
+                                 GtError *err)
 {
   unsigned long left, mid, right, len;
 
@@ -167,7 +167,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
                                 unsigned long numofrecords,
                                 unsigned long totalwidth,
                                 unsigned long position,
-                                GT_Error *err)
+                                GtError *err)
 {
   unsigned long left, mid, right, len;
 
@@ -217,7 +217,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
 
 int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
-                 GT_Error *err)
+                 GtError *err)
 {
   bool haserr = false;
 

@@ -549,7 +549,7 @@ static int searchforTSDandorMotifoutside(
   Seqpos *markpos,
   unsigned int *motifmismatchesleftLTR,
   unsigned int *motifmismatchesrightLTR,
-  GT_Error *err)
+  GtError *err)
 {
   Seqpos startleftLTR,
          endleftLTR,
@@ -732,7 +732,7 @@ int findcorrectboundaries(
     LTRboundaries *boundaries,
     Sequentialsuffixarrayreader *ssar,
     Seqpos *markpos,
-    GT_Error *err)
+    GtError *err)
 {
   unsigned int motifmismatchesleftLTR = 0,
                motifmismatchesrightLTR = 0;

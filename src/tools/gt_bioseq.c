@@ -125,7 +125,7 @@ static OptionParser* gt_gt_bioseq_option_parser_new(void *tool_arguments)
 }
 
 static int gt_gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
-                                     GT_Error *err)
+                                     GtError *err)
 {
   GT_BioseqArguments *arguments = tool_arguments;
   gt_error_check(err);
@@ -140,7 +140,7 @@ static int gt_gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
 }
 
 static int gt_gt_bioseq_runner(int argc, const char **argv, int parsed_args,
-                            void *tool_arguments, GT_Error *err)
+                            void *tool_arguments, GtError *err)
 {
   GT_BioseqArguments *arguments = tool_arguments;
   GT_Bioseq *bioseq;

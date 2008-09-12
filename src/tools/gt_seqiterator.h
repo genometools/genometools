@@ -19,6 +19,6 @@
 #define GT_SEQITERATOR_H
 
 /* the sequence iterator tool */
-int gt_seqiterator(int argc, const char **argv, GT_Error*);
+int gt_seqiterator(int argc, const char **argv, GtError*);
 
 #endif

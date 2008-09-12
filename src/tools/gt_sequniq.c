@@ -83,7 +83,7 @@ static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 }
 
 static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
-                             void *tool_arguments, GT_Error *err)
+                             void *tool_arguments, GtError *err)
 {
   SequniqArguments *arguments = tool_arguments;
   GT_Bioseq *bs;

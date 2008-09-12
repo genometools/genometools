@@ -22,7 +22,7 @@
 #include "core/range_api.h"
 
 GT_Range      gt_range_reorder(GT_Range);
-int           gt_range_unit_test(GT_Error*);
+int           gt_range_unit_test(GtError*);
 
 void          ranges_sort(GtArray*);
 void          ranges_sort_by_length_stable(GtArray*);

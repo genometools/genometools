@@ -21,6 +21,6 @@
 #include "core/error.h"
 
 int sspliced_alignment_parse(GtArray *spliced_alignments, const char *filename,
-                             GT_Error*);
+                             GtError*);
 
 #endif

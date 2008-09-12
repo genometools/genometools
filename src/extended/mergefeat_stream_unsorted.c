@@ -31,7 +31,7 @@ struct MergefeatStreamUnsorted {
 
 static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
                                                GT_GenomeNode **gn,
-                                               GT_Error *err)
+                                               GtError *err)
 {
   MergefeatStreamUnsorted *mfs;
   int had_err;

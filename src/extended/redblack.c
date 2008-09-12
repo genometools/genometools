@@ -1426,7 +1426,7 @@ static bool mangle_tree (SearchOrder how,
                          DoAction what,
                          RBTnode **root,
                          unsigned long lag,
-                         GT_Error *err)
+                         GtError *err)
 {
   unsigned long i;
   bool nodecreated, haserr = false;
@@ -1536,7 +1536,7 @@ static bool mangle_tree (SearchOrder how,
  * Unit test for the red black tree datastructure
  */
 
-int rbt_unit_test (GT_Error *err)
+int rbt_unit_test (GtError *err)
 {
   int had_err = 0;
   RBTnode *root = NULL;

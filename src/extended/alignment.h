@@ -36,7 +36,7 @@ void          alignment_remove_last(Alignment*); /* undo last add operation */
 unsigned long alignment_eval(const Alignment*); /* returns unit cost */
 void          alignment_show(const Alignment*, FILE*);
 void          alignment_show_multieop_list(const Alignment*, FILE*);
-int           alignment_unit_test(GT_Error*);
+int           alignment_unit_test(GtError*);
 void          alignment_delete(Alignment*);
 
 #endif

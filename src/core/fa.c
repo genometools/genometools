@@ -78,7 +78,7 @@ static void fa_init(void)
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
                               GT_GenFileMode genfilemode, bool x,
-                              const char *filename, int line, GT_Error *err)
+                              const char *filename, int line, GtError *err)
 {
   void  *fp = NULL;
   FAFileInfo *fileinfo;
@@ -149,7 +149,7 @@ static void xfclose_generic(void *stream, GT_GenFileMode genfilemode, FA *fa)
 }
 
 FILE* gt_fopen_func(const char *path, const char *mode,
-                    const char *filename, int line, GT_Error *err)
+                    const char *filename, int line, GtError *err)
 {
   gt_error_check(err);
   assert(path && mode);
@@ -186,7 +186,7 @@ void gt_xfclose(FILE *stream)
 }
 
 gzFile gt_gzopen_func(const char *path, const char *mode,
-                      const char *filename, int line, GT_Error *err)
+                      const char *filename, int line, GtError *err)
 {
   gt_error_check(err);
   assert(path && mode);
@@ -221,7 +221,7 @@ void gt_xgzclose(gzFile stream)
 }
 
 BZFILE* gt_bzopen_func(const char *path, const char *mode,
-                       const char *filename, int line, GT_Error *err)
+                       const char *filename, int line, GtError *err)
 {
   gt_error_check(err);
   assert(path && mode);
@@ -419,7 +419,7 @@ void gt_xmunmap(void *addr)
 }
 
 static int check_fptr_leak(GT_UNUSED void *key, void *value, void *data,
-                           GT_UNUSED GT_Error *err)
+                           GT_UNUSED GtError *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAFileInfo *fileinfo = (FAFileInfo*) value;
@@ -434,7 +434,7 @@ static int check_fptr_leak(GT_UNUSED void *key, void *value, void *data,
 }
 
 static int check_mmap_leak(GT_UNUSED void *key, void *value, void *data,
-                           GT_UNUSED GT_Error *err)
+                           GT_UNUSED GtError *err)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAMapInfo *mapinfo = (FAMapInfo*) value;

@@ -138,7 +138,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                             unsigned int kmersize,
                             unsigned int numofchars,
                             const char *characters,
-                            GT_Error *err)
+                            GtError *err)
 {
   unsigned long i;
   char buffer1[64+1], buffer2[64+1];
@@ -185,7 +185,7 @@ static int verifycodelists(const Encodedsequence *encseq,
                            unsigned int numofchars,
                            Seqpos stringtotallength,
                            const ArrayCodetype *codeliststream,
-                           GT_Error *err)
+                           GtError *err)
 {
   bool haserr = false;
   ArrayCodetype codeliststring;
@@ -210,7 +210,7 @@ static int verifycodelists(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-int verifymappedstr(const Suffixarray *suffixarray,GT_Error *err)
+int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
 {
   unsigned int numofchars;
   ArrayCodetype codeliststream;

@@ -29,7 +29,7 @@ const char *showreadmode(Readmode readmode)
   return readmodes[(int) readmode];
 }
 
-int parsereadmode(const char *dirargstring,GT_Error *err)
+int parsereadmode(const char *dirargstring,GtError *err)
 {
   size_t i;
 

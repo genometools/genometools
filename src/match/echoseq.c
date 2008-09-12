@@ -232,7 +232,7 @@ void encseq2fastaoutput(FILE *fpout,
                       width);
 }
 
-int echodescriptionandsequence(const GtStrArray *filenametab,GT_Error *err)
+int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
 {
   SeqIterator *seqit;
   char *desc = NULL;

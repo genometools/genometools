@@ -19,6 +19,6 @@
 #define GT_MATCHINGSTATISTICS_H
 
 /* the matchingstatistics tool */
-int gt_matchingstatistics(int argc, const char **argv, GT_Error*);
+int gt_matchingstatistics(int argc, const char **argv, GtError*);
 
 #endif

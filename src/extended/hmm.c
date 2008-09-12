@@ -572,7 +572,7 @@ void hmm_show(const HMM *hmm, FILE *fp)
   }
 }
 
-int hmm_unit_test(GT_Error *err)
+int hmm_unit_test(GtError *err)
 {
   /* the last coin string must be the longest */
   static char *coin_tosses[] = { "H", "T", "HH", "HT", "TH", "TT", "HTHT",

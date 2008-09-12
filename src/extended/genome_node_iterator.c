@@ -97,7 +97,7 @@ GT_GenomeNode* gt_genome_node_iterator_next(GT_GenomeNodeIterator *gni)
   return gn;
 }
 
-int gt_genome_node_iterator_example(GT_UNUSED GT_Error *err)
+int gt_genome_node_iterator_example(GT_UNUSED GtError *err)
 {
   GT_GenomeNodeIterator *gni;
   GT_GenomeNode *gn, *node;

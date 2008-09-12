@@ -111,7 +111,7 @@ static int cmp(const void *a_ptr, const void *b_ptr, GT_UNUSED void *unused)
 /* XXX: This unit test could be done much better by filling an array randomly,
    sorting it, and comparing gt_bsearch_all() against a brute force
    implementation.  */
-int gt_bsearch_unit_test(GT_Error *err)
+int gt_bsearch_unit_test(GtError *err)
 {
   GtArray *elements, *members;
   int key, element, *member_ptr;

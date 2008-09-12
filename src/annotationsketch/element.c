@@ -119,7 +119,7 @@ GT_GenomeNode* gt_element_get_node_ref(const GT_Element *elem)
   return elem->gn;
 }
 
-int gt_element_unit_test(GT_Error *err)
+int gt_element_unit_test(GtError *err)
 {
   GT_Range r1, r2, r_temp;
   GT_GenomeNode *gn, *gn2;

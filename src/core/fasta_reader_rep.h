@@ -26,7 +26,7 @@ struct GT_FastaReaderClass
   size_t size;
   int  (*run)(GT_FastaReader*, GT_FastaReaderProcDescription,
               GT_FastaReaderProcSequencePart, GT_FastaReaderProcSequenceLength,
-              void *data, GT_Error*);
+              void *data, GtError*);
   void (*free)(GT_FastaReader*);
 };
 

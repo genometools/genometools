@@ -28,7 +28,7 @@
 
 extern BWTSeq *
 availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
-            GT_Error *err)
+            GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
@@ -56,7 +56,7 @@ availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
 
 extern BWTSeq *
 trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
-                GT_Error *err)
+                GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
@@ -88,7 +88,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
 
 extern BWTSeq *
 availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                  Seqpos totalLen, GT_Error *err)
+                  Seqpos totalLen, GtError *err)
 {
   BWTSeq *bwtSeq;
   assert(sa && params && err);
@@ -123,7 +123,7 @@ static const enum rangeSortMode GTAlphabetRangeSort[][2] =
 
 extern BWTSeq *
 loadBWTSeq(const GtStr *projectName, int BWTOptFlags, Verboseinfo *verbosity,
-           GT_Error *err)
+           GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
@@ -142,7 +142,7 @@ loadBWTSeq(const GtStr *projectName, int BWTOptFlags, Verboseinfo *verbosity,
 extern BWTSeq *
 loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
                 int BWTOptFlags, const Suffixarray *sa,
-                Seqpos totalLen, GT_Error *err)
+                Seqpos totalLen, GtError *err)
 {
   struct BWTSeq *bwtSeq = NULL;
   EISeq *seqIdx = NULL;
@@ -165,7 +165,7 @@ loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
 
 extern BWTSeq *
 createBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                   Seqpos totalLen, GT_Error *err)
+                   Seqpos totalLen, GtError *err)
 {
   BWTSeq *bwtSeq = NULL;
   if (!sa->longest.defined)
@@ -210,12 +210,12 @@ static BWTSeq *
 createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
                      SpecialsRankLookup *sprTable,
                      const enum rangeSortMode *rangeSort,
-                     GT_Error *err);
+                     GtError *err);
 
 extern BWTSeq *
 createBWTSeqFromSAI(const struct bwtParam *params,
                     SuffixarrayFileInterface *sai,
-                    GT_Error *err)
+                    GtError *err)
 {
   BWTSeq *bwtSeq;
   SpecialsRankLookup *sprTable = NULL;
@@ -232,7 +232,7 @@ createBWTSeqFromSAI(const struct bwtParam *params,
 
 extern BWTSeq *
 createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
-                     GT_Error *err)
+                     GtError *err)
 {
   BWTSeq *bwtSeq;
   SpecialsRankLookup *sprTable = NULL;
@@ -251,7 +251,7 @@ static BWTSeq *
 createBWTSeqFromSASS(const struct bwtParam *params, SASeqSrc *src,
                      SpecialsRankLookup *sprTable,
                      const enum rangeSortMode *rangeSort,
-                     GT_Error *err)
+                     GtError *err)
 {
   EISeq *seqIdx = NULL;
   BWTSeq *bwtSeq = NULL;

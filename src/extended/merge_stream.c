@@ -31,7 +31,7 @@ struct MergeStream {
 #define merge_stream_cast(GS)\
         genome_stream_cast(merge_stream_class(), GS)
 
-int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GT_Error *err)
+int merge_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn, GtError *err)
 {
   MergeStream *ms;
   GT_GenomeNode *min_node = NULL;

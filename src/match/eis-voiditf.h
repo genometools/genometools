@@ -63,7 +63,7 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,
                           bool withpckbt,
-                          GT_Error *err);
+                          GtError *err);
 
 void deletevoidBWTSeq(void *packedindex);
 

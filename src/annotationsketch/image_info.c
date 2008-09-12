@@ -94,7 +94,7 @@ void gt_image_info_fill_recmap(GT_ImageInfo* ii, GT_RecMap* rm, unsigned long n)
   rm->has_omitted_children = tmp->has_omitted_children;
 }
 
-int gt_image_info_unit_test(GT_Error *err)
+int gt_image_info_unit_test(GtError *err)
 {
   GT_RecMap* rms[20];
   GT_GenomeNode* gfs[20];

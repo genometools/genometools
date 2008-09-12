@@ -89,7 +89,7 @@ static const char* obo_header_get(OBOHeader *obo_header, const char *tag)
 }
 
 static int obo_header_validate(OBOHeader *obo_header, const char *obo_file_name,
-                               GT_Error *err)
+                               GtError *err)
 {
   gt_error_check(err);
   assert(obo_header && obo_file_name);
@@ -164,7 +164,7 @@ static void obo_parse_tree_add_stanza(OBOParseTree *obo_parse_tree,
 }
 
 static int validate_value(const OBOStanza *obo_stanza, const char *value,
-                          GT_Error *err)
+                          GtError *err)
 {
   gt_error_check(err);
   assert(obo_stanza && value);
@@ -179,7 +179,7 @@ static int validate_value(const OBOStanza *obo_stanza, const char *value,
 }
 
 static int obo_parse_tree_validate_stanzas(const OBOParseTree *obo_parse_tree,
-                                            GT_Error *err)
+                                            GtError *err)
 {
   unsigned long i;
   int had_err = 0;
@@ -238,7 +238,7 @@ static bool ignored_char(GT_IO *obo_file)
   return false;
 }
 
-static int expect(GT_IO *obo_file, char expected_char, GT_Error *err)
+static int expect(GT_IO *obo_file, char expected_char, GtError *err)
 {
   char cc;
   gt_error_check(err);
@@ -269,7 +269,7 @@ static int expect(GT_IO *obo_file, char expected_char, GT_Error *err)
   return 0;
 }
 
-static int gt_comment_line(GT_IO *obo_file, GT_Error *err)
+static int gt_comment_line(GT_IO *obo_file, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -292,7 +292,7 @@ static int gt_comment_line(GT_IO *obo_file, GT_Error *err)
   return had_err;
 }
 
-static int blank_line(GT_IO *obo_file, GT_Error *err)
+static int blank_line(GT_IO *obo_file, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -317,7 +317,7 @@ static int blank_line(GT_IO *obo_file, GT_Error *err)
   return had_err;
 }
 
-static bool ignored_line(GT_IO *obo_file, GT_Error *err)
+static bool ignored_line(GT_IO *obo_file, GtError *err)
 {
   gt_error_check(err);
   if (gt_io_peek(obo_file) == BLANK_CHAR)
@@ -326,7 +326,7 @@ static bool ignored_line(GT_IO *obo_file, GT_Error *err)
 }
 
 static int proc_any_char(GT_IO *obo_file, GtStr *capture, bool be_permissive,
-                         GT_Error *err)
+                         GtError *err)
 {
   gt_error_check(err);
   assert(obo_file && capture);
@@ -351,7 +351,7 @@ static int proc_any_char(GT_IO *obo_file, GtStr *capture, bool be_permissive,
   return 0;
 }
 
-static int tag_line(GT_IO *obo_file, GtStr *tag, GtStr *value, GT_Error *err)
+static int tag_line(GT_IO *obo_file, GtStr *tag, GtStr *value, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -377,7 +377,7 @@ static int tag_line(GT_IO *obo_file, GtStr *tag, GtStr *value, GT_Error *err)
   return had_err;
 }
 
-static int header(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
+static int header(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GtError *err)
 {
   GtStr *tag, *value;
   int had_err;
@@ -403,7 +403,7 @@ static int header(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
   return had_err;
 }
 
-static int stanza_line(GT_IO *obo_file, GtStr *type, GT_Error *err)
+static int stanza_line(GT_IO *obo_file, GtStr *type, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -421,7 +421,7 @@ static int stanza_line(GT_IO *obo_file, GtStr *type, GT_Error *err)
   return had_err;
 }
 
-static int stanza(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
+static int stanza(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GtError *err)
 {
   unsigned long stanza_line_number;
   int had_err;
@@ -457,7 +457,7 @@ static int stanza(OBOParseTree *obo_parse_tree, GT_IO *obo_file, GT_Error *err)
 }
 
 static int parse_obo_file(OBOParseTree *obo_parse_tree,
-                          GT_IO *obo_file, GT_Error *err)
+                          GT_IO *obo_file, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -494,7 +494,7 @@ static int parse_obo_file(OBOParseTree *obo_parse_tree,
   return had_err;
 }
 
-OBOParseTree* obo_parse_tree_new(const char *obo_file_path, GT_Error *err)
+OBOParseTree* obo_parse_tree_new(const char *obo_file_path, GtError *err)
 {
   OBOParseTree *obo_parse_tree;
   GT_IO *obo_file;

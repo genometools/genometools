@@ -39,8 +39,8 @@ typedef enum {
 } OPrval;
 
 typedef void (*ShowVersionFunc)(const char *progname);
-typedef int  (*ShowGT_CommentFunc)(const char *progname, void *data, GT_Error*);
-typedef int  (*OptionParserHookFunc)(void *data, GT_Error*);
+typedef int  (*ShowGT_CommentFunc)(const char *progname, void *data, GtError*);
+typedef int  (*OptionParserHookFunc)(void *data, GtError*);
 
 /* the option parser */
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
@@ -67,7 +67,7 @@ void          option_parser_set_min_max_args(OptionParser*, unsigned int,
                                                             unsigned int);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
                                   const char **argv, ShowVersionFunc,
-                                  GT_Error*);
+                                  GtError*);
 void          option_parser_delete(OptionParser*);
 
 /* the options

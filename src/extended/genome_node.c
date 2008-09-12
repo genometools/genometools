@@ -179,7 +179,7 @@ void* gt_genome_node_cast(const GT_GenomeNodeClass *gnc, GT_GenomeNode *gn)
 }
 
 static int increase_reference_count(GT_GenomeNode *gn, GT_UNUSED void *data,
-                                    GT_UNUSED GT_Error *err)
+                                    GT_UNUSED GtError *err)
 {
   gt_error_check(err);
   assert(gn);
@@ -200,7 +200,7 @@ int gt_genome_node_traverse_children_generic(GT_GenomeNode *genome_node,
                                           GT_GenomeNodeTraverseFunc traverse,
                                           bool traverse_only_once,
                                           bool depth_first, bool with_pseudo,
-                                          GT_Error *err)
+                                          GtError *err)
 {
   GtArray *node_stack = NULL, *list_of_children;
   GT_Queue *node_queue = NULL;
@@ -336,7 +336,7 @@ static int gt_genome_node_traverse_children_with_pseudo(GT_GenomeNode
                                                        GT_GenomeNodeTraverseFunc
                                                         traverse,
                                                         bool traverse_only_once,
-                                                        GT_Error *err)
+                                                        GtError *err)
 {
   return gt_genome_node_traverse_children_generic(genome_node, data, traverse,
                                                traverse_only_once, true, true,
@@ -356,7 +356,7 @@ GT_GenomeNode* gt_genome_node_rec_ref(GT_GenomeNode *gn)
 
 int gt_genome_node_traverse_children(GT_GenomeNode *genome_node, void *data,
                                   GT_GenomeNodeTraverseFunc traverse,
-                                  bool traverse_only_once, GT_Error *err)
+                                  bool traverse_only_once, GtError *err)
 {
   return gt_genome_node_traverse_children_generic(genome_node, data, traverse,
                                                traverse_only_once, true, false,
@@ -367,7 +367,7 @@ int gt_genome_node_traverse_children_breadth(GT_GenomeNode *genome_node,
                                              void *data,
                                              GT_GenomeNodeTraverseFunc traverse,
                                              bool traverse_only_once,
-                                             GT_Error *err)
+                                             GtError *err)
 {
   return gt_genome_node_traverse_children_generic(genome_node, data, traverse,
                                                traverse_only_once, false, false,
@@ -377,7 +377,7 @@ int gt_genome_node_traverse_children_breadth(GT_GenomeNode *genome_node,
 int gt_genome_node_traverse_direct_children(GT_GenomeNode *gn,
                                          void *traverse_func_data,
                                          GT_GenomeNodeTraverseFunc traverse,
-                                         GT_Error *err)
+                                         GtError *err)
 {
   GT_Dlistelem *dlistelem;
   int had_err = 0;
@@ -460,7 +460,7 @@ void gt_genome_node_change_seqid(GT_GenomeNode *gn, GtStr *seqid)
   gn->c_class->change_seqid(gn, seqid);
 }
 
-int gt_genome_node_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GT_Error *err)
+int gt_genome_node_accept(GT_GenomeNode *gn, GenomeVisitor *gv, GtError *err)
 {
   gt_error_check(err);
   assert(gn && gv && gn->c_class && gn->c_class->accept);
@@ -489,7 +489,7 @@ void gt_genome_node_add_child(GT_GenomeNode *parent, GT_GenomeNode *child)
   add_parent(&child->bit_field);
 }
 
-static int remove_leaf(GT_GenomeNode *node, void *data, GT_UNUSED GT_Error *err)
+static int remove_leaf(GT_GenomeNode *node, void *data, GT_UNUSED GtError *err)
 {
   GT_Dlistelem *dlistelem;
   GT_GenomeNode *child, *leaf = (GT_GenomeNode*) data;
@@ -530,7 +530,7 @@ bool gt_genome_node_is_marked(const GT_GenomeNode *gn)
 }
 
 static int check_marked_status(GT_GenomeNode *gn, void *data,
-                               GT_UNUSED GT_Error *err)
+                               GT_UNUSED GtError *err)
 {
   bool *marked = data;
   if (gt_genome_node_is_marked(gn))
@@ -696,7 +696,7 @@ void gt_genome_node_delete(GT_GenomeNode *gn)
 }
 
 static int free_genome_node(GT_GenomeNode *gn, GT_UNUSED void *data,
-                            GT_UNUSED GT_Error *err)
+                            GT_UNUSED GtError *err)
 {
   gt_genome_node_delete(gn);
   return 0;

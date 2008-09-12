@@ -19,6 +19,6 @@
 #define GT_MULTISET_MATCHING_H
 
 /* the multiset matching tool */
-int gt_multiset_matching(int argc, const char **argv, GT_Error*);
+int gt_multiset_matching(int argc, const char **argv, GtError*);
 
 #endif

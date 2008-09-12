@@ -26,7 +26,7 @@
 
 Toolbox* gtt_tools(void);      /* return all GenomeTools tools */
 
-typedef int  (*UnitTestFunc)(GT_Error *);
+typedef int  (*UnitTestFunc)(GtError *);
 
 Hashmap* gtt_unit_tests(void); /* return all GenomeTools unit tests */
 

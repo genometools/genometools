@@ -20,7 +20,7 @@
 /* The GenomeTools (gt) genome analysis system */
 int main(int argc, char *argv[])
 {
-  GT_Error *err;
+  GtError *err;
   GTR *gtr;
   int rval;
   gt_allocators_init();

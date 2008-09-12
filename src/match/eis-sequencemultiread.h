@@ -41,7 +41,7 @@ typedef void (*move2BacklogFunc)(void *backlogState, const void *seqData,
 typedef size_t (*generatorFunc)(void *generatorState, void *backlogState,
                                 move2BacklogFunc move2Backlog, void *output,
                                 Seqpos generateStart, size_t len,
-                                SeqDataTranslator xltor, GT_Error *err);
+                                SeqDataTranslator xltor, GtError *err);
 
 typedef struct seqReaderSet SeqReaderSet;
 

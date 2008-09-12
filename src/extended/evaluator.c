@@ -94,7 +94,7 @@ void evaluator_reset(Evaluator *evaluator)
   memset(evaluator, 0, sizeof *evaluator);
 }
 
-int evaluator_unit_test(GT_Error *err)
+int evaluator_unit_test(GtError *err)
 {
   Evaluator *evaluator = evaluator_new();
   int had_err = 0;

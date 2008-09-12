@@ -51,7 +51,7 @@ typedef struct {
 
 static OPrval parse_options(int *parsed_args,
                             AnnotationSketchArguments *arguments,
-                            int argc, const char **argv, GT_Error *err)
+                            int argc, const char **argv, GtError *err)
 {
   OptionParser *op;
   Option  *option, *option2;
@@ -164,7 +164,7 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-int gt_sketch(int argc, const char **argv, GT_Error *err)
+int gt_sketch(int argc, const char **argv, GtError *err)
 {
   GenomeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,

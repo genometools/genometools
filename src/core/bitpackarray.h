@@ -141,6 +141,6 @@ bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
  * @return 0 on success, -1 on error.
  */
 extern int
-gt_bitpackarray_unit_test(GT_Error*);
+gt_bitpackarray_unit_test(GtError*);
 
 #endif

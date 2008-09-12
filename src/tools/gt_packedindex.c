@@ -29,7 +29,7 @@
 #include "tools/gt_packedindex_chk_search.h"
 
 /* rely on suffixerator for on the fly index construction */
-static int gt_packedindex_make(int argc, const char *argv[], GT_Error *err)
+static int gt_packedindex_make(int argc, const char *argv[], GtError *err)
 {
   return parseargsandcallsuffixerator(false, argc, argv, err);
 }
@@ -67,7 +67,7 @@ static OptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
 }
 
 static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
-                                 void *tool_arguments, GT_Error *err)
+                                 void *tool_arguments, GtError *err)
 {
   Toolbox *index_toolbox = tool_arguments;
   Toolfunc toolfunc;

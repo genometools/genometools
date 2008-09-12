@@ -29,7 +29,7 @@
 static void outputwriter_txt(ParseStruct *,
                              CombinedScoreMatrixEntry **,
                              HitInformation *,
-                             RegionStruct **, char, GT_Error *);
+                             RegionStruct **, char, GtError *);
 
 /* Funktion, die nacheinander die erforderlichen Funktionen zur Erstellung
    des html-Dokuments aufruft
@@ -40,7 +40,7 @@ static void outputwriter_txt(ParseStruct *,
 static void outputwriter_html(ParseStruct *,
                               CombinedScoreMatrixEntry **,
                               HitInformation *,
-                              RegionStruct **, char, GT_Error *);
+                              RegionStruct **, char, GtError *);
 
 /* Funktion, die nacheinander die erforderlichen Funktionen zur Erstellung
    des xml-Dokuments aufruft
@@ -51,7 +51,7 @@ static void outputwriter_html(ParseStruct *,
 static void outputwriter_xml(ParseStruct *,
                              CombinedScoreMatrixEntry **,
                              HitInformation *,
-                             RegionStruct **, char, GT_Error *);
+                             RegionStruct **, char, GtError *);
 
 /* Funktion zum Schreiben des Output-Header der txt-Datei
    Parameter:  Zeiger auf die ParseStruct-Struktur
@@ -91,7 +91,7 @@ static void output_querydna_xml(const ParseStruct *);
    Returnwert: void */
 static void output_hitdna(ParseStruct *,
                           CombinedScoreMatrixEntry **,
-                          HitInformation *, RegionStruct **, GT_Error *);
+                          HitInformation *, RegionStruct **, GtError *);
 
 /* Funktion zum Schreiben des Coding-DNA-Abschnittes
    Parameter:  Zeiger auf ParseStruct, Zeiger auf die DNA-Seq,
@@ -140,10 +140,10 @@ static int as_coding(const ParseStruct *,
                      char *,
                      GtStr *,
                      unsigned long,
-                     unsigned long, unsigned short, GT_Error *);
+                     unsigned long, unsigned short, GtError *);
 
 static enum iterator_op
-newmemory_hash(char *key, unsigned long *value, void *data, GT_Error * err);
+newmemory_hash(char *key, unsigned long *value, void *data, GtError * err);
 
 /* Funktion zum Schreiben des Statistic-Headers
    Parameter: Zeiger auf die ParseStruct-Struktur
@@ -174,7 +174,7 @@ struct tm *today(void)
 void mg_outputwriter(ParseStruct *parsestruct_ptr,
                      CombinedScoreMatrixEntry **combinedscore_matrix,
                      HitInformation *hit_information,
-                     RegionStruct **regionmatrix, char type, GT_Error * err)
+                     RegionStruct **regionmatrix, char type, GtError * err)
 {
   gt_error_check(err);
 
@@ -203,7 +203,7 @@ void mg_outputwriter(ParseStruct *parsestruct_ptr,
 static void outputwriter_txt(ParseStruct *parsestruct_ptr,
                       CombinedScoreMatrixEntry **combinedscore_matrix,
                       HitInformation *hit_information,
-                      RegionStruct **regionmatrix, char type, GT_Error * err)
+                      RegionStruct **regionmatrix, char type, GtError * err)
 {
   gt_error_check(err);
 
@@ -225,7 +225,7 @@ static void outputwriter_txt(ParseStruct *parsestruct_ptr,
 static void outputwriter_html(ParseStruct *parsestruct_ptr,
                        CombinedScoreMatrixEntry **combinedscore_matrix,
                        HitInformation *hit_information,
-                       RegionStruct **regionmatrix, char type, GT_Error * err)
+                       RegionStruct **regionmatrix, char type, GtError * err)
 {
   gt_error_check(err);
 
@@ -249,7 +249,7 @@ static void outputwriter_html(ParseStruct *parsestruct_ptr,
 static void outputwriter_xml(ParseStruct *parsestruct_ptr,
                       CombinedScoreMatrixEntry **combinedscore_matrix,
                       HitInformation *hit_information,
-                      RegionStruct **regionmatrix, char type, GT_Error * err)
+                      RegionStruct **regionmatrix, char type, GtError * err)
 {
   gt_error_check(err);
 
@@ -628,7 +628,7 @@ static void output_querydna_xml(const ParseStruct *parsestruct_ptr)
 static void output_hitdna(ParseStruct *parsestruct_ptr,
                    CombinedScoreMatrixEntry **combinedscore_matrix,
                    HitInformation *hit_information,
-                   RegionStruct **regionmatrix, GT_Error * err)
+                   RegionStruct **regionmatrix, GtError * err)
 {
   int had_err = 0;
 
@@ -1069,7 +1069,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                       GtStr *as_seq,
                       unsigned long from,
                       unsigned long to,
-                      unsigned short current_row, GT_Error * err)
+                      unsigned short current_row, GtError * err)
 {
   int had_err = 0;
 
@@ -1282,7 +1282,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
 
 static enum iterator_op
 newmemory_hash(GT_UNUSED char *key, unsigned long *value, void *data,
-               GT_UNUSED GT_Error * err)
+               GT_UNUSED GtError * err)
 {
   /* Parsestruct-Struktur */
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;

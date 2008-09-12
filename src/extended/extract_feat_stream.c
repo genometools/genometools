@@ -31,7 +31,7 @@ struct ExtractFeatStream
         genome_stream_cast(extract_feat_stream_class(), GS)
 
 static int extract_feat_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
-                                         GT_Error *err)
+                                         GtError *err)
 {
   ExtractFeatStream *efs;
   int had_err;

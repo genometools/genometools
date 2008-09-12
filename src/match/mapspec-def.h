@@ -64,12 +64,12 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void *assignmapinfo,
                         const GtStr *tmpfilename,
                         unsigned long expectedsize,
-                        GT_Error *err);
+                        GtError *err);
 
 int flushtheindex2file(FILE *fp,
                        Assignmapspec assignmapspec,
                        void *assignmapinfo,
                        unsigned long expectedsize,
-                       GT_Error *err);
+                       GtError *err);
 
 #endif

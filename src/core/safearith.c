@@ -88,7 +88,7 @@ unsigned long safe_cast2ulong(long value)
   return value;
 }
 
-int safearith_example(GT_UNUSED GT_Error *err)
+int safearith_example(GT_UNUSED GtError *err)
 {
   unsigned long ulong;
   long slong;
@@ -121,7 +121,7 @@ int safearith_example(GT_UNUSED GT_Error *err)
   return 0;
 }
 
-int safearith_unit_test(GT_Error *err)
+int safearith_unit_test(GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);

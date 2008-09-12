@@ -19,6 +19,6 @@
 #define GT_UNIQ_H
 
 /* the uniq tool */
-int gt_uniq(int argc, const char **argv, GT_Error*);
+int gt_uniq(int argc, const char **argv, GtError*);
 
 #endif

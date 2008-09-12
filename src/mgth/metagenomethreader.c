@@ -26,12 +26,12 @@
    Returnwert: 0 */
 static enum iterator_op
 printout_hits(GT_UNUSED char *key,
-              unsigned long *value, void *data, GT_Error * err);
+              unsigned long *value, void *data, GtError * err);
 
 static OPrval parse_options(int *parsed_args,
                             MetagenomeThreaderArguments
                             *metagenomethreader_arguments, int argc,
-                            const char **argv, GT_Error * err)
+                            const char **argv, GtError * err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -229,7 +229,7 @@ static OPrval parse_options(int *parsed_args,
 DEFINE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp, ht_cstr_elem_hash,
                ht_cstr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,,)
 
-int metagenomethreader(int argc, const char **argv, GT_Error * err)
+int metagenomethreader(int argc, const char **argv, GtError * err)
 {
   int had_err = 0,
       parsed_args = 0;
@@ -696,7 +696,7 @@ int metagenomethreader(int argc, const char **argv, GT_Error * err)
 
 static enum iterator_op
 printout_hits(GT_UNUSED char *key,
-              unsigned long *value, void *data, GT_Error * err)
+              unsigned long *value, void *data, GtError * err)
 {
   /* Parsestruct-Struktur */
   ParseStruct *parsestruct_ptr = (ParseStruct *) data;

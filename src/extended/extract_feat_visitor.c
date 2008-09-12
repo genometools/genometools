@@ -74,7 +74,7 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate)
 
 static int extract_feat_visitor_genome_feature(GenomeVisitor *gv,
                                                GT_GenomeFeature *gf,
-                                               GT_Error *err)
+                                               GtError *err)
 {
   ExtractFeatVisitor *efv;
   GT_GenomeNodeIterator *gni;

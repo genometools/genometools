@@ -29,6 +29,6 @@ int optionaddbitmask(Optionargmodedesc *modedesc,
                      unsigned int *mode,
                      const char *optname,
                      const char *optionargument,
-                     GT_Error *err);
+                     GtError *err);
 
 #endif

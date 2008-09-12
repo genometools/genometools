@@ -189,7 +189,7 @@ typedef uint32_t Uint32;
 typedef struct
 {
   const char *funcname;
-  int(*function)(Encodedsequence *,GT_FastaBuffer *,GT_Error *);
+  int(*function)(Encodedsequence *,GT_FastaBuffer *,GtError *);
 } Fillencposfunc;
 
 typedef struct
@@ -508,7 +508,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
 }
 
 int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
-                    GT_Error *err)
+                    GtError *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -538,7 +538,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
                                      const GtStr *indexname,
                                      Verboseinfo *verboseinfo,
-                                     GT_Error *err)
+                                     GtError *err)
 {
   bool haserr = false;
   GtStr *tmpfilename;
@@ -868,7 +868,7 @@ static Uchar delivercharViauint32tablesSpecialrange(
 }
 
 static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fb,
-                        GT_Error *err)
+                        GtError *err)
 {
   Seqpos pos;
   int retval;
@@ -896,7 +896,7 @@ static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fb,
 
 static int fillbitaccesstab(Encodedsequence *encseq,
                             GT_FastaBuffer *fb,
-                            GT_Error *err)
+                            GtError *err)
 {
   Uchar cc;
   Seqpos pos;
@@ -1841,7 +1841,7 @@ static Encodedsequence *determineencseqkeyvalues(
   return encseq;
 }
 
-static int readsatfromfile(const GtStr *indexname,GT_Error *err)
+static int readsatfromfile(const GtStr *indexname,GtError *err)
 {
   FILE *fp;
   int cc = 0;
@@ -1880,7 +1880,7 @@ static int determinesattype(Seqpos totallength,
                             Seqpos specialranges,
                             unsigned int mapsize,
                             const char *str_sat,
-                            GT_Error *err)
+                            GtError *err)
 {
   Positionaccesstype sat;
   bool haserr = false;
@@ -1999,7 +1999,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                   unsigned long
                                                      *characterdistribution,
                                                   Verboseinfo *verboseinfo,
-                                                  GT_Error *err)
+                                                  GtError *err)
 {
   Encodedsequence *encseq = NULL;
   Positionaccesstype sat = Undefpositionaccesstype;
@@ -2063,7 +2063,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
-                                               GT_Error *err)
+                                               GtError *err)
 {
   Encodedsequence *encseq;
   Positionaccesstype sat = Undefpositionaccesstype;

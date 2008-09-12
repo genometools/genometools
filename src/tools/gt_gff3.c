@@ -160,7 +160,7 @@ static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 }
 
 static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
-                          void *tool_arguments, GT_Error *err)
+                          void *tool_arguments, GtError *err)
 {
   GT_TypeChecker *type_checker = NULL;
   GenomeStream *gff3_in_stream,

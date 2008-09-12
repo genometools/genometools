@@ -501,7 +501,7 @@ bits2buf(char *buf, uint32_t v, unsigned numBits)
   bits2buf(buf, (accum), bitCount);             \
   if (fputs(buf, fp) == EOF)                    \
   {                                             \
-    ioGT_Error = 1;                                \
+    ioGtError = 1;                                \
     break;                                      \
   }
 
@@ -513,7 +513,7 @@ bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
   size_t elemStart = offset/bitElemBits;
   const BitElem *p = str + elemStart;
   char buf[sizeof(accum) * CHAR_BIT];
-  int ioGT_Error = 0;
+  int ioGtError = 0;
   assert(str);
   do {
     if (bitTop)
@@ -526,7 +526,7 @@ bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
       bitsLeft -= bits2Read;
     }
     /* get bits from intervening elems */
-    while (bitsLeft >= bitElemBits && !ioGT_Error)
+    while (bitsLeft >= bitElemBits && !ioGtError)
     {
       while (bitsLeft >= bitElemBits
              && sizeof (accum) * CHAR_BIT - bitElemBits >= bitsInAccum)
@@ -538,7 +538,7 @@ bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
       ACCUM2FP(accum, bitsInAccum);
       accum = 0; bitsInAccum = 0;
     }
-    if (ioGT_Error)
+    if (ioGtError)
       break;
     /* get bits from last elem */
     if (bitsLeft)
@@ -548,5 +548,5 @@ bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
       ACCUM2FP(accum, bitsLeft);
     }
   } while (0);
-  return ioGT_Error?-1:0;
+  return ioGtError?-1:0;
 }

@@ -32,7 +32,7 @@ struct StatStream
         genome_stream_cast(stat_stream_class(), GS)
 
 static int stat_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
-                                 GT_Error *err)
+                                 GtError *err)
 {
   StatStream *stat_stream;
   int had_err;

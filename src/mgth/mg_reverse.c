@@ -26,7 +26,7 @@
 
 #include "mg_reverse.h"
 
-static int mg_complement(char *reverse_char, char dna_char, GT_Error * err)
+static int mg_complement(char *reverse_char, char dna_char, GtError * err)
 {
   gt_error_check(err);
   switch (dna_char)
@@ -135,7 +135,7 @@ static int mg_complement(char *reverse_char, char dna_char, GT_Error * err)
   }
 }
 
-int mg_reverse_complement(char *dna_seq, unsigned long seqlen, GT_Error * err)
+int mg_reverse_complement(char *dna_seq, unsigned long seqlen, GtError * err)
 {
   char *front_char,
    *back_char,

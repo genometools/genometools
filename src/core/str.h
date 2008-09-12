@@ -29,6 +29,6 @@ void*         gt_str_get_mem(const GtStr*);
    is returned, otherwise 0. */
 int           gt_str_read_next_line(GtStr *str, FILE *fpin);
 int           gt_str_read_next_line_generic(GtStr*, GT_GenFile*);
-int           gt_str_unit_test(GT_Error*);
+int           gt_str_unit_test(GtError*);
 
 #endif

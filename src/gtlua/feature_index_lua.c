@@ -51,7 +51,7 @@ static int feature_index_lua_add_gff3file(lua_State *L)
 {
   GT_FeatureIndex **fi;
   const char *filename;
-  GT_Error *err;
+  GtError *err;
   assert(L);
   fi = check_feature_index(L, 1);
   filename = luaL_checkstring(L, 2);

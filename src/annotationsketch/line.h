@@ -34,7 +34,7 @@ void      gt_line_insert_block(GT_Line*, GT_Block*); /* takes ownership */
 bool      gt_line_has_captions(const GT_Line*);
 GtArray* gt_line_get_blocks(GT_Line*);
 int       gt_line_sketch(GT_Line*, GT_Canvas*);
-int       gt_line_unit_test(GT_Error*);
+int       gt_line_unit_test(GtError*);
 void      gt_line_delete(GT_Line*);
 
 #endif

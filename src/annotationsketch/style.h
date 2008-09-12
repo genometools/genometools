@@ -41,7 +41,7 @@ bool           gt_style_get_num(const GT_Style*, const char *section,
    If not set, false is returned.*/
 bool           gt_style_get_bool(const GT_Style*, const char *section,
                                  const char *key, bool*, GT_GenomeNode*);
-int            gt_style_unit_test(GT_Error*);
+int            gt_style_unit_test(GtError*);
 /* Deletes a GT_Style object but leaves the internal Lua state intact. */
 void           gt_style_delete_without_state(GT_Style*);
 

@@ -62,7 +62,7 @@ int seqiterator_next(SeqIterator *seqit,
                      const Uchar **sequence,
                      unsigned long *len,
                      char **desc,
-                     GT_Error *err)
+                     GtError *err)
 {
   Uchar charcode;
   int retval;

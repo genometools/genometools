@@ -126,26 +126,26 @@
                                                               \
   typedef enum iterator_op                                    \
   (*keytag##_##valuetag##_hashmap_iteratorfunc)(              \
-    keytype key, valuetype value, void *data, GT_Error *err);    \
+    keytype key, valuetype value, void *data, GtError *err);    \
                                                               \
   storagedecl inlineifstatic int                              \
   keytag##_##valuetag##_hashmap_foreach(                      \
     Hashtable *ht,                                            \
     keytag##_##valuetag##_hashmap_iteratorfunc iter,          \
-    void *data, GT_Error *err);                                  \
+    void *data, GtError *err);                                  \
                                                               \
   storagedecl inlineifstatic int                              \
   keytag##_##valuetag##_hashmap_foreach_ordered(              \
     Hashtable *ht,                                            \
     keytag##_##valuetag##_hashmap_iteratorfunc iter,          \
     void *data, keytag##_##valuetag##_hashmap_KeyCmp cmp,     \
-    GT_Error *err);                                              \
+    GtError *err);                                              \
                                                               \
   storagedecl inlineifstatic int                              \
   keytag##_##valuetag##_hashmap_foreach_in_default_order(     \
     Hashtable *ht,                                            \
     keytag##_##valuetag##_hashmap_iteratorfunc iter,          \
-    void *data, GT_Error *err);
+    void *data, GtError *err);
 
 #define DECLARE_SAFE_DEREF(valuetype, valuetag)               \
   static inline valuetype                                     \
@@ -182,7 +182,7 @@
                                                               \
   static enum iterator_op                                     \
   keytag##_##valuetag##_hashmap_iter(                         \
-    void *elem, void *data, GT_Error *err)                       \
+    void *elem, void *data, GtError *err)                       \
   {                                                           \
     keytag##_##valuetag##_map_entry *entry = elem;            \
     keytag##_##valuetag##_hashmap_DataIterCmpTripel *dip      \
@@ -195,7 +195,7 @@
   keytag##_##valuetag##_hashmap_foreach(                      \
     Hashtable *ht,                                            \
     keytag##_##valuetag##_hashmap_iteratorfunc iter,          \
-    void *data, GT_Error *err)                                   \
+    void *data, GtError *err)                                   \
   {                                                           \
     keytag##_##valuetag##_hashmap_DataIterCmpTripel dip =     \
       { data, iter, NULL };                                   \
@@ -221,7 +221,7 @@
     Hashtable *ht,                                            \
     keytag##_##valuetag##_hashmap_iteratorfunc iter,          \
     void *data, keytag##_##valuetag##_hashmap_KeyCmp cmp,     \
-    GT_Error *err)                                               \
+    GtError *err)                                               \
   {                                                           \
     keytag##_##valuetag##_hashmap_DataIterCmpTripel dip       \
       = { data, iter, cmp };                                  \
@@ -234,7 +234,7 @@
   keytag##_##valuetag##_hashmap_foreach_in_default_order(     \
     Hashtable *ht,                                            \
     keytag##_##valuetag##_hashmap_iteratorfunc iter,          \
-    void *data, GT_Error *err)                                   \
+    void *data, GtError *err)                                   \
   {                                                           \
     keytag##_##valuetag##_hashmap_DataIterCmpTripel dip       \
       = { data, iter, NULL };                                 \

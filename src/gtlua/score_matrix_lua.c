@@ -28,7 +28,7 @@ static int score_matrix_lua_new_read_protein(lua_State *L)
 {
   GT_ScoreMatrix **sm;
   const char *path;
-  GT_Error *err;
+  GtError *err;
   assert(L);
   path = luaL_checkstring(L, 1);
   sm = lua_newuserdata(L, sizeof (GT_ScoreMatrix*));

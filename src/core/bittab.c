@@ -311,7 +311,7 @@ void gt_bittab_show(const GT_Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
-int gt_bittab_example(GT_UNUSED GT_Error *err)
+int gt_bittab_example(GT_UNUSED GtError *err)
 {
   unsigned long bit;
   GT_Bittab *b;
@@ -334,7 +334,7 @@ int gt_bittab_example(GT_UNUSED GT_Error *err)
   return 0;
 }
 
-int gt_bittab_unit_test(GT_Error *err)
+int gt_bittab_unit_test(GtError *err)
 {
   unsigned long i, j, size, bit, counter;
   GT_Bittab *b, *tmp, *and;

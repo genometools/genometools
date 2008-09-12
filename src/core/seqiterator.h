@@ -28,7 +28,7 @@ typedef struct SeqIterator SeqIterator;
 SeqIterator* seqiterator_new(const GtStrArray *filenametab,
                              const Uchar *symbolmap, bool withsequence);
 int          seqiterator_next(SeqIterator*, const Uchar **sequence,
-                              unsigned long *len, char **desc, GT_Error*);
+                              unsigned long *len, char **desc, GtError*);
 const unsigned long long*
              seqiterator_getcurrentcounter(SeqIterator*, unsigned long long);
 void         seqiterator_delete(SeqIterator*);

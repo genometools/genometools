@@ -45,6 +45,6 @@ unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
                                       unsigned long size, void *data,
                                       GetElemvalue get_elemvalue);
 
-int           gt_countingsort_unit_test(GT_Error*);
+int           gt_countingsort_unit_test(GtError*);
 
 #endif

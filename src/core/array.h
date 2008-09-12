@@ -21,7 +21,7 @@
 #include "core/array_api.h"
 #include "core/error.h"
 
-typedef int (*GtArrayProcessor)(void *elem, void *info, GT_Error*);
+typedef int (*GtArrayProcessor)(void *elem, void *info, GtError*);
 
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
@@ -33,13 +33,13 @@ int           gt_array_cmp(const GtArray  *array_a, const GtArray *array_b);
    return value of <array_processor> is returned. */
 int           gt_array_iterate(GtArray *array,
                                GtArrayProcessor array_processor,
-                               void *info, GT_Error *err);
+                               void *info, GtError *err);
 /* Similar to <array_iterate>, except that the <array> is traversed in reverse
    order. */
 int           gt_array_iterate_reverse(GtArray *array,
                                        GtArrayProcessor array_processor,
-                                       void *info, GT_Error *err);
-int           gt_array_example(GT_Error*);
-int           gt_array_unit_test(GT_Error*);
+                                       void *info, GtError *err);
+int           gt_array_example(GtError*);
+int           gt_array_unit_test(GtError*);
 
 #endif

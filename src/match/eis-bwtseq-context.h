@@ -45,7 +45,7 @@ deleteBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory);
 
 extern Seqpos
 BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory, Seqpos chunkSize,
-                   SeqDataReader readSfxIdx, GT_Error *err);
+                   SeqDataReader readSfxIdx, GtError *err);
 
 extern size_t
 BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory, const Seqpos *src,

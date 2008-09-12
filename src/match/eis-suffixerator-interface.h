@@ -67,7 +67,7 @@ newSfxInterface(Readmode readmode,
                 const Alphabet *alpha,
                 const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
-                GT_Error *err);
+                GtError *err);
 
 /**
  * @brief Create suffixerator interface object with requestors already
@@ -109,7 +109,7 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            const Alphabet *alpha,
                            const unsigned long *characterdistribution,
                            Verboseinfo *verbosity,
-                           GT_Error *err);
+                           GtError *err);
 
 /**
  * @brief get Sfxiterator from SfxInterface
@@ -242,7 +242,7 @@ readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len, Uchar *dest);
  */
 extern size_t
 readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len, Seqpos *dest,
-                 GT_Error *err);
+                 GtError *err);
 
 /**
  * @return actual number of symbols read

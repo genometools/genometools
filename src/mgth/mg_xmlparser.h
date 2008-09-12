@@ -23,6 +23,6 @@
    Parameter: Zeiger auf ParseStruct-Struktur, Zeiger auf die XML-Datei,
               Env-Variable
    Returnwert: had_err */
-int mg_xmlparser(ParseStruct *, GT_GenFile *, GT_Error *);
+int mg_xmlparser(ParseStruct *, GT_GenFile *, GtError *);
 
 #endif

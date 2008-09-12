@@ -20,7 +20,7 @@
 
 #include "core/error_api.h"
 
-void        gt_error_set_progname(GT_Error*, const char *progname);
-const char* gt_error_get_progname(const GT_Error*);
+void        gt_error_set_progname(GtError*, const char *progname);
+const char* gt_error_get_progname(const GtError*);
 
 #endif

@@ -42,7 +42,7 @@ static int imageinfo_lua_get_height(lua_State *L)
 {
   GT_ImageInfo **ii;
   unsigned long height;
-  GT_Error *err = gt_error_new();
+  GtError *err = gt_error_new();
   ii = check_imageinfo(L, 1);
   assert(ii);
   height = gt_image_info_get_height(*ii);
@@ -61,7 +61,7 @@ static int imageinfo_lua_num_of_recmaps(lua_State *L)
 {
   GT_ImageInfo **ii;
   unsigned long nof_rm;
-  GT_Error *err = gt_error_new();
+  GtError *err = gt_error_new();
   ii = check_imageinfo(L, 1);
   assert(ii);
   nof_rm = gt_image_info_num_of_recmaps(*ii);

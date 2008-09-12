@@ -8,10 +8,10 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            unsigned int minlength,
                            const Alphabet *alpha,
                            int (*processmaxmatch)(void *,Seqpos,
-                                                  Seqpos,Seqpos,GT_Error *),
+                                                  Seqpos,Seqpos,GtError *),
                            void *processmaxmatchinfo,
                            Verboseinfo *verboseinfo,
-                           GT_Error *err);
+                           GtError *err);
 
 #ifdef __cplusplus
 }

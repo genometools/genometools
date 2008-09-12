@@ -46,7 +46,7 @@ struct GT_GraphicsClass {
                             GT_Color, double, double);
   void    (*draw_arrowhead)(GT_Graphics*, double, double, GT_Color,
                             ArrowStatus);
-  int     (*save_to_file)(const GT_Graphics*, const char*, GT_Error*);
+  int     (*save_to_file)(const GT_Graphics*, const char*, GtError*);
   void    (*save_to_stream)(const GT_Graphics*, GtStr*);
   void    (*free)(GT_Graphics*);
 };

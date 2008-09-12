@@ -31,9 +31,9 @@ bool          splicedseq_pos_is_border(const Splicedseq*, unsigned long);
 /* maps the given position back to the original coordinate system */
 unsigned long splicedseq_map(const Splicedseq*, unsigned long);
 unsigned long splicedseq_length(const Splicedseq*);
-int           splicedseq_reverse(Splicedseq*, GT_Error*);
+int           splicedseq_reverse(Splicedseq*, GtError*);
 void          splicedseq_reset(Splicedseq*);
-int           splicedseq_unit_test(GT_Error*);
+int           splicedseq_unit_test(GtError*);
 void          splicedseq_delete(Splicedseq*);
 
 #endif

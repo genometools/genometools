@@ -25,7 +25,7 @@
 #define REVERSESTRANDCHAR '-'
 
 static int parse_input_line(SSplicedAlignment **alignment, const char *line,
-                            unsigned long line_length, GT_Error *err)
+                            unsigned long line_length, GtError *err)
 {
   long leftpos, rightpos;
   unsigned long i = 0;
@@ -113,7 +113,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
 }
 
 int sspliced_alignment_parse(GtArray *spliced_alignments, const char *filename,
-                             GT_Error *err)
+                             GtError *err)
 {
   FILE *input_file;
   SSplicedAlignment *sa;

@@ -30,7 +30,7 @@ typedef struct
 {
   unsigned int minlength;
   Encodedsequence *encseq;
-  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos,GT_Error *);
+  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos,GtError *);
   void *processmaxmatchinfo;
 } Substringmatchinfo;
 
@@ -45,7 +45,7 @@ static int constructsarrandrunmaxpairs(
                  unsigned int numofparts,
                  Measuretime *mtime,
                  Verboseinfo *verboseinfo,
-                 GT_Error *err)
+                 GtError *err)
 {
   const Seqpos *suftabptr;
   Seqpos numberofsuffixes;
@@ -120,10 +120,10 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            unsigned int minlength,
                            const Alphabet *alpha,
                            int (*processmaxmatch)(void *,Seqpos,
-                                                  Seqpos,Seqpos,GT_Error *),
+                                                  Seqpos,Seqpos,GtError *),
                            void *processmaxmatchinfo,
                            Verboseinfo *verboseinfo,
-                           GT_Error *err)
+                           GtError *err)
 {
   Specialcharinfo samplespecialcharinfo;
   Substringmatchinfo ssi;

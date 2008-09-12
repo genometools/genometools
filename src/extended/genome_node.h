@@ -28,7 +28,7 @@ typedef struct GT_GenomeNode GT_GenomeNode;
 #include "core/str.h"
 #include "extended/genome_visitor.h"
 
-typedef int (*GT_GenomeNodeTraverseFunc)(GT_GenomeNode*, void*, GT_Error*);
+typedef int (*GT_GenomeNodeTraverseFunc)(GT_GenomeNode*, void*, GtError*);
 
 void           gt_genome_node_set_origin(GT_GenomeNode*,
                                          GtStr *filename,
@@ -40,15 +40,15 @@ void*          gt_genome_node_cast(const GT_GenomeNodeClass*, GT_GenomeNode*);
 int            gt_genome_node_traverse_children(GT_GenomeNode*, void*,
                                                 GT_GenomeNodeTraverseFunc,
                                                 bool traverse_only_once,
-                                                GT_Error*);
+                                                GtError*);
 /* perform breadth first traversal of the given genome node  */
 int            gt_genome_node_traverse_children_breadth(GT_GenomeNode*, void*,
                                                       GT_GenomeNodeTraverseFunc,
                                                         bool traverse_only_once,
-                                                        GT_Error*);
+                                                        GtError*);
 int            gt_genome_node_traverse_direct_children(GT_GenomeNode*, void*,
                                                       GT_GenomeNodeTraverseFunc,
-                                                       GT_Error*);
+                                                       GtError*);
 const char*    gt_genome_node_get_filename(const GT_GenomeNode*);
 unsigned int   gt_genome_node_get_line_number(const GT_GenomeNode*);
 unsigned long  gt_genome_node_number_of_children(const GT_GenomeNode*);
@@ -60,7 +60,7 @@ unsigned long  gt_genome_node_get_end(GT_GenomeNode*);
 GT_Range       gt_genome_node_get_range(GT_GenomeNode*);
 void           gt_genome_node_set_range(GT_GenomeNode*, GT_Range);
 void           gt_genome_node_change_seqid(GT_GenomeNode*, GtStr*);
-int            gt_genome_node_accept(GT_GenomeNode*, GenomeVisitor*, GT_Error*);
+int            gt_genome_node_accept(GT_GenomeNode*, GenomeVisitor*, GtError*);
 /* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
 void           gt_genome_node_add_child(GT_GenomeNode *parent,
                                         GT_GenomeNode *child);

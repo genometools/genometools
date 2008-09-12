@@ -32,7 +32,7 @@ struct FilterStream
         genome_stream_cast(filter_stream_class(), GS);
 
 static int filter_stream_next_tree(GenomeStream *gs, GT_GenomeNode **gn,
-                                   GT_Error *err)
+                                   GtError *err)
 {
   FilterStream *fs;
   int had_err;

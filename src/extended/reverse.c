@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "extended/reverse.h"
 
-static int complement(char *reverse_char, char dna_char, GT_Error *err)
+static int complement(char *reverse_char, char dna_char, GtError *err)
 {
   gt_error_check(err);
   switch (dna_char) {
@@ -38,7 +38,7 @@ static int complement(char *reverse_char, char dna_char, GT_Error *err)
   }
 }
 
-int reverse_complement(char *dna_seq, unsigned long seqlen, GT_Error *err)
+int reverse_complement(char *dna_seq, unsigned long seqlen, GtError *err)
 {
   char *front_char, *back_char, tmp_char;
   int had_err = 0;

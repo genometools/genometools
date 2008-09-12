@@ -69,7 +69,7 @@ static void luaL_opensecurelibs(lua_State *L)
   }
 }
 
-GT_Style* gt_style_new(bool verbose, GT_Error *err)
+GT_Style* gt_style_new(bool verbose, GtError *err)
 {
   GT_Style *sty;
   gt_error_check(err);
@@ -95,7 +95,7 @@ GT_Style* gt_style_new_with_state(lua_State *L)
   return sty;
 }
 
-int gt_style_load_file(GT_Style *sty, const char *filename, GT_Error *err)
+int gt_style_load_file(GT_Style *sty, const char *filename, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -426,7 +426,7 @@ bool gt_style_get_verbose(const GT_Style *sty)
   return sty->verbose;
 }
 
-int gt_style_to_str(const GT_Style *sty, GtStr *outstr, GT_Error *err)
+int gt_style_to_str(const GT_Style *sty, GtStr *outstr, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -444,7 +444,7 @@ int gt_style_to_str(const GT_Style *sty, GtStr *outstr, GT_Error *err)
   return had_err;
 }
 
-int gt_style_load_str(GT_Style *sty, GtStr *instr, GT_Error *err)
+int gt_style_load_str(GT_Style *sty, GtStr *instr, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -458,7 +458,7 @@ int gt_style_load_str(GT_Style *sty, GtStr *instr, GT_Error *err)
   return had_err;
 }
 
-GT_Style* gt_style_clone(const GT_Style *sty, GT_Error *err)
+GT_Style* gt_style_clone(const GT_Style *sty, GtError *err)
 {
   int had_err = 0;
   GtStr *sty_buffer = gt_str_new();
@@ -474,7 +474,7 @@ GT_Style* gt_style_clone(const GT_Style *sty, GT_Error *err)
   return new_sty;
 }
 
-int gt_style_unit_test(GT_Error *err)
+int gt_style_unit_test(GtError *err)
 {
   int had_err = 0;
   GT_Style *sty = NULL, *new_sty = NULL;

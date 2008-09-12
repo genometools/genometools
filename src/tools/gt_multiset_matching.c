@@ -24,7 +24,7 @@
 #include "tools/gt_multiset_matching.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GT_Error *err)
+                            GtError *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -43,7 +43,7 @@ static void show_match(unsigned long pos, GT_UNUSED void *data)
   printf("%lu\n", pos + 1);
 }
 
-int gt_multiset_matching(int argc, const char **argv, GT_Error *err)
+int gt_multiset_matching(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
   gt_error_check(err);

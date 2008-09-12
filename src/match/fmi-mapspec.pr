@@ -4,12 +4,12 @@ extern "C" {
 int flushfmindex2file(FILE *fp,
                       Fmindex *fmindex,
                       bool storeindexpos,
-                      GT_Error *err);
+                      GtError *err);
 
 int fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
                           const GtStr *tmpfilename,
-                          GT_Error *err);
+                          GtError *err);
 
 #ifdef __cplusplus
 }

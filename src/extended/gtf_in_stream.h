@@ -27,6 +27,6 @@ typedef struct GTFInStream GTFInStream;
 const GenomeStreamClass* gtf_in_stream_class(void);
 /* filename == NULL -> use stdin */
 GenomeStream*            gtf_in_stream_new(const char *filename,
-                                           bool be_tolerant, GT_Error*);
+                                           bool be_tolerant, GtError*);
 
 #endif

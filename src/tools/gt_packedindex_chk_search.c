@@ -46,10 +46,10 @@ struct chkSearchOptions
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                    struct chkSearchOptions *params, const GtStr *projectName,
-                   GT_Error *err);
+                   GtError *err);
 
 extern int
-gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
+gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
 {
   struct chkSearchOptions params;
   Suffixarray suffixarray;
@@ -258,7 +258,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], GT_Error *err)
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                    struct chkSearchOptions *params, const GtStr *projectName,
-                   GT_Error *err)
+                   GtError *err)
 {
   OptionParser *op;
   OPrval oprval;

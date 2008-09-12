@@ -43,6 +43,6 @@ void        tag_value_map_add(TagValueMap*, const char *tag,
 const char* tag_value_map_get(const TagValueMap, const char *tag);
 void        tag_value_map_foreach(const TagValueMap, TagValueMapIteratorFunc,
                                   void *data);
-int         tag_value_map_example(GT_Error*);
+int         tag_value_map_example(GtError*);
 
 #endif

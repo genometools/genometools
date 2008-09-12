@@ -22,7 +22,7 @@
 #include "tools/gt_gtf_to_gff3.h"
 
 static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
-                            const char **argv, GT_Error *err)
+                            const char **argv, GtError *err)
 {
   OptionParser *op;
   Option *option;
@@ -40,7 +40,7 @@ static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
   return oprval;
 }
 
-int gt_gtf_to_gff3(int argc, const char **argv, GT_Error *err)
+int gt_gtf_to_gff3(int argc, const char **argv, GtError *err)
 {
   GenomeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
   GT_GenomeNode *gn;

@@ -30,7 +30,7 @@ enum {
   MAX_RND_NUMS = 100000,
 };
 
-int gt_bitpackarray_unit_test(GT_Error *err)
+int gt_bitpackarray_unit_test(GtError *err)
 {
   struct BitPackArray *bitStore = NULL;
   int had_err = 0;

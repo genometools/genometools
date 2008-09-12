@@ -103,7 +103,7 @@ GTF_parser* gtf_parser_new(GT_TypeChecker *type_checker)
 }
 
 static int construct_sequence_regions(void *key, void *value, void *data,
-                                      GT_UNUSED GT_Error *err)
+                                      GT_UNUSED GtError *err)
 {
   GtStr *seqid;
   GT_Range range;
@@ -120,7 +120,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
 }
 
 static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
-                           GT_Error *err)
+                           GtError *err)
 {
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
   GtArray *gt_genome_node_array = (GtArray*) value,
@@ -184,7 +184,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
 }
 
 static int construct_genes(GT_UNUSED void *key, void *value, void *data,
-                           GT_Error *err)
+                           GtError *err)
 {
   Hashmap *transcript_id_hash = (Hashmap*) value;
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
@@ -245,7 +245,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 
 int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
                      GtStr *filenamestr, FILE *fpin, unsigned int be_tolerant,
-                     GT_Error *err)
+                     GtError *err)
 {
   GtStr *seqid_str, *source_str, *line_buffer;
   char *line;

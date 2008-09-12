@@ -67,7 +67,7 @@ const char* gt_cstr_table_get(const GT_CstrTable *table, const char *cstr)
 }
 
 static enum iterator_op store_type(void *elem, void *data,
-                                   GT_UNUSED GT_Error *err)
+                                   GT_UNUSED GtError *err)
 {
   GtStrArray *types = data;
   gt_error_check(err);
@@ -88,7 +88,7 @@ GtStrArray* gt_cstr_table_get_all(const GT_CstrTable *table)
   return cstrs;
 }
 
-int gt_cstr_table_unit_test(GT_Error *err)
+int gt_cstr_table_unit_test(GtError *err)
 {
   GT_CstrTable *table;
   int had_err = 0;

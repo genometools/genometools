@@ -33,7 +33,7 @@ typedef struct {
 
 static OPrval parse_options(int *parsed_args,
                             SpliceSiteInfoArguments *arguments, int argc,
-                            const char **argv, GT_Error *err)
+                            const char **argv, GtError *err)
 {
   OptionParser *op;
   Option *option;
@@ -58,7 +58,7 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-int gt_splicesiteinfo(int argc, const char **argv, GT_Error *err)
+int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
 {
   GenomeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,

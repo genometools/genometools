@@ -17,7 +17,7 @@ int getfastastreamkmers(
         unsigned int kmersize,
         const Uchar *symbolmap,
         bool plainformat,
-        GT_Error *err);
+        GtError *err);
 
 #ifdef __cplusplus
 }

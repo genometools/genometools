@@ -86,7 +86,7 @@ size_t gt_genfile_basename_length(const char *path)
 }
 
 GT_GenFile* gt_genfile_open(GT_GenFileMode genfilemode, const char *path,
-                      const char *mode, GT_Error *err)
+                      const char *mode, GtError *err)
 {
   GT_GenFile *genfile;
   gt_error_check(err);

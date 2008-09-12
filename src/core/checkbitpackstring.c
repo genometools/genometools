@@ -26,7 +26,7 @@
 #include "core/ensure.h"
 
 int
-bitPackString_unit_test(GT_Error *err)
+bitPackString_unit_test(GtError *err)
 {
   return bitPackStringInt_unit_test(err)
     || bitPackStringInt8_unit_test(err)

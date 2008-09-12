@@ -25,7 +25,7 @@
 #include "tools/gt_neighborjoining.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GT_Error *err)
+                            GtError *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -62,7 +62,7 @@ static double exampledistfunc(unsigned long i, unsigned long j,
   return exampledistances[i][j];
 }
 
-int gt_neighborjoining(int argc, const char **argv, GT_Error *err)
+int gt_neighborjoining(int argc, const char **argv, GtError *err)
 {
   bool use_hard_coded_example = false;
   GT_Bioseq *bioseq = NULL;

@@ -45,7 +45,7 @@ void seqid2file_options(OptionParser *op, GtStr *seqfile,
 
 RegionMapping* seqid2file_regionmapping_new(GtStr *seqfile,
                                             GtStr *regionmapping,
-                                            GT_Error *err)
+                                            GtError *err)
 {
   gt_error_check(err);
   assert(seqfile && regionmapping);

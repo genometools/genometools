@@ -469,7 +469,7 @@ void gt_graphics_cairo_draw_arrowhead(GT_Graphics *gg, double x, double y,
 }
 
 int gt_graphics_cairo_save_to_file(const GT_Graphics *gg, const char *filename,
-                                GT_Error *err)
+                                GtError *err)
 {
   const GT_GraphicsCairo *g = (const GT_GraphicsCairo*) gg;
   cairo_status_t rval;

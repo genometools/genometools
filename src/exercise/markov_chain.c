@@ -110,7 +110,7 @@ bool markov_chain_is_valid(const MarkovChain *mc)
 
 int markov_chain_compute_prob(const MarkovChain *mc, double *prob,
                               const char *sequence, unsigned long seqlen,
-                              GT_Error *err)
+                              GtError *err)
 {
   unsigned long i;
   unsigned int last_code = 0, cur_code;

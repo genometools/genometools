@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/ebzlib.h"
 
-BZFILE* gt_ebzopen(const char *path, const char *mode, GT_Error *err)
+BZFILE* gt_ebzopen(const char *path, const char *mode, GtError *err)
 {
   BZFILE* file;
   gt_error_check(err);

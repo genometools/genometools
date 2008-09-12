@@ -290,9 +290,9 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            unsigned int minlength,
                            int (*processmaxmatch)(void *,unsigned long,
                                                   Seqpos,uint64_t,
-                                                  unsigned long,GT_Error *),
+                                                  unsigned long,GtError *),
                            void *processmaxmatchinfo,
-                           GT_Error *err)
+                           GtError *err)
 {
   MMsearchiterator *mmsi;
   Seqpos dbstart, totallength;
@@ -360,10 +360,10 @@ int callenumquerymatches(const GtStr *indexname,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                 uint64_t,unsigned long,
-                                                GT_Error*),
+                                                GtError*),
                          void *processmaxmatchinfo,
                          Verboseinfo *verboseinfo,
-                         GT_Error *err)
+                         GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
@@ -449,10 +449,10 @@ static int constructsarrandrunmmsearch(
                  unsigned long querylen,
                  unsigned int minlength,
                  int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                        uint64_t,unsigned long,GT_Error *),
+                                        uint64_t,unsigned long,GtError *),
                  void *processmaxmatchinfo,
                  Measuretime *mtime,
-                 GT_Error *err)
+                 GtError *err)
 {
   const Seqpos *suftabptr;
   Seqpos numofsuffixes;
@@ -516,10 +516,10 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             const Alphabet *alpha,
                             int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                    uint64_t,unsigned long,
-                                                   GT_Error *),
+                                                   GtError *),
                             void *processmaxmatchinfo,
                             Verboseinfo *verboseinfo,
-                            GT_Error *err)
+                            GtError *err)
 {
   Specialcharinfo samplespecialcharinfo;
   unsigned int numofchars;

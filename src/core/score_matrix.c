@@ -43,7 +43,7 @@ GT_ScoreMatrix* gt_score_matrix_new(GT_Alpha *alpha)
 }
 
 static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
-                               Tokenizer *tz, GT_Error *err)
+                               Tokenizer *tz, GtError *err)
 {
   GtStr *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
@@ -106,7 +106,7 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
 
 static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
                             GtArray *index_to_gt_alpha_char_mapping,
-                            char *parsed_characters, GT_Error *err)
+                            char *parsed_characters, GtError *err)
 {
   unsigned int i = 0;
   char amino_acid;
@@ -158,7 +158,7 @@ static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
 
 /* the score matrix parser */
 static int parse_score_matrix(GT_ScoreMatrix *sm, const char *path,
-                              GT_Error *err)
+                              GtError *err)
 {
   Tokenizer *tz;
   GtArray *index_to_gt_alpha_char_mapping;
@@ -195,7 +195,7 @@ static int parse_score_matrix(GT_ScoreMatrix *sm, const char *path,
 }
 
 GT_ScoreMatrix* gt_score_matrix_new_read_protein(const char *path,
-                                                 GT_Error *err)
+                                                 GtError *err)
 {
   GT_Alpha *protein_alpha;
   GT_ScoreMatrix *sm;

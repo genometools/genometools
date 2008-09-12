@@ -42,7 +42,7 @@ typedef struct
 
 static OPrval parse_options(Seqiteroptions *seqiteroptions,
                             int *parsed_args,int argc,
-                            const char **argv, GT_Error *err)
+                            const char **argv, GtError *err)
 {
   OptionParser *op;
   Option *optionverbose, *optiondistlen, *optionastretch;
@@ -175,7 +175,7 @@ static void processastretches(const DiscDistri *distastretch,
   gt_free(astretchinfo.mmercount);
 }
 
-int gt_seqiterator(int argc, const char **argv, GT_Error *err)
+int gt_seqiterator(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
   SeqIterator *seqit;

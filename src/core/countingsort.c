@@ -74,7 +74,7 @@ static unsigned long get_int(const void *elem, GT_UNUSED void *data)
   return *(unsigned int*) elem;
 }
 
-int gt_countingsort_unit_test(GT_Error *err)
+int gt_countingsort_unit_test(GtError *err)
 {
   unsigned int numbers[]        = { 1, 2, 1, 2, 0 }, numbers_out[5],
                sorted_numbers[] = { 0, 1, 1, 2, 2 };

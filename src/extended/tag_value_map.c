@@ -113,7 +113,7 @@ void tag_value_map_foreach(const TagValueMap map, TagValueMapIteratorFunc func,
   } while (*map_ptr != '\0');
 }
 
-int tag_value_map_example(GT_UNUSED GT_Error *err)
+int tag_value_map_example(GT_UNUSED GtError *err)
 {
   TagValueMap map;
 

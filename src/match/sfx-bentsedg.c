@@ -1471,7 +1471,7 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           Seqpos totallength,
-                          GT_Error *err)
+                          GtError *err)
 {
   bool haserr = false;
   Outlcpinfo *outlcpinfo;

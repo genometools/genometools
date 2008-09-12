@@ -106,7 +106,7 @@ int outprjfile(const GtStr *indexname,
                Seqpos numoflargelcpvalues,
                Seqpos maxbranchdepth,
                const DefinedSeqpos *longest,
-               GT_Error *err)
+               GtError *err)
 {
   FILE *prjfp;
   bool haserr = false;

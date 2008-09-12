@@ -162,7 +162,7 @@ static int intcompare(const void *a, const void *b)
   return *(int*) a - *(int*) b;
 }
 
-int gt_dlist_example(GT_UNUSED GT_Error *err)
+int gt_dlist_example(GT_UNUSED GtError *err)
 {
   GT_Dlistelem *dlistelem;
   GT_Dlist *dlist;
@@ -187,7 +187,7 @@ int gt_dlist_example(GT_UNUSED GT_Error *err)
   return 0;
 }
 
-int gt_dlist_unit_test(GT_Error *err)
+int gt_dlist_unit_test(GtError *err)
 {
   GT_Dlist *dlist;
   GT_Dlistelem *dlistelem;

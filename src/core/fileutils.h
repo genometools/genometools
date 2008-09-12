@@ -41,7 +41,7 @@ void           file_dirname(GtStr *path, const char *file);
 
 /* Find <file> in $PATH, if it has no dirname; set <path> to dirname otherwise.
    Sets <path> to the empty string if <file> could not be found in $PATH. */
-int            file_find_in_path(GtStr *path, const char *file, GT_Error*);
+int            file_find_in_path(GtStr *path, const char *file, GtError*);
 
 off_t          files_estimate_total_size(const GtStrArray *filenames);
 

@@ -23,10 +23,10 @@
 
 /*
   This module contains wrappers for the functions from the bz2lib we use.
-  These functions always set the given GT_Error object accordingly if an error
+  These functions always set the given GtError object accordingly if an error
   occurs.
 */
 
-BZFILE* gt_ebzopen(const char *path, const char *mode, GT_Error*);
+BZFILE* gt_ebzopen(const char *path, const char *mode, GtError*);
 
 #endif

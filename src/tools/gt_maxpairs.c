@@ -44,7 +44,7 @@ static int simpleexactselfmatchoutput(GT_UNUSED void *info,
                                       Seqpos len,
                                       Seqpos pos1,
                                       Seqpos pos2,
-                                      GT_UNUSED GT_Error *err)
+                                      GT_UNUSED GtError *err)
 {
   if (pos1 > pos2)
   {
@@ -64,7 +64,7 @@ static int simpleexactquerymatchoutput(GT_UNUSED void *info,
                                        Seqpos dbstart,
                                        uint64_t unitnum,
                                        unsigned long querystart,
-                                       GT_UNUSED GT_Error *err)
+                                       GT_UNUSED GtError *err)
 {
   printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
            len,
@@ -78,7 +78,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                             int *parsed_args,
                             int argc,
                             const char **argv,
-                            GT_Error *err)
+                            GtError *err)
 {
   OptionParser *op;
   Option *option, *queryoption, *scanoption, *sampleoption;
@@ -138,7 +138,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   return oprval;
 }
 
-int gt_maxpairs(int argc, const char **argv, GT_Error *err)
+int gt_maxpairs(int argc, const char **argv, GtError *err)
 {
   bool haserr = false;
   int parsed_args;

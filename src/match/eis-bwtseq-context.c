@@ -135,7 +135,7 @@ addMapVal(BWTSeqContextRetrieverFactory *factory,
  */
 extern Seqpos
 BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory, Seqpos chunkSize,
-                   SeqDataReader readSfxIdx, GT_Error *err)
+                   SeqDataReader readSfxIdx, GtError *err)
 {
   Seqpos buf[BLOCK_IO_SIZE], sfxIdxLeft = chunkSize;
   assert(factory);

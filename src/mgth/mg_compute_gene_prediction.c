@@ -34,21 +34,21 @@ static void gene_prediction(unsigned short,
                             GtArray *,
                             HitInformation *,
                             ParseStruct *,
-                            RegionStruct **, unsigned long *, GT_Error *);
+                            RegionStruct **, unsigned long *, GtError *);
 
 /* Funktion zur Vereinigung von genkodierenden Bereichen innerhalb des
    selben Leserahmen
    Parameter: Zeiger auf ParseStruct, Zeiger auf RegionStruct,
               der "reale" Leserahmen
    Returnwert: void */
-static void genemergeprocessing(ParseStruct *, RegionStruct **, GT_Error *);
+static void genemergeprocessing(ParseStruct *, RegionStruct **, GtError *);
 
 /* Funktion zur Identifizierung von Frameshifts
    Parameter: Zeiger auf ParseStruct, Zeiger auf RegionStruct,
               der "reale" Leserahmen
    Returnwert: void */
 static int frameshiftprocessing(ParseStruct *, RegionStruct **, short,
-                                GT_Error *);
+                                GtError *);
 
 /* Funktion zur Ueberpruefung von Sequenzbereichen auf beinhaltende
    Stop-Codons
@@ -56,7 +56,7 @@ static int frameshiftprocessing(ParseStruct *, RegionStruct **, short,
               aktueller Leserahmen
    Returnwert: 0 - kein Stop-Codon; 1 - Stop-Codon */
 static int check_coding(ParseStruct *,
-                        unsigned long, unsigned long, short, GT_Error *);
+                        unsigned long, unsigned long, short, GtError *);
 
 /* Funktion zum sortierten Einfuegen neuer Bereichsgrenzen kodierender
    Abschnitte in das real-Frame-Array
@@ -85,7 +85,7 @@ int mg_compute_gene_prediction(CombinedScoreMatrixEntry
                                PathMatrixEntry **path_matrix,
                                unsigned long contig_len,
                                HitInformation *hit_information,
-                               ParseStruct *parsestruct_ptr, GT_Error * err)
+                               ParseStruct *parsestruct_ptr, GtError * err)
 {
   int had_err = 0;
 
@@ -217,7 +217,7 @@ static void gene_prediction(unsigned short row,
                             HitInformation *hit_information,
                             ParseStruct *parsestruct_ptr,
                             RegionStruct **regionmatrix,
-                            unsigned long *frame_counter, GT_Error * err)
+                            unsigned long *frame_counter, GtError * err)
 {
   unsigned long column_from,
     column_to;
@@ -487,7 +487,7 @@ static void gene_prediction(unsigned short row,
 
 static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
                                 RegionStruct **regionmatrix,
-                                short real_frame, GT_Error * err)
+                                short real_frame, GtError * err)
 {
   int had_err = 0;
 
@@ -694,7 +694,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 }
 
 static void genemergeprocessing(ParseStruct *parsestruct_ptr,
-                                RegionStruct **regionmatrix, GT_Error * err)
+                                RegionStruct **regionmatrix, GtError * err)
 {
   unsigned short row_index;
   short check_bp;
@@ -832,7 +832,7 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
 
 static int check_coding(ParseStruct *parsestruct_ptr,
                         unsigned long from,
-                        unsigned long to, short current_row, GT_Error * err)
+                        unsigned long to, short current_row, GtError * err)
 {
   int had_err = 0;
 

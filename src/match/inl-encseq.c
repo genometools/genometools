@@ -31,7 +31,7 @@
 #define TISTABFILESUFFIX ".tis"
 
 int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
-                    GT_Error *err)
+                    GtError *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -96,7 +96,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr)
 }
 
 static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,
-                        GT_Error *err)
+                        GtError *err)
 {
   Seqpos pos;
   int retval;
@@ -142,7 +142,7 @@ static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,
                                                   Verboseinfo *verboseinfo,
                                                   unsigned long
                                                     *characterdistribution,
-                                                  GT_Error *err)
+                                                  GtError *err)
 {
   Encodedsequence *encseq;
   GT_FastaBuffer *fb = NULL;
@@ -173,7 +173,7 @@ static int fillplainseq(Encodedsequence *encseq,GT_FastaBuffer *fbs,
                                    Seqpos specialranges,
                                    /*@unused@*/ unsigned int mapsize,
                                    /*@unused@*/ Verboseinfo *verboseinfo,
-                                   GT_Error *err)
+                                   GtError *err)
 {
   Encodedsequence *encseq;
   GtStr *tmpfilename;

@@ -172,7 +172,7 @@ void gt_graphics_draw_arrowhead(GT_Graphics *g, double x, double y,
 }
 
 int gt_graphics_save_to_file(const GT_Graphics *g, const char *filename,
-                             GT_Error *err)
+                             GtError *err)
 {
   gt_error_check(err);
   assert(g && g->c_class);

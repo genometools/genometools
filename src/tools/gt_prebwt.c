@@ -73,7 +73,7 @@ static OptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
 static int gt_prebwt_runner(GT_UNUSED int argc,
                             GT_UNUSED const char **argv,
                             GT_UNUSED int parsed_args,
-                            void *tool_arguments, GT_Error *err)
+                            void *tool_arguments, GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;

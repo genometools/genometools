@@ -19,6 +19,6 @@
 #define GT_NEIGHBORJOINING_H
 
 /* the Neighbor-Joining tool */
-int gt_neighborjoining(int argc, const char **argv, GT_Error*);
+int gt_neighborjoining(int argc, const char **argv, GtError*);
 
 #endif

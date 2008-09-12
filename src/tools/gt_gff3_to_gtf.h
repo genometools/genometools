@@ -19,6 +19,6 @@
 #define GT_GFF3_TO_GTF_H
 
 /* the GFF3 to GTF tool */
-int gt_gff3_to_gtf(int argc, const char **argv, GT_Error*);
+int gt_gff3_to_gtf(int argc, const char **argv, GtError*);
 
 #endif

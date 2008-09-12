@@ -70,7 +70,7 @@ createEncIdxSeqFromSfxI(sfxInterface *si,
                         void **headerCBData, bitInsertFunc biFunc,
                         BitOffset cwExtBitsPerPos,
                         varExtBitsEstimator biVarBits, void *cbState,
-                        GT_Error *err);
+                        GtError *err);
 
 /**
  * \brief Construct block-encoded indexed sequence object and write
@@ -110,7 +110,7 @@ createEncIdxSeqFromSA(Suffixarray *sa,
                       void **headerCBData,
                       bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                       varExtBitsEstimator biVarBits, void *cbState,
-                      GT_Error *err);
+                      GtError *err);
 
 /**
  * \brief Construct block-encoded indexed sequence object and write
@@ -153,7 +153,7 @@ createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
                        void **headerCBData,
                        bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                        varExtBitsEstimator biVarBits, void *cbState,
-                       GT_Error *err);
+                       GtError *err);
 
 /**
  * \brief Construct indexed sequence object and write
@@ -187,7 +187,7 @@ createEncIdxSeq(const GtStr *projectName,
                 headerWriteFunc *extHeaderCallbacks, void **headerCBData,
                 bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                 varExtBitsEstimator biVarBits, void *cbState,
-                Verboseinfo *verbosity, GT_Error *err);
+                Verboseinfo *verbosity, GtError *err);
 
 /**
  * \brief Load previously written indexed sequence
@@ -204,7 +204,7 @@ createEncIdxSeq(const GtStr *projectName,
 extern EISeq *
 loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
                    const GtStr *projectName,
-                   enum seqBaseEncoding encType, int features, GT_Error *err);
+                   enum seqBaseEncoding encType, int features, GtError *err);
 
 /**
  * \brief Load previously written block encoded sequence
@@ -217,7 +217,7 @@ loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
 extern EISeq *
 loadEncIdxSeq(const GtStr *projectName,
               enum seqBaseEncoding encType, int features,
-              Verboseinfo *verbosity, GT_Error *err);
+              Verboseinfo *verbosity, GtError *err);
 
 extern EISeq *
 createEncIdxSeqGen(Seqpos totalLen, const GtStr *projectName,
@@ -229,6 +229,6 @@ createEncIdxSeqGen(Seqpos totalLen, const GtStr *projectName,
                    headerWriteFunc *extHeaderCallbacks,
                    void **headerCBData,
                    bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
-                   varExtBitsEstimator biVarBits, void *cbState, GT_Error *err);
+                   varExtBitsEstimator biVarBits, void *cbState, GtError *err);
 
 #endif

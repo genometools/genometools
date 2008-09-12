@@ -35,8 +35,8 @@ unsigned long gt_dlist_size(const GT_Dlist*);
 void          gt_dlist_add(GT_Dlist*, void *data);
 /* Remove <dlistelem> from <dlist> and free it. */
 void          gt_dlist_remove(GT_Dlist *dlist, GT_Dlistelem *dlistelem);
-int           gt_dlist_example(GT_Error*);
-int           gt_dlist_unit_test(GT_Error*);
+int           gt_dlist_example(GtError*);
+int           gt_dlist_unit_test(GtError*);
 void          gt_dlist_delete(GT_Dlist*);
 
 GT_Dlistelem* gt_dlistelem_next(const GT_Dlistelem*);

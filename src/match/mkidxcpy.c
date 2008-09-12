@@ -27,7 +27,7 @@ int makeindexfilecopy(const GtStr *destindex,
                       const GtStr *sourceindex,
                       const char *suffix,
                       uint64_t maxlength,
-                      GT_Error *err)
+                      GtError *err)
 {
   FILE *fpdest = NULL, *fpsource = NULL;
   int cc;

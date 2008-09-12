@@ -102,6 +102,6 @@ int rbt_walkrange (const RBTnode *root,
                    Comparewithkey lowerequalright,
                    void *cmpinfo);
 
-int rbt_unit_test (GT_Error *err);
+int rbt_unit_test (GtError *err);
 
 #endif

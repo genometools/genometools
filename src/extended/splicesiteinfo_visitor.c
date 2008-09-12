@@ -54,7 +54,7 @@ static void splicesiteinfo_visitor_free(GenomeVisitor *gv)
 }
 
 static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
-                          GT_Error *err)
+                          GtError *err)
 {
   const char *sequence;
   unsigned long seqlen;
@@ -109,7 +109,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GT_GenomeNode *intron,
 
 static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
                                                  GT_GenomeFeature *gf,
-                                                 GT_Error *err)
+                                                 GtError *err)
 {
   SpliceSiteInfoVisitor *ssiv;
   GT_GenomeNodeIterator *gni;

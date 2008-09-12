@@ -150,7 +150,7 @@ BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
 
 static size_t
 BWTSASSReadSufTab(SeqDataSrc src, void *dest, size_t len,
-                  GT_UNUSED GT_Error *err)
+                  GT_UNUSED GtError *err)
 {
   const BWTSeq *bwtSeq;
   struct extBitsRetrieval extBits;
@@ -175,7 +175,7 @@ BWTSASSMakeSufTabReader(GT_UNUSED BWTSASeqSrc *bwtSASeqSrc,
 }
 
 static size_t
-BWTSASSReadBWT(SeqDataSrc src, void *dest, size_t len, GT_UNUSED GT_Error *err)
+BWTSASSReadBWT(SeqDataSrc src, void *dest, size_t len, GT_UNUSED GtError *err)
 {
   const BWTSeq *bwtSeq;
   assert(src);

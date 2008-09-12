@@ -73,7 +73,7 @@ static int canvas_lua_to_file(lua_State *L)
 {
   GT_Canvas **canvas;
   GT_CanvasCairoFile *ccf;
-  GT_Error *err;
+  GtError *err;
   const char *fn;
   int had_err = 0;
   err = gt_error_new();

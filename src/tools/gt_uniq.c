@@ -29,7 +29,7 @@ typedef struct {
 } UniqArguments;
 
 static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
-                            int argc, const char **argv, GT_Error *err)
+                            int argc, const char **argv, GtError *err)
 {
   OptionParser *op;
   OutputFileInfo *ofi;
@@ -60,7 +60,7 @@ static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
   return oprval;
 }
 
-int gt_uniq(int argc, const char **argv, GT_Error *err)
+int gt_uniq(int argc, const char **argv, GtError *err)
 {
   GenomeStream *gff3_in_stream,
                *uniq_stream = NULL,

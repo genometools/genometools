@@ -32,7 +32,7 @@ double     evaluator_get_specificity(const Evaluator*);
 void       evaluator_show_sensitivity(const Evaluator*, FILE*);
 void       evaluator_show_specificity(const Evaluator*, FILE*);
 void       evaluator_reset(Evaluator*);
-int        evaluator_unit_test(GT_Error*);
+int        evaluator_unit_test(GtError*);
 void       evaluator_delete(Evaluator*);
 
 #endif

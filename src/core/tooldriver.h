@@ -23,11 +23,11 @@
 
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.
-   The tool driver creates an GT_Error object, calls <tool>, and reports errors.
+   The tool driver creates an GtError object, calls <tool>, and reports errors.
    See below for example code to create a separate binary for the eval tool.
    XXX: change example to reflect the real gth application
 */
-int tooldriver(int(*tool)(int argc, const char **argv, GT_Error*),
+int tooldriver(int(*tool)(int argc, const char **argv, GtError*),
                int argc, char *argv[]);
 
 int toolobjdriver(ToolConstructor, int argc, char *argv[]);

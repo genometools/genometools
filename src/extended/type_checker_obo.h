@@ -25,6 +25,6 @@ typedef struct GT_TypeCheckerOBO GT_TypeCheckerOBO;
 
 const GT_TypeCheckerClass* gt_type_checker_obo_class(void);
 GT_TypeChecker*            gt_type_checker_obo_new(const char *obo_file_path,
-                                                   GT_Error*);
+                                                   GtError*);
 
 #endif

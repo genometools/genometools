@@ -99,7 +99,7 @@ void      gt_graphics_draw_arrowhead(GT_Graphics*, double x, double y, GT_Color,
                                      ArrowStatus);
 /* Write out the Graphic to the given file with <filename>. */
 int       gt_graphics_save_to_file(const GT_Graphics*, const char *filename,
-                                   GT_Error*);
+                                   GtError*);
 /* Write out the Graphic to the given <stream>. */
 void      gt_graphics_save_to_stream(const GT_Graphics*, GtStr *stream);
 

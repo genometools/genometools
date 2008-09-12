@@ -376,7 +376,7 @@ static void process_node(GT_Diagram *d, GT_GenomeNode *node,
 }
 
 static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value,
-                                     void *data, GT_UNUSED GT_Error *err)
+                                     void *data, GT_UNUSED GtError *err)
 {
   GT_TracklineInfo *add = (GT_TracklineInfo*) data;
   add->total_lines += gt_track_get_number_of_lines((GT_Track*) value);
@@ -386,7 +386,7 @@ static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value,
 }
 
 static int visit_child(GT_GenomeNode* gn, void* gt_genome_node_children,
-                       GT_Error *err)
+                       GtError *err)
 {
   NodeTraverseInfo* gt_genome_node_info;
   gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
@@ -418,7 +418,7 @@ static GtStr* gt_track_key_new(const char *filename, const char *type)
 
 /* Create lists of all GT_Blocks in the diagram. */
 static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
-                          GT_UNUSED GT_Error *err)
+                          GT_UNUSED GtError *err)
 {
   NodeInfoElement *ni = (NodeInfoElement*) value;
   GT_Diagram *diagram = (GT_Diagram*) data;
@@ -571,7 +571,7 @@ static int blocklist_block_compare(const void *item1, const void *item2)
 }
 
 static int layout_tracks(void *key, void *value, void *data,
-                         GT_UNUSED GT_Error *err)
+                         GT_UNUSED GtError *err)
 {
   unsigned long i, max;
   GT_Track *track;
@@ -622,7 +622,7 @@ static int layout_tracks(void *key, void *value, void *data,
 }
 
 static int render_tracks(GT_UNUSED void *key, void *value, void *data,
-                     GT_UNUSED GT_Error *err)
+                     GT_UNUSED GtError *err)
 {
   GT_TrackTraverseInfo *tti = (GT_TrackTraverseInfo*) data;
   GT_Track *track = (GT_Track*) value;
@@ -649,7 +649,7 @@ int gt_diagram_sketch(GT_Diagram *dia, GT_Canvas *canvas)
   return had_err;
 }
 
-int gt_diagram_unit_test(GT_Error *err)
+int gt_diagram_unit_test(GtError *err)
 {
   GT_GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GT_FeatureIndex *fi;

@@ -54,7 +54,7 @@
 typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    BitString varDest, BitOffset varOffset,
                                    Seqpos start, Seqpos len, void *cbState,
-                                   GT_Error *err);
+                                   GtError *err);
 
 /**
  * Callback to insert one header field. The data written can later be
@@ -419,7 +419,7 @@ enum EISIntegrityCheckFlags
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags,
-                   Verboseinfo *verbosity, GT_Error *err);
+                   Verboseinfo *verbosity, GtError *err);
 
 /**
  * @brief Position file pointer at header written by upper layer.

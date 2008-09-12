@@ -23,7 +23,7 @@
 #include "tools/gt_matchcount.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GT_Error *err)
+                            GtError *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -42,7 +42,7 @@ static void proc_match_count(int u_pos, int v_pos, int match_count)
   printf("mc(%2d, %2d)=%2d\n", u_pos, v_pos, match_count);
 }
 
-int gt_matchcount(int argc, const char **argv, GT_Error *err)
+int gt_matchcount(int argc, const char **argv, GtError *err)
 {
   const char *seq1, *seq2;
   int k, len1, len2, parsed_args, had_err = 0;

@@ -28,7 +28,7 @@ GT_DynBittab* gt_dynbittab_new(void);
 void          gt_dynbittab_set_bit(GT_DynBittab*, unsigned long);
 void          gt_dynbittab_unset_bit(GT_DynBittab*, unsigned long);
 bool          gt_dynbittab_bit_is_set(const GT_DynBittab*, unsigned long);
-int           gt_dynbittab_unit_test(GT_Error*);
+int           gt_dynbittab_unit_test(GtError*);
 void          gt_dynbittab_delete(GT_DynBittab*);
 
 #endif

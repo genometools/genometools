@@ -34,21 +34,21 @@ typedef enum {
 /* gets called for each description (the start of a fasta entry) */
 typedef int (*GT_FastaReaderProcDescription)(const char *description,
                                              unsigned long length, void *data,
-                                             GT_Error*);
+                                             GtError*);
 /* gets called for each sequence part of a fasta entry */
 typedef int (*GT_FastaReaderProcSequencePart)(const char *seqpart,
                                               unsigned long length, void *data,
-                                              GT_Error*);
+                                              GtError*);
 /* gets called after a fasta entry has been read */
 typedef int (*GT_FastaReaderProcSequenceLength)(unsigned long, void *data,
-                                                GT_Error*);
+                                                GtError*);
 
 /* construct a new fasta reader for the file named <sequence_filename>, pass
    NULL to read from stdin */
 int          gt_fasta_reader_run(GT_FastaReader*, GT_FastaReaderProcDescription,
                               GT_FastaReaderProcSequencePart,
                               GT_FastaReaderProcSequenceLength, void *data,
-                              GT_Error*);
+                              GtError*);
 void         gt_fasta_reader_delete(GT_FastaReader*);
 
 #endif

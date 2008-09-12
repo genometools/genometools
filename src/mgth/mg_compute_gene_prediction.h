@@ -31,5 +31,5 @@
 int mg_compute_gene_prediction(CombinedScoreMatrixEntry **,
                                PathMatrixEntry **,
                                unsigned long,
-                               HitInformation *, ParseStruct *, GT_Error *);
+                               HitInformation *, ParseStruct *, GtError *);
 #endif

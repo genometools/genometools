@@ -280,7 +280,7 @@ void alignment_show_multieop_list(const Alignment *a, FILE *fp)
   }
 }
 
-int alignment_unit_test(GT_Error *err)
+int alignment_unit_test(GtError *err)
 {
   static char u[] = "acgtagatatatagat",
               v[] = "agaaagaggtaagaggga";

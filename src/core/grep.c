@@ -24,7 +24,7 @@
 #include "core/error.h"
 #include "core/grep.h"
 
-static void grep_error(int errcode, regex_t *matcher, GT_Error *err)
+static void grep_error(int errcode, regex_t *matcher, GtError *err)
 {
   char sbuf[BUFSIZ], *buf;
   size_t bufsize;
@@ -36,7 +36,7 @@ static void grep_error(int errcode, regex_t *matcher, GT_Error *err)
   free(buf);
 }
 
-int gt_grep(bool *match, const char *pattern, const char *line, GT_Error *err)
+int gt_grep(bool *match, const char *pattern, const char *line, GtError *err)
 {
   regex_t matcher;
   int rval, had_err = 0;
@@ -63,7 +63,7 @@ int gt_grep(bool *match, const char *pattern, const char *line, GT_Error *err)
   return had_err;
 }
 
-int gt_grep_unit_test(GT_Error *err)
+int gt_grep_unit_test(GtError *err)
 {
   bool match;
   int grep_err, had_err = 0;

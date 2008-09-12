@@ -47,6 +47,6 @@
 #include "core/error.h"
 
 char* gt_basename(const char *path);
-int   gt_basename_unit_test(GT_Error*);
+int   gt_basename_unit_test(GtError*);
 
 #endif

@@ -108,7 +108,7 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      int ulen,
                                      int vlen,
                                      Xdropscore xdropbelowscore,
-                                     GT_Error *err);
+                                     GtError *err);
 
 #define EVALXDROPARBITSCORESRIGHT\
       void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
@@ -121,7 +121,7 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      int ulen,\
                                      int vlen,\
                                      Xdropscore xdropbelowscore,\
-                                     GT_UNUSED GT_Error *err)
+                                     GT_UNUSED GtError *err)
 
 void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     Myxdropbest * xdropbest,
@@ -133,7 +133,7 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     int ulen,
                                     int vlen,
                                     Xdropscore xdropbelowscore,
-                                    GT_Error *err);
+                                    GtError *err);
 
 #define EVALXDROPARBITSCORESLEFT\
        void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
@@ -146,5 +146,5 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     int ulen,\
                                     int vlen,\
                                     Xdropscore xdropbelowscore,\
-                                    GT_UNUSED GT_Error *err)
+                                    GT_UNUSED GtError *err)
 #endif

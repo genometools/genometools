@@ -22,7 +22,7 @@
 #include "tools/gt_trieins.h"
 
 static OPrval parse_options(bool *onlyins,int *parsed_args,
-                            int argc, const char **argv, GT_Error *err)
+                            int argc, const char **argv, GtError *err)
 {
   OptionParser *op;
   Option *option;
@@ -40,7 +40,7 @@ static OPrval parse_options(bool *onlyins,int *parsed_args,
   return oprval;
 }
 
-int gt_trieins(int argc, const char **argv, GT_Error *err)
+int gt_trieins(int argc, const char **argv, GtError *err)
 {
   GtStr *indexname;
   bool haserr = false;

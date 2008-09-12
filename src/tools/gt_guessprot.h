@@ -19,6 +19,6 @@
 #define GT_GUESSPROT_H
 
 /* the guessprot tool */
-int gt_guessprot(int argc, const char **argv, GT_Error*);
+int gt_guessprot(int argc, const char **argv, GtError*);
 
 #endif

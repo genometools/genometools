@@ -33,12 +33,12 @@ typedef struct Mapping Mapping;
    function must contain entries and return results of the given type,
    respectively. Returns NULL on error. */
 Mapping* mapping_new(GtStr *mapping_file, const char *global_name,
-                     MappingType type, GT_Error*);
+                     MappingType type, GtError*);
 /* map <input> to string, returns NULL on error */
-GtStr*  mapping_map_string(Mapping*, const char *input, GT_Error*);
+GtStr*  mapping_map_string(Mapping*, const char *input, GtError*);
 /* map <input> to integer <output>, returns -1 on error */
 int      mapping_map_integer(Mapping*, long *output, const char *input,
-                             GT_Error*);
+                             GtError*);
 void     mapping_delete(Mapping*);
 
 #endif

@@ -38,7 +38,7 @@ static int gt_fasta_reader_seqit_run(GT_FastaReader *fasta_reader,
                                      proc_sequence_part,
                                      GT_FastaReaderProcSequenceLength
                                      proc_sequence_length,
-                                     void *data, GT_Error *err)
+                                     void *data, GtError *err)
 {
   GT_FastaReaderSeqIt *gt_fasta_reader_seqit =
     gt_fasta_reader_seqit_cast(fasta_reader);

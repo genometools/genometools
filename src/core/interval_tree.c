@@ -351,7 +351,7 @@ static int range_ptr_compare(const void *r1p, const void *r2p)
   return ret;
 }
 
-int gt_interval_tree_unit_test(GT_UNUSED GT_Error *err)
+int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
 {
   GT_IntervalTree *it = NULL;
   GT_IntervalTreeNode *res = NULL;

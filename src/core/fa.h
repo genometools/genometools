@@ -31,7 +31,7 @@
 #define gt_fopen(path, mode, err)\
         gt_fopen_func(path, mode, __FILE__, __LINE__, err)
 FILE*   gt_fopen_func(const char *path, const char *mode, const char*, int,
-                      GT_Error*);
+                      GtError*);
 #define gt_xfopen(path, mode)\
         gt_xfopen_func(path, mode, __FILE__, __LINE__)
 FILE*   gt_xfopen_func(const char *path, const char *mode, const char*, int);
@@ -42,7 +42,7 @@ void    gt_xfclose(FILE *stream);
 #define gt_gzopen(path, mode, err)\
         gt_gzopen_func(path, mode, __FILE__, __LINE__, err)
 gzFile  gt_gzopen_func(const char *path, const char *mode, const char*, int,
-                       GT_Error*);
+                       GtError*);
 #define gt_xgzopen(path, mode)\
         gt_xgzopen_func(path, mode, __FILE__, __LINE__)
 gzFile  gt_xgzopen_func(const char *path, const char *mode, const char*, int);
@@ -53,7 +53,7 @@ void    gt_xgzclose(gzFile stream);
 #define gt_bzopen(path, mode, err)\
         gt_bzopen_func(path, mode, __FILE__, __LINE__, err)
 BZFILE* gt_bzopen_func(const char *path, const char *mode, const char*, int,
-                       GT_Error*);
+                       GtError*);
 #define gt_xbzopen(path, mode)\
         gt_xbzopen_func(path, mode, __FILE__, __LINE__)
 BZFILE* gt_xbzopen_func(const char *path, const char *mode, const char*, int);

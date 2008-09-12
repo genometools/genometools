@@ -56,7 +56,7 @@ static int inputthesequences(Alphabet **alpha,
                              const GtStrArray *indexnametab,
                              unsigned int demand,
                              Verboseinfo *verboseinfo,
-                             GT_Error *err)
+                             GtError *err)
 {
   unsigned long idx;
   GtStr *indexname;
@@ -89,7 +89,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
                                Seqpos *nextpostable,
                                Suffixarray *suffixarraytable,
                                unsigned int numofindexes,
-                               GT_Error *err)
+                               GtError *err)
 {
   unsigned int idx;
   Seqpos suftabvalue;
@@ -124,7 +124,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
 /*@null@*/ static Mergertrienode *findlargestnodeleqlcpvalue(
                                           Mergertrienode *smallest,
                                           Seqpos lcpvalue,
-                                          GT_Error *err)
+                                          GtError *err)
 {
   Mergertrienode *tmp;
 
@@ -141,7 +141,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   return NULL;
 }
 
-int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GT_Error *err)
+int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
 {
   Mergertrienode *tmpsmallestleaf, *tmplcpnode;
   Largelcpvalue tmpexception;
@@ -250,7 +250,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                           const GtStrArray *indexnametab,
                           unsigned int demand,
                           Verboseinfo *verboseinfo,
-                          GT_Error *err)
+                          GtError *err)
 {
   unsigned int numofindexes;
   bool haserr = false;

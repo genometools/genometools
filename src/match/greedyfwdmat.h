@@ -46,7 +46,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
                               bool showsequence,
                               bool showquerypos,
                               bool showsubjectpos,
-                              GT_Error *err);
+                              GtError *err);
 
 int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const void *genericindex,
@@ -56,5 +56,5 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                           const Alphabet *alphabet,
                           unsigned int prefixlength,
                           const GtStrArray *queryfilenames,
-                          GT_Error *err);
+                          GtError *err);
 #endif

@@ -47,7 +47,7 @@ typedef struct
 static int initNameandFILE(NameandFILE *nf,
                             const GtStr *outindex,
                             const char *suffix,
-                            GT_Error *err)
+                            GtError *err)
 {
   gt_error_check(err);
   nf->outfilename = gt_str_clone(outindex);
@@ -69,7 +69,7 @@ static void freeNameandFILE(NameandFILE *nf)
 static int outputsuflcpllv(void *processinfo,
                            const Seqpos *sequenceoffsettable,
                            const Suflcpbuffer *buf,
-                           GT_Error *err)
+                           GtError *err)
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
 
@@ -144,7 +144,7 @@ static int outputsuflcpllv(void *processinfo,
 
 static int mergeandstoreindex(const GtStr *storeindex,
                               Emissionmergedesa *emmesa,
-                              GT_Error *err)
+                              GtError *err)
 {
   Mergeoutinfo mergeoutinfo;
   Uchar smalllcpvalue;
@@ -216,7 +216,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
 int performtheindexmerging(const GtStr *storeindex,
                            const GtStrArray *indexnametab,
                            Verboseinfo *verboseinfo,
-                           GT_Error *err)
+                           GtError *err)
 {
   Emissionmergedesa emmesa;
   unsigned int demand = SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB;

@@ -34,6 +34,6 @@ const char*   gt_cstr_table_get(const GT_CstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
 GtStrArray*  gt_cstr_table_get_all(const GT_CstrTable *table);
-int           gt_cstr_table_unit_test(GT_Error*);
+int           gt_cstr_table_unit_test(GtError*);
 
 #endif

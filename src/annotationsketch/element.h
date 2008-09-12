@@ -46,7 +46,7 @@ bool                  gt_element_is_marked(const GT_Element*);
 bool                  gt_elements_are_equal(const GT_Element*,
                                             const GT_Element*);
 int                   gt_element_sketch(GT_Element*, GT_Canvas*);
-int                   gt_element_unit_test(GT_Error*);
+int                   gt_element_unit_test(GtError*);
 void                  gt_element_delete(GT_Element* element);
 
 #endif

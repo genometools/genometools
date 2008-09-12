@@ -41,7 +41,7 @@ Bcktab *mapbcktab(const GtStr *indexname,
                   Seqpos totallength,
                   unsigned int numofchars,
                   unsigned int prefixlength,
-                  GT_Error *err);
+                  GtError *err);
 
 void freebcktab(Bcktab **bcktab);
 
@@ -51,7 +51,7 @@ Bcktab *allocBcktab(Seqpos totallength,
                     unsigned int codebits,
                     Codetype maxcodevalue,
                     Verboseinfo *verboseinfo,
-                    GT_Error *err);
+                    GtError *err);
 
 void updatebckspecials(Bcktab *bcktab,
                        Codetype code,
@@ -66,7 +66,7 @@ Codetype codedownscale(const Bcktab *bcktab,
 void addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
                          Seqpos specialcharacters);
 
-int bcktab2file(FILE *fp,const Bcktab *bcktab,GT_Error *err);
+int bcktab2file(FILE *fp,const Bcktab *bcktab,GtError *err);
 
 unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
                                    const Bcktab *bcktab,

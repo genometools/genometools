@@ -40,7 +40,7 @@ int gt_fasta_reader_run(GT_FastaReader *fr,
                      GT_FastaReaderProcDescription proc_description,
                      GT_FastaReaderProcSequencePart proc_sequence_part,
                      GT_FastaReaderProcSequenceLength proc_sequence_length,
-                     void *data, GT_Error *err)
+                     void *data, GtError *err)
 {
   gt_error_check(err);
   assert(fr && fr->c_class && fr->c_class->run);

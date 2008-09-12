@@ -7,7 +7,7 @@ int testencodedsequence(const GtStrArray *filenametab,
                         const Uchar *symbolmap,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
-                        GT_Error *err);
+                        GtError *err);
 
 int checkspecialrangesfast(const Encodedsequence *encseq);
 

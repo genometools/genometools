@@ -8,14 +8,14 @@ int streamsuffixarray(Suffixarray *suffixarray,
                       unsigned int demand,
                       const GtStr *indexname,
                       Verboseinfo *verboseinfo,
-                      GT_Error *err);
+                      GtError *err);
 
 int mapsuffixarray(Suffixarray *suffixarray,
                    Seqpos *totallength,
                    unsigned int demand,
                    const GtStr *indexname,
                    Verboseinfo *verboseinfo,
-                   GT_Error *err);
+                   GtError *err);
 
 #ifdef __cplusplus
 }

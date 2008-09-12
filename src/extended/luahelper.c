@@ -26,7 +26,7 @@
 /* key used to store the Env object in the Lua registry */
 #define ENV_KEY env_new
 
-int lua_set_modules_path(lua_State *L, GT_Error *err)
+int lua_set_modules_path(lua_State *L, GtError *err)
 {
   GtStr *modules_path = NULL, *external_modules_path = NULL,
          *package_path = NULL;
@@ -104,7 +104,7 @@ void lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
   }
 }
 
-int lua_gt_error(lua_State *L, GT_Error *err)
+int lua_gt_error(lua_State *L, GtError *err)
 {
   assert(L && err);
   assert(gt_error_is_set(err));

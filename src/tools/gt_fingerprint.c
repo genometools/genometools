@@ -108,7 +108,7 @@ static void proc_superfluous_sequence(const char *string,
 }
 
 static int compare_fingerprints(StringDistri *sd, const char *checklist,
-                                GT_Error *err)
+                                GtError *err)
 {
   bool comparisons_failed = false, use_stdin = false;
   FILE *checkfile;
@@ -157,7 +157,7 @@ static void show_duplicate(const char *fingerprint, unsigned long occurrences,
   info->num_of_sequences += occurrences;
 }
 
-static int show_duplicates(StringDistri *sd, GT_Error *err)
+static int show_duplicates(StringDistri *sd, GtError *err)
 {
   FingerprintInfo info;
   gt_error_check(err);
@@ -175,7 +175,7 @@ static int show_duplicates(StringDistri *sd, GT_Error *err)
 }
 
 static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
-                                 void *tool_arguments, GT_Error *err)
+                                 void *tool_arguments, GtError *err)
 {
   FingerprintArguments *arguments = tool_arguments;
   GT_Bioseq *bs;

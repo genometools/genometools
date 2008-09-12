@@ -59,7 +59,7 @@ static void gt_sequence_node_change_seqid(GT_GenomeNode *gn, GtStr *seqid)
 }
 
 static int gt_sequence_node_accept(GT_GenomeNode *gn, GenomeVisitor *gv,
-                                   GT_Error *err)
+                                   GtError *err)
 {
   GT_SequenceNode *sn;
   gt_error_check(err);

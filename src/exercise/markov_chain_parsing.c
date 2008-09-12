@@ -26,7 +26,7 @@
 #define THIRDLINE  "# State labels:"
 #define FIFTHLINE  "# Transition matrix:"
 
-static int read_next_line(GtStr *line, FILE *fp, const char *filename, GT_Error *err)
+static int read_next_line(GtStr *line, FILE *fp, const char *filename, GtError *err)
 {
   gt_error_check(err);
   assert(line && fp);
@@ -39,7 +39,7 @@ static int read_next_line(GtStr *line, FILE *fp, const char *filename, GT_Error 
 }
 
 static int scan_alphabet(GtStr *alphabet, const char *line, int num_of_states,
-                         GT_Error *err)
+                         GtError *err)
 {
   gt_error_check(err);
   assert(alphabet && line);
@@ -57,7 +57,7 @@ static int scan_alphabet(GtStr *alphabet, const char *line, int num_of_states,
 }
 
 static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
-                                            GT_Error *err)
+                                            GtError *err)
 {
   unsigned long i, j;
   MarkovChain *mc = NULL;
@@ -166,7 +166,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
   return mc;
 }
 
-MarkovChain* markov_chain_parse(const char *filename, GT_Error *err)
+MarkovChain* markov_chain_parse(const char *filename, GtError *err)
 {
   MarkovChain *mc;
   FILE *fp;

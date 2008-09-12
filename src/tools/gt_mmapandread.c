@@ -23,7 +23,7 @@
 #include "tools/gt_mmapandread.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            GT_Error *err)
+                            GtError *err)
 {
   OptionParser *op;
   OPrval oprval;
@@ -36,7 +36,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-int gt_mmapandread(int argc, const char **argv, GT_Error *err)
+int gt_mmapandread(int argc, const char **argv, GtError *err)
 {
   int i, fd, parsed_args;
   void *map;

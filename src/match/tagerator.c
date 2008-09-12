@@ -240,7 +240,7 @@ static int dotransformtag(Uchar *transformedtag,
                           unsigned long taglen,
                           uint64_t tagnumber,
                           bool replacewildcard,
-                          GT_Error *err)
+                          GtError *err)
 {
   unsigned long idx;
   Uchar charcode;
@@ -407,7 +407,7 @@ static void reversecomplementtag(Uchar *transformedtag,unsigned long taglen)
   }
 }
 
-int runtagerator(const TageratorOptions *tageratoroptions,GT_Error *err)
+int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;

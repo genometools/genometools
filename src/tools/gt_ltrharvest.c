@@ -19,7 +19,7 @@
 #include "ltr/ltrharvest-run.h"
 #include "tools/gt_ltrharvest.h"
 
-int gt_ltrharvest(int argc, const char **argv, GT_Error *err)
+int gt_ltrharvest(int argc, const char **argv, GtError *err)
 {
   gt_error_check(err);
   return parseargsandcallltrharvest(argc, argv, err);

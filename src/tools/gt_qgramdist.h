@@ -19,6 +19,6 @@
 #define GT_QGRAMDIST_H
 
 /* the q-gram distance tool */
-int gt_qgramdist(int argc, const char **argv, GT_Error*);
+int gt_qgramdist(int argc, const char **argv, GtError*);
 
 #endif

@@ -39,7 +39,7 @@
             (ARRAY2DIM)[gt_a2d_i] = (ARRAY2DIM)[gt_a2d_i-1] + (COLUMNS);      \
         }
 
-int     gt_array2dim_example(GT_Error*);
+int     gt_array2dim_example(GtError*);
 
 #define gt_array2dim_delete(ARRAY2DIM) \
         gt_free((ARRAY2DIM)[0]);       \

@@ -150,7 +150,7 @@ static int
 ht_insert(Hashtable *ht, const void *elem);
 
 static enum iterator_op
-ht_insert_wrapper(void *elem, void *data, GT_UNUSED GT_Error *err)
+ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
 {
 #ifndef NDEBUG
   int ins_count =
@@ -398,7 +398,7 @@ struct hash_to_array_data
 };
 
 static enum iterator_op
-ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GT_Error *err)
+ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
 {
   GtArray *hash_entries;
   assert(elem && data);
@@ -410,7 +410,7 @@ ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GT_Error *err)
 
 extern int
 hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
-                          GT_Compare cmp, GT_Error *err)
+                          GT_Compare cmp, GtError *err)
 {
   GtArray *hash_entries;
   void *elem;
@@ -442,14 +442,14 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
 
 extern int
 hashtable_foreach_in_default_order(Hashtable *ht, Elemvisitfunc iter,
-                                   void *data, GT_Error *err)
+                                   void *data, GtError *err)
 {
   return hashtable_foreach_ordered(ht, iter, data, ht->table_info.cmp, err);
 }
 
 extern int
 hashtable_foreach(Hashtable *ht, Elemvisitfunc visitor, void *data,
-                  GT_Error *err)
+                  GtError *err)
 {
   htsize_t i, table_size = ht->table_mask + 1, deletion_count = 0;
   jmp_buf env;
@@ -802,7 +802,7 @@ hashtable_test(HashElemInfo table_info)
   return had_err;
 }
 
-int hashtable_unit_test(GT_UNUSED GT_Error *err)
+int hashtable_unit_test(GT_UNUSED GtError *err)
 {
   int had_err;
   gt_error_check(err);

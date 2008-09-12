@@ -36,6 +36,6 @@ typedef enum
 
 const char *showreadmode(Readmode readmode);
 
-int parsereadmode(const char *dirargstring,GT_Error *err);
+int parsereadmode(const char *dirargstring,GtError *err);
 
 #endif

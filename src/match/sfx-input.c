@@ -37,7 +37,7 @@
 #include "fillsci.pr"
 
 static int outal1file(const GtStr *indexname,const Alphabet *alpha,
-                      GT_Error *err)
+                      GtError *err)
 {
   FILE *al1fp;
   bool haserr = false;
@@ -74,7 +74,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                          Measuretime *mtime,
                          const Suffixeratoroptions *so,
                          Verboseinfo *verboseinfo,
-                         GT_Error *err)
+                         GtError *err)
 {
   Seqpos totallength;
   bool haserr = false;
@@ -164,7 +164,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                         const GtStr *indexname,
                         Verboseinfo *verboseinfo,
-                        GT_Error *err)
+                        GtError *err)
 {
   Seqpos totallength;
   bool haserr = false;

@@ -88,7 +88,7 @@ static void showmapspec(const Mapspecification *mapspec)
 static int assigncorrecttype(Mapspecification *mapspec,
                              void *ptr,
                              unsigned long byteoffset,
-                             GT_Error *err)
+                             GtError *err)
 {
   void *voidptr;
   bool haserr = false;
@@ -141,7 +141,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void *assignmapinfo,
                         const GtStr *tmpfilename,
                         unsigned long expectedsize,
-                        GT_Error *err)
+                        GtError *err)
 {
   void *mapptr;
   uint64_t expectedaccordingtomapspec;
@@ -235,7 +235,7 @@ int flushtheindex2file(FILE *fp,
                        Assignmapspec assignmapspec,
                        void *assignmapinfo,
                        unsigned long expectedsize,
-                       GT_Error *err)
+                       GtError *err)
 {
   ArrayMapspecification mapspectable;
   Mapspecification *mapspecptr;

@@ -74,7 +74,7 @@ static inline int ownbuffergt_genfile_getc(GT_FastaBuffer *fb,
   return fb->inputbuffer[fb->currentinpos++];
 }
 
-static int advancefastabufferstate(GT_FastaBuffer *fb, GT_Error *err)
+static int advancefastabufferstate(GT_FastaBuffer *fb, GtError *err)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
@@ -227,7 +227,7 @@ static int advancefastabufferstate(GT_FastaBuffer *fb, GT_Error *err)
   return 0;
 }
 
-static int advancePlainbufferstate(GT_FastaBuffer *fb, GT_Error *err)
+static int advancePlainbufferstate(GT_FastaBuffer *fb, GtError *err)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileread = 0;
@@ -304,7 +304,7 @@ static int advancePlainbufferstate(GT_FastaBuffer *fb, GT_Error *err)
   return 0;
 }
 
-int advanceformatbufferstate(GT_FastaBuffer *fb, GT_Error *err)
+int advanceformatbufferstate(GT_FastaBuffer *fb, GtError *err)
 {
   gt_error_check(err);
   if (fb->plainformat)

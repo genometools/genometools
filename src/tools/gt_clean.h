@@ -19,6 +19,6 @@
 #define GT_CLEAN_H
 
 /* the clean tool */
-int gt_clean(int argc, const char **argv, GT_Error*);
+int gt_clean(int argc, const char **argv, GtError*);
 
 #endif

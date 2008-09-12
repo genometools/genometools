@@ -127,7 +127,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 
 int checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,
-                      GT_Error *err)
+                      GtError *err)
 {
   gt_error_check(err);
   if (maxprefixlen < prefixlength)

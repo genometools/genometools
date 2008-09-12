@@ -69,7 +69,7 @@ uint64_t      safe_mult_u64(uint64_t, uint64_t);
 unsigned long safe_mult_ulong(unsigned long, unsigned long);
 long          safe_cast2long(unsigned long);
 unsigned long safe_cast2ulong(long);
-int           safearith_example(GT_Error*);
-int           safearith_unit_test(GT_Error*);
+int           safearith_example(GtError*);
+int           safearith_unit_test(GtError*);
 
 #endif

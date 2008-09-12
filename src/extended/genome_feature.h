@@ -94,6 +94,6 @@ double                gt_genome_feature_average_splice_site_prob(const
    strand, and phase. */
 bool                  gt_genome_features_are_similar(GT_GenomeFeature*,
                                                      GT_GenomeFeature*);
-int                   gt_genome_feature_unit_test(GT_Error*);
+int                   gt_genome_feature_unit_test(GtError*);
 
 #endif

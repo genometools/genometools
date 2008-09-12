@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int guessifproteinsequencestream(const GtStrArray *filenametab,GT_Error *err);
+int guessifproteinsequencestream(const GtStrArray *filenametab,GtError *err);
 
 #ifdef __cplusplus
 }

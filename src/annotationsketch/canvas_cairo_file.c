@@ -98,7 +98,7 @@ int gt_canvas_cairo_file_visit_diagram_post(GT_Canvas *canvas, GT_Diagram *dia)
 }
 
 int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile *canvas,
-                                 const char *filename, GT_Error *err)
+                                 const char *filename, GtError *err)
 {
   int had_err = 0;
   GT_Canvas *c = (GT_Canvas*) canvas;

@@ -114,7 +114,7 @@ static int testfullscan(const GtStrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
-                        GT_Error *err)
+                        GtError *err)
 {
   Seqpos pos, totallength;
   Uchar ccscan = 0, ccra, ccsr;
@@ -211,7 +211,7 @@ int testencodedsequence(const GtStrArray *filenametab,
                         const Uchar *symbolmap,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
-                        GT_Error *err)
+                        GtError *err)
 {
   if (hasfastspecialrangeenumerator(encseq))
   {

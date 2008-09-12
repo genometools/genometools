@@ -57,8 +57,8 @@ unsigned long gt_bittab_get_last_bitnum(const GT_Bittab*);
 unsigned long gt_bittab_get_next_bitnum(const GT_Bittab*, unsigned long);
 unsigned long gt_bittab_count_set_bits(GT_Bittab*);
 unsigned long gt_bittab_size(GT_Bittab*);
-int           gt_bittab_example(GT_Error*);
-int           gt_bittab_unit_test(GT_Error*);
+int           gt_bittab_example(GtError*);
+int           gt_bittab_unit_test(GtError*);
 void          gt_bittab_delete(GT_Bittab*);
 
 #endif

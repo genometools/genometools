@@ -152,7 +152,7 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
                           const Suffixarray *suffixarray,
                           Seqpos totallength,
                           bool withpckbt,
-                          GT_Error *err)
+                          GtError *err)
 {
   BWTSeq *bwtseq;
   bool haserr = false;

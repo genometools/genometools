@@ -41,7 +41,7 @@ static void regioncov_visitor_free(GenomeVisitor *gv)
 
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
                                             GT_GenomeFeature *gf,
-                                            GT_UNUSED GT_Error *err)
+                                            GT_UNUSED GtError *err)
 {
   GT_Range *old_gt_range_ptr, old_range, new_range;
   GtArray *ranges;
@@ -70,7 +70,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
 
 static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
                                              GT_SequenceRegion *sr,
-                                             GT_UNUSED GT_Error *err)
+                                             GT_UNUSED GtError *err)
 {
   RegionCovVisitor *regioncov_visitor;
   GtArray *rangelist;
@@ -108,7 +108,7 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
 }
 
 static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
-                          GT_UNUSED GT_Error *err)
+                          GT_UNUSED GtError *err)
 {
   unsigned long i;
   GtArray *rangelist;

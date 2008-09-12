@@ -4,7 +4,7 @@ extern "C" {
 /*@null@*/ FILE *opensfxfile(const GtStr *indexname,
                              const char *suffix,
                              const char *mode,
-                             GT_Error *err);
+                             GtError *err);
 
 bool indexfilealreadyexists(const GtStr *indexname,const char *suffix);
 

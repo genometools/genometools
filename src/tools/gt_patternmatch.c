@@ -67,7 +67,7 @@ static void comparemmsis(const MMsearchiterator *mmsi1,
 
 #define UNDEFREFSTART totallength
 
-static int callpatternmatcher(const Pmatchoptions *pmopt, GT_Error *err)
+static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
@@ -237,7 +237,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GT_Error *err)
 
 static OPrval parse_options(Pmatchoptions *pmopt,
                             int *parsed_args,
-                            int argc, const char **argv, GT_Error *err)
+                            int argc, const char **argv, GtError *err)
 {
   OptionParser *op;
   Option *option, *optionimm, *optionbck;
@@ -290,7 +290,7 @@ static OPrval parse_options(Pmatchoptions *pmopt,
   return oprval;
 }
 
-int gt_patternmatch(int argc, const char **argv, GT_Error *err)
+int gt_patternmatch(int argc, const char **argv, GtError *err)
 {
   bool haserr = false;
   int parsed_args;

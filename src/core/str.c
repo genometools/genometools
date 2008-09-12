@@ -256,7 +256,7 @@ int gt_str_read_next_line_generic(GtStr *s, GT_GenFile *fpin)
   }
 }
 
-int gt_str_unit_test(GT_Error *err)
+int gt_str_unit_test(GtError *err)
 {
   GtStr *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */
