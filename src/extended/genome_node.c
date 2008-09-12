@@ -171,7 +171,8 @@ void gt_genome_node_set_origin(GtGenomeNode *gn,
   gn->line_number =line_number;
 }
 
-void* gt_genome_node_cast(const GtGenomeNodeClass *gnc, GtGenomeNode *gn)
+void* gt_genome_node_cast(GT_UNUSED const GtGenomeNodeClass *gnc,
+                          GtGenomeNode *gn)
 {
   gt_assert(gnc && gn && gn->c_class == gnc);
   return gn;
