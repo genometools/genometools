@@ -983,7 +983,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
   return had_err;
 }
 
-static void set_source(GtGenomeNode *genome_feature, const char *source,
+static void set_source(GtFeatureNode *genome_feature, const char *source,
                        Hashmap *source_to_str_mapping)
 {
   GtStr *source_str;
@@ -1098,8 +1098,10 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
   }
 
   /* set source */
-  if (!had_err)
-    set_source(genome_feature, source, parser->source_to_str_mapping);
+  if (!had_err) {
+    set_source((GtFeatureNode*) genome_feature, source,
+               parser->source_to_str_mapping);
+  }
 
   /* parse the attributes */
   if (!had_err) {

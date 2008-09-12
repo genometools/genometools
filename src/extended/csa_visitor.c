@@ -308,7 +308,7 @@ static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
       gt_feature_node_set_score((GtFeatureNode*) new_feature,
                             gt_feature_node_get_score(exons_from_sa_feature));
     }
-    gt_feature_node_set_source(new_feature, gt_csa_source_str);
+    gt_feature_node_set_source((GtFeatureNode*) new_feature, gt_csa_source_str);
     gt_array_add(exon_nodes, new_feature);
   }
 
@@ -378,7 +378,7 @@ static GtFeatureNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
   mRNA_feature = (GtFeatureNode*)
                  gt_feature_node_new(seqid, gft_mRNA, range.start, range.end,
                                      strand);
-  gt_feature_node_set_source((GtGenomeNode*) mRNA_feature, gt_csa_source_str);
+  gt_feature_node_set_source(mRNA_feature, gt_csa_source_str);
   mRNA_set_target_attribute(mRNA_feature, csa_splice_form);
 
   /* create exon features */
@@ -417,7 +417,7 @@ static GtFeatureNode* create_gene_feature(CSAGene *csa_gene,
                                          csa_gene_get_representative(csa_gene)),
                           gft_gene, range.start, range.end,
                           csa_gene_strand(csa_gene));
-  gt_feature_node_set_source((GtGenomeNode*) gene_feature, gt_csa_source_str);
+  gt_feature_node_set_source(gene_feature, gt_csa_source_str);
 
   /* create mRNA features representing the splice forms */
   for (i = 0; i < csa_gene_num_of_splice_forms(csa_gene); i++) {

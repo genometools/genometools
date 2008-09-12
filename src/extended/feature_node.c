@@ -132,9 +132,8 @@ static void gt_feature_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
   fn->seqid = gt_str_ref(seqid);
 }
 
-void gt_feature_node_set_source(GtGenomeNode *gn, GtStr *source)
+void gt_feature_node_set_source(GtFeatureNode *fn, GtStr *source)
 {
-  GtFeatureNode *fn = gt_feature_node_cast(gn);
   gt_assert(fn && source && !fn->source);
   fn->source = gt_str_ref(source);
 }
@@ -224,7 +223,7 @@ GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
                             range.end, gt_feature_node_get_strand(fn));
   pf = gt_feature_node_cast(pn);
   pf->type = NULL; /* pseudo features do not have a type */
-  gt_feature_node_set_source(pn, fn->source);
+  gt_feature_node_set_source(pf, fn->source);
   pf->bit_field |= 1 << PSEUDO_FEATURE_OFFSET;
   return pn;
 }

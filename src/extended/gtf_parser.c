@@ -536,7 +536,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
                     source_str);
       }
       gt_assert(source_str);
-      gt_feature_node_set_source(gn, source_str);
+      gt_feature_node_set_source((GtFeatureNode*) gn, source_str);
 
       if (score_is_defined)
         gt_feature_node_set_score((GtFeatureNode*) gn, score_value);
