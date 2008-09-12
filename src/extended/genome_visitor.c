@@ -47,12 +47,12 @@ int genome_visitor_visit_comment_node(GenomeVisitor *gv, GtCommentNode *cn,
   return 0;
 }
 
-int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GtFeatureNode *gf,
-                                        GtError *err)
+int genome_visitor_visit_feature_node(GenomeVisitor *gv, GtFeatureNode *gf,
+                                      GtError *err)
 {
   gt_error_check(err);
-  gt_assert(gv && gf && gv->c_class && gv->c_class->genome_feature);
-  return gv->c_class->genome_feature(gv, gf, err);
+  gt_assert(gv && gf && gv->c_class && gv->c_class->feature_node);
+  return gv->c_class->feature_node(gv, gf, err);
 }
 
 int genome_visitor_visit_region_node(GenomeVisitor *gv, GtRegionNode *rn,
