@@ -28,7 +28,7 @@
 
 struct CSAVisitor {
   const GenomeVisitor parent_instance;
-  GT_Queue *gt_genome_node_buffer;
+  GtQueue *gt_genome_node_buffer;
   unsigned long join_length;
   GtArray *cluster;
   GtGenomeFeature *buffered_feature;
@@ -427,7 +427,7 @@ static GtGenomeNode* create_gene_feature(CSAGene *csa_gene,
   return gene_feature;
 }
 
-static void process_csa_genes(GT_Queue *gt_genome_node_buffer,
+static void process_csa_genes(GtQueue *gt_genome_node_buffer,
                               GtArray *csa_genes,
                               GtStr *gt_csa_source_str)
 {

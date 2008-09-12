@@ -26,7 +26,7 @@
 
 struct FilterVisitor {
   const GenomeVisitor parent_instance;
-  GT_Queue *gt_genome_node_buffer;
+  GtQueue *gt_genome_node_buffer;
   GtStr *seqid,
       *typefilter;
   GtRange contain_range,

@@ -34,7 +34,7 @@ struct GT_FastaBuffer
        firstseqinfile,
        complete,
        nextfile;
-  GT_Queue *descptr;
+  GtQueue *descptr;
   GtGenFile *inputstream;
   Uchar outputbuffer[OUTPUTFILEBUFFERSIZE],
         inputbuffer[INPUTFILEBUFFERSIZE];

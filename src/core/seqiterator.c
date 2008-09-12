@@ -28,7 +28,7 @@ struct SeqIterator
   GT_FastaBuffer *fb;
   const GtStrArray *filenametab;
   const Uchar *symbolmap;
-  GT_Queue *descptr;
+  GtQueue *descptr;
   ArrayUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;

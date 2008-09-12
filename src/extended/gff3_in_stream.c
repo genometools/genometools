@@ -38,7 +38,7 @@ struct GFF3InStream
        checkids;
   GtGenFile *fpin;
   unsigned long long line_number;
-  GT_Queue *genome_node_buffer;
+  GtQueue *genome_node_buffer;
   GT_GFF3Parser *gff3_parser;
   GT_CstrTable *used_types;
 };

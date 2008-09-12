@@ -203,7 +203,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
                                           GtError *err)
 {
   GtArray *node_stack = NULL, *list_of_children;
-  GT_Queue *node_queue = NULL;
+  GtQueue *node_queue = NULL;
   GtGenomeNode *gn, *gn_ref, *child_feature;
   GtDlistelem *dlistelem;
   unsigned long i;

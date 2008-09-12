@@ -45,7 +45,7 @@ struct GTF_parser {
 };
 
 typedef struct {
-  GT_Queue *genome_nodes;
+  GtQueue *genome_nodes;
   GtArray *mRNAs;
   Hashmap *gene_id_to_name_mapping,
           *transcript_id_to_name_mapping;
@@ -108,7 +108,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   GtStr *seqid;
   GtRange range;
   GtGenomeNode *gn;
-  GT_Queue *genome_nodes = (GT_Queue*) data;
+  GtQueue *genome_nodes = (GtQueue*) data;
   gt_error_check(err);
   assert(key && value && data);
   seqid = gt_str_new_cstr(key);
@@ -188,7 +188,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 {
   Hashmap *transcript_id_hash = (Hashmap*) value;
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
-  GT_Queue *genome_nodes = cinfo->genome_nodes;
+  GtQueue *genome_nodes = cinfo->genome_nodes;
   const char *gname;
   GtArray *mRNAs = gt_array_new(sizeof (GtGenomeNode*));
   GtGenomeNode *gene_node, *gn;
@@ -243,7 +243,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-int gtf_parser_parse(GTF_parser *parser, GT_Queue *genome_nodes,
+int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
                      GtStr *filenamestr, FILE *fpin, unsigned int be_tolerant,
                      GtError *err)
 {

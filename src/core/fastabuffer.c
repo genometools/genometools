@@ -29,7 +29,7 @@ GT_FastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
                              const Uchar *symbolmap,
                              bool plainformat,
                              Filelengthvalues **filelengthtab,
-                             GT_Queue *descptr,
+                             GtQueue *descptr,
                              unsigned long *characterdistribution)
 {
   GT_FastaBuffer *fb;

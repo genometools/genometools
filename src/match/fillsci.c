@@ -154,7 +154,7 @@ int fasta2sequencekeyvalues(
   DiscDistri *distspralen = NULL;
   unsigned long idx;
   bool haserr = false;
-  GT_Queue *descqueue = NULL;
+  GtQueue *descqueue = NULL;
   char *desc;
   FILE *desfp = NULL;
 

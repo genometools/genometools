@@ -138,7 +138,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
 {
   GenomeStream *gff3_in_stream;
   GtGenomeNode *gn;
-  GT_Queue *queue;
+  GtQueue *queue;
   int had_err = 0;
   gt_error_check(err);
   assert(feature_index && gff3file);

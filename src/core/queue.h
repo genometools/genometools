@@ -21,33 +21,33 @@
 #include <stdio.h>
 #include "core/error.h"
 
-typedef struct GT_Queue GT_Queue;
+typedef struct GtQueue GtQueue;
 
-typedef int (*GT_QueueProcessor)(void **elem, void *info, GtError*);
+typedef int (*GtQueueProcessor)(void **elem, void *info, GtError*);
 
-GT_Queue*     gt_queue_new(void);
-void          gt_queue_delete(GT_Queue*);
-void          gt_queue_delete_with_contents(GT_Queue*);
-void          gt_queue_add(GT_Queue*, void*);
-void*         gt_queue_get(GT_Queue*);
-void*         gt_queue_head(GT_Queue*);
+GtQueue*     gt_queue_new(void);
+void          gt_queue_delete(GtQueue*);
+void          gt_queue_delete_with_contents(GtQueue*);
+void          gt_queue_add(GtQueue*, void*);
+void*         gt_queue_get(GtQueue*);
+void*         gt_queue_head(GtQueue*);
 /* Remove <elem> from <queue> (<elem> has to be in <queue>).
    Thereby <queue> is traversed in reverse order, leading to O(gt_queue_size)
    worst-case running time. */
-void          gt_queue_remove(GT_Queue *queue, void *elem);
+void          gt_queue_remove(GtQueue *queue, void *elem);
 /* Iterate over all elements in <queue> and call <gt_queue_processor> with them.
    <info> and <err> are passed to <queue_processor>.
    If <queue_processor> returns a value != 0, the iteration is stopped and the
    return value of <queue_processor> is returned. */
-int           gt_queue_iterate(GT_Queue *queue,
-                               GT_QueueProcessor queue_processor,
+int           gt_queue_iterate(GtQueue *queue,
+                               GtQueueProcessor queue_processor,
                                void *info, GtError *err);
 /* Similar to <gt_queue_iterate>, except that the <queue> is traversed in
    reverse order. */
-int           gt_queue_iterate_reverse(GT_Queue *queue,
-                                       GT_QueueProcessor queue_processor,
+int           gt_queue_iterate_reverse(GtQueue *queue,
+                                       GtQueueProcessor queue_processor,
                                        void *info, GtError *err);
-unsigned long gt_queue_size(const GT_Queue*);
+unsigned long gt_queue_size(const GtQueue*);
 int           gt_queue_unit_test(GtError*);
 
 #endif

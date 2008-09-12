@@ -22,7 +22,7 @@
 #include "core/queue.h"
 #include "core/unused_api.h"
 
-struct GT_Queue
+struct GtQueue
 {
   void **contents;
   long front, /* f */
@@ -59,12 +59,12 @@ struct GT_Queue
             b
 */
 
-GT_Queue* gt_queue_new(void)
+GtQueue* gt_queue_new(void)
 {
-  return gt_calloc(1, sizeof (GT_Queue));
+  return gt_calloc(1, sizeof (GtQueue));
 }
 
-static void queue_wrap(GT_Queue *q, bool free_contents)
+static void queue_wrap(GtQueue *q, bool free_contents)
 {
   assert(q);
   if (free_contents) {
@@ -75,19 +75,19 @@ static void queue_wrap(GT_Queue *q, bool free_contents)
   gt_free(q);
 }
 
-void gt_queue_delete(GT_Queue *q)
+void gt_queue_delete(GtQueue *q)
 {
   if (!q) return;
   queue_wrap(q, false);
 }
 
-void gt_queue_delete_with_contents(GT_Queue *q)
+void gt_queue_delete_with_contents(GtQueue *q)
 {
   if (!q) return;
   queue_wrap(q, true);
 }
 
-static void check_space(GT_Queue *q)
+static void check_space(GtQueue *q)
 {
   if (!q->allocated) { /* empty queue without allocated memory */
     q->contents = gt_dynalloc(q->contents, &q->allocated, sizeof (void*));
@@ -119,14 +119,14 @@ static void check_space(GT_Queue *q)
   }
 }
 
-void gt_queue_add(GT_Queue *q, void *contents)
+void gt_queue_add(GtQueue *q, void *contents)
 {
   assert(q);
   check_space(q);
   q->contents[q->back++] = contents;
 }
 
-void* gt_queue_get(GT_Queue *q)
+void* gt_queue_get(GtQueue *q)
 {
   void *contents;
   assert(q && gt_queue_size(q));
@@ -140,13 +140,13 @@ void* gt_queue_get(GT_Queue *q)
   return contents;
 }
 
-void* gt_queue_head(GT_Queue *q)
+void* gt_queue_head(GtQueue *q)
 {
   assert(q && gt_queue_size(q));
   return q->contents[q->front];
 }
 
-void gt_queue_remove(GT_Queue *q, void *elem)
+void gt_queue_remove(GtQueue *q, void *elem)
 {
   long i, elemidx;
   assert(q &&  gt_queue_size(q));
@@ -196,7 +196,7 @@ void gt_queue_remove(GT_Queue *q, void *elem)
   }
 }
 
-int gt_queue_iterate(GT_Queue *q, GT_QueueProcessor gt_queue_processor,
+int gt_queue_iterate(GtQueue *q, GtQueueProcessor gt_queue_processor,
                      void *info, GtError *err)
 {
   long i;
@@ -223,7 +223,7 @@ int gt_queue_iterate(GT_Queue *q, GT_QueueProcessor gt_queue_processor,
   return 0;
 }
 
-int gt_queue_iterate_reverse(GT_Queue *q, GT_QueueProcessor gt_queue_processor,
+int gt_queue_iterate_reverse(GtQueue *q, GtQueueProcessor gt_queue_processor,
                              void *info, GtError *err)
 {
   long i;
@@ -250,7 +250,7 @@ int gt_queue_iterate_reverse(GT_Queue *q, GT_QueueProcessor gt_queue_processor,
   return 0;
 }
 
-unsigned long gt_queue_size(const GT_Queue *q)
+unsigned long gt_queue_size(const GtQueue *q)
 {
   assert(q);
   if ((q->front < q->back) || ((q->front == 0) && (q->back == 0)))
@@ -293,7 +293,7 @@ int gt_queue_unit_test(GtError *err)
   long check_counter = 0, check_counter_reverse = 1023;
   unsigned long i;
   int had_err = 0;
-  GT_Queue *q;
+  GtQueue *q;
 
   gt_error_check(err);
 

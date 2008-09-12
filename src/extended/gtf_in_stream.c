@@ -26,7 +26,7 @@
 struct GTFInStream
 {
   const GenomeStream parent_instance;
-  GT_Queue *gt_genome_node_buffer;
+  GtQueue *gt_genome_node_buffer;
   GT_TypeChecker *type_checker;
 };
 
