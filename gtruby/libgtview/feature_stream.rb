@@ -21,7 +21,7 @@ require 'libgtext/genome_stream'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GenomeStream* feature_stream_new(GenomeStream*, GtFeatureIndex*)"
+  extern "GtNodeStream* feature_stream_new(GtNodeStream*, GtFeatureIndex*)"
 
   class FeatureStream
     include GenomeStream
@@ -29,7 +29,7 @@ module GT
     def initialize(genome_stream, feature_index)
       @genome_stream = GT.feature_stream_new(genome_stream.genome_stream,
                                              feature_index.feature_index)
-      @genome_stream.free = GT::symbol("genome_stream_delete", "0P")
+      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
   end
 end

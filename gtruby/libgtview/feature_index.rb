@@ -41,7 +41,7 @@ module GT
   class FeatureIndex
     attr_reader :feature_index
     def initialize
-      @feature_index = GT.gt_feature_index_new()
+      @feature_index = GT.gt_feature_index_memory_new()
       @feature_index.free = GT::symbol("gt_feature_index_delete", "0P")
     end
 

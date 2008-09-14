@@ -24,7 +24,7 @@
 /* A table of C-strings. */
 typedef struct GtCstrTable GtCstrTable;
 
-GtCstrTable* gt_cstr_table_new();
+GtCstrTable*  gt_cstr_table_new();
 void          gt_cstr_table_delete(GtCstrTable*);
 /* Add <cstr> to <table>. */
 void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
@@ -34,6 +34,6 @@ const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
 GtStrArray*  gt_cstr_table_get_all(const GtCstrTable *table);
-int           gt_cstr_table_unit_test(GtError*);
+int          gt_cstr_table_unit_test(GtError*);
 
 #endif

@@ -34,6 +34,9 @@ if #arg >= 1 then
     if string.match(arg[1], "^-h") then
       out_mode = "html"
       table.remove(arg, 1)
+    elseif string.match(arg[1], "^-t") then
+      out_mode = "latex"
+      table.remove(arg, 1)
     elseif string.match(arg[1], "^-l") then
       in_mode = "Lua"
       table.remove(arg, 1)
@@ -120,6 +123,17 @@ local doc_visitor
 if out_mode == "txt" then
   doc_visitor = DocVisitorTxt:new()
   doc_base:accept(doc_visitor)
+elseif out_mode == "latex" then
+  local header
+  if in_mode == "C" then
+    header = "libgenometools_header_latex.lp"
+  else
+    header = "gtscript_header_latex.lp"
+  end
+  doc_visitor = DocVisitorLaTeX:new(template_path, header)
+  doc_visitor:show_header()
+  doc_base:accept(doc_visitor)
+  doc_visitor:show_footer()
 else
   assert(out_mode == "html")
   local header

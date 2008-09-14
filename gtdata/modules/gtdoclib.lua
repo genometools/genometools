@@ -24,6 +24,7 @@ local gtdocmodules = { "fileutils",
                        "gtdoclib.docbase",
                        "gtdoclib.docparser",
                        "gtdoclib.docvisitorhtml",
+                       "gtdoclib.docvisitorlatex",
                        "gtdoclib.docvisitortxt" }
 
 gtmodulehelper.load_modules(gtdocmodules);

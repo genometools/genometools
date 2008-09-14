@@ -21,14 +21,14 @@ require 'libgtext/genome_stream'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GenomeStream* add_introns_stream_new(GenomeStream*)"
+  extern "GtNodeStream* add_introns_stream_new(GtNodeStream*)"
 
   class AddIntronsStream
     include GT::GenomeStream
     attr_reader :genome_stream
     def initialize(in_stream)
       @genome_stream = GT.add_introns_stream_new(in_stream.genome_stream)
-      @genome_stream.free = GT::symbol("genome_stream_delete", "0P")
+      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
   end
 end

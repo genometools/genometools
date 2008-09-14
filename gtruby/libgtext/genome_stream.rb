@@ -23,15 +23,15 @@ require 'libgtext/genome_node'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "int genome_stream_next_tree(GenomeStream*, GtGenomeNode**, GtError*)"
+  extern "int gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*)"
 
   module GenomeStream
     def next_tree
       err = GT::Error.new()
       genome_node = DL::PtrData.new(0)
       genome_node.free = DL::FREE
-      rval = GT.genome_stream_next_tree(self.genome_stream, genome_node.ref,
-                                        err.to_ptr)
+      rval = GT.gt_node_stream_next(self.genome_stream, genome_node.ref,
+                                    err.to_ptr)
       if rval != 0 then GT.gterror(err) end
       if genome_node.null? then return nil end
       GT::GenomeNode.new(genome_node)

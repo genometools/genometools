@@ -21,14 +21,14 @@ require 'libgtext/genome_stream'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GenomeStream* gff3_out_stream_new(GenomeStream*, GenFile*)"
+  extern "GtNodeStream* gff3_out_stream_new(GenomeStream*, GenFile*)"
 
   class GFF3OutStream
     include GT::GenomeStream
     attr_reader :genome_stream
     def initialize(in_stream)
       @genome_stream = GT.gff3_out_stream_new(in_stream.genome_stream, nil)
-      @genome_stream.free = GT::symbol("genome_stream_delete", "0P")
+      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
   end
 end
