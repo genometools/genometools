@@ -538,7 +538,7 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
         > www/genometools.org/htdocs/docs.html
 	bin/examples/sketch_parsed gtdata/sketch/default.style \
           www/genometools.org/htdocs/images/parsed.png \
-          testdata/standard_gene_with_introns_as_tree.gff3
+          testdata/eden.gff3
 	bin/examples/sketch_parsed \
 	  www/genometools.org/htdocs/annotationsketch/callbacks.style \
 	  www/genometools.org/htdocs/images/callbacks.png \
