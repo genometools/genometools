@@ -28,6 +28,6 @@
    -- <feature_index>.
    function feature_visitor_new(feature_index)
 */
-int luaopen_feature_visitor(lua_State*);
+int gt_lua_open_feature_visitor(lua_State*);
 
 #endif

@@ -29,13 +29,13 @@
 int gt_lua_open_extended(lua_State *L)
 {
   assert(L);
-  luaopen_cds_stream(L);
-  luaopen_csa_stream(L);
+  gt_lua_open_cds_stream(L);
+  gt_lua_open_csa_stream(L);
   gt_lua_open_genome_node(L);
-  luaopen_genome_node_iterator(L);
-  luaopen_genome_stream(L);
-  luaopen_genome_visitor(L);
-  luaopen_region_mapping(L);
-  luaopen_stream_evaluator(L);
+  gt_lua_open_genome_node_iterator(L);
+  gt_lua_open_genome_stream(L);
+  gt_lua_open_genome_visitor(L);
+  gt_lua_open_region_mapping(L);
+  gt_lua_open_stream_evaluator(L);
   return 1;
 }

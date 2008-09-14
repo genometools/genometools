@@ -33,7 +33,7 @@
    -- Returns the next genome node for <genome_stream> or nil.
    function genome_stream:next_tree()
 */
-int luaopen_genome_stream(lua_State*);
+int gt_lua_open_genome_stream(lua_State*);
 
 #define GENOME_STREAM_METATABLE  "GenomeTools.genome_stream"
 #define check_genome_stream(L, POS) \

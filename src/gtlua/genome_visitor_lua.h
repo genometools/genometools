@@ -25,7 +25,7 @@
    -- Returns a new GFF3 visitor.
    function gff3_visitor_new()
 */
-int luaopen_genome_visitor(lua_State*);
+int gt_lua_open_genome_visitor(lua_State*);
 
 #define GENOME_VISITOR_METATABLE  "GenomeTools.genome_visitor"
 #define check_genome_visitor(L, POS) \

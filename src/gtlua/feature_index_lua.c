@@ -33,7 +33,7 @@ static int feature_index_lua_new(lua_State *L)
   return 1;
 }
 
-static int feature_index_lua_add_sequence_region(lua_State *L)
+static int feature_index_lua_add_region_node(lua_State *L)
 {
   GtFeatureIndex **fi;
   GtGenomeNode **gn;
@@ -62,7 +62,7 @@ static int feature_index_lua_add_gff3file(lua_State *L)
   return 0;
 }
 
-static int feature_index_lua_add_genome_feature(lua_State *L)
+static int feature_index_lua_add_feature_node(lua_State *L)
 {
   GtFeatureIndex **fi;
   GtGenomeNode **gn;
@@ -72,9 +72,9 @@ static int feature_index_lua_add_genome_feature(lua_State *L)
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
   gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
-  luaL_argcheck(L, gf, 2, "not a genome feature");
+  luaL_argcheck(L, gf, 2, "not a feature node");
   seqid = gt_genome_node_get_seqid(*gn);
-  luaL_argcheck(L, seqid, 2, "genome_feature does not have a sequence id");
+  luaL_argcheck(L, seqid, 2, "feature does not have a sequence id");
   luaL_argcheck(L, gt_feature_index_has_seqid(*fi, gt_str_get(seqid)), 2,
                 "feature index does not contain corresponding sequence region");
   gt_feature_index_add_feature_node(*fi, gf);
@@ -185,8 +185,8 @@ static const struct luaL_Reg feature_index_lib_f [] = {
 };
 
 static const struct luaL_Reg feature_index_lib_m [] = {
-  { "add_sequence_region", feature_index_lua_add_sequence_region },
-  { "add_genome_feature", feature_index_lua_add_genome_feature },
+  { "add_region_node", feature_index_lua_add_region_node },
+  { "add_feature_node", feature_index_lua_add_feature_node },
   { "add_gff3file", feature_index_lua_add_gff3file },
   { "get_features_for_seqid", feature_index_lua_get_features_for_seqid },
   { "get_features_for_range", feature_index_lua_get_features_for_range },
@@ -196,7 +196,7 @@ static const struct luaL_Reg feature_index_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_feature_index(lua_State *L)
+int gt_lua_open_feature_index(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, FEATURE_INDEX_METATABLE);

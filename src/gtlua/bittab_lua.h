@@ -46,6 +46,6 @@
    -- Returns true if <bit> is set in <bittab>, false otherwise.
    function bittab:bit_is_set(bit)
 */
-int luaopen_bittab(lua_State*);
+int gt_lua_open_bittab(lua_State*);
 
 #endif

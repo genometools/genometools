@@ -45,7 +45,7 @@ static const struct luaL_Reg csa_stream_lib_f [] = {
   { NULL, NULL }
 };
 
-int luaopen_csa_stream(lua_State *L)
+int gt_lua_open_csa_stream(lua_State *L)
 {
   assert(L);
   luaL_register(L, "gt", csa_stream_lib_f);

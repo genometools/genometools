@@ -31,6 +31,6 @@
    -- coding sequences.
    function cds_stream_new(region_mapping)
 */
-int luaopen_cds_stream(lua_State*);
+int gt_lua_open_cds_stream(lua_State*);
 
 #endif

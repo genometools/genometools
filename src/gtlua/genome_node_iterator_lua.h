@@ -33,6 +33,6 @@
    -- Returns the next genome node for <genome_node_iterator> or nil.
    function genome_node_iterator:next()
 */
-int luaopen_genome_node_iterator(lua_State*);
+int gt_lua_open_genome_node_iterator(lua_State*);
 
 #endif

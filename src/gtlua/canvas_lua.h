@@ -47,7 +47,7 @@
    -- contents of the canvas.
    function canvas:to_file(filename)
 */
-int luaopen_canvas(lua_State*);
+int gt_lua_open_canvas(lua_State*);
 
 #define CANVAS_METATABLE  "GenomeTools.canvas"
 #define check_canvas(L, POS) \

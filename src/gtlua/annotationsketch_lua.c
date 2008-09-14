@@ -27,11 +27,11 @@
 int gt_lua_open_annotationsketch(lua_State *L)
 {
   assert(L);
-  luaopen_canvas(L);
+  gt_lua_open_canvas(L);
   gt_lua_open_diagram(L);
-  luaopen_feature_index(L);
-  luaopen_feature_stream(L);
-  luaopen_feature_visitor(L);
-  luaopen_imageinfo(L);
+  gt_lua_open_feature_index(L);
+  gt_lua_open_feature_stream(L);
+  gt_lua_open_feature_visitor(L);
+  gt_lua_open_imageinfo(L);
   return 1;
 }

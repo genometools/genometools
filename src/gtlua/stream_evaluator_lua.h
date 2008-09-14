@@ -33,6 +33,6 @@
    -- Show result of <stream_evaluator> on stdout.
    function stream_evaluator:show()
 */
-int luaopen_stream_evaluator(lua_State*);
+int gt_lua_open_stream_evaluator(lua_State*);
 
 #endif

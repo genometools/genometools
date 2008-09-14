@@ -31,6 +31,6 @@
    -- Returns the size of <alpha> a number.
    function alpha:size()
 */
-int luaopen_alpha(lua_State*);
+int gt_lua_open_alpha(lua_State*);
 
 #endif

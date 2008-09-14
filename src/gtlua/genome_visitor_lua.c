@@ -45,7 +45,7 @@ static const struct luaL_Reg gt_node_visitor_lib_f [] = {
   { NULL, NULL }
 };
 
-int luaopen_genome_visitor(lua_State *L)
+int gt_lua_open_genome_visitor(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, GENOME_VISITOR_METATABLE);

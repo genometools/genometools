@@ -26,10 +26,10 @@
 int gt_lua_open_core(lua_State *L)
 {
   assert(L);
-  luaopen_alpha(L);
-  luaopen_bittab(L);
-  luaopen_range(L);
-  luaopen_score_matrix(L);
-  luaopen_translate(L);
+  gt_lua_open_alpha(L);
+  gt_lua_open_bittab(L);
+  gt_lua_open_range(L);
+  gt_lua_open_score_matrix(L);
+  gt_lua_open_translate(L);
   return 1;
 }

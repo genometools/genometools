@@ -25,6 +25,6 @@
    -- Returns translated <dna>.
    function translate_dna(dna)
 */
-int luaopen_translate(lua_State*);
+int gt_lua_open_translate(lua_State*);
 
 #endif

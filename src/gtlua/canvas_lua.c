@@ -109,7 +109,7 @@ static const struct luaL_Reg canvas_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_canvas(lua_State *L)
+int gt_lua_open_canvas(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, CANVAS_METATABLE);

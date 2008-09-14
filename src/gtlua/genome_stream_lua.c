@@ -87,7 +87,7 @@ static const struct luaL_Reg gt_node_stream_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_genome_stream(lua_State *L)
+int gt_lua_open_genome_stream(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, GENOME_STREAM_METATABLE);

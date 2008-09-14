@@ -44,7 +44,7 @@
    -- otherwise.
    function ranges_are_sorted(range_array)
 */
-int luaopen_range(lua_State*);
+int gt_lua_open_range(lua_State*);
 
 /* push a GtRange to Lua, returns 1 (number of elements pushed) */
 int gt_lua_range_push(lua_State*, GtRange);

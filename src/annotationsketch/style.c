@@ -55,7 +55,7 @@ static const luaL_Reg luasecurelibs[] = {
   {LUA_TABLIBNAME, luaopen_table},
   {LUA_STRLIBNAME, luaopen_string},
   {LUA_MATHLIBNAME, luaopen_math},
-  {"gt", gt_lua_openlib}, /* open the GenomeTools library for callbacks */
+  {"gt", gt_lua_open_lib}, /* open the GenomeTools library for callbacks */
   {NULL, NULL}
 };
 

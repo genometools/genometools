@@ -31,6 +31,6 @@
    -- clustering (default: 300).
    function csa_stream_new(in_stream, join)
 */
-int luaopen_csa_stream(lua_State*);
+int gt_lua_open_csa_stream(lua_State*);
 
 #endif

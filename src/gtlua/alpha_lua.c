@@ -80,7 +80,7 @@ static const struct luaL_Reg alpha_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_alpha(lua_State *L)
+int gt_lua_open_alpha(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, ALPHA_METATABLE);

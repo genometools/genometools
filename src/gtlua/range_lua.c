@@ -151,7 +151,7 @@ static const struct luaL_Reg range_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_range(lua_State *L)
+int gt_lua_open_range(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, RANGE_METATABLE);

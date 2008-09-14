@@ -41,7 +41,7 @@ static const struct luaL_Reg feature_stream_lib_f [] = {
   { NULL, NULL }
 };
 
-int luaopen_feature_stream(lua_State *L)
+int gt_lua_open_feature_stream(lua_State *L)
 {
   assert(L);
   luaL_register(L, "gt", feature_stream_lib_f);

@@ -78,7 +78,7 @@ GTR* gtr_new(GtError *err)
   }
   if (!had_err) {
     luaL_openlibs(gtr->L);    /* open the standard libraries */
-    gt_lua_openlib(gtr->L);   /* open the GenomeTools library */
+    gt_lua_open_lib(gtr->L);  /* open the GenomeTools library */
     luaopen_lfs(gtr->L);      /* open Lua filesystem */
     luaopen_lpeg(gtr->L);     /* open LPeg library */
     luaopen_md5_core(gtr->L); /* open MD5 library */

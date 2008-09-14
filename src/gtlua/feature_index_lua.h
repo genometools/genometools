@@ -29,14 +29,14 @@
    -- <feature_index>.
    function feature_index:add_gff3file(gff3file)
 
-   -- Add <sequence_region> to <feature_index>.
-   function feature_index:add_sequence_region(sequence_region)
+   -- Add <region_node> to <feature_index>.
+   function feature_index:add_region_node(region_node)
 
-   -- Add <genome_feature> to <feature_index>, implicitly creating sequence
+   -- Add <feature_node> to <feature_index>, implicitly creating sequence
    -- region if not present before.
-   function feature_index:add_genome_feature(genome_feature)
+   function feature_index:add_feature_node(feature_node)
 
-   -- Returns the genome features for sequence ID <seqid> in an array.
+   -- Returns the feature nodes for sequence ID <seqid> in an array.
    function feature_index:get_features_for_seqid(seqid)
 
    -- Returns the genome features for sequence ID <seqid> within <range> in an
@@ -53,7 +53,7 @@
    -- <feature_index>.
    function feature_index:get_range_for_seqid(seqid)
 */
-int luaopen_feature_index(lua_State*);
+int gt_lua_open_feature_index(lua_State*);
 
 #define FEATURE_INDEX_METATABLE  "GenomeTools.feature_index"
 #define check_feature_index(L, POS) \

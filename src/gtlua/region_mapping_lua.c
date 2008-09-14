@@ -51,7 +51,7 @@ static const struct luaL_Reg region_mapping_lib_f [] = {
   { NULL, NULL }
 };
 
-int luaopen_region_mapping(lua_State *L)
+int gt_lua_open_region_mapping(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, REGION_MAPPING_METATABLE);

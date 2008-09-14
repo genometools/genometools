@@ -32,6 +32,6 @@
    -- Returns the score for <idx1>,<idx2> as number.
    function score_matrix:get_score(idx1, idx2)
 */
-int luaopen_score_matrix(lua_State*);
+int gt_lua_open_score_matrix(lua_State*);
 
 #endif

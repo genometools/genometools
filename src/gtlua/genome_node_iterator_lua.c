@@ -85,7 +85,7 @@ static const struct luaL_Reg genome_node_iterator_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_genome_node_iterator(lua_State *L)
+int gt_lua_open_genome_node_iterator(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, GENOME_NODE_ITERATOR_METATABLE);

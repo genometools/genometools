@@ -29,6 +29,6 @@
    -- added to the <feature_index>.
    function feature_stream_new(in_stream, feature_index)
 */
-int luaopen_feature_stream(lua_State*);
+int gt_lua_open_feature_stream(lua_State*);
 
 #endif

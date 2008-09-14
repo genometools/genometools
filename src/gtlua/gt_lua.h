@@ -21,6 +21,6 @@
 #include "lua.h"
 
 /* Open GenomeTools library in Lua state <L>. */
-int                 gt_lua_openlib(lua_State *L);
+int                 gt_lua_open_lib(lua_State *L);
 
 #endif

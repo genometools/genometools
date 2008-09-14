@@ -26,7 +26,7 @@
    -- <seqfile>.
    function region_mapping_new_seqfile(seqfile)
 */
-int luaopen_region_mapping(lua_State*);
+int gt_lua_open_region_mapping(lua_State*);
 
 #define REGION_MAPPING_METATABLE  "GenomeTools.region_mapping"
 #define check_region_mapping(L, POS) \

@@ -23,16 +23,16 @@
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
-   -- Create a new genome feature on sequence with ID <seqid> and type <type>
+   -- Create a new feature node on sequence with ID <seqid> and type <type>
    -- which lies from <startpos> to <end> on strand <strand>.
    -- <startpos> and <endpos> always refer to the forward strand, therefore
    -- <startpos> has to bo smaller or equal than <endpos>.
-   function genome_feature_new(seqid, type, startpos, endpos, strand)
+   function feature_node_new(seqid, type, startpos, endpos, strand)
 
-   -- Returns a new sequence region for sequence id <seqid> spanning <range>.
-   function sequence_region_new(seqid, range)
+   -- Returns a new region node for sequence id <seqid> spanning <range>.
+   function region_node_new(seqid, range)
 
-   -- Returns the filenname of <genome_node>.
+   -- Returns the filename of <genome_node>.
    function genome_node:get_filename()
 
    -- Returns the range of <genome_node>.
@@ -41,23 +41,23 @@
    -- Returns the sequence id of <genome_node>.
    function genome_node:get_seqid()
 
-   -- Returns the strand of <genome_feature>.
-   function genome_feature:get_strand()
+   -- Returns the strand of <feature_node>.
+   function feature_node:get_strand()
 
-   -- Returns the source of <genome_feature>.
-   function genome_feature:get_source()
+   -- Returns the source of <feature_node>.
+   function feature_node:get_source()
 
-   -- Returns the score of <genome_feature>.
-   function genome_feature:get_score()
+   -- Returns the score of <feature_node>.
+   function feature_node:get_score()
 
-   -- Returns the <attrib> attribute of <genome_feature>.
-   function genome_feature:get_attribute(attrib)
+   -- Returns the <attrib> attribute of <feature_node>.
+   function feature_node:get_attribute(attrib)
 
-   -- Returns an array containing the exons of <genome_feature>.
-   function genome_feature:get_exons()
+   -- Returns an array containing the exons of <feature_node>.
+   function feature_node:get_exons()
 
-   -- Set the source of <genome_feature> to <source>.
-   function genome_feature:set_source(source)
+   -- Set the source of <feature_node> to <source>.
+   function feature_node:set_source(source)
 
    -- Accept <genome_visitor>.
    function genome_node:accept(genome_visitor)
@@ -74,19 +74,19 @@
    -- Returns true if <genome_node> contains a marked node, false otherwise.
    function genome_node:contains_marked()
 
-   -- Show leading part of GFF3 output for <genome_feature>
-   function genome_feature:output_leading()
+   -- Show leading part of GFF3 output for <feature_node>
+   function feature_node:output_leading()
 
-   -- Return type of <genome_feature> as string.
-   function genome_feature:get_type()
+   -- Return type of <feature_node> as string.
+   function feature_node:get_type()
 
-   -- Extract the sequence of <genome_feature>.
-   -- If <join> is false and <genome_feature> has type <type> the sequence is
+   -- Extract the sequence of <feature_node>.
+   -- If <join> is false and <feature_node> has type <type> the sequence is
    -- returned (using <region_mapping> to get it).
-   -- If <join> is true and <genome_feature> has children of type <type> their
+   -- If <join> is true and <feature_node> has children of type <type> their
    -- joined sequences are returned.
    -- If none of the above applies nil is returned.
-   function genome_feature:extract_sequence(type, join, region_mapping)
+   function feature_node:extract_sequence(type, join, region_mapping)
 */
 int gt_lua_open_genome_node(lua_State*);
 

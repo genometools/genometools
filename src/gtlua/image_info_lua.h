@@ -30,7 +30,7 @@
    -- points and a GenomeNode reference per element drawn.
    function imageinfo:get_recmaps()
 */
-int luaopen_imageinfo(lua_State*);
+int gt_lua_open_imageinfo(lua_State*);
 
 #define IMAGEINFO_METATABLE  "GenomeTools.imageinfo"
 #define check_imageinfo(L, POS) \

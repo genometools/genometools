@@ -131,7 +131,7 @@ static const struct luaL_Reg bittab_lib_m [] = {
   { NULL, NULL }
 };
 
-int luaopen_bittab(lua_State *L)
+int gt_lua_open_bittab(lua_State *L)
 {
   assert(L);
   luaL_newmetatable(L, BITTAB_METATABLE);

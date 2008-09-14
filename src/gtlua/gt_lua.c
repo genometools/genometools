@@ -24,7 +24,7 @@
 #include "gtlua/annotationsketch_lua.h"
 #endif
 
-int gt_lua_openlib(lua_State *L)
+int gt_lua_open_lib(lua_State *L)
 {
   assert(L);
   gt_lua_open_core(L); /* open core */
