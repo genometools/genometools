@@ -6,7 +6,7 @@
 GtCanvas *canvas = NULL;
 GtDiagram *d = NULL;
 GtStyle *sty = NULL;
-GT_ImageInfo* ii = NULL;
+GtImageInfo* ii = NULL;
 GtError *err = NULL;
 GtkWidget *area;
 gint lastwidth;
@@ -62,7 +62,7 @@ open_file(GtkWidget *widget,  gpointer user_data)
     gt_error_unset(err);
     /* file given, load GFF file */
     filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-    features = gt_feature_index_new();
+    features = gt_feature_index_memory_new();
     gt_feature_index_add_gff3file(features,
                                   filename,
                                   err);
