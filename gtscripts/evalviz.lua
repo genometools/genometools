@@ -68,7 +68,7 @@ reality_stream = gt.gff3_in_stream_new_sorted(reality_file)
 prediction_stream = gt.gff3_in_stream_new_sorted(prediction_file)
 stream_evaluator = gt.stream_evaluator_new(reality_stream, prediction_stream)
 
-feature_index = gt.feature_index_new()
+feature_index = gt.feature_index_memory_new()
 feature_visitor = gt.feature_visitor_new(feature_index)
 
 stream_evaluator:evaluate(feature_visitor)

@@ -25,7 +25,7 @@
 #include "gtlua/canvas_lua.h"
 #include "gtlua/image_info_lua.h"
 
-static int canvas_lua_new_generic(lua_State *L, GtGraphicsOutType t)
+static int canvas_cairo_file_lua_new_generic(lua_State *L, GtGraphicsOutType t)
 {
   GtCanvas **canvas;
   GtImageInfo **ii;
@@ -49,38 +49,39 @@ static int canvas_lua_new_generic(lua_State *L, GtGraphicsOutType t)
   return 1;
 }
 
-static int canvas_lua_new_pdf(lua_State *L)
+static int canvas_cairo_file_lua_new_pdf(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GT_GRAPHICS_PDF);
+  return canvas_cairo_file_lua_new_generic(L, GT_GRAPHICS_PDF);
 }
 
-static int canvas_lua_new_png(lua_State *L)
+static int canvas_cairo_file_lua_new_png(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GT_GRAPHICS_PNG);
+  return canvas_cairo_file_lua_new_generic(L, GT_GRAPHICS_PNG);
 }
 
-static int canvas_lua_new_svg(lua_State *L)
+static int canvas_cairo_file_lua_new_svg(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GT_GRAPHICS_SVG);
+  return canvas_cairo_file_lua_new_generic(L, GT_GRAPHICS_SVG);
 }
 
-static int canvas_lua_new_ps(lua_State *L)
+static int canvas_cairo_file_lua_new_ps(lua_State *L)
 {
-  return canvas_lua_new_generic(L, GT_GRAPHICS_PS);
+  return canvas_cairo_file_lua_new_generic(L, GT_GRAPHICS_PS);
 }
 
-static int canvas_lua_to_file(lua_State *L)
+static int canvas_cairo_file_lua_to_file(lua_State *L)
 {
   GtCanvas **canvas;
-  GtCanvasCairoFile *ccf;
+  GtCanvasCairoFile *ccf = NULL;
   GtError *err;
   const char *fn;
   int had_err = 0;
   err = gt_error_new();
   canvas = check_canvas(L, 1);
+  ccf = canvas_cairo_file_try_cast(*canvas);
+  luaL_argcheck(L, ccf, 1, "must be a CanvasCairoFile object");
   fn = luaL_checkstring(L, 2);
   assert(canvas);
-  ccf = (GtCanvasCairoFile*) *canvas;
   had_err = gt_canvas_cairo_file_to_file(ccf, fn, err);
   if (had_err)
     return lua_gt_error(L, err);
@@ -97,15 +98,15 @@ static int canvas_lua_delete(lua_State *L)
 }
 
 static const struct luaL_Reg canvas_lib_f [] = {
-  { "canvas_new_png", canvas_lua_new_png },
-  { "canvas_new_pdf", canvas_lua_new_pdf },
-  { "canvas_new_ps", canvas_lua_new_ps },
-  { "canvas_new_svg", canvas_lua_new_svg },
+  { "canvas_cairo_file_new_png", canvas_cairo_file_lua_new_png },
+  { "canvas_cairo_file_new_pdf", canvas_cairo_file_lua_new_pdf },
+  { "canvas_cairo_file_new_ps", canvas_cairo_file_lua_new_ps },
+  { "canvas_cairo_file_new_svg", canvas_cairo_file_lua_new_svg },
   { NULL, NULL }
 };
 
 static const struct luaL_Reg canvas_lib_m [] = {
-  { "to_file", canvas_lua_to_file },
+  { "to_file", canvas_cairo_file_lua_to_file },
   { NULL, NULL }
 };
 

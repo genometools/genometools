@@ -38,7 +38,7 @@ nodes[2] = reverse_gene
 diagram = gt.diagram_new_from_array(nodes, 1, 1000)
 
 -- create canvas
-canvas = gt.canvas_new_png(600, nil)
+canvas = gt.canvas_cairo_file_new_png(600, nil)
 
 -- sketch diagram on canvas
 diagram:sketch(canvas)

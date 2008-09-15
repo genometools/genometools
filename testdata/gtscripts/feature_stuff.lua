@@ -32,7 +32,7 @@ end
 
 -- set up the feature stream
 genome_stream = gt.gff3_in_stream_new_sorted(testdata.."/gff3_file_1_short.txt")
-feature_index = gt.feature_index_new()
+feature_index = gt.feature_index_memory_new()
 genome_stream = gt.feature_stream_new(genome_stream, feature_index)
 collectgarbage()
 
@@ -52,7 +52,7 @@ end
 range = gt.range_new(1, 100)
 
 -- more tests
-fi    = gt.feature_index_new()
+fi    = gt.feature_index_memory_new()
 sr    = gt.region_node_new("chr1", 1, 100)
 gf    = gt.feature_node_new("chr1", "gene", 1, 100 , "+")
 rval, err = pcall(GenomeTools_feature_index.add_feature_node, fi, nil)

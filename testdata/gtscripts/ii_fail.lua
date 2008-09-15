@@ -30,7 +30,7 @@ else
 end
 
 in_stream = gt.gff3_in_stream_new_sorted(gff3file)
-feature_index = gt.feature_index_new()
+feature_index = gt.feature_index_memory_new()
 feature_stream = gt.feature_stream_new(in_stream, feature_index)
 in_stream = nil; collectgarbage() -- being nasty
 gn = feature_stream:next_tree()

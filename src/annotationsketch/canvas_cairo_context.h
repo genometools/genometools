@@ -24,4 +24,10 @@
 
 const GtCanvasClass* gt_canvas_cairo_context_class(void);
 
+#define canvas_cairo_context_cast(C)\
+        gt_canvas_cast(gt_canvas_cairo_context_class(), C)
+
+#define canvas_cairo_context_try_cast(C)\
+        gt_canvas_try_cast(gt_canvas_cairo_context_class(), C)
+
 #endif

@@ -22,7 +22,7 @@
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/range_lua.h"
 
-static int feature_index_lua_new(lua_State *L)
+static int feature_index_memory_lua_new(lua_State *L)
 {
   GtFeatureIndex **feature_index;
   feature_index = lua_newuserdata(L, sizeof (GtFeatureIndex*));
@@ -180,7 +180,7 @@ static int feature_index_lua_delete(lua_State *L)
 }
 
 static const struct luaL_Reg feature_index_lib_f [] = {
-  { "feature_index_new", feature_index_lua_new },
+  { "feature_index_memory_new", feature_index_memory_lua_new },
   { NULL, NULL }
 };
 

@@ -16,7 +16,7 @@ end
 dofile(style_file)
 
 -- create feature index
-feature_index = gt.feature_index_new()
+feature_index = gt.feature_index_memory_new()
 
 -- add GFF3 file to index
 feature_index:add_gff3file(gff3_file)
@@ -27,7 +27,7 @@ range = feature_index:get_range_for_seqid(seqid)
 diagram = gt.diagram_new(feature_index, seqid, range)
 
 -- create canvas
-canvas = gt.canvas_new_png(600, nil)
+canvas = gt.canvas_cairo_file_new_png(600, nil)
 
 -- sketch diagram on canvas
 diagram:sketch(canvas)

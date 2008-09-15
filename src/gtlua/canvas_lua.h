@@ -26,25 +26,26 @@
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
    -- If not needed, pass nil as <imageinfo>.
-   function canvas_new_png(width, imageinfo)
+   function canvas_cairo_file_new_png(width, imageinfo)
 
    -- Return a Canvas object which acts as a PDF drawing surface of
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
-   function canvas_new_pdf(width, imageinfo)
+   function canvas_cairo_file_new_pdf(width, imageinfo)
 
    -- Return a Canvas object which acts as a PS drawing surface of
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
-   function canvas_new_ps(width, imageinfo)
+   function canvas_cairo_file_new_ps(width, imageinfo)
 
    -- Return a Canvas object which acts as a SVG drawing surface of
    -- width <width> to be passed to rendering functions as a visitor.
    -- An <imageinfo> object is filled with coordinate information if given.
-   function canvas_new_svg(width, imageinfo)
+   function canvas_cairo_file_new_svg(width, imageinfo)
 
    -- Creates an image file with the given <filename> which contains the
-   -- contents of the canvas.
+   -- contents of the canvas (only for objects created with
+   -- <canvas_cairo_file_new_*()>).
    function canvas:to_file(filename)
 */
 int gt_lua_open_canvas(lua_State*);

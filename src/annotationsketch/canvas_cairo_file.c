@@ -37,9 +37,6 @@ struct GtCanvasCairoFile {
   GtGraphicsOutType type;
 };
 
-#define canvas_cairo_file_cast(C)\
-        gt_canvas_cast(gt_canvas_cairo_file_class(), C)
-
 int gt_canvas_cairo_file_visit_diagram_pre(GtCanvas *canvas, GtDiagram *dia)
 {
   double margins;

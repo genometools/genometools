@@ -31,7 +31,7 @@ else
 end
 
 in_stream = gt.gff3_in_stream_new_sorted(gff3file)
-feature_index = gt.feature_index_new()
+feature_index = gt.feature_index_memory_new()
 feature_stream = gt.feature_stream_new(in_stream, feature_index)
 in_stream = nil; collectgarbage() -- being nasty
 gn = feature_stream:next_tree()
@@ -46,8 +46,8 @@ range = feature_index:get_range_for_seqid(seqid)
 ii = gt.imageinfo_new()
 
 diagram = gt.diagram_new(feature_index, seqid, range)
-canvas = gt.canvas_new_png(800, ii)
-canvas2 = gt.canvas_new_png(800, nil)  -- nil as ImageInfo parameter must be ok
+canvas = gt.canvas_cairo_file_new_png(800, ii)
+canvas2 = gt.canvas_cairo_file_new_png(800, nil)  -- nil as ImageInfo parameter must be ok
 
 -- test sketching with image info
 diagram:sketch(canvas)

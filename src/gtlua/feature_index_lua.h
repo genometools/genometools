@@ -22,8 +22,8 @@
 
 /* exports the FeatureIndex class to Lua:
 
-   -- Returns a new <feature_index> object.
-   function feature_index_new()
+   -- Returns a new FeatureIndex object storing the index in memory.
+   function feature_index_memory_new()
 
    -- Add all features from all sequence regions contained in <gff3file> to
    -- <feature_index>.

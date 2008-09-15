@@ -30,6 +30,9 @@ typedef struct GtCanvasClass GtCanvasClass;
 unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia);
 void          gt_canvas_draw_ruler(GtCanvas *canvas);
 
+void* gt_canvas_cast(const GtCanvasClass *cc, GtCanvas *c);
+void* gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
+
 /* Returns a pixel-based range for a nucleotide-based range
    using the scaling factor defined for the given <canvas> */
 GtDrawingRange  gt_canvas_convert_coords(GtCanvas *canvas, GtRange);

@@ -310,6 +310,14 @@ void* gt_canvas_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
   return c;
 }
 
+void* gt_canvas_try_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
+{
+  assert(cc && c);
+  if (c->c_class == cc)
+    return c;
+  return NULL;
+}
+
 unsigned long gt_canvas_get_height(GtCanvas *canvas)
 {
   assert(canvas);
