@@ -56,7 +56,8 @@ int              gt_feature_index_get_features_for_range(GtFeatureIndex
                                                          *feature_index,
                                                          GtArray *results,
                                                          const char *seqid,
-                                                         GtRange, GtError*);
+                                                         GtRange range,
+                                                         GtError*);
 /* Returns the first sequence region identifier added to <feature_index>. */
 const char*      gt_feature_index_get_first_seqid(const GtFeatureIndex
                                                   *feature_index);
@@ -67,7 +68,7 @@ GtStrArray*     gt_feature_index_get_seqids(const GtFeatureIndex
 /* Writes the range of all features contained in the <feature_index> for
    region identifier <seqid> to the <GtRange> pointer <range>. */
 void             gt_feature_index_get_range_for_seqid(GtFeatureIndex
-                                                        *feature_index,
+                                                      *feature_index,
                                                       GtRange *range,
                                                       const char *seqid);
 /* Returns <true> if the sequence region identified by <seqid> has been

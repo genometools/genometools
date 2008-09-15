@@ -23,7 +23,6 @@
 
 const GtCanvasClass* gt_canvas_cairo_file_class(void);
 
-
 #define canvas_cairo_file_cast(C)\
         gt_canvas_cast(gt_canvas_cairo_file_class(), C)
 
