@@ -1,6 +1,6 @@
-\subsection{Classes}
+\subsection*{Table of contents}
 \begin{itemize}
 <%for _, class in ipairs(classes) do%>
-  \item <%=class%> (pg. \pageref{<%=class%>})
+  \item Class \texttt{<%=class%>}\dotfill page \pageref{<%=class%>}
 <%end%>
 \end{itemize}

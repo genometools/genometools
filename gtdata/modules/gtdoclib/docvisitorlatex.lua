@@ -43,20 +43,26 @@ local function include(template, env)
   return lp.include(template_path, env)
 end
 
+local function trim(s)
+  return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
+end
+
 local function codify(str)
   assert(str)
+  str = trim(str)
   local res = string.gsub(str, "\\", "$\\backslash$")
   res = string.gsub(res, "<(.-)>", "\\texttt{%1}")
-  res = string.gsub(res, " ([%a_][%a%d_%.]-%(%))", " \\texttt{%1}")
-  res = string.gsub(res, "___(.-)___", "\\textbf{%1}")
+  res = string.gsub(res, " ([%a_][%a%d_%.]-%(%))", "\\texttt{%1}")
+  res = string.gsub(res, "___(.-)___", " \\textbf{%1}")
+  res = string.gsub(res, "__(.-)__", "\\emph{%1}")
   res = string.gsub(res, "_", "\\_")
   res = string.gsub(res, "#", "\\#")
-  return string.gsub(res, "__(.-)__", "\\emph{%1}")
+  return res
 end
 
 local function paragraphify(str)
   assert(str)
-  return string.gsub(str, "\n\n", "\\\n\n")
+  return string.gsub(str, "\n\n", "\n\n")
 end
 
 function DocVisitorLaTeX:show_header()

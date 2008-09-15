@@ -23,21 +23,25 @@
 #include "annotationsketch/image_info_api.h"
 #include "annotationsketch/style_api.h"
 
-/* Implements the Canvas interface.
-   This Canvas uses the GtGraphicsCairo class.  */
+/* Implements the <GtCanvas> interface.
+   This Canvas uses the <GtGraphicsCairo> class.  */
 typedef struct GtCanvasCairoFile GtCanvasCairoFile;
 
-/* Create a new Canvas object with given <output_type> and <width> using the
-   configuration given in <style>. The optional <image_info> is filled when
-   the created Canvas object is used to render a Diagram object. */
+/* Create a new <GtCanvasCairoFile> object with given <output_type> and
+   <width> using the configuration given in <style>. The optional <image_info>
+   is filled when the created object is used to render a <GtDiagram> object.
+   Possible <GtGraphicsOutType> values are <GRAPHICS_PNG>, <GRAPHICS_PS>,
+   <GRAPHICS_PDF> and <GRAPHICS_SVG>. Dependent on the local Cairo installation,
+   not all of them may be available. */
 GtCanvas* gt_canvas_cairo_file_new(GtStyle *style,
-                                    GtGraphicsOutType output_type,
-                                    unsigned long width,
-                                    GtImageInfo *image_info);
-/* Write rendered <canvas> to file with name <filename>. */
+                                   GtGraphicsOutType output_type,
+                                   unsigned long width,
+                                   GtImageInfo *image_info);
+/* Write rendered <canvas> to the file with name <filename>. If this
+   method returns a value other than 0, check <err> for an error message. */
 int     gt_canvas_cairo_file_to_file(GtCanvasCairoFile *canvas,
                                      const char *filename, GtError *err);
-/* Append rendered <canvas> to given <stream>. */
+/* Append rendered <canvas> image data to given <stream>. */
 int     gt_canvas_cairo_file_to_stream(GtCanvasCairoFile *canvas,
                                        GtStr *stream);
 

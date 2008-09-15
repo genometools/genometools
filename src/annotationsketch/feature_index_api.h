@@ -25,9 +25,15 @@
 #include "core/strarray.h"
 #include "extended/region_node_api.h"
 
+/* This interface represents a searchable container for <FeatureNode> objects,
+   typically root nodes of larger structures. How storage and searching takes
+   place is left to the discretion of the implementing class.
+
+   Output from a <gt_feature_index_get_features_*()> method should always
+   be sorted by feature start position. */
 typedef struct GtFeatureIndex GtFeatureIndex;
 
-GtFeatureIndex* gt_feature_index_new(void);
+/* Add <region_node> to <feature_index>. */
 void             gt_feature_index_add_region_node(GtFeatureIndex*,
                                                   GtRegionNode*);
 /* Add <feature_node> to <feature_index>, associating it with a sequence
@@ -40,7 +46,7 @@ void             gt_feature_index_add_feature_node(GtFeatureIndex
 int              gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
                                                const char *gff3file,
                                                GtError *err);
-/* Returns an array of GtFeatureNodes associated with a given sequence region
+/* Returns an array of <GtFeatureNodes> associated with a given sequence region
    identifier <seqid>. */
 GtArray*        gt_feature_index_get_features_for_seqid(GtFeatureIndex*,
                                                          const char *seqid);
@@ -54,15 +60,21 @@ int              gt_feature_index_get_features_for_range(GtFeatureIndex
 /* Returns the first sequence region identifier added to <feature_index>. */
 const char*      gt_feature_index_get_first_seqid(const GtFeatureIndex
                                                   *feature_index);
-/* Returns a GtStrArray of all sequence region identifiers contained in
+/* Returns a <GtStrArray> of all sequence region identifiers contained in
    <feature_index> (in alphabetical order). */
 GtStrArray*     gt_feature_index_get_seqids(const GtFeatureIndex
                                              *feature_index);
-void             gt_feature_index_get_range_for_seqid(GtFeatureIndex*,
-                                                      GtRange*,
+/* Writes the range of all features contained in the <feature_index> for
+   region identifier <seqid> to the <GtRange> pointer <range>. */
+void             gt_feature_index_get_range_for_seqid(GtFeatureIndex
+                                                        *feature_index,
+                                                      GtRange *range,
                                                       const char *seqid);
-bool             gt_feature_index_has_seqid(const GtFeatureIndex*,
-                                            const char*);
+/* Returns <true> if the sequence region identified by <seqid> has been
+  registered in the <feature_index>. */
+bool             gt_feature_index_has_seqid(const GtFeatureIndex *feature_index,
+                                            const char *seqid);
+/* Deletes the <feature_index> and all its referenced features. */
 void             gt_feature_index_delete(GtFeatureIndex*);
 
 #endif

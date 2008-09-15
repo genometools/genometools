@@ -23,8 +23,11 @@
 #include "annotationsketch/image_info_api.h"
 #include "annotationsketch/style_api.h"
 
-/* Implements the Canvas interface.
-   This Canvas uses the GtGraphicsCairo class.  */
+/* Implements the <GtCanvas> interface using a Cairo context (<cairo_t>)
+   as input. This Canvas uses the GtGraphicsCairo class.
+
+   Drawing to a <cairo_t> allows the use of the  __AnnotationSketch__  engine
+   in any Cairo-based graphical application. */
 typedef struct GtCanvasCairoContext GtCanvasCairoContext;
 
 /* Create a new Canvas object tied to the cairo_t <context> and <width>

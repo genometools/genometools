@@ -20,13 +20,27 @@
 
 #include "extended/feature_node.h"
 
+/* A <GtRecMap> object contains a mapping from a 2D coordinate pair
+   which identifies a rectangle in a rendered image to the <GtFeatureNode> it
+  represents. The rectangle is defined by the coordinates of its upper left
+  (``northwest'') and lower right (``southeast'') points.
+
+  <GtRecMap> objects are created by an <GtImageInfo> object which is filled
+  during the generation of an image by __AnnotationSketch__. */
 typedef struct GtRecMap GtRecMap;
 
+/* Retrieve __x__ value of the the upper left point of the rectangle. */
 double                  gt_recmap_get_northwest_x(const GtRecMap*);
+/* Retrieve __y__ value of the the upper left point of the rectangle. */
 double                  gt_recmap_get_northwest_y(const GtRecMap*);
+/* Retrieve __x__ value of the the lower right point of the rectangle. */
 double                  gt_recmap_get_southeast_x(const GtRecMap*);
+/* Retrieve __y__ value of the the lower right point of the rectangle. */
 double                  gt_recmap_get_southeast_y(const GtRecMap*);
-const GtFeatureNode* gt_recmap_get_genome_feature(const GtRecMap*);
+/* Retrieve <GtFeatureNode> associated with this rectangle. */
+const GtFeatureNode*    gt_recmap_get_genome_feature(const GtRecMap*);
+/* Returns <true> if the rectangle represents a block root whose elements
+   have not been drawn due to size restrictions. */
 bool                    gt_recmap_has_omitted_children(const GtRecMap*);
 
 #endif
