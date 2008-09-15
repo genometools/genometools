@@ -18,10 +18,15 @@
 #ifndef FEATURE_INDEX_MEMORY_API_H
 #define FEATURE_INDEX_MEMORY_API_H
 
-typedef struct GtFeatureIndexMemory GtFeatureIndexMemory;
-
 #include "annotationsketch/feature_index_api.h"
 
+/* The <GtFeatureIndexMemory> class implements a <GtFeatureIndex> in memory.
+   Features are organised by sequence region. Each sequence region collects its
+   feature nodes in an interval tree structure, which allows for efficient
+   range queries. */
+typedef struct GtFeatureIndexMemory GtFeatureIndexMemory;
+
+/* Creates a new <GtFeatureIndexMemory> object. */
 GtFeatureIndex* gt_feature_index_memory_new(void);
 
 #endif
