@@ -23,18 +23,15 @@
 #include "annotationsketch/feature_index_rep.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_stream.h"
-#include "annotationsketch/feature_visitor.h"
 #include "core/ensure.h"
 #include "core/hashmap.h"
 #include "core/interval_tree.h"
 #include "core/ma.h"
 #include "core/minmax.h"
-#include "core/queue.h"
 #include "core/range.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/genome_node.h"
-#include "extended/gff3_in_stream.h"
 
 struct GtFeatureIndexMemory {
   const GtFeatureIndex parent_instance;
@@ -125,37 +122,6 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
-}
-
-int gt_feature_index_memory_add_gff3file(GtFeatureIndex *gfi,
-                                         const char *gff3file, GtError *err)
-{
-  GtNodeStream *gff3_in_stream;
-  GtGenomeNode *gn;
-  GtFeatureIndexMemory *fi;
-  GtQueue *queue;
-  int had_err = 0;
-  gt_error_check(err);
-  assert(gfi && gff3file);
-  fi = gt_feature_index_memory_cast(gfi);
-  queue = gt_queue_new();
-  gff3_in_stream = gff3_in_stream_new_unsorted(1, &gff3file, false, false);
-  while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
-    gt_queue_add(queue, gn);
-  if (!had_err) {
-    GtNodeVisitor  *feature_visitor = feature_visitor_new(gfi);
-    while (gt_queue_size(queue)) {
-      gn = gt_queue_get(queue);
-      had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
-      assert(!had_err); /* cannot happen */
-    }
-    gt_node_visitor_delete(feature_visitor);
-  }
-  gt_node_stream_delete(gff3_in_stream);
-  while (gt_queue_size(queue))
-    gt_genome_node_rec_delete(gt_queue_get(queue));
-  gt_queue_delete(queue);
-  return had_err;
 }
 
 static int collect_features_from_itree(GtIntervalTreeNode *node, void *data)
@@ -292,7 +258,6 @@ const GtFeatureIndexClass* gt_feature_index_memory_class(void)
     { sizeof (GtFeatureIndexMemory),
       gt_feature_index_memory_add_region_node,
       gt_feature_index_memory_add_feature_node,
-      gt_feature_index_memory_add_gff3file,
       gt_feature_index_memory_get_features_for_seqid,
       gt_feature_index_memory_get_features_for_range,
       gt_feature_index_memory_get_first_seqid,
