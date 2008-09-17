@@ -57,6 +57,6 @@ struct GtGraphics {
 };
 
 GtGraphics* gt_graphics_create(const GtGraphicsClass*);
-void*     gt_graphics_cast(const GtGraphicsClass*, GtGraphics*);
+void*       gt_graphics_cast(const GtGraphicsClass*, GtGraphics*);
 
 #endif

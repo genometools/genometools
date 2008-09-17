@@ -45,6 +45,6 @@ struct GtCanvas {
 };
 
 GtCanvas* gt_canvas_create(const GtCanvasClass*);
-void*      gt_canvas_cast(const GtCanvasClass*, GtCanvas*);
+void*     gt_canvas_cast(const GtCanvasClass*, GtCanvas*);
 
 #endif

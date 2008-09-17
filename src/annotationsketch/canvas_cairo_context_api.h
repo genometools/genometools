@@ -26,7 +26,7 @@
 /* Implements the <GtCanvas> interface using a Cairo context (<cairo_t>)
    as input. This Canvas uses the GtGraphicsCairo class.
 
-   Drawing to a <cairo_t> allows the use of the  __AnnotationSketch__  engine
+   Drawing to a <cairo_t> allows the use of the  __AnnotationSketch__ engine
    in any Cairo-based graphical application. */
 typedef struct GtCanvasCairoContext GtCanvasCairoContext;
 
@@ -34,6 +34,6 @@ typedef struct GtCanvasCairoContext GtCanvasCairoContext;
    using the style given in <style>. The optional <image_info> is filled when
    the created Canvas object is used to render a Diagram object. */
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
-                                       unsigned long width,
-                                       GtImageInfo *image_info);
+                                      unsigned long width,
+                                      GtImageInfo *image_info);
 #endif
