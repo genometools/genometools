@@ -17,31 +17,24 @@
 
 require 'gtdlload'
 require 'gthelper'
-require 'libgtcore/strarray'
-require 'libgtext/genome_stream'
+require 'core/error'
+require 'extended/genome_node'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  typealias "bool", "ibool"
-  extern "GtNodeStream* gff3_in_stream_new_sorted(const char *, bool)"
-  extern "GtStrArray* gff3_in_stream_get_used_types(GtNodeStream*)"
+  extern "int gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*)"
 
-  class GFF3InStream
-    include GenomeStream
-    attr_reader :genome_stream
-    def initialize(filename)
-      if not File.readable?(filename)
-        GT.gterror("file '#{filename}' not readable")
-      end
-      @genome_stream = GT.gff3_in_stream_new_sorted(filename, false)
-      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
-    end
-
-    def get_used_types
-      strarray_ptr = GT.gff3_in_stream_get_used_types(@genome_stream)
-      used_types = GT::StrArray.new(strarray_ptr)
-      used_types.to_a
+  module GenomeStream
+    def next_tree
+      err = GT::Error.new()
+      genome_node = DL::PtrData.new(0)
+      genome_node.free = DL::FREE
+      rval = GT.gt_node_stream_next(self.genome_stream, genome_node.ref,
+                                    err.to_ptr)
+      if rval != 0 then GT.gterror(err) end
+      if genome_node.null? then return nil end
+      GT::GenomeNode.new(genome_node)
     end
   end
 end

@@ -9,11 +9,11 @@ end
 (stylefile, pngfile, gff3file) = ARGV
 
 # load style file
-style = GT::Config.new()
+style = GT::Style.new()
 style.load_file(stylefile)
 
 # create feature index
-feature_index = GT::FeatureIndex.new()
+feature_index = GT::FeatureIndexMemory.new()
 
 # add GFF3 file to index
 feature_index.add_gff3file(gff3file)
@@ -24,7 +24,7 @@ range = feature_index.get_range_for_seqid(seqid)
 diagram = GT::Diagram.new(feature_index, seqid, range, style)
 
 # create canvas
-canvas = GT::Canvas.new(style, 600, nil)
+canvas = GT::CanvasCairoFile.new(style, 600, nil)
 
 # sketch diagram on canvas
 diagram.sketch(canvas)

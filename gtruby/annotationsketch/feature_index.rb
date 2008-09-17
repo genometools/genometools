@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -16,9 +17,9 @@
 #
 
 require 'dl/import'
-require 'libgtcore/array'
-require 'libgtcore/range'
-require 'libgtcore/strarray'
+require 'core/array'
+require 'core/range'
+require 'core/strarray'
 
 module GT
   extend DL::Importable
@@ -36,13 +37,13 @@ module GT
   extern "void gt_feature_index_get_range_for_seqid(GtFeatureIndex*, " +
                                                    "GtRange*, const char*)"
   extern "bool gt_feature_index_has_seqid(const GtFeatureIndex*, const char*)"
-  extern "void gt_feature_index_delete(GtFeatureIndex*)"
 
   class FeatureIndex
     attr_reader :feature_index
-    def initialize
-      @feature_index = GT.gt_feature_index_memory_new()
-      @feature_index.free = GT::symbol("gt_feature_index_delete", "0P")
+
+    def initialize(*)
+      raise(NotImplementedError, "Please call the constructor of a " +
+                                 "#{self.class} implementation.")
     end
 
     def get_features_for_seqid(seqid)
@@ -81,6 +82,13 @@ module GT
       range = GT::Range.malloc
       GT.gt_feature_index_get_range_for_seqid(@feature_index, range, seqid)
       range
+    end
+  end
+
+  class FeatureIndexMemory < FeatureIndex
+    def initialize
+      @feature_index = GT.gt_feature_index_memory_new()
+      @feature_index.free = GT::symbol("gt_feature_index_delete", "0P")
     end
   end
 end

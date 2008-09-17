@@ -16,7 +16,7 @@
 #
 
 require 'gtdlload'
-require 'libgtext/genome_stream'
+require 'extended/genome_stream'
 
 module GT
   extend DL::Importable

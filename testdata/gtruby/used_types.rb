@@ -17,7 +17,7 @@
 
 # testing the Ruby bindings for the GFF3 output stream (similar to gff3 tool)
 
-require 'libgtext'
+require 'gtruby'
 
 if ARGV.size != 1 then
   STDERR.puts "Usage: #{$0} GFF3_file"

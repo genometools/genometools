@@ -15,10 +15,30 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtview/canvas'
-require 'libgtview/config'
-require 'libgtview/diagram'
-require 'libgtview/feature_index'
-require 'libgtview/feature_stream'
-require 'libgtview/image_info'
-require 'libgtview/recmap'
+require 'gtdlload'
+require 'core/range'
+
+module GT
+  extend DL::Importable
+  gtdlload "libgenometools"
+  extern "GT_Diagram* gt_diagram_new(GT_FeatureIndex*, const char*, const GT_Range*, " +
+                                 "GT_Style*)"
+  extern "int gt_diagram_sketch(GT_Diagram*, GT_Canvas*)"
+  extern "void gt_diagram_delete(GT_Diagram*)"
+
+  class Diagram
+    attr_reader :diagram
+    def initialize(feature_index, seqid, range, style)
+      if range.start > range.end
+        GT.gterror("range.start > range.end")
+      end
+      @diagram = GT.gt_diagram_new(feature_index.feature_index, seqid, range,
+                                   style.style)
+      @diagram.free = GT::symbol("gt_diagram_delete", "0P")
+    end
+
+    def sketch(canvas)
+      return GT.gt_diagram_sketch(@diagram, canvas.to_ptr)
+    end
+  end
+end

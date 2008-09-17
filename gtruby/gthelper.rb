@@ -15,7 +15,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtcore/error'
+require 'core/error'
 
 module GT
   class GTError < RuntimeError

@@ -29,7 +29,7 @@ end
 gff3file = ARGV[0]
 
 in_stream = GT::GFF3InStream.new(gff3file)
-feature_index = GT::FeatureIndex.new()
+feature_index = GT::FeatureIndexMemory.new()
 feature_stream = GT::FeatureStream.new(in_stream, feature_index)
 gn = feature_stream.next_tree()
 # fill feature index

@@ -28,7 +28,7 @@ end
 gff3file = ARGV[0]
 
 in_stream = GT::GFF3InStream.new(gff3file)
-feature_index = GT::FeatureIndex.new()
+feature_index = GT::FeatureIndexMemory.new()
 feature_stream = GT::FeatureStream.new(in_stream, feature_index)
 gn = feature_stream.next_tree()
 # fill feature index
@@ -39,10 +39,10 @@ end
 seqid = feature_index.get_first_seqid()
 range = feature_index.get_range_for_seqid(seqid)
 
-config = GT::Config.new()
-diagram = GT::Diagram.new(feature_index, seqid, range, config)
+style = GT::Style.new()
+diagram = GT::Diagram.new(feature_index, seqid, range, style)
 image_info = GT::ImageInfo.new()
-canvas = GT::Canvas.new(config, 800, image_info)
+canvas = GT::CanvasCairoFile.new(style, 800, image_info)
 diagram.sketch(canvas)
 
 image_info.each_hotspot do |x1, y1, x2, y2, gn|

@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,5 +15,20 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtcore/allocators'
-require 'libgtcore/error'
+require 'gtdlload'
+require 'extended/genome_stream'
+
+module GT
+  extend DL::Importable
+  gtdlload "libgenometools"
+  extern "GtNodeStream* gff3_out_stream_new(GenomeStream*, GenFile*)"
+
+  class GFF3OutStream
+    include GT::GenomeStream
+    attr_reader :genome_stream
+    def initialize(in_stream)
+      @genome_stream = GT.gff3_out_stream_new(in_stream.genome_stream, nil)
+      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
+    end
+  end
+end

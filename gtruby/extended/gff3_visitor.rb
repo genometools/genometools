@@ -16,25 +16,18 @@
 #
 
 require 'gtdlload'
-require 'gthelper'
-require 'libgtcore/error'
-require 'libgtext/genome_node'
+require 'extended/genome_stream'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "int gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*)"
+  extern "GtNodeVisitor* gff3_visitor_new(GtGenFile*)"
 
-  module GenomeStream
-    def next_tree
-      err = GT::Error.new()
-      genome_node = DL::PtrData.new(0)
-      genome_node.free = DL::FREE
-      rval = GT.gt_node_stream_next(self.genome_stream, genome_node.ref,
-                                    err.to_ptr)
-      if rval != 0 then GT.gterror(err) end
-      if genome_node.null? then return nil end
-      GT::GenomeNode.new(genome_node)
+  class GFF3Visitor
+    attr_reader :genome_visitor
+    def initialize
+      @genome_visitor = GT.gff3_visitor_new(nil)
+      @genome_visitor.free = GT::symbol("gt_node_visitor_delete", "0P")
     end
   end
 end

@@ -17,7 +17,7 @@
 
 require 'dl/import'
 require 'gthelper'
-require 'libgtcore/str'
+require 'core/str'
 
 module GT
   extend DL::Importable
@@ -30,11 +30,18 @@ module GT
   extern "void gt_canvas_delete(GT_Canvas*)"
 
   class Canvas
+    def initialize(*)
+      raise(NotImplementedError, "Please call the constructor of a " +
+                                 "#{self.class} implementation.")
+    end
+  end
+
+  class CanvasCairoFile < Canvas
     def initialize(style, width, ii)
       if ii.nil? then
-        @canvas = GT.gt_canvas_cairo_file_new(style.config, 1, width, GT::NULL)
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, GT::NULL)
       else
-        @canvas = GT.gt_canvas_cairo_file_new(style.config, 1, width, ii.to_ptr)
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, ii.to_ptr)
       end
       @canvas.free = GT::symbol("gt_canvas_delete", "0P")
     end

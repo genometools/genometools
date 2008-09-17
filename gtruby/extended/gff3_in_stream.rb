@@ -16,29 +16,32 @@
 #
 
 require 'gtdlload'
-require 'libgtcore/range'
+require 'gthelper'
+require 'core/strarray'
+require 'extended/genome_stream'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_Diagram* gt_diagram_new(GT_FeatureIndex*, const char*, const GT_Range*, " +
-                                 "GT_Style*)"
-  extern "int gt_diagram_sketch(GT_Diagram*, GT_Canvas*)"
-  extern "void gt_diagram_delete(GT_Diagram*)"
+  typealias "bool", "ibool"
+  extern "GtNodeStream* gff3_in_stream_new_sorted(const char *, bool)"
+  extern "GtStrArray* gff3_in_stream_get_used_types(GtNodeStream*)"
 
-  class Diagram
-    attr_reader :diagram
-    def initialize(feature_index, seqid, range, config)
-      if range.start > range.end
-        GT.gterror("range.start > range.end")
+  class GFF3InStream
+    include GenomeStream
+    attr_reader :genome_stream
+    def initialize(filename)
+      if not File.readable?(filename)
+        GT.gterror("file '#{filename}' not readable")
       end
-      @diagram = GT.gt_diagram_new(feature_index.feature_index, seqid, range,
-                                   config.config)
-      @diagram.free = GT::symbol("gt_diagram_delete", "0P")
+      @genome_stream = GT.gff3_in_stream_new_sorted(filename, false)
+      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
 
-    def sketch(canvas)
-      return GT.gt_diagram_sketch(@diagram, canvas.to_ptr)
+    def get_used_types
+      strarray_ptr = GT.gff3_in_stream_get_used_types(@genome_stream)
+      used_types = GT::StrArray.new(strarray_ptr)
+      used_types.to_a
     end
   end
 end

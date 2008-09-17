@@ -18,8 +18,8 @@
 require 'dl/import'
 require 'dl/struct'
 require 'gthelper'
-require 'libgtext/genome_feature'
-require 'libgtview/recmap'
+require 'extended/genome_feature'
+require 'annotationsketch/recmap'
 
 module GT
   extend DL::Importable

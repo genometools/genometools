@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +15,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'gtdlload'
-require 'libgtext/genome_stream'
-
-module GT
-  extend DL::Importable
-  gtdlload "libgenometools"
-  extern "GtNodeStream* add_introns_stream_new(GtNodeStream*)"
-
-  class AddIntronsStream
-    include GT::GenomeStream
-    attr_reader :genome_stream
-    def initialize(in_stream)
-      @genome_stream = GT.add_introns_stream_new(in_stream.genome_stream)
-      @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
-    end
-  end
-end
+require 'extended/add_introns_stream'
+require 'extended/gff3_in_stream'
+require 'extended/gff3_out_stream'
+require 'extended/gff3_visitor'

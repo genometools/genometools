@@ -29,7 +29,7 @@ pngfile  = ARGV[0]
 gff3file = ARGV[1]
 
 in_stream = GT::GFF3InStream.new(gff3file)
-feature_index = GT::FeatureIndex.new()
+feature_index = GT::FeatureIndexMemory.new()
 feature_stream = GT::FeatureStream.new(in_stream, feature_index)
 gn = feature_stream.next_tree()
 # fill feature index
@@ -40,9 +40,9 @@ end
 seqid = feature_index.get_first_seqid()
 range = feature_index.get_range_for_seqid(seqid)
 
-config = GT::Config.new()
-diagram = GT::Diagram.new(feature_index, seqid, range, config)
+style = GT::Style.new()
+diagram = GT::Diagram.new(feature_index, seqid, range, style)
 ii = GT::ImageInfo.new()
-canvas = GT::Canvas.new(config, 700, ii)
+canvas = GT::CanvasCairoFile.new(style, 700, ii)
 diagram.sketch(canvas)
 canvas.to_file(pngfile)

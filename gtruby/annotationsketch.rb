@@ -15,7 +15,10 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'libgtext/add_introns_stream'
-require 'libgtext/gff3_in_stream'
-require 'libgtext/gff3_out_stream'
-require 'libgtext/gff3_visitor'
+require 'annotationsketch/canvas'
+require 'annotationsketch/style'
+require 'annotationsketch/diagram'
+require 'annotationsketch/feature_index'
+require 'annotationsketch/feature_stream'
+require 'annotationsketch/image_info'
+require 'annotationsketch/recmap'

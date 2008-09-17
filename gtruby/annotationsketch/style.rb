@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -17,8 +18,8 @@
 
 require 'gtdlload'
 require 'gthelper'
-require 'libgtcore/error'
-require 'libgtview/color'
+require 'core/error'
+require 'annotationsketch/color'
 
 module GT
   extend DL::Importable
@@ -59,32 +60,33 @@ module GT
   extern "void gt_style_unset(GT_Style*, const char*, const char*)"
   extern "void gt_style_delete(GT_Style*)"
 
-  class Config
-    attr_reader :config
+  class Style
+    attr_reader :style
+
     def initialize
       err = GT::Error.new()
-      @config = GT.gt_style_new(false, err.to_ptr)
-      if not @config then GT.gterror(err) end
-      @config.free = GT::symbol("gt_style_delete", "0P")
+      @style = GT.gt_style_new(false, err.to_ptr)
+      if not @style then GT.gterror(err) end
+      @style.free = GT::symbol("gt_style_delete", "0P")
     end
 
     def load_file(filename)
       err = GT::Error.new()
-      rval = GT.gt_style_load_file(@config, filename, err.to_ptr)
+      rval = GT.gt_style_load_file(@style, filename, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def load_str(str)
       err = GT::Error.new()
       str = GT::Str.new(str)
-      rval = GT.gt_style_load_str(@config, str.to_ptr, err.to_ptr)
+      rval = GT.gt_style_load_str(@style, str.to_ptr, err.to_ptr)
       if rval != 0 then GT.gterror(err) end
     end
 
     def to_str()
       err = GT::Error.new()
       str = GT::Str.new(nil)
-      if GT.gt_style_to_str(@config, str.to_ptr, err.to_ptr) == 0
+      if GT.gt_style_to_str(@style, str.to_ptr, err.to_ptr) == 0
         str.to_s
       else
         GT.gterror(err)
@@ -92,15 +94,15 @@ module GT
     end
 
     def clone
-      cfg = GT::Config.new()
+      sty = GT::Style.new()
       str = self.to_str()
-      cfg.load_str(str)
-      cfg
+      sty.load_str(str)
+      sty
     end
 
     def get_color(section, key, gn = GT::NULL)
       color = GT::Color.malloc
-      if GT.gt_style_get_color(@config, section, key, color, gn)
+      if GT.gt_style_get_color(@style, section, key, color, gn)
         color
       else
         nil
@@ -108,12 +110,12 @@ module GT
     end
 
     def set_color(section, key, color)
-      GT.gt_style_set_color(@config, section, key, color)
+      GT.gt_style_set_color(@style, section, key, color)
     end
 
     def get_cstr(section, key, gn = GT::NULL)
       str = GT::Str.new(nil)
-      if GT.gt_style_get_str(@config, section, key, str, gn)
+      if GT.gt_style_get_str(@style, section, key, str, gn)
         str.to_s
       else
         nil
@@ -122,12 +124,12 @@ module GT
 
     def set_cstr(section, key, value)
       str = GT::Str.new(value)
-      GT.gt_style_set_str(@config, section, key, str)
+      GT.gt_style_set_str(@style, section, key, str)
     end
 
     def get_num(section, key, gn = GT::NULL)
       double = DoubleArg.malloc
-      if GT.gt_style_get_num(@config, section, key, double, gn)
+      if GT.gt_style_get_num(@style, section, key, double, gn)
         double.val
       else
         nil
@@ -136,12 +138,12 @@ module GT
 
     def set_num(section, key, number)
       num = number.to_f
-      GT.gt_style_set_num(@config, section, key, num)
+      GT.gt_style_set_num(@style, section, key, num)
     end
 
     def get_bool(section, key, gn = GT::NULL)
       bool = BoolArg.malloc
-      if GT.gt_style_get_bool(@config, section, key, bool, gn)
+      if GT.gt_style_get_bool(@style, section, key, bool, gn)
         bool.val
       else
         nil
@@ -149,11 +151,11 @@ module GT
     end
 
     def set_bool(section, key, val)
-      GT.gt_style_set_bool(@config, section, key, val)
+      GT.gt_style_set_bool(@style, section, key, val)
     end
 
     def unset(section, key)
-      GT.gt_style_unset(@config, section, key)
+      GT.gt_style_unset(@style, section, key)
     end
   end
 end

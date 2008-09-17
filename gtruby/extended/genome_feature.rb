@@ -17,8 +17,8 @@
 
 require 'dl/import'
 require 'gthelper'
-require 'libgtcore/str'
-require 'libgtext/genome_node'
+require 'core/str'
+require 'extended/genome_node'
 
 module GT
   extend DL::Importable
