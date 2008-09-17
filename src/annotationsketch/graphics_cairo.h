@@ -28,9 +28,9 @@ typedef struct GtGraphicsCairo GtGraphicsCairo;
 
 const GtGraphicsClass* gt_graphics_cairo_class(void);
 GtGraphics*            gt_graphics_cairo_new(GtGraphicsOutType type,
-                                              unsigned int width,
-                                              unsigned int height);
+                                             unsigned int width,
+                                             unsigned int height);
 GtGraphics*            gt_graphics_cairo_new_from_context(cairo_t *context,
-                                                           unsigned int width,
-                                                           unsigned int height);
+                                                          unsigned int width,
+                                                          unsigned int height);
 #endif

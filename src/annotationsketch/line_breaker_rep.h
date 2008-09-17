@@ -34,7 +34,7 @@ struct GtLineBreaker {
 };
 
 GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass*);
-void*        gt_line_breaker_cast(const GtLineBreakerClass*,
-                               GtLineBreaker*);
+void*          gt_line_breaker_cast(const GtLineBreakerClass*,
+                                    GtLineBreaker*);
 
 #endif

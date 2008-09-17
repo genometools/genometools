@@ -31,7 +31,7 @@ struct GtLineBreakerCaptions {
         gt_line_breaker_cast(gt_line_breaker_captions_class(), LB)
 
 static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lcb,
-                                            GtBlock* block)
+                                              GtBlock* block)
 {
   double textwidth = 0.0;
   GtDrawingRange drange;
@@ -48,8 +48,8 @@ static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lcb,
 }
 
 bool gt_line_breaker_captions_is_gt_line_occupied(GtLineBreaker* lb,
-                                            GtLine *line,
-                                            GtBlock *block)
+                                                  GtLine *line,
+                                                  GtBlock *block)
 {
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
@@ -64,8 +64,8 @@ bool gt_line_breaker_captions_is_gt_line_occupied(GtLineBreaker* lb,
 }
 
 void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
-                                          GtLine *line,
-                                          GtBlock *block)
+                                             GtLine *line,
+                                             GtBlock *block)
 {
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
