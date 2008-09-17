@@ -411,7 +411,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
-  SeqIterator *seqit = NULL;
+  GtSeqIterator *seqit = NULL;
   bool haserr = false;
   int retval, try;
   unsigned int demand;
@@ -569,10 +569,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                            : showmstats,
                                          &twl, /* refer to uninit structure */
                                          dfst);
-    seqit = seqiterator_new(tageratoroptions->tagfiles, NULL, true);
+    seqit = gt_seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
-      retval = seqiterator_next(seqit, &currenttag, &twl.taglen, &desc, err);
+      retval = gt_seqiterator_next(seqit, &currenttag, &twl.taglen, &desc, err);
       if (retval != 1)
       {
         if (retval < 0)
@@ -652,7 +652,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     freeMyersonlineresources(&mor);
   }
-  seqiterator_delete(seqit);
+  gt_seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);
   gt_free(showmatchinfo.eqsvector);
   if (packedindex != NULL)

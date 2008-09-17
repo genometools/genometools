@@ -59,17 +59,17 @@ typedef struct {
                                      region */
   GtArray *genome_features; /* the genome features which belong to this
                                 region */
-} AutomaticSequenceRegion;
+} AutomaticGtSequenceRegion;
 
-static AutomaticSequenceRegion* automatic_sequence_region_new(void)
+static AutomaticGtSequenceRegion* automatic_sequence_region_new(void)
 {
-  AutomaticSequenceRegion *auto_sr;
-  auto_sr = gt_malloc(sizeof (AutomaticSequenceRegion));
+  AutomaticGtSequenceRegion *auto_sr;
+  auto_sr = gt_malloc(sizeof (AutomaticGtSequenceRegion));
   auto_sr->genome_features = gt_array_new(sizeof (GtFeatureNode*));
   return auto_sr;
 }
 
-static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr)
+static void automatic_sequence_region_delete(AutomaticGtSequenceRegion *auto_sr)
 {
   unsigned long i;
   if (!auto_sr) return;
@@ -86,21 +86,21 @@ typedef struct {
   GtStr *seqid_str;
   GtRange range;
   unsigned int line_number;
-} SimpleGtSequenceRegion;
+} SimpleGtGtSequenceRegion;
 
-static SimpleGtSequenceRegion* simple_sequence_region_new(const char *seqid,
+static SimpleGtGtSequenceRegion* simple_sequence_region_new(const char *seqid,
                                                         GtRange range,
                                                         unsigned int
                                                         line_number)
 {
-  SimpleGtSequenceRegion *ssr = gt_malloc(sizeof *ssr);
+  SimpleGtGtSequenceRegion *ssr = gt_malloc(sizeof *ssr);
   ssr->seqid_str = gt_str_new_cstr(seqid);
   ssr->range = range;
   ssr->line_number = line_number;
   return ssr;
 }
 
-static void simple_sequence_region_delete(SimpleGtSequenceRegion *ssr)
+static void simple_sequence_region_delete(SimpleGtGtSequenceRegion *ssr)
 {
   if (!ssr) return;
   gt_str_delete(ssr->seqid_str);
@@ -261,11 +261,11 @@ int gt_gff3_parser_parse_target_attributes(const char *values,
 }
 
 static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
-                         AutomaticSequenceRegion **auto_sr,
+                         AutomaticGtSequenceRegion **auto_sr,
                          GT_GFF3Parser *parser, const char *filename,
                          unsigned int line_number, GtError *err)
 {
-  SimpleGtSequenceRegion *ssr;
+  SimpleGtGtSequenceRegion *ssr;
   int had_err = 0;
 
   gt_error_check(err);
@@ -336,7 +336,7 @@ static int replace_func(void **elem, void *info, GT_UNUSED GtError *err)
 
 static void replace_node(GtFeatureNode *node_to_replace,
                          GtFeatureNode *replacing_node, GtQueue *genome_nodes,
-                         AutomaticSequenceRegion *auto_sr)
+                         AutomaticGtSequenceRegion *auto_sr)
 {
   ReplaceInfo replace_info;
   int rval;
@@ -359,7 +359,7 @@ static void replace_node(GtFeatureNode *node_to_replace,
 }
 
 static void remove_node(GtGenomeNode *genome_node, GtQueue *genome_nodes,
-                        AutomaticSequenceRegion *auto_sr)
+                        AutomaticGtSequenceRegion *auto_sr)
 {
   gt_assert(genome_node && genome_nodes);
   if (auto_sr) {
@@ -409,7 +409,7 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
 
 static int store_id(const char *id, GtFeatureNode *genome_feature,
                     bool *is_child, GT_GFF3Parser *parser,
-                    GtQueue *genome_nodes, AutomaticSequenceRegion *auto_sr,
+                    GtQueue *genome_nodes, AutomaticGtSequenceRegion *auto_sr,
                     const char *filename, unsigned int line_number,
                     GtError *err)
 {
@@ -505,7 +505,7 @@ static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
                                          GtFeatureNode *pseudo_b,
                                          FeatureInfo *feature_info,
                                          GtQueue *genome_nodes,
-                                         AutomaticSequenceRegion *auto_sr)
+                                         AutomaticGtSequenceRegion *auto_sr)
 {
   GtGenomeNodeIterator *gni;
   GtFeatureNode *child;
@@ -530,7 +530,7 @@ static GtFeatureNode* add_node_to_pseudo_node(GtFeatureNode *pseudo_node,
                                               GtFeatureNode *normal_node,
                                               FeatureInfo *feature_info,
                                               GtQueue *genome_nodes,
-                                              AutomaticSequenceRegion *auto_sr)
+                                              AutomaticGtSequenceRegion *auto_sr)
 {
   gt_assert(pseudo_node &&
          gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_node));
@@ -546,7 +546,7 @@ static GtFeatureNode* create_pseudo_node(GtFeatureNode *node_a,
                                          GtFeatureNode *node_b,
                                          FeatureInfo *feature_info,
                                          GtQueue *genome_nodes,
-                                         AutomaticSequenceRegion *auto_sr)
+                                         AutomaticGtSequenceRegion *auto_sr)
 {
   GtFeatureNode *pseudo_node;
   gt_assert(node_a && !gt_feature_node_is_pseudo((GtFeatureNode*) node_a));
@@ -565,7 +565,7 @@ static GtFeatureNode* join_root_pair(GtFeatureNode *root_a,
                                      GtFeatureNode *root_b,
                                      FeatureInfo *feature_info,
                                      GtQueue *genome_nodes,
-                                     AutomaticSequenceRegion *auto_sr)
+                                     AutomaticGtSequenceRegion *auto_sr)
 {
   bool root_a_is_pseudo, root_b_is_pseudo;
   GtFeatureNode *master_root;
@@ -592,7 +592,7 @@ static GtFeatureNode* join_root_pair(GtFeatureNode *root_a,
 }
 
 static void join_roots(GtArray *roots, FeatureInfo *feature_info,
-                       GtQueue *genome_nodes, AutomaticSequenceRegion *auto_sr)
+                       GtQueue *genome_nodes, AutomaticGtSequenceRegion *auto_sr)
 {
   GtFeatureNode *master_root;
   unsigned long i;
@@ -608,7 +608,7 @@ static void join_roots(GtArray *roots, FeatureInfo *feature_info,
 static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
                                bool *is_child, GT_GFF3Parser *parser,
                                GtQueue *genome_nodes,
-                               AutomaticSequenceRegion *auto_sr,
+                               AutomaticGtSequenceRegion *auto_sr,
                                const char *filename, unsigned int line_number,
                                GtError *err)
 {
@@ -864,7 +864,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
 static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
                             bool *is_child, GT_GFF3Parser *parser,
                             GtQueue *genome_nodes,
-                            AutomaticSequenceRegion *auto_sr,
+                            AutomaticGtSequenceRegion *auto_sr,
                             const char *filename, unsigned int line_number,
                             GtError *err)
 {
@@ -1005,7 +1005,7 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
 {
   GtGenomeNode *gn = NULL, *genome_feature = NULL;
   Splitter *splitter;
-  AutomaticSequenceRegion *auto_sr = NULL;
+  AutomaticGtSequenceRegion *auto_sr = NULL;
   GtStr *seqid_str = NULL;
   GtStrand gt_strand_value;
   float score_value;
@@ -1205,7 +1205,7 @@ static int parse_fasta_entry(GtQueue *genome_nodes, const char *line,
 static int add_auto_sr_to_queue(GT_UNUSED void *key, void *value, void *data,
                                 GT_UNUSED GtError *err)
 {
-  AutomaticSequenceRegion *auto_sr = value;
+  AutomaticGtSequenceRegion *auto_sr = value;
   GtQueue *genome_nodes = data;
   GtGenomeNode *gf;
   unsigned int i;
@@ -1231,7 +1231,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
   char *tmpline, *tmplineend, *seqstart, *seqid = NULL;
   GtGenomeNode *gn;
   GtStr *changed_seqid = NULL;
-  SimpleGtSequenceRegion *ssr = NULL;
+  SimpleGtGtSequenceRegion *ssr = NULL;
   GtRange range;
   const char *filename;
   int had_err = 0;

@@ -387,23 +387,23 @@ int callenumquerymatches(const GtStr *indexname,
   }
   if (!haserr)
   {
-    SeqIterator *seqit;
+    GtSeqIterator *seqit;
     const Uchar *query;
     unsigned long querylen;
     char *desc = NULL;
     int retval;
     uint64_t unitnum;
 
-    seqit = seqiterator_new(queryfiles,
-                            getsymbolmapAlphabet(suffixarray.alpha),
-                            true);
+    seqit = gt_seqiterator_new(queryfiles,
+                              getsymbolmapAlphabet(suffixarray.alpha),
+                              true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
-      retval = seqiterator_next(seqit,
-                                &query,
-                                &querylen,
-                                &desc,
-                                err);
+      retval = gt_seqiterator_next(seqit,
+                                  &query,
+                                  &querylen,
+                                  &desc,
+                                  err);
       if (retval < 0)
       {
         haserr = true;
@@ -430,7 +430,7 @@ int callenumquerymatches(const GtStr *indexname,
       }
       FREESPACE(desc);
     }
-    seqiterator_delete(seqit);
+    gt_seqiterator_delete(seqit);
   }
   freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;

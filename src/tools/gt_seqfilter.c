@@ -26,24 +26,24 @@
 typedef struct {
   unsigned long minlength,
                 maxlength;
-} SeqFilterArguments;
+} GtSeqFilterArguments;
 
 static void* gt_seqfilter_arguments_new(void)
 {
-  SeqFilterArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtSeqFilterArguments *arguments = gt_calloc(1, sizeof *arguments);
   return arguments;
 }
 
 static void gt_seqfilter_arguments_delete(void *tool_arguments)
 {
-  SeqFilterArguments *arguments = tool_arguments;
+  GtSeqFilterArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_free(arguments);
 }
 
 static OptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
 {
-  SeqFilterArguments *arguments = tool_arguments;
+  GtSeqFilterArguments *arguments = tool_arguments;
   Option *option;
   OptionParser *op;
   assert(arguments);
@@ -70,7 +70,7 @@ static OptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
 static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
                                void *tool_arguments, GtError *err)
 {
-  SeqFilterArguments *arguments = tool_arguments;
+  GtSeqFilterArguments *arguments = tool_arguments;
   GtBioseqIterator *bsi;
   GtBioseq *bioseq;
   unsigned long i;

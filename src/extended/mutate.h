@@ -20,9 +20,9 @@
 
 #include "core/seq.h"
 
-/* returns a Seq which is the mutated sequence <orig_seq> of length <len> over
+/* returns a GtSeq which is the mutated sequence <orig_seq> of length <len> over
    alphabet <alpha>. <rate> denotes the error rate (must be >=0 && <= 100) */
-Seq* mutate(const char *description, const char *orig_seq, unsigned long len,
+GtSeq* mutate(const char *description, const char *orig_seq, unsigned long len,
             GtAlpha *alpha, unsigned int rate);
 
 #endif

@@ -20,24 +20,24 @@
 
 #include "core/alpha.h"
 
-typedef struct Seq Seq;
+typedef struct GtSeq GtSeq;
 
 /* Stores <seq> pointer. */
-Seq*          seq_new(const char *seq, unsigned long seqlen,
+GtSeq*          gt_seq_new(const char *seq, unsigned long seqlen,
                       GtAlpha *seqalpha);
 /* Takes ownership of <seq>. */
-Seq*          seq_new_own(char *seq, unsigned long seqlen,
+GtSeq*          gt_seq_new_own(char *seq, unsigned long seqlen,
                           GtAlpha *seqalpha);
 /* Stores <desc> pointer. */
-void            seq_set_description(Seq*, const char *desc);
+void            gt_seq_set_description(GtSeq*, const char *desc);
 /* Takes ownership of <desc>. */
-void            seq_set_description_own(Seq*, char *desc);
-void            seq_set_description(Seq*, const char *desc);
-const char*     seq_get_description(Seq*);
-const char*     seq_get_orig(const Seq*); /* not '\0' terminated */
-const char*     seq_get_encoded(Seq*);
-const GtAlpha* seq_get_alpha(const Seq*);
-unsigned long   seq_length(const Seq*);
-void            seq_delete(Seq*);
+void            gt_seq_set_description_own(GtSeq*, char *desc);
+void            gt_seq_set_description(GtSeq*, const char *desc);
+const char*     gt_seq_get_description(GtSeq*);
+const char*     gt_seq_get_orig(const GtSeq*); /* not '\0' terminated */
+const char*     gt_seq_get_encoded(GtSeq*);
+const GtAlpha* gt_seq_get_alpha(const GtSeq*);
+unsigned long   gt_seq_length(const GtSeq*);
+void            gt_seq_delete(GtSeq*);
 
 #endif

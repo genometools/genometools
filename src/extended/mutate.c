@@ -102,16 +102,16 @@ static char* mutate_seq(const char *seq, unsigned long len, GtAlpha *alpha,
   return mutated_seq;
 }
 
-Seq* mutate(const char *description, const char *orig_seq, unsigned long len,
+GtSeq* mutate(const char *description, const char *orig_seq, unsigned long len,
             GtAlpha *alpha, unsigned int rate)
 {
   char *mutated_description, *mutated_seq;
-  Seq *seq;
+  GtSeq *seq;
   assert(description && orig_seq && alpha);
   assert(rate <= 100);
   mutated_description = mutate_description(description, rate);
   mutated_seq = mutate_seq(orig_seq, len, alpha, rate);
-  seq = seq_new_own(mutated_seq, strlen(mutated_seq), alpha);
-  seq_set_description_own(seq, mutated_description);
+  seq = gt_seq_new_own(mutated_seq, strlen(mutated_seq), alpha);
+  gt_seq_set_description_own(seq, mutated_description);
   return seq;
 }

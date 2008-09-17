@@ -42,7 +42,7 @@ GtBioseq*       gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                            GtError*);
 void          gt_bioseq_delete(GtBioseq*);
 GtAlpha*        gt_bioseq_get_alpha(GtBioseq*);
-Seq*          gt_bioseq_get_seq(GtBioseq*, unsigned long);
+GtSeq*          gt_bioseq_get_seq(GtBioseq*, unsigned long);
 const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
 const char*   gt_bioseq_get_sequence(GtBioseq*, unsigned long index);

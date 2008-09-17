@@ -31,7 +31,7 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
   Option *o;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
+  op = option_parser_new("[option ...] gt_seq_file_1 gt_seq_file_2",
                          "Compute q-gram distance for each sequence "
                          "combination.");
   o = option_new_uint_min("q", "set q", q, 3, 1);
@@ -46,7 +46,7 @@ int gt_qgramdist(int argc, const char **argv, GtError *err)
 {
   GtBioseq *gt_bioseq_1 = NULL, *gt_bioseq_2 = NULL;
   unsigned long i, j, dist;
-  Seq *seq_1, *seq_2;
+  GtSeq *seq_1, *seq_2;
   int parsed_args, had_err = 0;
   unsigned int q;
   gt_error_check(err);
@@ -59,13 +59,13 @@ int gt_qgramdist(int argc, const char **argv, GtError *err)
   }
   assert(parsed_args+1 < argc);
 
-  /* make sure seq_file_1 exists */
+  /* make sure gt_seq_file_1 exists */
   if (!file_exists(argv[parsed_args])) {
     gt_error_set(err, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
     had_err = -1;
   }
 
-  /* make sure seq_file_2 exists */
+  /* make sure gt_seq_file_2 exists */
   if (!had_err && !file_exists(argv[parsed_args+1])) {
     gt_error_set(err, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
     had_err = -1;
@@ -89,9 +89,9 @@ int gt_qgramdist(int argc, const char **argv, GtError *err)
         seq_2 = gt_bioseq_get_seq(gt_bioseq_2, j);
         dist = qgramdist(seq_1, seq_2, q);
         printf("qgramdist_%u_(", q);
-        gt_cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
+        gt_cstr_show(gt_seq_get_orig(seq_1), gt_seq_length(seq_1), stdout);
         xputchar(',');
-        gt_cstr_show(seq_get_orig(seq_2), seq_length(seq_2), stdout);
+        gt_cstr_show(gt_seq_get_orig(seq_2), gt_seq_length(seq_2), stdout);
         printf(")=%lu\n", dist);
       }
     }

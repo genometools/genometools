@@ -178,7 +178,7 @@ static void processastretches(const DiscDistri *distastretch,
 int gt_seqiterator(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
-  SeqIterator *seqit;
+  GtSeqIterator *seqit;
   const Uchar *sequence;
   char *desc;
   unsigned long len;
@@ -211,7 +211,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   totalsize = files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
-  seqit = seqiterator_new(files, NULL, true);
+  seqit = gt_seqiterator_new(files, NULL, true);
   if (seqiteroptions.dodistlen)
   {
     distseqlen = disc_distri_new();
@@ -222,15 +222,15 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   }
   if (seqiteroptions.verbose)
   {
-    gt_progressbar_start(seqiterator_getcurrentcounter(seqit,
-                                                       (unsigned long long)
-                                                       totalsize),
+    gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+                                                         (unsigned long long)
+                                                         totalsize),
                          (unsigned long long) totalsize);
   }
   while (true)
   {
     desc = NULL;
-    had_err = seqiterator_next(seqit, &sequence, &len, &desc, err);
+    had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
     if (seqiteroptions.dodistlen)
     {
       if (!minlengthdefined || minlength > len)
@@ -260,7 +260,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   {
     gt_progressbar_stop();
   }
-  seqiterator_delete(seqit);
+  gt_seqiterator_delete(seqit);
   gt_strarray_delete(files);
   if (seqiteroptions.dodistlen)
   {

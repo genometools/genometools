@@ -20,7 +20,7 @@
 #include "core/seq.h"
 #include "core/xansi.h"
 
-struct Seq {
+struct GtSeq {
   char *seq, *description;
   char *encoded_seq;
   unsigned long seqlen;
@@ -29,31 +29,31 @@ struct Seq {
   GtAlpha *seqalpha;
 };
 
-Seq* seq_new(const char *seq, unsigned long seqlen, GtAlpha *seqalpha)
+GtSeq* gt_seq_new(const char *seq, unsigned long seqlen, GtAlpha *seqalpha)
 {
-  Seq *s;
+  GtSeq *s;
   assert(seq && seqalpha);
-  s = gt_calloc(1, sizeof (Seq));
+  s = gt_calloc(1, sizeof (GtSeq));
   s->seq = (char*) seq;
   s->seqlen = seqlen;
   s->seqalpha = gt_alpha_ref(seqalpha);
   return s;
 }
 
-Seq* seq_new_own(char* seq, unsigned long seqlen, GtAlpha *seqalpha)
+GtSeq* gt_seq_new_own(char* seq, unsigned long seqlen, GtAlpha *seqalpha)
 {
-  Seq *s = seq_new(seq, seqlen, seqalpha);
+  GtSeq *s = gt_seq_new(seq, seqlen, seqalpha);
   s->own_seq = true;
   return s;
 }
 
-void seq_set_description(Seq *s, const char *desc)
+void gt_seq_set_description(GtSeq *s, const char *desc)
 {
   assert(s);
   s->description = (char*) desc;
 }
 
-void seq_set_description_own(Seq *s, char *desc)
+void gt_seq_set_description_own(GtSeq *s, char *desc)
 {
   assert(s);
   if (s->description && s->own_description)
@@ -62,19 +62,19 @@ void seq_set_description_own(Seq *s, char *desc)
   s->own_description = true;
 }
 
-const char* seq_get_description(Seq *s)
+const char* gt_seq_get_description(GtSeq *s)
 {
   assert(s);
   return s->description;
 }
 
-const char* seq_get_orig(const Seq *s)
+const char* gt_seq_get_orig(const GtSeq *s)
 {
   assert(s);
   return s->seq;
 }
 
-const char* seq_get_encoded(Seq *s)
+const char* gt_seq_get_encoded(GtSeq *s)
 {
   assert(s);
   if (!s->encoded_seq) {
@@ -85,19 +85,19 @@ const char* seq_get_encoded(Seq *s)
   return s->encoded_seq;
 }
 
-const GtAlpha* seq_get_alpha(const Seq *s)
+const GtAlpha* gt_seq_get_alpha(const GtSeq *s)
 {
   assert(s);
   return s->seqalpha;
 }
 
-unsigned long seq_length(const Seq *s)
+unsigned long gt_seq_length(const GtSeq *s)
 {
   assert(s);
   return s->seqlen;
 }
 
-void seq_delete(Seq *s)
+void gt_seq_delete(GtSeq *s)
 {
   if (!s) return;
   if (s->own_seq)

@@ -65,7 +65,7 @@ int gt_node_visitor_visit_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-int gt_node_visitor_visit_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
+int gt_node_visitor_visit_sequence_node(GtNodeVisitor *gv, GtGtSequenceNode *sn,
                                        GtError *err)
 {
   gt_error_check(err);

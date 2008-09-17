@@ -23,14 +23,14 @@
 #include "core/strarray.h"
 #include "core/symboldef.h"
 
-typedef struct SeqIterator SeqIterator;
+typedef struct GtSeqIterator GtSeqIterator;
 
-SeqIterator* seqiterator_new(const GtStrArray *filenametab,
+GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
                              const Uchar *symbolmap, bool withsequence);
-int          seqiterator_next(SeqIterator*, const Uchar **sequence,
+int          gt_seqiterator_next(GtSeqIterator*, const Uchar **sequence,
                               unsigned long *len, char **desc, GtError*);
 const unsigned long long*
-             seqiterator_getcurrentcounter(SeqIterator*, unsigned long long);
-void         seqiterator_delete(SeqIterator*);
+             gt_seqiterator_getcurrentcounter(GtSeqIterator*, unsigned long long);
+void         gt_seqiterator_delete(GtSeqIterator*);
 
 #endif

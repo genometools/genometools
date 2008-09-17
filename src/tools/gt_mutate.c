@@ -65,7 +65,7 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
   GtBioseqIterator *bsi;
   unsigned long i;
   GtBioseq *bioseq;
-  Seq *mutated_seq;
+  GtSeq *mutated_seq;
   int had_err;
 
   gt_error_check(err);
@@ -79,10 +79,10 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
                            gt_bioseq_get_sequence(bioseq, i),
                            gt_bioseq_get_sequence_length(bioseq, i),
                            gt_bioseq_get_alpha(bioseq), arguments->rate);
-      gt_fasta_show_entry(seq_get_description(mutated_seq),
-                          seq_get_orig(mutated_seq), seq_length(mutated_seq),
+      gt_fasta_show_entry(gt_seq_get_description(mutated_seq),
+                          gt_seq_get_orig(mutated_seq), gt_seq_length(mutated_seq),
                           0);
-      seq_delete(mutated_seq);
+      gt_seq_delete(mutated_seq);
     }
     gt_bioseq_delete(bioseq);
   }

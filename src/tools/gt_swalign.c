@@ -49,9 +49,9 @@ static OptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
   OptionParser *op;
   Option *o;
   assert(arguments);
-  op = option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
-                         "Locally align each sequence in seq_file_1 "
-                         "with each sequence in seq_file_2.");
+  op = option_parser_new("[option ...] scorematrix gt_seq_file_1 gt_seq_file_2",
+                         "Locally align each sequence in gt_seq_file_1 "
+                         "with each sequence in gt_seq_file_2.");
   o = option_new_int("indelscore", "set the score used for "
                      "insertions/deletions", &arguments->indelscore,
                      DEFAULT_INDELSCORE);

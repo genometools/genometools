@@ -234,17 +234,17 @@ void encseq2fastaoutput(FILE *fpout,
 
 int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
 {
-  SeqIterator *seqit;
+  GtSeqIterator *seqit;
   char *desc = NULL;
   const Uchar *sequence;
   unsigned long seqlen;
   bool haserr = false;
   int retval;
 
-  seqit = seqiterator_new(filenametab,NULL,true);
+  seqit = gt_seqiterator_new(filenametab,NULL,true);
   while (true)
   {
-    retval = seqiterator_next(seqit,
+    retval = gt_seqiterator_next(seqit,
                               &sequence,
                               &seqlen,
                               &desc,
@@ -261,6 +261,6 @@ int echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
     symbolstring2fasta(stdout,desc,NULL,sequence,seqlen,70UL);
     FREESPACE(desc);
   }
-  seqiterator_delete(seqit);
+  gt_seqiterator_delete(seqit);
   return haserr ? -1 : 0;
 }

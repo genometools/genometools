@@ -47,9 +47,9 @@ static OptionParser* gt_align_option_parser_new(void *tool_arguments)
   Option *option;
   assert(arguments);
 
-  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
-                         "Globally align each sequence in seq_file_1 with each "
-                         "sequence in seq_file_2.");
+  op = option_parser_new("[option ...] gt_seq_file_1 gt_seq_file_2",
+                         "Globally align each sequence in gt_seq_file_1 with each "
+                         "sequence in gt_seq_file_2.");
   option = option_new_bool("all", "show all optimal alignments instead of just "
                            "one", &arguments->all, false);
   option_parser_add_option(op, option);

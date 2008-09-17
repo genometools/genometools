@@ -49,7 +49,7 @@ typedef struct {
 struct GtBioseq {
   bool use_stdin;
   GtStr *sequence_file;
-  Seq **seqs;
+  GtSeq **seqs;
   GtArray *descriptions,
         *sequence_ranges;
   char *raw_sequence;
@@ -498,7 +498,7 @@ void gt_bioseq_delete(GtBioseq *bs)
   gt_str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < gt_array_size(bs->descriptions); i++)
-      seq_delete(bs->seqs[i]);
+      gt_seq_delete(bs->seqs[i]);
     gt_free(bs->seqs);
   }
   for (i = 0; i < gt_array_size(bs->descriptions); i++)
@@ -530,18 +530,18 @@ GtAlpha* gt_bioseq_get_alpha(GtBioseq *bs)
   return bs->alpha;
 }
 
-Seq* gt_bioseq_get_seq(GtBioseq *bs, unsigned long idx)
+GtSeq* gt_bioseq_get_seq(GtBioseq *bs, unsigned long idx)
 {
   assert(bs);
   assert(idx < gt_array_size(bs->descriptions));
   if (!bs->seqs)
-    bs->seqs = gt_calloc(gt_array_size(bs->descriptions), sizeof (Seq*));
+    bs->seqs = gt_calloc(gt_array_size(bs->descriptions), sizeof (GtSeq*));
   determine_gt_alpha_if_necessary(bs);
   if (!bs->seqs[idx]) {
-    bs->seqs[idx] = seq_new(gt_bioseq_get_sequence(bs, idx),
+    bs->seqs[idx] = gt_seq_new(gt_bioseq_get_sequence(bs, idx),
                             gt_bioseq_get_sequence_length(bs, idx),
                             bs->alpha);
-    seq_set_description(bs->seqs[idx], gt_bioseq_get_description(bs, idx));
+    gt_seq_set_description(bs->seqs[idx], gt_bioseq_get_description(bs, idx));
   }
   return bs->seqs[idx];
 }

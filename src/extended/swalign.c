@@ -122,12 +122,12 @@ static Alignment* smith_waterman_align(const char *u_orig, const char *v_orig,
   return a;
 }
 
-Alignment* swalign(Seq *u, Seq *v, const GT_ScoreFunction *sf)
+Alignment* swalign(GtSeq *u, GtSeq *v, const GT_ScoreFunction *sf)
 {
   assert(u && v && sf);
-  return smith_waterman_align(seq_get_orig(u), seq_get_orig(v),
-                              seq_get_encoded(u), seq_get_encoded(v),
-                              seq_length(u), seq_length(v),
+  return smith_waterman_align(gt_seq_get_orig(u), gt_seq_get_orig(v),
+                              gt_seq_get_encoded(u), gt_seq_get_encoded(v),
+                              gt_seq_length(u), gt_seq_length(v),
                               gt_score_function_get_scores(sf),
                               gt_score_function_get_deletion_score(sf),
                               gt_score_function_get_insertion_score(sf));

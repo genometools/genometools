@@ -34,18 +34,18 @@ typedef struct {
        verbose;
   OutputFileInfo *ofi;
   GtGenFile *outfp;
-} SequniqArguments;
+} GtSequniqArguments;
 
 static void* gt_sequniq_arguments_new(void)
 {
-  SequniqArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtSequniqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = outputfileinfo_new();
   return arguments;
 }
 
 static void gt_sequniq_arguments_delete(void *tool_arguments)
 {
-  SequniqArguments *arguments = tool_arguments;
+  GtSequniqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_genfile_close(arguments->outfp);
   outputfileinfo_delete(arguments->ofi);
@@ -54,7 +54,7 @@ static void gt_sequniq_arguments_delete(void *tool_arguments)
 
 static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 {
-  SequniqArguments *arguments = tool_arguments;
+  GtSequniqArguments *arguments = tool_arguments;
   OptionParser *op;
   Option *seqit_option, *verbose_option;
   assert(arguments);
@@ -85,13 +85,13 @@ static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
-  SequniqArguments *arguments = tool_arguments;
+  GtSequniqArguments *arguments = tool_arguments;
   GtBioseq *bs;
   StringDistri *sd;
   unsigned long long duplicates = 0, num_of_sequences = 0;
   GtStrArray *files;
   int had_err = 0;
-  SeqIterator *seqit;
+  GtSeqIterator *seqit;
   const Uchar *sequence;
   char *desc;
   unsigned long len;
@@ -129,16 +129,16 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     for (i = parsed_args; i < argc; i++)
       gt_strarray_add_cstr(files, argv[i]);
     totalsize = files_estimate_total_size(files);
-    seqit = seqiterator_new(files, NULL, true);
+    seqit = gt_seqiterator_new(files, NULL, true);
     if (arguments->verbose) {
-      gt_progressbar_start(seqiterator_getcurrentcounter(seqit,
-                                                         (unsigned long long)
-                                                         totalsize),
+      gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+                                                            (unsigned long long)
+                                                            totalsize),
                            (unsigned long long) totalsize);
     }
     for (;;) {
       char *md5;
-      if ((seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
+      if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
         break;
       md5 = gt_md5_fingerprint((const char*) sequence, (unsigned long) len);
       if (!string_distri_get(sd, md5)) {
@@ -154,7 +154,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     }
     if (arguments->verbose)
       gt_progressbar_stop();
-    seqiterator_delete(seqit);
+    gt_seqiterator_delete(seqit);
     gt_strarray_delete(files);
   }
 
