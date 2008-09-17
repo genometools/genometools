@@ -32,8 +32,7 @@ struct GtCanvasClass {
   void          (*free)(GtCanvas*);
 };
 
-struct GtCanvas {
-  const GtCanvasClass *c_class;
+typedef struct {
   GtRange viewrange;
   double factor, y, margins;
   unsigned long width, height;
@@ -42,6 +41,11 @@ struct GtCanvas {
   GtBittab *bt;
   GtGraphics *g;
   GtImageInfo *ii;
+} GtCanvasPrivate;
+
+struct GtCanvas {
+  const GtCanvasClass *c_class;
+  GtCanvasPrivate *pvt;
 };
 
 GtCanvas* gt_canvas_create(const GtCanvasClass*);

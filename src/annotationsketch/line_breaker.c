@@ -26,26 +26,28 @@ GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass *lbc)
   assert(lbc && lbc->size);
   lb = gt_calloc(1, lbc->size);
   lb->c_class = lbc;
+  lb->pvt = gt_calloc(1, sizeof (GtLineBreakerPrivate));
   return lb;
 }
 
 GtLineBreaker* gt_line_breaker_ref(GtLineBreaker *lb)
 {
   assert(lb);
-  lb->reference_count++;
+  lb->pvt->reference_count++;
   return lb;
 }
 
 void gt_line_breaker_delete(GtLineBreaker *lb)
 {
   if (!lb) return;
-  if (lb->reference_count) {
-    lb->reference_count--;
+  if (lb->pvt->reference_count) {
+    lb->pvt->reference_count--;
     return;
   }
   assert(lb->c_class);
   if (lb->c_class->free)
     lb->c_class->free(lb);
+  gt_free(lb->pvt);
   gt_free(lb);
 }
 

@@ -51,9 +51,13 @@ struct GtGraphicsClass {
   void    (*free)(GtGraphics*);
 };
 
+typedef struct {
+    unsigned int reference_count;
+} GtGraphicsPrivate;
+
 struct GtGraphics {
   const GtGraphicsClass *c_class;
-  unsigned int reference_count;
+  GtGraphicsPrivate *pvt;
 };
 
 GtGraphics* gt_graphics_create(const GtGraphicsClass*);

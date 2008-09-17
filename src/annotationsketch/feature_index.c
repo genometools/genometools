@@ -29,26 +29,28 @@ GtFeatureIndex* gt_feature_index_create(const GtFeatureIndexClass *fic)
   assert(fic && fic->size);
   fi = gt_calloc(1, fic->size);
   fi->c_class = fic;
+  fi->pvt = gt_calloc(1, sizeof (GtFeatureIndexPrivate));
   return fi;
 }
 
 GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex *fi)
 {
   assert(fi);
-  fi->reference_count++;
+  fi->pvt->reference_count++;
   return fi;
 }
 
 void gt_feature_index_delete(GtFeatureIndex *fi)
 {
   if (!fi) return;
-  if (fi->reference_count) {
-    fi->reference_count--;
+  if (fi->pvt->reference_count) {
+    fi->pvt->reference_count--;
     return;
   }
   assert(fi->c_class);
   if (fi->c_class->free)
     fi->c_class->free(fi);
+  gt_free(fi->pvt);
   gt_free(fi);
 }
 

@@ -35,9 +35,13 @@ struct GtFeatureIndexClass {
   void        (*free)(GtFeatureIndex*);
 };
 
+typedef struct {
+  unsigned int reference_count;
+} GtFeatureIndexPrivate;
+
 struct GtFeatureIndex {
   const GtFeatureIndexClass *c_class;
-  unsigned int reference_count;
+  GtFeatureIndexPrivate *pvt;
 };
 
 GtFeatureIndex* gt_feature_index_create(const GtFeatureIndexClass*);

@@ -28,9 +28,13 @@ struct GtLineBreakerClass {
   void           (*free)(GtLineBreaker*);
 };
 
+typedef struct {
+  unsigned int reference_count;
+} GtLineBreakerPrivate;
+
 struct GtLineBreaker {
   const GtLineBreakerClass *c_class;
-  unsigned int reference_count;
+  GtLineBreakerPrivate *pvt;
 };
 
 GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass*);

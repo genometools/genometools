@@ -46,27 +46,27 @@ int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
 
   assert(canvas && dia);
 
-  if (gt_style_get_num(canvas->sty, "format", "margins", &margins, NULL))
-    canvas->margins = margins;
+  if (gt_style_get_num(canvas->pvt->sty, "format", "margins", &margins, NULL))
+    canvas->pvt->margins = margins;
   else
-    canvas->margins = MARGINS_DEFAULT;
+    canvas->pvt->margins = MARGINS_DEFAULT;
 
-  if (!gt_style_get_bool(canvas->sty, "format", "show_track_captions",
-                         &canvas->show_track_captions, NULL))
-    canvas->show_track_captions = true;
+  if (!gt_style_get_bool(canvas->pvt->sty, "format", "show_track_captions",
+                         &canvas->pvt->show_track_captions, NULL))
+    canvas->pvt->show_track_captions = true;
 
-  canvas->viewrange = gt_diagram_get_range(dia);
-  if (canvas->g)
+  canvas->pvt->viewrange = gt_diagram_get_range(dia);
+  if (canvas->pvt->g)
   {
-    gt_graphics_delete(canvas->g);
-    canvas->g = NULL;
+    gt_graphics_delete(canvas->pvt->g);
+    canvas->pvt->g = NULL;
   }
-  canvas->g = gt_graphics_cairo_new(GT_GRAPHICS_PNG, canvas->width, 1);
+  canvas->pvt->g = gt_graphics_cairo_new(GT_GRAPHICS_PNG, canvas->pvt->width, 1);
 
   /* calculate scaling factor */
-  canvas->factor = ((double) canvas->width
-                     -(2*canvas->margins))
-                    / gt_range_length(canvas->viewrange);
+  canvas->pvt->factor = ((double) canvas->pvt->width
+                     -(2*canvas->pvt->margins))
+                    / gt_range_length(canvas->pvt->viewrange);
   return 0;
 }
 
@@ -78,19 +78,19 @@ int gt_canvas_cairo_context_visit_diagram_post(GtCanvas *canvas,
   assert(canvas && dia);
 
   /* set initial image-specific values */
-  canvas->y += HEADER_SPACE;
-  canvas->height = gt_canvas_calculate_height(canvas, dia);
-  if (canvas->ii)
-    gt_image_info_set_height(canvas->ii, canvas->height);
-  if (canvas->g)
+  canvas->pvt->y += HEADER_SPACE;
+  canvas->pvt->height = gt_canvas_calculate_height(canvas, dia);
+  if (canvas->pvt->ii)
+    gt_image_info_set_height(canvas->pvt->ii, canvas->pvt->height);
+  if (canvas->pvt->g)
   {
-    gt_graphics_delete(canvas->g);
-    canvas->g = NULL;
+    gt_graphics_delete(canvas->pvt->g);
+    canvas->pvt->g = NULL;
   }
-  canvas->g = gt_graphics_cairo_new_from_context(
+  canvas->pvt->g = gt_graphics_cairo_new_from_context(
                                  ((GtCanvasCairoContext*) canvas)->context,
-                                 canvas->width, canvas->height);
-  gt_graphics_set_margins(canvas->g, canvas->margins, 0);
+                                 canvas->pvt->width, canvas->pvt->height);
+  gt_graphics_set_margins(canvas->pvt->g, canvas->pvt->margins, 0);
 
   /* Add ruler/scale to the image */
   gt_canvas_draw_ruler(canvas);
@@ -115,11 +115,11 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
   GtCanvasCairoContext *ccc;
   assert(sty && width > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_context_class());
-  canvas->sty = sty;
-  canvas->ii = ii;
-  canvas->width = width;
-  canvas->bt = NULL;
-  canvas->y = 0.5; /* 0.5 displacement to eliminate fuzzy horizontal lines */
+  canvas->pvt->sty = sty;
+  canvas->pvt->ii = ii;
+  canvas->pvt->width = width;
+  canvas->pvt->bt = NULL;
+  canvas->pvt->y = 0.5; /* 0.5 displacement to eliminate fuzzy horizontal lines */
   ccc = canvas_cairo_context_cast(canvas);
   ccc->context = context;
   return canvas;

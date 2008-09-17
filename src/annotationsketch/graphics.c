@@ -26,6 +26,7 @@ GtGraphics* gt_graphics_create(const GtGraphicsClass *gc)
   assert(gc && gc->size);
   g = gt_calloc(1, gc->size);
   g->c_class = gc;
+  g->pvt = gt_calloc(1, sizeof (GtGraphicsPrivate));
   return g;
 }
 
@@ -35,6 +36,7 @@ void gt_graphics_delete(GtGraphics *g)
   assert(g->c_class);
   if (g->c_class->free)
     g->c_class->free(g);
+  gt_free(g->pvt);
   gt_free(g);
 }
 

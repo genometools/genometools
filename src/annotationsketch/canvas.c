@@ -67,11 +67,11 @@ unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
   gt_diagram_get_lineinfo(dia, &lines);
 
   /* obtain line height and spacer from style */
-  if (gt_style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
+  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &tmp, NULL))
     gt_line_height = tmp;
   else
     gt_line_height = BAR_HEIGHT_DEFAULT;
-  if (gt_style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
+  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_vspace", &tmp, NULL))
     gt_line_height += tmp;
   else
     gt_line_height += BAR_VSPACE_DEFAULT;
@@ -81,9 +81,10 @@ unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
   height += lines.total_captionlines * (TOY_TEXT_HEIGHT
                                           + CAPTION_BAR_SPACE_DEFAULT);
   /* add track caption height and spacer */
-  if (canvas->show_track_captions)
+  if (canvas->pvt->show_track_captions)
   {
-    if (gt_style_get_num(canvas->sty, "format", "gt_track_vspace", &tmp, NULL))
+    if (gt_style_get_num(canvas->pvt->sty, "format", "gt_track_vspace", &tmp,
+                         NULL))
       height += gt_diagram_get_number_of_tracks(dia)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
@@ -97,7 +98,7 @@ unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
 
   /* add header space and footer */
   height += HEADER_SPACE + FOOTER_SPACE;
-  if (gt_style_get_verbose(canvas->sty))
+  if (gt_style_get_verbose(canvas->pvt->sty))
     fprintf(stderr, "calculated height: %lu\n", height);
   return height;
 }
@@ -106,14 +107,14 @@ double gt_canvas_get_text_width(GtCanvas *canvas, const char *text)
 {
   assert(canvas);
   if (!text) return 0.0;
-  return gt_graphics_get_text_width(canvas->g, text);
+  return gt_graphics_get_text_width(canvas->pvt->g, text);
 }
 
 static double convert_point(GtCanvas *canvas, long pos)
 {
-  return (double) ((canvas->factor *
-                      MAX(0,(pos-(long) canvas->viewrange.start)))
-                      + canvas->margins);
+  return (double) ((canvas->pvt->factor *
+                      MAX(0,(pos-(long) canvas->pvt->viewrange.start)))
+                      + canvas->pvt->margins);
 }
 
 /* Converts base range <node_range> into a pixel range.
@@ -125,22 +126,23 @@ GtDrawingRange gt_canvas_convert_coords(GtCanvas *canvas, GtRange node_range)
   node_range.end++;
   /* scale coordinates to target image width */
   /* first, check if left side has to be clipped */
-  if ((long) node_range.start < (long) canvas->viewrange.start )
+  if ((long) node_range.start < (long) canvas->pvt->viewrange.start )
   {
     converted_range.clip = CLIPPED_LEFT;
-    converted_range.start = MAX(0.0, canvas->margins - 5);
+    converted_range.start = MAX(0.0, canvas->pvt->margins - 5);
   }
   else
   {
     converted_range.start = convert_point(canvas, node_range.start);
   }
   /* then, check right side. */
-  if ((long) node_range.end > (long) canvas->viewrange.end+1)
+  if ((long) node_range.end > (long) canvas->pvt->viewrange.end+1)
   {
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
                                                       CLIPPED_BOTH :
                                                       CLIPPED_RIGHT);
-    converted_range.end = (double) canvas->width - canvas->margins + 5;
+    converted_range.end = (double) canvas->pvt->width - canvas->pvt->margins
+                                + 5;
   }
   else
   {
@@ -211,36 +213,37 @@ void gt_canvas_draw_ruler(GtCanvas *canvas)
 
   assert(canvas);
 
-  margins = canvas->margins;
+  margins = canvas->pvt->margins;
 
-  if (!(gt_style_get_bool(canvas->sty, "format","show_grid", &showgrid, NULL)))
+  if (!(gt_style_get_bool(canvas->pvt->sty, "format","show_grid", &showgrid,
+                          NULL)))
     showgrid = true;
 
   rulercol.red = rulercol.green = rulercol.blue = .2;
   gridcol.red = gridcol.green = gridcol.blue = .93;
 
   /* determine range and step of the scale */
-  base_length = gt_range_length(canvas->viewrange);
+  base_length = gt_range_length(canvas->pvt->viewrange);
 
   /* determine tick steps */
   step = pow(10,ceil(log10(base_length))-1);
   minorstep = step/10.0;
 
   /* calculate starting positions */
-  vminor = (double) (floor(canvas->viewrange.start / minorstep))*minorstep;
-  vmajor = (double) (floor(canvas->viewrange.start / step))*step;
+  vminor = (double) (floor(canvas->pvt->viewrange.start / minorstep))*minorstep;
+  vmajor = (double) (floor(canvas->pvt->viewrange.start / step))*step;
 
   /* draw major ticks */
-  for (tick = vmajor; tick <= canvas->viewrange.end; tick += step)
+  for (tick = vmajor; tick <= canvas->pvt->viewrange.end; tick += step)
   {
-    if (tick < canvas->viewrange.start) continue;
-    gt_graphics_draw_vertical_line(canvas->g,
+    if (tick < canvas->pvt->viewrange.start) continue;
+    gt_graphics_draw_vertical_line(canvas->pvt->g,
                                 convert_point(canvas, tick),
                                 30,
                                 rulercol,
                                 10);
     format_ruler_label(str, tick, BUFSIZ);
-    gt_graphics_draw_text_centered(canvas->g,
+    gt_graphics_draw_text_centered(canvas->pvt->g,
                                 convert_point(canvas, tick),
                                 20,
                                 str);
@@ -248,18 +251,18 @@ void gt_canvas_draw_ruler(GtCanvas *canvas)
   /* draw minor ticks */
   if (minorstep >= 1)
   {
-    for (tick = vminor; tick <= canvas->viewrange.end; tick += minorstep)
+    for (tick = vminor; tick <= canvas->pvt->viewrange.end; tick += minorstep)
     {
-      if (tick < canvas->viewrange.start) continue;
+      if (tick < canvas->pvt->viewrange.start) continue;
       if (showgrid)
       {
-        gt_graphics_draw_vertical_line(canvas->g,
+        gt_graphics_draw_vertical_line(canvas->pvt->g,
                                     convert_point(canvas, tick),
                                     40,
                                     gridcol,
-                                    canvas->height-40-15);
+                                    canvas->pvt->height-40-15);
       }
-      gt_graphics_draw_vertical_line(canvas->g,
+      gt_graphics_draw_vertical_line(canvas->pvt->g,
                                   convert_point(canvas, tick),
                                   35,
                                   rulercol,
@@ -267,17 +270,17 @@ void gt_canvas_draw_ruler(GtCanvas *canvas)
     }
   }
   /* draw ruler line */
-  gt_graphics_draw_horizontal_line(canvas->g,
-                                canvas->margins,
+  gt_graphics_draw_horizontal_line(canvas->pvt->g,
+                                canvas->pvt->margins,
                                 40,
-                                canvas->width-2*margins);
+                                canvas->pvt->width-2*margins);
   /* put 3' and 5' captions at the ends */
-  gt_graphics_draw_text_centered(canvas->g,
-                              canvas->margins-10,
+  gt_graphics_draw_text_centered(canvas->pvt->g,
+                              canvas->pvt->margins-10,
                               45-(TOY_TEXT_HEIGHT/2),
                               "5'");
-  gt_graphics_draw_text_centered(canvas->g,
-                              canvas->width-canvas->margins+10,
+  gt_graphics_draw_text_centered(canvas->pvt->g,
+                              canvas->pvt->width-canvas->pvt->margins+10,
                               45-(TOY_TEXT_HEIGHT/2),
                               "3'");
 }
@@ -288,20 +291,22 @@ GtCanvas* gt_canvas_create(const GtCanvasClass *cc)
   assert(cc && cc->size);
   c = gt_calloc(1, cc->size);
   c->c_class = cc;
+  c->pvt = gt_calloc(1, sizeof (GtCanvasPrivate));
   return c;
 }
 
-void gt_canvas_delete(GtCanvas *c)
+void gt_canvas_delete(GtCanvas *canvas)
 {
-  if (!c) return;
-  assert(c->c_class);
-  if (c->c_class->free)
-    c->c_class->free(c);
-  if (c->g)
-    gt_graphics_delete(c->g);
-  if (c->bt)
-    gt_bittab_delete(c->bt);
-  gt_free(c);
+  if (!canvas) return;
+  assert(canvas->c_class);
+  if (canvas->c_class->free)
+    canvas->c_class->free(canvas);
+  if (canvas->pvt->g)
+    gt_graphics_delete(canvas->pvt->g);
+  if (canvas->pvt->bt)
+    gt_bittab_delete(canvas->pvt->bt);
+  gt_free(canvas->pvt);
+  gt_free(canvas);
 }
 
 void* gt_canvas_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
@@ -321,7 +326,7 @@ void* gt_canvas_try_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
 unsigned long gt_canvas_get_height(GtCanvas *canvas)
 {
   assert(canvas);
-  return canvas->height;
+  return canvas->pvt->height;
 }
 
 int gt_canvas_visit_diagram_pre(GtCanvas *canvas, GtDiagram* diagram)
@@ -344,21 +349,21 @@ int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track)
 
   assert(canvas && track);
 
-  gt_style_get_color(canvas->sty, "format", "gt_track_title_color", &color,
+  gt_style_get_color(canvas->pvt->sty, "format", "gt_track_title_color", &color,
                      NULL);
 
   /* debug */
-  if (gt_style_get_verbose(canvas->sty)) {
+  if (gt_style_get_verbose(canvas->pvt->sty)) {
     fprintf(stderr, "processing track %s\n",
             gt_str_get(gt_track_get_title(track)));
   }
 
-  if (canvas->show_track_captions)
+  if (canvas->pvt->show_track_captions)
   {
     /* draw track title */
-    gt_graphics_draw_colored_text(canvas->g,
-                               canvas->margins,
-                               canvas->y,
+    gt_graphics_draw_colored_text(canvas->pvt->g,
+                               canvas->pvt->margins,
+                               canvas->pvt->y,
                                color,
                                gt_str_get(gt_track_get_title(track)));
 
@@ -378,15 +383,15 @@ int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track)
         msg = "(%lu blocks not shown due to exceeded line limit)";
         snprintf(buf, BUFSIZ, msg, exceeded);
       }
-      width = gt_graphics_get_text_width(canvas->g,
+      width = gt_graphics_get_text_width(canvas->pvt->g,
                                       gt_str_get(gt_track_get_title(track)));
-      gt_graphics_draw_colored_text(canvas->g,
-                                 canvas->margins+width+10.0,
-                                 canvas->y,
+      gt_graphics_draw_colored_text(canvas->pvt->g,
+                                 canvas->pvt->margins+width+10.0,
+                                 canvas->pvt->y,
                                  red,
                                  buf);
     }
-    canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+    canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
   }
   return had_err;
 }
@@ -396,10 +401,10 @@ int gt_canvas_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track)
   double vspace;
   assert(canvas && track);
   /* put track spacer after track */
-  if (gt_style_get_num(canvas->sty, "format", "gt_track_vspace", &vspace, NULL))
-    canvas->y += vspace;
+  if (gt_style_get_num(canvas->pvt->sty, "format", "gt_track_vspace", &vspace, NULL))
+    canvas->pvt->y += vspace;
   else
-    canvas->y += TRACK_VSPACE_DEFAULT;
+    canvas->pvt->y += TRACK_VSPACE_DEFAULT;
   return 0;
 }
 
@@ -407,9 +412,9 @@ int gt_canvas_visit_line_pre(GtCanvas *canvas, GtLine *line)
 {
   int had_err = 0;
   assert(canvas && line);
-  canvas->bt = gt_bittab_new(canvas->width);
+  canvas->pvt->bt = gt_bittab_new(canvas->pvt->width);
   if (gt_line_has_captions(line))
-    canvas->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+    canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
   return had_err;
 }
 
@@ -418,16 +423,16 @@ int gt_canvas_visit_line_post(GtCanvas *canvas, GT_UNUSED GtLine *line)
   int had_err = 0;
   double tmp;
   assert(canvas && line);
-  if (gt_style_get_num(canvas->sty, "format", "bar_height", &tmp, NULL))
-    canvas->y += tmp;
+  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &tmp, NULL))
+    canvas->pvt->y += tmp;
   else
-    canvas->y += BAR_HEIGHT_DEFAULT;
-  if (gt_style_get_num(canvas->sty, "format", "bar_vspace", &tmp, NULL))
-    canvas->y += tmp;
+    canvas->pvt->y += BAR_HEIGHT_DEFAULT;
+  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_vspace", &tmp, NULL))
+    canvas->pvt->y += tmp;
   else
-    canvas->y += BAR_VSPACE_DEFAULT;
-  gt_bittab_delete(canvas->bt);
-  canvas->bt = NULL;
+    canvas->pvt->y += BAR_VSPACE_DEFAULT;
+  gt_bittab_delete(canvas->pvt->bt);
+  canvas->pvt->bt = NULL;
   return had_err;
 }
 
@@ -446,16 +451,16 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
   grey.red = grey.green = grey.blue = .85;
   strand = gt_block_get_strand(block);
   block_range = gt_block_get_range(block);
-  if (!gt_style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
-  if (!gt_style_get_num(canvas->sty, "format", "min_len_block", &min_len_block,
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "min_len_block", &min_len_block,
                      NULL))
     min_len_block = MIN_LEN_BLOCK_DEFAULT;
-  if (!gt_style_get_num(canvas->sty, "format", "arrow_width", &arrow_width,
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "arrow_width", &arrow_width,
                         NULL)) {
     arrow_width = ARROW_WIDTH_DEFAULT;
   }
-  if (!gt_style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "stroke_width", &stroke_width,
                      NULL))
     stroke_width = STROKE_WIDTH_DEFAULT;
 
@@ -470,9 +475,9 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
     caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
-      gt_graphics_draw_text(canvas->g,
-                         MAX(canvas->margins, draw_range.start),
-                         canvas->y -CAPTION_BAR_SPACE_DEFAULT,
+      gt_graphics_draw_text(canvas->pvt->g,
+                         MAX(canvas->pvt->margins, draw_range.start),
+                         canvas->pvt->y -CAPTION_BAR_SPACE_DEFAULT,
                          caption);
     }
   }
@@ -482,13 +487,13 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
        && draw_range.end-draw_range.start < min_len_block)
   {
     const char *btype = gt_block_get_type(block);
-    gt_style_get_color(canvas->sty, btype, "fill", &fillcolor,
+    gt_style_get_color(canvas->pvt->sty, btype, "fill", &fillcolor,
                      (GtFeatureNode*) gt_block_get_top_level_feature(block));
-    gt_style_get_color(canvas->sty, btype, "stroke", &strokecolor,
+    gt_style_get_color(canvas->pvt->sty, btype, "stroke", &strokecolor,
                      (GtFeatureNode*) gt_block_get_top_level_feature(block));
-    gt_graphics_draw_box(canvas->g,
+    gt_graphics_draw_box(canvas->pvt->g,
                       draw_range.start,
-                      canvas->y,
+                      canvas->pvt->y,
                       draw_range.end-draw_range.start+1,
                       bar_height,
                       fillcolor,
@@ -499,37 +504,37 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
                       true);
     /* draw arrowheads at clipped margins */
     if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-        gt_graphics_draw_arrowhead(canvas->g,
-                                canvas->margins-10,
-                                canvas->y+((bar_height-8)/2),
+        gt_graphics_draw_arrowhead(canvas->pvt->g,
+                                canvas->pvt->margins-10,
+                                canvas->pvt->y+((bar_height-8)/2),
                                 grey,
                                 ARROW_LEFT);
     if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-        gt_graphics_draw_arrowhead(canvas->g,
-                                canvas->width-canvas->margins+10,
-                                canvas->y+((bar_height-8)/2),
+        gt_graphics_draw_arrowhead(canvas->pvt->g,
+                                canvas->pvt->width-canvas->pvt->margins+10,
+                                canvas->pvt->y+((bar_height-8)/2),
                                 grey,
                                 ARROW_RIGHT);
     /* register coordinates in GtImageInfo object if available */
-    if (canvas->ii)
+    if (canvas->pvt->ii)
     {
-      GtRecMap *rm = gt_recmap_new(draw_range.start, canvas->y,
-                                    draw_range.end, canvas->y+bar_height,
+      GtRecMap *rm = gt_recmap_new(draw_range.start, canvas->pvt->y,
+                                    draw_range.end, canvas->pvt->y+bar_height,
                                     (GtFeatureNode*) /* XXX */
                                     gt_block_get_top_level_feature(block));
-      gt_image_info_add_recmap(canvas->ii, rm);
+      gt_image_info_add_recmap(canvas->pvt->ii, rm);
       rm->has_omitted_children = true;
     }
     return -1;
   }
 
-  gt_style_get_color(canvas->sty, "format", "default_stroke_color",
+  gt_style_get_color(canvas->pvt->sty, "format", "default_stroke_color",
                      &strokecolor, NULL);
 
   /* draw parent block boundaries */
-  gt_graphics_draw_dashes(canvas->g,
+  gt_graphics_draw_dashes(canvas->pvt->g,
                        draw_range.start,
-                       canvas->y,
+                       canvas->pvt->y,
                        draw_range.end - draw_range.start,
                        bar_height,
                        ARROW_NONE,
@@ -553,14 +558,14 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   assert(canvas && elem);
 
   /* This shouldn't happen. */
-  if (!gt_range_overlap(elem_range, canvas->viewrange))
+  if (!gt_range_overlap(elem_range, canvas->pvt->viewrange))
     return -1;
 
   type = gt_element_get_type(elem);
   grey.red = grey.green = grey.blue = .85;
-  if (!gt_style_get_num(canvas->sty, "format", "bar_height", &bar_height, NULL))
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height, NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
-  if (!gt_style_get_num(canvas->sty, "format", "arrow_width", &arrow_width,
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "arrow_width", &arrow_width,
                         NULL)) {
     arrow_width = ARROW_WIDTH_DEFAULT;
   }
@@ -572,7 +577,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
          /*&& gt_dlistelem_next(delem) == NULL*/)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
-  if (gt_style_get_verbose(canvas->sty))
+  if (gt_style_get_verbose(canvas->pvt->sty))
     fprintf(stderr, "processing element from %lu to %lu, strand %d\n",
             elem_range.start,
             elem_range.end,
@@ -583,42 +588,42 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   elem_width = draw_range.end - draw_range.start;
 
   if (gt_element_is_marked(elem)) {
-    gt_style_get_color(canvas->sty, type, "stroke_marked", &elem_color,
+    gt_style_get_color(canvas->pvt->sty, type, "stroke_marked", &elem_color,
                     gt_element_get_node_ref(elem));
-    if (!gt_style_get_num(canvas->sty, "format", "stroke_marked_width",
+    if (!gt_style_get_num(canvas->pvt->sty, "format", "stroke_marked_width",
                        &stroke_width, gt_element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
   else {
-    gt_style_get_color(canvas->sty, type, "stroke", &elem_color,
+    gt_style_get_color(canvas->pvt->sty, type, "stroke", &elem_color,
                     gt_element_get_node_ref(elem));
-    if (!gt_style_get_num(canvas->sty, "format", "stroke_width", &stroke_width,
+    if (!gt_style_get_num(canvas->pvt->sty, "format", "stroke_width", &stroke_width,
                        gt_element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
-  gt_style_get_color(canvas->sty, type, "fill", &fill_color,
+  gt_style_get_color(canvas->pvt->sty, type, "fill", &fill_color,
                   gt_element_get_node_ref(elem));
 
   if (draw_range.end-draw_range.start <= 1.1)
   {
-    if (gt_bittab_bit_is_set(canvas->bt, (unsigned long) draw_range.start))
+    if (gt_bittab_bit_is_set(canvas->pvt->bt, (unsigned long) draw_range.start))
       return had_err;
-    gt_graphics_draw_vertical_line(canvas->g,
+    gt_graphics_draw_vertical_line(canvas->pvt->g,
                                 draw_range.start,
-                                canvas->y,
+                                canvas->pvt->y,
                                 elem_color,
                                 bar_height);
-    gt_bittab_set_bit(canvas->bt, (unsigned long) draw_range.start);
+    gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
   }
 
   /* register coordinates in GtImageInfo object if available */
-  if (canvas->ii)
+  if (canvas->pvt->ii)
   {
-    GtRecMap *rm = gt_recmap_new(elem_start, canvas->y,
-                                  elem_start+elem_width, canvas->y+bar_height,
+    GtRecMap *rm = gt_recmap_new(elem_start, canvas->pvt->y,
+                                  elem_start+elem_width, canvas->pvt->y+bar_height,
                                   (GtFeatureNode*) /* XXX */
                                   gt_element_get_node_ref(elem));
-    gt_image_info_add_recmap(canvas->ii, rm);
+    gt_image_info_add_recmap(canvas->pvt->ii, rm);
   }
 
   if (draw_range.end-draw_range.start <= 1.1)
@@ -626,7 +631,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
     return had_err;
   }
 
-  if (gt_style_get_verbose(canvas->sty))
+  if (gt_style_get_verbose(canvas->pvt->sty))
     fprintf(stderr, "drawing element from %f to %f, arrow status: %d\n",
             draw_range.start,
             draw_range.end,
@@ -634,15 +639,15 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
 
   /* draw each element according to style set in the style */
   style = gt_str_new();
-  if (!gt_style_get_str(canvas->sty, type, "style", style,
+  if (!gt_style_get_str(canvas->pvt->sty, type, "style", style,
                      gt_element_get_node_ref(elem)))
     gt_str_set(style, "box");
 
   if (strcmp(gt_str_get(style), "box")==0)
   {
-    gt_graphics_draw_box(canvas->g,
+    gt_graphics_draw_box(canvas->pvt->g,
                       elem_start,
-                      canvas->y,
+                      canvas->pvt->y,
                       elem_width,
                       bar_height,
                       fill_color,
@@ -654,9 +659,9 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   }
   else if (strcmp(gt_str_get(style), "caret")==0)
   {
-    gt_graphics_draw_caret(canvas->g,
+    gt_graphics_draw_caret(canvas->pvt->g,
                         elem_start,
-                        canvas->y,
+                        canvas->pvt->y,
                         elem_width,
                         bar_height,
                         ARROW_NONE,
@@ -666,9 +671,9 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   }
   else if (strcmp(gt_str_get(style), "dashes")==0)
   {
-    gt_graphics_draw_dashes(canvas->g,
+    gt_graphics_draw_dashes(canvas->pvt->g,
                          elem_start,
-                         canvas->y,
+                         canvas->pvt->y,
                          elem_width,
                          bar_height,
                          arrow_status,
@@ -678,16 +683,16 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   }
   else if (strcmp(gt_str_get(style), "line")==0)
   {
-    gt_graphics_draw_horizontal_line(canvas->g,
+    gt_graphics_draw_horizontal_line(canvas->pvt->g,
                                   elem_start,
-                                  canvas->y,
+                                  canvas->pvt->y,
                                   elem_width);
   }
   else
   {
-     gt_graphics_draw_box(canvas->g,
+     gt_graphics_draw_box(canvas->pvt->g,
                        elem_start,
-                       canvas->y,
+                       canvas->pvt->y,
                        elem_width,
                        bar_height,
                        fill_color,
@@ -701,15 +706,15 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
 
   /* draw arrowheads at clipped margins */
   if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-      gt_graphics_draw_arrowhead(canvas->g,
-                              canvas->margins-10,
-                              canvas->y+((bar_height-8)/2),
+      gt_graphics_draw_arrowhead(canvas->pvt->g,
+                              canvas->pvt->margins-10,
+                              canvas->pvt->y+((bar_height-8)/2),
                               grey,
                               ARROW_LEFT);
   if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-      gt_graphics_draw_arrowhead(canvas->g,
-                              canvas->width-canvas->margins+10,
-                              canvas->y+((bar_height-8)/2),
+      gt_graphics_draw_arrowhead(canvas->pvt->g,
+                              canvas->pvt->width-canvas->pvt->margins+10,
+                              canvas->pvt->y+((bar_height-8)/2),
                               grey,
                               ARROW_RIGHT);
   return had_err;
