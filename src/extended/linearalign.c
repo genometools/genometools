@@ -159,45 +159,45 @@ static unsigned long computeCtab(const char *u, unsigned long ulen,
   return dist;
 }
 
-static Alignment* reconstructalignment(const unsigned long *Ctab,
+static GtAlignment* reconstructalignment(const unsigned long *Ctab,
                                        const char *u, unsigned long ulen,
                                        const char *v, unsigned long vlen)
 {
   unsigned long row, col = vlen;
-  Alignment *alignment;
+  GtAlignment *alignment;
   assert(Ctab && u && ulen && v && vlen);
-  alignment = alignment_new_with_seqs(u, ulen, v, vlen);
+  alignment = gt_alignment_new_with_seqs(u, ulen, v, vlen);
   row = Ctab[col];
   /* process columns */
   while (col) {
     assert(Ctab[col-1] <= row);
     if (Ctab[col-1] == row)
-      alignment_add_insertion(alignment);
+      gt_alignment_add_insertion(alignment);
     else if (Ctab[col-1] + 1 == row)
-      alignment_add_replacement(alignment);
+      gt_alignment_add_replacement(alignment);
     else {
       while (Ctab[col-1] + 1 < row--)
-        alignment_add_deletion(alignment);
-      alignment_add_replacement(alignment);
+        gt_alignment_add_deletion(alignment);
+      gt_alignment_add_replacement(alignment);
     }
     row = Ctab[--col];
   }
   /* process first column */
   while (row--)
-    alignment_add_deletion(alignment);
+    gt_alignment_add_deletion(alignment);
   return alignment;
 }
 
-Alignment* linearalign(const char *u, unsigned long ulen,
+GtAlignment* linearalign(const char *u, unsigned long ulen,
                        const char *v, unsigned long vlen)
 {
   unsigned long *Ctab, dist;
-  Alignment *alignment;
+  GtAlignment *alignment;
   assert(u && ulen && v && vlen);
   Ctab = gt_malloc(sizeof (unsigned long) * (vlen + 1));
   dist = computeCtab(u, ulen, v, vlen, Ctab);
   alignment = reconstructalignment(Ctab, u, ulen, v, vlen);
-  assert(dist == alignment_eval(alignment));
+  assert(dist == gt_alignment_eval(alignment));
   gt_free(Ctab);
   return alignment;
 }

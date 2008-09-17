@@ -149,7 +149,7 @@ Hashmap* gtt_unit_tests(void)
   Hashmap *unit_tests = hashmap_new(HASH_STRING, NULL, NULL);
 
   /* add unit tests */
-  hashmap_add(unit_tests, "alignment class", alignment_unit_test);
+  hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   hashmap_add(unit_tests, "array class", gt_array_unit_test);
   hashmap_add(unit_tests, "array example", gt_array_example);
   hashmap_add(unit_tests, "array2dim example", gt_array2dim_example);

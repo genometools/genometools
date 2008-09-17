@@ -70,7 +70,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   GT_ScoreMatrix *scorematrix;
   unsigned long i, j;
   int had_err = 0;
-  Alignment *a;
+  GtAlignment *a;
   gt_error_check(err);
   assert(arguments);
 
@@ -96,9 +96,9 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
           a = swalign(gt_bioseq_get_seq(gt_bioseq_1, i),
                       gt_bioseq_get_seq(gt_bioseq_2, j), score_function);
           if (a) {
-            alignment_show(a, stdout);
+            gt_alignment_show(a, stdout);
             xputchar('\n');
-            alignment_delete(a);
+            gt_alignment_delete(a);
           }
         }
       }

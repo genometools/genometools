@@ -26,7 +26,7 @@
 #define MATCHSYMBOL    '|'
 #define MISMATCHSYMBOL ' '
 
-struct Alignment {
+struct GtAlignment {
   const char *u,
              *v;
   unsigned long ulen,
@@ -47,25 +47,25 @@ typedef struct {
 /* XXX: possible improvement to save memory: combine both parts into a single
         variable (use bit shifting operations) */
 
-Alignment* alignment_new(void)
+GtAlignment* gt_alignment_new(void)
 {
-  Alignment *a;
-  a = gt_calloc(1, sizeof (Alignment));
+  GtAlignment *a;
+  a = gt_calloc(1, sizeof (GtAlignment));
   a->eops = gt_array_new(sizeof (Multieop));
   return a;
 }
 
-Alignment* alignment_new_with_seqs(const char *u, unsigned long ulen,
+GtAlignment* gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
                                    const char *v, unsigned long vlen)
 {
-  Alignment *a;
+  GtAlignment *a;
   assert(u && v);
-  a = alignment_new();
-  alignment_set_seqs(a, u, ulen, v, vlen);
+  a = gt_alignment_new();
+  gt_alignment_set_seqs(a, u, ulen, v, vlen);
   return a;
 }
 
-void alignment_set_seqs(Alignment *a, const char *u, unsigned long ulen,
+void gt_alignment_set_seqs(GtAlignment *a, const char *u, unsigned long ulen,
                         const char *v, unsigned long vlen)
 {
   assert(a && u && v);
@@ -75,7 +75,7 @@ void alignment_set_seqs(Alignment *a, const char *u, unsigned long ulen,
   a->vlen = vlen;
 }
 
-static void alignment_add_eop(Alignment *a, Eoptype type)
+static void gt_alignment_add_eop(GtAlignment *a, Eoptype type)
 {
   Multieop meop, *meop_ptr;
   assert(a);
@@ -96,22 +96,22 @@ static void alignment_add_eop(Alignment *a, Eoptype type)
   }
 }
 
-void alignment_add_replacement(Alignment *a)
+void gt_alignment_add_replacement(GtAlignment *a)
 {
-  alignment_add_eop(a, Replacement);
+  gt_alignment_add_eop(a, Replacement);
 }
 
-void alignment_add_deletion(Alignment *a)
+void gt_alignment_add_deletion(GtAlignment *a)
 {
-  alignment_add_eop(a, Deletion);
+  gt_alignment_add_eop(a, Deletion);
 }
 
-void alignment_add_insertion(Alignment *a)
+void gt_alignment_add_insertion(GtAlignment *a)
 {
-  alignment_add_eop(a, Insertion);
+  gt_alignment_add_eop(a, Insertion);
 }
 
-void alignment_remove_last(Alignment *a)
+void gt_alignment_remove_last(GtAlignment *a)
 {
   Multieop *meop_ptr;
   assert(a && gt_array_size(a->eops));
@@ -124,7 +124,7 @@ void alignment_remove_last(Alignment *a)
 }
 
 #ifndef NDEBUG
-static int alignment_is_valid(const Alignment *a)
+static int gt_alignment_is_valid(const GtAlignment *a)
 {
   unsigned long i, len;
   Multieop meop;
@@ -150,11 +150,11 @@ static int alignment_is_valid(const Alignment *a)
 }
 #endif
 
-unsigned long alignment_eval(const Alignment *a)
+unsigned long gt_alignment_eval(const GtAlignment *a)
 {
   unsigned long i, j, uctr = 0, vctr = 0, sumcost = 0;
   Multieop meop;
-  assert(a && alignment_is_valid(a));
+  assert(a && gt_alignment_is_valid(a));
   for (i = gt_array_size(a->eops); i > 0; i--) {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
@@ -183,12 +183,12 @@ unsigned long alignment_eval(const Alignment *a)
   return sumcost;
 }
 
-/* XXX: add width parameter and format the Alignment accordingly */
-void alignment_show(const Alignment *a, FILE *fp)
+/* XXX: add width parameter and format the GtAlignment accordingly */
+void gt_alignment_show(const GtAlignment *a, FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
   Multieop meop;
-  assert(a && alignment_is_valid(a));
+  assert(a && gt_alignment_is_valid(a));
   /* output first line */
   uctr = 0;
   for (i = gt_array_size(a->eops); i > 0; i--) {
@@ -253,7 +253,7 @@ void alignment_show(const Alignment *a, FILE *fp)
   xfputc('\n', fp);
 }
 
-void alignment_show_multieop_list(const Alignment *a, FILE *fp)
+void gt_alignment_show_multieop_list(const GtAlignment *a, FILE *fp)
 {
   unsigned long i;
   Multieop meop;
@@ -280,11 +280,11 @@ void alignment_show_multieop_list(const Alignment *a, FILE *fp)
   }
 }
 
-int alignment_unit_test(GtError *err)
+int gt_alignment_unit_test(GtError *err)
 {
   static char u[] = "acgtagatatatagat",
               v[] = "agaaagaggtaagaggga";
-  Alignment *a;
+  GtAlignment *a;
   int had_err = 0;
   gt_error_check(err);
 
@@ -295,35 +295,35 @@ int alignment_unit_test(GtError *err)
      agaaagaggta-agaggga
   */
 
-  a = alignment_new_with_seqs(u, strlen(u), v, strlen(v));
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_insertion(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_deletion(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_insertion(a);
-  alignment_add_insertion(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
-  alignment_add_replacement(a);
+  a = gt_alignment_new_with_seqs(u, strlen(u), v, strlen(v));
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_insertion(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_deletion(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_insertion(a);
+  gt_alignment_add_insertion(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
+  gt_alignment_add_replacement(a);
 
-  ensure(had_err, alignment_eval(a) == 10);
+  ensure(had_err, gt_alignment_eval(a) == 10);
 
-  alignment_delete(a);
+  gt_alignment_delete(a);
 
   return had_err;
 }
 
-void alignment_delete(Alignment *a)
+void gt_alignment_delete(GtAlignment *a)
 {
   if (!a) return;
   gt_array_delete(a->eops);

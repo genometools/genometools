@@ -71,7 +71,7 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
   GtBioseq *gt_bioseq_1, *gt_bioseq_2 = NULL;
   unsigned long i, j;
   int had_err = 0;
-  Alignment *a;
+  GtAlignment *a;
   Costs *costs = tool_arguments;
 
   gt_error_check(err);
@@ -97,9 +97,9 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
                         gt_bioseq_get_sequence_length(gt_bioseq_2, j),
                         costs->replacement_cost, costs->gap_opening_cost,
                         costs->gap_extension_cost);
-        alignment_show(a, stdout);
+        gt_alignment_show(a, stdout);
         xputchar('\n');
-        alignment_delete(a);
+        gt_alignment_delete(a);
       }
     }
   }

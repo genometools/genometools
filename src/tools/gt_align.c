@@ -57,10 +57,10 @@ static OptionParser* gt_align_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static void show_alignment(const Alignment *a, GT_UNUSED void *data)
+static void show_alignment(const GtAlignment *a, GT_UNUSED void *data)
 {
   assert(a && !data);
-  alignment_show(a, stdout);
+  gt_alignment_show(a, stdout);
   xputchar('\n');
 }
 
@@ -77,7 +77,7 @@ static int gt_align_runner(GT_UNUSED int argc, const char **argv,
   GtBioseq *gt_bioseq_1, *gt_bioseq_2 = NULL;
   unsigned long i, j;
   int had_err = 0;
-  Alignment *a;
+  GtAlignment *a;
   gt_error_check(err);
   assert(arguments);
 
@@ -107,9 +107,9 @@ static int gt_align_runner(GT_UNUSED int argc, const char **argv,
                     gt_bioseq_get_sequence_length(gt_bioseq_1, i),
                     gt_bioseq_get_sequence(gt_bioseq_2, j),
                     gt_bioseq_get_sequence_length(gt_bioseq_2, j));
-          alignment_show(a, stdout);
+          gt_alignment_show(a, stdout);
           xputchar('\n');
-          alignment_delete(a);
+          gt_alignment_delete(a);
         }
       }
     }

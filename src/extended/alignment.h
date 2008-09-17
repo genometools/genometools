@@ -21,22 +21,25 @@
 #include <stdio.h>
 #include "core/error.h"
 
-/* the Alignment class (an Alignment object has to be contructed backwards) */
-typedef struct Alignment Alignment;
+/* the GtAlignment class (an object has to be contructed backwards) */
+typedef struct GtAlignment GtAlignment;
 
-Alignment*    alignment_new(void);
-Alignment*    alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                      const char *v, unsigned long vlen);
-void          alignment_set_seqs(Alignment*, const char *u, unsigned long ulen,
-                                 const char *v, unsigned long vlen);
-void          alignment_add_replacement(Alignment*);
-void          alignment_add_deletion(Alignment*);
-void          alignment_add_insertion(Alignment*);
-void          alignment_remove_last(Alignment*); /* undo last add operation */
-unsigned long alignment_eval(const Alignment*); /* returns unit cost */
-void          alignment_show(const Alignment*, FILE*);
-void          alignment_show_multieop_list(const Alignment*, FILE*);
-int           alignment_unit_test(GtError*);
-void          alignment_delete(Alignment*);
+GtAlignment*    gt_alignment_new(void);
+GtAlignment*    gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
+                                           const char *v, unsigned long vlen);
+void          gt_alignment_set_seqs(GtAlignment*, const char *u,
+                                    unsigned long ulen,
+                                    const char *v, unsigned long vlen);
+void          gt_alignment_add_replacement(GtAlignment*);
+void          gt_alignment_add_deletion(GtAlignment*);
+void          gt_alignment_add_insertion(GtAlignment*);
+/* undo last add operation */
+void          gt_alignment_remove_last(GtAlignment*);
+/* returns unit cost */
+unsigned long gt_alignment_eval(const GtAlignment*);
+void          gt_alignment_show(const GtAlignment*, FILE*);
+void          gt_alignment_show_multieop_list(const GtAlignment*, FILE*);
+int           gt_alignment_unit_test(GtError*);
+void          gt_alignment_delete(GtAlignment*);
 
 #endif

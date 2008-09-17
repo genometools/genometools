@@ -25,6 +25,6 @@
 /* (locally) align <u> and <v> (Smith-Waterman algorithm ) with the given score
    function and return one optimal Alignment.
    If no such alignment was found, NULL is returned. */
-Alignment* swalign(GtSeq *u, GtSeq *v, const GT_ScoreFunction*);
+GtAlignment* swalign(GtSeq *u, GtSeq *v, const GT_ScoreFunction*);
 
 #endif

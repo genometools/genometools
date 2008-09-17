@@ -56,31 +56,31 @@ static void fillDPtable(DPentry **dptable,
   }
 }
 
-static void traceback(Alignment *a, DPentry **dptable,
+static void traceback(GtAlignment *a, DPentry **dptable,
                       unsigned long i, unsigned long j)
 {
   assert(a && dptable);
   while (i > 0 || j > 0) {
     if (dptable[i][j].min_replacement) {
-      alignment_add_replacement(a);
+      gt_alignment_add_replacement(a);
       i--;
       j--;
     }
     else if (dptable[i][j].min_deletion) {
-      alignment_add_deletion(a);
+      gt_alignment_add_deletion(a);
       i--;
     }
     else if (dptable[i][j].min_insertion) {
-      alignment_add_insertion(a);
+      gt_alignment_add_insertion(a);
       j--;
     }
   }
 }
 
-static unsigned long traceback_all(Alignment *a, DPentry **dptable,
+static unsigned long traceback_all(GtAlignment *a, DPentry **dptable,
                                    unsigned long i, unsigned long j,
                                    unsigned long dist,
-                                   void (*proc_alignment)(const Alignment*,
+                                   void (*proc_alignment)(const GtAlignment*,
                                                           void *data),
                                    void *data)
 {
@@ -89,62 +89,62 @@ static unsigned long traceback_all(Alignment *a, DPentry **dptable,
   assert(a && dptable);
   if (dptable[i][j].min_replacement) {
     backtrace = true;
-    alignment_add_replacement(a);
+    gt_alignment_add_replacement(a);
     aligns += traceback_all(a, dptable, i-1, j-1, dist, proc_alignment, data);
-    alignment_remove_last(a);
+    gt_alignment_remove_last(a);
   }
   if (dptable[i][j].min_deletion) {
     backtrace = true;
-    alignment_add_deletion(a);
+    gt_alignment_add_deletion(a);
     aligns += traceback_all(a, dptable, i-1, j, dist, proc_alignment, data);
-    alignment_remove_last(a);
+    gt_alignment_remove_last(a);
   }
   if (dptable[i][j].min_insertion) {
     backtrace = true;
-    alignment_add_insertion(a);
+    gt_alignment_add_insertion(a);
     aligns += traceback_all(a, dptable, i, j-1, dist, proc_alignment, data);
-    alignment_remove_last(a);
+    gt_alignment_remove_last(a);
   }
   if (!backtrace) {
     aligns++;
-    assert(dist == alignment_eval(a));
+    assert(dist == gt_alignment_eval(a));
     if (proc_alignment)
       proc_alignment(a, data);
   }
   return aligns;
 }
 
-Alignment* align(const char *u, unsigned long ulen,
+GtAlignment* align(const char *u, unsigned long ulen,
                  const char *v, unsigned long vlen)
 {
   DPentry **dptable;
-  Alignment *a;
+  GtAlignment *a;
   assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
-  a = alignment_new_with_seqs(u, ulen, v, vlen);
+  a = gt_alignment_new_with_seqs(u, ulen, v, vlen);
   fillDPtable(dptable, u, ulen, v, vlen);
   traceback(a, dptable, ulen, vlen);
-  assert(dptable[ulen][vlen].distvalue == alignment_eval(a));
+  assert(dptable[ulen][vlen].distvalue == gt_alignment_eval(a));
   gt_array2dim_delete(dptable);
   return a;
 }
 
 void align_all(const char *u, unsigned long ulen,
                const char *v, unsigned long vlen,
-               void (*proc_alignment)(const Alignment*, void *data),
+               void (*proc_alignment)(const GtAlignment*, void *data),
                void (*proc_aligns)(unsigned long, void *data), void *data)
 {
   unsigned long aligns;
   DPentry **dptable;
-  Alignment *a;
+  GtAlignment *a;
   assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
-  a = alignment_new_with_seqs(u, ulen, v, vlen);
+  a = gt_alignment_new_with_seqs(u, ulen, v, vlen);
   fillDPtable(dptable, u, ulen, v, vlen);
   aligns = traceback_all(a, dptable, ulen, vlen, dptable[ulen][vlen].distvalue,
                          proc_alignment, data);
   if (proc_aligns)
     proc_aligns(aligns, data);
-  alignment_delete(a);
+  gt_alignment_delete(a);
   gt_array2dim_delete(dptable);
 }
