@@ -20,8 +20,8 @@
 
 #include "core/seq.h"
 
-/* returns the q-gram distance of two GtSeqs. The alphabets of the given GtSeqs have
-   to be compatible */
+/* returns the q-gram distance of two <GtSeq>s. The alphabets of the given
+   <GtSeq>s have to be compatible */
 unsigned long qgramdist(GtSeq*, GtSeq*, unsigned int q);
 
 #endif

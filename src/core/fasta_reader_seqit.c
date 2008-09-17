@@ -51,8 +51,8 @@ static int gt_fasta_reader_seqit_run(GtFastaReader *fasta_reader,
   /* at least one function has to be defined */
   assert(proc_description || proc_sequence_part || proc_sequence_length);
 
-  while ((rval = gt_seqiterator_next(gt_fasta_reader_seqit->seqit, &sequence, &len,
-                                  &desc, err))) {
+  while ((rval = gt_seqiterator_next(gt_fasta_reader_seqit->seqit, &sequence,
+                                     &len, &desc, err))) {
     if (rval < 0) {
       had_err = -1;
       break;

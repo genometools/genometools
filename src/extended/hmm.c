@@ -39,7 +39,7 @@
 #define MINUSINFINITY   -99999.0
 #define PSEUDOCOUNT     1
 
-struct HMM {
+struct GtHMM {
   unsigned int num_of_states,
                num_of_symbols;
   double *initial_state_prob, /* log values */
@@ -47,9 +47,9 @@ struct HMM {
          **emission_prob;     /* log values */
 };
 
-HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
+GtHMM* gt_hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
 {
-  HMM *hmm;
+  GtHMM *hmm;
   unsigned int i, j;
 
   assert(num_of_states && num_of_symbols);
@@ -65,22 +65,22 @@ HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
   hmm->num_of_symbols = num_of_symbols;
 
   for (i = 0; i < num_of_states; i++)
-    hmm_set_initial_state_probability(hmm, i, 1.0 / num_of_states);
+    gt_hmm_set_initial_state_probability(hmm, i, 1.0 / num_of_states);
 
   for (i = 0; i < num_of_states; i++) {
     for (j = 0; j < num_of_states; j++)
-      hmm_set_transition_probability(hmm, i, j, 0.0);
+      gt_hmm_set_transition_probability(hmm, i, j, 0.0);
   }
 
   for (i = 0; i < num_of_states; i++) {
     for (j = 0; j < num_of_symbols; j++)
-      hmm_set_emission_probability(hmm, i, j, 0.0);
+      gt_hmm_set_emission_probability(hmm, i, j, 0.0);
   }
 
   return hmm;
 }
 
-void hmm_set_initial_state_probability(HMM *hmm, unsigned int state_num,
+void gt_hmm_set_initial_state_probability(GtHMM *hmm, unsigned int state_num,
                                        double probability)
 {
   assert(hmm);
@@ -92,7 +92,8 @@ void hmm_set_initial_state_probability(HMM *hmm, unsigned int state_num,
     hmm->initial_state_prob[state_num] = log(probability);
 }
 
-double hmm_get_initial_state_probability(const HMM *hmm, unsigned int state_num)
+double gt_hmm_get_initial_state_probability(const GtHMM *hmm,
+                                            unsigned int state_num)
 {
   assert(hmm);
   assert(state_num < hmm->num_of_states);
@@ -101,7 +102,7 @@ double hmm_get_initial_state_probability(const HMM *hmm, unsigned int state_num)
   return exp(hmm->initial_state_prob[state_num]);
 }
 
-void hmm_set_transition_probability(HMM *hmm,
+void gt_hmm_set_transition_probability(GtHMM *hmm,
                                     unsigned int from_state_num,
                                     unsigned int to_state_num,
                                     double probability)
@@ -116,7 +117,7 @@ void hmm_set_transition_probability(HMM *hmm,
     hmm->transition_prob[from_state_num][to_state_num] = log(probability);
 }
 
-double hmm_get_transition_probability(const HMM *hmm,
+double gt_hmm_get_transition_probability(const GtHMM *hmm,
                                       unsigned int from_state_num,
                                       unsigned int to_state_num)
 {
@@ -128,7 +129,7 @@ double hmm_get_transition_probability(const HMM *hmm,
   return exp(hmm->transition_prob[from_state_num][to_state_num]);
 }
 
-void hmm_set_missing_transition_probabilities(HMM *hmm)
+void gt_hmm_set_missing_transition_probabilities(GtHMM *hmm)
 {
   unsigned int row, column, num_of_missing_entries;
   double prob, sum_of_probabilities;
@@ -140,7 +141,7 @@ void hmm_set_missing_transition_probabilities(HMM *hmm)
     sum_of_probabilities = 0.0;
     num_of_missing_entries = 0;
     for (column = 0; column < hmm->num_of_states; column++) {
-      prob = hmm_get_transition_probability(hmm, row, column);
+      prob = gt_hmm_get_transition_probability(hmm, row, column);
       if (prob == 0.0)
         num_of_missing_entries++;
       else
@@ -150,9 +151,9 @@ void hmm_set_missing_transition_probabilities(HMM *hmm)
     /* set missing probabilites (equal distribution) */
     if (num_of_missing_entries) {
       for (column = 0; column < hmm->num_of_states; column++) {
-        prob = hmm_get_transition_probability(hmm, row, column);
+        prob = gt_hmm_get_transition_probability(hmm, row, column);
         if (prob == 0.0) {
-          hmm_set_transition_probability(hmm, row, column,
+          gt_hmm_set_transition_probability(hmm, row, column,
                                          (1.0 - sum_of_probabilities) /
                                          num_of_missing_entries);
         }
@@ -161,7 +162,7 @@ void hmm_set_missing_transition_probabilities(HMM *hmm)
   }
 }
 
-void hmm_set_emission_probability(HMM *hmm,
+void gt_hmm_set_emission_probability(GtHMM *hmm,
                                   unsigned int state_num,
                                   unsigned int symbol_num,
                                   double probability)
@@ -176,7 +177,7 @@ void hmm_set_emission_probability(HMM *hmm,
     hmm->emission_prob[state_num][symbol_num] = log(probability);
 }
 
-double hmm_get_emission_probability(const HMM *hmm,
+double gt_hmm_get_emission_probability(const GtHMM *hmm,
                                     unsigned int state_num,
                                     unsigned int symbol_num)
 {
@@ -188,7 +189,7 @@ double hmm_get_emission_probability(const HMM *hmm,
   return exp(hmm->emission_prob[state_num][symbol_num]);
 }
 
-static bool hmm_has_valid_initial_state_probs(const HMM *hmm)
+static bool gt_hmm_has_valid_initial_state_probs(const GtHMM *hmm)
 {
   unsigned int state;
   double sum_of_probabilities = 0.0;
@@ -196,12 +197,12 @@ static bool hmm_has_valid_initial_state_probs(const HMM *hmm)
   assert(hmm);
 
   for (state = 0; state < hmm->num_of_states; state++)
-    sum_of_probabilities += hmm_get_initial_state_probability(hmm, state);
+    sum_of_probabilities += gt_hmm_get_initial_state_probability(hmm, state);
 
   return gt_double_equals_one(sum_of_probabilities);
 }
 
-static bool hmm_has_valid_emissions(const HMM *hmm)
+static bool gt_hmm_has_valid_emissions(const GtHMM *hmm)
 {
   unsigned int state, symbol;
   double sum_of_probabilities;
@@ -211,14 +212,15 @@ static bool hmm_has_valid_emissions(const HMM *hmm)
   for (state = 0; state < hmm->num_of_states; state++) {
     sum_of_probabilities = 0.0;
     for (symbol = 0; symbol < hmm->num_of_symbols; symbol++)
-      sum_of_probabilities += hmm_get_emission_probability(hmm, state, symbol);
+      sum_of_probabilities += gt_hmm_get_emission_probability(hmm,
+                                                              state, symbol);
     if (!gt_double_equals_one(sum_of_probabilities))
       return false;
   }
   return true;
 }
 
-static bool hmm_has_valid_states(const HMM *hmm)
+static bool gt_hmm_has_valid_states(const GtHMM *hmm)
 {
   unsigned int state_1, state_2;
   double sum_of_probabilities;
@@ -228,7 +230,7 @@ static bool hmm_has_valid_states(const HMM *hmm)
   for (state_1 = 0; state_1 < hmm->num_of_states; state_1++) {
     sum_of_probabilities = 0.0;
     for (state_2 = 0; state_2 < hmm->num_of_states; state_2++) {
-      sum_of_probabilities += hmm_get_transition_probability(hmm,state_1,
+      sum_of_probabilities += gt_hmm_get_transition_probability(hmm,state_1,
                                                              state_2);
 
     }
@@ -239,16 +241,16 @@ static bool hmm_has_valid_states(const HMM *hmm)
   return true;
 }
 
-bool hmm_is_valid(const HMM *hmm)
+bool gt_hmm_is_valid(const GtHMM *hmm)
 {
   assert(hmm);
-  return (hmm_has_valid_initial_state_probs(hmm) &&
-          hmm_has_valid_emissions(hmm) &&
-          hmm_has_valid_states(hmm));
+  return (gt_hmm_has_valid_initial_state_probs(hmm) &&
+          gt_hmm_has_valid_emissions(hmm) &&
+          gt_hmm_has_valid_states(hmm));
 
 }
 
-void hmm_init_random(HMM *hmm)
+void gt_hmm_init_random(GtHMM *hmm)
 {
   double random_value, cumulative_prob;
   unsigned int i, j;
@@ -258,22 +260,22 @@ void hmm_init_random(HMM *hmm)
   cumulative_prob = 0.0;
   for (i = 0; i < hmm->num_of_states - 1; i++) {
     random_value = gt_rand_max_double(1.0 - cumulative_prob);
-    hmm_set_initial_state_probability(hmm, i, random_value);
+    gt_hmm_set_initial_state_probability(hmm, i, random_value);
     cumulative_prob += random_value;
   }
   assert(cumulative_prob <= 1.0);
-  hmm_set_initial_state_probability(hmm, i,  1.0 - cumulative_prob);
+  gt_hmm_set_initial_state_probability(hmm, i,  1.0 - cumulative_prob);
 
   /* initialize transition probabilities in random fashion */
   for (i = 0; i < hmm->num_of_states; i++) {
     cumulative_prob = 0.0;
     for (j = 0; j < hmm->num_of_states - 1; j++) {
       random_value = gt_rand_max_double(1.0 - cumulative_prob);
-      hmm_set_transition_probability(hmm, i, j, random_value);
+      gt_hmm_set_transition_probability(hmm, i, j, random_value);
       cumulative_prob += random_value;
     }
     assert(cumulative_prob <= 1.0);
-    hmm_set_transition_probability(hmm, i, j, 1.0 - cumulative_prob);
+    gt_hmm_set_transition_probability(hmm, i, j, 1.0 - cumulative_prob);
   }
 
   /* initialize emission probabilities in random fashion */
@@ -281,18 +283,18 @@ void hmm_init_random(HMM *hmm)
     cumulative_prob = 0.0;
     for (j = 0; j < hmm->num_of_symbols - 1; j++) {
       random_value = gt_rand_max_double(1.0 - cumulative_prob);
-      hmm_set_emission_probability(hmm, i, j, random_value);
+      gt_hmm_set_emission_probability(hmm, i, j, random_value);
       cumulative_prob += random_value;
     }
     assert(cumulative_prob <= 1.0);
-    hmm_set_emission_probability(hmm, i, j, 1.0 - cumulative_prob);
+    gt_hmm_set_emission_probability(hmm, i, j, 1.0 - cumulative_prob);
   }
 
-  assert(hmm_is_valid(hmm));
+  assert(gt_hmm_is_valid(hmm));
 }
 
 /* [DEKM98, p. 56] */
-void hmm_decode(const HMM *hmm,
+void gt_hmm_decode(const GtHMM *hmm,
                 unsigned int *state_sequence,
                 const unsigned int *emissions,
                 unsigned int num_of_emissions)
@@ -302,7 +304,7 @@ void hmm_decode(const HMM *hmm,
   int row, column, num_of_rows, num_of_columns, previous_row;
 
   assert(hmm);
-  assert(hmm_is_valid(hmm));
+  assert(gt_hmm_is_valid(hmm));
   assert(num_of_emissions);
 
   /* alloc tables */
@@ -359,7 +361,7 @@ void hmm_decode(const HMM *hmm,
 }
 
 /* [DEKM98, p. 58] */
-static void compute_forward_table(double **f, const HMM *hmm,
+static void compute_forward_table(double **f, const GtHMM *hmm,
                                   const unsigned int *emissions,
                                   unsigned long num_of_emissions)
 {
@@ -392,7 +394,7 @@ static void compute_forward_table(double **f, const HMM *hmm,
 }
 
 /* [DEKM98, p. 58] */
-double hmm_forward(const HMM* hmm, const unsigned int *emissions,
+double gt_hmm_forward(const GtHMM* hmm, const unsigned int *emissions,
                    unsigned int num_of_emissions)
 {
   unsigned int i;
@@ -416,7 +418,7 @@ double hmm_forward(const HMM* hmm, const unsigned int *emissions,
 }
 
 /* [DEKM98, p. 59] */
-static void compute_backward_table(double **b, const HMM *hmm,
+static void compute_backward_table(double **b, const GtHMM *hmm,
                                    const unsigned int *emissions,
                                    unsigned long num_of_emissions)
 {
@@ -448,7 +450,7 @@ static void compute_backward_table(double **b, const HMM *hmm,
 }
 
 /* [DEKM98, p. 59] */
-double hmm_backward(const HMM* hmm, const unsigned int *emissions,
+double gt_hmm_backward(const GtHMM* hmm, const unsigned int *emissions,
                     unsigned int num_of_emissions)
 {
   unsigned int i;
@@ -473,7 +475,7 @@ double hmm_backward(const HMM* hmm, const unsigned int *emissions,
   return P;
 }
 
-void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
+void gt_hmm_emit(GtHMM *hmm, unsigned long num_of_emissions,
               void (*proc_emission)(unsigned int symbol, void *data),
               void *data)
 {
@@ -486,7 +488,7 @@ void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
   random_value = gt_rand_0_to_1();
   cumulative_prob = 0.0;
   for (state = 0; state < hmm->num_of_states - 1; state++) {
-    cumulative_prob += hmm_get_initial_state_probability(hmm, state);
+    cumulative_prob += gt_hmm_get_initial_state_probability(hmm, state);
     if (cumulative_prob > random_value)
       break;
   }
@@ -497,7 +499,7 @@ void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
     random_value = gt_rand_0_to_1();
     cumulative_prob = 0.0;
     for (symbol = 0; symbol < hmm->num_of_symbols - 1; symbol++) {
-      cumulative_prob += hmm_get_emission_probability(hmm, state, symbol);
+      cumulative_prob += gt_hmm_get_emission_probability(hmm, state, symbol);
       if (cumulative_prob > random_value)
         break;
     }
@@ -507,7 +509,8 @@ void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
     random_value = gt_rand_0_to_1();
     cumulative_prob = 0.0;
     for (next_state = 0; next_state < hmm->num_of_states - 1; next_state++) {
-      cumulative_prob += hmm_get_transition_probability(hmm, state, next_state);
+      cumulative_prob += gt_hmm_get_transition_probability(hmm,
+                                                           state, next_state);
       if (cumulative_prob > random_value)
         break;
     }
@@ -515,35 +518,35 @@ void hmm_emit(HMM *hmm, unsigned long num_of_emissions,
   }
 }
 
-double hmm_rmsd(const HMM *hmm_a, const HMM* hmm_b)
+double gt_hmm_rmsd(const GtHMM *hmm_a, const GtHMM* hmm_b)
 {
   unsigned int i, j;
   double difference = 0.0, rmsd = 0.0;
   assert(hmm_a && hmm_b);
   assert(hmm_a->num_of_states == hmm_b->num_of_states);
   assert(hmm_a->num_of_symbols == hmm_b->num_of_symbols);
-  assert(hmm_is_valid(hmm_a));
-  assert(hmm_is_valid(hmm_b));
+  assert(gt_hmm_is_valid(hmm_a));
+  assert(gt_hmm_is_valid(hmm_b));
   /* add transitions probabilities */
   for (i = 0; i < hmm_a->num_of_states; i++) {
     for (j = 0; j < hmm_a->num_of_states; j++) {
-      difference = hmm_get_transition_probability(hmm_a, i, j) -
-                   hmm_get_transition_probability(hmm_b, i, j);
+      difference = gt_hmm_get_transition_probability(hmm_a, i, j) -
+                   gt_hmm_get_transition_probability(hmm_b, i, j);
       rmsd += difference * difference;
     }
   }
   /* add emission probabilities */
   for (i = 0; i < hmm_a->num_of_states; i++) {
     for (j = 0; j < hmm_a->num_of_symbols; j++) {
-      difference = hmm_get_emission_probability(hmm_a, i, j) -
-                   hmm_get_emission_probability(hmm_b, i, j);
+      difference = gt_hmm_get_emission_probability(hmm_a, i, j) -
+                   gt_hmm_get_emission_probability(hmm_b, i, j);
       rmsd += difference * difference;
     }
   }
   return sqrt(rmsd);
 }
 
-void hmm_show(const HMM *hmm, FILE *fp)
+void gt_hmm_show(const GtHMM *hmm, FILE *fp)
 {
   unsigned int i, j;
   assert(hmm && fp);
@@ -551,14 +554,14 @@ void hmm_show(const HMM *hmm, FILE *fp)
   fprintf(fp, "# of symbols: %u\n", hmm->num_of_symbols);
   fprintf(fp, "initial state probabilities:\n");
   for (i = 0; i < hmm->num_of_states; i++) {
-    fprintf(fp, "%2u: %f", i, hmm_get_initial_state_probability(hmm, i));
+    fprintf(fp, "%2u: %f", i, gt_hmm_get_initial_state_probability(hmm, i));
   }
   xfputc('\n', fp);
   fprintf(fp, "transition probabilities:\n");
   for (i = 0; i < hmm->num_of_states; i++) {
     fprintf(fp, "%2u:", i);
     for (j = 0; j < hmm->num_of_states; j++) {
-      fprintf(fp, " %.2f", hmm_get_transition_probability(hmm, i, j));
+      fprintf(fp, " %.2f", gt_hmm_get_transition_probability(hmm, i, j));
     }
     xfputc('\n', fp);
   }
@@ -566,13 +569,13 @@ void hmm_show(const HMM *hmm, FILE *fp)
   for (i = 0; i < hmm->num_of_states; i++) {
     fprintf(fp, "%2u:", i);
     for (j = 0; j < hmm->num_of_symbols; j++) {
-      fprintf(fp, " %.2f", hmm_get_emission_probability(hmm, i, j));
+      fprintf(fp, " %.2f", gt_hmm_get_emission_probability(hmm, i, j));
     }
     xfputc('\n', fp);
   }
 }
 
-int hmm_unit_test(GtError *err)
+int gt_hmm_unit_test(GtError *err)
 {
   /* the last coin string must be the longest */
   static char *coin_tosses[] = { "H", "T", "HH", "HT", "TH", "TT", "HTHT",
@@ -596,11 +599,11 @@ int hmm_unit_test(GtError *err)
   unsigned int *encoded_seq;
   GtAlpha *alpha;
   size_t i, j, len, size;
-  HMM *fair_hmm, *loaded_hmm;
+  GtHMM *fair_hmm, *loaded_hmm;
   int had_err = 0;
   gt_error_check(err);
 
-  /* test the HMM class with the coin HMMs */
+  /* test the GtHMM class with the coin GtHMMs */
   fair_hmm = coin_hmm_fair();
   loaded_hmm = coin_hmm_loaded();
   alpha = coin_hmm_alpha();
@@ -613,25 +616,27 @@ int hmm_unit_test(GtError *err)
       encoded_seq[j] = gt_alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
     ensure(had_err,
-           gt_double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
-                                   exp(hmm_backward(fair_hmm, encoded_seq,
+           gt_double_equals_double(exp(gt_hmm_forward(fair_hmm, encoded_seq,
+                                                      len)),
+                                   exp(gt_hmm_backward(fair_hmm, encoded_seq,
                                                     len))));
     ensure(had_err,
-           gt_double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq,
+           gt_double_equals_double(exp(gt_hmm_forward(loaded_hmm, encoded_seq,
                                                    len)),
-                                   exp(hmm_backward(loaded_hmm, encoded_seq,
+                                   exp(gt_hmm_backward(loaded_hmm, encoded_seq,
                                                     len))));
   }
 
   gt_free(encoded_seq);
   gt_alpha_delete(alpha);
-  ensure(had_err, gt_double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(had_err, gt_double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm),
+  ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(fair_hmm, fair_hmm),
                                           0.0));
-  hmm_delete(loaded_hmm);
-  hmm_delete(fair_hmm);
+  ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(loaded_hmm, loaded_hmm),
+                                          0.0));
+  gt_hmm_delete(loaded_hmm);
+  gt_hmm_delete(fair_hmm);
 
-  /* test the HMM class with the dice HMMs */
+  /* test the GtHMM class with the dice GtHMMs */
   fair_hmm = dice_hmm_fair();
   loaded_hmm = dice_hmm_loaded();
   alpha = dice_hmm_alpha();
@@ -645,28 +650,30 @@ int hmm_unit_test(GtError *err)
     }
     /* XXX: remove exp() calls */
     ensure(had_err,
-           gt_double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
-                                   exp(hmm_backward(fair_hmm, encoded_seq,
-                                                    len))));
+           gt_double_equals_double(exp(gt_hmm_forward(fair_hmm, encoded_seq,
+                                                      len)),
+                                   exp(gt_hmm_backward(fair_hmm, encoded_seq,
+                                                       len))));
     ensure(had_err,
-           gt_double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq,
-                                                   len)),
-                                   exp(hmm_backward(loaded_hmm, encoded_seq,
-                                                    len))));
+           gt_double_equals_double(exp(gt_hmm_forward(loaded_hmm, encoded_seq,
+                                                      len)),
+                                   exp(gt_hmm_backward(loaded_hmm, encoded_seq,
+                                                       len))));
   }
 
   gt_free(encoded_seq);
   gt_alpha_delete(alpha);
-  ensure(had_err, gt_double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(had_err, gt_double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm),
+  ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(fair_hmm, fair_hmm),
                                           0.0));
-  hmm_delete(loaded_hmm);
-  hmm_delete(fair_hmm);
+  ensure(had_err, gt_double_equals_double(gt_hmm_rmsd(loaded_hmm, loaded_hmm),
+                                          0.0));
+  gt_hmm_delete(loaded_hmm);
+  gt_hmm_delete(fair_hmm);
 
   return had_err;
 }
 
-void hmm_delete(HMM *hmm)
+void gt_hmm_delete(GtHMM *hmm)
 {
   if (!hmm) return;
   gt_free(hmm->initial_state_prob);

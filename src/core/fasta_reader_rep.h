@@ -25,8 +25,8 @@ struct GtFastaReaderClass
 {
   size_t size;
   int  (*run)(GtFastaReader*, GtFastaReaderProcDescription,
-              GtFastaReaderProcGtSequencePart, GtFastaReaderProcGtSequenceLength,
-              void *data, GtError*);
+              GtFastaReaderProcGtSequencePart,
+              GtFastaReaderProcGtSequenceLength, void *data, GtError*);
   void (*free)(GtFastaReader*);
 };
 

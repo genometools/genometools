@@ -30,7 +30,8 @@ GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
 int          gt_seqiterator_next(GtSeqIterator*, const Uchar **sequence,
                               unsigned long *len, char **desc, GtError*);
 const unsigned long long*
-             gt_seqiterator_getcurrentcounter(GtSeqIterator*, unsigned long long);
+             gt_seqiterator_getcurrentcounter(GtSeqIterator*,
+                                              unsigned long long);
 void         gt_seqiterator_delete(GtSeqIterator*);
 
 #endif

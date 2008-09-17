@@ -21,42 +21,44 @@
 #include "core/error.h"
 
 /* The Hidden Markov Model (HMM) class */
-typedef struct HMM HMM;
+typedef struct GtHMM GtHMM;
 
-HMM*   hmm_new(unsigned int num_of_states, unsigned int num_of_symbols);
-void   hmm_set_initial_state_probability(HMM*, unsigned int state_num,
+GtHMM*   gt_hmm_new(unsigned int num_of_states, unsigned int num_of_symbols);
+void   gt_hmm_set_initial_state_probability(GtHMM*, unsigned int state_num,
                                          double probability);
-double hmm_get_initial_state_probability(const HMM*, unsigned int state_num);
-void   hmm_set_transition_probability(HMM*, unsigned int from_state_num,
-                                            unsigned int to_state_num,
-                                            double probability);
-void   hmm_set_missing_transition_probabilities(HMM*);
-double hmm_get_transition_probability(const HMM*, unsigned int from_state_num,
-                                                  unsigned int to_state_num);
-void   hmm_set_emission_probability(HMM*, unsigned int state_num,
-                                          unsigned int symbol_num,
-                                          double probability);
-double hmm_get_emission_probability(const HMM*, unsigned int state_num,
+double gt_hmm_get_initial_state_probability(const GtHMM*,
+                                            unsigned int state_num);
+void   gt_hmm_set_transition_probability(GtHMM*, unsigned int from_state_num,
+                                         unsigned int to_state_num,
+                                         double probability);
+void   gt_hmm_set_missing_transition_probabilities(GtHMM*);
+double gt_hmm_get_transition_probability(const GtHMM*,
+                                         unsigned int from_state_num,
+                                         unsigned int to_state_num);
+void   gt_hmm_set_emission_probability(GtHMM*, unsigned int state_num,
+                                       unsigned int symbol_num,
+                                       double probability);
+double gt_hmm_get_emission_probability(const GtHMM*, unsigned int state_num,
                                                 unsigned int symbol_num);
-/* initialize the HMM with completly random values */
-void   hmm_init_random(HMM*);
+/* initialize the GtHMM with completly random values */
+void   gt_hmm_init_random(GtHMM*);
 /* Viterbi algorithm */
-void   hmm_decode(const HMM*, unsigned int *state_sequence,
+void   gt_hmm_decode(const GtHMM*, unsigned int *state_sequence,
                   const unsigned int *emissions, unsigned int num_of_emissions);
 /* Forward algorithm, returns log(P(emissions)) */
-double hmm_forward(const HMM*, const unsigned int *emissions,
+double gt_hmm_forward(const GtHMM*, const unsigned int *emissions,
                    unsigned int num_of_emissions);
 /* Backward algorithm, returns log(P(emissions)) */
-double hmm_backward(const HMM*, const unsigned int *emissions,
+double gt_hmm_backward(const GtHMM*, const unsigned int *emissions,
                     unsigned int num_of_emissions);
-void   hmm_emit(HMM*, unsigned long num_of_emissions,
+void   gt_hmm_emit(GtHMM*, unsigned long num_of_emissions,
                 void (*proc_emission)(unsigned int symbol, void *data),
                 void *data);
-bool   hmm_is_valid(const HMM*);
-/* returns the RMSD of two HMMs */
-double hmm_rmsd(const HMM*, const HMM*);
-void   hmm_show(const HMM*, FILE*);
-int    hmm_unit_test(GtError*);
-void   hmm_delete(HMM*);
+bool   gt_hmm_is_valid(const GtHMM*);
+/* returns the RMSD of two GtHMMs */
+double gt_hmm_rmsd(const GtHMM*, const GtHMM*);
+void   gt_hmm_show(const GtHMM*, FILE*);
+int    gt_hmm_unit_test(GtError*);
+void   gt_hmm_delete(GtHMM*);
 
 #endif

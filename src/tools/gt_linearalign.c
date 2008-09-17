@@ -27,9 +27,9 @@ static OptionParser* gt_linearalign_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
   OptionParser *op;
-  op = option_parser_new("[option ...] gt_seq_file_1 gt_seq_file_2",
-                         "Globally align each sequence in gt_seq_file_1 with each "
-                         "sequence in gt_seq_file_2.\nThe memory consumption of "
+  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
+                         "Globally align each sequence in seq_file_1 with each "
+                         "sequence in seq_file_2.\nThe memory consumption of "
                          "the alignment procedure is linear.");
   option_parser_set_min_max_args(op, 2, 2);
   return op;

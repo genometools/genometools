@@ -530,7 +530,8 @@ static GtFeatureNode* add_node_to_pseudo_node(GtFeatureNode *pseudo_node,
                                               GtFeatureNode *normal_node,
                                               FeatureInfo *feature_info,
                                               GtQueue *genome_nodes,
-                                              AutomaticGtSequenceRegion *auto_sr)
+                                              AutomaticGtSequenceRegion
+                                                 *auto_sr)
 {
   gt_assert(pseudo_node &&
          gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_node));
@@ -592,7 +593,8 @@ static GtFeatureNode* join_root_pair(GtFeatureNode *root_a,
 }
 
 static void join_roots(GtArray *roots, FeatureInfo *feature_info,
-                       GtQueue *genome_nodes, AutomaticGtSequenceRegion *auto_sr)
+                       GtQueue *genome_nodes,
+                       AutomaticGtSequenceRegion *auto_sr)
 {
   GtFeatureNode *master_root;
   unsigned long i;

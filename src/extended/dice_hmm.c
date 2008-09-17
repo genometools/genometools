@@ -18,64 +18,64 @@
 #include <assert.h>
 #include "extended/dice_hmm.h"
 
-HMM* dice_hmm_loaded(void)
+GtHMM* dice_hmm_loaded(void)
 {
-  HMM *hmm;
+  GtHMM *hmm;
 
-  /* create the HMM */
-  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
+  /* create the GtHMM */
+  hmm = gt_hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
 
   /* set emmission probabilities */
-  hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, TWO,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, THREE, 1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, FOUR,  1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, FIVE,  1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, SIX,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_LOADED, ONE,   1.0/10);
-  hmm_set_emission_probability(hmm, DICE_LOADED, TWO,   1.0/10);
-  hmm_set_emission_probability(hmm, DICE_LOADED, THREE, 1.0/10);
-  hmm_set_emission_probability(hmm, DICE_LOADED, FOUR,  1.0/10);
-  hmm_set_emission_probability(hmm, DICE_LOADED, FIVE,  1.0/10);
-  hmm_set_emission_probability(hmm, DICE_LOADED, SIX,   1.0/2);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, TWO,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, THREE, 1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, FOUR,  1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, FIVE,  1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, SIX,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, ONE,   1.0/10);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, TWO,   1.0/10);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, THREE, 1.0/10);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, FOUR,  1.0/10);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, FIVE,  1.0/10);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, SIX,   1.0/2);
 
   /* set transition probabilities */
-  hmm_set_transition_probability(hmm, DICE_FAIR, DICE_LOADED, 0.05);
-  hmm_set_transition_probability(hmm, DICE_LOADED, DICE_FAIR, 0.1);
-  hmm_set_transition_probability(hmm, DICE_FAIR, DICE_FAIR, 0.95);
-  hmm_set_transition_probability(hmm, DICE_LOADED, DICE_LOADED, 0.9);
-  assert(hmm_is_valid(hmm));
+  gt_hmm_set_transition_probability(hmm, DICE_FAIR, DICE_LOADED, 0.05);
+  gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_FAIR, 0.1);
+  gt_hmm_set_transition_probability(hmm, DICE_FAIR, DICE_FAIR, 0.95);
+  gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_LOADED, 0.9);
+  assert(gt_hmm_is_valid(hmm));
 
   return hmm;
 }
 
-HMM* dice_hmm_fair(void)
+GtHMM* dice_hmm_fair(void)
 {
-  HMM *hmm;
+  GtHMM *hmm;
 
-  /* create the HMM */
-  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
+  /* create the GtHMM */
+  hmm = gt_hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
 
   /* set emmission probabilities */
-  hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, TWO,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, THREE, 1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, FOUR,  1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, FIVE,  1.0/6);
-  hmm_set_emission_probability(hmm, DICE_FAIR, SIX,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_LOADED, ONE,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_LOADED, TWO,   1.0/6);
-  hmm_set_emission_probability(hmm, DICE_LOADED, THREE, 1.0/6);
-  hmm_set_emission_probability(hmm, DICE_LOADED, FOUR,  1.0/6);
-  hmm_set_emission_probability(hmm, DICE_LOADED, FIVE,  1.0/6);
-  hmm_set_emission_probability(hmm, DICE_LOADED, SIX,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, TWO,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, THREE, 1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, FOUR,  1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, FIVE,  1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_FAIR, SIX,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, ONE,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, TWO,   1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, THREE, 1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, FOUR,  1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, FIVE,  1.0/6);
+  gt_hmm_set_emission_probability(hmm, DICE_LOADED, SIX,   1.0/6);
 
   /* set transition probabilities */
-  hmm_set_transition_probability(hmm, DICE_FAIR, DICE_LOADED, 0.5);
-  hmm_set_transition_probability(hmm, DICE_LOADED, DICE_FAIR, 0.5);
-  hmm_set_transition_probability(hmm, DICE_FAIR, DICE_FAIR, 0.5);
-  hmm_set_transition_probability(hmm, DICE_LOADED, DICE_LOADED, 0.5);
-  assert(hmm_is_valid(hmm));
+  gt_hmm_set_transition_probability(hmm, DICE_FAIR, DICE_LOADED, 0.5);
+  gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_FAIR, 0.5);
+  gt_hmm_set_transition_probability(hmm, DICE_FAIR, DICE_FAIR, 0.5);
+  gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_LOADED, 0.5);
+  assert(gt_hmm_is_valid(hmm));
 
   return hmm;
 }

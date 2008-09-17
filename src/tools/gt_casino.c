@@ -42,7 +42,7 @@ int gt_casino(int argc, const char **argv, GtError *err)
 {
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
   int parsed_args, had_err = 0;
-  HMM *hmm = NULL;
+  GtHMM *hmm = NULL;
   gt_error_check(err);
 
   /* option parsing */
@@ -85,12 +85,12 @@ int gt_casino(int argc, const char **argv, GtError *err)
   }
 
   if (!had_err) {
-    /* create the HMM */
+    /* create the GtHMM */
     hmm = dice_hmm_loaded();
 
     /* decoding */
     state_sequence = gt_malloc(sizeof (unsigned int) * num_of_emissions);
-    hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
+    gt_hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
 
     /* print most probable state sequence state sequence */
     for (i = 0 ; i < num_of_emissions; i++) {
@@ -108,7 +108,7 @@ int gt_casino(int argc, const char **argv, GtError *err)
   }
 
   /* free */
-  hmm_delete(hmm);
+  gt_hmm_delete(hmm);
   gt_free(emissions);
   gt_free(state_sequence);
 

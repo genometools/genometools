@@ -32,7 +32,7 @@ const char*              gt_sequence_node_get_description(const
                                                           GtGtSequenceNode*);
 const char*              gt_sequence_node_get_sequence(const GtGtSequenceNode*);
 unsigned long            gt_sequence_node_get_sequence_length(const
-                                                              GtGtSequenceNode*);
+                                                             GtGtSequenceNode*);
 
 #define gt_sequence_node_cast(genome_node) \
         gt_genome_node_cast(gt_sequence_node_class(), genome_node)

@@ -48,9 +48,9 @@ static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
   Option *option;
   Costs *costs = tool_arguments;
   assert(costs);
-  op = option_parser_new("[option ...] gt_seq_file_1 gt_seq_file_2",
-                         "Globally align each sequence in gt_seq_file_1 with each "
-                         "sequence in gt_seq_file_2 (affine gap costs).");
+  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
+                         "Globally align each sequence in seq_file_1 with each "
+                         "sequence in seq_file_2 (affine gap costs).");
   option = option_new_int("rep", "set replacement cost",
                           &costs->replacement_cost, 1);
   option_parser_add_option(op, option);
