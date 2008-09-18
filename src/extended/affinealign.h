@@ -22,7 +22,7 @@
 
 /* (globally) align u and v (affine gap costs) and return one optimal
    GtAlignment */
-GtAlignment* affinealign(const char *u, unsigned long ulen,
+GtAlignment* gt_affinealign(const char *u, unsigned long ulen,
                        const char *v, unsigned long vlen, int replacement_cost,
                        int gap_opening_cost, int gap_extension_cost);
 

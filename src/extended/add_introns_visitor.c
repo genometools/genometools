@@ -21,19 +21,19 @@
 #include "extended/add_introns_visitor.h"
 #include "extended/node_visitor_rep.h"
 
-struct AddIntronsVisitor {
+struct GtAddIntronsVisitor {
   const GtNodeVisitor parent_instance;
   GtFeatureNode *parent_feature,
                 *previous_exon_feature;
 };
 
-#define add_introns_visitor_cast(GV)\
-        gt_node_visitor_cast(add_introns_visitor_class(), GV)
+#define gt_add_introns_visitor_cast(GV)\
+        gt_node_visitor_cast(gt_add_introns_visitor_class(), GV)
 
 static int add_introns_in_children(GtGenomeNode *gn, void *data,
                                    GT_UNUSED GtError *err)
 {
-  AddIntronsVisitor *v = (AddIntronsVisitor*) data;
+  GtAddIntronsVisitor *v = (GtAddIntronsVisitor*) data;
   GtFeatureNode *current_feature, *intron_node;
   GtRange previous_range, current_range, intron_range;
   GtStrand previous_strand, current_strand, intron_strand;
@@ -81,7 +81,7 @@ static int add_introns_in_children(GtGenomeNode *gn, void *data,
 static int add_introns_if_necessary(GtGenomeNode *gn, void *data,
                                     GtError *err)
 {
-  AddIntronsVisitor *v = (AddIntronsVisitor*) data;
+  GtAddIntronsVisitor *v = (GtAddIntronsVisitor*) data;
   GtFeatureNode *gf;
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
@@ -92,29 +92,29 @@ static int add_introns_if_necessary(GtGenomeNode *gn, void *data,
                                               err);
 }
 
-static int add_introns_visitor_genome_feature(GtNodeVisitor *gv,
+static int gt_add_introns_visitor_genome_feature(GtNodeVisitor *gv,
                                               GtFeatureNode *gf,
                                               GtError *err)
 {
-  AddIntronsVisitor *v;
+  GtAddIntronsVisitor *v;
   gt_error_check(err);
-  v = add_introns_visitor_cast(gv);
+  v = gt_add_introns_visitor_cast(gv);
   return gt_genome_node_traverse_children((GtGenomeNode*) gf, v,
                                        add_introns_if_necessary, false, err);
 }
 
-const GtNodeVisitorClass* add_introns_visitor_class()
+const GtNodeVisitorClass* gt_add_introns_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (AddIntronsVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (GtAddIntronsVisitor),
                                           NULL,
                                           NULL,
-                                          add_introns_visitor_genome_feature,
+                                          gt_add_introns_visitor_genome_feature,
                                           NULL,
                                           NULL };
   return &gvc;
 }
 
-GtNodeVisitor* add_introns_visitor_new(void)
+GtNodeVisitor* gt_add_introns_visitor_new(void)
 {
-  return gt_node_visitor_create(add_introns_visitor_class());
+  return gt_node_visitor_create(gt_add_introns_visitor_class());
 }

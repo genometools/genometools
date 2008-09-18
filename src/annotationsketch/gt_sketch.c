@@ -232,7 +232,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
     /* create add introns stream if -addintrons was used */
     if (arguments.addintrons) {
-      add_introns_stream = add_introns_stream_new(last_stream);
+      add_introns_stream = gt_add_introns_stream_new(last_stream);
       last_stream = add_introns_stream;
     }
 

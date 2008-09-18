@@ -20,49 +20,49 @@
 #include "extended/add_introns_stream.h"
 #include "extended/add_introns_visitor.h"
 
-struct AddIntronsStream{
+struct GtAddIntronsStream{
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *add_introns_visitor;
 };
 
-#define add_introns_stream_cast(GS)\
-        gt_node_stream_cast(add_introns_stream_class(), GS)
+#define gt_add_introns_stream_cast(GS)\
+        gt_node_stream_cast(gt_add_introns_stream_class(), GS)
 
-static int add_introns_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
+static int gt_add_introns_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                         GtError *err)
 {
-  AddIntronsStream *ais;
+  GtAddIntronsStream *ais;
   int had_err;
   gt_error_check(err);
-  ais = add_introns_stream_cast(gs);
+  ais = gt_add_introns_stream_cast(gs);
   had_err = gt_node_stream_next(ais->in_stream, gn, err);
   if (!had_err && *gn)
     had_err = gt_genome_node_accept(*gn, ais->add_introns_visitor, err);
   return had_err;
 }
 
-static void add_introns_stream_free(GtNodeStream *gs)
+static void gt_add_introns_stream_free(GtNodeStream *gs)
 {
-  AddIntronsStream *ais = add_introns_stream_cast(gs);
+  GtAddIntronsStream *ais = gt_add_introns_stream_cast(gs);
   gt_node_visitor_delete(ais->add_introns_visitor);
   gt_node_stream_delete(ais->in_stream);
 }
 
-const GtNodeStreamClass* add_introns_stream_class(void)
+const GtNodeStreamClass* gt_add_introns_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (AddIntronsStream),
-                                         add_introns_stream_next_tree,
-                                         add_introns_stream_free };
+  static const GtNodeStreamClass gsc = { sizeof (GtAddIntronsStream),
+                                         gt_add_introns_stream_next_tree,
+                                         gt_add_introns_stream_free };
   return &gsc;
 }
 
-GtNodeStream* add_introns_stream_new(GtNodeStream *in_stream)
+GtNodeStream* gt_add_introns_stream_new(GtNodeStream *in_stream)
 {
-  GtNodeStream *gs = gt_node_stream_create(add_introns_stream_class(), true);
-  AddIntronsStream *ais = add_introns_stream_cast(gs);
+  GtNodeStream *gs = gt_node_stream_create(gt_add_introns_stream_class(), true);
+  GtAddIntronsStream *ais = gt_add_introns_stream_cast(gs);
   assert(in_stream);
   ais->in_stream = gt_node_stream_ref(in_stream);
-  ais->add_introns_visitor = add_introns_visitor_new();
+  ais->add_introns_visitor = gt_add_introns_visitor_new();
   return gs;
 }

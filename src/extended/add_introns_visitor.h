@@ -19,11 +19,11 @@
 #define ADD_INTRONS_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct AddIntronsVisitor AddIntronsVisitor;
+typedef struct GtAddIntronsVisitor GtAddIntronsVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* add_introns_visitor_class(void);
-GtNodeVisitor*            add_introns_visitor_new(void);
+const GtNodeVisitorClass* gt_add_introns_visitor_class(void);
+GtNodeVisitor*            gt_add_introns_visitor_new(void);
 
 #endif

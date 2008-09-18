@@ -232,7 +232,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* create addintrons stream (if necessary) */
   if (!had_err && arguments->addintrons) {
     assert(last_stream);
-    add_introns_stream = add_introns_stream_new(last_stream);
+    add_introns_stream = gt_add_introns_stream_new(last_stream);
     last_stream = add_introns_stream;
   }
 

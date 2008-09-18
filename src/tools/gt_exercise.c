@@ -46,7 +46,7 @@
 static void* gt_exercise_arguments_new(void)
 {
   GtToolbox *exercise_toolbox = gt_toolbox_new();
-  gt_toolbox_add_tool(exercise_toolbox, "affinealign", gt_affinealign());
+  gt_toolbox_add_tool(exercise_toolbox, "affinealign", gt_gt_affinealign());
   gt_toolbox_add_tool(exercise_toolbox, "align", gt_align());
   gt_toolbox_add_tool(exercise_toolbox, "assemblegreedy", gt_assemblegreedy());
   gt_toolbox_add_tool(exercise_toolbox, "blastenv", gt_blastenv());

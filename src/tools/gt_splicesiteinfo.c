@@ -102,7 +102,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
   if (!had_err) {
     /* create addintrons stream (if necessary) */
     if (arguments.addintrons)
-      add_introns_stream = add_introns_stream_new(gff3_in_stream);
+      add_introns_stream = gt_add_introns_stream_new(gff3_in_stream);
 
     /* create extract feature stream */
     splice_site_info_stream = splice_site_info_stream_new(arguments.addintrons

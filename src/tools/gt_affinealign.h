@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the align tool (affine gap costs) */
-GtTool* gt_affinealign(void);
+GtTool* gt_gt_affinealign(void);
 
 #endif

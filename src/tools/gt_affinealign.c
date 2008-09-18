@@ -91,7 +91,7 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err) {
     for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
       for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
-        a = affinealign(gt_bioseq_get_sequence(gt_bioseq_1, i),
+        a = gt_affinealign(gt_bioseq_get_sequence(gt_bioseq_1, i),
                         gt_bioseq_get_sequence_length(gt_bioseq_1, i),
                         gt_bioseq_get_sequence(gt_bioseq_2, j),
                         gt_bioseq_get_sequence_length(gt_bioseq_2, j),
@@ -111,7 +111,7 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_affinealign(void)
+GtTool* gt_gt_affinealign(void)
 {
   return gt_tool_new(gt_affinealign_arguments_new,
                   gt_affinealign_arguments_delete,

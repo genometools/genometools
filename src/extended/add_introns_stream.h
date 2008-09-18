@@ -22,9 +22,9 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct AddIntronsStream AddIntronsStream;
+typedef struct GtAddIntronsStream GtAddIntronsStream;
 
-const GtNodeStreamClass* add_introns_stream_class(void);
-GtNodeStream*            add_introns_stream_new(GtNodeStream*);
+const GtNodeStreamClass* gt_add_introns_stream_class(void);
+GtNodeStream*            gt_add_introns_stream_new(GtNodeStream*);
 
 #endif
