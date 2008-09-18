@@ -22,32 +22,33 @@
 #include "extended/transcript_counts.h"
 
 /* a container class for transcript exon arrays */
-typedef struct TranscriptExons TranscriptExons;
+typedef struct GtTranscriptExons GtTranscriptExons;
 
-TranscriptExons*   transcript_exons_new(void);
+GtTranscriptExons* gt_transcript_exons_new(void);
 
 /* return the exon array for all exons */
-GtArray*          transcript_exons_get_all(const TranscriptExons*);
+GtArray*           gt_transcript_exons_get_all(const GtTranscriptExons*);
 
 /* return the exon array for single exons */
-GtArray*          transcript_exons_get_single(const TranscriptExons*);
+GtArray*           gt_transcript_exons_get_single(const GtTranscriptExons*);
 
 /* return the exon array for initial exons */
-GtArray*          transcript_exons_get_initial(const TranscriptExons*);
+GtArray*           gt_transcript_exons_get_initial(const GtTranscriptExons*);
 
 /* return the exon array for internal exons */
-GtArray*          transcript_exons_get_internal(const TranscriptExons*);
+GtArray*           gt_transcript_exons_get_internal(const GtTranscriptExons*);
 
 /* return the exon array for terminal exons */
-GtArray*          transcript_exons_get_terminal(const TranscriptExons*);
+GtArray*           gt_transcript_exons_get_terminal(const GtTranscriptExons*);
 
-void               transcript_exons_sort(const TranscriptExons*);
+void               gt_transcript_exons_sort(const GtTranscriptExons*);
 
-TranscriptCounts*  transcript_exons_uniq_in_place_count(TranscriptExons*);
+GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons*);
 
-bool               transcript_exons_are_sorted(const TranscriptExons*);
-TranscriptGtBittabs* transcript_exons_create_bittabs(const TranscriptExons*);
+bool               gt_transcript_exons_are_sorted(const GtTranscriptExons*);
+GtTranscriptGtBittabs*
+                   gt_transcript_exons_create_bittabs(const GtTranscriptExons*);
 
-void               transcript_exons_delete(TranscriptExons*);
+void               gt_transcript_exons_delete(GtTranscriptExons*);
 
 #endif

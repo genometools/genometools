@@ -21,18 +21,18 @@
 #include <stdio.h>
 #include "core/error.h"
 
-typedef struct Evaluator Evaluator;
+typedef struct GtEvaluator GtEvaluator;
 
-Evaluator* evaluator_new(void);
-void       evaluator_add_true(Evaluator*);
-void       evaluator_add_actual(Evaluator*, unsigned long);
-void       evaluator_add_predicted(Evaluator*, unsigned long);
-double     evaluator_get_sensitivity(const Evaluator*);
-double     evaluator_get_specificity(const Evaluator*);
-void       evaluator_show_sensitivity(const Evaluator*, FILE*);
-void       evaluator_show_specificity(const Evaluator*, FILE*);
-void       evaluator_reset(Evaluator*);
-int        evaluator_unit_test(GtError*);
-void       evaluator_delete(Evaluator*);
+GtEvaluator* gt_evaluator_new(void);
+void       gt_evaluator_add_true(GtEvaluator*);
+void       gt_evaluator_add_actual(GtEvaluator*, unsigned long);
+void       gt_evaluator_add_predicted(GtEvaluator*, unsigned long);
+double     gt_evaluator_get_sensitivity(const GtEvaluator*);
+double     gt_evaluator_get_specificity(const GtEvaluator*);
+void       gt_evaluator_show_sensitivity(const GtEvaluator*, FILE*);
+void       gt_evaluator_show_specificity(const GtEvaluator*, FILE*);
+void       gt_evaluator_reset(GtEvaluator*);
+int        gt_evaluator_unit_test(GtError*);
+void       gt_evaluator_delete(GtEvaluator*);
 
 #endif

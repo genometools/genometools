@@ -19,7 +19,7 @@
 #include "core/range.h"
 #include "extended/transcript_exons.h"
 
-struct TranscriptExons {
+struct GtTranscriptExons {
   GtArray *exon_array_all,
         *exon_array_single,
         *exon_array_initial,
@@ -27,9 +27,9 @@ struct TranscriptExons {
         *exon_array_terminal;
 };
 
-TranscriptExons* transcript_exons_new(void)
+GtTranscriptExons* gt_transcript_exons_new(void)
 {
-  TranscriptExons *te = gt_malloc(sizeof (TranscriptExons));
+  GtTranscriptExons *te = gt_malloc(sizeof (GtTranscriptExons));
   te->exon_array_all = gt_array_new(sizeof (GtRange));
   te->exon_array_single = gt_array_new(sizeof (GtRange));
   te->exon_array_initial = gt_array_new(sizeof (GtRange));
@@ -38,37 +38,37 @@ TranscriptExons* transcript_exons_new(void)
   return te;
 }
 
-GtArray* transcript_exons_get_all(const TranscriptExons *te)
+GtArray* gt_transcript_exons_get_all(const GtTranscriptExons *te)
 {
   assert(te);
   return te->exon_array_all;
 }
 
-GtArray* transcript_exons_get_single(const TranscriptExons *te)
+GtArray* gt_transcript_exons_get_single(const GtTranscriptExons *te)
 {
   assert(te);
   return te->exon_array_single;
 }
 
-GtArray* transcript_exons_get_initial(const TranscriptExons *te)
+GtArray* gt_transcript_exons_get_initial(const GtTranscriptExons *te)
 {
   assert(te);
   return te->exon_array_initial;
 }
 
-GtArray* transcript_exons_get_internal(const TranscriptExons *te)
+GtArray* gt_transcript_exons_get_internal(const GtTranscriptExons *te)
 {
   assert(te);
   return te->exon_array_internal;
 }
 
-GtArray* transcript_exons_get_terminal(const TranscriptExons *te)
+GtArray* gt_transcript_exons_get_terminal(const GtTranscriptExons *te)
 {
   assert(te);
   return te->exon_array_terminal;
 }
 
-void transcript_exons_sort(const TranscriptExons *te)
+void gt_transcript_exons_sort(const GtTranscriptExons *te)
 {
   assert(te);
   ranges_sort(te->exon_array_all);
@@ -78,26 +78,27 @@ void transcript_exons_sort(const TranscriptExons *te)
   ranges_sort(te->exon_array_terminal);
 }
 
-TranscriptCounts* transcript_exons_uniq_in_place_count(TranscriptExons *te)
+GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons
+                                                                         *te)
 {
-  TranscriptCounts *tc;
+  GtTranscriptCounts *tc;
   GtArray *counts;
   assert(te);
-  tc = transcript_counts_new();
+  tc = gt_transcript_counts_new();
   counts = ranges_uniq_in_place_count(te->exon_array_all);
-  transcript_counts_set_all(tc, counts);
+  gt_transcript_counts_set_all(tc, counts);
   counts = ranges_uniq_in_place_count(te->exon_array_single);
-  transcript_counts_set_single(tc, counts);
+  gt_transcript_counts_set_single(tc, counts);
   counts = ranges_uniq_in_place_count(te->exon_array_initial);
-  transcript_counts_set_initial(tc, counts);
+  gt_transcript_counts_set_initial(tc, counts);
   counts = ranges_uniq_in_place_count(te->exon_array_internal);
-  transcript_counts_set_internal(tc, counts);
+  gt_transcript_counts_set_internal(tc, counts);
   counts = ranges_uniq_in_place_count(te->exon_array_terminal);
-  transcript_counts_set_terminal(tc, counts);
+  gt_transcript_counts_set_terminal(tc, counts);
   return tc;
 }
 
-bool transcript_exons_are_sorted(const TranscriptExons *te)
+bool gt_transcript_exons_are_sorted(const GtTranscriptExons *te)
 {
   assert(te);
   if (!ranges_are_sorted(te->exon_array_all)) return false;
@@ -108,17 +109,18 @@ bool transcript_exons_are_sorted(const TranscriptExons *te)
   return true;
 }
 
-TranscriptGtBittabs* transcript_exons_create_bittabs(const TranscriptExons *te)
+GtTranscriptGtBittabs* gt_transcript_exons_create_bittabs(const
+                                                          GtTranscriptExons *te)
 {
   assert(te);
-  return transcript_bittabs_new(gt_array_size(te->exon_array_all),
+  return gt_transcript_bittabs_new(gt_array_size(te->exon_array_all),
                                 gt_array_size(te->exon_array_single),
                                 gt_array_size(te->exon_array_initial),
                                 gt_array_size(te->exon_array_internal),
                                 gt_array_size(te->exon_array_terminal));
 }
 
-void transcript_exons_delete(TranscriptExons *te)
+void gt_transcript_exons_delete(GtTranscriptExons *te)
 {
   if (!te) return;
   gt_array_delete(te->exon_array_all);

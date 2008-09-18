@@ -170,7 +170,7 @@ const GtGenomeNodeClass* gt_feature_node_class()
 }
 
 static void set_transcriptfeaturetype(GtFeatureNode *fn,
-                                      TranscriptFeatureType tft)
+                                      GtTranscriptFeatureType tft)
 {
   gt_assert(fn);
   fn->bit_field &= ~(TRANSCRIPT_FEATURE_TYPE_MASK <<
@@ -417,7 +417,7 @@ static int save_exons_and_cds(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-static void set_transcript_types(GtArray *features)
+static void set_gt_transcript_types(GtArray *features)
 {
   GtFeatureNode *fn;
   unsigned long i;
@@ -456,8 +456,8 @@ static int determine_transcripttypes(GtGenomeNode *gn, void *data,
                                                     save_exons_and_cds, NULL);
   gt_assert(!had_err); /* cannot happen, because save_exons_and_cds() is sane */
   /* set transcript feature type, if necessary */
-  set_transcript_types(info->exon_features);
-  set_transcript_types(info->cds_features);
+  set_gt_transcript_types(info->exon_features);
+  set_gt_transcript_types(info->cds_features);
   return 0;
 }
 
@@ -477,7 +477,7 @@ void gt_feature_node_determine_transcripttypes(GtFeatureNode *fn)
   gt_array_delete(info.cds_features);
 }
 
-TranscriptFeatureType gt_feature_node_get_transcriptfeaturetype(GtFeatureNode
+GtTranscriptFeatureType gt_feature_node_get_transcriptfeaturetype(GtFeatureNode
                                                                 *fn)
 {
   gt_assert(fn);

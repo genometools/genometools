@@ -20,11 +20,11 @@
 
 #include "lua.h"
 
-/* exports the StreamEvaluator class to Lua:
+/* exports the GtStreamEvaluator class to Lua:
 
    -- Returns a new stream evaluator object for the two genome streams
    -- <reality_stream> and <prediction_stream>.
-   function stream_evaluator_new(reality_stream, prediction_stream)
+   function gt_stream_evaluator_new(reality_stream, prediction_stream)
 
    -- Run evaluation of <stream_evaluator>. All evaluated features are visited
    -- by the optional <genome_visitor>.

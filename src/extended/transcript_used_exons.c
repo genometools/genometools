@@ -19,7 +19,7 @@
 #include "core/range.h"
 #include "extended/transcript_used_exons.h"
 
-struct TranscriptUsedExons {
+struct GtTranscriptUsedExons {
   GtDlist *used_exons_all,
         *used_exons_single,
         *used_exons_initial,
@@ -27,9 +27,9 @@ struct TranscriptUsedExons {
         *used_exons_terminal;
 };
 
-TranscriptUsedExons* transcript_used_exons_new(void)
+GtTranscriptUsedExons* gt_transcript_used_exons_new(void)
 {
-  TranscriptUsedExons *tue = gt_malloc(sizeof (TranscriptUsedExons));
+  GtTranscriptUsedExons *tue = gt_malloc(sizeof (GtTranscriptUsedExons));
   tue->used_exons_all = gt_dlist_new((GtCompare) gt_range_compare_ptr);
   tue->used_exons_single = gt_dlist_new((GtCompare) gt_range_compare_ptr);
   tue->used_exons_initial = gt_dlist_new((GtCompare) gt_range_compare_ptr);
@@ -38,31 +38,31 @@ TranscriptUsedExons* transcript_used_exons_new(void)
   return tue;
 }
 
-GtDlist* transcript_used_exons_get_all(TranscriptUsedExons *tue)
+GtDlist* gt_transcript_used_exons_get_all(GtTranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_all;
 }
 
-GtDlist* transcript_used_exons_get_single(TranscriptUsedExons *tue)
+GtDlist* gt_transcript_used_exons_get_single(GtTranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_single;
 }
 
-GtDlist* transcript_used_exons_get_initial(TranscriptUsedExons *tue)
+GtDlist* gt_transcript_used_exons_get_initial(GtTranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_initial;
 }
 
-GtDlist* transcript_used_exons_get_internal(TranscriptUsedExons *tue)
+GtDlist* gt_transcript_used_exons_get_internal(GtTranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_internal;
 }
 
-GtDlist* transcript_used_exons_get_terminal(TranscriptUsedExons *tue)
+GtDlist* gt_transcript_used_exons_get_terminal(GtTranscriptUsedExons *tue)
 {
   assert(tue);
   return tue->used_exons_terminal;
@@ -78,7 +78,7 @@ static void used_gt_dlist_delete(GtDlist *used_list)
   gt_dlist_delete(used_list);
 }
 
-void transcript_used_exons_delete(TranscriptUsedExons *tue)
+void gt_transcript_used_exons_delete(GtTranscriptUsedExons *tue)
 {
   if (!tue) return;
   used_gt_dlist_delete(tue->used_exons_all);

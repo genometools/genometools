@@ -18,78 +18,83 @@
 #include "core/ma.h"
 #include "extended/transcript_evaluators.h"
 
-struct TranscriptEvaluators {
-  Evaluator *exon_evaluator_all,
+struct GtTranscriptEvaluators {
+  GtEvaluator *exon_evaluator_all,
             *exon_evaluator_single,
             *exon_evaluator_initial,
             *exon_evaluator_internal,
             *exon_evaluator_terminal;
 };
 
-TranscriptEvaluators* transcript_evaluators_new(void)
+GtTranscriptEvaluators* gt_transcript_evaluators_new(void)
 {
-  TranscriptEvaluators *te = gt_malloc(sizeof (TranscriptEvaluators));
-  te->exon_evaluator_all = evaluator_new();
-  te->exon_evaluator_single = evaluator_new();
-  te->exon_evaluator_initial = evaluator_new();
-  te->exon_evaluator_internal = evaluator_new();
-  te->exon_evaluator_terminal = evaluator_new();
+  GtTranscriptEvaluators *te = gt_malloc(sizeof (GtTranscriptEvaluators));
+  te->exon_evaluator_all = gt_evaluator_new();
+  te->exon_evaluator_single = gt_evaluator_new();
+  te->exon_evaluator_initial = gt_evaluator_new();
+  te->exon_evaluator_internal = gt_evaluator_new();
+  te->exon_evaluator_terminal = gt_evaluator_new();
   return te;
 }
 
-Evaluator* transcript_evaluators_get_all(const TranscriptEvaluators *te)
+GtEvaluator* gt_transcript_evaluators_get_all(const GtTranscriptEvaluators *te)
 {
   assert(te);
   return te->exon_evaluator_all;
 }
 
-Evaluator* transcript_evaluators_get_single(const TranscriptEvaluators *te)
+GtEvaluator* gt_transcript_evaluators_get_single(const GtTranscriptEvaluators
+                                                 *te)
 {
   assert(te);
   return te->exon_evaluator_single;
 }
 
-Evaluator* transcript_evaluators_get_initial(const TranscriptEvaluators *te)
+GtEvaluator* gt_transcript_evaluators_get_initial(const GtTranscriptEvaluators
+                                                  *te)
 {
   assert(te);
   return te->exon_evaluator_initial;
 }
 
-Evaluator* transcript_evaluators_get_internal(const TranscriptEvaluators *te)
+GtEvaluator* gt_transcript_evaluators_get_internal(const GtTranscriptEvaluators
+                                                   *te)
 {
   assert(te);
   return te->exon_evaluator_internal;
 }
 
-Evaluator* transcript_evaluators_get_terminal(const TranscriptEvaluators *te)
+GtEvaluator* gt_transcript_evaluators_get_terminal(const GtTranscriptEvaluators
+                                                   *te)
 {
   assert(te);
   return te->exon_evaluator_terminal;
 }
 
-void transcript_evaluators_add_actuals(const TranscriptEvaluators *evaluators,
-                                       const TranscriptExons *exons)
+void gt_transcript_evaluators_add_actuals(const GtTranscriptEvaluators
+                                                                *evaluators,
+                                          const GtTranscriptExons *exons)
 {
   assert(evaluators && exons);
-  evaluator_add_actual(evaluators->exon_evaluator_all,
-                       gt_array_size(transcript_exons_get_all(exons)));
-  evaluator_add_actual(evaluators->exon_evaluator_single,
-                       gt_array_size(transcript_exons_get_single(exons)));
-  evaluator_add_actual(evaluators->exon_evaluator_initial,
-                       gt_array_size(transcript_exons_get_initial(exons)));
-  evaluator_add_actual(evaluators->exon_evaluator_internal,
-                       gt_array_size(transcript_exons_get_internal(exons)));
-  evaluator_add_actual(evaluators->exon_evaluator_terminal,
-                       gt_array_size(transcript_exons_get_terminal(exons)));
+  gt_evaluator_add_actual(evaluators->exon_evaluator_all,
+                       gt_array_size(gt_transcript_exons_get_all(exons)));
+  gt_evaluator_add_actual(evaluators->exon_evaluator_single,
+                       gt_array_size(gt_transcript_exons_get_single(exons)));
+  gt_evaluator_add_actual(evaluators->exon_evaluator_initial,
+                       gt_array_size(gt_transcript_exons_get_initial(exons)));
+  gt_evaluator_add_actual(evaluators->exon_evaluator_internal,
+                       gt_array_size(gt_transcript_exons_get_internal(exons)));
+  gt_evaluator_add_actual(evaluators->exon_evaluator_terminal,
+                       gt_array_size(gt_transcript_exons_get_terminal(exons)));
 }
 
-void transcript_evaluators_delete(TranscriptEvaluators *te)
+void gt_transcript_evaluators_delete(GtTranscriptEvaluators *te)
 {
   if (!te) return;
-  evaluator_delete(te->exon_evaluator_all);
-  evaluator_delete(te->exon_evaluator_single);
-  evaluator_delete(te->exon_evaluator_initial);
-  evaluator_delete(te->exon_evaluator_internal);
-  evaluator_delete(te->exon_evaluator_terminal);
+  gt_evaluator_delete(te->exon_evaluator_all);
+  gt_evaluator_delete(te->exon_evaluator_single);
+  gt_evaluator_delete(te->exon_evaluator_initial);
+  gt_evaluator_delete(te->exon_evaluator_internal);
+  gt_evaluator_delete(te->exon_evaluator_terminal);
   gt_free(te);
 }

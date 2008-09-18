@@ -20,14 +20,14 @@
 
 #include "core/dlist.h"
 
-typedef struct TranscriptUsedExons TranscriptUsedExons;
+typedef struct GtTranscriptUsedExons GtTranscriptUsedExons;
 
-TranscriptUsedExons* transcript_used_exons_new(void);
-GtDlist*            transcript_used_exons_get_all(TranscriptUsedExons*);
-GtDlist*            transcript_used_exons_get_single(TranscriptUsedExons*);
-GtDlist*            transcript_used_exons_get_initial(TranscriptUsedExons*);
-GtDlist*            transcript_used_exons_get_internal(TranscriptUsedExons*);
-GtDlist*            transcript_used_exons_get_terminal(TranscriptUsedExons*);
-void                 transcript_used_exons_delete(TranscriptUsedExons*);
+GtTranscriptUsedExons* gt_transcript_used_exons_new(void);
+GtDlist*          gt_transcript_used_exons_get_all(GtTranscriptUsedExons*);
+GtDlist*          gt_transcript_used_exons_get_single(GtTranscriptUsedExons*);
+GtDlist*          gt_transcript_used_exons_get_initial(GtTranscriptUsedExons*);
+GtDlist*          gt_transcript_used_exons_get_internal(GtTranscriptUsedExons*);
+GtDlist*          gt_transcript_used_exons_get_terminal(GtTranscriptUsedExons*);
+void              gt_transcript_used_exons_delete(GtTranscriptUsedExons*);
 
 #endif

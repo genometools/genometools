@@ -21,31 +21,31 @@
 #include "core/array.h"
 
 /* a container class for transcript count arrays */
-typedef struct TranscriptCounts TranscriptCounts;
+typedef struct GtTranscriptCounts GtTranscriptCounts;
 
 /* create an empy container */
-TranscriptCounts* transcript_counts_new(void);
+GtTranscriptCounts* gt_transcript_counts_new(void);
 
 /* return the count array for all exons */
-GtArray*         transcript_counts_get_all(const TranscriptCounts*);
-void              transcript_counts_set_all(TranscriptCounts*, GtArray*);
+GtArray*       gt_transcript_counts_get_all(const GtTranscriptCounts*);
+void           gt_transcript_counts_set_all(GtTranscriptCounts*, GtArray*);
 
 /* return the count array for single exons */
-GtArray*         transcript_counts_get_single(const TranscriptCounts*);
-void              transcript_counts_set_single(TranscriptCounts*, GtArray*);
+GtArray*       gt_transcript_counts_get_single(const GtTranscriptCounts*);
+void           gt_transcript_counts_set_single(GtTranscriptCounts*, GtArray*);
 
 /* return the count array for initial exons */
-GtArray*         transcript_counts_get_initial(const TranscriptCounts*);
-void              transcript_counts_set_initial(TranscriptCounts*, GtArray*);
+GtArray*       gt_transcript_counts_get_initial(const GtTranscriptCounts*);
+void           gt_transcript_counts_set_initial(GtTranscriptCounts*, GtArray*);
 
 /* return the count array for internal exons */
-GtArray*         transcript_counts_get_internal(const TranscriptCounts*);
-void              transcript_counts_set_internal(TranscriptCounts*, GtArray*);
+GtArray*       gt_transcript_counts_get_internal(const GtTranscriptCounts*);
+void           gt_transcript_counts_set_internal(GtTranscriptCounts*, GtArray*);
 
 /* return the count array for terminal exons */
-GtArray*         transcript_counts_get_terminal(const TranscriptCounts*);
-void              transcript_counts_set_terminal(TranscriptCounts*, GtArray*);
+GtArray*       gt_transcript_counts_get_terminal(const GtTranscriptCounts*);
+void           gt_transcript_counts_set_terminal(GtTranscriptCounts*, GtArray*);
 
-void              transcript_counts_delete(TranscriptCounts*);
+void           gt_transcript_counts_delete(GtTranscriptCounts*);
 
 #endif

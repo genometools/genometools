@@ -28,80 +28,81 @@ typedef enum
   leaf
 } VISIT;
 
-typedef void *Keytype;
+typedef void *GtKeytype;
 
-#define Keytypeerror NULL
+#define GtKeytypeerror NULL
 
-typedef struct RBTnode RBTnode;
+typedef struct GtRBTnode GtRBTnode;
 
-typedef int (*Dictcomparefunction) (const Keytype,const Keytype, void *);
-typedef void (*Dictshowelem) (const Keytype,void *);
-typedef int (*Dictaction) (const Keytype,VISIT,unsigned long, void *);
-typedef void (*Freekeyfunction) (const Keytype,void *);
-typedef bool (*Comparewithkey) (const Keytype, void *);
+typedef int (*Dictcomparefunction) (const GtKeytype,const GtKeytype, void *);
+typedef void (*Dictshowelem) (const GtKeytype,void *);
+typedef int (*Dictaction) (const GtKeytype,VISIT,unsigned long, void *);
+typedef void (*Freekeyfunction) (const GtKeytype,void *);
+typedef bool (*Comparewithkey) (const GtKeytype, void *);
 
-Keytype rbt_search (const Keytype key,
+GtKeytype gt_rbt_search (const GtKeytype key,
                     bool *nodecreated,
-                    RBTnode **rootp,
+                    GtRBTnode **rootp,
                     Dictcomparefunction cmpfun,
                     void *cmpinfo);
 
-Keytype rbt_find (const Keytype key,
-                  const RBTnode *root,
+GtKeytype gt_rbt_find (const GtKeytype key,
+                  const GtRBTnode *root,
                   Dictcomparefunction cmpfun,
                   void *cmpinfo);
 
-int rbt_delete (const Keytype key,
-                RBTnode **rootp,
+int gt_rbt_delete (const GtKeytype key,
+                GtRBTnode **rootp,
                 Dictcomparefunction cmpfun,
                 void *cmpinfo);
 
-int rbt_walk (const RBTnode *root,Dictaction action,void *actinfo);
+int gt_rbt_walk (const GtRBTnode *root,Dictaction action,void *actinfo);
 
-int rbt_walkwithstop (const RBTnode *root,Dictaction action,void *actinfo);
+int gt_rbt_walkwithstop (const GtRBTnode *root,Dictaction action,void *actinfo);
 
-int rbt_walkreverseorder (const RBTnode *root,Dictaction action,void *actinfo);
+int gt_rbt_walkreverseorder (const GtRBTnode *root,Dictaction action,
+                             void *actinfo);
 
-Keytype rbt_minimumkey (const RBTnode *root);
+GtKeytype gt_rbt_minimumkey (const GtRBTnode *root);
 
-Keytype rbt_maximumkey (const RBTnode *root);
+GtKeytype gt_rbt_maximumkey (const GtRBTnode *root);
 
-void rbt_treeshape (const RBTnode *root,unsigned long level);
+void gt_rbt_treeshape (const GtRBTnode *root,unsigned long level);
 
-Keytype rbt_previouskey (const Keytype key,
-                         const RBTnode *root,
+GtKeytype gt_rbt_previouskey (const GtKeytype key,
+                         const GtRBTnode *root,
                          Dictcomparefunction cmpfun,
                          void *cmpinfo);
 
-Keytype rbt_previousequalkey (const Keytype key,
-                              const RBTnode *root,
+GtKeytype gt_rbt_previousequalkey (const GtKeytype key,
+                              const GtRBTnode *root,
                               Dictcomparefunction cmpfun,
                               void *cmpinfo);
 
-Keytype rbt_nextkey (const Keytype key,
-                     const RBTnode *root,
+GtKeytype gt_rbt_nextkey (const GtKeytype key,
+                     const GtRBTnode *root,
                      Dictcomparefunction cmpfun,
                      void *cmpinfo);
 
-Keytype rbt_nextequalkey (const Keytype key,
-                          const RBTnode *root,
+GtKeytype gt_rbt_nextequalkey (const GtKeytype key,
+                          const GtRBTnode *root,
                           Dictcomparefunction cmpfun,
                           void *cmpinfo);
 
-void rbt_destroy (bool dofreekey,
+void gt_rbt_destroy (bool dofreekey,
                   Freekeyfunction freekey,
                   void *freeinfo,
-                  RBTnode *root);
+                  GtRBTnode *root);
 
-Keytype rbt_extractrootkey (const RBTnode *root);
+GtKeytype gt_rbt_extractrootkey (const GtRBTnode *root);
 
-int rbt_walkrange (const RBTnode *root,
+int gt_rbt_walkrange (const GtRBTnode *root,
                    Dictaction action,
                    void *actinfo,
                    Comparewithkey greaterequalleft,
                    Comparewithkey lowerequalright,
                    void *cmpinfo);
 
-int rbt_unit_test (GtError *err);
+int gt_rbt_unit_test (GtError *err);
 
 #endif

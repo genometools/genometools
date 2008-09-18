@@ -24,6 +24,6 @@ typedef enum {
   TRANSCRIPT_FEATURE_TYPE_INTERNAL,
   TRANSCRIPT_FEATURE_TYPE_TERMINAL,
   TRANSCRIPT_FEATURE_TYPE_UNDETERMINED
-} TranscriptFeatureType;
+} GtTranscriptFeatureType;
 
 #endif

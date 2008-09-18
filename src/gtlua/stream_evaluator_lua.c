@@ -26,16 +26,16 @@
 
 #define STREAM_EVALUATOR_METATABLE  "GenomeTools.stream_evaluator"
 #define check_stream_evaluator(L) \
-        (StreamEvaluator**) luaL_checkudata(L, 1, STREAM_EVALUATOR_METATABLE)
+        (GtStreamEvaluator**) luaL_checkudata(L, 1, STREAM_EVALUATOR_METATABLE)
 
 static int stream_evaluator_lua_new(lua_State *L)
 {
-  StreamEvaluator **stream_evaluator;
+  GtStreamEvaluator **stream_evaluator;
   GtNodeStream **reality_stream, **prediction_stream;
   reality_stream = check_genome_stream(L, 1);
   prediction_stream = check_genome_stream(L, 2);
-  stream_evaluator = lua_newuserdata(L, sizeof (StreamEvaluator*));
-  *stream_evaluator = stream_evaluator_new(*reality_stream, *prediction_stream,
+  stream_evaluator = lua_newuserdata(L, sizeof (GtStreamEvaluator*));
+  *stream_evaluator = gt_stream_evaluator_new(*reality_stream, *prediction_stream,
                                            true, false, 0);
   luaL_getmetatable(L, STREAM_EVALUATOR_METATABLE);
   lua_setmetatable(L, -2);
@@ -44,7 +44,7 @@ static int stream_evaluator_lua_new(lua_State *L)
 
 static int stream_evaluator_lua_evaluate(lua_State *L)
 {
-  StreamEvaluator **stream_evaluator;
+  GtStreamEvaluator **stream_evaluator;
   GtNodeVisitor **genome_visitor;
   GtError *err;
   stream_evaluator = check_stream_evaluator(L);
@@ -54,7 +54,7 @@ static int stream_evaluator_lua_evaluate(lua_State *L)
   else
     genome_visitor = NULL;
   err = gt_error_new();
-  if (stream_evaluator_evaluate(*stream_evaluator, false, false,
+  if (gt_stream_evaluator_evaluate(*stream_evaluator, false, false,
                                 genome_visitor ? *genome_visitor : NULL, err)) {
     return lua_gt_error(L, err);
   }
@@ -64,21 +64,21 @@ static int stream_evaluator_lua_evaluate(lua_State *L)
 
 static int stream_evaluator_lua_show(lua_State *L)
 {
-  StreamEvaluator **stream_evaluator = check_stream_evaluator(L);
-  stream_evaluator_show(*stream_evaluator, stdout);
+  GtStreamEvaluator **stream_evaluator = check_stream_evaluator(L);
+  gt_stream_evaluator_show(*stream_evaluator, stdout);
   return 0;
 }
 
 static int stream_evaluator_lua_delete(lua_State *L)
 {
-  StreamEvaluator **stream_evaluator;
+  GtStreamEvaluator **stream_evaluator;
   stream_evaluator = check_stream_evaluator(L);
-  stream_evaluator_delete(*stream_evaluator);
+  gt_stream_evaluator_delete(*stream_evaluator);
   return 0;
 }
 
 static const struct luaL_Reg stream_evaluator_lib_f [] = {
-  { "stream_evaluator_new", stream_evaluator_lua_new },
+  { "gt_stream_evaluator_new", stream_evaluator_lua_new },
   { NULL, NULL }
 };
 

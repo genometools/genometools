@@ -20,16 +20,16 @@
 
 #include "extended/node_stream.h"
 
-typedef struct StreamEvaluator StreamEvaluator;
+typedef struct GtStreamEvaluator GtStreamEvaluator;
 
-StreamEvaluator* stream_evaluator_new(GtNodeStream *reality,
+GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reality,
                                       GtNodeStream *prediction, bool nuceval,
                                       bool evalLTR, unsigned long LTRdelta);
 /* if <gv> is not NULL, it visits all nodes from reality and the prediction */
-int              stream_evaluator_evaluate(StreamEvaluator*, bool verbose,
+int              gt_stream_evaluator_evaluate(GtStreamEvaluator*, bool verbose,
                                            bool exondiff, GtNodeVisitor *gv,
                                            GtError*);
-void             stream_evaluator_show(StreamEvaluator*, FILE*);
-void             stream_evaluator_delete(StreamEvaluator*);
+void             gt_stream_evaluator_show(GtStreamEvaluator*, FILE*);
+void             gt_stream_evaluator_delete(GtStreamEvaluator*);
 
 #endif

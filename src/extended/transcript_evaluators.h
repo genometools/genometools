@@ -22,34 +22,34 @@
 #include "extended/transcript_exons.h"
 
 /* a container class for transcript evaluators */
-typedef struct TranscriptEvaluators TranscriptEvaluators;
+typedef struct GtTranscriptEvaluators GtTranscriptEvaluators;
 
-TranscriptEvaluators* transcript_evaluators_new(void);
+GtTranscriptEvaluators* gt_transcript_evaluators_new(void);
 
 /* return the evaluator for all exons */
-Evaluator*            transcript_evaluators_get_all(const
-                                                    TranscriptEvaluators*);
+GtEvaluator*            gt_transcript_evaluators_get_all(const
+                                                    GtTranscriptEvaluators*);
 
 /* return the evaluator for single exons */
-Evaluator*            transcript_evaluators_get_single(const
-                                                       TranscriptEvaluators*);
+GtEvaluator*            gt_transcript_evaluators_get_single(const
+                                                       GtTranscriptEvaluators*);
 
 /* return the evaluator for initial exons */
-Evaluator*            transcript_evaluators_get_initial(const
-                                                        TranscriptEvaluators*);
+GtEvaluator*            gt_transcript_evaluators_get_initial(const
+                                                       GtTranscriptEvaluators*);
 
 /* return the evaluator for internal exons */
-Evaluator*            transcript_evaluators_get_internal(const
-                                                         TranscriptEvaluators*);
+GtEvaluator*            gt_transcript_evaluators_get_internal(const
+                                                       GtTranscriptEvaluators*);
 
 /* return the evaluator for terminal exons */
-Evaluator*            transcript_evaluators_get_terminal(const
-                                                         TranscriptEvaluators*);
+GtEvaluator*            gt_transcript_evaluators_get_terminal(const
+                                                       GtTranscriptEvaluators*);
 
-void                  transcript_evaluators_add_actuals(const
-                                                        TranscriptEvaluators*,
-                                                        const TranscriptExons*);
+void                  gt_transcript_evaluators_add_actuals(const
+                                                        GtTranscriptEvaluators*,
+                                                      const GtTranscriptExons*);
 
-void                  transcript_evaluators_delete(TranscriptEvaluators*);
+void                  gt_transcript_evaluators_delete(GtTranscriptEvaluators*);
 
 #endif

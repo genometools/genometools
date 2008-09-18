@@ -87,7 +87,7 @@ int gt_eval(int argc, const char **argv, GtError *err)
 {
   GtNodeStream *reality_stream,
                *prediction_stream;
-  StreamEvaluator *evaluator;
+  GtStreamEvaluator *evaluator;
   EvalArguments arguments;
   int had_err, parsed_args;
   gt_error_check(err);
@@ -108,20 +108,20 @@ int gt_eval(int argc, const char **argv, GtError *err)
                                                 arguments.verbose);
 
   /* create the stream evaluator */
-  evaluator = stream_evaluator_new(reality_stream, prediction_stream,
+  evaluator = gt_stream_evaluator_new(reality_stream, prediction_stream,
                                    arguments.nuceval, arguments.evalLTR,
                                    arguments.LTRdelta);
 
   /* compute the evaluation */
-  had_err = stream_evaluator_evaluate(evaluator, arguments.verbose,
+  had_err = gt_stream_evaluator_evaluate(evaluator, arguments.verbose,
                                       arguments.exondiff, NULL, err);
 
   /* show the evaluation */
   if (!had_err)
-    stream_evaluator_show(evaluator, stdout);
+    gt_stream_evaluator_show(evaluator, stdout);
 
   /* free */
-  stream_evaluator_delete(evaluator);
+  gt_stream_evaluator_delete(evaluator);
   gt_node_stream_delete(prediction_stream);
   gt_node_stream_delete(reality_stream);
 

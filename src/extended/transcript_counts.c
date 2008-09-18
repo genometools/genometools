@@ -18,7 +18,7 @@
 #include "core/ma.h"
 #include "extended/transcript_counts.h"
 
-struct TranscriptCounts {
+struct GtTranscriptCounts {
   GtArray *exon_array_all,
         *exon_array_single,
         *exon_array_initial,
@@ -26,73 +26,73 @@ struct TranscriptCounts {
         *exon_array_terminal;
 };
 
-TranscriptCounts* transcript_counts_new(void)
+GtTranscriptCounts* gt_transcript_counts_new(void)
 {
-  TranscriptCounts *tc = gt_calloc(1, sizeof (TranscriptCounts));
+  GtTranscriptCounts *tc = gt_calloc(1, sizeof (GtTranscriptCounts));
   return tc;
 }
 
-GtArray* transcript_counts_get_all(const TranscriptCounts *tc)
+GtArray* gt_transcript_counts_get_all(const GtTranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_all;
 }
 
-void transcript_counts_set_all(TranscriptCounts *tc, GtArray *counts)
+void gt_transcript_counts_set_all(GtTranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_all = counts;
 }
 
-GtArray* transcript_counts_get_single(const TranscriptCounts *tc)
+GtArray* gt_transcript_counts_get_single(const GtTranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_single;
 }
 
-void transcript_counts_set_single(TranscriptCounts *tc, GtArray *counts)
+void gt_transcript_counts_set_single(GtTranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_single = counts;
 }
 
-GtArray* transcript_counts_get_initial(const TranscriptCounts *tc)
+GtArray* gt_transcript_counts_get_initial(const GtTranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_initial;
 }
 
-void transcript_counts_set_initial(TranscriptCounts *tc, GtArray *counts)
+void gt_transcript_counts_set_initial(GtTranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_initial = counts;
 }
 
-GtArray* transcript_counts_get_internal(const TranscriptCounts *tc)
+GtArray* gt_transcript_counts_get_internal(const GtTranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_internal;
 }
 
-void transcript_counts_set_internal(TranscriptCounts *tc, GtArray *counts)
+void gt_transcript_counts_set_internal(GtTranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_internal = counts;
 }
 
-GtArray* transcript_counts_get_terminal(const TranscriptCounts *tc)
+GtArray* gt_transcript_counts_get_terminal(const GtTranscriptCounts *tc)
 {
   assert(tc);
   return tc->exon_array_terminal;
 }
 
-void transcript_counts_set_terminal(TranscriptCounts *tc, GtArray *counts)
+void gt_transcript_counts_set_terminal(GtTranscriptCounts *tc, GtArray *counts)
 {
   assert(tc && counts);
   tc->exon_array_terminal = counts;
 }
 
-void transcript_counts_delete(TranscriptCounts *tc)
+void gt_transcript_counts_delete(GtTranscriptCounts *tc)
 {
   if (!tc) return;
   gt_array_delete(tc->exon_array_all);

@@ -165,7 +165,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
   gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
-  gt_hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
+  gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
   gt_hashmap_add(unit_tests, "genome feature class", gt_feature_node_unit_test);
   gt_hashmap_add(unit_tests, "genome node iterator example",
                  gt_genome_node_iterator_example);
@@ -178,7 +178,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "Lua serializer module", lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
-  gt_hashmap_add(unit_tests, "red-black tree class", rbt_unit_test);
+  gt_hashmap_add(unit_tests, "red-black tree class", gt_rbt_unit_test);
   gt_hashmap_add(unit_tests, "safearith module", safearith_unit_test);
   gt_hashmap_add(unit_tests, "safearith example", safearith_example);
   gt_hashmap_add(unit_tests, "splicedseq class", gt_splicedseq_unit_test);
