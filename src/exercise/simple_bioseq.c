@@ -27,7 +27,7 @@ typedef struct {
          *sequence;
 } FastaEntry;
 
-struct SimpleGtBioseq {
+struct GtSimpleBioseq {
   GtArray *entries;
 };
 
@@ -100,9 +100,9 @@ static void parse_fasta_file(GtArray *entries, const char *fasta_file)
   xfclose(fp);
 }
 
-SimpleGtBioseq* simple_gt_bioseq_new(const char *fasta_file)
+GtSimpleBioseq* gt_simple_bioseq_new(const char *fasta_file)
 {
-  SimpleGtBioseq *sbs;
+  GtSimpleBioseq *sbs;
   assert(fasta_file);
   sbs = xmalloc(sizeof *sbs);
   sbs->entries = gt_array_new(sizeof (FastaEntry));
@@ -110,7 +110,7 @@ SimpleGtBioseq* simple_gt_bioseq_new(const char *fasta_file)
   return sbs;
 }
 
-void simple_gt_bioseq_delete(SimpleGtBioseq *sbs)
+void gt_simple_bioseq_delete(GtSimpleBioseq *sbs)
 {
   unsigned long i;
   if (!sbs) return;
@@ -123,7 +123,7 @@ void simple_gt_bioseq_delete(SimpleGtBioseq *sbs)
   free(sbs);
 }
 
-const char* simple_gt_bioseq_get_description(SimpleGtBioseq *sbs,
+const char* gt_simple_bioseq_get_description(GtSimpleBioseq *sbs,
                                           unsigned long index)
 {
   assert(sbs);
@@ -131,7 +131,7 @@ const char* simple_gt_bioseq_get_description(SimpleGtBioseq *sbs,
                     index))->description);
 }
 
-const char* simple_gt_bioseq_get_sequence(SimpleGtBioseq *sbs,
+const char* gt_simple_bioseq_get_sequence(GtSimpleBioseq *sbs,
                                           unsigned long index)
 {
   assert(sbs);
@@ -139,7 +139,7 @@ const char* simple_gt_bioseq_get_sequence(SimpleGtBioseq *sbs,
                                                 index))->sequence);
 }
 
-unsigned long simple_gt_bioseq_get_sequence_length(SimpleGtBioseq *sbs,
+unsigned long gt_simple_bioseq_get_sequence_length(GtSimpleBioseq *sbs,
                                                    unsigned long index)
 {
   assert(sbs);
@@ -147,7 +147,7 @@ unsigned long simple_gt_bioseq_get_sequence_length(SimpleGtBioseq *sbs,
                                                    index))->sequence);
 }
 
-unsigned long simple_gt_bioseq_number_of_sequences(SimpleGtBioseq *sbs)
+unsigned long gt_simple_bioseq_number_of_sequences(GtSimpleBioseq *sbs)
 {
   assert(sbs);
   return gt_array_size(sbs->entries);

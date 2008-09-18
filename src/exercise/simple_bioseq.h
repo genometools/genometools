@@ -27,16 +27,16 @@
    reduced funcionality. It serves mainly educational purposes and should be
    easily understandable.
 */
-typedef struct SimpleGtBioseq SimpleGtBioseq;
+typedef struct GtSimpleBioseq GtSimpleBioseq;
 
-SimpleGtBioseq* simple_gt_bioseq_new(const char *fasta_file);
-void            simple_gt_bioseq_delete(SimpleGtBioseq*);
-const char*     simple_gt_bioseq_get_description(SimpleGtBioseq*,
+GtSimpleBioseq* gt_simple_bioseq_new(const char *fasta_file);
+void            gt_simple_bioseq_delete(GtSimpleBioseq*);
+const char*     gt_simple_bioseq_get_description(GtSimpleBioseq*,
                                                  unsigned long);
-const char*     simple_gt_bioseq_get_sequence(SimpleGtBioseq*,
+const char*     gt_simple_bioseq_get_sequence(GtSimpleBioseq*,
                                               unsigned long index);
-unsigned long   simple_gt_bioseq_get_sequence_length(SimpleGtBioseq*,
+unsigned long   gt_simple_bioseq_get_sequence_length(GtSimpleBioseq*,
                                                      unsigned long);
-unsigned long   simple_gt_bioseq_number_of_sequences(SimpleGtBioseq*);
+unsigned long   gt_simple_bioseq_number_of_sequences(GtSimpleBioseq*);
 
 #endif
