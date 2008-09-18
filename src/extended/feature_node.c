@@ -677,7 +677,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
   GtFeatureNode *feature_node, *fn, *fn_ref;
   GtDlistelem *dlistelem;
   unsigned long i;
-  Hashtable *traversed_nodes = NULL;
+  GtHashtable *traversed_nodes = NULL;
   bool has_node_with_multiple_parents = false;
   int had_err = 0;
 
@@ -730,7 +730,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
     static const HashElemInfo node_hashtype
       = { ht_ptr_elem_hash, { NULL }, sizeof (GtGenomeNode *),
           ht_ptr_elem_cmp, NULL, NULL };
-    traversed_nodes = hashtable_new(node_hashtype);
+    traversed_nodes = gt_hashtable_new(node_hashtype);
   }
 
   while ((depth_first ? gt_array_size(node_stack)
@@ -770,7 +770,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
         child_feature = *(GtGenomeNode**) gt_array_get(list_of_children, i);
       }
       if (!traverse_only_once ||
-          !hashtable_get(traversed_nodes, &child_feature)) {
+          !gt_hashtable_get(traversed_nodes, &child_feature)) {
         /* feature has not been traversed or has to be traversed multiple
            times */
         if (depth_first)
@@ -778,7 +778,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
         else
           gt_queue_add(node_queue, child_feature);
         if (traverse_only_once)
-          hashtable_add(traversed_nodes, &child_feature);
+          gt_hashtable_add(traversed_nodes, &child_feature);
       }
     }
   }
@@ -798,7 +798,7 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
   /* free */
   gt_genome_node_delete(gn_ref);
   if (traverse_only_once)
-    hashtable_delete(traversed_nodes);
+    gt_hashtable_delete(traversed_nodes);
   gt_array_delete(list_of_children);
   gt_array_delete(node_stack);
   gt_queue_delete(node_queue);

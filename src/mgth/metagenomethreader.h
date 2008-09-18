@@ -196,7 +196,7 @@ typedef struct
   GtGenFile *fp_outputfile,
    *fp_blasthit_file,
    *fp_giexp_file;
-  Hashtable *queryhash,
+  GtHashtable *queryhash,
    *hithash,
    *resulthits;
   GtError *err;

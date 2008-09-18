@@ -299,7 +299,7 @@ static void XMLCALL endElement(void *data, const char *name)
         PARSESTRUCT(xml_tag_flag) = SET;
 
         /* Auslesen der Eintrags-Nr aus der Hashtabelle */
-        if ((query_nr_p = cstr_nofree_ulp_hashmap_get(
+        if ((query_nr_p = cstr_nofree_ulp_gt_hashmap_get(
                PARSESTRUCT(queryhash), gt_str_get(PARSESTRUCT(buf_ptr)))))
         {
           query_nr = **query_nr_p;
@@ -517,7 +517,7 @@ static void XMLCALL endElement(void *data, const char *name)
                                      XMLPARSERSTRUCT(hit_counter)));
 
         /* Hit-Hashtabelle enthaelt den konstruierten Eintrag */
-        if ((query_nr_p = cstr_nofree_ulp_hashmap_get(
+        if ((query_nr_p = cstr_nofree_ulp_gt_hashmap_get(
                PARSESTRUCT(hithash), gt_str_get(hit_tmp))))
         {
           /* Positionsbestimmung des Eintrages in der GtBioseq-Struktur */

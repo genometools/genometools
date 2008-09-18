@@ -434,7 +434,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     querynum = gt_calloc(nrofseq, sizeof (unsigned long));
     /* Hash erzeugen - Eintraege: Key - Query-FASTA-Def; Value - Zeiger
        auf deren Indices in der GtBioseq - Struktur */
-    parsestruct.queryhash = cstr_nofree_ulp_hashmap_new();
+    parsestruct.queryhash = cstr_nofree_ulp_gt_hashmap_new();
 
     for (loop_index = 0; loop_index < nrofseq; loop_index++)
     {
@@ -447,8 +447,8 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
       /* Dem aktuellen Schluessel Zeige auf die Position in der GtBioseq
          zuordnen */
-      if (!cstr_nofree_ulp_hashmap_get(parsestruct.queryhash, descr_ptr_query))
-        cstr_nofree_ulp_hashmap_add(parsestruct.queryhash, descr_ptr_query,
+      if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.queryhash, descr_ptr_query))
+        cstr_nofree_ulp_gt_hashmap_add(parsestruct.queryhash, descr_ptr_query,
                                    querynum + loop_index);
     }
 
@@ -464,7 +464,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
       hitnum = gt_calloc(nrofseq, sizeof (unsigned long));
       /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile; Value - Zeiger
          auf deren Indices in der GtBioseq - Struktur */
-      parsestruct.hithash = cstr_nofree_ulp_hashmap_new();
+      parsestruct.hithash = cstr_nofree_ulp_gt_hashmap_new();
 
       /* Hit-Fasta-File zeilenweise abarbeiten */
       for (loop_index = 0; loop_index < nrofseq; loop_index++)
@@ -477,14 +477,14 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
         /* Dem aktuellen Schluessel Zeige auf die Position in der GtBioseq
            zuordnen */
-        if (!cstr_nofree_ulp_hashmap_get(parsestruct.hithash, descr_ptr_hit))
-          cstr_nofree_ulp_hashmap_add(parsestruct.hithash, descr_ptr_hit,
+        if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.hithash, descr_ptr_hit))
+          cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash, descr_ptr_hit,
                                      hitnum + loop_index);
       }
     }
 
     /* Hashtabelle fuer die Statistik anlegen */
-    parsestruct.resulthits = cstr_nofree_ulp_hashmap_new();
+    parsestruct.resulthits = cstr_nofree_ulp_gt_hashmap_new();
 
     /* konstruieren des Output-Filenames aus angegebenen Filename und dem
        angegebenen Format */
@@ -585,7 +585,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
             /* Hash erzeugen - Eintraege: Key - Hit-FASTA-Zeile;
                Value - Zeiger
                auf deren Indices in der GtBioseq - Struktur */
-            parsestruct.hithash = cstr_nofree_ulp_hashmap_new();
+            parsestruct.hithash = cstr_nofree_ulp_gt_hashmap_new();
 
             /* Hit-Fasta-File zeilenweise abarbeiten */
             for (loop_index = 0; loop_index < nrofseq; loop_index++)
@@ -599,9 +599,9 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
              /* Dem aktuellen Schluessel Zeige auf die Position in der GtBioseq
                 zuordnen */
-              if (!cstr_nofree_ulp_hashmap_get(parsestruct.hithash,
+              if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.hithash,
                                               descr_ptr_hit))
-                cstr_nofree_ulp_hashmap_add(parsestruct.hithash, descr_ptr_hit,
+                cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash, descr_ptr_hit,
                                            hitnum + loop_index);
             }
           }
@@ -635,7 +635,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
       /* Ausgeben der verwendeten Hit-Def, in dem die Hashtabelle einmal
          vollstaendig durchlaufen wird */
-      (void) cstr_nofree_ulp_hashmap_foreach(parsestruct.resulthits,
+      (void) cstr_nofree_ulp_gt_hashmap_foreach(parsestruct.resulthits,
                                             printout_hits, &parsestruct, err);
 
       /* Schreiben des Ausgabe-Footers */
@@ -676,11 +676,11 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     gt_genfile_close(fp_xmlfile);
     gt_genfile_close(parsestruct.fp_outputfile);
 
-    /* Hashtable loeschen */
-    hashtable_delete(parsestruct.queryhash);
-    hashtable_delete(parsestruct.resulthits);
+    /* GtHashtable loeschen */
+    gt_hashtable_delete(parsestruct.queryhash);
+    gt_hashtable_delete(parsestruct.resulthits);
 
-    hashtable_delete(parsestruct.hithash);
+    gt_hashtable_delete(parsestruct.hithash);
     gt_bioseq_delete(parsestruct.hitseq);
     gt_free(hitnum);
 

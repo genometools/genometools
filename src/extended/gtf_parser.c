@@ -35,7 +35,7 @@
 #define TRANSCRIPT_NAME_ATTRIBUTE "transcript_name"
 
 struct GTF_parser {
-  Hashmap *sequence_region_to_range, /* map from sequence regions to ranges */
+  GtHashmap *sequence_region_to_range, /* map from sequence regions to ranges */
           *gene_id_hash, /* map from gene_id to transcript_id hash */
           *seqid_to_str_mapping,
           *source_to_str_mapping,
@@ -47,7 +47,7 @@ struct GTF_parser {
 typedef struct {
   GtQueue *genome_nodes;
   GtArray *mRNAs;
-  Hashmap *gene_id_to_name_mapping,
+  GtHashmap *gene_id_to_name_mapping,
           *transcript_id_to_name_mapping;
 } ConstructionInfo;
 
@@ -86,17 +86,17 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 GTF_parser* gtf_parser_new(GT_TypeChecker *type_checker)
 {
   GTF_parser *parser = gt_malloc(sizeof (GTF_parser));
-  parser->sequence_region_to_range = hashmap_new(HASH_STRING,
+  parser->sequence_region_to_range = gt_hashmap_new(HASH_STRING,
                                                  gt_free_func, gt_free_func);
-  parser->gene_id_hash = hashmap_new(HASH_STRING, gt_free_func,
-                                     (GtFree) hashmap_delete);
-  parser->seqid_to_str_mapping = hashmap_new(HASH_STRING, NULL,
+  parser->gene_id_hash = gt_hashmap_new(HASH_STRING, gt_free_func,
+                                     (GtFree) gt_hashmap_delete);
+  parser->seqid_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
                                              (GtFree) gt_str_delete);
-  parser->source_to_str_mapping = hashmap_new(HASH_STRING, NULL,
+  parser->source_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
                                               (GtFree) gt_str_delete);
-  parser->gene_id_to_name_mapping = hashmap_new(HASH_STRING, gt_free_func,
+  parser->gene_id_to_name_mapping = gt_hashmap_new(HASH_STRING, gt_free_func,
                                                 gt_free_func);
-  parser->transcript_id_to_name_mapping = hashmap_new(HASH_STRING, gt_free_func,
+  parser->transcript_id_to_name_mapping = gt_hashmap_new(HASH_STRING, gt_free_func,
                                                       gt_free_func);
   parser->type_checker = type_checker;
   return parser;
@@ -165,7 +165,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
     mRNA_node = gt_feature_node_new(mRNA_seqid, gft_mRNA, mRNA_range.start,
                                       mRNA_range.end, mRNA_strand);
 
-    if ((tname = hashmap_get(cinfo->transcript_id_to_name_mapping,
+    if ((tname = gt_hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key))) {
       gt_feature_node_add_attribute((GtFeatureNode*) mRNA_node, "Name",
                                       tname);
@@ -188,7 +188,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
 static int construct_genes(GT_UNUSED void *key, void *value, void *data,
                            GtError *err)
 {
-  Hashmap *transcript_id_hash = (Hashmap*) value;
+  GtHashmap *transcript_id_hash = (GtHashmap*) value;
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
   GtQueue *genome_nodes = cinfo->genome_nodes;
   const char *gname;
@@ -203,7 +203,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   gt_error_check(err);
   gt_assert(key && value && data);
   cinfo->mRNAs = mRNAs;
-  had_err = hashmap_foreach(transcript_id_hash, construct_mRNAs, cinfo, err);
+  had_err = gt_hashmap_foreach(transcript_id_hash, construct_mRNAs, cinfo, err);
   if (!had_err) {
     gt_assert(gt_array_size(mRNAs)); /* at least one mRNA constructed */
 
@@ -223,7 +223,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
     gene_node = gt_feature_node_new(gene_seqid, gft_gene, gene_range.start,
                                       gene_range.end, gene_strand);
 
-    if ((gname = hashmap_get(cinfo->gene_id_to_name_mapping,
+    if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key))) {
       gt_feature_node_add_attribute((GtFeatureNode*) gene_node, "Name",
                                       gname);
@@ -275,7 +275,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
        *transcript_id,
        *transcript_name = NULL,
        **tokens;
-  Hashmap *transcript_id_hash; /* map from transcript id to array of genome
+  GtHashmap *transcript_id_hash; /* map from transcript id to array of genome
                                     nodes */
   GtArray *gt_genome_node_array;
   ConstructionInfo cinfo;
@@ -376,7 +376,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
-      if ((rangeptr = hashmap_get(parser->sequence_region_to_range, seqname))) {
+      if ((rangeptr = gt_hashmap_get(parser->sequence_region_to_range, seqname))) {
         /* sequence region is already defined -> update range */
         *rangeptr = gt_range_join(range, *rangeptr);
       }
@@ -384,7 +384,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
         /* sequence region is not already defined -> define it */
         rangeptr = gt_malloc(sizeof (GtRange));
         *rangeptr = range;
-        hashmap_add(parser->sequence_region_to_range, gt_cstr_dup(seqname),
+        gt_hashmap_add(parser->sequence_region_to_range, gt_cstr_dup(seqname),
                     rangeptr);
       }
 
@@ -483,42 +483,42 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
       HANDLE_ERROR;
 
       /* process the mandatory attributes */
-      if (!(transcript_id_hash = hashmap_get(parser->gene_id_hash,
+      if (!(transcript_id_hash = gt_hashmap_get(parser->gene_id_hash,
                                              gene_id))) {
-        transcript_id_hash = hashmap_new(HASH_STRING, gt_free_func,
+        transcript_id_hash = gt_hashmap_new(HASH_STRING, gt_free_func,
                                          (GtFree) gt_array_delete);
-        hashmap_add(parser->gene_id_hash, gt_cstr_dup(gene_id),
+        gt_hashmap_add(parser->gene_id_hash, gt_cstr_dup(gene_id),
                     transcript_id_hash);
       }
       gt_assert(transcript_id_hash);
 
-      if (!(gt_genome_node_array = hashmap_get(transcript_id_hash,
+      if (!(gt_genome_node_array = gt_hashmap_get(transcript_id_hash,
                                             transcript_id))) {
         gt_genome_node_array = gt_array_new(sizeof (GtGenomeNode*));
-        hashmap_add(transcript_id_hash, gt_cstr_dup(transcript_id),
+        gt_hashmap_add(transcript_id_hash, gt_cstr_dup(transcript_id),
                     gt_genome_node_array);
       }
       gt_assert(gt_genome_node_array);
 
       /* save optional gene_name and transcript_name attributes */
-      if (transcript_name && !hashmap_get(parser->transcript_id_to_name_mapping,
+      if (transcript_name && !gt_hashmap_get(parser->transcript_id_to_name_mapping,
                              transcript_id)) {
-        hashmap_add(parser->transcript_id_to_name_mapping,
+        gt_hashmap_add(parser->transcript_id_to_name_mapping,
                     gt_cstr_dup(transcript_id),
                     gt_cstr_dup(transcript_name));
       }
-      if (gene_name && !hashmap_get(parser->gene_id_to_name_mapping,
+      if (gene_name && !gt_hashmap_get(parser->gene_id_to_name_mapping,
                                     gene_id)) {
-        hashmap_add(parser->gene_id_to_name_mapping,
+        gt_hashmap_add(parser->gene_id_to_name_mapping,
                     gt_cstr_dup(gene_id),
                     gt_cstr_dup(gene_name));
       }
 
       /* get seqid */
-      seqid_str = hashmap_get(parser->seqid_to_str_mapping, seqname);
+      seqid_str = gt_hashmap_get(parser->seqid_to_str_mapping, seqname);
       if (!seqid_str) {
         seqid_str = gt_str_new_cstr(seqname);
-        hashmap_add(parser->seqid_to_str_mapping, gt_str_get(seqid_str),
+        gt_hashmap_add(parser->seqid_to_str_mapping, gt_str_get(seqid_str),
                     seqid_str);
       }
       gt_assert(seqid_str);
@@ -529,10 +529,10 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
       gt_genome_node_set_origin(gn, filenamestr, line_number);
 
       /* set source */
-      source_str = hashmap_get(parser->source_to_str_mapping, source);
+      source_str = gt_hashmap_get(parser->source_to_str_mapping, source);
       if (!source_str) {
         source_str = gt_str_new_cstr(source);
-        hashmap_add(parser->source_to_str_mapping, gt_str_get(source_str),
+        gt_hashmap_add(parser->source_to_str_mapping, gt_str_get(source_str),
                     source_str);
       }
       gt_assert(source_str);
@@ -550,7 +550,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
 
   /* process all comments features */
   if (!had_err) {
-    had_err = hashmap_foreach(parser->sequence_region_to_range,
+    had_err = gt_hashmap_foreach(parser->sequence_region_to_range,
                               construct_sequence_regions, genome_nodes, NULL);
     gt_assert(!had_err); /* construct_sequence_regions() is sane */
   }
@@ -560,7 +560,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
   cinfo.gene_id_to_name_mapping = parser->gene_id_to_name_mapping;
   cinfo.transcript_id_to_name_mapping = parser->transcript_id_to_name_mapping;
   if (!had_err) {
-    had_err = hashmap_foreach(parser->gene_id_hash, construct_genes,
+    had_err = gt_hashmap_foreach(parser->gene_id_hash, construct_genes,
                               &cinfo, err);
   }
 
@@ -575,11 +575,11 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
 void gtf_parser_delete(GTF_parser *parser)
 {
   if (!parser) return;
-  hashmap_delete(parser->sequence_region_to_range);
-  hashmap_delete(parser->gene_id_hash);
-  hashmap_delete(parser->seqid_to_str_mapping);
-  hashmap_delete(parser->source_to_str_mapping);
-  hashmap_delete(parser->transcript_id_to_name_mapping);
-  hashmap_delete(parser->gene_id_to_name_mapping);
+  gt_hashmap_delete(parser->sequence_region_to_range);
+  gt_hashmap_delete(parser->gene_id_hash);
+  gt_hashmap_delete(parser->seqid_to_str_mapping);
+  gt_hashmap_delete(parser->source_to_str_mapping);
+  gt_hashmap_delete(parser->transcript_id_to_name_mapping);
+  gt_hashmap_delete(parser->gene_id_to_name_mapping);
   gt_free(parser);
 }

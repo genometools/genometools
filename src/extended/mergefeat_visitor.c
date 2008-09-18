@@ -25,7 +25,7 @@
 struct MergefeatVisitor {
   const GtNodeVisitor parent_instance;
   GtGenomeNode *current_tree;
-  Hashmap *hm; /* type -> previous node */
+  GtHashmap *hm; /* type -> previous node */
   GtArray *nodes_to_remove;
 };
 
@@ -36,7 +36,7 @@ static void mergefeat_visitor_free(GtNodeVisitor *gv)
 {
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   assert(mergefeat_visitor);
-  hashmap_delete(mergefeat_visitor->hm);
+  gt_hashmap_delete(mergefeat_visitor->hm);
   gt_array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
@@ -50,7 +50,7 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
   current_feature = gt_genome_node_cast(gt_feature_node_class(), gn);
   assert(current_feature);
   if ((previous_feature =
-        hashmap_get(v->hm, gt_feature_node_get_type(current_feature)))) {
+        gt_hashmap_get(v->hm, gt_feature_node_get_type(current_feature)))) {
     /* previous feature found -> check if merging is necessary */
     assert(gt_feature_node_get_type(previous_feature) ==
            gt_feature_node_get_type(current_feature));
@@ -68,10 +68,10 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
       gt_array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */
-    hashmap_remove(v->hm, gt_feature_node_get_type(previous_feature));
+    gt_hashmap_remove(v->hm, gt_feature_node_get_type(previous_feature));
   }
   /* add current feature */
-  hashmap_add(v->hm, (char*) gt_feature_node_get_type(current_feature),
+  gt_hashmap_add(v->hm, (char*) gt_feature_node_get_type(current_feature),
               current_feature);
   return 0;
 }
@@ -84,7 +84,7 @@ static int mergefeat_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
   assert(gf);
   v->current_tree = gn;
-  hashmap_reset(v->hm);
+  gt_hashmap_reset(v->hm);
   return gt_genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
                                               err);
 }
@@ -126,7 +126,7 @@ GtNodeVisitor* mergefeat_visitor_new(void)
 {
   GtNodeVisitor *gv = gt_node_visitor_create(mergefeat_visitor_class());
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
-  mergefeat_visitor->hm = hashmap_new(HASH_STRING, NULL, NULL);
+  mergefeat_visitor->hm = gt_hashmap_new(HASH_STRING, NULL, NULL);
   mergefeat_visitor->nodes_to_remove = gt_array_new(sizeof (GtGenomeNode*));
   return gv;
 }

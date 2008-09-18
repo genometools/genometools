@@ -40,7 +40,7 @@ struct StreamEvaluator {
                *prediction;
   bool nuceval, evalLTR;
   unsigned long LTRdelta;
-  Hashmap *slots; /* sequence id -> slot */
+  GtHashmap *slots; /* sequence id -> slot */
   Evaluator *gene_evaluator,
             *mRNA_evaluator,
             *LTR_evaluator;
@@ -236,7 +236,7 @@ StreamEvaluator* stream_evaluator_new(GtNodeStream *reality,
   evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
-  evaluator->slots = hashmap_new(HASH_STRING, gt_free_func,
+  evaluator->slots = gt_hashmap_new(HASH_STRING, gt_free_func,
                                  (GtFree) slot_delete);
   evaluator->gene_evaluator = evaluator_new();
   evaluator->mRNA_evaluator = evaluator_new();
@@ -1286,11 +1286,11 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   while (!(had_err = gt_node_stream_next(se->reality, &gn, err)) && gn) {
     if (gt_region_node_try_cast(gn)) {
       /* each sequence region gets its own ``slot'' */
-      if (!(slot = hashmap_get(se->slots,
+      if (!(slot = gt_hashmap_get(se->slots,
                                gt_str_get(gt_genome_node_get_seqid(gn)))))
       {
         slot = slot_new(se->nuceval, gt_genome_node_get_range(gn));
-        hashmap_add(se->slots,
+        gt_hashmap_add(se->slots,
                     gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))),
                     slot);
       }
@@ -1299,7 +1299,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     /* we consider only genome features */
     if ((gf = gt_feature_node_try_cast(gn))) {
       /* each sequence must have its own ``slot'' at this point */
-      slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
+      slot = gt_hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
       assert(slot);
       /* store the exons */
       real_info.slot = slot;
@@ -1316,7 +1316,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* set the actuals and sort them */
   if (!had_err) {
-    had_err = hashmap_foreach(se->slots, set_actuals_and_sort_them, se, NULL);
+    had_err = gt_hashmap_foreach(se->slots, set_actuals_and_sort_them, se, NULL);
     assert(!had_err); /* set_actuals_and_sort_them() is sane */
   }
 
@@ -1327,7 +1327,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       /* we consider only genome features */
       if ((gf = gt_feature_node_try_cast(gn))) {
         /* get (real) slot */
-        slot = hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
+        slot = gt_hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
         if (slot) {
           predicted_info.slot = slot;
           gt_feature_node_determine_transcripttypes(gf);
@@ -1351,13 +1351,13 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* determine the missing mRNAs */
   if (!had_err) {
-    had_err = hashmap_foreach(se->slots, determine_missing_features, se, NULL);
+    had_err = gt_hashmap_foreach(se->slots, determine_missing_features, se, NULL);
     assert(!had_err); /* determine_missing_features() is sane */
   }
 
   /* compute the nucleotides values */
   if (!had_err && se->nuceval) {
-    had_err = hashmap_foreach(se->slots, compute_nucleotides_values, se, NULL);
+    had_err = gt_hashmap_foreach(se->slots, compute_nucleotides_values, se, NULL);
     assert(!had_err); /* compute_nucleotides_values() is sane */
   }
 
@@ -1498,7 +1498,7 @@ void stream_evaluator_delete(StreamEvaluator *se)
   if (!se) return;
   gt_node_stream_delete(se->reality);
   gt_node_stream_delete(se->prediction);
-  hashmap_delete(se->slots);
+  gt_hashmap_delete(se->slots);
   evaluator_delete(se->gene_evaluator);
   evaluator_delete(se->mRNA_evaluator);
   evaluator_delete(se->LTR_evaluator);

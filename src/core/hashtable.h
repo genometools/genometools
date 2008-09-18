@@ -24,7 +24,7 @@
 #include "core/error.h"
 #include "core/fptr_api.h"
 
-typedef struct Hashtable Hashtable;
+typedef struct GtHashtable GtHashtable;
 
 enum iterator_op
 {
@@ -57,47 +57,47 @@ struct HashElemInfo
   GtCompare cmp;
   void *table_data;             /**< per table data, passed to
                                  * free_elem_with_data */
-  GtFree table_data_free;     /**< called on hashtable_delete with
+  GtFree table_data_free;     /**< called on gt_hashtable_delete with
                                      * table_data as argument if != NULL */
 };
 
 typedef struct HashElemInfo HashElemInfo;
 
-extern Hashtable *
-hashtable_new(HashElemInfo);
-extern Hashtable *
-hashtable_new_with_start_size(HashElemInfo htype, unsigned short size_log);
-void*      hashtable_get(Hashtable*, const void *elem);
+extern GtHashtable *
+gt_hashtable_new(HashElemInfo);
+extern GtHashtable *
+gt_hashtable_new_with_start_size(HashElemInfo htype, unsigned short size_log);
+void*      gt_hashtable_get(GtHashtable*, const void *elem);
 /**
  * @return 1 if add succeeded, 0 if elem is already in table.
  */
-int        hashtable_add(Hashtable*, const void *elem);
-int        hashtable_remove(Hashtable*, const void *elem);
+int        gt_hashtable_add(GtHashtable*, const void *elem);
+int        gt_hashtable_remove(GtHashtable*, const void *elem);
 /**
  * @brief iterate over the hashtable in key order given by compare
  * function <cmp>
  * @return 0 => no error, -1 => error occured
  */
 extern int
-hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
+gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
                           GtCompare cmp, GtError *err);
 /**
  * @brief iterate over the hashtable in implementation-defined order
  * @return 0 => no error, -1 => error occured
  */
 extern int
-hashtable_foreach(Hashtable *ht, Elemvisitfunc iter, void *data,
+gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc iter, void *data,
                   GtError *err);
 /* iterate over the hashtable in default order. Requires that the hashtable
    was constructed with an ordering compare function. */
 extern int
-hashtable_foreach_in_default_order(Hashtable*, Elemvisitfunc, void *data,
+gt_hashtable_foreach_in_default_order(GtHashtable*, Elemvisitfunc, void *data,
                                    GtError *err);
 size_t
-hashtable_fill(Hashtable *);
-void       hashtable_reset(Hashtable*);
-int        hashtable_unit_test(GtError*);
-void       hashtable_delete(Hashtable*);
+gt_hashtable_fill(GtHashtable *);
+void       gt_hashtable_reset(GtHashtable*);
+int        gt_hashtable_unit_test(GtError*);
+void       gt_hashtable_delete(GtHashtable*);
 
 /*
  * helper functions for users constructing their own HashElemInfos

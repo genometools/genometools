@@ -104,7 +104,7 @@ static int obo_header_validate(OBOHeader *obo_header, const char *obo_file_name,
 
 typedef struct {
   char *type;
-  Hashmap *content;
+  GtHashmap *content;
   unsigned long line;
   GtStr *filename;
 } OBOStanza;
@@ -114,7 +114,7 @@ static OBOStanza* obo_stanza_new(const char *type, unsigned long line,
 {
   OBOStanza *obo_stanza = gt_malloc(sizeof *obo_stanza);
   obo_stanza->type = gt_cstr_dup(type);
-  obo_stanza->content = hashmap_new(HASH_STRING, gt_free_func, gt_free_func);
+  obo_stanza->content = gt_hashmap_new(HASH_STRING, gt_free_func, gt_free_func);
   obo_stanza->line = line;
   obo_stanza->filename = gt_str_ref(filename);
   return obo_stanza;
@@ -124,7 +124,7 @@ static void obo_stanza_delete(OBOStanza *obo_stanza)
 {
   if (!obo_stanza) return;
   gt_str_delete(obo_stanza->filename);
-  hashmap_delete(obo_stanza->content);
+  gt_hashmap_delete(obo_stanza->content);
   gt_free(obo_stanza->type);
   gt_free(obo_stanza);
 }
@@ -134,8 +134,8 @@ static void obo_stanza_add(OBOStanza *obo_stanza,
 {
   assert(obo_stanza && tag && value);
   /* XXX: currently duplicate tags are silently skipped */
-  if (!hashmap_get(obo_stanza->content, tag))
-    hashmap_add(obo_stanza->content, gt_cstr_dup(tag), gt_cstr_dup(value));
+  if (!gt_hashmap_get(obo_stanza->content, tag))
+    gt_hashmap_add(obo_stanza->content, gt_cstr_dup(tag), gt_cstr_dup(value));
 }
 
 static const char* obo_stanza_get_type(const OBOStanza *obo_stanza)
@@ -148,7 +148,7 @@ static const char* obo_stanza_get_value(const OBOStanza *obo_stanza,
                                         const char *stanza_key)
 {
   assert(obo_stanza);
-  return hashmap_get(obo_stanza->content, stanza_key);
+  return gt_hashmap_get(obo_stanza->content, stanza_key);
 }
 
 struct OBOParseTree {

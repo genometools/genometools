@@ -20,8 +20,8 @@
 #include "core/error.h"
 #include "core/fptr_api.h"
 
-#ifndef Hashmap
-typedef struct Hashmap Hashmap;
+#ifndef GtHashmap
+typedef struct GtHashmap GtHashmap;
 #endif
 
 typedef enum {
@@ -31,23 +31,23 @@ typedef enum {
 
 typedef int (*Mapentryvisitfunc)(void *key, void *value, void *data, GtError*);
 
-Hashmap*   hashmap_new(HashType, GtFree keyfree, GtFree valuefree);
-void*      hashmap_get(Hashmap*, const void*);
-void       hashmap_add(Hashmap*, void*, void*);
-void       hashmap_remove(Hashmap*, const void*);
+GtHashmap*   gt_hashmap_new(HashType, GtFree keyfree, GtFree valuefree);
+void*      gt_hashmap_get(GtHashmap*, const void*);
+void       gt_hashmap_add(GtHashmap*, void*, void*);
+void       gt_hashmap_remove(GtHashmap*, const void*);
 /* iterate over the hashmap in key order given by compare function <cmp> */
-int        hashmap_foreach_ordered(Hashmap*, Mapentryvisitfunc, void *data,
+int        gt_hashmap_foreach_ordered(GtHashmap*, Mapentryvisitfunc, void *data,
                                      GtCompare cmp, GtError*);
-int        hashmap_foreach(Hashmap*, Mapentryvisitfunc, void*, GtError*);
+int        gt_hashmap_foreach(GtHashmap*, Mapentryvisitfunc, void*, GtError*);
 /* iterate over the hashmap elements in
  * - alphabetical order, requires that HashType was specified as HASH_STRING
  * or
  * - numerical order if the HashType was specified as HASH_DIRECT
  */
-int        hashmap_foreach_in_key_order(Hashmap*, Mapentryvisitfunc,
+int        gt_hashmap_foreach_in_key_order(GtHashmap*, Mapentryvisitfunc,
                                         void*, GtError*);
-void       hashmap_reset(Hashmap*);
-int        hashmap_unit_test(GtError*);
-void       hashmap_delete(Hashmap*);
+void       gt_hashmap_reset(GtHashmap*);
+int        gt_hashmap_unit_test(GtError*);
+void       gt_hashmap_delete(GtHashmap*);
 
 #endif

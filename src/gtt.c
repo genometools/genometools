@@ -144,60 +144,60 @@ GtToolbox* gtt_tools(void)
   return tools;
 }
 
-Hashmap* gtt_unit_tests(void)
+GtHashmap* gtt_unit_tests(void)
 {
-  Hashmap *unit_tests = hashmap_new(HASH_STRING, NULL, NULL);
+  GtHashmap *unit_tests = gt_hashmap_new(HASH_STRING, NULL, NULL);
 
   /* add unit tests */
-  hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
-  hashmap_add(unit_tests, "array class", gt_array_unit_test);
-  hashmap_add(unit_tests, "array example", gt_array_example);
-  hashmap_add(unit_tests, "array2dim example", gt_array2dim_example);
-  hashmap_add(unit_tests, "basename module", gt_basename_unit_test);
-  hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
-  hashmap_add(unit_tests, "bit pack string module", bitPackString_unit_test);
-  hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
-  hashmap_add(unit_tests, "bittab example", gt_bittab_example);
-  hashmap_add(unit_tests, "bsearch module", gt_bsearch_unit_test);
-  hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
-  hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
-  hashmap_add(unit_tests, "disc distri class", disc_distri_unit_test);
-  hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
-  hashmap_add(unit_tests, "dlist example", gt_dlist_example);
-  hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
-  hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
-  hashmap_add(unit_tests, "genome feature class", gt_feature_node_unit_test);
-  hashmap_add(unit_tests, "genome node iterator example",
+  gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
+  gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);
+  gt_hashmap_add(unit_tests, "array example", gt_array_example);
+  gt_hashmap_add(unit_tests, "array2dim example", gt_array2dim_example);
+  gt_hashmap_add(unit_tests, "basename module", gt_basename_unit_test);
+  gt_hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
+  gt_hashmap_add(unit_tests, "bit pack string module", bitPackString_unit_test);
+  gt_hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
+  gt_hashmap_add(unit_tests, "bittab example", gt_bittab_example);
+  gt_hashmap_add(unit_tests, "bsearch module", gt_bsearch_unit_test);
+  gt_hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
+  gt_hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
+  gt_hashmap_add(unit_tests, "disc distri class", disc_distri_unit_test);
+  gt_hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
+  gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
+  gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
+  gt_hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
+  gt_hashmap_add(unit_tests, "genome feature class", gt_feature_node_unit_test);
+  gt_hashmap_add(unit_tests, "genome node iterator example",
               gt_genome_node_iterator_example);
-  hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
-  hashmap_add(unit_tests, "grep module", gt_grep_unit_test);
-  hashmap_add(unit_tests, "hashmap class", hashmap_unit_test);
-  hashmap_add(unit_tests, "hashtable class", hashtable_unit_test);
-  hashmap_add(unit_tests, "hmm class", gt_hmm_unit_test);
-  hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
-  hashmap_add(unit_tests, "Lua serializer module", lua_serializer_unit_test);
-  hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
-  hashmap_add(unit_tests, "range class", gt_range_unit_test);
-  hashmap_add(unit_tests, "red-black tree class", rbt_unit_test);
-  hashmap_add(unit_tests, "safearith module", safearith_unit_test);
-  hashmap_add(unit_tests, "safearith example", safearith_example);
-  hashmap_add(unit_tests, "splicedseq class", splicedseq_unit_test);
-  hashmap_add(unit_tests, "splitter class", splitter_unit_test);
-  hashmap_add(unit_tests, "string class", gt_str_unit_test);
-  hashmap_add(unit_tests, "string matching module", string_matching_unit_test);
-  hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
-  hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
-  hashmap_add(unit_tests, "union find class", union_find_unit_test);
+  gt_hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
+  gt_hashmap_add(unit_tests, "grep module", gt_grep_unit_test);
+  gt_hashmap_add(unit_tests, "hashmap class", gt_hashmap_unit_test);
+  gt_hashmap_add(unit_tests, "hashtable class", gt_hashtable_unit_test);
+  gt_hashmap_add(unit_tests, "hmm class", gt_hmm_unit_test);
+  gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
+  gt_hashmap_add(unit_tests, "Lua serializer module", lua_serializer_unit_test);
+  gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
+  gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
+  gt_hashmap_add(unit_tests, "red-black tree class", rbt_unit_test);
+  gt_hashmap_add(unit_tests, "safearith module", safearith_unit_test);
+  gt_hashmap_add(unit_tests, "safearith example", safearith_example);
+  gt_hashmap_add(unit_tests, "splicedseq class", splicedseq_unit_test);
+  gt_hashmap_add(unit_tests, "splitter class", splitter_unit_test);
+  gt_hashmap_add(unit_tests, "string class", gt_str_unit_test);
+  gt_hashmap_add(unit_tests, "string matching module", string_matching_unit_test);
+  gt_hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
+  gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
+  gt_hashmap_add(unit_tests, "union find class", union_find_unit_test);
 #ifndef WITHOUT_CAIRO
-  hashmap_add(unit_tests, "block class", gt_block_unit_test);
-  hashmap_add(unit_tests, "style class", gt_style_unit_test);
-  hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
-  hashmap_add(unit_tests, "element class", gt_element_unit_test);
-  hashmap_add(unit_tests, "memory feature index class",
+  gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
+  gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);
+  gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
+  gt_hashmap_add(unit_tests, "element class", gt_element_unit_test);
+  gt_hashmap_add(unit_tests, "memory feature index class",
               gt_feature_index_memory_unit_test);
-  hashmap_add(unit_tests, "imageinfo class", gt_image_info_unit_test);
-  hashmap_add(unit_tests, "line class", gt_line_unit_test);
-  hashmap_add(unit_tests, "track class", gt_track_unit_test);
+  gt_hashmap_add(unit_tests, "imageinfo class", gt_image_info_unit_test);
+  gt_hashmap_add(unit_tests, "line class", gt_line_unit_test);
+  gt_hashmap_add(unit_tests, "track class", gt_track_unit_test);
 #endif
 
   return unit_tests;

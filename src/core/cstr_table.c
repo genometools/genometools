@@ -22,7 +22,7 @@
 #include "core/ma.h"
 
 struct GtCstrTable {
-  Hashtable *strings;
+  GtHashtable *strings;
 };
 
 static void free_gt_cstr_table_entry(void *cstr_entry)
@@ -36,14 +36,14 @@ GtCstrTable* gt_cstr_table_new()
     ht_cstr_elem_hash, { free_gt_cstr_table_entry }, sizeof (char*),
     ht_cstr_elem_cmp, NULL, NULL };
   GtCstrTable *table = gt_malloc(sizeof *table);
-  table->strings = hashtable_new(cstr_table);
+  table->strings = gt_hashtable_new(cstr_table);
   return table;
 }
 
 void gt_cstr_table_delete(GtCstrTable *table)
 {
   if (!table) return;
-  hashtable_delete(table->strings);
+  gt_hashtable_delete(table->strings);
   gt_free(table);
 }
 
@@ -54,7 +54,7 @@ void gt_cstr_table_add(GtCstrTable *table, const char *cstr)
   assert(table && cstr);
   assert(!gt_cstr_table_get(table, cstr));
   dup = gt_cstr_dup(cstr);
-  rval = hashtable_add(table->strings, &dup);
+  rval = gt_hashtable_add(table->strings, &dup);
   assert(rval == 1);
 }
 
@@ -62,7 +62,7 @@ const char* gt_cstr_table_get(const GtCstrTable *table, const char *cstr)
 {
   const char **entry;
   assert(table && cstr);
-  entry = hashtable_get(table->strings, &cstr);
+  entry = gt_hashtable_get(table->strings, &cstr);
   return entry ? *entry : NULL;
 }
 
@@ -82,7 +82,7 @@ GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
   GtStrArray *cstrs;
   assert(table);
   cstrs = gt_strarray_new();
-  had_err = hashtable_foreach_ordered(table->strings, store_type, cstrs,
+  had_err = gt_hashtable_foreach_ordered(table->strings, store_type, cstrs,
                                       (GtCompare) strcmp, NULL);
   assert(!had_err);
   return cstrs;

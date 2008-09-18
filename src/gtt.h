@@ -28,6 +28,6 @@ GtToolbox* gtt_tools(void);      /* return all GenomeTools tools */
 
 typedef int  (*UnitTestFunc)(GtError *);
 
-Hashmap* gtt_unit_tests(void); /* return all GenomeTools unit tests */
+GtHashmap* gtt_unit_tests(void); /* return all GenomeTools unit tests */
 
 #endif

@@ -40,7 +40,7 @@
 
 struct GT_GFF3Parser {
   FeatureInfo *feature_info;
-  Hashmap *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
+  GtHashmap *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
     *source_to_str_mapping,
     *undefined_sequence_regions; /* contains all (automatically created)
                                   * sequence regions */
@@ -112,11 +112,11 @@ GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker *type_checker)
   GT_GFF3Parser *parser;
   parser = gt_malloc(sizeof *parser);
   parser->feature_info = feature_info_new();
-  parser->seqid_to_ssr_mapping = hashmap_new(
+  parser->seqid_to_ssr_mapping = gt_hashmap_new(
     HASH_STRING, NULL, (GtFree) simple_sequence_region_delete);
-  parser->source_to_str_mapping = hashmap_new(HASH_STRING, NULL,
+  parser->source_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
                                               (GtFree) gt_str_delete);
-  parser->undefined_sequence_regions = hashmap_new(
+  parser->undefined_sequence_regions = gt_hashmap_new(
     HASH_STRING, NULL, (GtFree) automatic_sequence_region_delete);
   parser->incomplete_node = false;
   parser->checkids = checkids;
@@ -270,11 +270,11 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
 
   gt_error_check(err);
 
-  ssr = hashmap_get(parser->seqid_to_ssr_mapping, seqid);
+  ssr = gt_hashmap_get(parser->seqid_to_ssr_mapping, seqid);
   if (!ssr) {
     /* sequence region has not been previously introduced -> check if one has
        already been created automatically */
-    *auto_sr = hashmap_get(parser->undefined_sequence_regions, seqid);
+    *auto_sr = gt_hashmap_get(parser->undefined_sequence_regions, seqid);
     if (!*auto_sr) {
       /* sequence region has not been createad automatically -> do it now */
       warning("seqid \"%s\" on line %u in file \"%s\" has not been "
@@ -285,7 +285,7 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
       *seqid_str = gt_str_new_cstr(seqid);
       (*auto_sr)->sequence_region = gt_region_node_new(*seqid_str, range.start,
                                                                    range.end);
-      hashmap_add(parser->undefined_sequence_regions, gt_str_get(*seqid_str),
+      gt_hashmap_add(parser->undefined_sequence_regions, gt_str_get(*seqid_str),
                   *auto_sr);
     }
     else {
@@ -986,14 +986,14 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
 }
 
 static void set_source(GtFeatureNode *genome_feature, const char *source,
-                       Hashmap *source_to_str_mapping)
+                       GtHashmap *source_to_str_mapping)
 {
   GtStr *source_str;
   gt_assert(genome_feature && source && source_to_str_mapping);
-  source_str = hashmap_get(source_to_str_mapping, source);
+  source_str = gt_hashmap_get(source_to_str_mapping, source);
   if (!source_str) {
     source_str = gt_str_new_cstr(source);
-    hashmap_add(source_to_str_mapping, gt_str_get(source_str), source_str);
+    gt_hashmap_add(source_to_str_mapping, gt_str_get(source_str), source_str);
   }
   gt_assert(source_str);
   gt_feature_node_set_source(genome_feature, source_str);
@@ -1252,7 +1252,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
   else if (strcmp(line, GFF_FASTA_DIRECTIVE) == 0) {
     if (!parser->fasta_parsing) {
       parser->fasta_parsing = true;
-      had_err = hashmap_foreach(parser->undefined_sequence_regions,
+      had_err = gt_hashmap_foreach(parser->undefined_sequence_regions,
                                 add_auto_sr_to_queue, genome_nodes, NULL);
       gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
     }
@@ -1317,7 +1317,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
     if (!had_err)
       had_err = add_offset_if_necessary(&range, parser, seqid, err);
     if (!had_err) {
-      if (hashmap_get(parser->undefined_sequence_regions, seqid)) {
+      if (gt_hashmap_get(parser->undefined_sequence_regions, seqid)) {
         gt_error_set(err, "genome feature with id \"%s\" has been defined "
                      "before the corresponding \"%s\" definition on line %u in "
                      "file \"%s\"", seqid, GFF_SEQUENCE_REGION, line_number,
@@ -1328,7 +1328,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
     if (!had_err) {
       /* now we can create a sequence region node */
       gt_assert(seqid);
-      ssr = hashmap_get(parser->seqid_to_ssr_mapping, seqid);
+      ssr = gt_hashmap_get(parser->seqid_to_ssr_mapping, seqid);
       if (ssr) {
         gt_error_set(err, "the sequence region \"%s\" on line %u in file "
                      "\"%s\" has already been defined",
@@ -1337,7 +1337,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
       }
       else {
         ssr = simple_sequence_region_new(seqid, range, line_number);
-        hashmap_add(parser->seqid_to_ssr_mapping, gt_str_get(ssr->seqid_str),
+        gt_hashmap_add(parser->seqid_to_ssr_mapping, gt_str_get(ssr->seqid_str),
                     ssr);
       }
     }
@@ -1406,7 +1406,7 @@ int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
     else if (parser->fasta_parsing || line[0] == '>') {
       if (!parser->fasta_parsing) {
         parser->fasta_parsing = true;
-        had_err = hashmap_foreach(parser->undefined_sequence_regions,
+        had_err = gt_hashmap_foreach(parser->undefined_sequence_regions,
                                   add_auto_sr_to_queue, genome_nodes, NULL);
         gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
       }
@@ -1439,7 +1439,7 @@ int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
   else if (rval == EOF) {
     /* the file has been parsed completely, add automatically created sequence
        regions to queue */
-    had_err = hashmap_foreach(parser->undefined_sequence_regions,
+    had_err = gt_hashmap_foreach(parser->undefined_sequence_regions,
                               add_auto_sr_to_queue, genome_nodes, NULL);
     gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
   }
@@ -1457,9 +1457,9 @@ void gt_gff3_parser_reset(GT_GFF3Parser *parser)
   gt_assert(parser);
   parser->fasta_parsing = false;
   feature_info_reset(parser->feature_info);
-  hashmap_reset(parser->seqid_to_ssr_mapping);
-  hashmap_reset(parser->source_to_str_mapping);
-  hashmap_reset(parser->undefined_sequence_regions);
+  gt_hashmap_reset(parser->seqid_to_ssr_mapping);
+  gt_hashmap_reset(parser->source_to_str_mapping);
+  gt_hashmap_reset(parser->undefined_sequence_regions);
   parser->last_terminator = 0;
 }
 
@@ -1467,9 +1467,9 @@ void gt_gff3_parser_delete(GT_GFF3Parser *parser)
 {
   if (!parser) return;
   feature_info_delete(parser->feature_info);
-  hashmap_delete(parser->seqid_to_ssr_mapping);
-  hashmap_delete(parser->source_to_str_mapping);
-  hashmap_delete(parser->undefined_sequence_regions);
+  gt_hashmap_delete(parser->seqid_to_ssr_mapping);
+  gt_hashmap_delete(parser->source_to_str_mapping);
+  gt_hashmap_delete(parser->undefined_sequence_regions);
   mapping_delete(parser->offset_mapping);
   gt_type_checker_delete(parser->type_checker);
   gt_free(parser);

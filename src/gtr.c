@@ -53,7 +53,7 @@ struct GTR {
   GtStr *debugfp,
       *testspacepeak;
   GtToolbox *tools;
-  Hashmap *unit_tests;
+  GtHashmap *unit_tests;
   lua_State *L;
 #ifndef WITHOUT_CAIRO
   GtStyle *style;
@@ -179,7 +179,7 @@ void gtr_register_components(GTR *gtr)
   gt_toolbox_delete(gtr->tools);
   gtr->tools = gtt_tools();
   /* add unit tests */
-  hashmap_delete(gtr->unit_tests);
+  gt_hashmap_delete(gtr->unit_tests);
   gtr->unit_tests = gtt_unit_tests();
 }
 
@@ -236,9 +236,9 @@ static int run_tests(GTR *gtr, GtError *err)
 
   /* show seed */
   printf("seed=%u\n", gtr->seed);
-  hashmap_unit_test(err);
+  gt_hashmap_unit_test(err);
   if (gtr->unit_tests) {
-    had_err = hashmap_foreach_in_key_order(
+    had_err = gt_hashmap_foreach_in_key_order(
       gtr->unit_tests, run_test, &test_err, err);
     assert(!had_err); /* cannot happen, run_test() is sane */
   }
@@ -343,7 +343,7 @@ void gtr_delete(GTR *gtr)
   gt_str_delete(gtr->testspacepeak);
   gt_str_delete(gtr->debugfp);
   gt_toolbox_delete(gtr->tools);
-  hashmap_delete(gtr->unit_tests);
+  gt_hashmap_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
 #ifndef WITHOUT_CAIRO
   gt_style_delete_without_state(gtr->style);

@@ -44,13 +44,13 @@ enum {
   DEFAULT_HIGH_MUL = 192,
 };
 
-typedef htsize_t (*GetLinkFunc)(Hashtable *ht, htsize_t idx);
-typedef void (*SetLinkFunc)(Hashtable *ht, htsize_t idx, htsize_t link);
+typedef htsize_t (*GetLinkFunc)(GtHashtable *ht, htsize_t idx);
+typedef void (*SetLinkFunc)(GtHashtable *ht, htsize_t idx, htsize_t link);
 
 static htsize_t
-ht_get_table_link(Hashtable *ht, htsize_t idx);
+ht_get_table_link(GtHashtable *ht, htsize_t idx);
 static void
-ht_set_table_link(Hashtable *ht, htsize_t idx, htsize_t link);
+ht_set_table_link(GtHashtable *ht, htsize_t idx, htsize_t link);
 
 #if POLYMORPHLINK
 #define HT_GET_LINK(ht, idx) ht->get_link(ht, idx)
@@ -60,7 +60,7 @@ ht_set_table_link(Hashtable *ht, htsize_t idx, htsize_t link);
 #define HT_SET_LINK(ht, idx, link) ht_set_table_link(ht, idx, link)
 #endif
 
-struct Hashtable
+struct GtHashtable
 {
   HashElemInfo table_info;
   void *table;
@@ -72,28 +72,28 @@ struct Hashtable
 };
 
 static inline void *
-ht_elem_ptr(const Hashtable *ht, htsize_t idx)
+ht_elem_ptr(const GtHashtable *ht, htsize_t idx)
 {
   return (char *)ht->table + ht->table_info.elem_size * idx;
 }
 
 static inline void
-ht_cp_elem(Hashtable *ht, htsize_t dest_idx, const void *src)
+ht_cp_elem(GtHashtable *ht, htsize_t dest_idx, const void *src)
 {
   memcpy(ht_elem_ptr(ht, dest_idx), src, ht->table_info.elem_size);
 }
 
 static void
-ht_resize(Hashtable *ht, unsigned short new_size_log);
+ht_resize(GtHashtable *ht, unsigned short new_size_log);
 
-extern Hashtable *
-hashtable_new(HashElemInfo table_info)
+extern GtHashtable *
+gt_hashtable_new(HashElemInfo table_info)
 {
-  return hashtable_new_with_start_size(table_info, MIN_SIZE_LOG);
+  return gt_hashtable_new_with_start_size(table_info, MIN_SIZE_LOG);
 }
 
 static void
-ht_reinit(Hashtable *ht, HashElemInfo table_info, unsigned short size_log,
+ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
         unsigned short high_mul, unsigned short low_mul)
 {
   htsize_t table_size;
@@ -121,7 +121,7 @@ ht_reinit(Hashtable *ht, HashElemInfo table_info, unsigned short size_log,
 }
 
 static void
-ht_init(Hashtable *ht, HashElemInfo table_info, unsigned short size_log,
+ht_init(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
         unsigned short high_mul, unsigned short low_mul)
 {
   assert(size_log < sizeof (htsize_t) * CHAR_BIT);
@@ -131,23 +131,23 @@ ht_init(Hashtable *ht, HashElemInfo table_info, unsigned short size_log,
 }
 
 static void
-ht_destruct(Hashtable *ht)
+ht_destruct(GtHashtable *ht)
 {
   gt_free(ht->table);
   gt_free(ht->links.table);
 }
 
-extern Hashtable *
-hashtable_new_with_start_size(HashElemInfo table_info, unsigned short size_log)
+extern GtHashtable *
+gt_hashtable_new_with_start_size(HashElemInfo table_info, unsigned short size_log)
 {
-  Hashtable *ht;
+  GtHashtable *ht;
   ht = gt_malloc(sizeof (*ht));
   ht_init(ht, table_info, size_log, DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
   return ht;
 }
 
 static int
-ht_insert(Hashtable *ht, const void *elem);
+ht_insert(GtHashtable *ht, const void *elem);
 
 static enum iterator_op
 ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
@@ -167,9 +167,9 @@ ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
 }
 
 static void
-ht_resize(Hashtable *ht, unsigned short new_size_log)
+ht_resize(GtHashtable *ht, unsigned short new_size_log)
 {
-  Hashtable new_ht;
+  GtHashtable new_ht;
 #ifndef NDEBUG
   htsize_t new_size = 1 << new_size_log;
 #endif
@@ -179,21 +179,21 @@ ht_resize(Hashtable *ht, unsigned short new_size_log)
     ht_init(&new_ht, ht->table_info, new_size_log, ht->high_fill_mul,
             ht->low_fill_mul);
     assert(ht->current_fill < new_size);
-    hashtable_foreach(ht, ht_insert_wrapper, &new_ht, NULL);
+    gt_hashtable_foreach(ht, ht_insert_wrapper, &new_ht, NULL);
     ht_destruct(ht);
     memcpy(ht, &new_ht, sizeof (*ht));
   }
 }
 
 static inline htsize_t
-ht_elem_hash_idx(const Hashtable *ht, const void *elem)
+ht_elem_hash_idx(const GtHashtable *ht, const void *elem)
 {
   return ht->table_info.keyhash(elem) & ht->table_mask;
 }
 
 #define ht_traverse_list_of_key(ht, elem, pre_loop, in_loop, post_loop) \
   do {                                                                  \
-    Hashtable *htref = (ht);                                            \
+    GtHashtable *htref = (ht);                                            \
     htsize_t elem_hash = ht_elem_hash_idx(htref, (elem)),               \
       idx, link = elem_hash;                                            \
     pre_loop;                                                           \
@@ -208,9 +208,9 @@ ht_elem_hash_idx(const Hashtable *ht, const void *elem)
 
 #if TJ_DEBUG > 1
 static void
-ht_traverse_list_of_key_debug(Hashtable *ht, const void *elem)
+ht_traverse_list_of_key_debug(GtHashtable *ht, const void *elem)
 {
-  Hashtable *htref = (ht);
+  GtHashtable *htref = (ht);
   htsize_t elem_hash = ht_elem_hash_idx(htref, (elem)),
     idx, link = elem_hash;
   do {
@@ -227,7 +227,7 @@ ht_traverse_list_of_key_debug(Hashtable *ht, const void *elem)
 #endif
 
 extern void *
-hashtable_get(Hashtable *ht, const void *elem)
+gt_hashtable_get(GtHashtable *ht, const void *elem)
 {
   assert(ht);
 #if TJ_DEBUG > 1
@@ -242,7 +242,7 @@ hashtable_get(Hashtable *ht, const void *elem)
 }
 
 extern int
-hashtable_add(Hashtable *ht, const void *elem)
+gt_hashtable_add(GtHashtable *ht, const void *elem)
 {
   int insert_count;
   assert(ht && elem);
@@ -253,7 +253,7 @@ hashtable_add(Hashtable *ht, const void *elem)
 }
 
 static htsize_t
-ht_find_free_idx(Hashtable *ht, htsize_t start_idx, int search_dir)
+ht_find_free_idx(GtHashtable *ht, htsize_t start_idx, int search_dir)
 {
   htsize_t new_idx = start_idx;
   assert(ht->current_fill < ht->table_mask + 1);
@@ -264,7 +264,7 @@ ht_find_free_idx(Hashtable *ht, htsize_t start_idx, int search_dir)
 }
 
 static int
-ht_insert(Hashtable *ht, const void *elem)
+ht_insert(GtHashtable *ht, const void *elem)
 {
   htsize_t insert_pos;
   do {
@@ -315,13 +315,13 @@ ht_insert(Hashtable *ht, const void *elem)
 }
 
 static htsize_t
-ht_remove(Hashtable *ht, const void *elem);
+ht_remove(GtHashtable *ht, const void *elem);
 
 static inline void
-ht_shrink(Hashtable *ht);
+ht_shrink(GtHashtable *ht);
 
 extern int
-hashtable_remove(Hashtable *ht, const void *elem)
+gt_hashtable_remove(GtHashtable *ht, const void *elem)
 {
   htsize_t remove_pos;
   assert(ht && elem);
@@ -336,7 +336,7 @@ hashtable_remove(Hashtable *ht, const void *elem)
 }
 
 static inline void
-ht_shrink(Hashtable *ht)
+ht_shrink(GtHashtable *ht)
 {
   if (ht->current_fill < ht->low_fill
       && ht->table_size_log > MIN_SIZE_LOG)
@@ -353,7 +353,7 @@ ht_shrink(Hashtable *ht)
 }
 
 static htsize_t
-ht_remove(Hashtable *ht, const void *elem)
+ht_remove(GtHashtable *ht, const void *elem)
 {
   htsize_t remove_pos = free_mark, referent = free_mark;
   ht_traverse_list_of_key(ht, elem,,
@@ -409,7 +409,7 @@ ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
 }
 
 extern int
-hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
+gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
                           GtCompare cmp, GtError *err)
 {
   GtArray *hash_entries;
@@ -422,7 +422,7 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
   {
     struct hash_to_array_data visitor_data = { ht->table_info.elem_size,
                                                hash_entries };
-    had_err = hashtable_foreach(ht, ht_save_entry_to_array, &visitor_data,
+    had_err = gt_hashtable_foreach(ht, ht_save_entry_to_array, &visitor_data,
                                 err);
   }
   if (!had_err) {
@@ -430,7 +430,7 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
     gt_qsort_r(gt_array_get_space(hash_entries), gt_array_size(hash_entries),
                gt_array_elem_size(hash_entries), data, (GtCompareWithData)cmp);
     hash_size = gt_array_size(hash_entries);
-    assert(hash_size == hashtable_fill(ht));
+    assert(hash_size == gt_hashtable_fill(ht));
     for (i = 0; !had_err && i < hash_size; i++) {
       elem = gt_array_get(hash_entries, i);
       had_err = iter(elem, data, err);
@@ -441,14 +441,14 @@ hashtable_foreach_ordered(Hashtable *ht, Elemvisitfunc iter, void *data,
 }
 
 extern int
-hashtable_foreach_in_default_order(Hashtable *ht, Elemvisitfunc iter,
+gt_hashtable_foreach_in_default_order(GtHashtable *ht, Elemvisitfunc iter,
                                    void *data, GtError *err)
 {
-  return hashtable_foreach_ordered(ht, iter, data, ht->table_info.cmp, err);
+  return gt_hashtable_foreach_ordered(ht, iter, data, ht->table_info.cmp, err);
 }
 
 extern int
-hashtable_foreach(Hashtable *ht, Elemvisitfunc visitor, void *data,
+gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
                   GtError *err)
 {
   htsize_t i, table_size = ht->table_mask + 1, deletion_count = 0;
@@ -509,7 +509,7 @@ hashtable_foreach(Hashtable *ht, Elemvisitfunc visitor, void *data,
 }
 
 extern size_t
-hashtable_fill(Hashtable *ht)
+gt_hashtable_fill(GtHashtable *ht)
 {
   assert(ht);
   return ht->current_fill;
@@ -533,7 +533,7 @@ hashtable_fill(Hashtable *ht)
   } while (0)
 
 extern void
-hashtable_reset(Hashtable *ht)
+gt_hashtable_reset(GtHashtable *ht)
 {
   assert(ht);
   FreeFuncWData free_elem_with_data =
@@ -546,7 +546,7 @@ hashtable_reset(Hashtable *ht)
 }
 
 extern void
-hashtable_delete(Hashtable *ht)
+gt_hashtable_delete(GtHashtable *ht)
 {
   if (ht)
   {
@@ -683,13 +683,13 @@ ht_cstr_elem_cmp(const void *elemA, const void *elemB)
  * link table stuff
  */
 static htsize_t
-ht_get_table_link(Hashtable *ht, htsize_t idx)
+ht_get_table_link(GtHashtable *ht, htsize_t idx)
 {
   return ht->links.table[idx];
 }
 
 static void
-ht_set_table_link(Hashtable *ht, htsize_t idx, htsize_t link)
+ht_set_table_link(GtHashtable *ht, htsize_t idx, htsize_t link)
 {
   ht->links.table[idx] = link;
 }
@@ -723,52 +723,52 @@ cstr_cstr_elem_dup(struct ht_elem_2cstr *elem,
 }
 
 static int
-hashtable_test(HashElemInfo table_info)
+gt_hashtable_test(HashElemInfo table_info)
 {
   GtFree orig_free_elem = table_info.free_op.free_elem;
   char *s1 = "foo", *s2 = "bar";
-  Hashtable *ht;
+  GtHashtable *ht;
   int had_err = 0;
   struct ht_elem_2cstr elemA = { s1, s2 }, elemB = { s2, s1 };
   table_info.free_op.free_elem = NULL;
   do {
     struct ht_elem_2cstr *elem_p;
     /* empty hash */
-    ht = hashtable_new(table_info);
-    hashtable_delete(ht);
+    ht = gt_hashtable_new(table_info);
+    gt_hashtable_delete(ht);
 
     /* empty hash with reset */
-    ht = hashtable_new(table_info);
-    hashtable_reset(ht);
-    hashtable_delete(ht);
+    ht = gt_hashtable_new(table_info);
+    gt_hashtable_reset(ht);
+    gt_hashtable_delete(ht);
 
     /* hashes containing one element */
-    ht = hashtable_new(table_info);
-    hashtable_add(ht, &elemA);
-    my_ensure(had_err, !memcmp(hashtable_get(ht, &elemA), &elemA,
+    ht = gt_hashtable_new(table_info);
+    gt_hashtable_add(ht, &elemA);
+    my_ensure(had_err, !memcmp(gt_hashtable_get(ht, &elemA), &elemA,
                                table_info.elem_size));
-    my_ensure(had_err, !hashtable_get(ht, &elemB));
-    hashtable_delete(ht);
+    my_ensure(had_err, !gt_hashtable_get(ht, &elemB));
+    gt_hashtable_delete(ht);
 
     /* hashes containing two elements */
-    ht = hashtable_new(table_info);
-    hashtable_add(ht, &elemA);
-    hashtable_add(ht, &elemB);
-    elem_p = hashtable_get(ht, &elemA);
+    ht = gt_hashtable_new(table_info);
+    gt_hashtable_add(ht, &elemA);
+    gt_hashtable_add(ht, &elemB);
+    elem_p = gt_hashtable_get(ht, &elemA);
     my_ensure(had_err, elem_p
               && !memcmp(elem_p, &elemA, table_info.elem_size));
-    elem_p = hashtable_get(ht, &elemB);
+    elem_p = gt_hashtable_get(ht, &elemB);
     my_ensure(had_err, elem_p
               && !memcmp(elem_p, &elemB, table_info.elem_size));
 
     /* remove element A and ensure it's no longer present */
-    my_ensure(had_err, hashtable_remove(ht, &elemA));
-    my_ensure(had_err, !hashtable_get(ht, &elemA));
+    my_ensure(had_err, gt_hashtable_remove(ht, &elemA));
+    my_ensure(had_err, !gt_hashtable_get(ht, &elemA));
 
-    elem_p = hashtable_get(ht, &elemB);
+    elem_p = gt_hashtable_get(ht, &elemB);
     my_ensure(had_err, elem_p
               && !memcmp(elem_p, &elemB, table_info.elem_size));
-    hashtable_delete(ht);
+    gt_hashtable_delete(ht);
 
     /* hashes containing two elements (store key and value in
      * hashtable) where simple free is the correct way to get rid of them
@@ -777,32 +777,32 @@ hashtable_test(HashElemInfo table_info)
     {
       struct ht_elem_2cstr elem_dup;
       table_info.free_op.free_elem = ht_2ptr_elem_free;
-      ht = hashtable_new(table_info);
+      ht = gt_hashtable_new(table_info);
 
       cstr_cstr_elem_dup(&elem_dup, s1, s2);
-      hashtable_add(ht, &elem_dup);
+      gt_hashtable_add(ht, &elem_dup);
 
       cstr_cstr_elem_dup(&elem_dup, s2, s1);
-      hashtable_add(ht, &elem_dup);
+      gt_hashtable_add(ht, &elem_dup);
 
-      elem_p = hashtable_get(ht, &s1);
+      elem_p = gt_hashtable_get(ht, &s1);
       my_ensure(had_err, elem_p && !strcmp(elem_p->value, s2));
 
-      elem_p = hashtable_get(ht, &s2);
+      elem_p = gt_hashtable_get(ht, &s2);
       my_ensure(had_err, elem_p && !strcmp(elem_p->value, s1));
 
-      my_ensure(had_err, hashtable_remove(ht, &s1)); /* remove first element */
-      my_ensure(had_err, !hashtable_get(ht, &s1));
+      my_ensure(had_err, gt_hashtable_remove(ht, &s1)); /* remove first element */
+      my_ensure(had_err, !gt_hashtable_get(ht, &s1));
 
-      elem_p = hashtable_get(ht, s2);
+      elem_p = gt_hashtable_get(ht, s2);
       my_ensure(had_err, elem_p && !strcmp(elem_p->value,  s1));
-      hashtable_delete(ht);
+      gt_hashtable_delete(ht);
     }
   } while (0);
   return had_err;
 }
 
-int hashtable_unit_test(GT_UNUSED GtError *err)
+int gt_hashtable_unit_test(GT_UNUSED GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -812,11 +812,11 @@ int hashtable_unit_test(GT_UNUSED GtError *err)
     hash_str = { ht_cstr_elem_hash, { NULL }, sizeof (struct ht_elem_2cstr),
                  ht_cstr_elem_cmp, NULL, NULL };
   /* hash key as string */
-  had_err = hashtable_test(hash_str);
+  had_err = gt_hashtable_test(hash_str);
 
   /* hash key by pointer value */
   if (!had_err)
-    had_err = hashtable_test(hash_ptr);
+    had_err = gt_hashtable_test(hash_ptr);
 
   return had_err;
 }

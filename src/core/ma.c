@@ -23,7 +23,7 @@
 
 /* the memory allocator class */
 typedef struct {
-  Hashmap *allocated_pointer;
+  GtHashmap *allocated_pointer;
   bool bookkeeping;
   unsigned long current_size,
                 max_size;
@@ -51,7 +51,7 @@ void gt_ma_init(bool bookkeeping)
   assert(!ma);
   ma = xcalloc(1, sizeof (MA));
   assert(!ma->bookkeeping);
-  ma->allocated_pointer = hashmap_new(HASH_DIRECT, NULL,
+  ma->allocated_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
                                       (GtFree) free_MAInfo);
   /* MA is ready to use */
   ma->bookkeeping = bookkeeping;
@@ -85,7 +85,7 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
     mainfo->filename = filename;
     mainfo->line = line;
     mem = xmalloc(size);
-    hashmap_add(ma->allocated_pointer, mem, mainfo);
+    gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
@@ -106,7 +106,7 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
     mainfo->filename = filename;
     mainfo->line = line;
     mem = xcalloc(nmemb, size);
-    hashmap_add(ma->allocated_pointer, mem, mainfo);
+    gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, nmemb * size);
     ma->bookkeeping = true;
     return mem;
@@ -123,17 +123,17 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
     if (ptr) {
-      mainfo = hashmap_get(ma->allocated_pointer, ptr);
+      mainfo = gt_hashmap_get(ma->allocated_pointer, ptr);
       assert(mainfo);
       subtract_size(ma, mainfo->size);
-      hashmap_remove(ma->allocated_pointer, ptr);
+      gt_hashmap_remove(ma->allocated_pointer, ptr);
     }
     mainfo = xmalloc(sizeof (MAInfo));
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
     mem = xrealloc(ptr, size);
-    hashmap_add(ma->allocated_pointer, mem, mainfo);
+    gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
@@ -149,16 +149,16 @@ void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
 #ifndef NDEBUG
-    if (!hashmap_get(ma->allocated_pointer, ptr)) {
+    if (!gt_hashmap_get(ma->allocated_pointer, ptr)) {
       fprintf(stderr, "bug: double free() attempted on line %d in file "
               "\"%s\"\n", line, filename);
       exit(2); /* programmer error */
     }
 #endif
-    mainfo = hashmap_get(ma->allocated_pointer, ptr);
+    mainfo = gt_hashmap_get(ma->allocated_pointer, ptr);
     assert(mainfo);
     subtract_size(ma, mainfo->size);
-    hashmap_remove(ma->allocated_pointer, ptr);
+    gt_hashmap_remove(ma->allocated_pointer, ptr);
     free(ptr);
     ma->bookkeeping = true;
   }
@@ -207,7 +207,7 @@ int gt_ma_check_space_leak(void)
   int had_err;
   assert(ma);
   info.has_leak = false;
-  had_err = hashmap_foreach(ma->allocated_pointer, check_space_leak, &info,
+  had_err = gt_hashmap_foreach(ma->allocated_pointer, check_space_leak, &info,
                               NULL);
   assert(!had_err); /* cannot happen, check_space_leak() is sane */
   if (info.has_leak)
@@ -219,7 +219,7 @@ void gt_ma_clean(void)
 {
   assert(ma);
   ma->bookkeeping = false;
-  hashmap_delete(ma->allocated_pointer);
+  gt_hashmap_delete(ma->allocated_pointer);
   free(ma);
   ma = NULL;
 }

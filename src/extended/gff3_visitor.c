@@ -34,14 +34,14 @@ struct GFF3Visitor {
   bool version_string_shown,
        fasta_directive_shown;
   StringDistri *id_counter;
-  Hashmap *gt_feature_node_to_id_array,
+  GtHashmap *gt_feature_node_to_id_array,
             *gt_feature_node_to_unique_id_str;
   unsigned long fasta_width;
   GtGenFile *outfp;
 };
 
 typedef struct {
-  Hashmap *gt_feature_node_to_id_array;
+  GtHashmap *gt_feature_node_to_id_array;
   const char *id;
 } Add_id_info;
 
@@ -69,8 +69,8 @@ static void gff3_visitor_free(GtNodeVisitor *gv)
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
   string_distri_delete(gff3_visitor->id_counter);
-  hashmap_delete(gff3_visitor->gt_feature_node_to_id_array);
-  hashmap_delete(gff3_visitor->gt_feature_node_to_unique_id_str);
+  gt_hashmap_delete(gff3_visitor->gt_feature_node_to_id_array);
+  gt_hashmap_delete(gff3_visitor->gt_feature_node_to_unique_id_str);
 }
 
 static int gff3_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
@@ -92,10 +92,10 @@ static int add_id(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
   GtArray *parent_features = NULL;
   gt_error_check(err);
   assert(gn && info && info->gt_feature_node_to_id_array && info->id);
-  parent_features = hashmap_get(info->gt_feature_node_to_id_array, gn);
+  parent_features = gt_hashmap_get(info->gt_feature_node_to_id_array, gn);
   if (!parent_features) {
     parent_features = gt_array_new(sizeof (char*));
-    hashmap_add(info->gt_feature_node_to_id_array, gn, parent_features);
+    gt_hashmap_add(info->gt_feature_node_to_id_array, gn, parent_features);
   }
   gt_array_add(parent_features, info->id);
   return 0;
@@ -133,14 +133,14 @@ static int gff3_show_genome_feature(GtGenomeNode *gn, void *data,
   gff3_output_leading(gf, gff3_visitor->outfp);
 
   /* show unique id part of attributes */
-  if ((id = hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,
+  if ((id = gt_hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,
                         gn))) {
     gt_genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, gt_str_get(id));
     part_shown = true;
   }
 
   /* show parent part of attributes */
-  parent_features = hashmap_get(gff3_visitor->gt_feature_node_to_id_array,
+  parent_features = gt_hashmap_get(gff3_visitor->gt_feature_node_to_id_array,
                                   gn);
   if (gt_array_size(parent_features)) {
     if (part_shown)
@@ -185,7 +185,7 @@ static GtStr* create_unique_id(GFF3Visitor *gff3_visitor, GtFeatureNode *gf)
   gt_str_append_ulong(id, string_distri_get(gff3_visitor->id_counter, type));
 
   /* store (unique) id */
-  hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf, id);
+  gt_hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf, id);
 
   return id;
 }
@@ -203,14 +203,14 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
 
   if (gt_genome_node_has_children(gn) || gt_feature_node_is_multi(gf)) {
     if (gt_feature_node_is_multi(gf)) {
-      id = hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,
+      id = gt_hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,
                        gt_feature_node_get_multi_representative(gf));
       if (!id) { /* the representative does not have its own id */
         id = create_unique_id(gff3_visitor,
                               gt_feature_node_get_multi_representative(gf));
       }
       if (gt_feature_node_get_multi_representative(gf) != gf) {
-        hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf,
+        gt_hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf,
                     gt_str_ref(id));
       }
     }
@@ -257,8 +257,8 @@ static int gff3_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
   }
 
   /* reset hashmaps */
-  hashmap_reset(gff3_visitor->gt_feature_node_to_id_array);
-  hashmap_reset(gff3_visitor->gt_feature_node_to_unique_id_str);
+  gt_hashmap_reset(gff3_visitor->gt_feature_node_to_id_array);
+  gt_hashmap_reset(gff3_visitor->gt_feature_node_to_unique_id_str);
 
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
@@ -320,9 +320,9 @@ GtNodeVisitor* gff3_visitor_new(GtGenFile *outfp)
   gff3_visitor->version_string_shown = false;
   gff3_visitor->fasta_directive_shown = false;
   gff3_visitor->id_counter = string_distri_new();
-  gff3_visitor->gt_feature_node_to_id_array = hashmap_new(
+  gff3_visitor->gt_feature_node_to_id_array = gt_hashmap_new(
     HASH_DIRECT, NULL, (GtFree) gt_array_delete);
-  gff3_visitor->gt_feature_node_to_unique_id_str = hashmap_new(
+  gff3_visitor->gt_feature_node_to_unique_id_str = gt_hashmap_new(
     HASH_DIRECT, NULL, (GtFree) gt_str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;

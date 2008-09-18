@@ -23,7 +23,7 @@
 
 struct GtLineBreakerBases {
   const GtLineBreaker parent_instance;
-  Hashmap *itrees;
+  GtHashmap *itrees;
 };
 
 #define gt_line_breaker_bases_cast(LB)\
@@ -39,7 +39,7 @@ bool gt_line_breaker_bases_is_gt_line_occupied(GtLineBreaker* lb,
   assert(lb && block && line);
   r = gt_block_get_range(block);
   lbb = gt_line_breaker_bases_cast(lb);
-  if (!(t = hashmap_get(lbb->itrees, line)))
+  if (!(t = gt_hashmap_get(lbb->itrees, line)))
     return false;
   else
     return (gt_interval_tree_find_first_overlapping(t, r.start, r.end));
@@ -57,10 +57,10 @@ void gt_line_breaker_bases_register_block(GtLineBreaker *lb,
   lbb = gt_line_breaker_bases_cast(lb);
   rng = gt_block_get_range_ptr(block);
   new_node = gt_interval_tree_node_new(rng, rng->start, rng->end);
-  if (!(t = hashmap_get(lbb->itrees, line)))
+  if (!(t = gt_hashmap_get(lbb->itrees, line)))
   {
     t = gt_interval_tree_new(NULL);
-    hashmap_add(lbb->itrees, line, t);
+    gt_hashmap_add(lbb->itrees, line, t);
   }
   gt_interval_tree_insert(t, new_node);
 }
@@ -70,7 +70,7 @@ void gt_line_breaker_bases_delete(GtLineBreaker *lb)
   GtLineBreakerBases *lbb;
   if (!lb) return;
   lbb = gt_line_breaker_bases_cast(lb);
-  hashmap_delete(lbb->itrees);
+  gt_hashmap_delete(lbb->itrees);
 }
 
 const GtLineBreakerClass* gt_line_breaker_bases_class(void)
@@ -89,7 +89,7 @@ GtLineBreaker* gt_line_breaker_bases_new()
   GtLineBreaker *lb;
   lb = gt_line_breaker_create(gt_line_breaker_bases_class());
   lbb = gt_line_breaker_bases_cast(lb);
-  lbb->itrees = hashmap_new(HASH_DIRECT, NULL,
+  lbb->itrees = gt_hashmap_new(HASH_DIRECT, NULL,
                             (GtFree) gt_interval_tree_delete);
   return lb;
 }

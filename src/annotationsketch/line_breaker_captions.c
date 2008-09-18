@@ -24,7 +24,7 @@
 struct GtLineBreakerCaptions {
   const GtLineBreaker parent_instance;
   GtCanvas *canvas;
-  Hashmap *linepositions;
+  GtHashmap *linepositions;
 };
 
 #define gt_line_breaker_captions_cast(LB)\
@@ -57,7 +57,7 @@ bool gt_line_breaker_captions_is_gt_line_occupied(GtLineBreaker* lb,
   assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
   dr = calculate_drawing_range(lbcap, block);
-  if (!(num = hashmap_get(lbcap->linepositions, line)))
+  if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
     return false;
   else
     return (dr.start < *num);
@@ -72,10 +72,10 @@ void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
   unsigned long *num;
   assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
-  if (!(num = hashmap_get(lbcap->linepositions, line)))
+  if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
   {
     num = gt_malloc(sizeof (unsigned long));
-    hashmap_add(lbcap->linepositions, line, num);
+    gt_hashmap_add(lbcap->linepositions, line, num);
   }
   dr = calculate_drawing_range(lbcap, block);
   *num = dr.end + 1;
@@ -86,7 +86,7 @@ void gt_line_breaker_captions_delete(GtLineBreaker *lb)
   GtLineBreakerCaptions *lbcap;
   if (!lb) return;
   lbcap = gt_line_breaker_captions_cast(lb);
-  hashmap_delete(lbcap->linepositions);
+  gt_hashmap_delete(lbcap->linepositions);
 }
 
 const GtLineBreakerClass* gt_line_breaker_captions_class(void)
@@ -107,6 +107,6 @@ GtLineBreaker* gt_line_breaker_captions_new(GtCanvas *canvas)
   lb = gt_line_breaker_create(gt_line_breaker_captions_class());
   lbcap = gt_line_breaker_captions_cast(lb);
   lbcap->canvas = canvas;
-  lbcap->linepositions = hashmap_new(HASH_DIRECT, NULL, gt_free_func);
+  lbcap->linepositions = gt_hashmap_new(HASH_DIRECT, NULL, gt_free_func);
   return lb;
 }

@@ -28,7 +28,7 @@ typedef struct GtTracklineInfo {
                 total_captionlines;
 } GtTracklineInfo;
 
-Hashmap*    gt_diagram_get_tracks(const GtDiagram*);
+GtHashmap*    gt_diagram_get_tracks(const GtDiagram*);
 void        gt_diagram_get_lineinfo(const GtDiagram*, GtTracklineInfo*);
 int         gt_diagram_get_number_of_tracks(const GtDiagram*);
 int         gt_diagram_unit_test(GtError*);

@@ -26,7 +26,7 @@
 #include "core/unused_api.h"
 
 struct DiscDistri {
-  Hashtable *hashdist;
+  GtHashtable *hashdist;
   unsigned long long num_of_occurrences;
 };
 
@@ -52,11 +52,11 @@ void disc_distri_add_multi(DiscDistri *d, unsigned long key,
   assert(d);
 
   if (!d->hashdist)
-    d->hashdist = ul_ull_hashmap_new();
+    d->hashdist = ul_ull_gt_hashmap_new();
 
-  valueptr = ul_ull_hashmap_get(d->hashdist, key);
+  valueptr = ul_ull_gt_hashmap_get(d->hashdist, key);
   if (!valueptr) {
-    ul_ull_hashmap_add(d->hashdist, key, occurrences);
+    ul_ull_gt_hashmap_add(d->hashdist, key, occurrences);
   }
   else
     (*valueptr) += occurrences;
@@ -68,7 +68,7 @@ unsigned long long disc_distri_get(const DiscDistri *d, unsigned long key)
 {
   unsigned long long *valueptr;
   assert(d);
-  if (!d->hashdist || !(valueptr = ul_ull_hashmap_get(d->hashdist, key)))
+  if (!d->hashdist || !(valueptr = ul_ull_gt_hashmap_get(d->hashdist, key)))
     return 0;
   return *valueptr;
 }
@@ -114,7 +114,7 @@ void disc_distri_show_generic(const DiscDistri *d, GtGenFile *genfile)
     showvalueinfo.cumulative_probability = 0.0;
     showvalueinfo.num_of_occurrences = d->num_of_occurrences;
     showvalueinfo.genfile = genfile;
-    rval = ul_ull_hashmap_foreach_in_default_order(d->hashdist, showvalue,
+    rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist, showvalue,
                                                    &showvalueinfo, NULL);
     assert(!rval); /* showvalue() is sane */
   }
@@ -146,7 +146,7 @@ void disc_distri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
   if (d->hashdist) {
     info.func = func;
     info.data = data;
-    rval = ul_ull_hashmap_foreach_in_default_order(d->hashdist,
+    rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist,
                                                    foreach_iterfunc, &info,
                                                    NULL);
     assert(!rval); /* foreach_iterfunc() is sane */
@@ -179,6 +179,6 @@ int disc_distri_unit_test(GtError *err)
 void disc_distri_delete(DiscDistri *d)
 {
   if (!d) return;
-  hashtable_delete(d->hashdist);
+  gt_hashtable_delete(d->hashdist);
   gt_free(d);
 }
