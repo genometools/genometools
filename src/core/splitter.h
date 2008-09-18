@@ -20,28 +20,28 @@
 
 #include "core/error.h"
 
-typedef struct Splitter Splitter;
+typedef struct GtSplitter GtSplitter;
 
-Splitter*     splitter_new(void);
+GtSplitter*     gt_splitter_new(void);
 
 /* split <string> of given <length> into tokens delimited by 'delimiter'.
    <string> is modified in the splitting process! */
-void          splitter_split(Splitter*, char *string, unsigned long length,
+void          gt_splitter_split(GtSplitter*, char *string, unsigned long length,
                              char delimiter);
 
 /* get all tokens */
-char**        splitter_get_tokens(Splitter*);
+char**        gt_splitter_get_tokens(GtSplitter*);
 
 /* get token with number <token_num> */
-char*         splitter_get_token(Splitter*, unsigned long token_num);
+char*         gt_splitter_get_token(GtSplitter*, unsigned long token_num);
 
 /* reset the splitter */
-void          splitter_reset(Splitter*);
+void          gt_splitter_reset(GtSplitter*);
 
 /* returns the number of tokens */
-unsigned long splitter_size(Splitter*);
+unsigned long gt_splitter_size(GtSplitter*);
 
-int           splitter_unit_test(GtError*);
-void          splitter_delete(Splitter*);
+int           gt_splitter_unit_test(GtError*);
+void          gt_splitter_delete(GtSplitter*);
 
 #endif

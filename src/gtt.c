@@ -168,7 +168,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "evaluator class", evaluator_unit_test);
   gt_hashmap_add(unit_tests, "genome feature class", gt_feature_node_unit_test);
   gt_hashmap_add(unit_tests, "genome node iterator example",
-              gt_genome_node_iterator_example);
+                 gt_genome_node_iterator_example);
   gt_hashmap_add(unit_tests, "gff3 escaping module", gff3_escaping_unit_test);
   gt_hashmap_add(unit_tests, "grep module", gt_grep_unit_test);
   gt_hashmap_add(unit_tests, "hashmap class", gt_hashmap_unit_test);
@@ -181,20 +181,21 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "red-black tree class", rbt_unit_test);
   gt_hashmap_add(unit_tests, "safearith module", safearith_unit_test);
   gt_hashmap_add(unit_tests, "safearith example", safearith_example);
-  gt_hashmap_add(unit_tests, "splicedseq class", splicedseq_unit_test);
-  gt_hashmap_add(unit_tests, "splitter class", splitter_unit_test);
+  gt_hashmap_add(unit_tests, "splicedseq class", gt_splicedseq_unit_test);
+  gt_hashmap_add(unit_tests, "splitter class", gt_splitter_unit_test);
   gt_hashmap_add(unit_tests, "string class", gt_str_unit_test);
-  gt_hashmap_add(unit_tests, "string matching module", string_matching_unit_test);
-  gt_hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
+  gt_hashmap_add(unit_tests, "string matching module",
+                 string_matching_unit_test);
+  gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
-  gt_hashmap_add(unit_tests, "union find class", union_find_unit_test);
+  gt_hashmap_add(unit_tests, "union find class", gt_union_find_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);
   gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
   gt_hashmap_add(unit_tests, "element class", gt_element_unit_test);
   gt_hashmap_add(unit_tests, "memory feature index class",
-              gt_feature_index_memory_unit_test);
+                 gt_feature_index_memory_unit_test);
   gt_hashmap_add(unit_tests, "imageinfo class", gt_image_info_unit_test);
   gt_hashmap_add(unit_tests, "line class", gt_line_unit_test);
   gt_hashmap_add(unit_tests, "track class", gt_track_unit_test);

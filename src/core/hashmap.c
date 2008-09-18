@@ -134,7 +134,8 @@ gt_hashmap_foreach_ordered(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
 }
 
 extern int
-gt_hashmap_foreach(GtHashmap *hm, Mapentryvisitfunc visit, void *data, GtError *err)
+gt_hashmap_foreach(GtHashmap *hm, Mapentryvisitfunc visit, void *data,
+                   GtError *err)
 {
   struct hashiteration_state state = { visit, data, NULL };
   return gt_hashtable_foreach(hm, gt_hashmap_visit, &state, err);
@@ -145,7 +146,8 @@ gt_hashmap_foreach_in_key_order(GtHashmap *hm, Mapentryvisitfunc iter,
                              void *data, GtError *err)
 {
   struct hashiteration_state state = { iter, data, NULL };
-  return gt_hashtable_foreach_in_default_order(hm, gt_hashmap_visit, &state, err);
+  return gt_hashtable_foreach_in_default_order(hm, gt_hashmap_visit, &state,
+                                               err);
 }
 
 extern void

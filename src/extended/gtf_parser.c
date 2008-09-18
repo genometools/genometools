@@ -96,8 +96,9 @@ GTF_parser* gtf_parser_new(GT_TypeChecker *type_checker)
                                               (GtFree) gt_str_delete);
   parser->gene_id_to_name_mapping = gt_hashmap_new(HASH_STRING, gt_free_func,
                                                 gt_free_func);
-  parser->transcript_id_to_name_mapping = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                                      gt_free_func);
+  parser->transcript_id_to_name_mapping = gt_hashmap_new(HASH_STRING,
+                                                         gt_free_func,
+                                                         gt_free_func);
   parser->type_checker = type_checker;
   return parser;
 }
@@ -258,7 +259,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
   GtRange range, *rangeptr;
   Phase phase_value;
   GtStrand gt_strand_value;
-  Splitter *splitter, *attribute_splitter;
+  GtSplitter *splitter, *attribute_splitter;
   float score_value;
   char *seqname,
        *source,
@@ -293,8 +294,8 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
 
   /* alloc */
   line_buffer = gt_str_new();
-  splitter = splitter_new(),
-  attribute_splitter = splitter_new();
+  splitter = gt_splitter_new(),
+  attribute_splitter = gt_splitter_new();
 
 #define HANDLE_ERROR                                                \
         if (had_err) {                                              \
@@ -327,16 +328,16 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
     }
     else {
       /* process tab delimited GTF line */
-      splitter_reset(splitter);
-      splitter_split(splitter, line, line_length, '\t');
-      if (splitter_size(splitter) != 9UL) {
+      gt_splitter_reset(splitter);
+      gt_splitter_split(splitter, line, line_length, '\t');
+      if (gt_splitter_size(splitter) != 9UL) {
         gt_error_set(err, "line %lu in file \"%s\" contains %lu tab (\\t) "
                   "separated fields instead of 9", line_number, filename,
-                  splitter_size(splitter));
+                  gt_splitter_size(splitter));
         had_err = -1;
         break;
       }
-      tokens = splitter_get_tokens(splitter);
+      tokens = gt_splitter_get_tokens(splitter);
       seqname    = tokens[0];
       source     = tokens[1];
       feature    = tokens[2];
@@ -376,7 +377,8 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
-      if ((rangeptr = gt_hashmap_get(parser->sequence_region_to_range, seqname))) {
+      if ((rangeptr = gt_hashmap_get(parser->sequence_region_to_range,
+                                     seqname))) {
         /* sequence region is already defined -> update range */
         *rangeptr = gt_range_join(range, *rangeptr);
       }
@@ -403,12 +405,13 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
       HANDLE_ERROR;
 
       /* parse the attributes */
-      splitter_reset(attribute_splitter);
+      gt_splitter_reset(attribute_splitter);
       gene_id = NULL;
       transcript_id = NULL;
-      splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
-      for (i = 0; i < splitter_size(attribute_splitter); i++) {
-        token = splitter_get_token(attribute_splitter, i);
+      gt_splitter_split(attribute_splitter, attributes, strlen(attributes),
+                        ';');
+      for (i = 0; i < gt_splitter_size(attribute_splitter); i++) {
+        token = gt_splitter_get_token(attribute_splitter, i);
         /* skip leading blanks */
         while (*token == ' ')
           token++;
@@ -501,7 +504,8 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
       gt_assert(gt_genome_node_array);
 
       /* save optional gene_name and transcript_name attributes */
-      if (transcript_name && !gt_hashmap_get(parser->transcript_id_to_name_mapping,
+      if (transcript_name
+            && !gt_hashmap_get(parser->transcript_id_to_name_mapping,
                              transcript_id)) {
         gt_hashmap_add(parser->transcript_id_to_name_mapping,
                     gt_cstr_dup(transcript_id),
@@ -565,8 +569,8 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
   }
 
   /* free */
-  splitter_delete(splitter);
-  splitter_delete(attribute_splitter);
+  gt_splitter_delete(splitter);
+  gt_splitter_delete(attribute_splitter);
   gt_str_delete(line_buffer);
 
   return had_err;

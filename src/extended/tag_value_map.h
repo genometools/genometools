@@ -28,21 +28,22 @@
    The implementation as a char* shines through (also to save one additional
    memory allocation), therefore the usage is a little bit different compared
    to other GenomeTools classes.
-   See the implementation of tag_value_map_example() for an example.
+   See the implementation of gt_tag_value_map_example() for an example.
 */
 
-typedef char* TagValueMap;
+typedef char* GtTagValueMap;
 
-typedef void (*TagValueMapIteratorFunc)(const char *tag, const char *value,
-                                        void *data);
+typedef void (*GtTagValueMapIteratorFunc)(const char *tag, const char *value,
+                                          void *data);
 
-TagValueMap tag_value_map_new(const char *tag, const char *value);
-void        tag_value_map_delete(TagValueMap);
-void        tag_value_map_add(TagValueMap*, const char *tag,
-                                            const char *value);
-const char* tag_value_map_get(const TagValueMap, const char *tag);
-void        tag_value_map_foreach(const TagValueMap, TagValueMapIteratorFunc,
-                                  void *data);
-int         tag_value_map_example(GtError*);
+GtTagValueMap gt_tag_value_map_new(const char *tag, const char *value);
+void        gt_tag_value_map_delete(GtTagValueMap);
+void        gt_tag_value_map_add(GtTagValueMap*, const char *tag,
+                                                 const char *value);
+const char* gt_tag_value_map_get(const GtTagValueMap, const char *tag);
+void        gt_tag_value_map_foreach(const GtTagValueMap,
+                                     GtTagValueMapIteratorFunc,
+                                     void *data);
+int         gt_tag_value_map_example(GtError*);
 
 #endif

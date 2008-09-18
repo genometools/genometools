@@ -24,18 +24,18 @@
 #include "core/splitter.h"
 #include "core/xansi.h"
 
-struct Splitter {
+struct GtSplitter {
   char **tokens;
   unsigned long num_of_tokens;
   size_t allocated;
 };
 
-Splitter* splitter_new(void)
+GtSplitter* gt_splitter_new(void)
 {
-  return gt_calloc(1, sizeof (Splitter));
+  return gt_calloc(1, sizeof (GtSplitter));
 }
 
-void splitter_split(Splitter *s, char *string, unsigned long length,
+void gt_splitter_split(GtSplitter *s, char *string, unsigned long length,
                     char delimiter)
 {
 
@@ -65,32 +65,32 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
   assert(s->num_of_tokens);
 }
 
-char** splitter_get_tokens(Splitter *s)
+char** gt_splitter_get_tokens(GtSplitter *s)
 {
   assert(s);
   return s->tokens;
 }
 
-char* splitter_get_token(Splitter *s, unsigned long token_num)
+char* gt_splitter_get_token(GtSplitter *s, unsigned long token_num)
 {
   assert(s && token_num < s->num_of_tokens);
   return s->tokens[token_num];
 }
 
-void splitter_reset(Splitter *s)
+void gt_splitter_reset(GtSplitter *s)
 {
   assert(s);
   if (s->tokens) s->tokens[0] = NULL;
   s->num_of_tokens = 0;
 }
 
-unsigned long splitter_size(Splitter *s)
+unsigned long gt_splitter_size(GtSplitter *s)
 {
   assert(s);
   return s->num_of_tokens;
 }
 
-int splitter_unit_test(GtError *err)
+int gt_splitter_unit_test(GtError *err)
 {
   static char string_1[]  = "a bb ccc dddd eeeee",
               string_2[]  = "a\tbb\tccc\tdddd\teeeee",
@@ -98,71 +98,71 @@ int splitter_unit_test(GtError *err)
               string_4[]  = "a  b",
               string_5[]  = "ac bc ",
               string_6[]  = "test";
-  Splitter *s;
+  GtSplitter *s;
   int had_err = 0;
   gt_error_check(err);
-  s = splitter_new();
+  s = gt_splitter_new();
 
   /* string_1 */
-  ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_1, strlen(string_1), ' ');
-  ensure(had_err, splitter_size(s) == 5);
-  ensure(had_err, strcmp(splitter_get_token(s, 0), "a") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 2), "ccc") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 3), "dddd") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 4), "eeeee") == 0);
-  splitter_reset(s);
+  ensure(had_err, !gt_splitter_size(s));
+  gt_splitter_split(s, string_1, strlen(string_1), ' ');
+  ensure(had_err, gt_splitter_size(s) == 5);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "a") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "bb") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "ccc") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 3), "dddd") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 4), "eeeee") == 0);
+  gt_splitter_reset(s);
 
   /* string_2 */
-  ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_2, strlen(string_2), '\t');
-  ensure(had_err, splitter_size(s) == 5);
-  ensure(had_err, strcmp(splitter_get_token(s, 0), "a") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 2), "ccc") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 3), "dddd") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 4), "eeeee") == 0);
-  splitter_reset(s);
+  ensure(had_err, !gt_splitter_size(s));
+  gt_splitter_split(s, string_2, strlen(string_2), '\t');
+  ensure(had_err, gt_splitter_size(s) == 5);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "a") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "bb") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "ccc") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 3), "dddd") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 4), "eeeee") == 0);
+  gt_splitter_reset(s);
 
   /* string_3 */
-  ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_3, strlen(string_3), '\t');
-  ensure(had_err, splitter_size(s) == 1);
-  ensure(had_err, strcmp(splitter_get_token(s, 0), "") == 0);
-  splitter_reset(s);
+  ensure(had_err, !gt_splitter_size(s));
+  gt_splitter_split(s, string_3, strlen(string_3), '\t');
+  ensure(had_err, gt_splitter_size(s) == 1);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "") == 0);
+  gt_splitter_reset(s);
 
   /* string_4 */
-  ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_4, strlen(string_4), ' ');
-  ensure(had_err, splitter_size(s) == 3);
-  ensure(had_err, strcmp(splitter_get_token(s, 0), "a") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 1), "") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 2), "b") == 0);
-  splitter_reset(s);
+  ensure(had_err, !gt_splitter_size(s));
+  gt_splitter_split(s, string_4, strlen(string_4), ' ');
+  ensure(had_err, gt_splitter_size(s) == 3);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "a") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "b") == 0);
+  gt_splitter_reset(s);
 
   /* string_5 */
-  ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_5, strlen(string_5), ' ');
-  ensure(had_err, splitter_size(s) == 3);
-  ensure(had_err, strcmp(splitter_get_token(s, 0), "ac") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 1), "bc") == 0);
-  ensure(had_err, strcmp(splitter_get_token(s, 2), "") == 0);
-  splitter_reset(s);
+  ensure(had_err, !gt_splitter_size(s));
+  gt_splitter_split(s, string_5, strlen(string_5), ' ');
+  ensure(had_err, gt_splitter_size(s) == 3);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "ac") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 1), "bc") == 0);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 2), "") == 0);
+  gt_splitter_reset(s);
 
   /* string_6 */
-  ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_6, strlen(string_6), ';');
-  ensure(had_err, splitter_size(s) == 1);
-  ensure(had_err, strcmp(splitter_get_token(s, 0), "test") == 0);
+  ensure(had_err, !gt_splitter_size(s));
+  gt_splitter_split(s, string_6, strlen(string_6), ';');
+  ensure(had_err, gt_splitter_size(s) == 1);
+  ensure(had_err, strcmp(gt_splitter_get_token(s, 0), "test") == 0);
 
   /* free */
-  splitter_delete(s);
+  gt_splitter_delete(s);
 
   return had_err;
 }
 
-void splitter_delete(Splitter *s)
+void gt_splitter_delete(GtSplitter *s)
 {
   if (!s) return;
   gt_free(s->tokens);

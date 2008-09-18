@@ -21,15 +21,15 @@
 #include "core/unused_api.h"
 #include "extended/tag_value_map.h"
 
-/* The TagValueMap is implemented as a simple char* which points to a memory
+/* The GtTagValueMap is implemented as a simple char* which points to a memory
    region organized as follows:
 
    tag\0value\0tag\0value\0\0
 */
 
-TagValueMap tag_value_map_new(const char *tag, const char *value)
+GtTagValueMap gt_tag_value_map_new(const char *tag, const char *value)
 {
-  TagValueMap map;
+  GtTagValueMap map;
   size_t tag_len, value_len;
   assert(tag && value);
   tag_len = strlen(tag);
@@ -42,7 +42,7 @@ TagValueMap tag_value_map_new(const char *tag, const char *value)
   return map;
 }
 
-void tag_value_map_delete(TagValueMap map)
+void gt_tag_value_map_delete(GtTagValueMap map)
 {
   if (!map) return;
   gt_free(map);
@@ -50,7 +50,7 @@ void tag_value_map_delete(TagValueMap map)
 
 /* Stores map length in <map_len> if the return value equals NULL (i.e., if not
    value has been found) and <map_len> does not equal NULL. */
-static const char* get_value(const TagValueMap map, const char *tag,
+static const char* get_value(const GtTagValueMap map, const char *tag,
                              size_t *map_len)
 {
   const char *map_ptr, *tag_ptr;
@@ -74,7 +74,8 @@ static const char* get_value(const TagValueMap map, const char *tag,
   return NULL;
 }
 
-void tag_value_map_add(TagValueMap *map, const char *tag, const char *value)
+void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
+                          const char *value)
 {
   size_t tag_len, value_len, map_len = 0;
   const char *tag_already_used;
@@ -93,14 +94,15 @@ void tag_value_map_add(TagValueMap *map, const char *tag, const char *value)
   (*map)[map_len + tag_len + 1 + value_len + 1] = '\0';
 }
 
-const char* tag_value_map_get(const TagValueMap map, const char *tag)
+const char* gt_tag_value_map_get(const GtTagValueMap map, const char *tag)
 {
   assert(map && tag && strlen(tag));
   return get_value(map, tag, NULL);
 }
 
-void tag_value_map_foreach(const TagValueMap map, TagValueMapIteratorFunc func,
-                           void *data)
+void gt_tag_value_map_foreach(const GtTagValueMap map,
+                              GtTagValueMapIteratorFunc func,
+                              void *data)
 {
   const char *map_ptr, *tag;
   assert(map && func);
@@ -113,22 +115,22 @@ void tag_value_map_foreach(const TagValueMap map, TagValueMapIteratorFunc func,
   } while (*map_ptr != '\0');
 }
 
-int tag_value_map_example(GT_UNUSED GtError *err)
+int gt_tag_value_map_example(GT_UNUSED GtError *err)
 {
-  TagValueMap map;
+  GtTagValueMap map;
 
   gt_error_check(err);
 
-  map = tag_value_map_new("tag 1", "value 1");
-  tag_value_map_add(&map, "tag 2", "value 2");
-  tag_value_map_add(&map, "tag 3", "value 3");
+  map = gt_tag_value_map_new("tag 1", "value 1");
+  gt_tag_value_map_add(&map, "tag 2", "value 2");
+  gt_tag_value_map_add(&map, "tag 3", "value 3");
 
-  assert(!tag_value_map_get(map, "unused tag"));
-  assert(!strcmp(tag_value_map_get(map, "tag 1"), "value 1"));
-  assert(!strcmp(tag_value_map_get(map, "tag 2"), "value 2"));
-  assert(!strcmp(tag_value_map_get(map, "tag 3"), "value 3"));
+  assert(!gt_tag_value_map_get(map, "unused tag"));
+  assert(!strcmp(gt_tag_value_map_get(map, "tag 1"), "value 1"));
+  assert(!strcmp(gt_tag_value_map_get(map, "tag 2"), "value 2"));
+  assert(!strcmp(gt_tag_value_map_get(map, "tag 3"), "value 3"));
 
-  tag_value_map_delete(map);
+  gt_tag_value_map_delete(map);
 
   return 0;
 }

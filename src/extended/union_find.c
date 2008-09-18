@@ -25,47 +25,48 @@
 typedef struct {
   unsigned long parent,
                 rank;
-} UnionFindElement;
+} GtUnionFindElement;
 
-struct UnionFind {
-  UnionFindElement *elems;
+struct GtUnionFind {
+  GtUnionFindElement *elems;
   unsigned long num_of_elems;
 };
 
-UnionFind* union_find_new(unsigned long num_of_elems)
+GtUnionFind* gt_union_find_new(unsigned long num_of_elems)
 {
-  UnionFind *uf;
+  GtUnionFind *uf;
   unsigned long i;
   assert(num_of_elems);
   uf = gt_malloc(sizeof *uf);
-  uf->elems = gt_calloc(sizeof (UnionFindElement), num_of_elems);
+  uf->elems = gt_calloc(sizeof (GtUnionFindElement), num_of_elems);
   for (i = 0; i < num_of_elems; i++)
     uf->elems[i].parent = i;
   uf->num_of_elems = num_of_elems;
   return uf;
 }
 
-void union_find_delete(UnionFind *uf)
+void gt_union_find_delete(GtUnionFind *uf)
 {
   if (!uf) return;
   gt_free(uf->elems);
   gt_free(uf);
 }
 
-unsigned long union_find_find(UnionFind *uf, unsigned long elem)
+unsigned long gt_union_find_find(GtUnionFind *uf, unsigned long elem)
 {
   assert(uf && elem < uf->num_of_elems);
   if (elem != uf->elems[elem].parent) /* path compression */
-    uf->elems[elem].parent = union_find_find(uf, uf->elems[elem].parent);
+    uf->elems[elem].parent = gt_union_find_find(uf, uf->elems[elem].parent);
   return uf->elems[elem].parent;
 }
 
-void union_find_union(UnionFind *uf, unsigned long elem_a, unsigned long elem_b)
+void gt_union_find_union(GtUnionFind *uf, unsigned long elem_a,
+                         unsigned long elem_b)
 {
   unsigned long x, y;
   assert(uf && elem_a < uf->num_of_elems && elem_b < uf->num_of_elems);
-  x = union_find_find(uf, elem_a);
-  y = union_find_find(uf, elem_b);
+  x = gt_union_find_find(uf, elem_a);
+  y = gt_union_find_find(uf, elem_b);
   /* union-by-rank heuristic */
   if (uf->elems[x].rank > uf->elems[y].rank)
     uf->elems[y].parent = x;
@@ -76,37 +77,37 @@ void union_find_union(UnionFind *uf, unsigned long elem_a, unsigned long elem_b)
   }
 }
 
-int union_find_unit_test(GtError *err)
+int gt_union_find_unit_test(GtError *err)
 {
   unsigned long i;
-  UnionFind *uf;
+  GtUnionFind *uf;
   int had_err = 0;
   gt_error_check(err);
 
   /* one element */
-  uf = union_find_new(1);
-  ensure(had_err, union_find_find(uf, 0) == 0);
-  union_find_delete(uf);
+  uf = gt_union_find_new(1);
+  ensure(had_err, gt_union_find_find(uf, 0) == 0);
+  gt_union_find_delete(uf);
 
   /* two elements */
   if (!had_err) {
-    uf = union_find_new(2);
-    ensure(had_err, union_find_find(uf, 0) != union_find_find(uf, 1));
-    union_find_union(uf, 0, 1);
-    ensure(had_err, union_find_find(uf, 0) == union_find_find(uf, 1));
-    union_find_delete(uf);
+    uf = gt_union_find_new(2);
+    ensure(had_err, gt_union_find_find(uf, 0) != gt_union_find_find(uf, 1));
+    gt_union_find_union(uf, 0, 1);
+    ensure(had_err, gt_union_find_find(uf, 0) == gt_union_find_find(uf, 1));
+    gt_union_find_delete(uf);
   }
 
   /* many elements */
   if (!had_err) {
-    uf = union_find_new(UNION_FIND_TEST_SIZE);
+    uf = gt_union_find_new(UNION_FIND_TEST_SIZE);
     for (i = 1; !had_err && i < UNION_FIND_TEST_SIZE; i++)
-      ensure(had_err, union_find_find(uf, 0) != union_find_find(uf, i));
+      ensure(had_err, gt_union_find_find(uf, 0) != gt_union_find_find(uf, i));
     for (i = 1; !had_err && i < UNION_FIND_TEST_SIZE; i++)
-      union_find_union(uf, 0, i);
+      gt_union_find_union(uf, 0, i);
     for (i = 1; !had_err && i < UNION_FIND_TEST_SIZE; i++)
-      ensure(had_err, union_find_find(uf, 0) == union_find_find(uf, i));
-    union_find_delete(uf);
+      ensure(had_err, gt_union_find_find(uf, 0) == gt_union_find_find(uf, i));
+    gt_union_find_delete(uf);
   }
 
   return had_err;

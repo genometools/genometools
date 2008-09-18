@@ -117,7 +117,8 @@ int gt_toolbox_show(GT_UNUSED const char *progname, void *toolbox,
   assert(toolbox);
   tb = (GtToolbox*) toolbox;
   printf("\nTools:\n\n");
-  had_err = gt_hashmap_foreach_in_key_order(tb->tools, show_tool_name, NULL, NULL);
+  had_err = gt_hashmap_foreach_in_key_order(tb->tools, show_tool_name, NULL,
+                                            NULL);
   assert(!had_err); /* show_tool_name() is sane */
   return 0;
 }

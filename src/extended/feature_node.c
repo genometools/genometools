@@ -78,7 +78,7 @@ static void gt_feature_node_free(GtGenomeNode *gn)
   gt_assert(fn);
   gt_str_delete(fn->seqid);
   gt_str_delete(fn->source);
-  tag_value_map_delete(fn->attributes);
+  gt_tag_value_map_delete(fn->attributes);
   gt_dlist_delete(fn->children);
 }
 
@@ -87,7 +87,7 @@ const char* gt_feature_node_get_attribute(GtFeatureNode *fn,
 {
   if (!fn->attributes)
     return NULL;
-  return tag_value_map_get(fn->attributes, attr_name);
+  return gt_tag_value_map_get(fn->attributes, attr_name);
 }
 
 static void store_attribute(const char *attr_name,
@@ -102,7 +102,7 @@ GtStrArray* gt_feature_node_get_attribute_list(GtFeatureNode *fn)
 {
   GtStrArray *list = gt_strarray_new();
   if (fn->attributes)
-    tag_value_map_foreach(fn->attributes, store_attribute, list);
+    gt_tag_value_map_foreach(fn->attributes, store_attribute, list);
   return list;
 }
 
@@ -513,9 +513,9 @@ void gt_feature_node_add_attribute(GtFeatureNode *fn,
   gt_assert(strlen(attr_name)); /* attribute name cannot be empty */
   gt_assert(strlen(attr_value)); /* attribute value cannot be empty */
   if (!fn->attributes)
-    fn->attributes = tag_value_map_new(attr_name, attr_value);
+    fn->attributes = gt_tag_value_map_new(attr_name, attr_value);
   else
-    tag_value_map_add(&fn->attributes, attr_name, attr_value);
+    gt_tag_value_map_add(&fn->attributes, attr_name, attr_value);
 }
 
 void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
@@ -523,8 +523,9 @@ void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
 {
   gt_assert(fn && iterfunc);
   if (fn->attributes) {
-    tag_value_map_foreach(fn->attributes, (TagValueMapIteratorFunc) iterfunc,
-                          data);
+    gt_tag_value_map_foreach(fn->attributes,
+                             (GtTagValueMapIteratorFunc) iterfunc,
+                             data);
   }
 }
 

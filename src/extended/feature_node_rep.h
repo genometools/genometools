@@ -28,7 +28,7 @@ struct GtFeatureNode {
   const char *type;
   GtRange range;
   float score;
-  TagValueMap attributes; /* stores the attributes; created on demand */
+  GtTagValueMap attributes; /* stores the attributes; created on demand */
   unsigned int bit_field;
   GtDlist *children;
   GtFeatureNode *representative;

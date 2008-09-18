@@ -29,23 +29,23 @@
   MIT Press: Cambridge, MA, 1990.
 */
 
-typedef struct UnionFind UnionFind;
+typedef struct GtUnionFind GtUnionFind;
 
 /* Create a new union-find data structures representing <num_of_elems> many
    elements (numbered from 0 up to <num_of_elems> - 1) contained in disjoined
    sets. */
-UnionFind*    union_find_new(unsigned long num_of_elems);
+GtUnionFind*    gt_union_find_new(unsigned long num_of_elems);
 
 /* Delete the given union-find data structure. */
-void          union_find_delete(UnionFind*);
+void          gt_union_find_delete(GtUnionFind*);
 
 /* Find the representative set for the given <elem>. */
-unsigned long union_find_find(UnionFind*, unsigned long elem);
+unsigned long gt_union_find_find(GtUnionFind*, unsigned long elem);
 
 /* Union the set containing <elem_a> with the set containing <elem_b>. */
-void          union_find_union(UnionFind*, unsigned long elem_a,
+void          gt_union_find_union(GtUnionFind*, unsigned long elem_a,
                                            unsigned long elem_b);
 
-int           union_find_unit_test(GtError*);
+int           gt_union_find_unit_test(GtError*);
 
 #endif

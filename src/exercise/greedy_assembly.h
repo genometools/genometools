@@ -26,7 +26,8 @@ typedef struct GreedyAssembly GreedyAssembly;
 GreedyAssembly* greedy_assembly_new(GtBioseq *fragments,
                                     FragmentOverlaps *sorted_overlaps);
 void            greedy_assembly_delete(GreedyAssembly*);
-void            greedy_assembly_show(const GreedyAssembly*, GtBioseq *fragments);
+void            greedy_assembly_show(const GreedyAssembly*,
+                                     GtBioseq *fragments);
 void            greedy_assembly_show_path(const GreedyAssembly*);
 
 #endif

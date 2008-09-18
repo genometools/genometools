@@ -105,7 +105,8 @@ static GtFeatureNode* find_root(const FeatureInfo *fi, const char *id)
   if (delim) {
     char *first_parent = gt_cstr_dup_nt(id, delim - id);
     this_feature = gt_hashmap_get(fi->id_to_genome_node, first_parent);
-    parent_pseudo_feature = gt_hashmap_get(fi->id_to_pseudo_parent, first_parent);
+    parent_pseudo_feature = gt_hashmap_get(fi->id_to_pseudo_parent,
+                                           first_parent);
     gt_free(first_parent);
   }
   else {

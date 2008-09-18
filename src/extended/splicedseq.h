@@ -22,18 +22,18 @@
 
 typedef struct Splicedseq Splicedseq;
 
-Splicedseq*   splicedseq_new(void);
+Splicedseq*   gt_splicedseq_new(void);
 /* adds an ``exon'' to the spliced sequence */
-void          splicedseq_add(Splicedseq*, unsigned long start,
+void          gt_splicedseq_add(Splicedseq*, unsigned long start,
                              unsigned long end, const char *original_sequence);
-char*         splicedseq_get(const Splicedseq*);
-bool          splicedseq_pos_is_border(const Splicedseq*, unsigned long);
+char*         gt_splicedseq_get(const Splicedseq*);
+bool          gt_splicedseq_pos_is_border(const Splicedseq*, unsigned long);
 /* maps the given position back to the original coordinate system */
-unsigned long splicedseq_map(const Splicedseq*, unsigned long);
-unsigned long splicedseq_length(const Splicedseq*);
-int           splicedseq_reverse(Splicedseq*, GtError*);
-void          splicedseq_reset(Splicedseq*);
-int           splicedseq_unit_test(GtError*);
-void          splicedseq_delete(Splicedseq*);
+unsigned long gt_splicedseq_map(const Splicedseq*, unsigned long);
+unsigned long gt_splicedseq_length(const Splicedseq*);
+int           gt_splicedseq_reverse(Splicedseq*, GtError*);
+void          gt_splicedseq_reset(Splicedseq*);
+int           gt_splicedseq_unit_test(GtError*);
+void          gt_splicedseq_delete(Splicedseq*);
 
 #endif

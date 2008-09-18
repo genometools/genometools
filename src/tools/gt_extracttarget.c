@@ -95,23 +95,24 @@ static int extracttarget_from_seqfiles(const char *target,
 {
   GtStr *unescaped_target;
   char *escaped_target;
-  Splitter *splitter;
+  GtSplitter *splitter;
   unsigned long i;
   int had_err = 0;
   gt_error_check(err);
   assert(target && seqfiles);
-  splitter = splitter_new();
+  splitter = gt_splitter_new();
   unescaped_target = gt_str_new();
   escaped_target = gt_cstr_dup(target);
-  splitter_split(splitter, escaped_target, strlen(escaped_target), ',');
-  for (i = 0; !had_err && i < splitter_size(splitter); i++) {
-    Splitter *blank_splitter;
-    char *token = splitter_get_token(splitter, i);
-    blank_splitter = splitter_new();
-    splitter_split(blank_splitter, token, strlen(token), ' ');
+  gt_splitter_split(splitter, escaped_target, strlen(escaped_target), ',');
+  for (i = 0; !had_err && i < gt_splitter_size(splitter); i++) {
+    GtSplitter *blank_splitter;
+    char *token = gt_splitter_get_token(splitter, i);
+    blank_splitter = gt_splitter_new();
+    gt_splitter_split(blank_splitter, token, strlen(token), ' ');
     had_err = gff3_unescape(unescaped_target,
-                            splitter_get_token(blank_splitter, 0),
-                            strlen(splitter_get_token(blank_splitter, 0)), err);
+                            gt_splitter_get_token(blank_splitter, 0),
+                            strlen(gt_splitter_get_token(blank_splitter, 0)),
+                                   err);
     if (!had_err) {
       unsigned long j;
       for (j = 0; j < gt_strarray_size(seqfiles); j++) {
@@ -133,11 +134,11 @@ static int extracttarget_from_seqfiles(const char *target,
         gt_bioseq_delete(bioseq);
       }
     }
-    splitter_delete(blank_splitter);
+    gt_splitter_delete(blank_splitter);
   }
   gt_free(escaped_target);
   gt_str_delete(unescaped_target);
-  splitter_delete(splitter);
+  gt_splitter_delete(splitter);
   return had_err;
 }
 

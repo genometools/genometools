@@ -32,23 +32,24 @@ struct GreedyAssembly {
 };
 
 static void try_to_select_edge(GreedyAssembly *ga, const Overlap *edge,
-                               bool *inedges, bool *outedges, UnionFind *uf,
+                               bool *inedges, bool *outedges, GtUnionFind *uf,
                                unsigned long *selected)
 {
   if (!inedges[edge->end] && !outedges[edge->start] &&
-      union_find_find(uf, edge->start) != union_find_find(uf, edge->end)) {
+      gt_union_find_find(uf, edge->start) != gt_union_find_find(uf,
+                                                                edge->end)) {
     /* valid edge found */
     ga->next_fragment[edge->start] = edge->end;
     ga->overlap[edge->end] = edge->weight;
     (*selected)++;
     inedges[edge->end] = true;
     outedges[edge->start] = true;
-    union_find_union(uf, edge->start, edge->end);
+    gt_union_find_union(uf, edge->start, edge->end);
   }
 }
 
 static void add_zero_weight_edges(GreedyAssembly *ga, bool *inedges,
-                                  bool *outedges, UnionFind *uf,
+                                  bool *outedges, GtUnionFind *uf,
                                   unsigned long *selected)
 {
   Overlap zeroedge = { 0 };
@@ -75,12 +76,12 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
 {
   unsigned long i, current_edge, selected = 0;
   bool *inedges, *outedges;
-  UnionFind *uf;
+  GtUnionFind *uf;
   assert(ga && sorted_overlaps);
   /* init */
   inedges = gt_calloc(sizeof *inedges, ga->num_of_fragments);
   outedges = gt_calloc(sizeof *inedges, ga->num_of_fragments);
-  uf = union_find_new(ga->num_of_fragments);
+  uf = gt_union_find_new(ga->num_of_fragments);
   current_edge = fragment_overlaps_size(sorted_overlaps);
   /* process given edges */
   while (selected  + 1 < ga->num_of_fragments) {
@@ -104,7 +105,7 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
   }
   assert(ga->first_fragment != UNDEF_ULONG);
   assert(selected + 1 == ga->num_of_fragments);
-  union_find_delete(uf);
+  gt_union_find_delete(uf);
   gt_free(outedges);
   gt_free(inedges);
 }

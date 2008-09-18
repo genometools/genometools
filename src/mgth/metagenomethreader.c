@@ -447,7 +447,8 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
       /* Dem aktuellen Schluessel Zeige auf die Position in der GtBioseq
          zuordnen */
-      if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.queryhash, descr_ptr_query))
+      if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.queryhash,
+                                          descr_ptr_query))
         cstr_nofree_ulp_gt_hashmap_add(parsestruct.queryhash, descr_ptr_query,
                                    querynum + loop_index);
     }
@@ -601,8 +602,9 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
                 zuordnen */
               if (!cstr_nofree_ulp_gt_hashmap_get(parsestruct.hithash,
                                               descr_ptr_hit))
-                cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash, descr_ptr_hit,
-                                           hitnum + loop_index);
+                cstr_nofree_ulp_gt_hashmap_add(parsestruct.hithash,
+                                               descr_ptr_hit,
+                                               hitnum + loop_index);
             }
           }
         }

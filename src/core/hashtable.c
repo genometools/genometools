@@ -138,7 +138,8 @@ ht_destruct(GtHashtable *ht)
 }
 
 extern GtHashtable *
-gt_hashtable_new_with_start_size(HashElemInfo table_info, unsigned short size_log)
+gt_hashtable_new_with_start_size(HashElemInfo table_info,
+                                 unsigned short size_log)
 {
   GtHashtable *ht;
   ht = gt_malloc(sizeof (*ht));
@@ -791,7 +792,8 @@ gt_hashtable_test(HashElemInfo table_info)
       elem_p = gt_hashtable_get(ht, &s2);
       my_ensure(had_err, elem_p && !strcmp(elem_p->value, s1));
 
-      my_ensure(had_err, gt_hashtable_remove(ht, &s1)); /* remove first element */
+      /* remove first element */
+      my_ensure(had_err, gt_hashtable_remove(ht, &s1));
       my_ensure(had_err, !gt_hashtable_get(ht, &s1));
 
       elem_p = gt_hashtable_get(ht, s2);

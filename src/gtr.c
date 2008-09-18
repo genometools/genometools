@@ -134,11 +134,13 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).");
   gt_option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
-  o = gt_option_new_bool("i", "enter interactive mode after executing 'tool' or "
-                      "'script'", &gtr->interactive, false);
+  o = gt_option_new_bool("i",
+                         "enter interactive mode after executing 'tool' or "
+                         "'script'", &gtr->interactive, false);
   gt_option_hide_default(o);
   gt_option_parser_add_option(op, o);
-  o = gt_option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
+  o = gt_option_new_bool("test", "perform unit tests and exit", &gtr->test,
+                         false);
   gt_option_hide_default(o);
   gt_option_parser_add_option(op, o);
   debug_option = gt_option_new_debug(&gtr->debug);
@@ -154,9 +156,10 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   gt_option_is_development_option(debugfp_option);
   gt_option_parser_add_option(op, debugfp_option);
   gt_option_imply(debugfp_option, debug_option);
-  o = gt_option_new_uint("seed", "set seed for random number generator manually\n"
-                      "0 generates a seed from current time and process id",
-                      &gtr->seed, 0);
+  o = gt_option_new_uint("seed",
+                         "set seed for random number generator manually\n"
+                         "0 generates a seed from current time and process id",
+                         &gtr->seed, 0);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "
@@ -167,7 +170,8 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                           "file", gtr->testspacepeak);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
   gt_option_parser_delete(op);
   return oprval;
 }

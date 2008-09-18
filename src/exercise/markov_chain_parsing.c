@@ -26,7 +26,8 @@
 #define THIRDLINE  "# State labels:"
 #define FIFTHLINE  "# Transition matrix:"
 
-static int read_next_line(GtStr *line, FILE *fp, const char *filename, GtError *err)
+static int read_next_line(GtStr *line, FILE *fp, const char *filename,
+                          GtError *err)
 {
   gt_error_check(err);
   assert(line && fp);
@@ -62,13 +63,13 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
   unsigned long i, j;
   MarkovChain *mc = NULL;
   GtStr *line, *alphabet;
-  Splitter *splitter;
+  GtSplitter *splitter;
   int num_of_states, had_err;
   gt_error_check(err);
   assert(fp);
   line = gt_str_new();
   alphabet = gt_str_new();
-  splitter = splitter_new();
+  splitter = gt_splitter_new();
 
   /* read first line */
   had_err = read_next_line(line, fp, filename, err);
@@ -130,15 +131,16 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
     double transition_prob;
     had_err = read_next_line(line, fp, filename, err);
     if (!had_err) {
-      splitter_split(splitter, gt_str_get(line), gt_str_length(line), ' ');
-      if (splitter_size(splitter) != num_of_states) {
+      gt_splitter_split(splitter, gt_str_get(line), gt_str_length(line), ' ');
+      if (gt_splitter_size(splitter) != num_of_states) {
         gt_error_set(err, "%lu line of file \"%s\" does not contain %d tokens",
                   5 + i + 1, filename, num_of_states);
         had_err = -1;
       }
     }
     for (j = 0; !had_err && j < num_of_states; j++) {
-      if (gt_parse_double(&transition_prob, splitter_get_token(splitter, j))) {
+      if (gt_parse_double(&transition_prob,
+                          gt_splitter_get_token(splitter, j))) {
         gt_error_set(err, "could not parse transition probability %lu on line "
                           "%lu from file \"%s\"", j + 1, 5 + i + 1, filename);
         had_err = -1;
@@ -146,7 +148,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
       if (!had_err) /* store transition probability */
         markov_chain_set_transition_prob(mc, i, j, transition_prob);
     }
-    splitter_reset(splitter);
+    gt_splitter_reset(splitter);
   }
 
   /* make sure markov chain is valid */
@@ -156,7 +158,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
     had_err = -1;
   }
 
-  splitter_delete(splitter);
+  gt_splitter_delete(splitter);
   gt_str_delete(alphabet);
   gt_str_delete(line);
   if (had_err) {

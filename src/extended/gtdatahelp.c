@@ -32,7 +32,7 @@
 int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
                      GtError *err)
 {
-  Splitter *splitter;
+  GtSplitter *splitter;
   GtStr *doc_file;
   lua_State *L = NULL;
   char *prog, *bn;
@@ -42,9 +42,9 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
   assert(progname);
 
   prog = gt_cstr_dup(progname); /* create modifiable copy for splitter */
-  splitter = splitter_new();
-  splitter_split(splitter, prog, strlen(prog), ' ');
-  doc_file = gt_get_gtdata_path(splitter_get_token(splitter, 0), err);
+  splitter = gt_splitter_new();
+  gt_splitter_split(splitter, prog, strlen(prog), ' ');
+  doc_file = gt_get_gtdata_path(gt_splitter_get_token(splitter, 0), err);
   if (!doc_file)
     had_err = -1;
 
@@ -63,7 +63,7 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
     lua_pushstring(L, gt_str_get(doc_file));
     lua_setglobal(L, "gtdata_doc_dir");
     /* finish creating doc_file */
-    if (splitter_size(splitter) == 1) {
+    if (gt_splitter_size(splitter) == 1) {
       /* special case for `gt` */
       bn = gt_basename(progname);
       gt_str_append_cstr(doc_file, bn);
@@ -72,8 +72,8 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
     else {
       /* general case for the tools */
       gt_str_append_cstr(doc_file,
-                      splitter_get_token(splitter,
-                                         splitter_size(splitter) - 1));
+                      gt_splitter_get_token(splitter,
+                                         gt_splitter_size(splitter) - 1));
     }
     gt_str_append_cstr(doc_file, ".lua");
     /* execute doc_file */
@@ -86,7 +86,7 @@ int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
   /* free */
   if (L) lua_close(L);
   gt_str_delete(doc_file);
-  splitter_delete(splitter);
+  gt_splitter_delete(splitter);
   gt_free(prog);
 
   return had_err;

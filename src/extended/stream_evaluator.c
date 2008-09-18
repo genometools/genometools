@@ -1299,7 +1299,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     /* we consider only genome features */
     if ((gf = gt_feature_node_try_cast(gn))) {
       /* each sequence must have its own ``slot'' at this point */
-      slot = gt_hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
+      slot = gt_hashmap_get(se->slots,
+                            gt_str_get(gt_genome_node_get_seqid(gn)));
       assert(slot);
       /* store the exons */
       real_info.slot = slot;
@@ -1316,7 +1317,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* set the actuals and sort them */
   if (!had_err) {
-    had_err = gt_hashmap_foreach(se->slots, set_actuals_and_sort_them, se, NULL);
+    had_err = gt_hashmap_foreach(se->slots, set_actuals_and_sort_them, se,
+                                 NULL);
     assert(!had_err); /* set_actuals_and_sort_them() is sane */
   }
 
@@ -1327,7 +1329,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       /* we consider only genome features */
       if ((gf = gt_feature_node_try_cast(gn))) {
         /* get (real) slot */
-        slot = gt_hashmap_get(se->slots, gt_str_get(gt_genome_node_get_seqid(gn)));
+        slot = gt_hashmap_get(se->slots,
+                              gt_str_get(gt_genome_node_get_seqid(gn)));
         if (slot) {
           predicted_info.slot = slot;
           gt_feature_node_determine_transcripttypes(gf);
@@ -1351,13 +1354,15 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* determine the missing mRNAs */
   if (!had_err) {
-    had_err = gt_hashmap_foreach(se->slots, determine_missing_features, se, NULL);
+    had_err = gt_hashmap_foreach(se->slots, determine_missing_features, se,
+                                 NULL);
     assert(!had_err); /* determine_missing_features() is sane */
   }
 
   /* compute the nucleotides values */
   if (!had_err && se->nuceval) {
-    had_err = gt_hashmap_foreach(se->slots, compute_nucleotides_values, se, NULL);
+    had_err = gt_hashmap_foreach(se->slots, compute_nucleotides_values, se,
+                                 NULL);
     assert(!had_err); /* compute_nucleotides_values() is sane */
   }
 

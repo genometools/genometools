@@ -210,7 +210,8 @@ GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi)
 
   fi = gt_feature_index_memory_cast((GtFeatureIndex*) gfi);
   seqids = gt_strarray_new();
-  rval = gt_hashmap_foreach_in_key_order(fi->regions, store_seqid, seqids, NULL);
+  rval = gt_hashmap_foreach_in_key_order(fi->regions, store_seqid, seqids,
+                                         NULL);
   assert(!rval); /* store_seqid() is sane */
   return seqids;
 }

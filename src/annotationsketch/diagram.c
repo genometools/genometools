@@ -589,8 +589,9 @@ static void gt_diagram_build(GtDiagram *diagram, GtArray *features)
     traverse_genome_nodes(current_root, &gt_genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
-  had_err = gt_hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks, diagram,
-                                    (GtCompare) gt_genome_node_cmp, NULL);
+  had_err = gt_hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks,
+                                       diagram, (GtCompare) gt_genome_node_cmp,
+                                       NULL);
   assert(!had_err); /* collect_blocks() is sane */
 
   /* clear caches */
@@ -729,7 +730,8 @@ static int layout_tracks(void *key, void *value, void *data,
     block = *(GtBlock**) gt_array_get(list, i);
     gt_track_insert_block(track, block);
   }
-  gt_hashmap_add(tti->dia->tracks, gt_cstr_dup(gt_str_get(gt_track_key)), track);
+  gt_hashmap_add(tti->dia->tracks, gt_cstr_dup(gt_str_get(gt_track_key)),
+                 track);
   gt_str_delete(gt_track_key);
   return 0;
 }

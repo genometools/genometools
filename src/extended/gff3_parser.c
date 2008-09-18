@@ -182,16 +182,16 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
   GtStr *unescaped_target;
   char *escaped_target;
   GtStrand parsed_strand;
-  Splitter *splitter;
+  GtSplitter *splitter;
   GtRange parsed_range;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(value && filename);
-  splitter = splitter_new();
+  splitter = gt_splitter_new();
   unescaped_target = gt_str_new();
   escaped_target = gt_cstr_dup(value);
-  splitter_split(splitter, escaped_target, strlen(escaped_target), ' ');
-  num_of_tokens = splitter_size(splitter);
+  gt_splitter_split(splitter, escaped_target, strlen(escaped_target), ' ');
+  num_of_tokens = gt_splitter_size(splitter);
   if (!(num_of_tokens == 3 || num_of_tokens == 4)) {
     gt_error_set(err, "Target attribute value '%s' on line %u in file \"%s\" "
               "must have 3 or 4 blank separated entries", value, line_number,
@@ -200,21 +200,23 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
   }
   /* parse target id */
   if (!had_err) {
-    had_err = gff3_unescape(unescaped_target, splitter_get_token(splitter, 0),
-                            strlen(splitter_get_token(splitter, 0)), err);
+    had_err = gff3_unescape(unescaped_target, gt_splitter_get_token(splitter,
+                                                                    0),
+                            strlen(gt_splitter_get_token(splitter, 0)), err);
   }
   if (!had_err && target_id) gt_str_append_str(target_id, unescaped_target);
   /* parse target range */
   if (!had_err) {
-    had_err = gt_parse_range(&parsed_range, splitter_get_token(splitter, 1),
-                          splitter_get_token(splitter, 2), line_number,
+    had_err = gt_parse_range(&parsed_range, gt_splitter_get_token(splitter, 1),
+                          gt_splitter_get_token(splitter, 2), line_number,
                           filename, err);
   }
   if (!had_err && target_range) *target_range = parsed_range;
   /* parse target strand (if given) */
   if (!had_err) {
-    if (splitter_size(splitter) == 4) {
-      had_err = gt_parse_strand(&parsed_strand, splitter_get_token(splitter, 3),
+    if (gt_splitter_size(splitter) == 4) {
+      had_err = gt_parse_strand(&parsed_strand, gt_splitter_get_token(splitter,
+                                                                      3),
                              line_number, filename, err);
       if (!had_err && target_strand)
         *target_strand = parsed_strand;
@@ -224,7 +226,7 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
   }
   gt_free(escaped_target);
   gt_str_delete(unescaped_target);
-  splitter_delete(splitter);
+  gt_splitter_delete(splitter);
   return had_err;
 }
 
@@ -237,26 +239,26 @@ int gt_gff3_parser_parse_target_attributes(const char *values,
                                            unsigned int line_number,
                                            GtError *err)
 {
-  Splitter *splitter;
+  GtSplitter *splitter;
   unsigned long i;
   char *targets;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(values && filename);
   targets = gt_cstr_dup(values);
-  splitter = splitter_new();
-  splitter_split(splitter, targets, strlen(targets), ',');
+  splitter = gt_splitter_new();
+  gt_splitter_split(splitter, targets, strlen(targets), ',');
   if (num_of_targets)
-    *num_of_targets = splitter_size(splitter);
-  for (i = 0; !had_err && i < splitter_size(splitter); i++) {
-    had_err = parse_target_attribute(splitter_get_token(splitter, i),
+    *num_of_targets = gt_splitter_size(splitter);
+  for (i = 0; !had_err && i < gt_splitter_size(splitter); i++) {
+    had_err = parse_target_attribute(gt_splitter_get_token(splitter, i),
                                      i ? NULL : first_target_id,
                                      i ? NULL : first_target_range,
                                      i ? NULL : first_target_strand, filename,
                                      line_number, err);
   }
   gt_free(targets);
-  splitter_delete(splitter);
+  gt_splitter_delete(splitter);
   return had_err;
 }
 
@@ -614,7 +616,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
                                const char *filename, unsigned int line_number,
                                GtError *err)
 {
-  Splitter *parent_splitter;
+  GtSplitter *parent_splitter;
   GtStrArray *valid_parents;
   unsigned long i;
   int had_err = 0;
@@ -623,13 +625,13 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
   gt_assert(parent_attr);
 
   valid_parents = gt_strarray_new();
-  parent_splitter = splitter_new();
-  splitter_split(parent_splitter, parent_attr, strlen(parent_attr), ',');
-  gt_assert(splitter_size(parent_splitter));
+  parent_splitter = gt_splitter_new();
+  gt_splitter_split(parent_splitter, parent_attr, strlen(parent_attr), ',');
+  gt_assert(gt_splitter_size(parent_splitter));
 
-  for (i = 0; i < splitter_size(parent_splitter); i++) {
+  for (i = 0; i < gt_splitter_size(parent_splitter); i++) {
     GtGenomeNode* parent_gf;
-    const char *parent = splitter_get_token(parent_splitter, i);
+    const char *parent = gt_splitter_get_token(parent_splitter, i);
     parent_gf = (GtGenomeNode*) feature_info_get(parser->feature_info, parent);
     if (!parent_gf) {
       if (!parser->tidy) {
@@ -664,11 +666,11 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
   }
 
   if (!had_err && !parser->tidy) {
-    gt_assert(splitter_size(parent_splitter) ==
+    gt_assert(gt_splitter_size(parent_splitter) ==
               gt_strarray_size(valid_parents));
   }
 
-  splitter_delete(parent_splitter);
+  gt_splitter_delete(parent_splitter);
 
   /* make sure all (valid) parents have the same (pseudo-)root */
   if (!had_err && gt_strarray_size(valid_parents) >= 2) {
@@ -870,23 +872,24 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
                             const char *filename, unsigned int line_number,
                             GtError *err)
 {
-  Splitter *attribute_splitter, *tmp_splitter, *parent_splitter;
+  GtSplitter *attribute_splitter, *tmp_splitter, *parent_splitter;
   unsigned long i;
   int had_err = 0;
 
   gt_error_check(err);
   gt_assert(attributes);
 
-  attribute_splitter = splitter_new();
-  tmp_splitter = splitter_new();
-  parent_splitter = splitter_new();
-  splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
+  attribute_splitter = gt_splitter_new();
+  tmp_splitter = gt_splitter_new();
+  parent_splitter = gt_splitter_new();
+  gt_splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
 
-  for (i = 0; !had_err && i < splitter_size(attribute_splitter); i++) {
+  for (i = 0; !had_err && i < gt_splitter_size(attribute_splitter); i++) {
     const char *attr_tag = NULL;
-    char *attr_value = NULL, *token = splitter_get_token(attribute_splitter, i);
+    char *attr_value = NULL, *token = gt_splitter_get_token(attribute_splitter,
+                                                            i);
     if (strncmp(token, ".", 1) == 0) {
-      if (splitter_size(attribute_splitter) > 1) {
+      if (gt_splitter_size(attribute_splitter) > 1) {
         gt_error_set(err, "more than one attribute token defined on line %u in "
                      "file \"%s\", altough the first one is '.'", line_number,
                      filename);
@@ -898,16 +901,16 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
     else if (is_blank_attribute(token))
       continue;
     else {
-      splitter_reset(tmp_splitter);
-      splitter_split(tmp_splitter, token, strlen(token), '=');
-      if (splitter_size(tmp_splitter) != 2) {
+      gt_splitter_reset(tmp_splitter);
+      gt_splitter_split(tmp_splitter, token, strlen(token), '=');
+      if (gt_splitter_size(tmp_splitter) != 2) {
         gt_error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
                      "contain exactly one '='", token, line_number, filename);
         had_err = -1;
         break;
       }
       else {
-        attr_tag = splitter_get_token(tmp_splitter, 0);
+        attr_tag = gt_splitter_get_token(tmp_splitter, 0);
         /* Skip leading blanks of attribute tag.
            Iit is not mentioned in the GFF3 spec that attribute tags cannot
            start with blanks, but if a Parent or ID attribute is prepended by a
@@ -919,7 +922,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
            construction. */
         while (attr_tag[0] == ' ')
           attr_tag++;
-        attr_value = splitter_get_token(tmp_splitter, 1);
+        attr_value = gt_splitter_get_token(tmp_splitter, 1);
       }
     }
     if (!had_err && !strlen(attr_tag)) {
@@ -978,9 +981,9 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
                                                 line_number, err);
   }
 
-  splitter_delete(parent_splitter);
-  splitter_delete(tmp_splitter);
-  splitter_delete(attribute_splitter);
+  gt_splitter_delete(parent_splitter);
+  gt_splitter_delete(tmp_splitter);
+  gt_splitter_delete(attribute_splitter);
 
   return had_err;
 }
@@ -1006,7 +1009,7 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
                                    unsigned int line_number, GtError *err)
 {
   GtGenomeNode *gn = NULL, *genome_feature = NULL;
-  Splitter *splitter;
+  GtSplitter *splitter;
   AutomaticGtSequenceRegion *auto_sr = NULL;
   GtStr *seqid_str = NULL;
   GtStrand gt_strand_value;
@@ -1025,17 +1028,17 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
   filename = gt_str_get(filenamestr);
 
   /* create splitter */
-  splitter = splitter_new();
+  splitter = gt_splitter_new();
 
   /* parse */
-  splitter_split(splitter, line, line_length, '\t');
-  if (splitter_size(splitter) != 9UL) {
+  gt_splitter_split(splitter, line, line_length, '\t');
+  if (gt_splitter_size(splitter) != 9UL) {
     gt_error_set(err, "line %u in file \"%s\" does not contain 9 tab (\\t) "
                    "separated fields", line_number, filename);
     had_err = -1;
   }
   if (!had_err) {
-    tokens = splitter_get_tokens(splitter);
+    tokens = gt_splitter_get_tokens(splitter);
     seqid      = tokens[0];
     source     = tokens[1];
     type       = tokens[2];
@@ -1132,7 +1135,7 @@ static int parse_regular_gff3_line(GT_GFF3Parser *parser,
 
   /* free */
   gt_str_delete(seqid_str);
-  splitter_delete(splitter);
+  gt_splitter_delete(splitter);
 
   return had_err;
 }

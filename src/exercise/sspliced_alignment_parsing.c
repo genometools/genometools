@@ -69,8 +69,9 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
   else if (line[i] == REVERSESTRANDCHAR)
     *alignment = sspliced_alignment_new(gt_str_get(id), false);
   else {
-    gt_error_set(err, "wrong formatted input line, orientation must be %c or %c\n"
-                   "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
+    gt_error_set(err,
+                 "wrong formatted input line, orientation must be %c or %c\n"
+                 "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
     had_err = -1;
   }
   i++;

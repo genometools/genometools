@@ -93,7 +93,7 @@ void file_dirname(GtStr *path, const char *file)
 int file_find_in_path(GtStr *path, const char *file, GtError *err)
 {
   char *pathvariable, *pathcomponent = NULL;
-  Splitter *splitter = NULL;
+  GtSplitter *splitter = NULL;
   unsigned long i;
   int had_err = 0;
 
@@ -114,10 +114,10 @@ int file_find_in_path(GtStr *path, const char *file, GtError *err)
   }
 
   if (!had_err) {
-    splitter = splitter_new();
-    splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
-    for (i = 0; i < splitter_size(splitter); i++) {
-      pathcomponent = splitter_get_token(splitter, i);
+    splitter = gt_splitter_new();
+    gt_splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
+    for (i = 0; i < gt_splitter_size(splitter); i++) {
+      pathcomponent = gt_splitter_get_token(splitter, i);
       gt_str_reset(path);
       gt_str_append_cstr(path, pathcomponent);
       gt_str_append_char(path, '/');
@@ -125,7 +125,7 @@ int file_find_in_path(GtStr *path, const char *file, GtError *err)
       if (file_exists(gt_str_get(path)))
         break;
     }
-    if (i < splitter_size(splitter)) {
+    if (i < gt_splitter_size(splitter)) {
       /* file found in path */
       gt_str_reset(path);
       gt_str_append_cstr(path, pathcomponent);
@@ -138,7 +138,7 @@ int file_find_in_path(GtStr *path, const char *file, GtError *err)
 
   /* free */
   gt_free(pathvariable);
-  splitter_delete(splitter);
+  gt_splitter_delete(splitter);
 
   return had_err;
 }
