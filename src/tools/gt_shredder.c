@@ -44,33 +44,35 @@ static void gt_shredder_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
 {
   ShredderArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] [sequence_file ...]",
+  op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "Shredder sequence_file into consecutive pieces of "
                          "random length.");
-  o = option_new_ulong_min("coverage", "set the number of times the "
+  o = gt_option_new_ulong_min("coverage", "set the number of times the "
                            "sequence_file is shreddered", &arguments->coverage,
                            1, 1);
-  option_parser_add_option(op, o);
-  o = option_new_ulong("minlength", "set the minimum length of the shreddered "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong("minlength",
+                       "set the minimum length of the shreddered "
                        "fragments", &arguments->minlength, 300);
-  option_parser_add_option(op, o);
-  o = option_new_ulong("maxlength", "set the maximum length of the shreddered "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong("maxlength",
+                       "set the maximum length of the shreddered "
                        "fragments", &arguments->maxlength, 700);
-  option_parser_add_option(op, o);
-  o = option_new_ulong("overlap", "set the overlap between consecutive "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong("overlap", "set the overlap between consecutive "
                        "pieces", &arguments->overlap, 0);
-  option_parser_add_option(op, o);
-  o = option_new_probability("sample", "take samples of the generated "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_probability("sample", "take samples of the generated "
                              "sequences pieces with the given probability",
                              &arguments->sample_probability, 1.0);
-  option_parser_add_option(op, o);
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
   return op;
 }
 
@@ -131,9 +133,9 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_shredder(void)
+GtTool* gt_shredder(void)
 {
-  return tool_new(gt_shredder_arguments_new,
+  return gt_tool_new(gt_shredder_arguments_new,
                   gt_shredder_arguments_delete,
                   gt_shredder_option_parser_new,
                   gt_shredder_arguments_check,

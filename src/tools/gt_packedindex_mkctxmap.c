@@ -144,25 +144,26 @@ static OPrval
 parseMkCtxMapOptions(int *parsed_args, int argc, const char **argv,
                      struct mkCtxMapOptions *params, GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  Option *option;
+  GtOption *option;
 
   gt_error_check(err);
-  op = option_parser_new("indexname",
+  op = gt_option_parser_new("indexname",
                          "Build BWT packedindex for project <indexname>.");
   registerCtxMapOptions(op, &params->mapIntervalLog2);
 
-  option = option_new_bool("v",
+  option = gt_option_new_bool("v",
                            "print verbose progress information",
                            &params->verboseOutput,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
 
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

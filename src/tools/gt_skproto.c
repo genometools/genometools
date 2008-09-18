@@ -28,10 +28,10 @@
 
 #define MAX_LINE_LENGTH  80
 
-static OptionParser* gt_skproto_option_parser_new(GT_UNUSED
+static GtOptionParser* gt_skproto_option_parser_new(GT_UNUSED
                                                   void *tool_arguments)
 {
-  return option_parser_new("[C-file ...]",
+  return gt_option_parser_new("[C-file ...]",
                            "Extract Header-File from C-file(s).");
 }
 
@@ -184,9 +184,9 @@ static int gt_skproto_runner(int argc, const char **argv, int parsed_args,
   return 0;
 }
 
-Tool* gt_skproto(void)
+GtTool* gt_skproto(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_skproto_option_parser_new,
                   NULL,

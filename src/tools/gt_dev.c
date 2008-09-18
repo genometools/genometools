@@ -35,50 +35,50 @@
 
 static void* gt_dev_arguments_new(void)
 {
-  Toolbox *dev_toolbox = toolbox_new();
+  GtToolbox *dev_toolbox = gt_toolbox_new();
   /* add development tools here with a function call like this:
-     toolbox_add(dev_toolbox, "devtool", gt_devtool); */
-  toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
-  toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
-  toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
-  toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
-  toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
-  toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
-  toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
-  toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
-  toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
-  toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
-  toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
-  toolbox_add(dev_toolbox, "trieins", gt_trieins);
+     gt_toolbox_add(dev_toolbox, "devtool", gt_devtool); */
+  gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
+  gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
+  gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
+  gt_toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
+  gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
+  gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
+  gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
+  gt_toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
+  gt_toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
+  gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
+  gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
   return dev_toolbox;
 }
 
 static void gt_dev_arguments_delete(void *tool_arguments)
 {
-  Toolbox *dev_toolbox = tool_arguments;
+  GtToolbox *dev_toolbox = tool_arguments;
   if (!dev_toolbox) return;
-  toolbox_delete(dev_toolbox);
+  gt_toolbox_delete(dev_toolbox);
 }
 
-static OptionParser* gt_dev_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_dev_option_parser_new(void *tool_arguments)
 {
-  Toolbox *dev_toolbox = tool_arguments;
-  OptionParser *op;
+  GtToolbox *dev_toolbox = tool_arguments;
+  GtOptionParser *op;
   assert(dev_toolbox);
-  op = option_parser_new("[option ...] dev_tool_name [argument ...]",
+  op = gt_option_parser_new("[option ...] dev_tool_name [argument ...]",
                          "Call development tool with name dev_tool_name and "
                          "pass argument(s) to it.");
-  option_parser_set_comment_func(op, toolbox_show, dev_toolbox);
-  option_parser_set_min_args(op, 1);
+  gt_option_parser_set_comment_func(op, gt_toolbox_show, dev_toolbox);
+  gt_option_parser_set_min_args(op, 1);
   return op;
 }
 
 static int gt_dev_runner(int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GtError *err)
 {
-  Toolbox *dev_toolbox = tool_arguments;
-  Toolfunc toolfunc;
-  Tool *tool = NULL;
+  GtToolbox *dev_toolbox = tool_arguments;
+  GtToolfunc toolfunc;
+  GtTool *tool = NULL;
   int had_err = 0;
   char **nargv = NULL;
 
@@ -86,7 +86,7 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
   assert(dev_toolbox);
 
   /* get development tools */
-  if (!toolbox_has_tool(dev_toolbox, argv[parsed_args])) {
+  if (!gt_toolbox_has_tool(dev_toolbox, argv[parsed_args])) {
     gt_error_set(err, "development tool '%s' not found; option -help lists "
                    "possible tools", argv[parsed_args]);
     had_err = -1;
@@ -94,8 +94,8 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
 
   /* call development tool */
   if (!had_err) {
-    if (!(toolfunc = toolbox_get(dev_toolbox, argv[parsed_args]))) {
-      tool = toolbox_get_tool(dev_toolbox, argv[parsed_args]);
+    if (!(toolfunc = gt_toolbox_get(dev_toolbox, argv[parsed_args]))) {
+      tool = gt_toolbox_get_tool(dev_toolbox, argv[parsed_args]);
       assert(tool);
     }
     nargv = gt_cstr_array_prefix_first(argv + parsed_args,
@@ -104,7 +104,8 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
     if (toolfunc)
       had_err = toolfunc(argc - parsed_args , (const char**) nargv, err);
     else
-      had_err = tool_run(tool, argc - parsed_args , (const char**) nargv, err);
+      had_err = gt_tool_run(tool, argc - parsed_args , (const char**) nargv,
+                            err);
   }
 
   /* free */
@@ -113,9 +114,9 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_dev(void)
+GtTool* gt_dev(void)
 {
-  return tool_new(gt_dev_arguments_new,
+  return gt_tool_new(gt_dev_arguments_new,
                   gt_dev_arguments_delete,
                   gt_dev_option_parser_new,
                   NULL,

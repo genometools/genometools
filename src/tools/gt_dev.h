@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the development tool */
-Tool* gt_dev(void);
+GtTool* gt_dev(void);
 
 #endif

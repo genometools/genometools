@@ -96,49 +96,49 @@
 #include "annotationsketch/style.h"
 #endif
 
-Toolbox* gtt_tools(void)
+GtToolbox* gtt_tools(void)
 {
-  Toolbox *tools = toolbox_new();
+  GtToolbox *tools = gt_toolbox_new();
 
   /* add tools */
-  toolbox_add_tool(tools, "bioseq", gt_bioseq());
-  toolbox_add_tool(tools, "cds", gt_cds());
-  toolbox_add(tools, "chseqids", gt_chseqids);
-  toolbox_add(tools, "clean", gt_clean);
-  toolbox_add_tool(tools, "csa", gt_csa());
-  toolbox_add_tool(tools, "dev", gt_dev());
-  toolbox_add(tools, "eval", gt_eval);
-  toolbox_add_tool(tools, "exercise", gt_exercise());
-  toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
-  toolbox_add_tool(tools, "extractseq", gt_extractseq());
-  toolbox_add_tool(tools, "filter", gt_filter());
-  toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
-  toolbox_add_tool(tools, "gff3", gt_gff3());
-  toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
-  toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
-  toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
-  toolbox_add(tools, "ltrharvest", gt_ltrharvest);
-  toolbox_add(tools, "matstat", gt_matchingstatistics);
-  toolbox_add(tools, "merge", gt_merge);
-  toolbox_add(tools, "mgth", gt_mgth);
-  toolbox_add(tools, "mmapandread", gt_mmapandread);
-  toolbox_add_tool(tools, "mutate", gt_mutate());
-  toolbox_add(tools, "mkfmindex", gt_mkfmindex);
-  toolbox_add_tool(tools, "packedindex", gt_packedindex());
-  toolbox_add_tool(tools, "prebwt", gt_prebwt());
-  toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
-  toolbox_add_tool(tools, "sequniq", gt_sequniq());
-  toolbox_add_tool(tools, "shredder", gt_shredder());
-  toolbox_add_tool(tools, "splitfasta", gt_splitfasta());
-  toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
-  toolbox_add(tools, "stat", gt_stat);
-  toolbox_add(tools, "suffixerator", gt_suffixerator);
-  toolbox_add_tool(tools, "tagerator", gt_tagerator());
-  toolbox_add_tool(tools, "template", gt_template());
-  toolbox_add(tools, "uniq", gt_uniq);
-  toolbox_add(tools, "uniquesub", gt_uniquesub);
+  gt_toolbox_add_tool(tools, "bioseq", gt_bioseq());
+  gt_toolbox_add_tool(tools, "cds", gt_cds());
+  gt_toolbox_add(tools, "chseqids", gt_chseqids);
+  gt_toolbox_add(tools, "clean", gt_clean);
+  gt_toolbox_add_tool(tools, "csa", gt_csa());
+  gt_toolbox_add_tool(tools, "dev", gt_dev());
+  gt_toolbox_add(tools, "eval", gt_eval);
+  gt_toolbox_add_tool(tools, "exercise", gt_exercise());
+  gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
+  gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
+  gt_toolbox_add_tool(tools, "filter", gt_filter());
+  gt_toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
+  gt_toolbox_add_tool(tools, "gff3", gt_gff3());
+  gt_toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
+  gt_toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
+  gt_toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
+  gt_toolbox_add(tools, "ltrharvest", gt_ltrharvest);
+  gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
+  gt_toolbox_add(tools, "merge", gt_merge);
+  gt_toolbox_add(tools, "mgth", gt_mgth);
+  gt_toolbox_add(tools, "mmapandread", gt_mmapandread);
+  gt_toolbox_add_tool(tools, "mutate", gt_mutate());
+  gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
+  gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
+  gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
+  gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
+  gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
+  gt_toolbox_add_tool(tools, "shredder", gt_shredder());
+  gt_toolbox_add_tool(tools, "splitfasta", gt_splitfasta());
+  gt_toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
+  gt_toolbox_add(tools, "stat", gt_stat);
+  gt_toolbox_add(tools, "suffixerator", gt_suffixerator);
+  gt_toolbox_add_tool(tools, "tagerator", gt_tagerator());
+  gt_toolbox_add_tool(tools, "template", gt_template());
+  gt_toolbox_add(tools, "uniq", gt_uniq);
+  gt_toolbox_add(tools, "uniquesub", gt_uniquesub);
 #ifndef WITHOUT_CAIRO
-  toolbox_add(tools, "sketch", gt_sketch);
+  gt_toolbox_add(tools, "sketch", gt_sketch);
 #endif
 
   return tools;
@@ -186,7 +186,7 @@ Hashmap* gtt_unit_tests(void)
   hashmap_add(unit_tests, "string class", gt_str_unit_test);
   hashmap_add(unit_tests, "string matching module", string_matching_unit_test);
   hashmap_add(unit_tests, "tag value map example", tag_value_map_example);
-  hashmap_add(unit_tests, "tokenizer class", tokenizer_unit_test);
+  hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
   hashmap_add(unit_tests, "union find class", union_find_unit_test);
 #ifndef WITHOUT_CAIRO
   hashmap_add(unit_tests, "block class", gt_block_unit_test);

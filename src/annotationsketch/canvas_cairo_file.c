@@ -148,7 +148,8 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,
   canvas->pvt->ii = ii;
   canvas->pvt->width = width;
   canvas->pvt->bt = NULL;
-  canvas->pvt->y = 0.5; /* 0.5 displacement to eliminate fuzzy horizontal lines */
+  /* 0.5 displacement to eliminate fuzzy horizontal lines */
+  canvas->pvt->y = 0.5;
   ccf = canvas_cairo_file_cast(canvas);
   ccf->type = type;
   return canvas;

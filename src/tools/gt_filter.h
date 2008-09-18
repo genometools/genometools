@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the filter tool */
-Tool* gt_filter(void);
+GtTool* gt_filter(void);
 
 #endif

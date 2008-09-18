@@ -22,20 +22,20 @@
 #include "core/io.h"
 #include "core/str.h"
 
-typedef struct Tokenizer Tokenizer;
+typedef struct GtTokenizer GtTokenizer;
 
-Tokenizer*    tokenizer_new(GtIO*); /* takes ownership */
+GtTokenizer*    gt_tokenizer_new(GtIO*); /* takes ownership */
 /* activates the skipping of comment lines in the tokenizer (lines starting
    with '#') */
-void          tokenizer_skip_comment_lines(Tokenizer*);
+void          gt_tokenizer_skip_comment_lines(GtTokenizer*);
 /* returns the current token */
-GtStr*       tokenizer_get_token(Tokenizer*);
-bool          tokenizer_has_token(Tokenizer*);
-bool          tokenizer_line_start(const Tokenizer*);
-void          tokenizer_next_token(Tokenizer*); /* go to the next token */
-unsigned long tokenizer_get_line_number(const Tokenizer*);
-const char*   tokenizer_get_filename(const Tokenizer*);
-int           tokenizer_unit_test(GtError*);
-void          tokenizer_delete(Tokenizer*);
+GtStr*       gt_tokenizer_get_token(GtTokenizer*);
+bool          gt_tokenizer_has_token(GtTokenizer*);
+bool          gt_tokenizer_line_start(const GtTokenizer*);
+void          gt_tokenizer_next_token(GtTokenizer*); /* go to the next token */
+unsigned long gt_tokenizer_get_line_number(const GtTokenizer*);
+const char*   gt_tokenizer_get_filename(const GtTokenizer*);
+int           gt_tokenizer_unit_test(GtError*);
+void          gt_tokenizer_delete(GtTokenizer*);
 
 #endif

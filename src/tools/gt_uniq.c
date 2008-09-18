@@ -31,31 +31,32 @@ typedef struct {
 static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OutputFileInfo *ofi;
-  Option *option;
+  GtOption *option;
   OPrval oprval;
   gt_error_check(err);
 
   /* init */
-  op = option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
+  op = gt_option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
                          "features in a sorted GFF3_file.");
   ofi = outputfileinfo_new();
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
-  option_parser_set_max_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_max_args(op, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
 
   /* free */
   outputfileinfo_delete(ofi);
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

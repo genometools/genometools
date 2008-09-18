@@ -26,15 +26,16 @@
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("[option ...] multiset_string text",
+  op = gt_option_parser_new("[option ...] multiset_string text",
                          "Match multiset defined by multiset_string against "
                          "text.");
-  option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 2, 2);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

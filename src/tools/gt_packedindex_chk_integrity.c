@@ -103,40 +103,40 @@ static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
                      struct chkIndexOptions *params, GtError *err)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   OPrval oprval;
   bool extRankCheck;
 
   gt_error_check(err);
-  op = option_parser_new("indexname",
+  op = gt_option_parser_new("indexname",
                          "Map <indexname> block composition index"
                          "and bwt and check index integrity.");
 
-  option = option_new_bool("v",
+  option = gt_option_new_bool("v",
                            "print verbose progress information",
                            &params->verboseOutput,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("skip", "number of symbols to skip",
+  option = gt_option_new_ulong("skip", "number of symbols to skip",
                             &params->skipCount, 0);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("ticks", "print dot after this many symbols"
+  option = gt_option_new_ulong("ticks", "print dot after this many symbols"
                             " tested okay", &params->progressInterval,
                             DEFAULT_PROGRESS_INTERVAL);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("ext-rank-check",
+  option = gt_option_new_bool("ext-rank-check",
                            "do additional checks of rank query results",
                            &extRankCheck, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, (const char**) argv,
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, (const char**) argv,
                                versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   params->checkFlags = EIS_VERIFY_BASIC | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
   params->EISFeatureSet = EIS_FEATURE_REGION_SUMS;
   params->encType = BWT_ON_BLOCK_ENC;

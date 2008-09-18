@@ -39,22 +39,23 @@ static void gt_gff3validator_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
 {
   GFF3ValidatorArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] [GFF3_file ...]",
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Strictly validate given GFF3 files.");
 
   /* -typecheck */
-  option = option_new_filename("typecheck", "check GFF3 types against \"id\" "
+  option = gt_option_new_filename("typecheck",
+                               "check GFF3 types against \"id\" "
                                "and \"name\" tags in given OBO file",
                                arguments->typecheck);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   return op;
 }
@@ -104,9 +105,9 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_gff3validator(void)
+GtTool* gt_gff3validator(void)
 {
-  return tool_new(gt_gff3validator_arguments_new,
+  return gt_tool_new(gt_gff3validator_arguments_new,
                   gt_gff3validator_arguments_delete,
                   gt_gff3validator_option_parser_new,
                   NULL,

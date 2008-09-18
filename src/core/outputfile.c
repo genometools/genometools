@@ -81,36 +81,36 @@ static int determine_outfp(void *data, GtError *err)
   return had_err;
 }
 
-void outputfile_register_options(OptionParser *op, GtGenFile **outfp,
+void outputfile_register_options(GtOptionParser *op, GtGenFile **outfp,
                                  OutputFileInfo *ofi)
 {
-  Option *opto, *optgzip, *optbzip2, *optforce;
+  GtOption *opto, *optgzip, *optbzip2, *optforce;
   assert(outfp && ofi);
   ofi->outfp = outfp;
   /* register option -o */
-  opto = option_new_string("o", "redirect output to specified file",
+  opto = gt_option_new_string("o", "redirect output to specified file",
                            ofi->output_filename, NULL);
-  option_parser_add_option(op, opto);
+  gt_option_parser_add_option(op, opto);
   /* register option -gzip */
-  optgzip = option_new_bool("gzip", "write gzip compressed output file",
+  optgzip = gt_option_new_bool("gzip", "write gzip compressed output file",
                             &ofi->gzip, false);
-  option_parser_add_option(op, optgzip);
+  gt_option_parser_add_option(op, optgzip);
   /* register option -bzip2 */
-  optbzip2 = option_new_bool("bzip2", "write bzip2 compressed output file",
+  optbzip2 = gt_option_new_bool("bzip2", "write bzip2 compressed output file",
                              &ofi->bzip2, false);
-  option_parser_add_option(op, optbzip2);
+  gt_option_parser_add_option(op, optbzip2);
   /* register option -force */
-  optforce = option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
+  optforce = gt_option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
                              &ofi->force, false);
-  option_parser_add_option(op, optforce);
+  gt_option_parser_add_option(op, optforce);
   /* options -gzip and -bzip2 exclude each other */
-  option_exclude(optgzip, optbzip2);
+  gt_option_exclude(optgzip, optbzip2);
   /* option implications */
-  option_imply(optgzip, opto);
-  option_imply(optbzip2, opto);
-  option_imply(optforce, opto);
+  gt_option_imply(optgzip, opto);
+  gt_option_imply(optbzip2, opto);
+  gt_option_imply(optforce, opto);
   /* set hook function to determine <outfp> */
-  option_parser_register_hook(op, determine_outfp, ofi);
+  gt_option_parser_register_hook(op, determine_outfp, ofi);
 }
 
 void outputfileinfo_delete(OutputFileInfo *ofi)

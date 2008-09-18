@@ -72,8 +72,8 @@ static OPrval parse_options(int *parsed_args,
                             Cmppairwiseopt *pw,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *optionstrings,
+  GtOptionParser *op;
+  GtOption *optionstrings,
          *optionfiles,
          *optioncharlistlen,
          *optiontext;
@@ -86,36 +86,37 @@ static OPrval parse_options(int *parsed_args,
   pw->files = gt_strarray_new();
   pw->text = gt_str_new();
   pw->charlistlen = NULL;
-  op = option_parser_new("options","Apply function to pairs of strings.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  op = gt_option_parser_new("options","Apply function to pairs of strings.");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionstrings = option_new_stringarray("ss","use two strings",
+  optionstrings = gt_option_new_stringarray("ss","use two strings",
                                          pw->strings);
-  option_parser_add_option(op, optionstrings);
+  gt_option_parser_add_option(op, optionstrings);
 
-  optionfiles = option_new_filenamearray("ff","use two files",
+  optionfiles = gt_option_new_filenamearray("ff","use two files",
                                          pw->files);
-  option_parser_add_option(op, optionfiles);
+  gt_option_parser_add_option(op, optionfiles);
 
-  optioncharlistlen = option_new_stringarray("a",
+  optioncharlistlen = gt_option_new_stringarray("a",
                                              "use character list and length",
                                              charlistlen);
-  option_parser_add_option(op, optioncharlistlen);
+  gt_option_parser_add_option(op, optioncharlistlen);
 
-  optiontext = option_new_string("t","use text",pw->text, NULL);
-  option_parser_add_option(op, optiontext);
+  optiontext = gt_option_new_string("t","use text",pw->text, NULL);
+  gt_option_parser_add_option(op, optiontext);
 
-  option_exclude(optionstrings, optionfiles);
-  option_exclude(optionstrings, optioncharlistlen);
-  option_exclude(optionstrings, optiontext);
-  option_exclude(optionfiles, optioncharlistlen);
-  option_exclude(optionfiles, optiontext);
-  option_exclude(optioncharlistlen, optiontext);
+  gt_option_exclude(optionstrings, optionfiles);
+  gt_option_exclude(optionstrings, optioncharlistlen);
+  gt_option_exclude(optionstrings, optiontext);
+  gt_option_exclude(optionfiles, optioncharlistlen);
+  gt_option_exclude(optionfiles, optiontext);
+  gt_option_exclude(optioncharlistlen, optiontext);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
   if (oprval == OPTIONPARSER_OK)
   {
-    if (option_is_set(optionstrings))
+    if (gt_option_is_set(optionstrings))
     {
       if (gt_strarray_size(pw->strings) != 2UL)
       {
@@ -124,7 +125,7 @@ static OPrval parse_options(int *parsed_args,
       }
     } else
     {
-      if (option_is_set(optionfiles))
+      if (gt_option_is_set(optionfiles))
       {
         if (gt_strarray_size(pw->files) != 2UL)
         {
@@ -133,7 +134,7 @@ static OPrval parse_options(int *parsed_args,
         }
       } else
       {
-        if (option_is_set(optioncharlistlen))
+        if (gt_option_is_set(optioncharlistlen))
         {
           long readint;
 
@@ -157,7 +158,7 @@ static OPrval parse_options(int *parsed_args,
           pw->charlistlen->len = (unsigned long) readint;
         } else
         {
-          if (!option_is_set(optiontext))
+          if (!gt_option_is_set(optiontext))
           {
             gt_error_set(err,
                          "use exactly one of the options -ss, -ff, -a, -t");
@@ -167,7 +168,7 @@ static OPrval parse_options(int *parsed_args,
       }
     }
   }
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
     gt_error_set(err, "superfluous program parameters");

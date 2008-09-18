@@ -33,11 +33,11 @@ static OPrval parse_options(int *parsed_args,
                             *metagenomethreader_arguments, int argc,
                             const char **argv, GtError * err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
 
   /* Definition der optionalen Eingabeparameter */
-  Option *syn_value_option,
+  GtOption *syn_value_option,
    *nonsyn_value_option,
    *blasthitend_value_option,
    *stopcodon_queryseq_option,
@@ -62,167 +62,168 @@ static OPrval parse_options(int *parsed_args,
 
   /* init Option-Parser */
   op =
-    option_parser_new
+    gt_option_parser_new
     ("[option ...] XML-File Query-FASTA-File Hit-FASTA-File",
      "Metagenomethreader, for predicting genes in metagenomeprojects.");
 
-  /* Option zur Eingabe des Scores fuer synonymen Basenaustausch; default:
+  /* GtOption zur Eingabe des Scores fuer synonymen Basenaustausch; default:
      1.0 */
   syn_value_option =
-    option_new_double("s", "score for synonymic base exchanges",
+    gt_option_new_double("s", "score for synonymic base exchanges",
                       &metagenomethreader_arguments->synonomic_value, 1.0);
-  option_parser_add_option(op, syn_value_option);
+  gt_option_parser_add_option(op, syn_value_option);
 
-  /* Option zur Eingabe des Scores fuer nicht-synonymen Basenaustausch;
+  /* GtOption zur Eingabe des Scores fuer nicht-synonymen Basenaustausch;
      default: -1.0 */
   nonsyn_value_option =
-    option_new_double("n", "score for non-synonymic base exchanges",
+    gt_option_new_double("n", "score for non-synonymic base exchanges",
                       &metagenomethreader_arguments->nonsynonomic_value,
                       -1.0);
-  option_parser_add_option(op, nonsyn_value_option);
+  gt_option_parser_add_option(op, nonsyn_value_option);
 
-  /* Option zur Eingabe des Scores fuer das Blast-Hit-Ende; default: -10 */
+  /* GtOption zur Eingabe des Scores fuer das Blast-Hit-Ende; default: -10 */
   blasthitend_value_option =
-    option_new_double("b", "score for blast-hit-end within query sequence",
+    gt_option_new_double("b", "score for blast-hit-end within query sequence",
                       &metagenomethreader_arguments->blasthit_end_value,
                       -10.0);
-  option_parser_add_option(op, blasthitend_value_option);
+  gt_option_parser_add_option(op, blasthitend_value_option);
 
-  /* Option zur Eingabe des Scores zur Bewertung eines Stop-Codons in der
+  /* GtOption zur Eingabe des Scores zur Bewertung eines Stop-Codons in der
      Query-Sequence; default: -2 */
   stopcodon_queryseq_option =
-    option_new_double("q", "score for stop-codon within querysequence",
+    gt_option_new_double("q", "score for stop-codon within querysequence",
                       &metagenomethreader_arguments->stopcodon_queryseq,
                       -2.0);
-  option_parser_add_option(op, stopcodon_queryseq_option);
+  gt_option_parser_add_option(op, stopcodon_queryseq_option);
 
-  /* Option zur Eingabe des Scores zur Bewertung eines Stop-Codons in der
+  /* GtOption zur Eingabe des Scores zur Bewertung eines Stop-Codons in der
      Hit-Sequence; default: -5 */
   stopcodon_hitseq_option =
-    option_new_double("h", "score for stop-codon within hitsequence",
+    gt_option_new_double("h", "score for stop-codon within hitsequence",
                       &metagenomethreader_arguments->stopcodon_hitseq,
                       -5.0);
-  option_parser_add_option(op, stopcodon_hitseq_option);
+  gt_option_parser_add_option(op, stopcodon_hitseq_option);
 
-  /* Option zur Eingabe des Scores zur Bewertung des Verlassens oder
+  /* GtOption zur Eingabe des Scores zur Bewertung des Verlassens oder
      Eintretens eines bzw. in ein Gen ; default: -2 */
   leavegene_value_option =
-    option_new_double("l",
+    gt_option_new_double("l",
                       "score for leaving a gene on forward/reverse strand "
                       "or enter a gene on forward/reverse strand",
                       &metagenomethreader_arguments->leavegene_value,
                       -2.0);
-  option_parser_add_option(op, leavegene_value_option);
+  gt_option_parser_add_option(op, leavegene_value_option);
 
-  /* Option zur Eingabe des Wertes innerhalb welches Zwischenbereichs ein
+  /* GtOption zur Eingabe des Wertes innerhalb welches Zwischenbereichs ein
      zusammenhaengender Genbereich vorliegt; default: 400 */
   prediction_span_option =
-    option_new_double_min("p",
+    gt_option_new_double_min("p",
                           "max. span between coding-regions resume as one "
                           "prediction",
                           &metagenomethreader_arguments->prediction_span,
                           400.0, 0.0);
-  option_parser_add_option(op, prediction_span_option);
+  gt_option_parser_add_option(op, prediction_span_option);
 
-  /* Option zur Eingabe des Wertes innerhalb welches Zwischenbereichs ein
+  /* GtOption zur Eingabe des Wertes innerhalb welches Zwischenbereichs ein
      Frameshift vorliegt; default: 200 */
   frameshift_span_option =
-    option_new_double_min("f",
+    gt_option_new_double_min("f",
                           "max. span between coding-regions in different "
                           "reading frames resume as coding-regions in the "
                           "optimal reading-frame",
                           &metagenomethreader_arguments->frameshift_span,
                       200.0, 0.0);
-  option_parser_add_option(op, frameshift_span_option);
+  gt_option_parser_add_option(op, frameshift_span_option);
 
-  /* Option zur Eingabe der DB, die bei der Verwendung des fcgi-Skriptes
+  /* GtOption zur Eingabe der DB, die bei der Verwendung des fcgi-Skriptes
      verwendet wird; default: nucleotide */
   curlfcgi_option =
-    option_new_string("c", "db-name for fcgi-db",
+    gt_option_new_string("c", "db-name for fcgi-db",
                       metagenomethreader_arguments->curl_fcgi_db,
                       "nucleotide");
-  option_parser_add_option(op, curlfcgi_option);
+  gt_option_parser_add_option(op, curlfcgi_option);
 
-  /* Option zur Eingabe des Namens der Outputdatei; default: output.txt */
+  /* GtOption zur Eingabe des Namens der Outputdatei; default: output.txt */
   resulttextfile_name_option =
-    option_new_string("o", "name for resulting output-file",
+    gt_option_new_string("o", "name for resulting output-file",
                       metagenomethreader_arguments->outputtextfile_name,
                       "output");
-  option_parser_add_option(op, resulttextfile_name_option);
+  gt_option_parser_add_option(op, resulttextfile_name_option);
 
-  /* Option zur Angabe der Hit-Sequenz-DB  */
+  /* GtOption zur Angabe der Hit-Sequenz-DB  */
   giexpfile_name_option =
-    option_new_stringarray("k", "name for the Hit-Sequence-DB",
+    gt_option_new_stringarray("k", "name for the Hit-Sequence-DB",
                            metagenomethreader_arguments->giexpfile_name);
-  option_parser_add_option(op, giexpfile_name_option);
+  gt_option_parser_add_option(op, giexpfile_name_option);
 
-  /* Option zur Angabe, ob ein Hit-FASTA-File exisitiert; default: false */
+  /* GtOption zur Angabe, ob ein Hit-FASTA-File exisitiert; default: false */
   hitfile_bool_option =
-    option_new_bool("t", "true or false if a Hit-FASTA-File exist",
+    gt_option_new_bool("t", "true or false if a Hit-FASTA-File exist",
                     &metagenomethreader_arguments->hitfile_bool, false);
-  option_parser_add_option(op, hitfile_bool_option);
+  gt_option_parser_add_option(op, hitfile_bool_option);
 
-  /* Option zur Angabe des Formates der Outputdatei; default: 1 -> txt */
+  /* GtOption zur Angabe des Formates der Outputdatei; default: 1 -> txt */
   outputfile_format_option =
-    option_new_int("r", "format of the output-file",
+    gt_option_new_int("r", "format of the output-file",
                    &metagenomethreader_arguments->outputfile_format, 1);
-  option_parser_add_option(op, outputfile_format_option);
+  gt_option_parser_add_option(op, outputfile_format_option);
 
-  /* Option zur Angabe der minimalen Laenger der AS-Sequnezen, die in der
+  /* GtOption zur Angabe der minimalen Laenger der AS-Sequnezen, die in der
      Ausgabedatei aufgefuehrt werden sollen; default: 15; min: 15 */
   min_as_option =
-    option_new_ulong_min("a", "minimum length of the as-sequence",
+    gt_option_new_ulong_min("a", "minimum length of the as-sequence",
                          &metagenomethreader_arguments->min_as, 15, 15);
-  option_parser_add_option(op, min_as_option);
+  gt_option_parser_add_option(op, min_as_option);
 
-  /* Option zur Angabe der minimalen Prozentzahl, ab der Hits-Def. im
+  /* GtOption zur Angabe der minimalen Prozentzahl, ab der Hits-Def. im
      Statistikbereich der Ausgabe angezeigt werden */
   percent_option =
-    option_new_double_min_max("d",
+    gt_option_new_double_min_max("d",
                               "minimum percent-value for hit-statistic-output",
                               &metagenomethreader_arguments->percent_value,
                               0.0, 0.0, 1.0);
-  option_parser_add_option(op, percent_option);
+  gt_option_parser_add_option(op, percent_option);
 
-  /* Option zur Angabe, ob alternative Start-Codons verwendet werden
+  /* GtOption zur Angabe, ob alternative Start-Codons verwendet werden
      sollen; default: 1 -> txt */
   codon_mode_option =
-    option_new_int("e", "use of alternative start-codons",
+    gt_option_new_int("e", "use of alternative start-codons",
                    &metagenomethreader_arguments->codon_mode, 1);
-  option_parser_add_option(op, codon_mode_option);
+  gt_option_parser_add_option(op, codon_mode_option);
 
-  /* Experimenteller Status dieser Option - Funktionsfaehigkeit nicht
+  /* Experimenteller Status dieser GtOption - Funktionsfaehigkeit nicht
      abschliessend geklaert */
-  /* Option zur Angabe, ob nach Homologien gesucht werden soll, statt nach
+  /* GtOption zur Angabe, ob nach Homologien gesucht werden soll, statt nach
      synonymen-Basenaustauschen; default: false */
   homology_mode_option =
-    option_new_bool("m", "search for homology",
+    gt_option_new_bool("m", "search for homology",
                     &metagenomethreader_arguments->homology_mode, false);
-  option_parser_add_option(op, homology_mode_option);
+  gt_option_parser_add_option(op, homology_mode_option);
 
   /* Testmodus: die Programm-Parameter werden zur Vergleichbarkeit der
      Ergebnisse nicht mit ausgegeben; default: false */
   testmodus_mode_option =
-    option_new_bool("g", "testmodus, output without creating date",
+    gt_option_new_bool("g", "testmodus, output without creating date",
                     &metagenomethreader_arguments->testmodus_mode, false);
-  option_parser_add_option(op, testmodus_mode_option);
+  gt_option_parser_add_option(op, testmodus_mode_option);
 
-  /* Option zur Angabe, ob die EGTs auf den max. ORF erweitert werden
+  /* GtOption zur Angabe, ob die EGTs auf den max. ORF erweitert werden
      sollen, default: false */
   extended_mode_option =
-    option_new_bool("x", "extend the EGTs to max",
+    gt_option_new_bool("x", "extend the EGTs to max",
                     &metagenomethreader_arguments->extended_mode, false);
-  option_parser_add_option(op, extended_mode_option);
+  gt_option_parser_add_option(op, extended_mode_option);
 
-  option_parser_set_mailaddress(op, "<dschmitz@zbh.uni-hamburg.de>");
-  option_parser_set_min_max_args(op, 3, 3);
-  option_parser_refer_to_manual(op);
+  gt_option_parser_set_mailaddress(op, "<dschmitz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_min_max_args(op, 3, 3);
+  gt_option_parser_refer_to_manual(op);
 
   /* es werden die Parameter XML-File, Query-Fasta-File und Hit-FASTA-File
      erwartet, Min und Max. der Anzahl an Parametern ist also 3 */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
 
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
@@ -288,7 +289,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     had_err = -1;
   }
 
-  /* nur wenn die Hitfile-Bool-Option auf true gesetzt ist (File
+  /* nur wenn die Hitfile-Bool-GtOption auf true gesetzt ist (File
      vorhanden) und der Fehlercode nicht gesetzt ist, muss die
      GtBioseq-Struktur auch fuer die Hits erstellt werden */
   if (ARGUMENTS(hitfile_bool) && !had_err)
@@ -451,7 +452,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
                                    querynum + loop_index);
     }
 
-    /* nur wenn die Option hitfile_bool auf TRUE gesetzt ist, muss die
+    /* nur wenn die GtOption hitfile_bool auf TRUE gesetzt ist, muss die
        GtBioseq-Struktur bzw. die Hash-Tabelle auch fuer die Hits erzeugt
        werden; Erzeugung inkl. Hash wie beim Query-DNA-FASTA-File */
     if (ARGUMENTS(hitfile_bool))

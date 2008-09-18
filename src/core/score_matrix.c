@@ -43,7 +43,7 @@ GT_ScoreMatrix* gt_score_matrix_new(GtAlpha *alpha)
 }
 
 static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
-                               Tokenizer *tz, GtError *err)
+                               GtTokenizer *tz, GtError *err)
 {
   GtStr *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
@@ -51,11 +51,11 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
   gt_error_check(err);
   assert(index_to_gt_alpha_char_mapping && tz);
   assert(!gt_array_size(index_to_gt_alpha_char_mapping));
-  while ((token = tokenizer_get_token(tz))) {
+  while ((token = gt_tokenizer_get_token(tz))) {
     if (gt_str_length(token) > 2) {
       gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
-                gt_str_get(token), tokenizer_get_line_number(tz),
-                tokenizer_get_filename(tz));
+                gt_str_get(token), gt_tokenizer_get_line_number(tz),
+                gt_tokenizer_get_filename(tz));
       had_err = -1;
       break;
     }
@@ -64,15 +64,16 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
     /* check for character duplications */
     if (parsed_characters[(int) amino_acid]) {
       gt_error_set(err, "the character '%c' appears more then once on line %lu "
-                   "in file  '%s'", amino_acid, tokenizer_get_line_number(tz),
-                tokenizer_get_filename(tz));
+                   "in file  '%s'", amino_acid,
+                   gt_tokenizer_get_line_number(tz),
+                gt_tokenizer_get_filename(tz));
       had_err = -1;
       break;
     }
     parsed_characters[(int) amino_acid] = UNDEF_CHAR;
     if (amino_acid == '\n') {
       gt_str_delete(token);
-      tokenizer_next_token(tz);
+      gt_tokenizer_next_token(tz);
       assert(!had_err);
       return 0;
     }
@@ -80,23 +81,25 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
     if (gt_str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
         gt_error_set(err, "illegal character token '%s' on line %lu in file "
-                     "'%s'", gt_str_get(token), tokenizer_get_line_number(tz),
-                     tokenizer_get_filename(tz));
+                     "'%s'", gt_str_get(token),
+                     gt_tokenizer_get_line_number(tz),
+                     gt_tokenizer_get_filename(tz));
         had_err = -1;
         break;
       }
       gt_str_delete(token);
-      tokenizer_next_token(tz);
+      gt_tokenizer_next_token(tz);
       assert(!had_err);
       return 0;
     }
     gt_str_delete(token);
-    tokenizer_next_token(tz);
+    gt_tokenizer_next_token(tz);
   }
   if (!had_err) {
     if (!gt_array_size(index_to_gt_alpha_char_mapping)) {
       gt_error_set(err, "could not parse a single alphabet character in file "
-                "'%s' (file empty or directory?)", tokenizer_get_filename(tz));
+                "'%s' (file empty or directory?)",
+                gt_tokenizer_get_filename(tz));
     had_err = -1;
     }
   }
@@ -104,7 +107,7 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
   return had_err;
 }
 
-static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
+static int parse_score_line(GT_ScoreMatrix *sm, GtTokenizer *tz,
                             GtArray *index_to_gt_alpha_char_mapping,
                             char *parsed_characters, GtError *err)
 {
@@ -114,30 +117,30 @@ static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
   GtStr *token;
   assert(sm && tz && index_to_gt_alpha_char_mapping);
   gt_error_check(err);
-  token = tokenizer_get_token(tz);
+  token = gt_tokenizer_get_token(tz);
   assert(token);
   if (gt_str_length(token) != 1) {
     gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
-              gt_str_get(token), tokenizer_get_line_number(tz),
-              tokenizer_get_filename(tz));
+              gt_str_get(token), gt_tokenizer_get_line_number(tz),
+              gt_tokenizer_get_filename(tz));
     had_err = -1;
   }
   amino_acid = gt_str_get(token)[0];
   /* check for character duplications */
   if (parsed_characters[(int) amino_acid]) {
     gt_error_set(err, "multiple character '%c' entry on line %lu in file '%s'",
-              amino_acid, tokenizer_get_line_number(tz),
-              tokenizer_get_filename(tz));
+              amino_acid, gt_tokenizer_get_line_number(tz),
+              gt_tokenizer_get_filename(tz));
     had_err = -1;
   }
   parsed_characters[(int) amino_acid] = UNDEF_CHAR;
   gt_str_delete(token);
   if (!had_err) {
-    tokenizer_next_token(tz);
-    while ((token = tokenizer_get_token(tz))) {
+    gt_tokenizer_next_token(tz);
+    while ((token = gt_tokenizer_get_token(tz))) {
       had_err = gt_parse_int_line(&score, gt_str_get(token),
-                                  tokenizer_get_line_number(tz),
-                                  tokenizer_get_filename(tz), err);
+                                  gt_tokenizer_get_line_number(tz),
+                                  gt_tokenizer_get_filename(tz), err);
       if (had_err)
         break;
       gt_score_matrix_set_score(sm,
@@ -148,8 +151,8 @@ static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
                                 score);
       i++;
       gt_str_delete(token);
-      tokenizer_next_token(tz);
-      if (tokenizer_line_start(tz))
+      gt_tokenizer_next_token(tz);
+      if (gt_tokenizer_line_start(tz))
           break;
     }
   }
@@ -160,19 +163,19 @@ static int parse_score_line(GT_ScoreMatrix *sm, Tokenizer *tz,
 static int parse_score_matrix(GT_ScoreMatrix *sm, const char *path,
                               GtError *err)
 {
-  Tokenizer *tz;
+  GtTokenizer *tz;
   GtArray *index_to_gt_alpha_char_mapping;
   unsigned int parsed_score_lines = 0;
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   gt_error_check(err);
   assert(sm && path && sm->alpha);
-  tz = tokenizer_new(gt_io_new(path, "r"));
+  tz = gt_tokenizer_new(gt_io_new(path, "r"));
   index_to_gt_alpha_char_mapping = gt_array_new(sizeof (char));
-  tokenizer_skip_comment_lines(tz);
+  gt_tokenizer_skip_comment_lines(tz);
   had_err = parse_alphabet_line(index_to_gt_alpha_char_mapping, tz, err);
   if (!had_err) {
-    while (tokenizer_has_token(tz)) {
+    while (gt_tokenizer_has_token(tz)) {
       had_err = parse_score_line(sm, tz, index_to_gt_alpha_char_mapping,
                                  parsed_characters, err);
       if (had_err)
@@ -189,7 +192,7 @@ static int parse_score_matrix(GT_ScoreMatrix *sm, const char *path,
   }
 
   gt_array_delete(index_to_gt_alpha_char_mapping);
-  tokenizer_delete(tz);
+  gt_tokenizer_delete(tz);
 
   return had_err;
 }

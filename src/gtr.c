@@ -52,7 +52,7 @@ struct GTR {
   unsigned int seed;
   GtStr *debugfp,
       *testspacepeak;
-  Toolbox *tools;
+  GtToolbox *tools;
   Hashmap *unit_tests;
   lua_State *L;
 #ifndef WITHOUT_CAIRO
@@ -115,7 +115,7 @@ GTR* gtr_new(GtError *err)
 static int show_gtr_help(const char *progname, void *data, GtError *err)
 {
   int had_err;
-  had_err = toolbox_show(progname, data, err);
+  had_err = gt_toolbox_show(progname, data, err);
   if (!had_err)
     had_err = gtdata_show_help(progname, NULL, err);
   return had_err;
@@ -124,26 +124,26 @@ static int show_gtr_help(const char *progname, void *data, GtError *err)
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                  GtError *err)
 {
-  OptionParser *op;
-  Option *o, *debug_option, *debugfp_option;
+  GtOptionParser *op;
+  GtOption *o, *debug_option, *debugfp_option;
   OPrval oprval;
 
   gt_error_check(err);
   assert(gtr);
-  op = option_parser_new("[option ...] [tool | script] [argument ...]",
+  op = gt_option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).");
-  option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
-  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
+  gt_option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
+  o = gt_option_new_bool("i", "enter interactive mode after executing 'tool' or "
                       "'script'", &gtr->interactive, false);
-  option_hide_default(o);
-  option_parser_add_option(op, o);
-  o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
-  option_hide_default(o);
-  option_parser_add_option(op, o);
-  debug_option = option_new_debug(&gtr->debug);
-  option_parser_add_option(op, debug_option);
-  debugfp_option = option_new_string("debugfp",
+  gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
+  gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
+  debug_option = gt_option_new_debug(&gtr->debug);
+  gt_option_parser_add_option(op, debug_option);
+  debugfp_option = gt_option_new_string("debugfp",
                                      "set file pointer for debugging output\n"
                                      "use ``stdout'' for standard output\n"
                                      "use ``stderr'' for standard error\n"
@@ -151,24 +151,24 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                                      "corresponding file (will be overwritten "
                                      "without warning!)", gtr->debugfp,
                                      "stderr");
-  option_is_development_option(debugfp_option);
-  option_parser_add_option(op, debugfp_option);
-  option_imply(debugfp_option, debug_option);
-  o = option_new_uint("seed", "set seed for random number generator manually\n"
+  gt_option_is_development_option(debugfp_option);
+  gt_option_parser_add_option(op, debugfp_option);
+  gt_option_imply(debugfp_option, debug_option);
+  o = gt_option_new_uint("seed", "set seed for random number generator manually\n"
                       "0 generates a seed from current time and process id",
                       &gtr->seed, 0);
-  option_is_development_option(o);
-  option_parser_add_option(op, o);
-  o = option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "
+  gt_option_is_development_option(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "
                       "with 1 otherwise", &gtr->check64bit, false);
-  option_is_development_option(o);
-  option_parser_add_option(op, o);
-  o = option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
+  gt_option_is_development_option(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
                           "file", gtr->testspacepeak);
-  option_is_development_option(o);
-  option_parser_add_option(op, o);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_is_development_option(o);
+  gt_option_parser_add_option(op, o);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
@@ -176,7 +176,7 @@ void gtr_register_components(GTR *gtr)
 {
   assert(gtr);
   /* add tools */
-  toolbox_delete(gtr->tools);
+  gt_toolbox_delete(gtr->tools);
   gtr->tools = gtt_tools();
   /* add unit tests */
   hashmap_delete(gtr->unit_tests);
@@ -262,8 +262,8 @@ static void enable_logging(const char *debugfp, FILE **logfp)
 
 int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
 {
-  Toolfunc toolfunc;
-  Tool *tool = NULL;
+  GtToolfunc toolfunc;
+  GtTool *tool = NULL;
   char **nargv = NULL;
   void *mem, *map;
   int had_err = 0;
@@ -289,7 +289,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
     had_err = -1;
   }
   if (!had_err && argc) {
-    if (!gtr->tools || !toolbox_has_tool(gtr->tools, argv[0])) {
+    if (!gtr->tools || !gt_toolbox_has_tool(gtr->tools, argv[0])) {
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
@@ -313,8 +313,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
     }
     else {
       /* run tool */
-      if (!(toolfunc = toolbox_get(gtr->tools, argv[0]))) {
-        tool = toolbox_get_tool(gtr->tools, argv[0]);
+      if (!(toolfunc = gt_toolbox_get(gtr->tools, argv[0]))) {
+        tool = gt_toolbox_get_tool(gtr->tools, argv[0]);
         assert(tool);
       }
       nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
@@ -322,7 +322,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
       if (toolfunc)
         had_err = toolfunc(argc, (const char**) nargv, err);
       else
-        had_err = tool_run(tool, argc, (const char**) nargv, err);
+        had_err = gt_tool_run(tool, argc, (const char**) nargv, err);
     }
   }
   gt_cstr_array_delete(nargv);
@@ -342,7 +342,7 @@ void gtr_delete(GTR *gtr)
   gt_fclose(gtr->logfp);
   gt_str_delete(gtr->testspacepeak);
   gt_str_delete(gtr->debugfp);
-  toolbox_delete(gtr->tools);
+  gt_toolbox_delete(gtr->tools);
   hashmap_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
 #ifndef WITHOUT_CAIRO

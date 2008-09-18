@@ -30,7 +30,7 @@ enum ctxMapSize {
 };
 
 extern void
-registerCtxMapOptions(OptionParser *op, int *ilogOut);
+registerCtxMapOptions(GtOptionParser *op, int *ilogOut);
 
 static inline bool
 ctxMapILogIsValid(Seqpos seqLen, short mapIntervalLog2)

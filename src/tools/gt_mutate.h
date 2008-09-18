@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the mutate tool */
-Tool* gt_mutate(void);
+GtTool* gt_mutate(void);
 
 #endif

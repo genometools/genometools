@@ -512,7 +512,7 @@ bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits, bitsInAccum = 0;
   size_t elemStart = offset/bitElemBits;
   const BitElem *p = str + elemStart;
-  char buf[sizeof(accum) * CHAR_BIT];
+  char buf[sizeof (accum) * CHAR_BIT];
   int ioGtError = 0;
   assert(str);
   do {

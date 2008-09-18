@@ -605,7 +605,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
             }
 
             /* Falls der betrachtete Abschnitt des zu vergleichenden
-               Frames innerhalb des max. Abstandes liegt (per Option bei
+               Frames innerhalb des max. Abstandes liegt (per GtOption bei
                Programmaufruf einstellbar) und der kodierende Bereich kein
                Stop-Codon enthaelt werden die Grenzen des Abschnittes im
                real_fromtmp- bzw. real_totmp-Array abgespeichert */
@@ -761,7 +761,7 @@ static void genemergeprocessing(ParseStruct *parsestruct_ptr,
                                             array_idx);
 
           /* zusammenlegen kodierender Bereiche nur, wenn diese innerhalb
-             der per Option angegebenen Spanbreite liegen */
+             der per GtOption angegebenen Spanbreite liegen */
           if (to_tmp + ARGUMENTSSTRUCT(prediction_span) > from_tmp_next)
           {
             /* es wurden noch keine Eintragungen vorgenommen - der erste

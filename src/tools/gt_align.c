@@ -40,20 +40,21 @@ static void gt_align_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_align_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_align_option_parser_new(void *tool_arguments)
 {
   AlignArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   assert(arguments);
 
-  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
-                         "Globally align each sequence in seq_file_1 with each "
-                         "sequence in seq_file_2.");
-  option = option_new_bool("all", "show all optimal alignments instead of just "
-                           "one", &arguments->all, false);
-  option_parser_add_option(op, option);
-  option_parser_set_min_max_args(op, 2, 2);
+  op = gt_option_parser_new("[option ...] seq_file_1 seq_file_2",
+                            "Globally align each sequence in seq_file_1 with "
+                            "each sequence in seq_file_2.");
+  option = gt_option_new_bool("all",
+                              "show all optimal alignments instead of just "
+                              "one", &arguments->all, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
@@ -122,9 +123,9 @@ static int gt_align_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_align(void)
+GtTool* gt_align(void)
 {
-  return tool_new(gt_align_arguments_new,
+  return gt_tool_new(gt_align_arguments_new,
                   gt_align_arguments_delete,
                   gt_align_option_parser_new,
                   NULL,

@@ -23,13 +23,13 @@
 #include "extended/compare.h"
 #include "extended/toolbox.h"
 
-struct Toolbox {
+struct GtToolbox {
   Hashmap *tools;
 };
 
 typedef struct {
-  Tool *tool;
-  Toolfunc toolfunc;
+  GtTool *tool;
+  GtToolfunc toolfunc;
 } Toolinfo;
 
 Toolinfo* toolinfo_new(void)
@@ -40,19 +40,19 @@ Toolinfo* toolinfo_new(void)
 void toolinfo_delete(Toolinfo *toolinfo)
 {
   if (!toolinfo) return;
-  tool_delete(toolinfo->tool);
+  gt_tool_delete(toolinfo->tool);
   gt_free(toolinfo);
 }
 
-Toolbox* toolbox_new(void)
+GtToolbox* gt_toolbox_new(void)
 {
-  Toolbox *tb;
-  tb = gt_malloc(sizeof (Toolbox));
+  GtToolbox *tb;
+  tb = gt_malloc(sizeof (GtToolbox));
   tb->tools = hashmap_new(HASH_STRING, NULL, (GtFree) toolinfo_delete);
   return tb;
 }
 
-void toolbox_add_tool(Toolbox *tb, const char *toolname, Tool *tool)
+void gt_toolbox_add_tool(GtToolbox *tb, const char *toolname, GtTool *tool)
 {
   Toolinfo *toolinfo;
   assert(tb && tb->tools);
@@ -61,7 +61,7 @@ void toolbox_add_tool(Toolbox *tb, const char *toolname, Tool *tool)
   hashmap_add(tb->tools, (char*) toolname, toolinfo);
 }
 
-Tool* toolbox_get_tool(Toolbox *tb, const char *toolname)
+GtTool* gt_toolbox_get_tool(GtToolbox *tb, const char *toolname)
 {
   Toolinfo *toolinfo;
   assert(tb && tb->tools);
@@ -71,7 +71,7 @@ Tool* toolbox_get_tool(Toolbox *tb, const char *toolname)
   return NULL;
 }
 
-bool toolbox_has_tool(const Toolbox *tb, const char *toolname)
+bool gt_toolbox_has_tool(const GtToolbox *tb, const char *toolname)
 {
   assert(tb && tb->tools);
   if (hashmap_get(tb->tools, toolname))
@@ -79,7 +79,7 @@ bool toolbox_has_tool(const Toolbox *tb, const char *toolname)
   return false;
 }
 
-void toolbox_add(Toolbox *tb, const char *toolname, Toolfunc toolfunc)
+void gt_toolbox_add(GtToolbox *tb, const char *toolname, GtToolfunc toolfunc)
 {
   Toolinfo *toolinfo;
   assert(tb && tb->tools);
@@ -88,7 +88,7 @@ void toolbox_add(Toolbox *tb, const char *toolname, Toolfunc toolfunc)
   hashmap_add(tb->tools, (char*) toolname, toolinfo);
 }
 
-Toolfunc toolbox_get(const Toolbox *tb, const char *toolname)
+GtToolfunc gt_toolbox_get(const GtToolbox *tb, const char *toolname)
 {
   Toolinfo *toolinfo;
   assert(tb && tb->tools);
@@ -108,21 +108,21 @@ static int show_tool_name(void *key, GT_UNUSED void *value,
   return 0;
 }
 
-int toolbox_show(GT_UNUSED const char *progname, void *toolbox,
+int gt_toolbox_show(GT_UNUSED const char *progname, void *toolbox,
                  GT_UNUSED GtError *err)
 {
-  Toolbox *tb;
+  GtToolbox *tb;
   int had_err = 0;
   gt_error_check(err);
   assert(toolbox);
-  tb = (Toolbox*) toolbox;
+  tb = (GtToolbox*) toolbox;
   printf("\nTools:\n\n");
   had_err = hashmap_foreach_in_key_order(tb->tools, show_tool_name, NULL, NULL);
   assert(!had_err); /* show_tool_name() is sane */
   return 0;
 }
 
-void toolbox_delete(Toolbox *tb)
+void gt_toolbox_delete(GtToolbox *tb)
 {
   if (!tb) return;
   hashmap_delete(tb->tools);

@@ -358,7 +358,7 @@ bitPackStringInt64_unit_test(GtError *err)
   gt_log_log("bsStoreNonUniformUInt64Array/bsGetUInt64: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%64 + 1);
     offset = offsetStart;
@@ -426,7 +426,7 @@ bitPackStringInt64_unit_test(GtError *err)
   gt_log_log("bsNonStoreUniformInt64Array/bsGetInt64: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%64 + 1);
     offset = offsetStart;

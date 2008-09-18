@@ -41,28 +41,29 @@ static void gt_seqfilter_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
 {
   GtSeqFilterArguments *arguments = tool_arguments;
-  Option *option;
-  OptionParser *op;
+  GtOption *option;
+  GtOptionParser *op;
   assert(arguments);
 
-  op = option_parser_new("[option ...] [sequence_file ...]",
+  op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "Filter the given sequence_file(s) and show the "
                          "results on stdout.");
 
   /* -minlength */
-  option = option_new_ulong("minlength", "set minimum length a sequence must "
+  option = gt_option_new_ulong("minlength",
+                            "set minimum length a sequence must "
                             "have to pass the filter", &arguments->minlength,
                             UNDEF_ULONG);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -maxlength */
-  option = option_new_ulong("maxlength", "set maximum length a sequence can "
+  option = gt_option_new_ulong("maxlength", "set maximum length a sequence can "
                             "have to pass the filter", &arguments->maxlength,
                             UNDEF_ULONG);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   return op;
 }
@@ -111,9 +112,9 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_seqfilter(void)
+GtTool* gt_seqfilter(void)
 {
-  return tool_new(gt_seqfilter_arguments_new,
+  return gt_tool_new(gt_seqfilter_arguments_new,
                   gt_seqfilter_arguments_delete,
                   gt_seqfilter_option_parser_new,
                   NULL,

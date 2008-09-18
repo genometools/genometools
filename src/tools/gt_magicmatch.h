@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the MagicMatch tool */
-Tool* gt_magicmatch(void);
+GtTool* gt_magicmatch(void);
 
 #endif

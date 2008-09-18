@@ -35,26 +35,28 @@ static OPrval parse_options(int *parsed_args,
                             SpliceSiteInfoArguments *arguments, int argc,
                             const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("[option ...] [GFF3_file ...]", "Show information "
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Show information "
                          "about splice sites given in GFF3 files.");
 
   /* -seqfile and -regionmapping */
   seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -addintrons */
-  option = option_new_bool("addintrons", "add intron features between existing "
+  option = gt_option_new_bool("addintrons",
+                           "add intron features between existing "
                            "exon features\n(before computing the information "
                            "to be shown)", &arguments->addintrons, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* parse */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

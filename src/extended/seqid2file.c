@@ -17,30 +17,30 @@
 
 #include "extended/seqid2file.h"
 
-void seqid2file_options(OptionParser *op, GtStr *seqfile,
+void seqid2file_options(GtOptionParser *op, GtStr *seqfile,
                         GtStr *regionmapping)
 {
-  Option *seqfile_option, *regionmapping_option;
+  GtOption *seqfile_option, *regionmapping_option;
   assert(op && seqfile && regionmapping);
 
   /* -seqfile */
-  seqfile_option = option_new_string("seqfile", "set the sequence file from "
+  seqfile_option = gt_option_new_string("seqfile", "set the sequence file from "
                                      "which to extract the features", seqfile,
                                      NULL);
-  option_parser_add_option(op, seqfile_option);
+  gt_option_parser_add_option(op, seqfile_option);
 
   /* -regionmapping */
-  regionmapping_option = option_new_string("regionmapping", "set file "
+  regionmapping_option = gt_option_new_string("regionmapping", "set file "
                                            "containing sequence-region to "
                                            "sequence file mapping",
                                            regionmapping, NULL);
-  option_parser_add_option(op, regionmapping_option);
+  gt_option_parser_add_option(op, regionmapping_option);
 
   /* either option -seqfile or -regionmapping is mandatory */
-  option_is_mandatory_either(seqfile_option, regionmapping_option);
+  gt_option_is_mandatory_either(seqfile_option, regionmapping_option);
 
   /* the options -seqfile and -regionmapping exclude each other */
-  option_exclude(seqfile_option, regionmapping_option);
+  gt_option_exclude(seqfile_option, regionmapping_option);
 }
 
 RegionMapping* seqid2file_regionmapping_new(GtStr *seqfile,

@@ -30,7 +30,7 @@
 int tooldriver(int(*tool)(int argc, const char **argv, GtError*),
                int argc, char *argv[]);
 
-int toolobjdriver(ToolConstructor, int argc, char *argv[]);
+int toolobjdriver(GtToolConstructor, int argc, char *argv[]);
 
 #if 0
 

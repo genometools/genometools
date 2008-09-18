@@ -47,32 +47,32 @@ static void gt_csa_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_csa_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
 {
   CSAArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] [GFF3_file]",
+  op = gt_option_parser_new("[option ...] [GFF3_file]",
                          "Replace spliced alignments with computed consensus "
                          "spliced alignments.");
 
   /* -join-length */
-  option = option_new_ulong("join-length", "set join length for the spliced "
+  option = gt_option_new_ulong("join-length", "set join length for the spliced "
                             "alignment clustering", &arguments->join_length,
                             DEFAULT_JOIN_LENGTH);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
-  option_parser_set_max_args(op, 1);
+  gt_option_parser_set_max_args(op, 1);
 
   return op;
 }
@@ -111,9 +111,9 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_csa(void)
+GtTool* gt_csa(void)
 {
-  return tool_new(gt_csa_arguments_new,
+  return gt_tool_new(gt_csa_arguments_new,
                   gt_csa_arguments_delete,
                   gt_csa_option_parser_new,
                   NULL,

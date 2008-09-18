@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the GFF3 tool */
-Tool* gt_gff3(void);
+GtTool* gt_gff3(void);
 
 #endif

@@ -26,43 +26,43 @@
 #include "match/eis-encidxseq-param.h"
 
 extern void
-registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
+registerPackedIndexOptions(GtOptionParser *op, struct bwtOptions *paramOutput,
                            int defaultOptimizationFlags,
                            const GtStr *projectName)
 {
-  Option *option;
+ GtOption *option;
 
   registerEncIdxSeqOptions(op, &paramOutput->final.seqParams);
 
   paramOutput->final.featureToggles = BWTBaseFeatures;
 
-  option = option_new_uint(
+  option = gt_option_new_uint(
     "locfreq", "specify the locate frequency\n"
     "parameter i means that each i-th position of input string is stored\n"
     "0 => no locate information", &paramOutput->final.locateInterval, 16U);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool(
+  option = gt_option_new_bool(
     "locbitmap", "marked/unmarked positions for locate are stored as bitmaps\n"
     "this gives faster location of hits but increases the index by 1 bit per"
     " symbol", &paramOutput->useLocateBitmap, true);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
   paramOutput->useLocateBitmapOption = option;
 
-  option = option_new_bool(
+  option = gt_option_new_bool(
     "sprank", "build rank table for special symbols\n"
     "this produces an index which can be used to regenerate the "
     "original sequence but increases the memory used during index creation",
     &paramOutput->useSourceRank, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_int_min_max(
+  option = gt_option_new_int_min_max(
     "sprankilog", "specify the interval of rank sampling as log value\n"
     "parameter i means that each 2^i-th position of source is sampled for "
     "rank\nundefined => chooses default of log(log(sequence length))",
     &paramOutput->final.sourceRankInterval, -1, -1,
     sizeof (Seqpos) * CHAR_BIT - 1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   registerCtxMapOptions(op, &paramOutput->final.ctxMapILog);
 
@@ -91,7 +91,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
 extern void
 computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles)
 {
-  if (option_is_set(paramOutput->useLocateBitmapOption))
+  if (gt_option_is_set(paramOutput->useLocateBitmapOption))
     paramOutput->final.featureToggles
       |= (paramOutput->useLocateBitmap?BWTLocateBitmap:BWTLocateCount);
   else

@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the align tool */
-Tool* gt_align(void);
+GtTool* gt_align(void);
 
 #endif

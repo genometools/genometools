@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the exercise tool */
-Tool* gt_exercise(void);
+GtTool* gt_exercise(void);
 
 #endif

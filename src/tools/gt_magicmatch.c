@@ -43,32 +43,32 @@ static void gt_magicmatch_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
 {
   MagicMatchArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] -f sequence_file [...] -t",
+  op = gt_option_parser_new("[option ...] -f sequence_file [...] -t",
                          "Compute MD5 fingerprints for each sequence given in "
                          "sequence_file(s).");
 
   /* -f */
-  o = option_new_filenamearray("f", "fasta file names (at least one file is "
+  o = gt_option_new_filenamearray("f", "fasta file names (at least one file is "
                                "required)", arguments->seqfiles);
-  option_is_mandatory(o);
-  option_parser_add_option(op, o);
+  gt_option_is_mandatory(o);
+  gt_option_parser_add_option(op, o);
 
   /* -t */
-  o = option_new_bool("t", "translate the sequences of the files",
+  o = gt_option_new_bool("t", "translate the sequences of the files",
                       &arguments->translate, false);
-  option_is_mandatory(o);
-  option_parser_add_option(op, o);
+  gt_option_is_mandatory(o);
+  gt_option_parser_add_option(op, o);
 
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 0, 0);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_min_max_args(op, 0, 0);
 
   return op;
 }
@@ -110,9 +110,9 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   return had_err;
 }
 
-Tool* gt_magicmatch(void)
+GtTool* gt_magicmatch(void)
 {
-  return tool_new(gt_magicmatch_arguments_new,
+  return gt_tool_new(gt_magicmatch_arguments_new,
                   gt_magicmatch_arguments_delete,
                   gt_magicmatch_option_parser_new,
                   NULL,

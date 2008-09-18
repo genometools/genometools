@@ -357,7 +357,7 @@ static void* gt_mmap_generic_path_func(const char *path, size_t *len,
     xfstat(fd, &sb);
   else if (fstat(fd, &sb))
     return NULL;
-  if (sizeof(off_t) > sizeof (size_t)
+  if (sizeof (off_t) > sizeof (size_t)
       && sb.st_size > SIZE_MAX)
     return NULL;
   map = gt_mmap_generic_fd_func(fd, sb.st_size, 0, mapwritable, hard_fail,

@@ -19,21 +19,21 @@
 #include "core/versionfunc.h"
 #include "core/tool.h"
 
-struct Tool {
-  ToolArgumentsNew tool_arguments_new;
-  ToolArgumentsDelete tool_arguments_delete;
-  ToolOptionParserNew tool_option_parser_new;
-  ToolArgumentsCheck tool_arguments_check;
-  ToolRunner tool_runner;
+struct GtTool {
+  GtToolArgumentsNew tool_arguments_new;
+  GtToolArgumentsDelete tool_arguments_delete;
+  GtToolOptionParserNew tool_option_parser_new;
+  GtToolArgumentsCheck tool_arguments_check;
+  GtToolRunner tool_runner;
 };
 
-Tool* tool_new(ToolArgumentsNew tool_arguments_new,
-               ToolArgumentsDelete tool_arguments_delete,
-               ToolOptionParserNew tool_option_parser_new,
-               ToolArgumentsCheck tool_arguments_check,
-               ToolRunner tool_runner)
+GtTool* gt_tool_new(GtToolArgumentsNew tool_arguments_new,
+                    GtToolArgumentsDelete tool_arguments_delete,
+                    GtToolOptionParserNew tool_option_parser_new,
+                    GtToolArgumentsCheck tool_arguments_check,
+                    GtToolRunner tool_runner)
 {
-  Tool *tool;
+  GtTool *tool;
   assert(tool_option_parser_new && tool_runner); /* required arguments */
   /* <tool_arguments_new> and <tool_arguments_delete> imply each other */
   assert(( tool_arguments_new &&  tool_arguments_delete) ||
@@ -47,10 +47,10 @@ Tool* tool_new(ToolArgumentsNew tool_arguments_new,
   return tool;
 }
 
-int tool_run(Tool *tool, int argc, const char **argv, GtError *err)
+int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
 {
   void *tool_arguments = NULL;
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
   int parsed_args, had_err = 0;
   gt_error_check(err);
@@ -62,8 +62,9 @@ int tool_run(Tool *tool, int argc, const char **argv, GtError *err)
 
   /* parse options */
   op = tool->tool_option_parser_new(tool_arguments);
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   switch (oprval) {
     case OPTIONPARSER_OK:
       break;
@@ -96,7 +97,7 @@ int tool_run(Tool *tool, int argc, const char **argv, GtError *err)
   return 0;
 }
 
-void  tool_delete(Tool *tool)
+void  gt_tool_delete(GtTool *tool)
 {
   if (!tool) return;
   gt_free(tool);

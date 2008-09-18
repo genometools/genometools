@@ -47,29 +47,31 @@ void gt_splitfasta_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
 {
   SplitfastaArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *targetsize_option, *splitdesc_option, *o;
+  GtOptionParser *op;
+  GtOption *targetsize_option, *splitdesc_option, *o;
   assert(arguments);
-  op = option_parser_new("[option ...] fastafile","Split the supplied fasta "
+  op = gt_option_parser_new("[option ...] fastafile","Split the supplied fasta "
                          "file.");
-  targetsize_option = option_new_ulong_min("targetsize", "set the target file "
+  targetsize_option = gt_option_new_ulong_min("targetsize",
+                                           "set the target file "
                                            "size in MB",
                                            &arguments->max_filesize_in_MB, 50,
                                            1);
-  option_parser_add_option(op, targetsize_option);
-  splitdesc_option = option_new_string("splitdesc", "put every fasta entry in "
+  gt_option_parser_add_option(op, targetsize_option);
+  splitdesc_option = gt_option_new_string("splitdesc",
+                                       "put every fasta entry in "
                                        "a separate file named by its "
                                        "description in the given directory",
                                        arguments->splitdesc, NULL);
-  option_parser_add_option(op, splitdesc_option);
-  option_exclude(targetsize_option, splitdesc_option);
-  o = option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
+  gt_option_parser_add_option(op, splitdesc_option);
+  gt_option_exclude(targetsize_option, splitdesc_option);
+  o = gt_option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
                       &arguments->force, false);
-  option_parser_add_option(op, o);
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
 
@@ -248,9 +250,9 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_splitfasta(void)
+GtTool* gt_splitfasta(void)
 {
-  return tool_new(gt_splitfasta_arguments_new,
+  return gt_tool_new(gt_splitfasta_arguments_new,
                   gt_splitfasta_arguments_delete,
                   gt_splitfasta_option_parser_new,
                   NULL,

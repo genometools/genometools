@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the shredder tool */
-Tool* gt_shredder(void);
+GtTool* gt_shredder(void);
 
 #endif

@@ -18,14 +18,15 @@
 #include "match/eis-encidxseq.h"
 
 extern void
-registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput)
+registerBlockEncOptions(GtOptionParser *op, struct blockEncParams *paramOutput)
 {
-  Option *option;
+  GtOption *option;
 
-  option = option_new_uint_min("bsize", "specify size of blocks",
-                               &paramOutput->blockSize, 8U, 1U);
-  option_parser_add_option(op, option);
-  option = option_new_uint_min("blbuck", "specify number of blocks per bucket",
-                               &paramOutput->bucketBlocks, 8U, 1U);
-  option_parser_add_option(op, option);
+  option = gt_option_new_uint_min("bsize", "specify size of blocks",
+                                  &paramOutput->blockSize, 8U, 1U);
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_uint_min("blbuck", "specify number of blocks per "
+                                            "bucket",
+                                  &paramOutput->bucketBlocks, 8U, 1U);
+  gt_option_parser_add_option(op, option);
 }

@@ -178,7 +178,7 @@ void mg_outputwriter(ParseStruct *parsestruct_ptr,
 {
   gt_error_check(err);
 
-  /* je nach dem per Option angegebenen Output-Fileformat wird die
+  /* je nach dem per GtOption angegebenen Output-Fileformat wird die
      entsprechende Ausgabefunktion aufgerufen */
   switch (ARGUMENTSSTRUCT(outputfile_format))
   {

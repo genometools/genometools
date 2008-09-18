@@ -18,7 +18,7 @@
 #include "match/eis-blockcomp-param.h"
 
 extern void
-registerEncIdxSeqOptions(OptionParser *op, struct seqBaseParam *paramOutput)
+registerEncIdxSeqOptions(GtOptionParser *op, struct seqBaseParam *paramOutput)
 {
   /* currently BWT_ON_BLOCK is fixed but might be extended in the future */
   paramOutput->encType = BWT_ON_BLOCK_ENC;

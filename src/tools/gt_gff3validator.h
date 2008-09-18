@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the GFF3 validator tool */
-Tool* gt_gff3validator(void);
+GtTool* gt_gff3validator(void);
 
 #endif

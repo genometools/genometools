@@ -52,33 +52,33 @@ static void gt_sequniq_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 {
   GtSequniqArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *seqit_option, *verbose_option;
+  GtOptionParser *op;
+  GtOption *seqit_option, *verbose_option;
   assert(arguments);
 
-  op = option_parser_new("[option ...] sequence_file [...] ",
+  op = gt_option_parser_new("[option ...] sequence_file [...] ",
                          "Filter out repeated sequences in given in given "
                          "sequence_file(s).");
 
   /* -seqit */
-  seqit_option = option_new_bool("seqit", "use sequence iterator",
+  seqit_option = gt_option_new_bool("seqit", "use sequence iterator",
                                  &arguments->seqit, false);
-  option_is_development_option(seqit_option);
-  option_parser_add_option(op, seqit_option);
+  gt_option_is_development_option(seqit_option);
+  gt_option_parser_add_option(op, seqit_option);
 
   /* -v */
-  verbose_option = option_new_verbose(&arguments->verbose);
-  option_is_development_option(verbose_option);
-  option_parser_add_option(op, verbose_option);
+  verbose_option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_is_development_option(verbose_option);
+  gt_option_parser_add_option(op, verbose_option);
 
   /* option implications */
-  option_imply(verbose_option, seqit_option);
+  gt_option_imply(verbose_option, seqit_option);
 
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
-  option_parser_set_min_args(op, 1);
+  gt_option_parser_set_min_args(op, 1);
   return op;
 }
 
@@ -169,9 +169,9 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_sequniq(void)
+GtTool* gt_sequniq(void)
 {
-  return tool_new(gt_sequniq_arguments_new,
+  return gt_tool_new(gt_sequniq_arguments_new,
                   gt_sequniq_arguments_delete,
                   gt_sequniq_option_parser_new,
                   NULL,

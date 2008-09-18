@@ -26,29 +26,30 @@ static OPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
                             int *parsed_args, int argc,
                             const char **argv, GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  Option *option;
+  GtOption *option;
 
   gt_error_check(err);
-  op = option_parser_new("storeindex <mkvindex1> <mkvindex2> ...",
+  op = gt_option_parser_new("storeindex <mkvindex1> <mkvindex2> ...",
                          "Merge indexes into one index.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("ii",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  option = gt_option_new_filenamearray("ii",
                                     "specify input index files (mandatory)",
                                     indexnametab);
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_string("indexname",
+  option = gt_option_new_string("indexname",
                              "specify index to be created",
                              indexname, NULL);
 
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

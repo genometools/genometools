@@ -125,7 +125,7 @@ style =
     max_capt_show_width= nil,
     -- Display this track only if the viewport is not wider than this
     -- number of nucleotides. Set to 0 to disable type track.
-    max_show_width     = nil,
+    max_show_width     = 0,
     -- Limit the number of tracks
     max_num_lines      = 10,
   },
@@ -137,7 +137,7 @@ style =
     fill               = {red=0.8, green=0.5, blue=0.5},
     style              = "box",
     -- Collapsing options
-    collapse_to_parent = true,
+    collapse_to_parent = false,
     split_lines        = true,
     -- Caption options
     max_capt_show_width= nil,
@@ -166,6 +166,9 @@ style =
     max_show_width     = nil,
     -- Limit the number of tracks
     max_num_lines      = 10,
+  },
+  target_site_duplication = {
+    max_show_width = 0,
   },
 --------------------------------------
     protein_match = {
@@ -253,7 +256,7 @@ style =
     stroke_width = .5, -- width of outlines, in pixels
     stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
     show_grid = true, -- shows light vertical lines for orientation
-    min_len_block = 30 , -- minimum length of a block in which single elements are shown
+    min_len_block = 0 , -- minimum length of a block in which single elements are shown
     track_title_color     = {red=0.7, green=0.7, blue=0.7},
     default_stroke_color  = {red=0.1, green=0.1, blue=0.1},
   },

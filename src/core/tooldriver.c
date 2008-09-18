@@ -43,17 +43,17 @@ int tooldriver(int(*tool)(int argc, const char **argv, GtError*),
   return EXIT_SUCCESS;
 }
 
-int toolobjdriver(ToolConstructor tool_constructor, int argc, char *argv[])
+int toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
 {
-  Tool *tool;
+  GtTool *tool;
   GtError *err;
   int had_err;
   gt_allocators_init();
   err = gt_error_new();
   gt_error_set_progname(err, argv[0]);
   tool = tool_constructor();
-  had_err = tool_run(tool, argc, (const char**) argv, err);
-  tool_delete(tool);
+  had_err = gt_tool_run(tool, argc, (const char**) argv, err);
+  gt_tool_delete(tool);
   if (gt_error_is_set(err)) {
     fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
             gt_error_get(err));

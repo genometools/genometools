@@ -47,26 +47,27 @@ static void gt_prebwt_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
 {
   Prebwtoptions *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option, *optionpck;
+  GtOptionParser *op;
+  GtOption *option, *optionpck;
 
   assert(arguments != NULL);
   arguments->indexname = gt_str_new();
-  op = option_parser_new("[options] -pck indexname",
+  op = gt_option_parser_new("[options] -pck indexname",
                          "Precompute bwt-bounds for some prefix length.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionpck = option_new_string("pck","Specify index (packed index)",
+  optionpck = gt_option_new_string("pck","Specify index (packed index)",
                              arguments->indexname, NULL);
-  option_parser_add_option(op, optionpck);
-  option_is_mandatory(optionpck);
+  gt_option_parser_add_option(op, optionpck);
+  gt_option_is_mandatory(optionpck);
 
-  option = option_new_uint_min("maxdepth","specify maximum depth (value > 0)",
+  option = gt_option_new_uint_min("maxdepth",
+                                "specify maximum depth (value > 0)",
                                 &arguments->maxdepth,0,1U);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
   return op;
 }
 
@@ -123,9 +124,9 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   return haserr ? -1 : 0;
 }
 
-Tool* gt_prebwt(void)
+GtTool* gt_prebwt(void)
 {
-  return tool_new(gt_prebwt_arguments_new,
+  return gt_tool_new(gt_prebwt_arguments_new,
                   gt_prebwt_arguments_delete,
                   gt_prebwt_option_parser_new,
                   NULL,

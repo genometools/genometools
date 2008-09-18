@@ -68,14 +68,14 @@ static void process_splice_form(GtArray *spliced_alignments_in_form,
   printf("]\n");
 }
 
-static OptionParser* gt_consensus_sa_option_parser_new(GT_UNUSED
+static GtOptionParser* gt_consensus_sa_option_parser_new(GT_UNUSED
                                                        void *tool_arguments)
 {
-  OptionParser *op;
-  op = option_parser_new("spliced_alignment_file", "Read file containing "
+  GtOptionParser *op;
+  op = gt_option_parser_new("spliced_alignment_file", "Read file containing "
                          "spliced alingments, compute consensus spliced "
                          "alignments,\nand print them to stdout.");
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
 
@@ -118,9 +118,9 @@ static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_consensus_sa(void)
+GtTool* gt_consensus_sa(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_consensus_sa_option_parser_new,
                   NULL,

@@ -41,17 +41,17 @@ static void gt_scorefasta_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
 {
   ScorefastaArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] u w",
+  op = gt_option_parser_new("[option ...] u w",
                          "Compute scorefasta for DNA sequences u and w).");
-  o = option_new_ulong_min("q", "set q-gram length", &arguments->q, 3, 1);
-  option_parser_add_option(op, o);
-  option_parser_set_min_max_args(op, 2, 2);
+  o = gt_option_new_ulong_min("q", "set q-gram length", &arguments->q, 3, 1);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
@@ -93,9 +93,9 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
   return 0;
 }
 
-Tool* gt_scorefasta(void)
+GtTool* gt_scorefasta(void)
 {
-  return tool_new(gt_scorefasta_arguments_new,
+  return gt_tool_new(gt_scorefasta_arguments_new,
                   gt_scorefasta_arguments_delete,
                   gt_scorefasta_option_parser_new,
                   NULL,

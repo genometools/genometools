@@ -61,7 +61,8 @@ int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
     gt_graphics_delete(canvas->pvt->g);
     canvas->pvt->g = NULL;
   }
-  canvas->pvt->g = gt_graphics_cairo_new(GT_GRAPHICS_PNG, canvas->pvt->width, 1);
+  canvas->pvt->g = gt_graphics_cairo_new(GT_GRAPHICS_PNG, canvas->pvt->width,
+                                         1);
 
   /* calculate scaling factor */
   canvas->pvt->factor = ((double) canvas->pvt->width
@@ -119,7 +120,8 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
   canvas->pvt->ii = ii;
   canvas->pvt->width = width;
   canvas->pvt->bt = NULL;
-  canvas->pvt->y = 0.5; /* 0.5 displacement to eliminate fuzzy horizontal lines */
+  /* 0.5 displacement to eliminate fuzzy horizontal lines */
+  canvas->pvt->y = 0.5;
   ccc = canvas_cairo_context_cast(canvas);
   ccc->context = context;
   return canvas;

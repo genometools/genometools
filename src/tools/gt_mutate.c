@@ -39,22 +39,24 @@ static void gt_mutate_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_mutate_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
 {
   MutateArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] [sequence_file ...]",
+  op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "Mutate the sequences of the given sequence_file(s) "
                          "and show them on stdout.");
   /* -rate */
-  o = option_new_uint_max("rate", "set the mutation rate", &arguments->rate, 1,
-                          100);
-  option_parser_add_option(op, o);
+  o = gt_option_new_uint_max("rate", "set the mutation rate",
+                             &arguments->rate,
+                             1,
+                             100);
+  gt_option_parser_add_option(op, o);
 
   /* parse */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
   return op;
 }
 
@@ -93,9 +95,9 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_mutate(void)
+GtTool* gt_mutate(void)
 {
-  return tool_new(gt_mutate_arguments_new,
+  return gt_tool_new(gt_mutate_arguments_new,
                   gt_mutate_arguments_delete,
                   gt_mutate_option_parser_new,
                   NULL,

@@ -40,29 +40,30 @@ static void gt_assemblegreedy_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)
 {
-  OptionParser *op;
-  Option *option, *showoverlaps_option, *showpath_option;
+  GtOptionParser *op;
+  GtOption *option, *showoverlaps_option, *showpath_option;
   AssemblegreedyArguments *arguments = tool_arguments;
   assert(arguments);
-  op = option_parser_new("[option ...] fragment_file",
+  op = gt_option_parser_new("[option ...] fragment_file",
                          "Assemble fragments given in fragment_file in greedy "
                          "fashion.");
-  option = option_new_ulong("minlength", "set the minimum length an overlap "
+  option = gt_option_new_ulong("minlength", "set the minimum length an overlap "
                             "must have to be considered", &arguments->minlength,
                             5);
-  option_parser_add_option(op, option);
-  showoverlaps_option = option_new_bool("showoverlaps", "show only the "
+  gt_option_parser_add_option(op, option);
+  showoverlaps_option = gt_option_new_bool("showoverlaps", "show only the "
                                         "overlaps between the fragments",
                                         &arguments->showoverlaps, false);
-  option_parser_add_option(op, showoverlaps_option);
-  showpath_option = option_new_bool("showpath", "show the assembled fragment "
-                                    "path instead of the assembled sequence",
-                                    &arguments->showpath, false);
-  option_parser_add_option(op, showpath_option);
-  option_exclude(showoverlaps_option, showpath_option);
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_add_option(op, showoverlaps_option);
+  showpath_option = gt_option_new_bool("showpath",
+                                       "show the assembled fragment "
+                                       "path instead of the assembled sequence",
+                                       &arguments->showpath, false);
+  gt_option_parser_add_option(op, showpath_option);
+  gt_option_exclude(showoverlaps_option, showpath_option);
+  gt_option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
 
@@ -108,9 +109,9 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_assemblegreedy(void)
+GtTool* gt_assemblegreedy(void)
 {
-  return tool_new(gt_assemblegreedy_arguments_new,
+  return gt_tool_new(gt_assemblegreedy_arguments_new,
                   gt_assemblegreedy_arguments_delete,
                   gt_assemblegreedy_option_parser_new,
                   NULL,

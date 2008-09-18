@@ -125,7 +125,7 @@ struct bwtOptions
   bool useSourceRank;                   /**< did the user request extra
                                          * information for sort reversing of
                                          * rank-sorted symbols? */
-  Option *useLocateBitmapOption;        /**< used to query wether the
+ GtOption *useLocateBitmapOption;        /**< used to query wether the
                                          * option was set or left
                                          * unspecified in which case a
                                          * reasonable default is
@@ -143,7 +143,7 @@ struct bwtOptions
  * name (i.e. without extension) of the project once index creation begins
  */
 extern void
-registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
+registerPackedIndexOptions(GtOptionParser *op, struct bwtOptions *paramOutput,
                            int defaultOptimizationFlags,
                            const GtStr *projectName);
 

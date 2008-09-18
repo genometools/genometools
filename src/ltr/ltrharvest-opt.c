@@ -181,8 +181,8 @@ static OPrval parse_options(int *parsed_args,
                             LTRharvestoptions *lo,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *optionindex,
+  GtOptionParser *op;
+  GtOption *optionindex,
          *optionseed,
          *optionminlenltr,
          *optionmaxlenltr,
@@ -216,93 +216,93 @@ static OPrval parse_options(int *parsed_args,
   };
 
   gt_error_check(err);
-  op = option_parser_new("[option ...] -index filenameindex",
+  op = gt_option_parser_new("[option ...] -index filenameindex",
                          "Predict LTR retrotransposons.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   /* -index */
   lo->str_indexname = gt_str_new();
-  optionindex = option_new_string("index",
+  optionindex = gt_option_new_string("index",
                              "specify the name of the enhanced suffix "
                              "array index (mandatory)",
                              lo->str_indexname, NULL);
-  option_is_mandatory(optionindex);
-  option_parser_add_option(op, optionindex);
+  gt_option_is_mandatory(optionindex);
+  gt_option_parser_add_option(op, optionindex);
 
   /* -seed */
-  optionseed = option_new_ulong_min("seed",
+  optionseed = gt_option_new_ulong_min("seed",
                                "specify minimum seed length for"
                                " exact repeats",
                                &lo->minseedlength,
                                30UL,
                                1UL);
-  option_parser_add_option(op, optionseed);
+  gt_option_parser_add_option(op, optionseed);
 
   /* -minlenltr */
-  optionminlenltr = option_new_ulong_min_max("minlenltr",
+  optionminlenltr = gt_option_new_ulong_min_max("minlenltr",
                                "specify minimum length for each LTR",
                                &lo->repeatinfo.lmin,
                                100UL,
                                1UL,
                                UNDEF_ULONG);
-  option_parser_add_option(op, optionminlenltr);
+  gt_option_parser_add_option(op, optionminlenltr);
 
   /* -maxlenltr */
-  optionmaxlenltr = option_new_ulong_min_max("maxlenltr",
+  optionmaxlenltr = gt_option_new_ulong_min_max("maxlenltr",
                                "specify maximum length for each LTR",
                                &lo->repeatinfo.lmax,
                                1000UL,
                                1UL,
                                UNDEF_ULONG);
-  option_parser_add_option(op, optionmaxlenltr);
+  gt_option_parser_add_option(op, optionmaxlenltr);
 
   /* -mindistltr */
-  optionmindistltr = option_new_ulong_min_max("mindistltr",
+  optionmindistltr = gt_option_new_ulong_min_max("mindistltr",
                                "specify minimum distance of "
                                "LTR startpositions",
                                &lo->repeatinfo.dmin,
                                1000UL,
                                1UL,
                                UNDEF_ULONG);
-  option_parser_add_option(op, optionmindistltr);
+  gt_option_parser_add_option(op, optionmindistltr);
 
   /* -maxdistltr */
-  optionmaxdistltr = option_new_ulong_min_max("maxdistltr",
+  optionmaxdistltr = gt_option_new_ulong_min_max("maxdistltr",
                                "specify maximum distance of "
                                "LTR startpositions",
                                &lo->repeatinfo.dmax,
                                15000UL,
                                1UL,
                                UNDEF_ULONG);
-  option_parser_add_option(op, optionmaxdistltr);
+  gt_option_parser_add_option(op, optionmaxdistltr);
 
   /* -similar */
-  optionsimilar = option_new_double_min_max("similar",
+  optionsimilar = gt_option_new_double_min_max("similar",
                                "specify similaritythreshold in "
                                "range [1..100%]",
                                &lo->similaritythreshold,
                                (double) 85.0,
                                (double) 0.0,
                                100.0);
-  option_parser_add_option(op, optionsimilar);
+  gt_option_parser_add_option(op, optionsimilar);
 
   /* -mintsd */
-  optionmintsd = option_new_uint_min_max("mintsd",
+  optionmintsd = gt_option_new_uint_min_max("mintsd",
                               "specify minimum length for each TSD",
                                &lo->minlengthTSD,
                                4U,
                                0,
                                UNDEF_UINT);
-  option_parser_add_option(op, optionmintsd);
+  gt_option_parser_add_option(op, optionmintsd);
 
   /* -maxtsd */
-  optionmaxtsd = option_new_uint_min_max("maxtsd",
+  optionmaxtsd = gt_option_new_uint_min_max("maxtsd",
                               "specify maximum length for each TSD",
                                &lo->maxlengthTSD,
                                20U,
                                0,
                                UNDEF_UINT);
-  option_parser_add_option(op, optionmaxtsd);
+  gt_option_parser_add_option(op, optionmaxtsd);
 
   /* -motif */
   /* characters will be tranformed later
@@ -312,24 +312,24 @@ static OPrval parse_options(int *parsed_args,
   lo->motif.firstright  = (Uchar) 'c';
   lo->motif.secondright = (Uchar) 'a';
   lo->motif.str_motif = gt_str_new();
-  optionmotif = option_new_string("motif",
+  optionmotif = gt_option_new_string("motif",
                              "specify 2 nucleotides startmotif + "
                              "2 nucleotides endmotif: ****",
                              lo->motif.str_motif, NULL);
-  option_parser_add_option(op, optionmotif);
+  gt_option_parser_add_option(op, optionmotif);
 
   /* -motifmis */
-  optionmotifmis = option_new_uint_min_max("motifmis",
+  optionmotifmis = gt_option_new_uint_min_max("motifmis",
                              "specify maximum number of "
                              "mismatches in motif [0,3]",
                              &lo->motif.allowedmismatches,
                              4U,
                              0,
                              3U);
-  option_parser_add_option(op, optionmotifmis);
+  gt_option_parser_add_option(op, optionmotifmis);
 
   /* -vic */
-  optionvic = option_new_uint_min_max("vic",
+  optionvic = gt_option_new_uint_min_max("vic",
                         "specify the number of nucleotides (to the left and "
                         "to the right) that will be searched "
                         "for TSDs and/or motifs around 5' and 3' boundary "
@@ -338,105 +338,105 @@ static OPrval parse_options(int *parsed_args,
                         60U,
                         1U,
                         500U);
-  option_parser_add_option(op, optionvic);
+  gt_option_parser_add_option(op, optionvic);
 
   /* -overlaps */
   lo->str_overlaps = gt_str_new();
-  optionoverlaps = option_new_choice("overlaps",
+  optionoverlaps = gt_option_new_choice("overlaps",
                "specify no|best|all",
                lo->str_overlaps,
                overlaps[0],
                overlaps);
-  option_parser_add_option(op, optionoverlaps);
+  gt_option_parser_add_option(op, optionoverlaps);
 
   /* -xdrop */
-  optionxdrop = option_new_int_min("xdrop",
+  optionxdrop = gt_option_new_int_min("xdrop",
                         "specify xdropbelowscore for extension-alignment",
                         &lo->xdropbelowscore,
                         (int)5,
                         (int)0);
-  option_parser_add_option(op, optionxdrop);
+  gt_option_parser_add_option(op, optionxdrop);
 
   /* -mat */
   lo->arbitscores.gcd  = (int) 1;      /* set only for initialization,
                                         do not change! */
-  optionmat = option_new_int_min("mat",
+  optionmat = gt_option_new_int_min("mat",
                         "specify matchscore for extension-alignment",
                         &lo->arbitscores.mat,
                         (int)2,
                         (int)1);
-  option_parser_add_option(op, optionmat);
+  gt_option_parser_add_option(op, optionmat);
 
   /* -mis */
-  optionmis = option_new_int_max("mis",
+  optionmis = gt_option_new_int_max("mis",
                         "specify mismatchscore for extension-alignment",
                         &lo->arbitscores.mis,
                         (int)-2,
                         (int)-1);
-  option_parser_add_option(op, optionmis);
+  gt_option_parser_add_option(op, optionmis);
 
   /* -ins */
-  optionins = option_new_int_max("ins",
+  optionins = gt_option_new_int_max("ins",
                         "specify insertionscore for extension-alignment",
                         &lo->arbitscores.ins,
                         (int)-3,
                         (int)-1);
-  option_parser_add_option(op, optionins);
+  gt_option_parser_add_option(op, optionins);
 
   /* -del */
-  optiondel = option_new_int_max("del",
+  optiondel = gt_option_new_int_max("del",
                         "specify deletionscore for extension-alignment",
                         &lo->arbitscores.del,
                         (int)-3,
                         (int)-1);
-  option_parser_add_option(op, optiondel);
+  gt_option_parser_add_option(op, optiondel);
 
   /* -v */
-  optionv = option_new_bool("v",
+  optionv = gt_option_new_bool("v",
                            "verbose mode",
                            &lo->verbosemode,
                            false);
-  option_parser_add_option(op, optionv);
+  gt_option_parser_add_option(op, optionv);
 
   /* -longoutput */
-  optionlongoutput = option_new_bool("longoutput",
+  optionlongoutput = gt_option_new_bool("longoutput",
                            "additional motif/TSD output",
                            &lo->longoutput,
                            false);
-  option_parser_add_option(op, optionlongoutput);
+  gt_option_parser_add_option(op, optionlongoutput);
 
   /* -out */
   lo->fastaoutput = false;      /* by default no FASTA output */
   lo->str_fastaoutputfilename = gt_str_new();
-  optionout = option_new_string("out",
+  optionout = gt_option_new_string("out",
                              "specify FASTA outputfilename",
                              lo->str_fastaoutputfilename, NULL);
-  option_parser_add_option(op, optionout);
+  gt_option_parser_add_option(op, optionout);
 
   /* -outinner */
   lo->fastaoutputinnerregion = false;
   lo->str_fastaoutputfilenameinnerregion = gt_str_new();
-  optionoutinner = option_new_string("outinner",
+  optionoutinner = gt_option_new_string("outinner",
                              "specify FASTA outputfilename for inner regions",
                              lo->str_fastaoutputfilenameinnerregion, NULL);
-  option_parser_add_option(op, optionoutinner);
+  gt_option_parser_add_option(op, optionoutinner);
 
   /* -gff3 */
   lo->gff3output = false;       /* by default no gff3 output */
   lo->str_gff3filename = gt_str_new();
-  optiongff3 = option_new_string("gff3",
+  optiongff3 = gt_option_new_string("gff3",
                              "specify GFF3 outputfilename",
                              lo->str_gff3filename, NULL);
-  option_parser_add_option(op, optiongff3);
+  gt_option_parser_add_option(op, optiongff3);
 
   /* implications */
-  option_imply(optionmaxtsd, optionmintsd);
-  option_imply(optionmotifmis, optionmotif);
+  gt_option_imply(optionmaxtsd, optionmintsd);
+  gt_option_imply(optionmotifmis, optionmotif);
 
-  option_imply_either_2(optionlongoutput, optionmintsd, optionmotif);
+  gt_option_imply_either_2(optionlongoutput, optionmintsd, optionmotif);
 
-  option_parser_refer_to_manual(op);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  gt_option_parser_refer_to_manual(op);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
                                err);
   lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;
   if (oprval == OPTIONPARSER_OK)
@@ -468,7 +468,7 @@ static OPrval parse_options(int *parsed_args,
 
     /* If option motif is set,
        store characters, transform them later */
-    if (option_is_set(optionmotif))
+    if (gt_option_is_set(optionmotif))
     {
       if (gt_str_length(lo->motif.str_motif) != 4UL)
       {
@@ -481,14 +481,14 @@ static OPrval parse_options(int *parsed_args,
       lo->motif.firstright = (Uchar)  gt_str_get(lo->motif.str_motif)[2];
       lo->motif.secondright = (Uchar)  gt_str_get(lo->motif.str_motif)[3];
       /* default if motif specified */
-      if (!option_is_set(optionmotifmis))
+      if (!gt_option_is_set(optionmotifmis))
       {
         lo->motif.allowedmismatches = 0;
       }
     }
 
     /* If option overlaps is set */
-    if (option_is_set(optionoverlaps))
+    if (gt_option_is_set(optionoverlaps))
     {
       if (strcmp(gt_str_get(lo->str_overlaps), "no") == 0)
       {
@@ -519,25 +519,25 @@ static OPrval parse_options(int *parsed_args,
     }
 
     /* if FASTA output is set */
-    if (option_is_set(optionout))
+    if (gt_option_is_set(optionout))
     {
       lo->fastaoutput = true;
     }
 
     /* if FASTA output inner region is set */
-    if (option_is_set(optionoutinner))
+    if (gt_option_is_set(optionoutinner))
     {
       lo->fastaoutputinnerregion = true;
     }
 
     /* if GFF3 output is set */
-    if (option_is_set(optiongff3))
+    if (gt_option_is_set(optiongff3))
     {
       lo->gff3output = true;
     }
   }
 
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

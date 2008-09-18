@@ -32,6 +32,6 @@
  * @param err
  */
 extern void
-registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput);
+registerBlockEncOptions(GtOptionParser *op, struct blockEncParams *paramOutput);
 
 #endif

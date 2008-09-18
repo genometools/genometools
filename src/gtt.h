@@ -24,7 +24,7 @@
 
 /* The GenomeTools toolbox (gtt) module */
 
-Toolbox* gtt_tools(void);      /* return all GenomeTools tools */
+GtToolbox* gtt_tools(void);      /* return all GenomeTools tools */
 
 typedef int  (*UnitTestFunc)(GtError *);
 

@@ -21,14 +21,14 @@
 #include "exercise/markov_chain_parsing.h"
 #include "tools/gt_markovchain.h"
 
-static OptionParser* gt_markovchain_option_parser_new(GT_UNUSED
+static GtOptionParser* gt_markovchain_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
-  OptionParser *op;
-  op = option_parser_new("[option ...] markov_chain_file sequence",
+  GtOptionParser *op;
+  op = gt_option_parser_new("[option ...] markov_chain_file sequence",
                          "Compute the probability of sequence given the markov "
                          "chain in markov_chain_file.");
-  option_parser_set_min_max_args(op, 2, 2);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
@@ -60,9 +60,9 @@ static int gt_markovchain_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_markovchain(void)
+GtTool* gt_markovchain(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_markovchain_option_parser_new,
                   NULL,

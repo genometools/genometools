@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the sequniq tool */
-Tool* gt_sequniq(void);
+GtTool* gt_sequniq(void);
 
 #endif

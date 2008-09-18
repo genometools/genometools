@@ -30,29 +30,31 @@ typedef struct {
 static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("[option ...] MSA_file",
+  op = gt_option_parser_new("[option ...] MSA_file",
                          "Parse multiple sequence alignment (MSA) file and "
                          "optionally show score(s).");
   /* -show */
-  o = option_new_bool("show", "show the parsed MSA on stdout", &arguments->show,
-                      false);
-  option_parser_add_option(op, o);
+  o = gt_option_new_bool("show", "show the parsed MSA on stdout",
+                         &arguments->show,
+                         false);
+  gt_option_parser_add_option(op, o);
   /* -consensus */
-  o = option_new_bool("consensus", "show consensus distance",
+  o = gt_option_new_bool("consensus", "show consensus distance",
                       &arguments->consensus, false);
-  option_parser_add_option(op, o);
+  gt_option_parser_add_option(op, o);
   /* -sumofpairs */
-  o = option_new_bool("sumofpairs", "show optimal sum of pairwise scores",
+  o = gt_option_new_bool("sumofpairs", "show optimal sum of pairwise scores",
                       &arguments->sumofpairs, false);
-  option_parser_add_option(op, o);
+  gt_option_parser_add_option(op, o);
   /* parse */
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

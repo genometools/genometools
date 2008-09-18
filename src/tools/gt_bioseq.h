@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the biosequence tool */
-Tool* gt_bioseq(void);
+GtTool* gt_bioseq(void);
 
 #endif

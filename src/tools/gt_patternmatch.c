@@ -239,53 +239,53 @@ static OPrval parse_options(Pmatchoptions *pmopt,
                             int *parsed_args,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option, *optionimm, *optionbck;
+  GtOptionParser *op;
+  GtOption *option, *optionimm, *optionbck;
   OPrval oprval;
 
   gt_error_check(err);
-  op = option_parser_new("[options] -ii indexname",
+  op = gt_option_parser_new("[options] -ii indexname",
                          "Perform pattern matches.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  option = option_new_ulong("minpl","Specify minimum length of pattern",
+  option = gt_option_new_ulong("minpl","Specify minimum length of pattern",
                            &pmopt->minpatternlen,
                            (unsigned long) 20);
-  option_parser_add_option(op, option);
-  option = option_new_ulong("maxpl","Specify maximum length of pattern",
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_ulong("maxpl","Specify maximum length of pattern",
                             &pmopt->maxpatternlen,
                             (unsigned long) 30);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("samples","Specify number of samples",
+  option = gt_option_new_ulong("samples","Specify number of samples",
                             &pmopt->numofsamples,
                            (unsigned long) 100000);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("s","Show generated pattern",
+  option = gt_option_new_bool("s","Show generated pattern",
                             &pmopt->showpatt,
                             false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  optionbck = option_new_bool("bck","Use the bucket boundaries",
+  optionbck = gt_option_new_bool("bck","Use the bucket boundaries",
                               &pmopt->usebcktab,
                               false);
-  option_parser_add_option(op, optionbck);
+  gt_option_parser_add_option(op, optionbck);
 
-  optionimm = option_new_bool("imm","Start with offset 0",
+  optionimm = gt_option_new_bool("imm","Start with offset 0",
                               &pmopt->immediate,
                               false);
-  option_parser_add_option(op, optionimm);
+  gt_option_parser_add_option(op, optionimm);
 
-  option = option_new_string("ii",
+  option = gt_option_new_string("ii",
                              "Specify input index",
                              pmopt->indexname, NULL);
-  option_parser_add_option(op, option);
-  option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
                                versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

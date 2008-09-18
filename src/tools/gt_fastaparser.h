@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the fasta parser tool */
-Tool* gt_fastaparser(void);
+GtTool* gt_fastaparser(void);
 
 #endif

@@ -22,21 +22,24 @@
 #include "core/tool.h"
 
 /* the toolbox class */
-typedef struct Toolbox Toolbox;
+typedef struct GtToolbox GtToolbox;
 
-typedef int (*Toolfunc)(int argc, const char **argv, GtError*);
+typedef int (*GtToolfunc)(int argc, const char **argv, GtError*);
 
-Toolbox* toolbox_new(void);
+GtToolbox* gt_toolbox_new(void);
 
 /* Add <tool> with name <toolname> to <toolbox>. Takes ownership of <tool>. */
-void     toolbox_add_tool(Toolbox*, const char *toolname, Tool *tool);
-/* Get Tool with name <toolname> from <toolbox>. */
-Tool*    toolbox_get_tool(Toolbox*, const char *toolname);
-bool     toolbox_has_tool(const Toolbox*, const char *toolname); /*deprecated */
-void     toolbox_add(Toolbox*, const char *toolname, Toolfunc); /* deprecated */
-Toolfunc toolbox_get(const Toolbox*, const char *toolname); /* deprecated */
+void       gt_toolbox_add_tool(GtToolbox*, const char *toolname, GtTool *tool);
+/* Get GtTool with name <toolname> from <toolbox>. */
+GtTool*    gt_toolbox_get_tool(GtToolbox*, const char *toolname);
+/*deprecated */
+bool       gt_toolbox_has_tool(const GtToolbox*, const char *toolname);
+/* deprecated */
+void       gt_toolbox_add(GtToolbox*, const char *toolname, GtToolfunc);
+/* deprecated */
+GtToolfunc gt_toolbox_get(const GtToolbox*, const char *toolname);
 /* shows all tools except tools with toolname ``dev'' */
-int      toolbox_show(const char *progname, void *toolbox, GtError*);
-void     toolbox_delete(Toolbox*);
+int        gt_toolbox_show(const char *progname, void *toolbox, GtError*);
+void       gt_toolbox_delete(GtToolbox*);
 
 #endif

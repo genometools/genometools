@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the scorefasta tool */
-Tool* gt_scorefasta(void);
+GtTool* gt_scorefasta(void);
 
 #endif

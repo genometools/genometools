@@ -34,8 +34,8 @@ static OPrval parse_options(int *parsed_args,
                             Suffixeratoroptions *so,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option,
+  GtOptionParser *op;
+  GtOption *option,
          *optionsmap,
          *optiondna,
          *optionprotein,
@@ -59,49 +59,49 @@ static OPrval parse_options(int *parsed_args,
   GtStr *dirarg = gt_str_new();
 
   gt_error_check(err);
-  op = option_parser_new("[option ...] (-db file [...] | -ii index)",
+  op = gt_option_parser_new("[option ...] (-db file [...] | -ii index)",
                          doesa ? "Compute enhanced suffix array."
                                : "Compute packed index.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  optiondb = option_new_filenamearray("db","specify database files",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  optiondb = gt_option_new_filenamearray("db","specify database files",
                                       so->filenametab);
-  option_parser_add_option(op, optiondb);
+  gt_option_parser_add_option(op, optiondb);
 
-  optionii = option_new_filename("ii","specify sequence index created "
+  optionii = gt_option_new_filename("ii","specify sequence index created "
                                       " previously by -tis option",
                                  so->str_inputindex);
-  option_is_mandatory_either(optiondb,optionii);
-  option_parser_add_option(op, optionii);
+  gt_option_is_mandatory_either(optiondb,optionii);
+  gt_option_parser_add_option(op, optionii);
 
-  optionsmap = option_new_string("smap",
+  optionsmap = gt_option_new_string("smap",
                                  "specify file containing a symbol mapping",
                                  so->str_smap, NULL);
-  option_parser_add_option(op, optionsmap);
+  gt_option_parser_add_option(op, optionsmap);
 
-  optiondna = option_new_bool("dna","input is DNA sequence",
+  optiondna = gt_option_new_bool("dna","input is DNA sequence",
                               &so->isdna,false);
-  option_parser_add_option(op, optiondna);
+  gt_option_parser_add_option(op, optiondna);
 
-  optionprotein = option_new_bool("protein","input is Protein sequence",
+  optionprotein = gt_option_new_bool("protein","input is Protein sequence",
                                   &so->isprotein,false);
-  option_parser_add_option(op, optionprotein);
+  gt_option_parser_add_option(op, optionprotein);
 
-  optionplain = option_new_bool("plain","process as plain text",
+  optionplain = gt_option_new_bool("plain","process as plain text",
                                 &so->isplain,false);
-  option_parser_add_option(op, optionplain);
+  gt_option_parser_add_option(op, optionplain);
 
-  optiondir = option_new_string("dir",
+  optiondir = gt_option_new_string("dir",
                                 "specify reading direction "
                                 "(fwd, cpl, rev, rcl)",
                                  dirarg, "fwd");
-  option_parser_add_option(op, optiondir);
+  gt_option_parser_add_option(op, optiondir);
 
-  optionindexname = option_new_string("indexname",
+  optionindexname = gt_option_new_string("indexname",
                                       "specify name for index to be generated",
                                       so->str_indexname, NULL);
-  option_parser_add_option(op, optionindexname);
+  gt_option_parser_add_option(op, optionindexname);
 
-  optionpl = option_new_uint_min("pl",
+  optionpl = gt_option_new_uint_min("pl",
                                  "specify prefix length for bucket sort\n"
                                  "recommendation: use without argument;\n"
                                  "then a reasonable prefix length is "
@@ -109,161 +109,161 @@ static OPrval parse_options(int *parsed_args,
                                  &so->prefixlength,
                                  PREFIXLENGTH_AUTOMATIC,
                                  1U);
-  option_argument_is_optional(optionpl);
-  option_parser_add_option(op, optionpl);
+  gt_option_argument_is_optional(optionpl);
+  gt_option_parser_add_option(op, optionpl);
 
   if (doesa)
   {
-    optionmaxdepth = option_new_uint_min("maxdepth",
+    optionmaxdepth = gt_option_new_uint_min("maxdepth",
                                          "restrict suffix sorting to prefixes "
                                          "of the given length",
                                          &so->maxdepth.valueunsignedint,
                                          MAXDEPTH_AUTOMATIC,
                                          1U);
-    option_is_development_option(optionmaxdepth);
-    option_argument_is_optional(optionmaxdepth);
-    option_parser_add_option(op, optionmaxdepth);
+    gt_option_is_development_option(optionmaxdepth);
+    gt_option_argument_is_optional(optionmaxdepth);
+    gt_option_parser_add_option(op, optionmaxdepth);
 
   } else
   {
     optionmaxdepth = NULL;
   }
-  optioncmpcharbychar = option_new_bool("cmpcharbychar",
+  optioncmpcharbychar = gt_option_new_bool("cmpcharbychar",
                          "compare suffixes by character wise comparisons",
                          &so->sfxstrategy.cmpcharbychar,false);
-  option_is_development_option(optioncmpcharbychar);
-  option_parser_add_option(op, optioncmpcharbychar);
+  gt_option_is_development_option(optioncmpcharbychar);
+  gt_option_parser_add_option(op, optioncmpcharbychar);
 
-  optionmaxwidthrealmedian = option_new_ulong(
+  optionmaxwidthrealmedian = gt_option_new_ulong(
                                      "maxwidthrealmedian",
                                      "compute real median for intervals of "
                                      "at most the given widthprefixes",
                                      &so->sfxstrategy.maxwidthrealmedian,
                                      1U);
-  option_is_development_option(optionmaxwidthrealmedian);
-  option_parser_add_option(op, optionmaxwidthrealmedian);
+  gt_option_is_development_option(optionmaxwidthrealmedian);
+  gt_option_parser_add_option(op, optionmaxwidthrealmedian);
 
-  optionmaxbltriesort = option_new_ulong("maxbltriesort",
+  optionmaxbltriesort = gt_option_new_ulong("maxbltriesort",
                                          "all intervals of specified size and "
                                          "smaller are sorted by blind trie "
                                          "sorting algorithm",
                                          &so->sfxstrategy.maxbltriesort,
                                          10U);
-  option_is_development_option(optionmaxbltriesort);
-  option_parser_add_option(op, optionmaxbltriesort);
+  gt_option_is_development_option(optionmaxbltriesort);
+  gt_option_parser_add_option(op, optionmaxbltriesort);
 
   optionstorespecialcodes
-    = option_new_bool("storespecialcodes",
+    = gt_option_new_bool("storespecialcodes",
                       "store special codes (this may speed up the program)",
                       &so->sfxstrategy.storespecialcodes,false);
-  option_is_development_option(optionstorespecialcodes);
-  option_parser_add_option(op, optionstorespecialcodes);
+  gt_option_is_development_option(optionstorespecialcodes);
+  gt_option_parser_add_option(op, optionstorespecialcodes);
 
-  option = option_new_uint_min("parts",
+  option = gt_option_new_uint_min("parts",
                                "specify number of parts in which the "
                                "sequence is processed",
                                &so->numofparts,
                                1U,
                                1U);
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
-  optionsat = option_new_string("sat",
+  optionsat = gt_option_new_string("sat",
                                 "specify kind of sequence representation",
                                 so->str_sat, NULL);
-  option_parser_add_option(op, optionsat);
+  gt_option_parser_add_option(op, optionsat);
 
-  option = option_new_bool("tis",
+  option = gt_option_new_bool("tis",
                            "output transformed and encoded input "
                            "sequence to file",
                            &so->outtistab,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  optiondes = option_new_bool("des",
+  optiondes = gt_option_new_bool("des",
                               "output sequence descriptions to file ",
                               &so->outdestab,
                               false);
-  option_parser_add_option(op, optiondes);
+  gt_option_parser_add_option(op, optiondes);
 
   if (doesa)
   {
-    optionsuf = option_new_bool("suf",
+    optionsuf = gt_option_new_bool("suf",
                                 "output suffix array (suftab) to file",
                                 &so->outsuftab,
                                 false);
-    option_parser_add_option(op, optionsuf);
+    gt_option_parser_add_option(op, optionsuf);
 
-    optionlcp = option_new_bool("lcp",
+    optionlcp = gt_option_new_bool("lcp",
                                 "output lcp table (lcptab) to file",
                                 &so->outlcptab,
                                 false);
-    option_parser_add_option(op, optionlcp);
+    gt_option_parser_add_option(op, optionlcp);
 
-    optionbwt = option_new_bool("bwt",
+    optionbwt = gt_option_new_bool("bwt",
                                 "output Burrows-Wheeler Transformation "
                                 "(bwttab) to file",
                                 &so->outbwttab,
                                 false);
-    option_parser_add_option(op, optionbwt);
+    gt_option_parser_add_option(op, optionbwt);
   } else
   {
     optionsuf = optionlcp = optionbwt = NULL;
   }
-  option = option_new_bool("bck",
+  option = gt_option_new_bool("bck",
                            "output bucket table to file",
                            &so->outbcktab,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   if (!doesa)
   {
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                so->str_indexname);
   }
-  option = option_new_bool("showtime",
+  option = gt_option_new_bool("showtime",
                            "show the time of the different computation phases",
                            &so->showtime,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("v",
+  option = gt_option_new_bool("v",
                            "be verbose ",
                            &so->beverbose,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option_exclude(optionii, optiondb);
-  option_exclude(optionii, optiondir);
-  option_exclude(optionii, optionsmap);
-  option_exclude(optionii, optiondna);
-  option_exclude(optionii, optionprotein);
-  option_exclude(optionii, optionplain);
-  option_exclude(optionii, optionsat);
-  option_exclude(optionsmap, optiondna);
-  option_exclude(optionsmap, optionprotein);
-  option_exclude(optiondna, optionprotein);
+  gt_option_exclude(optionii, optiondb);
+  gt_option_exclude(optionii, optiondir);
+  gt_option_exclude(optionii, optionsmap);
+  gt_option_exclude(optionii, optiondna);
+  gt_option_exclude(optionii, optionprotein);
+  gt_option_exclude(optionii, optionplain);
+  gt_option_exclude(optionii, optionsat);
+  gt_option_exclude(optionsmap, optiondna);
+  gt_option_exclude(optionsmap, optionprotein);
+  gt_option_exclude(optiondna, optionprotein);
   if (doesa)
   {
     assert(optionmaxdepth != NULL);
-    option_exclude(optionmaxdepth, optionlcp);
+    gt_option_exclude(optionmaxdepth, optionlcp);
                    /* because lcp table may be incorrect. XXX change later */
-    option_exclude(optionmaxdepth, optionbwt);
+    gt_option_exclude(optionmaxdepth, optionbwt);
                    /* because bwt table may be incorrect. XXX change later */
   }
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
                                err);
   if (oprval == OPTIONPARSER_OK)
   {
-    if (option_is_set(optiondb) && gt_strarray_size(so->filenametab) == 0)
+    if (gt_option_is_set(optiondb) && gt_strarray_size(so->filenametab) == 0)
     {
       gt_error_set(err,"missing argument to option -db");
       oprval = OPTIONPARSER_ERROR;
     } else
     {
-      if (!option_is_set(optionindexname))
+      if (!gt_option_is_set(optionindexname))
       {
-        if (option_is_set(optiondb))
+        if (gt_option_is_set(optiondb))
         {
           if (gt_strarray_size(so->filenametab) > 1UL)
           {
@@ -291,11 +291,11 @@ static OPrval parse_options(int *parsed_args,
   }
   if (oprval == OPTIONPARSER_OK)
   {
-    if (option_is_set(optionplain))
+    if (gt_option_is_set(optionplain))
     {
-      if (!option_is_set(optiondna) &&
-         !option_is_set(optionprotein) &&
-         !option_is_set(optionsmap))
+      if (!gt_option_is_set(optiondna) &&
+         !gt_option_is_set(optionprotein) &&
+         !gt_option_is_set(optionsmap))
       {
         gt_error_set(err,"if option -plain is used, then any of the options "
                           "-dna, -protein, or -smap is mandatory");
@@ -306,7 +306,7 @@ static OPrval parse_options(int *parsed_args,
   if (oprval == OPTIONPARSER_OK && doesa)
   {
     assert(optionmaxdepth != NULL);
-    if (option_is_set(optionmaxdepth))
+    if (gt_option_is_set(optionmaxdepth))
     {
       so->maxdepth.defined = true;
     }
@@ -315,7 +315,7 @@ static OPrval parse_options(int *parsed_args,
   {
     computePackedIndexDefaults(&so->bwtIdxParams, BWTBaseFeatures);
   }
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
     gt_error_set(err,"superfluous program parameters");

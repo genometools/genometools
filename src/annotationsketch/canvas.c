@@ -401,7 +401,8 @@ int gt_canvas_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track)
   double vspace;
   assert(canvas && track);
   /* put track spacer after track */
-  if (gt_style_get_num(canvas->pvt->sty, "format", "gt_track_vspace", &vspace, NULL))
+  if (gt_style_get_num(canvas->pvt->sty, "format", "gt_track_vspace", &vspace,
+                       NULL))
     canvas->pvt->y += vspace;
   else
     canvas->pvt->y += TRACK_VSPACE_DEFAULT;
@@ -451,17 +452,20 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
   grey.red = grey.green = grey.blue = .85;
   strand = gt_block_get_strand(block);
   block_range = gt_block_get_range(block);
-  if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height, NULL))
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height,
+                        NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
-  if (!gt_style_get_num(canvas->pvt->sty, "format", "min_len_block", &min_len_block,
-                     NULL))
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "min_len_block",
+                        &min_len_block,
+                        NULL))
     min_len_block = MIN_LEN_BLOCK_DEFAULT;
   if (!gt_style_get_num(canvas->pvt->sty, "format", "arrow_width", &arrow_width,
                         NULL)) {
     arrow_width = ARROW_WIDTH_DEFAULT;
   }
-  if (!gt_style_get_num(canvas->pvt->sty, "format", "stroke_width", &stroke_width,
-                     NULL))
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "stroke_width",
+                        &stroke_width,
+                        NULL))
     stroke_width = STROKE_WIDTH_DEFAULT;
 
   if (strand == GT_STRAND_REVERSE || strand == GT_STRAND_BOTH)
@@ -563,7 +567,8 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
 
   type = gt_element_get_type(elem);
   grey.red = grey.green = grey.blue = .85;
-  if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height, NULL))
+  if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height,
+                        NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
   if (!gt_style_get_num(canvas->pvt->sty, "format", "arrow_width", &arrow_width,
                         NULL)) {
@@ -597,8 +602,9 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   else {
     gt_style_get_color(canvas->pvt->sty, type, "stroke", &elem_color,
                     gt_element_get_node_ref(elem));
-    if (!gt_style_get_num(canvas->pvt->sty, "format", "stroke_width", &stroke_width,
-                       gt_element_get_node_ref(elem)))
+    if (!gt_style_get_num(canvas->pvt->sty, "format", "stroke_width",
+                          &stroke_width,
+                          gt_element_get_node_ref(elem)))
     stroke_width = STROKE_WIDTH_DEFAULT;
   }
   gt_style_get_color(canvas->pvt->sty, type, "fill", &fill_color,
@@ -620,7 +626,8 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   if (canvas->pvt->ii)
   {
     GtRecMap *rm = gt_recmap_new(elem_start, canvas->pvt->y,
-                                  elem_start+elem_width, canvas->pvt->y+bar_height,
+                                  elem_start+elem_width,
+                                  canvas->pvt->y+bar_height,
                                   (GtFeatureNode*) /* XXX */
                                   gt_element_get_node_ref(elem));
     gt_image_info_add_recmap(canvas->pvt->ii, rm);

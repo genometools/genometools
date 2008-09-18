@@ -23,15 +23,15 @@
 #include "extended/linearalign.h"
 #include "tools/gt_linearalign.h"
 
-static OptionParser* gt_linearalign_option_parser_new(GT_UNUSED
+static GtOptionParser* gt_linearalign_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
-  OptionParser *op;
-  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
+  GtOptionParser *op;
+  op = gt_option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2.\nThe memory consumption of "
                          "the alignment procedure is linear.");
-  option_parser_set_min_max_args(op, 2, 2);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
@@ -77,9 +77,9 @@ static int gt_linearalign_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool *gt_linearalign(void)
+GtTool *gt_linearalign(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_linearalign_option_parser_new,
                   NULL,

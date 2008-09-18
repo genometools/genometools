@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the greedy assembly tool */
-Tool* gt_assemblegreedy(void);
+GtTool* gt_assemblegreedy(void);
 
 #endif

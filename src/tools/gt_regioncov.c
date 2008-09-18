@@ -29,25 +29,26 @@ typedef struct {
 static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("[option ...] GFF3_file",
+  op = gt_option_parser_new("[option ...] GFF3_file",
                          "Show which parts of the given sequence regions are "
                          "covered by features.");
   /* -maxfeaturedist */
-  o = option_new_ulong("maxfeaturedist", "set the maximum distance two "
+  o = gt_option_new_ulong("maxfeaturedist", "set the maximum distance two "
                        "features can have while still being in the same "
                        "``cluster''", &arguments->max_feature_dist, 0);
-  option_parser_add_option(op, o);
+  gt_option_parser_add_option(op, o);
   /* -v */
-  o = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, o);
+  o = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, o);
   /* parse */
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

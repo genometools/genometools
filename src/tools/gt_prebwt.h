@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the tagerator tool */
-Tool* gt_prebwt(void);
+GtTool* gt_prebwt(void);
 
 #endif

@@ -56,8 +56,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                              const char **argv,
                              GtError *err)
 {
-  OptionParser *op;
-  Option *option, *optionfmout;
+  GtOptionParser *op;
+  GtOption *option, *optionfmout;
   OPrval oprval;
   int parsed_args;
 
@@ -65,36 +65,36 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   mkfmcallinfo->indexnametab = gt_strarray_new();
   mkfmcallinfo->outfmindex = gt_str_new();
   mkfmcallinfo->leveldesc = gt_str_new();
-  op = option_parser_new("[option ...] -ii indexfile [...]",
+  op = gt_option_parser_new("[option ...] -ii indexfile [...]",
                          "Compute FMindex.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  optionfmout = option_new_string("fmout",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  optionfmout = gt_option_new_string("fmout",
                              "specify name of FMindex to be generated\n"
                              "(mandatory if more than one input index "
                              "is specified)",
                              mkfmcallinfo->outfmindex, NULL);
-  option_parser_add_option(op, optionfmout);
+  gt_option_parser_add_option(op, optionfmout);
 
-  option = option_new_filenamearray("ii", "specify indices to be used",
+  option = gt_option_new_filenamearray("ii", "specify indices to be used",
                                     mkfmcallinfo->indexnametab);
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_string("size",
+  option = gt_option_new_string("size",
                              "specify size (tiny, small, medium, big)",
                              mkfmcallinfo->leveldesc, "medium");
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("noindexpos",
+  option = gt_option_new_bool("noindexpos",
                            "store no index positions (hence the positions of\n"
                            "matches in the index cannot be retrieved)",
                            &mkfmcallinfo->noindexpos,false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc,err);
+  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, versionfunc,err);
   if (oprval == OPTIONPARSER_OK)
   {
-    if (!option_is_set(optionfmout))
+    if (!gt_option_is_set(optionfmout))
     {
       if (gt_strarray_size(mkfmcallinfo->indexnametab) > 1UL)
       {
@@ -112,7 +112,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
       }
     }
   }
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
     gt_error_set(err,"superfluous program parameters");

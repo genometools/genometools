@@ -99,7 +99,7 @@ struct seqBaseParam
 };
 
 extern void
-registerEncIdxSeqOptions(OptionParser *op, struct seqBaseParam *paramOutput);
+registerEncIdxSeqOptions(GtOptionParser *op, struct seqBaseParam *paramOutput);
 
 /**
  * @brief Given the construction parameters for a sequence index,

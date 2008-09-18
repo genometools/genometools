@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the exercise consensus spliced alignment (csa) tool */
-Tool* gt_consensus_sa(void);
+GtTool* gt_consensus_sa(void);
 
 #endif

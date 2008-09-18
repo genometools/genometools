@@ -49,25 +49,27 @@ static void gt_extracttarget_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
 {
   ExtractTargetArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] -seqfile sequence_file GFF3_file",
+  op = gt_option_parser_new("[option ...] -seqfile sequence_file GFF3_file",
                          "Extract target sequences given in GFF3_file from "
                          "sequence_file.");
 
   /* -seqfile */
-  o = option_new_filenamearray("seqfiles", "set the sequence file from which "
-                               "to extract the features", arguments->seqfiles);
-  option_is_mandatory(o);
-  option_parser_add_option(op, o);
+  o = gt_option_new_filenamearray("seqfiles",
+                                  "set the sequence file from which "
+                                  "to extract the features",
+                                  arguments->seqfiles);
+  gt_option_is_mandatory(o);
+  gt_option_parser_add_option(op, o);
 
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1, 1);
 
   return op;
 }
@@ -185,9 +187,9 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_extracttarget(void)
+GtTool* gt_extracttarget(void)
 {
-  return tool_new(gt_extracttarget_arguments_new,
+  return gt_tool_new(gt_extracttarget_arguments_new,
                   gt_extracttarget_arguments_delete,
                   gt_extracttarget_option_parser_new,
                   NULL,

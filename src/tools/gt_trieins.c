@@ -24,19 +24,20 @@
 static OPrval parse_options(bool *onlyins,int *parsed_args,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   OPrval oprval;
 
   gt_error_check(err);
-  op = option_parser_new("[options] indexname",
+  op = gt_option_parser_new("[options] indexname",
                          "Perform trie insertions and check consistency.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option= option_new_bool("ins","perform only insertions",onlyins,false);
-  option_parser_add_option(op, option);
-  option_parser_set_min_max_args(op, 1U, 1U);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  option= gt_option_new_bool("ins","perform only insertions",onlyins,false);
+  gt_option_parser_add_option(op, option);
+  gt_option_parser_set_min_max_args(op, 1U, 1U);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

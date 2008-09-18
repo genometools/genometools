@@ -42,25 +42,25 @@ static void gt_affinealign_arguments_delete(void *tool_arguments)
   gt_free(costs);
 }
 
-static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   Costs *costs = tool_arguments;
   assert(costs);
-  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
+  op = gt_option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2 (affine gap costs).");
-  option = option_new_int("rep", "set replacement cost",
+  option = gt_option_new_int("rep", "set replacement cost",
                           &costs->replacement_cost, 1);
-  option_parser_add_option(op, option);
-  option = option_new_int("gapopen", "set gap opening cost",
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_int("gapopen", "set gap opening cost",
                           &costs->gap_opening_cost, 3);
-  option_parser_add_option(op, option);
-  option = option_new_int("gapext", "set gap extension cost",
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_int("gapext", "set gap extension cost",
                           &costs->gap_extension_cost, 1);
-  option_parser_add_option(op, option);
-  option_parser_set_min_max_args(op, 2, 2);
+  gt_option_parser_add_option(op, option);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
@@ -111,9 +111,9 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_affinealign(void)
+GtTool* gt_affinealign(void)
 {
-  return tool_new(gt_affinealign_arguments_new,
+  return gt_tool_new(gt_affinealign_arguments_new,
                   gt_affinealign_arguments_delete,
                   gt_affinealign_option_parser_new,
                   NULL,

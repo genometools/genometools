@@ -50,25 +50,26 @@ static void gt_cds_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_cds_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
 {
   CDSArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   assert(arguments);
 
-  op = option_parser_new("[option ...] GFF3_file", "Add CDS features to exon "
-                         "features given in GFF3_file.");
+  op = gt_option_parser_new("[option ...] GFF3_file",
+                            "Add CDS features to exon "
+                            "features given in GFF3_file.");
 
   /* -seqfile and -regionmapping */
   seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_min_max_args(op, 1, 1);
 
   return op;
 }
@@ -122,9 +123,9 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool *gt_cds(void)
+GtTool *gt_cds(void)
 {
-  return tool_new(gt_cds_arguments_new,
+  return gt_tool_new(gt_cds_arguments_new,
                   gt_cds_arguments_delete,
                   gt_cds_option_parser_new,
                   NULL,

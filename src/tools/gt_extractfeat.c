@@ -52,44 +52,44 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
 {
   ExtractFeatArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   assert(arguments);
 
-  op = option_parser_new("[option ...] GFF3_file",
+  op = gt_option_parser_new("[option ...] GFF3_file",
                          "Extract features given in GFF3_file from "
                          "sequence file.");
 
   /* -type */
-  option = option_new_string("type", "set type of features to extract",
+  option = gt_option_new_string("type", "set type of features to extract",
                              arguments->type, NULL);
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
 
   /* -join */
-  option = option_new_bool("join", "join feature sequences in the same "
+  option = gt_option_new_bool("join", "join feature sequences in the same "
                            "subgraph into a single one", &arguments->join,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -translate */
-  option = option_new_bool("translate", "translate the features (of a DNA "
+  option = gt_option_new_bool("translate", "translate the features (of a DNA "
                            "sequence) into protein", &arguments->translate,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -seqfile and -regionmapping */
   seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_min_max_args(op, 1, 1);
 
   return op;
 }
@@ -140,9 +140,9 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_extractfeat(void)
+GtTool* gt_extractfeat(void)
 {
-  return tool_new(gt_extractfeat_arguments_new,
+  return gt_tool_new(gt_extractfeat_arguments_new,
                   gt_extractfeat_arguments_delete,
                   gt_extractfeat_option_parser_new,
                   NULL,

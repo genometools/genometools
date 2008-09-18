@@ -24,14 +24,16 @@
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  op = option_parser_new("[GFF3_file ...]", "Parse GFF3 file(s) and show it as "
-                         "GTF2.2.");
+  op = gt_option_parser_new("[GFF3_file ...]",
+                            "Parse GFF3 file(s) and show it as "
+                            "GTF2.2.");
   /* parse */
-  option_parser_set_max_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_max_args(op, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

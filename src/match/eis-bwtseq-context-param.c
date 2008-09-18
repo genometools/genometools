@@ -19,14 +19,14 @@
 #include "match/eis-bwtseq-context-param.h"
 
 extern void
-registerCtxMapOptions(OptionParser *op, int *ilogOut)
+registerCtxMapOptions(GtOptionParser *op, int *ilogOut)
 {
-  Option *option = option_new_int_min_max(
+ GtOption *option = gt_option_new_int_min_max(
     "ctxilog", "specify the interval of context sampling as log value\n"
     "parameter i means that each 2^i-th position of source is sampled for "
     "rank\n-1 => chooses default of log(log(sequence length))\n"
     "-2 => generates no map",
     ilogOut, CTX_MAP_ILOG_NOMAP, CTX_MAP_ILOG_AUTOSIZE,
     sizeof (Seqpos) * CHAR_BIT - 1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 }

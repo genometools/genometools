@@ -36,39 +36,42 @@ typedef struct {
 static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OutputFileInfo *ofi;
-  Option *option;
+  GtOption *option;
   OPrval oprval;
   gt_error_check(err);
 
   /* init */
-  op = option_parser_new("[option ...] mapping_file [GFF3_file]",
+  op = gt_option_parser_new("[option ...] mapping_file [GFF3_file]",
                          "Change sequence ids by the mapping given in "
                          "mapping_file.");
   ofi = outputfileinfo_new();
 
   /* -sort */
-  option = option_new_bool("sort", "sort the GFF3 features after changing the "
-                           "sequence ids\n(memory consumption is O(file_size))",
-                           &arguments->sort, false);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("sort",
+                              "sort the GFF3 features after changing the "
+                              "sequence ids\n(memory consumption is "
+                              "O(file_size))",
+                              &arguments->sort, false);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 1, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_min_max_args(op, 1, 2);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
 
   /* free */
   outputfileinfo_delete(ofi);
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

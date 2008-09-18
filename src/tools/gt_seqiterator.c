@@ -44,34 +44,35 @@ static OPrval parse_options(Seqiteroptions *seqiteroptions,
                             int *parsed_args,int argc,
                             const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *optionverbose, *optiondistlen, *optionastretch;
+  GtOptionParser *op;
+  GtOption *optionverbose, *optiondistlen, *optionastretch;
   OPrval oprval;
 
   gt_error_check(err);
 
-  op = option_parser_new("[options] file [...]",
+  op = gt_option_parser_new("[options] file [...]",
                          "Parse the supplied Fasta files.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionverbose = option_new_bool("v","be verbose",
+  optionverbose = gt_option_new_bool("v","be verbose",
                                   &seqiteroptions->verbose,false);
-  option_parser_add_option(op, optionverbose);
+  gt_option_parser_add_option(op, optionverbose);
 
-  optiondistlen = option_new_bool("distlen",
+  optiondistlen = gt_option_new_bool("distlen",
                                   "show distribution of sequence length",
                                   &seqiteroptions->dodistlen,false);
-  option_parser_add_option(op, optiondistlen);
+  gt_option_parser_add_option(op, optiondistlen);
 
-  optionastretch = option_new_bool("astretch",
+  optionastretch = gt_option_new_bool("astretch",
                                    "show distribution of A-substrings",
                                    &seqiteroptions->doastretch,false);
-  option_exclude(optiondistlen, optionastretch);
-  option_parser_add_option(op, optionastretch);
+  gt_option_exclude(optiondistlen, optionastretch);
+  gt_option_parser_add_option(op, optionastretch);
 
-  option_parser_set_min_args(op, 1U);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_args(op, 1U);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
@@ -160,7 +161,7 @@ static void processastretches(const DiscDistri *distastretch,
   astretchinfo.maxvalue = 0;
   astretchinfo.minkey = 10UL;
   disc_distri_foreach(distastretch,showastretches,&astretchinfo);
-  astretchinfo.mmercount = gt_malloc(sizeof(*astretchinfo.mmercount) *
+  astretchinfo.mmercount = gt_malloc(sizeof (*astretchinfo.mmercount) *
                                     (astretchinfo.maxvalue+1));
   memset(astretchinfo.mmercount,0,sizeof (*astretchinfo.mmercount) *
                                   (astretchinfo.maxvalue+1));

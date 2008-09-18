@@ -24,19 +24,21 @@
 static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
                             const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   OPrval oprval;
-  op = option_parser_new("[gtf_file]",
+  op = gt_option_parser_new("[gtf_file]",
                          "Parse GTF2.2 file and show it as GFF3.");
   /* -tolerant */
-  option = option_new_bool("tolerant", "be tolerant when parsing the GTF file",
-                           be_tolerant, false);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("tolerant",
+                              "be tolerant when parsing the GTF file",
+                              be_tolerant, false);
+  gt_option_parser_add_option(op, option);
   /* parse */
-  option_parser_set_max_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_max_args(op, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

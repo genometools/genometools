@@ -260,13 +260,13 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                    struct chkSearchOptions *params, const GtStr *projectName,
                    GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  Option *option, *optionProgress;
+  GtOption *option, *optionProgress;
   bool checkSuffixArrayValues, tryContextRetrieve, tryFullRegen;
 
   gt_error_check(err);
-  op = option_parser_new("indexname",
+  op = gt_option_parser_new("indexname",
                          "Load (or build if necessary) BWT index for project"
                          " <indexname> and perform verification of search"
                          " results.");
@@ -274,51 +274,53 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName);
 
-  option = option_new_long("minpatlen",
+  option = gt_option_new_long("minpatlen",
                            "minimum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
                            "properties", &params->minPatLen, -1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_long("maxpatlen",
+  option = gt_option_new_long("maxpatlen",
                            "maximum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
                            "properties", &params->maxPatLen, -1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("nsamples",
+  option = gt_option_new_ulong("nsamples",
                             "number of sequences to search for",
                             &params->numOfSamples, 1000);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("chksfxarray",
+  option = gt_option_new_bool("chksfxarray",
                            "verify integrity of stored suffix array positions",
                            &checkSuffixArrayValues, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("full-lfmap",
+  option = gt_option_new_bool("full-lfmap",
                            "verify complete backwards regeneration of "
                            "original sequence", &tryFullRegen, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("chkcontext",
+  option = gt_option_new_bool("chkcontext",
                            "verify integrity of regenerated sequence context",
                            &tryContextRetrieve, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  optionProgress = option_new_ulong("ticks", "print dot after this many symbols"
-                                    " tested okay", &params->progressInterval,
+  optionProgress = gt_option_new_ulong("ticks",
+                                    "print dot after this many symbols "
+                                    "tested okay", &params->progressInterval,
                                     DEFAULT_PROGRESS_INTERVAL);
-  option_parser_add_option(op, optionProgress);
+  gt_option_parser_add_option(op, optionProgress);
 
-  option = option_new_bool("v",
+  option = gt_option_new_bool("v",
                            "print verbose progress information",
                            &params->verboseOutput,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
 
   /* condense boolean options to flags field */
   params->flags = (checkSuffixArrayValues?VERIFY_BWTSEQ_SUFVAL:0)
@@ -328,7 +330,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
    * determined indirectly */
   computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
 
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

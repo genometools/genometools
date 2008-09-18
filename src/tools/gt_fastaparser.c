@@ -20,13 +20,13 @@
 #include "exercise/simple_bioseq.h"
 #include "tools/gt_fastaparser.h"
 
-static OptionParser* gt_fastaparser_option_parser_new(GT_UNUSED
+static GtOptionParser* gt_fastaparser_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
-  OptionParser *op;
-  op = option_parser_new("[option ...] fasta_file",
+  GtOptionParser *op;
+  op = gt_option_parser_new("[option ...] fasta_file",
                          "Parser fasta_file and show it on stdout.");
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
 
@@ -53,9 +53,9 @@ static int gt_fastaparser_runner(GT_UNUSED int argc, const char **argv,
   return 0;
 }
 
-Tool* gt_fastaparser(void)
+GtTool* gt_fastaparser(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_fastaparser_option_parser_new,
                   NULL,

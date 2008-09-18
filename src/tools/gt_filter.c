@@ -77,60 +77,65 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_filter_option_parser_new(void *tool_arguments)
 {
   FilterArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option, *contain_option, *overlap_option;
+  GtOptionParser *op;
+  GtOption *option, *contain_option, *overlap_option;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.");
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]",
+                            "Filter GFF3 files.");
 
   /* -seqid */
-  option = option_new_string("seqid", "seqid a feature must have to pass the "
-                             "filter (excluding comments)", arguments->seqid,
-                             NULL);
-  option_parser_add_option(op, option);
+  option = gt_option_new_string("seqid", "seqid a feature must have to pass "
+                                "the filter (excluding comments)",
+                                arguments->seqid,
+                                NULL);
+  gt_option_parser_add_option(op, option);
 
   /* -typefilter */
-  option = option_new_string("typefilter", "filter out all features of the "
-                             "given type", arguments->typefilter, NULL);
+  option = gt_option_new_string("typefilter", "filter out all features of the "
+                                "given type", arguments->typefilter, NULL);
   /* XXX */
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -contain */
-  contain_option = option_new_range("contain", "filter out all features which "
-                                    "are not contained in the given range",
-                                    &arguments->contain_range, NULL);
-  option_parser_add_option(op, contain_option);
+  contain_option = gt_option_new_range("contain", "filter out all features "
+                                       "which are not contained in the given "
+                                       "range",
+                                       &arguments->contain_range, NULL);
+  gt_option_parser_add_option(op, contain_option);
 
   /* -overlap */
-  overlap_option = option_new_range("overlap", "filter out all features which "
-                                    "do not overlap with the given range",
-                                    &arguments->overlap_range, NULL);
-  option_parser_add_option(op, overlap_option);
+  overlap_option = gt_option_new_range("overlap", "filter out all features "
+                                       "which do not overlap with the given "
+                                       "range",
+                                       &arguments->overlap_range, NULL);
+  gt_option_parser_add_option(op, overlap_option);
 
   /* -strand */
-  option = option_new_string(GT_STRAND_OPT, "filter out all top-level features "
-                             "(i.e., features without parents) whose strand is "
-                             "different from the given one (must be one of '"
-                             GT_STRAND_CHARS"')", arguments->gt_strand_char,
-                             NULL);
-  option_parser_add_option(op, option);
+  option = gt_option_new_string(GT_STRAND_OPT, "filter out all top-level "
+                                "features (i.e., features without parents) "
+                                "whose strand is different from the given one "
+                                "(must be one of '"
+                                GT_STRAND_CHARS"')", arguments->gt_strand_char,
+                                NULL);
+  gt_option_parser_add_option(op, option);
 
   /* -targetstrand */
-  option = option_new_string(TARGETGT_STRAND_OPT, "filter out all top-level "
+  option = gt_option_new_string(TARGETGT_STRAND_OPT, "filter out all top-level "
                              "features (i.e., features without parents) which "
                              "have exactly one target attribute whose strand "
                              "is different from the given one (must be one of '"
                              GT_STRAND_CHARS"')",
                              arguments->targetgt_strand_char, NULL);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -targetbest */
-  option = option_new_bool("targetbest", "if multiple top-level features "
+  option = gt_option_new_bool("targetbest", "if multiple top-level features "
                            "(i.e., features without parents) with exactly one "
                            "target attribute have the same target_id, keep "
                            "only the feature with the best score. If "
@@ -139,58 +144,61 @@ static OptionParser* gt_filter_option_parser_new(void *tool_arguments)
                            "-"TARGETGT_STRAND_OPT".\n"
                            "Memory consumption is O(file_size).",
                            &arguments->targetbest, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -hascds */
-  option = option_new_bool("hascds", "filter out all top-level features which "
-                           "do not have a CDS child", &arguments->has_CDS,
-                           false);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("hascds", "filter out all top-level features "
+                              "which do not have a CDS child",
+                              &arguments->has_CDS,
+                              false);
+  gt_option_parser_add_option(op, option);
 
   /* -maxgenelength */
-  option = option_new_ulong_min("maxgenelength", "the maximum length a gene "
+  option = gt_option_new_ulong_min("maxgenelength", "the maximum length a gene "
                                 "can have to pass the filter",
                                 &arguments->max_gene_length, UNDEF_ULONG, 1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -maxgenenum */
-  option = option_new_ulong("maxgenenum", "the maximum number of genes which "
-                            "can pass the filter", &arguments->max_gene_num,
-                            UNDEF_ULONG);
-  option_parser_add_option(op, option);
+  option = gt_option_new_ulong("maxgenenum", "the maximum number of genes "
+                               "which can pass the filter",
+                               &arguments->max_gene_num,
+                               UNDEF_ULONG);
+  gt_option_parser_add_option(op, option);
 
   /* -mingenescore */
-  option = option_new_double("mingenescore", "the minimum score a gene must "
-                             "have to pass the filter",
-                             &arguments->min_gene_score, UNDEF_DOUBLE);
-  option_parser_add_option(op, option);
+  option = gt_option_new_double("mingenescore", "the minimum score a gene must "
+                                "have to pass the filter",
+                                &arguments->min_gene_score, UNDEF_DOUBLE);
+  gt_option_parser_add_option(op, option);
 
   /* -maxgenescore */
-  option = option_new_double("maxgenescore", "the maximum score a gene can "
-                             "have to pass the filter",
-                             &arguments->max_gene_score, UNDEF_DOUBLE);
-  option_parser_add_option(op, option);
+  option = gt_option_new_double("maxgenescore", "the maximum score a gene can "
+                                "have to pass the filter",
+                                &arguments->max_gene_score, UNDEF_DOUBLE);
+  gt_option_parser_add_option(op, option);
 
   /* -minaveragessp */
-  option = option_new_probability("minaveragessp", "set the minimum average "
-                                  "splice site probability",
-                                  &arguments->min_average_splice_site_prob,
-                                  UNDEF_DOUBLE);
-  option_parser_add_option(op, option);
+  option = gt_option_new_probability("minaveragessp", "set the minimum average "
+                                     "splice site probability",
+                                     &arguments->min_average_splice_site_prob,
+                                     UNDEF_DOUBLE);
+  gt_option_parser_add_option(op, option);
 
   /* -featurenum */
-  option = option_new_ulong_min("featurenum", "select feature tree occurring "
-                                "at given position in input",
-                                &arguments->feature_num, UNDEF_ULONG, 1);
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
+  option = gt_option_new_ulong_min("featurenum",
+                                   "select feature tree occurring "
+                                   "at given position in input",
+                                   &arguments->feature_num, UNDEF_ULONG, 1);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* option exclusions */
-  option_exclude(contain_option, overlap_option);
+  gt_option_exclude(contain_option, overlap_option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
@@ -291,9 +299,9 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_filter(void)
+GtTool* gt_filter(void)
 {
-  return tool_new(gt_filter_arguments_new,
+  return gt_tool_new(gt_filter_arguments_new,
                   gt_filter_arguments_delete,
                   gt_filter_option_parser_new,
                   gt_filter_arguments_check,

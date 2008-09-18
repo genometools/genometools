@@ -39,26 +39,26 @@ static void gt_template_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_template_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_template_option_parser_new(void *tool_arguments)
 {
   TemplateArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] [file]", /* XXX */
+  op = gt_option_parser_new("[option ...] [file]", /* XXX */
                          "DESCRIBE YOUR TOOL IN ONE LINE HERE."); /* XXX */
 
   /* -bool */
-  option = option_new_bool("bool", "bool option template",
+  option = gt_option_new_bool("bool", "bool option template",
                            &arguments->bool_option_template, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -str */
-  option = option_new_string("str", "str option template",
+  option = gt_option_new_string("str", "str option template",
                              arguments->str_option_template, NULL);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   return op;
 }
@@ -97,9 +97,9 @@ static int gt_template_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_template(void)
+GtTool* gt_template(void)
 {
-  return tool_new(gt_template_arguments_new,
+  return gt_tool_new(gt_template_arguments_new,
                   gt_template_arguments_delete,
                   gt_template_option_parser_new,
                   gt_template_arguments_check,

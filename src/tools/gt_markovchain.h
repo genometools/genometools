@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the markov chain tool */
-Tool* gt_markovchain(void);
+GtTool* gt_markovchain(void);
 
 #endif

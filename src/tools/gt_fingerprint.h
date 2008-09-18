@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the fingerprint tool */
-Tool* gt_fingerprint(void);
+GtTool* gt_fingerprint(void);
 
 #endif

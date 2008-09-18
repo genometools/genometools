@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the seqfilter tool */
-Tool* gt_seqfilter(void);
+GtTool* gt_seqfilter(void);
 
 #endif

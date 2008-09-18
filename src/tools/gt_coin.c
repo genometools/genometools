@@ -26,15 +26,16 @@
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("sequence_of_coin_tosses", "Decode "
+  op = gt_option_parser_new("sequence_of_coin_tosses", "Decode "
                          "'sequence_of_coin_tosses' and show the result on "
                          "stdout.");
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

@@ -31,18 +31,18 @@ static bool spacepeak = false;
 
 static OPrval parse_env_options(int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   OPrval oprval;
-  op = option_parser_new("GT_ENV_OPTIONS='[option ...]' ...",
+  op = gt_option_parser_new("GT_ENV_OPTIONS='[option ...]' ...",
                          "Parse the options contained in the "
                          "environment variable GT_ENV_OPTIONS.");
-  o = option_new_bool("spacepeak", "show space peak on stdout upon deletion",
+  o = gt_option_new_bool("spacepeak", "show space peak on stdout upon deletion",
                       &spacepeak, false);
-  option_parser_add_option(op, o);
-  option_parser_set_max_args(op, 0);
-  oprval = option_parser_parse(op, NULL, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_max_args(op, 0);
+  oprval = gt_option_parser_parse(op, NULL, argc, argv, versionfunc, err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

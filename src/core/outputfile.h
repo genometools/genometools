@@ -25,7 +25,7 @@
 typedef struct OutputFileInfo OutputFileInfo;
 
 OutputFileInfo* outputfileinfo_new(void);
-void            outputfile_register_options(OptionParser*, GtGenFile **outfp,
+void            outputfile_register_options(GtOptionParser*, GtGenFile **outfp,
                                             OutputFileInfo*);
 void            outputfileinfo_delete(OutputFileInfo*);
 

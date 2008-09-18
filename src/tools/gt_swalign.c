@@ -43,20 +43,20 @@ static void gt_swalign_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
+static GtOptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
 {
   SWAlignArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] scorematrix gt_seq_file_1 gt_seq_file_2",
-                         "Locally align each sequence in gt_seq_file_1 "
-                         "with each sequence in gt_seq_file_2.");
-  o = option_new_int("indelscore", "set the score used for "
+  op = gt_option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
+                         "Locally align each sequence in seq_file_1 "
+                         "with each sequence in seq_file_2.");
+  o = gt_option_new_int("indelscore", "set the score used for "
                      "insertions/deletions", &arguments->indelscore,
                      DEFAULT_INDELSCORE);
-  option_parser_add_option(op, o);
-  option_parser_set_min_max_args(op, 3, 3);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_min_max_args(op, 3, 3);
   return op;
 }
 
@@ -113,9 +113,9 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_swalign(void)
+GtTool* gt_swalign(void)
 {
-  return tool_new(gt_swalign_arguments_new,
+  return gt_tool_new(gt_swalign_arguments_new,
                   gt_swalign_arguments_delete,
                   gt_swalign_opion_parser_new,
                   NULL,

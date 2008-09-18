@@ -355,7 +355,7 @@ bitPackString@iTypeTag@_unit_test(GT_Error *err)
   gt_log_log("bsStoreNonUniform@uTypeTag@Array/bsGet@uTypeTag@: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
     offset = offsetStart;
@@ -423,7 +423,7 @@ bitPackString@iTypeTag@_unit_test(GT_Error *err)
   gt_log_log("bsNonStoreUniform@iTypeTag@Array/bsGet@iTypeTag@: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
     offset = offsetStart;

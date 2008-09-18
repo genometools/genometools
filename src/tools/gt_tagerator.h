@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the tagerator tool */
-Tool* gt_tagerator(void);
+GtTool* gt_tagerator(void);
 
 #endif

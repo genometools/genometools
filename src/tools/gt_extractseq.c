@@ -59,66 +59,66 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
 {
   ExtractSeqArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *frompos_option, *topos_option, *match_option, *width_option,
+  GtOptionParser *op;
+  GtOption *frompos_option, *topos_option, *match_option, *width_option,
          *ginum_option;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] [sequence_file ...]",
+  op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "Extract sequences from given sequence file(s).");
 
   /* -frompos */
-  frompos_option = option_new_ulong_min(FROMPOS_OPTION_STR,
+  frompos_option = gt_option_new_ulong_min(FROMPOS_OPTION_STR,
                                         "extract sequence from this position\n"
                                         "counting from 1 on",
                                         &arguments->frompos, 0, 1);
-  option_parser_add_option(op, frompos_option);
+  gt_option_parser_add_option(op, frompos_option);
 
   /* -topos */
-  topos_option = option_new_ulong_min(TOPOS_OPTION_STR,
+  topos_option = gt_option_new_ulong_min(TOPOS_OPTION_STR,
                                       "extract sequence up to this position\n"
                                       "counting from 1 on",
                                       &arguments->topos, 0, 1);
-  option_parser_add_option(op, topos_option);
+  gt_option_parser_add_option(op, topos_option);
 
   /* -match */
-  match_option = option_new_string("match", "extract all sequences whose "
+  match_option = gt_option_new_string("match", "extract all sequences whose "
                                    "description matches the given pattern.\n"
                                    "The given pattern must be a valid extended "
                                    "regular expression.", arguments->pattern,
                                    NULL);
-  option_parser_add_option(op, match_option);
+  gt_option_parser_add_option(op, match_option);
 
   /* -ginum */
-  ginum_option = option_new_filename("ginum", "extract substrings for gi "
+  ginum_option = gt_option_new_filename("ginum", "extract substrings for gi "
                                      "numbers in specified file",
                                      arguments->ginum);
-  option_parser_add_option(op, ginum_option);
+  gt_option_parser_add_option(op, ginum_option);
 
   /* -width */
-  width_option = option_new_ulong("width", "set output width for showing of "
+  width_option = gt_option_new_ulong("width", "set output width for showing of "
                                   "sequences (0 disables formatting)",
                                   &arguments->width, 0);
-  option_parser_add_option(op, width_option);
+  gt_option_parser_add_option(op, width_option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* option implications */
-  option_imply(frompos_option, topos_option);
-  option_imply(topos_option, frompos_option);
+  gt_option_imply(frompos_option, topos_option);
+  gt_option_imply(topos_option, frompos_option);
 
   /* option exclusions */
-  option_exclude(frompos_option, match_option);
-  option_exclude(topos_option, match_option);
-  option_exclude(frompos_option, ginum_option);
-  option_exclude(match_option, ginum_option);
+  gt_option_exclude(frompos_option, match_option);
+  gt_option_exclude(topos_option, match_option);
+  gt_option_exclude(frompos_option, ginum_option);
+  gt_option_exclude(match_option, ginum_option);
 
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
   return op;
 }
 
@@ -245,9 +245,9 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_extractseq(void)
+GtTool* gt_extractseq(void)
 {
-  return tool_new(gt_extractseq_arguments_new,
+  return gt_tool_new(gt_extractseq_arguments_new,
                   gt_extractseq_arguments_delete,
                   gt_extractseq_option_parser_new,
                   gt_extractseq_arguments_check,

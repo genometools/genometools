@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the splitfasta tool */
-Tool* gt_splitfasta(void);
+GtTool* gt_splitfasta(void);
 
 #endif

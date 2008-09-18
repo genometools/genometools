@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the template tool */
-Tool* gt_template(void);
+GtTool* gt_template(void);
 
 #endif

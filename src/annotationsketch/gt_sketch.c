@@ -53,8 +53,8 @@ static OPrval parse_options(int *parsed_args,
                             AnnotationSketchArguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option  *option, *option2;
+  GtOptionParser *op;
+  GtOption  *option, *option2;
   OPrval oprval;
   bool force;
   static const char *formats[] = { "png",
@@ -71,54 +71,55 @@ static OPrval parse_options(int *parsed_args,
   gt_error_check(err);
 
   /* init */
-  op = option_parser_new("[option ...] image_file [GFF3_file ...]",
+  op = gt_option_parser_new("[option ...] image_file [GFF3_file ...]",
                          "Create graphical representations of "
                          "GFF3 annotation files.");
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* -pipe */
-  option = option_new_bool("pipe", "use pipe mode (i.e., show all gff3 "
+  option = gt_option_new_bool("pipe", "use pipe mode (i.e., show all gff3 "
                            "features on stdout)", &arguments->pipe, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -force */
-  option = option_new_bool("force", "force writing to output file", &force,
+  option = gt_option_new_bool("force", "force writing to output file", &force,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -seqid */
-  option = option_new_string("seqid", "sequence region identifier\n"
+  option = gt_option_new_string("seqid", "sequence region identifier\n"
                                       "default: first one in file",
                             arguments->seqid, NULL);
-  option_parser_add_option(op, option);
-  option_hide_default(option);
+  gt_option_parser_add_option(op, option);
+  gt_option_hide_default(option);
 
   /* -start */
-  option = option_new_ulong_min("start", "start position\n"
+  option = gt_option_new_ulong_min("start", "start position\n"
                                          "default: first region start",
                             &arguments->start, UNDEF_ULONG, 1);
-  option_parser_add_option(op, option);
-  option_hide_default(option);
+  gt_option_parser_add_option(op, option);
+  gt_option_hide_default(option);
 
   /* -end */
-  option2 = option_new_ulong("end", "end position\ndefault: last region end",
+  option2 = gt_option_new_ulong("end", "end position\ndefault: last region end",
                             &arguments->end, UNDEF_ULONG);
-  option_parser_add_option(op, option2);
+  gt_option_parser_add_option(op, option2);
   /* -start and -end must be given together */
-  option_imply(option, option2);
-  option_imply(option2, option);
-  option_hide_default(option2);
+  gt_option_imply(option, option2);
+  gt_option_imply(option2, option);
+  gt_option_hide_default(option2);
 
   /* -width */
-  option = option_new_uint_min("width", "target image width", &arguments->width,
-                               800, 1);
-  option_parser_add_option(op, option);
+  option = gt_option_new_uint_min("width", "target image width",
+                                  &arguments->width,
+                                  800, 1);
+  gt_option_parser_add_option(op, option);
 
   /* -format */
-  option = option_new_choice("format", "output graphics format\n"
+  option = gt_option_new_choice("format", "output graphics format\n"
                                        "choose from png"
 #ifdef CAIRO_HAS_PDF_SURFACE
                                        "|pdf"
@@ -131,26 +132,28 @@ static OPrval parse_options(int *parsed_args,
 #endif
                                        "",
                              arguments->format, formats[0], formats);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -addintrons */
-  option = option_new_bool("addintrons", "add intron features between "
+  option = gt_option_new_bool("addintrons", "add intron features between "
                            "existing exon features (before drawing)",
                            &arguments->addintrons, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -showrecmaps */
-  option = option_new_bool("showrecmaps", "show RecMaps after image creation",
-                           &arguments->showrecmaps, false);
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("showrecmaps",
+                              "show RecMaps after image creation",
+                              &arguments->showrecmaps, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* set contact mailaddress */
-  option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
   /* parse options */
-  option_parser_set_min_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_min_args(op, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
 
   if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
     gt_error_set(err, "file \"%s\" exists already. use option -force to "
@@ -159,7 +162,7 @@ static OPrval parse_options(int *parsed_args,
   }
 
   /* free */
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

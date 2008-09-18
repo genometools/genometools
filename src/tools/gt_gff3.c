@@ -67,94 +67,98 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_gff3_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 {
   GFF3Arguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
+  GtOptionParser *op;
+  GtOption *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
          *offsetfile_option, *typecheck_option, *built_in_option, *option;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] [GFF3_file ...]",
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Parse, possibly transform, and output GFF3 files.");
 
   /* -sort */
-  sort_option = option_new_bool("sort", "sort the GFF3 features (memory "
+  sort_option = gt_option_new_bool("sort", "sort the GFF3 features (memory "
                                 "consumption is O(file_size))",
                                 &arguments->sort, false);
-  option_parser_add_option(op, sort_option);
+  gt_option_parser_add_option(op, sort_option);
 
   /* -tidy */
-  option = option_new_bool("tidy", "try to tidy the GFF3 files up during "
+  option = gt_option_new_bool("tidy", "try to tidy the GFF3 files up during "
                            "parsing", &arguments->tidy, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -checkids */
-  option = option_new_bool("checkids", "make sure the ID attributes are unique "
+  option = gt_option_new_bool("checkids",
+                           "make sure the ID attributes are unique "
                            "within the scope of each GFF3_file, as required by "
                            "GFF3 specification\n"
                            "(memory consumption is O(file_size))",
                            &arguments->checkids, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -mergefeat */
-  mergefeat_option = option_new_bool("mergefeat", "merge adjacent features of "
+  mergefeat_option = gt_option_new_bool("mergefeat",
+                                     "merge adjacent features of "
                                      "the same type", &arguments->mergefeat,
                                      false);
-  option_is_development_option(mergefeat_option);
-  option_imply(mergefeat_option, sort_option);
-  option_parser_add_option(op, mergefeat_option);
+  gt_option_is_development_option(mergefeat_option);
+  gt_option_imply(mergefeat_option, sort_option);
+  gt_option_parser_add_option(op, mergefeat_option);
 
   /* -addintrons */
-  addintrons_option = option_new_bool("addintrons", "add intron features "
+  addintrons_option = gt_option_new_bool("addintrons", "add intron features "
                                       "between existing exon features",
                                       &arguments->addintrons, false);
-  option_parser_add_option(op, addintrons_option);
+  gt_option_parser_add_option(op, addintrons_option);
 
   /* -offset */
-  offset_option = option_new_long("offset",
+  offset_option = gt_option_new_long("offset",
                                  "transform all features by the given offset",
                                   &arguments->offset, UNDEF_LONG);
-  option_parser_add_option(op, offset_option);
+  gt_option_parser_add_option(op, offset_option);
 
   /* -offsetfile */
-  offsetfile_option = option_new_filename("offsetfile", "transform all "
+  offsetfile_option = gt_option_new_filename("offsetfile", "transform all "
                                           "features by the offsets given in "
                                           "file", arguments->offsetfile);
-  option_parser_add_option(op, offsetfile_option);
-  option_exclude(offset_option, offsetfile_option);
+  gt_option_parser_add_option(op, offsetfile_option);
+  gt_option_exclude(offset_option, offsetfile_option);
 
   /* -typecheck */
-  typecheck_option = option_new_filename("typecheck", "check GFF3 types "
+  typecheck_option = gt_option_new_filename("typecheck", "check GFF3 types "
                                          "against \"id\" and \"name\" tags "
                                          "in given OBO file",
                                          arguments->typecheck);
-  option_parser_add_option(op, typecheck_option);
+  gt_option_parser_add_option(op, typecheck_option);
 
   /* -typecheck-built-in */
-  built_in_option = option_new_bool("typecheck-built-in", "use built-in type "
+  built_in_option = gt_option_new_bool("typecheck-built-in",
+                                    "use built-in type "
                                     "checker", &arguments->typecheck_built_in,
                                     false);
-  option_is_development_option(built_in_option);
-  option_parser_add_option(op, built_in_option);
-  option_exclude(typecheck_option, built_in_option);
+  gt_option_is_development_option(built_in_option);
+  gt_option_parser_add_option(op, built_in_option);
+  gt_option_exclude(typecheck_option, built_in_option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* -width */
-  option = option_new_ulong("width", "set output width for showing of embedded "
+  option = gt_option_new_ulong("width",
+                            "set output width for showing of embedded "
                             "FASTA sequences\n(0 disables formatting)",
                             &arguments->width, 0);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* set comment function */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
 
   return op;
 }
@@ -257,9 +261,9 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_gff3(void)
+GtTool* gt_gff3(void)
 {
-  return tool_new(gt_gff3_arguments_new,
+  return gt_tool_new(gt_gff3_arguments_new,
                   gt_gff3_arguments_delete,
                   gt_gff3_option_parser_new,
                   NULL,

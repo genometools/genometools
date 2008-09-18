@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the packedindex tool */
-Tool* gt_packedindex(void);
+GtTool* gt_packedindex(void);
 
 #endif

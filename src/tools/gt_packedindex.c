@@ -36,42 +36,42 @@ static int gt_packedindex_make(int argc, const char *argv[], GtError *err)
 
 static void* gt_packedindex_arguments_new(void)
 {
-  Toolbox *packedindex_toolbox = toolbox_new();
-  toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
-  toolbox_add(packedindex_toolbox, "mkctxmap", gt_packedindex_mkctxmap);
-  toolbox_add(packedindex_toolbox, "trsuftab", gt_packedindex_trsuftab);
-  toolbox_add(packedindex_toolbox, "chkintegrity",
+  GtToolbox *packedindex_toolbox = gt_toolbox_new();
+  gt_toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
+  gt_toolbox_add(packedindex_toolbox, "mkctxmap", gt_packedindex_mkctxmap);
+  gt_toolbox_add(packedindex_toolbox, "trsuftab", gt_packedindex_trsuftab);
+  gt_toolbox_add(packedindex_toolbox, "chkintegrity",
               gt_packedindex_chk_integrity );
-  toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);
+  gt_toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);
   return packedindex_toolbox;
 }
 
 static void gt_packedindex_arguments_delete(void *tool_arguments)
 {
-  Toolbox *index_toolbox = tool_arguments;
+  GtToolbox *index_toolbox = tool_arguments;
   if (!index_toolbox) return;
-  toolbox_delete(index_toolbox);
+  gt_toolbox_delete(index_toolbox);
 }
 
-static OptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
 {
-  Toolbox *index_toolbox = tool_arguments;
-  OptionParser *op;
+  GtToolbox *index_toolbox = tool_arguments;
+  GtOptionParser *op;
   assert(index_toolbox);
-  op = option_parser_new("[option ...] index_tool [argument ...]",
+  op = gt_option_parser_new("[option ...] index_tool [argument ...]",
                          "Call packed index tool with name index_tool and "
                          "pass argument(s) to it.");
-  option_parser_set_comment_func(op, toolbox_show, index_toolbox);
-  option_parser_refer_to_manual(op);
+  gt_option_parser_set_comment_func(op, gt_toolbox_show, index_toolbox);
+  gt_option_parser_refer_to_manual(op);
   return op;
 }
 
 static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GtError *err)
 {
-  Toolbox *index_toolbox = tool_arguments;
-  Toolfunc toolfunc;
-  Tool *tool = NULL;
+  GtToolbox *index_toolbox = tool_arguments;
+  GtToolfunc toolfunc;
+  GtTool *tool = NULL;
   char **nargv = NULL;
   int had_err = 0;
 
@@ -79,7 +79,7 @@ static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
   assert(index_toolbox);
 
   /* determine tool */
-  if (!toolbox_has_tool(index_toolbox, argv[parsed_args])) {
+  if (!gt_toolbox_has_tool(index_toolbox, argv[parsed_args])) {
     gt_error_set(err, "packedindex tool '%s' not found; option -help lists "
                    "possible tools", argv[parsed_args]);
     had_err = -1;
@@ -87,8 +87,8 @@ static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
 
   /* call sub-tool */
   if (!had_err) {
-    if (!(toolfunc = toolbox_get(index_toolbox, argv[parsed_args]))) {
-      tool = toolbox_get_tool(index_toolbox, argv[parsed_args]);
+    if (!(toolfunc = gt_toolbox_get(index_toolbox, argv[parsed_args]))) {
+      tool = gt_toolbox_get_tool(index_toolbox, argv[parsed_args]);
       assert(tool);
     }
     nargv = gt_cstr_array_prefix_first(argv + parsed_args,
@@ -97,16 +97,17 @@ static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
     if (toolfunc)
       had_err = toolfunc(argc - parsed_args, (const char**) nargv, err);
     else
-      had_err = tool_run(tool, argc - parsed_args, (const char**) nargv, err);
+      had_err = gt_tool_run(tool, argc - parsed_args, (const char**) nargv,
+                            err);
   }
 
   gt_cstr_array_delete(nargv);
   return had_err;
 }
 
-Tool* gt_packedindex(void)
+GtTool* gt_packedindex(void)
 {
-  return tool_new(gt_packedindex_arguments_new,
+  return gt_tool_new(gt_packedindex_arguments_new,
                   gt_packedindex_arguments_delete,
                   gt_packedindex_option_parser_new,
                   NULL,

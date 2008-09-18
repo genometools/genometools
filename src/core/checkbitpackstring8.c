@@ -358,7 +358,7 @@ bitPackStringInt8_unit_test(GtError *err)
   gt_log_log("bsStoreNonUniformUInt8Array/bsGetUInt8: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%8 + 1);
     offset = offsetStart;
@@ -426,7 +426,7 @@ bitPackStringInt8_unit_test(GtError *err)
   gt_log_log("bsNonStoreUniformInt8Array/bsGetInt8: ");
   {
     BitOffset bitsTotal = 0;
-    numBitsList = gt_malloc(sizeof(unsigned) * numRnd);
+    numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%8 + 1);
     offset = offsetStart;

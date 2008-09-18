@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the extract feature tool */
-Tool* gt_extractfeat(void);
+GtTool* gt_extractfeat(void);
 
 #endif

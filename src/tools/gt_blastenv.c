@@ -42,20 +42,20 @@ static void gt_blastenv_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
 {
   ScorefastaArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] scorematrix_file w",
+  op = gt_option_parser_new("[option ...] scorematrix_file w",
                          "Show the BlastP environment for sequence w (using "
                          "the given scormatrix_file).");
-  o = option_new_ulong_min("q", "set q-gram length", &arguments->q, 4, 1);
-  option_parser_add_option(op, o);
-  o = option_new_ulong_min("k", "set minimum score", &arguments->k, 3, 1);
-  option_parser_add_option(op, o);
-  option_parser_set_min_max_args(op, 2, 2);
+  o = gt_option_new_ulong_min("q", "set q-gram length", &arguments->q, 4, 1);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong_min("k", "set minimum score", &arguments->k, 3, 1);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
@@ -105,9 +105,9 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-Tool* gt_blastenv(void)
+GtTool* gt_blastenv(void)
 {
-  return tool_new(gt_blastenv_arguments_new,
+  return gt_tool_new(gt_blastenv_arguments_new,
                   gt_blastenv_arguments_delete,
                   gt_blastenv_option_parser_new,
                   NULL,

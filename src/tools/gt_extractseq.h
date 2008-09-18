@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the extract sequence tool */
-Tool* gt_extractseq(void);
+GtTool* gt_extractseq(void);
 
 #endif

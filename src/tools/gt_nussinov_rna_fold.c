@@ -191,15 +191,17 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("l_min alpha(G,C) alpha(A,U) alpha(G,U) RNA_sequence",
-                         "Fold the supplied RNA sequence with the Nussinov "
-                         "algorithm.");
-  option_parser_set_min_max_args(op, 5, 5);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  op = gt_option_parser_new("l_min alpha(G,C) alpha(A,U) alpha(G,U) "
+                            "RNA_sequence",
+                            "Fold the supplied RNA sequence with the Nussinov "
+                            "algorithm.");
+  gt_option_parser_set_min_max_args(op, 5, 5);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

@@ -101,75 +101,77 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             const char **argv,
                             GtError *err)
 {
-  OptionParser *op;
-  Option *optionstream, *optionverbose, *optionscantrials,
+  GtOptionParser *op;
+  GtOption *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
          *optiondes, *optionbwt, *optionlcp, *optiontis,
          *optiondelspranges;
   OPrval oprval;
 
   gt_error_check(err);
-  op = option_parser_new("[options] indexname",
+  op = gt_option_parser_new("[options] indexname",
                          "Map or Stream <indexname> and check consistency.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  optionstream = option_new_bool("stream","stream the index",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  optionstream = gt_option_new_bool("stream","stream the index",
                                  &sfxmapoptions->usestream,false);
-  option_parser_add_option(op, optionstream);
+  gt_option_parser_add_option(op, optionstream);
 
-  optionscantrials = option_new_ulong("scantrials",
+  optionscantrials = gt_option_new_ulong("scantrials",
                                       "specify number of scan trials",
                                       &sfxmapoptions->scantrials,0);
-  option_parser_add_option(op, optionscantrials);
+  gt_option_parser_add_option(op, optionscantrials);
 
   optionmulticharcmptrials
-    = option_new_ulong("multicharcmptrials",
+    = gt_option_new_ulong("multicharcmptrials",
                        "specify number of multichar cmp trials",
                        &sfxmapoptions->multicharcmptrials,0);
-  option_parser_add_option(op, optionmulticharcmptrials);
+  gt_option_parser_add_option(op, optionmulticharcmptrials);
 
-  optiondelspranges = option_new_ulong("delspranges",
+  optiondelspranges = gt_option_new_ulong("delspranges",
                                       "delete ranges of special values",
                                        &sfxmapoptions->delspranges,
                                        0);
-  option_parser_add_option(op, optiondelspranges);
+  gt_option_parser_add_option(op, optiondelspranges);
 
-  optiontis = option_new_bool("tis","input the transformed input sequence",
+  optiontis = gt_option_new_bool("tis","input the transformed input sequence",
                               &sfxmapoptions->inputtis,
                               false);
-  option_parser_add_option(op, optiontis);
+  gt_option_parser_add_option(op, optiontis);
 
-  optiondes = option_new_bool("des","input the descriptions",
+  optiondes = gt_option_new_bool("des","input the descriptions",
                               &sfxmapoptions->inputdes,
                               false);
-  option_parser_add_option(op, optiondes);
+  gt_option_parser_add_option(op, optiondes);
 
-  optionsuf = option_new_bool("suf","input the suffix array",
+  optionsuf = gt_option_new_bool("suf","input the suffix array",
                               &sfxmapoptions->inputsuf,
                               false);
-  option_parser_add_option(op, optionsuf);
+  gt_option_parser_add_option(op, optionsuf);
 
-  optionlcp = option_new_bool("lcp","input the lcp-table",
+  optionlcp = gt_option_new_bool("lcp","input the lcp-table",
                               &sfxmapoptions->inputlcp,
                               false);
-  option_parser_add_option(op, optionlcp);
+  gt_option_parser_add_option(op, optionlcp);
 
-  optionbwt = option_new_bool("bwt","input the Burrows-Wheeler Transformation",
+  optionbwt = gt_option_new_bool("bwt",
+                              "input the Burrows-Wheeler Transformation",
                               &sfxmapoptions->inputbwt,
                               false);
-  option_parser_add_option(op, optionbwt);
+  gt_option_parser_add_option(op, optionbwt);
 
-  optionbck = option_new_bool("bck","input the bucket table",
+  optionbck = gt_option_new_bool("bck","input the bucket table",
                               &sfxmapoptions->inputbck,
                               false);
-  option_parser_add_option(op, optionbck);
+  gt_option_parser_add_option(op, optionbck);
 
-  optionverbose = option_new_bool("v","be verbose",&sfxmapoptions->verbose,
+  optionverbose = gt_option_new_bool("v","be verbose",&sfxmapoptions->verbose,
                                   false);
-  option_parser_add_option(op, optionverbose);
+  gt_option_parser_add_option(op, optionverbose);
 
-  option_parser_set_min_max_args(op, 1U, 2U);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1U, 2U);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

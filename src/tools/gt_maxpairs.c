@@ -80,61 +80,61 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                             const char **argv,
                             GtError *err)
 {
-  OptionParser *op;
-  Option *option, *queryoption, *scanoption, *sampleoption;
+  GtOptionParser *op;
+  GtOption *option, *queryoption, *scanoption, *sampleoption;
   OPrval oprval;
 
   gt_error_check(err);
-  op = option_parser_new("[options] -ii indexname",
+  op = gt_option_parser_new("[options] -ii indexname",
                          "Perform Substring matches with or without query.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  option = option_new_uint_min("l","Specify minimum length",
+  option = gt_option_new_uint_min("l","Specify minimum length",
                                &maxpairsoptions->userdefinedleastlength,
                                (unsigned int) 20,
                                (unsigned int) 1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  sampleoption = option_new_ulong_min("samples","Specify number of samples",
+  sampleoption = gt_option_new_ulong_min("samples","Specify number of samples",
                                  &maxpairsoptions->samples,
                                  (unsigned long) 0,
                                  (unsigned long) 1);
-  option_parser_add_option(op, sampleoption);
+  gt_option_parser_add_option(op, sampleoption);
 
-  scanoption = option_new_bool("scan","scan index",
+  scanoption = gt_option_new_bool("scan","scan index",
                                &maxpairsoptions->scanfile,
                                false);
-  option_parser_add_option(op, scanoption);
+  gt_option_parser_add_option(op, scanoption);
 
-  option = option_new_string("ii",
+  option = gt_option_new_string("ii",
                              "Specify input index",
                              maxpairsoptions->indexname, NULL);
-  option_parser_add_option(op, option);
-  option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
 
-  queryoption = option_new_filenamearray("q",
+  queryoption = gt_option_new_filenamearray("q",
                              "Specify query files",
                              maxpairsoptions->queryfiles);
-  option_parser_add_option(op, queryoption);
+  gt_option_parser_add_option(op, queryoption);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
                                versionfunc, err);
-  if (option_is_set(queryoption))
+  if (gt_option_is_set(queryoption))
   {
-    if (option_is_set(sampleoption))
+    if (gt_option_is_set(sampleoption))
     {
       gt_error_set(err, "option -samples cannot be combined with option -q");
       oprval = OPTIONPARSER_ERROR;
     } else
     {
-      if (option_is_set(scanoption))
+      if (gt_option_is_set(scanoption))
       {
         gt_error_set(err, "option -scan cannot be combined with option -q");
         oprval = OPTIONPARSER_ERROR;
       }
     }
   }
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

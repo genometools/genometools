@@ -27,18 +27,19 @@
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
                             const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("[option ...] gt_seq_file_1 gt_seq_file_2",
+  op = gt_option_parser_new("[option ...] gt_seq_file_1 gt_seq_file_2",
                          "Compute q-gram distance for each sequence "
                          "combination.");
-  o = option_new_uint_min("q", "set q", q, 3, 1);
-  option_parser_add_option(op, o);
-  option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  o = gt_option_new_uint_min("q", "set q", q, 3, 1);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_min_max_args(op, 2, 2);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 

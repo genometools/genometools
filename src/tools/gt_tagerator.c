@@ -25,22 +25,22 @@
 
 /*
   Remark Gordon from July 2008: How to have access to an option in the
-  Tool argument parser framework:
+  GtTool argument parser framework:
 
   typedef struct
   {
-    Option *foo;
+    GtOption *foo;
   } Arguments;
 
-  foo = option_parser_new();
+  foo = gt_option_parser_new();
   optionparseraddoption(op,foo);
-  arguments->foo = option_ref(foo);
+  arguments->foo = gt_option_ref(foo);
 
   ...
 
   arguments_delete()
   {
-    option_delete(arguments_foo);
+    gt_option_delete(arguments_foo);
   }
 */
 
@@ -63,94 +63,95 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 {
   TageratorOptions *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
+  GtOptionParser *op;
+  GtOption *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
          *optionpckindex, *optionmaxdepth;
 
   assert(arguments != NULL);
   arguments->esaindexname = gt_str_new();
   arguments->pckindexname = gt_str_new();
   arguments->tagfiles = gt_strarray_new();
-  op = option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
+  op = gt_option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("q",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  option = gt_option_new_filenamearray("q",
                                     "Specify files containing the short "
                                     "sequence tags",
                                     arguments->tagfiles);
-  option_parser_add_option(op, option);
-  option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
 
-  option = option_new_long("e",
+  option = gt_option_new_long("e",
                            "Specify the allowed number of differences "
                            "(replacements/insertions/deletions)",
                            &arguments->maxdistance,
                            -1L);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  optionesaindex = option_new_string("esa",
+  optionesaindex = gt_option_new_string("esa",
                                      "Specify index (enhanced suffix array)",
                                      arguments->esaindexname, NULL);
-  option_parser_add_option(op, optionesaindex);
+  gt_option_parser_add_option(op, optionesaindex);
 
-  optionpckindex = option_new_string("pck",
+  optionpckindex = gt_option_new_string("pck",
                                      "Specify index (packed index)",
                                      arguments->pckindexname, NULL);
-  option_parser_add_option(op, optionpckindex);
-  option_exclude(optionesaindex,optionpckindex);
-  option_is_mandatory_either(optionesaindex,optionpckindex);
+  gt_option_parser_add_option(op, optionpckindex);
+  gt_option_exclude(optionesaindex,optionpckindex);
+  gt_option_is_mandatory_either(optionesaindex,optionpckindex);
 
-  optionmaxdepth = option_new_int("maxdepth",
+  optionmaxdepth = gt_option_new_int("maxdepth",
                                   "Use the data in the .pbt file only up to "
                                   "this depth (only relevant with option -pck)",
                                   &arguments->userdefinedmaxdepth,
                                   -1);
-  option_parser_add_option(op, optionmaxdepth);
-  option_is_development_option(optionmaxdepth);
+  gt_option_parser_add_option(op, optionmaxdepth);
+  gt_option_is_development_option(optionmaxdepth);
 
-  optiononline = option_new_bool("online","Perform online searches",
+  optiononline = gt_option_new_bool("online","Perform online searches",
                             &arguments->online, false);
-  option_parser_add_option(op, optiononline);
-  option_is_development_option(optiononline);
+  gt_option_parser_add_option(op, optiononline);
+  gt_option_is_development_option(optiononline);
 
-  optioncmp = option_new_bool("cmp","compare results of offline and online "
+  optioncmp = gt_option_new_bool("cmp","compare results of offline and online "
                               "searches",
                             &arguments->docompare, false);
-  option_parser_add_option(op, optioncmp);
-  option_exclude(optiononline,optioncmp);
-  option_is_development_option(optioncmp);
+  gt_option_parser_add_option(op, optioncmp);
+  gt_option_exclude(optiononline,optioncmp);
+  gt_option_is_development_option(optioncmp);
 
-  optionrw = option_new_bool("rw","Replace wildcard in tag by random char",
+  optionrw = gt_option_new_bool("rw","Replace wildcard in tag by random char",
                              &arguments->replacewildcard, false);
-  option_parser_add_option(op, optionrw);
-  option_is_development_option(optionrw);
+  gt_option_parser_add_option(op, optionrw);
+  gt_option_is_development_option(optionrw);
 
-  option = option_new_bool("nod","Do not compute direct matches",
+  option = gt_option_new_bool("nod","Do not compute direct matches",
                            &arguments->nofwdmatch, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("nop","Do not compute palindromic matches "
+  option = gt_option_new_bool("nop","Do not compute palindromic matches "
                            "(i.e. no reverse complemented matches.)",
                              &arguments->norcmatch, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong_min("maxocc",
-                                "specify max number of match-occurrencs",
+  option = gt_option_new_ulong_min("maxocc",
+                                "specify max number of match-occurrences",
                                 &arguments->maxintervalwidth,0,1UL);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("skpp","Skip prefix of pattern (only in pdiff mode)",
+  option = gt_option_new_bool("skpp",
+                           "Skip prefix of pattern (only in pdiff mode)",
                            &arguments->skpp, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("nowildcards","do not output matches containing "
+  option = gt_option_new_bool("nowildcards","do not output matches containing "
                            "wildcard characters (e.g. N); only relevant for "
                            "approximate matching",
                            &arguments->nowildcards, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
   return op;
 }
 
@@ -247,9 +248,9 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   return 0;
 }
 
-Tool* gt_tagerator(void)
+GtTool* gt_tagerator(void)
 {
-  return tool_new(gt_tagerator_arguments_new,
+  return gt_tool_new(gt_tagerator_arguments_new,
                   gt_tagerator_arguments_delete,
                   gt_tagerator_option_parser_new,
                   gt_tagerator_arguments_check,

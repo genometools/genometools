@@ -26,17 +26,18 @@
 static OPrval parse_options(int *parsed_args, GtGenFile **outfp, int argc,
                             const char **argv, GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OutputFileInfo *ofi;
   OPrval oprval;
   gt_error_check(err);
-  op = option_parser_new("[option ...] [GFF3_file ...]",
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
   ofi = outputfileinfo_new();
   outputfile_register_options(op, outfp, ofi);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+                                  err);
   outputfileinfo_delete(ofi);
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
