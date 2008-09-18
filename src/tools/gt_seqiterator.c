@@ -122,7 +122,7 @@ static void showmeroccurrence(unsigned long key, unsigned long long value,
   }
 }
 
-static unsigned long long accumulateastretch(DiscDistri *distastretch,
+static unsigned long long accumulateastretch(GtDiscDistri *distastretch,
                                              const Uchar *sequence,
                                              unsigned long len)
 {
@@ -139,19 +139,19 @@ static unsigned long long accumulateastretch(DiscDistri *distastretch,
     {
       if (lenofastretch > 0)
       {
-        disc_distri_add(distastretch,lenofastretch);
+        gt_disc_distri_add(distastretch,lenofastretch);
         lenofastretch = 0;
       }
     }
   }
   if (lenofastretch > 0)
   {
-    disc_distri_add(distastretch,lenofastretch);
+    gt_disc_distri_add(distastretch,lenofastretch);
   }
   return countA;
 }
 
-static void processastretches(const DiscDistri *distastretch,
+static void processastretches(const GtDiscDistri *distastretch,
                               GT_UNUSED unsigned long long countA)
 {
   Astretchinfo astretchinfo;
@@ -160,12 +160,12 @@ static void processastretches(const DiscDistri *distastretch,
   astretchinfo.sumA = 0;
   astretchinfo.maxvalue = 0;
   astretchinfo.minkey = 10UL;
-  disc_distri_foreach(distastretch,showastretches,&astretchinfo);
+  gt_disc_distri_foreach(distastretch,showastretches,&astretchinfo);
   astretchinfo.mmercount = gt_malloc(sizeof (*astretchinfo.mmercount) *
                                     (astretchinfo.maxvalue+1));
   memset(astretchinfo.mmercount,0,sizeof (*astretchinfo.mmercount) *
                                   (astretchinfo.maxvalue+1));
-  disc_distri_foreach(distastretch,showmeroccurrence,&astretchinfo);
+  gt_disc_distri_foreach(distastretch,showmeroccurrence,&astretchinfo);
   for (len=astretchinfo.minkey; len<=astretchinfo.maxvalue; len++)
   {
     /*@ignore@*/
@@ -185,8 +185,8 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   unsigned long len;
   int i, parsed_args, had_err;
   off_t totalsize;
-  DiscDistri *distseqlen = NULL;
-  DiscDistri *distastretch = NULL;
+  GtDiscDistri *distseqlen = NULL;
+  GtDiscDistri *distastretch = NULL;
   uint64_t numofseq = 0, sumlength = 0;
   unsigned long minlength = 0, maxlength = 0;
   unsigned long long countA = 0;
@@ -215,11 +215,11 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   seqit = gt_seqiterator_new(files, NULL, true);
   if (seqiteroptions.dodistlen)
   {
-    distseqlen = disc_distri_new();
+    distseqlen = gt_disc_distri_new();
   }
   if (seqiteroptions.doastretch)
   {
-    distastretch = disc_distri_new();
+    distastretch = gt_disc_distri_new();
   }
   if (seqiteroptions.verbose)
   {
@@ -245,7 +245,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
       }
       sumlength += (uint64_t) len;
       numofseq++;
-      disc_distri_add(distseqlen,len/BUCKETSIZE);
+      gt_disc_distri_add(distseqlen,len/BUCKETSIZE);
     }
     if (seqiteroptions.doastretch)
     {
@@ -271,13 +271,13 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
     printf("# maximum length %lu\n",maxlength);
     printf("# distribution of sequence length in buckets of size %d\n",
            BUCKETSIZE);
-    disc_distri_foreach(distseqlen,showdistseqlen,NULL);
-    disc_distri_delete(distseqlen);
+    gt_disc_distri_foreach(distseqlen,showdistseqlen,NULL);
+    gt_disc_distri_delete(distseqlen);
   }
   if (seqiteroptions.doastretch)
   {
     processastretches(distastretch,countA);
-    disc_distri_delete(distastretch);
+    gt_disc_distri_delete(distastretch);
   }
   return had_err;
 }

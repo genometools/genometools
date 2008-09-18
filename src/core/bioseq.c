@@ -652,13 +652,13 @@ void gt_bioseq_show_stat(GtBioseq *bs)
 
 void gt_bioseq_show_seqlengthdistri(GtBioseq *bs)
 {
-  DiscDistri *d;
+  GtDiscDistri *d;
   unsigned long i;
   assert(bs);
-  d = disc_distri_new();
+  d = gt_disc_distri_new();
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++)
-    disc_distri_add(d, gt_bioseq_get_sequence_length(bs, i));
+    gt_disc_distri_add(d, gt_bioseq_get_sequence_length(bs, i));
   printf("sequence length distribution:\n");
-  disc_distri_show(d);
-  disc_distri_delete(d);
+  gt_disc_distri_show(d);
+  gt_disc_distri_delete(d);
 }

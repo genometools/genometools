@@ -25,19 +25,19 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 
-struct DiscDistri {
+struct GtDiscDistri {
   GtHashtable *hashdist;
   unsigned long long num_of_occurrences;
 };
 
-DiscDistri* disc_distri_new(void)
+GtDiscDistri* gt_disc_distri_new(void)
 {
-  return gt_calloc(1, sizeof (DiscDistri));
+  return gt_calloc(1, sizeof (GtDiscDistri));
 }
 
-void disc_distri_add(DiscDistri *d, unsigned long key)
+void gt_disc_distri_add(GtDiscDistri *d, unsigned long key)
 {
-  disc_distri_add_multi(d, key, 1);
+  gt_disc_distri_add_multi(d, key, 1);
 }
 
 DECLARE_HASHMAP(unsigned long, ul, unsigned long long, ull, static, inline)
@@ -45,7 +45,7 @@ DEFINE_HASHMAP(unsigned long, ul, unsigned long long, ull, ht_ul_elem_hash,
                ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
-void disc_distri_add_multi(DiscDistri *d, unsigned long key,
+void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
                            unsigned long long occurrences)
 {
   unsigned long long *valueptr;
@@ -64,7 +64,7 @@ void disc_distri_add_multi(DiscDistri *d, unsigned long key,
   d->num_of_occurrences += occurrences;
 }
 
-unsigned long long disc_distri_get(const DiscDistri *d, unsigned long key)
+unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
 {
   unsigned long long *valueptr;
   assert(d);
@@ -73,10 +73,10 @@ unsigned long long disc_distri_get(const DiscDistri *d, unsigned long key)
   return *valueptr;
 }
 
-void disc_distri_show(const DiscDistri *d)
+void gt_disc_distri_show(const GtDiscDistri *d)
 {
   assert(d);
-  disc_distri_show_generic(d, NULL);
+  gt_disc_distri_show_generic(d, NULL);
 }
 
 typedef struct {
@@ -103,7 +103,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
   return CONTINUE_ITERATION;
 }
 
-void disc_distri_show_generic(const DiscDistri *d, GtGenFile *genfile)
+void gt_disc_distri_show_generic(const GtDiscDistri *d, GtGenFile *genfile)
 {
   ShowValueInfo showvalueinfo;
   int rval;
@@ -121,7 +121,7 @@ void disc_distri_show_generic(const DiscDistri *d, GtGenFile *genfile)
 }
 
 typedef struct {
-  DiscDistriIterFunc func;
+  GtDiscDistriIterFunc func;
   void *data;
 } ForeachInfo;
 
@@ -137,7 +137,7 @@ foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
   return CONTINUE_ITERATION;
 }
 
-void disc_distri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
+void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
                         void *data)
 {
   ForeachInfo info;
@@ -153,30 +153,30 @@ void disc_distri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
   }
 }
 
-int disc_distri_unit_test(GtError *err)
+int gt_disc_distri_unit_test(GtError *err)
 {
-  DiscDistri *d;
+  GtDiscDistri *d;
   int had_err = 0;
 
   gt_error_check(err);
 
-  d = disc_distri_new();
+  d = gt_disc_distri_new();
 
-  ensure(had_err, disc_distri_get(d, 0) == 0);
-  ensure(had_err, disc_distri_get(d, 100) == 0);
+  ensure(had_err, gt_disc_distri_get(d, 0) == 0);
+  ensure(had_err, gt_disc_distri_get(d, 100) == 0);
   if (!had_err) {
-    disc_distri_add(d, 0);
-    disc_distri_add_multi(d, 100, 256);
+    gt_disc_distri_add(d, 0);
+    gt_disc_distri_add_multi(d, 100, 256);
   }
-  ensure(had_err, disc_distri_get(d, 0) == 1);
-  ensure(had_err, disc_distri_get(d, 100) == 256);
+  ensure(had_err, gt_disc_distri_get(d, 0) == 1);
+  ensure(had_err, gt_disc_distri_get(d, 100) == 256);
 
-  disc_distri_delete(d);
+  gt_disc_distri_delete(d);
 
   return had_err;
 }
 
-void disc_distri_delete(DiscDistri *d)
+void gt_disc_distri_delete(GtDiscDistri *d)
 {
   if (!d) return;
   gt_hashtable_delete(d->hashdist);

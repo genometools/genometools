@@ -90,7 +90,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 static void doupdatesumranges(Specialcharinfo *specialcharinfo,
                               Seqpos totallength,
                               unsigned int mapsize,
-                              DiscDistri *distspralen,
+                              GtDiscDistri *distspralen,
                               Verboseinfo *verboseinfo)
 {
   Updatesumrangeinfo updatesumrangeinfo;
@@ -101,7 +101,7 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   updatesumrangeinfo.specialrangesUint32 = 0;
   updatesumrangeinfo.realspecialranges = 0;
   updatesumrangeinfo.verboseinfo = verboseinfo;
-  disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
+  gt_disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   smallestsize = detsizeencseq(0,totallength,
                                updatesumrangeinfo.specialrangesUchar,mapsize);
   specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
@@ -151,7 +151,7 @@ int fasta2sequencekeyvalues(
   int retval;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
-  DiscDistri *distspralen = NULL;
+  GtDiscDistri *distspralen = NULL;
   unsigned long idx;
   bool haserr = false;
   GtQueue *descqueue = NULL;
@@ -181,7 +181,7 @@ int fasta2sequencekeyvalues(
                          filelengthtab,
                          descqueue,
                          characterdistribution);
-    distspralen = disc_distri_new();
+    distspralen = gt_disc_distri_new();
     for (pos = 0; /* Nothing */; pos++)
     {
       retval = gt_fastabuffer_next(fb,&charcode,err);
@@ -195,7 +195,7 @@ int fasta2sequencekeyvalues(
         if (lastspeciallength > 0)
         {
           idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          disc_distri_add(distspralen,idx);
+          gt_disc_distri_add(distspralen,idx);
         }
         break;
       }
@@ -239,7 +239,7 @@ int fasta2sequencekeyvalues(
         if (lastspeciallength > 0)
         {
           idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          disc_distri_add(distspralen,idx);
+          gt_disc_distri_add(distspralen,idx);
           lastspeciallength = 0;
         }
       }
@@ -266,7 +266,7 @@ int fasta2sequencekeyvalues(
     (*numofsequences)++;
   }
   gt_xfclose(desfp);
-  disc_distri_delete(distspralen);
+  gt_disc_distri_delete(distspralen);
   gt_fastabuffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
@@ -282,13 +282,13 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   Seqpos pos;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
-  DiscDistri *distspralen;
+  GtDiscDistri *distspralen;
   unsigned long idx;
 
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  distspralen = disc_distri_new();
+  distspralen = gt_disc_distri_new();
   for (pos = 0; pos < len; pos++)
   {
     charcode = seq[pos];
@@ -315,7 +315,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
       if (lastspeciallength > 0)
       {
         idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        disc_distri_add(distspralen,idx);
+        gt_disc_distri_add(distspralen,idx);
         lastspeciallength = 0;
       }
     }
@@ -323,9 +323,9 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   if (lastspeciallength > 0)
   {
     idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-    disc_distri_add(distspralen,idx);
+    gt_disc_distri_add(distspralen,idx);
   }
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
   doupdatesumranges(specialcharinfo,len,mapsize,distspralen,verboseinfo);
-  disc_distri_delete(distspralen);
+  gt_disc_distri_delete(distspralen);
 }
