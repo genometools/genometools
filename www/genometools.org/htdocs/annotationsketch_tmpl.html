@@ -113,7 +113,7 @@ config = {
   },
 }
 </pre>
-would lead to all features of there types collapsing into the <em>mRNA</em> track (see Fig. <a href="#fig4">4</a> and <a href="#fig5">5</a>).
+would lead to all features of the <em>exon</em>, <em>intron</em> and <em>CDS</em> types collapsing into the <em>mRNA</em> track (see Fig. <a href="#fig4">4</a> and <a href="#fig5">5</a>).
 <div class="figure">
 <div class="subfigure">
 <p><b>Figure 4:</b> Schematic of the relationships between the <em>gene</em>, <em>mRNA</em>, <em>exon</em>, <em>intron</em> and <em>CDS</em> types and the colors of their representations in a diagram. The arrows illustrate how the relationships influence the collapsing process if collapsing is enabled for the <em>exon</em>, <em>intron</em> and <em>CDS</em> types. In this example, they will be drawn on top of their parent <em>mRNA</em> features.</p>
@@ -184,18 +184,25 @@ The <em>GenomeTools</em> <tt>gt</tt> executable provides a new tool which uses t
 $ gt sketch output.png annotation.gff3
 $
 </pre>
-or by receiving GFF3 data via the standard input:
+or by receiving GFF3 data via the standard input, here prepared by the <tt>gt gff3</tt> tool:
 <pre>
 $ gt gff3 -sort -addintrons annotation.gff3 | gt sketch output.png
 $
 </pre>
-Furthermore, the <tt>-force</tt> switch can be used to force overwriting of the output file. The <tt>-pipe</tt> option allows to pass the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the <tt>-help</tt> switch.
+The region to create a diagram for can be specified in detail by using the <tt>-seqid</tt>, <tt>-start</tt> and <tt>-end</tt> parameters. For example, if the <em>D. melanogaster</em> gene annotation is given as a <tt>dmel_annotation.gff3</tt>, use
+<pre>
+$ gt sketch -format pdf -seqid 2R -start 9326816 -end 9332879 output.pdf dmel_annotation.gff3
+$
+</pre>
+to plot the gene from the <a href="http://flybase.org/cgi-bin/gbrowse/dmel/"><em>FlyBase</em> default view</a> in PDF format.
+The <tt>-force</tt> switch is used to force overwriting of an already existing output file. The <tt>-pipe</tt> option additionally allows passing the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the <tt>-help</tt> switch.
 
 <a name="examples"></a>
 <h2>Examples</h2>
+
 <a name="examples-parsed"></a>
 <h3>Using <em>AnnotationSketch</em> to draw annotations from a file</h3>
-The following code examples (in C and Lua) illustrate how to produce an image from a given GFF3 file using <em>AnnotationSketch</em>. The result is shown in Fig. <a href="#fig7">7</a>.
+The following code examples (in C and Lua) illustrate how to produce an image from a given GFF3 file using <em>AnnotationSketch</em>. The result is shown in Fig. <a href="#fig7">7</a>. In essence, these code examples implement something like a simple version of the <tt>gt sketch</tt> tool from <em>GenomeTools</em> without most command-line options.
 <div class="figure">
   <p><a name="fig7"></a><img src="images/parsed.png" alt="[Example rendering from parsed GFF3 file]"></p>
   <p><b>Figure 7: </b>Example rendering of a GFF3 file with default style.</p>
