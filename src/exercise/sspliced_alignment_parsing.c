@@ -24,7 +24,7 @@
 #define FORWARDSTRANDCHAR '+'
 #define REVERSESTRANDCHAR '-'
 
-static int parse_input_line(SSplicedAlignment **alignment, const char *line,
+static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
                             unsigned long line_length, GtError *err)
 {
   long leftpos, rightpos;
@@ -65,9 +65,9 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
 
   /* parsing orientation */
   if (line[i] == FORWARDSTRANDCHAR)
-    *alignment = sspliced_alignment_new(gt_str_get(id), true);
+    *alignment = gt_sspliced_alignment_new(gt_str_get(id), true);
   else if (line[i] == REVERSESTRANDCHAR)
-    *alignment = sspliced_alignment_new(gt_str_get(id), false);
+    *alignment = gt_sspliced_alignment_new(gt_str_get(id), false);
   else {
     gt_error_set(err,
                  "wrong formatted input line, orientation must be %c or %c\n"
@@ -94,7 +94,7 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
         /* save exon */
         exon.start = leftpos;
         exon.end   = rightpos;
-        sspliced_alignment_add_exon(*alignment, exon);
+        gt_sspliced_alignment_add_exon(*alignment, exon);
       }
     }
     i++;
@@ -103,21 +103,21 @@ static int parse_input_line(SSplicedAlignment **alignment, const char *line,
   }
 
   if (had_err)
-    sspliced_alignment_delete(*alignment);
+    gt_sspliced_alignment_delete(*alignment);
   else {
     /* alignment contains at least one exon */
-    assert(sspliced_alignment_num_of_exons(*alignment));
+    assert(gt_sspliced_alignment_num_of_exons(*alignment));
   }
   gt_str_delete(id);
 
   return had_err;
 }
 
-int sspliced_alignment_parse(GtArray *spliced_alignments, const char *filename,
+int gt_sspliced_alignment_parse(GtArray *spliced_alignments, const char *filename,
                              GtError *err)
 {
   FILE *input_file;
-  SSplicedAlignment *sa;
+  GtSSplicedAlignment *sa;
   int had_err = 0;
   GtStr *line;
   gt_error_check(err);

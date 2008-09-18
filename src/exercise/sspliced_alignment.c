@@ -19,15 +19,15 @@
 #include "core/ma.h"
 #include "exercise/sspliced_alignment.h"
 
-struct SSplicedAlignment {
+struct GtSSplicedAlignment {
   char *id;
   bool forward;
   GtArray *exons; /* the exon ranges */
 };
 
-SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)
+GtSSplicedAlignment* gt_sspliced_alignment_new(const char *id, bool forward)
 {
-  SSplicedAlignment *sa;
+  GtSSplicedAlignment *sa;
   assert(id);
   sa = gt_malloc(sizeof *sa);
   sa->id = gt_cstr_dup(id);
@@ -36,7 +36,7 @@ SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward)
   return sa;
 }
 
-void sspliced_alignment_delete(SSplicedAlignment *sa)
+void gt_sspliced_alignment_delete(GtSSplicedAlignment *sa)
 {
   if (!sa) return;
   gt_array_delete(sa->exons);
@@ -44,32 +44,32 @@ void sspliced_alignment_delete(SSplicedAlignment *sa)
   gt_free(sa);
 }
 
-bool sspliced_alignment_is_forward(const SSplicedAlignment *sa)
+bool gt_sspliced_alignment_is_forward(const GtSSplicedAlignment *sa)
 {
   assert(sa);
   return sa->forward;
 }
 
-void sspliced_alignment_add_exon(SSplicedAlignment *sa, GtRange exon)
+void gt_sspliced_alignment_add_exon(GtSSplicedAlignment *sa, GtRange exon)
 {
   assert(sa);
   gt_array_add(sa->exons, exon);
 }
 
-unsigned long sspliced_alignment_num_of_exons(const SSplicedAlignment *sa)
+unsigned long gt_sspliced_alignment_num_of_exons(const GtSSplicedAlignment *sa)
 {
   assert(sa);
   return gt_array_size(sa->exons);
 }
 
-GtRange sspliced_alignment_get_exon(const SSplicedAlignment *sa,
+GtRange gt_sspliced_alignment_get_exon(const GtSSplicedAlignment *sa,
                                   unsigned long exon_number)
 {
   assert(sa);
   return *(GtRange*) gt_array_get(sa->exons, exon_number);
 }
 
-GtRange sspliced_alignment_genomic_range(const SSplicedAlignment *sa)
+GtRange gt_sspliced_alignment_genomic_range(const GtSSplicedAlignment *sa)
 {
   GtRange range;
   assert(sa);
@@ -93,11 +93,11 @@ static int range_compare_long_first(GtRange range_a, GtRange range_b)
   return 1; /* range_a > range_b */
 }
 
-int sspliced_alignment_compare_ptr(const SSplicedAlignment **sa_a,
-                                   const SSplicedAlignment **sa_b)
+int gt_sspliced_alignment_compare_ptr(const GtSSplicedAlignment **sa_a,
+                                   const GtSSplicedAlignment **sa_b)
 {
   GtRange range_a, range_b;
-  range_a = sspliced_alignment_genomic_range(*sa_a);
-  range_b = sspliced_alignment_genomic_range(*sa_b);
+  range_a = gt_sspliced_alignment_genomic_range(*sa_a);
+  range_b = gt_sspliced_alignment_genomic_range(*sa_b);
   return range_compare_long_first(range_a, range_b);
 }

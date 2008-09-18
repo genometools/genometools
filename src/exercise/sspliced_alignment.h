@@ -22,17 +22,17 @@
 #include "core/range.h"
 
 /* the simple spliced alignment class */
-typedef struct SSplicedAlignment SSplicedAlignment;
+typedef struct GtSSplicedAlignment GtSSplicedAlignment;
 
-SSplicedAlignment* sspliced_alignment_new(const char *id, bool forward);
-void               sspliced_alignment_delete(SSplicedAlignment*);
-bool               sspliced_alignment_is_forward(const SSplicedAlignment*);
-void               sspliced_alignment_add_exon(SSplicedAlignment*, GtRange);
-unsigned long      sspliced_alignment_num_of_exons(const SSplicedAlignment*);
-GtRange              sspliced_alignment_get_exon(const SSplicedAlignment*,
+GtSSplicedAlignment* gt_sspliced_alignment_new(const char *id, bool forward);
+void               gt_sspliced_alignment_delete(GtSSplicedAlignment*);
+bool               gt_sspliced_alignment_is_forward(const GtSSplicedAlignment*);
+void               gt_sspliced_alignment_add_exon(GtSSplicedAlignment*, GtRange);
+unsigned long      gt_sspliced_alignment_num_of_exons(const GtSSplicedAlignment*);
+GtRange              gt_sspliced_alignment_get_exon(const GtSSplicedAlignment*,
                                                unsigned long exon_number);
-GtRange              sspliced_alignment_genomic_range(const SSplicedAlignment*);
-int                sspliced_alignment_compare_ptr(const SSplicedAlignment**,
-                                                  const SSplicedAlignment**);
+GtRange              gt_sspliced_alignment_genomic_range(const GtSSplicedAlignment*);
+int                gt_sspliced_alignment_compare_ptr(const GtSSplicedAlignment**,
+                                                  const GtSSplicedAlignment**);
 
 #endif

@@ -20,7 +20,7 @@
 
 #include "core/error.h"
 
-int sspliced_alignment_parse(GtArray *spliced_alignments, const char *filename,
+int gt_sspliced_alignment_parse(GtArray *spliced_alignments, const char *filename,
                              GtError*);
 
 #endif
