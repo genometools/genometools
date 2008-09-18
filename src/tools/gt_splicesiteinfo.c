@@ -67,7 +67,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                *splice_site_info_stream = NULL;
   GtGenomeNode *gn;
   SpliceSiteInfoArguments arguments;
-  RegionMapping *regionmapping;
+  GtRegionMapping *regionmapping;
   int parsed_args, had_err = 0;
   gt_error_check(err);
 

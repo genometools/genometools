@@ -21,16 +21,19 @@
 #include "core/str.h"
 
 /* maps a sequence-region to a sequence file */
-typedef struct RegionMapping RegionMapping;
+typedef struct GtRegionMapping GtRegionMapping;
 
-RegionMapping* region_mapping_new_mapping(GtStr *mapping_filename, GtError*);
-RegionMapping* region_mapping_new_seqfile(GtStr *sequence_filename);
-RegionMapping* region_mapping_ref(RegionMapping*);
-int            region_mapping_get_raw_sequence(RegionMapping*, const char**,
-                                               GtStr *seqid, GtError*);
-int            region_mapping_get_raw_sequence_length(RegionMapping*,
-                                                      unsigned long*,
-                                                      GtStr *seqid, GtError*);
-void           region_mapping_delete(RegionMapping*);
+GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
+                                               GtError*);
+GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename);
+GtRegionMapping* gt_region_mapping_ref(GtRegionMapping*);
+int              gt_region_mapping_get_raw_sequence(GtRegionMapping*,
+                                                    const char**,
+                                                    GtStr *seqid, GtError*);
+int              gt_region_mapping_get_raw_sequence_length(GtRegionMapping*,
+                                                           unsigned long*,
+                                                           GtStr *seqid,
+                                                           GtError*);
+void             gt_region_mapping_delete(GtRegionMapping*);
 
 #endif

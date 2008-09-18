@@ -27,12 +27,17 @@ typedef struct GtSSplicedAlignment GtSSplicedAlignment;
 GtSSplicedAlignment* gt_sspliced_alignment_new(const char *id, bool forward);
 void               gt_sspliced_alignment_delete(GtSSplicedAlignment*);
 bool               gt_sspliced_alignment_is_forward(const GtSSplicedAlignment*);
-void               gt_sspliced_alignment_add_exon(GtSSplicedAlignment*, GtRange);
-unsigned long      gt_sspliced_alignment_num_of_exons(const GtSSplicedAlignment*);
-GtRange              gt_sspliced_alignment_get_exon(const GtSSplicedAlignment*,
-                                               unsigned long exon_number);
-GtRange              gt_sspliced_alignment_genomic_range(const GtSSplicedAlignment*);
-int                gt_sspliced_alignment_compare_ptr(const GtSSplicedAlignment**,
-                                                  const GtSSplicedAlignment**);
+void               gt_sspliced_alignment_add_exon(GtSSplicedAlignment*,
+                                                  GtRange);
+unsigned long      gt_sspliced_alignment_num_of_exons(const
+                                                      GtSSplicedAlignment*);
+GtRange            gt_sspliced_alignment_get_exon(const GtSSplicedAlignment*,
+                                                  unsigned long exon_number);
+GtRange            gt_sspliced_alignment_genomic_range(const
+                                                       GtSSplicedAlignment*);
+int                gt_sspliced_alignment_compare_ptr(const
+                                                     GtSSplicedAlignment**,
+                                                     const
+                                                     GtSSplicedAlignment**);
 
 #endif

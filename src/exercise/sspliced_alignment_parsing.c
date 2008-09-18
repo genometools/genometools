@@ -113,8 +113,9 @@ static int parse_input_line(GtSSplicedAlignment **alignment, const char *line,
   return had_err;
 }
 
-int gt_sspliced_alignment_parse(GtArray *spliced_alignments, const char *filename,
-                             GtError *err)
+int gt_sspliced_alignment_parse(GtArray *spliced_alignments,
+                                const char *filename,
+                                GtError *err)
 {
   FILE *input_file;
   GtSSplicedAlignment *sa;

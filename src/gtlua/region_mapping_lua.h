@@ -20,16 +20,16 @@
 
 #include "lua.h"
 
-/* exports the RegionMapping class to Lua:
+/* exports the GtRegionMapping class to Lua:
 
    -- Returns a new region mapping which maps everything onto sequence file
    -- <seqfile>.
-   function region_mapping_new_seqfile(seqfile)
+   function gt_region_mapping_new_seqfile(seqfile)
 */
 int gt_lua_open_region_mapping(lua_State*);
 
 #define REGION_MAPPING_METATABLE  "GenomeTools.region_mapping"
 #define check_region_mapping(L, POS) \
-        (RegionMapping**) luaL_checkudata(L, POS, REGION_MAPPING_METATABLE)
+        (GtRegionMapping**) luaL_checkudata(L, POS, REGION_MAPPING_METATABLE)
 
 #endif

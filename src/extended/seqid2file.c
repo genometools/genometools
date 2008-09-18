@@ -43,7 +43,7 @@ void seqid2file_options(GtOptionParser *op, GtStr *seqfile,
   gt_option_exclude(seqfile_option, regionmapping_option);
 }
 
-RegionMapping* seqid2file_regionmapping_new(GtStr *seqfile,
+GtRegionMapping* seqid2file_regionmapping_new(GtStr *seqfile,
                                             GtStr *regionmapping,
                                             GtError *err)
 {
@@ -53,7 +53,7 @@ RegionMapping* seqid2file_regionmapping_new(GtStr *seqfile,
   assert(!(gt_str_length(seqfile) && gt_str_length(regionmapping)));
   /* create region mapping */
   if (gt_str_length(seqfile))
-    return region_mapping_new_seqfile(seqfile);
+    return gt_region_mapping_new_seqfile(seqfile);
   else
-    return region_mapping_new_mapping(regionmapping, err);
+    return gt_region_mapping_new_mapping(regionmapping, err);
 }

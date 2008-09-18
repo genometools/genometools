@@ -25,13 +25,13 @@ static int region_mapping_lua_new_seqfile(lua_State *L)
 {
   const char *seqfilename;
   GtStr *seqfile;
-  RegionMapping **region_mapping;
+  GtRegionMapping **region_mapping;
   assert(L);
   seqfilename = luaL_checkstring(L, 1);
-  region_mapping = lua_newuserdata(L, sizeof (RegionMapping*));
+  region_mapping = lua_newuserdata(L, sizeof (GtRegionMapping*));
   assert(region_mapping);
   seqfile = gt_str_new_cstr(seqfilename);
-  *region_mapping = region_mapping_new_seqfile(seqfile);
+  *region_mapping = gt_region_mapping_new_seqfile(seqfile);
   gt_str_delete(seqfile);
   luaL_getmetatable(L, REGION_MAPPING_METATABLE);
   lua_setmetatable(L, -2);
@@ -40,14 +40,14 @@ static int region_mapping_lua_new_seqfile(lua_State *L)
 
 static int region_mapping_lua_delete(lua_State *L)
 {
-  RegionMapping **region_mapping;
+  GtRegionMapping **region_mapping;
   region_mapping = check_region_mapping(L, 1);
-  region_mapping_delete(*region_mapping);
+  gt_region_mapping_delete(*region_mapping);
   return 0;
 }
 
 static const struct luaL_Reg region_mapping_lib_f [] = {
-  { "region_mapping_new_seqfile", region_mapping_lua_new_seqfile },
+  { "gt_region_mapping_new_seqfile", region_mapping_lua_new_seqfile },
   { NULL, NULL }
 };
 

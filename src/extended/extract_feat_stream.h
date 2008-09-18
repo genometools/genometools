@@ -27,8 +27,9 @@ typedef struct ExtractFeatStream ExtractFeatStream;
 
 const GtNodeStreamClass* extract_feat_stream_class(void);
 
-/* create a ExtractFeatStream, takes ownership of RegionMapping  */
-GtNodeStream*            extract_feat_stream_new(GtNodeStream*, RegionMapping*,
+/* create a ExtractFeatStream, takes ownership of GtRegionMapping  */
+GtNodeStream*            extract_feat_stream_new(GtNodeStream*,
+                                                 GtRegionMapping*,
                                                  const char *type, bool join,
                                                  bool translate);
 

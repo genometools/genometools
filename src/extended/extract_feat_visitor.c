@@ -30,7 +30,7 @@ struct ExtractFeatVisitor {
   bool join,
        translate;
   unsigned long fastaseq_counter;
-  RegionMapping *region_mapping;
+  GtRegionMapping *region_mapping;
 };
 
 #define extract_feat_visitor_cast(GV)\
@@ -40,7 +40,7 @@ static void extract_feat_visitor_free(GtNodeVisitor *gv)
 {
   ExtractFeatVisitor *extract_feat_visitor = extract_feat_visitor_cast(gv);
   assert(extract_feat_visitor);
-  region_mapping_delete(extract_feat_visitor->region_mapping);
+  gt_region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
 static void construct_description(GtStr *description, const char *type,
@@ -120,7 +120,7 @@ const GtNodeVisitorClass* extract_feat_visitor_class()
   return &gvc;
 }
 
-GtNodeVisitor* extract_feat_visitor_new(RegionMapping *rm, const char *type,
+GtNodeVisitor* extract_feat_visitor_new(GtRegionMapping *rm, const char *type,
                                         bool join, bool translate)
 {
   GtNodeVisitor *gv;

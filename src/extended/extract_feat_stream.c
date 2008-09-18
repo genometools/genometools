@@ -68,7 +68,7 @@ const GtNodeStreamClass* extract_feat_stream_class(void)
 }
 
 GtNodeStream* extract_feat_stream_new(GtNodeStream *in_stream,
-                                      RegionMapping *rm, const char *type,
+                                      GtRegionMapping *rm, const char *type,
                                       bool join, bool translate)
 {
   GtNodeStream *gs = gt_node_stream_create(extract_feat_stream_class(), true);

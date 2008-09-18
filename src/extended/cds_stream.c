@@ -57,7 +57,7 @@ const GtNodeStreamClass* cds_stream_class(void)
   return &gsc;
 }
 
-GtNodeStream* cds_stream_new(GtNodeStream *in_stream, RegionMapping *rm,
+GtNodeStream* cds_stream_new(GtNodeStream *in_stream, GtRegionMapping *rm,
                              const char *source)
 {
   GtNodeStream *gs;

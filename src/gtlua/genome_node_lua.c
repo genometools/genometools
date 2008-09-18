@@ -282,7 +282,7 @@ static int feature_node_lua_extract_sequence(lua_State *L)
   GtFeatureNode *fn;
   const char *type;
   bool join;
-  RegionMapping **region_mapping;
+  GtRegionMapping **region_mapping;
   GtStr *sequence;
   GtError *err;
   gn = check_genome_node(L, 1);

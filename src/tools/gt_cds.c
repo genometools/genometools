@@ -80,7 +80,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   GtNodeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
   GtGenomeNode *gn;
   CDSArguments *arguments = tool_arguments;
-  RegionMapping *regionmapping;
+  GtRegionMapping *regionmapping;
   int had_err = 0;
 
   gt_error_check(err);

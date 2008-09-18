@@ -27,8 +27,8 @@ typedef struct CDSStream CDSStream;
 
 const GtNodeStreamClass* cds_stream_class(void);
 
-/* create a CDSSTream, takes ownership of RegionMapping */
-GtNodeStream*            cds_stream_new(GtNodeStream*, RegionMapping*,
+/* create a CDSSTream, takes ownership of GtRegionMapping */
+GtNodeStream*            cds_stream_new(GtNodeStream*, GtRegionMapping*,
                                         const char *source);
 
 #endif

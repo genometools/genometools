@@ -25,6 +25,6 @@ typedef struct CDSVisitor CDSVisitor;
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* cds_visitor_class(void);
-GtNodeVisitor*            cds_visitor_new(RegionMapping*, GtStr *source);
+GtNodeVisitor*            cds_visitor_new(GtRegionMapping*, GtStr *source);
 
 #endif

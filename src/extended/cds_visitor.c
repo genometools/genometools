@@ -28,7 +28,7 @@ struct CDSVisitor {
   GtStr *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
-  RegionMapping *region_mapping;
+  GtRegionMapping *region_mapping;
 };
 
 #define cds_visitor_cast(GV)\
@@ -40,7 +40,7 @@ static void cds_visitor_free(GtNodeVisitor *gv)
   assert(cds_visitor);
   gt_str_delete(cds_visitor->source);
   gt_splicedseq_delete(cds_visitor->splicedseq);
-  region_mapping_delete(cds_visitor->region_mapping);
+  gt_region_mapping_delete(cds_visitor->region_mapping);
 }
 
 static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
@@ -60,13 +60,14 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
   if (gt_feature_node_has_type(gf, gft_exon) &&
       (gt_feature_node_get_strand(gf) == GT_STRAND_FORWARD ||
        gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)) {
-    had_err = region_mapping_get_raw_sequence(v->region_mapping, &raw_sequence,
-                                              gt_genome_node_get_seqid(gn),
-                                              err);
+    had_err = gt_region_mapping_get_raw_sequence(v->region_mapping,
+                                                 &raw_sequence,
+                                                 gt_genome_node_get_seqid(gn),
+                                                 err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
       assert(range.start && range.end); /* 1-based coordinates */
-      had_err = region_mapping_get_raw_sequence_length(v->region_mapping,
+      had_err = gt_region_mapping_get_raw_sequence_length(v->region_mapping,
                                                        &raw_sequence_length,
                                                    gt_genome_node_get_seqid(gn),
                                                        err);
@@ -230,7 +231,7 @@ const GtNodeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GtNodeVisitor* cds_visitor_new(RegionMapping *region_mapping, GtStr *source)
+GtNodeVisitor* cds_visitor_new(GtRegionMapping *region_mapping, GtStr *source)
 {
   GtNodeVisitor *gv;
   CDSVisitor *cds_visitor;

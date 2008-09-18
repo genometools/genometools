@@ -22,6 +22,6 @@
 #include "extended/region_mapping.h"
 
 int extract_feat_sequence(GtStr *sequence, GtGenomeNode*, const char *type,
-                          bool join, RegionMapping*, GtError*);
+                          bool join, GtRegionMapping*, GtError*);
 
 #endif

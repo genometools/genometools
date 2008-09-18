@@ -27,7 +27,7 @@ typedef struct ExtractFeatVisitor ExtractFeatVisitor;
 
 const GtNodeVisitorClass* extract_feat_visitor_class(void);
 /* takes ownership of <rm> */
-GtNodeVisitor*            extract_feat_visitor_new(RegionMapping *rm,
+GtNodeVisitor*            extract_feat_visitor_new(GtRegionMapping *rm,
                                                    const char*, bool join,
                                                    bool translate);
 

@@ -31,7 +31,7 @@
 
 struct SpliceSiteInfoVisitor {
   const GtNodeVisitor parent_instance;
-  RegionMapping *region_mapping;
+  GtRegionMapping *region_mapping;
   StringDistri *splicesites,
                *donorsites,
                *acceptorsites;
@@ -47,7 +47,7 @@ static void splicesiteinfo_visitor_free(GtNodeVisitor *gv)
   SpliceSiteInfoVisitor *splicesiteinfo_visitor;
   assert(gv);
   splicesiteinfo_visitor = splicesiteinfo_visitor_cast(gv);
-  region_mapping_delete(splicesiteinfo_visitor->region_mapping);
+  gt_region_mapping_delete(splicesiteinfo_visitor->region_mapping);
   string_distri_delete(splicesiteinfo_visitor->splicesites);
   string_distri_delete(splicesiteinfo_visitor->donorsites);
   string_distri_delete(splicesiteinfo_visitor->acceptorsites);
@@ -70,11 +70,11 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   assert(range.start); /* 1-based coordinates */
   if (gt_range_length(range) >= 4) {
     seqid = gt_genome_node_get_seqid(intron);
-    had_err = region_mapping_get_raw_sequence(ssiv->region_mapping, &sequence,
-                                              seqid, err);
+    had_err = gt_region_mapping_get_raw_sequence(ssiv->region_mapping,
+                                                 &sequence, seqid, err);
     if (!had_err) {
-      had_err = region_mapping_get_raw_sequence_length(ssiv->region_mapping,
-                                                       &seqlen, seqid, err);
+      had_err = gt_region_mapping_get_raw_sequence_length(ssiv->region_mapping,
+                                                          &seqlen, seqid, err);
     }
     if (!had_err) {
       assert(range.end <= seqlen);
@@ -138,7 +138,7 @@ const GtNodeVisitorClass* splicesiteinfo_visitor_class()
   return &gvc;
 }
 
-GtNodeVisitor* splicesiteinfo_visitor_new(RegionMapping *rm)
+GtNodeVisitor* splicesiteinfo_visitor_new(GtRegionMapping *rm)
 {
   GtNodeVisitor *gv;
   SpliceSiteInfoVisitor *ssiv;

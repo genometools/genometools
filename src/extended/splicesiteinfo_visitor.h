@@ -27,7 +27,7 @@ typedef struct SpliceSiteInfoVisitor SpliceSiteInfoVisitor;
 
 const GtNodeVisitorClass* splicesiteinfo_visitor_class(void);
 /* takes ownership of <rm> */
-GtNodeVisitor*            splicesiteinfo_visitor_new(RegionMapping *rm);
+GtNodeVisitor*            splicesiteinfo_visitor_new(GtRegionMapping *rm);
 bool                      splicesiteinfo_visitor_show(GtNodeVisitor*);
 
 #endif

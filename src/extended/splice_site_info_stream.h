@@ -27,9 +27,9 @@ typedef struct SpliceSiteInfoStream SpliceSiteInfoStream;
 
 const GtNodeStreamClass* splice_site_info_stream_class(void);
 
-/* create a SpliceSiteInfoStream, takes ownership of RegionMapping  */
+/* create a SpliceSiteInfoStream, takes ownership of GtRegionMapping  */
 GtNodeStream*            splice_site_info_stream_new(GtNodeStream*,
-                                                     RegionMapping*);
+                                                     GtRegionMapping*);
 /* returns if an intron has been processed, false otherwise */
 bool                     splice_site_info_stream_show(GtNodeStream*);
 

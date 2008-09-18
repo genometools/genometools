@@ -68,7 +68,7 @@ const GtNodeStreamClass* splice_site_info_stream_class(void)
 }
 
 GtNodeStream* splice_site_info_stream_new(GtNodeStream *in_stream,
-                                          RegionMapping *rm)
+                                          GtRegionMapping *rm)
 {
   GtNodeStream *gs = gt_node_stream_create(splice_site_info_stream_class(),
                                           false);
