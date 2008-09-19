@@ -1,1 +1,1 @@
-\subsection{Sole functions}
+\section{Sole functions}

@@ -1,2 +1,2 @@
-\subsection{Class <%=classname%>}
+\section{Class <%=classname%>}
 \label{<%=classname%>}

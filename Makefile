@@ -551,6 +551,10 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	sed -f /tmp/tmp.sed \
 	  www/genometools.org/htdocs/annotationsketch_tmpl.html > \
 	  www/genometools.org/htdocs/annotationsketch.html
+	bin/gt gtscripts/gtdoc.lua -tex $(CURDIR) \
+	> doc/manuals/api_reference.tex
+	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
+	> doc/manuals/gtscript_reference.tex
 
 manuals:
 	$(MAKE) -C $(CURDIR)/doc/manuals
