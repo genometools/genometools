@@ -32,7 +32,7 @@
 */
 
 /* assign <src> to <dest> or exit upon overflow */
-#define safe_assign(dest, src)                                               \
+#define gt_safe_assign(dest, src)                                           \
         do {                                                                \
           if (assign(dest, src)) {                                          \
             fprintf(stderr, "%s, l.%d: overflow in assignment\n", __FILE__, \
@@ -42,7 +42,7 @@
         } while (0)
 
 /* add <a> to <b> and assign the result to <c> or exit upon overflow */
-#define safe_add(c, a, b)                                                  \
+#define gt_safe_add(c, a, b)                                              \
         do {                                                              \
           if (add_of(c, a, b)) {                                          \
             fprintf(stderr, "%s, l.%d: overflow in addition\n", __FILE__, \
@@ -52,7 +52,7 @@
         } while (0)
 
 /* subtract <b> from <a> and assign the result to <c> or exit upon overflow */
-#define safe_sub(c, a, b)                                                     \
+#define gt_safe_sub(c, a, b)                                                 \
         do {                                                                 \
           if (sub_of(c, a, b)) {                                             \
             fprintf(stderr, "%s, l.%d: overflow in subtraction\n", __FILE__, \
@@ -61,15 +61,15 @@
           }                                                                  \
         } while (0)
 
-int           safe_abs(int);
-long          safe_labs(long);
-long long     safe_llabs(long long);
-uint32_t      safe_mult_u32(uint32_t, uint32_t);
-uint64_t      safe_mult_u64(uint64_t, uint64_t);
-unsigned long safe_mult_ulong(unsigned long, unsigned long);
-long          safe_cast2long(unsigned long);
-unsigned long safe_cast2ulong(long);
-int           safearith_example(GtError*);
-int           safearith_unit_test(GtError*);
+int           gt_safe_abs(int);
+long          gt_safe_labs(long);
+long long     gt_safe_llabs(long long);
+uint32_t      gt_safe_mult_u32(uint32_t, uint32_t);
+uint64_t      gt_safe_mult_u64(uint64_t, uint64_t);
+unsigned long gt_safe_mult_ulong(unsigned long, unsigned long);
+long          gt_safe_cast2long(unsigned long);
+unsigned long gt_safe_cast2ulong(long);
+int           gt_safearith_example(GtError*);
+int           gt_safearith_unit_test(GtError*);
 
 #endif

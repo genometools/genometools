@@ -1025,9 +1025,9 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GtGenomeNode
     }
   }
 
-  ranges_sort(children_ranges);
-  gt_assert(ranges_are_sorted(children_ranges));
-  rval = ranges_do_not_overlap(children_ranges);
+  gt_ranges_sort(children_ranges);
+  gt_assert(gt_ranges_are_sorted(children_ranges));
+  rval = gt_ranges_do_not_overlap(children_ranges);
 
   gt_array_delete(children_ranges);
 

@@ -72,7 +72,7 @@ static void add_zero_weight_edges(GreedyAssembly *ga, bool *inedges,
   }
 }
 
-static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
+static void assemble(GreedyAssembly *ga, GtFragmentOverlaps *sorted_overlaps)
 {
   unsigned long i, current_edge, selected = 0;
   bool *inedges, *outedges;
@@ -82,13 +82,13 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
   inedges = gt_calloc(sizeof *inedges, ga->num_of_fragments);
   outedges = gt_calloc(sizeof *inedges, ga->num_of_fragments);
   uf = gt_union_find_new(ga->num_of_fragments);
-  current_edge = fragment_overlaps_size(sorted_overlaps);
+  current_edge = gt_fragment_overlaps_size(sorted_overlaps);
   /* process given edges */
   while (selected  + 1 < ga->num_of_fragments) {
     const Overlap *edge;
     if (!current_edge)
       break; /* no more edges to process */
-    edge = fragment_overlaps_get(sorted_overlaps, current_edge - 1);
+    edge = gt_fragment_overlaps_get(sorted_overlaps, current_edge - 1);
     try_to_select_edge(ga, edge, inedges, outedges, uf, &selected);
     current_edge--;
   }
@@ -111,11 +111,11 @@ static void assemble(GreedyAssembly *ga, FragmentOverlaps *sorted_overlaps)
 }
 
 GreedyAssembly* greedy_assembly_new(GtBioseq *fragments,
-                                    FragmentOverlaps *sorted_overlaps)
+                                    GtFragmentOverlaps *sorted_overlaps)
 {
   GreedyAssembly *ga;
   assert(fragments && sorted_overlaps);
-  assert(fragment_overlaps_are_sorted(sorted_overlaps));
+  assert(gt_fragment_overlaps_are_sorted(sorted_overlaps));
   ga = gt_malloc(sizeof *ga);
   ga->first_fragment = UNDEF_ULONG;
   ga->num_of_fragments = gt_bioseq_number_of_sequences(fragments);

@@ -57,11 +57,11 @@ static int scan_alphabet(GtStr *alphabet, const char *line, int num_of_states,
   return 0;
 }
 
-static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
+static GtMarkovChain* parse_gt_markov_chain_file(FILE *fp, const char *filename,
                                             GtError *err)
 {
   unsigned long i, j;
-  MarkovChain *mc = NULL;
+  GtMarkovChain *mc = NULL;
   GtStr *line, *alphabet;
   GtSplitter *splitter;
   int num_of_states, had_err;
@@ -124,7 +124,7 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
 
   /* create markov chain object */
   if (!had_err)
-    mc = markov_chain_new(gt_str_get(alphabet));
+    mc = gt_markov_chain_new(gt_str_get(alphabet));
 
   /* read in transition probabilities */
   for (i = 0; !had_err && i < num_of_states; i++) {
@@ -146,13 +146,13 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
         had_err = -1;
       }
       if (!had_err) /* store transition probability */
-        markov_chain_set_transition_prob(mc, i, j, transition_prob);
+        gt_markov_chain_set_transition_prob(mc, i, j, transition_prob);
     }
     gt_splitter_reset(splitter);
   }
 
   /* make sure markov chain is valid */
-  if (!had_err && !markov_chain_is_valid(mc)) {
+  if (!had_err && !gt_markov_chain_is_valid(mc)) {
     gt_error_set(err, "the markov chain defined in file \"%s\" is not valid",
               filename);
     had_err = -1;
@@ -162,19 +162,19 @@ static MarkovChain* parse_markov_chain_file(FILE *fp, const char *filename,
   gt_str_delete(alphabet);
   gt_str_delete(line);
   if (had_err) {
-    markov_chain_delete(mc);
+    gt_markov_chain_delete(mc);
     return NULL;
   }
   return mc;
 }
 
-MarkovChain* markov_chain_parse(const char *filename, GtError *err)
+GtMarkovChain* gt_markov_chain_parse(const char *filename, GtError *err)
 {
-  MarkovChain *mc;
+  GtMarkovChain *mc;
   FILE *fp;
   gt_error_check(err);
   fp = gt_xfopen(filename, "r");
-  mc = parse_markov_chain_file(fp, filename, err);
+  mc = parse_gt_markov_chain_file(fp, filename, err);
   gt_xfclose(fp);
   return mc;
 }

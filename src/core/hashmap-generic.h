@@ -149,7 +149,7 @@
 
 #define DECLARE_SAFE_DEREF(valuetype, valuetag)               \
   static inline valuetype                                     \
-  valuetag##_safe_deref(valuetype *ptr)                       \
+  valuetag##_gt_safe_deref(valuetype *ptr)                       \
   {                                                           \
     return ptr ? *ptr : NULL;                                 \
   }

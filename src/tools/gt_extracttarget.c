@@ -127,7 +127,7 @@ static int extracttarget_from_seqfiles(const char *target,
           const char *desc = gt_bioseq_get_description(bioseq, k);
           target_info.bioseq = bioseq;
           target_info.seqnum = k;
-          string_matching_bmh(desc, strlen(desc), gt_str_get(unescaped_target),
+          gt_string_matching_bmh(desc, strlen(desc), gt_str_get(unescaped_target),
                               gt_str_length(unescaped_target), show_target,
                               &target_info);
         }

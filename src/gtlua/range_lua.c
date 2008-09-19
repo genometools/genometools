@@ -120,7 +120,7 @@ static int ranges_lua_sort(lua_State *L)
 {
   GtArray *ranges;
   ranges = range_table_to_array(L);
-  ranges_sort(ranges);
+  gt_ranges_sort(ranges);
   push_range_array_as_table(L, ranges);
   gt_array_delete(ranges);
   return 1;
@@ -131,7 +131,7 @@ static int ranges_lua_are_sorted(lua_State *L)
   GtArray *ranges;
   bool are_sorted;
   ranges = range_table_to_array(L);
-  are_sorted = ranges_are_sorted(ranges);
+  are_sorted = gt_ranges_are_sorted(ranges);
   gt_array_delete(ranges);
   lua_pushboolean(L, are_sorted);
   return 1;

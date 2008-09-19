@@ -202,7 +202,7 @@ static void get_exons(GtArray *exon_ranges, const void *sa)
   assert(!had_err);
   /* we got at least one exon */
   assert(gt_array_size(exon_ranges));
-  assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
+  assert(gt_ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
 
 static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
@@ -328,7 +328,7 @@ static bool genome_nodes_are_sorted_and_do_not_overlap(GtArray *exon_nodes)
                                      gt_array_get(exon_nodes, i));
     gt_array_add(ranges, range);
   }
-  rval = ranges_are_sorted_and_do_not_overlap(ranges);
+  rval = gt_ranges_are_sorted_and_do_not_overlap(ranges);
   gt_array_delete(ranges);
   return rval;
 }

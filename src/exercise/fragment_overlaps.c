@@ -22,7 +22,7 @@
 #include "exercise/fragment_overlaps.h"
 #include "extended/string_matching.h"
 
-struct FragmentOverlaps{
+struct GtFragmentOverlaps{
   GtArray *overlaps;
 };
 
@@ -33,7 +33,7 @@ static void determine_overlaps(GtArray *overlaps, GtBioseq *fragments,
   unsigned long cpl; /* common prefix length */
   Overlap overlap;
   assert(overlaps && fragments && i != j);
-  cpl = string_matching_kmp(gt_bioseq_get_sequence(fragments, i),
+  cpl = gt_string_matching_kmp(gt_bioseq_get_sequence(fragments, i),
                             gt_bioseq_get_sequence_length(fragments, i),
                             gt_bioseq_get_sequence(fragments, j),
                             gt_bioseq_get_sequence_length(fragments, j),
@@ -44,7 +44,7 @@ static void determine_overlaps(GtArray *overlaps, GtBioseq *fragments,
     overlap.end = j;
     gt_array_add(overlaps, overlap);
   }
-  cpl = string_matching_kmp(gt_bioseq_get_sequence(fragments, j),
+  cpl = gt_string_matching_kmp(gt_bioseq_get_sequence(fragments, j),
                             gt_bioseq_get_sequence_length(fragments, j),
                             gt_bioseq_get_sequence(fragments, i),
                             gt_bioseq_get_sequence_length(fragments, i),
@@ -57,10 +57,10 @@ static void determine_overlaps(GtArray *overlaps, GtBioseq *fragments,
   }
 }
 
-FragmentOverlaps* fragment_overlaps_new(GtBioseq *fragments,
+GtFragmentOverlaps* gt_fragment_overlaps_new(GtBioseq *fragments,
                                         unsigned long minlength)
 {
-  FragmentOverlaps *fo;
+  GtFragmentOverlaps *fo;
   unsigned long i, j;
   assert(fragments);
   fo = gt_malloc(sizeof *fo);
@@ -72,7 +72,7 @@ FragmentOverlaps* fragment_overlaps_new(GtBioseq *fragments,
   return fo;
 }
 
-void fragment_overlaps_delete(FragmentOverlaps *fo)
+void gt_fragment_overlaps_delete(GtFragmentOverlaps *fo)
 {
   if (!fo) return;
   gt_array_delete(fo->overlaps);
@@ -86,7 +86,7 @@ static unsigned long get_weight(const void *elem, GT_UNUSED void *data)
   return overlap->weight;
 }
 
-void fragment_overlaps_sort(FragmentOverlaps *fo)
+void gt_fragment_overlaps_sort(GtFragmentOverlaps *fo)
 {
   Overlap *sorted_overlaps;
   unsigned long i, num_of_overlaps;
@@ -107,7 +107,7 @@ void fragment_overlaps_sort(FragmentOverlaps *fo)
   gt_free(sorted_overlaps);
 }
 
-bool fragment_overlaps_are_sorted(const FragmentOverlaps *fo)
+bool gt_fragment_overlaps_are_sorted(const GtFragmentOverlaps *fo)
 {
   Overlap *overlap_a, *overlap_b;
   unsigned long i;
@@ -120,7 +120,7 @@ bool fragment_overlaps_are_sorted(const FragmentOverlaps *fo)
   return true;
 }
 
-void fragment_overlaps_show(const FragmentOverlaps *fo)
+void gt_fragment_overlaps_show(const GtFragmentOverlaps *fo)
 {
   Overlap *overlap;
   unsigned long i;
@@ -131,14 +131,14 @@ void fragment_overlaps_show(const FragmentOverlaps *fo)
   }
 }
 
-const Overlap* fragment_overlaps_get(const FragmentOverlaps *fo,
+const Overlap* gt_fragment_overlaps_get(const GtFragmentOverlaps *fo,
                                      unsigned long fragnum)
 {
   assert(fo && fragnum < gt_array_size(fo->overlaps));
   return gt_array_get(fo->overlaps, fragnum);
 }
 
-unsigned long fragment_overlaps_size(const FragmentOverlaps *fo)
+unsigned long gt_fragment_overlaps_size(const GtFragmentOverlaps *fo)
 {
   assert(fo);
   return gt_array_size(fo->overlaps);

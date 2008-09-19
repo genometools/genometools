@@ -21,23 +21,23 @@
 #include "extended/filter_visitor.h"
 #include "extended/node_stream_rep.h"
 
-struct FilterStream
+struct GtFilterStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *filter_visitor; /* the actual work is done in the visitor */
 };
 
-#define filter_stream_cast(GS)\
-        gt_node_stream_cast(filter_stream_class(), GS);
+#define gt_filter_stream_cast(GS)\
+        gt_node_stream_cast(gt_filter_stream_class(), GS);
 
-static int filter_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
+static int gt_filter_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                    GtError *err)
 {
-  FilterStream *fs;
+  GtFilterStream *fs;
   int had_err;
   gt_error_check(err);
-  fs = filter_stream_cast(gs);
+  fs = gt_filter_stream_cast(gs);
 
   /* we still have nodes in the buffer */
   if (filter_visitor_node_buffer_size(fs->filter_visitor)) {
@@ -63,22 +63,22 @@ static int filter_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void filter_stream_free(GtNodeStream *gs)
+static void gt_filter_stream_free(GtNodeStream *gs)
 {
-  FilterStream *fs = filter_stream_cast(gs);
+  GtFilterStream *fs = gt_filter_stream_cast(gs);
   gt_node_visitor_delete(fs->filter_visitor);
   gt_node_stream_delete(fs->in_stream);
 }
 
-const GtNodeStreamClass* filter_stream_class(void)
+const GtNodeStreamClass* gt_filter_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (FilterStream),
-                                         filter_stream_next_tree,
-                                         filter_stream_free };
+  static const GtNodeStreamClass gsc = { sizeof (GtFilterStream),
+                                         gt_filter_stream_next_tree,
+                                         gt_filter_stream_free };
   return &gsc;
 }
 
-GtNodeStream* filter_stream_new(GtNodeStream *in_stream,
+GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream,
                                 GtStr *seqid, GtStr *typefilter,
                                 GtRange contain_range, GtRange overlap_range,
                                 GtStrand strand, GtStrand targetstrand,
@@ -88,9 +88,9 @@ GtNodeStream* filter_stream_new(GtNodeStream *in_stream,
                                 double min_average_splice_site_prob,
                                 unsigned long feature_num)
 {
-  GtNodeStream *gs = gt_node_stream_create(filter_stream_class(),
+  GtNodeStream *gs = gt_node_stream_create(gt_filter_stream_class(),
                                           gt_node_stream_is_sorted(in_stream));
-  FilterStream *filter_stream = filter_stream_cast(gs);
+  GtFilterStream *filter_stream = gt_filter_stream_cast(gs);
   assert(in_stream);
   filter_stream->in_stream = gt_node_stream_ref(in_stream);
   filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter,

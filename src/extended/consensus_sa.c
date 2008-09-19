@@ -90,7 +90,7 @@ static void extract_exons(const ConsensusSA *csa, GtArray *exon_ranges,
   assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
   csa->get_exons(exon_ranges, (char*) csa->set_of_sas + csa->size_of_sa * sa);
   assert(gt_array_size(exon_ranges));
-  assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
+  assert(gt_ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
 
 static bool has_donor_site(GtArray *gene, unsigned long exon)

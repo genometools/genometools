@@ -179,13 +179,13 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbt_unit_test);
-  gt_hashmap_add(unit_tests, "safearith module", safearith_unit_test);
-  gt_hashmap_add(unit_tests, "safearith example", safearith_example);
+  gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
+  gt_hashmap_add(unit_tests, "safearith example", gt_safearith_example);
   gt_hashmap_add(unit_tests, "splicedseq class", gt_splicedseq_unit_test);
   gt_hashmap_add(unit_tests, "splitter class", gt_splitter_unit_test);
   gt_hashmap_add(unit_tests, "string class", gt_str_unit_test);
   gt_hashmap_add(unit_tests, "string matching module",
-                 string_matching_unit_test);
+                 gt_string_matching_unit_test);
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
   gt_hashmap_add(unit_tests, "union find class", gt_union_find_unit_test);

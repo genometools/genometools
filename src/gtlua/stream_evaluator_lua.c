@@ -78,7 +78,7 @@ static int stream_evaluator_lua_delete(lua_State *L)
 }
 
 static const struct luaL_Reg stream_evaluator_lib_f [] = {
-  { "gt_stream_evaluator_new", stream_evaluator_lua_new },
+  { "stream_evaluator_new", stream_evaluator_lua_new },
   { NULL, NULL }
 };
 

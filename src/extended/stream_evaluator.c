@@ -110,7 +110,7 @@ typedef struct
   Slot *slot;
   bool nuceval,
        verbose;
-} ProcessRealFeatureInfo;
+} ProcessRealGtFeatureInfo;
 
 typedef struct {
   Slot *slot;
@@ -128,7 +128,7 @@ typedef struct {
   unsigned long *wrong_genes,
                 *wrong_mRNAs,
                 *wrong_LTRs;
-} ProcessPredictedFeatureInfo;
+} ProcessPredictedGtFeatureInfo;
 
 static Slot* slot_new(bool nuceval, GtRange range)
 {
@@ -428,7 +428,7 @@ static void add_nucleotide_exon(GtBittab *nucleotides, GtRange range,
 static int process_real_feature(GtGenomeNode *gn, void *data,
                                 GT_UNUSED GtError *err)
 {
-  ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
+  ProcessRealGtFeatureInfo *info = (ProcessRealGtFeatureInfo*) data;
   GtGenomeNode *gn_ref;
   GtFeatureNode *gf;
   GtRange range;
@@ -566,11 +566,11 @@ static bool mRNAs_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
   assert(!had_err); /* cannot happen, store_exon() is sane */
 
   /* sort exon ranges */
-  ranges_sort(exons_1);
-  ranges_sort(exons_2);
+  gt_ranges_sort(exons_1);
+  gt_ranges_sort(exons_2);
 
   /* compare exon ranges */
-  equal = ranges_are_equal(exons_1, exons_2);
+  equal = gt_ranges_are_equal(exons_1, exons_2);
 
   /* free */
   gt_array_delete(exons_1);
@@ -630,11 +630,11 @@ static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
   assert(!had_err); /* cannot happen, store_gene_feature() is sane */
 
   /* sort exon ranges */
-  ranges_sort(exons_1);
-  ranges_sort(exons_2);
+  gt_ranges_sort(exons_1);
+  gt_ranges_sort(exons_2);
 
   /* compare exon ranges */
-  equal = ranges_are_equal(exons_1, exons_2);
+  equal = gt_ranges_are_equal(exons_1, exons_2);
 
   /* compare mRNAs, if necessary */
   if (equal && gt_array_size(mRNAs_1) == gt_array_size(mRNAs_2)) {
@@ -890,7 +890,7 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
 static int process_predicted_feature(GtGenomeNode *gn, void *data,
                                      GT_UNUSED GtError *err)
 {
-  ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
+  ProcessPredictedGtFeatureInfo *info = (ProcessPredictedGtFeatureInfo*) data;
   GtRange predicted_range;
   unsigned long i, num;
   GtStrand predicted_strand;
@@ -1267,8 +1267,8 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   GtGenomeNode *gn;
   GtFeatureNode *gf;
   Slot *slot;
-  ProcessRealFeatureInfo real_info;
-  ProcessPredictedFeatureInfo predicted_info;
+  ProcessRealGtFeatureInfo real_info;
+  ProcessPredictedGtFeatureInfo predicted_info;
   int had_err;
 
   gt_error_check(err);

@@ -23,14 +23,14 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_parser.h"
 
-struct FeatureInfo {
+struct GtFeatureInfo {
   GtHashmap *id_to_genome_node,
           *id_to_pseudo_parent;
 };
 
-FeatureInfo* feature_info_new(void)
+GtFeatureInfo* gt_feature_info_new(void)
 {
-  FeatureInfo *fi = gt_malloc(sizeof *fi);
+  GtFeatureInfo *fi = gt_malloc(sizeof *fi);
   fi->id_to_genome_node = gt_hashmap_new(HASH_STRING, gt_free_func,
                                       (GtFree) gt_genome_node_delete);
   fi->id_to_pseudo_parent = gt_hashmap_new(HASH_STRING, gt_free_func,
@@ -38,7 +38,7 @@ FeatureInfo* feature_info_new(void)
   return fi;
 }
 
-void feature_info_delete(FeatureInfo *fi)
+void gt_feature_info_delete(GtFeatureInfo *fi)
 {
   if (!fi) return;
   gt_hashmap_delete(fi->id_to_genome_node);
@@ -46,20 +46,20 @@ void feature_info_delete(FeatureInfo *fi)
   gt_free(fi);
 }
 
-void feature_info_reset(FeatureInfo *fi)
+void gt_feature_info_reset(GtFeatureInfo *fi)
 {
   assert(fi);
   gt_hashmap_reset(fi->id_to_genome_node);
   gt_hashmap_reset(fi->id_to_pseudo_parent);
 }
 
-GtFeatureNode* feature_info_get(const FeatureInfo *fi, const char *id)
+GtFeatureNode* gt_feature_info_get(const GtFeatureInfo *fi, const char *id)
 {
   assert(fi && id);
   return gt_hashmap_get(fi->id_to_genome_node, id);
 }
 
-void feature_info_add(FeatureInfo *fi, const char *id, GtFeatureNode *fn)
+void gt_feature_info_add(GtFeatureInfo *fi, const char *id, GtFeatureNode *fn)
 {
   assert(fi && id && fn);
   assert(!gt_feature_node_is_pseudo((GtFeatureNode*) fn));
@@ -67,14 +67,14 @@ void feature_info_add(FeatureInfo *fi, const char *id, GtFeatureNode *fn)
               gt_genome_node_ref((GtGenomeNode*) fn));
 }
 
-GtFeatureNode* feature_info_get_pseudo_parent(const FeatureInfo *fi,
+GtFeatureNode* gt_feature_info_get_pseudo_parent(const GtFeatureInfo *fi,
                                            const char *id)
 {
   assert(fi && id);
   return gt_hashmap_get(fi->id_to_pseudo_parent, id);
 }
 
-void feature_info_add_pseudo_parent(FeatureInfo *fi, const char *id,
+void gt_feature_info_add_pseudo_parent(GtFeatureInfo *fi, const char *id,
                                     GtFeatureNode *pseudo_parent)
 {
   assert(fi && id && pseudo_parent);
@@ -83,7 +83,7 @@ void feature_info_add_pseudo_parent(FeatureInfo *fi, const char *id,
               gt_genome_node_ref((GtGenomeNode*) pseudo_parent));
 }
 
-void feature_info_replace_pseudo_parent(FeatureInfo *fi, GtFeatureNode *child,
+void gt_feature_info_replace_pseudo_parent(GtFeatureInfo *fi, GtFeatureNode *child,
                                         GtFeatureNode *new_pseudo_parent)
 {
   const char *id;
@@ -92,10 +92,10 @@ void feature_info_replace_pseudo_parent(FeatureInfo *fi, GtFeatureNode *child,
   id = gt_feature_node_get_attribute(child, ID_STRING);
   assert(id);
   gt_hashmap_remove(fi->id_to_pseudo_parent, id);
-  feature_info_add_pseudo_parent(fi, id, new_pseudo_parent);
+  gt_feature_info_add_pseudo_parent(fi, id, new_pseudo_parent);
 }
 
-static GtFeatureNode* find_root(const FeatureInfo *fi, const char *id)
+static GtFeatureNode* find_root(const GtFeatureInfo *fi, const char *id)
 {
   const char *delim, *parents;
   GtFeatureNode *this_feature, *parent_pseudo_feature;
@@ -123,9 +123,9 @@ static GtFeatureNode* find_root(const FeatureInfo *fi, const char *id)
   return this_feature;
 }
 
-GtFeatureNode* feature_info_find_root(const FeatureInfo *fi, const char *id)
+GtFeatureNode* gt_feature_info_find_root(const GtFeatureInfo *fi, const char *id)
 {
   assert(fi && id);
-  assert(feature_info_get(fi, id));
+  assert(gt_feature_info_get(fi, id));
   return find_root(fi, id);
 }

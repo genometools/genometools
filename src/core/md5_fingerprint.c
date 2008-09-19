@@ -31,7 +31,7 @@ char* gt_md5_fingerprint(const char *sequence, unsigned long seqlen)
   upper = gt_malloc(seqlen * sizeof (char));
   for (i = 0; i < seqlen; i++)
     upper[i] = toupper(sequence[i]);
-  md5(upper, safe_cast2long(seqlen), (char*) output);
+  md5(upper, gt_safe_cast2long(seqlen), (char*) output);
   gt_free(upper);
   fingerprint = gt_calloc(33, sizeof (char));
   snprintf(fingerprint, 33,

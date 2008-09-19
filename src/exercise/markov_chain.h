@@ -20,19 +20,19 @@
 
 #include <stdbool.h>
 
-typedef struct MarkovChain MarkovChain;
+typedef struct GtMarkovChain GtMarkovChain;
 
-MarkovChain* markov_chain_new(const char *states);
-void         markov_chain_delete(MarkovChain*);
-void         markov_chain_set_transition_prob(MarkovChain*,
+GtMarkovChain* gt_markov_chain_new(const char *states);
+void         gt_markov_chain_delete(GtMarkovChain*);
+void         gt_markov_chain_set_transition_prob(GtMarkovChain*,
                                               unsigned long from_state_num,
                                               unsigned long to_state_num,
                                               double probability);
-double       markov_chain_get_transition_prob(const MarkovChain*,
+double       gt_markov_chain_get_transition_prob(const GtMarkovChain*,
                                               unsigned long from_state_num,
                                               unsigned long to_state_num);
-bool         markov_chain_is_valid(const MarkovChain*);
-int          markov_chain_compute_prob(const MarkovChain*, double *prob,
+bool         gt_markov_chain_is_valid(const GtMarkovChain*);
+int          gt_markov_chain_compute_prob(const GtMarkovChain*, double *prob,
                                        const char *sequence,
                                        unsigned long seqlen, GtError*);
 

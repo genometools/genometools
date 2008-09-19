@@ -39,7 +39,7 @@
 #include "extended/region_node.h"
 
 struct GT_GFF3Parser {
-  FeatureInfo *feature_info;
+  GtFeatureInfo *feature_info;
   GtHashmap *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
     *source_to_str_mapping,
     *undefined_sequence_regions; /* contains all (automatically created)
@@ -111,7 +111,7 @@ GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker *type_checker)
 {
   GT_GFF3Parser *parser;
   parser = gt_malloc(sizeof *parser);
-  parser->feature_info = feature_info_new();
+  parser->feature_info = gt_feature_info_new();
   parser->seqid_to_ssr_mapping = gt_hashmap_new(
     HASH_STRING, NULL, (GtFree) simple_sequence_region_delete);
   parser->source_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
@@ -396,7 +396,7 @@ static void update_pseudo_node_range(GtFeatureNode *pseudo_node,
 
 static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
                                                 GtFeatureNode *child,
-                                                FeatureInfo *feature_info)
+                                                GtFeatureInfo *feature_info)
 {
   const char *id;
   gt_assert(pseudo_node &&
@@ -406,7 +406,7 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
   gt_feature_node_add_child(pseudo_node, child);
   id = gt_feature_node_get_attribute(child, ID_STRING);
   gt_assert(id);
-  feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
+  gt_feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
 }
 
 static int store_id(const char *id, GtFeatureNode *genome_feature,
@@ -421,7 +421,7 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
   gt_error_check(err);
   gt_assert(id && genome_feature && parser);
 
-  if ((fn = feature_info_get(parser->feature_info, id))) {
+  if ((fn = gt_feature_info_get(parser->feature_info, id))) {
     /* this id has been used already -> try to make this a multi-feature */
     if (gt_genome_node_get_line_number((GtGenomeNode*) fn) <
         parser->last_terminator) {
@@ -438,7 +438,7 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
       has_parent = gt_feature_node_get_attribute(fn, PARENT_STRING)
                    ? true : false;
       gt_assert(!gt_feature_node_is_pseudo(fn));
-      pseudo_parent = feature_info_get_pseudo_parent(parser->feature_info, id);
+      pseudo_parent = gt_feature_info_get_pseudo_parent(parser->feature_info, id);
       if (pseudo_parent ||
           !gt_feature_node_is_multi(fn)) {
         if (!pseudo_parent) {
@@ -468,7 +468,7 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
     }
   }
   else
-    feature_info_add(parser->feature_info, id, genome_feature);
+    gt_feature_info_add(parser->feature_info, id, genome_feature);
 
   if (!had_err)
     parser->incomplete_node = true;
@@ -476,14 +476,14 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
   return had_err;
 }
 
-static GtArray* find_roots(GtStrArray *parents, FeatureInfo *feature_info)
+static GtArray* find_roots(GtStrArray *parents, GtFeatureInfo *feature_info)
 {
   GtArray *roots;
   unsigned long i;
   gt_assert(parents);
   roots = gt_array_new(sizeof (GtGenomeNode*));
   for (i = 0; i < gt_strarray_size(parents); i++) {
-    GtFeatureNode *root = feature_info_find_root(feature_info,
+    GtFeatureNode *root = gt_feature_info_find_root(feature_info,
                                                  gt_strarray_get(parents, i));
     gt_array_add(roots, root);
   }
@@ -505,7 +505,7 @@ static bool roots_differ(GtArray *roots)
 
 static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
                                          GtFeatureNode *pseudo_b,
-                                         FeatureInfo *feature_info,
+                                         GtFeatureInfo *feature_info,
                                          GtQueue *genome_nodes,
                                          AutomaticGtSequenceRegion *auto_sr)
 {
@@ -519,7 +519,7 @@ static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
   /* XXX: remove cast */
   while ((child = (GtFeatureNode*) gt_genome_node_iterator_next(gni))) {
     gt_feature_node_add_child(pseudo_a, child);
-    feature_info_replace_pseudo_parent(feature_info, child, pseudo_a);
+    gt_feature_info_replace_pseudo_parent(feature_info, child, pseudo_a);
   }
   gt_genome_node_iterator_delete(gni);
   /* remove pseudo node b from buffer */
@@ -530,7 +530,7 @@ static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
 
 static GtFeatureNode* add_node_to_pseudo_node(GtFeatureNode *pseudo_node,
                                               GtFeatureNode *normal_node,
-                                              FeatureInfo *feature_info,
+                                              GtFeatureInfo *feature_info,
                                               GtQueue *genome_nodes,
                                               AutomaticGtSequenceRegion
                                                  *auto_sr)
@@ -547,7 +547,7 @@ static GtFeatureNode* add_node_to_pseudo_node(GtFeatureNode *pseudo_node,
 
 static GtFeatureNode* create_pseudo_node(GtFeatureNode *node_a,
                                          GtFeatureNode *node_b,
-                                         FeatureInfo *feature_info,
+                                         GtFeatureInfo *feature_info,
                                          GtQueue *genome_nodes,
                                          AutomaticGtSequenceRegion *auto_sr)
 {
@@ -566,7 +566,7 @@ static GtFeatureNode* create_pseudo_node(GtFeatureNode *node_a,
 
 static GtFeatureNode* join_root_pair(GtFeatureNode *root_a,
                                      GtFeatureNode *root_b,
-                                     FeatureInfo *feature_info,
+                                     GtFeatureInfo *feature_info,
                                      GtQueue *genome_nodes,
                                      AutomaticGtSequenceRegion *auto_sr)
 {
@@ -594,7 +594,7 @@ static GtFeatureNode* join_root_pair(GtFeatureNode *root_a,
   return master_root;
 }
 
-static void join_roots(GtArray *roots, FeatureInfo *feature_info,
+static void join_roots(GtArray *roots, GtFeatureInfo *feature_info,
                        GtQueue *genome_nodes,
                        AutomaticGtSequenceRegion *auto_sr)
 {
@@ -632,7 +632,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
   for (i = 0; i < gt_splitter_size(parent_splitter); i++) {
     GtGenomeNode* parent_gf;
     const char *parent = gt_splitter_get_token(parent_splitter, i);
-    parent_gf = (GtGenomeNode*) feature_info_get(parser->feature_info, parent);
+    parent_gf = (GtGenomeNode*) gt_feature_info_get(parser->feature_info, parent);
     if (!parent_gf) {
       if (!parser->tidy) {
         gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
@@ -1355,7 +1355,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
     /* now all nodes are complete */
     parser->incomplete_node = false;
     if (!parser->checkids)
-      feature_info_reset(parser->feature_info);
+      gt_feature_info_reset(parser->feature_info);
     parser->last_terminator = line_number;
   }
   else {
@@ -1459,7 +1459,7 @@ void gt_gff3_parser_reset(GT_GFF3Parser *parser)
 {
   gt_assert(parser);
   parser->fasta_parsing = false;
-  feature_info_reset(parser->feature_info);
+  gt_feature_info_reset(parser->feature_info);
   gt_hashmap_reset(parser->seqid_to_ssr_mapping);
   gt_hashmap_reset(parser->source_to_str_mapping);
   gt_hashmap_reset(parser->undefined_sequence_regions);
@@ -1469,7 +1469,7 @@ void gt_gff3_parser_reset(GT_GFF3Parser *parser)
 void gt_gff3_parser_delete(GT_GFF3Parser *parser)
 {
   if (!parser) return;
-  feature_info_delete(parser->feature_info);
+  gt_feature_info_delete(parser->feature_info);
   gt_hashmap_delete(parser->seqid_to_ssr_mapping);
   gt_hashmap_delete(parser->source_to_str_mapping);
   gt_hashmap_delete(parser->undefined_sequence_regions);

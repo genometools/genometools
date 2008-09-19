@@ -56,7 +56,7 @@ void pos_add(Pos *pos, unsigned long code, unsigned long position)
 {
   GtArray *position_list;
   assert(pos && pos->mapping);
-  position_list = array_safe_deref(ul_array_gt_hashmap_get(pos->mapping, code));
+  position_list = array_gt_safe_deref(ul_array_gt_hashmap_get(pos->mapping, code));
   if (!position_list) {
     position_list = gt_array_new(sizeof (unsigned long));
     gt_array_add(position_list, position);
@@ -70,7 +70,7 @@ void pos_add(Pos *pos, unsigned long code, unsigned long position)
 GtArray* pos_get(Pos *pos, unsigned long code)
 {
   assert(pos && pos->mapping);
-  return array_safe_deref(ul_array_gt_hashmap_get(pos->mapping, code));
+  return array_gt_safe_deref(ul_array_gt_hashmap_get(pos->mapping, code));
 }
 
 /*

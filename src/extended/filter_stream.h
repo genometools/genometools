@@ -21,10 +21,10 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
-typedef struct FilterStream FilterStream;
+typedef struct GtFilterStream GtFilterStream;
 
-const GtNodeStreamClass* filter_stream_class(void);
-GtNodeStream*            filter_stream_new(GtNodeStream*,
+const GtNodeStreamClass* gt_filter_stream_class(void);
+GtNodeStream*            gt_filter_stream_new(GtNodeStream*,
                                            GtStr *seqid, GtStr *typefilter,
                                            GtRange contain_range,
                                            GtRange overlap_range,

@@ -36,26 +36,26 @@ static int gt_markovchain_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args,
                                  GT_UNUSED void *tool_arguments, GtError *err)
 {
-  MarkovChain *mc;
+  GtMarkovChain *mc;
   double P;
   int had_err = 0;
 
   gt_error_check(err);
 
-  if (!(mc = markov_chain_parse(argv[parsed_args], err)))
+  if (!(mc = gt_markov_chain_parse(argv[parsed_args], err)))
     had_err = -1;
 
   if (!had_err) {
     unsigned long seqlen = strlen(argv[parsed_args+1]);
-    assert(markov_chain_is_valid(mc));
-    had_err = markov_chain_compute_prob(mc, &P, argv[parsed_args+1], seqlen,
+    assert(gt_markov_chain_is_valid(mc));
+    had_err = gt_markov_chain_compute_prob(mc, &P, argv[parsed_args+1], seqlen,
                                         err);
   }
 
   if (!had_err)
     printf("P=%.10f\n", P);
 
-  markov_chain_delete(mc);
+  gt_markov_chain_delete(mc);
 
   return had_err;
 }

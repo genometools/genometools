@@ -71,11 +71,11 @@ GtArray* gt_transcript_exons_get_terminal(const GtTranscriptExons *te)
 void gt_transcript_exons_sort(const GtTranscriptExons *te)
 {
   assert(te);
-  ranges_sort(te->exon_array_all);
-  ranges_sort(te->exon_array_single);
-  ranges_sort(te->exon_array_initial);
-  ranges_sort(te->exon_array_internal);
-  ranges_sort(te->exon_array_terminal);
+  gt_ranges_sort(te->exon_array_all);
+  gt_ranges_sort(te->exon_array_single);
+  gt_ranges_sort(te->exon_array_initial);
+  gt_ranges_sort(te->exon_array_internal);
+  gt_ranges_sort(te->exon_array_terminal);
 }
 
 GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons
@@ -85,15 +85,15 @@ GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons
   GtArray *counts;
   assert(te);
   tc = gt_transcript_counts_new();
-  counts = ranges_uniq_in_place_count(te->exon_array_all);
+  counts = gt_ranges_uniq_in_place_count(te->exon_array_all);
   gt_transcript_counts_set_all(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_single);
+  counts = gt_ranges_uniq_in_place_count(te->exon_array_single);
   gt_transcript_counts_set_single(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_initial);
+  counts = gt_ranges_uniq_in_place_count(te->exon_array_initial);
   gt_transcript_counts_set_initial(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_internal);
+  counts = gt_ranges_uniq_in_place_count(te->exon_array_internal);
   gt_transcript_counts_set_internal(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_terminal);
+  counts = gt_ranges_uniq_in_place_count(te->exon_array_terminal);
   gt_transcript_counts_set_terminal(tc, counts);
   return tc;
 }
@@ -101,11 +101,11 @@ GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons
 bool gt_transcript_exons_are_sorted(const GtTranscriptExons *te)
 {
   assert(te);
-  if (!ranges_are_sorted(te->exon_array_all)) return false;
-  if (!ranges_are_sorted(te->exon_array_single)) return false;
-  if (!ranges_are_sorted(te->exon_array_initial)) return false;
-  if (!ranges_are_sorted(te->exon_array_internal)) return false;
-  if (!ranges_are_sorted(te->exon_array_terminal)) return false;
+  if (!gt_ranges_are_sorted(te->exon_array_all)) return false;
+  if (!gt_ranges_are_sorted(te->exon_array_single)) return false;
+  if (!gt_ranges_are_sorted(te->exon_array_initial)) return false;
+  if (!gt_ranges_are_sorted(te->exon_array_internal)) return false;
+  if (!gt_ranges_are_sorted(te->exon_array_terminal)) return false;
   return true;
 }
 

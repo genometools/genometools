@@ -47,7 +47,7 @@ static int region_mapping_lua_delete(lua_State *L)
 }
 
 static const struct luaL_Reg region_mapping_lib_f [] = {
-  { "gt_region_mapping_new_seqfile", region_mapping_lua_new_seqfile },
+  { "region_mapping_new_seqfile", region_mapping_lua_new_seqfile },
   { NULL, NULL }
 };
 

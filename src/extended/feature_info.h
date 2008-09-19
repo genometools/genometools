@@ -20,21 +20,21 @@
 
 #include "extended/genome_node.h"
 
-typedef struct FeatureInfo FeatureInfo;
+typedef struct GtFeatureInfo GtFeatureInfo;
 
-FeatureInfo*   feature_info_new();
-void           feature_info_delete(FeatureInfo*);
-void           feature_info_reset(FeatureInfo*);
-GtFeatureNode* feature_info_get(const FeatureInfo*, const char *id);
-void           feature_info_add(FeatureInfo*, const char *id, GtFeatureNode*);
-GtFeatureNode* feature_info_get_pseudo_parent(const FeatureInfo*,
+GtFeatureInfo*   gt_feature_info_new();
+void           gt_feature_info_delete(GtFeatureInfo*);
+void           gt_feature_info_reset(GtFeatureInfo*);
+GtFeatureNode* gt_feature_info_get(const GtFeatureInfo*, const char *id);
+void           gt_feature_info_add(GtFeatureInfo*, const char *id, GtFeatureNode*);
+GtFeatureNode* gt_feature_info_get_pseudo_parent(const GtFeatureInfo*,
                                               const char *id);
-void           feature_info_add_pseudo_parent(FeatureInfo*, const char *id,
+void           gt_feature_info_add_pseudo_parent(GtFeatureInfo*, const char *id,
                                               GtFeatureNode *pseudo_parent);
-void           feature_info_replace_pseudo_parent(FeatureInfo*,
+void           gt_feature_info_replace_pseudo_parent(GtFeatureInfo*,
                                                   GtFeatureNode *child,
                                                   GtFeatureNode
                                                   *new_pseudo_parent);
-GtFeatureNode* feature_info_find_root(const FeatureInfo*, const char *id);
+GtFeatureNode* gt_feature_info_find_root(const GtFeatureInfo*, const char *id);
 
 #endif

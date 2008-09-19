@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/bioseq.h"
 
-typedef struct FragmentOverlaps FragmentOverlaps;
+typedef struct GtFragmentOverlaps GtFragmentOverlaps;
 
 typedef struct {
   unsigned long start,  /* the start fragment / vertex of the edge */
@@ -31,13 +31,13 @@ typedef struct {
 
 /* Create a new fragment overlaps object which stores the overlaps between the
    given <fragments> (if they are equal or larger than <minlength). */
-FragmentOverlaps* fragment_overlaps_new(GtBioseq *fragments,
+GtFragmentOverlaps* gt_fragment_overlaps_new(GtBioseq *fragments,
                                         unsigned long minlength);
-void              fragment_overlaps_delete(FragmentOverlaps*);
-void              fragment_overlaps_sort(FragmentOverlaps*);
-bool              fragment_overlaps_are_sorted(const FragmentOverlaps*);
-void              fragment_overlaps_show(const FragmentOverlaps*);
-const Overlap*    fragment_overlaps_get(const FragmentOverlaps*, unsigned long);
-unsigned long     fragment_overlaps_size(const FragmentOverlaps*);
+void              gt_fragment_overlaps_delete(GtFragmentOverlaps*);
+void              gt_fragment_overlaps_sort(GtFragmentOverlaps*);
+bool              gt_fragment_overlaps_are_sorted(const GtFragmentOverlaps*);
+void              gt_fragment_overlaps_show(const GtFragmentOverlaps*);
+const Overlap*    gt_fragment_overlaps_get(const GtFragmentOverlaps*, unsigned long);
+unsigned long     gt_fragment_overlaps_size(const GtFragmentOverlaps*);
 
 #endif

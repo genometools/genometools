@@ -176,7 +176,7 @@ static void create_CDS_features_for_longest_ORF(GtArray *orfs, CDSVisitor *v,
 {
   if (gt_array_size(orfs)) {
     /* sort ORFs according to length */
-    ranges_sort_by_length_stable(orfs);
+    gt_ranges_sort_by_length_stable(orfs);
 
     /* create CDS features from the longest ORF */
     create_CDS_features_for_ORF(*(GtRange*) gt_array_get_first(orfs), v, gn);

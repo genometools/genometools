@@ -84,15 +84,15 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
      had_err = -1;
 
   if (!had_err) {
-    FragmentOverlaps *fragment_overlaps;
-    fragment_overlaps = fragment_overlaps_new(fragments, arguments->minlength);
+    GtFragmentOverlaps *fragment_overlaps;
+    fragment_overlaps = gt_fragment_overlaps_new(fragments, arguments->minlength);
 
     /* greedy assembly */
     if (arguments->showoverlaps)
-      fragment_overlaps_show(fragment_overlaps);
+      gt_fragment_overlaps_show(fragment_overlaps);
     else {
       GreedyAssembly *greedy_assembly;
-      fragment_overlaps_sort(fragment_overlaps);
+      gt_fragment_overlaps_sort(fragment_overlaps);
       greedy_assembly = greedy_assembly_new(fragments, fragment_overlaps);
       if (arguments->showpath)
         greedy_assembly_show_path(greedy_assembly);
@@ -100,7 +100,7 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
         greedy_assembly_show(greedy_assembly, fragments);
       greedy_assembly_delete(greedy_assembly);
     }
-    fragment_overlaps_delete(fragment_overlaps);
+    gt_fragment_overlaps_delete(fragment_overlaps);
   }
 
   /* free */

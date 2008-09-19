@@ -26,17 +26,17 @@
 
 #define MINUSINFINITY   -99999.0
 
-struct MarkovChain {
+struct GtMarkovChain {
   GtAlpha *alpha;
   unsigned long num_of_states;
   double **transition_prob; /* log values */
 };
 
-MarkovChain* markov_chain_new(const char *states)
+GtMarkovChain* gt_markov_chain_new(const char *states)
 {
   unsigned long i, j;
   char characters[2];
-  MarkovChain *mc;
+  GtMarkovChain *mc;
   assert(states && strlen(states));
   /* alloc */
   mc = gt_malloc(sizeof *mc);
@@ -53,13 +53,13 @@ MarkovChain* markov_chain_new(const char *states)
   /* init */
   for (i = 0; i < mc->num_of_states; i++) {
     for (j = 0; j < mc->num_of_states; j++)
-      markov_chain_set_transition_prob(mc, i, j, 1.0 / mc->num_of_states);
+      gt_markov_chain_set_transition_prob(mc, i, j, 1.0 / mc->num_of_states);
   }
-  assert(markov_chain_is_valid(mc));
+  assert(gt_markov_chain_is_valid(mc));
   return mc;
 }
 
-void markov_chain_delete(MarkovChain *mc)
+void gt_markov_chain_delete(GtMarkovChain *mc)
 {
   if (!mc) return;
   gt_array2dim_delete(mc->transition_prob);
@@ -67,7 +67,7 @@ void markov_chain_delete(MarkovChain *mc)
   gt_free(mc);
 }
 
-void markov_chain_set_transition_prob(MarkovChain *mc,
+void gt_markov_chain_set_transition_prob(GtMarkovChain *mc,
                                       unsigned long from_state_num,
                                       unsigned long to_state_num,
                                       double probability)
@@ -82,7 +82,7 @@ void markov_chain_set_transition_prob(MarkovChain *mc,
     mc->transition_prob[from_state_num][to_state_num] = log(probability);
 }
 
-double markov_chain_get_transition_prob(const MarkovChain *mc,
+double gt_markov_chain_get_transition_prob(const GtMarkovChain *mc,
                                         unsigned long from_state_num,
                                         unsigned long to_state_num)
 {
@@ -94,21 +94,21 @@ double markov_chain_get_transition_prob(const MarkovChain *mc,
   return  exp(mc->transition_prob[from_state_num][to_state_num]);
 }
 
-bool markov_chain_is_valid(const MarkovChain *mc)
+bool gt_markov_chain_is_valid(const GtMarkovChain *mc)
 {
   unsigned long i, j;
   assert(mc);
   for (i = 0; i < mc->num_of_states; i++) {
     double sum_of_probabilities = 0.0;
     for (j = 0; j < mc->num_of_states; j++)
-      sum_of_probabilities += markov_chain_get_transition_prob(mc, i, j);
+      sum_of_probabilities += gt_markov_chain_get_transition_prob(mc, i, j);
     if (!gt_double_equals_one(sum_of_probabilities))
       return false;
   }
   return true;
 }
 
-int markov_chain_compute_prob(const MarkovChain *mc, double *prob,
+int gt_markov_chain_compute_prob(const GtMarkovChain *mc, double *prob,
                               const char *sequence, unsigned long seqlen,
                               GtError *err)
 {
@@ -118,7 +118,7 @@ int markov_chain_compute_prob(const MarkovChain *mc, double *prob,
   int had_err = 0;
   gt_error_check(err);
   assert(mc && sequence);
-  assert(markov_chain_is_valid(mc));
+  assert(gt_markov_chain_is_valid(mc));
   if (!gt_alpha_char_is_valid(mc->alpha, sequence[0])) {
     gt_error_set(err, "'%c' is not valid sequence character", sequence[0]);
     had_err = -1;

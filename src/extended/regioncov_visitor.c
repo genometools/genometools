@@ -116,7 +116,7 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
   gt_assert(key && value);
   rangelist = (GtArray*) value;
   if (gt_array_size(rangelist)) {
-    gt_assert(ranges_are_sorted_and_do_not_overlap(rangelist));
+    gt_assert(gt_ranges_are_sorted_and_do_not_overlap(rangelist));
     printf("%s:\n", (char*) key);
     for (i = 0; i < gt_array_size(rangelist); i++) {
       rangeptr = gt_array_get(rangelist, i);

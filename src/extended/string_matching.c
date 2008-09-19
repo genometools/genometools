@@ -29,7 +29,7 @@
 #define MAX_STRING_LENGTH   100000
 #define MAX_PATTERN_LENGTH  66
 
-void string_matching_bmh(const char *s, unsigned long n,
+void gt_string_matching_bmh(const char *s, unsigned long n,
                          const char *p, unsigned long m,
                          ProcessMatch process_match, void *data)
 {
@@ -76,7 +76,7 @@ static unsigned long* compute_prefixtab(const char *p, unsigned long m)
   return prefixtab;
 }
 
-unsigned long string_matching_kmp(const char *s, unsigned long n,
+unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
                                   const char *p, unsigned long m,
                                   ProcessMatch process_match, void *data)
 {
@@ -121,7 +121,7 @@ unsigned long string_matching_kmp(const char *s, unsigned long n,
   return cpl;
 }
 
-void string_matching_shift_and(const char *s, unsigned long n,
+void gt_string_matching_shift_and(const char *s, unsigned long n,
                                const char *p, unsigned long m,
                                ProcessMatch process_match, void *data)
 {
@@ -156,7 +156,7 @@ void string_matching_shift_and(const char *s, unsigned long n,
   gt_bittab_delete(D);
 }
 
-void string_matching_brute_force(const char *s, unsigned long n,
+void gt_string_matching_brute_force(const char *s, unsigned long n,
                                  const char *p, unsigned long m,
                                  ProcessMatch process_match, void *data)
 {
@@ -191,7 +191,7 @@ static bool store_match(unsigned long pos, void *data)
   return false;
 }
 
-int string_matching_unit_test(GtError *err)
+int gt_string_matching_unit_test(GtError *err)
 {
   char s[MAX_STRING_LENGTH+1], p[MAX_PATTERN_LENGTH+1], *text = "foo";
   GtArray *brute_force_matches,
@@ -209,11 +209,11 @@ int string_matching_unit_test(GtError *err)
   shift_and_matches = gt_array_new(sizeof (unsigned long));
 
   /* match the empty pattern */
-  string_matching_brute_force(text, strlen(text), "", 0, store_match,
+  gt_string_matching_brute_force(text, strlen(text), "", 0, store_match,
                               brute_force_matches);
-  string_matching_bmh(text, strlen(text), "", 0, store_match, bmh_matches);
-  string_matching_kmp(text, strlen(text), "", 0, store_match, kmp_matches);
-  string_matching_shift_and(text, strlen(text), "", 0, store_match,
+  gt_string_matching_bmh(text, strlen(text), "", 0, store_match, bmh_matches);
+  gt_string_matching_kmp(text, strlen(text), "", 0, store_match, kmp_matches);
+  gt_string_matching_shift_and(text, strlen(text), "", 0, store_match,
                             shift_and_matches);
 
   ensure(had_err, !gt_array_size(brute_force_matches));
@@ -237,20 +237,20 @@ int string_matching_unit_test(GtError *err)
     bmh_match = UNDEF_ULONG;
     kmp_match = UNDEF_ULONG;
     shift_and_match = UNDEF_ULONG;
-    string_matching_brute_force(s, n, p, m, store_first_match,
+    gt_string_matching_brute_force(s, n, p, m, store_first_match,
                                 &brute_force_match);
-    string_matching_bmh(s, n, p, m, store_first_match, &bmh_match);
-    string_matching_kmp(s, n, p, m, store_first_match, &kmp_match);
-    string_matching_shift_and(s, n, p, m, store_first_match, &shift_and_match);
+    gt_string_matching_bmh(s, n, p, m, store_first_match, &bmh_match);
+    gt_string_matching_kmp(s, n, p, m, store_first_match, &kmp_match);
+    gt_string_matching_shift_and(s, n, p, m, store_first_match, &shift_and_match);
     /* comparing (first match) */
     ensure(had_err, brute_force_match == bmh_match);
     ensure(had_err, brute_force_match == kmp_match);
     ensure(had_err, brute_force_match == shift_and_match);
     /* matching (all matches) */
-    string_matching_brute_force(s, n, p, m, store_match, brute_force_matches);
-    string_matching_bmh(s, n, p, m, store_match, bmh_matches);
-    string_matching_kmp(s, n, p, m, store_match, kmp_matches);
-    string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);
+    gt_string_matching_brute_force(s, n, p, m, store_match, brute_force_matches);
+    gt_string_matching_bmh(s, n, p, m, store_match, bmh_matches);
+    gt_string_matching_kmp(s, n, p, m, store_match, kmp_matches);
+    gt_string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);
     /* comparing (all matches) */
     ensure(had_err, gt_array_size(brute_force_matches) ==
                     gt_array_size(bmh_matches));
