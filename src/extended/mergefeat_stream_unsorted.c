@@ -29,7 +29,7 @@ struct GtMergefeatStreamUnsorted {
 #define gt_mergefeat_stream_unsorted_cast(GS)\
         gt_node_stream_cast(gt_mergefeat_stream_unsorted_class(), GS)
 
-static int gt_mergefeat_stream_unsorted_next_tree(GtNodeStream *gs,
+static int mergefeat_stream_unsorted_next_tree(GtNodeStream *gs,
                                                  GtGenomeNode **gn,
                                                  GtError *err)
 {
@@ -43,7 +43,7 @@ static int gt_mergefeat_stream_unsorted_next_tree(GtNodeStream *gs,
   return had_err;
 }
 
-static void gt_mergefeat_stream_unsorted_free(GtNodeStream *gs)
+static void mergefeat_stream_unsorted_free(GtNodeStream *gs)
 {
   GtMergefeatStreamUnsorted *mfs = gt_mergefeat_stream_unsorted_cast(gs);
   gt_node_visitor_delete(mfs->mergefeat_visitor);
@@ -52,8 +52,8 @@ static void gt_mergefeat_stream_unsorted_free(GtNodeStream *gs)
 const GtNodeStreamClass* gt_mergefeat_stream_unsorted_class(void)
 {
   static const GtNodeStreamClass gsc = { sizeof (GtMergefeatStreamUnsorted),
-                                         gt_mergefeat_stream_unsorted_next_tree,
-                                         gt_mergefeat_stream_unsorted_free };
+                                         mergefeat_stream_unsorted_next_tree,
+                                         mergefeat_stream_unsorted_free };
   return &gsc;
 }
 
@@ -63,6 +63,6 @@ GtNodeStream* gt_mergefeat_stream_unsorted_new(GtNodeStream *in_stream)
                                            false);
   GtMergefeatStreamUnsorted *mfs = gt_mergefeat_stream_unsorted_cast(gs);
   mfs->in_stream = in_stream;
-  mfs->mergefeat_visitor = mergefeat_visitor_new();
+  mfs->mergefeat_visitor = gt_mergefeat_visitor_new();
   return gs;
 }
