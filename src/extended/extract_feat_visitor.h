@@ -19,15 +19,15 @@
 #define EXTRACT_FEAT_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct ExtractFeatVisitor ExtractFeatVisitor;
+typedef struct GtExtractFeatVisitor GtExtractFeatVisitor;
 
 #include <stdbool.h>
 #include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
-const GtNodeVisitorClass* extract_feat_visitor_class(void);
+const GtNodeVisitorClass* gt_extract_feat_visitor_class(void);
 /* takes ownership of <rm> */
-GtNodeVisitor*            extract_feat_visitor_new(GtRegionMapping *rm,
+GtNodeVisitor*            gt_extract_feat_visitor_new(GtRegionMapping *rm,
                                                    const char*, bool join,
                                                    bool translate);
 

@@ -24,7 +24,7 @@
 #include "extended/genome_node_iterator.h"
 #include "extended/node_visitor_rep.h"
 
-struct ExtractFeatVisitor {
+struct GtExtractFeatVisitor {
   const GtNodeVisitor parent_instance;
   const char *type;
   bool join,
@@ -33,12 +33,12 @@ struct ExtractFeatVisitor {
   GtRegionMapping *region_mapping;
 };
 
-#define extract_feat_visitor_cast(GV)\
-        gt_node_visitor_cast(extract_feat_visitor_class(), GV)
+#define gt_extract_feat_visitor_cast(GV)\
+        gt_node_visitor_cast(gt_extract_feat_visitor_class(), GV)
 
 static void extract_feat_visitor_free(GtNodeVisitor *gv)
 {
-  ExtractFeatVisitor *extract_feat_visitor = extract_feat_visitor_cast(gv);
+  GtExtractFeatVisitor *extract_feat_visitor = gt_extract_feat_visitor_cast(gv);
   assert(extract_feat_visitor);
   gt_region_mapping_delete(extract_feat_visitor->region_mapping);
 }
@@ -76,20 +76,20 @@ static int extract_feat_visitor_genome_feature(GtNodeVisitor *gv,
                                                GtFeatureNode *gf,
                                                GtError *err)
 {
-  ExtractFeatVisitor *efv;
+  GtExtractFeatVisitor *efv;
   GtGenomeNodeIterator *gni;
   GtGenomeNode *gn;
   GtStr *description,
       *sequence;
   int had_err = 0;
   gt_error_check(err);
-  efv = extract_feat_visitor_cast(gv);
+  efv = gt_extract_feat_visitor_cast(gv);
   assert(efv->region_mapping);
   gni = gt_genome_node_iterator_new((GtGenomeNode*) gf);
   description = gt_str_new();
   sequence = gt_str_new();
   while (!had_err && (gn = gt_genome_node_iterator_next(gni))) {
-    if (extract_feat_sequence(sequence, gn, efv->type, efv->join,
+    if (gt_extract_feat_sequence(sequence, gn, efv->type, efv->join,
                               efv->region_mapping, err)) {
       had_err = -1;
     }
@@ -109,9 +109,9 @@ static int extract_feat_visitor_genome_feature(GtNodeVisitor *gv,
   return had_err;
 }
 
-const GtNodeVisitorClass* extract_feat_visitor_class()
+const GtNodeVisitorClass* gt_extract_feat_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (ExtractFeatVisitor),
+  static const GtNodeVisitorClass gvc = { sizeof (GtExtractFeatVisitor),
                                           extract_feat_visitor_free,
                                           NULL,
                                           extract_feat_visitor_genome_feature,
@@ -120,14 +120,15 @@ const GtNodeVisitorClass* extract_feat_visitor_class()
   return &gvc;
 }
 
-GtNodeVisitor* extract_feat_visitor_new(GtRegionMapping *rm, const char *type,
-                                        bool join, bool translate)
+GtNodeVisitor* gt_extract_feat_visitor_new(GtRegionMapping *rm,
+                                           const char *type,
+                                           bool join, bool translate)
 {
   GtNodeVisitor *gv;
-  ExtractFeatVisitor *efv;
+  GtExtractFeatVisitor *efv;
   assert(rm);
-  gv = gt_node_visitor_create(extract_feat_visitor_class());
-  efv= extract_feat_visitor_cast(gv);
+  gv = gt_node_visitor_create(gt_extract_feat_visitor_class());
+  efv= gt_extract_feat_visitor_cast(gv);
   efv->type = gt_symbol(type);
   efv->join = join;
   efv->translate = translate;

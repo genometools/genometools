@@ -20,23 +20,23 @@
 #include "extended/extract_feat_visitor.h"
 #include "extended/node_stream_rep.h"
 
-struct ExtractFeatStream
+struct GtExtractFeatStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *extract_feat_visitor;
 };
 
-#define extract_feat_stream_cast(GS)\
-        gt_node_stream_cast(extract_feat_stream_class(), GS)
+#define gt_extract_feat_stream_cast(GS)\
+        gt_node_stream_cast(gt_extract_feat_stream_class(), GS)
 
 static int extract_feat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
                                          GtError *err)
 {
-  ExtractFeatStream *efs;
+  GtExtractFeatStream *efs;
   int had_err;
   gt_error_check(err);
-  efs = extract_feat_stream_cast(gs);
+  efs = gt_extract_feat_stream_cast(gs);
   had_err = gt_node_stream_next(efs->in_stream, gn, err);
   if (!had_err) {
     assert(efs->extract_feat_visitor);
@@ -54,27 +54,28 @@ static int extract_feat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
 
 static void extract_feat_stream_free(GtNodeStream *gs)
 {
-  ExtractFeatStream *extract_feat_stream = extract_feat_stream_cast(gs);
+  GtExtractFeatStream *extract_feat_stream = gt_extract_feat_stream_cast(gs);
   gt_node_visitor_delete(extract_feat_stream->extract_feat_visitor);
   gt_node_stream_delete(extract_feat_stream->in_stream);
 }
 
-const GtNodeStreamClass* extract_feat_stream_class(void)
+const GtNodeStreamClass* gt_extract_feat_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (ExtractFeatStream),
+  static const GtNodeStreamClass gsc = { sizeof (GtExtractFeatStream),
                                          extract_feat_stream_next_tree,
                                          extract_feat_stream_free };
   return &gsc;
 }
 
-GtNodeStream* extract_feat_stream_new(GtNodeStream *in_stream,
+GtNodeStream* gt_extract_feat_stream_new(GtNodeStream *in_stream,
                                       GtRegionMapping *rm, const char *type,
                                       bool join, bool translate)
 {
-  GtNodeStream *gs = gt_node_stream_create(extract_feat_stream_class(), true);
-  ExtractFeatStream *efs = extract_feat_stream_cast(gs);
+  GtNodeStream *gs = gt_node_stream_create(gt_extract_feat_stream_class(),
+                                           true);
+  GtExtractFeatStream *efs = gt_extract_feat_stream_cast(gs);
   efs->in_stream = gt_node_stream_ref(in_stream);
-  efs->extract_feat_visitor = extract_feat_visitor_new(rm, type, join,
-                                                       translate);
+  efs->extract_feat_visitor = gt_extract_feat_visitor_new(rm, type, join,
+                                                             translate);
   return gs;
 }

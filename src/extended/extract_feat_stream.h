@@ -23,12 +23,12 @@
 #include "extended/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct ExtractFeatStream ExtractFeatStream;
+typedef struct GtExtractFeatStream GtExtractFeatStream;
 
-const GtNodeStreamClass* extract_feat_stream_class(void);
+const GtNodeStreamClass* gt_extract_feat_stream_class(void);
 
-/* create a ExtractFeatStream, takes ownership of GtRegionMapping  */
-GtNodeStream*            extract_feat_stream_new(GtNodeStream*,
+/* create a GtExtractFeatStream, takes ownership of GtRegionMapping  */
+GtNodeStream*            gt_extract_feat_stream_new(GtNodeStream*,
                                                  GtRegionMapping*,
                                                  const char *type, bool join,
                                                  bool translate);
