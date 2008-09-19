@@ -28,16 +28,16 @@ typedef struct {
                 clustersize;    /* size of cluster */
   double height,     /* the height of this cluster in the resulting tree */
          *distances; /* stores the distances to other clusters */
-} UPGMAcluster;
+} GtUPGMAcluster;
 
-struct UPGMA {
-  UPGMAcluster *clusters;
+struct GtUPGMA {
+  GtUPGMAcluster *clusters;
   unsigned long num_of_taxa,
                 num_of_clusters; /* 2 * num_of_taxa - 1 */
 };
 
-static void upggt_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
-                       UPGMADistFunc distfunc)
+static void gt_upggt_init(GtUPGMA *upgma, unsigned long num_of_taxa, void *data,
+                       GtUPGMADistFunc distfunc)
 {
   unsigned long i, j;
   double retval;
@@ -46,7 +46,7 @@ static void upggt_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
 
   upgma->num_of_taxa = num_of_taxa;
   upgma->num_of_clusters = 2 * num_of_taxa - 1;
-  upgma->clusters = gt_malloc(sizeof (UPGMAcluster) * upgma->num_of_clusters);
+  upgma->clusters = gt_malloc(sizeof (GtUPGMAcluster) * upgma->num_of_clusters);
 
   for (i = 0; i < upgma->num_of_clusters; i++) {
     upgma->clusters[i].leftdaughter  = UNDEF_ULONG;
@@ -66,7 +66,7 @@ static void upggt_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data);
-          /* the UPGMA distance function returns a value >= 0.0 */
+          /* the GtUPGMA distance function returns a value >= 0.0 */
           assert(retval >= 0.0);
           upgma->clusters[i].distances[j] = retval;
         }
@@ -77,7 +77,7 @@ static void upggt_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
   }
 }
 
-static double distance(const UPGMA *upgma, unsigned long i, unsigned long j)
+static double distance(const GtUPGMA *upgma, unsigned long i, unsigned long j)
 {
   double distance;
   if (i < j)
@@ -89,7 +89,7 @@ static double distance(const UPGMA *upgma, unsigned long i, unsigned long j)
   return distance;
 }
 
-static void upggt_compute(UPGMA *upgma)
+static void gt_upggt_compute(GtUPGMA *upgma)
 {
   unsigned long i, j, k, step, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG,
                 newclusternum = upgma->num_of_taxa; /* denoted 'l' in script */
@@ -157,17 +157,18 @@ static void upggt_compute(UPGMA *upgma)
   gt_bittab_delete(clustertab);
 }
 
-UPGMA* upggt_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc)
+GtUPGMA* gt_upggt_new(unsigned long num_of_taxa, void *data,
+                      GtUPGMADistFunc distfunc)
 {
-  UPGMA *upgma;
+  GtUPGMA *upgma;
   assert(num_of_taxa && distfunc);
-  upgma = gt_malloc(sizeof (UPGMA));
-  upggt_init(upgma, num_of_taxa, data, distfunc);
-  upggt_compute(upgma);
+  upgma = gt_malloc(sizeof (GtUPGMA));
+  gt_upggt_init(upgma, num_of_taxa, data, distfunc);
+  gt_upggt_compute(upgma);
   return upgma;
 }
 
-static void upggt_show_node(const UPGMA *upgma, unsigned long nodenum,
+static void gt_upggt_show_node(const GtUPGMA *upgma, unsigned long nodenum,
                             unsigned int level, FILE *fp)
 {
   assert(upgma);
@@ -176,18 +177,20 @@ static void upggt_show_node(const UPGMA *upgma, unsigned long nodenum,
   fprintf(fp, "%lu, %.4f\n", nodenum, upgma->clusters[nodenum].height);
   if (upgma->clusters[nodenum].leftdaughter != UNDEF_ULONG) {
     /* in this case the node has always two daughters, show them recursively */
-    upggt_show_node(upgma, upgma->clusters[nodenum].leftdaughter, level+1, fp);
-    upggt_show_node(upgma, upgma->clusters[nodenum].rightdaughter, level+1, fp);
+    gt_upggt_show_node(upgma, upgma->clusters[nodenum].leftdaughter, level+1,
+                       fp);
+    gt_upggt_show_node(upgma, upgma->clusters[nodenum].rightdaughter, level+1,
+                       fp);
   }
 }
 
-void upggt_show_tree(const UPGMA *upgma, FILE *fp)
+void gt_upggt_show_tree(const GtUPGMA *upgma, FILE *fp)
 {
   assert(upgma);
-  upggt_show_node(upgma, upgma->num_of_clusters-1, 0, fp);
+  gt_upggt_show_node(upgma, upgma->num_of_clusters-1, 0, fp);
 }
 
-void upggt_delete(UPGMA *upgma)
+void gt_upggt_delete(GtUPGMA *upgma)
 {
   unsigned long i;
   if (!upgma) return;

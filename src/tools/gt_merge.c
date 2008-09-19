@@ -79,7 +79,7 @@ int gt_merge(int argc, const char **argv, GtError *err)
    }
 
   /* create a merge stream */
-  merge_stream = merge_stream_new(genome_streams);
+  merge_stream = gt_merge_stream_new(genome_streams);
 
   /* create a gff3 output stream */
   gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);

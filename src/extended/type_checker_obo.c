@@ -55,13 +55,13 @@ const GT_TypeCheckerClass* gt_type_checker_obo_class(void)
 }
 
 static void add_gt_feature_node_from_tree(GT_TypeCheckerOBO *tco,
-                                            OBOParseTree *obo_parse_tree,
+                                            GtOBOParseTree *obo_parse_tree,
                                             unsigned long stanza_num,
                                             const char *stanza_key)
 {
   const char *value;
   assert(tco && obo_parse_tree && stanza_key);
-  value = obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
+  value = gt_obo_parse_tree_get_stanza_value(obo_parse_tree, stanza_num,
                                           stanza_key);
   /* do not add values multiple times (possible for "name" values) */
   if (!gt_cstr_table_get(tco->gt_feature_node_types, value))
@@ -71,15 +71,16 @@ static void add_gt_feature_node_from_tree(GT_TypeCheckerOBO *tco,
 static int create_genome_features(GT_TypeCheckerOBO *tco,
                                   const char *obo_file_path, GtError *err)
 {
-  OBOParseTree *obo_parse_tree;
+  GtOBOParseTree *obo_parse_tree;
   unsigned long i;
   gt_error_check(err);
   assert(tco && obo_file_path);
-  if ((obo_parse_tree = obo_parse_tree_new(obo_file_path, err))) {
-    for (i = 0; i < obo_parse_tree_num_of_stanzas(obo_parse_tree); i++) {
-      if (!strcmp(obo_parse_tree_get_stanza_type(obo_parse_tree, i), "Term")) {
+  if ((obo_parse_tree = gt_obo_parse_tree_new(obo_file_path, err))) {
+    for (i = 0; i < gt_obo_parse_tree_num_of_stanzas(obo_parse_tree); i++) {
+      if (!strcmp(gt_obo_parse_tree_get_stanza_type(obo_parse_tree, i),
+                  "Term")) {
         const char *is_obsolete =
-          obo_parse_tree_get_stanza_value(obo_parse_tree, i, "is_obsolete");
+          gt_obo_parse_tree_get_stanza_value(obo_parse_tree, i, "is_obsolete");
         /* do not add obsolete types */
         if (!is_obsolete || strcmp(is_obsolete, "true")) {
           add_gt_feature_node_from_tree(tco, obo_parse_tree, i, "id");
@@ -87,7 +88,7 @@ static int create_genome_features(GT_TypeCheckerOBO *tco,
         }
       }
     }
-    obo_parse_tree_delete(obo_parse_tree);
+    gt_obo_parse_tree_delete(obo_parse_tree);
     return 0;
   }
   return -1;

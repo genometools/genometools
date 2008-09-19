@@ -242,7 +242,8 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
   substringinfo.processinfo = &rangespecinfo;
   substringinfo.gmatchforward = gmatchforward;
   substringinfo.encseq = encseq;
-  seqit = gt_seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
+  seqit = gt_seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),
+                             true);
   for (unitnum = 0; /* Nothing */; unitnum++)
   {
     retval = gt_seqiterator_next(seqit,
@@ -380,7 +381,8 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   Bucketspecification bucketspec;
   bool haserr = false;
 
-  seqit = gt_seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),true);
+  seqit = gt_seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),
+  *                          true);
   for (unitnum = 0; ; unitnum++)
   {
     retval = gt_seqiterator_next(seqit,

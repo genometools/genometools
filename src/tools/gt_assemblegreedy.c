@@ -85,7 +85,8 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     GtFragmentOverlaps *fragment_overlaps;
-    fragment_overlaps = gt_fragment_overlaps_new(fragments, arguments->minlength);
+    fragment_overlaps = gt_fragment_overlaps_new(fragments,
+                                                 arguments->minlength);
 
     /* greedy assembly */
     if (arguments->showoverlaps)

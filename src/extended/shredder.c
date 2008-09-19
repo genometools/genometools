@@ -19,7 +19,7 @@
 #include "core/mathsupport.h"
 #include "extended/shredder.h"
 
-struct Shredder {
+struct GtShredder {
   GtBioseq *bioseq;
   unsigned long minlength,
                 maxlength,
@@ -29,10 +29,10 @@ struct Shredder {
   double sample_probability;
 };
 
-Shredder* shredder_new(GtBioseq *bioseq, unsigned long minlength,
+GtShredder* gt_shredder_new(GtBioseq *bioseq, unsigned long minlength,
                                        unsigned long maxlength)
 {
-  Shredder *shredder = gt_calloc(1, sizeof *shredder);
+  GtShredder *shredder = gt_calloc(1, sizeof *shredder);
   assert(bioseq && minlength && minlength <= maxlength);
   shredder->bioseq = bioseq;
   shredder->minlength = minlength;
@@ -41,26 +41,27 @@ Shredder* shredder_new(GtBioseq *bioseq, unsigned long minlength,
   return shredder;
 }
 
-void shredder_delete(Shredder *shredder)
+void gt_shredder_delete(GtShredder *shredder)
 {
   if (!shredder) return;
   gt_free(shredder);
 }
 
-void shredder_set_overlap(Shredder *shredder, unsigned long overlap)
+void gt_shredder_set_overlap(GtShredder *shredder, unsigned long overlap)
 {
   assert(shredder);
   shredder->overlap = overlap;
 }
 
-void shredder_set_sample_probability(Shredder *shredder, double probability)
+void gt_shredder_set_sample_probability(GtShredder *shredder,
+                                        double probability)
 {
   assert(shredder);
   assert(probability >= 0.0 && probability <= 1.0);
   shredder->sample_probability = probability;
 }
 
-static const char* generate_fragment(Shredder *shredder,
+static const char* generate_fragment(GtShredder *shredder,
                                      unsigned long *fragment_length,
                                      GtStr *desc)
 {
@@ -97,8 +98,9 @@ static const char* generate_fragment(Shredder *shredder,
   return NULL;
 }
 
-const char* shredder_shred(Shredder *shredder, unsigned long *fragment_length,
-                           GtStr *desc)
+const char* gt_shredder_shred(GtShredder *shredder,
+                              unsigned long *fragment_length,
+                              GtStr *desc)
 {
   const char *frag;
   assert(shredder && fragment_length);

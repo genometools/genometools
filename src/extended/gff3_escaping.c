@@ -28,7 +28,7 @@
 #define AND       "%26"
 #define COMMA     "%82"
 
-void gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
+void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
                  unsigned long length)
 {
   const char *cc;
@@ -115,7 +115,7 @@ static int test_single_escaping(char unescaped_char, const char *escaped_char,
   snprintf(unescaped_testseq, sizeof unescaped_testseq, "foo%cbar",
            unescaped_char);
   snprintf(escaped_testseq, sizeof escaped_testseq, "foo%sbar", escaped_char);
-  gff3_escape(escaped_seq, unescaped_testseq, strlen(unescaped_testseq));
+  gt_gff3_escape(escaped_seq, unescaped_testseq, strlen(unescaped_testseq));
   ensure(had_err, !strcmp(gt_str_get(escaped_seq), escaped_testseq));
   if (!had_err) {
     had_err = gff3_unescape(unescaped_seq, gt_str_get(escaped_seq),
@@ -127,7 +127,7 @@ static int test_single_escaping(char unescaped_char, const char *escaped_char,
   return had_err;
 }
 
-int gff3_escaping_unit_test(GtError *err)
+int gt_gff3_escaping_unit_test(GtError *err)
 {
   GtStr *seq;
   int had_err = 0;

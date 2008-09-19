@@ -91,7 +91,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                            &mkfmcallinfo->noindexpos,false);
   gt_option_parser_add_option(op, option);
 
-  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, versionfunc,err);
+  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
+                                  err);
   if (oprval == OPTIONPARSER_OK)
   {
     if (!gt_option_is_set(optionfmout))

@@ -307,7 +307,7 @@ static int feature_node_lua_extract_sequence(lua_State *L)
   return 1;
 }
 
-static int gt_genome_node_lua_delete(lua_State *L)
+static int genome_node_lua_delete(lua_State *L)
 {
   GtGenomeNode **gn;
   gn = check_genome_node(L, 1);
@@ -351,7 +351,7 @@ int gt_lua_open_genome_node(lua_State *L)
   lua_setfield(L, -2, "__index");
   /* set its _gc field */
   lua_pushstring(L, "__gc");
-  lua_pushcfunction(L, gt_genome_node_lua_delete);
+  lua_pushcfunction(L, genome_node_lua_delete);
   lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, genome_node_lib_m);

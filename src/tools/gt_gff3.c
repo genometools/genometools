@@ -225,7 +225,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* create merge feature stream (if necessary) */
   if (!had_err && arguments->mergefeat) {
     assert(sort_stream);
-    mergefeat_stream = mergefeat_stream_sorted_new(sort_stream);
+    mergefeat_stream = gt_mergefeat_stream_sorted_new(sort_stream);
     last_stream = mergefeat_stream;
   }
 

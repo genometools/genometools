@@ -22,7 +22,7 @@
 
 /* Escape <unescaped_seq> of given <length> for GFF3 format and append the
    result to <escaped_seq>. */
-void gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
+void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
                  unsigned long length);
 
 /* Unescape GFF3 format <escaped_seq> of given <length> and append the result to
@@ -31,6 +31,6 @@ int  gff3_unescape(GtStr *unescaped_seq, const char *escaped_seq,
                    unsigned long length, GtError*);
 
 /* Perform unit test of GFF3 format escaping module */
-int  gff3_escaping_unit_test(GtError*);
+int  gt_gff3_escaping_unit_test(GtError*);
 
 #endif

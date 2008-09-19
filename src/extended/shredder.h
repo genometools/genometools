@@ -20,21 +20,21 @@
 
 #include "core/bioseq.h"
 
-typedef struct Shredder Shredder;
+typedef struct GtShredder GtShredder;
 
-/* Create new Shredder for sequences in <bioseq>. The produced fragments will
+/* Create new GtShredder for sequences in <bioseq>. The produced fragments will
    have at least length <minlength> and at most length <maxlength>. */
-Shredder*   shredder_new(GtBioseq *bioseq, unsigned long minlength,
+GtShredder*   gt_shredder_new(GtBioseq *bioseq, unsigned long minlength,
                                          unsigned long maxlength);
-void        shredder_delete(Shredder*);
+void        gt_shredder_delete(GtShredder*);
 /* Set the <overlap> between shredded fragments, the default is 0. */
-void        shredder_set_overlap(Shredder*, unsigned long overlap);
+void        gt_shredder_set_overlap(GtShredder*, unsigned long overlap);
 /* Set the <probabilty> that a generated fragment is returned. */
-void        shredder_set_sample_probability(Shredder*, double probability);
+void        gt_shredder_set_sample_probability(GtShredder*, double probability);
 /* Return the next shredded fragment or NULL if no additional fragment is
    available. The length of the fragment is stored in <fragment_length> and
    <desc> is set to the description of the corresponding sequence. */
-const char* shredder_shred(Shredder*, unsigned long *fragment_length,
+const char* gt_shredder_shred(GtShredder*, unsigned long *fragment_length,
                            GtStr *desc);
 
 #endif

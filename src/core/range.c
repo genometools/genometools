@@ -194,7 +194,9 @@ int gt_range_unit_test(GtError *err)
   /* test gt_ranges_uniq() */
   ranges = gt_array_new(sizeof (GtRange));
   tmp_ranges = gt_array_new(sizeof (GtRange));
-  for (i = 0; i < sizeof (gt_ranges_in) / sizeof (gt_ranges_in[0]) && !had_err; i++)
+  for (i = 0;
+       i < sizeof (gt_ranges_in) / sizeof (gt_ranges_in[0]) && !had_err;
+       i++)
     gt_array_add(ranges, gt_ranges_in[i]);
   gt_ranges_uniq(tmp_ranges, ranges);
   ensure(had_err, gt_array_size(ranges) ==
@@ -240,7 +242,8 @@ int gt_range_unit_test(GtError *err)
   for (i = 0; i < gt_array_size(ctr) && !had_err; i++) {
     ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
     ensure(had_err,
-           gt_ranges_out[i].start == (*(GtRange*) gt_array_get(ranges, i)).start);
+           gt_ranges_out[i].start == (*(GtRange*)
+                                             gt_array_get(ranges, i)).start);
     ensure(had_err,
            gt_ranges_out[i].end == (*(GtRange*) gt_array_get(ranges, i)).end);
   }
@@ -317,7 +320,8 @@ bool gt_ranges_are_equal(const GtArray *gt_ranges_1, const GtArray *gt_ranges_2)
   unsigned long i;
   GtRange gt_range_1, gt_range_2;
 
-  assert(gt_ranges_are_sorted(gt_ranges_1) && gt_ranges_are_sorted(gt_ranges_2));
+  assert(gt_ranges_are_sorted(gt_ranges_1)
+           && gt_ranges_are_sorted(gt_ranges_2));
 
   if (gt_array_size(gt_ranges_1) != gt_array_size(gt_ranges_2))
     return false;

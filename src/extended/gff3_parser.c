@@ -438,7 +438,8 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
       has_parent = gt_feature_node_get_attribute(fn, PARENT_STRING)
                    ? true : false;
       gt_assert(!gt_feature_node_is_pseudo(fn));
-      pseudo_parent = gt_feature_info_get_pseudo_parent(parser->feature_info, id);
+      pseudo_parent = gt_feature_info_get_pseudo_parent(parser->feature_info,
+                                                        id);
       if (pseudo_parent ||
           !gt_feature_node_is_multi(fn)) {
         if (!pseudo_parent) {
@@ -632,7 +633,8 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
   for (i = 0; i < gt_splitter_size(parent_splitter); i++) {
     GtGenomeNode* parent_gf;
     const char *parent = gt_splitter_get_token(parent_splitter, i);
-    parent_gf = (GtGenomeNode*) gt_feature_info_get(parser->feature_info, parent);
+    parent_gf = (GtGenomeNode*) gt_feature_info_get(parser->feature_info,
+                                                    parent);
     if (!parent_gf) {
       if (!parser->tidy) {
         gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "

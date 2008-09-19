@@ -32,12 +32,13 @@ typedef struct {
 /* Create a new fragment overlaps object which stores the overlaps between the
    given <fragments> (if they are equal or larger than <minlength). */
 GtFragmentOverlaps* gt_fragment_overlaps_new(GtBioseq *fragments,
-                                        unsigned long minlength);
-void              gt_fragment_overlaps_delete(GtFragmentOverlaps*);
-void              gt_fragment_overlaps_sort(GtFragmentOverlaps*);
-bool              gt_fragment_overlaps_are_sorted(const GtFragmentOverlaps*);
-void              gt_fragment_overlaps_show(const GtFragmentOverlaps*);
-const Overlap*    gt_fragment_overlaps_get(const GtFragmentOverlaps*, unsigned long);
-unsigned long     gt_fragment_overlaps_size(const GtFragmentOverlaps*);
+                                             unsigned long minlength);
+void                gt_fragment_overlaps_delete(GtFragmentOverlaps*);
+void                gt_fragment_overlaps_sort(GtFragmentOverlaps*);
+bool                gt_fragment_overlaps_are_sorted(const GtFragmentOverlaps*);
+void                gt_fragment_overlaps_show(const GtFragmentOverlaps*);
+const Overlap*      gt_fragment_overlaps_get(const GtFragmentOverlaps*,
+                                             unsigned long);
+unsigned long       gt_fragment_overlaps_size(const GtFragmentOverlaps*);
 
 #endif

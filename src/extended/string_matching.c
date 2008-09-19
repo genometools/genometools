@@ -241,13 +241,15 @@ int gt_string_matching_unit_test(GtError *err)
                                 &brute_force_match);
     gt_string_matching_bmh(s, n, p, m, store_first_match, &bmh_match);
     gt_string_matching_kmp(s, n, p, m, store_first_match, &kmp_match);
-    gt_string_matching_shift_and(s, n, p, m, store_first_match, &shift_and_match);
+    gt_string_matching_shift_and(s, n, p, m, store_first_match,
+                                 &shift_and_match);
     /* comparing (first match) */
     ensure(had_err, brute_force_match == bmh_match);
     ensure(had_err, brute_force_match == kmp_match);
     ensure(had_err, brute_force_match == shift_and_match);
     /* matching (all matches) */
-    gt_string_matching_brute_force(s, n, p, m, store_match, brute_force_matches);
+    gt_string_matching_brute_force(s, n, p, m, store_match,
+                                   brute_force_matches);
     gt_string_matching_bmh(s, n, p, m, store_match, bmh_matches);
     gt_string_matching_kmp(s, n, p, m, store_match, kmp_matches);
     gt_string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);

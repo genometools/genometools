@@ -20,21 +20,21 @@
 
 #include "core/error.h"
 
-typedef struct OBOParseTree OBOParseTree;
+typedef struct GtOBOParseTree GtOBOParseTree;
 
 /* Parse the OBO file given with <obo_file_path> and return the result as an
-   OBOParseTree.
+   GtOBOParseTree.
    If an error occurs during parsing, NULL is returned and <err> is set. */
-OBOParseTree* obo_parse_tree_new(const char *obo_file_path, GtError *err);
-void          obo_parse_tree_delete(OBOParseTree*);
+GtOBOParseTree* gt_obo_parse_tree_new(const char *obo_file_path, GtError *err);
+void          gt_obo_parse_tree_delete(GtOBOParseTree*);
 /* Return the type of stanza number <stanza_number>. */
-const char*   obo_parse_tree_get_stanza_type(const OBOParseTree*,
+const char*   gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree*,
                                              unsigned long stanza_num);
 /* Return the value of entry <stanza_key> in stanza number <stanza_number>. */
-const char*   obo_parse_tree_get_stanza_value(const OBOParseTree*,
+const char*   gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree*,
                                               unsigned long stanza_num,
                                               const char *stanza_key);
 /* Return the number of stanzas. */
-unsigned long obo_parse_tree_num_of_stanzas(const OBOParseTree*);
+unsigned long gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree*);
 
 #endif

@@ -21,12 +21,13 @@
 #include <stdio.h>
 #include "core/error.h"
 
-typedef struct UPGMA UPGMA;
+typedef struct GtUPGMA GtUPGMA;
 
-typedef double (*UPGMADistFunc)(unsigned long, unsigned long, void *data);
+typedef double (*GtUPGMADistFunc)(unsigned long, unsigned long, void *data);
 
-UPGMA* upggt_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc);
-void   upggt_show_tree(const UPGMA*, FILE*);
-void   upggt_delete(UPGMA*);
+GtUPGMA* gt_upggt_new(unsigned long num_of_taxa, void *data,
+                      GtUPGMADistFunc distfunc);
+void     gt_upggt_show_tree(const GtUPGMA*, FILE*);
+void     gt_upggt_delete(GtUPGMA*);
 
 #endif

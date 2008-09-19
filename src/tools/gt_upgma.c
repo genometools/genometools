@@ -31,7 +31,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   OPrval oprval;
   gt_error_check(err);
   op = gt_option_parser_new("sequence_file|example",
-                         "Compute and show UPGMA tree "
+                         "Compute and show GtUPGMA tree "
                          "for the sequences in sequence file (using the unit\n"
                          "cost edit distance as distance function). If "
                          "'example' is given as\nsequence_file, a builtin "
@@ -69,7 +69,7 @@ int gt_upgma(int argc, const char **argv, GtError *err)
   bool use_hard_coded_example = false;
   int parsed_args, had_err = 0;
   GtBioseq *bioseq = NULL;
-  UPGMA *upgma = NULL;
+  GtUPGMA *upgma = NULL;
   gt_error_check(err);
 
   /* option parsing */
@@ -84,21 +84,21 @@ int gt_upgma(int argc, const char **argv, GtError *err)
     use_hard_coded_example = true;
 
   if (use_hard_coded_example)
-    upgma = upggt_new(5, NULL, exampledistfunc);
+    upgma = gt_upggt_new(5, NULL, exampledistfunc);
   else {
     bioseq = gt_bioseq_new(argv[parsed_args], err);
     if (!bioseq)
       had_err = -1;
     if (!had_err)
-      upgma = upggt_new(gt_bioseq_number_of_sequences(bioseq), bioseq,
-                        distfunc);
+      upgma = gt_upggt_new(gt_bioseq_number_of_sequences(bioseq), bioseq,
+                           distfunc);
   }
 
   if (!had_err)
-    upggt_show_tree(upgma, stdout);
+    gt_upggt_show_tree(upgma, stdout);
 
   gt_bioseq_delete(bioseq);
-  upggt_delete(upgma);
+  gt_upggt_delete(upgma);
 
   return had_err;
 }

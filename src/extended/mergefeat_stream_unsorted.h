@@ -22,9 +22,9 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct MergefeatStreamUnsorted MergefeatStreamUnsorted;
+typedef struct GtMergefeatStreamUnsorted GtMergefeatStreamUnsorted;
 
-const GtNodeStreamClass* mergefeat_stream_unsorted_class(void);
-GtNodeStream*            mergefeat_stream_unsorted_new(GtNodeStream*);
+const GtNodeStreamClass* gt_mergefeat_stream_unsorted_class(void);
+GtNodeStream*            gt_mergefeat_stream_unsorted_new(GtNodeStream*);
 
 #endif

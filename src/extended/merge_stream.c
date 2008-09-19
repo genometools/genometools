@@ -22,18 +22,18 @@
 #include "extended/node_stream_rep.h"
 #include "extended/region_node.h"
 
-struct MergeStream {
+struct GtMergeStream {
   const GtNodeStream parent_instance;
   GtArray *genome_streams;
   GtGenomeNode **buffer;
 };
 
-#define merge_stream_cast(GS)\
-        gt_node_stream_cast(merge_stream_class(), GS)
+#define gt_merge_stream_cast(GS)\
+        gt_node_stream_cast(gt_merge_stream_class(), GS)
 
-int merge_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+int gt_merge_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
-  MergeStream *ms;
+  GtMergeStream *ms;
   GtGenomeNode *min_node = NULL;
   unsigned long i, j, min_i = UNDEF_ULONG;
   unsigned int gt_genome_node_consolidated;
@@ -41,7 +41,7 @@ int merge_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
   gt_error_check(err);
 
-  ms = merge_stream_cast(gs);
+  ms = gt_merge_stream_cast(gs);
 
   /* fill buffers */
   for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
@@ -96,9 +96,9 @@ int merge_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void merge_stream_free(GtNodeStream *gs)
+static void gt_merge_stream_free(GtNodeStream *gs)
 {
-  MergeStream *ms = merge_stream_cast(gs);
+  GtMergeStream *ms = gt_merge_stream_cast(gs);
   unsigned long i;
   for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
     gt_node_stream_delete(*(GtNodeStream**)
@@ -108,19 +108,19 @@ static void merge_stream_free(GtNodeStream *gs)
   gt_free(ms->buffer);
 }
 
-const GtNodeStreamClass* merge_stream_class(void)
+const GtNodeStreamClass* gt_merge_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (MergeStream),
-                                         merge_stream_next_tree,
-                                         merge_stream_free };
+  static const GtNodeStreamClass gsc = { sizeof (GtMergeStream),
+                                         gt_merge_stream_next_tree,
+                                         gt_merge_stream_free };
   return &gsc;
 }
 
-GtNodeStream* merge_stream_new(const GtArray *genome_streams)
+GtNodeStream* gt_merge_stream_new(const GtArray *genome_streams)
 {
   GtNodeStream *in_stream,
-               *gs = gt_node_stream_create(merge_stream_class(), true);
-  MergeStream *ms = merge_stream_cast(gs);
+               *gs = gt_node_stream_create(gt_merge_stream_class(), true);
+  GtMergeStream *ms = gt_merge_stream_cast(gs);
   unsigned long i;
 #ifndef NDEBUG
   assert(gt_array_size(genome_streams)); /* at least on input stream given */

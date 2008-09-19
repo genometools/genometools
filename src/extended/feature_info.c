@@ -83,8 +83,9 @@ void gt_feature_info_add_pseudo_parent(GtFeatureInfo *fi, const char *id,
               gt_genome_node_ref((GtGenomeNode*) pseudo_parent));
 }
 
-void gt_feature_info_replace_pseudo_parent(GtFeatureInfo *fi, GtFeatureNode *child,
-                                        GtFeatureNode *new_pseudo_parent)
+void gt_feature_info_replace_pseudo_parent(GtFeatureInfo *fi,
+                                           GtFeatureNode *child,
+                                           GtFeatureNode *new_pseudo_parent)
 {
   const char *id;
   assert(fi && child && new_pseudo_parent);
@@ -123,7 +124,8 @@ static GtFeatureNode* find_root(const GtFeatureInfo *fi, const char *id)
   return this_feature;
 }
 
-GtFeatureNode* gt_feature_info_find_root(const GtFeatureInfo *fi, const char *id)
+GtFeatureNode* gt_feature_info_find_root(const GtFeatureInfo *fi,
+                                         const char *id)
 {
   assert(fi && id);
   assert(gt_feature_info_get(fi, id));
