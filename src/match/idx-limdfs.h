@@ -46,7 +46,6 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
                          const AbstractDfstransformer *adfst);
 
 void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
-                                     bool rcmatch,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
@@ -55,7 +54,6 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const AbstractDfstransformer *adfst);
 
 void indexbasedmstats(Limdfsresources *limdfsresources,
-                      bool rcmatch,
                       const Uchar *pattern,
                       unsigned long patternlength,
                       const AbstractDfstransformer *adfst);
@@ -65,7 +63,6 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qend);
 
 void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
-                                    bool rcmatch,
                                     const Uchar *pattern,
                                     unsigned long patternlength,
                                     Processmatch processmatch,
@@ -86,7 +83,6 @@ bool intervalwidthleq(const Limdfsresources *limdfsresources,
 DECLAREARRAYSTRUCT(Seqpos);
 
 ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
-                                          bool rcmatch,
                                           Seqpos leftbound,
                                           Seqpos rightbound,
                                           unsigned long offset);

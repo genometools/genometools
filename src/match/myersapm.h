@@ -37,7 +37,6 @@ void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources);
 void edistmyersbitvectorAPM(Myersonlineresources *mor,
                             const Uchar *pattern,
                             unsigned long patternlength,
-                            bool rcmatch,
                             unsigned long maxdistance);
 
 #endif

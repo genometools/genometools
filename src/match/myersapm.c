@@ -76,7 +76,6 @@ void freeMyersonlineresources(Myersonlineresources **ptrmyersonlineresources)
 void edistmyersbitvectorAPM(Myersonlineresources *mor,
                             const Uchar *pattern,
                             unsigned long patternlength,
-                            bool rcmatch,
                             unsigned long maxdistance)
 {
   unsigned long Pv = ~0UL,
@@ -165,7 +164,6 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         if (matchlength.defined)
         {
           mor->processmatch(mor->processmatchinfo,
-                            rcmatch,
                             dbstartpos,
                             (Seqpos) matchlength.valueunsignedlong,
                             NULL,

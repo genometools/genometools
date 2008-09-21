@@ -20,7 +20,7 @@
 
 #include "seqpos-def.h"
 
-typedef void (*Processmatch)(void *,bool,Seqpos,Seqpos,
+typedef void (*Processmatch)(void *,Seqpos,Seqpos,
                              const Uchar *,unsigned long);
 
 typedef void (*Processresult)(void *,const void *,unsigned long,

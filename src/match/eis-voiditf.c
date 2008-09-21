@@ -352,7 +352,6 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
 }
 
 void pck_exactpatternmatching(const void *voidbwtseq,
-                              bool rcmatch,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
@@ -370,7 +369,6 @@ void pck_exactpatternmatching(const void *voidbwtseq,
   {
     assert(totallength >= (dbstartpos + patternlength));
     processmatch(processmatchinfo,
-                 rcmatch,
                  totallength - (dbstartpos + patternlength),
                  (Seqpos) patternlength,
                  dbsubstring,

@@ -66,7 +66,6 @@ typedef struct
 } Showmatchinfo;
 
 static void showmatch(void *processinfo,
-                      bool rcmatch,
                       Seqpos dbstartpos,
                       Seqpos dblen,
                       const Uchar *dbsubstring,
@@ -74,10 +73,9 @@ static void showmatch(void *processinfo,
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
 
-  assert((rcmatch && *showmatchinfo->rcdirptr) ||
-         (!rcmatch && !*showmatchinfo->rcdirptr));
   printf(FormatSeqpos,PRINTSeqposcast(dblen));
-  printf(" %c " FormatSeqpos,rcmatch ? '-' : '+',PRINTSeqposcast(dbstartpos));
+  printf(" %c " FormatSeqpos,*showmatchinfo->rcdirptr ? '-' : '+',
+         PRINTSeqposcast(dbstartpos));
   if (showmatchinfo->tageratoroptions != NULL &&
       showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
@@ -116,7 +114,6 @@ typedef struct
 } ArraySimplematch;
 
 static void storematch(void *processinfo,
-                       bool rcmatch,
                        Seqpos dbstartpos,
                        Seqpos dblen,
                        GT_UNUSED const Uchar *dbsubstring,
@@ -125,12 +122,10 @@ static void storematch(void *processinfo,
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;
 
-  assert((rcmatch && *storetab->rcdirptr) ||
-         (!rcmatch && !*storetab->rcdirptr));
   GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
   match->dbstartpos = dbstartpos;
   match->matchlength = dblen;
-  match->rcmatch = rcmatch;
+  match->rcmatch = *storetab->rcdirptr;
 }
 
 static void checkmstats(void *processinfo,
@@ -161,7 +156,6 @@ static void checkmstats(void *processinfo,
     unsigned long idx;
     ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
-                                  twl->rcdir,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
@@ -208,7 +202,6 @@ static void showmstats(void *processinfo,
     unsigned long idx;
     ArraySeqpos *mstatspos = fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
-                                  twl->rcdir,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
@@ -296,7 +289,6 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  Limdfsresources *limdfsresources,
                                  const Uchar *transformedtag,
                                  unsigned long taglen,
-                                 bool rcmatch,
                                  Processmatch processmatch,
                                  void *processmatchinfooffline)
 {
@@ -306,7 +298,6 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
     edistmyersbitvectorAPM(mor,
                            transformedtag,
                            taglen,
-                           rcmatch,
                            (unsigned long) tageratoroptions->maxdistance);
   }
   if (!tageratoroptions->online || tageratoroptions->docompare)
@@ -314,7 +305,6 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
     if (tageratoroptions->maxdistance == 0)
     {
       indexbasedexactpatternmatching(limdfsresources,
-                                     rcmatch,
                                      transformedtag,
                                      taglen,
                                      processmatch,
@@ -324,7 +314,6 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
       if (tageratoroptions->maxdistance > 0)
       {
         indexbasedapproxpatternmatching(limdfsresources,
-                                        rcmatch,
                                         transformedtag,
                                         taglen,
                                         (tageratoroptions->maxdistance < 0)
@@ -337,7 +326,6 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
       } else
       {
         indexbasedmstats(limdfsresources,
-                         rcmatch,
                          transformedtag,
                          taglen,
                          dfst);
@@ -652,7 +640,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                limdfsresources,
                                twl.transformedtag,
                                twl.taglen,
-                               twl.rcdir,
                                processmatch,
                                processmatchinfooffline);
           if (tageratoroptions->docompare)
