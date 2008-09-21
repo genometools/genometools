@@ -54,6 +54,12 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      bool skpp,
                                      const AbstractDfstransformer *adfst);
 
+void indexbasedmstats(Limdfsresources *limdfsresources,
+                      bool rcmatch,
+                      const Uchar *pattern,
+                      unsigned long patternlength,
+                      const AbstractDfstransformer *adfst);
+
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend);

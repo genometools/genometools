@@ -763,29 +763,13 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 #define SHOWSTACKTOP(STACKPTR) /* Nothing */
 #endif
 
-void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
-                                     bool rcmatch,
-                                     const Uchar *pattern,
-                                     unsigned long patternlength,
-                                     unsigned long maxdistance,
-                                     unsigned long maxintervalwidth,
-                                     bool skpp,
-                                     const AbstractDfstransformer *adfst)
+static void runlimdfs(Limdfsresources *limdfsresources,
+                      bool rcmatch,
+                      const AbstractDfstransformer *adfst)
 {
   Lcpintervalwithinfo *stackptr, parentwithinfo;
 
-  /*
-  printf("sizeofdfsstate()=%lu\n",(unsigned long) adfst->sizeofdfsstate);
-  printf("sizeof (parentwithinfo.aliasstate)=%lu\n",
-          (unsigned long) sizeof (parentwithinfo.aliasstate));
-  */
   assert(adfst->sizeofdfsstate <= sizeof (parentwithinfo.aliasstate));
-  assert(maxdistance < patternlength);
-  adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
-                          (unsigned int) limdfsresources->alphasize,
-                          pattern,patternlength,maxdistance,
-                          maxintervalwidth,
-                          skpp);
   initlcpinfostack(&limdfsresources->stack,
                    0,
                    limdfsresources->withesa
@@ -818,6 +802,38 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                limdfsresources->patterninfo,
                                limdfsresources->dfsconstinfo);
   }
+}
+
+void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
+                                     bool rcmatch,
+                                     const Uchar *pattern,
+                                     unsigned long patternlength,
+                                     unsigned long maxdistance,
+                                     unsigned long maxintervalwidth,
+                                     bool skpp,
+                                     const AbstractDfstransformer *adfst)
+{
+  adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
+                          (unsigned int) limdfsresources->alphasize,
+                          pattern,
+                          patternlength,
+                          maxdistance,
+                          maxintervalwidth,
+                          skpp);
+  runlimdfs(limdfsresources,rcmatch,adfst);
+}
+
+void indexbasedmstats(Limdfsresources *limdfsresources,
+                      bool rcmatch,
+                      const Uchar *pattern,
+                      unsigned long patternlength,
+                      const AbstractDfstransformer *adfst)
+{
+  adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
+                          (unsigned int) limdfsresources->alphasize,
+                          pattern,
+                          patternlength);
+  runlimdfs(limdfsresources,rcmatch,adfst);
 }
 
 unsigned long genericmstats(const Limdfsresources *limdfsresources,

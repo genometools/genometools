@@ -62,6 +62,7 @@ typedef struct
   const Uchar *tagptr;
   const Alphabet *alpha;
   unsigned long *eqsvector;
+  bool *rcdirptr;
 } Showmatchinfo;
 
 static void showmatch(void *processinfo,
@@ -73,6 +74,8 @@ static void showmatch(void *processinfo,
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
 
+  assert((rcmatch && *showmatchinfo->rcdirptr) ||
+         (!rcmatch && !*showmatchinfo->rcdirptr));
   printf(FormatSeqpos,PRINTSeqposcast(dblen));
   printf(" %c " FormatSeqpos,rcmatch ? '-' : '+',PRINTSeqposcast(dbstartpos));
   if (showmatchinfo->tageratoroptions != NULL &&
@@ -105,7 +108,12 @@ static void showmatch(void *processinfo,
   printf("\n");
 }
 
-DECLAREARRAYSTRUCT(Simplematch);
+typedef struct
+{
+  Simplematch *spaceSimplematch;
+  unsigned long nextfreeSimplematch, allocatedSimplematch;
+  bool *rcdirptr;
+} ArraySimplematch;
 
 static void storematch(void *processinfo,
                        bool rcmatch,
@@ -117,6 +125,8 @@ static void storematch(void *processinfo,
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;
 
+  assert((rcmatch && *storetab->rcdirptr) ||
+         (!rcmatch && !*storetab->rcdirptr));
   GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
   match->dbstartpos = dbstartpos;
   match->matchlength = dblen;
@@ -311,17 +321,27 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                      processmatchinfooffline);
     } else
     {
-      indexbasedapproxpatternmatching(limdfsresources,
-                                      rcmatch,
-                                      transformedtag,
-                                      taglen,
-                                      (tageratoroptions->maxdistance < 0)
-                                        ?  0
-                                        : (unsigned long)
-                                          tageratoroptions->maxdistance,
-                                      tageratoroptions->maxintervalwidth,
-                                      tageratoroptions->skpp,
-                                      dfst);
+      if (tageratoroptions->maxdistance > 0)
+      {
+        indexbasedapproxpatternmatching(limdfsresources,
+                                        rcmatch,
+                                        transformedtag,
+                                        taglen,
+                                        (tageratoroptions->maxdistance < 0)
+                                          ?  0
+                                          : (unsigned long)
+                                            tageratoroptions->maxdistance,
+                                        tageratoroptions->maxintervalwidth,
+                                        tageratoroptions->skpp,
+                                        dfst);
+      } else
+      {
+        indexbasedmstats(limdfsresources,
+                         rcmatch,
+                         transformedtag,
+                         taglen,
+                         dfst);
+      }
     }
   }
 }
@@ -421,7 +441,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   void *packedindex = NULL;
   bool withesa;
   const AbstractDfstransformer *dfst;
-  Showmatchinfo showmatchinfo;
 
   if (tageratoroptions->maxdistance >= 0)
   {
@@ -499,8 +518,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     unsigned int maxdepth;
     unsigned long maxpathlength;
     Processmatch processmatch;
+    Showmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
 
+    storeonline.rcdirptr = storeoffline.rcdirptr = &twl.rcdir;
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
     mapsize = getmapsizeAlphabet(suffixarray.alpha);
     if (tageratoroptions->docompare)
@@ -513,6 +534,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       processmatch = showmatch;
       processmatchinfoonline = NULL;
+      showmatchinfo.rcdirptr = &twl.rcdir;
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) (mapsize-1);
       showmatchinfo.tagptr = &twl.transformedtag[0];
@@ -641,6 +663,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       }
       gt_free(desc);
     }
+    gt_free(showmatchinfo.eqsvector);
   }
   FREEARRAY(&storeonline,Simplematch);
   FREEARRAY(&storeoffline,Simplematch);
@@ -654,7 +677,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   }
   gt_seqiterator_delete(seqit);
   freesuffixarray(&suffixarray);
-  gt_free(showmatchinfo.eqsvector);
   if (packedindex != NULL)
   {
     deletevoidBWTSeq(packedindex);

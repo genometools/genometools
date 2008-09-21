@@ -34,11 +34,7 @@ struct AbstractDfstransformer
   void *(*allocatedfsconstinfo)(unsigned int alphasize);
   void (*initdfsconstinfo)(void *dfsconstinfo,
                            unsigned int alphasize,
-                           const Uchar *pattern,
-                           unsigned long patternlength,
-                           unsigned long maxdistance,
-                           unsigned long maxintervalwidth,
-                           bool skpp);
+                           ...);
   void (*extractdfsconstinfo)(Processresult processresult,
                               void *processinfo,
                               const void *patterninfo,

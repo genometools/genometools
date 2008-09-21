@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include <stdarg.h>
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "core/ma.h"
@@ -154,19 +155,29 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
 
 static void apm_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned int alphasize,
-                                 const Uchar *pattern,
-                                 unsigned long patternlength,
-                                 unsigned long maxdistance,
-                                 unsigned long maxintervalwidth,
-                                 bool skpp)
+                                 ...)
+                                 /* Variable argument list is as follows:
+                                    const Uchar *pattern,
+                                    unsigned long patternlength,
+                                    unsigned long maxdistance,
+                                    unsigned long maxintervalwidth,
+                                    bool skpp
+                                 */
 {
+  va_list ap;
+  const Uchar *pattern;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
-  initeqsvector(mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
-  mti->patternlength = patternlength;
-  mti->maxdistance = maxdistance;
-  mti->maxintervalwidth = maxintervalwidth;
-  mti->skpp = skpp;
+  va_start(ap,alphasize);
+  pattern = va_arg(ap, const Uchar *);
+  mti->patternlength = va_arg(ap, unsigned long);
+  mti->maxdistance = va_arg(ap, unsigned long);
+  mti->maxintervalwidth = va_arg(ap, unsigned long);
+  mti->skpp = (bool) va_arg(ap, int);
+  va_end(ap);
+  assert(mti->maxdistance < mti->patternlength);
+  initeqsvector(mti->eqsvector,(unsigned long) alphasize,
+                pattern,mti->patternlength);
 }
 
 static void *apm_allocatedfsconstinfo(unsigned int alphasize)

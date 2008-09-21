@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdarg.h>
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "core/chardef.h"
@@ -81,27 +82,22 @@ static void *pms_allocatedfsconstinfo(unsigned int alphasize)
 
 static void pms_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned int alphasize,
-                                 const Uchar *pattern,
-                                 unsigned long patternlength,
-                                 GT_UNUSED unsigned long maxdistance,
-                                 GT_UNUSED unsigned long maxintervalwidth,
-                                 GT_UNUSED bool skpp)
+                                 ...)
+                                 /* Variable argument list is as follows:
+                                    const Uchar *pattern,
+                                    unsigned long patternlength
+                                 */
 {
+  va_list ap;
+  const Uchar *pattern;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
-#ifdef SKDEBUG
-  int a;
-#endif
 
-  initeqsvector(mti->eqsvector,(unsigned long) alphasize,pattern,patternlength);
-#ifdef SKDEBUG
-  for (a=0; a<4; a++)
-  {
-    char buffer[32+1];
-    uint32_t2string(buffer,(uint32_t) mti->eqsvector[a]);
-    printf("# %d->%s\n",a,buffer);
-  }
-#endif
-  mti->patternlength = patternlength;
+  va_start(ap,alphasize);
+  pattern = va_arg(ap, const Uchar *);
+  mti->patternlength = va_arg(ap, unsigned long);
+  va_end(ap);
+  initeqsvector(mti->eqsvector,(unsigned long) alphasize,
+                pattern,mti->patternlength);
 }
 
 static void pms_extractdfsconstinfo(Processresult processresult,
