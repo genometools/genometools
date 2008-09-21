@@ -16,18 +16,19 @@
 */
 
 #include <string.h>
+#include <assert.h>
 #include "core/symboldef.h"
 #include "core/unused_api.h"
+#include "core/chardef.h"
 #include "core/ma.h"
+#include "intbits.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
-#include "defined-types.h"
 #include "absdfstrans-imp.h"
 #include "initeqsvec.h"
 
 typedef struct
 {
-  unsigned long prefixofsuffix;
+  unsigned long prefixofsuffixbits;
 } Parallelmstats;
 
 typedef struct
@@ -54,7 +55,7 @@ static void pms_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
   printf("at depth %lu: [",depth);
   for (idx=0, backmask = 1UL; idx<mti->patternlength; idx++, backmask <<= 1)
   {
-    if (col->prefixofsuffix & backmask)
+    if (col->prefixofsuffixbits & backmask)
     {
       if (first)
       {
@@ -178,7 +179,7 @@ static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   unsigned long idx;
 
-  column->prefixofsuffix = ~0UL;
+  column->prefixofsuffixbits = ~0UL;
   assert(mti->patternlength <= (unsigned long) INTWORDSIZE);
   for (idx = 0; idx<mti->patternlength; idx++)
   {
@@ -198,10 +199,12 @@ static unsigned long pms_nextstepfullmatches(
 {
   Parallelmstats *limdfsstate = (Parallelmstats *) aliascolumn;
 
-  if (limdfsstate->prefixofsuffix > 0)
+  if (limdfsstate->prefixofsuffixbits > 0)
   {
     Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
-    unsigned long bitindex = 0, first1, tmp = limdfsstate->prefixofsuffix;
+    unsigned long bitindex = 0,
+                  first1,
+                  tmp = limdfsstate->prefixofsuffixbits;
     do
     {
       first1 = zerosontheright(tmp);
@@ -243,15 +246,16 @@ static void pms_nextParallelmstats(const void *dfsconstinfo,
 
   if (currentdepth > 1UL)
   {
-    outcol->prefixofsuffix = incol->prefixofsuffix &
-                             (mti->eqsvector[currentchar] >> (currentdepth-1));
+    outcol->prefixofsuffixbits
+      = incol->prefixofsuffixbits &
+        (mti->eqsvector[currentchar] >> (currentdepth-1));
   } else
   {
-    outcol->prefixofsuffix = mti->eqsvector[currentchar];
+    outcol->prefixofsuffixbits = mti->eqsvector[currentchar];
   }
 #ifdef SKDEBUG
-  uint32_t2string(buffer1,(uint32_t) incol->prefixofsuffix);
-  uint32_t2string(buffer2,(uint32_t) outcol->prefixofsuffix);
+  uint32_t2string(buffer1,(uint32_t) incol->prefixofsuffixbits);
+  uint32_t2string(buffer2,(uint32_t) outcol->prefixofsuffixbits);
   printf("next(%s,%u,depth=%lu)->%s\n",buffer1,(unsigned int) currentchar,
                                        currentdepth,buffer2);
 #endif
@@ -271,12 +275,12 @@ static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
 
   assert(ISNOTSPECIAL(currentchar));
 #ifdef SKDEBUG
-  tmp = col->prefixofsuffix;
+  tmp = col->prefixofsuffixbits;
 #endif
-  col->prefixofsuffix &= (mti->eqsvector[currentchar] >> (currentdepth-1));
+  col->prefixofsuffixbits &= (mti->eqsvector[currentchar] >> (currentdepth-1));
 #ifdef SKDEBUG
   uint32_t2string(buffer1,(uint32_t) tmp);
-  uint32_t2string(buffer2,(uint32_t) col->prefixofsuffix);
+  uint32_t2string(buffer2,(uint32_t) col->prefixofsuffixbits);
   printf("inplacenext(%s,%u,%lu)->%s\n",buffer1,(unsigned int) currentchar,
                                         currentdepth,buffer2);
 #endif
@@ -303,35 +307,35 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
 }
 
 /*
-  define bitvector prefixofsuffix_{d} such that after processing a sequence v
-  of length d we have: for all i\in[0,m-1]
-  prefixofsuffix_{d}[i] is 1 iff P[i..i+d-1] = v[0..d-1]
+  define bitvector prefixofsuffixbits_{d} such that after processing a
+  sequence v of length d we have: for all i\in[0,m-1]
+  prefixofsuffixbits_{d}[i] is 1 iff P[i..i+d-1] = v[0..d-1]
 
   Let eqsvector_{a} be a vector of size m such that
   eqsvector_{a}[i]=1 if P[i]=a
 
   Let d=0 (i.e. at the root). Then
   P[i..i+d-1]=P[i..i-1]=\varepsilon=v[0..-1]=v[0..d-1] for all i \in[0..m-1]
-  and hence prefixofsuffix_{d}[i]=1. In other words
-  prefixofsuffix_{d} = 1^{m}.
+  and hence prefixofsuffixbits_{d}[i]=1. In other words
+  prefixofsuffixbits_{d} = 1^{m}.
 
   Now suppose d > 0 and assume we have computed
-  prefixofsuffix_{d-1}. Then by definition
-  prefixofsuffix_{d}[i]
+  prefixofsuffixbits_{d-1}. Then by definition
+  prefixofsuffixbits_{d}[i]
     iff P[i..i+d-1] = v[0..d-1]
     iff P[i..i+d-2] = v[0..d-2] && P[i+d-1]=v[d-1]
-    iff prefixofsuffix_{d-1][i]=1 && eqsvector_{v[d-1]}[i+d-1]=1
-    iff prefixofsuffix_{d-1][i] & eqsvector_{v[d-1]}[i+d-1]
+    iff prefixofsuffixbits_{d-1][i]=1 && eqsvector_{v[d-1]}[i+d-1]=1
+    iff prefixofsuffixbits_{d-1][i] & eqsvector_{v[d-1]}[i+d-1]
 
-  All values in prefixofsuffix_{d} are independent and can be computed
+  All values in prefixofsuffixbits_{d} are independent and can be computed
   in parallel by
 
-  prefixofsuffix_{d} = prefixofsuffix_{d-1} & (eqsvector_{a} << (d-1))
+  prefixofsuffixbits_{d} = prefixofsuffixbits_{d-1} & (eqsvector_{a} << (d-1))
   where a=v[d-1]
 
-  prefixofsuffix_{d] = 0 and
-  prefixofsuffix_{d-1} != 0 then  for all i satisfying
-  prefixofsuffix_{d-1][i] = 1 do:
+  prefixofsuffixbits_{d] = 0 and
+  prefixofsuffixbits_{d-1} != 0 then  for all i satisfying
+  prefixofsuffixbits_{d-1][i] = 1 do:
     if mstats[i]<d then mstats[i]=d and store first suffixposition of current
     interval.
 */
