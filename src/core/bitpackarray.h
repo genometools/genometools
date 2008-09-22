@@ -84,7 +84,7 @@ bitpackarray_store_uint32(BitPackArray *array, BitOffset index, uint32_t val)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
-  bsStoreUInt32(array->store, array->bitsPerElem * index,
+  gt_bsStoreUInt32(array->store, array->bitsPerElem * index,
                 array->bitsPerElem, val);
 }
 
@@ -100,7 +100,7 @@ bitpackarray_get_uint32(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (uint32_t)*CHAR_BIT);
-  return bsGetUInt32(array->store, array->bitsPerElem * index,
+  return gt_bsGetUInt32(array->store, array->bitsPerElem * index,
                      array->bitsPerElem);
 }
 
@@ -116,7 +116,7 @@ bitpackarray_store_uint64(BitPackArray *array, BitOffset index, uint64_t val)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
-  bsStoreUInt64(array->store, array->bitsPerElem * index,
+  gt_bsStoreUInt64(array->store, array->bitsPerElem * index,
                 array->bitsPerElem, val);
 }
 
@@ -132,7 +132,7 @@ bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (uint64_t)*CHAR_BIT);
-  return bsGetUInt64(array->store, array->bitsPerElem * index,
+  return gt_bsGetUInt64(array->store, array->bitsPerElem * index,
                      array->bitsPerElem);
 }
 

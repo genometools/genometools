@@ -93,7 +93,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     randCmp = gt_malloc(sizeof (@uOpType@)*numRnd);
   }
   /* first test unsigned types */
-  gt_log_log("bsStore@uTypeTag@/bsGet@uTypeTag@: ");
+  gt_log_log("gt_bsStore@uTypeTag@/gt_bsGet@uTypeTag@: ");
   for (i = 0; i < numRnd; ++i)
   {
 #if @bitSize@ > 32 && LONG_BIT < @bitSize@
@@ -102,7 +102,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     @uOpType@ v = randSrc[i] = random();
 #endif /* @bitSize@ > 32 && LONG_BIT < @bitSize@ */
     int bits = required@uTypeTag@Bits(v);
-    bsStore@uTypeTag@(bitStore, offset, bits, v);
+    gt_bsStore@uTypeTag@(bitStore, offset, bits, v);
     offset += bits;
   }
   offset = offsetStart;
@@ -110,7 +110,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   {
     @uOpType@ v = randSrc[i];
     int bits = required@uTypeTag@Bits(v);
-    @uOpType@ r = bsGet@uTypeTag@(bitStore, offset, bits);
+    @uOpType@ r = gt_bsGet@uTypeTag@(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
     {
@@ -129,12 +129,12 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     @uOpType@ mask = ~(@uOpType@)0;
     if (numBits < @bitSize@)
       mask = ~(mask << numBits);
-    gt_log_log("bsSetBit, bsClearBit, bsToggleBit, bsGetBit: ");
+    gt_log_log("bsSetBit, gt_bsClearBit, bsToggleBit, gt_bsGetBit: ");
     while (v)
     {
       int lowBit = v & 1;
       v >>= 1;
-      ensure(had_err, lowBit == (r = bsGetBit(bitStore, --i)));
+      ensure(had_err, lowBit == (r = gt_bsGetBit(bitStore, --i)));
       if (had_err)
       {
         gt_log_log("Expected %d, got %d, i = %llu\n",
@@ -143,7 +143,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       }
     }
     i = offsetStart + numBits;
-    bsClear(bitStoreCopy, offsetStart, numBits, random()&1);
+    gt_bsClear(bitStoreCopy, offsetStart, numBits, random()&1);
     v = randSrc[0];
     while (i)
     {
@@ -152,10 +152,10 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       if (lowBit)
         bsSetBit(bitStoreCopy, --i);
       else
-        bsClearBit(bitStoreCopy, --i);
+        gt_bsClearBit(bitStoreCopy, --i);
     }
     v = randSrc[0];
-    r = bsGet@uTypeTag@(bitStoreCopy, offsetStart, numBits);
+    r = gt_bsGet@uTypeTag@(bitStoreCopy, offsetStart, numBits);
     ensure(had_err, r == v);
     if (had_err)
     {
@@ -164,7 +164,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     }
     for (i = 0; i < numBits; ++i)
       bsToggleBit(bitStoreCopy, offsetStart + i);
-    r = bsGet@uTypeTag@(bitStoreCopy, offsetStart, numBits);
+    r = gt_bsGet@uTypeTag@(bitStoreCopy, offsetStart, numBits);
     ensure(had_err, r == (v = (~v & mask)));
     if (had_err)
     {
@@ -175,24 +175,24 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   }
   if (numRnd > 1)
   {
-    gt_log_log("bsCompare: ");
+    gt_log_log("gt_bsCompare: ");
     {
       @uOpType@ v0 = randSrc[0];
       int bits0 = required@uTypeTag@Bits(v0);
       @uOpType@ r0;
       offset = offsetStart;
-      r0 = bsGet@uTypeTag@(bitStore, offset, bits0);
+      r0 = gt_bsGet@uTypeTag@(bitStore, offset, bits0);
       for (i = 1; i < numRnd; ++i)
       {
         @uOpType@ v1 = randSrc[i];
         int bits1 = required@uTypeTag@Bits(v1);
-        @uOpType@ r1 = bsGet@uTypeTag@(bitStore, offset + bits0, bits1);
-        int result = -2;   /*< -2 is not a return value of bsCompare, thus
+        @uOpType@ r1 = gt_bsGet@uTypeTag@(bitStore, offset + bits0, bits1);
+        int result = -2;   /*< -2 is not a return value of gt_bsCompare, thus
                             *   if it is displayed, there was an earlier
                             *   error. */
         ensure(had_err, r0 == v0 && r1 == v1);
         ensure(had_err, icmp(v0, v1) ==
-               (result = bsCompare(bitStore, offset, bits0,
+               (result = gt_bsCompare(bitStore, offset, bits0,
                                    bitStore, offset + bits0, bits1)));
         if (had_err)
         {
@@ -212,18 +212,18 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     }
     gt_log_log("passed\n");
   }
-  gt_log_log("bsStoreUniform@uTypeTag@Array/bsGet@uTypeTag@: ");
+  gt_log_log("gt_bsStoreUniform@uTypeTag@Array/gt_bsGet@uTypeTag@: ");
   {
     unsigned numBits = random()%@bitSize@ + 1;
     @uOpType@ mask = ~(@uOpType@)0;
     if (numBits < @bitSize@)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numRnd, randSrc);
+    gt_bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numRnd, randSrc);
     for (i = 0; i < numRnd; ++i)
     {
       @uOpType@ v = randSrc[i] & mask;
-      @uOpType@ r = bsGet@uTypeTag@(bitStore, offset, numBits);
+      @uOpType@ r = gt_bsGet@uTypeTag@(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -234,8 +234,8 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreUniform@uTypeTag@Array/bsGetUniform@uTypeTag@Array: ");
-    bsGetUniform@uTypeTag@Array(bitStore, offset = offsetStart,
+    gt_log_log("gt_bsStoreUniform@uTypeTag@Array/gt_bsGetUniform@uTypeTag@Array: ");
+    gt_bsGetUniform@uTypeTag@Array(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
     {
@@ -254,7 +254,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     {
       @uOpType@ v = randSrc[0] & mask;
       @uOpType@ r;
-      bsGetUniform@uTypeTag@Array(bitStore, offsetStart,
+      gt_bsGetUniform@uTypeTag@Array(bitStore, offsetStart,
                                  numBits, 1, &r);
       if (r != v)
       {
@@ -267,12 +267,12 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     gt_log_log(" passed\n");
   }
   /* int types */
-  gt_log_log("bsStore@iTypeTag@/bsGet@iTypeTag@: ");
+  gt_log_log("gt_bsStore@iTypeTag@/gt_bsGet@iTypeTag@: ");
   for (i = 0; i < numRnd; ++i)
   {
     @iOpType@ v = (@iOpType@)randSrc[i];
     unsigned bits = required@iTypeTag@Bits(v);
-    bsStore@iTypeTag@(bitStore, offset, bits, v);
+    gt_bsStore@iTypeTag@(bitStore, offset, bits, v);
     offset += bits;
   }
   offset = offsetStart;
@@ -280,7 +280,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   {
     @iOpType@ v = randSrc[i];
     unsigned bits = required@iTypeTag@Bits(v);
-    @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, bits);
+    @iOpType@ r = gt_bsGet@iTypeTag@(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
     {
@@ -292,20 +292,20 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     offset += bits;
   }
   gt_log_log("passed\n");
-  gt_log_log("bsStoreUniform@iTypeTag@Array/bsGet@iTypeTag@: ");
+  gt_log_log("gt_bsStoreUniform@iTypeTag@Array/gt_bsGet@iTypeTag@: ");
   {
     unsigned numBits = random()%@bitSize@ + 1;
     @iOpType@ mask = ~(@iOpType@)0;
     if (numBits < @bitSize@)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    bsStoreUniform@iTypeTag@Array(bitStore, offset, numBits, numRnd,
+    gt_bsStoreUniform@iTypeTag@Array(bitStore, offset, numBits, numRnd,
                                 (@iOpType@ *)randSrc);
     for (i = 0; i < numRnd; ++i)
     {
       @iOpType@ m = (@iOpType@)1 << (numBits - 1);
       @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
-      @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+      @iOpType@ r = gt_bsGet@iTypeTag@(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -317,8 +317,8 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreUniform@iTypeTag@Array/bsGetUniform@iTypeTag@Array: ");
-    bsGetUniform@iTypeTag@Array(bitStore, offset = offsetStart,
+    gt_log_log("gt_bsStoreUniform@iTypeTag@Array/gt_bsGetUniform@iTypeTag@Array: ");
+    gt_bsGetUniform@iTypeTag@Array(bitStore, offset = offsetStart,
                               numBits, numRnd, (@iOpType@ *)randCmp);
     for (i = 0; i < numRnd; ++i)
     {
@@ -338,7 +338,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       @iOpType@ m = (@iOpType@)1 << (numBits - 1);
       @iOpType@ v = (@iOpType@)((randSrc[0] & mask) ^ m) - m;
       @iOpType@ r = 0;
-      bsGetUniform@iTypeTag@Array(bitStore, offsetStart,
+      gt_bsGetUniform@iTypeTag@Array(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);
       if (had_err)
@@ -352,14 +352,14 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     gt_log_log("passed\n");
   }
 
-  gt_log_log("bsStoreNonUniform@uTypeTag@Array/bsGet@uTypeTag@: ");
+  gt_log_log("gt_bsStoreNonUniform@uTypeTag@Array/gt_bsGet@uTypeTag@: ");
   {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
     offset = offsetStart;
-    bsStoreNonUniform@uTypeTag@Array(bitStore, offset, numRnd, bitsTotal,
+    gt_bsStoreNonUniform@uTypeTag@Array(bitStore, offset, numRnd, bitsTotal,
                                      numBitsList, randSrc);
     for (i = 0; i < numRnd; ++i)
     {
@@ -367,7 +367,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       @uOpType@ mask = (numBits < @bitSize@)?
         ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
       @uOpType@ v = randSrc[i] & mask;
-      @uOpType@ r = bsGet@uTypeTag@(bitStore, offset, numBits);
+      @uOpType@ r = gt_bsGet@uTypeTag@(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -379,9 +379,9 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreNonUniform@uTypeTag@Array/"
-            "bsGetNonUniform@uTypeTag@Array: ");
-    bsGetNonUniform@uTypeTag@Array(bitStore, offset = offsetStart,
+    gt_log_log("gt_bsStoreNonUniform@uTypeTag@Array/"
+            "gt_bsGetNonUniform@uTypeTag@Array: ");
+    gt_bsGetNonUniform@uTypeTag@Array(bitStore, offset = offsetStart,
                                    numRnd, bitsTotal, numBitsList, randCmp);
     for (i = 0; i < numRnd; ++i)
     {
@@ -406,7 +406,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
         ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
       @uOpType@ v = randSrc[0] & mask;
       @uOpType@ r;
-      bsGetNonUniform@uTypeTag@Array(bitStore, offsetStart, 1, numBits,
+      gt_bsGetNonUniform@uTypeTag@Array(bitStore, offsetStart, 1, numBits,
                                      numBitsList, &r);
       if (r != v)
       {
@@ -420,14 +420,14 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
     gt_free(numBitsList);
     numBitsList = NULL;
   }
-  gt_log_log("bsNonStoreUniform@iTypeTag@Array/bsGet@iTypeTag@: ");
+  gt_log_log("bsNonStoreUniform@iTypeTag@Array/gt_bsGet@iTypeTag@: ");
   {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%@bitSize@ + 1);
     offset = offsetStart;
-    bsStoreNonUniform@iTypeTag@Array(bitStore, offset, numRnd, bitsTotal,
+    gt_bsStoreNonUniform@iTypeTag@Array(bitStore, offset, numRnd, bitsTotal,
                                      numBitsList, (@iOpType@ *)randSrc);
     for (i = 0; i < numRnd; ++i)
     {
@@ -436,7 +436,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
         ? ~((~(@iOpType@)0) << numBits) : ~(@iOpType@)0;
       @iOpType@ m = (@iOpType@)1 << (numBits - 1);
       @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
-      @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+      @iOpType@ r = gt_bsGet@iTypeTag@(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -448,9 +448,9 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreNonUniform@iTypeTag@Array/"
-            "bsGetNonUniform@iTypeTag@Array: ");
-    bsGetNonUniform@iTypeTag@Array(bitStore, offset = offsetStart, numRnd,
+    gt_log_log("gt_bsStoreNonUniform@iTypeTag@Array/"
+            "gt_bsGetNonUniform@iTypeTag@Array: ");
+    gt_bsGetNonUniform@iTypeTag@Array(bitStore, offset = offsetStart, numRnd,
                                    bitsTotal, numBitsList,
                                    (@iOpType@ *)randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -477,7 +477,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       @iOpType@ m = (@iOpType@)1 << (numBits - 1);
       @iOpType@ v = (@iOpType@)((randSrc[0] & mask) ^ m) - m;
       @iOpType@ r = 0;
-      bsGetNonUniform@iTypeTag@Array(bitStore, offsetStart,
+      gt_bsGetNonUniform@iTypeTag@Array(bitStore, offsetStart,
                                      1, numBits, numBitsList, &r);
       ensure(had_err, r == v);
       if (had_err)
@@ -495,7 +495,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
 
   if (numRnd > 0)
   {
-    gt_log_log("bsCopy: ");
+    gt_log_log("gt_bsCopy: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
@@ -516,17 +516,17 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       }
       assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
-      bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numValueCopies,
+      gt_bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numValueCopies,
                                     randSrc);
       destOffset = random()%(offsetStart + @bitSize@
                              * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
-      /* the following bsCopy should be equivalent to:
-       * bsStoreUniform@uTypeTag@Array(bitStoreCopy, destOffset,
+      /* the following gt_bsCopy should be equivalent to:
+       * gt_bsStoreUniform@uTypeTag@Array(bitStoreCopy, destOffset,
        *                              numBits, numValueCopies, randSrc); */
-      bsCopy(bitStore, offset, bitStoreCopy, destOffset, numCopyBits);
+      gt_bsCopy(bitStore, offset, bitStoreCopy, destOffset, numCopyBits);
       ensure(had_err,
-             bsCompare(bitStore, offset, numCopyBits,
+             gt_bsCompare(bitStore, offset, numCopyBits,
                        bitStoreCopy, destOffset, numCopyBits) == 0);
       if (had_err)
       {
@@ -544,7 +544,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   }
   if (numRnd > 0)
   {
-    gt_log_log("bsClear: ");
+    gt_log_log("gt_bsClear: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numResetValues, resetStart;
@@ -567,17 +567,17 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       }
       assert(resetStart + numResetValues <= numRnd);
       offset = offsetStart;
-      bsStoreUniform@iTypeTag@Array(bitStore, offset, numBits, numRnd,
+      gt_bsStoreUniform@iTypeTag@Array(bitStore, offset, numBits, numRnd,
                                     (@iOpType@ *)randSrc);
       numResetBits = (BitOffset)numBits * numResetValues;
-      bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
+      gt_bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
               numResetBits, bitVal);
       {
         @iOpType@ m = (@iOpType@)1 << (numBits - 1);
         for (i = 0; i < resetStart; ++i)
         {
           @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
-          @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+          @iOpType@ r = gt_bsGet@iTypeTag@(bitStore, offset, numBits);
           ensure(had_err, r == v);
           if (had_err)
           {
@@ -590,7 +590,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
         }
         for (; i < resetStart + numResetValues; ++i)
         {
-          @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+          @iOpType@ r = gt_bsGet@iTypeTag@(bitStore, offset, numBits);
           ensure(had_err, r == cmpVal);
           if (had_err)
           {
@@ -604,7 +604,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
         for (; i < numRnd; ++i)
         {
           @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
-          @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+          @iOpType@ r = gt_bsGet@iTypeTag@(bitStore, offset, numBits);
           ensure(had_err, r == v);
           if (had_err)
           {
@@ -621,7 +621,7 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
   }
   if (numRnd > 0)
   {
-    gt_log_log("bs1BitsCount: ");
+    gt_log_log("gt_bs1BitsCount: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numCountValues, countStart;
@@ -642,9 +642,9 @@ gt_bitPackString@iTypeTag@_unit_test(GtError *err)
       }
       assert(countStart + numCountValues <= numRnd);
       offset = offsetStart;
-      bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numRnd, randSrc);
+      gt_bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numRnd, randSrc);
       numCountBits = (BitOffset)numBits * numCountValues;
-      bitCountCmp = bs1BitsCount(bitStore,
+      bitCountCmp = gt_bs1BitsCount(bitStore,
                                  offset + (BitOffset)countStart * numBits,
                                  numCountBits);
       for (i = countStart; i < countStart + numCountValues; ++i)

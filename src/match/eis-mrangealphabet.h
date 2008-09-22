@@ -41,13 +41,13 @@ typedef unsigned AlphabetRangeID;
  *           represent the total number of symbols */
 typedef unsigned short AlphabetRangeSize;
 /** retrieve symbol from BitString */
-#define bsGetSymbol bsGetUInt8
+#define gt_bsGetSymbol gt_bsGetUInt8
 /** store symbol in BitString */
-#define bsStoreSymbol bsStoreUInt8
+#define gt_bsStoreSymbol gt_bsStoreUInt8
 /** retrieve array of symbols from BitString  */
-#define bsGetUniformSymbolArray bsGetUniformUInt8Array
+#define gt_bsGetUniformSymbolArray gt_bsGetUniformUInt8Array
 /** store array of symbols in BitString  */
-#define bsStoreUniformSymbolArray bsStoreUniformUInt8Array
+#define gt_bsStoreUniformSymbolArray gt_bsStoreUniformUInt8Array
 /** how many bits are required to store given symbol value */
 #define requiredSymbolBits requiredUInt8Bits
 

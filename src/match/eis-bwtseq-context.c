@@ -220,7 +220,7 @@ readBlock2Buf(FILE *fp, Seqpos *buf, size_t len, BitString bitstring,
 {
   if (fread(buf, sizeof (buf[0]), len, fp) != len)
     die("short read when reading backing store");
-  bsStoreUniformSeqposArray(bitstring, offset, bitsPerSeqpos, len, buf);
+  gt_bsStoreUniformSeqposArray(bitstring, offset, bitsPerSeqpos, len, buf);
 }
 
 static inline void
@@ -280,8 +280,8 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         BitElem headerBuf[headerBitElems];
         if (!(mapFile = gt_fa_fopen(gt_str_get(mapName), "w+b", NULL)))
           break;
-        bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
-        bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
+        gt_bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
+        gt_bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
                       bitsPerSeqpos);
         if (fwrite(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
           break;
@@ -302,8 +302,8 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
           break;
         if (fread(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
           break;
-        if (bsGetUInt16(headerBuf, 0, HEADER_ENTRY_BITS) != mapIntervalLog2
-            || (bsGetUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS)
+        if (gt_bsGetUInt16(headerBuf, 0, HEADER_ENTRY_BITS) != mapIntervalLog2
+            || (gt_bsGetUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS)
                 != bitsPerSeqpos))
         {
           fprintf(stderr, "error: context map file %s contains corrupted "

@@ -17,7 +17,7 @@
 #include "core/unused_api.h"
 
 void
-bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
+gt_bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
                              size_t numValues, const @ValueType@ val[])
 {
   /* idea: read as much as possible from val in each iteration,
@@ -138,7 +138,7 @@ bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
 }
 
 void
-bsStoreNonUniform@uTypeTag@Array(
+gt_bsStoreNonUniform@uTypeTag@Array(
   BitString str, BitOffset offset, GT_UNUSED size_t numValues,
   BitOffset totalBitsLeft, unsigned numBitsList[], const @ValueType@ val[])
 {

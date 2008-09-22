@@ -46,25 +46,25 @@ struct seqRangeList
 static inline Seqpos
 seqRangeLen(const struct seqRange *p, unsigned symBits)
 {
-  return bsGetSeqpos(p->symLenStr, symBits, symLenStrBits - symBits);
+  return gt_bsGetSeqpos(p->symLenStr, symBits, symLenStrBits - symBits);
 }
 
 static inline Symbol
 seqRangeSym(const struct seqRange *p, unsigned symBits)
 {
-  return bsGetSymbol(p->symLenStr, 0, symBits);
+  return gt_bsGetSymbol(p->symLenStr, 0, symBits);
 }
 
 static inline void
 seqRangeSetLen(struct seqRange *p, Seqpos len, unsigned symBits)
 {
-  return bsStoreSeqpos(p->symLenStr, symBits, symLenStrBits - symBits, len);
+  return gt_bsStoreSeqpos(p->symLenStr, symBits, symLenStrBits - symBits, len);
 }
 
 static inline void
 seqRangeSetSym(struct seqRange *p, Symbol sym, unsigned symBits)
 {
-  return bsStoreSymbol(p->symLenStr, 0, symBits, sym);
+  return gt_bsStoreSymbol(p->symLenStr, 0, symBits, sym);
 }
 
 static inline int

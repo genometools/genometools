@@ -194,7 +194,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 #if EIS_DEBUG > 1
       printComposition(stderr, composition, alphabetSize, blockSize);
 #endif /* EIS_DEBUG > 1 */
-      bsStoreUniformUIntArray(newList->catCompsPerms, offset,
+      gt_bsStoreUniformUIntArray(newList->catCompsPerms, offset,
                               bitsPerCount, alphabetSize, composition);
       assert(cmpIdx > 1?(gt_bsCompare(newList->catCompsPerms, offset,
                                       bitsPerComp,
@@ -334,7 +334,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
     BitOffset offset = permOffset;
     do
     {
-      bsStoreUniformSymbolArray(permStore, offset,
+      gt_bsStoreUniformSymbolArray(permStore, offset,
                                 bitsPerSymbol, blockSize, currentPermutation);
 #if EIS_DEBUG > 1
       printPermutation(stderr, currentPermutation, blockSize);
@@ -471,7 +471,7 @@ block2IndexPair(const struct compList *compositionTable,
     {
       ++composition[block[i]];
     }
-    bsStoreUniformUIntArray(permCompBitString, 0, bitsPerCount,
+    gt_bsStoreUniformUIntArray(permCompBitString, 0, bitsPerCount,
                             alphabetSize, composition);
     if (!compPA)
       gt_free(composition);
@@ -505,7 +505,7 @@ block2IndexPair(const struct compList *compositionTable,
     if (permutation->numPermutations > 1)
     {
       /* build permutation bitstring */
-      bsStoreUniformSymbolArray(permCompBitString, bitsPerComposition,
+      gt_bsStoreUniformSymbolArray(permCompBitString, bitsPerComposition,
                                 compositionTable->bitsPerSymbol, blockSize,
                                 block);
       /* do binary search for permutation */

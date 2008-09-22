@@ -15,7 +15,7 @@
 */
 
 void
-bsGetUniform@uTypeTag@Array@VecOpName@(constBitString str, BitOffset offset,
+gt_bsGetUniform@uTypeTag@Array@VecOpName@(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            @ValueType@ val[])
 {
@@ -77,7 +77,7 @@ bsGetUniform@uTypeTag@Array@VecOpName@(constBitString str, BitOffset offset,
 }
 
 void
-bsGetNonUniform@uTypeTag@Array@VecOpName@(
+gt_bsGetNonUniform@uTypeTag@Array@VecOpName@(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], @uOpType@ val[])
 {
@@ -144,7 +144,7 @@ bsGetNonUniform@uTypeTag@Array@VecOpName@(
 }
 
 void
-bsGetNonUniform@iTypeTag@Array@VecOpName@(
+gt_bsGetNonUniform@iTypeTag@Array@VecOpName@(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], @iOpType@ val[])
 {

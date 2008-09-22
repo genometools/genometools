@@ -64,7 +64,7 @@ int gt_bitpackarray_unit_test(GtError *err)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-        gt_log_log("bsStoreUInt32/bitpackarray_get_uint32: "
+        gt_log_log("gt_bsStoreUInt32/bitpackarray_get_uint32: "
                 "Expected %"PRIu32", got %"PRIu32", i = %lu, bits=%u\n",
                 v & mask, r, (unsigned long)i, bits);
         gt_free(randSrc);
@@ -117,7 +117,7 @@ int gt_bitpackarray_unit_test(GtError *err)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-        gt_log_log("bsStoreUInt64/bitpackarray_get_uint64: "
+        gt_log_log("gt_bsStoreUInt64/bitpackarray_get_uint64: "
                 "Expected %llu, got %llu, i = %lu, bits=%u\n",
                 (unsigned long long)(v & mask),
                 (unsigned long long)r, (unsigned long)i, bits);

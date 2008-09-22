@@ -61,48 +61,48 @@ enum {
 /** bits required to store int value val exactly */
 #define requiredIntBits(val) requiredInt32Bits(val)
 /** extract unsigned from BitString */
-#define bsGetUInt(str, offset, numBits) bsGetUInt32(str, offset, numBits)
+#define gt_bsGetUInt(str, offset, numBits) gt_bsGetUInt32(str, offset, numBits)
 /** extract int from BitString */
-#define bsGetInt(str, offset, numBits) bsGetInt32(str, offset, numBits)
+#define gt_bsGetInt(str, offset, numBits) gt_bsGetInt32(str, offset, numBits)
 /** store unsigned in BitString */
-#define bsStoreUInt(str, offset, numBits, val) \
-  bsStoreUInt32(str, offset, numBits, val)
+#define gt_bsStoreUInt(str, offset, numBits, val) \
+  gt_bsStoreUInt32(str, offset, numBits, val)
 /** store int in BitString */
-#define bsStoreInt(str, offset, numBits, val) \
-  bsStoreInt32(str, offset, numBits, val)
+#define gt_bsStoreInt(str, offset, numBits, val) \
+  gt_bsStoreInt32(str, offset, numBits, val)
 /** store array of unsigned ints in BitString */
-#define bsStoreUniformUIntArray(str, offset, numBits, numValues, val) \
-  bsStoreUniformUInt32Array(str, offset, numBits, numValues, \
+#define gt_bsStoreUniformUIntArray(str, offset, numBits, numValues, val) \
+  gt_bsStoreUniformUInt32Array(str, offset, numBits, numValues, \
                             (uint32_t *)(void *)val)
 /** store array of unsigned ints in BitString */
-#define bsStoreNonUniformUIntArray(str, offset, numValues, bitsTotal, \
+#define gt_bsStoreNonUniformUIntArray(str, offset, numValues, bitsTotal, \
                                    numBitsList, val)                  \
-  bsStoreNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
+  gt_bsStoreNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
                                numBitsList, (uint32_t *)(void *)val)
 /** store array of unsigned ints in BitString */
-#define bsStoreNonUniformIntArray(str, offset, numValues, bitsTotal, \
+#define gt_bsStoreNonUniformIntArray(str, offset, numValues, bitsTotal, \
                                   numBitsList, val)                  \
-  bsStoreNonUniformInt32Array(str, offset, numValues, bitsTotal, \
+  gt_bsStoreNonUniformInt32Array(str, offset, numValues, bitsTotal, \
                               numBitsList, (int32_t *)val)
 /** store array of ints in BitString */
-#define bsStoreUniformIntArray(str, offset, numBits, numValues, val) \
-  bsStoreUniformInt32Array(str, offset, numBits, numValues, (int32_t *)val)
+#define gt_bsStoreUniformIntArray(str, offset, numBits, numValues, val) \
+  gt_bsStoreUniformInt32Array(str, offset, numBits, numValues, (int32_t *)val)
 /** get array of unsigned ints from BitString */
-#define bsGetUniformUIntArray(str, offset, numBits, numValues, val) \
-  bsGetUniformUInt32Array(str, offset, numBits, numValues, \
+#define gt_bsGetUniformUIntArray(str, offset, numBits, numValues, val) \
+  gt_bsGetUniformUInt32Array(str, offset, numBits, numValues, \
                           (uint32_t *)(void *)val)
 /** get array of unsigned ints from BitString */
-#define bsGetNonUniformUIntArray(str, offset, numValues, bitsTotal, \
+#define gt_bsGetNonUniformUIntArray(str, offset, numValues, bitsTotal, \
                                  numBitsList, val)                      \
-  bsGetNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
+  gt_bsGetNonUniformUInt32Array(str, offset, numValues, bitsTotal, \
                              numBitsList, (uint32_t *)(void *)val)
 /** get array of ints from BitString */
-#define bsGetUniformIntArray(str, offset, numBits, numValues, val) \
-  bsGetUniformInt32Array(str, offset, numBits, numValues, \
+#define gt_bsGetUniformIntArray(str, offset, numBits, numValues, val) \
+  gt_bsGetUniformInt32Array(str, offset, numBits, numValues, \
                          (int32_t *)(void *)val)
-#define bsGetNonUniformIntArray(str, offset, numValues, bitsTotal, \
+#define gt_bsGetNonUniformIntArray(str, offset, numValues, bitsTotal, \
                                 numBitsList, val)                  \
-  bsGetNonUniformInt32Array(str, offset, numValues, bitsTotal, \
+  gt_bsGetNonUniformInt32Array(str, offset, numValues, bitsTotal, \
                              numBitsList, (int32_t *)(void *)val)
 
 /**
@@ -211,7 +211,7 @@ requiredInt64Bits(int64_t v);
  * @return value read
  */
 extern uint8_t
-bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -221,7 +221,7 @@ bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 extern uint16_t
-bsGetUInt16(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetUInt16(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -231,7 +231,7 @@ bsGetUInt16(constBitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 extern uint32_t
-bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -241,7 +241,7 @@ bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 extern uint64_t
-bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -252,7 +252,7 @@ bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
  * @param val value to store
  */
 extern void
-bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
+gt_bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -263,7 +263,8 @@ bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
  * @param val value to store
  */
 extern void
-bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val);
+gt_bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits,
+                 uint16_t val);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -274,7 +275,8 @@ bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val);
  * @param val value to store
  */
 extern void
-bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
+gt_bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits,
+                 uint32_t val);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -285,7 +287,8 @@ bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
  * @param val value to store
  */
 extern void
-bsStoreUInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
+gt_bsStoreUInt64(BitString str, BitOffset offset, unsigned numBits,
+                 uint64_t val);
 /**
  * \brief Retrieve integer of specified length from bitstring at given
  * position.
@@ -296,7 +299,7 @@ bsStoreUInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
  * @return value read
  */
 static inline int8_t
-bsGetInt8(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetInt8(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve integer of specified length from bitstring at given
  * position.
@@ -307,7 +310,7 @@ bsGetInt8(constBitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 static inline int16_t
-bsGetInt16(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetInt16(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve integer of specified length from bitstring at given
  * position.
@@ -318,7 +321,7 @@ bsGetInt16(constBitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 static inline int32_t
-bsGetInt32(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetInt32(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve integer of specified length from bitstring at given
  * position.
@@ -329,7 +332,7 @@ bsGetInt32(constBitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 static inline int64_t
-bsGetInt64(constBitString str, BitOffset offset, unsigned numBits);
+gt_bsGetInt64(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Store integer of specified length in bitstring at given
  * position.
@@ -340,7 +343,7 @@ bsGetInt64(constBitString str, BitOffset offset, unsigned numBits);
  * @param val value to store
  */
 static inline void
-bsStoreInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
+gt_bsStoreInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
 /**
  * \brief Store integer of specified length in bitstring at given
  * position.
@@ -351,7 +354,8 @@ bsStoreInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
  * @param val value to store
  */
 static inline void
-bsStoreInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val);
+gt_bsStoreInt16(BitString str, BitOffset offset, unsigned numBits,
+                uint16_t val);
 /**
  * \brief Store integer of specified length in bitstring at given
  * position.
@@ -362,7 +366,8 @@ bsStoreInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val);
  * @param val value to store
  */
 static inline void
-bsStoreInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
+gt_bsStoreInt32(BitString str, BitOffset offset, unsigned numBits,
+                uint32_t val);
 /**
  * \brief Store integer of specified length in bitstring at given
  * position.
@@ -373,7 +378,8 @@ bsStoreInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
  * @param val value to store
  */
 static inline void
-bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
+gt_bsStoreInt64(BitString str, BitOffset offset, unsigned numBits,
+                uint64_t val);
 /* higher level functions */
 
 /**
@@ -386,8 +392,8 @@ bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
  * @param val read integers from this array
  */
 void
-bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
-                         size_t numValues, const uint8_t val[]);
+gt_bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
+                            size_t numValues, const uint8_t val[]);
 /**
  * \brief Store n unsigned integers of specified length from array, in
  * bitstring, starting at given position.
@@ -398,8 +404,8 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val read integers from this array
  */
 void
-bsStoreUniformUInt16Array(BitString str, BitOffset offset, unsigned numBits,
-                          size_t numValues, const uint16_t val[]);
+gt_bsStoreUniformUInt16Array(BitString str, BitOffset offset, unsigned numBits,
+                             size_t numValues, const uint16_t val[]);
 /**
  * \brief Store n unsigned integers of specified length from array, in
  * bitstring, starting at given position.
@@ -410,8 +416,8 @@ bsStoreUniformUInt16Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val read integers from this array
  */
 void
-bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
-                          size_t numValues, const uint32_t val[]);
+gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
+                             size_t numValues, const uint32_t val[]);
 /**
  * \brief Store n unsigned integers of specified length from array, in
  * bitstring, starting at given position.
@@ -422,8 +428,8 @@ bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val read integers from this array
  */
 void
-bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
-                          size_t numValues, const uint64_t val[]);
+gt_bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
+                             size_t numValues, const uint64_t val[]);
 
 /**
  * \brief Store n unsigned integers of specified length from array, in
@@ -438,7 +444,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val read integers from this array
  */
 void
-bsStoreNonUniformUInt8Array(
+gt_bsStoreNonUniformUInt8Array(
   BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
   unsigned *numBitsList, const uint8_t val[]);
 /**
@@ -454,7 +460,7 @@ bsStoreNonUniformUInt8Array(
  * @param val read integers from this array
  */
 void
-bsStoreNonUniformUInt16Array(
+gt_bsStoreNonUniformUInt16Array(
   BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
   unsigned *numBitsList, const uint16_t val[]);
 /**
@@ -470,7 +476,7 @@ bsStoreNonUniformUInt16Array(
  * @param val read integers from this array
  */
 void
-bsStoreNonUniformUInt32Array(
+gt_bsStoreNonUniformUInt32Array(
   BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
   unsigned *numBitsList, const uint32_t val[]);
 /**
@@ -486,7 +492,7 @@ bsStoreNonUniformUInt32Array(
  * @param val read integers from this array
  */
 void
-bsStoreNonUniformUInt64Array(
+gt_bsStoreNonUniformUInt64Array(
   BitString str, BitOffset offset, size_t numValues, BitOffset totalBitsLeft,
   unsigned *numBitsList, const uint64_t val[]);
 
@@ -500,7 +506,7 @@ bsStoreNonUniformUInt64Array(
  * @param val read integers from this array
  */
 static inline void
-bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
+gt_bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
                         size_t numValues, const int8_t val[]);
 /**
  * \brief Store n unsigned integers of specified length from array, in
@@ -512,7 +518,7 @@ bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val read integers from this array
  */
 static inline void
-bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
+gt_bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
                          size_t numValues, const int16_t val[]);
 /**
  * \brief Store n unsigned integers of specified length from array, in
@@ -524,7 +530,7 @@ bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val read integers from this array
  */
 static inline void
-bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
+gt_bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
                          size_t numValues, const int32_t val[]);
 /**
  * \brief Store n unsigned integers of specified length from array, in
@@ -536,7 +542,7 @@ bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val read integers from this array
  */
 static inline void
-bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
+gt_bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
                          size_t numValues, const int64_t val[]);
 
 /**
@@ -549,8 +555,8 @@ bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 void
-bsGetUniformUInt8Array(constBitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, uint8_t val[]);
+gt_bsGetUniformUInt8Array(constBitString str, BitOffset offset,
+                          unsigned numBits, size_t numValues, uint8_t val[]);
 /**
  * \brief Retrieve n unsigned integers of specified length from
  * bitstring, starting at given position.
@@ -561,8 +567,8 @@ bsGetUniformUInt8Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 void
-bsGetUniformUInt16Array(constBitString str, BitOffset offset, unsigned numBits,
-                        size_t numValues, uint16_t val[]);
+gt_bsGetUniformUInt16Array(constBitString str, BitOffset offset,
+                           unsigned numBits, size_t numValues, uint16_t val[]);
 /**
  * \brief Retrieve n unsigned integers of specified length from
  * bitstring, starting at given position.
@@ -573,8 +579,8 @@ bsGetUniformUInt16Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 void
-bsGetUniformUInt32Array(constBitString str, BitOffset offset, unsigned numBits,
-                        size_t numValues, uint32_t val[]);
+gt_bsGetUniformUInt32Array(constBitString str, BitOffset offset,
+                           unsigned numBits, size_t numValues, uint32_t val[]);
 /**
  * \brief Retrieve n unsigned integers of specified length from
  * bitstring, starting at given position.
@@ -585,8 +591,8 @@ bsGetUniformUInt32Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 void
-bsGetUniformUInt64Array(constBitString str, BitOffset offset, unsigned numBits,
-                        size_t numValues, uint64_t val[]);
+gt_bsGetUniformUInt64Array(constBitString str, BitOffset offset,
+                           unsigned numBits, size_t numValues, uint64_t val[]);
 
 /**
  * \brief Retrieve n integers of specified length from bitstring,
@@ -598,8 +604,8 @@ bsGetUniformUInt64Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 static inline void
-bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
-                      size_t numValues, int8_t val[]);
+gt_bsGetUniformInt8Array(constBitString str, BitOffset offset,
+                         unsigned numBits, size_t numValues, int8_t val[]);
 /**
  * \brief Retrieve n integers of specified length from bitstring,
  * starting at given position.
@@ -610,8 +616,8 @@ bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 static inline void
-bsGetUniformInt16Array(constBitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, int16_t val[]);
+gt_bsGetUniformInt16Array(constBitString str, BitOffset offset,
+                          unsigned numBits, size_t numValues, int16_t val[]);
 /**
  * \brief Retrieve n integers of specified length from bitstring,
  * starting at given position.
@@ -622,8 +628,8 @@ bsGetUniformInt16Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 static inline void
-bsGetUniformInt32Array(constBitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, int32_t val[]);
+gt_bsGetUniformInt32Array(constBitString str, BitOffset offset,
+                          unsigned numBits, size_t numValues, int32_t val[]);
 /**
  * \brief Retrieve n integers of specified length from bitstring,
  * starting at given position.
@@ -634,8 +640,8 @@ bsGetUniformInt32Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 static inline void
-bsGetUniformInt64Array(constBitString str, BitOffset offset, unsigned numBits,
-                       size_t numValues, int64_t val[]);
+gt_bsGetUniformInt64Array(constBitString str, BitOffset offset,
+                          unsigned numBits, size_t numValues, int64_t val[]);
 
 /**
  * \brief Retrieve n unsigned integers of specified length from
@@ -649,7 +655,7 @@ bsGetUniformInt64Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformUInt8Array(
+gt_bsGetNonUniformUInt8Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[]);
 /**
@@ -664,7 +670,7 @@ bsGetNonUniformUInt8Array(
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformUInt16Array(
+gt_bsGetNonUniformUInt16Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint16_t val[]);
 /**
@@ -679,7 +685,7 @@ bsGetNonUniformUInt16Array(
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformUInt32Array(
+gt_bsGetNonUniformUInt32Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint32_t val[]);
 /**
@@ -694,7 +700,7 @@ bsGetNonUniformUInt32Array(
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformUInt64Array(
+gt_bsGetNonUniformUInt64Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint64_t val[]);
 
@@ -710,7 +716,7 @@ bsGetNonUniformUInt64Array(
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformInt8Array(
+gt_bsGetNonUniformInt8Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[]);
 /**
@@ -725,7 +731,7 @@ bsGetNonUniformInt8Array(
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformInt16Array(
+gt_bsGetNonUniformInt16Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int16_t val[]);
 /**
@@ -740,7 +746,7 @@ bsGetNonUniformInt16Array(
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformInt32Array(
+gt_bsGetNonUniformInt32Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int32_t val[]);
 /**
@@ -755,7 +761,7 @@ bsGetNonUniformInt32Array(
  * @param val store integers read in this array
  */
 void
-bsGetNonUniformInt64Array(
+gt_bsGetNonUniformInt64Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int64_t val[]);
 
@@ -770,7 +776,7 @@ bsGetNonUniformInt64Array(
  * returned in this array
  */
 void
-bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
                           unsigned numBits, size_t numValues,
                           uint8_t val[]);
 /**
@@ -784,7 +790,7 @@ bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
  * returned in this array
  */
 void
-bsGetUniformUInt16ArrayAdd(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt16ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint16_t val[]);
 /**
@@ -798,7 +804,7 @@ bsGetUniformUInt16ArrayAdd(constBitString str, BitOffset offset,
  * returned in this array
  */
 void
-bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint32_t val[]);
 /**
@@ -812,7 +818,7 @@ bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
  * returned in this array
  */
 void
-bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint64_t val[]);
 
@@ -829,7 +835,7 @@ bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
  * returned in this array
  */
 void
-bsGetNonUniformUInt8ArrayAdd(
+gt_bsGetNonUniformUInt8ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[]);
 /**
@@ -845,7 +851,7 @@ bsGetNonUniformUInt8ArrayAdd(
  * returned in this array
  */
 void
-bsGetNonUniformUInt16ArrayAdd(
+gt_bsGetNonUniformUInt16ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint16_t val[]);
 /**
@@ -861,7 +867,7 @@ bsGetNonUniformUInt16ArrayAdd(
  * returned in this array
  */
 void
-bsGetNonUniformUInt32ArrayAdd(
+gt_bsGetNonUniformUInt32ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint32_t val[]);
 /**
@@ -877,7 +883,7 @@ bsGetNonUniformUInt32ArrayAdd(
  * returned in this array
  */
 void
-bsGetNonUniformUInt64ArrayAdd(
+gt_bsGetNonUniformUInt64ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint64_t val[]);
 
@@ -894,7 +900,7 @@ bsGetNonUniformUInt64ArrayAdd(
  * returned in this array
  */
 void
-bsGetNonUniformInt8ArrayAdd(
+gt_bsGetNonUniformInt8ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[]);
 /**
@@ -910,7 +916,7 @@ bsGetNonUniformInt8ArrayAdd(
  * returned in this array
  */
 void
-bsGetNonUniformInt16ArrayAdd(
+gt_bsGetNonUniformInt16ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int16_t val[]);
 /**
@@ -926,7 +932,7 @@ bsGetNonUniformInt16ArrayAdd(
  * returned in this array
  */
 void
-bsGetNonUniformInt32ArrayAdd(
+gt_bsGetNonUniformInt32ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int32_t val[]);
 /**
@@ -942,7 +948,7 @@ bsGetNonUniformInt32ArrayAdd(
  * returned in this array
  */
 void
-bsGetNonUniformInt64ArrayAdd(
+gt_bsGetNonUniformInt64ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int64_t val[]);
 
@@ -1022,7 +1028,7 @@ bsToggleBit(BitString str, BitOffset pos);
  * @return 1 if selected bit is set, 0 if not set
  */
 static inline int
-bsGetBit(constBitString str, BitOffset pos);
+gt_bsGetBit(constBitString str, BitOffset pos);
 /**
  * \brief Compute Hamming weight of (sub-)bitstring
  * @return number of bits set in (sub-)bitstring
@@ -1040,7 +1046,7 @@ gt_bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
  * @return -1 in case of error, 0 otherwise
  */
 extern int
-bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits);
+gt_bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits);
 
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions

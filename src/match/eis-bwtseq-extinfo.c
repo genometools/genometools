@@ -477,7 +477,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       if (locateCount)
       {
         unsigned bitsPerCount = requiredSeqposBits(len);
-        bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerCount,
+        gt_bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerCount,
                       revMapQueueLen);
         bitsWritten += bitsPerCount;
       }
@@ -485,11 +485,11 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       {
         if (locateCount)
         {
-          bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerBWTPos,
+          gt_bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerBWTPos,
                         state->revMapQueue[i].bwtPos);
           bitsWritten += bitsPerBWTPos;
         }
-        bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerOrigPos,
+        gt_bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerOrigPos,
                       state->revMapQueue[i].origPos);
         bitsWritten += bitsPerOrigPos;
       }
@@ -499,7 +499,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       unsigned bitsPerOrigRank = state->bitsPerOrigRank;
       if (origRanksQueueLen)
       {
-        bsStoreUniformSeqposArray(varDest, varOffset + bitsWritten,
+        gt_bsStoreUniformSeqposArray(varDest, varOffset + bitsWritten,
                                   bitsPerOrigRank, origRanksQueueLen,
                                   state->origRanksQueue);
         bitsWritten += bitsPerOrigRank * origRanksQueueLen;
@@ -638,7 +638,7 @@ searchLocateCountMark(const BWTSeq *bwtSeq, Seqpos pos,
                        | EBRF_RETRIEVE_VARBITS, extBits, bwtSeq->hint);
   markOffset = extBits->varOffset;
   bitsPerCount = requiredSeqposBits(extBits->len);
-  numMarks = bsGetSeqpos(extBits->varPart, markOffset, bitsPerCount);
+  numMarks = gt_bsGetSeqpos(extBits->varPart, markOffset, bitsPerCount);
   if (numMarks)
   {
     unsigned bitsPerBWTPos = requiredSeqposBits(extBits->len - 1),
@@ -650,7 +650,7 @@ searchLocateCountMark(const BWTSeq *bwtSeq, Seqpos pos,
     markOffset += bitsPerCount;
     for (i = 0; i < numMarks; ++i)
     {
-      Seqpos markedPos = bsGetSeqpos(extBits->varPart, markOffset,
+      Seqpos markedPos = gt_bsGetSeqpos(extBits->varPart, markOffset,
                                      bitsPerBWTPos);
       if (markedPos < cmpPos)
         markOffset += bitsPerBWTPos + bitsPerOrigPos;
@@ -671,7 +671,8 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
   {
     EISRetrieveExtraBits(bwtSeq->seqIdx, pos, EBRF_RETRIEVE_CWBITS, extBits,
                          bwtSeq->hint);
-    return bsGetBit(extBits->cwPart, extBits->cwOffset + pos - extBits->start);
+    return gt_bsGetBit(extBits->cwPart,
+                       extBits->cwOffset + pos - extBits->start);
   }
   else if (bwtSeq->featureToggles & BWTLocateCount)
   {
@@ -718,7 +719,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
         * locateRecordIndex
         + ((bwtSeq->featureToggles & BWTLocateCount)?bitsPerCount:0);
       Seqpos matchPos =
-        bsGetSeqpos(
+        gt_bsGetSeqpos(
           extBits->varPart, extBits->varOffset + locateRecordOffset
           + ((bwtSeq->featureToggles & BWTLocateCount)?bitsPerBWTPos:0),
           bitsPerOrigPos);
@@ -726,7 +727,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
         matchPos = matchPos * bwtSeq->locateSampleInterval;
       matchPos += locateOffset;
       assert(!(bwtSeq->featureToggles & BWTLocateCount)
-             || bsGetSeqpos(extBits->varPart,
+             || gt_bsGetSeqpos(extBits->varPart,
                             extBits->varOffset + locateRecordOffset,
                             bitsPerBWTPos)
              == nextLocate - extBits->start);
@@ -750,7 +751,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
       nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, extBits);
       ++locateOffset;
     }
-    matchPos = bsGetSeqpos(extBits->varPart, markOffset, bitsPerOrigPos);
+    matchPos = gt_bsGetSeqpos(extBits->varPart, markOffset, bitsPerOrigPos);
     if (bwtSeq->featureToggles & BWTReversiblySorted)
         matchPos = matchPos * bwtSeq->locateSampleInterval;
     matchPos += locateOffset;
@@ -781,7 +782,7 @@ locateVarBits(const BWTSeq *bwtSeq, struct extBitsRetrieval *extBits)
   {
     BitOffset markOffset = extBits->varOffset;
     unsigned bitsPerCount = requiredSeqposBits(extBits->len);
-    unsigned numMarks = bsGetSeqpos(extBits->varPart, markOffset,
+    unsigned numMarks = gt_bsGetSeqpos(extBits->varPart, markOffset,
                                     bitsPerCount);
     numLocBits = bitsPerCount + numMarks * (bitsPerBWTPos + bitsPerOrigPos);
   }
@@ -807,7 +808,7 @@ BWTSeqGetRankSort(const BWTSeq *bwtSeq, Seqpos pos, AlphabetRangeID range,
                         bwtSeq->hint);
     for (i = 0; i < rSize; ++i)
       BWTRankTotal += ranks[i + rSize] - ranks[i];
-    return bsGetSeqpos(extBits->varPart, extBits->varOffset + locVarBits
+    return gt_bsGetSeqpos(extBits->varPart, extBits->varOffset + locVarBits
                        + bwtSeq->bitsPerOrigRank * BWTRankTotal,
                        bwtSeq->bitsPerOrigRank);
   }

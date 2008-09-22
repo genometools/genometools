@@ -506,7 +506,7 @@ bits2buf(char *buf, uint32_t v, unsigned numBits)
   }
 
 extern int
-bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
+gt_bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
 {
   uint32_t accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits, bitsInAccum = 0;

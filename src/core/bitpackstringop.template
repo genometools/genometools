@@ -23,7 +23,7 @@
 #include "core/bitpackstring.h"
 
 @ValueType@
-bsGet@uTypeTag@(constBitString str, BitOffset offset, unsigned numBits)
+gt_bsGet@uTypeTag@(constBitString str, BitOffset offset, unsigned numBits)
 {
   @AccumType@ accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
@@ -61,7 +61,7 @@ bsGet@uTypeTag@(constBitString str, BitOffset offset, unsigned numBits)
 }
 
 void
-bsStore@uTypeTag@(BitString str, BitOffset offset,
+gt_bsStore@uTypeTag@(BitString str, BitOffset offset,
                  unsigned numBits, @ValueType@ val)
 {
   unsigned bitsLeft = numBits,

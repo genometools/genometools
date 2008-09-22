@@ -45,7 +45,7 @@ BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, Seqpos pos)
   if (nextMark.textPos < seqLen)
   {
     nextMark.bwtPos
-      = bsGetSeqpos(bwtSeqCR->revMap,
+      = gt_bsGetSeqpos(bwtSeqCR->revMap,
                     (nextMark.textPos >> bwtSeqCR->mapIntervalLog2)
                     * bwtSeqCR->bitsPerSeqpos, bwtSeqCR->bitsPerSeqpos);
   }

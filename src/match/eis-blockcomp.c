@@ -791,7 +791,7 @@ static inline Seqpos
 sBlockGetPartialSymSum(struct superBlock *sBlock, Symbol sym,
                        const struct blockCompositionSeq *seqIdx)
 {
-  return bsGetSeqpos(sBlock->cwData, seqIdx->partialSymSumBitsSums[sym]
+  return gt_bsGetSeqpos(sBlock->cwData, seqIdx->partialSymSumBitsSums[sym]
                      + sBlock->cwIdxMemBase, seqIdx->partialSymSumBits[sym]);
 }
 
@@ -800,7 +800,7 @@ sBlockGetPartialSymSums(struct superBlock *sBlock,
                         const struct blockCompositionSeq *seqIdx,
                         Seqpos *sums)
 {
-  bsGetNonUniformSeqposArray(
+  gt_bsGetNonUniformSeqposArray(
     sBlock->cwData, sBlock->cwIdxMemBase, seqIdx->blockMapAlphabetSize,
     seqIdx->symSumBits, seqIdx->partialSymSumBits, sums);
 }
@@ -816,7 +816,7 @@ sBlockGetVarIdxOffset(const struct superBlock *sBlock,
                       const struct blockCompositionSeq *seqIdx)
 {
   BitOffset offset = cwPreVarIdxBits(seqIdx) + sBlock->cwIdxMemBase;
-  return bsGetUInt64(sBlock->cwData, offset, seqIdx->bitsPerVarDiskOffset);
+  return gt_bsGetUInt64(sBlock->cwData, offset, seqIdx->bitsPerVarDiskOffset);
 }
 
 static inline BitOffset
@@ -872,7 +872,7 @@ sBlockGetcbOffset(const struct superBlock *sBlock,
                   const struct blockCompositionSeq *seqIdx)
 {
   BitOffset offset = sBlockGetcbOffsetOffset(sBlock, seqIdx);
-  return bsGetUInt64(sBlock->cwData, offset, seqIdx->callBackDataOffsetBits);
+  return gt_bsGetUInt64(sBlock->cwData, offset, seqIdx->callBackDataOffsetBits);
 }
 
 static inline PermCompIndex
@@ -881,7 +881,7 @@ sBlockGetCompIdx(const struct superBlock *sBlock, unsigned compIdxNum,
 {
   BitOffset offset = sBlockGetCompIdxOffset(sBlock, seqIdx, compIdxNum);
   unsigned bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
-  return bsGetPermCompIndex(sBlock->cwData, offset, bitsPerCompositionIdx);
+  return gt_bsGetPermCompIndex(sBlock->cwData, offset, bitsPerCompositionIdx);
 }
 
 static inline Seqpos
@@ -1059,7 +1059,7 @@ cacheFetchSuperBlock(const struct blockCompositionSeq *seqIdx,
     while (blocksLeft)                                                  \
     {                                                                   \
       PermCompIndex compIndex;                                          \
-      compIndex = bsGetPermCompIndex((sBlock)->cwData, cwIdxMemOffset,  \
+      compIndex = gt_bsGetPermCompIndex((sBlock)->cwData, cwIdxMemOffset,  \
                                      bitsPerCompositionIdx);            \
       codeForCompIndex;                                                 \
       (varOffset) +=                                                    \
@@ -1087,10 +1087,10 @@ unpackBlock(const struct blockCompositionSeq *seqIdx,
   unsigned varIdxBits, bitsPerCompositionIdx;
   PermCompIndex compIndex, permIndex;
   bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
-  compIndex = bsGetPermCompIndex(sBlock->cwData, cwOffset,
+  compIndex = gt_bsGetPermCompIndex(sBlock->cwData, cwOffset,
                                  bitsPerCompositionIdx);
   varIdxBits = seqIdx->compositionTable.permutations[compIndex].permIdxBits;
-  permIndex = bsGetPermCompIndex(sBlock->varData, varOffset, varIdxBits);
+  permIndex = gt_bsGetPermCompIndex(sBlock->varData, varOffset, varIdxBits);
   indexPair2block(&seqIdx->compositionTable, seqIdx->blockSize,
                   compIndex, permIndex, block, sublen);
 }
@@ -1157,7 +1157,7 @@ adjustPosRankForBlock(struct blockCompositionSeq *seqIdx,
   if ((inBlockPos = pos % blockSize)
       && symCountFromComposition(
         &seqIdx->compositionTable, seqIdx->blockMapAlphabetSize,
-        bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,
+        gt_bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,
                            bitsPerCompositionIdx), bSym))
   {
     Symbol block[blockSize];
@@ -1774,12 +1774,12 @@ append2IdxOutput(struct appendState *state,
                  unsigned bitsOfCompositionIdx, unsigned bitsOfPermutationIdx)
 {
   assert(state->cwMemPos + bitsOfCompositionIdx <= state->compCacheLen);
-  bsStorePermCompIndex(state->compCache, state->cwMemPos, bitsOfCompositionIdx,
-                       permCompIdx[0]);
+  gt_bsStorePermCompIndex(state->compCache, state->cwMemPos,
+                          bitsOfCompositionIdx, permCompIdx[0]);
   state->cwMemPos += bitsOfCompositionIdx;
   assert(state->varMemPos + bitsOfPermutationIdx <= state->permCacheLen);
-  bsStorePermCompIndex(state->permCache, state->varMemPos, bitsOfPermutationIdx,
-                       permCompIdx[1]);
+  gt_bsStorePermCompIndex(state->permCache, state->varMemPos,
+                          bitsOfPermutationIdx, permCompIdx[1]);
   state->varMemPos += bitsOfPermutationIdx;
 }
 
@@ -1795,7 +1795,7 @@ appendCallBackOutput(struct appendState *state,
   if (callBackDataOffsetBits)
   {
     BitOffset offset = cwPreCBOffsetBits(seqIdx);
-    bsStoreUInt64(state->compCache, state->cwMemOldBits + offset,
+    gt_bsStoreUInt64(state->compCache, state->cwMemOldBits + offset,
                   callBackDataOffsetBits,
                   state->varMemPos - state->varMemOldBits);
   }
@@ -1834,13 +1834,13 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
     Symbol i;
     for (i = 0; i < blockAlphabetSize; ++i)
     {
-      bsStoreSeqpos(aState->compCache,
+      gt_bsStoreSeqpos(aState->compCache,
                     aState->cwMemOldBits + seqIdx->partialSymSumBitsSums[i],
                     seqIdx->partialSymSumBits[i], buck[i]);
     }
   }
   /* append variable width offset position */
-  bsStoreUInt64(aState->compCache, aState->cwMemOldBits
+  gt_bsStoreUInt64(aState->compCache, aState->cwMemOldBits
                 + cwPreVarIdxBits(seqIdx), seqIdx->bitsPerVarDiskOffset,
                 aState->varDiskOffset);
   if (fseeko(seqIdx->externalData.idxFP,
@@ -2562,7 +2562,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
         fp, "# block %u: comp idx: %lu, permIdxBits=%u, perm idx: %lu =>",
         i, (unsigned long)compIndex,
         (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits,
-        (unsigned long)bsGetPermCompIndex(
+        (unsigned long)gt_bsGetPermCompIndex(
           sBlock->varData, varDataMemOffset,
           seqIdx->compositionTable.permutations[compIndex].permIdxBits));
       unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
@@ -2575,37 +2575,37 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
     {
       for (i = 0; i < blockMapAlphabetSize; ++i)
       {
-        if (bsPrint(fp, sBlock->cwData, seqIdx->partialSymSumBitsSums[i]
+        if (gt_bsPrint(fp, sBlock->cwData, seqIdx->partialSymSumBitsSums[i]
                     + sBlock->cwIdxMemBase, seqIdx->partialSymSumBits[i]))
           outCount += seqIdx->partialSymSumBits[i];
         if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
           outCount += fputs("&", fp);
       }
-      bsPrint(fp, sBlock->cwData,
+      gt_bsPrint(fp, sBlock->cwData,
               cwPreVarIdxBits(seqIdx) + sBlock->cwIdxMemBase,
               seqIdx->bitsPerVarDiskOffset);
       if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
         outCount += fputs("&", fp);
       if (seqIdx->callBackDataOffsetBits)
       {
-        bsPrint(fp, sBlock->cwData, sBlockGetcbOffsetOffset(sBlock, seqIdx),
+        gt_bsPrint(fp, sBlock->cwData, sBlockGetcbOffsetOffset(sBlock, seqIdx),
                 seqIdx->callBackDataOffsetBits);
         if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
           outCount += fputs("&", fp);
       }
       walkCompIndicesPrefix(
         seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
-        bsPrint(fp, sBlock->cwData, cwIdxMemOffset, idxBits);
+        gt_bsPrint(fp, sBlock->cwData, cwIdxMemOffset, idxBits);
         if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
           outCount += fputs("&", fp);, varDataMemOffset);
-      bsPrint(fp, sBlock->cwData, sBlockCWExtBitsOffset(sBlock, seqIdx),
+      gt_bsPrint(fp, sBlock->cwData, sBlockCWExtBitsOffset(sBlock, seqIdx),
               seqIdx->cwExtBitsPerBucket);
       fputs("\n# variable width string: \n", fp);
       walkCompIndicesPrefix(
         seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
         idxBits =
         seqIdx->compositionTable.permutations[compIndex].permIdxBits;
-        bsPrint(fp, sBlock->varData, varDataMemOffset, idxBits);
+        gt_bsPrint(fp, sBlock->varData, varDataMemOffset, idxBits);
         if (flags & BUCKET_PRINT_BITSTRING_SEPARATOR)
           outCount += fputs("&", fp);, varDataMemOffset);
       if (bucketNum != lastBucket)
@@ -2619,7 +2619,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
         nextSBlock = fetchSuperBlock(seqIdx, bucketNum + 1, NULL);
 #endif
         nextVarIdxOffset = sBlockGetVarIdxOffset(nextSBlock, seqIdx);
-        bsPrint(fp, sBlock->varData, varDataMemOffset,
+        gt_bsPrint(fp, sBlock->varData, varDataMemOffset,
                 nextVarIdxOffset - varIdxOffset);
         fprintf(fp, "\n# varIdxOffset for next block: %llu",
                 (unsigned long long)nextVarIdxOffset);

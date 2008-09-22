@@ -96,7 +96,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     randCmp = gt_malloc(sizeof (uint64_t)*numRnd);
   }
   /* first test unsigned types */
-  gt_log_log("bsStoreUInt64/bsGetUInt64: ");
+  gt_log_log("gt_bsStoreUInt64/gt_bsGetUInt64: ");
   for (i = 0; i < numRnd; ++i)
   {
 #if 64 > 32 && LONG_BIT < 64
@@ -105,7 +105,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     uint64_t v = randSrc[i] = random();
 #endif /* 64 > 32 && LONG_BIT < 64 */
     int bits = requiredUInt64Bits(v);
-    bsStoreUInt64(bitStore, offset, bits, v);
+    gt_bsStoreUInt64(bitStore, offset, bits, v);
     offset += bits;
   }
   offset = offsetStart;
@@ -113,7 +113,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
   {
     uint64_t v = randSrc[i];
     int bits = requiredUInt64Bits(v);
-    uint64_t r = bsGetUInt64(bitStore, offset, bits);
+    uint64_t r = gt_bsGetUInt64(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
     {
@@ -132,12 +132,12 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     uint64_t mask = ~(uint64_t)0;
     if (numBits < 64)
       mask = ~(mask << numBits);
-    gt_log_log("bsSetBit, gt_bsClearBit, bsToggleBit, bsGetBit: ");
+    gt_log_log("bsSetBit, gt_bsClearBit, bsToggleBit, gt_bsGetBit: ");
     while (v)
     {
       int lowBit = v & 1;
       v >>= 1;
-      ensure(had_err, lowBit == (r = bsGetBit(bitStore, --i)));
+      ensure(had_err, lowBit == (r = gt_bsGetBit(bitStore, --i)));
       if (had_err)
       {
         gt_log_log("Expected %d, got %d, i = %llu\n",
@@ -158,7 +158,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
         gt_bsClearBit(bitStoreCopy, --i);
     }
     v = randSrc[0];
-    r = bsGetUInt64(bitStoreCopy, offsetStart, numBits);
+    r = gt_bsGetUInt64(bitStoreCopy, offsetStart, numBits);
     ensure(had_err, r == v);
     if (had_err)
     {
@@ -167,7 +167,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     }
     for (i = 0; i < numBits; ++i)
       bsToggleBit(bitStoreCopy, offsetStart + i);
-    r = bsGetUInt64(bitStoreCopy, offsetStart, numBits);
+    r = gt_bsGetUInt64(bitStoreCopy, offsetStart, numBits);
     ensure(had_err, r == (v = (~v & mask)));
     if (had_err)
     {
@@ -184,12 +184,12 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       int bits0 = requiredUInt64Bits(v0);
       uint64_t r0;
       offset = offsetStart;
-      r0 = bsGetUInt64(bitStore, offset, bits0);
+      r0 = gt_bsGetUInt64(bitStore, offset, bits0);
       for (i = 1; i < numRnd; ++i)
       {
         uint64_t v1 = randSrc[i];
         int bits1 = requiredUInt64Bits(v1);
-        uint64_t r1 = bsGetUInt64(bitStore, offset + bits0, bits1);
+        uint64_t r1 = gt_bsGetUInt64(bitStore, offset + bits0, bits1);
         int result = -2;   /*< -2 is not a return value of gt_bsCompare, thus
                             *   if it is displayed, there was an earlier
                             *   error. */
@@ -215,18 +215,18 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     }
     gt_log_log("passed\n");
   }
-  gt_log_log("bsStoreUniformUInt64Array/bsGetUInt64: ");
+  gt_log_log("gt_bsStoreUniformUInt64Array/gt_bsGetUInt64: ");
   {
     unsigned numBits = random()%64 + 1;
     uint64_t mask = ~(uint64_t)0;
     if (numBits < 64)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
+    gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
     for (i = 0; i < numRnd; ++i)
     {
       uint64_t v = randSrc[i] & mask;
-      uint64_t r = bsGetUInt64(bitStore, offset, numBits);
+      uint64_t r = gt_bsGetUInt64(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -237,8 +237,8 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreUniformUInt64Array/bsGetUniformUInt64Array: ");
-    bsGetUniformUInt64Array(bitStore, offset = offsetStart,
+    gt_log_log("gt_bsStoreUniformUInt64Array/gt_bsGetUniformUInt64Array: ");
+    gt_bsGetUniformUInt64Array(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
     {
@@ -257,7 +257,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     {
       uint64_t v = randSrc[0] & mask;
       uint64_t r;
-      bsGetUniformUInt64Array(bitStore, offsetStart,
+      gt_bsGetUniformUInt64Array(bitStore, offsetStart,
                                  numBits, 1, &r);
       if (r != v)
       {
@@ -270,12 +270,12 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     gt_log_log(" passed\n");
   }
   /* int types */
-  gt_log_log("bsStoreInt64/bsGetInt64: ");
+  gt_log_log("gt_bsStoreInt64/gt_bsGetInt64: ");
   for (i = 0; i < numRnd; ++i)
   {
     int64_t v = (int64_t)randSrc[i];
     unsigned bits = requiredInt64Bits(v);
-    bsStoreInt64(bitStore, offset, bits, v);
+    gt_bsStoreInt64(bitStore, offset, bits, v);
     offset += bits;
   }
   offset = offsetStart;
@@ -283,7 +283,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
   {
     int64_t v = randSrc[i];
     unsigned bits = requiredInt64Bits(v);
-    int64_t r = bsGetInt64(bitStore, offset, bits);
+    int64_t r = gt_bsGetInt64(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
     {
@@ -295,20 +295,20 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     offset += bits;
   }
   gt_log_log("passed\n");
-  gt_log_log("bsStoreUniformInt64Array/bsGetInt64: ");
+  gt_log_log("gt_bsStoreUniformInt64Array/gt_bsGetInt64: ");
   {
     unsigned numBits = random()%64 + 1;
     int64_t mask = ~(int64_t)0;
     if (numBits < 64)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
+    gt_bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
                                 (int64_t *)randSrc);
     for (i = 0; i < numRnd; ++i)
     {
       int64_t m = (int64_t)1 << (numBits - 1);
       int64_t v = (int64_t)((randSrc[i] & mask) ^ m) - m;
-      int64_t r = bsGetInt64(bitStore, offset, numBits);
+      int64_t r = gt_bsGetInt64(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -320,8 +320,8 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreUniformInt64Array/bsGetUniformInt64Array: ");
-    bsGetUniformInt64Array(bitStore, offset = offsetStart,
+    gt_log_log("gt_bsStoreUniformInt64Array/gt_bsGetUniformInt64Array: ");
+    gt_bsGetUniformInt64Array(bitStore, offset = offsetStart,
                               numBits, numRnd, (int64_t *)randCmp);
     for (i = 0; i < numRnd; ++i)
     {
@@ -341,7 +341,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       int64_t m = (int64_t)1 << (numBits - 1);
       int64_t v = (int64_t)((randSrc[0] & mask) ^ m) - m;
       int64_t r = 0;
-      bsGetUniformInt64Array(bitStore, offsetStart,
+      gt_bsGetUniformInt64Array(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);
       if (had_err)
@@ -355,14 +355,14 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     gt_log_log("passed\n");
   }
 
-  gt_log_log("bsStoreNonUniformUInt64Array/bsGetUInt64: ");
+  gt_log_log("gt_bsStoreNonUniformUInt64Array/gt_bsGetUInt64: ");
   {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%64 + 1);
     offset = offsetStart;
-    bsStoreNonUniformUInt64Array(bitStore, offset, numRnd, bitsTotal,
+    gt_bsStoreNonUniformUInt64Array(bitStore, offset, numRnd, bitsTotal,
                                      numBitsList, randSrc);
     for (i = 0; i < numRnd; ++i)
     {
@@ -370,7 +370,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       uint64_t mask = (numBits < 64)?
         ~((~(uint64_t)0) << numBits):~(uint64_t)0;
       uint64_t v = randSrc[i] & mask;
-      uint64_t r = bsGetUInt64(bitStore, offset, numBits);
+      uint64_t r = gt_bsGetUInt64(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -382,9 +382,9 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreNonUniformUInt64Array/"
-            "bsGetNonUniformUInt64Array: ");
-    bsGetNonUniformUInt64Array(bitStore, offset = offsetStart,
+    gt_log_log("gt_bsStoreNonUniformUInt64Array/"
+            "gt_bsGetNonUniformUInt64Array: ");
+    gt_bsGetNonUniformUInt64Array(bitStore, offset = offsetStart,
                                    numRnd, bitsTotal, numBitsList, randCmp);
     for (i = 0; i < numRnd; ++i)
     {
@@ -409,7 +409,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
         ~((~(uint64_t)0) << numBits):~(uint64_t)0;
       uint64_t v = randSrc[0] & mask;
       uint64_t r;
-      bsGetNonUniformUInt64Array(bitStore, offsetStart, 1, numBits,
+      gt_bsGetNonUniformUInt64Array(bitStore, offsetStart, 1, numBits,
                                      numBitsList, &r);
       if (r != v)
       {
@@ -423,14 +423,14 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     gt_free(numBitsList);
     numBitsList = NULL;
   }
-  gt_log_log("bsNonStoreUniformInt64Array/bsGetInt64: ");
+  gt_log_log("bsNonStoreUniformInt64Array/gt_bsGetInt64: ");
   {
     BitOffset bitsTotal = 0;
     numBitsList = gt_malloc(sizeof (unsigned) * numRnd);
     for (i = 0; i < numRnd; ++i)
       bitsTotal += (numBitsList[i] = random()%64 + 1);
     offset = offsetStart;
-    bsStoreNonUniformInt64Array(bitStore, offset, numRnd, bitsTotal,
+    gt_bsStoreNonUniformInt64Array(bitStore, offset, numRnd, bitsTotal,
                                      numBitsList, (int64_t *)randSrc);
     for (i = 0; i < numRnd; ++i)
     {
@@ -439,7 +439,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
         ? ~((~(int64_t)0) << numBits) : ~(int64_t)0;
       int64_t m = (int64_t)1 << (numBits - 1);
       int64_t v = (int64_t)((randSrc[i] & mask) ^ m) - m;
-      int64_t r = bsGetInt64(bitStore, offset, numBits);
+      int64_t r = gt_bsGetInt64(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
@@ -451,9 +451,9 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("bsStoreNonUniformInt64Array/"
-            "bsGetNonUniformInt64Array: ");
-    bsGetNonUniformInt64Array(bitStore, offset = offsetStart, numRnd,
+    gt_log_log("gt_bsStoreNonUniformInt64Array/"
+            "gt_bsGetNonUniformInt64Array: ");
+    gt_bsGetNonUniformInt64Array(bitStore, offset = offsetStart, numRnd,
                                    bitsTotal, numBitsList,
                                    (int64_t *)randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -480,7 +480,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       int64_t m = (int64_t)1 << (numBits - 1);
       int64_t v = (int64_t)((randSrc[0] & mask) ^ m) - m;
       int64_t r = 0;
-      bsGetNonUniformInt64Array(bitStore, offsetStart,
+      gt_bsGetNonUniformInt64Array(bitStore, offsetStart,
                                      1, numBits, numBitsList, &r);
       ensure(had_err, r == v);
       if (had_err)
@@ -519,13 +519,13 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       }
       assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
-      bsStoreUniformUInt64Array(bitStore, offset, numBits, numValueCopies,
+      gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numValueCopies,
                                     randSrc);
       destOffset = random()%(offsetStart + 64
                              * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
       /* the following gt_bsCopy should be equivalent to:
-       * bsStoreUniformUInt64Array(bitStoreCopy, destOffset,
+       * gt_bsStoreUniformUInt64Array(bitStoreCopy, destOffset,
        *                              numBits, numValueCopies, randSrc); */
       gt_bsCopy(bitStore, offset, bitStoreCopy, destOffset, numCopyBits);
       ensure(had_err,
@@ -570,7 +570,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       }
       assert(resetStart + numResetValues <= numRnd);
       offset = offsetStart;
-      bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
+      gt_bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
                                     (int64_t *)randSrc);
       numResetBits = (BitOffset)numBits * numResetValues;
       gt_bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
@@ -580,7 +580,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
         for (i = 0; i < resetStart; ++i)
         {
           int64_t v = (int64_t)((randSrc[i] & mask) ^ m) - m;
-          int64_t r = bsGetInt64(bitStore, offset, numBits);
+          int64_t r = gt_bsGetInt64(bitStore, offset, numBits);
           ensure(had_err, r == v);
           if (had_err)
           {
@@ -593,7 +593,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
         }
         for (; i < resetStart + numResetValues; ++i)
         {
-          int64_t r = bsGetInt64(bitStore, offset, numBits);
+          int64_t r = gt_bsGetInt64(bitStore, offset, numBits);
           ensure(had_err, r == cmpVal);
           if (had_err)
           {
@@ -607,7 +607,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
         for (; i < numRnd; ++i)
         {
           int64_t v = (int64_t)((randSrc[i] & mask) ^ m) - m;
-          int64_t r = bsGetInt64(bitStore, offset, numBits);
+          int64_t r = gt_bsGetInt64(bitStore, offset, numBits);
           ensure(had_err, r == v);
           if (had_err)
           {
@@ -645,7 +645,7 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       }
       assert(countStart + numCountValues <= numRnd);
       offset = offsetStart;
-      bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
+      gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
       numCountBits = (BitOffset)numBits * numCountValues;
       bitCountCmp = gt_bs1BitsCount(bitStore,
                                  offset + (BitOffset)countStart * numBits,

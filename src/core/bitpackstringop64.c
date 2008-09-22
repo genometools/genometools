@@ -26,7 +26,7 @@
 #include "core/bitpackstring.h"
 
 uint64_t
-bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits)
+gt_bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits)
 {
   unsigned long long accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
@@ -64,7 +64,7 @@ bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits)
 }
 
 void
-bsStoreUInt64(BitString str, BitOffset offset,
+gt_bsStoreUInt64(BitString str, BitOffset offset,
                  unsigned numBits, uint64_t val)
 {
   unsigned bitsLeft = numBits,
@@ -157,7 +157,7 @@ bsStoreUInt64(BitString str, BitOffset offset,
 */
 
 void
-bsGetUniformUInt64Array(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt64Array(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint64_t val[])
 {
@@ -219,7 +219,7 @@ bsGetUniformUInt64Array(constBitString str, BitOffset offset,
 }
 
 void
-bsGetNonUniformUInt64Array(
+gt_bsGetNonUniformUInt64Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint64_t val[])
 {
@@ -286,7 +286,7 @@ bsGetNonUniformUInt64Array(
 }
 
 void
-bsGetNonUniformInt64Array(
+gt_bsGetNonUniformInt64Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int64_t val[])
 {
@@ -371,7 +371,7 @@ bsGetNonUniformInt64Array(
 #include "core/unused_api.h"
 
 void
-bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
+gt_bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
                              size_t numValues, const uint64_t val[])
 {
   /* idea: read as much as possible from val in each iteration,
@@ -492,7 +492,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
 }
 
 void
-bsStoreNonUniformUInt64Array(
+gt_bsStoreNonUniformUInt64Array(
   BitString str, BitOffset offset, GT_UNUSED size_t numValues,
   BitOffset totalBitsLeft, unsigned numBitsList[], const uint64_t val[])
 {
@@ -645,7 +645,7 @@ bsStoreNonUniformUInt64Array(
 */
 
 void
-bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint64_t val[])
 {
@@ -707,7 +707,7 @@ bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
 }
 
 void
-bsGetNonUniformUInt64ArrayAdd(
+gt_bsGetNonUniformUInt64ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint64_t val[])
 {
@@ -774,7 +774,7 @@ bsGetNonUniformUInt64ArrayAdd(
 }
 
 void
-bsGetNonUniformInt64ArrayAdd(
+gt_bsGetNonUniformInt64ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int64_t val[])
 {

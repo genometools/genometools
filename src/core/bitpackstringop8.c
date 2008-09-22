@@ -26,7 +26,7 @@
 #include "core/bitpackstring.h"
 
 uint8_t
-bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits)
+gt_bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits)
 {
   unsigned long accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
@@ -64,7 +64,7 @@ bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits)
 }
 
 void
-bsStoreUInt8(BitString str, BitOffset offset,
+gt_bsStoreUInt8(BitString str, BitOffset offset,
                  unsigned numBits, uint8_t val)
 {
   unsigned bitsLeft = numBits,
@@ -157,7 +157,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
 */
 
 void
-bsGetUniformUInt8Array(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt8Array(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint8_t val[])
 {
@@ -219,7 +219,7 @@ bsGetUniformUInt8Array(constBitString str, BitOffset offset,
 }
 
 void
-bsGetNonUniformUInt8Array(
+gt_bsGetNonUniformUInt8Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[])
 {
@@ -286,7 +286,7 @@ bsGetNonUniformUInt8Array(
 }
 
 void
-bsGetNonUniformInt8Array(
+gt_bsGetNonUniformInt8Array(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[])
 {
@@ -371,7 +371,7 @@ bsGetNonUniformInt8Array(
 #include "core/unused_api.h"
 
 void
-bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
+gt_bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
                              size_t numValues, const uint8_t val[])
 {
   /* idea: read as much as possible from val in each iteration,
@@ -492,7 +492,7 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
 }
 
 void
-bsStoreNonUniformUInt8Array(
+gt_bsStoreNonUniformUInt8Array(
   BitString str, BitOffset offset, GT_UNUSED size_t numValues,
   BitOffset totalBitsLeft, unsigned numBitsList[], const uint8_t val[])
 {
@@ -645,7 +645,7 @@ bsStoreNonUniformUInt8Array(
 */
 
 void
-bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
+gt_bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint8_t val[])
 {
@@ -707,7 +707,7 @@ bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
 }
 
 void
-bsGetNonUniformUInt8ArrayAdd(
+gt_bsGetNonUniformUInt8ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], uint8_t val[])
 {
@@ -774,7 +774,7 @@ bsGetNonUniformUInt8ArrayAdd(
 }
 
 void
-bsGetNonUniformInt8ArrayAdd(
+gt_bsGetNonUniformInt8ArrayAdd(
   constBitString str, BitOffset offset, size_t numValues,
   BitOffset numBitsTotal, unsigned numBitsList[], int8_t val[])
 {

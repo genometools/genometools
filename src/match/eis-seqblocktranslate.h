@@ -33,9 +33,9 @@
 /** store indices in this scalar */
 typedef uint32_t PermCompIndex;
 /** method to retrieve one index from a BitString */
-#define bsGetPermCompIndex bsGetUInt32
+#define gt_bsGetPermCompIndex gt_bsGetUInt32
 /** method to store one index in a BitString */
-#define bsStorePermCompIndex bsStoreUInt32
+#define gt_bsStorePermCompIndex gt_bsStoreUInt32
 
 /**
  * For permutations common to one composition.
@@ -156,7 +156,7 @@ indexPair2block(const struct compList *compositionTable, unsigned blockSize,
   assert(subLen <= blockSize);
   bitsPerPermutation = compositionTable->bitsPerSymbol * blockSize;
   permutationList = compositionTable->permutations + compIdx;
-  bsGetUniformSymbolArray(
+  gt_bsGetUniformSymbolArray(
     compositionTable->catCompsPerms,
     permutationList->catPermsOffset + bitsPerPermutation * permIdx,
     compositionTable->bitsPerSymbol, subLen, block);
@@ -180,7 +180,7 @@ symCountFromComposition(struct compList *compositionTable,
   bitsPerCount = compositionTable->bitsPerCount;
   bitsPerComp = bitsPerCount * alphabetSize;
   assert(compIndex < compositionTable->numCompositions);
-  return bsGetUInt(compositionTable->catCompsPerms,
+  return gt_bsGetUInt(compositionTable->catCompsPerms,
                    compIndex * bitsPerComp + sym * bitsPerCount,
                    bitsPerCount);
 }
@@ -202,7 +202,7 @@ addSymCountsFromComposition(struct compList *compositionTable,
   bitsPerCount = compositionTable->bitsPerCount;
   bitsPerComp = bitsPerCount * alphabetSize;
   assert(compIndex < compositionTable->numCompositions);
-  bsGetUniformSeqposArrayAdd(compositionTable->catCompsPerms,
+  gt_bsGetUniformSeqposArrayAdd(compositionTable->catCompsPerms,
                              compIndex * bitsPerComp, bitsPerCount,
                              alphabetSize, counts);
 }
