@@ -304,7 +304,7 @@ static int advancePlainbufferstate(GtFastaBuffer *fb, GtError *err)
   return 0;
 }
 
-int advanceformatbufferstate(GtFastaBuffer *fb, GtError *err)
+int gt_fastabuffer_advance(GtFastaBuffer *fb, GtError *err)
 {
   gt_error_check(err);
   if (fb->plainformat)

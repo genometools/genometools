@@ -48,7 +48,7 @@ struct GtFastaBuffer
   Arraychar headerbuffer;
 };
 
-int advanceformatbufferstate(GtFastaBuffer *fb, GtError*);
+int gt_fastabuffer_advance(GtFastaBuffer *fb, GtError*);
 
 static inline int gt_fastabuffer_next(GtFastaBuffer *fb,Uchar *val,
                                       GtError *err)
@@ -59,7 +59,7 @@ static inline int gt_fastabuffer_next(GtFastaBuffer *fb,Uchar *val,
     {
       return 0;
     }
-    if (advanceformatbufferstate(fb, err) != 0)
+    if (gt_fastabuffer_advance(fb, err) != 0)
     {
       return -1;
     }
