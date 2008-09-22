@@ -155,7 +155,8 @@ static OPrval parse_options(int *parsed_args,
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
                                   err);
 
-  if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
+  if (oprval == OPTIONPARSER_OK && !force &&
+      gt_file_exists(argv[*parsed_args])) {
     gt_error_set(err, "file \"%s\" exists already. use option -force to "
                    "overwrite", argv[*parsed_args]);
     oprval = OPTIONPARSER_ERROR;
@@ -299,7 +300,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     gt_str_append_cstr(gt_style_file, "/sketch/default.style");
     if (!(sty = gt_style_new(arguments.verbose, err)))
       had_err = -1;
-    if (!had_err && file_exists(gt_str_get(gt_style_file)))
+    if (!had_err && gt_file_exists(gt_str_get(gt_style_file)))
       had_err = gt_style_load_file(sty, gt_str_get(gt_style_file), err);
   }
 

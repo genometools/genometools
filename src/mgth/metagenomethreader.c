@@ -511,7 +511,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
        nach dem Programmnamen */
     fp_xmlfile = gt_genfile_xopen(argv[parsed_args], "r");
 
-    if (file_exists(gt_str_get(outputfilename)))
+    if (gt_file_exists(gt_str_get(outputfilename)))
     {
       parsestruct.fp_outputfile = gt_genfile_xopen(gt_str_get(outputfilename),
                                                    "w+");

@@ -96,7 +96,7 @@ GTR* gtr_new(GtError *err)
   }
   if (!had_err) {
     gt_str_append_cstr(style_file, "/sketch/default.style");
-    if (file_exists(gt_str_get(style_file))) {
+    if (gt_file_exists(gt_str_get(style_file))) {
       if (gt_style_load_file(gtr->style, gt_str_get(style_file), err))
         had_err = -1;
       else
@@ -294,7 +294,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
   if (!had_err && argc) {
     if (!gtr->tools || !gt_toolbox_has_tool(gtr->tools, argv[0])) {
       /* no tool found -> try to open script */
-      if (file_exists(argv[0])) {
+      if (gt_file_exists(argv[0])) {
         /* run script */
         nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
         lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);

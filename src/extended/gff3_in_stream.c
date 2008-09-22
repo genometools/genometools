@@ -124,7 +124,7 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       }
       if (!had_err && is->fpin && is->be_verbose) {
         gt_progressbar_start(&is->line_number,
-                            file_number_of_lines(gt_strarray_get(is->files,
+                            gt_file_number_of_lines(gt_strarray_get(is->files,
                                                              is->next_file-1)));
       }
     }

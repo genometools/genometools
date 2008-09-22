@@ -61,13 +61,13 @@ int gt_qgramdist(int argc, const char **argv, GtError *err)
   assert(parsed_args+1 < argc);
 
   /* make sure gt_seq_file_1 exists */
-  if (!file_exists(argv[parsed_args])) {
+  if (!gt_file_exists(argv[parsed_args])) {
     gt_error_set(err, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
     had_err = -1;
   }
 
   /* make sure gt_seq_file_2 exists */
-  if (!had_err && !file_exists(argv[parsed_args+1])) {
+  if (!had_err && !gt_file_exists(argv[parsed_args+1])) {
     gt_error_set(err, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
     had_err = -1;
   }

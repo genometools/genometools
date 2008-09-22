@@ -27,7 +27,7 @@
 #include "core/xansi.h"
 #include "core/xposix.h"
 
-bool file_exists(const char *path)
+bool gt_file_exists(const char *path)
 {
   FILE *file;
   if ((file = fopen(path, "r")) == NULL)
@@ -36,7 +36,7 @@ bool file_exists(const char *path)
   return true;
 }
 
-bool file_is_newer(const char *a, const char *b)
+bool gt_file_is_newer(const char *a, const char *b)
 {
   struct stat stat_a, stat_b;
   assert(a && b);
@@ -50,7 +50,7 @@ bool file_is_newer(const char *a, const char *b)
   return false;
 }
 
-unsigned long file_number_of_lines(const char *path)
+unsigned long gt_file_number_of_lines(const char *path)
 {
   unsigned long number_of_lines = 0;
   GtGenFile *fp;
@@ -63,7 +63,7 @@ unsigned long file_number_of_lines(const char *path)
   return number_of_lines;
 }
 
-const char* file_suffix(const char *path)
+const char* gt_file_suffix(const char *path)
 {
   const char *suffixptr;
   assert(path);
@@ -78,7 +78,7 @@ const char* file_suffix(const char *path)
   return suffixptr;
 }
 
-void file_dirname(GtStr *path, const char *file)
+void gt_file_dirname(GtStr *path, const char *file)
 {
   long i;
   gt_str_reset(path);
@@ -90,7 +90,7 @@ void file_dirname(GtStr *path, const char *file)
     gt_str_append_cstr_nt(path, file, i);
 }
 
-int file_find_in_path(GtStr *path, const char *file, GtError *err)
+int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
 {
   char *pathvariable, *pathcomponent = NULL;
   GtSplitter *splitter = NULL;
@@ -101,7 +101,7 @@ int file_find_in_path(GtStr *path, const char *file, GtError *err)
   assert(file);
 
   /* check if 'file' has dirname */
-  file_dirname(path, file);
+  gt_file_dirname(path, file);
   if (gt_str_length(path))
     return had_err;
   /* 'file' has no dirname -> scan $PATH */
@@ -122,7 +122,7 @@ int file_find_in_path(GtStr *path, const char *file, GtError *err)
       gt_str_append_cstr(path, pathcomponent);
       gt_str_append_char(path, '/');
       gt_str_append_cstr(path, file);
-      if (file_exists(gt_str_get(path)))
+      if (gt_file_exists(gt_str_get(path)))
         break;
     }
     if (i < gt_splitter_size(splitter)) {
@@ -143,7 +143,7 @@ int file_find_in_path(GtStr *path, const char *file, GtError *err)
   return had_err;
 }
 
-off_t files_estimate_total_size(const GtStrArray *filenames)
+off_t gt_files_estimate_total_size(const GtStrArray *filenames)
 {
   unsigned long filenum;
   off_t totalsize = 0;

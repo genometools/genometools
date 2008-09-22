@@ -67,7 +67,7 @@ static bool read_fingerprints(GtStrArray *md5_fingerprints,
   FILE *fingerprint_file = NULL;
   assert(md5_fingerprints && fingerprints_filename);
   /* open file */
-  if (file_exists(gt_str_get(fingerprints_filename)))
+  if (gt_file_exists(gt_str_get(fingerprints_filename)))
     fingerprint_file = gt_fa_xfopen(gt_str_get(fingerprints_filename), "r");
   else
     reading_succeeded = false;
@@ -133,9 +133,9 @@ static GtBioseqFingerprints* gt_bioseq_fingerprints_new(GtBioseq *bs)
   bsf->md5_fingerprints = gt_strarray_new();
   fingerprints_filename = gt_str_clone(bs->sequence_file);
   gt_str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
-  if (!bs->use_stdin && file_exists(gt_str_get(fingerprints_filename)) &&
-      !file_is_newer(gt_str_get(bs->sequence_file),
-                     gt_str_get(fingerprints_filename))) {
+  if (!bs->use_stdin && gt_file_exists(gt_str_get(fingerprints_filename)) &&
+      !gt_file_is_newer(gt_str_get(bs->sequence_file),
+                        gt_str_get(fingerprints_filename))) {
     /* only try to read the fingerprint file if the sequence file was not
        modified in the meantime */
     reading_succeeded = read_fingerprints(bsf->md5_fingerprints,
@@ -393,12 +393,12 @@ static int gt_bioseq_fill(GtBioseq *bs, bool recreate,
 
   /* construct the bioseq files if necessary */
   if (recreate || bs->use_stdin ||
-      !file_exists(gt_str_get(gt_bioseq_index_file)) ||
-      !file_exists(gt_str_get(gt_bioseq_raw_file)) ||
-      file_is_newer(gt_str_get(bs->sequence_file),
-                    gt_str_get(gt_bioseq_index_file)) ||
-      file_is_newer(gt_str_get(bs->sequence_file),
-                    gt_str_get(gt_bioseq_raw_file))) {
+      !gt_file_exists(gt_str_get(gt_bioseq_index_file)) ||
+      !gt_file_exists(gt_str_get(gt_bioseq_raw_file)) ||
+      gt_file_is_newer(gt_str_get(bs->sequence_file),
+                       gt_str_get(gt_bioseq_index_file)) ||
+      gt_file_is_newer(gt_str_get(bs->sequence_file),
+                       gt_str_get(gt_bioseq_raw_file))) {
     had_err = construct_bioseq_files(bs, gt_bioseq_index_file,
                                      gt_bioseq_raw_file, gt_fasta_reader_type,
                                      err);
@@ -429,7 +429,7 @@ static GtBioseq* gt_bioseq_new_with_recreate_and_type(GtStr *sequence_file,
   bs = gt_calloc(1, sizeof (GtBioseq));
   if (!strcmp(gt_str_get(sequence_file), "-"))
     bs->use_stdin = true;
-  if (!bs->use_stdin && !file_exists(gt_str_get(sequence_file))) {
+  if (!bs->use_stdin && !gt_file_exists(gt_str_get(sequence_file))) {
     gt_error_set(err, "sequence file \"%s\" does not exist or is not readable",
               gt_str_get(sequence_file));
     had_err = -1;

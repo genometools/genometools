@@ -128,7 +128,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     files = gt_strarray_new();
     for (i = parsed_args; i < argc; i++)
       gt_strarray_add_cstr(files, argv[i]);
-    totalsize = files_estimate_total_size(files);
+    totalsize = gt_files_estimate_total_size(files);
     seqit = gt_seqiterator_new(files, NULL, true);
     if (arguments->verbose) {
       gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,

@@ -89,7 +89,7 @@ static unsigned long buf_contains_separator(char *buf)
 static GtGenFile* genfile_xopen_forcecheck(const char *path, const char *mode,
                                             bool force, GtError *err)
 {
-  if (!force && file_exists(path)) {
+  if (!force && gt_file_exists(path)) {
     gt_error_set(err, "file \"%s\" exists already, use option -%s to overwrite",
               path, FORCE_OPT_CSTR);
     return NULL;
@@ -117,7 +117,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
     gt_str_append_str(descname, splitdesc);
     gt_str_append_char(descname, '/');
     gt_str_append_cstr(descname, gt_bioseq_get_description(bioseq, i));
-    gt_str_append_cstr(descname, file_suffix(filename));
+    gt_str_append_cstr(descname, gt_file_suffix(filename));
     if (!(outfp = genfile_xopen_forcecheck(gt_str_get(descname), "w", force,
                                            err))) {
       had_err = -1;

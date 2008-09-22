@@ -242,7 +242,7 @@ bool pckbuckettableexists(const GtStr *indexname)
 
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,PCKBUCKETTABLE);
-  retval = file_exists(gt_str_get(tmpfilename));
+  retval = gt_file_exists(gt_str_get(tmpfilename));
   gt_str_delete(tmpfilename);
   return retval;
 }

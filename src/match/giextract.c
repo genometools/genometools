@@ -136,7 +136,7 @@ static Giquery *readginumberfile(bool verbose,
 #endif
 
   gt_error_check(err);
-  *numofqueries = file_number_of_lines(gt_str_get(ginumberfile));
+  *numofqueries = gt_file_number_of_lines(gt_str_get(ginumberfile));
   if (*numofqueries == 0)
   {
     gt_error_set(err,"empty file \"%s\" not allowed",gt_str_get(ginumberfile));
@@ -322,7 +322,7 @@ int extractginumbers(bool verbose,
   {
     return -1;
   }
-  totalsize = files_estimate_total_size(referencefiletab);
+  totalsize = gt_files_estimate_total_size(referencefiletab);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
   seqit = gt_seqiterator_new(referencefiletab, NULL, true);

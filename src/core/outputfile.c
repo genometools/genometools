@@ -65,7 +65,7 @@ static int determine_outfp(void *data, GtError *err)
       gt_str_append_cstr(ofi->output_filename,
                          gt_genfilemode_suffix(genfilemode));
     }
-    if (!ofi->force && file_exists(gt_str_get(ofi->output_filename))) {
+    if (!ofi->force && gt_file_exists(gt_str_get(ofi->output_filename))) {
         gt_error_set(err, "file \"%s\" exists already, use option -%s to "
                      "overwrite", gt_str_get(ofi->output_filename),
                      FORCE_OPT_CSTR);

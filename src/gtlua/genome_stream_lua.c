@@ -31,7 +31,7 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
   assert(L);
   /* get/check parameters */
   filename = luaL_checkstring(L, 1);
-  luaL_argcheck(L, file_exists(filename), 1, "file does not exist");
+  luaL_argcheck(L, gt_file_exists(filename), 1, "file does not exist");
   /* construct object */
   gs = lua_newuserdata(L, sizeof (GtNodeStream*));
   *gs = gff3_in_stream_new_sorted(filename, false);

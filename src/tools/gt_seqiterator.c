@@ -209,7 +209,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   {
     gt_strarray_add_cstr(files, argv[i]);
   }
-  totalsize = files_estimate_total_size(files);
+  totalsize = gt_files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
   seqit = gt_seqiterator_new(files, NULL, true);

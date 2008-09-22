@@ -457,7 +457,7 @@ void freeAlphabet(Alphabet **alpha)
       {
         GtStr *transpath = NULL;
 
-        if (!file_exists(gt_str_get(smapfile)))
+        if (!gt_file_exists(gt_str_get(smapfile)))
         {
           GtStr *prog;
           const char *progname = gt_error_get_progname(err);
