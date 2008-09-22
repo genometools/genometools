@@ -199,7 +199,7 @@ int gt_genfile_xfgetc(GtGenFile *genfile)
           c = gt_xgzfgetc(genfile->fileptr.gzfile);
           break;
         case GFM_BZIP2:
-          c = xbzfgetc(genfile->fileptr.bzfile);
+          c = gt_xbzfgetc(genfile->fileptr.bzfile);
           break;
         default: assert(0);
       }
@@ -283,7 +283,7 @@ void gt_genfile_xfputc(int c, GtGenFile *genfile)
       gt_xgzfputc(c, genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
-      xbzfputc(c, genfile->fileptr.bzfile);
+      gt_xbzfputc(c, genfile->fileptr.bzfile);
       break;
     default: assert(0);
   }
@@ -301,7 +301,7 @@ void gt_genfile_xfputs(const char *str, GtGenFile *genfile)
       gt_xgzfputs(str, genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
-      xbzfputs(str, genfile->fileptr.bzfile);
+      gt_xbzfputs(str, genfile->fileptr.bzfile);
       break;
     default: assert(0);
   }
@@ -319,7 +319,7 @@ int gt_genfile_xread(GtGenFile *genfile, void *buf, size_t nbytes)
         rval = gt_xgzread(genfile->fileptr.gzfile, buf, nbytes);
         break;
       case GFM_BZIP2:
-        rval = xbzread(genfile->fileptr.bzfile, buf, nbytes);
+        rval = gt_xbzread(genfile->fileptr.bzfile, buf, nbytes);
         break;
       default: assert(0);
     }
@@ -343,7 +343,7 @@ void gt_genfile_xwrite(GtGenFile *genfile, void *buf, size_t nbytes)
       gt_xgzwrite(genfile->fileptr.gzfile, buf, nbytes);
       break;
     case GFM_BZIP2:
-      xbzwrite(genfile->fileptr.bzfile, buf, nbytes);
+      gt_xbzwrite(genfile->fileptr.bzfile, buf, nbytes);
       break;
     default: assert(0);
   }
@@ -360,7 +360,7 @@ void gt_genfile_xrewind(GtGenFile *genfile)
       gt_xgzrewind(genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
-      xbzrewind(&genfile->fileptr.bzfile, genfile->orig_path,
+      gt_xbzrewind(&genfile->fileptr.bzfile, genfile->orig_path,
                 genfile->orig_mode);
       break;
     default: assert(0);

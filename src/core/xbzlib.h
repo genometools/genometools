@@ -26,14 +26,14 @@
   That is, one can use this functions without the need to check for errors.
 */
 
-BZFILE* xbzopen(const char *path, const char *mode);
+BZFILE* gt_xbzopen(const char *path, const char *mode);
 /* Returns next character from <bzfile> or EOF, if end-of-file is reached. */
-int     xbzfgetc(BZFILE *bzfile);
-void    xbzfputc(int, BZFILE*);
-void    xbzfputs(const char*, BZFILE*);
+int     gt_xbzfgetc(BZFILE *bzfile);
+void    gt_xbzfputc(int, BZFILE*);
+void    gt_xbzfputs(const char*, BZFILE*);
 /* Returns num of read bytes. */
-int     xbzread(BZFILE*, void *buf, unsigned len);
-void    xbzwrite(BZFILE*, void *buf, unsigned len);
-void    xbzrewind(BZFILE**, const char *orig_path, const char *orig_mode);
+int     gt_xbzread(BZFILE*, void *buf, unsigned len);
+void    gt_xbzwrite(BZFILE*, void *buf, unsigned len);
+void    gt_xbzrewind(BZFILE**, const char *orig_path, const char *orig_mode);
 
 #endif

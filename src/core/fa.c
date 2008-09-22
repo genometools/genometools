@@ -95,7 +95,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
       fp = x ? gt_xgzopen(path, mode) : gt_egzopen(path, mode, err);
       break;
     case GFM_BZIP2:
-      fp = x ? xbzopen(path, mode) : gt_ebzopen(path, mode, err);
+      fp = x ? gt_xbzopen(path, mode) : gt_ebzopen(path, mode, err);
       break;
     default: assert(0);
   }

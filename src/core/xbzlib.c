@@ -22,7 +22,7 @@
 #include <string.h>
 #include "core/xbzlib.h"
 
-BZFILE* xbzopen(const char *path, const char *mode)
+BZFILE* gt_xbzopen(const char *path, const char *mode)
 {
   BZFILE* file;
   if (!(file = BZ2_bzopen(path, mode))) {
@@ -33,10 +33,10 @@ BZFILE* xbzopen(const char *path, const char *mode)
   return file;
 }
 
-int xbzfgetc(BZFILE *bzfile)
+int gt_xbzfgetc(BZFILE *bzfile)
 {
   char c;
-  return xbzread(bzfile, &c, 1) ? c : EOF;
+  return gt_xbzread(bzfile, &c, 1) ? c : EOF;
 }
 
 static int bzputc(int c, BZFILE *bzfile)
@@ -45,7 +45,7 @@ static int bzputc(int c, BZFILE *bzfile)
   return BZ2_bzwrite(bzfile, &cc, 1) == 1 ? cc : -1;
 }
 
-void xbzfputc(int c, BZFILE *bzfile)
+void gt_xbzfputc(int c, BZFILE *bzfile)
 {
   if (bzputc(c, bzfile) == -1) {
     fprintf(stderr, "cannot put character to compressed file\n");
@@ -59,7 +59,7 @@ static int bzputs(const char *str, BZFILE *bzfile)
   return BZ2_bzwrite(bzfile, (char*) str, len) == len ? len : -1;
 }
 
-void xbzfputs(const char *str, BZFILE *bzfile)
+void gt_xbzfputs(const char *str, BZFILE *bzfile)
 {
   if (bzputs(str, bzfile) == -1) {
     fprintf(stderr, "cannot put string to compressed file\n");
@@ -67,7 +67,7 @@ void xbzfputs(const char *str, BZFILE *bzfile)
   }
 }
 
-int xbzread(BZFILE *file, void *buf, unsigned len)
+int gt_xbzread(BZFILE *file, void *buf, unsigned len)
 {
   int rval;
   if ((rval = BZ2_bzread(file, buf, len)) == -1) {
@@ -77,7 +77,7 @@ int xbzread(BZFILE *file, void *buf, unsigned len)
   return rval;
 }
 
-void xbzwrite(BZFILE *file, void *buf, unsigned len)
+void gt_xbzwrite(BZFILE *file, void *buf, unsigned len)
 {
   assert(buf && len);
   if (BZ2_bzwrite(file, buf, len) != len) {
@@ -86,9 +86,9 @@ void xbzwrite(BZFILE *file, void *buf, unsigned len)
   }
 }
 
-void xbzrewind(BZFILE **file, const char *orig_path, const char *orig_mode)
+void gt_xbzrewind(BZFILE **file, const char *orig_path, const char *orig_mode)
 {
   /* simulate a rewind with close/open */
   BZ2_bzclose(*file);
-  *file = xbzopen(orig_path, orig_mode);
+  *file = gt_xbzopen(orig_path, orig_mode);
 }
