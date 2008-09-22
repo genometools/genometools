@@ -569,9 +569,9 @@ ht_ptr_elem_hash(const void *elem)
    * at oct addresses. */
 #if CHAR_BIT == 8
   if (sizeof (void *) == 4)
-    return uint32_key_mul_hash(ht_rotate_right_u32(*(uint32_t *)elem, 3));
+    return gt_uint32_key_mul_hash(ht_rotate_right_u32(*(uint32_t *)elem, 3));
   else if (sizeof (void *) == 8)
-    return uint64_key_mul_hash(ht_rotate_right_u64(*(uint64_t *)elem, 3));
+    return gt_uint64_key_mul_hash(ht_rotate_right_u64(*(uint64_t *)elem, 3));
 #else
 #error "pointer size is not a multiple of 8, I'd like to hear of your platform"
 #endif
@@ -582,9 +582,9 @@ ht_ul_elem_hash(const void *elem)
 {
 #if CHAR_BIT == 8
   if (sizeof (void *) == 4)
-    return uint32_key_mul_hash(*(uint32_t *)elem);
+    return gt_uint32_key_mul_hash(*(uint32_t *)elem);
   else if (sizeof (void *) == 8)
-    return uint64_key_mul_hash(*(uint64_t *)elem);
+    return gt_uint64_key_mul_hash(*(uint64_t *)elem);
 #else
 #error "pointer size is not a multiple of 8, I'd like to hear of your platform"
 #endif
@@ -601,7 +601,7 @@ ht_ul_elem_hash(const void *elem)
   }
 
 extern uint32_t
-uint32_data_hash(const void *data, size_t length)
+gt_uint32_data_hash(const void *data, size_t length)
 {
   uint32_t a,b,c;
   a = b = c = 0xdeadbeef + ((uint32_t)length);

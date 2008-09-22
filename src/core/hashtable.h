@@ -103,7 +103,7 @@ void       gt_hashtable_delete(GtHashtable*);
  * helper functions for users constructing their own HashElemInfos
  */
 static inline uint32_t
-uint32_key_mul_hash(uint32_t key);
+gt_uint32_key_mul_hash(uint32_t key);
 
 /**
  * @brief Hash pointer by address value
@@ -131,7 +131,7 @@ ht_cstr_elem_hash(const void *elem);
  * @brief hash binary data
  */
 extern uint32_t
-uint32_data_hash(const void *data, size_t length);
+gt_uint32_data_hash(const void *data, size_t length);
 extern int
 ht_ptr_elem_cmp(const void *elemA, const void *elemB);
 static inline int

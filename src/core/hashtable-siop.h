@@ -74,18 +74,18 @@ ht_finalize2_u32(uint32_t a, uint32_t b)
 }
 
 static inline uint32_t
-uint32_key_mul_hash(uint32_t key)
+gt_uint32_key_mul_hash(uint32_t key)
 {
   uint32_t x = ((uint64_t)GOLDEN_RATIO_MULTIPLIER * key) & (~(uint32_t)0);
   return x;
 }
 
 static inline uint32_t
-uint64_key_mul_hash(uint64_t key)
+gt_uint64_key_mul_hash(uint64_t key)
 {
   uint32_t low = key, hi = key >> 32;
-  uint32_t x = ht_finalize2_u32(uint32_key_mul_hash(low),
-                                uint32_key_mul_hash(hi));
+  uint32_t x = ht_finalize2_u32(gt_uint32_key_mul_hash(low),
+                                gt_uint32_key_mul_hash(hi));
   return x;
 }
 
