@@ -250,10 +250,10 @@ endif
 
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
-                      src/exercise \
                       src/gtlua
 
-LIBGTUNSTABLE_DIRS:=  src/match \
+LIBGTUNSTABLE_DIRS:=  src/exercise \
+                      src/match \
                       src/ltr \
                       src/mgth
 
