@@ -102,10 +102,10 @@ static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
           (GtCompare) gt_sspliced_alignment_compare_ptr);
 
     /* compute the consensus spliced alignments */
-    consensus_sa(gt_array_get_space(spliced_alignments),
-                 gt_array_size(spliced_alignments),
-                 gt_array_elem_size(spliced_alignments), get_genomic_range,
-                 get_strand, get_exons, process_splice_form, NULL);
+    gt_consensus_sa(gt_array_get_space(spliced_alignments),
+                    gt_array_size(spliced_alignments),
+                    gt_array_elem_size(spliced_alignments), get_genomic_range,
+                    get_strand, get_exons, process_splice_form, NULL);
   }
 
   /* free */
@@ -118,7 +118,7 @@ static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_consensus_sa(void)
+GtTool* gt_consensus_sa_tool(void)
 {
   return gt_tool_new(NULL,
                   NULL,

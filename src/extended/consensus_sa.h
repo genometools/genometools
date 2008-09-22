@@ -45,8 +45,8 @@ typedef void   (*ProcessSpliceFormFunc)(GtArray *spliced_alignments_in_form,
                                         size_t size_of_sa,
                                         void *userdata);
 
-void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
-                  size_t size_of_sa, GetGenomicRangeFunc, GetStrandFunc,
-                  GetExonsFunc, ProcessSpliceFormFunc, void *userdata);
+void gt_consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
+                     size_t size_of_sa, GetGenomicRangeFunc, GetStrandFunc,
+                     GetExonsFunc, ProcessSpliceFormFunc, void *userdata);
 
 #endif

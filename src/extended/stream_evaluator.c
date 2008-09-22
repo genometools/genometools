@@ -1228,8 +1228,8 @@ static void add_nucleotide_values(NucEval *nucleotides, GtBittab *real,
   nucleotides->FN += gt_bittab_count_set_bits(tmp);
 }
 
-int compute_nucleotides_values(GT_UNUSED void *key, void *value, void *data,
-                               GT_UNUSED GtError *err)
+static int compute_nucleotides_values(GT_UNUSED void *key, void *value,
+                                      void *data, GT_UNUSED GtError *err)
 {
   GtStreamEvaluator *se = (GtStreamEvaluator*) data;
   Slot *slot = (Slot*) value;

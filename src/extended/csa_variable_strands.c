@@ -110,8 +110,8 @@ GtArray* csa_variable_strands(const void *set_of_sas,
   info.get_genomic_range = get_genomic_range;
   info.get_strand = get_strand;
 
-  consensus_sa(set_of_sas, number_of_sas, size_of_sa, get_genomic_range,
-               get_strand, get_exons, store_splice_form, &info);
+  gt_consensus_sa(set_of_sas, number_of_sas, size_of_sa, get_genomic_range,
+                  get_strand, get_exons, store_splice_form, &info);
 
   process_splice_forms(genes, info.splice_forms);
 

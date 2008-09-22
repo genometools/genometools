@@ -52,7 +52,7 @@ static void* gt_exercise_arguments_new(void)
   gt_toolbox_add_tool(exercise_toolbox, "blastenv", gt_blastenv());
   gt_toolbox_add(exercise_toolbox, "casino", gt_casino);
   gt_toolbox_add(exercise_toolbox, "coin", gt_coin);
-  gt_toolbox_add_tool(exercise_toolbox, "consensus_sa", gt_consensus_sa());
+  gt_toolbox_add_tool(exercise_toolbox, "consensus_sa", gt_consensus_sa_tool());
   gt_toolbox_add_tool(exercise_toolbox, "fastaparser", gt_fastaparser());
   gt_toolbox_add_tool(exercise_toolbox, "markovchain", gt_markovchain());
   gt_toolbox_add(exercise_toolbox, "matchcount", gt_matchcount);
