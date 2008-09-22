@@ -28,8 +28,8 @@ struct GTFOutStream {
 #define gtf_out_stream_cast(GS)\
         gt_node_stream_cast(gtf_out_stream_class(), GS);
 
-static int gtf_out_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                    GtError *err)
+static int gtf_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                               GtError *err)
 {
   GTFOutStream *gtf_out_stream;
   int had_err;
@@ -50,10 +50,13 @@ static void gtf_out_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gtf_out_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GTFOutStream),
-                                         gtf_out_stream_next_tree,
-                                         gtf_out_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+   nsc = gt_node_stream_class_new(sizeof (GTFOutStream),
+                                  gtf_out_stream_free,
+                                  gtf_out_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* gtf_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)

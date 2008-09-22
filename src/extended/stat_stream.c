@@ -25,14 +25,13 @@ struct StatStream
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *stat_visitor;
-  unsigned long number_of_trees;
+  unsigned long number_of_DAGs;
 };
 
 #define stat_stream_cast(GS)\
         gt_node_stream_cast(stat_stream_class(), GS)
 
-static int stat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                 GtError *err)
+static int stat_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   StatStream *stat_stream;
   int had_err;
@@ -42,7 +41,7 @@ static int stat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
   if (!had_err) {
     assert(stat_stream->stat_visitor);
     if (*gn) {
-      stat_stream->number_of_trees++;
+      stat_stream->number_of_DAGs++;
       had_err = gt_genome_node_accept(*gn, stat_stream->stat_visitor, err);
       assert(!had_err); /* the status visitor is sane */
     }
@@ -59,10 +58,13 @@ static void stat_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* stat_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (StatStream),
-                                         stat_stream_next_tree,
-                                         stat_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (StatStream),
+                                   stat_stream_free,
+                                   stat_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* stat_stream_new(GtNodeStream *in_stream,
@@ -84,6 +86,6 @@ GtNodeStream* stat_stream_new(GtNodeStream *in_stream,
 void stat_stream_show_stats(GtNodeStream *gs)
 {
   StatStream *ss = stat_stream_cast(gs);
-  printf("parsed feature trees: %lu\n", ss->number_of_trees);
+  printf("parsed feature trees: %lu\n", ss->number_of_DAGs);
   stat_visitor_show_stats(ss->stat_visitor);
 }

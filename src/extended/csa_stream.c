@@ -30,7 +30,7 @@ struct CSAStream {
 #define csa_stream_cast(GS)\
         gt_node_stream_cast(csa_stream_class(), GS)
 
-int csa_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   CSAStream *cs;
   int had_err;
@@ -78,10 +78,13 @@ static void csa_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* csa_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (CSAStream),
-                                         csa_stream_next_tree,
-                                         csa_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc= NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (CSAStream),
+                                   csa_stream_free,
+                                   csa_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* csa_stream_new(GtNodeStream *in_stream, unsigned long join_length)

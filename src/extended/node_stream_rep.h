@@ -21,12 +21,8 @@
 #include <stdio.h>
 #include "extended/node_stream.h"
 
-struct GtNodeStreamClass
-{
-  size_t size;
-  int  (*next)(GtNodeStream*, GtGenomeNode**, GtError*);
-  void (*free)(GtNodeStream*);
-};
+typedef void (*GtNodeStreamFreeFunc)(GtNodeStream*);
+typedef int  (*GtNodeStreamNextFunc)(GtNodeStream*, GtGenomeNode**, GtError*);
 
 typedef struct GtNodeStreamMembers GtNodeStreamMembers;
 
@@ -36,8 +32,12 @@ struct GtNodeStream
   GtNodeStreamMembers *members;
 };
 
-GtNodeStream*  gt_node_stream_create(const GtNodeStreamClass*,
-                                     bool ensure_sorting);
-void*          gt_node_stream_cast(const GtNodeStreamClass*, GtNodeStream*);
+const
+GtNodeStreamClass* gt_node_stream_class_new(size_t size,
+                                            GtNodeStreamFreeFunc,
+                                            GtNodeStreamNextFunc);
+GtNodeStream*      gt_node_stream_create(const GtNodeStreamClass*,
+                                         bool ensure_sorting);
+void*              gt_node_stream_cast(const GtNodeStreamClass*, GtNodeStream*);
 
 #endif

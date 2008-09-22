@@ -31,8 +31,7 @@ struct GtFilterStream
 #define gt_filter_stream_cast(GS)\
         gt_node_stream_cast(gt_filter_stream_class(), GS);
 
-static int gt_filter_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                   GtError *err)
+static int filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   GtFilterStream *fs;
   int had_err;
@@ -63,7 +62,7 @@ static int gt_filter_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void gt_filter_stream_free(GtNodeStream *gs)
+static void filter_stream_free(GtNodeStream *gs)
 {
   GtFilterStream *fs = gt_filter_stream_cast(gs);
   gt_node_visitor_delete(fs->filter_visitor);
@@ -72,10 +71,13 @@ static void gt_filter_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gt_filter_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GtFilterStream),
-                                         gt_filter_stream_next_tree,
-                                         gt_filter_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (GtFilterStream),
+                                   filter_stream_free,
+                                   filter_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream,

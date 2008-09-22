@@ -43,8 +43,8 @@ static int change_sequence_id(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-int chseqids_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                              GtError *err)
+static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                                GtError *err)
 {
   ChseqidsStream *cs;
   GtGenomeNode *node, **gn_a, **gn_b;
@@ -158,10 +158,13 @@ static void chseqids_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* chseqids_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (ChseqidsStream),
-                                         chseqids_stream_next_tree,
-                                         chseqids_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (ChseqidsStream),
+                                   chseqids_stream_free,
+                                   chseqids_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* chseqids_stream_new(GtNodeStream *in_stream,

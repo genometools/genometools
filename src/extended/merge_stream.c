@@ -31,7 +31,7 @@ struct GtMergeStream {
 #define gt_merge_stream_cast(GS)\
         gt_node_stream_cast(gt_merge_stream_class(), GS)
 
-int gt_merge_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int merge_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   GtMergeStream *ms;
   GtGenomeNode *min_node = NULL;
@@ -96,7 +96,7 @@ int gt_merge_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void gt_merge_stream_free(GtNodeStream *gs)
+static void merge_stream_free(GtNodeStream *gs)
 {
   GtMergeStream *ms = gt_merge_stream_cast(gs);
   unsigned long i;
@@ -110,10 +110,13 @@ static void gt_merge_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gt_merge_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GtMergeStream),
-                                         gt_merge_stream_next_tree,
-                                         gt_merge_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (GtMergeStream),
+                                   merge_stream_free,
+                                   merge_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* gt_merge_stream_new(const GtArray *genome_streams)

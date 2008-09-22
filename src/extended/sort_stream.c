@@ -31,8 +31,7 @@ struct SortStream
 #define sort_stream_cast(GS)\
         gt_node_stream_cast(sort_stream_class(), GS);
 
-static int sort_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                 GtError *err)
+static int sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   SortStream *sort_stream;
   GtGenomeNode *node;
@@ -83,10 +82,13 @@ static void sort_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* sort_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (SortStream),
-                                         sort_stream_next_tree,
-                                         sort_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (SortStream),
+                                   sort_stream_free,
+                                   sort_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* sort_stream_new(GtNodeStream *in_stream)

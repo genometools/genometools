@@ -29,8 +29,8 @@ struct FeatureStream {
 #define feature_stream_cast(GS)\
         gt_node_stream_cast(feature_stream_class(), GS)
 
-static int feature_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                    GtError *err)
+static int feature_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                               GtError *err)
 {
   FeatureStream *feature_stream;
   int had_err;
@@ -51,10 +51,13 @@ static void feature_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* feature_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (FeatureStream),
-                                         feature_stream_next_tree,
-                                         feature_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (FeatureStream),
+                                   feature_stream_free,
+                                   feature_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* feature_stream_new(GtNodeStream *in_stream, GtFeatureIndex *fi)

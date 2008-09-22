@@ -69,8 +69,8 @@ static int buffer_is_sorted(void **elem, void *info, GtError *err)
   return 0;
 }
 
-static int gff3_in_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                    GtError *err)
+static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                               GtError *err)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   GtStr *filenamestr;
@@ -200,10 +200,13 @@ static void gff3_in_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gff3_in_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GFF3InStream),
-                                         gff3_in_stream_next_tree,
-                                         gff3_in_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (GFF3InStream),
+                                   gff3_in_stream_free,
+                                   gff3_in_stream_next);
+  }
+  return nsc;
 }
 
 /* takes ownership of <files> */

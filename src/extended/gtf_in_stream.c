@@ -33,8 +33,8 @@ struct GTFInStream
 #define gtf_in_stream_cast(GS)\
         gt_node_stream_cast(gtf_in_stream_class(), GS)
 
-static int gtf_in_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                   GT_UNUSED GtError *err)
+static int gtf_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                              GT_UNUSED GtError *err)
 {
   GTFInStream *is;
   gt_error_check(err);
@@ -59,10 +59,13 @@ static void gtf_in_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gtf_in_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GTFInStream),
-                                         gtf_in_stream_next_tree,
-                                         gtf_in_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (GTFInStream),
+                                   gtf_in_stream_free,
+                                   gtf_in_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,

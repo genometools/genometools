@@ -96,8 +96,7 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
   return false;
 }
 
-static int uniq_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                 GtError *err)
+static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
   UniqStream *us;
   int had_err;
@@ -150,10 +149,13 @@ static void uniq_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* uniq_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (UniqStream),
-                                         uniq_stream_next_tree,
-                                         uniq_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (UniqStream),
+                                   uniq_stream_free,
+                                   uniq_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* uniq_stream_new(GtNodeStream *in_stream)

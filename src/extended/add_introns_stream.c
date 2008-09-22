@@ -29,8 +29,8 @@ struct GtAddIntronsStream{
 #define gt_add_introns_stream_cast(GS)\
         gt_node_stream_cast(gt_add_introns_stream_class(), GS)
 
-static int gt_add_introns_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                        GtError *err)
+static int add_introns_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                                   GtError *err)
 {
   GtAddIntronsStream *ais;
   int had_err;
@@ -42,7 +42,7 @@ static int gt_add_introns_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void gt_add_introns_stream_free(GtNodeStream *gs)
+static void add_introns_stream_free(GtNodeStream *gs)
 {
   GtAddIntronsStream *ais = gt_add_introns_stream_cast(gs);
   gt_node_visitor_delete(ais->add_introns_visitor);
@@ -51,10 +51,13 @@ static void gt_add_introns_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gt_add_introns_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GtAddIntronsStream),
-                                         gt_add_introns_stream_next_tree,
-                                         gt_add_introns_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+   nsc = gt_node_stream_class_new(sizeof (GtAddIntronsStream),
+                                  add_introns_stream_free,
+                                  add_introns_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* gt_add_introns_stream_new(GtNodeStream *in_stream)

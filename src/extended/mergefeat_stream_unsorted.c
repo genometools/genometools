@@ -29,9 +29,8 @@ struct GtMergefeatStreamUnsorted {
 #define gt_mergefeat_stream_unsorted_cast(GS)\
         gt_node_stream_cast(gt_mergefeat_stream_unsorted_class(), GS)
 
-static int mergefeat_stream_unsorted_next_tree(GtNodeStream *gs,
-                                                 GtGenomeNode **gn,
-                                                 GtError *err)
+static int mergefeat_stream_unsorted_next(GtNodeStream *gs, GtGenomeNode **gn,
+                                          GtError *err)
 {
   GtMergefeatStreamUnsorted *mfs;
   int had_err;
@@ -51,10 +50,13 @@ static void mergefeat_stream_unsorted_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gt_mergefeat_stream_unsorted_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GtMergefeatStreamUnsorted),
-                                         mergefeat_stream_unsorted_next_tree,
-                                         mergefeat_stream_unsorted_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (GtMergefeatStreamUnsorted),
+                                   mergefeat_stream_unsorted_free,
+                                   mergefeat_stream_unsorted_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* gt_mergefeat_stream_unsorted_new(GtNodeStream *in_stream)

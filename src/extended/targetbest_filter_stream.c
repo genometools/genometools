@@ -35,8 +35,8 @@ struct TargetbestGtFilterStream
   bool in_stream_processed;
 };
 
-#define targetbest_gt_filter_stream_cast(GS)\
-        gt_node_stream_cast(targetbest_gt_filter_stream_class(), GS);
+#define targetbest_filter_stream_cast(GS)\
+        gt_node_stream_cast(targetbest_filter_stream_class(), GS);
 
 static void build_key(GtStr *key, GtFeatureNode *feature, GtStr *target_id)
 {
@@ -115,14 +115,14 @@ static void filter_targetbest(GtFeatureNode *current_feature,
   gt_str_delete(first_target_id);
 }
 
-static int targetbest_gt_filter_stream_next_tree(GtNodeStream *gs,
-                                              GtGenomeNode **gn, GtError *err)
+static int targetbest_filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                                         GtError *err)
 {
   TargetbestGtFilterStream *tfs;
   GtGenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
-  tfs = targetbest_gt_filter_stream_cast(gs);
+  tfs = targetbest_filter_stream_cast(gs);
 
   if (!tfs->in_stream_processed) {
     while (!(had_err = gt_node_stream_next(tfs->in_stream, &node, err)) &&
@@ -153,9 +153,9 @@ static int targetbest_gt_filter_stream_next_tree(GtNodeStream *gs,
   return had_err;
 }
 
-static void targetbest_gt_filter_stream_free(GtNodeStream *gs)
+static void targetbest_filter_stream_free(GtNodeStream *gs)
 {
-  TargetbestGtFilterStream *tfs = targetbest_gt_filter_stream_cast(gs);
+  TargetbestGtFilterStream *tfs = targetbest_filter_stream_cast(gs);
   for (; tfs->next != NULL; tfs->next = gt_dlistelem_next(tfs->next))
     gt_genome_node_rec_delete(gt_dlistelem_get_data(tfs->next));
   gt_dlist_delete(tfs->trees);
@@ -163,22 +163,25 @@ static void targetbest_gt_filter_stream_free(GtNodeStream *gs)
   gt_node_stream_delete(tfs->in_stream);
 }
 
-const GtNodeStreamClass* targetbest_gt_filter_stream_class(void)
+const GtNodeStreamClass* targetbest_filter_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (TargetbestGtFilterStream),
-                                         targetbest_gt_filter_stream_next_tree,
-                                         targetbest_gt_filter_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (TargetbestGtFilterStream),
+                                   targetbest_filter_stream_free,
+                                   targetbest_filter_stream_next);
+  }
+  return nsc;
 }
 
-GtNodeStream* targetbest_gt_filter_stream_new(GtNodeStream *in_stream)
+GtNodeStream* targetbest_filter_stream_new(GtNodeStream *in_stream)
 {
   TargetbestGtFilterStream *tfs;
   GtNodeStream *gs;
   assert(in_stream);
-  gs = gt_node_stream_create(targetbest_gt_filter_stream_class(),
+  gs = gt_node_stream_create(targetbest_filter_stream_class(),
                             gt_node_stream_is_sorted(in_stream));
-  tfs = targetbest_gt_filter_stream_cast(gs);
+  tfs = targetbest_filter_stream_cast(gs);
   tfs->in_stream = gt_node_stream_ref(in_stream);
   tfs->in_stream_processed = false;
   tfs->trees = gt_dlist_new(NULL);

@@ -30,8 +30,8 @@ struct GtExtractFeatStream
 #define gt_extract_feat_stream_cast(GS)\
         gt_node_stream_cast(gt_extract_feat_stream_class(), GS)
 
-static int extract_feat_stream_next_tree(GtNodeStream *gs, GtGenomeNode **gn,
-                                         GtError *err)
+static int extract_feat_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                                    GtError *err)
 {
   GtExtractFeatStream *efs;
   int had_err;
@@ -61,10 +61,13 @@ static void extract_feat_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gt_extract_feat_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (GtExtractFeatStream),
-                                         extract_feat_stream_next_tree,
-                                         extract_feat_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (GtExtractFeatStream),
+                                   extract_feat_stream_free,
+                                   extract_feat_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* gt_extract_feat_stream_new(GtNodeStream *in_stream,

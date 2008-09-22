@@ -30,8 +30,8 @@ struct SpliceSiteInfoStream
 #define splice_site_info_stream_cast(GS)\
         gt_node_stream_cast(splice_site_info_stream_class(), GS)
 
-static int splice_site_info_stream_next_tree(GtNodeStream *gs,
-                                             GtGenomeNode **gn, GtError *err)
+static int splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                                        GtError *err)
 {
   SpliceSiteInfoStream *ssis;
   int had_err;
@@ -61,10 +61,13 @@ static void splice_site_info_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* splice_site_info_stream_class(void)
 {
-  static const GtNodeStreamClass gsc = { sizeof (SpliceSiteInfoStream),
-                                         splice_site_info_stream_next_tree,
-                                         splice_site_info_stream_free };
-  return &gsc;
+  static const GtNodeStreamClass *nsc = NULL;
+  if (!nsc) {
+    nsc = gt_node_stream_class_new(sizeof (SpliceSiteInfoStream),
+                                   splice_site_info_stream_free,
+                                   splice_site_info_stream_next);
+  }
+  return nsc;
 }
 
 GtNodeStream* splice_site_info_stream_new(GtNodeStream *in_stream,

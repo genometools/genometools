@@ -40,7 +40,9 @@ gt_node_visitor_class_new(size_t size,
                           GtNodeVisitorRegionNodeFunc region_node,
                           GtNodeVisitorSequenceNodeFunc sequence_node)
 {
-  GtNodeVisitorClass *c_class = gt_class_alloc(sizeof *c_class);
+  GtNodeVisitorClass *c_class;
+  gt_assert(size);
+  c_class = gt_class_alloc(sizeof *c_class);
   c_class->size = size;
   c_class->free = free;
   c_class->comment_node = comment_node;

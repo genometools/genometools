@@ -15,17 +15,37 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <stdarg.h>
+#include "core/assert.h"
+#include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/node_stream_rep.h"
+
+struct GtNodeStreamClass {
+  size_t size;
+  GtNodeStreamFreeFunc free;
+  GtNodeStreamNextFunc next;
+};
 
 struct GtNodeStreamMembers {
   GtGenomeNode *buffer;
   bool ensure_sorting;
   unsigned int reference_count;
 };
+
+const GtNodeStreamClass*
+gt_node_stream_class_new(size_t size, GtNodeStreamFreeFunc free,
+                         GtNodeStreamNextFunc next)
+{
+  GtNodeStreamClass *c_class;
+  gt_assert(size && next);
+  c_class = gt_class_alloc(sizeof *c_class);
+  c_class->size = size;
+  c_class->free = free;
+  c_class->next = next;
+  return c_class;
+}
 
 GtNodeStream* gt_node_stream_create(const GtNodeStreamClass *nsc,
                                     bool ensure_sorting)
