@@ -19,12 +19,12 @@
 #define CDS_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct CDSVisitor CDSVisitor;
+typedef struct GtCDSVisitor GtCDSVisitor;
 
 #include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
-const GtNodeVisitorClass* cds_visitor_class(void);
-GtNodeVisitor*            cds_visitor_new(GtRegionMapping*, GtStr *source);
+const GtNodeVisitorClass* gt_cds_visitor_class(void);
+GtNodeVisitor*            gt_cds_visitor_new(GtRegionMapping*, GtStr *source);
 
 #endif

@@ -23,7 +23,7 @@
 #include "extended/node_visitor_rep.h"
 #include "extended/splicedseq.h"
 
-struct CDSVisitor {
+struct GtCDSVisitor {
   const GtNodeVisitor parent_instance;
   GtStr *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
@@ -32,11 +32,11 @@ struct CDSVisitor {
 };
 
 #define cds_visitor_cast(GV)\
-        gt_node_visitor_cast(cds_visitor_class(), GV)
+        gt_node_visitor_cast(gt_cds_visitor_class(), GV)
 
 static void cds_visitor_free(GtNodeVisitor *gv)
 {
-  CDSVisitor *cds_visitor = cds_visitor_cast(gv);
+  GtCDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
   gt_str_delete(cds_visitor->source);
   gt_splicedseq_delete(cds_visitor->splicedseq);
@@ -46,7 +46,7 @@ static void cds_visitor_free(GtNodeVisitor *gv)
 static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
                                     GtError *err)
 {
-  CDSVisitor *v = (CDSVisitor*) data;
+  GtCDSVisitor *v = (GtCDSVisitor*) data;
   GtFeatureNode *gf;
   GtRange range;
   const char *raw_sequence;
@@ -81,7 +81,7 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
   return had_err;
 }
 
-static int extract_spliced_seq(GtGenomeNode *gn, CDSVisitor *visitor,
+static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
                                GtError *err)
 {
   gt_error_check(err);
@@ -117,7 +117,7 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
   return orfs;
 }
 
-static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
+static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
                                         GtGenomeNode *gn)
 {
   GtFeatureNode *cds_feature;
@@ -171,7 +171,7 @@ static void create_CDS_features_for_ORF(GtRange orf, CDSVisitor *v,
   gt_feature_node_add_child(gt_feature_node_cast(gn), cds_feature);
 }
 
-static void create_CDS_features_for_longest_ORF(GtArray *orfs, CDSVisitor *v,
+static void create_CDS_features_for_longest_ORF(GtArray *orfs, GtCDSVisitor *v,
                                                 GtGenomeNode *gn)
 {
   if (gt_array_size(orfs)) {
@@ -185,7 +185,7 @@ static void create_CDS_features_for_longest_ORF(GtArray *orfs, CDSVisitor *v,
 
 static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 {
-  CDSVisitor *v = (CDSVisitor*) data;
+  GtCDSVisitor *v = (GtCDSVisitor*) data;
   GtFeatureNode *gf;
   int had_err;
 
@@ -213,18 +213,18 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 static int cds_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
                                       GtError *err)
 {
-  CDSVisitor *v = cds_visitor_cast(gv);
+  GtCDSVisitor *v = cds_visitor_cast(gv);
   gt_error_check(err);
   return gt_genome_node_traverse_children((GtGenomeNode*) gf, v,
                                        add_cds_if_necessary, false, err);
 
 }
 
-const GtNodeVisitorClass* cds_visitor_class()
+const GtNodeVisitorClass* gt_cds_visitor_class()
 {
   static const GtNodeVisitorClass *gvc = NULL;
   if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (CDSVisitor),
+    gvc = gt_node_visitor_class_new(sizeof (GtCDSVisitor),
                                     cds_visitor_free,
                                     NULL,
                                     cds_visitor_genome_feature,
@@ -234,12 +234,13 @@ const GtNodeVisitorClass* cds_visitor_class()
   return gvc;
 }
 
-GtNodeVisitor* cds_visitor_new(GtRegionMapping *region_mapping, GtStr *source)
+GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
+                                  GtStr *source)
 {
   GtNodeVisitor *gv;
-  CDSVisitor *cds_visitor;
+  GtCDSVisitor *cds_visitor;
   assert(region_mapping);
-  gv = gt_node_visitor_create(cds_visitor_class());
+  gv = gt_node_visitor_create(gt_cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->source = gt_str_ref(source);
   cds_visitor->splicedseq = gt_splicedseq_new();
