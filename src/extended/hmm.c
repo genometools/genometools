@@ -604,9 +604,9 @@ int gt_hmm_unit_test(GtError *err)
   gt_error_check(err);
 
   /* test the GtHMM class with the coin GtHMMs */
-  fair_hmm = coin_hmm_fair();
-  loaded_hmm = coin_hmm_loaded();
-  alpha = coin_hmm_alpha();
+  fair_hmm = gt_coin_hmm_fair();
+  loaded_hmm = gt_coin_hmm_loaded();
+  alpha = gt_coin_hmm_alpha();
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
   encoded_seq = gt_malloc(sizeof (int) * strlen(coin_tosses[size-1]));
 

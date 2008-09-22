@@ -33,8 +33,8 @@ typedef enum {
   COIN_NUM_OF_SYMBOLS
 } Coin_emissions;
 
-GtHMM*   coin_hmm_loaded(void);
-GtHMM*   coin_hmm_fair(void);
-GtAlpha* coin_hmm_alpha(void);
+GtHMM*   gt_coin_hmm_loaded(void);
+GtHMM*   gt_coin_hmm_fair(void);
+GtAlpha* gt_coin_hmm_alpha(void);
 
 #endif

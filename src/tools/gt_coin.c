@@ -75,7 +75,7 @@ int gt_coin(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* create the GtHMM */
-    hmm = coin_hmm_loaded();
+    hmm = gt_coin_hmm_loaded();
 
     /* decoding */
     state_sequence = gt_malloc(sizeof (unsigned int) * num_of_emissions);

@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "extended/coin_hmm.h"
 
-GtHMM* coin_hmm_loaded(void)
+GtHMM* gt_coin_hmm_loaded(void)
 {
   GtHMM *hmm;
 
@@ -40,7 +40,7 @@ GtHMM* coin_hmm_loaded(void)
   return hmm;
 }
 
-GtHMM* coin_hmm_fair(void)
+GtHMM* gt_coin_hmm_fair(void)
 {
   GtHMM *hmm;
 
@@ -62,7 +62,7 @@ GtHMM* coin_hmm_fair(void)
   return hmm;
 }
 
-GtAlpha* coin_hmm_alpha(void)
+GtAlpha* gt_coin_hmm_alpha(void)
 {
   GtAlpha *a = gt_alpha_new();
   gt_alpha_add_mapping(a, "Hh");
