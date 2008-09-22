@@ -136,7 +136,7 @@ static void xfclose_generic(void *stream, GtGenFileMode genfilemode, FA *fa)
   gt_hashmap_remove(fa->file_pointer, stream);
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      gt_fa_xfclose(stream);
+      gt_xfclose(stream);
       break;
     case GFM_GZIP:
       gt_xgzclose(stream);
