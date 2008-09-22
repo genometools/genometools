@@ -196,7 +196,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   }
   if (!haserr)
   {
-    if (is_little_endian())
+    if (gt_is_little_endian())
     {
       if (littleendian != (uint32_t) 1)
       {

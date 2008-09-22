@@ -90,7 +90,7 @@ static void showprjinfo(FILE *outprj,
                    PRINTSeqposcast(maxbranchdepth));
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
-  fprintf(outprj,"littleendian=%c\n",is_little_endian() ? '1' : '0');
+  fprintf(outprj,"littleendian=%c\n",gt_is_little_endian() ? '1' : '0');
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
 

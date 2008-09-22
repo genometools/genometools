@@ -19,6 +19,6 @@
 #define ENDIANESS_H
 
 /* returns true if host CPU is little-endian, false otherwise */
-bool is_little_endian(void);
+bool gt_is_little_endian(void);
 
 #endif

@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include "core/endianess.h"
 
-bool is_little_endian(void)
+bool gt_is_little_endian(void)
 {
   int x = 1;
   if (*(char*) &x == 1)
