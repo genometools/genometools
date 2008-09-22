@@ -45,7 +45,7 @@ static int diagram_lua_new(lua_State *L)
   /* get range */
   range = check_range(L, 3);
   /* create diagram */
-  style = lua_get_style_from_registry(L);
+  style = gt_lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   assert(diagram);
   *diagram = gt_diagram_new(*feature_index, seqid, range, style);
@@ -111,7 +111,7 @@ static int diagram_lua_new_from_array(lua_State *L)
   luaL_argcheck(L, range.end > 0, 3, "must be > 0");
   luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
   /* create diagram */
-  style = lua_get_style_from_registry(L);
+  style = gt_lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   assert(diagram);
   *diagram = gt_diagram_new_from_array(nodes, &range, style);

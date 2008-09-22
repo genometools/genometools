@@ -57,7 +57,7 @@ static int feature_index_lua_add_gff3file(lua_State *L)
   filename = luaL_checkstring(L, 2);
   err = gt_error_new();
   if (gt_feature_index_add_gff3file(*fi, filename, err))
-    return lua_gt_error(L, err);
+    return gt_lua_error(L, err);
   gt_error_delete(err);
   return 0;
 }
@@ -154,7 +154,7 @@ static int feature_index_lua_get_seqids(lua_State *L)
   seqids = gt_feature_index_get_seqids(*feature_index);
   assert(seqids);
   /* push table containing sequence ids onto the stack */
-  lua_push_strarray_as_table(L, seqids);
+  gt_lua_push_strarray_as_table(L, seqids);
   gt_strarray_delete(seqids);
   return 1;
 }
@@ -209,7 +209,7 @@ int gt_lua_open_feature_index(lua_State *L)
   lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, feature_index_lib_m);
-  lua_export_metatable(L, FEATURE_INDEX_METATABLE);
+  gt_lua_export_metatable(L, FEATURE_INDEX_METATABLE);
   luaL_register(L, "gt", feature_index_lib_f);
   return 1;
 }

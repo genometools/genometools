@@ -57,7 +57,7 @@ static int stream_evaluator_lua_evaluate(lua_State *L)
   err = gt_error_new();
   if (gt_stream_evaluator_evaluate(*stream_evaluator, false, false,
                                 genome_visitor ? *genome_visitor : NULL, err)) {
-    return lua_gt_error(L, err);
+    return gt_lua_error(L, err);
   }
   gt_error_delete(err);
   return 0;

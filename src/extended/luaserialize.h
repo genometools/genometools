@@ -22,7 +22,7 @@
 #include "core/error.h"
 #include "core/str.h"
 
-int lua_table_to_str(lua_State *L, GtStr *out, int index, GtError*);
-int lua_serializer_unit_test(GtError *err);
+int gt_lua_table_to_str(lua_State *L, GtStr *out, int index, GtError*);
+int gt_lua_serializer_unit_test(GtError *err);
 
 #endif

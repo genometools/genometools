@@ -83,7 +83,7 @@ GTR* gtr_new(GtError *err)
     luaopen_lpeg(gtr->L);     /* open LPeg library */
     luaopen_md5_core(gtr->L); /* open MD5 library */
     luaopen_des56(gtr->L);
-    had_err = lua_set_modules_path(gtr->L, err);
+    had_err = gt_lua_set_modules_path(gtr->L, err);
   }
 #ifndef WITHOUT_CAIRO
   if (!had_err) {
@@ -100,7 +100,7 @@ GTR* gtr_new(GtError *err)
       if (gt_style_load_file(gtr->style, gt_str_get(style_file), err))
         had_err = -1;
       else
-        lua_put_style_in_registry(gtr->L, gtr->style);
+        gt_lua_put_style_in_registry(gtr->L, gtr->style);
     }
   }
   gt_str_delete(style_file);
@@ -297,7 +297,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
       if (gt_file_exists(argv[0])) {
         /* run script */
         nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
-        lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
+        gt_lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
@@ -331,7 +331,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
   gt_cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
     showshortversion(gt_error_get_progname(err));
-    lua_set_arg(gtr->L, gt_error_get_progname(err), argv);
+    gt_lua_set_arg(gtr->L, gt_error_get_progname(err), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)

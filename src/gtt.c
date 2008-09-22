@@ -177,7 +177,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "hashtable class", gt_hashtable_unit_test);
   gt_hashmap_add(unit_tests, "hmm class", gt_hmm_unit_test);
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
-  gt_hashmap_add(unit_tests, "Lua serializer module", lua_serializer_unit_test);
+  gt_hashmap_add(unit_tests, "Lua serializer module",
+                 gt_lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbt_unit_test);

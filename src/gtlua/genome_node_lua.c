@@ -210,7 +210,7 @@ static int genome_node_lua_accept(lua_State *L)
   gv = check_genome_visitor(L, 2);
   err = gt_error_new();
   if (gt_genome_node_accept(*gn, *gv, err))
-    return lua_gt_error(L, err);
+    return gt_lua_error(L, err);
   gt_error_delete(err);
   return 0;
 }
@@ -297,7 +297,7 @@ static int feature_node_lua_extract_sequence(lua_State *L)
   if (gt_extract_feat_sequence(sequence, *gn, type, join, *region_mapping, err))
   {
     gt_str_delete(sequence);
-    return lua_gt_error(L, err);
+    return gt_lua_error(L, err);
   }
   if (gt_str_length(sequence))
     lua_pushstring(L, gt_str_get(sequence));
@@ -356,7 +356,7 @@ int gt_lua_open_genome_node(lua_State *L)
   lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, genome_node_lib_m);
-  lua_export_metatable(L, GENOME_NODE_METATABLE);
+  gt_lua_export_metatable(L, GENOME_NODE_METATABLE);
   luaL_register(L, "gt", genome_node_lib_f);
   return 1;
 }

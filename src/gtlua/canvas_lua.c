@@ -33,7 +33,7 @@ static int canvas_cairo_file_lua_new_generic(lua_State *L, GtGraphicsOutType t)
   GtStyle *style;
   width = luaL_checkint(L, 1);
   /* create canvas */
-  style = lua_get_style_from_registry(L);
+  style = gt_lua_get_style_from_registry(L);
   canvas = lua_newuserdata(L, sizeof (GtCanvas*));
   assert(canvas);
   /* if a imageinfo object is passed, it must be correct type */
@@ -84,7 +84,7 @@ static int canvas_cairo_file_lua_to_file(lua_State *L)
   assert(canvas);
   had_err = gt_canvas_cairo_file_to_file(ccf, fn, err);
   if (had_err)
-    return lua_gt_error(L, err);
+    return gt_lua_error(L, err);
   gt_error_delete(err);
   return 0;
 }

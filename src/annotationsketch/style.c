@@ -434,7 +434,7 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
   lua_getglobal(sty->L, "style");
   gt_str_append_cstr(outstr, "style = {\n");
   if (lua_istable(sty->L, -1))
-    had_err = lua_table_to_str(sty->L, outstr, -1, err);
+    had_err = gt_lua_table_to_str(sty->L, outstr, -1, err);
   else {
     gt_error_set(err, "'style' must be a table");
     had_err = -1;

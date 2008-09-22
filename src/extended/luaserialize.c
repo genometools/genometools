@@ -106,14 +106,14 @@ static int parse_table(lua_State *L, GtStr *out, int index, int level,
   return had_err;
 }
 
-int lua_table_to_str(lua_State *L, GtStr *out, int index, GtError *err)
+int gt_lua_table_to_str(lua_State *L, GtStr *out, int index, GtError *err)
 {
   gt_error_check(err);
   assert(L && out && lua_istable(L, index));
   return parse_table(L, out, index, 1, err);
 }
 
-int lua_serializer_unit_test(GtError *err)
+int gt_lua_serializer_unit_test(GtError *err)
 {
   int had_err = 0;
   lua_State *L;
@@ -150,7 +150,7 @@ int lua_serializer_unit_test(GtError *err)
   {
     lua_getglobal(L, "config");
     gt_str_append_cstr(outstr, "config = {\n");
-    lua_table_to_str(L, outstr, -1, err);
+    gt_lua_table_to_str(L, outstr, -1, err);
     gt_str_append_cstr(outstr, "}");
     had_err = luaL_loadbuffer(L, gt_str_get(outstr),
                               gt_str_length(outstr), "t2") ||

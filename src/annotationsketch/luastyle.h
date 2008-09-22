@@ -21,7 +21,7 @@
 #include "lua.h"
 #include "annotationsketch/style.h"
 
-void      lua_put_style_in_registry(lua_State*, GtStyle*);
-GtStyle* lua_get_style_from_registry(lua_State*);
+void      gt_lua_put_style_in_registry(lua_State*, GtStyle*);
+GtStyle*  gt_lua_get_style_from_registry(lua_State*);
 
 #endif

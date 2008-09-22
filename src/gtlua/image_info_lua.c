@@ -49,7 +49,7 @@ static int imageinfo_lua_get_height(lua_State *L)
   if (height > DBL_MAX)
   {
     gt_error_set(err, "image height exceeds %f!", DBL_MAX);
-    return lua_gt_error(L, err);
+    return gt_lua_error(L, err);
   }
   else
     lua_pushnumber(L, (double) height);
@@ -68,7 +68,7 @@ static int imageinfo_lua_num_of_recmaps(lua_State *L)
   if (nof_rm > DBL_MAX)
   {
     gt_error_set(err, "number of recmaps exceeds %f!", DBL_MAX);
-    return lua_gt_error(L, err);
+    return gt_lua_error(L, err);
   }
   else
     lua_pushnumber(L, (double) nof_rm);

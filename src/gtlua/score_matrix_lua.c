@@ -35,7 +35,7 @@ static int score_matrix_lua_new_read_protein(lua_State *L)
   assert(sm);
   err = gt_error_new();
   if (!(*sm = gt_score_matrix_new_read_protein(path, err)))
-    return lua_gt_error(L, err); /* handle error */
+    return gt_lua_error(L, err); /* handle error */
   gt_error_delete(err);
   assert(*sm);
   luaL_getmetatable(L, SCOREMATRIX_METATABLE);

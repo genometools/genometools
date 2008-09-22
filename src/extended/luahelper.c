@@ -26,7 +26,7 @@
 /* key used to store the Env object in the Lua registry */
 #define ENV_KEY env_new
 
-int lua_set_modules_path(lua_State *L, GtError *err)
+int gt_lua_set_modules_path(lua_State *L, GtError *err)
 {
   GtStr *modules_path = NULL, *external_modules_path = NULL,
          *package_path = NULL;
@@ -59,7 +59,7 @@ int lua_set_modules_path(lua_State *L, GtError *err)
   return had_err;
 }
 
-void lua_set_arg(lua_State *L, const char *argv_0, const char **argv)
+void gt_lua_set_arg(lua_State *L, const char *argv_0, const char **argv)
 {
   lua_Integer n = 0;
   assert(L && argv_0);
@@ -80,7 +80,7 @@ void lua_set_arg(lua_State *L, const char *argv_0, const char **argv)
   lua_setglobal(L, "arg");
 }
 
-void lua_export_metatable(lua_State *L, const char *metatable_desc)
+void gt_lua_export_metatable(lua_State *L, const char *metatable_desc)
 {
   char *dot, *mt;
   assert(L && metatable_desc);
@@ -92,7 +92,7 @@ void lua_export_metatable(lua_State *L, const char *metatable_desc)
   gt_free(mt);
 }
 
-void lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
+void gt_lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
 {
   unsigned long i;
   assert(L && sa);
@@ -104,7 +104,7 @@ void lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
   }
 }
 
-int lua_gt_error(lua_State *L, GtError *err)
+int gt_lua_error(lua_State *L, GtError *err)
 {
   assert(L && err);
   assert(gt_error_is_set(err));

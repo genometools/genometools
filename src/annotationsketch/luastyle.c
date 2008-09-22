@@ -21,7 +21,7 @@
 /* key used to store the Style object in the Lua registry */
 #define STYLE_KEY gt_style_new
 
-void lua_put_style_in_registry(lua_State *L, GtStyle *style)
+void gt_lua_put_style_in_registry(lua_State *L, GtStyle *style)
 {
   assert(L && style);
   lua_pushlightuserdata(L, STYLE_KEY);
@@ -29,7 +29,7 @@ void lua_put_style_in_registry(lua_State *L, GtStyle *style)
   lua_rawset(L, LUA_REGISTRYINDEX);
 }
 
-GtStyle* lua_get_style_from_registry(lua_State *L)
+GtStyle* gt_lua_get_style_from_registry(lua_State *L)
 {
   GtStyle *style;
   assert(L);
