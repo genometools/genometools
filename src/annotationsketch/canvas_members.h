@@ -15,6 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef CANVAS_MEMBERS_H
+#define CANVAS_MEMBERS_H
+
 #include "core/bittab.h"
 #include "core/range.h"
 #include "annotationsketch/graphics.h"
@@ -31,3 +34,5 @@ struct GtCanvasMembers {
   GtGraphics *g;
   GtImageInfo *ii;
 };
+
+#endif
