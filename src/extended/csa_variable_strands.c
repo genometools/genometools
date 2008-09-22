@@ -32,17 +32,18 @@ static void store_splice_form(GtArray *spliced_alignments_in_form,
                               size_t size_of_sa, void *data)
 {
   StoreSpliceFormInfo *info = data;
-  CSASpliceForm *splice_form;
+  GtCSASpliceForm *splice_form;
   unsigned long i, sa;
   assert(info);
   assert(spliced_alignments_in_form &&
          gt_array_size(spliced_alignments_in_form));
   sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, 0);
-  splice_form = csa_splice_form_new((char*) set_of_sas + sa * size_of_sa,
+  splice_form = gt_csa_splice_form_new((char*) set_of_sas + sa * size_of_sa,
                                     info->get_genomic_range, info->get_strand);
   for (i = 1; i < gt_array_size(spliced_alignments_in_form); i++) {
     sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, i);
-    csa_splice_form_add_sa(splice_form, (char*) set_of_sas + sa * size_of_sa);
+    gt_csa_splice_form_add_sa(splice_form,
+                              (char*) set_of_sas + sa * size_of_sa);
   }
   gt_array_add(info->splice_forms, splice_form);
 }
@@ -54,9 +55,9 @@ static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
   assert(genes && splice_forms);
   /* put splice forms into appropirate genes */
   for (i = 0; i < gt_array_size(splice_forms); i++) {
-    CSASpliceForm *splice_form = *(CSASpliceForm**)
+    GtCSASpliceForm *splice_form = *(GtCSASpliceForm**)
                                  gt_array_get(splice_forms, i);
-    switch (csa_splice_form_strand(splice_form)) {
+    switch (gt_csa_splice_form_strand(splice_form)) {
       case GT_STRAND_FORWARD:
         if (!forward_gene)
           forward_gene = gt_csa_gene_new(splice_form);
@@ -106,7 +107,7 @@ GtArray* csa_variable_strands(const void *set_of_sas,
 
   genes = gt_array_new(sizeof (GtCSAGene*));
 
-  info.splice_forms = gt_array_new(sizeof (CSASpliceForm*));
+  info.splice_forms = gt_array_new(sizeof (GtCSASpliceForm*));
   info.get_genomic_range = get_genomic_range;
   info.get_strand = get_strand;
 

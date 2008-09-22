@@ -22,12 +22,12 @@ struct GtCSAGene {
   GtArray *splice_forms;
 };
 
-GtCSAGene* gt_csa_gene_new(CSASpliceForm *splice_form)
+GtCSAGene* gt_csa_gene_new(GtCSASpliceForm *splice_form)
 {
   GtCSAGene *gene;
   assert(splice_form);
   gene = gt_malloc(sizeof *gene);
-  gene->splice_forms = gt_array_new(sizeof (CSASpliceForm*));
+  gene->splice_forms = gt_array_new(sizeof (GtCSASpliceForm*));
   gt_array_add(gene->splice_forms, splice_form);
   return gene;
 }
@@ -36,27 +36,28 @@ void gt_csa_gene_delete(GtCSAGene *gene)
 {
   unsigned long i;
   if (!gene) return;
-  for (i = 0; i < gt_array_size(gene->splice_forms); i++)
-    csa_splice_form_delete(*(CSASpliceForm**) gt_array_get(gene->splice_forms,
-                                                           i));
+  for (i = 0; i < gt_array_size(gene->splice_forms); i++) {
+    gt_csa_splice_form_delete(*(GtCSASpliceForm**)
+                              gt_array_get(gene->splice_forms, i));
+  }
   gt_array_delete(gene->splice_forms);
   gt_free(gene);
 }
 
-void gt_csa_gene_add_splice_form(GtCSAGene *gene, CSASpliceForm *splice_form)
+void gt_csa_gene_add_splice_form(GtCSAGene *gene, GtCSASpliceForm *splice_form)
 {
   assert(gene && splice_form);
-  assert(csa_splice_form_strand(*(CSASpliceForm**)
+  assert(gt_csa_splice_form_strand(*(GtCSASpliceForm**)
                                 gt_array_get(gene->splice_forms, 0)) ==
-         csa_splice_form_strand(splice_form));
+         gt_csa_splice_form_strand(splice_form));
   gt_array_add(gene->splice_forms, splice_form);
 }
 
-CSASpliceForm* gt_csa_gene_get_splice_form(const GtCSAGene *gene,
+GtCSASpliceForm* gt_csa_gene_get_splice_form(const GtCSAGene *gene,
                                            unsigned long sf)
 {
   assert(gene);
-  return *(CSASpliceForm**) gt_array_get(gene->splice_forms, sf);
+  return *(GtCSASpliceForm**) gt_array_get(gene->splice_forms, sf);
 }
 
 unsigned long gt_csa_gene_num_of_splice_forms(const GtCSAGene *gene)
@@ -73,7 +74,7 @@ GtRange gt_csa_gene_genomic_range(const GtCSAGene *gene)
   gene_range.start = ~0UL;
   gene_range.end = 0UL;
   for (i = 0; i < gt_array_size(gene->splice_forms); i++) {
-    tmp_range = csa_splice_form_genomic_range(*(CSASpliceForm**)
+    tmp_range = gt_csa_splice_form_genomic_range(*(GtCSASpliceForm**)
                                               gt_array_get(gene->splice_forms,
                                                            i));
     if (tmp_range.start < gene_range.start)
@@ -87,14 +88,14 @@ GtRange gt_csa_gene_genomic_range(const GtCSAGene *gene)
 GtStrand gt_csa_gene_strand(const GtCSAGene *gene)
 {
   assert(gene);
-  return csa_splice_form_strand(*(CSASpliceForm**)
+  return gt_csa_splice_form_strand(*(GtCSASpliceForm**)
                                 gt_array_get(gene->splice_forms, 0));
 }
 
 void* gt_csa_gene_get_representative(const GtCSAGene *gene)
 {
   assert(gene);
-  return csa_splice_form_get_representative(*(CSASpliceForm**)
+  return gt_csa_splice_form_get_representative(*(GtCSASpliceForm**)
                                             gt_array_get(gene->splice_forms,
                                                          0));
 }

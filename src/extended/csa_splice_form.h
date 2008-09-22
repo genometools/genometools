@@ -21,16 +21,18 @@
 #include "core/strand.h"
 #include "extended/consensus_sa.h"
 
-typedef struct CSASpliceForm CSASpliceForm;
+typedef struct GtCSASpliceForm GtCSASpliceForm;
 
-CSASpliceForm* csa_splice_form_new(void *spliced_alignment, GetGenomicRangeFunc,
-                                   GetStrandFunc);
-void           csa_splice_form_delete(CSASpliceForm*);
-void           csa_splice_form_add_sa(CSASpliceForm*, void *spliced_alignment);
-void*          csa_splice_form_get_sa(const CSASpliceForm*, unsigned long);
-unsigned long  csa_splice_form_num_of_sas(const CSASpliceForm*);
-GtRange       csa_splice_form_genomic_range(const CSASpliceForm*);
-GtStrand      csa_splice_form_strand(const CSASpliceForm*);
-void*          csa_splice_form_get_representative(const CSASpliceForm*);
+GtCSASpliceForm* gt_csa_splice_form_new(void *spliced_alignment,
+                                        GetGenomicRangeFunc, GetStrandFunc);
+void             gt_csa_splice_form_delete(GtCSASpliceForm*);
+void             gt_csa_splice_form_add_sa(GtCSASpliceForm*,
+                                           void *spliced_alignment);
+void*            gt_csa_splice_form_get_sa(const GtCSASpliceForm*,
+                                           unsigned long);
+unsigned long    gt_csa_splice_form_num_of_sas(const GtCSASpliceForm*);
+GtRange          gt_csa_splice_form_genomic_range(const GtCSASpliceForm*);
+GtStrand         gt_csa_splice_form_strand(const GtCSASpliceForm*);
+void*            gt_csa_splice_form_get_representative(const GtCSASpliceForm*);
 
 #endif

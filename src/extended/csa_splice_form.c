@@ -19,17 +19,17 @@
 #include "core/ma.h"
 #include "extended/csa_splice_form.h"
 
-struct CSASpliceForm {
+struct GtCSASpliceForm {
   GtArray *spliced_alignments;
   GetGenomicRangeFunc get_genomic_range;
   GetStrandFunc get_strand;
 };
 
-CSASpliceForm* csa_splice_form_new(void *spliced_alignment,
+GtCSASpliceForm* gt_csa_splice_form_new(void *spliced_alignment,
                                    GetGenomicRangeFunc get_genomic_range,
                                    GetStrandFunc get_strand)
 {
-  CSASpliceForm *splice_form;
+  GtCSASpliceForm *splice_form;
   assert(spliced_alignment && get_strand);
   splice_form = gt_malloc(sizeof (*splice_form));
   splice_form->spliced_alignments = gt_array_new(sizeof (void*));
@@ -39,7 +39,7 @@ CSASpliceForm* csa_splice_form_new(void *spliced_alignment,
   return splice_form;
 }
 
-void csa_splice_form_delete(CSASpliceForm *splice_form)
+void gt_csa_splice_form_delete(GtCSASpliceForm *splice_form)
 {
   if (!splice_form) return;
   gt_array_delete(splice_form->spliced_alignments);
@@ -47,7 +47,7 @@ void csa_splice_form_delete(CSASpliceForm *splice_form)
 }
 
 #ifndef NDEBUG
-static unsigned long csa_splice_form_start(const CSASpliceForm *splice_form)
+static unsigned long csa_splice_form_start(const GtCSASpliceForm *splice_form)
 {
   return splice_form
          ->get_genomic_range(*(void**)
@@ -56,29 +56,31 @@ static unsigned long csa_splice_form_start(const CSASpliceForm *splice_form)
 }
 #endif
 
-void csa_splice_form_add_sa(CSASpliceForm *splice_form, void *spliced_alignment)
+void gt_csa_splice_form_add_sa(GtCSASpliceForm *splice_form,
+                               void *spliced_alignment)
 {
   assert(splice_form);
   assert(csa_splice_form_start(splice_form) <=
          splice_form->get_genomic_range(spliced_alignment).start);
-  assert(csa_splice_form_strand(splice_form) ==
+  assert(gt_csa_splice_form_strand(splice_form) ==
          splice_form->get_strand(spliced_alignment));
   gt_array_add(splice_form->spliced_alignments, spliced_alignment);
 }
 
-void* csa_splice_form_get_sa(const CSASpliceForm *splice_form, unsigned long sa)
+void* gt_csa_splice_form_get_sa(const GtCSASpliceForm *splice_form,
+                                unsigned long sa)
 {
   assert(splice_form);
   return *(void**) gt_array_get(splice_form->spliced_alignments, sa);
 }
 
-unsigned long csa_splice_form_num_of_sas(const CSASpliceForm *splice_form)
+unsigned long gt_csa_splice_form_num_of_sas(const GtCSASpliceForm *splice_form)
 {
   assert(splice_form);
   return gt_array_size(splice_form->spliced_alignments);
 }
 
-GtRange csa_splice_form_genomic_range(const CSASpliceForm *splice_form)
+GtRange gt_csa_splice_form_genomic_range(const GtCSASpliceForm *splice_form)
 {
   GtRange splice_form_range, tmp_range;
   unsigned long i;
@@ -98,7 +100,7 @@ GtRange csa_splice_form_genomic_range(const CSASpliceForm *splice_form)
   return splice_form_range;
 }
 
-GtStrand csa_splice_form_strand(const CSASpliceForm *splice_form)
+GtStrand gt_csa_splice_form_strand(const GtCSASpliceForm *splice_form)
 {
   assert(splice_form);
   return splice_form->get_strand(*(void**)
@@ -106,7 +108,7 @@ GtStrand csa_splice_form_strand(const CSASpliceForm *splice_form)
                                               0));
 }
 
-void* csa_splice_form_get_representative(const CSASpliceForm *splice_form)
+void* gt_csa_splice_form_get_representative(const GtCSASpliceForm *splice_form)
 {
   assert(splice_form);
   return *(void**) gt_array_get(splice_form->spliced_alignments, 0);

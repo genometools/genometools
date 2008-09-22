@@ -22,14 +22,14 @@
 
 typedef struct GtCSAGene GtCSAGene;
 
-GtCSAGene*     gt_csa_gene_new(CSASpliceForm*); /* takes ownership */
-void           gt_csa_gene_delete(GtCSAGene*);
+GtCSAGene*       gt_csa_gene_new(GtCSASpliceForm*); /* takes ownership */
+void             gt_csa_gene_delete(GtCSAGene*);
 /* takes ownership */
-void           gt_csa_gene_add_splice_form(GtCSAGene*, CSASpliceForm*);
-CSASpliceForm* gt_csa_gene_get_splice_form(const GtCSAGene*, unsigned long);
-unsigned long  gt_csa_gene_num_of_splice_forms(const GtCSAGene*);
-GtRange        gt_csa_gene_genomic_range(const GtCSAGene*);
-GtStrand       gt_csa_gene_strand(const GtCSAGene*);
-void*          gt_csa_gene_get_representative(const GtCSAGene*);
+void             gt_csa_gene_add_splice_form(GtCSAGene*, GtCSASpliceForm*);
+GtCSASpliceForm* gt_csa_gene_get_splice_form(const GtCSAGene*, unsigned long);
+unsigned long    gt_csa_gene_num_of_splice_forms(const GtCSAGene*);
+GtRange          gt_csa_gene_genomic_range(const GtCSAGene*);
+GtStrand         gt_csa_gene_strand(const GtCSAGene*);
+void*            gt_csa_gene_get_representative(const GtCSAGene*);
 
 #endif

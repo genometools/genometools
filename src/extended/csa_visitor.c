@@ -338,15 +338,15 @@ static bool genome_nodes_are_sorted_and_do_not_overlap(GtArray *exon_nodes)
 #endif
 
 static void mRNA_set_target_attribute(GtFeatureNode *mRNA_feature,
-                                      const CSASpliceForm *csa_splice_form)
+                                      const GtCSASpliceForm *csa_splice_form)
 {
   unsigned long i;
   GtStr *targets;
   assert(mRNA_feature && csa_splice_form);
   targets = gt_str_new();
-  for (i = 0; i < csa_splice_form_num_of_sas(csa_splice_form); i++) {
+  for (i = 0; i < gt_csa_splice_form_num_of_sas(csa_splice_form); i++) {
     GtFeatureNode *sa = *(GtFeatureNode**)
-                        csa_splice_form_get_sa(csa_splice_form, i);
+                        gt_csa_splice_form_get_sa(csa_splice_form, i);
     if (gt_feature_node_get_attribute(sa, "Target")) {
       if (gt_str_length(targets))
         gt_str_append_char(targets, ',');
@@ -361,7 +361,7 @@ static void mRNA_set_target_attribute(GtFeatureNode *mRNA_feature,
   gt_str_delete(targets);
 }
 
-static GtFeatureNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
+static GtFeatureNode* create_mRNA_feature(GtCSASpliceForm *csa_splice_form,
                                           GtStr *gt_csa_source_str)
 {
   GtFeatureNode *mRNA_feature;
@@ -374,10 +374,10 @@ static GtFeatureNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 
   /* create the mRNA feature itself */
   seqid = gt_genome_node_get_seqid(*(GtGenomeNode**)
-                               csa_splice_form_get_representative(
+                               gt_csa_splice_form_get_representative(
                                                               csa_splice_form));
-  range = csa_splice_form_genomic_range(csa_splice_form),
-  strand = csa_splice_form_strand(csa_splice_form),
+  range = gt_csa_splice_form_genomic_range(csa_splice_form),
+  strand = gt_csa_splice_form_strand(csa_splice_form),
   mRNA_feature = (GtFeatureNode*)
                  gt_feature_node_new(seqid, gft_mRNA, range.start, range.end,
                                      strand);
@@ -386,10 +386,10 @@ static GtFeatureNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
 
   /* create exon features */
   exon_nodes = gt_array_new(sizeof (GtGenomeNode*));
-  for (i = 0; i < csa_splice_form_num_of_sas(csa_splice_form); i++) {
+  for (i = 0; i < gt_csa_splice_form_num_of_sas(csa_splice_form); i++) {
     add_sa_to_exon_feature_array(exon_nodes,
                                  *(GtFeatureNode**)
-                                 csa_splice_form_get_sa(csa_splice_form, i),
+                                 gt_csa_splice_form_get_sa(csa_splice_form, i),
                                  seqid, gt_csa_source_str, strand);
   }
   assert(genome_nodes_are_sorted_and_do_not_overlap(exon_nodes));
@@ -424,7 +424,7 @@ static GtFeatureNode* create_gene_feature(GtCSAGene *csa_gene,
 
   /* create mRNA features representing the splice forms */
   for (i = 0; i < gt_csa_gene_num_of_splice_forms(csa_gene); i++) {
-    CSASpliceForm *csa_splice_form = gt_csa_gene_get_splice_form(csa_gene, i);
+    GtCSASpliceForm *csa_splice_form = gt_csa_gene_get_splice_form(csa_gene, i);
     mRNA_feature = create_mRNA_feature(csa_splice_form, gt_csa_source_str);
     gt_feature_node_add_child(gene_feature, mRNA_feature);
   }
