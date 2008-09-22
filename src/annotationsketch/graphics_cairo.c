@@ -532,29 +532,32 @@ void gt_graphics_cairo_delete(GtGraphics *gg)
 
 const GtGraphicsClass* gt_graphics_cairo_class(void)
 {
-  static const GtGraphicsClass gt_graphics_class =
-    { sizeof (GtGraphicsCairo),
-      gt_graphics_cairo_draw_text,
-      gt_graphics_cairo_draw_text_centered,
-      gt_graphics_cairo_draw_text_right,
-      gt_graphics_cairo_draw_colored_text,
-      gt_graphics_cairo_get_text_height,
-      gt_graphics_cairo_get_text_width,
-      gt_graphics_cairo_set_font,
-      gt_graphics_cairo_get_image_width,
-      gt_graphics_cairo_get_image_height,
-      gt_graphics_cairo_set_margins,
-      gt_graphics_cairo_draw_horizontal_line,
-      gt_graphics_cairo_draw_vertical_line,
-      gt_graphics_cairo_draw_box,
-      gt_graphics_cairo_draw_dashes,
-      gt_graphics_cairo_draw_caret,
-      gt_graphics_cairo_draw_rectangle,
-      gt_graphics_cairo_draw_arrowhead,
-      gt_graphics_cairo_save_to_file,
-      gt_graphics_cairo_save_to_stream,
-      gt_graphics_cairo_delete };
-  return &gt_graphics_class;
+  static const GtGraphicsClass *gc = NULL;
+  if (!gc)
+  {
+    gc = gt_graphics_class_new(sizeof (GtGraphicsCairo),
+                               gt_graphics_cairo_draw_text,
+                               gt_graphics_cairo_draw_text_centered,
+                               gt_graphics_cairo_draw_text_right,
+                               gt_graphics_cairo_draw_colored_text,
+                               gt_graphics_cairo_get_text_height,
+                               gt_graphics_cairo_get_text_width,
+                               gt_graphics_cairo_set_font,
+                               gt_graphics_cairo_get_image_width,
+                               gt_graphics_cairo_get_image_height,
+                               gt_graphics_cairo_set_margins,
+                               gt_graphics_cairo_draw_horizontal_line,
+                               gt_graphics_cairo_draw_vertical_line,
+                               gt_graphics_cairo_draw_box,
+                               gt_graphics_cairo_draw_dashes,
+                               gt_graphics_cairo_draw_caret,
+                               gt_graphics_cairo_draw_rectangle,
+                               gt_graphics_cairo_draw_arrowhead,
+                               gt_graphics_cairo_save_to_file,
+                               gt_graphics_cairo_save_to_stream,
+                               gt_graphics_cairo_delete);
+  }
+  return gc;
 }
 
 GtGraphics* gt_graphics_cairo_new(GtGraphicsOutType type,

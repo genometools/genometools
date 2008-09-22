@@ -21,45 +21,75 @@
 #include <stdio.h>
 #include "annotationsketch/graphics.h"
 
-struct GtGraphicsClass {
-  size_t size;
-  void    (*draw_text)(GtGraphics*, double, double, const char*);
-  void    (*draw_text_centered)(GtGraphics*, double, double, const char*);
-  void    (*draw_text_right)(GtGraphics*, double, double, const char*);
-  void    (*draw_colored_text)(GtGraphics*, double, double, GtColor,
-                               const char*);
-  double  (*get_text_height)(GtGraphics*);
-  double  (*get_text_width)(GtGraphics*, const char*);
-  void    (*set_font)(GtGraphics*, const char*, FontSlant, FontWeight);
-  double  (*get_image_width)(GtGraphics*);
-  double  (*get_image_height)(GtGraphics*);
-  void    (*set_margins)(GtGraphics*, double, double);
-  void    (*draw_horizontal_line)(GtGraphics*, double, double, double);
-  void    (*draw_vertical_line)(GtGraphics*, double, double, GtColor, double);
-  void    (*draw_box)(GtGraphics*, double, double, double, double, GtColor,
-                      ArrowStatus, double, double, GtColor, bool);
-  void    (*draw_dashes)(GtGraphics*, double, double, double, double,
-                         ArrowStatus, double, double, GtColor);
-  void    (*draw_caret)(GtGraphics*, double, double, double, double,
-                        ArrowStatus, double, double, GtColor);
-  void    (*draw_rectangle)(GtGraphics*, double, double, bool, GtColor, bool,
-                            GtColor, double, double);
-  void    (*draw_arrowhead)(GtGraphics*, double, double, GtColor,
-                            ArrowStatus);
-  int     (*save_to_file)(const GtGraphics*, const char*, GtError*);
-  void    (*save_to_stream)(const GtGraphics*, GtStr*);
-  void    (*free)(GtGraphics*);
-};
+typedef void   (*GtGraphicsDrawTextFunc)(GtGraphics*, double, double,
+                                         const char*);
+typedef void   (*GtGraphicsDrawColoredTextFunc)(GtGraphics*, double, double,
+                                                GtColor,const char*);
+typedef double (*GtGraphicsGetSingleExtentFunc)(GtGraphics*);
+typedef double (*GtGraphicsGetTextWidthFunc)(GtGraphics*, const char*);
+typedef void   (*GtGraphicsSetMarginsFunc)(GtGraphics*, double, double);
+typedef void   (*GtGraphicsSetFontFunc)(GtGraphics*, const char*, FontSlant,
+                                        FontWeight);
+typedef void   (*GtGraphicsDrawHorizontalLineFunc)(GtGraphics*, double, double,
+                                                   double);
+typedef void   (*GtGraphicsDrawVerticalLineFunc)(GtGraphics*, double, double,
+                                                 GtColor, double);
+typedef void   (*GtGraphicsDrawBoxFunc)(GtGraphics*, double, double, double,
+                                        double, GtColor, ArrowStatus, double,
+                                        double, GtColor, bool);
+typedef void    (*GtGraphicsDrawSimpleFunc)(GtGraphics*, double, double,
+                                            double, double, ArrowStatus,
+                                            double, double, GtColor);
+typedef void    (*GtGraphicsDrawRectFunc)(GtGraphics*, double, double, bool,
+                                          GtColor, bool, GtColor, double,
+                                          double);
+typedef void    (*GtGraphicsDrawArrowheadFunc)(GtGraphics*, double, double,
+                                               GtColor, ArrowStatus);
+typedef int     (*GtGraphicsSaveToFileFunc)(const GtGraphics*, const char*,
+                                            GtError*);
+typedef void    (*GtGraphicsSaveToStreamFunc)(const GtGraphics*, GtStr*);
+typedef void    (*GtGraphicsFreeFunc)(GtGraphics*);
 
-typedef struct {
-    unsigned int reference_count;
-} GtGraphicsPrivate;
+typedef struct GtGraphicsMembers GtGraphicsMembers;
 
 struct GtGraphics {
   const GtGraphicsClass *c_class;
-  GtGraphicsPrivate *pvt;
+  GtGraphicsMembers *pvt;
 };
 
+const GtGraphicsClass* gt_graphics_class_new(size_t size,
+                                         GtGraphicsDrawTextFunc draw_text,
+                                         GtGraphicsDrawTextFunc
+                                                     draw_text_centered,
+                                         GtGraphicsDrawTextFunc draw_text_right,
+                                         GtGraphicsDrawColoredTextFunc
+                                                     draw_colored_text,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_text_height,
+                                         GtGraphicsGetTextWidthFunc
+                                                     get_text_width,
+                                         GtGraphicsSetFontFunc
+                                                     set_font,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_image_width,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_image_height,
+                                         GtGraphicsSetMarginsFunc
+                                                     set_margins,
+                                         GtGraphicsDrawHorizontalLineFunc
+                                                     draw_horizontal_line,
+                                         GtGraphicsDrawVerticalLineFunc
+                                                     draw_vertical_line,
+                                         GtGraphicsDrawBoxFunc draw_box,
+                                         GtGraphicsDrawSimpleFunc draw_dashes,
+                                         GtGraphicsDrawSimpleFunc draw_caret,
+                                         GtGraphicsDrawRectFunc draw_rectangle,
+                                         GtGraphicsDrawArrowheadFunc
+                                                     draw_arrowhead,
+                                         GtGraphicsSaveToFileFunc save_to_file,
+                                         GtGraphicsSaveToStreamFunc
+                                                     save_to_stream,
+                                         GtGraphicsFreeFunc free);
 GtGraphics* gt_graphics_create(const GtGraphicsClass*);
 void*       gt_graphics_cast(const GtGraphicsClass*, GtGraphics*);
 

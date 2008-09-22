@@ -16,9 +16,97 @@
 */
 
 #include <assert.h>
+#include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "annotationsketch/graphics_rep.h"
+
+struct GtGraphicsMembers {
+    unsigned int reference_count;
+};
+
+struct GtGraphicsClass {
+  size_t size;
+  GtGraphicsDrawTextFunc draw_text,
+                         draw_text_centered,
+                         draw_text_right;
+  GtGraphicsDrawColoredTextFunc draw_colored_text;
+  GtGraphicsGetSingleExtentFunc get_text_height;
+  GtGraphicsGetTextWidthFunc get_text_width;
+  GtGraphicsSetFontFunc set_font;
+  GtGraphicsGetSingleExtentFunc get_image_width,
+                                get_image_height;
+  GtGraphicsSetMarginsFunc set_margins;
+  GtGraphicsDrawHorizontalLineFunc draw_horizontal_line;
+  GtGraphicsDrawVerticalLineFunc draw_vertical_line;
+  GtGraphicsDrawBoxFunc draw_box;
+  GtGraphicsDrawSimpleFunc draw_dashes,
+                           draw_caret;
+  GtGraphicsDrawRectFunc draw_rectangle;
+  GtGraphicsDrawArrowheadFunc draw_arrowhead;
+  GtGraphicsSaveToFileFunc save_to_file;
+  GtGraphicsSaveToStreamFunc save_to_stream;
+  GtGraphicsFreeFunc free;
+};
+
+const GtGraphicsClass* gt_graphics_class_new(size_t size,
+                                         GtGraphicsDrawTextFunc draw_text,
+                                         GtGraphicsDrawTextFunc
+                                                     draw_text_centered,
+                                         GtGraphicsDrawTextFunc draw_text_right,
+                                         GtGraphicsDrawColoredTextFunc
+                                                     draw_colored_text,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_text_height,
+                                         GtGraphicsGetTextWidthFunc
+                                                     get_text_width,
+                                         GtGraphicsSetFontFunc
+                                                     set_font,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_image_width,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_image_height,
+                                         GtGraphicsSetMarginsFunc
+                                                     set_margins,
+                                         GtGraphicsDrawHorizontalLineFunc
+                                                     draw_horizontal_line,
+                                         GtGraphicsDrawVerticalLineFunc
+                                                     draw_vertical_line,
+                                         GtGraphicsDrawBoxFunc draw_box,
+                                         GtGraphicsDrawSimpleFunc draw_dashes,
+                                         GtGraphicsDrawSimpleFunc draw_caret,
+                                         GtGraphicsDrawRectFunc draw_rectangle,
+                                         GtGraphicsDrawArrowheadFunc
+                                                     draw_arrowhead,
+                                         GtGraphicsSaveToFileFunc save_to_file,
+                                         GtGraphicsSaveToStreamFunc
+                                                     save_to_stream,
+                                         GtGraphicsFreeFunc free)
+{
+  GtGraphicsClass *c_class = gt_class_alloc(sizeof *c_class);
+  c_class->size = size;
+  c_class->draw_text = draw_text;
+  c_class->draw_text_right = draw_text_right;
+  c_class->draw_text_centered = draw_text_centered;
+  c_class->draw_colored_text = draw_colored_text;
+  c_class->get_text_height = get_text_height;
+  c_class->get_text_width = get_text_width;
+  c_class->set_font = set_font;
+  c_class->get_image_width = get_image_width;
+  c_class->get_image_height = get_image_height;
+  c_class->set_margins = set_margins;
+  c_class->draw_horizontal_line = draw_horizontal_line;
+  c_class->draw_vertical_line = draw_vertical_line;
+  c_class->draw_box = draw_box;
+  c_class->draw_dashes = draw_dashes;
+  c_class->draw_caret = draw_caret;
+  c_class->draw_rectangle = draw_rectangle;
+  c_class->draw_arrowhead = draw_arrowhead;
+  c_class->save_to_file = save_to_file;
+  c_class->save_to_stream = save_to_stream;
+  c_class->free = free;
+  return c_class;
+}
 
 GtGraphics* gt_graphics_create(const GtGraphicsClass *gc)
 {
@@ -26,7 +114,7 @@ GtGraphics* gt_graphics_create(const GtGraphicsClass *gc)
   assert(gc && gc->size);
   g = gt_calloc(1, gc->size);
   g->c_class = gc;
-  g->pvt = gt_calloc(1, sizeof (GtGraphicsPrivate));
+  g->pvt = gt_calloc(1, sizeof (GtGraphicsMembers));
   return g;
 }
 
