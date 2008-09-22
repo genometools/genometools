@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ALIGN_H
-#define ALIGN_H
+#ifndef GALIGN_H
+#define GALIGN_H
 
 #include "extended/alignment.h"
 
 /* (globally) align <u> and <v> (unit cost) and return an optimal GtAlignment */
-GtAlignment* align(const char *u, unsigned long ulen,
-                   const char *v, unsigned long vlen);
+GtAlignment* gt_galign(const char *u, unsigned long ulen,
+                       const char *v, unsigned long vlen);
 
 /* align <u> and <v> (unit cost), call proc_alignment for each optimal
    Alignment, and call proc_aligns with the number of optimal alignments*/
-void align_all(const char *u, unsigned long ulen,
-               const char *v, unsigned long vlen,
-               void (*proc_alignment)(const GtAlignment*, void *data),
-               void (*proc_aligns)(unsigned long, void *data), void *data);
+void gt_galign_all(const char *u, unsigned long ulen,
+                   const char *v, unsigned long vlen,
+                   void (*proc_alignment)(const GtAlignment*, void *data),
+                   void (*proc_aligns)(unsigned long, void *data), void *data);
 
 #endif

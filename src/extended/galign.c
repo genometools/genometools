@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include "core/array2dim.h"
 #include "core/minmax.h"
-#include "extended/align.h"
+#include "extended/galign.h"
 
 typedef struct {
   unsigned long distvalue;
@@ -114,8 +114,8 @@ static unsigned long traceback_all(GtAlignment *a, DPentry **dptable,
   return aligns;
 }
 
-GtAlignment* align(const char *u, unsigned long ulen,
-                 const char *v, unsigned long vlen)
+GtAlignment* gt_galign(const char *u, unsigned long ulen,
+                       const char *v, unsigned long vlen)
 {
   DPentry **dptable;
   GtAlignment *a;
@@ -129,10 +129,10 @@ GtAlignment* align(const char *u, unsigned long ulen,
   return a;
 }
 
-void align_all(const char *u, unsigned long ulen,
-               const char *v, unsigned long vlen,
-               void (*proc_alignment)(const GtAlignment*, void *data),
-               void (*proc_aligns)(unsigned long, void *data), void *data)
+void gt_galign_all(const char *u, unsigned long ulen,
+                   const char *v, unsigned long vlen,
+                   void (*proc_alignment)(const GtAlignment*, void *data),
+                   void (*proc_aligns)(unsigned long, void *data), void *data)
 {
   unsigned long aligns;
   DPentry **dptable;

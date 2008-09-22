@@ -20,8 +20,8 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/xansi.h"
-#include "extended/align.h"
 #include "extended/alignment.h"
+#include "extended/galign.h"
 #include "tools/gt_align.h"
 
 typedef struct {
@@ -97,17 +97,17 @@ static int gt_align_runner(GT_UNUSED int argc, const char **argv,
     for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
       for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
         if (arguments->all) {
-          align_all(gt_bioseq_get_sequence(gt_bioseq_1, i),
-                    gt_bioseq_get_sequence_length(gt_bioseq_1, i),
-                    gt_bioseq_get_sequence(gt_bioseq_2, j),
-                    gt_bioseq_get_sequence_length(gt_bioseq_2, j),
-                    show_alignment, show_aligns, NULL);
+          gt_galign_all(gt_bioseq_get_sequence(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence_length(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence(gt_bioseq_2, j),
+                        gt_bioseq_get_sequence_length(gt_bioseq_2, j),
+                        show_alignment, show_aligns, NULL);
         }
         else {
-          a = align(gt_bioseq_get_sequence(gt_bioseq_1, i),
-                    gt_bioseq_get_sequence_length(gt_bioseq_1, i),
-                    gt_bioseq_get_sequence(gt_bioseq_2, j),
-                    gt_bioseq_get_sequence_length(gt_bioseq_2, j));
+          a = gt_galign(gt_bioseq_get_sequence(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence_length(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence(gt_bioseq_2, j),
+                        gt_bioseq_get_sequence_length(gt_bioseq_2, j));
           gt_alignment_show(a, stdout);
           gt_xputchar('\n');
           gt_alignment_delete(a);
