@@ -36,7 +36,7 @@ void* gt_xcalloc(size_t nmemb, size_t size)
   return p;
 }
 
-void xfclose(FILE *stream)
+void gt_xfclose(FILE *stream)
 {
   if (fclose(stream)) {
     perror("cannot close stream");
@@ -72,7 +72,7 @@ void gt_xfgetpos(FILE *stream, fpos_t *pos)
   }
 }
 
-FILE* xfopen(const char *path, const char *mode)
+FILE* gt_xfopen(const char *path, const char *mode)
 {
   FILE *file;
   if ((file = fopen(path, mode)) == NULL) {

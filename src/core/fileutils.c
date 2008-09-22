@@ -32,7 +32,7 @@ bool file_exists(const char *path)
   FILE *file;
   if ((file = fopen(path, "r")) == NULL)
     return false;
-  xfclose(file);
+  gt_xfclose(file);
   return true;
 }
 

@@ -90,14 +90,14 @@ static void parse_fasta_file(GtArray *entries, const char *fasta_file)
 {
   FILE *fp;
   assert(entries && fasta_file);
-  fp = xfopen(fasta_file, "r");
+  fp = gt_xfopen(fasta_file, "r");
   if (!has_char(fp)) {
     fprintf(stderr, "sequence file \"%s\" is empty\n", fasta_file);
     exit(EXIT_FAILURE);
   }
   while (has_char(fp))
     parse_fasta_entry(entries, fp, fasta_file);
-  xfclose(fp);
+  gt_xfclose(fp);
 }
 
 GtSimpleBioseq* gt_simple_bioseq_new(const char *fasta_file)

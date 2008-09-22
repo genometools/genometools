@@ -32,11 +32,11 @@
 
 void   gt_xatexit(void (*function)(void));
 void*  gt_xcalloc(size_t nmemb, size_t size);
-void   xfclose(FILE*);
+void   gt_xfclose(FILE*);
 void   gt_xfflush(FILE*);
 int    gt_xfgetc(FILE*);
 void   gt_xfgetpos(FILE*, fpos_t*);
-FILE*  xfopen(const char *path, const char *mode);
+FILE*  gt_xfopen(const char *path, const char *mode);
 void   gt_xfputc(int, FILE*);
 void   gt_xfputs(const char*, FILE*);
 size_t gt_xfread(void *ptr, size_t size, size_t nmemb, FILE*);
