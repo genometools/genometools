@@ -965,7 +965,7 @@ bsGetNonUniformInt64ArrayAdd(
  * @return 0 for equality, \f$-1\f$ if \f$a < b\f$, \f$1\f$ if \f$b > a\f$
  */
 extern int
-bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
+gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
           constBitString b, BitOffset offsetB, BitOffset numBitsB);
 
 /**
@@ -978,7 +978,7 @@ bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
  * @param numBits number of bits to copy
  */
 extern void
-bsCopy(constBitString src, BitOffset offsetSrc,
+gt_bsCopy(constBitString src, BitOffset offsetSrc,
        BitString dest, BitOffset offsetDest, BitOffset numBits);
 
 /**
@@ -989,7 +989,7 @@ bsCopy(constBitString src, BitOffset offsetSrc,
  * @param bitVal set all numBits bits to 0 if 0, to 1 otherwise
  */
 extern void
-bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal);
+gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal);
 
 /**
  * \brief set singular bit in bitstring to 1
@@ -1005,7 +1005,7 @@ bsSetBit(BitString str, BitOffset pos);
  * @param pos selects bit to clear
  */
 static inline void
-bsClearBit(BitString str, BitOffset pos);
+gt_bsClearBit(BitString str, BitOffset pos);
 
 /**
  * \brief XOR singular bit in bitstring
@@ -1028,7 +1028,7 @@ bsGetBit(constBitString str, BitOffset pos);
  * @return number of bits set in (sub-)bitstring
  */
 extern BitOffset
-bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
+gt_bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
 
 /**
  * \brief Print sequence of 0s and 1s to stream to display BitString

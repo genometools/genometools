@@ -367,7 +367,7 @@ bsSetBit(BitString str, BitOffset pos)
 }
 
 static inline void
-bsClearBit(BitString str, BitOffset pos)
+gt_bsClearBit(BitString str, BitOffset pos)
 {
   unsigned bitTop = pos%bitElemBits;
   BitElem *p = str + pos/bitElemBits;

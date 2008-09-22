@@ -105,7 +105,7 @@ computeDeBruijn()
 #endif
 
 extern int
-bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
+gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
           constBitString b, BitOffset offsetB, BitOffset numBitsB)
 {
   BitOffset totalBitsLeftA = numBitsA, totalBitsLeftB = numBitsB;
@@ -121,7 +121,7 @@ bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
     return 0;
   }
   if (numBitsA > numBitsB)
-    return -1 * bsCompare(b, offsetB, numBitsB, a, offsetA, numBitsA);
+    return -1 * gt_bsCompare(b, offsetB, numBitsB, a, offsetA, numBitsA);
   if (numBitsB > numBitsA)
   {
     /* B is longer and thus compared with virtual zeros prepended to A */
@@ -228,7 +228,7 @@ bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
 }
 
 void
-bsCopy(constBitString src, BitOffset offsetSrc,
+gt_bsCopy(constBitString src, BitOffset offsetSrc,
        BitString dest, BitOffset offsetDest, BitOffset numBits)
 {
   size_t elemStartSrc = offsetSrc/bitElemBits,
@@ -392,7 +392,7 @@ bsCopy(constBitString src, BitOffset offsetSrc,
 }
 
 void
-bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
+gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
 {
   unsigned bitsLeft = numBits,
     bitTop = offset%bitElemBits;
@@ -444,7 +444,7 @@ bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
 }
 
 extern BitOffset
-bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits)
+gt_bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits)
 {
   uint32_t accum = 0;
   BitOffset weight = 0, bitsLeft = numBits;

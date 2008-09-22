@@ -196,7 +196,8 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 #endif /* EIS_DEBUG > 1 */
       bsStoreUniformUIntArray(newList->catCompsPerms, offset,
                               bitsPerCount, alphabetSize, composition);
-      assert(cmpIdx > 1?(bsCompare(newList->catCompsPerms, offset, bitsPerComp,
+      assert(cmpIdx > 1?(gt_bsCompare(newList->catCompsPerms, offset,
+                                      bitsPerComp,
                               newList->catCompsPerms, offset - bitsPerComp,
                               bitsPerComp)>0):1);
       if (initPermutationsList(composition, newList->permutations + cmpIdx,
@@ -338,7 +339,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 #if EIS_DEBUG > 1
       printPermutation(stderr, currentPermutation, blockSize);
 #endif /* EIS_DEBUG > 1 */
-      assert(i > 0?(bsCompare(permStore, offset, bitsPerPermutation,
+      assert(i > 0?(gt_bsCompare(permStore, offset, bitsPerPermutation,
                               permStore,
                               offset - bitsPerPermutation,
                               bitsPerPermutation)>0):1);
@@ -482,7 +483,7 @@ block2IndexPair(const struct compList *compositionTable,
     size_t compIndex = compositionTable->numCompositions / 2;
     size_t divStep = compIndex;
     int cmpresult;
-    while ((cmpresult = bsCompare(permCompBitString, 0, bitsPerComposition,
+    while ((cmpresult = gt_bsCompare(permCompBitString, 0, bitsPerComposition,
                                  compositionTable->catCompsPerms,
                                  compIndex * bitsPerComposition,
                                  bitsPerComposition)))
@@ -512,7 +513,7 @@ block2IndexPair(const struct compList *compositionTable,
         size_t permIndex = permutation->numPermutations / 2;
         size_t divStep = permIndex;
         int cmpresult;
-        while ((cmpresult = bsCompare(permCompBitString, bitsPerComposition,
+        while ((cmpresult = gt_bsCompare(permCompBitString, bitsPerComposition,
                                      bitsPerPermutation,
                                      compositionTable->catCompsPerms,
                                      permutation->catPermsOffset

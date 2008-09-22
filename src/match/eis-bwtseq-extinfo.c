@@ -445,7 +445,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
         }
         else
           if (locateBitmap)
-            bsClearBit(cwDest, cwOffset + i);
+            gt_bsClearBit(cwDest, cwOffset + i);
       }
       /* and add data for extra sort information */
       if (bitsPerOrigRank)
@@ -711,7 +711,7 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
         bitsPerBWTPos = requiredSeqposBits(extBits->len - 1),
         bitsPerOrigPos = requiredSeqposBits(maxPosVal);
       BitOffset locateRecordIndex =
-        bs1BitsCount(extBits->cwPart, extBits->cwOffset,
+        gt_bs1BitsCount(extBits->cwPart, extBits->cwOffset,
                      nextLocate - extBits->start),
         locateRecordOffset = ((bwtSeq->featureToggles & BWTLocateCount?
                                bitsPerBWTPos:0) + bitsPerOrigPos)
@@ -773,7 +773,7 @@ locateVarBits(const BWTSeq *bwtSeq, struct extBitsRetrieval *extBits)
        BWTSeqLength(bwtSeq) - 1));
   if (bwtSeq->featureToggles & BWTLocateBitmap)
   {
-    unsigned numMarks = bs1BitsCount(extBits->cwPart, extBits->cwOffset,
+    unsigned numMarks = gt_bs1BitsCount(extBits->cwPart, extBits->cwOffset,
                                      extBits->len);
     numLocBits = numMarks * bitsPerOrigPos;
   }
