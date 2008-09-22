@@ -23,11 +23,11 @@ typedef struct CSAVisitor CSAVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* csa_visitor_class(void);
-GtNodeVisitor*            csa_visitor_new(unsigned long join_length);
-unsigned long             csa_visitor_node_buffer_size(GtNodeVisitor*);
-GtGenomeNode*               csa_visitor_get_node(GtNodeVisitor*);
-void                      csa_visitor_process_cluster(GtNodeVisitor*,
-                                                      bool final_cluster);
+const GtNodeVisitorClass* gt_csa_visitor_class(void);
+GtNodeVisitor*            gt_csa_visitor_new(unsigned long join_length);
+unsigned long             gt_csa_visitor_node_buffer_size(GtNodeVisitor*);
+GtGenomeNode*             gt_csa_visitor_get_node(GtNodeVisitor*);
+void                      gt_csa_visitor_process_cluster(GtNodeVisitor*,
+                                                         bool final_cluster);
 
 #endif

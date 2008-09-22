@@ -38,8 +38,8 @@ static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   cs = csa_stream_cast(gs);
 
   /* we have still nodes in the buffer */
-  if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-    *gn = csa_visitor_get_node(cs->csa_visitor); /* return one of them */
+  if (gt_csa_visitor_node_buffer_size(cs->csa_visitor)) {
+    *gn = gt_csa_visitor_get_node(cs->csa_visitor); /* return one of them */
     return 0;
   }
 
@@ -49,8 +49,8 @@ static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
     had_err = gt_genome_node_accept(*gn, cs->csa_visitor, err);
     if (had_err)
       break;
-    if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-      *gn = csa_visitor_get_node(cs->csa_visitor);
+    if (gt_csa_visitor_node_buffer_size(cs->csa_visitor)) {
+      *gn = gt_csa_visitor_get_node(cs->csa_visitor);
       return 0;
     }
   }
@@ -60,9 +60,9 @@ static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
   /* if we have no error, process the last cluster */
   if (!had_err) {
-    csa_visitor_process_cluster(cs->csa_visitor, true);
-    if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-      *gn = csa_visitor_get_node(cs->csa_visitor);
+    gt_csa_visitor_process_cluster(cs->csa_visitor, true);
+    if (gt_csa_visitor_node_buffer_size(cs->csa_visitor)) {
+      *gn = gt_csa_visitor_get_node(cs->csa_visitor);
       return 0;
     }
   }
@@ -94,6 +94,6 @@ GtNodeStream* gt_csa_stream_new(GtNodeStream *in_stream,
                                           gt_node_stream_is_sorted(in_stream));
   GtCSAStream *cs = csa_stream_cast(gs);
   cs->in_stream = gt_node_stream_ref(in_stream);
-  cs->csa_visitor = csa_visitor_new(join_length);
+  cs->csa_visitor = gt_csa_visitor_new(join_length);
   return gs;
 }

@@ -31,9 +31,9 @@
 */
 
 /* Returns an array of GtCSAGenes. */
-GtArray* csa_variable_strands(const void *set_of_sas,
-                               unsigned long number_of_sas,
-                               size_t size_of_sa, GetGenomicRangeFunc,
-                               GetStrandFunc, GetExonsFunc);
+GtArray* gt_csa_variable_strands(const void *set_of_sas,
+                                 unsigned long number_of_sas,
+                                 size_t size_of_sa, GetGenomicRangeFunc,
+                                 GetStrandFunc, GetExonsFunc);
 
 #endif

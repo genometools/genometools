@@ -93,12 +93,12 @@ static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
     gt_array_add(genes, reverse_gene);
 }
 
-GtArray* csa_variable_strands(const void *set_of_sas,
-                               unsigned long number_of_sas,
-                               size_t size_of_sa,
-                               GetGenomicRangeFunc get_genomic_range,
-                               GetStrandFunc get_strand,
-                               GetExonsFunc get_exons)
+GtArray* gt_csa_variable_strands(const void *set_of_sas,
+                                 unsigned long number_of_sas,
+                                 size_t size_of_sa,
+                                 GetGenomicRangeFunc get_genomic_range,
+                                 GetStrandFunc get_strand,
+                                 GetExonsFunc get_exons)
 {
   StoreSpliceFormInfo info;
   GtArray *genes;
