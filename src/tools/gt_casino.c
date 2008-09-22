@@ -87,7 +87,7 @@ int gt_casino(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* create the GtHMM */
-    hmm = dice_hmm_loaded();
+    hmm = gt_dice_hmm_loaded();
 
     /* decoding */
     state_sequence = gt_malloc(sizeof (unsigned int) * num_of_emissions);

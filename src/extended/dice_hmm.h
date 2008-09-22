@@ -37,8 +37,8 @@ typedef enum {
   DICE_NUM_OF_SYMBOLS
 } Dice_emissions;
 
-GtHMM*   dice_hmm_loaded(void);
-GtHMM*   dice_hmm_fair(void);
-GtAlpha* dice_hmm_alpha(void);
+GtHMM*   gt_dice_hmm_loaded(void);
+GtHMM*   gt_dice_hmm_fair(void);
+GtAlpha* gt_dice_hmm_alpha(void);
 
 #endif

@@ -637,9 +637,9 @@ int gt_hmm_unit_test(GtError *err)
   gt_hmm_delete(fair_hmm);
 
   /* test the GtHMM class with the dice GtHMMs */
-  fair_hmm = dice_hmm_fair();
-  loaded_hmm = dice_hmm_loaded();
-  alpha = dice_hmm_alpha();
+  fair_hmm = gt_dice_hmm_fair();
+  loaded_hmm = gt_dice_hmm_loaded();
+  alpha = gt_dice_hmm_alpha();
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
   encoded_seq = gt_malloc(sizeof (int) * strlen(dice_rolls[size-1]));
 

@@ -1169,8 +1169,8 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-int determine_missing_features(GT_UNUSED void *key, void *value, void *data,
-                               GT_UNUSED GtError *err)
+static int determine_missing_features(GT_UNUSED void *key, void *value,
+                                      void *data, GT_UNUSED GtError *err)
 {
   GtStreamEvaluator *se = (GtStreamEvaluator*) data;
   Slot *slot = (Slot*) value;
