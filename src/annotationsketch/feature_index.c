@@ -132,7 +132,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
     gt_queue_add(queue, gn);
   if (!had_err) {
-    GtNodeVisitor  *feature_visitor = feature_visitor_new(fi);
+    GtNodeVisitor  *feature_visitor = gt_feature_visitor_new(fi);
     while (gt_queue_size(queue)) {
       gn = gt_queue_get(queue);
       had_err = gt_genome_node_accept(gn, feature_visitor, NULL);

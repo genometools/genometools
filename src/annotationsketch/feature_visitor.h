@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,12 +19,12 @@
 #define FEATURE_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct FeatureVisitor FeatureVisitor;
+typedef struct GtFeatureVisitor GtFeatureVisitor;
 
 #include "annotationsketch/feature_index.h"
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* feature_visitor_class(void);
-GtNodeVisitor*            feature_visitor_new(GtFeatureIndex*);
+const GtNodeVisitorClass* gt_feature_visitor_class(void);
+GtNodeVisitor*            gt_feature_visitor_new(GtFeatureIndex*);
 
 #endif

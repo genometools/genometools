@@ -22,17 +22,17 @@
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_visitor.h"
 
-struct FeatureVisitor {
+struct GtFeatureVisitor {
   const GtNodeVisitor parent_instance;
         GtFeatureIndex *feature_index;
 };
 
 #define feature_visitor_cast(GV)\
-        gt_node_visitor_cast(feature_visitor_class(), GV)
+        gt_node_visitor_cast(gt_feature_visitor_class(), GV)
 
 static void feature_visitor_free(GtNodeVisitor *gv)
 {
-  FeatureVisitor *feature_visitor = feature_visitor_cast(gv);
+  GtFeatureVisitor *feature_visitor = feature_visitor_cast(gv);
   assert(feature_visitor);
   gt_feature_index_delete(feature_visitor->feature_index);
 }
@@ -40,7 +40,7 @@ static void feature_visitor_free(GtNodeVisitor *gv)
 static int feature_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *fn,
                                         GT_UNUSED GtError *err)
 {
-  FeatureVisitor *v = feature_visitor_cast(gv);
+  GtFeatureVisitor *v = feature_visitor_cast(gv);
   gt_error_check(err);
   gt_feature_index_add_feature_node(v->feature_index, fn);
   return 0;
@@ -49,17 +49,17 @@ static int feature_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *fn,
 static int feature_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
                                        GT_UNUSED GtError *err)
 {
-  FeatureVisitor *v = feature_visitor_cast(gv);
+  GtFeatureVisitor *v = feature_visitor_cast(gv);
   gt_error_check(err);
   gt_feature_index_add_region_node(v->feature_index, rn);
   return 0;
 }
 
-const GtNodeVisitorClass* feature_visitor_class()
+const GtNodeVisitorClass* gt_feature_visitor_class()
 {
   static const GtNodeVisitorClass *gvc = NULL;
   if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (FeatureVisitor),
+    gvc = gt_node_visitor_class_new(sizeof (GtFeatureVisitor),
                                     feature_visitor_free,
                                     NULL,
                                     feature_visitor_feature_node,
@@ -69,12 +69,12 @@ const GtNodeVisitorClass* feature_visitor_class()
   return gvc;
 }
 
-GtNodeVisitor* feature_visitor_new(GtFeatureIndex *fi)
+GtNodeVisitor* gt_feature_visitor_new(GtFeatureIndex *fi)
 {
   GtNodeVisitor *gv;
-  FeatureVisitor *feature_visitor;
+  GtFeatureVisitor *feature_visitor;
   assert(fi != NULL);
-  gv = gt_node_visitor_create(feature_visitor_class());
+  gv = gt_node_visitor_create(gt_feature_visitor_class());
   feature_visitor = feature_visitor_cast(gv);
   feature_visitor->feature_index = gt_feature_index_ref(fi);
   assert(feature_visitor != NULL);

@@ -67,6 +67,6 @@ GtNodeStream* gt_feature_stream_new(GtNodeStream *in_stream, GtFeatureIndex *fi)
   gs = gt_node_stream_create(gt_feature_stream_class(), false);
   feature_stream = feature_stream_cast(gs);
   feature_stream->in_stream = gt_node_stream_ref(in_stream);
-  feature_stream->feature_visitor = feature_visitor_new(fi);
+  feature_stream->feature_visitor = gt_feature_visitor_new(fi);
   return gs;
 }
