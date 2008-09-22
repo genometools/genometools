@@ -22,11 +22,11 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct ChseqidsStream ChseqidsStream;
+typedef struct GtChseqidsStream GtChseqidsStream;
 
-const GtNodeStreamClass* chseqids_stream_class(void);
+const GtNodeStreamClass* gt_chseqids_stream_class(void);
 /* returns NULL upon error */
-GtNodeStream*            chseqids_stream_new(GtNodeStream*,
-                                             GtStr *chseqids_file, GtError*);
+GtNodeStream*            gt_chseqids_stream_new(GtNodeStream*,
+                                                GtStr *chseqids_file, GtError*);
 
 #endif

@@ -99,7 +99,8 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
                                              arguments.verbose &&
                                              arguments.outfp);
   chseqids = gt_str_new_cstr(argv[parsed_args]);
-  if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids, err)))
+  chseqids_stream = gt_chseqids_stream_new(gff3_in_stream, chseqids, err);
+  if (!chseqids_stream)
     had_err = -1;
   gt_str_delete(chseqids);
   if (!had_err) {

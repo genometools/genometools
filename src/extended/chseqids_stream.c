@@ -21,7 +21,7 @@
 #include "extended/node_stream_rep.h"
 #include "extended/mapping.h"
 
-struct ChseqidsStream {
+struct GtChseqidsStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   Mapping *chseqids_mapping;
@@ -31,7 +31,7 @@ struct ChseqidsStream {
 };
 
 #define chseqids_stream_cast(GS)\
-        gt_node_stream_cast(chseqids_stream_class(), GS)
+        gt_node_stream_cast(gt_chseqids_stream_class(), GS)
 
 static int change_sequence_id(GtGenomeNode *gn, void *data,
                               GT_UNUSED GtError *err)
@@ -46,7 +46,7 @@ static int change_sequence_id(GtGenomeNode *gn, void *data,
 static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                 GtError *err)
 {
-  ChseqidsStream *cs;
+  GtChseqidsStream *cs;
   GtGenomeNode *node, **gn_a, **gn_b;
   GtFeatureNode *feature_node;
   GtStr *changed_seqid;
@@ -143,7 +143,7 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
 static void chseqids_stream_free(GtNodeStream *gs)
 {
-  ChseqidsStream *cs;
+  GtChseqidsStream *cs;
   unsigned long i;
   cs = chseqids_stream_cast(gs);
   mapping_delete(cs->chseqids_mapping);
@@ -156,26 +156,26 @@ static void chseqids_stream_free(GtNodeStream *gs)
   gt_node_stream_delete(cs->in_stream);
 }
 
-const GtNodeStreamClass* chseqids_stream_class(void)
+const GtNodeStreamClass* gt_chseqids_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (ChseqidsStream),
+    nsc = gt_node_stream_class_new(sizeof (GtChseqidsStream),
                                    chseqids_stream_free,
                                    chseqids_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* chseqids_stream_new(GtNodeStream *in_stream,
-                                  GtStr *chseqids_file, GtError *err)
+GtNodeStream* gt_chseqids_stream_new(GtNodeStream *in_stream,
+                                     GtStr *chseqids_file, GtError *err)
 {
   GtNodeStream *gs;
-  ChseqidsStream *cs;
+  GtChseqidsStream *cs;
   gt_error_check(err);
   gt_assert(in_stream && chseqids_file);
   gt_assert(gt_node_stream_is_sorted(in_stream));
-  gs = gt_node_stream_create(chseqids_stream_class(), false);
+  gs = gt_node_stream_create(gt_chseqids_stream_class(), false);
   cs = chseqids_stream_cast(gs);
   cs->in_stream = gt_node_stream_ref(in_stream);
   cs->chseqids_mapping = mapping_new(chseqids_file, "chseqids",
