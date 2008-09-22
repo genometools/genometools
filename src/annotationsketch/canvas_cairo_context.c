@@ -23,6 +23,7 @@
 #include "core/minmax.h"
 #include "core/range.h"
 #include "core/unused_api.h"
+#include "annotationsketch/canvas_members.h"
 #include "annotationsketch/canvas_rep.h"
 #include "annotationsketch/canvas_cairo_context.h"
 #include "annotationsketch/graphics_cairo.h"
@@ -101,12 +102,14 @@ int gt_canvas_cairo_context_visit_diagram_post(GtCanvas *canvas,
 
 const GtCanvasClass* gt_canvas_cairo_context_class(void)
 {
-  static const GtCanvasClass canvas_class =
-    { sizeof (GtCanvasCairoContext),
-      gt_canvas_cairo_context_visit_diagram_pre,
-      gt_canvas_cairo_context_visit_diagram_post,
-      NULL };
-  return &canvas_class;
+  static const GtCanvasClass *canvas_class = NULL;
+  if (!canvas_class) {
+    canvas_class = gt_canvas_class_new(sizeof (GtCanvasCairoContext),
+                                     gt_canvas_cairo_context_visit_diagram_pre,
+                                     gt_canvas_cairo_context_visit_diagram_post,
+                                     NULL);
+  }
+  return canvas_class;
 }
 
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,

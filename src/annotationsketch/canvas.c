@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
+#include "core/class_alloc.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -26,6 +27,7 @@
 #include "core/unused_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_members.h"
 #include "annotationsketch/canvas_rep.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/line.h"
@@ -52,6 +54,26 @@ typedef enum
   CLIPPED_NONE,
   CLIPPED_BOTH
 } ClipType;
+
+struct GtCanvasClass {
+  size_t size;
+  GtCanvasVisitDiagramFunc visit_diagram_pre,
+                           visit_diagram_post;
+  GtCanvasFreeFunc free;
+};
+
+const GtCanvasClass* gt_canvas_class_new(size_t size,
+                                         GtCanvasVisitDiagramFunc visit_pre,
+                                         GtCanvasVisitDiagramFunc visit_post,
+                                         GtCanvasFreeFunc free)
+{
+  GtCanvasClass *c_class = gt_class_alloc(sizeof *c_class);
+  c_class->size = size;
+  c_class->visit_diagram_pre = visit_pre;
+  c_class->visit_diagram_post = visit_post;
+  c_class->free = free;
+  return c_class;
+}
 
 /* Calculate the final height of the image to be created. */
 unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
@@ -291,7 +313,7 @@ GtCanvas* gt_canvas_create(const GtCanvasClass *cc)
   assert(cc && cc->size);
   c = gt_calloc(1, cc->size);
   c->c_class = cc;
-  c->pvt = gt_calloc(1, sizeof (GtCanvasPrivate));
+  c->pvt = gt_calloc(1, sizeof (GtCanvasMembers));
   return c;
 }
 

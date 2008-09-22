@@ -24,6 +24,7 @@
 #include "core/range.h"
 #include "core/unused_api.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/canvas_members.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/canvas_rep.h"
 #include "annotationsketch/graphics_cairo.h"
@@ -129,12 +130,14 @@ int gt_canvas_cairo_file_to_stream(GtCanvasCairoFile *canvas, GtStr *stream)
 
 const GtCanvasClass* gt_canvas_cairo_file_class(void)
 {
-  static const GtCanvasClass canvas_class =
-    { sizeof (GtCanvasCairoFile),
-      gt_canvas_cairo_file_visit_diagram_pre,
-      gt_canvas_cairo_file_visit_diagram_post,
-      NULL };
-  return &canvas_class;
+  static const GtCanvasClass *canvas_class = NULL;
+  if (!canvas_class) {
+    canvas_class = gt_canvas_class_new(sizeof (GtCanvasCairoFile),
+                                     gt_canvas_cairo_file_visit_diagram_pre,
+                                     gt_canvas_cairo_file_visit_diagram_post,
+                                     NULL);
+  }
+  return canvas_class;
 }
 
 GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,

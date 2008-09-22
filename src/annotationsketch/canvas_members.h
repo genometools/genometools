@@ -15,30 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CANVAS_REP_H
-#define CANVAS_REP_H
-
-#include <stdio.h>
 #include "core/bittab.h"
 #include "core/range.h"
-#include "annotationsketch/canvas.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/image_info.h"
+#include "annotationsketch/style.h"
 
-typedef int  (*GtCanvasVisitDiagramFunc)(GtCanvas*, GtDiagram*);
-typedef void (*GtCanvasFreeFunc)(GtCanvas*);
-
-typedef struct GtCanvasMembers GtCanvasMembers;
-
-struct GtCanvas {
-  const GtCanvasClass *c_class;
-  GtCanvasMembers *pvt;
+struct GtCanvasMembers {
+  GtRange viewrange;
+  double factor, y, margins;
+  unsigned long width, height;
+  GtStyle *sty;
+  bool show_track_captions;
+  GtBittab *bt;
+  GtGraphics *g;
+  GtImageInfo *ii;
 };
-const GtCanvasClass* gt_canvas_class_new(size_t size,
-                                         GtCanvasVisitDiagramFunc visit_pre,
-                                         GtCanvasVisitDiagramFunc visit_post,
-                                         GtCanvasFreeFunc free);
-GtCanvas* gt_canvas_create(const GtCanvasClass*);
-void*     gt_canvas_cast(const GtCanvasClass*, GtCanvas*);
-
-#endif
