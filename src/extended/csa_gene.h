@@ -20,16 +20,16 @@
 
 #include "extended/csa_splice_form.h"
 
-typedef struct CSAGene CSAGene;
+typedef struct GtCSAGene GtCSAGene;
 
-CSAGene*       csa_gene_new(CSASpliceForm*); /* takes ownership */
-void           csa_gene_delete(CSAGene*);
+GtCSAGene*     gt_csa_gene_new(CSASpliceForm*); /* takes ownership */
+void           gt_csa_gene_delete(GtCSAGene*);
 /* takes ownership */
-void           csa_gene_add_splice_form(CSAGene*, CSASpliceForm*);
-CSASpliceForm* csa_gene_get_splice_form(const CSAGene*, unsigned long);
-unsigned long  csa_gene_num_of_splice_forms(const CSAGene*);
-GtRange          csa_gene_genomic_range(const CSAGene*);
-GtStrand         csa_gene_strand(const CSAGene*);
-void*          csa_gene_get_representative(const CSAGene*);
+void           gt_csa_gene_add_splice_form(GtCSAGene*, CSASpliceForm*);
+CSASpliceForm* gt_csa_gene_get_splice_form(const GtCSAGene*, unsigned long);
+unsigned long  gt_csa_gene_num_of_splice_forms(const GtCSAGene*);
+GtRange        gt_csa_gene_genomic_range(const GtCSAGene*);
+GtStrand       gt_csa_gene_strand(const GtCSAGene*);
+void*          gt_csa_gene_get_representative(const GtCSAGene*);
 
 #endif

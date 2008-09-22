@@ -49,7 +49,7 @@ static void store_splice_form(GtArray *spliced_alignments_in_form,
 
 static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
 {
-  CSAGene *forward_gene = NULL, *reverse_gene = NULL;
+  GtCSAGene *forward_gene = NULL, *reverse_gene = NULL;
   unsigned long i;
   assert(genes && splice_forms);
   /* put splice forms into appropirate genes */
@@ -59,15 +59,15 @@ static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
     switch (csa_splice_form_strand(splice_form)) {
       case GT_STRAND_FORWARD:
         if (!forward_gene)
-          forward_gene = csa_gene_new(splice_form);
+          forward_gene = gt_csa_gene_new(splice_form);
         else
-          csa_gene_add_splice_form(forward_gene, splice_form);
+          gt_csa_gene_add_splice_form(forward_gene, splice_form);
         break;
       case GT_STRAND_REVERSE:
         if (!reverse_gene)
-          reverse_gene = csa_gene_new(splice_form);
+          reverse_gene = gt_csa_gene_new(splice_form);
         else
-          csa_gene_add_splice_form(reverse_gene, splice_form);
+          gt_csa_gene_add_splice_form(reverse_gene, splice_form);
         break;
       default: assert(0);
     }
@@ -76,8 +76,8 @@ static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
   assert(forward_gene || reverse_gene);
   if (forward_gene && reverse_gene) {
     /* determine which comes first to keep sorting */
-    if (gt_range_compare(csa_gene_genomic_range(forward_gene),
-                      csa_gene_genomic_range(reverse_gene)) <= 0) {
+    if (gt_range_compare(gt_csa_gene_genomic_range(forward_gene),
+                      gt_csa_gene_genomic_range(reverse_gene)) <= 0) {
       gt_array_add(genes, forward_gene);
       gt_array_add(genes, reverse_gene);
     }
@@ -104,7 +104,7 @@ GtArray* csa_variable_strands(const void *set_of_sas,
   assert(set_of_sas && number_of_sas && size_of_sa);
   assert(get_genomic_range && get_strand && get_exons);
 
-  genes = gt_array_new(sizeof (CSAGene*));
+  genes = gt_array_new(sizeof (GtCSAGene*));
 
   info.splice_forms = gt_array_new(sizeof (CSASpliceForm*));
   info.get_genomic_range = get_genomic_range;

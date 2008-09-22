@@ -405,7 +405,7 @@ static GtFeatureNode* create_mRNA_feature(CSASpliceForm *csa_splice_form,
   return mRNA_feature;
 }
 
-static GtFeatureNode* create_gene_feature(CSAGene *csa_gene,
+static GtFeatureNode* create_gene_feature(GtCSAGene *csa_gene,
                                           GtStr *gt_csa_source_str)
 {
   GtFeatureNode *gene_feature, *mRNA_feature;
@@ -414,17 +414,17 @@ static GtFeatureNode* create_gene_feature(CSAGene *csa_gene,
   assert(csa_gene && gt_csa_source_str);
 
   /* create top-level gene feature */
-  range = csa_gene_genomic_range(csa_gene),
+  range = gt_csa_gene_genomic_range(csa_gene),
   gene_feature = (GtFeatureNode*)
     gt_feature_node_new(gt_genome_node_get_seqid(*(GtGenomeNode**)
-                                         csa_gene_get_representative(csa_gene)),
-                          gft_gene, range.start, range.end,
-                          csa_gene_strand(csa_gene));
+                                      gt_csa_gene_get_representative(csa_gene)),
+                        gft_gene, range.start, range.end,
+                        gt_csa_gene_strand(csa_gene));
   gt_feature_node_set_source(gene_feature, gt_csa_source_str);
 
   /* create mRNA features representing the splice forms */
-  for (i = 0; i < csa_gene_num_of_splice_forms(csa_gene); i++) {
-    CSASpliceForm *csa_splice_form = csa_gene_get_splice_form(csa_gene, i);
+  for (i = 0; i < gt_csa_gene_num_of_splice_forms(csa_gene); i++) {
+    CSASpliceForm *csa_splice_form = gt_csa_gene_get_splice_form(csa_gene, i);
     mRNA_feature = create_mRNA_feature(csa_splice_form, gt_csa_source_str);
     gt_feature_node_add_child(gene_feature, mRNA_feature);
   }
@@ -439,7 +439,7 @@ static void process_csa_genes(GtQueue *gt_genome_node_buffer,
   unsigned long i;
   assert(csa_genes);
   for (i = 0; i < gt_array_size(csa_genes); i++) {
-    GtFeatureNode *gene_feature = create_gene_feature(*(CSAGene**)
+    GtFeatureNode *gene_feature = create_gene_feature(*(GtCSAGene**)
                                                      gt_array_get(csa_genes, i),
                                                       gt_csa_source_str);
     gt_queue_add(gt_genome_node_buffer, gene_feature);
@@ -480,7 +480,7 @@ void csa_visitor_process_cluster(GtNodeVisitor *gv, bool final_cluster)
                     csa_visitor->gt_csa_source_str);
 
   for (i = 0; i < gt_array_size(csa_genes); i++)
-    csa_gene_delete(*(CSAGene**) gt_array_get(csa_genes, i));
+    gt_csa_gene_delete(*(GtCSAGene**) gt_array_get(csa_genes, i));
   gt_array_delete(csa_genes);
 
   /* remove the cluster genome nodes */

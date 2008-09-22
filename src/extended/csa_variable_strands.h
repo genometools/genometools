@@ -27,10 +27,10 @@
   conveniently.
 
   That is, after the call to consensus_sa() the (collected) splice forms are
-  postprocessed into CSAGenes representing genes on variable strands.
+  postprocessed into GtCSAGenes representing genes on variable strands.
 */
 
-/* Returns an array of CSAGenes. */
+/* Returns an array of GtCSAGenes. */
 GtArray* csa_variable_strands(const void *set_of_sas,
                                unsigned long number_of_sas,
                                size_t size_of_sa, GetGenomicRangeFunc,

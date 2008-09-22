@@ -18,13 +18,13 @@
 #include "core/ma.h"
 #include "extended/csa_gene.h"
 
-struct CSAGene {
+struct GtCSAGene {
   GtArray *splice_forms;
 };
 
-CSAGene* csa_gene_new(CSASpliceForm *splice_form)
+GtCSAGene* gt_csa_gene_new(CSASpliceForm *splice_form)
 {
-  CSAGene *gene;
+  GtCSAGene *gene;
   assert(splice_form);
   gene = gt_malloc(sizeof *gene);
   gene->splice_forms = gt_array_new(sizeof (CSASpliceForm*));
@@ -32,7 +32,7 @@ CSAGene* csa_gene_new(CSASpliceForm *splice_form)
   return gene;
 }
 
-void csa_gene_delete(CSAGene *gene)
+void gt_csa_gene_delete(GtCSAGene *gene)
 {
   unsigned long i;
   if (!gene) return;
@@ -43,7 +43,7 @@ void csa_gene_delete(CSAGene *gene)
   gt_free(gene);
 }
 
-void csa_gene_add_splice_form(CSAGene *gene, CSASpliceForm *splice_form)
+void gt_csa_gene_add_splice_form(GtCSAGene *gene, CSASpliceForm *splice_form)
 {
   assert(gene && splice_form);
   assert(csa_splice_form_strand(*(CSASpliceForm**)
@@ -52,19 +52,20 @@ void csa_gene_add_splice_form(CSAGene *gene, CSASpliceForm *splice_form)
   gt_array_add(gene->splice_forms, splice_form);
 }
 
-CSASpliceForm* csa_gene_get_splice_form(const CSAGene *gene, unsigned long sf)
+CSASpliceForm* gt_csa_gene_get_splice_form(const GtCSAGene *gene,
+                                           unsigned long sf)
 {
   assert(gene);
   return *(CSASpliceForm**) gt_array_get(gene->splice_forms, sf);
 }
 
-unsigned long csa_gene_num_of_splice_forms(const CSAGene *gene)
+unsigned long gt_csa_gene_num_of_splice_forms(const GtCSAGene *gene)
 {
   assert(gene);
   return gt_array_size(gene->splice_forms);
 }
 
-GtRange csa_gene_genomic_range(const CSAGene *gene)
+GtRange gt_csa_gene_genomic_range(const GtCSAGene *gene)
 {
   GtRange gene_range, tmp_range;
   unsigned long i;
@@ -83,14 +84,14 @@ GtRange csa_gene_genomic_range(const CSAGene *gene)
   return gene_range;
 }
 
-GtStrand csa_gene_strand(const CSAGene *gene)
+GtStrand gt_csa_gene_strand(const GtCSAGene *gene)
 {
   assert(gene);
   return csa_splice_form_strand(*(CSASpliceForm**)
                                 gt_array_get(gene->splice_forms, 0));
 }
 
-void* csa_gene_get_representative(const CSAGene *gene)
+void* gt_csa_gene_get_representative(const GtCSAGene *gene)
 {
   assert(gene);
   return csa_splice_form_get_representative(*(CSASpliceForm**)
