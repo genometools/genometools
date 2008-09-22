@@ -19,27 +19,27 @@
 #define FILTER_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct FilterVisitor FilterVisitor;
+typedef struct GtFilterVisitor GtFilterVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* filter_visitor_class(void);
+const GtNodeVisitorClass* gt_filter_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have
    strand <strand>. */
-GtNodeVisitor*            filter_visitor_new(GtStr *seqid, GtStr *typefilter,
-                                             GtRange contain_range,
-                                             GtRange overlap_range,
-                                             GtStrand strand,
-                                             GtStrand targetstrand,
-                                             bool has_CDS,
-                                             unsigned long max_gene_length,
-                                             unsigned long max_gene_num,
-                                             double min_gene_score,
-                                             double max_gene_score,
-                                             double
-                                             min_average_splice_site_prob,
-                                             unsigned long feature_num);
-unsigned long             filter_visitor_node_buffer_size(GtNodeVisitor*);
-GtGenomeNode*               filter_visitor_get_node(GtNodeVisitor*);
+GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid,
+                                     GtStr *typefilter,
+                                     GtRange contain_range,
+                                     GtRange overlap_range,
+                                     GtStrand strand,
+                                     GtStrand targetstrand,
+                                     bool has_CDS,
+                                     unsigned long max_gene_length,
+                                     unsigned long max_gene_num,
+                                     double min_gene_score,
+                                     double max_gene_score,
+                                     double min_average_splice_site_prob,
+                                     unsigned long feature_num);
+unsigned long  gt_filter_visitor_node_buffer_size(GtNodeVisitor*);
+GtGenomeNode*  gt_filter_visitor_get_node(GtNodeVisitor*);
 
 #endif

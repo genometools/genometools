@@ -39,9 +39,9 @@ static int filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   fs = gt_filter_stream_cast(gs);
 
   /* we still have nodes in the buffer */
-  if (filter_visitor_node_buffer_size(fs->filter_visitor)) {
+  if (gt_filter_visitor_node_buffer_size(fs->filter_visitor)) {
     /* return one of them */
-    *gn = filter_visitor_get_node(fs->filter_visitor);
+    *gn = gt_filter_visitor_get_node(fs->filter_visitor);
     return 0;
   }
 
@@ -51,8 +51,8 @@ static int filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
     had_err = gt_genome_node_accept(*gn, fs->filter_visitor, err);
     if (had_err)
       break;
-    if (filter_visitor_node_buffer_size(fs->filter_visitor)) {
-      *gn = filter_visitor_get_node(fs->filter_visitor);
+    if (gt_filter_visitor_node_buffer_size(fs->filter_visitor)) {
+      *gn = gt_filter_visitor_get_node(fs->filter_visitor);
       return 0;
     }
   }
@@ -95,7 +95,7 @@ GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream,
   GtFilterStream *filter_stream = gt_filter_stream_cast(gs);
   assert(in_stream);
   filter_stream->in_stream = gt_node_stream_ref(in_stream);
-  filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter,
+  filter_stream->filter_visitor = gt_filter_visitor_new(seqid, typefilter,
                                                      contain_range,
                                                      overlap_range, strand,
                                                      targetstrand, has_CDS,
