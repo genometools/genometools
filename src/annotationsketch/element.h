@@ -30,24 +30,22 @@ typedef struct GtElement GtElement;
 #include "extended/genome_node.h"
 
 /* Creates a complete new GtElement object. */
-GtElement*           gt_element_new(GtFeatureNode*);
-GtElement*           gt_element_ref(GtElement*);
+GtElement*     gt_element_new(GtFeatureNode*);
+GtElement*     gt_element_ref(GtElement*);
 /* Creates an empty GT_Element object.
    Range and type have to be set afterwards. */
-GtElement*           gt_element_new_empty(void);
-GtRange              gt_element_get_range(const GtElement*);
-void                  gt_element_set_range(GtElement*, GtRange);
-GtDrawingRange       gt_element_calculate_drawing_range(GtElement*,
+GtElement*     gt_element_new_empty(void);
+GtRange        gt_element_get_range(const GtElement*);
+void           gt_element_set_range(GtElement*, GtRange);
+GtDrawingRange gt_element_calculate_drawing_range(GtElement*,
                                                         GtCanvas*);
-const char*           gt_element_get_type(const GtElement*);
-void                  gt_element_set_type(GtElement*, const char *type);
-GtStrand             gt_element_get_strand(const GtElement*);
-GtFeatureNode*     gt_element_get_node_ref(const GtElement*);
-bool                  gt_element_is_marked(const GtElement*);
-bool                  gt_elements_are_equal(const GtElement*,
-                                            const GtElement*);
-int                   gt_element_sketch(GtElement*, GtCanvas*);
-int                   gt_element_unit_test(GtError*);
-void                  gt_element_delete(GtElement* element);
+const char*    gt_element_get_type(const GtElement*);
+void           gt_element_set_type(GtElement*, const char *type);
+GtStrand       gt_element_get_strand(const GtElement*);
+GtFeatureNode* gt_element_get_node_ref(const GtElement*);
+bool           gt_element_is_marked(const GtElement*);
+int            gt_element_sketch(GtElement*, GtCanvas*);
+int            gt_element_unit_test(GtError*);
+void           gt_element_delete(GtElement* element);
 
 #endif

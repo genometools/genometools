@@ -103,7 +103,7 @@ bool gt_element_is_marked(const GtElement *element)
   return element->mark;
 }
 
-bool elements_are_equal(const GtElement *e1, const GtElement *e2)
+static bool elements_are_equal(const GtElement *e1, const GtElement *e2)
 {
   assert(e1 && e2);
   if (e1->type == e2->type && !gt_range_compare(e1->range, e2->range))
