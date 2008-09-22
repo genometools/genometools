@@ -531,7 +531,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
     }
   }
   FREESPACE(encseq->satcharptr);
-  gt_xfclose(fp);
+  gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
 
@@ -1872,7 +1872,7 @@ static int readsatfromfile(const GtStr *indexname,GtError *err)
       haserr = true;
     }
   }
-  gt_xfclose(fp);
+  gt_fa_xfclose(fp);
   return haserr ? -1 : cc;
 }
 

@@ -1531,8 +1531,8 @@ void freeoutlcptab(Outlcpinfo **outlcpinfo)
                       *outlcpinfo);
   }
   assert((*outlcpinfo)->countoutputlcpvalues == (*outlcpinfo)->totallength + 1);
-  gt_fclose((*outlcpinfo)->outfplcptab);
-  gt_fclose((*outlcpinfo)->outfpllvtab);
+  gt_fa_fclose((*outlcpinfo)->outfplcptab);
+  gt_fa_fclose((*outlcpinfo)->outfpllvtab);
   FREEARRAY(&(*outlcpinfo)->lcpsubtab,Seqpos);
   freeTurningwheel(&(*outlcpinfo)->tw);
   FREEARRAY(&(*outlcpinfo)->lcpsubtab.largelcpvalues,Largelcpvalue);

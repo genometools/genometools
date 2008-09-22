@@ -1709,7 +1709,7 @@ openOnDiskData(const GtStr *projectName, struct onDiskBlockCompIdx *idx,
 {
   GtStr *bdxName = gt_str_clone(projectName);
   gt_str_append_cstr(bdxName, ".bdx");
-  idx->idxFP = gt_fopen(gt_str_get(bdxName), mode, NULL);
+  idx->idxFP = gt_fa_fopen(gt_str_get(bdxName), mode, NULL);
   gt_str_delete(bdxName);
   if (!idx->idxFP)
     return 0;
@@ -1738,7 +1738,7 @@ destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx)
   if (idx->idxMMap)
     gt_xmunmap(idx->idxMMap);
   if (idx->idxFP)
-    gt_xfclose(idx->idxFP);
+    gt_fa_xfclose(idx->idxFP);
 }
 
 static inline void

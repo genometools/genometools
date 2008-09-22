@@ -96,7 +96,7 @@ GtGenFile* gt_genfile_open(GtGenFileMode genfilemode, const char *path,
   if (path) {
     switch (genfilemode) {
       case GFM_UNCOMPRESSED:
-        genfile->fileptr.file = gt_fopen(path, mode, err);
+        genfile->fileptr.file = gt_fa_fopen(path, mode, err);
         if (!genfile->fileptr.file) {
           gt_genfile_delete(genfile);
           return NULL;
@@ -139,7 +139,7 @@ GtGenFile* gt_genfile_xopen_w_gfmode(GtGenFileMode genfilemode,
   if (path) {
     switch (genfilemode) {
       case GFM_UNCOMPRESSED:
-        genfile->fileptr.file = gt_xfopen(path, mode);
+        genfile->fileptr.file = gt_fa_xfopen(path, mode);
         break;
       case GFM_GZIP:
         genfile->fileptr.gzfile = gt_xgzopen(path, mode);
@@ -381,7 +381,7 @@ void gt_genfile_close(GtGenFile *genfile)
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
         if (!genfile->is_stdin)
-          gt_fclose(genfile->fileptr.file);
+          gt_fa_fclose(genfile->fileptr.file);
       break;
     case GFM_GZIP:
         gt_gzclose(genfile->fileptr.gzfile);

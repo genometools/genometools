@@ -28,15 +28,15 @@
 /* the file allocator module */
 
 /* functions for normal file pointer */
-#define gt_fopen(path, mode, err)\
-        gt_fopen_func(path, mode, __FILE__, __LINE__, err)
-FILE*   gt_fopen_func(const char *path, const char *mode, const char*, int,
-                      GtError*);
-#define gt_xfopen(path, mode)\
-        gt_xfopen_func(path, mode, __FILE__, __LINE__)
-FILE*   gt_xfopen_func(const char *path, const char *mode, const char*, int);
-void    gt_fclose(FILE *stream);
-void    gt_xfclose(FILE *stream);
+#define gt_fa_fopen(path, mode, err)\
+        gt_fa_fopen_func(path, mode, __FILE__, __LINE__, err)
+FILE*   gt_fa_fopen_func(const char *path, const char *mode, const char*, int,
+                         GtError*);
+#define gt_fa_xfopen(path, mode)\
+        gt_fa_xfopen_func(path, mode, __FILE__, __LINE__)
+FILE*   gt_fa_xfopen_func(const char *path, const char *mode, const char*, int);
+void    gt_fa_fclose(FILE *stream);
+void    gt_fa_xfclose(FILE *stream);
 
 /* functions for gzip file pointer */
 #define gt_gzopen(path, mode, err)\

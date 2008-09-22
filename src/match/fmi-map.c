@@ -195,7 +195,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
       haserr = true;
     }
   }
-  gt_xfclose(fpin);
+  gt_fa_xfclose(fpin);
   if (!haserr)
   {
     fmindex->bwtformatching = mapbwtencoding(indexname,verboseinfo,err);

@@ -171,9 +171,9 @@ static int gt_skproto_runner(int argc, const char **argv, int parsed_args,
     skproto("(stdout)", stdin);
   else {
     for (i = parsed_args; i < argc; i++) {
-      fpin = gt_xfopen(argv[i], "r");
+      fpin = gt_fa_xfopen(argv[i], "r");
       skproto(argv[i], fpin);
-      gt_xfclose(fpin);
+      gt_fa_xfclose(fpin);
     }
   }
 

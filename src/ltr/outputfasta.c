@@ -201,10 +201,10 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   const char *destab = NULL;
   int had_err;
 
-  formatout = gt_xfopen(innerregion
-                        ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
-                        : gt_str_get(lo->str_fastaoutputfilename),
-                        "w");
+  formatout = gt_fa_xfopen(innerregion
+                           ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
+                           : gt_str_get(lo->str_fastaoutputfilename),
+                           "w");
 
   fastaoutinfo.ssar = ssar;
   fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
@@ -231,7 +231,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                        showpredictionfastasequence, err);
 
   gt_free(descendtab);
-  gt_xfclose(formatout);
+  gt_fa_xfclose(formatout);
 
   return 0;
 }

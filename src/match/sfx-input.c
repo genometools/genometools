@@ -51,7 +51,7 @@ static int outal1file(const GtStr *indexname,const Alphabet *alpha,
   if (!haserr)
   {
     outputalphabet(al1fp,alpha);
-    gt_xfclose(al1fp);
+    gt_fa_xfclose(al1fp);
   }
   return haserr ? -1 : 0;
 }

@@ -131,7 +131,7 @@ int outprjfile(const GtStr *indexname,
                 numoflargelcpvalues,
                 maxbranchdepth,
                 longest);
-    gt_xfclose(prjfp);
+    gt_fa_xfclose(prjfp);
   }
   return haserr ? -1 : 0;
 }

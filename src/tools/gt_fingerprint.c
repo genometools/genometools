@@ -118,7 +118,7 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   assert(sd && checklist);
   if (!strcmp(checklist, "-"))
     use_stdin = true;
-  checkfile = use_stdin ? stdin : gt_xfopen(checklist, "r");
+  checkfile = use_stdin ? stdin : gt_fa_xfopen(checklist, "r");
   line = gt_str_new();
   /* process checklist */
   while (gt_str_read_next_line(line, checkfile) != EOF) {
@@ -132,7 +132,7 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   }
   gt_str_delete(line);
   if (!use_stdin)
-    gt_xfclose(checkfile);
+    gt_fa_xfclose(checkfile);
   /* process remaining sequence_file(s) fingerprints */
   string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
   if (comparisons_failed) {

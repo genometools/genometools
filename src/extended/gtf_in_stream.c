@@ -89,7 +89,7 @@ GtNodeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   /* open input file */
   if (filename)
-    fpin = gt_xfopen(filename, "r");
+    fpin = gt_fa_xfopen(filename, "r");
   else
     fpin = stdin;
 
@@ -101,7 +101,7 @@ GtNodeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   /* close input file, if necessary */
   if (filename)
-    gt_xfclose(fpin);
+    gt_fa_xfclose(fpin);
 
   /* free */
   gtf_parser_delete(gtf_parser);

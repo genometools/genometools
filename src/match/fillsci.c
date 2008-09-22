@@ -265,7 +265,7 @@ int fasta2sequencekeyvalues(
                       getmapsizeAlphabet(alpha),distspralen,verboseinfo);
     (*numofsequences)++;
   }
-  gt_xfclose(desfp);
+  gt_fa_xfclose(desfp);
   gt_disc_distri_delete(distspralen);
   gt_fastabuffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);

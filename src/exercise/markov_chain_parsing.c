@@ -173,8 +173,8 @@ GtMarkovChain* gt_markov_chain_parse(const char *filename, GtError *err)
   GtMarkovChain *mc;
   FILE *fp;
   gt_error_check(err);
-  fp = gt_xfopen(filename, "r");
+  fp = gt_fa_xfopen(filename, "r");
   mc = parse_gt_markov_chain_file(fp, filename, err);
-  gt_xfclose(fp);
+  gt_fa_xfclose(fp);
   return mc;
 }

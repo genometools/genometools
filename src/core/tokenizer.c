@@ -133,7 +133,7 @@ int gt_tokenizer_unit_test(GtError *err)
   tmpfilename = gt_str_new();
   tmpfp = gt_xtmpfp(tmpfilename);
   fprintf(tmpfp, "# comment line\n");
-  gt_xfclose(tmpfp);
+  gt_fa_xfclose(tmpfp);
   t = gt_tokenizer_new(gt_io_new(gt_str_get(tmpfilename), "r"));
   gt_tokenizer_skip_comment_lines(t);
   ensure(had_err, !gt_tokenizer_has_token(t));
@@ -143,7 +143,7 @@ int gt_tokenizer_unit_test(GtError *err)
   /* larger test */
   tmpfp = gt_xtmpfp(tmpfilename);
   fprintf(tmpfp, " a bb ccc\ndddd -5");
-  gt_xfclose(tmpfp);
+  gt_fa_xfclose(tmpfp);
   t = gt_tokenizer_new(gt_io_new(gt_str_get(tmpfilename), "r"));
 
   token = gt_tokenizer_get_token(t);

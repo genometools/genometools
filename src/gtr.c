@@ -258,7 +258,7 @@ static void enable_logging(const char *debugfp, FILE **logfp)
   else if (!strcmp(debugfp, "stderr"))
     gt_log_set_fp(stderr);
   else {
-    *logfp = gt_xfopen(debugfp, "w");
+    *logfp = gt_fa_xfopen(debugfp, "w");
     gt_log_set_fp(*logfp);
   }
 }
@@ -342,7 +342,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
 void gtr_delete(GTR *gtr)
 {
   if (!gtr) return;
-  gt_fclose(gtr->logfp);
+  gt_fa_fclose(gtr->logfp);
   gt_str_delete(gtr->testspacepeak);
   gt_str_delete(gtr->debugfp);
   gt_toolbox_delete(gtr->tools);

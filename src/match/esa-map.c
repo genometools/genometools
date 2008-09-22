@@ -323,7 +323,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   {
     haserr = true;
   }
-  gt_xfclose(fp);
+  gt_fa_xfclose(fp);
   return haserr;
 }
 
@@ -361,13 +361,13 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttab = NULL;
   gt_xmunmap((void *) suffixarray->destab);
   suffixarray->destab = NULL;
-  gt_xfclose(suffixarray->suftabstream.fp);
+  gt_fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
-  gt_xfclose(suffixarray->lcptabstream.fp);
+  gt_fa_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
-  gt_xfclose(suffixarray->llvtabstream.fp);
+  gt_fa_xfclose(suffixarray->llvtabstream.fp);
   suffixarray->llvtabstream.fp = NULL;
-  gt_xfclose(suffixarray->bwttabstream.fp);
+  gt_fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
   if (suffixarray->alpha != NULL)
   {

@@ -136,7 +136,7 @@ static void xfclose_generic(void *stream, GtGenFileMode genfilemode, FA *fa)
   gt_hashmap_remove(fa->file_pointer, stream);
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      gt_xfclose(stream);
+      gt_fa_xfclose(stream);
       break;
     case GFM_GZIP:
       xgzclose(stream);
@@ -148,8 +148,8 @@ static void xfclose_generic(void *stream, GtGenFileMode genfilemode, FA *fa)
   }
 }
 
-FILE* gt_fopen_func(const char *path, const char *mode,
-                    const char *filename, int line, GtError *err)
+FILE* gt_fa_fopen_func(const char *path, const char *mode,
+                       const char *filename, int line, GtError *err)
 {
   gt_error_check(err);
   assert(path && mode);
@@ -159,8 +159,8 @@ FILE* gt_fopen_func(const char *path, const char *mode,
                           line, err);
 }
 
-FILE* gt_xfopen_func(const char *path, const char *mode,
-                     const char *filename, int line)
+FILE* gt_fa_xfopen_func(const char *path, const char *mode,
+                        const char *filename, int line)
 {
   assert(path && mode);
   if (!fa) fa_init();
@@ -169,7 +169,7 @@ FILE* gt_xfopen_func(const char *path, const char *mode,
                           line, NULL);
 }
 
-void gt_fclose(FILE *stream)
+void gt_fa_fclose(FILE *stream)
 {
   if (!fa) fa_init();
   assert(fa);
@@ -177,7 +177,7 @@ void gt_fclose(FILE *stream)
   fclose_generic(stream, GFM_UNCOMPRESSED, fa);
 }
 
-void gt_xfclose(FILE *stream)
+void gt_fa_xfclose(FILE *stream)
 {
   if (!fa) fa_init();
   assert(fa);

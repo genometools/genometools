@@ -105,7 +105,7 @@ newBWTSeqContextRetrieverFactory(Seqpos seqLen, short mapIntervalLog2)
 static void
 destructBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *factory)
 {
-  gt_xfclose(factory->mapTableDiskBackingStore);
+  gt_fa_xfclose(factory->mapTableDiskBackingStore);
   gt_str_delete(factory->mapTableDBSPath);
 }
 
@@ -278,7 +278,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         /* write header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = gt_fopen(gt_str_get(mapName), "w+b", NULL)))
+        if (!(mapFile = gt_fa_fopen(gt_str_get(mapName), "w+b", NULL)))
           break;
         bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
         bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
@@ -298,7 +298,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         /* read header information, for reference to verify noone
          * toyed with the file name */
         BitElem headerBuf[headerBitElems];
-        if (!(mapFile = gt_fopen(gt_str_get(mapName), "rb", NULL)))
+        if (!(mapFile = gt_fa_fopen(gt_str_get(mapName), "rb", NULL)))
           break;
         if (fread(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
           break;
@@ -317,7 +317,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
     newBWTSeqCR->revMap = (newBWTSeqCR->revMapMMap = mapMap) + headerSize;
   } while (0);
   if (mapName) gt_str_delete(mapName);
-  if (mapFile) gt_xfclose(mapFile);
+  if (mapFile) gt_fa_xfclose(mapFile);
   return mapMap != NULL;
 }
 
