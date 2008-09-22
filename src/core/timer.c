@@ -44,7 +44,7 @@ void gt_timer_start(GtTimer *t)
 {
   assert(t);
   gettimeofday(&t->start_tv, NULL);
-  xgetrusage(RUSAGE_SELF, &t->start_ru);
+  gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
   t->state = TIMER_RUNNING;
 }
 
@@ -53,7 +53,7 @@ void gt_timer_stop(GtTimer *t)
   assert(t);
   if (t->state == TIMER_RUNNING) {
     gettimeofday(&t->stop_tv, NULL);
-    xgetrusage(RUSAGE_SELF, &t->stop_ru);
+    gt_xgetrusage(RUSAGE_SELF, &t->stop_ru);
     t->state = TIMER_STOPPED;
   }
 }

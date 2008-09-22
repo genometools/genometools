@@ -112,7 +112,7 @@ static void refresh_progressbar(void)
   /* ETA */
   if (processed_counter == last_computation) {
     /* computation is finished -> show elapsed time */
-    seconds = xtime(NULL) - computation_start;
+    seconds = gt_xtime(NULL) - computation_start;
     SPLIT_SECONDS;
     if (hours) {
       (void) snprintf(buf + strlen(buf), window_size - strlen(buf),
@@ -133,7 +133,7 @@ static void refresh_progressbar(void)
     if (computed_eta != processed_counter) {
       /* compute new ETA */
       computed_eta = processed_counter;
-      computed_eta_time = xtime(NULL);
+      computed_eta_time = gt_xtime(NULL);
       eta = (time_t)
             (((double) (computed_eta_time - computation_start) /
               (double) (processed_counter)) *
@@ -142,7 +142,7 @@ static void refresh_progressbar(void)
     }
     else {
       /* use previous ETA */
-      eta_diff = xtime(NULL) - computed_eta_time;
+      eta_diff = gt_xtime(NULL) - computed_eta_time;
       if (eta_diff >= eta)
         seconds = 0;
       else
@@ -170,7 +170,7 @@ static void refresh_progressbar(void)
   /* file line with blanks */
   (void) snprintf(buf + strlen(buf), window_size - strlen(buf), "%*s",
                   window_size - (int) strlen(buf), "");
-  xwrite(STDOUT_FILENO, buf, strlen(buf));
+  gt_xwrite(STDOUT_FILENO, buf, strlen(buf));
 }
 
 static void update_progressbar(GT_UNUSED int sigraised)
@@ -183,9 +183,9 @@ static void update_progressbar(GT_UNUSED int sigraised)
   }
   if (output_is_possible())
     refresh_progressbar();
-  (void) xsignal(SIGALRM, update_progressbar); /* set signal handler again (for
-                                                  systems which switch it back
-                                                  to SIG_DFL)*/
+  (void) gt_xsignal(SIGALRM, update_progressbar); /* set signal handler again
+                                                     (for systems which switch
+                                                     it back to SIG_DFL) */
   (void) alarm(UPDATE_INTERVAL);
   errno = last_errno;
 }
@@ -203,14 +203,14 @@ void gt_progressbar_start(const unsigned long long *current_computation,
   last_computation = number_of_computations;
   computed_eta = 0;
   assert(*current_computation == 0);
-  computation_start = xtime(NULL);
+  computation_start = gt_xtime(NULL);
   set_window_size();
   if (output_is_possible())
     refresh_progressbar();
   /* register signal handlers */
-  (void) xsignal(SIGALRM, update_progressbar); /* the timer */
-  (void) xsignal(SIGWINCH, sig_winch);         /* window resizing */
-  (void) alarm(UPDATE_INTERVAL);               /* set alarm */
+  (void) gt_xsignal(SIGALRM, update_progressbar); /* the timer */
+  (void) gt_xsignal(SIGWINCH, sig_winch);         /* window resizing */
+  (void) alarm(UPDATE_INTERVAL);                  /* set alarm */
 }
 
 void gt_progressbar_stop(void)
@@ -223,8 +223,8 @@ void gt_progressbar_stop(void)
     last_computation = *computation_counter;
     refresh_progressbar();
   }
-  xwrite(STDOUT_FILENO, "\n", 1); /* trailing newline */
+  gt_xwrite(STDOUT_FILENO, "\n", 1); /* trailing newline */
   /* unregister signal handlers */
-  (void) xsignal(SIGALRM, SIG_DFL);  /* the timer */
-  (void) xsignal(SIGWINCH, SIG_DFL); /* window resizing */
+  (void) gt_xsignal(SIGALRM, SIG_DFL);  /* the timer */
+  (void) gt_xsignal(SIGWINCH, SIG_DFL); /* window resizing */
 }

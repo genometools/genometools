@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -40,23 +40,24 @@
   That is, one can use this functions without the need to check for errors.
 */
 
-void   xclose(int d);
-FILE*  xfdopen(int filedes, const char *mode);
-void   xfstat(int fd, struct stat *sb);
-void   xgetrusage(int who, struct rusage *rusage);
-void   xglob(const char *pattern, int flags,
-             int (*errfunc)(const char*, int), glob_t *pglob);
-int    xopen(const char *path, int flags, mode_t mode);
-int    xmkstemp(char *temp);
+void   gt_xclose(int d);
+FILE*  gt_xfdopen(int filedes, const char *mode);
+void   gt_xfstat(int fd, struct stat *sb);
+void   gt_xgetrusage(int who, struct rusage *rusage);
+void   gt_xglob(const char *pattern, int flags,
+                int (*errfunc)(const char*, int), glob_t *pglob);
+int    gt_xopen(const char *path, int flags, mode_t mode);
+int    gt_xmkstemp(char *temp);
 /* low-level wrapper for the mmap() routine */
-void*  xmmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
+void*  gt_xmmap(void *addr, size_t len, int prot, int flags, int fd,
+                off_t offset);
 /* generic unmapping routine */
-void   xmunmap(void *addr, size_t len);
-void   xraise(int sig);
-void (*xsignal(int sigcatch, void (*func)(int sigraised)))(int);
-void   xstat(const char *path, struct stat *sb);
-time_t xtime(time_t *tloc);
-void   xunlink(const char *path);
-void   xwrite(int d, const void *buf, size_t nbytes);
+void   gt_xmunmap(void *addr, size_t len);
+void   gt_xraise(int sig);
+void (*gt_xsignal(int sigcatch, void (*func)(int sigraised)))(int);
+void   gt_xstat(const char *path, struct stat *sb);
+time_t gt_xtime(time_t *tloc);
+void   gt_xunlink(const char *path);
+void   gt_xwrite(int d, const void *buf, size_t nbytes);
 
 #endif

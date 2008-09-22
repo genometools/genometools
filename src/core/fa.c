@@ -289,7 +289,7 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, int flags,
   {
     int fd = mkstemp(gt_str_get(template));
     char mode[] = { 'w', '+', flags & TMPFP_OPENBINARY?'b':'\0', '\0' };
-    fp = xfdopen(fd, mode);
+    fp = gt_xfdopen(fd, mode);
   }
   assert(fp);
   if (flags & TMPFP_AUTOREMOVE)
@@ -321,7 +321,7 @@ void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   mapinfo->len = len;
   if (hard_fail)
   {
-    map = xmmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
+    map = gt_xmmap(0, len, mapwritable?PROT_WRITE:PROT_READ,
                 MAP_SHARED, fd, offset);
   }
   else
@@ -354,7 +354,7 @@ static void* mmap_generic_path_func(const char *path, size_t *len,
   if (fd == -1)
     return NULL;
   if (hard_fail)
-    xfstat(fd, &sb);
+    gt_xfstat(fd, &sb);
   else if (fstat(fd, &sb))
     return NULL;
   if (sizeof (off_t) > sizeof (size_t)
@@ -364,7 +364,7 @@ static void* mmap_generic_path_func(const char *path, size_t *len,
                                    filename, line);
   if (map && len)
     *len = sb.st_size;
-  xclose(fd);
+  gt_xclose(fd);
   return map;
 }
 
@@ -412,7 +412,7 @@ void gt_fa_xmunmap(void *addr)
   if (!addr) return;
   mapinfo = gt_hashmap_get(fa->memory_maps, addr);
   assert(mapinfo);
-  xmunmap(addr, mapinfo->len);
+  gt_xmunmap(addr, mapinfo->len);
   assert(fa->current_size >= mapinfo->len);
   fa->current_size -= mapinfo->len;
   gt_hashmap_remove(fa->memory_maps, addr);

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 
 #include "core/xposix.h"
 
-void xclose(int d)
+void gt_xclose(int d)
 {
   if (close(d)) {
     perror("cannot close file descriptor");
@@ -25,7 +25,7 @@ void xclose(int d)
   }
 }
 
-FILE* xfdopen(int filedes, const char *mode)
+FILE* gt_xfdopen(int filedes, const char *mode)
 {
   FILE *fp;
   if (!(fp = fdopen(filedes, mode))) {
@@ -35,7 +35,7 @@ FILE* xfdopen(int filedes, const char *mode)
   return fp;
 }
 
-void xfstat(int fd, struct stat *sb)
+void gt_xfstat(int fd, struct stat *sb)
 {
   if (fstat(fd, sb)) {
     perror("cannot fstat");
@@ -43,7 +43,7 @@ void xfstat(int fd, struct stat *sb)
   }
 }
 
-void xgetrusage(int who, struct rusage *rusage)
+void gt_xgetrusage(int who, struct rusage *rusage)
 {
   if (getrusage(who, rusage)) {
     perror("cannot getrusage");
@@ -51,8 +51,8 @@ void xgetrusage(int who, struct rusage *rusage)
   }
 }
 
-void xglob(const char *pattern, int flags,
-           int (*errfunc)(const char*, int), glob_t *pglob)
+void gt_xglob(const char *pattern, int flags,
+              int (*errfunc)(const char*, int), glob_t *pglob)
 {
   int rval;
   errno = 0;
@@ -78,7 +78,7 @@ void xglob(const char *pattern, int flags,
   }
 }
 
-int xopen(const char *path, int flags, mode_t mode)
+int gt_xopen(const char *path, int flags, mode_t mode)
 {
   int fd;
 
@@ -91,7 +91,7 @@ int xopen(const char *path, int flags, mode_t mode)
   return fd;
 }
 
-int xmkstemp(char *temp)
+int gt_xmkstemp(char *temp)
 {
   int fd;
   if ((fd = mkstemp(temp)) == -1) {
@@ -101,7 +101,8 @@ int xmkstemp(char *temp)
   return fd;
 }
 
-void* xmmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
+void* gt_xmmap(void *addr, size_t len, int prot, int flags, int fd,
+               off_t offset)
 {
   void *map;
   if ((map = mmap(addr, len, prot, flags, fd, offset)) == MAP_FAILED) {
@@ -111,7 +112,7 @@ void* xmmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
   return map;
 }
 
-void xmunmap(void *addr, size_t len)
+void gt_xmunmap(void *addr, size_t len)
 {
   if (munmap(addr, len)) {
     perror("cannot munmap");
@@ -119,7 +120,7 @@ void xmunmap(void *addr, size_t len)
   }
 }
 
-void xraise(int sig)
+void gt_xraise(int sig)
 {
   if (raise(sig)) {
     perror("cannot raise");
@@ -127,7 +128,7 @@ void xraise(int sig)
   }
 }
 
-void (*xsignal(int sigcatch, void (*func)(int sigraised)))(int)
+void (*gt_xsignal(int sigcatch, void (*func)(int sigraised)))(int)
 {
   void (*rval)(int);
   if ((rval = signal(sigcatch, func)) == SIG_ERR) {
@@ -137,7 +138,7 @@ void (*xsignal(int sigcatch, void (*func)(int sigraised)))(int)
   return rval;
 }
 
-void xstat(const char *path, struct stat *sb)
+void gt_xstat(const char *path, struct stat *sb)
 {
   if (stat(path, sb)) {
     fprintf(stderr, "cannot stat() file '%s': %s\n", path, strerror(errno));
@@ -145,7 +146,7 @@ void xstat(const char *path, struct stat *sb)
   }
 }
 
-time_t xtime(time_t *tloc)
+time_t gt_xtime(time_t *tloc)
 {
   time_t t;
   if ((t = time(tloc)) == -1) {
@@ -155,7 +156,7 @@ time_t xtime(time_t *tloc)
   return t;
 }
 
-void xunlink(const char *path)
+void gt_xunlink(const char *path)
 {
   if (unlink(path)) {
     fprintf(stderr, "cannot unlink \'%s\': %s\n", path, strerror(errno));
@@ -163,7 +164,7 @@ void xunlink(const char *path)
   }
 }
 
-void xwrite(int d, const void *buf, size_t nbytes)
+void gt_xwrite(int d, const void *buf, size_t nbytes)
 {
   size_t pos = 0;
   ssize_t rval;

@@ -45,14 +45,14 @@ static void remove_pattern_in_current_dir(const char *pattern)
 
   path = gt_str_new_cstr("./*");
   gt_str_append_cstr(path, pattern);
-  xglob(gt_str_get(path), GLOB_NOCHECK, NULL, &g);
+  gt_xglob(gt_str_get(path), GLOB_NOCHECK, NULL, &g);
 
   /* remove found files */
   if (g.gl_pathc) {
     files_to_remove = g.gl_pathv;
     if (strcmp(*files_to_remove, gt_str_get(path))) {
       while (*files_to_remove) {
-        xunlink(*files_to_remove);
+        gt_xunlink(*files_to_remove);
         files_to_remove++;
       }
     }

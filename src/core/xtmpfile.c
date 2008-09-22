@@ -23,7 +23,7 @@ FILE* xtmpfile(char *template)
   FILE *tmpfp;
   int tmpfd;
   assert(template);
-  tmpfd = xmkstemp(template);
-  tmpfp = xfdopen(tmpfd, "w");
+  tmpfd = gt_xmkstemp(template);
+  tmpfp = gt_xfdopen(tmpfd, "w");
   return tmpfp;
 }

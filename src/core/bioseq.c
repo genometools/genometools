@@ -241,10 +241,10 @@ static void remove_gt_bioseq_files(int sigraised)
   /* we don't care if fclose() succeeds, xunlink() will take care of it */
   (void) fclose(gt_bioseq_files_info.gt_bioseq_index);
   (void) fclose(gt_bioseq_files_info.gt_bioseq_raw);
-  xunlink(gt_bioseq_index_filename);
-  xunlink(gt_bioseq_raw_filename);
-  (void) xsignal(sigraised, SIG_DFL);
-  xraise(sigraised);
+  gt_xunlink(gt_bioseq_index_filename);
+  gt_xunlink(gt_bioseq_raw_filename);
+  (void) gt_xsignal(sigraised, SIG_DFL);
+  gt_xraise(sigraised);
 }
 
 static int fill_bioseq(GtBioseq *bs, const char *index_filename,
@@ -366,8 +366,8 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *gt_bioseq_index_file,
     gt_fa_xfclose(gt_bioseq_files_info.gt_bioseq_index);
     gt_fa_xfclose(gt_bioseq_files_info.gt_bioseq_raw);
     if (had_err) {
-      xunlink(gt_bioseq_index_filename);
-      xunlink(gt_bioseq_raw_filename);
+      gt_xunlink(gt_bioseq_index_filename);
+      gt_xunlink(gt_bioseq_raw_filename);
     }
   }
 

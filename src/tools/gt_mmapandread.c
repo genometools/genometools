@@ -57,10 +57,10 @@ int gt_mmapandread(int argc, const char **argv, GtError *err)
   /* iterate over all files */
   for (i = parsed_args; i < argc; i++) {
     /* open file */
-    fd = xopen(argv[i], O_RDONLY, 0);
+    fd = gt_xopen(argv[i], O_RDONLY, 0);
 
     /* get file statistics */
-    xfstat(fd, &sb);
+    gt_xfstat(fd, &sb);
 
     if (sb.st_size == 0)
       printf("file \"%s\" is empty\n", argv[i]);
@@ -68,7 +68,7 @@ int gt_mmapandread(int argc, const char **argv, GtError *err)
       printf("\"%s\" is not a regular file\n", argv[i]);
     else {
       /* map file */
-      map = xmmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+      map = gt_xmmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 
       /* read file */
       printf("reading file \"%s\"\n", argv[i]);
@@ -79,11 +79,11 @@ int gt_mmapandread(int argc, const char **argv, GtError *err)
       gt_progressbar_stop();
 
       /* unmap file */
-      xmunmap(map, sb.st_size);
+      gt_xmunmap(map, sb.st_size);
     }
 
     /* close file */
-    xclose(fd);
+    gt_xclose(fd);
   }
 
   if (!byte)

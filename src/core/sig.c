@@ -21,55 +21,55 @@
 void sig_register_all(void (*func)(int sigraised))
 {
   /* POSIX */
-  (void) xsignal(SIGABRT, func);
-  (void) xsignal(SIGBUS, func);
-  (void) xsignal(SIGFPE, func);
-  (void) xsignal(SIGHUP, func);
-  (void) xsignal(SIGILL, func);
-  (void) xsignal(SIGINT, func);
-  (void) xsignal(SIGPIPE, func);
-  (void) xsignal(SIGQUIT, func);
-  (void) xsignal(SIGSEGV, func);
-  (void) xsignal(SIGTERM, func);
-  (void) xsignal(SIGTSTP, func);
-  (void) xsignal(SIGTTIN, func);
-  (void) xsignal(SIGTTOU, func);
-  (void) xsignal(SIGUSR1, func);
-  (void) xsignal(SIGUSR2, func);
-  (void) xsignal(SIGSYS, func);
-  (void) xsignal(SIGXCPU, func);
-  (void) xsignal(SIGXFSZ, func);
+  (void) gt_xsignal(SIGABRT, func);
+  (void) gt_xsignal(SIGBUS, func);
+  (void) gt_xsignal(SIGFPE, func);
+  (void) gt_xsignal(SIGHUP, func);
+  (void) gt_xsignal(SIGILL, func);
+  (void) gt_xsignal(SIGINT, func);
+  (void) gt_xsignal(SIGPIPE, func);
+  (void) gt_xsignal(SIGQUIT, func);
+  (void) gt_xsignal(SIGSEGV, func);
+  (void) gt_xsignal(SIGTERM, func);
+  (void) gt_xsignal(SIGTSTP, func);
+  (void) gt_xsignal(SIGTTIN, func);
+  (void) gt_xsignal(SIGTTOU, func);
+  (void) gt_xsignal(SIGUSR1, func);
+  (void) gt_xsignal(SIGUSR2, func);
+  (void) gt_xsignal(SIGSYS, func);
+  (void) gt_xsignal(SIGXCPU, func);
+  (void) gt_xsignal(SIGXFSZ, func);
 
   /* OpenBSD */
 #ifdef SIGEMT
-  (void) xsignal(SIGEMT, func);
+  (void) gt_xsignal(SIGEMT, func);
 #endif
 }
 
 void sig_unregister_all(void)
 {
   /* POSIX */
-  (void) xsignal(SIGABRT, SIG_DFL);
-  (void) xsignal(SIGBUS, SIG_DFL);
-  (void) xsignal(SIGFPE, SIG_DFL);
-  (void) xsignal(SIGHUP, SIG_DFL);
-  (void) xsignal(SIGILL, SIG_DFL);
-  (void) xsignal(SIGINT, SIG_DFL);
-  (void) xsignal(SIGPIPE, SIG_DFL);
-  (void) xsignal(SIGQUIT, SIG_DFL);
-  (void) xsignal(SIGSEGV, SIG_DFL);
-  (void) xsignal(SIGTERM, SIG_DFL);
-  (void) xsignal(SIGTSTP, SIG_DFL);
-  (void) xsignal(SIGTTIN, SIG_DFL);
-  (void) xsignal(SIGTTOU, SIG_DFL);
-  (void) xsignal(SIGUSR1, SIG_DFL);
-  (void) xsignal(SIGUSR2, SIG_DFL);
-  (void) xsignal(SIGSYS, SIG_DFL);
-  (void) xsignal(SIGXCPU, SIG_DFL);
-  (void) xsignal(SIGXFSZ, SIG_DFL);
+  (void) gt_xsignal(SIGABRT, SIG_DFL);
+  (void) gt_xsignal(SIGBUS, SIG_DFL);
+  (void) gt_xsignal(SIGFPE, SIG_DFL);
+  (void) gt_xsignal(SIGHUP, SIG_DFL);
+  (void) gt_xsignal(SIGILL, SIG_DFL);
+  (void) gt_xsignal(SIGINT, SIG_DFL);
+  (void) gt_xsignal(SIGPIPE, SIG_DFL);
+  (void) gt_xsignal(SIGQUIT, SIG_DFL);
+  (void) gt_xsignal(SIGSEGV, SIG_DFL);
+  (void) gt_xsignal(SIGTERM, SIG_DFL);
+  (void) gt_xsignal(SIGTSTP, SIG_DFL);
+  (void) gt_xsignal(SIGTTIN, SIG_DFL);
+  (void) gt_xsignal(SIGTTOU, SIG_DFL);
+  (void) gt_xsignal(SIGUSR1, SIG_DFL);
+  (void) gt_xsignal(SIGUSR2, SIG_DFL);
+  (void) gt_xsignal(SIGSYS, SIG_DFL);
+  (void) gt_xsignal(SIGXCPU, SIG_DFL);
+  (void) gt_xsignal(SIGXFSZ, SIG_DFL);
 
   /* OpenBSD */
 #ifdef SIGEMT
-  (void) xsignal(SIGEMT, SIG_DFL);
+  (void) gt_xsignal(SIGEMT, SIG_DFL);
 #endif
 }

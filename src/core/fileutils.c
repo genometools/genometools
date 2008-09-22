@@ -40,8 +40,8 @@ bool file_is_newer(const char *a, const char *b)
 {
   struct stat stat_a, stat_b;
   assert(a && b);
-  xstat(a, &stat_a);
-  xstat(b, &stat_b);
+  gt_xstat(a, &stat_a);
+  gt_xstat(b, &stat_b);
   if (stat_a.st_mtime > stat_b.st_mtime ||
       (stat_a.st_mtime == stat_b.st_mtime &&
        stat_a.st_mtime > stat_b.st_mtime)) {
@@ -153,8 +153,8 @@ off_t files_estimate_total_size(const GtStrArray *filenames)
 
   for (filenum = 0; filenum < gt_strarray_size(filenames); filenum++)
   {
-    fd = xopen(gt_strarray_get(filenames,filenum), O_RDONLY, 0);
-    xfstat(fd, &sb);
+    fd = gt_xopen(gt_strarray_get(filenames,filenum), O_RDONLY, 0);
+    gt_xfstat(fd, &sb);
     gfm = gt_genfilemode_determine(gt_strarray_get(filenames,filenum));
     if (gfm == GFM_UNCOMPRESSED)
     {
@@ -164,7 +164,7 @@ off_t files_estimate_total_size(const GtStrArray *filenames)
       totalsize += (4*sb.st_size); /* expected compression rate for
                                       sequence is 0.25 */
     }
-    xclose(fd);
+    gt_xclose(fd);
   }
   return totalsize;
 }
