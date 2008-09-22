@@ -113,13 +113,16 @@ static int mergefeat_visitor_genome_feature(GtNodeVisitor *gv,
 
 const GtNodeVisitorClass* gt_mergefeat_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (GtMergefeatVisitor),
-                                          mergefeat_visitor_free,
-                                          NULL,
-                                          mergefeat_visitor_genome_feature,
-                                          NULL,
-                                          NULL };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (GtMergefeatVisitor),
+                                    mergefeat_visitor_free,
+                                    NULL,
+                                    mergefeat_visitor_genome_feature,
+                                    NULL,
+                                    NULL);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* gt_mergefeat_visitor_new(void)

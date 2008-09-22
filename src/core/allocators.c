@@ -16,6 +16,7 @@
 */
 
 #include "core/allocators.h"
+#include "core/class_alloc.h"
 #include "core/cstr.h"
 #include "core/cstr_array.h"
 #include "core/fa.h"
@@ -110,6 +111,7 @@ int gt_allocators_clean(void)
   fa_mmap_rval = gt_fa_check_mmap_leak();
   gt_fa_clean();
   gt_symbol_clean();
+  gt_class_alloc_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
   return fa_fptr_rval || fa_mmap_rval || gt_rval;

@@ -57,13 +57,16 @@ static int feature_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
 
 const GtNodeVisitorClass* feature_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (FeatureVisitor),
-                                          feature_visitor_free,
-                                          NULL,
-                                          feature_visitor_feature_node,
-                                          feature_visitor_region_node,
-                                          NULL };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (FeatureVisitor),
+                                    feature_visitor_free,
+                                    NULL,
+                                    feature_visitor_feature_node,
+                                    feature_visitor_region_node,
+                                    NULL);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* feature_visitor_new(GtFeatureIndex *fi)

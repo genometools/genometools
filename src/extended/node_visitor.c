@@ -17,9 +17,38 @@
 
 #include <stdlib.h>
 #include "core/assert.h"
+#include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_rep.h"
+
+/* the ``genome visitor'' interface */
+struct GtNodeVisitorClass {
+  size_t size;
+  GtNodeVisitorFreeFunc free;
+  GtNodeVisitorCommentNodeFunc comment_node;
+  GtNodeVisitorFeatureNodeFunc feature_node;
+  GtNodeVisitorRegionNodeFunc region_node;
+  GtNodeVisitorSequenceNodeFunc sequence_node;
+};
+
+const GtNodeVisitorClass*
+gt_node_visitor_class_new(size_t size,
+                          GtNodeVisitorFreeFunc free,
+                          GtNodeVisitorCommentNodeFunc comment_node,
+                          GtNodeVisitorFeatureNodeFunc feature_node,
+                          GtNodeVisitorRegionNodeFunc region_node,
+                          GtNodeVisitorSequenceNodeFunc sequence_node)
+{
+  GtNodeVisitorClass *c_class = gt_class_alloc(sizeof *c_class);
+  c_class->size = size;
+  c_class->free = free;
+  c_class->comment_node = comment_node;
+  c_class->feature_node = feature_node;
+  c_class->region_node = region_node;
+  c_class->sequence_node = sequence_node;
+  return c_class;
+}
 
 GtNodeVisitor* gt_node_visitor_create(const GtNodeVisitorClass *gvc)
 {

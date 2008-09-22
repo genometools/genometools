@@ -222,13 +222,16 @@ static int cds_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
 
 const GtNodeVisitorClass* cds_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (CDSVisitor),
-                                          cds_visitor_free,
-                                          NULL,
-                                          cds_visitor_genome_feature,
-                                          NULL,
-                                          NULL };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (CDSVisitor),
+                                    cds_visitor_free,
+                                    NULL,
+                                    cds_visitor_genome_feature,
+                                    NULL,
+                                    NULL);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* cds_visitor_new(GtRegionMapping *region_mapping, GtStr *source)

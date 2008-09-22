@@ -129,13 +129,16 @@ static int csa_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
 
 const GtNodeVisitorClass* csa_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (CSAVisitor),
-                                          csa_visitor_free,
-                                          csa_visitor_comment,
-                                          csa_visitor_genome_feature,
-                                          csa_visitor_sequence_region,
-                                          csa_visitor_sequence_node };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (CSAVisitor),
+                                    csa_visitor_free,
+                                    csa_visitor_comment,
+                                    csa_visitor_genome_feature,
+                                    csa_visitor_sequence_region,
+                                    csa_visitor_sequence_node);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* csa_visitor_new(unsigned long join_length)

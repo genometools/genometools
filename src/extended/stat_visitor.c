@@ -148,13 +148,16 @@ static int stat_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
 
 const GtNodeVisitorClass* stat_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (StatVisitor),
-                                          stat_visitor_free,
-                                          NULL,
-                                          stat_visitor_genome_feature,
-                                          stat_visitor_region_node,
-                                          NULL };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (StatVisitor),
+                                    stat_visitor_free,
+                                    NULL,
+                                    stat_visitor_genome_feature,
+                                    stat_visitor_region_node,
+                                    NULL);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* stat_visitor_new(bool gene_length_distri,

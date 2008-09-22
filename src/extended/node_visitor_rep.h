@@ -21,21 +21,32 @@
 #include <stdio.h>
 #include "extended/node_visitor.h"
 
-/* the ``genome visitor'' interface */
-struct GtNodeVisitorClass {
-  size_t size;
-  void (*free)(GtNodeVisitor*);
-  int  (*comment_node)(GtNodeVisitor*, GtCommentNode*, GtError*);
-  int  (*feature_node)(GtNodeVisitor*, GtFeatureNode*, GtError*);
-  int  (*region_node)(GtNodeVisitor*, GtRegionNode*, GtError*);
-  int  (*sequence_node)(GtNodeVisitor*, GtSequenceNode*, GtError*);
-};
+typedef void (*GtNodeVisitorFreeFunc)(GtNodeVisitor*);
+typedef int  (*GtNodeVisitorCommentNodeFunc)(GtNodeVisitor*, GtCommentNode*,
+                                             GtError*);
+typedef int  (*GtNodeVisitorFeatureNodeFunc)(GtNodeVisitor*, GtFeatureNode*,
+                                             GtError*);
+typedef int  (*GtNodeVisitorRegionNodeFunc)(GtNodeVisitor*, GtRegionNode*,
+                                            GtError*);
+typedef int  (*GtNodeVisitorSequenceNodeFunc)(GtNodeVisitor*, GtSequenceNode*,
+                                              GtError*);
+
+typedef struct GtNodeVisitorMembers GtNodeVisitorMembers;
 
 struct GtNodeVisitor {
   const GtNodeVisitorClass *c_class;
+  GtNodeVisitorMembers *members;
 };
 
-GtNodeVisitor* gt_node_visitor_create(const GtNodeVisitorClass*);
-void*          gt_node_visitor_cast(const GtNodeVisitorClass*, GtNodeVisitor*);
+const
+GtNodeVisitorClass* gt_node_visitor_class_new(size_t size,
+                                              GtNodeVisitorFreeFunc,
+                                              GtNodeVisitorCommentNodeFunc,
+                                              GtNodeVisitorFeatureNodeFunc,
+                                              GtNodeVisitorRegionNodeFunc,
+                                              GtNodeVisitorSequenceNodeFunc);
+GtNodeVisitor*      gt_node_visitor_create(const GtNodeVisitorClass*);
+void*               gt_node_visitor_cast(const GtNodeVisitorClass*,
+                                         GtNodeVisitor*);
 
 #endif

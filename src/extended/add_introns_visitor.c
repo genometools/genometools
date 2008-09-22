@@ -105,13 +105,16 @@ static int gt_add_introns_visitor_genome_feature(GtNodeVisitor *gv,
 
 const GtNodeVisitorClass* gt_add_introns_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (GtAddIntronsVisitor),
-                                          NULL,
-                                          NULL,
-                                          gt_add_introns_visitor_genome_feature,
-                                          NULL,
-                                          NULL };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (GtAddIntronsVisitor),
+                                    NULL,
+                                    NULL,
+                                    gt_add_introns_visitor_genome_feature,
+                                    NULL,
+                                    NULL);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* gt_add_introns_visitor_new(void)

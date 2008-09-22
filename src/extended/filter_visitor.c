@@ -253,13 +253,16 @@ static int filter_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
 
 const GtNodeVisitorClass* filter_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (FilterVisitor),
-                                          filter_visitor_free,
-                                          filter_visitor_comment,
-                                          filter_visitor_genome_feature,
-                                          filter_visitor_region_node,
-                                          filter_visitor_sequence_node };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (FilterVisitor),
+                                    filter_visitor_free,
+                                    filter_visitor_comment,
+                                    filter_visitor_genome_feature,
+                                    filter_visitor_region_node,
+                                    filter_visitor_sequence_node);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* filter_visitor_new(GtStr *seqid, GtStr *typefilter,

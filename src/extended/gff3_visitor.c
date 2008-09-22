@@ -304,13 +304,16 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
 
 const GtNodeVisitorClass* gff3_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (GFF3Visitor),
-                                          gff3_visitor_free,
-                                          gff3_visitor_comment_node,
-                                          gff3_visitor_genome_feature,
-                                          gff3_visitor_region_node,
-                                          gff3_visitor_sequence_node };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (GFF3Visitor),
+                                    gff3_visitor_free,
+                                    gff3_visitor_comment_node,
+                                    gff3_visitor_genome_feature,
+                                    gff3_visitor_region_node,
+                                    gff3_visitor_sequence_node);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* gff3_visitor_new(GtGenFile *outfp)

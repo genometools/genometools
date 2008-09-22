@@ -129,13 +129,16 @@ static int splicesiteinfo_visitor_genome_feature(GtNodeVisitor *gv,
 
 const GtNodeVisitorClass* splicesiteinfo_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (SpliceSiteInfoVisitor),
-                                          splicesiteinfo_visitor_free,
-                                          NULL,
-                                          splicesiteinfo_visitor_genome_feature,
-                                          NULL,
-                                          NULL };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+   gvc = gt_node_visitor_class_new(sizeof (SpliceSiteInfoVisitor),
+                                   splicesiteinfo_visitor_free,
+                                   NULL,
+                                   splicesiteinfo_visitor_genome_feature,
+                                   NULL,
+                                   NULL);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* splicesiteinfo_visitor_new(GtRegionMapping *rm)

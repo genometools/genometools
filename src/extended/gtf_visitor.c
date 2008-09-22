@@ -158,13 +158,16 @@ static int gtf_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
 
 const GtNodeVisitorClass* gtf_visitor_class()
 {
-  static const GtNodeVisitorClass gvc = { sizeof (GTFVisitor),
-                                          gtf_visitor_free,
-                                          gtf_visitor_comment,
-                                          gtf_visitor_genome_feature,
-                                          NULL,
-                                          NULL };
-  return &gvc;
+  static const GtNodeVisitorClass *gvc = NULL;
+  if (!gvc) {
+    gvc = gt_node_visitor_class_new(sizeof (GTFVisitor),
+                                    gtf_visitor_free,
+                                    gtf_visitor_comment,
+                                    gtf_visitor_genome_feature,
+                                    NULL,
+                                    NULL);
+  }
+  return gvc;
 }
 
 GtNodeVisitor* gtf_visitor_new(GtGenFile *outfp)
