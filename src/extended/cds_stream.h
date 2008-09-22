@@ -23,12 +23,12 @@
 #include "extended/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct CDSStream CDSStream;
+typedef struct GtCDSStream GtCDSStream;
 
-const GtNodeStreamClass* cds_stream_class(void);
+const GtNodeStreamClass* gt_cds_stream_class(void);
 
 /* create a CDSSTream, takes ownership of GtRegionMapping */
-GtNodeStream*            cds_stream_new(GtNodeStream*, GtRegionMapping*,
-                                        const char *source);
+GtNodeStream*            gt_cds_stream_new(GtNodeStream*, GtRegionMapping*,
+                                           const char *source);
 
 #endif

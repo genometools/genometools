@@ -98,8 +98,8 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 
   /* create CDS stream */
   if (!had_err) {
-    cds_stream = cds_stream_new(gff3_in_stream, regionmapping,
-                                GT_CDS_SOURCE_TAG);
+    cds_stream = gt_cds_stream_new(gff3_in_stream, regionmapping,
+                                   GT_CDS_SOURCE_TAG);
     if (!cds_stream)
       had_err = -1;
   }

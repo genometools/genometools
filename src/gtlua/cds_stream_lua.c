@@ -30,9 +30,9 @@ static int cds_stream_lua_new(lua_State *L)
   region_mapping = check_region_mapping(L, 2);
   cds_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
   assert(cds_stream);
-  *cds_stream = cds_stream_new(*in_stream,
-                               gt_region_mapping_ref(*region_mapping),
-                               "gtscript");
+  *cds_stream = gt_cds_stream_new(*in_stream,
+                                  gt_region_mapping_ref(*region_mapping),
+                                  "gtscript");
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

@@ -19,19 +19,18 @@
 #include "extended/cds_visitor.h"
 #include "extended/node_stream_rep.h"
 
-struct CDSStream
-{
+struct GtCDSStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *cds_visitor;
 };
 
 #define cds_stream_cast(GS)\
-        gt_node_stream_cast(cds_stream_class(), GS)
+        gt_node_stream_cast(gt_cds_stream_class(), GS)
 
 static int cds_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
-  CDSStream *cds_stream;
+  GtCDSStream *cds_stream;
   int had_err;
   gt_error_check(err);
   cds_stream = cds_stream_cast(gs);
@@ -43,30 +42,30 @@ static int cds_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
 static void cds_stream_free(GtNodeStream *gs)
 {
-  CDSStream *cds_stream = cds_stream_cast(gs);
+  GtCDSStream *cds_stream = cds_stream_cast(gs);
   gt_node_visitor_delete(cds_stream->cds_visitor);
   gt_node_stream_delete(cds_stream->in_stream);
 }
 
-const GtNodeStreamClass* cds_stream_class(void)
+const GtNodeStreamClass* gt_cds_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (CDSStream),
+    nsc = gt_node_stream_class_new(sizeof (GtCDSStream),
                                    cds_stream_free,
                                    cds_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* cds_stream_new(GtNodeStream *in_stream, GtRegionMapping *rm,
-                             const char *source)
+GtNodeStream* gt_cds_stream_new(GtNodeStream *in_stream, GtRegionMapping *rm,
+                                const char *source)
 {
   GtNodeStream *gs;
-  CDSStream *cds_stream;
+  GtCDSStream *cds_stream;
   GtStr *source_str;
   int had_err = 0;
-  gs = gt_node_stream_create(cds_stream_class(), true);
+  gs = gt_node_stream_create(gt_cds_stream_class(), true);
   cds_stream = cds_stream_cast(gs);
   source_str = gt_str_new_cstr(source);
   cds_stream->in_stream = gt_node_stream_ref(in_stream);
