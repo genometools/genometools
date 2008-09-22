@@ -26,15 +26,15 @@
   That is, one can use this functions without the need to check for errors.
 */
 
-gzFile xgzopen(const char *path, const char *mode);
+gzFile gt_xgzopen(const char *path, const char *mode);
 /* Returns next character from <file> or EOF, if end-of-file is reached. */
-int    xgzfgetc(gzFile file);
-void   xgzfputc(int, gzFile);
-void   xgzfputs(const char*, gzFile);
+int    gt_xgzfgetc(gzFile file);
+void   gt_xgzfputc(int, gzFile);
+void   gt_xgzfputs(const char*, gzFile);
 /* Returns num of read bytes. */
-int    xgzread(gzFile, void *buf, unsigned len);
-void   xgzwrite(gzFile, void *buf, unsigned len);
-void   xgzrewind(gzFile);
-void   xgzclose(gzFile);
+int    gt_xgzread(gzFile, void *buf, unsigned len);
+void   gt_xgzwrite(gzFile, void *buf, unsigned len);
+void   gt_xgzrewind(gzFile);
+void   gt_xgzclose(gzFile);
 
 #endif

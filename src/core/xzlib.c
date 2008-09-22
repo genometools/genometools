@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +22,7 @@
 #include <string.h>
 #include "core/xzlib.h"
 
-gzFile xgzopen(const char *path, const char *mode)
+gzFile gt_xgzopen(const char *path, const char *mode)
 {
   gzFile file;
   if (!(file = gzopen(path, mode))) {
@@ -33,13 +33,13 @@ gzFile xgzopen(const char *path, const char *mode)
   return file;
 }
 
-int xgzfgetc(gzFile file)
+int gt_xgzfgetc(gzFile file)
 {
   char c;
-  return xgzread(file, &c, 1) ? c : EOF;
+  return gt_xgzread(file, &c, 1) ? c : EOF;
 }
 
-void xgzfputc(int c, gzFile file)
+void gt_xgzfputc(int c, gzFile file)
 {
   int errnum;
   if (gzputc(file, c) == -1) {
@@ -49,7 +49,7 @@ void xgzfputc(int c, gzFile file)
   }
 }
 
-void xgzfputs(const char *str, gzFile file)
+void gt_xgzfputs(const char *str, gzFile file)
 {
   int errnum;
   if (gzputs(file, str) == -1) {
@@ -59,7 +59,7 @@ void xgzfputs(const char *str, gzFile file)
   }
 }
 
-int xgzread(gzFile file, void *buf, unsigned len)
+int gt_xgzread(gzFile file, void *buf, unsigned len)
 {
   int errnum, rval;
   if ((rval = gzread(file, buf, len)) == -1) {
@@ -70,7 +70,7 @@ int xgzread(gzFile file, void *buf, unsigned len)
   return rval;
 }
 
-void xgzwrite(gzFile file, void *buf, unsigned len)
+void gt_xgzwrite(gzFile file, void *buf, unsigned len)
 {
   int errnum;
   assert(buf && len);
@@ -81,7 +81,7 @@ void xgzwrite(gzFile file, void *buf, unsigned len)
   }
 }
 
-void xgzrewind(gzFile file)
+void gt_xgzrewind(gzFile file)
 {
   if (gzrewind(file) == -1) {
     fprintf(stderr, "cannot rewind compressed file\n");
@@ -89,7 +89,7 @@ void xgzrewind(gzFile file)
   }
 }
 
-void xgzclose(gzFile file)
+void gt_xgzclose(gzFile file)
 {
   const char *msg;
   int errnum;

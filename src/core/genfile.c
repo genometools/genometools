@@ -196,7 +196,7 @@ int gt_genfile_xfgetc(GtGenFile *genfile)
           c = gt_xfgetc(genfile->fileptr.file);
           break;
         case GFM_GZIP:
-          c = xgzfgetc(genfile->fileptr.gzfile);
+          c = gt_xgzfgetc(genfile->fileptr.gzfile);
           break;
         case GFM_BZIP2:
           c = xbzfgetc(genfile->fileptr.bzfile);
@@ -280,7 +280,7 @@ void gt_genfile_xfputc(int c, GtGenFile *genfile)
       gt_xfputc(c, genfile->fileptr.file);
       break;
     case GFM_GZIP:
-      xgzfputc(c, genfile->fileptr.gzfile);
+      gt_xgzfputc(c, genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
       xbzfputc(c, genfile->fileptr.bzfile);
@@ -298,7 +298,7 @@ void gt_genfile_xfputs(const char *str, GtGenFile *genfile)
       gt_xfputs(str, genfile->fileptr.file);
       break;
     case GFM_GZIP:
-      xgzfputs(str, genfile->fileptr.gzfile);
+      gt_xgzfputs(str, genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
       xbzfputs(str, genfile->fileptr.bzfile);
@@ -316,7 +316,7 @@ int gt_genfile_xread(GtGenFile *genfile, void *buf, size_t nbytes)
         rval = gt_xfread(buf, 1, nbytes, genfile->fileptr.file);
         break;
       case GFM_GZIP:
-        rval = xgzread(genfile->fileptr.gzfile, buf, nbytes);
+        rval = gt_xgzread(genfile->fileptr.gzfile, buf, nbytes);
         break;
       case GFM_BZIP2:
         rval = xbzread(genfile->fileptr.bzfile, buf, nbytes);
@@ -340,7 +340,7 @@ void gt_genfile_xwrite(GtGenFile *genfile, void *buf, size_t nbytes)
       gt_xfwrite(buf, 1, nbytes, genfile->fileptr.file);
       break;
     case GFM_GZIP:
-      xgzwrite(genfile->fileptr.gzfile, buf, nbytes);
+      gt_xgzwrite(genfile->fileptr.gzfile, buf, nbytes);
       break;
     case GFM_BZIP2:
       xbzwrite(genfile->fileptr.bzfile, buf, nbytes);
@@ -357,7 +357,7 @@ void gt_genfile_xrewind(GtGenFile *genfile)
       rewind(genfile->fileptr.file);
       break;
     case GFM_GZIP:
-      xgzrewind(genfile->fileptr.gzfile);
+      gt_xgzrewind(genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
       xbzrewind(&genfile->fileptr.bzfile, genfile->orig_path,

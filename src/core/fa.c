@@ -92,7 +92,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
       fp = x ? gt_xfopen(path, mode) : gt_efopen(path, mode, err);
       break;
     case GFM_GZIP:
-      fp = x ? xgzopen(path, mode) : gt_egzopen(path, mode, err);
+      fp = x ? gt_xgzopen(path, mode) : gt_egzopen(path, mode, err);
       break;
     case GFM_BZIP2:
       fp = x ? xbzopen(path, mode) : gt_ebzopen(path, mode, err);
@@ -139,7 +139,7 @@ static void xfclose_generic(void *stream, GtGenFileMode genfilemode, FA *fa)
       gt_fa_xfclose(stream);
       break;
     case GFM_GZIP:
-      xgzclose(stream);
+      gt_xgzclose(stream);
       break;
     case GFM_BZIP2:
       BZ2_bzclose(stream);
