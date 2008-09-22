@@ -32,7 +32,7 @@ int  gt_node_visitor_visit_comment_node(GtNodeVisitor*, GtCommentNode*,
 int  gt_node_visitor_visit_feature_node(GtNodeVisitor*, GtFeatureNode*,
                                         GtError*);
 int  gt_node_visitor_visit_region_node(GtNodeVisitor*, GtRegionNode*, GtError*);
-int  gt_node_visitor_visit_sequence_node(GtNodeVisitor*, GtGtSequenceNode*,
+int  gt_node_visitor_visit_sequence_node(GtNodeVisitor*, GtSequenceNode*,
                                          GtError*);
 void gt_node_visitor_delete(GtNodeVisitor *gv);
 

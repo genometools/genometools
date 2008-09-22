@@ -235,7 +235,7 @@ static int filter_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-static int filter_visitor_sequence_node(GtNodeVisitor *gv, GtGtSequenceNode *sn,
+static int filter_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
                                         GT_UNUSED GtError *err)
 {
   FilterVisitor *filter_visitor;

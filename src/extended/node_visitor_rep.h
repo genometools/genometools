@@ -28,7 +28,7 @@ struct GtNodeVisitorClass {
   int  (*comment_node)(GtNodeVisitor*, GtCommentNode*, GtError*);
   int  (*feature_node)(GtNodeVisitor*, GtFeatureNode*, GtError*);
   int  (*region_node)(GtNodeVisitor*, GtRegionNode*, GtError*);
-  int  (*sequence_node)(GtNodeVisitor*, GtGtSequenceNode*, GtError*);
+  int  (*sequence_node)(GtNodeVisitor*, GtSequenceNode*, GtError*);
 };
 
 struct GtNodeVisitor {

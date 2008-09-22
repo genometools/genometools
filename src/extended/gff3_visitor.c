@@ -284,7 +284,7 @@ static int gff3_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-static int gff3_visitor_sequence_node(GtNodeVisitor *gv, GtGtSequenceNode *sn,
+static int gff3_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
                                       GT_UNUSED GtError *err)
 {
   GFF3Visitor *gff3_visitor;
