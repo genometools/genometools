@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,19 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SPLICESITEINFO_VISITOR_H
-#define SPLICESITEINFO_VISITOR_H
+#ifndef SPLICE_SITE_INFO_VISITOR_H
+#define SPLICE_SITE_INFO_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct SpliceSiteInfoVisitor SpliceSiteInfoVisitor;
+typedef struct GtSpliceSiteInfoVisitor GtSpliceSiteInfoVisitor;
 
 #include <stdbool.h>
 #include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
-const GtNodeVisitorClass* splicesiteinfo_visitor_class(void);
+const GtNodeVisitorClass* gt_splice_site_info_visitor_class(void);
 /* takes ownership of <rm> */
-GtNodeVisitor*            splicesiteinfo_visitor_new(GtRegionMapping *rm);
-bool                      splicesiteinfo_visitor_show(GtNodeVisitor*);
+GtNodeVisitor*            gt_splice_site_info_visitor_new(GtRegionMapping *rm);
+bool                      gt_splice_site_info_visitor_show(GtNodeVisitor*);
 
 #endif

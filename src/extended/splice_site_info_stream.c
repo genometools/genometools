@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "extended/node_stream_rep.h"
 #include "extended/splice_site_info_stream.h"
-#include "extended/splicesiteinfo_visitor.h"
+#include "extended/splice_site_info_visitor.h"
 
 struct SpliceSiteInfoStream
 {
@@ -77,7 +77,7 @@ GtNodeStream* splice_site_info_stream_new(GtNodeStream *in_stream,
                                           false);
   SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
   ssis->in_stream = gt_node_stream_ref(in_stream);
-  ssis->splice_site_info_visitor = splicesiteinfo_visitor_new(rm);
+  ssis->splice_site_info_visitor = gt_splice_site_info_visitor_new(rm);
   return gs;
 }
 
@@ -86,5 +86,5 @@ bool splice_site_info_stream_show(GtNodeStream *gs)
   SpliceSiteInfoStream *ssis;
   assert(gs);
   ssis = splice_site_info_stream_cast(gs);
-  return splicesiteinfo_visitor_show(ssis->splice_site_info_visitor);
+  return gt_splice_site_info_visitor_show(ssis->splice_site_info_visitor);
 }

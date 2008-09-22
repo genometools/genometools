@@ -26,10 +26,10 @@
 #include "core/xansi.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/node_visitor_rep.h"
-#include "extended/splicesiteinfo_visitor.h"
+#include "extended/splice_site_info_visitor.h"
 #include "extended/reverse.h"
 
-struct SpliceSiteInfoVisitor {
+struct GtSpliceSiteInfoVisitor {
   const GtNodeVisitor parent_instance;
   GtRegionMapping *region_mapping;
   GtStringDistri *splicesites,
@@ -39,21 +39,21 @@ struct SpliceSiteInfoVisitor {
        intron_processed;
 };
 
-#define splicesiteinfo_visitor_cast(GV)\
-        gt_node_visitor_cast(splicesiteinfo_visitor_class(), GV)
+#define splice_site_info_visitor_cast(GV)\
+        gt_node_visitor_cast(gt_splice_site_info_visitor_class(), GV)
 
-static void splicesiteinfo_visitor_free(GtNodeVisitor *gv)
+static void splice_site_info_visitor_free(GtNodeVisitor *gv)
 {
-  SpliceSiteInfoVisitor *splicesiteinfo_visitor;
+  GtSpliceSiteInfoVisitor *splice_site_info_visitor;
   assert(gv);
-  splicesiteinfo_visitor = splicesiteinfo_visitor_cast(gv);
-  gt_region_mapping_delete(splicesiteinfo_visitor->region_mapping);
-  gt_string_distri_delete(splicesiteinfo_visitor->splicesites);
-  gt_string_distri_delete(splicesiteinfo_visitor->donorsites);
-  gt_string_distri_delete(splicesiteinfo_visitor->acceptorsites);
+  splice_site_info_visitor = splice_site_info_visitor_cast(gv);
+  gt_region_mapping_delete(splice_site_info_visitor->region_mapping);
+  gt_string_distri_delete(splice_site_info_visitor->splicesites);
+  gt_string_distri_delete(splice_site_info_visitor->donorsites);
+  gt_string_distri_delete(splice_site_info_visitor->acceptorsites);
 }
 
-static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
+static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                           GtError *err)
 {
   const char *sequence;
@@ -107,16 +107,16 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   return had_err;
 }
 
-static int splicesiteinfo_visitor_genome_feature(GtNodeVisitor *gv,
+static int splice_site_info_visitor_genome_feature(GtNodeVisitor *gv,
                                                  GtFeatureNode *gf,
                                                  GtError *err)
 {
-  SpliceSiteInfoVisitor *ssiv;
+  GtSpliceSiteInfoVisitor *ssiv;
   GtGenomeNodeIterator *gni;
   GtGenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
-  ssiv = splicesiteinfo_visitor_cast(gv);
+  ssiv = splice_site_info_visitor_cast(gv);
   assert(ssiv->region_mapping);
   gni = gt_genome_node_iterator_new((GtGenomeNode*) gf);
   while (!had_err && (node = gt_genome_node_iterator_next(gni))) {
@@ -127,27 +127,27 @@ static int splicesiteinfo_visitor_genome_feature(GtNodeVisitor *gv,
   return had_err;
 }
 
-const GtNodeVisitorClass* splicesiteinfo_visitor_class()
+const GtNodeVisitorClass* gt_splice_site_info_visitor_class()
 {
   static const GtNodeVisitorClass *gvc = NULL;
   if (!gvc) {
-   gvc = gt_node_visitor_class_new(sizeof (SpliceSiteInfoVisitor),
-                                   splicesiteinfo_visitor_free,
+   gvc = gt_node_visitor_class_new(sizeof (GtSpliceSiteInfoVisitor),
+                                   splice_site_info_visitor_free,
                                    NULL,
-                                   splicesiteinfo_visitor_genome_feature,
+                                   splice_site_info_visitor_genome_feature,
                                    NULL,
                                    NULL);
   }
   return gvc;
 }
 
-GtNodeVisitor* splicesiteinfo_visitor_new(GtRegionMapping *rm)
+GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm)
 {
   GtNodeVisitor *gv;
-  SpliceSiteInfoVisitor *ssiv;
+  GtSpliceSiteInfoVisitor *ssiv;
   assert(rm);
-  gv = gt_node_visitor_create(splicesiteinfo_visitor_class());
-  ssiv = splicesiteinfo_visitor_cast(gv);
+  gv = gt_node_visitor_create(gt_splice_site_info_visitor_class());
+  ssiv = splice_site_info_visitor_cast(gv);
   ssiv->region_mapping = rm;
   ssiv->splicesites = gt_string_distri_new();
   ssiv->acceptorsites = gt_string_distri_new();
@@ -174,11 +174,11 @@ static void showsinglesite(const char *string, unsigned long occurrences,
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
 }
 
-bool splicesiteinfo_visitor_show(GtNodeVisitor *gv)
+bool gt_splice_site_info_visitor_show(GtNodeVisitor *gv)
 {
-  SpliceSiteInfoVisitor *ssiv;
+  GtSpliceSiteInfoVisitor *ssiv;
   assert(gv);
-  ssiv = splicesiteinfo_visitor_cast(gv);
+  ssiv = splice_site_info_visitor_cast(gv);
 
   if (ssiv->show) {
     /* show splice sites */
