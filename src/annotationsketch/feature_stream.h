@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,11 +23,11 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct FeatureStream FeatureStream;
+typedef struct GtFeatureStream GtFeatureStream;
 
-const GtNodeStreamClass* feature_stream_class(void);
+const GtNodeStreamClass* gt_feature_stream_class(void);
 
 /* create a FeatureStream which writes to GtFeatureIndex */
-GtNodeStream*            feature_stream_new(GtNodeStream*, GtFeatureIndex*);
+GtNodeStream*            gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*);
 
 #endif

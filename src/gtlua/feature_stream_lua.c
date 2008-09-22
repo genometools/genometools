@@ -30,7 +30,7 @@ static int feature_stream_lua_new(lua_State *L)
   assert(feature_stream);
   in_stream = check_genome_stream(L, 1);
   feature_index = check_feature_index(L, 2);
-  *feature_stream = feature_stream_new(*in_stream, *feature_index);
+  *feature_stream = gt_feature_stream_new(*in_stream, *feature_index);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

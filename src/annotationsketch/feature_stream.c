@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,19 +20,19 @@
 #include "annotationsketch/feature_index.h"
 #include "extended/node_stream_rep.h"
 
-struct FeatureStream {
+struct GtFeatureStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *feature_visitor;
 };
 
 #define feature_stream_cast(GS)\
-        gt_node_stream_cast(feature_stream_class(), GS)
+        gt_node_stream_cast(gt_feature_stream_class(), GS)
 
 static int feature_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                GtError *err)
 {
-  FeatureStream *feature_stream;
+  GtFeatureStream *feature_stream;
   int had_err;
   gt_error_check(err);
   feature_stream = feature_stream_cast(gs);
@@ -44,27 +44,27 @@ static int feature_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
 static void feature_stream_free(GtNodeStream *gs)
 {
-  FeatureStream *feature_stream = feature_stream_cast(gs);
+  GtFeatureStream *feature_stream = feature_stream_cast(gs);
   gt_node_stream_delete(feature_stream->in_stream);
   gt_node_visitor_delete(feature_stream->feature_visitor);
 }
 
-const GtNodeStreamClass* feature_stream_class(void)
+const GtNodeStreamClass* gt_feature_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (FeatureStream),
+    nsc = gt_node_stream_class_new(sizeof (GtFeatureStream),
                                    feature_stream_free,
                                    feature_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* feature_stream_new(GtNodeStream *in_stream, GtFeatureIndex *fi)
+GtNodeStream* gt_feature_stream_new(GtNodeStream *in_stream, GtFeatureIndex *fi)
 {
   GtNodeStream *gs;
-  FeatureStream *feature_stream;
-  gs = gt_node_stream_create(feature_stream_class(), false);
+  GtFeatureStream *feature_stream;
+  gs = gt_node_stream_create(gt_feature_stream_class(), false);
   feature_stream = feature_stream_cast(gs);
   feature_stream->in_stream = gt_node_stream_ref(in_stream);
   feature_stream->feature_visitor = feature_visitor_new(fi);

@@ -243,7 +243,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     }
 
     /* create feature stream */
-    feature_stream = feature_stream_new(last_stream, features);
+    feature_stream = gt_feature_stream_new(last_stream, features);
 
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = gt_node_stream_next(feature_stream, &gn, err)) &&
