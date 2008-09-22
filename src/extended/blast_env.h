@@ -20,7 +20,7 @@
 
 #include "core/score_matrix.h"
 
-typedef struct BlastEnv BlastEnv;
+typedef struct GtBlastEnv GtBlastEnv;
 
 /*
    Construct the BlastP environment for encoded sequence <w> of length <wlen>
@@ -29,14 +29,14 @@ typedef struct BlastEnv BlastEnv;
    scores.
    Returns a new BlastEnv object.
 */
-BlastEnv* blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
-                        unsigned long q, long k,
-                        const GT_ScoreMatrix *score_matrix);
+GtBlastEnv* gt_blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
+                             unsigned long q, long k,
+                             const GT_ScoreMatrix *score_matrix);
 
 /* Delete the Blast environment <blast_env>. */
-void      blast_env_delete(BlastEnv*);
+void      gt_blast_env_delete(GtBlastEnv*);
 
 /* Show the Blast environment <blast_env> on stdout. */
-void      blast_env_show(const BlastEnv*);
+void      gt_blast_env_show(const GtBlastEnv*);
 
 #endif

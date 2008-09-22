@@ -65,7 +65,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
 {
   ScorefastaArguments *arguments = tool_arguments;
   GT_ScoreMatrix *score_matrix;
-  BlastEnv *blast_env = NULL;
+  GtBlastEnv *blast_env = NULL;
   unsigned long wlen;
   char *w = NULL;
   GtAlpha *alpha = NULL;
@@ -91,13 +91,13 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
     gt_alpha_encode_seq(alpha, w, w, wlen);
 
     /* construct and show BlastP environment */
-    blast_env = blast_env_new(w, wlen, alpha, arguments->q, arguments->k,
-                              score_matrix);
-    blast_env_show(blast_env);
+    blast_env = gt_blast_env_new(w, wlen, alpha, arguments->q, arguments->k,
+                                 score_matrix);
+    gt_blast_env_show(blast_env);
   }
 
   /* free space */
-  blast_env_delete(blast_env);
+  gt_blast_env_delete(blast_env);
   gt_score_matrix_delete(score_matrix);
   gt_alpha_delete(alpha);
   gt_free(w);

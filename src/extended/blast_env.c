@@ -207,7 +207,7 @@ static void compute_env(GtBittab *V, Pos *pos, const char *w,
 }
 
 /* the actual class implementation */
-struct BlastEnv {
+struct GtBlastEnv {
   GtAlpha *alpha;
   unsigned long q;
   GtBittab *V; /* The vector V of r^q bits. */
@@ -215,11 +215,11 @@ struct BlastEnv {
                 contains the corresponding position list for that code. */
 };
 
-BlastEnv* blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
-                        unsigned long q, long k,
-                        const GT_ScoreMatrix *score_matrix)
+GtBlastEnv* gt_blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
+                             unsigned long q, long k,
+                             const GT_ScoreMatrix *score_matrix)
 {
-  BlastEnv *be;
+  GtBlastEnv *be;
   assert(w && alpha && q && score_matrix);
   assert(gt_alpha_size(alpha) == gt_score_matrix_get_dimension(score_matrix));
   be = gt_calloc(1, sizeof *be);
@@ -234,7 +234,7 @@ BlastEnv* blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
   return be;
 }
 
-void blast_env_delete(BlastEnv *be)
+void gt_blast_env_delete(GtBlastEnv *be)
 {
   if (!be) return;
   gt_alpha_delete(be->alpha);
@@ -243,7 +243,7 @@ void blast_env_delete(BlastEnv *be)
   gt_free(be);
 }
 
-void blast_env_show(const BlastEnv *be)
+void gt_blast_env_show(const GtBlastEnv *be)
 {
   unsigned long i, code;
   GtArray *position_list;
