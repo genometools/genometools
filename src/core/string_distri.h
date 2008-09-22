@@ -22,19 +22,20 @@
 #include "core/genfile.h"
 
 /* A discrete distribution */
-typedef struct StringDistri StringDistri;
+typedef struct GtStringDistri GtStringDistri;
 
-typedef void (*StringDistriIterFunc)(const char *string,
+typedef void (*GtStringDistriIterFunc)(const char *string,
                                      unsigned long occurrences,
                                      double probability, void *data);
 
-StringDistri*      string_distri_new(void);
-void               string_distri_add(StringDistri*, const char*);
-/* <sd> must contain at least on element with given <key>. */
-void               string_distri_sub(StringDistri *sd, const char *key);
-unsigned long      string_distri_get(const StringDistri*, const char*);
-void               string_distri_foreach(const StringDistri*,
-                                        StringDistriIterFunc, void *data);
-void               string_distri_delete(StringDistri*);
+GtStringDistri* gt_string_distri_new(void);
+void            gt_string_distri_add(GtStringDistri*, const char*);
+/* <string_distri> must contain at least one element with given <key>. */
+void            gt_string_distri_sub(GtStringDistri *string_distri,
+                                     const char *key);
+unsigned long   gt_string_distri_get(const GtStringDistri*, const char*);
+void            gt_string_distri_foreach(const GtStringDistri*,
+                                         GtStringDistriIterFunc, void *data);
+void            gt_string_distri_delete(GtStringDistri*);
 
 #endif

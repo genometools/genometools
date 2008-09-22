@@ -108,7 +108,7 @@ static void proc_superfluous_sequence(const char *string,
   *comparisons_failed = true;
 }
 
-static int compare_fingerprints(StringDistri *sd, const char *checklist,
+static int compare_fingerprints(GtStringDistri *sd, const char *checklist,
                                 GtError *err)
 {
   bool comparisons_failed = false, use_stdin = false;
@@ -122,8 +122,8 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   line = gt_str_new();
   /* process checklist */
   while (gt_str_read_next_line(line, checkfile) != EOF) {
-    if (string_distri_get(sd, gt_str_get(line)))
-      string_distri_sub(sd, gt_str_get(line));
+    if (gt_string_distri_get(sd, gt_str_get(line)))
+      gt_string_distri_sub(sd, gt_str_get(line));
     else {
       printf("%s only in checklist\n", gt_str_get(line));
       comparisons_failed = true;
@@ -134,7 +134,7 @@ static int compare_fingerprints(StringDistri *sd, const char *checklist,
   if (!use_stdin)
     gt_fa_xfclose(checkfile);
   /* process remaining sequence_file(s) fingerprints */
-  string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
+  gt_string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
   if (comparisons_failed) {
     gt_error_set(err, "fingerprint comparison failed");
     return -1;
@@ -158,14 +158,14 @@ static void show_duplicate(const char *fingerprint, unsigned long occurrences,
   info->num_of_sequences += occurrences;
 }
 
-static int show_duplicates(StringDistri *sd, GtError *err)
+static int show_duplicates(GtStringDistri *sd, GtError *err)
 {
   FingerprintInfo info;
   gt_error_check(err);
   assert(sd);
   info.duplicates = 0;
   info.num_of_sequences = 0;
-  string_distri_foreach(sd, show_duplicate, &info);
+  gt_string_distri_foreach(sd, show_duplicate, &info);
   if (info.duplicates) {
     gt_error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
               info.duplicates, info.num_of_sequences,
@@ -180,13 +180,13 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
 {
   FingerprintArguments *arguments = tool_arguments;
   GtBioseq *bs;
-  StringDistri *sd;
+  GtStringDistri *sd;
   unsigned long i, j;
   int had_err = 0;
 
   gt_error_check(err);
   assert(arguments);
-  sd = string_distri_new();
+  sd = gt_string_distri_new();
 
   /* process sequence files */
   for (i = parsed_args; !had_err && i < argc; i++) {
@@ -195,7 +195,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
     if (!had_err) {
       for (j = 0; j < gt_bioseq_number_of_sequences(bs); j++) {
         if (gt_str_length(arguments->checklist) || arguments->show_duplicates)
-          string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
+          gt_string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
         else if (gt_str_length(arguments->extract)) {
           if (!strcmp(gt_bioseq_get_md5_fingerprint(bs, j),
                       gt_str_get(arguments->extract))) {
@@ -218,7 +218,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
       had_err = show_duplicates(sd, err);
   }
 
-  string_distri_delete(sd);
+  gt_string_distri_delete(sd);
 
   return had_err;
 }

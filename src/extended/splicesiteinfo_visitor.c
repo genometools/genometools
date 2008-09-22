@@ -32,9 +32,9 @@
 struct SpliceSiteInfoVisitor {
   const GtNodeVisitor parent_instance;
   GtRegionMapping *region_mapping;
-  StringDistri *splicesites,
-               *donorsites,
-               *acceptorsites;
+  GtStringDistri *splicesites,
+                 *donorsites,
+                 *acceptorsites;
   bool show,
        intron_processed;
 };
@@ -48,9 +48,9 @@ static void splicesiteinfo_visitor_free(GtNodeVisitor *gv)
   assert(gv);
   splicesiteinfo_visitor = splicesiteinfo_visitor_cast(gv);
   gt_region_mapping_delete(splicesiteinfo_visitor->region_mapping);
-  string_distri_delete(splicesiteinfo_visitor->splicesites);
-  string_distri_delete(splicesiteinfo_visitor->donorsites);
-  string_distri_delete(splicesiteinfo_visitor->acceptorsites);
+  gt_string_distri_delete(splicesiteinfo_visitor->splicesites);
+  gt_string_distri_delete(splicesiteinfo_visitor->donorsites);
+  gt_string_distri_delete(splicesiteinfo_visitor->acceptorsites);
 }
 
 static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
@@ -90,10 +90,10 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
           had_err = reverse_complement(site, 4, err);
         if (!had_err) {
           /* add site to distributions */
-          string_distri_add(ssiv->splicesites, site);
-          string_distri_add(ssiv->acceptorsites, site + 2);
+          gt_string_distri_add(ssiv->splicesites, site);
+          gt_string_distri_add(ssiv->acceptorsites, site + 2);
           site[2] = '\0';
-          string_distri_add(ssiv->donorsites, site);
+          gt_string_distri_add(ssiv->donorsites, site);
           ssiv->show = true;
         }
       }
@@ -149,9 +149,9 @@ GtNodeVisitor* splicesiteinfo_visitor_new(GtRegionMapping *rm)
   gv = gt_node_visitor_create(splicesiteinfo_visitor_class());
   ssiv = splicesiteinfo_visitor_cast(gv);
   ssiv->region_mapping = rm;
-  ssiv->splicesites = string_distri_new();
-  ssiv->acceptorsites = string_distri_new();
-  ssiv->donorsites = string_distri_new();
+  ssiv->splicesites = gt_string_distri_new();
+  ssiv->acceptorsites = gt_string_distri_new();
+  ssiv->donorsites = gt_string_distri_new();
   return gv;
 }
 
@@ -183,17 +183,17 @@ bool splicesiteinfo_visitor_show(GtNodeVisitor *gv)
   if (ssiv->show) {
     /* show splice sites */
     printf("splice site distribution (for introns >= 4bp)\n");
-    string_distri_foreach(ssiv->splicesites, showsplicesite, NULL);
+    gt_string_distri_foreach(ssiv->splicesites, showsplicesite, NULL);
     gt_xputchar('\n');
 
     /* show donor sites */
     printf("donor site distribution (for introns >= 4bp)\n");
-    string_distri_foreach(ssiv->donorsites, showsinglesite, NULL);
+    gt_string_distri_foreach(ssiv->donorsites, showsinglesite, NULL);
     gt_xputchar('\n');
 
     /* show acceptor sites */
     printf("acceptor site distribution (for introns >= 4bp)\n");
-    string_distri_foreach(ssiv->acceptorsites, showsinglesite, NULL);
+    gt_string_distri_foreach(ssiv->acceptorsites, showsinglesite, NULL);
   }
   return ssiv->intron_processed;
 }

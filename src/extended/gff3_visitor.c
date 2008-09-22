@@ -33,7 +33,7 @@ struct GtGFF3Visitor {
   const GtNodeVisitor parent_instance;
   bool version_string_shown,
        fasta_directive_shown;
-  StringDistri *id_counter;
+  GtStringDistri *id_counter;
   GtHashmap *gt_feature_node_to_id_array,
             *gt_feature_node_to_unique_id_str;
   unsigned long fasta_width;
@@ -68,7 +68,7 @@ static void gff3_visitor_free(GtNodeVisitor *gv)
 {
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
-  string_distri_delete(gff3_visitor->id_counter);
+  gt_string_distri_delete(gff3_visitor->id_counter);
   gt_hashmap_delete(gff3_visitor->gt_feature_node_to_id_array);
   gt_hashmap_delete(gff3_visitor->gt_feature_node_to_unique_id_str);
 }
@@ -178,11 +178,11 @@ static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *gf)
   type = gt_feature_node_get_type(gf);
 
   /* increase id counter */
-  string_distri_add(gff3_visitor->id_counter, type);
+  gt_string_distri_add(gff3_visitor->id_counter, type);
 
   /* build id string */
   id = gt_str_new_cstr(type);
-  gt_str_append_ulong(id, string_distri_get(gff3_visitor->id_counter, type));
+  gt_str_append_ulong(id, gt_string_distri_get(gff3_visitor->id_counter, type));
 
   /* store (unique) id */
   gt_hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf, id);
@@ -322,7 +322,7 @@ GtNodeVisitor* gt_gff3_visitor_new(GtGenFile *outfp)
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = false;
   gff3_visitor->fasta_directive_shown = false;
-  gff3_visitor->id_counter = string_distri_new();
+  gff3_visitor->id_counter = gt_string_distri_new();
   gff3_visitor->gt_feature_node_to_id_array = gt_hashmap_new(
     HASH_DIRECT, NULL, (GtFree) gt_array_delete);
   gff3_visitor->gt_feature_node_to_unique_id_str = gt_hashmap_new(

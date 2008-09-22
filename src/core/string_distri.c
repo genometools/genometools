@@ -22,7 +22,7 @@
 #include "core/string_distri.h"
 #include "core/unused_api.h"
 
-struct StringDistri {
+struct GtStringDistri {
   GtHashtable *hashdist;
   unsigned long num_of_occurrences;
 };
@@ -32,16 +32,16 @@ DEFINE_HASHMAP(char *, cstr, unsigned long, ul, gt_ht_cstr_elem_hash,
                gt_ht_cstr_elem_cmp, gt_free, NULL_DESTRUCTOR, static,
                inline)
 
-StringDistri* string_distri_new(void)
+GtStringDistri* gt_string_distri_new(void)
 {
-  StringDistri *sd;
+  GtStringDistri *sd;
   sd = gt_malloc(sizeof *sd);
   sd->hashdist = cstr_ul_gt_hashmap_new();
   sd->num_of_occurrences = 0;
   return sd;
 }
 
-void string_distri_add(StringDistri *sd, const char *key)
+void gt_string_distri_add(GtStringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
   assert(sd && key);
@@ -54,10 +54,10 @@ void string_distri_add(StringDistri *sd, const char *key)
   sd->num_of_occurrences++;
 }
 
-void string_distri_sub(StringDistri *sd, const char *key)
+void gt_string_distri_sub(GtStringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
-  assert(sd && key && string_distri_get(sd, key) && sd->num_of_occurrences);
+  assert(sd && key && gt_string_distri_get(sd, key) && sd->num_of_occurrences);
   valueptr = cstr_ul_gt_hashmap_get(sd->hashdist, key);
   (*valueptr)--;
   if (!(*valueptr))
@@ -65,7 +65,7 @@ void string_distri_sub(StringDistri *sd, const char *key)
   sd->num_of_occurrences--;
 }
 
-unsigned long string_distri_get(const StringDistri *sd, const char *key)
+unsigned long gt_string_distri_get(const GtStringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
   assert(sd && key);
@@ -76,7 +76,7 @@ unsigned long string_distri_get(const StringDistri *sd, const char *key)
 }
 
 typedef struct {
-  StringDistriIterFunc func;
+  GtStringDistriIterFunc func;
   void *data;
   unsigned long num_of_occurrences;
 } ForeachInfo;
@@ -94,8 +94,8 @@ foreach_iterfunc(char *key, unsigned long occurrences, void *data,
   return 0;
 }
 
-void string_distri_foreach(const StringDistri *sd, StringDistriIterFunc func,
-                          void *data)
+void gt_string_distri_foreach(const GtStringDistri *sd,
+                              GtStringDistriIterFunc func, void *data)
 {
   ForeachInfo info;
   int rval;
@@ -110,7 +110,7 @@ void string_distri_foreach(const StringDistri *sd, StringDistriIterFunc func,
   }
 }
 
-void string_distri_delete(StringDistri *sd)
+void gt_string_distri_delete(GtStringDistri *sd)
 {
   if (!sd) return;
   gt_hashtable_delete(sd->hashdist);
