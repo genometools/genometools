@@ -21,7 +21,6 @@
 #include "core/ma.h"
 #include "core/tokenizer.h"
 #include "core/xansi.h"
-#include "core/xtmpfile.h"
 
 struct GtTokenizer {
   GtIO *io;
