@@ -93,7 +93,7 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   gt_option_exclude(extract_option, check_option);
   gt_option_exclude(extract_option, duplicates_option);
 
-  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_args(op, 1);
   return op;
 }

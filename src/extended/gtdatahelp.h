@@ -21,6 +21,6 @@
 #include "core/str.h"
 
 /* execute helpfile gtdata/doc/progname.lua */
-int gtdata_show_help(const char *progname, void *unused, GtError*);
+int gt_gtdata_show_help(const char *progname, void *unused, GtError*);
 
 #endif

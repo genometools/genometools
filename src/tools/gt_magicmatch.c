@@ -67,7 +67,7 @@ static GtOptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(o);
   gt_option_parser_add_option(op, o);
 
-  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_max_args(op, 0, 0);
 
   return op;

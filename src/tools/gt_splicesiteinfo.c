@@ -53,7 +53,7 @@ static OPrval parse_options(int *parsed_args,
   gt_option_parser_add_option(op, option);
 
   /* parse */
-  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
                                   err);
   gt_option_parser_delete(op);

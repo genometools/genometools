@@ -88,7 +88,7 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
-  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_max_args(op, 1, 1);
 
   return op;

@@ -29,8 +29,8 @@
 #include "core/unused_api.h"
 #include "extended/gtdatahelp.h"
 
-int gtdata_show_help(const char *progname, GT_UNUSED void *unused,
-                     GtError *err)
+int gt_gtdata_show_help(const char *progname, GT_UNUSED void *unused,
+                        GtError *err)
 {
   GtSplitter *splitter;
   GtStr *doc_file;

@@ -64,7 +64,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
-  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_max_args(op, 1, 2);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
                                   err);

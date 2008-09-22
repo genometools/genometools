@@ -72,7 +72,7 @@ static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
                              "sequences pieces with the given probability",
                              &arguments->sample_probability, 1.0);
   gt_option_parser_add_option(op, o);
-  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   return op;
 }
 

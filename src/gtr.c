@@ -117,7 +117,7 @@ static int show_gtr_help(const char *progname, void *data, GtError *err)
   int had_err;
   had_err = gt_toolbox_show(progname, data, err);
   if (!had_err)
-    had_err = gtdata_show_help(progname, NULL, err);
+    had_err = gt_gtdata_show_help(progname, NULL, err);
   return had_err;
 }
 

@@ -118,7 +118,7 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   gt_option_exclude(frompos_option, ginum_option);
   gt_option_exclude(match_option, ginum_option);
 
-  gt_option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   return op;
 }
 
