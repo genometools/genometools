@@ -98,9 +98,9 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
         }
       }
       else {
-        warning("skipping intron with unknown orientation "
-                "(file '%s', line %u)", gt_genome_node_get_filename(intron),
-                gt_genome_node_get_line_number(intron));
+        gt_warning("skipping intron with unknown orientation "
+                   "(file '%s', line %u)", gt_genome_node_get_filename(intron),
+                   gt_genome_node_get_line_number(intron));
       }
     }
   }

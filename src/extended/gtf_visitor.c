@@ -135,11 +135,11 @@ static int gtf_show_genome_feature(GtGenomeNode *gn, void *data, GtError *err)
   }
   else if (!(gt_feature_node_has_type(gf, gft_CDS) ||
              gt_feature_node_has_type(gf, gft_exon))) {
-      warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
-              "\"%s\")",
-              gt_feature_node_get_type(gf),
-              gt_genome_node_get_line_number(gn),
-              gt_genome_node_get_filename(gn));
+      gt_warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
+                 "\"%s\")",
+                 gt_feature_node_get_type(gf),
+                 gt_genome_node_get_line_number(gn),
+                 gt_genome_node_get_filename(gn));
   }
   return had_err;
 }

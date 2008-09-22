@@ -279,10 +279,10 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
     *auto_sr = gt_hashmap_get(parser->undefined_sequence_regions, seqid);
     if (!*auto_sr) {
       /* sequence region has not been createad automatically -> do it now */
-      warning("seqid \"%s\" on line %u in file \"%s\" has not been "
-              "previously introduced with a \"%s\" line, create such a line "
-              "automatically", seqid, line_number, filename,
-              GFF_SEQUENCE_REGION);
+      gt_warning("seqid \"%s\" on line %u in file \"%s\" has not been "
+                 "previously introduced with a \"%s\" line, create such a line "
+                 "automatically", seqid, line_number, filename,
+                 GFF_SEQUENCE_REGION);
       *auto_sr = automatic_sequence_region_new();
       *seqid_str = gt_str_new_cstr(seqid);
       (*auto_sr)->sequence_region = gt_region_node_new(*seqid_str, range.start,
@@ -643,9 +643,9 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
         had_err = -1;
       }
       else {
-        warning("%s \"%s\" on line %u in file \"%s\" has not been "
-                "previously defined (via \"%s=\")", PARENT_STRING, parent,
-                line_number, filename, ID_STRING);
+        gt_warning("%s \"%s\" on line %u in file \"%s\" has not been "
+                   "previously defined (via \"%s=\")", PARENT_STRING, parent,
+                   line_number, filename, ID_STRING);
       }
     }
     else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
@@ -1150,9 +1150,9 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   gt_assert(line && filename);
   if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
     if (tidy) {
-      warning("line 1 in file \"%s\" does not begin with \"%s\", create \"%s "
-              "%d\" line automaticallly", filename, GFF_VERSION_PREFIX,
-              GFF_VERSION_PREFIX, GFF_VERSION);
+      gt_warning("line 1 in file \"%s\" does not begin with \"%s\", create "
+                 "\"%s %d\" line automaticallly", filename, GFF_VERSION_PREFIX,
+                 GFF_VERSION_PREFIX, GFF_VERSION);
       return 0;
     }
     else {
@@ -1361,8 +1361,8 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
     parser->last_terminator = line_number;
   }
   else {
-    warning("skipping unknown meta line %u in file \"%s\": %s", line_number,
-            filename, line);
+    gt_warning("skipping unknown meta line %u in file \"%s\": %s", line_number,
+               filename, line);
   }
   gt_str_delete(changed_seqid);
   return had_err;
@@ -1405,8 +1405,8 @@ int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
       gt_assert(had_err == 0); /* line not processed */
     }
     if (line_length == 0) {
-      warning("skipping blank line %llu in file \"%s\"", *line_number,
-              filename);
+      gt_warning("skipping blank line %llu in file \"%s\"", *line_number,
+                 filename);
     }
     else if (parser->fasta_parsing || line[0] == '>') {
       if (!parser->fasta_parsing) {

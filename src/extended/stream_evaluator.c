@@ -386,11 +386,12 @@ static void add_real_exon(GtTranscriptExons *te, GtRange range,
   gt_array_add(gt_transcript_exons_get_all(te), range);
   switch (gt_feature_node_get_transcriptfeaturetype((GtFeatureNode*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
-      warning("type of feature (single, initial, internal, or terminal) given "
-              "on line %u in file \"%s\" could not be determined, because the "
-              "feature has no Parent attribute. Treating it as single.",
-              gt_genome_node_get_line_number(gn),
-              gt_genome_node_get_filename(gn));
+      gt_warning("type of feature (single, initial, internal, or terminal) "
+                 "given on line %u in file \"%s\" could not be determined, "
+                 "because the feature has no Parent attribute. Treating it as "
+                 "single.",
+                 gt_genome_node_get_line_number(gn),
+                 gt_genome_node_get_filename(gn));
       /*@fallthrough@*/
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       gt_array_add(gt_transcript_exons_get_single(te), range);
@@ -665,11 +666,12 @@ static void store_predicted_exon(GtTranscriptEvaluators *te, GtGenomeNode *gn)
   gt_evaluator_add_predicted(gt_transcript_evaluators_get_all(te), 1);
   switch (gt_feature_node_get_transcriptfeaturetype((GtFeatureNode*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
-      warning("type of feature (single, initial, internal, or terminal) given "
-              "on line %u in file \"%s\" could not be determined, because the "
-              "feature has no Parent attribute. Treating it as single.",
-              gt_genome_node_get_line_number(gn),
-              gt_genome_node_get_filename(gn));
+      gt_warning("type of feature (single, initial, internal, or terminal) "
+                 "given on line %u in file \"%s\" could not be determined, "
+                 "because the feature has no Parent attribute. Treating it as "
+                 "single.",
+                 gt_genome_node_get_line_number(gn),
+                 gt_genome_node_get_filename(gn));
       /*@fallthrough@*/
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       gt_evaluator_add_predicted(gt_transcript_evaluators_get_single(te), 1);
@@ -1354,8 +1356,8 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
         }
         else {
           /* we got no (real) slot */
-          warning("sequence id \"%s\" (with predictions) not given in "
-                  "``reality''", gt_str_get(gt_genome_node_get_seqid(gn)));
+          gt_warning("sequence id \"%s\" (with predictions) not given in "
+                     "``reality''", gt_str_get(gt_genome_node_get_seqid(gn)));
         }
       }
       if (gv)

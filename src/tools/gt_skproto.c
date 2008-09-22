@@ -124,7 +124,7 @@ static void skproto(const char *filename, FILE *fpin)
              strncmp(gt_str_get(line), "/*@", (size_t) 3) == 0)) {
           if (!forbiddenstring(line)) {
             if (gt_str_length(line) >= (unsigned long) MAX_LINE_LENGTH)
-              warning("file %s, line %d too long\n", filename, linenum);
+              gt_warning("file %s, line %d too long\n", filename, linenum);
             printf("%s", gt_str_get(line));
             if (gt_str_get(line)[gt_str_length(line)-1] == ')') {
               (void) putchar(';');
@@ -138,7 +138,7 @@ static void skproto(const char *filename, FILE *fpin)
       }
       else {
         if (gt_str_length(line) >= (unsigned long) MAX_LINE_LENGTH)
-          warning("file %s, line %d too long\n", filename, linenum);
+          gt_warning("file %s, line %d too long\n", filename, linenum);
         printf("%s", gt_str_get(line));
         if (gt_str_get(line)[gt_str_length(line)-1] == ')') {
           (void) putchar(';');

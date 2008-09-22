@@ -318,8 +318,10 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
     line_number++;
     had_err = 0;
 
-    if (line_length == 0)
-      warning("skipping blank line %lu in file \"%s\"", line_number, filename);
+    if (line_length == 0) {
+      gt_warning("skipping blank line %lu in file \"%s\"", line_number,
+                 filename);
+    }
     else if (line[0] == '#') {
       /* storing comment */
       gn = gt_comment_node_new(line+1);

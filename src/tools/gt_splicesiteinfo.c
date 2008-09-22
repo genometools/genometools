@@ -119,8 +119,8 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     if (!splice_site_info_stream_show(splice_site_info_stream)) {
-      warning("input file(s) contained no intron, use option -addintrons to "
-              "add introns automatically");
+      gt_warning("input file(s) contained no intron, use option -addintrons to "
+                 "add introns automatically");
     }
   }
 

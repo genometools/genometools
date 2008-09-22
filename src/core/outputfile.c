@@ -59,9 +59,9 @@ static int determine_outfp(void *data, GtError *err)
                gt_str_length(ofi->output_filename) -
                strlen(gt_genfilemode_suffix(genfilemode)),
                gt_genfilemode_suffix(genfilemode))) {
-      warning("output file '%s' doesn't have correct suffix '%s', appending "
-              "it", gt_str_get(ofi->output_filename),
-              gt_genfilemode_suffix(genfilemode));
+      gt_warning("output file '%s' doesn't have correct suffix '%s', appending "
+                 "it", gt_str_get(ofi->output_filename),
+                 gt_genfilemode_suffix(genfilemode));
       gt_str_append_cstr(ofi->output_filename,
                          gt_genfilemode_suffix(genfilemode));
     }
