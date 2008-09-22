@@ -19,13 +19,13 @@
 #define GFF3_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct GFF3Visitor GFF3Visitor;
+typedef struct GtGFF3Visitor GtGFF3Visitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* gff3_visitor_class(void);
-GtNodeVisitor*            gff3_visitor_new(GtGenFile*);
-void                      gff3_visitor_set_fasta_width(GtNodeVisitor*,
-                                                       unsigned long);
+const GtNodeVisitorClass* gt_gff3_visitor_class(void);
+GtNodeVisitor*            gt_gff3_visitor_new(GtGenFile*);
+void                      gt_gff3_visitor_set_fasta_width(GtNodeVisitor*,
+                                                          unsigned long);
 
 #endif

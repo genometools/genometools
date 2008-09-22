@@ -65,7 +65,7 @@ GtNodeStream* gt_gff3_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)
                                            gt_node_stream_is_sorted(in_stream));
   GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = gt_node_stream_ref(in_stream);
-  gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp);
+  gff3_out_stream->gff3_visitor = gt_gff3_visitor_new(outfp);
   return gs;
 }
 
@@ -74,5 +74,5 @@ void gt_gff3_out_stream_set_fasta_width(GtNodeStream *gs,
 {
   GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   assert(gff3_out_stream);
-  gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
+  gt_gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
 }

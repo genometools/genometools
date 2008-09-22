@@ -26,7 +26,7 @@ static int gff3_visitor_lua_new(lua_State *L)
   assert(L);
   /* construct object */
   gv = lua_newuserdata(L, sizeof (GtNodeVisitor*));
-  *gv = gff3_visitor_new(NULL);
+  *gv = gt_gff3_visitor_new(NULL);
   assert(*gv);
   luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
   lua_setmetatable(L, -2);
