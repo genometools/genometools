@@ -50,7 +50,7 @@ struct GT_GFF3Parser {
        fasta_parsing; /* parser is in FASTA parsing mode */
   long offset;
   Mapping *offset_mapping;
-  GT_TypeChecker *type_checker;
+  GtTypeChecker *type_checker;
   unsigned int last_terminator; /* line number of the last terminator */
 };
 
@@ -107,7 +107,7 @@ static void simple_sequence_region_delete(SimpleGtSequenceRegion *ssr)
   gt_free(ssr);
 }
 
-GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker *type_checker)
+GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker *type_checker)
 {
   GT_GFF3Parser *parser;
   parser = gt_malloc(sizeof *parser);

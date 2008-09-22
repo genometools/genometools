@@ -23,38 +23,38 @@
 #include "extended/type_checker_obo.h"
 #include "extended/type_checker_rep.h"
 
-struct GT_TypeCheckerOBO {
-  const GT_TypeChecker parent_instance;
+struct GtTypeCheckerOBO {
+  const GtTypeChecker parent_instance;
   GtCstrTable *gt_feature_node_types;
 };
 
 #define gt_type_checker_obo_cast(FTF)\
         gt_type_checker_cast(gt_type_checker_obo_class(), FTF)
 
-static void gt_type_checker_obo_free(GT_TypeChecker *tc)
+static void gt_type_checker_obo_free(GtTypeChecker *tc)
 {
-  GT_TypeCheckerOBO *tco = gt_type_checker_obo_cast(tc);
+  GtTypeCheckerOBO *tco = gt_type_checker_obo_cast(tc);
   gt_cstr_table_delete(tco->gt_feature_node_types);
 }
 
-static bool gt_type_checker_obo_is_valid(GT_TypeChecker *tc, const char *type)
+static bool gt_type_checker_obo_is_valid(GtTypeChecker *tc, const char *type)
 {
-  GT_TypeCheckerOBO *tco;
+  GtTypeCheckerOBO *tco;
   assert(tc && type);
   tco = gt_type_checker_obo_cast(tc);
   return gt_cstr_table_get(tco->gt_feature_node_types, type) ? true : false;
 }
 
-const GT_TypeCheckerClass* gt_type_checker_obo_class(void)
+const GtTypeCheckerClass* gt_type_checker_obo_class(void)
 {
-  static const GT_TypeCheckerClass gt_type_checker_class =
-    { sizeof (GT_TypeCheckerOBO),
+  static const GtTypeCheckerClass gt_type_checker_class =
+    { sizeof (GtTypeCheckerOBO),
       gt_type_checker_obo_is_valid,
       gt_type_checker_obo_free };
   return &gt_type_checker_class;
 }
 
-static void add_gt_feature_node_from_tree(GT_TypeCheckerOBO *tco,
+static void add_gt_feature_node_from_tree(GtTypeCheckerOBO *tco,
                                             GtOBOParseTree *obo_parse_tree,
                                             unsigned long stanza_num,
                                             const char *stanza_key)
@@ -68,7 +68,7 @@ static void add_gt_feature_node_from_tree(GT_TypeCheckerOBO *tco,
     gt_cstr_table_add(tco->gt_feature_node_types, value);
 }
 
-static int create_genome_features(GT_TypeCheckerOBO *tco,
+static int create_genome_features(GtTypeCheckerOBO *tco,
                                   const char *obo_file_path, GtError *err)
 {
   GtOBOParseTree *obo_parse_tree;
@@ -94,11 +94,11 @@ static int create_genome_features(GT_TypeCheckerOBO *tco,
   return -1;
 }
 
-GT_TypeChecker* gt_type_checker_obo_new(const char *obo_file_path,
+GtTypeChecker* gt_type_checker_obo_new(const char *obo_file_path,
                                         GtError *err)
 {
-  GT_TypeCheckerOBO *tco;
-  GT_TypeChecker *tc;
+  GtTypeCheckerOBO *tco;
+  GtTypeChecker *tc;
   gt_error_check(err);
   assert(obo_file_path);
   tc = gt_type_checker_create(gt_type_checker_obo_class());

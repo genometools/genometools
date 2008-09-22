@@ -24,8 +24,8 @@
 #include "extended/type_checker_builtin.h"
 #include "extended/type_checker_rep.h"
 
-struct GT_TypeCheckerBuiltin {
-  const GT_TypeChecker parent_instance;
+struct GtTypeCheckerBuiltin {
+  const GtTypeChecker parent_instance;
 };
 
 #define gt_type_checker_builtin_cast(FTF)\
@@ -70,7 +70,7 @@ static const char* find_type(const char *gft_string)
   return NULL;
 }
 
-static bool gt_type_checker_builtin_create_gft(GT_UNUSED GT_TypeChecker
+static bool gt_type_checker_builtin_create_gft(GT_UNUSED GtTypeChecker
                                                *type_checker,
                                                const char *type)
 {
@@ -78,19 +78,19 @@ static bool gt_type_checker_builtin_create_gft(GT_UNUSED GT_TypeChecker
   return find_type(type) ? true : false;
 }
 
-const GT_TypeCheckerClass* gt_type_checker_builtin_class(void)
+const GtTypeCheckerClass* gt_type_checker_builtin_class(void)
 {
-  static const GT_TypeCheckerClass gt_type_checker_class =
-    { sizeof (GT_TypeCheckerBuiltin),
+  static const GtTypeCheckerClass gt_type_checker_class =
+    { sizeof (GtTypeCheckerBuiltin),
       gt_type_checker_builtin_create_gft,
       NULL };
   return &gt_type_checker_class;
 }
 
-GT_TypeChecker* gt_type_checker_builtin_new(void)
+GtTypeChecker* gt_type_checker_builtin_new(void)
 {
-  GT_TypeCheckerBuiltin *type_checker_builtin;
-  GT_TypeChecker *type_checker;
+  GtTypeCheckerBuiltin *type_checker_builtin;
+  GtTypeChecker *type_checker;
   type_checker = gt_type_checker_create(gt_type_checker_builtin_class());
   type_checker_builtin = gt_type_checker_builtin_cast(type_checker);
   return type_checker;

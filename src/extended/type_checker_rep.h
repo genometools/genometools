@@ -23,19 +23,19 @@
 #include "extended/feature_type.h"
 #include "extended/type_checker.h"
 
-struct GT_TypeCheckerClass {
+struct GtTypeCheckerClass {
   size_t size;
-  bool  (*is_valid)(GT_TypeChecker*, const char *type);
-  void  (*free)(GT_TypeChecker*);
+  bool  (*is_valid)(GtTypeChecker*, const char *type);
+  void  (*free)(GtTypeChecker*);
 };
 
-struct GT_TypeChecker {
-  const GT_TypeCheckerClass *c_class;
+struct GtTypeChecker {
+  const GtTypeCheckerClass *c_class;
   unsigned int reference_count;
 };
 
-GT_TypeChecker* gt_type_checker_create(const GT_TypeCheckerClass*);
-void*           gt_type_checker_cast(const GT_TypeCheckerClass*,
-                                     GT_TypeChecker*);
+GtTypeChecker* gt_type_checker_create(const GtTypeCheckerClass*);
+void*           gt_type_checker_cast(const GtTypeCheckerClass*,
+                                     GtTypeChecker*);
 
 #endif

@@ -20,11 +20,11 @@
 
 #include "extended/type_checker.h"
 
-/* Implements the GT_TypeChecker interface with types from an OBO file. */
-typedef struct GT_TypeCheckerOBO GT_TypeCheckerOBO;
+/* Implements the GtTypeChecker interface with types from an OBO file. */
+typedef struct GtTypeCheckerOBO GtTypeCheckerOBO;
 
-const GT_TypeCheckerClass* gt_type_checker_obo_class(void);
-GT_TypeChecker*            gt_type_checker_obo_new(const char *obo_file_path,
+const GtTypeCheckerClass* gt_type_checker_obo_class(void);
+GtTypeChecker*            gt_type_checker_obo_new(const char *obo_file_path,
                                                    GtError*);
 
 #endif

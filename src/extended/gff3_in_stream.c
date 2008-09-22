@@ -234,7 +234,7 @@ static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
 }
 
 void gff3_in_stream_set_type_checker(GtNodeStream *gs,
-                                     GT_TypeChecker *type_checker)
+                                     GtTypeChecker *type_checker)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   assert(is);

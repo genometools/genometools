@@ -18,18 +18,18 @@
 #ifndef TYPE_CHECKER_H
 #define TYPE_CHECKER_H
 
-/* The GT_TypeChecker interface. */
+/* The GtTypeChecker interface. */
 
-typedef struct GT_TypeCheckerClass GT_TypeCheckerClass;
-typedef struct GT_TypeChecker GT_TypeChecker;
+typedef struct GtTypeCheckerClass GtTypeCheckerClass;
+typedef struct GtTypeChecker GtTypeChecker;
 
 #include "core/strarray.h"
 #include "extended/feature_type.h"
 
 /* Return a new reference to <type_checker>. */
-GT_TypeChecker* gt_type_checker_ref(GT_TypeChecker *type_checker);
+GtTypeChecker* gt_type_checker_ref(GtTypeChecker *type_checker);
 /* Returns <true> if <type> is a valid type, <false> otherwise. */
-bool            gt_type_checker_is_valid(GT_TypeChecker*, const char *type);
-void            gt_type_checker_delete(GT_TypeChecker*);
+bool            gt_type_checker_is_valid(GtTypeChecker*, const char *type);
+void            gt_type_checker_delete(GtTypeChecker*);
 
 #endif

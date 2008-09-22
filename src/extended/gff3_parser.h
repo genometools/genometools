@@ -36,7 +36,7 @@
 
 typedef struct GT_GFF3Parser GT_GFF3Parser;
 
-GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GT_TypeChecker*);
+GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker*);
 void           gt_gff3_parser_set_offset(GT_GFF3Parser*, long);
 int            gt_gff3_parser_set_offsetfile(GT_GFF3Parser*, GtStr*,
                                              GtError*);

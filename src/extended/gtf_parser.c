@@ -41,7 +41,7 @@ struct GTF_parser {
           *source_to_str_mapping,
           *gene_id_to_name_mapping,
           *transcript_id_to_name_mapping;
-  GT_TypeChecker *type_checker;
+  GtTypeChecker *type_checker;
 };
 
 typedef struct {
@@ -83,7 +83,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
   return -1;
 }
 
-GTF_parser* gtf_parser_new(GT_TypeChecker *type_checker)
+GTF_parser* gtf_parser_new(GtTypeChecker *type_checker)
 {
   GTF_parser *parser = gt_malloc(sizeof (GTF_parser));
   parser->sequence_region_to_range = gt_hashmap_new(HASH_STRING,

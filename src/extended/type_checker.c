@@ -20,31 +20,31 @@
 #include "core/unused_api.h"
 #include "extended/type_checker_rep.h"
 
-GT_TypeChecker* gt_type_checker_create(const GT_TypeCheckerClass
+GtTypeChecker* gt_type_checker_create(const GtTypeCheckerClass
                                        *type_checker_class)
 {
-  GT_TypeChecker *type_checker;
+  GtTypeChecker *type_checker;
   assert(type_checker_class && type_checker_class->size);
   type_checker = gt_calloc(1, type_checker_class->size);
   type_checker->c_class = type_checker_class;
   return type_checker;
 }
 
-GT_TypeChecker* gt_type_checker_ref(GT_TypeChecker *type_checker)
+GtTypeChecker* gt_type_checker_ref(GtTypeChecker *type_checker)
 {
   assert(type_checker);
   type_checker->reference_count++;
   return type_checker;
 }
 
-bool gt_type_checker_is_valid(GT_TypeChecker *type_checker, const char *type)
+bool gt_type_checker_is_valid(GtTypeChecker *type_checker, const char *type)
 {
   assert(type_checker && type_checker->c_class &&
          type_checker->c_class->is_valid);
   return type_checker->c_class->is_valid(type_checker, type);
 }
 
-void gt_type_checker_delete(GT_TypeChecker *type_checker)
+void gt_type_checker_delete(GtTypeChecker *type_checker)
 {
   if (!type_checker) return;
   if (type_checker->reference_count) {
@@ -57,9 +57,9 @@ void gt_type_checker_delete(GT_TypeChecker *type_checker)
   gt_free(type_checker);
 }
 
-void* gt_type_checker_cast(GT_UNUSED const GT_TypeCheckerClass
+void* gt_type_checker_cast(GT_UNUSED const GtTypeCheckerClass
                            *type_checker_class,
-                           GT_TypeChecker *type_checker)
+                           GtTypeChecker *type_checker)
 {
   assert(type_checker_class && type_checker &&
          type_checker->c_class == type_checker_class);

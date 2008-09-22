@@ -27,7 +27,7 @@ typedef struct GFF3InStream GFF3InStream;
 
 const GtNodeStreamClass* gff3_in_stream_class(void);
 void                     gff3_in_stream_set_type_checker(GtNodeStream*,
-                                                         GT_TypeChecker
+                                                         GtTypeChecker
                                                          *type_checker);
 /* Returns a <GtStrArray*> which contains all type names in alphabetical order
    which have been parsed by <gff3_in_stream>.

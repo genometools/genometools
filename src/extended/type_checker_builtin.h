@@ -20,10 +20,10 @@
 
 #include "extended/type_checker.h"
 
-/* Implements the GT_TypeChecker interface with built-in types. */
-typedef struct GT_TypeCheckerBuiltin GT_TypeCheckerBuiltin;
+/* Implements the GtTypeChecker interface with built-in types. */
+typedef struct GtTypeCheckerBuiltin GtTypeCheckerBuiltin;
 
-const GT_TypeCheckerClass* gt_type_checker_builtin_class(void);
-GT_TypeChecker*            gt_type_checker_builtin_new();
+const GtTypeCheckerClass* gt_type_checker_builtin_class(void);
+GtTypeChecker*            gt_type_checker_builtin_new();
 
 #endif
