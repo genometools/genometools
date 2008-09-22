@@ -37,7 +37,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 
 int gt_scorematrix(int argc, const char **argv, GtError *err)
 {
-  GT_ScoreMatrix *sm;
+  GtScoreMatrix *sm;
   int parsed_args, had_err = 0;
   gt_error_check(err);
 

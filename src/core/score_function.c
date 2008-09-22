@@ -21,12 +21,12 @@
 #include "core/xansi.h"
 
 struct GT_ScoreFunction {
-  GT_ScoreMatrix *sm;
+  GtScoreMatrix *sm;
   int deletion_score,
       insertion_score;
 };
 
-GT_ScoreFunction* gt_score_function_new(GT_ScoreMatrix *sm, int deletion_score,
+GT_ScoreFunction* gt_score_function_new(GtScoreMatrix *sm, int deletion_score,
                                  int insertion_score)
 {
   GT_ScoreFunction *sf;

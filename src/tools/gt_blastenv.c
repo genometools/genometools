@@ -64,7 +64,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
                               GtError *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
-  GT_ScoreMatrix *score_matrix;
+  GtScoreMatrix *score_matrix;
   GtBlastEnv *blast_env = NULL;
   unsigned long wlen;
   char *w = NULL;

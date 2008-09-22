@@ -22,7 +22,7 @@
 
 typedef struct GT_ScoreFunction GT_ScoreFunction;
 
-GT_ScoreFunction* gt_score_function_new(GT_ScoreMatrix*, /* takes ownership  */
+GT_ScoreFunction* gt_score_function_new(GtScoreMatrix*, /* takes ownership  */
                                  int deletion_score, int insertion_score);
 int            gt_score_function_get_score(const GT_ScoreFunction*,
                                        unsigned int, unsigned int);

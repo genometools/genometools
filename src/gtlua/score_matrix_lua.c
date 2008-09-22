@@ -22,16 +22,16 @@
 
 #define SCOREMATRIX_METATABLE  "GenomeTools.score_matrix"
 #define check_score_matrix(L, POS) \
-        (GT_ScoreMatrix**) luaL_checkudata(L, POS, SCOREMATRIX_METATABLE)
+        (GtScoreMatrix**) luaL_checkudata(L, POS, SCOREMATRIX_METATABLE)
 
 static int score_matrix_lua_new_read_protein(lua_State *L)
 {
-  GT_ScoreMatrix **sm;
+  GtScoreMatrix **sm;
   const char *path;
   GtError *err;
   assert(L);
   path = luaL_checkstring(L, 1);
-  sm = lua_newuserdata(L, sizeof (GT_ScoreMatrix*));
+  sm = lua_newuserdata(L, sizeof (GtScoreMatrix*));
   assert(sm);
   err = gt_error_new();
   if (!(*sm = gt_score_matrix_new_read_protein(path, err)))
@@ -45,7 +45,7 @@ static int score_matrix_lua_new_read_protein(lua_State *L)
 
 static int score_matrix_lua_get_dimension(lua_State *L)
 {
-  GT_ScoreMatrix **sm;
+  GtScoreMatrix **sm;
   unsigned int dimension;
   sm = check_score_matrix(L, 1);
   dimension = gt_score_matrix_get_dimension(*sm);
@@ -55,7 +55,7 @@ static int score_matrix_lua_get_dimension(lua_State *L)
 
 static int score_matrix_lua_get_score(lua_State *L)
 {
-  GT_ScoreMatrix **sm;
+  GtScoreMatrix **sm;
   int idx1, idx2;
   int score;
   sm = check_score_matrix(L, 1);
@@ -74,7 +74,7 @@ static int score_matrix_lua_get_score(lua_State *L)
 
 static int score_matrix_lua_delete(lua_State *L)
 {
-  GT_ScoreMatrix **sm;
+  GtScoreMatrix **sm;
   sm = check_score_matrix(L, 1);
   gt_score_matrix_delete(*sm);
   return 0;

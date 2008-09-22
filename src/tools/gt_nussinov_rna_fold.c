@@ -42,7 +42,7 @@
         }
 
 static int computeEentry(unsigned long i, unsigned long j, int **E,
-                         char *rna_sequence, GT_ScoreMatrix *energy_function)
+                         char *rna_sequence, GtScoreMatrix *energy_function)
 {
   unsigned long k;
   int minvalue, value, alphavalue;
@@ -77,7 +77,7 @@ static int computeEentry(unsigned long i, unsigned long j, int **E,
 
 static void compute_matrix(int **E, char *rna_sequence,
                            unsigned long rna_length, unsigned int l_min,
-                           GT_ScoreMatrix *energy_function)
+                           GtScoreMatrix *energy_function)
 {
   unsigned long i, j, l, n = rna_length;
 
@@ -104,7 +104,7 @@ static void compute_matrix(int **E, char *rna_sequence,
 
 static void traceback(unsigned long i, unsigned long j, int **E,
                       char *rna_sequence, unsigned long rna_length,
-                      GT_ScoreMatrix *energy_function, FILE *fp)
+                      GtScoreMatrix *energy_function, FILE *fp)
 {
   unsigned long k;
   int alphavalue;
@@ -140,7 +140,7 @@ static void traceback(unsigned long i, unsigned long j, int **E,
 
 static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
                               unsigned int l_min, unsigned int verbose,
-                              GT_ScoreMatrix *energy_function,
+                              GtScoreMatrix *energy_function,
                               GtAlpha *dna_alpha, FILE *fp)
 {
   unsigned long i;
@@ -212,7 +212,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GtError *err)
   char *rna_sequence = NULL;
   int parsed_args, rval, had_err = 0;
   GtAlpha *dna_alpha;
-  GT_ScoreMatrix *energy_function; /* alpha */
+  GtScoreMatrix *energy_function; /* alpha */
   gt_error_check(err);
 
   /* option parsing */

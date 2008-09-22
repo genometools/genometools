@@ -81,7 +81,7 @@ GtArray* pos_get(Pos *pos, unsigned long code)
   Returns an array of length <wlen> which has to be freed by the caller.
 */
 static long* compute_max_pos_scores(const char *w, unsigned long wlen,
-                                    const GT_ScoreMatrix *score_matrix)
+                                    const GtScoreMatrix *score_matrix)
 {
   long score, max_score, *max_matrix_scores, *max_pos_scores;
   unsigned int dimension;
@@ -142,7 +142,7 @@ static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
                               GtAlpha *alpha, unsigned long q,
                               unsigned long q_rest, long k, long current_score,
                               unsigned long position,
-                              const GT_ScoreMatrix *score_matrix)
+                              const GtScoreMatrix *score_matrix)
 {
   assert(V && pos && qgram_rest && alpha);
   if (q_rest == 0) {
@@ -178,7 +178,7 @@ static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
 */
 static void compute_env(GtBittab *V, Pos *pos, const char *w,
                         unsigned long wlen, GtAlpha *alpha, unsigned long q,
-                        long k, const GT_ScoreMatrix *score_matrix)
+                        long k, const GtScoreMatrix *score_matrix)
 {
   long *max_pos_scores, *max_cumul_scores;
   unsigned long i;
@@ -217,7 +217,7 @@ struct GtBlastEnv {
 
 GtBlastEnv* gt_blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
                              unsigned long q, long k,
-                             const GT_ScoreMatrix *score_matrix)
+                             const GtScoreMatrix *score_matrix)
 {
   GtBlastEnv *be;
   assert(w && alpha && q && score_matrix);

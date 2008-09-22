@@ -21,19 +21,19 @@
 #include "core/alpha.h"
 #include "core/error.h"
 
-typedef struct GT_ScoreMatrix GT_ScoreMatrix;
+typedef struct GtScoreMatrix GtScoreMatrix;
 
 /* a score matrix is always defined over a given alphabet */
-GT_ScoreMatrix* gt_score_matrix_new(GtAlpha*);
+GtScoreMatrix* gt_score_matrix_new(GtAlpha*);
 /* reads in a protein scorematrix from the given <path> and returns it */
-GT_ScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError*);
-unsigned int gt_score_matrix_get_dimension(const GT_ScoreMatrix*);
-int          gt_score_matrix_get_score(const GT_ScoreMatrix*,
+GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError*);
+unsigned int gt_score_matrix_get_dimension(const GtScoreMatrix*);
+int          gt_score_matrix_get_score(const GtScoreMatrix*,
                                     unsigned int, unsigned int);
-void         gt_score_matrix_set_score(GT_ScoreMatrix*,
+void         gt_score_matrix_set_score(GtScoreMatrix*,
                                     unsigned int, unsigned int, int);
-const int**  gt_score_matrix_get_scores(const GT_ScoreMatrix*);
-void         gt_score_matrix_show(const GT_ScoreMatrix*, FILE*);
-void         gt_score_matrix_delete(GT_ScoreMatrix*);
+const int**  gt_score_matrix_get_scores(const GtScoreMatrix*);
+void         gt_score_matrix_show(const GtScoreMatrix*, FILE*);
+void         gt_score_matrix_delete(GtScoreMatrix*);
 
 #endif

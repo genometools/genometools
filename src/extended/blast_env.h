@@ -31,7 +31,7 @@ typedef struct GtBlastEnv GtBlastEnv;
 */
 GtBlastEnv* gt_blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
                              unsigned long q, long k,
-                             const GT_ScoreMatrix *score_matrix);
+                             const GtScoreMatrix *score_matrix);
 
 /* Delete the Blast environment <blast_env>. */
 void      gt_blast_env_delete(GtBlastEnv*);
