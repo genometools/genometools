@@ -26,13 +26,13 @@
 struct GtGenomeNodeClass
 {
   size_t size;
-  void     (*free)(GtGenomeNode*);
+  void    (*free)(GtGenomeNode*);
   GtStr*  (*get_seqid)(GtGenomeNode*);
   GtStr*  (*get_idstr)(GtGenomeNode*);
   GtRange (*get_range)(GtGenomeNode*);
-  void     (*set_range)(GtGenomeNode*, GtRange);
-  void     (*change_seqid)(GtGenomeNode*, GtStr*);
-  int      (*accept)(GtGenomeNode*, GtNodeVisitor*, GtError*);
+  void    (*set_range)(GtGenomeNode*, GtRange);
+  void    (*change_seqid)(GtGenomeNode*, GtStr*);
+  int     (*accept)(GtGenomeNode*, GtNodeVisitor*, GtError*);
 };
 
 struct GtGenomeNode
