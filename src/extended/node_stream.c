@@ -21,71 +21,80 @@
 #include "core/unused_api.h"
 #include "extended/node_stream_rep.h"
 
-GtNodeStream* gt_node_stream_create(const GtNodeStreamClass *gsc,
-                                   bool ensure_sorting)
+struct GtNodeStreamMembers {
+  GtGenomeNode *buffer;
+  bool ensure_sorting;
+  unsigned int reference_count;
+};
+
+GtNodeStream* gt_node_stream_create(const GtNodeStreamClass *nsc,
+                                    bool ensure_sorting)
 {
-  GtNodeStream *gs;
-  assert(gsc && gsc->size);
-  gs = gt_calloc(1, gsc->size);
-  gs->c_class = gsc;
-  gs->ensure_sorting = ensure_sorting;
-  return gs;
+  GtNodeStream *ns;
+  assert(nsc && nsc->size);
+  ns = gt_calloc(1, nsc->size);
+  ns->c_class = nsc;
+  ns->members = gt_calloc(1, sizeof (GtNodeStreamMembers));
+  ns->members->ensure_sorting = ensure_sorting;
+  return ns;
 }
 
-GtNodeStream* gt_node_stream_ref(GtNodeStream *gs)
+GtNodeStream* gt_node_stream_ref(GtNodeStream *ns)
 {
-  assert(gs);
-  gs->reference_count++;
-  return gs;
+  assert(ns);
+  ns->members->reference_count++;
+  return ns;
 }
 
-void gt_node_stream_delete(GtNodeStream *gs)
+void gt_node_stream_delete(GtNodeStream *ns)
 {
-  if (!gs) return;
-  if (gs->reference_count) {
-    gs->reference_count--;
+  if (!ns) return;
+  if (ns->members->reference_count) {
+    ns->members->reference_count--;
     return;
   }
-  assert(gs->c_class);
-  if (gs->c_class->free) gs->c_class->free(gs);
-  gt_genome_node_rec_delete(gs->buffer);
-  gt_free(gs);
+  assert(ns->c_class);
+  if (ns->c_class->free) ns->c_class->free(ns);
+  gt_genome_node_rec_delete(ns->members->buffer);
+  gt_free(ns->members);
+  gt_free(ns);
 }
 
-int gt_node_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+int gt_node_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtGenomeNode *new_node = NULL;
   int had_err = 0;
-  assert(gs && gs->c_class && gs->c_class->next_tree);
+  assert(ns && ns->c_class && ns->c_class->next_tree);
   gt_error_check(err);
   /* filling */
-  if (!gs->buffer)
-    had_err = gs->c_class->next_tree(gs, &gs->buffer, err);
-  if (!had_err && gs->buffer)
-    had_err = gs->c_class->next_tree(gs, &new_node, err);
+  if (!ns->members->buffer)
+    had_err = ns->c_class->next_tree(ns, &ns->members->buffer, err);
+  if (!had_err && ns->members->buffer)
+    had_err = ns->c_class->next_tree(ns, &new_node, err);
 #ifndef NDEBUG
   /* checking */
-  if (!had_err && gs->ensure_sorting && gs->buffer && new_node) {
-    assert(gt_genome_node_compare(&gs->buffer, &new_node) <= 0);
+  if (!had_err && ns->members->ensure_sorting && ns->members->buffer &&
+      new_node) {
+    assert(gt_genome_node_compare(&ns->members->buffer, &new_node) <= 0);
   }
 #endif
   /* serving */
   if (!had_err) {
-    *gn = gs->buffer;
-    gs->buffer = new_node;
+    *gn = ns->members->buffer;
+    ns->members->buffer = new_node;
   }
   return had_err;
 }
 
-bool gt_node_stream_is_sorted(GtNodeStream *gs)
+bool gt_node_stream_is_sorted(GtNodeStream *ns)
 {
-  assert(gs);
-  return gs->ensure_sorting;
+  assert(ns);
+  return ns->members->ensure_sorting;
 }
 
-void* gt_node_stream_cast(GT_UNUSED const GtNodeStreamClass *gsc,
-                         GtNodeStream *gs)
+void* gt_node_stream_cast(GT_UNUSED const GtNodeStreamClass *nsc,
+                         GtNodeStream *ns)
 {
-  assert(gsc && gs && gs->c_class == gsc);
-  return gs;
+  assert(nsc && ns && ns->c_class == nsc);
+  return ns;
 }

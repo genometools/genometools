@@ -28,16 +28,16 @@ struct GtNodeStreamClass
   void (*free)(GtNodeStream*);
 };
 
+typedef struct GtNodeStreamMembers GtNodeStreamMembers;
+
 struct GtNodeStream
 {
   const GtNodeStreamClass *c_class;
-  GtGenomeNode *buffer;
-  bool ensure_sorting;
-  unsigned int reference_count;
+  GtNodeStreamMembers *members;
 };
 
 GtNodeStream*  gt_node_stream_create(const GtNodeStreamClass*,
-                                    bool ensure_sorting);
+                                     bool ensure_sorting);
 void*          gt_node_stream_cast(const GtNodeStreamClass*, GtNodeStream*);
 
 #endif
