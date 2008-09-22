@@ -84,7 +84,7 @@ int gt_uniq(int argc, const char **argv, GtError *err)
                                                 arguments.outfp);
 
   /* create uniq stream */
-  uniq_stream = uniq_stream_new(gff3_in_stream);
+  uniq_stream = gt_uniq_stream_new(gff3_in_stream);
 
   /* create gff3 output stream */
   gff3_out_stream = gt_gff3_out_stream_new(uniq_stream, arguments.outfp);

@@ -22,9 +22,9 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct UniqStream UniqStream;
+typedef struct GtUniqStream GtUniqStream;
 
-const GtNodeStreamClass* uniq_stream_class(void);
-GtNodeStream*            uniq_stream_new(GtNodeStream*);
+const GtNodeStreamClass* gt_uniq_stream_class(void);
+GtNodeStream*            gt_uniq_stream_new(GtNodeStream*);
 
 #endif

@@ -21,7 +21,7 @@
 #include "extended/node_stream_rep.h"
 #include "extended/uniq_stream.h"
 
-struct UniqStream{
+struct GtUniqStream{
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtGenomeNode *first_node,
@@ -29,7 +29,7 @@ struct UniqStream{
 };
 
 #define uniq_stream_cast(GS)\
-        gt_node_stream_cast(uniq_stream_class(), GS)
+        gt_node_stream_cast(gt_uniq_stream_class(), GS)
 
 static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
                                           GtGenomeNode *second_node)
@@ -98,7 +98,7 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
 
 static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
-  UniqStream *us;
+  GtUniqStream *us;
   int had_err;
   gt_error_check(err);
   us = uniq_stream_cast(gs);
@@ -141,29 +141,29 @@ static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
 static void uniq_stream_free(GtNodeStream *gs)
 {
-  UniqStream *us = uniq_stream_cast(gs);
+  GtUniqStream *us = uniq_stream_cast(gs);
   gt_genome_node_rec_delete(us->first_node);
   gt_genome_node_rec_delete(us->second_node);
   gt_node_stream_delete(us->in_stream);
 }
 
-const GtNodeStreamClass* uniq_stream_class(void)
+const GtNodeStreamClass* gt_uniq_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (UniqStream),
+    nsc = gt_node_stream_class_new(sizeof (GtUniqStream),
                                    uniq_stream_free,
                                    uniq_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* uniq_stream_new(GtNodeStream *in_stream)
+GtNodeStream* gt_uniq_stream_new(GtNodeStream *in_stream)
 {
   GtNodeStream *gs;
-  UniqStream *us;
+  GtUniqStream *us;
   assert(in_stream && gt_node_stream_is_sorted(in_stream));
-  gs = gt_node_stream_create(uniq_stream_class(), true);
+  gs = gt_node_stream_create(gt_uniq_stream_class(), true);
   us = uniq_stream_cast(gs);
   us->in_stream = gt_node_stream_ref(in_stream);
   return gs;
