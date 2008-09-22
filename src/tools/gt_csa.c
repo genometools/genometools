@@ -94,7 +94,7 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   gff3_in_stream  = gff3_in_stream_new_sorted(argv[parsed_args],
                                               arguments->verbose &&
                                               arguments->outfp);
-  csa_stream      = csa_stream_new(gff3_in_stream, arguments->join_length);
+  csa_stream      = gt_csa_stream_new(gff3_in_stream, arguments->join_length);
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */

@@ -24,10 +24,10 @@
 #define DEFAULT_JOIN_LENGTH 300
 
 /* implements the ``genome_stream'' interface */
-typedef struct CSAStream CSAStream;
+typedef struct GtCSAStream GtCSAStream;
 
-const GtNodeStreamClass* csa_stream_class(void);
-GtNodeStream*            csa_stream_new(GtNodeStream*,
-                                        unsigned long join_length);
+const GtNodeStreamClass* gt_csa_stream_class(void);
+GtNodeStream*            gt_csa_stream_new(GtNodeStream*,
+                                           unsigned long join_length);
 
 #endif

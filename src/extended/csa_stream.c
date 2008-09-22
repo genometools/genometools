@@ -21,18 +21,18 @@
 #include "extended/consensus_sa.h"
 #include "extended/node_stream_rep.h"
 
-struct CSAStream {
+struct GtCSAStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *csa_visitor; /* the actual work is done in the visitor */
 };
 
 #define csa_stream_cast(GS)\
-        gt_node_stream_cast(csa_stream_class(), GS)
+        gt_node_stream_cast(gt_csa_stream_class(), GS)
 
 static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
-  CSAStream *cs;
+  GtCSAStream *cs;
   int had_err;
   gt_error_check(err);
   cs = csa_stream_cast(gs);
@@ -71,27 +71,28 @@ static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
 static void csa_stream_free(GtNodeStream *gs)
 {
-  CSAStream *cs = csa_stream_cast(gs);
+  GtCSAStream *cs = csa_stream_cast(gs);
   gt_node_visitor_delete(cs->csa_visitor);
   gt_node_stream_delete(cs->in_stream);
 }
 
-const GtNodeStreamClass* csa_stream_class(void)
+const GtNodeStreamClass* gt_csa_stream_class(void)
 {
   static const GtNodeStreamClass *nsc= NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (CSAStream),
+    nsc = gt_node_stream_class_new(sizeof (GtCSAStream),
                                    csa_stream_free,
                                    csa_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* csa_stream_new(GtNodeStream *in_stream, unsigned long join_length)
+GtNodeStream* gt_csa_stream_new(GtNodeStream *in_stream,
+                                unsigned long join_length)
 {
-  GtNodeStream *gs = gt_node_stream_create(csa_stream_class(),
+  GtNodeStream *gs = gt_node_stream_create(gt_csa_stream_class(),
                                           gt_node_stream_is_sorted(in_stream));
-  CSAStream *cs = csa_stream_cast(gs);
+  GtCSAStream *cs = csa_stream_cast(gs);
   cs->in_stream = gt_node_stream_ref(in_stream);
   cs->csa_visitor = csa_visitor_new(join_length);
   return gs;

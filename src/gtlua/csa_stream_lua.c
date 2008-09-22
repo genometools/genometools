@@ -34,7 +34,7 @@ static int csa_stream_lua_new(lua_State *L)
     join_length = DEFAULT_JOIN_LENGTH;
   csa_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
   assert(csa_stream);
-  *csa_stream = csa_stream_new(*in_stream, join_length);
+  *csa_stream = gt_csa_stream_new(*in_stream, join_length);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
