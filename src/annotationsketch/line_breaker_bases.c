@@ -75,12 +75,15 @@ void gt_line_breaker_bases_delete(GtLineBreaker *lb)
 
 const GtLineBreakerClass* gt_line_breaker_bases_class(void)
 {
-  static const GtLineBreakerClass gt_line_breaker_class =
-    { sizeof (GtLineBreakerBases),
-      gt_line_breaker_bases_is_gt_line_occupied,
-      gt_line_breaker_bases_register_block,
-      gt_line_breaker_bases_delete };
-  return &gt_line_breaker_class;
+  static const GtLineBreakerClass *lbc = NULL;
+  if (!lbc)
+  {
+    lbc = gt_line_breaker_class_new(sizeof (GtLineBreakerBases),
+                                    gt_line_breaker_bases_is_gt_line_occupied,
+                                    gt_line_breaker_bases_register_block,
+                                    gt_line_breaker_bases_delete);
+  }
+  return lbc;
 }
 
 GtLineBreaker* gt_line_breaker_bases_new()

@@ -21,22 +21,21 @@
 #include <stdio.h>
 #include "annotationsketch/line_breaker.h"
 
-struct GtLineBreakerClass {
-  size_t size;
-  bool    (*is_occupied)(GtLineBreaker*, GtLine*, GtBlock*);
-  void (*register_block)(GtLineBreaker*, GtLine*, GtBlock*);
-  void           (*free)(GtLineBreaker*);
-};
+typedef bool (*LineBreakerIsOccupiedFunc)(GtLineBreaker*, GtLine*, GtBlock*);
+typedef void (*LineBreakerRegisterBlockFunc)(GtLineBreaker*, GtLine*, GtBlock*);
+typedef void (*LineBreakerFreeFunc)(GtLineBreaker*);
 
-typedef struct {
-  unsigned int reference_count;
-} GtLineBreakerPrivate;
+typedef struct GtLineBreakerMembers GtLineBreakerMembers;
 
 struct GtLineBreaker {
   const GtLineBreakerClass *c_class;
-  GtLineBreakerPrivate *pvt;
+  GtLineBreakerMembers *pvt;
 };
 
+const GtLineBreakerClass* gt_line_breaker_class_new(size_t size,
+                                    LineBreakerIsOccupiedFunc is_occupied,
+                                    LineBreakerRegisterBlockFunc register_block,
+                                    LineBreakerFreeFunc free);
 GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass*);
 void*          gt_line_breaker_cast(const GtLineBreakerClass*,
                                     GtLineBreaker*);

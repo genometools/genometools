@@ -16,9 +16,34 @@
 */
 
 #include <assert.h>
+#include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "annotationsketch/line_breaker_rep.h"
+
+struct GtLineBreakerMembers {
+  unsigned int reference_count;
+};
+
+struct GtLineBreakerClass {
+  size_t size;
+  LineBreakerIsOccupiedFunc is_occupied;
+  LineBreakerRegisterBlockFunc register_block;
+  LineBreakerFreeFunc free;
+};
+
+const GtLineBreakerClass* gt_line_breaker_class_new(size_t size,
+                                    LineBreakerIsOccupiedFunc is_occupied,
+                                    LineBreakerRegisterBlockFunc register_block,
+                                    LineBreakerFreeFunc free)
+{
+  GtLineBreakerClass *c_class = gt_class_alloc(sizeof *c_class);
+  c_class->size = size;
+  c_class->is_occupied = is_occupied;
+  c_class->register_block = register_block;
+  c_class->free = free;
+  return c_class;
+}
 
 GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass *lbc)
 {
@@ -26,7 +51,7 @@ GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass *lbc)
   assert(lbc && lbc->size);
   lb = gt_calloc(1, lbc->size);
   lb->c_class = lbc;
-  lb->pvt = gt_calloc(1, sizeof (GtLineBreakerPrivate));
+  lb->pvt = gt_calloc(1, sizeof (GtLineBreakerMembers));
   return lb;
 }
 

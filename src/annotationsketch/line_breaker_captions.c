@@ -91,12 +91,15 @@ void gt_line_breaker_captions_delete(GtLineBreaker *lb)
 
 const GtLineBreakerClass* gt_line_breaker_captions_class(void)
 {
-  static const GtLineBreakerClass gt_line_breaker_class =
-    { sizeof (GtLineBreakerCaptions),
-      gt_line_breaker_captions_is_gt_line_occupied,
-      gt_line_breaker_captions_register_block,
-      gt_line_breaker_captions_delete };
-  return &gt_line_breaker_class;
+  static const GtLineBreakerClass *lbc = NULL;
+  if (!lbc)
+  {
+    lbc = gt_line_breaker_class_new(sizeof (GtLineBreakerCaptions),
+                                   gt_line_breaker_captions_is_gt_line_occupied,
+                                   gt_line_breaker_captions_register_block,
+                                   gt_line_breaker_captions_delete);
+  }
+  return lbc;
 }
 
 GtLineBreaker* gt_line_breaker_captions_new(GtCanvas *canvas)
