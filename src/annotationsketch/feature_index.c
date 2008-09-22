@@ -128,7 +128,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
   gt_error_check(err);
   assert(fi && gff3file);
   queue = gt_queue_new();
-  gff3_in_stream = gff3_in_stream_new_unsorted(1, &gff3file, false, false);
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, &gff3file, false, false);
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
     gt_queue_add(queue, gn);
   if (!had_err) {

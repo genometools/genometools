@@ -34,7 +34,7 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
   luaL_argcheck(L, gt_file_exists(filename), 1, "file does not exist");
   /* construct object */
   gs = lua_newuserdata(L, sizeof (GtNodeStream*));
-  *gs = gff3_in_stream_new_sorted(filename, false);
+  *gs = gt_gff3_in_stream_new_sorted(filename, false);
   assert(*gs);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);

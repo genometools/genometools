@@ -23,27 +23,27 @@
 #include "extended/type_checker.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct GFF3InStream GFF3InStream;
+typedef struct GtGFF3InStream GtGFF3InStream;
 
-const GtNodeStreamClass* gff3_in_stream_class(void);
-void                     gff3_in_stream_set_type_checker(GtNodeStream*,
-                                                         GtTypeChecker
-                                                         *type_checker);
+const GtNodeStreamClass* gt_gff3_in_stream_class(void);
+void                     gt_gff3_in_stream_set_type_checker(GtNodeStream*,
+                                                            GtTypeChecker
+                                                            *type_checker);
 /* Returns a <GtStrArray*> which contains all type names in alphabetical order
    which have been parsed by <gff3_in_stream>.
    The caller is responsible to free it! */
-GtStrArray*              gff3_in_stream_get_used_types(GtNodeStream
-                                                       *gff3_in_stream);
-void                     gff3_in_stream_set_offset(GtNodeStream*, long);
-int                      gff3_in_stream_set_offsetfile(GtNodeStream*, GtStr*,
-                                                       GtError*);
-void                     gff3_in_stream_enable_tidy_mode(GtNodeStream*);
-GtNodeStream*            gff3_in_stream_new_unsorted(int num_of_files,
-                                                     const char **filenames,
-                                                     bool be_verbose,
-                                                     bool checkids);
+GtStrArray*              gt_gff3_in_stream_get_used_types(GtNodeStream
+                                                          *gff3_in_stream);
+void                     gt_gff3_in_stream_set_offset(GtNodeStream*, long);
+int                      gt_gff3_in_stream_set_offsetfile(GtNodeStream*, GtStr*,
+                                                          GtError*);
+void                     gt_gff3_in_stream_enable_tidy_mode(GtNodeStream*);
+GtNodeStream*            gt_gff3_in_stream_new_unsorted(int num_of_files,
+                                                        const char **filenames,
+                                                        bool be_verbose,
+                                                        bool checkids);
 /* filename == NULL -> use stdin */
-GtNodeStream*            gff3_in_stream_new_sorted(const char *filename,
-                                                   bool be_verbose);
+GtNodeStream*            gt_gff3_in_stream_new_sorted(const char *filename,
+                                                      bool be_verbose);
 
 #endif

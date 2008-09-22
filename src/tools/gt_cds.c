@@ -87,8 +87,8 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   assert(arguments);
 
   /* create gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments->verbose);
+  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args],
+                                                arguments->verbose);
 
   /* create region mapping */
   regionmapping = seqid2file_regionmapping_new(arguments->seqfile,

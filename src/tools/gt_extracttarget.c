@@ -176,8 +176,8 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
   gt_error_check(err);
   assert(arguments);
 
-  gff3_in_stream = gff3_in_stream_new_unsorted(1, argv + parsed_args, false,
-                                               false);
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, argv + parsed_args, false,
+                                                  false);
 
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn) {
     had_err = extracttarget_from_node(gn, arguments->seqfiles, err);

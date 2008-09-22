@@ -226,9 +226,9 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     parsed_args++;
 
     /* create a gff3 input stream */
-    gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                                 argv + parsed_args,
-                                                 arguments.verbose, false);
+    gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                    argv + parsed_args,
+                                                    arguments.verbose, false);
     last_stream = gff3_in_stream;
 
     /* create add introns stream if -addintrons was used */

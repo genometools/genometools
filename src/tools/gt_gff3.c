@@ -181,17 +181,17 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   assert(arguments);
 
   /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                               argv + parsed_args,
-                                               arguments->verbose &&
-                                               arguments->outfp,
-                                               arguments->checkids);
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                  argv + parsed_args,
+                                                  arguments->verbose &&
+                                                  arguments->outfp,
+                                                  arguments->checkids);
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */
   if (arguments->typecheck_built_in) {
       type_checker = gt_type_checker_builtin_new();
-      gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
+      gt_gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
   }
   if (gt_str_length(arguments->typecheck)) {
     type_checker = gt_type_checker_obo_new(gt_str_get(arguments->typecheck),
@@ -199,22 +199,22 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     if (!type_checker)
       had_err = -1;
     if (!had_err)
-      gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
+      gt_gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
   }
 
   /* set offset (if necessary) */
   if (!had_err && arguments->offset != UNDEF_LONG)
-    gff3_in_stream_set_offset(gff3_in_stream, arguments->offset);
+    gt_gff3_in_stream_set_offset(gff3_in_stream, arguments->offset);
 
   /* set offsetfile (if necessary) */
   if (!had_err && gt_str_length(arguments->offsetfile)) {
-    had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
-                                            arguments->offsetfile, err);
+    had_err = gt_gff3_in_stream_set_offsetfile(gff3_in_stream,
+                                               arguments->offsetfile, err);
   }
 
   /* enable tidy mode (if necessary) */
   if (!had_err && arguments->tidy)
-    gff3_in_stream_enable_tidy_mode(gff3_in_stream);
+    gt_gff3_in_stream_enable_tidy_mode(gff3_in_stream);
 
   /* create sort stream (if necessary) */
   if (!had_err && arguments->sort) {

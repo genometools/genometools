@@ -88,9 +88,9 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* create gff3 input stream */
-    gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                                 argv + parsed_args,
-                                                 false, false);
+    gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                    argv + parsed_args,
+                                                    false, false);
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments.seqfile,

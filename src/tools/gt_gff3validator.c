@@ -73,9 +73,9 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   assert(arguments);
 
   /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                               argv + parsed_args,
-                                               false, true);
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                  argv + parsed_args,
+                                                  false, true);
 
   /* set different type checker if necessary */
   if (gt_str_length(arguments->typecheck)) {
@@ -84,7 +84,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
     if (!type_checker)
       had_err = -1;
     if (!had_err)
-      gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
+      gt_gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
   }
 
   /* pull the features through the stream and free them afterwards */
