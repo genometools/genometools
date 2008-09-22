@@ -19,16 +19,16 @@
 #define STAT_VISITOR_H
 
 /* implements the ``genome visitor'' interface, gathers statistics */
-typedef struct StatVisitor StatVisitor;
+typedef struct GtStatVisitor GtStatVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* stat_visitor_class(void);
-GtNodeVisitor*            stat_visitor_new(bool gene_length_distri,
-                                           bool gene_score_distri,
-                                           bool exon_length_distri,
-                                           bool exon_number_distri,
-                                           bool intron_length_distri);
-void                      stat_visitor_show_stats(GtNodeVisitor*);
+const GtNodeVisitorClass* gt_stat_visitor_class(void);
+GtNodeVisitor*            gt_stat_visitor_new(bool gene_length_distri,
+                                              bool gene_score_distri,
+                                              bool exon_length_distri,
+                                              bool exon_number_distri,
+                                              bool intron_length_distri);
+void                      gt_stat_visitor_show_stats(GtNodeVisitor*);
 
 #endif

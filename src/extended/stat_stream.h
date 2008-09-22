@@ -22,16 +22,16 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct StatStream StatStream;
+typedef struct GtStatStream GtStatStream;
 
-const GtNodeStreamClass* stat_stream_class(void);
+const GtNodeStreamClass* gt_stat_stream_class(void);
 
-GtNodeStream*            stat_stream_new(GtNodeStream*,
-                                         bool gene_length_distri,
-                                         bool gene_score_distri,
-                                         bool exon_length_distri,
-                                         bool exon_number_distri,
-                                         bool intron_length_distri);
-void                     stat_stream_show_stats(GtNodeStream*);
+GtNodeStream*            gt_stat_stream_new(GtNodeStream*,
+                                            bool gene_length_distri,
+                                            bool gene_score_distri,
+                                            bool exon_length_distri,
+                                            bool exon_number_distri,
+                                            bool intron_length_distri);
+void                     gt_stat_stream_show_stats(GtNodeStream*);
 
 #endif

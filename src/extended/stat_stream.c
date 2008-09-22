@@ -20,7 +20,7 @@
 #include "extended/stat_visitor.h"
 #include "extended/node_stream_rep.h"
 
-struct StatStream
+struct GtStatStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
@@ -29,11 +29,11 @@ struct StatStream
 };
 
 #define stat_stream_cast(GS)\
-        gt_node_stream_cast(stat_stream_class(), GS)
+        gt_node_stream_cast(gt_stat_stream_class(), GS)
 
 static int stat_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 {
-  StatStream *stat_stream;
+  GtStatStream *stat_stream;
   int had_err;
   gt_error_check(err);
   stat_stream = stat_stream_cast(gs);
@@ -51,41 +51,41 @@ static int stat_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
 static void stat_stream_free(GtNodeStream *gs)
 {
-  StatStream *stat_stream = stat_stream_cast(gs);
+  GtStatStream *stat_stream = stat_stream_cast(gs);
   gt_node_visitor_delete(stat_stream->stat_visitor);
   gt_node_stream_delete(stat_stream->in_stream);
 }
 
-const GtNodeStreamClass* stat_stream_class(void)
+const GtNodeStreamClass* gt_stat_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (StatStream),
+    nsc = gt_node_stream_class_new(sizeof (GtStatStream),
                                    stat_stream_free,
                                    stat_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* stat_stream_new(GtNodeStream *in_stream,
-                              bool gene_length_distri,
-                              bool gene_score_distri,
-                              bool exon_length_distri,
-                              bool exon_number_distri,
-                              bool intron_length_distri)
+GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
+                                 bool gene_length_distri,
+                                 bool gene_score_distri,
+                                 bool exon_length_distri,
+                                 bool exon_number_distri,
+                                 bool intron_length_distri)
 {
-  GtNodeStream *gs = gt_node_stream_create(stat_stream_class(), false);
-  StatStream *ss = stat_stream_cast(gs);
+  GtNodeStream *gs = gt_node_stream_create(gt_stat_stream_class(), false);
+  GtStatStream *ss = stat_stream_cast(gs);
   ss->in_stream = gt_node_stream_ref(in_stream);
-  ss->stat_visitor = stat_visitor_new(gene_length_distri, gene_score_distri,
-                                      exon_length_distri, exon_number_distri,
-                                      intron_length_distri);
+  ss->stat_visitor = gt_stat_visitor_new(gene_length_distri, gene_score_distri,
+                                         exon_length_distri, exon_number_distri,
+                                         intron_length_distri);
   return gs;
 }
 
-void stat_stream_show_stats(GtNodeStream *gs)
+void gt_stat_stream_show_stats(GtNodeStream *gs)
 {
-  StatStream *ss = stat_stream_cast(gs);
+  GtStatStream *ss = stat_stream_cast(gs);
   printf("parsed feature trees: %lu\n", ss->number_of_DAGs);
-  stat_visitor_show_stats(ss->stat_visitor);
+  gt_stat_visitor_show_stats(ss->stat_visitor);
 }

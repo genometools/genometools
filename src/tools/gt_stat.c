@@ -102,12 +102,12 @@ int gt_stat(int argc, const char **argv, GtError *err)
                                                   arguments.verbose, false);
 
   /* create s status stream */
-  stat_stream = stat_stream_new(gff3_in_stream,
-                                arguments.gene_length_distribution,
-                                arguments.gene_score_distribution,
-                                arguments.exon_length_distribution,
-                                arguments.exon_number_distribution,
-                                arguments.intron_length_distribution);
+  stat_stream = gt_stat_stream_new(gff3_in_stream,
+                                   arguments.gene_length_distribution,
+                                   arguments.gene_score_distribution,
+                                   arguments.exon_length_distribution,
+                                   arguments.exon_number_distribution,
+                                   arguments.intron_length_distribution);
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
@@ -117,7 +117,7 @@ int gt_stat(int argc, const char **argv, GtError *err)
 
   /* show statistics */
   if (!had_err)
-    stat_stream_show_stats(stat_stream);
+    gt_stat_stream_show_stats(stat_stream);
 
   /* free */
   gt_node_stream_delete(stat_stream);

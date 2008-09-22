@@ -21,7 +21,7 @@
 #include "extended/node_visitor_rep.h"
 #include "extended/stat_visitor.h"
 
-struct StatVisitor {
+struct GtStatVisitor {
   const GtNodeVisitor parent_instance;
   unsigned long number_of_sequence_regions,
                 number_of_genes,
@@ -40,11 +40,11 @@ struct StatVisitor {
 };
 
 #define stat_visitor_cast(GV)\
-        gt_node_visitor_cast(stat_visitor_class(), GV)
+        gt_node_visitor_cast(gt_stat_visitor_class(), GV)
 
 static void stat_visitor_free(GtNodeVisitor *gv)
 {
-  StatVisitor *stat_visitor = stat_visitor_cast(gv);
+  GtStatVisitor *stat_visitor = stat_visitor_cast(gv);
   gt_disc_distri_delete(stat_visitor->gene_length_distribution);
   gt_disc_distri_delete(stat_visitor->gene_score_distribution);
   gt_disc_distri_delete(stat_visitor->exon_length_distribution);
@@ -55,7 +55,7 @@ static void stat_visitor_free(GtNodeVisitor *gv)
 static int add_exon_number(GtGenomeNode *gn, void *data,
                            GT_UNUSED GtError *err)
 {
-  StatVisitor *stat_visitor = (StatVisitor*) data;
+  GtStatVisitor *stat_visitor = (GtStatVisitor*) data;
   GtFeatureNode *gf = (GtFeatureNode*) gn;
   gt_error_check(err);
   assert(stat_visitor && gf);
@@ -66,12 +66,12 @@ static int add_exon_number(GtGenomeNode *gn, void *data,
 
 static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
 {
-  StatVisitor *stat_visitor;
+  GtStatVisitor *stat_visitor;
   GtFeatureNode *gf;
   int rval;
   gt_error_check(err);
   assert(data);
-  stat_visitor = (StatVisitor*) data;
+  stat_visitor = (GtStatVisitor*) data;
   gf = (GtFeatureNode*) gn;
   if (gt_feature_node_has_type(gf, gft_gene)) {
     stat_visitor->number_of_genes++;
@@ -127,7 +127,7 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
 static int stat_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
                                        GtError *err)
 {
-  StatVisitor *stat_visitor;
+  GtStatVisitor *stat_visitor;
   gt_error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   return gt_genome_node_traverse_children((GtGenomeNode*) gf, stat_visitor,
@@ -137,7 +137,7 @@ static int stat_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
 static int stat_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
                                     GT_UNUSED GtError *err)
 {
-  StatVisitor *stat_visitor;
+  GtStatVisitor *stat_visitor;
   gt_error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   stat_visitor->number_of_sequence_regions++;
@@ -146,11 +146,11 @@ static int stat_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
   return 0;
 }
 
-const GtNodeVisitorClass* stat_visitor_class()
+const GtNodeVisitorClass* gt_stat_visitor_class()
 {
   static const GtNodeVisitorClass *gvc = NULL;
   if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (StatVisitor),
+    gvc = gt_node_visitor_class_new(sizeof (GtStatVisitor),
                                     stat_visitor_free,
                                     NULL,
                                     stat_visitor_genome_feature,
@@ -160,14 +160,14 @@ const GtNodeVisitorClass* stat_visitor_class()
   return gvc;
 }
 
-GtNodeVisitor* stat_visitor_new(bool gene_length_distri,
-                                bool gene_score_distri,
-                                bool exon_length_distri,
-                                bool exon_number_distri,
-                                bool intron_length_distri)
+GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
+                                   bool gene_score_distri,
+                                   bool exon_length_distri,
+                                   bool exon_number_distri,
+                                   bool intron_length_distri)
 {
-  GtNodeVisitor *gv = gt_node_visitor_create(stat_visitor_class());
-  StatVisitor *stat_visitor = stat_visitor_cast(gv);
+  GtNodeVisitor *gv = gt_node_visitor_create(gt_stat_visitor_class());
+  GtStatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (gene_length_distri)
     stat_visitor->gene_length_distribution = gt_disc_distri_new();
   if (gene_score_distri)
@@ -181,9 +181,9 @@ GtNodeVisitor* stat_visitor_new(bool gene_length_distri,
   return gv;
 }
 
-void stat_visitor_show_stats(GtNodeVisitor *gv)
+void gt_stat_visitor_show_stats(GtNodeVisitor *gv)
 {
-  StatVisitor *stat_visitor = stat_visitor_cast(gv);
+  GtStatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (stat_visitor->number_of_sequence_regions) {
     printf("sequence regions: %lu (total length: %llu)\n",
            stat_visitor->number_of_sequence_regions,
