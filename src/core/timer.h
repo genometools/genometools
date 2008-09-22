@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,12 +24,12 @@
 #include "core/error.h"
 
 /* the timer class */
-typedef struct Timer Timer;
+typedef struct GtTimer GtTimer;
 
-Timer* timer_new(void);
-void   timer_start(Timer*);
-void   timer_stop(Timer*);
-void   timer_show(Timer*, FILE*);
-void   timer_del(Timer*);
+GtTimer* gt_timer_new(void);
+void     gt_timer_start(GtTimer*);
+void     gt_timer_stop(GtTimer*);
+void     gt_timer_show(GtTimer*, FILE*);
+void     gt_timer_delete(GtTimer*);
 
 #endif

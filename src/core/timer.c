@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,7 +25,7 @@ typedef enum {
   TIMER_STOPPED
 } Timerstate;
 
-struct Timer {
+struct GtTimer {
   struct timeval start_tv,
                  stop_tv;
   struct rusage  start_ru,
@@ -33,15 +33,14 @@ struct Timer {
   Timerstate state;
 };
 
-Timer* timer_new(void)
+GtTimer* gt_timer_new(void)
 {
-  Timer *t;
-  t = gt_malloc(sizeof (Timer));
+  GtTimer *t = gt_malloc(sizeof *t);
   t->state = TIMER_RUNNING;
   return t;
 }
 
-void timer_start(Timer *t)
+void gt_timer_start(GtTimer *t)
 {
   assert(t);
   gettimeofday(&t->start_tv, NULL);
@@ -49,7 +48,7 @@ void timer_start(Timer *t)
   t->state = TIMER_RUNNING;
 }
 
-void timer_stop(Timer *t)
+void gt_timer_stop(GtTimer *t)
 {
   assert(t);
   if (t->state == TIMER_RUNNING) {
@@ -78,12 +77,12 @@ static int timeval_subtract (struct timeval *result,
   return x->tv_sec < y->tv_sec;
 }
 
-void timer_show(Timer *t, FILE *fp)
+void gt_timer_show(GtTimer *t, FILE *fp)
 {
   struct timeval elapsed_tv;
 
   if (t->state == TIMER_RUNNING)
-    timer_stop(t);
+    gt_timer_stop(t);
   assert(t->state == TIMER_STOPPED);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
   fprintf(fp, "%ld.%06lds real %lds user %lds system\n",
@@ -93,7 +92,7 @@ void timer_show(Timer *t, FILE *fp)
           (long)(t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec));
 }
 
-void timer_del(Timer *t)
+void gt_timer_delete(GtTimer *t)
 {
   if (!t) return;
   gt_free(t);
