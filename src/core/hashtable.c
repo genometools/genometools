@@ -48,16 +48,16 @@ typedef htsize_t (*GetLinkFunc)(GtHashtable *ht, htsize_t idx);
 typedef void (*SetLinkFunc)(GtHashtable *ht, htsize_t idx, htsize_t link);
 
 static htsize_t
-ht_get_table_link(GtHashtable *ht, htsize_t idx);
+gt_ht_get_table_link(GtHashtable *ht, htsize_t idx);
 static void
-ht_set_table_link(GtHashtable *ht, htsize_t idx, htsize_t link);
+gt_ht_set_table_link(GtHashtable *ht, htsize_t idx, htsize_t link);
 
 #if POLYMORPHLINK
 #define HT_GET_LINK(ht, idx) ht->get_link(ht, idx)
 #define HT_SET_LINK(ht, idx, link) ht->set_link(ht, idx, link)
 #else
-#define HT_GET_LINK(ht, idx) ht_get_table_link(ht, idx)
-#define HT_SET_LINK(ht, idx, link) ht_set_table_link(ht, idx, link)
+#define HT_GET_LINK(ht, idx) gt_ht_get_table_link(ht, idx)
+#define HT_SET_LINK(ht, idx, link) gt_ht_set_table_link(ht, idx, link)
 #endif
 
 struct GtHashtable
@@ -72,19 +72,19 @@ struct GtHashtable
 };
 
 static inline void *
-ht_elem_ptr(const GtHashtable *ht, htsize_t idx)
+gt_ht_elem_ptr(const GtHashtable *ht, htsize_t idx)
 {
   return (char *)ht->table + ht->table_info.elem_size * idx;
 }
 
 static inline void
-ht_cp_elem(GtHashtable *ht, htsize_t dest_idx, const void *src)
+gt_ht_cp_elem(GtHashtable *ht, htsize_t dest_idx, const void *src)
 {
-  memcpy(ht_elem_ptr(ht, dest_idx), src, ht->table_info.elem_size);
+  memcpy(gt_ht_elem_ptr(ht, dest_idx), src, ht->table_info.elem_size);
 }
 
 static void
-ht_resize(GtHashtable *ht, unsigned short new_size_log);
+gt_ht_resize(GtHashtable *ht, unsigned short new_size_log);
 
 extern GtHashtable *
 gt_hashtable_new(HashElemInfo table_info)
@@ -93,7 +93,7 @@ gt_hashtable_new(HashElemInfo table_info)
 }
 
 static void
-ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
+gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
         unsigned short high_mul, unsigned short low_mul)
 {
   htsize_t table_size;
@@ -115,23 +115,23 @@ ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
                                  sizeof (*(ht->links.table)) * table_size);
     for (i = 0; i < table_size; ++i)
       ht->links.table[i] = free_mark;
-    ht->get_link = ht_get_table_link;
-    ht->set_link = ht_set_table_link;
+    ht->get_link = gt_ht_get_table_link;
+    ht->set_link = gt_ht_set_table_link;
   }
 }
 
 static void
-ht_init(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
+gt_ht_init(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
         unsigned short high_mul, unsigned short low_mul)
 {
   assert(size_log < sizeof (htsize_t) * CHAR_BIT);
   ht->current_fill = 0;
   ht->table = ht->links.table = NULL;
-  ht_reinit(ht, table_info, size_log, high_mul, low_mul);
+  gt_ht_reinit(ht, table_info, size_log, high_mul, low_mul);
 }
 
 static void
-ht_destruct(GtHashtable *ht)
+gt_ht_destruct(GtHashtable *ht)
 {
   gt_free(ht->table);
   gt_free(ht->links.table);
@@ -143,20 +143,20 @@ gt_hashtable_new_with_start_size(HashElemInfo table_info,
 {
   GtHashtable *ht;
   ht = gt_malloc(sizeof (*ht));
-  ht_init(ht, table_info, size_log, DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
+  gt_ht_init(ht, table_info, size_log, DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
   return ht;
 }
 
 static int
-ht_insert(GtHashtable *ht, const void *elem);
+gt_ht_insert(GtHashtable *ht, const void *elem);
 
 static enum iterator_op
-ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
+gt_ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
 {
 #ifndef NDEBUG
   int ins_count =
 #endif
-    ht_insert(data, elem);
+    gt_ht_insert(data, elem);
 #ifndef NDEBUG
   if (!ins_count)
   {
@@ -168,7 +168,7 @@ ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
 }
 
 static void
-ht_resize(GtHashtable *ht, unsigned short new_size_log)
+gt_ht_resize(GtHashtable *ht, unsigned short new_size_log)
 {
   GtHashtable new_ht;
 #ifndef NDEBUG
@@ -177,25 +177,25 @@ ht_resize(GtHashtable *ht, unsigned short new_size_log)
   assert(ht);
   if (new_size_log != ht->table_size_log)
   {
-    ht_init(&new_ht, ht->table_info, new_size_log, ht->high_fill_mul,
+    gt_ht_init(&new_ht, ht->table_info, new_size_log, ht->high_fill_mul,
             ht->low_fill_mul);
     assert(ht->current_fill < new_size);
-    gt_hashtable_foreach(ht, ht_insert_wrapper, &new_ht, NULL);
-    ht_destruct(ht);
+    gt_hashtable_foreach(ht, gt_ht_insert_wrapper, &new_ht, NULL);
+    gt_ht_destruct(ht);
     memcpy(ht, &new_ht, sizeof (*ht));
   }
 }
 
 static inline htsize_t
-ht_elem_hash_idx(const GtHashtable *ht, const void *elem)
+gt_ht_elem_hash_idx(const GtHashtable *ht, const void *elem)
 {
   return ht->table_info.keyhash(elem) & ht->table_mask;
 }
 
-#define ht_traverse_list_of_key(ht, elem, pre_loop, in_loop, post_loop) \
+#define gt_ht_traverse_list_of_key(ht, elem, pre_loop, in_loop, post_loop) \
   do {                                                                  \
     GtHashtable *htref = (ht);                                            \
-    htsize_t elem_hash = ht_elem_hash_idx(htref, (elem)),               \
+    htsize_t elem_hash = gt_ht_elem_hash_idx(htref, (elem)),               \
       idx, link = elem_hash;                                            \
     pre_loop;                                                           \
     do {                                                                \
@@ -209,16 +209,16 @@ ht_elem_hash_idx(const GtHashtable *ht, const void *elem)
 
 #if TJ_DEBUG > 1
 static void
-ht_traverse_list_of_key_debug(GtHashtable *ht, const void *elem)
+gt_ht_traverse_list_of_key_debug(GtHashtable *ht, const void *elem)
 {
   GtHashtable *htref = (ht);
-  htsize_t elem_hash = ht_elem_hash_idx(htref, (elem)),
+  htsize_t elem_hash = gt_ht_elem_hash_idx(htref, (elem)),
     idx, link = elem_hash;
   do {
     idx = link;
     link = HT_GET_LINK(htref, idx);
     if (link != free_mark
-        && !ht->table_info.cmp(elem, ht_elem_ptr(ht, idx)))
+        && !ht->table_info.cmp(elem, gt_ht_elem_ptr(ht, idx)))
     {
       fputs("found\n", stderr);
     }
@@ -232,13 +232,13 @@ gt_hashtable_get(GtHashtable *ht, const void *elem)
 {
   assert(ht);
 #if TJ_DEBUG > 1
-  ht_traverse_list_of_key_debug(ht, elem);
+  gt_ht_traverse_list_of_key_debug(ht, elem);
 #endif
-  ht_traverse_list_of_key(ht, elem, ,
+  gt_ht_traverse_list_of_key(ht, elem, ,
                           if (link != free_mark
                               && !ht->table_info.cmp(elem,
-                                                     ht_elem_ptr(ht, idx)))
-                            return ht_elem_ptr(ht, idx),);
+                                                     gt_ht_elem_ptr(ht, idx)))
+                            return gt_ht_elem_ptr(ht, idx),);
   return NULL;
 }
 
@@ -248,13 +248,13 @@ gt_hashtable_add(GtHashtable *ht, const void *elem)
   int insert_count;
   assert(ht && elem);
   if (ht->current_fill + 1 > ht->high_fill)
-    ht_resize(ht, ht->table_size_log + 1);
-  insert_count = ht_insert(ht, elem);
+    gt_ht_resize(ht, ht->table_size_log + 1);
+  insert_count = gt_ht_insert(ht, elem);
   return insert_count;
 }
 
 static htsize_t
-ht_find_free_idx(GtHashtable *ht, htsize_t start_idx, int search_dir)
+gt_ht_find_free_idx(GtHashtable *ht, htsize_t start_idx, int search_dir)
 {
   htsize_t new_idx = start_idx;
   assert(ht->current_fill < ht->table_mask + 1);
@@ -265,11 +265,11 @@ ht_find_free_idx(GtHashtable *ht, htsize_t start_idx, int search_dir)
 }
 
 static int
-ht_insert(GtHashtable *ht, const void *elem)
+gt_ht_insert(GtHashtable *ht, const void *elem)
 {
   htsize_t insert_pos;
   do {
-    htsize_t elem_hash = ht_elem_hash_idx(ht, elem), idx,
+    htsize_t elem_hash = gt_ht_elem_hash_idx(ht, elem), idx,
       link = elem_hash;
     if (HT_GET_LINK(ht, link) == free_mark)
     {
@@ -277,16 +277,16 @@ ht_insert(GtHashtable *ht, const void *elem)
       insert_pos = link;
       break;
     }
-    else if (ht_elem_hash_idx(ht, ht_elem_ptr(ht, link)) != elem_hash)
+    else if (gt_ht_elem_hash_idx(ht, gt_ht_elem_ptr(ht, link)) != elem_hash)
     {
       /* relocate chained element */
       htsize_t reloc_idx = link, reloc_referent, new_idx;
-      ht_traverse_list_of_key(ht, ht_elem_ptr(ht, reloc_idx),,
+      gt_ht_traverse_list_of_key(ht, gt_ht_elem_ptr(ht, reloc_idx),,
                               if (link == reloc_idx)
                                 break;,
                               reloc_referent = idx;);
-      new_idx = ht_find_free_idx(ht, reloc_referent, -1);
-      ht_cp_elem(ht, new_idx, ht_elem_ptr(ht, reloc_idx));
+      new_idx = gt_ht_find_free_idx(ht, reloc_referent, -1);
+      gt_ht_cp_elem(ht, new_idx, gt_ht_elem_ptr(ht, reloc_idx));
       HT_SET_LINK(ht, new_idx,
                   HT_GET_LINK(ht, reloc_idx));
       HT_SET_LINK(ht, reloc_referent, new_idx);
@@ -296,7 +296,7 @@ ht_insert(GtHashtable *ht, const void *elem)
     do {
       idx = link;
       link = HT_GET_LINK(ht, idx);
-      if (!ht->table_info.cmp(elem, ht_elem_ptr(ht, idx)))
+      if (!ht->table_info.cmp(elem, gt_ht_elem_ptr(ht, idx)))
         /* don't insert elements already present! */
         return 0;
     } while (link != end_mark);
@@ -304,32 +304,32 @@ ht_insert(GtHashtable *ht, const void *elem)
       /* we can search, starting at idx, for a
        * free position to insert elem */
       htsize_t referent = idx,
-        new_idx = ht_find_free_idx(ht, idx, +1);
+        new_idx = gt_ht_find_free_idx(ht, idx, +1);
       HT_SET_LINK(ht, referent, new_idx);
       insert_pos = new_idx;
     }
   } while (0);
-  ht_cp_elem(ht, insert_pos, elem);
+  gt_ht_cp_elem(ht, insert_pos, elem);
   HT_SET_LINK(ht, insert_pos, end_mark);
   ht->current_fill += 1;
   return 1;
 }
 
 static htsize_t
-ht_remove(GtHashtable *ht, const void *elem);
+gt_ht_remove(GtHashtable *ht, const void *elem);
 
 static inline void
-ht_shrink(GtHashtable *ht);
+gt_ht_shrink(GtHashtable *ht);
 
 extern int
 gt_hashtable_remove(GtHashtable *ht, const void *elem)
 {
   htsize_t remove_pos;
   assert(ht && elem);
-  remove_pos = ht_remove(ht, elem);
+  remove_pos = gt_ht_remove(ht, elem);
   if (remove_pos != free_mark)
   {
-    ht_shrink(ht);
+    gt_ht_shrink(ht);
     return 1;
   }
   else
@@ -337,7 +337,7 @@ gt_hashtable_remove(GtHashtable *ht, const void *elem)
 }
 
 static inline void
-ht_shrink(GtHashtable *ht)
+gt_ht_shrink(GtHashtable *ht)
 {
   if (ht->current_fill < ht->low_fill
       && ht->table_size_log > MIN_SIZE_LOG)
@@ -349,18 +349,18 @@ ht_shrink(GtHashtable *ht)
       --new_size_log;
       low_fill >>= 1;
     } while (ht->current_fill < old_low_fill && new_size_log > MIN_SIZE_LOG);
-    ht_resize(ht, new_size_log);
+    gt_ht_resize(ht, new_size_log);
   }
 }
 
 static htsize_t
-ht_remove(GtHashtable *ht, const void *elem)
+gt_ht_remove(GtHashtable *ht, const void *elem)
 {
   htsize_t remove_pos = free_mark, referent = free_mark;
-  ht_traverse_list_of_key(ht, elem,,
+  gt_ht_traverse_list_of_key(ht, elem,,
                           if (link != free_mark
                               && !ht->table_info.cmp(elem,
-                                                     ht_elem_ptr(ht, idx)))
+                                                     gt_ht_elem_ptr(ht, idx)))
                           { remove_pos = idx; break; }
                           referent = idx;,);
   /* was elem found? */
@@ -375,15 +375,15 @@ ht_remove(GtHashtable *ht, const void *elem)
     {
       /* handle removal of chain head, where there is a non-empty tail */
       /* find next free field to move chain head to temporarily */
-      htsize_t cp_dest_idx = ht_find_free_idx(ht, remove_pos, -1);
-      ht_cp_elem(ht, cp_dest_idx, ht_elem_ptr(ht, remove_pos));
-      ht_cp_elem(ht, remove_pos, ht_elem_ptr(ht, chain_next));
+      htsize_t cp_dest_idx = gt_ht_find_free_idx(ht, remove_pos, -1);
+      gt_ht_cp_elem(ht, cp_dest_idx, gt_ht_elem_ptr(ht, remove_pos));
+      gt_ht_cp_elem(ht, remove_pos, gt_ht_elem_ptr(ht, chain_next));
       HT_SET_LINK(ht, remove_pos, HT_GET_LINK(ht, chain_next));
       HT_SET_LINK(ht, chain_next, free_mark);
       remove_pos = cp_dest_idx;
     }
     if (ht->table_info.free_op.free_elem_with_data)
-      ht->table_info.free_op.free_elem_with_data(ht_elem_ptr(ht, remove_pos),
+      ht->table_info.free_op.free_elem_with_data(gt_ht_elem_ptr(ht, remove_pos),
                                                  ht->table_info.table_data);
     HT_SET_LINK(ht, remove_pos, free_mark);
     --ht->current_fill;
@@ -399,7 +399,7 @@ struct hash_to_array_data
 };
 
 static enum iterator_op
-ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
+gt_ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
 {
   GtArray *hash_entries;
   assert(elem && data);
@@ -423,7 +423,7 @@ gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
   {
     struct hash_to_array_data visitor_data = { ht->table_info.elem_size,
                                                hash_entries };
-    had_err = gt_hashtable_foreach(ht, ht_save_entry_to_array, &visitor_data,
+    had_err = gt_hashtable_foreach(ht, gt_ht_save_entry_to_array, &visitor_data,
                                 err);
   }
   if (!had_err) {
@@ -461,11 +461,11 @@ gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
     htsize_t idx = i, link = HT_GET_LINK(ht, i);
     /* if i is occupied and forms a chain start */
     if (link != free_mark
-        && ht_elem_hash_idx(ht, ht_elem_ptr(ht, i)) == i)
+        && gt_ht_elem_hash_idx(ht, gt_ht_elem_ptr(ht, i)) == i)
       while (1)
       {
         void *elem;
-        elem = ht_elem_ptr(ht, idx);
+        elem = gt_ht_elem_ptr(ht, idx);
         switch (visitor(elem, data, err))
         {
         case CONTINUE_ITERATION:
@@ -474,14 +474,14 @@ gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
           return 0;
         case DELETED_ELEM:
           {
-            htsize_t remove_pos = ht_remove(ht, elem);
+            htsize_t remove_pos = gt_ht_remove(ht, elem);
             ht->table_info.free_op.free_elem_with_data(
-              ht_elem_ptr(ht, remove_pos), ht->table_info.table_data);
+              gt_ht_elem_ptr(ht, remove_pos), ht->table_info.table_data);
             ++deletion_count;
           }
           break;
         case MODIFIED_KEY:
-          if (ht_elem_hash_idx(ht, elem) != i)
+          if (gt_ht_elem_hash_idx(ht, elem) != i)
           {
             /* elem now belongs to new chain */
             /* FIXME: handle deferred move */
@@ -505,7 +505,7 @@ gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
   /* if hashtable shrunk below low_mark, resize */
   if (deletion_count &&
       ht->current_fill < ht->low_fill)
-    ht_shrink(ht);
+    gt_ht_shrink(ht);
   return 0;
 }
 
@@ -516,7 +516,7 @@ gt_hashtable_fill(GtHashtable *ht)
   return ht->current_fill;
 }
 
-#define ht_internal_foreach(ht,visitcode)                       \
+#define gt_ht_internal_foreach(ht,visitcode)                       \
   do {                                                          \
     htsize_t i, table_size = ht->table_mask + 1;                \
     void *table_data = ht->table_info.table_data;               \
@@ -540,9 +540,9 @@ gt_hashtable_reset(GtHashtable *ht)
   FreeFuncWData free_elem_with_data =
     ht->table_info.free_op.free_elem_with_data;
   if (free_elem_with_data)
-    ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
+    gt_ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
   ht->current_fill = 0;
-  ht_reinit(ht, ht->table_info, MIN_SIZE_LOG, DEFAULT_HIGH_MUL,
+  gt_ht_reinit(ht, ht->table_info, MIN_SIZE_LOG, DEFAULT_HIGH_MUL,
             DEFAULT_LOW_MUL);
 }
 
@@ -554,8 +554,8 @@ gt_hashtable_delete(GtHashtable *ht)
     FreeFuncWData free_elem_with_data =
       ht->table_info.free_op.free_elem_with_data;
     if (free_elem_with_data)
-      ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
-    ht_destruct(ht);
+      gt_ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
+    gt_ht_destruct(ht);
     if (ht->table_info.table_data_free)
       ht->table_info.table_data_free(ht->table_info.table_data);
     gt_free(ht);
@@ -563,22 +563,26 @@ gt_hashtable_delete(GtHashtable *ht)
 }
 
 extern uint32_t
-ht_ptr_elem_hash(const void *elem)
+gt_ht_ptr_elem_hash(const void *elem)
 {
   /* rotate right by 3 because memory addresses are to often aligned
    * at oct addresses. */
 #if CHAR_BIT == 8
-  if (sizeof (void *) == 4)
-    return gt_uint32_key_mul_hash(ht_rotate_right_u32(*(uint32_t *)elem, 3));
-  else if (sizeof (void *) == 8)
-    return gt_uint64_key_mul_hash(ht_rotate_right_u64(*(uint64_t *)elem, 3));
+  if (sizeof (void *) == 4) {
+    return gt_uint32_key_mul_hash(gt_ht_rotate_riggt_ht_u32(*(uint32_t *)elem,
+                                                            3));
+  }
+  else if (sizeof (void *) == 8) {
+    return gt_uint64_key_mul_hash(gt_ht_rotate_riggt_ht_u64(*(uint64_t *)elem,
+                                                            3));
+  }
 #else
 #error "pointer size is not a multiple of 8, I'd like to hear of your platform"
 #endif
 }
 
 extern uint32_t
-ht_ul_elem_hash(const void *elem)
+gt_ht_ul_elem_hash(const void *elem)
 {
 #if CHAR_BIT == 8
   if (sizeof (void *) == 4)
@@ -590,14 +594,14 @@ ht_ul_elem_hash(const void *elem)
 #endif
 }
 
-#define ht_u32_mix(a,b,c)                                      \
+#define gt_ht_u32_mix(a,b,c)                                      \
   {                                                            \
-    a -= c;  a ^= ht_rotate_left_u32(c, 4);  c += b;           \
-    b -= a;  b ^= ht_rotate_left_u32(a, 6);  a += c;           \
-    c -= b;  c ^= ht_rotate_left_u32(b, 8);  b += a;           \
-    a -= c;  a ^= ht_rotate_left_u32(c,16);  c += b;           \
-    b -= a;  b ^= ht_rotate_left_u32(a,19);  a += c;           \
-    c -= b;  c ^= ht_rotate_left_u32(b, 4);  b += a;           \
+    a -= c;  a ^= gt_ht_rotate_left_u32(c, 4);  c += b;           \
+    b -= a;  b ^= gt_ht_rotate_left_u32(a, 6);  a += c;           \
+    c -= b;  c ^= gt_ht_rotate_left_u32(b, 8);  b += a;           \
+    a -= c;  a ^= gt_ht_rotate_left_u32(c,16);  c += b;           \
+    b -= a;  b ^= gt_ht_rotate_left_u32(a,19);  a += c;           \
+    c -= b;  c ^= gt_ht_rotate_left_u32(b, 4);  b += a;           \
   }
 
 extern uint32_t
@@ -621,7 +625,7 @@ gt_uint32_data_hash(const void *data, size_t length)
     c += ((uint32_t)k[9])<<8;
     c += ((uint32_t)k[10])<<16;
     c += ((uint32_t)k[11])<<24;
-    ht_u32_mix(a,b,c);
+    gt_ht_u32_mix(a,b,c);
     length -= 12;
     k += 12;
   }
@@ -643,7 +647,7 @@ gt_uint32_data_hash(const void *data, size_t length)
     break;
   case 0 : return c;
   }
-  return ht_finalize3_u32(a,b,c);
+  return gt_ht_finalize3_u32(a,b,c);
 }
 
 static uint32_t
@@ -657,25 +661,25 @@ uint32_str_key_hash(const char *str)
 }
 
 extern uint32_t
-ht_cstr_elem_hash(const void *elem)
+gt_ht_cstr_elem_hash(const void *elem)
 {
   return uint32_str_key_hash(*(const char **)elem);
 }
 
 extern int
-ht_ptr_elem_cmp(const void *elemA, const void *elemB)
+gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB)
 {
-  return ht_ptr_cmp(*(void **)elemA, *(void **)elemB);
+  return gt_ht_ptr_cmp(*(void **)elemA, *(void **)elemB);
 }
 
 extern int
-ht_ul_elem_cmp(const void *elemA, const void *elemB)
+gt_ht_ul_elem_cmp(const void *elemA, const void *elemB)
 {
-  return ht_ul_cmp(*(unsigned long *)elemA, *(unsigned long *)elemB);
+  return gt_ht_ul_cmp(*(unsigned long *)elemA, *(unsigned long *)elemB);
 }
 
 extern int
-ht_cstr_elem_cmp(const void *elemA, const void *elemB)
+gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB)
 {
   return strcmp(*(const char **)elemA, *(const char **)elemB);
 }
@@ -684,26 +688,26 @@ ht_cstr_elem_cmp(const void *elemA, const void *elemB)
  * link table stuff
  */
 static htsize_t
-ht_get_table_link(GtHashtable *ht, htsize_t idx)
+gt_ht_get_table_link(GtHashtable *ht, htsize_t idx)
 {
   return ht->links.table[idx];
 }
 
 static void
-ht_set_table_link(GtHashtable *ht, htsize_t idx, htsize_t link)
+gt_ht_set_table_link(GtHashtable *ht, htsize_t idx, htsize_t link)
 {
   ht->links.table[idx] = link;
 }
 
-struct ht_elem_2cstr
+struct gt_ht_elem_2cstr
 {
   char *key, *value;
 };
 
 extern void
-ht_2ptr_elem_free(void *elem)
+gt_ht_2ptr_elem_free(void *elem)
 {
-  struct ht_elem_2cstr *p = elem;
+  struct gt_ht_elem_2cstr *p = elem;
   assert(elem);
   gt_free(p->key);
   gt_free(p->value);
@@ -716,7 +720,7 @@ ht_2ptr_elem_free(void *elem)
   }
 
 static inline void
-cstr_cstr_elem_dup(struct ht_elem_2cstr *elem,
+cstr_cstr_elem_dup(struct gt_ht_elem_2cstr *elem,
                    const char *key_template, const char *value_template)
 {
   elem->key = gt_cstr_dup(key_template);
@@ -730,10 +734,10 @@ gt_hashtable_test(HashElemInfo table_info)
   char *s1 = "foo", *s2 = "bar";
   GtHashtable *ht;
   int had_err = 0;
-  struct ht_elem_2cstr elemA = { s1, s2 }, elemB = { s2, s1 };
+  struct gt_ht_elem_2cstr elemA = { s1, s2 }, elemB = { s2, s1 };
   table_info.free_op.free_elem = NULL;
   do {
-    struct ht_elem_2cstr *elem_p;
+    struct gt_ht_elem_2cstr *elem_p;
     /* empty hash */
     ht = gt_hashtable_new(table_info);
     gt_hashtable_delete(ht);
@@ -774,10 +778,10 @@ gt_hashtable_test(HashElemInfo table_info)
     /* hashes containing two elements (store key and value in
      * hashtable) where simple free is the correct way to get rid of them
      */
-    if (orig_free_elem == ht_2ptr_elem_free)
+    if (orig_free_elem == gt_ht_2ptr_elem_free)
     {
-      struct ht_elem_2cstr elem_dup;
-      table_info.free_op.free_elem = ht_2ptr_elem_free;
+      struct gt_ht_elem_2cstr elem_dup;
+      table_info.free_op.free_elem = gt_ht_2ptr_elem_free;
       ht = gt_hashtable_new(table_info);
 
       cstr_cstr_elem_dup(&elem_dup, s1, s2);
@@ -809,10 +813,12 @@ int gt_hashtable_unit_test(GT_UNUSED GtError *err)
   int had_err;
   gt_error_check(err);
   static const HashElemInfo
-    hash_ptr = { ht_ptr_elem_hash, { NULL }, sizeof (struct ht_elem_2cstr),
-                 ht_ptr_elem_cmp, NULL, NULL },
-    hash_str = { ht_cstr_elem_hash, { NULL }, sizeof (struct ht_elem_2cstr),
-                 ht_cstr_elem_cmp, NULL, NULL };
+    hash_ptr = { gt_ht_ptr_elem_hash, { NULL },
+                 sizeof (struct gt_ht_elem_2cstr),
+                 gt_ht_ptr_elem_cmp, NULL, NULL },
+    hash_str = { gt_ht_cstr_elem_hash, { NULL },
+                 sizeof (struct gt_ht_elem_2cstr),
+                 gt_ht_cstr_elem_cmp, NULL, NULL };
   /* hash key as string */
   had_err = gt_hashtable_test(hash_str);
 

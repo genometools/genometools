@@ -33,8 +33,8 @@ static void free_gt_cstr_table_entry(void *cstr_entry)
 GtCstrTable* gt_cstr_table_new()
 {
   HashElemInfo cstr_table = {
-    ht_cstr_elem_hash, { free_gt_cstr_table_entry }, sizeof (char*),
-    ht_cstr_elem_cmp, NULL, NULL };
+    gt_ht_cstr_elem_hash, { free_gt_cstr_table_entry }, sizeof (char*),
+    gt_ht_cstr_elem_cmp, NULL, NULL };
   GtCstrTable *table = gt_malloc(sizeof *table);
   table->strings = gt_hashtable_new(cstr_table);
   return table;

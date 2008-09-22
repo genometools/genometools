@@ -41,8 +41,8 @@ void gt_disc_distri_add(GtDiscDistri *d, unsigned long key)
 }
 
 DECLARE_HASHMAP(unsigned long, ul, unsigned long long, ull, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, unsigned long long, ull, ht_ul_elem_hash,
-               ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
+DEFINE_HASHMAP(unsigned long, ul, unsigned long long, ull, gt_ht_ul_elem_hash,
+               gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
 void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,

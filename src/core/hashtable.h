@@ -111,14 +111,14 @@ gt_uint32_key_mul_hash(uint32_t key);
  * key to hash
  */
 extern uint32_t
-ht_ptr_elem_hash(const void *elem);
+gt_ht_ptr_elem_hash(const void *elem);
 
 /**
  * @brief Hash unsigned long by value
  * @param elem *(unsigned long *)elem is used as key to hash
  */
 extern uint32_t
-ht_ul_elem_hash(const void *elem);
+gt_ht_ul_elem_hash(const void *elem);
 
 /**
  * @brief Hash string by mixing hash value of characters
@@ -126,20 +126,20 @@ ht_ul_elem_hash(const void *elem);
  * @param elem *(char **)elem is used as key to hash
  */
 extern uint32_t
-ht_cstr_elem_hash(const void *elem);
+gt_ht_cstr_elem_hash(const void *elem);
 /**
  * @brief hash binary data
  */
 extern uint32_t
 gt_uint32_data_hash(const void *data, size_t length);
 extern int
-ht_ptr_elem_cmp(const void *elemA, const void *elemB);
+gt_ht_ptr_elem_cmp(const void *elemA, const void *elemB);
 static inline int
-ht_ul_cmp(unsigned long a, unsigned long b);
+gt_ht_ul_cmp(unsigned long a, unsigned long b);
 extern int
-ht_ul_elem_cmp(const void *elemA, const void *elemB);
+gt_ht_ul_elem_cmp(const void *elemA, const void *elemB);
 extern int
-ht_cstr_elem_cmp(const void *elemA, const void *elemB);
+gt_ht_cstr_elem_cmp(const void *elemA, const void *elemB);
 
 #include "core/hashtable-siop.h"
 

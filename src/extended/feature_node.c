@@ -729,8 +729,8 @@ int gt_genome_node_traverse_children_generic(GtGenomeNode *genome_node,
   if (traverse_only_once)
   {
     static const HashElemInfo node_hashtype
-      = { ht_ptr_elem_hash, { NULL }, sizeof (GtGenomeNode *),
-          ht_ptr_elem_cmp, NULL, NULL };
+      = { gt_ht_ptr_elem_hash, { NULL }, sizeof (GtGenomeNode *),
+          gt_ht_ptr_elem_cmp, NULL, NULL };
     traversed_nodes = gt_hashtable_new(node_hashtype);
   }
 

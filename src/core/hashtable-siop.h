@@ -25,25 +25,25 @@
 #define GOLDEN_RATIO_MULTIPLIER 2654435761UL
 
 static inline uint32_t
-ht_rotate_left_u32(uint32_t m, unsigned short k)
+gt_ht_rotate_left_u32(uint32_t m, unsigned short k)
 {
   return (((m)<<(k)) | ((m)>>((sizeof (m) * CHAR_BIT)-(k))));
 }
 
 static inline uint64_t
-ht_rotate_left_u64(uint64_t m, unsigned short k)
+gt_ht_rotate_left_u64(uint64_t m, unsigned short k)
 {
   return (((m)<<(k)) | ((m)>>((sizeof (m) * CHAR_BIT)-(k))));
 }
 
 static inline uint32_t
-ht_rotate_right_u32(uint32_t m, unsigned short k)
+gt_ht_rotate_riggt_ht_u32(uint32_t m, unsigned short k)
 {
   return (((m)>>(k)) | ((m)<<((sizeof (m) * CHAR_BIT)-(k))));
 }
 
 static inline uint64_t
-ht_rotate_right_u64(uint64_t m, unsigned short k)
+gt_ht_rotate_riggt_ht_u64(uint64_t m, unsigned short k)
 {
   return (((m)>>(k)) | ((m)<<((sizeof (m) * CHAR_BIT)-(k))));
 }
@@ -55,22 +55,22 @@ ht_rotate_right_u64(uint64_t m, unsigned short k)
  */
 
 static inline uint32_t
-ht_finalize3_u32(uint32_t a, uint32_t b, uint32_t c)
+gt_ht_finalize3_u32(uint32_t a, uint32_t b, uint32_t c)
 {
-  c ^= b; c -= ht_rotate_left_u32(b,14);
-  a ^= c; a -= ht_rotate_left_u32(c,11);
-  b ^= a; b -= ht_rotate_left_u32(a,25);
-  c ^= b; c -= ht_rotate_left_u32(b,16);
-  a ^= c; a -= ht_rotate_left_u32(c,4);
-  b ^= a; b -= ht_rotate_left_u32(a,14);
-  c ^= b; c -= ht_rotate_left_u32(b,24);
+  c ^= b; c -= gt_ht_rotate_left_u32(b,14);
+  a ^= c; a -= gt_ht_rotate_left_u32(c,11);
+  b ^= a; b -= gt_ht_rotate_left_u32(a,25);
+  c ^= b; c -= gt_ht_rotate_left_u32(b,16);
+  a ^= c; a -= gt_ht_rotate_left_u32(c,4);
+  b ^= a; b -= gt_ht_rotate_left_u32(a,14);
+  c ^= b; c -= gt_ht_rotate_left_u32(b,24);
   return c;
 }
 
 static inline uint32_t
-ht_finalize2_u32(uint32_t a, uint32_t b)
+gt_ht_finalize2_u32(uint32_t a, uint32_t b)
 {
-  return ht_finalize3_u32(a, b, 0);
+  return gt_ht_finalize3_u32(a, b, 0);
 }
 
 static inline uint32_t
@@ -84,19 +84,19 @@ static inline uint32_t
 gt_uint64_key_mul_hash(uint64_t key)
 {
   uint32_t low = key, hi = key >> 32;
-  uint32_t x = ht_finalize2_u32(gt_uint32_key_mul_hash(low),
+  uint32_t x = gt_ht_finalize2_u32(gt_uint32_key_mul_hash(low),
                                 gt_uint32_key_mul_hash(hi));
   return x;
 }
 
 static inline int
-ht_ul_cmp(unsigned long a, unsigned long b)
+gt_ht_ul_cmp(unsigned long a, unsigned long b)
 {
   return (a > b) - (a < b);
 }
 
 static inline int
-ht_ptr_cmp(void *a, void *b)
+gt_ht_ptr_cmp(void *a, void *b)
 {
   return (a > b) - (a < b);
 }

@@ -227,8 +227,8 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-DEFINE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp, ht_cstr_elem_hash,
-               ht_cstr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,,)
+DEFINE_HASHMAP(char *, cstr_nofree, unsigned long *, ulp, gt_ht_cstr_elem_hash,
+               gt_ht_cstr_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR,,)
 
 int metagenomethreader(int argc, const char **argv, GtError * err)
 {

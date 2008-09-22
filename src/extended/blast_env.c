@@ -30,8 +30,8 @@ typedef struct {
 } Pos;
 
 DECLARE_HASHMAP(unsigned long, ul, GtArray *, array, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, GtArray *, array, ht_ul_elem_hash,
-               ht_ul_elem_cmp, NULL_DESTRUCTOR, gt_array_delete, static,
+DEFINE_HASHMAP(unsigned long, ul, GtArray *, array, gt_ht_ul_elem_hash,
+               gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, gt_array_delete, static,
                inline)
 DECLARE_SAFE_DEREF(GtArray *,array)
 

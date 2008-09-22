@@ -28,8 +28,8 @@ struct StringDistri {
 };
 
 DECLARE_HASHMAP(char *, cstr, unsigned long, ul, static, inline)
-DEFINE_HASHMAP(char *, cstr, unsigned long, ul, ht_cstr_elem_hash,
-               ht_cstr_elem_cmp, gt_free, NULL_DESTRUCTOR, static,
+DEFINE_HASHMAP(char *, cstr, unsigned long, ul, gt_ht_cstr_elem_hash,
+               gt_ht_cstr_elem_cmp, gt_free, NULL_DESTRUCTOR, static,
                inline)
 
 StringDistri* string_distri_new(void)

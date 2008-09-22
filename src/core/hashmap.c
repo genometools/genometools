@@ -54,16 +54,16 @@ gt_hashmap_new(HashType keyhashtype, GtFree keyfree, GtFree valuefree)
   case HASH_DIRECT:
     {
       HashElemInfo hm_directkey_eleminfo = {
-        ht_ptr_elem_hash, { .free_elem_with_data = hm_elem_free },
-        sizeof (struct map_entry), ht_ptr_elem_cmp, ff, gt_free_func
+        gt_ht_ptr_elem_hash, { .free_elem_with_data = hm_elem_free },
+        sizeof (struct map_entry), gt_ht_ptr_elem_cmp, ff, gt_free_func
       };
       return gt_hashtable_new(hm_directkey_eleminfo);
     }
   case HASH_STRING:
     {
       HashElemInfo hm_strkey_eleminfo = {
-        ht_cstr_elem_hash, { .free_elem_with_data = hm_elem_free },
-        sizeof (struct map_entry), ht_cstr_elem_cmp, ff, gt_free_func
+        gt_ht_cstr_elem_hash, { .free_elem_with_data = hm_elem_free },
+        sizeof (struct map_entry), gt_ht_cstr_elem_cmp, ff, gt_free_func
       };
       return gt_hashtable_new(hm_strkey_eleminfo);
     }
