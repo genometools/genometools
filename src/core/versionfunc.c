@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "gt_config.h"
 
-void versionfunc(const char *progname)
+void gt_versionfunc(const char *progname)
 {
   printf("%s (GenomeTools) %s (%s)\n", progname, GT_VERSION, GT_BUILT);
   printf("Copyright (c) 2003-2008 Gordon Gremme, Stefan Kurtz, and "
@@ -31,7 +31,7 @@ void versionfunc(const char *progname)
   printf("Compile flags: %s\n", GT_CFLAGS);
 }
 
-void showshortversion(const char *progname)
+void gt_showshortversion(const char *progname)
 {
   printf("%s (GenomeTools) %s (%s)\n", progname, GT_VERSION, GT_BUILT);
 }

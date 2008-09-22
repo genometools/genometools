@@ -47,7 +47,7 @@ static OPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
   gt_option_is_mandatory(option);
   gt_option_parser_add_option(op, option);
 
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   return oprval;

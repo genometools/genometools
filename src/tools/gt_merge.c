@@ -34,7 +34,7 @@ static OPrval parse_options(int *parsed_args, GtGenFile **outfp, int argc,
                          "Merge sorted GFF3 files in sorted fashion.");
   ofi = outputfileinfo_new();
   outputfile_register_options(op, outfp, ofi);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   outputfileinfo_delete(ofi);
   gt_option_parser_delete(op);

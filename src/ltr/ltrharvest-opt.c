@@ -436,8 +436,8 @@ static OPrval parse_options(int *parsed_args,
   gt_option_imply_either_2(optionlongoutput, optionmintsd, optionmotif);
 
   gt_option_parser_refer_to_manual(op);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
-                               err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
   lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;
   if (oprval == OPTIONPARSER_OK)
   {

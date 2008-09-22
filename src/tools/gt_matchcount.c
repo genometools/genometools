@@ -32,7 +32,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                          "Compute the match-count for each substring pair of "
                          "length k from seq1 and seq2.");
   gt_option_parser_set_min_max_args(op, 3, 3);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   return oprval;

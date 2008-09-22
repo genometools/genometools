@@ -251,8 +251,8 @@ static OPrval parse_options(int *parsed_args,
     gt_option_exclude(optionmaxdepth, optionbwt);
                    /* because bwt table may be incorrect. XXX change later */
   }
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
-                               err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
   if (oprval == OPTIONPARSER_OK)
   {
     if (gt_option_is_set(optiondb) && gt_strarray_size(so->filenametab) == 0)

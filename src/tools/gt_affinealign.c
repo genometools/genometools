@@ -111,11 +111,11 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_gt_affinealign(void)
+GtTool* gt_affinealign_tool(void)
 {
   return gt_tool_new(gt_affinealign_arguments_new,
-                  gt_affinealign_arguments_delete,
-                  gt_affinealign_option_parser_new,
-                  NULL,
-                  gt_affinealign_runner);
+                     gt_affinealign_arguments_delete,
+                     gt_affinealign_option_parser_new,
+                     NULL,
+                     gt_affinealign_runner);
 }

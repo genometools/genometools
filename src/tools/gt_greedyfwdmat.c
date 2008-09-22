@@ -153,7 +153,7 @@ static OPrval parsegfmsub(bool doms,
 
   gt_option_parser_refer_to_manual(op);
   oprval = gt_option_parser_parse(op, &parsed_args, argc, argv,
-                               versionfunc,err);
+                               gt_versionfunc,err);
 
   if (oprval == OPTIONPARSER_OK)
   {

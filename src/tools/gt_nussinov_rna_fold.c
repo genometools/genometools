@@ -199,7 +199,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             "Fold the supplied RNA sequence with the Nussinov "
                             "algorithm.");
   gt_option_parser_set_min_max_args(op, 5, 5);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   return oprval;

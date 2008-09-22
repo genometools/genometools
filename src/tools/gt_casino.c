@@ -33,7 +33,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                          "'sequence_of_die_rolls' and show the result on "
                          "stdout.");
   gt_option_parser_set_min_max_args(op, 1, 1);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   return oprval;

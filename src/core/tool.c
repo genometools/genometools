@@ -62,7 +62,7 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
 
   /* parse options */
   op = tool->tool_option_parser_new(tool_arguments);
-  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, &parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   switch (oprval) {

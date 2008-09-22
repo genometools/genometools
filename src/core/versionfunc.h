@@ -18,7 +18,7 @@
 #ifndef VERSIONFUNC_H
 #define VERSIONFUNC_H
 
-void versionfunc(const char *progname);
-void showshortversion(const char *progname);
+void gt_versionfunc(const char *progname);
+void gt_showshortversion(const char *progname);
 
 #endif

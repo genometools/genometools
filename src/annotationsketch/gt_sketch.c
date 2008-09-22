@@ -152,7 +152,7 @@ static OPrval parse_options(int *parsed_args,
 
   /* parse options */
   gt_option_parser_set_min_args(op, 1);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
 
   if (oprval == OPTIONPARSER_OK && !force &&

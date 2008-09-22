@@ -36,7 +36,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                          "edit distance as distance function). If 'example' is "
                          "given as\nsequence_file, a builtin example is used.");
   gt_option_parser_set_min_max_args(op, 1, 1);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
            err);
   gt_option_parser_delete(op);
   return oprval;

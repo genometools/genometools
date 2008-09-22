@@ -32,7 +32,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             "Map the supplied files into memory and "
                             "read them once.");
   gt_option_parser_set_min_args(op, 1);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   return oprval;

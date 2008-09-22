@@ -42,7 +42,7 @@ static OPrval parse_env_options(int argc, const char **argv, GtError *err)
                       &spacepeak, false);
   gt_option_parser_add_option(op, o);
   gt_option_parser_set_max_args(op, 0);
-  oprval = gt_option_parser_parse(op, NULL, argc, argv, versionfunc, err);
+  oprval = gt_option_parser_parse(op, NULL, argc, argv, gt_versionfunc, err);
   gt_option_parser_delete(op);
   return oprval;
 }

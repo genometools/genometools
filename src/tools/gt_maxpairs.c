@@ -118,7 +118,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   gt_option_parser_add_option(op, queryoption);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
-                               versionfunc, err);
+                               gt_versionfunc, err);
   if (gt_option_is_set(queryoption))
   {
     if (gt_option_is_set(sampleoption))

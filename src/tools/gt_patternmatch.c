@@ -284,7 +284,7 @@ static OPrval parse_options(Pmatchoptions *pmopt,
   gt_option_is_mandatory(option);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
-                               versionfunc, err);
+                               gt_versionfunc, err);
   gt_option_parser_delete(op);
 
   return oprval;

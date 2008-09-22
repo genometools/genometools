@@ -31,7 +31,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             "Remove all files in the current directory which "
                             "are automatically created by gt.");
   gt_option_parser_set_max_args(op, 0);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   return oprval;

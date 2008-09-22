@@ -170,7 +170,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                           "file", gtr->testspacepeak);
   gt_option_is_development_option(o);
   gt_option_parser_add_option(op, o);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
   return oprval;
@@ -330,7 +330,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
   }
   gt_cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
-    showshortversion(gt_error_get_progname(err));
+    gt_showshortversion(gt_error_get_progname(err));
     gt_lua_set_arg(gtr->L, gt_error_get_progname(err), argv);
     run_interactive_lua_interpreter(gtr->L);
   }

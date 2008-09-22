@@ -106,7 +106,7 @@ parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
   gt_option_parser_add_option(op, option);
 
   gt_option_parser_set_min_max_args(op, 1, 1);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, versionfunc,
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   /* compute parameters currently not set from command-line or
    * determined indirectly */

@@ -135,7 +135,7 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
 
   gt_option_parser_set_min_max_args(op, 1, 1);
   oprval = gt_option_parser_parse(op, parsed_args, argc, (const char**) argv,
-                               versionfunc, err);
+                               gt_versionfunc, err);
   gt_option_parser_delete(op);
   params->checkFlags = EIS_VERIFY_BASIC | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
   params->EISFeatureSet = EIS_FEATURE_REGION_SUMS;
