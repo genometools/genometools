@@ -62,7 +62,7 @@ static void show_alignment(const GtAlignment *a, GT_UNUSED void *data)
 {
   assert(a && !data);
   gt_alignment_show(a, stdout);
-  xputchar('\n');
+  gt_xputchar('\n');
 }
 
 static void show_aligns(unsigned long aligns, GT_UNUSED void *data)
@@ -109,7 +109,7 @@ static int gt_align_runner(GT_UNUSED int argc, const char **argv,
                     gt_bioseq_get_sequence(gt_bioseq_2, j),
                     gt_bioseq_get_sequence_length(gt_bioseq_2, j));
           gt_alignment_show(a, stdout);
-          xputchar('\n');
+          gt_xputchar('\n');
           gt_alignment_delete(a);
         }
       }

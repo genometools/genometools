@@ -33,10 +33,10 @@ struct GtSimpleBioseq {
 
 static bool has_char(FILE *fp)
 {
-  int cc = xfgetc(fp);
+  int cc = gt_xfgetc(fp);
   if (cc == EOF)
     return false;
-  xungetc(cc, fp);
+  gt_xungetc(cc, fp);
   return true;
 }
 
@@ -45,14 +45,14 @@ static void parse_fasta_description(GtStr *description, FILE *fp,
 {
   int cc;
   assert(description && fp && fasta_file);
-  cc = xfgetc(fp);
+  cc = gt_xfgetc(fp);
   if (cc != FASTA_SEPARATOR) {
     fprintf(stderr, "the first character of fasta file \"%s\" has to be '%c'\n",
             fasta_file, FASTA_SEPARATOR);
     exit(EXIT_FAILURE);
   }
   /* read description */
-  while ((cc = xfgetc(fp)) != EOF && cc != '\n')
+  while ((cc = gt_xfgetc(fp)) != EOF && cc != '\n')
     gt_str_append_char(description, cc);
 }
 
@@ -62,7 +62,7 @@ static void parse_fasta_sequence(GtStr *sequence, FILE *fp,
   int cc;
   assert(sequence && fp && fasta_file);
   /* read sequence */
-  while ((cc = xfgetc(fp)) != EOF && cc != FASTA_SEPARATOR) {
+  while ((cc = gt_xfgetc(fp)) != EOF && cc != FASTA_SEPARATOR) {
     if (cc != '\n' && cc != ' ') /* skip newlines and blanks */
       gt_str_append_char(sequence, cc);
   }
@@ -71,7 +71,7 @@ static void parse_fasta_sequence(GtStr *sequence, FILE *fp,
     exit(EXIT_FAILURE);
   }
   if (cc == FASTA_SEPARATOR) /* lookahead */
-    xungetc(FASTA_SEPARATOR, fp);
+    gt_xungetc(FASTA_SEPARATOR, fp);
 }
 
 static void parse_fasta_entry(GtArray *entries, FILE *fp,
@@ -104,7 +104,7 @@ GtSimpleBioseq* gt_simple_bioseq_new(const char *fasta_file)
 {
   GtSimpleBioseq *sbs;
   assert(fasta_file);
-  sbs = xmalloc(sizeof *sbs);
+  sbs = gt_xmalloc(sizeof *sbs);
   sbs->entries = gt_array_new(sizeof (FastaEntry));
   parse_fasta_file(sbs->entries, fasta_file); /* top-down / recursive descent */
   return sbs;

@@ -108,8 +108,8 @@ static void strarray_dump_to_file(GtStrArray *sa, FILE *outfp)
   unsigned long i;
   assert(sa && outfp);
   for (i = 0; i < gt_strarray_size(sa); i++) {
-    xfputs(gt_strarray_get(sa, i), outfp);
-    xfputc('\n', outfp);
+    gt_xfputs(gt_strarray_get(sa, i), outfp);
+    gt_xfputc('\n', outfp);
   }
 }
 
@@ -184,8 +184,8 @@ static int proc_description(const char *description, unsigned long length,
   }
   else {
     if (length)
-      xfputs(description, info->gt_bioseq_index);
-    xfputc('\n', info->gt_bioseq_index);
+      gt_xfputs(description, info->gt_bioseq_index);
+    gt_xfputc('\n', info->gt_bioseq_index);
   }
   return 0;
 }
@@ -206,7 +206,7 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
     info->bs->raw_sequence_length += length;
   }
   else
-    xfputs(seqpart, info->gt_bioseq_raw);
+    gt_xfputs(seqpart, info->gt_bioseq_raw);
   return 0;
 }
 

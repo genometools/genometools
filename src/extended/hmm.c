@@ -556,14 +556,14 @@ void gt_hmm_show(const GtHMM *hmm, FILE *fp)
   for (i = 0; i < hmm->num_of_states; i++) {
     fprintf(fp, "%2u: %f", i, gt_hmm_get_initial_state_probability(hmm, i));
   }
-  xfputc('\n', fp);
+  gt_xfputc('\n', fp);
   fprintf(fp, "transition probabilities:\n");
   for (i = 0; i < hmm->num_of_states; i++) {
     fprintf(fp, "%2u:", i);
     for (j = 0; j < hmm->num_of_states; j++) {
       fprintf(fp, " %.2f", gt_hmm_get_transition_probability(hmm, i, j));
     }
-    xfputc('\n', fp);
+    gt_xfputc('\n', fp);
   }
   fprintf(fp, "emission probabilities:\n");
   for (i = 0; i < hmm->num_of_states; i++) {
@@ -571,7 +571,7 @@ void gt_hmm_show(const GtHMM *hmm, FILE *fp)
     for (j = 0; j < hmm->num_of_symbols; j++) {
       fprintf(fp, " %.2f", gt_hmm_get_emission_probability(hmm, i, j));
     }
-    xfputc('\n', fp);
+    gt_xfputc('\n', fp);
   }
 }
 

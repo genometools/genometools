@@ -97,7 +97,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
                       gt_bioseq_get_seq(gt_bioseq_2, j), score_function);
           if (a) {
             gt_alignment_show(a, stdout);
-            xputchar('\n');
+            gt_xputchar('\n');
             gt_alignment_delete(a);
           }
         }

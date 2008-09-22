@@ -104,7 +104,7 @@ static int show_tool_name(void *key, GT_UNUSED void *value,
   gt_error_check(err);
   assert(key && value);
   if (strcmp(key, "dev") && strcmp(key, "template"))
-    xputs(key);
+    gt_xputs(key);
   return 0;
 }
 

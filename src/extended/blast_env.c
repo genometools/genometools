@@ -262,11 +262,11 @@ void blast_env_show(const BlastEnv *be)
     assert(position_list);
     assert(gt_array_size(position_list)); /* contains at least one position */
     qgram_decode(qgram, code, be->q, be->alpha);
-    xfputs(qgram, stdout);
+    gt_xfputs(qgram, stdout);
     for (i = 0; i < gt_array_size(position_list); i++) {
       printf(", %lu", *(unsigned long*) gt_array_get(position_list, i) + 1);
     }
-    xputchar('\n');
+    gt_xputchar('\n');
   }
   gt_free(qgram);
 }

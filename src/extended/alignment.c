@@ -197,15 +197,15 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
       case Replacement:
       case Deletion:
         for (j = 0; j < meop.steps; j++)
-          xfputc(a->u[uctr++], fp);
+          gt_xfputc(a->u[uctr++], fp);
         break;
       case Insertion:
         for (j = 0; j < meop.steps; j++)
-          xfputc(GAPSYMBOL, fp);
+          gt_xfputc(GAPSYMBOL, fp);
         break;
     }
   }
-  xfputc('\n', fp);
+  gt_xfputc('\n', fp);
   /* output middle line */
   uctr = vctr = 0;
   for (i = gt_array_size(a->eops); i > 0; i--) {
@@ -214,26 +214,26 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
           if (a->u[uctr++] == a->v[vctr++])
-            xfputc(MATCHSYMBOL, fp);
+            gt_xfputc(MATCHSYMBOL, fp);
           else
-            xfputc(MISMATCHSYMBOL, fp);
+            gt_xfputc(MISMATCHSYMBOL, fp);
         }
         break;
       case Deletion:
         for (j = 0; j < meop.steps; j++) {
-          xfputc(MISMATCHSYMBOL, fp);
+          gt_xfputc(MISMATCHSYMBOL, fp);
           uctr++;
         }
         break;
       case Insertion:
         for (j = 0; j < meop.steps; j++) {
-          xfputc(MISMATCHSYMBOL, fp);
+          gt_xfputc(MISMATCHSYMBOL, fp);
           vctr++;
         }
         break;
     }
   }
-  xfputc('\n', fp);
+  gt_xfputc('\n', fp);
   /* ouput last line */
   vctr = 0;
   for (i = gt_array_size(a->eops); i > 0; i--) {
@@ -242,15 +242,15 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
       case Replacement:
       case Insertion:
         for (j = 0; j < meop.steps; j++)
-          xfputc(a->v[vctr++], fp);
+          gt_xfputc(a->v[vctr++], fp);
         break;
       case Deletion:
         for (j = 0; j < meop.steps; j++)
-          xfputc(GAPSYMBOL, fp);
+          gt_xfputc(GAPSYMBOL, fp);
         break;
     }
   }
-  xfputc('\n', fp);
+  gt_xfputc('\n', fp);
 }
 
 void gt_alignment_show_multieop_list(const GtAlignment *a, FILE *fp)
@@ -258,25 +258,25 @@ void gt_alignment_show_multieop_list(const GtAlignment *a, FILE *fp)
   unsigned long i;
   Multieop meop;
   assert(a);
-  xfputc('[', fp);
+  gt_xfputc('[', fp);
   for (i = gt_array_size(a->eops); i > 0; i--) {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
       case Replacement:
-        xfputc('R', fp);
+        gt_xfputc('R', fp);
         break;
       case Insertion:
-        xfputc('I', fp);
+        gt_xfputc('I', fp);
         break;
       case Deletion:
-        xfputc('D', fp);
+        gt_xfputc('D', fp);
         break;
     }
     fprintf(fp, " %lu", meop.steps);
     if (i == 1)
       fprintf(fp, "]\n");
     else
-      xfputc(',', fp);
+      gt_xfputc(',', fp);
   }
 }
 

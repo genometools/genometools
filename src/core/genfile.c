@@ -193,7 +193,7 @@ int gt_genfile_xfgetc(GtGenFile *genfile)
     else {
       switch (genfile->mode) {
         case GFM_UNCOMPRESSED:
-          c = xfgetc(genfile->fileptr.file);
+          c = gt_xfgetc(genfile->fileptr.file);
           break;
         case GFM_GZIP:
           c = xgzfgetc(genfile->fileptr.gzfile);
@@ -206,7 +206,7 @@ int gt_genfile_xfgetc(GtGenFile *genfile)
     }
   }
   else
-    c = xfgetc(stdin);
+    c = gt_xfgetc(stdin);
   return c;
 }
 
@@ -274,10 +274,10 @@ void gt_genfile_xprintf(GtGenFile *genfile, const char *format, ...)
 void gt_genfile_xfputc(int c, GtGenFile *genfile)
 {
   if (!genfile)
-    return xfputc(c, stdout);
+    return gt_xfputc(c, stdout);
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-      xfputc(c, genfile->fileptr.file);
+      gt_xfputc(c, genfile->fileptr.file);
       break;
     case GFM_GZIP:
       xgzfputc(c, genfile->fileptr.gzfile);
@@ -292,10 +292,10 @@ void gt_genfile_xfputc(int c, GtGenFile *genfile)
 void gt_genfile_xfputs(const char *str, GtGenFile *genfile)
 {
   if (!genfile)
-    return xfputs(str, stdout);
+    return gt_xfputs(str, stdout);
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-      xfputs(str, genfile->fileptr.file);
+      gt_xfputs(str, genfile->fileptr.file);
       break;
     case GFM_GZIP:
       xgzfputs(str, genfile->fileptr.gzfile);
@@ -313,7 +313,7 @@ int gt_genfile_xread(GtGenFile *genfile, void *buf, size_t nbytes)
   if (genfile) {
     switch (genfile->mode) {
       case GFM_UNCOMPRESSED:
-        rval = xfread(buf, 1, nbytes, genfile->fileptr.file);
+        rval = gt_xfread(buf, 1, nbytes, genfile->fileptr.file);
         break;
       case GFM_GZIP:
         rval = xgzread(genfile->fileptr.gzfile, buf, nbytes);
@@ -325,19 +325,19 @@ int gt_genfile_xread(GtGenFile *genfile, void *buf, size_t nbytes)
     }
   }
   else
-    rval = xfread(buf, 1, nbytes, stdin);
+    rval = gt_xfread(buf, 1, nbytes, stdin);
   return rval;
 }
 
 void gt_genfile_xwrite(GtGenFile *genfile, void *buf, size_t nbytes)
 {
   if (!genfile) {
-    xfwrite(buf, 1, nbytes, stdout);
+    gt_xfwrite(buf, 1, nbytes, stdout);
     return;
   }
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-      xfwrite(buf, 1, nbytes, genfile->fileptr.file);
+      gt_xfwrite(buf, 1, nbytes, genfile->fileptr.file);
       break;
     case GFM_GZIP:
       xgzwrite(genfile->fileptr.gzfile, buf, nbytes);

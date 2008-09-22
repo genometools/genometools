@@ -97,7 +97,7 @@ static void gt_allocators_atexit_func(void)
 
 void gt_allocators_reg_atexit_func(void)
 {
-  xatexit(gt_allocators_atexit_func);
+  gt_xatexit(gt_allocators_atexit_func);
 }
 
 int gt_allocators_clean(void)

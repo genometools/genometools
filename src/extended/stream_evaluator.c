@@ -1390,58 +1390,58 @@ static void show_gt_transcript_values(GtTranscriptEvaluators *te,
   fprintf(outfp, "exon sensitivity (%s level, all%s): ", level,
           additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_all(te), outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon specificity (%s level, all%s): ", level,
           additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_all(te), outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon sensitivity (%s level, single%s): ", level,
           additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_single(te), outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon specificity (%s level, single%s): ", level,
           additional_info );
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_single(te), outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon sensitivity (%s level, initial%s): ", level,
           additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_initial(te),
                                 outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon specificity (%s level, initial%s): ", level,
           additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_initial(te),
                                 outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon sensitivity (%s level, internal%s): ", level,
           additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_internal(te),
                                 outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon specificity (%s level, internal%s): ", level,
           additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_internal(te),
                                 outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon sensitivity (%s level, terminal%s): ", level,
           additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_terminal(te),
                                 outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 
   fprintf(outfp, "exon specificity (%s level, terminal%s): ", level,
           additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_terminal(te),
                                 outfp);
-  xfputc('\n', outfp);
+  gt_xfputc('\n', outfp);
 }
 
 static void show_nucleotide_values(NucEval *nucleotides, const char *level,

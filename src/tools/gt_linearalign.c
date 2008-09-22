@@ -64,7 +64,7 @@ static int gt_linearalign_runner(GT_UNUSED int argc, const char **argv,
                         gt_bioseq_get_sequence(gt_bioseq_2, j),
                         gt_bioseq_get_sequence_length(gt_bioseq_2, j));
         gt_alignment_show(a, stdout);
-        xputchar('\n');
+        gt_xputchar('\n');
         gt_alignment_delete(a);
       }
     }

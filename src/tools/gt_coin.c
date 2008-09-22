@@ -85,15 +85,15 @@ int gt_coin(int argc, const char **argv, GtError *err)
     for (i = 0 ; i < num_of_emissions; i++) {
       switch (state_sequence[i]) {
         case COIN_FAIR:
-          xputchar('F');
+          gt_xputchar('F');
           break;
         case COIN_LOADED:
-          xputchar('L');
+          gt_xputchar('L');
           break;
         default: assert(0);
       }
     }
-    xputchar('\n');
+    gt_xputchar('\n');
   }
 
   /* free */

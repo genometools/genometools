@@ -91,7 +91,7 @@ int gt_qgramdist(int argc, const char **argv, GtError *err)
         dist = qgramdist(seq_1, seq_2, q);
         printf("qgramdist_%u_(", q);
         gt_cstr_show(gt_seq_get_orig(seq_1), gt_seq_length(seq_1), stdout);
-        xputchar(',');
+        gt_xputchar(',');
         gt_cstr_show(gt_seq_get_orig(seq_2), gt_seq_length(seq_2), stdout);
         printf(")=%lu\n", dist);
       }

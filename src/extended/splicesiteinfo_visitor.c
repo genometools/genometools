@@ -159,11 +159,11 @@ static void showsplicesite(const char *string, unsigned long occurrences,
                            double probability, GT_UNUSED void *unused)
 {
   assert(string && strlen(string) == 4);
-  xputchar(string[0]);
-  xputchar(string[1]);
-  xputchar('-');
-  xputchar(string[2]);
-  xputchar(string[3]);
+  gt_xputchar(string[0]);
+  gt_xputchar(string[1]);
+  gt_xputchar('-');
+  gt_xputchar(string[2]);
+  gt_xputchar(string[3]);
   printf(": %6.2f%% (n=%lu)\n", probability * 100.0, occurrences);
 }
 
@@ -184,12 +184,12 @@ bool splicesiteinfo_visitor_show(GtNodeVisitor *gv)
     /* show splice sites */
     printf("splice site distribution (for introns >= 4bp)\n");
     string_distri_foreach(ssiv->splicesites, showsplicesite, NULL);
-    xputchar('\n');
+    gt_xputchar('\n');
 
     /* show donor sites */
     printf("donor site distribution (for introns >= 4bp)\n");
     string_distri_foreach(ssiv->donorsites, showsinglesite, NULL);
-    xputchar('\n');
+    gt_xputchar('\n');
 
     /* show acceptor sites */
     printf("acceptor site distribution (for introns >= 4bp)\n");

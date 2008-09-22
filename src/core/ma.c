@@ -49,7 +49,7 @@ static void free_MAInfo(MAInfo *mainfo)
 void gt_ma_init(bool bookkeeping)
 {
   assert(!ma);
-  ma = xcalloc(1, sizeof (MA));
+  ma = gt_xcalloc(1, sizeof (MA));
   assert(!ma->bookkeeping);
   ma->allocated_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
                                       (GtFree) free_MAInfo);
@@ -80,17 +80,17 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    mainfo = xmalloc(sizeof (MAInfo));
+    mainfo = gt_xmalloc(sizeof (MAInfo));
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
-    mem = xmalloc(size);
+    mem = gt_xmalloc(size);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
   }
-  return xmalloc(size);
+  return gt_xmalloc(size);
 }
 
 void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
@@ -101,17 +101,17 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    mainfo = xmalloc(sizeof (MAInfo));
+    mainfo = gt_xmalloc(sizeof (MAInfo));
     mainfo->size = nmemb * size;
     mainfo->filename = filename;
     mainfo->line = line;
-    mem = xcalloc(nmemb, size);
+    mem = gt_xcalloc(nmemb, size);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, nmemb * size);
     ma->bookkeeping = true;
     return mem;
   }
-  return xcalloc(nmemb, size);
+  return gt_xcalloc(nmemb, size);
 }
 
 void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
@@ -128,17 +128,17 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
       subtract_size(ma, mainfo->size);
       gt_hashmap_remove(ma->allocated_pointer, ptr);
     }
-    mainfo = xmalloc(sizeof (MAInfo));
+    mainfo = gt_xmalloc(sizeof (MAInfo));
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
-    mem = xrealloc(ptr, size);
+    mem = gt_xrealloc(ptr, size);
     gt_hashmap_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
   }
-  return xrealloc(ptr, size);
+  return gt_xrealloc(ptr, size);
 }
 
 void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)

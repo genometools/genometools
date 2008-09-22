@@ -97,15 +97,15 @@ int gt_casino(int argc, const char **argv, GtError *err)
     for (i = 0 ; i < num_of_emissions; i++) {
       switch (state_sequence[i]) {
         case DICE_FAIR:
-          xputchar('F');
+          gt_xputchar('F');
           break;
         case DICE_LOADED:
-          xputchar('L');
+          gt_xputchar('L');
           break;
         default: assert(0);
       }
     }
-    xputchar('\n');
+    gt_xputchar('\n');
   }
 
   /* free */

@@ -149,9 +149,9 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   if (verbose) {
     fprintf(fp, "fold the following RNA sequence with Nussinov Algorithm:\n");
     for (i = 0; i < rna_length; i++) {
-      xfputc(gt_alpha_decode(dna_alpha, rna_sequence[i]), fp);
+      gt_xfputc(gt_alpha_decode(dna_alpha, rna_sequence[i]), fp);
     }
-    xfputc('\n', fp);
+    gt_xfputc('\n', fp);
     fprintf(fp, "length of RNA sequence = %lu\n", rna_length);
     fprintf(fp, "using the following parameters:\n");
     fprintf(fp, "l_min =  %u\n", l_min);
@@ -182,7 +182,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
     fprintf(fp, "result:\n");
   }
   traceback(1, rna_length, E, rna_sequence, rna_length, energy_function, fp);
-  xfputc('\n', fp);
+  gt_xfputc('\n', fp);
 
   /* free matrix E */
   gt_array2dim_delete(E);

@@ -159,14 +159,14 @@ static void show_assembly_part(unsigned long fragnum, unsigned long overlap,
   frag = gt_bioseq_get_sequence(fragments, fragnum);
   fraglen = gt_bioseq_get_sequence_length(fragments, fragnum);
   for (i = overlap; i < fraglen; i++)
-    xputchar(frag[i]);
+    gt_xputchar(frag[i]);
 }
 
 void greedy_assembly_show(const GreedyAssembly *ga, GtBioseq *fragments)
 {
   printf("%cAssembled sequence\n", FASTA_SEPARATOR);
   greedy_assembly_show_generic(ga, show_assembly_part, fragments);
-  xputchar('\n');
+  gt_xputchar('\n');
 }
 
 static void show_assebly_fragnum(unsigned long fragnum, unsigned long overlap,

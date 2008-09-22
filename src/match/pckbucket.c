@@ -228,9 +228,9 @@ int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
     return -1;
   }
   seqposmaxdepth = (Seqpos) pckbuckettable->maxdepth;
-  xfwrite(&seqposmaxdepth,sizeof (Seqpos),(size_t) 1,fp);
-  xfwrite(pckbuckettable->mbtab[0],sizeof (Matchbound),
-          (size_t) pckbuckettable->maxnumofvalues,fp);
+  gt_xfwrite(&seqposmaxdepth,sizeof (Seqpos),(size_t) 1,fp);
+  gt_xfwrite(pckbuckettable->mbtab[0],sizeof (Matchbound),
+             (size_t) pckbuckettable->maxnumofvalues,fp);
   gt_fclose(fp);
   return 0;
 }

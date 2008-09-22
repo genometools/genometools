@@ -459,8 +459,8 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
   size_t numRanges;
   assert(rangeList && fp);
   numRanges = rangeList->numRanges;
-  xfwrite(&(rangeList->numRanges), sizeof (rangeList->numRanges), 1, fp);
-  xfwrite(rangeList->ranges, sizeof (struct seqRange), numRanges, fp);
+  gt_xfwrite(&(rangeList->numRanges), sizeof (rangeList->numRanges), 1, fp);
+  gt_xfwrite(rangeList->ranges, sizeof (struct seqRange), numRanges, fp);
   return 1;
 }
 
@@ -480,13 +480,14 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
       (((Seqpos)1) << (symLenStrBits - newRangeList->symBits)) - 1;
   else
     newRangeList->maxRangeLen = ~(Seqpos)0;
-  xfread(&(newRangeList->numRanges), sizeof (newRangeList->numRanges), 1, fp);
+  gt_xfread(&(newRangeList->numRanges), sizeof (newRangeList->numRanges), 1,
+            fp);
   numRanges = newRangeList->numRanges;
   newRangeList->partialSymSums = NULL;
   newRangeList->ranges = gt_malloc(sizeof (struct seqRange) *
                                    (newRangeList->numRangesStorable
                                    = numRanges));
-  xfread(newRangeList->ranges, sizeof (struct seqRange), numRanges, fp);
+  gt_xfread(newRangeList->ranges, sizeof (struct seqRange), numRanges, fp);
   if (features & SRL_PARTIAL_SYMBOL_SUMS)
   {
     Seqpos *partialSymSums;

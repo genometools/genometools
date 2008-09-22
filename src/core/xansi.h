@@ -30,25 +30,25 @@
   That is, one can use this functions without the need to check for errors.
 */
 
-void   xatexit(void (*function)(void));
-void*  xcalloc(size_t nmemb, size_t size);
+void   gt_xatexit(void (*function)(void));
+void*  gt_xcalloc(size_t nmemb, size_t size);
 void   xfclose(FILE*);
-void   xfflush(FILE*);
-int    xfgetc(FILE*);
-void   xfgetpos(FILE*, fpos_t*);
+void   gt_xfflush(FILE*);
+int    gt_xfgetc(FILE*);
+void   gt_xfgetpos(FILE*, fpos_t*);
 FILE*  xfopen(const char *path, const char *mode);
-void   xfputc(int, FILE*);
-void   xfputs(const char*, FILE*);
-size_t xfread(void *ptr, size_t size, size_t nmemb, FILE*);
-void   xfseek(FILE*, long offset, int whence);
-void   xfsetpos(FILE*, const fpos_t*);
-void   xfwrite(const void *ptr, size_t size, size_t nmemb, FILE*);
-void*  xmalloc(size_t size);
-void   xputchar(int);
-void   xputs(const char*);
-void*  xrealloc(void *ptr, size_t size);
-void   xremove(const char*);
-char*  xstrdup(const char*);
-void   xungetc(int, FILE*);
+void   gt_xfputc(int, FILE*);
+void   gt_xfputs(const char*, FILE*);
+size_t gt_xfread(void *ptr, size_t size, size_t nmemb, FILE*);
+void   gt_xfseek(FILE*, long offset, int whence);
+void   gt_xfsetpos(FILE*, const fpos_t*);
+void   gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE*);
+void*  gt_xmalloc(size_t size);
+void   gt_xputchar(int);
+void   gt_xputs(const char*);
+void*  gt_xrealloc(void *ptr, size_t size);
+void   gt_xremove(const char*);
+char*  gt_xstrdup(const char*);
+void   gt_xungetc(int, FILE*);
 
 #endif

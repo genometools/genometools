@@ -70,11 +70,11 @@ void gt_cstr_array_show(char **gt_cstr_array, FILE *fp)
   unsigned long i = 0;
   while (gt_cstr_array[i]) {
     if (i)
-      xfputc(' ', fp);
-    xfputs(gt_cstr_array[i], fp);
+      gt_xfputc(' ', fp);
+    gt_xfputs(gt_cstr_array[i], fp);
     i++;
   }
-  xfputc('\n', fp);
+  gt_xfputc('\n', fp);
 }
 
 void gt_cstr_array_show_genfile(const char **gt_cstr_array, GtGenFile *fp)

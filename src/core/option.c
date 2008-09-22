@@ -258,11 +258,11 @@ static void show_description(unsigned long initial_space, const char *desc,
     }
     /* break point found, show description up to that point */
     for (; desc_ptr < tmp_ptr; desc_ptr++) {
-      xputchar(*desc_ptr);
+      gt_xputchar(*desc_ptr);
       if (*desc_ptr == '\n') {
         /* show leading spaces */
         for  (i = 0; i < initial_space; i++)
-          xputchar(' ');
+          gt_xputchar(' ');
         desc_ptr++;
         continue_while = true;
         break;
@@ -276,24 +276,24 @@ static void show_description(unsigned long initial_space, const char *desc,
     assert(*desc_ptr == ' ' || *desc_ptr == '\n');
     /* show newline for break point */
     desc_ptr++;
-    xputchar('\n');
+    gt_xputchar('\n');
     /* show leading spaces */
     for  (i = 0; i < initial_space; i++)
-      xputchar(' ');
+      gt_xputchar(' ');
   }
   /* show final line */
   while (desc_ptr < desc + len) {
-    xputchar(*desc_ptr);
+    gt_xputchar(*desc_ptr);
     if (*desc_ptr == '\n') {
       /* show leading spaces */
       for  (i = 0; i < initial_space; i++)
-        xputchar(' ');
+        gt_xputchar(' ');
       desc_ptr++;
       continue;
     }
     desc_ptr++;
   }
-  xputchar('\n');
+  gt_xputchar('\n');
 }
 
 static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
@@ -343,50 +343,50 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
       else if (option->option_type == OPTION_CHOICE) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (!option->default_value.s || !strlen(option->default_value.s))
-          xputs("undefined");
+          gt_xputs("undefined");
         else
-          xputs(option->default_value.s);
+          gt_xputs(option->default_value.s);
       }
 
       else if (option->option_type == OPTION_DOUBLE) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.d == UNDEF_DOUBLE)
-          xputs("undefined");
+          gt_xputs("undefined");
         else
           printf("%.2f\n", option->default_value.d);
       }
       else if (option->option_type == OPTION_INT) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.i == UNDEF_INT)
-          xputs("undefined");
+          gt_xputs("undefined");
         else
           printf("%d\n", option->default_value.i);
       }
       else if (option->option_type == OPTION_UINT) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.ui == UNDEF_UINT)
-          xputs("undefined");
+          gt_xputs("undefined");
         else
           printf("%u\n", option->default_value.ui);
       }
       else if (option->option_type == OPTION_LONG) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.ul == UNDEF_LONG)
-          xputs("undefined");
+          gt_xputs("undefined");
         else
           printf("%ld\n", option->default_value.l);
       }
       else if (option->option_type == OPTION_ULONG) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.ul == UNDEF_ULONG)
-          xputs("undefined");
+          gt_xputs("undefined");
         else
           printf("%lu\n", option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.r.start == UNDEF_ULONG)
-          xputs("undefined");
+          gt_xputs("undefined");
         else {
           printf("%lu %lu\n", option->default_value.r.start,
                  option->default_value.r.end);
@@ -395,9 +395,9 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
       else if (option->option_type == OPTION_STRING) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (!option->default_value.s || !strlen(option->default_value.s))
-          xputs("undefined");
+          gt_xputs("undefined");
         else
-          xputs(option->default_value.s);
+          gt_xputs(option->default_value.s);
       }
     }
   }

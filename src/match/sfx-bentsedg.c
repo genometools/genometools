@@ -1233,11 +1233,11 @@ static void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
   countout = many/NUMBEROFZEROS;
   for (i=0; i<countout; i++)
   {
-    xfwrite(outvalues,sizeof (Uchar),(size_t) NUMBEROFZEROS,
-            outlcpinfo->outfplcptab);
+    gt_xfwrite(outvalues,sizeof (Uchar),(size_t) NUMBEROFZEROS,
+               outlcpinfo->outfplcptab);
   }
-  xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
-          outlcpinfo->outfplcptab);
+  gt_xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
+             outlcpinfo->outfplcptab);
   outlcpinfo->countoutputlcpvalues += many;
 }
 
@@ -1303,12 +1303,13 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
     }
   }
   outlcpinfo->countoutputlcpvalues += bucketsize;
-  xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
-          sizeof (Uchar),(size_t) bucketsize,outlcpinfo->outfplcptab);
-  xfwrite(outlcpinfo->lcpsubtab.largelcpvalues.spaceLargelcpvalue,
-          sizeof (Largelcpvalue),
-          (size_t) outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue,
-          outlcpinfo->outfpllvtab);
+  gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
+             sizeof (Uchar),(size_t) bucketsize,outlcpinfo->outfplcptab);
+  gt_xfwrite(outlcpinfo->lcpsubtab.largelcpvalues.spaceLargelcpvalue,
+             sizeof (Largelcpvalue),
+             (size_t)
+             outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue,
+             outlcpinfo->outfpllvtab);
 }
 
 #ifdef SKDEBUG
@@ -1462,8 +1463,8 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   }
   outlcpinfo->lcpsubtab.smalllcpvalues[0] = (Uchar) lcpvalue;
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
-  xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
-          sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
+  gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
+             sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
   return minprefixindex;
 }
 

@@ -98,7 +98,7 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
                         costs->replacement_cost, costs->gap_opening_cost,
                         costs->gap_extension_cost);
         gt_alignment_show(a, stdout);
-        xputchar('\n');
+        gt_xputchar('\n');
         gt_alignment_delete(a);
       }
     }

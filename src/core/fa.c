@@ -136,7 +136,7 @@ static void xfclose_generic(void *stream, GtGenFileMode genfilemode, FA *fa)
   gt_hashmap_remove(fa->file_pointer, stream);
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      xfclose(stream);
+      gt_xfclose(stream);
       break;
     case GFM_GZIP:
       xgzclose(stream);
@@ -294,7 +294,7 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, int flags,
   assert(fp);
   if (flags & TMPFP_AUTOREMOVE)
   {
-    xremove(gt_str_get(template));
+    gt_xremove(gt_str_get(template));
   }
   {
     FAFileInfo *fileinfo;

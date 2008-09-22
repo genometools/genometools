@@ -255,16 +255,16 @@ void gt_score_matrix_show(const GT_ScoreMatrix *sm, FILE *fp)
   unsigned i, j;
   assert(sm && fp);
   /* show alphabet line */
-  xfputc(' ', fp);
+  gt_xfputc(' ', fp);
   for (i = 0; i < gt_alpha_size(sm->alpha); i++)
     fprintf(fp, "  %c", gt_alpha_decode(sm->alpha, i));
-  xfputc('\n', fp);
+  gt_xfputc('\n', fp);
   /* show score lines */
   for (i = 0; i < gt_alpha_size(sm->alpha); i++) {
-    xfputc(gt_alpha_decode(sm->alpha, i), fp);
+    gt_xfputc(gt_alpha_decode(sm->alpha, i), fp);
     for (j = 0; j < gt_alpha_size(sm->alpha); j++)
       fprintf(fp, " %2d", gt_score_matrix_get_score(sm, i, j));
-    xfputc('\n', fp);
+    gt_xfputc('\n', fp);
   }
 }
 

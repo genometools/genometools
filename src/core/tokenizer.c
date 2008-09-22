@@ -138,7 +138,7 @@ int gt_tokenizer_unit_test(GtError *err)
   gt_tokenizer_skip_comment_lines(t);
   ensure(had_err, !gt_tokenizer_has_token(t));
   gt_tokenizer_delete(t);
-  xremove(gt_str_get(tmpfilename));
+  gt_xremove(gt_str_get(tmpfilename));
 
   /* larger test */
   tmpfp = gt_xtmpfp(tmpfilename);
@@ -173,7 +173,7 @@ int gt_tokenizer_unit_test(GtError *err)
   gt_tokenizer_next_token(t);
   ensure(had_err, !gt_tokenizer_has_token(t));
   gt_tokenizer_delete(t);
-  xremove(gt_str_get(tmpfilename));
+  gt_xremove(gt_str_get(tmpfilename));
   gt_str_delete(tmpfilename);
 
   return had_err;

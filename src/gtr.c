@@ -187,8 +187,7 @@ void gtr_register_components(GTR *gtr)
   gtr->unit_tests = gtt_unit_tests();
 }
 
-static int
-run_test(void *key, void *value, void *data, GtError *err)
+static int run_test(void *key, void *value, void *data, GtError *err)
 {
   int had_err, *had_errp;
   char *testname = key;
@@ -197,18 +196,18 @@ run_test(void *key, void *value, void *data, GtError *err)
   assert(testname && test && data);
   had_errp = (int*) data;
   printf("%s...", testname);
-  xfflush(stdout);
+  gt_xfflush(stdout);
   had_err = test(err);
   if (had_err) {
-    xputs("error");
+    gt_xputs("error");
     *had_errp = had_err;
     fprintf(stderr, "first error: %s\n", gt_error_get(err));
     gt_error_unset(err);
-    xfflush(stderr);
+    gt_xfflush(stderr);
   }
   else
-    xputs("ok");
-  xfflush(stdout);
+    gt_xputs("ok");
+  gt_xfflush(stdout);
   return 0;
 }
 

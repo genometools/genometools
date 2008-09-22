@@ -205,7 +205,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
           }
         }
         else
-          xputs(gt_bioseq_get_md5_fingerprint(bs, j));
+          gt_xputs(gt_bioseq_get_md5_fingerprint(bs, j));
       }
     }
     gt_bioseq_delete(bs);

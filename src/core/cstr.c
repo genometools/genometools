@@ -59,7 +59,7 @@ void gt_cstr_show(const char *cstr, unsigned long length, FILE *fp)
   unsigned long i;
   assert(cstr && fp);
   for (i = 0; i < length; i++)
-    xfputc(cstr[i], fp);
+    gt_xfputc(cstr[i], fp);
 }
 
 unsigned long gt_cstr_length_up_to_char(const char *cstr, char c)
