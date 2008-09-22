@@ -34,12 +34,12 @@
 
 */
 
-typedef struct GTF_parser GTF_parser;
+typedef struct GtGTFParser GtGTFParser;
 
-GTF_parser* gtf_parser_new(GtTypeChecker*);
-int         gtf_parser_parse(GTF_parser*, GtQueue *genome_nodes,
-                             GtStr *filenamestr, FILE*,
-                             unsigned int be_tolerant, GtError*);
-void        gtf_parser_delete(GTF_parser*);
+GtGTFParser* gt_gtf_parser_new(GtTypeChecker*);
+int          gt_gtf_parser_parse(GtGTFParser*, GtQueue *genome_nodes,
+                                 GtStr *filenamestr, FILE*,
+                                 bool be_tolerant, GtError*);
+void         gt_gtf_parser_delete(GtGTFParser*);
 
 #endif

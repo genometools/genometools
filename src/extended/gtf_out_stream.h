@@ -21,9 +21,9 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
-typedef struct GTFOutStream GTFOutStream;
+typedef struct GtGTFOutStream GtGTFOutStream;
 
-const GtNodeStreamClass* gtf_out_stream_class(void);
-GtNodeStream*            gtf_out_stream_new(GtNodeStream*, GtGenFile*);
+const GtNodeStreamClass* gt_gtf_out_stream_class(void);
+GtNodeStream*            gt_gtf_out_stream_new(GtNodeStream*, GtGenFile*);
 
 #endif

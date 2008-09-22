@@ -19,19 +19,19 @@
 #include "extended/gtf_visitor.h"
 #include "extended/node_stream_rep.h"
 
-struct GTFOutStream {
+struct GtGTFOutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *gtf_visitor;
 };
 
 #define gtf_out_stream_cast(GS)\
-        gt_node_stream_cast(gtf_out_stream_class(), GS);
+        gt_node_stream_cast(gt_gtf_out_stream_class(), GS);
 
 static int gtf_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                GtError *err)
 {
-  GTFOutStream *gtf_out_stream;
+  GtGTFOutStream *gtf_out_stream;
   int had_err;
   gt_error_check(err);
   gtf_out_stream = gtf_out_stream_cast(gs);
@@ -43,28 +43,28 @@ static int gtf_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
 static void gtf_out_stream_free(GtNodeStream *gs)
 {
-  GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
+  GtGTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
   gt_node_visitor_delete(gtf_out_stream->gtf_visitor);
   gt_node_stream_delete(gtf_out_stream->in_stream);
 }
 
-const GtNodeStreamClass* gtf_out_stream_class(void)
+const GtNodeStreamClass* gt_gtf_out_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-   nsc = gt_node_stream_class_new(sizeof (GTFOutStream),
+   nsc = gt_node_stream_class_new(sizeof (GtGTFOutStream),
                                   gtf_out_stream_free,
                                   gtf_out_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* gtf_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)
+GtNodeStream* gt_gtf_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)
 {
-  GtNodeStream *gs = gt_node_stream_create(gtf_out_stream_class(),
-                                          gt_node_stream_is_sorted(in_stream));
-  GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
+  GtNodeStream *gs = gt_node_stream_create(gt_gtf_out_stream_class(),
+                                           gt_node_stream_is_sorted(in_stream));
+  GtGTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
   gtf_out_stream->in_stream = gt_node_stream_ref(in_stream);
-  gtf_out_stream->gtf_visitor = gtf_visitor_new(outfp);
+  gtf_out_stream->gtf_visitor = gt_gtf_visitor_new(outfp);
   return gs;
 }

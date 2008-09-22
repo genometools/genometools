@@ -34,7 +34,7 @@
 #define TRANSCRIPT_ID_ATTRIBUTE   "transcript_id"
 #define TRANSCRIPT_NAME_ATTRIBUTE "transcript_name"
 
-struct GTF_parser {
+struct GtGTFParser {
   GtHashmap *sequence_region_to_range, /* map from sequence regions to ranges */
           *gene_id_hash, /* map from gene_id to transcript_id hash */
           *seqid_to_str_mapping,
@@ -83,9 +83,9 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
   return -1;
 }
 
-GTF_parser* gtf_parser_new(GtTypeChecker *type_checker)
+GtGTFParser* gt_gtf_parser_new(GtTypeChecker *type_checker)
 {
-  GTF_parser *parser = gt_malloc(sizeof (GTF_parser));
+  GtGTFParser *parser = gt_malloc(sizeof (GtGTFParser));
   parser->sequence_region_to_range = gt_hashmap_new(HASH_STRING,
                                                  gt_free_func, gt_free_func);
   parser->gene_id_hash = gt_hashmap_new(HASH_STRING, gt_free_func,
@@ -247,9 +247,9 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
-                     GtStr *filenamestr, FILE *fpin, unsigned int be_tolerant,
-                     GtError *err)
+int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
+                        GtStr *filenamestr, FILE *fpin, bool be_tolerant,
+                        GtError *err)
 {
   GtStr *seqid_str, *source_str, *line_buffer;
   char *line;
@@ -578,7 +578,7 @@ int gtf_parser_parse(GTF_parser *parser, GtQueue *genome_nodes,
   return had_err;
 }
 
-void gtf_parser_delete(GTF_parser *parser)
+void gt_gtf_parser_delete(GtGTFParser *parser)
 {
   if (!parser) return;
   gt_hashmap_delete(parser->sequence_region_to_range);

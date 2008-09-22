@@ -58,7 +58,7 @@ int gt_gtf_to_gff3(int argc, const char **argv, GtError *err)
   }
 
   /* create a gtf input stream */
-  gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, err);
+  gtf_in_stream = gt_gtf_in_stream_new(argv[parsed_args], be_tolerant, err);
   if (!gtf_in_stream)
     had_err = -1;
 

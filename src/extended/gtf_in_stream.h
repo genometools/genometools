@@ -22,11 +22,11 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct GTFInStream GTFInStream;
+typedef struct GtGTFInStream GtGTFInStream;
 
-const GtNodeStreamClass* gtf_in_stream_class(void);
+const GtNodeStreamClass* gt_gtf_in_stream_class(void);
 /* filename == NULL -> use stdin */
-GtNodeStream*            gtf_in_stream_new(const char *filename,
-                                           bool be_tolerant, GtError*);
+GtNodeStream*            gt_gtf_in_stream_new(const char *filename,
+                                              bool be_tolerant, GtError*);
 
 #endif

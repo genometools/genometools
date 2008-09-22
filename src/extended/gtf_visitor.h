@@ -19,11 +19,11 @@
 #define GTF_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct GTFVisitor GTFVisitor;
+typedef struct GtGTFVisitor GtGTFVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* gtf_visitor_class(void);
-GtNodeVisitor*            gtf_visitor_new(GtGenFile*);
+const GtNodeVisitorClass* gt_gtf_visitor_class(void);
+GtNodeVisitor*            gt_gtf_visitor_new(GtGenFile*);
 
 #endif
