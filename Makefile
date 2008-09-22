@@ -251,8 +251,9 @@ endif
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/exercise \
-                      src/match \
-                      src/gtlua \
+                      src/gtlua
+
+LIBGTUNSTABLE_DIRS:=  src/match \
                       src/ltr \
                       src/mgth
 
@@ -278,6 +279,11 @@ LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \
 LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
                     $(LIBLUA_DEP) \
                     $(LIBEXPAT_DEP)
+
+# the GenomeTools unstable library
+LIBGTUNSTABLE_SRC:=$(foreach DIR,$(LIBGTUNSTABLE_DIRS),$(wildcard $(DIR)/*.c))
+LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
+LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 
 # set prefix for install target
 prefix ?= /usr/local
@@ -324,6 +330,20 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGENOMETOOLS_OBJ)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	-o $@ $(GTSHAREDLIB_LIBDEP)
 
+lib/libgtunstable.a: $(LIBGTUNSTABLE_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(LIBGTUNSTABLE_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
+lib/libgtunstable$(SHARED_OBJ_NAME_EXT): $(LIBGTUNSTABLE_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTUNSTABLE_OBJ) \
+	-o $@ $(GTSHAREDLIB_LIBDEP)
+
 lib/libtecla.a: $(LIBTECLA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -361,7 +381,9 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
                                              $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
-                                        lib/libgenometools.a $(GTLIBS) \
+                                        lib/libgenometools.a \
+                                        lib/libgtunstable.a \
+                                        $(GTLIBS) \
                                         $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/noop, \
