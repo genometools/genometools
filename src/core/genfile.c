@@ -103,14 +103,14 @@ GtGenFile* gt_genfile_open(GtGenFileMode genfilemode, const char *path,
         }
         break;
       case GFM_GZIP:
-        genfile->fileptr.gzfile = gt_gzopen(path, mode, err);
+        genfile->fileptr.gzfile = gt_fa_gzopen(path, mode, err);
         if (!genfile->fileptr.gzfile) {
           gt_genfile_delete(genfile);
           return NULL;
         }
         break;
       case GFM_BZIP2:
-        genfile->fileptr.bzfile = gt_bzopen(path, mode, err);
+        genfile->fileptr.bzfile = gt_fa_bzopen(path, mode, err);
         if (!genfile->fileptr.bzfile) {
           gt_genfile_delete(genfile);
           return NULL;
@@ -142,10 +142,10 @@ GtGenFile* gt_genfile_xopen_w_gfmode(GtGenFileMode genfilemode,
         genfile->fileptr.file = gt_fa_xfopen(path, mode);
         break;
       case GFM_GZIP:
-        genfile->fileptr.gzfile = gt_xgzopen(path, mode);
+        genfile->fileptr.gzfile = gt_fa_xgzopen(path, mode);
         break;
       case GFM_BZIP2:
-        genfile->fileptr.bzfile = gt_xbzopen(path, mode);
+        genfile->fileptr.bzfile = gt_fa_xbzopen(path, mode);
         genfile->orig_path = gt_cstr_dup(path);
         genfile->orig_mode = gt_cstr_dup(path);
         break;
@@ -384,10 +384,10 @@ void gt_genfile_close(GtGenFile *genfile)
           gt_fa_fclose(genfile->fileptr.file);
       break;
     case GFM_GZIP:
-        gt_gzclose(genfile->fileptr.gzfile);
+        gt_fa_gzclose(genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
-        gt_bzclose(genfile->fileptr.bzfile);
+        gt_fa_bzclose(genfile->fileptr.bzfile);
       break;
     default: assert(0);
   }
