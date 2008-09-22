@@ -82,7 +82,7 @@ int gt_merge(int argc, const char **argv, GtError *err)
   merge_stream = gt_merge_stream_new(genome_streams);
 
   /* create a gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);
+  gff3_out_stream = gt_gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&

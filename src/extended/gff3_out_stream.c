@@ -19,19 +19,19 @@
 #include "extended/gff3_visitor.h"
 #include "extended/node_stream_rep.h"
 
-struct GFF3OutStream {
+struct GtGFF3OutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *gff3_visitor;
 };
 
 #define gff3_out_stream_cast(GS)\
-        gt_node_stream_cast(gff3_out_stream_class(), GS);
+        gt_node_stream_cast(gt_gff3_out_stream_class(), GS);
 
 static int gff3_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                 GtError *err)
 {
-  GFF3OutStream *gff3_out_stream;
+  GtGFF3OutStream *gff3_out_stream;
   int had_err;
   gt_error_check(err);
   gff3_out_stream = gff3_out_stream_cast(gs);
@@ -43,36 +43,36 @@ static int gff3_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
 static void gff3_out_stream_free(GtNodeStream *gs)
 {
-  GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
+  GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gt_node_stream_delete(gff3_out_stream->in_stream);
   gt_node_visitor_delete(gff3_out_stream->gff3_visitor);
 }
 
-const GtNodeStreamClass* gff3_out_stream_class(void)
+const GtNodeStreamClass* gt_gff3_out_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (GFF3OutStream),
+    nsc = gt_node_stream_class_new(sizeof (GtGFF3OutStream),
                                    gff3_out_stream_free,
                                    gff3_out_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* gff3_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)
+GtNodeStream* gt_gff3_out_stream_new(GtNodeStream *in_stream, GtGenFile *outfp)
 {
-  GtNodeStream *gs = gt_node_stream_create(gff3_out_stream_class(),
-                                          gt_node_stream_is_sorted(in_stream));
-  GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
+  GtNodeStream *gs = gt_node_stream_create(gt_gff3_out_stream_class(),
+                                           gt_node_stream_is_sorted(in_stream));
+  GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = gt_node_stream_ref(in_stream);
   gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp);
   return gs;
 }
 
-void gff3_out_stream_set_fasta_width(GtNodeStream *gs,
+void gt_gff3_out_stream_set_fasta_width(GtNodeStream *gs,
                                      unsigned long fasta_width)
 {
-  GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
+  GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   assert(gff3_out_stream);
   gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
 }

@@ -106,10 +106,12 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
   if (!had_err) {
     if (arguments.sort) {
       sort_stream = sort_stream_new(chseqids_stream);
-      gff3_out_stream = gff3_out_stream_new(sort_stream, arguments.outfp);
+      gff3_out_stream = gt_gff3_out_stream_new(sort_stream, arguments.outfp);
     }
-    else
-      gff3_out_stream = gff3_out_stream_new(chseqids_stream, arguments.outfp);
+    else {
+      gff3_out_stream = gt_gff3_out_stream_new(chseqids_stream,
+                                               arguments.outfp);
+    }
   }
 
   /* pull the features through the stream and free them afterwards */

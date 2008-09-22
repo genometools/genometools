@@ -239,7 +239,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
     /* create gff3 output stream if -pipe was used */
     if (arguments.pipe) {
-      gff3_out_stream = gff3_out_stream_new(last_stream, NULL);
+      gff3_out_stream = gt_gff3_out_stream_new(last_stream, NULL);
       last_stream = gff3_out_stream;
     }
 

@@ -238,8 +238,8 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* create gff3 output stream */
   if (!had_err) {
-    gff3_out_stream = gff3_out_stream_new(last_stream, arguments->outfp);
-    gff3_out_stream_set_fasta_width(gff3_out_stream, arguments->width);
+    gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
+    gt_gff3_out_stream_set_fasta_width(gff3_out_stream, arguments->width);
   }
 
   /* pull the features through the stream and free them afterwards */

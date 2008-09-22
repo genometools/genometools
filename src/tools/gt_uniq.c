@@ -87,7 +87,7 @@ int gt_uniq(int argc, const char **argv, GtError *err)
   uniq_stream = uniq_stream_new(gff3_in_stream);
 
   /* create gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(uniq_stream, arguments.outfp);
+  gff3_out_stream = gt_gff3_out_stream_new(uniq_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) && gn)

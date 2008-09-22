@@ -107,7 +107,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   /* create gff3 output stream */
   /* XXX: replace NULL with proper outfile */
   if (!had_err)
-    gff3_out_stream = gff3_out_stream_new(cds_stream, NULL);
+    gff3_out_stream = gt_gff3_out_stream_new(cds_stream, NULL);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&

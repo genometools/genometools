@@ -65,7 +65,7 @@ int gt_gtf_to_gff3(int argc, const char **argv, GtError *err)
   if (!had_err) {
     /* create a gff3 output stream */
     /* XXX: use proper genfile */
-    gff3_out_stream = gff3_out_stream_new(gtf_in_stream, NULL);
+    gff3_out_stream = gt_gff3_out_stream_new(gtf_in_stream, NULL);
 
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&

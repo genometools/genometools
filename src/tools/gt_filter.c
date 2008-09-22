@@ -279,10 +279,10 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
     targetbest_filter_stream = gt_targetbest_filter_stream_new(filter_stream);
 
   /* create a gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(arguments->targetbest
-                                        ? targetbest_filter_stream
-                                        : filter_stream,
-                                        arguments->outfp);
+  gff3_out_stream = gt_gff3_out_stream_new(arguments->targetbest
+                                           ? targetbest_filter_stream
+                                           : filter_stream,
+                                           arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&

@@ -21,11 +21,11 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
-typedef struct GFF3OutStream GFF3OutStream;
+typedef struct GtGFF3OutStream GtGFF3OutStream;
 
-const GtNodeStreamClass* gff3_out_stream_class(void);
-GtNodeStream*            gff3_out_stream_new(GtNodeStream*, GtGenFile*);
-void                     gff3_out_stream_set_fasta_width(GtNodeStream*,
-                                                         unsigned long);
+const GtNodeStreamClass* gt_gff3_out_stream_class(void);
+GtNodeStream*            gt_gff3_out_stream_new(GtNodeStream*, GtGenFile*);
+void                     gt_gff3_out_stream_set_fasta_width(GtNodeStream*,
+                                                            unsigned long);
 
 #endif

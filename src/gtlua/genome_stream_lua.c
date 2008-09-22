@@ -47,7 +47,7 @@ static int gff3_out_stream_lua_new(lua_State *L)
   assert(L);
   /* construct object */
   out_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
-  *out_stream = gff3_out_stream_new(*in_stream, NULL);
+  *out_stream = gt_gff3_out_stream_new(*in_stream, NULL);
   assert(*out_stream);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
