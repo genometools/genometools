@@ -70,7 +70,7 @@ genBitCount(@uOpType@ v)
   } while (0)
 
 int
-bitPackString@iTypeTag@_unit_test(GT_Error *err)
+gt_bitPackString@iTypeTag@_unit_test(GtError *err)
 {
   BitString bitStore = NULL;
   BitString bitStoreCopy = NULL;

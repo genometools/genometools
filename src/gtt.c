@@ -155,7 +155,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "array2dim example", gt_array2dim_example);
   gt_hashmap_add(unit_tests, "basename module", gt_basename_unit_test);
   gt_hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
-  gt_hashmap_add(unit_tests, "bit pack string module", bitPackString_unit_test);
+  gt_hashmap_add(unit_tests, "bit pack string module",
+                 gt_bitPackString_unit_test);
   gt_hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
   gt_hashmap_add(unit_tests, "bittab example", gt_bittab_example);
   gt_hashmap_add(unit_tests, "bsearch module", gt_bsearch_unit_test);

@@ -26,11 +26,11 @@
 #include "core/ensure.h"
 
 int
-bitPackString_unit_test(GtError *err)
+gt_bitPackString_unit_test(GtError *err)
 {
-  return bitPackStringInt_unit_test(err)
-    || bitPackStringInt8_unit_test(err)
-    || bitPackStringInt16_unit_test(err)
-    || bitPackStringInt32_unit_test(err)
-    || bitPackStringInt64_unit_test(err);
+  return gt_bitPackStringInt_unit_test(err)
+    || gt_bitPackStringInt8_unit_test(err)
+    || gt_bitPackStringInt16_unit_test(err)
+    || gt_bitPackStringInt32_unit_test(err)
+    || gt_bitPackStringInt64_unit_test(err);
 }

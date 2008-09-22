@@ -73,7 +73,7 @@ genBitCount(uint64_t v)
   } while (0)
 
 int
-bitPackStringInt64_unit_test(GtError *err)
+gt_bitPackStringInt64_unit_test(GtError *err)
 {
   BitString bitStore = NULL;
   BitString bitStoreCopy = NULL;
