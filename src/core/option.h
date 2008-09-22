@@ -38,8 +38,8 @@ typedef enum {
                                 option -help, -helpdev, or -version was used */
 } OPrval;
 
-typedef void (*ShowVersionFunc)(const char *progname);
-typedef int  (*ShowGT_CommentFunc)(const char *progname, void *data, GtError*);
+typedef void (*GtShowVersionFunc)(const char *progname);
+typedef int  (*GtShowCommentFunc)(const char *progname, void *data, GtError*);
 typedef int  (*GtOptionParserHookFunc)(void *data, GtError*);
 
 /* the option parser */
@@ -50,7 +50,7 @@ void            gt_option_parser_add_option(GtOptionParser*, GtOption*);
 /* refer to manual at the end of help output */
 void            gt_option_parser_refer_to_manual(GtOptionParser*);
 void            gt_option_parser_set_comment_func(GtOptionParser*,
-                                                  ShowGT_CommentFunc,
+                                                  GtShowCommentFunc,
                                                   void* data);
 /* set the mailadress used in the final ``Report bugs to'' line of the -help
    output to <address>. It should be of the form "<bill@microsoft.com>" */
@@ -71,7 +71,7 @@ void            gt_option_parser_set_min_max_args(GtOptionParser*, unsigned int,
                                                   unsigned int);
 OPrval          gt_option_parser_parse(GtOptionParser*, int *parsed_args,
                                        int argc, const char **argv,
-                                       ShowVersionFunc, GtError*);
+                                       GtShowVersionFunc, GtError*);
 void            gt_option_parser_delete(GtOptionParser*);
 
 /* the options

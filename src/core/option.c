@@ -63,7 +63,7 @@ struct GtOptionParser {
         *hooks;
   bool parser_called,
        refer_to_manual;
-  ShowGT_CommentFunc comment_func;
+  GtShowCommentFunc comment_func;
   void *comment_func_data;
   const char *mailaddress;
   unsigned int min_additional_arguments,
@@ -158,7 +158,7 @@ static GtOption* gt_option_new_helpdev(void)
   return o;
 }
 
-static GtOption* gt_option_new_version(ShowVersionFunc versionfunc)
+static GtOption* gt_option_new_version(GtShowVersionFunc versionfunc)
 {
   GtOption *o = gt_option_new("version", "display version information and exit",
                          versionfunc);
@@ -209,7 +209,8 @@ void gt_option_parser_refer_to_manual(GtOptionParser *op)
 }
 
 void gt_option_parser_set_comment_func(GtOptionParser *op,
-                                    ShowGT_CommentFunc comment_func, void *data)
+                                       GtShowCommentFunc comment_func,
+                                       void *data)
 {
   assert(op);
   op->comment_func = comment_func;
@@ -600,8 +601,8 @@ void gt_option_parser_set_min_max_args(GtOptionParser *op,
 }
 
 OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
-                           const char **argv, ShowVersionFunc versionfunc,
-                           GtError *err)
+                              const char **argv, GtShowVersionFunc versionfunc,
+                              GtError *err)
 {
   int argnum, int_value;
   unsigned int uint_value;
@@ -1026,7 +1027,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_VERSION:
-              ((ShowVersionFunc) option->value)(op->progname);
+              ((GtShowVersionFunc) option->value)(op->progname);
               return OPTIONPARSER_REQUESTS_EXIT;
             default: assert(0);
           }
