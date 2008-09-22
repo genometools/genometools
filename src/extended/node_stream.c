@@ -64,13 +64,13 @@ int gt_node_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtGenomeNode *new_node = NULL;
   int had_err = 0;
-  assert(ns && ns->c_class && ns->c_class->next_tree);
+  assert(ns && ns->c_class && ns->c_class->next);
   gt_error_check(err);
   /* filling */
   if (!ns->members->buffer)
-    had_err = ns->c_class->next_tree(ns, &ns->members->buffer, err);
+    had_err = ns->c_class->next(ns, &ns->members->buffer, err);
   if (!had_err && ns->members->buffer)
-    had_err = ns->c_class->next_tree(ns, &new_node, err);
+    had_err = ns->c_class->next(ns, &new_node, err);
 #ifndef NDEBUG
   /* checking */
   if (!had_err && ns->members->ensure_sorting && ns->members->buffer &&

@@ -24,7 +24,7 @@
 struct GtNodeStreamClass
 {
   size_t size;
-  int  (*next_tree)(GtNodeStream*, GtGenomeNode**, GtError*);
+  int  (*next)(GtNodeStream*, GtGenomeNode**, GtError*);
   void (*free)(GtNodeStream*);
 };
 
