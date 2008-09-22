@@ -381,8 +381,8 @@ $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
                                              $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
-                                        lib/libgenometools.a \
                                         lib/libgtunstable.a \
+                                        lib/libgenometools.a \
                                         $(GTLIBS) \
                                         $(OVERRIDELIBS)))
 
