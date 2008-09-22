@@ -93,8 +93,8 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
       /* aligning all sequence combinations */
       for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
         for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
-          a = swalign(gt_bioseq_get_seq(gt_bioseq_1, i),
-                      gt_bioseq_get_seq(gt_bioseq_2, j), score_function);
+          a = gt_swalign(gt_bioseq_get_seq(gt_bioseq_1, i),
+                         gt_bioseq_get_seq(gt_bioseq_2, j), score_function);
           if (a) {
             gt_alignment_show(a, stdout);
             gt_xputchar('\n');
@@ -113,11 +113,11 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_swalign(void)
+GtTool* gt_swalign_tool(void)
 {
   return gt_tool_new(gt_swalign_arguments_new,
-                  gt_swalign_arguments_delete,
-                  gt_swalign_opion_parser_new,
-                  NULL,
-                  gt_swalign_runner);
+                     gt_swalign_arguments_delete,
+                     gt_swalign_opion_parser_new,
+                     NULL,
+                     gt_swalign_runner);
 }

@@ -21,6 +21,6 @@
 #include "core/tool.h"
 
 /* the Smith-Waterman alignment tool */
-GtTool* gt_swalign(void);
+GtTool* gt_swalign_tool(void);
 
 #endif

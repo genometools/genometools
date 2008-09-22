@@ -122,7 +122,7 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
   return a;
 }
 
-GtAlignment* swalign(GtSeq *u, GtSeq *v, const GT_ScoreFunction *sf)
+GtAlignment* gt_swalign(GtSeq *u, GtSeq *v, const GT_ScoreFunction *sf)
 {
   assert(u && v && sf);
   return smith_waterman_align(gt_seq_get_orig(u), gt_seq_get_orig(v),
