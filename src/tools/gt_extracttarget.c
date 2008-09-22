@@ -109,10 +109,10 @@ static int extracttarget_from_seqfiles(const char *target,
     char *token = gt_splitter_get_token(splitter, i);
     blank_splitter = gt_splitter_new();
     gt_splitter_split(blank_splitter, token, strlen(token), ' ');
-    had_err = gff3_unescape(unescaped_target,
-                            gt_splitter_get_token(blank_splitter, 0),
-                            strlen(gt_splitter_get_token(blank_splitter, 0)),
-                                   err);
+    had_err = gt_gff3_unescape(unescaped_target,
+                               gt_splitter_get_token(blank_splitter, 0),
+                               strlen(gt_splitter_get_token(blank_splitter, 0)),
+                               err);
     if (!had_err) {
       unsigned long j;
       for (j = 0; j < gt_strarray_size(seqfiles); j++) {

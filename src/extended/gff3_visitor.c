@@ -130,7 +130,7 @@ static int gff3_show_genome_feature(GtGenomeNode *gn, void *data,
   assert(gn && gf && gff3_visitor);
 
   /* output leading part */
-  gff3_output_leading(gf, gff3_visitor->outfp);
+  gt_gff3_output_leading(gf, gff3_visitor->outfp);
 
   /* show unique id part of attributes */
   if ((id = gt_hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,

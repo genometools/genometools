@@ -200,9 +200,9 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
   }
   /* parse target id */
   if (!had_err) {
-    had_err = gff3_unescape(unescaped_target, gt_splitter_get_token(splitter,
-                                                                    0),
-                            strlen(gt_splitter_get_token(splitter, 0)), err);
+    had_err = gt_gff3_unescape(unescaped_target,
+                               gt_splitter_get_token(splitter, 0),
+                               strlen(gt_splitter_get_token(splitter, 0)), err);
   }
   if (!had_err && target_id) gt_str_append_str(target_id, unescaped_target);
   /* parse target range */

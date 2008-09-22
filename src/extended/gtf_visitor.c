@@ -92,7 +92,7 @@ static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
     gtf_visitor->transcript_id++;
     for (i = 0; i < gt_array_size(gtf_visitor->exon_features); i++) {
       gf = *(GtFeatureNode**) gt_array_get(gtf_visitor->exon_features, i);
-      gff3_output_leading(gf, gtf_visitor->outfp);
+      gt_gff3_output_leading(gf, gtf_visitor->outfp);
       gt_genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
                       gtf_visitor->gene_id, gtf_visitor->transcript_id);
@@ -110,7 +110,7 @@ static int gtf_show_transcript(GtGenomeNode *gn, GTFVisitor *gtf_visitor,
     /* show CDS features */
     for (i = 0; i < gt_array_size(gtf_visitor->CDS_features); i++) {
       gf = *(GtFeatureNode**) gt_array_get(gtf_visitor->CDS_features, i);
-      gff3_output_leading(gf, gtf_visitor->outfp);
+      gt_gff3_output_leading(gf, gtf_visitor->outfp);
       gt_genfile_xprintf(gtf_visitor->outfp, "gene_id \"%lu\"; transcript_id "
                       "\"%lu.%lu\";\n", gtf_visitor->gene_id,
                       gtf_visitor->gene_id, gtf_visitor->transcript_id);

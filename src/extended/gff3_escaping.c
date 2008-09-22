@@ -47,8 +47,8 @@ void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
   }
 }
 
-int gff3_unescape(GtStr *unescaped_seq, const char *escaped_seq,
-                  unsigned long length, GtError *err)
+int gt_gff3_unescape(GtStr *unescaped_seq, const char *escaped_seq,
+                     unsigned long length, GtError *err)
 {
   const char *cc;
   int had_err = 0;
@@ -118,8 +118,8 @@ static int test_single_escaping(char unescaped_char, const char *escaped_char,
   gt_gff3_escape(escaped_seq, unescaped_testseq, strlen(unescaped_testseq));
   ensure(had_err, !strcmp(gt_str_get(escaped_seq), escaped_testseq));
   if (!had_err) {
-    had_err = gff3_unescape(unescaped_seq, gt_str_get(escaped_seq),
-                            gt_str_length(escaped_seq), err);
+    had_err = gt_gff3_unescape(unescaped_seq, gt_str_get(escaped_seq),
+                               gt_str_length(escaped_seq), err);
   }
   ensure(had_err, !strcmp(gt_str_get(unescaped_seq), unescaped_testseq));
   gt_str_delete(unescaped_seq);
@@ -143,8 +143,8 @@ int gt_gff3_escaping_unit_test(GtError *err)
   if (!had_err) had_err = test_single_escaping(',', COMMA, err);
 
   /* error cases */
-  ensure(had_err, gff3_unescape(seq, "foo%2", 5, NULL));
-  ensure(had_err, gff3_unescape(seq, "foo%ffbar", 9, NULL));
+  ensure(had_err, gt_gff3_unescape(seq, "foo%2", 5, NULL));
+  ensure(had_err, gt_gff3_unescape(seq, "foo%ffbar", 9, NULL));
 
   gt_str_delete(seq);
   return had_err;

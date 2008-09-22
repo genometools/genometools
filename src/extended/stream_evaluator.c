@@ -742,7 +742,7 @@ static void mark_and_show_false_exon(GtGenomeNode *gn, bool exondiff)
 {
   gt_genome_node_mark(gn); /* mark false exons */
   if (exondiff) {
-    gff3_output_leading((GtFeatureNode*) gn, NULL);
+    gt_gff3_output_leading((GtFeatureNode*) gn, NULL);
     printf(".\n");
   }
 }

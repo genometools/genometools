@@ -260,7 +260,7 @@ static int feature_node_lua_output_leading(lua_State *L)
   /* make sure we get a genome feature */
   fn = gt_feature_node_try_cast(*gn);
   luaL_argcheck(L, fn, 1, "not a genome feature");
-  gff3_output_leading(fn, NULL);
+  gt_gff3_output_leading(fn, NULL);
   return 0;
 }
 
