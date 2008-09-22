@@ -18,7 +18,7 @@
 #include <string.h>
 #include "extended/compare.h"
 
-int compare(const void *a, const void *b)
+int gt_compare(const void *a, const void *b)
 {
   return strcmp(*((const char**) a), *((const char**) b));
 }

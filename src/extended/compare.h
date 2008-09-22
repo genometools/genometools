@@ -18,6 +18,6 @@
 #ifndef COMPARE_H
 #define COMPARE_H
 
-int compare(const void *a, const void *b);
+int gt_compare(const void *a, const void *b);
 
 #endif

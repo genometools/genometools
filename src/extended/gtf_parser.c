@@ -72,7 +72,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
                    sizeof (GTF_feature_type_strings) /
                    sizeof (GTF_feature_type_strings[0]),
                    sizeof (char*),
-                   compare);
+                   gt_compare);
 
   if (result) {
     *type = (GTF_feature_type)

@@ -64,7 +64,7 @@ static const char* find_type(const char *gft_string)
                    sizeof (gt_feature_node_type_strings) /
                    sizeof (gt_feature_node_type_strings[0]),
                    sizeof (char*),
-                   compare);
+                   gt_compare);
   if (result)
     return *(char**) result;
   return NULL;
