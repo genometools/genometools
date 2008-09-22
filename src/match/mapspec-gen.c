@@ -155,7 +155,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   gt_error_check(err);
   INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,false);
-  mapptr = gt_mmap_read(gt_str_get(tmpfilename), &numofbytes);
+  mapptr = gt_fa_mmap_read(gt_str_get(tmpfilename), &numofbytes);
   if (mapptr == NULL)
   {
     gt_error_set(err,"could not map datafile %s",gt_str_get(tmpfilename));

@@ -97,7 +97,7 @@ void pckbuckettable_free(Pckbuckettable *pckbt)
     gt_free(pckbt->mbtab[0]);
   } else
   {
-    gt_xmunmap(pckbt->mapptr);
+    gt_fa_xmunmap(pckbt->mapptr);
   }
   pckbt->mbtab[0] = NULL;
   gt_free(pckbt->mbtab);
@@ -261,7 +261,7 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,PCKBUCKETTABLE);
-  mapptr = gt_mmap_read(gt_str_get(tmpfilename),&numofbytes);
+  mapptr = gt_fa_mmap_read(gt_str_get(tmpfilename),&numofbytes);
   if (mapptr == NULL)
   {
     gt_error_set(err,"could not map datafile %s",gt_str_get(tmpfilename));

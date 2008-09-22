@@ -301,7 +301,7 @@ static int fill_bioseq(GtBioseq *bs, const char *index_filename,
     assert(gt_array_size(bs->descriptions) ==
            gt_array_size(bs->sequence_ranges));
     /* map the raw file */
-    bs->raw_sequence = gt_xmmap_read(raw_filename, &bs->raw_sequence_length);
+    bs->raw_sequence = gt_fa_xmmap_read(raw_filename, &bs->raw_sequence_length);
   }
 
   gt_fa_xfclose(index_file);
@@ -508,7 +508,7 @@ void gt_bioseq_delete(GtBioseq *bs)
   if (bs->use_stdin)
     gt_free(bs->raw_sequence);
   else
-    gt_xmunmap(bs->raw_sequence);
+    gt_fa_xmunmap(bs->raw_sequence);
   gt_alpha_delete(bs->alpha);
   gt_free(bs);
 }

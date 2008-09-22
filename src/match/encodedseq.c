@@ -655,7 +655,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   }
   if (encseq->mappedptr != NULL)
   {
-    gt_xmunmap(encseq->mappedptr);
+    gt_fa_xmunmap(encseq->mappedptr);
   } else
   {
     FREESPACE(encseq->characterdistribution);

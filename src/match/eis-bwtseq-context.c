@@ -312,8 +312,8 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
         }
       }
     }
-    mapMap = gt_mmap_generic_fd(fileno(mapFile), mapSize, 0, createMapFile,
-                                false);
+    mapMap = gt_fa_mmap_generic_fd(fileno(mapFile), mapSize, 0, createMapFile,
+                                   false);
     newBWTSeqCR->revMap = (newBWTSeqCR->revMapMMap = mapMap) + headerSize;
   } while (0);
   if (mapName) gt_str_delete(mapName);
@@ -367,7 +367,7 @@ extern void
 deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 {
   assert(bwtSeqCR);
-  gt_xmunmap(bwtSeqCR->revMapMMap);
+  gt_fa_xmunmap(bwtSeqCR->revMapMMap);
   gt_free(bwtSeqCR);
 }
 

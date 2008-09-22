@@ -308,9 +308,9 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, int flags,
   return fp;
 }
 
-void* gt_mmap_generic_fd_func(int fd, size_t len, size_t offset,
-                              bool mapwritable, bool hard_fail,
-                              const char *filename, int line)
+void* gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+                                 bool mapwritable, bool hard_fail,
+                                 const char *filename, int line)
 {
   FAMapInfo *mapinfo;
   void *map;
@@ -342,9 +342,9 @@ void* gt_mmap_generic_fd_func(int fd, size_t len, size_t offset,
   return map;
 }
 
-static void* gt_mmap_generic_path_func(const char *path, size_t *len,
-                                       bool mapwritable, bool hard_fail,
-                                       const char *filename, int line)
+static void* mmap_generic_path_func(const char *path, size_t *len,
+                                    bool mapwritable, bool hard_fail,
+                                    const char *filename, int line)
 {
   int fd;
   struct stat sb;
@@ -360,21 +360,21 @@ static void* gt_mmap_generic_path_func(const char *path, size_t *len,
   if (sizeof (off_t) > sizeof (size_t)
       && sb.st_size > SIZE_MAX)
     return NULL;
-  map = gt_mmap_generic_fd_func(fd, sb.st_size, 0, mapwritable, hard_fail,
-                                filename, line);
+  map = gt_fa_mmap_generic_fd_func(fd, sb.st_size, 0, mapwritable, hard_fail,
+                                   filename, line);
   if (map && len)
     *len = sb.st_size;
   xclose(fd);
   return map;
 }
 
-void* gt_mmap_read_func(const char *path, size_t *len,
-                        const char *filename, int line)
+void* gt_fa_mmap_read_func(const char *path, size_t *len,
+                           const char *filename, int line)
 {
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return gt_mmap_generic_path_func(path, len, false, false, filename, line);
+  return mmap_generic_path_func(path, len, false, false, filename, line);
 }
 
 void* gt_mmap_write_func(const char *path, size_t *len,
@@ -383,16 +383,16 @@ void* gt_mmap_write_func(const char *path, size_t *len,
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return gt_mmap_generic_path_func(path, len, true, false, filename, line);
+  return mmap_generic_path_func(path, len, true, false, filename, line);
 }
 
-void* gt_xmmap_read_func(const char *path, size_t *len,
-                         const char *filename, int line)
+void* gt_fa_xmmap_read_func(const char *path, size_t *len,
+                            const char *filename, int line)
 {
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return gt_mmap_generic_path_func(path, len, false, true, filename, line);
+  return mmap_generic_path_func(path, len, false, true, filename, line);
 }
 
 void* gt_xmmap_write_func(const char *path, size_t *len,
@@ -401,10 +401,10 @@ void* gt_xmmap_write_func(const char *path, size_t *len,
   assert(path);
   if (!fa) fa_init();
   assert(fa);
-  return gt_mmap_generic_path_func(path, len, true, true, filename, line);
+  return mmap_generic_path_func(path, len, true, true, filename, line);
 }
 
-void gt_xmunmap(void *addr)
+void gt_fa_xmunmap(void *addr)
 {
   FAMapInfo *mapinfo;
   if (!fa) fa_init();

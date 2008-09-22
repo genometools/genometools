@@ -282,8 +282,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
     return run_tests(gtr, err);
   if (gt_str_length(gtr->testspacepeak)) {
     mem = gt_malloc(1 << 26); /* alloc 64 MB */;
-    map = gt_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
-    gt_xmunmap(map);
+    map = gt_fa_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
+    gt_fa_xmunmap(map);
     gt_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {

@@ -83,25 +83,25 @@ FILE*   gt_xtmpfp_generic_func(GtStr *template, int flags, const char*, int);
         gt_xtmpfp_generic(template, TMPFP_DEFAULT_FLAGS)
 
 /* memory map functions */
-#define gt_mmap_read(path, len)\
-        gt_mmap_read_func(path, len, __FILE__, __LINE__)
-void*   gt_mmap_read_func(const char *path, size_t *len, const char*, int);
-#define gt_mmap_write(path, len)\
-        gt_mmap_write_func(path, len, __FILE__, __LINE__)
-void*   gt_mmap_write_func(const char *path, size_t *len, const char*, int);
-#define gt_xmmap_read(path, len)\
-        gt_xmmap_read_func(path, len, __FILE__, __LINE__)
-void*   gt_xmmap_read_func(const char *path, size_t *len, const char*, int);
-#define gt_xmmap_write(path, len)\
-        gt_xmmap_write_func(path, len, __FILE__, __LINE__)
-void*   gt_xmmap_write_func(const char *path, size_t *len, const char*, int);
-void    gt_xmunmap(void *addr);
-#define gt_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail) \
-  gt_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail,  \
-                          __FILE__, __LINE__)
-void*   gt_mmap_generic_fd_func(int fd, size_t len, size_t offset,
-                                bool mapwritable, bool hard_fail,
-                                const char *filename, int line);
+#define gt_fa_mmap_read(path, len)\
+        gt_fa_mmap_read_func(path, len, __FILE__, __LINE__)
+void*   gt_fa_mmap_read_func(const char *path, size_t *len, const char*, int);
+#define gt_fa_mmap_write(path, len)\
+        gt_fa_mmap_write_func(path, len, __FILE__, __LINE__)
+void*   gt_fa_mmap_write_func(const char *path, size_t *len, const char*, int);
+#define gt_fa_xmmap_read(path, len)\
+        gt_fa_xmmap_read_func(path, len, __FILE__, __LINE__)
+void*   gt_fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
+#define gt_fa_xmmap_write(path, len)\
+        gt_fa_xmmap_write_func(path, len, __FILE__, __LINE__)
+void*   gt_fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
+void    gt_fa_xmunmap(void *addr);
+#define gt_fa_mmap_generic_fd(fd, len, offset, mapwritable, hard_fail) \
+        gt_fa_mmap_generic_fd_func(fd, len, offset, mapwritable, hard_fail, \
+                                   __FILE__, __LINE__)
+void*   gt_fa_mmap_generic_fd_func(int fd, size_t len, size_t offset,
+                                   bool mapwritable, bool hard_fail,
+                                   const char *filename, int line);
 /* check if all allocated file pointer have been released, prints to stderr */
 int     gt_fa_check_fptr_leak(void);
 /* check if all allocated memory maps have been freed, prints to stderr */

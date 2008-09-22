@@ -1736,7 +1736,7 @@ static void
 destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx)
 {
   if (idx->idxMMap)
-    gt_xmunmap(idx->idxMMap);
+    gt_fa_xmunmap(idx->idxMMap);
   if (idx->idxFP)
     gt_fa_xfclose(idx->idxFP);
 }
@@ -2334,8 +2334,8 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
 {
   size_t len = idxData->rangeEncPos - idxData->cwDataPos;
   assert(idxData && idxData->idxFP && idxData->idxMMap == NULL);
-  idxData->idxMMap = gt_mmap_generic_fd(fileno(idxData->idxFP), len,
-                                        idxData->cwDataPos, false, false);
+  idxData->idxMMap = gt_fa_mmap_generic_fd(fileno(idxData->idxFP), len,
+                                           idxData->cwDataPos, false, false);
   return idxData->idxMMap != NULL;
 }
 

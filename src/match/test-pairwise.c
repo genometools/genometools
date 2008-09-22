@@ -35,13 +35,13 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   size_t ulen, vlen;
   bool forward = true;
 
-  useq = (const Uchar *) gt_mmap_read(file1,&ulen);
+  useq = (const Uchar *) gt_fa_mmap_read(file1,&ulen);
   if (useq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s\n",file1,strerror(errno));
     exit(EXIT_FAILURE);
   }
-  vseq = (const Uchar *) gt_mmap_read(file2,&vlen);
+  vseq = (const Uchar *) gt_fa_mmap_read(file2,&vlen);
   if (vseq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s",file2,strerror(errno));
@@ -57,8 +57,8 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
     }
     forward = false;
   }
-  gt_xmunmap((void *) useq);
-  gt_xmunmap((void *) vseq);
+  gt_fa_xmunmap((void *) useq);
+  gt_fa_xmunmap((void *) vseq);
 }
 
 unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,

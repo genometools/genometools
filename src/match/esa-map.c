@@ -238,7 +238,7 @@ static void *genericmaponlytable(const GtStr *indexname,const char *suffix,
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
   gt_str_append_cstr(tmpfilename,suffix);
-  ptr = gt_mmap_read(gt_str_get(tmpfilename),numofbytes);
+  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
     gt_error_set(err,"cannot map file \"%s\": %s",gt_str_get(tmpfilename),
@@ -278,7 +278,7 @@ static void *genericmaptable(const GtStr *indexname,
   }
   if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
   {
-    gt_xmunmap(ptr);
+    gt_fa_xmunmap(ptr);
     return NULL;
   }
   return ptr;
@@ -351,15 +351,15 @@ static bool scanal1file(Suffixarray *suffixarray,const GtStr *indexname,
 
 void freesuffixarray(Suffixarray *suffixarray)
 {
-  gt_xmunmap((void *) suffixarray->suftab);
+  gt_fa_xmunmap((void *) suffixarray->suftab);
   suffixarray->suftab = NULL;
-  gt_xmunmap((void *) suffixarray->lcptab);
+  gt_fa_xmunmap((void *) suffixarray->lcptab);
   suffixarray->lcptab = NULL;
-  gt_xmunmap((void *) suffixarray->llvtab);
+  gt_fa_xmunmap((void *) suffixarray->llvtab);
   suffixarray->llvtab = NULL;
-  gt_xmunmap((void *) suffixarray->bwttab);
+  gt_fa_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  gt_xmunmap((void *) suffixarray->destab);
+  gt_fa_xmunmap((void *) suffixarray->destab);
   suffixarray->destab = NULL;
   gt_fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;

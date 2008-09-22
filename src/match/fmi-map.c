@@ -131,7 +131,7 @@ void freefmindex(Fmindex *fmindex)
 {
   if (fmindex->mappedptr != NULL)
   {
-    gt_xmunmap(fmindex->mappedptr);
+    gt_fa_xmunmap(fmindex->mappedptr);
   }
   if (fmindex->bwtformatching != NULL)
   {
