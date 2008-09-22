@@ -30,26 +30,28 @@ typedef struct {
   long weight;             /* weight of fragment */
 } Fragment;
 
-typedef void (*ChainProc)(Chain*, Fragment*, void*);
+typedef void (*GtChainProc)(GtChain*, Fragment*, void*);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
    in O(<num_of_fragments>^2) time.
    Two fragments can maximally be <max_gap_width> many bases away.
-   For all global chains of maximal score, the ChainProc function is called.
-   Thereby, ChainProc does not get the ownership of the Chain. */
-void globalchaining_max(Fragment *fragments, unsigned long num_of_fragments,
-                        unsigned long max_gap_width, ChainProc, void *cpinfo);
+   For all global chains of maximal score, the GtChainProc function is called.
+   Thereby, GtChainProc does not get the ownership of the GtChain. */
+void gt_globalchaining_max(Fragment *fragments, unsigned long num_of_fragments,
+                           unsigned long max_gap_width, GtChainProc,
+                           void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
    in O(<num_of_fragments>^2) time.
    Two fragments can maximally be <max_gap_width> many bases away.
    For all non-overlapping global chains with a coverage of more then
    <mincoverage> of the sequence in dimension 1 (with length <seqlen1>), the
-   ChainProc function is called. Thereby, ChainProc does not get the ownership
-   of the Chain. */
-void globalchaining_coverage(Fragment *fragments,
-                             unsigned long num_of_fragments,
-                             unsigned long max_gap_width, unsigned long seqlen1,
-                             double mincoverage, ChainProc, void *cpinfo);
+   GtChainProc function is called. Thereby, GtChainProc does not get the
+   ownership of the GtChain. */
+void gt_globalchaining_coverage(Fragment *fragments,
+                                unsigned long num_of_fragments,
+                                unsigned long max_gap_width,
+                                unsigned long seqlen1, double mincoverage,
+                                GtChainProc, void *cpinfo);
 
 #endif

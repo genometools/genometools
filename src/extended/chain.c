@@ -20,45 +20,46 @@
 #include "core/ma.h"
 #include "extended/chain.h"
 
-struct Chain {
+struct GtChain {
   GtArray *fragments;
   long score;
 };
 
-Chain* chain_new(void)
+GtChain* gt_chain_new(void)
 {
-  Chain *chain;
+  GtChain *chain;
   chain = gt_calloc(1, sizeof *chain);
   chain->fragments = gt_array_new(sizeof (unsigned long));
   return chain;
 }
 
-void chain_reset(Chain *chain)
+void gt_chain_reset(GtChain *chain)
 {
   assert(chain);
   chain->score = 0;
   gt_array_reset(chain->fragments);
 }
 
-long chain_get_score(const Chain *chain)
+long gt_chain_get_score(const GtChain *chain)
 {
   assert(chain);
   return chain->score;
 }
 
-void chain_set_score(Chain *chain, long score)
+void gt_chain_set_score(GtChain *chain, long score)
 {
   assert(chain);
   chain->score = score;
 }
 
-void chain_add_fragnum(Chain *chain, unsigned long fragnum)
+void gt_chain_add_fragnum(GtChain *chain, unsigned long fragnum)
 {
   assert(chain);
   gt_array_add(chain->fragments, fragnum);
 }
 
-void chain_set_fragnum(Chain *chain, unsigned long idx, unsigned long fragnum)
+void gt_chain_set_fragnum(GtChain *chain, unsigned long idx,
+                          unsigned long fragnum)
 {
   unsigned long *fragments;
   assert(chain);
@@ -67,20 +68,20 @@ void chain_set_fragnum(Chain *chain, unsigned long idx, unsigned long fragnum)
   fragments[idx] = fragnum;
 }
 
-unsigned long chain_get_fragnum(const Chain *chain, unsigned long idx)
+unsigned long gt_chain_get_fragnum(const GtChain *chain, unsigned long idx)
 {
   assert(chain);
   assert(idx < gt_array_size(chain->fragments));
   return *(unsigned long*) gt_array_get(chain->fragments, idx);
 }
 
-unsigned long chain_size(const Chain *chain)
+unsigned long gt_chain_size(const GtChain *chain)
 {
   assert(chain);
   return gt_array_size(chain->fragments);
 }
 
-void chain_delete(Chain *chain)
+void gt_chain_delete(GtChain *chain)
 {
   if (!chain) return;
   gt_array_delete(chain->fragments);

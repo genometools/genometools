@@ -21,17 +21,17 @@
 
 #include "core/error.h"
 
-typedef struct Chain Chain;
+typedef struct GtChain GtChain;
 
-Chain*        chain_new(void);
-void          chain_reset(Chain*);
-long          chain_get_score(const Chain*);
-void          chain_set_score(Chain*, long);
-void          chain_add_fragnum(Chain*, unsigned long fragnum);
-void          chain_set_fragnum(Chain*, unsigned long idx,
+GtChain*        gt_chain_new(void);
+void          gt_chain_reset(GtChain*);
+long          gt_chain_get_score(const GtChain*);
+void          gt_chain_set_score(GtChain*, long);
+void          gt_chain_add_fragnum(GtChain*, unsigned long fragnum);
+void          gt_chain_set_fragnum(GtChain*, unsigned long idx,
                                         unsigned long fragnum);
-unsigned long chain_get_fragnum(const Chain*, unsigned long idx);
-unsigned long chain_size(const Chain*);
-void          chain_delete(Chain*);
+unsigned long gt_chain_get_fragnum(const GtChain*, unsigned long idx);
+unsigned long gt_chain_size(const GtChain*);
+void          gt_chain_delete(GtChain*);
 
 #endif
