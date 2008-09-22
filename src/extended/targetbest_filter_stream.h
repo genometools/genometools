@@ -23,7 +23,7 @@
 /* implements the ``genome stream'' interface */
 typedef struct TargetbestGtFilterStream TargetbestGtFilterStream;
 
-const GtNodeStreamClass* targetbest_filter_stream_class(void);
-GtNodeStream*            targetbest_filter_stream_new(GtNodeStream*);
+const GtNodeStreamClass* gt_targetbest_filter_stream_class(void);
+GtNodeStream*            gt_targetbest_filter_stream_new(GtNodeStream*);
 
 #endif

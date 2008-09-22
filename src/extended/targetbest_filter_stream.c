@@ -36,7 +36,7 @@ struct TargetbestGtFilterStream
 };
 
 #define targetbest_filter_stream_cast(GS)\
-        gt_node_stream_cast(targetbest_filter_stream_class(), GS);
+        gt_node_stream_cast(gt_targetbest_filter_stream_class(), GS);
 
 static void build_key(GtStr *key, GtFeatureNode *feature, GtStr *target_id)
 {
@@ -163,7 +163,7 @@ static void targetbest_filter_stream_free(GtNodeStream *gs)
   gt_node_stream_delete(tfs->in_stream);
 }
 
-const GtNodeStreamClass* targetbest_filter_stream_class(void)
+const GtNodeStreamClass* gt_targetbest_filter_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
@@ -174,13 +174,13 @@ const GtNodeStreamClass* targetbest_filter_stream_class(void)
   return nsc;
 }
 
-GtNodeStream* targetbest_filter_stream_new(GtNodeStream *in_stream)
+GtNodeStream* gt_targetbest_filter_stream_new(GtNodeStream *in_stream)
 {
   TargetbestGtFilterStream *tfs;
   GtNodeStream *gs;
   assert(in_stream);
-  gs = gt_node_stream_create(targetbest_filter_stream_class(),
-                            gt_node_stream_is_sorted(in_stream));
+  gs = gt_node_stream_create(gt_targetbest_filter_stream_class(),
+                             gt_node_stream_is_sorted(in_stream));
   tfs = targetbest_filter_stream_cast(gs);
   tfs->in_stream = gt_node_stream_ref(in_stream);
   tfs->in_stream_processed = false;

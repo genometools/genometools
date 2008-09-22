@@ -276,7 +276,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                        arguments->feature_num);
 
   if (arguments->targetbest)
-    targetbest_filter_stream = targetbest_filter_stream_new(filter_stream);
+    targetbest_filter_stream = gt_targetbest_filter_stream_new(filter_stream);
 
   /* create a gff3 output stream */
   gff3_out_stream = gff3_out_stream_new(arguments->targetbest
