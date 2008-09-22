@@ -21,29 +21,51 @@
 #include <stdio.h>
 #include "annotationsketch/feature_index.h"
 
-struct GtFeatureIndexClass {
-  size_t size;
-  void        (*add_region_node)(GtFeatureIndex*, GtRegionNode*);
-  void        (*add_feature_node)(GtFeatureIndex*, GtFeatureNode*);
-  GtArray*    (*get_features_for_seqid)(GtFeatureIndex*, const char*);
-  int         (*get_features_for_range)(GtFeatureIndex*, GtArray*, const char*,
-                                        GtRange, GtError*);
-  const char* (*get_first_seqid)(const GtFeatureIndex*);
-  GtStrArray* (*get_seqids)(const GtFeatureIndex*);
-  void        (*get_range_for_seqid)(GtFeatureIndex*, GtRange*, const char*);
-  bool        (*has_seqid)(const GtFeatureIndex*,const char*);
-  void        (*free)(GtFeatureIndex*);
-};
+typedef void        (*GtFeatureIndexAddRegionNodeFunc)(GtFeatureIndex*,
+                                                       GtRegionNode*);
+typedef void        (*GtFeatureIndexAddFeatureNodeFunc)(GtFeatureIndex*,
+                                                        GtFeatureNode*);
+typedef GtArray*    (*GtFeatureIndexGetFeatsForSeqidFunc)(GtFeatureIndex*,
+                                                          const char*);
+typedef int         (*GtFeatureIndexGetFeatsForRangeFunc)(GtFeatureIndex*,
+                                                          GtArray*,
+                                                          const char*, GtRange,
+                                                          GtError*);
+typedef const char* (*GtFeatureIndexGetFirstSeqidFunc)(const GtFeatureIndex*);
+typedef GtStrArray* (*GtFeatureIndexGetSeqidsFunc)(const GtFeatureIndex*);
+typedef void        (*GtFeatureIndexGetRangeForSeqidFunc)(GtFeatureIndex*,
+                                                          GtRange*,
+                                                          const char*);
+typedef bool        (*GtFeatureIndexHasSeqidFunc)(const GtFeatureIndex*,
+                                                  const char*);
+typedef void        (*GtFeatureIndexFreeFunc)(GtFeatureIndex*);
 
-typedef struct {
-  unsigned int reference_count;
-} GtFeatureIndexPrivate;
+typedef struct GtFeatureIndexMembers GtFeatureIndexMembers;
 
 struct GtFeatureIndex {
   const GtFeatureIndexClass *c_class;
-  GtFeatureIndexPrivate *pvt;
+  GtFeatureIndexMembers *pvt;
 };
 
+const GtFeatureIndexClass* gt_feature_index_class_new(size_t size,
+                                         GtFeatureIndexAddRegionNodeFunc
+                                                 add_region_node,
+                                         GtFeatureIndexAddFeatureNodeFunc
+                                                 add_feature_node,
+                                         GtFeatureIndexGetFeatsForSeqidFunc
+                                                 get_features_for_seqid,
+                                         GtFeatureIndexGetFeatsForRangeFunc
+                                                 get_features_for_range,
+                                         GtFeatureIndexGetFirstSeqidFunc
+                                                 get_first_seqid,
+                                         GtFeatureIndexGetSeqidsFunc
+                                                 get_seqids,
+                                         GtFeatureIndexGetRangeForSeqidFunc
+                                                 get_range_for_seqid,
+                                         GtFeatureIndexHasSeqidFunc
+                                                 has_seqid,
+                                         GtFeatureIndexFreeFunc
+                                                 free);
 GtFeatureIndex* gt_feature_index_create(const GtFeatureIndexClass*);
 void*           gt_feature_index_cast(const GtFeatureIndexClass*,
                                       GtFeatureIndex*);

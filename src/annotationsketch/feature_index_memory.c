@@ -255,18 +255,20 @@ void gt_feature_index_memory_delete(GtFeatureIndex *gfi)
 
 const GtFeatureIndexClass* gt_feature_index_memory_class(void)
 {
-  static const GtFeatureIndexClass gt_feature_index_class =
-    { sizeof (GtFeatureIndexMemory),
-      gt_feature_index_memory_add_region_node,
-      gt_feature_index_memory_add_feature_node,
-      gt_feature_index_memory_get_features_for_seqid,
-      gt_feature_index_memory_get_features_for_range,
-      gt_feature_index_memory_get_first_seqid,
-      gt_feature_index_memory_get_seqids,
-      gt_feature_index_memory_get_range_for_seqid,
-      gt_feature_index_memory_has_seqid,
-      gt_feature_index_memory_delete };
-  return &gt_feature_index_class;
+  static const GtFeatureIndexClass *fic = NULL;
+  if (!fic) {
+    fic = gt_feature_index_class_new(sizeof (GtFeatureIndexMemory),
+                     gt_feature_index_memory_add_region_node,
+                     gt_feature_index_memory_add_feature_node,
+                     gt_feature_index_memory_get_features_for_seqid,
+                     gt_feature_index_memory_get_features_for_range,
+                     gt_feature_index_memory_get_first_seqid,
+                     gt_feature_index_memory_get_seqids,
+                     gt_feature_index_memory_get_range_for_seqid,
+                     gt_feature_index_memory_has_seqid,
+                     gt_feature_index_memory_delete);
+  }
+  return fic;
 }
 
 GtFeatureIndex* gt_feature_index_memory_new(void)

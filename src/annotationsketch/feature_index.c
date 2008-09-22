@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "core/class_alloc.h"
 #include "core/queue.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
@@ -23,13 +24,64 @@
 #include "annotationsketch/feature_visitor.h"
 #include "extended/gff3_in_stream.h"
 
+struct GtFeatureIndexClass {
+  size_t size;
+  GtFeatureIndexAddRegionNodeFunc add_region_node;
+  GtFeatureIndexAddFeatureNodeFunc add_feature_node;
+  GtFeatureIndexGetFeatsForSeqidFunc get_features_for_seqid;
+  GtFeatureIndexGetFeatsForRangeFunc get_features_for_range;
+  GtFeatureIndexGetFirstSeqidFunc get_first_seqid;
+  GtFeatureIndexGetSeqidsFunc get_seqids;
+  GtFeatureIndexGetRangeForSeqidFunc get_range_for_seqid;
+  GtFeatureIndexHasSeqidFunc has_seqid;
+  GtFeatureIndexFreeFunc free;
+};
+
+struct GtFeatureIndexMembers {
+  unsigned int reference_count;
+};
+
+const GtFeatureIndexClass* gt_feature_index_class_new(size_t size,
+                                         GtFeatureIndexAddRegionNodeFunc
+                                                 add_region_node,
+                                         GtFeatureIndexAddFeatureNodeFunc
+                                                 add_feature_node,
+                                         GtFeatureIndexGetFeatsForSeqidFunc
+                                                 get_features_for_seqid,
+                                         GtFeatureIndexGetFeatsForRangeFunc
+                                                 get_features_for_range,
+                                         GtFeatureIndexGetFirstSeqidFunc
+                                                 get_first_seqid,
+                                         GtFeatureIndexGetSeqidsFunc
+                                                 get_seqids,
+                                         GtFeatureIndexGetRangeForSeqidFunc
+                                                 get_range_for_seqid,
+                                         GtFeatureIndexHasSeqidFunc
+                                                 has_seqid,
+                                         GtFeatureIndexFreeFunc
+                                                 free)
+{
+  GtFeatureIndexClass *c_class = gt_class_alloc(sizeof *c_class);
+  c_class->size = size;
+  c_class->add_region_node = add_region_node;
+  c_class->add_feature_node = add_feature_node;
+  c_class->get_features_for_seqid = get_features_for_seqid;
+  c_class->get_features_for_range = get_features_for_range;
+  c_class->get_first_seqid = get_first_seqid;
+  c_class->get_seqids = get_seqids;
+  c_class->get_range_for_seqid = get_range_for_seqid;
+  c_class->has_seqid = has_seqid;
+  c_class->free = free;
+  return c_class;
+}
+
 GtFeatureIndex* gt_feature_index_create(const GtFeatureIndexClass *fic)
 {
   GtFeatureIndex *fi;
   assert(fic && fic->size);
   fi = gt_calloc(1, fic->size);
   fi->c_class = fic;
-  fi->pvt = gt_calloc(1, sizeof (GtFeatureIndexPrivate));
+  fi->pvt = gt_calloc(1, sizeof (GtFeatureIndexMembers));
   return fi;
 }
 
