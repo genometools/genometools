@@ -34,13 +34,13 @@
 #define PARENT_STRING       "Parent"
 #define TARGET_STRING       "Target"
 
-typedef struct GT_GFF3Parser GT_GFF3Parser;
+typedef struct GtGFF3Parser GtGFF3Parser;
 
-GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker*);
-void           gt_gff3_parser_set_offset(GT_GFF3Parser*, long);
-int            gt_gff3_parser_set_offsetfile(GT_GFF3Parser*, GtStr*,
+GtGFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker*);
+void           gt_gff3_parser_set_offset(GtGFF3Parser*, long);
+int            gt_gff3_parser_set_offsetfile(GtGFF3Parser*, GtStr*,
                                              GtError*);
-void           gt_gff3_parser_enable_tidy_mode(GT_GFF3Parser*);
+void           gt_gff3_parser_enable_tidy_mode(GtGFF3Parser*);
 int            gt_gff3_parser_parse_target_attributes(const char *values,
                                                       unsigned long
                                                       *num_of_targets,
@@ -52,7 +52,7 @@ int            gt_gff3_parser_parse_target_attributes(const char *values,
                                                       const char *filename,
                                                       unsigned int line_number,
                                                       GtError*);
-int            gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser*,
+int            gt_gff3_parser_parse_genome_nodes(GtGFF3Parser*,
                                                  int *status_code,
                                                  GtQueue *genome_nodes,
                                                  GtCstrTable *used_types,
@@ -61,7 +61,7 @@ int            gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser*,
                                                  *line_number,
                                                  GtGenFile *fpin, GtError*);
 /* Reset the GFF3 parser (necessary if the processed input file is switched). */
-void           gt_gff3_parser_reset(GT_GFF3Parser*);
-void           gt_gff3_parser_delete(GT_GFF3Parser*);
+void           gt_gff3_parser_reset(GtGFF3Parser*);
+void           gt_gff3_parser_delete(GtGFF3Parser*);
 
 #endif

@@ -38,7 +38,7 @@
 #include "extended/mapping.h"
 #include "extended/region_node.h"
 
-struct GT_GFF3Parser {
+struct GtGFF3Parser {
   GtFeatureInfo *feature_info;
   GtHashmap *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
     *source_to_str_mapping,
@@ -107,9 +107,9 @@ static void simple_sequence_region_delete(SimpleGtSequenceRegion *ssr)
   gt_free(ssr);
 }
 
-GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker *type_checker)
+GtGFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker *type_checker)
 {
-  GT_GFF3Parser *parser;
+  GtGFF3Parser *parser;
   parser = gt_malloc(sizeof *parser);
   parser->feature_info = gt_feature_info_new();
   parser->seqid_to_ssr_mapping = gt_hashmap_new(
@@ -130,14 +130,14 @@ GT_GFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker *type_checker)
   return parser;
 }
 
-void gt_gff3_parser_set_offset(GT_GFF3Parser *parser, long offset)
+void gt_gff3_parser_set_offset(GtGFF3Parser *parser, long offset)
 {
   gt_assert(parser);
   gt_assert(!parser->offset_mapping);
   parser->offset = offset;
 }
 
-int gt_gff3_parser_set_offsetfile(GT_GFF3Parser *parser, GtStr *offsetfile,
+int gt_gff3_parser_set_offsetfile(GtGFF3Parser *parser, GtStr *offsetfile,
                                   GtError *err)
 {
   gt_error_check(err);
@@ -150,13 +150,13 @@ int gt_gff3_parser_set_offsetfile(GT_GFF3Parser *parser, GtStr *offsetfile,
   return -1;
 }
 
-void gt_gff3_parser_enable_tidy_mode(GT_GFF3Parser *parser)
+void gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *parser)
 {
   gt_assert(parser);
   parser->tidy = true;
 }
 
-static int add_offset_if_necessary(GtRange *range, GT_GFF3Parser *parser,
+static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
                                    const char *seqid, GtError *err)
 {
   long offset;
@@ -264,7 +264,7 @@ int gt_gff3_parser_parse_target_attributes(const char *values,
 
 static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
                          AutomaticGtSequenceRegion **auto_sr,
-                         GT_GFF3Parser *parser, const char *filename,
+                         GtGFF3Parser *parser, const char *filename,
                          unsigned int line_number, GtError *err)
 {
   SimpleGtSequenceRegion *ssr;
@@ -410,7 +410,7 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
 }
 
 static int store_id(const char *id, GtFeatureNode *genome_feature,
-                    bool *is_child, GT_GFF3Parser *parser,
+                    bool *is_child, GtGFF3Parser *parser,
                     GtQueue *genome_nodes, AutomaticGtSequenceRegion *auto_sr,
                     const char *filename, unsigned int line_number,
                     GtError *err)
@@ -611,7 +611,7 @@ static void join_roots(GtArray *roots, GtFeatureInfo *feature_info,
 }
 
 static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
-                               bool *is_child, GT_GFF3Parser *parser,
+                               bool *is_child, GtGFF3Parser *parser,
                                GtQueue *genome_nodes,
                                AutomaticGtSequenceRegion *auto_sr,
                                const char *filename, unsigned int line_number,
@@ -868,7 +868,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
 }
 
 static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
-                            bool *is_child, GT_GFF3Parser *parser,
+                            bool *is_child, GtGFF3Parser *parser,
                             GtQueue *genome_nodes,
                             AutomaticGtSequenceRegion *auto_sr,
                             const char *filename, unsigned int line_number,
@@ -1004,7 +1004,7 @@ static void set_source(GtFeatureNode *genome_feature, const char *source,
   gt_feature_node_set_source(genome_feature, source_str);
 }
 
-static int parse_regular_gff3_line(GT_GFF3Parser *parser,
+static int parse_regular_gff3_line(GtGFF3Parser *parser,
                                    GtQueue *genome_nodes,
                                    GtCstrTable *used_types, char *line,
                                    size_t line_length, GtStr *filenamestr,
@@ -1230,7 +1230,7 @@ static int add_auto_sr_to_queue(GT_UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
+static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                                 char *line, size_t line_length,
                                 GtStr *filenamestr, unsigned int line_number,
                                 GtError *err)
@@ -1368,7 +1368,7 @@ static int parse_meta_gff3_line(GT_GFF3Parser *parser, GtQueue *genome_nodes,
   return had_err;
 }
 
-int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
+int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
                                       GtQueue *genome_nodes,
                                       GtCstrTable *used_types,
                                       GtStr *filenamestr,
@@ -1457,7 +1457,7 @@ int gt_gff3_parser_parse_genome_nodes(GT_GFF3Parser *parser, int *status_code,
   return had_err;
 }
 
-void gt_gff3_parser_reset(GT_GFF3Parser *parser)
+void gt_gff3_parser_reset(GtGFF3Parser *parser)
 {
   gt_assert(parser);
   parser->fasta_parsing = false;
@@ -1468,7 +1468,7 @@ void gt_gff3_parser_reset(GT_GFF3Parser *parser)
   parser->last_terminator = 0;
 }
 
-void gt_gff3_parser_delete(GT_GFF3Parser *parser)
+void gt_gff3_parser_delete(GtGFF3Parser *parser)
 {
   if (!parser) return;
   gt_feature_info_delete(parser->feature_info);
