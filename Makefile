@@ -419,6 +419,12 @@ obj/gt_config.h: VERSION
 	sed -e 's/\([^\]\)"/\1\\"/g' -e 's/^"/\\"/g' -e 's/$$/"/' \
 	    -e 's/^/#define GT_CPPFLAGS "/'; \
 	  echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
+	@cat VERSION | sed 's/\([0-9]*\)\.[0-9]*\.[0-9]*/#define GT_MAJOR \1/' \
+          >> $@
+	@cat VERSION | sed 's/[0-9]*\.\([0-9]*\)\.[0-9]*/#define GT_MINOR \1/' \
+          >> $@
+	@cat VERSION | sed 's/[0-9]*\.[0-9]*\.\([0-9]*\)/#define GT_MICRO \1/' \
+          >> $@
 
 bitpackstringop_Dependencies=src/core/bitpackstringop.template \
 	 src/core/bitpackstringvectorreadop.gen \
