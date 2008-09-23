@@ -20,7 +20,6 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/xansi.h"
-#include "extended/compare.h"
 #include "extended/toolbox.h"
 
 struct GtToolbox {

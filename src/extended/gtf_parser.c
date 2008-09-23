@@ -22,10 +22,10 @@
 #include "core/ma.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"
+#include "core/strcmp.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "extended/compare.h"
 #include "extended/genome_node.h"
 #include "extended/gtf_parser.h"
 
@@ -72,7 +72,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
                    sizeof (GTF_feature_type_strings) /
                    sizeof (GTF_feature_type_strings[0]),
                    sizeof (char*),
-                   gt_compare);
+                   gt_strcmpptr);
 
   if (result) {
     *type = (GTF_feature_type)

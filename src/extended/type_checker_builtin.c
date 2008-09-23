@@ -20,7 +20,7 @@
 #include <string.h>
 #include "core/hashtable.h"
 #include "core/ma.h"
-#include "extended/compare.h"
+#include "core/strcmp.h"
 #include "extended/type_checker_builtin.h"
 #include "extended/type_checker_rep.h"
 
@@ -64,7 +64,7 @@ static const char* find_type(const char *gft_string)
                    sizeof (gt_feature_node_type_strings) /
                    sizeof (gt_feature_node_type_strings[0]),
                    sizeof (char*),
-                   gt_compare);
+                   gt_strcmpptr);
   if (result)
     return *(char**) result;
   return NULL;

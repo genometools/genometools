@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/assert.h"
 #include "core/strcmp.h"
 
 int gt_strcmp(const char *s1, const char *s2)
@@ -23,4 +24,10 @@ int gt_strcmp(const char *s1, const char *s2)
   if (s1 == s2)
     return 0;
   return strcmp(s1, s2);
+}
+
+int gt_strcmpptr(const void *a, const void *b)
+{
+  gt_assert(a && b);
+  return strcmp(*((const char**) a), *((const char**) b));
 }
