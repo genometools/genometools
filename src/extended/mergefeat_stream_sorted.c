@@ -64,6 +64,6 @@ GtNodeStream* gt_mergefeat_stream_sorted_new(GtNodeStream *in_stream)
   GtMergefeatStreamSorted *mfs = gt_mergefeat_stream_sorted_cast(gs);
   assert(in_stream && gt_node_stream_is_sorted(in_stream));
   mfs->mergefeat_stream_unsorted = gt_mergefeat_stream_unsorted_new(in_stream);
-  mfs->sort_stream = sort_stream_new(mfs->mergefeat_stream_unsorted);
+  mfs->sort_stream = gt_sort_stream_new(mfs->mergefeat_stream_unsorted);
   return gs;
 }

@@ -105,7 +105,7 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
   gt_str_delete(chseqids);
   if (!had_err) {
     if (arguments.sort) {
-      sort_stream = sort_stream_new(chseqids_stream);
+      sort_stream = gt_sort_stream_new(chseqids_stream);
       gff3_out_stream = gt_gff3_out_stream_new(sort_stream, arguments.outfp);
     }
     else {

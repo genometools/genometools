@@ -218,7 +218,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* create sort stream (if necessary) */
   if (!had_err && arguments->sort) {
-    sort_stream = sort_stream_new(gff3_in_stream);
+    sort_stream = gt_sort_stream_new(gff3_in_stream);
     last_stream = sort_stream;
   }
 
