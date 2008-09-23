@@ -17,7 +17,7 @@
 
 #include "core/assert.h"
 #include "core/class_alloc.h"
-#include "core/queue.h"
+#include "core/array.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "annotationsketch/feature_index_rep.h"
@@ -123,27 +123,28 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
 {
   GtNodeStream *gff3_in_stream;
   GtGenomeNode *gn;
-  GtQueue *queue;
+  GtArray *tmp;
   int had_err = 0;
+  unsigned long i;
   gt_error_check(err);
   gt_assert(fi && gff3file);
-  queue = gt_queue_new();
+  tmp = gt_array_new(sizeof (GtGenomeNode*));
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, &gff3file, false, false);
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
-    gt_queue_add(queue, gn);
+    gt_array_add(tmp, gn);
   if (!had_err) {
     GtNodeVisitor  *feature_visitor = gt_feature_visitor_new(fi);
-    while (gt_queue_size(queue)) {
-      gn = gt_queue_get(queue);
+    for (i=0;i<gt_array_size(tmp);i++) {
+      gn = *(GtGenomeNode**) gt_array_get(tmp, i);
       had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
       gt_assert(!had_err); /* cannot happen */
     }
     gt_node_visitor_delete(feature_visitor);
   }
   gt_node_stream_delete(gff3_in_stream);
-  while (gt_queue_size(queue))
-    gt_genome_node_rec_delete(gt_queue_get(queue));
-  gt_queue_delete(queue);
+  for (i=0;i<gt_array_size(tmp);i++)
+    gt_genome_node_rec_delete(*(GtGenomeNode**) gt_array_get(tmp, i));
+  gt_array_delete(tmp);
   return had_err;
 }
 
