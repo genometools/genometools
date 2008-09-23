@@ -210,10 +210,6 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   /* save name of output file */
   file = argv[parsed_args];
 
-  /* disable warnings */
-  if (!arguments.verbose)
-    gt_warning_disable();
-
   /* check for correct order: range end < range start */
   if (!had_err &&
       arguments.start != UNDEF_ULONG &&

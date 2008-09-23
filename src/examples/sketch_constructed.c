@@ -99,8 +99,6 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  gt_warning_disable(); /* disable AnnotationSketch warnings */
-
   features = create_example_features();
 
   draw_example_features(features, argv[1], argv[2]);

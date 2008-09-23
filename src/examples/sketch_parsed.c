@@ -25,9 +25,6 @@ int main(int argc, char *argv[])
   png_file = argv[2];
   gff3_file = argv[3];
 
-  /* disable AnnotationSketch warnings */
-  gt_warning_disable();
-
   /* create style */
   if (!(style = gt_style_new(err)))
     handle_error(err);
