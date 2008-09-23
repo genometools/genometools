@@ -33,7 +33,6 @@
 #include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "core/warning_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 
@@ -777,14 +776,7 @@ int gt_diagram_unit_test(GtError *err)
   GtDiagram *dia = NULL, *dia2 = NULL, *dia3 = NULL;
   GtArray *features;
   GtCanvas *canvas = NULL;
-  GtWarningHandler warning_handler;
-  void *warning_data;
   gt_error_check(err);
-
-  /* backup warning handler and disable warnings */
-  warning_handler = gt_warning_get_handler();
-  warning_data = gt_warning_get_data();
-  gt_warning_disable();
 
   /* generating some ranges */
   rs.start=100; rs.end=1200;
@@ -933,9 +925,6 @@ int gt_diagram_unit_test(GtError *err)
   gt_genome_node_rec_delete((GtGenomeNode*) rn2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
-
-  /* restore warning handler */
-  gt_warning_set_handler(warning_handler, warning_data);
 
   return had_err;
 }
