@@ -23,14 +23,14 @@
 #include "extended/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct SpliceSiteInfoStream SpliceSiteInfoStream;
+typedef struct GtSpliceSiteInfoStream GtSpliceSiteInfoStream;
 
-const GtNodeStreamClass* splice_site_info_stream_class(void);
+const GtNodeStreamClass* gt_splice_site_info_stream_class(void);
 
-/* create a SpliceSiteInfoStream, takes ownership of GtRegionMapping  */
-GtNodeStream*            splice_site_info_stream_new(GtNodeStream*,
+/* create a GtSpliceSiteInfoStream, takes ownership of GtRegionMapping  */
+GtNodeStream*            gt_splice_site_info_stream_new(GtNodeStream*,
                                                      GtRegionMapping*);
 /* returns if an intron has been processed, false otherwise */
-bool                     splice_site_info_stream_show(GtNodeStream*);
+bool                     gt_splice_site_info_stream_show(GtNodeStream*);
 
 #endif

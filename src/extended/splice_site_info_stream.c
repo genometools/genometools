@@ -20,23 +20,23 @@
 #include "extended/splice_site_info_stream.h"
 #include "extended/splice_site_info_visitor.h"
 
-struct SpliceSiteInfoStream
+struct GtSpliceSiteInfoStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *splice_site_info_visitor;
 };
 
-#define splice_site_info_stream_cast(GS)\
-        gt_node_stream_cast(splice_site_info_stream_class(), GS)
+#define gt_splice_site_info_stream_cast(GS)\
+        gt_node_stream_cast(gt_splice_site_info_stream_class(), GS)
 
-static int splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+static int gt_splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                         GtError *err)
 {
-  SpliceSiteInfoStream *ssis;
+  GtSpliceSiteInfoStream *ssis;
   int had_err;
   gt_error_check(err);
-  ssis = splice_site_info_stream_cast(gs);
+  ssis = gt_splice_site_info_stream_cast(gs);
   had_err = gt_node_stream_next(ssis->in_stream, gn, err);
   if (!had_err) {
     assert(ssis->splice_site_info_visitor);
@@ -52,39 +52,39 @@ static int splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void splice_site_info_stream_free(GtNodeStream *gs)
+static void gt_splice_site_info_stream_free(GtNodeStream *gs)
 {
-  SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
+  GtSpliceSiteInfoStream *ssis = gt_splice_site_info_stream_cast(gs);
   gt_node_visitor_delete(ssis->splice_site_info_visitor);
   gt_node_stream_delete(ssis->in_stream);
 }
 
-const GtNodeStreamClass* splice_site_info_stream_class(void)
+const GtNodeStreamClass* gt_splice_site_info_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (SpliceSiteInfoStream),
-                                   splice_site_info_stream_free,
-                                   splice_site_info_stream_next);
+    nsc = gt_node_stream_class_new(sizeof (GtSpliceSiteInfoStream),
+                                   gt_splice_site_info_stream_free,
+                                   gt_splice_site_info_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* splice_site_info_stream_new(GtNodeStream *in_stream,
+GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
                                           GtRegionMapping *rm)
 {
-  GtNodeStream *gs = gt_node_stream_create(splice_site_info_stream_class(),
+  GtNodeStream *gs = gt_node_stream_create(gt_splice_site_info_stream_class(),
                                           false);
-  SpliceSiteInfoStream *ssis = splice_site_info_stream_cast(gs);
+  GtSpliceSiteInfoStream *ssis = gt_splice_site_info_stream_cast(gs);
   ssis->in_stream = gt_node_stream_ref(in_stream);
   ssis->splice_site_info_visitor = gt_splice_site_info_visitor_new(rm);
   return gs;
 }
 
-bool splice_site_info_stream_show(GtNodeStream *gs)
+bool gt_splice_site_info_stream_show(GtNodeStream *gs)
 {
-  SpliceSiteInfoStream *ssis;
+  GtSpliceSiteInfoStream *ssis;
   assert(gs);
-  ssis = splice_site_info_stream_cast(gs);
+  ssis = gt_splice_site_info_stream_cast(gs);
   return gt_splice_site_info_visitor_show(ssis->splice_site_info_visitor);
 }
