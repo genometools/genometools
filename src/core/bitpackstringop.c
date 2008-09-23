@@ -41,7 +41,7 @@
  * bit set in v results in a corresponding table lookup.
  */
 int
-requiredUInt32Bits(uint32_t v)
+gt_requiredUInt32Bits(uint32_t v)
 {
   int r;
   static const int MultiplyDeBruijnBitPosition[32] = {
@@ -59,7 +59,7 @@ requiredUInt32Bits(uint32_t v)
 }
 
 int
-requiredUInt64Bits(uint64_t v)
+gt_requiredUInt64Bits(uint64_t v)
 {
   int r;
   static const int MultiplyDeBruijnBitPosition[64] = {

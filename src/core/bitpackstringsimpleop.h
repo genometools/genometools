@@ -108,13 +108,13 @@ gt_bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val)
 static inline int
 requiredUInt8Bits(uint8_t v)
 {
-  return requiredUInt32Bits((uint32_t)v);
+  return gt_requiredUInt32Bits((uint32_t)v);
 }
 
 static inline int
 requiredUInt16Bits(uint16_t v)
 {
-  return requiredUInt32Bits((uint32_t)v);
+  return gt_requiredUInt32Bits((uint32_t)v);
 }
 
 static inline int
@@ -124,7 +124,7 @@ requiredInt8Bits(int8_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt32Bits(gt_safe_abs(v)) + 1;
+    return gt_requiredUInt32Bits(gt_safe_abs(v)) + 1;
 }
 
 static inline int
@@ -134,7 +134,7 @@ requiredInt16Bits(int16_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt32Bits(gt_safe_abs(v)) + 1;
+    return gt_requiredUInt32Bits(gt_safe_abs(v)) + 1;
 }
 
 static inline int
@@ -144,7 +144,7 @@ requiredInt32Bits(int32_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt32Bits(gt_safe_labs(v)) + 1;
+    return gt_requiredUInt32Bits(gt_safe_labs(v)) + 1;
 }
 
 static inline int
@@ -154,7 +154,7 @@ requiredInt64Bits(int64_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt64Bits(gt_safe_llabs(v)) + 1;
+    return gt_requiredUInt64Bits(gt_safe_llabs(v)) + 1;
 }
 
 static inline void

@@ -503,14 +503,14 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
   newSeqIdx->blockSize = blockSize;
   newSeqIdx->cwExtBitsPerBucket = cwExtBitsPerPos * bucketLen;
   newSeqIdx->callBackDataOffsetBits = callBackDataOffsetBits
-    = biFunc ? requiredUInt64Bits(newSeqIdx->compositionTable.maxPermIdxBits
+    = biFunc ? gt_requiredUInt64Bits(newSeqIdx->compositionTable.maxPermIdxBits
                                   * bucketBlocks) : 0;
   {
     BitOffset maxVarBitsTotal =
       vwBits(totalLen, blockSize, bucketBlocks,
              newSeqIdx->compositionTable.maxPermIdxBits,
              biVarBits, cbState, &biMaxExtSize);
-    newSeqIdx->bitsPerVarDiskOffset = requiredUInt64Bits(maxVarBitsTotal);
+    newSeqIdx->bitsPerVarDiskOffset = gt_requiredUInt64Bits(maxVarBitsTotal);
   }
   newSeqIdx->maxVarExtBitsPerBucket = biMaxExtSize.maxBitsPerBucket;
   {
@@ -2306,7 +2306,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
     loadBlockEncIdxSeqErrRet();
   if (newSeqIdx->bitsPerVarDiskOffset == 0)
     newSeqIdx->bitsPerVarDiskOffset =
-      requiredUInt64Bits(
+      gt_requiredUInt64Bits(
         vwBitsSimple(newSeqIdx->baseClass.seqLen, newSeqIdx->blockSize,
                      newSeqIdx->bucketBlocks,
                      newSeqIdx->compositionTable.maxPermIdxBits,

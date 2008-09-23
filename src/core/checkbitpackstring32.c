@@ -104,7 +104,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
 #else /* 32 > 32 && LONG_BIT < 32 */
     uint32_t v = randSrc[i] = random();
 #endif /* 32 > 32 && LONG_BIT < 32 */
-    int bits = requiredUInt32Bits(v);
+    int bits = gt_requiredUInt32Bits(v);
     gt_bsStoreUInt32(bitStore, offset, bits, v);
     offset += bits;
   }
@@ -112,7 +112,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     uint32_t v = randSrc[i];
-    int bits = requiredUInt32Bits(v);
+    int bits = gt_requiredUInt32Bits(v);
     uint32_t r = gt_bsGetUInt32(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
@@ -127,7 +127,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
   if (numRnd > 0)
   {
     uint32_t v = randSrc[0], r = 0;
-    unsigned numBits = requiredUInt32Bits(v);
+    unsigned numBits = gt_requiredUInt32Bits(v);
     BitOffset i = offsetStart + numBits;
     uint32_t mask = ~(uint32_t)0;
     if (numBits < 32)
@@ -181,14 +181,14 @@ gt_bitPackStringInt32_unit_test(GtError *err)
     gt_log_log("gt_bsCompare: ");
     {
       uint32_t v0 = randSrc[0];
-      int bits0 = requiredUInt32Bits(v0);
+      int bits0 = gt_requiredUInt32Bits(v0);
       uint32_t r0;
       offset = offsetStart;
       r0 = gt_bsGetUInt32(bitStore, offset, bits0);
       for (i = 1; i < numRnd; ++i)
       {
         uint32_t v1 = randSrc[i];
-        int bits1 = requiredUInt32Bits(v1);
+        int bits1 = gt_requiredUInt32Bits(v1);
         uint32_t r1 = gt_bsGetUInt32(bitStore, offset + bits0, bits1);
         int result = -2;   /*< -2 is not a return value of gt_bsCompare, thus
                             *   if it is displayed, there was an earlier

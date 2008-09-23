@@ -57,7 +57,7 @@ enum {
  */
 
 /** bits required to store an unsigned value ranging from 0..val */
-#define requiredUIntBits(val) requiredUInt32Bits(val)
+#define requiredUIntBits(val) gt_requiredUInt32Bits(val)
 /** bits required to store int value val exactly */
 #define requiredIntBits(val) requiredInt32Bits(val)
 /** extract unsigned from BitString */
@@ -144,7 +144,7 @@ requiredUInt16Bits(uint16_t val);
  * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 extern int
-requiredUInt32Bits(uint32_t val);
+gt_requiredUInt32Bits(uint32_t val);
 /**
  * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 64-bit type.
@@ -154,7 +154,7 @@ requiredUInt32Bits(uint32_t val);
  * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 extern int
-requiredUInt64Bits(uint64_t val);
+gt_requiredUInt64Bits(uint64_t val);
 /**
  * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed 8-bit
  * type.
