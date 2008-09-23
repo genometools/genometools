@@ -43,7 +43,7 @@ typedef struct {
   GtStr *offsetfile,
       *typecheck;
   unsigned long width;
-  OutputFileInfo *ofi;
+  GtOutputFileInfo *ofi;
   GtGenFile *outfp;
 } GFF3Arguments;
 
@@ -52,7 +52,7 @@ static void* gt_gff3_arguments_new(void)
   GFF3Arguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->offsetfile = gt_str_new();
   arguments->typecheck = gt_str_new();
-  arguments->ofi = outputfileinfo_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -61,7 +61,7 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   GFF3Arguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_genfile_close(arguments->outfp);
-  outputfileinfo_delete(arguments->ofi);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->typecheck);
   gt_str_delete(arguments->offsetfile);
   gt_free(arguments);
@@ -155,7 +155,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* set comment function */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);

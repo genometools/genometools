@@ -102,8 +102,8 @@ static char* mutate_seq(const char *seq, unsigned long len, GtAlpha *alpha,
   return mutated_seq;
 }
 
-GtSeq* gt_mutate_seq(const char *description, const char *orig_seq, unsigned long len,
-                     GtAlpha *alpha, unsigned int rate)
+GtSeq* gt_mutate_seq(const char *description, const char *orig_seq,
+                     unsigned long len, GtAlpha *alpha, unsigned int rate)
 {
   char *mutated_description, *mutated_seq;
   GtSeq *seq;

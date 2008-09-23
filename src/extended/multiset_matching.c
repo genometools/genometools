@@ -26,7 +26,8 @@
 void gt_do_multiset_matching(unsigned char *multiset_string,
                              unsigned long multiset_size, unsigned char *text,
                              unsigned long text_length, void *data,
-                             void (*procmatchfunc)(unsigned long pos, void *data))
+                             void (*procmatchfunc)(unsigned long pos,
+                                                   void *data))
 {
   unsigned long i;
   long multiset[UCHAR_MAX],

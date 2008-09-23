@@ -32,14 +32,14 @@
 typedef struct {
   bool seqit,
        verbose;
-  OutputFileInfo *ofi;
+  GtOutputFileInfo *ofi;
   GtGenFile *outfp;
 } GtSequniqArguments;
 
 static void* gt_sequniq_arguments_new(void)
 {
   GtSequniqArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = outputfileinfo_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -48,7 +48,7 @@ static void gt_sequniq_arguments_delete(void *tool_arguments)
   GtSequniqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_genfile_close(arguments->outfp);
-  outputfileinfo_delete(arguments->ofi);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -77,7 +77,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   /* option implications */
   gt_option_imply(verbose_option, seqit_option);
 
-  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
   gt_option_parser_set_min_args(op, 1);
   return op;
 }
