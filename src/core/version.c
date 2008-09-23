@@ -15,24 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef VERSION_API_H
-#define VERSION_API_H
+#include <stdlib.h>
+#include "gt_config.h"
+#include "core/version_api.h"
 
-#include <stdarg.h>
-
-/* Version module */
-
-/* Check that the __GenomeTools__ library in use is compatible with the given
-   version. Generally you would pass in the constants <GT_MAJOR_VERSION>,
-   <GT_MINOR_VERSION>, and <GT_MICRO_VERSION> as the three arguments to this
-   function.
-
-   Returns <NULL> if the __GenomeTools__ library is compatible with the given
-   version, or a string describing the version mismatch, if the library is not
-   compatible.
-*/
 const char* gt_version_check(unsigned int required_major,
                              unsigned int required_minor,
-                             unsigned int required_micro);
-
-#endif
+                             unsigned int required_micro)
+{
+  if (required_major > GT_MAJOR_VERSION)
+    return "GenomeTools library version too old (major mismatch)";
+  if (required_major < GT_MAJOR_VERSION)
+    return "GenomeTools library version too new (major mismatch)";
+  if (required_minor > GT_MINOR_VERSION)
+    return "GenomeTools library version too old (minor mismatch)";
+  if (required_micro > GT_MICRO_VERSION)
+    return "GenomeTools library version too old (micro mismatch)";
+  return NULL;
+}
