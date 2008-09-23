@@ -34,10 +34,10 @@ unsigned long gt_qgram_encode(const char *w, unsigned long q,
   return qgram_code;
 }
 
-unsigned long gt_qgram_step(unsigned long current_code, char previous, char next,
-                         unsigned long alphabet_size,
-                         unsigned long
-                         alpha_size_raised_to_the_power_of_q_minus_1)
+unsigned long gt_qgram_step(unsigned long current_code, char previous,
+                            char next, unsigned long alphabet_size,
+                            unsigned long
+                            alpha_size_raised_to_the_power_of_q_minus_1)
 
 {
   unsigned long next_code;
@@ -59,7 +59,8 @@ void gt_qgram_compute(GtArray *qgrams, const char *encoded_seq,
     gt_array_add(qgrams, code);
     i = 0;
     while (i + q < seqlen) {
-      code = gt_qgram_step(code, encoded_seq[i], encoded_seq[i+q], gt_alpha_size,
+      code = gt_qgram_step(code, encoded_seq[i], encoded_seq[i+q],
+                           gt_alpha_size,
                            alpha_size_raised_to_the_power_of_q_minus_1);
       gt_array_add(qgrams, code);
       i++;

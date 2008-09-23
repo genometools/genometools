@@ -42,11 +42,11 @@ unsigned long qgramdist(GtSeq *seq_a, GtSeq *seq_b, unsigned int q)
   seq_a_qgrams = gt_array_new(sizeof (unsigned long));
   seq_b_qgrams = gt_array_new(sizeof (unsigned long));
 
-  gt_qgram_compute(seq_a_qgrams, gt_seq_get_encoded(seq_a), gt_seq_length(seq_a),
-                gt_alpha_size(gt_alpha_a), q);
+  gt_qgram_compute(seq_a_qgrams, gt_seq_get_encoded(seq_a),
+                   gt_seq_length(seq_a), gt_alpha_size(gt_alpha_a), q);
   assert(gt_array_size(seq_a_qgrams) == gt_seq_length(seq_a) - q + 1);
-  gt_qgram_compute(seq_b_qgrams, gt_seq_get_encoded(seq_b), gt_seq_length(seq_b),
-                gt_alpha_size(gt_alpha_b), q);
+  gt_qgram_compute(seq_b_qgrams, gt_seq_get_encoded(seq_b),
+                   gt_seq_length(seq_b), gt_alpha_size(gt_alpha_b), q);
   assert(gt_array_size(seq_b_qgrams) == gt_seq_length(seq_b) - q + 1);
 
   for (i = 0; i < gt_array_size(seq_a_qgrams); i++)

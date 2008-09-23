@@ -27,10 +27,10 @@ unsigned long gt_qgram_encode(const char *w, unsigned long q,
                            unsigned long alphabet_size);
 
 /* Computes the next encoding. */
-unsigned long gt_qgram_step(unsigned long current_code, char previous, char next,
-                         unsigned long alphabet_size,
-                         unsigned long
-                         gt_alpha_size_raised_to_the_power_of_q_minus_1);
+unsigned long gt_qgram_step(unsigned long current_code, char previous,
+                            char next, unsigned long alphabet_size,
+                            unsigned long
+                            gt_alpha_size_raised_to_the_power_of_q_minus_1);
 
 /* Computes all q-grams of the given <encoded_seq> (over an alphabet of size
    <gt_alpha_size>) and stores them in the array <qgrams>. */
