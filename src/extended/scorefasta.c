@@ -39,7 +39,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
     h[i] = gt_array_new(sizeof (unsigned long));
 
   /* compute code of first q-gram of w */
-  code = qgram_encode(w, q, alphabet_size);
+  code = gt_qgram_encode(w, q, alphabet_size);
 
   /* store first encoding in h */
   i = 0;
@@ -48,7 +48,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
   r_raised_to_the_power_of_q_minus_1 = pow(alphabet_size, q-1);
   for (i = 1; i < wlen - q + 1; i++) {
     /* update code */
-    code = qgram_step(code, w[i-1], w[i+q-1], alphabet_size,
+    code = gt_qgram_step(code, w[i-1], w[i+q-1], alphabet_size,
                       r_raised_to_the_power_of_q_minus_1);
     /* store startposition in h[code] */
     gt_array_add(h[code], i);
@@ -60,7 +60,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
   count = gt_calloc((ulen + wlen + 1), sizeof *count);
 
   /* compute code of first q-gram in u */
-  code = qgram_encode(u, q, alphabet_size);
+  code = gt_qgram_encode(u, q, alphabet_size);
 
   /* increase count */
   for (i = 0; i < gt_array_size(h[code]); i++)
@@ -68,7 +68,7 @@ unsigned long scorefasta(const char *u, unsigned long ulen,
 
   for (j = 1; j < ulen - q + 1; j++) {
     /* update code */
-    code = qgram_step(code, u[j-1], u[j+q-1], alphabet_size,
+    code = gt_qgram_step(code, u[j-1], u[j+q-1], alphabet_size,
                       r_raised_to_the_power_of_q_minus_1);
     /* increase count */
     for (i = 0; i < gt_array_size(h[code]); i++)

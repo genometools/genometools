@@ -127,7 +127,7 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
   - <q_rest> is the size of <qgram_rest>.
   - <k> is the minimum score which is necessary to add the <current_word> to the
     Blast environment).
-  - <current_score> denotes the score of the <curren_word>.
+  - <current_score> denotes the score of the <current_word>.
   - <position> denotes the position of the current q-gram in the query string.
 
   The lookahead mechanism works as follows:
@@ -147,8 +147,8 @@ static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
   assert(V && pos && qgram_rest && alpha);
   if (q_rest == 0) {
     if (current_score >= k) {
-      unsigned long qgram_code = qgram_encode(current_word, q,
-                                              gt_alpha_size(alpha));
+      unsigned long qgram_code = gt_qgram_encode(current_word, q,
+                                                 gt_alpha_size(alpha));
       /* set V[qgram_code] */
       gt_bittab_set_bit(V, qgram_code);
       /* store position */
@@ -261,7 +261,7 @@ void gt_blast_env_show(const GtBlastEnv *be)
     position_list = pos_get(be->pos, code);
     assert(position_list);
     assert(gt_array_size(position_list)); /* contains at least one position */
-    qgram_decode(qgram, code, be->q, be->alpha);
+    gt_qgram_decode(qgram, code, be->q, be->alpha);
     gt_xfputs(qgram, stdout);
     for (i = 0; i < gt_array_size(position_list); i++) {
       printf(", %lu", *(unsigned long*) gt_array_get(position_list, i) + 1);

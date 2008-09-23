@@ -19,7 +19,7 @@
 #include <math.h>
 #include "extended/qgram.h"
 
-unsigned long qgram_encode(const char *w, unsigned long q,
+unsigned long gt_qgram_encode(const char *w, unsigned long q,
                            unsigned long alphabet_size)
 {
   unsigned long i, qgram_code;
@@ -34,40 +34,40 @@ unsigned long qgram_encode(const char *w, unsigned long q,
   return qgram_code;
 }
 
-unsigned long qgram_step(unsigned long current_code, char previous, char next,
+unsigned long gt_qgram_step(unsigned long current_code, char previous, char next,
                          unsigned long alphabet_size,
                          unsigned long
-                         gt_alpha_size_raised_to_the_power_of_q_minus_1)
+                         alpha_size_raised_to_the_power_of_q_minus_1)
 
 {
   unsigned long next_code;
   next_code = (current_code - previous *
-               gt_alpha_size_raised_to_the_power_of_q_minus_1) * alphabet_size +
-              next;
+               alpha_size_raised_to_the_power_of_q_minus_1) * alphabet_size +
+               next;
   return next_code;
 }
 
-void qgram_compute(GtArray *qgrams, const char *encoded_seq,
+void gt_qgram_compute(GtArray *qgrams, const char *encoded_seq,
                    unsigned long seqlen, unsigned long gt_alpha_size,
                    unsigned int q)
 {
-  unsigned long i, code, gt_alpha_size_raised_to_the_power_of_q_minus_1;
+  unsigned long i, code, alpha_size_raised_to_the_power_of_q_minus_1;
   assert(qgrams && encoded_seq && gt_alpha_size && q);
   if (seqlen >= q) {
-    gt_alpha_size_raised_to_the_power_of_q_minus_1 = pow(gt_alpha_size, q-1);
-    code = qgram_encode(encoded_seq, q, gt_alpha_size);
+    alpha_size_raised_to_the_power_of_q_minus_1 = pow(gt_alpha_size, q-1);
+    code = gt_qgram_encode(encoded_seq, q, gt_alpha_size);
     gt_array_add(qgrams, code);
     i = 0;
     while (i + q < seqlen) {
-      code = qgram_step(code, encoded_seq[i], encoded_seq[i+q], gt_alpha_size,
-                        gt_alpha_size_raised_to_the_power_of_q_minus_1);
+      code = gt_qgram_step(code, encoded_seq[i], encoded_seq[i+q], gt_alpha_size,
+                           alpha_size_raised_to_the_power_of_q_minus_1);
       gt_array_add(qgrams, code);
       i++;
     }
   }
 }
 
-void qgram_decode(char *qgram, unsigned long code, unsigned long q,
+void gt_qgram_decode(char *qgram, unsigned long code, unsigned long q,
                   GtAlpha *alpha)
 {
   unsigned int alphabet_size, c = 0;
