@@ -93,7 +93,8 @@ int gt_msaparse(int argc, const char **argv, GtError *err)
     if (arguments.consensus)
       printf("consensus distance: %lu\n", gt_msa_consensus_distance(msa));
     if (arguments.sumofpairs) {
-      printf("sum of pairwise scores: %lu\n", gt_msa_sum_of_pairwise_scores(msa));
+      printf("sum of pairwise scores: %lu\n",
+             gt_msa_sum_of_pairwise_scores(msa));
     }
   }
 

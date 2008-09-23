@@ -30,7 +30,7 @@ typedef struct {
          *distances;           /* stores the distances to other nodes */
 } NJnode;
 
-struct NeighborJoining {
+struct GtNeighborJoining {
   NJnode *nodes;
   unsigned long num_of_taxa,
                 numofnodes, /* 2 * num_of_taxa - 2 */
@@ -39,8 +39,10 @@ struct NeighborJoining {
   double finaldist;
 };
 
-static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
-                                 void *data, NeighborJoiningDistFunc distfunc)
+static void gt_neighborjoining_init(GtNeighborJoining *nj,
+                                    unsigned long num_of_taxa,
+                                    void *data, GtNeighborJoiningDistFunc
+                                    distfunc)
 {
   unsigned long i, j;
   double retval;
@@ -73,7 +75,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
   }
 }
 
-static double distance(const NeighborJoining *nj, unsigned long i,
+static double distance(const GtNeighborJoining *nj, unsigned long i,
                        unsigned long j)
 {
   double distance;
@@ -87,7 +89,7 @@ static double distance(const NeighborJoining *nj, unsigned long i,
 }
 
 static void updatertab(double *rtab, GtBittab *nodetab,
-                       unsigned long activenodes, NeighborJoining *nj)
+                       unsigned long activenodes, GtNeighborJoining *nj)
 {
   unsigned long i, j;
   for (i = 0; i < nj->numofnodes; i++) {
@@ -103,7 +105,7 @@ static void updatertab(double *rtab, GtBittab *nodetab,
   }
 }
 
-static void neighborjoining_compute(NeighborJoining *nj)
+static void gt_neighborjoining_compute(GtNeighborJoining *nj)
 {
   unsigned long i, j, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG, step,
                 newnodenum = nj->num_of_taxa,
@@ -182,18 +184,18 @@ static void neighborjoining_compute(NeighborJoining *nj)
   gt_free(rtab);
 }
 
-NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
-                                     NeighborJoiningDistFunc distfunc)
+GtNeighborJoining* gt_neighborjoining_new(unsigned long num_of_taxa, void *data,
+                                     GtNeighborJoiningDistFunc distfunc)
 {
-  NeighborJoining *nj;
+  GtNeighborJoining *nj;
   assert(num_of_taxa && distfunc);
-  nj = gt_malloc(sizeof (NeighborJoining));
-  neighborjoining_init(nj, num_of_taxa, data, distfunc);
-  neighborjoining_compute(nj);
+  nj = gt_malloc(sizeof (GtNeighborJoining));
+  gt_neighborjoining_init(nj, num_of_taxa, data, distfunc);
+  gt_neighborjoining_compute(nj);
   return nj;
 }
 
-static void neighborjoining_show_node(const NeighborJoining *nj,
+static void gt_neighborjoining_show_node(const GtNeighborJoining *nj,
                                       unsigned long nodenum, FILE *fp)
 {
   unsigned long leftdaughter  = nj->nodes[nodenum].leftdaughter;
@@ -204,23 +206,23 @@ static void neighborjoining_show_node(const NeighborJoining *nj,
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n", nodenum,
           rightdaughter, nj->nodes[nodenum].rightdist);
   if (nj->nodes[leftdaughter].leftdaughter != UNDEF_ULONG)
-    neighborjoining_show_node(nj, leftdaughter, fp);
+    gt_neighborjoining_show_node(nj, leftdaughter, fp);
   if (nj->nodes[rightdaughter].leftdaughter != UNDEF_ULONG)
-    neighborjoining_show_node(nj, rightdaughter, fp);
+    gt_neighborjoining_show_node(nj, rightdaughter, fp);
 }
 
-void neighborjoining_show_tree(const NeighborJoining *nj, FILE *fp)
+void gt_neighborjoining_show_tree(const GtNeighborJoining *nj, FILE *fp)
 {
   assert(nj);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n",
           nj->finalnodeA, nj->finalnodeB, nj->finaldist);
   if (nj->nodes[nj->finalnodeA].leftdaughter != UNDEF_ULONG)
-    neighborjoining_show_node(nj, nj->finalnodeA, fp);
+    gt_neighborjoining_show_node(nj, nj->finalnodeA, fp);
   if (nj->nodes[nj->finalnodeB].leftdaughter != UNDEF_ULONG)
-    neighborjoining_show_node(nj, nj->finalnodeB, fp);
+    gt_neighborjoining_show_node(nj, nj->finalnodeB, fp);
 }
 
-void neighborjoining_delete(NeighborJoining *nj)
+void gt_neighborjoining_delete(GtNeighborJoining *nj)
 {
   unsigned long i;
   if (!nj) return;

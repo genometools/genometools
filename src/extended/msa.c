@@ -50,8 +50,8 @@ GtMSA* gt_msa_new(const char *GtMSA_filename, GtError *err)
     firstseqlen = gt_bioseq_get_sequence_length(msa->bs, 0);
     for (i = 1; i < gt_bioseq_number_of_sequences(msa->bs); i++) {
       if (gt_bioseq_get_sequence_length(msa->bs, i) != firstseqlen) {
-        gt_error_set(err, "length of sequence %lu in the GtMSA file '%s' differs "
-                  "from the first", i, GtMSA_filename);
+        gt_error_set(err, "length of sequence %lu in the GtMSA file '%s' "
+                          "differs from the first", i, GtMSA_filename);
         had_err = -1;
         break;
       }
