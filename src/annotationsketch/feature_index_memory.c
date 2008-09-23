@@ -162,7 +162,7 @@ static int gt_genome_node_cmp_range_start(const void *v1, const void *v2)
 int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
                                                    GtArray *results,
                                                    const char *seqid,
-                                                   GtRange qry_range,
+                                                   const GtRange *qry_range,
                                                    GtError *err)
 {
   RegionInfo *ri;
@@ -176,8 +176,8 @@ int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
     gt_error_set(err, "feature index does not contain the given sequence id");
     return -1;
   }
-  gt_interval_tree_find_all_overlapping(ri->features, qry_range.start,
-                                     qry_range.end, results);
+  gt_interval_tree_find_all_overlapping(ri->features, qry_range->start,
+                                        qry_range->end, results);
   gt_array_sort(results, gt_genome_node_cmp_range_start);
   return 0;
 }

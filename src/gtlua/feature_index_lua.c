@@ -125,7 +125,7 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
   range = check_range(L, 3);
   features = gt_array_new(sizeof (GtGenomeNode*));
   had_err = gt_feature_index_get_features_for_range(*feature_index, features,
-                                                    seqid, *range, NULL);
+                                                    seqid, range, NULL);
   assert(!had_err); /* it was checked before that the feature_index contains the
                        given sequence id*/
   push_features_as_table(L, features);

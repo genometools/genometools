@@ -29,7 +29,8 @@ typedef GtArray*    (*GtFeatureIndexGetFeatsForSeqidFunc)(GtFeatureIndex*,
                                                           const char*);
 typedef int         (*GtFeatureIndexGetFeatsForRangeFunc)(GtFeatureIndex*,
                                                           GtArray*,
-                                                          const char*, GtRange,
+                                                          const char*,
+                                                          const GtRange*,
                                                           GtError*);
 typedef const char* (*GtFeatureIndexGetFirstSeqidFunc)(const GtFeatureIndex*);
 typedef GtStrArray* (*GtFeatureIndexGetSeqidsFunc)(const GtFeatureIndex*);

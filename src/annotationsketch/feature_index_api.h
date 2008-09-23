@@ -54,7 +54,7 @@ int         gt_feature_index_get_features_for_range(GtFeatureIndex
                                                     *feature_index,
                                                     GtArray *results,
                                                     const char *seqid,
-                                                    GtRange range,
+                                                    const GtRange *range,
                                                     GtError*);
 /* Returns the first sequence region identifier added to <feature_index>. */
 const char* gt_feature_index_get_first_seqid(const GtFeatureIndex

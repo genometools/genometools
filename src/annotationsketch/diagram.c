@@ -634,8 +634,8 @@ GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
   int had_err = 0;
   GtArray *features = gt_array_new(sizeof (GtGenomeNode*));
   assert(features && seqid && range && style);
-  had_err = gt_feature_index_get_features_for_range(fi, features, seqid, *range,
-                                                 NULL);
+  had_err = gt_feature_index_get_features_for_range(fi, features, seqid, range,
+                                                    NULL);
   assert(!had_err); /* <fi> must contain <seqid> */
   diagram = gt_diagram_new_generic(features, range, style);
   gt_array_delete(features);

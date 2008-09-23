@@ -157,7 +157,7 @@ GtArray* gt_feature_index_get_features_for_seqid(GtFeatureIndex *fi,
 int gt_feature_index_get_features_for_range(GtFeatureIndex *fi,
                                             GtArray *results,
                                             const char *seqid,
-                                            GtRange rng , GtError *err)
+                                            const GtRange *rng, GtError *err)
 {
   assert(fi && fi->c_class && results && seqid);
   return fi->c_class->get_features_for_range(fi, results, seqid, rng, err);
