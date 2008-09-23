@@ -14,9 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <string.h>
 
+#include "core/assert_api.h"
 #include "core/dataalign.h"
 #include "core/error.h"
 #include "core/log.h"

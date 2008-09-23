@@ -15,12 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <string.h>
+#include "core/assert_api.h"
 #include "core/cstr_table.h"
 #include "core/fileutils.h"
 #include "core/progressbar.h"
 #include "core/strarray.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_stream_rep.h"

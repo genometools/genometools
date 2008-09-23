@@ -18,7 +18,7 @@
 #ifndef ARRAYDEF_H
 #define ARRAYDEF_H
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/symboldef.h"
 

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "extended/node_stream_rep.h"
 #include "extended/add_introns_stream.h"
 #include "extended/add_introns_visitor.h"

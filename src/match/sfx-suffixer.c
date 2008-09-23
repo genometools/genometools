@@ -17,10 +17,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "core/assert.h"
 #include <limits.h>
 #include <errno.h>
 #include "core/arraydef.h"
+#include "core/assert_api.h"
 #include "core/error.h"
 #include "core/unused_api.h"
 #include "core/progressbar.h"

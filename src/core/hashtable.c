@@ -14,14 +14,14 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#include "core/assert.h"
+
 #include <limits.h>
 #include <setjmp.h>
 #if TJ_DEBUG > 1
 #include <stdio.h>
 #endif
 #include <string.h>
-
+#include "core/assert_api.h"
 #include "core/array.h"
 #include "core/cstr.h"
 #include "core/hashtable.h"

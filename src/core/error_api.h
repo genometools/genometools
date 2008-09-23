@@ -18,9 +18,9 @@
 #ifndef ERROR_API_H
 #define ERROR_API_H
 
-#include "core/assert.h"
 #include <stdarg.h>
 #include <stdbool.h>
+#include "core/assert_api.h"
 
 /*
    This class is used for the handling of ___user errors___ in __GenomeTools__.

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/gc_content.h"
 
 void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha)

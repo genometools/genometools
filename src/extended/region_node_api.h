@@ -21,7 +21,7 @@
 /* implements the ``genome node'' interface */
 typedef struct GtRegionNode GtRegionNode;
 
-#include "extended/genome_node.h"
+#include "extended/genome_node_api.h"
 #include "core/str_api.h"
 
 const GtGenomeNodeClass* gt_region_node_class(void);

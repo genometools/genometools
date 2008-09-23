@@ -80,7 +80,7 @@ estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput)
     /* two cases: we store 1 bit per position or log(segmentlen) for
      * each marked position plus one to note the number of marked positions */
     unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams);
-    if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
+    if (segmentLen > (segmentLen + 1) * gt_requiredUIntBits(segmentLen)
                      / paramOutput->final.locateInterval)
       return BWTLocateCount;
     else

@@ -19,6 +19,7 @@
 #include "core/option.h"
 #include "core/unused_api.h"
 #include "extended/extract_feat_stream.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtdatahelp.h"
 #include "extended/seqid2file.h"

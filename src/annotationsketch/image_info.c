@@ -21,8 +21,10 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
-#include "core/strand.h"
+#include "core/strand_api.h"
 #include "core/unused_api.h"
+#include "extended/feature_type.h"
+#include "extended/genome_node.h"
 
 struct GtImageInfo {
   GtArray* recmaps;

@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/minmax.h"
 #include "core/queue.h"
 #include "core/undef.h"

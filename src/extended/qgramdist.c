@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <math.h>
+#include "core/assert_api.h"
 #include "core/ma.h"
 #include "extended/qgramdist.h"
 #include "extended/qgram.h"

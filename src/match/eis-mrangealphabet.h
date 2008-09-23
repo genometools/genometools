@@ -49,7 +49,7 @@ typedef unsigned short AlphabetRangeSize;
 /** store array of symbols in BitString  */
 #define gt_bsStoreUniformSymbolArray gt_bsStoreUniformUInt8Array
 /** how many bits are required to store given symbol value */
-#define requiredSymbolBits requiredUInt8Bits
+#define requiredSymbolBits gt_requiredUInt8Bits
 
 /**
  * Describes an alphabet i.e. a mapping function from a given input

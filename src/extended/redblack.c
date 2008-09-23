@@ -109,9 +109,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "core/assert.h"
 #include <stdio.h>
 #include <math.h>
+#include "core/assert_api.h"
 #include "core/ensure.h"
 #include "core/mathsupport.h"
 #include "core/ma.h"

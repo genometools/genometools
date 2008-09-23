@@ -164,13 +164,13 @@ initCompositionList(struct compList *newList, unsigned blockSize,
   newList->catCompsPerms = NULL;
   if (!(composition = gt_malloc(sizeof (composition[0]) * alphabetSize)))
     initCompositionListErrRet();
-  bitsPerComp = alphabetSize * (bitsPerCount = requiredUIntBits(blockSize));
+  bitsPerComp = alphabetSize * (bitsPerCount = gt_requiredUIntBits(blockSize));
   newList->bitsPerCount = bitsPerCount;
   numCompositions = newList->numCompositions =
     binomialCoeff(blockSize + maxSym, maxSym);
   numTotalPermutations = iPow(alphabetSize, blockSize);
   newList->compositionIdxBits = gt_requiredUInt64Bits(numCompositions - 1);
-  newList->bitsPerSymbol = requiredUIntBits(maxSym);
+  newList->bitsPerSymbol = gt_requiredUIntBits(maxSym);
   bitsPerPerm = newList->bitsPerSymbol * blockSize;
   {
     size_t size = bitElemsAllocSize(numCompositions * bitsPerComp

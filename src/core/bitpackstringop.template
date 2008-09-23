@@ -14,11 +14,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
-
+#include "core/assert_api.h"
 #include "core/minmax.h"
 #include "core/bitpackstring.h"
 
@@ -29,12 +28,12 @@ gt_bsGet@uTypeTag@(constBitString str, BitOffset offset, unsigned numBits)
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
   size_t elemStart = offset/bitElemBits;
   const BitElem *p = str + elemStart;
-  assert(str);
+  gt_assert(str);
 #ifndef NDEBUG
   if (numBits > sizeof (accum)*CHAR_BIT)
     fprintf(stderr, "numBits = %u\n", numBits);
 #endif
-  assert(numBits <= sizeof (accum)*CHAR_BIT);
+  gt_assert(numBits <= sizeof (accum)*CHAR_BIT);
   if (bitTop)
   {
     @AccumType@ mask;
@@ -68,8 +67,8 @@ gt_bsStore@uTypeTag@(BitString str, BitOffset offset,
     bitTop = offset%bitElemBits;
   size_t elemStart = offset/bitElemBits;
   BitElem *p = str + elemStart;
-  assert(str);
-  assert(numBits <= sizeof (val)*CHAR_BIT);
+  gt_assert(str);
+  gt_assert(numBits <= sizeof (val)*CHAR_BIT);
   /* set bits of first element, accounting for bits to be preserved */
   if (bitTop)
   {

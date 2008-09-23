@@ -141,10 +141,11 @@ for _, fn in ipairs(arg) do -- iterate over all files
     end
 
     -- check for stdlib assert.h includes
-    if not string.match(fn, "assert.h$") then
+    if not string.match(fn, "assert_api.h$") then
       if string.find(l, "^#include <assert.h>") or
          string.find(l, "^#include \"assert.h\"") then
-        err(fn, ln, "do not include <assert.h>, use \"core/assert.h\" instead")
+        err(fn, ln,
+            "do not include <assert.h>, use \"core/assert_api.h\" instead")
       end
     end
 

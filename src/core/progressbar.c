@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -23,6 +22,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/termios.h>
+#include "core/assert_api.h"
 #include "core/unused_api.h"
 #include "core/xposix.h"
 

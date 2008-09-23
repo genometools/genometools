@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "gtlua/gtcore_lua.h"
 #include "gtlua/gtext_lua.h"
 #include "gtlua/gt_lua.h"

@@ -17,11 +17,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
-
+#include "core/assert_api.h"
 #include "core/minmax.h"
 #include "core/bitpackstring.h"
 
@@ -173,8 +172,8 @@ gt_bsGetUniformUInt64Array(constBitString str, BitOffset offset,
   unsigned long long accum = 0, valMask = ~(unsigned long long)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  gt_assert(str && val);
-  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  assert(str && val);
+  assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -233,7 +232,7 @@ gt_bsGetNonUniformUInt64Array(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long long accum = 0;
-  gt_assert(str && val);
+  assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -274,7 +273,7 @@ gt_bsGetNonUniformUInt64Array(
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
         unsigned long long valMask;
-        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = ~(unsigned long long)0;
         if (numBits < (sizeof (val[0])*CHAR_BIT))
           valMask = ~(valMask << numBits);
@@ -300,7 +299,7 @@ gt_bsGetNonUniformInt64Array(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long long accum = 0;
-  gt_assert(str && val);
+  assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -343,7 +342,7 @@ gt_bsGetNonUniformInt64Array(
         unsigned long long valMask = (numBits < 64)
           ? ~((~(unsigned long long)0) << numBits) : ~(unsigned long long)0;
         int64_t m = (int64_t)1 << (numBits - 1);
-        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
         val[j++] = ((((accum >> (bitsInAccum - numBits)) & valMask)
                               ^ m) - m);
         bitsInAccum -= numBits;
@@ -386,8 +385,8 @@ gt_bsStoreUniformUInt64Array(BitString str, BitOffset offset,
   unsigned long long accum, valMask = ~(unsigned long long)0, currentVal;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  gt_assert(str && val);
-  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  assert(str && val);
+  assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -507,8 +506,8 @@ gt_bsStoreNonUniformUInt64Array(
   unsigned long long accum, valMask = ~(unsigned long long)0, currentVal;
   if (numBitsList[0] < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBitsList[0]);
-  gt_assert(str && val);
-  gt_assert(numBitsList[0] <= sizeof (val[0])*CHAR_BIT);
+  assert(str && val);
+  assert(numBitsList[0] <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -519,7 +518,7 @@ gt_bsStoreNonUniformUInt64Array(
   if (totalBitsLeft)
   {
     unsigned numBits = numBitsList[++j];
-    gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+    assert(numBits <= sizeof (val[0])*CHAR_BIT);
     valMask = (numBits < 64)?
       ~((~(uint64_t)0) << numBits):~(uint64_t)0;
     currentVal = val[j] & valMask;
@@ -551,7 +550,7 @@ gt_bsStoreNonUniformUInt64Array(
       if (!(bitsLeft -= bits2Read) && totalBitsLeft)
       {
         unsigned numBits = numBitsList[++j];
-        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = (numBits < 64)?
           ~((~(uint64_t)0) << numBits):~(uint64_t)0;
         currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;
@@ -597,7 +596,7 @@ gt_bsStoreNonUniformUInt64Array(
       if (bits2Read == bitsLeft && totalBitsLeft)
       {
         unsigned numBits = numBitsList[++j];
-        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = (numBits < 64)?
           ~((~(uint64_t)0) << numBits):~(uint64_t)0;
         currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;
@@ -662,8 +661,8 @@ gt_bsGetUniformUInt64ArrayAdd(constBitString str, BitOffset offset,
   unsigned long long accum = 0, valMask = ~(unsigned long long)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  gt_assert(str && val);
-  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  assert(str && val);
+  assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -722,7 +721,7 @@ gt_bsGetNonUniformUInt64ArrayAdd(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long long accum = 0;
-  gt_assert(str && val);
+  assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -763,7 +762,7 @@ gt_bsGetNonUniformUInt64ArrayAdd(
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
         unsigned long long valMask;
-        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = ~(unsigned long long)0;
         if (numBits < (sizeof (val[0])*CHAR_BIT))
           valMask = ~(valMask << numBits);
@@ -789,7 +788,7 @@ gt_bsGetNonUniformInt64ArrayAdd(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long long accum = 0;
-  gt_assert(str && val);
+  assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -832,7 +831,7 @@ gt_bsGetNonUniformInt64ArrayAdd(
         unsigned long long valMask = (numBits < 64)
           ? ~((~(unsigned long long)0) << numBits) : ~(unsigned long long)0;
         int64_t m = (int64_t)1 << (numBits - 1);
-        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        assert(numBits <= sizeof (val[0])*CHAR_BIT);
         val[j++] += ((((accum >> (bitsInAccum - numBits)) & valMask)
                               ^ m) - m);
         bitsInAccum -= numBits;

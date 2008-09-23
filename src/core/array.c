@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <limits.h>
 #include <string.h>
 #include "core/array.h"
+#include "core/assert_api.h"
 #include "core/dynalloc.h"
 #include "core/ensure.h"
 #include "core/ma.h"

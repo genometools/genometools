@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/genome_node_iterator.h"

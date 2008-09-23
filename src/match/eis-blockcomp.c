@@ -24,7 +24,6 @@
  * - normalize use  of  seqIdx variable naming (seq, bseq etc.)
  */
 
-#include "core/assert.h"
 #include <stddef.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -32,6 +31,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
+#include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/dataalign.h"
 #include "core/error.h"

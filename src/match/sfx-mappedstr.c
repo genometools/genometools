@@ -20,7 +20,7 @@
 #include <ctype.h>
 #include <zlib.h>
 #include <stdbool.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/fastabuffer.h"

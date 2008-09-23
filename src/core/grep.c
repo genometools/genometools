@@ -16,10 +16,10 @@
 */
 
 #include <sys/types.h>
-#include "core/assert.h"
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "core/assert_api.h"
 #include "core/ensure.h"
 #include "core/error.h"
 #include "core/grep.h"

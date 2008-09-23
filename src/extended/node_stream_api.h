@@ -19,8 +19,8 @@
 #define NODE_STREAM_API_H
 
 #include <stdbool.h>
-
-#include "extended/genome_node.h"
+#include "core/error_api.h"
+#include "extended/genome_node_api.h"
 
 /* the ``genome stream'' interface */
 typedef struct GtNodeStreamClass GtNodeStreamClass;

@@ -19,7 +19,7 @@
 #define CONSENSUS_SA_H
 
 #include "core/range.h"
-#include "core/strand.h"
+#include "core/strand_api.h"
 
 /*
   This module implements the method to construct consensus spliced alignments

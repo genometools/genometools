@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <string.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+#include "core/assert_api.h"
 #include "core/cstr.h"
 #include "core/fileutils.h"
 #include "core/basename.h"

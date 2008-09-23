@@ -20,6 +20,7 @@
 #include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "extended/csa_stream.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "tools/gt_csa.h"

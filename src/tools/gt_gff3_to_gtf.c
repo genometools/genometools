@@ -17,6 +17,7 @@
 
 #include "core/option.h"
 #include "core/versionfunc.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtf_out_stream.h"
 #include "tools/gt_gff3_to_gtf.h"

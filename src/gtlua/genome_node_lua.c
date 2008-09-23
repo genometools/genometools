@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "extended/extract_feat_sequence.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_output.h"

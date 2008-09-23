@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"

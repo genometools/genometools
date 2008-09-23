@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <math.h>
 #include <stdlib.h>
+#include "core/assert_api.h"
 #include "core/mathsupport.h"
 #include "core/yarandom.h"
 

@@ -26,9 +26,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "core/assert.h"
 #include <math.h>
 #include "core/array2dim.h"
+#include "core/assert_api.h"
 #include "core/ensure.h"
 #include "core/mathsupport.h"
 #include "core/xansi.h"

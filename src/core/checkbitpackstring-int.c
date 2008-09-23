@@ -17,7 +17,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +25,7 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/ensure.h"
@@ -104,7 +104,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
 #else /* 32 > 32 && LONG_BIT < 32 */
     unsigned v = randSrc[i] = random();
 #endif /* 32 > 32 && LONG_BIT < 32 */
-    int bits = requiredUIntBits(v);
+    int bits = gt_requiredUIntBits(v);
     gt_bsStoreUInt(bitStore, offset, bits, v);
     offset += bits;
   }
@@ -112,7 +112,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     unsigned v = randSrc[i];
-    int bits = requiredUIntBits(v);
+    int bits = gt_requiredUIntBits(v);
     unsigned r = gt_bsGetUInt(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
@@ -127,7 +127,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
   if (numRnd > 0)
   {
     unsigned v = randSrc[0], r = 0;
-    unsigned numBits = requiredUIntBits(v);
+    unsigned numBits = gt_requiredUIntBits(v);
     BitOffset i = offsetStart + numBits;
     unsigned mask = ~(unsigned)0;
     if (numBits < 32)
@@ -181,14 +181,14 @@ gt_bitPackStringInt_unit_test(GtError *err)
     gt_log_log("gt_bsCompare: ");
     {
       unsigned v0 = randSrc[0];
-      int bits0 = requiredUIntBits(v0);
+      int bits0 = gt_requiredUIntBits(v0);
       unsigned r0;
       offset = offsetStart;
       r0 = gt_bsGetUInt(bitStore, offset, bits0);
       for (i = 1; i < numRnd; ++i)
       {
         unsigned v1 = randSrc[i];
-        int bits1 = requiredUIntBits(v1);
+        int bits1 = gt_requiredUIntBits(v1);
         unsigned r1 = gt_bsGetUInt(bitStore, offset + bits0, bits1);
         int result = -2;   /*< -2 is not a return value of gt_bsCompare, thus
                             *   if it is displayed, there was an earlier
@@ -276,7 +276,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     int v = (int)randSrc[i];
-    unsigned bits = requiredIntBits(v);
+    unsigned bits = gt_requiredIntBits(v);
     gt_bsStoreInt(bitStore, offset, bits, v);
     offset += bits;
   }
@@ -284,7 +284,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     int v = randSrc[i];
-    unsigned bits = requiredIntBits(v);
+    unsigned bits = gt_requiredIntBits(v);
     int r = gt_bsGetInt(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)

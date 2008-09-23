@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "core/assert_api.h"
 #include "core/xzlib.h"
 
 gzFile gt_xgzopen(const char *path, const char *mode)

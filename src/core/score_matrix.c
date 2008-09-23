@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/array.h"
 #include "core/array2dim.h"
 #include "core/parseutils.h"

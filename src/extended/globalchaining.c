@@ -16,9 +16,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <stdbool.h>
 #include "core/array.h"
+#include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/log.h"
 #include "core/safearith.h"

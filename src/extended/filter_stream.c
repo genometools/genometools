@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "extended/feature_node.h"
 #include "extended/filter_stream.h"
 #include "extended/filter_visitor.h"

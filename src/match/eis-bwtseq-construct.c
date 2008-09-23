@@ -197,7 +197,7 @@ buildSpRTable(const struct bwtParam *params,
     if (sampleIntervalLog2 == -1)
     {
       sampleIntervalLog2
-        = requiredUIntBits(requiredSeqposBits(totalLen));
+        = gt_requiredUIntBits(requiredSeqposBits(totalLen));
     }
     *sprTable = newSpecialsRankLookup(encseq, readmode, sampleIntervalLog2);
   }

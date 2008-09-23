@@ -14,12 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <limits.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/dataalign.h"
 #include "core/ma.h"

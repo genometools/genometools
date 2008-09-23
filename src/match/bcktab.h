@@ -18,7 +18,7 @@
 #ifndef BCKTAB_H
 #define BCKTAB_H
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/error.h"
 #include "core/str.h"
 #include "core/symboldef.h"

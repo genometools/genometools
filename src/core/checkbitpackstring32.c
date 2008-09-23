@@ -17,7 +17,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +25,7 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/ensure.h"
@@ -276,7 +276,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     int32_t v = (int32_t)randSrc[i];
-    unsigned bits = requiredInt32Bits(v);
+    unsigned bits = gt_requiredInt32Bits(v);
     gt_bsStoreInt32(bitStore, offset, bits, v);
     offset += bits;
   }
@@ -284,7 +284,7 @@ gt_bitPackStringInt32_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     int32_t v = randSrc[i];
-    unsigned bits = requiredInt32Bits(v);
+    unsigned bits = gt_requiredInt32Bits(v);
     int32_t r = gt_bsGetInt32(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)

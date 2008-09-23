@@ -18,6 +18,7 @@
 #ifndef GTF_OUT_STREAM_H
 #define GTF_OUT_STREAM_H
 
+#include "core/genfile.h"
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome stream'' interface */

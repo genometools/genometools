@@ -17,13 +17,12 @@
 #ifndef BITPACKSTRINGSIMPLEOP_H
 #define BITPACKSTRINGSIMPLEOP_H
 
-#include "core/assert.h"
 #include <inttypes.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
+#include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/dynalloc.h"
 #include "core/safearith.h"
@@ -106,19 +105,19 @@ gt_bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val)
 }
 
 static inline int
-requiredUInt8Bits(uint8_t v)
+gt_requiredUInt8Bits(uint8_t v)
 {
   return gt_requiredUInt32Bits((uint32_t)v);
 }
 
 static inline int
-requiredUInt16Bits(uint16_t v)
+gt_requiredUInt16Bits(uint16_t v)
 {
   return gt_requiredUInt32Bits((uint32_t)v);
 }
 
 static inline int
-requiredInt8Bits(int8_t v)
+gt_requiredInt8Bits(int8_t v)
 {
   if (v == INT8_MIN)
     return sizeof (v)*CHAR_BIT;
@@ -128,7 +127,7 @@ requiredInt8Bits(int8_t v)
 }
 
 static inline int
-requiredInt16Bits(int16_t v)
+gt_requiredInt16Bits(int16_t v)
 {
   if (v == INT16_MIN)
     return sizeof (v)*CHAR_BIT;
@@ -138,7 +137,7 @@ requiredInt16Bits(int16_t v)
 }
 
 static inline int
-requiredInt32Bits(int32_t v)
+gt_requiredInt32Bits(int32_t v)
 {
   if (v == INT32_MIN)
     return sizeof (v)*CHAR_BIT;
@@ -148,7 +147,7 @@ requiredInt32Bits(int32_t v)
 }
 
 static inline int
-requiredInt64Bits(int64_t v)
+gt_requiredInt64Bits(int64_t v)
 {
   if (v == INT64_MIN)
     return sizeof (v)*CHAR_BIT;

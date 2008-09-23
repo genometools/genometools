@@ -19,21 +19,10 @@
 #define STRARRAY_H
 
 #include "core/str.h"
+#include "core/str_array_api.h"
 
-/* the string array class  */
-typedef struct GtStrArray GtStrArray;
-
-GtStrArray*  gt_strarray_new(void);
-GtStrArray*  gt_strarray_new_file(const char *path);
-void          gt_strarray_add_cstr(GtStrArray*, const char*);
-void          gt_strarray_add_cstr_nt(GtStrArray*, const char*,unsigned long);
-void          gt_strarray_add(GtStrArray*, const GtStr*);
-const char*   gt_strarray_get(const GtStrArray*, unsigned long strnum);
+GtStrArray*   gt_strarray_new_file(const char *path);
 /* Returns an internal GtStr pointer (i.e., _not_ a new reference!). */
-GtStr*       gt_strarray_get_str(const GtStrArray*, unsigned long strnum);
-void          gt_strarray_set_size(GtStrArray*, unsigned long);
-/* Returns number of strings. */
-unsigned long gt_strarray_size(const GtStrArray*);
-void          gt_strarray_delete(GtStrArray*);
+GtStr*        gt_strarray_get_str(const GtStrArray*, unsigned long strnum);
 
 #endif

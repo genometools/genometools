@@ -16,7 +16,7 @@
 */
 
 #include <stdlib.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "extended/genome_node_rep.h"
 #include "extended/region_node.h"
 

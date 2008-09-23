@@ -21,8 +21,9 @@
 #ifndef FEATURE_INDEX_API_H
 #define FEATURE_INDEX_API_H
 
-#include "core/range.h"
-#include "core/strarray.h"
+#include "core/range_api.h"
+#include "core/str_array_api.h"
+#include "extended/feature_node_api.h"
 #include "extended/region_node_api.h"
 
 /* This interface represents a searchable container for <FeatureNode> objects,

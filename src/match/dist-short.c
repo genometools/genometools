@@ -16,7 +16,7 @@
 */
 
 #include <limits.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/symboldef.h"
 #include "core/chardef.h"
 #include "encseq-def.h"

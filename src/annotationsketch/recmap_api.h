@@ -18,7 +18,7 @@
 #ifndef RECMAP_API_H
 #define RECMAP_API_H
 
-#include "extended/feature_node.h"
+#include "extended/feature_node_api.h"
 
 /* A <GtRecMap> object contains a mapping from a 2D coordinate pair
    which identifies a rectangle in a rendered image to the <GtFeatureNode> it

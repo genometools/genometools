@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "extended/csa_stream.h"
 #include "extended/csa_visitor.h"
 #include "extended/consensus_sa.h"

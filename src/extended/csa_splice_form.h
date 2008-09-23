@@ -18,7 +18,7 @@
 #ifndef CSA_SPLICE_FORM_H
 #define CSA_SPLICE_FORM_H
 
-#include "core/strand.h"
+#include "core/strand_api.h"
 #include "extended/consensus_sa.h"
 
 typedef struct GtCSASpliceForm GtCSASpliceForm;

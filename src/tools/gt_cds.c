@@ -19,6 +19,7 @@
 #include "core/option.h"
 #include "core/unused_api.h"
 #include "extended/cds_stream.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "extended/gtdatahelp.h"

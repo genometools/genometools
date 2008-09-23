@@ -18,6 +18,7 @@
 #ifndef FILTER_STREAM_H
 #define FILTER_STREAM_H
 
+#include "core/strand_api.h"
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome stream'' interface */

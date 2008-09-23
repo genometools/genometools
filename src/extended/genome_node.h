@@ -18,14 +18,11 @@
 #ifndef GENOME_NODE_H
 #define GENOME_NODE_H
 
-/* the ``genome node'' interface */
-typedef struct GtGenomeNodeClass GtGenomeNodeClass;
-typedef struct GtGenomeNode GtGenomeNode;
-
 #include "core/bittab.h"
 #include "core/phase.h"
 #include "core/range.h"
 #include "core/str.h"
+#include "extended/genome_node_api.h"
 #include "extended/node_visitor.h"
 
 void          gt_genome_node_set_origin(GtGenomeNode*, GtStr *filename,

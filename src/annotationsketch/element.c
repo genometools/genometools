@@ -22,7 +22,7 @@
 #include "core/array.h"
 #include "core/ensure.h"
 #include "core/ma.h"
-#include "core/strand.h"
+#include "core/strand_api.h"
 #include "extended/feature_node.h"
 
 struct GtElement {

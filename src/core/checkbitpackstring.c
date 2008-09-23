@@ -14,13 +14,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <time.h>
 #include <sys/time.h>
 
+#include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/ensure.h"

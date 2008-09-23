@@ -20,7 +20,6 @@
   interpreter (lua.c), therefore the copyright notice in lua.h also applies.
 */
 
-#include "core/assert.h"
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -28,6 +27,7 @@
 #include "interactive.h"
 #include "lauxlib.h"
 #include "libtecla.h"
+#include "core/assert_api.h"
 #include "core/cstr.h"
 #include "core/ma.h"
 #include "core/unused_api.h"

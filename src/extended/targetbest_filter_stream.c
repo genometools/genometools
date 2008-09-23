@@ -15,12 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/cstr.h"
 #include "core/dlist.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/undef.h"
+#include "extended/feature_node.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_stream_rep.h"
 #include "extended/targetbest_filter_stream.h"

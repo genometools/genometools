@@ -17,8 +17,7 @@
 #ifndef COMBINATORICS_H
 #define COMBINATORICS_H
 
-#include "core/assert.h"
-
+#include "core/assert_api.h"
 #include "core/minmax.h"
 
 /**

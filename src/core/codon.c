@@ -17,7 +17,7 @@
 
 /* This implementation was heavily inspired by code from Stefan Kurtz. */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/codon.h"
 
 const char gt_aminos[] = "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRR"

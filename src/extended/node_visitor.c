@@ -16,7 +16,7 @@
 */
 
 #include <stdlib.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"

@@ -57,9 +57,9 @@ enum {
  */
 
 /** bits required to store an unsigned value ranging from 0..val */
-#define requiredUIntBits(val) gt_requiredUInt32Bits(val)
+#define gt_requiredUIntBits(val) gt_requiredUInt32Bits(val)
 /** bits required to store int value val exactly */
-#define requiredIntBits(val) requiredInt32Bits(val)
+#define gt_requiredIntBits(val) gt_requiredInt32Bits(val)
 /** extract unsigned from BitString */
 #define gt_bsGetUInt(str, offset, numBits) gt_bsGetUInt32(str, offset, numBits)
 /** extract int from BitString */
@@ -124,7 +124,7 @@ bitElemsAllocSize(BitOffset numBits);
  * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 static inline int
-requiredUInt8Bits(uint8_t val);
+gt_requiredUInt8Bits(uint8_t val);
 /**
  * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 16-bit type.
@@ -134,7 +134,7 @@ requiredUInt8Bits(uint8_t val);
  * @return \f$\lfloor{}gt_log_2v\rfloor + 1\f$
  */
 static inline int
-requiredUInt16Bits(uint16_t val);
+gt_requiredUInt16Bits(uint16_t val);
 /**
  * \brief Computes \f$\gt_log_2v + 1\f$, where \f$v\f$ is of unsigned
  * 32-bit type.
@@ -166,7 +166,7 @@ gt_requiredUInt64Bits(uint64_t val);
  * \f[\left\lfloor{}gt_log_2\left|-(2^{7})\right|\right\rfloor + 2 = 9.\f]
  */
 static inline int
-requiredInt8Bits(int8_t v);
+gt_requiredInt8Bits(int8_t v);
 /**
  * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed
  * 16-bit type.
@@ -178,7 +178,7 @@ requiredInt8Bits(int8_t v);
  * \f[\left\lfloor{}gt_log_2\left|-(2^{15})\right|\right\rfloor + 2 = 17.\f]
  */
 static inline int
-requiredInt16Bits(int16_t v);
+gt_requiredInt16Bits(int16_t v);
 /**
  * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed
  * 32-bit type.
@@ -190,7 +190,7 @@ requiredInt16Bits(int16_t v);
  * \f[\left\lfloor{}gt_log_2\left|-(2^{31})\right|\right\rfloor + 2 = 33.\f]
  */
 static inline int
-requiredInt32Bits(int32_t v);
+gt_requiredInt32Bits(int32_t v);
 /**
  * \brief Computes \f$\gt_log_2v + 2\f$, where \f$v\f$ is of signed
  * 64-bit type.
@@ -201,7 +201,7 @@ requiredInt32Bits(int32_t v);
  * (Special case: INT64_MIN is representable in 64 bits)
  */
 static inline int
-requiredInt64Bits(int64_t v);
+gt_requiredInt64Bits(int64_t v);
 /**
  * \brief Retrieve unsigned integer of specified length from
  * bitstring at given position.

@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <string.h>
-#include "core/strand.h"
+#include "core/assert_api.h"
+#include "core/strand_api.h"
 
 GtStrand gt_strand_get(char strand_char)
 {

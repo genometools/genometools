@@ -16,6 +16,7 @@
 */
 
 #include "core/ma.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/type_checker_obo.h"
 #include "tools/gt_gff3validator.h"

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ASSERT_H
-#define ASSERT_H
+#ifndef GENOME_NODE_API_H
+#define GENOME_NODE_API_H
 
-#include <assert.h>
-
-#define gt_assert(expr) \
-        assert(expr)
+/* the ``genome node'' interface */
+typedef struct GtGenomeNodeClass GtGenomeNodeClass;
+typedef struct GtGenomeNode GtGenomeNode;
 
 #endif

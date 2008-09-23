@@ -63,7 +63,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
   gt_assert(ctxMapILogIsValid(seqLen, mapIntervalLog2));
   if (mapIntervalLog2 == CTX_MAP_ILOG_AUTOSIZE)
   {
-    mapIntervalLog2 = requiredUIntBits(requiredSeqposBits(seqLen));
+    mapIntervalLog2 = gt_requiredUIntBits(requiredSeqposBits(seqLen));
   }
   newFactory->seqLen = seqLen;
   newFactory->currentSfxPos = 0;

@@ -21,7 +21,7 @@
 #include "core/error.h"
 #include "core/range.h"
 #include "core/phase.h"
-#include "core/strand.h"
+#include "core/strand_api.h"
 
 /* Parse integer from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */

@@ -20,7 +20,7 @@
  * Keeps information about multiple synchronous reads of sequence
  * data, where only one source and multiple consumers exist.
  */
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/minmax.h"
 #include "match/eis-seqdatasrc.h"
 #include "match/seqpos-def.h"

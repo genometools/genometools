@@ -19,11 +19,11 @@
 #define GREP_H
 
 #include <sys/types.h>
-#include "core/assert.h"
 #include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "core/assert_api.h"
 #include "core/error.h"
 
 /* Sets <match> to true if <pattern> matches <line>, to false otherwise. */

@@ -25,7 +25,7 @@ typedef struct GtElement GtElement;
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/drawing_range.h"
 #include "core/range.h"
-#include "core/strand.h"
+#include "core/strand_api.h"
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 

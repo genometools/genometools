@@ -37,6 +37,8 @@
 #include "core/warning_api.h"
 
 /* the extended module */
+#include "extended/feature_node_api.h"
+#include "extended/genome_node_api.h"
 #include "extended/gff3_in_stream_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/region_node_api.h"

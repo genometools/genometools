@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <string.h>
 #include "spacedef.h"
+#include "core/assert_api.h"
 
 char *dynamicstrdup(const char *file,int linenum,const char *source)
 {

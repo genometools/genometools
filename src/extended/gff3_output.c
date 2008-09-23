@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/undef.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_output.h"
 
 void gt_gff3_output_leading(GtFeatureNode *gf, GtGenFile *outfp)

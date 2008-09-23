@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "extended/matchcount.h"
 
 void gt_matchcount_matchcount(const char *u, int m, const char *v, int n, int k,

@@ -25,8 +25,8 @@
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 
-#include "core/assert.h"
 #include <stdlib.h>
+#include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/ma.h"

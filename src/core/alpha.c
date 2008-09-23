@@ -18,7 +18,7 @@
 #include <limits.h>
 #include <string.h>
 #include "core/alpha.h"
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/undef.h"
 #include "core/xansi.h"

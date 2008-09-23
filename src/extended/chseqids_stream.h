@@ -19,6 +19,7 @@
 #define CHSEQIDS_STREAM_H
 
 #include <stdio.h>
+#include "core/str.h"
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */

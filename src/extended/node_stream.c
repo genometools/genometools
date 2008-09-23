@@ -16,10 +16,11 @@
 */
 
 #include <stdarg.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "extended/genome_node.h"
 #include "extended/node_stream_rep.h"
 
 struct GtNodeStreamClass {

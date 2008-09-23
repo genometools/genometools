@@ -18,7 +18,7 @@
 #ifndef SPACEDEF_H
 #define SPACEDEF_H
 #include <string.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/error.h"
 #include "core/ma.h"
 

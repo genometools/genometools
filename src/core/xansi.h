@@ -18,11 +18,11 @@
 #ifndef XANSI_H
 #define XANSI_H
 
-#include "core/assert.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "core/assert_api.h"
 
 /*
   This module contains wrappers for the functions from the standard library we

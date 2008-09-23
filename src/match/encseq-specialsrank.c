@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <limits.h>
 
+#include "core/assert_api.h"
 #include "core/dataalign.h"
 #include "core/ma.h"
 #include "core/minmax.h"

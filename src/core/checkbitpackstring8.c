@@ -17,7 +17,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +25,7 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/ensure.h"
@@ -104,7 +104,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
 #else /* 8 > 32 && LONG_BIT < 8 */
     uint8_t v = randSrc[i] = random();
 #endif /* 8 > 32 && LONG_BIT < 8 */
-    int bits = requiredUInt8Bits(v);
+    int bits = gt_requiredUInt8Bits(v);
     gt_bsStoreUInt8(bitStore, offset, bits, v);
     offset += bits;
   }
@@ -112,7 +112,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     uint8_t v = randSrc[i];
-    int bits = requiredUInt8Bits(v);
+    int bits = gt_requiredUInt8Bits(v);
     uint8_t r = gt_bsGetUInt8(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
@@ -127,7 +127,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
   if (numRnd > 0)
   {
     uint8_t v = randSrc[0], r = 0;
-    unsigned numBits = requiredUInt8Bits(v);
+    unsigned numBits = gt_requiredUInt8Bits(v);
     BitOffset i = offsetStart + numBits;
     uint8_t mask = ~(uint8_t)0;
     if (numBits < 8)
@@ -181,14 +181,14 @@ gt_bitPackStringInt8_unit_test(GtError *err)
     gt_log_log("gt_bsCompare: ");
     {
       uint8_t v0 = randSrc[0];
-      int bits0 = requiredUInt8Bits(v0);
+      int bits0 = gt_requiredUInt8Bits(v0);
       uint8_t r0;
       offset = offsetStart;
       r0 = gt_bsGetUInt8(bitStore, offset, bits0);
       for (i = 1; i < numRnd; ++i)
       {
         uint8_t v1 = randSrc[i];
-        int bits1 = requiredUInt8Bits(v1);
+        int bits1 = gt_requiredUInt8Bits(v1);
         uint8_t r1 = gt_bsGetUInt8(bitStore, offset + bits0, bits1);
         int result = -2;   /*< -2 is not a return value of gt_bsCompare, thus
                             *   if it is displayed, there was an earlier
@@ -276,7 +276,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     int8_t v = (int8_t)randSrc[i];
-    unsigned bits = requiredInt8Bits(v);
+    unsigned bits = gt_requiredInt8Bits(v);
     gt_bsStoreInt8(bitStore, offset, bits, v);
     offset += bits;
   }
@@ -284,7 +284,7 @@ gt_bitPackStringInt8_unit_test(GtError *err)
   for (i = 0; i < numRnd; ++i)
   {
     int8_t v = randSrc[i];
-    unsigned bits = requiredInt8Bits(v);
+    unsigned bits = gt_requiredInt8Bits(v);
     int8_t r = gt_bsGetInt8(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)

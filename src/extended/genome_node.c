@@ -16,7 +16,7 @@
 */
 
 #include <stdarg.h>
-#include "core/assert.h"
+#include "core/assert_api.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/msort.h"

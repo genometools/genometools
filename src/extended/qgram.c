@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <math.h>
+#include "core/assert_api.h"
 #include "extended/qgram.h"
 
 unsigned long gt_qgram_encode(const char *w, unsigned long q,

@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert.h"
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "core/assert_api.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
 

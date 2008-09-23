@@ -18,15 +18,13 @@
 #ifndef FEATURE_NODE_H
 #define FEATURE_NODE_H
 
-/* implements the ``genome node'' interface */
-typedef struct GtFeatureNode GtFeatureNode;
-
+#include "core/bittab.h"
 #include "core/range.h"
 #include "core/phase.h"
-#include "core/strand.h"
+#include "core/strand_api.h"
 #include "core/strarray.h"
+#include "extended/feature_node_api.h"
 #include "extended/feature_type.h"
-#include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
 
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
@@ -34,14 +32,6 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
 typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
-/* Create an new <GtFeatureNode*> on sequence with ID <seqid> and type <type>
-   which lies from <start> to <end> on strand <strand>.
-   <start> and <end> always refer to the forward strand, therefore <start> has
-   to be smaller or equal than <end>. */
-GtGenomeNode*        gt_feature_node_new(GtStr *seqid, const char *type,
-                                            unsigned long start,
-                                            unsigned long end,
-                                            GtStrand strand);
 GtGenomeNode*        gt_feature_node_new_pseudo(GtFeatureNode*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GtGenomeNode*        gt_feature_node_new_standard_gene(void);
@@ -111,9 +101,6 @@ int           gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
                                                       GtGenomeNodeTraverseFunc,
                                                       GtError*);
 unsigned long gt_genome_node_number_of_children(const GtGenomeNode*);
-/* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
-void           gt_feature_node_add_child(GtFeatureNode *parent,
-                                         GtFeatureNode *child);
 /* does not free the leaf, do not use during traversal! */
 void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
                                           GtGenomeNode *leafn);
@@ -140,8 +127,6 @@ bool           gt_genome_node_overlaps_nodes(GtGenomeNode*, GtArray*);
    corresponding to overlapped nodes are marked (i.e., set) */
 bool           gt_genome_node_overlaps_nodes_mark(GtGenomeNode*, GtArray*,
                                                   GtBittab*);
-
-void           gt_genome_node_rec_delete(GtGenomeNode*);
 
 #define gt_feature_node_cast(genome_node) \
         gt_genome_node_cast(gt_feature_node_class(), genome_node)
