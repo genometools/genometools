@@ -22,7 +22,7 @@
 
 /* Warning module */
 
-/* Handler type used to process warnings */
+/* Handler type used to process warnings. */
 typedef void (*GtWarningHandler)(void *data, const char *format, va_list ap);
 
 /* Print a warning according to <format> and <...>, if a handler is set. */

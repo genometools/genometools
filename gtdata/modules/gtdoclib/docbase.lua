@@ -143,6 +143,7 @@ function DocBase:process_ast(ast, be_verbose)
           self.moduledefs[self.last_module][#self.moduledefs[self.last_module]
                                             + 1] = desc
         end
+        break
       elseif keyword == "comment" then
         local funcpos = method_keyword(ast, be_verbose)
         local complete_comment = ""
@@ -216,6 +217,12 @@ function DocBase:accept(visitor)
   if visitor.visit_module then
     for _, modulename in ipairs(sorted_modules) do
       visitor:visit_module(modulename)
+      -- visit funcdefs for module
+      if self.moduledefs[modulename] then
+        for _, funcdef in ipairs(self.moduledefs[modulename]) do
+          visitor:visit_funcdef(funcdef)
+        end
+      end
       -- visit functions for module
       for _, method in ipairs(self.modules[modulename]) do
         visitor:visit_method(method)

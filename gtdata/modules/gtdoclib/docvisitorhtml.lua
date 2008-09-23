@@ -110,6 +110,11 @@ function DocVisitorHTML:visit_method(desc)
                          prototype = prototype })
 end
 
+function DocVisitorHTML:visit_funcdef(desc)
+  assert(desc)
+  include("funcdef.lp", { name = desc.name, comment = codify(desc.comment) })
+end
+
 function DocVisitorHTML:visit_index(names)
   assert(names)
   include("index.lp", { names = names })

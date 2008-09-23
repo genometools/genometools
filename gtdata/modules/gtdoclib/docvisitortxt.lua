@@ -52,6 +52,11 @@ function DocVisitorTxt:visit_method(desc)
            desc.args))
 end
 
+function DocVisitorTxt:visit_funcdef(desc)
+  assert(desc)
+  io.write(string.format("fundef:\n%s\n%s\n", desc.comment, desc.name))
+end
+
 function DocVisitorTxt:visit_index(names)
   assert(names)
   print("index:")
