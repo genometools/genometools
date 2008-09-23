@@ -77,7 +77,7 @@ void gt_msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
   gt_free(buf);
 }
 
-int non_r_cmpfunc(void *compar, const void *a, const void *b)
+int gt_non_r_cmpfunc(void *compar, const void *a, const void *b)
 {
   int (*cmpfunc)(const void *, const void *) = compar, rval;
   rval = (*cmpfunc)(a, b);
@@ -87,5 +87,5 @@ int non_r_cmpfunc(void *compar, const void *a, const void *b)
 void gt_msort(void *base, size_t nmemb, size_t size,
               int (*compar)(const void *, const void *))
 {
-  gt_msort_r(base, nmemb, size, compar, non_r_cmpfunc);
+  gt_msort_r(base, nmemb, size, compar, gt_non_r_cmpfunc);
 }

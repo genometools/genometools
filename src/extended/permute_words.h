@@ -21,20 +21,20 @@
 /* module for word permutation */
 
 /* initializes the word w of length l with 0's */
-void permute_word_init(char *w, unsigned long l);
+void gt_permute_word_init(char *w, unsigned long l);
 
 /* computes the next permutation and returns True if one exists,
    False otherwise */
-unsigned int permute_word_next(char *w, unsigned long l,
+unsigned int gt_permute_word_next(char *w, unsigned long l,
                                unsigned long alphabet_size);
 
 #if 0
   a typical use:
 
-  permute_word_init(w, l);
+  gt_permute_word_init(w, l);
   do {
     /* ... */
-  } while (permute_word_next(w, l, alphabet_size));
+  } while (gt_permute_word_next(w, l, alphabet_size));
 
 #endif
 

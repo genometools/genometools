@@ -19,12 +19,12 @@
 #include <string.h>
 #include "extended/permute_words.h"
 
-void permute_word_init(char *w, unsigned long l)
+void gt_permute_word_init(char *w, unsigned long l)
 {
   memset(w, 0, l);
 }
 
-unsigned int permute_word_next(char *w, unsigned long l,
+unsigned int gt_permute_word_next(char *w, unsigned long l,
                                unsigned long alphabet_size)
 {
   unsigned long i;

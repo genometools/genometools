@@ -20,9 +20,9 @@
 #include "core/ma.h"
 #include "extended/qgram.h"
 
-unsigned long scorefasta(const char *u, unsigned long ulen,
-                         const char *w, unsigned long wlen,
-                         unsigned long q, unsigned long alphabet_size)
+unsigned long gt_calc_scorefasta(const char *u, unsigned long ulen,
+                                 const char *w, unsigned long wlen,
+                                 unsigned long q, unsigned long alphabet_size)
 {
   GtArray **h;
   unsigned long i, j, code, hsize, r_raised_to_the_power_of_q_minus_1,

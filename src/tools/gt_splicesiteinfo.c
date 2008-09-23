@@ -43,7 +43,7 @@ static OPrval parse_options(int *parsed_args,
                          "about splice sites given in GFF3 files.");
 
   /* -seqfile and -regionmapping */
-  seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -addintrons */
   option = gt_option_new_bool("addintrons",
@@ -93,7 +93,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                                                     false, false);
 
     /* create region mapping */
-    regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
+    regionmapping = gt_seqid2file_regionmapping_new(arguments.seqfile,
                                                  arguments.regionmapping, err);
     if (!regionmapping)
       had_err = -1;

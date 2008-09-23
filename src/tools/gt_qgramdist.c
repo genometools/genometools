@@ -88,7 +88,7 @@ int gt_qgramdist(int argc, const char **argv, GtError *err)
       for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
         seq_1 = gt_bioseq_get_seq(gt_bioseq_1, i);
         seq_2 = gt_bioseq_get_seq(gt_bioseq_2, j);
-        dist = qgramdist(seq_1, seq_2, q);
+        dist = gt_calc_qgramdist(seq_1, seq_2, q);
         printf("qgramdist_%u_(", q);
         gt_cstr_show(gt_seq_get_orig(seq_1), gt_seq_length(seq_1), stdout);
         gt_xputchar(',');

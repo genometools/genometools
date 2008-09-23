@@ -19,7 +19,7 @@
 #define SIG_H
 
 /* register a signal handler for all signals which can be caught */
-void sig_register_all(void (*)(int));
-void sig_unregister_all(void);
+void gt_sig_register_all(void (*)(int));
+void gt_sig_unregister_all(void);
 
 #endif

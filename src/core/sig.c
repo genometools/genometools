@@ -18,7 +18,7 @@
 #include "core/sig.h"
 #include "core/xposix.h"
 
-void sig_register_all(void (*func)(int sigraised))
+void gt_sig_register_all(void (*func)(int sigraised))
 {
   /* POSIX */
   (void) gt_xsignal(SIGABRT, func);
@@ -46,7 +46,7 @@ void sig_register_all(void (*func)(int sigraised))
 #endif
 }
 
-void sig_unregister_all(void)
+void gt_sig_unregister_all(void)
 {
   /* POSIX */
   (void) gt_xsignal(SIGABRT, SIG_DFL);

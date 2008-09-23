@@ -82,8 +82,8 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
   gt_alpha_encode_seq(alpha, u, u, ulen);
   gt_alpha_encode_seq(alpha, w, w, wlen);
 
-  printf("scorefasta=%lu\n", scorefasta(u, ulen, w, wlen, arguments->q,
-                                        gt_alpha_size(alpha)));
+  printf("scorefasta=%lu\n", gt_calc_scorefasta(u, ulen, w, wlen, arguments->q,
+                                                gt_alpha_size(alpha)));
 
   /* free space */
   gt_alpha_delete(alpha);

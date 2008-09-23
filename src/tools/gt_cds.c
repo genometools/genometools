@@ -62,7 +62,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
                             "features given in GFF3_file.");
 
   /* -seqfile and -regionmapping */
-  seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -91,7 +91,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
                                                 arguments->verbose);
 
   /* create region mapping */
-  regionmapping = seqid2file_regionmapping_new(arguments->seqfile,
+  regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
                                                arguments->regionmapping, err);
   if (!regionmapping)
     had_err = -1;

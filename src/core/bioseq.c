@@ -335,7 +335,7 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *gt_bioseq_index_file,
   if (!bs->use_stdin) {
     gt_bioseq_index_filename = gt_str_get(gt_bioseq_index_file);
     gt_bioseq_raw_filename = gt_str_get(gt_bioseq_raw_file);
-    sig_register_all(remove_gt_bioseq_files);
+    gt_sig_register_all(remove_gt_bioseq_files);
   }
 
   /* read fasta file */
@@ -359,7 +359,7 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *gt_bioseq_index_file,
 
   /* unregister the signal handler */
   if (!bs->use_stdin)
-    sig_unregister_all();
+    gt_sig_unregister_all();
 
   /* close files */
   if (!bs->use_stdin) {
