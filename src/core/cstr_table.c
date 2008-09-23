@@ -20,6 +20,7 @@
 #include "core/ensure.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
+#include "core/strcmp.h"
 
 struct GtCstrTable {
   GtHashtable *strings;
@@ -76,12 +77,6 @@ static enum iterator_op store_type(void *elem, void *data,
   return CONTINUE_ITERATION;
 }
 
-static int cmp(const void *p1, const void *p2)
-{
-  assert(p1 && p2);
-  return strcmp(*(char**) p1, *(char**) p2);
-}
-
 GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
 {
   int had_err;
@@ -89,7 +84,7 @@ GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
   assert(table);
   cstrs = gt_strarray_new();
   had_err = gt_hashtable_foreach_ordered(table->strings, store_type, cstrs,
-                                         (GtCompare) cmp, NULL);
+                                         gt_strcmpptr, NULL);
   assert(!had_err);
   return cstrs;
 }
