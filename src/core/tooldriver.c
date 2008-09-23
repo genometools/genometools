@@ -43,7 +43,7 @@ int gt_tooldriver(int(*tool)(int argc, const char **argv, GtError*),
   return EXIT_SUCCESS;
 }
 
-int toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
+int gt_toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
 {
   GtTool *tool;
   GtError *err;
