@@ -21,5 +21,5 @@
 
 int main(int argc, char *argv[])
 {
-  return toolobjdriver(gt_skproto, argc, argv);
+  return gt_toolobjdriver(gt_skproto, argc, argv);
 }

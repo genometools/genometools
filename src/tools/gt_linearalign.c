@@ -59,10 +59,10 @@ static int gt_linearalign_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err) {
     for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
       for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
-        a = linearalign(gt_bioseq_get_sequence(gt_bioseq_1, i),
-                        gt_bioseq_get_sequence_length(gt_bioseq_1, i),
-                        gt_bioseq_get_sequence(gt_bioseq_2, j),
-                        gt_bioseq_get_sequence_length(gt_bioseq_2, j));
+        a = gt_align_linearalign(gt_bioseq_get_sequence(gt_bioseq_1, i),
+                                 gt_bioseq_get_sequence_length(gt_bioseq_1, i),
+                                 gt_bioseq_get_sequence(gt_bioseq_2, j),
+                                 gt_bioseq_get_sequence_length(gt_bioseq_2, j));
         gt_alignment_show(a, stdout);
         gt_xputchar('\n');
         gt_alignment_delete(a);

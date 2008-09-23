@@ -21,7 +21,7 @@
 #include "core/outputfile.h"
 #include "core/warning_api.h"
 
-struct OutputFileInfo {
+struct GtOutputFileInfo {
   GtStr *output_filename;
   bool gzip,
        bzip2,
@@ -29,17 +29,17 @@ struct OutputFileInfo {
   GtGenFile **outfp;
 };
 
-OutputFileInfo* outputfileinfo_new(void)
+GtOutputFileInfo* gt_outputfileinfo_new(void)
 {
-  OutputFileInfo *ofi;
-  ofi = gt_malloc(sizeof (OutputFileInfo));
+  GtOutputFileInfo *ofi;
+  ofi = gt_malloc(sizeof (GtOutputFileInfo));
   ofi->output_filename = gt_str_new();
   return ofi;
 }
 
 static int determine_outfp(void *data, GtError *err)
 {
-  OutputFileInfo *ofi = (OutputFileInfo*) data;
+  GtOutputFileInfo *ofi = (GtOutputFileInfo*) data;
   GtGenFileMode genfilemode;
   int had_err = 0;
   gt_error_check(err);
@@ -81,8 +81,8 @@ static int determine_outfp(void *data, GtError *err)
   return had_err;
 }
 
-void outputfile_register_options(GtOptionParser *op, GtGenFile **outfp,
-                                 OutputFileInfo *ofi)
+void gt_outputfile_register_options(GtOptionParser *op, GtGenFile **outfp,
+                                 GtOutputFileInfo *ofi)
 {
   GtOption *opto, *optgzip, *optbzip2, *optforce;
   assert(outfp && ofi);
@@ -113,7 +113,7 @@ void outputfile_register_options(GtOptionParser *op, GtGenFile **outfp,
   gt_option_parser_register_hook(op, determine_outfp, ofi);
 }
 
-void outputfileinfo_delete(OutputFileInfo *ofi)
+void gt_outputfileinfo_delete(GtOutputFileInfo *ofi)
 {
   if (!ofi) return;
   gt_str_delete(ofi->output_filename);

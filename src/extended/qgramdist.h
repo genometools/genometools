@@ -22,6 +22,6 @@
 
 /* returns the q-gram distance of two <GtSeq>s. The alphabets of the given
    <GtSeq>s have to be compatible */
-unsigned long qgramdist(GtSeq*, GtSeq*, unsigned int q);
+unsigned long gt_calc_qgramdist(GtSeq*, GtSeq*, unsigned int q);
 
 #endif

@@ -190,7 +190,7 @@ static void update_progressbar(GT_UNUSED int sigraised)
   errno = last_errno;
 }
 
-static void sig_winch(GT_UNUSED int sigraised)
+static void gt_sig_winch(GT_UNUSED int sigraised)
 {
   assert(sigraised == SIGWINCH);
   window_resized = 1;
@@ -209,7 +209,7 @@ void gt_progressbar_start(const unsigned long long *current_computation,
     refresh_progressbar();
   /* register signal handlers */
   (void) gt_xsignal(SIGALRM, update_progressbar); /* the timer */
-  (void) gt_xsignal(SIGWINCH, sig_winch);         /* window resizing */
+  (void) gt_xsignal(SIGWINCH, gt_sig_winch);         /* window resizing */
   (void) alarm(UPDATE_INTERVAL);                  /* set alarm */
 }
 

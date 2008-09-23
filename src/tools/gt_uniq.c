@@ -32,7 +32,7 @@ static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
-  OutputFileInfo *ofi;
+  GtOutputFileInfo *ofi;
   GtOption *option;
   OPrval oprval;
   gt_error_check(err);
@@ -40,14 +40,14 @@ static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
                          "features in a sorted GFF3_file.");
-  ofi = outputfileinfo_new();
+  ofi = gt_outputfileinfo_new();
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
   gt_option_parser_set_max_args(op, 1);
@@ -55,7 +55,7 @@ static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
                                   err);
 
   /* free */
-  outputfileinfo_delete(ofi);
+  gt_outputfileinfo_delete(ofi);
   gt_option_parser_delete(op);
 
   return oprval;

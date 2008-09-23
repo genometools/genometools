@@ -23,22 +23,22 @@
 typedef enum {
   MAPPINGTYPE_STRING,
   MAPPINGTYPE_INTEGER
-} MappingType;
+} GtMappingType;
 
 /* a generic mapping */
-typedef struct Mapping Mapping;
+typedef struct GtMapping GtMapping ;
 
 /* creates a new mapping from the Lua file <mapping_file> which must contain a
    global table or function with name <global_name>. The global table or
    function must contain entries and return results of the given type,
    respectively. Returns NULL on error. */
-Mapping* mapping_new(GtStr *mapping_file, const char *global_name,
-                     MappingType type, GtError*);
+GtMapping*  gt_mapping_new(GtStr *mapping_file, const char *global_name,
+                           GtMappingType type, GtError*);
 /* map <input> to string, returns NULL on error */
-GtStr*  mapping_map_string(Mapping*, const char *input, GtError*);
+GtStr*      gt_mapping_map_string(GtMapping*, const char *input, GtError*);
 /* map <input> to integer <output>, returns -1 on error */
-int      mapping_map_integer(Mapping*, long *output, const char *input,
-                             GtError*);
-void     mapping_delete(Mapping*);
+int         gt_mapping_map_integer(GtMapping*, long *output, const char *input,
+                                   GtError*);
+void        gt_mapping_delete(GtMapping*);
 
 #endif

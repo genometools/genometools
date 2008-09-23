@@ -46,10 +46,10 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 static double distfunc(unsigned long i, unsigned long j, void *data)
 {
   GtBioseq *bioseq= (GtBioseq*) data;
-  return linearedist(gt_bioseq_get_sequence(bioseq, i),
-                     gt_bioseq_get_sequence_length(bioseq, i),
-                     gt_bioseq_get_sequence(bioseq, j),
-                     gt_bioseq_get_sequence_length(bioseq, j));
+  return gt_calc_linearedist(gt_bioseq_get_sequence(bioseq, i),
+                             gt_bioseq_get_sequence_length(bioseq, i),
+                             gt_bioseq_get_sequence(bioseq, j),
+                             gt_bioseq_get_sequence_length(bioseq, j));
 }
 
 static double exampledistfunc(unsigned long i, unsigned long j,

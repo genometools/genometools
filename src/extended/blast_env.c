@@ -27,7 +27,7 @@
 /* Internal class to hold position lists. */
 typedef struct {
   GtHashtable *mapping;
-} Pos;
+} GtPos;
 
 DECLARE_HASHMAP(unsigned long, ul, GtArray *, array, static, inline)
 DEFINE_HASHMAP(unsigned long, ul, GtArray *, array, gt_ht_ul_elem_hash,
@@ -35,16 +35,16 @@ DEFINE_HASHMAP(unsigned long, ul, GtArray *, array, gt_ht_ul_elem_hash,
                inline)
 DECLARE_SAFE_DEREF(GtArray *,array)
 
-/* Return a new Pos object. */
-Pos* pos_new(void)
+/* Return a new GtGtPos object. */
+GtPos* gt_pos_new(void)
 {
-  Pos *pos = gt_malloc(sizeof *pos);
+  GtPos *pos = gt_malloc(sizeof *pos);
   pos->mapping = ul_array_gt_hashmap_new();
   return pos;
 }
 
 /* Delete <pos> object. */
-void pos_delete(Pos *pos)
+void gt_pos_delete(GtPos *pos)
 {
   if (!pos) return;
   gt_hashtable_delete(pos->mapping);
@@ -52,7 +52,7 @@ void pos_delete(Pos *pos)
 }
 
 /* Add <position> to position list for <code>. */
-void pos_add(Pos *pos, unsigned long code, unsigned long position)
+void gt_pos_add(GtPos *pos, unsigned long code, unsigned long position)
 {
   GtArray *position_list;
   assert(pos && pos->mapping);
@@ -68,7 +68,7 @@ void pos_add(Pos *pos, unsigned long code, unsigned long position)
 }
 
 /* Get position list for <code>. */
-GtArray* pos_get(Pos *pos, unsigned long code)
+GtArray* gt_pos_get(GtPos *pos, unsigned long code)
 {
   assert(pos && pos->mapping);
   return array_gt_safe_deref(ul_array_gt_hashmap_get(pos->mapping, code));
@@ -137,7 +137,7 @@ static long* compute_max_pos_scores(const char *w, unsigned long wlen,
   (because it is not possible to find a word with a sufficient score on this
   branch).
 */
-static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
+static void add_q_word_to_env(GtBittab *V, GtPos *pos, const char *qgram_rest,
                               char *current_word, long *max_cumul_scores,
                               GtAlpha *alpha, unsigned long q,
                               unsigned long q_rest, long k, long current_score,
@@ -152,7 +152,7 @@ static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
       /* set V[qgram_code] */
       gt_bittab_set_bit(V, qgram_code);
       /* store position */
-      pos_add(pos, qgram_code, position);
+      gt_pos_add(pos, qgram_code, position);
     }
   }
   else if (current_score + max_cumul_scores[q - q_rest] >= k) { /* lookahead */
@@ -176,7 +176,7 @@ static void add_q_word_to_env(GtBittab *V, Pos *pos, const char *qgram_rest,
   <V> and the set of position lists <pos>, for the encoded word <w> of length
   <wlen>.
 */
-static void compute_env(GtBittab *V, Pos *pos, const char *w,
+static void compute_env(GtBittab *V, GtPos *pos, const char *w,
                         unsigned long wlen, GtAlpha *alpha, unsigned long q,
                         long k, const GtScoreMatrix *score_matrix)
 {
@@ -211,7 +211,7 @@ struct GtBlastEnv {
   GtAlpha *alpha;
   unsigned long q;
   GtBittab *V; /* The vector V of r^q bits. */
-  Pos *pos;  /* The set of position lists. If a bit in <V> is set then <pos>
+  GtPos *pos;  /* The set of position lists. If a bit in <V> is set then <pos>
                 contains the corresponding position list for that code. */
 };
 
@@ -228,7 +228,7 @@ GtBlastEnv* gt_blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
   /* if <w> is long enough fill the Blast environment */
   if (wlen >= q) {
     be->V = gt_bittab_new(pow(gt_alpha_size(alpha), q));
-    be->pos = pos_new();
+    be->pos = gt_pos_new();
     compute_env(be->V, be->pos, w, wlen, alpha, q, k, score_matrix);
   }
   return be;
@@ -238,7 +238,7 @@ void gt_blast_env_delete(GtBlastEnv *be)
 {
   if (!be) return;
   gt_alpha_delete(be->alpha);
-  pos_delete(be->pos);
+  gt_pos_delete(be->pos);
   gt_bittab_delete(be->V);
   gt_free(be);
 }
@@ -258,7 +258,7 @@ void gt_blast_env_show(const GtBlastEnv *be)
   for (code  = gt_bittab_get_first_bitnum(be->V);
        code != gt_bittab_get_last_bitnum(be->V);
        code  = gt_bittab_get_next_bitnum(be->V, code)) {
-    position_list = pos_get(be->pos, code);
+    position_list = gt_pos_get(be->pos, code);
     assert(position_list);
     assert(gt_array_size(position_list)); /* contains at least one position */
     gt_qgram_decode(qgram, code, be->q, be->alpha);

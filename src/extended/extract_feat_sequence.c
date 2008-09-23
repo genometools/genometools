@@ -88,7 +88,7 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
     gt_genome_node_iterator_delete(gni);
     if (!had_err && gt_str_length(sequence)) {
       if (reverse_strand) {
-        had_err = reverse_complement(gt_str_get(sequence),
+        had_err = gt_reverse_complement(gt_str_get(sequence),
                                      gt_str_length(sequence), err);
       }
     }
@@ -113,7 +113,7 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
       gt_str_append_cstr_nt(sequence, raw_sequence + range.start - 1,
                             gt_range_length(range));
       if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE) {
-        had_err = reverse_complement(gt_str_get(sequence),
+        had_err = gt_reverse_complement(gt_str_get(sequence),
                                      gt_str_length(sequence), err);
       }
     }

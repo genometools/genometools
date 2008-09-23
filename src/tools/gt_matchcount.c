@@ -73,7 +73,7 @@ int gt_matchcount(int argc, const char **argv, GtError *err)
 
     /* compute match count */
     printf("args=%d %s %s\n", k, seq1, seq2);
-    matchcount(seq1, len1, seq2, len2, k, proc_match_count);
+    gt_matchcount_matchcount(seq1, len1, seq2, len2, k, proc_match_count);
   }
 
   return had_err;

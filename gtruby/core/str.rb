@@ -20,16 +20,16 @@ require 'gtdlload'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_Str* gt_str_new()"
-  extern "GT_Str* gt_str_new_cstr(const char*)"
-  extern "void* gt_str_get_mem(const GT_Str*)"
-  extern "void gt_str_append_str(GT_Str*, const GT_Str*)"
+  extern "GtStr* gt_str_new()"
+  extern "GtStr* gt_str_new_cstr(const char*)"
+  extern "void* gt_str_get_mem(const GtStr*)"
+  extern "void gt_str_append_str(GtStr*, const GtStr*)"
   # we declare the return value as const char* instead of char*, because
   # otherwise dl/import wrongly assumes that it has responsibility for the
   # returned memory region (which leads to a double free())
-  extern "const char* gt_str_get(const GT_Str*)"
-  extern "unsigned long gt_str_length(const GT_Str*)"
-  extern "void gt_str_delete(GT_Str*)"
+  extern "const char* gt_str_get(const GtStr*)"
+  extern "unsigned long gt_str_length(const GtStr*)"
+  extern "void gt_str_delete(GtStr*)"
 
   class Str
     def initialize(cstr)

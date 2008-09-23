@@ -45,10 +45,10 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 static double distfunc(unsigned long i, unsigned long j, void *data)
 {
   GtBioseq *bioseq= (GtBioseq*) data;
-  return linearedist(gt_bioseq_get_sequence(bioseq, i),
-                     gt_bioseq_get_sequence_length(bioseq, i),
-                     gt_bioseq_get_sequence(bioseq, j),
-                     gt_bioseq_get_sequence_length(bioseq, j));
+  return gt_calc_linearedist(gt_bioseq_get_sequence(bioseq, i),
+                             gt_bioseq_get_sequence_length(bioseq, i),
+                             gt_bioseq_get_sequence(bioseq, j),
+                             gt_bioseq_get_sequence_length(bioseq, j));
 }
 
 static double exampledistfunc(unsigned long i, unsigned long j,
@@ -67,7 +67,7 @@ int gt_neighborjoining(int argc, const char **argv, GtError *err)
 {
   bool use_hard_coded_example = false;
   GtBioseq *bioseq = NULL;
-  NeighborJoining *nj = NULL;
+  GtNeighborJoining *nj = NULL;
   int parsed_args, had_err = 0;
   gt_error_check(err);
 
@@ -82,22 +82,22 @@ int gt_neighborjoining(int argc, const char **argv, GtError *err)
     use_hard_coded_example = true;
 
   if (use_hard_coded_example)
-    nj = neighborjoining_new(5, NULL, exampledistfunc);
+    nj = gt_neighborjoining_new(5, NULL, exampledistfunc);
   else {
     bioseq = gt_bioseq_new(argv[1], err);
     if (!bioseq)
       had_err = -1;
     if (!had_err) {
-      nj = neighborjoining_new(gt_bioseq_number_of_sequences(bioseq), bioseq,
+      nj = gt_neighborjoining_new(gt_bioseq_number_of_sequences(bioseq), bioseq,
                                distfunc);
     }
   }
 
   if (!had_err)
-    neighborjoining_show_tree(nj, stdout);
+    gt_neighborjoining_show_tree(nj, stdout);
 
   gt_bioseq_delete(bioseq);
-  neighborjoining_delete(nj);
+  gt_neighborjoining_delete(nj);
 
   return had_err;
 }

@@ -35,7 +35,7 @@ typedef struct {
   unsigned long frompos,
                 topos,
                 width;
-  OutputFileInfo *ofi;
+  GtOutputFileInfo *ofi;
   GtGenFile *outfp;
 } ExtractSeqArguments;
 
@@ -44,7 +44,7 @@ static void* gt_extractseq_arguments_new(void)
   ExtractSeqArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->pattern = gt_str_new();
   arguments->ginum = gt_str_new();
-  arguments->ofi = outputfileinfo_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -53,7 +53,7 @@ static void gt_extractseq_arguments_delete(void *tool_arguments)
   ExtractSeqArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_genfile_close(arguments->outfp);
-  outputfileinfo_delete(arguments->ofi);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->ginum);
   gt_str_delete(arguments->pattern);
   gt_free(arguments);
@@ -106,7 +106,7 @@ static GtOptionParser* gt_extractseq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, width_option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   /* option implications */
   gt_option_imply(frompos_option, topos_option);

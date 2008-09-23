@@ -41,7 +41,7 @@
 /** store array of Seqpos values in BitString */
 #define gt_bsStoreUniformSeqposArray gt_bsStoreUniformUInt32Array
 /** how many bits are required to store given Seqpos value */
-#define requiredSeqposBits requiredUInt32Bits
+#define requiredSeqposBits gt_requiredUInt32Bits
 #else
 /** retrieve Seqpos from BitString */
 #define gt_bsGetSeqpos gt_bsGetUInt64
@@ -58,7 +58,7 @@
 /** store array of Seqpos values in BitString  */
 #define gt_bsStoreUniformSeqposArray gt_bsStoreUniformUInt64Array
 /** how many bits are required to store given Seqpos value */
-#define requiredSeqposBits requiredUInt64Bits
+#define requiredSeqposBits gt_requiredUInt64Bits
 #endif
 
 #endif

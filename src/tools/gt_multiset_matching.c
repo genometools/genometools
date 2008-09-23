@@ -58,10 +58,10 @@ int gt_multiset_matching(int argc, const char **argv, GtError *err)
 
   /* matching */
   assert(parsed_args + 1 < argc);
-  multiset_matching((unsigned char*) argv[parsed_args],
-                    strlen(argv[parsed_args]),
-                    (unsigned char*) argv[parsed_args+1],
-                    strlen(argv[parsed_args+1]), NULL, show_match);
+  gt_do_multiset_matching((unsigned char*) argv[parsed_args],
+                          strlen(argv[parsed_args]),
+                          (unsigned char*) argv[parsed_args+1],
+                          strlen(argv[parsed_args+1]), NULL, show_match);
 
   return 0;
 }

@@ -21,12 +21,12 @@ require 'extended/genome_stream'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GtNodeVisitor* gff3_visitor_new(GtGenFile*)"
+  extern "GtNodeVisitor* gt_gff3_visitor_new(GtGenFile*)"
 
   class GFF3Visitor
     attr_reader :genome_visitor
     def initialize
-      @genome_visitor = GT.gff3_visitor_new(nil)
+      @genome_visitor = GT.gt_gff3_visitor_new(nil)
       @genome_visitor.free = GT::symbol("gt_node_visitor_delete", "0P")
     end
   end

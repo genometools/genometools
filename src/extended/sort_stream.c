@@ -19,7 +19,7 @@
 #include "extended/node_stream_rep.h"
 #include "extended/sort_stream.h"
 
-struct SortStream
+struct GtSortStream
 {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
@@ -28,16 +28,17 @@ struct SortStream
   bool sorted;
 };
 
-#define sort_stream_cast(GS)\
-        gt_node_stream_cast(sort_stream_class(), GS);
+#define gt_sort_stream_cast(GS)\
+        gt_node_stream_cast(gt_sort_stream_class(), GS);
 
-static int sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+                               GtError *err)
 {
-  SortStream *sort_stream;
+  GtSortStream *sort_stream;
   GtGenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
-  sort_stream = sort_stream_cast(gs);
+  sort_stream = gt_sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {
     while (!(had_err = gt_node_stream_next(sort_stream->in_stream, &node,
@@ -68,10 +69,10 @@ static int sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void sort_stream_free(GtNodeStream *gs)
+static void gt_sort_stream_free(GtNodeStream *gs)
 {
   unsigned long i;
-  SortStream *sort_stream = sort_stream_cast(gs);
+  GtSortStream *sort_stream = gt_sort_stream_cast(gs);
   for (i = sort_stream->idx; i < gt_array_size(sort_stream->trees); i++) {
     gt_genome_node_rec_delete(*(GtGenomeNode**)
                               gt_array_get(sort_stream->trees, i));
@@ -80,21 +81,21 @@ static void sort_stream_free(GtNodeStream *gs)
   gt_node_stream_delete(sort_stream->in_stream);
 }
 
-const GtNodeStreamClass* sort_stream_class(void)
+const GtNodeStreamClass* gt_sort_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (SortStream),
-                                   sort_stream_free,
-                                   sort_stream_next);
+    nsc = gt_node_stream_class_new(sizeof (GtSortStream),
+                                   gt_sort_stream_free,
+                                   gt_sort_stream_next);
   }
   return nsc;
 }
 
-GtNodeStream* sort_stream_new(GtNodeStream *in_stream)
+GtNodeStream* gt_sort_stream_new(GtNodeStream *in_stream)
 {
-  GtNodeStream *gs = gt_node_stream_create(sort_stream_class(), true);
-  SortStream *sort_stream = sort_stream_cast(gs);
+  GtNodeStream *gs = gt_node_stream_create(gt_sort_stream_class(), true);
+  GtSortStream *sort_stream = gt_sort_stream_cast(gs);
   assert(in_stream);
   sort_stream->in_stream = gt_node_stream_ref(in_stream);
   sort_stream->sorted = false;

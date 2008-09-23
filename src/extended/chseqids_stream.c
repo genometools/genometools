@@ -24,7 +24,7 @@
 struct GtChseqidsStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  Mapping *chseqids_mapping;
+  GtMapping *chseqids_mapping;
   GtArray *gt_genome_node_buffer;
   unsigned long buffer_index;
   bool sequence_regions_processed;
@@ -71,7 +71,7 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     for (i = 0; !had_err && i < gt_array_size(cs->gt_genome_node_buffer); i++) {
       node = *(GtGenomeNode**) gt_array_get(cs->gt_genome_node_buffer, i);
       if (gt_genome_node_get_seqid(node)) {
-        if  ((changed_seqid = mapping_map_string(cs->chseqids_mapping,
+        if  ((changed_seqid = gt_mapping_map_string(cs->chseqids_mapping,
                                      gt_str_get(gt_genome_node_get_seqid(node)),
                                                  err))) {
           if ((feature_node = gt_feature_node_try_cast(node))) {
@@ -122,7 +122,7 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     had_err = gt_node_stream_next(cs->in_stream, gn, err);
   if (!had_err && *gn) {
     if (gt_genome_node_get_seqid(*gn)) {
-      changed_seqid = mapping_map_string(cs->chseqids_mapping,
+      changed_seqid = gt_mapping_map_string(cs->chseqids_mapping,
                                       gt_str_get(gt_genome_node_get_seqid(*gn)),
                                          err);
       gt_assert(changed_seqid); /* is always defined, because an undefined
@@ -146,7 +146,7 @@ static void chseqids_stream_free(GtNodeStream *gs)
   GtChseqidsStream *cs;
   unsigned long i;
   cs = chseqids_stream_cast(gs);
-  mapping_delete(cs->chseqids_mapping);
+  gt_mapping_delete(cs->chseqids_mapping);
   for (i = cs->buffer_index; i < gt_array_size(cs->gt_genome_node_buffer);
        i++) {
     gt_genome_node_rec_delete(*(GtGenomeNode**)
@@ -178,7 +178,7 @@ GtNodeStream* gt_chseqids_stream_new(GtNodeStream *in_stream,
   gs = gt_node_stream_create(gt_chseqids_stream_class(), false);
   cs = chseqids_stream_cast(gs);
   cs->in_stream = gt_node_stream_ref(in_stream);
-  cs->chseqids_mapping = mapping_new(chseqids_file, "chseqids",
+  cs->chseqids_mapping = gt_mapping_new(chseqids_file, "chseqids",
                                      MAPPINGTYPE_STRING, err);
   if (!cs->chseqids_mapping) {
     gt_node_stream_delete(gs);

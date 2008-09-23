@@ -37,7 +37,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
                             int argc, const char **argv, GtError *err)
 {
   GtOptionParser *op;
-  OutputFileInfo *ofi;
+  GtOutputFileInfo *ofi;
   GtOption *option;
   OPrval oprval;
   gt_error_check(err);
@@ -46,7 +46,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   op = gt_option_parser_new("[option ...] mapping_file [GFF3_file]",
                          "Change sequence ids by the mapping given in "
                          "mapping_file.");
-  ofi = outputfileinfo_new();
+  ofi = gt_outputfileinfo_new();
 
   /* -sort */
   option = gt_option_new_bool("sort",
@@ -61,7 +61,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
@@ -70,7 +70,7 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
                                   err);
 
   /* free */
-  outputfileinfo_delete(ofi);
+  gt_outputfileinfo_delete(ofi);
   gt_option_parser_delete(op);
 
   return oprval;
@@ -105,7 +105,7 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
   gt_str_delete(chseqids);
   if (!had_err) {
     if (arguments.sort) {
-      sort_stream = sort_stream_new(chseqids_stream);
+      sort_stream = gt_sort_stream_new(chseqids_stream);
       gff3_out_stream = gt_gff3_out_stream_new(sort_stream, arguments.outfp);
     }
     else {

@@ -22,8 +22,8 @@
 
 /* computes a <m> x <n> table containing the lcp lengths of <u> and <v> in O(mn)
    time and returns it */
-int** multilcp_compute(const char *u, int m, const char *v, int n);
+int** gt_multilcp_compute(const char *u, int m, const char *v, int n);
 /* shows lcp value table <tab> of size <dim1> x <dim2> on stdout */
-void  multilcp_show(int **tab, int dim1, int dim2);
+void  gt_multilcp_show(int **tab, int dim1, int dim2);
 
 #endif

@@ -23,23 +23,23 @@
 #include "core/ma.h"
 #include "extended/mapping.h"
 
-struct Mapping {
+struct GtMapping {
   GtStr *mapping_file;
   char *global;
-  MappingType type;
+  GtMappingType type;
   lua_State *L;
   bool is_table;
 };
 
-Mapping* mapping_new(GtStr *mapping_file, const char *global_name,
-                     MappingType type, GtError *err)
+GtMapping* gt_mapping_new(GtStr *mapping_file, const char *global_name,
+                     GtMappingType type, GtError *err)
 {
-  Mapping *m;
+  GtMapping *m;
   int had_err = 0;
   gt_error_check(err);
   assert(mapping_file && global_name);
   /* alloc */
-  m = gt_malloc(sizeof (Mapping));
+  m = gt_malloc(sizeof (GtMapping));
   m->mapping_file = gt_str_ref(mapping_file);
   m->global = gt_cstr_dup(global_name);
   m->type = type;
@@ -88,13 +88,13 @@ Mapping* mapping_new(GtStr *mapping_file, const char *global_name,
   }
   /* return */
   if (had_err) {
-    mapping_delete(m);
+    gt_mapping_delete(m);
     return NULL;
   }
   return m;
 }
 
-static int map_table(Mapping *m, GtStr **stroutput, long *integeroutput,
+static int map_table(GtMapping *m, GtStr **stroutput, long *integeroutput,
                      const char *input, GtError *err)
 {
   int had_err = 0;
@@ -137,7 +137,7 @@ static int map_table(Mapping *m, GtStr **stroutput, long *integeroutput,
   return had_err;
 }
 
-static int map_function(Mapping *m, GtStr **stroutput, long *integeroutput,
+static int map_function(GtMapping *m, GtStr **stroutput, long *integeroutput,
                         const char *input, GtError *err)
 {
   int had_err = 0;
@@ -180,7 +180,7 @@ static int map_function(Mapping *m, GtStr **stroutput, long *integeroutput,
   return had_err;
 }
 
-static int map_generic(Mapping *m, GtStr **stroutput, long *integeroutput,
+static int map_generic(GtMapping *m, GtStr **stroutput, long *integeroutput,
                        const char *input, GtError *err)
 {
   gt_error_check(err);
@@ -192,7 +192,7 @@ static int map_generic(Mapping *m, GtStr **stroutput, long *integeroutput,
   return map_function(m, stroutput, integeroutput, input, err);
 }
 
-GtStr* mapping_map_string(Mapping *m, const char *input, GtError *err)
+GtStr* gt_mapping_map_string(GtMapping *m, const char *input, GtError *err)
 {
   GtStr *output = NULL;
   gt_error_check(err);
@@ -200,14 +200,14 @@ GtStr* mapping_map_string(Mapping *m, const char *input, GtError *err)
   return output;
 }
 
-int mapping_map_integer(Mapping *m, long *output, const char *input,
-                        GtError *err)
+int gt_mapping_map_integer(GtMapping *m, long *output, const char *input,
+                           GtError *err)
 {
   gt_error_check(err);
   return map_generic(m, NULL, output, input, err);
 }
 
-void mapping_delete(Mapping *m)
+void gt_mapping_delete(GtMapping *m)
 {
   if (!m) return;
   gt_str_delete(m->mapping_file);

@@ -169,7 +169,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
   numCompositions = newList->numCompositions =
     binomialCoeff(blockSize + maxSym, maxSym);
   numTotalPermutations = iPow(alphabetSize, blockSize);
-  newList->compositionIdxBits = requiredUInt64Bits(numCompositions - 1);
+  newList->compositionIdxBits = gt_requiredUInt64Bits(numCompositions - 1);
   newList->bitsPerSymbol = requiredUIntBits(maxSym);
   bitsPerPerm = newList->bitsPerSymbol * blockSize;
   {
@@ -231,7 +231,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 #endif
     assert(permSum == pow(alphabetSize, blockSize));
   }
-  newList->maxPermIdxBits = requiredUInt64Bits(maxNumPermutations - 1);
+  newList->maxPermIdxBits = gt_requiredUInt64Bits(maxNumPermutations - 1);
   gt_free(composition);
   return 1;
 }
@@ -320,7 +320,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
   size_t numPermutations = permutation->numPermutations =
     multinomialCoeff(blockSize, alphabetSize, composition);
   if (numPermutations > 1)
-    permutation->permIdxBits = requiredUInt64Bits(numPermutations - 1);
+    permutation->permIdxBits = gt_requiredUInt64Bits(numPermutations - 1);
   else
     permutation->permIdxBits = 0;
   Symbol *currentPermutation;

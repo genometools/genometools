@@ -24,8 +24,8 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   typealias "bool", "ibool"
-  extern "GtNodeStream* gff3_in_stream_new_sorted(const char *, bool)"
-  extern "GtStrArray* gff3_in_stream_get_used_types(GtNodeStream*)"
+  extern "GtNodeStream* gt_gff3_in_stream_new_sorted(const char *, bool)"
+  extern "GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream*)"
 
   class GFF3InStream
     include GenomeStream
@@ -34,12 +34,12 @@ module GT
       if not File.readable?(filename)
         GT.gterror("file '#{filename}' not readable")
       end
-      @genome_stream = GT.gff3_in_stream_new_sorted(filename, false)
+      @genome_stream = GT.gt_gff3_in_stream_new_sorted(filename, false)
       @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
 
     def get_used_types
-      strarray_ptr = GT.gff3_in_stream_get_used_types(@genome_stream)
+      strarray_ptr = GT.gt_gff3_in_stream_get_used_types(@genome_stream)
       used_types = GT::StrArray.new(strarray_ptr)
       used_types.to_a
     end

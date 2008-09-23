@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -149,7 +149,7 @@ static OPrval parse_options(int *parsed_args,
   gt_option_parser_add_option(op, option);
 
   /* set contact mailaddress */
-  gt_option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op, "<steinbiss@zbh.uni-hamburg.de>");
 
   /* parse options */
   gt_option_parser_set_min_args(op, 1);

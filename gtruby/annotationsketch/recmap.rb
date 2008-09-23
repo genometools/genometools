@@ -22,12 +22,12 @@ module GT
   extend DL::Importable
   typealias "bool", "ibool"
 
-  extern "double gt_recmap_get_northwest_x(const GT_RecMap*)"
-  extern "double gt_recmap_get_northwest_y(const GT_RecMap*)"
-  extern "double gt_recmap_get_southeast_x(const GT_RecMap*)"
-  extern "double gt_recmap_get_southeast_y(const GT_RecMap*)"
-  extern "const GT_GenomeFeature* gt_recmap_get_genome_feature(const GT_RecMap*)"
-  extern "bool gt_recmap_has_omitted_children(const GT_RecMap*)"
+  extern "double gt_recmap_get_northwest_x(const GtRecMap*)"
+  extern "double gt_recmap_get_northwest_y(const GtRecMap*)"
+  extern "double gt_recmap_get_southeast_x(const GtRecMap*)"
+  extern "double gt_recmap_get_southeast_y(const GtRecMap*)"
+  extern "const GtGenomeFeature* gt_recmap_get_genome_feature(const GtRecMap*)"
+  extern "bool gt_recmap_has_omitted_children(const GtRecMap*)"
 
   class RecMap
     def initialize(rm)

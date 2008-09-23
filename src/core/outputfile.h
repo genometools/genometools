@@ -22,11 +22,12 @@
 
 #define FORCE_OPT_CSTR  "force"
 
-typedef struct OutputFileInfo OutputFileInfo;
+typedef struct GtOutputFileInfo GtOutputFileInfo;
 
-OutputFileInfo* outputfileinfo_new(void);
-void            outputfile_register_options(GtOptionParser*, GtGenFile **outfp,
-                                            OutputFileInfo*);
-void            outputfileinfo_delete(OutputFileInfo*);
+GtOutputFileInfo* gt_outputfileinfo_new(void);
+void              gt_outputfile_register_options(GtOptionParser*,
+                                                 GtGenFile **outfp,
+                                                 GtOutputFileInfo*);
+void              gt_outputfileinfo_delete(GtOutputFileInfo*);
 
 #endif

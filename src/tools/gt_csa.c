@@ -27,14 +27,14 @@
 typedef struct {
   bool verbose;
   unsigned long join_length;
-  OutputFileInfo *ofi;
+  GtOutputFileInfo *ofi;
   GtGenFile *outfp;
 } CSAArguments;
 
 static void* gt_csa_arguments_new(void)
 {
   CSAArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->ofi = outputfileinfo_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -43,7 +43,7 @@ static void gt_csa_arguments_delete(void *tool_arguments)
   CSAArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_genfile_close(arguments->outfp);
-  outputfileinfo_delete(arguments->ofi);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -70,7 +70,7 @@ static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_max_args(op, 1);
 

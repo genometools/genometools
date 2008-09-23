@@ -27,10 +27,10 @@
    See below for example code to create a separate binary for the eval tool.
    XXX: change example to reflect the real gth application
 */
-int tooldriver(int(*tool)(int argc, const char **argv, GtError*),
+int gt_tooldriver(int(*tool)(int argc, const char **argv, GtError*),
                int argc, char *argv[]);
 
-int toolobjdriver(GtToolConstructor, int argc, char *argv[]);
+int gt_toolobjdriver(GtToolConstructor, int argc, char *argv[]);
 
 #if 0
 
@@ -39,7 +39,7 @@ int toolobjdriver(GtToolConstructor, int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
-  return tooldriver(gt_gff3, argc, argv);
+  return gt_tooldriver(gt_gff3, argc, argv);
 }
 
 #endif

@@ -41,8 +41,8 @@ static void fillDPtable(unsigned long *dptable,
   }
 }
 
-unsigned long linearedist(const char *u, unsigned long n,
-                          const char *v, unsigned long m)
+unsigned long gt_calc_linearedist(const char *u, unsigned long n,
+                                  const char *v, unsigned long m)
 {
   unsigned long *dptable, edist;
   dptable = gt_malloc(sizeof (unsigned long) * (MIN(n,m) + 1));

@@ -21,9 +21,9 @@
 #include "extended/node_stream.h"
 
 /* implements the ``genome stream'' interface */
-typedef struct SortStream SortStream;
+typedef struct GtSortStream GtSortStream;
 
-const GtNodeStreamClass* sort_stream_class(void);
-GtNodeStream*            sort_stream_new(GtNodeStream*);
+const GtNodeStreamClass* gt_sort_stream_class(void);
+GtNodeStream*            gt_sort_stream_new(GtNodeStream*);
 
 #endif

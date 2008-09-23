@@ -49,7 +49,7 @@ struct GtGFF3Parser {
        tidy,
        fasta_parsing; /* parser is in FASTA parsing mode */
   long offset;
-  Mapping *offset_mapping;
+  GtMapping *offset_mapping;
   GtTypeChecker *type_checker;
   unsigned int last_terminator; /* line number of the last terminator */
 };
@@ -143,7 +143,7 @@ int gt_gff3_parser_set_offsetfile(GtGFF3Parser *parser, GtStr *offsetfile,
   gt_error_check(err);
   gt_assert(parser);
   gt_assert(parser->offset == UNDEF_LONG);
-  parser->offset_mapping = mapping_new(offsetfile, "offsets",
+  parser->offset_mapping = gt_mapping_new(offsetfile, "offsets",
                                        MAPPINGTYPE_INTEGER, err);
   if (parser->offset_mapping)
     return 0;
@@ -165,7 +165,8 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
   if (parser->offset != UNDEF_LONG)
     *range = gt_range_offset(*range, parser->offset);
   else if (parser->offset_mapping) {
-    had_err = mapping_map_integer(parser->offset_mapping, &offset, seqid, err);
+    had_err = gt_mapping_map_integer(parser->offset_mapping, &offset, seqid,
+                                     err);
     if (!had_err)
       *range = gt_range_offset(*range, offset);
   }
@@ -1475,7 +1476,7 @@ void gt_gff3_parser_delete(GtGFF3Parser *parser)
   gt_hashmap_delete(parser->seqid_to_ssr_mapping);
   gt_hashmap_delete(parser->source_to_str_mapping);
   gt_hashmap_delete(parser->undefined_sequence_regions);
-  mapping_delete(parser->offset_mapping);
+  gt_mapping_delete(parser->offset_mapping);
   gt_type_checker_delete(parser->type_checker);
   gt_free(parser);
 }

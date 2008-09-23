@@ -18,8 +18,8 @@
 #ifndef SCOREFASTA_H
 #define SCOREFASTA_H
 
-unsigned long scorefasta(const char *u, unsigned long ulen,
-                         const char *w, unsigned long wlen,
-                         unsigned long q, unsigned long alphabet_size);
+unsigned long gt_calc_scorefasta(const char *u, unsigned long ulen,
+                                 const char *w, unsigned long wlen,
+                                 unsigned long q, unsigned long alphabet_size);
 
 #endif

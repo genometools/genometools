@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "extended/matchcount.h"
 
-void matchcount(const char *u, int m, const char *v, int n, int k,
+void gt_matchcount_matchcount(const char *u, int m, const char *v, int n, int k,
                 ProcMC proc_match_count)
 {
   int diagonal, i, j, mc;

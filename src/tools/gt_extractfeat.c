@@ -82,7 +82,7 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -seqfile and -regionmapping */
-  seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -113,7 +113,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                                   arguments->verbose);
 
     /* create region mapping */
-    regionmapping = seqid2file_regionmapping_new(arguments->seqfile,
+    regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
                                                  arguments->regionmapping, err);
     if (!regionmapping)
       had_err = -1;

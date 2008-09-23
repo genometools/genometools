@@ -21,13 +21,14 @@
 #include <stdio.h>
 #include "core/error.h"
 
-typedef struct NeighborJoining NeighborJoining;
+typedef struct GtNeighborJoining GtNeighborJoining;
 
-typedef double (*NeighborJoiningDistFunc)(unsigned long, unsigned long, void*);
+typedef double (*GtNeighborJoiningDistFunc)(unsigned long, unsigned long,
+                                            void*);
 
-NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
-                                     NeighborJoiningDistFunc);
-void             neighborjoining_show_tree(const NeighborJoining*, FILE*);
-void             neighborjoining_delete(NeighborJoining*);
+GtNeighborJoining* gt_neighborjoining_new(unsigned long num_of_taxa, void *data,
+                                     GtNeighborJoiningDistFunc);
+void             gt_neighborjoining_show_tree(const GtNeighborJoining*, FILE*);
+void             gt_neighborjoining_delete(GtNeighborJoining*);
 
 #endif

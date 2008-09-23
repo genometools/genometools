@@ -21,7 +21,7 @@
 #include "extended/qgramdist.h"
 #include "extended/qgram.h"
 
-unsigned long qgramdist(GtSeq *seq_a, GtSeq *seq_b, unsigned int q)
+unsigned long gt_calc_qgramdist(GtSeq *seq_a, GtSeq *seq_b, unsigned int q)
 {
   unsigned long i, alphasize_to_the_power_of_q, *seq_a_profile, *seq_b_profile,
                 dist = 0;

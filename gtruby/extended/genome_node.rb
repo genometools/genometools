@@ -21,14 +21,14 @@ require 'gthelper'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "int gt_genome_node_accept(GT_GenomeNode*, GenomeVisitor*, Error*)"
-  extern "GT_GenomeNode* gt_genome_node_rec_ref(GT_GenomeNode*)"
-  extern "GT_GenomeNode* gt_genome_node_ref(GT_GenomeNode*)"
-  extern "unsigned long gt_genome_node_get_start(GT_GenomeNode*)"
-  extern "unsigned long gt_genome_node_get_end(GT_GenomeNode*)"
-  extern "const char* gt_genome_node_get_filename(GT_GenomeNode*)"
-  extern "void gt_genome_node_rec_delete(GT_GenomeNode*)"
-  extern "void gt_genome_node_delete(GT_GenomeNode*)"
+  extern "int gt_genome_node_accept(GtGenomeNode*, GenomeVisitor*, GtError*)"
+  extern "GtGenomeNode* gt_genome_node_rec_ref(GtGenomeNode*)"
+  extern "GtGenomeNode* gt_genome_node_ref(GtGenomeNode*)"
+  extern "unsigned long gt_genome_node_get_start(GtGenomeNode*)"
+  extern "unsigned long gt_genome_node_get_end(GtGenomeNode*)"
+  extern "const char* gt_genome_node_get_filename(GtGenomeNode*)"
+  extern "void gt_genome_node_rec_delete(GtGenomeNode*)"
+  extern "void gt_genome_node_delete(GtGenomeNode*)"
 
   class GenomeNode
     attr_reader :genome_node

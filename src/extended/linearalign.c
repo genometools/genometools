@@ -188,8 +188,8 @@ static GtAlignment* reconstructalignment(const unsigned long *Ctab,
   return alignment;
 }
 
-GtAlignment* linearalign(const char *u, unsigned long ulen,
-                       const char *v, unsigned long vlen)
+GtAlignment* gt_align_linearalign(const char *u, unsigned long ulen,
+                                  const char *v, unsigned long vlen)
 {
   unsigned long *Ctab, dist;
   GtAlignment *alignment;

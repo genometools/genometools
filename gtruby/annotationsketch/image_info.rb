@@ -24,12 +24,12 @@ require 'annotationsketch/recmap'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_ImageInfo* gt_image_info_new()"
-  extern "unsigned int gt_image_info_get_height(GT_ImageInfo*)"
-  extern "unsigned long gt_image_info_num_of_recmaps(GT_ImageInfo*)"
-  extern "const GT_RecMap* gt_image_info_get_recmap(GT_ImageInfo*, " +
+  extern "GtImageInfo* gt_image_info_new()"
+  extern "unsigned int gt_image_info_get_height(GtImageInfo*)"
+  extern "unsigned long gt_image_info_num_of_recmaps(GtImageInfo*)"
+  extern "const GtRecMap* gt_image_info_get_recmap(GtImageInfo*, " +
                                                    "unsigned long)"
-  extern "void gt_image_info_delete(GT_ImageInfo*)"
+  extern "void gt_image_info_delete(GtImageInfo*)"
 
   class ImageInfo
     attr_reader :image_info

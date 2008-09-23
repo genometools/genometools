@@ -47,7 +47,7 @@ typedef struct {
   double min_gene_score,
          max_gene_score,
          min_average_splice_site_prob;
-  OutputFileInfo *ofi;
+  GtOutputFileInfo *ofi;
   GtGenFile *outfp;
 } FilterArguments;
 
@@ -60,7 +60,7 @@ static void* gt_filter_arguments_new(void)
   arguments->strand = GT_NUM_OF_STRAND_TYPES;
   arguments->targetgt_strand_char = gt_str_new();
   arguments->targetstrand = GT_NUM_OF_STRAND_TYPES;
-  arguments->ofi = outputfileinfo_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -69,7 +69,7 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   FilterArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_genfile_close(arguments->outfp);
-  outputfileinfo_delete(arguments->ofi);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->targetgt_strand_char);
   gt_str_delete(arguments->gt_strand_char);
   gt_str_delete(arguments->typefilter);
@@ -201,7 +201,7 @@ static GtOptionParser* gt_filter_option_parser_new(void *tool_arguments)
   gt_option_exclude(contain_option, overlap_option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   return op;
 }

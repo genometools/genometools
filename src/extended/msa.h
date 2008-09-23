@@ -21,12 +21,12 @@
 #include "core/error.h"
 
 /* the multiple sequence alignment (MSA) class */
-typedef struct MSA MSA;
+typedef struct GtMSA GtMSA;
 
-MSA*          msa_new(const char *MSA_filename, GtError*);
-unsigned long msa_consensus_distance(const MSA*);
-unsigned long msa_sum_of_pairwise_scores(const MSA*);
-void          msa_show(MSA*); /* on stdout */
-void          msa_delete(MSA*);
+GtMSA*          gt_msa_new(const char *MSA_filename, GtError*);
+unsigned long   gt_msa_consensus_distance(const GtMSA*);
+unsigned long   gt_msa_sum_of_pairwise_scores(const GtMSA*);
+void            gt_msa_show(GtMSA*); /* on stdout */
+void            gt_msa_delete(GtMSA*);
 
 #endif
