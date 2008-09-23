@@ -94,7 +94,7 @@ int gt_splicedseq_reverse(Splicedseq *ss, GtError *err)
   int had_err;
   gt_error_check(err);
   assert(ss);
-  had_err = reverse_complement(gt_str_get(ss->splicedseq),
+  had_err = gt_reverse_complement(gt_str_get(ss->splicedseq),
                                gt_str_length(ss->splicedseq), err);
   if (!had_err) {
     gt_array_reverse(ss->positionmapping);

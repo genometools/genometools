@@ -87,7 +87,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
         site[3] = tolower(sequence[range.end-1]);
         site[4] = '\0';
         if (strand == GT_STRAND_REVERSE)
-          had_err = reverse_complement(site, 4, err);
+          had_err = gt_reverse_complement(site, 4, err);
         if (!had_err) {
           /* add site to distributions */
           gt_string_distri_add(ssiv->splicesites, site);

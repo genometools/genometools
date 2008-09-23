@@ -38,7 +38,7 @@ static int complement(char *reverse_char, char dna_char, GtError *err)
   }
 }
 
-int reverse_complement(char *dna_seq, unsigned long seqlen, GtError *err)
+int gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError *err)
 {
   char *front_char, *back_char, tmp_char;
   int had_err = 0;
