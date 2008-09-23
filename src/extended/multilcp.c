@@ -21,7 +21,7 @@
 #include "core/array2dim.h"
 #include "extended/multilcp.h"
 
-int** multilcp_compute(const char *u, int m, const char *v, int n)
+int** gt_multilcp_compute(const char *u, int m, const char *v, int n)
 {
   int i, j, **prefix;
 
@@ -49,7 +49,7 @@ int** multilcp_compute(const char *u, int m, const char *v, int n)
   return prefix;
 }
 
-void multilcp_show(int **tab, int dim1, int dim2)
+void gt_multilcp_show(int **tab, int dim1, int dim2)
 {
   int i, j;
 
