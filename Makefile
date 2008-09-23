@@ -412,19 +412,22 @@ bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 obj/gt_config.h: VERSION
 	@echo '[create $@]'
 	@test -d $(@D) || mkdir -p $(@D)
-	@(echo '#define GT_BUILT $(BUILDSTAMP)' ;\
+	@(echo '#ifndef GT_CONFIG_H' ;\
+	echo '#define GT_CONFIG_H' ;\
+        echo '#define GT_BUILT $(BUILDSTAMP)' ;\
 	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
 	echo '#define GT_CFLAGS "$(EXP_CFLAGS) $(GT_CFLAGS)"' ;\
 	echo '$(EXP_CPPFLAGS) $(GT_CPPFLAGS)' | \
 	sed -e 's/\([^\]\)"/\1\\"/g' -e 's/^"/\\"/g' -e 's/$$/"/' \
 	    -e 's/^/#define GT_CPPFLAGS "/'; \
 	  echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
-	@cat VERSION | sed 's/\([0-9]*\)\.[0-9]*\.[0-9]*/#define GT_MAJOR \1/' \
-          >> $@
-	@cat VERSION | sed 's/[0-9]*\.\([0-9]*\)\.[0-9]*/#define GT_MINOR \1/' \
-          >> $@
-	@cat VERSION | sed 's/[0-9]*\.[0-9]*\.\([0-9]*\)/#define GT_MICRO \1/' \
-          >> $@
+	@cat VERSION | \
+          sed 's/\([0-9]*\)\.[0-9]*\.[0-9]*/#define GT_MAJOR_VERSION \1/' >> $@
+	@cat VERSION | \
+          sed 's/[0-9]*\.\([0-9]*\)\.[0-9]*/#define GT_MINOR_VERSION \1/' >> $@
+	@cat VERSION | \
+          sed 's/[0-9]*\.[0-9]*\.\([0-9]*\)/#define GT_MICRO_VERSION \1/' >> $@
+	@echo '#endif' >> $@
 
 bitpackstringop_Dependencies=src/core/bitpackstringop.template \
 	 src/core/bitpackstringvectorreadop.gen \

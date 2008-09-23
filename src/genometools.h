@@ -22,6 +22,9 @@
    Include only this header if you program against the libgenometools.
 */
 
+/* the generated config header (includes version information) */
+#include "gt_config.h"
+
 /* the core module */
 #include "core/array_api.h"
 #include "core/error_api.h"
