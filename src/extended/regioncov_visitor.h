@@ -19,12 +19,13 @@
 #define REGIONCOV_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct RegionCovVisitor RegionCovVisitor;
+typedef struct GtRegionCovVisitor GtRegionCovVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* regioncov_visitor_class(void);
-GtNodeVisitor*            regioncov_visitor_new(unsigned long max_feature_dist);
-void                      regioncov_visitor_show_coverage(GtNodeVisitor*);
+const GtNodeVisitorClass* gt_regioncov_visitor_class(void);
+GtNodeVisitor*            gt_regioncov_visitor_new(unsigned long
+                                                   max_feature_dist);
+void                      gt_regioncov_visitor_show_coverage(GtNodeVisitor*);
 
 #endif

@@ -76,7 +76,7 @@ int gt_regioncov(int argc, const char **argv, GtError *err)
                                                 arguments.verbose);
 
   /* create region coverage visitor */
-  regioncov_visitor = regioncov_visitor_new(arguments.max_feature_dist);
+  regioncov_visitor = gt_regioncov_visitor_new(arguments.max_feature_dist);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn) {
@@ -86,7 +86,7 @@ int gt_regioncov(int argc, const char **argv, GtError *err)
 
   /* show region coverage */
   if (!had_err)
-    regioncov_visitor_show_coverage(regioncov_visitor);
+    gt_regioncov_visitor_show_coverage(regioncov_visitor);
 
   /* free */
   gt_node_visitor_delete(regioncov_visitor);
