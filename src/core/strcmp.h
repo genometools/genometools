@@ -18,8 +18,6 @@
 #ifndef STRCMP_H
 #define STRCMP_H
 
-/* Strcmp module */
-
 /* Returns 0 if <s1> == <s2>, otherwise the equivalent of <strcmp(s1, s2)>. */
 int gt_strcmp(const char *s1, const char *s2);
 
