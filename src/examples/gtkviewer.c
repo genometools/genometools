@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
   gtk_init(&argc, &argv);
 
   err = gt_error_new();
-  sty = gt_style_new(0, err);
+  sty = gt_style_new(err);
   gt_style_load_file(sty, "gtdata/sketch/default.style", err);
 
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
