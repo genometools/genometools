@@ -65,6 +65,11 @@ function DocVisitorHTML:visit_classes(classes)
   include("classes.lp", { classes = classes })
 end
 
+function DocVisitorHTML:visit_modules(modules)
+  assert(modules)
+  include("modules.lp", { modules = modules })
+end
+
 function DocVisitorHTML:visit_class(classname, comments)
   assert(classname)
   include("class.lp", { classname = classname })
@@ -74,6 +79,11 @@ function DocVisitorHTML:visit_class(classname, comments)
     end
   include("class_comments.lp", { comments = comments })
   end
+end
+
+function DocVisitorHTML:visit_module(modulename)
+  assert(modulename)
+  include("module.lp", { modulename = modulename })
 end
 
 local sole_function_visited = false

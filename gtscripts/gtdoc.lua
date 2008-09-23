@@ -59,6 +59,7 @@ local template_path = gt_home .. "/gtdata/modules/gtdoclib/"
 local export_C   = { "src/core/array_api.h",
                      "src/core/error_api.h",
                      "src/core/str_api.h",
+                     "src/core/warning_api.h",
                      "src/annotationsketch" }
 
 local export_Lua = { "src/gtlua",

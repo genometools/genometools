@@ -24,8 +24,10 @@ DocBase = {}
 
 function DocBase:new()
   o = {}
-  o.classes   = {}
+  o.classes = {}
   o.classcomments = {}
+  o.modules = {}
+  o.moduledefs = {}
   o.solefuncs = {}
   setmetatable(o, self)
   self.__index = self
@@ -41,6 +43,14 @@ function DocBase:add_class(classname, comments, be_verbose)
   self.classcomments[classname] = comments
 end
 
+function DocBase:add_module(modulename, be_verbose)
+  assert(modulename)
+  if be_verbose then
+    print("module added: " .. modulename)
+  end
+  self.modules[modulename] = self.modules[modulename] or {}
+end
+
 function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
   assert(funcname and funcargs and comment)
   local desc = {}
@@ -52,23 +62,11 @@ function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
   if be_verbose then
     print("method added: " .. desc.name)
   end
+  if self.last_module then
+    self.modules[self.last_module][#self.modules[self.last_module] + 1] = desc
+    return
+  end
   local classname
-  --[[ XXX remove this stuff?
-  -- check if function is a constructor
-  classname = string.match(desc.name, "^(%a[%a%d_]*)_new[%a%d_]*")
-  if not classname then
-    -- check if function name starts with a letter and is a method
-    classname = string.match(desc.name, "^(%a[%a%d_]*):")
-  end
-  -- transform classname, if necessary
-  if classname then
-    -- special case for abbrevated class names
-    classname = string.gsub(classname, "^%a%a%a_", string.upper)
-    classname = string.gsub(classname, "^%a", string.upper)
-    classname = string.gsub(classname, "_%a", string.upper)
-    classname = string.gsub(classname, "_", "")
-  end
-  ]]
   funcname = "^" .. string.gsub(funcname, "_", "")
   for class_to_search in pairs(self.classes) do
     local class_to_match = string.lower(string.gsub(class_to_search, "_", ""))
@@ -117,6 +115,7 @@ function DocBase:process_ast(ast, be_verbose)
         print("keyword: " .. keyword)
       end
       if keyword == "class" then
+        o.last_module = nil
         local comments
         if #ast > 2 then
           comments = {}
@@ -129,6 +128,21 @@ function DocBase:process_ast(ast, be_verbose)
         end
         self["add_" .. ast[1]](self, ast[#ast], comments, be_verbose)
         break
+      elseif keyword == "module" then
+        self.last_module = ast[2]
+        self["add_" .. ast[1]](self, ast[2], be_verbose)
+      elseif keyword == "funcdef" then
+        if be_verbose then
+          print("funcdef keyword found")
+        end
+        if self.last_module then
+          desc = {}
+          desc.name = ast[3]
+          desc.comment = ast[2]
+          self.moduledefs[self.last_module] = self.moduledefs[self.last_module]                                               or {}
+          self.moduledefs[self.last_module][#self.moduledefs[self.last_module]
+                                            + 1] = desc
+        end
       elseif keyword == "comment" then
         local funcpos = method_keyword(ast, be_verbose)
         local complete_comment = ""
@@ -169,6 +183,17 @@ function DocBase:accept(visitor)
   if visitor.visit_classes then
     visitor:visit_classes(sorted_classes)
   end
+  -- visit all modules
+  local sorted_modules = {}
+  for modulename in pairs(self.modules) do
+    if #self.modules[modulename] > 0 then
+      sorted_modules[#sorted_modules + 1] = modulename
+    end
+  end
+  table.sort(sorted_modules)
+  if visitor.visit_modules then
+    visitor:visit_modules(sorted_modules)
+  end
   -- visit sole functions
   for _, funcdesc in ipairs(self.solefuncs) do
     if visitor.visit_sole_function then
@@ -185,6 +210,17 @@ function DocBase:accept(visitor)
     for _, method in ipairs(self.classes[classname]) do
       visitor:visit_method(method)
       method_names[#method_names + 1] = method.name
+    end
+  end
+  -- visit each module
+  if visitor.visit_module then
+    for _, modulename in ipairs(sorted_modules) do
+      visitor:visit_module(modulename)
+      -- visit functions for module
+      for _, method in ipairs(self.modules[modulename]) do
+        visitor:visit_method(method)
+        method_names[#method_names + 1] = method.name
+      end
     end
   end
   -- visit all method names (for index construction)

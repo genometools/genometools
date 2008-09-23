@@ -26,12 +26,24 @@ function DocVisitorTxt:new()
   return o
 end
 
+function DocVisitorTxt:visit_modules(modules)
+  print("modules:")
+  for _, mod in ipairs(modules) do
+    print(mod)
+  end
+end
+
 function DocVisitorTxt:visit_class(classname, comments)
   assert(classname)
   io.write(string.format("class: %s\n", classname))
   if comments then
     print("comments: " .. table.concat(comments))
   end
+end
+
+function DocVisitorTxt:visit_module(modulename)
+  assert(modulename)
+  io.write(string.format("module: %s\n", modulename))
 end
 
 function DocVisitorTxt:visit_method(desc)

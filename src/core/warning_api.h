@@ -20,6 +20,8 @@
 
 #include <stdarg.h>
 
+/* Warning module */
+
 /* Handler type used to process warnings */
 typedef void (*GtWarningHandler)(void *data, const char *format, va_list ap);
 
@@ -32,7 +34,7 @@ void gt_warning(const char *format, ...)
 void gt_warning_disable(void);
 
 /* Set <warning_handler> to handle all warnings issued with <gt_warning()>.
-   <data> is passed to <warning_handler> on each invocation. */
+   The <data> is passed to <warning_handler> on each invocation. */
 void gt_warning_set_handler(GtWarningHandler warning_handler, void *data);
 
 /* The default warning handler which prints on <stderr>.

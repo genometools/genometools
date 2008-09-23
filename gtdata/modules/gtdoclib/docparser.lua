@@ -85,7 +85,12 @@ local ClassTypedef = lpeg.Ct(lpeg.Cc("class") *
                              lpeg.P("typedef struct") * Space * Character^1 *
                              Space * lpeg.C(Character^1) * OptionalSpace *
                              Semicolon)
-local Typedef = lpeg.P("typedef struct") * (Any - Semicolon)^1 * Semicolon
+local FunctionTypedef = lpeg.Ct(lpeg.Cc("funcdef") *
+                                (CCommentStart * lpeg.C((Any - CCommentEnd)^0) *
+                                CCommentEnd) * Newline^0 *
+                                lpeg.P("typedef") * Space *
+                                lpeg.C((Any - Semicolon)^1) * Semicolon)
+local TypedefStruct = lpeg.P("typedef struct") * (Any - Semicolon)^1 * Semicolon
 local OptionalWord = (Character^1 * Space)^-1
 local Function = lpeg.Cc("function") *
                  lpeg.C(Character^1 * Space * OptionalWord) *
@@ -100,6 +105,9 @@ local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
                        OptionalSpace * DefineSeparator
 local ExportCMethod = lpeg.Ct(ExportedComment * Newline^0 * Function)
 local ExportCDefine = lpeg.Ct(ExportedComment * Newline^0 * ExportedDefine)
+local ModuleDef = lpeg.Ct(lpeg.Cc("module") * CCommentStart * Space *
+                          lpeg.C(Character^1) * Space * lpeg.P("module") *
+                          Space * CCommentEnd)
 
 -- Lua Grammar
 local Elem, Start = lpeg.V"Elem", lpeg.V"Start"
@@ -121,8 +129,8 @@ LuaCGrammar = LuaCGrammar * -1
 local CGrammar = lpeg.P{ Start,
   -- Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0 * Endif);
   Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0);
-  Elem = ClassTypedef + ExportCDefine + ExportCMethod + Space + Include +
-         lpeg.C(Typedef) + CCode;
+  Elem = ClassTypedef + ModuleDef + ExportCDefine + ExportCMethod + Space +
+         Include + lpeg.C(TypedefStruct) + FunctionTypedef + CCode;
 }
 CGrammar = CGrammar * -1
 
