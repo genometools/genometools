@@ -22,12 +22,12 @@ require 'core/str'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_Canvas* gt_canvas_cairo_file_new(GT_Style*, int, unsigned int, "+
-                                          "GT_ImageInfo*)"
-  extern "int gt_canvas_cairo_file_to_file(GT_CanvasCairoFile*, const char*, " +
-                                       "GT_Error*)"
-  extern "int gt_canvas_cairo_file_to_stream(GT_CanvasCairoFile*, GT_Str*)"
-  extern "void gt_canvas_delete(GT_Canvas*)"
+  extern "GtCanvas* gt_canvas_cairo_file_new(GtStyle*, int, unsigned int, "+
+                                             "GtImageInfo*)"
+  extern "int gt_canvas_cairo_file_to_file(GtCanvasCairoFile*, const char*, " +
+                                           "GtError*)"
+  extern "int gt_canvas_cairo_file_to_stream(GtCanvasCairoFile*, GtStr*)"
+  extern "void gt_canvas_delete(GtCanvas*)"
 
   class Canvas
     def initialize(*)

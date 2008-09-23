@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007      Malte Mader <mmader@zbh.uni-hamburg.de>
   Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg

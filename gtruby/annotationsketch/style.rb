@@ -41,24 +41,24 @@ module GT
   # a NULL pointer
   NULL = DL::PtrData.new(0)
 
-  extern "GT_Style* gt_style_new(bool, GT_Error*)"
-  extern "int gt_style_load_file(GT_Style*, const char*, GT_Error*)"
-  extern "int gt_style_load_str(GT_Style*, GT_Str*, GT_Error*)"
-  extern "int gt_style_to_str(const GT_Style*, GT_Str*, GT_Error*)"
-  extern "bool gt_style_get_color(GT_Style*, const char*, const char*, GT_Color*, " +
+  extern "GtStyle* gt_style_new(bool, GtError*)"
+  extern "int gt_style_load_file(GtStyle*, const char*, GtError*)"
+  extern "int gt_style_load_str(GtStyle*, GtStr*, GtError*)"
+  extern "int gt_style_to_str(const GtStyle*, GtStr*, GtError*)"
+  extern "bool gt_style_get_color(GtStyle*, const char*, const char*, GtColor*, " +
                                  "GenomeNode*)"
-  extern "void gt_style_set_color(GT_Style*, const char*, const char*, GT_Color*)"
-  extern "bool gt_style_get_str(const GT_Style*, const char*, " +
-                               "const char*, GT_Str*, GT_GenomeNode*)"
-  extern "void gt_style_set_str(GT_Style*, const char*, const char*, GT_Str*)"
-  extern "bool gt_style_get_num(const GT_Style*, const char*, " +
-                               "const char*, double*, GT_GenomeNode*)"
-  extern "void gt_style_set_num(GT_Style*, const char*, const char*, double)"
-  extern "bool gt_style_get_bool(const GT_Style*, const char*, " +
-                                "const char*, bool*, GT_GenomeNode*)"
-  extern "void gt_style_set_bool(GT_Style*, const char*, const char*, bool)"
-  extern "void gt_style_unset(GT_Style*, const char*, const char*)"
-  extern "void gt_style_delete(GT_Style*)"
+  extern "void gt_style_set_color(GtStyle*, const char*, const char*, GtColor*)"
+  extern "bool gt_style_get_str(const GtStyle*, const char*, " +
+                               "const char*, GtStr*, GtGenomeNode*)"
+  extern "void gt_style_set_str(GtStyle*, const char*, const char*, GtStr*)"
+  extern "bool gt_style_get_num(const GtStyle*, const char*, " +
+                               "const char*, double*, GtGenomeNode*)"
+  extern "void gt_style_set_num(GtStyle*, const char*, const char*, double)"
+  extern "bool gt_style_get_bool(const GtStyle*, const char*, " +
+                                "const char*, bool*, GtGenomeNode*)"
+  extern "void gt_style_set_bool(GtStyle*, const char*, const char*, bool)"
+  extern "void gt_style_unset(GtStyle*, const char*, const char*)"
+  extern "void gt_style_delete(GtStyle*)"
 
   class Style
     attr_reader :style
