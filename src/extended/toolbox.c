@@ -30,14 +30,14 @@ struct GtToolbox {
 typedef struct {
   GtTool *tool;
   GtToolfunc toolfunc;
-} Toolinfo;
+} GtToolinfo;
 
-Toolinfo* toolinfo_new(void)
+GtToolinfo* gt_toolinfo_new(void)
 {
-  return gt_calloc(1, sizeof (Toolinfo));
+  return gt_calloc(1, sizeof (GtToolinfo));
 }
 
-void toolinfo_delete(Toolinfo *toolinfo)
+void gt_toolinfo_delete(GtToolinfo *toolinfo)
 {
   if (!toolinfo) return;
   gt_tool_delete(toolinfo->tool);
@@ -48,22 +48,22 @@ GtToolbox* gt_toolbox_new(void)
 {
   GtToolbox *tb;
   tb = gt_malloc(sizeof (GtToolbox));
-  tb->tools = gt_hashmap_new(HASH_STRING, NULL, (GtFree) toolinfo_delete);
+  tb->tools = gt_hashmap_new(HASH_STRING, NULL, (GtFree) gt_toolinfo_delete);
   return tb;
 }
 
 void gt_toolbox_add_tool(GtToolbox *tb, const char *toolname, GtTool *tool)
 {
-  Toolinfo *toolinfo;
+  GtToolinfo *toolinfo;
   assert(tb && tb->tools);
-  toolinfo = toolinfo_new();
+  toolinfo = gt_toolinfo_new();
   toolinfo->tool= tool;
   gt_hashmap_add(tb->tools, (char*) toolname, toolinfo);
 }
 
 GtTool* gt_toolbox_get_tool(GtToolbox *tb, const char *toolname)
 {
-  Toolinfo *toolinfo;
+  GtToolinfo *toolinfo;
   assert(tb && tb->tools);
   toolinfo = gt_hashmap_get(tb->tools, toolname);
   if (toolinfo)
@@ -81,16 +81,16 @@ bool gt_toolbox_has_tool(const GtToolbox *tb, const char *toolname)
 
 void gt_toolbox_add(GtToolbox *tb, const char *toolname, GtToolfunc toolfunc)
 {
-  Toolinfo *toolinfo;
+  GtToolinfo *toolinfo;
   assert(tb && tb->tools);
-  toolinfo = toolinfo_new();
+  toolinfo = gt_toolinfo_new();
   toolinfo->toolfunc = toolfunc;
   gt_hashmap_add(tb->tools, (char*) toolname, toolinfo);
 }
 
 GtToolfunc gt_toolbox_get(const GtToolbox *tb, const char *toolname)
 {
-  Toolinfo *toolinfo;
+  GtToolinfo *toolinfo;
   assert(tb && tb->tools);
   toolinfo = gt_hashmap_get(tb->tools, toolname);
   if (toolinfo)
