@@ -159,13 +159,13 @@ static int gt_style_find_section_for_getting(const GtStyle *sty,
   assert(sty && section);
   lua_getglobal(sty->L, "style");
   if (lua_isnil(sty->L, -1)) {
-    gt_warning("'style' is not defined");
+    gt_log_log("'style' is not defined");
     lua_pop(sty->L, 1);
     return -1;
   } else depth++;
   lua_getfield(sty->L, -1, section);
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-    gt_warning("section '%s' is not defined", section);
+    gt_log_log("section '%s' is not defined", section);
     lua_pop(sty->L, 2);
     return -1;
   } else depth++;
@@ -201,14 +201,14 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-    gt_warning("no colors are defined for type '%s', will use defaults.", key);
+    gt_log_log("no colors are defined for type '%s', will use defaults.", key);
     lua_pop(sty->L, 3);
     return false;
   } else i++;
   /* update color struct */
   lua_getfield(sty->L, -1, "red");
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_warning("%s  value for type '%s' is undefined or not numeric, using "
+    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
                "default","red", key);
   }
   else
@@ -216,7 +216,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   lua_pop(sty->L, 1);
   lua_getfield(sty->L, -1, "green");
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_warning("%s  value for type '%s' is undefined or not numeric, using "
+    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
                "default","green", key);
   }
   else
@@ -224,7 +224,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   lua_pop(sty->L, 1);
   lua_getfield(sty->L, -1, "blue");
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_warning("%s  value for type '%s' is undefined or not numeric, using "
+    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
                "default","blue", key);
   }
   else
@@ -287,7 +287,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_isstring(sty->L, -1)) {
-    gt_warning("no value is defined for key '%s'", key);
+    gt_log_log("no value is defined for key '%s'", key);
     lua_pop(sty->L, i+1);
     return false;
   } else i++;
@@ -337,7 +337,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_warning("no or non-numeric value found for key '%s'", key);
+    gt_log_log("no or non-numeric value found for key '%s'", key);
     lua_pop(sty->L, i+1);
     return false;
   } else i++;
@@ -375,7 +375,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   /* lookup entry for given key */
   lua_getfield(sty->L, -1, key);
   if (lua_isnil(sty->L, -1) || !lua_isboolean(sty->L, -1)) {
-    gt_warning("no or non-boolean value found for key '%s'", key);
+    gt_log_log("no or non-boolean value found for key '%s'", key);
     lua_pop(sty->L, i+1);
     return false;
   } else i++;
