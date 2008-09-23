@@ -21,7 +21,7 @@
 #include "core/error.h"
 
 /* Compute the edit distance of sequences u and v in O(max{|u|,|v|}) space */
-unsigned long linearedist(const char *u, unsigned long n,
-                          const char *v, unsigned long m);
+unsigned long gt_calc_linearedist(const char *u, unsigned long n,
+                                  const char *v, unsigned long m);
 
 #endif
