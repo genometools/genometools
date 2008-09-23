@@ -31,9 +31,8 @@
    pair must uniquely identify a value. */
 typedef struct GtStyle GtStyle;
 
-/* Creates a new <GtStyle> object with given verbosity. If set, warnings will be
-   given. */
-GtStyle*      gt_style_new(bool verbose, GtError*);
+/* Creates a new <GtStyle> object. */
+GtStyle*      gt_style_new(GtError*);
 /* Creates a independent (``deep'') copy of the given <GtStyle> object. */
 GtStyle*      gt_style_clone(const GtStyle*, GtError*);
 /* Loads and executes Lua style file with given <filename>.
@@ -62,8 +61,6 @@ void           gt_style_set_bool(GtStyle*, const char *section,
                                  const char *key, bool val);
 /* Unset value of key <key> in <section>. */
 void           gt_style_unset(GtStyle*, const char *section, const char *key);
-/* Returns verbosity status. */
-bool           gt_style_get_verbose(const GtStyle *style);
 /* Deletes this <style>. */
 void           gt_style_delete(GtStyle *style);
 

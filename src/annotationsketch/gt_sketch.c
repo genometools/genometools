@@ -26,6 +26,7 @@
 #include "core/splitter.h"
 #include "core/undef.h"
 #include "core/versionfunc.h"
+#include "core/warning_api.h"
 #include "extended/add_introns_stream.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
@@ -209,6 +210,10 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   /* save name of output file */
   file = argv[parsed_args];
 
+  /* disable warnings */
+  if (!arguments.verbose)
+    gt_warning_disable();
+
   /* check for correct order: range end < range start */
   if (!had_err &&
       arguments.start != UNDEF_ULONG &&
@@ -298,7 +303,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     gt_style_file = gt_get_gtdata_path(gt_str_get(prog), err);
     gt_str_delete(prog);
     gt_str_append_cstr(gt_style_file, "/sketch/default.style");
-    if (!(sty = gt_style_new(arguments.verbose, err)))
+    if (!(sty = gt_style_new(err)))
       had_err = -1;
     if (!had_err && gt_file_exists(gt_str_get(gt_style_file)))
       had_err = gt_style_load_file(sty, gt_str_get(gt_style_file), err);

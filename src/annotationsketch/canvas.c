@@ -20,6 +20,7 @@
 #include <string.h>
 #include "core/class_alloc.h"
 #include "core/ensure.h"
+#include "core/log.h"
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/range.h"
@@ -120,8 +121,7 @@ unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
 
   /* add header space and footer */
   height += HEADER_SPACE + FOOTER_SPACE;
-  if (gt_style_get_verbose(canvas->pvt->sty))
-    fprintf(stderr, "calculated height: %lu\n", height);
+  gt_log_log("calculated height: %lu", height);
   return height;
 }
 
@@ -375,10 +375,7 @@ int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track)
                      NULL);
 
   /* debug */
-  if (gt_style_get_verbose(canvas->pvt->sty)) {
-    fprintf(stderr, "processing track %s\n",
-            gt_str_get(gt_track_get_title(track)));
-  }
+  gt_log_log("processing track %s", gt_str_get(gt_track_get_title(track)));
 
   if (canvas->pvt->show_track_captions)
   {
@@ -604,11 +601,8 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
          /*&& gt_dlistelem_next(delem) == NULL*/)
     arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
-  if (gt_style_get_verbose(canvas->pvt->sty))
-    fprintf(stderr, "processing element from %lu to %lu, strand %d\n",
-            elem_range.start,
-            elem_range.end,
-            (int) strand);
+  gt_log_log("processing element from %lu to %lu, strand %d\n",
+             elem_range.start, elem_range.end, (int) strand);
 
   draw_range = gt_canvas_convert_coords(canvas, elem_range);
   elem_start = draw_range.start;
@@ -660,11 +654,8 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
     return had_err;
   }
 
-  if (gt_style_get_verbose(canvas->pvt->sty))
-    fprintf(stderr, "drawing element from %f to %f, arrow status: %d\n",
-            draw_range.start,
-            draw_range.end,
-            arrow_status);
+  gt_log_log("drawing element from %f to %f, arrow status: %d\n",
+             draw_range.start, draw_range.end, arrow_status);
 
   /* draw each element according to style set in the style */
   style = gt_str_new();

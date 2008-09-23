@@ -53,7 +53,7 @@ static void draw_example_features(GtArray *features, const char *style_file,
   GtError *err = gt_error_new();
 
   /* create style */
-  if (!(style = gt_style_new(false, err)))
+  if (!(style = gt_style_new(err)))
     handle_error(err);
 
   /* load style file */
@@ -98,6 +98,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Usage: %s style_file output_file\n", argv[0]);
     return EXIT_FAILURE;
   }
+
+  gt_warning_disable(); /* disable AnnotationSketch warnings */
 
   features = create_example_features();
 

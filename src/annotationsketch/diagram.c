@@ -814,7 +814,7 @@ int gt_diagram_unit_test(GtError *err)
 
   /* create a style object */
   if (!had_err) {
-    if (!(sty = gt_style_new(false, err)))
+    if (!(sty = gt_style_new(err)))
       had_err = -1;
   }
 

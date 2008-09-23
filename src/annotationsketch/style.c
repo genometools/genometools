@@ -25,6 +25,7 @@
 #include "annotationsketch/style.h"
 #include "core/cstr.h"
 #include "core/ensure.h"
+#include "core/log.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -37,7 +38,6 @@ struct GtStyle
 {
   lua_State *L;
   char *filename;
-  bool verbose;
 };
 
 static void gt_style_lua_new_table(lua_State *L, const char *key)
@@ -69,13 +69,12 @@ static void luaL_opensecurelibs(lua_State *L)
   }
 }
 
-GtStyle* gt_style_new(bool verbose, GtError *err)
+GtStyle* gt_style_new(GtError *err)
 {
   GtStyle *sty;
   gt_error_check(err);
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->filename = NULL;
-  sty->verbose = verbose;
   sty->L = luaL_newstate();
   if (!sty->L) {
     gt_error_set(err, "out of memory (cannot create new Lua state)");
@@ -101,8 +100,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
   gt_error_check(err);
   assert(sty && sty->L && filename);
   sty->filename = gt_cstr_dup(filename);
-  if (gt_style_get_verbose(sty))
-    fprintf(stderr, "Trying to load style file: %s...\n", filename);
+  gt_log_log("Trying to load style file: %s...", filename);
   if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {
     gt_error_set(err, "cannot run style file: %s",
               lua_tostring(sty->L, -1));
@@ -161,13 +159,13 @@ static int gt_style_find_section_for_getting(const GtStyle *sty,
   assert(sty && section);
   lua_getglobal(sty->L, "style");
   if (lua_isnil(sty->L, -1)) {
-    if (sty->verbose) gt_warning("'style' is not defined");
+    gt_warning("'style' is not defined");
     lua_pop(sty->L, 1);
     return -1;
   } else depth++;
   lua_getfield(sty->L, -1, section);
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-    if (sty->verbose) gt_warning("section '%s' is not defined", section);
+    gt_warning("section '%s' is not defined", section);
     lua_pop(sty->L, 2);
     return -1;
   } else depth++;
@@ -203,33 +201,31 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-    if (sty->verbose) gt_warning("no colors are defined for type '%s', "
-                               "will use defaults.",
-                               key);
+    gt_warning("no colors are defined for type '%s', will use defaults.", key);
     lua_pop(sty->L, 3);
     return false;
   } else i++;
   /* update color struct */
   lua_getfield(sty->L, -1, "red");
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    if (sty->verbose) gt_warning("%s  value for type '%s' is undefined or"
-                               " not numeric, using default","red", key);
+    gt_warning("%s  value for type '%s' is undefined or not numeric, using "
+               "default","red", key);
   }
   else
     color->red = lua_tonumber(sty->L,-1);
   lua_pop(sty->L, 1);
   lua_getfield(sty->L, -1, "green");
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    if (sty->verbose) gt_warning("%s  value for type '%s' is undefined or"
-                               " not numeric, using default","green", key);
+    gt_warning("%s  value for type '%s' is undefined or not numeric, using "
+               "default","green", key);
   }
   else
     color->green = lua_tonumber(sty->L,-1);
   lua_pop(sty->L, 1);
   lua_getfield(sty->L, -1, "blue");
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    if (sty->verbose) gt_warning("%s  value for type '%s' is undefined or"
-                               " not numeric, using default","blue", key);
+    gt_warning("%s  value for type '%s' is undefined or not numeric, using "
+               "default","blue", key);
   }
   else
     color->blue = lua_tonumber(sty->L,-1);
@@ -291,7 +287,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_isstring(sty->L, -1)) {
-    if (sty->verbose) gt_warning("no value is defined for key '%s'", key);
+    gt_warning("no value is defined for key '%s'", key);
     lua_pop(sty->L, i+1);
     return false;
   } else i++;
@@ -341,8 +337,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    if (sty->verbose) gt_warning("no or non-numeric value found for key '%s'",
-                                 key);
+    gt_warning("no or non-numeric value found for key '%s'", key);
     lua_pop(sty->L, i+1);
     return false;
   } else i++;
@@ -380,8 +375,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   /* lookup entry for given key */
   lua_getfield(sty->L, -1, key);
   if (lua_isnil(sty->L, -1) || !lua_isboolean(sty->L, -1)) {
-    if (sty->verbose) gt_warning("no or non-boolean value found for key '%s'",
-                                 key);
+    gt_warning("no or non-boolean value found for key '%s'", key);
     lua_pop(sty->L, i+1);
     return false;
   } else i++;
@@ -418,12 +412,6 @@ void gt_style_unset(GtStyle *sty, const char *section, const char *key)
       lua_settable(sty->L, -3);
     }
   }
-}
-
-bool gt_style_get_verbose(const GtStyle *sty)
-{
-  assert(sty);
-  return sty->verbose;
 }
 
 int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
@@ -464,7 +452,7 @@ GtStyle* gt_style_clone(const GtStyle *sty, GtError *err)
   GtStr *sty_buffer = gt_str_new();
   GtStyle *new_sty;
   assert(sty);
-  if (!(new_sty = gt_style_new(gt_style_get_verbose(sty), err)))
+  if (!(new_sty = gt_style_new(err)))
     had_err = -1;
   if (!had_err)
     had_err = gt_style_to_str(sty, sty_buffer, err);
@@ -493,7 +481,7 @@ int gt_style_unit_test(GtError *err)
   defcol.red=.5;defcol.green=.5;defcol.blue=.5;
 
   /* instantiate new style object */
-  if (!(sty = gt_style_new(false, err)))
+  if (!(sty = gt_style_new(err)))
     had_err = -1;
 
   /* at the beginning, all values are defaults, since nothing is defined */
