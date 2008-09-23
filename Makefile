@@ -609,17 +609,12 @@ install: all
 	cp -r gtdata $(prefix)/bin
 	test -d $(prefix)/include/genometools/core \
 	  || mkdir -p $(prefix)/include/genometools/core
-	cp src/core.h obj/gt_config.h $(prefix)/include/genometools
+	cp obj/gt_config.h $(prefix)/include/genometools
 	cp src/core/*.h $(prefix)/include/genometools/core
 	test -d $(prefix)/include/genometools/extended \
           || mkdir -p $(prefix)/include/genometools/extended
-	cp src/extended.h $(prefix)/include/genometools
 	cp src/extended/*.h $(prefix)/include/genometools/extended
-	cp src/genometools.h $(prefix)/include/genometools
-	test -d $(prefix)/include/match \
-	  || mkdir -p $(prefix)/include/genometools/match
-	cp src/match.h $(prefix)/include/genometools
-	cp src/match/*.h src/match/*.pr $(prefix)/include/genometools/match
+	cp src/genometools.h $(prefix)/include
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
 	cp lib/libgenometools.a $(prefix)/lib
 ifdef RANLIB
