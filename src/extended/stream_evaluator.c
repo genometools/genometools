@@ -22,7 +22,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 #include "core/xansi.h"
 #include "extended/evaluator.h"
 #include "extended/gff3_output.h"

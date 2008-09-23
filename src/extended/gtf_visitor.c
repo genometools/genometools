@@ -20,7 +20,7 @@
 #include <string.h>
 #include "core/fptr_api.h"
 #include "core/unused_api.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_output.h"
 #include "extended/gtf_visitor.h"

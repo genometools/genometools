@@ -27,7 +27,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 #include "extended/luahelper.h"
 #include "extended/luaserialize.h"
 #include "gtlua/genome_node_lua.h"

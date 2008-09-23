@@ -22,7 +22,7 @@
 #include "core/string_distri.h"
 #include "core/translate.h"
 #include "core/unused_api.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 #include "core/xansi.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/node_visitor_rep.h"

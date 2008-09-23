@@ -19,7 +19,7 @@
 #include "core/fileutils.h"
 #include "core/ma.h"
 #include "core/outputfile.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 
 struct OutputFileInfo {
   GtStr *output_filename;

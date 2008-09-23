@@ -23,7 +23,7 @@
 #include "core/option.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 #include "tools/gt_skproto.h"
 
 #define MAX_LINE_LENGTH  80

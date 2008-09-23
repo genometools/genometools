@@ -15,11 +15,29 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef WARNING_H
-#define WARNING_H
+#ifndef WARNING_API_H
+#define WARNING_API_H
 
-/* print a warning and continue */
+#include <stdarg.h>
+
+/* Handler type used to process warnings */
+typedef void (*GtWarningHandler)(void *data, const char *format, va_list ap);
+
+/* Print a warning according to <format> and <...>, if a handler is set. */
 void gt_warning(const char *format, ...)
   __attribute__ ((format (printf, 1, 2)));
+
+/* Disable that warnings are shown. That is, subsequent <gt_warning()> calls
+   have no effect. */
+void gt_warning_disable(void);
+
+/* Set <warning_handler> to handle all warnings issued with <gt_warning()>.
+   <data> is passed to <warning_handler> on each invocation. */
+void gt_warning_set_handler(GtWarningHandler warning_handler, void *data);
+
+/* The default warning handler which prints on <stderr>.
+   "warning: " is prepended and a newline is appended to the message defined by
+   <format> and <ap>. Does not use <data>. */
+void gt_warning_default_handler(void *data, const char *format, va_list ap);
 
 #endif

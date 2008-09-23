@@ -27,7 +27,7 @@
 #include "core/splitter.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 #include "extended/comment_node.h"
 #include "extended/feature_info.h"
 #include "extended/feature_node.h"

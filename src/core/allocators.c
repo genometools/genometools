@@ -25,7 +25,7 @@
 #include "core/splitter.h"
 #include "core/symbol.h"
 #include "core/versionfunc.h"
-#include "core/warning.h"
+#include "core/warning_api.h"
 #include "core/xansi.h"
 
 static bool spacepeak = false;
