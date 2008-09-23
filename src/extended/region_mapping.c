@@ -28,7 +28,7 @@ struct GtRegionMapping {
   GtStr *sequence_filename,
       *sequence_file, /* the (current) sequence file */
       *sequence_name; /* the (current) sequence name */
-  Mapping *mapping;
+  GtMapping *mapping;
   GtBioseq *bioseq; /* the current bioseq */
   unsigned int reference_count;
 };
@@ -40,8 +40,8 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
   gt_error_check(err);
   assert(mapping_filename);
   rm = gt_calloc(1, sizeof (GtRegionMapping));
-  rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
-                            err);
+  rm->mapping = gt_mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
+                               err);
   if (!rm->mapping) {
     gt_region_mapping_delete(rm);
     return NULL;
@@ -73,7 +73,7 @@ static GtStr* gt_region_mapping_map(GtRegionMapping *rm,
   if (rm->sequence_filename)
     return gt_str_ref(rm->sequence_filename);
   else
-    return mapping_map_string(rm->mapping, sequence_region, err);
+    return gt_mapping_map_string(rm->mapping, sequence_region, err);
 }
 
 static int update_gt_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
@@ -137,7 +137,7 @@ void gt_region_mapping_delete(GtRegionMapping *rm)
   gt_str_delete(rm->sequence_filename);
   gt_str_delete(rm->sequence_file);
   gt_str_delete(rm->sequence_name);
-  mapping_delete(rm->mapping);
+  gt_mapping_delete(rm->mapping);
   gt_bioseq_delete(rm->bioseq);
   gt_free(rm);
 }
