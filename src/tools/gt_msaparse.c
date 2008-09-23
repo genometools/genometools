@@ -62,7 +62,7 @@ int gt_msaparse(int argc, const char **argv, GtError *err)
 {
   MSAparse_arguments arguments;
   int parsed_args, had_err = 0;
-  MSA *msa = NULL;
+  GtMSA *msa = NULL;
   gt_error_check(err);
 
   /* option parsing */
@@ -81,7 +81,7 @@ int gt_msaparse(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* multiple sequence alignment construction */
-    msa = msa_new(argv[parsed_args], err);
+    msa = gt_msa_new(argv[parsed_args], err);
     if (!msa)
       had_err = -1;
   }
@@ -89,16 +89,16 @@ int gt_msaparse(int argc, const char **argv, GtError *err)
   if (!had_err) {
     /* output */
     if (arguments.show)
-      msa_show(msa);
+      gt_msa_show(msa);
     if (arguments.consensus)
-      printf("consensus distance: %lu\n", msa_consensus_distance(msa));
+      printf("consensus distance: %lu\n", gt_msa_consensus_distance(msa));
     if (arguments.sumofpairs) {
-      printf("sum of pairwise scores: %lu\n", msa_sum_of_pairwise_scores(msa));
+      printf("sum of pairwise scores: %lu\n", gt_msa_sum_of_pairwise_scores(msa));
     }
   }
 
   /* free */
-  msa_delete(msa);
+  gt_msa_delete(msa);
 
   return had_err;
 }

@@ -23,25 +23,25 @@
 
 #define GAPSYMBOL '-'
 
-struct MSA {
+struct GtMSA {
   GtBioseq *bs;
 };
 
-MSA* msa_new(const char *MSA_filename, GtError *err)
+GtMSA* gt_msa_new(const char *GtMSA_filename, GtError *err)
 {
   unsigned long i, firstseqlen;
   int had_err = 0;
-  MSA *msa;
+  GtMSA *msa;
   gt_error_check(err);
-  msa = gt_malloc(sizeof (MSA));
-  msa->bs = gt_bioseq_new(MSA_filename, err);
+  msa = gt_malloc(sizeof (GtMSA));
+  msa->bs = gt_bioseq_new(GtMSA_filename, err);
   if (!msa->bs)
     had_err = -1;
   if (!had_err) {
-    /* make sure that the MSA contains at least two sequences */
+    /* make sure that the GtMSA contains at least two sequences */
     if (gt_bioseq_number_of_sequences(msa->bs) < 2) {
-      gt_error_set(err, "the MSA file '%s' contains less then 2 sequences",
-                MSA_filename);
+      gt_error_set(err, "the GtMSA file '%s' contains less then 2 sequences",
+                GtMSA_filename);
       had_err = -1;
     }
   }
@@ -50,15 +50,15 @@ MSA* msa_new(const char *MSA_filename, GtError *err)
     firstseqlen = gt_bioseq_get_sequence_length(msa->bs, 0);
     for (i = 1; i < gt_bioseq_number_of_sequences(msa->bs); i++) {
       if (gt_bioseq_get_sequence_length(msa->bs, i) != firstseqlen) {
-        gt_error_set(err, "length of sequence %lu in the MSA file '%s' differs "
-                  "from the first", i, MSA_filename);
+        gt_error_set(err, "length of sequence %lu in the GtMSA file '%s' differs "
+                  "from the first", i, GtMSA_filename);
         had_err = -1;
         break;
       }
     }
   }
   if (had_err) {
-    msa_delete(msa);
+    gt_msa_delete(msa);
     return NULL;
   }
   return msa;
@@ -108,7 +108,7 @@ static char* get_consensus(unsigned long **count, unsigned long seqlen)
   return consensus;
 }
 
-unsigned long msa_consensus_distance(const MSA *msa)
+unsigned long gt_msa_consensus_distance(const GtMSA *msa)
 {
   unsigned long col, number_of_seqs, seqlen, **count, dist = 0;
   char **msa_array, *consensus;
@@ -118,7 +118,7 @@ unsigned long msa_consensus_distance(const MSA *msa)
   number_of_seqs = gt_bioseq_number_of_sequences(msa->bs);
   seqlen = gt_bioseq_get_sequence_length(msa->bs, 0);
 
-  /* get the MSA in a convenient form */
+  /* get the GtMSA in a convenient form */
   msa_array = get_msa_array(msa->bs);
 
   /* compute the character count array */
@@ -140,7 +140,7 @@ unsigned long msa_consensus_distance(const MSA *msa)
   return dist;
 }
 
-unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
+unsigned long gt_msa_sum_of_pairwise_scores(const GtMSA *msa)
 {
   unsigned long i, j, col, number_of_seqs, seqlen, sum = 0;
   char **msa_array;
@@ -150,7 +150,7 @@ unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
   number_of_seqs = gt_bioseq_number_of_sequences(msa->bs);
   seqlen = gt_bioseq_get_sequence_length(msa->bs, 0);
 
-  /* get the MSA in a convenient form */
+  /* get the GtMSA in a convenient form */
   msa_array = get_msa_array(msa->bs);
 
   /* compute the actual sum of pairwise scores */
@@ -165,13 +165,13 @@ unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
   return sum;
 }
 
-void msa_show(MSA *msa)
+void gt_msa_show(GtMSA *msa)
 {
   assert(msa);
   gt_bioseq_show_as_fasta(msa->bs, 0);
 }
 
-void msa_delete(MSA *msa)
+void gt_msa_delete(GtMSA *msa)
 {
   if (!msa) return;
   gt_bioseq_delete(msa->bs);
