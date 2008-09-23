@@ -48,9 +48,9 @@ static void free_MAInfo(MAInfo *mainfo)
 
 void gt_ma_init(bool bookkeeping)
 {
-  assert(!ma);
+  gt_assert(!ma);
   ma = gt_xcalloc(1, sizeof (MA));
-  assert(!ma->bookkeeping);
+  gt_assert(!ma->bookkeeping);
   ma->allocated_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
                                       (GtFree) free_MAInfo);
   /* MA is ready to use */
@@ -59,7 +59,7 @@ void gt_ma_init(bool bookkeeping)
 
 static void add_size(MA* ma, unsigned long size)
 {
-  assert(ma);
+  gt_assert(ma);
   ma->current_size += size;
   if (ma->current_size > ma->max_size)
     ma->max_size = ma->current_size;
@@ -67,8 +67,8 @@ static void add_size(MA* ma, unsigned long size)
 
 static void subtract_size(MA *ma, unsigned long size)
 {
-  assert(ma);
-  assert(ma->current_size >= size);
+  gt_assert(ma);
+  gt_assert(ma->current_size >= size);
   ma->current_size -= size;
 }
 
@@ -77,7 +77,7 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
   MAInfo *mainfo;
   void *mem;
   if (!ma) gt_ma_init(false);
-  assert(ma);
+  gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
     mainfo = gt_xmalloc(sizeof (MAInfo));
@@ -98,7 +98,7 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
   MAInfo *mainfo;
   void *mem;
   if (!ma) gt_ma_init(false);
-  assert(ma);
+  gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
     mainfo = gt_xmalloc(sizeof (MAInfo));
@@ -119,12 +119,12 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
   MAInfo *mainfo;
   void *mem;
   if (!ma) gt_ma_init(false);
-  assert(ma);
+  gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
     if (ptr) {
       mainfo = gt_hashmap_get(ma->allocated_pointer, ptr);
-      assert(mainfo);
+      gt_assert(mainfo);
       subtract_size(ma, mainfo->size);
       gt_hashmap_remove(ma->allocated_pointer, ptr);
     }
@@ -144,7 +144,7 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
 void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
 {
   MAInfo *mainfo;
-  assert(ma);
+  gt_assert(ma);
   if (!ptr) return;
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
@@ -156,7 +156,7 @@ void gt_free_mem(void *ptr, GT_UNUSED const char *filename, GT_UNUSED int line)
     }
 #endif
     mainfo = gt_hashmap_get(ma->allocated_pointer, ptr);
-    assert(mainfo);
+    gt_assert(mainfo);
     subtract_size(ma, mainfo->size);
     gt_hashmap_remove(ma->allocated_pointer, ptr);
     free(ptr);
@@ -178,7 +178,7 @@ static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
   CheckSpaceLeakInfo *info = (CheckSpaceLeakInfo*) data;
   MAInfo *mainfo = (MAInfo*) value;
   gt_error_check(err);
-  assert(key && value && data);
+  gt_assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {
     fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %d in "
@@ -190,13 +190,13 @@ static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
 
 unsigned long gt_ma_get_space_peak(void)
 {
-  assert(ma);
+  gt_assert(ma);
   return ma->max_size;
 }
 
 void gt_ma_show_space_peak(FILE *fp)
 {
-  assert(ma);
+  gt_assert(ma);
   fprintf(fp, "# space peak in megabytes: %.2f\n",
           (double) ma->max_size / (1 << 20));
 }
@@ -205,11 +205,11 @@ int gt_ma_check_space_leak(void)
 {
   CheckSpaceLeakInfo info;
   int had_err;
-  assert(ma);
+  gt_assert(ma);
   info.has_leak = false;
   had_err = gt_hashmap_foreach(ma->allocated_pointer, check_space_leak, &info,
                               NULL);
-  assert(!had_err); /* cannot happen, check_space_leak() is sane */
+  gt_assert(!had_err); /* cannot happen, check_space_leak() is sane */
   if (info.has_leak)
     return -1;
   return 0;
@@ -217,7 +217,7 @@ int gt_ma_check_space_leak(void)
 
 void gt_ma_clean(void)
 {
-  assert(ma);
+  gt_assert(ma);
   ma->bookkeeping = false;
   gt_hashmap_delete(ma->allocated_pointer);
   free(ma);

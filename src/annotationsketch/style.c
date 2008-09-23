@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "lua.h"
 #include "lauxlib.h"
@@ -98,7 +98,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(sty && sty->L && filename);
+  gt_assert(sty && sty->L && filename);
   sty->filename = gt_cstr_dup(filename);
   gt_log_log("Trying to load style file: %s...", filename);
   if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {
@@ -120,9 +120,9 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
 void gt_style_reload(GtStyle *sty)
 {
   int rval;
-  assert(sty && sty->filename);
+  gt_assert(sty && sty->filename);
   rval = gt_style_load_file(sty, sty->filename, NULL);
-  assert(!rval); /* should not happen, file was loaded before */
+  gt_assert(!rval); /* should not happen, file was loaded before */
 }
 
 /* Searches for <section> inside the style table, creating it if it does not
@@ -131,7 +131,7 @@ void gt_style_reload(GtStyle *sty)
 static int gt_style_find_section_for_setting(GtStyle* sty, const char *section)
 {
   int depth = 0;
-  assert(sty && section);
+  gt_assert(sty && section);
   lua_getglobal(sty->L, "style");
   if (lua_isnil(sty->L, -1)) {
     lua_pop(sty->L, 1);
@@ -156,7 +156,7 @@ static int gt_style_find_section_for_getting(const GtStyle *sty,
                                           const char *section)
 {
   int depth = 0;
-  assert(sty && section);
+  gt_assert(sty && section);
   lua_getglobal(sty->L, "style");
   if (lua_isnil(sty->L, -1)) {
     gt_log_log("'style' is not defined");
@@ -176,7 +176,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
                      const char *key, GtColor *color, GtFeatureNode *gn)
 {
   int i = 0;
-  assert(sty && section && key && color);
+  gt_assert(sty && section && key && color);
   /* set default colors */
   color->red=0.5; color->green = 0.5; color->blue=0.5;
   /* get section */
@@ -239,7 +239,7 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
                         const GtColor *color)
 {
   int i = 0;
-  assert(sty && section && key && color);
+  gt_assert(sty && section && key && color);
   i = gt_style_find_section_for_setting(sty, section);
   lua_getfield(sty->L, -1, key);
   i++;
@@ -264,7 +264,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
                      const char *key, GtStr *text, GtFeatureNode *gn)
 {
   int i = 0;
-  assert(sty && key && section);
+  gt_assert(sty && key && section);
   /* get section */
   i = gt_style_find_section_for_getting(sty, section);
   /* could not get section, return default */
@@ -302,7 +302,7 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
                      GtStr *str)
 {
   int i = 0;
-  assert(sty && section && key && str);
+  gt_assert(sty && section && key && str);
   i = gt_style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushstring(sty->L, gt_str_get(str));
@@ -314,7 +314,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
                     double *val, GT_UNUSED GtFeatureNode *gn)
 {
   int i = 0;
-  assert(sty && key && section && val);
+  gt_assert(sty && key && section && val);
   /* get section */
   i = gt_style_find_section_for_getting(sty, section);
   /* could not get section, return default */
@@ -352,7 +352,7 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
                     double number)
 {
   int i = 0;
-  assert(sty && section && key);
+  gt_assert(sty && section && key);
   i = gt_style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushnumber(sty->L, number);
@@ -365,7 +365,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
                        GT_UNUSED GtFeatureNode *gn)
 {
   int i = 0;
-  assert(sty && key && section);
+  gt_assert(sty && key && section);
   /* get section */
   i = gt_style_find_section_for_getting(sty, section);
   /* could not get section, return default */
@@ -390,7 +390,7 @@ void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
                      bool flag)
 {
   int i = 0;
-  assert(sty && section && key);
+  gt_assert(sty && section && key);
   i = gt_style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushboolean(sty->L, flag);
@@ -400,13 +400,13 @@ void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
 
 void gt_style_unset(GtStyle *sty, const char *section, const char *key)
 {
-  assert(sty && section && key);
+  gt_assert(sty && section && key);
   lua_getglobal(sty->L, "style");
   if (!lua_isnil(sty->L, -1)) {
-    assert(lua_istable(sty->L, -1));
+    gt_assert(lua_istable(sty->L, -1));
     lua_getfield(sty->L, -1, section);
     if (!lua_isnil(sty->L, -1)) {
-      assert(lua_istable(sty->L, -1));
+      gt_assert(lua_istable(sty->L, -1));
       lua_pushstring(sty->L, key);
       lua_pushnil(sty->L);
       lua_settable(sty->L, -3);
@@ -418,7 +418,7 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
 {
   int had_err;
   gt_error_check(err);
-  assert(sty && outstr);
+  gt_assert(sty && outstr);
   lua_getglobal(sty->L, "style");
   gt_str_append_cstr(outstr, "style = {\n");
   if (lua_istable(sty->L, -1))
@@ -436,7 +436,7 @@ int gt_style_load_str(GtStyle *sty, GtStr *instr, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(sty && instr);
+  gt_assert(sty && instr);
   if (luaL_loadbuffer(sty->L, gt_str_get(instr), gt_str_length(instr), "str") ||
       lua_pcall(sty->L, 0, 0, 0)) {
     gt_error_set(err, "cannot run style buffer: %s",
@@ -451,7 +451,7 @@ GtStyle* gt_style_clone(const GtStyle *sty, GtError *err)
   int had_err = 0;
   GtStr *sty_buffer = gt_str_new();
   GtStyle *new_sty;
-  assert(sty);
+  gt_assert(sty);
   if (!(new_sty = gt_style_new(err)))
     had_err = -1;
   if (!had_err)

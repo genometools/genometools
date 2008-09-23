@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <math.h>
 #include <stdlib.h>
 #include "core/mathsupport.h"
@@ -47,18 +47,18 @@ bool gt_double_equals_double(double d1, double d2)
 unsigned long gt_rand_max(unsigned long maximal_value)
 {
   unsigned long r;
-  assert(maximal_value);
+  gt_assert(maximal_value);
   r = ((double) random() / ((double) RAND_MAX + 1) * (maximal_value + 1));
-  assert(r <= maximal_value);
+  gt_assert(r <= maximal_value);
   return r;
 }
 
 double gt_rand_max_double(double maximal_value)
 {
   double r;
-  assert(maximal_value);
+  gt_assert(maximal_value);
   r = ((double) random() / RAND_MAX) * maximal_value; /* XXX */
-  assert(r >= 0.0 && r <= maximal_value);
+  gt_assert(r >= 0.0 && r <= maximal_value);
   return r;
 }
 
@@ -66,7 +66,7 @@ double gt_rand_0_to_1(void)
 {
   double r;
   r = (double) random() / RAND_MAX;
-  assert(r >= 0.0 && r <= 1.0);
+  gt_assert(r >= 0.0 && r <= 1.0);
   return r;
 }
 
@@ -76,6 +76,6 @@ char gt_rand_char(void)
   char c;
   offset = gt_rand_max(25);
   c = 97 + offset;
-  assert(c >= 'a' && c <= 'z');
+  gt_assert(c >= 'a' && c <= 'z');
   return c;
 }

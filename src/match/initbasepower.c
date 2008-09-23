@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 

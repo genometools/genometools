@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/node_stream_rep.h"
 #include "extended/add_introns_stream.h"
 #include "extended/add_introns_visitor.h"
@@ -64,7 +64,7 @@ GtNodeStream* gt_add_introns_stream_new(GtNodeStream *in_stream)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_add_introns_stream_class(), true);
   GtAddIntronsStream *ais = gt_add_introns_stream_cast(gs);
-  assert(in_stream);
+  gt_assert(in_stream);
   ais->in_stream = gt_node_stream_ref(in_stream);
   ais->add_introns_visitor = gt_add_introns_visitor_new();
   return gs;

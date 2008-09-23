@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/strand.h"
 
@@ -34,10 +34,10 @@ GtStrand gt_strand_join(GtStrand strand_a, GtStrand strand_b)
 {
   switch (strand_b) {
     case GT_STRAND_FORWARD:
-      assert(strand_a != GT_STRAND_REVERSE);
+      gt_assert(strand_a != GT_STRAND_REVERSE);
       return GT_STRAND_FORWARD;
     case GT_STRAND_REVERSE:
-      assert(strand_a != GT_STRAND_FORWARD);
+      gt_assert(strand_a != GT_STRAND_FORWARD);
       return GT_STRAND_REVERSE;
     case GT_STRAND_BOTH:
     case GT_STRAND_UNKNOWN:
@@ -46,7 +46,7 @@ GtStrand gt_strand_join(GtStrand strand_a, GtStrand strand_b)
       /* strand_a == GT_STRAND_UNKNOWN -> stays the same */
       if (strand_a == GT_STRAND_BOTH)
         return GT_STRAND_UNKNOWN;
-    default: assert(0);
+    default: gt_assert(0);
   }
   return strand_a;
 }

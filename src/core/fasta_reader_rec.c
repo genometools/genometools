@@ -35,9 +35,9 @@ static int parse_fasta_description(GtStr *description, GtIO *seqio,
   int rval;
   char cc;
   gt_error_check(err);
-  assert(description && seqio);
+  gt_assert(description && seqio);
   rval = gt_io_get_char(seqio, &cc);
-  assert(!rval); /* was checked earlier */
+  gt_assert(!rval); /* was checked earlier */
   /* make sure we got a proper fasta description */
   if (cc != FASTA_SEPARATOR) {
     gt_error_set(err, "the first character of fasta file \"%s\" has to be '%c'",
@@ -54,8 +54,8 @@ static int parse_fasta_sequence(GtStr *sequence, GtIO *seqio, GtError *err)
 {
   char cc;
   gt_error_check(err);
-  assert(sequence && seqio);
-  assert(!gt_str_length(sequence));
+  gt_assert(sequence && seqio);
+  gt_assert(!gt_str_length(sequence));
   /* read sequence */
   while (!gt_io_get_char(seqio, &cc) && cc != FASTA_SEPARATOR) {
     if (cc != '\n' && cc != ' ')
@@ -76,7 +76,7 @@ static int parse_fasta_entry(GtStr *description, GtStr *sequence,
 {
   int had_err;
   gt_error_check(err);
-  assert(description && sequence && seqio);
+  gt_assert(description && sequence && seqio);
   had_err = parse_fasta_description(description, seqio, err);
   if (!had_err)
     had_err = parse_fasta_sequence(sequence, seqio, err);
@@ -98,7 +98,7 @@ static int gt_fasta_reader_rec_run(GtFastaReader *fasta_reader,
   gt_error_check(err);
 
   /* at least one function has to be defined */
-  assert(proc_description || proc_sequence_part || proc_sequence_length);
+  gt_assert(proc_description || proc_sequence_part || proc_sequence_length);
 
   /* init */
   description = gt_str_new();

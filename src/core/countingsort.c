@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/countingsort.h"
 #include "core/ensure.h"
@@ -28,7 +28,7 @@ void gt_countingsort(void *out, const void *in, size_t elem_size,
                      void *data, GetElemvalue get_elemvalue)
 {
   unsigned long i, k, *c;
-  assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
+  gt_assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
 
   /* allocate count array */
   c = gt_calloc(sizeof (unsigned long), max_elemvalue + 1);
@@ -36,7 +36,7 @@ void gt_countingsort(void *out, const void *in, size_t elem_size,
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
     k = get_elemvalue((const char*) in + elem_size * i, data);
-    assert(k <= max_elemvalue);
+    gt_assert(k <= max_elemvalue);
     c[k]++;
   }
 
@@ -70,7 +70,7 @@ unsigned long gt_countingsort_get_max(const void *in, size_t elem_size,
 
 static unsigned long get_int(const void *elem, GT_UNUSED void *data)
 {
-  assert(elem);
+  gt_assert(elem);
   return *(unsigned int*) elem;
 }
 

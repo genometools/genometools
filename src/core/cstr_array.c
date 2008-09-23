@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/cstr.h"
 #include "core/cstr_array.h"
@@ -26,7 +26,7 @@ char** gt_cstr_array_dup(const char **gt_cstr_array)
 {
   unsigned long i, size = 0;
   char **copy;
-  assert(gt_cstr_array);
+  gt_assert(gt_cstr_array);
   while (gt_cstr_array[size++]);
   copy = gt_malloc(size * sizeof *copy);
   for (i = 0; i < size - 1; i++)
@@ -39,7 +39,7 @@ char** gt_cstr_array_prefix_first(const char **gt_cstr_array, const char *p)
 {
   unsigned long i, a_len, f_len;
   char **a;
-  assert(gt_cstr_array && p);
+  gt_assert(gt_cstr_array && p);
   a_len = gt_cstr_array_size(gt_cstr_array);
   a = gt_malloc(sizeof (char*) * (a_len + 1));
   f_len = strlen(p) + strlen(gt_cstr_array[0]) + 2; /* blank + '\0' */
@@ -55,7 +55,7 @@ char** gt_cstr_array_preprend(const char **gt_cstr_array, const char *p)
 {
   unsigned long i, a_len;
   char **a;
-  assert(gt_cstr_array && p);
+  gt_assert(gt_cstr_array && p);
   a_len = gt_cstr_array_size(gt_cstr_array);
   a = gt_malloc(sizeof (char*) * (a_len + 2));
   a[0] = gt_cstr_dup(p);

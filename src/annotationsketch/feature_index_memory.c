@@ -65,7 +65,7 @@ void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
   GtFeatureIndexMemory *fi;
   fi = gt_feature_index_memory_cast(gfi);
   RegionInfo *info;
-  assert(fi && rn);
+  gt_assert(fi && rn);
   seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn));
   if (!gt_hashmap_get(fi->regions, seqid)) {
     info = gt_malloc(sizeof (RegionInfo));
@@ -89,7 +89,7 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   GtRange node_range;
   RegionInfo *info;
 
-  assert(gfi && gf);
+  gt_assert(gfi && gf);
 
   fi = gt_feature_index_memory_cast(gfi);
   gn = gt_genome_node_rec_ref((GtGenomeNode*) gf);
@@ -139,7 +139,7 @@ GtArray* gt_feature_index_memory_get_features_for_seqid(GtFeatureIndex *gfi,
   int had_err = 0;
   GtArray *a;
   GtFeatureIndexMemory *fi;
-  assert(gfi && seqid);
+  gt_assert(gfi && seqid);
   fi = gt_feature_index_memory_cast(gfi);
   a = gt_array_new(sizeof (GtFeatureNode*));
   ri = (RegionInfo*) gt_hashmap_get(fi->regions, seqid);
@@ -147,7 +147,7 @@ GtArray* gt_feature_index_memory_get_features_for_seqid(GtFeatureIndex *gfi,
     had_err = gt_interval_tree_traverse(ri->features,
                                      collect_features_from_itree,
                                      a);
-  assert(!had_err);   /* collect_features_from_itree() is sane */
+  gt_assert(!had_err);   /* collect_features_from_itree() is sane */
   return a;
 }
 
@@ -168,7 +168,7 @@ int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
   RegionInfo *ri;
   GtFeatureIndexMemory *fi;
   gt_error_check(err);
-  assert(gfi && results);
+  gt_assert(gfi && results);
 
   fi = gt_feature_index_memory_cast(gfi);
   ri = (RegionInfo*) gt_hashmap_get(fi->regions, seqid);
@@ -185,7 +185,7 @@ int gt_feature_index_memory_get_features_for_range(GtFeatureIndex *gfi,
 const char* gt_feature_index_memory_get_first_seqid(const GtFeatureIndex *gfi)
 {
   GtFeatureIndexMemory *fi;
-  assert(gfi);
+  gt_assert(gfi);
 
   fi = gt_feature_index_memory_cast((GtFeatureIndex*) gfi);
   return fi->firstseqid;
@@ -196,7 +196,7 @@ static int store_seqid(void *key, GT_UNUSED void *value, void *data,
 {
   GtStrArray *seqids = (GtStrArray*) data;
   const char *seqid = (const char*) key;
-  assert(seqids && seqid);
+  gt_assert(seqids && seqid);
   gt_strarray_add_cstr(seqids, seqid);
   return 0;
 }
@@ -206,13 +206,13 @@ GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi)
   GtStrArray* seqids;
   int rval;
   GtFeatureIndexMemory *fi;
-  assert(gfi);
+  gt_assert(gfi);
 
   fi = gt_feature_index_memory_cast((GtFeatureIndex*) gfi);
   seqids = gt_strarray_new();
   rval = gt_hashmap_foreach_in_key_order(fi->regions, store_seqid, seqids,
                                          NULL);
-  assert(!rval); /* store_seqid() is sane */
+  gt_assert(!rval); /* store_seqid() is sane */
   return seqids;
 }
 
@@ -222,10 +222,10 @@ void gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
 {
   RegionInfo *info;
   GtFeatureIndexMemory *fi;
-  assert(gfi && range && seqid);
+  gt_assert(gfi && range && seqid);
   fi = gt_feature_index_memory_cast(gfi);
   info = (RegionInfo*) gt_hashmap_get(fi->regions, seqid);
-  assert(info);
+  gt_assert(info);
 
   if (info->dyn_range.start != ~0UL && info->dyn_range.end != 0) {
     range->start = info->dyn_range.start;
@@ -239,7 +239,7 @@ bool gt_feature_index_memory_has_seqid(const GtFeatureIndex *gfi,
                                        const char *seqid)
 {
   GtFeatureIndexMemory *fi;
-  assert(gfi);
+  gt_assert(gfi);
 
   fi = gt_feature_index_memory_cast((GtFeatureIndex*) gfi);
   return (gt_hashmap_get(fi->regions, seqid));

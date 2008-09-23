@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <ctype.h>
 #include <string.h>
 #include "core/log.h"
@@ -30,8 +30,8 @@ static char* mutate_description(const char *description, unsigned int rate)
   unsigned long mutated_description_len;
   char *mutated_description;
   int rval;
-  assert(description);
-  assert(rate <= 100);
+  gt_assert(description);
+  gt_assert(rate <= 100);
   mutated_description_len = strlen(description) + strlen(MUTATED_DESC_PRIMER)
                             + 3  /* for the rate */
                             + 1  /* terminal ']' */
@@ -39,7 +39,7 @@ static char* mutate_description(const char *description, unsigned int rate)
   mutated_description = gt_malloc(sizeof (char) * mutated_description_len);
   rval = snprintf(mutated_description, mutated_description_len, "%s%s%u]",
                   description, MUTATED_DESC_PRIMER, rate);
-  assert(rval < mutated_description_len);
+  gt_assert(rval < mutated_description_len);
   return mutated_description;
 }
 
@@ -61,8 +61,8 @@ static char* mutate_seq(const char *seq, unsigned long len, GtAlpha *alpha,
   double rand_prob, mutate_prob;
   char *mutated_seq;
   bool was_upper;
-  assert(seq && alpha);
-  assert(rate <= 100);
+  gt_assert(seq && alpha);
+  gt_assert(rate <= 100);
   mutate_prob = (double) rate / 100.0;
   allocated = len * 2; /* XXX: possibly reduce this memory consumption */
   mutated_seq = gt_malloc(sizeof (char) * allocated);
@@ -107,8 +107,8 @@ GtSeq* gt_mutate_seq(const char *description, const char *orig_seq,
 {
   char *mutated_description, *mutated_seq;
   GtSeq *seq;
-  assert(description && orig_seq && alpha);
-  assert(rate <= 100);
+  gt_assert(description && orig_seq && alpha);
+  gt_assert(rate <= 100);
   mutated_description = mutate_description(description, rate);
   mutated_seq = mutate_seq(orig_seq, len, alpha, rate);
   seq = gt_seq_new_own(mutated_seq, strlen(mutated_seq), alpha);

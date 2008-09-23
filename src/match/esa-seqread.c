@@ -118,7 +118,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
-  assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
+  gt_assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
   if (((seqactype == SEQ_mappedboth)
          ? mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
                                                &totallength,
@@ -239,7 +239,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
 
       if (ssar->seqactype == SEQ_mappedboth)
       {
-        assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
+        gt_assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
                ssar->nextlcptabindex-1);
         *currentlcp = ssar->suffixarray->llvtab[ssar->largelcpindex++].value;
       } else
@@ -303,14 +303,14 @@ Readmode readmodeSequentialsuffixarrayreader(
 const Alphabet *alphabetSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr)
 {
-  assert(sarr->suffixarray != NULL);
+  gt_assert(sarr->suffixarray != NULL);
   return sarr->suffixarray->alpha;
 }
 
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
                     const Sequentialsuffixarrayreader *sarr)
 {
-  assert(sarr->suffixarray != NULL);
+  gt_assert(sarr->suffixarray != NULL);
   return sarr->suffixarray->numofdbsequences;
 }
 

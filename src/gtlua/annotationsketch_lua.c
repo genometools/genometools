@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/diagram_lua.h"
 #include "gtlua/feature_index_lua.h"
@@ -26,7 +26,7 @@
 
 int gt_lua_open_annotationsketch(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   gt_lua_open_canvas(L);
   gt_lua_open_diagram(L);
   gt_lua_open_feature_index(L);

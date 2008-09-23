@@ -44,7 +44,7 @@ createEncIdxSeq(const GtStr *projectName,
   Suffixarray suffixArray;
   struct encIdxSeq *newSeqIdx;
   Seqpos length;
-  assert(projectName);
+  gt_assert(projectName);
   /* map and interpret index project file */
   if (streamsuffixarray(&suffixArray, &length,
                        SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, err))
@@ -74,7 +74,7 @@ createEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
 {
   struct encIdxSeq *newSeqIdx;
   SuffixarrayFileInterface sai;
-  assert(sa && projectName && err);
+  gt_assert(sa && projectName && err);
   initSuffixarrayFileInterface(&sai, totalLen, sa);
   newSeqIdx = createEncIdxSeqFromSAI(
     &sai, projectName, params, numExtHeaders, headerIDs,
@@ -96,7 +96,7 @@ createEncIdxSeqFromSAI(SuffixarrayFileInterface *sai,
                        varExtBitsEstimator biVarBits, void *cbState,
                        GtError *err)
 {
-  assert(sai && projectName && err);
+  gt_assert(sai && projectName && err);
   return createEncIdxSeqFromSASeqSrc(
     SAI2SASS(sai), projectName, params,
     numExtHeaders, headerIDs, extHeaderSizes,
@@ -116,7 +116,7 @@ createEncIdxSeqFromSfxI(sfxInterface *sfxi,
                         varExtBitsEstimator biVarBits, void *cbState,
                         GtError *err)
 {
-  assert(sfxi && projectName && err);
+  gt_assert(sfxi && projectName && err);
   return createEncIdxSeqFromSASeqSrc(
     SfxI2SASS(sfxi), projectName, params,
     numExtHeaders, headerIDs, extHeaderSizes,
@@ -191,7 +191,7 @@ loadEncIdxSeqForSA(const Suffixarray *sa, Seqpos totalLen,
 {
   MRAEnc *alphabet;
   EISeq *seqIdx = NULL;
-  assert(sa);
+  gt_assert(sa);
   alphabet = SANewMRAEnc(sa);
   switch (encType)
   {

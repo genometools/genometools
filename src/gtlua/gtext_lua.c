@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "gtlua/cds_stream_lua.h"
 #include "gtlua/csa_stream_lua.h"
 #include "gtlua/genome_node_lua.h"
@@ -28,7 +28,7 @@
 
 int gt_lua_open_extended(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   gt_lua_open_cds_stream(L);
   gt_lua_open_csa_stream(L);
   gt_lua_open_genome_node(L);

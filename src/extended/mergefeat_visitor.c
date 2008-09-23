@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/hashmap.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
@@ -35,7 +35,7 @@ struct GtMergefeatVisitor {
 static void mergefeat_visitor_free(GtNodeVisitor *gv)
 {
   GtMergefeatVisitor *mergefeat_visitor = gt_mergefeat_visitor_cast(gv);
-  assert(mergefeat_visitor);
+  gt_assert(mergefeat_visitor);
   gt_hashmap_delete(mergefeat_visitor->hm);
   gt_array_delete(mergefeat_visitor->nodes_to_remove);
 }
@@ -48,22 +48,23 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
   GtRange previous_range, current_range;
   gt_error_check(err);
   current_feature = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(current_feature);
+  gt_assert(current_feature);
   if ((previous_feature =
         gt_hashmap_get(v->hm, gt_feature_node_get_type(current_feature)))) {
     /* previous feature found -> check if merging is necessary */
-    assert(gt_feature_node_get_type(previous_feature) ==
+    gt_assert(gt_feature_node_get_type(previous_feature) ==
            gt_feature_node_get_type(current_feature));
     previous_range = gt_genome_node_get_range((GtGenomeNode*)
                                               previous_feature);
     current_range = gt_genome_node_get_range((GtGenomeNode*) current_feature);
-    assert(gt_range_compare(previous_range, current_range) <= 0); /* sorted */
+    /* sorted */
+    gt_assert(gt_range_compare(previous_range, current_range) <= 0);
     if (previous_range.end + 1 == current_range.start) {
       /* merge nodes */
       gt_feature_node_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
       gt_feature_node_unset_score(previous_feature);
-      assert(!gt_genome_node_number_of_children((GtGenomeNode*)
+      gt_assert(!gt_genome_node_number_of_children((GtGenomeNode*)
                                                 current_feature));
       gt_array_add(v->nodes_to_remove, current_feature);
     }
@@ -82,7 +83,7 @@ static int mergefeat_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   GtFeatureNode *gf;
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf);
+  gt_assert(gf);
   v->current_tree = gn;
   gt_hashmap_reset(v->hm);
   return gt_genome_node_traverse_direct_children(gn, v, mergefeat_in_children,

@@ -42,11 +42,11 @@ void gt_splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
                     const char *original_sequence)
 {
   unsigned long i;
-  assert(ss && start <= end && original_sequence);
+  gt_assert(ss && start <= end && original_sequence);
   gt_str_append_cstr_nt(ss->splicedseq, original_sequence + start,
                         end - start + 1);
   /* make sure elemnts are added in ascending order */
-  assert(!gt_array_size(ss->positionmapping) ||
+  gt_assert(!gt_array_size(ss->positionmapping) ||
          start > *(unsigned long*) gt_array_get_last(ss->positionmapping));
   for (i = start; i <= end; i++)
     gt_array_add(ss->positionmapping, i);
@@ -59,9 +59,9 @@ char* gt_splicedseq_get(const Splicedseq *ss)
 
 bool gt_splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss &&
+  gt_assert(ss &&
          gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
-  assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
+  gt_assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
   if (ss->forward && pos + 1 < gt_array_size(ss->positionmapping) &&
       *(unsigned long*) gt_array_get(ss->positionmapping, pos) + 1 !=
       *(unsigned long*) gt_array_get(ss->positionmapping, pos+1)) {
@@ -77,15 +77,15 @@ bool gt_splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 
 unsigned long gt_splicedseq_map(const Splicedseq *ss, unsigned long pos)
 {
-  assert(ss &&
+  gt_assert(ss &&
          gt_str_length(ss->splicedseq) == gt_array_size(ss->positionmapping));
-  assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
+  gt_assert(pos < gt_str_length(ss->splicedseq)); /* legal position */
   return *(unsigned long*) gt_array_get(ss->positionmapping, pos);
 }
 
 unsigned long gt_splicedseq_length(const Splicedseq *ss)
 {
-  assert(ss);
+  gt_assert(ss);
   return gt_str_length(ss->splicedseq);
 }
 
@@ -93,7 +93,7 @@ int gt_splicedseq_reverse(Splicedseq *ss, GtError *err)
 {
   int had_err;
   gt_error_check(err);
-  assert(ss);
+  gt_assert(ss);
   had_err = gt_reverse_complement(gt_str_get(ss->splicedseq),
                                gt_str_length(ss->splicedseq), err);
   if (!had_err) {
@@ -105,7 +105,7 @@ int gt_splicedseq_reverse(Splicedseq *ss, GtError *err)
 
 void gt_splicedseq_reset(Splicedseq *ss)
 {
-  assert(ss);
+  gt_assert(ss);
   gt_str_reset(ss->splicedseq);
   gt_array_reset(ss->positionmapping);
   ss->forward = true;

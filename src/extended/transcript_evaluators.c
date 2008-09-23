@@ -39,35 +39,35 @@ GtTranscriptEvaluators* gt_transcript_evaluators_new(void)
 
 GtEvaluator* gt_transcript_evaluators_get_all(const GtTranscriptEvaluators *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_evaluator_all;
 }
 
 GtEvaluator* gt_transcript_evaluators_get_single(const GtTranscriptEvaluators
                                                  *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_evaluator_single;
 }
 
 GtEvaluator* gt_transcript_evaluators_get_initial(const GtTranscriptEvaluators
                                                   *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_evaluator_initial;
 }
 
 GtEvaluator* gt_transcript_evaluators_get_internal(const GtTranscriptEvaluators
                                                    *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_evaluator_internal;
 }
 
 GtEvaluator* gt_transcript_evaluators_get_terminal(const GtTranscriptEvaluators
                                                    *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_evaluator_terminal;
 }
 
@@ -75,7 +75,7 @@ void gt_transcript_evaluators_add_actuals(const GtTranscriptEvaluators
                                                                 *evaluators,
                                           const GtTranscriptExons *exons)
 {
-  assert(evaluators && exons);
+  gt_assert(evaluators && exons);
   gt_evaluator_add_actual(evaluators->exon_evaluator_all,
                        gt_array_size(gt_transcript_exons_get_all(exons)));
   gt_evaluator_add_actual(evaluators->exon_evaluator_single,

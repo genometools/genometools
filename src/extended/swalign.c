@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include "core/array2dim.h"
 #include "core/minmax.h"
@@ -39,7 +39,7 @@ static void fillDPtable(DPentry **dptable,
 {
   unsigned long i, j;
   long maxscore, repscore, delscore, insscore, overall_maxscore = LONG_MIN;
-  assert(dptable && u && ulen && v && vlen && max_coordinate);
+  gt_assert(dptable && u && ulen && v && vlen && max_coordinate);
   for (j = 1; j <= vlen; j++) {
     for (i = 1; i <= ulen; i++) {
       repscore = dptable[i-1][j-1].score + scores[(int) u[i-1]][(int) v[j-1]];
@@ -63,9 +63,9 @@ static Coordinate traceback(GtAlignment *a, DPentry **dptable,
                             unsigned long i, unsigned long j)
 {
   Coordinate start_coordinate = { UNDEF_ULONG, UNDEF_ULONG };
-  assert(a && dptable);
+  gt_assert(a && dptable);
   while (dptable[i][j].score) {
-    assert(dptable[i][j].score > 0);
+    gt_assert(dptable[i][j].score > 0);
     start_coordinate.x = i;
     start_coordinate.y = j;
     if (dptable[i][j].max_replacement) {
@@ -82,8 +82,8 @@ static Coordinate traceback(GtAlignment *a, DPentry **dptable,
       j--;
     }
   }
-  assert(start_coordinate.x != UNDEF_ULONG);
-  assert(start_coordinate.y != UNDEF_ULONG);
+  gt_assert(start_coordinate.x != UNDEF_ULONG);
+  gt_assert(start_coordinate.y != UNDEF_ULONG);
   return start_coordinate;
 }
 
@@ -93,15 +93,15 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
                                        const int **scores,
                                        int deletion_score, int insertion_score)
 {
-  assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores);
+  gt_assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores);
   Coordinate alignment_start, alignment_end = { UNDEF_ULONG, UNDEF_ULONG };
   DPentry **dptable;
   GtAlignment *a = NULL;
   gt_array2dim_calloc(dptable, u_len+1, v_len+1);
   fillDPtable(dptable, u_enc, u_len, v_enc, v_len, scores, deletion_score,
               insertion_score, &alignment_end);
-  assert(alignment_end.x != UNDEF_ULONG);
-  assert(alignment_end.y != UNDEF_ULONG);
+  gt_assert(alignment_end.x != UNDEF_ULONG);
+  gt_assert(alignment_end.y != UNDEF_ULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {
     /* construct only an alignment if a (positive) score was computed */
     a = gt_alignment_new();
@@ -124,7 +124,7 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
 
 GtAlignment* gt_swalign(GtSeq *u, GtSeq *v, const GT_ScoreFunction *sf)
 {
-  assert(u && v && sf);
+  gt_assert(u && v && sf);
   return smith_waterman_align(gt_seq_get_orig(u), gt_seq_get_orig(v),
                               gt_seq_get_encoded(u), gt_seq_get_encoded(v),
                               gt_seq_length(u), gt_seq_length(v),

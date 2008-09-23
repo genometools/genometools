@@ -34,44 +34,44 @@ GtRecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
 
 double gt_recmap_get_northwest_x(const GtRecMap *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   return rm->nw_x;
 }
 
 double gt_recmap_get_northwest_y(const GtRecMap *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   return rm->nw_y;
 }
 
 double gt_recmap_get_southeast_x(const GtRecMap *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   return rm->se_x;
 }
 
 double gt_recmap_get_southeast_y(const GtRecMap *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   return rm->se_y;
 }
 
 const GtFeatureNode* gt_recmap_get_genome_feature(const GtRecMap *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   return rm->gf;
 }
 
 bool gt_recmap_has_omitted_children(const GtRecMap *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   return rm->has_omitted_children;
 }
 
 int gt_recmap_format_html_imagemap_coords(const GtRecMap *rm, char *buf,
                                           size_t n)
 {
-  assert(rm && buf);
+  gt_assert(rm && buf);
   return snprintf(buf, n, "%.0f,%.0f,%.0f,%.0f", rm->nw_x, rm->nw_y,
                                                  rm->se_x, rm->se_y);
 }

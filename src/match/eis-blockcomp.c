@@ -24,7 +24,7 @@
  * - normalize use  of  seqIdx variable naming (seq, bseq etc.)
  */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stddef.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -130,7 +130,7 @@ static const struct encIdxSeqClass blockCompositionSeqClass;
 static inline struct blockCompositionSeq *
 encIdxSeq2blockCompositionSeq(struct encIdxSeq *seq)
 {
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   return (struct blockCompositionSeq *)((char *)seq
     - offsetof(struct blockCompositionSeq, baseClass));
 }
@@ -138,14 +138,14 @@ encIdxSeq2blockCompositionSeq(struct encIdxSeq *seq)
 static inline struct encIdxSeq *
 blockCompositionSeq2encIdxSeq(struct blockCompositionSeq *seq)
 {
-  assert(seq);
+  gt_assert(seq);
   return &(seq->baseClass);
 }
 
 static inline const struct blockCompositionSeq *
 constEncIdxSeq2blockCompositionSeq(const struct encIdxSeq *seq)
 {
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   return (struct blockCompositionSeq *)((char *)seq
     - offsetof(struct blockCompositionSeq, baseClass));
 }
@@ -153,7 +153,7 @@ constEncIdxSeq2blockCompositionSeq(const struct encIdxSeq *seq)
 static inline const struct encIdxSeq *
 constBlockCompositionSeq2encIdxSeq(const struct blockCompositionSeq *seq)
 {
-  assert(seq);
+  gt_assert(seq);
   return &(seq->baseClass);
 }
 
@@ -341,10 +341,10 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
   struct varBitsEstimate biMaxExtSize;
   enum rangeStoreMode modes[] = { BLOCK_COMPOSITION_INCLUDE,
                                   REGIONS_LIST };
-  assert(projectName);
-  assert(params->encType == BWT_ON_BLOCK_ENC);
-  assert(blockSize > 0);
-  assert((biFunc && biVarBits) || (biFunc == NULL && biVarBits == NULL));
+  gt_assert(projectName);
+  gt_assert(params->encType == BWT_ON_BLOCK_ENC);
+  gt_assert(blockSize > 0);
+  gt_assert((biFunc && biVarBits) || (biFunc == NULL && biVarBits == NULL));
   gt_error_check(err);
 
   newSeqIdx = gt_calloc(sizeof (struct blockCompositionSeq), 1);
@@ -387,8 +387,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
     newSeqIdx->rangeMapAlphabet = rangeMapAlphabet =
       MRAEncSecondaryMapping(alphabet, REGIONS_LIST, modesCopy,
                              newSeqIdx->rangeEncFallback = 0);
-    assert(MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
-    assert(MRAEncGetSize(rangeMapAlphabet)
+    gt_assert(MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
+    gt_assert(MRAEncGetSize(rangeMapAlphabet)
            == totalAlphabetSize - blockMapAlphabetSize);
   }
   newSeqIdx->partialSymSumBits
@@ -672,7 +672,7 @@ static void
 deleteBlockEncIdxSeq(struct encIdxSeq *seq)
 {
   struct blockCompositionSeq *bseq;
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   bseq = encIdxSeq2blockCompositionSeq(seq);
   gt_free(bseq->extHeaderPos);
   gt_free(bseq->partialSymSumBits);
@@ -783,7 +783,7 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
   gt_log_log("symSumBits=%u, blockMapAlphabetSize=%u\n",
           seqIdx->symSumBits, seqIdx->blockMapAlphabetSize);
 #endif
-  assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerSeqpos
+  gt_assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerSeqpos
          == seqIdx->symSumBits);
 }
 
@@ -919,8 +919,8 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
                 struct superBlock *sBlockPreAlloc)
 {
   struct superBlock *retval = NULL;
-  assert(seqIdx);
-  assert(bucketNum * seqIdx->bucketBlocks * seqIdx->blockSize
+  gt_assert(seqIdx);
+  gt_assert(bucketNum * seqIdx->bucketBlocks * seqIdx->blockSize
          <= seqIdx->baseClass.seqLen);
   if (sBlockPreAlloc)
     retval = sBlockPreAlloc;
@@ -995,7 +995,7 @@ initSuperBlockSeqCache(struct seqCache *sBlockCache,
   unsigned bucketBlocks, bucketLen, blockSize;
   size_t superBlockSize;
 
-  assert(seqIdx && sBlockCache);
+  gt_assert(seqIdx && sBlockCache);
   blockSize = seqIdx->blockSize;
   bucketLen = (bucketBlocks = seqIdx->bucketBlocks) * blockSize;
   superBlockSize = superBlockMemSize(seqIdx);
@@ -1109,7 +1109,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
   Seqpos relBlockNum;
   unsigned blockSize;
   Symbol *block;
-  assert(seqIdx);
+  gt_assert(seqIdx);
   blockSize = seqIdx->blockSize;
   if (blockNum * blockSize >= EISLength(&seqIdx->baseClass))
     return NULL;
@@ -1181,9 +1181,9 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
 {
   struct blockCompositionSeq *seqIdx;
   Seqpos rankCount;
-  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
+  gt_assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
                                         eSym, BLOCK_COMPOSITION_INCLUDE,
                                         seqIdx->modes) >= 0);
   if (MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
@@ -1240,10 +1240,10 @@ blockCompSeqPosPairRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos posA,
   struct blockCompositionSeq *seqIdx;
   struct SeqposPair rankCounts;
   Seqpos bucketNum;
-  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
-  assert(posA <= posB);
+  gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  gt_assert(posA <= posB);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
+  gt_assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
                                         eSym, BLOCK_COMPOSITION_INCLUDE,
                                         seqIdx->modes) >= 0);
   /* Only when both positions are in same bucket, special treatment
@@ -1327,8 +1327,8 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
                    struct extBitsRetrieval *retval, union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
-  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
-  assert(retval);
+  gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  gt_assert(retval);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
   {
     struct superBlock *sBlock;
@@ -1418,9 +1418,9 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
                       Seqpos pos, Seqpos *rankCounts, union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
-  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
+  gt_assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
   switch (seqIdx->modes[range])
   {
   case BLOCK_COMPOSITION_INCLUDE:
@@ -1479,9 +1479,9 @@ blockCompSeqPosPairRangeRank(
   Seqpos posA, Seqpos posB, Seqpos *rankCounts, union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
-  assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
+  gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
+  gt_assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
   switch (seqIdx->modes[range])
   {
   case BLOCK_COMPOSITION_INCLUDE:
@@ -1570,7 +1570,7 @@ blockCompSeqGet(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint)
   Symbol sym;
   struct blockCompositionSeq *seqIdx;
   unsigned blockSize;
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   if (pos >= seq->seqLen)
     return ~(Symbol)0;
   seqIdx = encIdxSeq2blockCompositionSeq(seq);
@@ -1773,11 +1773,11 @@ append2IdxOutput(struct appendState *state,
                  PermCompIndex permCompIdx[2],
                  unsigned bitsOfCompositionIdx, unsigned bitsOfPermutationIdx)
 {
-  assert(state->cwMemPos + bitsOfCompositionIdx <= state->compCacheLen);
+  gt_assert(state->cwMemPos + bitsOfCompositionIdx <= state->compCacheLen);
   gt_bsStorePermCompIndex(state->compCache, state->cwMemPos,
                           bitsOfCompositionIdx, permCompIdx[0]);
   state->cwMemPos += bitsOfCompositionIdx;
-  assert(state->varMemPos + bitsOfPermutationIdx <= state->permCacheLen);
+  gt_assert(state->varMemPos + bitsOfPermutationIdx <= state->permCacheLen);
   gt_bsStorePermCompIndex(state->permCache, state->varMemPos,
                           bitsOfPermutationIdx, permCompIdx[1]);
   state->varMemPos += bitsOfPermutationIdx;
@@ -1791,7 +1791,7 @@ appendCallBackOutput(struct appendState *state,
                      GtError *err)
 {
   BitOffset bitsWritten;
-  assert(state);
+  gt_assert(state);
   if (callBackDataOffsetBits)
   {
     BitOffset offset = cwPreCBOffsetBits(seqIdx);
@@ -1821,15 +1821,15 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
 {
   size_t recordsExpected, cwBitElems;
   AlphabetRangeSize blockAlphabetSize;
-  assert(seqIdx && aState && buck);
+  gt_assert(seqIdx && aState && buck);
   /* seek2/write constant width indices */
-  assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
+  gt_assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
          < seqIdx->externalData.varDataPos
          + aState->varDiskOffset/bitElemBits * sizeof (BitElem));
   blockAlphabetSize = seqIdx->blockMapAlphabetSize;
   /* put bucket data for count up to the beginning of the current
    * block into the cw BitString */
-  assert(sizeof (Seqpos) * CHAR_BIT >= seqIdx->bitsPerSeqpos);
+  gt_assert(sizeof (Seqpos) * CHAR_BIT >= seqIdx->bitsPerSeqpos);
   {
     Symbol i;
     for (i = 0; i < blockAlphabetSize; ++i)
@@ -1979,7 +1979,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   size_t i, bufLen;
   off_t offset, len;
   char *buf;
-  assert(seqIdx && err);
+  gt_assert(seqIdx && err);
   fp = seqIdx->externalData.idxFP;
   bufLen = blockEncIdxSeqHeaderLength(seqIdx, 0, NULL);
   buf = gt_malloc(bufLen);
@@ -2040,7 +2040,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     *(uint64_t *)(buf + offset + 4) = seqIdx->maxVarExtBitsPerBucket;
     offset += 12;
   }
-  assert(offset == bufLen);
+  gt_assert(offset == bufLen);
   if (fseeko(fp, 0, SEEK_SET))
     writeIdxHeaderErrRet(0);
   if (fwrite(buf, bufLen, 1, fp) != 1)
@@ -2070,9 +2070,9 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     }
     offset = offsetTargetValue + EXT_HEADER_PREFIX_SIZE
       + extHeaderSizes[numExtHeaders - 1];
-    assert(offset >= ftello(fp));
+    gt_assert(offset >= ftello(fp));
   }
-  assert(seqIdx->externalData.cwDataPos == len);
+  gt_assert(seqIdx->externalData.cwDataPos == len);
   gt_free(buf);
   return len;
 }
@@ -2107,7 +2107,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
   size_t headerLen;
   int *modesCopy = NULL;
   char *buf = NULL;
-  assert(projectName && err);
+  gt_assert(projectName && err);
   newSeqIdx = gt_calloc(sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->baseClass.seqLen = totalLen;
   newSeqIdx->baseClass.alphabet = alphabet;
@@ -2247,7 +2247,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
         }
       }
     }
-    assert(newSeqIdx->modes
+    gt_assert(newSeqIdx->modes
            && newSeqIdx->bucketBlocks
            && newSeqIdx->numModes
            && offset == headerLen);
@@ -2290,7 +2290,7 @@ loadBlockEncIdxSeqGen(MRAEnc *alphabet, Seqpos totalLen,
       MRAEncSecondaryMapping(alphabet, REGIONS_LIST, modesCopy,
                              newSeqIdx->rangeEncFallback);
     newSeqIdx->blockMapAlphabetSize = blockMapAlphabetSize;
-    assert(MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
+    gt_assert(MRAEncGetSize(blockMapAlphabet) == blockMapAlphabetSize);
   }
   if (!newSeqIdx->partialSymSumBits && blockMapAlphabetSize)
   {
@@ -2333,7 +2333,7 @@ static inline int
 tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
 {
   size_t len = idxData->rangeEncPos - idxData->cwDataPos;
-  assert(idxData && idxData->idxFP && idxData->idxMMap == NULL);
+  gt_assert(idxData && idxData->idxFP && idxData->idxMMap == NULL);
   idxData->idxMMap = gt_fa_mmap_generic_fd(fileno(idxData->idxFP), len,
                                            idxData->cwDataPos, false, false);
   return idxData->idxMMap != NULL;
@@ -2346,7 +2346,7 @@ seekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
   const struct blockCompositionSeq *bSeqIdx;
   size_t i;
   uint32_t query = headerID | EH_HEADER_PREFIX;
-  assert(seqIdx);
+  gt_assert(seqIdx);
   bSeqIdx =
     constEncIdxSeq2blockCompositionSeq(seqIdx);
   for (i = 0; i < bSeqIdx->numExtHeaders; ++i)
@@ -2384,11 +2384,11 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
 {
   off_t rangeEncPos;
   size_t recordsExpected;
-  assert(aState && seqIdx);
-  assert(aState->cwMemOldBits < bitElemBits
+  gt_assert(aState && seqIdx);
+  gt_assert(aState->cwMemOldBits < bitElemBits
          && aState->cwMemOldBits + cwPreCompIdxBits(seqIdx)
          == aState->cwMemPos);
-  assert(aState->varMemOldBits < bitElemBits
+  gt_assert(aState->varMemOldBits < bitElemBits
          && aState->varMemOldBits == aState->varMemPos);
   if (aState->cwMemOldBits)
   {
@@ -2442,7 +2442,7 @@ addRangeEncodedSyms(struct seqRangeList *rangeList, const Symbol *block,
   unsigned i;
   for (i = 0; i < blockSize; ++i)
   {
-    assert(MRAEncSymbolIsInSelectedRanges(alphabet, block[i],
+    gt_assert(MRAEncSymbolIsInSelectedRanges(alphabet, block[i],
                                           selection, rangeSel) >= 0);
     if (MRAEncSymbolIsInSelectedRanges(alphabet, block[i], selection, rangeSel))
       SRLAddPosition(rangeList, blockNum * blockSize + i, block[i]);
@@ -2454,7 +2454,7 @@ newBlockCompSeqHint(const struct encIdxSeq *seq)
 {
   union EISHint *hintret;
   const struct blockCompositionSeq *seqIdx;
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   hintret = gt_malloc(sizeof (union EISHint));
   SRLInitListSearchHint(seqIdx->rangeEncs, &hintret->bcHint.rangeHint);
@@ -2467,7 +2467,7 @@ static void
 deleteBlockCompSeqHint(struct encIdxSeq *seq, union EISHint *hint)
 {
   struct blockCompositionSeq *seqIdx;
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(seq);
   destructSuperBlockSeqCache(&hint->bcHint.sBlockCache);
   gt_free(hint);
@@ -2499,7 +2499,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
     start, end;
   AlphabetRangeSize i, blockMapAlphabetSize = seqIdx->blockMapAlphabetSize;
   int outCount = 0;
-  assert(seqIdx && fp && hint);
+  gt_assert(seqIdx && fp && hint);
   if (bucketBasePos(seqIdx, bucketNum) >= EISLength(&seqIdx->baseClass))
   {
     gt_log_log("warning: querying bucket "FormatSeqpos
@@ -2651,7 +2651,7 @@ printBlockEncPosDiags(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
   const struct blockCompositionSeq *seqIdx;
   int outCount = 0;
   Seqpos bucketNum;
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   bucketNum = bucketNumFromPos(seqIdx, pos);
   fputs("##################################################\n"
@@ -2681,7 +2681,7 @@ displayBlockEncBlock(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint)
   const struct blockCompositionSeq *seqIdx;
   int outCount;
   Seqpos bucketNum;
-  assert(seq && seq->classInfo == &blockCompositionSeqClass);
+  gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = constEncIdxSeq2blockCompositionSeq(seq);
   bucketNum = bucketNumFromPos(seqIdx, pos);
   outCount = printBucket(seqIdx, bucketNum, BUCKET_PRINT_BITSTRING_SEPARATOR

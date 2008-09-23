@@ -318,7 +318,7 @@ int mg_combinedscore(ParseStruct *parsestruct_ptr,
 /* Funktion zur Bestimmung der dem Leserahmen entsprechenden Matrix-Zeile */
 short get_matrix_row(long frame_fct)
 {
-  assert(frame_fct >= -3 && frame_fct <= 3);
+  gt_assert(frame_fct >= -3 && frame_fct <= 3);
   return 3 - frame_fct;         /* [-3..3] -> [6..0] */
 }
 
@@ -326,7 +326,7 @@ short get_matrix_row(long frame_fct)
    bestimmt */
 short get_current_frame(long row_fct)
 {
-  assert(row_fct >= 0 && row_fct <= 6);
+  gt_assert(row_fct >= 0 && row_fct <= 6);
   return 3 - row_fct;           /* [0..6] -> [3..-3] */
 }
 

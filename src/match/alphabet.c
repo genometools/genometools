@@ -197,7 +197,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
               ALLOCASSIGNSPACE(alpha->mapdomain,alpha->mapdomain,Uchar,
                                allocateddomainsize);
             }
-            assert(alpha->mapdomain != NULL);
+            gt_assert(alpha->mapdomain != NULL);
             alpha->mapdomain[alpha->domainsize++] = (Uchar) cc;
           } else
           {
@@ -277,7 +277,7 @@ static int readsymbolmap(Alphabet *alpha,const GtStr *mapfile,GtError *err)
 
   gt_error_check(err);
   lines = gt_strarray_new_file(gt_str_get(mapfile));
-  assert(lines != NULL);
+  gt_assert(lines != NULL);
   if (readsymbolmapfromlines(alpha,mapfile,lines,err) != 0)
   {
     haserr = true;
@@ -462,7 +462,7 @@ void freeAlphabet(Alphabet **alpha)
           GtStr *prog;
           const char *progname = gt_error_get_progname(err);
 
-          assert(progname != NULL);
+          gt_assert(progname != NULL);
           prog = gt_str_new();
           gt_str_append_cstr_nt(prog, progname,
                                 gt_cstr_length_up_to_char(progname, ' '));
@@ -637,7 +637,7 @@ void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
         (void) fprintf(fpout,">\n");
       } else
       {
-        assert((unsigned int) currentchar < alpha->mapsize-1);
+        gt_assert((unsigned int) currentchar < alpha->mapsize-1);
         (void) putc((int) alpha->characters[(int) currentchar],fpout);
       }
     }
@@ -646,7 +646,7 @@ void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
 
 Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar)
 {
-   assert(currentchar < alpha->mapsize-1);
+   gt_assert(currentchar < alpha->mapsize-1);
    return alpha->characters[currentchar];
 }
 
@@ -739,7 +739,7 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
       cc2 = (Uchar) tolower((int) cc1);
     } else
     {
-      assert(islower((int) cc1));
+      gt_assert(islower((int) cc1));
       cc2 = (Uchar) toupper((int) cc1);
     }
     if (testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&

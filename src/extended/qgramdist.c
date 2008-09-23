@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <math.h>
 #include "core/ma.h"
 #include "extended/qgramdist.h"
@@ -28,10 +28,10 @@ unsigned long gt_calc_qgramdist(GtSeq *seq_a, GtSeq *seq_b, unsigned int q)
   const GtAlpha *gt_alpha_a, *gt_alpha_b;
   GtArray *seq_a_qgrams, *seq_b_qgrams;
 
-  assert(seq_a && seq_b);
+  gt_assert(seq_a && seq_b);
   gt_alpha_a = gt_seq_get_alpha(seq_a);
   gt_alpha_b = gt_seq_get_alpha(seq_b);
-  assert(gt_alpha_is_compatible_with_alpha(gt_alpha_a, gt_alpha_b));
+  gt_assert(gt_alpha_is_compatible_with_alpha(gt_alpha_a, gt_alpha_b));
   alphasize_to_the_power_of_q = pow(gt_alpha_size(gt_alpha_a), q);
 
   seq_a_profile = gt_calloc(alphasize_to_the_power_of_q,
@@ -44,10 +44,10 @@ unsigned long gt_calc_qgramdist(GtSeq *seq_a, GtSeq *seq_b, unsigned int q)
 
   gt_qgram_compute(seq_a_qgrams, gt_seq_get_encoded(seq_a),
                    gt_seq_length(seq_a), gt_alpha_size(gt_alpha_a), q);
-  assert(gt_array_size(seq_a_qgrams) == gt_seq_length(seq_a) - q + 1);
+  gt_assert(gt_array_size(seq_a_qgrams) == gt_seq_length(seq_a) - q + 1);
   gt_qgram_compute(seq_b_qgrams, gt_seq_get_encoded(seq_b),
                    gt_seq_length(seq_b), gt_alpha_size(gt_alpha_b), q);
-  assert(gt_array_size(seq_b_qgrams) == gt_seq_length(seq_b) - q + 1);
+  gt_assert(gt_array_size(seq_b_qgrams) == gt_seq_length(seq_b) - q + 1);
 
   for (i = 0; i < gt_array_size(seq_a_qgrams); i++)
     seq_a_profile[*(unsigned long*) gt_array_get(seq_a_qgrams, i)]++;

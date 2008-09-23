@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <ctype.h>
 #include <limits.h>
 #include <stdio.h>
@@ -118,8 +118,8 @@ static GtOption *gt_option_new(const char *option_str, const char *description,
                           void *value)
 {
   GtOption *o = gt_calloc(1, sizeof (GtOption));
-  assert(option_str && strlen(option_str));
-  assert("an option string should not start with '-', this is added "
+  gt_assert(option_str && strlen(option_str));
+  gt_assert("an option string should not start with '-', this is added "
          "automatically"  && option_str[0] != '-');
   o->option_str = gt_str_new_cstr(option_str);
   o->description = gt_str_new_cstr(description);
@@ -168,7 +168,7 @@ static GtOption* gt_option_new_version(GtShowVersionFunc versionfunc)
 
 GtOption* gt_option_ref(GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   o->reference_count++;
   return o;
 }
@@ -177,10 +177,10 @@ GtOptionParser* gt_option_parser_new(const char *synopsis,
                                      const char *one_liner)
 {
   GtOptionParser *op = gt_malloc(sizeof (GtOptionParser));
-  assert(synopsis && one_liner);
-  assert("one_liner must have upper case letter at start and '.' at end" &&
+  gt_assert(synopsis && one_liner);
+  gt_assert("one_liner must have upper case letter at start and '.' at end" &&
          strlen(one_liner) && isupper((int) one_liner[0]));
-  assert(one_liner[strlen(one_liner)-1] == '.');
+  gt_assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
   op->synopsis = gt_cstr_dup(synopsis);
   op->one_liner = gt_cstr_dup(one_liner);
@@ -198,13 +198,13 @@ GtOptionParser* gt_option_parser_new(const char *synopsis,
 
 void gt_option_parser_add_option(GtOptionParser *op, GtOption *o)
 {
-  assert(op && o);
+  gt_assert(op && o);
   gt_array_add(op->options, o);
 }
 
 void gt_option_parser_refer_to_manual(GtOptionParser *op)
 {
-  assert(op);
+  gt_assert(op);
   op->refer_to_manual = true;
 }
 
@@ -212,7 +212,7 @@ void gt_option_parser_set_comment_func(GtOptionParser *op,
                                        GtShowCommentFunc comment_func,
                                        void *data)
 {
-  assert(op);
+  gt_assert(op);
   op->comment_func = comment_func;
   op->comment_func_data = data;
 }
@@ -222,7 +222,7 @@ void gt_option_parser_register_hook(GtOptionParser *op,
                                     void *data)
 {
   HookInfo hookinfo;
-  assert(op && hook);
+  gt_assert(op && hook);
   if (!op->hooks)
     op->hooks = gt_array_new(sizeof (HookInfo));
   hookinfo.hook = hook;
@@ -232,7 +232,7 @@ void gt_option_parser_register_hook(GtOptionParser *op,
 
 void gt_option_parser_set_mailaddress(GtOptionParser *op, const char *address)
 {
-  assert(op && address);
+  gt_assert(op && address);
   op->mailaddress = address;
 }
 
@@ -245,7 +245,7 @@ static void show_description(unsigned long initial_space, const char *desc,
   bool continue_while = false;
 
   /* got space to show option */
-  assert(initial_space < TERMINAL_WIDTH);
+  gt_assert(initial_space < TERMINAL_WIDTH);
 
   while (desc_ptr < desc + len) {
     /* break, if the rest of the description fits on one line */
@@ -273,7 +273,7 @@ static void show_description(unsigned long initial_space, const char *desc,
       continue;
     }
     /* we are at the break point now */
-    assert(*desc_ptr == ' ' || *desc_ptr == '\n');
+    gt_assert(*desc_ptr == ' ' || *desc_ptr == '\n');
     /* show newline for break point */
     desc_ptr++;
     gt_xputchar('\n');
@@ -302,7 +302,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
   GtOption *option;
   int had_err = 0;
   gt_error_check(err);
-  assert(optiontype == OPTION_HELP || optiontype == OPTION_HELPPLUS ||
+  gt_assert(optiontype == OPTION_HELP || optiontype == OPTION_HELPPLUS ||
          optiontype == OPTION_HELPDEV);
 
   /* determine maximum option length */
@@ -317,7 +317,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
     if (gt_str_length(option->option_str) > max_option_length)
       max_option_length = gt_str_length(option->option_str);
   }
-  assert(max_option_length);
+  gt_assert(max_option_length);
 
   printf("Usage: %s %s\n", op->progname, op->synopsis);
   printf("%s\n\n", op->one_liner);
@@ -416,7 +416,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
 
 static bool optional_arg(GtOption *o, int argnum, int argc, const char **argv)
 {
-  assert(o);
+  gt_assert(o);
   if (o->argument_is_optional &&
       (argnum + 1 >= argc || argv[argnum + 1][0] == '-' ||
        !strcmp(argv[argnum + 1], "--"))) {
@@ -441,7 +441,7 @@ static int check_mandatory_options(GtOptionParser *op, GtError *err)
   unsigned long i;
   GtOption *o;
   gt_error_check(err);
-  assert(op);
+  gt_assert(op);
   for (i = 0; i < gt_array_size(op->options); i++) {
     o = *(GtOption**) gt_array_get(op->options, i);
     if (o->is_mandatory && !o->is_set) {
@@ -467,7 +467,7 @@ static int check_option_implications(GtOptionParser *op, GtError *err)
     if (o->implications && o->is_set) {
       for (j = 0; j < gt_array_size(o->implications); j++) {
         implied_option_array = *(GtArray**) gt_array_get(o->implications, j);
-        assert(gt_array_size(implied_option_array));
+        gt_assert(gt_array_size(implied_option_array));
         if (gt_array_size(implied_option_array) == 1) {
           /* special case: option implies exactly one option */
           implied_option = *(GtOption**) gt_array_get(implied_option_array, 0);
@@ -568,7 +568,7 @@ static bool has_extended_option(GtArray *options)
 {
   unsigned long i;
   GtOption *option;
-  assert(options);
+  gt_assert(options);
   for (i = 0; i < gt_array_size(options); i++) {
     option = *(GtOption**) gt_array_get(options, i);
     if (option->is_extended_option)
@@ -580,14 +580,14 @@ static bool has_extended_option(GtArray *options)
 void gt_option_parser_set_min_args(GtOptionParser *op,
                                 unsigned int min_additional_arguments)
 {
-  assert(op);
+  gt_assert(op);
   op->min_additional_arguments = min_additional_arguments;
 }
 
 void gt_option_parser_set_max_args(GtOptionParser *op,
                                 unsigned int max_additional_arguments)
 {
-  assert(op);
+  gt_assert(op);
   op->max_additional_arguments = max_additional_arguments;
 }
 
@@ -595,7 +595,7 @@ void gt_option_parser_set_min_max_args(GtOptionParser *op,
                                     unsigned int min_additional_arguments,
                                     unsigned int max_additional_arguments)
 {
-  assert(op);
+  gt_assert(op);
   op->min_additional_arguments = min_additional_arguments;
   op->max_additional_arguments = max_additional_arguments;
 }
@@ -616,8 +616,9 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   GtStr *gt_error_str;
 
   gt_error_check(err);
-  assert(op);
-  assert(!op->parser_called); /* to avoid multiple adding of common options */
+  gt_assert(op);
+  /* to avoid multiple adding of common options */
+  gt_assert(!op->parser_called);
 
   op->progname = gt_cstr_dup(argv[0]);
 
@@ -684,7 +685,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
                 break;
               }
-              assert(option->domain[0]);
+              gt_assert(option->domain[0]);
               had_err = check_missing_argument(argnum, argc, option->option_str,
                                                err);
               if (!had_err) {
@@ -782,7 +783,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_INT:
-              assert(!option->argument_is_optional);
+              gt_assert(!option->argument_is_optional);
               had_err = check_missing_argument(argnum, argc, option->option_str,
                                                err);
               if (!had_err) {
@@ -858,7 +859,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_LONG:
-              assert(!option->argument_is_optional);
+              gt_assert(!option->argument_is_optional);
               had_err = check_missing_argument(argnum, argc, option->option_str,
                                                err);
               if (!had_err) {
@@ -1029,7 +1030,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
             case OPTION_VERSION:
               ((GtShowVersionFunc) option->value)(op->progname);
               return OPTIONPARSER_REQUESTS_EXIT;
-            default: assert(0);
+            default: gt_assert(0);
           }
         }
         if (had_err || option_parsed)
@@ -1043,7 +1044,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
       continue;
 
     /* no matching option found -> error */
-    assert(!had_err);
+    gt_assert(!had_err);
     gt_error_set(err, "unknown option: %s (-help shows possible options)",
               argv[argnum]);
     had_err = -1;
@@ -1413,7 +1414,7 @@ GtOption* gt_option_new_choice(const char *option_str, const char *description,
   }
   else
     in_domain = 0;
-  assert(!in_domain);
+  gt_assert(!in_domain);
 #endif
 
   o = gt_option_new_string(option_str, description, value, default_value);
@@ -1425,39 +1426,39 @@ GtOption* gt_option_new_choice(const char *option_str, const char *description,
 
 const char* gt_option_get_name(const GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   return gt_str_get(o->option_str);
 }
 
 void gt_option_is_mandatory(GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   o->is_mandatory = true;
 }
 
 void gt_option_is_mandatory_either(GtOption *o, const GtOption *meo)
 {
-  assert(o && meo);
-  assert(!o->mandatory_either_option);
+  gt_assert(o && meo);
+  gt_assert(!o->mandatory_either_option);
   o->mandatory_either_option = meo;
 }
 
 void gt_option_is_extended_option(GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   o->is_extended_option = true;
 }
 
 void gt_option_is_development_option(GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   o->is_development_option = true;
 }
 
 void gt_option_imply(GtOption *o, const GtOption *implied_option)
 {
   GtArray *option_array;
-  assert(o && implied_option);
+  gt_assert(o && implied_option);
   if (!o->implications)
     o->implications = gt_array_new(sizeof (GtArray*));
   option_array = gt_array_new(sizeof (GtOption*));
@@ -1469,7 +1470,7 @@ void gt_option_imply_either_2(GtOption *o, const GtOption *io1,
                               const GtOption *io2)
 {
   GtArray *option_array;
-  assert(o && io1 && io2);
+  gt_assert(o && io1 && io2);
   if (!o->implications)
     o->implications = gt_array_new(sizeof (GtArray*));
   option_array = gt_array_new(sizeof (GtOption*));
@@ -1480,7 +1481,7 @@ void gt_option_imply_either_2(GtOption *o, const GtOption *io1,
 
 void gt_option_exclude(GtOption *o_a, GtOption *o_b)
 {
-  assert(o_a && o_b);
+  gt_assert(o_a && o_b);
   if (!o_a->exclusions)
     o_a->exclusions = gt_array_new(sizeof (GtOption*));
   if (!o_b->exclusions)
@@ -1491,19 +1492,19 @@ void gt_option_exclude(GtOption *o_a, GtOption *o_b)
 
 void gt_option_hide_default(GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   o->hide_default = true;
 }
 
 void gt_option_argument_is_optional(GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   o->argument_is_optional = true;
 }
 
 bool gt_option_is_set(const GtOption *o)
 {
-  assert(o);
+  gt_assert(o);
   return o->is_set;
 }
 

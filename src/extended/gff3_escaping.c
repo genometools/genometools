@@ -32,7 +32,7 @@ void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
                  unsigned long length)
 {
   const char *cc;
-  assert(escaped_seq && unescaped_seq);
+  gt_assert(escaped_seq && unescaped_seq);
   for (cc = unescaped_seq; cc < unescaped_seq + length; cc++) {
     switch (*cc) {
       case ' ':  gt_str_append_cstr(escaped_seq, SPACE); break;
@@ -53,7 +53,7 @@ int gt_gff3_unescape(GtStr *unescaped_seq, const char *escaped_seq,
   const char *cc;
   int had_err = 0;
   gt_error_check(err);
-  assert(unescaped_seq && escaped_seq);
+  gt_assert(unescaped_seq && escaped_seq);
   for (cc = escaped_seq; !had_err && cc < escaped_seq + length; cc++) {
     if (*cc == '%') {
       if (cc + 2 >= escaped_seq + length) {

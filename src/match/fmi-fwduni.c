@@ -37,7 +37,7 @@ unsigned long skfmuniqueforward (const void *genericindex,
   Bwtbound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
-  assert(qstart < qend);
+  gt_assert(qstart < qend);
   qptr = qstart;
   cc = *qptr++;
   if (ISSPECIAL(cc))
@@ -81,7 +81,7 @@ unsigned long skfmmstats (const void *genericindex,
   Bwtbound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
-  assert(qstart < qend);
+  gt_assert(qstart < qend);
   qptr = qstart;
   cc = *qptr;
   if (ISSPECIAL(cc))
@@ -116,7 +116,7 @@ unsigned long skfmmstats (const void *genericindex,
   if (witnessposition != NULL)
   {
     Seqpos startpos = fmfindtextpos (fmindex,prevlbound);
-    assert((fmindex->bwtlength-1) >= (startpos + matchlength));
+    gt_assert((fmindex->bwtlength-1) >= (startpos + matchlength));
     *witnessposition = (fmindex->bwtlength-1) - (startpos + matchlength);
   }
   return matchlength;

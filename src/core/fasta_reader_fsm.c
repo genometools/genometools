@@ -52,14 +52,14 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(fr);
+  gt_assert(fr);
 
   /* init */
   description = gt_str_new();
   sequence    = gt_str_new();
 
   /* at least one function has to be defined */
-  assert(proc_description || proc_sequence_part || proc_sequence_length);
+  gt_assert(proc_description || proc_sequence_part || proc_sequence_length);
 
   /* rewind sequence file (to allow multiple calls) */
   if (fr->sequence_file)
@@ -98,7 +98,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
       case READING_SEQUENCE_AFTER_NEWLINE:
         if (cc == FASTA_SEPARATOR) {
           if (!sequence_length) {
-            assert(line_counter);
+            gt_assert(line_counter);
             gt_error_set(err, "empty sequence after description given in line "
                               "%lu", line_counter - 1);
             had_err = -1;
@@ -106,7 +106,7 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
           }
           else {
             if (proc_sequence_part) {
-              assert(gt_str_length(sequence));
+              gt_assert(gt_str_length(sequence));
               had_err = proc_sequence_part(gt_str_get(sequence),
                                            gt_str_length(sequence), data, err);
             }
@@ -161,14 +161,14 @@ static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
       case READING_SEQUENCE_AFTER_NEWLINE:
       case READING_SEQUENCE:
         if (!sequence_length) {
-          assert(line_counter);
+          gt_assert(line_counter);
           gt_error_set(err, "empty sequence after description given in line "
                             "%lu", line_counter - 1);
           had_err = -1;
         }
         else {
           if (proc_sequence_part) {
-            assert(gt_str_length(sequence));
+            gt_assert(gt_str_length(sequence));
             had_err = proc_sequence_part(gt_str_get(sequence),
                                          gt_str_length(sequence), data, err);
           }

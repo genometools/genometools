@@ -35,7 +35,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
            tmprealspecialranges,
            tmplarge;
 
-  assert(numofindexes > 0);
+  gt_assert(numofindexes > 0);
   ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
   tmpspecialranges = 0;

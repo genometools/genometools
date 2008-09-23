@@ -65,7 +65,7 @@ static void gt_neighborjoining_init(GtNeighborJoining *nj,
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data);
           /* the Neighbor-Joining distance function returns a value >= 0.0 */
-          assert(retval >= 0.0);
+          gt_assert(retval >= 0.0);
           nj->nodes[i].distances[j] = retval;
         }
         else
@@ -144,8 +144,8 @@ static void gt_neighborjoining_compute(GtNeighborJoining *nj)
     }
 
     /* add new node to L and remove the daughters */
-    assert(min_i != UNDEF_ULONG);
-    assert(min_j != UNDEF_ULONG);
+    gt_assert(min_i != UNDEF_ULONG);
+    gt_assert(min_j != UNDEF_ULONG);
     gt_bittab_set_bit(nodetab, newnodenum);
     gt_bittab_unset_bit(nodetab, min_i);
     gt_bittab_unset_bit(nodetab, min_j);
@@ -188,7 +188,7 @@ GtNeighborJoining* gt_neighborjoining_new(unsigned long num_of_taxa, void *data,
                                      GtNeighborJoiningDistFunc distfunc)
 {
   GtNeighborJoining *nj;
-  assert(num_of_taxa && distfunc);
+  gt_assert(num_of_taxa && distfunc);
   nj = gt_malloc(sizeof (GtNeighborJoining));
   gt_neighborjoining_init(nj, num_of_taxa, data, distfunc);
   gt_neighborjoining_compute(nj);
@@ -200,7 +200,7 @@ static void gt_neighborjoining_show_node(const GtNeighborJoining *nj,
 {
   unsigned long leftdaughter  = nj->nodes[nodenum].leftdaughter;
   unsigned long rightdaughter = nj->nodes[nodenum].rightdaughter;
-  assert(nj);
+  gt_assert(nj);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n", nodenum,
           leftdaughter , nj->nodes[nodenum].leftdist);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n", nodenum,
@@ -213,7 +213,7 @@ static void gt_neighborjoining_show_node(const GtNeighborJoining *nj,
 
 void gt_neighborjoining_show_tree(const GtNeighborJoining *nj, FILE *fp)
 {
-  assert(nj);
+  gt_assert(nj);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n",
           nj->finalnodeA, nj->finalnodeB, nj->finaldist);
   if (nj->nodes[nj->finalnodeA].leftdaughter != UNDEF_ULONG)

@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/mathsupport.h"
 #include "annotationsketch/drawing_range.h"
 
 int gt_drawing_range_compare(GtDrawingRange range_a, GtDrawingRange range_b)
 {
-  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+  gt_assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
   if (gt_double_equals_double(range_a.start, range_b.start) &&
       gt_double_equals_double(range_a.end, range_b.end))

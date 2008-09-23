@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/array.h"
 #include "core/array2dim.h"
 #include "core/parseutils.h"
@@ -34,7 +34,7 @@ struct GtScoreMatrix {
 GtScoreMatrix* gt_score_matrix_new(GtAlpha *alpha)
 {
   GtScoreMatrix *sm;
-  assert(alpha);
+  gt_assert(alpha);
   sm = gt_malloc(sizeof (GtScoreMatrix));
   sm->alpha = gt_alpha_ref(alpha);
   sm->dimension = gt_alpha_size(alpha);
@@ -49,8 +49,8 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   gt_error_check(err);
-  assert(index_to_gt_alpha_char_mapping && tz);
-  assert(!gt_array_size(index_to_gt_alpha_char_mapping));
+  gt_assert(index_to_gt_alpha_char_mapping && tz);
+  gt_assert(!gt_array_size(index_to_gt_alpha_char_mapping));
   while ((token = gt_tokenizer_get_token(tz))) {
     if (gt_str_length(token) > 2) {
       gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
@@ -74,7 +74,7 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
     if (amino_acid == '\n') {
       gt_str_delete(token);
       gt_tokenizer_next_token(tz);
-      assert(!had_err);
+      gt_assert(!had_err);
       return 0;
     }
     gt_array_add(index_to_gt_alpha_char_mapping, amino_acid);
@@ -89,7 +89,7 @@ static int parse_alphabet_line(GtArray *index_to_gt_alpha_char_mapping,
       }
       gt_str_delete(token);
       gt_tokenizer_next_token(tz);
-      assert(!had_err);
+      gt_assert(!had_err);
       return 0;
     }
     gt_str_delete(token);
@@ -115,10 +115,10 @@ static int parse_score_line(GtScoreMatrix *sm, GtTokenizer *tz,
   char amino_acid;
   int score, had_err = 0;
   GtStr *token;
-  assert(sm && tz && index_to_gt_alpha_char_mapping);
+  gt_assert(sm && tz && index_to_gt_alpha_char_mapping);
   gt_error_check(err);
   token = gt_tokenizer_get_token(tz);
-  assert(token);
+  gt_assert(token);
   if (gt_str_length(token) != 1) {
     gt_error_set(err, "illegal character token '%s' on line %lu in file '%s'",
               gt_str_get(token), gt_tokenizer_get_line_number(tz),
@@ -169,7 +169,7 @@ static int parse_score_matrix(GtScoreMatrix *sm, const char *path,
   char parsed_characters[UCHAR_MAX] = { 0 };
   int had_err = 0;
   gt_error_check(err);
-  assert(sm && path && sm->alpha);
+  gt_assert(sm && path && sm->alpha);
   tz = gt_tokenizer_new(gt_io_new(path, "r"));
   index_to_gt_alpha_char_mapping = gt_array_new(sizeof (char));
   gt_tokenizer_skip_comment_lines(tz);
@@ -205,7 +205,7 @@ GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path,
   int had_err;
 
   gt_error_check(err);
-  assert(path);
+  gt_assert(path);
 
   /* create score matrix */
   protein_alpha = gt_alpha_new_protein();
@@ -224,36 +224,38 @@ GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path,
 
 unsigned int gt_score_matrix_get_dimension(const GtScoreMatrix *sm)
 {
-  assert(sm);
+  gt_assert(sm);
   return sm->dimension;
 }
 
 int gt_score_matrix_get_score(const GtScoreMatrix *sm,
-                          unsigned int idx1, unsigned int idx2)
+                              unsigned int idx1, unsigned int idx2)
 {
-  assert(sm);
-  assert(idx1 < sm->dimension && idx2 < sm->dimension); /* indices are valid */
+  gt_assert(sm);
+  /* indices are valid */
+  gt_assert(idx1 < sm->dimension && idx2 < sm->dimension);
   return sm->scores[idx1][idx2];
 }
 
 void gt_score_matrix_set_score(GtScoreMatrix *sm,
-                           unsigned int idx1, unsigned int idx2, int score)
+                               unsigned int idx1, unsigned int idx2, int score)
 {
-  assert(sm);
-  assert(idx1 < sm->dimension && idx2 < sm->dimension); /* indices are valid */
+  gt_assert(sm);
+  /* indices are valid */
+  gt_assert(idx1 < sm->dimension && idx2 < sm->dimension);
   sm->scores[idx1][idx2] = score;
 }
 
 const int** gt_score_matrix_get_scores(const GtScoreMatrix *sm)
 {
-  assert(sm);
+  gt_assert(sm);
   return (const int**) sm->scores;
 }
 
 void gt_score_matrix_show(const GtScoreMatrix *sm, FILE *fp)
 {
   unsigned i, j;
-  assert(sm && fp);
+  gt_assert(sm && fp);
   /* show alphabet line */
   gt_xfputc(' ', fp);
   for (i = 0; i < gt_alpha_size(sm->alpha); i++)

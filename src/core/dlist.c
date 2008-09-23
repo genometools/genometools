@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include "core/dlist.h"
 #include "core/ensure.h"
@@ -49,13 +49,13 @@ GtDlist* gt_dlist_new(GtCompare cmp_func)
 
 GtDlistelem* gt_dlist_first(const GtDlist *dlist)
 {
-  assert(dlist);
+  gt_assert(dlist);
   return dlist->first;
 }
 
 GtDlistelem* gt_dlist_last(const GtDlist *dlist)
 {
-  assert(dlist);
+  gt_assert(dlist);
   return dlist->last;
 }
 
@@ -63,7 +63,7 @@ GtDlistelem* gt_dlist_find(const GtDlist *dlist, void *new_data)
 {
   GtDlistelem *dlistelem;
   void *old_data;
-  assert(dlist);
+  gt_assert(dlist);
   for (dlistelem = gt_dlist_first(dlist); dlistelem != NULL;
        dlistelem = gt_dlistelem_next(dlistelem)) {
     old_data = gt_dlistelem_get_data(dlistelem);
@@ -83,29 +83,29 @@ unsigned long gt_dlist_size(const GtDlist *dlist)
 void gt_dlist_add(GtDlist *dlist, void *data)
 {
   GtDlistelem *oldelem, *newelem;
-  assert(dlist); /* data can be null */
+  gt_assert(dlist); /* data can be null */
   newelem = gt_calloc(1, sizeof (GtDlistelem));
   newelem->data = data;
 
   if (!dlist->first) {
-    assert(!dlist->last);
+    gt_assert(!dlist->last);
     dlist->first = newelem;
     dlist->last = newelem;
   }
   else {
-    assert(dlist->first && dlist->last);
+    gt_assert(dlist->first && dlist->last);
     if (dlist->cmp_func) {
       /* compare function defined -> find place to add new element */
       if (dlist->cmp_func(data, dlist->first->data) < 0) {
         /* the new element is smaller then the first element */
-        assert(!dlist->first->previous);
+        gt_assert(!dlist->first->previous);
         dlist->first->previous = newelem;
         newelem->next = dlist->first;
         dlist->first = newelem;
       }
       else if (dlist->cmp_func(dlist->last->data, data) <= 0) {
         /* the new element is larger or equal then the last element */
-        assert(!dlist->last->next);
+        gt_assert(!dlist->last->next);
         dlist->last->next = newelem;
         newelem->previous = dlist->last;
         dlist->last = newelem;
@@ -113,11 +113,11 @@ void gt_dlist_add(GtDlist *dlist, void *data)
       else {
         /* traverse list backwards to find a place to insert the new element */
         oldelem = dlist->last->previous;
-        assert(oldelem);
+        gt_assert(oldelem);
         while (oldelem) {
           if (dlist->cmp_func(oldelem->data, data) <= 0) {
             /* position found */
-            assert(oldelem->next);
+            gt_assert(oldelem->next);
             newelem->next = oldelem->next;
             newelem->previous = oldelem;
             oldelem->next->previous = newelem;
@@ -126,12 +126,12 @@ void gt_dlist_add(GtDlist *dlist, void *data)
           }
           oldelem = oldelem->previous;
         }
-        assert(oldelem); /* a position has been found */
+        gt_assert(oldelem); /* a position has been found */
       }
     }
     else {
       /* no compare function defined -> add new element to the end */
-      assert(!dlist->last->next);
+      gt_assert(!dlist->last->next);
       dlist->last->next = newelem;
       newelem->previous = dlist->last;
       dlist->last = newelem;
@@ -142,9 +142,9 @@ void gt_dlist_add(GtDlist *dlist, void *data)
 
 void gt_dlist_remove(GtDlist *dlist, GtDlistelem *dlistelem)
 {
-  assert(dlist && dlistelem);
-  assert(!dlistelem->previous || dlistelem->previous->next == dlistelem);
-  assert(!dlistelem->next || dlistelem->next->previous == dlistelem);
+  gt_assert(dlist && dlistelem);
+  gt_assert(!dlistelem->previous || dlistelem->previous->next == dlistelem);
+  gt_assert(!dlistelem->next || dlistelem->next->previous == dlistelem);
   if (dlistelem->previous)
     dlistelem->previous->next = dlistelem->next;
   if (dlistelem->next)
@@ -360,18 +360,18 @@ void gt_dlist_delete(GtDlist *dlist)
 
 GtDlistelem* gt_dlistelem_next(const GtDlistelem *dlistelem)
 {
-  assert(dlistelem);
+  gt_assert(dlistelem);
   return dlistelem->next;
 }
 
 GtDlistelem* gt_dlistelem_previous(const GtDlistelem *dlistelem)
 {
-  assert(dlistelem);
+  gt_assert(dlistelem);
   return dlistelem->previous;
 }
 
 void* gt_dlistelem_get_data(const GtDlistelem *dlistelem)
 {
-  assert(dlistelem);
+  gt_assert(dlistelem);
   return dlistelem->data;
 }

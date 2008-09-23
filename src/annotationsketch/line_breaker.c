@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
@@ -48,7 +48,7 @@ const GtLineBreakerClass* gt_line_breaker_class_new(size_t size,
 GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass *lbc)
 {
   GtLineBreaker *lb;
-  assert(lbc && lbc->size);
+  gt_assert(lbc && lbc->size);
   lb = gt_calloc(1, lbc->size);
   lb->c_class = lbc;
   lb->pvt = gt_calloc(1, sizeof (GtLineBreakerMembers));
@@ -57,7 +57,7 @@ GtLineBreaker* gt_line_breaker_create(const GtLineBreakerClass *lbc)
 
 GtLineBreaker* gt_line_breaker_ref(GtLineBreaker *lb)
 {
-  assert(lb);
+  gt_assert(lb);
   lb->pvt->reference_count++;
   return lb;
 }
@@ -69,7 +69,7 @@ void gt_line_breaker_delete(GtLineBreaker *lb)
     lb->pvt->reference_count--;
     return;
   }
-  assert(lb->c_class);
+  gt_assert(lb->c_class);
   if (lb->c_class->free)
     lb->c_class->free(lb);
   gt_free(lb->pvt);
@@ -79,20 +79,20 @@ void gt_line_breaker_delete(GtLineBreaker *lb)
 bool gt_line_breaker_gt_line_is_occupied(GtLineBreaker *lb, GtLine *line,
                                          GtBlock *block)
 {
-  assert(lb && lb->c_class && line && block);
+  gt_assert(lb && lb->c_class && line && block);
   return lb->c_class->is_occupied(lb, line, block);
 }
 
 void gt_line_breaker_register_block(GtLineBreaker *lb, GtLine *line,
                                     GtBlock *block)
 {
-  assert(lb && lb->c_class && line && block);
+  gt_assert(lb && lb->c_class && line && block);
   lb->c_class->register_block(lb, line, block);
 }
 
 void* gt_line_breaker_cast(GT_UNUSED const GtLineBreakerClass *lbc,
                            GtLineBreaker *lb)
 {
-  assert(lbc && lb && lb->c_class == lbc);
+  gt_assert(lbc && lb && lb->c_class == lbc);
   return lb;
 }

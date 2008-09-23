@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <math.h>
 #include "extended/qgram.h"
 
@@ -23,7 +23,7 @@ unsigned long gt_qgram_encode(const char *w, unsigned long q,
                            unsigned long alphabet_size)
 {
   unsigned long i, qgram_code;
-  assert(w);
+  gt_assert(w);
   qgram_code = w[0];
   for (i = 1; i < q; i++) {
     if (alphabet_size == 4)
@@ -52,7 +52,7 @@ void gt_qgram_compute(GtArray *qgrams, const char *encoded_seq,
                    unsigned int q)
 {
   unsigned long i, code, alpha_size_raised_to_the_power_of_q_minus_1;
-  assert(qgrams && encoded_seq && gt_alpha_size && q);
+  gt_assert(qgrams && encoded_seq && gt_alpha_size && q);
   if (seqlen >= q) {
     alpha_size_raised_to_the_power_of_q_minus_1 = pow(gt_alpha_size, q-1);
     code = gt_qgram_encode(encoded_seq, q, gt_alpha_size);
@@ -73,7 +73,7 @@ void gt_qgram_decode(char *qgram, unsigned long code, unsigned long q,
 {
   unsigned int alphabet_size, c = 0;
   unsigned long i;
-  assert(qgram && q && alpha);
+  gt_assert(qgram && q && alpha);
   alphabet_size = gt_alpha_size(alpha);
   for (i = q; i > 0; i--) {
     c = code % alphabet_size;

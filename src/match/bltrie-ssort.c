@@ -67,7 +67,7 @@ struct Blindtrierep
 
 static Nodeptr newBlindtrienode(Blindtrierep *trierep)
 {
-  assert(trierep->nextfreeBlindtrienode < trierep->allocatedBlindtrienode);
+  gt_assert(trierep->nextfreeBlindtrienode < trierep->allocatedBlindtrienode);
   return trierep->spaceBlindtrienode + trierep->nextfreeBlindtrienode++;
 }
 
@@ -96,7 +96,7 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
   root->firstchar = 0; /* undefined */
   root->rightsibling = NULL;
   SETLEAF(root,false);
-  assert(startpos < trierep->totallength);
+  gt_assert(startpos < trierep->totallength);
   if (startpos >= trierep->totallength)
   {
     firstchar = (Uchar) SEPARATOR;
@@ -116,7 +116,7 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
 
 static Nodeptr extractleafnode(const Blindtrierep *trierep,Nodeptr head)
 {
-  assert(ISNOTLEAF(head));
+  gt_assert(ISNOTLEAF(head));
   do
   {
     head = head->either.firstchild;
@@ -207,7 +207,7 @@ static void insertsuffixintoblindtrie(Blindtrierep *trierep,
 {
   Nodeptr newleaf, newnode, previous, current;
 
-  assert(ISSPECIAL(mm_oldsuffix) || ISSPECIAL(mm_newsuffix) ||
+  gt_assert(ISSPECIAL(mm_oldsuffix) || ISSPECIAL(mm_newsuffix) ||
          mm_oldsuffix != mm_newsuffix || ISLEAF(oldnode) ||
          oldnode->depth == lcp);
 
@@ -224,7 +224,7 @@ static void insertsuffixintoblindtrie(Blindtrierep *trierep,
     SETLEAF(oldnode,false);
     oldnode->either.firstchild = newnode; /* oldnode has newnode as only child*/
   }
-  assert(oldnode->depth == lcp);
+  gt_assert(oldnode->depth == lcp);
 
   /* search S[lcp] among the offsprings */
   newleaf = newBlindtrienode(trierep);
@@ -474,7 +474,7 @@ static void checkcurrentblindtrie(Blindtrierep *trierep,
     {
       fprintf(stderr,"retval = %d, maxcommon = %u for idx = %lu\n",
               retval,maxcommon,idx);
-      assert(retval < 0);
+      gt_assert(retval < 0);
     }
   }
 }
@@ -483,7 +483,7 @@ static void showleaf(const Blindtrierep *trierep,unsigned int level,
                      Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-  assert(current != NULL);
+  gt_assert(current != NULL);
   printf("Leaf(add=%lu,firstchar=%u,startpos=" FormatSeqpos
          ",rightsibling=%lu)\n",
          NODENUM(current),
@@ -496,7 +496,7 @@ static void showintern(const Blindtrierep *trierep,unsigned int level,
                        Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-  assert(current != NULL);
+  gt_assert(current != NULL);
   printf("Intern(add=%lu,firstchar=%u,depth=" FormatSeqpos
          ",firstchild=%lu,rightsibling=%lu)\n",
           NODENUM(current),
@@ -535,7 +535,7 @@ static void showblindtrie(const Blindtrierep *trierep)
 
 static int suffixcompare(const void *a, const void *b)
 {
-  assert(*((Seqpos *) a) != *((Seqpos *) b));
+  gt_assert(*((Seqpos *) a) != *((Seqpos *) b));
   if (*((Seqpos *) a) < *((Seqpos *) b))
   {
     return -1;
@@ -574,7 +574,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
       break;
     }
     leafinsubtree = findcompanion(trierep, suffixtable[idx] + offset);
-    assert(ISLEAF(leafinsubtree));
+    gt_assert(ISLEAF(leafinsubtree));
     lcp = (trierep->cmpcharbychar ? cmpcharbychargetlcp : fastgetlcp)
                              (&mm_oldsuffix,
                               &mm_newsuffix,

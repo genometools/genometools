@@ -49,7 +49,7 @@ static int gt_fasta_reader_seqit_run(GtFastaReader *fasta_reader,
   gt_error_check(err);
 
   /* at least one function has to be defined */
-  assert(proc_description || proc_sequence_part || proc_sequence_length);
+  gt_assert(proc_description || proc_sequence_part || proc_sequence_length);
 
   while ((rval = gt_seqiterator_next(gt_fasta_reader_seqit->seqit, &sequence,
                                      &len, &desc, err))) {
@@ -92,7 +92,7 @@ GtFastaReader* gt_fasta_reader_seqit_new(GtStr *sequence_filename)
 {
   GtFastaReader *fr;
   GtFastaReaderGtSeqIt *gt_fasta_reader_seqit;
-  assert(sequence_filename);
+  gt_assert(sequence_filename);
   fr = gt_fasta_reader_create(gt_fasta_reader_seqit_class());
   gt_fasta_reader_seqit = gt_fasta_reader_seqit_cast(fr);
   gt_fasta_reader_seqit->filenametab = gt_strarray_new();

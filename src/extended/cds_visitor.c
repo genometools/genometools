@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/orf.h"
 #include "core/translate.h"
 #include "core/undef.h"
@@ -37,7 +37,7 @@ struct GtCDSVisitor {
 static void cds_visitor_free(GtNodeVisitor *gv)
 {
   GtCDSVisitor *cds_visitor = cds_visitor_cast(gv);
-  assert(cds_visitor);
+  gt_assert(cds_visitor);
   gt_str_delete(cds_visitor->source);
   gt_splicedseq_delete(cds_visitor->splicedseq);
   gt_region_mapping_delete(cds_visitor->region_mapping);
@@ -55,7 +55,7 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
 
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf);
+  gt_assert(gf);
 
   if (gt_feature_node_has_type(gf, gft_exon) &&
       (gt_feature_node_get_strand(gf) == GT_STRAND_FORWARD ||
@@ -66,14 +66,14 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
                                                  err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
-      assert(range.start && range.end); /* 1-based coordinates */
+      gt_assert(range.start && range.end); /* 1-based coordinates */
       had_err = gt_region_mapping_get_raw_sequence_length(v->region_mapping,
                                                        &raw_sequence_length,
                                                    gt_genome_node_get_seqid(gn),
                                                        err);
     }
     if (!had_err) {
-      assert(range.end <= raw_sequence_length);
+      gt_assert(range.end <= raw_sequence_length);
       gt_splicedseq_add(v->splicedseq, range.start - 1, range.end - 1,
                      raw_sequence);
     }
@@ -85,7 +85,7 @@ static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
                                GtError *err)
 {
   gt_error_check(err);
-  assert(gn && visitor);
+  gt_assert(gn && visitor);
   /* traverse the direct children */
   gt_splicedseq_reset(visitor->splicedseq);
   return gt_genome_node_traverse_direct_children(gn, visitor,
@@ -96,7 +96,7 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss)
 {
   GtStr *pr_0, *pr_1, *pr_2;
   GtArray *orfs;
-  assert(ss);
+  gt_assert(ss);
 
   pr_0 = gt_str_new();
   pr_1 = gt_str_new();
@@ -125,7 +125,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
   GtRange cds;
   GtStrand strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
 
-  assert(gt_range_length(orf) >= 3);
+  gt_assert(gt_range_length(orf) >= 3);
   /* the first CDS feature */
   cds.start = gt_splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                              ? orf.start : orf.end) + 1;
@@ -191,7 +191,7 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
 
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf);
+  gt_assert(gf);
 
   had_err = extract_spliced_seq(gn, v, err);
   if (!had_err && gt_splicedseq_length(v->splicedseq) > 2) {
@@ -239,7 +239,7 @@ GtNodeVisitor* gt_cds_visitor_new(GtRegionMapping *region_mapping,
 {
   GtNodeVisitor *gv;
   GtCDSVisitor *cds_visitor;
-  assert(region_mapping);
+  gt_assert(region_mapping);
   gv = gt_node_visitor_create(gt_cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->source = gt_str_ref(source);

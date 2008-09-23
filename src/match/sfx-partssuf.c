@@ -85,7 +85,7 @@ static void removeemptyparts(Suftabparts *suftabparts,
     }
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
-      assert(suftabparts->components[srcpart].widthofpart > 0);
+      gt_assert(suftabparts->components[srcpart].widthofpart > 0);
       showverbose(verboseinfo,"widthofpart[%u]=" FormatSeqpos,
                   srcpart,
                   PRINTSeqposcast(suftabparts->components[srcpart].
@@ -104,7 +104,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
   Suftabparts *suftabparts;
 
   ALLOCASSIGNSPACE(suftabparts,NULL,Suftabparts,(size_t) 1);
-  assert(suftabparts != NULL);
+  gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
     suftabparts->numofparts = 0;
@@ -174,7 +174,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
       sumofwidth += suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
     }
-    assert(sumofwidth == numofsuffixestoinsert);
+    gt_assert(sumofwidth == numofsuffixestoinsert);
   }
   removeemptyparts(suftabparts,verboseinfo);
   return suftabparts;

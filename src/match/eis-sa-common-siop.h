@@ -32,7 +32,7 @@ EncSeqGetSubSeq(const Encodedsequence *encseq, Readmode readmode, Seqpos pos,
                 size_t len, Uchar *subSeq)
 {
   size_t i;
-  assert(encseq);
+  gt_assert(encseq);
   for (i = 0; i < len; ++i)
     subSeq[i] = getencodedchar(encseq, pos + i, readmode);
   return len;
@@ -99,9 +99,9 @@ initSASeqSrc(SASeqSrc *src, Seqpos seqLen,
              newMRAEncFunc newMRAEnc,
              generatorFunc generator, void *generatorState)
 {
-  assert(src);
-  assert(createReader || createTranslator);
-  assert(getRot0Pos);
+  gt_assert(src);
+  gt_assert(createReader || createTranslator);
+  gt_assert(getRot0Pos);
   src->seqLen = seqLen;
   src->createTranslator = createTranslator;
   if (createTranslator && !createReader)

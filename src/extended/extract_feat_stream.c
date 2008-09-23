@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/extract_feat_stream.h"
 #include "extended/extract_feat_visitor.h"
 #include "extended/node_stream_rep.h"
@@ -39,7 +39,7 @@ static int extract_feat_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   efs = gt_extract_feat_stream_cast(gs);
   had_err = gt_node_stream_next(efs->in_stream, gn, err);
   if (!had_err) {
-    assert(efs->extract_feat_visitor);
+    gt_assert(efs->extract_feat_visitor);
     if (*gn) {
       had_err = gt_genome_node_accept(*gn, efs->extract_feat_visitor, err);
       if (had_err) {

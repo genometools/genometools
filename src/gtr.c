@@ -129,7 +129,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   OPrval oprval;
 
   gt_error_check(err);
-  assert(gtr);
+  gt_assert(gtr);
   op = gt_option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).");
@@ -178,7 +178,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
 
 void gtr_register_components(GTR *gtr)
 {
-  assert(gtr);
+  gt_assert(gtr);
   /* add tools */
   gt_toolbox_delete(gtr->tools);
   gtr->tools = gtt_tools();
@@ -193,7 +193,7 @@ static int run_test(void *key, void *value, void *data, GtError *err)
   char *testname = key;
   UnitTestFunc test = value;
   gt_error_check(err);
-  assert(testname && test && data);
+  gt_assert(testname && test && data);
   had_errp = (int*) data;
   printf("%s...", testname);
   gt_xfflush(stdout);
@@ -222,7 +222,7 @@ static int run_tests(GTR *gtr, GtError *err)
 {
   int test_err = 0, had_err = 0;
   gt_error_check(err);
-  assert(gtr);
+  gt_assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
   ensure(had_err, sizeof (char) == 1);
@@ -243,7 +243,7 @@ static int run_tests(GTR *gtr, GtError *err)
   if (gtr->unit_tests) {
     had_err = gt_hashmap_foreach_in_key_order(
       gtr->unit_tests, run_test, &test_err, err);
-    assert(!had_err); /* cannot happen, run_test() is sane */
+    gt_assert(!had_err); /* cannot happen, run_test() is sane */
   }
   if (test_err)
     return EXIT_FAILURE;
@@ -271,7 +271,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
   void *mem, *map;
   int had_err = 0;
   gt_error_check(err);
-  assert(gtr);
+  gt_assert(gtr);
   if (gtr->debug)
     enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
   gtr->seed = gt_ya_rand_init(gtr->seed);
@@ -300,7 +300,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
         gt_lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
-          assert(lua_isstring(gtr->L, -1)); /* error message on top */
+          gt_assert(lua_isstring(gtr->L, -1)); /* error message on top */
           gt_error_set(err, "could not execute script %s",
                     lua_tostring(gtr->L, -1));
           had_err = -1;
@@ -318,7 +318,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
       /* run tool */
       if (!(toolfunc = gt_toolbox_get(gtr->tools, argv[0]))) {
         tool = gt_toolbox_get_tool(gtr->tools, argv[0]);
-        assert(tool);
+        gt_assert(tool);
       }
       nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
       gt_error_set_progname(err, nargv[0]);

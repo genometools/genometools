@@ -43,40 +43,40 @@ void gt_error_set(GtError *err, const char *format, ...)
 
 void gt_error_vset(GtError *err, const char *format, va_list ap)
 {
-  assert(err && format);
+  gt_assert(err && format);
   err->error_is_set = true;
   (void) vsnprintf(err->error_string, sizeof (err->error_string), format, ap);
 }
 
 bool gt_error_is_set(const GtError *err)
 {
-  assert(err);
+  gt_assert(err);
   return err->error_is_set;
 }
 
 void gt_error_unset(GtError *err)
 {
-  assert(err);
+  gt_assert(err);
   err->error_is_set = false;
   err->error_string[0] = '\0';
 }
 
 const char* gt_error_get(const GtError *err)
 {
-  assert(err && err->error_is_set);
+  gt_assert(err && err->error_is_set);
   return err->error_string;
 }
 
 void gt_error_set_progname(GtError *err, const char *progname)
 {
-  assert(err && progname);
+  gt_assert(err && progname);
   gt_free(err->progname);
   err->progname = gt_cstr_dup(progname);
 }
 
 const char* gt_error_get_progname(const GtError *err)
 {
-  assert(err);
+  gt_assert(err);
   return err->progname;
 }
 

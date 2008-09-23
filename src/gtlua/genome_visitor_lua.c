@@ -23,11 +23,11 @@
 static int gff3_visitor_lua_new(lua_State *L)
 {
   GtNodeVisitor **gv;
-  assert(L);
+  gt_assert(L);
   /* construct object */
   gv = lua_newuserdata(L, sizeof (GtNodeVisitor*));
   *gv = gt_gff3_visitor_new(NULL);
-  assert(*gv);
+  gt_assert(*gv);
   luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -47,7 +47,7 @@ static const struct luaL_Reg gt_node_visitor_lib_f [] = {
 
 int gt_lua_open_genome_visitor(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, GENOME_VISITOR_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

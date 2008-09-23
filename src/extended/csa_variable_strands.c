@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/unused_api.h"
 #include "extended/csa_splice_form.h"
 #include "extended/csa_variable_strands.h"
@@ -34,8 +34,8 @@ static void store_splice_form(GtArray *spliced_alignments_in_form,
   StoreSpliceFormInfo *info = data;
   GtCSASpliceForm *splice_form;
   unsigned long i, sa;
-  assert(info);
-  assert(spliced_alignments_in_form &&
+  gt_assert(info);
+  gt_assert(spliced_alignments_in_form &&
          gt_array_size(spliced_alignments_in_form));
   sa = *(unsigned long*) gt_array_get(spliced_alignments_in_form, 0);
   splice_form = gt_csa_splice_form_new((char*) set_of_sas + sa * size_of_sa,
@@ -52,7 +52,7 @@ static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
 {
   GtCSAGene *forward_gene = NULL, *reverse_gene = NULL;
   unsigned long i;
-  assert(genes && splice_forms);
+  gt_assert(genes && splice_forms);
   /* put splice forms into appropirate genes */
   for (i = 0; i < gt_array_size(splice_forms); i++) {
     GtCSASpliceForm *splice_form = *(GtCSASpliceForm**)
@@ -70,11 +70,11 @@ static void process_splice_forms(GtArray *genes, GtArray *splice_forms)
         else
           gt_csa_gene_add_splice_form(reverse_gene, splice_form);
         break;
-      default: assert(0);
+      default: gt_assert(0);
     }
   }
   /* store genes */
-  assert(forward_gene || reverse_gene);
+  gt_assert(forward_gene || reverse_gene);
   if (forward_gene && reverse_gene) {
     /* determine which comes first to keep sorting */
     if (gt_range_compare(gt_csa_gene_genomic_range(forward_gene),
@@ -102,8 +102,8 @@ GtArray* gt_csa_variable_strands(const void *set_of_sas,
 {
   StoreSpliceFormInfo info;
   GtArray *genes;
-  assert(set_of_sas && number_of_sas && size_of_sa);
-  assert(get_genomic_range && get_strand && get_exons);
+  gt_assert(set_of_sas && number_of_sas && size_of_sa);
+  gt_assert(get_genomic_range && get_strand && get_exons);
 
   genes = gt_array_new(sizeof (GtCSAGene*));
 

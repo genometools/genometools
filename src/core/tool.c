@@ -34,9 +34,9 @@ GtTool* gt_tool_new(GtToolArgumentsNew tool_arguments_new,
                     GtToolRunner tool_runner)
 {
   GtTool *tool;
-  assert(tool_option_parser_new && tool_runner); /* required arguments */
+  gt_assert(tool_option_parser_new && tool_runner); /* required arguments */
   /* <tool_arguments_new> and <tool_arguments_delete> imply each other */
-  assert(( tool_arguments_new &&  tool_arguments_delete) ||
+  gt_assert(( tool_arguments_new &&  tool_arguments_delete) ||
          (!tool_arguments_new && !tool_arguments_delete));
   tool = gt_malloc(sizeof *tool);
   tool->tool_arguments_new = tool_arguments_new;
@@ -54,7 +54,7 @@ int gt_tool_run(GtTool *tool, int argc, const char **argv, GtError *err)
   OPrval oprval;
   int parsed_args, had_err = 0;
   gt_error_check(err);
-  assert(tool);
+  gt_assert(tool);
 
   /* create tool arguments object */
   if (tool->tool_arguments_new)

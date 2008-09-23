@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/coin_hmm.h"
 
 GtHMM* gt_coin_hmm_loaded(void)
@@ -35,7 +35,7 @@ GtHMM* gt_coin_hmm_loaded(void)
   gt_hmm_set_transition_probability(hmm, COIN_FAIR, COIN_LOADED, 0.1);
   gt_hmm_set_transition_probability(hmm, COIN_LOADED, COIN_FAIR, 0.1);
   gt_hmm_set_missing_transition_probabilities(hmm);
-  assert(gt_hmm_is_valid(hmm));
+  gt_assert(gt_hmm_is_valid(hmm));
 
   return hmm;
 }
@@ -57,7 +57,7 @@ GtHMM* gt_coin_hmm_fair(void)
   gt_hmm_set_transition_probability(hmm, COIN_FAIR, COIN_LOADED, 0.5);
   gt_hmm_set_transition_probability(hmm, COIN_LOADED, COIN_FAIR, 0.5);
   gt_hmm_set_missing_transition_probabilities(hmm);
-  assert(gt_hmm_is_valid(hmm));
+  gt_assert(gt_hmm_is_valid(hmm));
 
   return hmm;
 }
@@ -67,6 +67,6 @@ GtAlpha* gt_coin_hmm_alpha(void)
   GtAlpha *a = gt_alpha_new();
   gt_alpha_add_mapping(a, "Hh");
   gt_alpha_add_mapping(a, "Tt");
-  assert(gt_alpha_size(a) == 2);
+  gt_assert(gt_alpha_size(a) == 2);
   return a;
 }

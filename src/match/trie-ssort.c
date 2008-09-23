@@ -111,7 +111,7 @@ static int comparecharacters(Uchar cc1,Seqpos idx1,
 
 static Trienode *newTrienode(Trierep *trierep)
 {
-  assert(trierep->nextfreeTrienode < trierep->allocatedTrienode);
+  gt_assert(trierep->nextfreeTrienode < trierep->allocatedTrienode);
   return trierep->nodetable + trierep->nextfreeTrienode++;
 }
 
@@ -253,8 +253,8 @@ static void insertsuffixintotrie(Trierep *trierep,Seqpos startpos)
                             startpos + currentnode->depth,
                             trierep->readmode);
       }
-      assert(currentnode != NULL);
-      assert(!ISLEAF(currentnode));
+      gt_assert(currentnode != NULL);
+      gt_assert(!ISLEAF(currentnode));
       if (!hasccsuccessor(trierep,&np,currentnode,cc,startpos))
       {
         newleaf = makenewleaf(trierep,startpos);
@@ -353,7 +353,7 @@ static unsigned long rekenumeratetrieleaves(Seqpos *suffixtable,
   {
     if (ISLEAF(current))
     {
-      assert(current->startpos >= depth);
+      gt_assert(current->startpos >= depth);
       suffixtable[nextfree++] = current->startpos - depth;
     } else
     {
@@ -389,7 +389,7 @@ static void enumeratetrieleaves (Seqpos *suffixtable,
       assert (currentnode->startpos >= depth);
       if (lcpsubtab != NULL && nextfree > 0)
       {
-        assert(lcpnode != NULL);
+        gt_assert(lcpnode != NULL);
         lcpsubtab[nextfree] = lcpnode->depth + depth;
       }
       suffixtable[nextfree++] = currentnode->startpos - depth;

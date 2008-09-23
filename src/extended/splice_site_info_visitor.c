@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <ctype.h>
 #include <string.h>
 #include "core/fasta.h"
@@ -45,7 +45,7 @@ struct GtSpliceSiteInfoVisitor {
 static void splice_site_info_visitor_free(GtNodeVisitor *gv)
 {
   GtSpliceSiteInfoVisitor *splice_site_info_visitor;
-  assert(gv);
+  gt_assert(gv);
   splice_site_info_visitor = splice_site_info_visitor_cast(gv);
   gt_region_mapping_delete(splice_site_info_visitor->region_mapping);
   gt_string_distri_delete(splice_site_info_visitor->splicesites);
@@ -64,10 +64,10 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   GtStr *seqid;
   int had_err = 0;
   gt_error_check(err);
-  assert(ssiv && intron);
+  gt_assert(ssiv && intron);
   ssiv->intron_processed = true;
   range = gt_genome_node_get_range(intron);
-  assert(range.start); /* 1-based coordinates */
+  gt_assert(range.start); /* 1-based coordinates */
   if (gt_range_length(range) >= 4) {
     seqid = gt_genome_node_get_seqid(intron);
     had_err = gt_region_mapping_get_raw_sequence(ssiv->region_mapping,
@@ -77,7 +77,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                                                           &seqlen, seqid, err);
     }
     if (!had_err) {
-      assert(range.end <= seqlen);
+      gt_assert(range.end <= seqlen);
       strand = gt_feature_node_get_strand((GtFeatureNode*) intron);
       if (strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE) {
         /* fill site */
@@ -117,7 +117,7 @@ static int splice_site_info_visitor_genome_feature(GtNodeVisitor *gv,
   int had_err = 0;
   gt_error_check(err);
   ssiv = splice_site_info_visitor_cast(gv);
-  assert(ssiv->region_mapping);
+  gt_assert(ssiv->region_mapping);
   gni = gt_genome_node_iterator_new((GtGenomeNode*) gf);
   while (!had_err && (node = gt_genome_node_iterator_next(gni))) {
     if (gt_feature_node_has_type((GtFeatureNode*) node, gft_intron))
@@ -145,7 +145,7 @@ GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm)
 {
   GtNodeVisitor *gv;
   GtSpliceSiteInfoVisitor *ssiv;
-  assert(rm);
+  gt_assert(rm);
   gv = gt_node_visitor_create(gt_splice_site_info_visitor_class());
   ssiv = splice_site_info_visitor_cast(gv);
   ssiv->region_mapping = rm;
@@ -158,7 +158,7 @@ GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm)
 static void showsplicesite(const char *string, unsigned long occurrences,
                            double probability, GT_UNUSED void *unused)
 {
-  assert(string && strlen(string) == 4);
+  gt_assert(string && strlen(string) == 4);
   gt_xputchar(string[0]);
   gt_xputchar(string[1]);
   gt_xputchar('-');
@@ -170,14 +170,14 @@ static void showsplicesite(const char *string, unsigned long occurrences,
 static void showsinglesite(const char *string, unsigned long occurrences,
                            double probability, GT_UNUSED void *unused)
 {
-  assert(string && strlen(string) == 2);
+  gt_assert(string && strlen(string) == 2);
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
 }
 
 bool gt_splice_site_info_visitor_show(GtNodeVisitor *gv)
 {
   GtSpliceSiteInfoVisitor *ssiv;
-  assert(gv);
+  gt_assert(gv);
   ssiv = splice_site_info_visitor_cast(gv);
 
   if (ssiv->show) {

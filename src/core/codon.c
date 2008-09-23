@@ -17,7 +17,7 @@
 
 /* This implementation was heavily inspired by code from Stefan Kurtz. */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/codon.h"
 
 const char gt_aminos[] = "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRR"
@@ -46,7 +46,7 @@ char gt_codon2amino(char n0, char n1, char n2)
     case 'u':
       code = GT_T_CODE << 4;
       break;
-    default: assert(0); /* XXX */
+    default: gt_assert(0); /* XXX */
   }
 
   switch (n1) {
@@ -68,7 +68,7 @@ char gt_codon2amino(char n0, char n1, char n2)
     case 'u':
       code += GT_T_CODE << 2;
       break;
-    default: assert(0); /* XXX */
+    default: gt_assert(0); /* XXX */
   }
 
   switch (n2) {
@@ -90,7 +90,7 @@ char gt_codon2amino(char n0, char n1, char n2)
     case 'u':
       code += GT_T_CODE;
       break;
-    default: assert(0); /* XXX */
+    default: gt_assert(0); /* XXX */
   }
 
   return gt_aminos[code];

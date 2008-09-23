@@ -22,7 +22,7 @@
 void gt_fasta_show_entry(const char *description, const char *sequence,
                          unsigned long sequence_length, unsigned long width)
 {
-  assert(sequence);
+  gt_assert(sequence);
   gt_fasta_show_entry_generic(description, sequence, sequence_length, width,
                               NULL);
 }
@@ -32,7 +32,7 @@ void gt_fasta_show_entry_generic(const char *description, const char *sequence,
                                  unsigned long width, GtGenFile *outfp)
 {
   unsigned long i, current_length;
-  assert(sequence);
+  gt_assert(sequence);
   gt_genfile_xfputc(FASTA_SEPARATOR, outfp);
   if (description)
     gt_genfile_xfputs(description, outfp);

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdlib.h>
 #include <string.h>
 #include "core/hashtable.h"
@@ -57,8 +57,9 @@ static const char *gt_feature_node_type_strings[] = { "CDS",
 static const char* find_type(const char *gft_string)
 {
   void *result;
-  assert(gft_string);
-  assert(strcmp(gft_string, "undefined")); /* do not convert undefined string */
+  gt_assert(gft_string);
+  /* do not convert undefined string */
+  gt_assert(strcmp(gft_string, "undefined"));
   result = bsearch(&gft_string,
                    gt_feature_node_type_strings,
                    sizeof (gt_feature_node_type_strings) /
@@ -74,7 +75,7 @@ static bool gt_type_checker_builtin_create_gft(GT_UNUSED GtTypeChecker
                                                *type_checker,
                                                const char *type)
 {
-  assert(type_checker && type);
+  gt_assert(type_checker && type);
   return find_type(type) ? true : false;
 }
 

@@ -31,7 +31,7 @@
 #define PUSHDFS(D,B,PREVIOUSPTR)\
         if (nextfreeItvinfo >= allocatedItvinfo)\
         {\
-          assert(nextfreeItvinfo == allocatedItvinfo);\
+          gt_assert(nextfreeItvinfo == allocatedItvinfo);\
           stackspace = allocItvinfo(PREVIOUSPTR,\
                                     allocatedItvinfo,\
                                     allocatedItvinfo+INCSTACKSIZE,\
@@ -65,13 +65,13 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
   ALLOCASSIGNSPACE(itvinfo,ptr,Itvinfo,allocated);
   if (allocateDfsinfo != NULL)
   {
-    assert(allocated > currentallocated);
+    gt_assert(allocated > currentallocated);
     for (i=currentallocated; i<allocated; i++)
     {
       itvinfo[i].dfsinfo = allocateDfsinfo(state);
     }
   }
-  assert(itvinfo != NULL);
+  gt_assert(itvinfo != NULL);
   return itvinfo;
 }
 
@@ -181,7 +181,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         }
       } else
       {
-        assert(nextfreeItvinfo < allocatedItvinfo);
+        gt_assert(nextfreeItvinfo < allocatedItvinfo);
         if (processbranchedge != NULL &&
             processbranchedge(false,
                               TOP.depth,
@@ -213,7 +213,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         break;
       }
       */
-      assert(nextfreeItvinfo > 0);
+      gt_assert(nextfreeItvinfo > 0);
       nextfreeItvinfo--;
     }
     if (haserr)
@@ -243,7 +243,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       {
         if (!firstedge)
         {
-          assert(nextfreeItvinfo < allocatedItvinfo);
+          gt_assert(nextfreeItvinfo < allocatedItvinfo);
         }
         if (processbranchedge != NULL &&
             processbranchedge(firstedge,

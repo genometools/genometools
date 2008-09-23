@@ -17,7 +17,7 @@
 #ifndef BITPACKSTRINGSIMPLEOP_H
 #define BITPACKSTRINGSIMPLEOP_H
 
-#include <assert.h>
+#include "core/assert.h"
 #include <inttypes.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -362,7 +362,7 @@ bsSetBit(BitString str, BitOffset pos)
 {
   unsigned bitTop = pos%bitElemBits;
   BitElem *p = str + pos/bitElemBits;
-  assert(str);
+  gt_assert(str);
   *p |= 1 << (bitElemBits - bitTop - 1);
 }
 
@@ -371,7 +371,7 @@ gt_bsClearBit(BitString str, BitOffset pos)
 {
   unsigned bitTop = pos%bitElemBits;
   BitElem *p = str + pos/bitElemBits;
-  assert(str);
+  gt_assert(str);
   *p &= ~(1 << (bitElemBits - bitTop - 1));
 }
 
@@ -380,7 +380,7 @@ bsToggleBit(BitString str, BitOffset pos)
 {
   unsigned bitTop = pos%bitElemBits;
   BitElem *p = str + pos/bitElemBits;
-  assert(str);
+  gt_assert(str);
   *p ^= 1 << (bitElemBits - bitTop - 1);
 }
 
@@ -389,7 +389,7 @@ gt_bsGetBit(constBitString str, BitOffset pos)
 {
   unsigned bitTop = pos%bitElemBits;
   const BitElem *p = str + pos/bitElemBits;
-  assert(str);
+  gt_assert(str);
   return (*p & 1 << (bitElemBits - bitTop - 1))?1:0;
 }
 

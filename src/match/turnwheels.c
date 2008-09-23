@@ -36,9 +36,9 @@ Turningwheel *newTurningwheel(unsigned int numofwheels,
   Turningwheel *tw;
 
   ALLOCASSIGNSPACE(tw,NULL,Turningwheel,1);
-  assert(numofwheels < (unsigned int) MAXNUMOFWHEELS);
-  assert(numofwheels > 0);
-  assert(asize > 0);
+  gt_assert(numofwheels < (unsigned int) MAXNUMOFWHEELS);
+  gt_assert(numofwheels > 0);
+  gt_assert(asize > 0);
   for (i=0; i<numofwheels; i++)
   {
     tw->wheelspace[i] = 0;

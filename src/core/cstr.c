@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/cstr.h"
 #include "core/ma.h"
@@ -25,7 +25,7 @@ char* gt_cstr_dup(const char *cstr)
 {
   size_t size;
   char *copy;
-  assert(cstr);
+  gt_assert(cstr);
   size = strlen(cstr) + 1;
   copy = gt_malloc(size);
   memcpy(copy, cstr, size);
@@ -35,7 +35,7 @@ char* gt_cstr_dup(const char *cstr)
 char* gt_cstr_dup_nt(const char *cstr, unsigned long length)
 {
   char *copy;
-  assert(cstr);
+  gt_assert(cstr);
   copy = gt_malloc(length+1);
   memcpy(copy, cstr, length);
   copy[length] = '\0';
@@ -45,7 +45,7 @@ char* gt_cstr_dup_nt(const char *cstr, unsigned long length)
 void gt_cstr_rep(char *cstr, char f, char t)
 {
   char *cc;
-  assert(cstr);
+  gt_assert(cstr);
   cc = cstr;
   while (*cc) {
     if (*cc == f)
@@ -57,7 +57,7 @@ void gt_cstr_rep(char *cstr, char f, char t)
 void gt_cstr_show(const char *cstr, unsigned long length, FILE *fp)
 {
   unsigned long i;
-  assert(cstr && fp);
+  gt_assert(cstr && fp);
   for (i = 0; i < length; i++)
     gt_xfputc(cstr[i], fp);
 }
@@ -65,7 +65,7 @@ void gt_cstr_show(const char *cstr, unsigned long length, FILE *fp)
 unsigned long gt_cstr_length_up_to_char(const char *cstr, char c)
 {
   char *suffix;
-  assert(cstr);
+  gt_assert(cstr);
   suffix = strchr(cstr, c);
   if (suffix)
     return suffix - cstr;

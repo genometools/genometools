@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "gtlua/gtcore_lua.h"
 #include "gtlua/gtext_lua.h"
 #include "gtlua/gt_lua.h"
@@ -26,7 +26,7 @@
 
 int gt_lua_open_lib(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   gt_lua_open_core(L); /* open core */
   gt_lua_open_extended(L); /* open extended */
 #ifndef WITHOUT_CAIRO

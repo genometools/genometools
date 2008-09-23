@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/cstr.h"
 #include "core/dlist.h"
 #include "core/hashmap.h"
@@ -40,7 +40,7 @@ struct TargetbestGtFilterStream
 
 static void build_key(GtStr *key, GtFeatureNode *feature, GtStr *target_id)
 {
-  assert(key && feature && target_id);
+  gt_assert(key && feature && target_id);
   gt_str_reset(key);
   gt_str_append_str(key, gt_genome_node_get_seqid((GtGenomeNode*) feature));
   gt_str_append_char(key, '\t'); /* cannot occur in seqid or target_id */
@@ -81,14 +81,14 @@ static void filter_targetbest(GtFeatureNode *current_feature,
   GtStr *first_target_id;
   const char *target;
   int had_err;
-  assert(current_feature && trees);
+  gt_assert(current_feature && trees);
   target = gt_feature_node_get_attribute(current_feature, TARGET_STRING);
-  assert(target);
+  gt_assert(target);
   first_target_id = gt_str_new();
   had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
                                                    first_target_id, NULL, NULL,
                                                    "", 0, NULL);
-  assert(!had_err);
+  gt_assert(!had_err);
   if (num_of_targets == 1) {
     GtStr *key = gt_str_new();
     build_key(key, current_feature, first_target_id);
@@ -140,7 +140,7 @@ static int targetbest_filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   }
 
   if (!had_err) {
-    assert(tfs->in_stream_processed);
+    gt_assert(tfs->in_stream_processed);
     if (tfs->next) {
       *gn = gt_dlistelem_get_data(tfs->next);
       tfs->next = gt_dlistelem_next(tfs->next);
@@ -178,7 +178,7 @@ GtNodeStream* gt_targetbest_filter_stream_new(GtNodeStream *in_stream)
 {
   TargetbestGtFilterStream *tfs;
   GtNodeStream *gs;
-  assert(in_stream);
+  gt_assert(in_stream);
   gs = gt_node_stream_create(gt_targetbest_filter_stream_class(),
                              gt_node_stream_is_sorted(in_stream));
   tfs = targetbest_filter_stream_cast(gs);

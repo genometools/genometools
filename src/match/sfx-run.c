@@ -258,7 +258,7 @@ static void showcharacterdistribution(
   unsigned int mapsize, idx;
 
   mapsize = getmapsizeAlphabet(alpha);
-  assert(characterdistribution != NULL);
+  gt_assert(characterdistribution != NULL);
   for (idx=0; idx<mapsize-1; idx++)
   {
     showverbose(verboseinfo,"occurrences(%c)=%lu",
@@ -401,7 +401,7 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
         outfileinfo.longest = SfxIGetRot0Pos(si);
       */
       sfi = SfxInterface2Sfxiterator(si);
-      assert(sfi != NULL);
+      gt_assert(sfi != NULL);
       if (outfpbcktab != NULL)
       {
         if (sfibcktab2file(outfpbcktab,sfi,err) != 0)
@@ -586,8 +586,8 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-    assert(sfxseqinfo.numofsequences > 0);
-    assert(sfxseqinfo.filelengthtab != NULL);
+    gt_assert(sfxseqinfo.numofsequences > 0);
+    gt_assert(sfxseqinfo.filelengthtab != NULL);
     if (outprjfile(so->str_indexname,
                    sfxseqinfo.filenametab,
                    sfxseqinfo.readmode,

@@ -15,18 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/phase.h"
 
 Phase gt_phase_get(char phase_char)
 {
-  assert(strchr(GT_PHASE_CHARS, phase_char));
+  gt_assert(strchr(GT_PHASE_CHARS, phase_char));
   switch (phase_char) {
     case '0': return GT_PHASE_ZERO;
     case '1': return GT_PHASE_ONE;
     case '2': return GT_PHASE_TWO;
-    default : assert(0); /*@fallthrough@*/
+    default : gt_assert(0); /*@fallthrough@*/
     case '.': return GT_PHASE_UNDEFINED;
   }
 }

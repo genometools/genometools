@@ -23,7 +23,7 @@ static void firstEDtabRtabcolumn(unsigned long *EDtabcolumn,
                                  unsigned long *Rtabcolumn, unsigned long ulen)
 {
   unsigned long row;
-  assert(EDtabcolumn && Rtabcolumn);
+  gt_assert(EDtabcolumn && Rtabcolumn);
   for (row = 0; row <= ulen; row++) {
     EDtabcolumn[row] = row;
     Rtabcolumn[row] = row;
@@ -39,7 +39,7 @@ static void nextEDtabRtabcolumn(unsigned long *EDtabcolumn,
                 north_west_Rtab_entry, west_Rtab_entry = 0;
   bool update_Rtabcolumn = false;
 
-  assert(EDtabcolumn && Rtabcolumn && u);
+  gt_assert(EDtabcolumn && Rtabcolumn && u);
 
   /* saves the first entry of EDtabcolumn */
   west_EDtab_entry = EDtabcolumn[0];
@@ -80,7 +80,7 @@ static unsigned long evaluateallcolumns(unsigned long *EDtabcolumn,
                                         const char *v, unsigned long vlen)
 {
   unsigned long col;
-  assert(EDtabcolumn && Rtabcolumn && u && v);
+  gt_assert(EDtabcolumn && Rtabcolumn && u && v);
   firstEDtabRtabcolumn(EDtabcolumn, Rtabcolumn, ulen);
   for (col = 1; col <= vlen; col++) {
     nextEDtabRtabcolumn(EDtabcolumn, Rtabcolumn, col, midcol, v[col-1], u,
@@ -97,7 +97,7 @@ static unsigned long evaluatecrosspoints(const char *u, unsigned long ulen,
                                          unsigned long rowoffset)
 {
   unsigned long midrow, midcol, dist;
-  assert(u && v && EDtabcolumn && Rtabcolumn && Ctab);
+  gt_assert(u && v && EDtabcolumn && Rtabcolumn && Ctab);
   if (vlen >= 2) {
     midcol = vlen / 2;
     dist = evaluateallcolumns(EDtabcolumn, Rtabcolumn, midcol, u, ulen, v,
@@ -117,7 +117,7 @@ static unsigned long evaluatecrosspoints(const char *u, unsigned long ulen,
 static unsigned long determineCtab0(unsigned long *Ctab, char v0, const char *u)
 {
   unsigned long row;
-  assert(Ctab && u);
+  gt_assert(Ctab && u);
   for (row = 0; row < Ctab[1]; row++) {
     if (v0 == u[row]) {
       Ctab[0] = row;
@@ -165,12 +165,12 @@ static GtAlignment* reconstructalignment(const unsigned long *Ctab,
 {
   unsigned long row, col = vlen;
   GtAlignment *alignment;
-  assert(Ctab && u && ulen && v && vlen);
+  gt_assert(Ctab && u && ulen && v && vlen);
   alignment = gt_alignment_new_with_seqs(u, ulen, v, vlen);
   row = Ctab[col];
   /* process columns */
   while (col) {
-    assert(Ctab[col-1] <= row);
+    gt_assert(Ctab[col-1] <= row);
     if (Ctab[col-1] == row)
       gt_alignment_add_insertion(alignment);
     else if (Ctab[col-1] + 1 == row)
@@ -193,11 +193,11 @@ GtAlignment* gt_align_linearalign(const char *u, unsigned long ulen,
 {
   unsigned long *Ctab, dist;
   GtAlignment *alignment;
-  assert(u && ulen && v && vlen);
+  gt_assert(u && ulen && v && vlen);
   Ctab = gt_malloc(sizeof (unsigned long) * (vlen + 1));
   dist = computeCtab(u, ulen, v, vlen, Ctab);
   alignment = reconstructalignment(Ctab, u, ulen, v, vlen);
-  assert(dist == gt_alignment_eval(alignment));
+  gt_assert(dist == gt_alignment_eval(alignment));
   gt_free(Ctab);
   return alignment;
 }

@@ -45,7 +45,7 @@ int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
 {
   double margins;
 
-  assert(canvas && dia);
+  gt_assert(canvas && dia);
 
   if (gt_style_get_num(canvas->pvt->sty, "format", "margins", &margins, NULL))
     canvas->pvt->margins = margins;
@@ -77,7 +77,7 @@ int gt_canvas_cairo_context_visit_diagram_post(GtCanvas *canvas,
 {
   int had_err = 0;
 
-  assert(canvas && dia);
+  gt_assert(canvas && dia);
 
   /* set initial image-specific values */
   canvas->pvt->y += HEADER_SPACE;
@@ -117,7 +117,7 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
 {
   GtCanvas *canvas;
   GtCanvasCairoContext *ccc;
-  assert(sty && width > 0);
+  gt_assert(sty && width > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_context_class());
   canvas->pvt->sty = sty;
   canvas->pvt->ii = ii;

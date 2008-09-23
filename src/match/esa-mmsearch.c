@@ -214,8 +214,8 @@ bool isemptymmsearchiterator(const MMsearchiterator *mmsi)
 bool identicalmmsearchiterators(const MMsearchiterator *mmsi1,
                                 const MMsearchiterator *mmsi2)
 {
-  assert(mmsi1 != NULL);
-  assert(mmsi2 != NULL);
+  gt_assert(mmsi1 != NULL);
+  gt_assert(mmsi2 != NULL);
   return mmsi1->lcpitv.left == mmsi2->lcpitv.left &&
          mmsi1->lcpitv.right == mmsi2->lcpitv.right;
 }
@@ -300,7 +300,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
   uint64_t localunitnum = unitnum;
   unsigned long localqueryoffset = 0;
 
-  assert(numberofsuffixes > 0);
+  gt_assert(numberofsuffixes > 0);
   totallength = getencseqtotallength(dbencseq);
   for (currentquerystart = 0;
        currentquerystart <= querylen - minlength;

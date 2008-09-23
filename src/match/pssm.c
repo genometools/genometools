@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <stdarg.h>
 #include "core/symboldef.h"
 #include "core/chardef.h"
@@ -93,7 +93,7 @@ void makeitmthresholds(Profilematrix *prof,
     }
   }
   partsum = (ProfScore) 0;
-  assert(prof->itmthreshold != NULL);
+  gt_assert(prof->itmthreshold != NULL);
   for (ddown = (long) (prof->dimension-1); ddown>=0; ddown--)
   {
     prof->itmthreshold[ddown] = minscore - partsum;

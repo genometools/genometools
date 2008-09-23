@@ -35,7 +35,7 @@ static int canvas_cairo_file_lua_new_generic(lua_State *L, GtGraphicsOutType t)
   /* create canvas */
   style = gt_lua_get_style_from_registry(L);
   canvas = lua_newuserdata(L, sizeof (GtCanvas*));
-  assert(canvas);
+  gt_assert(canvas);
   /* if a imageinfo object is passed, it must be correct type */
   if (lua_isnil(L, 2))
     *canvas = gt_canvas_cairo_file_new(style, t, width, NULL);
@@ -81,7 +81,7 @@ static int canvas_cairo_file_lua_to_file(lua_State *L)
   ccf = canvas_cairo_file_try_cast(*canvas);
   luaL_argcheck(L, ccf, 1, "must be a CanvasCairoFile object");
   fn = luaL_checkstring(L, 2);
-  assert(canvas);
+  gt_assert(canvas);
   had_err = gt_canvas_cairo_file_to_file(ccf, fn, err);
   if (had_err)
     return gt_lua_error(L, err);
@@ -112,7 +112,7 @@ static const struct luaL_Reg canvas_lib_m [] = {
 
 int gt_lua_open_canvas(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, CANVAS_METATABLE);
   lua_pushvalue(L, -1); /* duplicate the metatable */
   lua_setfield(L, -2, "__index");

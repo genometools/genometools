@@ -27,7 +27,7 @@ static int feature_stream_lua_new(lua_State *L)
   GtNodeStream **feature_stream, **in_stream;
   GtFeatureIndex **feature_index;
   feature_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
-  assert(feature_stream);
+  gt_assert(feature_stream);
   in_stream = check_genome_stream(L, 1);
   feature_index = check_feature_index(L, 2);
   *feature_stream = gt_feature_stream_new(*in_stream, *feature_index);
@@ -43,7 +43,7 @@ static const struct luaL_Reg feature_stream_lib_f [] = {
 
 int gt_lua_open_feature_stream(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_register(L, "gt", feature_stream_lib_f);
   return 1;
 }

@@ -180,7 +180,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
 #endif
 
   gt_error_check(err);
-  assert(!specialsareequal || specialsareequalatdepth0);
+  gt_assert(!specialsareequal || specialsareequalatdepth0);
   INITBITTAB(startposoccurs,totallength+1);
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
@@ -202,12 +202,12 @@ void checkentiresuftab(const Encodedsequence *encseq,
   FREESPACE(startposoccurs);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
-  assert(*suftab < totallength);
+  gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
   {
     if (ptr < suftab + totallength)
     {
-      assert(*ptr < totallength);
+      gt_assert(*ptr < totallength);
       cmp = comparetwosuffixes(encseq,
                                readmode,
                                &maxlcp,
@@ -236,7 +236,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
     } else
     {
       maxlcp = 0;
-      assert(*ptr == totallength);
+      gt_assert(*ptr == totallength);
     }
     if (ssar != NULL)
     {

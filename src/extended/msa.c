@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include "core/array2dim.h"
 #include "core/bioseq.h"
@@ -68,7 +68,7 @@ static char** get_msa_array(GtBioseq *bs)
 {
   unsigned long i;
   char **msa;
-  assert(bs);
+  gt_assert(bs);
   msa = gt_malloc(sizeof (const char*) * gt_bioseq_number_of_sequences(bs));
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++)
     msa[i] = (char*) gt_bioseq_get_sequence(bs, i);
@@ -79,7 +79,7 @@ static unsigned long** get_count(char **msa, unsigned long number_of_seqs,
                                  unsigned long seqlen)
 {
   unsigned long col, seq, **count;
-  assert(msa);
+  gt_assert(msa);
   gt_array2dim_calloc(count, seqlen, UCHAR_MAX);
   for (seq = 0; seq < number_of_seqs; seq++) {
     for (col = 0; col < seqlen; col++)
@@ -92,7 +92,7 @@ static char* get_consensus(unsigned long **count, unsigned long seqlen)
 {
   unsigned long col, c, max_count;
   char *consensus, consensus_char = GAPSYMBOL;
-  assert(count);
+  gt_assert(count);
   consensus = gt_malloc(sizeof (char) * seqlen);
   for (col = 0; col < seqlen; col++) {
     max_count = 0;
@@ -102,7 +102,7 @@ static char* get_consensus(unsigned long **count, unsigned long seqlen)
         consensus_char = c;
       }
     }
-    assert(consensus_char != GAPSYMBOL);
+    gt_assert(consensus_char != GAPSYMBOL);
     consensus[col] = consensus_char;
   }
   return consensus;
@@ -113,7 +113,7 @@ unsigned long gt_msa_consensus_distance(const GtMSA *msa)
   unsigned long col, number_of_seqs, seqlen, **count, dist = 0;
   char **msa_array, *consensus;
 
-  assert(msa);
+  gt_assert(msa);
 
   number_of_seqs = gt_bioseq_number_of_sequences(msa->bs);
   seqlen = gt_bioseq_get_sequence_length(msa->bs, 0);
@@ -145,7 +145,7 @@ unsigned long gt_msa_sum_of_pairwise_scores(const GtMSA *msa)
   unsigned long i, j, col, number_of_seqs, seqlen, sum = 0;
   char **msa_array;
 
-  assert(msa);
+  gt_assert(msa);
 
   number_of_seqs = gt_bioseq_number_of_sequences(msa->bs);
   seqlen = gt_bioseq_get_sequence_length(msa->bs, 0);
@@ -167,7 +167,7 @@ unsigned long gt_msa_sum_of_pairwise_scores(const GtMSA *msa)
 
 void gt_msa_show(GtMSA *msa)
 {
-  assert(msa);
+  gt_assert(msa);
   gt_bioseq_show_as_fasta(msa->bs, 0);
 }
 

@@ -42,7 +42,7 @@ typedef struct multiRangeAlphabetEncodingUInt8 MRAEncUInt8;
 static inline MRAEncUInt8 *
 MRAEnc2MRAEncUInt8(MRAEnc *mralpha)
 {
-  assert(mralpha && mralpha->encType == sourceUInt8);
+  gt_assert(mralpha && mralpha->encType == sourceUInt8);
   return (MRAEncUInt8*)
     ((char *)mralpha - offsetof(MRAEncUInt8, baseClass));
 }
@@ -50,7 +50,7 @@ MRAEnc2MRAEncUInt8(MRAEnc *mralpha)
 static inline const MRAEncUInt8 *
 constMRAEnc2MRAEncUInt8(const MRAEnc *mralpha)
 {
-  assert(mralpha && mralpha->encType == sourceUInt8);
+  gt_assert(mralpha && mralpha->encType == sourceUInt8);
   return (const MRAEncUInt8*)
     ((char *)mralpha - offsetof(MRAEncUInt8, baseClass));
 }
@@ -58,7 +58,7 @@ constMRAEnc2MRAEncUInt8(const MRAEnc *mralpha)
 static inline MRAEnc*
 MRAEncUInt82MRAEnc(MRAEncUInt8 *mralpha)
 {
-  assert(mralpha);
+  gt_assert(mralpha);
   return &(mralpha->baseClass);
 }
 

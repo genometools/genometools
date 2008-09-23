@@ -47,7 +47,7 @@ static int diagram_lua_new(lua_State *L)
   /* create diagram */
   style = gt_lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
-  assert(diagram);
+  gt_assert(diagram);
   *diagram = gt_diagram_new(*feature_index, seqid, range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
@@ -113,7 +113,7 @@ static int diagram_lua_new_from_array(lua_State *L)
   /* create diagram */
   style = gt_lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
-  assert(diagram);
+  gt_assert(diagram);
   *diagram = gt_diagram_new_from_array(nodes, &range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
@@ -151,7 +151,7 @@ static const struct luaL_Reg diagram_lib_m [] = {
 
 int gt_lua_open_diagram(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, DIAGRAM_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

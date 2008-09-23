@@ -37,7 +37,7 @@ GtStrArray* gt_strarray_new_file(const char *path)
   GtGenFile *fpin;
   GtStr *line;
   fpin = gt_genfile_xopen(path, "r");
-  assert(fpin);
+  gt_assert(fpin);
   line = gt_str_new();
   filecontent = gt_strarray_new();
   while (gt_str_read_next_line_generic(line, fpin) != EOF) {
@@ -52,7 +52,7 @@ GtStrArray* gt_strarray_new_file(const char *path)
 void gt_strarray_add_cstr(GtStrArray *sa, const char *cstr)
 {
   GtStr *str;
-  assert(sa && cstr);
+  gt_assert(sa && cstr);
   str = gt_str_new_cstr(cstr);
   gt_array_add(sa->strings, str);
 }
@@ -61,7 +61,7 @@ void gt_strarray_add_cstr_nt(GtStrArray *sa, const char *cstr,
                              unsigned long length)
 {
   GtStr *str;
-  assert(sa && cstr);
+  gt_assert(sa && cstr);
   str = gt_str_new();
   gt_str_append_cstr_nt(str, cstr, length);
   gt_array_add(sa->strings, str);
@@ -70,27 +70,27 @@ void gt_strarray_add_cstr_nt(GtStrArray *sa, const char *cstr,
 void gt_strarray_add(GtStrArray *sa, const GtStr *str)
 {
   GtStr *clone;
-  assert(sa && str);
+  gt_assert(sa && str);
   clone = gt_str_clone(str);
   gt_array_add(sa->strings, clone);
 }
 
 const char* gt_strarray_get(const GtStrArray *sa, unsigned long strnum)
 {
-  assert(sa && strnum < gt_array_size(sa->strings));
+  gt_assert(sa && strnum < gt_array_size(sa->strings));
   return gt_str_get(*(GtStr**) gt_array_get(sa->strings, strnum));
 }
 
 GtStr* gt_strarray_get_str(const GtStrArray *sa, unsigned long strnum)
 {
-  assert(sa && strnum < gt_array_size(sa->strings));
+  gt_assert(sa && strnum < gt_array_size(sa->strings));
   return *(GtStr**) gt_array_get(sa->strings, strnum);
 }
 
 void gt_strarray_set_size(GtStrArray *sa, unsigned long size)
 {
   unsigned long i;
-  assert(sa && size <= gt_array_size(sa->strings));
+  gt_assert(sa && size <= gt_array_size(sa->strings));
   for (i = size; i < gt_array_size(sa->strings); i++)
     gt_str_delete(*(GtStr**) gt_array_get(sa->strings, i));
   gt_array_set_size(sa->strings, size);
@@ -98,7 +98,7 @@ void gt_strarray_set_size(GtStrArray *sa, unsigned long size)
 
 unsigned long gt_strarray_size(const GtStrArray *sa)
 {
-  assert(sa);
+  gt_assert(sa);
   return gt_array_size(sa->strings);
 }
 

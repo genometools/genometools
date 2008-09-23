@@ -16,7 +16,7 @@
 */
 
 #include <sys/types.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,7 +41,7 @@ int gt_grep(bool *match, const char *pattern, const char *line, GtError *err)
   regex_t matcher;
   int rval, had_err = 0;
   gt_error_check(err);
-  assert(pattern && line);
+  gt_assert(pattern && line);
   if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
     grep_error(rval, &matcher, err);
     had_err = -1;

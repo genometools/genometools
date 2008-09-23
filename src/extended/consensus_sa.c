@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/bittab.h"
 #include "core/log.h"
 #include "core/ma.h"
@@ -44,7 +44,7 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
   unsigned long max_end;
   const char *sa;
 
-  assert(set_of_sas && number_of_sas && size_of_sa && get_genomic_range);
+  gt_assert(set_of_sas && number_of_sas && size_of_sa && get_genomic_range);
 
   /* get first range */
   gt_range_a = get_genomic_range(set_of_sas);
@@ -71,31 +71,32 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
 
 static GtRange extract_genomic_range(const ConsensusSA *csa, unsigned long sa)
 {
-  assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
+  gt_assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
   return csa->get_genomic_range((char*) csa->set_of_sas + csa->size_of_sa * sa);
 }
 
 static GtStrand extract_strand(const ConsensusSA *csa, unsigned long sa)
 {
   GtStrand strand;
-  assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
+  gt_assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
   strand = csa->get_strand((char*) csa->set_of_sas + csa->size_of_sa * sa);
-  assert(strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE); /* XXX */
+  /* XXX */
+  gt_assert(strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE);
   return strand;
 }
 
 static void extract_exons(const ConsensusSA *csa, GtArray *exon_ranges,
                           unsigned long sa)
 {
-  assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
+  gt_assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
   csa->get_exons(exon_ranges, (char*) csa->set_of_sas + csa->size_of_sa * sa);
-  assert(gt_array_size(exon_ranges));
-  assert(gt_ranges_are_sorted_and_do_not_overlap(exon_ranges));
+  gt_assert(gt_array_size(exon_ranges));
+  gt_assert(gt_ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
 
 static bool has_donor_site(GtArray *gene, unsigned long exon)
 {
-  assert(exon < gt_array_size(gene));
+  gt_assert(exon < gt_array_size(gene));
   if (exon == gt_array_size(gene) - 1)
     return false;
   return true;
@@ -103,7 +104,7 @@ static bool has_donor_site(GtArray *gene, unsigned long exon)
 
 static bool has_acceptor_site(GT_UNUSED GtArray *gene, unsigned long exon)
 {
-  assert(exon < gt_array_size(gene));
+  gt_assert(exon < gt_array_size(gene));
   if (exon == 0)
     return false;
   return true;
@@ -119,7 +120,7 @@ static bool compatible(const ConsensusSA *csa,
   bool start_values_set = false;
   const unsigned long fuzzlength = 0; /* XXX */
 
-  assert(csa);
+  gt_assert(csa);
 
   /* check strands */
   if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return false;
@@ -169,7 +170,7 @@ static bool compatible(const ConsensusSA *csa,
   }
   /* from now on the start values are set */
 
-  assert(start_1 != UNDEF_ULONG && start_2 != UNDEF_ULONG);
+  gt_assert(start_1 != UNDEF_ULONG && start_2 != UNDEF_ULONG);
   if (!(start_1 == 0 || start_2 == 0)) {
     /* no first segment could be maped */
     gt_array_delete(exons_sa_1);
@@ -265,7 +266,7 @@ static bool contains(const ConsensusSA *csa,
                      unsigned long sa_1, unsigned long sa_2)
 {
   GtRange range_sa_1, range_sa_2;
-  assert(csa);
+  gt_assert(csa);
 
   /* get ranges */
   range_sa_1 = extract_genomic_range(csa, sa_1);
@@ -279,13 +280,13 @@ static bool contains(const ConsensusSA *csa,
 static void compute_C(GtBittab **C, const ConsensusSA *csa)
 {
   unsigned long sa, sa_1;
-  assert(csa);
+  gt_assert(csa);
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
       if (contains(csa, sa, sa_1))
         gt_bittab_set_bit(C[sa], sa_1);
     }
-    assert(gt_bittab_bit_is_set(C[sa], sa));
+    gt_assert(gt_bittab_bit_is_set(C[sa], sa));
   }
 }
 
@@ -296,7 +297,7 @@ static void compute_left_or_right(GtBittab **left_or_right,
                                                     unsigned long sa_2))
 {
   unsigned long sa, sa_1;
-  assert(csa && left_or_right && *left_or_right);
+  gt_assert(csa && left_or_right && *left_or_right);
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
       if (cmp_func(csa, sa, sa_1) && compatible(csa, sa, sa_1))
@@ -309,7 +310,7 @@ static bool is_right_of(const ConsensusSA *csa,
                         unsigned long sa_1, unsigned long sa_2)
 {
   GtRange range_sa_1, range_sa_2;
-  assert(csa);
+  gt_assert(csa);
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
   if (range_sa_1.start  > range_sa_2.start && range_sa_1.end > range_sa_2.end)
@@ -321,7 +322,7 @@ static bool is_left_of(const ConsensusSA *csa,
                        unsigned long sa_1, unsigned long sa_2)
 {
   GtRange range_sa_1, range_sa_2;
-  assert(csa);
+  gt_assert(csa);
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
   if (range_sa_1.start  < range_sa_2.start && range_sa_1.end < range_sa_2.end)
@@ -331,13 +332,13 @@ static bool is_left_of(const ConsensusSA *csa,
 
 static void compute_left(GtBittab **left, const ConsensusSA *csa)
 {
-  assert(csa);
+  gt_assert(csa);
   compute_left_or_right(left, csa, is_right_of);
 }
 
 static void compute_right(GtBittab **right, const ConsensusSA *csa)
 {
-  assert(csa);
+  gt_assert(csa);
   compute_left_or_right(right, csa, is_left_of);
 }
 
@@ -375,7 +376,7 @@ static void compute_L(GtBittab **L, GtBittab **C, GtBittab **left,
         }
       }
 
-      assert(sa_1 != UNDEF_ULONG);
+      gt_assert(sa_1 != UNDEF_ULONG);
       gt_bittab_or(L[sa], L[sa_1], C[sa]);
     }
   }
@@ -416,7 +417,7 @@ static void compute_R(GtBittab **R, GtBittab **C, GtBittab **right,
           }
         }
       }
-      assert(sa_1 != UNDEF_ULONG);
+      gt_assert(sa_1 != UNDEF_ULONG);
       gt_bittab_or(R[sa], R[sa_1], C[sa]);
     }
   }
@@ -459,7 +460,7 @@ static void compute_csas(ConsensusSA *csa)
   GtBittab **C, **left, **right, **L, **R, *U_i, *SA_i, *SA_prime;
 #ifndef NDEBUG
   unsigned long u_i_size, u_i_minus_1_size;
-  assert(csa && csa->set_of_sas);
+  gt_assert(csa && csa->set_of_sas);
 #endif
 
   /* init sets */
@@ -520,7 +521,7 @@ static void compute_csas(ConsensusSA *csa)
     }
 
     /* make sure the computed splice form is maximal w.r.t. to compatibility */
-    assert(splice_form_is_valid(SA_i, csa));
+    gt_assert(splice_form_is_valid(SA_i, csa));
 
     /* process splice form */
     if (csa->process_splice_form) {
@@ -536,7 +537,7 @@ static void compute_csas(ConsensusSA *csa)
 #ifndef NDEBUG
     /* ensure that |U_i| < |U_i-1| */
     u_i_size = gt_bittab_count_set_bits(U_i);
-    assert(u_i_size < u_i_minus_1_size);
+    gt_assert(u_i_size < u_i_minus_1_size);
     u_i_minus_1_size = u_i_size;
 #endif
   }
@@ -566,9 +567,9 @@ void gt_consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
                      ProcessSpliceFormFunc process_splice_form, void *userdata)
 {
   ConsensusSA csa;
-  assert(set_of_sas && number_of_sas && size_of_sa);
-  assert(get_genomic_range && get_strand && get_exons);
-  assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
+  gt_assert(set_of_sas && number_of_sas && size_of_sa);
+  gt_assert(get_genomic_range && get_strand && get_exons);
+  gt_assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
                               get_genomic_range));
   gt_log_log("-from %lu", get_genomic_range(set_of_sas).start);
   gt_log_log("csa number_of_sas=%lu", number_of_sas);

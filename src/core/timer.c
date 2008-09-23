@@ -42,7 +42,7 @@ GtTimer* gt_timer_new(void)
 
 void gt_timer_start(GtTimer *t)
 {
-  assert(t);
+  gt_assert(t);
   gettimeofday(&t->start_tv, NULL);
   gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
   t->state = TIMER_RUNNING;
@@ -50,7 +50,7 @@ void gt_timer_start(GtTimer *t)
 
 void gt_timer_stop(GtTimer *t)
 {
-  assert(t);
+  gt_assert(t);
   if (t->state == TIMER_RUNNING) {
     gettimeofday(&t->stop_tv, NULL);
     gt_xgetrusage(RUSAGE_SELF, &t->stop_ru);
@@ -83,7 +83,7 @@ void gt_timer_show(GtTimer *t, FILE *fp)
 
   if (t->state == TIMER_RUNNING)
     gt_timer_stop(t);
-  assert(t->state == TIMER_STOPPED);
+  gt_assert(t->state == TIMER_STOPPED);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
   fprintf(fp, "%ld.%06lds real %lds user %lds system\n",
           (long)(elapsed_tv.tv_sec),

@@ -26,7 +26,7 @@ translateSuftab2BWT(struct encSeqTrState *trState, Uchar *dest, Seqpos *src,
                     size_t len)
 {
   size_t i;
-  assert(trState);
+  gt_assert(trState);
   for (i = 0; i < len; ++i)
   {
     dest[i] = sfxIdx2BWTSym(src[i], trState->encseq, trState->readmode);
@@ -67,7 +67,7 @@ translateSuftab2LCP(struct encSeqLCPState *lcpState, Seqpos *dest, Seqpos *src,
 {
   size_t elemsLeft = len;
   Seqpos lastSufIdx;
-  assert(lcpState && dest && src);
+  gt_assert(lcpState && dest && src);
   lastSufIdx = lcpState->lastSufIdx;
   if (elemsLeft)
   {
@@ -111,7 +111,7 @@ destructSATaggedXltorStateList(
   struct saTaggedXltorStateList *saXltorStateList)
 {
   struct saTaggedXltorStateLE *next;
-  assert(saXltorStateList);
+  gt_assert(saXltorStateList);
   next = saXltorStateList->stateList;
   while (next)
   {

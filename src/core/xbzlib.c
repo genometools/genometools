@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,7 +79,7 @@ int gt_xbzread(BZFILE *file, void *buf, unsigned len)
 
 void gt_xbzwrite(BZFILE *file, void *buf, unsigned len)
 {
-  assert(buf && len);
+  gt_assert(buf && len);
   if (BZ2_bzwrite(file, buf, len) != len) {
     fprintf(stderr, "cannot write it compressed file\n");
     exit(EXIT_FAILURE);

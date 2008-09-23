@@ -20,7 +20,7 @@
   interpreter (lua.c), therefore the copyright notice in lua.h also applies.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -157,7 +157,7 @@ static int loadline(lua_State *L, GetLine *gl) {
                                      because otherwise gl_append_history() would
                                      truncate <line> at the first newline */
     rval = gl_append_history(gl, line);
-    assert(!rval);
+    gt_assert(!rval);
     gt_free(line);
   }
   lua_remove(L, 1);  /* remove line */

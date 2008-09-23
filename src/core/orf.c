@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/codon.h"
 #include "core/orf.h"
 #include "core/range.h"
@@ -29,7 +29,7 @@ void gt_determine_ORFs(GtArray *ranges, unsigned int framenum,
 {
   unsigned long i;
   GtRange orf;
-  assert(ranges && framenum < 3 && frame);
+  gt_assert(ranges && framenum < 3 && frame);
   orf.start = UNDEF_ULONG;
   for (i = 0; i < framelen; i++) {
     if (orf.start == UNDEF_ULONG) {

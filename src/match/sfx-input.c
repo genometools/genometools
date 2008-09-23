@@ -191,7 +191,7 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     sfxseqinfo->filelengthtab = suffixarray->filelengthtab;
     sfxseqinfo->readmode = suffixarray->readmode;
     sfxseqinfo->filenametab = suffixarray->filenametab;
-    assert(sfxseqinfo->filelengthtab != NULL);
+    gt_assert(sfxseqinfo->filelengthtab != NULL);
     sfxseqinfo->encseq = suffixarray->encseq;
   }
   return haserr ? -1 : 0;

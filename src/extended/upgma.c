@@ -42,7 +42,7 @@ static void gt_upggt_init(GtUPGMA *upgma, unsigned long num_of_taxa, void *data,
   unsigned long i, j;
   double retval;
 
-  assert(upgma);
+  gt_assert(upgma);
 
   upgma->num_of_taxa = num_of_taxa;
   upgma->num_of_clusters = 2 * num_of_taxa - 1;
@@ -67,7 +67,7 @@ static void gt_upggt_init(GtUPGMA *upgma, unsigned long num_of_taxa, void *data,
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data);
           /* the GtUPGMA distance function returns a value >= 0.0 */
-          assert(retval >= 0.0);
+          gt_assert(retval >= 0.0);
           upgma->clusters[i].distances[j] = retval;
         }
         else
@@ -161,7 +161,7 @@ GtUPGMA* gt_upggt_new(unsigned long num_of_taxa, void *data,
                       GtUPGMADistFunc distfunc)
 {
   GtUPGMA *upgma;
-  assert(num_of_taxa && distfunc);
+  gt_assert(num_of_taxa && distfunc);
   upgma = gt_malloc(sizeof (GtUPGMA));
   gt_upggt_init(upgma, num_of_taxa, data, distfunc);
   gt_upggt_compute(upgma);
@@ -171,7 +171,7 @@ GtUPGMA* gt_upggt_new(unsigned long num_of_taxa, void *data,
 static void gt_upggt_show_node(const GtUPGMA *upgma, unsigned long nodenum,
                             unsigned int level, FILE *fp)
 {
-  assert(upgma);
+  gt_assert(upgma);
   /* indent according to level */
   fprintf(fp, "%*s", (int) level * INDENTFACTOR, "");
   fprintf(fp, "%lu, %.4f\n", nodenum, upgma->clusters[nodenum].height);
@@ -186,7 +186,7 @@ static void gt_upggt_show_node(const GtUPGMA *upgma, unsigned long nodenum,
 
 void gt_upggt_show_tree(const GtUPGMA *upgma, FILE *fp)
 {
-  assert(upgma);
+  gt_assert(upgma);
   gt_upggt_show_node(upgma, upgma->num_of_clusters-1, 0, fp);
 }
 

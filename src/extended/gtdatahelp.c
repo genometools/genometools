@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "lua.h"
 #include "lauxlib.h"
@@ -39,7 +39,7 @@ int gt_gtdata_show_help(const char *progname, GT_UNUSED void *unused,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(progname);
+  gt_assert(progname);
 
   prog = gt_cstr_dup(progname); /* create modifiable copy for splitter */
   splitter = gt_splitter_new();

@@ -110,14 +110,14 @@ void pckbuckettable_free(Pckbuckettable *pckbt)
 static void storeBoundsatdepth(Pckbuckettable *pckbt,
                                const Boundsatdepth *bd)
 {
-  assert(bd->depth <= pckbt->maxdepth);
-  assert(bd->code <= pckbt->basepower[bd->depth]);
+  gt_assert(bd->depth <= pckbt->maxdepth);
+  gt_assert(bd->code <= pckbt->basepower[bd->depth]);
   /*
   printf("bd->depth=%u,bd->code=%lu\n",bd->depth,bd->code);
   */
-  assert(pckbt->mbtab[bd->depth][bd->code].lowerbound == 0 &&
+  gt_assert(pckbt->mbtab[bd->depth][bd->code].lowerbound == 0 &&
          pckbt->mbtab[bd->depth][bd->code].upperbound == 0);
-  assert(pckbt->numofvalues < pckbt->maxnumofvalues);
+  gt_assert(pckbt->numofvalues < pckbt->maxnumofvalues);
   pckbt->numofvalues++;
   pckbt->mbtab[bd->depth][bd->code].lowerbound = bd->lowerbound;
   pckbt->mbtab[bd->depth][bd->code].upperbound = bd->upperbound;
@@ -173,19 +173,19 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   while (stack.nextfreeBoundsatdepth > 0)
   {
     parent = stack.spaceBoundsatdepth[--stack.nextfreeBoundsatdepth];
-    assert(parent.lowerbound < parent.upperbound);
+    gt_assert(parent.lowerbound < parent.upperbound);
     rangesize = bwtrangesplitallwithoutspecial(tmpmbtab,
                                                rangeOccs,
                                                voidbwtseq,
                                                parent.lowerbound,
                                                parent.upperbound);
-    assert(rangesize <= (unsigned long) numofchars);
+    gt_assert(rangesize <= (unsigned long) numofchars);
     for (idx = 0; idx < rangesize; idx++)
     {
       child.lowerbound = tmpmbtab[idx].lowerbound;
       child.upperbound = tmpmbtab[idx].upperbound;
       child.depth = parent.depth + 1;
-      assert(child.depth <= maxdepth);
+      gt_assert(child.depth <= maxdepth);
       child.code = parent.code * numofchars + idx;
       /*
       printf("depth=%lu code=%lu: %lu %lu\n",
@@ -270,13 +270,13 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
   gt_str_delete(tmpfilename);
   if (!haserr)
   {
-    assert(mapptr != NULL);
+    gt_assert(mapptr != NULL);
     maxdepth = (unsigned int) ((Seqpos *) mapptr)[0];
     pckbt = allocandinitpckbuckettable(numofchars,maxdepth,false);
     pckbt->mapptr = mapptr;
     pckbt->mbtab[0] = (Matchbound *) (((Seqpos *) mapptr) + 1);
     setbcktaboffsets(pckbt);
-    assert(numofbytes ==
+    gt_assert(numofbytes ==
            sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
   }
   return haserr ? NULL : pckbt;

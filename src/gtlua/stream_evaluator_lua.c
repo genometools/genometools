@@ -91,7 +91,7 @@ static const struct luaL_Reg stream_evaluator_lib_m [] = {
 
 int gt_lua_open_stream_evaluator(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, STREAM_EVALUATOR_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

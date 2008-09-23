@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/node_stream_rep.h"
 #include "extended/splice_site_info_stream.h"
 #include "extended/splice_site_info_visitor.h"
@@ -39,7 +39,7 @@ static int gt_splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   ssis = gt_splice_site_info_stream_cast(gs);
   had_err = gt_node_stream_next(ssis->in_stream, gn, err);
   if (!had_err) {
-    assert(ssis->splice_site_info_visitor);
+    gt_assert(ssis->splice_site_info_visitor);
     if (*gn) {
       had_err = gt_genome_node_accept(*gn, ssis->splice_site_info_visitor, err);
       if (had_err) {
@@ -84,7 +84,7 @@ GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
 bool gt_splice_site_info_stream_show(GtNodeStream *gs)
 {
   GtSpliceSiteInfoStream *ssis;
-  assert(gs);
+  gt_assert(gs);
   ssis = gt_splice_site_info_stream_cast(gs);
   return gt_splice_site_info_visitor_show(ssis->splice_site_info_visitor);
 }

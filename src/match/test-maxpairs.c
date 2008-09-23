@@ -61,7 +61,7 @@ static Seqpos samplesubstring(Uchar *seqspace,
   {
     substringlength = totallength - start;
   }
-  assert(substringlength > 0);
+  gt_assert(substringlength > 0);
   encseqextract(seqspace,encseq,start,start+substringlength-1);
   return substringlength;
 }

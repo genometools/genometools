@@ -135,7 +135,7 @@ static int levedescl2levelnum(const char *name,
 {
   size_t i;
 
-  assert(name != NULL);
+  gt_assert(name != NULL);
   for (i=0; i<sizeof (indexlevel)/sizeof (indexlevel[0]); i++)
   {
     if (strcmp(name,indexlevel[i].name) == 0)

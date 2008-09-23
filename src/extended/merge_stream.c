@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/ma.h"
 #include "core/undef.h"
 #include "extended/merge_stream.h"
@@ -60,7 +60,7 @@ static int merge_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
       gt_genome_node_consolidated = 0;
       for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
         for (j = i+1; j < gt_array_size(ms->genome_streams); j++) {
-          assert(i != j);
+          gt_assert(i != j);
           if (gt_genome_nodes_are_equal_region_nodes(ms->buffer[i],
                                                      ms->buffer[j])) {
             gt_region_node_consolidate(gt_region_node_cast(ms->buffer[i]),
@@ -126,10 +126,10 @@ GtNodeStream* gt_merge_stream_new(const GtArray *genome_streams)
   GtMergeStream *ms = gt_merge_stream_cast(gs);
   unsigned long i;
 #ifndef NDEBUG
-  assert(gt_array_size(genome_streams)); /* at least on input stream given */
+  gt_assert(gt_array_size(genome_streams)); /* at least on input stream given */
   /* each input stream is sorted */
   for (i = 0; i < gt_array_size(genome_streams); i++) {
-    assert(gt_node_stream_is_sorted(*(GtNodeStream**)
+    gt_assert(gt_node_stream_is_sorted(*(GtNodeStream**)
                                    gt_array_get(genome_streams, i)));
   }
 #endif

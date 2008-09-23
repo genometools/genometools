@@ -51,7 +51,7 @@ GtNodeStream* gt_node_stream_create(const GtNodeStreamClass *nsc,
                                     bool ensure_sorting)
 {
   GtNodeStream *ns;
-  assert(nsc && nsc->size);
+  gt_assert(nsc && nsc->size);
   ns = gt_calloc(1, nsc->size);
   ns->c_class = nsc;
   ns->members = gt_calloc(1, sizeof (GtNodeStreamMembers));
@@ -61,7 +61,7 @@ GtNodeStream* gt_node_stream_create(const GtNodeStreamClass *nsc,
 
 GtNodeStream* gt_node_stream_ref(GtNodeStream *ns)
 {
-  assert(ns);
+  gt_assert(ns);
   ns->members->reference_count++;
   return ns;
 }
@@ -73,7 +73,7 @@ void gt_node_stream_delete(GtNodeStream *ns)
     ns->members->reference_count--;
     return;
   }
-  assert(ns->c_class);
+  gt_assert(ns->c_class);
   if (ns->c_class->free) ns->c_class->free(ns);
   gt_genome_node_rec_delete(ns->members->buffer);
   gt_free(ns->members);
@@ -84,7 +84,7 @@ int gt_node_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtGenomeNode *new_node = NULL;
   int had_err = 0;
-  assert(ns && ns->c_class && ns->c_class->next);
+  gt_assert(ns && ns->c_class && ns->c_class->next);
   gt_error_check(err);
   /* filling */
   if (!ns->members->buffer)
@@ -95,7 +95,7 @@ int gt_node_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
   /* checking */
   if (!had_err && ns->members->ensure_sorting && ns->members->buffer &&
       new_node) {
-    assert(gt_genome_node_compare(&ns->members->buffer, &new_node) <= 0);
+    gt_assert(gt_genome_node_compare(&ns->members->buffer, &new_node) <= 0);
   }
 #endif
   /* serving */
@@ -108,13 +108,13 @@ int gt_node_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 
 bool gt_node_stream_is_sorted(GtNodeStream *ns)
 {
-  assert(ns);
+  gt_assert(ns);
   return ns->members->ensure_sorting;
 }
 
 void* gt_node_stream_cast(GT_UNUSED const GtNodeStreamClass *nsc,
                          GtNodeStream *ns)
 {
-  assert(nsc && ns && ns->c_class == nsc);
+  gt_assert(nsc && ns && ns->c_class == nsc);
   return ns;
 }

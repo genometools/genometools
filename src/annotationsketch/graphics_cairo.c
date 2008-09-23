@@ -51,7 +51,7 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
                                      unsigned int length)
 {
   GtStr *stream = closure;
-  assert(stream);
+  gt_assert(stream);
   gt_str_append_cstr_nt(stream, (char*) data, length);
   return CAIRO_STATUS_SUCCESS;
 }
@@ -92,9 +92,9 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
       g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
       break;
   }
-  assert(g->surf && cairo_surface_status(g->surf) == CAIRO_STATUS_SUCCESS);
+  gt_assert(g->surf && cairo_surface_status(g->surf) == CAIRO_STATUS_SUCCESS);
   g->cr = cairo_create(g->surf);
-  assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
+  gt_assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
   g->width = width;
   g->height = height;
   g->margin_x = g->margin_y = 20;
@@ -111,7 +111,7 @@ void gt_graphics_cairo_set_font(GtGraphics *gg, const char *family,
                              FontSlant slant, FontWeight weight)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g && family);
+  gt_assert(g && family);
   cairo_select_font_face(g->cr, family,
                          (cairo_font_slant_t) slant,
                          (cairo_font_weight_t) weight);
@@ -122,7 +122,7 @@ void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
-  assert(g && text);
+  gt_assert(g && text);
   cairo_text_extents(g->cr, text, &ext);
   if (x+ext.width > g->width)
     return;
@@ -136,7 +136,7 @@ void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
-  assert(g && text);
+  gt_assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   /* get text extents */
   cairo_text_extents(g->cr, text, &ext);
@@ -150,7 +150,7 @@ void gt_graphics_cairo_draw_text_right(GtGraphics *gg, double x, double y,
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
-  assert(g && text);
+  gt_assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   /* get text extents */
   cairo_text_extents(g->cr, text, &ext);
@@ -163,7 +163,7 @@ void gt_graphics_cairo_draw_colored_text(GtGraphics *gg, double x, double y,
                                       GtColor color, const char *text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g && text);
+  gt_assert(g && text);
   cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
@@ -172,14 +172,14 @@ void gt_graphics_cairo_draw_colored_text(GtGraphics *gg, double x, double y,
 double gt_graphics_cairo_get_image_height(GtGraphics *gg)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   return g->height;
 }
 
 double gt_graphics_cairo_get_image_width(GtGraphics *gg)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   return g->width;
 }
 
@@ -187,7 +187,7 @@ void gt_graphics_cairo_set_margins(GtGraphics *gg, double margin_x,
                                 double margin_y)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   g->margin_x = margin_x;
   g->margin_y = margin_y;
 }
@@ -196,7 +196,7 @@ void gt_graphics_cairo_draw_horizontal_line(GtGraphics *gg, double x, double y,
                                          double width)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   cairo_move_to(g->cr, x, y);
   cairo_rel_line_to(g->cr, width, 0);
   cairo_stroke(g->cr);
@@ -206,7 +206,7 @@ void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
                                        GtColor color, double length)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   cairo_save(g->cr);
   cairo_move_to(g->cr, x, y);
   cairo_set_line_width(g->cr, 0.7);
@@ -220,7 +220,7 @@ double gt_graphics_cairo_get_text_width(GtGraphics *gg, const char* text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
-  assert(g);
+  gt_assert(g);
   /* get text extents */
   cairo_text_extents(g->cr, text, &ext);
   return ext.width;
@@ -230,7 +230,7 @@ double gt_graphics_cairo_get_text_height(GtGraphics *gg)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_font_extents_t ext;
-  assert(g);
+  gt_assert(g);
   cairo_font_extents(g->cr, &ext);
   return ext.height;
 }
@@ -242,7 +242,7 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
                                 GtColor stroke_color, bool dashed)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   double dashes[]={2.0};
   /* save cairo context */
   cairo_save(g->cr);
@@ -302,7 +302,7 @@ void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   double dashes[] = {3.0};
-  assert(g);
+  gt_assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
@@ -350,7 +350,7 @@ void gt_graphics_cairo_draw_caret(GtGraphics *gg, double x, double y,
                                double stroke_width, GtColor stroke_color)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
@@ -409,7 +409,7 @@ void gt_graphics_cairo_draw_rectangle(GtGraphics *gg, double x, double y,
                                    double outline_width, double width)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
-  assert(g);
+  gt_assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_new_path(g->cr);
@@ -436,7 +436,7 @@ void gt_graphics_cairo_draw_arrowhead(GtGraphics *gg, double x, double y,
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   double arrow_height = 8, arrow_width = 5;
-  assert(g);
+  gt_assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_reset_clip(g->cr);
@@ -475,7 +475,7 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
   cairo_status_t rval;
   gt_error_check(err);
   GtGenFile *outfile;
-  assert(g && filename);
+  gt_assert(g && filename);
   /* do nothing if no surface was created */
   if (g->from_context)
     return 0;
@@ -483,7 +483,8 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
   {
     case GT_GRAPHICS_PNG:
       rval = cairo_surface_write_to_png(g->surf, filename);
-      assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
+      gt_assert(rval == CAIRO_STATUS_SUCCESS ||
+                rval == CAIRO_STATUS_WRITE_ERROR);
       if (rval == CAIRO_STATUS_WRITE_ERROR)
       {
         gt_error_set(err, "an I/O error occurred while attempting "
@@ -511,11 +512,11 @@ void gt_graphics_cairo_save_to_stream(const GtGraphics *gg, GtStr *stream)
 {
   const GtGraphicsCairo *g = (const GtGraphicsCairo*) gg;
   cairo_status_t rval;
-  assert(g && stream);
+  gt_assert(g && stream);
   /* do nothing if no surface was created */
   if (g->from_context) return;
   rval = cairo_surface_write_to_png_stream(g->surf, str_write_func, stream);
-  assert(rval == CAIRO_STATUS_SUCCESS); /* str_write_func() is sane */
+  gt_assert(rval == CAIRO_STATUS_SUCCESS); /* str_write_func() is sane */
 }
 
 void gt_graphics_cairo_delete(GtGraphics *gg)

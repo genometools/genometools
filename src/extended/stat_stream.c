@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/stat_stream.h"
 #include "extended/stat_visitor.h"
 #include "extended/node_stream_rep.h"
@@ -39,11 +39,11 @@ static int stat_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   stat_stream = stat_stream_cast(gs);
   had_err = gt_node_stream_next(stat_stream->in_stream, gn, err);
   if (!had_err) {
-    assert(stat_stream->stat_visitor);
+    gt_assert(stat_stream->stat_visitor);
     if (*gn) {
       stat_stream->number_of_DAGs++;
       had_err = gt_genome_node_accept(*gn, stat_stream->stat_visitor, err);
-      assert(!had_err); /* the status visitor is sane */
+      gt_assert(!had_err); /* the status visitor is sane */
     }
   }
   return had_err;

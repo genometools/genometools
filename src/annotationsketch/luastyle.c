@@ -23,7 +23,7 @@
 
 void gt_lua_put_style_in_registry(lua_State *L, GtStyle *style)
 {
-  assert(L && style);
+  gt_assert(L && style);
   lua_pushlightuserdata(L, STYLE_KEY);
   lua_pushlightuserdata(L, style);
   lua_rawset(L, LUA_REGISTRYINDEX);
@@ -32,10 +32,10 @@ void gt_lua_put_style_in_registry(lua_State *L, GtStyle *style)
 GtStyle* gt_lua_get_style_from_registry(lua_State *L)
 {
   GtStyle *style;
-  assert(L);
+  gt_assert(L);
   lua_pushlightuserdata(L, STYLE_KEY);
   lua_rawget(L, LUA_REGISTRYINDEX);
-  assert(lua_islightuserdata(L, -1));
+  gt_assert(lua_islightuserdata(L, -1));
   style = lua_touserdata(L, -1);
   lua_pop(L, 1);
   return style;

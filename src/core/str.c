@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include <assert.h>
+#include "core/assert.h"
 #include "core/cstr.h"
 #include "core/dynalloc.h"
 #include "core/ensure.h"
@@ -53,7 +53,7 @@ void gt_str_set(GtStr *s, const char *cstr)
 {
   size_t cstrlen;
   char *sptr;
-  assert(s);
+  gt_assert(s);
   if (!cstr)
     s->length = 0;
   else {
@@ -68,7 +68,7 @@ void gt_str_set(GtStr *s, const char *cstr)
 
 void gt_str_append_str(GtStr *dest, const GtStr* src)
 {
-  assert(dest && src);
+  gt_assert(dest && src);
   dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
                            (dest->length + src->length + 1) * sizeof (char));
   memcpy(dest->cstr + dest->length, src->cstr, src->length);
@@ -79,7 +79,7 @@ void gt_str_append_cstr(GtStr *dest, const char *cstr)
 {
   size_t cstrlen;
   char *destptr;
-  assert(dest && cstr);
+  gt_assert(dest && cstr);
   cstrlen = strlen(cstr);
   dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
                            (dest->length + cstrlen + 1) * sizeof (char));
@@ -91,7 +91,7 @@ void gt_str_append_cstr(GtStr *dest, const char *cstr)
 
 void gt_str_append_cstr_nt(GtStr *dest, const char *cstr, unsigned long length)
 {
-  assert(dest && cstr);
+  gt_assert(dest && cstr);
   dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
                            (dest->length + length + 1) * sizeof (char));
   memcpy(dest->cstr + dest->length, cstr, length);
@@ -104,7 +104,7 @@ void gt_str_append_ulong(GtStr *dest, unsigned long u)
   unsigned int ulength = 1;
   unsigned long q = u;
   char *s;
-  assert(dest);
+  gt_assert(dest);
   /* determine length of u */
   while (q > 9) {
     ulength++;
@@ -125,7 +125,7 @@ void gt_str_append_ulong(GtStr *dest, unsigned long u)
 
 void gt_str_append_char(GtStr *dest, char c)
 {
-  assert(dest);
+  gt_assert(dest);
   if (dest->length + 2 > dest->allocated) {
     dest->cstr = gt_dynalloc(dest->cstr, &dest->allocated,
                              (dest->length + 2) * sizeof (char));
@@ -137,22 +137,22 @@ void gt_str_append_double(GtStr *dest, double d, int precision)
 {
   char buf[BUFSIZ];
   int rval;
-  assert(dest);
+  gt_assert(dest);
   rval = snprintf(buf, BUFSIZ, "%.*f", precision, d);
-  assert(rval < BUFSIZ);
+  gt_assert(rval < BUFSIZ);
   gt_str_append_cstr(dest, buf);
 }
 
 char* gt_str_get(const GtStr *s)
 {
-  assert(s);
+  gt_assert(s);
   s->cstr[s->length] = '\0';
   return s->cstr;
 }
 
 void* gt_str_get_mem(const GtStr *s)
 {
-  assert(s);
+  gt_assert(s);
   return s->cstr;
 }
 
@@ -163,23 +163,23 @@ unsigned long gt_str_length(const GtStr *s)
 
 void gt_str_set_length(GtStr *s, unsigned long length)
 {
-  assert(s && length <= s->length);
+  gt_assert(s && length <= s->length);
   s->length = length;
 }
 
 void gt_str_reset(GtStr *s)
 {
-  assert(s);
+  gt_assert(s);
   s->length = 0;
 }
 
 /* does not handle embedded \0's */
 int gt_str_cmp(const GtStr *s1, const GtStr *s2)
 {
-  assert(s1 && s2);
+  gt_assert(s1 && s2);
   if (s1 == s2)
     return 0; /* a string is equal to itself */
-  assert(s1->cstr && s2->cstr);
+  gt_assert(s1->cstr && s2->cstr);
   s1->cstr[s1->length] = '\0';
   s2->cstr[s2->length] = '\0';
   return strcmp(s1->cstr, s2->cstr);
@@ -188,7 +188,7 @@ int gt_str_cmp(const GtStr *s1, const GtStr *s2)
 GtStr* gt_str_clone(const GtStr *s)
 {
   GtStr *s_copy;
-  assert(s);
+  gt_assert(s);
   s_copy = gt_malloc(sizeof *s_copy);
   s->cstr[s->length] = '\0';
   s_copy->cstr = gt_cstr_dup(s->cstr);
@@ -208,7 +208,7 @@ int gt_str_read_next_line(GtStr *s, FILE *fpin)
 {
   int cc;
   char c;
-  assert(s && fpin);
+  gt_assert(s && fpin);
   for (;;) {
     cc = gt_xfgetc(fpin);
     if (cc == EOF)
@@ -234,7 +234,7 @@ int gt_str_read_next_line_generic(GtStr *s, GtGenFile *fpin)
 {
   int cc;
   char c;
-  assert(s);
+  gt_assert(s);
   for (;;) {
     cc = gt_genfile_xfgetc(fpin);
     if (cc == EOF)

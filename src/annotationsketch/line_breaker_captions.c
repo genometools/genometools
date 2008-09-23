@@ -35,7 +35,7 @@ static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lcb,
 {
   double textwidth = 0.0;
   GtDrawingRange drange;
-  assert(block && lcb);
+  gt_assert(block && lcb);
   drange = gt_canvas_convert_coords(lcb->canvas, gt_block_get_range(block));
   if (gt_block_get_caption(block))
   {
@@ -54,7 +54,7 @@ bool gt_line_breaker_captions_is_gt_line_occupied(GtLineBreaker* lb,
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
   unsigned long *num;
-  assert(lb && block && line);
+  gt_assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
   dr = calculate_drawing_range(lbcap, block);
   if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
@@ -70,7 +70,7 @@ void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
   unsigned long *num;
-  assert(lb && block && line);
+  gt_assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
   if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
   {
@@ -104,7 +104,7 @@ const GtLineBreakerClass* gt_line_breaker_captions_class(void)
 
 GtLineBreaker* gt_line_breaker_captions_new(GtCanvas *canvas)
 {
-  assert(canvas);
+  gt_assert(canvas);
   GtLineBreakerCaptions *lbcap;
   GtLineBreaker *lb;
   lb = gt_line_breaker_create(gt_line_breaker_captions_class());

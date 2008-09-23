@@ -44,7 +44,7 @@ static unsigned long currentspecialrangevalue(
 */
   if (maxspecialtype == UINT32_MAX)
   {
-    assert(len - 1 <= UINT32_MAX);
+    gt_assert(len - 1 <= UINT32_MAX);
     return occcount;
   }
   if (len <= maxspecialtype+1)

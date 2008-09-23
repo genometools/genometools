@@ -40,37 +40,37 @@ GtTranscriptExons* gt_transcript_exons_new(void)
 
 GtArray* gt_transcript_exons_get_all(const GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_array_all;
 }
 
 GtArray* gt_transcript_exons_get_single(const GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_array_single;
 }
 
 GtArray* gt_transcript_exons_get_initial(const GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_array_initial;
 }
 
 GtArray* gt_transcript_exons_get_internal(const GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_array_internal;
 }
 
 GtArray* gt_transcript_exons_get_terminal(const GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   return te->exon_array_terminal;
 }
 
 void gt_transcript_exons_sort(const GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   gt_ranges_sort(te->exon_array_all);
   gt_ranges_sort(te->exon_array_single);
   gt_ranges_sort(te->exon_array_initial);
@@ -83,7 +83,7 @@ GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons
 {
   GtTranscriptCounts *tc;
   GtArray *counts;
-  assert(te);
+  gt_assert(te);
   tc = gt_transcript_counts_new();
   counts = gt_ranges_uniq_in_place_count(te->exon_array_all);
   gt_transcript_counts_set_all(tc, counts);
@@ -100,7 +100,7 @@ GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons
 
 bool gt_transcript_exons_are_sorted(const GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   if (!gt_ranges_are_sorted(te->exon_array_all)) return false;
   if (!gt_ranges_are_sorted(te->exon_array_single)) return false;
   if (!gt_ranges_are_sorted(te->exon_array_initial)) return false;
@@ -112,7 +112,7 @@ bool gt_transcript_exons_are_sorted(const GtTranscriptExons *te)
 GtTranscriptGtBittabs* gt_transcript_exons_create_bittabs(const
                                                           GtTranscriptExons *te)
 {
-  assert(te);
+  gt_assert(te);
   return gt_transcript_bittabs_new(gt_array_size(te->exon_array_all),
                                 gt_array_size(te->exon_array_single),
                                 gt_array_size(te->exon_array_initial),

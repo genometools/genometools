@@ -18,7 +18,7 @@
 #ifndef ARRAYDEF_H
 #define ARRAYDEF_H
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/ma.h"
 #include "core/symboldef.h"
 
@@ -106,7 +106,7 @@
 
 #define STOREINARRAY(A,TYPE,L,VAL)\
         CHECKARRAYSPACE(A,TYPE,L);\
-        assert((A)->space##TYPE != NULL);\
+        gt_assert((A)->space##TYPE != NULL);\
         (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL
 
 /*

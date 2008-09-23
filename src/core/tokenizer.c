@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/ensure.h"
 #include "core/fa.h"
 #include "core/ma.h"
@@ -31,7 +31,7 @@ struct GtTokenizer {
 GtTokenizer* gt_tokenizer_new(GtIO *io)
 {
   GtTokenizer *t;
-  assert(io);
+  gt_assert(io);
   t = gt_calloc(1, sizeof (GtTokenizer));
   t->io = io;
   return t;
@@ -39,14 +39,14 @@ GtTokenizer* gt_tokenizer_new(GtIO *io)
 
 void gt_tokenizer_skip_comment_lines(GtTokenizer *t)
 {
-  assert(t);
+  gt_assert(t);
   t->skip_comment_lines = true;
 }
 
 GtStr* gt_tokenizer_get_token(GtTokenizer *t)
 {
   char c = EOF;
-  assert(t);
+  gt_assert(t);
 
   /* if we have no current token, get it if possible */
   if (!t->token) {
@@ -71,7 +71,7 @@ GtStr* gt_tokenizer_get_token(GtTokenizer *t)
       }
     } while ((gt_io_get_char(t->io, &c) != -1) && c != ' ' && c != '\n');
     if (c == '\n' && c != EOF) {
-      assert(t->token);
+      gt_assert(t->token);
       gt_str_append_char(t->token, c);
     }
   }
@@ -85,7 +85,7 @@ bool gt_tokenizer_has_token(GtTokenizer *t)
 {
   bool has_token = false;
   GtStr *token;
-  assert(t);
+  gt_assert(t);
   token = gt_tokenizer_get_token(t);
   if (token) {
     has_token = true;
@@ -96,26 +96,26 @@ bool gt_tokenizer_has_token(GtTokenizer *t)
 
 bool gt_tokenizer_line_start(const GtTokenizer *t)
 {
-  assert(t);
+  gt_assert(t);
   return gt_io_line_start(t->io);
 }
 
 void gt_tokenizer_next_token(GtTokenizer *t)
 {
-  assert(t);
+  gt_assert(t);
   gt_str_delete(t->token);
   t->token = NULL;
 }
 
 unsigned long gt_tokenizer_get_line_number(const GtTokenizer *t)
 {
-  assert(t);
+  gt_assert(t);
   return gt_io_get_line_number(t->io);
 }
 
 const char* gt_tokenizer_get_filename(const GtTokenizer *t)
 {
-  assert(t);
+  gt_assert(t);
   return gt_io_get_filename(t->io);
 }
 

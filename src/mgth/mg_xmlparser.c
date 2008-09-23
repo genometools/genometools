@@ -335,7 +335,7 @@ static void XMLCALL endElement(void *data, const char *name)
         /* gi_ptr zeigt auf die erste Zahl der Hit-GI-Nummer */
         gi_ptr = strchr(gt_str_get(PARSESTRUCT(buf_ptr)), '|');
 
-        assert(gi_ptr != NULL);
+        gt_assert(gi_ptr != NULL);
         gi_ptr = gi_ptr + 1;
 
         if (!isalpha(*gi_ptr))

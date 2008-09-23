@@ -38,7 +38,7 @@ struct GtElement {
 GtElement* gt_element_new(GtFeatureNode *gf)
 {
   GtElement *element;
-  assert(gf);
+  gt_assert(gf);
   element = gt_element_new_empty();
   gt_element_set_type(element, gt_feature_node_get_type(gf));
   gt_element_set_range(element, gt_genome_node_get_range((GtGenomeNode*) gf));
@@ -50,7 +50,7 @@ GtElement* gt_element_new(GtFeatureNode *gf)
 
 GtElement* gt_element_ref(GtElement *elem)
 {
-  assert(elem);
+  gt_assert(elem);
   elem->refcount++;
   return elem;
 }
@@ -63,49 +63,49 @@ GtElement* gt_element_new_empty(void)
 GtDrawingRange gt_element_calculate_drawing_range(GtElement *element,
                                              GtCanvas *canvas)
 {
-  assert(element && canvas);
+  gt_assert(element && canvas);
   element->drange = gt_canvas_convert_coords(canvas, element->range);
   return element->drange;
 }
 
 GtRange gt_element_get_range(const GtElement *element)
 {
-  assert(element);
+  gt_assert(element);
   return element->range;
 }
 
 void gt_element_set_range(GtElement *element, GtRange r)
 {
-  assert(element);
+  gt_assert(element);
   element->range = r;
 }
 
 const char* gt_element_get_type(const GtElement *element)
 {
-  assert(element);
+  gt_assert(element);
   return element->type;
 }
 
 void gt_element_set_type(GtElement *element, const char *type)
 {
-  assert(element);
+  gt_assert(element);
   element->type = type;
 }
 
 GtStrand gt_element_get_strand(const GtElement *element)
 {
-  assert(element);
+  gt_assert(element);
   return element->strand;
 }
 bool gt_element_is_marked(const GtElement *element)
 {
-  assert(element);
+  gt_assert(element);
   return element->mark;
 }
 
 static bool elements_are_equal(const GtElement *e1, const GtElement *e2)
 {
-  assert(e1 && e2);
+  gt_assert(e1 && e2);
   if (e1->type == e2->type && !gt_range_compare(e1->range, e2->range))
     return true;
   return false;
@@ -114,14 +114,14 @@ static bool elements_are_equal(const GtElement *e1, const GtElement *e2)
 int gt_element_sketch(GtElement *elem, GtCanvas *canvas)
 {
   int had_err = 0;
-  assert(elem && canvas);
+  gt_assert(elem && canvas);
   gt_canvas_visit_element(canvas, elem);
   return had_err;
 }
 
 GtFeatureNode* gt_element_get_node_ref(const GtElement *elem)
 {
-  assert(elem);
+  gt_assert(elem);
   return elem->gn;
 }
 

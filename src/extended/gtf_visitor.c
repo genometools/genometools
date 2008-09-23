@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdlib.h>
 #include <string.h>
 #include "core/fptr_api.h"
@@ -41,7 +41,7 @@ struct GtGTFVisitor {
 static void gtf_visitor_free(GtNodeVisitor *gv)
 {
   GtGTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
-  assert(gtf_visitor);
+  gt_assert(gtf_visitor);
   gt_array_delete(gtf_visitor->exon_features);
   gt_array_delete(gtf_visitor->CDS_features);
 }
@@ -62,7 +62,7 @@ static int save_exon_node(GtGenomeNode *gn, void *data,
 {
   GtGTFVisitor *gtf_visitor;
   gt_error_check(err);
-  assert(gn && data);
+  gt_assert(gn && data);
   gtf_visitor = (GtGTFVisitor*) data;
   if (gt_feature_node_has_type((GtFeatureNode*) gn, gft_exon))
     gt_array_add(gtf_visitor->exon_features, gn);
@@ -78,7 +78,7 @@ static int gtf_show_transcript(GtGenomeNode *gn, GtGTFVisitor *gtf_visitor,
   unsigned long i;
   int had_err;
   gt_error_check(err);
-  assert(gn && gtf_visitor);
+  gt_assert(gn && gtf_visitor);
   gt_array_reset(gtf_visitor->exon_features);
   gt_array_reset(gtf_visitor->CDS_features);
   had_err = gt_genome_node_traverse_direct_children(gn, gtf_visitor,

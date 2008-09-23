@@ -17,7 +17,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -520,7 +520,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         copyStart = random() % numRnd;
         numValueCopies = random()%(numRnd - copyStart) + 1;
       }
-      assert(copyStart + numValueCopies <= numRnd);
+      gt_assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
       gt_bsStoreUniformUIntArray(bitStore, offset, numBits,
                                        numValueCopies, randSrc);
@@ -571,7 +571,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         resetStart = random() % numRnd;
         numResetValues = random()%(numRnd - resetStart) + 1;
       }
-      assert(resetStart + numResetValues <= numRnd);
+      gt_assert(resetStart + numResetValues <= numRnd);
       offset = offsetStart;
       gt_bsStoreUniformIntArray(bitStore, offset, numBits, numRnd,
                                     (int *)randSrc);
@@ -646,7 +646,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         countStart = random() % numRnd;
         numCountValues = random()%(numRnd - countStart) + 1;
       }
-      assert(countStart + numCountValues <= numRnd);
+      gt_assert(countStart + numCountValues <= numRnd);
       offset = offsetStart;
       gt_bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd,
                                        randSrc);

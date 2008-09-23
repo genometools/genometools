@@ -33,7 +33,7 @@ availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  assert(params && err);
+  gt_assert(params && err);
   gt_error_check(err);
   if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB
                         | SARR_ESQTAB, params->projectName, verbosity, err))
@@ -61,7 +61,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  assert(params && err);
+  gt_assert(params && err);
   gt_error_check(err);
   do
   {
@@ -91,7 +91,7 @@ availBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
                   Seqpos totalLen, GtError *err)
 {
   BWTSeq *bwtSeq;
-  assert(sa && params && err);
+  gt_assert(sa && params && err);
   gt_error_check(err);
   /* try loading index */
   bwtSeq = loadBWTSeqForSA(params->projectName, params->seqParams.encType,
@@ -128,7 +128,7 @@ loadBWTSeq(const GtStr *projectName, int BWTOptFlags, Verboseinfo *verbosity,
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  assert(projectName && err);
+  gt_assert(projectName && err);
   gt_error_check(err);
   if (mapsuffixarray(&suffixArray, &len, 0, projectName, verbosity, err))
     return NULL;
@@ -147,7 +147,7 @@ loadBWTSeqForSA(const GtStr *projectName, enum seqBaseEncoding encType,
   struct BWTSeq *bwtSeq = NULL;
   EISeq *seqIdx = NULL;
   MRAEnc *alphabet = NULL;
-  assert(projectName && sa && err);
+  gt_assert(projectName && sa && err);
   alphabet = SANewMRAEnc(sa);
   if ((seqIdx = loadEncIdxSeqForSA(
          sa, totalLen, projectName, encType,
@@ -220,7 +220,7 @@ createBWTSeqFromSAI(const struct bwtParam *params,
   BWTSeq *bwtSeq;
   SpecialsRankLookup *sprTable = NULL;
   const enum rangeSortMode *rangeSort;
-  assert(sai && err && params);
+  gt_assert(sai && err && params);
   buildSpRTable(params, SAIGetLength(sai), SAIGetEncSeq(sai),
                 SAIGetReadmode(sai), &sprTable, &rangeSort);
   bwtSeq = createBWTSeqFromSASS(params, SAI2SASS(sai), sprTable, rangeSort,
@@ -237,7 +237,7 @@ createBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *sfxi,
   BWTSeq *bwtSeq;
   SpecialsRankLookup *sprTable = NULL;
   const enum rangeSortMode *rangeSort;
-  assert(sfxi && params && err);
+  gt_assert(sfxi && params && err);
   buildSpRTable(params, SfxIGetLength(sfxi), SfxIGetEncSeq(sfxi),
                 SfxIGetReadmode(sfxi), &sprTable, &rangeSort);
   bwtSeq = createBWTSeqFromSASS(params, SfxI2SASS(sfxi), sprTable, rangeSort,

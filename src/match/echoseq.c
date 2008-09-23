@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/seqiterator.h"
@@ -30,16 +30,16 @@ unsigned long *calcdescendpositions(const char *destab,
   unsigned long *descendtab, i, idx = 0;
 
   ALLOCASSIGNSPACE(descendtab,NULL,unsigned long,numofsequences);
-  assert(destab != NULL);
+  gt_assert(destab != NULL);
   for (i=0; i<destablength; i++)
   {
     if (destab[i] == '\n')
     {
-      assert(idx < numofsequences);
+      gt_assert(idx < numofsequences);
       descendtab[idx++] = i;
     }
   }
-  assert(idx == numofsequences);
+  gt_assert(idx == numofsequences);
   return descendtab;
 }
 
@@ -53,7 +53,7 @@ const char *retriesequencedescription(unsigned long *desclen,
     *desclen = descendtab[0];
     return destab;
   }
-  assert(descendtab[seqnum-1] < descendtab[seqnum]);
+  gt_assert(descendtab[seqnum-1] < descendtab[seqnum]);
   *desclen = descendtab[seqnum] - descendtab[seqnum-1] - 1;
   return destab + descendtab[seqnum-1] + 1;
 }
@@ -107,7 +107,7 @@ void symbolstring2fasta(FILE *fpout,
   unsigned long i, j;
   Uchar currentchar;
 
-  assert(width > 0);
+  gt_assert(width > 0);
   if (desc == NULL)
   {
     fprintf(fpout,">\n");
@@ -158,7 +158,7 @@ void encseq2symbolstring(FILE *fpout,
 
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,start);
-  assert(width > 0);
+  gt_assert(width > 0);
   lastpos = start + wlen - 1;
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
@@ -201,7 +201,7 @@ void fprintfencseq(FILE *fpout,
   for (idx = start; idx < start + wlen; idx++)
   {
     currentchar = getencodedchar(encseq,idx,Forwardmode);
-    assert(ISNOTSPECIAL(currentchar));
+    gt_assert(ISNOTSPECIAL(currentchar));
     echoprettysymbol(fpout,alpha,currentchar);
   }
 }
@@ -215,7 +215,7 @@ void encseq2fastaoutput(FILE *fpout,
                         Seqpos wlen,
                         unsigned long width)
 {
-  assert(width > 0);
+  gt_assert(width > 0);
   if (desc == NULL)
   {
     fprintf(fpout,">\n");

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/feature_node.h"
 #include "extended/filter_stream.h"
 #include "extended/filter_visitor.h"
@@ -47,7 +47,7 @@ static int filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
   /* no nodes in the buffer -> get new nodes */
   while (!(had_err = gt_node_stream_next(fs->in_stream, gn, err)) && *gn) {
-    assert(*gn && !had_err);
+    gt_assert(*gn && !had_err);
     had_err = gt_genome_node_accept(*gn, fs->filter_visitor, err);
     if (had_err)
       break;
@@ -58,7 +58,7 @@ static int filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   }
 
   /* either we have an error or no new node */
-  assert(had_err || !*gn);
+  gt_assert(had_err || !*gn);
   return had_err;
 }
 
@@ -93,7 +93,7 @@ GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream,
   GtNodeStream *gs = gt_node_stream_create(gt_filter_stream_class(),
                                           gt_node_stream_is_sorted(in_stream));
   GtFilterStream *filter_stream = gt_filter_stream_cast(gs);
-  assert(in_stream);
+  gt_assert(in_stream);
   filter_stream->in_stream = gt_node_stream_ref(in_stream);
   filter_stream->filter_visitor = gt_filter_visitor_new(seqid, typefilter,
                                                      contain_range,

@@ -31,7 +31,7 @@ GtBioseqIterator* gt_bioseq_iterator_new(int seqfile_counter,
                                     const char **sequence_files)
 {
   GtBioseqIterator *bsi;
-  assert(sequence_files);
+  gt_assert(sequence_files);
   bsi = gt_calloc(1, sizeof *bsi);
   bsi->seqfile_counter = seqfile_counter ? seqfile_counter : 1 /* for stdin */;
   bsi->sequence_files = gt_cstr_array_dup(sequence_files);
@@ -50,7 +50,7 @@ int gt_bioseq_iterator_next(GtBioseqIterator *bsi, GtBioseq **bioseq,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(bsi && bioseq);
+  gt_assert(bsi && bioseq);
   if (bsi->current_file < bsi->seqfile_counter) {
     if (bsi->sequence_files[bsi->current_file] &&
         !strcmp(bsi->sequence_files[bsi->current_file], "-")) {

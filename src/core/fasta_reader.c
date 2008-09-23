@@ -22,7 +22,7 @@
 GtFastaReader* gt_fasta_reader_create(const GtFastaReaderClass *frc)
 {
   GtFastaReader *fr;
-  assert(frc && frc->size);
+  gt_assert(frc && frc->size);
   fr = gt_calloc(1, frc->size);
   fr->c_class = frc;
   return fr;
@@ -31,7 +31,7 @@ GtFastaReader* gt_fasta_reader_create(const GtFastaReaderClass *frc)
 void gt_fasta_reader_delete(GtFastaReader *fr)
 {
   if (!fr) return;
-  assert(fr->c_class && fr->c_class->free);
+  gt_assert(fr->c_class && fr->c_class->free);
   fr->c_class->free(fr);
   gt_free(fr);
 }
@@ -43,7 +43,7 @@ int gt_fasta_reader_run(GtFastaReader *fr,
                      void *data, GtError *err)
 {
   gt_error_check(err);
-  assert(fr && fr->c_class && fr->c_class->run);
+  gt_assert(fr && fr->c_class && fr->c_class->run);
   return fr->c_class->run(fr, proc_description, proc_sequence_part,
                           proc_sequence_length, data, err);
 }
@@ -51,6 +51,6 @@ int gt_fasta_reader_run(GtFastaReader *fr,
 void* gt_fasta_reader_cast(GT_UNUSED const GtFastaReaderClass *frc,
                            GtFastaReader *fr)
 {
-  assert(frc && fr && fr->c_class == frc);
+  gt_assert(frc && fr && fr->c_class == frc);
   return fr;
 }

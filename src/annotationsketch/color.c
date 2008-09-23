@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/ma.h"
 #include "annotationsketch/color.h"
 
@@ -30,7 +30,7 @@ GtColor* gt_color_new(double red, double green, double blue)
 
 void gt_color_set(GtColor *color, double red, double green, double blue)
 {
-  assert(color);
+  gt_assert(color);
   color->red = red;
   color->green = green;
   color->blue = blue;
@@ -38,7 +38,7 @@ void gt_color_set(GtColor *color, double red, double green, double blue)
 
 bool gt_color_equals(const GtColor *c1, const GtColor *c2)
 {
-  assert(c1 && c2);
+  gt_assert(c1 && c2);
   return ((c1->red == c2->red) && (c1->green == c2->green) &&
           (c1->blue == c2->blue));
 }

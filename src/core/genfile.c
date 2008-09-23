@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdio.h>
 #include <string.h>
 #include "core/cstr.h"
@@ -63,7 +63,7 @@ const char* gt_genfilemode_suffix(GtGenFileMode mode)
     case GFM_BZIP2:
       return ".bz2";
     default:
-      assert(0);
+      gt_assert(0);
       return "";
   }
   /* due do warning on solaris:
@@ -75,7 +75,7 @@ size_t gt_genfile_basename_length(const char *path)
 {
   size_t path_length;
 
-  assert(path);
+  gt_assert(path);
   path_length = strlen(path);
 
   if (path_length >= 4 && strcmp(".gz", path + path_length - 3) == 0)
@@ -90,7 +90,7 @@ GtGenFile* gt_genfile_open(GtGenFileMode genfilemode, const char *path,
 {
   GtGenFile *genfile;
   gt_error_check(err);
-  assert(mode);
+  gt_assert(mode);
   genfile = gt_calloc(1, sizeof (GtGenFile));
   genfile->mode = genfilemode;
   if (path) {
@@ -118,11 +118,11 @@ GtGenFile* gt_genfile_open(GtGenFileMode genfilemode, const char *path,
         genfile->orig_path = gt_cstr_dup(path);
         genfile->orig_mode = gt_cstr_dup(path);
         break;
-      default: assert(0);
+      default: gt_assert(0);
     }
   }
   else {
-    assert(genfilemode == GFM_UNCOMPRESSED);
+    gt_assert(genfilemode == GFM_UNCOMPRESSED);
     genfile->fileptr.file = stdin;
     genfile->is_stdin = true;
   }
@@ -133,7 +133,7 @@ GtGenFile* gt_genfile_xopen_w_gfmode(GtGenFileMode genfilemode,
                                       const char *path, const char *mode)
 {
   GtGenFile *genfile;
-  assert(mode);
+  gt_assert(mode);
   genfile = gt_calloc(1, sizeof (GtGenFile));
   genfile->mode = genfilemode;
   if (path) {
@@ -149,11 +149,11 @@ GtGenFile* gt_genfile_xopen_w_gfmode(GtGenFileMode genfilemode,
         genfile->orig_path = gt_cstr_dup(path);
         genfile->orig_mode = gt_cstr_dup(path);
         break;
-      default: assert(0);
+      default: gt_assert(0);
     }
   }
   else {
-    assert(genfilemode == GFM_UNCOMPRESSED);
+    gt_assert(genfilemode == GFM_UNCOMPRESSED);
     genfile->fileptr.file = stdin;
     genfile->is_stdin = true;
   }
@@ -162,14 +162,14 @@ GtGenFile* gt_genfile_xopen_w_gfmode(GtGenFileMode genfilemode,
 
 GtGenFile* gt_genfile_xopen(const char *path, const char *mode)
 {
-  assert(mode);
+  gt_assert(mode);
   return gt_genfile_xopen_w_gfmode(gt_genfilemode_determine(path), path, mode);
 }
 
 GtGenFile* gt_genfile_new(FILE *fp)
 {
   GtGenFile *genfile;
-  assert(fp);
+  gt_assert(fp);
   genfile = gt_calloc(1, sizeof (GtGenFile));
   genfile->mode = GFM_UNCOMPRESSED;
   genfile->fileptr.file = fp;
@@ -178,7 +178,7 @@ GtGenFile* gt_genfile_new(FILE *fp)
 
 GtGenFileMode gt_genfile_mode(GtGenFile *genfile)
 {
-  assert(genfile);
+  gt_assert(genfile);
   return genfile->mode;
 }
 
@@ -201,7 +201,7 @@ int gt_genfile_xfgetc(GtGenFile *genfile)
         case GFM_BZIP2:
           c = gt_xbzfgetc(genfile->fileptr.bzfile);
           break;
-        default: assert(0);
+        default: gt_assert(0);
       }
     }
   }
@@ -212,8 +212,8 @@ int gt_genfile_xfgetc(GtGenFile *genfile)
 
 void gt_genfile_unget_char(GtGenFile *genfile, char c)
 {
-  assert(genfile);
-  assert(!genfile->unget_used); /* only one char can be unget at a time */
+  gt_assert(genfile);
+  gt_assert(!genfile->unget_used); /* only one char can be unget at a time */
   genfile->unget_char = c;
   genfile->unget_used = true;
 }
@@ -223,7 +223,7 @@ static int vgzprintf(gzFile file, const char *format, va_list va)
   char buf[BUFSIZ];
   int len;
   len = vsnprintf(buf, sizeof (buf), format, va);
-  assert(len <= BUFSIZ);
+  gt_assert(len <= BUFSIZ);
   return gzwrite(file, buf, (unsigned) len);
 }
 
@@ -232,7 +232,7 @@ static int vbzprintf(BZFILE *file, const char *format, va_list va)
   char buf[BUFSIZ];
   int len;
   len = vsnprintf(buf, sizeof (buf), format, va);
-  assert(len <= BUFSIZ);
+  gt_assert(len <= BUFSIZ);
   return BZ2_bzwrite(file, buf, len);
 }
 
@@ -253,7 +253,7 @@ static int xvprintf(GtGenFile *genfile, const char *format, va_list va)
       case GFM_BZIP2:
         rval = vbzprintf(genfile->fileptr.bzfile, format, va);
         break;
-      default: assert(0);
+      default: gt_assert(0);
     }
   }
   return rval;
@@ -285,7 +285,7 @@ void gt_genfile_xfputc(int c, GtGenFile *genfile)
     case GFM_BZIP2:
       gt_xbzfputc(c, genfile->fileptr.bzfile);
       break;
-    default: assert(0);
+    default: gt_assert(0);
   }
 }
 
@@ -303,7 +303,7 @@ void gt_genfile_xfputs(const char *str, GtGenFile *genfile)
     case GFM_BZIP2:
       gt_xbzfputs(str, genfile->fileptr.bzfile);
       break;
-    default: assert(0);
+    default: gt_assert(0);
   }
 }
 
@@ -321,7 +321,7 @@ int gt_genfile_xread(GtGenFile *genfile, void *buf, size_t nbytes)
       case GFM_BZIP2:
         rval = gt_xbzread(genfile->fileptr.bzfile, buf, nbytes);
         break;
-      default: assert(0);
+      default: gt_assert(0);
     }
   }
   else
@@ -345,13 +345,13 @@ void gt_genfile_xwrite(GtGenFile *genfile, void *buf, size_t nbytes)
     case GFM_BZIP2:
       gt_xbzwrite(genfile->fileptr.bzfile, buf, nbytes);
       break;
-    default: assert(0);
+    default: gt_assert(0);
   }
 }
 
 void gt_genfile_xrewind(GtGenFile *genfile)
 {
-  assert(genfile);
+  gt_assert(genfile);
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
       rewind(genfile->fileptr.file);
@@ -363,7 +363,7 @@ void gt_genfile_xrewind(GtGenFile *genfile)
       gt_xbzrewind(&genfile->fileptr.bzfile, genfile->orig_path,
                 genfile->orig_mode);
       break;
-    default: assert(0);
+    default: gt_assert(0);
   }
 }
 
@@ -389,7 +389,7 @@ void gt_genfile_close(GtGenFile *genfile)
     case GFM_BZIP2:
         gt_fa_bzclose(genfile->fileptr.bzfile);
       break;
-    default: assert(0);
+    default: gt_assert(0);
   }
   gt_genfile_delete(genfile);
 }

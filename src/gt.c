@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
   if (gt_error_is_set(err)) {
     fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
             gt_error_get(err));
-    assert(rval);
+    gt_assert(rval);
   }
   gtr_delete(gtr);
   gt_error_delete(err);

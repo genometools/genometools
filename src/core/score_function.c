@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/ma.h"
 #include "core/score_function.h"
 #include "core/xansi.h"
@@ -30,7 +30,7 @@ GT_ScoreFunction* gt_score_function_new(GtScoreMatrix *sm, int deletion_score,
                                  int insertion_score)
 {
   GT_ScoreFunction *sf;
-  assert(sm);
+  gt_assert(sm);
   sf = gt_malloc(sizeof (GT_ScoreFunction));
   sf->sm = sm;
   sf->deletion_score = deletion_score;
@@ -41,25 +41,25 @@ GT_ScoreFunction* gt_score_function_new(GtScoreMatrix *sm, int deletion_score,
 int gt_score_function_get_score(const GT_ScoreFunction *sf,
                             unsigned int idx1, unsigned int idx2)
 {
-  assert(sf);
+  gt_assert(sf);
   return gt_score_matrix_get_score(sf->sm, idx1, idx2);
 }
 
 const int** gt_score_function_get_scores(const GT_ScoreFunction *sf)
 {
-  assert(sf);
+  gt_assert(sf);
   return gt_score_matrix_get_scores(sf->sm);
 }
 
 int gt_score_function_get_deletion_score(const GT_ScoreFunction *sf)
 {
-  assert(sf);
+  gt_assert(sf);
   return sf->deletion_score;
 }
 
 int gt_score_function_get_insertion_score(const GT_ScoreFunction *sf)
 {
-  assert(sf);
+  gt_assert(sf);
   return sf->insertion_score;
 }
 

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -37,7 +37,7 @@ GtMapping* gt_mapping_new(GtStr *mapping_file, const char *global_name,
   GtMapping *m;
   int had_err = 0;
   gt_error_check(err);
-  assert(mapping_file && global_name);
+  gt_assert(mapping_file && global_name);
   /* alloc */
   m = gt_malloc(sizeof (GtMapping));
   m->mapping_file = gt_str_ref(mapping_file);
@@ -99,8 +99,8 @@ static int map_table(GtMapping *m, GtStr **stroutput, long *integeroutput,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(m && input);
-  assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
+  gt_assert(m && input);
+  gt_assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
          (m->type == MAPPINGTYPE_INTEGER && integeroutput));
   lua_pushstring(m->L, input);
   lua_gettable(m->L, -2); /* get global[input] */
@@ -142,8 +142,8 @@ static int map_function(GtMapping *m, GtStr **stroutput, long *integeroutput,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(m && input);
-  assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
+  gt_assert(m && input);
+  gt_assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
          (m->type == MAPPINGTYPE_INTEGER && integeroutput));
   lua_getglobal(m->L, m->global);
   lua_pushstring(m->L, input);
@@ -184,8 +184,8 @@ static int map_generic(GtMapping *m, GtStr **stroutput, long *integeroutput,
                        const char *input, GtError *err)
 {
   gt_error_check(err);
-  assert(m && input);
-  assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
+  gt_assert(m && input);
+  gt_assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
          (m->type == MAPPINGTYPE_INTEGER && integeroutput));
   if (m->is_table)
     return map_table(m, stroutput, integeroutput, input, err);

@@ -18,14 +18,14 @@
 #ifndef SPACEDEF_H
 #define SPACEDEF_H
 #include <string.h>
-#include <assert.h>
+#include "core/assert.h"
 #include "core/error.h"
 #include "core/ma.h"
 
 #ifdef NOSPACEBOOKKEEPING
 
 #define ALLOCASSIGNSPACEGENERIC(FILENAME,LINENUM,V,S,T,N)\
-        assert(sizeof(*(V)) == sizeof (T));\
+        gt_assert(sizeof(*(V)) == sizeof (T));\
         V = (T *) realloc(S,sizeof (T) * (size_t) (N));\
         if ((V) == NULL)\
         {\
@@ -47,7 +47,7 @@
 
 #else
 #define ALLOCASSIGNSPACEGENERIC(FILENAME,LINENUM,V,S,T,N)\
-        assert(sizeof(*(V)) == sizeof (T));\
+        gt_assert(sizeof(*(V)) == sizeof (T));\
         V = gt_realloc_mem(S, sizeof (T) * (N), FILENAME,\
                            LINENUM)
 

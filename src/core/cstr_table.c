@@ -52,17 +52,17 @@ void gt_cstr_table_add(GtCstrTable *table, const char *cstr)
 {
   char *dup;
   int rval;
-  assert(table && cstr);
-  assert(!gt_cstr_table_get(table, cstr));
+  gt_assert(table && cstr);
+  gt_assert(!gt_cstr_table_get(table, cstr));
   dup = gt_cstr_dup(cstr);
   rval = gt_hashtable_add(table->strings, &dup);
-  assert(rval == 1);
+  gt_assert(rval == 1);
 }
 
 const char* gt_cstr_table_get(const GtCstrTable *table, const char *cstr)
 {
   const char **entry;
-  assert(table && cstr);
+  gt_assert(table && cstr);
   entry = gt_hashtable_get(table->strings, &cstr);
   return entry ? *entry : NULL;
 }
@@ -72,7 +72,7 @@ static enum iterator_op store_type(void *elem, void *data,
 {
   GtStrArray *types = data;
   gt_error_check(err);
-  assert(elem && types);
+  gt_assert(elem && types);
   gt_strarray_add_cstr(types, *(char**) elem);
   return CONTINUE_ITERATION;
 }
@@ -81,11 +81,11 @@ GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
 {
   int had_err;
   GtStrArray *cstrs;
-  assert(table);
+  gt_assert(table);
   cstrs = gt_strarray_new();
   had_err = gt_hashtable_foreach_ordered(table->strings, store_type, cstrs,
                                          gt_strcmpptr, NULL);
-  assert(!had_err);
+  gt_assert(!had_err);
   return cstrs;
 }
 

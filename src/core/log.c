@@ -46,7 +46,7 @@ void gt_log_log(const char *format, ...)
 void gt_log_vlog(const char *format, va_list ap)
 {
   if (!logging) return;
-  assert(logfp);
+  gt_assert(logfp);
   fprintf(logfp, "debug: ");
   (void) vfprintf(logfp, format, ap);
   (void) putc('\n', logfp);
@@ -54,12 +54,12 @@ void gt_log_vlog(const char *format, va_list ap)
 
 FILE* gt_log_fp(void)
 {
-  assert(logging);
+  gt_assert(logging);
   return logfp;
 }
 
 void gt_log_set_fp(FILE *fp)
 {
-  assert(logging);
+  gt_assert(logging);
   logfp = fp;
 }

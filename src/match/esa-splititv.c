@@ -131,7 +131,7 @@ void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
   while (true)
   {
     leftcc = SEQUENCE(encseq,suftab[leftbound] + parentoffset);
-    assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
+    gt_assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
     if (ISSPECIAL(leftcc))
     {
       ADDPREVIOUSRBOUND(rightbound);
@@ -150,7 +150,7 @@ void lcpintervalsplitwithoutspecial(ArrayBoundswithchar *bwci,
                                            leftbound,parentright);
     leftbound = rightbound+1;
   }
-  assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
+  gt_assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
   ADDPREVIOUSRBOUND(parentright);
   ADDCURRENTLBOUND(parentright+1);
 }
@@ -172,6 +172,6 @@ Uchar lcpintervalextendlcp(const Encodedsequence *encseq,
   {
     return alphasize;
   }
-  assert(ccl < alphasize);
+  gt_assert(ccl < alphasize);
   return ccl;
 }

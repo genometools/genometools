@@ -17,7 +17,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdio.h>
 #include "core/disc_distri.h"
 #include "core/ensure.h"
@@ -49,7 +49,7 @@ void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
                            unsigned long long occurrences)
 {
   unsigned long long *valueptr;
-  assert(d);
+  gt_assert(d);
 
   if (!d->hashdist)
     d->hashdist = ul_ull_gt_hashmap_new();
@@ -67,7 +67,7 @@ void gt_disc_distri_add_multi(GtDiscDistri *d, unsigned long key,
 unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
 {
   unsigned long long *valueptr;
-  assert(d);
+  gt_assert(d);
   if (!d->hashdist || !(valueptr = ul_ull_gt_hashmap_get(d->hashdist, key)))
     return 0;
   return *valueptr;
@@ -75,7 +75,7 @@ unsigned long long gt_disc_distri_get(const GtDiscDistri *d, unsigned long key)
 
 void gt_disc_distri_show(const GtDiscDistri *d)
 {
-  assert(d);
+  gt_assert(d);
   gt_disc_distri_show_generic(d, NULL);
 }
 
@@ -93,7 +93,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
   ShowValueInfo *info;
 
   gt_error_check(err);
-  assert(data && occurrences);
+  gt_assert(data && occurrences);
   info = (ShowValueInfo*) data;
 
   probability = (double) occurrences / info->num_of_occurrences;
@@ -108,7 +108,7 @@ void gt_disc_distri_show_generic(const GtDiscDistri *d, GtGenFile *genfile)
   ShowValueInfo showvalueinfo;
   int rval;
 
-  assert(d);
+  gt_assert(d);
 
   if (d->hashdist) {
     showvalueinfo.cumulative_probability = 0.0;
@@ -116,7 +116,7 @@ void gt_disc_distri_show_generic(const GtDiscDistri *d, GtGenFile *genfile)
     showvalueinfo.genfile = genfile;
     rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist, showvalue,
                                                    &showvalueinfo, NULL);
-    assert(!rval); /* showvalue() is sane */
+    gt_assert(!rval); /* showvalue() is sane */
   }
 }
 
@@ -131,7 +131,7 @@ foreach_iterfunc(unsigned long key, unsigned long long occurrences, void *data,
 {
   ForeachInfo *info;
   gt_error_check(err);
-  assert(data);
+  gt_assert(data);
   info = (ForeachInfo*) data;
   info->func(key, occurrences, info->data);
   return CONTINUE_ITERATION;
@@ -142,14 +142,14 @@ void gt_disc_distri_foreach(const GtDiscDistri *d, GtDiscDistriIterFunc func,
 {
   ForeachInfo info;
   int rval;
-  assert(d);
+  gt_assert(d);
   if (d->hashdist) {
     info.func = func;
     info.data = data;
     rval = ul_ull_gt_hashmap_foreach_in_default_order(d->hashdist,
                                                    foreach_iterfunc, &info,
                                                    NULL);
-    assert(!rval); /* foreach_iterfunc() is sane */
+    gt_assert(!rval); /* foreach_iterfunc() is sane */
   }
 }
 

@@ -223,7 +223,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
 {
-  assert(pos < encseq->totallength);
+  gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
     case Forwardmode:
@@ -252,7 +252,7 @@ Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
                               Readmode readmode)
 {
-  assert(pos < encseq->totallength);
+  gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
     case Forwardmode:
@@ -316,7 +316,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Seqpos pos,
                                Readmode readmode)
 {
-  assert(pos < encseq->totallength);
+  gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
     case Forwardmode:
@@ -1393,7 +1393,7 @@ void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
       esr->firstcell = esr->lastcell = 0;
     } else
     {
-      assert(startpos < encseq->totallength);
+      gt_assert(startpos < encseq->totallength);
       binpreparenextrange(encseq,esr,moveforward,startpos);
 #ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
@@ -1548,7 +1548,7 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
 {
   Specialrangeiterator *sri;
 
-  assert(encseq->numofspecialstostore > 0);
+  gt_assert(encseq->numofspecialstostore > 0);
   ALLOCASSIGNSPACE(sri,NULL,Specialrangeiterator,1);
   sri->moveforward = moveforward;
   sri->encseq = encseq;
@@ -1579,7 +1579,7 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                         moveforward ? 0
                                                     : (encseq->totallength-1));
   }
-  assert(sri != NULL);
+  gt_assert(sri != NULL);
   return sri;
 }
 
@@ -1687,7 +1687,7 @@ static bool bitnextspecialrangeiterator(Sequencerange *range,
       }
       if (currentword == 0)
       {
-        assert(MODWORDSIZE(sri->pos) == 0);
+        gt_assert(MODWORDSIZE(sri->pos) == 0);
         sri->pos += INTWORDSIZE;
         if (sri->pos >= sri->encseq->totallength)
         {
@@ -1713,7 +1713,7 @@ static bool bitnextspecialrangeiterator(Sequencerange *range,
       }
       if (currentword == 0)
       {
-        assert(MODWORDSIZE(sri->pos) == INTWORDSIZE-1);
+        gt_assert(MODWORDSIZE(sri->pos) == INTWORDSIZE-1);
         if (sri->pos < INTWORDSIZE)
         {
           sri->exhausted = true;
@@ -1743,7 +1743,7 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
   {
     return bitnextspecialrangeiterator(range,sri);
   }
-  assert(sri->esr->hasprevious);
+  gt_assert(sri->esr->hasprevious);
   *range = sri->esr->previousrange;
   if (sri->esr->hasrange)
   {
@@ -2031,7 +2031,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
-    assert(filenametab != NULL);
+    gt_assert(filenametab != NULL);
     fb = gt_fastabuffer_new(filenametab,
                          plainformat ? NULL : getsymbolmapAlphabet(alphabet),
                          plainformat,
@@ -2117,8 +2117,8 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   Seqpos len;
   const Positionaccesstype sat = Viadirectaccess;
 
-  assert(seq1 != NULL);
-  assert(len1 > 0);
+  gt_assert(seq1 != NULL);
+  gt_assert(len1 > 0);
   if (seq2 == NULL)
   {
     seqptr = (Uchar *) seq1;
@@ -2148,7 +2148,7 @@ static Seqpos fwdgetnextstoppos(const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
                                 Seqpos pos)
 {
-  assert(esr->moveforward);
+  gt_assert(esr->moveforward);
   while (esr->hasprevious)
   {
     if (pos >= esr->previousrange.leftpos)
@@ -2177,7 +2177,7 @@ static Seqpos revgetnextstoppos(const Encodedsequence *encseq,
                                 Encodedsequencescanstate *esr,
                                 Seqpos pos)
 {
-  assert(!esr->moveforward);
+  gt_assert(!esr->moveforward);
   while (esr->hasprevious)
   {
     if (pos < esr->previousrange.rightpos)
@@ -2209,8 +2209,8 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
 {
   Seqpos stoppos;
 
-  assert(encseq->sat != Viadirectaccess);
-  assert(startpos < encseq->totallength);
+  gt_assert(encseq->sat != Viadirectaccess);
+  gt_assert(startpos < encseq->totallength);
   if (encseq->sat == Viabitaccess)
   {
     fprintf(stderr,"fwdextract2bitenc for bitaccess not implemented yet\n");
@@ -2251,7 +2251,7 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
                      MULT2(UNITSIN2BITENC - remain);
       } else
       {
-        assert(ptbe->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
+        gt_assert(ptbe->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
       }
     } else
     {
@@ -2267,7 +2267,7 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
 {
   Seqpos stoppos;
 
-  assert(encseq->sat != Viadirectaccess);
+  gt_assert(encseq->sat != Viadirectaccess);
   if (encseq->sat == Viabitaccess)
   {
     fprintf(stderr,"revextract2bitenc for bitaccess not implemented yet\n");
@@ -2311,7 +2311,7 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
                      MULT2(1 + remain);
       } else
       {
-        assert(ptbe->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
+        gt_assert(ptbe->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
       }
     }
   }
@@ -2383,12 +2383,12 @@ static int prefixofdifftbe(bool complement,
 {
   unsigned int tmplcpvalue = 0;
 
-  assert((tbe1 ^ tbe2) > 0);
+  gt_assert((tbe1 ^ tbe2) > 0);
   if (complement || lcpval != NULL)
   {
     tmplcpvalue = (unsigned int) DIV2(MULT2(UNITSIN2BITENC) -
                                       requiredUIntTwobitencoding(tbe1 ^ tbe2));
-    assert(tmplcpvalue < (unsigned int) UNITSIN2BITENC);
+    gt_assert(tmplcpvalue < (unsigned int) UNITSIN2BITENC);
   }
   if (lcpval != NULL)
   {
@@ -2408,9 +2408,9 @@ static int suffixofdifftbe(bool complement,unsigned int *lcsval,
 {
   unsigned int tmplcsvalue = 0;
 
-  assert((tbe1 ^ tbe2) > 0);
+  gt_assert((tbe1 ^ tbe2) > 0);
   tmplcsvalue = DIV2(numberoftrailingzeros(tbe1 ^ tbe2));
-  assert(tmplcsvalue < (unsigned int) UNITSIN2BITENC);
+  gt_assert(tmplcsvalue < (unsigned int) UNITSIN2BITENC);
   if (lcsval != NULL)
   {
     *lcsval = tmplcsvalue;
@@ -2452,7 +2452,7 @@ int compareTwobitencodings(bool fwd,
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
     {
-      assert(ptbe1->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
+      gt_assert(ptbe1->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
       if (commonunits != NULL)
       {
         *commonunits = ptbe1->unitsnotspecial;
@@ -2471,7 +2471,7 @@ int compareTwobitencodings(bool fwd,
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
     {
-      assert(ptbe2->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
+      gt_assert(ptbe2->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
       if (commonunits != NULL)
       {
         *commonunits = ptbe2->unitsnotspecial;
@@ -2480,7 +2480,7 @@ int compareTwobitencodings(bool fwd,
     }
     return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
   }
-  assert(ptbe1->unitsnotspecial == ptbe2->unitsnotspecial);
+  gt_assert(ptbe1->unitsnotspecial == ptbe2->unitsnotspecial);
   if (ptbe1->unitsnotspecial < (unsigned int) UNITSIN2BITENC)
   {
     Twobitencoding tbe1, tbe2;
@@ -2509,7 +2509,7 @@ int compareTwobitencodings(bool fwd,
     }
     return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
   }
-  assert(ptbe1->unitsnotspecial == (unsigned int) UNITSIN2BITENC &&
+  gt_assert(ptbe1->unitsnotspecial == (unsigned int) UNITSIN2BITENC &&
          ptbe2->unitsnotspecial == (unsigned int) UNITSIN2BITENC);
   if (ptbe1->tbe != ptbe2->tbe)
   {
@@ -2536,7 +2536,7 @@ int compareEncseqsequences(Seqpos *lcp,
   unsigned int commonunits;
   int retval;
 
-  assert(pos1 != pos2);
+  gt_assert(pos1 != pos2);
   if (!fwd)
   {
     pos1 = REVERSEPOS(encseq->totallength,pos1);
@@ -2616,7 +2616,7 @@ int compareEncseqsequences(Seqpos *lcp,
                                        pos1,
                                        pos2,
                                        depth);
-    assert(retval == retval2);
+    gt_assert(retval == retval2);
     if (*lcp != lcp2)
     {
       fprintf(stderr,"line %d: pos1 = %u, pos2 = %u, depth = %u, "
@@ -2629,7 +2629,7 @@ int compareEncseqsequences(Seqpos *lcp,
                       (unsigned int) lcp2);
       exit(EXIT_FAILURE); /* assertion failed */
     }
-    assert(*lcp == lcp2);
+    gt_assert(*lcp == lcp2);
   }
 #endif
   return retval;
@@ -2654,10 +2654,10 @@ int multicharactercompare(const Encodedsequence *encseq,
   retval = compareTwobitencodings(fwd,complement,&commonunits,&ptbe1,&ptbe2);
   if (retval == 0)
   {
-    assert(commonunits == (unsigned int) UNITSIN2BITENC);
+    gt_assert(commonunits == (unsigned int) UNITSIN2BITENC);
   } else
   {
-    assert(commonunits < (unsigned int) UNITSIN2BITENC);
+    gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
   }
   return retval;
 }
@@ -2687,7 +2687,7 @@ static void fwdextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
       ptbe->tbe <<= MULT2(startpos + UNITSIN2BITENC - pos);
       return;
     }
-    assert(cc < (Uchar) 4);
+    gt_assert(cc < (Uchar) 4);
     ptbe->tbe = (ptbe->tbe << 2) | cc;
   }
   ptbe->unitsnotspecial = (unsigned int) UNITSIN2BITENC;
@@ -2710,7 +2710,7 @@ static void revextract2bitenc_bruteforce(EndofTwobitencoding *ptbe,
       ptbe->unitsnotspecial = unit;
       return;
     }
-    assert(cc < (Uchar) 4);
+    gt_assert(cc < (Uchar) 4);
     ptbe->tbe |= (cc << MULT2(unit));
     if (pos == 0)
     {
@@ -2752,7 +2752,7 @@ static void showbufchar(FILE *fp,bool complement,Uchar cc)
       {
         cc = COMPLEMENTBASE(cc);
       }
-      assert(cc < (Uchar) 4);
+      gt_assert(cc < (Uchar) 4);
       fprintf(fp,"%c","acgt"[cc]);
     }
   }
@@ -2828,7 +2828,7 @@ static bool checktbe(bool fwd,Twobitencoding tbe1,Twobitencoding tbe2,
   {
     mask = MASKSUFFIX(unitsnotspecial);
   }
-  assert(mask > 0);
+  gt_assert(mask > 0);
   if ((tbe1 & mask) == (tbe2 & mask))
   {
     return true;

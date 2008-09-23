@@ -54,7 +54,7 @@ newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
 void
 SRLCompact(struct seqRangeList *rangeList)
 {
-  assert(rangeList);
+  gt_assert(rangeList);
   rangeList->ranges = gt_realloc(rangeList->ranges,
                                  sizeof (rangeList->ranges[0])
                                  * rangeList->numRanges);
@@ -69,7 +69,7 @@ SRLCompact(struct seqRangeList *rangeList)
 void
 deleteSeqRangeList(struct seqRangeList *rangeList)
 {
-  assert(rangeList);
+  gt_assert(rangeList);
   if (rangeList->ranges)
     gt_free(rangeList->ranges);
   if (rangeList->partialSymSums)
@@ -81,7 +81,7 @@ void
 SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
                   Symbol esym)
 {
-  assert(rangeList);
+  gt_assert(rangeList);
   if (len)
   {
     Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym);
@@ -157,7 +157,7 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
       }
       ++numRanges;
     }
-    assert(numRanges == rangeList->numRanges + numNewRanges);
+    gt_assert(numRanges == rangeList->numRanges + numNewRanges);
     rangeList->numRanges = numRanges;
   }
 }
@@ -167,7 +167,7 @@ SRLinsertNewRange(GT_UNUSED struct seqRangeList *rangeList,
                   GT_UNUSED Seqpos pos, GT_UNUSED Seqpos len,
                   GT_UNUSED Symbol esym)
 {
-  assert(rangeList);
+  gt_assert(rangeList);
   abort();
 /*   { */
 /*     Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym); */
@@ -184,7 +184,7 @@ SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos, Symbol esym)
   Seqpos lastRangeLen;
   unsigned symBits;
   Symbol sym;
-  assert(rangeList);
+  gt_assert(rangeList);
   sym = MRAEncMapSymbol(rangeList->alphabet, esym);
   numRanges = rangeList->numRanges;
   lastRange = rangeList->ranges + numRanges - 1;
@@ -210,7 +210,7 @@ void
 SRLInitListSearchHint(struct seqRangeList *rangeList,
                       seqRangeListSearchHint *hint)
 {
-  assert(rangeList && hint);
+  gt_assert(rangeList && hint);
   *hint = rangeList->numRanges / 2;
 }
 
@@ -237,7 +237,7 @@ SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
 {
   size_t rangeIdx;
   struct seqRange *p;
-  assert(rangeList);
+  gt_assert(rangeList);
   if (hint)
     rangeIdx = *hint;
   else
@@ -314,7 +314,7 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
   size_t numRanges;
   struct seqRange *ranges;
   unsigned symBits;
-  assert(rangeList);
+  gt_assert(rangeList);
   ranges = rangeList->ranges;
   symBits = rangeList->symBits;
   if (hint)
@@ -400,7 +400,7 @@ SRLFindPositionLast(struct seqRangeList *rangeList, Seqpos pos,
   size_t numRanges;
   struct seqRange *ranges;
   unsigned symBits;
-  assert(rangeList);
+  gt_assert(rangeList);
   ranges = rangeList->ranges;
   symBits = rangeList->symBits;
   if (hint)
@@ -457,7 +457,7 @@ int
 SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
 {
   size_t numRanges;
-  assert(rangeList && fp);
+  gt_assert(rangeList && fp);
   numRanges = rangeList->numRanges;
   gt_xfwrite(&(rangeList->numRanges), sizeof (rangeList->numRanges), 1, fp);
   gt_xfwrite(rangeList->ranges, sizeof (struct seqRange), numRanges, fp);
@@ -471,7 +471,7 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
 {
   struct seqRangeList *newRangeList;
   size_t numRanges;
-  assert(fp && err);
+  gt_assert(fp && err);
   newRangeList = gt_malloc(sizeof (struct seqRangeList));
   newRangeList->alphabet = alphabet;
   newRangeList->symBits = requiredSymbolBits(MRAEncGetSize(alphabet) - 1);
@@ -688,7 +688,7 @@ SRLApplyRangesToSubString(struct seqRangeList *rangeList,
   struct seqRange *nextRange;
   Seqpos inSeqPos = start;
   unsigned symBits = rangeList->symBits;
-  assert(rangeList);
+  gt_assert(rangeList);
   nextRange = SRLFindPositionNext(rangeList, inSeqPos, hint);
   do {
     if (inSeqPos < nextRange->startPos)
@@ -719,7 +719,7 @@ SRLPrintRangesInfo(struct seqRangeList *rangeList, FILE *fp, Seqpos start,
   Seqpos end = start + len;
   unsigned symBits = rangeList->symBits;
   int result = 0;
-  assert(rangeList);
+  gt_assert(rangeList);
   nextRange = SRLFindPositionNext(rangeList, start, hint);
   while (nextRange->startPos < end)
   {

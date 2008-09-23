@@ -40,31 +40,31 @@ GtTranscriptUsedExons* gt_transcript_used_exons_new(void)
 
 GtDlist* gt_transcript_used_exons_get_all(GtTranscriptUsedExons *tue)
 {
-  assert(tue);
+  gt_assert(tue);
   return tue->used_exons_all;
 }
 
 GtDlist* gt_transcript_used_exons_get_single(GtTranscriptUsedExons *tue)
 {
-  assert(tue);
+  gt_assert(tue);
   return tue->used_exons_single;
 }
 
 GtDlist* gt_transcript_used_exons_get_initial(GtTranscriptUsedExons *tue)
 {
-  assert(tue);
+  gt_assert(tue);
   return tue->used_exons_initial;
 }
 
 GtDlist* gt_transcript_used_exons_get_internal(GtTranscriptUsedExons *tue)
 {
-  assert(tue);
+  gt_assert(tue);
   return tue->used_exons_internal;
 }
 
 GtDlist* gt_transcript_used_exons_get_terminal(GtTranscriptUsedExons *tue)
 {
-  assert(tue);
+  gt_assert(tue);
   return tue->used_exons_terminal;
 }
 

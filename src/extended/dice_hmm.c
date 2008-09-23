@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/dice_hmm.h"
 
 GtHMM* gt_dice_hmm_loaded(void)
@@ -44,7 +44,7 @@ GtHMM* gt_dice_hmm_loaded(void)
   gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_FAIR, 0.1);
   gt_hmm_set_transition_probability(hmm, DICE_FAIR, DICE_FAIR, 0.95);
   gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_LOADED, 0.9);
-  assert(gt_hmm_is_valid(hmm));
+  gt_assert(gt_hmm_is_valid(hmm));
 
   return hmm;
 }
@@ -75,7 +75,7 @@ GtHMM* gt_dice_hmm_fair(void)
   gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_FAIR, 0.5);
   gt_hmm_set_transition_probability(hmm, DICE_FAIR, DICE_FAIR, 0.5);
   gt_hmm_set_transition_probability(hmm, DICE_LOADED, DICE_LOADED, 0.5);
-  assert(gt_hmm_is_valid(hmm));
+  gt_assert(gt_hmm_is_valid(hmm));
 
   return hmm;
 }
@@ -89,6 +89,6 @@ GtAlpha* gt_dice_hmm_alpha(void)
   gt_alpha_add_mapping(a, "4");
   gt_alpha_add_mapping(a, "5");
   gt_alpha_add_mapping(a, "6");
-  assert(gt_alpha_size(a) == 6);
+  gt_assert(gt_alpha_size(a) == 6);
   return a;
 }

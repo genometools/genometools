@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include <string.h>
 #include "core/bittab.h"
@@ -34,7 +34,7 @@ void gt_string_matching_bmh(const char *s, unsigned long n,
                          ProcessMatch process_match, void *data)
 {
   unsigned long i, j, pos, d[UCHAR_MAX];
-  assert(s && p);
+  gt_assert(s && p);
   if (m > n || !m || !n) /* no match possible */
     return;
   /* preprocessing */
@@ -60,7 +60,7 @@ static unsigned long* compute_prefixtab(const char *p, unsigned long m)
 {
   unsigned long i, vlen = 0, *prefixtab;
   char b;
-  assert(p);
+  gt_assert(p);
   prefixtab = gt_malloc(sizeof (unsigned long) * (m+1));
   prefixtab[0] = UNDEF_ULONG; /* paranoia */
   if (m)
@@ -85,7 +85,7 @@ unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
                             in p */
                 cpl = 0; /* length of common prefix of s[j]..s[n-1] and p */
   char b, c;
-  assert(s && p);
+  gt_assert(s && p);
   if (!m || !n) /* no match possible */
     return 0;
   prefixtab = compute_prefixtab(p, m);
@@ -127,7 +127,7 @@ void gt_string_matching_shift_and(const char *s, unsigned long n,
 {
   GtBittab *D, *B[UCHAR_MAX] = { NULL };
   unsigned long i, j;
-  assert(s && p);
+  gt_assert(s && p);
   if (m > n || !m || !n) /* no match possible */
     return;
   /* preprocessing */
@@ -161,7 +161,7 @@ void gt_string_matching_brute_force(const char *s, unsigned long n,
                                  ProcessMatch process_match, void *data)
 {
   unsigned long i;
-  assert(s && p);
+  gt_assert(s && p);
   if (m > n || !m || !n) /* no match possible */
     return;
   for (i = 0; i <= n - m; i++) {
@@ -178,7 +178,7 @@ void gt_string_matching_brute_force(const char *s, unsigned long n,
 static bool store_first_match(unsigned long pos, void *data)
 {
   unsigned long *match = data;
-  assert(match);
+  gt_assert(match);
   *match = pos;
   return true;
 }
@@ -186,7 +186,7 @@ static bool store_first_match(unsigned long pos, void *data)
 static bool store_match(unsigned long pos, void *data)
 {
   GtArray *positions = data;
-  assert(positions);
+  gt_assert(positions);
   gt_array_add(positions, pos);
   return false;
 }

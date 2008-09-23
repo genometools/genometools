@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "lua.h"
 #include "lauxlib.h"
@@ -33,11 +33,11 @@ GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
   GtStr *path;
   int had_err = 0;
   gt_error_check(err);
-  assert(prog);
+  gt_assert(prog);
   path = gt_str_new();
   had_err = gt_file_find_in_path(path, prog, err);
   if (!had_err) {
-    assert(gt_str_length(path));
+    gt_assert(gt_str_length(path));
     gt_str_append_cstr(path, GTDATADIR);
     if (gt_file_exists(gt_str_get(path)))
       return path;

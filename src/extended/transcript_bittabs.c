@@ -43,31 +43,31 @@ GtTranscriptGtBittabs* gt_transcript_bittabs_new(unsigned long size_all,
 
 GtBittab* gt_transcript_bittabs_get_all(const GtTranscriptGtBittabs *tb)
 {
-  assert(tb);
+  gt_assert(tb);
   return tb->gt_bittab_all;
 }
 
 GtBittab* gt_transcript_bittabs_get_single(const GtTranscriptGtBittabs *tb)
 {
-  assert(tb);
+  gt_assert(tb);
   return tb->gt_bittab_single;
 }
 
 GtBittab* gt_transcript_bittabs_get_initial(const GtTranscriptGtBittabs *tb)
 {
-  assert(tb);
+  gt_assert(tb);
   return tb->gt_bittab_initial;
 }
 
 GtBittab* gt_transcript_bittabs_get_internal(const GtTranscriptGtBittabs *tb)
 {
-  assert(tb);
+  gt_assert(tb);
   return tb->gt_bittab_internal;
 }
 
 GtBittab* gt_transcript_bittabs_get_terminal(const GtTranscriptGtBittabs *tb)
 {
-  assert(tb);
+  gt_assert(tb);
   return tb->gt_bittab_terminal;
 }
 

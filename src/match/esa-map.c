@@ -110,7 +110,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         ALLOCASSIGNSPACE(suffixarray->filelengthtab,suffixarray->filelengthtab,
                          Filelengthvalues,numofallocatedfiles);
       }
-      assert(suffixarray->filelengthtab != NULL);
+      gt_assert(suffixarray->filelengthtab != NULL);
       ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
       if (sscanf((const char *) gt_str_get(currentline),
                   "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
@@ -142,7 +142,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       {
         gt_strarray_add_cstr(suffixarray->filenametab,tmpfilename);
         FREESPACE(tmpfilename);
-        assert(suffixarray->filelengthtab != NULL);
+        gt_assert(suffixarray->filelengthtab != NULL);
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
         suffixarray->filelengthtab[numoffiles].effectivelength
                                                = (Seqpos) readint2;

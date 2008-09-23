@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/reverse.h"
 
 static int complement(char *reverse_char, char dna_char, GtError *err)
@@ -43,7 +43,7 @@ int gt_reverse_complement(char *dna_seq, unsigned long seqlen, GtError *err)
   char *front_char, *back_char, tmp_char;
   int had_err = 0;
   gt_error_check(err);
-  assert(dna_seq);
+  gt_assert(dna_seq);
   for (front_char = dna_seq, back_char = dna_seq + seqlen - 1;
        front_char <= back_char;
        front_char++, back_char--) {

@@ -186,7 +186,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   if (!haserr)
   {
     mapspecptr = mapspectable.spaceMapspecification;
-    assert(mapspecptr != NULL);
+    gt_assert(mapspecptr != NULL);
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                               (uint64_t) (mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
@@ -247,7 +247,7 @@ int flushtheindex2file(FILE *fp,
   gt_error_check(err);
   INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,true);
-  assert(mapspectable.spaceMapspecification != NULL);
+  gt_assert(mapspectable.spaceMapspecification != NULL);
   for (mapspecptr = mapspectable.spaceMapspecification;
        mapspecptr < mapspectable.spaceMapspecification +
                     mapspectable.nextfreeMapspecification;

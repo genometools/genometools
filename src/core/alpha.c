@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <limits.h>
 #include <string.h>
 #include "core/alpha.h"
+#include "core/assert.h"
 #include "core/ma.h"
 #include "core/undef.h"
 #include "core/xansi.h"
@@ -100,7 +100,7 @@ GtAlpha* gt_alpha_new_protein(void)
 GtAlpha* gt_alpha_guess(const char *seq, unsigned long seqlen)
 {
   unsigned long i;
-  assert(seq && seqlen);
+  gt_assert(seq && seqlen);
   for (i = 0; i < seqlen && i < ALPHA_GUESS_MAX_LENGTH; i++) {
     if (strchr(ALPHA_GUESS_PROTEIN_CHARS, seq[i]))
       return gt_alpha_new_protein();
@@ -110,7 +110,7 @@ GtAlpha* gt_alpha_guess(const char *seq, unsigned long seqlen)
 
 GtAlpha* gt_alpha_ref(GtAlpha *a)
 {
-  assert(a);
+  gt_assert(a);
   a->reference_count++;
   return a;
 }
@@ -118,9 +118,9 @@ GtAlpha* gt_alpha_ref(GtAlpha *a)
 void gt_alpha_add_mapping(GtAlpha *a, const char *characters)
 {
   size_t i, num_of_characters;
-  assert(a && characters && a->map_size < UCHAR_MAX-1);
+  gt_assert(a && characters && a->map_size < UCHAR_MAX-1);
   num_of_characters = strlen(characters);
-  assert(num_of_characters);
+  gt_assert(num_of_characters);
   a->character_to_code_map[(int) characters[0]] = a->map_size;
   a->code_to_character_map[a->map_size] = characters[0];
   for (i = 1; i < num_of_characters; i++)
@@ -130,15 +130,15 @@ void gt_alpha_add_mapping(GtAlpha *a, const char *characters)
 
 char gt_alpha_decode(const GtAlpha *a, unsigned int c)
 {
-  assert(a);
-  assert(a->code_to_character_map[c] != UNDEF_UCHAR);
+  gt_assert(a);
+  gt_assert(a->code_to_character_map[c] != UNDEF_UCHAR);
   return a->code_to_character_map[c];
 }
 
 unsigned int gt_alpha_encode(const GtAlpha *a, char c)
 {
-  assert(a);
-  assert(a->character_to_code_map[(int) c] != UNDEF_UCHAR);
+  gt_assert(a);
+  gt_assert(a->character_to_code_map[(int) c] != UNDEF_UCHAR);
   return a->character_to_code_map[(int) c];
 }
 
@@ -146,9 +146,9 @@ void gt_alpha_decode_seq(const GtAlpha *a, char *out, char *in,
                          unsigned long length)
 {
   unsigned long i;
-  assert(a && out && in);
+  gt_assert(a && out && in);
   for (i = 0; i < length; i++) {
-    assert(a->code_to_character_map[(int) in[i]] != UNDEF_UCHAR);
+    gt_assert(a->code_to_character_map[(int) in[i]] != UNDEF_UCHAR);
     out[i] = a->code_to_character_map[(int) in[i]];
   }
 }
@@ -157,9 +157,9 @@ void gt_alpha_encode_seq(const GtAlpha *a, char *out, char *in,
                          unsigned long length)
 {
   unsigned long i;
-  assert(a && out && in);
+  gt_assert(a && out && in);
   for (i = 0; i < length; i++) {
-    assert(a->character_to_code_map[(int) in[i]] != UNDEF_UCHAR);
+    gt_assert(a->character_to_code_map[(int) in[i]] != UNDEF_UCHAR);
     out[i] = (char) a->character_to_code_map[(int) in[i]];
   }
 }
@@ -174,7 +174,7 @@ bool gt_alpha_char_is_valid(const GtAlpha *a, char c)
 bool gt_alpha_is_compatible_with_alpha(const GtAlpha *gt_alpha_a,
                                             const GtAlpha *gt_alpha_b)
 {
-  assert(gt_alpha_a && gt_alpha_b);
+  gt_assert(gt_alpha_a && gt_alpha_b);
   if (gt_alpha_a->map_size == gt_alpha_b->map_size)
     return true;
   return false;
@@ -182,7 +182,7 @@ bool gt_alpha_is_compatible_with_alpha(const GtAlpha *gt_alpha_a,
 
 unsigned int gt_alpha_size(const GtAlpha *a)
 {
-  assert(a);
+  gt_assert(a);
   return a->map_size;
 }
 

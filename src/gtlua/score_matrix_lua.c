@@ -29,15 +29,15 @@ static int score_matrix_lua_new_read_protein(lua_State *L)
   GtScoreMatrix **sm;
   const char *path;
   GtError *err;
-  assert(L);
+  gt_assert(L);
   path = luaL_checkstring(L, 1);
   sm = lua_newuserdata(L, sizeof (GtScoreMatrix*));
-  assert(sm);
+  gt_assert(sm);
   err = gt_error_new();
   if (!(*sm = gt_score_matrix_new_read_protein(path, err)))
     return gt_lua_error(L, err); /* handle error */
   gt_error_delete(err);
-  assert(*sm);
+  gt_assert(*sm);
   luaL_getmetatable(L, SCOREMATRIX_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -93,7 +93,7 @@ static const struct luaL_Reg score_matrix_lib_m [] = {
 
 int gt_lua_open_score_matrix(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, SCOREMATRIX_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

@@ -227,7 +227,7 @@ static size_t
 SAIReadBWT(void *state, Uchar *dest, size_t len, GT_UNUSED GtError *err)
 {
   SuffixarrayFileInterface *sai = state;
-  assert(state);
+  gt_assert(state);
   return fread(dest, sizeof (Uchar), len, sai->sa->bwttabstream.fp);
 }
 
@@ -237,7 +237,7 @@ extern size_t
 SAIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 {
   const SuffixarrayFileInterface *sai;
-  assert(state);
+  gt_assert(state);
   sai = state;
   return EncSeqGetSubSeq(sai->sa->encseq, sai->sa->readmode, pos, len, dest);
 }
@@ -246,7 +246,7 @@ extern DefinedSeqpos
 SAIGetRot0Pos(const void *state)
 {
   const SuffixarrayFileInterface *sai = state;
-  assert(sai);
+  gt_assert(sai);
   return sai->sa->longest;
 }
 
@@ -254,7 +254,7 @@ extern MRAEnc *
 SANewMRAEnc(const Suffixarray *sa)
 {
   MRAEnc *alphabet;
-  assert(sa);
+  gt_assert(sa);
   alphabet = MRAEncGTAlphaNew(sa->alpha);
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
@@ -270,7 +270,7 @@ SAIGenerate(void *generatorState, void *backlogState,
   SuffixarrayFileInterface *sai = generatorState;
   Suffixarray *sa;
   Seqpos buf[len];
-  assert(sai);
+  gt_assert(sai);
   sa = sai->sa;
   for (i = 0; i < len; ++i)
     if (readnextSeqposfromstream(buf + i, &sa->suftabstream, err) != 1)

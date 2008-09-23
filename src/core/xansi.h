@@ -18,7 +18,7 @@
 #ifndef XANSI_H
 #define XANSI_H
 
-#include <assert.h>
+#include "core/assert.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -38,7 +38,7 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
 {
   GtRegionMapping *rm;
   gt_error_check(err);
-  assert(mapping_filename);
+  gt_assert(mapping_filename);
   rm = gt_calloc(1, sizeof (GtRegionMapping));
   rm->mapping = gt_mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
                                err);
@@ -52,7 +52,7 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
 GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename)
 {
   GtRegionMapping *rm;
-  assert(sequence_filename);
+  gt_assert(sequence_filename);
   rm = gt_calloc(1, sizeof (GtRegionMapping));
   rm->sequence_filename = gt_str_ref(sequence_filename);
   return rm;
@@ -60,7 +60,7 @@ GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename)
 
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   rm->reference_count++;
   return rm;
 }
@@ -69,7 +69,7 @@ static GtStr* gt_region_mapping_map(GtRegionMapping *rm,
                                   const char *sequence_region, GtError *err)
 {
   gt_error_check(err);
-  assert(rm && sequence_region);
+  gt_assert(rm && sequence_region);
   if (rm->sequence_filename)
     return gt_str_ref(rm->sequence_filename);
   else
@@ -81,7 +81,7 @@ static int update_gt_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(rm && seqid);
+  gt_assert(rm && seqid);
   if (!rm->sequence_file || gt_str_cmp(rm->sequence_name, seqid)) {
     gt_str_delete(rm->sequence_file);
     rm->sequence_file = gt_region_mapping_map(rm, gt_str_get(seqid), err);
@@ -107,7 +107,7 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **raw,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(rm && seqid);
+  gt_assert(rm && seqid);
   had_err = update_gt_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
     *raw = gt_bioseq_get_raw_sequence(rm->bioseq);
@@ -120,7 +120,7 @@ int gt_region_mapping_get_raw_sequence_length(GtRegionMapping *rm,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(rm && seqid);
+  gt_assert(rm && seqid);
   had_err = update_gt_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
     *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);

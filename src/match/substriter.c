@@ -51,7 +51,7 @@ void substriter_init(Substriter *substriter,const Uchar *start,
 {
   substriter->start = substriter->currentptr = start;
   substriter->remaining = len;
-  assert(substriter->remaining > 0);
+  gt_assert(substriter->remaining > 0);
 }
 
 int substriter_next(Substriter *substriter)

@@ -34,7 +34,7 @@ GtImageInfo* gt_image_info_new()
   GtImageInfo *ii;
   ii = gt_calloc(1, sizeof (GtImageInfo));
   ii->recmaps = gt_array_new(sizeof (GtRecMap*));
-  assert(ii->recmaps);
+  gt_assert(ii->recmaps);
   return ii;
 }
 
@@ -53,38 +53,38 @@ void gt_image_info_delete(GtImageInfo *ii)
 
 void gt_image_info_add_recmap(GtImageInfo *ii, GtRecMap *rm)
 {
-  assert(ii && rm);
+  gt_assert(ii && rm);
   gt_array_add(ii->recmaps, rm);
 }
 
 void gt_image_info_set_height(GtImageInfo *ii, unsigned int height)
 {
-  assert(ii);
+  gt_assert(ii);
   ii->height = height;
 }
 
 unsigned int gt_image_info_get_height(GtImageInfo *ii)
 {
-  assert(ii);
+  gt_assert(ii);
   return ii->height;
 }
 
 unsigned long gt_image_info_num_of_recmaps(GtImageInfo *ii)
 {
-  assert(ii);
+  gt_assert(ii);
   return gt_array_size(ii->recmaps);
 }
 
 const GtRecMap* gt_image_info_get_recmap(GtImageInfo *ii, unsigned long n)
 {
-  assert(ii);
+  gt_assert(ii);
   return *(GtRecMap**) gt_array_get(ii->recmaps, n);
 }
 
 void gt_image_info_fill_recmap(GtImageInfo* ii, GtRecMap* rm, unsigned long n)
 {
   const GtRecMap* tmp;
-  assert(ii && rm);
+  gt_assert(ii && rm);
   tmp = gt_image_info_get_recmap(ii, n);
   rm->nw_x = tmp->nw_x;
   rm->nw_y = tmp->nw_y;
@@ -102,7 +102,7 @@ int gt_image_info_unit_test(GtError *err)
   unsigned long i;
   GtStr *seqid;
   int had_err = 0;
-  assert(err);
+  gt_assert(err);
   gt_error_check(err);
 
   seqid = gt_str_new_cstr("seqid");

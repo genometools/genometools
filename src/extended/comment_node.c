@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdlib.h>
 #include "core/cstr.h"
 #include "core/ma.h"
@@ -36,7 +36,7 @@ struct GtCommentNode
 static void comment_node_free(GtGenomeNode *gn)
 {
   GtCommentNode *c = gt_comment_node_cast(gn);
-  assert(c && c->comment);
+  gt_assert(c && c->comment);
   gt_free(c->comment);
   gt_str_delete(c->comment_str);
 }
@@ -44,7 +44,7 @@ static void comment_node_free(GtGenomeNode *gn)
 static GtStr* comment_node_get_idstr(GtGenomeNode *gn)
 {
   GtCommentNode *c;
-  assert(gn);
+  gt_assert(gn);
   c = gt_comment_node_cast(gn);
   return c->comment_str;
 }
@@ -83,7 +83,7 @@ GtGenomeNode* gt_comment_node_new(const char *comment)
 {
   GtGenomeNode *gn = gt_genome_node_create(gt_comment_node_class());
   GtCommentNode *c = gt_comment_node_cast(gn);
-  assert(comment);
+  gt_assert(comment);
   c->comment = gt_cstr_dup(comment);
   c->comment_str = gt_str_new_cstr("");
   return gn;
@@ -91,6 +91,6 @@ GtGenomeNode* gt_comment_node_new(const char *comment)
 
 const char* gt_comment_node_get_comment(const GtCommentNode *c)
 {
-  assert(c && c->comment);
+  gt_assert(c && c->comment);
   return c->comment;
 }

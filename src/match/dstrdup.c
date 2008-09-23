@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "spacedef.h"
 
@@ -24,7 +24,7 @@ char *dynamicstrdup(const char *file,int linenum,const char *source)
   size_t sourcelength;
   char *dest;
 
-  assert(source != NULL);
+  gt_assert(source != NULL);
   sourcelength = strlen(source);
   ALLOCASSIGNSPACEGENERIC(file,linenum,dest,NULL,char,sourcelength+1);
   strcpy(dest,source);

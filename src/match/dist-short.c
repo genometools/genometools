@@ -16,7 +16,7 @@
 */
 
 #include <limits.h>
-#include <assert.h>
+#include "core/assert.h"
 #include "core/symboldef.h"
 #include "core/chardef.h"
 #include "encseq-def.h"
@@ -36,7 +36,7 @@
                       distval = ulen
 
 #define COMPUTENEWDIST(CC)\
-        assert((CC) != (Uchar) SEPARATOR);\
+        gt_assert((CC) != (Uchar) SEPARATOR);\
         if ((CC) != (Uchar) WILDCARD)\
         {\
           Eq = eqsvector[(unsigned long) (CC)];\
@@ -119,7 +119,7 @@ unsigned long reversesuffixmatch(unsigned long *eqsvector,
   const Uchar *vptr;
 
   initeqsvectorrev(eqsvector,(unsigned long) alphasize,useq,ulen);
-  assert(maxdistance > 0);
+  gt_assert(maxdistance > 0);
   for (vptr = vseq + vlen - 1; vptr >= vseq; vptr--)
   {
     COMPUTENEWDIST(*vptr);
@@ -128,7 +128,7 @@ unsigned long reversesuffixmatch(unsigned long *eqsvector,
       break;
     }
   }
-  /* assert(distval <= maxdistance); */
+  /* gt_assert(distval <= maxdistance); */
   return (unsigned long) (vseq + vlen - vptr);
 }
 
@@ -147,7 +147,7 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
   Definedunsignedlong result;
 
   initeqsvector(eqsvector,(unsigned long) alphasize,useq,ulen);
-  assert(maxdistance > 0);
+  gt_assert(maxdistance > 0);
   for (pos = startpos; /* Nothing */; pos++)
   {
     if (pos - startpos > (Seqpos) (ulen + maxdistance))
@@ -156,7 +156,7 @@ Definedunsignedlong forwardprefixmatch(const Encodedsequence *encseq,
              (unsigned long) pos,(unsigned long) startpos,ulen,maxdistance);
       exit(EXIT_FAILURE);
     }
-    assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
+    gt_assert(pos - startpos <= (Seqpos) (ulen + maxdistance));
     cc = getencodedchar(encseq,pos,Forwardmode);
     if (nowildcards && cc == (Uchar) WILDCARD)
     {

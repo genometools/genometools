@@ -21,7 +21,7 @@ void gt_seqid2file_options(GtOptionParser *op, GtStr *seqfile,
                         GtStr *regionmapping)
 {
   GtOption *seqfile_option, *regionmapping_option;
-  assert(op && seqfile && regionmapping);
+  gt_assert(op && seqfile && regionmapping);
 
   /* -seqfile */
   seqfile_option = gt_option_new_string("seqfile", "set the sequence file from "
@@ -48,9 +48,9 @@ GtRegionMapping* gt_seqid2file_regionmapping_new(GtStr *seqfile,
                                             GtError *err)
 {
   gt_error_check(err);
-  assert(seqfile && regionmapping);
-  assert(gt_str_length(seqfile) || gt_str_length(regionmapping));
-  assert(!(gt_str_length(seqfile) && gt_str_length(regionmapping)));
+  gt_assert(seqfile && regionmapping);
+  gt_assert(gt_str_length(seqfile) || gt_str_length(regionmapping));
+  gt_assert(!(gt_str_length(seqfile) && gt_str_length(regionmapping)));
   /* create region mapping */
   if (gt_str_length(seqfile))
     return gt_region_mapping_new_seqfile(seqfile);

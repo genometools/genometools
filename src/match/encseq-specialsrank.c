@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 
 #include "core/dataalign.h"
@@ -94,8 +94,8 @@ newSpecialsRankLookup(const Encodedsequence *encseq, Readmode readmode,
   struct specialsRankLookup *ranker;
   Seqpos seqLastPos, seqLen;
   Seqpos sampleInterval = ((Seqpos)1) << sampleIntervalLog2;
-  assert(encseq);
-  assert(sampleIntervalLog2 < sizeof (Seqpos) * CHAR_BIT);
+  gt_assert(encseq);
+  gt_assert(sampleIntervalLog2 < sizeof (Seqpos) * CHAR_BIT);
   seqLastPos = getencseqtotallength(encseq);
   seqLen = seqLastPos + 1;
   if (hasspecialranges(encseq))
@@ -154,9 +154,9 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
 {
   const SpecialsRankTable *rankTable = &ranker->implementationData.sampleTable;
   Seqpos rankCount, samplePos, encSeqLen;
-  assert(ranker);
+  gt_assert(ranker);
   encSeqLen = getencseqtotallength(ranker->encseq);
-  assert(pos <= encSeqLen + 1);
+  gt_assert(pos <= encSeqLen + 1);
   samplePos = pos & ~(rankTable->sampleInterval - 1);
   {
     size_t sampleIdx = pos >> rankTable->sampleIntervalLog2;
@@ -185,7 +185,7 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, Seqpos pos)
 static Seqpos
 specialsRankFromTermPos(const SpecialsRankLookup *ranker, Seqpos pos)
 {
-  assert(pos <= ranker->implementationData.lastSeqPos + 1);
+  gt_assert(pos <= ranker->implementationData.lastSeqPos + 1);
   return ((pos == ranker->implementationData.lastSeqPos + 1)?1:0);
 }
 

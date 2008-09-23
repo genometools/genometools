@@ -55,7 +55,7 @@ static int elemcmp(const void *a, const void *b)
 int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
 {
   int ret;
-  assert(block1 && block2);
+  gt_assert(block1 && block2);
   ret = gt_range_compare(gt_block_get_range(block1),
                          gt_block_get_range(block2));
   if (ret == 0 && block1 != block2)
@@ -66,7 +66,7 @@ int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
 
 GtBlock* gt_block_ref(GtBlock *block)
 {
-  assert(block);
+  gt_assert(block);
   block->reference_count++;
   return block;
 }
@@ -85,7 +85,7 @@ GtBlock* gt_block_new(void)
 GtBlock* gt_block_new_from_node(GtFeatureNode *node)
 {
   GtBlock *block;
-  assert(node);
+  gt_assert(node);
   block = gt_block_new();
   block->range = gt_genome_node_get_range((GtGenomeNode*) node);
   block->strand = gt_feature_node_get_strand(node);
@@ -98,7 +98,7 @@ GtBlock* gt_block_new_from_node(GtFeatureNode *node)
 void gt_block_insert_element(GtBlock *block, GtFeatureNode *gf)
 {
   GtElement *element;
-  assert(block && gf);
+  gt_assert(block && gf);
   if (!block->top_level_feature)
     block->top_level_feature = (GtFeatureNode*)
                                     gt_genome_node_ref((GtGenomeNode*) gf);
@@ -110,34 +110,34 @@ void gt_block_merge(GtBlock *b1, GtBlock *b2)
 {
   GtDlistelem *delem;
   unsigned int oldsize;
-  assert(b1 && b2);
+  gt_assert(b1 && b2);
   oldsize = gt_block_get_size(b1) + gt_block_get_size(b2);
   for (delem = gt_dlist_first(b2->elements); delem;
        delem = gt_dlistelem_next(delem))
   {
     GtElement *elem;
     elem = (GtElement*) gt_dlistelem_get_data(delem);
-    assert(elem);
+    gt_assert(elem);
     gt_dlist_add(b1->elements, gt_element_ref(elem));
   }
-  assert(gt_block_get_size(b1) == oldsize);
+  gt_assert(gt_block_get_size(b1) == oldsize);
 }
 
 GtBlock* gt_block_clone(GtBlock *block)
 {
   GtBlock* newblock;
   GtDlistelem *delem;
-  assert(block);
+  gt_assert(block);
   newblock = gt_block_new();
   for (delem = gt_dlist_first(block->elements); delem;
        delem = gt_dlistelem_next(delem))
   {
     GtElement *elem;
     elem = (GtElement*) gt_dlistelem_get_data(delem);
-    assert(elem);
+    gt_assert(elem);
     gt_dlist_add(newblock->elements, gt_element_ref(elem));
   }
-  assert(gt_block_get_size(newblock) == gt_block_get_size(block));
+  gt_assert(gt_block_get_size(newblock) == gt_block_get_size(block));
   newblock->caption = gt_str_ref(block->caption);
   newblock->type = block->type;
   newblock->range.start = block->range.start;
@@ -152,35 +152,36 @@ GtBlock* gt_block_clone(GtBlock *block)
 
 GtFeatureNode* gt_block_get_top_level_feature(const GtBlock *block)
 {
-  assert(block);
+  gt_assert(block);
   return block->top_level_feature;
 }
 
 GtRange gt_block_get_range(const GtBlock *block)
 {
-   assert(block);
+   gt_assert(block);
    return block->range;
 }
 
 GtRange* gt_block_get_range_ptr(const GtBlock *block)
 {
-   assert(block);
+   gt_assert(block);
    return (GtRange*) &(block->range);
 }
 
 void gt_block_set_range(GtBlock *block, GtRange r)
 {
-  assert(block && r.start <= r.end);
+  gt_assert(block && r.start <= r.end);
   block->range = r;
 }
 
 bool gt_block_has_only_one_fullsize_element(const GtBlock *block)
 {
   bool ret = false;
-  assert(block);
+  gt_assert(block);
   if (gt_dlist_size(block->elements) == 1UL) {
     GtRange elem_range, block_range;
-    assert(gt_dlist_first(block->elements) == gt_dlist_last(block->elements));
+    gt_assert(gt_dlist_first(block->elements) ==
+              gt_dlist_last(block->elements));
     elem_range = gt_element_get_range(
                    gt_dlistelem_get_data(gt_dlist_first(block->elements)));
     block_range = gt_block_get_range(block);
@@ -191,55 +192,55 @@ bool gt_block_has_only_one_fullsize_element(const GtBlock *block)
 
 void gt_block_set_caption_visibility(GtBlock *block, bool val)
 {
-  assert(block);
+  gt_assert(block);
   block->show_caption = val;
 }
 
 bool gt_block_caption_is_visible(const GtBlock *block)
 {
-  assert(block);
+  gt_assert(block);
   return (block->caption && block->show_caption);
 }
 
 void gt_block_set_caption(GtBlock *block, GtStr *caption)
 {
-  assert(block);
+  gt_assert(block);
   block->caption = caption;
 }
 
 GtStr* gt_block_get_caption(const GtBlock *block)
 {
-  assert(block);
+  gt_assert(block);
   return block->caption;
 }
 
 void gt_block_set_strand(GtBlock *block, GtStrand strand)
 {
-  assert(block);
+  gt_assert(block);
   block->strand = strand;
 }
 
 GtStrand gt_block_get_strand(const GtBlock *block)
 {
-  assert(block);
+  gt_assert(block);
   return block->strand;
 }
 
 void gt_block_set_type(GtBlock *block, const char *type)
 {
-  assert(block);
+  gt_assert(block);
   block->type = type;
 }
 
 const char* gt_block_get_type(const GtBlock *block)
 {
-  assert(block);
+  gt_assert(block);
   return block->type;
 }
 
 unsigned long gt_block_get_size(const GtBlock *block)
 {
-  assert(block && block->elements);
+  gt_assert(block && block->elements);
   return gt_dlist_size(block->elements);
 }
 
@@ -247,7 +248,7 @@ int gt_block_sketch(GtBlock *block, GtCanvas *canvas)
 {
  int had_err = 0;
  GtDlistelem *delem;
- assert(block && canvas);
+ gt_assert(block && canvas);
  /* if resulting block was too short,
     do not traverse this feature tree further */
  if (-1 == gt_canvas_visit_block(canvas, block))

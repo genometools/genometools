@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/matchcount.h"
 
 void gt_matchcount_matchcount(const char *u, int m, const char *v, int n, int k,
@@ -54,7 +54,7 @@ void gt_matchcount_matchcount(const char *u, int m, const char *v, int n, int k,
 
       /* process match count */
       if (i >= k-1 && j >= k-1) {
-        assert(mc >= 0); /* match count is always >= 0 */
+        gt_assert(mc >= 0); /* match count is always >= 0 */
         proc_match_count(i-(k-1), j-(k-1), mc);
       }
     }

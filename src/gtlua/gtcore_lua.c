@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "gtlua/alpha_lua.h"
 #include "gtlua/bittab_lua.h"
 #include "gtlua/gtcore_lua.h"
@@ -25,7 +25,7 @@
 
 int gt_lua_open_core(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   gt_lua_open_alpha(L);
   gt_lua_open_bittab(L);
   gt_lua_open_range(L);

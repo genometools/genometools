@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/cstr_table.h"
 #include "core/fileutils.h"
@@ -50,13 +50,13 @@ static int buffer_is_sorted(void **elem, void *info, GtError *err)
   GtGenomeNode *current_node, **last_node;
 
   gt_error_check(err);
-  assert(elem && info);
+  gt_assert(elem && info);
 
   current_node = *(GtGenomeNode**) elem,
   last_node = info;
 
   if (*last_node && gt_genome_node_compare(last_node, &current_node) > 0) {
-    assert(*last_node);
+    gt_assert(*last_node);
     gt_error_set(err, "the file %s is not sorted (example: line %u and %u)",
               gt_genome_node_get_filename(*last_node),
               gt_genome_node_get_line_number(*last_node),
@@ -84,7 +84,7 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   }
 
   /* the buffer is empty or has one element */
-  assert(gt_queue_size(is->genome_node_buffer) <= 1);
+  gt_assert(gt_queue_size(is->genome_node_buffer) <= 1);
 
   for (;;) {
     /* open file if necessary */
@@ -128,7 +128,7 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       }
     }
 
-    assert(is->file_is_open);
+    gt_assert(is->file_is_open);
 
     filenamestr = gt_strarray_size(is->files)
                   ? gt_strarray_get_str(is->files, is->next_file-1)
@@ -163,13 +163,13 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       continue;
     }
 
-    assert(gt_queue_size(is->genome_node_buffer));
+    gt_assert(gt_queue_size(is->genome_node_buffer));
 
     /* make sure the parsed nodes are sorted */
     if (is->ensure_sorting && gt_queue_size(is->genome_node_buffer) > 1) {
       GtGenomeNode *last_node = NULL;
       /* a sorted stream can have at most one input file */
-      assert(gt_strarray_size(is->files) == 0 ||
+      gt_assert(gt_strarray_size(is->files) == 0 ||
              gt_strarray_size(is->files) == 1);
       had_err = gt_queue_iterate(is->genome_node_buffer, buffer_is_sorted,
                               &last_node, err);
@@ -179,7 +179,7 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     }
     return had_err;
   }
-  assert(!gt_queue_size(is->genome_node_buffer));
+  gt_assert(!gt_queue_size(is->genome_node_buffer));
   *gn = NULL;
   return had_err;
 }
@@ -236,7 +236,7 @@ void gt_gff3_in_stream_set_type_checker(GtNodeStream *gs,
                                         GtTypeChecker *type_checker)
 {
   GtGFF3InStream *is = gff3_in_stream_cast(gs);
-  assert(is);
+  gt_assert(is);
   gt_gff3_parser_delete(is->gff3_parser);
   is->gff3_parser = gt_gff3_parser_new(is->checkids, type_checker);
 }
@@ -244,14 +244,14 @@ void gt_gff3_in_stream_set_type_checker(GtNodeStream *gs,
 GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream *gs)
 {
   GtGFF3InStream *is = gff3_in_stream_cast(gs);
-  assert(is);
+  gt_assert(is);
   return gt_cstr_table_get_all(is->used_types);
 }
 
 void gt_gff3_in_stream_set_offset(GtNodeStream *gs, long offset)
 {
   GtGFF3InStream *is = gff3_in_stream_cast(gs);
-  assert(is);
+  gt_assert(is);
   gt_gff3_parser_set_offset(is->gff3_parser, offset);
 }
 
@@ -259,14 +259,14 @@ int gt_gff3_in_stream_set_offsetfile(GtNodeStream *gs, GtStr *offsetfile,
                                      GtError *err)
 {
   GtGFF3InStream *is = gff3_in_stream_cast(gs);
-  assert(is);
+  gt_assert(is);
   return gt_gff3_parser_set_offsetfile(is->gff3_parser, offsetfile, err);
 }
 
 void gt_gff3_in_stream_enable_tidy_mode(GtNodeStream *gs)
 {
   GtGFF3InStream *is = gff3_in_stream_cast(gs);
-  assert(is);
+  gt_assert(is);
   gt_gff3_parser_enable_tidy_mode(is->gff3_parser);
 }
 

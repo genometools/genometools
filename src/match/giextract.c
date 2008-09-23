@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -279,11 +279,11 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
     {
       if (firstpipe > 0)
       {
-        assert(i>0);
+        gt_assert(i>0);
         secondpipe = i;
         break;
       }
-      assert(i>0);
+      gt_assert(i>0);
       firstpipe = i;
     }
   }
@@ -292,7 +292,7 @@ static const char *desc2ginumber(unsigned long *ginumlen,const char *desc,
     gt_error_set(err,"Cannot find gi-number in description \"%s\"\n",desc);
     return NULL;
   }
-  assert(firstpipe < secondpipe);
+  gt_assert(firstpipe < secondpipe);
   *ginumlen = firstpipe - secondpipe - 1;
   return desc + firstpipe + 1;
 }

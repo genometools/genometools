@@ -36,9 +36,9 @@ BWTSeqCRNextMark(const BWTSeqContextRetriever *bwtSeqCR, Seqpos pos)
 {
   Seqpos seqLen, mapMask;
   struct SeqMark nextMark;
-  assert(bwtSeqCR);
+  gt_assert(bwtSeqCR);
   seqLen = BWTSeqLength(bwtSeqCR->bwtSeq);
-  assert(pos < seqLen);
+  gt_assert(pos < seqLen);
   mapMask = bwtSeqCR->mapMask;
   /* rounds up to next multiple of mapInterval */
   nextMark.textPos = (pos + mapMask) & ~mapMask;

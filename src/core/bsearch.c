@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/bsearch.h"
 #include "core/ensure.h"
 #include "core/unused_api.h"
@@ -29,8 +29,8 @@ static void* bsearch_generic(GtArray *members, const void *key,
    *ptr; /* the current element we consider */
   int limit, rval;
 
-  assert(key && size && compar);
-  assert(!b || gt_bittab_size(b) == nmemb);
+  gt_assert(key && size && compar);
+  gt_assert(!b || gt_bittab_size(b) == nmemb);
 
   /* the actual binary search */
   for (limit = nmemb; limit != 0; limit >>= 1) {
@@ -83,7 +83,7 @@ void gt_bsearch_all(GtArray *members, const void *key, const void *base,
                     size_t nmemb, size_t size, GtCompareWithData compar,
                     void *data)
 {
-  assert(members);
+  gt_assert(members);
   bsearch_generic(members, key, base, nmemb, size, compar, data, NULL);
 }
 
@@ -91,14 +91,14 @@ void gt_bsearch_all_mark(GtArray *members, const void *key, const void *base,
                          size_t nmemb, size_t size, GtCompareWithData compar,
                          void *data, GtBittab *b)
 {
-  assert(members);
+  gt_assert(members);
   bsearch_generic(members, key, base, nmemb, size, compar, data, b);
 }
 
 static int cmp(const void *a_ptr, const void *b_ptr, GT_UNUSED void *unused)
 {
   int a, b;
-  assert(a_ptr && b_ptr);
+  gt_assert(a_ptr && b_ptr);
   a = *(int*) a_ptr;
   b = *(int*) b_ptr;
   if (a == b)

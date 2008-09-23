@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/arraydef.h"
 #include "core/chardef.h"
 #include "format64.h"
@@ -207,10 +207,10 @@ static void checkmergertrie2(Mergertrierep *trierep,
     (*numberofbitsset)++;
   } else
   {
-    assert(node->depth == 0 || node->firstchild->rightsibling != NULL);
+    gt_assert(node->depth == 0 || node->firstchild->rightsibling != NULL);
     if (father != NULL)
     {
-      assert(!ISLEAF(father));
+      gt_assert(!ISLEAF(father));
       if (father->depth >= node->depth)
       {
         fprintf(stderr,"father.depth = " FormatSeqpos " >= " FormatSeqpos
@@ -326,7 +326,7 @@ static Mergertrienode *newMergertrienode(Mergertrierep *trierep)
 #endif
   if (trierep->nextfreeMergertrienode >= trierep->allocatedMergertrienode)
   {
-    assert(trierep->nextunused > 0);
+    gt_assert(trierep->nextunused > 0);
     trierep->nextunused--;
     return trierep->unusedMergertrienodes[trierep->nextunused];
   }
@@ -488,7 +488,7 @@ void insertsuffixintomergertrie(Mergertrierep *trierep,
     Uchar cc;
     Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
 
-    assert(!ISLEAF(node));
+    gt_assert(!ISLEAF(node));
     currentnode = node;
     currentdepth = node->depth;
     totallength = getencseqtotallength(eri->encseqptr);
@@ -503,8 +503,8 @@ void insertsuffixintomergertrie(Mergertrierep *trierep,
                             suffixinfo->startpos + currentdepth,
                             eri->readmode);
       }
-      assert(currentnode != NULL);
-      assert(!ISLEAF(currentnode));
+      gt_assert(currentnode != NULL);
+      gt_assert(!ISLEAF(currentnode));
       if (!hassuccessor(trierep,&np,currentdepth,currentnode,cc,
                         suffixinfo->idx))
       {
@@ -587,7 +587,7 @@ Mergertrienode *findsmallestnodeintrie(const Mergertrierep *trierep)
 {
   Mergertrienode *node;
 
-  assert(trierep->root != NULL);
+  gt_assert(trierep->root != NULL);
   for (node = trierep->root; node->firstchild != NULL; node = node->firstchild)
     /* Nothing */ ;
   return node;

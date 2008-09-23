@@ -159,7 +159,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
   BitOffset bitsPerComp, bitsPerCount, bitsPerPerm;
   size_t numCompositions, cmpIdx = 0;
   size_t maxNumPermutations = 0, numTotalPermutations;
-  assert(newList);
+  gt_assert(newList);
   newList->permutations = NULL;
   newList->catCompsPerms = NULL;
   if (!(composition = gt_malloc(sizeof (composition[0]) * alphabetSize)))
@@ -196,7 +196,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
 #endif /* EIS_DEBUG > 1 */
       gt_bsStoreUniformUIntArray(newList->catCompsPerms, offset,
                               bitsPerCount, alphabetSize, composition);
-      assert(cmpIdx > 1?(gt_bsCompare(newList->catCompsPerms, offset,
+      gt_assert(cmpIdx > 1?(gt_bsCompare(newList->catCompsPerms, offset,
                                       bitsPerComp,
                               newList->catCompsPerms, offset - bitsPerComp,
                               bitsPerComp)>0):1);
@@ -222,14 +222,14 @@ initCompositionList(struct compList *newList, unsigned blockSize,
       nextComposition(composition, maxSym, &symRMNZ);
     } while (1);
     /* verify that the last composition is indeed the lexically maximally */
-    assert(composition[0] == blockSize);
+    gt_assert(composition[0] == blockSize);
 #if EIS_DEBUG > 1 && !defined(NDEBUG)
     gt_log_log("permSum=%lu, alphabetSize=%lu, blockSize=%d, "
             "pow(alphabetSize, blockSize)=%f",
             (unsigned long)permSum, (unsigned long)alphabetSize, blockSize,
             pow(alphabetSize, blockSize));
 #endif
-    assert(permSum == pow(alphabetSize, blockSize));
+    gt_assert(permSum == pow(alphabetSize, blockSize));
   }
   newList->maxPermIdxBits = gt_requiredUInt64Bits(maxNumPermutations - 1);
   gt_free(composition);
@@ -339,7 +339,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 #if EIS_DEBUG > 1
       printPermutation(stderr, currentPermutation, blockSize);
 #endif /* EIS_DEBUG > 1 */
-      assert(i > 0?(gt_bsCompare(permStore, offset, bitsPerPermutation,
+      gt_assert(i > 0?(gt_bsCompare(permStore, offset, bitsPerPermutation,
                               permStore,
                               offset - bitsPerPermutation,
                               bitsPerPermutation)>0):1);
@@ -445,8 +445,8 @@ block2IndexPair(const struct compList *compositionTable,
   unsigned bitsPerCount;
   BitOffset bitsPerComposition, bitsPerPermutation;
   BitString permCompBitString;
-  assert(compositionTable && idxOutput && block);
-  assert(blockSize > 0);
+  gt_assert(compositionTable && idxOutput && block);
+  gt_assert(blockSize > 0);
   bitsPerComposition = (bitsPerCount = compositionTable->bitsPerCount)
     * alphabetSize;
   bitsPerPermutation = compositionTable->bitsPerSymbol * blockSize;

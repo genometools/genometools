@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
@@ -27,7 +27,7 @@ int gt_parse_int(int *out, const char *nptr)
 {
   long lval;
   char *ep;
-  assert(out && nptr);
+  gt_assert(out && nptr);
   errno = 0;
   lval = strtol(nptr, &ep, 10);
   if (nptr[0] == '\0' || *ep != '\0')
@@ -44,7 +44,7 @@ int gt_parse_uint(unsigned int *out, const char *nptr)
 {
   unsigned long ulval;
   char *ep;
-  assert(out && nptr);
+  gt_assert(out && nptr);
   errno = 0;
   ulval = strtoul(nptr, &ep, 10);
   if (nptr[0] == '\0' || *ep != '\0')
@@ -60,7 +60,7 @@ int gt_parse_long(long *out, const char *nptr)
 {
   long lval;
   char *ep;
-  assert(out && nptr);
+  gt_assert(out && nptr);
   errno = 0;
   lval = strtol(nptr, &ep, 10);
   if (nptr[0] == '\0' || *ep != '\0')
@@ -75,7 +75,7 @@ int gt_parse_ulong(unsigned long *out, const char *nptr)
 {
   unsigned long ulval;
   char *ep;
-  assert(out && nptr);
+  gt_assert(out && nptr);
   errno = 0;
   ulval = strtoul(nptr, &ep, 10);
   if (nptr[0] == '\0' || *ep != '\0')
@@ -90,7 +90,7 @@ int gt_parse_double(double *out, const char *nptr)
 {
   double dval;
   char *ep;
-  assert(out && nptr);
+  gt_assert(out && nptr);
   errno = 0;
   dval = strtod(nptr, &ep);
   if (nptr[0] == '\0' || *ep != '\0')
@@ -107,7 +107,7 @@ int gt_parse_range(GtRange *range, const char *start, const char *end,
   long start_val, end_val;
   char *ep;
 
-  assert(start && end && filename);
+  gt_assert(start && end && filename);
   gt_error_check(err);
 
   range->start = UNDEF_ULONG;
@@ -171,7 +171,7 @@ int gt_parse_score(bool *score_is_defined, float *score_value,
 {
   int rval;
 
-  assert(score && filename);
+  gt_assert(score && filename);
   gt_error_check(err);
 
   if (strlen(score) == 1 && score[0] == '.')
@@ -190,7 +190,7 @@ int gt_parse_score(bool *score_is_defined, float *score_value,
 int gt_parse_strand(GtStrand *gt_strand_value, const char *strand,
                  unsigned int line_number, const char *filename, GtError *err)
 {
-  assert(strand && filename);
+  gt_assert(strand && filename);
   gt_error_check(err);
 
   if (strlen(strand) != 1) {
@@ -213,7 +213,7 @@ int gt_parse_strand(GtStrand *gt_strand_value, const char *strand,
 int gt_parse_phase(Phase *phase_value, const char *phase,
                 unsigned int line_number, const char *filename, GtError *err)
 {
-  assert(phase && filename);
+  gt_assert(phase && filename);
   gt_error_check(err);
 
   if (strlen(phase) != 1) {
@@ -240,7 +240,7 @@ int gt_parse_int_line(int *int_value, const char *integer,
   int rval;
 
   gt_error_check(err);
-  assert(integer && filename);
+  gt_assert(integer && filename);
 
   if ((rval = sscanf(integer, "%d", int_value)) != 1) {
     gt_error_set(err, "could not parse integer '%s' on line %u in file '%s'",

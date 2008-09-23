@@ -92,7 +92,7 @@ static void showmatch(void *processinfo,
                              pprefixlen,
                              (unsigned long) showmatchinfo->tageratoroptions
                                                          ->maxdistance);
-      assert(pprefixlen >= suffixlength);
+      gt_assert(pprefixlen >= suffixlength);
       printf(" %lu %lu ",suffixlength,pprefixlen - suffixlength);
       printfsymbolstring(NULL,showmatchinfo->tagptr +
                               (pprefixlen - suffixlength),
@@ -347,7 +347,8 @@ static void compareresults(const ArraySimplematch *storeonline,
                    storeoffline->nextfreeSimplematch);
     exit(EXIT_FAILURE);
   }
-  assert(storeonline->nextfreeSimplematch == storeoffline->nextfreeSimplematch);
+  gt_assert(storeonline->nextfreeSimplematch ==
+            storeoffline->nextfreeSimplematch);
   if (storeoffline->nextfreeSimplematch > 1UL)
   {
     qsort(storeoffline->spaceSimplematch,(size_t)
@@ -357,7 +358,7 @@ static void compareresults(const ArraySimplematch *storeonline,
   }
   for (ss=0; ss < storeoffline->nextfreeSimplematch; ss++)
   {
-    assert(storeonline->spaceSimplematch != NULL &&
+    gt_assert(storeonline->spaceSimplematch != NULL &&
            storeoffline->spaceSimplematch != NULL);
     if (storeonline->spaceSimplematch[ss].rcmatch &&
         !storeoffline->spaceSimplematch[ss].rcmatch)
@@ -533,7 +534,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
-      assert(suffixarray.encseq != NULL);
+      gt_assert(suffixarray.encseq != NULL);
       mor = newMyersonlineresources(mapsize,
                                     tageratoroptions->nowildcards,
                                     suffixarray.encseq,
@@ -622,7 +623,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         gt_free(desc);
         break;
       }
-      assert(tageratoroptions->maxdistance < 0 ||
+      gt_assert(tageratoroptions->maxdistance < 0 ||
              twl.taglen > (unsigned long) tageratoroptions->maxdistance);
       for (try=0 ; try < 2; try++)
       {

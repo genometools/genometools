@@ -28,14 +28,14 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 {
   GtNodeStream **gs;
   const char *filename;
-  assert(L);
+  gt_assert(L);
   /* get/check parameters */
   filename = luaL_checkstring(L, 1);
   luaL_argcheck(L, gt_file_exists(filename), 1, "file does not exist");
   /* construct object */
   gs = lua_newuserdata(L, sizeof (GtNodeStream*));
   *gs = gt_gff3_in_stream_new_sorted(filename, false);
-  assert(*gs);
+  gt_assert(*gs);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -44,11 +44,11 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 static int gff3_out_stream_lua_new(lua_State *L)
 {
   GtNodeStream **out_stream, **in_stream = check_genome_stream(L, 1);
-  assert(L);
+  gt_assert(L);
   /* construct object */
   out_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
   *out_stream = gt_gff3_out_stream_new(*in_stream, NULL);
-  assert(*out_stream);
+  gt_assert(*out_stream);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -89,7 +89,7 @@ static const struct luaL_Reg gt_node_stream_lib_m [] = {
 
 int gt_lua_open_genome_stream(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, GENOME_STREAM_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

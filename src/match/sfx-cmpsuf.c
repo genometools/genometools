@@ -53,7 +53,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
     initEncodedsequencescanstate(esr2,encseq,readmode,start2);
   } else
   {
-    assert(esr1 == NULL && esr2 == NULL);
+    gt_assert(esr1 == NULL && esr2 == NULL);
   }
   for (pos1=start1, pos2=start2; /* Nothing */; pos1++, pos2++)
   {
@@ -207,7 +207,7 @@ int comparewithonespecial(const Encodedsequence *encseq,
                                pos2,
                                depth,
                                totallength);
-  assert(cc1 != cc2);
+  gt_assert(cc1 != cc2);
   if (!fwd && cc1 >= (Seqpos) COMPAREOFFSET && cc2 >= (Seqpos) COMPAREOFFSET)
   {
     return cc1 > cc2 ? -1 : 1;
@@ -267,8 +267,8 @@ int comparetwostrings(const Encodedsequence *encseq,
 
   if (fwd)
   {
-    assert(pos1 < totallength);
-    assert(pos2 < totallength);
+    gt_assert(pos1 < totallength);
+    gt_assert(pos2 < totallength);
     maxoffset = MIN(totallength - pos1,totallength - pos2);
     if (*maxcommon > 0)
     {

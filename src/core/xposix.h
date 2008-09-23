@@ -23,7 +23,7 @@
 #include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/mman.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>

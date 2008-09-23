@@ -36,7 +36,7 @@ bool gt_line_breaker_bases_is_gt_line_occupied(GtLineBreaker* lb,
   GtLineBreakerBases *lbb;
   GtRange r;
   GtIntervalTree *t;
-  assert(lb && block && line);
+  gt_assert(lb && block && line);
   r = gt_block_get_range(block);
   lbb = gt_line_breaker_bases_cast(lb);
   if (!(t = gt_hashmap_get(lbb->itrees, line)))
@@ -53,7 +53,7 @@ void gt_line_breaker_bases_register_block(GtLineBreaker *lb,
   GtIntervalTree *t;
   GtIntervalTreeNode *new_node;
   GtRange *rng;
-  assert(lb && block && line);
+  gt_assert(lb && block && line);
   lbb = gt_line_breaker_bases_cast(lb);
   rng = gt_block_get_range_ptr(block);
   new_node = gt_interval_tree_node_new(rng, rng->start, rng->end);

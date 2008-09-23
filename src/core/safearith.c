@@ -23,28 +23,28 @@
 int gt_safe_abs(int j)
 {
   int rval = j < 0 ? -j : j;
-  assert(rval >= 0); /* prevent overflow */
+  gt_assert(rval >= 0); /* prevent overflow */
   return rval;
 }
 
 long gt_safe_labs(long j)
 {
   long rval = j < 0 ? -j : j;
-  assert(rval >= 0); /* prevent overflow */
+  gt_assert(rval >= 0); /* prevent overflow */
   return rval;
 }
 
 long long gt_safe_llabs(long long j)
 {
   long long rval = j < 0 ? -j : j;
-  assert(rval >= 0); /* prevent overflow */
+  gt_assert(rval >= 0); /* prevent overflow */
   return rval;
 }
 
 uint32_t gt_safe_mult_u32(uint32_t a, uint32_t b)
 {
   unsigned long long x = (unsigned long long) a * b;
-  assert(x <= 0xffffffff); /* prevent overflow */
+  gt_assert(x <= 0xffffffff); /* prevent overflow */
   return x;
 }
 
@@ -61,15 +61,15 @@ uint64_t gt_safe_mult_u64(uint64_t a, uint64_t b)
      a * b = (a_hi*x + a_lo) * (b_hi*x + b_lo)
            = a_hi*x*b_hi*x + a_hi*x*b_lo + a_lo*b_hi*x + a_lo*b_lo
   */
-  assert(!(a_hi && b_hi)); /* prevent overflow */
+  gt_assert(!(a_hi && b_hi)); /* prevent overflow */
   a = (uint64_t)(a_hi) * b_lo + (uint64_t)(a_lo) * b_hi;
-  assert(a <= 0xffffffff); /* prevent overflow */
+  gt_assert(a <= 0xffffffff); /* prevent overflow */
   return (a << 32) + (uint64_t)(a_lo) * b_lo;
 }
 
 unsigned long gt_safe_mult_ulong(unsigned long a, unsigned long b)
 {
-  assert(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
+  gt_assert(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
   if (sizeof (unsigned long) == 4)
     return gt_safe_mult_u32(a, b);
   else /* sizeof (unsigned long) == 8 */
@@ -78,13 +78,13 @@ unsigned long gt_safe_mult_ulong(unsigned long a, unsigned long b)
 
 long gt_safe_cast2long(unsigned long value)
 {
-  assert(value <= (~0UL >> 1));
+  gt_assert(value <= (~0UL >> 1));
   return value;
 }
 
 unsigned long gt_safe_cast2ulong(long value)
 {
-  assert(value >= 0);
+  gt_assert(value >= 0);
   return value;
 }
 
@@ -99,24 +99,24 @@ int gt_safearith_example(GT_UNUSED GtError *err)
   /* safe assignments */
   slong = 256;
   gt_safe_assign(ulong, slong);
-  assert(ulong = 256);
+  gt_assert(ulong = 256);
 
   /* safe additions */
   a = 256;
   b = 1;
   gt_safe_add(c, a, b);
-  assert(c == 257);
+  gt_assert(c == 257);
 
   /* safe subtractions */
   a = 256;
   b = 1;
   gt_safe_sub(c, a, b);
-  assert(c == 255);
+  gt_assert(c == 255);
 
   /* safe absolutes */
   src = -256;
   dest = gt_safe_abs(src);
-  assert(dest == 256);
+  gt_assert(dest == 256);
 
   return 0;
 }

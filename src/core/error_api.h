@@ -18,7 +18,7 @@
 #ifndef ERROR_API_H
 #define ERROR_API_H
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdarg.h>
 #include <stdbool.h>
 
@@ -50,7 +50,7 @@ GtError*   gt_error_new(void);
    <GtError*> argument to make sure the error propagation has been coded
    correctly. */
 #define gt_error_check(err)\
-        assert(!err || !gt_error_is_set(err))
+        gt_assert(!err || !gt_error_is_set(err))
 /* Set the error message stored in <err> according to <format> (as in
    <printf(3)>).  */
 void        gt_error_set(GtError *err, const char *format, ...)

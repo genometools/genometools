@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "extended/permute_words.h"
 
@@ -30,7 +30,7 @@ unsigned int gt_permute_word_next(char *w, unsigned long l,
   unsigned long i;
   unsigned int next = 1;
 
-  assert(w && l && alphabet_size);
+  gt_assert(w && l && alphabet_size);
 
   for (i = 0; i < l; i++) {
     if (w[i] < alphabet_size - 1) {

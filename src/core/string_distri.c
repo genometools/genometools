@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/cstr.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
@@ -44,7 +44,7 @@ GtStringDistri* gt_string_distri_new(void)
 void gt_string_distri_add(GtStringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
-  assert(sd && key);
+  gt_assert(sd && key);
   valueptr = cstr_ul_gt_hashmap_get(sd->hashdist, key);
   if (!valueptr) {
     cstr_ul_gt_hashmap_add(sd->hashdist, gt_cstr_dup(key), 1);
@@ -57,7 +57,8 @@ void gt_string_distri_add(GtStringDistri *sd, const char *key)
 void gt_string_distri_sub(GtStringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
-  assert(sd && key && gt_string_distri_get(sd, key) && sd->num_of_occurrences);
+  gt_assert(sd && key && gt_string_distri_get(sd, key) &&
+            sd->num_of_occurrences);
   valueptr = cstr_ul_gt_hashmap_get(sd->hashdist, key);
   (*valueptr)--;
   if (!(*valueptr))
@@ -68,7 +69,7 @@ void gt_string_distri_sub(GtStringDistri *sd, const char *key)
 unsigned long gt_string_distri_get(const GtStringDistri *sd, const char *key)
 {
   unsigned long *valueptr;
-  assert(sd && key);
+  gt_assert(sd && key);
   if ((valueptr = cstr_ul_gt_hashmap_get(sd->hashdist, key)))
     return *valueptr;
   else
@@ -87,7 +88,7 @@ foreach_iterfunc(char *key, unsigned long occurrences, void *data,
 {
   ForeachInfo *info;
   gt_error_check(err);
-  assert(key && data);
+  gt_assert(key && data);
   info = (ForeachInfo*) data;
   info->func(key, occurrences, (double) occurrences / info->num_of_occurrences,
              info->data);
@@ -99,14 +100,14 @@ void gt_string_distri_foreach(const GtStringDistri *sd,
 {
   ForeachInfo info;
   int rval;
-  assert(sd);
+  gt_assert(sd);
   if (sd->hashdist) {
     info.func = func;
     info.data = data;
     info.num_of_occurrences = sd->num_of_occurrences;
     rval = cstr_ul_gt_hashmap_foreach_in_default_order(
       sd->hashdist, foreach_iterfunc, &info, NULL);
-    assert(!rval); /* foreach_iterfunc() is sane */
+    gt_assert(!rval); /* foreach_iterfunc() is sane */
   }
 }
 

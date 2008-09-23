@@ -35,26 +35,26 @@ GtChain* gt_chain_new(void)
 
 void gt_chain_reset(GtChain *chain)
 {
-  assert(chain);
+  gt_assert(chain);
   chain->score = 0;
   gt_array_reset(chain->fragments);
 }
 
 long gt_chain_get_score(const GtChain *chain)
 {
-  assert(chain);
+  gt_assert(chain);
   return chain->score;
 }
 
 void gt_chain_set_score(GtChain *chain, long score)
 {
-  assert(chain);
+  gt_assert(chain);
   chain->score = score;
 }
 
 void gt_chain_add_fragnum(GtChain *chain, unsigned long fragnum)
 {
-  assert(chain);
+  gt_assert(chain);
   gt_array_add(chain->fragments, fragnum);
 }
 
@@ -62,22 +62,22 @@ void gt_chain_set_fragnum(GtChain *chain, unsigned long idx,
                           unsigned long fragnum)
 {
   unsigned long *fragments;
-  assert(chain);
-  assert(idx < gt_array_size(chain->fragments));
+  gt_assert(chain);
+  gt_assert(idx < gt_array_size(chain->fragments));
   fragments = gt_array_get_space(chain->fragments);
   fragments[idx] = fragnum;
 }
 
 unsigned long gt_chain_get_fragnum(const GtChain *chain, unsigned long idx)
 {
-  assert(chain);
-  assert(idx < gt_array_size(chain->fragments));
+  gt_assert(chain);
+  gt_assert(idx < gt_array_size(chain->fragments));
   return *(unsigned long*) gt_array_get(chain->fragments, idx);
 }
 
 unsigned long gt_chain_size(const GtChain *chain)
 {
-  assert(chain);
+  gt_assert(chain);
   return gt_array_size(chain->fragments);
 }
 

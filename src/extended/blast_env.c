@@ -55,7 +55,7 @@ void gt_pos_delete(GtPos *pos)
 void gt_pos_add(GtPos *pos, unsigned long code, unsigned long position)
 {
   GtArray *position_list;
-  assert(pos && pos->mapping);
+  gt_assert(pos && pos->mapping);
   position_list = array_gt_safe_deref(ul_array_gt_hashmap_get(pos->mapping,
                                       code));
   if (!position_list) {
@@ -70,7 +70,7 @@ void gt_pos_add(GtPos *pos, unsigned long code, unsigned long position)
 /* Get position list for <code>. */
 GtArray* gt_pos_get(GtPos *pos, unsigned long code)
 {
-  assert(pos && pos->mapping);
+  gt_assert(pos && pos->mapping);
   return array_gt_safe_deref(ul_array_gt_hashmap_get(pos->mapping, code));
 }
 
@@ -144,7 +144,7 @@ static void add_q_word_to_env(GtBittab *V, GtPos *pos, const char *qgram_rest,
                               unsigned long position,
                               const GtScoreMatrix *score_matrix)
 {
-  assert(V && pos && qgram_rest && alpha);
+  gt_assert(V && pos && qgram_rest && alpha);
   if (q_rest == 0) {
     if (current_score >= k) {
       unsigned long qgram_code = gt_qgram_encode(current_word, q,
@@ -161,7 +161,7 @@ static void add_q_word_to_env(GtBittab *V, GtPos *pos, const char *qgram_rest,
     for (i = 0; i < gt_alpha_size(alpha); i++) {
       long char_score = gt_score_matrix_get_score(score_matrix, qgram_rest[0],
                                                   i);
-      assert(i < CHAR_MAX);
+      gt_assert(i < CHAR_MAX);
       current_word[q - q_rest] = i;
       /* recursive call (descend into branch) */
       add_q_word_to_env(V, pos, qgram_rest+1, current_word, max_cumul_scores,
@@ -220,8 +220,9 @@ GtBlastEnv* gt_blast_env_new(const char *w, unsigned long wlen, GtAlpha *alpha,
                              const GtScoreMatrix *score_matrix)
 {
   GtBlastEnv *be;
-  assert(w && alpha && q && score_matrix);
-  assert(gt_alpha_size(alpha) == gt_score_matrix_get_dimension(score_matrix));
+  gt_assert(w && alpha && q && score_matrix);
+  gt_assert(gt_alpha_size(alpha) ==
+            gt_score_matrix_get_dimension(score_matrix));
   be = gt_calloc(1, sizeof *be);
   be->alpha = gt_alpha_ref(alpha);
   be->q = q;
@@ -248,10 +249,10 @@ void gt_blast_env_show(const GtBlastEnv *be)
   unsigned long i, code;
   GtArray *position_list;
   char *qgram;
-  assert(be);
+  gt_assert(be);
   if (!be->pos)
     return; /* nothing to do */
-  assert(be->V && be->alpha);
+  gt_assert(be->V && be->alpha);
   qgram = gt_malloc(sizeof (char) * (be->q+1));
   qgram[be->q] = '\0';
   /* iterate over all codes which have a position list */
@@ -259,8 +260,8 @@ void gt_blast_env_show(const GtBlastEnv *be)
        code != gt_bittab_get_last_bitnum(be->V);
        code  = gt_bittab_get_next_bitnum(be->V, code)) {
     position_list = gt_pos_get(be->pos, code);
-    assert(position_list);
-    assert(gt_array_size(position_list)); /* contains at least one position */
+    gt_assert(position_list);
+    gt_assert(gt_array_size(position_list)); /* contains at least one pos. */
     gt_qgram_decode(qgram, code, be->q, be->alpha);
     gt_xfputs(qgram, stdout);
     for (i = 0; i < gt_array_size(position_list); i++) {

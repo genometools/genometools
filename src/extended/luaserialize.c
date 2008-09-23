@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "lua.h"
 #include "lauxlib.h"
@@ -28,7 +28,7 @@ static int format_scalar(lua_State *L, GtStr *out, int index, bool table_key,
 {
   int had_err = 0;
   gt_error_check(err);
-  assert(!lua_istable(L, index));
+  gt_assert(!lua_istable(L, index));
   if (lua_isboolean(L, index))
   {
     int val;
@@ -76,7 +76,7 @@ static int parse_table(lua_State *L, GtStr *out, int index, int level,
 {
   int rval, had_err = 0;
   gt_error_check(err);
-  assert(lua_istable(L, index));
+  gt_assert(lua_istable(L, index));
   lua_pushnil(L);
   if (index < 0)
     index--;
@@ -86,7 +86,7 @@ static int parse_table(lua_State *L, GtStr *out, int index, int level,
     for (i=0;i<level;i++)
       gt_str_append_cstr(out, "  ");
     rval = format_scalar(L, out, -2, true, NULL);
-    assert(!rval); /* cannot happen */
+    gt_assert(!rval); /* cannot happen */
     gt_str_append_cstr(out, " = ");
     if (lua_istable(L, -1))
     {
@@ -109,7 +109,7 @@ static int parse_table(lua_State *L, GtStr *out, int index, int level,
 int gt_lua_table_to_str(lua_State *L, GtStr *out, int index, GtError *err)
 {
   gt_error_check(err);
-  assert(L && out && lua_istable(L, index));
+  gt_assert(L && out && lua_istable(L, index));
   return parse_table(L, out, index, 1, err);
 }
 

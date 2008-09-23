@@ -33,7 +33,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
 
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf);
+  gt_assert(gf);
 
   if (gt_feature_node_has_type(gf, type)) {
     had_err = gt_region_mapping_get_raw_sequence(region_mapping, &raw_sequence,
@@ -41,7 +41,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
                                               err);
     if (!had_err) {
       range = gt_genome_node_get_range(gn);
-      assert(range.start); /* 1-based coordinates */
+      gt_assert(range.start); /* 1-based coordinates */
       raw_sequence += range.start - 1;
       had_err = gt_region_mapping_get_raw_sequence_length(region_mapping,
                                                        &raw_sequence_length,
@@ -49,7 +49,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
                                                        err);
     }
     if (!had_err) {
-      assert(range.end <= raw_sequence_length);
+      gt_assert(range.end <= raw_sequence_length);
       gt_str_append_cstr_nt(sequence, raw_sequence, gt_range_length(range));
       if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)
         *reverse_strand = true;
@@ -71,7 +71,7 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
 
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf);
+  gt_assert(gf);
 
   if (join) {
     GtGenomeNodeIterator *gni;
@@ -94,16 +94,16 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
     }
   }
   else if (gt_feature_node_get_type(gf) == type) {
-    assert(!had_err);
+    gt_assert(!had_err);
     /* otherwise we only have to look this feature */
     range = gt_genome_node_get_range(gn);
-    assert(range.start); /* 1-based coordinates */
+    gt_assert(range.start); /* 1-based coordinates */
     had_err = gt_region_mapping_get_raw_sequence_length(region_mapping,
                                                      &raw_sequence_length,
                                                    gt_genome_node_get_seqid(gn),
                                                      err);
     if (!had_err) {
-      assert(range.end <= raw_sequence_length);
+      gt_assert(range.end <= raw_sequence_length);
       had_err = gt_region_mapping_get_raw_sequence(region_mapping,
                                                 &raw_sequence,
                                                 gt_genome_node_get_seqid(gn),

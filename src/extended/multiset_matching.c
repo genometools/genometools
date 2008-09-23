@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,7 +67,7 @@ void gt_do_multiset_matching(unsigned char *multiset_string,
     if (multiset[text[i]] == 0)
       exhausted_characters++;
 
-    assert(exhausted_characters <= alphabet_size);
+    gt_assert(exhausted_characters <= alphabet_size);
     if (exhausted_characters == alphabet_size) /* match found */
       procmatchfunc(i - multiset_size + 1, data);
   }

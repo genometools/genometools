@@ -43,11 +43,11 @@ static int determine_outfp(void *data, GtError *err)
   GtGenFileMode genfilemode;
   int had_err = 0;
   gt_error_check(err);
-  assert(ofi);
+  gt_assert(ofi);
   if (!gt_str_length(ofi->output_filename))
     *ofi->outfp = NULL; /* no output file given -> use stdin */
   else { /* outputfile given -> create generic file pointer */
-    assert(!(ofi->gzip && ofi->bzip2));
+    gt_assert(!(ofi->gzip && ofi->bzip2));
     if (ofi->gzip)
       genfilemode = GFM_GZIP;
     else if (ofi->bzip2)
@@ -75,7 +75,7 @@ static int determine_outfp(void *data, GtError *err)
       *ofi->outfp = gt_genfile_xopen_w_gfmode(genfilemode,
                                               gt_str_get(ofi->output_filename),
                                               "w");
-      assert(*ofi->outfp);
+      gt_assert(*ofi->outfp);
     }
   }
   return had_err;
@@ -85,7 +85,7 @@ void gt_outputfile_register_options(GtOptionParser *op, GtGenFile **outfp,
                                  GtOutputFileInfo *ofi)
 {
   GtOption *opto, *optgzip, *optbzip2, *optforce;
-  assert(outfp && ofi);
+  gt_assert(outfp && ofi);
   ofi->outfp = outfp;
   /* register option -o */
   opto = gt_option_new_string("o", "redirect output to specified file",

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include "core/array2dim.h"
 #include "core/minmax.h"
@@ -50,7 +50,7 @@ static void fillDPtable(DPentry **dptable,
 {
   unsigned long i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
-  assert(dptable && u && ulen && v && vlen);
+  gt_assert(dptable && u && ulen && v && vlen);
   for (i = 0; i <= ulen; i++) {
     for (j = 0; j <= vlen; j++) {
       if (!i && !j) {
@@ -68,7 +68,7 @@ static void fillDPtable(DPentry **dptable,
           Dvalue = infadd(dptable[i-1][j-1].Ddist, rcost);
           Ivalue = infadd(dptable[i-1][j-1].Idist, rcost);
           minvalue = MIN3(Rvalue, Dvalue, Ivalue);
-          assert(minvalue != ULONG_MAX);
+          gt_assert(minvalue != ULONG_MAX);
           dptable[i][j].Rdist = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
@@ -86,7 +86,7 @@ static void fillDPtable(DPentry **dptable,
           Dvalue = infadd(dptable[i-1][j].Ddist, gap_extension);
           Ivalue = infadd(dptable[i-1][j].Idist, gap_opening + gap_extension);
           minvalue = MIN3(Rvalue, Dvalue, Ivalue);
-          assert(minvalue != ULONG_MAX);
+          gt_assert(minvalue != ULONG_MAX);
           dptable[i][j].Ddist = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
@@ -104,7 +104,7 @@ static void fillDPtable(DPentry **dptable,
           Dvalue = infadd(dptable[i][j-1].Ddist, gap_opening + gap_extension);
           Ivalue = infadd(dptable[i][j-1].Idist, gap_extension);
           minvalue = MIN3(Rvalue, Dvalue, Ivalue);
-          assert(minvalue != ULONG_MAX);
+          gt_assert(minvalue != ULONG_MAX);
           dptable[i][j].Idist = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
@@ -124,7 +124,7 @@ static void traceback(GtAlignment *a, DPentry **dptable,
 {
   unsigned long minvalue;
   Edge edge;
-  assert(a && dptable);
+  gt_assert(a && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
   minvalue = MIN3(dptable[i][j].Rdist, dptable[i][j].Ddist,
                   dptable[i][j].Idist);
@@ -138,23 +138,23 @@ static void traceback(GtAlignment *a, DPentry **dptable,
   while (i > 0 || j > 0) {
     switch (edge) {
       case R:
-        assert(dptable[i][j].Rdist != ULONG_MAX);
+        gt_assert(dptable[i][j].Rdist != ULONG_MAX);
         gt_alignment_add_replacement(a);
         edge = dptable[i][j].Redge;
-        /* assert(i && j); */
+        /* gt_assert(i && j); */
         i--;
         j--;
         break;
       case D:
         gt_alignment_add_deletion(a);
         edge = dptable[i][j].Dedge;
-        assert(i);
+        gt_assert(i);
         i--;
         break;
       case I:
         gt_alignment_add_insertion(a);
         edge = dptable[i][j].Iedge;
-        assert(j);
+        gt_assert(j);
         j--;
         break;
     }
@@ -167,7 +167,7 @@ GtAlignment* gt_affinealign(const char *u, unsigned long ulen,
 {
   DPentry **dptable;
   GtAlignment *a;
-  assert(u && ulen && v && vlen);
+  gt_assert(u && ulen && v && vlen);
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
   fillDPtable(dptable, u, ulen, v, vlen,
               replacement_cost, gap_opening_cost, gap_extension_cost);

@@ -204,8 +204,8 @@ Encodedsequence *plain2encodedsequence(
   Uchar *seqptr;
   Seqpos pos, len;
 
-  assert(seq1 != NULL);
-  assert(len1 > 0);
+  gt_assert(seq1 != NULL);
+  gt_assert(len1 > 0);
   if (seq2 == NULL)
   {
     seqptr = (Uchar *) seq1;
@@ -253,7 +253,7 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   {
     sri->pos = encseq->totallength-1;
   }
-  assert(sri != NULL);
+  gt_assert(sri != NULL);
   return sri;
 }
 
@@ -354,7 +354,7 @@ void encseqextract(Uchar *buffer,
   unsigned long idx;
   Seqpos pos;
 
-  assert(frompos < topos && topos < encseq->totallength);
+  gt_assert(frompos < topos && topos < encseq->totallength);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
     buffer[idx] = getencodedchar(encseq,pos,Forwardmode);

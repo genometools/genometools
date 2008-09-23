@@ -169,7 +169,7 @@ int mg_curl(ParseStruct *parsestruct_ptr,
       /* seq_pos+16 zeigt auf das erste Zeichen der Sequence; gezaehlt
          wird die Laenge bis zum naechsten Zeichen das kein g,a,c oder t
          etc. ist */
-      assert(seq_pos != NULL);
+      gt_assert(seq_pos != NULL);
       seq_len = strspn(seq_pos + 16, "gactrymkswhbvdnu");
 
       numb_from = atol(gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));

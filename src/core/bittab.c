@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/bittab.h"
 #include "core/ensure.h"
 #include "core/fa.h"
@@ -38,7 +38,7 @@ GtBittab* gt_bittab_new(unsigned long num_of_bits)
 {
   GtBittab *b;
 
-  assert(num_of_bits);
+  gt_assert(num_of_bits);
 
   b = gt_malloc(sizeof (GtBittab));
   b->num_of_bits = num_of_bits;
@@ -55,14 +55,14 @@ GtBittab* gt_bittab_new(unsigned long num_of_bits)
 
 void gt_bittab_set_bit(GtBittab *b, unsigned long bit)
 {
-  assert(b && bit < b->num_of_bits);
+  gt_assert(b && bit < b->num_of_bits);
   b->tabptr[(bit >> 3) / sizeof (unsigned long)] |=
     1UL << (bit & (8UL * sizeof (unsigned long) - 1));
 }
 
 void gt_bittab_unset_bit(GtBittab *b, unsigned long bit)
 {
-  assert(b && bit < b->num_of_bits);
+  gt_assert(b && bit < b->num_of_bits);
   b->tabptr[(bit >> 3) / sizeof (unsigned long)] &=
     ~(1UL << (bit & (8UL * sizeof (unsigned long) - 1)));
 }
@@ -71,7 +71,7 @@ void gt_bittab_complement(GtBittab *dest, const GtBittab *src)
 {
   unsigned long i;
 
-  assert(dest && src && dest->num_of_bits == src->num_of_bits);
+  gt_assert(dest && src && dest->num_of_bits == src->num_of_bits);
 
   for (i = 0; i < src->tabsize - 1; i++)
     dest->tabptr[i] = ~src->tabptr[i];
@@ -88,7 +88,7 @@ void gt_bittab_complement(GtBittab *dest, const GtBittab *src)
 void gt_bittab_equal(GtBittab *dest, const GtBittab *src)
 {
   unsigned long i;
-  assert(dest && src && dest->num_of_bits == src->num_of_bits);
+  gt_assert(dest && src && dest->num_of_bits == src->num_of_bits);
   for (i = 0; i < src->tabsize; i++)
     dest->tabptr[i] = src->tabptr[i];
 }
@@ -97,9 +97,9 @@ void gt_bittab_and(GtBittab *dest, const GtBittab *src1,
                    const GtBittab *src2)
 {
   unsigned long i;
-  assert(dest && src1 && src2);
-  assert(dest->num_of_bits == src1->num_of_bits);
-  assert(dest->num_of_bits == src2->num_of_bits);
+  gt_assert(dest && src1 && src2);
+  gt_assert(dest->num_of_bits == src1->num_of_bits);
+  gt_assert(dest->num_of_bits == src2->num_of_bits);
   for (i = 0; i < src1->tabsize; i++)
     dest->tabptr[i] = src1->tabptr[i] & src2->tabptr[i];
 }
@@ -107,9 +107,9 @@ void gt_bittab_and(GtBittab *dest, const GtBittab *src1,
 void gt_bittab_or(GtBittab *dest, const GtBittab *src1, const GtBittab *src2)
 {
   unsigned long i;
-  assert(dest && src1 && src2);
-  assert(dest->num_of_bits == src1->num_of_bits);
-  assert(dest->num_of_bits == src2->num_of_bits);
+  gt_assert(dest && src1 && src2);
+  gt_assert(dest->num_of_bits == src1->num_of_bits);
+  gt_assert(dest->num_of_bits == src2->num_of_bits);
   for (i = 0; i < src1->tabsize; i++)
     dest->tabptr[i] = src1->tabptr[i] | src2->tabptr[i];
 }
@@ -119,9 +119,9 @@ void gt_bittab_nand(GtBittab *dest,
                   const GtBittab *subtrahend)
 {
   unsigned long i;
-  assert(dest && minuend && subtrahend);
-  assert(dest->num_of_bits == minuend->num_of_bits);
-  assert(minuend->num_of_bits == subtrahend->num_of_bits);
+  gt_assert(dest && minuend && subtrahend);
+  gt_assert(dest->num_of_bits == minuend->num_of_bits);
+  gt_assert(minuend->num_of_bits == subtrahend->num_of_bits);
   for (i = 0; i < dest->tabsize; i++)
     dest->tabptr[i] = minuend->tabptr[i] & ~subtrahend->tabptr[i];
 }
@@ -129,8 +129,8 @@ void gt_bittab_nand(GtBittab *dest,
 void gt_bittab_and_equal(GtBittab *dest, const GtBittab *src)
 {
   unsigned long i;
-  assert(dest && src);
-  assert(dest->num_of_bits == src->num_of_bits);
+  gt_assert(dest && src);
+  gt_assert(dest->num_of_bits == src->num_of_bits);
   for (i = 0; i < dest->tabsize; i++)
     dest->tabptr[i] &= src->tabptr[i];
 }
@@ -138,8 +138,8 @@ void gt_bittab_and_equal(GtBittab *dest, const GtBittab *src)
 void gt_bittab_or_equal(GtBittab *dest, const GtBittab *src)
 {
   unsigned long i;
-  assert(dest && src);
-  assert(dest->num_of_bits == src->num_of_bits);
+  gt_assert(dest && src);
+  gt_assert(dest->num_of_bits == src->num_of_bits);
   for (i = 0; i < dest->tabsize; i++)
     dest->tabptr[i] |= src->tabptr[i];
 }
@@ -147,7 +147,7 @@ void gt_bittab_or_equal(GtBittab *dest, const GtBittab *src)
 void gt_bittab_shift_left_equal(GtBittab *b)
 {
   unsigned long i, new_carry, old_carry = 0;
-  assert(b);
+  gt_assert(b);
   for (i = 0; i < b->tabsize; i++) {
     new_carry = b->tabptr[i] & (1UL << (8UL * sizeof (unsigned long) - 1));
     b->tabptr[i] = (b->tabptr[i] << 1) | old_carry;
@@ -158,7 +158,7 @@ void gt_bittab_shift_left_equal(GtBittab *b)
 void gt_bittab_shift_right_equal(GtBittab *b)
 {
   unsigned long i, new_carry, old_carry = 0;
-  assert(b);
+  gt_assert(b);
   for (i = b->tabsize; i > 0; i--) {
     new_carry = b->tabptr[i-1] & 1UL;
     b->tabptr[i-1] = (b->tabptr[i-1] >> 1) | old_carry;
@@ -169,7 +169,7 @@ void gt_bittab_shift_right_equal(GtBittab *b)
 void gt_bittab_unset(GtBittab *b)
 {
   unsigned long i;
-  assert(b);
+  gt_assert(b);
   for (i = 0; i < b->tabsize; i++)
     b->tabptr[i] = 0;
 }
@@ -177,14 +177,14 @@ void gt_bittab_unset(GtBittab *b)
 void gt_bittab_get_all_bitnums(const GtBittab *b, GtArray *bitnums)
 {
   unsigned long i;
-  assert(b && bitnums);
+  gt_assert(b && bitnums);
   for (i = 0; i < b->num_of_bits; i++)
     if (gt_bittab_bit_is_set(b, i)) gt_array_add(bitnums, i);
 }
 
 bool gt_bittab_bit_is_set(const GtBittab *b, unsigned long bit)
 {
-  assert(b && bit < b->num_of_bits);
+  gt_assert(b && bit < b->num_of_bits);
   if (b->tabptr[(bit >> 3) / sizeof (unsigned long)] &
       1UL << (bit & (8UL * sizeof (unsigned long) - 1))) {
     return true;
@@ -195,7 +195,7 @@ bool gt_bittab_bit_is_set(const GtBittab *b, unsigned long bit)
 bool gt_bittab_is_true(const GtBittab *b)
 {
   unsigned long i;
-  assert(b);
+  gt_assert(b);
   for (i = 0; i < b->tabsize; i++) {
     if (b->tabptr[i])
       return true;
@@ -206,7 +206,7 @@ bool gt_bittab_is_true(const GtBittab *b)
 bool gt_bittab_cmp(const GtBittab *b1, const GtBittab *b2)
 {
   unsigned long i;
-  assert(b1 && b2 && b1->num_of_bits == b2->num_of_bits);
+  gt_assert(b1 && b2 && b1->num_of_bits == b2->num_of_bits);
   for (i = 0; i < b1->tabsize; i++) {
     if (b1->tabptr[i] != b2->tabptr[i])
       return false;
@@ -216,14 +216,14 @@ bool gt_bittab_cmp(const GtBittab *b1, const GtBittab *b2)
 
 unsigned long gt_bittab_size(GtBittab *b)
 {
-  assert(b);
+  gt_assert(b);
   return b->num_of_bits;
 }
 
 unsigned long gt_bittab_get_first_bitnum(const GtBittab *b)
 {
   unsigned long i, rval = UNDEF_ULONG;
-  assert(b);
+  gt_assert(b);
   for (i = 0; i < b->num_of_bits; i++)
     if (gt_bittab_bit_is_set(b, i)) {
       rval = i;
@@ -236,7 +236,7 @@ unsigned long gt_bittab_get_first_bitnum(const GtBittab *b)
 
 unsigned long gt_bittab_get_last_bitnum(const GtBittab *b)
 {
-  assert(b);
+  gt_assert(b);
   return b->num_of_bits;
 }
 
@@ -245,8 +245,8 @@ unsigned long gt_bittab_get_next_bitnum(const GtBittab *b,
 {
   unsigned long i, rval = UNDEF_ULONG;
 
-  assert(b);
-  assert(curnum < b->num_of_bits);
+  gt_assert(b);
+  gt_assert(curnum < b->num_of_bits);
   for (i = curnum + 1; i < b->num_of_bits; i++)
     if (gt_bittab_bit_is_set(b, i)) {
       rval = i;
@@ -286,7 +286,7 @@ unsigned long gt_bittab_count_set_bits(GtBittab *b)
                                                    4, 5, 5, 6, 5, 6, 6, 7, 5, 6,
                                                    6, 7, 6, 7, 7, 8 };
   unsigned long i, j, counter = 0;
-  assert(b);
+  gt_assert(b);
   for (i = 0; i < b->tabsize; i++)
     for (j = 0; j < sizeof (unsigned long); j++)
       counter += bits_in_char[((b->tabptr[i] >> (j * 8)) & 0xffu)];
@@ -296,7 +296,7 @@ unsigned long gt_bittab_count_set_bits(GtBittab *b)
 void gt_bittab_show(const GtBittab *b, FILE *outfp)
 {
   unsigned long i;
-  assert(b && outfp);
+  gt_assert(b && outfp);
   /* header line */
   for (i = 0; i < b->num_of_bits; i++)
     fprintf(outfp, "%lu", i % 10);

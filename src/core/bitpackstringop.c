@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
@@ -94,7 +94,7 @@ computeDeBruijn()
   {
     prod = ((unsigned long long)v * 0x26752B916FC7B0DULL) >> 58;
     printf("v = %llu, i = %u, prod = %u\n", v, i, prod);
-    assert(prod < 64);
+    gt_assert(prod < 64);
     MultiplyDeBruijnBitPosition[prod] = i;
   }
   fputs("int MultiplyDeBruijnBitPosition[64] = { ", stdout);
@@ -114,7 +114,7 @@ gt_bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
   const BitElem *pA = a + elemStartA, *pB = b + elemStartB;
   unsigned long accumA = 0, accumB = 0;
   unsigned bitsInAccumA, bitsInAccumB;
-  assert(a && b);
+  gt_assert(a && b);
   /* user requested zero length comparison, treat as equality */
   if (!numBitsA && !numBitsB)
   {
@@ -238,7 +238,7 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
   BitOffset bitsLeft = numBits;
   const BitElem *p = src + elemStartSrc;
   BitElem *q = dest + elemStartDest;
-  assert(src && dest);
+  gt_assert(src && dest);
   /* special optimization if equally aligned data will be copied */
   if (bitTopSrc == bitTopDest)
   {
@@ -399,7 +399,7 @@ gt_bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
   size_t elemStart = offset/bitElemBits;
   BitElem *p = str + elemStart;
   unsigned long bitPatSource = 0UL;
-  assert(str);
+  gt_assert(str);
   if (bitVal)
     bitPatSource = ~0UL;
   if (bitTop)
@@ -451,7 +451,7 @@ gt_bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits)
   unsigned bitTop = offset%bitElemBits, bitsInAccum = 0;
   size_t elemStart = offset/bitElemBits;
   const BitElem *p = str + elemStart;
-  assert(str);
+  gt_assert(str);
   if (bitTop)
   {
     uint32_t mask;
@@ -514,7 +514,7 @@ gt_bsPrint(FILE *fp, constBitString str, BitOffset offset, BitOffset numBits)
   const BitElem *p = str + elemStart;
   char buf[sizeof (accum) * CHAR_BIT];
   int ioGtError = 0;
-  assert(str);
+  gt_assert(str);
   do {
     if (bitTop)
     {

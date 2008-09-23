@@ -36,15 +36,15 @@ MRAEncGetNumRanges(const MRAEnc *mralpha)
 static inline AlphabetRangeSize
 MRAEncGetRangeSize(const MRAEnc *mralpha, AlphabetRangeID range)
 {
-  assert(mralpha);
-  assert(mralpha->numRanges > range);
+  gt_assert(mralpha);
+  gt_assert(mralpha->numRanges > range);
   return mralpha->symbolsPerRange[range];
 }
 
 static inline Symbol
 MRAEncGetRangeBase(const MRAEnc *mralpha, AlphabetRangeID range)
 {
-  assert(mralpha && mralpha->numRanges > range);
+  gt_assert(mralpha && mralpha->numRanges > range);
   if (range == 0)
     return 0;
   else
@@ -54,7 +54,7 @@ MRAEncGetRangeBase(const MRAEnc *mralpha, AlphabetRangeID range)
 static inline size_t
 MRAEncGetDomainSize(const MRAEnc *mralpha)
 {
-  assert(mralpha);
+  gt_assert(mralpha);
   switch (mralpha->encType)
   {
   case sourceUInt8:
@@ -106,7 +106,7 @@ static inline AlphabetRangeID
 MRAEncGetRangeOfSymbol(const MRAEnc *mralpha, Symbol sym)
 {
   AlphabetRangeID range = 0;
-  assert(mralpha && sym < MRAEncGetSize(mralpha));
+  gt_assert(mralpha && sym < MRAEncGetSize(mralpha));
   while (sym >= mralpha->rangeEndIndices[range])
     ++range;
   return range;

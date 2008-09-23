@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/undef.h"
 #include "extended/genome_node_iterator.h"
 #include "extended/node_stream_rep.h"
@@ -64,7 +64,7 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
 {
   bool first_score_is_defined, second_score_is_defined;
   float first_score = 0.0, second_score;
-  assert(*first_node && *second_node);
+  gt_assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     if ((first_score_is_defined =
            gt_feature_node_score_is_defined((GtFeatureNode*)
@@ -103,7 +103,7 @@ static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   gt_error_check(err);
   us = uniq_stream_cast(gs);
 
-  assert(!us->second_node); /* the second buffer is always empty when this
+  gt_assert(!us->second_node); /* the second buffer is always empty when this
                                function is called */
   if (!us->first_node) {
     /* both buffers are empty */
@@ -118,7 +118,7 @@ static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
   /* uniq loop */
   for (;;) {
-    assert(us->first_node && !us->second_node);
+    gt_assert(us->first_node && !us->second_node);
     had_err = gt_node_stream_next(us->in_stream, &us->second_node, err);
     if (!had_err && us->second_node) {
       if (!uniq(&us->first_node, &us->second_node))
@@ -130,7 +130,7 @@ static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
   /* serve node */
   if (!had_err) {
-    assert(us->first_node);
+    gt_assert(us->first_node);
     *gn = us->first_node;
     us->first_node = us->second_node;
     us->second_node = NULL;
@@ -162,7 +162,7 @@ GtNodeStream* gt_uniq_stream_new(GtNodeStream *in_stream)
 {
   GtNodeStream *gs;
   GtUniqStream *us;
-  assert(in_stream && gt_node_stream_is_sorted(in_stream));
+  gt_assert(in_stream && gt_node_stream_is_sorted(in_stream));
   gs = gt_node_stream_create(gt_uniq_stream_class(), true);
   us = uniq_stream_cast(gs);
   us->in_stream = gt_node_stream_ref(in_stream);

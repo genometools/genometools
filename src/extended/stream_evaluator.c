@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/bsearch.h"
 #include "core/cstr.h"
 #include "core/hashmap.h"
@@ -165,7 +165,7 @@ static Slot* slot_new(bool nuceval, GtRange range)
 static void slot_delete(Slot *s)
 {
   unsigned long i;
-  assert(s);
+  gt_assert(s);
   for (i = 0; i < gt_array_size(s->genes_forward); i++) {
     gt_genome_node_rec_delete(*(GtGenomeNode**)
                               gt_array_get(s->genes_forward, i));
@@ -255,7 +255,7 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value,
   Slot *s = (Slot*) value;
 
   gt_error_check(err);
-  assert(key && value && data);
+  gt_assert(key && value && data);
 
   /* set actual genes */
   gt_evaluator_add_actual(se->gene_evaluator, gt_array_size(s->genes_forward));
@@ -316,21 +316,21 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value,
                                     s->CDS_exons_reverse);
 
   /* make sure that the genes are sorted */
-  assert(gt_genome_nodes_are_sorted(s->genes_forward));
-  assert(gt_genome_nodes_are_sorted(s->genes_reverse));
+  gt_assert(gt_genome_nodes_are_sorted(s->genes_forward));
+  gt_assert(gt_genome_nodes_are_sorted(s->genes_reverse));
 
   /* make sure that the mRNAs are sorted */
-  assert(gt_genome_nodes_are_sorted(s->mRNAs_forward));
-  assert(gt_genome_nodes_are_sorted(s->mRNAs_reverse));
+  gt_assert(gt_genome_nodes_are_sorted(s->mRNAs_forward));
+  gt_assert(gt_genome_nodes_are_sorted(s->mRNAs_reverse));
 
   /* make sure that the LTRs are sorted */
-  assert(gt_genome_nodes_are_sorted(s->LTRs));
+  gt_assert(gt_genome_nodes_are_sorted(s->LTRs));
 
   /* make sure that the exons are sorted */
-  assert(gt_transcript_exons_are_sorted(s->mRNA_exons_forward));
-  assert(gt_transcript_exons_are_sorted(s->mRNA_exons_reverse));
-  assert(gt_transcript_exons_are_sorted(s->CDS_exons_forward));
-  assert(gt_transcript_exons_are_sorted(s->CDS_exons_reverse));
+  gt_assert(gt_transcript_exons_are_sorted(s->mRNA_exons_forward));
+  gt_assert(gt_transcript_exons_are_sorted(s->mRNA_exons_reverse));
+  gt_assert(gt_transcript_exons_are_sorted(s->CDS_exons_forward));
+  gt_assert(gt_transcript_exons_are_sorted(s->CDS_exons_reverse));
 
   /* init true bittabs */
   s->true_genes_forward = gt_array_size(s->genes_forward)
@@ -382,7 +382,7 @@ static int set_actuals_and_sort_them(GT_UNUSED void *key, void *value,
 static void add_real_exon(GtTranscriptExons *te, GtRange range,
                           GtGenomeNode *gn)
 {
-  assert(te);
+  gt_assert(te);
   gt_array_add(gt_transcript_exons_get_all(te), range);
   switch (gt_feature_node_get_transcriptfeaturetype((GtFeatureNode*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
@@ -413,14 +413,14 @@ static void add_nucleotide_exon(GtBittab *nucleotides, GtRange range,
                                 unsigned long *FP)
 {
   unsigned long i;
-  assert(nucleotides);
+  gt_assert(nucleotides);
   for (i = range.start; i <= range.end; i++) {
     if (gt_range_within(real_range, i)) {
-      assert(i >= real_range.start);
+      gt_assert(i >= real_range.start);
       gt_bittab_set_bit(nucleotides, i - real_range.start);
     }
     else {
-      assert(FP);
+      gt_assert(FP);
       (*FP)++;
     }
   }
@@ -435,7 +435,7 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
   GtRange range;
 
   gt_error_check(err);
-  assert(gn && data);
+  gt_assert(gn && data);
   gf = (GtFeatureNode*) gn;
 
   if (gt_feature_node_has_type(gf, gft_gene)) {
@@ -538,7 +538,7 @@ static int store_exon(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
   GtFeatureNode *gf;
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf && exons);
+  gt_assert(gf && exons);
   if (gt_feature_node_has_type(gf, gft_exon)) {
     range = gt_genome_node_get_range(gn);
     gt_array_add(exons, range);
@@ -552,7 +552,7 @@ static bool mRNAs_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
   bool equal;
   int had_err;
 
-  assert(gn_1 && gn_2);
+  gt_assert(gn_1 && gn_2);
 
   /* init */
   exons_1 = gt_array_new(sizeof (GtRange));
@@ -561,10 +561,10 @@ static bool mRNAs_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
   /* get exon ranges */
   had_err = gt_genome_node_traverse_children(gn_1, exons_1, store_exon, false,
                                           NULL);
-  assert(!had_err); /* cannot happen, store_exon() is sane */
+  gt_assert(!had_err); /* cannot happen, store_exon() is sane */
   had_err = gt_genome_node_traverse_children(gn_2, exons_2, store_exon, false,
                                           NULL);
-  assert(!had_err); /* cannot happen, store_exon() is sane */
+  gt_assert(!had_err); /* cannot happen, store_exon() is sane */
 
   /* sort exon ranges */
   gt_ranges_sort(exons_1);
@@ -593,7 +593,7 @@ static int store_gene_feature(GtGenomeNode *gn, void *data,
   GtRange range;
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf && info);
+  gt_assert(gf && info);
   if (gt_feature_node_has_type(gf, gft_mRNA)) {
     gt_array_add(info->mRNAs, gf);
   }
@@ -623,12 +623,12 @@ static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
   info.mRNAs = mRNAs_1;
   had_err = gt_genome_node_traverse_direct_children(gn_1, &info,
                                                  store_gene_feature, NULL);
-  assert(!had_err); /* cannot happen, store_gene_feature() is sane */
+  gt_assert(!had_err); /* cannot happen, store_gene_feature() is sane */
   info.exons = exons_2;
   info.mRNAs = mRNAs_2;
   had_err = gt_genome_node_traverse_direct_children(gn_2, &info,
                                                  store_gene_feature, NULL);
-  assert(!had_err); /* cannot happen, store_gene_feature() is sane */
+  gt_assert(!had_err); /* cannot happen, store_gene_feature() is sane */
 
   /* sort exon ranges */
   gt_ranges_sort(exons_1);
@@ -643,7 +643,7 @@ static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
     gt_genome_nodes_sort(mRNAs_1);
     gt_genome_nodes_sort(mRNAs_2);
     for (i = 0; i < gt_array_size(mRNAs_1); i++) {
-      assert(equal);
+      gt_assert(equal);
       equal = mRNAs_are_equal(*(GtGenomeNode**) gt_array_get(mRNAs_1, i),
                               *(GtGenomeNode**) gt_array_get(mRNAs_2, i));
       if (!equal)
@@ -662,7 +662,7 @@ static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2)
 
 static void store_predicted_exon(GtTranscriptEvaluators *te, GtGenomeNode *gn)
 {
-  assert(te && gn);
+  gt_assert(te && gn);
   gt_evaluator_add_predicted(gt_transcript_evaluators_get_all(te), 1);
   switch (gt_feature_node_get_transcriptfeaturetype((GtFeatureNode*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
@@ -815,7 +815,7 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                             GtTranscriptEvaluators *exon_evaluators,
                             GtTranscriptEvaluators *exon_evaluators_collapsed)
 {
-  assert(gn && predicted_range && exons_forward && exons_reverse);
+  gt_assert(gn && predicted_range && exons_forward && exons_reverse);
   determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
                       gt_transcript_exons_get_all(exons_forward),
                       gt_transcript_exons_get_all(exons_reverse),
@@ -900,7 +900,7 @@ static int process_predicted_feature(GtGenomeNode *gn, void *data,
   GtGenomeNode **real_gn;
 
   gt_error_check(err);
-  assert(gn && data);
+  gt_assert(gn && data);
 
   predicted_range = gt_genome_node_get_range(gn);
   predicted_strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
@@ -1175,7 +1175,7 @@ static int determine_missing_features(GT_UNUSED void *key, void *value,
   GtStreamEvaluator *se = (GtStreamEvaluator*) data;
   Slot *slot = (Slot*) value;
   gt_error_check(err);
-  assert(key && value && data);
+  gt_assert(key && value && data);
   if (slot->overlapped_genes_forward) {
     se->missing_genes +=
       gt_bittab_size(slot->overlapped_genes_forward) -
@@ -1207,7 +1207,7 @@ static void add_nucleotide_values(NucEval *nucleotides, GtBittab *real,
                                   GtBittab *pred, GtBittab *tmp,
                                   const char *level)
 {
-  assert(nucleotides && real && pred && tmp);
+  gt_assert(nucleotides && real && pred && tmp);
   if (gt_log_enabled()) {
     gt_log_log(level);
     gt_log_log("reality:");
@@ -1235,7 +1235,7 @@ static int compute_nucleotides_values(GT_UNUSED void *key, void *value,
   Slot *slot = (Slot*) value;
   GtBittab *tmp;
   gt_error_check(err);
-  assert(key && value && data);
+  gt_assert(key && value && data);
   /* add ``out of range'' FPs */
   se->mRNA_nucleotides.FP += slot->FP_mRNA_nucleotides_forward;
   se->mRNA_nucleotides.FP += slot->FP_mRNA_nucleotides_reverse;
@@ -1274,7 +1274,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   int had_err;
 
   gt_error_check(err);
-  assert(se);
+  gt_assert(se);
 
   /* init */
   real_info.nuceval = se->nuceval;
@@ -1308,21 +1308,21 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
                     gt_cstr_dup(gt_str_get(gt_genome_node_get_seqid(gn))),
                     slot);
       }
-      assert(slot);
+      gt_assert(slot);
     }
     /* we consider only genome features */
     if ((gf = gt_feature_node_try_cast(gn))) {
       /* each sequence must have its own ``slot'' at this point */
       slot = gt_hashmap_get(se->slots,
                             gt_str_get(gt_genome_node_get_seqid(gn)));
-      assert(slot);
+      gt_assert(slot);
       /* store the exons */
       real_info.slot = slot;
       gt_feature_node_determine_transcripttypes(gf);
       had_err = gt_genome_node_traverse_children(gn, &real_info,
                                               process_real_feature, false,
                                               NULL);
-      assert(!had_err); /* cannot happen, process_real_feature() is sane */
+      gt_assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
     if (gv)
       gt_genome_node_accept(gn, gv, err);
@@ -1333,7 +1333,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   if (!had_err) {
     had_err = gt_hashmap_foreach(se->slots, set_actuals_and_sort_them, se,
                                  NULL);
-    assert(!had_err); /* set_actuals_and_sort_them() is sane */
+    gt_assert(!had_err); /* set_actuals_and_sort_them() is sane */
   }
 
   /* process the prediction stream */
@@ -1351,7 +1351,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
           had_err = gt_genome_node_traverse_children(gn, &predicted_info,
                                                   process_predicted_feature,
                                                   false, NULL);
-          assert(!had_err); /* cannot happen, process_predicted_feature() is
+          gt_assert(!had_err); /* cannot happen, process_predicted_feature() is
                                sane */
         }
         else {
@@ -1370,14 +1370,14 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   if (!had_err) {
     had_err = gt_hashmap_foreach(se->slots, determine_missing_features, se,
                                  NULL);
-    assert(!had_err); /* determine_missing_features() is sane */
+    gt_assert(!had_err); /* determine_missing_features() is sane */
   }
 
   /* compute the nucleotides values */
   if (!had_err && se->nuceval) {
     had_err = gt_hashmap_foreach(se->slots, compute_nucleotides_values, se,
                                  NULL);
-    assert(!had_err); /* compute_nucleotides_values() is sane */
+    gt_assert(!had_err); /* compute_nucleotides_values() is sane */
   }
 
   return had_err;
@@ -1387,7 +1387,7 @@ static void show_gt_transcript_values(GtTranscriptEvaluators *te,
                                       const char *level,
                                       const char *additional_info, FILE *outfp)
 {
-  assert(te);
+  gt_assert(te);
 
   fprintf(outfp, "exon sensitivity (%s level, all%s): ", level,
           additional_info);
@@ -1450,7 +1450,7 @@ static void show_nucleotide_values(NucEval *nucleotides, const char *level,
                                    FILE *outfp)
 {
   double sensitivity = 1.0, specificity = 1.0;
-  assert(nucleotides && level);
+  gt_assert(nucleotides && level);
   if (nucleotides->TP || nucleotides->FN) {
     sensitivity = (double) nucleotides->TP /
                   (nucleotides->TP + nucleotides->FN);
@@ -1469,7 +1469,7 @@ static void show_nucleotide_values(NucEval *nucleotides, const char *level,
 
 void gt_stream_evaluator_show(GtStreamEvaluator *se, FILE *outfp)
 {
-  assert(se);
+  gt_assert(se);
 
   if (!se->evalLTR) {
     /* gene level */

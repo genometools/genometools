@@ -285,7 +285,7 @@ static int processbranchedge(bool firstsucc,
   }
   if (father->commonchar != ISLEFTDIVERSE)
   {
-    assert(son != NULL);
+    gt_assert(son != NULL);
 #ifdef SKDEBUG
     printf("commonchar=%u\n",(unsigned int) son->commonchar);
 #endif

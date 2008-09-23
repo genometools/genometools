@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/array.h"
@@ -39,7 +39,7 @@ bool gt_file_exists(const char *path)
 bool gt_file_is_newer(const char *a, const char *b)
 {
   struct stat stat_a, stat_b;
-  assert(a && b);
+  gt_assert(a && b);
   gt_xstat(a, &stat_a);
   gt_xstat(b, &stat_b);
   if (stat_a.st_mtime > stat_b.st_mtime ||
@@ -55,7 +55,7 @@ unsigned long gt_file_number_of_lines(const char *path)
   unsigned long number_of_lines = 0;
   GtGenFile *fp;
   int cc;
-  assert(path);
+  gt_assert(path);
   fp = gt_genfile_xopen(path, "r");
   while ((cc = gt_genfile_xfgetc(fp)) != EOF)
     if (cc == '\n') number_of_lines++;
@@ -66,7 +66,7 @@ unsigned long gt_file_number_of_lines(const char *path)
 const char* gt_file_suffix(const char *path)
 {
   const char *suffixptr;
-  assert(path);
+  gt_assert(path);
   suffixptr = path + gt_genfile_basename_length(path) - 1;
   while (suffixptr > path) {
     if (*suffixptr == '/')
@@ -98,7 +98,7 @@ int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
   int had_err = 0;
 
   gt_error_check(err);
-  assert(file);
+  gt_assert(file);
 
   /* check if 'file' has dirname */
   gt_file_dirname(path, file);

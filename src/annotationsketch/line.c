@@ -40,7 +40,7 @@ GtLine* gt_line_new(void)
 
 void gt_line_insert_block(GtLine *line, GtBlock *block)
 {
-  assert(line && block);
+  gt_assert(line && block);
   if (!line->has_captions && gt_block_get_caption(block) != NULL)
     line->has_captions = true;
   gt_array_add(line->blocks, block);
@@ -48,20 +48,20 @@ void gt_line_insert_block(GtLine *line, GtBlock *block)
 
 bool gt_line_has_captions(const GtLine *line)
 {
-  assert(line);
+  gt_assert(line);
   return line->has_captions;
 }
 
 GtArray* gt_line_get_blocks(GtLine* line)
 {
-  assert(line);
+  gt_assert(line);
   return line->blocks;
 }
 
 int gt_line_sketch(GtLine *line, GtCanvas *canvas)
 {
   int i = 0;
-  assert(line && canvas);
+  gt_assert(line && canvas);
   gt_canvas_visit_line_pre(canvas, line);
   for (i = 0; i < gt_array_size(line->blocks); i++) {
     GtBlock *block;

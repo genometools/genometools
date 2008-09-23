@@ -29,7 +29,7 @@ static int cds_stream_lua_new(lua_State *L)
   in_stream = check_genome_stream(L, 1);
   region_mapping = check_region_mapping(L, 2);
   cds_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
-  assert(cds_stream);
+  gt_assert(cds_stream);
   *cds_stream = gt_cds_stream_new(*in_stream,
                                   gt_region_mapping_ref(*region_mapping),
                                   "gtscript");
@@ -45,7 +45,7 @@ static const struct luaL_Reg cds_stream_lib_f [] = {
 
 int gt_lua_open_cds_stream(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_register(L, "gt", cds_stream_lib_f);
   return 1;
 }

@@ -42,7 +42,7 @@ int gt_canvas_cairo_file_visit_diagram_pre(GtCanvas *canvas, GtDiagram *dia)
 {
   double margins;
 
-  assert(canvas && dia);
+  gt_assert(canvas && dia);
 
   if (gt_style_get_num(canvas->pvt->sty, "format", "margins", &margins, NULL))
     canvas->pvt->margins = margins;
@@ -73,7 +73,7 @@ int gt_canvas_cairo_file_visit_diagram_post(GtCanvas *canvas, GtDiagram *dia)
 {
   int had_err = 0;
 
-  assert(canvas && dia);
+  gt_assert(canvas && dia);
 
   /* set initial image-specific values */
   canvas->pvt->y += HEADER_SPACE;
@@ -101,7 +101,7 @@ int gt_canvas_cairo_file_to_file(GtCanvasCairoFile *canvas,
   int had_err = 0;
   GtCanvas *c = (GtCanvas*) canvas;
   gt_error_check(err);
-  assert(canvas && filename);
+  gt_assert(canvas && filename);
   /* write out result file */
   if (c->pvt->g)
     had_err = gt_graphics_save_to_file(c->pvt->g, filename, err);
@@ -119,7 +119,7 @@ int gt_canvas_cairo_file_to_stream(GtCanvasCairoFile *canvas, GtStr *stream)
 {
   int had_err = 0;
   GtCanvas *c = (GtCanvas*) canvas;
-  assert(canvas && stream);
+  gt_assert(canvas && stream);
 
   /* write out result file */
   if (c->pvt->g)
@@ -145,7 +145,7 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,
 {
   GtCanvas *canvas;
   GtCanvasCairoFile *ccf;
-  assert(sty && width > 0);
+  gt_assert(sty && width > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_file_class());
   canvas->pvt->sty = sty;
   canvas->pvt->ii = ii;

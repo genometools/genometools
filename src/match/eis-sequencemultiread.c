@@ -46,7 +46,7 @@ struct seqSinkState
 static inline Seqpos
 seqReaderSetGetConsumerNextPos(struct seqReaderState *consumer)
 {
-  assert(consumer);
+  gt_assert(consumer);
   return consumer->nextReadPos;
 }
 
@@ -54,7 +54,7 @@ static inline void
 seqReaderSetSetConsumerNextPos(struct seqReaderState *consumer,
                                Seqpos newPos)
 {
-  assert(consumer && consumer->nextReadPos <= newPos);
+  gt_assert(consumer && consumer->nextReadPos <= newPos);
   consumer->nextReadPos = newPos;
 }
 
@@ -105,7 +105,7 @@ initEmptySeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
 extern void
 destructSeqReaderSet(SeqReaderSet *readerSet)
 {
-  assert(readerSet);
+  gt_assert(readerSet);
   ListDo(struct seqReaderState, readerSet->consumerList, gt_free(p));
   if (readerSet->autoConsumerList)
     gt_free(readerSet->autoConsumerList);
@@ -120,7 +120,7 @@ seqReaderSetRegisterConsumer(SeqReaderSet *readerSet, int tag,
   int availId = readerSet->numConsumers++;
   SeqDataReader reader;
   struct seqReaderState *state;
-  assert(readerSet);
+  gt_assert(readerSet);
   state = gt_malloc(sizeof (*state));
   state->readerSet = readerSet;
   state->id = availId;
@@ -142,7 +142,7 @@ seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
                                  SeqDataWriter writer)
 {
   int availId = readerSet->numConsumers++;
-  assert(readerSet);
+  gt_assert(readerSet);
   {
     struct seqSinkState *temp;
     if (!(temp = gt_realloc(readerSet->autoConsumerList,
@@ -168,7 +168,7 @@ seqReaderSetRead(void *src, void *dest, size_t len, GtError *err)
   struct seqReaderSet *readerSet;
   Seqpos pos;
   size_t elemsLeft;
-  assert(src);
+  gt_assert(src);
   readerSet = state->readerSet;
   elemsLeft = len;
   pos = seqReaderSetGetConsumerNextPos(state);
@@ -220,7 +220,7 @@ seqReaderSetFindMinOpenRequestBySet(SeqReaderSet *readerSet, int setSpec)
 {
   Seqpos min = -1;
   int i;
-  assert(readerSet);
+  gt_assert(readerSet);
   for (i = 0; i < readerSet->numConsumers; ++i)
     if (readerSet->consumers[i].tag & setSpec)
       min = MIN(min, readerSet->consumers[i].nextReadPos);
@@ -232,7 +232,7 @@ seqReaderSetFindMinOpenRequestByVal(SeqReaderSet *readerSet, int tagVal)
 {
   Seqpos min = -1;
   int i;
-  assert(readerSet);
+  gt_assert(readerSet);
   for (i = 0; i < readerSet->numConsumers; ++i)
     if (readerSet->consumers[i].tag == tagVal)
       min = MIN(min, readerSet->consumers[i].nextReadPos);
@@ -245,7 +245,7 @@ seqReaderSetFindMinOpenRequest(SeqReaderSet *readerSet)
 {
   struct seqReaderState *p;
   Seqpos min = -1;
-  assert(readerSet);
+  gt_assert(readerSet);
   p = readerSet->consumerList;
   while (p)
   {
@@ -261,7 +261,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
 {
   Seqpos requestMinPos;
   struct seqReaderSet *readerSet = backlogState;
-  assert(backlogState && (requestLen?(seqData!=NULL):1));
+  gt_assert(backlogState && (requestLen?(seqData!=NULL):1));
   requestMinPos = seqReaderSetFindMinOpenRequest(readerSet);
   /* 1. pass all data to be invalidated to automatic sinks */
   {
@@ -271,7 +271,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
       SDWWrite(sinks[i].writer, seqData, requestLen);
   }
   /* 2. move still unread old values as far as possible to head of copy */
-  assert(requestMinPos >= readerSet->backlogStartPos);
+  gt_assert(requestMinPos >= readerSet->backlogStartPos);
   if (requestMinPos < readerSet->backlogStartPos + readerSet->backlogLen)
   {
     size_t backlogUnread
@@ -318,13 +318,13 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
 static inline int
 seqReaderSetGetConsumerTag(struct seqReaderState *state)
 {
-  assert(state);
+  gt_assert(state);
   return state->tag;
 }
 
 static inline void
 seqReaderSetAdvanceConsumer(struct seqReaderState *state, size_t len)
 {
-  assert(state);
+  gt_assert(state);
   state->nextReadPos += len;
 }

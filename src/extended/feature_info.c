@@ -48,21 +48,21 @@ void gt_feature_info_delete(GtFeatureInfo *fi)
 
 void gt_feature_info_reset(GtFeatureInfo *fi)
 {
-  assert(fi);
+  gt_assert(fi);
   gt_hashmap_reset(fi->id_to_genome_node);
   gt_hashmap_reset(fi->id_to_pseudo_parent);
 }
 
 GtFeatureNode* gt_feature_info_get(const GtFeatureInfo *fi, const char *id)
 {
-  assert(fi && id);
+  gt_assert(fi && id);
   return gt_hashmap_get(fi->id_to_genome_node, id);
 }
 
 void gt_feature_info_add(GtFeatureInfo *fi, const char *id, GtFeatureNode *fn)
 {
-  assert(fi && id && fn);
-  assert(!gt_feature_node_is_pseudo((GtFeatureNode*) fn));
+  gt_assert(fi && id && fn);
+  gt_assert(!gt_feature_node_is_pseudo((GtFeatureNode*) fn));
   gt_hashmap_add(fi->id_to_genome_node, gt_cstr_dup(id),
               gt_genome_node_ref((GtGenomeNode*) fn));
 }
@@ -70,15 +70,15 @@ void gt_feature_info_add(GtFeatureInfo *fi, const char *id, GtFeatureNode *fn)
 GtFeatureNode* gt_feature_info_get_pseudo_parent(const GtFeatureInfo *fi,
                                            const char *id)
 {
-  assert(fi && id);
+  gt_assert(fi && id);
   return gt_hashmap_get(fi->id_to_pseudo_parent, id);
 }
 
 void gt_feature_info_add_pseudo_parent(GtFeatureInfo *fi, const char *id,
                                     GtFeatureNode *pseudo_parent)
 {
-  assert(fi && id && pseudo_parent);
-  assert(gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_parent));
+  gt_assert(fi && id && pseudo_parent);
+  gt_assert(gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_parent));
   gt_hashmap_add(fi->id_to_pseudo_parent, gt_cstr_dup(id),
               gt_genome_node_ref((GtGenomeNode*) pseudo_parent));
 }
@@ -88,10 +88,10 @@ void gt_feature_info_replace_pseudo_parent(GtFeatureInfo *fi,
                                            GtFeatureNode *new_pseudo_parent)
 {
   const char *id;
-  assert(fi && child && new_pseudo_parent);
-  assert(gt_feature_node_is_pseudo((GtFeatureNode*) new_pseudo_parent));
+  gt_assert(fi && child && new_pseudo_parent);
+  gt_assert(gt_feature_node_is_pseudo((GtFeatureNode*) new_pseudo_parent));
   id = gt_feature_node_get_attribute(child, ID_STRING);
-  assert(id);
+  gt_assert(id);
   gt_hashmap_remove(fi->id_to_pseudo_parent, id);
   gt_feature_info_add_pseudo_parent(fi, id, new_pseudo_parent);
 }
@@ -100,7 +100,7 @@ static GtFeatureNode* find_root(const GtFeatureInfo *fi, const char *id)
 {
   const char *delim, *parents;
   GtFeatureNode *this_feature, *parent_pseudo_feature;
-  assert(fi && id);
+  gt_assert(fi && id);
   /* get feature */
   delim = strchr(id, ';');
   if (delim) {
@@ -114,7 +114,7 @@ static GtFeatureNode* find_root(const GtFeatureInfo *fi, const char *id)
     this_feature = gt_hashmap_get(fi->id_to_genome_node, id);
     parent_pseudo_feature = gt_hashmap_get(fi->id_to_pseudo_parent, id);
   }
-  assert(this_feature);
+  gt_assert(this_feature);
   /* recursion */
   parents = gt_feature_node_get_attribute(this_feature, PARENT_STRING);
   if (parents)
@@ -127,7 +127,7 @@ static GtFeatureNode* find_root(const GtFeatureInfo *fi, const char *id)
 GtFeatureNode* gt_feature_info_find_root(const GtFeatureInfo *fi,
                                          const char *id)
 {
-  assert(fi && id);
-  assert(gt_feature_info_get(fi, id));
+  gt_assert(fi && id);
+  gt_assert(gt_feature_info_get(fi, id));
   return find_root(fi, id);
 }

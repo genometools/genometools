@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "extended/union_find.h"
@@ -36,7 +36,7 @@ GtUnionFind* gt_union_find_new(unsigned long num_of_elems)
 {
   GtUnionFind *uf;
   unsigned long i;
-  assert(num_of_elems);
+  gt_assert(num_of_elems);
   uf = gt_malloc(sizeof *uf);
   uf->elems = gt_calloc(sizeof (GtUnionFindElement), num_of_elems);
   for (i = 0; i < num_of_elems; i++)
@@ -54,7 +54,7 @@ void gt_union_find_delete(GtUnionFind *uf)
 
 unsigned long gt_union_find_find(GtUnionFind *uf, unsigned long elem)
 {
-  assert(uf && elem < uf->num_of_elems);
+  gt_assert(uf && elem < uf->num_of_elems);
   if (elem != uf->elems[elem].parent) /* path compression */
     uf->elems[elem].parent = gt_union_find_find(uf, uf->elems[elem].parent);
   return uf->elems[elem].parent;
@@ -64,7 +64,7 @@ void gt_union_find_union(GtUnionFind *uf, unsigned long elem_a,
                          unsigned long elem_b)
 {
   unsigned long x, y;
-  assert(uf && elem_a < uf->num_of_elems && elem_b < uf->num_of_elems);
+  gt_assert(uf && elem_a < uf->num_of_elems && elem_b < uf->num_of_elems);
   x = gt_union_find_find(uf, elem_a);
   y = gt_union_find_find(uf, elem_b);
   /* union-by-rank heuristic */

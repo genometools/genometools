@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "lauxlib.h"
 #include "core/cstr.h"
@@ -32,7 +32,7 @@ int gt_lua_set_modules_path(lua_State *L, GtError *err)
          *package_path = NULL;
   int had_err = 0;
   gt_error_check(err);
-  assert(L);
+  gt_assert(L);
   if (!(modules_path = gt_get_gtdata_path(gt_error_get_progname(err), err)))
     had_err = -1;
   if (!had_err) {
@@ -40,9 +40,9 @@ int gt_lua_set_modules_path(lua_State *L, GtError *err)
     gt_str_append_cstr(modules_path, "/modules/?.lua");
     gt_str_append_cstr(external_modules_path, "/modules/external/?.lua");
     lua_getglobal(L, "package");
-    assert(lua_istable(L, -1));
+    gt_assert(lua_istable(L, -1));
     lua_getfield(L, -1, "path");
-    assert(lua_isstring(L, -1));
+    gt_assert(lua_isstring(L, -1));
     package_path = gt_str_new_cstr(lua_tostring(L, -1));
     lua_pop(L, 1);
     gt_str_append_char(package_path, ';');
@@ -62,7 +62,7 @@ int gt_lua_set_modules_path(lua_State *L, GtError *err)
 void gt_lua_set_arg(lua_State *L, const char *argv_0, const char **argv)
 {
   lua_Integer n = 0;
-  assert(L && argv_0);
+  gt_assert(L && argv_0);
   /* create table */
   lua_newtable(L);
   /* set arg[0] */
@@ -83,10 +83,10 @@ void gt_lua_set_arg(lua_State *L, const char *argv_0, const char **argv)
 void gt_lua_export_metatable(lua_State *L, const char *metatable_desc)
 {
   char *dot, *mt;
-  assert(L && metatable_desc);
+  gt_assert(L && metatable_desc);
   mt = gt_cstr_dup(metatable_desc);
   dot = strchr(mt, '.');
-  assert(dot);
+  gt_assert(dot);
   *dot = '_';
   lua_setglobal(L, mt);
   gt_free(mt);
@@ -95,7 +95,7 @@ void gt_lua_export_metatable(lua_State *L, const char *metatable_desc)
 void gt_lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
 {
   unsigned long i;
-  assert(L && sa);
+  gt_assert(L && sa);
   lua_newtable(L);
   for (i = 0; i < gt_strarray_size(sa); i++) {
     lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
@@ -106,8 +106,8 @@ void gt_lua_push_strarray_as_table(lua_State *L, GtStrArray *sa)
 
 int gt_lua_error(lua_State *L, GtError *err)
 {
-  assert(L && err);
-  assert(gt_error_is_set(err));
+  gt_assert(L && err);
+  gt_assert(gt_error_is_set(err));
   luaL_where(L, 1);
   lua_pushstring(L, gt_error_get(err));
   gt_error_delete(err);

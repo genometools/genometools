@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include <errno.h>
 #include "core/arraydef.h"
@@ -182,7 +182,7 @@ static void verifycodelistcomputation(
                                                       readmode,
                                                       prefixlength,
                                                       numofchars);
-  assert(realspecialranges+1 >= (Seqpos) nextfreeCodeatposition2);
+  gt_assert(realspecialranges+1 >= (Seqpos) nextfreeCodeatposition2);
   compareCodeatpositionlists(spaceCodeatposition1,
                              nextfreeCodeatposition1,
                              spaceCodeatposition2,
@@ -205,9 +205,9 @@ static Codetype getencseqcode(const Encodedsequence *encseq,
 
   for (idx=0; idx<prefixlength; idx++)
   {
-    assert((Seqpos) (pos + idx) < totallength);
+    gt_assert((Seqpos) (pos + idx) < totallength);
     cc = getencodedcharnospecial(encseq,pos + idx, readmode);
-    assert(ISNOTSPECIAL(cc));
+    gt_assert(ISNOTSPECIAL(cc));
     code += multimappower[idx][cc];
   }
   return code;
@@ -237,21 +237,21 @@ static void updatekmercount(void *processinfo,
           Codeatposition *cp;
 
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-          assert(code <= (Codetype) MAXCODEVALUE);
+          gt_assert(code <= (Codetype) MAXCODEVALUE);
           cp->code = (unsigned int) code;
-          assert(firstspecial->specialpos <= MAXPREFIXLENGTH);
+          gt_assert(firstspecial->specialpos <= MAXPREFIXLENGTH);
           cp->maxprefixindex = firstspecial->specialpos;
           cp->position = position + firstspecial->specialpos;
         }
         sfi->storespecials = false;
-        assert(code > 0);
+        gt_assert(code > 0);
         sfi->leftborder[code]++;
       }
     } else
     {
       if (firstspecial->specialpos > 0)
       {
-        assert(code > 0);
+        gt_assert(code > 0);
         sfi->leftborder[code]++;
       } else
       {
@@ -398,11 +398,11 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
                                             specialcontext.position-prefixindex,
                                             sfi->currentmaxcode))
         {
-          assert(code <= sfi->currentmaxcode);
+          gt_assert(code <= sfi->currentmaxcode);
           if (code >= sfi->currentmincode)
           {
             updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
-            assert(code > 0);
+            gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
             sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
@@ -476,7 +476,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   bool haserr = false;
 
   gt_error_check(err);
-  assert(prefixlength > 0);
+  gt_assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
       prefixlength > MAXPREFIXLENGTH)
   {
@@ -557,7 +557,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   }
   if (!haserr)
   {
-    assert(sfi != NULL);
+    gt_assert(sfi != NULL);
     sfi->storespecials = true;
     if (mtime != NULL)
     {
@@ -571,7 +571,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    prefixlength);
     if (sfi->storespecialcodes)
     {
-      assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
+      gt_assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
       reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
     }
 #ifdef SKDEBUG
@@ -583,7 +583,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               sfi->nextfreeCodeatposition,
                               sfi->spaceCodeatposition);
 #endif
-    assert(sfi->leftborder != NULL);
+    gt_assert(sfi->leftborder != NULL);
 #ifdef SKDEBUG
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
@@ -600,7 +600,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                                       sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
                                       verboseinfo);
-    assert(sfi->suftabparts != NULL);
+    gt_assert(sfi->suftabparts != NULL);
     ALLOCASSIGNSPACE(sfi->suftab,NULL,Seqpos,
                      stpgetlargestwidth(sfi->suftabparts));
     if (hasspecialranges(sfi->encseq))
@@ -694,7 +694,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 {
   Seqpos pos;
 
-  assert(leftpos < rightpos);
+  gt_assert(leftpos < rightpos);
   if (ISDIRREVERSE(sfi->readmode))
   {
     pos = rightpos - 1;
@@ -740,7 +740,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         /* does not fit into the buffer, so only output a part */
         unsigned long rest = sfi->fusp.nextfreeSeqpos +
                              width - sfi->fusp.allocatedSeqpos;
-        assert(rest > 0);
+        gt_assert(rest > 0);
         if (ISDIRREVERSE(sfi->readmode))
         {
           insertfullspecialrange(sfi,sfi->overhang.leftpos + rest,
@@ -770,7 +770,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       if (sfi->sri != NULL && nextspecialrangeiterator(&range,sfi->sri))
       {
         width = range.rightpos - range.leftpos;
-        assert(width > 0);
+        gt_assert(width > 0);
         if (sfi->fusp.nextfreeSeqpos + width > sfi->fusp.allocatedSeqpos)
         { /* does not fit into the buffer, so only output a part */
           unsigned long rest = sfi->fusp.nextfreeSeqpos +
@@ -830,7 +830,7 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   }
   sfi->fusp.nextfreeSeqpos = 0;
   fillspecialnextpage(sfi);
-  assert(sfi->fusp.nextfreeSeqpos > 0);
+  gt_assert(sfi->fusp.nextfreeSeqpos > 0);
   *numberofsuffixes = (Seqpos) sfi->fusp.nextfreeSeqpos;
   *specialsuffixes = true;
   return sfi->suftab;

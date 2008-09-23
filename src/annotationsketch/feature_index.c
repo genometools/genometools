@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/class_alloc.h"
 #include "core/queue.h"
 #include "core/ma.h"
@@ -78,7 +78,7 @@ const GtFeatureIndexClass* gt_feature_index_class_new(size_t size,
 GtFeatureIndex* gt_feature_index_create(const GtFeatureIndexClass *fic)
 {
   GtFeatureIndex *fi;
-  assert(fic && fic->size);
+  gt_assert(fic && fic->size);
   fi = gt_calloc(1, fic->size);
   fi->c_class = fic;
   fi->pvt = gt_calloc(1, sizeof (GtFeatureIndexMembers));
@@ -87,7 +87,7 @@ GtFeatureIndex* gt_feature_index_create(const GtFeatureIndexClass *fic)
 
 GtFeatureIndex* gt_feature_index_ref(GtFeatureIndex *fi)
 {
-  assert(fi);
+  gt_assert(fi);
   fi->pvt->reference_count++;
   return fi;
 }
@@ -99,7 +99,7 @@ void gt_feature_index_delete(GtFeatureIndex *fi)
     fi->pvt->reference_count--;
     return;
   }
-  assert(fi->c_class);
+  gt_assert(fi->c_class);
   if (fi->c_class->free)
     fi->c_class->free(fi);
   gt_free(fi->pvt);
@@ -108,13 +108,13 @@ void gt_feature_index_delete(GtFeatureIndex *fi)
 
 void gt_feature_index_add_region_node(GtFeatureIndex *fi, GtRegionNode *rn)
 {
-  assert(fi && fi->c_class && rn);
+  gt_assert(fi && fi->c_class && rn);
   fi->c_class->add_region_node(fi, rn);
 }
 
 void gt_feature_index_add_feature_node(GtFeatureIndex *fi, GtFeatureNode *fn)
 {
-  assert(fi && fi->c_class && fn);
+  gt_assert(fi && fi->c_class && fn);
   fi->c_class->add_feature_node(fi, fn);
 }
 
@@ -126,7 +126,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
   GtQueue *queue;
   int had_err = 0;
   gt_error_check(err);
-  assert(fi && gff3file);
+  gt_assert(fi && gff3file);
   queue = gt_queue_new();
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, &gff3file, false, false);
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
@@ -136,7 +136,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
     while (gt_queue_size(queue)) {
       gn = gt_queue_get(queue);
       had_err = gt_genome_node_accept(gn, feature_visitor, NULL);
-      assert(!had_err); /* cannot happen */
+      gt_assert(!had_err); /* cannot happen */
     }
     gt_node_visitor_delete(feature_visitor);
   }
@@ -150,7 +150,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
 GtArray* gt_feature_index_get_features_for_seqid(GtFeatureIndex *fi,
                                                  const char *seqid)
 {
-  assert(fi && fi->c_class && seqid);
+  gt_assert(fi && fi->c_class && seqid);
   return fi->c_class->get_features_for_seqid(fi, seqid);
 }
 
@@ -159,38 +159,38 @@ int gt_feature_index_get_features_for_range(GtFeatureIndex *fi,
                                             const char *seqid,
                                             const GtRange *rng, GtError *err)
 {
-  assert(fi && fi->c_class && results && seqid);
+  gt_assert(fi && fi->c_class && results && seqid);
   return fi->c_class->get_features_for_range(fi, results, seqid, rng, err);
 }
 
 const char* gt_feature_index_get_first_seqid(const GtFeatureIndex *fi)
 {
-  assert(fi && fi->c_class);
+  gt_assert(fi && fi->c_class);
   return fi->c_class->get_first_seqid(fi);
 }
 
 GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex *fi)
 {
-  assert(fi && fi->c_class);
+  gt_assert(fi && fi->c_class);
   return fi->c_class->get_seqids(fi);
 }
 
 void gt_feature_index_get_range_for_seqid(GtFeatureIndex *fi, GtRange *rng,
                                           const char *seqid)
 {
-  assert(fi && fi->c_class && rng && seqid);
+  gt_assert(fi && fi->c_class && rng && seqid);
   fi->c_class->get_range_for_seqid(fi, rng, seqid);
 }
 
 bool gt_feature_index_has_seqid(const GtFeatureIndex *fi, const char *seqid)
 {
-  assert(fi && fi->c_class && seqid);
+  gt_assert(fi && fi->c_class && seqid);
   return fi->c_class->has_seqid(fi, seqid);
 }
 
 void* gt_feature_index_cast(GT_UNUSED const GtFeatureIndexClass *fic,
                             GtFeatureIndex *fi)
 {
-  assert(fic && fi && fi->c_class == fic);
+  gt_assert(fic && fi && fi->c_class == fic);
   return fi;
 }

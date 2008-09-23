@@ -30,11 +30,11 @@ static int bittab_lua_new(lua_State *L)
 {
   long num_of_bits;
   GtBittab **bittab;
-  assert(L);
+  gt_assert(L);
   num_of_bits = luaL_checklong(L, 1);
   luaL_argcheck(L, num_of_bits > 0, 1, "must be > 0");
   bittab = lua_newuserdata(L, sizeof (GtBittab*));
-  assert(bittab);
+  gt_assert(bittab);
   *bittab = gt_bittab_new(num_of_bits);
   luaL_getmetatable(L, BITTAB_METATABLE);
   lua_setmetatable(L, -2);
@@ -133,7 +133,7 @@ static const struct luaL_Reg bittab_lib_m [] = {
 
 int gt_lua_open_bittab(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, BITTAB_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,7 +73,7 @@ int gt_xgzread(gzFile file, void *buf, unsigned len)
 void gt_xgzwrite(gzFile file, void *buf, unsigned len)
 {
   int errnum;
-  assert(buf && len);
+  gt_assert(buf && len);
   if (gzwrite(file, buf, len) != len) {
     fprintf(stderr, "cannot write to compressed file: %s\n",
             gzerror(file, &errnum));

@@ -26,7 +26,7 @@ static int feature_index_memory_lua_new(lua_State *L)
 {
   GtFeatureIndex **feature_index;
   feature_index = lua_newuserdata(L, sizeof (GtFeatureIndex*));
-  assert(feature_index);
+  gt_assert(feature_index);
   *feature_index = gt_feature_index_memory_new();
   luaL_getmetatable(L, FEATURE_INDEX_METATABLE);
   lua_setmetatable(L, -2);
@@ -38,7 +38,7 @@ static int feature_index_lua_add_region_node(lua_State *L)
   GtFeatureIndex **fi;
   GtGenomeNode **gn;
   GtRegionNode *rn;
-  assert(L);
+  gt_assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
   rn = gt_region_node_try_cast(*gn);
@@ -52,7 +52,7 @@ static int feature_index_lua_add_gff3file(lua_State *L)
   GtFeatureIndex **fi;
   const char *filename;
   GtError *err;
-  assert(L);
+  gt_assert(L);
   fi = check_feature_index(L, 1);
   filename = luaL_checkstring(L, 2);
   err = gt_error_new();
@@ -68,7 +68,7 @@ static int feature_index_lua_add_feature_node(lua_State *L)
   GtGenomeNode **gn;
   GtFeatureNode *gf;
   GtStr *seqid;
-  assert(L);
+  gt_assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
   gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
@@ -126,8 +126,8 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
   features = gt_array_new(sizeof (GtGenomeNode*));
   had_err = gt_feature_index_get_features_for_range(*feature_index, features,
                                                     seqid, range, NULL);
-  assert(!had_err); /* it was checked before that the feature_index contains the
-                       given sequence id*/
+  gt_assert(!had_err); /* it was checked before that the feature_index contains
+                          the given sequence id*/
   push_features_as_table(L, features);
   gt_array_delete(features);
   return 1;
@@ -152,7 +152,7 @@ static int feature_index_lua_get_seqids(lua_State *L)
   GtStrArray *seqids;
   feature_index = check_feature_index(L, 1);
   seqids = gt_feature_index_get_seqids(*feature_index);
-  assert(seqids);
+  gt_assert(seqids);
   /* push table containing sequence ids onto the stack */
   gt_lua_push_strarray_as_table(L, seqids);
   gt_strarray_delete(seqids);
@@ -198,7 +198,7 @@ static const struct luaL_Reg feature_index_lib_m [] = {
 
 int gt_lua_open_feature_index(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, FEATURE_INDEX_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

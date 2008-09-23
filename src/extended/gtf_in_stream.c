@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
 #include "extended/gtf_in_stream.h"
@@ -44,7 +44,7 @@ static int gtf_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     return 0;
   }
   /* the buffer is empty */
-  assert(!gt_queue_size(is->gt_genome_node_buffer));
+  gt_assert(!gt_queue_size(is->gt_genome_node_buffer));
   *gn = NULL;
   return 0;
 }

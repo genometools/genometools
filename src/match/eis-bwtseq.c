@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 
 #include "core/dataalign.h"
@@ -51,7 +51,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
   size_t alphabetSize;
   Symbol bwtTerminatorFlat;
   EISHint hint;
-  assert(bwtSeq && seqIdx);
+  gt_assert(bwtSeq && seqIdx);
   bwtSeq->alphabet = alphabet;
   alphabetSize = MRAEncGetSize(alphabet);
   if (!alphabetSize)
@@ -62,7 +62,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
    * unique mapping */
   /* FIXME: this assumes there is exactly two ranges */
   MRAEncAddSymbolToRange(alphabet, bwtTerminatorSym, 1);
-  assert(MRAEncGetSize(alphabet) ==  alphabetSize + 1);
+  gt_assert(MRAEncGetSize(alphabet) ==  alphabetSize + 1);
   alphabetSize = MRAEncGetSize(alphabet);
   bwtSeq->bwtTerminatorFallback = bwtTerminatorFlat =
     MRAEncMapSymbol(alphabet, UNDEFBWTCHAR);
@@ -82,7 +82,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     /* handle character which the terminator has been mapped to specially */
     count[i + 1] = count[i]
       + EISSymTransformedRank(seqIdx, i, len, hint) - 1;
-    assert(count[i + 1] >= count[i]);
+    gt_assert(count[i + 1] >= count[i]);
     /* now we can finish the rest of the symbols */
     for (i += 2; i < alphabetSize; ++i)
       count[i] = count[i - 1]
@@ -95,7 +95,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
     for (i = 0; i <= alphabetSize; ++i)
       gt_log_log("count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
 #endif
-    assert(count[alphabetSize] == len);
+    gt_assert(count[alphabetSize] == len);
   }
   BWTSeqInitLocateHandling(bwtSeq, defaultRangeSort);
   return 1;
@@ -114,7 +114,7 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
   size_t countsOffset, rangeSortOffset, totalSize;
   enum rangeSortMode *rangeSort;
   unsigned alphabetSize;
-  assert(seqIdx);
+  gt_assert(seqIdx);
   /* alphabetSize is increased by one to handle the flattened
    * terminator symbol correctly */
   alphabetSize = MRAEncGetSize(alphabet) + 1;
@@ -153,7 +153,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   Symbol curSym;
   const MRAEnc *alphabet;
 
-  assert(bwtSeq && query);
+  gt_assert(bwtSeq && query);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   if (forward)
   {
@@ -197,7 +197,7 @@ unsigned long packedindexuniqueforward(const BWTSeq *bwtSeq,
   Symbol curSym;
   const MRAEnc *alphabet;
 
-  assert(bwtSeq && qstart);
+  gt_assert(bwtSeq && qstart);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   qptr = qstart;
   cc = *qptr++;
@@ -264,7 +264,7 @@ unsigned long packedindexmstatsforward(const BWTSeq *bwtSeq,
   unsigned long matchlength;
   const MRAEnc *alphabet;
 
-  assert(bwtSeq && qstart && qstart < qend);
+  gt_assert(bwtSeq && qstart && qstart < qend);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   qptr = qstart;
   cc = *qptr;
@@ -332,7 +332,7 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  bool forward)
 {
   struct matchBound match;
-  assert(bwtSeq && query);
+  gt_assert(bwtSeq && query);
   getMatchBound(bwtSeq, query, queryLen, &match, forward);
   if (match.end < match.start)
     return 0;
@@ -344,7 +344,7 @@ extern bool
 initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                const Symbol *query, size_t queryLen, bool forward)
 {
-  assert(iter && bwtSeq && query);
+  gt_assert(iter && bwtSeq && query);
   if (!bwtSeq->locateSampleInterval)
   {
     fputs("Index does not contain locate information.\n"
@@ -360,7 +360,7 @@ initEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
 extern bool
 initEmptyEMIterator(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq)
 {
-  assert(iter && bwtSeq);
+  gt_assert(iter && bwtSeq);
   if (!bwtSeq->locateSampleInterval)
   {
     fputs("Index does not contain locate information.\n"
@@ -377,7 +377,7 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               bool forward)
 {
   struct BWTSeqExactMatchesIterator *iter;
-  assert(bwtSeq && query);
+  gt_assert(bwtSeq && query);
   iter = gt_malloc(sizeof (*iter));
   if (initEMIterator(iter, bwtSeq, query, queryLen,forward))
     return iter;
@@ -412,7 +412,7 @@ deleteEMIterator(struct BWTSeqExactMatchesIterator *iter)
 Seqpos
 EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
 {
-  assert(iter);
+  gt_assert(iter);
   if (iter->bounds.start > iter->bounds.end)
     return 0;
   else
@@ -422,7 +422,7 @@ EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
 extern Seqpos
 EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
 {
-  assert(iter);
+  gt_assert(iter);
   if (iter->nextMatchBWTPos > iter->bounds.end)
     return 0;
   else
@@ -451,7 +451,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
   do
   {
     Seqpos seqLen;
-    assert(bwtSeq && projectName && err);
+    gt_assert(bwtSeq && projectName && err);
     gt_error_check(err);
 
     initExtBitsRetrieval(&extBits);

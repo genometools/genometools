@@ -56,7 +56,7 @@ typedef struct {
 static void gff3_version_string(GtNodeVisitor *gv)
 {
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
-  assert(gff3_visitor);
+  gt_assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
     gt_genfile_xprintf(gff3_visitor->outfp, "%s   %u\n", GFF_VERSION_PREFIX,
                     GFF_VERSION);
@@ -67,7 +67,7 @@ static void gff3_version_string(GtNodeVisitor *gv)
 static void gff3_visitor_free(GtNodeVisitor *gv)
 {
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
-  assert(gff3_visitor);
+  gt_assert(gff3_visitor);
   gt_string_distri_delete(gff3_visitor->id_counter);
   gt_hashmap_delete(gff3_visitor->gt_feature_node_to_id_array);
   gt_hashmap_delete(gff3_visitor->gt_feature_node_to_unique_id_str);
@@ -79,7 +79,7 @@ static int gff3_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
   GtGFF3Visitor *gff3_visitor;
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
-  assert(gv && cn);
+  gt_assert(gv && cn);
   gff3_version_string(gv);
   gt_genfile_xprintf(gff3_visitor->outfp, "#%s\n",
                      gt_comment_node_get_comment(cn));
@@ -91,7 +91,7 @@ static int add_id(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
   Add_id_info *info = (Add_id_info*) data;
   GtArray *parent_features = NULL;
   gt_error_check(err);
-  assert(gn && info && info->gt_feature_node_to_id_array && info->id);
+  gt_assert(gn && info && info->gt_feature_node_to_id_array && info->id);
   parent_features = gt_hashmap_get(info->gt_feature_node_to_id_array, gn);
   if (!parent_features) {
     parent_features = gt_array_new(sizeof (char*));
@@ -105,7 +105,7 @@ static void show_attribute(const char *attr_name, const char *attr_value,
                            void *data)
 {
   ShowAttributeInfo *info = (ShowAttributeInfo*) data;
-  assert(attr_name && attr_value && info);
+  gt_assert(attr_name && attr_value && info);
   if (strcmp(attr_name, ID_STRING) && strcmp(attr_name, PARENT_STRING)) {
     if (*info->attribute_shown)
       gt_genfile_xfputc(';', info->outfp);
@@ -127,7 +127,7 @@ static int gff3_show_genome_feature(GtGenomeNode *gn, void *data,
   GtStr *id;
 
   gt_error_check(err);
-  assert(gn && gf && gff3_visitor);
+  gt_assert(gn && gf && gff3_visitor);
 
   /* output leading part */
   gt_gff3_output_leading(gf, gff3_visitor->outfp);
@@ -174,7 +174,7 @@ static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *gf)
 {
   const char *type;
   GtStr *id;
-  assert(gff3_visitor && gf);
+  gt_assert(gff3_visitor && gf);
   type = gt_feature_node_get_type(gf);
 
   /* increase id counter */
@@ -199,7 +199,7 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
   GtStr *id;
 
   gt_error_check(err);
-  assert(gn && gf && gff3_visitor);
+  gt_assert(gn && gf && gff3_visitor);
 
   if (gt_genome_node_has_children(gn) || gt_feature_node_is_multi(gf)) {
     if (gt_feature_node_is_multi(gf)) {
@@ -290,7 +290,7 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
   GtGFF3Visitor *gff3_visitor;
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
-  assert(gv && sn);
+  gt_assert(gv && sn);
   if (!gff3_visitor->fasta_directive_shown) {
     gt_genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_FASTA_DIRECTIVE);
     gff3_visitor->fasta_directive_shown = true;
@@ -336,6 +336,6 @@ void gt_gff3_visitor_set_fasta_width(GtNodeVisitor *gv,
                                      unsigned long fasta_width)
 {
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
-  assert(gv);
+  gt_assert(gv);
   gff3_visitor->fasta_width = fasta_width;
 }

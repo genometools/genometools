@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/disc_distri.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_rep.h"
@@ -58,7 +58,7 @@ static int add_exon_number(GtGenomeNode *gn, void *data,
   GtStatVisitor *stat_visitor = (GtStatVisitor*) data;
   GtFeatureNode *gf = (GtFeatureNode*) gn;
   gt_error_check(err);
-  assert(stat_visitor && gf);
+  gt_assert(stat_visitor && gf);
   if (gt_feature_node_has_type(gf, gft_exon))
     stat_visitor->exon_number_for_distri++;
   return 0;
@@ -70,7 +70,7 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
   GtFeatureNode *gf;
   int rval;
   gt_error_check(err);
-  assert(data);
+  gt_assert(data);
   stat_visitor = (GtStatVisitor*) data;
   gf = (GtFeatureNode*) gn;
   if (gt_feature_node_has_type(gf, gft_gene)) {
@@ -115,7 +115,7 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
     stat_visitor->exon_number_for_distri = 0;
     rval = gt_genome_node_traverse_direct_children(gn, stat_visitor,
                                                 add_exon_number, err);
-    assert(!rval); /* add_exon_number() is sane */
+    gt_assert(!rval); /* add_exon_number() is sane */
     if (stat_visitor->exon_number_for_distri) {
       gt_disc_distri_add(stat_visitor->exon_number_distribution,
                      stat_visitor->exon_number_for_distri);

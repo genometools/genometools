@@ -824,7 +824,7 @@ static int increase_reference_count(GtGenomeNode *gn, GT_UNUSED void *data,
                                     GT_UNUSED GtError *err)
 {
   gt_error_check(err);
-  assert(gn);
+  gt_assert(gn);
   gn->reference_count++;
   return 0;
 }

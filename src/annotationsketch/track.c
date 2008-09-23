@@ -37,9 +37,9 @@ GtTrack* gt_track_new(GtStr *title, unsigned long max_num_lines, bool split,
                  GtLineBreaker *lb)
 {
   GtTrack *track;
-  assert(title && lb);
+  gt_assert(title && lb);
   track = gt_calloc(1, sizeof (GtTrack));
-  assert(track);
+  gt_assert(track);
   track->title = gt_str_ref(title);
   track->lines = gt_array_new(sizeof (GtLine*));
   track->max_num_lines = max_num_lines;
@@ -53,7 +53,7 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
   unsigned long i;
   GtLine* line;
 
-  assert(track);
+  gt_assert(track);
 
   /* find unoccupied line -- may need optimisation */
   for (i = 0; i < gt_array_size(track->lines); i++) {
@@ -78,20 +78,20 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
     }
     else
       line = *(GtLine**) gt_array_get(track->lines, 0);
-    assert(gt_array_size(track->lines) == 1);
+    gt_assert(gt_array_size(track->lines) == 1);
   }
   else
   {
     line = gt_line_new();
     gt_array_add(track->lines, line);
   }
-  assert(line);
+  gt_assert(line);
   return line;
 }
 
 unsigned long gt_track_get_number_of_discarded_blocks(GtTrack *track)
 {
-  assert(track);
+  gt_assert(track);
   return track->discarded_blocks;
 }
 
@@ -99,7 +99,7 @@ void gt_track_insert_block(GtTrack *track, GtBlock *block)
 {
   GtLine *line;
 
-  assert(track && block);
+  gt_assert(track && block);
   line = get_next_free_line(track, block);
   block = gt_block_ref(block);
   if (line)
@@ -111,20 +111,20 @@ void gt_track_insert_block(GtTrack *track, GtBlock *block)
 
 GtStr* gt_track_get_title(const GtTrack *track)
 {
-  assert(track && track->title);
+  gt_assert(track && track->title);
   return track->title;
 }
 
 unsigned long gt_track_get_number_of_lines(const GtTrack *track)
 {
-  assert(track);
+  gt_assert(track);
   return gt_array_size(track->lines);
 }
 
 unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track)
 {
   unsigned long i = 0, nof_tracks = 0;
-  assert(track);
+  gt_assert(track);
   for (i = 0; i < gt_array_size(track->lines); i++) {
     if (gt_line_has_captions(*(GtLine**) gt_array_get(track->lines, i)))
       nof_tracks++;
@@ -135,7 +135,7 @@ unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track)
 int gt_track_sketch(GtTrack* track, GtCanvas *canvas)
 {
   int i = 0;
-  assert(track && canvas);
+  gt_assert(track && canvas);
   gt_canvas_visit_track_pre(canvas, track);
   for (i = 0; i < gt_array_size(track->lines); i++)
     gt_line_sketch(*(GtLine**) gt_array_get(track->lines, i), canvas);

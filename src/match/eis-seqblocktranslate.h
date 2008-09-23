@@ -152,8 +152,8 @@ indexPair2block(const struct compList *compositionTable, unsigned blockSize,
 {
   unsigned bitsPerPermutation;
   struct permList *permutationList;
-  assert(compositionTable && block);
-  assert(subLen <= blockSize);
+  gt_assert(compositionTable && block);
+  gt_assert(subLen <= blockSize);
   bitsPerPermutation = compositionTable->bitsPerSymbol * blockSize;
   permutationList = compositionTable->permutations + compIdx;
   gt_bsGetUniformSymbolArray(
@@ -176,10 +176,10 @@ symCountFromComposition(struct compList *compositionTable,
                         PermCompIndex compIndex, Symbol sym)
 {
   BitOffset bitsPerComp, bitsPerCount;
-  assert(compositionTable);
+  gt_assert(compositionTable);
   bitsPerCount = compositionTable->bitsPerCount;
   bitsPerComp = bitsPerCount * alphabetSize;
-  assert(compIndex < compositionTable->numCompositions);
+  gt_assert(compIndex < compositionTable->numCompositions);
   return gt_bsGetUInt(compositionTable->catCompsPerms,
                    compIndex * bitsPerComp + sym * bitsPerCount,
                    bitsPerCount);
@@ -198,10 +198,10 @@ addSymCountsFromComposition(struct compList *compositionTable,
                             PermCompIndex compIndex, Seqpos *counts)
 {
   BitOffset bitsPerComp, bitsPerCount;
-  assert(compositionTable);
+  gt_assert(compositionTable);
   bitsPerCount = compositionTable->bitsPerCount;
   bitsPerComp = bitsPerCount * alphabetSize;
-  assert(compIndex < compositionTable->numCompositions);
+  gt_assert(compIndex < compositionTable->numCompositions);
   gt_bsGetUniformSeqposArrayAdd(compositionTable->catCompsPerms,
                              compIndex * bitsPerComp, bitsPerCount,
                              alphabetSize, counts);

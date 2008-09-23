@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/region_node.h"
@@ -33,7 +33,7 @@ struct GtFeatureVisitor {
 static void feature_visitor_free(GtNodeVisitor *gv)
 {
   GtFeatureVisitor *feature_visitor = feature_visitor_cast(gv);
-  assert(feature_visitor);
+  gt_assert(feature_visitor);
   gt_feature_index_delete(feature_visitor->feature_index);
 }
 
@@ -73,10 +73,10 @@ GtNodeVisitor* gt_feature_visitor_new(GtFeatureIndex *fi)
 {
   GtNodeVisitor *gv;
   GtFeatureVisitor *feature_visitor;
-  assert(fi != NULL);
+  gt_assert(fi != NULL);
   gv = gt_node_visitor_create(gt_feature_visitor_class());
   feature_visitor = feature_visitor_cast(gv);
   feature_visitor->feature_index = gt_feature_index_ref(fi);
-  assert(feature_visitor != NULL);
+  gt_assert(feature_visitor != NULL);
   return gv;
 }

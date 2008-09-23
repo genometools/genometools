@@ -66,7 +66,7 @@ GtQueue* gt_queue_new(void)
 
 static void queue_wrap(GtQueue *q, bool free_contents)
 {
-  assert(q);
+  gt_assert(q);
   if (free_contents) {
     while (gt_queue_size(q))
       gt_free(gt_queue_get(q));
@@ -113,7 +113,7 @@ static void check_space(GtQueue *q)
        left to set the back pointer to (otherwise we would have to reset the
        back pointer to 0).
      */
-    assert((size_t) q->front + q->size < q->allocated / sizeof (void*));
+    gt_assert((size_t) q->front + q->size < q->allocated / sizeof (void*));
     q->back = q->front + q->size;
     q->size = q->allocated / sizeof (void*);
   }
@@ -121,7 +121,7 @@ static void check_space(GtQueue *q)
 
 void gt_queue_add(GtQueue *q, void *contents)
 {
-  assert(q);
+  gt_assert(q);
   check_space(q);
   q->contents[q->back++] = contents;
 }
@@ -129,7 +129,7 @@ void gt_queue_add(GtQueue *q, void *contents)
 void* gt_queue_get(GtQueue *q)
 {
   void *contents;
-  assert(q && gt_queue_size(q));
+  gt_assert(q && gt_queue_size(q));
   /* get contents */
   contents = q->contents[q->front++];
   /* adjust indices */
@@ -142,21 +142,21 @@ void* gt_queue_get(GtQueue *q)
 
 void* gt_queue_head(GtQueue *q)
 {
-  assert(q && gt_queue_size(q));
+  gt_assert(q && gt_queue_size(q));
   return q->contents[q->front];
 }
 
 void gt_queue_remove(GtQueue *q, void *elem)
 {
   long i, elemidx;
-  assert(q &&  gt_queue_size(q));
+  gt_assert(q &&  gt_queue_size(q));
   if (q->front < q->back) { /* no wraparound */
     for (i = q->back-1; i >= q->front; i--) {
       if (q->contents[i] == elem)
         break;
     }
     elemidx = i;
-    assert(elemidx >= q->front); /* valid element found */
+    gt_assert(elemidx >= q->front); /* valid element found */
     for (i = elemidx+1; i < q->back; i++)
       q->contents[i-1] = q->contents[i];
     q->contents[q->back-1] = NULL;
@@ -183,7 +183,7 @@ void gt_queue_remove(GtQueue *q, void *elem)
         break;
     }
     elemidx = i;
-    assert(elemidx >= q->front); /* valid element found */
+    gt_assert(elemidx >= q->front); /* valid element found */
     for (i = elemidx+1; i < q->size; i++)
       q->contents[i-1] = q->contents[i];
     q->contents[q->size-1] = q->contents[0];
@@ -202,7 +202,7 @@ int gt_queue_iterate(GtQueue *q, GtQueueProcessor gt_queue_processor,
   long i;
   int rval;
   gt_error_check(err);
-  assert(q && gt_queue_processor);
+  gt_assert(q && gt_queue_processor);
   if (gt_queue_size(q)) {
     if (q->front < q->back) { /* no wraparound */
       for (i = q->front; i < q->back; i++) {
@@ -229,7 +229,7 @@ int gt_queue_iterate_reverse(GtQueue *q, GtQueueProcessor gt_queue_processor,
   long i;
   int rval;
   gt_error_check(err);
-  assert(q && gt_queue_processor);
+  gt_assert(q && gt_queue_processor);
   if (gt_queue_size(q)) {
     if (q->front < q->back) { /* no wraparound */
       for (i = q->back-1; i >= q->front; i--) {
@@ -252,7 +252,7 @@ int gt_queue_iterate_reverse(GtQueue *q, GtQueueProcessor gt_queue_processor,
 
 unsigned long gt_queue_size(const GtQueue *q)
 {
-  assert(q);
+  gt_assert(q);
   if ((q->front < q->back) || ((q->front == 0) && (q->back == 0)))
     return q->back - q->front; /* no wraparound */
   return q->size - (q->front - q->back); /* wraparound */
@@ -263,7 +263,7 @@ static int check_queue(void **elem, void *info, GtError *err)
   long *check_counter = info;
   int had_err = 0;
   gt_error_check(err);
-  assert(check_counter);
+  gt_assert(check_counter);
   ensure(had_err, *check_counter == *(long*) elem);
   if (!had_err)
     (*check_counter)++;
@@ -275,7 +275,7 @@ static int check_gt_queue_reverse(void **elem, void *info, GtError *err)
   long *check_counter_reverse = info;
   int had_err = 0;
   gt_error_check(err);
-  assert(check_counter_reverse);
+  gt_assert(check_counter_reverse);
   ensure(had_err, *check_counter_reverse == *(long*) elem);
   if (!had_err)
     (*check_counter_reverse)--;

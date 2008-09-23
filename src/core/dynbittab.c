@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/dynbittab.h"
 #include "core/ensure.h"
@@ -42,7 +42,7 @@ static unsigned long determine_tabsize(unsigned long num_of_bits)
 void gt_dynbittab_set_bit(GT_DynBittab *b, unsigned long bit)
 {
   unsigned long new_tabsize;
-  assert(b);
+  gt_assert(b);
   /* make sure tab is large enough */
   if (bit >= b->num_of_bits) {
     if ((new_tabsize = determine_tabsize(bit + 1)) > b->tabsize) {
@@ -60,7 +60,7 @@ void gt_dynbittab_set_bit(GT_DynBittab *b, unsigned long bit)
 
 void gt_dynbittab_unset_bit(GT_DynBittab *b, unsigned long bit)
 {
-  assert(b);
+  gt_assert(b);
   if (bit < b->num_of_bits) {
     b->tabptr[(bit >> 3) / sizeof (unsigned long)] &=
       ~(1UL << (bit & (8UL * sizeof (unsigned long) - 1)));
@@ -69,7 +69,7 @@ void gt_dynbittab_unset_bit(GT_DynBittab *b, unsigned long bit)
 
 bool gt_dynbittab_bit_is_set(const GT_DynBittab *b, unsigned long bit)
 {
-  assert(b);
+  gt_assert(b);
   if (bit < b->num_of_bits &&
       (b->tabptr[(bit >> 3) / sizeof (unsigned long)] &
        1UL << (bit & (8UL * sizeof (unsigned long) - 1)))) {

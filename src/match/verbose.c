@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdarg.h>
 #include "core/ma.h"
 #include "verbose-def.h"
@@ -29,7 +29,7 @@ void showdefinitelyverbose(const char *format, ...)
 {
   va_list ap;
 
-  assert(format != NULL);
+  gt_assert(format != NULL);
   va_start(ap, format);
   printf("# ");
   (void) vprintf(format, ap);
@@ -43,7 +43,7 @@ void showverbose(Verboseinfo *verboseinfo,const char *format, ...)
   {
     va_list ap;
 
-    assert(format != NULL);
+    gt_assert(format != NULL);
     va_start(ap, format);
     printf("# ");
     (void) vprintf(format, ap);

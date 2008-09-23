@@ -68,8 +68,8 @@ int gt_seqiterator_next(GtSeqIterator *seqit,
   int retval;
   bool haserr = false, foundseq = false;
 
-  assert(seqit && len && desc);
-  assert((sequence && seqit->withsequence) || !seqit->withsequence);
+  gt_assert(seqit && len && desc);
+  gt_assert((sequence && seqit->withsequence) || !seqit->withsequence);
 
   if (seqit->exhausted)
   {

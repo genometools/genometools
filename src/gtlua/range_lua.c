@@ -153,7 +153,7 @@ static const struct luaL_Reg range_lib_m [] = {
 
 int gt_lua_open_range(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, RANGE_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
@@ -168,7 +168,7 @@ int gt_lua_open_range(lua_State *L)
 int gt_lua_range_push(lua_State *L, GtRange inrange)
 {
   GtRange *outrange;
-  assert(L);
+  gt_assert(L);
   outrange = lua_newuserdata(L, sizeof (GtRange));
   *outrange = inrange;
   luaL_getmetatable(L, RANGE_METATABLE);

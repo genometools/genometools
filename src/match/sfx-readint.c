@@ -57,19 +57,19 @@ void setreadintkeys(GtArray *riktab,
 
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
-  assert(sizeval == 0 || sizeval == (size_t) 4 || sizeval == (size_t) 8);
+  gt_assert(sizeval == 0 || sizeval == (size_t) 4 || sizeval == (size_t) 8);
   switch (sizeval)
   {
     case 0: rikvalue.smallvalueptr = NULL;
             rikvalue.bigvalueptr = NULL;
             rikvalue.ptrdefined = false;
             break;
-    case 4: assert(sizeof (uint32_t) == (size_t) 4);
+    case 4: gt_assert(sizeof (uint32_t) == (size_t) 4);
             rikvalue.smallvalueptr = valueptr;
             rikvalue.bigvalueptr = NULL;
             rikvalue.ptrdefined = true;
             break;
-    case 8: assert(sizeof (uint64_t) == (size_t) 8);
+    case 8: gt_assert(sizeof (uint64_t) == (size_t) 8);
             rikvalue.bigvalueptr = valueptr;
             rikvalue.smallvalueptr = NULL;
             rikvalue.ptrdefined = true;
@@ -161,7 +161,7 @@ int allkeysdefined(const GtStr *indexname,const char *suffix,
                         PRINTuint64_tcast(*(rikptr->bigvalueptr)));
           } else
           {
-            assert(false);
+            gt_assert(false);
           }
         }
       } else

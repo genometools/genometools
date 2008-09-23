@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <math.h>
 #include "core/array2dim.h"
 #include "core/ensure.h"
@@ -52,7 +52,7 @@ GtHMM* gt_hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
   GtHMM *hmm;
   unsigned int i, j;
 
-  assert(num_of_states && num_of_symbols);
+  gt_assert(num_of_states && num_of_symbols);
 
   /* alloc */
   hmm = gt_malloc(sizeof *hmm);
@@ -83,9 +83,9 @@ GtHMM* gt_hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
 void gt_hmm_set_initial_state_probability(GtHMM *hmm, unsigned int state_num,
                                        double probability)
 {
-  assert(hmm);
-  assert(probability >= 0.0 && probability <= 1.0);
-  assert(state_num < hmm->num_of_states);
+  gt_assert(hmm);
+  gt_assert(probability >= 0.0 && probability <= 1.0);
+  gt_assert(state_num < hmm->num_of_states);
   if (probability == 0.0)
     hmm->initial_state_prob[state_num] = MINUSINFINITY;
   else
@@ -95,8 +95,8 @@ void gt_hmm_set_initial_state_probability(GtHMM *hmm, unsigned int state_num,
 double gt_hmm_get_initial_state_probability(const GtHMM *hmm,
                                             unsigned int state_num)
 {
-  assert(hmm);
-  assert(state_num < hmm->num_of_states);
+  gt_assert(hmm);
+  gt_assert(state_num < hmm->num_of_states);
   if (hmm->initial_state_prob[state_num] == MINUSINFINITY)
     return 0.0;
   return exp(hmm->initial_state_prob[state_num]);
@@ -107,10 +107,10 @@ void gt_hmm_set_transition_probability(GtHMM *hmm,
                                     unsigned int to_state_num,
                                     double probability)
 {
-  assert(hmm);
-  assert(probability >= 0.0 && probability <= 1.0);
-  assert(from_state_num < hmm->num_of_states);
-  assert(to_state_num < hmm->num_of_states);
+  gt_assert(hmm);
+  gt_assert(probability >= 0.0 && probability <= 1.0);
+  gt_assert(from_state_num < hmm->num_of_states);
+  gt_assert(to_state_num < hmm->num_of_states);
   if (probability == 0.0)
     hmm->transition_prob[from_state_num][to_state_num] = MINUSINFINITY;
   else
@@ -121,9 +121,9 @@ double gt_hmm_get_transition_probability(const GtHMM *hmm,
                                       unsigned int from_state_num,
                                       unsigned int to_state_num)
 {
-  assert(hmm);
-  assert(from_state_num < hmm->num_of_states);
-  assert(to_state_num < hmm->num_of_states);
+  gt_assert(hmm);
+  gt_assert(from_state_num < hmm->num_of_states);
+  gt_assert(to_state_num < hmm->num_of_states);
   if (hmm->transition_prob[from_state_num][to_state_num] == MINUSINFINITY)
     return 0.0;
   return exp(hmm->transition_prob[from_state_num][to_state_num]);
@@ -134,7 +134,7 @@ void gt_hmm_set_missing_transition_probabilities(GtHMM *hmm)
   unsigned int row, column, num_of_missing_entries;
   double prob, sum_of_probabilities;
 
-  assert(hmm);
+  gt_assert(hmm);
 
   for (row = 0; row < hmm->num_of_states; row++) {
     /* determine sum of probabilities */
@@ -167,10 +167,10 @@ void gt_hmm_set_emission_probability(GtHMM *hmm,
                                   unsigned int symbol_num,
                                   double probability)
 {
-  assert(hmm);
-  assert(probability >= 0.0 && probability <= 1.0);
-  assert(state_num < hmm->num_of_states);
-  assert(symbol_num < hmm->num_of_symbols);
+  gt_assert(hmm);
+  gt_assert(probability >= 0.0 && probability <= 1.0);
+  gt_assert(state_num < hmm->num_of_states);
+  gt_assert(symbol_num < hmm->num_of_symbols);
   if (probability == 0.0)
     hmm->emission_prob[state_num][symbol_num] = MINUSINFINITY;
   else
@@ -181,9 +181,9 @@ double gt_hmm_get_emission_probability(const GtHMM *hmm,
                                     unsigned int state_num,
                                     unsigned int symbol_num)
 {
-  assert(hmm);
-  assert(state_num < hmm->num_of_states);
-  assert(symbol_num < hmm->num_of_symbols);
+  gt_assert(hmm);
+  gt_assert(state_num < hmm->num_of_states);
+  gt_assert(symbol_num < hmm->num_of_symbols);
   if (hmm->emission_prob[state_num][symbol_num] == MINUSINFINITY)
     return 0.0;
   return exp(hmm->emission_prob[state_num][symbol_num]);
@@ -194,7 +194,7 @@ static bool gt_hmm_has_valid_initial_state_probs(const GtHMM *hmm)
   unsigned int state;
   double sum_of_probabilities = 0.0;
 
-  assert(hmm);
+  gt_assert(hmm);
 
   for (state = 0; state < hmm->num_of_states; state++)
     sum_of_probabilities += gt_hmm_get_initial_state_probability(hmm, state);
@@ -207,7 +207,7 @@ static bool gt_hmm_has_valid_emissions(const GtHMM *hmm)
   unsigned int state, symbol;
   double sum_of_probabilities;
 
-  assert(hmm);
+  gt_assert(hmm);
 
   for (state = 0; state < hmm->num_of_states; state++) {
     sum_of_probabilities = 0.0;
@@ -225,7 +225,7 @@ static bool gt_hmm_has_valid_states(const GtHMM *hmm)
   unsigned int state_1, state_2;
   double sum_of_probabilities;
 
-  assert(hmm);
+  gt_assert(hmm);
 
   for (state_1 = 0; state_1 < hmm->num_of_states; state_1++) {
     sum_of_probabilities = 0.0;
@@ -243,7 +243,7 @@ static bool gt_hmm_has_valid_states(const GtHMM *hmm)
 
 bool gt_hmm_is_valid(const GtHMM *hmm)
 {
-  assert(hmm);
+  gt_assert(hmm);
   return (gt_hmm_has_valid_initial_state_probs(hmm) &&
           gt_hmm_has_valid_emissions(hmm) &&
           gt_hmm_has_valid_states(hmm));
@@ -254,7 +254,7 @@ void gt_hmm_init_random(GtHMM *hmm)
 {
   double random_value, cumulative_prob;
   unsigned int i, j;
-  assert(hmm);
+  gt_assert(hmm);
 
   /* initialize initial state probabilities in random fashion */
   cumulative_prob = 0.0;
@@ -263,7 +263,7 @@ void gt_hmm_init_random(GtHMM *hmm)
     gt_hmm_set_initial_state_probability(hmm, i, random_value);
     cumulative_prob += random_value;
   }
-  assert(cumulative_prob <= 1.0);
+  gt_assert(cumulative_prob <= 1.0);
   gt_hmm_set_initial_state_probability(hmm, i,  1.0 - cumulative_prob);
 
   /* initialize transition probabilities in random fashion */
@@ -274,7 +274,7 @@ void gt_hmm_init_random(GtHMM *hmm)
       gt_hmm_set_transition_probability(hmm, i, j, random_value);
       cumulative_prob += random_value;
     }
-    assert(cumulative_prob <= 1.0);
+    gt_assert(cumulative_prob <= 1.0);
     gt_hmm_set_transition_probability(hmm, i, j, 1.0 - cumulative_prob);
   }
 
@@ -286,11 +286,11 @@ void gt_hmm_init_random(GtHMM *hmm)
       gt_hmm_set_emission_probability(hmm, i, j, random_value);
       cumulative_prob += random_value;
     }
-    assert(cumulative_prob <= 1.0);
+    gt_assert(cumulative_prob <= 1.0);
     gt_hmm_set_emission_probability(hmm, i, j, 1.0 - cumulative_prob);
   }
 
-  assert(gt_hmm_is_valid(hmm));
+  gt_assert(gt_hmm_is_valid(hmm));
 }
 
 /* [DEKM98, p. 56] */
@@ -303,9 +303,9 @@ void gt_hmm_decode(const GtHMM *hmm,
   unsigned int **backtrace, colidx, precolidx;
   int row, column, num_of_rows, num_of_columns, previous_row;
 
-  assert(hmm);
-  assert(gt_hmm_is_valid(hmm));
-  assert(num_of_emissions);
+  gt_assert(hmm);
+  gt_assert(gt_hmm_is_valid(hmm));
+  gt_assert(num_of_emissions);
 
   /* alloc tables */
   num_of_rows = hmm->num_of_states;
@@ -315,14 +315,14 @@ void gt_hmm_decode(const GtHMM *hmm,
 
   /* fill DP table */
   for (row = 0; row < num_of_rows; row++) { /* first column */
-    assert(emissions[0] < hmm->num_of_symbols);
+    gt_assert(emissions[0] < hmm->num_of_symbols);
     max_probabilities[row][0] = hmm->initial_state_prob[row] +
                                 hmm->emission_prob[row][emissions[0]];
     backtrace[row][0] = row;
   }
 
   for (column = 1; column < num_of_columns; column++) { /* other columns */
-    assert(emissions[column] < hmm->num_of_symbols);
+    gt_assert(emissions[column] < hmm->num_of_symbols);
     colidx = column & 1;
     precolidx = (column - 1) & 1;
     for (row = 0; row < num_of_rows; row++) {
@@ -368,17 +368,17 @@ static void compute_forward_table(double **f, const GtHMM *hmm,
   int row, column, previous_row;
   double tmp_prob;
 
-  assert(f && hmm && emissions && num_of_emissions);
+  gt_assert(f && hmm && emissions && num_of_emissions);
 
   /* fill DP table 'f' (hmm->num_of_states * num_of_emissions) */
   for (row = 0; row < hmm->num_of_states; row++) { /* first column */
-    assert(emissions[0] < hmm->num_of_symbols);
+    gt_assert(emissions[0] < hmm->num_of_symbols);
     f[row][0] = hmm->initial_state_prob[row] +
                 hmm->emission_prob[row][emissions[0]];
   }
 
   for (column = 1; column < num_of_emissions; column++) { /* other columns */
-    assert(emissions[column] < hmm->num_of_symbols);
+    gt_assert(emissions[column] < hmm->num_of_symbols);
     for (row = 0; row < hmm->num_of_states; row++) {
       f[row][column] = hmm->emission_prob[row][emissions[column]];
       tmp_prob = f[0][column-1] + hmm->transition_prob[0][row];
@@ -400,7 +400,7 @@ double gt_hmm_forward(const GtHMM* hmm, const unsigned int *emissions,
   unsigned int i;
   double **f, P;
 
-  assert(hmm && emissions && num_of_emissions);
+  gt_assert(hmm && emissions && num_of_emissions);
   gt_array2dim_malloc(f, hmm->num_of_states, num_of_emissions);
 
   /* XXX: we do not need the full table here, the last column would suffice */
@@ -425,7 +425,7 @@ static void compute_backward_table(double **b, const GtHMM *hmm,
   int row, column, next_row;
   double tmp_prob;
 
-  assert(b && hmm && emissions && num_of_emissions);
+  gt_assert(b && hmm && emissions && num_of_emissions);
 
   /* fill DP table 'b' (hmm->num_of_states * num_of_emissions) */
   for (row = 0; row < hmm->num_of_states; row++) { /* last column */
@@ -433,7 +433,7 @@ static void compute_backward_table(double **b, const GtHMM *hmm,
   }
 
   for (column = num_of_emissions - 2; column >= 0; column--) { /* other cols */
-    assert(emissions[column] < hmm->num_of_symbols);
+    gt_assert(emissions[column] < hmm->num_of_symbols);
     for (row = 0; row < hmm->num_of_states; row++) {
       tmp_prob = hmm->transition_prob[row][0] +
                  hmm->emission_prob[0][emissions[column+1]] +
@@ -456,7 +456,7 @@ double gt_hmm_backward(const GtHMM* hmm, const unsigned int *emissions,
   unsigned int i;
   double **b, P;
 
-  assert(hmm && emissions && num_of_emissions);
+  gt_assert(hmm && emissions && num_of_emissions);
   gt_array2dim_malloc(b, hmm->num_of_states, num_of_emissions);
 
   /* XXX: we do not need the full table here, the last column would suffice */
@@ -482,7 +482,7 @@ void gt_hmm_emit(GtHMM *hmm, unsigned long num_of_emissions,
   unsigned long i;
   unsigned int state, symbol, next_state;
   double random_value, cumulative_prob;
-  assert(hmm);
+  gt_assert(hmm);
 
   /* determine initial state */
   random_value = gt_rand_0_to_1();
@@ -522,11 +522,11 @@ double gt_hmm_rmsd(const GtHMM *hmm_a, const GtHMM* hmm_b)
 {
   unsigned int i, j;
   double difference = 0.0, rmsd = 0.0;
-  assert(hmm_a && hmm_b);
-  assert(hmm_a->num_of_states == hmm_b->num_of_states);
-  assert(hmm_a->num_of_symbols == hmm_b->num_of_symbols);
-  assert(gt_hmm_is_valid(hmm_a));
-  assert(gt_hmm_is_valid(hmm_b));
+  gt_assert(hmm_a && hmm_b);
+  gt_assert(hmm_a->num_of_states == hmm_b->num_of_states);
+  gt_assert(hmm_a->num_of_symbols == hmm_b->num_of_symbols);
+  gt_assert(gt_hmm_is_valid(hmm_a));
+  gt_assert(gt_hmm_is_valid(hmm_b));
   /* add transitions probabilities */
   for (i = 0; i < hmm_a->num_of_states; i++) {
     for (j = 0; j < hmm_a->num_of_states; j++) {
@@ -549,7 +549,7 @@ double gt_hmm_rmsd(const GtHMM *hmm_a, const GtHMM* hmm_b)
 void gt_hmm_show(const GtHMM *hmm, FILE *fp)
 {
   unsigned int i, j;
-  assert(hmm && fp);
+  gt_assert(hmm && fp);
   fprintf(fp, "# of states: %u\n", hmm->num_of_states);
   fprintf(fp, "# of symbols: %u\n", hmm->num_of_symbols);
   fprintf(fp, "initial state probabilities:\n");

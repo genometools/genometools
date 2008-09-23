@@ -355,7 +355,7 @@ void updatebckspecials(Bcktab *bcktab,
                        unsigned int numofchars,
                        unsigned int prefixindex)
 {
-  assert(prefixindex > 0);
+  gt_assert(prefixindex > 0);
   if (prefixindex < bcktab->prefixlength-1)
   {
     Codetype ordercode = (code - bcktab->filltable[prefixindex])/
@@ -419,7 +419,7 @@ static void pfxidxpartialsums(unsigned long *count,
     }
   }
   specialsinbucket = fromcode2countspecialcodes(code,bcktab);
-  assert(sum <= specialsinbucket);
+  gt_assert(sum <= specialsinbucket);
   count[bcktab->prefixlength-1] = specialsinbucket - sum;
   if (bcktab->prefixlength > 2U)
   {
@@ -481,7 +481,7 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
   bucketspec->left = bcktab->leftborder[code];
   if (code == maxcode)
   {
-    assert(totalwidth >= bucketspec->left);
+    gt_assert(totalwidth >= bucketspec->left);
     bucketspec->nonspecialsinbucket
       = (unsigned long) (totalwidth - bucketspec->left);
   } else
@@ -495,7 +495,7 @@ unsigned int calcbucketboundsparts(Bucketspecification *bucketspec,
       bucketspec->nonspecialsinbucket = 0;
     }
   }
-  assert(rightchar == (unsigned int) (code % numofchars));
+  gt_assert(rightchar == (unsigned int) (code % numofchars));
   if (rightchar == numofchars - 1)
   {
     bucketspec->specialsinbucket
@@ -521,7 +521,7 @@ void calcbucketboundaries(Bucketspecification *bucketspec,
                           Codetype code)
 {
   unsigned int numofchars = (unsigned int) bcktab->basepower[1];
-  assert(code != bcktab->numofallcodes);
+  gt_assert(code != bcktab->numofallcodes);
   (void) calcbucketboundsparts(bucketspec,
                                bcktab,
                                code,
@@ -592,7 +592,7 @@ unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
           }
           for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
-            assert(insertptr >= lcpsubtab);
+            gt_assert(insertptr >= lcpsubtab);
             *insertptr-- = (Uchar) prefixindex;
           }
         }
@@ -670,8 +670,8 @@ void consistencyofsuffix(int line,
                                 (const Codetype **) bcktab->multimappower,
                                 bcktab->prefixlength,
                                 bcktab->qgrambuffer);
-  assert(gramfirstspecial == bcktab->prefixlength);
-  assert(qgramcode == suffix->code);
+  gt_assert(gramfirstspecial == bcktab->prefixlength);
+  gt_assert(qgramcode == suffix->code);
   if (firstspecial != suffix->prefixindex)
   {
     fprintf(stderr,"line %d: code=%u: ",line,suffix->code);

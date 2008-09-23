@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/fasta.h"
 #include "core/symbol.h"
 #include "core/translate.h"
@@ -39,7 +39,7 @@ struct GtExtractFeatVisitor {
 static void extract_feat_visitor_free(GtNodeVisitor *gv)
 {
   GtExtractFeatVisitor *extract_feat_visitor = gt_extract_feat_visitor_cast(gv);
-  assert(extract_feat_visitor);
+  gt_assert(extract_feat_visitor);
   gt_region_mapping_delete(extract_feat_visitor->region_mapping);
 }
 
@@ -47,7 +47,7 @@ static void construct_description(GtStr *description, const char *type,
                                   unsigned long counter, bool join,
                                   bool translate)
 {
-  assert(!gt_str_length(description));
+  gt_assert(!gt_str_length(description));
   gt_str_append_cstr(description, type);
   gt_str_append_char(description, '_');
   gt_str_append_ulong(description, counter);
@@ -84,7 +84,7 @@ static int extract_feat_visitor_genome_feature(GtNodeVisitor *gv,
   int had_err = 0;
   gt_error_check(err);
   efv = gt_extract_feat_visitor_cast(gv);
-  assert(efv->region_mapping);
+  gt_assert(efv->region_mapping);
   gni = gt_genome_node_iterator_new((GtGenomeNode*) gf);
   description = gt_str_new();
   sequence = gt_str_new();
@@ -129,7 +129,7 @@ GtNodeVisitor* gt_extract_feat_visitor_new(GtRegionMapping *rm,
 {
   GtNodeVisitor *gv;
   GtExtractFeatVisitor *efv;
-  assert(rm);
+  gt_assert(rm);
   gv = gt_node_visitor_create(gt_extract_feat_visitor_class());
   efv= gt_extract_feat_visitor_cast(gv);
   efv->type = gt_symbol(type);

@@ -696,7 +696,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
           /* kopieren von contig_seq_diff-1 Zeichen */
           (void) snprintf(contig_seq, contig_seq_diff, "%s",
                           contig_seq_ptr + from);
-          assert(contig_seq);
+          gt_assert(contig_seq);
 
           had_err = as_coding(parsestruct_ptr,
                               contig_seq_ptr, as_seq, from, to, row_index, err);
@@ -747,7 +747,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
           for (seq_index = 0; seq_index < hitcounter; seq_index++)
           {
 
-            assert(hit_ptr != NULL);
+            gt_assert(hit_ptr != NULL);
             /* Wenn an der Position seq_index eine 1 steht, kommt der
                entsprechende Hit(-Eintrag) in der Ergebnismenge vor und
                muss ausgegeben werden */
@@ -900,7 +900,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 static void print_codingheader(const ParseStruct *parsestruct_ptr,
                                const char *contig_seq, GtStr * as_seq)
 {
-  assert(contig_seq);
+  gt_assert(contig_seq);
 
   switch (ARGUMENTSSTRUCT(outputfile_format))
   {
@@ -1092,7 +1092,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
     start_codon = 0;
 
   gt_error_check(err);
-  assert(contig_seq);
+  gt_assert(contig_seq);
 
   contig_len = strlen(contig_seq);
   current_frame = get_current_frame(current_row);
@@ -1130,12 +1130,12 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
       contig_triplet[0] = contig_seq[startpoint];
       contig_triplet[1] = contig_seq[startpoint + 1];
       contig_triplet[2] = contig_seq[startpoint + 2];
-      /* XXX assert(contig_triplet); */
+      /* XXX gt_assert(contig_triplet); */
 
       /* Bestimmen der AS der jeweiligen Triplets */
       contig_as = mg_codon2amino(contig_triplet[0],
                                  contig_triplet[1], contig_triplet[2]);
-      assert(contig_as);
+      gt_assert(contig_as);
 
       gt_str_append_char(as_seq, contig_as);
       startpoint += 3;
@@ -1154,7 +1154,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
       contig_seq_tri[1] = tolower(contig_seq[startpoint - 2]);
       contig_seq_tri[2] = tolower(contig_seq[startpoint - 1]);
       contig_seq_tri[3] = '\0';
-      assert(contig_seq_tri);
+      gt_assert(contig_seq_tri);
 
       found = check_stopcodon(contig_seq_tri);
 
@@ -1165,7 +1165,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
         contig_seq_tri[1] = tolower(contig_seq[startpoint - 2]);
         contig_seq_tri[2] = tolower(contig_seq[startpoint - 1]);
         contig_seq_tri[3] = '\0';
-        assert(contig_seq_tri);
+        gt_assert(contig_seq_tri);
 
         found_end = check_stopcodon(contig_seq_tri);
 
@@ -1175,12 +1175,12 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
           contig_triplet[0] = contig_seq[startpoint];
           contig_triplet[1] = contig_seq[startpoint + 1];
           contig_triplet[2] = contig_seq[startpoint + 2];
-          /* XXX assert(contig_triplet); */
+          /* XXX gt_assert(contig_triplet); */
 
           /* Bestimmen der AS der jeweiligen Triplets */
           contig_as = mg_codon2amino(contig_triplet[0],
                                      contig_triplet[1], contig_triplet[2]);
-          assert(contig_as);
+          gt_assert(contig_as);
 
           gt_str_append_char(as_seq, contig_as);
         }
@@ -1193,7 +1193,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
       contig_seq_tri[1] = tolower(contig_seq[startpoint_start + 1]);
       contig_seq_tri[2] = tolower(contig_seq[startpoint_start + 2]);
       contig_seq_tri[3] = '\0';
-      assert(contig_seq_tri);
+      gt_assert(contig_seq_tri);
 
       start_codon = check_startcodon(parsestruct_ptr, contig_seq_tri);
 
@@ -1210,7 +1210,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
           contig_seq_tri[2] =
             tolower(contig_seq[startpoint_start - 1]);
           contig_seq_tri[3] = '\0';
-          assert(contig_seq_tri);
+          gt_assert(contig_seq_tri);
 
           found = check_stopcodon(contig_seq_tri);
 
@@ -1229,7 +1229,7 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                 contig_seq_tri[2] =
                   tolower(contig_seq[startpoint_atg + 2]);
                 contig_seq_tri[3] = '\0';
-                assert(contig_seq_tri);
+                gt_assert(contig_seq_tri);
 
                 start_codon = check_startcodon(parsestruct_ptr,
                                                contig_seq_tri);
@@ -1247,13 +1247,13 @@ static int as_coding(const ParseStruct *parsestruct_ptr,
                 contig_triplet[0] = contig_seq[startpoint_atg];
                 contig_triplet[1] = contig_seq[startpoint_atg + 1];
                 contig_triplet[2] = contig_seq[startpoint_atg + 2];
-                /* XXX assert(contig_triplet); */
+                /* XXX gt_assert(contig_triplet); */
 
                 /* Bestimmen der AS der jeweiligen Triplets */
                 contig_as = mg_codon2amino(contig_triplet[0],
                                            contig_triplet[1],
                                            contig_triplet[2]);
-                assert(contig_as);
+                gt_assert(contig_as);
 
                 gt_str_append_char(as_seq_start, contig_as);
               }

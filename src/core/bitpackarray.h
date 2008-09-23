@@ -25,7 +25,7 @@
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdlib.h>
 #include "core/bitpackstring.h"
 #include "core/error.h"
@@ -82,7 +82,7 @@ bitpackarray_delete(BitPackArray *bpa)
 static inline void
 bitpackarray_store_uint32(BitPackArray *array, BitOffset index, uint32_t val)
 {
-  assert(array && index < array->numElems
+  gt_assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
   gt_bsStoreUInt32(array->store, array->bitsPerElem * index,
                 array->bitsPerElem, val);
@@ -98,7 +98,7 @@ bitpackarray_store_uint32(BitPackArray *array, BitOffset index, uint32_t val)
 static inline uint32_t
 bitpackarray_get_uint32(const BitPackArray *array, BitOffset index)
 {
-  assert(array && index < array->numElems
+  gt_assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (uint32_t)*CHAR_BIT);
   return gt_bsGetUInt32(array->store, array->bitsPerElem * index,
                      array->bitsPerElem);
@@ -114,7 +114,7 @@ bitpackarray_get_uint32(const BitPackArray *array, BitOffset index)
 static inline void
 bitpackarray_store_uint64(BitPackArray *array, BitOffset index, uint64_t val)
 {
-  assert(array && index < array->numElems
+  gt_assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
   gt_bsStoreUInt64(array->store, array->bitsPerElem * index,
                 array->bitsPerElem, val);
@@ -130,7 +130,7 @@ bitpackarray_store_uint64(BitPackArray *array, BitOffset index, uint64_t val)
 static inline uint64_t
 bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
 {
-  assert(array && index < array->numElems
+  gt_assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof (uint64_t)*CHAR_BIT);
   return gt_bsGetUInt64(array->store, array->bitsPerElem * index,
                      array->bitsPerElem);

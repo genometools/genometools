@@ -53,7 +53,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
 {
   Seqpos lcpvalue;
 
-  assert(lvi->relpos < numberofsuffixes);
+  gt_assert(lvi->relpos < numberofsuffixes);
   if (firstpage && lvi->relpos == 0)
   {
     lcpvalue = 0;

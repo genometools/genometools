@@ -27,11 +27,11 @@
 static int alpha_lua_new_protein(lua_State *L)
 {
   GtAlpha **alpha;
-  assert(L);
+  gt_assert(L);
   alpha = lua_newuserdata(L, sizeof (GtAlpha*));
-  assert(alpha);
+  gt_assert(alpha);
   *alpha = gt_alpha_new_protein();
-  assert(*alpha);
+  gt_assert(*alpha);
   luaL_getmetatable(L, ALPHA_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -82,7 +82,7 @@ static const struct luaL_Reg alpha_lib_m [] = {
 
 int gt_lua_open_alpha(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, ALPHA_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

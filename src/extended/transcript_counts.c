@@ -34,61 +34,61 @@ GtTranscriptCounts* gt_transcript_counts_new(void)
 
 GtArray* gt_transcript_counts_get_all(const GtTranscriptCounts *tc)
 {
-  assert(tc);
+  gt_assert(tc);
   return tc->exon_array_all;
 }
 
 void gt_transcript_counts_set_all(GtTranscriptCounts *tc, GtArray *counts)
 {
-  assert(tc && counts);
+  gt_assert(tc && counts);
   tc->exon_array_all = counts;
 }
 
 GtArray* gt_transcript_counts_get_single(const GtTranscriptCounts *tc)
 {
-  assert(tc);
+  gt_assert(tc);
   return tc->exon_array_single;
 }
 
 void gt_transcript_counts_set_single(GtTranscriptCounts *tc, GtArray *counts)
 {
-  assert(tc && counts);
+  gt_assert(tc && counts);
   tc->exon_array_single = counts;
 }
 
 GtArray* gt_transcript_counts_get_initial(const GtTranscriptCounts *tc)
 {
-  assert(tc);
+  gt_assert(tc);
   return tc->exon_array_initial;
 }
 
 void gt_transcript_counts_set_initial(GtTranscriptCounts *tc, GtArray *counts)
 {
-  assert(tc && counts);
+  gt_assert(tc && counts);
   tc->exon_array_initial = counts;
 }
 
 GtArray* gt_transcript_counts_get_internal(const GtTranscriptCounts *tc)
 {
-  assert(tc);
+  gt_assert(tc);
   return tc->exon_array_internal;
 }
 
 void gt_transcript_counts_set_internal(GtTranscriptCounts *tc, GtArray *counts)
 {
-  assert(tc && counts);
+  gt_assert(tc && counts);
   tc->exon_array_internal = counts;
 }
 
 GtArray* gt_transcript_counts_get_terminal(const GtTranscriptCounts *tc)
 {
-  assert(tc);
+  gt_assert(tc);
   return tc->exon_array_terminal;
 }
 
 void gt_transcript_counts_set_terminal(GtTranscriptCounts *tc, GtArray *counts)
 {
-  assert(tc && counts);
+  gt_assert(tc && counts);
   tc->exon_array_terminal = counts;
 }
 

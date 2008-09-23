@@ -175,7 +175,7 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
   mti->maxintervalwidth = va_arg(ap, unsigned long);
   mti->skpp = (bool) va_arg(ap, int);
   va_end(ap);
-  assert(mti->maxdistance < mti->patternlength);
+  gt_assert(mti->maxdistance < mti->patternlength);
   initeqsvector(mti->eqsvector,(unsigned long) alphasize,
                 pattern,mti->patternlength);
 }
@@ -245,7 +245,7 @@ static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
   {
     if (width <= (Seqpos) mti->maxintervalwidth)
     {
-      assert(col->maxleqk > 0);
+      gt_assert(col->maxleqk > 0);
       return col->maxleqk+1; /* success with match of length maxleqk */
     }
   }
@@ -268,9 +268,9 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
   Myerscolumn *outcol = (Myerscolumn *) aliasoutcol;
   const Myerscolumn *incol = (const Myerscolumn *) aliasincol;
 
-  assert(incol->maxleqk != UNDEFMAXLEQK);
-  assert(mti->maxintervalwidth > 0 || incol->maxleqk != SUCCESSMAXLEQK);
-  assert(currentchar != (Uchar) SEPARATOR);
+  gt_assert(incol->maxleqk != UNDEFMAXLEQK);
+  gt_assert(mti->maxintervalwidth > 0 || incol->maxleqk != SUCCESSMAXLEQK);
+  gt_assert(currentchar != (Uchar) SEPARATOR);
   if (currentchar != (Uchar) WILDCARD)
   {
     Eq = mti->eqsvector[(unsigned long) currentchar];
@@ -355,8 +355,8 @@ static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Myerscolumn *col = (Myerscolumn *) aliascol;
 
-  assert(col->maxleqk != UNDEFMAXLEQK);
-  assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
+  gt_assert(col->maxleqk != UNDEFMAXLEQK);
+  gt_assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
   if (currentchar != (Uchar) WILDCARD)
   {
     Eq = mti->eqsvector[(unsigned long) currentchar];

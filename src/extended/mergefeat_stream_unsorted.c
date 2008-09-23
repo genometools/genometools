@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/mergefeat_stream_unsorted.h"
 #include "extended/mergefeat_visitor.h"
 #include "extended/node_stream_rep.h"

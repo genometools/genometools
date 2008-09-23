@@ -280,7 +280,7 @@ void bwtrangewithspecial(GT_UNUSED GtArrayBoundswithchar *bwci,
 
   AlphabetRangeSize rangesize
     = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),1);
-  assert(rangesize < (AlphabetRangeSize) 4);
+  gt_assert(rangesize < (AlphabetRangeSize) 4);
   BWTSeqPosPairRangeOcc(bwtseq, 1, parent->left, parent->right,rangeOccs);
     inchar = WILDCARD
     bwtcode = MRAEncMapSymbol(EISGetAlphabet(bwtseq->seqIdx),WILDCARD);
@@ -326,7 +326,7 @@ Seqpos voidpackedfindfirstmatchconvert(const void *voidbwtseq,
   Seqpos startpos;
 
   startpos = bwtseqfirstmatch(voidbwtseq,witnessbound);
-  assert((bwtseq->seqIdx->seqLen-1) >= (startpos + matchlength));
+  gt_assert((bwtseq->seqIdx->seqLen-1) >= (startpos + matchlength));
   return (bwtseq->seqIdx->seqLen - 1) - (startpos + matchlength);
 }
 
@@ -364,10 +364,10 @@ void pck_exactpatternmatching(const void *voidbwtseq,
 
   bsemi = newEMIterator((const BWTSeq *) voidbwtseq,
                         pattern,(size_t) patternlength, true);
-  assert(bsemi != NULL);
+  gt_assert(bsemi != NULL);
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) voidbwtseq))
   {
-    assert(totallength >= (dbstartpos + patternlength));
+    gt_assert(totallength >= (dbstartpos + patternlength));
     processmatch(processmatchinfo,
                  totallength - (dbstartpos + patternlength),
                  (Seqpos) patternlength,

@@ -54,7 +54,7 @@ Myersonlineresources *newMyersonlineresources(
   ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,mapsize-1);
   mor->encseq = encseq;
   mor->esr = newEncodedsequencescanstate();
-  assert(mapsize > 0 && mapsize-1 <= MAXALPHABETCHARACTER);
+  gt_assert(mapsize > 0 && mapsize-1 <= MAXALPHABETCHARACTER);
   mor->alphasize = mapsize-1;
   mor->totallength = getencseqtotallength(encseq);
   mor->nowildcards = nowildcards;
@@ -132,7 +132,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
       {
         if (Mh & Ebit)
         {
-          assert(score > 0);
+          gt_assert(score > 0);
           score--;
         }
       }

@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdbool.h>
 #include "core/array.h"
 #include "core/ma.h"
@@ -131,13 +131,13 @@ static void retracepreviousinchain(GtChain *chain, GtChaininfo *chaininfo,
   fragnum = retracestart;
   idx = lengthofchain;
   while (fragnum != UNDEFPREVIOUS) {
-    assert(idx != 0);
+    gt_assert(idx != 0);
     idx--;
     gt_chain_set_fragnum(chain, idx, fragnum); /* set dummy */
     fragnum = chaininfo[fragnum].previousinchain;
   }
-  assert(idx == 0);
-  assert(gt_chain_size(chain) == lengthofchain);
+  gt_assert(idx == 0);
+  gt_assert(gt_chain_size(chain) == lengthofchain);
 }
 
 static bool check_max_gap_width(Fragment *fragments,
@@ -338,8 +338,8 @@ static void findmaximalscores_withoverlaps(GtChain *chain,
   unsigned long i, startfrag;
   GtArray *startfragments;
 
-  assert(seqlen1 != UNDEF_ULONG);
-  assert(mincoverage != UNDEF_DOUBLE);
+  gt_assert(seqlen1 != UNDEF_ULONG);
+  gt_assert(mincoverage != UNDEF_DOUBLE);
   startfragments = gt_array_new(sizeof (unsigned long));
 
   /* compute chain array */
@@ -372,7 +372,7 @@ static void findmaximalscores_withoverlaps(GtChain *chain,
   /* retrieve maximal chains */
   for (i = 0; i < gt_array_size(startfragments); i++) {
     startfrag = *(unsigned long*) gt_array_get(startfragments, i);
-    assert(overlapinfo[startfrag].chainarray != UNDEFPREVIOUS);
+    gt_assert(overlapinfo[startfrag].chainarray != UNDEFPREVIOUS);
     gt_chain_reset(chain);
     gt_chain_set_score(chain,
                        chaininfo[overlapinfo[startfrag].chainarray].score);
@@ -457,7 +457,7 @@ void gt_globalchaining_coverage(Fragment *fragments,
                              double mincoverage, GtChainProc chainprocessor,
                              void *cpinfo)
 {
-  assert(mincoverage >= 0.0 && mincoverage <= 1.0);
+  gt_assert(mincoverage >= 0.0 && mincoverage <= 1.0);
   globalchaining_generic(false, max_gap_width, fragments, num_of_fragments,
                          seqlen1, mincoverage, chainprocessor, cpinfo);
 }

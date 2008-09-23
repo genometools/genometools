@@ -81,7 +81,7 @@ unsigned long suffixarraymstats (const void *genericindex,
   totallength = getencseqtotallength(suffixarray->encseq);
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
-    assert(itv.left <= itv.right);
+    gt_assert(itv.left <= itv.right);
     if (qptr >= qend || ISSPECIAL(*qptr) ||
         !lcpintervalfindcharchildintv(suffixarray->encseq,
                                       suffixarray->readmode,

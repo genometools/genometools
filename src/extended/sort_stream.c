@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/node_stream_rep.h"
 #include "extended/sort_stream.h"
 
@@ -52,7 +52,7 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   }
 
   if (!had_err) {
-    assert(sort_stream->sorted);
+    gt_assert(sort_stream->sorted);
     if (sort_stream->idx < gt_array_size(sort_stream->trees)) {
       *gn = *(GtGenomeNode**)
             gt_array_get(sort_stream->trees, sort_stream->idx);
@@ -96,7 +96,7 @@ GtNodeStream* gt_sort_stream_new(GtNodeStream *in_stream)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_sort_stream_class(), true);
   GtSortStream *sort_stream = gt_sort_stream_cast(gs);
-  assert(in_stream);
+  gt_assert(in_stream);
   sort_stream->in_stream = gt_node_stream_ref(in_stream);
   sort_stream->sorted = false;
   sort_stream->idx = 0;

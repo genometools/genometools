@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <string.h>
 #include "core/cstr.h"
 #include "core/genfile.h"
@@ -32,8 +32,9 @@ struct GtIO {
 GtIO* gt_io_new(const char *path, const char *mode)
 {
   GtIO *io;
-  assert(mode);
-  assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
+  gt_assert(mode);
+  /* XXX: only the read mode has been implemented */
+  gt_assert(!strcmp(mode, "r"));
   io = gt_malloc(sizeof *io);
   io->fp = gt_genfile_xopen(path, mode);
   io->path = path ? gt_str_new_cstr(path) : gt_str_new_cstr("stdin");
@@ -45,7 +46,7 @@ GtIO* gt_io_new(const char *path, const char *mode)
 int gt_io_get_char(GtIO *io, char *c)
 {
   int cc;
-  assert(io && c);
+  gt_assert(io && c);
   cc = gt_genfile_xfgetc(io->fp);
   if (cc == '\n') {
     io->line_number++;
@@ -61,13 +62,13 @@ int gt_io_get_char(GtIO *io, char *c)
 
 void gt_io_unget_char(GtIO *io, char c)
 {
-  assert(io);
+  gt_assert(io);
   gt_genfile_unget_char(io->fp, c);
 }
 
 bool gt_io_line_start(const GtIO *io)
 {
-  assert(io);
+  gt_assert(io);
   return io->line_start;
 }
 
@@ -75,7 +76,7 @@ bool gt_io_has_char(GtIO *io)
 {
   int rval;
   char c = 0;
-  assert(io);
+  gt_assert(io);
   rval = gt_io_get_char(io, &c);
   gt_io_unget_char(io, c);
   return rval ? false : true;
@@ -84,7 +85,7 @@ bool gt_io_has_char(GtIO *io)
 char gt_io_peek(GtIO *io)
 {
   char c;
-  assert(io);
+  gt_assert(io);
   gt_io_get_char(io, &c);
   gt_io_unget_char(io, c);
   return c;
@@ -93,26 +94,26 @@ char gt_io_peek(GtIO *io)
 char gt_io_next(GtIO *io)
 {
   char c;
-  assert(io);
+  gt_assert(io);
   gt_io_get_char(io, &c);
   return c;
 }
 
 unsigned long gt_io_get_line_number(const GtIO *io)
 {
-  assert(io);
+  gt_assert(io);
   return io->line_number;
 }
 
 const char* gt_io_get_filename(const GtIO *io)
 {
-  assert(io && io->path);
+  gt_assert(io && io->path);
   return gt_str_get(io->path);
 }
 
 GtStr* gt_io_get_filename_str(const GtIO *io)
 {
-  assert(io && io->path);
+  gt_assert(io && io->path);
   return io->path;
 }
 

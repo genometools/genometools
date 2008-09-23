@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/gc_content.h"
 
 void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha)
@@ -26,9 +26,9 @@ void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha)
                 n  = 0; /* number of N   bases */
   unsigned int a_code, c_code, g_code, t_code, n_code, cc;
   GtAlpha *dna_alpha;
-  assert(seq && alpha);
+  gt_assert(seq && alpha);
   dna_alpha = gt_alpha_new_dna();
-  assert(gt_alpha_is_compatible_with_alpha(alpha, dna_alpha));
+  gt_assert(gt_alpha_is_compatible_with_alpha(alpha, dna_alpha));
   a_code = gt_alpha_encode(dna_alpha, 'A');
   c_code = gt_alpha_encode(dna_alpha, 'C');
   g_code = gt_alpha_encode(dna_alpha, 'G');
@@ -43,7 +43,7 @@ void gt_gc_content_show(const char *seq, unsigned long len, GtAlpha *alpha)
     else if (cc == n_code)
       n++;
     else {
-      assert(0);
+      gt_assert(0);
     }
   }
   printf("GC-content: %.2f%% (AT-content: %.2f%%, N-content: %.2f%%)\n",

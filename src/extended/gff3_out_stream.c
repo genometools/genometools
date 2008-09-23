@@ -73,6 +73,6 @@ void gt_gff3_out_stream_set_fasta_width(GtNodeStream *gs,
                                      unsigned long fasta_width)
 {
   GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
-  assert(gff3_out_stream);
+  gt_assert(gff3_out_stream);
   gt_gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
 }

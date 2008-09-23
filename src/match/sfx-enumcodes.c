@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
+#include "core/assert.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
@@ -93,7 +93,8 @@ static bool newcodelistelem(Specialcontext *specialcontext,
     {
       specialcontext->position = largerval;
     }
-    assert(specialcontext->position >= (Seqpos) specialcontext->maxprefixindex);
+    gt_assert(specialcontext->position >=
+              (Seqpos) specialcontext->maxprefixindex);
     return true;
   }
   return false;
@@ -172,13 +173,13 @@ Codetype computefilledqgramcode(const Enumcodeatposition *ecp,
   unsigned int idx;
   Uchar cc;
 
-  assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
+  gt_assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
   code = ecp->filltable[prefixindex];
   for (idx=0; idx<prefixindex; idx++)
   {
-    assert((Seqpos) (pos + idx) < ecp->totallength);
+    gt_assert((Seqpos) (pos + idx) < ecp->totallength);
     cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
-    assert(ISNOTSPECIAL(cc));
+    gt_assert(ISNOTSPECIAL(cc));
     code += ecp->multimappower[idx][cc];
   }
   return code;
@@ -194,7 +195,7 @@ bool computefilledqgramcodestopatmax(Codetype *code,
   unsigned int idx;
   Uchar cc;
 
-  assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
+  gt_assert(prefixindex > 0 && prefixindex < ecp->prefixlength);
   tmpcode = ecp->filltable[prefixindex];
   if (tmpcode > stopcode)
   {
@@ -202,9 +203,9 @@ bool computefilledqgramcodestopatmax(Codetype *code,
   }
   for (idx=0; idx<prefixindex; idx++)
   {
-    assert((Seqpos) (pos + idx) < ecp->totallength);
+    gt_assert((Seqpos) (pos + idx) < ecp->totallength);
     cc = getencodedcharnospecial(ecp->encseq,pos + idx, ecp->readmode);
-    assert(ISNOTSPECIAL(cc));
+    gt_assert(ISNOTSPECIAL(cc));
     tmpcode += ecp->multimappower[idx][cc];
     if (tmpcode > stopcode)
     {

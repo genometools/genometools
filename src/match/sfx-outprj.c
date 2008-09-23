@@ -54,8 +54,8 @@ static void showprjinfo(FILE *outprj,
 {
   unsigned long i;
 
-  assert(filelengthtab != NULL);
-  assert(filenametab != NULL);
+  gt_assert(filelengthtab != NULL);
+  gt_assert(filenametab != NULL);
   for (i=0; i<gt_strarray_size(filenametab); i++)
   {
     fprintf(outprj,"dbfile=%s " Formatuint64_t " " Formatuint64_t "\n",

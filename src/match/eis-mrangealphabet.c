@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -113,7 +113,7 @@ MRAEncGTAlphaNew(const Alphabet *alpha)
 extern MRAEnc *
 MRAEncCopy(const MRAEnc *alpha)
 {
-  assert(alpha);
+  gt_assert(alpha);
   switch (alpha->encType)
   {
   case sourceUInt8:
@@ -121,7 +121,7 @@ MRAEncCopy(const MRAEnc *alpha)
       MRAEncUInt8 *newAlpha = NULL;
       const MRAEncUInt8 *srcAlpha = constMRAEnc2MRAEncUInt8(alpha);
       int numRanges = alpha->numRanges;
-      assert(numRanges > 0);
+      gt_assert(numRanges > 0);
       if ((newAlpha = gt_calloc(sizeof (MRAEncUInt8), 1))
           && (newAlpha->baseClass.rangeEndIndices =
               gt_malloc(sizeof (newAlpha->baseClass.rangeEndIndices[0])
@@ -224,7 +224,7 @@ MRAEnc *
 MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
 {
   Symbol insertPos, numSyms;
-  assert(mralpha && range < mralpha->numRanges);
+  gt_assert(mralpha && range < mralpha->numRanges);
   insertPos = mralpha->rangeEndIndices[range];
   numSyms = mralpha->rangeEndIndices[mralpha->numRanges - 1];
   switch (mralpha->encType)
@@ -233,7 +233,7 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, AlphabetRangeID range)
     {
       MRAEncUInt8 *ui8alpha;
       ui8alpha = MRAEnc2MRAEncUInt8(mralpha);
-      assert(ui8alpha->mappings[sym] == UNDEF_UCHAR);
+      gt_assert(ui8alpha->mappings[sym] == UNDEF_UCHAR);
       /* first move all old mappings accordingly */
       {
         Symbol i;
@@ -348,7 +348,7 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, const int *rangeSel)
 {
   AlphabetRangeID range = 0;
-  assert(mralpha && rangeSel);
+  gt_assert(mralpha && rangeSel);
   while (range < mralpha->numRanges
          && sym >= mralpha->rangeEndIndices[range])
     ++range;
@@ -369,7 +369,7 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
 void
 MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha)
 {
-  assert(mralpha);
+  gt_assert(mralpha);
   switch (mralpha->encType)
   {
     MRAEncUInt8 *ui8alpha;

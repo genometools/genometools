@@ -33,7 +33,7 @@ int gt_tooldriver(int(*tool)(int argc, const char **argv, GtError*),
   if (gt_error_is_set(err)) {
     fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
             gt_error_get(err));
-    assert(had_err);
+    gt_assert(had_err);
   }
   gt_error_delete(err);
   if (gt_allocators_clean())
@@ -57,7 +57,7 @@ int gt_toolobjdriver(GtToolConstructor tool_constructor, int argc, char *argv[])
   if (gt_error_is_set(err)) {
     fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
             gt_error_get(err));
-    assert(had_err);
+    gt_assert(had_err);
   }
   gt_error_delete(err);
   if (gt_allocators_clean())

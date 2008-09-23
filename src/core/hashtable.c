@@ -14,7 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#include <assert.h>
+#include "core/assert.h"
 #include <limits.h>
 #include <setjmp.h>
 #if TJ_DEBUG > 1
@@ -97,8 +97,8 @@ gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
         unsigned short high_mul, unsigned short low_mul)
 {
   htsize_t table_size;
-  assert(high_mul > low_mul);
-  assert(low_mul > 0 && high_mul < FILL_DIVISOR);
+  gt_assert(high_mul > low_mul);
+  gt_assert(low_mul > 0 && high_mul < FILL_DIVISOR);
   ht->table_info = table_info;
   ht->table_size_log = size_log;
   ht->table_mask = (table_size = 1 << size_log) - 1;
@@ -124,7 +124,7 @@ static void
 gt_ht_init(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
         unsigned short high_mul, unsigned short low_mul)
 {
-  assert(size_log < sizeof (htsize_t) * CHAR_BIT);
+  gt_assert(size_log < sizeof (htsize_t) * CHAR_BIT);
   ht->current_fill = 0;
   ht->table = ht->links.table = NULL;
   gt_ht_reinit(ht, table_info, size_log, high_mul, low_mul);
@@ -174,12 +174,12 @@ gt_ht_resize(GtHashtable *ht, unsigned short new_size_log)
 #ifndef NDEBUG
   htsize_t new_size = 1 << new_size_log;
 #endif
-  assert(ht);
+  gt_assert(ht);
   if (new_size_log != ht->table_size_log)
   {
     gt_ht_init(&new_ht, ht->table_info, new_size_log, ht->high_fill_mul,
             ht->low_fill_mul);
-    assert(ht->current_fill < new_size);
+    gt_assert(ht->current_fill < new_size);
     gt_hashtable_foreach(ht, gt_ht_insert_wrapper, &new_ht, NULL);
     gt_ht_destruct(ht);
     memcpy(ht, &new_ht, sizeof (*ht));
@@ -230,7 +230,7 @@ gt_ht_traverse_list_of_key_debug(GtHashtable *ht, const void *elem)
 extern void *
 gt_hashtable_get(GtHashtable *ht, const void *elem)
 {
-  assert(ht);
+  gt_assert(ht);
 #if TJ_DEBUG > 1
   gt_ht_traverse_list_of_key_debug(ht, elem);
 #endif
@@ -246,7 +246,7 @@ extern int
 gt_hashtable_add(GtHashtable *ht, const void *elem)
 {
   int insert_count;
-  assert(ht && elem);
+  gt_assert(ht && elem);
   if (ht->current_fill + 1 > ht->high_fill)
     gt_ht_resize(ht, ht->table_size_log + 1);
   insert_count = gt_ht_insert(ht, elem);
@@ -257,7 +257,7 @@ static htsize_t
 gt_ht_find_free_idx(GtHashtable *ht, htsize_t start_idx, int search_dir)
 {
   htsize_t new_idx = start_idx;
-  assert(ht->current_fill < ht->table_mask + 1);
+  gt_assert(ht->current_fill < ht->table_mask + 1);
   do {
     new_idx = (new_idx + search_dir) & ht->table_mask;
   } while (HT_GET_LINK(ht, new_idx) != free_mark);
@@ -325,7 +325,7 @@ extern int
 gt_hashtable_remove(GtHashtable *ht, const void *elem)
 {
   htsize_t remove_pos;
-  assert(ht && elem);
+  gt_assert(ht && elem);
   remove_pos = gt_ht_remove(ht, elem);
   if (remove_pos != free_mark)
   {
@@ -402,7 +402,7 @@ static enum iterator_op
 gt_ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
 {
   GtArray *hash_entries;
-  assert(elem && data);
+  gt_assert(elem && data);
   hash_entries = ((struct hash_to_array_data *)data)->hash_entries;
   gt_array_add_elem(hash_entries, elem,
                  ((struct hash_to_array_data *)data)->elem_size);
@@ -418,7 +418,7 @@ gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
   unsigned long i;
   int had_err;
   gt_error_check(err);
-  assert(ht && iter && cmp);
+  gt_assert(ht && iter && cmp);
   hash_entries = gt_array_new(ht->table_info.elem_size);
   {
     struct hash_to_array_data visitor_data = { ht->table_info.elem_size,
@@ -431,7 +431,7 @@ gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
     gt_qsort_r(gt_array_get_space(hash_entries), gt_array_size(hash_entries),
                gt_array_elem_size(hash_entries), data, (GtCompareWithData)cmp);
     hash_size = gt_array_size(hash_entries);
-    assert(hash_size == gt_hashtable_fill(ht));
+    gt_assert(hash_size == gt_hashtable_fill(ht));
     for (i = 0; !had_err && i < hash_size; i++) {
       elem = gt_array_get(hash_entries, i);
       had_err = iter(elem, data, err);
@@ -512,7 +512,7 @@ gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
 extern size_t
 gt_hashtable_fill(GtHashtable *ht)
 {
-  assert(ht);
+  gt_assert(ht);
   return ht->current_fill;
 }
 
@@ -536,7 +536,7 @@ gt_hashtable_fill(GtHashtable *ht)
 extern void
 gt_hashtable_reset(GtHashtable *ht)
 {
-  assert(ht);
+  gt_assert(ht);
   FreeFuncWData free_elem_with_data =
     ht->table_info.free_op.free_elem_with_data;
   if (free_elem_with_data)
@@ -708,7 +708,7 @@ extern void
 gt_ht_2ptr_elem_free(void *elem)
 {
   struct gt_ht_elem_2cstr *p = elem;
-  assert(elem);
+  gt_assert(elem);
   gt_free(p->key);
   gt_free(p->value);
 }

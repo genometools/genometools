@@ -36,10 +36,10 @@ static int addmarkpos(ArraySeqpos *asp,
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
     currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
-    assert(ISSPECIAL(currentchar));
+    gt_assert(ISSPECIAL(currentchar));
     if (currentchar == (Uchar) SEPARATOR)
     {
-      assert(asp->nextfreeSeqpos < asp->allocatedSeqpos);
+      gt_assert(asp->nextfreeSeqpos < asp->allocatedSeqpos);
       asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos;
     }
   }
@@ -117,7 +117,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
 {
   unsigned long left, mid, right, len;
 
-  assert(numofrecords > 0);
+  gt_assert(numofrecords > 0);
   if (numofrecords == 1UL || position < recordseps[0])
   {
     return 0;
@@ -171,7 +171,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
 {
   unsigned long left, mid, right, len;
 
-  assert(numofrecords > 0);
+  gt_assert(numofrecords > 0);
   if (numofrecords == 1UL || position < recordseps[0])
   {
     return 0;

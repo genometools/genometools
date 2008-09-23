@@ -133,7 +133,7 @@ static void gmatchposinsinglesequence(Substringinfo *substringinfo,
     {
       if (substringinfo->encseq != NULL)
       {
-        assert(wptr != NULL);
+        gt_assert(wptr != NULL);
         checkifsequenceisthere(substringinfo->encseq,
                                witnessposition,
                                gmatchlength,
@@ -309,7 +309,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
     {
       break;
     }
-    assert(substring.remaining >= (unsigned long) prefixlength);
+    gt_assert(substring.remaining >= (unsigned long) prefixlength);
     gmatchlength = gmatchforward(genericindex,
                                  0,
                                  0,

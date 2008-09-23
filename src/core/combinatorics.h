@@ -17,7 +17,7 @@
 #ifndef COMBINATORICS_H
 #define COMBINATORICS_H
 
-#include <assert.h>
+#include "core/assert.h"
 
 #include "core/minmax.h"
 
@@ -53,7 +53,7 @@ static inline unsigned long
 binomialCoeff(unsigned long n, unsigned long k)
 {
   unsigned long accum;
-  assert(k <= n);
+  gt_assert(k <= n);
   if (k == 0 || k == n)
     return 1;
   else if (k < n/2)
@@ -86,7 +86,7 @@ multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
 #ifndef NDEBUG
   unsigned long binSum = 0;
 #endif
-  assert(n > 0 && numBins > 0 && binSizes);
+  gt_assert(n > 0 && numBins > 0 && binSizes);
   for (i = 0; i < numBins; ++i)
   {
 #ifndef NDEBUG
@@ -98,7 +98,7 @@ multinomialCoeff(unsigned n, size_t numBins, const unsigned binSizes[])
       maxBin = i;
     }
   }
-  assert(binSum <= n);
+  gt_assert(binSum <= n);
   for (nfac = maxBinSize + 1; nfac <= n; ++nfac)
     accum *= nfac;
   for (i = 0; i < numBins; ++i)

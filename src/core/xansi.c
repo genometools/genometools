@@ -93,7 +93,7 @@ void gt_xfputc(int c, FILE *stream)
 
 void gt_xfputs(const char *str, FILE *stream)
 {
-  assert(str);
+  gt_assert(str);
   if (fputs(str, stream) == EOF) {
     perror("cannot fputs to stream");
     exit(EXIT_FAILURE);

@@ -109,7 +109,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <stdio.h>
 #include <math.h>
 #include "core/ensure.h"
@@ -175,7 +175,7 @@ static void check_tree (const GtRBTnode *root)
   {
     return;
   }
-  /* assert(!root->red); */
+  /* gt_assert(!root->red); */
   /* root->red = false; */
   for (p = root->left; p != NULL; p = p->left)
   {

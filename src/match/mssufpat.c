@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <stdarg.h>
 #include "core/symboldef.h"
 #include "core/unused_api.h"
@@ -129,7 +129,7 @@ static unsigned long zerosontheright(unsigned long v)
 {
   unsigned long c;     /* c will be the number of zero bits on the right,
                          so if v is 1101000 (base 2), then c will be 3 */
-  assert(v > 0);
+  gt_assert(v > 0);
   if (v & 0x1)
   {
     c = 0; /* special case for odd v (assumed to happen half of the time) */
@@ -176,7 +176,7 @@ static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
   unsigned long idx;
 
   column->prefixofsuffixbits = ~0UL;
-  assert(mti->patternlength <= (unsigned long) INTWORDSIZE);
+  gt_assert(mti->patternlength <= (unsigned long) INTWORDSIZE);
   for (idx = 0; idx<mti->patternlength; idx++)
   {
     mti->mstatlength[idx] = 0;
@@ -204,7 +204,7 @@ static unsigned long pms_nextstepfullmatches(
     do
     {
       first1 = zerosontheright(tmp);
-      assert(bitindex + first1 < mti->patternlength);
+      gt_assert(bitindex + first1 < mti->patternlength);
       if (mti->mstatlength[bitindex+first1] < currentdepth)
       {
         /*
@@ -237,8 +237,8 @@ static void pms_nextParallelmstats(const void *dfsconstinfo,
   Parallelmstats *outcol = (Parallelmstats *) aliasoutcol;
   const Parallelmstats *incol = (const Parallelmstats *) aliasincol;
 
-  assert(ISNOTSPECIAL(currentchar));
-  assert(currentdepth > 0);
+  gt_assert(ISNOTSPECIAL(currentchar));
+  gt_assert(currentdepth > 0);
 
   if (currentdepth > 1UL)
   {
@@ -269,7 +269,7 @@ static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Parallelmstats *col = (Parallelmstats *) aliascol;
 
-  assert(ISNOTSPECIAL(currentchar));
+  gt_assert(ISNOTSPECIAL(currentchar));
 #ifdef SKDEBUG
   tmp = col->prefixofsuffixbits;
 #endif

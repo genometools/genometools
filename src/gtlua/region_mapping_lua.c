@@ -26,10 +26,10 @@ static int region_mapping_lua_new_seqfile(lua_State *L)
   const char *seqfilename;
   GtStr *seqfile;
   GtRegionMapping **region_mapping;
-  assert(L);
+  gt_assert(L);
   seqfilename = luaL_checkstring(L, 1);
   region_mapping = lua_newuserdata(L, sizeof (GtRegionMapping*));
-  assert(region_mapping);
+  gt_assert(region_mapping);
   seqfile = gt_str_new_cstr(seqfilename);
   *region_mapping = gt_region_mapping_new_seqfile(seqfile);
   gt_str_delete(seqfile);
@@ -53,7 +53,7 @@ static const struct luaL_Reg region_mapping_lib_f [] = {
 
 int gt_lua_open_region_mapping(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, REGION_MAPPING_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

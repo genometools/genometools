@@ -301,7 +301,7 @@ extern MRAEnc *
 SfxINewMRAEnc(const sfxInterface *si)
 {
   MRAEnc *alphabet;
-  assert(si);
+  gt_assert(si);
   alphabet = MRAEncGTAlphaNew(SfxIGetAlphabet(si));
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
@@ -310,7 +310,7 @@ SfxINewMRAEnc(const sfxInterface *si)
 Seqpos
 SfxIGetLength(const sfxInterface *si)
 {
-  assert(si);
+  gt_assert(si);
   return si->baseClass.seqLen;
 }
 
@@ -349,7 +349,7 @@ extern size_t
 SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 {
   const struct sfxInterface *sfxi;
-  assert(state);
+  gt_assert(state);
   sfxi = state;
   return EncSeqGetSubSeq(sfxi->encseq, sfxi->readmode, pos, len, dest);
 }
@@ -363,8 +363,8 @@ SfxIGenerate(void *iface, void *backlogState,
 {
   sfxInterface *sfxi = iface;
   size_t elemsLeft = len;
-  assert(sfxi && backlogState && move2Backlog && output);
-  assert(generateStart + len <= SfxIGetLength(sfxi));
+  gt_assert(sfxi && backlogState && move2Backlog && output);
+  gt_assert(generateStart + len <= SfxIGetLength(sfxi));
   do
   {
     if (generateStart < sfxi->lastGeneratedStart + sfxi->lastGeneratedLen)

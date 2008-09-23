@@ -91,7 +91,7 @@ static GtBlockTuple* blocktuple_new(const char *gft,
                                      GtBlock *block)
 {
   GtBlockTuple *bt;
-  assert(block);
+  gt_assert(block);
   bt = gt_calloc(1, sizeof (GtBlockTuple));
   bt->gft = gft;
   bt->rep = rep;
@@ -103,7 +103,7 @@ static NodeInfoElement* nodeinfo_get(GtDiagram *d,
                                      GtFeatureNode *node)
 {
   NodeInfoElement *ni;
-  assert(d && node);
+  gt_assert(d && node);
   if (!(ni = gt_hashmap_get(d->nodeinfo, node))) {
     ni = gt_calloc(1, sizeof (NodeInfoElement));
     ni->type_index  = gt_hashmap_new(HASH_STRING, NULL,
@@ -120,12 +120,12 @@ static GtBlock* nodeinfo_find_block(NodeInfoElement* ni,
 {
   PerTypeInfo *type_struc = NULL;
   GtBlockTuple *bt = NULL;
-  assert(ni);
+  gt_assert(ni);
   if (!(type_struc = gt_hashmap_get(ni->type_index, gft)))
     return NULL;
   if (!(bt = gt_hashmap_get(type_struc->rep_index, gf)))
     return NULL;
-  assert(bt);
+  gt_assert(bt);
   return bt->block;
 }
 
@@ -136,7 +136,7 @@ static void nodeinfo_add_block(NodeInfoElement *ni,
 {
   GtBlockTuple *bt;
   PerTypeInfo *type_struc = NULL;
-  assert(ni && !nodeinfo_find_block(ni, gft, rep));
+  gt_assert(ni && !nodeinfo_find_block(ni, gft, rep));
   bt = blocktuple_new(gft, rep, block);
   if (!(ni->type_index))
   {
@@ -170,7 +170,7 @@ static const char* get_node_name_or_id(GtFeatureNode *gn)
 
 static bool get_caption_display_status(GtDiagram *d, const char *gft)
 {
-  assert(d && gft);
+  gt_assert(d && gft);
   bool *status;
   status = (bool*) gt_hashmap_get(d->caption_display_status, gft);
   if (!status)
@@ -230,7 +230,7 @@ static void add_to_current(GtDiagram *d, GtFeatureNode *node,
   NodeInfoElement *ni;
   GtStr *caption;
   const char *nnid_p = NULL, *nnid_n = NULL;
-  assert(d && node);
+  gt_assert(d && node);
   /* Get nodeinfo element and set itself as parent */
   ni = nodeinfo_get(d, node);
   ni->parent = node;
@@ -271,7 +271,7 @@ static void add_to_parent(GtDiagram *d, GtFeatureNode *node,
 {
   GtBlock *block = NULL;
   NodeInfoElement *par_ni, *ni;
-  assert(d && node);
+  gt_assert(d && node);
   if (!parent) return;
   par_ni = nodeinfo_get(d, parent);
   ni = nodeinfo_get(d, node);
@@ -287,7 +287,7 @@ static void add_to_parent(GtDiagram *d, GtFeatureNode *node,
                      parent,
                      block);
   }
-  assert(block);
+  gt_assert(block);
   gt_block_insert_element(block, node);
 }
 
@@ -297,7 +297,7 @@ static void add_to_rep(GtDiagram *d, GtFeatureNode *node,
   GtBlock *block = NULL;
   GtFeatureNode *rep = UNDEF_REPR;
   NodeInfoElement *ni;
-  assert(d && node && gt_feature_node_is_multi(node));
+  gt_assert(d && node && gt_feature_node_is_multi(node));
   rep = gt_feature_node_get_multi_representative(node);
   ni = nodeinfo_get(d, rep);
 
@@ -310,7 +310,7 @@ static void add_to_rep(GtDiagram *d, GtFeatureNode *node,
     nodeinfo_add_block(ni, gt_feature_node_get_type(node),
                      rep, block);
   }
-  assert(block);
+  gt_assert(block);
   gt_block_insert_element(block, node);
 }
 
@@ -320,7 +320,7 @@ static void add_recursive(GtDiagram *d, GtFeatureNode *node,
 {
   NodeInfoElement *ni;
   GtFeatureNode *rep = UNDEF_REPR;
-  assert(d && node && original_node);
+  gt_assert(d && node && original_node);
   if (!parent) return;
   ni = nodeinfo_get(d, node);
   if (gt_feature_node_is_multi(original_node))
@@ -364,7 +364,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   unsigned long max_show_width = UNDEF_ULONG,
                 par_max_show_width = UNDEF_ULONG;
 
-  assert(d && node);
+  gt_assert(d && node);
 
   feature_type = gt_feature_node_get_type(node);
   if (parent)
@@ -441,10 +441,10 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   {
     GtFeatureNode *rep;
     rep = gt_feature_node_get_multi_representative((GtFeatureNode*) node);
-    assert(gt_hashmap_get(d->nodeinfo, rep));
+    gt_assert(gt_hashmap_get(d->nodeinfo, rep));
   }
   else
-    assert(gt_hashmap_get(d->nodeinfo, node));
+    gt_assert(gt_hashmap_get(d->nodeinfo, node));
 }
 
 static int gt_diagram_add_tracklines(GT_UNUSED void *key, void *value,
@@ -474,7 +474,7 @@ static int visit_child(GtGenomeNode* gn, void *gt_genome_node_children,
                                                       gt_genome_node_info,
                                                       visit_child,
                                                       err);
-    assert(!had_err); /* visit_child() is sane */
+    gt_assert(!had_err); /* visit_child() is sane */
     gt_genome_node_info->parent = oldparent;
   }
   else
@@ -508,7 +508,7 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
     GtBlock* mainblock = NULL;
     type = gt_strarray_get(ni->types, i);
     type_struc = gt_hashmap_get(ni->type_index, type);
-    assert(type_struc);
+    gt_assert(type_struc);
     for (j=0; j<gt_array_size(type_struc->blocktuples); j++)
     {
       GtBlockTuple *bt;
@@ -530,14 +530,14 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
         } else
             block = bt->block;
       }
-      assert(block);
+      gt_assert(block);
       list = (GtArray*) gt_hashmap_get(diagram->blocks, bt->gft);
       if (!list)
       {
         list = gt_array_new(sizeof (GtBlock*));
         gt_hashmap_add(diagram->blocks, (void*) bt->gft, list);
       }
-      assert(list);
+      gt_assert(list);
       gt_array_add(list, block);
       gt_free(bt);
     }
@@ -557,7 +557,7 @@ static void traverse_genome_nodes(GtFeatureNode *gn,
 {
   NodeTraverseInfo* gt_genome_node_info;
   int had_err;
-  assert(gt_genome_node_children);
+  gt_assert(gt_genome_node_children);
   gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
   gt_genome_node_info->parent = gn;
   /* handle root nodes */
@@ -566,7 +566,7 @@ static void traverse_genome_nodes(GtFeatureNode *gn,
     had_err = gt_genome_node_traverse_direct_children((GtGenomeNode*)gn,
                                                       gt_genome_node_info,
                                                       visit_child, NULL);
-    assert(!had_err); /* visit_child() is sane */
+    gt_assert(!had_err); /* visit_child() is sane */
   }
 }
 
@@ -592,7 +592,7 @@ static void gt_diagram_build(GtDiagram *diagram, GtArray *features)
   had_err = gt_hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks,
                                        diagram, (GtCompare) gt_genome_node_cmp,
                                        NULL);
-  assert(!had_err); /* collect_blocks() is sane */
+  gt_assert(!had_err); /* collect_blocks() is sane */
 
   /* clear caches */
   gt_hashmap_delete(diagram->collapsingtypes);
@@ -633,10 +633,10 @@ GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
   GtDiagram *diagram;
   int had_err = 0;
   GtArray *features = gt_array_new(sizeof (GtGenomeNode*));
-  assert(features && seqid && range && style);
+  gt_assert(features && seqid && range && style);
   had_err = gt_feature_index_get_features_for_range(fi, features, seqid, range,
                                                     NULL);
-  assert(!had_err); /* <fi> must contain <seqid> */
+  gt_assert(!had_err); /* <fi> must contain <seqid> */
   diagram = gt_diagram_new_generic(features, range, style);
   gt_array_delete(features);
   return diagram;
@@ -645,40 +645,40 @@ GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
 GtDiagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
                                 GtStyle *style)
 {
-  assert(features && range && style);
+  gt_assert(features && range && style);
   return gt_diagram_new_generic(features, range, style);
 }
 
 GtRange gt_diagram_get_range(GtDiagram* diagram)
 {
-  assert(diagram);
+  gt_assert(diagram);
   return diagram->range;
 }
 
 GtHashmap* gt_diagram_get_tracks(const GtDiagram *diagram)
 {
-  assert(diagram);
+  gt_assert(diagram);
   return diagram->tracks;
 }
 
 void gt_diagram_get_lineinfo(const GtDiagram *diagram, GtTracklineInfo *tli)
 {
   int had_err;
-  assert(diagram);
+  gt_assert(diagram);
   had_err = gt_hashmap_foreach(diagram->tracks, gt_diagram_add_tracklines,
                               tli, NULL);
-  assert(!had_err); /* gt_diagram_add_tracklines() is sane */
+  gt_assert(!had_err); /* gt_diagram_add_tracklines() is sane */
 }
 
 int gt_diagram_get_number_of_tracks(const GtDiagram *diagram)
 {
-  assert(diagram);
+  gt_assert(diagram);
   return diagram->nof_tracks;
 }
 
 static int blocklist_block_compare(const void *item1, const void *item2)
 {
-  assert(item1 && item2);
+  gt_assert(item1 && item2);
   return gt_block_compare(*(GtBlock**) item1, *(GtBlock**) item2);
 }
 
@@ -695,7 +695,7 @@ static int layout_tracks(void *key, void *value, void *data,
   GtBlock *block;
   bool split;
   double tmp;
-  assert(type && list);
+  gt_assert(type && list);
 
   /* to get a deterministic layout, we sort the GtBlocks for each type */
   gt_array_sort_stable(list, blocklist_block_compare);
@@ -742,7 +742,7 @@ static int render_tracks(GT_UNUSED void *key, void *value, void *data,
   GtTrackTraverseInfo *tti = (GtTrackTraverseInfo*) data;
   GtTrack *track = (GtTrack*) value;
   int had_err = 0;
-  assert(tti && track);
+  gt_assert(tti && track);
   had_err = gt_track_sketch(track, tti->canvas);
   return had_err;
 }

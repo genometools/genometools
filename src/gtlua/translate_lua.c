@@ -38,7 +38,7 @@ static const struct luaL_Reg translate_lib_f [] = {
 
 int gt_lua_open_translate(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_register(L, "gt", translate_lib_f);
   return 1;
 }

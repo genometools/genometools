@@ -188,7 +188,7 @@ static int mergeandstoreindex(const GtStr *storeindex,
                                                  &specialcharinfo,
                                                  emmesa->suffixarraytable,
                                                  emmesa->numofindexes);
-    assert(sequenceoffsettable != NULL);
+    gt_assert(sequenceoffsettable != NULL);
     while (emmesa->numofentries > 0)
     {
       if (stepdeleteandinsertothersuffixes(emmesa,err) != 0)

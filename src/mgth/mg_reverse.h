@@ -26,7 +26,7 @@
 #ifndef MG_REVERSE_H
 #define MG_REVERSE_H
 
-#include <assert.h>
+#include "core/assert.h"
 #include "metagenomethreader.h"
 
 /* reverse 'dna_seq' of length 'seqlen' in place */

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <stdbool.h>
 #include "core/array2dim.h"
 #include "core/minmax.h"
@@ -35,7 +35,7 @@ static void fillDPtable(DPentry **dptable,
                         const char *v, unsigned long vlen)
 {
   unsigned long i, j, repvalue, delvalue, insvalue, minvalue;
-  assert(dptable && u && ulen && v && vlen);
+  gt_assert(dptable && u && ulen && v && vlen);
   for (i = 1; i <= ulen; i++) {
     dptable[i][0].distvalue = i;
     dptable[i][0].min_deletion = true;
@@ -59,7 +59,7 @@ static void fillDPtable(DPentry **dptable,
 static void traceback(GtAlignment *a, DPentry **dptable,
                       unsigned long i, unsigned long j)
 {
-  assert(a && dptable);
+  gt_assert(a && dptable);
   while (i > 0 || j > 0) {
     if (dptable[i][j].min_replacement) {
       gt_alignment_add_replacement(a);
@@ -86,7 +86,7 @@ static unsigned long traceback_all(GtAlignment *a, DPentry **dptable,
 {
   unsigned long aligns = 0;
   bool backtrace = false;
-  assert(a && dptable);
+  gt_assert(a && dptable);
   if (dptable[i][j].min_replacement) {
     backtrace = true;
     gt_alignment_add_replacement(a);
@@ -107,7 +107,7 @@ static unsigned long traceback_all(GtAlignment *a, DPentry **dptable,
   }
   if (!backtrace) {
     aligns++;
-    assert(dist == gt_alignment_eval(a));
+    gt_assert(dist == gt_alignment_eval(a));
     if (proc_alignment)
       proc_alignment(a, data);
   }
@@ -119,12 +119,12 @@ GtAlignment* gt_galign(const char *u, unsigned long ulen,
 {
   DPentry **dptable;
   GtAlignment *a;
-  assert(u && ulen && v && vlen);
+  gt_assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
   a = gt_alignment_new_with_seqs(u, ulen, v, vlen);
   fillDPtable(dptable, u, ulen, v, vlen);
   traceback(a, dptable, ulen, vlen);
-  assert(dptable[ulen][vlen].distvalue == gt_alignment_eval(a));
+  gt_assert(dptable[ulen][vlen].distvalue == gt_alignment_eval(a));
   gt_array2dim_delete(dptable);
   return a;
 }
@@ -137,7 +137,7 @@ void gt_galign_all(const char *u, unsigned long ulen,
   unsigned long aligns;
   DPentry **dptable;
   GtAlignment *a;
-  assert(u && ulen && v && vlen);
+  gt_assert(u && ulen && v && vlen);
   gt_array2dim_calloc(dptable, ulen+1, vlen+1);
   a = gt_alignment_new_with_seqs(u, ulen, v, vlen);
   fillDPtable(dptable, u, ulen, v, vlen);

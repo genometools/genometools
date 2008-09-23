@@ -31,10 +31,10 @@ GtTagValueMap gt_tag_value_map_new(const char *tag, const char *value)
 {
   GtTagValueMap map;
   size_t tag_len, value_len;
-  assert(tag && value);
+  gt_assert(tag && value);
   tag_len = strlen(tag);
   value_len = strlen(value);
-  assert(tag_len && value_len);
+  gt_assert(tag_len && value_len);
   map = gt_malloc((tag_len + 1 + value_len + 1 + 1) * sizeof *map);
   memcpy(map, tag, tag_len + 1);
   memcpy(map + tag_len + 1, value, value_len + 1);
@@ -79,13 +79,13 @@ void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
 {
   size_t tag_len, value_len, map_len = 0;
   const char *tag_already_used;
-  assert(map && *map && tag && value);
+  gt_assert(map && *map && tag && value);
   tag_len = strlen(tag);
   value_len = strlen(value);
-  assert(tag_len && value_len);
+  gt_assert(tag_len && value_len);
   /* determine current map length */
   tag_already_used = get_value(*map, tag, &map_len);
-  assert(!tag_already_used); /* map does not contain the given <tag> already */
+  gt_assert(!tag_already_used); /* map does not contain given <tag> already */
   /* allocate additional space */
   *map = gt_realloc(*map, map_len + tag_len + 1 + value_len + 1 + 1);
   /* store new tag/value pair */
@@ -96,7 +96,7 @@ void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
 
 const char* gt_tag_value_map_get(const GtTagValueMap map, const char *tag)
 {
-  assert(map && tag && strlen(tag));
+  gt_assert(map && tag && strlen(tag));
   return get_value(map, tag, NULL);
 }
 
@@ -105,7 +105,7 @@ void gt_tag_value_map_foreach(const GtTagValueMap map,
                               void *data)
 {
   const char *map_ptr, *tag;
-  assert(map && func);
+  gt_assert(map && func);
   map_ptr = map;
   do { /* the map has at least one tag/value pair */
     tag = map_ptr;
@@ -125,10 +125,10 @@ int gt_tag_value_map_example(GT_UNUSED GtError *err)
   gt_tag_value_map_add(&map, "tag 2", "value 2");
   gt_tag_value_map_add(&map, "tag 3", "value 3");
 
-  assert(!gt_tag_value_map_get(map, "unused tag"));
-  assert(!strcmp(gt_tag_value_map_get(map, "tag 1"), "value 1"));
-  assert(!strcmp(gt_tag_value_map_get(map, "tag 2"), "value 2"));
-  assert(!strcmp(gt_tag_value_map_get(map, "tag 3"), "value 3"));
+  gt_assert(!gt_tag_value_map_get(map, "unused tag"));
+  gt_assert(!strcmp(gt_tag_value_map_get(map, "tag 1"), "value 1"));
+  gt_assert(!strcmp(gt_tag_value_map_get(map, "tag 2"), "value 2"));
+  gt_assert(!strcmp(gt_tag_value_map_get(map, "tag 3"), "value 3"));
 
   gt_tag_value_map_delete(map);
 

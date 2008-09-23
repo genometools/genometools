@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/mergefeat_stream_sorted.h"
 #include "extended/mergefeat_stream_unsorted.h"
 #include "extended/node_stream_rep.h"
@@ -62,7 +62,7 @@ GtNodeStream* gt_mergefeat_stream_sorted_new(GtNodeStream *in_stream)
   GtNodeStream *gs = gt_node_stream_create(gt_mergefeat_stream_sorted_class(),
                                           true);
   GtMergefeatStreamSorted *mfs = gt_mergefeat_stream_sorted_cast(gs);
-  assert(in_stream && gt_node_stream_is_sorted(in_stream));
+  gt_assert(in_stream && gt_node_stream_is_sorted(in_stream));
   mfs->mergefeat_stream_unsorted = gt_mergefeat_stream_unsorted_new(in_stream);
   mfs->sort_stream = gt_sort_stream_new(mfs->mergefeat_stream_unsorted);
   return gs;

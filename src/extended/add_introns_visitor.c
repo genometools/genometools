@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/add_introns_visitor.h"
@@ -40,30 +40,30 @@ static int add_introns_in_children(GtGenomeNode *gn, void *data,
   GtStr *parent_seqid;
   gt_error_check(err);
   current_feature = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(current_feature);
+  gt_assert(current_feature);
   if (gt_feature_node_has_type(current_feature, gft_exon)) {
     if (v->previous_exon_feature) {
       /* determine intron range */
       previous_range = gt_genome_node_get_range((GtGenomeNode*)
                                              v->previous_exon_feature);
       current_range = gt_genome_node_get_range(gn);
-      assert(previous_range.end < current_range.start);
+      gt_assert(previous_range.end < current_range.start);
       intron_range.start = previous_range.end + 1;
       intron_range.end = current_range.start - 1;
 
       /* determine intron strand */
       previous_strand = gt_feature_node_get_strand(v->previous_exon_feature);
       current_strand = gt_feature_node_get_strand(current_feature);
-      assert(previous_strand == current_strand);
+      gt_assert(previous_strand == current_strand);
       intron_strand = previous_strand;
 
       /* determine sequence id */
       parent_seqid =
         gt_genome_node_get_seqid((GtGenomeNode*) v->parent_feature);
-      assert(!gt_str_cmp(parent_seqid,
+      gt_assert(!gt_str_cmp(parent_seqid,
              gt_genome_node_get_seqid((GtGenomeNode*)
                                       v->previous_exon_feature)));
-      assert(!gt_str_cmp(parent_seqid,
+      gt_assert(!gt_str_cmp(parent_seqid,
              gt_genome_node_get_seqid((GtGenomeNode*) current_feature)));
 
       /* create intron */
@@ -85,7 +85,7 @@ static int add_introns_if_necessary(GtGenomeNode *gn, void *data,
   GtFeatureNode *gf;
   gt_error_check(err);
   gf = gt_genome_node_cast(gt_feature_node_class(), gn);
-  assert(gf);
+  gt_assert(gf);
   v->parent_feature = gf;
   v->previous_exon_feature = NULL;
   return gt_genome_node_traverse_direct_children(gn, v, add_introns_in_children,

@@ -64,13 +64,13 @@ GtIntervalTree* gt_interval_tree_new(GtFree func)
 
 unsigned long gt_interval_tree_size(GtIntervalTree *it)
 {
-  assert(it);
+  gt_assert(it);
   return it->size;
 }
 
 void* gt_interval_tree_node_get_data(GtIntervalTreeNode *n)
 {
-  assert(n);
+  gt_assert(n);
   return n->data;
 }
 
@@ -112,7 +112,7 @@ GtIntervalTreeNode* gt_interval_tree_find_first_overlapping(GtIntervalTree
                                                              unsigned long low,
                                                              unsigned long high)
 {
-  assert(it);
+  gt_assert(it);
   if (!it->root)
     return NULL;
   return interval_tree_search_internal(it->root, low, high);
@@ -161,7 +161,7 @@ void gt_interval_tree_find_all_overlapping(GtIntervalTree *it,
                                            unsigned long start,
                                            unsigned long end, GtArray* a)
 {
-  assert(it && a && start <= end);
+  gt_assert(it && a && start <= end);
   if (!it->root) return;
   interval_tree_find_all_internal(it->root, start, end, a);
 }
@@ -319,7 +319,7 @@ static void interval_tree_insert_internal(GtIntervalTreeNode **root,
 
 void gt_interval_tree_insert(GtIntervalTree *it, GtIntervalTreeNode *n)
 {
-  assert(it && n);
+  gt_assert(it && n);
   if (!it->root)
   {
     it->root = n;
@@ -337,7 +337,7 @@ void gt_interval_tree_delete(GtIntervalTree *it)
 static int range_ptr_compare(const void *r1p, const void *r2p)
 {
   int ret;
-  assert(r1p && r2p);
+  gt_assert(r1p && r2p);
   ret = gt_range_compare(**(GtRange**) r1p,**(GtRange**) r2p);
   /* It could be that two identical ranges with different pointers are
      present. If so, compare pointers instead to get a canonical ordering. */

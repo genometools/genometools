@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/codon.h"
 #include "core/ma.h"
 #include "core/translate.h"
@@ -24,7 +24,7 @@ void gt_translate_dna(GtStr *protein, const char *dnaseq, unsigned long dnalen,
                       unsigned int frame)
 {
   const char *dnaptr;
-  assert(protein && !gt_str_length(protein) && dnaseq && frame < 3);
+  gt_assert(protein && !gt_str_length(protein) && dnaseq && frame < 3);
   /* translate the DNA in forward direction */
   for (dnaptr = dnaseq + frame; dnaptr < dnaseq + dnalen - 2; dnaptr += 3) {
     gt_str_append_char(protein,
@@ -53,7 +53,7 @@ void gt_translate_all_frames(char **frame1, char **frame2, char **frame3,
 {
   unsigned long i, frame1len, frame2len, frame3len;
   int codon;
-  assert(frame1 && frame2 && frame3 && dna_sequence);
+  gt_assert(frame1 && frame2 && frame3 && dna_sequence);
 
   if (seqlen < 3)
     return; /* nothing to translate here */

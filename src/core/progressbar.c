@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -176,7 +176,7 @@ static void refresh_progressbar(void)
 static void update_progressbar(GT_UNUSED int sigraised)
 {
   int last_errno = errno;
-  assert(sigraised == SIGALRM);
+  gt_assert(sigraised == SIGALRM);
   if (window_resized) {
     set_window_size();
     window_resized = 0;
@@ -192,7 +192,7 @@ static void update_progressbar(GT_UNUSED int sigraised)
 
 static void gt_sig_winch(GT_UNUSED int sigraised)
 {
-  assert(sigraised == SIGWINCH);
+  gt_assert(sigraised == SIGWINCH);
   window_resized = 1;
 }
 
@@ -202,7 +202,7 @@ void gt_progressbar_start(const unsigned long long *current_computation,
   computation_counter = current_computation;
   last_computation = number_of_computations;
   computed_eta = 0;
-  assert(*current_computation == 0);
+  gt_assert(*current_computation == 0);
   computation_start = gt_xtime(NULL);
   set_window_size();
   if (output_is_possible())

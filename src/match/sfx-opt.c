@@ -245,7 +245,7 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optiondna, optionprotein);
   if (doesa)
   {
-    assert(optionmaxdepth != NULL);
+    gt_assert(optionmaxdepth != NULL);
     gt_option_exclude(optionmaxdepth, optionlcp);
                    /* because lcp table may be incorrect. XXX change later */
     gt_option_exclude(optionmaxdepth, optionbwt);
@@ -305,7 +305,7 @@ static OPrval parse_options(int *parsed_args,
   }
   if (oprval == OPTIONPARSER_OK && doesa)
   {
-    assert(optionmaxdepth != NULL);
+    gt_assert(optionmaxdepth != NULL);
     if (gt_option_is_set(optionmaxdepth))
     {
       so->maxdepth.defined = true;
@@ -377,7 +377,7 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     showdefinitelyverbose("inputindex=%s",gt_str_get(so->str_inputindex));
   }
-  assert(gt_str_length(so->str_indexname) > 0);
+  gt_assert(gt_str_length(so->str_indexname) > 0);
   showdefinitelyverbose("indexname=%s",gt_str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
                         "outbwttab=%s,outbcktab=%s,outdestab=%s",

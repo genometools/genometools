@@ -27,7 +27,7 @@ static int feature_visitor_lua_new(lua_State *L)
   GtNodeVisitor **feature_visitor;
   GtFeatureIndex **feature_index;
   feature_visitor = lua_newuserdata(L, sizeof (GtNodeVisitor*));
-  assert(feature_visitor);
+  gt_assert(feature_visitor);
   feature_index = check_feature_index(L, 1);
   *feature_visitor = gt_feature_visitor_new(*feature_index);
   luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
@@ -42,7 +42,7 @@ static const struct luaL_Reg feature_visitor_lib_f [] = {
 
 int gt_lua_open_feature_visitor(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_register(L, "gt", feature_visitor_lib_f);
   return 1;
 }

@@ -91,7 +91,7 @@ static size_t
 BWTSASSAccessOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 {
   const BWTSeqContextRetriever *ctxMap = state;
-  assert(state);
+  gt_assert(state);
   BWTSeqCRAccessSubseq(ctxMap, pos, len, dest);
   return len;
 }
@@ -100,7 +100,7 @@ static MRAEnc *
 BWTSASSNewMRAEnc(const SASeqSrc *src)
 {
   const BWTSASeqSrc *bwtSASeqSrc;
-  assert(src);
+  gt_assert(src);
   bwtSASeqSrc = constSASS2BWTSASS(src);
   return MRAEncCopy(EISGetAlphabet(BWTSeqGetEncIdxSeq(bwtSASeqSrc->bwtSeq)));
 }
@@ -112,7 +112,7 @@ extern SASeqSrc *
 BWTSeqNewSASeqSrc(const BWTSeq *bwtSeq, const BWTSeqContextRetriever *ctxMap)
 {
   struct BWTSASeqSrc *newBWTSASeqSrc;
-  assert(bwtSeq);
+  gt_assert(bwtSeq);
   newBWTSASeqSrc = gt_malloc(sizeof (*newBWTSASeqSrc));
   {
     RandomSeqAccessor origSeqAccess;
@@ -154,7 +154,7 @@ BWTSASSReadSufTab(SeqDataSrc src, void *dest, size_t len,
 {
   const BWTSeq *bwtSeq;
   struct extBitsRetrieval extBits;
-  assert(src);
+  gt_assert(src);
   initExtBitsRetrieval(&extBits);
   bwtSeq = ((BWTSeqReaderState *)src)->backLink->bwtSeq;
   size_t i;
@@ -178,7 +178,7 @@ static size_t
 BWTSASSReadBWT(SeqDataSrc src, void *dest, size_t len, GT_UNUSED GtError *err)
 {
   const BWTSeq *bwtSeq;
-  assert(src);
+  gt_assert(src);
   bwtSeq = ((BWTSeqReaderState *)src)->backLink->bwtSeq;
   size_t i;
   Seqpos pos = ((BWTSeqReaderState *)src)->nextReadPos;
@@ -200,7 +200,7 @@ static BWTSeqReaderState *
 BWTSeqSASSAddReaderState(BWTSASeqSrc *bwtSASeqSrc)
 {
   BWTSeqReaderState *newReader = gt_malloc(sizeof (*newReader));
-  assert(bwtSASeqSrc);
+  gt_assert(bwtSASeqSrc);
   newReader->backLink = bwtSASeqSrc;
   newReader->nextReadPos = 0;
   newReader->next = bwtSASeqSrc->readerStateList;
@@ -213,7 +213,7 @@ BWTSASSCreateReader(SASeqSrc *src, enum sfxDataRequest rtype)
 {
   struct seqDataReader reader = { NULL, NULL};
   BWTSASeqSrc *bwtSASeqSrc;
-  assert(src);
+  gt_assert(src);
   bwtSASeqSrc = SASS2BWTSASS(src);
   switch (rtype)
   {

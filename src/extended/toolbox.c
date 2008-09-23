@@ -54,7 +54,7 @@ GtToolbox* gt_toolbox_new(void)
 void gt_toolbox_add_tool(GtToolbox *tb, const char *toolname, GtTool *tool)
 {
   GtToolinfo *toolinfo;
-  assert(tb && tb->tools);
+  gt_assert(tb && tb->tools);
   toolinfo = gt_toolinfo_new();
   toolinfo->tool= tool;
   gt_hashmap_add(tb->tools, (char*) toolname, toolinfo);
@@ -63,7 +63,7 @@ void gt_toolbox_add_tool(GtToolbox *tb, const char *toolname, GtTool *tool)
 GtTool* gt_toolbox_get_tool(GtToolbox *tb, const char *toolname)
 {
   GtToolinfo *toolinfo;
-  assert(tb && tb->tools);
+  gt_assert(tb && tb->tools);
   toolinfo = gt_hashmap_get(tb->tools, toolname);
   if (toolinfo)
     return toolinfo->tool;
@@ -72,7 +72,7 @@ GtTool* gt_toolbox_get_tool(GtToolbox *tb, const char *toolname)
 
 bool gt_toolbox_has_tool(const GtToolbox *tb, const char *toolname)
 {
-  assert(tb && tb->tools);
+  gt_assert(tb && tb->tools);
   if (gt_hashmap_get(tb->tools, toolname))
     return true;
   return false;
@@ -81,7 +81,7 @@ bool gt_toolbox_has_tool(const GtToolbox *tb, const char *toolname)
 void gt_toolbox_add(GtToolbox *tb, const char *toolname, GtToolfunc toolfunc)
 {
   GtToolinfo *toolinfo;
-  assert(tb && tb->tools);
+  gt_assert(tb && tb->tools);
   toolinfo = gt_toolinfo_new();
   toolinfo->toolfunc = toolfunc;
   gt_hashmap_add(tb->tools, (char*) toolname, toolinfo);
@@ -90,7 +90,7 @@ void gt_toolbox_add(GtToolbox *tb, const char *toolname, GtToolfunc toolfunc)
 GtToolfunc gt_toolbox_get(const GtToolbox *tb, const char *toolname)
 {
   GtToolinfo *toolinfo;
-  assert(tb && tb->tools);
+  gt_assert(tb && tb->tools);
   toolinfo = gt_hashmap_get(tb->tools, toolname);
   if (toolinfo)
     return toolinfo->toolfunc;
@@ -101,7 +101,7 @@ static int show_tool_name(void *key, GT_UNUSED void *value,
                           GT_UNUSED void *data, GT_UNUSED GtError *err)
 {
   gt_error_check(err);
-  assert(key && value);
+  gt_assert(key && value);
   if (strcmp(key, "dev") && strcmp(key, "template"))
     gt_xputs(key);
   return 0;
@@ -113,12 +113,12 @@ int gt_toolbox_show(GT_UNUSED const char *progname, void *toolbox,
   GtToolbox *tb;
   int had_err = 0;
   gt_error_check(err);
-  assert(toolbox);
+  gt_assert(toolbox);
   tb = (GtToolbox*) toolbox;
   printf("\nTools:\n\n");
   had_err = gt_hashmap_foreach_in_key_order(tb->tools, show_tool_name, NULL,
                                             NULL);
-  assert(!had_err); /* show_tool_name() is sane */
+  gt_assert(!had_err); /* show_tool_name() is sane */
   return 0;
 }
 

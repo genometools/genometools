@@ -105,7 +105,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->bwci.nextfreeBoundswithchar = 0;
   limdfsresources->bwci.allocatedBoundswithchar = (unsigned long) mapsize;
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
-  assert(mapsize-1 <= MAXALPHABETCHARACTER);
+  gt_assert(mapsize-1 <= MAXALPHABETCHARACTER);
   limdfsresources->alphasize = (Uchar) (mapsize-1);
   limdfsresources->processmatch = processmatch;
   limdfsresources->processmatchinfo = processmatchinfo;
@@ -227,11 +227,11 @@ static void gen_pck_overinterval(const void *voidbwtseq,
   Bwtseqpositioniterator *bspi;
   Seqpos dbstartpos;
 
-  assert(itv->leftbound < itv->rightbound);
+  gt_assert(itv->leftbound < itv->rightbound);
   bspi = newBwtseqpositioniterator (voidbwtseq,itv->leftbound,itv->rightbound);
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
-    assert(totallength >= (dbstartpos + itv->offset));
+    gt_assert(totallength >= (dbstartpos + itv->offset));
     processmatch(processmatchinfo,
                  totallength - (dbstartpos + itv->offset),
                  itv->offset,
@@ -360,7 +360,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 static void addpathchar(Limdfsresources *limdfsresources,unsigned long idx,
                         Uchar cc)
 {
-  assert(idx < limdfsresources->maxpathlength);
+  gt_assert(idx < limdfsresources->maxpathlength);
   limdfsresources->currentpathspace[idx] = cc;
 }
 
@@ -632,7 +632,7 @@ static void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
   Codetype childcode;
   const Matchbound *mbptr;
 
-  assert(childdepth > 0);
+  gt_assert(childdepth > 0);
   bwci->nextfreeBoundswithchar = 0;
   childcode = parentcode * alphasize;
   for (mbptr = mbtab[childdepth] + childcode;
@@ -686,7 +686,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
-    assert(inchar < limdfsresources->alphasize);
+    gt_assert(inchar < limdfsresources->alphasize);
     child.code = startcode + inchar;
     child.inchar = inchar;
     addpathchar(limdfsresources,(unsigned long) parent->offset,inchar);
@@ -742,7 +742,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
 {
   Lcpintervalwithinfo *stackptr, parentwithinfo;
 
-  assert(adfst->sizeofdfsstate <= sizeof (parentwithinfo.aliasstate));
+  gt_assert(adfst->sizeofdfsstate <= sizeof (parentwithinfo.aliasstate));
   initlcpinfostack(&limdfsresources->stack,
                    0,
                    limdfsresources->withesa
@@ -752,7 +752,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
                    adfst);
   while (limdfsresources->stack.nextfreeLcpintervalwithinfo > 0)
   {
-    assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
+    gt_assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
     SHOWSTACKTOP(stackptr);
@@ -763,7 +763,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
                   (unsigned long) (parentwithinfo.lcpitv.offset-1),
                   parentwithinfo.lcpitv.inchar);
     }
-    assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
+    gt_assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;
     (limdfsresources->withesa ? esa_splitandprocess : pck_splitandprocess)
         (limdfsresources,&parentwithinfo,adfst);
@@ -890,7 +890,7 @@ Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
                            Seqpos pos,
                            Readmode readmode)
 {
-  assert(limdfsresources->encseq != NULL);
+  gt_assert(limdfsresources->encseq != NULL);
 
   return getencodedchar(limdfsresources->encseq,pos,readmode);
 }

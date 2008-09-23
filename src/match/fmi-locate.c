@@ -28,8 +28,8 @@ static Seqpos searchsmallestgeq(const PairBwtidx *left,
   const PairBwtidx *leftptr, *midptr, *rightptr, *found = NULL;
   unsigned long len;
 
-  assert(left != NULL);
-  assert(right != NULL);
+  gt_assert(left != NULL);
+  gt_assert(right != NULL);
   leftptr = left;
   rightptr = right;
   while (leftptr<=rightptr)
@@ -51,7 +51,7 @@ static Seqpos searchsmallestgeq(const PairBwtidx *left,
       }
     }
   }
-  assert(found != NULL);
+  gt_assert(found != NULL);
   return found->suftabvalue;
 }
 

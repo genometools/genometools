@@ -29,10 +29,10 @@ static int genome_node_iterator_lua_new(lua_State *L)
 {
   GtGenomeNodeIterator **gni;
   GtGenomeNode **gn;
-  assert(L);
+  gt_assert(L);
   gn = check_genome_node(L, 1);
   gni = lua_newuserdata(L, sizeof (GtGenomeNodeIterator*));
-  assert(gni);
+  gt_assert(gni);
   *gni = gt_genome_node_iterator_new(*gn);
   luaL_getmetatable(L, GENOME_NODE_ITERATOR_METATABLE);
   lua_setmetatable(L, -2);
@@ -43,10 +43,10 @@ static int genome_node_iterator_lua_new_direct(lua_State *L)
 {
   GtGenomeNodeIterator **gni;
   GtGenomeNode **gn;
-  assert(L);
+  gt_assert(L);
   gn = check_genome_node(L, 1);
   gni = lua_newuserdata(L, sizeof (GtGenomeNodeIterator*));
-  assert(gni);
+  gt_assert(gni);
   *gni = gt_genome_node_iterator_new_direct(*gn);
   luaL_getmetatable(L, GENOME_NODE_ITERATOR_METATABLE);
   lua_setmetatable(L, -2);
@@ -87,7 +87,7 @@ static const struct luaL_Reg genome_node_iterator_lib_m [] = {
 
 int gt_lua_open_genome_node_iterator(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, GENOME_NODE_ITERATOR_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */

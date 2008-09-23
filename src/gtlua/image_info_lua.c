@@ -31,7 +31,7 @@ static int imageinfo_lua_new(lua_State *L)
 {
   GtImageInfo **ii;
   ii = lua_newuserdata(L, sizeof (GtImageInfo*));
-  assert(ii);
+  gt_assert(ii);
   *ii = gt_image_info_new();
   luaL_getmetatable(L, IMAGEINFO_METATABLE);
   lua_setmetatable(L, -2);
@@ -44,7 +44,7 @@ static int imageinfo_lua_get_height(lua_State *L)
   unsigned long height;
   GtError *err = gt_error_new();
   ii = check_imageinfo(L, 1);
-  assert(ii);
+  gt_assert(ii);
   height = gt_image_info_get_height(*ii);
   if (height > DBL_MAX)
   {
@@ -63,7 +63,7 @@ static int imageinfo_lua_num_of_recmaps(lua_State *L)
   unsigned long nof_rm;
   GtError *err = gt_error_new();
   ii = check_imageinfo(L, 1);
-  assert(ii);
+  gt_assert(ii);
   nof_rm = gt_image_info_num_of_recmaps(*ii);
   if (nof_rm > DBL_MAX)
   {
@@ -78,7 +78,7 @@ static int imageinfo_lua_num_of_recmaps(lua_State *L)
 
 static void push_recmap_as_table(lua_State *L, const GtRecMap *rm)
 {
-  assert(rm);
+  gt_assert(rm);
   lua_newtable(L);
   lua_pushstring(L, "nw_x");
   lua_pushnumber(L, rm->nw_x);
@@ -102,7 +102,7 @@ static int imageinfo_lua_recmaps_as_table(lua_State *L)
   GtImageInfo **ii;
   unsigned long num, i;
   ii = check_imageinfo(L, 1);
-  assert(ii);
+  gt_assert(ii);
   num = gt_image_info_num_of_recmaps(*ii);
   if (num>0)
   {
@@ -139,7 +139,7 @@ static const struct luaL_Reg imageinfo_lib_m [] = {
 
 int gt_lua_open_imageinfo(lua_State *L)
 {
-  assert(L);
+  gt_assert(L);
   luaL_newmetatable(L, IMAGEINFO_METATABLE);
   lua_pushvalue(L, -1); /* duplicate the metatable */
   lua_setfield(L, -2, "__index");

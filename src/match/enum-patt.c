@@ -108,7 +108,7 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
                                              epi->minpatternlen+1)));
   }
   start = (Seqpos) (drand48() * (double) (epi->totallength - *patternlen));
-  assert(start < (Seqpos) (epi->totallength - *patternlen));
+  gt_assert(start < (Seqpos) (epi->totallength - *patternlen));
   initEncodedsequencescanstate(epi->esr,epi->sampleencseq,Forwardmode,start);
   for (j=0; j<*patternlen; j++)
   {

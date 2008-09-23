@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/undef.h"
 #include "extended/gff3_output.h"
 
 void gt_gff3_output_leading(GtFeatureNode *gf, GtGenFile *outfp)
 {
   GtGenomeNode *gn;
-  assert(gf);
+  gt_assert(gf);
   gn = (GtGenomeNode*) gf;
   gt_genfile_xprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t",
                      gt_str_get(gt_genome_node_get_seqid(gn)),

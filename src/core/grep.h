@@ -19,7 +19,7 @@
 #define GREP_H
 
 #include <sys/types.h>
-#include <assert.h>
+#include "core/assert.h"
 #include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>

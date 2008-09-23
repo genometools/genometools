@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include <math.h>
 #include <string.h>
 #include "core/class_alloc.h"
@@ -83,7 +83,7 @@ unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
   double tmp;
   unsigned long height;
   unsigned long gt_line_height;
-  assert(dia && canvas);
+  gt_assert(dia && canvas);
 
   /* get line information for height calculation */
   lines.total_captionlines = lines.total_lines = 0;
@@ -127,7 +127,7 @@ unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia)
 
 double gt_canvas_get_text_width(GtCanvas *canvas, const char *text)
 {
-  assert(canvas);
+  gt_assert(canvas);
   if (!text) return 0.0;
   return gt_graphics_get_text_width(canvas->pvt->g, text);
 }
@@ -176,7 +176,7 @@ GtDrawingRange gt_canvas_convert_coords(GtCanvas *canvas, GtRange node_range)
 /* Formats a given position number for short display in the ruler. */
 static void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 {
-  assert(txt);
+  gt_assert(txt);
   double fpos;
   int logval;
   GtStr *formatstring;
@@ -233,7 +233,7 @@ void gt_canvas_draw_ruler(GtCanvas *canvas)
   char str[BUFSIZ];
   bool showgrid;
 
-  assert(canvas);
+  gt_assert(canvas);
 
   margins = canvas->pvt->margins;
 
@@ -310,7 +310,7 @@ void gt_canvas_draw_ruler(GtCanvas *canvas)
 GtCanvas* gt_canvas_create(const GtCanvasClass *cc)
 {
   GtCanvas *c;
-  assert(cc && cc->size);
+  gt_assert(cc && cc->size);
   c = gt_calloc(1, cc->size);
   c->c_class = cc;
   c->pvt = gt_calloc(1, sizeof (GtCanvasMembers));
@@ -320,7 +320,7 @@ GtCanvas* gt_canvas_create(const GtCanvasClass *cc)
 void gt_canvas_delete(GtCanvas *canvas)
 {
   if (!canvas) return;
-  assert(canvas->c_class);
+  gt_assert(canvas->c_class);
   if (canvas->c_class->free)
     canvas->c_class->free(canvas);
   if (canvas->pvt->g)
@@ -333,13 +333,13 @@ void gt_canvas_delete(GtCanvas *canvas)
 
 void* gt_canvas_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
 {
-  assert(cc && c && c->c_class == cc);
+  gt_assert(cc && c && c->c_class == cc);
   return c;
 }
 
 void* gt_canvas_try_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
 {
-  assert(cc && c);
+  gt_assert(cc && c);
   if (c->c_class == cc)
     return c;
   return NULL;
@@ -347,19 +347,19 @@ void* gt_canvas_try_cast(GT_UNUSED const GtCanvasClass *cc, GtCanvas *c)
 
 unsigned long gt_canvas_get_height(GtCanvas *canvas)
 {
-  assert(canvas);
+  gt_assert(canvas);
   return canvas->pvt->height;
 }
 
 int gt_canvas_visit_diagram_pre(GtCanvas *canvas, GtDiagram* diagram)
 {
-  assert(canvas && diagram);
+  gt_assert(canvas && diagram);
   return canvas->c_class->visit_diagram_pre(canvas, diagram);
 }
 
 int gt_canvas_visit_diagram_post(GtCanvas *canvas, GtDiagram* diagram)
 {
-  assert(canvas && diagram);
+  gt_assert(canvas && diagram);
   return canvas->c_class->visit_diagram_post(canvas, diagram);
 }
 
@@ -369,7 +369,7 @@ int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track)
   unsigned long exceeded;
   GtColor color;
 
-  assert(canvas && track);
+  gt_assert(canvas && track);
 
   gt_style_get_color(canvas->pvt->sty, "format", "gt_track_title_color", &color,
                      NULL);
@@ -418,7 +418,7 @@ int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track)
 int gt_canvas_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track)
 {
   double vspace;
-  assert(canvas && track);
+  gt_assert(canvas && track);
   /* put track spacer after track */
   if (gt_style_get_num(canvas->pvt->sty, "format", "gt_track_vspace", &vspace,
                        NULL))
@@ -431,7 +431,7 @@ int gt_canvas_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track)
 int gt_canvas_visit_line_pre(GtCanvas *canvas, GtLine *line)
 {
   int had_err = 0;
-  assert(canvas && line);
+  gt_assert(canvas && line);
   canvas->pvt->bt = gt_bittab_new(canvas->pvt->width);
   if (gt_line_has_captions(line))
     canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
@@ -442,7 +442,7 @@ int gt_canvas_visit_line_post(GtCanvas *canvas, GT_UNUSED GtLine *line)
 {
   int had_err = 0;
   double tmp;
-  assert(canvas && line);
+  gt_assert(canvas && line);
   if (gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &tmp, NULL))
     canvas->pvt->y += tmp;
   else
@@ -466,7 +466,7 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
   const char* caption;
   GtStrand strand;
 
-  assert(canvas && block);
+  gt_assert(canvas && block);
 
   grey.red = grey.green = grey.blue = .85;
   strand = gt_block_get_strand(block);
@@ -578,7 +578,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   GtStr *style;
   GtStrand strand = gt_element_get_strand(elem);
 
-  assert(canvas && elem);
+  gt_assert(canvas && elem);
 
   /* This shouldn't happen. */
   if (!gt_range_overlap(elem_range, canvas->pvt->viewrange))

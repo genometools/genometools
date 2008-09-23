@@ -295,8 +295,8 @@ unsigned long greedyunitedist(const Uchar *useq,
 #ifdef SKDEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
-  assert(ulenvalue < (unsigned long) LONG_MAX);
-  assert(vlenvalue < (unsigned long) LONG_MAX);
+  gt_assert(ulenvalue < (unsigned long) LONG_MAX);
+  gt_assert(vlenvalue < (unsigned long) LONG_MAX);
   currentallocated = 1UL;
   ALLOCASSIGNSPACE(gl.frontspace,NULL,Frontvalue,currentallocated);
   gl.useq = useq;

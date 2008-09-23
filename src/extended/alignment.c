@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "core/array.h"
 #include "core/ensure.h"
 #include "core/ma.h"
@@ -59,7 +59,7 @@ GtAlignment* gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
                                    const char *v, unsigned long vlen)
 {
   GtAlignment *a;
-  assert(u && v);
+  gt_assert(u && v);
   a = gt_alignment_new();
   gt_alignment_set_seqs(a, u, ulen, v, vlen);
   return a;
@@ -68,7 +68,7 @@ GtAlignment* gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
 void gt_alignment_set_seqs(GtAlignment *a, const char *u, unsigned long ulen,
                         const char *v, unsigned long vlen)
 {
-  assert(a && u && v);
+  gt_assert(a && u && v);
   a->u = u;
   a->v = v;
   a->ulen = ulen;
@@ -78,7 +78,7 @@ void gt_alignment_set_seqs(GtAlignment *a, const char *u, unsigned long ulen,
 static void gt_alignment_add_eop(GtAlignment *a, Eoptype type)
 {
   Multieop meop, *meop_ptr;
-  assert(a);
+  gt_assert(a);
   if (!gt_array_size(a->eops)) {
     meop.type = type;
     meop.steps = 1;
@@ -114,9 +114,9 @@ void gt_alignment_add_insertion(GtAlignment *a)
 void gt_alignment_remove_last(GtAlignment *a)
 {
   Multieop *meop_ptr;
-  assert(a && gt_array_size(a->eops));
+  gt_assert(a && gt_array_size(a->eops));
   meop_ptr = gt_array_get_last(a->eops);
-  assert(meop_ptr->steps);
+  gt_assert(meop_ptr->steps);
   if (meop_ptr->steps == 1)
     (void) gt_array_pop(a->eops);
   else
@@ -154,7 +154,7 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
 {
   unsigned long i, j, uctr = 0, vctr = 0, sumcost = 0;
   Multieop meop;
-  assert(a && gt_alignment_is_valid(a));
+  gt_assert(a && gt_alignment_is_valid(a));
   for (i = gt_array_size(a->eops); i > 0; i--) {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
@@ -188,7 +188,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
   Multieop meop;
-  assert(a && gt_alignment_is_valid(a));
+  gt_assert(a && gt_alignment_is_valid(a));
   /* output first line */
   uctr = 0;
   for (i = gt_array_size(a->eops); i > 0; i--) {
@@ -257,7 +257,7 @@ void gt_alignment_show_multieop_list(const GtAlignment *a, FILE *fp)
 {
   unsigned long i;
   Multieop meop;
-  assert(a);
+  gt_assert(a);
   gt_xfputc('[', fp);
   for (i = gt_array_size(a->eops); i > 0; i--) {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);

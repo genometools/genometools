@@ -60,7 +60,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
                                   short mapIntervalLog2)
 {
   FILE *fp;
-  assert(ctxMapILogIsValid(seqLen, mapIntervalLog2));
+  gt_assert(ctxMapILogIsValid(seqLen, mapIntervalLog2));
   if (mapIntervalLog2 == CTX_MAP_ILOG_AUTOSIZE)
   {
     mapIntervalLog2 = requiredUIntBits(requiredSeqposBits(seqLen));
@@ -138,7 +138,7 @@ BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory, Seqpos chunkSize,
                    SeqDataReader readSfxIdx, GtError *err)
 {
   Seqpos buf[BLOCK_IO_SIZE], sfxIdxLeft = chunkSize;
-  assert(factory);
+  gt_assert(factory);
   while (sfxIdxLeft)
   {
     Seqpos len = MIN(BLOCK_IO_SIZE, sfxIdxLeft);
@@ -159,7 +159,7 @@ BWTSCRFMapAdvance(BWTSeqContextRetrieverFactory *factory, const Seqpos *src,
                   size_t len)
 {
   Seqpos currentSfxPos;
-  assert(factory);
+  gt_assert(factory);
   currentSfxPos = factory->currentSfxPos;
   {
     size_t i;
@@ -196,7 +196,7 @@ BWTSCRFGet(BWTSeqContextRetrieverFactory *factory, const BWTSeq *bwtSeq,
 {
   unsigned short bitsPerSeqpos, mapIntervalLog2;
   BWTSeqContextRetriever *newBWTSeqCR;
-  assert(factory && projectName);
+  gt_assert(factory && projectName);
   bitsPerSeqpos = requiredSeqposBits(factory->seqLen - 1);
   newBWTSeqCR = gt_malloc(sizeof (*newBWTSeqCR));
   newBWTSeqCR->mapIntervalLog2 = mapIntervalLog2 = factory->mapIntervalLog2;
@@ -261,7 +261,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2, unsigned short bitsPerSeqpos,
   FILE *mapFile = NULL;
   BitString mapMap = NULL;
   GtStr *mapName = NULL;
-  assert(projectName);
+  gt_assert(projectName);
   do {
     size_t headerBitElems = bitElemsAllocSize(2 * HEADER_ENTRY_BITS),
       headerSize = headerBitElems * sizeof (BitElem),
@@ -328,7 +328,7 @@ BWTSeqCRLoad(const BWTSeq *bwtSeq, const GtStr *projectName,
   Seqpos seqLen;
   unsigned short bitsPerSeqpos;
   BWTSeqContextRetriever *newBWTSeqCR;
-  assert(bwtSeq && projectName);
+  gt_assert(bwtSeq && projectName);
   seqLen = BWTSeqLength(bwtSeq);
   bitsPerSeqpos = requiredSeqposBits(seqLen - 1);
   newBWTSeqCR = gt_malloc(sizeof (*newBWTSeqCR));
@@ -366,7 +366,7 @@ BWTSeqCRLoad(const BWTSeq *bwtSeq, const GtStr *projectName,
 extern void
 deleteBWTSeqCR(BWTSeqContextRetriever *bwtSeqCR)
 {
-  assert(bwtSeqCR);
+  gt_assert(bwtSeqCR);
   gt_fa_xmunmap(bwtSeqCR->revMapMMap);
   gt_free(bwtSeqCR);
 }
@@ -379,13 +379,13 @@ BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
   struct extBitsRetrieval extBits;
   const BWTSeq *bwtSeq;
   initExtBitsRetrieval(&extBits);
-  assert(bwtSeqCR);
-  assert(start < BWTSeqLength(bwtSeqCR->bwtSeq));
+  gt_assert(bwtSeqCR);
+  gt_assert(start < BWTSeqLength(bwtSeqCR->bwtSeq));
   bwtSeq = bwtSeqCR->bwtSeq;
   {
     Seqpos end = start + len - 1;
     currentPos = BWTSeqCRNextMark(bwtSeqCR, end);
-    assert(currentPos.textPos >= end);
+    gt_assert(currentPos.textPos >= end);
     while (currentPos.textPos > end)
     {
       currentPos.bwtPos = BWTSeqLFMap(bwtSeq, currentPos.bwtPos, &extBits);
@@ -404,5 +404,5 @@ BWTSeqCRAccessSubseq(const BWTSeqContextRetriever *bwtSeqCR,
 #endif
     }
   }
-  assert(currentPos.textPos + 1 == start);
+  gt_assert(currentPos.textPos + 1 == start);
 }

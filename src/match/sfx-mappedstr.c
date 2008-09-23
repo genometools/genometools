@@ -20,7 +20,7 @@
 #include <ctype.h>
 #include <zlib.h>
 #include <stdbool.h>
-#include <assert.h>
+#include "core/assert.h"
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/fastabuffer.h"
@@ -332,7 +332,7 @@ static void shiftrightwithchar(
                                                    spwp->multimappower,
                                                    spwp->cyclicwindow,
                                                    spwp->firstindex);
-    assert(tmpprefixcode == head->codeforleftcontext);
+    gt_assert(tmpprefixcode == head->codeforleftcontext);
   }
   firstspecialposbrute = determinefirstspecialposition(spwp->windowwidth,
                                                        spwp->kmersize,
@@ -340,12 +340,12 @@ static void shiftrightwithchar(
                                                        spwp->firstindex);
   if (specialqueueisempty(&spwp->spos))
   {
-    assert(!firstspecialposbrute.defined);
+    gt_assert(!firstspecialposbrute.defined);
   } else
   {
     GtQueueelem *head = specialheadofqueue(&spwp->spos);
-    assert(firstspecialposbrute.defined ? 1 : 0);
-    assert(head->distvalue == firstspecialposbrute.specialpos);
+    gt_assert(firstspecialposbrute.defined ? 1 : 0);
+    gt_assert(head->distvalue == firstspecialposbrute.specialpos);
   }
 #endif
   if (spwp->windowwidth == spwp->kmersize)
@@ -374,7 +374,7 @@ static void shiftrightwithchar(
       localfirstspecial.specialpos = head->distvalue;
     }
 #ifdef SKDEBUG
-    assert(wcode == code);
+    gt_assert(wcode == code);
 #endif
     processkmercode(processkmercodeinfo,
                     code,

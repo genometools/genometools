@@ -16,7 +16,7 @@
 */
 
 #include <limits.h>
-#include <assert.h>
+#include "core/assert.h"
 #include "core/chardef.h"
 #include "core/minmax.h"
 #include "core/xansi.h"
@@ -117,7 +117,7 @@
         width = (unsigned long) ((R) - (L) + 1)
 
 #define UPDATELCP(MINVAL,MAXVAL)\
-        assert(commonunits < (unsigned int) UNITSIN2BITENC);\
+        gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);\
         UPDATELCPDISTRIBUTION(commonunits);\
         if ((MINVAL) > commonunits)\
         {\
@@ -308,12 +308,12 @@ static unsigned int checkstartpointorder(const Seqpos *left,
   const Seqpos *ptr;
   bool ascending;
 
-  assert(left < right);
-  assert(*left != *(left+1));
+  gt_assert(left < right);
+  gt_assert(*left != *(left+1));
   ascending = (*left < *(left+1)) ? true : false;
   for (ptr = left+1; ptr < right; ptr++)
   {
-    assert(*ptr != *(ptr+1));
+    gt_assert(*ptr != *(ptr+1));
     if (*ptr < *(ptr+1))
     {
       if (!ascending)
@@ -472,7 +472,7 @@ static void insertionsort(const Encodedsequence *encseq,
         retval = compareEncseqsequences(&lcplen,encseq,fwd,complement,
                                         esr1,esr2,*(pj-1),*pj,depth);
       }
-      assert(retval != 0);
+      gt_assert(retval != 0);
       if (lcpsubtab != NULL)
       {
         lcpindex = LCPINDEX(pj);
@@ -532,7 +532,7 @@ static MedianElem *quickmedian (bool fwd,bool complement,
   MedianElem *low, *high, *median, *middle, *ll, *hh;
   unsigned int commonunits;
 
-  assert(width > 0);
+  gt_assert(width > 0);
   low = arr;
   high = arr + width - 1;
   median = low + DIV2(width);
@@ -687,7 +687,7 @@ static Suffixptr *realmedian(Medianinfo *space,
 /*
   checkmedian(fwd,complement,medianptr,space,width);
 */
-  assert(medianptr != NULL);
+  gt_assert(medianptr != NULL);
   return medianptr->suffixptr;
 }
 
@@ -828,11 +828,11 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     cmp = compareTwobitencodings(fwd,complement,&commonunits,
                                  &etbecurrent,pivot);
     countingsortinfo[idx].suffix = left[idx];
-    assert(commonunits <= (unsigned int) UNITSIN2BITENC);
+    gt_assert(commonunits <= (unsigned int) UNITSIN2BITENC);
     countingsortinfo[idx].lcpwithpivot = commonunits;
     if (cmp > 0)
     {
-      assert(commonunits < (unsigned int) UNITSIN2BITENC);
+      gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
       rightlcpdist[commonunits]++;
       if (maxlargerwithlcp < commonunits)
       {
@@ -844,7 +844,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     {
       if (cmp < 0)
       {
-        assert(commonunits < (unsigned int) UNITSIN2BITENC);
+        gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
         leftlcpdist[commonunits]++;
         if (maxsmallerwithlcp < commonunits)
         {
@@ -854,7 +854,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
         smaller++;
       } else
       {
-        assert(commonunits == (unsigned int) UNITSIN2BITENC);
+        gt_assert(commonunits == (unsigned int) UNITSIN2BITENC);
         countingsortinfo[idx].cmpresult = 0;
       }
     }
@@ -1148,14 +1148,14 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         pc--;
       }
     }
-    assert(pa >= left);
-    assert(pb >= pa);
+    gt_assert(pa >= left);
+    gt_assert(pb >= pa);
     w = MIN((unsigned long) (pa-left),(unsigned long) (pb-pa));
     /* move w elements at the left to the middle */
     VECSWAP(left,  pb-w, w);
 
-    assert(pd >= pc);
-    assert(right >= pd);
+    gt_assert(pd >= pc);
+    gt_assert(right >= pd);
     w = MIN((unsigned long) (pd-pc), (unsigned long) (right-pd));
     /* move w elements at the right to the middle */
     VECSWAP(pb, right+1-w, w);
@@ -1166,7 +1166,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
        [left..left+(pb-pa)-1] and
        [right-(pd-pc)+1..right] */
 
-    assert(pb >= pa);
+    gt_assert(pb >= pa);
     if ((w = (unsigned long) (pb-pa)) > 0)
     {
       leftplusw = left + w;
@@ -1194,7 +1194,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
               depth+commonunitsequal);
     }
 
-    assert(pd >= pc);
+    gt_assert(pd >= pc);
     if ((w = (unsigned long) (pd-pc)) > 0)
     {
       if (lcpsubtab != NULL)
@@ -1368,11 +1368,11 @@ static Seqpos bruteforcelcpvalue(const Encodedsequence *encseq,
   }
   if (previoussuffix->code == currentsuffix->code)
   {
-    assert(lcpvalue == MIN(previoussuffix->prefixindex,
+    gt_assert(lcpvalue == MIN(previoussuffix->prefixindex,
                            currentsuffix->prefixindex));
   } else
   {
-    assert(previoussuffix->code < currentsuffix->code);
+    gt_assert(previoussuffix->code < currentsuffix->code);
     lcpvalue2 = MIN(minchanged,MIN(previoussuffix->prefixindex,
                                    currentsuffix->prefixindex));
     if (lcpvalue != lcpvalue2)
@@ -1405,7 +1405,7 @@ static Seqpos computelocallcpvalue(const Suffixwithcode *previoussuffix,
                    currentsuffix->prefixindex);
   } else
   {
-    assert(previoussuffix->code < currentsuffix->code);
+    gt_assert(previoussuffix->code < currentsuffix->code);
     lcpvalue = MIN(minchanged,MIN(previoussuffix->prefixindex,
                                   currentsuffix->prefixindex));
   }
@@ -1530,7 +1530,8 @@ void freeoutlcptab(Outlcpinfo **outlcpinfo)
                       (*outlcpinfo)->countoutputlcpvalues,
                       *outlcpinfo);
   }
-  assert((*outlcpinfo)->countoutputlcpvalues == (*outlcpinfo)->totallength + 1);
+  gt_assert((*outlcpinfo)->countoutputlcpvalues ==
+            (*outlcpinfo)->totallength + 1);
   gt_fa_fclose((*outlcpinfo)->outfplcptab);
   gt_fa_fclose((*outlcpinfo)->outfpllvtab);
   FREEARRAY(&(*outlcpinfo)->lcpsubtab,Seqpos);
@@ -1686,7 +1687,7 @@ void sortallbuckets(Seqpos *suftabptr,
           /* first part first code */
           lcpvalue = 0;
         }
-        assert(lcpsubtab != NULL);
+        gt_assert(lcpsubtab != NULL);
 #ifdef SKDEBUG
         baseptr = bucketspec.left;
 #endif
@@ -1774,9 +1775,9 @@ void sortallbuckets(Seqpos *suftabptr,
   freeBlindtrierep(&trierep);
   if (!cmpcharbychar && hasspecialranges(encseq))
   {
-    assert(esr1 != NULL);
+    gt_assert(esr1 != NULL);
     freeEncodedsequencescanstate(&esr1);
-    assert(esr2 != NULL);
+    gt_assert(esr2 != NULL);
     freeEncodedsequencescanstate(&esr2);
   }
   FREEARRAY(&mkvauxstack,MKVstack);

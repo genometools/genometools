@@ -36,7 +36,7 @@ static void
 hm_elem_free(void *elem, void *table_data)
 {
   struct hm_freefuncs *ff = table_data;
-  assert(elem && ff);
+  gt_assert(elem && ff);
   if (ff->keyfree)
     ff->keyfree(((struct map_entry *)elem)->key);
   if (ff->valuefree)

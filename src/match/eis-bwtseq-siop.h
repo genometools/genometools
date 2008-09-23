@@ -49,7 +49,7 @@ BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
 static inline Seqpos
 BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
 {
-  assert(bwtSeq);
+  gt_assert(bwtSeq);
   /* two counts must be treated specially:
    * 1. for the symbols mapped to the same value as the terminator
    * 2. for queries of the terminator itself */
@@ -63,7 +63,7 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos)
       - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0);
   else /* tsym == not flattened terminator == alphabetSize - 1 */
   {
-    assert(tsym == bwtSeq->alphabetSize - 1);
+    gt_assert(tsym == bwtSeq->alphabetSize - 1);
     return (pos > BWTSeqTerminatorPos(bwtSeq))?1:0;
   }
 }
@@ -72,7 +72,7 @@ static inline struct SeqposPair
 BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
                             Seqpos posA, Seqpos posB)
 {
-  assert(bwtSeq);
+  gt_assert(bwtSeq);
   /* two counts must be treated specially:
    * 1. for the symbols mapped to the same value as the terminator
    * 2. for queries of the terminator itself */
@@ -90,7 +90,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
   else /* tSym == not flattened terminator == alphabetSize - 1 */
   {
     struct SeqposPair occ;
-    assert(tSym == bwtSeq->alphabetSize - 1);
+    gt_assert(tSym == bwtSeq->alphabetSize - 1);
     occ.a = (posA > BWTSeqTerminatorPos(bwtSeq))?1:0;
     occ.b = (posB > BWTSeqTerminatorPos(bwtSeq))?1:0;
     return occ;
@@ -100,7 +100,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
 static inline Seqpos
 BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos)
 {
-  assert(bwtSeq);
+  gt_assert(bwtSeq);
   Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
   return BWTSeqTransformedOcc(bwtSeq, tSym, pos);
 }
@@ -108,7 +108,7 @@ BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos)
 static inline struct SeqposPair
 BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos posA, Seqpos posB)
 {
-  assert(bwtSeq);
+  gt_assert(bwtSeq);
   Symbol tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
   return BWTSeqTransformedPosPairOcc(bwtSeq, tSym, posA, posB);
 }
@@ -117,8 +117,8 @@ static inline void
 BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos pos,
                Seqpos *rangeOccs)
 {
-  assert(bwtSeq && rangeOccs);
-  assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
+  gt_assert(bwtSeq && rangeOccs);
+  gt_assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
   EISRangeRank(bwtSeq->seqIdx, range, pos, rangeOccs, bwtSeq->hint);
   if (range == bwtSeq->bwtTerminatorFallbackRange)
   {
@@ -142,9 +142,9 @@ static inline void
 BWTSeqPosPairRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, Seqpos posA,
                       Seqpos posB, Seqpos *rangeOccs)
 {
-  assert(bwtSeq && rangeOccs);
-  assert(posA <= posB);
-  assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
+  gt_assert(bwtSeq && rangeOccs);
+  gt_assert(posA <= posB);
+  gt_assert(range < MRAEncGetNumRanges(BWTSeqGetAlphabet(bwtSeq)));
   EISPosPairRangeRank(bwtSeq->seqIdx, range, posA, posB, rangeOccs,
                       bwtSeq->hint);
   if (range == bwtSeq->bwtTerminatorFallbackRange)
@@ -206,7 +206,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos LPos,
   }
   else
   {
-    assert(tSym == bwtSeq->bwtTerminatorFallback);
+    gt_assert(tSym == bwtSeq->bwtTerminatorFallback);
     FPos = bwtSeq->count[bwtSeq->alphabetSize - 1];
   }
   return FPos;
@@ -216,8 +216,8 @@ static inline Seqpos
 BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym)
 {
   Symbol  tSym;
-  assert(bwtSeq);
-  assert(MRAEncSymbolHasValidMapping(BWTSeqGetAlphabet(bwtSeq), sym));
+  gt_assert(bwtSeq);
+  gt_assert(MRAEncSymbolHasValidMapping(BWTSeqGetAlphabet(bwtSeq), sym));
   tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
   return bwtSeq->count[tSym];
 }
@@ -225,8 +225,8 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym)
 static inline Seqpos
 BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym)
 {
-  assert(bwtSeq);
-  assert(tSym <= bwtSeq->alphabetSize);
+  gt_assert(bwtSeq);
+  gt_assert(tSym <= bwtSeq->alphabetSize);
   return bwtSeq->count[tSym];
 }
 
@@ -236,12 +236,12 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
 {
   const MRAEnc *alphabet;
   Symbol curSym;
-  assert(bwtSeq && limits);
-  assert(limits->start < bwtSeq->count[bwtSeq->alphabetSize]
+  gt_assert(bwtSeq && limits);
+  gt_assert(limits->start < bwtSeq->count[bwtSeq->alphabetSize]
          && limits->end < bwtSeq->count[bwtSeq->alphabetSize]);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
   curSym = MRAEncMapSymbol(alphabet, nextSym);
-  assert(MRAEncSymbolHasValidMapping(alphabet, curSym));
+  gt_assert(MRAEncSymbolHasValidMapping(alphabet, curSym));
   limits->start = bwtSeq->count[curSym]
     + BWTSeqTransformedOcc(bwtSeq, curSym, limits->start);
   limits->end = bwtSeq->count[curSym]
@@ -252,14 +252,14 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
 static inline const EISeq *
 BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
 {
-  assert(bwtSeq);
+  gt_assert(bwtSeq);
   return bwtSeq->seqIdx;
 }
 
 static inline Symbol
 BWTSeqGetSym(const BWTSeq *bwtSeq, Seqpos pos)
 {
-  assert(bwtSeq);
+  gt_assert(bwtSeq);
   return EISGetSym(bwtSeq->seqIdx, pos, bwtSeq->hint);
 }
 

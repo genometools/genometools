@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
+#include "core/assert.h"
 #include "extended/csa_stream.h"
 #include "extended/csa_visitor.h"
 #include "extended/consensus_sa.h"
@@ -45,7 +45,7 @@ static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 
   /* no nodes in the buffer -> get new nodes */
   while (!(had_err = gt_node_stream_next(cs->in_stream, gn, err)) && *gn) {
-    assert(*gn && !had_err);
+    gt_assert(*gn && !had_err);
     had_err = gt_genome_node_accept(*gn, cs->csa_visitor, err);
     if (had_err)
       break;
@@ -56,7 +56,7 @@ static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   }
 
   /* either we have an error or no new node */
-  assert(had_err || !*gn);
+  gt_assert(had_err || !*gn);
 
   /* if we have no error, process the last cluster */
   if (!had_err) {

@@ -44,8 +44,8 @@ static inline unsigned int prefixqgram2code(Codetype *code,
   Codetype tmpcode = 0;
   Uchar a;
 
-  assert(qvalueprefix > 0);
-  assert(qvalue > qvalueprefix);
+  gt_assert(qvalueprefix > 0);
+  gt_assert(qvalue > qvalueprefix);
   for (i = (int) (qvalueprefix-1); i>=0; i--)
   {
     a = qgram[i];
@@ -76,7 +76,7 @@ Bucketenumerator *newbucketenumerator(const Bcktab *bcktab,
                                   prefixlength,
                                   demandprefixlength,
                                   demandprefix);
-  assert(firstspecial == prefixlength);
+  gt_assert(firstspecial == prefixlength);
   bucketenumerator->lastcode
     = bucketenumerator->currentcode
       + bcktab_filltable(bcktab,demandprefixlength);
