@@ -78,7 +78,7 @@ function check_header_file(fn, filecontent)
   end
 end
 
-for i, fn in ipairs(arg) do -- iterate over all files
+for _, fn in ipairs(arg) do -- iterate over all files
   -- reset per file variables
   local empty_line_found = false
   local ln = 1 -- the line number
@@ -138,6 +138,13 @@ for i, fn in ipairs(arg) do -- iterate over all files
     -- check for tool includes with <
     if string.find(l, "^#include <tools/") then
       err(fn, ln, "wrong tool include (<...>), use \"...\" instead")
+    end
+
+    -- check for stdlib assert.h includes
+    if not string.match(fn, "assert.h$") then
+      if string.find(l, "^#include <assert.h>") then
+        err(fn, ln, "do not include <assert.h>, use \"core/assert.h\" instead")
+      end
     end
 
     -- check for carriage return
