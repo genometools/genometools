@@ -42,4 +42,11 @@ void gt_warning_set_handler(GtWarningHandler warning_handler, void *data);
    <format> and <ap>. Does not use <data>. */
 void gt_warning_default_handler(void *data, const char *format, va_list ap);
 
+/* Return currently used <GtWarningHandler>. */
+GtWarningHandler gt_warning_get_handler(void);
+
+/* Return currently used <data> which is passed to the currently used
+   <GtWarningHandler>. */
+void* gt_warning_get_data(void);
+
 #endif

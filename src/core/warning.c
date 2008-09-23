@@ -53,3 +53,13 @@ void gt_warning_default_handler(GT_UNUSED void *data, const char *format,
   (void) vfprintf(stderr, format, ap);
   (void) putc('\n', stderr);
 }
+
+GtWarningHandler gt_warning_get_handler(void)
+{
+  return warning_handler;
+}
+
+void* gt_warning_get_data(void)
+{
+  return warning_data;
+}
