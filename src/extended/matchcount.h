@@ -24,6 +24,7 @@ typedef void (*ProcMC)(int u_pos, int v_pos, int match_count);
    with O(max{n,m}^2) operations. For each substring pair the ProcMC function is
    called with the corresponding positions in <u> and <v> and the computed match
    count. */
-void matchcount(const char *u, int m, const char *v, int n, int k, ProcMC);
+void gt_matchcount_matchcount(const char *u, int m, const char *v, int n,
+                              int k, ProcMC);
 
 #endif
