@@ -18,7 +18,7 @@
 #ifndef SORT_STREAM_H
 #define SORT_STREAM_H
 
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct GtSortStream GtSortStream;

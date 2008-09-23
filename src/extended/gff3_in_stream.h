@@ -19,11 +19,9 @@
 #define GFF3_IN_STREAM_H
 
 #include <stdio.h>
-#include "extended/node_stream.h"
+#include "extended/gff3_in_stream_api.h"
+#include "extended/node_stream_api.h"
 #include "extended/type_checker.h"
-
-/* implements the ``genome_stream'' interface */
-typedef struct GtGFF3InStream GtGFF3InStream;
 
 const GtNodeStreamClass* gt_gff3_in_stream_class(void);
 void                     gt_gff3_in_stream_set_type_checker(GtNodeStream*,
@@ -38,12 +36,5 @@ void                     gt_gff3_in_stream_set_offset(GtNodeStream*, long);
 int                      gt_gff3_in_stream_set_offsetfile(GtNodeStream*, GtStr*,
                                                           GtError*);
 void                     gt_gff3_in_stream_enable_tidy_mode(GtNodeStream*);
-GtNodeStream*            gt_gff3_in_stream_new_unsorted(int num_of_files,
-                                                        const char **filenames,
-                                                        bool be_verbose,
-                                                        bool checkids);
-/* filename == NULL -> use stdin */
-GtNodeStream*            gt_gff3_in_stream_new_sorted(const char *filename,
-                                                      bool be_verbose);
 
 #endif

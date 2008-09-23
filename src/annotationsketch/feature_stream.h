@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "annotationsketch/feature_index.h"
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct GtFeatureStream GtFeatureStream;

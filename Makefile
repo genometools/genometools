@@ -290,7 +290,7 @@ prefix ?= /usr/local
 
 all: lib/libgenometools.a lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
      bin/skproto bin/gt bin/lua bin/rnv \
-     bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
+     bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -385,6 +385,11 @@ $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
                                         $(GTLIBS) \
                                         $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/examples/gff3validator, \
+                                obj/src/examples/gff3validator.o \
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/noop, \
                                 obj/src/examples/noop.o \

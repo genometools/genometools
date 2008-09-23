@@ -19,7 +19,7 @@
 #define SPLICE_SITE_INFO_STREAM_H
 
 #include <stdio.h>
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 #include "extended/region_mapping.h"
 
 /* implements the ``genome_stream'' interface */

@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "core/fileutils.h"
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "extended/luahelper.h"

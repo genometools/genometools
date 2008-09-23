@@ -19,7 +19,7 @@
 #define MERGEFEAT_STREAM_SORTED_H
 
 #include <stdio.h>
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct GtMergefeatStreamSorted GtMergefeatStreamSorted;

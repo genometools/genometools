@@ -19,7 +19,7 @@
 #define GTF_IN_STREAM_H
 
 #include <stdio.h>
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct GtGTFInStream GtGTFInStream;

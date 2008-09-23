@@ -18,7 +18,7 @@
 #ifndef GTF_OUT_STREAM_H
 #define GTF_OUT_STREAM_H
 
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct GtGTFOutStream GtGTFOutStream;

@@ -19,7 +19,7 @@
 #define CSA_STREAM_H
 
 #include <stdio.h>
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 #define DEFAULT_JOIN_LENGTH 300
 

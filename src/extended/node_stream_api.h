@@ -15,22 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EXTRACT_FEAT_STREAM_H
-#define EXTRACT_FEAT_STREAM_H
+#ifndef NODE_STREAM_API_H
+#define NODE_STREAM_API_H
 
-#include <stdio.h>
-#include "extended/node_stream_api.h"
-#include "extended/region_mapping.h"
+#include <stdbool.h>
 
-/* implements the ``genome_stream'' interface */
-typedef struct GtExtractFeatStream GtExtractFeatStream;
+#include "extended/genome_node.h"
 
-const GtNodeStreamClass* gt_extract_feat_stream_class(void);
+/* the ``genome stream'' interface */
+typedef struct GtNodeStreamClass GtNodeStreamClass;
+typedef struct GtNodeStream GtNodeStream;
 
-/* create a GtExtractFeatStream, takes ownership of GtRegionMapping  */
-GtNodeStream*            gt_extract_feat_stream_new(GtNodeStream*,
-                                                 GtRegionMapping*,
-                                                 const char *type, bool join,
-                                                 bool translate);
+GtNodeStream* gt_node_stream_ref(GtNodeStream*);
+int           gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*);
+bool          gt_node_stream_is_sorted(GtNodeStream*);
+void          gt_node_stream_delete(GtNodeStream*);
 
 #endif

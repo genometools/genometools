@@ -18,7 +18,7 @@
 #ifndef GFF3_OUT_STREAM_H
 #define GFF3_OUT_STREAM_H
 
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct GtGFF3OutStream GtGFF3OutStream;

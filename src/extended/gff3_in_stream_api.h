@@ -15,20 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef NODE_STREAM_H
-#define NODE_STREAM_H
+#ifndef GFF3_IN_STREAM_API_H
+#define GFF3_IN_STREAM_API_H
 
-#include <stdbool.h>
+#include <stdio.h>
+#include "extended/node_stream_api.h"
 
-#include "extended/genome_node.h"
+/* implements the ``genome_stream'' interface */
+typedef struct GtGFF3InStream GtGFF3InStream;
 
-/* the ``genome stream'' interface */
-typedef struct GtNodeStreamClass GtNodeStreamClass;
-typedef struct GtNodeStream GtNodeStream;
-
-GtNodeStream* gt_node_stream_ref(GtNodeStream*);
-int           gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*);
-bool          gt_node_stream_is_sorted(GtNodeStream*);
-void          gt_node_stream_delete(GtNodeStream*);
+GtNodeStream*            gt_gff3_in_stream_new_unsorted(int num_of_files,
+                                                        const char **filenames,
+                                                        bool be_verbose,
+                                                        bool checkids);
+/* filename == NULL -> use stdin */
+GtNodeStream*            gt_gff3_in_stream_new_sorted(const char *filename,
+                                                      bool be_verbose);
 
 #endif

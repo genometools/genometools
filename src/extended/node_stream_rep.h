@@ -19,7 +19,7 @@
 #define NODE_STREAM_REP_H
 
 #include <stdio.h>
-#include "extended/node_stream.h"
+#include "extended/node_stream_api.h"
 
 typedef void (*GtNodeStreamFreeFunc)(GtNodeStream*);
 typedef int  (*GtNodeStreamNextFunc)(GtNodeStream*, GtGenomeNode**, GtError*);

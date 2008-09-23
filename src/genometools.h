@@ -37,6 +37,8 @@
 #include "core/warning_api.h"
 
 /* the extended module */
+#include "extended/gff3_in_stream_api.h"
+#include "extended/node_stream_api.h"
 #include "extended/region_node_api.h"
 
 #ifndef WITHOUT_CAIRO
