@@ -21,9 +21,9 @@
 /* Find all positions where a multiset defined by <multiset_string> occurs in
    text. For each such position the <ProcMatch> function is called.
    Positions start at 0. */
-void multiset_matching(unsigned char *multiset_string,
-                       unsigned long multiset_size, unsigned char *text,
-                       unsigned long text_length, void *data,
-                       void (*ProcMatch)(unsigned long pos, void *data));
+void gt_do_multiset_matching(unsigned char *multiset_string,
+                             unsigned long multiset_size, unsigned char *text,
+                             unsigned long text_length, void *data,
+                             void (*ProcMatch)(unsigned long pos, void *data));
 
 #endif
