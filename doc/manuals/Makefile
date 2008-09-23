@@ -2,8 +2,8 @@ ALL=ltrharvest.pdf\
     uniquesub.pdf\
     matstat.pdf\
     mgth.pdf\
-    packedindex.pdf\
-    annotationsketch.pdf
+    packedindex.pdf
+    #annotationsketch.pdf
 
 all:${ALL}
 
