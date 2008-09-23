@@ -35,7 +35,7 @@ GtCstrTable* gt_cstr_table_new()
   HashElemInfo cstr_table = {
     gt_ht_cstr_elem_hash, { free_gt_cstr_table_entry }, sizeof (char*),
     gt_ht_cstr_elem_cmp, NULL, NULL };
-  GtCstrTable *table = gt_malloc(sizeof *table);
+  GtCstrTable *table = gt_malloc(sizeof (GtCstrTable));
   table->strings = gt_hashtable_new(cstr_table);
   return table;
 }
@@ -72,8 +72,14 @@ static enum iterator_op store_type(void *elem, void *data,
   GtStrArray *types = data;
   gt_error_check(err);
   assert(elem && types);
-  gt_strarray_add_cstr(types, elem);
+  gt_strarray_add_cstr(types, *(char**) elem);
   return CONTINUE_ITERATION;
+}
+
+static int cmp(const void *p1, const void *p2)
+{
+  assert(p1 && p2);
+  return strcmp(*(char**) p1, *(char**) p2);
 }
 
 GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
@@ -83,7 +89,7 @@ GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
   assert(table);
   cstrs = gt_strarray_new();
   had_err = gt_hashtable_foreach_ordered(table->strings, store_type, cstrs,
-                                      (GtCompare) strcmp, NULL);
+                                         (GtCompare) cmp, NULL);
   assert(!had_err);
   return cstrs;
 }
@@ -91,6 +97,7 @@ GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
 int gt_cstr_table_unit_test(GtError *err)
 {
   GtCstrTable *table;
+  GtStrArray *sta;
   int had_err = 0;
   gt_error_check(err);
   table = gt_cstr_table_new();
@@ -98,6 +105,10 @@ int gt_cstr_table_unit_test(GtError *err)
   if (!had_err)
     gt_cstr_table_add(table, "foo");
   ensure(had_err, !strcmp(gt_cstr_table_get(table, "foo"), "foo"));
+  sta = gt_cstr_table_get_all(table);
+  ensure(had_err, gt_strarray_size(sta) == 1);
+  ensure(had_err, strcmp(gt_strarray_get(sta, 0), "foo") == 0);
+  gt_strarray_delete(sta);
   gt_cstr_table_delete(table);
   return had_err;
 }
