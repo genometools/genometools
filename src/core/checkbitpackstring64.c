@@ -222,7 +222,8 @@ gt_bitPackStringInt64_unit_test(GtError *err)
     if (numBits < 64)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
+    gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd,
+                                     randSrc);
     for (i = 0; i < numRnd; ++i)
     {
       uint64_t v = randSrc[i] & mask;
@@ -237,7 +238,8 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("gt_bsStoreUniformUInt64Array/gt_bsGetUniformUInt64Array: ");
+    gt_log_log("gt_bsStoreUniformUInt64Array/"
+               "gt_bsGetUniformUInt64Array: ");
     gt_bsGetUniformUInt64Array(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -320,7 +322,8 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("gt_bsStoreUniformInt64Array/gt_bsGetUniformInt64Array: ");
+    gt_log_log("gt_bsStoreUniformInt64Array/"
+               "gt_bsGetUniformInt64Array: ");
     gt_bsGetUniformInt64Array(bitStore, offset = offsetStart,
                               numBits, numRnd, (int64_t *)randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -519,8 +522,8 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       }
       assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
-      gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numValueCopies,
-                                    randSrc);
+      gt_bsStoreUniformUInt64Array(bitStore, offset, numBits,
+                                       numValueCopies, randSrc);
       destOffset = random()%(offsetStart + 64
                              * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
@@ -645,7 +648,8 @@ gt_bitPackStringInt64_unit_test(GtError *err)
       }
       assert(countStart + numCountValues <= numRnd);
       offset = offsetStart;
-      gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
+      gt_bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd,
+                                       randSrc);
       numCountBits = (BitOffset)numBits * numCountValues;
       bitCountCmp = gt_bs1BitsCount(bitStore,
                                  offset + (BitOffset)countStart * numBits,

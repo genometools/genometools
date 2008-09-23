@@ -371,8 +371,9 @@ gt_bsGetNonUniformInt32Array(
 #include "core/unused_api.h"
 
 void
-gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
-                             size_t numValues, const uint32_t val[])
+gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
+                                 unsigned numBits, size_t numValues,
+                                 const uint32_t val[])
 {
   /* idea: read as much as possible from val in each iteration,
    * accumulate if bitsInAccum < bitElemBits */

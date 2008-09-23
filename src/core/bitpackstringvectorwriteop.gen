@@ -17,8 +17,9 @@
 #include "core/unused_api.h"
 
 void
-gt_bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
-                             size_t numValues, const @ValueType@ val[])
+gt_bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset,
+                                 unsigned numBits, size_t numValues,
+                                 const @ValueType@ val[])
 {
   /* idea: read as much as possible from val in each iteration,
    * accumulate if bitsInAccum < bitElemBits */

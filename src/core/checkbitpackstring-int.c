@@ -222,7 +222,8 @@ gt_bitPackStringInt_unit_test(GtError *err)
     if (numBits < 32)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    gt_bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd, randSrc);
+    gt_bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd,
+                                     randSrc);
     for (i = 0; i < numRnd; ++i)
     {
       unsigned v = randSrc[i] & mask;
@@ -237,7 +238,8 @@ gt_bitPackStringInt_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("gt_bsStoreUniformUIntArray/gt_bsGetUniformUIntArray: ");
+    gt_log_log("gt_bsStoreUniformUIntArray/"
+               "gt_bsGetUniformUIntArray: ");
     gt_bsGetUniformUIntArray(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -320,7 +322,8 @@ gt_bitPackStringInt_unit_test(GtError *err)
       offset += numBits;
     }
     gt_log_log("passed\n");
-    gt_log_log("gt_bsStoreUniformIntArray/gt_bsGetUniformIntArray: ");
+    gt_log_log("gt_bsStoreUniformIntArray/"
+               "gt_bsGetUniformIntArray: ");
     gt_bsGetUniformIntArray(bitStore, offset = offsetStart,
                               numBits, numRnd, (int *)randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -519,8 +522,8 @@ gt_bitPackStringInt_unit_test(GtError *err)
       }
       assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
-      gt_bsStoreUniformUIntArray(bitStore, offset, numBits, numValueCopies,
-                                    randSrc);
+      gt_bsStoreUniformUIntArray(bitStore, offset, numBits,
+                                       numValueCopies, randSrc);
       destOffset = random()%(offsetStart + 32
                              * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
@@ -645,7 +648,8 @@ gt_bitPackStringInt_unit_test(GtError *err)
       }
       assert(countStart + numCountValues <= numRnd);
       offset = offsetStart;
-      gt_bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd, randSrc);
+      gt_bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd,
+                                       randSrc);
       numCountBits = (BitOffset)numBits * numCountValues;
       bitCountCmp = gt_bs1BitsCount(bitStore,
                                  offset + (BitOffset)countStart * numBits,
