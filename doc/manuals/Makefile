@@ -20,7 +20,7 @@ all:${ALL}
 	-test -e $*-pdf.aux && mv $*-pdf.aux $*.aux
 	-bibtex $*
 	test -e $@ || touch $@
-	-diff $@ $*.bbl || mv $*.bbl $@ && rm $*.bbl
+	-diff $@ $*.bbl || mv $*.bbl $@ && rm -f $*.bbl
 	mv $*.aux $*-pdf.aux
 
 %-pdf.aux: %.tex
