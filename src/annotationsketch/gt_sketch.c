@@ -44,7 +44,7 @@ typedef struct {
        verbose,
        addintrons,
        showrecmaps;
-  GtStr *seqid, *format;
+  GtStr *seqid, *format, *stylefile;
   unsigned long start,
                 end;
   unsigned int width;
@@ -117,6 +117,11 @@ static OPrval parse_options(int *parsed_args,
   option = gt_option_new_uint_min("width", "target image width",
                                   &arguments->width,
                                   800, 1);
+  gt_option_parser_add_option(op, option);
+
+  /* -style */
+  option = gt_option_new_string("style", "style file to use",
+                                arguments->stylefile, gt_str_get(arguments->stylefile));
   gt_option_parser_add_option(op, option);
 
   /* -format */
@@ -195,13 +200,24 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   /* option parsing */
   arguments.seqid = gt_str_new();
   arguments.format = gt_str_new();
+  prog = gt_str_new();
+  gt_str_append_cstr_nt(prog, argv[0],
+                        gt_cstr_length_up_to_char(argv[0], ' '));
+  gt_style_file = gt_get_gtdata_path(gt_str_get(prog), err);
+  gt_str_delete(prog);
+  gt_str_append_cstr(gt_style_file, "/sketch/default.style");
+  arguments.stylefile = gt_str_new_cstr(gt_str_get(gt_style_file));
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
+      gt_str_delete(arguments.stylefile);
+      gt_str_delete(gt_style_file);
       gt_str_delete(arguments.seqid);
       gt_str_delete(arguments.format);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
+      gt_str_delete(arguments.stylefile);
+      gt_str_delete(gt_style_file);
       gt_str_delete(arguments.seqid);
       gt_str_delete(arguments.format);
       return 0;
@@ -294,16 +310,17 @@ int gt_sketch(int argc, const char **argv, GtError *err)
       fprintf(stderr, "# of results: %lu\n", gt_array_size(results));
 
     /* find and load style file */
-    prog = gt_str_new();
-    gt_str_append_cstr_nt(prog, argv[0],
-                          gt_cstr_length_up_to_char(argv[0], ' '));
-    gt_style_file = gt_get_gtdata_path(gt_str_get(prog), err);
-    gt_str_delete(prog);
-    gt_str_append_cstr(gt_style_file, "/sketch/default.style");
+
     if (!(sty = gt_style_new(err)))
       had_err = -1;
-    if (!had_err && gt_file_exists(gt_str_get(gt_style_file)))
-      had_err = gt_style_load_file(sty, gt_str_get(gt_style_file), err);
+    if (!had_err && gt_file_exists(gt_str_get(arguments.stylefile)))
+      had_err = gt_style_load_file(sty, gt_str_get(arguments.stylefile), err);
+    else
+    {
+      had_err = -1;
+      gt_error_set(err, "style file '%s' does not exist!",
+                        gt_str_get(arguments.stylefile));
+    }
   }
 
   if (!had_err) {
@@ -348,6 +365,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   gt_str_delete(gt_style_file);
   gt_diagram_delete(d);
   gt_str_delete(arguments.seqid);
+  gt_str_delete(arguments.stylefile);
   gt_str_delete(arguments.format);
   gt_array_delete(results);
   gt_feature_index_delete(features);

@@ -37,6 +37,21 @@ Test do
   grep($last_stderr, /Permission denied/)
 end
 
+Name "gt sketch short test (nonexistant style file)"
+Keywords "gt_sketch"
+Test do
+  run_test("#{$bin}gt sketch  -style foo.bar out.png #{$testdata}gff3_file_1_short.txt", :retval => 1)
+  grep($last_stderr, /style file 'foo.bar' does not exist/)
+end
+
+Name "gt sketch short test (invalid style file)"
+Keywords "gt_sketch"
+Test do
+  run "echo thisisnotlua > foo.bar"
+  run_test("#{$bin}gt sketch  -style foo.bar out.png #{$testdata}gff3_file_1_short.txt", :retval => 1)
+  grep($last_stderr, /cannot run style file/)
+end
+
 Name "gt sketch prob 1"
 Keywords "gt_sketch"
 Test do
