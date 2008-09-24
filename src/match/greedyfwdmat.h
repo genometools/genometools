@@ -19,7 +19,7 @@
 #define GREEDYFWDMAT_H
 
 #include <stdbool.h>
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/error.h"
 #include "defined-types.h"
 #include "seqpos-def.h"

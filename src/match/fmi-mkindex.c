@@ -62,7 +62,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   int parsed_args;
 
   gt_error_check(err);
-  mkfmcallinfo->indexnametab = gt_strarray_new();
+  mkfmcallinfo->indexnametab = gt_str_array_new();
   mkfmcallinfo->outfmindex = gt_str_new();
   mkfmcallinfo->leveldesc = gt_str_new();
   op = gt_option_parser_new("[option ...] -ii indexfile [...]",
@@ -97,7 +97,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   {
     if (!gt_option_is_set(optionfmout))
     {
-      if (gt_strarray_size(mkfmcallinfo->indexnametab) > 1UL)
+      if (gt_str_array_size(mkfmcallinfo->indexnametab) > 1UL)
       {
         gt_error_set(err,"if more than one index is given, then "
                           "option -fmout is mandatory");
@@ -106,7 +106,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
       {
         char *basenameptr;
 
-        basenameptr = gt_basename(gt_strarray_get(mkfmcallinfo->indexnametab,
+        basenameptr = gt_basename(gt_str_array_get(mkfmcallinfo->indexnametab,
                                   0));
         gt_str_set(mkfmcallinfo->outfmindex,basenameptr);
         gt_free(basenameptr);
@@ -124,7 +124,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 
 static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo)
 {
-  gt_strarray_delete(mkfmcallinfo->indexnametab);
+  gt_str_array_delete(mkfmcallinfo->indexnametab);
   gt_str_delete(mkfmcallinfo->outfmindex);
   gt_str_delete(mkfmcallinfo->leveldesc);
 }

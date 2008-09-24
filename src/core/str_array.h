@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef STRARRAY_H
-#define STRARRAY_H
+#ifndef STR_ARRAY_H
+#define STR_ARRAY_H
 
 #include "core/str.h"
 #include "core/str_array_api.h"
 
-GtStrArray*   gt_strarray_new_file(const char *path);
+GtStrArray* gt_str_array_new_file(const char *path);
 /* Returns an internal GtStr pointer (i.e., _not_ a new reference!). */
-GtStr*        gt_strarray_get_str(const GtStrArray*, unsigned long strnum);
+GtStr*      gt_str_array_get_str(const GtStrArray*, unsigned long strnum);
 
 #endif

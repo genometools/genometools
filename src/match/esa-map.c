@@ -92,7 +92,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
   SETREADINTKEYS("readmode",&readmodeint,NULL);
-  suffixarray->filenametab = gt_strarray_new();
+  suffixarray->filenametab = gt_str_array_new();
   suffixarray->filelengthtab = NULL;
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
@@ -140,7 +140,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       if (!haserr)
       {
-        gt_strarray_add_cstr(suffixarray->filenametab,tmpfilename);
+        gt_str_array_add_cstr(suffixarray->filenametab,tmpfilename);
         FREESPACE(tmpfilename);
         gt_assert(suffixarray->filelengthtab != NULL);
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
@@ -149,7 +149,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         showverbose(verboseinfo,
                     "%s%s " Formatuint64_t " " Formatuint64_t,
                     DBFILEKEY,
-                    gt_strarray_get(suffixarray->filenametab,numoffiles),
+                    gt_str_array_get(suffixarray->filenametab,numoffiles),
                     PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
                                       length),
                     PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
@@ -374,7 +374,7 @@ void freesuffixarray(Suffixarray *suffixarray)
     freeAlphabet(&suffixarray->alpha);
   }
   freeEncodedsequence(&suffixarray->encseq);
-  gt_strarray_delete(suffixarray->filenametab);
+  gt_str_array_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
   if (suffixarray->bcktab != NULL)

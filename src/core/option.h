@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/range.h"
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 
 #define TERMINAL_WIDTH  80
 

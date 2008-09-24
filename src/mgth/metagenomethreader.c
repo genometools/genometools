@@ -261,7 +261,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
   ARGUMENTS(curl_fcgi_db) = gt_str_new();
   ARGUMENTS(outputtextfile_name) = gt_str_new();
-  ARGUMENTS(giexpfile_name) = gt_strarray_new();
+  ARGUMENTS(giexpfile_name) = gt_str_array_new();
 
   /* Check der Umgebungsvariablen */
   gt_error_check(err);
@@ -309,11 +309,11 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     outputfilename = gt_str_new();
 
     /* StringArrays zur Aufnahme der einzulesenden XML-Tag Bezeichnungen */
-    parsestruct.query_array = gt_strarray_new();
-    parsestruct.hit_array = gt_strarray_new();
-    parsestruct.hit_hsp_array = gt_strarray_new();
-    parsestruct.hits_statistics.hits_statistic = gt_strarray_new();
-    parsestruct.key_tmp = gt_strarray_new();
+    parsestruct.query_array = gt_str_array_new();
+    parsestruct.hit_array = gt_str_array_new();
+    parsestruct.hit_hsp_array = gt_str_array_new();
+    parsestruct.hits_statistics.hits_statistic = gt_str_array_new();
+    parsestruct.key_tmp = gt_str_array_new();
 
     /* String fuer die Bezeichnung des letzten XML-Tags eines
        Bearbeitunsschrittes */
@@ -351,23 +351,23 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     gt_str_set(parsestruct.xml_tag, "Iteration_stat");
 
     /* XML-Tags im Query-Def-Bereich */
-    gt_strarray_add_cstr(parsestruct.query_array, "Iteration_query-def");
+    gt_str_array_add_cstr(parsestruct.query_array, "Iteration_query-def");
 
     /* XML-Tags im Hit-Def-Bereich */
-    gt_strarray_add_cstr(parsestruct.hit_array, "Hit_id");
-    gt_strarray_add_cstr(parsestruct.hit_array, "Hit_def");
-    gt_strarray_add_cstr(parsestruct.hit_array, "Hit_accession");
+    gt_str_array_add_cstr(parsestruct.hit_array, "Hit_id");
+    gt_str_array_add_cstr(parsestruct.hit_array, "Hit_def");
+    gt_str_array_add_cstr(parsestruct.hit_array, "Hit_accession");
 
     /* XML-Tags im Hits-Bereich */
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_num");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_query-from");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_query-to");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_hit-from");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_hit-to");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_query-frame");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_hit-frame");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_qseq");
-    gt_strarray_add_cstr(parsestruct.hit_hsp_array, "Hsp_hseq");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_num");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_query-from");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_query-to");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_hit-from");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_hit-to");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_query-frame");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_hit-frame");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_qseq");
+    gt_str_array_add_cstr(parsestruct.hit_hsp_array, "Hsp_hseq");
 
     /* 3 Flags, die bei oeffnenden XML-Tags gesetzt und bei schliessenden
        geloescht werden */
@@ -531,9 +531,9 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
       gt_str_set(gi_numbers_txt, "gi_numbers.txt");
       unsigned long row_width = 150;
 
-      if (!gt_strarray_size(ARGUMENTS(giexpfile_name)))
+      if (!gt_str_array_size(ARGUMENTS(giexpfile_name)))
       {
-        gt_strarray_add_cstr(ARGUMENTS(giexpfile_name), "nt.gz");
+        gt_str_array_add_cstr(ARGUMENTS(giexpfile_name), "nt.gz");
       }
 
       /* Datei fuer die GI-Nr. des XML-Files  */
@@ -645,11 +645,11 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
     }
 
     /* Freigabe der verschiedenen reservierten Speicherbereiche */
-    gt_strarray_delete(parsestruct.query_array);
-    gt_strarray_delete(parsestruct.hit_array);
-    gt_strarray_delete(parsestruct.hit_hsp_array);
-    gt_strarray_delete(parsestruct.hits_statistics.hits_statistic);
-    gt_strarray_delete(parsestruct.key_tmp);
+    gt_str_array_delete(parsestruct.query_array);
+    gt_str_array_delete(parsestruct.hit_array);
+    gt_str_array_delete(parsestruct.hit_hsp_array);
+    gt_str_array_delete(parsestruct.hits_statistics.hits_statistic);
+    gt_str_array_delete(parsestruct.key_tmp);
 
     gt_str_delete(outputfilename);
     gt_str_delete(parsestruct.xml_tag);
@@ -691,7 +691,7 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
 
   gt_str_delete(ARGUMENTS(curl_fcgi_db));
   gt_str_delete(ARGUMENTS(outputtextfile_name));
-  gt_strarray_delete(ARGUMENTS(giexpfile_name));
+  gt_str_array_delete(ARGUMENTS(giexpfile_name));
 
   /* Rueckgabe des Fehlercode */
   return had_err;

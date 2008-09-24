@@ -151,11 +151,11 @@ off_t gt_files_estimate_total_size(const GtStrArray *filenames)
   GtGenFileMode gfm;
   int fd;
 
-  for (filenum = 0; filenum < gt_strarray_size(filenames); filenum++)
+  for (filenum = 0; filenum < gt_str_array_size(filenames); filenum++)
   {
-    fd = gt_xopen(gt_strarray_get(filenames,filenum), O_RDONLY, 0);
+    fd = gt_xopen(gt_str_array_get(filenames,filenum), O_RDONLY, 0);
     gt_xfstat(fd, &sb);
-    gfm = gt_genfilemode_determine(gt_strarray_get(filenames,filenum));
+    gfm = gt_genfilemode_determine(gt_str_array_get(filenames,filenum));
     if (gfm == GFM_UNCOMPRESSED)
     {
       totalsize += sb.st_size;

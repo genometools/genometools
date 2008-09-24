@@ -24,7 +24,7 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/fastabuffer.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"

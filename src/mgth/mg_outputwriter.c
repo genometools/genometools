@@ -662,7 +662,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 
   hit_ptr = NULL;
   as_seq = gt_str_new();
-  hitcounter = gt_strarray_size(hit_information->hit_gi);
+  hitcounter = gt_str_array_size(hit_information->hit_gi);
   contig_seq_ptr = gt_str_get(MATRIXSTRUCT(query_dna));
 
   /* in allen Leserahmen nach kodierenden Abschnitten suchen */
@@ -755,12 +755,12 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
             {
               /* Die aktuelle Hit-Definition wird eingelesen */
               gt_str_set(parsestruct_ptr->result_hits,
-                      gt_strarray_get(hit_information->hit_def, seq_index));
+                      gt_str_array_get(hit_information->hit_def, seq_index));
 
               hit_from =
-                atoi(gt_strarray_get(hit_information->hit_from, seq_index));
+                atoi(gt_str_array_get(hit_information->hit_from, seq_index));
               hit_to =
-                atoi(gt_strarray_get(hit_information->hit_to, seq_index));
+                atoi(gt_str_array_get(hit_information->hit_to, seq_index));
 
               /* ueberpruefen, ob der aktuelle Hit bereits erfasst wurde */
               if (!cstr_nofree_ulp_gt_hashmap_get
@@ -769,11 +769,11 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
               {
                 /* Hit noch nicht erfasst, also in das Statistik-Array
                    einfuegen */
-                gt_strarray_add_cstr(HITSTRUCT(hits_statistic),
+                gt_str_array_add_cstr(HITSTRUCT(hits_statistic),
                                   gt_str_get(parsestruct_ptr->result_hits));
                 /* Position der Hit-Def. im Statistik-Array */
                 string_number =
-                  gt_strarray_size(HITSTRUCT(hits_statistic)) - 1;
+                  gt_str_array_size(HITSTRUCT(hits_statistic)) - 1;
 
                 /* Hitscounter: zaehlt , Hitsnumber: zaehlt das Auftreten
                    der Hit-Def. in der Ergebnismenge */
@@ -812,7 +812,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                   {
                     cstr_nofree_ulp_gt_hashmap_add(parsestruct_ptr->resulthits,
                                   (char *)
-                                  gt_strarray_get(HITSTRUCT(hits_statistic),
+                                  gt_str_array_get(HITSTRUCT(hits_statistic),
                                                *(unsigned long *)
                                                gt_array_get(parsestruct_ptr->
                                                          value_tmp,
@@ -832,7 +832,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
 
                 cstr_nofree_ulp_gt_hashmap_add(parsestruct_ptr->resulthits,
                               (char *)
-                              gt_strarray_get(HITSTRUCT(hits_statistic),
+                              gt_str_array_get(HITSTRUCT(hits_statistic),
                                            string_number),
                               HITSTRUCT(memory + tmp_var));
               }
@@ -954,16 +954,16 @@ static void print_hitinformation(const ParseStruct *parsestruct_ptr,
       /* txt */
     case 1:
       gt_genfile_xprintf(FILEPOINTEROUT, "gi-nr: gi|%s ",
-                      gt_strarray_get(hit_information->hit_gi, seq_index));
+                      gt_str_array_get(hit_information->hit_gi, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "gi_def: %s ",
-                      gt_strarray_get(hit_information->hit_def, seq_index));
+                      gt_str_array_get(hit_information->hit_def, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "hsp_num: %s ",
-                      gt_strarray_get(hit_information->hit_hsp_nr,
+                      gt_str_array_get(hit_information->hit_hsp_nr,
                                    seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "from: %s ",
-                      gt_strarray_get(hit_information->hit_from, seq_index));
+                      gt_str_array_get(hit_information->hit_from, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "to: %s\n",
-                      gt_strarray_get(hit_information->hit_to, seq_index));
+                      gt_str_array_get(hit_information->hit_to, seq_index));
       break;
       /* html */
     case 2:
@@ -972,38 +972,38 @@ static void print_hitinformation(const ParseStruct *parsestruct_ptr,
       gt_genfile_xprintf(FILEPOINTEROUT,
                       "<a href=\"http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi"
                       "?db=nuccore&id=%s\">",
-                      gt_strarray_get(hit_information->hit_gi, seq_index));
+                      gt_str_array_get(hit_information->hit_gi, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "gi|%s</a>  ",
-                      gt_strarray_get(hit_information->hit_gi, seq_index));
+                      gt_str_array_get(hit_information->hit_gi, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "gi_def: %s ",
-                      gt_strarray_get(hit_information->hit_def, seq_index));
+                      gt_str_array_get(hit_information->hit_def, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "hsp_num: %s ",
-                      gt_strarray_get(hit_information->hit_hsp_nr,
+                      gt_str_array_get(hit_information->hit_hsp_nr,
                                    seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "from: %s ",
-                      gt_strarray_get(hit_information->hit_from, seq_index));
+                      gt_str_array_get(hit_information->hit_from, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "to: %s</font></td></tr>",
-                      gt_strarray_get(hit_information->hit_to, seq_index));
+                      gt_str_array_get(hit_information->hit_to, seq_index));
       break;
       /* xml */
     case 3:
       gt_genfile_xprintf(FILEPOINTEROUT, "          <Infos>\n");
       gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_gi-nr>gi|%s</Infos_gi-nr>\n",
-                      gt_strarray_get(hit_information->hit_gi, seq_index));
+                      gt_str_array_get(hit_information->hit_gi, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_gi-def>%s</Infos_gi-def>\n",
-                      gt_strarray_get(hit_information->hit_def, seq_index));
+                      gt_str_array_get(hit_information->hit_def, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_hsp-num>%s</Infos_hsp-num>\n",
-                      gt_strarray_get(hit_information->hit_hsp_nr,
+                      gt_str_array_get(hit_information->hit_hsp_nr,
                                    seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_from>%s</Infos_from>\n",
-                      gt_strarray_get(hit_information->hit_from, seq_index));
+                      gt_str_array_get(hit_information->hit_from, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT,
                       "            <Infos_to>%s</Infos_to>\n",
-                      gt_strarray_get(hit_information->hit_to, seq_index));
+                      gt_str_array_get(hit_information->hit_to, seq_index));
       gt_genfile_xprintf(FILEPOINTEROUT, "          </Infos>\n");
       break;
   }
@@ -1016,7 +1016,7 @@ static void output_statistics_txt(const ParseStruct *parsestruct_ptr)
                   ((double) *(HITSTRUCT(hitsnum) + HITSTRUCT(stat_pos)) /
                    (double) HITSTRUCT(hitsnumber)) * 100);
   gt_genfile_xprintf(FILEPOINTEROUT, "%s\n",
-                  gt_strarray_get(HITSTRUCT(hits_statistic),
+                  gt_str_array_get(HITSTRUCT(hits_statistic),
                                *(HITSTRUCT(memory) +
                                  HITSTRUCT(stat_pos))));
 }
@@ -1029,7 +1029,7 @@ static void output_statistics_html(const ParseStruct *parsestruct_ptr)
                    (float) HITSTRUCT(hitsnumber)) * 100);
   gt_genfile_xprintf(FILEPOINTEROUT,
                   "<td><font class=\"font_header\"> %s</font></td></tr>",
-                  gt_strarray_get(HITSTRUCT(hits_statistic),
+                  gt_str_array_get(HITSTRUCT(hits_statistic),
                                *(HITSTRUCT(memory) +
                                  HITSTRUCT(stat_pos))));
 }
@@ -1043,7 +1043,7 @@ static void output_statistics_xml(const ParseStruct *parsestruct_ptr)
                    (double) HITSTRUCT(hitsnumber)) * 100);
   gt_genfile_xprintf(FILEPOINTEROUT,
                   "      <Statistics_gi-def>%s</Statistics_gi-def>\n",
-                  gt_strarray_get(HITSTRUCT(hits_statistic),
+                  gt_str_array_get(HITSTRUCT(hits_statistic),
                                *(HITSTRUCT(memory) +
                                  HITSTRUCT(stat_pos))));
   gt_genfile_xprintf(FILEPOINTEROUT, "    </Statistics>\n");

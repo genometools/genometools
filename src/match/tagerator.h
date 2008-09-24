@@ -17,8 +17,9 @@
 
 #ifndef TAGERATOR_H
 #define TAGERATOR_H
+
 #include <stdbool.h>
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/error.h"
 
 typedef struct

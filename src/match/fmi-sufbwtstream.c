@@ -218,10 +218,10 @@ int sufbwt2fmindex(Fmindex *fmindex,
   gt_error_check(err);
   longest.defined = false;
   longest.valueseqpos = 0;
-  numofindexes = (unsigned int) gt_strarray_size(indexnametab);
+  numofindexes = (unsigned int) gt_str_array_size(indexnametab);
   if (numofindexes == 1U)
   {
-    GtStr *indexname = gt_strarray_get_str(indexnametab,0);
+    GtStr *indexname = gt_str_array_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
                          &totallength,
@@ -265,7 +265,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      GtStr *indexname = gt_strarray_get_str(indexnametab,0);
+      GtStr *indexname = gt_str_array_get_str(indexnametab,0);
       suffixlength = 0;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {

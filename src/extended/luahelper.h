@@ -20,7 +20,7 @@
 
 #include "lua.h"
 #include "core/error.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 
 int  gt_lua_set_modules_path(lua_State*, GtError*);
 

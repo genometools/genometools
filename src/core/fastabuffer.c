@@ -19,7 +19,7 @@
 #include "core/chardef.h"
 #include "core/cstr.h"
 #include "core/error.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/fastabuffer.h"
 
 #define FASTASEPARATOR    '>'
@@ -46,7 +46,7 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
   fb->lastspeciallength = 0;
   fb->descptr = descptr;
   if (filelengthtab) {
-    *filelengthtab = gt_calloc(gt_strarray_size(filenametab),
+    *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
                                sizeof (Filelengthvalues));
     fb->filelengthtab = *filelengthtab;
   }
@@ -107,7 +107,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
       currentfileadd = 0;
       currentfileread = 0;
       fb->linenum = (uint64_t) 1;
-      fb->inputstream = gt_genfile_xopen(gt_strarray_get(fb->filenametab,
+      fb->inputstream = gt_genfile_xopen(gt_str_array_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
                                        "rb");
       fb->currentinpos = 0;
@@ -124,7 +124,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
           fb->filelengthtab[fb->filenum].length += currentfileread;
           fb->filelengthtab[fb->filenum].effectivelength += currentfileadd;
         }
-        if ((unsigned long) fb->filenum == gt_strarray_size(fb->filenametab)-1)
+        if ((unsigned long) fb->filenum == gt_str_array_size(fb->filenametab)-1)
         {
           fb->complete = true;
           break;
@@ -190,7 +190,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
                   gt_error_set(err,
                             "illegal character '%c': file \"%s\", line %llu",
                             currentchar,
-                            gt_strarray_get(fb->filenametab, fb->filenum),
+                            gt_str_array_get(fb->filenametab, fb->filenum),
                             (unsigned long long) fb->linenum);
                   return -1;
                 }
@@ -220,7 +220,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
   if (fb->firstoverallseq)
   {
     gt_error_set(err,"no sequences in multiple fasta file(s) %s ...",
-              gt_strarray_get(fb->filenametab,0));
+              gt_str_array_get(fb->filenametab,0));
     return -2;
   }
   fb->nextfree = currentoutpos;
@@ -261,7 +261,7 @@ static int advancePlainbufferstate(GtFastaBuffer *fb, GtError *err)
       fb->nextfile = false;
       fb->firstseqinfile = true;
       currentfileread = 0;
-      fb->inputstream = gt_genfile_xopen(gt_strarray_get(fb->filenametab,
+      fb->inputstream = gt_genfile_xopen(gt_str_array_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
                                       "rb");
       fb->currentinpos = 0;
@@ -280,7 +280,7 @@ static int advancePlainbufferstate(GtFastaBuffer *fb, GtError *err)
           fb->filelengthtab[fb->filenum].effectivelength
             += (uint64_t) currentfileread;
         }
-        if ((unsigned long) fb->filenum == gt_strarray_size(fb->filenametab)-1)
+        if ((unsigned long) fb->filenum == gt_str_array_size(fb->filenametab)-1)
         {
           fb->complete = true;
           break;
@@ -297,7 +297,7 @@ static int advancePlainbufferstate(GtFastaBuffer *fb, GtError *err)
   if (currentoutpos == 0)
   {
     gt_error_set(err, "no characters in plain file(s) %s ...",
-              gt_strarray_get(fb->filenametab,0));
+              gt_str_array_get(fb->filenametab,0));
     return -2;
   }
   fb->nextfree = currentoutpos;

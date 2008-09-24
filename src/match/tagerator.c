@@ -17,7 +17,7 @@
 
 #include <limits.h>
 #include "core/unused_api.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/ma.h"
 #include "core/error.h"
 #include "core/fileutils.h"

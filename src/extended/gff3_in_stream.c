@@ -20,7 +20,7 @@
 #include "core/cstr_table.h"
 #include "core/fileutils.h"
 #include "core/progressbar.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_parser.h"
@@ -90,12 +90,12 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   for (;;) {
     /* open file if necessary */
     if (!is->file_is_open) {
-      if (gt_strarray_size(is->files) &&
-          is->next_file == gt_strarray_size(is->files)) {
+      if (gt_str_array_size(is->files) &&
+          is->next_file == gt_str_array_size(is->files)) {
         break;
       }
-      if (gt_strarray_size(is->files)) {
-        if (strcmp(gt_strarray_get(is->files, is->next_file), "-") == 0) {
+      if (gt_str_array_size(is->files)) {
+        if (strcmp(gt_str_array_get(is->files, is->next_file), "-") == 0) {
           if (is->stdin_argument) {
             gt_error_set(err, "multiple specification of argument file \"-\"");
             had_err = -1;
@@ -106,8 +106,8 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
           is->stdin_argument = true;
         }
         else {
-          is->fpin = gt_genfile_xopen(gt_strarray_get(is->files, is->next_file),
-                                   "r");
+          is->fpin = gt_genfile_xopen(gt_str_array_get(is->files,
+                                                       is->next_file), "r");
           is->file_is_open = true;
         }
         is->next_file++;
@@ -119,20 +119,20 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       is->line_number = 0;
 
       if (!had_err && is->be_verbose) {
-        printf("processing file \"%s\"\n", gt_strarray_size(is->files)
-               ? gt_strarray_get(is->files, is->next_file-1) : "stdin");
+        printf("processing file \"%s\"\n", gt_str_array_size(is->files)
+               ? gt_str_array_get(is->files, is->next_file-1) : "stdin");
       }
       if (!had_err && is->fpin && is->be_verbose) {
         gt_progressbar_start(&is->line_number,
-                            gt_file_number_of_lines(gt_strarray_get(is->files,
+                            gt_file_number_of_lines(gt_str_array_get(is->files,
                                                              is->next_file-1)));
       }
     }
 
     gt_assert(is->file_is_open);
 
-    filenamestr = gt_strarray_size(is->files)
-                  ? gt_strarray_get_str(is->files, is->next_file-1)
+    filenamestr = gt_str_array_size(is->files)
+                  ? gt_str_array_get_str(is->files, is->next_file-1)
                   : is->stdinstr;
     /* read two nodes */
     had_err = gt_gff3_parser_parse_genome_nodes(is->gff3_parser, &status_code,
@@ -159,7 +159,7 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       is->fpin = NULL;
       is->file_is_open = false;
       gt_gff3_parser_reset(is->gff3_parser);
-      if (!gt_strarray_size(is->files))
+      if (!gt_str_array_size(is->files))
         break;
       continue;
     }
@@ -170,8 +170,8 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     if (is->ensure_sorting && gt_queue_size(is->genome_node_buffer) > 1) {
       GtGenomeNode *last_node = NULL;
       /* a sorted stream can have at most one input file */
-      gt_assert(gt_strarray_size(is->files) == 0 ||
-             gt_strarray_size(is->files) == 1);
+      gt_assert(gt_str_array_size(is->files) == 0 ||
+             gt_str_array_size(is->files) == 1);
       had_err = gt_queue_iterate(is->genome_node_buffer, buffer_is_sorted,
                               &last_node, err);
     }
@@ -188,7 +188,7 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 static void gff3_in_stream_free(GtNodeStream *gs)
 {
   GtGFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
-  gt_strarray_delete(gff3_in_stream->files);
+  gt_str_array_delete(gff3_in_stream->files);
   gt_str_delete(gff3_in_stream->stdinstr);
   while (gt_queue_size(gff3_in_stream->genome_node_buffer))
     gt_genome_node_rec_delete(gt_queue_get(gff3_in_stream->genome_node_buffer));
@@ -276,17 +276,17 @@ GtNodeStream* gt_gff3_in_stream_new_unsorted(int num_of_files,
                                              bool be_verbose, bool checkids)
 {
   int i;
-  GtStrArray *files = gt_strarray_new();
+  GtStrArray *files = gt_str_array_new();
   for (i = 0; i < num_of_files; i++)
-    gt_strarray_add_cstr(files, filenames[i]);
+    gt_str_array_add_cstr(files, filenames[i]);
   return gff3_in_stream_new(files, false, be_verbose, checkids);
 }
 
 GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename,
                                            bool be_verbose)
 {
-  GtStrArray *files = gt_strarray_new();
+  GtStrArray *files = gt_str_array_new();
   if (filename)
-    gt_strarray_add_cstr(files, filename);
+    gt_str_array_add_cstr(files, filename);
   return gff3_in_stream_new(files, true, be_verbose, false);
 }

@@ -73,7 +73,7 @@ static enum iterator_op store_type(void *elem, void *data,
   GtStrArray *types = data;
   gt_error_check(err);
   gt_assert(elem && types);
-  gt_strarray_add_cstr(types, *(char**) elem);
+  gt_str_array_add_cstr(types, *(char**) elem);
   return CONTINUE_ITERATION;
 }
 
@@ -82,7 +82,7 @@ GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
   int had_err;
   GtStrArray *cstrs;
   gt_assert(table);
-  cstrs = gt_strarray_new();
+  cstrs = gt_str_array_new();
   had_err = gt_hashtable_foreach_ordered(table->strings, store_type, cstrs,
                                          gt_strcmpptr, NULL);
   gt_assert(!had_err);
@@ -101,9 +101,9 @@ int gt_cstr_table_unit_test(GtError *err)
     gt_cstr_table_add(table, "foo");
   ensure(had_err, !strcmp(gt_cstr_table_get(table, "foo"), "foo"));
   sta = gt_cstr_table_get_all(table);
-  ensure(had_err, gt_strarray_size(sta) == 1);
-  ensure(had_err, strcmp(gt_strarray_get(sta, 0), "foo") == 0);
-  gt_strarray_delete(sta);
+  ensure(had_err, gt_str_array_size(sta) == 1);
+  ensure(had_err, strcmp(gt_str_array_get(sta, 0), "foo") == 0);
+  gt_str_array_delete(sta);
   gt_cstr_table_delete(table);
   return had_err;
 }

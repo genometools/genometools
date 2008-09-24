@@ -125,9 +125,9 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   }
   else {
     int i;
-    files = gt_strarray_new();
+    files = gt_str_array_new();
     for (i = parsed_args; i < argc; i++)
-      gt_strarray_add_cstr(files, argv[i]);
+      gt_str_array_add_cstr(files, argv[i]);
     totalsize = gt_files_estimate_total_size(files);
     seqit = gt_seqiterator_new(files, NULL, true);
     if (arguments->verbose) {
@@ -155,7 +155,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     if (arguments->verbose)
       gt_progressbar_stop();
     gt_seqiterator_delete(seqit);
-    gt_strarray_delete(files);
+    gt_str_array_delete(files);
   }
 
   /* show statistics */

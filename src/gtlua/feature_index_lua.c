@@ -155,7 +155,7 @@ static int feature_index_lua_get_seqids(lua_State *L)
   gt_assert(seqids);
   /* push table containing sequence ids onto the stack */
   gt_lua_push_strarray_as_table(L, seqids);
-  gt_strarray_delete(seqids);
+  gt_str_array_delete(seqids);
   return 1;
 }
 

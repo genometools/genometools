@@ -29,7 +29,7 @@
 #include "core/fileutils.h"
 #include "core/gtdatapath.h"
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 #include "spacedef.h"
 #include "qsorttype.h"
@@ -153,10 +153,10 @@ static int readsymbolmapfromlines(Alphabet *alpha,
     alpha->symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
   alpha->mapdomain = NULL;
-  ALLOCASSIGNSPACE(alpha->characters,NULL,Uchar,gt_strarray_size(lines)-1);
-  for (linecount = 0; linecount < gt_strarray_size(lines); linecount++)
+  ALLOCASSIGNSPACE(alpha->characters,NULL,Uchar,gt_str_array_size(lines)-1);
+  for (linecount = 0; linecount < gt_str_array_size(lines); linecount++)
   {
-    currentline = gt_strarray_get(lines,linecount);
+    currentline = gt_str_array_get(lines,linecount);
     ignore = false;
     if (currentline != NULL && currentline[0] != '\0')
     {
@@ -234,7 +234,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
           /* use first character of line to display character */
           chartoshow = (Uchar) LINE(0);
         }
-        if (linecount == gt_strarray_size(lines)-1)
+        if (linecount == gt_str_array_size(lines)-1)
         {
           alpha->wildcardshow = chartoshow;
         } else
@@ -276,13 +276,13 @@ static int readsymbolmap(Alphabet *alpha,const GtStr *mapfile,GtError *err)
   GtStrArray *lines;
 
   gt_error_check(err);
-  lines = gt_strarray_new_file(gt_str_get(mapfile));
+  lines = gt_str_array_new_file(gt_str_get(mapfile));
   gt_assert(lines != NULL);
   if (readsymbolmapfromlines(alpha,mapfile,lines,err) != 0)
   {
     haserr = true;
   }
-  gt_strarray_delete(lines);
+  gt_str_array_delete(lines);
   return haserr ? -1 : 0;
 }
 

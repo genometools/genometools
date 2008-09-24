@@ -20,7 +20,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 #include "intcode-def.h"
 #include "alphadef.h"

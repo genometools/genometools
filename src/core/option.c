@@ -1014,7 +1014,7 @@ OPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               while (!had_err) {
                 if (argnum + 1 < argc && argv[argnum+1][0] != '-') {
                   argnum++;
-                  gt_strarray_add_cstr(option->value, argv[argnum]);
+                  gt_str_array_add_cstr(option->value, argv[argnum]);
                   option_parsed = true;
                 }
                 else {

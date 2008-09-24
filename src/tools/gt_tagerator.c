@@ -17,7 +17,7 @@
 
 #include "core/option.h"
 #include "core/ma.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/unused_api.h"
 #include "core/tool.h"
 #include "match/tagerator.h"
@@ -59,7 +59,7 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   }
   gt_str_delete(arguments->esaindexname);
   gt_str_delete(arguments->pckindexname);
-  gt_strarray_delete(arguments->tagfiles);
+  gt_str_array_delete(arguments->tagfiles);
   gt_free(arguments);
 }
 
@@ -73,7 +73,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   assert(arguments != NULL);
   arguments->esaindexname = gt_str_new();
   arguments->pckindexname = gt_str_new();
-  arguments->tagfiles = gt_strarray_new();
+  arguments->tagfiles = gt_str_array_new();
   op = gt_option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -202,9 +202,9 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
     assert(gt_str_length(arguments->pckindexname) > 0);
     printf("# indexname(pck)=%s\n",gt_str_get(arguments->pckindexname));
   }
-  for (idx=0; idx<gt_strarray_size(arguments->tagfiles); idx++)
+  for (idx=0; idx<gt_str_array_size(arguments->tagfiles); idx++)
   {
-    printf("# queryfile=%s\n",gt_strarray_get(arguments->tagfiles,idx));
+    printf("# queryfile=%s\n",gt_str_array_get(arguments->tagfiles,idx));
   }
   if (runtagerator(arguments,err) != 0)
   {

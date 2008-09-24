@@ -19,7 +19,7 @@
 #define CSTR_TABLE_H
 
 #include "core/error.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 
 /* A table of C-strings. */
 typedef struct GtCstrTable GtCstrTable;

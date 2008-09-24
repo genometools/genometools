@@ -108,7 +108,7 @@ static NodeInfoElement* nodeinfo_get(GtDiagram *d,
     ni = gt_calloc(1, sizeof (NodeInfoElement));
     ni->type_index  = gt_hashmap_new(HASH_STRING, NULL,
                                   gt_free_func);
-    ni->types       = gt_strarray_new();
+    ni->types       = gt_str_array_new();
     gt_hashmap_add(d->nodeinfo, node, ni);
   }
   return ni;
@@ -149,7 +149,7 @@ static void nodeinfo_add_block(NodeInfoElement *ni,
     type_struc->rep_index = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
     type_struc->blocktuples = gt_array_new(sizeof (GtBlockTuple*));
     gt_hashmap_add(ni->type_index, (char*) gft, type_struc);
-    gt_strarray_add_cstr(ni->types, gft);
+    gt_str_array_add_cstr(ni->types, gft);
   }
   gt_hashmap_add(type_struc->rep_index, rep, bt);
   if (rep != UNDEF_REPR)
@@ -500,13 +500,13 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
   GtDiagram *diagram = (GtDiagram*) data;
   GtBlock *block = NULL;
   unsigned long i = 0;
-  for (i = 0; i < gt_strarray_size(ni->types); i++) {
+  for (i = 0; i < gt_str_array_size(ni->types); i++) {
     const char *type;
     unsigned long j;
     GtArray *list;
     PerTypeInfo *type_struc = NULL;
     GtBlock* mainblock = NULL;
-    type = gt_strarray_get(ni->types, i);
+    type = gt_str_array_get(ni->types, i);
     type_struc = gt_hashmap_get(ni->type_index, type);
     gt_assert(type_struc);
     for (j=0; j<gt_array_size(type_struc->blocktuples); j++)
@@ -546,7 +546,7 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
     gt_block_delete(mainblock);
   }
   gt_hashmap_delete(ni->type_index);
-  gt_strarray_delete(ni->types);
+  gt_str_array_delete(ni->types);
   gt_free(ni);
   return 0;
 }

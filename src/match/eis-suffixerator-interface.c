@@ -26,7 +26,7 @@
 #include "core/minmax.h"
 #include "core/seqiterator.h"
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "match/seqpos-def.h"

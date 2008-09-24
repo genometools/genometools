@@ -204,10 +204,10 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
         return 0;
   }
 
-  files = gt_strarray_new();
+  files = gt_str_array_new();
   for (i = parsed_args; i < argc; i++)
   {
-    gt_strarray_add_cstr(files, argv[i]);
+    gt_str_array_add_cstr(files, argv[i]);
   }
   totalsize = gt_files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
@@ -262,7 +262,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
     gt_progressbar_stop();
   }
   gt_seqiterator_delete(seqit);
-  gt_strarray_delete(files);
+  gt_str_array_delete(files);
   if (seqiteroptions.dodistlen)
   {
     printf("# " Formatuint64_t " sequences of average length %.2f\n",

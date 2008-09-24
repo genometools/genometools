@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/error.h"
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 #include "myxdrop.h"
 #include "repeattypes.h"

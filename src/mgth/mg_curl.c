@@ -112,10 +112,10 @@ int mg_curl(ParseStruct *parsestruct_ptr,
   gt_str_append_str(http_adr, parsestruct_ptr->hit_gi_nr_tmp);
   gt_str_append_cstr(http_adr, "&seq_start=");
   gt_str_append_cstr(http_adr,
-                  gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
+                  gt_str_array_get(MATRIXSTRUCT(hit_from), hit_counter));
   gt_str_append_cstr(http_adr, "&seq_stop=");
   gt_str_append_cstr(http_adr,
-                  gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
+                  gt_str_array_get(MATRIXSTRUCT(hit_to), hit_counter));
   gt_str_append_cstr(http_adr, "&retmode=xml");
 
   /* char-Zeiger wird benoetigt, da curl_easy_setopt als 3. Parameter
@@ -172,8 +172,8 @@ int mg_curl(ParseStruct *parsestruct_ptr,
       gt_assert(seq_pos != NULL);
       seq_len = strspn(seq_pos + 16, "gactrymkswhbvdnu");
 
-      numb_from = atol(gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
-      numb_to = atol(gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
+      numb_from = atol(gt_str_array_get(MATRIXSTRUCT(hit_from), hit_counter));
+      numb_to = atol(gt_str_array_get(MATRIXSTRUCT(hit_to), hit_counter));
 
       numb_diff = numb_to - numb_from +1;
 
@@ -183,21 +183,26 @@ int mg_curl(ParseStruct *parsestruct_ptr,
         gt_str_append_cstr_nt(seq_var, seq_pos + 16, seq_len);
 
         /* Die Sequenz in seq_var wird in das GtStrArray hit_dna kopiert */
-        gt_strarray_add_cstr(MATRIXSTRUCT(hit_dna), gt_str_get(seq_var));
+        gt_str_array_add_cstr(MATRIXSTRUCT(hit_dna), gt_str_get(seq_var));
 
         /* das Hit-Sequenz-File wird geschrieben; die erste Zeile eines
            Eintrages ist die Hit-GI-Def, an die durch ein Leerzeichen
            getrennt die Hsp-Num des jeweiligen Hits angehaengt wird */
         gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, ">%s ",
-                        gt_strarray_get(MATRIXSTRUCT(hit_num), hit_counter));
+                           gt_str_array_get(MATRIXSTRUCT(hit_num),
+                                            hit_counter));
         gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                        gt_strarray_get(MATRIXSTRUCT(hit_from), hit_counter));
+                           gt_str_array_get(MATRIXSTRUCT(hit_from),
+                                            hit_counter));
         gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                        gt_strarray_get(MATRIXSTRUCT(hit_to), hit_counter));
+                           gt_str_array_get(MATRIXSTRUCT(hit_to),
+                                            hit_counter));
         gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s ",
-                        gt_strarray_get(MATRIXSTRUCT(fasta_row), hit_counter));
+                           gt_str_array_get(MATRIXSTRUCT(fasta_row),
+                                            hit_counter));
         gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",
-                        gt_strarray_get(MATRIXSTRUCT(hit_gi_def), hit_counter));
+                           gt_str_array_get(MATRIXSTRUCT(hit_gi_def),
+                                            hit_counter));
 
         /* nach dem GI-Def Eintrag folgt in der naechsten Zeile die Sequenz */
         gt_genfile_xprintf(parsestruct_ptr->fp_blasthit_file, "%s\n",

@@ -197,7 +197,7 @@ static int store_seqid(void *key, GT_UNUSED void *value, void *data,
   GtStrArray *seqids = (GtStrArray*) data;
   const char *seqid = (const char*) key;
   gt_assert(seqids && seqid);
-  gt_strarray_add_cstr(seqids, seqid);
+  gt_str_array_add_cstr(seqids, seqid);
   return 0;
 }
 
@@ -209,7 +209,7 @@ GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi)
   gt_assert(gfi);
 
   fi = gt_feature_index_memory_cast((GtFeatureIndex*) gfi);
-  seqids = gt_strarray_new();
+  seqids = gt_str_array_new();
   rval = gt_hashmap_foreach_in_key_order(fi->regions, store_seqid, seqids,
                                          NULL);
   gt_assert(!rval); /* store_seqid() is sane */
@@ -373,9 +373,9 @@ int gt_feature_index_memory_unit_test(GtError *err)
 
   if (!had_err) {
     seqids = gt_feature_index_get_seqids(fi);
-    ensure(had_err, gt_strarray_size(seqids) == 2);
-    ensure(had_err, !strcmp(gt_strarray_get(seqids, 0), "test1"));
-    ensure(had_err, !strcmp(gt_strarray_get(seqids, 1), "test2"));
+    ensure(had_err, gt_str_array_size(seqids) == 2);
+    ensure(had_err, !strcmp(gt_str_array_get(seqids, 0), "test1"));
+    ensure(had_err, !strcmp(gt_str_array_get(seqids, 1), "test2"));
   }
 
   gt_feature_index_get_range_for_seqid(fi, &check_range, "test1");
@@ -390,7 +390,7 @@ int gt_feature_index_memory_unit_test(GtError *err)
   gt_array_delete(features);
 
   /* delete all generated objects */
-  gt_strarray_delete(seqids);
+  gt_str_array_delete(seqids);
   gt_feature_index_delete(fi);
   gt_genome_node_rec_delete(gn1);
   gt_genome_node_rec_delete(gn2);

@@ -37,7 +37,7 @@ typedef struct {
 static void* gt_extracttarget_arguments_new(void)
 {
   ExtractTargetArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->seqfiles = gt_strarray_new();
+  arguments->seqfiles = gt_str_array_new();
   return arguments;
 }
 
@@ -45,7 +45,7 @@ static void gt_extracttarget_arguments_delete(void *tool_arguments)
 {
   ExtractTargetArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_strarray_delete(arguments->seqfiles);
+  gt_str_array_delete(arguments->seqfiles);
   gt_free(arguments);
 }
 
@@ -115,10 +115,10 @@ static int extracttarget_from_seqfiles(const char *target,
                                err);
     if (!had_err) {
       unsigned long j;
-      for (j = 0; j < gt_strarray_size(seqfiles); j++) {
+      for (j = 0; j < gt_str_array_size(seqfiles); j++) {
         unsigned long k;
         GtBioseq *bioseq;
-        if (!(bioseq =  gt_bioseq_new(gt_strarray_get(seqfiles, j), err))) {
+        if (!(bioseq =  gt_bioseq_new(gt_str_array_get(seqfiles, j), err))) {
           had_err = -1;
           break;
         }

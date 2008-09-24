@@ -63,9 +63,9 @@ static int inputthesequences(Alphabet **alpha,
   Seqpos totallength;
 
   gt_error_check(err);
-  for (idx=0; idx<gt_strarray_size(indexnametab); idx++)
+  for (idx=0; idx<gt_str_array_size(indexnametab); idx++)
   {
-    indexname = gt_strarray_get_str(indexnametab,idx);
+    indexname = gt_str_array_get_str(indexnametab,idx);
     if (streamsuffixarray(&suffixarraytable[idx],
                           &totallength,
                           demand,
@@ -255,7 +255,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   unsigned int numofindexes;
   bool haserr = false;
 
-  numofindexes = (unsigned int) gt_strarray_size(indexnametab);
+  numofindexes = (unsigned int) gt_str_array_size(indexnametab);
   emmesa->buf.nextaccessidx = emmesa->buf.nextstoreidx = 0;
   emmesa->numofindexes = numofindexes;
   emmesa->numofentries = numofindexes;

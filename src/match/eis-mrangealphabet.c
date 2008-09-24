@@ -25,7 +25,7 @@
 #include "core/ma.h"
 #include "core/str.h"
 #include "core/symboldef.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "match/alphadef.h"
 
 #include "match/eis-mrangealphabet.h"

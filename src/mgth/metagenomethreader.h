@@ -30,7 +30,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/versionfunc.h"
 
 /* jeweils die Anzahl der zu betrachtenden XML-Tags; Definitionen werden auch

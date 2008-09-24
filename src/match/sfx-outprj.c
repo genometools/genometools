@@ -22,7 +22,7 @@
 #include "core/endianess.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "seqpos-def.h"
@@ -56,10 +56,10 @@ static void showprjinfo(FILE *outprj,
 
   gt_assert(filelengthtab != NULL);
   gt_assert(filenametab != NULL);
-  for (i=0; i<gt_strarray_size(filenametab); i++)
+  for (i=0; i<gt_str_array_size(filenametab); i++)
   {
     fprintf(outprj,"dbfile=%s " Formatuint64_t " " Formatuint64_t "\n",
-                    gt_strarray_get(filenametab,i),
+                    gt_str_array_get(filenametab,i),
                     PRINTuint64_tcast(filelengthtab[i].length),
                     PRINTuint64_tcast(filelengthtab[i].effectivelength));
   }

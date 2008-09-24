@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "readmode-def.h"
 #include "defined-types.h"
 #include "sfx-strategy.h"

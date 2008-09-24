@@ -484,9 +484,9 @@ static GtArray* find_roots(GtStrArray *parents, GtFeatureInfo *feature_info)
   unsigned long i;
   gt_assert(parents);
   roots = gt_array_new(sizeof (GtGenomeNode*));
-  for (i = 0; i < gt_strarray_size(parents); i++) {
+  for (i = 0; i < gt_str_array_size(parents); i++) {
     GtFeatureNode *root = gt_feature_info_find_root(feature_info,
-                                                 gt_strarray_get(parents, i));
+                                                 gt_str_array_get(parents, i));
     gt_array_add(roots, root);
   }
   return roots;
@@ -626,7 +626,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
   gt_error_check(err);
   gt_assert(parent_attr);
 
-  valid_parents = gt_strarray_new();
+  valid_parents = gt_str_array_new();
   parent_splitter = gt_splitter_new();
   gt_splitter_split(parent_splitter, parent_attr, strlen(parent_attr), ',');
   gt_assert(gt_splitter_size(parent_splitter));
@@ -664,26 +664,26 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
       gt_feature_node_add_child((GtFeatureNode*) parent_gf,
                                 (GtFeatureNode*) genome_feature);
       *is_child = true;
-      gt_strarray_add_cstr(valid_parents, parent);
+      gt_str_array_add_cstr(valid_parents, parent);
     }
   }
 
   if (!had_err && !parser->tidy) {
     gt_assert(gt_splitter_size(parent_splitter) ==
-              gt_strarray_size(valid_parents));
+              gt_str_array_size(valid_parents));
   }
 
   gt_splitter_delete(parent_splitter);
 
   /* make sure all (valid) parents have the same (pseudo-)root */
-  if (!had_err && gt_strarray_size(valid_parents) >= 2) {
+  if (!had_err && gt_str_array_size(valid_parents) >= 2) {
     GtArray *roots = find_roots(valid_parents, parser->feature_info);
     if (roots_differ(roots))
         join_roots(roots, parser->feature_info, genome_nodes, auto_sr);
     gt_array_delete(roots);
   }
 
-  gt_strarray_delete(valid_parents);
+  gt_str_array_delete(valid_parents);
 
   return had_err;
 }
@@ -708,14 +708,14 @@ static int check_missing_attributes(GtGenomeNode *this_feature,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(this_feature && this_attributes && other_feature);
-  for (i = 0; !had_err && i < gt_strarray_size(this_attributes); i++) {
+  for (i = 0; !had_err && i < gt_str_array_size(this_attributes); i++) {
     if (!gt_feature_node_get_attribute(other_feature,
-                                      gt_strarray_get(this_attributes, i))) {
+                                      gt_str_array_get(this_attributes, i))) {
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                 "\"%s\" does not have a '%s' attribute which is present in its "
                 "counterpart on line %u", ID_STRING, id,
                 gt_genome_node_get_line_number((GtGenomeNode*) other_feature),
-                filename, gt_strarray_get(this_attributes, i),
+                filename, gt_str_array_get(this_attributes, i),
                 gt_genome_node_get_line_number(this_feature));
       had_err = -1;
       break;
@@ -848,10 +848,10 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
     }
     if (!had_err) {
       unsigned long i;
-      gt_assert(gt_strarray_size(new_attributes) ==
-             gt_strarray_size(old_attributes));
-      for (i = 0; !had_err && i < gt_strarray_size(new_attributes); i++) {
-        const char *attr_name = gt_strarray_get(new_attributes, i);
+      gt_assert(gt_str_array_size(new_attributes) ==
+             gt_str_array_size(old_attributes));
+      for (i = 0; !had_err && i < gt_str_array_size(new_attributes); i++) {
+        const char *attr_name = gt_str_array_get(new_attributes, i);
         if (!strcmp(attr_name, TARGET_STRING)) {
           had_err = compare_target_attribute((GtFeatureNode*) new_gf,
                                              (GtFeatureNode*) old_gf, id, err);
@@ -862,8 +862,8 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
         }
       }
     }
-    gt_strarray_delete(new_attributes);
-    gt_strarray_delete(old_attributes);
+    gt_str_array_delete(new_attributes);
+    gt_str_array_delete(old_attributes);
   }
   return had_err;
 }

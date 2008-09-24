@@ -31,7 +31,7 @@ typedef struct {
 static void* gt_magicmatch_arguments_new(void)
 {
   MagicMatchArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->seqfiles = gt_strarray_new();
+  arguments->seqfiles = gt_str_array_new();
   return arguments;
 }
 
@@ -39,7 +39,7 @@ static void gt_magicmatch_arguments_delete(void *tool_arguments)
 {
   MagicMatchArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_strarray_delete(arguments->seqfiles);
+  gt_str_array_delete(arguments->seqfiles);
   gt_free(arguments);
 }
 
@@ -96,8 +96,8 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   assert(arguments);
 
   if (arguments->translate) {
-    for (i = 0; !had_err && i < gt_strarray_size(arguments->seqfiles); i++) {
-      if (!(bioseq = gt_bioseq_new(gt_strarray_get(arguments->seqfiles, i),
+    for (i = 0; !had_err && i < gt_str_array_size(arguments->seqfiles); i++) {
+      if (!(bioseq = gt_bioseq_new(gt_str_array_get(arguments->seqfiles, i),
                                    err))) {
         had_err = -1;
       }

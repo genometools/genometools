@@ -23,7 +23,7 @@
 typedef struct GtTypeCheckerClass GtTypeCheckerClass;
 typedef struct GtTypeChecker GtTypeChecker;
 
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "extended/feature_type.h"
 
 /* Return a new reference to <type_checker>. */

@@ -20,7 +20,7 @@
 
 #include <inttypes.h>
 #include "core/queue.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 
 typedef struct GtSeqIterator GtSeqIterator;

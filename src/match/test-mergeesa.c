@@ -233,7 +233,7 @@ int performtheindexmerging(const GtStr *storeindex,
   }
   if (!haserr)
   {
-    if (gt_strarray_size(indexnametab) > 1UL)
+    if (gt_str_array_size(indexnametab) > 1UL)
     {
       if (mergeandstoreindex(storeindex,&emmesa,err) != 0)
       {

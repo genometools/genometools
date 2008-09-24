@@ -20,7 +20,7 @@
 
 #include "core/chardef.h"
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "seqpos-def.h"

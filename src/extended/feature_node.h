@@ -22,7 +22,7 @@
 #include "core/range.h"
 #include "core/phase.h"
 #include "core/strand_api.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "extended/feature_node_api.h"
 #include "extended/feature_type.h"
 #include "extended/transcript_feature_type.h"

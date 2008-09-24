@@ -23,14 +23,14 @@
 /* the string array class  */
 typedef struct GtStrArray GtStrArray;
 
-GtStrArray*   gt_strarray_new(void);
-void          gt_strarray_add_cstr(GtStrArray*, const char*);
-void          gt_strarray_add_cstr_nt(GtStrArray*, const char*,unsigned long);
-void          gt_strarray_add(GtStrArray*, const GtStr*);
-const char*   gt_strarray_get(const GtStrArray*, unsigned long strnum);
-void          gt_strarray_set_size(GtStrArray*, unsigned long);
+GtStrArray*   gt_str_array_new(void);
+void          gt_str_array_add_cstr(GtStrArray*, const char*);
+void          gt_str_array_add_cstr_nt(GtStrArray*, const char*,unsigned long);
+void          gt_str_array_add(GtStrArray*, const GtStr*);
+const char*   gt_str_array_get(const GtStrArray*, unsigned long strnum);
+void          gt_str_array_set_size(GtStrArray*, unsigned long);
 /* Returns number of strings. */
-unsigned long gt_strarray_size(const GtStrArray*);
-void          gt_strarray_delete(GtStrArray*);
+unsigned long gt_str_array_size(const GtStrArray*);
+void          gt_str_array_delete(GtStrArray*);
 
 #endif

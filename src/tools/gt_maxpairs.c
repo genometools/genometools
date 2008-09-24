@@ -148,13 +148,13 @@ int gt_maxpairs(int argc, const char **argv, GtError *err)
   gt_error_check(err);
 
   maxpairsoptions.indexname = gt_str_new();
-  maxpairsoptions.queryfiles = gt_strarray_new();
+  maxpairsoptions.queryfiles = gt_str_array_new();
   oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv,err);
   if (oprval == OPTIONPARSER_OK)
   {
     Verboseinfo *verboseinfo = newverboseinfo(false);
     assert(parsed_args == argc);
-    if (gt_strarray_size(maxpairsoptions.queryfiles) == 0)
+    if (gt_str_array_size(maxpairsoptions.queryfiles) == 0)
     {
       if (maxpairsoptions.samples == 0)
       {
@@ -198,7 +198,7 @@ int gt_maxpairs(int argc, const char **argv, GtError *err)
     freeverboseinfo(&verboseinfo);
   }
   gt_str_delete(maxpairsoptions.indexname);
-  gt_strarray_delete(maxpairsoptions.queryfiles);
+  gt_str_array_delete(maxpairsoptions.queryfiles);
 
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {

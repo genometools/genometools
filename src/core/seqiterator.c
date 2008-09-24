@@ -19,7 +19,7 @@
 #include "core/chardef.h"
 #include "core/fastabuffer.h"
 #include "core/minmax.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/seqiterator.h"
 

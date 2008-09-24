@@ -16,7 +16,7 @@
 */
 
 #include <inttypes.h>
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/seqiterator.h"
 #include "core/chardef.h"
 #include "spacedef.h"

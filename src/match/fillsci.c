@@ -22,7 +22,7 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/fastabuffer.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "esa-fileend.h"
 #include "seqpos-def.h"
 #include "verbose-def.h"

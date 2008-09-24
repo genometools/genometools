@@ -20,7 +20,7 @@
 
 #include <limits.h>
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 #include "core/symboldef.h"
 
 #define MAXALPHABETCHARACTER UCHAR_MAX

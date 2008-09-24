@@ -95,12 +95,12 @@ static void store_attribute(const char *attr_name,
 {
   GtStrArray *list = data;
   gt_assert(attr_name && attr_value && data);
-  gt_strarray_add_cstr(list, attr_name);
+  gt_str_array_add_cstr(list, attr_name);
 }
 
 GtStrArray* gt_feature_node_get_attribute_list(GtFeatureNode *fn)
 {
-  GtStrArray *list = gt_strarray_new();
+  GtStrArray *list = gt_str_array_new();
   if (fn->attributes)
     gt_tag_value_map_foreach(fn->attributes, store_attribute, list);
   return list;

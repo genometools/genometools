@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include "core/str.h"
-#include "core/strarray.h"
+#include "core/str_array.h"
 
 bool           gt_file_exists(const char*);
 /* Returns true if the file with path <a> has a later modification time than the
