@@ -24,6 +24,7 @@
 #include "core/versionfunc.h"
 #include "extended/toolbox.h"
 #include "tools/gt_tallymer.h"
+#include "match/tyr-mkindex.h"
 
 typedef enum
 {
@@ -40,7 +41,7 @@ typedef struct
 
 typedef struct
 {
-  unsigned long mersize,
+  unsigned long searchlength,
                 userdefinedminocc,
                 userdefinedmaxocc,
                 userdefinedprefixlength;
@@ -93,7 +94,7 @@ static GtOptionParser
 
   option = gt_option_new_ulong("mersize",
                                "Specify the mer size.",
-                               &arguments->mersize,
+                               &arguments->searchlength,
                                20UL);
   gt_option_parser_add_option(op, option);
 
@@ -183,7 +184,7 @@ static int gt_tallymer_mkindex_runner(int argc,
 
   assert(parsed_args + 1 == argc);
   gt_str_set(arguments->str_inputindex,argv[parsed_args]);
-  printf("# mersize=%lu\n",arguments->mersize);
+  printf("# mersize=%lu\n",arguments->searchlength);
   printf("# minocc=%lu\n",arguments->userdefinedminocc);
   printf("# maxocc=%lu\n",arguments->userdefinedmaxocc);
   printf("# prefixlength=");
@@ -206,6 +207,16 @@ static int gt_tallymer_mkindex_runner(int argc,
     printf("# storeindex=%s\n",gt_str_get(arguments->str_storeindex));
   }
   printf("# inputindex=%s\n",gt_str_get(arguments->str_inputindex));
+  if (merstatistics(arguments->str_inputindex,
+                    arguments->searchlength,
+                    arguments->userdefinedminocc,
+                    arguments->userdefinedmaxocc,
+                    arguments->str_storeindex,
+                    arguments->storecounts,
+                    arguments->verbose) != 0)
+  {
+    return -1;
+  }
   return 0;
 }
 
