@@ -48,10 +48,15 @@ local function trim(s)
 end
 
 local function codify(str)
-  assert(str)
+  if (str == nil) then
+    str = ""
+  end
   str = trim(str)
   local res = string.gsub(str, "\\", "$\\backslash$")
-  res = string.gsub(res, "<(.-)>", "\\texttt{%1}")
+  res = string.gsub(res, "<([^ ]-)>", "\\texttt{%1}")
+  res = string.gsub(res, "\->", "$\\to$")
+  res = string.gsub(res, ">", "$>$")
+  res = string.gsub(res, "<", "$<$")
   res = string.gsub(res, " ([%a_][%a%d_%.]-%(%))", "\\texttt{%1}")
   res = string.gsub(res, "___(.-)___", " \\textbf{%1}")
   res = string.gsub(res, "__(.-)__", "\\emph{%1}")
@@ -62,7 +67,7 @@ end
 
 local function paragraphify(str)
   assert(str)
-  return string.gsub(str, "\n\n", "\n\n")
+  return string.gsub(str, "\n\n", "\\\\")
 end
 
 function DocVisitorLaTeX:show_header()
@@ -74,6 +79,14 @@ function DocVisitorLaTeX:visit_classes(classes)
   include("classes_latex.lp", { classes = classes })
 end
 
+function DocVisitorLaTeX:visit_modules(modules)
+  assert(modules)
+  if (#modules == 0) then
+    return
+  end
+  include("modules_latex.lp", { modules = modules })
+end
+
 function DocVisitorLaTeX:visit_class(classname, comments)
   assert(classname)
   include("class_latex.lp", { classname = codify(classname) })
@@ -83,6 +96,11 @@ function DocVisitorLaTeX:visit_class(classname, comments)
     end
   include("class_comments_latex.lp", { comments = comments })
   end
+end
+
+function DocVisitorLaTeX:visit_module(modulename)
+  assert(modulename)
+  include("module_latex.lp", { modulename = modulename })
 end
 
 local sole_function_visited = false
@@ -105,8 +123,14 @@ function DocVisitorLaTeX:visit_method(desc)
     name = desc.rval
   end
   include("method_latex.lp", { name = codify(name), args = codify(desc.args),
-                         comment = codify(desc.comment),
+                         comment = paragraphify(codify(desc.comment)),
                          prototype = codify(prototype) })
+end
+
+function DocVisitorLaTeX:visit_funcdef(desc)
+  assert(desc)
+  include("funcdef_latex.lp", { name = codify(desc.name),
+                                comment = paragraphify(codify(desc.comment)) })
 end
 
 function DocVisitorLaTeX:visit_index(names)

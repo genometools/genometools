@@ -78,7 +78,7 @@ Sequence Ontology hierarchy. A validating GFF3 parser is available in \emph{Geno
 Each top-level node is then registered into a persistent \emph{FeatureIndex} object that can be (repeatedly) queried for all the features in a genomic region of interest. Alternatively, annotation graphs can be built by the user by creating each node explicitly and then connecting the nodes in a way such that the relationships are reflected in the graph structure (see examples section for example annotation graph building code).
 
 \subsection{Phase 2: Layout}
-The next step consists of processing the features (given via a \emph{FeatureIndex} or a simple array of top level nodes) into a structural \emph{Diagram} object which first builds \emph{blocks} from features by grouping and overlaying them semantically according to several options (see Collapsing). During image generation, the \emph{Block} objects are distributed into \emph{Line} (each containing non-overlapping blocks) and \emph{Track} objects (containing all lines of a given type). \emph{Tracks} and \emph{Lines} are contained within the \emph{Diagram} object and correspond to particular building blocks of the resulting diagram (see Fig. \ref{diagram}). The overall layout of the diagram tries to keep the amount of vertical space as compact as possible. How new \emph{Lines} are created depends on the chosen  implementation of the \emph{LineBreaker} interface, by default a \emph{Block} is pushed into a new \emph{Line} when either the \emph{Block} or its caption overlaps with another one.
+The next step consists of processing the features (given via a \emph{FeatureIndex} or a simple array of top level nodes) into a structural \emph{Diagram} object which first builds \emph{blocks} from features by grouping and overlaying them according to several options (see Collapsing). During image generation, the \emph{Block} objects are distributed into \emph{Line} (each containing non-overlapping blocks) and \emph{Track} objects (containing all lines of a given type). \emph{Tracks} and \emph{Lines} are contained within the \emph{Diagram} object and correspond to particular building blocks of the resulting diagram (see Fig. \ref{diagram}). The overall layout of the diagram tries to keep the amount of vertical space as compact as possible. How new \emph{Lines} are created depends on the chosen  implementation of the \emph{LineBreaker} interface, by default a \emph{Block} is pushed into a new \emph{Line} when either the \emph{Block} or its caption overlaps with another one.
 
 \begin{figure}[ht]
 \centering{\includegraphics[width=\textwidth]{../../www/genometools.org/htdocs/images/diagram.pdf}}
@@ -208,6 +208,15 @@ $
 to plot the gene from the \emph{FlyBase} default view in PDF format.
 The \texttt{-force} switch is used to force overwriting of an already existing output file. The \texttt{-pipe} option additionally allows passing the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the \texttt{-help} switch.
 
+If an input file file is not plotted due to parsing errors, \emph{GenomeTools} includes a strict GFF3 validator tool to check whether the input file is in valid GFF3 format. Simply run a command like the following:
+\small
+\begin{verbatim}
+$ gt gff3validator input_file.gff3
+input is valid GFF3
+$
+\end{verbatim}
+\normalsize
+This validator also allows to check the SO types occuring in a GFF3 file against a given OBO ontology file. This checking can be enabled by specifying the file as an argument to the \texttt{-typecheck} switch.
 
 \section{Examples}
 
