@@ -20,33 +20,33 @@ require 'gtdlload'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GtStrArray* gt_strarray_new()"
-  extern "void gt_strarray_add_cstr(GtStrArray*, const char*)"
-  extern "const char* gt_strarray_get(const GtStrArray*, unsigned long)"
-  extern "unsigned long gt_strarray_size(const GtStrArray*)"
-  extern "void gt_strarray_delete(GtStrArray*)"
+  extern "GtStrArray* gt_str_array_new()"
+  extern "void gt_str_array_add_cstr(GtStrArray*, const char*)"
+  extern "const char* gt_str_array_get(const GtStrArray*, unsigned long)"
+  extern "unsigned long gt_str_array_size(const GtStrArray*)"
+  extern "void gt_str_array_delete(GtStrArray*)"
 
   class StrArray
-    attr_reader :strarray
-    def initialize(strarray_ptr = GT.gt_strarray_new())
-      @strarray = strarray_ptr
-      @strarray.free = GT::symbol("gt_strarray_delete", "0P")
+    attr_reader :str_array
+    def initialize(str_array_ptr = GT.gt_str_array_new())
+      @str_array = str_array_ptr
+      @str_array.free = GT::symbol("gt_str_array_delete", "0P")
     end
 
     def add_list(list)
-      list.each { |cstr| GT.gt_strarray_add_cstr(@strarray, cstr) }
+      list.each { |cstr| GT.gt_str_array_add_cstr(@str_array, cstr) }
     end
 
     def to_a
       strings = []
-      1.upto(GT.gt_strarray_size(@strarray)) do |i|
-        strings.push(GT.gt_strarray_get(@strarray, i-1))
+      1.upto(GT.gt_str_array_size(@str_array)) do |i|
+        strings.push(GT.gt_str_array_get(@str_array, i-1))
       end
       strings
     end
 
     def to_ptr
-      @strarray
+      @str_array
     end
   end
 end

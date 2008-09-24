@@ -329,9 +329,9 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     if (arguments.showrecmaps) {
       unsigned long i;
       const GtRecMap *rm;
-      for (i = 0; i < gt_image_info_num_of_recmaps(ii) ;i++) {
+      for (i = 0; i < gt_image_info_num_of_rec_maps(ii) ;i++) {
         char buf[BUFSIZ];
-        rm = gt_image_info_get_recmap(ii, i);
+        rm = gt_image_info_get_rec_map(ii, i);
         gt_rec_map_format_html_imagemap_coords(rm, buf, BUFSIZ);
         printf("%s, %s\n", buf, gt_feature_node_get_type(rm->gf));
       }

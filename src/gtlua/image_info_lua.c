@@ -64,7 +64,7 @@ static int imageinfo_lua_num_of_recmaps(lua_State *L)
   GtError *err = gt_error_new();
   ii = check_imageinfo(L, 1);
   gt_assert(ii);
-  nof_rm = gt_image_info_num_of_recmaps(*ii);
+  nof_rm = gt_image_info_num_of_rec_maps(*ii);
   if (nof_rm > DBL_MAX)
   {
     gt_error_set(err, "number of recmaps exceeds %f!", DBL_MAX);
@@ -103,14 +103,14 @@ static int imageinfo_lua_recmaps_as_table(lua_State *L)
   unsigned long num, i;
   ii = check_imageinfo(L, 1);
   gt_assert(ii);
-  num = gt_image_info_num_of_recmaps(*ii);
+  num = gt_image_info_num_of_rec_maps(*ii);
   if (num>0)
   {
     lua_newtable(L);
     for (i=0;i<num;i++)
     {
       lua_pushnumber(L, i+1);
-      push_recmap_as_table(L, gt_image_info_get_recmap(*ii, i));
+      push_recmap_as_table(L, gt_image_info_get_rec_map(*ii, i));
       lua_rawset(L, -3);
     }
   } else lua_pushnil(L);

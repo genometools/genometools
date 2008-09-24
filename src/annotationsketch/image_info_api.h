@@ -35,10 +35,10 @@ GtImageInfo*     gt_image_info_new(void);
 /* Returns the height of the rendered image (in pixels or points). */
 unsigned int     gt_image_info_get_height(GtImageInfo *image_info);
 /* Returns the total number of mappings in <image_info>. */
-unsigned long    gt_image_info_num_of_recmaps(GtImageInfo *image_info);
+unsigned long    gt_image_info_num_of_rec_maps(GtImageInfo *image_info);
 /* Returns the <i>-th <GtRecMap> mapping in <image_info>. */
-const GtRecMap*  gt_image_info_get_recmap(GtImageInfo *image_info,
-                                          unsigned long i);
+const GtRecMap*  gt_image_info_get_rec_map(GtImageInfo *image_info,
+                                           unsigned long i);
 /* Deletes <image_info> and all the <GtRecMap> objects created by it. */
 void             gt_image_info_delete(GtImageInfo *image_info);
 

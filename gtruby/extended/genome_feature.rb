@@ -38,8 +38,8 @@ module GT
 
   #callback to populate attribute list
   def collect_attrib(tag, val, data)
-    GT.gt_strarray_add_cstr(data, tag)
-    GT.gt_strarray_add_cstr(data, val)
+    GT.gt_str_array_add_cstr(data, tag)
+    GT.gt_str_array_add_cstr(data, val)
   end
   COLLECTFUNC = callback "void collect_attrib(const char*, const char*, void*)"
 

@@ -19,15 +19,15 @@ require 'dl/import'
 require 'dl/struct'
 require 'gthelper'
 require 'extended/genome_feature'
-require 'annotationsketch/recmap'
+require 'annotationsketch/rec_map'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
   extern "GtImageInfo* gt_image_info_new()"
   extern "unsigned int gt_image_info_get_height(GtImageInfo*)"
-  extern "unsigned long gt_image_info_num_of_recmaps(GtImageInfo*)"
-  extern "const GtRecMap* gt_image_info_get_recmap(GtImageInfo*, " +
+  extern "unsigned long gt_image_info_num_of_rec_maps(GtImageInfo*)"
+  extern "const GtRecMap* gt_image_info_get_rec_map(GtImageInfo*, " +
                                                    "unsigned long)"
   extern "void gt_image_info_delete(GtImageInfo*)"
 
@@ -42,15 +42,15 @@ module GT
       GT.gt_image_info_get_height(@image_info)
     end
 
-    def num_of_recmaps()
-      GT.gt_image_info_num_of_recmaps(@image_info)
+    def num_of_rec_maps()
+      GT.gt_image_info_num_of_rec_maps(@image_info)
     end
 
     def each_hotspot()
       if @hotspots.nil? then
         @hotspots = []
-        0.upto(self.num_of_recmaps()-1) do |i|
-          rm = GT::RecMap.new(GT.gt_image_info_get_recmap(@image_info, i))
+        0.upto(self.num_of_rec_maps()-1) do |i|
+          rm = GT::RecMap.new(GT.gt_image_info_get_rec_map(@image_info, i))
           @hotspots.push([rm.get_northwest_x.to_i, \
                           rm.get_northwest_y.to_i, \
                           rm.get_southeast_x.to_i, \

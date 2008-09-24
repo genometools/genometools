@@ -19,7 +19,7 @@
 require 'dl/import'
 require 'core/array'
 require 'core/range'
-require 'core/strarray'
+require 'core/str_array'
 
 module GT
   extend DL::Importable

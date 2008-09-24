@@ -17,7 +17,7 @@
 
 require 'gtdlload'
 require 'gthelper'
-require 'core/strarray'
+require 'core/str_array'
 require 'extended/genome_stream'
 
 module GT
@@ -39,8 +39,8 @@ module GT
     end
 
     def get_used_types
-      strarray_ptr = GT.gt_gff3_in_stream_get_used_types(@genome_stream)
-      used_types = GT::StrArray.new(strarray_ptr)
+      str_array_ptr = GT.gt_gff3_in_stream_get_used_types(@genome_stream)
+      used_types = GT::StrArray.new(str_array_ptr)
       used_types.to_a
     end
   end

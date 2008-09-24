@@ -545,7 +545,7 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
                                     draw_range.end, canvas->pvt->y+bar_height,
                                     (GtFeatureNode*) /* XXX */
                                     gt_block_get_top_level_feature(block));
-      gt_image_info_add_recmap(canvas->pvt->ii, rm);
+      gt_image_info_add_rec_map(canvas->pvt->ii, rm);
       rm->has_omitted_children = true;
     }
     return -1;
@@ -646,7 +646,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
                                   canvas->pvt->y+bar_height,
                                   (GtFeatureNode*) /* XXX */
                                   gt_element_get_node_ref(elem));
-    gt_image_info_add_recmap(canvas->pvt->ii, rm);
+    gt_image_info_add_rec_map(canvas->pvt->ii, rm);
   }
 
   if (draw_range.end-draw_range.start <= 1.1)

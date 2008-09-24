@@ -44,7 +44,7 @@ void gt_image_info_delete(GtImageInfo *ii)
 {
   unsigned long i;
   if (!ii) return;
-  for (i=0;i<gt_image_info_num_of_recmaps(ii);i++)
+  for (i=0;i<gt_image_info_num_of_rec_maps(ii);i++)
   {
     GtRecMap *rm = *(GtRecMap**) gt_array_get(ii->recmaps, i);
     gt_rec_map_delete(rm);
@@ -53,7 +53,7 @@ void gt_image_info_delete(GtImageInfo *ii)
   gt_free(ii);
 }
 
-void gt_image_info_add_recmap(GtImageInfo *ii, GtRecMap *rm)
+void gt_image_info_add_rec_map(GtImageInfo *ii, GtRecMap *rm)
 {
   gt_assert(ii && rm);
   gt_array_add(ii->recmaps, rm);
@@ -71,29 +71,16 @@ unsigned int gt_image_info_get_height(GtImageInfo *ii)
   return ii->height;
 }
 
-unsigned long gt_image_info_num_of_recmaps(GtImageInfo *ii)
+unsigned long gt_image_info_num_of_rec_maps(GtImageInfo *ii)
 {
   gt_assert(ii);
   return gt_array_size(ii->recmaps);
 }
 
-const GtRecMap* gt_image_info_get_recmap(GtImageInfo *ii, unsigned long n)
+const GtRecMap* gt_image_info_get_rec_map(GtImageInfo *ii, unsigned long n)
 {
   gt_assert(ii);
   return *(GtRecMap**) gt_array_get(ii->recmaps, n);
-}
-
-void gt_image_info_fill_recmap(GtImageInfo* ii, GtRecMap* rm, unsigned long n)
-{
-  const GtRecMap* tmp;
-  gt_assert(ii && rm);
-  tmp = gt_image_info_get_recmap(ii, n);
-  rm->nw_x = tmp->nw_x;
-  rm->nw_y = tmp->nw_y;
-  rm->se_x = tmp->se_x;
-  rm->se_y = tmp->se_y;
-  rm->gf = tmp->gf;
-  rm->has_omitted_children = tmp->has_omitted_children;
 }
 
 int gt_image_info_unit_test(GtError *err)
@@ -123,9 +110,9 @@ int gt_image_info_unit_test(GtError *err)
                             gt_rand_max_double(100.0),
                             gt_rand_max_double(100.0),
                             (GtFeatureNode*) /* XXX */ gfs[i]);
-    gt_image_info_add_recmap(ii, rms[i]);
-    ensure(had_err, gt_image_info_num_of_recmaps(ii) == i+1);
-    ensure(had_err, (rm = gt_image_info_get_recmap(ii, i)) == rms[i]);
+    gt_image_info_add_rec_map(ii, rms[i]);
+    ensure(had_err, gt_image_info_num_of_rec_maps(ii) == i+1);
+    ensure(had_err, (rm = gt_image_info_get_rec_map(ii, i)) == rms[i]);
     ensure(had_err, rm->gf == rms[i]->gf);
     gt_genome_node_delete((GtGenomeNode*) gfs[i]);
   }

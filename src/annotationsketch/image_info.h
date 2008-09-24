@@ -23,8 +23,8 @@
 #include "core/error.h"
 
 void gt_image_info_set_height(GtImageInfo*, unsigned int);
-/* Takes ownership of <recmap>. */
-void gt_image_info_add_recmap(GtImageInfo*, GtRecMap *recmap);
+/* Takes ownership of <rec_map>. */
+void gt_image_info_add_rec_map(GtImageInfo*, GtRecMap *rec_map);
 int  gt_image_info_unit_test(GtError*);
 
 #endif

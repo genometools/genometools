@@ -22,12 +22,12 @@ module GT
   extend DL::Importable
   typealias "bool", "ibool"
 
-  extern "double gt_recmap_get_northwest_x(const GtRecMap*)"
-  extern "double gt_recmap_get_northwest_y(const GtRecMap*)"
-  extern "double gt_recmap_get_southeast_x(const GtRecMap*)"
-  extern "double gt_recmap_get_southeast_y(const GtRecMap*)"
-  extern "const GtGenomeFeature* gt_recmap_get_genome_feature(const GtRecMap*)"
-  extern "bool gt_recmap_has_omitted_children(const GtRecMap*)"
+  extern "double gt_rec_map_get_northwest_x(const GtRecMap*)"
+  extern "double gt_rec_map_get_northwest_y(const GtRecMap*)"
+  extern "double gt_rec_map_get_southeast_x(const GtRecMap*)"
+  extern "double gt_rec_map_get_southeast_y(const GtRecMap*)"
+  extern "const GtGenomeFeature* gt_rec_map_get_genome_feature(const GtRecMap*)"
+  extern "bool gt_rec_map_has_omitted_children(const GtRecMap*)"
 
   class RecMap
     def initialize(rm)
@@ -35,28 +35,28 @@ module GT
     end
 
     def get_northwest_x
-      GT::gt_recmap_get_northwest_x(@rm)
+      GT::gt_rec_map_get_northwest_x(@rm)
     end
 
     def get_northwest_y
-      GT::gt_recmap_get_northwest_y(@rm)
+      GT::gt_rec_map_get_northwest_y(@rm)
     end
 
     def get_southeast_x
-      GT::gt_recmap_get_southeast_x(@rm)
+      GT::gt_rec_map_get_southeast_x(@rm)
     end
 
     def get_southeast_y
-      GT::gt_recmap_get_southeast_y(@rm)
+      GT::gt_rec_map_get_southeast_y(@rm)
     end
 
     def get_genome_feature
       #refcount only this GenomeFeature!
-      GT::GenomeFeature.new(GT::gt_recmap_get_genome_feature(@rm), true)
+      GT::GenomeFeature.new(GT::gt_rec_map_get_genome_feature(@rm), true)
     end
 
     def has_omitted_children
-      GT::gt_recmap_has_omitted_children(@gn)
+      GT::gt_rec_map_has_omitted_children(@gn)
     end
   end
 end
