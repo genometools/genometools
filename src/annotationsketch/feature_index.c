@@ -129,7 +129,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
   gt_error_check(err);
   gt_assert(fi && gff3file);
   tmp = gt_array_new(sizeof (GtGenomeNode*));
-  gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, &gff3file, false, false);
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, &gff3file, false);
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
     gt_array_add(tmp, gn);
   if (!had_err) {

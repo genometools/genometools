@@ -185,8 +185,9 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
                                                   argv + parsed_args,
                                                   arguments->verbose &&
-                                                  arguments->outfp,
-                                                  arguments->checkids);
+                                                  arguments->outfp);
+  if (arguments->checkids)
+    gt_gff3_in_stream_check_id_attributes((GtGFF3InStream*) gff3_in_stream);
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */

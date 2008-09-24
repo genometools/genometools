@@ -211,8 +211,7 @@ const GtNodeStreamClass* gt_gff3_in_stream_class(void)
 
 /* takes ownership of <files> */
 static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
-                                        bool ensure_sorting, bool be_verbose,
-                                        bool checkids)
+                                        bool ensure_sorting, bool be_verbose)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_gff3_in_stream_class(),
                                           ensure_sorting);
@@ -226,11 +225,18 @@ static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
   gff3_in_stream->fpin               = NULL;
   gff3_in_stream->line_number        = 0;
   gff3_in_stream->genome_node_buffer = gt_queue_new();
-  gff3_in_stream->checkids           = checkids;
-  gff3_in_stream->gff3_parser        = gt_gff3_parser_new(checkids, NULL);
+  gff3_in_stream->checkids           = false;
+  gff3_in_stream->gff3_parser        = gt_gff3_parser_new(NULL);
   gff3_in_stream->used_types         = gt_cstr_table_new();
   gff3_in_stream->be_verbose         = be_verbose;
   return gs;
+}
+
+void gt_gff3_in_stream_check_id_attributes(GtGFF3InStream *is)
+{
+  gt_assert(is);
+  is->checkids = true;
+  gt_gff3_parser_check_id_attributes(is->gff3_parser);
 }
 
 void gt_gff3_in_stream_set_type_checker(GtNodeStream *gs,
@@ -239,7 +245,9 @@ void gt_gff3_in_stream_set_type_checker(GtNodeStream *gs,
   GtGFF3InStream *is = gff3_in_stream_cast(gs);
   gt_assert(is);
   gt_gff3_parser_delete(is->gff3_parser);
-  is->gff3_parser = gt_gff3_parser_new(is->checkids, type_checker);
+  is->gff3_parser = gt_gff3_parser_new(type_checker);
+  if (is->checkids)
+    gt_gff3_parser_check_id_attributes(is->gff3_parser);
 }
 
 GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream *gs)
@@ -273,13 +281,13 @@ void gt_gff3_in_stream_enable_tidy_mode(GtNodeStream *gs)
 
 GtNodeStream* gt_gff3_in_stream_new_unsorted(int num_of_files,
                                              const char **filenames,
-                                             bool be_verbose, bool checkids)
+                                             bool be_verbose)
 {
   int i;
   GtStrArray *files = gt_str_array_new();
   for (i = 0; i < num_of_files; i++)
     gt_str_array_add_cstr(files, filenames[i]);
-  return gff3_in_stream_new(files, false, be_verbose, checkids);
+  return gff3_in_stream_new(files, false, be_verbose);
 }
 
 GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename,
@@ -288,5 +296,5 @@ GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename,
   GtStrArray *files = gt_str_array_new();
   if (filename)
     gt_str_array_add_cstr(files, filename);
-  return gff3_in_stream_new(files, true, be_verbose, false);
+  return gff3_in_stream_new(files, true, be_verbose);
 }

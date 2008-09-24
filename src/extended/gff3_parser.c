@@ -107,7 +107,7 @@ static void simple_sequence_region_delete(SimpleGtSequenceRegion *ssr)
   gt_free(ssr);
 }
 
-GtGFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker *type_checker)
+GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
 {
   GtGFF3Parser *parser;
   parser = gt_malloc(sizeof *parser);
@@ -119,7 +119,7 @@ GtGFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker *type_checker)
   parser->undefined_sequence_regions = gt_hashmap_new(
     HASH_STRING, NULL, (GtFree) automatic_sequence_region_delete);
   parser->incomplete_node = false;
-  parser->checkids = checkids;
+  parser->checkids = false;
   parser->tidy = false;
   parser->fasta_parsing = false;
   parser->offset = UNDEF_LONG;
@@ -128,6 +128,12 @@ GtGFF3Parser* gt_gff3_parser_new(bool checkids, GtTypeChecker *type_checker)
                                       : NULL;
   parser->last_terminator = 0;
   return parser;
+}
+
+void gt_gff3_parser_check_id_attributes(GtGFF3Parser *parser)
+{
+  gt_assert(parser);
+  parser->checkids = true;
 }
 
 void gt_gff3_parser_set_offset(GtGFF3Parser *parser, long offset)

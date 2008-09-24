@@ -259,7 +259,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
                                                   argv + parsed_args,
                                                   arguments->verbose &&
-                                                  arguments->outfp, false);
+                                                  arguments->outfp);
 
   /* create a filter stream */
   filter_stream = gt_filter_stream_new(gff3_in_stream, arguments->seqid,
