@@ -30,7 +30,9 @@ struct GtRange {
                 end;
 };
 
-/* XXX */
+/* Compare <range_a> with <range_b>. Returns 0 if <range_a> equals <range_b>, -1
+   if <range_a> starts before <range_b> or (for equal starts) <range_a> ends
+   before <range_b>, and 1 else. */
 int           gt_range_compare(const GtRange *range_a, const GtRange *range_b);
 /* XXX */
 int           gt_range_compare_with_delta(GtRange, GtRange,
