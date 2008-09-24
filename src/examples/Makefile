@@ -9,7 +9,7 @@ GT_CFLAGS:=-Wall -Werror -Wunused-parameter -g -Os -pipe \
            -I/opt/local/include/cairo
 LD:=$(CC)
 GT_LDFLAGS:=-L$(prefix)/lib \
-            -L/usr/X11R6 \
+            -L/usr/X11R6/lib \
             -L/usr/local/lib \
             -L/opt/local/lib
 
