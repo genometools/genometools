@@ -372,7 +372,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 
   /* discard elements that do not overlap with visible range */
   elem_range = gt_genome_node_get_range((GtGenomeNode*) node);
-  if (!gt_range_overlap(d->range, elem_range))
+  if (!gt_range_overlap(&d->range, &elem_range))
     return;
 
   /* get maximal view widths in nucleotides to show this type */

@@ -74,11 +74,11 @@ int gt_range_compare_by_length_ptr(const GtRange *range_a,
   return 1;
 }
 
-bool gt_range_overlap(GtRange range_a, GtRange range_b)
+bool gt_range_overlap(const GtRange *range_a, const GtRange *range_b)
 {
-  gt_assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+  gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
 
-  if (range_a.start <= range_b.end && range_a.end >= range_b.start)
+  if (range_a->start <= range_b->end && range_a->end >= range_b->start)
     return true;
   return false;
 }
@@ -297,10 +297,8 @@ bool gt_ranges_do_not_overlap(const GtArray *ranges)
   gt_assert(ranges && gt_array_size(ranges));
 
   for (i = 1; i < gt_array_size(ranges); i++) {
-    if (gt_range_overlap(*(GtRange*) gt_array_get(ranges, i-1),
-                      *(GtRange*) gt_array_get(ranges, i))) {
+    if (gt_range_overlap(gt_array_get(ranges, i-1), gt_array_get(ranges, i)))
       return false;
-    }
   }
   return true;
 }

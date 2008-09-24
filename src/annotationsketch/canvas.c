@@ -581,7 +581,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   gt_assert(canvas && elem);
 
   /* This shouldn't happen. */
-  if (!gt_range_overlap(elem_range, canvas->pvt->viewrange))
+  if (!gt_range_overlap(&elem_range, &canvas->pvt->viewrange))
     return -1;
 
   type = gt_element_get_type(elem);

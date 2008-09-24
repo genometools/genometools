@@ -244,7 +244,7 @@ static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
 
     switch (gt_range_compare(&exon_feature_range, &exons_from_sa_range)) {
       case -1:
-        if (gt_range_overlap(exon_feature_range, exons_from_sa_range)) {
+        if (gt_range_overlap(&exon_feature_range, &exons_from_sa_range)) {
           if (!gt_range_contains(exon_feature_range, exons_from_sa_range)) {
             gt_assert(gt_genome_node_get_start((GtGenomeNode*) exon_feature) <=
               gt_genome_node_get_start((GtGenomeNode*) exons_from_sa_feature));
@@ -264,7 +264,7 @@ static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
         exon_feature_index++;
         break;
       case 0:
-        gt_assert(gt_range_overlap(exon_feature_range, exons_from_sa_range));
+        gt_assert(gt_range_overlap(&exon_feature_range, &exons_from_sa_range));
         /* update score if necessary */
         if ((gt_feature_node_score_is_defined(exon_feature) &&
              gt_feature_node_score_is_defined(exons_from_sa_feature) &&
@@ -279,7 +279,7 @@ static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
         exons_from_sa_index++;
         break;
       case 1:
-        gt_assert(gt_range_overlap(exon_feature_range, exons_from_sa_range));
+        gt_assert(gt_range_overlap(&exon_feature_range, &exons_from_sa_range));
         gt_assert(gt_genome_node_get_start((GtGenomeNode*) exon_feature) <=
               gt_genome_node_get_start((GtGenomeNode*) exons_from_sa_feature));
         /* update right border and score, if necessary */

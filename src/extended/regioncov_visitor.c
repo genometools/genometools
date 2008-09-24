@@ -59,7 +59,7 @@ static int gt_regioncov_visitor_genome_feature(GtNodeVisitor *gv,
     old_gt_range_ptr = gt_array_get_last(ranges);
     old_range = *old_gt_range_ptr;
     old_range.end += regioncov_visitor->max_feature_dist;
-    if (gt_range_overlap(old_range, new_range)) {
+    if (gt_range_overlap(&old_range, &new_range)) {
       old_gt_range_ptr->end = MAX(old_gt_range_ptr->end, new_range.end);
     }
     else

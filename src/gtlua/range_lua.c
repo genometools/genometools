@@ -55,7 +55,7 @@ static int range_lua_overlap(lua_State *L)
   GtRange *range_a, *range_b;
   range_a = check_range(L, 1);
   range_b = check_range(L, 2);
-  lua_pushboolean(L, gt_range_overlap(*range_a, *range_b));
+  lua_pushboolean(L, gt_range_overlap(range_a, range_b));
   return 1;
 }
 

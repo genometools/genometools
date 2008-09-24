@@ -42,8 +42,8 @@ int           gt_range_compare(const GtRange *range_a, const GtRange *range_b);
 int           gt_range_compare_with_delta(const GtRange *range_a,
                                           const GtRange *range_b,
                                           unsigned long delta);
-/* XXX */
-bool          gt_range_overlap(GtRange, GtRange);
+/* Returns <true> if <range_a> and <range_b> overlap, <false> otherwise. */
+bool          gt_range_overlap(const GtRange *range_a, const GtRange *range_b);
 /* XXX */
 bool          gt_range_contains(GtRange, GtRange);
 /* XXX */

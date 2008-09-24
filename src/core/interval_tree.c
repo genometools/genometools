@@ -405,7 +405,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     {
       /* we have a hit, check if really overlapping */
       res_rng = (GtRange*) gt_interval_tree_node_get_data(res);
-      ensure(had_err, gt_range_overlap(qrange, *res_rng));
+      ensure(had_err, gt_range_overlap(&qrange, res_rng));
     } else {
       /* no hit, check whether there really is no overlapping
          interval in tree */
@@ -415,7 +415,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
       for (j = 0; j < gt_array_size(arr); j++)
       {
         this_rng = *(GtRange**) gt_array_get(arr, j);
-        if (gt_range_overlap(*this_rng, qrange))
+        if (gt_range_overlap(this_rng, &qrange))
         {
           found = true;
           break;
@@ -443,7 +443,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
       {
         GtRange *this_rng;
         this_rng = *(GtRange**) gt_array_get(arr, j);
-        if (gt_range_overlap(*this_rng, qrange))
+        if (gt_range_overlap(this_rng, &qrange))
         {
           gt_array_add(ref, this_rng);
         }

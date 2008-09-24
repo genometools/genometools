@@ -133,7 +133,7 @@ static bool compatible(const ConsensusSA *csa,
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
-  if (!gt_range_overlap(range_sa_1, range_sa_2)) {
+  if (!gt_range_overlap(&range_sa_1, &range_sa_2)) {
     gt_array_delete(exons_sa_1);
     gt_array_delete(exons_sa_2);
     return false;
@@ -149,8 +149,8 @@ static bool compatible(const ConsensusSA *csa,
   num_of_exons_1 = gt_array_size(exons_sa_1);
   num_of_exons_2 = gt_array_size(exons_sa_2);
   while (i < num_of_exons_1 && j < num_of_exons_2) {
-    if (gt_range_overlap(*(GtRange*) gt_array_get(exons_sa_1, i),
-                      *(GtRange*) gt_array_get(exons_sa_2, j))) {
+    if (gt_range_overlap(gt_array_get(exons_sa_1, i),
+                         gt_array_get(exons_sa_2, j))) {
       start_1 = i;
       start_2 = j;
       start_values_set = true;
@@ -182,7 +182,7 @@ static bool compatible(const ConsensusSA *csa,
     range_sa_1 = *((GtRange*) gt_array_get(exons_sa_1, start_1));
     range_sa_2 = *((GtRange*) gt_array_get(exons_sa_2, start_2));
 
-    if (gt_range_overlap(range_sa_1, range_sa_2)) {
+    if (gt_range_overlap(&range_sa_1, &range_sa_2)) {
       /* analyze acceptor sites */
 
       /* see if at least one exon has a acceptor site (on the left).
