@@ -22,8 +22,11 @@
 
 /* Assert module */
 
-/* XXX */
-#define gt_assert(expr) \
-        assert(expr)
+/* The <gt_assert()> macro tests the given <expression> and if it is false, the
+   calling process is terminated. A diagnostic message is written to <stderr>
+   and the <abort(3)> function is called, effectively terminating the program.
+   If <expression> is true, the <gt_assert()> macro does nothing. */
+#define gt_assert(expression) \
+        assert(expression)
 
 #endif
