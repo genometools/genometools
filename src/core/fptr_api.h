@@ -20,15 +20,15 @@
 
 /* FunctionPointer module */
 
-/* Return less than 0 if *a < *b,
-   0 if *a == *b, and
-   greater 0 if *a > * b.
-   Do not count on these functions to return -1, 0, or 1!
- */
+/* Functions of this type return less than 0 if <a> is __smaller__ than <b>,
+   0 if <a> is __equal__ to <b>, and greater 0 if <a> is __larger__ than <b>.
+   Thereby, the operators __smaller__, __equal__, and __larger__ are
+   implementation dependend.
+   Do not count on these functions to return -1, 0, or 1!  */
 typedef int  (*GtCompare)(const void *a, const void *b);
-/* XXX */
+/* Similar to <GtCompare>, but with an additional <data> pointer. */
 typedef int  (*GtCompareWithData)(const void*, const void*, void *data);
-/* XXX */
+/* The generic free function pointer type. */
 typedef void (*GtFree)(void*);
 
 #endif
