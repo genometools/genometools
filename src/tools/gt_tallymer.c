@@ -44,14 +44,21 @@ typedef struct
                 userdefinedminocc,
                 userdefinedmaxocc,
                 userdefinedprefixlength;
-  GtOption *refoptionpl;
   Prefixlengthvalue prefixlength;
-  GtStr *str_indexname;
+  GtOption *refoptionpl;
+  GtStr *str_storeindex,
+        *str_inputindex;
+  bool storecounts,
+       verbose;
 } Tallymer_mkindex_options;
 
 static void *gt_tallymer_mkindex_arguments_new(void)
 {
-  return gt_malloc(sizeof (Tallymer_mkindex_options));
+  Tallymer_mkindex_options *arguments
+    = gt_malloc(sizeof (Tallymer_mkindex_options));
+  arguments->str_storeindex = gt_str_new();
+  arguments->str_inputindex = gt_str_new();
+  return arguments;
 }
 
 static void gt_tallymer_mkindex_arguments_delete(void *tool_arguments)
@@ -62,39 +69,50 @@ static void gt_tallymer_mkindex_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  gt_str_delete(argument->str_indexname);
+  gt_str_delete(arguments->str_storeindex);
   gt_option_delete(arguments->refoptionpl);
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_tallymer_mkindex_option_parser_new(
-                          void *tool_arguments)
+static GtOptionParser
+            *gt_tallymer_mkindex_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
-  GtOption *option, *optionpl;
+  GtOption *option,
+           *optionminocc,
+           *optionmaxocc,
+           *optionpl,
+           *optionstoreindex,
+           *optionstorecounts;
   Tallymer_mkindex_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] indexname1 [indexname2 ...]",
-                         "Count and index k-mers in the given indexes "
-                         "for a fixed value of k.");
+  op = gt_option_parser_new("[options] enhanced-suffix-array",
+                            "Count and index k-mers in the given enhanced "
+                            "suffix array for a fixed value of k.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
   option = gt_option_new_ulong("mersize",
                                "Specify the mer size.",
                                &arguments->mersize,
                                20UL);
   gt_option_parser_add_option(op, option);
-  option = gt_option_new_ulong("minocc",
-                               "Specify the minimum occurrence number for "
-                               "the mers to output/index",
-                               &arguments->userdefinedminocc,
-                               0);
-  gt_option_parser_add_option(op, option);
-  option = gt_option_new_ulong("maxocc",
-                               "Specify the maximum occurrence number for "
-                               "the mers to output/index",
-                               &arguments->userdefinedmaxocc,
-                               0);
-  gt_option_parser_add_option(op, option);
+
+  optionminocc
+    = gt_option_new_ulong("minocc",
+                          "Specify the minimum occurrence number for "
+                          "the mers to output/index",
+                          &arguments->userdefinedminocc,
+                          0);
+  gt_option_parser_add_option(op, optionminocc);
+
+  optionmaxocc
+    = gt_option_new_ulong("maxocc",
+                          "Specify the maximum occurrence number for "
+                          "the mers to output/index",
+                          &arguments->userdefinedmaxocc,
+                          0);
+  gt_option_parser_add_option(op, optionmaxocc);
+
   optionpl = gt_option_new_ulong_min("pl",
                  "specify prefix length for bucket boundary construction\n"
                  "recommendation: use without argument;\n"
@@ -105,16 +123,29 @@ static GtOptionParser* gt_tallymer_mkindex_option_parser_new(
   gt_option_argument_is_optional(optionpl);
   gt_option_parser_add_option(op, optionpl);
   arguments->refoptionpl = gt_option_ref(optionpl);
-  optionindexname = gt_option_new_string("indexname",
-                                         "store the mers specified by options "
-                                         "-maxocc and -minocc in an index",
-                                         arguments->str_indexname, NULL);
+
+  optionstoreindex = gt_option_new_string("indexname",
+                                          "store the mers specified by options "
+                                          "-maxocc and -minocc in an index",
+                                          arguments->str_storeindex, NULL);
+  gt_option_parser_add_option(op, optionstoreindex);
+
+  optionstorecounts = gt_option_new_bool("counts", "store counts of the mers",
+                                         &arguments->storecounts,false);
+  gt_option_parser_add_option(op, optionstorecounts);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
+  gt_option_imply(optionpl, optionstoreindex);
+  gt_option_imply(optionstorecounts, optionstoreindex);
+  gt_option_imply_either_2(optionstoreindex,optionminocc,optionmaxocc);
   return op;
 }
 
-static int gt_tallymer_mkindex_arguments_check(GT_UNUSED int rest_argc,
+static int gt_tallymer_mkindex_arguments_check(int rest_argc,
                                                void *tool_arguments,
-                                               GT_UNUSED GtError *err)
+                                               GtError *err)
 {
   Tallymer_mkindex_options *arguments = tool_arguments;
 
@@ -134,34 +165,47 @@ static int gt_tallymer_mkindex_arguments_check(GT_UNUSED int rest_argc,
     arguments->prefixlength.flag = Undeterminedprefixlength;
     arguments->prefixlength.value = 0;
   }
+  if (rest_argc != 1)
+  {
+    gt_error_set(err,"missing name of enhanced suffix array index");
+    return -1;
+  }
   return 0;
 }
 
-static int gt_tallymer_mkindex_runner(GT_UNUSED int argc,
-                                      GT_UNUSED const char **argv,
-                                      GT_UNUSED int parsed_args,
+static int gt_tallymer_mkindex_runner(int argc,
+                                      const char **argv,
+                                      int parsed_args,
                                       void *tool_arguments,
                                       GT_UNUSED GtError *err)
 {
   Tallymer_mkindex_options *arguments = tool_arguments;
 
+  assert(parsed_args + 1 == argc);
+  gt_str_set(arguments->str_inputindex,argv[parsed_args]);
   printf("# mersize=%lu\n",arguments->mersize);
   printf("# minocc=%lu\n",arguments->userdefinedminocc);
   printf("# maxocc=%lu\n",arguments->userdefinedmaxocc);
   printf("# prefixlength=");
   if (arguments->prefixlength.flag == Autoprefixlength)
   {
-    printf("automatic\n");
+    printf("automatic");
   } else
   {
     if (arguments->prefixlength.flag == Determinedprefixlength)
     {
-      printf("%lu\n",arguments->prefixlength.value);
+      printf("%lu",arguments->prefixlength.value);
     } else
     {
-      printf("undefined\n");
+      printf("undefined");
     }
-  } 
+  }
+  printf("\n");
+  if (gt_str_length(arguments->str_storeindex) > 0)
+  {
+    printf("# storeindex=%s\n",gt_str_get(arguments->str_storeindex));
+  }
+  printf("# inputindex=%s\n",gt_str_get(arguments->str_inputindex));
   return 0;
 }
 
@@ -183,8 +227,8 @@ static int gt_tallymer_occratio(GT_UNUSED int argc,
 }
 
 static int gt_tallymer_search(GT_UNUSED int argc,
-                                GT_UNUSED const char *argv[],
-                                GtError *err)
+                              GT_UNUSED const char *argv[],
+                              GtError *err)
 {
   gt_error_set(err,"tallymer search not implemented yet");
   return -1;
