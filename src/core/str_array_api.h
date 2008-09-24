@@ -20,17 +20,29 @@
 
 #include "core/str_api.h"
 
-/* the string array class  */
+/* <GtStrArray*> objects are arrays of string which grow on demand. */
 typedef struct GtStrArray GtStrArray;
 
+/* Return a new <GtStrArray*> object. */
 GtStrArray*   gt_str_array_new(void);
-void          gt_str_array_add_cstr(GtStrArray*, const char*);
-void          gt_str_array_add_cstr_nt(GtStrArray*, const char*,unsigned long);
-void          gt_str_array_add(GtStrArray*, const GtStr*);
-const char*   gt_str_array_get(const GtStrArray*, unsigned long strnum);
-void          gt_str_array_set_size(GtStrArray*, unsigned long);
-/* Returns number of strings. */
-unsigned long gt_str_array_size(const GtStrArray*);
-void          gt_str_array_delete(GtStrArray*);
+/* Add <cstr> to <str_array>. Thereby, an internal copy of <cstr> is created. */
+void          gt_str_array_add_cstr(GtStrArray *str_array, const char *cstr);
+/* Add the non <\0>-terminated <cstr> with given <length> to <str_array>.
+   Thereby, an internal copy of <cstr> is created. */
+void          gt_str_array_add_cstr_nt(GtStrArray *str_array, const char *cstr,
+                                       unsigned long length);
+/* Add <str> to <str_array>. Thereby, an internal copy of <str> is created. */
+void          gt_str_array_add(GtStrArray *str_array, const GtStr *str);
+/* Return pointer to internal string with number <strnum> of <str_array>.
+   <strnum> must be smaller than <gt_str_array_size(str_array)>. */
+const char*   gt_str_array_get(const GtStrArray *str_array,
+                               unsigned long strnum);
+/* Set the size of <str_array> to <size>. <size> must be smaller or equal than
+   <gt_str_array_size(str_array)>. */
+void          gt_str_array_set_size(GtStrArray *str_array, unsigned long size);
+/* Return the number of strings stored in <str_array>. */
+unsigned long gt_str_array_size(const GtStrArray *str_array);
+/* Delete <str_array>. */
+void          gt_str_array_delete(GtStrArray *str_array);
 
 #endif
