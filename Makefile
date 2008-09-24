@@ -265,6 +265,7 @@ ifneq ($(cairo),no)
   STEST_FLAGS += -libannotationsketch
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed
+  ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
@@ -595,9 +596,11 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
 	> doc/manuals/gtscript_reference.tex
 
-manuals: docs
-	$(MAKE) -C $(CURDIR)/doc/manuals
+doc/manuals/annotationsketch.pdf: docs
+	$(MAKE) -C $(CURDIR)/doc/manuals annotationsketch
 
+manuals: $(ANNOTATIONSKETCH_MANUAL)
+	$(MAKE) -C $(CURDIR)/doc/manuals
 
 installwww:
 # install genometools.org website

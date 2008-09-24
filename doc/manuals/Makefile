@@ -2,10 +2,11 @@ ALL=ltrharvest.pdf\
     uniquesub.pdf\
     matstat.pdf\
     mgth.pdf\
-    packedindex.pdf\
-    annotationsketch.pdf
+    packedindex.pdf
 
 all:${ALL}
+
+annotationsketch: annotationsketch.pdf
 
 %.pdf:%.tex %-pdf.bbl
 	-test -e $*-pdf.aux && mv $*-pdf.aux $*.aux
