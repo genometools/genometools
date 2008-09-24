@@ -121,7 +121,8 @@ static OPrval parse_options(int *parsed_args,
 
   /* -style */
   option = gt_option_new_string("style", "style file to use",
-                                arguments->stylefile, gt_str_get(arguments->stylefile));
+                                arguments->stylefile,
+                                gt_str_get(arguments->stylefile));
   gt_option_parser_add_option(op, option);
 
   /* -format */
