@@ -1,5 +1,12 @@
 <a name="<%= prototype%>"></a>
-<code><%=name%>(<%=args%>)</code>
+<?lua
+  if args then
+    func = name .. "(" .. args ..")"
+  else
+    func = name
+  end
+?>
+<code><%=func%></code>
 <p>
 <%=comment%>
 </p>

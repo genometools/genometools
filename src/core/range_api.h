@@ -21,20 +21,31 @@
 #include <stdbool.h>
 #include "core/array_api.h"
 
-typedef struct {
+typedef struct GtRange GtRange;
+
+struct GtRange {
   unsigned long start,
                 end;
-} GtRange;
+};
 
+/* XXX */
 int           gt_range_compare(GtRange, GtRange);
+/* XXX */
 int           gt_range_compare_ptr(const GtRange*, const GtRange*);
+/* XXX */
 int           gt_range_compare_with_delta(GtRange, GtRange,
                                           unsigned long delta);
+/* XXX */
 bool          gt_range_overlap(GtRange, GtRange);
+/* XXX */
 bool          gt_range_contains(GtRange, GtRange);
+/* XXX */
 bool          gt_range_within(GtRange, unsigned long);
+/* XXX */
 GtRange       gt_range_join(GtRange, GtRange);
+/* XXX */
 GtRange       gt_range_offset(GtRange, long offset);
+/* XXX */
 unsigned long gt_range_length(GtRange);
 
 #endif

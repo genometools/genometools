@@ -22,20 +22,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* the memory allocator module */
+/* MemoryAllocation module */
 
+/* XXX */
 #define       gt_malloc(size)\
               gt_malloc_mem(size, __FILE__, __LINE__)
+/* XXX */
 void*         gt_malloc_mem(size_t size, const char*, int);
+/* XXX */
 #define       gt_calloc(nmemb, size)\
               gt_calloc_mem(nmemb, size, __FILE__, __LINE__)
+/* XXX */
 void*         gt_calloc_mem(size_t nmemb, size_t size, const char*, int);
+/* XXX */
 #define       gt_realloc(ptr, size)\
               gt_realloc_mem(ptr, size, __FILE__, __LINE__)
+/* XXX */
 void*         gt_realloc_mem(void *ptr, size_t size, const char*, int);
+/* XXX */
 #define       gt_free(ptr)\
               gt_free_mem(ptr, __FILE__, __LINE__)
+/* XXX */
 void          gt_free_mem(void *ptr, const char*, int);
+/* XXX */
 void          gt_free_func(void *ptr);
 
 #endif

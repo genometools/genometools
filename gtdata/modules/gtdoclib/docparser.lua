@@ -63,7 +63,8 @@ local CodeStop             = LuaCommentStart + LuaLocalFunction + LuaGlobalFunct
 local LuaCode              = lpeg.Cc("code") * lpeg.C((Any - CodeStop)^1)
 
 -- Lexical Elements of (Lua) C
-local Character      = lpeg.R("AZ", "az") + lpeg.P("_") + lpeg.P("*")
+local Character      = lpeg.R("AZ", "az") + lpeg.R("09") + lpeg.P("_") +
+                       lpeg.P("*")
 local CCommentStart  = lpeg.P("/*")
 local CCommentEnd    = lpeg.P("*/")
 local ExportLuaCComment = CCommentStart * lpeg.P(" exports the ") *
@@ -82,9 +83,10 @@ local Include = lpeg.P("#include") * (Any - Newline)^1 * Newline
 local ClassTypedef = lpeg.Ct(lpeg.Cc("class") *
                              (CCommentStart * lpeg.C((Any - CCommentEnd)^0) *
                                CCommentEnd)^0 * Newline^0 *
-                             lpeg.P("typedef struct") * Space * Character^1 *
-                             Space * lpeg.C(Character^1) * OptionalSpace *
-                             Semicolon)
+                             lpeg.P("typedef") * Space *
+                             (lpeg.P("struct") + lpeg.P("enum")) * Space *
+                             Character^1 * Space * lpeg.C(Character^1) *
+                             OptionalSpace * Semicolon)
 local FunctionTypedef = lpeg.Ct(lpeg.Cc("funcdef") *
                                 (CCommentStart * lpeg.C((Any - CCommentEnd)^0) *
                                 CCommentEnd) * Newline^0 *
@@ -103,8 +105,12 @@ local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
                        lpeg.C(lpeg.P(Any - lpeg.P("("))^1) * lpeg.P("(") *
                        lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
                        OptionalSpace * DefineSeparator
+local ExportedPlainDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
+                            lpeg.C(lpeg.P(Any - (DefineSeparator + Space))^1) *
+                            OptionalSpace * DefineSeparator
 local ExportCMethod = lpeg.Ct(ExportedComment * Newline^0 * Function)
-local ExportCDefine = lpeg.Ct(ExportedComment * Newline^0 * ExportedDefine)
+local ExportCDefine = lpeg.Ct(ExportedComment * Newline^0 *
+                              (ExportedDefine+ ExportedPlainDefine))
 local ModuleDef = lpeg.Ct(lpeg.Cc("module") * CCommentStart * Space *
                           lpeg.C(Character^1) * Space * lpeg.P("module") *
                           Space * CCommentEnd)
@@ -130,7 +136,7 @@ local CGrammar = lpeg.P{ Start,
   -- Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0 * Endif);
   Start = lpeg.Ct(CComment * Newline^0 * Ifndef * Define * Elem^0);
   Elem = ClassTypedef + ModuleDef + ExportCDefine + ExportCMethod + Space +
-         Include + lpeg.C(TypedefStruct) + FunctionTypedef + CCode;
+         Include + lpeg.C(TypedefStruct) + FunctionTypedef + CCode + CComment;
 }
 CGrammar = CGrammar * -1
 

@@ -18,7 +18,7 @@
 #ifndef FPTR_API_H
 #define FPTR_API_H
 
-/* The generic function pointers. */
+/* FunctionPointer module */
 
 /* Return less than 0 if *a < *b,
    0 if *a == *b, and
@@ -26,7 +26,9 @@
    Do not count on these functions to return -1, 0, or 1!
  */
 typedef int  (*GtCompare)(const void *a, const void *b);
+/* XXX */
 typedef int  (*GtCompareWithData)(const void*, const void*, void *data);
+/* XXX */
 typedef void (*GtFree)(void*);
 
 #endif

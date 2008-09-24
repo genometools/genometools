@@ -20,6 +20,9 @@
 
 #include <assert.h>
 
+/* Assert module */
+
+/* XXX */
 #define gt_assert(expr) \
         assert(expr)
 

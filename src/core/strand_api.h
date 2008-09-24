@@ -18,18 +18,23 @@
 #ifndef STRAND_API_H
 #define STRAND_API_H
 
-typedef enum {
+typedef enum GtStrand GtStrand;
+
+enum GtStrand {
   GT_STRAND_FORWARD, /* '+' */
   GT_STRAND_REVERSE, /* '-' */
   GT_STRAND_BOTH,    /* '.' */
   GT_STRAND_UNKNOWN, /* '?' */
   GT_NUM_OF_STRAND_TYPES
-} GtStrand;
+};
 
-#define GT_STRAND_CHARS "+-.?"
+/* XXX */
+#define GT_STRAND_CHARS \
+        "+-.?"
 
 /* Returns NUM_OF_GT_STRAND_TYPES if <strand_char> is not a valid one. */
 GtStrand gt_strand_get(char strand_char);
+/* XXX */
 GtStrand gt_strand_join(GtStrand, GtStrand);
 
 #endif

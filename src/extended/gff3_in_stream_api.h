@@ -24,6 +24,7 @@
 /* implements the ``genome_stream'' interface */
 typedef struct GtGFF3InStream GtGFF3InStream;
 
+/* XXX */
 GtNodeStream*            gt_gff3_in_stream_new_unsorted(int num_of_files,
                                                         const char **filenames,
                                                         bool be_verbose,

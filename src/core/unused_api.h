@@ -18,6 +18,10 @@
 #ifndef UNUSED_API_H
 #define UNUSED_API_H
 
-#define GT_UNUSED __attribute__ ((unused)) /*@unused@*/
+/* Unused module */
+
+/* XXX */
+#define GT_UNUSED \
+        __attribute__ ((unused)) /*@unused@*/
 
 #endif

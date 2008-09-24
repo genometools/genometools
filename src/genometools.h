@@ -27,11 +27,13 @@
 
 /* the core module */
 #include "core/array_api.h"
+#include "core/assert_api.h"
 #include "core/error_api.h"
 #include "core/fptr_api.h"
 #include "core/ma_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
+#include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "core/version_api.h"
 #include "core/warning_api.h"

@@ -52,7 +52,7 @@ function DocBase:add_module(modulename, be_verbose)
 end
 
 function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
-  assert(funcname and funcargs and comment)
+  assert(funcname and comment)
   local desc = {}
   -- remove ``GenomeTools_'' prefix which is used to extend exported C classes
   desc.rval = funcret
@@ -66,16 +66,18 @@ function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
     self.modules[self.last_module][#self.modules[self.last_module] + 1] = desc
     return
   end
-  local classname
-  funcname = "^" .. string.gsub(funcname, "_", "")
+  local classname, match
+  funcname = string.lower(string.gsub(funcname, "_", ""))
   for class_to_search in pairs(self.classes) do
-    local class_to_match = string.lower(string.gsub(class_to_search, "_", ""))
+    local class_to_match = "^" .. string.lower(string.gsub(class_to_search, "_", ""))
     if be_verbose then
       print("match class: " .. class_to_match .. funcname)
     end
-    if string.match(funcname, class_to_match) then
-      classname = class_to_search
-      break
+    match = string.match(funcname, class_to_match)
+    if match then
+      if not classname or string.len(match) > string.len(classname) then
+        classname = class_to_search
+      end
     end
   end
   if be_verbose and classname then
@@ -149,7 +151,7 @@ function DocBase:process_ast(ast, be_verbose)
         local complete_comment = ""
         if funcpos > 0 then
           assert(funcpos > 2)
-          assert(#ast == funcpos + 3)
+          assert(#ast == funcpos + 2 or #ast == funcpos + 3)
           if be_verbose then
             print("function found!")
           end
@@ -187,7 +189,7 @@ function DocBase:accept(visitor)
   -- visit all modules
   local sorted_modules = {}
   for modulename in pairs(self.modules) do
-    if #self.modules[modulename] > 0 then
+    if #self.modules[modulename] > 0 or #self.moduledefs[modulename] > 0 then
       sorted_modules[#sorted_modules + 1] = modulename
     end
   end

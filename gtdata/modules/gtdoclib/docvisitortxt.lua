@@ -48,8 +48,12 @@ end
 
 function DocVisitorTxt:visit_method(desc)
   assert(desc)
-  io.write(string.format("method:\n%s\n%s(%s)\n", desc.comment, desc.name,
-           desc.args))
+  if desc.args then
+    io.write(string.format("method:\n%s\n%s(%s)\n", desc.comment, desc.name,
+             desc.args))
+  else
+    io.write(string.format("method:\n%s\n%s\n", desc.comment, desc.name))
+           end
 end
 
 function DocVisitorTxt:visit_funcdef(desc)
