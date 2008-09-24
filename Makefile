@@ -595,7 +595,7 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
 	> doc/manuals/gtscript_reference.tex
 
-manuals:
+manuals: docs
 	$(MAKE) -C $(CURDIR)/doc/manuals
 
 
