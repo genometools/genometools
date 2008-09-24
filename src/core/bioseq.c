@@ -577,10 +577,8 @@ const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
 
 unsigned long gt_bioseq_get_sequence_length(GtBioseq *bs, unsigned long idx)
 {
-  GtRange sequence_range;
   gt_assert(bs);
-  sequence_range = *(GtRange*) gt_array_get(bs->sequence_ranges, idx);
-  return gt_range_length(sequence_range);
+  return gt_range_length(gt_array_get(bs->sequence_ranges, idx));
 }
 
 unsigned long gt_bioseq_get_raw_sequence_length(GtBioseq *bs)

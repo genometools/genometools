@@ -68,7 +68,7 @@ int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
   /* calculate scaling factor */
   canvas->pvt->factor = ((double) canvas->pvt->width
                      -(2*canvas->pvt->margins))
-                    / gt_range_length(canvas->pvt->viewrange);
+                    / gt_range_length(&canvas->pvt->viewrange);
   return 0;
 }
 

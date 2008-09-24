@@ -163,12 +163,12 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
   int had_err = 0;
   gt_error_check(err);
   if (parser->offset != UNDEF_LONG)
-    *range = gt_range_offset(*range, parser->offset);
+    *range = gt_range_offset(range, parser->offset);
   else if (parser->offset_mapping) {
     had_err = gt_mapping_map_integer(parser->offset_mapping, &offset, seqid,
                                      err);
     if (!had_err)
-      *range = gt_range_offset(*range, offset);
+      *range = gt_range_offset(range, offset);
   }
   return had_err;
 }
@@ -292,19 +292,18 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
                   *auto_sr);
     }
     else {
+      GtRange sr_range = gt_genome_node_get_range((*auto_sr)->sequence_region);
       /* get seqid string */
       *seqid_str =
         gt_str_ref(gt_genome_node_get_seqid((*auto_sr)->sequence_region));
       /* update the range of the sequence region */
       gt_genome_node_set_range((*auto_sr)->sequence_region,
-                            gt_range_join(range,
-                                       gt_genome_node_get_range((*auto_sr)
-                                                         ->sequence_region)));
+                               gt_range_join(&range, &sr_range));
     }
   }
   else {
     /* perform range check */
-    if (!gt_range_contains(ssr->range, range)) {
+    if (!gt_range_contains(&ssr->range, &range)) {
       gt_error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" "
                 "is not contained in range (%lu,%lu) of corresponding "
                 "sequence region on line %u", range.start, range.end,
@@ -385,14 +384,14 @@ static void remove_node(GtGenomeNode *genome_node, GtQueue *genome_nodes,
 static void update_pseudo_node_range(GtFeatureNode *pseudo_node,
                                      GtFeatureNode *genome_feature)
 {
+  GtRange pseudo_range, feature_range;
   gt_assert(pseudo_node && genome_feature);
   gt_assert(gt_feature_node_is_pseudo(pseudo_node));
   gt_assert(!gt_feature_node_is_pseudo(genome_feature));
+  pseudo_range = gt_genome_node_get_range((GtGenomeNode*) pseudo_node);
+  feature_range = gt_genome_node_get_range((GtGenomeNode*) genome_feature);
   gt_genome_node_set_range((GtGenomeNode*) pseudo_node,
-                        gt_range_join(gt_genome_node_get_range((GtGenomeNode*)
-                                                               pseudo_node),
-                                      gt_genome_node_get_range((GtGenomeNode*)
-                                                              genome_feature)));
+                           gt_range_join(&pseudo_range, &feature_range));
 }
 
 static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,

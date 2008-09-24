@@ -302,7 +302,7 @@ int gt_block_unit_test(GtError *err)
   ensure(had_err, (2UL == gt_block_get_size(b)));
 
   /* test gt_block_set_range & gt_block_get_range */
-  r_temp = gt_range_join(r1, r2);
+  r_temp = gt_range_join(&r1, &r2);
   gt_block_set_range(b, r_temp);
   b_range = gt_block_get_range(b);
   ensure(had_err, (0 == gt_range_compare(&b_range, &r_temp)));

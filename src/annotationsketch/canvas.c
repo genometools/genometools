@@ -245,7 +245,7 @@ void gt_canvas_draw_ruler(GtCanvas *canvas)
   gridcol.red = gridcol.green = gridcol.blue = .93;
 
   /* determine range and step of the scale */
-  base_length = gt_range_length(canvas->pvt->viewrange);
+  base_length = gt_range_length(&canvas->pvt->viewrange);
 
   /* determine tick steps */
   step = pow(10,ceil(log10(base_length))-1);

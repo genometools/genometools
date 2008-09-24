@@ -134,7 +134,7 @@ static Slot* slot_new(bool nuceval, GtRange range)
 {
   unsigned long length;
   Slot *s = gt_calloc(1, sizeof (Slot));
-  length = gt_range_length(range);
+  length = gt_range_length(&range);
   s->genes_forward = gt_array_new(sizeof (GtGenomeNode*));
   s->genes_reverse = gt_array_new(sizeof (GtGenomeNode*));
   s->mRNAs_forward = gt_array_new(sizeof (GtGenomeNode*));
@@ -415,7 +415,7 @@ static void add_nucleotide_exon(GtBittab *nucleotides, GtRange range,
   unsigned long i;
   gt_assert(nucleotides);
   for (i = range.start; i <= range.end; i++) {
-    if (gt_range_within(real_range, i)) {
+    if (gt_range_within(&real_range, i)) {
       gt_assert(i >= real_range.start);
       gt_bittab_set_bit(nucleotides, i - real_range.start);
     }
@@ -1242,7 +1242,7 @@ static int compute_nucleotides_values(GT_UNUSED void *key, void *value,
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_forward;
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_reverse;
   /* add other values */
-  tmp = gt_bittab_new(gt_range_length(slot->real_range));
+  tmp = gt_bittab_new(gt_range_length(&slot->real_range));
   add_nucleotide_values(&se->mRNA_nucleotides,
                         slot->real_mRNA_nucleotides_forward,
                         slot->pred_mRNA_nucleotides_forward, tmp,

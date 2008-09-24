@@ -190,7 +190,7 @@ static bool get_caption_display_status(GtDiagram *d, const char *gft)
       if (threshold == UNDEF_ULONG)
         *status = true;
       else
-        *status = (gt_range_length(d->range) <= threshold);
+        *status = (gt_range_length(&d->range) <= threshold);
     }
     gt_hashmap_add(d->caption_display_status, (void*) gft, status);
   }
@@ -390,11 +390,11 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   }
   /* check if this type is to be displayed */
   if (max_show_width != UNDEF_ULONG &&
-      gt_range_length(d->range) > max_show_width) {
+      gt_range_length(&d->range) > max_show_width) {
     return;
   }
   if (parent && par_max_show_width != UNDEF_ULONG
-        && gt_range_length(d->range) > par_max_show_width)
+        && gt_range_length(&d->range) > par_max_show_width)
     parent = NULL;
 
   /* check if this is a collapsing type, cache result */

@@ -145,8 +145,10 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   mRNA_strand = gt_feature_node_get_strand((GtFeatureNode*) first_node);
   mRNA_seqid = gt_genome_node_get_seqid(first_node);
   for (i = 1; i < gt_array_size(gt_genome_node_array); i++) {
+    GtRange range;
     gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
-    mRNA_range = gt_range_join(mRNA_range, gt_genome_node_get_range(gn));
+    range = gt_genome_node_get_range(gn);
+    mRNA_range = gt_range_join(&mRNA_range, &range);
     /* XXX: an error check is necessary here, otherwise gt_strand_join() can
        cause a failed assertion */
     mRNA_strand = gt_strand_join(mRNA_strand,
@@ -214,8 +216,10 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
     gene_strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
     gene_seqid = gt_genome_node_get_seqid(gn);
     for (i = 1; i < gt_array_size(mRNAs); i++) {
+      GtRange range;
       gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
-      gene_range = gt_range_join(gene_range, gt_genome_node_get_range(gn));
+      range = gt_genome_node_get_range(gn);
+      gene_range = gt_range_join(&gene_range, &range);
       gene_strand = gt_strand_join(gene_strand,
                           gt_feature_node_get_strand((GtFeatureNode*) gn));
       gt_assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
@@ -382,7 +386,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       if ((rangeptr = gt_hashmap_get(parser->sequence_region_to_range,
                                      seqname))) {
         /* sequence region is already defined -> update range */
-        *rangeptr = gt_range_join(range, *rangeptr);
+        *rangeptr = gt_range_join(&range, rangeptr);
       }
       else {
         /* sequence region is not already defined -> define it */

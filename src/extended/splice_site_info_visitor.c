@@ -68,7 +68,7 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
   ssiv->intron_processed = true;
   range = gt_genome_node_get_range(intron);
   gt_assert(range.start); /* 1-based coordinates */
-  if (gt_range_length(range) >= 4) {
+  if (gt_range_length(&range) >= 4) {
     seqid = gt_genome_node_get_seqid(intron);
     had_err = gt_region_mapping_get_raw_sequence(ssiv->region_mapping,
                                                  &sequence, seqid, err);

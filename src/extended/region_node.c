@@ -103,6 +103,6 @@ void gt_region_node_consolidate(GtRegionNode *rn_a, GtRegionNode *rn_b)
                         gt_genome_node_get_seqid((GtGenomeNode*) rn_b)));
   range_a = gt_genome_node_get_range((GtGenomeNode*) rn_a);
   range_b = gt_genome_node_get_range((GtGenomeNode*) rn_b);
-  range_a = gt_range_join(range_a, range_b);
+  range_a = gt_range_join(&range_a, &range_b);
   gt_genome_node_set_range((GtGenomeNode*) rn_a, range_a);
 }

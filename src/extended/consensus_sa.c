@@ -272,8 +272,10 @@ static bool contains(const ConsensusSA *csa,
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
-  if (gt_range_contains(range_sa_1, range_sa_2) && compatible(csa, sa_1, sa_2))
+  if (gt_range_contains(&range_sa_1, &range_sa_2) &&
+      compatible(csa, sa_1, sa_2)) {
     return true;
+  }
   return false;
 }
 

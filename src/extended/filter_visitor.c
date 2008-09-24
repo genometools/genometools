@@ -68,10 +68,11 @@ static int filter_visitor_comment(GtNodeVisitor *gv, GtCommentNode *c,
 
 static bool filter_contain_range(GtFeatureNode *gf, GtRange contain_range)
 {
+  GtRange range;
   gt_assert(gf);
+  range = gt_genome_node_get_range((GtGenomeNode*) gf);
   if (contain_range.start != UNDEF_ULONG &&
-      !gt_range_contains(contain_range,
-                         gt_genome_node_get_range((GtGenomeNode*) gf))) {
+      !gt_range_contains(&contain_range, &range)) {
     return true;
   }
   return false;
@@ -149,12 +150,12 @@ static int filter_visitor_genome_feature(GtNodeVisitor *gv,
   if (!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are
                                       equal */
       !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GtGenomeNode*) gf))) {
+    GtRange range = gt_genome_node_get_range((GtGenomeNode*) gf);
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (gf && gt_feature_node_has_type(gf, gft_gene)) {
       if (fv->max_gene_length != UNDEF_ULONG &&
-          gt_range_length(gt_genome_node_get_range((GtGenomeNode*) gf)) >
-          fv->max_gene_length) {
+          gt_range_length(&range) > fv->max_gene_length) {
         filter_node = true;
       }
       else if (fv->max_gene_num != UNDEF_ULONG &&

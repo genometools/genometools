@@ -125,7 +125,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
   GtRange cds;
   GtStrand strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
 
-  gt_assert(gt_range_length(orf) >= 3);
+  gt_assert(gt_range_length(&orf) >= 3);
   /* the first CDS feature */
   cds.start = gt_splicedseq_map(v->splicedseq, strand == GT_STRAND_FORWARD
                              ? orf.start : orf.end) + 1;

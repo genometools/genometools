@@ -65,8 +65,8 @@ int gt_range_compare_by_length_ptr(const GtRange *range_a,
 {
   unsigned long range_a_length, range_b_length;
   gt_assert(range_a && range_b);
-  range_a_length = gt_range_length(*range_a);
-  range_b_length = gt_range_length(*range_b);
+  range_a_length = gt_range_length(range_a);
+  range_b_length = gt_range_length(range_b);
   if (range_a_length == range_b_length)
     return 0;
   if (range_a_length > range_b_length)
@@ -83,42 +83,42 @@ bool gt_range_overlap(const GtRange *range_a, const GtRange *range_b)
   return false;
 }
 
-bool gt_range_contains(GtRange range_a, GtRange range_b)
+bool gt_range_contains(const GtRange *range_a, const GtRange *range_b)
 {
-  gt_assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+  gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
 
-  if (range_a.start <= range_b.start && range_a.end >= range_b.end)
+  if (range_a->start <= range_b->start && range_a->end >= range_b->end)
     return true;
   return false;
 }
 
-bool gt_range_within(GtRange range, unsigned long point)
+bool gt_range_within(const GtRange *range, unsigned long point)
 {
-  gt_assert(range.start <= range.end);
+  gt_assert(range->start <= range->end);
 
-  if (range.start <= point && range.end >= point)
+  if (range->start <= point && range->end >= point)
     return true;
   return false;
 }
 
-GtRange gt_range_join(GtRange range_a, GtRange range_b)
+GtRange gt_range_join(const GtRange *range_a, const GtRange *range_b)
 {
   GtRange r;
 
-  gt_assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+  gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
 
-  r.start = range_a.start < range_b.start ? range_a.start : range_b.start;
-  r.end   = range_a.end   > range_b.end   ? range_a.end   : range_b.end;
+  r.start = range_a->start < range_b->start ? range_a->start : range_b->start;
+  r.end   = range_a->end   > range_b->end   ? range_a->end   : range_b->end;
 
   return r;
 }
 
-GtRange gt_range_offset(GtRange range, long offset)
+GtRange gt_range_offset(const GtRange *range, long offset)
 {
   GtRange transformed_range = { 0, 0 };
-  gt_assert(range.start <= range.end);
-  gt_safe_add(transformed_range.start, range.start, offset);
-  gt_safe_add(transformed_range.end, range.end, offset);
+  gt_assert(range->start <= range->end);
+  gt_safe_add(transformed_range.start, range->start, offset);
+  gt_safe_add(transformed_range.end, range->end, offset);
   gt_assert(transformed_range.start <= transformed_range.end);
   return transformed_range;
 }
@@ -133,10 +133,10 @@ GtRange gt_range_reorder(GtRange range)
   return ordered_range;
 }
 
-unsigned long gt_range_length(GtRange range)
+unsigned long gt_range_length(const GtRange *range)
 {
-  gt_assert(range.start <= range.end);
-  return range.end - range.start + 1;
+  gt_assert(range->start <= range->end);
+  return range->end - range->start + 1;
 }
 
 int gt_range_unit_test(GtError *err)

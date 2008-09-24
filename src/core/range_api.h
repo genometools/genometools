@@ -44,15 +44,15 @@ int           gt_range_compare_with_delta(const GtRange *range_a,
                                           unsigned long delta);
 /* Returns <true> if <range_a> and <range_b> overlap, <false> otherwise. */
 bool          gt_range_overlap(const GtRange *range_a, const GtRange *range_b);
-/* XXX */
-bool          gt_range_contains(GtRange, GtRange);
-/* XXX */
-bool          gt_range_within(GtRange, unsigned long);
-/* XXX */
-GtRange       gt_range_join(GtRange, GtRange);
-/* XXX */
-GtRange       gt_range_offset(GtRange, long offset);
-/* XXX */
-unsigned long gt_range_length(GtRange);
+/* Returns <true> if <range_b> is contained in <range_a>, <false> otherwise. */
+bool          gt_range_contains(const GtRange *range_a, const GtRange *range_b);
+/* Returns <true> if <point> lies within <range>, <false> otherwise. */
+bool          gt_range_within(const GtRange *range, unsigned long point);
+/* Join <range_a> and <range_b> and return the result. */
+GtRange       gt_range_join(const GtRange *range_a, const GtRange *range_b);
+/* Transform start and end of <range> by <offset> and return the result. */
+GtRange       gt_range_offset(const GtRange *range, long offset);
+/* Returns the length of the given <range>. */
+unsigned long gt_range_length(const GtRange *range);
 
 #endif
