@@ -21,7 +21,7 @@
 #include <limits.h>
 #include "lauxlib.h"
 #include "annotationsketch/image_info.h"
-#include "annotationsketch/recmap.h"
+#include "annotationsketch/rec_map.h"
 #include "core/error.h"
 #include "extended/luahelper.h"
 #include "gtlua/genome_node_lua.h"

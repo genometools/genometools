@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RECMAP_H
-#define RECMAP_H
+#ifndef REC_MAP_H
+#define REC_MAP_H
 
-#include "annotationsketch/recmap_api.h"
+#include "annotationsketch/rec_map_api.h"
 
 struct GtRecMap {
   double nw_x,
@@ -29,10 +29,10 @@ struct GtRecMap {
   bool has_omitted_children;
 };
 
-GtRecMap* gt_recmap_new(double nw_x, double nw_y, double se_x, double se_y,
+GtRecMap* gt_rec_map_new(double nw_x, double nw_y, double se_x, double se_y,
                          GtFeatureNode*);
-int        gt_recmap_format_html_imagemap_coords(const GtRecMap*, char*,
+int       gt_rec_map_format_html_imagemap_coords(const GtRecMap*, char*,
                                                  size_t);
-void       gt_recmap_delete(GtRecMap*);
+void      gt_rec_map_delete(GtRecMap*);
 
 #endif

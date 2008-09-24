@@ -18,7 +18,7 @@
 #ifndef IMAGE_INFO_API_H
 #define IMAGE_INFO_API_H
 
-#include "annotationsketch/recmap_api.h"
+#include "annotationsketch/rec_map_api.h"
 #include "core/error_api.h"
 
 /* The <GtImageInfo> class is a container for 2D coordinate to <GtFeatureNode>

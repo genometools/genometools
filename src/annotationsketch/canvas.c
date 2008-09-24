@@ -541,7 +541,7 @@ int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
     /* register coordinates in GtImageInfo object if available */
     if (canvas->pvt->ii)
     {
-      GtRecMap *rm = gt_recmap_new(draw_range.start, canvas->pvt->y,
+      GtRecMap *rm = gt_rec_map_new(draw_range.start, canvas->pvt->y,
                                     draw_range.end, canvas->pvt->y+bar_height,
                                     (GtFeatureNode*) /* XXX */
                                     gt_block_get_top_level_feature(block));
@@ -641,7 +641,7 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *elem)
   /* register coordinates in GtImageInfo object if available */
   if (canvas->pvt->ii)
   {
-    GtRecMap *rm = gt_recmap_new(elem_start, canvas->pvt->y,
+    GtRecMap *rm = gt_rec_map_new(elem_start, canvas->pvt->y,
                                   elem_start+elem_width,
                                   canvas->pvt->y+bar_height,
                                   (GtFeatureNode*) /* XXX */

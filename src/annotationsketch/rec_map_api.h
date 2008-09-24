@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RECMAP_API_H
-#define RECMAP_API_H
+#ifndef REC_MAP_API_H
+#define REC_MAP_API_H
 
 #include "extended/feature_node_api.h"
 
@@ -30,17 +30,17 @@
 typedef struct GtRecMap GtRecMap;
 
 /* Retrieve __x__ value of the the upper left point of the rectangle. */
-double                  gt_recmap_get_northwest_x(const GtRecMap*);
+double                  gt_rec_map_get_northwest_x(const GtRecMap*);
 /* Retrieve __y__ value of the the upper left point of the rectangle. */
-double                  gt_recmap_get_northwest_y(const GtRecMap*);
+double                  gt_rec_map_get_northwest_y(const GtRecMap*);
 /* Retrieve __x__ value of the the lower right point of the rectangle. */
-double                  gt_recmap_get_southeast_x(const GtRecMap*);
+double                  gt_rec_map_get_southeast_x(const GtRecMap*);
 /* Retrieve __y__ value of the the lower right point of the rectangle. */
-double                  gt_recmap_get_southeast_y(const GtRecMap*);
+double                  gt_rec_map_get_southeast_y(const GtRecMap*);
 /* Retrieve <GtFeatureNode> associated with this rectangle. */
-const GtFeatureNode*    gt_recmap_get_genome_feature(const GtRecMap*);
+const GtFeatureNode*    gt_rec_map_get_genome_feature(const GtRecMap*);
 /* Returns <true> if the rectangle represents a block root whose elements
    have not been drawn due to size restrictions. */
-bool                    gt_recmap_has_omitted_children(const GtRecMap*);
+bool                    gt_rec_map_has_omitted_children(const GtRecMap*);
 
 #endif

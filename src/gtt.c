@@ -92,7 +92,7 @@
 #include "annotationsketch/gt_sketch.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/track.h"
-#include "annotationsketch/recmap.h"
+#include "annotationsketch/rec_map.h"
 #include "annotationsketch/style.h"
 #endif
 
