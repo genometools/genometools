@@ -24,27 +24,30 @@
 
 /* MemoryAllocation module */
 
-/* XXX */
+/* Allocate ___uninitialized___ space for an object whose size is specified by
+   <size> and return it.
+   Besides the fact that it never returns <NULL> analog to <malloc(3)>. */
 #define       gt_malloc(size)\
               gt_malloc_mem(size, __FILE__, __LINE__)
-/* XXX */
 void*         gt_malloc_mem(size_t size, const char*, int);
-/* XXX */
+/* Allocate contiguous space for an array of <nmemb> objects, each of whose size
+   is <size>.  The space is initialized to zero.
+   Besides the fact that it never returns <NULL> analog to <calloc(3)>. */
 #define       gt_calloc(nmemb, size)\
               gt_calloc_mem(nmemb, size, __FILE__, __LINE__)
-/* XXX */
 void*         gt_calloc_mem(size_t nmemb, size_t size, const char*, int);
-/* XXX */
+/* Change the size of the object pointed to by <ptr> to <size> bytes and return
+   a pointer to the (possibly moved) object.
+   Besides the fact that it never returns <NULL> analog to <realloc(3)>. */
 #define       gt_realloc(ptr, size)\
               gt_realloc_mem(ptr, size, __FILE__, __LINE__)
-/* XXX */
 void*         gt_realloc_mem(void *ptr, size_t size, const char*, int);
-/* XXX */
+/* Free the space pointed to by <ptr>. If <ptr> equals <NULL>, no action occurs.
+   Analog to <free(3)>. */
 #define       gt_free(ptr)\
               gt_free_mem(ptr, __FILE__, __LINE__)
-/* XXX */
 void          gt_free_mem(void *ptr, const char*, int);
-/* XXX */
+/* Analog to <gt_free()>, but usable as a function pointer. */
 void          gt_free_func(void *ptr);
 
 #endif
