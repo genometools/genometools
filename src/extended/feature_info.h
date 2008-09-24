@@ -22,7 +22,7 @@
 
 typedef struct GtFeatureInfo GtFeatureInfo;
 
-GtFeatureInfo*   gt_feature_info_new();
+GtFeatureInfo* gt_feature_info_new();
 void           gt_feature_info_delete(GtFeatureInfo*);
 void           gt_feature_info_reset(GtFeatureInfo*);
 GtFeatureNode* gt_feature_info_get(const GtFeatureInfo*, const char *id);
@@ -35,7 +35,7 @@ void           gt_feature_info_add_pseudo_parent(GtFeatureInfo*, const char *id,
 void           gt_feature_info_replace_pseudo_parent(GtFeatureInfo*,
                                                      GtFeatureNode *child,
                                                      GtFeatureNode
-                                                       *new_pseudo_parent);
+                                                     *new_pseudo_parent);
 GtFeatureNode* gt_feature_info_find_root(const GtFeatureInfo*, const char *id);
 
 #endif
