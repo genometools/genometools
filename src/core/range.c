@@ -146,7 +146,7 @@ unsigned long gt_range_length(GtRange range)
 
 int gt_range_unit_test(GtError *err)
 {
-  static GtRange gt_ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
+  static GtRange ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
                                 { 620957, 621056 }, { 620957, 621056 },
                                 { 625234, 625253 }, { 625500, 625655 },
                                 { 625533, 625655 }, { 625533, 625655 },
@@ -170,7 +170,7 @@ int gt_range_unit_test(GtError *err)
                                 { 732544, 732821 }, { 750016, 750280 },
                                 { 750016, 750280 }, { 769508, 769734 },
                                 { 769508, 769734 } },
-               gt_ranges_out[] = { { 620432, 620536 }, { 620957, 621056 },
+               ranges_out[] = { { 620432, 620536 }, { 620957, 621056 },
                                 { 625234, 625253 }, { 625500, 625655 },
                                 { 625533, 625655 }, { 627618, 627729 },
                                 { 662083, 662194 }, { 663032, 663166 },
@@ -188,25 +188,25 @@ int gt_range_unit_test(GtError *err)
   int had_err = 0;
   gt_error_check(err);
 
-  ensure(had_err, sizeof (gt_ranges_out) / sizeof (gt_ranges_out[0]) ==
+  ensure(had_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
                   sizeof (counts)     / sizeof (counts[0]));
 
   /* test gt_ranges_uniq() */
   ranges = gt_array_new(sizeof (GtRange));
   tmp_ranges = gt_array_new(sizeof (GtRange));
   for (i = 0;
-       i < sizeof (gt_ranges_in) / sizeof (gt_ranges_in[0]) && !had_err;
+       i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !had_err;
        i++)
-    gt_array_add(ranges, gt_ranges_in[i]);
+    gt_array_add(ranges, ranges_in[i]);
   gt_ranges_uniq(tmp_ranges, ranges);
   ensure(had_err, gt_array_size(ranges) ==
-                  sizeof (gt_ranges_in) / sizeof (gt_ranges_in[0]));
+                  sizeof (ranges_in) / sizeof (ranges_in[0]));
   ensure(had_err, gt_array_size(tmp_ranges) ==
-                  sizeof (gt_ranges_out) / sizeof (gt_ranges_out[0]));
+                  sizeof (ranges_out) / sizeof (ranges_out[0]));
   for (i = 0; i < gt_array_size(tmp_ranges) && !had_err; i++) {
-    ensure(had_err, gt_ranges_out[i].start ==
+    ensure(had_err, ranges_out[i].start ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
-    ensure(had_err, gt_ranges_out[i].end ==
+    ensure(had_err, ranges_out[i].end ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
 
@@ -215,9 +215,9 @@ int gt_range_unit_test(GtError *err)
   gt_array_add_array(tmp_ranges, ranges);
   gt_ranges_uniq_in_place(tmp_ranges);
   for (i = 0; i < gt_array_size(tmp_ranges) && !had_err; i++) {
-    ensure(had_err, gt_ranges_out[i].start ==
+    ensure(had_err, ranges_out[i].start ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
-    ensure(had_err, gt_ranges_out[i].end ==
+    ensure(had_err, ranges_out[i].end ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
 
@@ -228,9 +228,9 @@ int gt_range_unit_test(GtError *err)
   ensure(had_err, gt_array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < gt_array_size(ctr) && !had_err; i++) {
     ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
-    ensure(had_err, gt_ranges_out[i].start ==
+    ensure(had_err, ranges_out[i].start ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
-    ensure(had_err, gt_ranges_out[i].end ==
+    ensure(had_err, ranges_out[i].end ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
   gt_array_delete(ctr);
@@ -242,10 +242,10 @@ int gt_range_unit_test(GtError *err)
   for (i = 0; i < gt_array_size(ctr) && !had_err; i++) {
     ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
     ensure(had_err,
-           gt_ranges_out[i].start == (*(GtRange*)
+           ranges_out[i].start == (*(GtRange*)
                                              gt_array_get(ranges, i)).start);
     ensure(had_err,
-           gt_ranges_out[i].end == (*(GtRange*) gt_array_get(ranges, i)).end);
+           ranges_out[i].end == (*(GtRange*) gt_array_get(ranges, i)).end);
   }
   gt_array_delete(ctr);
 
