@@ -90,7 +90,7 @@ The next step consists of processing the features (given via a \emph{FeatureInde
 In the final phase, the \emph{Diagram} object is used as a blueprint to create an
 image of a given type and size, considering user-defined options.
 
-Rendering logic is implemented in the \emph{Canvas} class, whose methods are called while traversal of the \emph{Diagram} structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering backend-dependent subclasses of \emph{Canvas} are closely tied to a specific implementation of the \emph{Graphics} interface, which provides methods to draw a number of primitives to a
+Rendering logic is implemented in the \emph{Canvas} class, whose methods are called while traversal of the \emph{Diagram} structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering back-end-dependent subclasses of \emph{Canvas} are closely tied to a specific implementation of the \emph{Graphics} interface, which provides methods to draw a number of primitives to a
 drawing surface abstraction. It wraps around the low-level graphics library and allows for easy extension or replacement of the graphics back-end. Currently, there are \emph{Graphics} implementations for the Cairo 2D graphics library (\emph{GraphicsCairo}) and two \emph{Canvas} subclasses providing access to the image file formats supported by Cairo (\emph{CanvasCairoFile}) and to arbitrary Cairo contexts (\emph{CanvasCairoContext}, which directly accesses a \texttt{cairo\_t}). This class can be used, for example, to directly draw \emph{AnnotationSketch} output in any graphical environment which is supported by Cairo (see  list of supported surface types).
 
 
@@ -197,7 +197,7 @@ $ gt gff3 -sort -addintrons annotation.gff3 | gt sketch output.png
 $
 \end{verbatim}
 \normalsize
-The region to create a diagram for can be specified in detail by using the \texttt{-seqid}, \texttt{-start} and \texttt{-end} parameters. For example, if the \emph{D. melanogaster} gene annotation is given as a \texttt{dmel\_annotation.gff3}, use
+The region to create a diagram for can be specified in detail by using the \texttt{-seqid}, \texttt{-start} and \texttt{-end} parameters. For example, if the \emph{D. melanogaster} gene annotation is given in the \texttt{dmel\_annotation.gff3} file, use
 \small
 \begin{verbatim}
 $ gt sketch -format pdf -seqid 2R -start 9326816 -end 9332879 output.pdf \
@@ -205,8 +205,8 @@ $ gt sketch -format pdf -seqid 2R -start 9326816 -end 9332879 output.pdf \
 $
 \end{verbatim}
 \normalsize
-to plot the gene from the \emph{FlyBase} default view in PDF format.
-The \texttt{-force} switch is used to force overwriting of an already existing output file. The \texttt{-pipe} option additionally allows passing the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the \texttt{-help} switch.
+to plot a graphical representation of the \emph{cnn} and \emph{cbs} gene region from the \emph{FlyBase} default view in PDF format.
+The \texttt{-force} option can be used to force overwriting of an already existing output file. The \texttt{-pipe} option additionally allows passing the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the \texttt{-help} option.
 
 If an input file file is not plotted due to parsing errors, \emph{GenomeTools} includes a strict GFF3 validator tool to check whether the input file is in valid GFF3 format. Simply run a command like the following:
 \small
@@ -216,13 +216,16 @@ input is valid GFF3
 $
 \end{verbatim}
 \normalsize
-This validator also allows to check the SO types occuring in a GFF3 file against a given OBO ontology file. This checking can be enabled by specifying the file as an argument to the \texttt{-typecheck} switch.
+This validator also allows to check the SO types occurring in a GFF3 file against a given OBO ontology file. This checking can be enabled by specifying the file as an argument to the \texttt{-typecheck} option.
 
 \section{Examples}
 
+This section will show how to use the \emph{AnnotationSketch} library in custom applications. As \emph{AnnotationSketch} is distributed as a part of \emph{GenomeTools}, its code is compiled into the \texttt{libgenometools.so} shared library. Please refer to the INSTALL file inside the \emph{GenomeTools} distribution for installation instructions.
+
+For a general idea about how to use the library, a simple implementation of the GFF3 validator is included in the source package (see \texttt{src/examples/gff3validator.c}) as an example showing how to create \emph{GenomeTools}-based programs. In the same directory, there is also an appropriate \texttt{Makefile} to build and link this application against the installed shared library \texttt{libgenometools.so}.
 
 \subsection{Using \emph{AnnotationSketch} to draw annotations from a file}
-The following code examples (in C and Lua) illustrate how to produce an image from a given GFF3 file using \emph{AnnotationSketch}. The result is shown in Fig. \ref{parsed_img}. In essence, these code examples implement something like a simple version of the \texttt{gt sketch} tool from \emph{GenomeTools} without most command-line options. All C-based examples are compiled along with the \emph{GenomeTools} library itself and available in the \texttt{bin/examples} directory.
+The following code examples (in C and Lua) illustrate how to produce an image from a given GFF3 file using \emph{AnnotationSketch}. The result is shown in Fig. \ref{parsed_img}. In essence, these code examples implement something like a simple version of the \texttt{gt sketch} tool from \emph{GenomeTools} without most command-line options. The C-based examples mentioned below are compiled along with the \emph{GenomeTools} library itself and available in the \texttt{bin/examples} directory.
 
 \begin{figure}
 \centering{\includegraphics[width=.7\textwidth]{../../www/genometools.org/htdocs/images/parsed}}
