@@ -117,8 +117,8 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_dev(void)
 {
   return gt_tool_new(gt_dev_arguments_new,
-                  gt_dev_arguments_delete,
-                  gt_dev_option_parser_new,
-                  NULL,
-                  gt_dev_runner);
+                     gt_dev_arguments_delete,
+                     gt_dev_option_parser_new,
+                     NULL,
+                     gt_dev_runner);
 }
