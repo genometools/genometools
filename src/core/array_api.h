@@ -21,7 +21,8 @@
 #include <stdlib.h>
 #include "core/fptr_api.h"
 
-/* Objects of the <GtArray> class grow on demand. */
+/* <GtArray*> objects are generic arrays for elements of a certain size which
+   grow on demand. */
 typedef struct GtArray GtArray;
 
 /* Return a new <GtArray*> object whose elements have the size
@@ -33,7 +34,7 @@ GtArray*     gt_array_ref(GtArray *array);
 /* Return a clone of <array>. */
 GtArray*     gt_array_clone(const GtArray *array);
 /* Return pointer to element number <index> of <array>. <index> has to be
-   equal than <gt_array_size(array)>. */
+   smaller than <gt_array_size(array)>. */
 void*         gt_array_get(const GtArray *array, unsigned long index);
 /* Return pointer to first element of <array>. */
 void*         gt_array_get_first(const GtArray *array);
