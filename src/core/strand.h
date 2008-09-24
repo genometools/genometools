@@ -15,27 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef STRAND_API_H
-#define STRAND_API_H
+#ifndef STRAND_H
+#define STRAND_H
 
-/* This enum type defines the possible strands, namely <GT_STRAND_FORWARD>,
-   <GT_STRAND_REVERSE>, <GT_STRAND_BOTH>, and <GT_STRAND_UNKNOWN>. */
-typedef enum GtStrand GtStrand;
+#include "core/strand_api.h"
 
-enum GtStrand {
-  GT_STRAND_FORWARD, /* '+' */
-  GT_STRAND_REVERSE, /* '-' */
-  GT_STRAND_BOTH,    /* '.' */
-  GT_STRAND_UNKNOWN, /* '?' */
-  GT_NUM_OF_STRAND_TYPES
-};
-
-/* Use this string to map strand enum types to their corresponding character. */
-#define GT_STRAND_CHARS \
-        "+-.?"
-
-/* Map <strand_char> to the corresponding strand enum type.
-   Returns <GT_NUM_OF_STRAND_TYPES> if <strand_char> is not a valid one. */
-GtStrand gt_strand_get(char strand_char);
+GtStrand gt_strand_join(GtStrand, GtStrand);
 
 #endif

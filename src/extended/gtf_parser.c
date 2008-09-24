@@ -22,6 +22,7 @@
 #include "core/ma.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"
+#include "core/strand.h"
 #include "core/strcmp.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
@@ -36,11 +37,11 @@
 
 struct GtGTFParser {
   GtHashmap *sequence_region_to_range, /* map from sequence regions to ranges */
-          *gene_id_hash, /* map from gene_id to transcript_id hash */
-          *seqid_to_str_mapping,
-          *source_to_str_mapping,
-          *gene_id_to_name_mapping,
-          *transcript_id_to_name_mapping;
+            *gene_id_hash, /* map from gene_id to transcript_id hash */
+            *seqid_to_str_mapping,
+            *source_to_str_mapping,
+            *gene_id_to_name_mapping,
+            *transcript_id_to_name_mapping;
   GtTypeChecker *type_checker;
 };
 
