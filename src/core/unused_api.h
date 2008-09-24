@@ -20,7 +20,8 @@
 
 /* Unused module */
 
-/* XXX */
+/* Unused function arguments can be annotated with this macro to get rid of
+   compiler warnings. */
 #define GT_UNUSED \
         __attribute__ ((unused)) /*@unused@*/
 
