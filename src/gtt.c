@@ -79,6 +79,7 @@
 #include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
+#include "tools/gt_tallymer.h"
 #include "tools/gt_tagerator.h"
 #include "tools/gt_template.h"
 #include "tools/gt_uniq.h"
@@ -133,6 +134,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "splicesiteinfo", gt_splicesiteinfo);
   gt_toolbox_add(tools, "stat", gt_stat);
   gt_toolbox_add(tools, "suffixerator", gt_suffixerator);
+  gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
   gt_toolbox_add_tool(tools, "tagerator", gt_tagerator());
   gt_toolbox_add_tool(tools, "template", gt_template());
   gt_toolbox_add(tools, "uniq", gt_uniq);
