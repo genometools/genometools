@@ -27,7 +27,6 @@
 
 void          gt_genome_node_set_origin(GtGenomeNode*, GtStr *filename,
                                         unsigned int line_number);
-GtGenomeNode* gt_genome_node_ref(GtGenomeNode*);
 void*         gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 void*         gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 const char*   gt_genome_node_get_filename(const GtGenomeNode*);
@@ -48,7 +47,6 @@ int           gt_genome_node_compare_with_data(GtGenomeNode**, GtGenomeNode**,
 /* <delta> has to point to a variable of type unsigned long */
 int           gt_genome_node_compare_delta(GtGenomeNode**, GtGenomeNode**,
                                            void *delta);
-void          gt_genome_node_delete(GtGenomeNode*);
 
 void          gt_genome_nodes_sort(GtArray*);
 void          gt_genome_nodes_sort_stable(GtArray*);

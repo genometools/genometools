@@ -18,7 +18,7 @@
 #ifndef REGION_NODE_API_H
 #define REGION_NODE_API_H
 
-/* implements the ``genome node'' interface */
+/* Implements the <GtGenomeNode> interface. */
 typedef struct GtRegionNode GtRegionNode;
 
 #include "extended/genome_node_api.h"

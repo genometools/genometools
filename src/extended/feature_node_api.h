@@ -22,7 +22,7 @@
 #include "core/strand_api.h"
 #include "extended/genome_node_api.h"
 
-/* implements the ``genome node'' interface */
+/* Implements <GtGenomeNode> interface. */
 typedef struct GtFeatureNode GtFeatureNode;
 
 /* Create an new <GtFeatureNode*> on sequence with ID <seqid> and type <type>
@@ -35,8 +35,5 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
 /* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
 void          gt_feature_node_add_child(GtFeatureNode *parent,
                                         GtFeatureNode *child);
-
-/* XXX */
-void          gt_genome_node_rec_delete(GtGenomeNode*);
 
 #endif

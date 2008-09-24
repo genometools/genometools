@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* implements the NodeStream interface */
+/* Implements the <GtNodeStream> interface. */
 typedef struct GtGFF3InStream GtGFF3InStream;
 
 /* Create a <GtGFF3InStream*> which subsequently reads the <num_of_files> many

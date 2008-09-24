@@ -22,13 +22,26 @@
 #include "core/error_api.h"
 #include "extended/genome_node_api.h"
 
-/* the ``genome stream'' interface */
 typedef struct GtNodeStreamClass GtNodeStreamClass;
+
+/* The <GtNodeStream> interface. */
 typedef struct GtNodeStream GtNodeStream;
 
-GtNodeStream* gt_node_stream_ref(GtNodeStream*);
-int           gt_node_stream_next(GtNodeStream*, GtGenomeNode**, GtError*);
-bool          gt_node_stream_is_sorted(GtNodeStream*);
-void          gt_node_stream_delete(GtNodeStream*);
+/* Increase the reference count for <node_stream> and return it. */
+GtNodeStream* gt_node_stream_ref(GtNodeStream *node_stream);
+/* Try to get the the next <GtGenomeNode> from <node_stream> and store it in
+   <genome_node> (transfers ownership to <genome_node>).
+   If no error occurs, 0 is returned and <genome_node> contains either the next
+   <GtGenomeNode> or <NULL>, if the <node_stream> is exhausted.
+   If an error occurs, -1 is returned and <err> is set accordingly (the status
+   of <genome_node> is undefined, but no ownership transfer occured). */
+int           gt_node_stream_next(GtNodeStream *node_stream,
+                                  GtGenomeNode **genome_node,
+                                  GtError *err);
+/* Return <true> if <node_stream> is a sorted stream, <false> otherwise. */
+bool          gt_node_stream_is_sorted(GtNodeStream *node_stream);
+/* Decrease the reference count for <node_stream> or delete it, if this was the
+   last reference. */
+void          gt_node_stream_delete(GtNodeStream *node_stream);
 
 #endif
