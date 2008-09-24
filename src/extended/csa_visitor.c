@@ -242,7 +242,7 @@ static void add_sa_to_exon_feature_array(GtArray *exon_nodes,
     exons_from_sa_range =
       gt_genome_node_get_range((GtGenomeNode*) exons_from_sa_feature);
 
-    switch (gt_range_compare(exon_feature_range, exons_from_sa_range)) {
+    switch (gt_range_compare(&exon_feature_range, &exons_from_sa_range)) {
       case -1:
         if (gt_range_overlap(exon_feature_range, exons_from_sa_range)) {
           if (!gt_range_contains(exon_feature_range, exons_from_sa_range)) {

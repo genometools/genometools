@@ -768,7 +768,7 @@ int gt_diagram_unit_test(GtError *err)
 {
   GtGenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   GtFeatureIndex *fi;
-  GtRange dr1, rs;
+  GtRange dr1, rs, range;
   GtStr *seqid1, *seqid2, *gt_track_key;
   GtRegionNode *rn1, *rn2;
   int had_err=0;
@@ -847,7 +847,9 @@ int gt_diagram_unit_test(GtError *err)
     ensure(had_err, gt_hashmap_get(dia->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
-  ensure(had_err, gt_range_compare(gt_diagram_get_range(dia),dr1) == 0);
+  if (!had_err)
+    range = gt_diagram_get_range(dia);
+  ensure(had_err, gt_range_compare(&range, &dr1) == 0);
 
   /* create a diagram object and test it */
   if (!had_err) {
@@ -882,7 +884,9 @@ int gt_diagram_unit_test(GtError *err)
     ensure(had_err, gt_hashmap_get(dia2->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
-  ensure(had_err, gt_range_compare(gt_diagram_get_range(dia),dr1) == 0);
+  if (!had_err)
+    range = gt_diagram_get_range(dia);
+  ensure(had_err, gt_range_compare(&range, &dr1) == 0);
 
   features = gt_array_new(sizeof (GtGenomeNode*));
   gt_array_add(features, gn1);
@@ -909,7 +913,9 @@ int gt_diagram_unit_test(GtError *err)
     ensure(had_err, gt_hashmap_get(dia3->tracks, gt_str_get(gt_track_key)));
     gt_str_delete(gt_track_key);
   }
-  ensure(had_err, gt_range_compare(gt_diagram_get_range(dia3),rs) == 0);
+  if (!had_err)
+    range = gt_diagram_get_range(dia3);
+  ensure(had_err, gt_range_compare(&range, &rs) == 0);
 
   /* delete all generated objects */
   gt_style_delete(sty);

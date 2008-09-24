@@ -106,7 +106,7 @@ bool gt_element_is_marked(const GtElement *element)
 static bool elements_are_equal(const GtElement *e1, const GtElement *e2)
 {
   gt_assert(e1 && e2);
-  if (e1->type == e2->type && !gt_range_compare(e1->range, e2->range))
+  if (e1->type == e2->type && !gt_range_compare(&e1->range, &e2->range))
     return true;
   return false;
 }
@@ -151,8 +151,8 @@ int gt_element_unit_test(GtError *err)
 
   /* tests gt_element_get_range */
   r_temp = gt_element_get_range(e);
-  ensure(had_err, (0 == gt_range_compare(r1, r_temp)));
-  ensure(had_err, (1 == gt_range_compare(r2, r_temp)));
+  ensure(had_err, (0 == gt_range_compare(&r1, &r_temp)));
+  ensure(had_err, (1 == gt_range_compare(&r2, &r_temp)));
 
   /* tests gt_element_get_type and gt_element_set_type*/
   ensure(had_err, !strcmp(gft_exon, gt_element_get_type(e)));

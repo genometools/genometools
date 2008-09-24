@@ -338,7 +338,7 @@ static int range_ptr_compare(const void *r1p, const void *r2p)
 {
   int ret;
   gt_assert(r1p && r2p);
-  ret = gt_range_compare(**(GtRange**) r1p,**(GtRange**) r2p);
+  ret = gt_range_compare(*(GtRange**) r1p, *(GtRange**) r2p);
   /* It could be that two identical ranges with different pointers are
      present. If so, compare pointers instead to get a canonical ordering. */
   if (ret == 0 && *(GtRange**) r1p != *(GtRange**) r2p)

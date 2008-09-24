@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include "core/array_api.h"
 
+/* The <GtRange> class is used to represent genomic ranges in __GenomeTools__.
+   Thereby, the <start> must ___always___ be smaller or equal than the <end>. */
 typedef struct GtRange GtRange;
 
 struct GtRange {
@@ -29,9 +31,7 @@ struct GtRange {
 };
 
 /* XXX */
-int           gt_range_compare(GtRange, GtRange);
-/* XXX */
-int           gt_range_compare_ptr(const GtRange*, const GtRange*);
+int           gt_range_compare(const GtRange *range_a, const GtRange *range_b);
 /* XXX */
 int           gt_range_compare_with_delta(GtRange, GtRange,
                                           unsigned long delta);

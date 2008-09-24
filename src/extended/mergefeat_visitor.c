@@ -58,7 +58,7 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
                                               previous_feature);
     current_range = gt_genome_node_get_range((GtGenomeNode*) current_feature);
     /* sorted */
-    gt_assert(gt_range_compare(previous_range, current_range) <= 0);
+    gt_assert(gt_range_compare(&previous_range, &current_range) <= 0);
     if (previous_range.end + 1 == current_range.start) {
       /* merge nodes */
       gt_feature_node_set_end(previous_feature, current_range.end);

@@ -52,6 +52,7 @@ static int compare_gt_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 
 int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
+  GtRange range_a, range_b;
   int rval;
   gt_assert(gn_a && gn_b);
   /* ensure that region nodes come first and sequence nodes come last,
@@ -63,8 +64,9 @@ int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
                          gt_genome_node_get_idstr(gn_b)))) {
     return rval;
   }
-  return gt_range_compare(gt_genome_node_get_range(gn_a),
-                          gt_genome_node_get_range(gn_b));
+  range_a = gt_genome_node_get_range(gn_a),
+  range_b = gt_genome_node_get_range(gn_b);
+  return gt_range_compare(&range_a, &range_b);
 }
 
 static int compare_genome_nodes_with_delta(GtGenomeNode *gn_a,

@@ -24,23 +24,18 @@
 #include "core/safearith.h"
 #include "core/undef.h"
 
-int gt_range_compare(GtRange range_a, GtRange range_b)
+int gt_range_compare(const GtRange *range_a, const GtRange *range_b)
 {
-  gt_assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+  gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
 
-  if ((range_a.start == range_b.start) && (range_a.end == range_b.end))
+  if ((range_a->start == range_b->start) && (range_a->end == range_b->end))
     return 0; /* range_a == range_b */
 
-  if ((range_a.start < range_b.start) ||
-      ((range_a.start == range_b.start) && (range_a.end < range_b.end)))
+  if ((range_a->start < range_b->start) ||
+      ((range_a->start == range_b->start) && (range_a->end < range_b->end)))
     return -1; /* range_a < range_b */
 
   return 1; /* range_a > range_b */
-}
-
-int gt_range_compare_ptr(const GtRange *range_a, const GtRange *range_b)
-{
-  return gt_range_compare(*range_a, *range_b);
 }
 
 int gt_range_compare_with_delta(GtRange range_a, GtRange range_b,
@@ -270,7 +265,7 @@ void gt_ranges_sort(GtArray *ranges)
 {
   gt_assert(ranges);
   qsort(gt_array_get_space(ranges), gt_array_size(ranges), sizeof (GtRange),
-        (GtCompare) gt_range_compare_ptr);
+        (GtCompare) gt_range_compare);
 }
 
 void gt_ranges_sort_by_length_stable(GtArray *ranges)
@@ -287,8 +282,8 @@ bool gt_ranges_are_sorted(const GtArray *ranges)
   gt_assert(ranges);
 
   for (i = 1; i < gt_array_size(ranges); i++) {
-    if (gt_range_compare(*(GtRange*) gt_array_get(ranges, i-1),
-                      *(GtRange*) gt_array_get(ranges, i)) == 1) {
+    if (gt_range_compare(gt_array_get(ranges, i-1),
+                         gt_array_get(ranges, i)) == 1) {
       return false;
     }
   }
@@ -315,21 +310,17 @@ bool gt_ranges_are_sorted_and_do_not_overlap(const GtArray *ranges)
   return gt_ranges_are_sorted(ranges) && gt_ranges_do_not_overlap(ranges);
 }
 
-bool gt_ranges_are_equal(const GtArray *gt_ranges_1, const GtArray *gt_ranges_2)
+bool gt_ranges_are_equal(const GtArray *ranges_1, const GtArray *ranges_2)
 {
   unsigned long i;
-  GtRange gt_range_1, gt_range_2;
 
-  gt_assert(gt_ranges_are_sorted(gt_ranges_1)
-           && gt_ranges_are_sorted(gt_ranges_2));
+  gt_assert(gt_ranges_are_sorted(ranges_1) && gt_ranges_are_sorted(ranges_2));
 
-  if (gt_array_size(gt_ranges_1) != gt_array_size(gt_ranges_2))
+  if (gt_array_size(ranges_1) != gt_array_size(ranges_2))
     return false;
 
-  for (i = 0; i < gt_array_size(gt_ranges_1); i++) {
-    gt_range_1 = *(GtRange*) gt_array_get(gt_ranges_1, i);
-    gt_range_2 = *(GtRange*) gt_array_get(gt_ranges_2, i);
-    if (gt_range_compare(gt_range_1, gt_range_2))
+  for (i = 0; i < gt_array_size(ranges_1); i++) {
+    if (gt_range_compare(gt_array_get(ranges_1, i), gt_array_get(ranges_2, i)))
       return false;
   }
 

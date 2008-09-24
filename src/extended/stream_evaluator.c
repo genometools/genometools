@@ -768,7 +768,7 @@ static void determine_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                               predicted_strand == GT_STRAND_FORWARD
                               ? gt_array_size(exons_forward)
                               : gt_array_size(exons_reverse), sizeof (GtRange),
-                              (GtCompare) gt_range_compare_ptr))) {
+                              (GtCompare) gt_range_compare))) {
     if (predicted_strand == GT_STRAND_FORWARD) {
       num = actual_range - (GtRange*) gt_array_get_space(exons_forward);
       ctr_ptr = gt_array_get(true_exons_forward, num);
