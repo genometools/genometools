@@ -80,9 +80,9 @@ int gt_uniq(int argc, const char **argv, GtError *err)
   }
 
   /* create gff3 input stream */
-  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args],
-                                                arguments.verbose &&
-                                                arguments.outfp);
+  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+  if (arguments.verbose && arguments.outfp)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create uniq stream */
   uniq_stream = gt_uniq_stream_new(gff3_in_stream);

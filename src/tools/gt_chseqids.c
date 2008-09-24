@@ -96,9 +96,9 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
   }
 
   /* create the streams */
-  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1],
-                                                arguments.verbose &&
-                                                arguments.outfp);
+  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1]);
+  if (arguments.verbose && arguments.outfp)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
   chseqids = gt_str_new_cstr(argv[parsed_args]);
   chseqids_stream = gt_chseqids_stream_new(gff3_in_stream, chseqids, err);
   if (!chseqids_stream)

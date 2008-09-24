@@ -523,6 +523,7 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 	 $(ZLIB_DEP) \
          $(LIBGENOMETOOLS_DEP) \
          $(LIBGTUNSTABLE_DEP) \
+         obj/src/examples/gff3validator.d \
          obj/src/examples/noop.d \
          obj/src/examples/sketch_constructed.d \
          obj/src/examples/sketch_parsed.d

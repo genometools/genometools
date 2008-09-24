@@ -75,8 +75,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 
   /* create a GFF3 input stream */
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
-                                                  argv + parsed_args,
-                                                  false);
+                                                  argv + parsed_args);
   gt_gff3_in_stream_check_id_attributes((GtGFF3InStream*) gff3_in_stream);
 
   /* set different type checker if necessary */

@@ -92,9 +92,9 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   assert(arguments);
 
   /* create the streams */
-  gff3_in_stream  = gt_gff3_in_stream_new_sorted(argv[parsed_args],
-                                                 arguments->verbose &&
-                                                 arguments->outfp);
+  gff3_in_stream  = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+  if (arguments->verbose && arguments->outfp)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
   csa_stream      = gt_csa_stream_new(gff3_in_stream, arguments->join_length);
   gff3_out_stream = gt_gff3_out_stream_new(csa_stream, arguments->outfp);
 

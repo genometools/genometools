@@ -34,7 +34,7 @@ struct GtGFF3InStream {
   bool ensure_sorting,
        stdin_argument,
        file_is_open,
-       be_verbose,
+       progress_bar,
        checkids;
   GtGenFile *fpin;
   unsigned long long line_number;
@@ -118,11 +118,11 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       }
       is->line_number = 0;
 
-      if (!had_err && is->be_verbose) {
+      if (!had_err && is->progress_bar) {
         printf("processing file \"%s\"\n", gt_str_array_size(is->files)
                ? gt_str_array_get(is->files, is->next_file-1) : "stdin");
       }
-      if (!had_err && is->fpin && is->be_verbose) {
+      if (!had_err && is->fpin && is->progress_bar) {
         gt_progressbar_start(&is->line_number,
                             gt_file_number_of_lines(gt_str_array_get(is->files,
                                                              is->next_file-1)));
@@ -154,7 +154,7 @@ static int gff3_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
     if (status_code == EOF) {
       /* end of current file */
-      if (is->be_verbose) gt_progressbar_stop();
+      if (is->progress_bar) gt_progressbar_stop();
       gt_genfile_close(is->fpin);
       is->fpin = NULL;
       is->file_is_open = false;
@@ -211,7 +211,7 @@ const GtNodeStreamClass* gt_gff3_in_stream_class(void)
 
 /* takes ownership of <files> */
 static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
-                                        bool ensure_sorting, bool be_verbose)
+                                        bool ensure_sorting)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_gff3_in_stream_class(),
                                           ensure_sorting);
@@ -228,7 +228,7 @@ static GtNodeStream* gff3_in_stream_new(GtStrArray *files,
   gff3_in_stream->checkids           = false;
   gff3_in_stream->gff3_parser        = gt_gff3_parser_new(NULL);
   gff3_in_stream->used_types         = gt_cstr_table_new();
-  gff3_in_stream->be_verbose         = be_verbose;
+  gff3_in_stream->progress_bar       = false;
   return gs;
 }
 
@@ -237,6 +237,12 @@ void gt_gff3_in_stream_check_id_attributes(GtGFF3InStream *is)
   gt_assert(is);
   is->checkids = true;
   gt_gff3_parser_check_id_attributes(is->gff3_parser);
+}
+
+void gt_gff3_in_stream_show_progress_bar(GtGFF3InStream *is)
+{
+  gt_assert(is);
+  is->progress_bar = true;
 }
 
 void gt_gff3_in_stream_set_type_checker(GtNodeStream *gs,
@@ -280,21 +286,19 @@ void gt_gff3_in_stream_enable_tidy_mode(GtNodeStream *gs)
 }
 
 GtNodeStream* gt_gff3_in_stream_new_unsorted(int num_of_files,
-                                             const char **filenames,
-                                             bool be_verbose)
+                                             const char **filenames)
 {
   int i;
   GtStrArray *files = gt_str_array_new();
   for (i = 0; i < num_of_files; i++)
     gt_str_array_add_cstr(files, filenames[i]);
-  return gff3_in_stream_new(files, false, be_verbose);
+  return gff3_in_stream_new(files, false);
 }
 
-GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename,
-                                           bool be_verbose)
+GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename)
 {
   GtStrArray *files = gt_str_array_new();
   if (filename)
     gt_str_array_add_cstr(files, filename);
-  return gff3_in_stream_new(files, true, be_verbose);
+  return gff3_in_stream_new(files, true);
 }

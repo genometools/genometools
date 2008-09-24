@@ -110,8 +110,9 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create gff3 input stream */
-    gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args],
-                                                  arguments->verbose);
+    gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+    if (arguments->verbose)
+      gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
     /* create region mapping */
     regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,

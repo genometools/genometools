@@ -72,8 +72,9 @@ int gt_regioncov(int argc, const char **argv, GtError *err)
 
   /* create gff3 input stream */
   assert(parsed_args < argc);
-  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args],
-                                                arguments.verbose);
+  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+  if (arguments.verbose)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create region coverage visitor */
   regioncov_visitor = gt_regioncov_visitor_new(arguments.max_feature_dist);

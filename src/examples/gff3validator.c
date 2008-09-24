@@ -20,8 +20,9 @@ int main(int argc, const char *argv[])
   /* create error object */
   err = gt_error_new();
 
-  /* create GFF3 input stream */
-  gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc-1, argv+1, false, true);
+  /* create GFF3 input stream (with ID attribute checking) */
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc-1, argv+1);
+  gt_gff3_in_stream_check_id_attributes((GtGFF3InStream*) gff3_in_stream);
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)

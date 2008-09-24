@@ -100,12 +100,14 @@ int gt_eval(int argc, const char **argv, GtError *err)
   }
 
   /* create the reality stream */
-  reality_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args],
-                                                arguments.verbose);
+  reality_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+  if (arguments.verbose)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) reality_stream);
 
   /* create the prediction stream */
-  prediction_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1],
-                                                   arguments.verbose);
+  prediction_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1]);
+  if (arguments.verbose)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) prediction_stream);
 
   /* create the stream evaluator */
   evaluator = gt_stream_evaluator_new(reality_stream, prediction_stream,

@@ -26,11 +26,10 @@ typedef struct GtGFF3InStream GtGFF3InStream;
 
 /* XXX */
 GtNodeStream*            gt_gff3_in_stream_new_unsorted(int num_of_files,
-                                                        const char **filenames,
-                                                        bool be_verbose);
+                                                        const char **filenames);
 /* filename == NULL -> use stdin */
-GtNodeStream*            gt_gff3_in_stream_new_sorted(const char *filename,
-                                                      bool be_verbose);
+GtNodeStream*            gt_gff3_in_stream_new_sorted(const char *filename);
 void                     gt_gff3_in_stream_check_id_attributes(GtGFF3InStream*);
+void                     gt_gff3_in_stream_show_progress_bar(GtGFF3InStream*);
 
 #endif
