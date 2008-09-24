@@ -553,6 +553,7 @@ dist: all manuals
 	@strip $(GTDISTDIR)/bin/gt
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
+	@$(MAKE) prefix=$(GTDISTDIR) install
 	@cd $(DISTDIR) && tar cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
 	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
 	@echo "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
