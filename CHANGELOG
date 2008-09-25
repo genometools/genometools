@@ -1,4 +1,4 @@
-changes in version 1.2.0 (2008-09-24)
+changes in version 1.2.0 (2008-09-25)
 
 - `gt shredder` has new option -sample
 - `gt filter` has new options -targetbest and -maxgenescore
