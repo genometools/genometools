@@ -90,8 +90,7 @@ The next step consists of processing the features (given via a \emph{FeatureInde
 In the final phase, the \emph{Diagram} object is used as a blueprint to create an
 image of a given type and size, considering user-defined options.
 
-Rendering logic is implemented in the \emph{Canvas} class, whose methods are called while traversal of the \emph{Diagram} structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering back-end-dependent subclasses of \emph{Canvas} are closely tied to a specific implementation of the \emph{Graphics} interface, which provides methods to draw a number of primitives to a
-drawing surface abstraction. It wraps around the low-level graphics library and allows for easy extension or replacement of the graphics back-end. Currently, there are \emph{Graphics} implementations for the Cairo 2D graphics library (\emph{GraphicsCairo}) and two \emph{Canvas} subclasses providing access to the image file formats supported by Cairo (\emph{CanvasCairoFile}) and to arbitrary Cairo contexts (\emph{CanvasCairoContext}, which directly accesses a \texttt{cairo\_t}). This class can be used, for example, to directly draw \emph{AnnotationSketch} output in any graphical environment which is supported by Cairo (see  list of supported surface types).
+Rendering logic is implemented in the \emph{Canvas} class, whose methods are called during traversal of the \emph{Diagram} structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering back-end-dependent subclasses of \emph{Canvas} are closely tied to a specific implementation of the \emph{Graphics} interface, whose implementations provides methods to draw a number of primitives to a drawing surface abstraction. The \emph{Graphics} interface implementations wrap around a low-level graphics library, allowing for easy extension or replacement of the graphics back-end. Currently, there is a \emph{Graphics} implementation for the Cairo 2D graphics library (\emph{GraphicsCairo}) and two \emph{Canvas} subclasses providing access to the image file formats supported by Cairo (\emph{CanvasCairoFile}) and to arbitrary Cairo contexts (\emph{CanvasCairoContext}, which directly accesses a \texttt{cairo\_t}). This class can be used, for example, to directly draw \emph{AnnotationSketch} output in any graphical environment which is supported by Cairo (see  list of supported surface types).
 
 
 
@@ -190,10 +189,10 @@ $ gt sketch output.png annotation.gff3
 $
 \end{verbatim}
 \normalsize
-or by receiving GFF3 data via the standard input, here prepared by the \texttt{gt gff3} tool:
+or by receiving GFF3 data via the standard input, here prepared by the \texttt{gt gff3} tool (here called with the \texttt{-addintrons} option to automatically add intron features between exons):
 \small
 \begin{verbatim}
-$ gt gff3 -sort -addintrons annotation.gff3 | gt sketch output.png
+$ gt gff3 -addintrons annotation.gff3 | gt sketch output.png
 $
 \end{verbatim}
 \normalsize
