@@ -255,4 +255,10 @@ void showsequenceatstartpos(FILE *fp,
                             const Encodedsequence *encseq,
                             Seqpos startpos);
 
+bool containsspecial(const Encodedsequence *encseq,
+                     bool moveforward,
+                     Encodedsequencescanstate *esrspace,
+                     Seqpos startpos,
+                     Seqpos len);
+
 #endif

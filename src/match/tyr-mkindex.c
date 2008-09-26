@@ -63,6 +63,8 @@ struct Dfsstate /* global information */
   Processoccurrencecount processoccurrencecount;
   ArrayCountwithpositions occdistribution;
   FILE *merindexfpout;
+  bool moveforward;
+  Encodedsequencescanstate *esrspace;
 };
 
 #include "esa-dfs.h"
@@ -258,13 +260,6 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
   FREESPACE(dfsinfo);
 }
 
-static bool containsspecial(GT_UNUSED const Encodedsequence *encseq,
-                            GT_UNUSED Seqpos startindex,
-                            GT_UNUSED Seqpos len)
-{
-  return false;
-}
-
 static int processleafedge(GT_UNUSED bool firstsucc,
                            GT_UNUSED Seqpos fatherdepth,
                            Dfsinfo *father,
@@ -277,8 +272,10 @@ static int processleafedge(GT_UNUSED bool firstsucc,
       leafnumber + state->searchlength <=
       state->totallength &&
       !containsspecial(state->encseq,
-                      leafnumber + father->depth,
-                      state->searchlength - father->depth))
+                       state->moveforward,
+                       state->esrspace,
+                       leafnumber + father->depth,
+                       state->searchlength - father->depth))
   {
     if (state->processoccurrencecount(1UL,leafnumber,state,err) != 0)
     {
@@ -353,6 +350,8 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.minocc = minocc;
   state.maxocc = maxocc;
+  state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
+  state.esrspace = newEncodedsequencescanstate();
   INITARRAY(&state.occdistribution,Countwithpositions);
   if (gt_str_length(str_storeindex) == 0)
   {
@@ -386,6 +385,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   }
   FREESPACE(merindexoutfilename);
   FREEARRAY(&state.occdistribution,Countwithpositions);
+  freeEncodedsequencescanstate(&state.esrspace);
   return haserr ? -1 : 0;
 }
 
