@@ -46,17 +46,17 @@ typedef struct
                 length;
 } Listtype;
 
-typedef struct
+struct Dfsinfo
 {
   Uchar commonchar;
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
-} Dfsinfo;
+};
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-typedef struct
+struct Dfsstate
 {
   bool initialized;
   unsigned int searchlength,
@@ -68,9 +68,9 @@ typedef struct
   Readmode readmode;
   int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,GtError *);
   void *processmaxpairsinfo;
-} Dfsstate;
+};
 
-#include "esa-dfs.pr"
+#include "esa-dfs.h"
 
 static Dfsinfo *allocateDfsinfo(Dfsstate *state)
 {
@@ -381,11 +381,9 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                     freeDfsinfo,
                     processleafedge,
                     processbranchedge,
-                    /*
                     NULL,
                     NULL,
                     NULL,
-                    */
                     &state,
                     verboseinfo,
                     err) != 0)
