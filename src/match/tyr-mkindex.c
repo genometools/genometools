@@ -24,7 +24,7 @@
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
-  Uchar commonchar;
+  Seqpos leftmostleaf;
 };
 
 struct Dfsstate /* global information */
@@ -57,14 +57,10 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processbranchedge(GT_UNUSED bool firstsucc,
-                             GT_UNUSED Seqpos fatherdepth,
-                             GT_UNUSED Dfsinfo *father,
-                             GT_UNUSED Dfsinfo *son,
-                             GT_UNUSED Dfsstate *state,
-                             GT_UNUSED GtError *err)
+static void assignleftmostleaf(Dfsinfo *dfsinfo,Seqpos leftmostleaf,
+                               GT_UNUSED Dfsstate *dfsstate)
 {
-  return 0;
+  dfsinfo->leftmostleaf = leftmostleaf;
 }
 
 static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
@@ -81,9 +77,9 @@ static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
                     allocateDfsinfo,
                     freeDfsinfo,
                     processleafedge,
-                    processbranchedge,
                     NULL,
                     NULL,
+                    assignleftmostleaf,
                     NULL,
                     &state,
                     verboseinfo,

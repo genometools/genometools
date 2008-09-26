@@ -100,10 +100,9 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                           Dfsstate *,
                                           GtError *),
                   int(*processcompletenode)(Dfsinfo *,Dfsstate *,GtError *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,
-                                           GtError *),
-                  int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                            Seqpos,Dfsstate *,GtError *),
+                  void (*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *),
+                  void (*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
+                                              Seqpos,Dfsstate *),
                   Dfsstate *state,
                   GT_UNUSED Verboseinfo *verboseinfo,
                   GtError *err)
@@ -128,10 +127,9 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
 #endif
   firstrootedge = true;
   PUSHDFS(0,true,NULL);
-  if (assignleftmostleaf != NULL &&
-      assignleftmostleaf(TOP.dfsinfo,0,state,err) != 0)
+  if (assignleftmostleaf != NULL)
   {
-    haserr = true;
+    assignleftmostleaf(TOP.dfsinfo,0,state);
   }
   for (currentindex = 0; !haserr; currentindex++)
   {
@@ -187,16 +185,13 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
           break;
         }
       }
-      if (assignrightmostleaf != NULL &&
-          assignrightmostleaf(TOP.dfsinfo,
-                              currentindex,
-                              previoussuffix,
-                              currentlcp,
-                              state,
-                              err) != 0)
+      if (assignrightmostleaf != NULL)
       {
-        haserr = true;
-        break;
+        assignrightmostleaf(TOP.dfsinfo,
+                            currentindex,
+                            previoussuffix,
+                            currentlcp,
+                            state);
       }
       if (processcompletenode != NULL &&
           processcompletenode(TOP.dfsinfo,state,err) != 0)
@@ -254,11 +249,9 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       PUSHDFS(currentlcp,true,stackspace);
       if (BELOWTOP.lastisleafedge)
       {
-       if (assignleftmostleaf != NULL &&
-           assignleftmostleaf(TOP.dfsinfo,currentindex,state,err) != 0)
+       if (assignleftmostleaf != NULL)
         {
-          haserr = true;
-          break;
+          assignleftmostleaf(TOP.dfsinfo,currentindex,state);
         }
         if (processleafedge != NULL &&
             processleafedge(true,
@@ -321,19 +314,14 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     }
     if (!haserr)
     {
-      if (assignrightmostleaf != NULL &&
-          assignrightmostleaf(TOP.dfsinfo,
-                              currentindex,
-                              previoussuffix,
-                              currentlcp,
-                              state,
-                              err) != 0)
+      if (assignrightmostleaf != NULL)
       {
-        haserr = true;
+        assignrightmostleaf(TOP.dfsinfo,
+                            currentindex,
+                            previoussuffix,
+                            currentlcp,
+                            state);
       }
-    }
-    if (!haserr)
-    {
       if (processcompletenode != NULL &&
           processcompletenode(TOP.dfsinfo,state,err) != 0)
       {
