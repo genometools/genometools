@@ -24,12 +24,22 @@
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
-  Seqpos leftmostleaf;
+  Seqpos depth,
+         leftmostleaf,
+         rightmostleaf,
+         suftabrightmostleaf,
+         lcptabrightmostleafplus1;
 };
+
+typedef int (*Processoccurrencecount)(Seqpos,Seqpos,void *);
 
 struct Dfsstate /* global information */
 {
-  unsigned long searchlength;
+  Seqpos searchlength,
+         totallength;
+  const Encodedsequence *encseq;
+  Readmode readmode;
+  Processoccurrencecount processoccurrencecount;
 };
 
 #include "esa-dfs.h"
@@ -47,13 +57,32 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
   FREESPACE(dfsinfo);
 }
 
+static bool containsspecial(GT_UNUSED const Encodedsequence *encseq,
+                            GT_UNUSED Seqpos startindex,
+                            GT_UNUSED Seqpos len)
+{
+  return false;
+}
+
 static int processleafedge(GT_UNUSED bool firstsucc,
                            GT_UNUSED Seqpos fatherdepth,
-                           GT_UNUSED Dfsinfo *father,
-                           GT_UNUSED Seqpos leafnumber,
+                           Dfsinfo *father,
+                           Seqpos leafnumber,
                            GT_UNUSED Dfsstate *state,
                            GT_UNUSED GtError *err)
 {
+  if (father->depth < state->searchlength &&
+      leafnumber + state->searchlength <=
+      state->totallength &&
+      !containsspecial(state->encseq,
+                      leafnumber + father->depth,
+                      state->searchlength - father->depth))
+  {
+    if (state->processoccurrencecount((Seqpos) 1,leafnumber,state) != 0)
+    {
+      return -1;
+    }
+  }
   return 0;
 }
 
@@ -63,6 +92,17 @@ static void assignleftmostleaf(Dfsinfo *dfsinfo,Seqpos leftmostleaf,
   dfsinfo->leftmostleaf = leftmostleaf;
 }
 
+static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
+                                Seqpos previoussuffix,Seqpos currentlcp,
+                                GT_UNUSED Dfsstate *dfsstate)
+{
+  dfsinfo->rightmostleaf = currentindex;
+  dfsinfo->suftabrightmostleaf = previoussuffix;
+  dfsinfo->lcptabrightmostleafplus1 = currentlcp;
+}
+
+#define ASSIGNRIGHTMOSTLEAF(STACKELEM,VALUE,SUFVALUE,LCPVALUE)\
+
 static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
                                  unsigned long searchlength,
                                  Verboseinfo *verboseinfo,
@@ -71,8 +111,10 @@ static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.searchlength = searchlength;
-
+  state.searchlength = (Seqpos) searchlength;
+  state.encseq = encseqSequentialsuffixarrayreader(ssar);
+  state.totallength = getencseqtotallength(state.encseq);
+  state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   if (depthfirstesa(ssar,
                     allocateDfsinfo,
                     freeDfsinfo,
@@ -80,7 +122,7 @@ static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
                     NULL,
                     NULL,
                     assignleftmostleaf,
-                    NULL,
+                    assignrightmostleaf,
                     &state,
                     verboseinfo,
                     err) != 0)
