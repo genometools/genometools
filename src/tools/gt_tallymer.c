@@ -71,6 +71,7 @@ static void gt_tallymer_mkindex_arguments_delete(void *tool_arguments)
     return;
   }
   gt_str_delete(arguments->str_storeindex);
+  gt_str_delete(arguments->str_inputindex);
   gt_option_delete(arguments->refoptionpl);
   gt_free(arguments);
 }
@@ -178,7 +179,7 @@ static int gt_tallymer_mkindex_runner(int argc,
                                       const char **argv,
                                       int parsed_args,
                                       void *tool_arguments,
-                                      GT_UNUSED GtError *err)
+                                      GtError *err)
 {
   Tallymer_mkindex_options *arguments = tool_arguments;
 
@@ -212,8 +213,10 @@ static int gt_tallymer_mkindex_runner(int argc,
                     arguments->userdefinedminocc,
                     arguments->userdefinedmaxocc,
                     arguments->str_storeindex,
+                    true,
                     arguments->storecounts,
-                    arguments->verbose) != 0)
+                    arguments->verbose,
+                    err) != 0)
   {
     return -1;
   }

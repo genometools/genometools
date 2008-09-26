@@ -19,6 +19,7 @@
 #define TYR_MKINDEX_H
 
 #include "core/str.h"
+#include "core/error_api.h"
 
 int merstatistics(const GtStr *str_inputindex,
                   unsigned long searchlength,
@@ -26,6 +27,8 @@ int merstatistics(const GtStr *str_inputindex,
                   unsigned long maxocc,
                   const GtStr *str_storeindex,
                   bool storecounts,
-                  bool verbose);
+                  bool scanfile,
+                  bool verbose,
+                  GtError *err);
 
 #endif
