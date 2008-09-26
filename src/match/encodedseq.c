@@ -52,15 +52,6 @@
           cret = VAL;\
         }
 
-#define ACCESSENCODEDCHAR(ENCSEQ,POS)\
-        (ENCSEQ)->deliverchar(ENCSEQ,POS)
-
-#define ACCESSENCODEDCHAR64(ENCSEQ,POS)\
-        (ENCSEQ)->deliverchar64(ENCSEQ,POS)
-
-#define ACCESSSEQUENCELENGTH(ENCSEQ)\
-        (ENCSEQ)->totallength
-
 /* The following implements the access functions to the bit encoding */
 
 #define EXTRACTENCODEDCHARSCALARFROMLEFT(SCALAR,PREFIX)\
@@ -148,6 +139,9 @@ typedef uint32_t Uint32;
   Uchar(*seqdeliverchar)(const Encodedsequence *,
                          Encodedsequencescanstate *,Seqpos);
   const char *seqdelivercharname;
+  bool(*delivercontainsspecial)(const Encodedsequence *,
+                                bool,Encodedsequencescanstate *,Seqpos,Seqpos);
+  const char *delivercontainsspecialname;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long *characterdistribution;
 
@@ -206,12 +200,20 @@ typedef struct
 
 typedef struct
 {
+  const char *funcname;
+  bool(*function)(const Encodedsequence *,bool,Encodedsequencescanstate *,
+                  Seqpos,Seqpos);
+} Containsspecialfunc;
+
+typedef struct
+{
   Fillencposfunc fillpos;
   Delivercharfunc delivercharnospecial,
                   delivercharspecial,
                   delivercharspecialrange;
   SeqDelivercharfunc seqdeliverchar,
                      seqdelivercharspecial;
+  Containsspecialfunc delivercontainsspecial;
 } Encodedsequencefunctions;
 
 Seqpos getencseqtotallength(const Encodedsequence *encseq)
@@ -293,6 +295,21 @@ struct Encodedsequencescanstate
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
 };
+
+bool containsspecial(const Encodedsequence *encseq,
+                     bool moveforward,
+                     Encodedsequencescanstate *esrspace,
+                     Seqpos startpos,
+                     Seqpos len)
+{
+  assert(startpos < encseq->totallength);
+  return encseq->delivercontainsspecial(encseq,moveforward,esrspace,
+                                        moveforward
+                                          ? startpos
+                                          : REVERSEPOS(encseq->totallength,
+                                                       startpos),
+                                        len);
+}
 
 #undef RANGEDEBUG
 
@@ -745,6 +762,87 @@ static Uchar delivercharViadirectaccess(const Encodedsequence *encseq,
                                         Seqpos pos)
 {
   return encseq->plainseq[pos];
+}
+
+static bool containsspecialViabitordirectaccess(bool viabit,
+                                                const Encodedsequence *encseq,
+                                                bool moveforward,
+                                                Seqpos pos,
+                                                Seqpos len)
+{
+  Seqpos idx;
+
+  if (moveforward)
+  {
+    for (idx = pos; idx < pos + len; idx++)
+    {
+      if (viabit)
+      {
+        if (ISIBITSET(encseq->specialbits,pos))
+        {
+          return true;
+        }
+      } else
+      {
+        if (ISSPECIAL(encseq->plainseq[pos]))
+        {
+          return true;
+        }
+      }
+    }
+  } else
+  {
+    assert (pos + 1 >= len);
+    for (idx = pos; /* Nothing */; idx--)
+    {
+      if (viabit)
+      {
+        if (ISIBITSET(encseq->specialbits,pos))
+        {
+          return true;
+        }
+      } else
+      {
+        if (ISSPECIAL(encseq->plainseq[pos]))
+        {
+          return true;
+        }
+      }
+      if (idx == pos + 1 - len)
+      {
+        break;
+      }
+    }
+  }
+  return false;
+}
+
+static bool containsspecialViabitaccess(const Encodedsequence *encseq,
+                                        bool moveforward,
+                                        GT_UNUSED
+                                        Encodedsequencescanstate *esrspace,
+                                        Seqpos pos,
+                                        Seqpos len)
+{
+  return containsspecialViabitordirectaccess(true,
+                                             encseq,
+                                             moveforward,
+                                             pos,
+                                             len);
+}
+
+static bool containsspecialViadirectaccess(const Encodedsequence *encseq,
+                                           bool moveforward,
+                                           GT_UNUSED
+                                           Encodedsequencescanstate *esrspace,
+                                           Seqpos pos,
+                                           Seqpos len)
+{
+  return containsspecialViabitordirectaccess(false,
+                                             encseq,
+                                             moveforward,
+                                             pos,
+                                             len);
 }
 
 /* generic for the case that there are no specialsymbols */
@@ -1513,6 +1611,39 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
+static bool containsspecialViatables(const Encodedsequence *encseq,
+                                      bool moveforward,
+                                      Encodedsequencescanstate *esrspace,
+                                      Seqpos startpos,
+                                      Seqpos len)
+{
+  initEncodedsequencescanstategeneric(esrspace,encseq,moveforward,startpos);
+  if (esrspace->hasprevious)
+  {
+    if (esrspace->moveforward)
+    {
+      if (startpos + len - 1 >= esrspace->previousrange.leftpos)
+      {
+        if (startpos < esrspace->previousrange.rightpos)
+        {
+          return true;
+        }
+      }
+    } else
+    {
+      assert(startpos + 1 >= len);
+      if (startpos - len + 1 < esrspace->previousrange.rightpos)
+      {
+        if (startpos >= esrspace->previousrange.leftpos)
+        {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 bool hasspecialranges(const Encodedsequence *encseq)
 {
   if (encseq->numofspecialstostore > 0)
@@ -1915,6 +2046,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       NAMEDFUNCTION(delivercharViadirectaccess),
       NAMEDFUNCTION(seqdelivercharViadirectaccess),
       NAMEDFUNCTION(seqdelivercharViadirectaccess),
+      NAMEDFUNCTION(containsspecialViadirectaccess)
     },
 
     { /* Viabitaccess */
@@ -1923,7 +2055,8 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       NAMEDFUNCTION(delivercharViabitaccessSpecial),
       NAMEDFUNCTION(delivercharViabitaccessSpecial),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharViabitaccessSpecial)
+      NAMEDFUNCTION(seqdelivercharViabitaccessSpecial),
+      NAMEDFUNCTION(containsspecialViabitaccess)
     },
 
     { /* Viauchartables */
@@ -1932,7 +2065,8 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       NAMEDFUNCTION(delivercharViauchartablesSpecialfirst),
       NAMEDFUNCTION(delivercharViauchartablesSpecialrange),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharSpecial)
+      NAMEDFUNCTION(seqdelivercharSpecial),
+      NAMEDFUNCTION(containsspecialViatables)
     },
 
     { /* Viaushorttables */
@@ -1941,7 +2075,8 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       NAMEDFUNCTION(delivercharViaushorttablesSpecialfirst),
       NAMEDFUNCTION(delivercharViaushorttablesSpecialrange),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharSpecial)
+      NAMEDFUNCTION(seqdelivercharSpecial),
+      NAMEDFUNCTION(containsspecialViatables)
     },
 
     { /* Viauint32tables */
@@ -1950,9 +2085,9 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       NAMEDFUNCTION(delivercharViauint32tablesSpecialfirst),
       NAMEDFUNCTION(delivercharViauint32tablesSpecialrange),
       NAMEDFUNCTION(seqdelivercharnoSpecial),
-      NAMEDFUNCTION(seqdelivercharSpecial)
+      NAMEDFUNCTION(seqdelivercharSpecial),
+      NAMEDFUNCTION(containsspecialViatables)
     }
-
   };
 
 #define ASSIGNAPPFUNC(NAME)\
@@ -1986,7 +2121,11 @@ static Encodedsequencefunctions encodedseqfunctab[] =
         encseq->delivercharnospecial\
           = encodedseqfunctab[(int) sat].delivercharnospecial.function;\
         encseq->delivercharnospecialname\
-          = encodedseqfunctab[(int) sat].delivercharnospecial.funcname
+          = encodedseqfunctab[(int) sat].delivercharnospecial.funcname;\
+        encseq->delivercontainsspecial\
+          = encodedseqfunctab[(int) sat].delivercontainsspecial.function;\
+        encseq->delivercontainsspecialname\
+          = encodedseqfunctab[(int) sat].delivercontainsspecial.funcname
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
                                                   const GtStrArray

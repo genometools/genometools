@@ -52,11 +52,12 @@ eis-voiditf.c
 encodedseq.c
 encseq-specialsrank.c
 enum-patt.c
+esa-dfs.c
+esa-lcpval.c
 esa-mmsearch.c
+esa-ppbuckwid.c
 esa-seqread.c
 esa-splititv.c
-esa-lcpval.c
-esa-ppbuckwid.c
 greedyfwdmat.c
 idx-limdfs.c
 initeqsvec.c

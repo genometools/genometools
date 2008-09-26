@@ -19,8 +19,11 @@
 #include "core/unused_api.h"
 #include "core/arraydef.h"
 #include "esa-seqread.h"
+#include "alphadef.h"
 #include "verbose-def.h"
 #include "spacedef.h"
+#include "format64.h"
+#include "echoseq.pr"
 #include "tyr-mkindex.h"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
@@ -32,17 +35,17 @@ struct Dfsinfo /* information stored for each node of the lcp interval tree */
          lcptabrightmostleafplus1;
 };
 
-typedef int (*Processoccurrencecount)(Seqpos,Seqpos,void *);
+typedef int (*Processoccurrencecount)(unsigned long,Seqpos,void *,GtError *);
 
 typedef struct _listSeqpos
 {
-  Seqpos position; 
+  Seqpos position;
   struct _listSeqpos *nextptr;
 } ListSeqpos;
 
 typedef struct
 {
-  Seqpos occcount;
+  unsigned long occcount;
   ListSeqpos *positionlist;
 } Countwithpositions;
 
@@ -51,11 +54,12 @@ DECLAREARRAYSTRUCT(Countwithpositions);
 struct Dfsstate /* global information */
 {
   Seqpos searchlength,
-         minocc,
-         maxocc,
          totallength;
+  unsigned long minocc,
+                maxocc;
   const Encodedsequence *encseq;
   Readmode readmode;
+  const Alphabet *alpha;
   Processoccurrencecount processoccurrencecount;
   ArrayCountwithpositions occdistribution;
   FILE *merindexfpout;
@@ -74,40 +78,134 @@ static /*@null@*/ ListSeqpos *insertListSeqpos(ListSeqpos *liststart,
   return newnode;
 }
 
-static bool decideifocc(const Dfsstate *state,Seqpos countocc)
+static void wrapListSeqpos(ListSeqpos *node)
 {
-  if(state->minocc > 0)
+  ListSeqpos *tmpnext;
+
+  if (node != NULL)
   {
-    if(state->maxocc > 0)
+    while (true)
     {
-      if(countocc >= state->minocc && countocc <= state->maxocc)
+      if (node->nextptr == NULL)
+      {
+        FREESPACE(node);
+        break;
+      }
+      tmpnext = node->nextptr;
+      FREESPACE(node);
+      node = tmpnext;
+    }
+  }
+}
+
+static void showListSeqpos(const Encodedsequence *encseq,
+                           const Alphabet *alpha,
+                           Seqpos searchlength,
+                           const ListSeqpos *node)
+{
+  const ListSeqpos *tmp;
+
+  for (tmp = node; tmp != NULL; tmp = tmp->nextptr)
+  {
+    fprintfencseq(stdout,alpha,encseq,tmp->position,searchlength);
+    (void) putchar((int) '\n');
+  }
+}
+
+static bool decideifocc(const Dfsstate *state,unsigned long countocc)
+{
+  if (state->minocc > 0)
+  {
+    if (state->maxocc > 0)
+    {
+      if (countocc >= state->minocc && countocc <= state->maxocc)
       {
         return true;
       }
     } else
     {
-      if(countocc >= state->minocc)
+      if (countocc >= state->minocc)
       {
         return true;
       }
     }
   } else
   {
-    if(state->maxocc > 0)
+    if (state->maxocc > 0)
     {
-      if(countocc <= state->maxocc)
+      if (countocc <= state->maxocc)
       {
         return true;
       }
-    } 
+    }
   }
   return false;
 }
 
-static void incrementdistribcounts(ArrayCountwithpositions *occdistribution,
-                                   Seqpos countocc,Seqpos value)
+static uint64_t addupdistribution(const ArrayCountwithpositions *distribution)
 {
-  if(countocc >= occdistribution->allocatedCountwithpositions)
+  unsigned long idx;
+  uint64_t addcount = 0;
+
+  for (idx=0; idx < distribution->nextfreeCountwithpositions; idx++)
+  {
+    if (distribution->spaceCountwithpositions[idx].occcount > 0)
+    {
+      addcount += (uint64_t)
+                  (idx * distribution->spaceCountwithpositions[idx].occcount);
+    }
+  }
+  return addcount;
+}
+
+static void showmerdistribution(const Dfsstate *state)
+{
+  unsigned long countocc;
+
+  for (countocc = 0;
+      countocc < state->occdistribution.nextfreeCountwithpositions;
+      countocc++)
+  {
+    if (state->occdistribution.spaceCountwithpositions[countocc].occcount > 0)
+    {
+      printf("%lu %lu\n",countocc,
+                         state->occdistribution.
+                                spaceCountwithpositions[countocc].occcount);
+      if (decideifocc(state,countocc))
+      {
+        showListSeqpos(state->encseq,
+                       state->alpha,
+                       state->searchlength,
+                       state->occdistribution.spaceCountwithpositions[countocc].
+                                              positionlist);
+        wrapListSeqpos(state->occdistribution.spaceCountwithpositions[countocc].
+                                              positionlist);
+      }
+    }
+  }
+}
+
+static void showfinalstatistics(const Dfsstate *state,const GtStr *inputindex)
+{
+  uint64_t dnumofmers = addupdistribution(&state->occdistribution);
+  printf("# the following output refers to the set of all sequences\n");
+  printf("# represented by the %s\n",gt_str_get(inputindex));
+  printf("# number of %lu-mers in the sequences not containing a "
+         "wildcard: ",(unsigned long) state->searchlength);
+  printf(Formatuint64_t,PRINTuint64_tcast(dnumofmers));
+  printf("\n# show the distribution of the number of occurrences of %lu-mers\n"
+         "# not containing a wildcard as rows of the form "
+         "i d where d is the\n"
+         "# number of events that a %lu-mer occurs exactly i times\n",
+          (unsigned long) state->searchlength,
+          (unsigned long) state->searchlength);
+  showmerdistribution(state);
+}
+
+static void incrementdistribcounts(ArrayCountwithpositions *occdistribution,
+                                   unsigned long countocc,unsigned long value)
+{
+  if (countocc >= occdistribution->allocatedCountwithpositions)
   {
     const Seqpos addamount = (Seqpos) 128;
     unsigned long idx;
@@ -115,28 +213,29 @@ static void incrementdistribcounts(ArrayCountwithpositions *occdistribution,
     ALLOCASSIGNSPACE(occdistribution->spaceCountwithpositions,
                      occdistribution->spaceCountwithpositions,
                      Countwithpositions,countocc+addamount);
-    for(idx=occdistribution->allocatedCountwithpositions; 
-        idx<countocc+addamount; idx++)
+    for (idx=occdistribution->allocatedCountwithpositions;
+         idx<countocc+addamount; idx++)
     {
-      occdistribution->spaceCountwithpositions[idx].occcount = 0; 
+      occdistribution->spaceCountwithpositions[idx].occcount = 0;
       occdistribution->spaceCountwithpositions[idx].positionlist = NULL;
     }
     occdistribution->allocatedCountwithpositions = countocc+addamount;
-  } 
-  if(countocc + 1 > occdistribution->nextfreeCountwithpositions)
+  }
+  if (countocc + 1 > occdistribution->nextfreeCountwithpositions)
   {
     occdistribution->nextfreeCountwithpositions = countocc+1;
   }
   occdistribution->spaceCountwithpositions[countocc].occcount += value;
 }
 
-static int adddistpos2distribution(Seqpos countocc,Seqpos position,
-                                   void *adddistposinfo)
+static int adddistpos2distribution(unsigned long countocc,Seqpos position,
+                                   void *adddistposinfo,
+                                   GT_UNUSED GtError *err)
 {
   Dfsstate *state = (Dfsstate *) adddistposinfo;
 
-  incrementdistribcounts(&state->occdistribution,countocc,(Seqpos) 1);
-  if(decideifocc(state,countocc))
+  incrementdistribcounts(&state->occdistribution,countocc,1UL);
+  if (decideifocc(state,countocc))
   {
     state->occdistribution.spaceCountwithpositions[countocc].positionlist
       = insertListSeqpos(state->occdistribution.
@@ -170,9 +269,10 @@ static int processleafedge(GT_UNUSED bool firstsucc,
                            GT_UNUSED Seqpos fatherdepth,
                            Dfsinfo *father,
                            Seqpos leafnumber,
-                           GT_UNUSED Dfsstate *state,
+                           Dfsstate *state,
                            GT_UNUSED GtError *err)
 {
+  gt_error_check(err);
   if (father->depth < state->searchlength &&
       leafnumber + state->searchlength <=
       state->totallength &&
@@ -180,9 +280,38 @@ static int processleafedge(GT_UNUSED bool firstsucc,
                       leafnumber + father->depth,
                       state->searchlength - father->depth))
   {
-    if (state->processoccurrencecount((Seqpos) 1,leafnumber,state) != 0)
+    if (state->processoccurrencecount(1UL,leafnumber,state,err) != 0)
     {
       return -1;
+    }
+  }
+  return 0;
+}
+
+static int processcompletenode(Dfsinfo *nodeptr,Dfsstate *state,
+                               GT_UNUSED GtError *err)
+{
+  gt_error_check(err);
+  if (state->searchlength <= nodeptr->depth)
+  {
+    Seqpos fatherdepth;
+
+    fatherdepth = nodeptr->lcptabrightmostleafplus1;
+    if (fatherdepth < (nodeptr-1)->depth)
+    {
+      fatherdepth = (nodeptr-1)->depth;
+    }
+    if (fatherdepth < state->searchlength)
+    {
+      if (state->processoccurrencecount((unsigned long)
+                                        (nodeptr->rightmostleaf -
+                                         nodeptr->leftmostleaf + 1),
+                                        nodeptr->suftabrightmostleaf,
+                                        state,
+                                        err) != 0)
+      {
+        return -1;
+      }
     }
   }
   return 0;
@@ -203,7 +332,8 @@ static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
 }
 
-static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
+static int enumeratelcpintervals(const GtStr *str_inputindex,
+                                 Sequentialsuffixarrayreader *ssar,
                                  const GtStr *str_storeindex,
                                  unsigned long searchlength,
                                  unsigned long minocc,
@@ -215,19 +345,21 @@ static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
   char *merindexoutfilename = NULL;
 
+  gt_error_check(err);
   state.searchlength = (Seqpos) searchlength;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
+  state.alpha =  alphabetSequentialsuffixarrayreader(ssar);
   state.totallength = getencseqtotallength(state.encseq);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.minocc = minocc;
   state.maxocc = maxocc;
   INITARRAY(&state.occdistribution,Countwithpositions);
-  if(gt_str_length(str_storeindex) == 0)
+  if (gt_str_length(str_storeindex) == 0)
   {
     state.merindexfpout = NULL;
     state.processoccurrencecount = adddistpos2distribution;
   } else
-  {  
+  {
     state.merindexfpout = NULL;
     assert(false);
   }
@@ -236,7 +368,7 @@ static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
                     freeDfsinfo,
                     processleafedge,
                     NULL,
-                    NULL,
+                    processcompletenode,
                     assignleftmostleaf,
                     assignrightmostleaf,
                     &state,
@@ -244,6 +376,13 @@ static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
                     err) != 0)
   {
     haserr = true;
+  }
+  if (gt_str_length(str_storeindex) == 0)
+  {
+    showfinalstatistics(&state,str_inputindex);
+  } else
+  {
+    assert(false);
   }
   FREESPACE(merindexoutfilename);
   FREEARRAY(&state.occdistribution,Countwithpositions);
@@ -278,7 +417,8 @@ int merstatistics(const GtStr *str_inputindex,
   if (!haserr)
   {
     Verboseinfo *verboseinfo = newverboseinfo(verbose);
-    if (enumeratelcpintervals(ssar,
+    if (enumeratelcpintervals(str_inputindex,
+                              ssar,
                               str_storeindex,
                               searchlength,
                               minocc,
