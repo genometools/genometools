@@ -17,6 +17,7 @@
 
 #include "core/str.h"
 #include "core/unused_api.h"
+#include "core/arraydef.h"
 #include "esa-seqread.h"
 #include "verbose-def.h"
 #include "spacedef.h"
@@ -33,16 +34,117 @@ struct Dfsinfo /* information stored for each node of the lcp interval tree */
 
 typedef int (*Processoccurrencecount)(Seqpos,Seqpos,void *);
 
+typedef struct _listSeqpos
+{
+  Seqpos position; 
+  struct _listSeqpos *nextptr;
+} ListSeqpos;
+
+typedef struct
+{
+  Seqpos occcount;
+  ListSeqpos *positionlist;
+} Countwithpositions;
+
+DECLAREARRAYSTRUCT(Countwithpositions);
+
 struct Dfsstate /* global information */
 {
   Seqpos searchlength,
+         minocc,
+         maxocc,
          totallength;
   const Encodedsequence *encseq;
   Readmode readmode;
   Processoccurrencecount processoccurrencecount;
+  ArrayCountwithpositions occdistribution;
+  FILE *merindexfpout;
 };
 
 #include "esa-dfs.h"
+
+static /*@null@*/ ListSeqpos *insertListSeqpos(ListSeqpos *liststart,
+                                               Seqpos position)
+{
+  ListSeqpos *newnode;
+
+  ALLOCASSIGNSPACE(newnode,NULL,ListSeqpos,1);
+  newnode->position = position;
+  newnode->nextptr = liststart;
+  return newnode;
+}
+
+static bool decideifocc(const Dfsstate *state,Seqpos countocc)
+{
+  if(state->minocc > 0)
+  {
+    if(state->maxocc > 0)
+    {
+      if(countocc >= state->minocc && countocc <= state->maxocc)
+      {
+        return true;
+      }
+    } else
+    {
+      if(countocc >= state->minocc)
+      {
+        return true;
+      }
+    }
+  } else
+  {
+    if(state->maxocc > 0)
+    {
+      if(countocc <= state->maxocc)
+      {
+        return true;
+      }
+    } 
+  }
+  return false;
+}
+
+static void incrementdistribcounts(ArrayCountwithpositions *occdistribution,
+                                   Seqpos countocc,Seqpos value)
+{
+  if(countocc >= occdistribution->allocatedCountwithpositions)
+  {
+    const Seqpos addamount = (Seqpos) 128;
+    unsigned long idx;
+
+    ALLOCASSIGNSPACE(occdistribution->spaceCountwithpositions,
+                     occdistribution->spaceCountwithpositions,
+                     Countwithpositions,countocc+addamount);
+    for(idx=occdistribution->allocatedCountwithpositions; 
+        idx<countocc+addamount; idx++)
+    {
+      occdistribution->spaceCountwithpositions[idx].occcount = 0; 
+      occdistribution->spaceCountwithpositions[idx].positionlist = NULL;
+    }
+    occdistribution->allocatedCountwithpositions = countocc+addamount;
+  } 
+  if(countocc + 1 > occdistribution->nextfreeCountwithpositions)
+  {
+    occdistribution->nextfreeCountwithpositions = countocc+1;
+  }
+  occdistribution->spaceCountwithpositions[countocc].occcount += value;
+}
+
+static int adddistpos2distribution(Seqpos countocc,Seqpos position,
+                                   void *adddistposinfo)
+{
+  Dfsstate *state = (Dfsstate *) adddistposinfo;
+
+  incrementdistribcounts(&state->occdistribution,countocc,(Seqpos) 1);
+  if(decideifocc(state,countocc))
+  {
+    state->occdistribution.spaceCountwithpositions[countocc].positionlist
+      = insertListSeqpos(state->occdistribution.
+                              spaceCountwithpositions[countocc].positionlist,
+                       position);
+  }
+  return 0;
+}
 
 static Dfsinfo *allocateDfsinfo(GT_UNUSED Dfsstate *state)
 {
@@ -101,20 +203,34 @@ static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
 }
 
-#define ASSIGNRIGHTMOSTLEAF(STACKELEM,VALUE,SUFVALUE,LCPVALUE)\
-
 static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
+                                 const GtStr *str_storeindex,
                                  unsigned long searchlength,
+                                 unsigned long minocc,
+                                 unsigned long maxocc,
                                  Verboseinfo *verboseinfo,
                                  GtError *err)
 {
   Dfsstate state;
   bool haserr = false;
+  char *merindexoutfilename = NULL;
 
   state.searchlength = (Seqpos) searchlength;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
   state.totallength = getencseqtotallength(state.encseq);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+  state.minocc = minocc;
+  state.maxocc = maxocc;
+  INITARRAY(&state.occdistribution,Countwithpositions);
+  if(gt_str_length(str_storeindex) == 0)
+  {
+    state.merindexfpout = NULL;
+    state.processoccurrencecount = adddistpos2distribution;
+  } else
+  {  
+    state.merindexfpout = NULL;
+    assert(false);
+  }
   if (depthfirstesa(ssar,
                     allocateDfsinfo,
                     freeDfsinfo,
@@ -129,14 +245,16 @@ static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
   {
     haserr = true;
   }
+  FREESPACE(merindexoutfilename);
+  FREEARRAY(&state.occdistribution,Countwithpositions);
   return haserr ? -1 : 0;
 }
 
 int merstatistics(const GtStr *str_inputindex,
                   unsigned long searchlength,
-                  GT_UNUSED unsigned long minocc,
-                  GT_UNUSED unsigned long maxocc,
-                  GT_UNUSED const GtStr *str_storeindex,
+                  unsigned long minocc,
+                  unsigned long maxocc,
+                  const GtStr *str_storeindex,
                   GT_UNUSED bool storecounts,
                   bool scanfile,
                   bool verbose,
@@ -161,7 +279,10 @@ int merstatistics(const GtStr *str_inputindex,
   {
     Verboseinfo *verboseinfo = newverboseinfo(verbose);
     if (enumeratelcpintervals(ssar,
+                              str_storeindex,
                               searchlength,
+                              minocc,
+                              maxocc,
                               verboseinfo,
                               err) != 0)
     {
