@@ -28,8 +28,7 @@
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
-  Seqpos depth,
-         leftmostleaf,
+  Seqpos leftmostleaf,
          rightmostleaf,
          suftabrightmostleaf,
          lcptabrightmostleafplus1;
@@ -261,21 +260,21 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
 }
 
 static int processleafedge(GT_UNUSED bool firstsucc,
-                           GT_UNUSED Seqpos fatherdepth,
+                           Seqpos fatherdepth,
                            Dfsinfo *father,
                            Seqpos leafnumber,
                            Dfsstate *state,
                            GT_UNUSED GtError *err)
 {
   gt_error_check(err);
-  if (father->depth < state->searchlength &&
+  if (fatherdepth < state->searchlength &&
       leafnumber + state->searchlength <=
       state->totallength &&
       !containsspecial(state->encseq,
                        state->moveforward,
                        state->esrspace,
-                       leafnumber + father->depth,
-                       state->searchlength - father->depth))
+                       leafnumber + fatherdepth,
+                       state->searchlength - fatherdepth))
   {
     if (state->processoccurrencecount(1UL,leafnumber,state,err) != 0)
     {
@@ -289,7 +288,7 @@ static int processcompletenode(Dfsinfo *nodeptr,Dfsstate *state,
                                GT_UNUSED GtError *err)
 {
   gt_error_check(err);
-  if (state->searchlength <= nodeptr->depth)
+  if (state->searchlength <= nodeptrdepth)
   {
     Seqpos fatherdepth;
 
