@@ -18,6 +18,7 @@
 #ifndef REPEATS_H
 #define REPEATS_H
 
+#include "core/unused_api.h"
 #include "match/sarr-def.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
@@ -30,7 +31,7 @@ int simpleexactselfmatchstore(LTRharvestoptions *lo, Seqpos len,
 
 int subsimpleexactselfmatchstore(void *info,unsigned long len,
                                  Seqpos dbstart,
-                                 /*@unused@*/ uint64_t queryoffset,
+                                 GT_UNUSED uint64_t queryoffset,
                                  unsigned long querystart,
                                  GtError *err);
 

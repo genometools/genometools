@@ -16,6 +16,7 @@
 */
 
 #include <limits.h>
+#include "core/unused_api.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "esa-seqread.h"
@@ -29,7 +30,7 @@
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                   const GtStr *indexname,
                                   unsigned int demand,
-                                  /*@unused@*/ Sequentialaccesstype seqactype,
+                                  GT_UNUSED Sequentialaccesstype seqactype,
                                   GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
@@ -67,7 +68,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              /*@unused@*/ GtError *err)
+                              GT_UNUSED GtError *err)
 {
   *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
   return 1;
