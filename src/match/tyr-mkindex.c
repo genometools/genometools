@@ -18,16 +18,90 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "esa-seqread.h"
+#include "verbose-def.h"
+#include "spacedef.h"
 #include "tyr-mkindex.h"
 
+struct Dfsinfo /* information stored for each node of the lcp interval tree */
+{
+  Uchar commonchar;
+};
+
+struct Dfsstate /* global information */
+{
+  unsigned long searchlength;
+};
+
+#include "esa-dfs.h"
+
+static Dfsinfo *allocateDfsinfo(GT_UNUSED Dfsstate *state)
+{
+  Dfsinfo *dfsinfo;
+
+  ALLOCASSIGNSPACE(dfsinfo,NULL,Dfsinfo,1);
+  return dfsinfo;
+}
+
+static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
+{
+  FREESPACE(dfsinfo);
+}
+
+static int processleafedge(GT_UNUSED bool firstsucc,
+                           GT_UNUSED Seqpos fatherdepth,
+                           GT_UNUSED Dfsinfo *father,
+                           GT_UNUSED Seqpos leafnumber,
+                           GT_UNUSED Dfsstate *state,
+                           GT_UNUSED GtError *err)
+{
+  return 0;
+}
+
+static int processbranchedge(GT_UNUSED bool firstsucc,
+                             GT_UNUSED Seqpos fatherdepth,
+                             GT_UNUSED Dfsinfo *father,
+                             GT_UNUSED Dfsinfo *son,
+                             GT_UNUSED Dfsstate *state,
+                             GT_UNUSED GtError *err)
+{
+  return 0;
+}
+
+static int enumeratelcpintervals(Sequentialsuffixarrayreader *ssar,
+                                 unsigned long searchlength,
+                                 Verboseinfo *verboseinfo,
+                                 GtError *err)
+{
+  Dfsstate state;
+  bool haserr = false;
+
+  state.searchlength = searchlength;
+
+  if (depthfirstesa(ssar,
+                    allocateDfsinfo,
+                    freeDfsinfo,
+                    processleafedge,
+                    processbranchedge,
+                    NULL,
+                    NULL,
+                    NULL,
+                    &state,
+                    verboseinfo,
+                    err) != 0)
+  {
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
+}
+
 int merstatistics(const GtStr *str_inputindex,
-                  GT_UNUSED unsigned long searchlength,
+                  unsigned long searchlength,
                   GT_UNUSED unsigned long minocc,
                   GT_UNUSED unsigned long maxocc,
                   GT_UNUSED const GtStr *str_storeindex,
                   GT_UNUSED bool storecounts,
                   bool scanfile,
-                  GT_UNUSED bool verbose,
+                  bool verbose,
                   GtError *err)
 {
   bool haserr = false;
@@ -44,6 +118,18 @@ int merstatistics(const GtStr *str_inputindex,
   if (ssar == NULL)
   {
     haserr = true;
+  }
+  if (!haserr)
+  {
+    Verboseinfo *verboseinfo = newverboseinfo(verbose);
+    if (enumeratelcpintervals(ssar,
+                              searchlength,
+                              verboseinfo,
+                              err) != 0)
+    {
+      haserr = true;
+    }
+    freeverboseinfo(&verboseinfo);
   }
   if (ssar != NULL)
   {

@@ -46,7 +46,7 @@ typedef struct
                 length;
 } Listtype;
 
-struct Dfsinfo
+struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
   Uchar commonchar;
   unsigned long uniquecharposstart,
@@ -56,7 +56,7 @@ struct Dfsinfo
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-struct Dfsstate
+struct Dfsstate /* global information */
 {
   bool initialized;
   unsigned int searchlength,
@@ -261,7 +261,7 @@ static int processbranchedge(bool firstsucc,
                              Dfsinfo *father,
                              Dfsinfo *son,
                              Dfsstate *state,
-                             /*@unused@*/ GtError *err)
+                             GtError *err)
 {
   unsigned int chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
