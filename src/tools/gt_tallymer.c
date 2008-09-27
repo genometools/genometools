@@ -185,24 +185,39 @@ static int gt_tallymer_mkindex_runner(int argc,
 
   assert(parsed_args + 1 == argc);
   gt_str_set(arguments->str_inputindex,argv[parsed_args]);
-  printf("# mersize=%lu\n",arguments->searchlength);
-  printf("# minocc=%lu\n",arguments->userdefinedminocc);
-  printf("# maxocc=%lu\n",arguments->userdefinedmaxocc);
-  printf("# prefixlength=");
-  if (arguments->prefixlength.flag == Autoprefixlength)
+  if (arguments->verbose)
   {
-    printf("automatic");
-  } else
-  {
-    if (arguments->prefixlength.flag == Determinedprefixlength)
+    printf("# mersize=%lu\n",arguments->searchlength);
+    if (arguments->userdefinedminocc > 0)
     {
-      printf("%lu",arguments->prefixlength.value);
+      printf("# minocc=%lu\n",arguments->userdefinedminocc);
     } else
     {
-      printf("undefined");
+      printf("# minocc=undefined\n");
     }
+    if (arguments->userdefinedmaxocc > 0)
+    {
+      printf("# maxocc=%lu\n",arguments->userdefinedmaxocc);
+    } else
+    {
+      printf("# maxocc=undefined\n");
+    }
+    printf("# prefixlength=");
+    if (arguments->prefixlength.flag == Autoprefixlength)
+    {
+      printf("automatic");
+    } else
+    {
+      if (arguments->prefixlength.flag == Determinedprefixlength)
+      {
+        printf("%lu",arguments->prefixlength.value);
+      } else
+      {
+        printf("undefined");
+      }
+    }
+    printf("\n");
   }
-  printf("\n");
   if (gt_str_length(arguments->str_storeindex) > 0)
   {
     printf("# storeindex=%s\n",gt_str_get(arguments->str_storeindex));

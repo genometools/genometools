@@ -99,7 +99,8 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                           Dfsinfo *,
                                           Dfsstate *,
                                           GtError *),
-                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,GtError *),
+                  int(*processcompletenode)(Seqpos,Dfsinfo *,Seqpos,
+                                            Dfsstate *,GtError *),
                   void (*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *),
                   void (*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
                                               Seqpos,Dfsstate *),
@@ -194,7 +195,10 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                             state);
       }
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,state,err) != 0)
+          processcompletenode(TOP.depth,TOP.dfsinfo,
+                              nextfreeItvinfo >= 2UL ? BELOWTOP.depth
+                                                     : 0,
+                              state,err) != 0)
       {
         haserr = true;
         break;
@@ -323,7 +327,10 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                             state);
       }
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,state,err) != 0)
+          processcompletenode(TOP.depth,TOP.dfsinfo,
+                              nextfreeItvinfo >= 2UL ? BELOWTOP.depth
+                                                     : 0,
+                              state,err) != 0)
       {
         haserr = true;
       }

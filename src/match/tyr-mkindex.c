@@ -190,7 +190,7 @@ static void showfinalstatistics(const Dfsstate *state,const GtStr *inputindex)
 {
   uint64_t dnumofmers = addupdistribution(&state->occdistribution);
   printf("# the following output refers to the set of all sequences\n");
-  printf("# represented by the %s\n",gt_str_get(inputindex));
+  printf("# represented by the index %s\n",gt_str_get(inputindex));
   printf("# number of %lu-mers in the sequences not containing a "
          "wildcard: ",(unsigned long) state->searchlength);
   printf(Formatuint64_t,PRINTuint64_tcast(dnumofmers));
@@ -261,7 +261,7 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
 
 static int processleafedge(GT_UNUSED bool firstsucc,
                            Seqpos fatherdepth,
-                           Dfsinfo *father,
+                           GT_UNUSED Dfsinfo *father,
                            Seqpos leafnumber,
                            Dfsstate *state,
                            GT_UNUSED GtError *err)
@@ -284,7 +284,10 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processcompletenode(Dfsinfo *nodeptr,Dfsstate *state,
+static int processcompletenode(Seqpos nodeptrdepth,
+                               Dfsinfo *nodeptr,
+                               Seqpos nodeptrminusonedepth,
+                               Dfsstate *state,
                                GT_UNUSED GtError *err)
 {
   gt_error_check(err);
@@ -293,9 +296,9 @@ static int processcompletenode(Dfsinfo *nodeptr,Dfsstate *state,
     Seqpos fatherdepth;
 
     fatherdepth = nodeptr->lcptabrightmostleafplus1;
-    if (fatherdepth < (nodeptr-1)->depth)
+    if (fatherdepth < nodeptrminusonedepth)
     {
-      fatherdepth = (nodeptr-1)->depth;
+      fatherdepth = nodeptrminusonedepth;
     }
     if (fatherdepth < state->searchlength)
     {
