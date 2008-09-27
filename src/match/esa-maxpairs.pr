@@ -1,6 +1,29 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+struct Dfsinfo
+{
+  Uchar commonchar;
+  unsigned long uniquecharposstart,
+                uniquecharposlength;
+  Listtype *nodeposlist;
+};
+DECLAREARRAYSTRUCT(Seqpos);
+struct Dfsstate
+{
+  bool initialized;
+  unsigned int searchlength,
+               alphabetsize;
+  ArraySeqpos uniquechar,
+              *poslist;
+  const Encodedsequence *encseq;
+  Readmode readmode;
+  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,GtError *);
+  void *processmaxpairsinfo;
+};
+#include "esa-dfs.h"
+static Dfsinfo *allocateDfsinfo(Dfsstate *state);
+
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       unsigned int alphabetsize,
                       const Encodedsequence *encseq,

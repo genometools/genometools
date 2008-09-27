@@ -29,6 +29,7 @@ alphabet.c
 apmoveridx.c
 bcktab.c
 cutendpfx.c
+dist-short.pr
 eis-blockcomp.c
 eis-blockcomp-param.c
 eis-blockenc_params.c
@@ -70,6 +71,7 @@ myersapm.c
 optionargmode.c
 overallseq.c
 pckbucket.c
+pssm.pr
 nullcols.c
 sfx-bentsedg.c
 sfx-enumcodes.c
@@ -84,6 +86,7 @@ tagerator.c
 test-pairwise.c
 trie-ssort.c
 turnwheels.c
+tyr-mkindex.pr
 uniquesub.c
 verbose.c
 END_OF_TEXT
