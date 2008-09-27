@@ -46,7 +46,7 @@ typedef struct
                 length;
 } Listtype;
 
-struct Dfsinfo /* information stored for each node of the lcp interval tree */
+ struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
   Uchar commonchar;
   unsigned long uniquecharposstart,
@@ -56,7 +56,7 @@ struct Dfsinfo /* information stored for each node of the lcp interval tree */
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-struct Dfsstate /* global information */
+ struct Dfsstate /* global information */
 {
   bool initialized;
   unsigned int searchlength,
@@ -135,9 +135,11 @@ static int cartproduct1(Dfsstate *state,Seqpos fatherdepth,
 }
 
 static int cartproduct2(Dfsstate *state,
-                        Seqpos fatherdepth,const Dfsinfo *ninfo1, 
+                        Seqpos fatherdepth,
+                        const Dfsinfo *ninfo1,
                         unsigned int base1,
-                        const Dfsinfo *ninfo2, unsigned int base2,
+                        const Dfsinfo *ninfo2,
+                        unsigned int base2,
                         GtError *err)
 {
   Listtype *pl1, *pl2;

@@ -186,20 +186,28 @@ static void showmerdistribution(const Dfsstate *state)
   }
 }
 
-static void showfinalstatistics(const Dfsstate *state,const GtStr *inputindex)
+static void showfinalstatistics(const Dfsstate *state,
+                                const GtStr *inputindex,
+                                Verboseinfo *verboseinfo)
 {
   uint64_t dnumofmers = addupdistribution(&state->occdistribution);
-  printf("# the following output refers to the set of all sequences\n");
-  printf("# represented by the index %s\n",gt_str_get(inputindex));
-  printf("# number of %lu-mers in the sequences not containing a "
-         "wildcard: ",(unsigned long) state->searchlength);
-  printf(Formatuint64_t,PRINTuint64_tcast(dnumofmers));
-  printf("\n# show the distribution of the number of occurrences of %lu-mers\n"
-         "# not containing a wildcard as rows of the form "
-         "i d where d is the\n"
-         "# number of events that a %lu-mer occurs exactly i times\n",
-          (unsigned long) state->searchlength,
-          (unsigned long) state->searchlength);
+  showverbose(verboseinfo,
+              "the following output refers to the set of all sequences");
+  showverbose(verboseinfo,
+              "represented by the index \"%s\"",gt_str_get(inputindex));
+  showverbose(verboseinfo,
+              "number of %lu-mers in the sequences not containing a "
+              "wildcard: " Formatuint64_t,
+              (unsigned long) state->searchlength,
+              PRINTuint64_tcast(dnumofmers));
+  showverbose(verboseinfo,
+              "show the distribution of the number of occurrences of %lu-mers",
+               (unsigned long) state->searchlength);
+  showverbose(verboseinfo,"not containing a wildcard as rows of the form "
+              "i d where");
+  showverbose(verboseinfo,
+              "d is the number of events that a %lu-mer occurs exactly i times",
+              (unsigned long) state->searchlength);
   showmerdistribution(state);
 }
 
@@ -268,8 +276,7 @@ static int processleafedge(GT_UNUSED bool firstsucc,
 {
   gt_error_check(err);
   if (fatherdepth < state->searchlength &&
-      leafnumber + state->searchlength <=
-      state->totallength &&
+      leafnumber + state->searchlength <= state->totallength &&
       !containsspecial(state->encseq,
                        state->moveforward,
                        state->esrspace,
@@ -345,45 +352,55 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   char *merindexoutfilename = NULL;
 
   gt_error_check(err);
-  state.searchlength = (Seqpos) searchlength;
-  state.encseq = encseqSequentialsuffixarrayreader(ssar);
-  state.alpha =  alphabetSequentialsuffixarrayreader(ssar);
-  state.totallength = getencseqtotallength(state.encseq);
-  state.readmode = readmodeSequentialsuffixarrayreader(ssar);
-  state.minocc = minocc;
-  state.maxocc = maxocc;
-  state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
-  state.esrspace = newEncodedsequencescanstate();
   INITARRAY(&state.occdistribution,Countwithpositions);
-  if (gt_str_length(str_storeindex) == 0)
+  state.esrspace = newEncodedsequencescanstate();
+  state.searchlength = (Seqpos) searchlength;
+  state.totallength = getencseqtotallength(state.encseq);
+  if (state.searchlength > state.totallength)
   {
-    state.merindexfpout = NULL;
-    state.processoccurrencecount = adddistpos2distribution;
-  } else
-  {
-    state.merindexfpout = NULL;
-    assert(false);
-  }
-  if (depthfirstesa(ssar,
-                    allocateDfsinfo,
-                    freeDfsinfo,
-                    processleafedge,
-                    NULL,
-                    processcompletenode,
-                    assignleftmostleaf,
-                    assignrightmostleaf,
-                    &state,
-                    verboseinfo,
-                    err) != 0)
-  {
+    gt_error_set(err,"searchlength " FormatSeqpos " > " FormatSeqpos
+                     " = totallength not allowed",
+                 PRINTSeqposcast(state.searchlength),
+                 PRINTSeqposcast(state.totallength));
     haserr = true;
-  }
-  if (gt_str_length(str_storeindex) == 0)
-  {
-    showfinalstatistics(&state,str_inputindex);
   } else
   {
-    assert(false);
+    state.encseq = encseqSequentialsuffixarrayreader(ssar);
+    state.alpha =  alphabetSequentialsuffixarrayreader(ssar);
+    state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+    state.minocc = minocc;
+    state.maxocc = maxocc;
+    state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
+    if (gt_str_length(str_storeindex) == 0)
+    {
+      state.merindexfpout = NULL;
+      state.processoccurrencecount = adddistpos2distribution;
+    } else
+    {
+      state.merindexfpout = NULL;
+      assert(false);
+    }
+    if (depthfirstesa(ssar,
+                      allocateDfsinfo,
+                      freeDfsinfo,
+                      processleafedge,
+                      NULL,
+                      processcompletenode,
+                      assignleftmostleaf,
+                      assignrightmostleaf,
+                      &state,
+                      verboseinfo,
+                      err) != 0)
+    {
+      haserr = true;
+    }
+    if (gt_str_length(str_storeindex) == 0)
+    {
+      showfinalstatistics(&state,str_inputindex,verboseinfo);
+    } else
+    {
+      assert(false);
+    }
   }
   FREESPACE(merindexoutfilename);
   FREEARRAY(&state.occdistribution,Countwithpositions);
@@ -398,7 +415,7 @@ int merstatistics(const GtStr *str_inputindex,
                   const GtStr *str_storeindex,
                   GT_UNUSED bool storecounts,
                   bool scanfile,
-                  bool verbose,
+                  Verboseinfo *verboseinfo,
                   GtError *err)
 {
   bool haserr = false;
@@ -418,7 +435,6 @@ int merstatistics(const GtStr *str_inputindex,
   }
   if (!haserr)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(verbose);
     if (enumeratelcpintervals(str_inputindex,
                               ssar,
                               str_storeindex,
@@ -430,7 +446,6 @@ int merstatistics(const GtStr *str_inputindex,
     {
       haserr = true;
     }
-    freeverboseinfo(&verboseinfo);
   }
   if (ssar != NULL)
   {

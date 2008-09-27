@@ -25,6 +25,7 @@
 #include "extended/toolbox.h"
 #include "tools/gt_tallymer.h"
 #include "match/tyr-mkindex.h"
+#include "match/verbose-def.h"
 
 typedef enum
 {
@@ -182,9 +183,12 @@ static int gt_tallymer_mkindex_runner(int argc,
                                       GtError *err)
 {
   Tallymer_mkindex_options *arguments = tool_arguments;
+  Verboseinfo *verboseinfo;
+  bool haserr = false;
 
   assert(parsed_args + 1 == argc);
   gt_str_set(arguments->str_inputindex,argv[parsed_args]);
+  verboseinfo = newverboseinfo(arguments->verbose);
   if (arguments->verbose)
   {
     printf("# mersize=%lu\n",arguments->searchlength);
@@ -217,12 +221,12 @@ static int gt_tallymer_mkindex_runner(int argc,
       }
     }
     printf("\n");
+    if (gt_str_length(arguments->str_storeindex) > 0)
+    {
+      printf("# storeindex=%s\n",gt_str_get(arguments->str_storeindex));
+    }
+    printf("# inputindex=%s\n",gt_str_get(arguments->str_inputindex));
   }
-  if (gt_str_length(arguments->str_storeindex) > 0)
-  {
-    printf("# storeindex=%s\n",gt_str_get(arguments->str_storeindex));
-  }
-  printf("# inputindex=%s\n",gt_str_get(arguments->str_inputindex));
   if (merstatistics(arguments->str_inputindex,
                     arguments->searchlength,
                     arguments->userdefinedminocc,
@@ -230,12 +234,13 @@ static int gt_tallymer_mkindex_runner(int argc,
                     arguments->str_storeindex,
                     true,
                     arguments->storecounts,
-                    arguments->verbose,
+                    verboseinfo,
                     err) != 0)
   {
-    return -1;
+    haserr = true;
   }
-  return 0;
+  freeverboseinfo(&verboseinfo);
+  return haserr ? - 1 : 0;
 }
 
 static GtTool* gt_tallymer_mkindex(void)

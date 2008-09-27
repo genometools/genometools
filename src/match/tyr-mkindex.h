@@ -20,6 +20,7 @@
 
 #include "core/str.h"
 #include "core/error_api.h"
+#include "verbose-def.h"
 
 int merstatistics(const GtStr *str_inputindex,
                   unsigned long searchlength,
@@ -28,7 +29,7 @@ int merstatistics(const GtStr *str_inputindex,
                   const GtStr *str_storeindex,
                   bool storecounts,
                   bool scanfile,
-                  bool verbose,
+                  Verboseinfo *verboseinfo,
                   GtError *err);
 
 #endif
