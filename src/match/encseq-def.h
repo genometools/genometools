@@ -261,4 +261,6 @@ bool containsspecial(const Encodedsequence *encseq,
                      Seqpos startpos,
                      Seqpos len);
 
+unsigned int getsatforcevalue(const char *str);
+
 #endif

@@ -6,6 +6,7 @@ cerr()
   if [ $? -ne 0 ]
   then
     echo "failure: $*"
+    exit 1
   fi
 }
 

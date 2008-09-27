@@ -267,6 +267,39 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
   FREESPACE(dfsinfo);
 }
 
+static bool containsspecial2(const Encodedsequence *encseq,
+                     GT_UNUSED bool moveforward,
+                     GT_UNUSED Encodedsequencescanstate *esrspace,
+                     Seqpos startpos,
+                     Seqpos len)
+{
+  Seqpos pos;
+  bool result = false, result2;
+
+  for (pos=startpos; pos<startpos+len; pos++)
+  {
+    if (ISSPECIAL(getencodedchar(encseq,pos,Forwardmode)))
+    {
+      result = true;
+      break;
+    }
+  }
+  result2 = containsspecial(encseq,
+                            moveforward,
+                            esrspace,
+                            startpos,len);
+  if ((result && !result2) || (!result && result2))
+  {
+    fprintf(stderr,"pos = %lu, len = %lu: result = %s != %s = result2\n",
+                    (unsigned long) startpos,
+                    (unsigned long) len,
+                    result ? "true" : "false",
+                    result2 ? "true" : "false");
+    exit(EXIT_FAILURE);
+  }
+  return result;
+}
+
 static int processleafedge(GT_UNUSED bool firstsucc,
                            Seqpos fatherdepth,
                            GT_UNUSED Dfsinfo *father,
@@ -277,7 +310,7 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   gt_error_check(err);
   if (fatherdepth < state->searchlength &&
       leafnumber + state->searchlength <= state->totallength &&
-      !containsspecial(state->encseq,
+      !containsspecial2(state->encseq,
                        state->moveforward,
                        state->esrspace,
                        leafnumber + fatherdepth,
@@ -355,6 +388,12 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = newEncodedsequencescanstate();
   state.searchlength = (Seqpos) searchlength;
+  state.alpha =  alphabetSequentialsuffixarrayreader(ssar);
+  state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+  state.minocc = minocc;
+  state.maxocc = maxocc;
+  state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
+  state.encseq = encseqSequentialsuffixarrayreader(ssar);
   state.totallength = getencseqtotallength(state.encseq);
   if (state.searchlength > state.totallength)
   {
@@ -365,12 +404,6 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     haserr = true;
   } else
   {
-    state.encseq = encseqSequentialsuffixarrayreader(ssar);
-    state.alpha =  alphabetSequentialsuffixarrayreader(ssar);
-    state.readmode = readmodeSequentialsuffixarrayreader(ssar);
-    state.minocc = minocc;
-    state.maxocc = maxocc;
-    state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
     if (gt_str_length(str_storeindex) == 0)
     {
       state.merindexfpout = NULL;

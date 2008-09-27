@@ -59,6 +59,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
       {
         /* note that we store one less than the length to prevent overflows */
         assert(currentspecialchar > 0);
+        assert(currentspecialchar - 1 < encseq->numofspecialstostore);
         ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
           = (SPECIALTYPE) (lastspeciallength-1);
 #ifndef NDEBUG

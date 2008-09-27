@@ -302,7 +302,7 @@ bool containsspecial(const Encodedsequence *encseq,
                      Seqpos startpos,
                      Seqpos len)
 {
-  assert(startpos < encseq->totallength);
+  assert(len >= (Seqpos) 1 && startpos + len <= encseq->totallength);
   return encseq->delivercontainsspecial(encseq,moveforward,esrspace,
                                         moveforward
                                           ? startpos
@@ -427,6 +427,20 @@ static WrittenPositionaccesstype wpa[] = {
     }
   }
   return Undefpositionaccesstype;
+}
+
+unsigned int getsatforcevalue(const char *str)
+{
+  Positionaccesstype sat = str2positionaccesstype(str);
+
+  assert(sat != Undefpositionaccesstype);
+  switch (sat)
+  {
+    case Viauchartables: return 0;
+    case Viaushorttables: return 1U;
+    case Viauint32tables: return 2U;
+    default: return 3U;
+  }
 }
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
@@ -2270,7 +2284,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,mapsize,verboseinfo);
+  sequence2specialcharinfo(specialcharinfo,3U,seqptr,len,mapsize,verboseinfo);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     specialcharinfo->specialranges,

@@ -88,13 +88,17 @@ static void updatesumranges(unsigned long key, unsigned long long value,
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
 static void doupdatesumranges(Specialcharinfo *specialcharinfo,
+                              unsigned int forcetable,
                               Seqpos totallength,
                               unsigned int mapsize,
                               GtDiscDistri *distspralen,
                               Verboseinfo *verboseinfo)
 {
   Updatesumrangeinfo updatesumrangeinfo;
-  uint64_t smallestsize, tmp;
+  uint64_t smallestsize = 0, tmp;
+  Seqpos specialrangestab[3];
+  bool smallestdefined = false;
+  int c;
 
   updatesumrangeinfo.specialrangesUchar = 0;
   updatesumrangeinfo.specialrangesUshort = 0;
@@ -102,21 +106,22 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   updatesumrangeinfo.realspecialranges = 0;
   updatesumrangeinfo.verboseinfo = verboseinfo;
   gt_disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
-  smallestsize = detsizeencseq(0,totallength,
-                               updatesumrangeinfo.specialrangesUchar,mapsize);
-  specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUchar;
-  tmp = detsizeencseq(1,totallength,updatesumrangeinfo.specialrangesUshort,
-                      mapsize);
-  if (tmp < smallestsize)
+  specialrangestab[0] = updatesumrangeinfo.specialrangesUchar;
+  specialrangestab[1] = updatesumrangeinfo.specialrangesUshort;
+  specialrangestab[2] = updatesumrangeinfo.specialrangesUint32;
+  assert (forcetable <= 3U);
+  for (c = 0; c<3; c++)
   {
-    smallestsize = tmp;
-    specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUshort;
-  }
-  tmp = detsizeencseq(2,totallength,
-                      updatesumrangeinfo.specialrangesUint32,mapsize);
-  if (tmp < smallestsize)
-  {
-    specialcharinfo->specialranges = updatesumrangeinfo.specialrangesUint32;
+    if (forcetable == 3U || c == (int) forcetable)
+    {
+      tmp = detsizeencseq(c,totallength,specialrangestab[c],mapsize);
+      if (!smallestdefined || tmp < smallestsize)
+      {
+        smallestdefined = true;
+        smallestsize = tmp;
+        specialcharinfo->specialranges = specialrangestab[c];
+      }
+    }
   }
   /*
   printf("specialrangesUchar=%lu\n",
@@ -136,6 +141,7 @@ int fasta2sequencekeyvalues(
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
+        unsigned int forcetable,
         const GtStrArray *filenametab,
         Filelengthvalues **filelengthtab,
         const Alphabet *alpha,
@@ -261,7 +267,7 @@ int fasta2sequencekeyvalues(
     }
     *totallength = pos;
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-    doupdatesumranges(specialcharinfo,pos,
+    doupdatesumranges(specialcharinfo,forcetable,pos,
                       getmapsizeAlphabet(alpha),distspralen,verboseinfo);
     (*numofsequences)++;
   }
@@ -273,6 +279,7 @@ int fasta2sequencekeyvalues(
 }
 
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
+                              unsigned int forcetable,
                               const Uchar *seq,
                               const Seqpos len,
                               unsigned int mapsize,
@@ -326,6 +333,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
     gt_disc_distri_add(distspralen,idx);
   }
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  doupdatesumranges(specialcharinfo,len,mapsize,distspralen,verboseinfo);
+  doupdatesumranges(specialcharinfo,forcetable,len,mapsize,
+                    distspralen,verboseinfo);
   gt_disc_distri_delete(distspralen);
 }

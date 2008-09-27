@@ -218,7 +218,7 @@ Encodedsequence *plain2encodedsequence(
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,mapsize,verboseinfo);
+  sequence2specialcharinfo(specialcharinfo,3,seqptr,len,mapsize,verboseinfo);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,1);
   encseq->plainseq = seqptr;
   encseq->mappedfile = false;

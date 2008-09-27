@@ -1,6 +1,12 @@
 #!/bin/sh
 
-set -e -x
+checkerror() {
+if test $? -ne 0
+then
+  echo "failure: ${cmd}"
+  exit 1
+fi
+}
 
 cerr()
 {
@@ -21,8 +27,14 @@ fi
 mersize=7
 inputfile=$1
 
-cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
-cerr "env -i bin/gt tallymer mkindex -mersize 7 sfxidx" > tmp2
+cerr "bin/gt suffixerator -sat uchar -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
+cmd="env -i bin/gt tallymer mkindex -mersize 7 sfxidx"
+${cmd} > tmp1
+checkerror
 cerr "mkvtree.x -db ${inputfile} -tis -suf -lcp -pl -dna -indexname mkvidx"
-cerr "tallymer-mkindex -mersize 7 mkvidx" | grep -v '^#' > tmp1
+cmd="tallymer-mkindex -mersize 7 mkvidx" 
+${cmd} > tmp2
+checkerror
+grep -v '^#' tmp2 > tmp2.2
+mv tmp2.2 tmp2
 cerr "cmp -s tmp1 tmp2"
