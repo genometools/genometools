@@ -435,7 +435,7 @@ Bool uncompressStream ( FILE *zStream, FILE *stream )
    BZFILE* bzf = NULL;
    Int32   bzerr, bzerr_dummy, ret, nread, streamNo, i;
    UChar   obuf[5000];
-   UChar   unused[BZ_MAX_UNUSED];
+   UChar   unused[BZ_MAX_GT_UNUSED];
    Int32   nUnused;
    void*   unusedTmpV;
    UChar*  unusedTmp;
@@ -556,7 +556,7 @@ Bool testStream ( FILE *zStream )
    BZFILE* bzf = NULL;
    Int32   bzerr, bzerr_dummy, ret, nread, streamNo, i;
    UChar   obuf[5000];
-   UChar   unused[BZ_MAX_UNUSED];
+   UChar   unused[BZ_MAX_GT_UNUSED];
    Int32   nUnused;
    void*   unusedTmpV;
    UChar*  unusedTmp;

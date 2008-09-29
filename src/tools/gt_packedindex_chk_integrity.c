@@ -20,13 +20,13 @@
  */
 
 #include "gt_packedindex_chk_integrity.h"
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/eis-encidxseq.h"
-#include "libgtmatch/eis-encidxseq-param.h"
-#include "libgtmatch/eis-encidxseq-construct.h"
-#include "libgtmatch/verbose-def.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/eis-encidxseq.h"
+#include "match/eis-encidxseq-param.h"
+#include "match/eis-encidxseq-construct.h"
+#include "match/verbose-def.h"
 #include "tools/gt_packedindex_chk_integrity.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
@@ -43,18 +43,18 @@ struct chkIndexOptions
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *param, Error *err);
+                     struct chkIndexOptions *param, GtError *err);
 
 extern int
-gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
+gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err)
 {
   struct encIdxSeq *seq;
   struct chkIndexOptions params;
-  Str *inputProject;
+  GtStr *inputProject;
   int parsedArgs;
   int had_err = 0;
   Verboseinfo *verbosity = NULL;
-  error_check(err);
+  gt_error_check(err);
 
   switch (parseChkIndexOptions(&parsedArgs, argc, argv, &params, err))
   {
@@ -66,7 +66,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
       return 0;
   }
 
-  inputProject = str_new_cstr(argv[parsedArgs]);
+  inputProject = gt_str_new_cstr(argv[parsedArgs]);
 
   verbosity = newverboseinfo(params.verboseOutput);
 
@@ -74,7 +74,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
                       verbosity, err);
   if ((had_err = seq == NULL))
   {
-    error_set(err, "Failed to load index: %s", str_get(inputProject));
+    gt_error_set(err, "Failed to load index: %s", gt_str_get(inputProject));
   }
   else
   {
@@ -87,56 +87,56 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Error *err)
                              params.checkFlags, verbosity, err);
       if ((had_err = corrupt != 0))
       {
-        fputs(error_get(err), stderr); fputs("\n", stderr);
-        error_set(err, "Integrity check failed for index: %s",
+        fputs(gt_error_get(err), stderr); fputs("\n", stderr);
+        gt_error_set(err, "Integrity check failed for index: %s",
                   EISIntegrityCheckResultStrings[corrupt]);
       }
     }
   }
   if (seq) deleteEncIdxSeq(seq);
-  if (inputProject) str_delete(inputProject);
+  if (inputProject) gt_str_delete(inputProject);
   if (verbosity) freeverboseinfo(&verbosity);
   return had_err?-1:0;
 }
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *params, Error *err)
+                     struct chkIndexOptions *params, GtError *err)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   OPrval oprval;
   bool extRankCheck;
 
-  error_check(err);
-  op = option_parser_new("indexname",
+  gt_error_check(err);
+  op = gt_option_parser_new("indexname",
                          "Map <indexname> block composition index"
                          "and bwt and check index integrity.");
 
-  option = option_new_bool("v",
+  option = gt_option_new_bool("v",
                            "print verbose progress information",
                            &params->verboseOutput,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("skip", "number of symbols to skip",
+  option = gt_option_new_ulong("skip", "number of symbols to skip",
                             &params->skipCount, 0);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("ticks", "print dot after this many symbols"
+  option = gt_option_new_ulong("ticks", "print dot after this many symbols"
                             " tested okay", &params->progressInterval,
                             DEFAULT_PROGRESS_INTERVAL);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("ext-rank-check",
+  option = gt_option_new_bool("ext-rank-check",
                            "do additional checks of rank query results",
                            &extRankCheck, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, (const char**) argv,
-                               versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, (const char**) argv,
+                               gt_versionfunc, err);
+  gt_option_parser_delete(op);
   params->checkFlags = EIS_VERIFY_BASIC | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
   params->EISFeatureSet = EIS_FEATURE_REGION_SUMS;
   params->encType = BWT_ON_BLOCK_ENC;

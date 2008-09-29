@@ -14,7 +14,7 @@ INDEXDIR=../indexdir
 INDEXNAME=${INDEXDIR}/at1MB
 if test ! "X${GTTESTDATA}" = "X"
 then
-  QUERY=${GTTESTDATA}/Iowa/U89959.fna
+  QUERY=../testdata/U89959_genomic.fas
   AT=${GTTESTDATA}/Iowa/at1MB
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1
   mkdir -p ${INDEXDIR}

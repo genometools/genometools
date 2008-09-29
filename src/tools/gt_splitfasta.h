@@ -18,9 +18,9 @@
 #ifndef GT_SPLITFASTA_H
 #define GT_SPLITFASTA_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the splitfasta tool */
-Tool* gt_splitfasta(void);
+GtTool* gt_splitfasta(void);
 
 #endif

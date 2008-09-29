@@ -19,6 +19,6 @@
 #define GT_MAXPAIRS_H
 
 /* the maxpairs tool */
-int gt_maxpairs(int argc, const char **argv, Error *err);
+int gt_maxpairs(int argc, const char **argv, GtError *err);
 
 #endif

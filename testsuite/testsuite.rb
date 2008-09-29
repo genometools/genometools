@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -47,10 +47,11 @@ end
 if $arguments["cur"] then
   $cur=$arguments["cur"]
 else
-  $cur=File.join(Dir.pwd, "..")
+  $cur=File.join(Dir.pwd, "..", "")
 end
 
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
+$obodir=File.join(Dir.pwd, "..", "gtdata" , "obo_files", "")
 
 $scriptsdir=File.join(Dir.pwd, "..", "scripts", "")
 
@@ -100,6 +101,7 @@ require 'gt_extractseq_include'
 require 'gt_filter_include'
 require 'gt_fingerprint_include'
 require 'gt_gff3_include'
+require 'gt_gff3validator_include'
 require 'gt_gtf_to_gff3_include'
 require 'gt_ltrdigest_include'
 require 'gt_ltrharvest_include'
@@ -122,8 +124,8 @@ require 'gt_suffixerator_include'
 require 'gt_idxsearch_include'
 require 'gt_trieins_include'
 require 'gt_uniq_include'
-if $arguments["libgtview"] then
-  require 'gt_view_include'
+if not $arguments["nocairo"] then
+  require 'gt_sketch_include'
 end
 require 'gt_env_options_include'
 require 'scripts_include'

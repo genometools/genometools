@@ -196,7 +196,7 @@ def checkmapped(args)
     run_test "#{$bin}gt dev sfxmap #{outoptions()} #{trials()} -v sfxidx",
              :maxtime => 2400
     run_test "#{$bin}gt dev sfxmap #{outoptionsnobck()} -stream -v sfxidx",
-             :maxtime => 1200
+             :maxtime => 2400
   end
 end
 

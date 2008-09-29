@@ -18,9 +18,9 @@
 #ifndef GT_ASSEMBLEGREEDY_H
 #define GT_ASSEMBLEGREEDY_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the greedy assembly tool */
-Tool* gt_assemblegreedy(void);
+GtTool* gt_assemblegreedy(void);
 
 #endif

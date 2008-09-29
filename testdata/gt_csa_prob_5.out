@@ -1,0 +1,23 @@
+##gff-version   3
+##sequence-region   ENm002 1 1000000
+ENm002	gt csa	gene	774908	816850	.	-	.	ID=gene1
+ENm002	gt csa	mRNA	774908	816850	.	-	.	ID=mRNA1;Parent=gene1
+ENm002	gt csa	exon	774908	775960	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	778449	778573	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	779494	779562	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	779925	779978	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	781365	781490	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	781836	781946	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	782163	782343	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	782741	782897	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	785729	785737	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	790237	790335	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	795035	795209	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	795523	795720	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	796123	796262	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	799887	799992	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	805406	805490	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	805632	805776	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	813483	813756	.	-	.	Parent=mRNA1
+ENm002	gt csa	exon	816692	816850	.	-	.	Parent=mRNA1
+###

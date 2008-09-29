@@ -18,9 +18,9 @@
 #ifndef GT_PACKEDINDEX_MKCTXMAP_H
 #define GT_PACKEDINDEX_MKCTXMAP_H
 
-#include "libgtcore/error.h"
+#include "core/error.h"
 
 extern int
-gt_packedindex_mkctxmap(int argc, const char *argv[], Error *error);
+gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *error);
 
 #endif

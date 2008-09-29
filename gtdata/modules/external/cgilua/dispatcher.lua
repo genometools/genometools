@@ -1,12 +1,12 @@
 -- CGILua dispatcher module
--- @release $Id: dispatcher.lua,v 1.7 2007/11/16 21:30:24 carregal Exp $
+-- @release $Id: dispatcher.lua,v 1.8 2007/12/07 18:49:49 carregal Exp $
 
 module(..., package.seeall)
 
 -- Checks if an URL matches a route pattern
 local function route_match(url, pattern) 
     local params = {}
-    local captures = string.gsub(pattern, "(/$[%w_-]+)", "/?([^/]*)")
+    local captures = string.gsub(pattern, "(/$[%w_-]+)", "/([^/]*)")
     local url_parts = {string.match(url, captures)}
     local i = 1
     for name in string.gmatch(pattern, "/$([%w_-]+)") do

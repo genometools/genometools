@@ -17,6 +17,7 @@
 
 #include "gtr.h"
 #include "gtt.h"
+#include "interactive.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -24,128 +25,127 @@
 #include "lpeg.h"
 #include "md5.h"
 #include "ldes56.h"
-#include "libgtcore/cstr_array.h"
-#include "libgtcore/ensure.h"
-#include "libgtcore/fa.h"
-#include "libgtcore/fileutils.h"
-#include "libgtcore/gtdatapath.h"
-#include "libgtcore/log.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xansi.h"
-#include "libgtcore/yarandom.h"
-#include "libgtext/feature_type_factory_builtin.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/luahelper.h"
-#include "libgtlua/gt_lua.h"
-#include "libgtlua/interactive.h"
+#include "core/cstr_array.h"
+#include "core/ensure.h"
+#include "core/fa.h"
+#include "core/fileutils.h"
+#include "core/gtdatapath.h"
+#include "core/log.h"
+#include "core/ma.h"
+#include "core/versionfunc.h"
+#include "core/xansi.h"
+#include "core/yarandom.h"
+#include "extended/gtdatahelp.h"
+#include "extended/luahelper.h"
+#include "gtlua/gt_lua.h"
 
-#ifdef LIBGTVIEW
-#include "libgtview/luaconfig.h"
+#ifndef WITHOUT_CAIRO
+#include "annotationsketch/luastyle.h"
+#include "annotationsketch/style.h"
 #endif
 
 struct GTR {
   bool test,
        interactive,
-       debug;
+       debug,
+       check64bit;
   unsigned int seed;
-  Str *debugfp,
+  GtStr *debugfp,
       *testspacepeak;
-  Toolbox *tools;
-  Hashtable *unit_tests;
+  GtToolbox *tools;
+  GtHashmap *unit_tests;
   lua_State *L;
-  FeatureTypeFactory *feature_type_factory; /* for gtlua */
-#ifdef LIBGTVIEW
-  Config *config;
+#ifndef WITHOUT_CAIRO
+  GtStyle *style;
 #endif
   FILE *logfp;
 };
 
-GTR* gtr_new(Error *err)
+GTR* gtr_new(GtError *err)
 {
   GTR *gtr;
   int had_err = 0;
-#ifdef LIBGTVIEW
-  Str *config_file = NULL;
+#ifndef WITHOUT_CAIRO
+  GtStr *style_file = NULL;
 #endif
-  gtr = ma_calloc(1, sizeof (GTR));
-  gtr->debugfp = str_new();
-  gtr->testspacepeak = str_new();
+  gtr = gt_calloc(1, sizeof (GTR));
+  gtr->debugfp = gt_str_new();
+  gtr->testspacepeak = gt_str_new();
   gtr->L = luaL_newstate();
   if (!gtr->L) {
-    error_set(err, "out of memory (cannot create new lua state)");
+    gt_error_set(err, "out of memory (cannot create new lua state)");
     had_err = -1;
   }
   if (!had_err) {
-    gtr->feature_type_factory = feature_type_factory_builtin_new();
-    lua_put_feature_type_factory_in_registry(gtr->L, gtr->feature_type_factory);
     luaL_openlibs(gtr->L);    /* open the standard libraries */
-    luaopen_gt(gtr->L);       /* open all GenomeTools libraries */
+    gt_lua_open_lib(gtr->L);  /* open the GenomeTools library */
     luaopen_lfs(gtr->L);      /* open Lua filesystem */
     luaopen_lpeg(gtr->L);     /* open LPeg library */
     luaopen_md5_core(gtr->L); /* open MD5 library */
     luaopen_des56(gtr->L);
-    had_err = lua_set_modules_path(gtr->L, err);
+    had_err = gt_lua_set_modules_path(gtr->L, err);
   }
-#ifdef LIBGTVIEW
+#ifndef WITHOUT_CAIRO
   if (!had_err) {
-    if (!(gtr->config = config_new_with_state(gtr->L)))
+    if (!(gtr->style = gt_style_new_with_state(gtr->L)))
       had_err = -1;
   }
   if (!had_err) {
-    if (!(config_file = gtdata_get_path(error_get_progname(err), err)))
+    if (!(style_file = gt_get_gtdata_path(gt_error_get_progname(err), err)))
       had_err = -1;
   }
   if (!had_err) {
-    str_append_cstr(config_file, "/config/view.lua");
-    if (file_exists(str_get(config_file))) {
-      if (config_load_file(gtr->config, config_file, err))
+    gt_str_append_cstr(style_file, "/sketch/default.style");
+    if (gt_file_exists(gt_str_get(style_file))) {
+      if (gt_style_load_file(gtr->style, gt_str_get(style_file), err))
         had_err = -1;
       else
-        lua_put_config_in_registry(gtr->L, gtr->config);
+        gt_lua_put_style_in_registry(gtr->L, gtr->style);
     }
   }
-  str_delete(config_file);
+  gt_str_delete(style_file);
 #endif
   if (had_err) {
-    ma_free(gtr);
+    gt_free(gtr);
     return NULL;
   }
   return gtr;
 }
 
-static int show_gtr_help(const char *progname, void *data, Error *err)
+static int show_gtr_help(const char *progname, void *data, GtError *err)
 {
   int had_err;
-  had_err = toolbox_show(progname, data, err);
+  had_err = gt_toolbox_show(progname, data, err);
   if (!had_err)
-    had_err = gtdata_show_help(progname, NULL, err);
+    had_err = gt_gtdata_show_help(progname, NULL, err);
   return had_err;
 }
 
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
-                 Error *err)
+                 GtError *err)
 {
-  OptionParser *op;
-  Option *o, *debug_option, *debugfp_option;
+  GtOptionParser *op;
+  GtOption *o, *debug_option, *debugfp_option;
   OPrval oprval;
 
-  error_check(err);
-  assert(gtr);
-  op = option_parser_new("[option ...] [tool | script] [argument ...]",
+  gt_error_check(err);
+  gt_assert(gtr);
+  op = gt_option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).");
-  option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
-  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
-                      "'script'", &gtr->interactive, false);
-  option_hide_default(o);
-  option_parser_add_option(op, o);
-  o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
-  option_hide_default(o);
-  option_parser_add_option(op, o);
-  debug_option = option_new_debug(&gtr->debug);
-  option_parser_add_option(op, debug_option);
-  debugfp_option = option_new_string("debugfp",
+  gt_option_parser_set_comment_func(op, show_gtr_help, gtr->tools);
+  o = gt_option_new_bool("i",
+                         "enter interactive mode after executing 'tool' or "
+                         "'script'", &gtr->interactive, false);
+  gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("test", "perform unit tests and exit", &gtr->test,
+                         false);
+  gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
+  debug_option = gt_option_new_debug(&gtr->debug);
+  gt_option_parser_add_option(op, debug_option);
+  debugfp_option = gt_option_new_string("debugfp",
                                      "set file pointer for debugging output\n"
                                      "use ``stdout'' for standard output\n"
                                      "use ``stderr'' for standard error\n"
@@ -153,65 +153,76 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                                      "corresponding file (will be overwritten "
                                      "without warning!)", gtr->debugfp,
                                      "stderr");
-  option_is_development_option(debugfp_option);
-  option_parser_add_option(op, debugfp_option);
-  option_imply(debugfp_option, debug_option);
-  o = option_new_uint("seed", "set seed for random number generator manually\n"
-                      "0 generates a seed from current time and process id",
-                      &gtr->seed, 0);
-  option_is_development_option(o);
-  option_parser_add_option(op, o);
-  o = option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
+  gt_option_is_development_option(debugfp_option);
+  gt_option_parser_add_option(op, debugfp_option);
+  gt_option_imply(debugfp_option, debug_option);
+  o = gt_option_new_uint("seed",
+                         "set seed for random number generator manually\n"
+                         "0 generates a seed from current time and process id",
+                         &gtr->seed, 0);
+  gt_option_is_development_option(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("64bit", "exit with code 0 if this is a 64bit binary, "
+                      "with 1 otherwise", &gtr->check64bit, false);
+  gt_option_is_development_option(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
                           "file", gtr->testspacepeak);
-  option_is_development_option(o);
-  option_parser_add_option(op, o);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_is_development_option(o);
+  gt_option_parser_add_option(op, o);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
 void gtr_register_components(GTR *gtr)
 {
-  assert(gtr);
+  gt_assert(gtr);
   /* add tools */
-  toolbox_delete(gtr->tools);
+  gt_toolbox_delete(gtr->tools);
   gtr->tools = gtt_tools();
   /* add unit tests */
-  hashtable_delete(gtr->unit_tests);
+  gt_hashmap_delete(gtr->unit_tests);
   gtr->unit_tests = gtt_unit_tests();
 }
 
-int run_test(void *key, void *value, void *data, Error *e)
+static int run_test(void *key, void *value, void *data, GtError *err)
 {
-  const char *testname;
-  int (*test)(Error*);
   int had_err, *had_errp;
-  error_check(e);
-  assert(key && value && data);
-  testname = (const char*) key;
-  test = (int (*)(Error*)) value;
+  char *testname = key;
+  UnitTestFunc test = value;
+  gt_error_check(err);
+  gt_assert(testname && test && data);
   had_errp = (int*) data;
   printf("%s...", testname);
-  xfflush(stdout);
-  had_err = test(e);
+  gt_xfflush(stdout);
+  had_err = test(err);
   if (had_err) {
-    xputs("error");
+    gt_xputs("error");
     *had_errp = had_err;
-    fprintf(stderr, "first error: %s\n", error_get(e));
-    error_unset(e);
-    xfflush(stderr);
+    fprintf(stderr, "first error: %s\n", gt_error_get(err));
+    gt_error_unset(err);
+    gt_xfflush(stderr);
   }
   else
-    xputs("ok");
-  xfflush(stdout);
+    gt_xputs("ok");
+  gt_xfflush(stdout);
   return 0;
 }
 
-static int run_tests(GTR *gtr, Error *err)
+static int check64bit(void)
+{
+  if (sizeof (unsigned long) == 8)
+    return EXIT_SUCCESS;
+  return EXIT_FAILURE;
+}
+
+static int run_tests(GTR *gtr, GtError *err)
 {
   int test_err = 0, had_err = 0;
-  error_check(err);
-  assert(gtr);
+  gt_error_check(err);
+  gt_assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
   ensure(had_err, sizeof (char) == 1);
@@ -228,10 +239,11 @@ static int run_tests(GTR *gtr, Error *err)
 
   /* show seed */
   printf("seed=%u\n", gtr->seed);
-
+  gt_hashmap_unit_test(err);
   if (gtr->unit_tests) {
-    had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err, err);
-    assert(!had_err); /* cannot happen, run_test() is sane */
+    had_err = gt_hashmap_foreach_in_key_order(
+      gtr->unit_tests, run_test, &test_err, err);
+    gt_assert(!had_err); /* cannot happen, run_test() is sane */
   }
   if (test_err)
     return EXIT_FAILURE;
@@ -240,55 +252,56 @@ static int run_tests(GTR *gtr, Error *err)
 
 static void enable_logging(const char *debugfp, FILE **logfp)
 {
-  log_enable();
+  gt_log_enable();
   if (!strcmp(debugfp, "stdout"))
-    log_set_fp(stdout);
+    gt_log_set_fp(stdout);
   else if (!strcmp(debugfp, "stderr"))
-    log_set_fp(stderr);
+    gt_log_set_fp(stderr);
   else {
-    *logfp = fa_xfopen(debugfp, "w");
-    log_set_fp(*logfp);
+    *logfp = gt_fa_xfopen(debugfp, "w");
+    gt_log_set_fp(*logfp);
   }
 }
 
-int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
+int gtr_run(GTR *gtr, int argc, const char **argv, GtError *err)
 {
-  Toolfunc toolfunc;
-  Tool *tool = NULL;
+  GtToolfunc toolfunc;
+  GtTool *tool = NULL;
   char **nargv = NULL;
   void *mem, *map;
   int had_err = 0;
-  error_check(err);
-  assert(gtr);
+  gt_error_check(err);
+  gt_assert(gtr);
   if (gtr->debug)
-    enable_logging(str_get(gtr->debugfp), &gtr->logfp);
-  gtr->seed = ya_rand_init(gtr->seed);
-  log_log("seed=%u", gtr->seed);
-  if (gtr->test) {
+    enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
+  gtr->seed = gt_ya_rand_init(gtr->seed);
+  gt_log_log("seed=%u", gtr->seed);
+  if (gtr->check64bit)
+    return check64bit();
+  if (gtr->test)
     return run_tests(gtr, err);
-  }
-  if (str_length(gtr->testspacepeak)) {
-    mem = ma_malloc(1 << 26); /* alloc 64 MB */;
-    map = fa_mmap_read(str_get(gtr->testspacepeak), NULL);
-    fa_xmunmap(map);
-    ma_free(mem);
+  if (gt_str_length(gtr->testspacepeak)) {
+    mem = gt_malloc(1 << 26); /* alloc 64 MB */;
+    map = gt_fa_mmap_read(gt_str_get(gtr->testspacepeak), NULL);
+    gt_fa_xmunmap(map);
+    gt_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {
-    error_set(err, "neither tool nor script specified; option -help lists "
+    gt_error_set(err, "neither tool nor script specified; option -help lists "
                    "possible tools");
     had_err = -1;
   }
   if (!had_err && argc) {
-    if (!gtr->tools || !toolbox_has_tool(gtr->tools, argv[0])) {
+    if (!gtr->tools || !gt_toolbox_has_tool(gtr->tools, argv[0])) {
       /* no tool found -> try to open script */
-      if (file_exists(argv[0])) {
+      if (gt_file_exists(argv[0])) {
         /* run script */
-        nargv = cstr_array_prefix_first(argv, error_get_progname(err));
-        lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
+        nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
+        gt_lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
-          assert(lua_isstring(gtr->L, -1)); /* error message on top */
-          error_set(err, "could not execute script %s",
+          gt_assert(lua_isstring(gtr->L, -1)); /* error message on top */
+          gt_error_set(err, "could not execute script %s",
                     lua_tostring(gtr->L, -1));
           had_err = -1;
           lua_pop(gtr->L, 1); /* pop error message */
@@ -296,29 +309,29 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
       }
       else {
         /* neither tool nor script found */
-        error_set(err, "neither tool nor script '%s' found; option -help lists "
-                       "possible tools", argv[0]);
+        gt_error_set(err, "neither tool nor script '%s' found; option -help "
+                          "lists possible tools", argv[0]);
         had_err = -1;
       }
     }
     else {
       /* run tool */
-      if (!(toolfunc = toolbox_get(gtr->tools, argv[0]))) {
-        tool = toolbox_get_tool(gtr->tools, argv[0]);
-        assert(tool);
+      if (!(toolfunc = gt_toolbox_get(gtr->tools, argv[0]))) {
+        tool = gt_toolbox_get_tool(gtr->tools, argv[0]);
+        gt_assert(tool);
       }
-      nargv = cstr_array_prefix_first(argv, error_get_progname(err));
-      error_set_progname(err, nargv[0]);
+      nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
+      gt_error_set_progname(err, nargv[0]);
       if (toolfunc)
         had_err = toolfunc(argc, (const char**) nargv, err);
       else
-        had_err = tool_run(tool, argc, (const char**) nargv, err);
+        had_err = gt_tool_run(tool, argc, (const char**) nargv, err);
     }
   }
-  cstr_array_delete(nargv);
+  gt_cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
-    showshortversion(error_get_progname(err));
-    lua_set_arg(gtr->L, error_get_progname(err), argv);
+    gt_showshortversion(gt_error_get_progname(err));
+    gt_lua_set_arg(gtr->L, gt_error_get_progname(err), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
@@ -329,15 +342,14 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Error *err)
 void gtr_delete(GTR *gtr)
 {
   if (!gtr) return;
-  fa_fclose(gtr->logfp);
-  str_delete(gtr->testspacepeak);
-  str_delete(gtr->debugfp);
-  toolbox_delete(gtr->tools);
-  hashtable_delete(gtr->unit_tests);
-  feature_type_factory_delete(gtr->feature_type_factory);
+  gt_fa_fclose(gtr->logfp);
+  gt_str_delete(gtr->testspacepeak);
+  gt_str_delete(gtr->debugfp);
+  gt_toolbox_delete(gtr->tools);
+  gt_hashmap_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
-#ifdef LIBGTVIEW
-  config_delete_without_state(gtr->config);
+#ifndef WITHOUT_CAIRO
+  gt_style_delete_without_state(gtr->style);
 #endif
-  ma_free(gtr);
+  gt_free(gtr);
 }

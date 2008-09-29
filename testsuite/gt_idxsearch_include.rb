@@ -35,27 +35,35 @@ def checktagerator(queryfile,ms)
       "#{$bin}gt seqfilter -minlength 12 - | " +
       "sed -e \'s/^>.*/>/\' > patternfile"
   if File.size("patternfile") > 0
-    run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -pck pck -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 1 -esa sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -esa sfx -t patternfile",
+    run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile " +
+             " -nowildcards -maxocc 10",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 1 -pck pck -t patternfile -nospecials",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -k 2 -pck pck -t patternfile -nospecials",
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile" +
+             " -nowildcards", :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile" +
+             " -nowildcards", :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile " +
+             " -nowildcards -maxocc 10",
              :maxtime => 100)
   end
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
-  run "#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}"
+  run("#{$scriptsdir}/runmkfm.sh #{$bin}/gt 0 . fmi #{reffile}",
+      :maxtime => 100)
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
            "-db #{reffile}"
-  run "#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
-           "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev"
+  run("#{$bin}gt packedindex mkindex -tis -indexname pck -db #{reffile} " +
+      "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 100)
+  run "#{$bin}gt prebwt -maxdepth 4 -pck pck"
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
 end
@@ -83,7 +91,7 @@ allfiles.each do |reffile|
     run_test("#{$bin}gt packedindex mkindex -tis -indexname pck " +
              "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev", 
-             :maxtime => 600)
+             :maxtime => 1200)
   end
 end
 

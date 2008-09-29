@@ -18,13 +18,46 @@
 #ifndef GENOMETOOLS_H
 #define GENOMETOOLS_H
 
-/* the GenomeTools ``all-in-one'' header */
+/* The GenomeTools ``all-in-one'' header.
+   Include only this header if you program against the libgenometools.
+*/
 
-#include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
-#include "gtext.h"   /* include extended GenomeTools library (libgtext) */
-#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
-#ifdef LIBGTVIEW
-#include "gtview.h"  /* include GenomeTools Viewer library (libgtview) */
+/* the generated config header (includes version information) */
+#include "gt_config.h"
+
+/* the core module */
+#include "core/array_api.h"
+#include "core/assert_api.h"
+#include "core/error_api.h"
+#include "core/fptr_api.h"
+#include "core/ma_api.h"
+#include "core/range_api.h"
+#include "core/str_api.h"
+#include "core/str_array_api.h"
+#include "core/unused_api.h"
+#include "core/version_api.h"
+#include "core/warning_api.h"
+
+/* the extended module */
+#include "extended/feature_node_api.h"
+#include "extended/genome_node_api.h"
+#include "extended/gff3_in_stream_api.h"
+#include "extended/node_stream_api.h"
+#include "extended/region_node_api.h"
+
+#ifndef WITHOUT_CAIRO
+/* the AnnotationSketch module (depends on Cairo) */
+#include "annotationsketch/canvas_api.h"
+#include "annotationsketch/canvas_cairo_context_api.h"
+#include "annotationsketch/canvas_cairo_file_api.h"
+#include "annotationsketch/color_api.h"
+#include "annotationsketch/diagram_api.h"
+#include "annotationsketch/feature_index_api.h"
+#include "annotationsketch/feature_index_memory_api.h"
+#include "annotationsketch/graphics_api.h"
+#include "annotationsketch/image_info_api.h"
+#include "annotationsketch/rec_map_api.h"
+#include "annotationsketch/style_api.h"
 #endif
 
 #endif

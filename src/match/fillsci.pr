@@ -1,0 +1,26 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int fasta2sequencekeyvalues(
+        const GtStr *indexname,
+        unsigned long *numofsequences,
+        Seqpos *totallength,
+        Specialcharinfo *specialcharinfo,
+        const GtStrArray *filenametab,
+        Filelengthvalues **filelengthtab,
+        const Alphabet *alpha,
+        bool plainformat,
+        bool withdestab,
+        unsigned long *characterdistribution,
+        Verboseinfo *verboseinfo,
+        GtError *err);
+
+void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
+                              const Uchar *seq,
+                              const Seqpos len,
+                              unsigned int mapsize,
+                              Verboseinfo *verboseinfo);
+
+#ifdef __cplusplus
+}
+#endif

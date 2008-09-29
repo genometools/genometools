@@ -15,60 +15,62 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/uniq_stream.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/versionfunc.h"
+#include "extended/genome_node.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/uniq_stream.h"
 #include "tools/gt_uniq.h"
 
 typedef struct {
   bool verbose;
-  GenFile *outfp;
+  GtGenFile *outfp;
 } UniqArguments;
 
 static OPrval parse_options(int *parsed_args, UniqArguments *arguments,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  OutputFileInfo *ofi;
-  Option *option;
+  GtOptionParser *op;
+  GtOutputFileInfo *ofi;
+  GtOption *option;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
 
   /* init */
-  op = option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
+  op = gt_option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
                          "features in a sorted GFF3_file.");
-  ofi = outputfileinfo_new();
+  ofi = gt_outputfileinfo_new();
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
-  option_parser_set_max_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_max_args(op, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
 
   /* free */
-  outputfileinfo_delete(ofi);
-  option_parser_delete(op);
+  gt_outputfileinfo_delete(ofi);
+  gt_option_parser_delete(op);
 
   return oprval;
 }
 
-int gt_uniq(int argc, const char **argv, Error *err)
+int gt_uniq(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream,
+  GtNodeStream *gff3_in_stream,
                *uniq_stream = NULL,
                *gff3_out_stream = NULL;
   UniqArguments arguments;
-  GenomeNode *gn;
+  GtGenomeNode *gn;
   int parsed_args, had_err;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
@@ -78,25 +80,25 @@ int gt_uniq(int argc, const char **argv, Error *err)
   }
 
   /* create gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose &&
-                                             arguments.outfp);
+  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+  if (arguments.verbose && arguments.outfp)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create uniq stream */
-  uniq_stream = uniq_stream_new(gff3_in_stream);
+  uniq_stream = gt_uniq_stream_new(gff3_in_stream);
 
   /* create gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(uniq_stream, arguments.outfp);
+  gff3_out_stream = gt_gff3_out_stream_new(uniq_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) && gn)
-    genome_node_rec_delete(gn);
+  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) && gn)
+    gt_genome_node_rec_delete(gn);
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(uniq_stream);
-  genome_stream_delete(gff3_in_stream);
-  genfile_close(arguments.outfp);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(uniq_stream);
+  gt_node_stream_delete(gff3_in_stream);
+  gt_genfile_close(arguments.outfp);
 
   return had_err;
 }

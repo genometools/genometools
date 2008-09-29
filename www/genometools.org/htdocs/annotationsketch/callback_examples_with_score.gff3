@@ -1,0 +1,12 @@
+##gff-version   3
+##sequence-region   ctg123 1 10000
+ctg123	.	gene	1000	9000	0.5	+	.	ID=gene00001
+ctg123	.	TF_binding_site	1000	1012	.	+	.	Parent=gene00001
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA00001;Parent=gene00001
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA00002;Parent=gene00001
+ctg123	.	mRNA	1300	9000	.	+	.	ID=mRNA00003;Parent=gene00001
+ctg123	.	exon	1300	1500	0.6	+	.	ID=exon1;Parent=mRNA00003
+ctg123	.	exon	1050	1500	0.2	+	.	Parent=mRNA00001,mRNA00002
+ctg123	.	exon	3000	3902	1	+	.	Parent=mRNA00001,mRNA00003
+ctg123	.	exon	5000	5500	0.3	+	.	Parent=mRNA00001,mRNA00002,mRNA00003
+ctg123	.	exon	7000	9000	1	+	.	Parent=mRNA00001,mRNA00002,mRNA00003

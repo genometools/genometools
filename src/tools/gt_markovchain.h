@@ -18,9 +18,9 @@
 #ifndef GT_MARKOVCHAIN_H
 #define GT_MARKOVCHAIN_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the markov chain tool */
-Tool* gt_markovchain(void);
+GtTool* gt_markovchain(void);
 
 #endif

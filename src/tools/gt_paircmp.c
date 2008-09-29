@@ -17,169 +17,175 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "libgtcore/error.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/option.h"
-#include "libgtcore/str.h"
-#include "libgtcore/symboldef.h"
-#include "libgtmatch/spacedef.h"
-#include "libgtmatch/test-pairwise.h"
+#include "core/error.h"
+#include "core/versionfunc.h"
+#include "core/option.h"
+#include "core/str.h"
+#include "core/symboldef.h"
+#include "match/spacedef.h"
+#include "match/test-pairwise.h"
 #include "tools/gt_paircmp.h"
 
 typedef struct
 {
-  Str *charlist;
+  GtStr *charlist;
   unsigned long len;
 } Charlistlen;
 
 typedef struct
 {
-  StrArray *strings,
+  GtStrArray *strings,
            *files;
   Charlistlen *charlistlen;
-  Str *text;
+  GtStr *text;
 } Cmppairwiseopt;
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
 {
-  if (strarray_size(opt->strings) > 0)
+  if (gt_str_array_size(opt->strings) > 0)
   {
-    printf("# two strings \"%s\" \"%s\"\n",strarray_get(opt->strings,0),
-                                           strarray_get(opt->strings,1UL));
+    printf("# two strings \"%s\" \"%s\"\n",gt_str_array_get(opt->strings,0),
+                                           gt_str_array_get(opt->strings,1UL));
     return;
   }
-  if (strarray_size(opt->files) > 0)
+  if (gt_str_array_size(opt->files) > 0)
   {
-    printf("# two files \"%s\" \"%s\"\n",strarray_get(opt->files,0),
-                                         strarray_get(opt->files,1UL));
+    printf("# two files \"%s\" \"%s\"\n",gt_str_array_get(opt->files,0),
+                                         gt_str_array_get(opt->files,1UL));
     return;
   }
   if (opt->charlistlen != NULL)
   {
     printf("# alphalen \"%s\" %lu\n",
-             str_get(opt->charlistlen->charlist),
+             gt_str_get(opt->charlistlen->charlist),
              opt->charlistlen->len);
     return;
   }
-  if (str_length(opt->text) > 0)
+  if (gt_str_length(opt->text) > 0)
   {
-    printf("# text \"%s\"\n",str_get(opt->text));
+    printf("# text \"%s\"\n",gt_str_get(opt->text));
     return;
   }
 }
 
 static OPrval parse_options(int *parsed_args,
                             Cmppairwiseopt *pw,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *optionstrings,
+  GtOptionParser *op;
+  GtOption *optionstrings,
          *optionfiles,
          *optioncharlistlen,
          *optiontext;
-  StrArray *charlistlen;
+  GtStrArray *charlistlen;
   OPrval oprval;
 
-  error_check(err);
-  charlistlen = strarray_new();
-  pw->strings = strarray_new();
-  pw->files = strarray_new();
-  pw->text = str_new();
+  gt_error_check(err);
+  charlistlen = gt_str_array_new();
+  pw->strings = gt_str_array_new();
+  pw->files = gt_str_array_new();
+  pw->text = gt_str_new();
   pw->charlistlen = NULL;
-  op = option_parser_new("options","Apply function to pairs of strings.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  op = gt_option_parser_new("options","Apply function to pairs of strings.");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionstrings = option_new_stringarray("ss","use two strings",
+  optionstrings = gt_option_new_stringarray("ss","use two strings",
                                          pw->strings);
-  option_parser_add_option(op, optionstrings);
+  gt_option_parser_add_option(op, optionstrings);
 
-  optionfiles = option_new_filenamearray("ff","use two files",
+  optionfiles = gt_option_new_filenamearray("ff","use two files",
                                          pw->files);
-  option_parser_add_option(op, optionfiles);
+  gt_option_parser_add_option(op, optionfiles);
 
-  optioncharlistlen = option_new_stringarray("a",
+  optioncharlistlen = gt_option_new_stringarray("a",
                                              "use character list and length",
                                              charlistlen);
-  option_parser_add_option(op, optioncharlistlen);
+  gt_option_parser_add_option(op, optioncharlistlen);
 
-  optiontext = option_new_string("t","use text",pw->text, NULL);
-  option_parser_add_option(op, optiontext);
+  optiontext = gt_option_new_string("t","use text",pw->text, NULL);
+  gt_option_parser_add_option(op, optiontext);
 
-  option_exclude(optionstrings, optionfiles);
-  option_exclude(optionstrings, optioncharlistlen);
-  option_exclude(optionstrings, optiontext);
-  option_exclude(optionfiles, optioncharlistlen);
-  option_exclude(optionfiles, optiontext);
-  option_exclude(optioncharlistlen, optiontext);
+  gt_option_exclude(optionstrings, optionfiles);
+  gt_option_exclude(optionstrings, optioncharlistlen);
+  gt_option_exclude(optionstrings, optiontext);
+  gt_option_exclude(optionfiles, optioncharlistlen);
+  gt_option_exclude(optionfiles, optiontext);
+  gt_option_exclude(optioncharlistlen, optiontext);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
   if (oprval == OPTIONPARSER_OK)
   {
-    if (option_is_set(optionstrings))
+    if (gt_option_is_set(optionstrings))
     {
-      if (strarray_size(pw->strings) != 2UL)
+      if (gt_str_array_size(pw->strings) != 2UL)
       {
-        error_set(err, "option -ss requires two string arguments");
+        gt_error_set(err, "option -ss requires two string arguments");
         oprval = OPTIONPARSER_ERROR;
       }
     } else
     {
-      if (option_is_set(optionfiles))
+      if (gt_option_is_set(optionfiles))
       {
-        if (strarray_size(pw->files) != 2UL)
+        if (gt_str_array_size(pw->files) != 2UL)
         {
-          error_set(err, "option -ff requires two filename arguments");
+          gt_error_set(err, "option -ff requires two filename arguments");
           oprval = OPTIONPARSER_ERROR;
         }
       } else
       {
-        if (option_is_set(optioncharlistlen))
+        if (gt_option_is_set(optioncharlistlen))
         {
           long readint;
 
-          if (strarray_size(charlistlen) != 2UL)
+          if (gt_str_array_size(charlistlen) != 2UL)
           {
-            error_set(err, "option -a requires charlist and length argument");
+            gt_error_set(err,
+                         "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
-          pw->charlistlen->charlist = str_ref(strarray_get_str(charlistlen,0));
-          if (sscanf(strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
+          pw->charlistlen->charlist =
+            gt_str_ref(gt_str_array_get_str(charlistlen,
+                                                                  0));
+          if (sscanf(gt_str_array_get(charlistlen,1UL),"%ld",&readint) != 1 ||
               readint < 1L)
           {
-            error_set(err, "option -a requires charlist and length argument");
+            gt_error_set(err,
+                         "option -a requires charlist and length argument");
             oprval = OPTIONPARSER_ERROR;
           }
           pw->charlistlen->len = (unsigned long) readint;
         } else
         {
-          if (!option_is_set(optiontext))
+          if (!gt_option_is_set(optiontext))
           {
-            error_set(err, "use exactly one of the options -ss, -ff, -a, -t");
+            gt_error_set(err,
+                         "use exactly one of the options -ss, -ff, -a, -t");
             oprval = OPTIONPARSER_ERROR;
           }
         }
       }
     }
   }
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
-    error_set(err, "superfluous program parameters");
+    gt_error_set(err, "superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
-  strarray_delete(charlistlen);
+  gt_str_array_delete(charlistlen);
   return oprval;
 }
 
 static void freesimpleoption(Cmppairwiseopt *cmppairwise)
 {
-  strarray_delete(cmppairwise->strings);
-  strarray_delete(cmppairwise->files);
-  str_delete(cmppairwise->text);
+  gt_str_array_delete(cmppairwise->strings);
+  gt_str_array_delete(cmppairwise->files);
+  gt_str_delete(cmppairwise->text);
   if (cmppairwise->charlistlen != NULL)
   {
-    str_delete(cmppairwise->charlistlen->charlist);
+    gt_str_delete(cmppairwise->charlistlen->charlist);
     FREESPACE(cmppairwise->charlistlen);
   }
 }
@@ -188,16 +194,16 @@ static unsigned long applycheckfunctiontosimpleoptions(
                                   Checkcmppairfuntype checkfunction,
                                   const Cmppairwiseopt *opt)
 {
-  if (strarray_size(opt->strings) > 0)
+  if (gt_str_array_size(opt->strings) > 0)
   {
     bool forward = true;
     while (true)
     {
       checkfunction(forward,
-                    (const Uchar *) strarray_get(opt->strings,0),
-                    (unsigned long) strlen(strarray_get(opt->strings,0)),
-                    (const Uchar *) strarray_get(opt->strings,1UL),
-                    (unsigned long) strlen(strarray_get(opt->strings,1UL)));
+                    (const Uchar *) gt_str_array_get(opt->strings,0),
+                    (unsigned long) strlen(gt_str_array_get(opt->strings,0)),
+                    (const Uchar *) gt_str_array_get(opt->strings,1UL),
+                    (unsigned long) strlen(gt_str_array_get(opt->strings,1UL)));
       if (!forward)
       {
         break;
@@ -206,34 +212,34 @@ static unsigned long applycheckfunctiontosimpleoptions(
     }
     return 2UL; /* number of testcases */
   }
-  if (strarray_size(opt->files) > 0)
+  if (gt_str_array_size(opt->files) > 0)
   {
     runcheckfunctionontwofiles(checkfunction,
-                               strarray_get(opt->files,0),
-                               strarray_get(opt->files,1UL));
+                               gt_str_array_get(opt->files,0),
+                               gt_str_array_get(opt->files,1UL));
     return 2UL;
   }
   if (opt->charlistlen != NULL)
   {
     return runcheckfunctiononalphalen(checkfunction,
-                                      str_get(opt->charlistlen->charlist),
+                                      gt_str_get(opt->charlistlen->charlist),
                                       opt->charlistlen->len);
   }
-  if (str_length(opt->text) > 0)
+  if (gt_str_length(opt->text) > 0)
   {
-    return runcheckfunctionontext(checkfunction,str_get(opt->text));
+    return runcheckfunctionontext(checkfunction,gt_str_get(opt->text));
   }
   assert(false);
   return 0;
 }
 
-int gt_paircmp(int argc, const char **argv, Error *err)
+int gt_paircmp(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
   Cmppairwiseopt cmppairwise;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
 
   oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, err);
   if (oprval == OPTIONPARSER_OK)

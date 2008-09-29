@@ -18,9 +18,9 @@
 #ifndef GT_CSA_H
 #define GT_CSA_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the consensus spliced alignment (csa) tool */
-Tool* gt_csa(void);
+GtTool* gt_csa(void);
 
 #endif

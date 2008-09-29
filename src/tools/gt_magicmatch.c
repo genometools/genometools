@@ -16,22 +16,22 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtext/gtdatahelp.h"
+#include "core/bioseq.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/unused_api.h"
+#include "extended/gtdatahelp.h"
 #include "tools/gt_magicmatch.h"
 
 typedef struct {
-  StrArray *seqfiles;
+  GtStrArray *seqfiles;
   bool translate;
 } MagicMatchArguments;
 
 static void* gt_magicmatch_arguments_new(void)
 {
-  MagicMatchArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->seqfiles = strarray_new();
+  MagicMatchArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->seqfiles = gt_str_array_new();
   return arguments;
 }
 
@@ -39,78 +39,80 @@ static void gt_magicmatch_arguments_delete(void *tool_arguments)
 {
   MagicMatchArguments *arguments = tool_arguments;
   if (!arguments) return;
-  strarray_delete(arguments->seqfiles);
-  ma_free(arguments);
+  gt_str_array_delete(arguments->seqfiles);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
 {
   MagicMatchArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] -f sequence_file [...] -t",
+  op = gt_option_parser_new("[option ...] -f sequence_file [...] -t",
                          "Compute MD5 fingerprints for each sequence given in "
                          "sequence_file(s).");
 
   /* -f */
-  o = option_new_filenamearray("f", "fasta file names (at least one file is "
+  o = gt_option_new_filenamearray("f", "fasta file names (at least one file is "
                                "required)", arguments->seqfiles);
-  option_is_mandatory(o);
-  option_parser_add_option(op, o);
+  gt_option_is_mandatory(o);
+  gt_option_parser_add_option(op, o);
 
   /* -t */
-  o = option_new_bool("t", "translate the sequences of the files",
+  o = gt_option_new_bool("t", "translate the sequences of the files",
                       &arguments->translate, false);
-  option_is_mandatory(o);
-  option_parser_add_option(op, o);
+  gt_option_is_mandatory(o);
+  gt_option_parser_add_option(op, o);
 
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 0, 0);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+  gt_option_parser_set_min_max_args(op, 0, 0);
 
   return op;
 }
 
-static void translate_sequence_file(Bioseq *bs)
+static void translate_sequence_file(GtBioseq *bs)
 {
   unsigned long i;
   assert(bs);
-  for (i = 0; i < bioseq_number_of_sequences(bs); i++) {
-    printf("%s\t%s\n", bioseq_get_md5_fingerprint(bs, i),
-                       bioseq_get_description(bs, i));
+  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
+    printf("%s\t%s\n", gt_bioseq_get_md5_fingerprint(bs, i),
+                       gt_bioseq_get_description(bs, i));
   }
 }
 
-static int gt_magicmatch_runner(UNUSED int argc, UNUSED const char **argv,
-                                UNUSED int parsed_args, void *tool_arguments,
-                                Error *err)
+static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
+                                GT_UNUSED int parsed_args, void *tool_arguments,
+                                GtError *err)
 {
   MagicMatchArguments *arguments = tool_arguments;
-  Bioseq *bioseq;
+  GtBioseq *bioseq;
   unsigned long i;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   if (arguments->translate) {
-    for (i = 0; !had_err && i < strarray_size(arguments->seqfiles); i++) {
-      if (!(bioseq = bioseq_new(strarray_get(arguments->seqfiles, i), err)))
+    for (i = 0; !had_err && i < gt_str_array_size(arguments->seqfiles); i++) {
+      if (!(bioseq = gt_bioseq_new(gt_str_array_get(arguments->seqfiles, i),
+                                   err))) {
         had_err = -1;
+      }
       if (!had_err)
         translate_sequence_file(bioseq);
-      bioseq_delete(bioseq);
+      gt_bioseq_delete(bioseq);
     }
   }
 
   return had_err;
 }
 
-Tool* gt_magicmatch(void)
+GtTool* gt_magicmatch(void)
 {
-  return tool_new(gt_magicmatch_arguments_new,
+  return gt_tool_new(gt_magicmatch_arguments_new,
                   gt_magicmatch_arguments_delete,
                   gt_magicmatch_option_parser_new,
                   NULL,

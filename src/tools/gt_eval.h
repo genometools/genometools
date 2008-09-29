@@ -19,6 +19,6 @@
 #define GT_EVAL_H
 
 /* the evaluation tool */
-int gt_eval(int argc, const char **argv, Error*);
+int gt_eval(int argc, const char **argv, GtError*);
 
 #endif

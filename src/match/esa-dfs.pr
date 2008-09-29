@@ -1,0 +1,22 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int depthfirstesa(Sequentialsuffixarrayreader *ssar,
+                  Dfsinfo *(*allocateDfsinfo)(Dfsstate *),
+                  void(*freeDfsinfo)(Dfsinfo *,Dfsstate *),
+                  int(*processleafedge)(bool,Seqpos,Dfsinfo *,
+                                        Seqpos,Dfsstate *,
+                                        GtError *),
+                  int(*processbranchedge)(bool,
+                                          Seqpos,
+                                          Dfsinfo *,
+                                          Dfsinfo *,
+                                          Dfsstate *,
+                                          GtError *),
+                  Dfsstate *state,
+                  GT_UNUSED Verboseinfo *verboseinfo,
+                  GtError *err);
+
+#ifdef __cplusplus
+}
+#endif

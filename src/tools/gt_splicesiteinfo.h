@@ -19,6 +19,6 @@
 #define GT_SPLICESITEINFO_H
 
 /* the splice site info tool */
-int gt_splicesiteinfo(int argc, const char **argv, Error*);
+int gt_splicesiteinfo(int argc, const char **argv, GtError*);
 
 #endif

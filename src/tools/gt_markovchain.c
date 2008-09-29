@@ -17,52 +17,52 @@
 
 #include <math.h>
 #include <string.h>
-#include "libgtcore/unused.h"
-#include "libgtexercise/markov_chain_parsing.h"
+#include "core/unused_api.h"
+#include "exercise/markov_chain_parsing.h"
 #include "tools/gt_markovchain.h"
 
-static OptionParser* gt_markovchain_option_parser_new(UNUSED
+static GtOptionParser* gt_markovchain_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
-  OptionParser *op;
-  op = option_parser_new("[option ...] markov_chain_file sequence",
+  GtOptionParser *op;
+  op = gt_option_parser_new("[option ...] markov_chain_file sequence",
                          "Compute the probability of sequence given the markov "
                          "chain in markov_chain_file.");
-  option_parser_set_min_max_args(op, 2, 2);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
-static int gt_markovchain_runner(UNUSED int argc, const char **argv,
-                                 int parsed_args, UNUSED void *tool_arguments,
-                                 Error *err)
+static int gt_markovchain_runner(GT_UNUSED int argc, const char **argv,
+                                 int parsed_args,
+                                 GT_UNUSED void *tool_arguments, GtError *err)
 {
-  MarkovChain *mc;
+  GtMarkovChain *mc;
   double P;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
-  if (!(mc = markov_chain_parse(argv[parsed_args], err)))
+  if (!(mc = gt_markov_chain_parse(argv[parsed_args], err)))
     had_err = -1;
 
   if (!had_err) {
     unsigned long seqlen = strlen(argv[parsed_args+1]);
-    assert(markov_chain_is_valid(mc));
-    had_err = markov_chain_compute_prob(mc, &P, argv[parsed_args+1], seqlen,
+    assert(gt_markov_chain_is_valid(mc));
+    had_err = gt_markov_chain_compute_prob(mc, &P, argv[parsed_args+1], seqlen,
                                         err);
   }
 
   if (!had_err)
     printf("P=%.10f\n", P);
 
-  markov_chain_delete(mc);
+  gt_markov_chain_delete(mc);
 
   return had_err;
 }
 
-Tool* gt_markovchain(void)
+GtTool* gt_markovchain(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_markovchain_option_parser_new,
                   NULL,

@@ -15,54 +15,55 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/verbose-def.h"
-#include "libgtmatch/test-mergeesa.pr"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/verbose-def.h"
+#include "match/test-mergeesa.pr"
 #include "tools/gt_mergeesa.h"
 
-static OPrval parse_options(Str *indexname,StrArray *indexnametab,
+static OPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
                             int *parsed_args, int argc,
-                            const char **argv, Error *err)
+                            const char **argv, GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  Option *option;
+  GtOption *option;
 
-  error_check(err);
-  op = option_parser_new("storeindex <mkvindex1> <mkvindex2> ...",
+  gt_error_check(err);
+  op = gt_option_parser_new("storeindex <mkvindex1> <mkvindex2> ...",
                          "Merge indexes into one index.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("ii",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  option = gt_option_new_filenamearray("ii",
                                     "specify input index files (mandatory)",
                                     indexnametab);
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_string("indexname",
+  option = gt_option_new_string("indexname",
                              "specify index to be created",
                              indexname, NULL);
 
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_mergeesa(int argc, const char **argv, Error *err)
+int gt_mergeesa(int argc, const char **argv, GtError *err)
 {
-  Str *storeindex;
-  StrArray *indexnametab;
+  GtStr *storeindex;
+  GtStrArray *indexnametab;
   bool haserr = false;
   int parsed_args;
 
-  error_check(err);
+  gt_error_check(err);
 
-  storeindex = str_new();
-  indexnametab = strarray_new();
+  storeindex = gt_str_new();
+  indexnametab = gt_str_array_new();
   switch (parse_options(storeindex, indexnametab, &parsed_args, argc, argv,
                         err)) {
     case OPTIONPARSER_OK: break;
@@ -75,10 +76,10 @@ int gt_mergeesa(int argc, const char **argv, Error *err)
     unsigned long i;
     Verboseinfo *verboseinfo;
 
-    printf("# storeindex=%s\n",str_get(storeindex));
-    for (i=0; i<strarray_size(indexnametab); i++)
+    printf("# storeindex=%s\n",gt_str_get(storeindex));
+    for (i=0; i<gt_str_array_size(indexnametab); i++)
     {
-      printf("# input=%s\n",strarray_get(indexnametab,i));
+      printf("# input=%s\n",gt_str_array_get(indexnametab,i));
     }
     verboseinfo = newverboseinfo(false);
     if (performtheindexmerging(storeindex,
@@ -90,7 +91,7 @@ int gt_mergeesa(int argc, const char **argv, Error *err)
     }
     freeverboseinfo(&verboseinfo);
   }
-  str_delete(storeindex);
-  strarray_delete(indexnametab);
+  gt_str_delete(storeindex);
+  gt_str_array_delete(indexnametab);
   return haserr ? -1 : 0;
 }

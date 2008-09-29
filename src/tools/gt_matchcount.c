@@ -16,24 +16,25 @@
 */
 
 #include <string.h>
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/matchcount.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/matchcount.h"
 #include "tools/gt_matchcount.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] k seq1 seq2",
+  gt_error_check(err);
+  op = gt_option_parser_new("[option ...] k seq1 seq2",
                          "Compute the match-count for each substring pair of "
                          "length k from seq1 and seq2.");
-  option_parser_set_min_max_args(op, 3, 3);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 3, 3);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
@@ -42,11 +43,11 @@ static void proc_match_count(int u_pos, int v_pos, int match_count)
   printf("mc(%2d, %2d)=%2d\n", u_pos, v_pos, match_count);
 }
 
-int gt_matchcount(int argc, const char **argv, Error *err)
+int gt_matchcount(int argc, const char **argv, GtError *err)
 {
   const char *seq1, *seq2;
   int k, len1, len2, parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -57,7 +58,7 @@ int gt_matchcount(int argc, const char **argv, Error *err)
   assert(parsed_args + 2 < argc);
 
   if (sscanf(argv[parsed_args], "%d", &k) != 1 || k <= 0) {
-    error_set(err, "first argument <k> must be positive integer");
+    gt_error_set(err, "first argument <k> must be positive integer");
     had_err = -1;
   }
 
@@ -72,7 +73,7 @@ int gt_matchcount(int argc, const char **argv, Error *err)
 
     /* compute match count */
     printf("args=%d %s %s\n", k, seq1, seq2);
-    matchcount(seq1, len1, seq2, len2, k, proc_match_count);
+    gt_matchcount_matchcount(seq1, len1, seq2, len2, k, proc_match_count);
   }
 
   return had_err;

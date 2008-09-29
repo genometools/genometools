@@ -16,34 +16,35 @@
 */
 
 #include <string.h>
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/dice_hmm.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/xansi.h"
+#include "extended/dice_hmm.h"
 #include "tools/gt_casino.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("sequence_of_die_rolls", "Decode "
+  gt_error_check(err);
+  op = gt_option_parser_new("sequence_of_die_rolls", "Decode "
                          "'sequence_of_die_rolls' and show the result on "
                          "stdout.");
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_casino(int argc, const char **argv, Error *err)
+int gt_casino(int argc, const char **argv, GtError *err)
 {
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
   int parsed_args, had_err = 0;
-  HMM *hmm = NULL;
-  error_check(err);
+  GtHMM *hmm = NULL;
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -55,7 +56,7 @@ int gt_casino(int argc, const char **argv, Error *err)
 
   /* save sequence */
   num_of_emissions = strlen(argv[1]);
-  emissions = ma_malloc(sizeof (unsigned int) * num_of_emissions);
+  emissions = gt_malloc(sizeof (unsigned int) * num_of_emissions);
   for (i = 0; i < num_of_emissions; i++) {
     emissions[i] = argv[1][i];
     switch (emissions[i]) {
@@ -78,39 +79,39 @@ int gt_casino(int argc, const char **argv, Error *err)
         emissions[i] = SIX;
         break;
       default:
-        error_set(err, "emissions[%u]=%c is not a valid character (only "
+        gt_error_set(err, "emissions[%u]=%c is not a valid character (only "
                        "`1' to `6' allowed)", i, (char) emissions[i]);
         had_err = -1;
     }
   }
 
   if (!had_err) {
-    /* create the HMM */
-    hmm = dice_hmm_loaded();
+    /* create the GtHMM */
+    hmm = gt_dice_hmm_loaded();
 
     /* decoding */
-    state_sequence = ma_malloc(sizeof (unsigned int) * num_of_emissions);
-    hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
+    state_sequence = gt_malloc(sizeof (unsigned int) * num_of_emissions);
+    gt_hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
 
     /* print most probable state sequence state sequence */
     for (i = 0 ; i < num_of_emissions; i++) {
       switch (state_sequence[i]) {
         case DICE_FAIR:
-          xputchar('F');
+          gt_xputchar('F');
           break;
         case DICE_LOADED:
-          xputchar('L');
+          gt_xputchar('L');
           break;
         default: assert(0);
       }
     }
-    xputchar('\n');
+    gt_xputchar('\n');
   }
 
   /* free */
-  hmm_delete(hmm);
-  ma_free(emissions);
-  ma_free(state_sequence);
+  gt_hmm_delete(hmm);
+  gt_free(emissions);
+  gt_free(state_sequence);
 
   return had_err;
 }

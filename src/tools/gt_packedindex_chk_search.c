@@ -16,20 +16,20 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "libgtcore/error.h"
-#include "libgtcore/minmax.h"
-#include "libgtcore/option.h"
-#include "libgtcore/str.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/eis-bwtseq-param.h"
-#include "libgtmatch/encseq-def.h"
-#include "libgtmatch/enum-patt-def.h"
-#include "libgtmatch/esa-mmsearch-def.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/sfx-apfxlen.pr"
-#include "libgtmatch/verbose-def.h"
+#include "core/error.h"
+#include "core/minmax.h"
+#include "core/option.h"
+#include "core/str.h"
+#include "core/versionfunc.h"
+#include "match/eis-bwtseq.h"
+#include "match/eis-bwtseq-param.h"
+#include "match/encseq-def.h"
+#include "match/enum-patt-def.h"
+#include "match/esa-mmsearch-def.h"
+#include "match/sarr-def.h"
+#include "match/esa-map.pr"
+#include "match/sfx-apfxlen.pr"
+#include "match/verbose-def.h"
 #include "tools/gt_packedindex_chk_search.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
@@ -45,27 +45,27 @@ struct chkSearchOptions
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *params, const Str *projectName,
-                   Error *err);
+                   struct chkSearchOptions *params, const GtStr *projectName,
+                   GtError *err);
 
 extern int
-gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
+gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
 {
   struct chkSearchOptions params;
   Suffixarray suffixarray;
   Enumpatterniterator *epi = NULL;
   bool saIsLoaded = false;
   BWTSeq *bwtSeq = NULL;
-  Str *inputProject = NULL;
+  GtStr *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
   BWTSeqExactMatchesIterator EMIter;
   bool EMIterInitialized = false;
   Verboseinfo *verbosity = NULL;
-  inputProject = str_new();
+  inputProject = gt_str_new();
 
   do {
-    error_check(err);
+    gt_error_check(err);
     {
       bool exitNow = false;
       switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
@@ -84,7 +84,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
       if (exitNow)
         break;
     }
-    str_set(inputProject, argv[parsedArgs]);
+    gt_str_set(inputProject, argv[parsedArgs]);
 
     verbosity = newverboseinfo(params.verboseOutput);
 
@@ -99,8 +99,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
       if ((had_err = (retval != VERIFY_BWTSEQ_NO_ERROR)))
       {
         fprintf(stderr, "index integrity check failed: %s\n",
-                error_get(err));
-        error_set(err, "aborted because of index integrity check fail");
+                gt_error_get(err));
+        gt_error_set(err, "aborted because of index integrity check fail");
         break;
       }
     }
@@ -108,7 +108,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
     {
       if ((had_err = !initEmptyEMIterator(&EMIter, bwtSeq)))
       {
-        error_set(err, "Cannot create matches iterator for sequence index.");
+        gt_error_set(err, "Cannot create matches iterator for sequence index.");
         break;
       }
       EMIterInitialized = true;
@@ -121,7 +121,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
            mapsuffixarray(&suffixarray, &totalLen, SARR_SUFTAB | SARR_ESQTAB,
                           inputProject, NULL, err) != 0))
       {
-        error_set(err, "Can't load suffix array project with"
+        gt_error_set(err, "Can't load suffix array project with"
                   " demand for encoded sequence and suffix table files\n");
         break;
       }
@@ -129,7 +129,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))
       {
-        error_set(err, "Invalid pattern lengths selected: min=%ld, max=%ld;"
+        gt_error_set(err, "Invalid pattern lengths selected: min=%ld, max=%ld;"
                   " min <= max is required.", params.minPatLen,
                   params.maxPatLen);
         break;
@@ -150,7 +150,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
               params.minPatLen, params.maxPatLen);
       if ((had_err = totalLen + 1 != BWTSeqLength(bwtSeq)))
       {
-        error_set(err, "base suffix array and index have diferrent lengths!"
+        gt_error_set(err, "base suffix array and index have diferrent lengths!"
                   FormatSeqpos" vs. "FormatSeqpos,  totalLen + 1,
                   BWTSeqLength(bwtSeq));
         break;
@@ -202,14 +202,15 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
             bool match = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = !match))
             {
-              error_set(err, "matches of packedindex expired before mmsearch!");
+              gt_error_set(err,
+                           "matches of packedindex expired before mmsearch!");
               break;
             }
             if ((had_err = matchPos != dbstart))
             {
-              error_set(err, "packedindex match doesn't equal mmsearch match "
-                        "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
-                        matchPos, dbstart);
+              gt_error_set(err, "packedindex match doesn't equal mmsearch "
+                           "match result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
+                           matchPos, dbstart);
             }
           }
           if (!had_err)
@@ -218,7 +219,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
             bool trailingMatch = EMIGetNextMatch(&EMIter, &matchPos, bwtSeq);
             if ((had_err = trailingMatch))
             {
-              error_set(err, "matches of mmsearch expired before fmindex!");
+              gt_error_set(err, "matches of mmsearch expired before fmindex!");
               break;
             }
           }
@@ -230,7 +231,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
             numMMSearchMatches = countmmsearchiterator(mmsi);
           if ((had_err = numFMIMatches != numMMSearchMatches))
           {
-            error_set(err, "Number of matches not equal for suffix array ("
+            gt_error_set(err, "Number of matches not equal for suffix array ("
                       FormatSeqpos") and fmindex ("FormatSeqpos".\n",
                       numFMIMatches, numMMSearchMatches);
           }
@@ -250,22 +251,22 @@ gt_packedindex_chk_search(int argc, const char *argv[], Error *err)
   if (epi) freeEnumpatterniterator(&epi);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
   if (verbosity) freeverboseinfo(&verbosity);
-  if (inputProject) str_delete(inputProject);
+  if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
 }
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *params, const Str *projectName,
-                   Error *err)
+                   struct chkSearchOptions *params, const GtStr *projectName,
+                   GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  Option *option, *optionProgress;
+  GtOption *option, *optionProgress;
   bool checkSuffixArrayValues, tryContextRetrieve, tryFullRegen;
 
-  error_check(err);
-  op = option_parser_new("indexname",
+  gt_error_check(err);
+  op = gt_option_parser_new("indexname",
                          "Load (or build if necessary) BWT index for project"
                          " <indexname> and perform verification of search"
                          " results.");
@@ -273,51 +274,53 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName);
 
-  option = option_new_long("minpatlen",
+  option = gt_option_new_long("minpatlen",
                            "minimum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
                            "properties", &params->minPatLen, -1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_long("maxpatlen",
+  option = gt_option_new_long("maxpatlen",
                            "maximum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
                            "properties", &params->maxPatLen, -1);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("nsamples",
+  option = gt_option_new_ulong("nsamples",
                             "number of sequences to search for",
                             &params->numOfSamples, 1000);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("chksfxarray",
+  option = gt_option_new_bool("chksfxarray",
                            "verify integrity of stored suffix array positions",
                            &checkSuffixArrayValues, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("full-lfmap",
+  option = gt_option_new_bool("full-lfmap",
                            "verify complete backwards regeneration of "
                            "original sequence", &tryFullRegen, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("chkcontext",
+  option = gt_option_new_bool("chkcontext",
                            "verify integrity of regenerated sequence context",
                            &tryContextRetrieve, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  optionProgress = option_new_ulong("ticks", "print dot after this many symbols"
-                                    " tested okay", &params->progressInterval,
+  optionProgress = gt_option_new_ulong("ticks",
+                                    "print dot after this many symbols "
+                                    "tested okay", &params->progressInterval,
                                     DEFAULT_PROGRESS_INTERVAL);
-  option_parser_add_option(op, optionProgress);
+  gt_option_parser_add_option(op, optionProgress);
 
-  option = option_new_bool("v",
+  option = gt_option_new_bool("v",
                            "print verbose progress information",
                            &params->verboseOutput,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
 
   /* condense boolean options to flags field */
   params->flags = (checkSuffixArrayValues?VERIFY_BWTSEQ_SUFVAL:0)
@@ -327,7 +330,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
    * determined indirectly */
   computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
 
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

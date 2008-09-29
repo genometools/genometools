@@ -15,110 +15,112 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fptr.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtexercise/sspliced_alignment.h"
-#include "libgtexercise/sspliced_alignment_parsing.h"
-#include "libgtext/consensus_sa.h"
+#include "core/fptr_api.h"
+#include "core/unused_api.h"
+#include "core/xansi.h"
+#include "exercise/sspliced_alignment.h"
+#include "exercise/sspliced_alignment_parsing.h"
+#include "extended/consensus_sa.h"
 #include "tools/gt_consensus_sa.h"
 
-static Range get_genomic_range(const void *sa)
+static GtRange get_genomic_range(const void *sa)
 {
-  SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
+  GtSSplicedAlignment *alignment = *(GtSSplicedAlignment**) sa;
   assert(alignment);
-  return sspliced_alignment_genomic_range(alignment);
+  return gt_sspliced_alignment_genomic_range(alignment);
 }
 
-static Strand get_strand(const void *sa)
+static GtStrand get_strand(const void *sa)
 {
-  SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
-  if (sspliced_alignment_is_forward(alignment))
-    return STRAND_FORWARD;
-  return STRAND_REVERSE;
+  GtSSplicedAlignment *alignment = *(GtSSplicedAlignment**) sa;
+  if (gt_sspliced_alignment_is_forward(alignment))
+    return GT_STRAND_FORWARD;
+  return GT_STRAND_REVERSE;
 }
 
-static void get_exons(Array *exon_ranges, const void *sa)
+static void get_exons(GtArray *exon_ranges, const void *sa)
 {
-  SSplicedAlignment *alignment = *(SSplicedAlignment**) sa;
-  Range exon;
+  GtSSplicedAlignment *alignment = *(GtSSplicedAlignment**) sa;
+  GtRange exon;
   unsigned long i;
   assert(alignment);
-  for (i = 0; i < sspliced_alignment_num_of_exons(alignment); i++) {
-    exon = sspliced_alignment_get_exon(alignment, i);
-    array_add(exon_ranges, exon);
+  for (i = 0; i < gt_sspliced_alignment_num_of_exons(alignment); i++) {
+    exon = gt_sspliced_alignment_get_exon(alignment, i);
+    gt_array_add(exon_ranges, exon);
   }
 }
 
-static void process_splice_form(Array *spliced_alignments_in_form,
-                                UNUSED const void *set_of_sas,
-                                UNUSED unsigned long number_of_sas,
-                                UNUSED size_t size_of_sa,
-                                UNUSED void *userdata)
+static void process_splice_form(GtArray *spliced_alignments_in_form,
+                                GT_UNUSED const void *set_of_sas,
+                                GT_UNUSED unsigned long number_of_sas,
+                                GT_UNUSED size_t size_of_sa,
+                                GT_UNUSED void *userdata)
 {
   unsigned long i;
 
   printf("contains [");
-  for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
+  for (i = 0; i < gt_array_size(spliced_alignments_in_form); i++) {
     if (i)
-      xputchar(',');
-    printf("%lu", *((unsigned long*) array_get(spliced_alignments_in_form, i)));
+      gt_xputchar(',');
+    printf("%lu",
+           *((unsigned long*) gt_array_get(spliced_alignments_in_form, i)));
   }
   printf("]\n");
 }
 
-static OptionParser* gt_consensus_sa_option_parser_new(UNUSED
+static GtOptionParser* gt_consensus_sa_option_parser_new(GT_UNUSED
                                                        void *tool_arguments)
 {
-  OptionParser *op;
-  op = option_parser_new("spliced_alignment_file", "Read file containing "
+  GtOptionParser *op;
+  op = gt_option_parser_new("spliced_alignment_file", "Read file containing "
                          "spliced alingments, compute consensus spliced "
                          "alignments,\nand print them to stdout.");
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
 
-static int gt_consensus_sa_runner(UNUSED int argc, const char **argv,
-                                  int parsed_args, UNUSED void *tool_arguments,
-                                  Error *err)
+static int gt_consensus_sa_runner(GT_UNUSED int argc, const char **argv,
+                                  int parsed_args,
+                                  GT_UNUSED void *tool_arguments, GtError *err)
 {
-  Array *spliced_alignments;
-  SSplicedAlignment *sa;
+  GtArray *spliced_alignments;
+  GtSSplicedAlignment *sa;
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* parse input file and store resuilts in the spliced alignment array */
-  spliced_alignments = array_new(sizeof (SSplicedAlignment*));
-  had_err = sspliced_alignment_parse(spliced_alignments, argv[parsed_args],
+  spliced_alignments = gt_array_new(sizeof (GtSSplicedAlignment*));
+  had_err = gt_sspliced_alignment_parse(spliced_alignments, argv[parsed_args],
                                      err);
 
   if (!had_err) {
     /* sort spliced alignments */
-    qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
-          array_elem_size(spliced_alignments),
-          (Compare) sspliced_alignment_compare_ptr);
+    qsort(gt_array_get_space(spliced_alignments),
+          gt_array_size(spliced_alignments),
+          gt_array_elem_size(spliced_alignments),
+          (GtCompare) gt_sspliced_alignment_compare_ptr);
 
     /* compute the consensus spliced alignments */
-    consensus_sa(array_get_space(spliced_alignments),
-                 array_size(spliced_alignments),
-                 array_elem_size(spliced_alignments), get_genomic_range,
-                 get_strand, get_exons, process_splice_form, NULL);
+    gt_consensus_sa(gt_array_get_space(spliced_alignments),
+                    gt_array_size(spliced_alignments),
+                    gt_array_elem_size(spliced_alignments), get_genomic_range,
+                    get_strand, get_exons, process_splice_form, NULL);
   }
 
   /* free */
-  for (i = 0; i < array_size(spliced_alignments); i++) {
-    sa = *(SSplicedAlignment**) array_get(spliced_alignments, i);
-    sspliced_alignment_delete(sa);
+  for (i = 0; i < gt_array_size(spliced_alignments); i++) {
+    sa = *(GtSSplicedAlignment**) gt_array_get(spliced_alignments, i);
+    gt_sspliced_alignment_delete(sa);
   }
-  array_delete(spliced_alignments);
+  gt_array_delete(spliced_alignments);
 
   return had_err;
 }
 
-Tool* gt_consensus_sa(void)
+GtTool* gt_consensus_sa_tool(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_consensus_sa_option_parser_new,
                   NULL,

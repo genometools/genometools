@@ -18,9 +18,9 @@
 #ifndef GT_SEQFILTER_H
 #define GT_SEQFILTER_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the seqfilter tool */
-Tool* gt_seqfilter(void);
+GtTool* gt_seqfilter(void);
 
 #endif

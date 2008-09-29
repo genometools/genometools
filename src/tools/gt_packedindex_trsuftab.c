@@ -16,14 +16,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/str.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/eis-bwtseq.h"
-#include "libgtmatch/encseq-def.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/eis-bwtseq-param.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/str.h"
+#include "core/versionfunc.h"
+#include "match/eis-bwtseq.h"
+#include "match/encseq-def.h"
+#include "match/sarr-def.h"
+#include "match/eis-bwtseq-param.h"
 #include "tools/gt_packedindex_trsuftab.h"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
@@ -36,22 +36,22 @@ struct trSufTabOptions
 
 static OPrval
 parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
-                     struct trSufTabOptions *params, const Str *projectName,
-                     Error *err);
+                     struct trSufTabOptions *params, const GtStr *projectName,
+                     GtError *err);
 
 extern int
-gt_packedindex_trsuftab(int argc, const char *argv[], Error *err)
+gt_packedindex_trsuftab(int argc, const char *argv[], GtError *err)
 {
   struct trSufTabOptions params;
   BWTSeq *bwtSeq = NULL;
-  Str *inputProject = NULL;
+  GtStr *inputProject = NULL;
   int parsedArgs;
   bool had_err = false;
   Verboseinfo *verbosity = NULL;
-  inputProject = str_new();
+  inputProject = gt_str_new();
 
   do {
-    error_check(err);
+    gt_error_check(err);
     {
       bool exitNow = false;
       switch (parseTrSufTabOptions(&parsedArgs, argc, argv, &params,
@@ -70,7 +70,7 @@ gt_packedindex_trsuftab(int argc, const char *argv[], Error *err)
       if (exitNow)
         break;
     }
-    str_set(inputProject, argv[parsedArgs]);
+    gt_str_set(inputProject, argv[parsedArgs]);
     verbosity = newverboseinfo(params.verboseOutput);
     bwtSeq = trSuftab2BWTSeq(&params.idx.final, verbosity, err);
     had_err = bwtSeq == NULL;
@@ -79,39 +79,40 @@ gt_packedindex_trsuftab(int argc, const char *argv[], Error *err)
   } while (0);
   if (bwtSeq) deleteBWTSeq(bwtSeq);
   if (verbosity) freeverboseinfo(&verbosity);
-  if (inputProject) str_delete(inputProject);
+  if (inputProject) gt_str_delete(inputProject);
   return had_err?-1:0;
 }
 
 static OPrval
 parseTrSufTabOptions(int *parsed_args, int argc, const char **argv,
-                     struct trSufTabOptions *params, const Str *projectName,
-                     Error *err)
+                     struct trSufTabOptions *params, const GtStr *projectName,
+                     GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  Option *option;
+  GtOption *option;
 
-  error_check(err);
-  op = option_parser_new("indexname",
+  gt_error_check(err);
+  op = gt_option_parser_new("indexname",
                          "Build BWT packedindex for project <indexname>.");
 
   registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName);
 
-  option = option_new_bool("v",
+  option = gt_option_new_bool("v",
                            "print verbose progress information",
                            &params->verboseOutput,
                            false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
   /* compute parameters currently not set from command-line or
    * determined indirectly */
   computePackedIndexDefaults(&params->idx, BWTBaseFeatures);
 
-  option_parser_delete(op);
+  gt_option_parser_delete(op);
 
   return oprval;
 }

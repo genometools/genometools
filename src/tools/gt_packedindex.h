@@ -18,9 +18,9 @@
 #ifndef GT_PACKEDINDEX_H
 #define GT_PACKEDINDEX_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the packedindex tool */
-Tool* gt_packedindex(void);
+GtTool* gt_packedindex(void);
 
 #endif

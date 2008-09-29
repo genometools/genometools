@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtmgth/metagenomethreader.h"
+#include "mgth/metagenomethreader.h"
 #include "tools/gt_mgth.h"
 
-int gt_mgth(int argc, const char **argv, Error *err)
+int gt_mgth(int argc, const char **argv, GtError *err)
 {
-  error_check(err);
+  gt_error_check(err);
   return metagenomethreader(argc, argv, err);
 }

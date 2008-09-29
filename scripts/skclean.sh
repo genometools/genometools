@@ -16,15 +16,15 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-for filename in `ls src/libgtmatch/*.c`
+for filename in `ls src/match/*.c`
 do
-  headfile="obj/src/libgtmatch/`basename ${filename} .c`"
+  headfile="obj/src/match/`basename ${filename} .c`"
   rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
-for filename in `ls ${SKTOOLS} src/libgtltr/*.c`
+for filename in `ls ${SKTOOLS} src/ltr/*.c`
 do
-  headfile="obj/src/libgtltr/`basename ${filename} .c`"
+  headfile="obj/src/ltr/`basename ${filename} .c`"
   rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
@@ -37,8 +37,6 @@ do
 done
 
 rm -rf indexdir
-rm -f lib/libgtmatch.a
-rm -f lib/libgtltr.a
 rm -f testsuite/TMP.[a-zA-Z0-9]*
 rm -f testsuite/result.mp testsuite/result.vm
 rm -f testsuite/sfxidx.esq

@@ -1,0 +1,20 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int outprjfile(const GtStr *indexname,
+               const GtStrArray *filenametab,
+               Readmode readmode,
+               const Filelengthvalues *filelengthtab,
+               Seqpos totallength,
+               unsigned long numofsequences,
+               const Specialcharinfo *specialcharinfo,
+               unsigned int prefixlength,
+               const Definedunsignedint *maxdepth,
+               Seqpos numoflargelcpvalues,
+               Seqpos maxbranchdepth,
+               const DefinedSeqpos *longest,
+               GtError *err);
+
+#ifdef __cplusplus
+}
+#endif

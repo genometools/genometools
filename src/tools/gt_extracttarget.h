@@ -18,9 +18,9 @@
 #ifndef GT_EXTRACTTARGET_H
 #define GT_EXTRACTTARGET_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the extract target tool */
-Tool* gt_extracttarget(void);
+GtTool* gt_extracttarget(void);
 
 #endif

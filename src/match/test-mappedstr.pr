@@ -1,0 +1,8 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int verifymappedstr(const Suffixarray *suffixarray,GtError *err);
+
+#ifdef __cplusplus
+}
+#endif

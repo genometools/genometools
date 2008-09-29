@@ -18,9 +18,9 @@
 #ifndef GT_LINEARALIGN_H
 #define GT_LINEARALIGN_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the linear align tool */
-Tool* gt_linearalign(void);
+GtTool* gt_linearalign(void);
 
 #endif

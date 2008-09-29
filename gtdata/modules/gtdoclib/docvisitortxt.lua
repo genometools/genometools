@@ -26,13 +26,45 @@ function DocVisitorTxt:new()
   return o
 end
 
-function DocVisitorTxt:visit_class(classname)
+function DocVisitorTxt:visit_modules(modules)
+  print("modules:")
+  for _, mod in ipairs(modules) do
+    print(mod)
+  end
+end
+
+function DocVisitorTxt:visit_class(classname, comments)
   assert(classname)
   io.write(string.format("class: %s\n", classname))
+  if comments then
+    print("comments: " .. table.concat(comments))
+  end
+end
+
+function DocVisitorTxt:visit_module(modulename)
+  assert(modulename)
+  io.write(string.format("module: %s\n", modulename))
 end
 
 function DocVisitorTxt:visit_method(desc)
   assert(desc)
-  io.write(string.format("method:\n%s\n%s(%s)\n", desc.comment, desc.name,
-           desc.args))
+  if desc.args then
+    io.write(string.format("method:\n%s\n%s(%s)\n", desc.comment, desc.name,
+             desc.args))
+  else
+    io.write(string.format("method:\n%s\n%s\n", desc.comment, desc.name))
+           end
+end
+
+function DocVisitorTxt:visit_funcdef(desc)
+  assert(desc)
+  io.write(string.format("fundef:\n%s\n%s\n", desc.comment, desc.name))
+end
+
+function DocVisitorTxt:visit_index(names)
+  assert(names)
+  print("index:")
+  for _, name in ipairs(names) do
+    print(name)
+  end
 end

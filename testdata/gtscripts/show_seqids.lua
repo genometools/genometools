@@ -31,7 +31,7 @@ else
 end
 
 in_stream = gt.gff3_in_stream_new_sorted(gff3file)
-feature_index = gt.feature_index_new()
+feature_index = gt.feature_index_memory_new()
 feature_stream = gt.feature_stream_new(in_stream, feature_index)
 gn = feature_stream:next_tree()
 -- fill feature index

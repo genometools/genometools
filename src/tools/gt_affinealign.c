@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/option.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/affinealign.h"
-#include "libgtext/alignment.h"
+#include "core/bioseq.h"
+#include "core/option.h"
+#include "core/ma.h"
+#include "core/unused_api.h"
+#include "core/xansi.h"
+#include "extended/affinealign.h"
+#include "extended/alignment.h"
 #include "tools/gt_affinealign.h"
 
 typedef struct {
@@ -32,90 +32,90 @@ typedef struct {
 
 static void* gt_affinealign_arguments_new(void)
 {
-  return ma_malloc(sizeof (Costs));
+  return gt_malloc(sizeof (Costs));
 }
 
 static void gt_affinealign_arguments_delete(void *tool_arguments)
 {
   Costs *costs = tool_arguments;
   if (!costs) return;
-  ma_free(costs);
+  gt_free(costs);
 }
 
-static OptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   Costs *costs = tool_arguments;
   assert(costs);
-  op = option_parser_new("[option ...] seq_file_1 seq_file_2",
+  op = gt_option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2 (affine gap costs).");
-  option = option_new_int("rep", "set replacement cost",
+  option = gt_option_new_int("rep", "set replacement cost",
                           &costs->replacement_cost, 1);
-  option_parser_add_option(op, option);
-  option = option_new_int("gapopen", "set gap opening cost",
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_int("gapopen", "set gap opening cost",
                           &costs->gap_opening_cost, 3);
-  option_parser_add_option(op, option);
-  option = option_new_int("gapext", "set gap extension cost",
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_int("gapext", "set gap extension cost",
                           &costs->gap_extension_cost, 1);
-  option_parser_add_option(op, option);
-  option_parser_set_min_max_args(op, 2, 2);
+  gt_option_parser_add_option(op, option);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
-static int gt_affinealign_runner(UNUSED int argc, const char **argv,
+static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
-                                 Error *err)
+                                 GtError *err)
 {
-  Bioseq *bioseq_1, *bioseq_2 = NULL;
+  GtBioseq *gt_bioseq_1, *gt_bioseq_2 = NULL;
   unsigned long i, j;
   int had_err = 0;
-  Alignment *a;
+  GtAlignment *a;
   Costs *costs = tool_arguments;
 
-  error_check(err);
+  gt_error_check(err);
   assert(costs);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args], err);
-  if (!bioseq_1)
+  gt_bioseq_1 = gt_bioseq_new(argv[parsed_args], err);
+  if (!gt_bioseq_1)
      had_err = -1;
   if (!had_err) {
-    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
-    if (!bioseq_2)
+    gt_bioseq_2 = gt_bioseq_new(argv[parsed_args+1], err);
+    if (!gt_bioseq_2)
       had_err = -1;
   }
 
   /* aligning all sequence combinations */
   if (!had_err) {
-    for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-      for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-        a = affinealign(bioseq_get_sequence(bioseq_1, i),
-                        bioseq_get_sequence_length(bioseq_1, i),
-                        bioseq_get_sequence(bioseq_2, j),
-                        bioseq_get_sequence_length(bioseq_2, j),
+    for (i = 0; i < gt_bioseq_number_of_sequences(gt_bioseq_1); i++) {
+      for (j = 0; j < gt_bioseq_number_of_sequences(gt_bioseq_2); j++) {
+        a = gt_affinealign(gt_bioseq_get_sequence(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence_length(gt_bioseq_1, i),
+                        gt_bioseq_get_sequence(gt_bioseq_2, j),
+                        gt_bioseq_get_sequence_length(gt_bioseq_2, j),
                         costs->replacement_cost, costs->gap_opening_cost,
                         costs->gap_extension_cost);
-        alignment_show(a, stdout);
-        xputchar('\n');
-        alignment_delete(a);
+        gt_alignment_show(a, stdout);
+        gt_xputchar('\n');
+        gt_alignment_delete(a);
       }
     }
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
+  gt_bioseq_delete(gt_bioseq_2);
+  gt_bioseq_delete(gt_bioseq_1);
 
   return had_err;
 }
 
-Tool* gt_affinealign(void)
+GtTool* gt_affinealign_tool(void)
 {
-  return tool_new(gt_affinealign_arguments_new,
-                  gt_affinealign_arguments_delete,
-                  gt_affinealign_option_parser_new,
-                  NULL,
-                  gt_affinealign_runner);
+  return gt_tool_new(gt_affinealign_arguments_new,
+                     gt_affinealign_arguments_delete,
+                     gt_affinealign_option_parser_new,
+                     NULL,
+                     gt_affinealign_runner);
 }

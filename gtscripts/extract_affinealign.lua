@@ -36,29 +36,32 @@ p = Project:new(gt_home)
 p:set_name(name)
 
 -- add all dependencies
-f = File:new("src/libgtcore/array2dim.h")
+f = File:new("src/core/array2dim.h")
 f:bare_includes()
 f:remove_include("error.h")
 f:remove_example()
 f:ma2xansi()
 p:add(f)
 
-f = File:new("src/libgtcore/minmax.h")
+f = File:new("src/core/fptr_api.h")
 p:add(f)
 
-f = File:new("src/libgtcore/unused.h")
+f = File:new("src/core/minmax.h")
 p:add(f)
 
-m = Module:new("src/libgtcore/xansi")
+f = File:new("src/core/unused_api.h")
+p:add(f)
+
+m = Module:new("src/core/xansi")
 m:bare_includes()
 p:add(m)
 
-m = Module:new("src/libgtcore/dynalloc")
+m = Module:new("src/core/dynalloc")
 m:bare_includes()
 m:ma2xansi()
 p:add(m)
 
-m = Module:new("src/libgtcore/array")
+m = Module:new("src/core/array")
 m:bare_includes()
 m:remove_include("error.h")
 m:remove_include("mathsupport.h")
@@ -66,11 +69,14 @@ m:remove_include("range.h")
 m:remove_example()
 m:remove_unit_test()
 m:remove_function("array_iterate")
+m:remove_function("array_iterate_reverse")
 m:remove_function("iterate_test_func")
 m:remove_function("iterate_fail_func")
+m:remove_function_typedef("ArrayProcessor")
 m:ma2xansi()
 p:add(m)
 
+<<<<<<< HEAD:gtscripts/extract_affinealign.lua
 m = Module:new("src/libgtcore/range")
 m:bare_includes()
 m:remove_include("array.h")
@@ -95,13 +101,16 @@ m:remove_function("range_offset")
 p:add(m)
 
 m = Module:new("src/libgtext/alignment")
+=======
+m = Module:new("src/extended/alignment")
+>>>>>>> master:gtscripts/extract_affinealign.lua
 m:bare_includes()
 m:remove_include("error.h")
 m:remove_unit_test()
 m:ma2xansi()
 p:add(m)
 
-m = Module:new("src/libgtext/affinealign")
+m = Module:new("src/extended/affinealign")
 m:bare_includes()
 m:ma2xansi()
 p:add(m)

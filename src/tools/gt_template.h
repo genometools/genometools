@@ -18,9 +18,9 @@
 #ifndef GT_TEMPLATE_H
 #define GT_TEMPLATE_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the template tool */
-Tool* gt_template(void);
+GtTool* gt_template(void);
 
 #endif

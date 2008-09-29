@@ -18,9 +18,9 @@
 #ifndef GT_SHREDDER_H
 #define GT_SHREDDER_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the shredder tool */
-Tool* gt_shredder(void);
+GtTool* gt_shredder(void);
 
 #endif

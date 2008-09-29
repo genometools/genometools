@@ -18,12 +18,16 @@
 #ifndef GTT_H
 #define GTT_H
 
-#include "libgtcore/hashtable.h"
-#include "libgtext/toolbox.h"
+#include "core/fptr_api.h"
+#include "core/hashmap.h"
+#include "extended/toolbox.h"
 
 /* The GenomeTools toolbox (gtt) module */
 
-Toolbox*   gtt_tools(void);      /* return all GenomeTools tools */
-Hashtable* gtt_unit_tests(void); /* return all GenomeTools unit tests */
+GtToolbox* gtt_tools(void);      /* return all GenomeTools tools */
+
+typedef int  (*UnitTestFunc)(GtError *);
+
+GtHashmap* gtt_unit_tests(void); /* return all GenomeTools unit tests */
 
 #endif

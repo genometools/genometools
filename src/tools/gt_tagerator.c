@@ -15,17 +15,38 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/strarray.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/tool.h"
+#include "core/option.h"
+#include "core/ma.h"
+#include "core/str_array.h"
+#include "core/unused_api.h"
+#include "core/tool.h"
+#include "match/tagerator.h"
 #include "tools/gt_tagerator.h"
-#include "libgtmatch/tagerator.h"
+
+/*
+  Remark Gordon from July 2008: How to have access to an option in the
+  GtTool argument parser framework:
+
+  typedef struct
+  {
+    GtOption *foo;
+  } Arguments;
+
+  foo = gt_option_parser_new();
+  optionparseraddoption(op,foo);
+  arguments->foo = gt_option_ref(foo);
+
+  ...
+
+  arguments_delete()
+  {
+    gt_option_delete(arguments_foo);
+  }
+*/
 
 static void *gt_tagerator_arguments_new(void)
 {
-  return ma_malloc(sizeof (TageratorOptions));
+  return gt_malloc(sizeof (TageratorOptions));
 }
 
 static void gt_tagerator_arguments_delete(void *tool_arguments)
@@ -36,103 +57,154 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  str_delete(arguments->esaindexname);
-  str_delete(arguments->pckindexname);
-  strarray_delete(arguments->tagfiles);
-  ma_free(arguments);
+  gt_str_delete(arguments->esaindexname);
+  gt_str_delete(arguments->pckindexname);
+  gt_str_array_delete(arguments->tagfiles);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 {
   TageratorOptions *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
-         *optionpckindex;
+  GtOptionParser *op;
+  GtOption *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
+         *optionpckindex, *optionmaxdepth;
 
   assert(arguments != NULL);
-  arguments->esaindexname = str_new();
-  arguments->pckindexname = str_new();
-  arguments->tagfiles = strarray_new();
-  op = option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
+  arguments->esaindexname = gt_str_new();
+  arguments->pckindexname = gt_str_new();
+  arguments->tagfiles = gt_str_array_new();
+  op = gt_option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("t","Specify files containing the tags",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  option = gt_option_new_filenamearray("q",
+                                    "Specify files containing the short "
+                                    "sequence tags",
                                     arguments->tagfiles);
-  option_parser_add_option(op, option);
-  option_is_mandatory(option);
-  option = option_new_ulong("k",
-                            "Specify the allowed number of difference",
-                            &arguments->maxdistance,
-                            0);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
 
-  optionesaindex = option_new_string("esa",
+  option = gt_option_new_long("e",
+                           "Specify the allowed number of differences "
+                           "(replacements/insertions/deletions)",
+                           &arguments->maxdistance,
+                           -1L);
+  gt_option_parser_add_option(op, option);
+
+  optionesaindex = gt_option_new_string("esa",
                                      "Specify index (enhanced suffix array)",
                                      arguments->esaindexname, NULL);
-  option_parser_add_option(op, optionesaindex);
+  gt_option_parser_add_option(op, optionesaindex);
 
-  optionpckindex = option_new_string("pck",
+  optionpckindex = gt_option_new_string("pck",
                                      "Specify index (packed index)",
                                      arguments->pckindexname, NULL);
-  option_parser_add_option(op, optionpckindex);
-  option_exclude(optionesaindex,optionpckindex);
+  gt_option_parser_add_option(op, optionpckindex);
+  gt_option_exclude(optionesaindex,optionpckindex);
+  gt_option_is_mandatory_either(optionesaindex,optionpckindex);
 
-  optiononline = option_new_bool("online","Perform online searches",
+  optionmaxdepth = gt_option_new_int("maxdepth",
+                                  "Use the data in the .pbt file only up to "
+                                  "this depth (only relevant with option -pck)",
+                                  &arguments->userdefinedmaxdepth,
+                                  -1);
+  gt_option_parser_add_option(op, optionmaxdepth);
+  gt_option_is_development_option(optionmaxdepth);
+
+  optiononline = gt_option_new_bool("online","Perform online searches",
                             &arguments->online, false);
-  option_parser_add_option(op, optiononline);
+  gt_option_parser_add_option(op, optiononline);
+  gt_option_is_development_option(optiononline);
 
-  optioncmp = option_new_bool("cmp","compare results of offline and online "
-                                 "searches",
+  optioncmp = gt_option_new_bool("cmp","compare results of offline and online "
+                              "searches",
                             &arguments->docompare, false);
-  option_parser_add_option(op, optioncmp);
-  option_exclude(optiononline,optioncmp);
+  gt_option_parser_add_option(op, optioncmp);
+  gt_option_exclude(optiononline,optioncmp);
+  gt_option_is_development_option(optioncmp);
 
-  optionrw = option_new_bool("rw","Replace wildcard in tag by random char",
+  optionrw = gt_option_new_bool("rw","Replace wildcard in tag by random char",
                              &arguments->replacewildcard, false);
-  option_parser_add_option(op, optionrw);
-  option_is_development_option(optionrw);
+  gt_option_parser_add_option(op, optionrw);
+  gt_option_is_development_option(optionrw);
 
-  option = option_new_bool("d","Compute direct matches (default)",
-                             &arguments->fwdmatch, true);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("nod","Do not compute direct matches",
+                           &arguments->nofwdmatch, false);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("p","Compute palindromic "
-                           "(i.e. reverse complemented matches)",
-                             &arguments->rcmatch, false);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("nop","Do not compute palindromic matches "
+                           "(i.e. no reverse complemented matches.)",
+                             &arguments->norcmatch, false);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("nospecials","do not output matches containing "
-                           "wildcard characters (e.g. N)",
-                           &arguments->nospecials, false);
-  option_parser_add_option(op, option);
+  option = gt_option_new_ulong_min("maxocc",
+                                "specify max number of match-occurrences",
+                                &arguments->maxintervalwidth,0,1UL);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("skpp",
+                           "Skip prefix of pattern (only in pdiff mode)",
+                           &arguments->skpp, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("nowildcards","do not output matches containing "
+                           "wildcard characters (e.g. N); only relevant for "
+                           "approximate matching",
+                           &arguments->nowildcards, false);
+  gt_option_parser_add_option(op, option);
   return op;
 }
 
-static int gt_tagerator_runner(UNUSED int argc,
-                               UNUSED const char **argv,
-                               UNUSED int parsed_args,
-                               void *tool_arguments, Error *err)
+static int gt_tagerator_runner(GT_UNUSED int argc,
+                               GT_UNUSED const char **argv,
+                               GT_UNUSED int parsed_args,
+                               void *tool_arguments, GtError *err)
 {
   TageratorOptions *arguments = tool_arguments;
   bool haserr = false;
   unsigned long idx;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments != NULL);
 
   assert(parsed_args == argc);
-  for (idx=0; idx<strarray_size(arguments->tagfiles); idx++)
+  if (arguments->maxdistance == -1L)
   {
-    printf("# tagfile=%s\n",strarray_get(arguments->tagfiles,idx));
-  }
-  printf("# maxdifference=%lu\n",arguments->maxdistance);
-  if (str_length(arguments->esaindexname) > 0)
-  {
-    printf("# indexname(esa)=%s\n",str_get(arguments->esaindexname));
+    printf("# computing matching statistics\n");
   } else
   {
-    assert(str_length(arguments->pckindexname) > 0);
-    printf("# indexname(pck)=%s\n",str_get(arguments->pckindexname));
+    if (arguments->maxintervalwidth == 0)
+    {
+      printf("# computing complete matches");
+    } else
+    {
+      printf("# computing prefix matches");
+    }
+    if (arguments->maxdistance == 0)
+    {
+      printf(" without differences (exact matches)");
+    } else
+    {
+      printf(" with up to %ld differences",arguments->maxdistance);
+    }
+    if (arguments->maxintervalwidth > 0)
+    {
+      printf(" and at most %lu occurrences in the subject sequences",
+             arguments->maxintervalwidth);
+    }
+    printf("\n");
+  }
+  if (gt_str_length(arguments->esaindexname) > 0)
+  {
+    printf("# indexname(esa)=%s\n",gt_str_get(arguments->esaindexname));
+  } else
+  {
+    assert(gt_str_length(arguments->pckindexname) > 0);
+    printf("# indexname(pck)=%s\n",gt_str_get(arguments->pckindexname));
+  }
+  for (idx=0; idx<gt_str_array_size(arguments->tagfiles); idx++)
+  {
+    printf("# queryfile=%s\n",gt_str_array_get(arguments->tagfiles,idx));
   }
   if (runtagerator(arguments,err) != 0)
   {
@@ -141,11 +213,46 @@ static int gt_tagerator_runner(UNUSED int argc,
   return haserr ? -1 : 0;
 }
 
-Tool* gt_tagerator(void)
+static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
+                                        void *tool_arguments,
+                                        GtError *err)
 {
-  return tool_new(gt_tagerator_arguments_new,
+  TageratorOptions *arguments = tool_arguments;
+
+  if (arguments->maxdistance < 0)
+  {
+    if (arguments->online)
+    {
+      gt_error_set(err,"option -online requires option -e");
+      return -1;
+    }
+    if (!arguments->nowildcards)
+    {
+      arguments->nowildcards = true;
+    }
+    if (arguments->maxintervalwidth == 0)
+    {
+      gt_error_set(err,
+                   "if option -e is not used then option -maxocc is required");
+      return -1;
+    }
+  } else
+  {
+    if (arguments->skpp &&
+        (arguments->maxdistance == 0 || arguments->maxintervalwidth == 0))
+    {
+      gt_error_set(err,"option -skpp only works in pdiff mode");
+      return -1;
+    }
+  }
+  return 0;
+}
+
+GtTool* gt_tagerator(void)
+{
+  return gt_tool_new(gt_tagerator_arguments_new,
                   gt_tagerator_arguments_delete,
                   gt_tagerator_option_parser_new,
-                  NULL,
+                  gt_tagerator_arguments_check,
                   gt_tagerator_runner);
 }

@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fileutils.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/msa.h"
+#include "core/fileutils.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/msa.h"
 #include "tools/gt_msaparse.h"
 
 typedef struct {
@@ -28,40 +28,42 @@ typedef struct {
 } MSAparse_arguments;
 
 static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] MSA_file",
+  gt_error_check(err);
+  op = gt_option_parser_new("[option ...] MSA_file",
                          "Parse multiple sequence alignment (MSA) file and "
                          "optionally show score(s).");
   /* -show */
-  o = option_new_bool("show", "show the parsed MSA on stdout", &arguments->show,
-                      false);
-  option_parser_add_option(op, o);
+  o = gt_option_new_bool("show", "show the parsed MSA on stdout",
+                         &arguments->show,
+                         false);
+  gt_option_parser_add_option(op, o);
   /* -consensus */
-  o = option_new_bool("consensus", "show consensus distance",
+  o = gt_option_new_bool("consensus", "show consensus distance",
                       &arguments->consensus, false);
-  option_parser_add_option(op, o);
+  gt_option_parser_add_option(op, o);
   /* -sumofpairs */
-  o = option_new_bool("sumofpairs", "show optimal sum of pairwise scores",
+  o = gt_option_new_bool("sumofpairs", "show optimal sum of pairwise scores",
                       &arguments->sumofpairs, false);
-  option_parser_add_option(op, o);
+  gt_option_parser_add_option(op, o);
   /* parse */
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_msaparse(int argc, const char **argv, Error *err)
+int gt_msaparse(int argc, const char **argv, GtError *err)
 {
   MSAparse_arguments arguments;
   int parsed_args, had_err = 0;
-  MSA *msa = NULL;
-  error_check(err);
+  GtMSA *msa = NULL;
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
@@ -72,14 +74,14 @@ int gt_msaparse(int argc, const char **argv, Error *err)
 
   /* make sure sequence_file exists */
   assert(parsed_args < argc);
-  if (!file_exists(argv[parsed_args])) {
-    error_set(err, "MSA_file '%s' does not exist", argv[parsed_args]);
+  if (!gt_file_exists(argv[parsed_args])) {
+    gt_error_set(err, "MSA_file '%s' does not exist", argv[parsed_args]);
     had_err = -1;
   }
 
   if (!had_err) {
     /* multiple sequence alignment construction */
-    msa = msa_new(argv[parsed_args], err);
+    msa = gt_msa_new(argv[parsed_args], err);
     if (!msa)
       had_err = -1;
   }
@@ -87,16 +89,17 @@ int gt_msaparse(int argc, const char **argv, Error *err)
   if (!had_err) {
     /* output */
     if (arguments.show)
-      msa_show(msa);
+      gt_msa_show(msa);
     if (arguments.consensus)
-      printf("consensus distance: %lu\n", msa_consensus_distance(msa));
+      printf("consensus distance: %lu\n", gt_msa_consensus_distance(msa));
     if (arguments.sumofpairs) {
-      printf("sum of pairwise scores: %lu\n", msa_sum_of_pairwise_scores(msa));
+      printf("sum of pairwise scores: %lu\n",
+             gt_msa_sum_of_pairwise_scores(msa));
     }
   }
 
   /* free */
-  msa_delete(msa);
+  gt_msa_delete(msa);
 
   return had_err;
 }

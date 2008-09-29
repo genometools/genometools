@@ -16,28 +16,28 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/cstr.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/splitter.h"
-#include "libgtcore/unused.h"
-#include "libgtext/genome_node.h"
-#include "libgtext/genome_node_iterator.h"
-#include "libgtext/gff3_escaping.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/string_matching.h"
+#include "core/bioseq.h"
+#include "core/cstr.h"
+#include "core/fasta.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/splitter.h"
+#include "core/unused_api.h"
+#include "extended/genome_node.h"
+#include "extended/genome_node_iterator.h"
+#include "extended/gff3_escaping.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/string_matching.h"
 #include "tools/gt_extracttarget.h"
 
 typedef struct {
-  StrArray *seqfiles;
+  GtStrArray *seqfiles;
 } ExtractTargetArguments;
 
 static void* gt_extracttarget_arguments_new(void)
 {
-  ExtractTargetArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->seqfiles = strarray_new();
+  ExtractTargetArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->seqfiles = gt_str_array_new();
   return arguments;
 }
 
@@ -45,147 +45,152 @@ static void gt_extracttarget_arguments_delete(void *tool_arguments)
 {
   ExtractTargetArguments *arguments = tool_arguments;
   if (!arguments) return;
-  strarray_delete(arguments->seqfiles);
-  ma_free(arguments);
+  gt_str_array_delete(arguments->seqfiles);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
 {
   ExtractTargetArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] -seqfile sequence_file GFF3_file",
+  op = gt_option_parser_new("[option ...] -seqfile sequence_file GFF3_file",
                          "Extract target sequences given in GFF3_file from "
                          "sequence_file.");
 
   /* -seqfile */
-  o = option_new_filenamearray("seqfiles", "set the sequence file from which "
-                               "to extract the features", arguments->seqfiles);
-  option_is_mandatory(o);
-  option_parser_add_option(op, o);
+  o = gt_option_new_filenamearray("seqfiles",
+                                  "set the sequence file from which "
+                                  "to extract the features",
+                                  arguments->seqfiles);
+  gt_option_is_mandatory(o);
+  gt_option_parser_add_option(op, o);
 
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1, 1);
 
   return op;
 }
 
 typedef struct {
-  Bioseq *bioseq;
+  GtBioseq *bioseq;
   unsigned long seqnum;
 } TargetInfo;
 
-static bool show_target(UNUSED unsigned long pos, void *data)
+static bool show_target(GT_UNUSED unsigned long pos, void *data)
 {
   TargetInfo *ti = data;
   assert(ti);
-  fasta_show_entry(bioseq_get_description(ti->bioseq, ti->seqnum),
-                   bioseq_get_sequence(ti->bioseq, ti->seqnum),
-                   bioseq_get_sequence_length(ti->bioseq, ti->seqnum), 0);
+  gt_fasta_show_entry(gt_bioseq_get_description(ti->bioseq, ti->seqnum),
+                      gt_bioseq_get_sequence(ti->bioseq, ti->seqnum),
+                      gt_bioseq_get_sequence_length(ti->bioseq, ti->seqnum), 0);
   return true;
 }
 
-static int extracttarget_from_seqfiles(const char *target, StrArray *seqfiles,
-                                       Error *err)
+static int extracttarget_from_seqfiles(const char *target,
+                                       GtStrArray *seqfiles,
+                                       GtError *err)
 {
-  Str *unescaped_target;
+  GtStr *unescaped_target;
   char *escaped_target;
-  Splitter *splitter;
+  GtSplitter *splitter;
   unsigned long i;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(target && seqfiles);
-  splitter = splitter_new();
-  unescaped_target = str_new();
-  escaped_target = cstr_dup(target);
-  splitter_split(splitter, escaped_target, strlen(escaped_target), ',');
-  for (i = 0; !had_err && i < splitter_size(splitter); i++) {
-    Splitter *blank_splitter;
-    char *token = splitter_get_token(splitter, i);
-    blank_splitter = splitter_new();
-    splitter_split(blank_splitter, token, strlen(token), ' ');
-    had_err = gff3_unescape(unescaped_target,
-                            splitter_get_token(blank_splitter, 0),
-                            strlen(splitter_get_token(blank_splitter, 0)), err);
+  splitter = gt_splitter_new();
+  unescaped_target = gt_str_new();
+  escaped_target = gt_cstr_dup(target);
+  gt_splitter_split(splitter, escaped_target, strlen(escaped_target), ',');
+  for (i = 0; !had_err && i < gt_splitter_size(splitter); i++) {
+    GtSplitter *blank_splitter;
+    char *token = gt_splitter_get_token(splitter, i);
+    blank_splitter = gt_splitter_new();
+    gt_splitter_split(blank_splitter, token, strlen(token), ' ');
+    had_err = gt_gff3_unescape(unescaped_target,
+                               gt_splitter_get_token(blank_splitter, 0),
+                               strlen(gt_splitter_get_token(blank_splitter, 0)),
+                               err);
     if (!had_err) {
       unsigned long j;
-      for (j = 0; j < strarray_size(seqfiles); j++) {
+      for (j = 0; j < gt_str_array_size(seqfiles); j++) {
         unsigned long k;
-        Bioseq *bioseq;
-        if (!(bioseq =  bioseq_new(strarray_get(seqfiles, j), err))) {
+        GtBioseq *bioseq;
+        if (!(bioseq =  gt_bioseq_new(gt_str_array_get(seqfiles, j), err))) {
           had_err = -1;
           break;
         }
-        for (k = 0; k < bioseq_number_of_sequences(bioseq); k++) {
+        for (k = 0; k < gt_bioseq_number_of_sequences(bioseq); k++) {
           TargetInfo target_info;
-          const char *desc = bioseq_get_description(bioseq, k);
+          const char *desc = gt_bioseq_get_description(bioseq, k);
           target_info.bioseq = bioseq;
           target_info.seqnum = k;
-          string_matching_bmh(desc, strlen(desc), str_get(unescaped_target),
-                              str_length(unescaped_target), show_target,
-                              &target_info);
+          gt_string_matching_bmh(desc, strlen(desc),
+                                 gt_str_get(unescaped_target),
+                                 gt_str_length(unescaped_target), show_target,
+                                 &target_info);
         }
-        bioseq_delete(bioseq);
+        gt_bioseq_delete(bioseq);
       }
     }
-    splitter_delete(blank_splitter);
+    gt_splitter_delete(blank_splitter);
   }
-  ma_free(escaped_target);
-  str_delete(unescaped_target);
-  splitter_delete(splitter);
+  gt_free(escaped_target);
+  gt_str_delete(unescaped_target);
+  gt_splitter_delete(splitter);
   return had_err;
 }
 
-static int extracttarget_from_node(GenomeNode *gn, StrArray *seqfiles,
-                                   Error *err)
+static int extracttarget_from_node(GtGenomeNode *gn, GtStrArray *seqfiles,
+                                   GtError *err)
 {
-  GenomeNodeIterator *gni;
+  GtGenomeNodeIterator *gni;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(gn && seqfiles);
-  if (genome_node_cast(genome_feature_class(), gn)) {
+  if (gt_genome_node_cast(gt_feature_node_class(), gn)) {
     const char *target;
-    GenomeNode *child;
-    gni = genome_node_iterator_new(gn);
-    while (!had_err && (child = genome_node_iterator_next(gni))) {
-      if ((target = genome_feature_get_attribute(child, "Target")))
+    GtFeatureNode *child;
+    gni = gt_genome_node_iterator_new(gn);
+    while (!had_err && /* XXX remove cast */
+           (child = (GtFeatureNode*) gt_genome_node_iterator_next(gni))) {
+      if ((target = gt_feature_node_get_attribute(child, "Target")))
         had_err = extracttarget_from_seqfiles(target, seqfiles, err);
     }
-    genome_node_iterator_delete(gni);
+    gt_genome_node_iterator_delete(gni);
   }
   return had_err;
 }
 
-static int gt_extracttarget_runner(UNUSED int argc, const char **argv,
+static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
                                    int parsed_args, void *tool_arguments,
-                                   Error *err)
+                                   GtError *err)
 {
   ExtractTargetArguments *arguments = tool_arguments;
-  GenomeStream *gff3_in_stream;
-  GenomeNode *gn;
+  GtNodeStream *gff3_in_stream;
+  GtGenomeNode *gn;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
-  gff3_in_stream = gff3_in_stream_new_unsorted(1, argv + parsed_args, false,
-                                               false);
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, argv + parsed_args);
 
-  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, err)) && gn) {
+  while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn) {
     had_err = extracttarget_from_node(gn, arguments->seqfiles, err);
-    genome_node_rec_delete(gn);
+    gt_genome_node_rec_delete(gn);
   }
 
-  genome_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }
 
-Tool* gt_extracttarget(void)
+GtTool* gt_extracttarget(void)
 {
-  return tool_new(gt_extracttarget_arguments_new,
+  return gt_tool_new(gt_extracttarget_arguments_new,
                   gt_extracttarget_arguments_delete,
                   gt_extracttarget_option_parser_new,
                   NULL,

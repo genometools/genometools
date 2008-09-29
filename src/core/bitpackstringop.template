@@ -1,0 +1,143 @@
+/*
+  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#include <inttypes.h>
+#include <limits.h>
+#include <stdio.h>
+#include "core/assert_api.h"
+#include "core/minmax.h"
+#include "core/bitpackstring.h"
+
+@ValueType@
+gt_bsGet@uTypeTag@(constBitString str, BitOffset offset, unsigned numBits)
+{
+  @AccumType@ accum = 0;
+  unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
+  size_t elemStart = offset/bitElemBits;
+  const BitElem *p = str + elemStart;
+  gt_assert(str);
+#ifndef NDEBUG
+  if (numBits > sizeof (accum)*CHAR_BIT)
+    fprintf(stderr, "numBits = %u\n", numBits);
+#endif
+  gt_assert(numBits <= sizeof (accum)*CHAR_BIT);
+  if (bitTop)
+  {
+    @AccumType@ mask;
+    unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
+    unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
+    mask = (~((~(@AccumType@)0) << bits2Read)) << unreadRightBits;
+    accum = ((*p++) & mask) >> unreadRightBits;
+    bitsLeft -= bits2Read;
+  }
+  /* get bits from intervening elems */
+  while (bitsLeft >= bitElemBits)
+  {
+    accum = accum << bitElemBits | (*p++);
+    bitsLeft -= bitElemBits;
+  }
+  /* get bits from last elem */
+  if (bitsLeft)
+  {
+    accum = accum << bitsLeft |
+      (((*p) & ((~(@AccumType@)0)<<(bitElemBits - bitsLeft)))
+       >>(bitElemBits - bitsLeft));
+  }
+  return accum;
+}
+
+void
+gt_bsStore@uTypeTag@(BitString str, BitOffset offset,
+                 unsigned numBits, @ValueType@ val)
+{
+  unsigned bitsLeft = numBits,
+    bitTop = offset%bitElemBits;
+  size_t elemStart = offset/bitElemBits;
+  BitElem *p = str + elemStart;
+  gt_assert(str);
+  gt_assert(numBits <= sizeof (val)*CHAR_BIT);
+  /* set bits of first element, accounting for bits to be preserved */
+  if (bitTop)
+  {
+    @AccumType@ mask = ~(@AccumType@)0;
+    if (bitElemBits < (sizeof (@AccumType@)*CHAR_BIT))
+    {
+      mask <<= bitElemBits;
+    }
+    else
+    {
+      mask = 0;
+    }
+    mask = (~mask) >> bitTop;
+    if (numBits < bitElemBits - bitTop)
+    {
+      unsigned backShift = bitElemBits - numBits - bitTop;
+      mask &= ~(@AccumType@)0 << backShift;
+      *p = (*p & ~mask) | ((val << backShift) & mask);
+      /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
+      return;
+    }
+    else
+    {
+      bitsLeft -= bitElemBits - bitTop;
+      *p = (*p & ~mask) | ((val >> bitsLeft) & mask);
+      ++p;
+    }
+  }
+  /* set bits for intervening elems */
+  while (bitsLeft >= bitElemBits)
+  {
+    bitsLeft -= bitElemBits;
+    *p++ = val >> bitsLeft;
+  }
+  /* set bits for last elem */
+  if (bitsLeft)
+  {
+    @AccumType@ mask =
+      ((~(@AccumType@)0)<<(bitElemBits - bitsLeft));
+    if (bitElemBits < (sizeof (@AccumType@)*CHAR_BIT))
+      mask &= (~(~(@AccumType@)0<<bitElemBits));
+    *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
+  }
+}
+
+/**************************************************************************/
+/* Merge bits from two values according to a mask                         */
+/*                                                                        */
+/* unsigned int a;       value to merge in non-masked bits                */
+/* unsigned int b;       value to merge in masked bits                    */
+/* unsigned int mask;    1 where bits from b should be selected;          */
+/*                       0 where from a.                                  */
+/* unsigned int r;       result of (a & ~mask) | (b & mask) goes here     */
+/*                                                                        */
+/* r = a ^ ((a ^ b) & mask);                                              */
+/*                                                                        */
+/* This shaves one operation from the obvious way of combining two sets   */
+/* of bits according to a bit mask. If the mask is a constant, then there */
+/* may be no advantage.                                                   */
+/*                                                                        */
+/* Ron Jeffery sent this to me on February 9, 2006.                       */
+/**************************************************************************/
+
+/*
+ * include variations of vector operations
+ */
+
+@include "bitpackstringvectorreadop.gen" VecOpName="" AssignOp="="@
+
+@include "bitpackstringvectorwriteop.gen"@
+
+@include "bitpackstringvectorreadop.gen" VecOpName="Add" AssignOp="+="@

@@ -15,31 +15,32 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/option.h"
-#include "libgtmatch/guessprot.pr"
+#include "core/versionfunc.h"
+#include "core/option.h"
+#include "match/guessprot.pr"
 #include "tools/gt_guessprot.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("filenames",
+  gt_error_check(err);
+  op = gt_option_parser_new("filenames",
                          "guess if sequence in filenames is protein or DNA.");
-  option_parser_set_min_args(op, 1U);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_args(op, 1U);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_guessprot(int argc, const char **argv, Error *err)
+int gt_guessprot(int argc, const char **argv, GtError *err)
 {
   int i, parsed_args, retval;
-  StrArray *filenametab;
+  GtStrArray *filenametab;
 
-  error_check(err);
+  gt_error_check(err);
 
   switch (parse_options(&parsed_args, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
@@ -47,13 +48,13 @@ int gt_guessprot(int argc, const char **argv, Error *err)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  filenametab = strarray_new();
+  filenametab = gt_str_array_new();
   for (i=parsed_args; i < argc; i++)
   {
-    strarray_add_cstr(filenametab,argv[i]);
+    gt_str_array_add_cstr(filenametab,argv[i]);
   }
   retval = guessifproteinsequencestream(filenametab,err);
-  strarray_delete(filenametab);
+  gt_str_array_delete(filenametab);
   if (retval < 0)
   {
     return -1;

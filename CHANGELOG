@@ -1,7 +1,13 @@
-changes in version 1.1.3 (2008-07-05)
+changes in version 1.2.0 (2008-09-25)
 
 - `gt shredder` has new option -sample
 - `gt filter` has new options -targetbest and -maxgenescore
+- `gt gff3` has new option -typecheck
+- the GFF3 parser can handle embedded FASTA sequences
+- `gt gff3` has new option -width to format embedded FASTA sequences
+- new tool `gt gff3validator` has been added
+- `gt view` has been renamed to `gt sketch`
+- `gt gff3` has new option -tidy
 
 
 changes in version 1.1.2 (2008-07-04)

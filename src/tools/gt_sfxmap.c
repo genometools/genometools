@@ -15,19 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/verbose-def.h"
-#include "libgtmatch/stamp.h"
-#include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/test-encseq.pr"
-#include "libgtmatch/pos2seqnum.pr"
-#include "libgtmatch/test-mappedstr.pr"
-#include "libgtmatch/sfx-suftaborder.pr"
-#include "libgtmatch/echoseq.pr"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/sarr-def.h"
+#include "match/verbose-def.h"
+#include "match/stamp.h"
+#include "match/esa-seqread.h"
+#include "match/esa-map.pr"
+#include "match/test-encseq.pr"
+#include "match/pos2seqnum.pr"
+#include "match/test-mappedstr.pr"
+#include "match/sfx-suftaborder.pr"
+#include "match/echoseq.pr"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -42,82 +42,142 @@ typedef struct
        inputbck;
   unsigned long scantrials,
                 multicharcmptrials;
+  unsigned long delspranges;
 } Sfxmapoptions;
+
+static void deletethespranges(const Encodedsequence *encseq,
+                              const Alphabet *alpha,
+                              unsigned long delspranges)
+{
+  Specialrangeiterator *sri;
+  Sequencerange range;
+  Seqpos rangewidth, nextpos = 0, totallength;
+  const unsigned long fastawidth = 70UL;
+
+  sri = newspecialrangeiterator(encseq,true);
+  printf(">\n");
+  while (nextspecialrangeiterator(&range,sri))
+  {
+    assert (range.rightpos > range.leftpos);
+    rangewidth = range.rightpos - range.leftpos;
+    if (rangewidth > (Seqpos) delspranges)
+    {
+      if (range.leftpos == 0)
+      {
+        nextpos = range.rightpos;
+      } else
+      {
+        if (range.leftpos > nextpos)
+        {
+          encseq2symbolstring(stdout,
+                              alpha,
+                              encseq,
+                              Forwardmode,
+                              nextpos,
+                              range.leftpos + delspranges - nextpos,
+                              fastawidth);
+          nextpos = range.rightpos;
+        }
+      }
+    }
+  }
+  totallength = getencseqtotallength(encseq);
+  if (nextpos < totallength-1)
+  {
+    encseq2symbolstring(stdout,
+                        alpha,
+                        encseq,
+                        Forwardmode,
+                        nextpos,
+                        totallength - nextpos,
+                        fastawidth);
+  }
+  freespecialrangeiterator(&sri);
+}
 
 static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             int *parsed_args,
                             int argc,
                             const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
-  Option *optionstream, *optionverbose, *optionscantrials,
+  GtOptionParser *op;
+  GtOption *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
-         *optiondes, *optionbwt, *optionlcp, *optiontis;
+         *optiondes, *optionbwt, *optionlcp, *optiontis,
+         *optiondelspranges;
   OPrval oprval;
 
-  error_check(err);
-  op = option_parser_new("[options] indexname",
+  gt_error_check(err);
+  op = gt_option_parser_new("[options] indexname",
                          "Map or Stream <indexname> and check consistency.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  optionstream = option_new_bool("stream","stream the index",
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  optionstream = gt_option_new_bool("stream","stream the index",
                                  &sfxmapoptions->usestream,false);
-  option_parser_add_option(op, optionstream);
+  gt_option_parser_add_option(op, optionstream);
 
-  optionscantrials = option_new_ulong("scantrials",
+  optionscantrials = gt_option_new_ulong("scantrials",
                                       "specify number of scan trials",
                                       &sfxmapoptions->scantrials,0);
-  option_parser_add_option(op, optionscantrials);
+  gt_option_parser_add_option(op, optionscantrials);
 
   optionmulticharcmptrials
-    = option_new_ulong("multicharcmptrials",
+    = gt_option_new_ulong("multicharcmptrials",
                        "specify number of multichar cmp trials",
                        &sfxmapoptions->multicharcmptrials,0);
-  option_parser_add_option(op, optionmulticharcmptrials);
+  gt_option_parser_add_option(op, optionmulticharcmptrials);
 
-  optiontis = option_new_bool("tis","input the transformed input sequence",
+  optiondelspranges = gt_option_new_ulong("delspranges",
+                                      "delete ranges of special values",
+                                       &sfxmapoptions->delspranges,
+                                       0);
+  gt_option_parser_add_option(op, optiondelspranges);
+
+  optiontis = gt_option_new_bool("tis","input the transformed input sequence",
                               &sfxmapoptions->inputtis,
                               false);
-  option_parser_add_option(op, optiontis);
+  gt_option_parser_add_option(op, optiontis);
 
-  optiondes = option_new_bool("des","input the descriptions",
+  optiondes = gt_option_new_bool("des","input the descriptions",
                               &sfxmapoptions->inputdes,
                               false);
-  option_parser_add_option(op, optiondes);
+  gt_option_parser_add_option(op, optiondes);
 
-  optionsuf = option_new_bool("suf","input the suffix array",
+  optionsuf = gt_option_new_bool("suf","input the suffix array",
                               &sfxmapoptions->inputsuf,
                               false);
-  option_parser_add_option(op, optionsuf);
+  gt_option_parser_add_option(op, optionsuf);
 
-  optionlcp = option_new_bool("lcp","input the lcp-table",
+  optionlcp = gt_option_new_bool("lcp","input the lcp-table",
                               &sfxmapoptions->inputlcp,
                               false);
-  option_parser_add_option(op, optionlcp);
+  gt_option_parser_add_option(op, optionlcp);
 
-  optionbwt = option_new_bool("bwt","input the Burrows-Wheeler Transformation",
+  optionbwt = gt_option_new_bool("bwt",
+                              "input the Burrows-Wheeler Transformation",
                               &sfxmapoptions->inputbwt,
                               false);
-  option_parser_add_option(op, optionbwt);
+  gt_option_parser_add_option(op, optionbwt);
 
-  optionbck = option_new_bool("bck","input the bucket table",
+  optionbck = gt_option_new_bool("bck","input the bucket table",
                               &sfxmapoptions->inputbck,
                               false);
-  option_parser_add_option(op, optionbck);
+  gt_option_parser_add_option(op, optionbck);
 
-  optionverbose = option_new_bool("v","be verbose",&sfxmapoptions->verbose,
+  optionverbose = gt_option_new_bool("v","be verbose",&sfxmapoptions->verbose,
                                   false);
-  option_parser_add_option(op, optionverbose);
+  gt_option_parser_add_option(op, optionverbose);
 
-  option_parser_set_min_max_args(op, 1U, 2U);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1U, 2U);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_sfxmap(int argc, const char **argv, Error *err)
+int gt_sfxmap(int argc, const char **argv, GtError *err)
 {
-  Str *indexname;
+  GtStr *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
   Seqpos totallength;
@@ -126,7 +186,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
   Sfxmapoptions sfxmapoptions;
   unsigned int demand = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv,
                         err))
@@ -137,9 +197,9 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
   }
   assert(argc >= 2 && parsed_args == argc - 1);
 
-  indexname = str_new_cstr(argv[parsed_args]);
+  indexname = gt_str_new_cstr(argv[parsed_args]);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose);
-  if (sfxmapoptions.inputtis)
+  if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0)
   {
     demand |= SARR_ESQTAB;
   }
@@ -175,87 +235,94 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
   }
   if (suffixarray.encseq != NULL)
   {
-    if (!haserr)
+    if (sfxmapoptions.delspranges > 0)
     {
-      int readmode;
-
-      for (readmode = 0; readmode < 4; readmode++)
+      deletethespranges(suffixarray.encseq,suffixarray.alpha,
+                        sfxmapoptions.delspranges);
+    } else
+    {
+      if (!haserr)
       {
-        if (isdnaalphabet(suffixarray.alpha) ||
-           ((Readmode) readmode) == Forwardmode ||
-           ((Readmode) readmode) == Reversemode)
+        int readmode;
+
+        for (readmode = 0; readmode < 4; readmode++)
         {
-          showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
-                                  showreadmode((Readmode) readmode));
-          if (testencodedsequence(suffixarray.filenametab,
-                                  suffixarray.encseq,
-                                  (Readmode) readmode,
-                                  getsymbolmapAlphabet(suffixarray.alpha),
-                                  sfxmapoptions.scantrials,
-                                  sfxmapoptions.multicharcmptrials,
-                                  err) != 0)
+          if (isdnaalphabet(suffixarray.alpha) ||
+             ((Readmode) readmode) == Forwardmode ||
+             ((Readmode) readmode) == Reversemode)
           {
-            haserr = true;
-            break;
+            showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
+                                    showreadmode((Readmode) readmode));
+            if (testencodedsequence(suffixarray.filenametab,
+                                    suffixarray.encseq,
+                                    (Readmode) readmode,
+                                    getsymbolmapAlphabet(suffixarray.alpha),
+                                    sfxmapoptions.scantrials,
+                                    sfxmapoptions.multicharcmptrials,
+                                    err) != 0)
+            {
+              haserr = true;
+              break;
+            }
           }
         }
       }
-    }
-    if (!haserr)
-    {
-      showverbose(verboseinfo,"checkspecialrangesfast");
-      if (checkspecialrangesfast(suffixarray.encseq) != 0)
+      if (!haserr)
       {
-        haserr = true;
+        showverbose(verboseinfo,"checkspecialrangesfast");
+        if (checkspecialrangesfast(suffixarray.encseq) != 0)
+        {
+          haserr = true;
+        }
       }
-    }
-    if (!haserr)
-    {
-      showverbose(verboseinfo,"checkmarkpos");
-      if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
-                       err) != 0)
+      if (!haserr)
       {
-        haserr = true;
+        showverbose(verboseinfo,"checkmarkpos");
+        if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
+                         err) != 0)
+        {
+          haserr = true;
+        }
       }
-    }
-    if (!haserr && suffixarray.readmode == Forwardmode &&
-        suffixarray.prefixlength > 0)
-    {
-      showverbose(verboseinfo,"verifymappedstr");
-      if (verifymappedstr(&suffixarray,err) != 0)
+      if (!haserr && suffixarray.readmode == Forwardmode &&
+          suffixarray.prefixlength > 0)
       {
-        haserr = true;
+        showverbose(verboseinfo,"verifymappedstr");
+        if (verifymappedstr(&suffixarray,err) != 0)
+        {
+          haserr = true;
+        }
       }
-    }
-    if (!haserr && sfxmapoptions.inputsuf && !sfxmapoptions.usestream)
-    {
-      Sequentialsuffixarrayreader *ssar;
+      if (!haserr && sfxmapoptions.inputsuf && !sfxmapoptions.usestream)
+      {
+        Sequentialsuffixarrayreader *ssar;
 
-      if (sfxmapoptions.inputlcp)
-      {
-        ssar = newSequentialsuffixarrayreaderfromfile(indexname,
-                                                      SARR_LCPTAB,
-                                                      SEQ_scan,
-                                                      err);
-      } else
-      {
-        ssar = NULL;
+        if (sfxmapoptions.inputlcp)
+        {
+          ssar = newSequentialsuffixarrayreaderfromfile(indexname,
+                                                        SARR_LCPTAB,
+                                                        SEQ_scan,
+                                                        err);
+        } else
+        {
+          ssar = NULL;
+        }
+        showverbose(verboseinfo,"checkentiresuftab");
+        checkentiresuftab(suffixarray.encseq,
+                          suffixarray.readmode,
+                          getcharactersAlphabet(suffixarray.alpha),
+                          suffixarray.suftab,
+                          ssar,
+                          false, /* specialsareequal  */
+                          false,  /* specialsareequalatdepth0 */
+                          0,
+                          err);
+        if (ssar != NULL)
+        {
+          freeSequentialsuffixarrayreader(&ssar);
+        }
+        showverbose(verboseinfo,"okay");
       }
-      showverbose(verboseinfo,"checkentiresuftab");
-      checkentiresuftab(suffixarray.encseq,
-                        suffixarray.readmode,
-                        getcharactersAlphabet(suffixarray.alpha),
-                        suffixarray.suftab,
-                        ssar,
-                        false, /* specialsareequal  */
-                        false,  /* specialsareequalatdepth0 */
-                        0,
-                        err);
-      if (ssar != NULL)
-      {
-        freeSequentialsuffixarrayreader(&ssar);
-      }
-      showverbose(verboseinfo,"okay");
     }
   }
   if (sfxmapoptions.inputdes && !haserr)
@@ -264,7 +331,7 @@ int gt_sfxmap(int argc, const char **argv, Error *err)
     checkalldescriptions(suffixarray.destab,suffixarray.destablength,
                          suffixarray.numofdbsequences);
   }
-  str_delete(indexname);
+  gt_str_delete(indexname);
   freesuffixarray(&suffixarray);
   freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;

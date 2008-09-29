@@ -32,7 +32,7 @@ end
 
 -- set up the feature stream
 genome_stream = gt.gff3_in_stream_new_sorted(testdata.."/gff3_file_1_short.txt")
-feature_index = gt.feature_index_new()
+feature_index = gt.feature_index_memory_new()
 genome_stream = gt.feature_stream_new(genome_stream, feature_index)
 collectgarbage()
 
@@ -49,26 +49,20 @@ for i,feature in ipairs(features) do
   feature:accept(gff3_visitor)
 end
 
--- more tests
-fi    = gt.feature_index_new()
 range = gt.range_new(1, 100)
-sr    = gt.sequence_region_new("chr1", range)
-gf    = gt.genome_feature_new("gene", range, "+")
-rval, err = pcall(GenomeTools_feature_index.add_genome_feature, fi, nil)
+
+-- more tests
+fi    = gt.feature_index_memory_new()
+sr    = gt.region_node_new("chr1", 1, 100)
+gf    = gt.feature_node_new("chr1", "gene", 1, 100 , "+")
+rval, err = pcall(GenomeTools_feature_index.add_feature_node, fi, nil)
 assert(not rval)
 assert(string.find(err, "genome_node expected"))
-rval, err = pcall(GenomeTools_feature_index.add_genome_feature, fi, gf)
-assert(not rval)
-assert(string.find(err, "does not have a sequence id"))
-gf:set_seqid("chr1")
-rval, err = pcall(GenomeTools_feature_index.add_genome_feature, fi, gf)
-assert(not rval)
-assert(string.find(err, "does not contain corresponding sequence region"))
-rval, err = pcall(GenomeTools_feature_index.add_sequence_region, fi, nil)
+rval, err = pcall(GenomeTools_feature_index.add_region_node, fi, nil)
 assert(not rval)
 assert(string.find(err, "genome_node expected"))
-rval, err = pcall(GenomeTools_feature_index.add_sequence_region, fi, gf)
+rval, err = pcall(GenomeTools_feature_index.add_region_node, fi, gf)
 assert(not rval)
-assert(string.find(err, "not a sequence region"))
-fi:add_sequence_region(sr)
-fi:add_genome_feature(gf)
+assert(string.find(err, "not a region node"))
+fi:add_region_node(sr)
+fi:add_feature_node(gf)

@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,30 +17,28 @@
 
 -- testing the Lua bindings for the GenomeNode interface
 
--- testing gt.genome_feature_new
+-- testing gt.feature_node_new
 range = gt.range_new(1, 100)
-rval, err = pcall(gt.genome_feature_new, nil, range, "+")
+rval, err = pcall(gt.feature_node_new, nil, nil, range:get_start(), range:get_end(), "+")
 assert(not rval)
-rval, err = pcall(gt.genome_feature_new, "not_defined", range, "+")
+rval, err = pcall(gt.feature_node_new, "seqid", nil, range:get_start(), range:get_end(), "+")
 assert(not rval)
-assert(string.find(err, "invalid feature type"))
-rval, err = pcall(gt.genome_feature_new, "gene", "test", "+")
+rval, err = pcall(gt.feature_node_new, "seqid", "gene", "test", "+")
 assert(not rval)
-assert(string.find(err, "range expected"))
-rval, err = pcall(gt.genome_feature_new, "gene", range, "plus")
+rval, err = pcall(gt.feature_node_new, "seqid", "gene", range:get_start(), range:get_end(), "plus")
 assert(not rval)
 assert(string.find(err, "strand string must have length 1"))
-rval, err = pcall(gt.genome_feature_new, "gene", range, "p")
+rval, err = pcall(gt.feature_node_new, "seqid", "gene", range:get_start(), range:get_end(), "p")
 assert(not rval)
 assert(string.find(err, "invalid strand"))
-gn = gt.genome_feature_new("gene", range, "+")
+gn = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
 assert(not gn:is_marked())
 gn:mark()
 assert(gn:is_marked())
 
-parent = gt.genome_feature_new("gene", range, "+")
-child  = gt.genome_feature_new("exon", range, "+")
-parent:is_part_of_genome_node(child)
+parent = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
+child  = gt.feature_node_new("seqid", "exon", range:get_start(), range:get_end(), "+")
+parent:add_child(child)
 assert(not parent:is_marked(parent))
 assert(not parent:contains_marked(parent))
 child:mark()
@@ -51,13 +49,12 @@ assert(parent:contains_marked(parent))
 -- testing genome_node:get_filename
 rval, fn = pcall(gn.get_filename, gn)
 assert(rval)
-assert(string.find(fn, "^Lua$"))
+assert(string.find(fn, "^generated$"))
 
--- testing gt.sequence_region_new
+-- testing gt.region_node_new
 range = gt.range_new(1, 100)
-rval, err = pcall(gt.sequence_region_new, nil, range)
+rval, err = pcall(gt.region_node_new, nil, range:get_start(), range:get_end())
 assert(not rval)
-rval, err = pcall(gt.sequence_region_new, "chr1", "test")
+rval, err = pcall(gt.region_node_new, "chr1", "test")
 assert(not rval)
-assert(string.find(err, "range expected"))
-gn = gt.sequence_region_new("chr1", range)
+gn = gt.region_node_new("chr1", range:get_start(), range:get_end())

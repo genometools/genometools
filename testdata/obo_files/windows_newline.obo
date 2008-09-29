@@ -1,0 +1,13 @@
+format-version: 1.0
+date: 03:10:2007 16:20
+auto-generated-by: OBO-Edit 1.002
+remark: version: 1.62
+
+[Term]
+id: IEV:0000000
+name: Event
+
+[Term]
+id: IEV:0000001
+name: Pathway
+is_a: IEV:0000071 ! Molecular event

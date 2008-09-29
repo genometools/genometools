@@ -18,9 +18,9 @@
 #ifndef GT_ALIGN_H
 #define GT_ALIGN_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the align tool */
-Tool* gt_align(void);
+GtTool* gt_align(void);
 
 #endif

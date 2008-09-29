@@ -19,6 +19,6 @@
 #define GT_TRIEINS_H
 
 /* the trieins tool */
-int gt_trieins(int argc, const char **argv, Error *err);
+int gt_trieins(int argc, const char **argv, GtError *err);
 
 #endif

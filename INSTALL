@@ -29,10 +29,10 @@ If you invoked make without curses=no beforehand, do not forget to run `make
 clean` before running `make curses=no`.
 
 
-Building GenomeTools with the view tool (requires installed cairo library):
----------------------------------------------------------------------------
+Building GenomeTools without the sketch tool (if Cairo is not installed):
+-------------------------------------------------------------------------
 
-invoke make as above with the argument libgtview=yes
+invoke make as above with the argument cairo=no
 
 
 Building GenomeTools as a Univeral Binary (on Mac OS X):
@@ -56,8 +56,8 @@ http://www.ruby-lang.org/en/ for informations on Ruby).
 Installing GenomeTools
 ----------------------
 
-To install the ``gt'' binary and the ``libgt'' library (plus header files) on
-your system invoke
+To install the ``gt'' binary and the ``libgenometools'' library
+(plus header files) on your system invoke
 
 $ make install
 

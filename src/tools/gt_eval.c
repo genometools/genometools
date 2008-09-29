@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/stream_evaluator.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/stream_evaluator.h"
 #include "tools/gt_eval.h"
 
 typedef struct {
@@ -31,64 +31,66 @@ typedef struct {
 } EvalArguments;
 
 static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option, *ltroption, *ltrdeltaoption;
+  GtOptionParser *op;
+  GtOption *option, *ltroption, *ltrdeltaoption;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("reality_file prediction_file ",
+  gt_error_check(err);
+  op = gt_option_parser_new("reality_file prediction_file ",
                          "Evaluate a gene prediction against a given "
                          "``reality'' file (both in GFF3).");
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* -exondiff */
-  option = option_new_bool("exondiff", "show a diff for the exons",
+  option = gt_option_new_bool("exondiff", "show a diff for the exons",
                            &arguments->exondiff, false);
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -nuc */
-  option = option_new_bool("nuc", "evaluate nucleotide level (memory intense)",
-                           &arguments->nuceval, true);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("nuc",
+                              "evaluate nucleotide level (memory intense)",
+                              &arguments->nuceval, true);
+  gt_option_parser_add_option(op, option);
 
   /* -ltr */
-  ltroption = option_new_bool("ltr", "evaluate a LTR retrotransposon "
+  ltroption = gt_option_new_bool("ltr", "evaluate a LTR retrotransposon "
                               "prediction instead of a gene prediction\n"
                               "(all LTR_retrotransposon elements are "
                               "considered to have an undetermined strand)",
                               &arguments->evalLTR, false);
-  option_parser_add_option(op, ltroption);
+  gt_option_parser_add_option(op, ltroption);
 
   /* -ltrdelta */
-  ltrdeltaoption = option_new_ulong("ltrdelta", "set allowed delta for LTR "
+  ltrdeltaoption = gt_option_new_ulong("ltrdelta", "set allowed delta for LTR "
                                     "borders to be considered equal",
                                     &arguments->LTRdelta, 20);
-  option_parser_add_option(op, ltrdeltaoption);
+  gt_option_parser_add_option(op, ltrdeltaoption);
 
   /* option implications */
-  option_imply(ltrdeltaoption, ltroption);
+  gt_option_imply(ltrdeltaoption, ltroption);
 
   /* parse */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+  gt_option_parser_set_min_max_args(op, 2, 2);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_eval(int argc, const char **argv, Error *err)
+int gt_eval(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *reality_stream,
+  GtNodeStream *reality_stream,
                *prediction_stream;
-  StreamEvaluator *evaluator;
+  GtStreamEvaluator *evaluator;
   EvalArguments arguments;
   int had_err, parsed_args;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
@@ -98,30 +100,32 @@ int gt_eval(int argc, const char **argv, Error *err)
   }
 
   /* create the reality stream */
-  reality_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose);
+  reality_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+  if (arguments.verbose)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) reality_stream);
 
   /* create the prediction stream */
-  prediction_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
-                                                arguments.verbose);
+  prediction_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1]);
+  if (arguments.verbose)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) prediction_stream);
 
   /* create the stream evaluator */
-  evaluator = stream_evaluator_new(reality_stream, prediction_stream,
+  evaluator = gt_stream_evaluator_new(reality_stream, prediction_stream,
                                    arguments.nuceval, arguments.evalLTR,
                                    arguments.LTRdelta);
 
   /* compute the evaluation */
-  had_err = stream_evaluator_evaluate(evaluator, arguments.verbose,
+  had_err = gt_stream_evaluator_evaluate(evaluator, arguments.verbose,
                                       arguments.exondiff, NULL, err);
 
   /* show the evaluation */
   if (!had_err)
-    stream_evaluator_show(evaluator, stdout);
+    gt_stream_evaluator_show(evaluator, stdout);
 
   /* free */
-  stream_evaluator_delete(evaluator);
-  genome_stream_delete(prediction_stream);
-  genome_stream_delete(reality_stream);
+  gt_stream_evaluator_delete(evaluator);
+  gt_node_stream_delete(prediction_stream);
+  gt_node_stream_delete(reality_stream);
 
   return had_err;
 }

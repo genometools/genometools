@@ -16,37 +16,38 @@
 */
 
 #include <string.h>
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/multiset_matching.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/unused_api.h"
+#include "core/versionfunc.h"
+#include "extended/multiset_matching.h"
 #include "tools/gt_multiset_matching.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] multiset_string text",
+  gt_error_check(err);
+  op = gt_option_parser_new("[option ...] multiset_string text",
                          "Match multiset defined by multiset_string against "
                          "text.");
-  option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 2, 2);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-static void show_match(unsigned long pos, UNUSED void *data)
+static void show_match(unsigned long pos, GT_UNUSED void *data)
 {
   printf("%lu\n", pos + 1);
 }
 
-int gt_multiset_matching(int argc, const char **argv, Error *err)
+int gt_multiset_matching(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -57,10 +58,10 @@ int gt_multiset_matching(int argc, const char **argv, Error *err)
 
   /* matching */
   assert(parsed_args + 1 < argc);
-  multiset_matching((unsigned char*) argv[parsed_args],
-                    strlen(argv[parsed_args]),
-                    (unsigned char*) argv[parsed_args+1],
-                    strlen(argv[parsed_args+1]), NULL, show_match);
+  gt_do_multiset_matching((unsigned char*) argv[parsed_args],
+                          strlen(argv[parsed_args]),
+                          (unsigned char*) argv[parsed_args+1],
+                          strlen(argv[parsed_args+1]), NULL, show_match);
 
   return 0;
 }

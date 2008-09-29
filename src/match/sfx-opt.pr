@@ -1,0 +1,14 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void wrapsfxoptions(Suffixeratoroptions *so);
+
+int suffixeratoroptions(Suffixeratoroptions *so,
+                        bool doesa,
+                        int argc,
+                        const char **argv,
+                        GtError *err);
+
+#ifdef __cplusplus
+}
+#endif

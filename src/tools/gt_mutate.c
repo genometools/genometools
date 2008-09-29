@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq_iterator.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/mutate.h"
+#include "core/bioseq_iterator.h"
+#include "core/fasta.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "extended/gtdatahelp.h"
+#include "extended/mutate.h"
 #include "tools/gt_mutate.h"
 
 typedef struct {
@@ -29,71 +29,75 @@ typedef struct {
 
 static void* gt_mutate_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (MutateArguments));
+  return gt_calloc(1, sizeof (MutateArguments));
 }
 
 static void gt_mutate_arguments_delete(void *tool_arguments)
 {
   MutateArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_mutate_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
 {
   MutateArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] [sequence_file ...]",
+  op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "Mutate the sequences of the given sequence_file(s) "
                          "and show them on stdout.");
   /* -rate */
-  o = option_new_uint_max("rate", "set the mutation rate", &arguments->rate, 1,
-                          100);
-  option_parser_add_option(op, o);
+  o = gt_option_new_uint_max("rate", "set the mutation rate",
+                             &arguments->rate,
+                             1,
+                             100);
+  gt_option_parser_add_option(op, o);
 
   /* parse */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   return op;
 }
 
 static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
-                            void *tool_arguments, Error *err)
+                            void *tool_arguments, GtError *err)
 {
   MutateArguments *arguments = tool_arguments;
-  BioseqIterator *bsi;
+  GtBioseqIterator *bsi;
   unsigned long i;
-  Bioseq *bioseq;
-  Seq *mutated_seq;
+  GtBioseq *bioseq;
+  GtSeq *mutated_seq;
   int had_err;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
-  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+  bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
-  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
-    for (i = 0; i < bioseq_number_of_sequences(bioseq); i++) {
-      mutated_seq = mutate(bioseq_get_description(bioseq, i),
-                           bioseq_get_sequence(bioseq, i),
-                           bioseq_get_sequence_length(bioseq, i),
-                           bioseq_get_alpha(bioseq), arguments->rate);
-      fasta_show_entry(seq_get_description(mutated_seq),
-                       seq_get_orig(mutated_seq), seq_length(mutated_seq), 0);
-      seq_delete(mutated_seq);
+  while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
+    for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
+      mutated_seq = gt_mutate_seq(gt_bioseq_get_description(bioseq, i),
+                                  gt_bioseq_get_sequence(bioseq, i),
+                                  gt_bioseq_get_sequence_length(bioseq, i),
+                                  gt_bioseq_get_alpha(bioseq), arguments->rate);
+      gt_fasta_show_entry(gt_seq_get_description(mutated_seq),
+                          gt_seq_get_orig(mutated_seq),
+                          gt_seq_length(mutated_seq),
+                          0);
+      gt_seq_delete(mutated_seq);
     }
-    bioseq_delete(bioseq);
+    gt_bioseq_delete(bioseq);
   }
 
-  bioseq_iterator_delete(bsi);
+  gt_bioseq_iterator_delete(bsi);
 
   return had_err;
 }
 
-Tool* gt_mutate(void)
+GtTool* gt_mutate(void)
 {
-  return tool_new(gt_mutate_arguments_new,
+  return gt_tool_new(gt_mutate_arguments_new,
                   gt_mutate_arguments_delete,
                   gt_mutate_option_parser_new,
                   NULL,

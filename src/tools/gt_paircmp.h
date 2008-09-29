@@ -19,6 +19,6 @@
 #define GT_PAIRCMP_H
 
 /* the paircmp tool */
-int gt_paircmp(int argc, const char **argv, Error *err);
+int gt_paircmp(int argc, const char **argv, GtError *err);
 
 #endif

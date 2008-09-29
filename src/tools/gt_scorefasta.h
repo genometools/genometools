@@ -18,9 +18,9 @@
 #ifndef GT_SCOREFASTA_H
 #define GT_SCOREFASTA_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the scorefasta tool */
-Tool* gt_scorefasta(void);
+GtTool* gt_scorefasta(void);
 
 #endif

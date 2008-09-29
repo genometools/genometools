@@ -15,41 +15,43 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/merge_stream.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/versionfunc.h"
+#include "extended/genome_node.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/merge_stream.h"
 #include "tools/gt_merge.h"
 
-static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
-                            const char **argv, Error *err)
+static OPrval parse_options(int *parsed_args, GtGenFile **outfp, int argc,
+                            const char **argv, GtError *err)
 {
-  OptionParser *op;
-  OutputFileInfo *ofi;
+  GtOptionParser *op;
+  GtOutputFileInfo *ofi;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] [GFF3_file ...]",
+  gt_error_check(err);
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
-  ofi = outputfileinfo_new();
-  outputfile_register_options(op, outfp, ofi);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  outputfileinfo_delete(ofi);
-  option_parser_delete(op);
+  ofi = gt_outputfileinfo_new();
+  gt_outputfile_register_options(op, outfp, ofi);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_outputfileinfo_delete(ofi);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_merge(int argc, const char **argv, Error *err)
+int gt_merge(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream,
+  GtNodeStream *gff3_in_stream,
                 *merge_stream,
                 *gff3_out_stream;
-  Array *genome_streams;
-  GenomeNode *gn;
+  GtArray *genome_streams;
+  GtGenomeNode *gn;
   unsigned long i;
   int parsed_args, had_err;
-  GenFile *outfp;
+  GtGenFile *outfp;
 
   /* option parsing */
   switch (parse_options(&parsed_args, &outfp, argc, argv, err)) {
@@ -59,7 +61,7 @@ int gt_merge(int argc, const char **argv, Error *err)
   }
 
   /* alloc */
-  genome_streams = array_new(sizeof (GenomeStream*));
+  genome_streams = gt_array_new(sizeof (GtNodeStream*));
 
   /* XXX: check for multiple specification of '-' */
 
@@ -67,35 +69,35 @@ int gt_merge(int argc, const char **argv, Error *err)
   if (parsed_args < argc) {
     /* we got files to open */
     for (i = parsed_args; i < argc; i++) {
-      gff3_in_stream = gff3_in_stream_new_sorted(argv[i], false);
-      array_add(genome_streams, gff3_in_stream);
+      gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[i]);
+      gt_array_add(genome_streams, gff3_in_stream);
     }
    }
    else {
      /* use stdin */
-     gff3_in_stream = gff3_in_stream_new_sorted(NULL, false);
-     array_add(genome_streams, gff3_in_stream);
+     gff3_in_stream = gt_gff3_in_stream_new_sorted(NULL);
+     gt_array_add(genome_streams, gff3_in_stream);
    }
 
   /* create a merge stream */
-  merge_stream = merge_stream_new(genome_streams);
+  merge_stream = gt_merge_stream_new(genome_streams);
 
   /* create a gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);
+  gff3_out_stream = gt_gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
          gn) {
-    genome_node_rec_delete(gn);
+    gt_genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(merge_stream);
-  for (i = 0; i < array_size(genome_streams); i++)
-    genome_stream_delete(*(GenomeStream**) array_get(genome_streams, i));
-  array_delete(genome_streams);
-  genfile_close(outfp);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(merge_stream);
+  for (i = 0; i < gt_array_size(genome_streams); i++)
+    gt_node_stream_delete(*(GtNodeStream**) gt_array_get(genome_streams, i));
+  gt_array_delete(genome_streams);
+  gt_genfile_close(outfp);
 
   return had_err;
 }

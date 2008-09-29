@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,14 +20,15 @@
 /* The GenomeTools (gt) genome analysis system */
 int main(int argc, char *argv[])
 {
-  Error *err;
+  GtError *err;
   GTR *gtr;
   int rval;
-  allocators_init();
-  err = error_new();
-  error_set_progname(err, argv[0]);
+  gt_allocators_init();
+  err = gt_error_new();
+  gt_error_set_progname(err, argv[0]);
   if (!(gtr = gtr_new(err))) {
-    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
+            gt_error_get(err));
     return EXIT_FAILURE;
   }
   gtr_register_components(gtr);
@@ -43,13 +44,14 @@ int main(int argc, char *argv[])
     case OPTIONPARSER_REQUESTS_EXIT:
       rval = 0; /* everything went fine */
   }
-  if (error_is_set(err)) {
-    fprintf(stderr, "%s: error: %s\n", error_get_progname(err), error_get(err));
-    assert(rval);
+  if (gt_error_is_set(err)) {
+    fprintf(stderr, "%s: error: %s\n", gt_error_get_progname(err),
+            gt_error_get(err));
+    gt_assert(rval);
   }
   gtr_delete(gtr);
-  error_delete(err);
-  if (allocators_clean())
+  gt_error_delete(err);
+  if (gt_allocators_clean())
     return 2; /* programmer error */
   return rval;
 }

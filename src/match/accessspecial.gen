@@ -1,0 +1,348 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
+                                      GtFastaBuffer *fb,
+                                      GtError *err)
+{
+  Uchar cc;
+  unsigned long currentspecialchar = 0;
+  Seqpos pos;
+  int retval;
+  Twobitencoding bitwise = 0;
+  unsigned int lastspeciallength = 0;
+#ifndef NDEBUG
+  Seqpos sumspecials = 0, countspecials = 0;
+#endif
+#ifndef NOENDPTR
+  unsigned long *endptrUint, endspecialcells;
+  Seqpos nextcheck;
+#endif
+  DECLARESEQBUFFER(encseq->twobitencoding);
+
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialpositions),NULL,SPECIALTYPE,
+                   encseq->numofspecialstostore);
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialrangelength),NULL,SPECIALTYPE,
+                   encseq->numofspecialstostore);
+#ifndef NOENDPTR
+  endspecialcells = (unsigned long) (encseq->totallength/MAXSPECIALTYPE + 1);
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,unsigned long,
+                   endspecialcells);
+  nextcheck = (Seqpos) MAXSPECIALTYPE;
+  endptrUint = ACCESSENCSEQ(encseq,endspecialsubsUint);
+#endif
+
+  for (pos=0; /* Nothing */; pos++)
+  {
+    retval = gt_fastabuffer_next(fb,&cc,err);
+    if (retval < 0)
+    {
+      return -1;
+    }
+    if (retval == 0)
+    {
+      if (lastspeciallength > 0)
+      {
+        /* note that we store one less than the length to prevent overflows */
+        assert(currentspecialchar > 0);
+        ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
+          = (SPECIALTYPE) (lastspeciallength-1);
+#ifndef NDEBUG
+        sumspecials += (Seqpos) lastspeciallength;
+#endif
+      }
+      break;
+    }
+    if (ISSPECIAL(cc))
+    {
+#ifndef NDEBUG
+      countspecials++;
+#endif
+      if (lastspeciallength == 0) /* at beginning of special range */
+      {
+        ACCESSENCSEQ(encseq,specialpositions)[currentspecialchar++]
+#ifndef NOENDPTR
+          = (SPECIALTYPE) (pos & MAXSPECIALTYPE);
+#else
+          = pos;
+#endif
+        lastspeciallength = 1U;
+      } else /* extend special range */
+      {
+        if (lastspeciallength == (unsigned int) MAXSPECIALTYPE)
+            /* already at maximal length */
+        {
+          assert(currentspecialchar > 0);
+          ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
+            = (SPECIALTYPE) MAXSPECIALTYPE;
+#ifndef NDEBUG
+          sumspecials += (1 + (Seqpos) MAXSPECIALTYPE);
+#endif
+          lastspeciallength = 0;
+        } else
+        {
+          lastspeciallength++;
+        }
+      }
+    } else
+    {
+      if (lastspeciallength > 0)
+      {
+        ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
+          = (SPECIALTYPE) (lastspeciallength-1);
+#ifndef NDEBUG
+        sumspecials += (Seqpos) lastspeciallength;
+#endif
+        lastspeciallength = 0;
+      }
+    }
+#ifndef NOENDPTR
+    if (pos == nextcheck)
+    {
+      *endptrUint++ = currentspecialchar;
+      nextcheck += (Seqpos) (MAXSPECIALTYPE+1);
+    }
+#endif
+    UPDATESEQBUFFER(cc);
+  }
+  assert(sumspecials == countspecials);
+  UPDATESEQBUFFERFINAL;
+#ifndef NOENDPTR
+  while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)
+  {
+    *endptrUint++ = currentspecialchar;
+  }
+#endif
+  return 0;
+}
+
+static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
+                                      const SPECIALTYPE *rightptr,
+                                      SPECIALTYPE pos)
+{
+  const SPECIALTYPE *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    if (pos == *midptr)
+    {
+      return true;
+    }
+    if (pos < *midptr)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      leftptr = midptr + 1;
+    }
+  }
+  return false;
+}
+
+/*@null@*/ static const SPECIALTYPE *ADDTYPE(binarysearchpreviousequal)(
+                                             const SPECIALTYPE *leftptr,
+                                             const SPECIALTYPE *rightptr,
+                                             SPECIALTYPE pos)
+{
+  const SPECIALTYPE *midptr,
+                    *found = NULL;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    if (pos == *midptr)
+    {
+      found = midptr;
+      break;
+    }
+    if (pos < *midptr)
+    {
+      rightptr = midptr - 1;
+    } else
+    {
+      found = midptr;
+      leftptr = midptr + 1;
+    }
+  }
+  return found;
+}
+
+#ifdef POS2PAGENUM
+
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
+{
+  unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
+
+  if (pagenumber == 0)
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= 1UL)
+    {
+      if (ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
+                                    ACCESSENCSEQ(encseq,specialpositions) +
+                                    ACCESSENCSEQ(encseq,endspecialsubsUint)[0]
+                                    - 1,
+                                    (SPECIALTYPE) pos))
+      {
+        return true;
+      }
+    }
+  } else
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] <
+        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
+    {
+      if (ADDTYPE(binarysearchpage)(
+               ACCESSENCSEQ(encseq,specialpositions) +
+               ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1],
+               ACCESSENCSEQ(encseq,specialpositions) +
+               ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber] - 1,
+               (SPECIALTYPE) pos))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
+{
+  unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
+  const SPECIALTYPE *found, *start;
+
+  if (pagenumber == 0)
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= 1UL)
+    {
+      start = ACCESSENCSEQ(encseq,specialpositions);
+      found = ADDTYPE(binarysearchpreviousequal)(
+                        start,
+                        start + ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1,
+                        (SPECIALTYPE) pos);
+      if (found != NULL)
+      {
+        Seqpos rangeend
+               = (Seqpos) *found +
+                 (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
+                                      [(Seqpos) (found - start)]
+                          + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    }
+  } else
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] <
+        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
+    {
+      start = ACCESSENCSEQ(encseq,specialpositions);
+      found = ADDTYPE(binarysearchpreviousequal)(
+                        start +
+                        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1],
+                        start +
+                        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber] - 1,
+                        (SPECIALTYPE) pos);
+      if (found != NULL)
+      {
+        Seqpos rangeend
+               = (Seqpos) ((MAXSPECIALTYPE+1) * pagenumber) +
+                 (Seqpos) *found +
+                 (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
+                                      [(unsigned long) (found - start)]
+                 + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    }
+    if (pagenumber == 1UL)
+    {
+      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > 1UL)
+      {
+        unsigned long idx;
+        Seqpos rangeend;
+
+        idx = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
+        rangeend = (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[idx] +
+                   (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)[idx] + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    } else
+    {
+      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-2] <
+          ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
+      {
+        unsigned long idx;
+        Seqpos rangeend;
+
+        idx = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
+        rangeend = (Seqpos) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
+                   (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[idx] +
+                   (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)[idx] + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+#else
+
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
+{
+  return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
+                                   ACCESSENCSEQ(encseq,specialpositions) +
+                                   encseq->numofspecialstostore - 1,
+                                   pos);
+}
+
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
+                                       Seqpos pos)
+{
+  const SPECIALTYPE *found, *start;
+
+  start = ACCESSENCSEQ(encseq,specialpositions);
+  found = ADDTYPE(binarysearchpreviousequal)(start,
+                                             start +
+                                             encseq->numofspecialstostore - 1,
+                                             pos);
+  if (found != NULL)
+  {
+    Seqpos rangeend
+             = (Seqpos) *found +
+               (Seqpos) ACCESSENCSEQ(encseq,specialrangelength)
+                                    [(Seqpos) (found - start)]
+                        + 1;
+    if (pos < rangeend)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+#endif

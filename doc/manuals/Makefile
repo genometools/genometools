@@ -1,11 +1,17 @@
+<<<<<<< HEAD:doc/manuals/Makefile
 ALL=ltrharvestman.pdf\
     ltrdigestman.pdf\
+=======
+ALL=ltrharvest.pdf\
+>>>>>>> master:doc/manuals/Makefile
     uniquesub.pdf\
     matstat.pdf\
     mgth.pdf\
     packedindex.pdf
 
 all:${ALL}
+
+annotationsketch: annotationsketch.pdf
 
 %.pdf:%.tex %-pdf.bbl
 	-test -e $*-pdf.aux && mv $*-pdf.aux $*.aux
@@ -20,7 +26,7 @@ all:${ALL}
 	-test -e $*-pdf.aux && mv $*-pdf.aux $*.aux
 	-bibtex $*
 	test -e $@ || touch $@
-	-diff $@ $*.bbl || mv $*.bbl $@ && rm $*.bbl
+	-diff $@ $*.bbl || mv $*.bbl $@ && rm -f $*.bbl
 	mv $*.aux $*-pdf.aux
 
 %-pdf.aux: %.tex

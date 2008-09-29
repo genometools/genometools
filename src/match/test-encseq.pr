@@ -1,0 +1,16 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int testencodedsequence(const GtStrArray *filenametab,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        const Uchar *symbolmap,
+                        unsigned long scantrials,
+                        unsigned long multicharcmptrials,
+                        GtError *err);
+
+int checkspecialrangesfast(const Encodedsequence *encseq);
+
+#ifdef __cplusplus
+}
+#endif

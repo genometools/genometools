@@ -47,6 +47,8 @@ foreach my $input (@inputs)
 {
   my ($output, $outputfh) = $input;  
   $output =~ s/\.template$/$lengthTag\.c/;
+  die('Failed output name generation: ', $input, ' => ', $output, "\n")
+      if ($output eq $input);
   open($outputfh, '>', $output)
       or die('Failed to open ', $output, ' for writing: ');
   print $outputfh @autogenheader;

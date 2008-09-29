@@ -15,35 +15,37 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/error.h"
-#include "libgtcore/option.h"
-#include "libgtcore/progressbar.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xposix.h"
+#include "core/error.h"
+#include "core/option.h"
+#include "core/progressbar.h"
+#include "core/versionfunc.h"
+#include "core/xposix.h"
 #include "tools/gt_mmapandread.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("file [...]", "Map the supplied files into memory and "
-                         "read them once.");
-  option_parser_set_min_args(op, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_error_check(err);
+  op = gt_option_parser_new("file [...]",
+                            "Map the supplied files into memory and "
+                            "read them once.");
+  gt_option_parser_set_min_args(op, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_mmapandread(int argc, const char **argv, Error *err)
+int gt_mmapandread(int argc, const char **argv, GtError *err)
 {
   int i, fd, parsed_args;
   void *map;
   struct stat sb;
   unsigned long long j;
   unsigned int byte = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -55,10 +57,10 @@ int gt_mmapandread(int argc, const char **argv, Error *err)
   /* iterate over all files */
   for (i = parsed_args; i < argc; i++) {
     /* open file */
-    fd = xopen(argv[i], O_RDONLY, 0);
+    fd = gt_xopen(argv[i], O_RDONLY, 0);
 
     /* get file statistics */
-    xfstat(fd, &sb);
+    gt_xfstat(fd, &sb);
 
     if (sb.st_size == 0)
       printf("file \"%s\" is empty\n", argv[i]);
@@ -66,22 +68,22 @@ int gt_mmapandread(int argc, const char **argv, Error *err)
       printf("\"%s\" is not a regular file\n", argv[i]);
     else {
       /* map file */
-      map = xmmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+      map = gt_xmmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 
       /* read file */
       printf("reading file \"%s\"\n", argv[i]);
       j = 0;
-      progressbar_start(&j, (unsigned long long) sb.st_size);
+      gt_progressbar_start(&j, (unsigned long long) sb.st_size);
       for (; j < (unsigned long long) sb.st_size; j++)
         byte |= (unsigned int) ((char*) map)[j];
-      progressbar_stop();
+      gt_progressbar_stop();
 
       /* unmap file */
-      xmunmap(map, sb.st_size);
+      gt_xmunmap(map, sb.st_size);
     }
 
     /* close file */
-    xclose(fd);
+    gt_xclose(fd);
   }
 
   if (!byte)

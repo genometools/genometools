@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq_iterator.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/option.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/shredder.h"
+#include "core/bioseq_iterator.h"
+#include "core/fasta.h"
+#include "core/option.h"
+#include "core/ma.h"
+#include "core/unused_api.h"
+#include "extended/gtdatahelp.h"
+#include "extended/shredder.h"
 #include "tools/gt_shredder.h"
 
 typedef struct {
@@ -30,111 +30,115 @@ typedef struct {
                 maxlength,
                 overlap;
   double sample_probability;
-} ShredderArguments;
+} GtShredderArguments;
 
 static void* gt_shredder_arguments_new(void)
 {
-  return ma_calloc(1, sizeof (ShredderArguments));
+  return gt_calloc(1, sizeof (GtShredderArguments));
 }
 
 static void gt_shredder_arguments_delete(void *tool_arguments)
 {
-  ShredderArguments *arguments = tool_arguments;
+  GtShredderArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_shredder_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
 {
-  ShredderArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtShredderArguments *arguments = tool_arguments;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] [sequence_file ...]",
-                         "Shredder sequence_file into consecutive pieces of "
+  op = gt_option_parser_new("[option ...] [sequence_file ...]",
+                         "GtShredder sequence_file into consecutive pieces of "
                          "random length.");
-  o = option_new_ulong_min("coverage", "set the number of times the "
+  o = gt_option_new_ulong_min("coverage", "set the number of times the "
                            "sequence_file is shreddered", &arguments->coverage,
                            1, 1);
-  option_parser_add_option(op, o);
-  o = option_new_ulong("minlength", "set the minimum length of the shreddered "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong("minlength",
+                       "set the minimum length of the shreddered "
                        "fragments", &arguments->minlength, 300);
-  option_parser_add_option(op, o);
-  o = option_new_ulong("maxlength", "set the maximum length of the shreddered "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong("maxlength",
+                       "set the maximum length of the shreddered "
                        "fragments", &arguments->maxlength, 700);
-  option_parser_add_option(op, o);
-  o = option_new_ulong("overlap", "set the overlap between consecutive "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong("overlap", "set the overlap between consecutive "
                        "pieces", &arguments->overlap, 0);
-  option_parser_add_option(op, o);
-  o = option_new_probability("sample", "take samples of the generated "
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_probability("sample", "take samples of the generated "
                              "sequences pieces with the given probability",
                              &arguments->sample_probability, 1.0);
-  option_parser_add_option(op, o);
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   return op;
 }
 
-static int gt_shredder_arguments_check(UNUSED int rest_argc,
-                                       void *tool_arguments, Error *err)
+static int gt_shredder_arguments_check(GT_UNUSED int rest_argc,
+                                       void *tool_arguments, GtError *err)
 {
-  ShredderArguments *arguments = tool_arguments;
-  error_check(err);
+  GtShredderArguments *arguments = tool_arguments;
+  gt_error_check(err);
   assert(arguments);
   if (arguments->minlength > arguments->maxlength) {
-    error_set(err, "-minlength must be <= than -maxlength");
+    gt_error_set(err, "-minlength must be <= than -maxlength");
     return -1;
   }
   return 0;
 }
 
-static int gt_shredder_runner(UNUSED int argc, const char **argv,
-                              int parsed_args, void *tool_arguments, Error *err)
+static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
+                              int parsed_args, void *tool_arguments,
+                              GtError *err)
 {
-  ShredderArguments *arguments = tool_arguments;
-  BioseqIterator *bsi;
+  GtShredderArguments *arguments = tool_arguments;
+  GtBioseqIterator *bsi;
   unsigned long i;
-  Bioseq *bioseq;
+  GtBioseq *bioseq;
   int had_err;
-  Str *desc;
+  GtStr *desc;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* init */
-  desc = str_new();
-  bsi = bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
+  desc = gt_str_new();
+  bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
   /* shredder */
-  while (!(had_err = bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
+  while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < arguments->coverage; i++) {
-      Shredder *shredder;
+      GtShredder *shredder;
       unsigned long fragment_length;
       const char *fragment;
-      shredder = shredder_new(bioseq, arguments->minlength,
+      shredder = gt_shredder_new(bioseq, arguments->minlength,
                               arguments->maxlength);
-      shredder_set_overlap(shredder, arguments->overlap);
-      shredder_set_sample_probability(shredder, arguments->sample_probability);
-      while ((fragment = shredder_shred(shredder, &fragment_length, desc))) {
-        str_append_cstr(desc, " [shreddered fragment]");
-        fasta_show_entry(str_get(desc), fragment, fragment_length, 0);
+      gt_shredder_set_overlap(shredder, arguments->overlap);
+      gt_shredder_set_sample_probability(shredder,
+                                         arguments->sample_probability);
+      while ((fragment = gt_shredder_shred(shredder, &fragment_length, desc))) {
+        gt_str_append_cstr(desc, " [shreddered fragment]");
+        gt_fasta_show_entry(gt_str_get(desc), fragment, fragment_length, 0);
       }
-      shredder_delete(shredder);
+      gt_shredder_delete(shredder);
     }
-    bioseq_delete(bioseq);
+    gt_bioseq_delete(bioseq);
   }
 
   /* free */
-  bioseq_iterator_delete(bsi);
-  str_delete(desc);
+  gt_bioseq_iterator_delete(bsi);
+  gt_str_delete(desc);
 
   return had_err;
 }
 
-Tool* gt_shredder(void)
+GtTool* gt_shredder(void)
 {
-  return tool_new(gt_shredder_arguments_new,
-                  gt_shredder_arguments_delete,
-                  gt_shredder_option_parser_new,
-                  gt_shredder_arguments_check,
-                  gt_shredder_runner);
+  return gt_tool_new(gt_shredder_arguments_new,
+                     gt_shredder_arguments_delete,
+                     gt_shredder_option_parser_new,
+                     gt_shredder_arguments_check,
+                     gt_shredder_runner);
 }

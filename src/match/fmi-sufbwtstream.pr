@@ -1,0 +1,15 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int sufbwt2fmindex(Fmindex *fmindex,
+                   unsigned int log2bsize,
+                   unsigned int log2markdist,
+                   const GtStr *outfmindex,
+                   const GtStrArray *indexnametab,
+                   bool storeindexpos,
+                   Verboseinfo *verboseinfo,
+                   GtError *err);
+
+#ifdef __cplusplus
+}
+#endif

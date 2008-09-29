@@ -19,6 +19,6 @@
 #define GT_MERGE_H
 
 /* the merge tool */
-int gt_merge(int argc, const char **argv, Error*);
+int gt_merge(int argc, const char **argv, GtError*);
 
 #endif

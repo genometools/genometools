@@ -16,28 +16,28 @@
 */
 
 #include <string.h>
-#include "libgtcore/bioseq.h"
-#include "libgtcore/fa.h"
-#include "libgtcore/fasta.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/string_distri.h"
-#include "libgtcore/unused.h"
-#include "libgtcore/xansi.h"
-#include "libgtext/gtdatahelp.h"
+#include "core/bioseq.h"
+#include "core/fa.h"
+#include "core/fasta.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/string_distri.h"
+#include "core/unused_api.h"
+#include "core/xansi.h"
+#include "extended/gtdatahelp.h"
 #include "tools/gt_fingerprint.h"
 
 typedef struct {
   bool show_duplicates;
-  Str *checklist,
+  GtStr *checklist,
       *extract;
 } FingerprintArguments;
 
 static void* gt_fingerprint_arguments_new(void)
 {
-  FingerprintArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->checklist = str_new();
-  arguments->extract = str_new();
+  FingerprintArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->checklist = gt_str_new();
+  arguments->extract = gt_str_new();
   return arguments;
 }
 
@@ -45,24 +45,24 @@ static void gt_fingerprint_arguments_delete(void *tool_arguments)
 {
   FingerprintArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->extract);
-  str_delete(arguments->checklist);
-  ma_free(arguments);
+  gt_str_delete(arguments->extract);
+  gt_str_delete(arguments->checklist);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_fingerprint_option_parser_new(UNUSED
+static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
   FingerprintArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *check_option, *duplicates_option, *extract_option;
+  GtOptionParser *op;
+  GtOption *check_option, *duplicates_option, *extract_option;
   assert(arguments);
-  op = option_parser_new("[option ...] sequence_file [...] ",
+  op = gt_option_parser_new("[option ...] sequence_file [...] ",
                          "Compute MD5 fingerprints for each sequence given "
                          "in sequence_file(s).");
 
   /* -check */
-  check_option = option_new_filename("check", "Compare all fingerprints "
+  check_option = gt_option_new_filename("check", "GtCompare all fingerprints "
                                      "contained in the given checklist file "
                                      "with checksums in given "
                                      "sequence_files(s). The comparison is "
@@ -71,35 +71,36 @@ static OptionParser* gt_fingerprint_option_parser_new(UNUSED
                                      "sequence_file(s) in the exact same "
                                      "quantity and vice versa.",
                                      arguments->checklist);
-  option_parser_add_option(op, check_option);
+  gt_option_parser_add_option(op, check_option);
 
   /* -duplicates */
-  duplicates_option = option_new_bool("duplicates", "Show duplicate "
+  duplicates_option = gt_option_new_bool("duplicates", "Show duplicate "
                                       "fingerprints from given "
                                       "sequence_file(s).",
                                       &arguments->show_duplicates, false);
-  option_parser_add_option(op, duplicates_option);
+  gt_option_parser_add_option(op, duplicates_option);
 
   /* -extract */
-  extract_option = option_new_string("extract", "Extract the sequence(s) with "
+  extract_option = gt_option_new_string("extract",
+                                     "Extract the sequence(s) with "
                                      "the given fingerprint from "
                                      "sequence_file(s) and show them on "
                                      "stdout.", arguments->extract, NULL);
-  option_parser_add_option(op, extract_option);
+  gt_option_parser_add_option(op, extract_option);
 
   /* option exclusions */
-  option_exclude(check_option, duplicates_option);
-  option_exclude(extract_option, check_option);
-  option_exclude(extract_option, duplicates_option);
+  gt_option_exclude(check_option, duplicates_option);
+  gt_option_exclude(extract_option, check_option);
+  gt_option_exclude(extract_option, duplicates_option);
 
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_args(op, 1);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+  gt_option_parser_set_min_args(op, 1);
   return op;
 }
 
 static void proc_superfluous_sequence(const char *string,
-                                      UNUSED unsigned long occurrences,
-                                      UNUSED double probability, void *data)
+                                      GT_UNUSED unsigned long occurrences,
+                                      GT_UNUSED double probability, void *data)
 {
   bool *comparisons_failed = data;
   assert(string && occurrences && comparisons_failed);
@@ -107,35 +108,35 @@ static void proc_superfluous_sequence(const char *string,
   *comparisons_failed = true;
 }
 
-static int compare_fingerprints(StringDistri *sd, const char *checklist,
-                                Error *err)
+static int compare_fingerprints(GtStringDistri *sd, const char *checklist,
+                                GtError *err)
 {
   bool comparisons_failed = false, use_stdin = false;
   FILE *checkfile;
-  Str *line;
-  error_check(err);
+  GtStr *line;
+  gt_error_check(err);
   assert(sd && checklist);
   if (!strcmp(checklist, "-"))
     use_stdin = true;
-  checkfile = use_stdin ? stdin : fa_xfopen(checklist, "r");
-  line = str_new();
+  checkfile = use_stdin ? stdin : gt_fa_xfopen(checklist, "r");
+  line = gt_str_new();
   /* process checklist */
-  while (str_read_next_line(line, checkfile) != EOF) {
-    if (string_distri_get(sd, str_get(line)))
-      string_distri_sub(sd, str_get(line));
+  while (gt_str_read_next_line(line, checkfile) != EOF) {
+    if (gt_string_distri_get(sd, gt_str_get(line)))
+      gt_string_distri_sub(sd, gt_str_get(line));
     else {
-      printf("%s only in checklist\n", str_get(line));
+      printf("%s only in checklist\n", gt_str_get(line));
       comparisons_failed = true;
     }
-    str_reset(line);
+    gt_str_reset(line);
   }
-  str_delete(line);
+  gt_str_delete(line);
   if (!use_stdin)
-    fa_xfclose(checkfile);
+    gt_fa_xfclose(checkfile);
   /* process remaining sequence_file(s) fingerprints */
-  string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
+  gt_string_distri_foreach(sd, proc_superfluous_sequence, &comparisons_failed);
   if (comparisons_failed) {
-    error_set(err, "fingerprint comparison failed");
+    gt_error_set(err, "fingerprint comparison failed");
     return -1;
   }
   return 0;
@@ -147,7 +148,7 @@ typedef struct {
 } FingerprintInfo;
 
 static void show_duplicate(const char *fingerprint, unsigned long occurrences,
-                           UNUSED double probability, void *data)
+                           GT_UNUSED double probability, void *data)
 {
   FingerprintInfo *info = data;
   if (occurrences > 1) {
@@ -157,16 +158,16 @@ static void show_duplicate(const char *fingerprint, unsigned long occurrences,
   info->num_of_sequences += occurrences;
 }
 
-static int show_duplicates(StringDistri *sd, Error *err)
+static int show_duplicates(GtStringDistri *sd, GtError *err)
 {
   FingerprintInfo info;
-  error_check(err);
+  gt_error_check(err);
   assert(sd);
   info.duplicates = 0;
   info.num_of_sequences = 0;
-  string_distri_foreach(sd, show_duplicate, &info);
+  gt_string_distri_foreach(sd, show_duplicate, &info);
   if (info.duplicates) {
-    error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
+    gt_error_set(err, "duplicates found: %llu out of %llu (%.3f%%)",
               info.duplicates, info.num_of_sequences,
               (((double) info.duplicates / info.num_of_sequences) * 100.0));
     return -1;
@@ -175,56 +176,56 @@ static int show_duplicates(StringDistri *sd, Error *err)
 }
 
 static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
-                                 void *tool_arguments, Error *err)
+                                 void *tool_arguments, GtError *err)
 {
   FingerprintArguments *arguments = tool_arguments;
-  Bioseq *bs;
-  StringDistri *sd;
+  GtBioseq *bs;
+  GtStringDistri *sd;
   unsigned long i, j;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
-  sd = string_distri_new();
+  sd = gt_string_distri_new();
 
   /* process sequence files */
   for (i = parsed_args; !had_err && i < argc; i++) {
-    if (!(bs = bioseq_new(argv[i], err)))
+    if (!(bs = gt_bioseq_new(argv[i], err)))
       had_err = -1;
     if (!had_err) {
-      for (j = 0; j < bioseq_number_of_sequences(bs); j++) {
-        if (str_length(arguments->checklist) || arguments->show_duplicates)
-          string_distri_add(sd, bioseq_get_md5_fingerprint(bs, j));
-        else if (str_length(arguments->extract)) {
-          if (!strcmp(bioseq_get_md5_fingerprint(bs, j),
-                      str_get(arguments->extract))) {
-            fasta_show_entry(bioseq_get_description(bs, j),
-                             bioseq_get_sequence(bs, j),
-                             bioseq_get_sequence_length(bs, j), 0);
+      for (j = 0; j < gt_bioseq_number_of_sequences(bs); j++) {
+        if (gt_str_length(arguments->checklist) || arguments->show_duplicates)
+          gt_string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
+        else if (gt_str_length(arguments->extract)) {
+          if (!strcmp(gt_bioseq_get_md5_fingerprint(bs, j),
+                      gt_str_get(arguments->extract))) {
+            gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
+                                gt_bioseq_get_sequence(bs, j),
+                                gt_bioseq_get_sequence_length(bs, j), 0);
           }
         }
         else
-          xputs(bioseq_get_md5_fingerprint(bs, j));
+          gt_xputs(gt_bioseq_get_md5_fingerprint(bs, j));
       }
     }
-    bioseq_delete(bs);
+    gt_bioseq_delete(bs);
   }
 
   if (!had_err) {
-    if (str_length(arguments->checklist))
-      had_err = compare_fingerprints(sd, str_get(arguments->checklist), err);
+    if (gt_str_length(arguments->checklist))
+      had_err = compare_fingerprints(sd, gt_str_get(arguments->checklist), err);
     else if (arguments->show_duplicates)
       had_err = show_duplicates(sd, err);
   }
 
-  string_distri_delete(sd);
+  gt_string_distri_delete(sd);
 
   return had_err;
 }
 
-Tool* gt_fingerprint(void)
+GtTool* gt_fingerprint(void)
 {
-  return tool_new(gt_fingerprint_arguments_new,
+  return gt_tool_new(gt_fingerprint_arguments_new,
                   gt_fingerprint_arguments_delete,
                   gt_fingerprint_option_parser_new,
                   NULL,

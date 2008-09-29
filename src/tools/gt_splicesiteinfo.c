@@ -15,83 +15,85 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/warning.h"
-#include "libgtext/add_introns_stream.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/splice_site_info_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/seqid2file.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/warning_api.h"
+#include "extended/add_introns_stream.h"
+#include "extended/genome_node.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/splice_site_info_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/seqid2file.h"
 #include "tools/gt_splicesiteinfo.h"
 
 typedef struct {
-  Str *seqfile,
+  GtStr *seqfile,
       *regionmapping;
   bool addintrons;
 } SpliceSiteInfoArguments;
 
 static OPrval parse_options(int *parsed_args,
                             SpliceSiteInfoArguments *arguments, int argc,
-                            const char **argv, Error *err)
+                            const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] [GFF3_file ...]", "Show information "
+  gt_error_check(err);
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Show information "
                          "about splice sites given in GFF3 files.");
 
   /* -seqfile and -regionmapping */
-  seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
 
   /* -addintrons */
-  option = option_new_bool("addintrons", "add intron features between existing "
+  option = gt_option_new_bool("addintrons",
+                           "add intron features between existing "
                            "exon features\n(before computing the information "
                            "to be shown)", &arguments->addintrons, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* parse */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_splicesiteinfo(int argc, const char **argv, Error *err)
+int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream = NULL,
+  GtNodeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *splice_site_info_stream = NULL;
-  GenomeNode *gn;
+  GtGenomeNode *gn;
   SpliceSiteInfoArguments arguments;
-  RegionMapping *regionmapping;
+  GtRegionMapping *regionmapping;
   int parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
-  arguments.seqfile = str_new();
-  arguments.regionmapping = str_new();
+  arguments.seqfile = gt_str_new();
+  arguments.regionmapping = gt_str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.regionmapping);
-      str_delete(arguments.seqfile);
+      gt_str_delete(arguments.regionmapping);
+      gt_str_delete(arguments.seqfile);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.regionmapping);
-      str_delete(arguments.seqfile);
+      gt_str_delete(arguments.regionmapping);
+      gt_str_delete(arguments.seqfile);
       return 0;
   }
 
   if (!had_err) {
     /* create gff3 input stream */
-    gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                                 argv + parsed_args,
-                                                 false, false);
+    gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                    argv + parsed_args);
 
     /* create region mapping */
-    regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
+    regionmapping = gt_seqid2file_regionmapping_new(arguments.seqfile,
                                                  arguments.regionmapping, err);
     if (!regionmapping)
       had_err = -1;
@@ -100,34 +102,35 @@ int gt_splicesiteinfo(int argc, const char **argv, Error *err)
   if (!had_err) {
     /* create addintrons stream (if necessary) */
     if (arguments.addintrons)
-      add_introns_stream = add_introns_stream_new(gff3_in_stream);
+      add_introns_stream = gt_add_introns_stream_new(gff3_in_stream);
 
     /* create extract feature stream */
-    splice_site_info_stream = splice_site_info_stream_new(arguments.addintrons
+    splice_site_info_stream = gt_splice_site_info_stream_new(
+                                                          arguments.addintrons
                                                           ? add_introns_stream
                                                           : gff3_in_stream,
                                                           regionmapping);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(splice_site_info_stream, &gn,
+    while (!(had_err = gt_node_stream_next(splice_site_info_stream, &gn,
                                                err)) && gn) {
-      genome_node_rec_delete(gn);
+      gt_genome_node_rec_delete(gn);
     }
   }
 
   if (!had_err) {
-    if (!splice_site_info_stream_show(splice_site_info_stream)) {
-      warning("input file(s) contained no intron, use option -addintrons to "
-              "add introns automatically");
+    if (!gt_splice_site_info_stream_show(splice_site_info_stream)) {
+      gt_warning("input file(s) contained no intron, use option -addintrons to "
+                 "add introns automatically");
     }
   }
 
   /* free */
-  genome_stream_delete(splice_site_info_stream);
-  genome_stream_delete(add_introns_stream);
-  genome_stream_delete(gff3_in_stream);
-  str_delete(arguments.regionmapping);
-  str_delete(arguments.seqfile);
+  gt_node_stream_delete(splice_site_info_stream);
+  gt_node_stream_delete(add_introns_stream);
+  gt_node_stream_delete(gff3_in_stream);
+  gt_str_delete(arguments.regionmapping);
+  gt_str_delete(arguments.seqfile);
 
   return had_err;
 }

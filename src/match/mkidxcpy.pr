@@ -1,0 +1,12 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int makeindexfilecopy(const GtStr *destindex,
+                      const GtStr *sourceindex,
+                      const char *suffix,
+                      uint64_t maxlength,
+                      GtError *err);
+
+#ifdef __cplusplus
+}
+#endif

@@ -19,6 +19,6 @@
 #define GT_MGTH_H
 
 /* the MetaGenomeThreader tool */
-int gt_mgth(int argc, const char **argv, Error*);
+int gt_mgth(int argc, const char **argv, GtError*);
 
 #endif

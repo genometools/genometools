@@ -15,14 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/outputfile.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/chseqids_stream.h"
-#include "libgtext/gff3_in_stream.h"
-#include "libgtext/gff3_out_stream.h"
-#include "libgtext/gtdatahelp.h"
-#include "libgtext/sort_stream.h"
+#include "core/option.h"
+#include "core/outputfile.h"
+#include "core/versionfunc.h"
+#include "extended/chseqids_stream.h"
+#include "extended/genome_node.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/gff3_out_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/sort_stream.h"
 #include "tools/gt_chseqids.h"
 
 #define DEFAULT_JOINLENGTH 300
@@ -30,59 +31,62 @@
 typedef struct {
   bool sort,
        verbose;
-  GenFile *outfp;
+  GtGenFile *outfp;
 } ChseqidsArguments;
 
 static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  OutputFileInfo *ofi;
-  Option *option;
+  GtOptionParser *op;
+  GtOutputFileInfo *ofi;
+  GtOption *option;
   OPrval oprval;
-  error_check(err);
+  gt_error_check(err);
 
   /* init */
-  op = option_parser_new("[option ...] mapping_file [GFF3_file]",
+  op = gt_option_parser_new("[option ...] mapping_file [GFF3_file]",
                          "Change sequence ids by the mapping given in "
                          "mapping_file.");
-  ofi = outputfileinfo_new();
+  ofi = gt_outputfileinfo_new();
 
   /* -sort */
-  option = option_new_bool("sort", "sort the GFF3 features after changing the "
-                           "sequence ids\n(memory consumption is O(file_size))",
-                           &arguments->sort, false);
-  option_parser_add_option(op, option);
+  option = gt_option_new_bool("sort",
+                              "sort the GFF3 features after changing the "
+                              "sequence ids\n(memory consumption is "
+                              "O(file_size))",
+                              &arguments->sort, false);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi);
+  gt_outputfile_register_options(op, &arguments->outfp, ofi);
 
   /* parse options */
-  option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_set_min_max_args(op, 1, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+  gt_option_parser_set_min_max_args(op, 1, 2);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
 
   /* free */
-  outputfileinfo_delete(ofi);
-  option_parser_delete(op);
+  gt_outputfileinfo_delete(ofi);
+  gt_option_parser_delete(op);
 
   return oprval;
 }
 
-int gt_chseqids(int argc, const char **argv, Error *err)
+int gt_chseqids(int argc, const char **argv, GtError *err)
 {
-  GenomeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
+  GtNodeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
                *gff3_out_stream = NULL;
-  GenomeNode *gn;
+  GtGenomeNode *gn;
   ChseqidsArguments arguments;
-  Str *chseqids;
+  GtStr *chseqids;
   int parsed_args, had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
@@ -92,36 +96,39 @@ int gt_chseqids(int argc, const char **argv, Error *err)
   }
 
   /* create the streams */
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
-                                             arguments.verbose &&
-                                             arguments.outfp);
-  chseqids = str_new_cstr(argv[parsed_args]);
-  if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids, err)))
+  gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1]);
+  if (arguments.verbose && arguments.outfp)
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
+  chseqids = gt_str_new_cstr(argv[parsed_args]);
+  chseqids_stream = gt_chseqids_stream_new(gff3_in_stream, chseqids, err);
+  if (!chseqids_stream)
     had_err = -1;
-  str_delete(chseqids);
+  gt_str_delete(chseqids);
   if (!had_err) {
     if (arguments.sort) {
-      sort_stream = sort_stream_new(chseqids_stream);
-      gff3_out_stream = gff3_out_stream_new(sort_stream, arguments.outfp);
+      sort_stream = gt_sort_stream_new(chseqids_stream);
+      gff3_out_stream = gt_gff3_out_stream_new(sort_stream, arguments.outfp);
     }
-    else
-      gff3_out_stream = gff3_out_stream_new(chseqids_stream, arguments.outfp);
+    else {
+      gff3_out_stream = gt_gff3_out_stream_new(chseqids_stream,
+                                               arguments.outfp);
+    }
   }
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, err)) &&
+    while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
            gn) {
-      genome_node_rec_delete(gn);
+      gt_genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(chseqids_stream);
-  genome_stream_delete(sort_stream);
-  genome_stream_delete(gff3_in_stream);
-  genfile_close(arguments.outfp);
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(chseqids_stream);
+  gt_node_stream_delete(sort_stream);
+  gt_node_stream_delete(gff3_in_stream);
+  gt_genfile_close(arguments.outfp);
 
   return had_err;
 }

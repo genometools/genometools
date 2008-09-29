@@ -19,6 +19,6 @@
 #define GT_MULTILCP_H
 
 /* the multilcp tool */
-int gt_multilcp(int argc, const char **argv, Error*);
+int gt_multilcp(int argc, const char **argv, GtError*);
 
 #endif

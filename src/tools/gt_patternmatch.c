@@ -16,21 +16,20 @@
 */
 
 #include <inttypes.h>
-#include "libgtcore/error.h"
-#include "libgtcore/str.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtmatch/sarr-def.h"
-#include "libgtmatch/stamp.h"
-#include "libgtmatch/enum-patt-def.h"
-#include "libgtmatch/esa-mmsearch-def.h"
-#include "libgtmatch/qgram2code.h"
-#include "libgtmatch/bcktab.h"
-#include "libgtmatch/spacedef.h"
-#include "libgtmatch/cutendpfx.h"
+#include "core/error.h"
+#include "core/str.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "match/sarr-def.h"
+#include "match/stamp.h"
+#include "match/enum-patt-def.h"
+#include "match/esa-mmsearch-def.h"
+#include "match/qgram2code.h"
+#include "match/spacedef.h"
+#include "match/cutendpfx.h"
 
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/sfx-cmpsuf.pr"
+#include "match/esa-map.pr"
+#include "match/sfx-cmpsuf.pr"
 
 #include "tools/gt_patternmatch.h"
 
@@ -38,7 +37,7 @@ typedef struct
 {
   unsigned long minpatternlen, maxpatternlen, numofsamples;
   bool showpatt, usebcktab, immediate;
-  Str *indexname;
+  GtStr *indexname;
 } Pmatchoptions;
 
 static void comparemmsis(const MMsearchiterator *mmsi1,
@@ -68,7 +67,7 @@ static void comparemmsis(const MMsearchiterator *mmsi1,
 
 #define UNDEFREFSTART totallength
 
-static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
+static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
@@ -238,69 +237,69 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, Error *err)
 
 static OPrval parse_options(Pmatchoptions *pmopt,
                             int *parsed_args,
-                            int argc, const char **argv, Error *err)
+                            int argc, const char **argv, GtError *err)
 {
-  OptionParser *op;
-  Option *option, *optionimm, *optionbck;
+  GtOptionParser *op;
+  GtOption *option, *optionimm, *optionbck;
   OPrval oprval;
 
-  error_check(err);
-  op = option_parser_new("[options] -ii indexname",
+  gt_error_check(err);
+  op = gt_option_parser_new("[options] -ii indexname",
                          "Perform pattern matches.");
-  option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  option = option_new_ulong("minpl","Specify minimum length of pattern",
+  option = gt_option_new_ulong("minpl","Specify minimum length of pattern",
                            &pmopt->minpatternlen,
                            (unsigned long) 20);
-  option_parser_add_option(op, option);
-  option = option_new_ulong("maxpl","Specify maximum length of pattern",
+  gt_option_parser_add_option(op, option);
+  option = gt_option_new_ulong("maxpl","Specify maximum length of pattern",
                             &pmopt->maxpatternlen,
                             (unsigned long) 30);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_ulong("samples","Specify number of samples",
+  option = gt_option_new_ulong("samples","Specify number of samples",
                             &pmopt->numofsamples,
                            (unsigned long) 100000);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  option = option_new_bool("s","Show generated pattern",
+  option = gt_option_new_bool("s","Show generated pattern",
                             &pmopt->showpatt,
                             false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
-  optionbck = option_new_bool("bck","Use the bucket boundaries",
+  optionbck = gt_option_new_bool("bck","Use the bucket boundaries",
                               &pmopt->usebcktab,
                               false);
-  option_parser_add_option(op, optionbck);
+  gt_option_parser_add_option(op, optionbck);
 
-  optionimm = option_new_bool("imm","Start with offset 0",
+  optionimm = gt_option_new_bool("imm","Start with offset 0",
                               &pmopt->immediate,
                               false);
-  option_parser_add_option(op, optionimm);
+  gt_option_parser_add_option(op, optionimm);
 
-  option = option_new_string("ii",
+  option = gt_option_new_string("ii",
                              "Specify input index",
                              pmopt->indexname, NULL);
-  option_parser_add_option(op, option);
-  option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv,
-                               versionfunc, err);
-  option_parser_delete(op);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
+                               gt_versionfunc, err);
+  gt_option_parser_delete(op);
 
   return oprval;
 }
 
-int gt_patternmatch(int argc, const char **argv, Error *err)
+int gt_patternmatch(int argc, const char **argv, GtError *err)
 {
   bool haserr = false;
   int parsed_args;
   Pmatchoptions pmopt;
   OPrval oprval;
 
-  error_check(err);
+  gt_error_check(err);
 
-  pmopt.indexname = str_new();
+  pmopt.indexname = gt_str_new();
   oprval = parse_options(&pmopt,&parsed_args, argc, argv, err);
   if (oprval == OPTIONPARSER_OK)
   {
@@ -310,7 +309,7 @@ int gt_patternmatch(int argc, const char **argv, Error *err)
       haserr = true;
     }
   }
-  str_delete(pmopt.indexname);
+  gt_str_delete(pmopt.indexname);
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;

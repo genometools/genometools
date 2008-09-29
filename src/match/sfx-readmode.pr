@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+const char *showreadmode(Readmode readmode);
+
+int parsereadmode(const char *dirargstring,GtError *err);
+
+#ifdef __cplusplus
+}
+#endif

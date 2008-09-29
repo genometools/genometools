@@ -15,26 +15,26 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# testing the Ruby bindings for the Config object
+# testing the Ruby bindings for the style object
 
 require 'gtruby'
 
 if ARGV.size != 1 then
-  STDERR.puts "Usage: #{$0} config_file"
-  STDERR.puts "Load config_file and test config bindings."
+  STDERR.puts "Usage: #{$0} style_file"
+  STDERR.puts "Load style_file and test style bindings."
   exit(1)
 end
 
-configfile = ARGV[0]
+stylefile = ARGV[0]
 
-# create new config object
-config = GT::Config.new()
+# create new style object
+style = GT::Style.new()
 
-# load config file
-config.load_file(configfile)
+# load style file
+style.load_file(stylefile)
 
 # get color
-color = config.get_color("exon")
+color = style.get_color("exon", "fill")
 raise if not color
 
 # set color
@@ -42,27 +42,108 @@ color = GT::Color.malloc
 color.red   = 0.3
 color.green = 0.4
 color.blue  = 0.3
-config.set_color("exon", color)
+style.set_color("exon", "fill", color)
+color2 = style.get_color("exon", "fill")
+raise if color2.red != color.red \
+  and color2.green != color.green \
+  and color2.blue != color.blue
+
+# unset color
+style.unset("exon", "fill")
+color2 = style.get_color("exon", "fill")
+raise if not color2.nil?
+
+# get undefined color
+color = style.get_color("undefined", "undefined")
+raise if not color.nil?
 
 # get string
-str = config.get_cstr("feature_styles", "exon")
+str = style.get_cstr("exon", "style")
 raise if str != "box"
 
 # set string
-config.set_cstr("feature_styles", "exon", "line")
+style.set_cstr("exon", "style", "line")
+str = style.get_cstr("exon", "style")
+raise if str != "line"
+
+# unset string
+style.unset("exon", "style")
+str = style.get_cstr("exon", "style")
+raise if not str.nil?
+
+# get undefined string
+str = style.get_cstr("undefined", "undefined")
+raise if not str.nil?
 
 # get number
-num = config.get_num("format", "margins")
+num = style.get_num("format", "margins")
 raise if num != 30
 
 # set number
-config.set_num("format", "margins", 20.0)
+style.set_num("format", "margins", 20)
+num = style.get_num("format", "margins")
+raise if num != 20
 
-# get string list
-strarray = config.get_cstr_list("collapse", "to_parent")
-list = strarray.to_a # convert StrArray C object to Ruby array of strings
-puts list
+# unset number
+style.unset("format", "margins");
+num = style.get_num("format", "margins")
+raise if not num.nil?
 
-# set string list
-list = [ "mRNA", "gene" ]
-config.set_cstr_list("dominate", "exon", list)
+#get undefined number
+num = style.get_num("undefined", "undefined")
+raise if not num.nil?
+
+# get boolean
+bool = style.get_bool("format", "show_grid")
+raise if not bool
+
+# get undefined boolean
+bool = style.get_bool("undefined", "undefined")
+raise if not bool.nil?
+
+# set boolean
+style.set_bool("format", "show_grid", false)
+bool = style.get_bool("format", "show_grid")
+raise if bool
+
+# unset boolean
+style.unset("format", "show_grid")
+bool = style.get_bool("format", "show_grid")
+raise if not bool.nil?
+
+# serialise style to Lua code
+style.set_num("format", "margins", 20)
+style.set_bool("format", "show_grid", true)
+color = GT::Color.malloc
+color.red   = 0.3
+color.green = 0.4
+color.blue  = 0.3
+style.set_color("exon", "fill", color)
+luacode = style.to_str
+raise if luacode.nil? or luacode.length == 0
+
+# load style from Lua code
+style.load_str(luacode)
+num = style.get_num("format", "margins")
+raise if num != 20
+bool = style.get_bool("format", "show_grid")
+raise if not bool
+color2 = style.get_color("exon", "fill")
+raise if color2.red != color.red \
+  and color2.green != color.green \
+  and color2.blue != color.blue
+
+# clone style from existing copy
+style2 = style.clone
+num = style2.get_num("format", "margins")
+raise if num != 20
+bool = style2.get_bool("format", "show_grid")
+raise if not bool
+color2 = style2.get_color("exon", "fill")
+raise if color2.red != color.red \
+  and color2.green != color.green \
+  and color2.blue != color.blue
+style2.set_num("format", "margins", 30)
+raise if style2.get_num("format", "margins") != 30
+raise if style.get_num("format", "margins")\
+           == style2.get_num("format", "margins")

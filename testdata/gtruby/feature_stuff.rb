@@ -30,7 +30,18 @@ gff3file = ARGV[0]
 
 # set up the feature stream
 genome_stream = GT::GFF3InStream.new(gff3file)
-feature_index = GT::FeatureIndex.new()
+
+# try to instantiate an interface
+begin
+  feature_index = GT::FeatureIndex.new()
+rescue NotImplementedError => e
+  raise unless /GT::FeatureIndex implementation/.match(e)
+else
+  raise
+end
+
+# instantiate index object
+feature_index = GT::FeatureIndexMemory.new()
 genome_stream = GT::FeatureStream.new(genome_stream, feature_index)
 
 feature = genome_stream.next_tree()

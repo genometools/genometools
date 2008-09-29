@@ -18,9 +18,9 @@
 #ifndef GT_SWALIGN_H
 #define GT_SWALIGN_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the Smith-Waterman alignment tool */
-Tool* gt_swalign(void);
+GtTool* gt_swalign_tool(void);
 
 #endif

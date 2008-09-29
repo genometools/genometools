@@ -1,5 +1,5 @@
 ##gff-version   3
-##sequence-region   NC_003070 1 4294967295
+##sequence-region   NC_003070 1 10000000
 # 1 comment
 #1  comment
 # a comment

@@ -15,46 +15,47 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/fasta_separator.h"
-#include "libgtcore/unused.h"
-#include "libgtexercise/simple_bioseq.h"
+#include "core/fasta_separator.h"
+#include "core/unused_api.h"
+#include "exercise/simple_bioseq.h"
 #include "tools/gt_fastaparser.h"
 
-static OptionParser* gt_fastaparser_option_parser_new(UNUSED
+static GtOptionParser* gt_fastaparser_option_parser_new(GT_UNUSED
                                                       void *tool_arguments)
 {
-  OptionParser *op;
-  op = option_parser_new("[option ...] fasta_file",
+  GtOptionParser *op;
+  op = gt_option_parser_new("[option ...] fasta_file",
                          "Parser fasta_file and show it on stdout.");
-  option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1, 1);
   return op;
 }
 
-static int gt_fastaparser_runner(UNUSED int argc, const char **argv,
-                                 int parsed_args, UNUSED void *tool_arguments,
-                                 UNUSED Error *err)
+static int gt_fastaparser_runner(GT_UNUSED int argc, const char **argv,
+                                 int parsed_args,
+                                 GT_UNUSED void *tool_arguments,
+                                 GT_UNUSED GtError *err)
 {
   unsigned long i;
-  SimpleBioseq *simple_bioseq;
+  GtSimpleBioseq *simple_bioseq;
 
-  error_check(err);
+  gt_error_check(err);
 
-  simple_bioseq = simple_bioseq_new(argv[parsed_args]);
-  for (i = 0; i < simple_bioseq_number_of_sequences(simple_bioseq); i++) {
+  simple_bioseq = gt_simple_bioseq_new(argv[parsed_args]);
+  for (i = 0; i < gt_simple_bioseq_number_of_sequences(simple_bioseq); i++) {
     printf("%c%s\n%s\n", FASTA_SEPARATOR,
-           simple_bioseq_get_description(simple_bioseq, i),
-           simple_bioseq_get_sequence(simple_bioseq, i));
+           gt_simple_bioseq_get_description(simple_bioseq, i),
+           gt_simple_bioseq_get_sequence(simple_bioseq, i));
     printf("sequence #%lu length: %lu\n", i,
-           simple_bioseq_get_sequence_length(simple_bioseq, i));
+           gt_simple_bioseq_get_sequence_length(simple_bioseq, i));
   }
-  simple_bioseq_delete(simple_bioseq);
+  gt_simple_bioseq_delete(simple_bioseq);
 
   return 0;
 }
 
-Tool* gt_fastaparser(void)
+GtTool* gt_fastaparser(void)
 {
-  return tool_new(NULL,
+  return gt_tool_new(NULL,
                   NULL,
                   gt_fastaparser_option_parser_new,
                   NULL,

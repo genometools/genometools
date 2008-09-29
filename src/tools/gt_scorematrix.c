@@ -15,30 +15,31 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/option.h"
-#include "libgtcore/score_matrix.h"
-#include "libgtcore/versionfunc.h"
+#include "core/option.h"
+#include "core/score_matrix.h"
+#include "core/versionfunc.h"
 #include "tools/gt_scorematrix.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("scorematrix_filename", "Parse the given protein "
+  gt_error_check(err);
+  op = gt_option_parser_new("scorematrix_filename", "Parse the given protein "
                          "score matrix and show it on stdout.");
-  option_parser_set_min_max_args(op, 1, 1);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 1, 1);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_scorematrix(int argc, const char **argv, Error *err)
+int gt_scorematrix(int argc, const char **argv, GtError *err)
 {
-  ScoreMatrix *sm;
+  GtScoreMatrix *sm;
   int parsed_args, had_err = 0;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -48,11 +49,11 @@ int gt_scorematrix(int argc, const char **argv, Error *err)
   }
   assert(parsed_args == 1);
 
-  if (!(sm = score_matrix_new_read_protein(argv[1], err)))
+  if (!(sm = gt_score_matrix_new_read_protein(argv[1], err)))
     had_err = -1;
   if (!had_err)
-    score_matrix_show(sm, stdout);
-  score_matrix_delete(sm);
+    gt_score_matrix_show(sm, stdout);
+  gt_score_matrix_delete(sm);
 
   return had_err;
 }

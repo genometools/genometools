@@ -16,7 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-localpath=src/libgtmatch
+localpath=src/match
 
 if test "XX${GT_ENV_OPTIONS}" != "XX"
 then
@@ -26,6 +26,7 @@ fi
 TMPFILE=`mktemp /tmp/skproto-all.XXXXXX` || exit 1
 cat << END_OF_TEXT > ${TMPFILE}
 alphabet.c
+apmoveridx.c
 bcktab.c
 cutendpfx.c
 eis-blockcomp.c
@@ -47,21 +48,28 @@ eis-sequencemultiread.c
 eis-suffixarray-interface.c
 eis-suffixerator-interface.c
 eis-suffixeratorreader.c
+eis-voiditf.c
 encodedseq.c
 encseq-specialsrank.c
 enum-patt.c
-esa-limdfs.c
 esa-mmsearch.c
-esa-myersapm.c
 esa-seqread.c
 esa-splititv.c
+esa-lcpval.c
+esa-ppbuckwid.c
 greedyfwdmat.c
+idx-limdfs.c
+initeqsvec.c
 inl-encseq.c
 mapspec-gen.c
 measure-time.c
 merger-trie.c
+mssufpat.c
+myersapm.c
 optionargmode.c
 overallseq.c
+pckbucket.c
+nullcols.c
 sfx-bentsedg.c
 sfx-enumcodes.c
 sfx-input.c

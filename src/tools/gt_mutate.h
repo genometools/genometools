@@ -18,9 +18,9 @@
 #ifndef GT_MUTATE_H
 #define GT_MUTATE_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the mutate tool */
-Tool* gt_mutate(void);
+GtTool* gt_mutate(void);
 
 #endif

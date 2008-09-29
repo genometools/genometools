@@ -19,9 +19,9 @@
 #ifndef GT_SKPROTO_H
 #define GT_SKPROTO_H
 
-#include "libgtcore/tool.h"
+#include "core/tool.h"
 
 /* the skproto tool */
-Tool* gt_skproto(void);
+GtTool* gt_skproto(void);
 
 #endif

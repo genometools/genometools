@@ -18,10 +18,10 @@
 # the GenomeTools Ruby bindings
 
 require 'gthelper'
-require 'libgtcore'
-require 'libgtext'
-require 'libgtview'
+require 'core'
+require 'extended'
+require 'annotationsketch'
 
 # to allow for memory bookkeeping analog to `gt` binary
-GT::allocators_init()
-GT::allocators_reg_atexit_func()
+GT::gt_allocators_init()
+GT::gt_allocators_reg_atexit_func()

@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------
 -- CGILua library.
 --
--- @release $Id: cgilua.lua,v 1.70 2007/11/21 17:04:23 carregal Exp $
+-- @release $Id: cgilua.lua,v 1.81 2008/05/19 18:13:36 carregal Exp $
 ----------------------------------------------------------------------------
 
 local _G, SAPI = _G, SAPI
@@ -14,22 +14,23 @@ local pairs = pairs
 local gsub, format, strfind, strlower, strsub, match = string.gsub, string.format, string.find, string.lower, string.sub, string.match
 local setmetatable = setmetatable
 local _open = io.open
-local tinsert, tremove = table.insert, table.remove
+local tinsert, tremove, concat = table.insert, table.remove, table.concat
 local foreachi = table.foreachi
 local date = os.date
 local os_tmpname = os.tmpname
 local getenv = os.getenv
 local remove = os.remove
 local seeall = package.seeall
+local setfenv = setfenv
 
 lp.setoutfunc ("cgilua.put")
 lp.setcompatmode (true)
 
 module ("cgilua")
 
-_COPYRIGHT = "Copyright (C) 2003-2007 Kepler Project"
+_COPYRIGHT = "Copyright (C) 2003 Kepler Project"
 _DESCRIPTION = "CGILua is a tool for creating dynamic Web pages and manipulating input data from forms"
-_VERSION = "CGILua 5.1.1"
+_VERSION = "CGILua 5.1.2"
 --
 -- Internal state variables.
 local _default_errorhandler = debug.traceback
@@ -53,7 +54,7 @@ local _default_erroroutput = function (msg)
 	-- Building user message
 	msg = gsub (gsub (msg, "\n", "<br>\n"), "\t", "&nbsp;&nbsp;")
 	SAPI.Response.contenttype ("text/html")
-	SAPI.Response.write (msg)
+	SAPI.Response.write ("<html><head><title>CGILua Error</title></head><body>" .. msg .. "</body></html>")
 end
 local _erroroutput = _default_erroroutput
 local _default_maxfilesize = 512 * 1024
@@ -70,7 +71,9 @@ script_path = false
 -- @param header String with the header.
 -- @param value String with the corresponding value.
 ----------------------------------------------------------------------------
-header = SAPI.Response.header
+function header(...)
+   return SAPI.Response.header(...)
+end
 
 ----------------------------------------------------------------------------
 -- Sends a Content-type header.
@@ -111,7 +114,9 @@ end
 -- @param name String with the name of the server variable.
 -- @return String with the value of the server variable.
 ----------------------------------------------------------------------------
-servervariable = SAPI.Request.servervariable
+function servervariable(...)
+   return SAPI.Request.servervariable(...)
+end
 
 ----------------------------------------------------------------------------
 -- Primitive error output function
@@ -135,7 +140,8 @@ function print (...)
 	for i = 1, select("#",...) do
 		args[i] = tostring(args[i])
 	end
-	SAPI.Response.write (unpack(args))
+	SAPI.Response.write (concat(args,"\t"))
+	SAPI.Response.write ("\n")
 end
 
 ----------------------------------------------------------------------------
@@ -146,7 +152,9 @@ end
 --  handle initialized with the file descriptor for stdout)
 -- @param s String (or number) with output.
 ----------------------------------------------------------------------------
-put = SAPI.Response.write
+function put (...)
+   return SAPI.Response.write(...)
+end
 
 -- Returns the current errorhandler
 function _geterrorhandler(msg)
@@ -162,10 +170,17 @@ function pcall (f)
 	local ok = results[1]
 	tremove(results, 1)
 	if ok then
+	        if #results == 0 then results = { true } end
 		return unpack(results)
 	else
 		_erroroutput (unpack(results))
 	end
+end
+
+local function buildscriptenv()
+  local env = { print = _M.print, write = _M.put }
+  setmetatable(env, { __index = _G, __newindex = _G })
+  return env
 end
 
 ----------------------------------------------------------------------------
@@ -176,12 +191,14 @@ end
 -- @return The result of the execution of the file.
 ----------------------------------------------------------------------------
 function doscript (filename)
-	local f, err = _G.loadfile(filename)
-	if not f then
-		error (format ("Cannot execute `%s'. Exiting.\n%s", filename, err))
-	else
-        return pcall(f)
-	end
+  local f, err = _G.loadfile(filename)
+  if not f then
+    error (format ("Cannot execute `%s'. Exiting.\n%s", filename, err))
+  else
+    local env = buildscriptenv()
+    setfenv(f, env)
+    return pcall(f)
+  end
 end
 
 ----------------------------------------------------------------------------
@@ -220,7 +237,7 @@ end
 
 
 -- Default path for temporary files
-tmp_path = getenv("TEMP") or getenv ("TMP") or "/tmp"
+tmp_path = _G.CGILUA_TMP or getenv("TEMP") or getenv ("TMP") or "/tmp"
 
 -- Default function for temporary names
 -- @returns a temporay name using os.tmpname
@@ -260,8 +277,9 @@ end
 -- @param env Optional environment
 ----------------------------------------------------------------------------
 function handlelp (filename, env)
-	htmlheader ()
-	lp.include (filename, env)
+  env = env or buildscriptenv()
+  htmlheader ()
+  lp.include (filename, env)
 end
 
 ----------------------------------------------------------------------------
@@ -298,8 +316,9 @@ end
 ----------------------------------------------------------------------------
 function buildprocesshandler (type, subtype)
 	return function (filename)
-		contentheader (type, subtype)
-		lp.include (filename)
+		 local env = buildscriptenv()
+		 contentheader (type, subtype)
+		 lp.include (filename, env)
 	end
 end
 
@@ -572,46 +591,47 @@ end
 -- Request processing.
 ---------------------------------------------------------------------------
 function main ()
-    buildhandlers()    
+        SAPI = _G.SAPI
+	buildhandlers()    
 	-- Default handler values
 	addscripthandler ("lua", doscript)
 	addscripthandler ("lp", handlelp)
 	-- Looks for an optional loader module
 	pcall (function () _G.require"cgilua.loader" end)
 
-    -- post.lua needs to be loaded after cgilua.lua is compiled
+	-- post.lua needs to be loaded after cgilua.lua is compiled
 	pcall (function () _G.require"cgilua.post" end)
 
-    if loader then
-        loader.init()
-    end
+	if loader then
+		loader.init()
+	end
     
-    -- Build QUERY/POST tables
-	pcall (getparams)
+	-- Build QUERY/POST tables
+	if not pcall (getparams) then return nil end
 
 	local result
-    -- Executes the optional loader module
+	-- Executes the optional loader module
 	if loader then
 		loader.run()
 	end
 
-    -- Changing curent directory to the script's "physical" dir
-    local curr_dir = lfs.currentdir ()
-    pcall (function () lfs.chdir (script_pdir) end)
+	-- Changing curent directory to the script's "physical" dir
+	local curr_dir = lfs.currentdir ()
+	pcall (function () lfs.chdir (script_pdir) end)
 
-    -- Opening functions
-    pcall (open)
+	-- Opening functions
+	pcall (open)
 
-    -- Executes the script
+	-- Executes the script
 	result, err = pcall (function () return handle (script_file) end)
     
-    -- Closing functions
-    pcall (close)
-    -- Changing to original directory
-    pcall (function () lfs.chdir (curr_dir) end)
+	-- Closing functions
+	pcall (close)
+	-- Changing to original directory
+	pcall (function () lfs.chdir (curr_dir) end)
 
-    -- Cleanup
-    reset ()
+	-- Cleanup
+	reset ()
 	if result then -- script executed ok!
 		return result
 	end

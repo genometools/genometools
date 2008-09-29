@@ -1,0 +1,13 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+/*@null@*/ FILE *opensfxfile(const GtStr *indexname,
+                             const char *suffix,
+                             const char *mode,
+                             GtError *err);
+
+bool indexfilealreadyexists(const GtStr *indexname,const char *suffix);
+
+#ifdef __cplusplus
+}
+#endif

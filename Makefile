@@ -18,13 +18,11 @@
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/zlib-1.2.3 \
             -I$(CURDIR)/src/external/md5-1.1.2/src \
-            -I$(CURDIR)/src/external/lua-5.1.3/src \
+            -I$(CURDIR)/src/external/lua-5.1.4/src \
             -I$(CURDIR)/src/external/luafilesystem-1.4.1/src \
-            -I$(CURDIR)/src/external/lpeg-0.7 \
+            -I$(CURDIR)/src/external/lpeg-0.8.1 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.5 \
-            -I$(CURDIR)/src/external/agg-2.4/include \
-            -I$(CURDIR)/src/external/libpng-1.2.18 \
             -I$(CURDIR)/src/external/libtecla-1.6.1
 # these variables are exported by the configuration script
 CC:=gcc
@@ -50,7 +48,8 @@ GT_LDFLAGS:=-Llib
 STEST_FLAGS:=
 EXP_LDFLAGS+=$(foreach dir, \
 	$(shell test -d /usr/local/lib && echo /usr/local/lib ; \
-	test -d /usr/X11R6/lib && echo /usr/X11R6/lib),-L$(dir))
+	        test -d /usr/X11R6/lib && echo /usr/X11R6/lib ; \
+                test -d /opt/local/lib && echo /opt/local/lib),-L$(dir))
 BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
@@ -70,6 +69,7 @@ else
   SHARED:=-shared
 endif
 
+<<<<<<< HEAD:Makefile
 # the default GenomeTools libraries which are build
 GTLIBS:=lib/libgtexercise.a\
         lib/libgtltr.a\
@@ -84,83 +84,27 @@ GTLIBS:=lib/libgtexercise.a\
 GTSHAREDLIBS:=lib/libgtcore$(SHARED_OBJ_NAME_EXT)\
               lib/libgtext$(SHARED_OBJ_NAME_EXT)
 
+=======
+>>>>>>> master:Makefile
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
 OVERRIDELIBS:=lib/libbz2.a
 
 # compiled executables
-GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c
+GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
 GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
 GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
 
-EXAMPLE_SRC:=src/example.c
-EXAMPLE_OBJ:=$(EXAMPLE_SRC:%.c=obj/%.o)
-EXAMPLE_DEP:=$(EXAMPLE_SRC:%.c=obj/%.d)
+EXAMPLES_SRC:=src/example.c
+EXAMPLES_DEP:=$(EXAMPLES_SRC:%.c=obj/%.d)
 
 SKPROTO_SRC:=src/skproto.c src/tools/gt_skproto.c
 SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
 SKPROTO_DEP:=$(SKPROTO_SRC:%.c=obj/%.d)
 
-# the core GenomeTools library (no other dependencies)
-AUTOGEN_LIBGTCORE_SRC:= src/libgtcore/bitpackstringop8.c \
-	src/libgtcore/checkbitpackstring8.c \
-	src/libgtcore/bitpackstringop16.c src/libgtcore/checkbitpackstring16.c \
-	src/libgtcore/bitpackstringop32.c src/libgtcore/checkbitpackstring32.c \
-	src/libgtcore/bitpackstringop64.c src/libgtcore/checkbitpackstring64.c
-LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
-LIBGTCORE_SRC:=$(filter-out $(AUTOGEN_LIBGTCORE_SRC), $(LIBGTCORE_SRC)) \
-	 $(AUTOGEN_LIBGTCORE_SRC)
-LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
-LIBGTCORE_DEP:=$(LIBGTCORE_SRC:%.c=obj/%.d)
-LIBGTCORE_LIBDEP=-lbz2 -lz
-
-# the extended GenomeTools library (e.g., depends on Lua)
-LIBGTEXT_C_SRC:=$(wildcard src/libgtext/*.c)
-LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
-LIBGTEXT_C_DEP:=$(LIBGTEXT_C_SRC:%.c=obj/%.d)
-LIBGTEXT_CXX_SRC:=$(wildcard src/libgtext/*.cxx)
-LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
-LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
-LIBGTEXT_LIBDEP=-lgtcore -lbz2 -lz
-
-# the exercise GenomeTools library
-LIBGTEXERCISE_SRC:=$(wildcard src/libgtexercise/*.c)
-LIBGTEXERCISE_OBJ:=$(LIBGTEXERCISE_SRC:%.c=obj/%.o)
-LIBGTEXERCISE_DEP:=$(LIBGTEXERCISE_SRC:%.c=obj/%.d)
-
-# the MetaGenomeThreader library
-LIBGTMGTH_SRC:=$(wildcard src/libgtmgth/*.c)
-LIBGTMGTH_OBJ:=$(LIBGTMGTH_SRC:%.c=obj/%.o)
-LIBGTMGTH_DEP:=$(LIBGTMGTH_SRC:%.c=obj/%.d)
-
-# the GenomeTools matching library
-LIBGTMATCH_SRC:=$(wildcard src/libgtmatch/*.c)
-LIBGTMATCH_OBJ:=$(LIBGTMATCH_SRC:%.c=obj/%.o)
-LIBGTMATCH_DEP:=$(LIBGTMATCH_SRC:%.c=obj/%.d)
-
-# the GenomeTools LTRharvest library
-LIBGTLTR_SRC:=$(wildcard src/libgtltr/*.c)
-LIBGTLTR_OBJ:=$(LIBGTLTR_SRC:%.c=obj/%.o)
-LIBGTLTR_DEP:=$(LIBGTLTR_SRC:%.c=obj/%.d)
-
-# the GenomeTools view library
-LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
-LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
-LIBGTVIEW_C_DEP:=$(LIBGTVIEW_C_SRC:%.c=obj/%.d)
-LIBGTVIEW_LIBDEP=-lcairo -lgtext -lgtcore -lbz2 -lz
-
-# the GenomeTools Lua library
-LIBGTLUA_C_SRC:=$(wildcard src/libgtlua/*.c)
-LIBGTLUA_C_OBJ:=$(LIBGTLUA_C_SRC:%.c=obj/%.o)
-LIBGTLUA_C_DEP:=$(LIBGTLUA_C_SRC:%.c=obj/%.d)
-
 TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
-
-LIBAGG_SRC:=$(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/ctrl/*.cpp)
-LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
-LIBAGG_DEP:=$(LIBAGG_SRC:%.cpp=obj/%.d)
 
 EXPAT_DIR:=src/external/expat-2.0.1/lib
 LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
@@ -168,7 +112,7 @@ LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
 LIBEXPAT_DEP:=$(LIBEXPAT_SRC:%.c=obj/%.d)
 
-LUA_DIR:=src/external/lua-5.1.3/src
+LUA_DIR:=src/external/lua-5.1.4/src
 LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            $(LUA_DIR)/ldo.c $(LUA_DIR)/ldump.c $(LUA_DIR)/lfunc.c \
            $(LUA_DIR)/lgc.c $(LUA_DIR)/llex.c $(LUA_DIR)/lmem.c \
@@ -184,22 +128,13 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            src/external/md5-1.1.2/src/des56.c\
            src/external/md5-1.1.2/src/ldes56.c\
            src/external/luafilesystem-1.4.1/src/lfs.c\
-           src/external/lpeg-0.7/lpeg.c
+           src/external/lpeg-0.8.1/lpeg.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
 LUAMAIN_SRC:=$(LUA_DIR)/lua.c
 LUAMAIN_OBJ:=$(LUAMAIN_SRC:%.c=obj/%.o)
 LUAMAIN_DEP:=$(LUAMAIN_SRC:%.c=obj/%.d)
-
-PNG_DIR:=src/external/libpng-1.2.18
-LIBPNG_SRC:=$(PNG_DIR)/png.c $(PNG_DIR)/pngset.c $(PNG_DIR)/pngget.c \
-            $(PNG_DIR)/pngrutil.c $(PNG_DIR)/pngtrans.c $(PNG_DIR)/pngwutil.c \
-            $(PNG_DIR)/pngread.c $(PNG_DIR)/pngrio.c $(PNG_DIR)/pngwio.c \
-            $(PNG_DIR)/pngwrite.c $(PNG_DIR)/pngrtran.c $(PNG_DIR)/pngwtran.c \
-            $(PNG_DIR)/pngmem.c $(PNG_DIR)/pngerror.c $(PNG_DIR)/pngpread.c
-LIBPNG_OBJ:=$(LIBPNG_SRC:%.c=obj/%.o)
-LIBPNG_DEP:=$(LIBPNG_SRC:%.c=obj/%.d)
 
 TECLA_DIR:=src/external/libtecla-1.6.1
 LIBTECLA_SRC:=$(TECLA_DIR)/chrqueue.c $(TECLA_DIR)/cplfile.c \
@@ -270,9 +205,8 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
-# the objects which are included into the single GenomeThreader shared library
-GTSHAREDLIB_OBJ:=$(LIBGTCORE_OBJ) $(LIBGTEXT_C_OBJ) $(LIBLUA_OBJ)
-GTSHAREDLIB_LIBDEP:=$(LIBGTCORE_LIBDEP)
+# the objects which are included into the single GenomeTools shared library
+GTSHAREDLIB_LIBDEP:=-lbz2 -lz
 
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
@@ -318,9 +252,9 @@ ifeq ($(curl),yes)
 endif
 
 ifneq ($(curses),no)
-  GTLIBS := $(GTLIBS) lib/libtecla.a
   EXP_CPPFLAGS += -DCURSES
   EXP_LDLIBS += -lncurses
+  GTLIBS := lib/libtecla.a
 endif
 
 ifdef gttestdata
@@ -358,6 +292,7 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
+<<<<<<< HEAD:Makefile
 ifeq ($(with-hmmer),yes) 
   GTLIBS := lib/libhmmer.a $(GTLIBS)
   EXP_CPPFLAGS += -DHAVE_HMMER
@@ -373,30 +308,57 @@ ifeq ($(libgtview),yes)
   GTSHAREDLIB_LIBDEP := $(GTSHAREDLIB_LIBDEP) -lcairo
   EXP_CPPFLAGS += -DLIBGTVIEW
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
+=======
+LIBGENOMETOOLS_DIRS:= src/core \
+                      src/extended \
+                      src/gtlua
+
+LIBGTUNSTABLE_DIRS:=  src/exercise \
+                      src/match \
+                      src/ltr \
+                      src/mgth
+
+ifneq ($(cairo),no)
+  GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
+  GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo \
+                 -I/opt/local/include/cairo
+>>>>>>> master:Makefile
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
-  STEST_FLAGS += -libgtview
+  STEST_FLAGS += -libannotationsketch
+  ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
+                               bin/examples/sketch_parsed
+  ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
+  LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
+  EXP_CPPFLAGS += -DWITHOUT_CAIRO
 endif
+
+# the GenomeTools library
+LIBGENOMETOOLS_SRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
+LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \
+                    $(LIBLUA_OBJ) \
+                    $(LIBEXPAT_OBJ)
+LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
+                    $(LIBLUA_DEP) \
+                    $(LIBEXPAT_DEP)
+
+# the GenomeTools unstable library
+LIBGTUNSTABLE_SRC:=$(foreach DIR,$(LIBGTUNSTABLE_DIRS),$(wildcard $(DIR)/*.c))
+LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
+LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 
 # set prefix for install target
 prefix ?= /usr/local
 
-all: $(GTLIBS) lib/libgt$(SHARED_OBJ_NAME_EXT) bin/skproto bin/gt \
-     bin/example bin/lua bin/rnv
+all: lib/libgenometools.a lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
+     bin/skproto bin/gt bin/lua bin/rnv \
+     bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBEXPAT_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libagg.a: $(LIBAGG_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBAGG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -426,20 +388,21 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtcore.a: obj/gt_config.h  $(LIBGTCORE_OBJ)
+lib/libgenometools.a: obj/gt_config.h  $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTCORE_OBJ)
+	@ar ru $@ $(LIBGENOMETOOLS_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgt$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(GTSHAREDLIB_OBJ)
+lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(GTSHAREDLIB_OBJ) \
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	-o $@ $(GTSHAREDLIB_LIBDEP)
 
+<<<<<<< HEAD:Makefile
 lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -490,20 +453,21 @@ ifdef RANLIB
 endif
 
 lib/libgtlua.a: $(LIBGTLUA_C_OBJ)
+=======
+lib/libgtunstable.a: $(LIBGTUNSTABLE_OBJ)
+>>>>>>> master:Makefile
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTLUA_C_OBJ)
+	@ar ru $@ $(LIBGTUNSTABLE_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libpng.a: $(LIBPNG_OBJ)
+lib/libgtunstable$(SHARED_OBJ_NAME_EXT): $(LIBGTUNSTABLE_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBPNG_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGTUNSTABLE_OBJ) \
+	-o $@ $(GTSHAREDLIB_LIBDEP)
 
 lib/libtecla.a: $(LIBTECLA_OBJ)
 	@echo "[link $(@F)]"
@@ -537,14 +501,33 @@ $(1)_static: $(2)
 	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -static -o $$@
 endef
 
-$(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) lib/libgtcore.a \
+$(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
+                                             lib/libgenometools.a \
                                              $(OVERRIDELIBS)))
 
-$(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) \
+$(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
+                                        lib/libgtunstable.a \
+                                        lib/libgenometools.a \
+                                        $(GTLIBS) \
                                         $(OVERRIDELIBS)))
 
-$(eval $(call PROGRAM_template, bin/example, $(EXAMPLE_OBJ) $(GTLIBS) \
-                                             $(OVERRIDELIBS)))
+$(eval $(call PROGRAM_template, bin/examples/gff3validator, \
+                                obj/src/examples/gff3validator.o \
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/examples/noop, \
+                                obj/src/examples/noop.o \
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/examples/sketch_constructed, \
+                                obj/src/examples/sketch_constructed.o \
+                                lib/libgenometools.a $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/examples/sketch_parsed, \
+                                obj/src/examples/sketch_parsed.o \
+                                lib/libgenometools.a $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
@@ -556,6 +539,7 @@ bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
+<<<<<<< HEAD:Makefile
 $(SQUID_DIR)/squidconf.h:
 	@echo '[create $(@F)]'
 	@scripts/generate_hmmer_squidconf_h $(SQUID_DIR)/squidconf.h.in > $@
@@ -576,59 +560,71 @@ $(HMMER_DIR)/config.h: $(HMMER_DIR)/config.h.in
 	      -e 's/#undef PACKAGE_LICENSE/#define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"/' $(HMMER_DIR)/config.h.in  > $@
           
 obj/gt_config.h:
+=======
+obj/gt_config.h: VERSION
+>>>>>>> master:Makefile
 	@echo '[create $@]'
 	@test -d $(@D) || mkdir -p $(@D)
-	@(echo '#define GT_BUILT $(BUILDSTAMP)' ;\
+	@(echo '#ifndef GT_CONFIG_H' ;\
+	echo '#define GT_CONFIG_H' ;\
+        echo '#define GT_BUILT $(BUILDSTAMP)' ;\
 	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
 	echo '#define GT_CFLAGS "$(EXP_CFLAGS) $(GT_CFLAGS)"' ;\
 	echo '$(EXP_CPPFLAGS) $(GT_CPPFLAGS)' | \
 	sed -e 's/\([^\]\)"/\1\\"/g' -e 's/^"/\\"/g' -e 's/$$/"/' \
 	    -e 's/^/#define GT_CPPFLAGS "/'; \
 	  echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
+	@cat VERSION | \
+          sed 's/\([0-9]*\)\.[0-9]*\.[0-9]*/#define GT_MAJOR_VERSION \1/' >> $@
+	@cat VERSION | \
+          sed 's/[0-9]*\.\([0-9]*\)\.[0-9]*/#define GT_MINOR_VERSION \1/' >> $@
+	@cat VERSION | \
+          sed 's/[0-9]*\.[0-9]*\.\([0-9]*\)/#define GT_MICRO_VERSION \1/' >> $@
+	@echo '#endif' >> $@
 
-bitpackstringop_Dependencies=src/libgtcore/bitpackstringop.template \
-	 src/libgtcore/bitpackstringvectorreadop.gen \
-	 src/libgtcore/bitpackstringvectorwriteop.gen \
+bitpackstringop_Dependencies=src/core/bitpackstringop.template \
+	 src/core/bitpackstringvectorreadop.gen \
+	 src/core/bitpackstringvectorwriteop.gen \
 	 scripts/template2c.pl
 
-src/libgtcore/bitpackstringop8.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop8.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 8 $<
 
-src/libgtcore/checkbitpackstring8.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring8.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 8 $<
 
-src/libgtcore/bitpackstringop16.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop16.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 16 $<
 
-src/libgtcore/checkbitpackstring16.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring16.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 16 $<
 
-src/libgtcore/bitpackstringop32.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop32.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 32 $<
 
-src/libgtcore/checkbitpackstring32.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring32.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 32 $<
 
-src/libgtcore/bitpackstringop64.c: $(bitpackstringop_Dependencies)
+src/core/bitpackstringop64.c: $(bitpackstringop_Dependencies)
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 64 $<
 
-src/libgtcore/checkbitpackstring64.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring64.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 64 $<
 
-src/libgtcore/checkbitpackstring-int.c: \
- src/libgtcore/checkbitpackstring.template scripts/template2c.pl
+src/core/checkbitpackstring-int.c: \
+ src/core/checkbitpackstring.template scripts/template2c.pl
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $<
 
@@ -681,40 +677,42 @@ obj/%.o: %.cpp
 	@$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
 	  -MT $@
 
-obj/src/libgtcore/versionfunc.o: obj/gt_config.h
+obj/src/core/versionfunc.o: obj/gt_config.h
 
 # read dependencies
 -include $(GTMAIN_DEP) \
-         $(EXAMPLE_DEP) \
+         $(EXAMPLES_DEP) \
          $(SKPROTO_DEP) \
-	 $(LIBGTCORE_DEP) \
-	 $(LIBGTEXT_C_DEP) \
-	 $(LIBGTEXT_CXX_DEP) \
-	 $(LIBGTEXERCISE_DEP) \
-	 $(LIBGTMGTH_DEP) \
-	 $(LIBGTMATCH_DEP) \
-	 $(LIBGTLTR_DEP) \
-	 $(LIBGTLUA_C_DEP) \
 	 $(TOOLS_DEP) \
-	 $(LIBAGG_DEP) \
-	 $(LIBEXPAT_DEP) \
-	 $(LIBLUA_DEP) \
          $(LUAMAIN_DEP) \
-	 $(LIBPNG_DEP) \
 	 $(LIBTECLA_DEP) \
 	 $(LIBRNV_DEP) \
 	 $(RNVMAIN_DEP) \
 	 $(LIBBZ2_DEP) \
+<<<<<<< HEAD:Makefile
          $(HMMER_DEP) \
 	 $(ZLIB_DEP)
+=======
+	 $(ZLIB_DEP) \
+         $(LIBGENOMETOOLS_DEP) \
+         $(LIBGTUNSTABLE_DEP) \
+         obj/src/examples/gff3validator.d \
+         obj/src/examples/noop.d \
+         obj/src/examples/sketch_constructed.d \
+         obj/src/examples/sketch_parsed.d
+>>>>>>> master:Makefile
 
-ifeq ($(libgtview),yes)
--include $(LIBGTVIEW_C_DEP) $(LIBGTVIEW_CXX_DEP)
+ifeq ($(libannotationsketch),yes)
+-include $(LIBANNOTATIONSKETCH_C_DEP) $(LIBANNOTATIONSKETCH_CXX_DEP)
 endif
 
 .PRECIOUS: $(HMMER_DIR)/%.c $(SQUID_DIR)/%.c $(HMMER_DIR)/%.h.in $(SQUID_DIR)/%.h.in
 .SUFFIXES:
+<<<<<<< HEAD:Makefile
 .PHONY: dist srcdist release gt install docs installwww splint test clean cleanup hmmer_get
+=======
+.PHONY: dist srcdist release gt install docs manuals installwww splint test clean cleanup
+>>>>>>> master:Makefile
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
@@ -722,18 +720,20 @@ GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 
-dist: all
+dist: all manuals
 	@echo "[build distribution]"
 	@rm -rf $(GTDISTDIR)
 	@rm -rf $(DISTDIR)/$(GTDISTBASENAME).tar.gz
-	@mkdir -p $(GTDISTDIR)/bin
+	@mkdir -p $(GTDISTDIR)/bin $(GTDISTDIR)/doc
 	@cp $(CURDIR)/doc/dist_readme.txt $(GTDISTDIR)/README
 	@cp $(CURDIR)/LICENSE $(GTDISTDIR)
 	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
 	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
 	@strip $(GTDISTDIR)/bin/gt
+	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
+	@$(MAKE) prefix=$(GTDISTDIR) install
 	@cd $(DISTDIR) && tar cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
 	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
 	@echo "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
@@ -749,9 +749,36 @@ release:
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
 	git push --tags origin master
 
-docs: bin/gt
+docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
+        > www/genometools.org/htdocs/libgenometools.html
+	bin/gt gtscripts/gtdoc.lua -lua -html $(CURDIR) \
         > www/genometools.org/htdocs/docs.html
+	bin/examples/sketch_parsed gtdata/sketch/default.style \
+          www/genometools.org/htdocs/images/parsed.png \
+          testdata/eden.gff3
+	bin/examples/sketch_parsed \
+	  www/genometools.org/htdocs/annotationsketch/callbacks.style \
+	  www/genometools.org/htdocs/images/callbacks.png \
+          www/genometools.org/htdocs/annotationsketch/callback_examples_with_score.gff3
+	bin/examples/sketch_constructed gtdata/sketch/default.style \
+	  www/genometools.org/htdocs/images/constructed.png
+	sed -nf scripts/incl.sed \
+	  www/genometools.org/htdocs/annotationsketch_tmpl.html | \
+          sed 'N;N;s/\n//' > /tmp/tmp.sed
+	sed -f /tmp/tmp.sed \
+	  www/genometools.org/htdocs/annotationsketch_tmpl.html > \
+	  www/genometools.org/htdocs/annotationsketch.html
+	bin/gt gtscripts/gtdoc.lua -tex $(CURDIR) \
+	> doc/manuals/api_reference.tex
+	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
+	> doc/manuals/gtscript_reference.tex
+
+doc/manuals/annotationsketch.pdf: docs
+	$(MAKE) -C $(CURDIR)/doc/manuals annotationsketch
+
+manuals: $(ANNOTATIONSKETCH_MANUAL)
+	$(MAKE) -C $(CURDIR)/doc/manuals
 
 installwww:
 # install genometools.org website
@@ -763,32 +790,24 @@ install: all
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
 	cp bin/gt $(prefix)/bin
 	cp -r gtdata $(prefix)/bin
-	test -d $(prefix)/include/libgtcore \
-	  || mkdir -p $(prefix)/include/libgtcore
-	cp src/gtcore.h obj/gt_config.h $(prefix)/include
-	cp src/libgtcore/*.h $(prefix)/include/libgtcore
-	test -d $(prefix)/include/libgtext \
-          || mkdir -p $(prefix)/include/libgtext
-	cp src/gtext.h $(prefix)/include
-	cp src/libgtext/*.h $(prefix)/include/libgtext
-	cp src/genometools.h $(prefix)/include
-	test -d $(prefix)/include/libgtmatch \
-	  || mkdir -p $(prefix)/include/libgtmatch
-	cp src/gtmatch.h $(prefix)/include
-	cp src/libgtmatch/*.h src/libgtmatch/*.pr $(prefix)/include/libgtmatch
+	test -d $(prefix)/include/genometools/core \
+	  || mkdir -p $(prefix)/include/genometools/core
+	cp src/core/*_api.h $(prefix)/include/genometools/core
+	test -d $(prefix)/include/genometools/extended \
+          || mkdir -p $(prefix)/include/genometools/extended
+	cp src/extended/*_api.h $(prefix)/include/genometools/extended
+	test -d $(prefix)/include/genometools/annotationsketch \
+          || mkdir -p $(prefix)/include/genometools/annotationsketch
+	cp src/annotationsketch/*_api.h \
+          $(prefix)/include/genometools/annotationsketch
+	cp obj/gt_config.h $(prefix)/include/genometools
+	cp src/genometools.h $(prefix)/include/genometools
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
-	cp lib/libgtcore.a $(prefix)/lib
+	cp lib/libgenometools.a $(prefix)/lib
 ifdef RANLIB
-	$(RANLIB) $(prefix)/lib/libgtcore.a
+	$(RANLIB) $(prefix)/lib/libgenometools.a
 endif
-	cp lib/libgtext.a $(prefix)/lib
-ifdef RANLIB
-	$(RANLIB) $(prefix)/lib/libgtext.a
-endif
-	cp lib/libgtmatch.a $(prefix)/lib
-ifdef RANLIB
-	$(RANLIB) $(prefix)/lib/libgtmatch.a
-endif
+	cp lib/libgenometools$(SHARED_OBJ_NAME_EXT) $(prefix)/lib
 	@echo '[build config script $(@F)]'
 	sed -e 's!@CC@!$(CC)!' -e 's!@CFLAGS@!$(EXP_CFLAGS)!' \
 	  -e 's!@CPPFLAGS@!$(subst ",\\",-I"$(prefix)/include" $(EXP_CPPFLAGS))!' \
@@ -800,35 +819,38 @@ endif
 	  >$(prefix)/bin/genometools-config
 	chmod 755 $(prefix)/bin/genometools-config
 
+cflags:
+	@echo ${GT_CFLAGS}
 
 splint: obj/gt_config.h
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) \
 	$(CURDIR)/src/*.c \
-        $(CURDIR)/src/libgtcore/*.c \
-        $(CURDIR)/src/libgtext/*.c \
+        $(CURDIR)/src/core/*.c \
+        $(CURDIR)/src/extended/*.c \
         $(CURDIR)/src/tools/*.c
 
-EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
-         ${CURDIR}/src/libgtmatch/sfx-opt.c\
-         ${CURDIR}/src/libgtmatch/sfx-run.c\
-         ${CURDIR}/src/libgtmatch/encseq-specialsrank.c
+EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}\
+         ${CURDIR}/src/match/sfx-opt.c\
+         ${CURDIR}/src/match/sfx-run.c\
+         ${CURDIR}/src/match/encseq-specialsrank.c
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
-	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/libgtmatch/*.c}}\
+	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${wildcard ${CURDIR}/src/libgtltr/*.c}\
-                                ${SKTOOLS}}}}
+                                ${SKTOOLS}}}}\
+     obj/redblack.splint
 
 scgt:
-	src_check src/libgtmatch/*
-	src_check src/libgtltr/*
+	src_check src/match/*
+	src_check src/ltr/*
 	src_check src/tools/*
 
 splintclean:
 	find obj -name '*.splint' | xargs rm -f
 
-obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
+obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
@@ -838,12 +860,17 @@ obj/%.splint: ${CURDIR}/src/tools/%.c
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
-obj/%.splint: ${CURDIR}/src/libgtltr/%.c
+obj/%.splint: ${CURDIR}/src/ltr/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
-obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
+obj/%.splint: ${CURDIR}/src/extended/%.c
+	@echo "splint $<"
+	@splint -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.prepro: ${CURDIR}/src/match/%.c
 	@echo "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
@@ -863,6 +890,9 @@ clean:
 	rm -rf $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h $(SQUID_DIR)/squid.h
 	rm -rf obj
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
+
+gtkviewer:
+	$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) `pkg-config --cflags --libs gtk+-2.0 glib` -lgenometools src/examples/gtkviewer.c
 
 cleanup: clean
 	rm -rf lib bin

@@ -16,13 +16,13 @@
 */
 
 #include <string.h>
-#include "libgtcore/alpha.h"
-#include "libgtcore/error.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/option.h"
-#include "libgtcore/score_matrix.h"
-#include "libgtcore/unused.h"
-#include "libgtext/blast_env.h"
+#include "core/alpha.h"
+#include "core/error.h"
+#include "core/ma.h"
+#include "core/option.h"
+#include "core/score_matrix.h"
+#include "core/unused_api.h"
+#include "extended/blast_env.h"
 #include "tools/gt_blastenv.h"
 
 typedef struct {
@@ -32,81 +32,82 @@ typedef struct {
 
 static void* gt_blastenv_arguments_new(void)
 {
-  return ma_malloc(sizeof (ScorefastaArguments));
+  return gt_malloc(sizeof (ScorefastaArguments));
 }
 
 static void gt_blastenv_arguments_delete(void *tool_arguments)
 {
   ScorefastaArguments *arguments = tool_arguments;
   if (!arguments) return;
-  ma_free(arguments);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
 {
   ScorefastaArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *o;
+  GtOptionParser *op;
+  GtOption *o;
   assert(arguments);
-  op = option_parser_new("[option ...] scorematrix_file w",
+  op = gt_option_parser_new("[option ...] scorematrix_file w",
                          "Show the BlastP environment for sequence w (using "
                          "the given scormatrix_file).");
-  o = option_new_ulong_min("q", "set q-gram length", &arguments->q, 4, 1);
-  option_parser_add_option(op, o);
-  o = option_new_ulong_min("k", "set minimum score", &arguments->k, 3, 1);
-  option_parser_add_option(op, o);
-  option_parser_set_min_max_args(op, 2, 2);
+  o = gt_option_new_ulong_min("q", "set q-gram length", &arguments->q, 4, 1);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_ulong_min("k", "set minimum score", &arguments->k, 3, 1);
+  gt_option_parser_add_option(op, o);
+  gt_option_parser_set_min_max_args(op, 2, 2);
   return op;
 }
 
-static int gt_blastenv_runner(UNUSED int argc, const char **argv,
+static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
                               int parsed_args, void *tool_arguments,
-                              Error *err)
+                              GtError *err)
 {
   ScorefastaArguments *arguments = tool_arguments;
-  ScoreMatrix *score_matrix;
-  BlastEnv *blast_env = NULL;
+  GtScoreMatrix *score_matrix;
+  GtBlastEnv *blast_env = NULL;
   unsigned long wlen;
   char *w = NULL;
-  Alpha *alpha = NULL;
+  GtAlpha *alpha = NULL;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
-  if (!(score_matrix = score_matrix_new_read_protein(argv[parsed_args], err)))
+  score_matrix = gt_score_matrix_new_read_protein(argv[parsed_args], err);
+  if (!score_matrix)
     had_err = -1;
 
   if (!had_err) {
     /* store query sequence w */
     wlen = strlen(argv[parsed_args+1]);
-    w = ma_malloc(wlen+1);
+    w = gt_malloc(wlen+1);
     strcpy(w, argv[parsed_args+1]);
 
     /* assign protein alphabet */
-    alpha = alpha_new_protein();
+    alpha = gt_alpha_new_protein();
 
     /* transform w according to protein alphabet */
-    alpha_encode_seq(alpha, w, w, wlen);
+    gt_alpha_encode_seq(alpha, w, w, wlen);
 
     /* construct and show BlastP environment */
-    blast_env = blast_env_new(w, wlen, alpha, arguments->q, arguments->k,
-                              score_matrix);
-    blast_env_show(blast_env);
+    blast_env = gt_blast_env_new(w, wlen, alpha, arguments->q, arguments->k,
+                                 score_matrix);
+    gt_blast_env_show(blast_env);
   }
 
   /* free space */
-  blast_env_delete(blast_env);
-  score_matrix_delete(score_matrix);
-  alpha_delete(alpha);
-  ma_free(w);
+  gt_blast_env_delete(blast_env);
+  gt_score_matrix_delete(score_matrix);
+  gt_alpha_delete(alpha);
+  gt_free(w);
 
   return had_err;
 }
 
-Tool* gt_blastenv(void)
+GtTool* gt_blastenv(void)
 {
-  return tool_new(gt_blastenv_arguments_new,
+  return gt_tool_new(gt_blastenv_arguments_new,
                   gt_blastenv_arguments_delete,
                   gt_blastenv_option_parser_new,
                   NULL,

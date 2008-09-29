@@ -1,4 +1,4 @@
 ##gff-version   3
-##sequence-region   chr7 115404472 4110371766
+##sequence-region   chr7 115404472 2110371766
 chr7	gth	gene	115422568	117114462	0.766	+	.	.
 chr7	gth	gene	115422568	117114462	0.771	+	.	.

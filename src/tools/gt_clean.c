@@ -15,42 +15,44 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/bioseq.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtcore/xposix.h"
+#include "core/bioseq.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "core/xposix.h"
 #include "tools/gt_clean.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("", "Remove all files in the current directory which "
-                         "are automatically created by gt.");
-  option_parser_set_max_args(op, 0);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_error_check(err);
+  op = gt_option_parser_new("",
+                            "Remove all files in the current directory which "
+                            "are automatically created by gt.");
+  gt_option_parser_set_max_args(op, 0);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
 static void remove_pattern_in_current_dir(const char *pattern)
 {
   char **files_to_remove;
-  Str *path;
+  GtStr *path;
   glob_t g;
 
-  path = str_new_cstr("./*");
-  str_append_cstr(path, pattern);
-  xglob(str_get(path), GLOB_NOCHECK, NULL, &g);
+  path = gt_str_new_cstr("./*");
+  gt_str_append_cstr(path, pattern);
+  gt_xglob(gt_str_get(path), GLOB_NOCHECK, NULL, &g);
 
   /* remove found files */
   if (g.gl_pathc) {
     files_to_remove = g.gl_pathv;
-    if (strcmp(*files_to_remove, str_get(path))) {
+    if (strcmp(*files_to_remove, gt_str_get(path))) {
       while (*files_to_remove) {
-        xunlink(*files_to_remove);
+        gt_xunlink(*files_to_remove);
         files_to_remove++;
       }
     }
@@ -58,13 +60,13 @@ static void remove_pattern_in_current_dir(const char *pattern)
 
   /* free */
   globfree(&g);
-  str_delete(path);
+  gt_str_delete(path);
 }
 
-int gt_clean(int argc, const char **argv, Error *err)
+int gt_clean(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {

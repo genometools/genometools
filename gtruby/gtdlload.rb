@@ -20,7 +20,7 @@ require 'dl/import'
 module GT
   # XXX: Does anybody have a better idea for this mess?
   def GT.gtdlload(basename)
-    if not $GT_SYTEM then
+    if not $GT_SYSTEM then
       $GT_SYSTEM=`uname -s`.chomp
     end
     if $GT_SYSTEM == "Darwin" then

@@ -1,8 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-int parseargsandcallmkfmindex(int argc,const char **argv,Error *err);
-
-#ifdef __cplusplus
-}
-#endif

@@ -18,8 +18,9 @@
 
 # make a new tags file
 ctags -w src/*.[ch]            \
-         src/libgtcore/*.[ch]  \
-         src/libgtext/*.[ch]   \
-         src/libgtltr/*.[ch]   \
-         src/libgtmatch/*.[ch] \
-         src/libgtview/*.[ch]  \
+         src/core/*.[ch]  \
+         src/extended/*.[ch]   \
+         src/ltr/*.[ch]   \
+         src/match/*.[ch] \
+         src/mgth/*.[ch] \
+         src/annotationsketch/*.[ch]

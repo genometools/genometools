@@ -16,32 +16,33 @@
 */
 
 #include <string.h>
-#include "libgtcore/array2dim.h"
-#include "libgtcore/option.h"
-#include "libgtcore/versionfunc.h"
-#include "libgtext/multilcp.h"
+#include "core/array2dim.h"
+#include "core/option.h"
+#include "core/versionfunc.h"
+#include "extended/multilcp.h"
 #include "tools/gt_multilcp.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Error *err)
+                            GtError *err)
 {
-  OptionParser *op;
+  GtOptionParser *op;
   OPrval oprval;
-  error_check(err);
-  op = option_parser_new("[option ...] seq1 seq2",
+  gt_error_check(err);
+  op = gt_option_parser_new("[option ...] seq1 seq2",
                          "Compute lcp lengths of seq1 and seq2 in "
                          "O(|seq1|*|seq2|) time and show them.");
-  option_parser_set_min_max_args(op, 2, 2);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_delete(op);
+  gt_option_parser_set_min_max_args(op, 2, 2);
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
+                                  err);
+  gt_option_parser_delete(op);
   return oprval;
 }
 
-int gt_multilcp(int argc, const char **argv, Error *err)
+int gt_multilcp(int argc, const char **argv, GtError *err)
 {
   const char *seq1, *seq2;
   int parsed_args, len1, len2, **multilcptab;
-  error_check(err);
+  gt_error_check(err);
 
   /* option parsing */
   switch (parse_options(&parsed_args, argc, argv, err)) {
@@ -56,12 +57,12 @@ int gt_multilcp(int argc, const char **argv, Error *err)
   len1 = strlen(seq1);
   len2 = strlen(seq2);
   if (len1 == 0 || len2 == 0) {
-    error_set(err, "sequence of length 0 not allowed");
+    gt_error_set(err, "sequence of length 0 not allowed");
     return -1;
   }
-  multilcptab = multilcp_compute(seq1, len1, seq2, len2);
-  multilcp_show(multilcptab, len1, len2);
-  array2dim_delete(multilcptab);
+  multilcptab = gt_multilcp_compute(seq1, len1, seq2, len2);
+  gt_multilcp_show(multilcptab, len1, len2);
+  gt_array2dim_delete(multilcptab);
 
   return 0;
 }

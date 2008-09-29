@@ -46,7 +46,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "lfs.h"
-#include "libgtcore/unused.h"
+#include "core/unused_api.h"
 
 /* Define 'strerror' for systems that do not implement it */
 #ifdef NO_STRERROR
@@ -218,7 +218,7 @@ static int lfs_g_setmode (lua_State *L, FILE *f, int arg) {
   }
 }
 #else
-static int lfs_g_setmode (lua_State *L, UNUSED FILE *f, UNUSED int arg) {
+static int lfs_g_setmode (lua_State *L, GT_UNUSED FILE *f, GT_UNUSED int arg) {
   lua_pushboolean(L, 0);
   lua_pushliteral(L, "setmode not supported on this platform");
   return 2;

@@ -23,12 +23,13 @@ DocVisitorHTML = {}
 
 local template_dir
 
-function DocVisitorHTML:new(template_path)
-  assert(template_path)
+function DocVisitorHTML:new(template_path, header)
+  assert(template_path and header)
   template_dir = template_path
   o = {}
   setmetatable(o, self)
   self.__index = self
+  o.header = header
   return o
 end
 
@@ -45,11 +46,18 @@ end
 local function codify(str)
   assert(str)
   local res = string.gsub(str, "<(.-)>", "<code>%1</code>")
-  return string.gsub(res, " ([%a_][%a%d_%.]-%(%))", " <code>%1</code>")
+  res = string.gsub(res, " ([%a_][%a%d_%.]-%(%))", " <code>%1</code>")
+  res = string.gsub(res, "___(.-)___", "<strong>%1</strong>")
+  return string.gsub(res, "__(.-)__", "<em>%1</em>")
+end
+
+local function paragraphify(str)
+  assert(str)
+  return string.gsub(str, "\n\n", "</p><p>")
 end
 
 function DocVisitorHTML:show_header()
-  include("header.lp")
+  include(self.header)
 end
 
 function DocVisitorHTML:visit_classes(classes)
@@ -57,9 +65,25 @@ function DocVisitorHTML:visit_classes(classes)
   include("classes.lp", { classes = classes })
 end
 
-function DocVisitorHTML:visit_class(classname)
+function DocVisitorHTML:visit_modules(modules)
+  assert(modules)
+  include("modules.lp", { modules = modules })
+end
+
+function DocVisitorHTML:visit_class(classname, comments)
   assert(classname)
   include("class.lp", { classname = classname })
+  if comments then
+    for i, _ in ipairs(comments) do
+      comments[i] = paragraphify(codify(comments[i]))
+    end
+  include("class_comments.lp", { comments = comments })
+  end
+end
+
+function DocVisitorHTML:visit_module(modulename)
+  assert(modulename)
+  include("module.lp", { modulename = modulename })
 end
 
 local sole_function_visited = false
@@ -74,8 +98,26 @@ end
 
 function DocVisitorHTML:visit_method(desc)
   assert(desc)
-  include("method.lp", { name = desc.name, args = desc.args,
-                         comment = codify(desc.comment) })
+  local name
+  local prototype = desc.name
+  if desc.rval then
+    name = desc.rval .. " " .. desc.name
+  else
+    name = desc.rval
+  end
+  include("method.lp", { name = name, args = desc.args,
+                         comment = codify(desc.comment),
+                         prototype = prototype })
+end
+
+function DocVisitorHTML:visit_funcdef(desc)
+  assert(desc)
+  include("funcdef.lp", { name = desc.name, comment = codify(desc.comment) })
+end
+
+function DocVisitorHTML:visit_index(names)
+  assert(names)
+  include("index.lp", { names = names })
 end
 
 function DocVisitorHTML:show_footer()

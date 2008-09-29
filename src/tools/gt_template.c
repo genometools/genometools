@@ -15,19 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/ma.h"
-#include "libgtcore/unused.h"
+#include "core/ma.h"
+#include "core/unused_api.h"
 #include "tools/gt_template.h"
 
 typedef struct {
   bool bool_option_template;
-  Str  *str_option_template;
+  GtStr  *str_option_template;
 } TemplateArguments;
 
 static void* gt_template_arguments_new(void)
 {
-  TemplateArguments *arguments = ma_calloc(1, sizeof *arguments);
-  arguments->str_option_template = str_new();
+  TemplateArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->str_option_template = gt_str_new();
   return arguments;
 }
 
@@ -35,57 +35,58 @@ static void gt_template_arguments_delete(void *tool_arguments)
 {
   TemplateArguments *arguments = tool_arguments;
   if (!arguments) return;
-  str_delete(arguments->str_option_template);
-  ma_free(arguments);
+  gt_str_delete(arguments->str_option_template);
+  gt_free(arguments);
 }
 
-static OptionParser* gt_template_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_template_option_parser_new(void *tool_arguments)
 {
   TemplateArguments *arguments = tool_arguments;
-  OptionParser *op;
-  Option *option;
+  GtOptionParser *op;
+  GtOption *option;
   assert(arguments);
 
   /* init */
-  op = option_parser_new("[option ...] [file]", /* XXX */
+  op = gt_option_parser_new("[option ...] [file]", /* XXX */
                          "DESCRIBE YOUR TOOL IN ONE LINE HERE."); /* XXX */
 
   /* -bool */
-  option = option_new_bool("bool", "bool option template",
+  option = gt_option_new_bool("bool", "bool option template",
                            &arguments->bool_option_template, false);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   /* -str */
-  option = option_new_string("str", "str option template",
+  option = gt_option_new_string("str", "str option template",
                              arguments->str_option_template, NULL);
-  option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, option);
 
   return op;
 }
 
-static int gt_template_arguments_check(UNUSED int rest_argc,
-                                       void *tool_arguments, UNUSED Error *err)
+static int gt_template_arguments_check(GT_UNUSED int rest_argc,
+                                       void *tool_arguments,
+                                       GT_UNUSED GtError *err)
 {
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* XXX: do some checking after the option have been parsed (usally this is not
      necessary and this function can be removed completely). */
-  if (str_length(arguments->str_option_template))
-    printf("%s\n", str_get(arguments->str_option_template));
+  if (gt_str_length(arguments->str_option_template))
+    printf("%s\n", gt_str_get(arguments->str_option_template));
 
   return had_err;
 }
 
 static int gt_template_runner(int argc, const char **argv, int parsed_args,
-                              void *tool_arguments, UNUSED Error *err)
+                              void *tool_arguments, GT_UNUSED GtError *err)
 {
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;
 
-  error_check(err);
+  gt_error_check(err);
   assert(arguments);
 
   /* XXX */
@@ -96,9 +97,9 @@ static int gt_template_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-Tool* gt_template(void)
+GtTool* gt_template(void)
 {
-  return tool_new(gt_template_arguments_new,
+  return gt_tool_new(gt_template_arguments_new,
                   gt_template_arguments_delete,
                   gt_template_option_parser_new,
                   gt_template_arguments_check,
