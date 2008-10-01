@@ -1,9 +1,5 @@
-<<<<<<< HEAD:doc/manuals/Makefile
-ALL=ltrharvestman.pdf\
-    ltrdigestman.pdf\
-=======
 ALL=ltrharvest.pdf\
->>>>>>> master:doc/manuals/Makefile
+    ltrdigest.pdf\
     uniquesub.pdf\
     matstat.pdf\
     mgth.pdf\
