@@ -213,7 +213,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
   Multieop meop;
-  gt_assert(a && gt_alignment_is_valid(a));
+  assert(a && gt_alignment_is_valid(a));
   /* output first line */
   uctr = 0;
   for (i = gt_array_size(a->eops); i > 0; i--) {
@@ -222,7 +222,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
       case Replacement:
       case Deletion:
         for (j = 0; j < meop.steps; j++)
-          gt_xfputc(a->u[uctr++], fp);
+          gt_xfputc(a->u[a->urange.start + uctr++], fp);
         break;
       case Insertion:
         for (j = 0; j < meop.steps; j++)
@@ -238,7 +238,8 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (a->u[uctr++] == a->v[vctr++])
+          if (tolower(a->u[a->urange.start + uctr++])
+                == tolower(a->v[a->vrange.start + vctr++]))
             gt_xfputc(MATCHSYMBOL, fp);
           else
             gt_xfputc(MISMATCHSYMBOL, fp);
@@ -267,7 +268,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
       case Replacement:
       case Insertion:
         for (j = 0; j < meop.steps; j++)
-          gt_xfputc(a->v[vctr++], fp);
+          gt_xfputc(a->v[a->vrange.start + vctr++], fp);
         break;
       case Deletion:
         for (j = 0; j < meop.steps; j++)
