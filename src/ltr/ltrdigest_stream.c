@@ -235,7 +235,7 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
 }
 
 int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
-                                  GtError *e)
+                             GtError *e)
 {
   GtLTRdigestStream *ls;
   int had_err;
@@ -250,8 +250,12 @@ int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   had_err = gt_node_stream_next(ls->in_stream, gn, e);
   if (!had_err && *gn)
   {
-    GtGenomeNodeIterator* gni;
+    GtGenomeNodeIterator *gni;
     GtGenomeNode *mygn;
+
+   if (!gt_feature_node_try_cast(*gn))
+     return 0;
+
     /* fill LTRElement structure from GFF3 subgraph */
     gni = gt_genome_node_iterator_new(*gn);
     for (mygn = *gn; mygn; mygn = gt_genome_node_iterator_next(gni))
