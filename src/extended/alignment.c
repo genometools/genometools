@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/ensure.h"
@@ -31,6 +32,8 @@ struct GtAlignment {
              *v;
   unsigned long ulen,
                 vlen;
+  GtRange urange,
+         vrange;
   GtArray *eops;
 };
 
@@ -56,23 +59,45 @@ GtAlignment* gt_alignment_new(void)
 }
 
 GtAlignment* gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                   const char *v, unsigned long vlen)
+                                        const char *v, unsigned long vlen)
 {
   GtAlignment *a;
-  gt_assert(u && v);
+  GtRange urange, vrange;
+  assert(u && v);
+  urange.start = vrange.start = 0;
+  urange.end = ulen-1;
+  vrange.end = vlen-1;
   a = gt_alignment_new();
-  gt_alignment_set_seqs(a, u, ulen, v, vlen);
+  gt_alignment_set_seqs(a, u, ulen, urange, v, vlen, vrange);
   return a;
 }
 
+
 void gt_alignment_set_seqs(GtAlignment *a, const char *u, unsigned long ulen,
-                        const char *v, unsigned long vlen)
+                           GtRange urange, const char *v, unsigned long vlen,
+                           GtRange vrange)
 {
-  gt_assert(a && u && v);
+  assert(a && u && v);
   a->u = u;
   a->v = v;
   a->ulen = ulen;
   a->vlen = vlen;
+  a->urange.start = urange.start;
+  a->urange.end   = urange.end;
+  a->vrange.start = vrange.start;
+  a->vrange.end   = vrange.end;
+}
+
+GtRange gt_alignment_get_urange(GtAlignment *a)
+{
+  assert(a);
+  return a->urange;
+}
+
+GtRange gt_alignment_get_vrange(GtAlignment *a)
+{
+  assert(a);
+  return a->vrange;
 }
 
 static void gt_alignment_add_eop(GtAlignment *a, Eoptype type)
@@ -154,13 +179,14 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
 {
   unsigned long i, j, uctr = 0, vctr = 0, sumcost = 0;
   Multieop meop;
-  gt_assert(a && gt_alignment_is_valid(a));
+  assert(a && gt_alignment_is_valid(a));
   for (i = gt_array_size(a->eops); i > 0; i--) {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (a->u[uctr] != a->v[vctr])
+          if (tolower(a->u[a->urange.start + uctr])
+                != tolower(a->v[a->vrange.start + vctr]))
             sumcost++;
           uctr++;
           vctr++;
@@ -182,7 +208,6 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
   }
   return sumcost;
 }
-
 /* XXX: add width parameter and format the GtAlignment accordingly */
 void gt_alignment_show(const GtAlignment *a, FILE *fp)
 {

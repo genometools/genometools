@@ -95,6 +95,7 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
 {
   gt_assert(u_orig && v_orig && u_enc && v_enc && u_len && v_len && scores);
   Coordinate alignment_start, alignment_end = { UNDEF_ULONG, UNDEF_ULONG };
+  GtRange urange, vrange;
   DPentry **dptable;
   GtAlignment *a = NULL;
   gt_array2dim_calloc(dptable, u_len+1, v_len+1);
@@ -107,22 +108,24 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
     a = gt_alignment_new();
     alignment_start = traceback(a, dptable, alignment_end.x, alignment_end.y);
     /* transform the positions in the DP matrix to sequence positions */
-    alignment_start.x--;
-    alignment_start.y--;
-    alignment_end.x--;
-    alignment_end.y--;
+    urange.start = --alignment_start.x;
+    vrange.start = --alignment_start.y;
+    urange.end = --alignment_end.x;
+    vrange.end = --alignment_end.y;
     /* employ sequence positions to set alignment sequences */
     gt_alignment_set_seqs(a,
-                       u_orig + alignment_start.x,
-                       alignment_end.x - alignment_start.x + 1,
-                       v_orig + alignment_start.y,
-                       alignment_end.y - alignment_start.y + 1);
+                          u_orig,
+                          urange.end - urange.start + 1,
+                          urange,
+                          v_orig,
+                          vrange.end - vrange.start + 1,
+                          vrange);
   }
   gt_array2dim_delete(dptable);
   return a;
 }
 
-GtAlignment* gt_swalign(GtSeq *u, GtSeq *v, const GT_ScoreFunction *sf)
+GtAlignment* gt_swalign(GtSeq *u, GtSeq *v, const GtScoreFunction *sf)
 {
   gt_assert(u && v && sf);
   return smith_waterman_align(gt_seq_get_orig(u), gt_seq_get_orig(v),

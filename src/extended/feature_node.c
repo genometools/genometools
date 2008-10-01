@@ -147,6 +147,15 @@ void gt_feature_node_set_phase(GtGenomeNode *gn, Phase phase)
   fn->bit_field |= phase << PHASE_OFFSET;
 }
 
+void gt_feature_node_set_strand(GtGenomeNode *gn, GtStrand strand)
+{
+  GtFeatureNode *fn;
+  gt_assert(gn);
+  fn = gt_feature_node_cast(gn); /* XXX */
+  fn->bit_field &= ~(STRAND_MASK << STRAND_OFFSET);
+  fn->bit_field |= strand << STRAND_OFFSET;
+}
+
 static int gt_feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
                                   GtError *err)
 {

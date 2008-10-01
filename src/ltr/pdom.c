@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,15 +21,15 @@
 #include <ctype.h>
 #include <float.h>
 #include <pthread.h>
-#include "libgtcore/codon.h"
-#include "libgtcore/log.h"
-#include "libgtcore/ma.h"
-#include "libgtcore/mathsupport.h"
-#include "libgtcore/translate.h"
-#include "libgtcore/unused.h"
-#include "libgtext/globalchaining.h"
-#include "libgtext/reverse.h"
-#include "libgtltr/pdom.h"
+#include "core/codon.h"
+#include "core/log.h"
+#include "core/ma.h"
+#include "core/mathsupport.h"
+#include "core/translate.h"
+#include "core/unused_api.h"
+#include "extended/globalchaining.h"
+#include "extended/reverse.h"
+#include "ltr/pdom.h"
 
 /* HMMER related includes */
 #include "globals.h"
@@ -40,15 +40,15 @@ typedef struct pdom_shared {
   pthread_t *thread;
   int nof_threads;
   unsigned long next_hmm;
-  Array *hmms;
+  GtArray *hmms;
   char *fwd_fr1, *fwd_fr2, *fwd_fr3,
        *rev_fr1, *rev_fr2, *rev_fr3;
-  PdomResults *results;
-  PdomOptions *opts;
+  GtPdomResults *results;
+  GtPdomOptions *opts;
   pthread_mutex_t in_lock, out_lock;
 } pdom_shared_s;
 
-void hmmer_search(struct plan7_s *hmm,
+void gt_hmmer_search(struct plan7_s *hmm,
                   char *seq,
                   unsigned long seqlen,
                   char *seqdesc,
@@ -100,46 +100,46 @@ void hmmer_search(struct plan7_s *hmm,
   FreePlan7Matrix(mx);
 }
 
-void pdom_convert_frame_position(Range *rng, int frame)
+void gt_pdom_convert_frame_position(GtRange *rng, int frame)
 {
-  rng->start = (rng->start - 1)*CODONLENGTH + frame;
-  rng->end   = (rng->end   - 1)*CODONLENGTH + frame;
+  rng->start = (rng->start - 1)*GT_CODON_LENGTH + frame;
+  rng->end   = (rng->end   - 1)*GT_CODON_LENGTH + frame;
 }
 
-int pdom_load_hmm_files(PdomOptions *opts, Error *err)
+int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
 {
   unsigned long i;
   int had_err = 0;
 
   assert(opts && err);
 
-  for (i=0;i<strarray_size(opts->hmm_files);i++)
+  for (i=0;i<gt_str_array_size(opts->hmm_files);i++)
   {
     struct plan7_s *hmm;
     HMMFILE *hmmfp;
-    char *hmmfile = (char*) strarray_get(opts->hmm_files, i);
+    char *hmmfile = (char*) gt_str_array_get(opts->hmm_files, i);
     if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
     {
-      error_set(err, "Failed to open HMM file '%s'", hmmfile);
+      gt_error_set(err, "Failed to open HMM file '%s'", hmmfile);
       had_err = -1;
       break;
     }
     if (!had_err && !HMMFileRead(hmmfp, &hmm))
     {
-      error_set(err, "Failed to read any HMMs from file '%s'", hmmfile);
+      gt_error_set(err, "Failed to read any HMMs from file '%s'", hmmfile);
       had_err = -1;
       break;
     }
     if (!had_err && hmm == NULL)
     {
       had_err = -1;
-      error_set(err, "HMM file '%s' corrupt or in incorrect format?", hmmfile);
+      gt_error_set(err, "HMM file '%s' corrupt or in incorrect format?", hmmfile);
       break;
     }
     if (!had_err)
     {
       P7Logoddsify(hmm, true);
-      array_add(opts->plan7_ts, hmm);
+      gt_array_add(opts->plan7_ts, hmm);
     }
     if (!SetAutocuts(&opts->thresh, hmm))
     {
@@ -150,30 +150,32 @@ int pdom_load_hmm_files(PdomOptions *opts, Error *err)
     }
     if (hmmfp) HMMFileClose(hmmfp);
   }
-  log_log("Loaded %lu HMM model(s)",
-          array_size(opts->plan7_ts));
+  gt_log_log("Loaded %lu HMM model(s)",
+          gt_array_size(opts->plan7_ts));
   return had_err;
 }
 
-static void chainproc(Chain *c, Fragment *f, void *data)
+static void chainproc(GtChain *c, Fragment *f, void *data)
 {
   unsigned long i;
-  PdomHit *hit;
-  hit = (PdomHit*) data;
+  GtPdomHit *hit;
+  hit = (GtPdomHit*) data;
 
-  log_log("resulting chain has %ld fragments, score %ld", chain_size(c),
-                                                          chain_get_score(c));
-  for (i=0;i<chain_size(c);i++)
+  gt_log_log("resulting chain has %ld fragments, score %ld",
+             gt_chain_size(c),
+             gt_chain_get_score(c));
+  for (i=0;i<gt_chain_size(c);i++)
   {
-    Fragment frag = f[chain_get_fragnum(c, i)];
-    log_log("(%lu %lu) (%lu %lu), %p", frag.startpos1, frag.endpos1,
-                                       frag.startpos2, frag.endpos2, frag.data);
-    array_add(hit->best_chain, frag.data);
+    Fragment frag = f[gt_chain_get_fragnum(c, i)];
+    gt_log_log("(%lu %lu) (%lu %lu), %p", frag.startpos1, frag.endpos1,
+                                          frag.startpos2, frag.endpos2,
+                                          frag.data);
+    gt_array_add(hit->best_chain, frag.data);
   }
-  log_log("\n");
+  gt_log_log("\n");
 }
 
-static int fragcmp(const void *frag1, const void *frag2)
+static int gt_fragcmp(const void *frag1, const void *frag2)
 {
   Fragment *f1 = (Fragment*) frag1;
   Fragment *f2 = (Fragment*) frag2;
@@ -182,7 +184,7 @@ static int fragcmp(const void *frag1, const void *frag2)
   else return (f1->startpos2 < f2->startpos2 ? -1 : 1);
 }
 
-void* pdom_per_domain_worker_thread(void *data)
+void* gt_pdom_per_domain_worker_thread(void *data)
 {
   pdom_shared_s *shared;
   struct plan7_s *hmm;
@@ -191,7 +193,7 @@ void* pdom_per_domain_worker_thread(void *data)
   bool best_fwd = TRUE;
   unsigned long i;
   Fragment *frags;
-  PdomHit *hit;
+  GtPdomHit *hit;
 
   shared = (pdom_shared_s *) data;
 
@@ -204,7 +206,7 @@ void* pdom_per_domain_worker_thread(void *data)
       exit(EXIT_FAILURE);
     }
     /* Have all HMMs been distributed? If so, we are done here. */
-    if (shared->next_hmm == array_size(shared->opts->plan7_ts))
+    if (shared->next_hmm == gt_array_size(shared->opts->plan7_ts))
     {
       if ((rtn = pthread_mutex_unlock(&shared->in_lock)) != 0)
       {
@@ -215,8 +217,8 @@ void* pdom_per_domain_worker_thread(void *data)
     }
 
     /* Get work from HMM list */
-    hmm = *(struct plan7_s**) array_get(shared->opts->plan7_ts,
-                                        shared->next_hmm);
+    hmm = *(struct plan7_s**) gt_array_get(shared->opts->plan7_ts,
+                                           shared->next_hmm);
     shared->next_hmm++;
 
     /* work claimed, release input */
@@ -226,23 +228,23 @@ void* pdom_per_domain_worker_thread(void *data)
       exit(EXIT_FAILURE);
     }
 
-    hit = ma_malloc(sizeof (PdomHit));
+    hit = gt_malloc(sizeof (GtPdomHit));
     ghit = AllocTophits(50);
     hit->hits_fwd = AllocTophits(50);
     hit->hits_rev = AllocTophits(50);
-    hit->best_chain = array_new(sizeof (struct hit_s*));
+    hit->best_chain = gt_array_new(sizeof (struct hit_s*));
 
-    hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
+    gt_hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
                  &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
-    hmmer_search(hmm,shared->fwd_fr2,strlen(shared->fwd_fr2),"1+",
+    gt_hmmer_search(hmm,shared->fwd_fr2,strlen(shared->fwd_fr2),"1+",
                  &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
-    hmmer_search(hmm,shared->fwd_fr3,strlen(shared->fwd_fr3),"2+",
+    gt_hmmer_search(hmm,shared->fwd_fr3,strlen(shared->fwd_fr3),"2+",
                  &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
-    hmmer_search(hmm,shared->rev_fr1,strlen(shared->rev_fr1),"0-",
+    gt_hmmer_search(hmm,shared->rev_fr1,strlen(shared->rev_fr1),"0-",
                  &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
-    hmmer_search(hmm,shared->rev_fr2,strlen(shared->rev_fr2),"1-",
+    gt_hmmer_search(hmm,shared->rev_fr2,strlen(shared->rev_fr2),"1-",
                  &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
-    hmmer_search(hmm,shared->rev_fr3,strlen(shared->rev_fr3),"2-",
+    gt_hmmer_search(hmm,shared->rev_fr3,strlen(shared->rev_fr3),"2-",
                  &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
 
     FullSortTophits(hit->hits_fwd);
@@ -256,8 +258,8 @@ void* pdom_per_domain_worker_thread(void *data)
       {
         if (hit->hits_rev->num > 0)
         {
-          if (double_compare(hit->hits_fwd->hit[0]->score,
-                             hit->hits_rev->hit[0]->score) < 0)
+          if (gt_double_compare(hit->hits_fwd->hit[0]->score,
+                                hit->hits_rev->hit[0]->score) < 0)
             best_fwd = FALSE;
         }
         else best_fwd = TRUE;
@@ -272,7 +274,7 @@ void* pdom_per_domain_worker_thread(void *data)
       if (hits->num > 1)
       {
         /* create fragment set for chaining */
-        frags = (Fragment*) ma_calloc(hits->num, sizeof (Fragment));
+        frags = (Fragment*) gt_calloc(hits->num, sizeof (Fragment));
         for (i=0;i<hits->num;i++)
         {
           frags[i].startpos1 = hits->hit[i]->hmmfrom;
@@ -286,25 +288,25 @@ void* pdom_per_domain_worker_thread(void *data)
         }
 
         /* sort fragments by position */
-        qsort(frags, hits->num, sizeof (Fragment), fragcmp);
+        qsort(frags, hits->num, sizeof (Fragment), gt_fragcmp);
         for (i=0;i<hits->num;i++)
         {
-          log_log("(%lu %lu) (%lu %lu) %p", frags[i].startpos1,
-                                         frags[i].endpos1,
-                                         frags[i].startpos2,
-                                         frags[i].endpos2,
-                                         frags[i].data);
+          gt_log_log("(%lu %lu) (%lu %lu) %p", frags[i].startpos1,
+                                               frags[i].endpos1,
+                                               frags[i].startpos2,
+                                               frags[i].endpos2,
+                                               frags[i].data);
         }
-        log_log("chaining %d frags", hits->num);
+        gt_log_log("chaining %d frags", hits->num);
         /* do chaining */
-        globalchaining_max(frags, hits->num,
-                           shared->opts->chain_max_gap_length,
-                           chainproc, hit);
-        ma_free(frags);
+        gt_globalchaining_max(frags, hits->num,
+                              shared->opts->chain_max_gap_length,
+                              chainproc, hit);
+        gt_free(frags);
       }
       else
       {
-        array_add(hit->best_chain, hits->hit[0]);
+        gt_array_add(hit->best_chain, hits->hit[0]);
       }
 
       /* Lock results, we want to write to the result hashtable */
@@ -315,18 +317,18 @@ void* pdom_per_domain_worker_thread(void *data)
       }
 
       /* register results */
-      hashtable_add(shared->results->domains, hmm, hit);
+      gt_hashmap_add(shared->results->domains, hmm, hit);
       if (best_fwd)
       {
         shared->results->combined_e_value_fwd
           += log(hit->hits_fwd->hit[0]->pvalue);
-        hit->strand = STRAND_FORWARD;
+        hit->strand = GT_STRAND_FORWARD;
       }
       else
       {
         shared->results->combined_e_value_rev
           += log(hit->hits_rev->hit[0]->pvalue);
-        hit->strand = STRAND_REVERSE;
+        hit->strand = GT_STRAND_REVERSE;
        }
 
       /* unlock results */
@@ -337,16 +339,19 @@ void* pdom_per_domain_worker_thread(void *data)
       }
     }
     else
-      pdom_clear_domain_hit(hit);
+      gt_pdom_clear_domain_hit(hit);
 
     FreeTophits(ghit);
   }
 }
 
-static pdom_shared_s* pdom_run_threads(Array *hmms, int nof_threads,
-                                  char *fwd_fr1,char *fwd_fr2,char *fwd_fr3,
-                                  char *rev_fr1,char *rev_fr2,char *rev_fr3,
-                                  PdomResults *results, PdomOptions *opts)
+static pdom_shared_s* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
+                                          char *fwd_fr1,char *fwd_fr2,
+                                            char *fwd_fr3,
+                                          char *rev_fr1,char *rev_fr2,
+                                            char *rev_fr3,
+                                          GtPdomResults *results,
+                                          GtPdomOptions *opts)
 {
   int rtn, i;
   pdom_shared_s *shared;
@@ -355,10 +360,10 @@ static pdom_shared_s* pdom_run_threads(Array *hmms, int nof_threads,
   assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
           && *rev_fr1 && rev_fr2 && rev_fr3 && results && opts);
 
-  shared = ma_malloc(sizeof (pdom_shared_s));
+  shared = gt_calloc(1, sizeof (pdom_shared_s));
 
   shared->nof_threads = nof_threads;
-  shared->thread = ma_malloc(sizeof (pthread_t) * nof_threads);
+  shared->thread = gt_calloc(nof_threads, sizeof (pthread_t));
   shared->hmms = hmms;
   shared->fwd_fr1 = fwd_fr1;
   shared->fwd_fr2 = fwd_fr2;
@@ -386,7 +391,7 @@ static pdom_shared_s* pdom_run_threads(Array *hmms, int nof_threads,
   for (i = 0; i < nof_threads; i++)
   {
     if ((rtn = pthread_create(&(shared->thread[i]), &attr,
-           pdom_per_domain_worker_thread, (void *) shared)) != 0)
+           gt_pdom_per_domain_worker_thread, (void *) shared)) != 0)
     {
       fprintf(stderr,"Failed to create thread %d, return code %d\n", i, rtn);
       exit(EXIT_FAILURE);
@@ -396,18 +401,18 @@ static pdom_shared_s* pdom_run_threads(Array *hmms, int nof_threads,
   return shared;
 }
 
-static void pdom_free_shared(pdom_shared_s *shared)
+static void gt_pdom_free_shared(pdom_shared_s *shared)
 {
-  ma_free(shared->thread);
-  ma_free(shared);
+  gt_free(shared->thread);
+  gt_free(shared);
 }
 
-void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
-               PdomResults *results, PdomOptions *opts)
+void gt_pdom_find(const char *seq, const char *rev_seq, GtLTRElement *element,
+                  GtPdomResults *results, GtPdomOptions *opts)
 {
   char *fwd_fr1, *fwd_fr2, *fwd_fr3,
        *rev_fr1, *rev_fr2, *rev_fr3;
-  unsigned long seqlen = ltrelement_length(element);
+  unsigned long seqlen = gt_ltrelement_length(element);
   pdom_shared_s *shared;
   int i;
 
@@ -417,14 +422,14 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
   results->combined_e_value_fwd = results->combined_e_value_rev = 0.0;
 
   /* create translations */
-  translate_all_frames(&fwd_fr1,&fwd_fr2,&fwd_fr3,    seq,seqlen);
-  translate_all_frames(&rev_fr1,&rev_fr2,&rev_fr3,rev_seq,seqlen);
+  gt_translate_all_frames(&fwd_fr1,&fwd_fr2,&fwd_fr3,    seq,seqlen);
+  gt_translate_all_frames(&rev_fr1,&rev_fr2,&rev_fr3,rev_seq,seqlen);
 
   /* start worker threads */
-  shared = pdom_run_threads(opts->plan7_ts, opts->nof_threads,
-                            fwd_fr1, fwd_fr2, fwd_fr3,
-                            rev_fr1, rev_fr2, rev_fr3,
-                            results, opts);
+  shared = gt_pdom_run_threads(opts->plan7_ts, opts->nof_threads,
+                               fwd_fr1, fwd_fr2, fwd_fr3,
+                               rev_fr1, rev_fr2, rev_fr3,
+                               results, opts);
 
   /* continue when all threads are done */
   for (i = 0; i < shared->nof_threads; i++)
@@ -436,36 +441,36 @@ void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
     }
   }
 
-  pdom_free_shared(shared);
+  gt_pdom_free_shared(shared);
 
   SqdClean();
-  ma_free(fwd_fr1);ma_free(fwd_fr2);ma_free(fwd_fr3);
-  ma_free(rev_fr1);ma_free(rev_fr2);ma_free(rev_fr3);
+  gt_free(fwd_fr1);gt_free(fwd_fr2);gt_free(fwd_fr3);
+  gt_free(rev_fr1);gt_free(rev_fr2);gt_free(rev_fr3);
 }
 
-void pdom_clear_domain_hit(void *value)
+void gt_pdom_clear_domain_hit(void *value)
 {
-  PdomHit *hit;
+  GtPdomHit *hit;
   if (!value) return;
-  hit = (PdomHit*) value;
+  hit = (GtPdomHit*) value;
   if (hit->hits_fwd)
     FreeTophits(hit->hits_fwd);
   if (hit->hits_rev)
     FreeTophits(hit->hits_rev);
   if (hit->best_chain)
-    array_delete(hit->best_chain);
-  ma_free(hit);
+    gt_array_delete(hit->best_chain);
+  gt_free(hit);
 }
 
-void pdom_clear_hmms(Array *hmms)
+void gt_pdom_clear_hmms(GtArray *hmms)
 {
   unsigned long i;
   if (!hmms) return;
-  for (i=0;i<array_size(hmms);i++)
+  for (i=0;i<gt_array_size(hmms);i++)
   {
-    FreePlan7(*(struct plan7_s**) array_get(hmms,i));
+    FreePlan7(*(struct plan7_s**) gt_array_get(hmms,i));
   }
-  array_delete(hmms);
+  gt_array_delete(hmms);
 }
 
 #endif

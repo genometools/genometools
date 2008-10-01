@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,41 +20,41 @@
 
 #ifdef HAVE_HMMER
 
-#include "libgtcore/array.h"
-#include "libgtcore/hashtable.h"
-#include "libgtcore/strand.h"
-#include "libgtcore/strarray.h"
-#include "libgtltr/ltrelement.h"
+#include "core/array.h"
+#include "core/hashmap.h"
+#include "core/strand.h"
+#include "core/str_array.h"
+#include "ltr/ltrelement.h"
 #include "structs.h"
 
-typedef struct PdomOptions {
+typedef struct GtPdomOptions {
   double evalue_cutoff;
-  StrArray *hmm_files;
-  Array *plan7_ts;
+  GtStrArray *hmm_files;
+  GtArray *plan7_ts;
   struct threshold_s thresh;
   unsigned int nof_threads,
                chain_max_gap_length;
-} PdomOptions;
+} GtPdomOptions;
 
-typedef struct PdomHit {
+typedef struct GtPdomHit {
   struct tophit_s *hits_fwd, *hits_rev;
-  Strand strand;
-  Array *best_chain;
-} PdomHit;
+  GtStrand strand;
+  GtArray *best_chain;
+} GtPdomHit;
 
-typedef struct PdomResults {
-  Hashtable *domains;
+typedef struct GtPdomResults {
+  GtHashmap *domains;
   double combined_e_value_fwd,
          combined_e_value_rev;
   bool empty;
-} PdomResults;
+} GtPdomResults;
 
-int  pdom_load_hmm_files(PdomOptions *opts, Error *err);
-void pdom_convert_frame_position(Range *rng, int frame);
-void pdom_find(const char *seq, const char *rev_seq, LTRElement *element,
-               PdomResults *results, PdomOptions *opts);
-void pdom_clear_hmms(Array*);
-void pdom_clear_domain_hit(void*);
+int  gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err);
+void gt_pdom_convert_frame_position(GtRange *rng, int frame);
+void gt_pdom_find(const char *seq, const char *rev_seq, GtLTRElement *element,
+                  GtPdomResults *results, GtPdomOptions *opts);
+void gt_pdom_clear_hmms(GtArray*);
+void gt_pdom_clear_domain_hit(void*);
 
 #endif
 #endif

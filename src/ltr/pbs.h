@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,55 +18,55 @@
 #ifndef PBS_H
 #define PBS_H
 
-#include "libgtcore/undef.h"
-#include "libgtcore/bioseq.h"
-#include "libgtcore/dlist.h"
-#include "libgtcore/seq.h"
-#include "libgtcore/strand.h"
-#include "libgtcore/score_function.h"
-#include "libgtext/alignment.h"
-#include "libgtltr/ltrelement.h"
+#include "core/undef.h"
+#include "core/bioseq.h"
+#include "core/dlist.h"
+#include "core/seq.h"
+#include "core/strand.h"
+#include "core/score_function.h"
+#include "extended/alignment.h"
+#include "ltr/ltrelement.h"
 
-typedef struct PBSOptions {
+typedef struct GtPBSOptions {
   unsigned int radius,
                max_edist;
-  Range alilen,
-        offsetlen,
-        trnaoffsetlen;
+  GtRange alilen,
+          offsetlen,
+          trnaoffsetlen;
   int ali_score_match,
       ali_score_mismatch,
       ali_score_insertion,
       ali_score_deletion;
-  Bioseq *trna_lib;
-} PBSOptions;
+  GtBioseq *trna_lib;
+} GtPBSOptions;
 
 /* This struct holds information about a primer binding site (PBS). */
-typedef struct PBS_Hit {
+typedef struct GtPBS_Hit {
   unsigned long start,
                 end,
                 edist,
                 offset,
                 tstart,
                 alilen;
-  Strand strand;
+  GtStrand strand;
   double score;
   const char *trna;
-} PBS_Hit;
+} GtPBS_Hit;
 
-typedef struct PBSResults {
-  Dlist *hits_fwd, *hits_rev;
-  PBS_Hit *best_hit;
-} PBSResults;
+typedef struct GtPBSResults {
+  GtDlist *hits_fwd, *hits_rev;
+  GtPBS_Hit *best_hit;
+} GtPBSResults;
 
 /* Aligns tRNA from a library to the LTR retrotransposon candidate and
    returns highest-scoring hit (newly created). */
-void  pbs_find(const char *seq,
-               const char *rev_seq,
-               LTRElement *element,
-               PBSResults *results,
-               PBSOptions *o,
-               Error *err);
+void  gt_pbs_find(const char *seq,
+                  const char *rev_seq,
+                  GtLTRElement *element,
+                  GtPBSResults *results,
+                  GtPBSOptions *o,
+                  GtError *err);
 
-void  pbs_clear_results(PBSResults *results);
+void  gt_pbs_clear_results(GtPBSResults *results);
 
 #endif

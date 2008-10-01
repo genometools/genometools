@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,13 +18,19 @@
 #ifndef LTR_VISITOR_H
 #define LTR_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
-typedef struct LTRVisitor LTRVisitor;
+/* implements the ``node visitor'' interface */
+typedef struct GtLTRVisitor GtLTRVisitor;
 
-#include "libgtext/genome_visitor.h"
-#include "libgtltr/ltrelement.h"
+#include "extended/node_visitor.h"
+#include "ltr/ltrelement.h"
 
-const GenomeVisitorClass* ltr_visitor_class(void);
-GenomeVisitor*            ltr_visitor_new(LTRElement *element);
+const GtNodeVisitorClass* gt_ltr_visitor_class(void);
+GtNodeVisitor*            gt_ltr_visitor_new(GtLTRElement *element);
+
+#define gt_ltr_visitor_cast(GV)\
+        gt_node_visitor_cast(gt_ltr_visitor_class(), GV)
+
+#define gt_ltr_visitor_try_cast(GV)\
+        gt_node_visitor_try_cast(gt_ltr_visitor_class(), GV)
 
 #endif

@@ -69,23 +69,6 @@ else
   SHARED:=-shared
 endif
 
-<<<<<<< HEAD:Makefile
-# the default GenomeTools libraries which are build
-GTLIBS:=lib/libgtexercise.a\
-        lib/libgtltr.a\
-        lib/libgtext.a\
-        lib/libgtmgth.a\
-        lib/libgtmatch.a\
-        lib/libgtcore.a\
-        lib/libgtlua.a\
-        lib/libexpat.a
-
-# the default GenomeThreader shared libraries which are build
-GTSHAREDLIBS:=lib/libgtcore$(SHARED_OBJ_NAME_EXT)\
-              lib/libgtext$(SHARED_OBJ_NAME_EXT)
-
-=======
->>>>>>> master:Makefile
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
 OVERRIDELIBS:=lib/libbz2.a
@@ -292,23 +275,6 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
-<<<<<<< HEAD:Makefile
-ifeq ($(with-hmmer),yes) 
-  GTLIBS := lib/libhmmer.a $(GTLIBS)
-  EXP_CPPFLAGS += -DHAVE_HMMER
-  GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) \
-                  -I$(CURDIR)/$(SQUID_DIR)
-  EXP_LDLIBS += -lhmmer -lpthread
-  STEST_FLAGS += -hmmer
-endif
-
-ifeq ($(libgtview),yes)
-  GTLIBS := $(GTLIBS) lib/libgtview.a
-  GTSHAREDLIB_OBJ := $(GTSHAREDLIB_OBJ) $(LIBGTVIEW_C_OBJ)
-  GTSHAREDLIB_LIBDEP := $(GTSHAREDLIB_LIBDEP) -lcairo
-  EXP_CPPFLAGS += -DLIBGTVIEW
-  GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
-=======
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/gtlua
@@ -318,11 +284,18 @@ LIBGTUNSTABLE_DIRS:=  src/exercise \
                       src/ltr \
                       src/mgth
 
+ifeq ($(with-hmmer),yes)
+  LIBGTUNSTABLE_DIRS := src/external/hmmer-2.3.2  $(LIBGTUNSTABLE_DIRS) 
+  EXP_CPPFLAGS += -DHAVE_HMMER
+  GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(SQUID_DIR)
+  EXP_LDLIBS += -lhmmer -lpthread
+  STEST_FLAGS += -hmmer
+endif
+
 ifneq ($(cairo),no)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lcairo
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo \
                  -I/opt/local/include/cairo
->>>>>>> master:Makefile
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libannotationsketch
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
@@ -345,13 +318,18 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
 
 # the GenomeTools unstable library
 LIBGTUNSTABLE_SRC:=$(foreach DIR,$(LIBGTUNSTABLE_DIRS),$(wildcard $(DIR)/*.c))
-LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
+LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o) 
 LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
+
+ifeq ($(with-hmmer),yes)
+  LIBGTUNSTABLE_OBJ := lib/libhmmer.a $(LIBGTUNSTABLE_OBJ)
+endif
 
 # set prefix for install target
 prefix ?= /usr/local
 
 all: lib/libgenometools.a lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
+     lib/libgtunstable.a  lib/libgtunstable$(SHARED_OBJ_NAME_EXT) \
      bin/skproto bin/gt bin/lua bin/rnv \
      bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
@@ -371,8 +349,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libhmmer.a: hmmer_get $(HMMER_DIR)/config.h.in $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h \
-           $(SQUID_DIR)/squid.h $(HMMER_OBJ)
+lib/libhmmer.a: hmmer_get $(HMMER_DIR)/config.h.in $(HMMER_DIR)/config.h $(SQUID_DIR)/squidconf.h $(SQUID_DIR)/squid.h $(HMMER_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(HMMER_OBJ)
@@ -402,60 +379,7 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h $(LIBGENOMETOOLS_OBJ)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	-o $@ $(GTSHAREDLIB_LIBDEP)
 
-<<<<<<< HEAD:Makefile
-lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtexercise.a: $(LIBGTEXERCISE_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTEXERCISE_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtmgth.a: $(LIBGTMGTH_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTMGTH_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTMATCH_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtltr.a: $(LIBGTLTR_OBJ)
-
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTLTR_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGTVIEW_C_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/libgtlua.a: $(LIBGTLUA_C_OBJ)
-=======
 lib/libgtunstable.a: $(LIBGTUNSTABLE_OBJ)
->>>>>>> master:Makefile
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTUNSTABLE_OBJ)
@@ -539,7 +463,6 @@ bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
-<<<<<<< HEAD:Makefile
 $(SQUID_DIR)/squidconf.h:
 	@echo '[create $(@F)]'
 	@scripts/generate_hmmer_squidconf_h $(SQUID_DIR)/squidconf.h.in > $@
@@ -559,10 +482,7 @@ $(HMMER_DIR)/config.h: $(HMMER_DIR)/config.h.in
 	      -e 's/#undef PACKAGE_COPYRIGHT/#define PACKAGE_COPYRIGHT "Copyright (C) 1992-2003 HHMI\/Washington University School of Medicine"/'\
 	      -e 's/#undef PACKAGE_LICENSE/#define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"/' $(HMMER_DIR)/config.h.in  > $@
           
-obj/gt_config.h:
-=======
 obj/gt_config.h: VERSION
->>>>>>> master:Makefile
 	@echo '[create $@]'
 	@test -d $(@D) || mkdir -p $(@D)
 	@(echo '#ifndef GT_CONFIG_H' ;\
@@ -689,10 +609,7 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 	 $(LIBRNV_DEP) \
 	 $(RNVMAIN_DEP) \
 	 $(LIBBZ2_DEP) \
-<<<<<<< HEAD:Makefile
          $(HMMER_DEP) \
-	 $(ZLIB_DEP)
-=======
 	 $(ZLIB_DEP) \
          $(LIBGENOMETOOLS_DEP) \
          $(LIBGTUNSTABLE_DEP) \
@@ -700,7 +617,6 @@ obj/src/core/versionfunc.o: obj/gt_config.h
          obj/src/examples/noop.d \
          obj/src/examples/sketch_constructed.d \
          obj/src/examples/sketch_parsed.d
->>>>>>> master:Makefile
 
 ifeq ($(libannotationsketch),yes)
 -include $(LIBANNOTATIONSKETCH_C_DEP) $(LIBANNOTATIONSKETCH_CXX_DEP)
@@ -708,11 +624,7 @@ endif
 
 .PRECIOUS: $(HMMER_DIR)/%.c $(SQUID_DIR)/%.c $(HMMER_DIR)/%.h.in $(SQUID_DIR)/%.h.in
 .SUFFIXES:
-<<<<<<< HEAD:Makefile
-.PHONY: dist srcdist release gt install docs installwww splint test clean cleanup hmmer_get
-=======
-.PHONY: dist srcdist release gt install docs manuals installwww splint test clean cleanup
->>>>>>> master:Makefile
+.PHONY: dist srcdist release gt install docs manuals installwww splint test clean cleanup hmmer_get
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"

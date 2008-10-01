@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,27 +18,27 @@
 #ifndef LTRDIGEST_STREAM_H
 #define LTRDIGEST_STREAM_H
 
-#include "libgtcore/bioseq.h"
-#include "libgtext/genome_stream.h"
-#include "libgtltr/pbs.h"
-#include "libgtltr/ppt.h"
+#include "core/bioseq.h"
+#include "extended/node_stream_api.h"
+#include "ltr/pbs.h"
+#include "ltr/ppt.h"
 #ifdef HAVE_HMMER
-#include "libgtltr/pdom.h"
+#include "ltr/pdom.h"
 #endif
 
-/* implements the ``genome_stream'' interface */
-typedef struct LTRdigestStream LTRdigestStream;
+/* implements the ``node stream'' interface */
+typedef struct GtLTRdigestStream GtLTRdigestStream;
 
-const GenomeStreamClass* ltrdigest_stream_class(void);
+const GtNodeStreamClass* gt_ltrdigest_stream_class(void);
 
-GenomeStream* ltrdigest_stream_new(GenomeStream *in_stream,
-                                   int tests_to_run,
-                                   Bioseq *bioseq,
-                                   PBSOptions *pbs_opts,
-                                   PPTOptions *ppt_opts
+GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
+                                      int tests_to_run,
+                                      GtBioseq *bioseq,
+                                      GtPBSOptions *pbs_opts,
+                                      GtPPTOptions *ppt_opts
 #ifdef HAVE_HMMER
-				   ,PdomOptions *pdom_opts
+           ,GtPdomOptions *pdom_opts
 #endif
-				   );
+           );
 
 #endif

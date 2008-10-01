@@ -56,8 +56,8 @@ typedef struct
   bool fastaoutputinnerregion;
   bool gff3output;       /* by default no gff3 output */
 
-  unsigned int minlengthTSD,  /* minlength of TSD, default */
-               maxlengthTSD;  /* maxlength of TSD, default */
+  unsigned int minlengthTSD,   /* minlength of TSD, default */
+               maxlengthTSD;   /* maxlength of TSD, default */
                                /* by default no search for TSDs */
   Seqpos vicinityforcorrectboundaries; /* vicinity for search of TSD and
                                           motif */

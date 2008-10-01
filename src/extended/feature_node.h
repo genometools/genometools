@@ -64,6 +64,7 @@ GtTranscriptFeatureType gt_feature_node_get_transcriptfeaturetype(
                                                              GtFeatureNode*);
 void                  gt_feature_node_set_source(GtFeatureNode*, GtStr *source);
 void                  gt_feature_node_set_phase(GtGenomeNode*, Phase);
+void                  gt_feature_node_set_strand(GtGenomeNode*, GtStrand);
 void                  gt_feature_node_set_end(GtFeatureNode*,
                                                 unsigned long);
 void                  gt_feature_node_set_score(GtFeatureNode*, float);

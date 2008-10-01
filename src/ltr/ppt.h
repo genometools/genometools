@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,37 +18,37 @@
 #ifndef PPT_H
 #define PPT_H
 
-#include "libgtcore/alpha.h"
-#include "libgtcore/range.h"
-#include "libgtcore/strand.h"
-#include "libgtcore/undef.h"
-#include "libgtext/hmm.h"
-#include "libgtltr/ltrelement.h"
+#include "core/alpha.h"
+#include "core/range.h"
+#include "core/strand.h"
+#include "core/undef.h"
+#include "extended/hmm.h"
+#include "ltr/ltrelement.h"
 
 typedef struct {
-  Range ppt_len, ubox_len;
+  GtRange ppt_len, ubox_len;
   unsigned int radius;
-} PPTOptions;
+} GtPPTOptions;
 
-typedef struct PPTHit PPTHit;
-typedef struct PPTResults PPTResults;
+typedef struct GtPPTHit GtPPTHit;
+typedef struct GtPPTResults GtPPTResults;
 
 /* Searches for PPTs in the given sequence. */
-PPTResults*   ppt_find(const char *seq,
-                       const char *rev_seq,
-                       LTRElement *element,
-                       PPTOptions*);
+GtPPTResults*   gt_ppt_find(const char *seq,
+                            const char *rev_seq,
+                            GtLTRElement *element,
+                            GtPPTOptions*);
 
 /* A PPT hit representation */
-Range         ppt_hit_get_coords(PPTHit*);
-PPTHit*       ppt_hit_get_ubox(PPTHit*);
-Strand        ppt_hit_get_strand(PPTHit*);
+GtRange         gt_ppt_hit_get_coords(GtPPTHit*);
+GtPPTHit*       gt_ppt_hit_get_ubox(GtPPTHit*);
+GtStrand        gt_ppt_hit_get_strand(GtPPTHit*);
 
 /* A collection of PPT hits */
-unsigned long ppt_results_get_number_of_hits(PPTResults*);
-PPTHit*       ppt_results_get_ranked_hit(PPTResults*, unsigned long);
-void          ppt_results_delete(PPTResults*);
+unsigned long   gt_ppt_results_get_number_of_hits(GtPPTResults*);
+GtPPTHit*       gt_ppt_results_get_ranked_hit(GtPPTResults*, unsigned long);
+void            gt_ppt_results_delete(GtPPTResults*);
 
-int           ppt_unit_test(Error*);
+int             gt_ppt_unit_test(GtError*);
 
 #endif

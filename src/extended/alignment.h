@@ -20,16 +20,20 @@
 
 #include <stdio.h>
 #include "core/error.h"
+#include "core/range.h"
 
 /* the GtAlignment class (an object has to be contructed backwards) */
 typedef struct GtAlignment GtAlignment;
 
-GtAlignment*    gt_alignment_new(void);
-GtAlignment*    gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                           const char *v, unsigned long vlen);
+GtAlignment*  gt_alignment_new(void);
+GtAlignment*  gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
+                                         const char *v, unsigned long vlen);
 void          gt_alignment_set_seqs(GtAlignment*, const char *u,
                                     unsigned long ulen,
-                                    const char *v, unsigned long vlen);
+                                    GtRange urange, const char *v,
+                                    unsigned long vlen, GtRange vrange);
+GtRange       gt_alignment_get_urange(GtAlignment*);
+GtRange       gt_alignment_get_vrange(GtAlignment*);
 void          gt_alignment_add_replacement(GtAlignment*);
 void          gt_alignment_add_deletion(GtAlignment*);
 void          gt_alignment_add_insertion(GtAlignment*);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,12 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_LTRDIGEST_H
-#define GT_LTRDIGEST_H
+#ifndef LTRDIGEST_DEF_H
+#define LTRDIGEST_DEF_H
 
-#include "libgtcore/tool.h"
+#include "ltr/pbs.h"
+#include "ltr/ppt.h"
+#include "ltr/pdom.h"
 
-/* the LTRdigest tool */
-Tool* gt_ltrdigest(void);
+enum LTRdigestRunScans {
+  LTRDIGEST_RUN_PPT  = 0x1,
+  LTRDIGEST_RUN_PBS  = 0x2,
+  LTRDIGEST_RUN_PDOM = 0x4
+};
 
 #endif
