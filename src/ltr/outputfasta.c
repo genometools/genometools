@@ -71,7 +71,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
 {
   Seqpos offset;
 
-  assert(width > 0);
+  gt_assert(width > 0);
   if (desc == NULL)
   {
     fprintf(fpout,">");

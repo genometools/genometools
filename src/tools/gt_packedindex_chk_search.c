@@ -188,9 +188,9 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
             abort();
           }
           numMatches = EMINumMatchesTotal(&EMIter);
-          assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen,
+          gt_assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen,
                                                 false));
-          assert(EMINumMatchesTotal(&EMIter) == countmmsearchiterator(mmsi));
+          gt_assert(EMINumMatchesTotal(&EMIter) == countmmsearchiterator(mmsi));
 /*        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n" */
 /*                "pattern: ", trial, numMatches); */
 /*        fprintfsymbolstring(stderr, suffixarray.alpha, pptr, */

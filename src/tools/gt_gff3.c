@@ -74,7 +74,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
          *offsetfile_option, *typecheck_option, *built_in_option, *option;
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
@@ -179,7 +179,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* create a gff3 input stream */
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
@@ -226,14 +226,14 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* create merge feature stream (if necessary) */
   if (!had_err && arguments->mergefeat) {
-    assert(sort_stream);
+    gt_assert(sort_stream);
     mergefeat_stream = gt_mergefeat_stream_sorted_new(sort_stream);
     last_stream = mergefeat_stream;
   }
 
   /* create addintrons stream (if necessary) */
   if (!had_err && arguments->addintrons) {
-    assert(last_stream);
+    gt_assert(last_stream);
     add_introns_stream = gt_add_introns_stream_new(last_stream);
     last_stream = add_introns_stream;
   }

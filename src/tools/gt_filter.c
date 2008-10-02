@@ -83,7 +83,7 @@ static GtOptionParser* gt_filter_option_parser_new(void *tool_arguments)
   FilterArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *contain_option, *overlap_option;
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
@@ -232,7 +232,7 @@ static int gt_filter_arguments_check(GT_UNUSED int rest_argc,
   FilterArguments *arguments = tool_arguments;
   int had_err;
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
   had_err = process_gt_strand_arg(arguments->gt_strand_char, &arguments->strand,
                                GT_STRAND_OPT, err);
   if (!had_err) {
@@ -253,7 +253,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   int had_err;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* create a gff3 input stream */
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,

@@ -74,7 +74,7 @@ int gt_clean(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
+  gt_assert(parsed_args == 1);
 
   /* remove GT_BIOSEQ_INDEX files */
   remove_pattern_in_current_dir(GT_BIOSEQ_INDEX);

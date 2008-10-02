@@ -53,7 +53,7 @@ int gt_translate(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
+  gt_assert(parsed_args == 1);
 
   /* translation */
   seq = argv[parsed_args];

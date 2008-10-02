@@ -54,7 +54,7 @@ static GtOptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
   ExtractTargetArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] -seqfile sequence_file GFF3_file",
@@ -82,7 +82,7 @@ typedef struct {
 static bool show_target(GT_UNUSED unsigned long pos, void *data)
 {
   TargetInfo *ti = data;
-  assert(ti);
+  gt_assert(ti);
   gt_fasta_show_entry(gt_bioseq_get_description(ti->bioseq, ti->seqnum),
                       gt_bioseq_get_sequence(ti->bioseq, ti->seqnum),
                       gt_bioseq_get_sequence_length(ti->bioseq, ti->seqnum), 0);
@@ -99,7 +99,7 @@ static int extracttarget_from_seqfiles(const char *target,
   unsigned long i;
   int had_err = 0;
   gt_error_check(err);
-  assert(target && seqfiles);
+  gt_assert(target && seqfiles);
   splitter = gt_splitter_new();
   unescaped_target = gt_str_new();
   escaped_target = gt_cstr_dup(target);
@@ -149,7 +149,7 @@ static int extracttarget_from_node(GtGenomeNode *gn, GtStrArray *seqfiles,
   GtGenomeNodeIterator *gni;
   int had_err = 0;
   gt_error_check(err);
-  assert(gn && seqfiles);
+  gt_assert(gn && seqfiles);
   if (gt_genome_node_cast(gt_feature_node_class(), gn)) {
     const char *target;
     GtFeatureNode *child;
@@ -174,7 +174,7 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
   int had_err;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(1, argv + parsed_args);
 

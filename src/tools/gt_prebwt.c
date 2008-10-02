@@ -53,7 +53,7 @@ static GtOptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *optionpck;
 
-  assert(arguments != NULL);
+  gt_assert(arguments != NULL);
   arguments->indexname = gt_str_new();
   op = gt_option_parser_new("[options] -pck indexname",
                          "Precompute bwt-bounds for some prefix length.");

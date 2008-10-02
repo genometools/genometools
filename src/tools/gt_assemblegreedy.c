@@ -45,7 +45,7 @@ static GtOptionParser* gt_assemblegreedy_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *showoverlaps_option, *showpath_option;
   AssemblegreedyArguments *arguments = tool_arguments;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] fragment_file",
                          "Assemble fragments given in fragment_file in greedy "
                          "fashion.");
@@ -76,7 +76,7 @@ static int gt_assemblegreedy_runner(GT_UNUSED int argc, const char **argv,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   fragments = gt_bioseq_new(argv[parsed_args], err);

@@ -45,7 +45,7 @@ static GtOptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
   GFF3ValidatorArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
@@ -71,7 +71,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* create a GFF3 input stream */
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,

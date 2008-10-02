@@ -158,7 +158,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                             suffixarray.suftab[idx],
                                             esr1,
                                             esr2);
-                assert(retval == 0 && maxlcp == (Seqpos) patternlen);
+                gt_assert(retval == 0 && maxlcp == (Seqpos) patternlen);
               }
             }
           }
@@ -169,7 +169,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                     multimappower,
                                     suffixarray.prefixlength,
                                     pptr);
-          assert(firstspecial == suffixarray.prefixlength);
+          gt_assert(firstspecial == suffixarray.prefixlength);
           calcbucketboundaries(&bucketspec,
                                suffixarray.bcktab,
                                code);
@@ -303,7 +303,7 @@ int gt_patternmatch(int argc, const char **argv, GtError *err)
   oprval = parse_options(&pmopt,&parsed_args, argc, argv, err);
   if (oprval == OPTIONPARSER_OK)
   {
-    assert(parsed_args == argc);
+    gt_assert(parsed_args == argc);
     if (callpatternmatcher(&pmopt,err) != 0)
     {
       haserr = true;

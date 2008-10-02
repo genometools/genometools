@@ -47,7 +47,7 @@ static GtOptionParser* gt_affinealign_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option;
   Costs *costs = tool_arguments;
-  assert(costs);
+  gt_assert(costs);
   op = gt_option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2 (affine gap costs).");
@@ -75,7 +75,7 @@ static int gt_affinealign_runner(GT_UNUSED int argc, const char **argv,
   Costs *costs = tool_arguments;
 
   gt_error_check(err);
-  assert(costs);
+  gt_assert(costs);
 
   /* init */
   gt_bioseq_1 = gt_bioseq_new(argv[parsed_args], err);

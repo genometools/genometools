@@ -47,7 +47,7 @@ static GtOptionParser* gt_blastenv_option_parser_new(void *tool_arguments)
   ScorefastaArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] scorematrix_file w",
                          "Show the BlastP environment for sequence w (using "
                          "the given scormatrix_file).");
@@ -72,7 +72,7 @@ static int gt_blastenv_runner(GT_UNUSED int argc, const char **argv,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   score_matrix = gt_score_matrix_new_read_protein(argv[parsed_args], err);
   if (!score_matrix)

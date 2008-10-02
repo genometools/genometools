@@ -57,7 +57,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   GtSequniqArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *seqit_option, *verbose_option;
-  assert(arguments);
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
                          "Filter out repeated sequences in given in given "
@@ -98,7 +98,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   off_t totalsize;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
   sd = gt_string_distri_new();
 
   if (!arguments->seqit) {

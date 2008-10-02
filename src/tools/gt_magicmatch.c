@@ -48,7 +48,7 @@ static GtOptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
   MagicMatchArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] -f sequence_file [...] -t",
@@ -76,7 +76,7 @@ static GtOptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
 static void translate_sequence_file(GtBioseq *bs)
 {
   unsigned long i;
-  assert(bs);
+  gt_assert(bs);
   for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
     printf("%s\t%s\n", gt_bioseq_get_md5_fingerprint(bs, i),
                        gt_bioseq_get_description(bs, i));
@@ -93,7 +93,7 @@ static int gt_magicmatch_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   if (arguments->translate) {
     for (i = 0; !had_err && i < gt_str_array_size(arguments->seqfiles); i++) {

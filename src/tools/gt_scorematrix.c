@@ -47,7 +47,7 @@ int gt_scorematrix(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
+  gt_assert(parsed_args == 1);
 
   if (!(sm = gt_score_matrix_new_read_protein(argv[1], err)))
     had_err = -1;

@@ -53,7 +53,7 @@ static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
   CSAArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file]",
@@ -89,7 +89,7 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   int had_err;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* create the streams */
   gff3_in_stream  = gt_gff3_in_stream_new_sorted(argv[parsed_args]);

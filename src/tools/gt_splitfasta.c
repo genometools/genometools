@@ -52,7 +52,7 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
   SplitfastaArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *targetsize_option, *splitdesc_option, *o;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] fastafile","Split the supplied fasta "
                          "file.");
   targetsize_option = gt_option_new_ulong_min("targetsize",
@@ -78,7 +78,7 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
 static unsigned long buf_contains_separator(char *buf)
 {
   char *cc;
-  assert(buf);
+  gt_assert(buf);
   for (cc = buf; cc < buf + BUFSIZ; cc++) {
     if (*cc == '>')
       return cc - buf + 1;
@@ -105,7 +105,7 @@ static int split_description(const char *filename, GtStr *splitdesc,
   GtStr *descname;
   int had_err = 0;
   gt_error_check(err);
-  assert(filename && splitdesc && gt_str_length(splitdesc));
+  gt_assert(filename && splitdesc && gt_str_length(splitdesc));
 
   descname = gt_str_new();
   if (!(bioseq = gt_bioseq_new(filename, err)))
@@ -146,11 +146,11 @@ static int split_fasta_file(const char *filename,
   int read_bytes, had_err = 0;
   char buf[BUFSIZ];
   gt_error_check(err);
-  assert(filename && max_filesize_in_bytes);
+  gt_assert(filename && max_filesize_in_bytes);
 
   /* open source file */
   srcfp = gt_genfile_xopen(filename, "r");
-  assert(srcfp);
+  gt_assert(srcfp);
 
   /* read start characters */
   if ((read_bytes = gt_genfile_xread(srcfp, buf, BUFSIZ)) == 0) {
@@ -187,7 +187,7 @@ static int split_fasta_file(const char *filename,
       if (bytecount > max_filesize_in_bytes &&
           (separator_pos = buf_contains_separator(buf))) {
         separator_pos--;
-        assert(separator_pos < BUFSIZ);
+        gt_assert(separator_pos < BUFSIZ);
         if (separator_pos)
           gt_genfile_xwrite(destfp, buf, separator_pos);
         /* close current file */
@@ -206,7 +206,7 @@ static int split_fasta_file(const char *filename,
           break;
         }
         bytecount = 0;
-        assert(buf[separator_pos] == '>');
+        gt_assert(buf[separator_pos] == '>');
         gt_genfile_xwrite(destfp, buf+separator_pos, read_bytes-separator_pos);
       }
       else
@@ -234,7 +234,7 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
   unsigned long max_filesize_in_bytes;
   int had_err;
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
 

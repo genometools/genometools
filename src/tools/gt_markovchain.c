@@ -47,7 +47,7 @@ static int gt_markovchain_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     unsigned long seqlen = strlen(argv[parsed_args+1]);
-    assert(gt_markov_chain_is_valid(mc));
+    gt_assert(gt_markov_chain_is_valid(mc));
     had_err = gt_markov_chain_compute_prob(mc, &P, argv[parsed_args+1], seqlen,
                                         err);
   }

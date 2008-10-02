@@ -45,7 +45,7 @@ static GtOptionParser* gt_align_option_parser_new(void *tool_arguments)
   AlignArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  assert(arguments);
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] seq_file_1 seq_file_2",
                             "Globally align each sequence in seq_file_1 with "
@@ -60,14 +60,14 @@ static GtOptionParser* gt_align_option_parser_new(void *tool_arguments)
 
 static void show_alignment(const GtAlignment *a, GT_UNUSED void *data)
 {
-  assert(a && !data);
+  gt_assert(a && !data);
   gt_alignment_show(a, stdout);
   gt_xputchar('\n');
 }
 
 static void show_aligns(unsigned long aligns, GT_UNUSED void *data)
 {
-  assert(aligns && !data);
+  gt_assert(aligns && !data);
   printf("number of optimal alignments: %lu\n\n", aligns);
 }
 
@@ -80,7 +80,7 @@ static int gt_align_runner(GT_UNUSED int argc, const char **argv,
   int had_err = 0;
   GtAlignment *a;
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   gt_bioseq_1 = gt_bioseq_new(argv[parsed_args], err);

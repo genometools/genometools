@@ -386,7 +386,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
         }
       } else
       {
-        assert(gfmsubcallinfo.indextype == Packedindextype);
+        gt_assert(gfmsubcallinfo.indextype == Packedindextype);
         theindex = (const void *) packedindex;
         if (doms)
         {

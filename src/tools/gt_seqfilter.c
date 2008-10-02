@@ -46,7 +46,7 @@ static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
   GtSeqFilterArguments *arguments = tool_arguments;
   GtOption *option;
   GtOptionParser *op;
-  assert(arguments);
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "Filter the given sequence_file(s) and show the "
@@ -79,7 +79,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(tool_arguments);
+  gt_assert(tool_arguments);
 
   bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 

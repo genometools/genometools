@@ -153,7 +153,7 @@ int gt_maxpairs(int argc, const char **argv, GtError *err)
   if (oprval == OPTIONPARSER_OK)
   {
     Verboseinfo *verboseinfo = newverboseinfo(false);
-    assert(parsed_args == argc);
+    gt_assert(parsed_args == argc);
     if (gt_str_array_size(maxpairsoptions.queryfiles) == 0)
     {
       if (maxpairsoptions.samples == 0)

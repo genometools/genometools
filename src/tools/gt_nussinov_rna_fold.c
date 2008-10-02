@@ -221,7 +221,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
+  gt_assert(parsed_args == 1);
 
   /* set DNA alphabet */
   dna_alpha = gt_alpha_new_dna();

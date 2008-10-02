@@ -52,7 +52,7 @@ int gt_casino(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
+  gt_assert(parsed_args == 1);
 
   /* save sequence */
   num_of_emissions = strlen(argv[1]);
@@ -102,7 +102,7 @@ int gt_casino(int argc, const char **argv, GtError *err)
         case DICE_LOADED:
           gt_xputchar('L');
           break;
-        default: assert(0);
+        default: gt_assert(0);
       }
     }
     gt_xputchar('\n');

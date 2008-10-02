@@ -70,7 +70,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   GtOption *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
          *optionpckindex, *optionmaxdepth;
 
-  assert(arguments != NULL);
+  gt_assert(arguments != NULL);
   arguments->esaindexname = gt_str_new();
   arguments->pckindexname = gt_str_new();
   arguments->tagfiles = gt_str_array_new();
@@ -165,9 +165,9 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
   unsigned long idx;
 
   gt_error_check(err);
-  assert(arguments != NULL);
+  gt_assert(arguments != NULL);
 
-  assert(parsed_args == argc);
+  gt_assert(parsed_args == argc);
   if (arguments->maxdistance == -1L)
   {
     printf("# computing matching statistics\n");
@@ -199,7 +199,7 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
     printf("# indexname(esa)=%s\n",gt_str_get(arguments->esaindexname));
   } else
   {
-    assert(gt_str_length(arguments->pckindexname) > 0);
+    gt_assert(gt_str_length(arguments->pckindexname) > 0);
     printf("# indexname(pck)=%s\n",gt_str_get(arguments->pckindexname));
   }
   for (idx=0; idx<gt_str_array_size(arguments->tagfiles); idx++)

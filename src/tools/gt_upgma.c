@@ -78,7 +78,7 @@ int gt_upgma(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
+  gt_assert(parsed_args == 1);
 
   if (!strcmp(argv[parsed_args], "example"))
     use_hard_coded_example = true;

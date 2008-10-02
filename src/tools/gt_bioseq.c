@@ -55,7 +55,7 @@ static GtOptionParser* gt_bioseq_option_parser_new(void *tool_arguments)
          *option_width, *option_stat, *option_reader;
   GtOptionParser *op;
   static const char *reader_types[] = { "rec", "fsm", "seqit", NULL };
-  assert(arguments);
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...]",
                          "Construct the GtBiosequence files for the given "
@@ -132,7 +132,7 @@ static int gt_bioseq_arguments_check(int rest_argc, void *tool_arguments,
 {
   GtBioseqArguments *arguments = tool_arguments;
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
   if (arguments->showseqnum != UNDEF_ULONG && rest_argc > 1) {
     gt_error_set(err, "option '-showseqnum' makes only sense with a single "
@@ -150,7 +150,7 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
   GtFastaReaderType reader_type = GT_FASTA_READER_REC;
   int arg = parsed_args, had_err = 0;
   gt_error_check(err);
-  assert(tool_arguments);
+  gt_assert(tool_arguments);
 
   /* determine fasta reader type */
   if (!strcmp(gt_str_get(arguments->reader), "rec"))
@@ -160,7 +160,7 @@ static int gt_bioseq_runner(int argc, const char **argv, int parsed_args,
   else if (!strcmp(gt_str_get(arguments->reader), "seqit"))
     reader_type = GT_FASTA_READER_SEQIT;
   else {
-    assert(0); /* cannot happen */
+    gt_assert(0); /* cannot happen */
   }
 
   while (!had_err && arg < argc) {

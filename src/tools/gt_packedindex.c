@@ -57,7 +57,7 @@ static GtOptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
 {
   GtToolbox *index_toolbox = tool_arguments;
   GtOptionParser *op;
-  assert(index_toolbox);
+  gt_assert(index_toolbox);
   op = gt_option_parser_new("[option ...] index_tool [argument ...]",
                          "Call packed index tool with name index_tool and "
                          "pass argument(s) to it.");
@@ -76,7 +76,7 @@ static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(index_toolbox);
+  gt_assert(index_toolbox);
 
   /* determine tool */
   if (!gt_toolbox_has_tool(index_toolbox, argv[parsed_args])) {
@@ -89,7 +89,7 @@ static int gt_packedindex_runner(int argc, const char **argv, int parsed_args,
   if (!had_err) {
     if (!(toolfunc = gt_toolbox_get(index_toolbox, argv[parsed_args]))) {
       tool = gt_toolbox_get_tool(index_toolbox, argv[parsed_args]);
-      assert(tool);
+      gt_assert(tool);
     }
     nargv = gt_cstr_array_prefix_first(argv + parsed_args,
                                        gt_error_get_progname(err));

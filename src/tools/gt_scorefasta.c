@@ -46,7 +46,7 @@ static GtOptionParser* gt_scorefasta_option_parser_new(void *tool_arguments)
   ScorefastaArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] u w",
                          "Compute scorefasta for DNA sequences u and w).");
   o = gt_option_new_ulong_min("q", "set q-gram length", &arguments->q, 3, 1);
@@ -65,7 +65,7 @@ static int gt_scorefasta_runner(GT_UNUSED int argc, const char **argv,
   GtAlpha *alpha;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* store database sequence u and query sequence w */
   ulen = strlen(argv[parsed_args]);

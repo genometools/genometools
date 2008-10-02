@@ -127,7 +127,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
             }
             else
             {
-              assert(markpos != NULL);
+              gt_assert(markpos != NULL);
               offset = markpos[contignumber-1]+(Seqpos)1;
             }
             /* increase positions by 1 */
@@ -260,7 +260,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
             }
             else
             {
-              assert(markpos != NULL);
+              gt_assert(markpos != NULL);
               offset = markpos[contignumber-1]+(Seqpos)1;
             }
 
