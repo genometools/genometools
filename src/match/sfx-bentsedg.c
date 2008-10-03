@@ -1591,7 +1591,7 @@ void sortallbuckets(Seqpos *suftabptr,
   {
     lcpsubtab = &outlcpinfo->lcpsubtab;
   }
-  if (!cmpcharbychar && hasspecialranges(encseq))
+  if (!cmpcharbychar) /* && hasspecialranges(encseq)) */
   {
     esr1 = newEncodedsequencescanstate();
     esr2 = newEncodedsequencescanstate();
@@ -1773,7 +1773,7 @@ void sortallbuckets(Seqpos *suftabptr,
   FREESPACE(countingsortinfo);
   FREESPACE(medianinfospace);
   freeBlindtrierep(&trierep);
-  if (!cmpcharbychar && hasspecialranges(encseq))
+  if (!cmpcharbychar) /* && hasspecialranges(encseq)) */
   {
     gt_assert(esr1 != NULL);
     freeEncodedsequencescanstate(&esr1);

@@ -781,14 +781,20 @@ static Uchar delivercharViadirectaccess(const Encodedsequence *encseq,
 static bool containsspecialViabitordirectaccess(bool viabit,
                                                 const Encodedsequence *encseq,
                                                 bool moveforward,
-                                                Seqpos pos,
+                                                Seqpos startpos,
                                                 Seqpos len)
 {
-  Seqpos idx;
+  Seqpos pos;
 
+  assert(encseq != NULL);
+
+  if (viabit && encseq->specialbits == NULL)
+  {
+    return false;
+  }
   if (moveforward)
   {
-    for (idx = pos; idx < pos + len; idx++)
+    for (pos = startpos; pos < startpos + len; pos++)
     {
       if (viabit)
       {
@@ -806,8 +812,8 @@ static bool containsspecialViabitordirectaccess(bool viabit,
     }
   } else
   {
-    assert (pos + 1 >= len);
-    for (idx = pos; /* Nothing */; idx--)
+    assert (startpos + 1 >= len);
+    for (pos = startpos; /* Nothing */; pos--)
     {
       if (viabit)
       {
@@ -822,7 +828,7 @@ static bool containsspecialViabitordirectaccess(bool viabit,
           return true;
         }
       }
-      if (idx == pos + 1 - len)
+      if (pos == startpos + 1 - len)
       {
         break;
       }
@@ -835,13 +841,13 @@ static bool containsspecialViabitaccess(const Encodedsequence *encseq,
                                         bool moveforward,
                                         GT_UNUSED
                                         Encodedsequencescanstate *esrspace,
-                                        Seqpos pos,
+                                        Seqpos startpos,
                                         Seqpos len)
 {
   return containsspecialViabitordirectaccess(true,
                                              encseq,
                                              moveforward,
-                                             pos,
+                                             startpos,
                                              len);
 }
 
@@ -849,13 +855,13 @@ static bool containsspecialViadirectaccess(const Encodedsequence *encseq,
                                            bool moveforward,
                                            GT_UNUSED
                                            Encodedsequencescanstate *esrspace,
-                                           Seqpos pos,
+                                           Seqpos startpos,
                                            Seqpos len)
 {
   return containsspecialViabitordirectaccess(false,
                                              encseq,
                                              moveforward,
-                                             pos,
+                                             startpos,
                                              len);
 }
 
@@ -1490,6 +1496,7 @@ void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
                                          bool moveforward,
                                          Seqpos startpos)
 {
+  assert(esr != NULL);
   esr->moveforward = moveforward;
   if (encseq->sat == Viauchartables ||
       encseq->sat == Viaushorttables ||

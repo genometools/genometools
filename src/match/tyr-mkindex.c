@@ -267,6 +267,7 @@ static void freeDfsinfo(Dfsinfo *dfsinfo, GT_UNUSED Dfsstate *state)
   FREESPACE(dfsinfo);
 }
 
+/*
 static bool containsspecial2(const Encodedsequence *encseq,
                      GT_UNUSED bool moveforward,
                      GT_UNUSED Encodedsequencescanstate *esrspace,
@@ -299,6 +300,7 @@ static bool containsspecial2(const Encodedsequence *encseq,
   }
   return result;
 }
+*/
 
 static int processleafedge(GT_UNUSED bool firstsucc,
                            Seqpos fatherdepth,
@@ -310,7 +312,7 @@ static int processleafedge(GT_UNUSED bool firstsucc,
   gt_error_check(err);
   if (fatherdepth < state->searchlength &&
       leafnumber + state->searchlength <= state->totallength &&
-      !containsspecial2(state->encseq,
+      !containsspecial(state->encseq,
                        state->moveforward,
                        state->esrspace,
                        leafnumber + fatherdepth,

@@ -27,7 +27,7 @@ fi
 mersize=7
 inputfile=$1
 
-cerr "bin/gt suffixerator -sat uchar -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
+cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
 cmd="env -i bin/gt tallymer mkindex -mersize 7 sfxidx"
 ${cmd} > tmp1
 checkerror
@@ -38,3 +38,4 @@ checkerror
 grep -v '^#' tmp2 > tmp2.2
 mv tmp2.2 tmp2
 cerr "cmp -s tmp1 tmp2"
+rm -f tmp[12]
