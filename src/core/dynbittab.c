@@ -21,15 +21,15 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 
-struct GT_DynBittab {
+struct GtDynBittab {
   unsigned long *tabptr,
                 tabsize,
                 num_of_bits;
 };
 
-GT_DynBittab* gt_dynbittab_new(void)
+GtDynBittab* gt_dynbittab_new(void)
 {
-  return gt_calloc(1, sizeof (GT_DynBittab));
+  return gt_calloc(1, sizeof (GtDynBittab));
 }
 
 static unsigned long determine_tabsize(unsigned long num_of_bits)
@@ -39,7 +39,7 @@ static unsigned long determine_tabsize(unsigned long num_of_bits)
   return 1UL;
 }
 
-void gt_dynbittab_set_bit(GT_DynBittab *b, unsigned long bit)
+void gt_dynbittab_set_bit(GtDynBittab *b, unsigned long bit)
 {
   unsigned long new_tabsize;
   gt_assert(b);
@@ -58,7 +58,7 @@ void gt_dynbittab_set_bit(GT_DynBittab *b, unsigned long bit)
     1UL << (bit & (8UL * sizeof (unsigned long) - 1));
 }
 
-void gt_dynbittab_unset_bit(GT_DynBittab *b, unsigned long bit)
+void gt_dynbittab_unset_bit(GtDynBittab *b, unsigned long bit)
 {
   gt_assert(b);
   if (bit < b->num_of_bits) {
@@ -67,7 +67,7 @@ void gt_dynbittab_unset_bit(GT_DynBittab *b, unsigned long bit)
   }
 }
 
-bool gt_dynbittab_bit_is_set(const GT_DynBittab *b, unsigned long bit)
+bool gt_dynbittab_bit_is_set(const GtDynBittab *b, unsigned long bit)
 {
   gt_assert(b);
   if (bit < b->num_of_bits &&
@@ -81,7 +81,7 @@ bool gt_dynbittab_bit_is_set(const GT_DynBittab *b, unsigned long bit)
 int gt_dynbittab_unit_test(GtError *err)
 {
   unsigned long i;
-  GT_DynBittab *b;
+  GtDynBittab *b;
   int had_err = 0;
 
   b = gt_dynbittab_new();
@@ -133,7 +133,7 @@ int gt_dynbittab_unit_test(GtError *err)
   return had_err;
 }
 
-void gt_dynbittab_delete(GT_DynBittab *b)
+void gt_dynbittab_delete(GtDynBittab *b)
 {
   if (!b) return;
   gt_free(b->tabptr);
