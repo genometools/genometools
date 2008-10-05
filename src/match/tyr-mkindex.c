@@ -553,6 +553,17 @@ static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
 
 #define MEGABYTES(V)  ((double) (V)/((((unsigned long) 1) << 20) - 1))
 
+static void outputbytewiseUlongvalue(FILE *fpout,unsigned long value)
+{
+  size_t i;
+
+  for (i=0; i < sizeof (value); i++)
+  {
+    (void) putc((int) (value & UCHAR_MAX),fpout);
+    value >>= 8;
+  }
+}
+
 static int enumeratelcpintervals(const GtStr *str_inputindex,
                                  Sequentialsuffixarrayreader *ssar,
                                  const GtStr *str_storeindex,
@@ -566,7 +577,6 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
 {
   Dfsstate state;
   bool haserr = false;
-  char *merindexoutfilename = NULL;
 
   gt_error_check(err);
   INITARRAY(&state.occdistribution,Countwithpositions);
@@ -689,9 +699,16 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
                             sizeof (unsigned long) * EXTRAINTEGERS));
     }
   }
+  /* now out EXTRAINTEGERS integer values */
+  if (!haserr && state.merindexfpout != NULL)
+  {
+    outputbytewiseUlongvalue(state.merindexfpout,
+                             (unsigned long) state.mersize);
+    outputbytewiseUlongvalue(state.merindexfpout,
+                             (unsigned long) state.alphasize);
+  }
   gt_fa_xfclose(state.merindexfpout);
   gt_fa_xfclose(state.countsfilefpout);
-  FREESPACE(merindexoutfilename);
   FREEARRAY(&state.occdistribution,Countwithpositions);
   FREESPACE(state.currentmer);
   FREESPACE(state.bytebuffer);
