@@ -67,12 +67,15 @@ struct Dfsstate /* global information */
   unsigned int alphasize;
   Processoccurrencecount processoccurrencecount;
   ArrayCountwithpositions occdistribution;
-  FILE *merindexfpout;
+  FILE *merindexfpout,
+       *countsfilefpout;
   bool moveforward;
   Encodedsequencescanstate *esrspace;
+  bool performtest;
+  bool storecounts;
   Uchar *bytebuffer;
   unsigned long sizeofbuffer;
-  bool performtest;
+  ArrayLargecount largecounts;
   unsigned long countoutputmers;
   const Seqpos *suftab; /* only necessary for performtest */
   Uchar *currentmer;    /* only necessary for performtest */
@@ -341,15 +344,19 @@ static int adddistpos2distribution(unsigned long countocc,
   return 0;
 }
 
+#define MAXSMALLMERCOUNT UCHAR_MAX
+
 static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                                               unsigned int alphasize,
                                               Seqpos mersize,
                                               Uchar *bytebuffer,
                                               unsigned long sizeofbuffer,
                                               FILE *merindexfpout,
+                                              FILE *countsfilefpout,
                                               Seqpos position,
-                                              GT_UNUSED unsigned long
-                                                        countoutputmers,
+                                              unsigned long countocc,
+                                              ArrayLargecount *largecounts,
+                                              unsigned long countoutputmers,
                                               GtError *err)
 {
   if (alphasize == (unsigned int) (DNAALPHASIZE + 1))
@@ -371,10 +378,32 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                   strerror(errno));
     return -1;
   }
+  if (countsfilefpout != NULL)
+  {
+    Uchar smallcount;
+
+    if (countocc <= MAXSMALLMERCOUNT)
+    {
+      smallcount = (Uchar) countocc;
+    } else
+    {
+      Largecount *lc;
+
+      GETNEXTFREEINARRAY(lc,largecounts,Largecount,32);
+      lc->idx = countoutputmers;
+      lc->value = countocc;
+      smallcount = 0;
+    }
+    if (fwrite(&smallcount, sizeof (smallcount),(size_t) 1,countsfilefpout)
+              != (size_t) 1)
+    {
+      return -1;
+    }
+  }
   return 0;
 }
 
-static int outputsortedstring2index(GT_UNUSED unsigned long countocc,
+static int outputsortedstring2index(unsigned long countocc,
                                     Seqpos position,
                                     void *adddistposinfo,
                                     GtError *err)
@@ -389,7 +418,10 @@ static int outputsortedstring2index(GT_UNUSED unsigned long countocc,
                                            state->bytebuffer,
                                            state->sizeofbuffer,
                                            state->merindexfpout,
+                                           state->countsfilefpout,
                                            position,
+                                           countocc,
+                                           &state->largecounts,
                                            state->countoutputmers,
                                            err) != 0)
     {
@@ -519,9 +551,12 @@ static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
 }
 
+#define MEGABYTES(V)  ((double) (V)/((((unsigned long) 1) << 20) - 1))
+
 static int enumeratelcpintervals(const GtStr *str_inputindex,
                                  Sequentialsuffixarrayreader *ssar,
                                  const GtStr *str_storeindex,
+                                 bool storecounts,
                                  unsigned long mersize,
                                  unsigned long minocc,
                                  unsigned long maxocc,
@@ -540,6 +575,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.alpha = alphabetSequentialsuffixarrayreader(ssar);
   state.alphasize = getnumofcharsAlphabet(state.alpha);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+  state.storecounts = storecounts;
   state.minocc = minocc;
   state.maxocc = maxocc;
   state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
@@ -547,6 +583,9 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.totallength = getencseqtotallength(state.encseq);
   state.performtest = performtest;
   state.countoutputmers = 0;
+  state.merindexfpout = NULL;
+  state.countsfilefpout = NULL;
+  INITARRAY(&state.largecounts,Largecount);
   if (gt_str_length(str_storeindex) == 0)
   {
     state.sizeofbuffer = 0;
@@ -576,7 +615,6 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   {
     if (gt_str_length(str_storeindex) == 0)
     {
-      state.merindexfpout = NULL;
       state.processoccurrencecount = adddistpos2distribution;
     } else
     {
@@ -587,6 +625,17 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
       if (state.merindexfpout == NULL)
       {
         haserr = true;
+      } else
+      {
+        if (state.storecounts)
+        {
+          state.countsfilefpout = opensfxfile(str_storeindex,
+                                              COUNTSSUFFIX,"wb",err);
+          if (state.countsfilefpout == NULL)
+          {
+            haserr = true;
+          }
+        }
       }
       state.processoccurrencecount = outputsortedstring2index;
     }
@@ -609,16 +658,44 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
       if (gt_str_length(str_storeindex) == 0)
       {
         showfinalstatistics(&state,str_inputindex,verboseinfo);
-      } else
-      {
-        gt_fa_xfclose(state.merindexfpout);
       }
     }
+    if (!haserr)
+    {
+      if (state.countsfilefpout != NULL)
+      {
+        showverbose(verboseinfo,"write %lu mercounts > %lu to file \"%s.%s\"",
+                    state.largecounts.nextfreeLargecount,
+                    (unsigned long) MAXSMALLMERCOUNT,
+                    gt_str_get(str_storeindex),
+                    COUNTSSUFFIX);
+        if (fwrite(state.largecounts.spaceLargecount,
+                  sizeof (Largecount),
+                  (size_t) state.largecounts.nextfreeLargecount,
+                  state.countsfilefpout) !=
+                  (size_t) state.largecounts.nextfreeLargecount)
+        {
+          haserr = true;
+        }
+      }
+    }
+    if (!haserr)
+    {
+      showverbose(verboseinfo,"number of %lu-mers in index: %lu",
+                  mersize,
+                  state.countoutputmers);
+      showverbose(verboseinfo,"index size: %.2f megabytes\n",
+                  MEGABYTES(state.countoutputmers * state.sizeofbuffer +
+                            sizeof (unsigned long) * EXTRAINTEGERS));
+    }
   }
+  gt_fa_xfclose(state.merindexfpout);
+  gt_fa_xfclose(state.countsfilefpout);
   FREESPACE(merindexoutfilename);
   FREEARRAY(&state.occdistribution,Countwithpositions);
   FREESPACE(state.currentmer);
   FREESPACE(state.bytebuffer);
+  FREEARRAY(&state.largecounts,Largecount);
   freeEncodedsequencescanstate(&state.esrspace);
   return haserr ? -1 : 0;
 }
@@ -628,7 +705,7 @@ int merstatistics(const GtStr *str_inputindex,
                   unsigned long minocc,
                   unsigned long maxocc,
                   const GtStr *str_storeindex,
-                  GT_UNUSED bool storecounts,
+                  bool storecounts,
                   bool scanfile,
                   bool performtest,
                   Verboseinfo *verboseinfo,
@@ -654,6 +731,7 @@ int merstatistics(const GtStr *str_inputindex,
     if (enumeratelcpintervals(str_inputindex,
                               ssar,
                               str_storeindex,
+                              storecounts,
                               mersize,
                               minocc,
                               maxocc,

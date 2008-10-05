@@ -39,6 +39,6 @@ grep -v '^#' tmp2 > tmp2.2
 mv tmp2.2 tmp2
 cerr "cmp -s tmp1 tmp2"
 rm -f tmp[12]
-cmd="env -i bin/gt tallymer mkindex -indexname xxx -mersize 7 -minocc 10 -maxocc 30 sfxidx"
+cmd="env -i bin/gt tallymer mkindex -counts -indexname xxx -mersize 7 -minocc 10 -maxocc 30 sfxidx"
 ${cmd}
 checkerror

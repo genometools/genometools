@@ -18,6 +18,7 @@
 #ifndef TYR_SEARCH_H
 #define TYR_SEARCH_H
 
+#include "core/arraydef.h"
 #include "core/str_api.h"
 #include "intbits.h"
 #include "divmodmul.h"
@@ -46,6 +47,8 @@ typedef struct
 {
   unsigned long idx, value;
 } Largecount;
+
+DECLAREARRAYSTRUCT(Largecount);
 
 typedef struct
 {
