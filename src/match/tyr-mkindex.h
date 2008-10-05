@@ -23,7 +23,7 @@
 #include "verbose-def.h"
 
 int merstatistics(const GtStr *str_inputindex,
-                  unsigned long searchlength,
+                  unsigned long mersize,
                   unsigned long minocc,
                   unsigned long maxocc,
                   const GtStr *str_storeindex,

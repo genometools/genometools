@@ -54,7 +54,7 @@ DECLAREARRAYSTRUCT(Countwithpositions);
 
 struct Dfsstate /* global information */
 {
-  Seqpos searchlength,
+  Seqpos mersize,
          totallength;
   unsigned long minocc,
                 maxocc;
@@ -66,6 +66,7 @@ struct Dfsstate /* global information */
   FILE *merindexfpout;
   bool moveforward;
   Encodedsequencescanstate *esrspace;
+  unsigned long merbytes;
   bool performtest;
   const Seqpos *suftab; /* only necessary for performtest */
   Uchar *currentmer;    /* only necessary for performtest */
@@ -78,13 +79,13 @@ static uint64_t bruteforcecountnumofmers(const Dfsstate *state)
   Seqpos idx;
   uint64_t numofmers = 0;
 
-  for (idx=0; idx <= state->totallength - state->searchlength; idx++)
+  for (idx=0; idx <= state->totallength - state->mersize; idx++)
   {
     if (!containsspecial(state->encseq,
                          state->moveforward,
                          state->esrspace,
                          idx,
-                         state->searchlength))
+                         state->mersize))
     {
       numofmers++;
     }
@@ -114,7 +115,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
   MMsearchiterator *mmsi;
   Seqpos idx, bfcount;
 
-  for (idx = 0; idx < dfsstate->searchlength; idx++)
+  for (idx = 0; idx < dfsstate->mersize; idx++)
   {
     dfsstate->currentmer[idx] = getencodedchar(dfsstate->encseq,position+idx,
                                                dfsstate->readmode);
@@ -126,7 +127,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
                              0,
                              dfsstate->readmode,
                              dfsstate->currentmer,
-                             (unsigned long) dfsstate->searchlength);
+                             (unsigned long) dfsstate->mersize);
   bfcount = countmmsearchiterator(mmsi);
   if (bfcount != (Seqpos) countocc)
   {
@@ -171,14 +172,14 @@ static void wrapListSeqpos(ListSeqpos *node)
 
 static void showListSeqpos(const Encodedsequence *encseq,
                            const Alphabet *alpha,
-                           Seqpos searchlength,
+                           Seqpos mersize,
                            const ListSeqpos *node)
 {
   const ListSeqpos *tmp;
 
   for (tmp = node; tmp != NULL; tmp = tmp->nextptr)
   {
-    fprintfencseq(stdout,alpha,encseq,tmp->position,searchlength);
+    fprintfencseq(stdout,alpha,encseq,tmp->position,mersize);
     (void) putchar((int) '\n');
   }
 }
@@ -246,7 +247,7 @@ static void showmerdistribution(const Dfsstate *state)
       {
         showListSeqpos(state->encseq,
                        state->alpha,
-                       state->searchlength,
+                       state->mersize,
                        state->occdistribution.spaceCountwithpositions[countocc].
                                               positionlist);
         wrapListSeqpos(state->occdistribution.spaceCountwithpositions[countocc].
@@ -273,16 +274,16 @@ static void showfinalstatistics(const Dfsstate *state,
   showverbose(verboseinfo,
               "number of %lu-mers in the sequences not containing a "
               "wildcard: " Formatuint64_t,
-              (unsigned long) state->searchlength,
+              (unsigned long) state->mersize,
               PRINTuint64_tcast(dnumofmers));
   showverbose(verboseinfo,
               "show the distribution of the number of occurrences of %lu-mers",
-               (unsigned long) state->searchlength);
+               (unsigned long) state->mersize);
   showverbose(verboseinfo,"not containing a wildcard as rows of the form "
               "i d where");
   showverbose(verboseinfo,
               "d is the number of events that a %lu-mer occurs exactly i times",
-              (unsigned long) state->searchlength);
+              (unsigned long) state->mersize);
   showmerdistribution(state);
 }
 
@@ -390,13 +391,13 @@ static int processleafedge(GT_UNUSED bool firstsucc,
                            GT_UNUSED GtError *err)
 {
   gt_error_check(err);
-  if (fatherdepth < state->searchlength &&
-      leafnumber + state->searchlength <= state->totallength &&
+  if (fatherdepth < state->mersize &&
+      leafnumber + state->mersize <= state->totallength &&
       !containsspecial(state->encseq,
                        state->moveforward,
                        state->esrspace,
                        leafnumber + fatherdepth,
-                       state->searchlength - fatherdepth))
+                       state->mersize - fatherdepth))
   {
     if (state->processoccurrencecount(1UL,leafnumber,state,err) != 0)
     {
@@ -413,7 +414,7 @@ static int processcompletenode(Seqpos nodeptrdepth,
                                GT_UNUSED GtError *err)
 {
   gt_error_check(err);
-  if (state->searchlength <= nodeptrdepth)
+  if (state->mersize <= nodeptrdepth)
   {
     Seqpos fatherdepth;
 
@@ -422,7 +423,7 @@ static int processcompletenode(Seqpos nodeptrdepth,
     {
       fatherdepth = nodeptrminusonedepth;
     }
-    if (fatherdepth < state->searchlength)
+    if (fatherdepth < state->mersize)
     {
       if (state->processoccurrencecount((unsigned long)
                                         (nodeptr->rightmostleaf -
@@ -456,7 +457,7 @@ static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
 static int enumeratelcpintervals(const GtStr *str_inputindex,
                                  Sequentialsuffixarrayreader *ssar,
                                  const GtStr *str_storeindex,
-                                 unsigned long searchlength,
+                                 unsigned long mersize,
                                  unsigned long minocc,
                                  unsigned long maxocc,
                                  bool performtest,
@@ -470,7 +471,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   gt_error_check(err);
   INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = newEncodedsequencescanstate();
-  state.searchlength = (Seqpos) searchlength;
+  state.mersize = (Seqpos) mersize;
   state.alpha = alphabetSequentialsuffixarrayreader(ssar);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.minocc = minocc;
@@ -481,18 +482,18 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.performtest = performtest;
   if (performtest)
   {
-    ALLOCASSIGNSPACE(state.currentmer,NULL,Uchar,state.searchlength);
+    ALLOCASSIGNSPACE(state.currentmer,NULL,Uchar,state.mersize);
     state.suftab = suftabSequentialsuffixarrayreader(ssar);
   } else
   {
     state.currentmer = NULL;
     state.suftab = NULL;
   }
-  if (state.searchlength > state.totallength)
+  if (state.mersize > state.totallength)
   {
-    gt_error_set(err,"searchlength " FormatSeqpos " > " FormatSeqpos
+    gt_error_set(err,"mersize " FormatSeqpos " > " FormatSeqpos
                      " = totallength not allowed",
-                 PRINTSeqposcast(state.searchlength),
+                 PRINTSeqposcast(state.mersize),
                  PRINTSeqposcast(state.totallength));
     haserr = true;
   } else
@@ -536,7 +537,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
 }
 
 int merstatistics(const GtStr *str_inputindex,
-                  unsigned long searchlength,
+                  unsigned long mersize,
                   unsigned long minocc,
                   unsigned long maxocc,
                   const GtStr *str_storeindex,
@@ -566,7 +567,7 @@ int merstatistics(const GtStr *str_inputindex,
     if (enumeratelcpintervals(str_inputindex,
                               ssar,
                               str_storeindex,
-                              searchlength,
+                              mersize,
                               minocc,
                               maxocc,
                               performtest,
