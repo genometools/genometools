@@ -134,6 +134,7 @@ static void checknumberofoccurrences(const Dfsstate *dfsstate,
                    countocc);
     exit(EXIT_FAILURE);
   }
+  freemmsearchiterator(&mmsi);
 }
 
 static /*@null@*/ ListSeqpos *insertListSeqpos(ListSeqpos *liststart,
