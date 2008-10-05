@@ -28,7 +28,7 @@ mersize=7
 inputfile=$1
 
 cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
-cmd="env -i bin/gt tallymer mkindex -mersize 7 sfxidx"
+cmd="env -i bin/gt tallymer mkindex -test -mersize 7 sfxidx"
 ${cmd} > tmp1
 checkerror
 cerr "mkvtree.x -db ${inputfile} -tis -suf -lcp -pl -dna -indexname mkvidx"

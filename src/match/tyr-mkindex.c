@@ -68,6 +68,40 @@ struct Dfsstate /* global information */
 
 #include "esa-dfs.h"
 
+static uint64_t bruteforcecountnumofmers(const Dfsstate *state)
+{
+  Seqpos idx;
+  uint64_t numofmers = 0;
+
+  for (idx=0; idx <= state->totallength - state->searchlength; idx++)
+  {
+    if (!containsspecial(state->encseq,
+                         state->moveforward,
+                         state->esrspace,
+                         idx,
+                         state->searchlength))
+    {
+      numofmers++;
+    }
+  }
+  return numofmers;
+}
+
+static void checknumofmers(const Dfsstate *state,
+                           uint64_t dnumofmers)
+{
+  uint64_t bfnumofmers = bruteforcecountnumofmers(state);
+
+  if (dnumofmers != bfnumofmers)
+  {
+    fprintf(stderr,"numofmers(distribution) = " Formatuint64_t " != "
+                   Formatuint64_t,
+                   PRINTuint64_tcast(dnumofmers),
+                   PRINTuint64_tcast(bfnumofmers));
+    exit(EXIT_FAILURE);
+  }
+}
+
 static /*@null@*/ ListSeqpos *insertListSeqpos(ListSeqpos *liststart,
                                                Seqpos position)
 {
@@ -188,9 +222,15 @@ static void showmerdistribution(const Dfsstate *state)
 
 static void showfinalstatistics(const Dfsstate *state,
                                 const GtStr *inputindex,
+                                bool performtest,
                                 Verboseinfo *verboseinfo)
 {
   uint64_t dnumofmers = addupdistribution(&state->occdistribution);
+
+  if (performtest)
+  {
+    checknumofmers(state,dnumofmers);
+  }
   showverbose(verboseinfo,
               "the following output refers to the set of all sequences");
   showverbose(verboseinfo,
@@ -379,6 +419,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
                                  unsigned long searchlength,
                                  unsigned long minocc,
                                  unsigned long maxocc,
+                                 bool performtest,
                                  Verboseinfo *verboseinfo,
                                  GtError *err)
 {
@@ -431,7 +472,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     }
     if (gt_str_length(str_storeindex) == 0)
     {
-      showfinalstatistics(&state,str_inputindex,verboseinfo);
+      showfinalstatistics(&state,str_inputindex,performtest,verboseinfo);
     } else
     {
       assert(false);
@@ -450,6 +491,7 @@ int merstatistics(const GtStr *str_inputindex,
                   const GtStr *str_storeindex,
                   GT_UNUSED bool storecounts,
                   bool scanfile,
+                  bool performtest,
                   Verboseinfo *verboseinfo,
                   GtError *err)
 {
@@ -476,6 +518,7 @@ int merstatistics(const GtStr *str_inputindex,
                               searchlength,
                               minocc,
                               maxocc,
+                              performtest,
                               verboseinfo,
                               err) != 0)
     {

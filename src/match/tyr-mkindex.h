@@ -29,6 +29,7 @@ int merstatistics(const GtStr *str_inputindex,
                   const GtStr *str_storeindex,
                   bool storecounts,
                   bool scanfile,
+                  bool performtest,
                   Verboseinfo *verboseinfo,
                   GtError *err);
 

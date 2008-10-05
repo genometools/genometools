@@ -51,6 +51,7 @@ typedef struct
   GtStr *str_storeindex,
         *str_inputindex;
   bool storecounts,
+       performtest,
        verbose;
 } Tallymer_mkindex_options;
 
@@ -136,6 +137,12 @@ static GtOptionParser
   optionstorecounts = gt_option_new_bool("counts", "store counts of the mers",
                                          &arguments->storecounts,false);
   gt_option_parser_add_option(op, optionstorecounts);
+
+  option = gt_option_new_bool("test", "perform tests to verify program "
+                                      "correctness", &arguments->performtest,
+                                      false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -234,6 +241,7 @@ static int gt_tallymer_mkindex_runner(int argc,
                     arguments->str_storeindex,
                     true,
                     arguments->storecounts,
+                    arguments->performtest,
                     verboseinfo,
                     err) != 0)
   {
