@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <errno.h>
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/arraydef.h"
@@ -63,6 +64,7 @@ struct Dfsstate /* global information */
   const Encodedsequence *encseq;
   Readmode readmode;
   const Alphabet *alpha;
+  unsigned int alphasize;
   Processoccurrencecount processoccurrencecount;
   ArrayCountwithpositions occdistribution;
   FILE *merindexfpout;
@@ -71,6 +73,7 @@ struct Dfsstate /* global information */
   Uchar *bytebuffer;
   unsigned long sizeofbuffer;
   bool performtest;
+  unsigned long countoutputmers;
   const Seqpos *suftab; /* only necessary for performtest */
   Uchar *currentmer;    /* only necessary for performtest */
 };
@@ -338,11 +341,62 @@ static int adddistpos2distribution(unsigned long countocc,
   return 0;
 }
 
-static int outputsortedstring2index(GT_UNUSED unsigned long countocc,
-                                    GT_UNUSED Seqpos position,
-                                    GT_UNUSED void *adddistposinfo,
-                                    GT_UNUSED GtError *err)
+static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
+                                              unsigned int alphasize,
+                                              Seqpos mersize,
+                                              Uchar *bytebuffer,
+                                              unsigned long sizeofbuffer,
+                                              FILE *merindexfpout,
+                                              Seqpos position,
+                                              GT_UNUSED unsigned long
+                                                        countoutputmers,
+                                              GtError *err)
 {
+  if (alphasize == (unsigned int) (DNAALPHASIZE + 1))
+  {
+    shiftbytecode(bytebuffer,encseq,position,(Seqpos) mersize);
+  } else
+  {
+    /*
+    string2bytecode(bytebuffer,kmerseqinfotab[idxnum].plainseq + position,
+                    searchlength);
+    */
+  }
+  if (fwrite(bytebuffer,sizeof(*bytebuffer),(size_t) sizeofbuffer,merindexfpout)
+            != (size_t) sizeofbuffer)
+  {
+    gt_error_set(err,"cannot write %lu items of size %u: errormsg=\"%s\"",
+                  (unsigned long) sizeofbuffer,
+                  (unsigned int) sizeof (*bytebuffer),
+                  strerror(errno));
+    return -1;
+  }
+  return 0;
+}
+
+static int outputsortedstring2index(GT_UNUSED unsigned long countocc,
+                                    Seqpos position,
+                                    void *adddistposinfo,
+                                    GtError *err)
+{
+  Dfsstate *state = (Dfsstate *) adddistposinfo;
+
+  if (decideifocc(state,countocc))
+  {
+    if (outputsortedstring2indexviafileptr(state->encseq,
+                                           state->alphasize,
+                                           state->mersize,
+                                           state->bytebuffer,
+                                           state->sizeofbuffer,
+                                           state->merindexfpout,
+                                           position,
+                                           state->countoutputmers,
+                                           err) != 0)
+    {
+      return -1;
+    }
+    state->countoutputmers++;
+  }
   return 0;
 }
 
@@ -484,6 +538,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.esrspace = newEncodedsequencescanstate();
   state.mersize = (Seqpos) mersize;
   state.alpha = alphabetSequentialsuffixarrayreader(ssar);
+  state.alphasize = getnumofcharsAlphabet(state.alpha);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.minocc = minocc;
   state.maxocc = maxocc;
@@ -491,6 +546,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
   state.totallength = getencseqtotallength(state.encseq);
   state.performtest = performtest;
+  state.countoutputmers = 0;
   if (gt_str_length(str_storeindex) == 0)
   {
     state.sizeofbuffer = 0;

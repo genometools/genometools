@@ -216,6 +216,41 @@ typedef struct
   Containsspecialfunc delivercontainsspecial;
 } Encodedsequencefunctions;
 
+void shiftbytecode(Uchar *dest,const Encodedsequence *encseq,
+                   const Seqpos startindex,const Seqpos len)
+{
+  Seqpos i, j;
+
+  if (len >= (Seqpos) 3)
+  {
+    for (i=startindex, j=0; i < startindex + len - 3; i+=4, j++)
+    {
+      dest[j] = (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6) |
+                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4) |
+                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2) |
+                (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i+3);
+    }
+  } else
+  {
+    i = startindex;
+    j = 0;
+  }
+  switch (MOD4(len))
+  {
+    case (Seqpos) 1:
+      dest[j] = (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6;
+      break;
+    case (Seqpos) 2:
+      dest[j] = (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6) |
+                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4);
+      break;
+    case (Seqpos) 3:
+      dest[j] = (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6) |
+                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4) |
+                (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2);
+  }
+}
+
 Seqpos getencseqtotallength(const Encodedsequence *encseq)
 {
   return encseq->totallength;

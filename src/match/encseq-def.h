@@ -146,6 +146,9 @@ uint64_t detsizeencseq(int kind,
                        Seqpos specialranges,
                        unsigned int mapsize);
 
+void shiftbytecode(Uchar *dest,const Encodedsequence *encseq,
+                   const Seqpos startindex,const Seqpos len);
+
 #endif
 
 /* the functions with exactly the same interface for both implementation of
