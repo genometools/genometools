@@ -23,9 +23,9 @@
 #include "divmodmul.h"
 
 #define MERBYTES(SL)  (DIV4(SL) + ((MOD4(SL) == 0) ? 0 : 1UL))
-#define MERSUFFIX     "mer"
-#define COUNTSSUFFIX  "mct"
-#define BUCKETSUFFIX  "mbd"
+#define MERSUFFIX     ".mer"
+#define COUNTSSUFFIX  ".mct"
+#define BUCKETSUFFIX  ".mbd"
 #define EXTRAINTEGERS 2
 
 #define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)

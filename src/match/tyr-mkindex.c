@@ -18,6 +18,7 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/arraydef.h"
+#include "core/fa.h"
 #include "esa-seqread.h"
 #include "alphadef.h"
 #include "verbose-def.h"
@@ -27,6 +28,7 @@
 #include "esa-mmsearch-def.h"
 #include "tyr-mkindex.h"
 #include "tyr-search.h"
+#include "opensfxfile.pr"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
@@ -66,7 +68,8 @@ struct Dfsstate /* global information */
   FILE *merindexfpout;
   bool moveforward;
   Encodedsequencescanstate *esrspace;
-  unsigned long merbytes;
+  Uchar *bytebuffer;
+  unsigned long sizeofbuffer;
   bool performtest;
   const Seqpos *suftab; /* only necessary for performtest */
   Uchar *currentmer;    /* only necessary for performtest */
@@ -335,6 +338,14 @@ static int adddistpos2distribution(unsigned long countocc,
   return 0;
 }
 
+static int outputsortedstring2index(GT_UNUSED unsigned long countocc,
+                                    GT_UNUSED Seqpos position,
+                                    GT_UNUSED void *adddistposinfo,
+                                    GT_UNUSED GtError *err)
+{
+  return 0;
+}
+
 static Dfsinfo *allocateDfsinfo(GT_UNUSED Dfsstate *state)
 {
   Dfsinfo *dfsinfo;
@@ -480,6 +491,15 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
   state.totallength = getencseqtotallength(state.encseq);
   state.performtest = performtest;
+  if (gt_str_length(str_storeindex) == 0)
+  {
+    state.sizeofbuffer = 0;
+    state.bytebuffer = NULL;
+  } else
+  {
+    state.sizeofbuffer = MERBYTES(mersize);
+    ALLOCASSIGNSPACE(state.bytebuffer,NULL,Uchar,state.sizeofbuffer);
+  }
   if (performtest)
   {
     ALLOCASSIGNSPACE(state.currentmer,NULL,Uchar,state.mersize);
@@ -504,34 +524,45 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
       state.processoccurrencecount = adddistpos2distribution;
     } else
     {
-      state.merindexfpout = NULL;
-      assert(false);
+      state.merindexfpout = opensfxfile(str_storeindex,
+                                        MERSUFFIX,
+                                        "wb",
+                                        err);
+      if (state.merindexfpout == NULL)
+      {
+        haserr = true;
+      }
+      state.processoccurrencecount = outputsortedstring2index;
     }
-    if (depthfirstesa(ssar,
-                      allocateDfsinfo,
-                      freeDfsinfo,
-                      processleafedge,
-                      NULL,
-                      processcompletenode,
-                      assignleftmostleaf,
-                      assignrightmostleaf,
-                      &state,
-                      verboseinfo,
-                      err) != 0)
+    if (!haserr)
     {
-      haserr = true;
-    }
-    if (gt_str_length(str_storeindex) == 0)
-    {
-      showfinalstatistics(&state,str_inputindex,verboseinfo);
-    } else
-    {
-      assert(false);
+      if (depthfirstesa(ssar,
+                        allocateDfsinfo,
+                        freeDfsinfo,
+                        processleafedge,
+                        NULL,
+                        processcompletenode,
+                        assignleftmostleaf,
+                        assignrightmostleaf,
+                        &state,
+                        verboseinfo,
+                        err) != 0)
+      {
+        haserr = true;
+      }
+      if (gt_str_length(str_storeindex) == 0)
+      {
+        showfinalstatistics(&state,str_inputindex,verboseinfo);
+      } else
+      {
+        gt_fa_xfclose(state.merindexfpout);
+      }
     }
   }
   FREESPACE(merindexoutfilename);
   FREEARRAY(&state.occdistribution,Countwithpositions);
   FREESPACE(state.currentmer);
+  FREESPACE(state.bytebuffer);
   freeEncodedsequencescanstate(&state.esrspace);
   return haserr ? -1 : 0;
 }
