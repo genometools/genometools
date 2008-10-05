@@ -26,6 +26,7 @@
 #include "echoseq.pr"
 #include "esa-mmsearch-def.h"
 #include "tyr-mkindex.h"
+#include "tyr-search.h"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
