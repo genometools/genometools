@@ -118,4 +118,7 @@ unsigned long destablengthSequentialsuffixarrayreader(
 const char *destabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *sarr);
 
+const Seqpos *suftabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr);
+
 #endif

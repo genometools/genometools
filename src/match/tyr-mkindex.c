@@ -24,6 +24,7 @@
 #include "spacedef.h"
 #include "format64.h"
 #include "echoseq.pr"
+#include "esa-mmsearch-def.h"
 #include "tyr-mkindex.h"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
@@ -64,6 +65,9 @@ struct Dfsstate /* global information */
   FILE *merindexfpout;
   bool moveforward;
   Encodedsequencescanstate *esrspace;
+  bool performtest;
+  const Seqpos *suftab; /* only necessary for performtest */
+  Uchar *currentmer;    /* only necessary for performtest */
 };
 
 #include "esa-dfs.h"
@@ -98,6 +102,36 @@ static void checknumofmers(const Dfsstate *state,
                    Formatuint64_t,
                    PRINTuint64_tcast(dnumofmers),
                    PRINTuint64_tcast(bfnumofmers));
+    exit(EXIT_FAILURE);
+  }
+}
+
+static void checknumberofoccurrences(const Dfsstate *dfsstate,
+                                     unsigned long countocc,
+                                     Seqpos position)
+{
+  MMsearchiterator *mmsi;
+  Seqpos idx, bfcount;
+
+  for (idx = 0; idx < dfsstate->searchlength; idx++)
+  {
+    dfsstate->currentmer[idx] = getencodedchar(dfsstate->encseq,position+idx,
+                                               dfsstate->readmode);
+  }
+  mmsi = newmmsearchiterator(dfsstate->encseq,
+                             dfsstate->suftab,
+                             0,
+                             dfsstate->totallength,
+                             0,
+                             dfsstate->readmode,
+                             dfsstate->currentmer,
+                             (unsigned long) dfsstate->searchlength);
+  bfcount = countmmsearchiterator(mmsi);
+  if (bfcount != (Seqpos) countocc)
+  {
+    fprintf(stderr,"bfcount = " FormatSeqpos " != %lu = countocc\n",
+                   PRINTSeqposcast(bfcount),
+                   countocc);
     exit(EXIT_FAILURE);
   }
 }
@@ -222,12 +256,11 @@ static void showmerdistribution(const Dfsstate *state)
 
 static void showfinalstatistics(const Dfsstate *state,
                                 const GtStr *inputindex,
-                                bool performtest,
                                 Verboseinfo *verboseinfo)
 {
   uint64_t dnumofmers = addupdistribution(&state->occdistribution);
 
-  if (performtest)
+  if (state->performtest)
   {
     checknumofmers(state,dnumofmers);
   }
@@ -277,7 +310,8 @@ static void incrementdistribcounts(ArrayCountwithpositions *occdistribution,
   occdistribution->spaceCountwithpositions[countocc].occcount += value;
 }
 
-static int adddistpos2distribution(unsigned long countocc,Seqpos position,
+static int adddistpos2distribution(unsigned long countocc,
+                                   Seqpos position,
                                    void *adddistposinfo,
                                    GT_UNUSED GtError *err)
 {
@@ -290,6 +324,10 @@ static int adddistpos2distribution(unsigned long countocc,Seqpos position,
       = insertListSeqpos(state->occdistribution.
                               spaceCountwithpositions[countocc].positionlist,
                        position);
+  }
+  if (state->performtest)
+  {
+    checknumberofoccurrences(state,countocc,position);
   }
   return 0;
 }
@@ -431,13 +469,23 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = newEncodedsequencescanstate();
   state.searchlength = (Seqpos) searchlength;
-  state.alpha =  alphabetSequentialsuffixarrayreader(ssar);
+  state.alpha = alphabetSequentialsuffixarrayreader(ssar);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.minocc = minocc;
   state.maxocc = maxocc;
   state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
   state.encseq = encseqSequentialsuffixarrayreader(ssar);
   state.totallength = getencseqtotallength(state.encseq);
+  state.performtest = performtest;
+  if (performtest)
+  {
+    ALLOCASSIGNSPACE(state.currentmer,NULL,Uchar,state.searchlength);
+    state.suftab = suftabSequentialsuffixarrayreader(ssar);
+  } else
+  {
+    state.currentmer = NULL;
+    state.suftab = NULL;
+  }
   if (state.searchlength > state.totallength)
   {
     gt_error_set(err,"searchlength " FormatSeqpos " > " FormatSeqpos
@@ -472,7 +520,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     }
     if (gt_str_length(str_storeindex) == 0)
     {
-      showfinalstatistics(&state,str_inputindex,performtest,verboseinfo);
+      showfinalstatistics(&state,str_inputindex,verboseinfo);
     } else
     {
       assert(false);
@@ -480,6 +528,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   }
   FREESPACE(merindexoutfilename);
   FREEARRAY(&state.occdistribution,Countwithpositions);
+  FREESPACE(state.currentmer);
   freeEncodedsequencescanstate(&state.esrspace);
   return haserr ? -1 : 0;
 }
@@ -503,7 +552,7 @@ int merstatistics(const GtStr *str_inputindex,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,
-                                                scanfile
+                                                (scanfile && !performtest)
                                                   ? SEQ_scan : SEQ_mappedboth,
                                                 err);
   if (ssar == NULL)

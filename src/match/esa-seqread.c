@@ -326,3 +326,10 @@ const char *destabSequentialsuffixarrayreader(
 {
   return sarr->suffixarray->destab;
 }
+
+const Seqpos *suftabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr)
+{
+  assert(sarr->seqactype != SEQ_scan);
+  return sarr->suftab;
+}
