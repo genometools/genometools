@@ -534,7 +534,8 @@ ifeq ($(libannotationsketch),yes)
 endif
 
 .SUFFIXES:
-.PHONY: dist srcdist release gt install docs manuals installwww splint test clean cleanup
+.PHONY: dist srcdist release gt install docs manuals installwww push \
+        splint test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
@@ -570,6 +571,7 @@ release:
 	gzip -9 > genometools-`cat VERSION`.tar.gz
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
 	git push --tags origin master
+	git push --tags github master
 
 docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/gt gtscripts/gtdoc.lua -html $(CURDIR) \
@@ -605,6 +607,11 @@ manuals: $(ANNOTATIONSKETCH_MANUAL)
 installwww:
 # install genometools.org website
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
+
+
+push:
+	git push origin master
+	git push github master
 
 gt: bin/gt
 
