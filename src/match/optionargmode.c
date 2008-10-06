@@ -19,7 +19,7 @@
 #include "core/option.h"
 #include "optionargmode.h"
 
-int optionaddbitmask(Optionargmodedesc *modedesc,
+int optionaddbitmask(const Optionargmodedesc *modedesc,
                      size_t numberofentries,
                      unsigned int *mode,
                      const char *optname,

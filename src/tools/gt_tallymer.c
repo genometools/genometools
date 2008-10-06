@@ -26,6 +26,7 @@
 #include "tools/gt_tallymer.h"
 #include "match/tyr-mkindex.h"
 #include "match/verbose-def.h"
+#include "match/optionargmode.h"
 
 typedef enum
 {
@@ -42,7 +43,7 @@ typedef struct
 
 typedef struct
 {
-  unsigned long searchlength,
+  unsigned long mersize,
                 userdefinedminocc,
                 userdefinedmaxocc,
                 userdefinedprefixlength;
@@ -97,7 +98,7 @@ static GtOptionParser
 
   option = gt_option_new_ulong("mersize",
                                "Specify the mer size.",
-                               &arguments->searchlength,
+                               &arguments->mersize,
                                20UL);
   gt_option_parser_add_option(op, option);
 
@@ -198,7 +199,7 @@ static int gt_tallymer_mkindex_runner(int argc,
   verboseinfo = newverboseinfo(arguments->verbose);
   if (arguments->verbose)
   {
-    printf("# mersize=%lu\n",arguments->searchlength);
+    printf("# mersize=%lu\n",arguments->mersize);
     if (arguments->userdefinedminocc > 0)
     {
       printf("# minocc=%lu\n",arguments->userdefinedminocc);
@@ -235,7 +236,7 @@ static int gt_tallymer_mkindex_runner(int argc,
     printf("# inputindex=%s\n",gt_str_get(arguments->str_inputindex));
   }
   if (merstatistics(arguments->str_inputindex,
-                    arguments->searchlength,
+                    arguments->mersize,
                     arguments->userdefinedminocc,
                     arguments->userdefinedmaxocc,
                     arguments->str_storeindex,
@@ -268,26 +269,124 @@ static int gt_tallymer_occratio(GT_UNUSED int argc,
   return -1;
 }
 
+#define STRAND_FORWARD 1U
+#define STRAND_REVERSE (STRAND_FORWARD << 1)
+
+#define SHOWQSEQNUM  1U
+#define SHOWQPOS     (SHOWQSEQNUM << 1)
+#define SHOWCOUNTS   (SHOWQSEQNUM << 2)
+#define SHOWSEQUENCE (SHOWQSEQNUM << 3)
+
+const Optionargmodedesc showmodedesctable[] =
+{
+  {"qseqnum",SHOWQSEQNUM},
+  {"qpos",SHOWQPOS},
+  {"counts",SHOWCOUNTS},
+  {"sequence",SHOWSEQUENCE}
+};
+
+typedef struct
+{
+  GtStr *str_indexname;
+  GtStrArray *queryfilenames;
+  GtStr *strandspec;
+  GtStrArray *showmodespec;
+  unsigned int strand,
+               showmode;
+  bool verbose;
+} Tallymer_search_options;
+
 static void *gt_tallymer_search_arguments_new(void)
 {
-  return NULL;
+  Tallymer_search_options *arguments
+    = gt_malloc(sizeof (Tallymer_search_options));
+  arguments->str_indexname = gt_str_new();
+  arguments->strandspec = gt_str_new();
+  arguments->queryfilenames = gt_strarray_new();
+  arguments->showmodespec = gt_strarray_new();
+  arguments->showmode = 0;
+  arguments->strand = 0;
+  return arguments;
 }
 
-static void gt_tallymer_search_arguments_delete(GT_UNUSED void *tool_arguments)
+static void gt_tallymer_search_arguments_delete(void *tool_arguments)
 {
-  return;
+  Tallymer_search_options *arguments = tool_arguments;
+
+  if (!arguments)
+  {
+    return;
+  }
+  gt_str_delete(arguments->str_indexname);
+  gt_str_delete(arguments->strandspec);
+  gt_strarray_delete(arguments->queryfilenames);
+  gt_strarray_delete(arguments->showmodespec);
+  gt_free(arguments);
 }
 
 static GtOptionParser
-          *gt_tallymer_search_option_parser_new(GT_UNUSED void *tool_arguments)
+          *gt_tallymer_search_option_parser_new(void *tool_arguments)
 {
-  return NULL;
+  GtOptionParser *op;
+  GtOption *option;
+  Tallymer_search_options *arguments = tool_arguments;
+
+  op = gt_option_parser_new("[options] tallymer-indexname queryfile0 "
+                            "[queryfile1..]",
+                            "Search a set of k-mers in an index constructed "
+                            "by \"gt tallymer mkindex\".");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  option = gt_option_new_string("strand",
+                                "specify the strand to be searched: "
+                                "use f (for forward strand) or "
+                                "p (for reverse complemented strand) or "
+                                "fp (for both); default is f",
+                                arguments->strandspec,
+                                "f");
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_stringarray("output",
+                                     "specify output flags "
+                                     "(qseqnum, qpos, counts, sequence)",
+                                     arguments->showmodespec);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
+  return op;
 }
 
-static int gt_tallymer_search_arguments_check(GT_UNUSED int rest_argc,
-                                              GT_UNUSED void *tool_arguments,
-                                              GT_UNUSED GtError *err)
+static int gt_tallymer_search_arguments_check(int rest_argc,
+                                              void *tool_arguments,
+                                              GtError *err)
 {
+  unsigned long idx;
+  Tallymer_search_options *arguments = tool_arguments;
+
+  if (rest_argc < 1)
+  {
+    gt_error_set(err,"missing tallymer-indexname");
+    return -1;
+  }
+  if (rest_argc < 2)
+  {
+    gt_error_set(err,"missing tallymer-indexnames and queryfilenames");
+    return -1;
+  }
+  for (idx=0; idx<gt_strarray_size(arguments->showmodespec); idx++)
+  {
+    if (optionaddbitmask(showmodedesctable,
+                         sizeof (showmodedesctable)/
+                         sizeof (showmodedesctable[0]),
+                         &arguments->showmode,
+                         "-output",
+                         gt_strarray_get(arguments->showmodespec,idx),err) != 0)
+    {
+      return -1;
+    }
+  }
   return 0;
 }
 
@@ -297,6 +396,15 @@ static int gt_tallymer_search_runner(GT_UNUSED int argc,
                                      GT_UNUSED void *tool_arguments,
                                      GT_UNUSED GtError *err)
 {
+  int idx;
+  Tallymer_search_options *arguments = tool_arguments;
+
+  assert(parsed_args + 2 <= argc);
+  gt_str_set(arguments->str_indexname,argv[parsed_args]);
+  for (idx=parsed_args+1; idx<argc; idx++)
+  {
+    gt_strarray_add_cstr(arguments->queryfilenames,argv[idx]);
+  }
   return 0;
 }
 
