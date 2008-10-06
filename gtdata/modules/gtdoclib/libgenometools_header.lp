@@ -11,6 +11,7 @@
 <li><a href="index.html">Overview</a></li>
 <li><a href="pub/">Download</a></li>
 <li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
 <li><a href="design.html">Design</a></li>
 <li><a id="current" href="libgenometools.html">C API</a></li>
 <li><a href="docs.html"><tt>gtscript</tt> docs</a></li>

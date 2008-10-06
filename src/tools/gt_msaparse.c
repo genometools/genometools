@@ -73,7 +73,7 @@ int gt_msaparse(int argc, const char **argv, GtError *err)
   }
 
   /* make sure sequence_file exists */
-  assert(parsed_args < argc);
+  gt_assert(parsed_args < argc);
   if (!gt_file_exists(argv[parsed_args])) {
     gt_error_set(err, "MSA_file '%s' does not exist", argv[parsed_args]);
     had_err = -1;

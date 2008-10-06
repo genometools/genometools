@@ -56,7 +56,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   CDSArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  assert(arguments);
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] GFF3_file",
                             "Add CDS features to exon "
@@ -85,7 +85,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* create gff3 input stream */
   gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);

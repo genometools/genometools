@@ -56,7 +56,7 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   FingerprintArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *check_option, *duplicates_option, *extract_option;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
                          "Compute MD5 fingerprints for each sequence given "
                          "in sequence_file(s).");
@@ -103,7 +103,7 @@ static void proc_superfluous_sequence(const char *string,
                                       GT_UNUSED double probability, void *data)
 {
   bool *comparisons_failed = data;
-  assert(string && occurrences && comparisons_failed);
+  gt_assert(string && occurrences && comparisons_failed);
   printf("%s only in sequence_file(s)\n", string);
   *comparisons_failed = true;
 }
@@ -115,7 +115,7 @@ static int compare_fingerprints(GtStringDistri *sd, const char *checklist,
   FILE *checkfile;
   GtStr *line;
   gt_error_check(err);
-  assert(sd && checklist);
+  gt_assert(sd && checklist);
   if (!strcmp(checklist, "-"))
     use_stdin = true;
   checkfile = use_stdin ? stdin : gt_fa_xfopen(checklist, "r");
@@ -162,7 +162,7 @@ static int show_duplicates(GtStringDistri *sd, GtError *err)
 {
   FingerprintInfo info;
   gt_error_check(err);
-  assert(sd);
+  gt_assert(sd);
   info.duplicates = 0;
   info.num_of_sequences = 0;
   gt_string_distri_foreach(sd, show_duplicate, &info);
@@ -185,7 +185,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
   sd = gt_string_distri_new();
 
   /* process sequence files */

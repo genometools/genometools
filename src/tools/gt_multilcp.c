@@ -51,7 +51,7 @@ int gt_multilcp(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  assert(parsed_args + 1 < argc);
+  gt_assert(parsed_args + 1 < argc);
   seq1 = argv[parsed_args];
   seq2 = argv[parsed_args + 1];
   len1 = strlen(seq1);

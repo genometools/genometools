@@ -31,8 +31,8 @@ gt_bsGetUniform@uTypeTag@Array@VecOpName@(constBitString str, BitOffset offset,
   @AccumType@ accum = 0, valMask = ~(@AccumType@)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  assert(str && val);
-  assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  gt_assert(str && val);
+  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -91,7 +91,7 @@ gt_bsGetNonUniform@uTypeTag@Array@VecOpName@(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   @AccumType@ accum = 0;
-  assert(str && val);
+  gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -132,7 +132,7 @@ gt_bsGetNonUniform@uTypeTag@Array@VecOpName@(
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
         @AccumType@ valMask;
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = ~(@AccumType@)0;
         if (numBits < (sizeof (val[0])*CHAR_BIT))
           valMask = ~(valMask << numBits);
@@ -158,7 +158,7 @@ gt_bsGetNonUniform@iTypeTag@Array@VecOpName@(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   @AccumType@ accum = 0;
-  assert(str && val);
+  gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -201,7 +201,7 @@ gt_bsGetNonUniform@iTypeTag@Array@VecOpName@(
         @AccumType@ valMask = (numBits < @bitSize@)
           ? ~((~(@AccumType@)0) << numBits) : ~(@AccumType@)0;
         @iOpType@ m = (@iOpType@)1 << (numBits - 1);
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         val[j++] @AssignOp@ ((((accum >> (bitsInAccum - numBits)) & valMask)
                               ^ m) - m);
         bitsInAccum -= numBits;

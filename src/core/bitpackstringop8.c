@@ -172,8 +172,8 @@ gt_bsGetUniformUInt8Array(constBitString str, BitOffset offset,
   unsigned long accum = 0, valMask = ~(unsigned long)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  assert(str && val);
-  assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  gt_assert(str && val);
+  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -232,7 +232,7 @@ gt_bsGetNonUniformUInt8Array(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long accum = 0;
-  assert(str && val);
+  gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -273,7 +273,7 @@ gt_bsGetNonUniformUInt8Array(
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
         unsigned long valMask;
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = ~(unsigned long)0;
         if (numBits < (sizeof (val[0])*CHAR_BIT))
           valMask = ~(valMask << numBits);
@@ -299,7 +299,7 @@ gt_bsGetNonUniformInt8Array(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long accum = 0;
-  assert(str && val);
+  gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -342,7 +342,7 @@ gt_bsGetNonUniformInt8Array(
         unsigned long valMask = (numBits < 8)
           ? ~((~(unsigned long)0) << numBits) : ~(unsigned long)0;
         int8_t m = (int8_t)1 << (numBits - 1);
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         val[j++] = ((((accum >> (bitsInAccum - numBits)) & valMask)
                               ^ m) - m);
         bitsInAccum -= numBits;
@@ -385,8 +385,8 @@ gt_bsStoreUniformUInt8Array(BitString str, BitOffset offset,
   unsigned long accum, valMask = ~(unsigned long)0, currentVal;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  assert(str && val);
-  assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  gt_assert(str && val);
+  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -506,8 +506,8 @@ gt_bsStoreNonUniformUInt8Array(
   unsigned long accum, valMask = ~(unsigned long)0, currentVal;
   if (numBitsList[0] < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBitsList[0]);
-  assert(str && val);
-  assert(numBitsList[0] <= sizeof (val[0])*CHAR_BIT);
+  gt_assert(str && val);
+  gt_assert(numBitsList[0] <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -518,7 +518,7 @@ gt_bsStoreNonUniformUInt8Array(
   if (totalBitsLeft)
   {
     unsigned numBits = numBitsList[++j];
-    assert(numBits <= sizeof (val[0])*CHAR_BIT);
+    gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
     valMask = (numBits < 8)?
       ~((~(uint8_t)0) << numBits):~(uint8_t)0;
     currentVal = val[j] & valMask;
@@ -550,7 +550,7 @@ gt_bsStoreNonUniformUInt8Array(
       if (!(bitsLeft -= bits2Read) && totalBitsLeft)
       {
         unsigned numBits = numBitsList[++j];
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = (numBits < 8)?
           ~((~(uint8_t)0) << numBits):~(uint8_t)0;
         currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;
@@ -596,7 +596,7 @@ gt_bsStoreNonUniformUInt8Array(
       if (bits2Read == bitsLeft && totalBitsLeft)
       {
         unsigned numBits = numBitsList[++j];
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = (numBits < 8)?
           ~((~(uint8_t)0) << numBits):~(uint8_t)0;
         currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;
@@ -661,8 +661,8 @@ gt_bsGetUniformUInt8ArrayAdd(constBitString str, BitOffset offset,
   unsigned long accum = 0, valMask = ~(unsigned long)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  assert(str && val);
-  assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  gt_assert(str && val);
+  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -721,7 +721,7 @@ gt_bsGetNonUniformUInt8ArrayAdd(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long accum = 0;
-  assert(str && val);
+  gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -762,7 +762,7 @@ gt_bsGetNonUniformUInt8ArrayAdd(
       while (j < numValues && bitsInAccum >= (numBits = numBitsList[j]))
       {
         unsigned long valMask;
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = ~(unsigned long)0;
         if (numBits < (sizeof (val[0])*CHAR_BIT))
           valMask = ~(valMask << numBits);
@@ -788,7 +788,7 @@ gt_bsGetNonUniformInt8ArrayAdd(
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   unsigned long accum = 0;
-  assert(str && val);
+  gt_assert(str && val);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -831,7 +831,7 @@ gt_bsGetNonUniformInt8ArrayAdd(
         unsigned long valMask = (numBits < 8)
           ? ~((~(unsigned long)0) << numBits) : ~(unsigned long)0;
         int8_t m = (int8_t)1 << (numBits - 1);
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         val[j++] += ((((accum >> (bitsInAccum - numBits)) & valMask)
                               ^ m) - m);
         bitsInAccum -= numBits;

@@ -44,7 +44,7 @@ static GtOptionParser* gt_template_option_parser_new(void *tool_arguments)
   TemplateArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] [file]", /* XXX */
@@ -70,7 +70,7 @@ static int gt_template_arguments_check(GT_UNUSED int rest_argc,
   TemplateArguments *arguments = tool_arguments;
   int had_err = 0;
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* XXX: do some checking after the option have been parsed (usally this is not
      necessary and this function can be removed completely). */
@@ -87,7 +87,7 @@ static int gt_template_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* XXX */
   if (arguments->bool_option_template)

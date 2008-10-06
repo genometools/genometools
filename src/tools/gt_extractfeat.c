@@ -58,7 +58,7 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   GtExtractFeatArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
-  assert(arguments);
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] GFF3_file",
                          "Extract features given in GFF3_file from "
@@ -106,7 +106,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   if (!had_err) {
     /* create gff3 input stream */

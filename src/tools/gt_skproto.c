@@ -110,7 +110,7 @@ static void skproto(const char *filename, FILE *fpin)
   int linenum = 0, startfunction = 1, incomment = 0;
   GtStr *line;
 
-  assert(filename && fpin);
+  gt_assert(filename && fpin);
 
   line = gt_str_new();
 

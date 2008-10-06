@@ -507,7 +507,7 @@ static OPrval parse_options(int *parsed_args,
       }
       else
       {
-        assert(0); /* cannot happen */
+        gt_assert(0); /* cannot happen */
       }
     }
     else

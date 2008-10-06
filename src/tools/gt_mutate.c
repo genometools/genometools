@@ -44,7 +44,7 @@ static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
   MutateArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "Mutate the sequences of the given sequence_file(s) "
                          "and show them on stdout.");
@@ -71,7 +71,7 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
   int had_err;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 

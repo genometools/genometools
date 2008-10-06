@@ -32,8 +32,8 @@ gt_bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset,
   @AccumType@ accum, valMask = ~(@AccumType@)0, currentVal;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
-  assert(str && val);
-  assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  gt_assert(str && val);
+  gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -153,8 +153,8 @@ gt_bsStoreNonUniform@uTypeTag@Array(
   @AccumType@ accum, valMask = ~(@AccumType@)0, currentVal;
   if (numBitsList[0] < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBitsList[0]);
-  assert(str && val);
-  assert(numBitsList[0] <= sizeof (val[0])*CHAR_BIT);
+  gt_assert(str && val);
+  gt_assert(numBitsList[0] <= sizeof (val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
   if (!totalBitsLeft)
   {
@@ -165,7 +165,7 @@ gt_bsStoreNonUniform@uTypeTag@Array(
   if (totalBitsLeft)
   {
     unsigned numBits = numBitsList[++j];
-    assert(numBits <= sizeof (val[0])*CHAR_BIT);
+    gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
     valMask = (numBits < @bitSize@)?
       ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
     currentVal = val[j] & valMask;
@@ -197,7 +197,7 @@ gt_bsStoreNonUniform@uTypeTag@Array(
       if (!(bitsLeft -= bits2Read) && totalBitsLeft)
       {
         unsigned numBits = numBitsList[++j];
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = (numBits < @bitSize@)?
           ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
         currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;
@@ -243,7 +243,7 @@ gt_bsStoreNonUniform@uTypeTag@Array(
       if (bits2Read == bitsLeft && totalBitsLeft)
       {
         unsigned numBits = numBitsList[++j];
-        assert(numBits <= sizeof (val[0])*CHAR_BIT);
+        gt_assert(numBits <= sizeof (val[0])*CHAR_BIT);
         valMask = (numBits < @bitSize@)?
           ~((~(@uOpType@)0) << numBits):~(@uOpType@)0;
         currentVal = val[j] & valMask, totalBitsLeft -= bitsLeft = numBits;

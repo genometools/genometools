@@ -55,7 +55,7 @@ int gt_matchcount(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args + 2 < argc);
+  gt_assert(parsed_args + 2 < argc);
 
   if (sscanf(argv[parsed_args], "%d", &k) != 1 || k <= 0) {
     gt_error_set(err, "first argument <k> must be positive integer");

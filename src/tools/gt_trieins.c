@@ -55,7 +55,7 @@ int gt_trieins(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
+  gt_assert(parsed_args == 1);
 
   indexname = gt_str_new_cstr(argv[parsed_args]);
   if (test_trieins(onlyins,indexname,err) != 0)

@@ -117,7 +117,7 @@ static void showmeroccurrence(unsigned long key, unsigned long long value,
 
   for (len=astretchinfo->minkey; len<= key; len++)
   {
-    assert(len <= astretchinfo->maxvalue);
+    gt_assert(len <= astretchinfo->maxvalue);
     astretchinfo->mmercount[len] += value * (unsigned long long) (key-len+1);
   }
 }
@@ -172,7 +172,7 @@ static void processastretches(const GtDiscDistri *distastretch,
     printf("a^{%lu} occurs %llu times\n", len,astretchinfo.mmercount[len]);
     /*@end@*/
   }
-  assert(astretchinfo.sumA == countA);
+  gt_assert(astretchinfo.sumA == countA);
   gt_free(astretchinfo.mmercount);
 }
 

@@ -58,7 +58,7 @@ int gt_qgramdist(int argc, const char **argv, GtError *err)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args+1 < argc);
+  gt_assert(parsed_args+1 < argc);
 
   /* make sure gt_seq_file_1 exists */
   if (!gt_file_exists(argv[parsed_args])) {

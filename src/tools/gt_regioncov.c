@@ -71,7 +71,7 @@ int gt_regioncov(int argc, const char **argv, GtError *err)
   }
 
   /* create gff3 input stream */
-  assert(parsed_args < argc);
+  gt_assert(parsed_args < argc);
   gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
   if (arguments.verbose)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);

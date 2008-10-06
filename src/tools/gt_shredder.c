@@ -49,7 +49,7 @@ static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
   GtShredderArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] [sequence_file ...]",
                          "GtShredder sequence_file into consecutive pieces of "
                          "random length.");
@@ -81,7 +81,7 @@ static int gt_shredder_arguments_check(GT_UNUSED int rest_argc,
 {
   GtShredderArguments *arguments = tool_arguments;
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
   if (arguments->minlength > arguments->maxlength) {
     gt_error_set(err, "-minlength must be <= than -maxlength");
     return -1;
@@ -101,7 +101,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
   GtStr *desc;
 
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   desc = gt_str_new();

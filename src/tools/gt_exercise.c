@@ -82,7 +82,7 @@ static GtOptionParser* gt_exercise_option_parser_new(void *tool_arguments)
 {
   GtToolbox *exercise_toolbox = tool_arguments;
   GtOptionParser *op;
-  assert(exercise_toolbox);
+  gt_assert(exercise_toolbox);
   op = gt_option_parser_new("[option ...] exercise_tool_name [argument ...]",
                          "Call exercise tool with name exercise_tool_name and "
                          "pass argument(s) to it.");
@@ -101,7 +101,7 @@ static int gt_exercise_runner(int argc, const char **argv, int parsed_args,
   char **nargv = NULL;
 
   gt_error_check(err);
-  assert(exercise_toolbox);
+  gt_assert(exercise_toolbox);
 
   /* get exercise */
   if (!gt_toolbox_has_tool(exercise_toolbox, argv[parsed_args])) {
@@ -114,7 +114,7 @@ static int gt_exercise_runner(int argc, const char **argv, int parsed_args,
   if (!had_err) {
     if (!(toolfunc = gt_toolbox_get(exercise_toolbox, argv[parsed_args]))) {
       tool = gt_toolbox_get_tool(exercise_toolbox, argv[parsed_args]);
-      assert(tool);
+      gt_assert(tool);
     }
     nargv = gt_cstr_array_prefix_first(argv + parsed_args,
                                        gt_error_get_progname(err));

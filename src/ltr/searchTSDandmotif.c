@@ -676,7 +676,7 @@ static int searchforTSDandorMotifoutside(
     INITARRAY(&subrepeatinfo.repeats, Repeat);
     subrepeatinfo.lmin = (unsigned long) lo->minlengthTSD;
     subrepeatinfo.lmax = (unsigned long) lo->maxlengthTSD;
-    assert(startleftLTR < startrightLTR);
+    gt_assert(startleftLTR < startrightLTR);
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
 

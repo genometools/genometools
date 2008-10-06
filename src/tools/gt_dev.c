@@ -64,7 +64,7 @@ static GtOptionParser* gt_dev_option_parser_new(void *tool_arguments)
 {
   GtToolbox *dev_toolbox = tool_arguments;
   GtOptionParser *op;
-  assert(dev_toolbox);
+  gt_assert(dev_toolbox);
   op = gt_option_parser_new("[option ...] dev_tool_name [argument ...]",
                          "Call development tool with name dev_tool_name and "
                          "pass argument(s) to it.");
@@ -83,7 +83,7 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
   char **nargv = NULL;
 
   gt_error_check(err);
-  assert(dev_toolbox);
+  gt_assert(dev_toolbox);
 
   /* get development tools */
   if (!gt_toolbox_has_tool(dev_toolbox, argv[parsed_args])) {
@@ -96,7 +96,7 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
   if (!had_err) {
     if (!(toolfunc = gt_toolbox_get(dev_toolbox, argv[parsed_args]))) {
       tool = gt_toolbox_get_tool(dev_toolbox, argv[parsed_args]);
-      assert(tool);
+      gt_assert(tool);
     }
     nargv = gt_cstr_array_prefix_first(argv + parsed_args,
                                        gt_error_get_progname(err));

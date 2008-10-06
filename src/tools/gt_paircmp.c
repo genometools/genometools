@@ -229,7 +229,7 @@ static unsigned long applycheckfunctiontosimpleoptions(
   {
     return runcheckfunctionontext(checkfunction,gt_str_get(opt->text));
   }
-  assert(false);
+  gt_assert(false);
   return 0;
 }
 
@@ -246,7 +246,7 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
   {
     unsigned long testcases;
 
-    assert(parsed_args == argc);
+    gt_assert(parsed_args == argc);
     showsimpleoptions(&cmppairwise);
     testcases = applycheckfunctiontosimpleoptions(checkgreedyunitedist,
                                                   &cmppairwise);

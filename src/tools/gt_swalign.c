@@ -48,7 +48,7 @@ static GtOptionParser* gt_swalign_opion_parser_new(void *tool_arguments)
   SWAlignArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
-  assert(arguments);
+  gt_assert(arguments);
   op = gt_option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
                          "Locally align each sequence in seq_file_1 "
                          "with each sequence in seq_file_2.");
@@ -72,7 +72,7 @@ static int gt_swalign_runner(GT_UNUSED int argc, const char **argv,
   int had_err = 0;
   GtAlignment *a;
   gt_error_check(err);
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   /* XXX: make this more flexible */
