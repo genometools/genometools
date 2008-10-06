@@ -268,12 +268,45 @@ static int gt_tallymer_occratio(GT_UNUSED int argc,
   return -1;
 }
 
-static int gt_tallymer_search(GT_UNUSED int argc,
-                              GT_UNUSED const char *argv[],
-                              GtError *err)
+static void *gt_tallymer_search_arguments_new(void)
 {
-  gt_error_set(err,"tallymer search not implemented yet");
-  return -1;
+  return NULL;
+}
+
+static void gt_tallymer_search_arguments_delete(GT_UNUSED void *tool_arguments)
+{
+  return;
+}
+
+static GtOptionParser
+          *gt_tallymer_search_option_parser_new(GT_UNUSED void *tool_arguments)
+{
+  return NULL;
+}
+
+static int gt_tallymer_search_arguments_check(GT_UNUSED int rest_argc,
+                                              GT_UNUSED void *tool_arguments,
+                                              GT_UNUSED GtError *err)
+{
+  return 0;
+}
+
+static int gt_tallymer_search_runner(GT_UNUSED int argc,
+                                     GT_UNUSED const char **argv,
+                                     GT_UNUSED int parsed_args,
+                                     GT_UNUSED void *tool_arguments,
+                                     GT_UNUSED GtError *err)
+{
+  return 0;
+}
+
+static GtTool *gt_tallymer_search(void)
+{
+  return gt_tool_new(gt_tallymer_search_arguments_new,
+                     gt_tallymer_search_arguments_delete,
+                     gt_tallymer_search_option_parser_new,
+                     gt_tallymer_search_arguments_check,
+                     gt_tallymer_search_runner);
 }
 
 static void *gt_tallymer_arguments_new(void)
@@ -281,7 +314,7 @@ static void *gt_tallymer_arguments_new(void)
   GtToolbox *tallymer_toolbox = gt_toolbox_new();
   gt_toolbox_add_tool(tallymer_toolbox, "mkindex", gt_tallymer_mkindex());
   gt_toolbox_add(tallymer_toolbox, "occratio", gt_tallymer_occratio);
-  gt_toolbox_add(tallymer_toolbox, "search", gt_tallymer_search);
+  gt_toolbox_add_tool(tallymer_toolbox, "search", gt_tallymer_search());
   return tallymer_toolbox;
 }
 
