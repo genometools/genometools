@@ -32,8 +32,7 @@
 #include "esa-fileend.h"
 #include "readmode-def.h"
 #include "stamp.h"
-
-#include "opensfxfile.pr"
+#include "opensfxfile.h"
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s=" FormatSeqpos "\n",#VAL,\

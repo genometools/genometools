@@ -22,11 +22,11 @@
 #include "fmindex.h"
 #include "divmodmul.h"
 #include "spacedef.h"
+#include "opensfxfile.h"
 
 #include "esa-merge.pr"
 #include "esa-map.pr"
 #include "encseq2offset.pr"
-#include "opensfxfile.pr"
 #include "mkidxcpy.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"

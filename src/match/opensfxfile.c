@@ -23,6 +23,7 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
+#include "opensfxfile.h"
 
 /*@null@*/ FILE *opensfxfile(const GtStr *indexname,
                              const char *suffix,
@@ -55,4 +56,61 @@ bool indexfilealreadyexists(const GtStr *indexname,const char *suffix)
   }
   gt_str_delete(tmpfilename);
   return false;
+}
+
+void *genericmaponlytable(const GtStr *indexname,const char *suffix,
+                          size_t *numofbytes,GtError *err)
+{
+  GtStr *tmpfilename;
+  void *ptr;
+  bool haserr = false;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,suffix);
+  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes);
+  if (ptr == NULL)
+  {
+    gt_error_set(err,"cannot map file \"%s\": %s",gt_str_get(tmpfilename),
+                  strerror(errno));
+    haserr = true;
+  }
+  gt_str_delete(tmpfilename);
+  return haserr ? NULL : ptr;
+}
+
+int checkmappedfilesize(size_t numofbytes,unsigned long expectedunits,
+                        size_t sizeofunit,GtError *err)
+{
+  gt_error_check(err);
+  if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
+  {
+    gt_error_set(err,"number of mapped units = %lu != %lu"
+                      " = expected number of integers",
+                      (unsigned long) (numofbytes/sizeofunit),
+                      expectedunits);
+    return -1;
+  }
+  return 0;
+}
+
+void *genericmaptable(const GtStr *indexname,
+                      const char *suffix,
+                      unsigned long expectedunits,
+                      size_t sizeofunit,
+                      GtError *err)
+{
+  size_t numofbytes;
+
+  void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,err);
+  if (ptr == NULL)
+  {
+    return NULL;
+  }
+  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
+  {
+    gt_fa_xmunmap(ptr);
+    return NULL;
+  }
+  return ptr;
 }

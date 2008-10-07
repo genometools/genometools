@@ -24,8 +24,8 @@
 #include "core/unused_api.h"
 #include "encseq-def.h"
 #include "spacedef.h"
+#include "opensfxfile.h"
 
-#include "opensfxfile.pr"
 #include "fillsci.pr"
 
 #define TISTABFILESUFFIX ".tis"

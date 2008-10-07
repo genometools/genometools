@@ -30,8 +30,7 @@
 #include "safecast-gen.h"
 #include "encseq-def.h"
 #include "stamp.h"
-
-#include "opensfxfile.pr"
+#include "opensfxfile.h"
 
 static unsigned long currentspecialrangevalue(
                              unsigned long len,

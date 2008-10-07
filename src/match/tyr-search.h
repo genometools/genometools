@@ -61,7 +61,7 @@ typedef struct
 
 typedef struct
 {
-  const void *mappedfileptr;
+  void *mappedfileptr;
   const GtStr *indexfilename;
   unsigned int alphasize;
   unsigned long numofmers,

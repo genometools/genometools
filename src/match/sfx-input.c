@@ -31,8 +31,8 @@
 #include "sarr-def.h"
 #include "stamp.h"
 #include "sfx-input.h"
+#include "opensfxfile.h"
 
-#include "opensfxfile.pr"
 #include "esa-map.pr"
 #include "fillsci.pr"
 

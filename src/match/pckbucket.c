@@ -22,7 +22,7 @@
 #include "eis-voiditf.h"
 #include "pckbucket.h"
 #include "initbasepower.pr"
-#include "opensfxfile.pr"
+#include "opensfxfile.h"
 
 typedef struct
 {
@@ -251,35 +251,25 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
                                   unsigned int numofchars,
                                   GtError *err)
 {
-  GtStr *tmpfilename;
   size_t numofbytes;
-  bool haserr = false;
   void *mapptr;
   unsigned int maxdepth;
   Pckbuckettable *pckbt;
 
   gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,PCKBUCKETTABLE);
-  mapptr = gt_fa_mmap_read(gt_str_get(tmpfilename),&numofbytes);
+  mapptr = genericmaponlytable(indexname,PCKBUCKETTABLE,&numofbytes,err);
   if (mapptr == NULL)
   {
-    gt_error_set(err,"could not map datafile %s",gt_str_get(tmpfilename));
-    haserr = true;
+    return NULL;
   }
-  gt_str_delete(tmpfilename);
-  if (!haserr)
-  {
-    gt_assert(mapptr != NULL);
-    maxdepth = (unsigned int) ((Seqpos *) mapptr)[0];
-    pckbt = allocandinitpckbuckettable(numofchars,maxdepth,false);
-    pckbt->mapptr = mapptr;
-    pckbt->mbtab[0] = (Matchbound *) (((Seqpos *) mapptr) + 1);
-    setbcktaboffsets(pckbt);
-    gt_assert(numofbytes ==
-           sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
-  }
-  return haserr ? NULL : pckbt;
+  maxdepth = (unsigned int) ((Seqpos *) mapptr)[0];
+  pckbt = allocandinitpckbuckettable(numofchars,maxdepth,false);
+  pckbt->mapptr = mapptr;
+  pckbt->mbtab[0] = (Matchbound *) (((Seqpos *) mapptr) + 1);
+  setbcktaboffsets(pckbt);
+  assert(numofbytes ==
+         sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
+  return pckbt;
 }
 
 unsigned int pcktb2maxdepth(const Pckbuckettable *pckbuckettable)

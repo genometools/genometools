@@ -70,6 +70,7 @@ mssufpat.c
 myersapm.c
 optionargmode.c
 overallseq.c
+opensfxfile.c
 pckbucket.c
 pssm.c
 nullcols.c

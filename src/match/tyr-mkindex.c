@@ -29,7 +29,7 @@
 #include "esa-mmsearch-def.h"
 #include "tyr-mkindex.h"
 #include "tyr-search.h"
-#include "opensfxfile.pr"
+#include "opensfxfile.h"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
@@ -359,11 +359,12 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                                               unsigned long countoutputmers,
                                               GtError *err)
 {
-  if (alphasize == (unsigned int) (DNAALPHASIZE + 1))
+  if (alphasize == (unsigned int) DNAALPHASIZE)
   {
     shiftbytecode(bytebuffer,encseq,position,(Seqpos) mersize);
   } else
   {
+    assert(false);
     /*
     string2bytecode(bytebuffer,kmerseqinfotab[idxnum].plainseq + position,
                     searchlength);

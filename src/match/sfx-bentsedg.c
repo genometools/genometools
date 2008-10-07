@@ -32,9 +32,9 @@
 #include "bcktab.h"
 #include "bltrie-ssort.h"
 #include "lcpoverflow.h"
+#include "opensfxfile.h"
 
 #include "sfx-cmpsuf.pr"
-#include "opensfxfile.pr"
 #include "kmer2string.pr"
 
 #define COMPAREOFFSET   (MAXALPHABETCHARACTER + 1)

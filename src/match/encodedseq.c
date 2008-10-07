@@ -38,10 +38,10 @@
 #include "safecast-gen.h"
 #include "esa-fileend.h"
 #include "verbose-def.h"
+#include "opensfxfile.h"
 #include "stamp.h"
 
 #include "sfx-cmpsuf.pr"
-#include "opensfxfile.pr"
 #include "fillsci.pr"
 
 #define CHECKANDUPDATE(VAL)\
