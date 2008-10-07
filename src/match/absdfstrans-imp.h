@@ -42,18 +42,18 @@ struct AbstractDfstransformer
   void (*freedfsconstinfo)(void **dfsconstinfo);
   void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
                           void *dfsconstinfo);
-  unsigned long (*limdfsnextstep)(DECLAREPTRDFSSTATE(aliascolumn),
-                                  Seqpos left,
-                                  Seqpos right,
-                                  Seqpos width,
-                                  unsigned long currentdepth,
-                                  void *dfsconstinfo);
-  void (*nextDfsstate)(const void *dfsconstinfo,
+  unsigned long (*fullmatchLimdfsstate)(DECLAREPTRDFSSTATE(aliascolumn),
+                                       Seqpos left,
+                                       Seqpos right,
+                                       Seqpos width,
+                                       unsigned long currentdepth,
+                                       void *dfsconstinfo);
+  void (*nextLimdfsstate)(const void *dfsconstinfo,
                        DECLAREPTRDFSSTATE(aliasoutstate),
                        unsigned long currentdepth,
                        Uchar currentchar,
                        const DECLAREPTRDFSSTATE(aliasinstate));
-  void (*inplacenextDfsstate)(const void *dfsconstinfo,
+  void (*inplacenextLimdfsstate)(const void *dfsconstinfo,
                               DECLAREPTRDFSSTATE(aliasstate),
                               unsigned long currentdepth,
                               Uchar currentchar);

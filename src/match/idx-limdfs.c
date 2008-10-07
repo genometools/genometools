@@ -327,16 +327,16 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
-                                 limdfsresources->currentdfsstate,
-                                 (unsigned long) (pos - startpos + 1),
-                                 cc);
-      pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
-                                         leftbound,
-                                         leftbound,
-                                         (Seqpos) 1,
-                                         (unsigned long) (pos - startpos + 1),
-                                         limdfsresources->dfsconstinfo);
+      adfst->inplacenextLimdfsstate(limdfsresources->dfsconstinfo,
+                                    limdfsresources->currentdfsstate,
+                                    (unsigned long) (pos - startpos + 1),
+                                    cc);
+      pprefixlen = adfst->fullmatchLimdfsstate(limdfsresources->currentdfsstate,
+                                               leftbound,
+                                               leftbound,
+                                               (Seqpos) 1,
+                                               (unsigned long) (pos-startpos+1),
+                                               limdfsresources->dfsconstinfo);
       if (pprefixlen == 0) /* failure */
       {
         break;
@@ -400,16 +400,17 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 #endif
       addpathchar(limdfsresources,(unsigned long) (offset - 1 + contextlength),
                   cc);
-      adfst->inplacenextDfsstate(limdfsresources->dfsconstinfo,
-                                 limdfsresources->currentdfsstate,
-                                 (unsigned long) (offset + contextlength),
-                                 cc);
-      pprefixlen = adfst->limdfsnextstep(limdfsresources->currentdfsstate,
-                                         bound,
-                                         bound+1,
-                                         (Seqpos) 1,
-                                         (unsigned long) (offset+contextlength),
-                                         limdfsresources->dfsconstinfo);
+      adfst->inplacenextLimdfsstate(limdfsresources->dfsconstinfo,
+                                    limdfsresources->currentdfsstate,
+                                    (unsigned long) (offset + contextlength),
+                                    cc);
+      pprefixlen = adfst->fullmatchLimdfsstate(limdfsresources->currentdfsstate,
+                                               bound,
+                                               bound+1,
+                                               (Seqpos) 1,
+                                               (unsigned long)
+                                                 (offset+contextlength),
+                                               limdfsresources->dfsconstinfo);
       if (pprefixlen == 0)
       {
         break;
@@ -446,16 +447,16 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   stackptr->lcpitv = *child;
 
 #ifdef SKDEBUG
-  printf("(2) nextDfsstate(");
+  printf("(2) nextLimdfsstate(");
   adfst->showLimdfsstate(indfsstate,(unsigned long) (child->offset-1),
                          limdfsresources->dfsconstinfo);
   printf(",%u)=",(unsigned int) inchar);
 #endif
-  adfst->nextDfsstate(limdfsresources->dfsconstinfo,
-                      stackptr->aliasstate,
-                      (unsigned long) child->offset,
-                      inchar,
-                      indfsstate);
+  adfst->nextLimdfsstate(limdfsresources->dfsconstinfo,
+                         stackptr->aliasstate,
+                         (unsigned long) child->offset,
+                         inchar,
+                         indfsstate);
 #ifdef SKDEBUG
   adfst->showLimdfsstate(stackptr->aliasstate,(unsigned long) child->offset,
                          limdfsresources->dfsconstinfo);
@@ -468,12 +469,12 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   {
     width = child->rightbound - child->leftbound;
   }
-  pprefixlen = adfst->limdfsnextstep(stackptr->aliasstate,
-                                     child->leftbound,
-                                     child->rightbound,
-                                     width,
-                                     (unsigned long) child->offset,
-                                     limdfsresources->dfsconstinfo);
+  pprefixlen = adfst->fullmatchLimdfsstate(stackptr->aliasstate,
+                                           child->leftbound,
+                                           child->rightbound,
+                                           width,
+                                           (unsigned long) child->offset,
+                                           limdfsresources->dfsconstinfo);
   if (pprefixlen == 0)
   {
     return true;
