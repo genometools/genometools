@@ -20,6 +20,7 @@
 
 #include "core/arraydef.h"
 #include "core/str_api.h"
+#include "core/str_array_api.h"
 #include "intbits.h"
 #include "divmodmul.h"
 
@@ -31,6 +32,14 @@
 
 #define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)
 #define SETDEFINEDBOUND(UDB,IDX)         SETIBIT(UDB,IDX)
+
+#define STRAND_FORWARD 1U
+#define STRAND_REVERSE (STRAND_FORWARD << 1)
+
+#define SHOWQSEQNUM  1U
+#define SHOWQPOS     (SHOWQSEQNUM << 1)
+#define SHOWCOUNTS   (SHOWQSEQNUM << 2)
+#define SHOWSEQUENCE (SHOWQSEQNUM << 3)
 
 typedef struct
 {
@@ -52,5 +61,12 @@ DECLAREARRAYSTRUCT(Largecount);
 
 typedef struct Tallymerindex Tallymerindex;
 typedef struct Tallymercountinfo Tallymercountinfo;
+
+int tallymersearch(const GtStr *tallymerindexname,
+                   const GtStrArray *queryfilenames,
+                   unsigned int showmode,
+                   unsigned int strand,
+                   bool verbose,
+                   GtError *err);
 
 #endif

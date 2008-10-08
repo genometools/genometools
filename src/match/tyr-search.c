@@ -16,6 +16,7 @@
 */
 
 #include "core/fa.h"
+#include "core/unused_api.h"
 #include "divmodmul.h"
 #include "opensfxfile.h"
 #include "tyr-search.h"
@@ -212,4 +213,14 @@ void tallymercountinfo_delete(Tallymercountinfo **tallymercountinfoptr)
   tallymercountinfo->mappedmctfileptr = NULL;
   FREESPACE(tallymercountinfo);
   *tallymercountinfoptr = NULL;
+}
+
+int tallymersearch(GT_UNUSED const GtStr *tallymerindexname,
+                   GT_UNUSED const GtStrArray *queryfilenames,
+                   GT_UNUSED unsigned int showmode,
+                   GT_UNUSED unsigned int strand,
+                   GT_UNUSED bool verbose,
+                   GT_UNUSED GtError *err)
+{
+  return 0;
 }
