@@ -50,31 +50,7 @@ typedef struct
 
 DECLAREARRAYSTRUCT(Largecount);
 
-typedef struct
-{
-  void *mappedmctfileptr;
-  const GtStr *indexfilename;
-  Uchar *smallcounts;
-  Largecount *largecounts;
-  unsigned long numoflargecounts;
-} MCTinfo;
-
-typedef struct
-{
-  void *mappedfileptr;
-  const GtStr *indexfilename;
-  unsigned int alphasize;
-  unsigned long numofmers,
-                mersize,
-                merbytes;
-  Uchar *mertable,
-        *lastmer;
-} Vmerindex;
-
-typedef struct
-{
-  Uchar *leftmer,
-        *rightmer;
-} Merbounds;
+typedef struct Tallymerindex Tallymerindex;
+typedef struct MCTinfo MCTinfo;
 
 #endif

@@ -16,9 +16,37 @@
 */
 
 #include "core/fa.h"
-#include "tyr-search.h"
 #include "divmodmul.h"
 #include "opensfxfile.h"
+#include "tyr-search.h"
+#include "spacedef.h"
+
+struct MCTinfo
+{
+  void *mappedmctfileptr;
+  const GtStr *indexfilename;
+  Uchar *smallcounts;
+  Largecount *largecounts;
+  unsigned long numoflargecounts;
+};
+
+struct Tallymerindex
+{
+  void *mappedfileptr;
+  const GtStr *indexfilename;
+  unsigned int alphasize;
+  unsigned long numofmers,
+                mersize,
+                merbytes;
+  Uchar *mertable,
+        *lastmer;
+};
+
+typedef struct
+{
+  Uchar *leftmer,
+        *rightmer;
+} Merbounds;
 
 unsigned long decodesingleinteger(const Uchar *start)
 {
@@ -32,21 +60,23 @@ unsigned long decodesingleinteger(const Uchar *start)
   return value;
 }
 
-int mapvmerindex(Vmerindex *vmerindex,const GtStr *vmerindexname,GtError *err)
+Tallymerindex *tallymerindex_new(const GtStr *tallymerindexname,GtError *err)
 {
   bool haserr = false;
   size_t numofbytes, rest;
+  Tallymerindex *tallymerindex;
 
-  vmerindex->indexfilename = vmerindexname;
-  vmerindex->mappedfileptr = genericmaponlytable(vmerindexname,
+  ALLOCASSIGNSPACE(tallymerindex,NULL,Tallymerindex,1);
+  tallymerindex->indexfilename = tallymerindexname;
+  tallymerindex->mappedfileptr = genericmaponlytable(tallymerindexname,
                                                  MERSUFFIX,&numofbytes,err);
-  if (vmerindex->mappedfileptr == NULL)
+  if (tallymerindex->mappedfileptr == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    vmerindex->mertable = (Uchar *) vmerindex->mappedfileptr;
+    tallymerindex->mertable = (Uchar *) tallymerindex->mappedfileptr;
     rest = sizeof (unsigned long) * EXTRAINTEGERS;
     if (rest > numofbytes)
     {
@@ -57,53 +87,57 @@ int mapvmerindex(Vmerindex *vmerindex,const GtStr *vmerindexname,GtError *err)
   }
   if (!haserr)
   {
-    assert(vmerindex->mertable != NULL);
-    vmerindex->mersize
-      = decodesingleinteger(vmerindex->mertable + numofbytes - rest);
-    vmerindex->alphasize
-      = (unsigned int) decodesingleinteger(vmerindex->mertable +
+    assert(tallymerindex->mertable != NULL);
+    tallymerindex->mersize
+      = decodesingleinteger(tallymerindex->mertable + numofbytes - rest);
+    tallymerindex->alphasize
+      = (unsigned int) decodesingleinteger(tallymerindex->mertable +
                                            numofbytes - rest +
                                            sizeof (unsigned long));
-    vmerindex->merbytes = MERBYTES(vmerindex->mersize);
-    if ((numofbytes - rest) % vmerindex->merbytes != 0)
+    tallymerindex->merbytes = MERBYTES(tallymerindex->mersize);
+    if ((numofbytes - rest) % tallymerindex->merbytes != 0)
     {
       gt_error_set(err,"size of index is %lu which is not a multiple of %lu",
                    (unsigned long) (numofbytes - rest),
-                   vmerindex->merbytes);
+                   tallymerindex->merbytes);
       haserr = true;
     }
   }
   if (!haserr)
   {
-    vmerindex->numofmers
-      = (unsigned long) (numofbytes - rest) / vmerindex->merbytes;
-    assert(vmerindex->mertable != NULL);
-    if (vmerindex->numofmers == 0)
+    tallymerindex->numofmers
+      = (unsigned long) (numofbytes - rest) / tallymerindex->merbytes;
+    assert(tallymerindex->mertable != NULL);
+    if (tallymerindex->numofmers == 0)
     {
-      vmerindex->lastmer = vmerindex->mertable - 1;
+      tallymerindex->lastmer = tallymerindex->mertable - 1;
     } else
     {
-      vmerindex->lastmer
-        = vmerindex->mertable + numofbytes - rest - vmerindex->merbytes;
+      tallymerindex->lastmer
+        = tallymerindex->mertable + numofbytes - rest - tallymerindex->merbytes;
     }
   }
-  if (haserr && vmerindex->mappedfileptr != NULL)
+  if (haserr)
   {
-    gt_fa_xmunmap(vmerindex->mappedfileptr);
-    vmerindex->mappedfileptr = NULL;
+    if (tallymerindex->mappedfileptr != NULL)
+    {
+      gt_fa_xmunmap(tallymerindex->mappedfileptr);
+      tallymerindex->mappedfileptr = NULL;
+    }
+    FREESPACE(tallymerindex);
   }
-  return haserr ? -1 : 0;
+  return haserr ? NULL : tallymerindex;
 }
 
 int mapMCTinfo(MCTinfo *mctinfo,size_t numofmers,
-               const GtStr *vmerindexname,GtError *err)
+               const GtStr *tallymerindexname,GtError *err)
 {
   size_t numofbytes;
   void *tmp;
   bool haserr = false;
 
-  mctinfo->indexfilename = vmerindexname;
-  mctinfo->mappedmctfileptr = genericmaponlytable(vmerindexname,
+  mctinfo->indexfilename = tallymerindexname;
+  mctinfo->mappedmctfileptr = genericmaponlytable(tallymerindexname,
                                                   COUNTSSUFFIX,&numofbytes,err);
   if (mctinfo->mappedmctfileptr == NULL)
   {
@@ -117,7 +151,7 @@ int mapMCTinfo(MCTinfo *mctinfo,size_t numofmers,
     if (numofbytes < numofmers)
     {
       gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
-                       "%lu",gt_str_get(vmerindexname),COUNTSSUFFIX,
+                       "%lu",gt_str_get(tallymerindexname),COUNTSSUFFIX,
                        (unsigned long) numofmers);
       haserr = true;
     }
@@ -137,4 +171,23 @@ int mapMCTinfo(MCTinfo *mctinfo,size_t numofmers,
     mctinfo->mappedmctfileptr = NULL;
   }
   return haserr ? -1 : 0;
+}
+
+void tallymerindex_show(const Tallymerindex *tallymerindex)
+{
+  printf("# indexfilename = %s\n",gt_str_get(tallymerindex->indexfilename));
+  printf("# alphasize = %u\n",tallymerindex->alphasize);
+  printf("# mersize = %lu\n",tallymerindex->mersize);
+  printf("# numofmers = %lu\n",tallymerindex->numofmers);
+  printf("# merbytes = %lu\n",tallymerindex->merbytes);
+}
+
+void tallymerindex_delete(Tallymerindex **tallymerindexptr)
+{
+  Tallymerindex *tallymerindex = *tallymerindexptr;
+
+  gt_fa_xmunmap(tallymerindex->mappedfileptr);
+  tallymerindex->mappedfileptr = NULL;
+  FREESPACE(tallymerindex);
+  *tallymerindexptr = NULL;
 }
