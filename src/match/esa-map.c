@@ -379,7 +379,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->suftab = genericmaptable(indexname,
                                             SUFTABSUFFIX,
-                                            (*totallength)+1,
+                                            (unsigned long) (*totallength)+1,
                                             sizeof (Seqpos),
                                             err);
       if (suffixarray->suftab == NULL)
@@ -402,7 +402,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->lcptab = genericmaptable(indexname,
                                             LCPTABSUFFIX,
-                                            (*totallength)+1,
+                                            (unsigned long) (*totallength)+1,
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->lcptab == NULL)
@@ -428,12 +428,13 @@ static int inputsuffixarray(bool map,
     {
       if (map)
       {
-        suffixarray->llvtab = genericmaptable(indexname,
-                                              LARGELCPTABSUFFIX,
-                                              suffixarray->numoflargelcpvalues.
-                                              valueseqpos,
-                                              sizeof (Largelcpvalue),
-                                              err);
+        suffixarray->llvtab
+          = genericmaptable(indexname,
+                            LARGELCPTABSUFFIX,
+                            (unsigned long) suffixarray->numoflargelcpvalues.
+                            valueseqpos,
+                            sizeof (Largelcpvalue),
+                            err);
         if (suffixarray->llvtab == NULL)
         {
           haserr = true;
@@ -451,7 +452,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->bwttab = genericmaptable(indexname,
                                             BWTTABSUFFIX,
-                                            (*totallength)+1,
+                                            (unsigned long) (*totallength)+1,
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->bwttab == NULL)

@@ -68,7 +68,7 @@ int mapvmerindex(Vmerindex *vmerindex,const GtStr *vmerindexname,GtError *err)
     if ((numofbytes - rest) % vmerindex->merbytes != 0)
     {
       gt_error_set(err,"size of index is %lu which is not a multiple of %lu",
-                   numofbytes - rest,
+                   (unsigned long) (numofbytes - rest),
                    vmerindex->merbytes);
       haserr = true;
     }
