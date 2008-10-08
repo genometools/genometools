@@ -21,7 +21,7 @@
 #include "tyr-search.h"
 #include "spacedef.h"
 
-struct MCTinfo
+struct Tallymercountinfo
 {
   void *mappedmctfileptr;
   const GtStr *indexfilename;
@@ -129,50 +129,6 @@ Tallymerindex *tallymerindex_new(const GtStr *tallymerindexname,GtError *err)
   return haserr ? NULL : tallymerindex;
 }
 
-int mapMCTinfo(MCTinfo *mctinfo,size_t numofmers,
-               const GtStr *tallymerindexname,GtError *err)
-{
-  size_t numofbytes;
-  void *tmp;
-  bool haserr = false;
-
-  mctinfo->indexfilename = tallymerindexname;
-  mctinfo->mappedmctfileptr = genericmaponlytable(tallymerindexname,
-                                                  COUNTSSUFFIX,&numofbytes,err);
-  if (mctinfo->mappedmctfileptr == NULL)
-  {
-    mctinfo->smallcounts = NULL;
-    haserr = true;
-  } else
-  {
-    mctinfo->smallcounts = (Uchar *) mctinfo->mappedmctfileptr;
-    tmp = &mctinfo->smallcounts[numofmers];
-    mctinfo->largecounts = (Largecount *) tmp;
-    if (numofbytes < numofmers)
-    {
-      gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
-                       "%lu",gt_str_get(tallymerindexname),COUNTSSUFFIX,
-                       (unsigned long) numofmers);
-      haserr = true;
-    }
-  }
-  if ((numofbytes - numofmers) % sizeof (Largecount) != 0)
-  {
-    gt_error_set(err,"(numofbytes - numofmers) = %lu must be a multiple of %lu",
-           (unsigned long) (numofbytes - numofmers),
-           (unsigned long) sizeof (Largecount));
-    haserr = true;
-  }
-  mctinfo->numoflargecounts = (unsigned long) (numofbytes - numofmers)/
-                              (unsigned long) sizeof (Largecount);
-  if (haserr && mctinfo->mappedmctfileptr != NULL)
-  {
-    gt_fa_xmunmap(mctinfo->mappedmctfileptr);
-    mctinfo->mappedmctfileptr = NULL;
-  }
-  return haserr ? -1 : 0;
-}
-
 void tallymerindex_show(const Tallymerindex *tallymerindex)
 {
   printf("# indexfilename = %s\n",gt_str_get(tallymerindex->indexfilename));
@@ -190,4 +146,70 @@ void tallymerindex_delete(Tallymerindex **tallymerindexptr)
   tallymerindex->mappedfileptr = NULL;
   FREESPACE(tallymerindex);
   *tallymerindexptr = NULL;
+}
+
+Tallymercountinfo *tallymercountinfo_new(size_t numofmers,
+                                         const GtStr *tallymerindexname,
+                                         GtError *err)
+{
+  size_t numofbytes;
+  void *tmp;
+  bool haserr = false;
+  Tallymercountinfo *tallymercountinfo;
+
+  ALLOCASSIGNSPACE(tallymercountinfo,NULL,Tallymercountinfo,1);
+  tallymercountinfo->indexfilename = tallymerindexname;
+  tallymercountinfo->mappedmctfileptr
+    = genericmaponlytable(tallymerindexname,COUNTSSUFFIX,&numofbytes,err);
+  if (tallymercountinfo->mappedmctfileptr == NULL)
+  {
+    tallymercountinfo->smallcounts = NULL;
+    haserr = true;
+  } else
+  {
+    tallymercountinfo->smallcounts
+      = (Uchar *) tallymercountinfo->mappedmctfileptr;
+    tmp = &tallymercountinfo->smallcounts[numofmers];
+    tallymercountinfo->largecounts = (Largecount *) tmp;
+    if (numofbytes < numofmers)
+    {
+      gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
+                       "%lu",gt_str_get(tallymerindexname),COUNTSSUFFIX,
+                       (unsigned long) numofmers);
+      haserr = true;
+    }
+  }
+  if (!haserr && (numofbytes - numofmers) % sizeof (Largecount) != 0)
+  {
+    gt_error_set(err,"(numofbytes - numofmers) = %lu must be a multiple of %lu",
+           (unsigned long) (numofbytes - numofmers),
+           (unsigned long) sizeof (Largecount));
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    tallymercountinfo->numoflargecounts
+      = (unsigned long) (numofbytes - numofmers)/
+        (unsigned long) sizeof (Largecount);
+  }
+  if (haserr)
+  {
+    if (tallymercountinfo->mappedmctfileptr != NULL)
+    {
+      gt_fa_xmunmap(tallymercountinfo->mappedmctfileptr);
+      tallymercountinfo->mappedmctfileptr = NULL;
+    }
+    FREESPACE(tallymercountinfo);
+  }
+  return haserr ? NULL : tallymercountinfo;
+}
+
+void tallymercountinfo_delete(Tallymercountinfo **tallymercountinfoptr)
+{
+  Tallymercountinfo *tallymercountinfo = *tallymercountinfoptr;
+
+  gt_fa_xmunmap(tallymercountinfo->mappedmctfileptr);
+  tallymercountinfo->mappedmctfileptr = NULL;
+  FREESPACE(tallymercountinfo);
+  *tallymercountinfoptr = NULL;
 }

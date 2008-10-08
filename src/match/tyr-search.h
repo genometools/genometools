@@ -51,6 +51,6 @@ typedef struct
 DECLAREARRAYSTRUCT(Largecount);
 
 typedef struct Tallymerindex Tallymerindex;
-typedef struct MCTinfo MCTinfo;
+typedef struct Tallymercountinfo Tallymercountinfo;
 
 #endif
