@@ -18,7 +18,11 @@
 #include "core/fa.h"
 #include "core/unused_api.h"
 #include "core/seqiterator.h"
-#include "match/alphadef.h"
+#include "core/chardef.h"
+#include "revcompl.h"
+#include "alphadef.h"
+#include "format64.h"
+#include "encseq-def.h"
 #include "divmodmul.h"
 #include "opensfxfile.h"
 #include "tyr-search.h"
@@ -317,23 +321,180 @@ static void checktallymerindex(const Tallymerindex *tallymerindex)
   }
 }
 
-static void singleseqtallymersearch(unsigned long mersize,
-                                    GT_UNUSED uint64_t unitnum,
+static unsigned long containsspecialbytestring(const Uchar *seq,
+                                               unsigned long len)
+{
+  const Uchar *sptr;
+
+  for (sptr=seq; sptr < seq + len; sptr++)
+  {
+    if (ISSPECIAL(*sptr))
+    {
+      return (unsigned long) (sptr - seq);
+    }
+  }
+  return len;
+}
+
+typedef struct
+{
+  Uchar *bytecode,  /* buffer for encoded word to be searched */
+        *rcbuf;
+  unsigned int showmode,
+               searchstrand;
+  Alphabet *dnaalpha;
+} Vmersearchinfo;
+
+static void vmersearchinfo_init(Vmersearchinfo *vmersearchinfo,
+                                const Tallymerindex *tallymerindex,
+                                unsigned int showmode,
+                                unsigned int searchstrand)
+{
+  vmersearchinfo->showmode = showmode;
+  vmersearchinfo->searchstrand = searchstrand;
+  vmersearchinfo->dnaalpha = assigninputalphabet(true,false,NULL,NULL,NULL);
+  ALLOCASSIGNSPACE(vmersearchinfo->bytecode,NULL,Uchar,tallymerindex->merbytes);
+  ALLOCASSIGNSPACE(vmersearchinfo->rcbuf,NULL,Uchar,tallymerindex->mersize);
+}
+
+void vmersearchinfo_delete(Vmersearchinfo *vmersearchinfo)
+{
+  freeAlphabet(&vmersearchinfo->dnaalpha);
+  FREESPACE(vmersearchinfo->bytecode);
+  FREESPACE(vmersearchinfo->rcbuf);
+}
+
+/*@null@*/ const Uchar *searchsinglemer(const Uchar *qptr,
+                                        const Tallymerindex *tallymerindex,
+                                        const Vmersearchinfo *vmersearchinfo)
+{
+  const Uchar *result;
+
+  plainseq2bytecode(vmersearchinfo->bytecode,qptr,tallymerindex->mersize);
+  result = binmersearch(tallymerindex->merbytes,
+                        0,
+                        vmersearchinfo->bytecode,
+                        tallymerindex->mertable,
+                        tallymerindex->lastmer);
+  return result;
+}
+
+#define ADDTABULATOR\
+        if (firstitem)\
+        {\
+          firstitem = false;\
+        } else\
+        {\
+          (void) putchar('\t');\
+        }
+
+static void mermatchoutput(const Tallymerindex *tallymerindex,
+                           const Vmersearchinfo *vmersearchinfo,
+                           GT_UNUSED const Uchar *result,
+                           const Uchar *query,
+                           const Uchar *qptr,
+                           uint64_t unitnum,
+                           bool forward)
+{
+  bool firstitem = true;
+  unsigned long queryposition;
+
+  queryposition = (unsigned long) (qptr-query);
+  if (vmersearchinfo->showmode & SHOWQSEQNUM)
+  {
+    printf(Formatuint64_t,PRINTuint64_tcast(unitnum));
+    firstitem = false;
+  }
+  if (vmersearchinfo->showmode & SHOWQPOS)
+  {
+    ADDTABULATOR;
+    printf("%c%lu",forward ? '+' : '-',queryposition);
+  }
+  if (vmersearchinfo->showmode & SHOWCOUNTS)
+  {
+    /*
+    unsigned long mernumber
+      = (unsigned long) (result - tallymerindex->mertable)/
+                        tallymerindex->merbytes;
+    ADDTABULATOR;
+    if (showmercounts(&vmersearchinfo->mctinfo,mernumber) != 0)
+    {
+      return (Sint) -1;
+    }
+    */
+  }
+  if (vmersearchinfo->showmode & SHOWSEQUENCE)
+  {
+    ADDTABULATOR;
+    fprintfsymbolstring(stdout,vmersearchinfo->dnaalpha,qptr,
+                        tallymerindex->mersize);
+  }
+  printf("\n");
+}
+
+static void singleseqtallymersearch(const Tallymerindex *tallymerindex,
+                                    const Vmersearchinfo *vmersearchinfo,
+                                    uint64_t unitnum,
                                     const Uchar *query,
                                     unsigned long querylen,
                                     GT_UNUSED const char *desc)
 {
-  const Uchar *qptr;
+  const Uchar *qptr, *result;
+  unsigned long skipvalue;
 
-  for (qptr = query; qptr <= query + querylen - mersize; qptr++)
+  if (tallymerindex->mersize > querylen)
   {
+    return;
+  }
+  qptr = query;
+  while (qptr <= query + querylen - tallymerindex->mersize)
+  {
+    skipvalue = containsspecialbytestring(qptr,tallymerindex->mersize);
+    if (skipvalue == tallymerindex->mersize)
+    {
+      if (vmersearchinfo->searchstrand & STRAND_FORWARD)
+      {
+        result = searchsinglemer(qptr,tallymerindex,vmersearchinfo);
+        if (result != NULL)
+        {
+          mermatchoutput(tallymerindex,
+                         vmersearchinfo,
+                         result,
+                         query,
+                         qptr,
+                         unitnum,
+                         true);
+        }
+      }
+      if (vmersearchinfo->searchstrand & STRAND_REVERSE)
+      {
+        assert(vmersearchinfo->rcbuf != NULL);
+        copy_reversecomplement(vmersearchinfo->rcbuf,qptr,
+                               tallymerindex->mersize);
+        result = searchsinglemer(vmersearchinfo->rcbuf,tallymerindex,
+                                 vmersearchinfo);
+        if (result != NULL)
+        {
+          mermatchoutput(tallymerindex,
+                         vmersearchinfo,
+                         result,
+                         query,
+                         qptr,
+                         unitnum,
+                         false);
+        }
+      }
+    } else
+    {
+      qptr += (skipvalue+1);
+    }
   }
 }
 
 int tallymersearch(const GtStr *tallymerindexname,
                    const GtStrArray *queryfilenames,
-                   GT_UNUSED unsigned int showmode,
-                   GT_UNUSED unsigned int strand,
+                   unsigned int showmode,
+                   unsigned int searchstrand,
                    bool verbose,
                    bool performtest,
                    GtError *err)
@@ -341,7 +502,6 @@ int tallymersearch(const GtStr *tallymerindexname,
   Tallymerindex *tallymerindex;
   bool haserr = false;
   GtSeqIterator *seqit;
-  Alphabet *dnaalpha = NULL;
 
   tallymerindex = tallymerindex_new(tallymerindexname,err);
   if (tallymerindex == NULL)
@@ -357,11 +517,6 @@ int tallymersearch(const GtStr *tallymerindexname,
     {
       checktallymerindex(tallymerindex);
     }
-    dnaalpha = assigninputalphabet(true,false,NULL,NULL,err);
-    if (dnaalpha == NULL)
-    {
-      haserr = true;
-    }
   }
   if (!haserr)
   {
@@ -370,10 +525,12 @@ int tallymersearch(const GtStr *tallymerindexname,
     char *desc = NULL;
     uint64_t unitnum;
     int retval;
+    Vmersearchinfo vmersearchinfo;
 
     assert(tallymerindex != NULL);
+    vmersearchinfo_init(&vmersearchinfo,tallymerindex,showmode,searchstrand);
     seqit = gt_seqiterator_new(queryfilenames,
-                               getsymbolmapAlphabet(dnaalpha),
+                               getsymbolmapAlphabet(vmersearchinfo.dnaalpha),
                                true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
@@ -391,22 +548,20 @@ int tallymersearch(const GtStr *tallymerindexname,
       {
         break;
       }
-      singleseqtallymersearch(tallymerindex->mersize,
+      singleseqtallymersearch(tallymerindex,
+                              &vmersearchinfo,
                               unitnum,
                               query,
                               querylen,
                               desc);
-      FREESPACE(desc);
+      gt_free(desc);
     }
     gt_seqiterator_delete(seqit);
+    vmersearchinfo_delete(&vmersearchinfo);
   }
   if (tallymerindex != NULL)
   {
-    tallymerindex_delete(&tallymerindex);
-  }
-  if (dnaalpha != NULL)
-  {
-    freeAlphabet(&dnaalpha);
+   tallymerindex_delete(&tallymerindex);
   }
   return haserr ? -1 : 0;
 }

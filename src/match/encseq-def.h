@@ -146,8 +146,13 @@ uint64_t detsizeencseq(int kind,
                        Seqpos specialranges,
                        unsigned int mapsize);
 
-void shiftbytecode(Uchar *dest,const Encodedsequence *encseq,
-                   const Seqpos startindex,const Seqpos len);
+void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
+
+void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
+                     const Seqpos startindex,const Seqpos len);
+
+void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
+                       const Seqpos startindex,const Seqpos len);
 
 #endif
 

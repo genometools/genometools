@@ -216,8 +216,34 @@ typedef struct
   Containsspecialfunc delivercontainsspecial;
 } Encodedsequencefunctions;
 
-void shiftbytecode(Uchar *dest,const Encodedsequence *encseq,
-                   const Seqpos startindex,const Seqpos len)
+void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len)
+{
+  unsigned long j;
+  const Uchar *seqptr;
+
+  for (seqptr=seq, j=0; seqptr < seq + len - 3; seqptr+=4, j++)
+  {
+    bytecode[j] = (seqptr[0] << 6) |
+                  (seqptr[1] << 4) |
+                  (seqptr[2] << 2) |
+                   seqptr[3];
+  }
+  switch (MOD4(len))
+  {
+    case (Seqpos) 1:
+      bytecode[j] = seqptr[0] << 6;
+      break;
+    case (Seqpos) 2:
+      bytecode[j] = (seqptr[0] << 6) | (seqptr[1] << 4);
+      break;
+    case (Seqpos) 3:
+      bytecode[j] = (seqptr[0] << 6) | (seqptr[1] << 4) | (seqptr[2] << 2);
+      break;
+  }
+}
+
+void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
+                     const Seqpos startindex,const Seqpos len)
 {
   Seqpos i, j;
 
@@ -248,6 +274,18 @@ void shiftbytecode(Uchar *dest,const Encodedsequence *encseq,
       dest[j] = (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6) |
                 (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4) |
                 (Uchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2);
+  }
+}
+
+void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
+                       const Seqpos startindex,const Seqpos len)
+{
+  if (encseq->sat == Viadirectaccess)
+  {
+    plainseq2bytecode(dest,encseq->plainseq + startindex,(unsigned long) len);
+  } else
+  {
+    encseq2bytecode(dest,encseq,startindex,len);
   }
 }
 

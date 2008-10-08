@@ -64,7 +64,6 @@ struct Dfsstate /* global information */
   const Encodedsequence *encseq;
   Readmode readmode;
   const Alphabet *alpha;
-  unsigned int alphasize;
   Processoccurrencecount processoccurrencecount;
   ArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
@@ -347,7 +346,6 @@ static int adddistpos2distribution(unsigned long countocc,
 #define MAXSMALLMERCOUNT UCHAR_MAX
 
 static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
-                                              unsigned int alphasize,
                                               Seqpos mersize,
                                               Uchar *bytebuffer,
                                               unsigned long sizeofbuffer,
@@ -359,17 +357,7 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
                                               unsigned long countoutputmers,
                                               GtError *err)
 {
-  if (alphasize == (unsigned int) DNAALPHASIZE)
-  {
-    shiftbytecode(bytebuffer,encseq,position,(Seqpos) mersize);
-  } else
-  {
-    assert(false);
-    /*
-    string2bytecode(bytebuffer,kmerseqinfotab[idxnum].plainseq + position,
-                    searchlength);
-    */
-  }
+  sequence2bytecode(bytebuffer,encseq,position,(Seqpos) mersize);
   if (fwrite(bytebuffer,sizeof(*bytebuffer),(size_t) sizeofbuffer,merindexfpout)
             != (size_t) sizeofbuffer)
   {
@@ -414,7 +402,6 @@ static int outputsortedstring2index(unsigned long countocc,
   if (decideifocc(state,countocc))
   {
     if (outputsortedstring2indexviafileptr(state->encseq,
-                                           state->alphasize,
                                            state->mersize,
                                            state->bytebuffer,
                                            state->sizeofbuffer,
@@ -578,13 +565,14 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
 {
   Dfsstate state;
   bool haserr = false;
+  unsigned int alphasize;
 
   gt_error_check(err);
   INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = newEncodedsequencescanstate();
   state.mersize = (Seqpos) mersize;
   state.alpha = alphabetSequentialsuffixarrayreader(ssar);
-  state.alphasize = getnumofcharsAlphabet(state.alpha);
+  alphasize = getnumofcharsAlphabet(state.alpha);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.storecounts = storecounts;
   state.minocc = minocc;
@@ -705,8 +693,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   {
     outputbytewiseUlongvalue(state.merindexfpout,
                              (unsigned long) state.mersize);
-    outputbytewiseUlongvalue(state.merindexfpout,
-                             (unsigned long) state.alphasize);
+    outputbytewiseUlongvalue(state.merindexfpout,(unsigned long) alphasize);
   }
   gt_fa_xfclose(state.merindexfpout);
   gt_fa_xfclose(state.countsfilefpout);

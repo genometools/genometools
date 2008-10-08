@@ -65,7 +65,7 @@ typedef struct Tallymercountinfo Tallymercountinfo;
 int tallymersearch(const GtStr *tallymerindexname,
                    const GtStrArray *queryfilenames,
                    unsigned int showmode,
-                   unsigned int strand,
+                   unsigned int searchstrand,
                    bool verbose,
                    bool performtest,
                    GtError *err);
