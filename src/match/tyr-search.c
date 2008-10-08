@@ -17,6 +17,8 @@
 
 #include "core/fa.h"
 #include "core/unused_api.h"
+#include "core/seqiterator.h"
+#include "match/alphadef.h"
 #include "divmodmul.h"
 #include "opensfxfile.h"
 #include "tyr-search.h"
@@ -215,28 +217,196 @@ void tallymercountinfo_delete(Tallymercountinfo **tallymercountinfoptr)
   *tallymercountinfoptr = NULL;
 }
 
+static int mymemcmp(unsigned long *offset,const Uchar *s1,const Uchar *s2,
+                    unsigned long len)
+{
+  unsigned long idx;
+
+  for (idx=*offset; idx<len; idx++)
+  {
+    if (s1[idx] < s2[idx])
+    {
+      *offset = idx;
+      return -1;
+    }
+    if (s1[idx] > s2[idx])
+    {
+      *offset = idx;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static /*@null@*/ const Uchar *binmersearch(unsigned long merbytes,
+                                            unsigned long offset,
+                                            const Uchar *key,
+                                            const Uchar *left,
+                                            const Uchar *right)
+{
+  const Uchar *leftptr = left,
+              *midptr,
+              *rightptr = right;
+  int cmpval;
+  unsigned long leftlength = offset, rightlength = offset, len;
+
+  while (leftptr <= rightptr)
+  {
+    len = (unsigned long) (rightptr-leftptr)/MULT2(merbytes);
+    midptr = leftptr + merbytes * len;
+    cmpval = mymemcmp(&offset,midptr,key,merbytes);
+    if (cmpval < 0)
+    {
+      leftptr = midptr + merbytes;
+      leftlength = offset;
+      if (offset > rightlength)
+      {
+        offset = rightlength;
+      }
+    } else
+    {
+      if (cmpval > 0)
+      {
+        rightptr = midptr - merbytes;
+        rightlength = offset;
+        if (offset > leftlength)
+        {
+          offset = leftlength;
+        }
+      } else
+      {
+        return midptr;
+      }
+    }
+  }
+  return NULL;
+}
+
+static void checktallymerindex(const Tallymerindex *tallymerindex)
+{
+  Uchar *mercodeptr;
+  const Uchar *result;
+  unsigned long position, previousposition = 0;
+
+  for (mercodeptr = tallymerindex->mertable;
+       mercodeptr <= tallymerindex->lastmer;
+       mercodeptr += tallymerindex->merbytes)
+  {
+    result = binmersearch(tallymerindex->merbytes,
+                          0,
+                          mercodeptr,
+                          tallymerindex->mertable,
+                          tallymerindex->lastmer);
+    assert(result != NULL);
+    if ((result - tallymerindex->mertable) % tallymerindex->merbytes != 0)
+    {
+      fprintf(stderr,"result is not multiple of %lu\n",tallymerindex->merbytes);
+      exit(EXIT_FAILURE);
+    }
+    position = (unsigned long) (result-tallymerindex->mertable)/
+                               tallymerindex->merbytes;
+    if (position > 0)
+    {
+      if (previousposition + 1 != position)
+      {
+        fprintf(stderr,"position %lu is not increasing\n",position);
+        exit(EXIT_FAILURE);
+      }
+    }
+    previousposition = position;
+  }
+}
+
+static void singleseqtallymersearch(unsigned long mersize,
+                                    GT_UNUSED uint64_t unitnum,
+                                    const Uchar *query,
+                                    unsigned long querylen,
+                                    GT_UNUSED const char *desc)
+{
+  const Uchar *qptr;
+
+  for (qptr = query; qptr <= query + querylen - mersize; qptr++)
+  {
+  }
+}
+
 int tallymersearch(const GtStr *tallymerindexname,
-                   GT_UNUSED const GtStrArray *queryfilenames,
+                   const GtStrArray *queryfilenames,
                    GT_UNUSED unsigned int showmode,
                    GT_UNUSED unsigned int strand,
                    bool verbose,
+                   bool performtest,
                    GtError *err)
 {
   Tallymerindex *tallymerindex;
   bool haserr = false;
+  GtSeqIterator *seqit;
+  Alphabet *dnaalpha = NULL;
 
   tallymerindex = tallymerindex_new(tallymerindexname,err);
   if (tallymerindex == NULL)
   {
     haserr = true;
-  }
-  if (verbose)
+  } else
   {
-    tallymerindex_show(tallymerindex);
+    if (verbose)
+    {
+      tallymerindex_show(tallymerindex);
+    }
+    if (performtest)
+    {
+      checktallymerindex(tallymerindex);
+    }
+    dnaalpha = assigninputalphabet(true,false,NULL,NULL,err);
+    if (dnaalpha == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    const Uchar *query;
+    unsigned long querylen;
+    char *desc = NULL;
+    uint64_t unitnum;
+    int retval;
+
+    assert(tallymerindex != NULL);
+    seqit = gt_seqiterator_new(queryfilenames,
+                               getsymbolmapAlphabet(dnaalpha),
+                               true);
+    for (unitnum = 0; /* Nothing */; unitnum++)
+    {
+      retval = gt_seqiterator_next(seqit,
+                                   &query,
+                                   &querylen,
+                                   &desc,
+                                   err);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      singleseqtallymersearch(tallymerindex->mersize,
+                              unitnum,
+                              query,
+                              querylen,
+                              desc);
+      FREESPACE(desc);
+    }
+    gt_seqiterator_delete(seqit);
   }
   if (tallymerindex != NULL)
   {
     tallymerindex_delete(&tallymerindex);
+  }
+  if (dnaalpha != NULL)
+  {
+    freeAlphabet(&dnaalpha);
   }
   return haserr ? -1 : 0;
 }

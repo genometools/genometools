@@ -67,6 +67,7 @@ int tallymersearch(const GtStr *tallymerindexname,
                    unsigned int showmode,
                    unsigned int strand,
                    bool verbose,
+                   bool performtest,
                    GtError *err);
 
 #endif

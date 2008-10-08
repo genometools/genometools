@@ -278,7 +278,8 @@ typedef struct
   GtStrArray *showmodespec;
   unsigned int strand,
                showmode;
-  bool verbose;
+  bool verbose,
+       performtest;
 } Tallymer_search_options;
 
 static void *gt_tallymer_search_arguments_new(void)
@@ -335,6 +336,12 @@ static GtOptionParser
                                      "specify output flags "
                                      "(qseqnum, qpos, counts, sequence)",
                                      arguments->showmodespec);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("test", "perform tests to verify program "
+                                      "correctness", &arguments->performtest,
+                                      false);
+  gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);
@@ -419,6 +426,7 @@ static int gt_tallymer_search_runner(int argc,
                      arguments->showmode,
                      arguments->strand,
                      arguments->verbose,
+                     arguments->performtest,
                      err) != 0)
   {
     return -1;

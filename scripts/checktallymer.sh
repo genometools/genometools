@@ -42,6 +42,6 @@ rm -f tmp[12]
 cmd="env -i bin/gt tallymer mkindex -counts -indexname tyr-index -mersize 7 -minocc 10 -maxocc 30 sfxidx"
 ${cmd}
 checkerror
-cmd="env -i bin/gt tallymer search tyr-index yyy"
+cmd="env -i bin/gt tallymer search -test tyr-index ${AT}"
 ${cmd}
 checkerror
