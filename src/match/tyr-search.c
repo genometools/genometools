@@ -94,3 +94,47 @@ int mapvmerindex(Vmerindex *vmerindex,const GtStr *vmerindexname,GtError *err)
   }
   return haserr ? -1 : 0;
 }
+
+int mapMCTinfo(MCTinfo *mctinfo,size_t numofmers,
+               const GtStr *vmerindexname,GtError *err)
+{
+  size_t numofbytes;
+  void *tmp;
+  bool haserr = false;
+
+  mctinfo->indexfilename = vmerindexname;
+  mctinfo->mappedmctfileptr = genericmaponlytable(vmerindexname,
+                                                  COUNTSSUFFIX,&numofbytes,err);
+  if (mctinfo->mappedmctfileptr == NULL)
+  {
+    mctinfo->smallcounts = NULL;
+    haserr = true;
+  } else
+  {
+    mctinfo->smallcounts = (Uchar *) mctinfo->mappedmctfileptr;
+    tmp = &mctinfo->smallcounts[numofmers];
+    mctinfo->largecounts = (Largecount *) tmp;
+    if (numofbytes < numofmers)
+    {
+      gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
+                       "%lu",gt_str_get(vmerindexname),COUNTSSUFFIX,
+                       (unsigned long) numofmers);
+      haserr = true;
+    }
+  }
+  if ((numofbytes - numofmers) % sizeof (Largecount) != 0)
+  {
+    gt_error_set(err,"(numofbytes - numofmers) = %lu must be a multiple of %lu",
+           (unsigned long) (numofbytes - numofmers),
+           (unsigned long) sizeof (Largecount));
+    haserr = true;
+  }
+  mctinfo->numoflargecounts = (unsigned long) (numofbytes - numofmers)/
+                              (unsigned long) sizeof (Largecount);
+  if (haserr && mctinfo->mappedmctfileptr != NULL)
+  {
+    gt_fa_xmunmap(mctinfo->mappedmctfileptr);
+    mctinfo->mappedmctfileptr = NULL;
+  }
+  return haserr ? -1 : 0;
+}

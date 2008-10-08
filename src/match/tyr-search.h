@@ -52,7 +52,7 @@ DECLAREARRAYSTRUCT(Largecount);
 
 typedef struct
 {
-  const void *mappedmctfileptr;
+  void *mappedmctfileptr;
   const GtStr *indexfilename;
   Uchar *smallcounts;
   Largecount *largecounts;
