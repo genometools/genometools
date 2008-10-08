@@ -215,12 +215,28 @@ void tallymercountinfo_delete(Tallymercountinfo **tallymercountinfoptr)
   *tallymercountinfoptr = NULL;
 }
 
-int tallymersearch(GT_UNUSED const GtStr *tallymerindexname,
+int tallymersearch(const GtStr *tallymerindexname,
                    GT_UNUSED const GtStrArray *queryfilenames,
                    GT_UNUSED unsigned int showmode,
                    GT_UNUSED unsigned int strand,
-                   GT_UNUSED bool verbose,
-                   GT_UNUSED GtError *err)
+                   bool verbose,
+                   GtError *err)
 {
-  return 0;
+  Tallymerindex *tallymerindex;
+  bool haserr = false;
+
+  tallymerindex = tallymerindex_new(tallymerindexname,err);
+  if (tallymerindex == NULL)
+  {
+    haserr = true;
+  }
+  if (verbose)
+  {
+    tallymerindex_show(tallymerindex);
+  }
+  if (tallymerindex != NULL)
+  {
+    tallymerindex_delete(&tallymerindex);
+  }
+  return haserr ? -1 : 0;
 }

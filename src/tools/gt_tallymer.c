@@ -367,12 +367,12 @@ static int gt_tallymer_search_arguments_check(int rest_argc,
 
   if (rest_argc < 1)
   {
-    gt_error_set(err,"missing tallymer-indexname");
+    gt_error_set(err,"missing tallymer-indexnames and queryfilenames");
     return -1;
   }
   if (rest_argc < 2)
   {
-    gt_error_set(err,"missing tallymer-indexnames and queryfilenames");
+    gt_error_set(err,"missing queryfilenames");
     return -1;
   }
   for (idx=0; idx<gt_str_array_size(arguments->showmodespec); idx++)
