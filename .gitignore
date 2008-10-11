@@ -20,6 +20,8 @@
 *.esq
 *.bdx
 *.pbt
+*.mct
+*.mer
 *.polya
 *.polya.info
 *.gt_bsi

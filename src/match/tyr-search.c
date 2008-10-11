@@ -429,7 +429,10 @@ static void mermatchoutput(const Tallymerindex *tallymerindex,
     fprintfsymbolstring(stdout,vmersearchinfo->dnaalpha,qptr,
                         tallymerindex->mersize);
   }
-  printf("\n");
+  if (vmersearchinfo->showmode & (SHOWSEQUENCE | SHOWQPOS | SHOWCOUNTS))
+  {
+    printf("\n");
+  }
 }
 
 static void singleseqtallymersearch(const Tallymerindex *tallymerindex,
@@ -484,6 +487,7 @@ static void singleseqtallymersearch(const Tallymerindex *tallymerindex,
                          false);
         }
       }
+      qptr++;
     } else
     {
       qptr += (skipvalue+1);
