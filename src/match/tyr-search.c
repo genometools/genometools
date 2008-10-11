@@ -431,7 +431,7 @@ static void mermatchoutput(const Tallymerindex *tallymerindex,
   }
   if (vmersearchinfo->showmode & (SHOWSEQUENCE | SHOWQPOS | SHOWCOUNTS))
   {
-    printf("\n");
+    (void) putchar('\n');
   }
 }
 
