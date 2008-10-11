@@ -28,7 +28,7 @@
 #include "tyr-search.h"
 #include "spacedef.h"
 
-struct Tallymercountinfo
+struct Tyrcountinfo
 {
   void *mappedmctfileptr;
   const GtStr *indexfilename;
@@ -37,7 +37,7 @@ struct Tallymercountinfo
   unsigned long numoflargecounts;
 };
 
-struct Tallymerindex
+struct Tyrindex
 {
   void *mappedfileptr;
   const GtStr *indexfilename;
@@ -67,23 +67,23 @@ unsigned long decodesingleinteger(const Uchar *start)
   return value;
 }
 
-Tallymerindex *tallymerindex_new(const GtStr *tallymerindexname,GtError *err)
+Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
 {
   bool haserr = false;
   size_t numofbytes, rest;
-  Tallymerindex *tallymerindex;
+  Tyrindex *tyrindex;
 
-  ALLOCASSIGNSPACE(tallymerindex,NULL,Tallymerindex,1);
-  tallymerindex->indexfilename = tallymerindexname;
-  tallymerindex->mappedfileptr = genericmaponlytable(tallymerindexname,
-                                                 MERSUFFIX,&numofbytes,err);
-  if (tallymerindex->mappedfileptr == NULL)
+  ALLOCASSIGNSPACE(tyrindex,NULL,Tyrindex,1);
+  tyrindex->indexfilename = tyrindexname;
+  tyrindex->mappedfileptr = genericmaponlytable(tyrindexname,
+                                                MERSUFFIX,&numofbytes,err);
+  if (tyrindex->mappedfileptr == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    tallymerindex->mertable = (Uchar *) tallymerindex->mappedfileptr;
+    tyrindex->mertable = (Uchar *) tyrindex->mappedfileptr;
     rest = sizeof (unsigned long) * EXTRAINTEGERS;
     if (rest > numofbytes)
     {
@@ -94,94 +94,94 @@ Tallymerindex *tallymerindex_new(const GtStr *tallymerindexname,GtError *err)
   }
   if (!haserr)
   {
-    assert(tallymerindex->mertable != NULL);
-    tallymerindex->mersize
-      = decodesingleinteger(tallymerindex->mertable + numofbytes - rest);
-    tallymerindex->alphasize
-      = (unsigned int) decodesingleinteger(tallymerindex->mertable +
+    assert(tyrindex->mertable != NULL);
+    tyrindex->mersize
+      = decodesingleinteger(tyrindex->mertable + numofbytes - rest);
+    tyrindex->alphasize
+      = (unsigned int) decodesingleinteger(tyrindex->mertable +
                                            numofbytes - rest +
                                            sizeof (unsigned long));
-    tallymerindex->merbytes = MERBYTES(tallymerindex->mersize);
-    if ((numofbytes - rest) % tallymerindex->merbytes != 0)
+    tyrindex->merbytes = MERBYTES(tyrindex->mersize);
+    if ((numofbytes - rest) % tyrindex->merbytes != 0)
     {
       gt_error_set(err,"size of index is %lu which is not a multiple of %lu",
                    (unsigned long) (numofbytes - rest),
-                   tallymerindex->merbytes);
+                   tyrindex->merbytes);
       haserr = true;
     }
   }
   if (!haserr)
   {
-    tallymerindex->numofmers
-      = (unsigned long) (numofbytes - rest) / tallymerindex->merbytes;
-    assert(tallymerindex->mertable != NULL);
-    if (tallymerindex->numofmers == 0)
+    tyrindex->numofmers
+      = (unsigned long) (numofbytes - rest) / tyrindex->merbytes;
+    assert(tyrindex->mertable != NULL);
+    if (tyrindex->numofmers == 0)
     {
-      tallymerindex->lastmer = tallymerindex->mertable - 1;
+      tyrindex->lastmer = tyrindex->mertable - 1;
     } else
     {
-      tallymerindex->lastmer
-        = tallymerindex->mertable + numofbytes - rest - tallymerindex->merbytes;
+      tyrindex->lastmer
+        = tyrindex->mertable + numofbytes - rest - tyrindex->merbytes;
     }
   }
   if (haserr)
   {
-    if (tallymerindex->mappedfileptr != NULL)
+    if (tyrindex->mappedfileptr != NULL)
     {
-      gt_fa_xmunmap(tallymerindex->mappedfileptr);
-      tallymerindex->mappedfileptr = NULL;
+      gt_fa_xmunmap(tyrindex->mappedfileptr);
+      tyrindex->mappedfileptr = NULL;
     }
-    FREESPACE(tallymerindex);
+    FREESPACE(tyrindex);
   }
-  return haserr ? NULL : tallymerindex;
+  return haserr ? NULL : tyrindex;
 }
 
-void tallymerindex_show(const Tallymerindex *tallymerindex)
+void tyrindex_show(const Tyrindex *tyrindex)
 {
-  printf("# indexfilename = %s\n",gt_str_get(tallymerindex->indexfilename));
-  printf("# alphasize = %u\n",tallymerindex->alphasize);
-  printf("# mersize = %lu\n",tallymerindex->mersize);
-  printf("# numofmers = %lu\n",tallymerindex->numofmers);
-  printf("# merbytes = %lu\n",tallymerindex->merbytes);
+  printf("# indexfilename = %s\n",gt_str_get(tyrindex->indexfilename));
+  printf("# alphasize = %u\n",tyrindex->alphasize);
+  printf("# mersize = %lu\n",tyrindex->mersize);
+  printf("# numofmers = %lu\n",tyrindex->numofmers);
+  printf("# merbytes = %lu\n",tyrindex->merbytes);
 }
 
-void tallymerindex_delete(Tallymerindex **tallymerindexptr)
+void tyrindex_delete(Tyrindex **tyrindexptr)
 {
-  Tallymerindex *tallymerindex = *tallymerindexptr;
+  Tyrindex *tyrindex = *tyrindexptr;
 
-  gt_fa_xmunmap(tallymerindex->mappedfileptr);
-  tallymerindex->mappedfileptr = NULL;
-  FREESPACE(tallymerindex);
-  *tallymerindexptr = NULL;
+  gt_fa_xmunmap(tyrindex->mappedfileptr);
+  tyrindex->mappedfileptr = NULL;
+  FREESPACE(tyrindex);
+  *tyrindexptr = NULL;
 }
 
-Tallymercountinfo *tallymercountinfo_new(size_t numofmers,
-                                         const GtStr *tallymerindexname,
-                                         GtError *err)
+Tyrcountinfo *tyrcountinfo_new(size_t numofmers,
+                               const GtStr *tyrindexname,
+                               GtError *err)
 {
   size_t numofbytes;
   void *tmp;
   bool haserr = false;
-  Tallymercountinfo *tallymercountinfo;
+  Tyrcountinfo *tyrcountinfo;
 
-  ALLOCASSIGNSPACE(tallymercountinfo,NULL,Tallymercountinfo,1);
-  tallymercountinfo->indexfilename = tallymerindexname;
-  tallymercountinfo->mappedmctfileptr
-    = genericmaponlytable(tallymerindexname,COUNTSSUFFIX,&numofbytes,err);
-  if (tallymercountinfo->mappedmctfileptr == NULL)
+  ALLOCASSIGNSPACE(tyrcountinfo,NULL,Tyrcountinfo,1);
+  tyrcountinfo->indexfilename = tyrindexname;
+  tyrcountinfo->mappedmctfileptr
+    = genericmaponlytable(tyrindexname,COUNTSSUFFIX,&numofbytes,err);
+  if (tyrcountinfo->mappedmctfileptr == NULL)
   {
-    tallymercountinfo->smallcounts = NULL;
+    tyrcountinfo->smallcounts = NULL;
     haserr = true;
   } else
   {
-    tallymercountinfo->smallcounts
-      = (Uchar *) tallymercountinfo->mappedmctfileptr;
-    tmp = &tallymercountinfo->smallcounts[numofmers];
-    tallymercountinfo->largecounts = (Largecount *) tmp;
+    tyrcountinfo->smallcounts
+      = (Uchar *) tyrcountinfo->mappedmctfileptr;
+    tmp = &tyrcountinfo->smallcounts[numofmers];
+    tyrcountinfo->largecounts = (Largecount *) tmp;
     if (numofbytes < numofmers)
     {
       gt_error_set(err,"size of file \"%s.%s\" is smaller than minimum size "
-                       "%lu",gt_str_get(tallymerindexname),COUNTSSUFFIX,
+                       "%lu",gt_str_get(tyrindexname),COUNTSSUFFIX,
                        (unsigned long) numofmers);
       haserr = true;
     }
@@ -195,30 +195,30 @@ Tallymercountinfo *tallymercountinfo_new(size_t numofmers,
   }
   if (!haserr)
   {
-    tallymercountinfo->numoflargecounts
+    tyrcountinfo->numoflargecounts
       = (unsigned long) (numofbytes - numofmers)/
         (unsigned long) sizeof (Largecount);
   }
   if (haserr)
   {
-    if (tallymercountinfo->mappedmctfileptr != NULL)
+    if (tyrcountinfo->mappedmctfileptr != NULL)
     {
-      gt_fa_xmunmap(tallymercountinfo->mappedmctfileptr);
-      tallymercountinfo->mappedmctfileptr = NULL;
+      gt_fa_xmunmap(tyrcountinfo->mappedmctfileptr);
+      tyrcountinfo->mappedmctfileptr = NULL;
     }
-    FREESPACE(tallymercountinfo);
+    FREESPACE(tyrcountinfo);
   }
-  return haserr ? NULL : tallymercountinfo;
+  return haserr ? NULL : tyrcountinfo;
 }
 
-void tallymercountinfo_delete(Tallymercountinfo **tallymercountinfoptr)
+void tyrcountinfo_delete(Tyrcountinfo **tyrcountinfoptr)
 {
-  Tallymercountinfo *tallymercountinfo = *tallymercountinfoptr;
+  Tyrcountinfo *tyrcountinfo = *tyrcountinfoptr;
 
-  gt_fa_xmunmap(tallymercountinfo->mappedmctfileptr);
-  tallymercountinfo->mappedmctfileptr = NULL;
-  FREESPACE(tallymercountinfo);
-  *tallymercountinfoptr = NULL;
+  gt_fa_xmunmap(tyrcountinfo->mappedmctfileptr);
+  tyrcountinfo->mappedmctfileptr = NULL;
+  FREESPACE(tyrcountinfo);
+  *tyrcountinfoptr = NULL;
 }
 
 static int mymemcmp(unsigned long *offset,const Uchar *s1,const Uchar *s2,
@@ -286,29 +286,29 @@ static /*@null@*/ const Uchar *binmersearch(unsigned long merbytes,
   return NULL;
 }
 
-static void checktallymerindex(const Tallymerindex *tallymerindex)
+static void checktyrindex(const Tyrindex *tyrindex)
 {
   Uchar *mercodeptr;
   const Uchar *result;
   unsigned long position, previousposition = 0;
 
-  for (mercodeptr = tallymerindex->mertable;
-       mercodeptr <= tallymerindex->lastmer;
-       mercodeptr += tallymerindex->merbytes)
+  for (mercodeptr = tyrindex->mertable;
+       mercodeptr <= tyrindex->lastmer;
+       mercodeptr += tyrindex->merbytes)
   {
-    result = binmersearch(tallymerindex->merbytes,
+    result = binmersearch(tyrindex->merbytes,
                           0,
                           mercodeptr,
-                          tallymerindex->mertable,
-                          tallymerindex->lastmer);
+                          tyrindex->mertable,
+                          tyrindex->lastmer);
     assert(result != NULL);
-    if ((result - tallymerindex->mertable) % tallymerindex->merbytes != 0)
+    if ((result - tyrindex->mertable) % tyrindex->merbytes != 0)
     {
-      fprintf(stderr,"result is not multiple of %lu\n",tallymerindex->merbytes);
+      fprintf(stderr,"result is not multiple of %lu\n",tyrindex->merbytes);
       exit(EXIT_FAILURE);
     }
-    position = (unsigned long) (result-tallymerindex->mertable)/
-                               tallymerindex->merbytes;
+    position = (unsigned long) (result-tyrindex->mertable)/
+                               tyrindex->merbytes;
     if (position > 0)
     {
       if (previousposition + 1 != position)
@@ -343,39 +343,40 @@ typedef struct
   unsigned int showmode,
                searchstrand;
   Alphabet *dnaalpha;
-} Vmersearchinfo;
+} Tyrsearchinfo;
 
-static void vmersearchinfo_init(Vmersearchinfo *vmersearchinfo,
-                                const Tallymerindex *tallymerindex,
-                                unsigned int showmode,
-                                unsigned int searchstrand)
+static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
+                               const Tyrindex *tyrindex,
+                               unsigned int showmode,
+                               unsigned int searchstrand)
 {
-  vmersearchinfo->showmode = showmode;
-  vmersearchinfo->searchstrand = searchstrand;
-  vmersearchinfo->dnaalpha = assigninputalphabet(true,false,NULL,NULL,NULL);
-  ALLOCASSIGNSPACE(vmersearchinfo->bytecode,NULL,Uchar,tallymerindex->merbytes);
-  ALLOCASSIGNSPACE(vmersearchinfo->rcbuf,NULL,Uchar,tallymerindex->mersize);
+  tyrsearchinfo->showmode = showmode;
+  tyrsearchinfo->searchstrand = searchstrand;
+  tyrsearchinfo->dnaalpha = assigninputalphabet(true,false,NULL,NULL,NULL);
+  ALLOCASSIGNSPACE(tyrsearchinfo->bytecode,NULL,Uchar,
+                   tyrindex->merbytes);
+  ALLOCASSIGNSPACE(tyrsearchinfo->rcbuf,NULL,Uchar,tyrindex->mersize);
 }
 
-void vmersearchinfo_delete(Vmersearchinfo *vmersearchinfo)
+void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 {
-  freeAlphabet(&vmersearchinfo->dnaalpha);
-  FREESPACE(vmersearchinfo->bytecode);
-  FREESPACE(vmersearchinfo->rcbuf);
+  freeAlphabet(&tyrsearchinfo->dnaalpha);
+  FREESPACE(tyrsearchinfo->bytecode);
+  FREESPACE(tyrsearchinfo->rcbuf);
 }
 
 /*@null@*/ const Uchar *searchsinglemer(const Uchar *qptr,
-                                        const Tallymerindex *tallymerindex,
-                                        const Vmersearchinfo *vmersearchinfo)
+                                        const Tyrindex *tyrindex,
+                                        const Tyrsearchinfo *tyrsearchinfo)
 {
   const Uchar *result;
 
-  plainseq2bytecode(vmersearchinfo->bytecode,qptr,tallymerindex->mersize);
-  result = binmersearch(tallymerindex->merbytes,
+  plainseq2bytecode(tyrsearchinfo->bytecode,qptr,tyrindex->mersize);
+  result = binmersearch(tyrindex->merbytes,
                         0,
-                        vmersearchinfo->bytecode,
-                        tallymerindex->mertable,
-                        tallymerindex->lastmer);
+                        tyrsearchinfo->bytecode,
+                        tyrindex->mertable,
+                        tyrindex->lastmer);
   return result;
 }
 
@@ -388,8 +389,8 @@ void vmersearchinfo_delete(Vmersearchinfo *vmersearchinfo)
           (void) putchar('\t');\
         }
 
-static void mermatchoutput(const Tallymerindex *tallymerindex,
-                           const Vmersearchinfo *vmersearchinfo,
+static void mermatchoutput(const Tyrindex *tyrindex,
+                           const Tyrsearchinfo *tyrsearchinfo,
                            GT_UNUSED const Uchar *result,
                            const Uchar *query,
                            const Uchar *qptr,
@@ -400,68 +401,68 @@ static void mermatchoutput(const Tallymerindex *tallymerindex,
   unsigned long queryposition;
 
   queryposition = (unsigned long) (qptr-query);
-  if (vmersearchinfo->showmode & SHOWQSEQNUM)
+  if (tyrsearchinfo->showmode & SHOWQSEQNUM)
   {
     printf(Formatuint64_t,PRINTuint64_tcast(unitnum));
     firstitem = false;
   }
-  if (vmersearchinfo->showmode & SHOWQPOS)
+  if (tyrsearchinfo->showmode & SHOWQPOS)
   {
     ADDTABULATOR;
     printf("%c%lu",forward ? '+' : '-',queryposition);
   }
-  if (vmersearchinfo->showmode & SHOWCOUNTS)
+  if (tyrsearchinfo->showmode & SHOWCOUNTS)
   {
     /*
     unsigned long mernumber
-      = (unsigned long) (result - tallymerindex->mertable)/
-                        tallymerindex->merbytes;
+      = (unsigned long) (result - tyrindex->mertable)/
+                        tyrindex->merbytes;
     ADDTABULATOR;
-    if (showmercounts(&vmersearchinfo->mctinfo,mernumber) != 0)
+    if (showmercounts(&tyrsearchinfo->mctinfo,mernumber) != 0)
     {
       return (Sint) -1;
     }
     */
   }
-  if (vmersearchinfo->showmode & SHOWSEQUENCE)
+  if (tyrsearchinfo->showmode & SHOWSEQUENCE)
   {
     ADDTABULATOR;
-    fprintfsymbolstring(stdout,vmersearchinfo->dnaalpha,qptr,
-                        tallymerindex->mersize);
+    fprintfsymbolstring(stdout,tyrsearchinfo->dnaalpha,qptr,
+                        tyrindex->mersize);
   }
-  if (vmersearchinfo->showmode & (SHOWSEQUENCE | SHOWQPOS | SHOWCOUNTS))
+  if (tyrsearchinfo->showmode & (SHOWSEQUENCE | SHOWQPOS | SHOWCOUNTS))
   {
     (void) putchar('\n');
   }
 }
 
-static void singleseqtallymersearch(const Tallymerindex *tallymerindex,
-                                    const Vmersearchinfo *vmersearchinfo,
-                                    uint64_t unitnum,
-                                    const Uchar *query,
-                                    unsigned long querylen,
-                                    GT_UNUSED const char *desc)
+static void singleseqtyrsearch(const Tyrindex *tyrindex,
+                               const Tyrsearchinfo *tyrsearchinfo,
+                               uint64_t unitnum,
+                               const Uchar *query,
+                               unsigned long querylen,
+                               GT_UNUSED const char *desc)
 {
   const Uchar *qptr, *result;
   unsigned long skipvalue;
 
-  if (tallymerindex->mersize > querylen)
+  if (tyrindex->mersize > querylen)
   {
     return;
   }
   qptr = query;
-  while (qptr <= query + querylen - tallymerindex->mersize)
+  while (qptr <= query + querylen - tyrindex->mersize)
   {
-    skipvalue = containsspecialbytestring(qptr,tallymerindex->mersize);
-    if (skipvalue == tallymerindex->mersize)
+    skipvalue = containsspecialbytestring(qptr,tyrindex->mersize);
+    if (skipvalue == tyrindex->mersize)
     {
-      if (vmersearchinfo->searchstrand & STRAND_FORWARD)
+      if (tyrsearchinfo->searchstrand & STRAND_FORWARD)
       {
-        result = searchsinglemer(qptr,tallymerindex,vmersearchinfo);
+        result = searchsinglemer(qptr,tyrindex,tyrsearchinfo);
         if (result != NULL)
         {
-          mermatchoutput(tallymerindex,
-                         vmersearchinfo,
+          mermatchoutput(tyrindex,
+                         tyrsearchinfo,
                          result,
                          query,
                          qptr,
@@ -469,17 +470,17 @@ static void singleseqtallymersearch(const Tallymerindex *tallymerindex,
                          true);
         }
       }
-      if (vmersearchinfo->searchstrand & STRAND_REVERSE)
+      if (tyrsearchinfo->searchstrand & STRAND_REVERSE)
       {
-        assert(vmersearchinfo->rcbuf != NULL);
-        copy_reversecomplement(vmersearchinfo->rcbuf,qptr,
-                               tallymerindex->mersize);
-        result = searchsinglemer(vmersearchinfo->rcbuf,tallymerindex,
-                                 vmersearchinfo);
+        assert(tyrsearchinfo->rcbuf != NULL);
+        copy_reversecomplement(tyrsearchinfo->rcbuf,qptr,
+                               tyrindex->mersize);
+        result = searchsinglemer(tyrsearchinfo->rcbuf,tyrindex,
+                                 tyrsearchinfo);
         if (result != NULL)
         {
-          mermatchoutput(tallymerindex,
-                         vmersearchinfo,
+          mermatchoutput(tyrindex,
+                         tyrsearchinfo,
                          result,
                          query,
                          qptr,
@@ -495,31 +496,31 @@ static void singleseqtallymersearch(const Tallymerindex *tallymerindex,
   }
 }
 
-int tallymersearch(const GtStr *tallymerindexname,
-                   const GtStrArray *queryfilenames,
-                   unsigned int showmode,
-                   unsigned int searchstrand,
-                   bool verbose,
-                   bool performtest,
-                   GtError *err)
+int tyrsearch(const GtStr *tyrindexname,
+              const GtStrArray *queryfilenames,
+              unsigned int showmode,
+              unsigned int searchstrand,
+              bool verbose,
+              bool performtest,
+              GtError *err)
 {
-  Tallymerindex *tallymerindex;
+  Tyrindex *tyrindex;
   bool haserr = false;
   GtSeqIterator *seqit;
 
-  tallymerindex = tallymerindex_new(tallymerindexname,err);
-  if (tallymerindex == NULL)
+  tyrindex = tyrindex_new(tyrindexname,err);
+  if (tyrindex == NULL)
   {
     haserr = true;
   } else
   {
     if (verbose)
     {
-      tallymerindex_show(tallymerindex);
+      tyrindex_show(tyrindex);
     }
     if (performtest)
     {
-      checktallymerindex(tallymerindex);
+      checktyrindex(tyrindex);
     }
   }
   if (!haserr)
@@ -529,12 +530,12 @@ int tallymersearch(const GtStr *tallymerindexname,
     char *desc = NULL;
     uint64_t unitnum;
     int retval;
-    Vmersearchinfo vmersearchinfo;
+    Tyrsearchinfo tyrsearchinfo;
 
-    assert(tallymerindex != NULL);
-    vmersearchinfo_init(&vmersearchinfo,tallymerindex,showmode,searchstrand);
+    assert(tyrindex != NULL);
+    tyrsearchinfo_init(&tyrsearchinfo,tyrindex,showmode,searchstrand);
     seqit = gt_seqiterator_new(queryfilenames,
-                               getsymbolmapAlphabet(vmersearchinfo.dnaalpha),
+                               getsymbolmapAlphabet(tyrsearchinfo.dnaalpha),
                                true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
@@ -552,8 +553,8 @@ int tallymersearch(const GtStr *tallymerindexname,
       {
         break;
       }
-      singleseqtallymersearch(tallymerindex,
-                              &vmersearchinfo,
+      singleseqtyrsearch(tyrindex,
+                              &tyrsearchinfo,
                               unitnum,
                               query,
                               querylen,
@@ -561,11 +562,11 @@ int tallymersearch(const GtStr *tallymerindexname,
       gt_free(desc);
     }
     gt_seqiterator_delete(seqit);
-    vmersearchinfo_delete(&vmersearchinfo);
+    tyrsearchinfo_delete(&tyrsearchinfo);
   }
-  if (tallymerindex != NULL)
+  if (tyrindex != NULL)
   {
-   tallymerindex_delete(&tallymerindex);
+    tyrindex_delete(&tyrindex);
   }
   return haserr ? -1 : 0;
 }

@@ -55,20 +55,20 @@ typedef struct
   bool storecounts,
        performtest,
        verbose;
-} Tallymer_mkindex_options;
+} Tyr_mkindex_options;
 
-static void *gt_tallymer_mkindex_arguments_new(void)
+static void *gt_tyr_mkindex_arguments_new(void)
 {
-  Tallymer_mkindex_options *arguments
-    = gt_malloc(sizeof (Tallymer_mkindex_options));
+  Tyr_mkindex_options *arguments
+    = gt_malloc(sizeof (Tyr_mkindex_options));
   arguments->str_storeindex = gt_str_new();
   arguments->str_inputindex = gt_str_new();
   return arguments;
 }
 
-static void gt_tallymer_mkindex_arguments_delete(void *tool_arguments)
+static void gt_tyr_mkindex_arguments_delete(void *tool_arguments)
 {
-  Tallymer_mkindex_options *arguments = tool_arguments;
+  Tyr_mkindex_options *arguments = tool_arguments;
 
   if (!arguments)
   {
@@ -81,7 +81,7 @@ static void gt_tallymer_mkindex_arguments_delete(void *tool_arguments)
 }
 
 static GtOptionParser
-            *gt_tallymer_mkindex_option_parser_new(void *tool_arguments)
+            *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option,
@@ -90,7 +90,7 @@ static GtOptionParser
            *optionpl,
            *optionstoreindex,
            *optionstorecounts;
-  Tallymer_mkindex_options *arguments = tool_arguments;
+  Tyr_mkindex_options *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] enhanced-suffix-array",
                             "Count and index k-mers in the given enhanced "
@@ -155,11 +155,11 @@ static GtOptionParser
   return op;
 }
 
-static int gt_tallymer_mkindex_arguments_check(int rest_argc,
+static int gt_tyr_mkindex_arguments_check(int rest_argc,
                                                void *tool_arguments,
                                                GtError *err)
 {
-  Tallymer_mkindex_options *arguments = tool_arguments;
+  Tyr_mkindex_options *arguments = tool_arguments;
 
   if (gt_option_is_set(arguments->refoptionpl))
   {
@@ -185,13 +185,13 @@ static int gt_tallymer_mkindex_arguments_check(int rest_argc,
   return 0;
 }
 
-static int gt_tallymer_mkindex_runner(int argc,
+static int gt_tyr_mkindex_runner(int argc,
                                       const char **argv,
                                       int parsed_args,
                                       void *tool_arguments,
                                       GtError *err)
 {
-  Tallymer_mkindex_options *arguments = tool_arguments;
+  Tyr_mkindex_options *arguments = tool_arguments;
   Verboseinfo *verboseinfo;
   bool haserr = false;
 
@@ -253,20 +253,20 @@ static int gt_tallymer_mkindex_runner(int argc,
   return haserr ? - 1 : 0;
 }
 
-static GtTool* gt_tallymer_mkindex(void)
+static GtTool* gt_tyr_mkindex(void)
 {
-  return gt_tool_new(gt_tallymer_mkindex_arguments_new,
-                     gt_tallymer_mkindex_arguments_delete,
-                     gt_tallymer_mkindex_option_parser_new,
-                     gt_tallymer_mkindex_arguments_check,
-                     gt_tallymer_mkindex_runner);
+  return gt_tool_new(gt_tyr_mkindex_arguments_new,
+                     gt_tyr_mkindex_arguments_delete,
+                     gt_tyr_mkindex_option_parser_new,
+                     gt_tyr_mkindex_arguments_check,
+                     gt_tyr_mkindex_runner);
 }
 
-static int gt_tallymer_occratio(GT_UNUSED int argc,
+static int gt_tyr_occratio(GT_UNUSED int argc,
                                 GT_UNUSED const char *argv[],
                                 GtError *err)
 {
-  gt_error_set(err,"tallymer occratio not implemented yet");
+  gt_error_set(err,"tyr occratio not implemented yet");
   return -1;
 }
 
@@ -280,12 +280,12 @@ typedef struct
                showmode;
   bool verbose,
        performtest;
-} Tallymer_search_options;
+} Tyr_search_options;
 
-static void *gt_tallymer_search_arguments_new(void)
+static void *gt_tyr_search_arguments_new(void)
 {
-  Tallymer_search_options *arguments
-    = gt_malloc(sizeof (Tallymer_search_options));
+  Tyr_search_options *arguments
+    = gt_malloc(sizeof (Tyr_search_options));
   arguments->str_indexname = gt_str_new();
   arguments->strandspec = gt_str_new();
   arguments->queryfilenames = gt_str_array_new();
@@ -295,9 +295,9 @@ static void *gt_tallymer_search_arguments_new(void)
   return arguments;
 }
 
-static void gt_tallymer_search_arguments_delete(void *tool_arguments)
+static void gt_tyr_search_arguments_delete(void *tool_arguments)
 {
-  Tallymer_search_options *arguments = tool_arguments;
+  Tyr_search_options *arguments = tool_arguments;
 
   if (!arguments)
   {
@@ -311,16 +311,16 @@ static void gt_tallymer_search_arguments_delete(void *tool_arguments)
 }
 
 static GtOptionParser
-          *gt_tallymer_search_option_parser_new(void *tool_arguments)
+          *gt_tyr_search_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option;
-  Tallymer_search_options *arguments = tool_arguments;
+  Tyr_search_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] tallymer-indexname queryfile0 "
+  op = gt_option_parser_new("[options] tyr-indexname queryfile0 "
                             "[queryfile1..]",
                             "Search a set of k-mers in an index constructed "
-                            "by \"gt tallymer mkindex\".");
+                            "by \"gt tyr mkindex\".");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   option = gt_option_new_string("strand",
@@ -350,7 +350,7 @@ static GtOptionParser
   return op;
 }
 
-static int gt_tallymer_search_arguments_check(int rest_argc,
+static int gt_tyr_search_arguments_check(int rest_argc,
                                               void *tool_arguments,
                                               GtError *err)
 {
@@ -370,11 +370,11 @@ static int gt_tallymer_search_arguments_check(int rest_argc,
   };
 
   unsigned long idx;
-  Tallymer_search_options *arguments = tool_arguments;
+  Tyr_search_options *arguments = tool_arguments;
 
   if (rest_argc < 1)
   {
-    gt_error_set(err,"missing tallymer-indexnames and queryfilenames");
+    gt_error_set(err,"missing tyr-indexnames and queryfilenames");
     return -1;
   }
   if (rest_argc < 2)
@@ -406,14 +406,14 @@ static int gt_tallymer_search_arguments_check(int rest_argc,
   return 0;
 }
 
-static int gt_tallymer_search_runner(int argc,
+static int gt_tyr_search_runner(int argc,
                                      const char **argv,
                                      int parsed_args,
                                      void *tool_arguments,
                                      GtError *err)
 {
   int idx;
-  Tallymer_search_options *arguments = tool_arguments;
+  Tyr_search_options *arguments = tool_arguments;
 
   assert(parsed_args + 2 <= argc);
   gt_str_set(arguments->str_indexname,argv[parsed_args]);
@@ -421,7 +421,7 @@ static int gt_tallymer_search_runner(int argc,
   {
     gt_str_array_add_cstr(arguments->queryfilenames,argv[idx]);
   }
-  if (tallymersearch(arguments->str_indexname,
+  if (tyrsearch(arguments->str_indexname,
                      arguments->queryfilenames,
                      arguments->showmode,
                      arguments->strand,
@@ -434,32 +434,32 @@ static int gt_tallymer_search_runner(int argc,
   return 0;
 }
 
-static GtTool *gt_tallymer_search(void)
+static GtTool *gt_tyr_search(void)
 {
-  return gt_tool_new(gt_tallymer_search_arguments_new,
-                     gt_tallymer_search_arguments_delete,
-                     gt_tallymer_search_option_parser_new,
-                     gt_tallymer_search_arguments_check,
-                     gt_tallymer_search_runner);
+  return gt_tool_new(gt_tyr_search_arguments_new,
+                     gt_tyr_search_arguments_delete,
+                     gt_tyr_search_option_parser_new,
+                     gt_tyr_search_arguments_check,
+                     gt_tyr_search_runner);
 }
 
-static void *gt_tallymer_arguments_new(void)
+static void *gt_tyr_arguments_new(void)
 {
-  GtToolbox *tallymer_toolbox = gt_toolbox_new();
-  gt_toolbox_add_tool(tallymer_toolbox, "mkindex", gt_tallymer_mkindex());
-  gt_toolbox_add(tallymer_toolbox, "occratio", gt_tallymer_occratio);
-  gt_toolbox_add_tool(tallymer_toolbox, "search", gt_tallymer_search());
-  return tallymer_toolbox;
+  GtToolbox *tyr_toolbox = gt_toolbox_new();
+  gt_toolbox_add_tool(tyr_toolbox, "mkindex", gt_tyr_mkindex());
+  gt_toolbox_add(tyr_toolbox, "occratio", gt_tyr_occratio);
+  gt_toolbox_add_tool(tyr_toolbox, "search", gt_tyr_search());
+  return tyr_toolbox;
 }
 
-static void gt_tallymer_arguments_delete(void *tool_arguments)
+static void gt_tyr_arguments_delete(void *tool_arguments)
 {
   GtToolbox *index_toolbox = tool_arguments;
   if (!index_toolbox) return;
   gt_toolbox_delete(index_toolbox);
 }
 
-static GtOptionParser* gt_tallymer_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_tyr_option_parser_new(void *tool_arguments)
 {
   GtToolbox *index_toolbox = tool_arguments;
   GtOptionParser *op;
@@ -467,14 +467,14 @@ static GtOptionParser* gt_tallymer_option_parser_new(void *tool_arguments)
   assert(index_toolbox != NULL);
   op = gt_option_parser_new(
                     "[option ...] [mkindex|occratio|search] [argument ...]",
-                    "Call tallymer with specific tool and "
+                    "Call tyr with specific tool and "
                     "pass argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, index_toolbox);
   gt_option_parser_refer_to_manual(op);
   return op;
 }
 
-static int gt_tallymer_runner(int argc, const char **argv, int parsed_args,
+static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GtError *err)
 {
   GtToolbox *index_toolbox = tool_arguments;
@@ -489,7 +489,7 @@ static int gt_tallymer_runner(int argc, const char **argv, int parsed_args,
   /* determine tool */
   if (!gt_toolbox_has_tool(index_toolbox, argv[parsed_args]))
   {
-    gt_error_set(err, "tallymer tool '%s' not found; option -help lists "
+    gt_error_set(err, "tyr tool '%s' not found; option -help lists "
                    "possible tools", argv[parsed_args]);
     had_err = -1;
   }
@@ -517,9 +517,9 @@ static int gt_tallymer_runner(int argc, const char **argv, int parsed_args,
 
 GtTool* gt_tallymer(void)
 {
-  return gt_tool_new(gt_tallymer_arguments_new,
-                     gt_tallymer_arguments_delete,
-                     gt_tallymer_option_parser_new,
+  return gt_tool_new(gt_tyr_arguments_new,
+                     gt_tyr_arguments_delete,
+                     gt_tyr_option_parser_new,
                      NULL,
-                     gt_tallymer_runner);
+                     gt_tyr_runner);
 }

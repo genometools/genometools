@@ -59,15 +59,15 @@ typedef struct
 
 DECLAREARRAYSTRUCT(Largecount);
 
-typedef struct Tallymerindex Tallymerindex;
-typedef struct Tallymercountinfo Tallymercountinfo;
+typedef struct Tyrindex Tyrindex;
+typedef struct Tyrcountinfo Tyrcountinfo;
 
-int tallymersearch(const GtStr *tallymerindexname,
-                   const GtStrArray *queryfilenames,
-                   unsigned int showmode,
-                   unsigned int searchstrand,
-                   bool verbose,
-                   bool performtest,
-                   GtError *err);
+int tyrsearch(const GtStr *tyrindexname,
+              const GtStrArray *queryfilenames,
+              unsigned int showmode,
+              unsigned int searchstrand,
+              bool verbose,
+              bool performtest,
+              GtError *err);
 
 #endif
