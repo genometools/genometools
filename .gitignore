@@ -22,6 +22,7 @@
 *.pbt
 *.mct
 *.mer
+*.mbd
 *.polya
 *.polya.info
 *.gt_bsi

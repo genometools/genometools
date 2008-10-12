@@ -26,8 +26,10 @@
 #include "tools/gt_tallymer.h"
 #include "match/tyr-mkindex.h"
 #include "match/tyr-search.h"
+#include "match/tyr-mersplit.h"
 #include "match/verbose-def.h"
 #include "match/optionargmode.h"
+#include "match/defined-types.h"
 
 typedef enum
 {
@@ -38,7 +40,7 @@ typedef enum
 
 typedef struct
 {
-  unsigned long value;
+  unsigned int value;
   Prefixlengthflag flag;
 } Prefixlengthvalue;
 
@@ -46,8 +48,8 @@ typedef struct
 {
   unsigned long mersize,
                 userdefinedminocc,
-                userdefinedmaxocc,
-                userdefinedprefixlength;
+                userdefinedmaxocc;
+  unsigned int userdefinedprefixlength;
   Prefixlengthvalue prefixlength;
   GtOption *refoptionpl;
   GtStr *str_storeindex,
@@ -119,13 +121,13 @@ static GtOptionParser
                           0);
   gt_option_parser_add_option(op, optionmaxocc);
 
-  optionpl = gt_option_new_ulong_min("pl",
+  optionpl = gt_option_new_uint_min("pl",
                  "specify prefix length for bucket boundary construction\n"
                  "recommendation: use without argument;\n"
                  "then a reasonable prefix length is automatically determined",
                  &arguments->userdefinedprefixlength,
                  0,
-                 1UL);
+                 1U);
   gt_option_argument_is_optional(optionpl);
   gt_option_parser_add_option(op, optionpl);
   arguments->refoptionpl = gt_option_ref(optionpl);
@@ -186,10 +188,10 @@ static int gt_tyr_mkindex_arguments_check(int rest_argc,
 }
 
 static int gt_tyr_mkindex_runner(int argc,
-                                      const char **argv,
-                                      int parsed_args,
-                                      void *tool_arguments,
-                                      GtError *err)
+                                 const char **argv,
+                                 int parsed_args,
+                                 void *tool_arguments,
+                                 GtError *err)
 {
   Tyr_mkindex_options *arguments = tool_arguments;
   Verboseinfo *verboseinfo;
@@ -223,7 +225,7 @@ static int gt_tyr_mkindex_runner(int argc,
     {
       if (arguments->prefixlength.flag == Determinedprefixlength)
       {
-        printf("%lu",arguments->prefixlength.value);
+        printf("%u",arguments->prefixlength.value);
       } else
       {
         printf("undefined");
@@ -248,6 +250,25 @@ static int gt_tyr_mkindex_runner(int argc,
                     err) != 0)
   {
     haserr = true;
+  }
+  if (!haserr &&
+      gt_str_length(arguments->str_inputindex) > 0 &&
+      arguments->prefixlength.flag != Undeterminedprefixlength)
+  {
+    Definedunsignedint callprefixlength;
+
+    if (arguments->prefixlength.flag == Determinedprefixlength)
+    {
+      callprefixlength.defined = true;
+      callprefixlength.valueunsignedint = arguments->prefixlength.value;
+    } else
+    {
+      callprefixlength.defined = false;
+    }
+    if (constructmerbuckets(arguments->str_inputindex,&callprefixlength) < 0)
+    {
+      haserr = true;
+    }
   }
   freeverboseinfo(&verboseinfo);
   return haserr ? - 1 : 0;
