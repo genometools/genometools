@@ -334,7 +334,7 @@ static int adddistpos2distribution(unsigned long countocc,
     state->occdistribution.spaceCountwithpositions[countocc].positionlist
       = insertListSeqpos(state->occdistribution.
                               spaceCountwithpositions[countocc].positionlist,
-                       position);
+                         position);
   }
   if (state->performtest)
   {
@@ -473,7 +473,7 @@ static int processleafedge(GT_UNUSED bool firstsucc,
                            GT_UNUSED Dfsinfo *father,
                            Seqpos leafnumber,
                            Dfsstate *state,
-                           GT_UNUSED GtError *err)
+                           GtError *err)
 {
   gt_error_check(err);
   if (fatherdepth < state->mersize &&
@@ -496,7 +496,7 @@ static int processcompletenode(Seqpos nodeptrdepth,
                                Dfsinfo *nodeptr,
                                Seqpos nodeptrminusonedepth,
                                Dfsstate *state,
-                               GT_UNUSED GtError *err)
+                               GtError *err)
 {
   gt_error_check(err);
   if (state->mersize <= nodeptrdepth)

@@ -28,15 +28,6 @@
 #include "tyr-search.h"
 #include "spacedef.h"
 
-struct Tyrcountinfo
-{
-  void *mappedmctfileptr;
-  const GtStr *indexfilename;
-  Uchar *smallcounts;
-  Largecount *largecounts;
-  unsigned long numoflargecounts;
-};
-
 struct Tyrindex
 {
   void *mappedfileptr;
@@ -47,6 +38,15 @@ struct Tyrindex
                 merbytes;
   Uchar *mertable,
         *lastmer;
+};
+
+struct Tyrcountinfo
+{
+  void *mappedmctfileptr;
+  const GtStr *indexfilename;
+  Uchar *smallcounts;
+  Largecount *largecounts;
+  unsigned long numoflargecounts;
 };
 
 typedef struct
@@ -379,6 +379,57 @@ void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
   return result;
 }
 
+static /*@null@*/ const Largecount *binsearchLargecount(unsigned long key,
+                                                        const Largecount *left,
+                                                        const Largecount *right)
+{
+  const Largecount *leftptr = left, *midptr, *rightptr = right;
+  unsigned long len;
+
+  while (leftptr<=rightptr)
+  {
+    len = (unsigned long) (rightptr-leftptr);
+    midptr = leftptr + DIV2(len); /* halve len */
+    if (key < midptr->idx)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (key > midptr->idx)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr;
+      }
+    }
+  }
+  return NULL;
+}
+
+static void showmercounts(const Tyrcountinfo *tyrcountinfo,
+                          unsigned long mernumber)
+{
+  if (tyrcountinfo->smallcounts[mernumber] == 0)
+  {
+    const Largecount *lc
+      = binsearchLargecount(mernumber,
+                            tyrcountinfo->largecounts,
+                            tyrcountinfo->largecounts +
+                            tyrcountinfo->numoflargecounts-1);
+    assert (lc != NULL);
+    if (lc == NULL)
+    {
+      fprintf(stderr,"cannot find count for mer number %lu",mernumber);
+      exit(EXIT_FAILURE);
+    }
+    printf("%lu",lc->value);
+  } else
+  {
+    printf("%lu",(unsigned long) tyrcountinfo->smallcounts[mernumber]);
+  }
+}
+
 #define ADDTABULATOR\
         if (firstitem)\
         {\
@@ -389,8 +440,9 @@ void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
         }
 
 static void mermatchoutput(const Tyrindex *tyrindex,
+                           const Tyrcountinfo *tyrcountinfo,
                            const Tyrsearchinfo *tyrsearchinfo,
-                           GT_UNUSED const Uchar *result,
+                           const Uchar *result,
                            const Uchar *query,
                            const Uchar *qptr,
                            uint64_t unitnum,
@@ -412,16 +464,11 @@ static void mermatchoutput(const Tyrindex *tyrindex,
   }
   if (tyrsearchinfo->showmode & SHOWCOUNTS)
   {
-    /*
     unsigned long mernumber
       = (unsigned long) (result - tyrindex->mertable)/
                         tyrindex->merbytes;
     ADDTABULATOR;
-    if (showmercounts(&tyrsearchinfo->mctinfo,mernumber) != 0)
-    {
-      return (Sint) -1;
-    }
-    */
+    showmercounts(tyrcountinfo,mernumber);
   }
   if (tyrsearchinfo->showmode & SHOWSEQUENCE)
   {
@@ -436,6 +483,7 @@ static void mermatchoutput(const Tyrindex *tyrindex,
 }
 
 static void singleseqtyrsearch(const Tyrindex *tyrindex,
+                               const Tyrcountinfo *tyrcountinfo,
                                const Tyrsearchinfo *tyrsearchinfo,
                                uint64_t unitnum,
                                const Uchar *query,
@@ -461,6 +509,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
         if (result != NULL)
         {
           mermatchoutput(tyrindex,
+                         tyrcountinfo,
                          tyrsearchinfo,
                          result,
                          query,
@@ -479,6 +528,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
         if (result != NULL)
         {
           mermatchoutput(tyrindex,
+                         tyrcountinfo,
                          tyrsearchinfo,
                          result,
                          query,
@@ -566,11 +616,12 @@ int tyrsearch(const GtStr *tyrindexname,
         break;
       }
       singleseqtyrsearch(tyrindex,
-                              &tyrsearchinfo,
-                              unitnum,
-                              query,
-                              querylen,
-                              desc);
+                         tyrcountinfo,
+                         &tyrsearchinfo,
+                         unitnum,
+                         query,
+                         querylen,
+                         desc);
       gt_free(desc);
     }
     gt_seqiterator_delete(seqit);
