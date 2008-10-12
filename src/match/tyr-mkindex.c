@@ -663,7 +663,7 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
     {
       if (state.countsfilefpout != NULL)
       {
-        showverbose(verboseinfo,"write %lu mercounts > %lu to file \"%s.%s\"",
+        showverbose(verboseinfo,"write %lu mercounts > %lu to file \"%s%s\"",
                     state.largecounts.nextfreeLargecount,
                     (unsigned long) MAXSMALLMERCOUNT,
                     gt_str_get(str_storeindex),

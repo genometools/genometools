@@ -42,8 +42,8 @@ struct Tyrindex
   void *mappedfileptr;
   const GtStr *indexfilename;
   unsigned int alphasize;
-  unsigned long numofmers,
-                mersize,
+  size_t numofmers;
+  unsigned long mersize,
                 merbytes;
   Uchar *mertable,
         *lastmer;
@@ -112,8 +112,7 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   }
   if (!haserr)
   {
-    tyrindex->numofmers
-      = (unsigned long) (numofbytes - rest) / tyrindex->merbytes;
+    tyrindex->numofmers = (numofbytes - rest) / tyrindex->merbytes;
     assert(tyrindex->mertable != NULL);
     if (tyrindex->numofmers == 0)
     {
@@ -141,7 +140,7 @@ void tyrindex_show(const Tyrindex *tyrindex)
   printf("# indexfilename = %s\n",gt_str_get(tyrindex->indexfilename));
   printf("# alphasize = %u\n",tyrindex->alphasize);
   printf("# mersize = %lu\n",tyrindex->mersize);
-  printf("# numofmers = %lu\n",tyrindex->numofmers);
+  printf("# numofmers = %lu\n",(unsigned long) tyrindex->numofmers);
   printf("# merbytes = %lu\n",tyrindex->merbytes);
 }
 
@@ -505,6 +504,7 @@ int tyrsearch(const GtStr *tyrindexname,
               GtError *err)
 {
   Tyrindex *tyrindex;
+  Tyrcountinfo *tyrcountinfo = NULL;
   bool haserr = false;
   GtSeqIterator *seqit;
 
@@ -521,6 +521,18 @@ int tyrsearch(const GtStr *tyrindexname,
     if (performtest)
     {
       checktyrindex(tyrindex);
+    }
+  }
+  if (!haserr)
+  {
+    assert(tyrindex != NULL);
+    if ((showmode & SHOWCOUNTS) && tyrindex->numofmers > 0)
+    {
+      tyrcountinfo = tyrcountinfo_new(tyrindex->numofmers,tyrindexname,err);
+      if (tyrcountinfo == NULL)
+      {
+        haserr = true;
+      }
     }
   }
   if (!haserr)
@@ -563,6 +575,10 @@ int tyrsearch(const GtStr *tyrindexname,
     }
     gt_seqiterator_delete(seqit);
     tyrsearchinfo_delete(&tyrsearchinfo);
+  }
+  if (tyrcountinfo != NULL)
+  {
+    tyrcountinfo_delete(&tyrcountinfo);
   }
   if (tyrindex != NULL)
   {
