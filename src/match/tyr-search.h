@@ -22,6 +22,7 @@
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 #include "intbits.h"
+#include "intbits-tab.h"
 #include "divmodmul.h"
 
 #define MERBYTES(SL)  (DIV4(SL) + ((MOD4(SL) == 0) ? 0 : 1UL))
@@ -40,17 +41,6 @@
 #define SHOWQPOS     (SHOWQSEQNUM << 1)
 #define SHOWCOUNTS   (SHOWQSEQNUM << 2)
 #define SHOWSEQUENCE (SHOWQSEQNUM << 3)
-
-typedef struct
-{
-  const void *mappedmbdfileptr;
-  const GtStr *indexfilename;
-  unsigned int prefixlength;
-  unsigned long numofcodes,
-                *boundisdefined,
-                *bounds;
-  uint64_t numberofextractions;
-} MBDinfo;
 
 typedef struct
 {
