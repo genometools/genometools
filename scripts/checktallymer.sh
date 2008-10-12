@@ -26,6 +26,7 @@ fi
 
 mersize=20
 inputfile=$1
+outoptions="-counts -pl -mersize ${mersize} -minocc 10 -maxocc 30"
 
 cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
 cmd="env -i bin/gt tallymer mkindex -test -mersize ${mersize} sfxidx"
@@ -39,7 +40,10 @@ grep -v '^#' tmp2 > tmp2.2
 mv tmp2.2 tmp2
 cerr "cmp -s tmp1 tmp2"
 rm -f tmp[12]
-cmd="env -i bin/gt tallymer mkindex -counts -indexname tyr-index -mersize ${mersize} -minocc 10 -maxocc 30 sfxidx"
+cmd="tallymer-mkindex ${outoptions} -indexname mkv-tyr-index mkvidx" 
+${cmd} > tmp2
+checkerror
+cmd="env -i bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
 ${cmd}
 checkerror
 cmd="env -i bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
