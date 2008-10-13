@@ -76,6 +76,7 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   size_t numofbytes, rest;
   Tyrindex *tyrindex;
 
+  gt_error_check(err);
   ALLOCASSIGNSPACE(tyrindex,NULL,Tyrindex,1);
   tyrindex->indexfilename = tyrindexname;
   tyrindex->mappedfileptr = genericmaponlytable(tyrindexname,
@@ -191,6 +192,7 @@ Tyrcountinfo *tyrcountinfo_new(size_t numofmers,
   bool haserr = false;
   Tyrcountinfo *tyrcountinfo;
 
+  gt_error_check(err);
   ALLOCASSIGNSPACE(tyrcountinfo,NULL,Tyrcountinfo,1);
   tyrcountinfo->indexfilename = tyrindexname;
   tyrcountinfo->mappedmctfileptr
@@ -353,6 +355,7 @@ int determinetyrbckpfxlen(unsigned int *prefixlength,
                           const Definedunsignedint *callprefixlength,
                           GtError *err)
 {
+  gt_error_check(err);
   if (callprefixlength->defined)
   {
     unsigned int maxprefixlen
@@ -618,6 +621,7 @@ int tyrsearch(const GtStr *tyrindexname,
   bool haserr = false;
   GtSeqIterator *seqit;
 
+  gt_error_check(err);
   tyrindex = tyrindex_new(tyrindexname,err);
   if (tyrindex == NULL)
   {

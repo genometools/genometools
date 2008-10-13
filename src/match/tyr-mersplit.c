@@ -28,6 +28,7 @@
 #include "defined-types.h"
 #include "intbits.h"
 #include "tyr-search.h"
+#include "tyr-mersplit.h"
 #include "opensfxfile.h"
 
 typedef struct
@@ -142,8 +143,10 @@ int constructmerbuckets(const GtStr *inputindex,
   Tyrindex *tyrindex;
   Tyrbckinfo tyrbckinfo;
   FILE *bucketfp = NULL;
-  bool haserr = true;
+  bool haserr = false;
 
+  tyrbckinfo.bounds = NULL;
+  tyrbckinfo.boundisdefined = NULL;
   tyrindex = tyrindex_new(inputindex,err);
   if (tyrindex == NULL)
   {

@@ -19,9 +19,10 @@
 #define TYR_MERSPLIT_H
 
 #include "core/str_api.h"
+#include "core/error_api.h"
 #include "defined-types.h"
 
 int constructmerbuckets(const GtStr *inputindex,
-                        const Definedunsignedint *prefixlength);
-
+                        const Definedunsignedint *callprefixlength,
+                        GtError *err);
 #endif

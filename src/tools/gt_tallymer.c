@@ -252,7 +252,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     haserr = true;
   }
   if (!haserr &&
-      gt_str_length(arguments->str_inputindex) > 0 &&
+      gt_str_length(arguments->str_storeindex) > 0 &&
       arguments->prefixlength.flag != Undeterminedprefixlength)
   {
     Definedunsignedint callprefixlength;
@@ -265,7 +265,8 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     {
       callprefixlength.defined = false;
     }
-    if (constructmerbuckets(arguments->str_inputindex,&callprefixlength) < 0)
+    if (constructmerbuckets(arguments->str_storeindex,&callprefixlength,err)
+        != 0)
     {
       haserr = true;
     }
