@@ -187,7 +187,7 @@ static int gt_tyr_mkindex_arguments_check(int rest_argc,
   return 0;
 }
 
-static int gt_tyr_mkindex_runner(int argc,
+static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
                                  const char **argv,
                                  int parsed_args,
                                  void *tool_arguments,
