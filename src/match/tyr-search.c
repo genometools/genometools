@@ -94,7 +94,7 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   }
   if (!haserr)
   {
-    assert(tyrindex->mertable != NULL);
+    gt_assert(tyrindex->mertable != NULL);
     tyrindex->mersize
       = decodesingleinteger(tyrindex->mertable + numofbytes - rest);
     tyrindex->alphasize
@@ -113,7 +113,7 @@ Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err)
   if (!haserr)
   {
     tyrindex->numofmers = (numofbytes - rest) / tyrindex->merbytes;
-    assert(tyrindex->mertable != NULL);
+    gt_assert(tyrindex->mertable != NULL);
     if (tyrindex->numofmers == 0)
     {
       tyrindex->lastmer = tyrindex->mertable - 1;
@@ -300,7 +300,7 @@ static void checktyrindex(const Tyrindex *tyrindex)
                           mercodeptr,
                           tyrindex->mertable,
                           tyrindex->lastmer);
-    assert(result != NULL);
+    gt_assert(result != NULL);
     if ((result - tyrindex->mertable) % tyrindex->merbytes != 0)
     {
       fprintf(stderr,"result is not multiple of %lu\n",tyrindex->merbytes);
@@ -417,7 +417,7 @@ static void showmercounts(const Tyrcountinfo *tyrcountinfo,
                             tyrcountinfo->largecounts,
                             tyrcountinfo->largecounts +
                             tyrcountinfo->numoflargecounts-1);
-    assert (lc != NULL);
+    gt_assert (lc != NULL);
     if (lc == NULL)
     {
       fprintf(stderr,"cannot find count for mer number %lu",mernumber);
@@ -520,7 +520,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
       }
       if (tyrsearchinfo->searchstrand & STRAND_REVERSE)
       {
-        assert(tyrsearchinfo->rcbuf != NULL);
+        gt_assert(tyrsearchinfo->rcbuf != NULL);
         copy_reversecomplement(tyrsearchinfo->rcbuf,qptr,
                                tyrindex->mersize);
         result = searchsinglemer(tyrsearchinfo->rcbuf,tyrindex,
@@ -575,7 +575,7 @@ int tyrsearch(const GtStr *tyrindexname,
   }
   if (!haserr)
   {
-    assert(tyrindex != NULL);
+    gt_assert(tyrindex != NULL);
     if ((showmode & SHOWCOUNTS) && tyrindex->numofmers > 0)
     {
       tyrcountinfo = tyrcountinfo_new(tyrindex->numofmers,tyrindexname,err);
@@ -594,7 +594,7 @@ int tyrsearch(const GtStr *tyrindexname,
     int retval;
     Tyrsearchinfo tyrsearchinfo;
 
-    assert(tyrindex != NULL);
+    gt_assert(tyrindex != NULL);
     tyrsearchinfo_init(&tyrsearchinfo,tyrindex,showmode,searchstrand);
     seqit = gt_seqiterator_new(queryfilenames,
                                getsymbolmapAlphabet(tyrsearchinfo.dnaalpha),

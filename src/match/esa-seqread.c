@@ -330,7 +330,7 @@ const char *destabSequentialsuffixarrayreader(
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)
 {
-  assert(ssar->seqactype != SEQ_scan);
+  gt_assert(ssar->seqactype != SEQ_scan);
   if (ssar->seqactype == SEQ_mappedboth)
   {
     return ssar->suffixarray->suftab;

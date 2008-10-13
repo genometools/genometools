@@ -16,8 +16,8 @@
 */
 
 #include <string.h>
-#include <assert.h>
 #include <stdarg.h>
+#include "core/assert_api.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
 #include "core/chardef.h"
@@ -148,9 +148,9 @@ static void spse_nextLimdfsstate(const void *dfsconstinfo,
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
   const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
 
-  assert(ISNOTSPECIAL(currentchar));
-  assert(currentdepth > 0);
-  assert(incol->pathmatches);
+  gt_assert(ISNOTSPECIAL(currentchar));
+  gt_assert(currentdepth > 0);
+  gt_assert(incol->pathmatches);
 
   outcol->pathmatches = setpathmatch(mti->seedbitvector,
                                      mti->pattern,
@@ -166,8 +166,8 @@ static void spse_inplacenextLimdfsstate(const void *dfsconstinfo,
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascol;
 
-  assert(ISNOTSPECIAL(currentchar));
-  assert(currentdepth > 0);
+  gt_assert(ISNOTSPECIAL(currentchar));
+  gt_assert(currentdepth > 0);
   col->pathmatches = setpathmatch(mti->seedbitvector,
                                   mti->pattern,
                                   currentdepth,

@@ -197,7 +197,7 @@ static int gt_tyr_mkindex_runner(int argc,
   Verboseinfo *verboseinfo;
   bool haserr = false;
 
-  assert(parsed_args + 1 == argc);
+  gt_assert(parsed_args + 1 == argc);
   gt_str_set(arguments->str_inputindex,argv[parsed_args]);
   verboseinfo = newverboseinfo(arguments->verbose);
   if (arguments->verbose)
@@ -410,7 +410,8 @@ static int gt_tyr_search_arguments_check(int rest_argc,
                          sizeof (showmodedesctable[0]),
                          &arguments->showmode,
                          "-output",
-                         gt_str_array_get(arguments->showmodespec,idx),err) != 0)
+                         gt_str_array_get(arguments->showmodespec,idx),
+                         err) != 0)
     {
       return -1;
     }
@@ -436,7 +437,7 @@ static int gt_tyr_search_runner(int argc,
   int idx;
   Tyr_search_options *arguments = tool_arguments;
 
-  assert(parsed_args + 2 <= argc);
+  gt_assert(parsed_args + 2 <= argc);
   gt_str_set(arguments->str_indexname,argv[parsed_args]);
   for (idx=parsed_args+1; idx<argc; idx++)
   {
@@ -485,7 +486,7 @@ static GtOptionParser* gt_tyr_option_parser_new(void *tool_arguments)
   GtToolbox *index_toolbox = tool_arguments;
   GtOptionParser *op;
 
-  assert(index_toolbox != NULL);
+  gt_assert(index_toolbox != NULL);
   op = gt_option_parser_new(
                     "[option ...] [mkindex|occratio|search] [argument ...]",
                     "Call tyr with specific tool and "
@@ -505,7 +506,7 @@ static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
   int had_err = 0;
 
   gt_error_check(err);
-  assert(index_toolbox != NULL);
+  gt_assert(index_toolbox != NULL);
 
   /* determine tool */
   if (!gt_toolbox_has_tool(index_toolbox, argv[parsed_args]))
@@ -521,7 +522,7 @@ static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
     if (!(toolfunc = gt_toolbox_get(index_toolbox, argv[parsed_args])))
     {
       tool = gt_toolbox_get_tool(index_toolbox, argv[parsed_args]);
-      assert(tool != NULL);
+      gt_assert(tool != NULL);
     }
     nargv = gt_cstr_array_prefix_first(argv + parsed_args,
                                        gt_error_get_progname(err));

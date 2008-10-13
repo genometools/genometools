@@ -375,7 +375,7 @@ bool containsspecial(const Encodedsequence *encseq,
                      Seqpos startpos,
                      Seqpos len)
 {
-  assert(len >= (Seqpos) 1 && startpos + len <= encseq->totallength);
+  gt_assert(len >= (Seqpos) 1 && startpos + len <= encseq->totallength);
   return encseq->delivercontainsspecial(encseq,moveforward,esrspace,
                                         moveforward
                                           ? startpos
@@ -506,7 +506,7 @@ unsigned int getsatforcevalue(const char *str)
 {
   Positionaccesstype sat = str2positionaccesstype(str);
 
-  assert(sat != Undefpositionaccesstype);
+  gt_assert(sat != Undefpositionaccesstype);
   switch (sat)
   {
     case Viauchartables: return 0;
@@ -859,7 +859,7 @@ static bool containsspecialViabitordirectaccess(bool viabit,
 {
   Seqpos pos;
 
-  assert(encseq != NULL);
+  gt_assert(encseq != NULL);
 
   if (viabit && encseq->specialbits == NULL)
   {
@@ -885,7 +885,7 @@ static bool containsspecialViabitordirectaccess(bool viabit,
     }
   } else
   {
-    assert (startpos + 1 >= len);
+    gt_assert (startpos + 1 >= len);
     for (pos = startpos; /* Nothing */; pos--)
     {
       if (viabit)
@@ -1569,7 +1569,7 @@ void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
                                          bool moveforward,
                                          Seqpos startpos)
 {
-  assert(esr != NULL);
+  gt_assert(esr != NULL);
   esr->moveforward = moveforward;
   if (encseq->sat == Viauchartables ||
       encseq->sat == Viaushorttables ||
@@ -1725,7 +1725,7 @@ static bool containsspecialViatables(const Encodedsequence *encseq,
       }
     } else
     {
-      assert(startpos + 1 >= len);
+      gt_assert(startpos + 1 >= len);
       if (startpos - len + 1 < esrspace->previousrange.rightpos)
       {
         if (startpos >= esrspace->previousrange.leftpos)

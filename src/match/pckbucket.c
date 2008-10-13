@@ -267,8 +267,8 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
   pckbt->mapptr = mapptr;
   pckbt->mbtab[0] = (Matchbound *) (((Seqpos *) mapptr) + 1);
   setbcktaboffsets(pckbt);
-  assert(numofbytes ==
-         sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
+  gt_assert(numofbytes ==
+            sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
   return pckbt;
 }
 
