@@ -145,6 +145,7 @@ int constructmerbuckets(const GtStr *inputindex,
   FILE *bucketfp = NULL;
   bool haserr = false;
 
+  gt_error_check(err);
   tyrbckinfo.bounds = NULL;
   tyrbckinfo.boundisdefined = NULL;
   tyrindex = tyrindex_new(inputindex,err);
@@ -184,14 +185,15 @@ int constructmerbuckets(const GtStr *inputindex,
   }
   if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
   {
+    unsigned long pl_long = (unsigned long) tyrbckinfo.prefixlength;
     gt_assert(bucketfp != NULL);
-    if (fwrite(&tyrbckinfo.prefixlength,
-               sizeof (tyrbckinfo.prefixlength),
+    if (fwrite(&pl_long,
+               sizeof (pl_long),
                (size_t) 1,
                bucketfp) != (size_t) 1)
     {
       gt_error_set(err,"cannot write 1 item of size %u: errormsg=\"%s\"",
-                   (unsigned int) sizeof (tyrbckinfo.prefixlength),
+                   (unsigned int) sizeof (pl_long),
                    strerror(errno));
       haserr = true;
     }
@@ -226,4 +228,57 @@ int constructmerbuckets(const GtStr *inputindex,
   FREESPACE(tyrbckinfo.bounds);
   FREESPACE(tyrbckinfo.boundisdefined);
   return haserr ? -1 : 0;
+}
+
+Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
+                           GtError *err)
+{
+  size_t numofbytes, expectedsize;
+  Tyrbckinfo *tyrbckinfo;
+  bool haserr = false;
+
+  ALLOCASSIGNSPACE(tyrbckinfo,NULL,Tyrbckinfo,1);
+  tyrbckinfo->mappedmbdfileptr = genericmaponlytable(tyrindexname,
+                                                     BUCKETSUFFIX,
+                                                     &numofbytes,err);
+  if (tyrbckinfo->mappedmbdfileptr == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    unsigned long pl_long;
+
+    gt_assert(tyrbckinfo->mappedmbdfileptr != NULL);
+    pl_long = *((unsigned long *) tyrbckinfo->mappedmbdfileptr);
+    tyrbckinfo->prefixlength = (unsigned int) pl_long;
+    tyrbckinfo->numofcodes
+      = (unsigned long) pow((double) alphasize,
+                            (double) tyrbckinfo->prefixlength);
+    expectedsize
+      = sizeof (unsigned long) *
+        (1UL +
+         (tyrbckinfo->numofcodes+1) +
+         NUMOFINTSFORBITS(tyrbckinfo->numofcodes + 1));
+    gt_assert(expectedsize == numofbytes);
+    tyrbckinfo->bounds = ((unsigned long *) tyrbckinfo->mappedmbdfileptr) + 1;
+    tyrbckinfo->boundisdefined
+      = tyrbckinfo->bounds + tyrbckinfo->numofcodes + 1;
+  }
+  if (haserr)
+  {
+    FREESPACE(tyrbckinfo);
+    return NULL;
+  }
+  return tyrbckinfo;
+}
+
+void tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr)
+{
+  Tyrbckinfo *tyrbckinfo = *tyrbckinfoptr;
+
+  gt_fa_xmunmap(tyrbckinfo->mappedmbdfileptr);
+  tyrbckinfo->mappedmbdfileptr = NULL;
+  FREESPACE(tyrbckinfo);
+  *tyrbckinfoptr = NULL;
 }
