@@ -24,9 +24,12 @@
 #include "format64.h"
 #include "encseq-def.h"
 #include "divmodmul.h"
+#include "defined-types.h"
 #include "opensfxfile.h"
 #include "tyr-search.h"
 #include "spacedef.h"
+
+#include "sfx-apfxlen.pr"
 
 struct Tyrindex
 {
@@ -142,6 +145,31 @@ void tyrindex_show(const Tyrindex *tyrindex)
   printf("# mersize = %lu\n",tyrindex->mersize);
   printf("# numofmers = %lu\n",(unsigned long) tyrindex->numofmers);
   printf("# merbytes = %lu\n",tyrindex->merbytes);
+}
+
+bool tyrindex_isempty(const Tyrindex *tyrindex)
+{
+  return tyrindex->numofmers == 0 ? true : false;
+}
+
+const Uchar *tyrindex_mertable(const Tyrindex *tyrindex)
+{
+  return tyrindex->mertable;
+}
+
+const Uchar *tyrindex_lastmer(const Tyrindex *tyrindex)
+{
+  return tyrindex->lastmer;
+}
+
+unsigned long tyrindex_merbytes(const Tyrindex *tyrindex)
+{
+  return tyrindex->merbytes;
+}
+
+unsigned int tyrindex_alphasize(const Tyrindex *tyrindex)
+{
+  return tyrindex->alphasize;
 }
 
 void tyrindex_delete(Tyrindex **tyrindexptr)
@@ -318,6 +346,38 @@ static void checktyrindex(const Tyrindex *tyrindex)
     }
     previousposition = position;
   }
+}
+
+int determinetyrbckpfxlen(unsigned int *prefixlength,
+                          const Tyrindex *tyrindex,
+                          const Definedunsignedint *callprefixlength,
+                          GtError *err)
+{
+  if (callprefixlength->defined)
+  {
+    unsigned int maxprefixlen
+      = whatisthemaximalprefixlength(tyrindex->alphasize,tyrindex->numofmers,0);
+    if (maxprefixlen > (unsigned int) tyrindex->mersize)
+    {
+      maxprefixlen = (unsigned int) tyrindex->mersize;
+    }
+    if (checkprefixlength(maxprefixlen,callprefixlength->valueunsignedint,
+                          err) != 0)
+    {
+      return -1;
+    }
+    *prefixlength = callprefixlength->valueunsignedint;
+  } else
+  {
+    unsigned int recommended = recommendedprefixlength(tyrindex->alphasize,
+                                                       tyrindex->numofmers);
+    if (recommended > (unsigned int) tyrindex->mersize)
+    {
+      recommended = (unsigned int) tyrindex->mersize;
+    }
+    *prefixlength = recommended;
+  }
+  return 0;
 }
 
 static unsigned long containsspecialbytestring(const Uchar *seq,

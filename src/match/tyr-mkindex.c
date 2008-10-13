@@ -386,6 +386,9 @@ static int outputsortedstring2indexviafileptr(const Encodedsequence *encseq,
     if (fwrite(&smallcount, sizeof (smallcount),(size_t) 1,countsfilefpout)
               != (size_t) 1)
     {
+      gt_error_set(err,"cannot write 1 item of size %u: errormsg=\"%s\"",
+                  (unsigned int) sizeof (smallcount),
+                  strerror(errno));
       return -1;
     }
   }
@@ -674,6 +677,11 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
                   state.countsfilefpout) !=
                   (size_t) state.largecounts.nextfreeLargecount)
         {
+          gt_error_set(err,
+                       "cannot write %lu items of size %u: errormsg=\"%s\"",
+                       (unsigned long) state.largecounts.nextfreeLargecount,
+                       (unsigned int) sizeof (Largecount),
+                       strerror(errno));
           haserr = true;
         }
       }

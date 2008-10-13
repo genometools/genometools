@@ -24,6 +24,7 @@
 #include "intbits.h"
 #include "intbits-tab.h"
 #include "divmodmul.h"
+#include "defined-types.h"
 
 #define MERBYTES(SL)  (DIV4(SL) + ((MOD4(SL) == 0) ? 0 : 1UL))
 #define MERSUFFIX     ".mer"
@@ -59,5 +60,18 @@ int tyrsearch(const GtStr *tyrindexname,
               bool verbose,
               bool performtest,
               GtError *err);
+
+Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err);
+const Uchar *tyrindex_mertable(const Tyrindex *tyrindex);
+const Uchar *tyrindex_lastmer(const Tyrindex *tyrindex);
+unsigned long tyrindex_merbytes(const Tyrindex *tyrindex);
+unsigned int tyrindex_alphasize(const Tyrindex *tyrindex);
+bool tyrindex_isempty(const Tyrindex *tyrindex);
+void tyrindex_show(const Tyrindex *tyrindex);
+int determinetyrbckpfxlen(unsigned int *prefixlength,
+                          const Tyrindex *tyrindex,
+                          const Definedunsignedint *callprefixlength,
+                          GtError *err);
+void tyrindex_delete(Tyrindex **tyrindexptr);
 
 #endif

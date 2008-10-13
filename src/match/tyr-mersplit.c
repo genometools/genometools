@@ -15,19 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <math.h>
+#include <errno.h>
 #include "core/str_api.h"
 #include "core/unused_api.h"
 #include "core/minmax.h"
 #include "core/symboldef.h"
+#include "core/fa.h"
 #include "divmodmul.h"
+#include "seqpos-def.h"
+#include "verbose-def.h"
 #include "defined-types.h"
 #include "intbits.h"
 #include "tyr-search.h"
+#include "opensfxfile.h"
 
 typedef struct
 {
   void *mappedmbdfileptr;
-  const GtStr *indexfilename;
   unsigned int prefixlength;
   unsigned long numofcodes,
                 *boundisdefined,
@@ -81,14 +86,18 @@ static const Uchar *findrightmostmer(unsigned long merbytes,
   return leftptr;
 }
 
-void splitmerinterval(Tyrbckinfo *tyrbckinfo,
-                             const Uchar *mertable,
-                             const Uchar *lastmer,
-                             unsigned long merbytes)
+static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
+                             const Tyrindex *tyrindex)
+
 {
   const Uchar *rightbound, *leftptr, *rightptr;
   unsigned long code, leftcode, rightcode;
+  const Uchar *mertable, *lastmer;
+  unsigned long merbytes;
 
+  mertable = tyrindex_mertable(tyrindex);
+  lastmer = tyrindex_lastmer(tyrindex);
+  merbytes = tyrindex_merbytes(tyrindex);
   leftptr = mertable;
   rightptr = lastmer;
   rightcode = extractprefixbytecode(merbytes,
@@ -99,8 +108,7 @@ void splitmerinterval(Tyrbckinfo *tyrbckinfo,
     leftcode = extractprefixbytecode(merbytes,
                                      tyrbckinfo->prefixlength,
                                      leftptr);
-    tyrbckinfo->bounds[leftcode]
-      = (unsigned long) (leftptr - mertable);
+    tyrbckinfo->bounds[leftcode] = (unsigned long) (leftptr - mertable);
     SETDEFINEDBOUND(tyrbckinfo->boundisdefined,leftcode);
     if (leftcode == rightcode)
     {
@@ -127,8 +135,92 @@ void splitmerinterval(Tyrbckinfo *tyrbckinfo,
   }
 }
 
-int constructmerbuckets(GT_UNUSED const GtStr *inputindex,
-                        GT_UNUSED const Definedunsignedint *prefixlength)
+int constructmerbuckets(const GtStr *inputindex,
+                        const Definedunsignedint *callprefixlength,
+                        GtError *err)
 {
-  return 0;
+  Tyrindex *tyrindex;
+  Tyrbckinfo tyrbckinfo;
+  FILE *bucketfp = NULL;
+  bool haserr = true;
+
+  tyrindex = tyrindex_new(inputindex,err);
+  if (tyrindex == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  {
+    if (determinetyrbckpfxlen(&tyrbckinfo.prefixlength,
+                              tyrindex,
+                              callprefixlength,
+                              err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  {
+    printf("# construct mer buckets for prefixlength %u\n",
+            tyrbckinfo.prefixlength);
+    tyrbckinfo.numofcodes
+      = (unsigned long) pow((double) tyrindex_alphasize(tyrindex),
+                            (double) tyrbckinfo.prefixlength);
+    tyrbckinfo.mappedmbdfileptr = NULL;
+    printf("# numofcodes = %lu\n",tyrbckinfo.numofcodes);
+    tyrindex_show(tyrindex);
+    ALLOCASSIGNSPACE(tyrbckinfo.bounds,NULL,unsigned long,
+                     tyrbckinfo.numofcodes+1);
+    INITBITTAB(tyrbckinfo.boundisdefined,tyrbckinfo.numofcodes+1);
+    splitmerinterval(&tyrbckinfo,tyrindex);
+    bucketfp = opensfxfile(inputindex,BUCKETSUFFIX,"wb",err);
+    if (bucketfp == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  {
+    gt_assert(bucketfp != NULL);
+    if (fwrite(&tyrbckinfo.prefixlength,
+               sizeof (tyrbckinfo.prefixlength),
+               (size_t) 1,
+               bucketfp) != (size_t) 1)
+    {
+      gt_error_set(err,"cannot write 1 item of size %u: errormsg=\"%s\"",
+                   (unsigned int) sizeof (tyrbckinfo.prefixlength),
+                   strerror(errno));
+      haserr = true;
+    }
+  }
+  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  {
+    gt_assert(bucketfp != NULL);
+    if (fwrite(tyrbckinfo.bounds,
+               sizeof (*tyrbckinfo.bounds),
+               (size_t) (tyrbckinfo.numofcodes+1),
+               bucketfp) != (size_t) (tyrbckinfo.numofcodes+1))
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && tyrindex != NULL && !tyrindex_isempty(tyrindex))
+  {
+    gt_assert(bucketfp != NULL);
+    if (fwrite(tyrbckinfo.boundisdefined,
+               sizeof (*tyrbckinfo.boundisdefined),
+               NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1),
+               bucketfp) != NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1))
+    {
+      haserr = true;
+    }
+  }
+  gt_fa_xfclose(bucketfp);
+  if (tyrindex != NULL)
+  {
+    tyrindex_delete(&tyrindex);
+  }
+  FREESPACE(tyrbckinfo.bounds);
+  FREESPACE(tyrbckinfo.boundisdefined);
+  return haserr ? -1 : 0;
 }
