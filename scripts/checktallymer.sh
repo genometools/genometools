@@ -43,9 +43,10 @@ rm -f tmp[12]
 cmd="tallymer-mkindex ${outoptions} -indexname mkv-tyr-index mkvidx" 
 ${cmd} > tmp2
 checkerror
-cmd="env -i bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
+cmd="valgrind.sh bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
 ${cmd}
 checkerror
-cmd="env -i bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
+cmd="valgrind.sh bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
 ${cmd}
 checkerror
+rm -f tmp[12]

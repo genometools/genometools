@@ -18,6 +18,8 @@
 #ifndef REVCOMPL_H
 #define REVCOMPL_H
 
+#include "core/symboldef.h"
+
 void inplace_reversecomplement(Uchar *seq,unsigned long len);
 void copy_reversecomplement(Uchar *dest,const Uchar *src,unsigned long len);
 

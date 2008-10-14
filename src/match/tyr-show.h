@@ -15,23 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYR_MKINDEX_H
-#define TYR_MKINDEX_H
+#ifndef TYR_SHOW_H
+#define TYR_SHOW_H
 
-#include <stdbool.h>
-#include "core/str.h"
-#include "core/error_api.h"
-#include "verbose-def.h"
+#define STRAND_FORWARD 1U
+#define STRAND_REVERSE (STRAND_FORWARD << 1)
 
-int merstatistics(const GtStr *str_inputindex,
-                  unsigned long mersize,
-                  unsigned long minocc,
-                  unsigned long maxocc,
-                  const GtStr *str_storeindex,
-                  bool storecounts,
-                  bool scanfile,
-                  bool performtest,
-                  Verboseinfo *verboseinfo,
-                  GtError *err);
+#define SHOWQSEQNUM  1U
+#define SHOWQPOS     (SHOWQSEQNUM << 1)
+#define SHOWCOUNTS   (SHOWQSEQNUM << 2)
+#define SHOWSEQUENCE (SHOWQSEQNUM << 3)
 
 #endif

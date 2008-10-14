@@ -18,18 +18,20 @@
 #include <math.h>
 #include <errno.h>
 #include "core/str_api.h"
-#include "core/unused_api.h"
 #include "core/minmax.h"
 #include "core/symboldef.h"
 #include "core/fa.h"
 #include "divmodmul.h"
-#include "seqpos-def.h"
-#include "verbose-def.h"
 #include "defined-types.h"
 #include "intbits.h"
-#include "tyr-search.h"
+#include "intbits-tab.h"
+#include "tyr-map.h"
 #include "tyr-mersplit.h"
 #include "opensfxfile.h"
+
+#define BUCKETSUFFIX                     ".mbd"
+#define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)
+#define SETDEFINEDBOUND(UDB,IDX)         SETIBIT(UDB,IDX)
 
 typedef struct
 {

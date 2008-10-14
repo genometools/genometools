@@ -25,6 +25,7 @@
 #include "extended/toolbox.h"
 #include "tools/gt_tallymer.h"
 #include "match/tyr-mkindex.h"
+#include "match/tyr-show.h"
 #include "match/tyr-search.h"
 #include "match/tyr-mersplit.h"
 #include "match/verbose-def.h"

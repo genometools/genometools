@@ -18,40 +18,10 @@
 #ifndef TYR_SEARCH_H
 #define TYR_SEARCH_H
 
-#include "core/arraydef.h"
+#include <stdbool.h>
 #include "core/str_api.h"
 #include "core/str_array_api.h"
-#include "intbits.h"
-#include "intbits-tab.h"
-#include "divmodmul.h"
-#include "defined-types.h"
-
-#define MERBYTES(SL)  (DIV4(SL) + ((MOD4(SL) == 0) ? 0 : 1UL))
-#define MERSUFFIX     ".mer"
-#define COUNTSSUFFIX  ".mct"
-#define BUCKETSUFFIX  ".mbd"
-#define EXTRAINTEGERS 2
-
-#define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)
-#define SETDEFINEDBOUND(UDB,IDX)         SETIBIT(UDB,IDX)
-
-#define STRAND_FORWARD 1U
-#define STRAND_REVERSE (STRAND_FORWARD << 1)
-
-#define SHOWQSEQNUM  1U
-#define SHOWQPOS     (SHOWQSEQNUM << 1)
-#define SHOWCOUNTS   (SHOWQSEQNUM << 2)
-#define SHOWSEQUENCE (SHOWQSEQNUM << 3)
-
-typedef struct
-{
-  unsigned long idx, value;
-} Largecount;
-
-DECLAREARRAYSTRUCT(Largecount);
-
-typedef struct Tyrindex Tyrindex;
-typedef struct Tyrcountinfo Tyrcountinfo;
+#include "core/error_api.h"
 
 int tyrsearch(const GtStr *tyrindexname,
               const GtStrArray *queryfilenames,
@@ -60,18 +30,5 @@ int tyrsearch(const GtStr *tyrindexname,
               bool verbose,
               bool performtest,
               GtError *err);
-
-Tyrindex *tyrindex_new(const GtStr *tyrindexname,GtError *err);
-const Uchar *tyrindex_mertable(const Tyrindex *tyrindex);
-const Uchar *tyrindex_lastmer(const Tyrindex *tyrindex);
-unsigned long tyrindex_merbytes(const Tyrindex *tyrindex);
-unsigned int tyrindex_alphasize(const Tyrindex *tyrindex);
-bool tyrindex_isempty(const Tyrindex *tyrindex);
-void tyrindex_show(const Tyrindex *tyrindex);
-int determinetyrbckpfxlen(unsigned int *prefixlength,
-                          const Tyrindex *tyrindex,
-                          const Definedunsignedint *callprefixlength,
-                          GtError *err);
-void tyrindex_delete(Tyrindex **tyrindexptr);
 
 #endif

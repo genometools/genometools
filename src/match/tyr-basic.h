@@ -15,23 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYR_MKINDEX_H
-#define TYR_MKINDEX_H
+#ifndef TYR_BASIC_H
+#define TYR_BASIC_H
 
-#include <stdbool.h>
-#include "core/str.h"
-#include "core/error_api.h"
-#include "verbose-def.h"
+#include "core/arraydef.h"
+#include "divmodmul.h"
 
-int merstatistics(const GtStr *str_inputindex,
-                  unsigned long mersize,
-                  unsigned long minocc,
-                  unsigned long maxocc,
-                  const GtStr *str_storeindex,
-                  bool storecounts,
-                  bool scanfile,
-                  bool performtest,
-                  Verboseinfo *verboseinfo,
-                  GtError *err);
+#define MERSUFFIX     ".mer"
+#define COUNTSSUFFIX  ".mct"
+#define EXTRAINTEGERS 2
+
+#define MERBYTES(SL)  (DIV4(SL) + ((MOD4(SL) == 0) ? 0 : 1UL))
+
+typedef struct
+{
+  unsigned long idx,
+                value;
+} Largecount;
+
+DECLAREARRAYSTRUCT(Largecount);
 
 #endif

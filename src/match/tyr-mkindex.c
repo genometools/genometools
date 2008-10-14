@@ -25,11 +25,13 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "format64.h"
-#include "echoseq.pr"
+#include "divmodmul.h"
 #include "esa-mmsearch-def.h"
+#include "tyr-basic.h"
 #include "tyr-mkindex.h"
-#include "tyr-search.h"
 #include "opensfxfile.h"
+
+#include "echoseq.pr"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
