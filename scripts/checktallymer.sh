@@ -28,8 +28,9 @@ fi
 
 mersize=20
 inputfile=$1
-outoptions="-counts -pl -mersize ${mersize} -minocc 10 -maxocc 30"
-#VAL="valgrind.sh"
+outoptions="-counts -pl -mersize ${mersize} -minocc 5 -maxocc 30"
+#PRECMD="valgrind.sh"
+PRECMD="env -i"
 
 cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
 cmd="env -i bin/gt tallymer mkindex -test -mersize ${mersize} sfxidx"
@@ -44,12 +45,23 @@ mv tmp2.2 tmp2
 cerr "cmp -s tmp1 tmp2"
 rm -f tmp[12]
 cmd="tallymer-mkindex ${outoptions} -indexname mkv-tyr-index mkvidx" 
-${cmd} > tmp2
-checkerror
-cmd="${VAL} bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
 ${cmd}
 checkerror
-cmd="${VAL} bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
+cmd="${PRECMD} bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
 ${cmd}
 checkerror
+
+if test -s tyr-index.mct
+then
+  cmd="${PRECMD} bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
+  ${cmd} > tmp1
+  checkerror
+  cmd="tallymer-search -strand fp -output qseqnum qpos counts sequence mkv-tyr-index ${AT}"
+  ${cmd} > tmp2
+  checkerror
+  grep -v '^#' tmp2 > tmp2.2
+  mv tmp2.2 tmp2
+  cerr "cmp -s tmp1 tmp2"
+fi
+
 rm -f tmp[12]
