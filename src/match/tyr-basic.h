@@ -35,4 +35,10 @@ typedef struct
 
 DECLAREARRAYSTRUCT(Largecount);
 
+typedef struct
+{
+  const Uchar *leftmer,
+              *rightmer;
+} Merbounds;
+
 #endif

@@ -47,12 +47,6 @@ struct Tyrcountinfo
   unsigned long numoflargecounts;
 };
 
-typedef struct
-{
-  Uchar *leftmer,
-        *rightmer;
-} Merbounds;
-
 unsigned long decodesingleinteger(const Uchar *start)
 {
   unsigned long idx, value;
@@ -327,14 +321,16 @@ static int mymemcmp(unsigned long *offset,const Uchar *s1,const Uchar *s2,
 
 /*@null@*/ const Uchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
                                               unsigned long offset,
-                                              const Uchar *key)
+                                              const Uchar *key,
+                                              const Uchar *leftbound,
+                                              const Uchar *rightbound)
 {
   const Uchar *leftptr, *midptr, *rightptr;
   int cmpval;
   unsigned long leftlength = offset, rightlength = offset, len;
 
-  leftptr = tyrindex->mertable;
-  rightptr = tyrindex->lastmer;
+  leftptr = leftbound;
+  rightptr = rightbound;
   while (leftptr <= rightptr)
   {
     len = (unsigned long) (rightptr-leftptr)/MULT2(tyrindex->merbytes);
@@ -377,7 +373,9 @@ void tyrindex_check(const Tyrindex *tyrindex)
        mercodeptr <= tyrindex->lastmer;
        mercodeptr += tyrindex->merbytes)
   {
-    result = tyrindex_binmersearch(tyrindex,0,mercodeptr);
+    result = tyrindex_binmersearch(tyrindex,0,mercodeptr,
+                                   tyrindex->mertable,
+                                   tyrindex->lastmer);
     gt_assert(result != NULL);
     if ((result - tyrindex->mertable) % tyrindex->merbytes != 0)
     {

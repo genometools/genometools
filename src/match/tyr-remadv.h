@@ -15,27 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYR_MERSPLIT_H
-#define TYR_MERSPLIT_H
+#ifndef TYR_REMADV_H
+#define TYR_REMADV_H
 
-#include "core/str_api.h"
-#include "core/error_api.h"
-#include "defined-types.h"
-#include "tyr-map.h"
+#include "core/symboldef.h"
+#include "tyr-basic.h"
 
-typedef struct Tyrbckinfo Tyrbckinfo;
-
-int constructmerbuckets(const GtStr *inputindex,
-                        const Definedunsignedint *callprefixlength,
-                        GtError *err);
-
-Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
-                           GtError *err);
-
-void tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr);
-
-const Uchar *searchinbuckets(const Tyrindex *tyrindex,
-                             const Tyrbckinfo *tyrbckinfo,
-                             const Uchar *bytecode);
+bool remainadvance(Merbounds *merbounds,
+                   unsigned long merbytes,
+                   unsigned long byteoffset,
+                   Uchar remainmask,
+                   const Uchar *searchbytecode,
+                   const Uchar *leftptr,
+                   const Uchar *rightptr);
 
 #endif

@@ -25,11 +25,14 @@
 #include "defined-types.h"
 #include "intbits.h"
 #include "intbits-tab.h"
+#include "tyr-basic.h"
 #include "tyr-map.h"
+#include "tyr-remadv.h"
 #include "tyr-mersplit.h"
 #include "opensfxfile.h"
 
 #define BUCKETSUFFIX                     ".mbd"
+#define MAXUCHARVALUEWITHBITS(BITNUM)    ((1 << (BITNUM)) - 1)
 #define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)
 #define SETDEFINEDBOUND(UDB,IDX)         SETIBIT(UDB,IDX)
 
@@ -40,6 +43,7 @@ struct Tyrbckinfo
   unsigned long numofcodes,
                 *boundisdefined,
                 *bounds;
+  Uchar remainmask;
 };
 
 static unsigned long extractprefixbytecode(unsigned long merbytes,
@@ -62,6 +66,62 @@ static unsigned long extractprefixbytecode(unsigned long merbytes,
     }
   }
   return code;
+}
+
+const Uchar *searchinbuckets(const Tyrindex *tyrindex,
+                             const Tyrbckinfo *tyrbckinfo,
+                             const Uchar *bytecode)
+{
+  const Uchar *result;
+  unsigned long prefixcode, leftbound, rightbound, merbytes;
+  const Uchar *mertable;
+  Merbounds merbounds;
+
+  gt_assert(tyrbckinfo != NULL);
+  merbytes = tyrindex_merbytes(tyrindex);
+  mertable = tyrindex_mertable(tyrindex);
+  prefixcode = extractprefixbytecode(merbytes,
+                                     tyrbckinfo->prefixlength,
+                                     bytecode);
+  leftbound = tyrbckinfo->bounds[prefixcode];
+  if (ISBOUNDDEFINED(tyrbckinfo->boundisdefined,prefixcode))
+  {
+    rightbound = tyrbckinfo->bounds[prefixcode+1] - merbytes;
+    if (MOD4(tyrbckinfo->prefixlength) == 0)
+    {
+      result = tyrindex_binmersearch(tyrindex,
+                                     (unsigned long)
+                                     DIV4(tyrbckinfo->prefixlength),
+                                     bytecode,
+                                     mertable + leftbound,
+                                     mertable + rightbound);
+    } else
+    {
+      if (!remainadvance(&merbounds,
+                         merbytes,
+                         (unsigned long) DIV4(tyrbckinfo->prefixlength),
+                         tyrbckinfo->remainmask,
+                         bytecode,
+                         mertable + leftbound,
+                         mertable + rightbound) ||
+         merbounds.leftmer == NULL ||
+         merbounds.leftmer > merbounds.rightmer)
+      {
+        result = NULL;
+      } else
+      {
+        result = tyrindex_binmersearch(tyrindex,
+                                       1UL + DIV4(tyrbckinfo->prefixlength),
+                                       bytecode,
+                                       merbounds.leftmer,
+                                       merbounds.rightmer);
+      }
+    }
+  } else
+  {
+    result = NULL;
+  }
+  return result;
 }
 
 static const Uchar *findrightmostmer(unsigned long merbytes,
@@ -266,6 +326,12 @@ Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
     tyrbckinfo->bounds = ((unsigned long *) tyrbckinfo->mappedmbdfileptr) + 1;
     tyrbckinfo->boundisdefined
       = tyrbckinfo->bounds + tyrbckinfo->numofcodes + 1;
+    if (tyrbckinfo->prefixlength > 0 && MOD4(tyrbckinfo->prefixlength) > 0)
+    {
+      tyrbckinfo->remainmask
+        = (Uchar) MAXUCHARVALUEWITHBITS(MULT2(
+                                        4U - MOD4(tyrbckinfo->prefixlength)));
+    }
   }
   if (haserr)
   {

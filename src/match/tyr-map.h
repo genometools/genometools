@@ -36,7 +36,9 @@ void tyrindex_show(const Tyrindex *tyrindex);
 void tyrindex_delete(Tyrindex **tyrindexptr);
 /*@null@*/ const Uchar *tyrindex_binmersearch(const Tyrindex *tyrindex,
                                               unsigned long offset,
-                                              const Uchar *key);
+                                              const Uchar *key,
+                                              const Uchar *leftbound,
+                                              const Uchar *rightbound);
 void tyrindex_check(const Tyrindex *tyrindex);
 int determinetyrbckpfxlen(unsigned int *prefixlength,
                           const Tyrindex *tyrindex,

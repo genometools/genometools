@@ -48,6 +48,7 @@ typedef struct
 {
   Uchar *bytecode,  /* buffer for encoded word to be searched */
         *rcbuf;
+  const Uchar *mertable, *lastmer;
   unsigned long mersize;
   unsigned int showmode,
                searchstrand;
@@ -63,6 +64,8 @@ static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
 
   merbytes = tyrindex_merbytes(tyrindex);
   tyrsearchinfo->mersize = tyrindex_mersize(tyrindex);
+  tyrsearchinfo->mertable = tyrindex_mertable(tyrindex);
+  tyrsearchinfo->lastmer = tyrindex_lastmer(tyrindex);
   tyrsearchinfo->showmode = showmode;
   tyrsearchinfo->searchstrand = searchstrand;
   tyrsearchinfo->dnaalpha = assigninputalphabet(true,false,NULL,NULL,NULL);
@@ -79,12 +82,21 @@ void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 
 /*@null@*/ const Uchar *searchsinglemer(const Uchar *qptr,
                                         const Tyrindex *tyrindex,
-                                        const Tyrsearchinfo *tyrsearchinfo)
+                                        const Tyrsearchinfo *tyrsearchinfo,
+                                        const Tyrbckinfo *tyrbckinfo)
 {
   const Uchar *result;
 
   plainseq2bytecode(tyrsearchinfo->bytecode,qptr,tyrsearchinfo->mersize);
-  result = tyrindex_binmersearch(tyrindex,0,tyrsearchinfo->bytecode);
+  if (tyrbckinfo == NULL)
+  {
+    result = tyrindex_binmersearch(tyrindex,0,tyrsearchinfo->bytecode,
+                                   tyrsearchinfo->mertable,
+                                   tyrsearchinfo->lastmer);
+  } else
+  {
+    result = searchinbuckets(tyrindex,tyrbckinfo,tyrsearchinfo->bytecode);
+  }
   return result;
 }
 
@@ -141,6 +153,7 @@ static void mermatchoutput(const Tyrindex *tyrindex,
 static void singleseqtyrsearch(const Tyrindex *tyrindex,
                                const Tyrcountinfo *tyrcountinfo,
                                const Tyrsearchinfo *tyrsearchinfo,
+                               const Tyrbckinfo *tyrbckinfo,
                                uint64_t unitnum,
                                const Uchar *query,
                                unsigned long querylen,
@@ -161,7 +174,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
     {
       if (tyrsearchinfo->searchstrand & STRAND_FORWARD)
       {
-        result = searchsinglemer(qptr,tyrindex,tyrsearchinfo);
+        result = searchsinglemer(qptr,tyrindex,tyrsearchinfo,tyrbckinfo);
         if (result != NULL)
         {
           mermatchoutput(tyrindex,
@@ -180,7 +193,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
         copy_reversecomplement(tyrsearchinfo->rcbuf,qptr,
                                tyrsearchinfo->mersize);
         result = searchsinglemer(tyrsearchinfo->rcbuf,tyrindex,
-                                 tyrsearchinfo);
+                                 tyrsearchinfo,tyrbckinfo);
         if (result != NULL)
         {
           mermatchoutput(tyrindex,
@@ -289,6 +302,7 @@ int tyrsearch(const GtStr *tyrindexname,
       singleseqtyrsearch(tyrindex,
                          tyrcountinfo,
                          &tyrsearchinfo,
+                         tyrbckinfo,
                          unitnum,
                          query,
                          querylen,
