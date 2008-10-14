@@ -28,7 +28,7 @@ fi
 
 mersize=20
 inputfile=$1
-outoptions="-counts -pl -mersize ${mersize} -minocc 5 -maxocc 30"
+outoptions="-counts -pl -mersize ${mersize} -minocc 2 -maxocc 30"
 #PRECMD="valgrind.sh"
 PRECMD="env -i"
 
