@@ -245,10 +245,15 @@ int tyrsearch(const GtStr *tyrindexname,
   }
   if (!haserr)
   {
-    tyrbckinfo = tyrbckinfo_new(tyrindexname,tyrindex_alphasize(tyrindex),err);
-    if (tyrbckinfo == NULL)
+    gt_assert(tyrindex != NULL);
+    if (!tyrindex_isempty(tyrindex))
     {
-      haserr = true;
+      tyrbckinfo = tyrbckinfo_new(tyrindexname,tyrindex_alphasize(tyrindex),
+                                  err);
+      if (tyrbckinfo == NULL)
+      {
+        haserr = true;
+      }
     }
   }
   if (!haserr)
