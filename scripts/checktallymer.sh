@@ -27,6 +27,7 @@ fi
 mersize=20
 inputfile=$1
 outoptions="-counts -pl -mersize ${mersize} -minocc 10 -maxocc 30"
+#VAL="valgrind.sh"
 
 cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
 cmd="env -i bin/gt tallymer mkindex -test -mersize ${mersize} sfxidx"
@@ -43,10 +44,10 @@ rm -f tmp[12]
 cmd="tallymer-mkindex ${outoptions} -indexname mkv-tyr-index mkvidx" 
 ${cmd} > tmp2
 checkerror
-cmd="valgrind.sh bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
+cmd="${VAL} bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
 ${cmd}
 checkerror
-cmd="valgrind.sh bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
+cmd="${VAL} bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
 ${cmd}
 checkerror
 rm -f tmp[12]

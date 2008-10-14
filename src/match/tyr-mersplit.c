@@ -33,14 +33,14 @@
 #define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)
 #define SETDEFINEDBOUND(UDB,IDX)         SETIBIT(UDB,IDX)
 
-typedef struct
+struct Tyrbckinfo
 {
   void *mappedmbdfileptr;
   unsigned int prefixlength;
   unsigned long numofcodes,
                 *boundisdefined,
                 *bounds;
-} Tyrbckinfo;
+};
 
 static unsigned long extractprefixbytecode(unsigned long merbytes,
                                            unsigned int prefixlength,

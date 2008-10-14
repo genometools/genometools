@@ -26,6 +26,7 @@
 #include "tyr-map.h"
 #include "tyr-search.h"
 #include "tyr-show.h"
+#include "tyr-mersplit.h"
 #include "spacedef.h"
 
 static unsigned long containsspecialbytestring(const Uchar *seq,
@@ -210,6 +211,7 @@ int tyrsearch(const GtStr *tyrindexname,
 {
   Tyrindex *tyrindex;
   Tyrcountinfo *tyrcountinfo = NULL;
+  Tyrbckinfo *tyrbckinfo = NULL;
   bool haserr = false;
   GtSeqIterator *seqit;
 
@@ -239,6 +241,14 @@ int tyrsearch(const GtStr *tyrindexname,
       {
         haserr = true;
       }
+    }
+  }
+  if (!haserr)
+  {
+    tyrbckinfo = tyrbckinfo_new(tyrindexname,tyrindex_alphasize(tyrindex),err);
+    if (tyrbckinfo == NULL)
+    {
+      haserr = true;
     }
   }
   if (!haserr)
@@ -282,6 +292,10 @@ int tyrsearch(const GtStr *tyrindexname,
     }
     gt_seqiterator_delete(seqit);
     tyrsearchinfo_delete(&tyrsearchinfo);
+  }
+  if (tyrbckinfo != NULL)
+  {
+    tyrbckinfo_delete(&tyrbckinfo);
   }
   if (tyrcountinfo != NULL)
   {

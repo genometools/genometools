@@ -22,7 +22,15 @@
 #include "core/error_api.h"
 #include "defined-types.h"
 
+typedef struct Tyrbckinfo Tyrbckinfo;
+
 int constructmerbuckets(const GtStr *inputindex,
                         const Definedunsignedint *callprefixlength,
                         GtError *err);
+
+Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
+                           GtError *err);
+
+void tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr);
+
 #endif
