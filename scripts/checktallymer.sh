@@ -5,8 +5,6 @@ if test $? -ne 0
 then
   echo "failure: ${cmd}"
   exit 1
-else
-  echo "${cmd}"
 fi
 }
 

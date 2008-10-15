@@ -121,6 +121,7 @@ require 'gt_splitfasta_include'
 require 'gt_stat_include'
 require 'gt_suffixerator_include'
 require 'gt_idxsearch_include'
+require 'gt_tallymer_include'
 require 'gt_trieins_include'
 require 'gt_uniq_include'
 if not $arguments["nocairo"] then
