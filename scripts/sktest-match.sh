@@ -16,7 +16,7 @@ env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_tallymer'
 
 cd ..
 
-exit 0
+# exit 0
 
 for inputfile in `ls testdata/*.fna` ${AT} ${U8} ${ATK} `ls ${GTTESTDATA}/DNA-mix/Grumbach.fna/*.fna`
 do

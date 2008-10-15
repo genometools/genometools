@@ -27,9 +27,9 @@
 #include "format64.h"
 #include "divmodmul.h"
 #include "esa-mmsearch-def.h"
+#include "opensfxfile.h"
 #include "tyr-basic.h"
 #include "tyr-mkindex.h"
-#include "opensfxfile.h"
 
 #include "echoseq.pr"
 

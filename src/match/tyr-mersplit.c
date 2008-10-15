@@ -25,9 +25,7 @@
 #include "defined-types.h"
 #include "intbits.h"
 #include "intbits-tab.h"
-#include "tyr-basic.h"
 #include "tyr-map.h"
-#include "tyr-remadv.h"
 #include "tyr-mersplit.h"
 #include "opensfxfile.h"
 
@@ -45,6 +43,12 @@ struct Tyrbckinfo
                 *bounds;
   Uchar remainmask;
 };
+
+typedef struct
+{
+  const Uchar *leftmer,
+              *rightmer;
+} Merbounds;
 
 static unsigned long extractprefixbytecode(unsigned long merbytes,
                                            unsigned int prefixlength,
@@ -68,24 +72,136 @@ static unsigned long extractprefixbytecode(unsigned long merbytes,
   return code;
 }
 
+static Uchar extractremainingbytes(const Uchar remainmask,
+                                   unsigned long byteoffset,
+                                   const Uchar *bytecode)
+{
+  return bytecode[byteoffset] & remainmask;
+}
+
+static const Uchar *remainingleftmost(unsigned long merbytes,
+                                      unsigned long byteoffset,
+                                      Uchar remainmask,
+                                      Uchar code,
+                                      const Uchar *leftptr,
+                                      const Uchar *rightptr)
+{
+  unsigned long len;
+  Uchar midcode;
+  const Uchar *midptr;
+
+  while (leftptr + merbytes < rightptr)
+  {
+    len = (unsigned long) (rightptr-leftptr)/MULT2(merbytes);
+    midptr = leftptr + merbytes * len;
+    midcode = extractremainingbytes(remainmask,byteoffset,midptr);
+    if (code <= midcode)
+    {
+      rightptr = midptr;
+    } else
+    {
+      leftptr = midptr;
+    }
+  }
+  return rightptr;
+}
+
+static const Uchar *remainingrightmost(unsigned long merbytes,
+                                       unsigned long byteoffset,
+                                       Uchar remainmask,
+                                       Uchar code,
+                                       const Uchar *leftptr,
+                                       const Uchar *rightptr)
+{
+  unsigned long len;
+  Uchar midcode;
+  const Uchar *midptr;
+
+  while (leftptr + merbytes < rightptr)
+  {
+    len = (unsigned long) (rightptr-leftptr)/MULT2(merbytes);
+    midptr = leftptr + merbytes * len;
+    midcode = extractremainingbytes(remainmask,byteoffset,midptr);
+    if (code >= midcode)
+    {
+      leftptr = midptr;
+    } else
+    {
+      rightptr = midptr;
+    }
+  }
+  return leftptr;
+}
+
+static bool remainadvance(Merbounds *merbounds,
+                          unsigned long merbytes,
+                          unsigned long byteoffset,
+                          Uchar remainmask,
+                          const Uchar *searchbytecode,
+                          const Uchar *leftptr,
+                          const Uchar *rightptr)
+{
+  Uchar scode, scodeleft, scoderight;
+
+  scode = extractremainingbytes(remainmask,byteoffset,searchbytecode);
+  scodeleft = extractremainingbytes(remainmask,byteoffset,leftptr);
+  if (scode > scodeleft)
+  {
+    scoderight = extractremainingbytes(remainmask,byteoffset,rightptr);
+    if (scode > scoderight)
+    {
+      return false;
+    }
+    merbounds->leftmer = remainingleftmost(merbytes,
+                                           byteoffset,
+                                           remainmask,
+                                           scode,
+                                           leftptr,
+                                           rightptr);
+  }
+  if (scode < scodeleft)
+  {
+    return false;
+  }
+  if (scode == scodeleft)
+  {
+    merbounds->leftmer = leftptr;
+  }
+  scoderight = extractremainingbytes(remainmask,byteoffset,rightptr);
+  if (scode >= scoderight)
+  {
+    merbounds->rightmer = rightptr;
+  } else
+  {
+    merbounds->rightmer = remainingrightmost(merbytes,
+                                             byteoffset,
+                                             remainmask,
+                                             scode,
+                                             leftptr,
+                                             rightptr);
+  }
+  return true;
+}
+
 const Uchar *searchinbuckets(const Tyrindex *tyrindex,
                              const Tyrbckinfo *tyrbckinfo,
                              const Uchar *bytecode)
 {
   const Uchar *result;
-  unsigned long prefixcode, leftbound, rightbound, merbytes;
-  const Uchar *mertable;
-  Merbounds merbounds;
+  unsigned long prefixcode, leftbound, merbytes;
 
   gt_assert(tyrbckinfo != NULL);
   merbytes = tyrindex_merbytes(tyrindex);
-  mertable = tyrindex_mertable(tyrindex);
   prefixcode = extractprefixbytecode(merbytes,
                                      tyrbckinfo->prefixlength,
                                      bytecode);
   leftbound = tyrbckinfo->bounds[prefixcode];
   if (ISBOUNDDEFINED(tyrbckinfo->boundisdefined,prefixcode))
   {
+    const Uchar *mertable;
+    unsigned long rightbound;
+
+    mertable = tyrindex_mertable(tyrindex);
     rightbound = tyrbckinfo->bounds[prefixcode+1] - merbytes;
     if (MOD4(tyrbckinfo->prefixlength) == 0)
     {
@@ -97,6 +213,9 @@ const Uchar *searchinbuckets(const Tyrindex *tyrindex,
                                      mertable + rightbound);
     } else
     {
+      Merbounds merbounds;
+
+      merbounds.leftmer = merbounds.rightmer = NULL;
       if (!remainadvance(&merbounds,
                          merbytes,
                          (unsigned long) DIV4(tyrbckinfo->prefixlength),
@@ -153,10 +272,8 @@ static void splitmerinterval(Tyrbckinfo *tyrbckinfo,
                              const Tyrindex *tyrindex)
 
 {
-  const Uchar *rightbound, *leftptr, *rightptr;
-  unsigned long code, leftcode, rightcode;
-  const Uchar *mertable, *lastmer;
-  unsigned long merbytes;
+  const Uchar *rightbound, *leftptr, *rightptr, *mertable, *lastmer;
+  unsigned long code, leftcode, rightcode, merbytes;
 
   mertable = tyrindex_mertable(tyrindex);
   lastmer = tyrindex_lastmer(tyrindex);

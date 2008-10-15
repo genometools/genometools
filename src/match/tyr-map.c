@@ -20,9 +20,9 @@
 #include "divmodmul.h"
 #include "defined-types.h"
 #include "opensfxfile.h"
+#include "spacedef.h"
 #include "tyr-basic.h"
 #include "tyr-map.h"
-#include "spacedef.h"
 
 #include "sfx-apfxlen.pr"
 
