@@ -52,6 +52,7 @@
 #include "tools/gt_chseqids.h"
 #include "tools/gt_clean.h"
 #include "tools/gt_csa.h"
+#include "tools/gt_congruence.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_eval.h"
 #include "tools/gt_exercise.h"
@@ -107,6 +108,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "chseqids", gt_chseqids);
   gt_toolbox_add(tools, "clean", gt_clean);
   gt_toolbox_add_tool(tools, "csa", gt_csa());
+  gt_toolbox_add_tool(tools, "congruence", gt_congruence());
   gt_toolbox_add_tool(tools, "dev", gt_dev());
   gt_toolbox_add(tools, "eval", gt_eval);
   gt_toolbox_add_tool(tools, "exercise", gt_exercise());
