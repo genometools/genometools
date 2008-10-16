@@ -40,8 +40,6 @@ static void *gt_cge_spacedseed_arguments_new(void)
     = gt_malloc(sizeof (Cge_spacedseed_options));
   arguments->str_inputindex = gt_str_new();
   arguments->queryfilenames = gt_str_array_new();
-  gt_option_delete(arguments->refoptionpckindex);
-  gt_option_delete(arguments->refoptionesaindex);
   return arguments;
 }
 
@@ -55,6 +53,8 @@ static void gt_cge_spacedseed_arguments_delete(void *tool_arguments)
   }
   gt_str_delete(arguments->str_inputindex);
   gt_str_array_delete(arguments->queryfilenames);
+  gt_option_delete(arguments->refoptionpckindex);
+  gt_option_delete(arguments->refoptionesaindex);
   gt_free(arguments);
 }
 
@@ -75,6 +75,7 @@ static GtOptionParser
                                      "Specify index (enhanced suffix array)",
                                      arguments->str_inputindex, NULL);
   gt_option_parser_add_option(op, optionesaindex);
+  arguments->refoptionesaindex = gt_option_ref(optionesaindex);
 
   optionpckindex = gt_option_new_string("pck",
                                      "Specify index (packed index)",
@@ -125,7 +126,7 @@ static int gt_cge_spacedseed_arguments_check(int rest_argc,
 }
 
 static int gt_cge_spacedseed_runner(int argc,
-                                    const char **argv,
+                                    GT_UNUSED const char **argv,
                                     int parsed_args,
                                     void *tool_arguments,
                                     GT_UNUSED GtError *err)
@@ -134,14 +135,28 @@ static int gt_cge_spacedseed_runner(int argc,
   Verboseinfo *verboseinfo;
   bool haserr = false;
 
-  gt_assert(parsed_args + 1 == argc);
-  gt_str_set(arguments->str_inputindex,argv[parsed_args]);
+  gt_assert(parsed_args == argc);
   verboseinfo = newverboseinfo(arguments->verbose);
   if (arguments->verbose)
   {
+    unsigned long idx;
+
     printf("# %sindex=%s\n",arguments->isesa ? "esa" : "pck",
                             gt_str_get(arguments->str_inputindex));
+    for (idx = 0; idx < gt_str_array_size(arguments->queryfilenames); idx++)
+    {
+      printf("# queryfile=%s\n",
+             gt_str_array_get(arguments->queryfilenames,idx));
+    }
   }
+  /*
+  if (matchspacedseed(arguments->isesa,
+                      arguments->str_inputindex,
+                      arguments->queryfilenames) != 0)
+  {
+    haserr = true;
+  }
+  */
   freeverboseinfo(&verboseinfo);
   return haserr ? - 1 : 0;
 }
