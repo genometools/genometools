@@ -24,11 +24,12 @@
 #include "core/versionfunc.h"
 #include "extended/toolbox.h"
 #include "match/verbose-def.h"
+#include "match/cgr_spacedseed.h"
 #include "tools/gt_congruence.h"
 
 typedef struct
 {
-  bool isesa, verbose;
+  bool withesa, verbose;
   GtStr *str_inputindex;
   GtStrArray *queryfilenames;
   GtOption *refoptionesaindex, *refoptionpckindex;
@@ -111,11 +112,11 @@ static int gt_cge_spacedseed_arguments_check(int rest_argc,
   }
   if (gt_option_is_set(arguments->refoptionesaindex))
   {
-    arguments->isesa = true;
+    arguments->withesa = true;
   } else
   {
     gt_assert(gt_option_is_set(arguments->refoptionpckindex));
-    arguments->isesa = false;
+    arguments->withesa = false;
   }
   if (rest_argc != 0)
   {
@@ -129,7 +130,7 @@ static int gt_cge_spacedseed_runner(int argc,
                                     GT_UNUSED const char **argv,
                                     int parsed_args,
                                     void *tool_arguments,
-                                    GT_UNUSED GtError *err)
+                                    GtError *err)
 {
   Cge_spacedseed_options *arguments = tool_arguments;
   Verboseinfo *verboseinfo;
@@ -141,7 +142,7 @@ static int gt_cge_spacedseed_runner(int argc,
   {
     unsigned long idx;
 
-    printf("# %sindex=%s\n",arguments->isesa ? "esa" : "pck",
+    printf("# %sindex=%s\n",arguments->withesa ? "esa" : "pck",
                             gt_str_get(arguments->str_inputindex));
     for (idx = 0; idx < gt_str_array_size(arguments->queryfilenames); idx++)
     {
@@ -149,14 +150,13 @@ static int gt_cge_spacedseed_runner(int argc,
              gt_str_array_get(arguments->queryfilenames,idx));
     }
   }
-  /*
-  if (matchspacedseed(arguments->isesa,
+  if (matchspacedseed(arguments->withesa,
                       arguments->str_inputindex,
-                      arguments->queryfilenames) != 0)
+                      arguments->queryfilenames,
+                      err) != 0)
   {
     haserr = true;
   }
-  */
   freeverboseinfo(&verboseinfo);
   return haserr ? - 1 : 0;
 }
