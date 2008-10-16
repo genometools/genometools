@@ -29,21 +29,6 @@
 #include "tyr-mersplit.h"
 #include "spacedef.h"
 
-static unsigned long containsspecialbytestring(const Uchar *seq,
-                                               unsigned long len)
-{
-  const Uchar *sptr;
-
-  for (sptr=seq; sptr < seq + len; sptr++)
-  {
-    if (ISSPECIAL(*sptr))
-    {
-      return (unsigned long) (sptr - seq);
-    }
-  }
-  return len;
-}
-
 typedef struct
 {
   Uchar *bytecode,  /* buffer for encoded word to be searched */
@@ -160,18 +145,20 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
                                GT_UNUSED const char *desc)
 {
   const Uchar *qptr, *result;
-  unsigned long skipvalue;
+  unsigned long offset, skipvalue;
 
   if (tyrsearchinfo->mersize > querylen)
   {
     return;
   }
   qptr = query;
+  offset = 0;
   while (qptr <= query + querylen - tyrsearchinfo->mersize)
   {
-    skipvalue = containsspecialbytestring(qptr,tyrsearchinfo->mersize);
+    skipvalue = containsspecialbytestring(qptr,offset,tyrsearchinfo->mersize);
     if (skipvalue == tyrsearchinfo->mersize)
     {
+      offset = tyrsearchinfo->mersize-1;
       if (tyrsearchinfo->searchstrand & STRAND_FORWARD)
       {
         result = searchsinglemer(qptr,tyrindex,tyrsearchinfo,tyrbckinfo);
@@ -209,6 +196,7 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
       qptr++;
     } else
     {
+      offset = 0;
       qptr += (skipvalue+1);
     }
   }
@@ -226,7 +214,6 @@ int tyrsearch(const GtStr *tyrindexname,
   Tyrcountinfo *tyrcountinfo = NULL;
   Tyrbckinfo *tyrbckinfo = NULL;
   bool haserr = false;
-  GtSeqIterator *seqit;
 
   gt_error_check(err);
   tyrindex = tyrindex_new(tyrindexname,err);
@@ -277,6 +264,7 @@ int tyrsearch(const GtStr *tyrindexname,
     uint64_t unitnum;
     int retval;
     Tyrsearchinfo tyrsearchinfo;
+    GtSeqIterator *seqit;
 
     gt_assert(tyrindex != NULL);
     tyrsearchinfo_init(&tyrsearchinfo,tyrindex,showmode,searchstrand);

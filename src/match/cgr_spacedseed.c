@@ -17,14 +17,17 @@
 
 #include "core/unused_api.h"
 #include "core/ma_api.h"
+#include "core/seqiterator.h"
 #include "cgr_spacedseed.h"
+#include "alphadef.h"
 #include "sarr-def.h"
+#include "intbits.h"
 #include "eis-voiditf.h"
 
 #include "esa-map.pr"
 
 static int inputesaorpckindex(Suffixarray **suffixarray,
-                              void **packedindex, 
+                              void **packedindex,
                               const GtStr *indexname,
                               bool withesa,
                               bool alwayswithencseq,
@@ -33,7 +36,7 @@ static int inputesaorpckindex(Suffixarray **suffixarray,
   unsigned int demand;
   Seqpos totallength;
   bool haserr = false;
-  
+
   if (withesa)
   {
     demand = SARR_ESQTAB | SARR_SUFTAB;
@@ -87,23 +90,165 @@ static int inputesaorpckindex(Suffixarray **suffixarray,
   return haserr ? -1 : 0;
 }
 
+typedef struct
+{
+  unsigned long seedweight, numofonepositions;
+  unsigned char *onepositions;
+  Bitstring seedbitvector;
+} Spacedseed;
+
+static Spacedseed *spacedseed_new(const char *seedstring,GtError *err)
+{
+  Spacedseed *spse;
+  unsigned long idx, fillindex;
+  bool haserr = false;
+
+  spse = gt_malloc(sizeof(*spse));
+  spse->seedweight = spse->numofonepositions = 0;
+  spse->seedbitvector = 0;
+  spse->onepositions = NULL;
+  for (idx = 0; seedstring[idx] != '\0'; idx++)
+  {
+    if (spse->seedweight == (unsigned long) INTWORDSIZE)
+    {
+      gt_error_set(err,"space seed cannot be longer than %u",
+                       (unsigned int) INTWORDSIZE);
+      haserr = true;
+      break;
+    }
+    spse->seedweight++;
+    if (seedstring[idx] == '1')
+    {
+      spse->numofonepositions++;
+      spse->seedbitvector |= ITHBIT(idx);
+    }
+  }
+  if (!haserr)
+  {
+    spse->onepositions = gt_malloc(sizeof (*spse->onepositions) * 
+                                   spse->numofonepositions);
+    for (fillindex = 0, idx = 0; seedstring[idx] != '\0'; idx++)
+    {
+      if (seedstring[idx] == '1')
+      {
+        spse->onepositions[fillindex++] = (unsigned char) idx;
+      }
+    }
+  }
+  if (haserr)
+  {
+    gt_free(spse);
+    return NULL;
+  }
+  return spse;
+}
+
+static void spacedseed_delete(Spacedseed *spse)
+{
+  gt_free(spse->onepositions);
+  gt_free(spse);
+}
+
+static void singlewindowmatchspacedseed(GT_UNUSED const void *genericindex,
+                                        GT_UNUSED const Uchar *qptr,
+                                        GT_UNUSED const Spacedseed *spse)
+{
+  return;
+}
+
+static void singlequerymatchspacedseed(const void *genericindex,
+                                       const Uchar *query,
+                                       unsigned long querylen,
+                                       const Spacedseed *spse)
+{
+  const Uchar *qptr;
+  unsigned long offset, skipvalue;
+
+  if (spse->seedweight > querylen)
+  {
+    return;
+  }
+  qptr = query;
+  offset = 0;
+  while (qptr <= query + querylen - spse->seedweight)
+  {
+    skipvalue = containsspecialbytestring(qptr,offset,spse->seedweight);
+    if (skipvalue == spse->seedweight)
+    {
+      offset = spse->seedweight-1;
+      singlewindowmatchspacedseed(genericindex,qptr,spse);
+      qptr++;
+    } else
+    {
+      offset = 0;
+      qptr += (skipvalue+1);
+    }
+  }
+}
+
 int matchspacedseed(bool withesa,
                     const GtStr *str_inputindex,
-                    GT_UNUSED const GtStrArray *queryfilenames,
+                    const GtStrArray *queryfilenames,
                     GtError *err)
 {
   Suffixarray *suffixarray = NULL;
   void *packedindex = NULL;
   bool haserr = false;
+  Spacedseed *spse;
 
-  if (inputesaorpckindex(&suffixarray,
-                         &packedindex, 
-                         str_inputindex,
-                         withesa,
-                         false,
-                         err) != 0)
+  spse = spacedseed_new("11011011000011011",err);
+  if (spse == NULL)
   {
     haserr = true;
+  }
+  if (!haserr)
+  {
+    if (inputesaorpckindex(&suffixarray,
+                           &packedindex,
+                           str_inputindex,
+                           withesa,
+                           false,
+                           err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    GtSeqIterator *seqit;
+    const Uchar *query;
+    unsigned long querylen;
+    char *desc = NULL;
+    uint64_t unitnum;
+    int retval;
+
+    gt_assert(suffixarray != NULL);
+    seqit = gt_seqiterator_new(queryfilenames,
+                               getsymbolmapAlphabet(suffixarray->alpha),
+                               true);
+    for (unitnum = 0; /* Nothing */; unitnum++)
+    {
+      retval = gt_seqiterator_next(seqit,
+                                   &query,
+                                   &querylen,
+                                   &desc,
+                                   err);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      singlequerymatchspacedseed(withesa ? suffixarray : packedindex,
+                                 query,
+                                 querylen,
+                                 spse);
+      gt_free(desc);
+    }
+    gt_seqiterator_delete(seqit);
   }
   freesuffixarray(suffixarray);
   gt_free(suffixarray);
@@ -111,5 +256,6 @@ int matchspacedseed(bool withesa,
   {
     deletevoidBWTSeq(packedindex);
   }
+  spacedseed_delete(spse);
   return haserr ? -1 : 0;
 }

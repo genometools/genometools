@@ -33,9 +33,8 @@ typedef struct
 
 typedef struct
 {
-  unsigned long seedbitvector,
-                spacedseedlength,
-                lasterrorposition;
+  Bitstring seedbitvector;
+  unsigned long seedweight;
   const Uchar *pattern;
 } Matchtaskinfo;
 
@@ -67,8 +66,7 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
                                  /* Variable argument list is as follows:
                                     const Uchar *pattern,
                                     unsigned long seedbitvector,
-                                    unsigned long spacedseedlength,
-                                    unsigned long lasterrorposition
+                                    unsigned long seedweight
                                  */
 {
   va_list ap;
@@ -76,9 +74,8 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
 
   va_start(ap,alphasize);
   mti->pattern = va_arg(ap, const Uchar *);
-  mti->seedbitvector = va_arg(ap, unsigned long);
-  mti->spacedseedlength = va_arg(ap, unsigned long);
-  mti->lasterrorposition = va_arg(ap, unsigned long);
+  mti->seedbitvector = va_arg(ap, Bitstring);
+  mti->seedweight = va_arg(ap, unsigned long);
   va_end(ap);
 }
 
@@ -110,11 +107,11 @@ static unsigned long spse_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
 
   if (limdfsstate->pathmatches)
   {
-    if (currentdepth == mti->spacedseedlength)
+    if (currentdepth == mti->seedweight)
     {
       return currentdepth + 1; /* match of length currentdepth */
     }
-    if (currentdepth < mti->spacedseedlength)
+    if (currentdepth < mti->seedweight)
     {
       return 1UL; /* continue with depth first traversal */
     }
@@ -122,7 +119,7 @@ static unsigned long spse_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   return 0; /* stop depth first traversal */
 }
 
-static bool setpathmatch(unsigned long seedbitvector,
+static bool setpathmatch(Bitstring seedbitvector,
                          const Uchar *pattern,
                          unsigned long currentdepth,
                          Uchar currentchar)

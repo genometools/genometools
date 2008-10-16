@@ -18,6 +18,8 @@
 #ifndef CHARDEF_H
 #define CHARDEF_H
 
+#include "core/symboldef.h"
+#include "core/assert_api.h"
 #include <limits.h>
 
 /*
@@ -73,5 +75,23 @@
 */
 
 #define DNAALPHASIZE       ((unsigned int) 4)
+
+/*@unused@*/ static inline unsigned long
+                            containsspecialbytestring(const Uchar *seq,
+                                                      unsigned long offset,
+                                                      unsigned long len)
+{
+  const Uchar *sptr;
+
+  gt_assert(offset < len);
+  for (sptr=seq+offset; sptr < seq + len; sptr++)
+  {
+    if (ISSPECIAL(*sptr))
+    {
+      return (unsigned long) (sptr - seq);
+    }
+  }
+  return len;
+}
 
 #endif
