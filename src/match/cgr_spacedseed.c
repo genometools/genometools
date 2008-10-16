@@ -23,20 +23,47 @@
 #include "sarr-def.h"
 #include "intbits.h"
 #include "eis-voiditf.h"
+#include "idx-limdfs.h"
+#include "absdfstrans-def.h"
+#include "spaced-seeds.h"
 
 #include "esa-map.pr"
 
-static int inputesaorpckindex(Suffixarray **suffixarray,
-                              void **packedindex,
-                              const GtStr *indexname,
-                              bool withesa,
-                              bool alwayswithencseq,
-                              GtError *err)
+typedef struct
+{
+  Suffixarray *suffixarray;
+  void *packedindex;
+  bool withesa;
+  const Matchbound **mbtab; /* only relevant for packedindex */
+  unsigned int maxdepth;    /* maximaldepth of boundaries */
+} Genericindex;
+
+static void genericindex_delete(Genericindex *genericindex)
+{
+  if (genericindex == NULL)
+  {
+    return;
+  }
+  freesuffixarray(genericindex->suffixarray);
+  gt_free(genericindex->suffixarray);
+  if (genericindex->packedindex != NULL)
+  {
+    deletevoidBWTSeq(genericindex->packedindex);
+  }
+  gt_free(genericindex);
+}
+
+static Genericindex *genericindex_new(const GtStr *indexname,
+                                      bool withesa,
+                                      bool alwayswithencseq,
+                                      GtError *err)
 {
   unsigned int demand;
   Seqpos totallength;
   bool haserr = false;
+  Genericindex *genericindex;
 
+  genericindex = gt_malloc(sizeof(*genericindex));
   if (withesa)
   {
     demand = SARR_ESQTAB | SARR_SUFTAB;
@@ -50,8 +77,9 @@ static int inputesaorpckindex(Suffixarray **suffixarray,
       demand = 0;
     }
   }
-  *suffixarray = gt_malloc(sizeof(**suffixarray));
-  if (mapsuffixarray(*suffixarray,
+  genericindex->withesa = withesa;
+  genericindex->suffixarray = gt_malloc(sizeof(*genericindex->suffixarray));
+  if (mapsuffixarray(genericindex->suffixarray,
                      &totallength,
                      demand,
                      indexname,
@@ -62,14 +90,14 @@ static int inputesaorpckindex(Suffixarray **suffixarray,
   }
   if (!haserr)
   {
-    if (withesa && (*suffixarray)->readmode != Forwardmode)
+    if (withesa && genericindex->suffixarray->readmode != Forwardmode)
     {
       gt_error_set(err,"using option -esa you can only process index "
                        "in forward mode");
       haserr = true;
     } else
     {
-      if (!withesa && (*suffixarray)->readmode != Reversemode)
+      if (!withesa && genericindex->suffixarray->readmode != Reversemode)
       {
         gt_error_set(err,"with option -pck you can only process index "
                          "in reverse mode");
@@ -77,17 +105,30 @@ static int inputesaorpckindex(Suffixarray **suffixarray,
       }
     }
   }
+  genericindex->packedindex = NULL;
+  genericindex->mbtab = NULL;
+  genericindex->maxdepth = 0;
   if (!haserr && !withesa)
   {
-    *packedindex = loadvoidBWTSeqForSA(indexname,
-                                       *suffixarray,
-                                       totallength, true, err);
-    if (*packedindex == NULL)
+    genericindex->packedindex = loadvoidBWTSeqForSA(indexname,
+                                                    genericindex->suffixarray,
+                                                    totallength, true, err);
+    if (genericindex->packedindex == NULL)
     {
       haserr = true;
     }
   }
-  return haserr ? -1 : 0;
+  if (!haserr && !withesa)
+  {
+    genericindex->mbtab = bwtseq2mbtab(genericindex->packedindex);
+    genericindex->maxdepth = bwtseq2maxdepth(genericindex->packedindex);
+  }
+  if (haserr)
+  {
+    genericindex_delete(genericindex);
+    return NULL;
+  }
+  return genericindex;
 }
 
 typedef struct
@@ -149,14 +190,15 @@ static void spacedseed_delete(Spacedseed *spse)
   gt_free(spse);
 }
 
-static void singlewindowmatchspacedseed(GT_UNUSED const void *genericindex,
-                                        GT_UNUSED const Uchar *qptr,
-                                        GT_UNUSED const Spacedseed *spse)
+static void singlewindowmatchspacedseed(
+                        GT_UNUSED const Genericindex *genericindex,
+                        GT_UNUSED const Uchar *qptr,
+                        GT_UNUSED const Spacedseed *spse)
 {
   return;
 }
 
-static void singlequerymatchspacedseed(const void *genericindex,
+static void singlequerymatchspacedseed(const Genericindex *genericindex,
                                        const Uchar *query,
                                        unsigned long querylen,
                                        const Spacedseed *spse)
@@ -186,13 +228,22 @@ static void singlequerymatchspacedseed(const void *genericindex,
   }
 }
 
+static void showmatch(GT_UNUSED void *processinfo,
+                      Seqpos dbstartpos,
+                      Seqpos dblen,
+                      GT_UNUSED const Uchar *dbsubstring,
+                      GT_UNUSED unsigned long pprefixlen)
+{
+  printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
+  printf(FormatSeqpos "\n",PRINTSeqposcast(dbstartpos));
+}
+
 int matchspacedseed(bool withesa,
                     const GtStr *str_inputindex,
                     const GtStrArray *queryfilenames,
                     GtError *err)
 {
-  Suffixarray *suffixarray = NULL;
-  void *packedindex = NULL;
+  Genericindex *genericindex = NULL;
   bool haserr = false;
   Spacedseed *spse;
 
@@ -203,12 +254,8 @@ int matchspacedseed(bool withesa,
   }
   if (!haserr)
   {
-    if (inputesaorpckindex(&suffixarray,
-                           &packedindex,
-                           str_inputindex,
-                           withesa,
-                           false,
-                           err) != 0)
+    genericindex = genericindex_new(str_inputindex,withesa,false,err);
+    if (genericindex == NULL)
     {
       haserr = true;
     }
@@ -221,10 +268,33 @@ int matchspacedseed(bool withesa,
     char *desc = NULL;
     uint64_t unitnum;
     int retval;
+    Limdfsresources *limdfsresources = NULL;
+    const AbstractDfstransformer *dfst;
 
-    gt_assert(suffixarray != NULL);
+    dfst = spse_AbstractDfstransformer();
+    gt_assert(genericindex != NULL);
+    gt_assert(genericindex->suffixarray != NULL);
+    limdfsresources = newLimdfsresources(
+                           withesa ? genericindex->suffixarray
+                                   : genericindex->packedindex,
+                           genericindex->mbtab,
+                           genericindex->maxdepth,
+                           genericindex->suffixarray->encseq,
+                           withesa,
+                           true,
+                           0,
+                           getmapsizeAlphabet(genericindex->suffixarray->alpha),
+                           getencseqtotallength(genericindex->suffixarray
+                                                            ->encseq),
+                           (unsigned long) INTWORDSIZE,
+                           showmatch,
+                           NULL, /* processmatch info */
+                           NULL, /* processresult */
+                           NULL, /* processresult info */
+                           dfst);
     seqit = gt_seqiterator_new(queryfilenames,
-                               getsymbolmapAlphabet(suffixarray->alpha),
+                               getsymbolmapAlphabet(genericindex->suffixarray
+                                                                ->alpha),
                                true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
@@ -242,20 +312,19 @@ int matchspacedseed(bool withesa,
       {
         break;
       }
-      singlequerymatchspacedseed(withesa ? suffixarray : packedindex,
+      singlequerymatchspacedseed(genericindex,
                                  query,
                                  querylen,
                                  spse);
       gt_free(desc);
     }
+    if (limdfsresources != NULL)
+    {
+      freeLimdfsresources(&limdfsresources,dfst);
+    }
     gt_seqiterator_delete(seqit);
   }
-  freesuffixarray(suffixarray);
-  gt_free(suffixarray);
-  if (packedindex != NULL)
-  {
-    deletevoidBWTSeq(packedindex);
-  }
+  genericindex_delete(genericindex);
   spacedseed_delete(spse);
   return haserr ? -1 : 0;
 }
