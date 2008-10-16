@@ -124,15 +124,8 @@ static bool setpathmatch(Bitstring seedbitvector,
                          unsigned long currentdepth,
                          Uchar currentchar)
 {
-  if (ISBITSET(seedbitvector,currentdepth-1))
-  {
-    if (currentchar == pattern[currentdepth-1])
-    {
-      return true;
-    }
-    return false;
-  }
-  return true;
+  return (!ISBITSET(seedbitvector,currentdepth-1) ||
+          currentchar == pattern[currentdepth-1]) ? true : false;
 }
 
 static void spse_nextLimdfsstate(const void *dfsconstinfo,
@@ -180,7 +173,7 @@ const AbstractDfstransformer *spse_AbstractDfstransformer(void)
     sizeof (Limdfsstate),
     spse_allocatedfsconstinfo,
     spse_initdfsconstinfo,
-    NULL,
+    NULL, /* no extractdfsconstinfo */
     spse_freedfsconstinfo,
     spse_initLimdfsstate,
     spse_fullmatchLimdfsstate,

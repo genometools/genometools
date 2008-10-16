@@ -125,7 +125,7 @@ static Spacedseed *spacedseed_new(const char *seedstring,GtError *err)
   }
   if (!haserr)
   {
-    spse->onepositions = gt_malloc(sizeof (*spse->onepositions) * 
+    spse->onepositions = gt_malloc(sizeof (*spse->onepositions) *
                                    spse->numofonepositions);
     for (fillindex = 0, idx = 0; seedstring[idx] != '\0'; idx++)
     {
