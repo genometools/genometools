@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <string.h>
 #include "core/cstr.h"
 #include "core/hashmap.h"
@@ -43,15 +42,15 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
   const char *pfamname;
   const char *gft;
   lv = gt_ltr_visitor_cast(gv);
-  assert(lv);
+  gt_assert(lv);
   gt_error_check(err);
 
   gft = gt_feature_node_get_type(gf);
 
-  if(strcmp(gft, "LTR_retrotransposon") == 0)
+  if (strcmp(gft, "LTR_retrotransposon") == 0)
   {
     lv->element->mainnode = gf;
-  } else if(strcmp(gft, "long_terminal_repeat") == 0)
+  } else if (strcmp(gft, "long_terminal_repeat") == 0)
   {
     /* XXX: check order if unsorted! */
     if (lv->element->leftLTR == NULL)
@@ -68,7 +67,7 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
       lv->element->rightLTR_5 = node_range.start;
       lv->element->rightLTR_3 = node_range.end;
     }
-  } else if(strcmp(gft, "target_site_duplication") == 0)
+  } else if (strcmp(gft, "target_site_duplication") == 0)
   {
     /* XXX: check order if unsorted! */
     if (lv->element->leftTSD == NULL)
@@ -79,19 +78,19 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
     {
       lv->element->rightTSD = gf;
     }
-  } else if(strcmp(gft, "RR_tract") == 0)
+  } else if (strcmp(gft, "RR_tract") == 0)
   {
     if (lv->element->ppt == NULL)
     {
       lv->element->ppt = gf;
     }
-  } else if(strcmp(gft, "primer_binding_site") == 0)
+  } else if (strcmp(gft, "primer_binding_site") == 0)
   {
     if (lv->element->pbs == NULL)
     {
       lv->element->pbs = gf;
     }
-  } else if(strcmp(gft,"protein_match") == 0)
+  } else if (strcmp(gft,"protein_match") == 0)
   {
     if (!lv->element->pdoms)
     {
@@ -105,7 +104,7 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
       char *pfamcpy = gt_cstr_dup(pfamname);
       pdomarr = gt_array_new(sizeof (GtFeatureNode*));
       gt_hashmap_add(lv->element->pdoms, pfamcpy, pdomarr);
-      if(lv->element->pdomorder)
+      if (lv->element->pdomorder)
         gt_array_add(lv->element->pdomorder, pfamcpy);
     }
     gt_array_add(pdomarr, gf);
@@ -131,10 +130,10 @@ GtNodeVisitor* gt_ltr_visitor_new(GtLTRElement *element)
 {
   GtNodeVisitor *gv;
   GtLTRVisitor *lv;
-  assert(element);
+  gt_assert(element);
   gv = gt_node_visitor_create(gt_ltr_visitor_class());
   lv = gt_ltr_visitor_cast(gv);
   lv->element = element;
-  assert(lv);
+  gt_assert(lv);
   return gv;
 }

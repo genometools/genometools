@@ -37,7 +37,7 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts
 #ifdef HAVE_HMMER
-           ,GtPdomOptions *pdom_opts
+           /* HMMER only */ ,GtPdomOptions *pdom_opts
 #endif
            );
 

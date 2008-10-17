@@ -31,7 +31,6 @@
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltrfileout_stream.h"
 
-
 typedef struct GtLTRdigestOptions {
   GtPBSOptions  pbs_opts;
   GtPPTOptions  ppt_opts;
@@ -86,7 +85,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                  pbsalilen_defaults        = {11, 30},
                  pbsoffsetlen_defaults     = { 0,  5},
                  pbstrnaoffsetlen_defaults = { 0,  5};
-  assert(arguments);
+  gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] gff3_file sequence_file",
@@ -320,7 +319,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
         && gt_str_length(arguments->trna_lib) > 0)
   {
     tests_to_run |= LTRDIGEST_RUN_PBS;
-    arguments->pbs_opts.trna_lib = gt_bioseq_new(gt_str_get(arguments->trna_lib),
+   arguments->pbs_opts.trna_lib = gt_bioseq_new(gt_str_get(arguments->trna_lib),
                                                  err);
     if (gt_error_is_set(err))
       had_err = -1;
@@ -348,7 +347,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                                   &arguments->pbs_opts,
                                                   &arguments->ppt_opts
 #ifdef HAVE_HMMER
-                                                 ,&arguments->pdom_opts
+                                                 /*  */,&arguments->pdom_opts
 #endif
                                       );
 

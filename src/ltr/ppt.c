@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <math.h>
 #include "core/ensure.h"
 #include "core/ma.h"
@@ -46,32 +45,34 @@ struct GtPPTHit {
 
 struct GtPPTResults {
   GtArray *hits;
-  GtPPTHit *best_hit;
   GtLTRElement *elem;
   GtPPTOptions *opts;
 };
 
-static GtPPTResults* gt_ppt_results_new()
+static GtPPTResults* gt_ppt_results_new(GtLTRElement *elem,
+                                        GtPPTOptions *opts)
 {
   GtPPTResults *res = gt_calloc(1, sizeof (GtPPTResults));
-  assert(res);
+  res->elem = elem;
+  res->opts = opts;
+  res->hits = gt_array_new(sizeof (GtPPTHit*));
   return res;
 }
 
 static GtPPTHit* gt_ppt_hit_new(GtStrand strand, GtPPTResults *r)
 {
   GtPPTHit *h = gt_calloc(1, sizeof (GtPPTHit));
-  assert(h);
+  gt_assert(h);
   h->strand = strand;
   h->res = r;
   h->score = 0.0;
   return h;
 }
 
-GtRange gt_ppt_hit_get_coords(GtPPTHit *h)
+GtRange gt_ppt_hit_get_coords(const GtPPTHit *h)
 {
   GtRange r;
-  assert(h);
+  gt_assert(h);
   r.start = h->rng.start;
   r.end = h->rng.end;
   gt_ltrelement_offset2pos(h->res->elem,
@@ -82,27 +83,27 @@ GtRange gt_ppt_hit_get_coords(GtPPTHit *h)
   return r;
 }
 
-GtPPTHit* gt_ppt_hit_get_ubox(GtPPTHit *h)
+GtPPTHit* gt_ppt_hit_get_ubox(const GtPPTHit *h)
 {
-  assert(h);
+  gt_assert(h);
   return (h->ubox ? h->ubox : NULL);
 }
 
-GtStrand gt_ppt_hit_get_strand(GtPPTHit *h)
+GtStrand gt_ppt_hit_get_strand(const GtPPTHit *h)
 {
-  assert(h);
+  gt_assert(h);
   return h->strand;
 }
 
 unsigned long gt_ppt_results_get_number_of_hits(GtPPTResults *r)
 {
-  assert(r);
+  gt_assert(r);
   return gt_array_size(r->hits);
 }
 
 GtPPTHit* gt_ppt_results_get_ranked_hit(GtPPTResults *r, unsigned long i)
 {
-  assert(r);
+  gt_assert(r);
   return *(GtPPTHit**) gt_array_get(r->hits, i);
 }
 
@@ -110,28 +111,45 @@ static GtHMM* gt_ppt_hmm_new(const GtAlpha *alpha)
 {
   GtHMM *hmm;
 
-  assert(alpha);
+  gt_assert(alpha);
 
   hmm = gt_hmm_new(PPT_NOF_STATES, gt_alpha_size(alpha));
 
   /* set emission probabilities */
-  gt_hmm_set_emission_probability(hmm, PPT_OUT,  gt_alpha_encode(alpha, 'G'), 0.25);
-  gt_hmm_set_emission_probability(hmm, PPT_OUT,  gt_alpha_encode(alpha, 'A'), 0.25);
-  gt_hmm_set_emission_probability(hmm, PPT_OUT,  gt_alpha_encode(alpha, 'C'), 0.25);
-  gt_hmm_set_emission_probability(hmm, PPT_OUT,  gt_alpha_encode(alpha, 'T'), 0.25);
-  gt_hmm_set_emission_probability(hmm, PPT_IN,  gt_alpha_encode(alpha, 'G'),  0.485);
-  gt_hmm_set_emission_probability(hmm, PPT_IN,  gt_alpha_encode(alpha, 'A'),  0.485);
-  gt_hmm_set_emission_probability(hmm, PPT_IN,  gt_alpha_encode(alpha, 'C'),  0.015);
-  gt_hmm_set_emission_probability(hmm, PPT_IN,  gt_alpha_encode(alpha, 'T'),  0.015);
-  gt_hmm_set_emission_probability(hmm, PPT_UBOX, gt_alpha_encode(alpha, 'G'), 0.03);
-  gt_hmm_set_emission_probability(hmm, PPT_UBOX, gt_alpha_encode(alpha, 'A'), 0.03);
-  gt_hmm_set_emission_probability(hmm, PPT_UBOX, gt_alpha_encode(alpha, 'C'), 0.03);
-  gt_hmm_set_emission_probability(hmm, PPT_UBOX, gt_alpha_encode(alpha, 'T'), 0.91);
-  gt_hmm_set_emission_probability(hmm, PPT_N,    gt_alpha_encode(alpha, 'G'), 0.00);
-  gt_hmm_set_emission_probability(hmm, PPT_N,    gt_alpha_encode(alpha, 'A'), 0.00);
-  gt_hmm_set_emission_probability(hmm, PPT_N,    gt_alpha_encode(alpha, 'C'), 0.00);
-  gt_hmm_set_emission_probability(hmm, PPT_N,    gt_alpha_encode(alpha, 'T'), 0.00);
-  gt_hmm_set_emission_probability(hmm, PPT_N,    gt_alpha_encode(alpha, 'N'), 1.00);
+  gt_hmm_set_emission_probability(hmm, PPT_OUT,
+                                  gt_alpha_encode(alpha, 'G'), 0.25);
+  gt_hmm_set_emission_probability(hmm, PPT_OUT,
+                                  gt_alpha_encode(alpha, 'A'), 0.25);
+  gt_hmm_set_emission_probability(hmm, PPT_OUT,
+                                  gt_alpha_encode(alpha, 'C'), 0.25);
+  gt_hmm_set_emission_probability(hmm, PPT_OUT,
+                                  gt_alpha_encode(alpha, 'T'), 0.25);
+  gt_hmm_set_emission_probability(hmm, PPT_IN,
+                                  gt_alpha_encode(alpha, 'G'),  0.485);
+  gt_hmm_set_emission_probability(hmm, PPT_IN,
+                                  gt_alpha_encode(alpha, 'A'),  0.485);
+  gt_hmm_set_emission_probability(hmm, PPT_IN,
+                                  gt_alpha_encode(alpha, 'C'),  0.015);
+  gt_hmm_set_emission_probability(hmm, PPT_IN,
+                                  gt_alpha_encode(alpha, 'T'),  0.015);
+  gt_hmm_set_emission_probability(hmm, PPT_UBOX,
+                                  gt_alpha_encode(alpha, 'G'), 0.03);
+  gt_hmm_set_emission_probability(hmm, PPT_UBOX,
+                                  gt_alpha_encode(alpha, 'A'), 0.03);
+  gt_hmm_set_emission_probability(hmm, PPT_UBOX,
+                                  gt_alpha_encode(alpha, 'C'), 0.03);
+  gt_hmm_set_emission_probability(hmm, PPT_UBOX,
+                                  gt_alpha_encode(alpha, 'T'), 0.91);
+  gt_hmm_set_emission_probability(hmm, PPT_N,
+                                  gt_alpha_encode(alpha, 'G'), 0.00);
+  gt_hmm_set_emission_probability(hmm, PPT_N,
+                                  gt_alpha_encode(alpha, 'A'), 0.00);
+  gt_hmm_set_emission_probability(hmm, PPT_N,
+                                  gt_alpha_encode(alpha, 'C'), 0.00);
+  gt_hmm_set_emission_probability(hmm, PPT_N,
+                                  gt_alpha_encode(alpha, 'T'), 0.00);
+  gt_hmm_set_emission_probability(hmm, PPT_N,
+                                  gt_alpha_encode(alpha, 'N'), 1.00);
 
   /* set transition probabilities */
   gt_hmm_set_transition_probability(hmm, PPT_OUT, PPT_IN,   0.05);
@@ -147,7 +165,7 @@ static GtHMM* gt_ppt_hmm_new(const GtAlpha *alpha)
   gt_hmm_set_transition_probability(hmm, PPT_N, PPT_OUT,    0.05);
   gt_hmm_set_transition_probability(hmm, PPT_N, PPT_IN,     0.05);
   gt_hmm_set_missing_transition_probabilities(hmm);
-  assert(gt_hmm_is_valid(hmm));
+  gt_assert(gt_hmm_is_valid(hmm));
 
   return hmm;
 }
@@ -165,13 +183,13 @@ static int gt_ppt_hit_cmp(const void *h1, const void *h2)
 {
   GtPPTHit* ph1 = *(GtPPTHit**) h1;
   GtPPTHit* ph2 = *(GtPPTHit**) h2;
-  assert(h1 && h2);
+  gt_assert(h1 && h2);
   return gt_double_compare(ph2->score, ph1->score);
 }
 
 static bool gt_ubox_ok(GtPPTHit *hit, GtRange uboxlen)
 {
-  assert(hit);
+  gt_assert(hit);
   return (hit->state == PPT_UBOX
            && hit->rng.end-hit->rng.start+1 >= uboxlen.start
            && hit->rng.end-hit->rng.start+1 <= uboxlen.end);
@@ -179,7 +197,7 @@ static bool gt_ubox_ok(GtPPTHit *hit, GtRange uboxlen)
 
 static bool gt_ppt_ok(GtPPTHit *hit, GtRange pptlen)
 {
-  assert(hit);
+  gt_assert(hit);
   return (hit->state == PPT_IN
            && hit->rng.end-hit->rng.start+1 >= pptlen.start
            && hit->rng.end-hit->rng.start+1 <= pptlen.end);
@@ -193,7 +211,7 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
   unsigned long i = 0,
                 ltrlen = 0;
 
-  assert(decoded && results && strand != GT_STRAND_UNKNOWN);
+  gt_assert(decoded && results && strand != GT_STRAND_UNKNOWN);
 
   /* group hits into stretches */
   cur_hit = gt_ppt_hit_new(strand, results);
@@ -274,17 +292,12 @@ GtPPTResults* gt_ppt_find(const char *seq,
                 seqlen = gt_ltrelement_length(element),
                 ltrlen = 0;
 
-  assert(seq && rev_seq && element && o);
+  gt_assert(seq && rev_seq && element && o);
 
-  results = gt_ppt_results_new();
-  results->elem = element;
-  results->opts = o;
-  results->hits = gt_array_new(sizeof (GtPPTHit*));
+  results = gt_ppt_results_new(element, o);
 
   alpha = gt_alpha_new_dna();
   hmm = gt_ppt_hmm_new(alpha);
-
-  results->best_hit = NULL;
 
   /* do PPT finding on forward strand
    * -------------------------------- */

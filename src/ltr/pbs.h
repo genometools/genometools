@@ -40,33 +40,27 @@ typedef struct GtPBSOptions {
   GtBioseq *trna_lib;
 } GtPBSOptions;
 
-/* This struct holds information about a primer binding site (PBS). */
-typedef struct GtPBS_Hit {
-  unsigned long start,
-                end,
-                edist,
-                offset,
-                tstart,
-                alilen;
-  GtStrand strand;
-  double score;
-  const char *trna;
-} GtPBS_Hit;
+typedef struct GtPBSHit GtPBSHit;
+typedef struct GtPBSResults GtPBSResults;
 
-typedef struct GtPBSResults {
-  GtDlist *hits_fwd, *hits_rev;
-  GtPBS_Hit *best_hit;
-} GtPBSResults;
+GtPBSResults*  gt_pbs_find(const char *seq,
+                           const char *rev_seq,
+                           GtLTRElement *element,
+                           GtPBSOptions *o,
+                           GtError *err);
 
-/* Aligns tRNA from a library to the LTR retrotransposon candidate and
-   returns highest-scoring hit (newly created). */
-void  gt_pbs_find(const char *seq,
-                  const char *rev_seq,
-                  GtLTRElement *element,
-                  GtPBSResults *results,
-                  GtPBSOptions *o,
-                  GtError *err);
+GtRange        gt_pbs_hit_get_coords(const GtPBSHit*);
+GtStrand       gt_pbs_hit_get_strand(const GtPBSHit*);
+double         gt_pbs_hit_get_score(const GtPBSHit*);
+unsigned long  gt_pbs_hit_get_edist(const GtPBSHit*);
+unsigned long  gt_pbs_hit_get_offset(const GtPBSHit*);
+unsigned long  gt_pbs_hit_get_tstart(const GtPBSHit*);
+const char*    gt_pbs_hit_get_trna(const GtPBSHit*);
+unsigned long  gt_pbs_hit_get_alignment_length(const GtPBSHit*);
 
-void  gt_pbs_clear_results(GtPBSResults *results);
+unsigned long  gt_pbs_results_get_number_of_hits(const GtPBSResults*);
+GtPBSHit*      gt_pbs_results_get_ranked_hit(const GtPBSResults*,
+                                             unsigned long);
+void           gt_pbs_results_delete(GtPBSResults*);
 
 #endif

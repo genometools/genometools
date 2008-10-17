@@ -236,7 +236,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       GtStr *pdomorderstr = gt_str_new();
       for (i=0;i<gt_array_size(ls->element.pdomorder);i++)
       {
-        const char* key = *(const char**) gt_array_get(ls->element.pdomorder, i);
+        const char* key = *(const char**) gt_array_get(ls->element.pdomorder,
+                                                       i);
         GtArray *entry = (GtArray*) gt_hashmap_get(ls->element.pdoms, key);
         (void) write_pdom(ls, entry, key, seq, desc, e);
       }
@@ -374,7 +375,8 @@ static void write_metadata(GtGenFile *metadata_file,
                        "PBS/tRNA maximum unit edit distance\t%u\t1\n",
                        pbs_opts->max_edist);
     gt_genfile_xprintf(metadata_file,
-                       "allowed PBS offset from 5' LTR range\t%lu-%lunt\t0-5nt\n",
+                       "allowed PBS offset from 5' LTR range"
+                       "\t%lu-%lunt\t0-5nt\n",
                        pbs_opts->offsetlen.start,
                        pbs_opts->offsetlen.end);
     gt_genfile_xprintf(metadata_file,
@@ -467,7 +469,7 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   GtLTRFileOutStream *ls;
   char fn[GT_MAXFILENAMELEN];
 
-  assert(file_prefix && in_stream && bioseq && ppt_opts && pbs_opts
+  gt_assert(file_prefix && in_stream && bioseq && ppt_opts && pbs_opts
 #ifdef HAVE_HMMER
     && pdom_opts
 #endif

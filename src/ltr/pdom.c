@@ -111,7 +111,7 @@ int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
   unsigned long i;
   int had_err = 0;
 
-  assert(opts && err);
+  gt_assert(opts && err);
 
   for (i=0;i<gt_str_array_size(opts->hmm_files);i++)
   {
@@ -133,7 +133,8 @@ int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
     if (!had_err && hmm == NULL)
     {
       had_err = -1;
-      gt_error_set(err, "HMM file '%s' corrupt or in incorrect format?", hmmfile);
+      gt_error_set(err, "HMM file '%s' corrupt or in incorrect format?",
+                   hmmfile);
       break;
     }
     if (!had_err)
@@ -268,7 +269,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
 
       /* determine best-scoring strand */
       hits = (best_fwd ? hit->hits_fwd : hit->hits_rev);
-      assert(hits);
+      gt_assert(hits);
 
       /* no need to chain if there is only one hit */
       if (hits->num > 1)
@@ -357,7 +358,7 @@ static pdom_shared_s* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
   pdom_shared_s *shared;
   pthread_attr_t attr;
 
-  assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
+  gt_assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
           && *rev_fr1 && rev_fr2 && rev_fr3 && results && opts);
 
   shared = gt_calloc(1, sizeof (pdom_shared_s));
@@ -416,7 +417,7 @@ void gt_pdom_find(const char *seq, const char *rev_seq, GtLTRElement *element,
   pdom_shared_s *shared;
   int i;
 
-  assert(seq && rev_seq && element && results && opts);
+  gt_assert(seq && rev_seq && element && results && opts);
 
   results->empty = TRUE;
   results->combined_e_value_fwd = results->combined_e_value_rev = 0.0;

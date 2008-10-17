@@ -33,18 +33,15 @@ typedef struct {
 typedef struct GtPPTHit GtPPTHit;
 typedef struct GtPPTResults GtPPTResults;
 
-/* Searches for PPTs in the given sequence. */
 GtPPTResults*   gt_ppt_find(const char *seq,
                             const char *rev_seq,
                             GtLTRElement *element,
                             GtPPTOptions*);
 
-/* A PPT hit representation */
-GtRange         gt_ppt_hit_get_coords(GtPPTHit*);
-GtPPTHit*       gt_ppt_hit_get_ubox(GtPPTHit*);
-GtStrand        gt_ppt_hit_get_strand(GtPPTHit*);
+GtRange         gt_ppt_hit_get_coords(const GtPPTHit*);
+GtPPTHit*       gt_ppt_hit_get_ubox(const GtPPTHit*);
+GtStrand        gt_ppt_hit_get_strand(const GtPPTHit*);
 
-/* A collection of PPT hits */
 unsigned long   gt_ppt_results_get_number_of_hits(GtPPTResults*);
 GtPPTHit*       gt_ppt_results_get_ranked_hit(GtPPTResults*, unsigned long);
 void            gt_ppt_results_delete(GtPPTResults*);

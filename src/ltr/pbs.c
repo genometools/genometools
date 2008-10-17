@@ -15,10 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <math.h>
 #include "core/ma.h"
-#include "core/dlist.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/xansi.h"
@@ -28,8 +26,126 @@
 #include "extended/swalign.h"
 #include "ltr/pbs.h"
 
-GtScoreFunction* gt_dna_scorefunc_new(GtAlpha *a, int match, int mismatch,
-                                      int insertion, int deletion)
+struct GtPBSHit {
+  unsigned long start,
+                end,
+                edist,
+                offset,
+                tstart,
+                alilen;
+  GtStrand strand;
+  double score;
+  const char *trna;
+  GtPBSResults *res;
+};
+
+struct GtPBSResults {
+  GtArray *hits;
+  GtLTRElement *elem;
+  GtPBSOptions *opts;
+};
+
+static GtPBSHit* gt_pbs_hit_new(unsigned long alilen, GtStrand strand,
+                                const char *tRNA, unsigned long tstart,
+                                unsigned long start, unsigned long end,
+                                unsigned long offset, unsigned long edist,
+                                double score, GtPBSResults *r)
+{
+  GtPBSHit *hit = gt_calloc(1, sizeof (GtPBSHit));
+  hit->alilen  = alilen;
+  hit->strand  = strand;
+  hit->trna    = tRNA;
+  hit->tstart  = tstart;
+  hit->start   = start;
+  hit->end     = end;
+  hit->offset  = offset;
+  hit->edist   = edist;
+  hit->score   = score;
+  hit->res     = r;
+  return hit;
+}
+
+static GtPBSResults* gt_pbs_results_new(GtLTRElement *elem,
+                                        GtPBSOptions *opts)
+{
+  GtPBSResults *res = gt_calloc(1, sizeof (GtPBSResults));
+  res->elem = elem;
+  res->opts = opts;
+  res->hits = gt_array_new(sizeof (GtPBSHit*));
+  return res;
+}
+
+GtRange gt_pbs_hit_get_coords(const GtPBSHit *h)
+{
+  GtRange r;
+  gt_assert(h);
+  r.start = h->start;
+  r.end   = h->end;
+  gt_ltrelement_offset2pos(h->res->elem,
+                           &r,
+                           h->res->opts->radius,
+                           GT_OFFSET_END_LEFT_LTR,
+                           h->strand);
+  return r;
+}
+
+unsigned long gt_pbs_hit_get_offset(const GtPBSHit *h)
+{
+  gt_assert(h);
+  return h->offset;
+}
+
+double gt_pbs_hit_get_score(const GtPBSHit *h)
+{
+  gt_assert(h);
+  return h->score;
+}
+
+unsigned long gt_pbs_hit_get_edist(const GtPBSHit *h)
+{
+  gt_assert(h);
+  return h->edist;
+}
+
+const char* gt_pbs_hit_get_trna(const GtPBSHit *h)
+{
+  gt_assert(h);
+  return h->trna;
+}
+
+unsigned long gt_pbs_hit_get_tstart(const GtPBSHit *h)
+{
+  gt_assert(h);
+  return h->tstart;
+}
+
+GtStrand gt_pbs_hit_get_strand(const GtPBSHit *h)
+{
+  gt_assert(h);
+  return h->strand;
+}
+
+unsigned long gt_pbs_hit_get_alignment_length(const GtPBSHit *h)
+{
+  gt_assert(h);
+  return h->alilen;
+}
+
+unsigned long gt_pbs_results_get_number_of_hits(const GtPBSResults *r)
+{
+  gt_assert(r);
+  return gt_array_size(r->hits);
+}
+
+GtPBSHit* gt_pbs_results_get_ranked_hit(const GtPBSResults *r, unsigned long i)
+{
+  gt_assert(r);
+  return *(GtPBSHit**) gt_array_get(r->hits, i);
+}
+
+static GtScoreFunction* gt_dna_scorefunc_new(GtAlpha *a, int match,
+                                             int mismatch, int insertion,
+                                             int deletion)
 {
   GtScoreMatrix *sm = gt_score_matrix_new(a);
   GtScoreFunction *sf = gt_score_function_new(sm, insertion, deletion);
@@ -45,9 +161,9 @@ GtScoreFunction* gt_dna_scorefunc_new(GtAlpha *a, int match, int mismatch,
   return sf;
 }
 
-double gt_pbs_score_func(unsigned long edist, unsigned long offset,
-                         unsigned long alilen, unsigned long trnalen,
-                         unsigned long trna_offset)
+static double gt_pbs_score_func(unsigned long edist, unsigned long offset,
+                                unsigned long alilen, unsigned long trnalen,
+                                unsigned long trna_offset)
 {
   double penalties;
   if (edist == 0 || offset == 0)
@@ -59,12 +175,12 @@ double gt_pbs_score_func(unsigned long edist, unsigned long offset,
           /penalties;
 }
 
-void gt_pbs_add_hit(GtDlist *hitlist, GtAlignment *ali, GtPBSOptions *o,
-                    unsigned long trna_seqlen, const char *desc,
-                    GtStrand strand)
+static void gt_pbs_add_hit(GtArray *hitlist, GtAlignment *ali, GtPBSOptions *o,
+                           unsigned long trna_seqlen, const char *desc,
+                           GtStrand strand, GtPBSResults *r)
 {
   unsigned long dist;
-  GtPBS_Hit *hit;
+  GtPBSHit *hit;
   GtRange urange, vrange;
 
   dist = gt_alignment_eval(ali);
@@ -78,40 +194,40 @@ void gt_pbs_add_hit(GtDlist *hitlist, GtAlignment *ali, GtPBSOptions *o,
         && vrange.start <= o->trnaoffsetlen.end
         && vrange.start >= o->trnaoffsetlen.start)
   {
-    hit = gt_calloc(1, sizeof (GtPBS_Hit));
-    hit->alilen  = abs(urange.end-urange.start)+1;
-    hit->strand  = strand;
-    hit->trna    = desc;
-    hit->tstart  = vrange.start;
-    hit->start   = urange.start;
-    hit->end     = urange.end;
-    hit->offset  = abs(o->radius-urange.start);
-    hit->edist   = dist;
-    hit->score   = gt_pbs_score_func(dist,
-                                     abs(o->radius-urange.start),
-                                     urange.end-urange.start+1,
-                                     trna_seqlen,
-                                     vrange.start);
-    gt_dlist_add(hitlist, hit);
+    hit = gt_pbs_hit_new(abs(urange.end-urange.start)+1,
+                         strand,
+                         desc,
+                         vrange.start,
+                         urange.start,
+                         urange.end,
+                         abs(o->radius-urange.start),
+                         dist,
+                         gt_pbs_score_func(dist,
+                                           abs(o->radius-urange.start),
+                                           urange.end-urange.start+1,
+                                           trna_seqlen,
+                                           vrange.start),
+                         r);
+    gt_array_add(hitlist, hit);
   }
 }
 
-int gt_pbs_hit_compare(const void *h1, const void *h2)
+static int gt_pbs_hit_compare(const void *h1, const void *h2)
 {
-  GtPBS_Hit *hp1 = (GtPBS_Hit*) h1;
-  GtPBS_Hit *hp2 = (GtPBS_Hit*) h2;
+  GtPBSHit *hp1 = *(GtPBSHit**) h1;
+  GtPBSHit *hp2 = *(GtPBSHit**) h2;
 
-  return (gt_double_compare(hp2->score,hp1->score));
+  return (gt_double_compare(hp2->score, hp1->score));
 }
 
-void gt_pbs_find(const char *seq,
-                 const char *rev_seq,
-                 GtLTRElement *element,
-                 GtPBSResults *results,
-                 GtPBSOptions *o,
-                 GtError *err)
+GtPBSResults* gt_pbs_find(const char *seq,
+                          const char *rev_seq,
+                          GtLTRElement *element,
+                          GtPBSOptions *o,
+                          GtError *err)
 {
   GtSeq *seq_forward, *seq_rev;
+  GtPBSResults *results;
   unsigned long j;
   GtAlignment *ali;
   GtAlpha *a = (GtAlpha*) gt_alpha_new_dna();
@@ -121,11 +237,9 @@ void gt_pbs_find(const char *seq,
                                              o->ali_score_insertion,
                                              o->ali_score_deletion);
 
-  assert(seq && rev_seq && sf && a && element && results);
+  gt_assert(seq && rev_seq && sf && a && element);
 
-  results->hits_fwd = gt_dlist_new(gt_pbs_hit_compare);
-  results->hits_rev = gt_dlist_new(gt_pbs_hit_compare);
-  results->best_hit = NULL;
+  results = gt_pbs_results_new(element, o);
 
   seq_forward = gt_seq_new(seq +
                              element->leftLTR_3-element->leftLTR_5-o->radius,
@@ -153,13 +267,15 @@ void gt_pbs_find(const char *seq,
     trna_from3 = gt_seq_new_own(trna_from3_full, trna_seqlen, a);
 
     ali = gt_swalign(seq_forward, trna_from3, sf);
-    gt_pbs_add_hit(results->hits_fwd,ali,o,trna_seqlen,
-                   gt_seq_get_description(trna_seq), GT_STRAND_FORWARD);
+    gt_pbs_add_hit(results->hits, ali, o, trna_seqlen,
+                   gt_seq_get_description(trna_seq), GT_STRAND_FORWARD,
+                   results);
     gt_alignment_delete(ali);
 
     ali = gt_swalign(seq_rev, trna_from3, sf);
-    gt_pbs_add_hit(results->hits_rev,ali,o,trna_seqlen,
-                gt_seq_get_description(trna_seq), GT_STRAND_REVERSE);
+    gt_pbs_add_hit(results->hits, ali, o, trna_seqlen,
+                   gt_seq_get_description(trna_seq), GT_STRAND_REVERSE,
+                   results);
     gt_alignment_delete(ali);
 
     gt_seq_delete(trna_from3);
@@ -169,50 +285,23 @@ void gt_pbs_find(const char *seq,
   gt_score_function_delete(sf);
   gt_alpha_delete(a);
 
-  if (gt_dlist_size(results->hits_fwd) > 0)
-  {
-    GtDlistelem *delem;
-    delem = gt_dlist_first(results->hits_fwd);
-    results->best_hit = (GtPBS_Hit*) gt_dlistelem_get_data(delem);
-  }
-  if (gt_dlist_size(results->hits_rev) > 0)
-  {
-    GtDlistelem *delem;
-    GtPBS_Hit *tmp;
-    delem = gt_dlist_first(results->hits_rev);
-    tmp = (GtPBS_Hit*) gt_dlistelem_get_data(delem);
-    if (!results->best_hit
-          || gt_double_compare(tmp->score, results->best_hit->score) > 0)
-      results->best_hit = tmp;
-  }
+  gt_array_sort(results->hits, gt_pbs_hit_compare);
+
+  return results;
 }
 
-void gt_pbs_clear_results(GtPBSResults *results)
+void gt_pbs_results_delete(GtPBSResults *results)
 {
-    GtDlistelem *delem;
-
+    unsigned long i;
     if (!results) return;
-
-    if (results->hits_fwd)
+    if (results->hits)
     {
-      for (delem = gt_dlist_first(results->hits_fwd);
-          delem;
-          delem = gt_dlistelem_next(delem))
+      for (i=0;i<gt_array_size(results->hits);i++)
       {
-        GtPBS_Hit *hit = (GtPBS_Hit*) gt_dlistelem_get_data(delem);
+        GtPBSHit *hit = *(GtPBSHit**) gt_array_get(results->hits, i);
         gt_free(hit);
       }
-      gt_dlist_delete(results->hits_fwd);
+      gt_array_delete(results->hits);
     }
-    if (results->hits_rev)
-    {
-      for (delem = gt_dlist_first(results->hits_rev);
-          delem;
-          delem = gt_dlistelem_next(delem))
-      {
-        GtPBS_Hit *hit = (GtPBS_Hit*) gt_dlistelem_get_data(delem);
-        gt_free(hit);
-      }
-      gt_dlist_delete(results->hits_rev);
-    }
+    gt_free(results);
 }

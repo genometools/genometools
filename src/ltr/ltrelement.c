@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
 #include <string.h>
 #include "core/cstr.h"
 #include "core/ensure.h"
@@ -26,13 +25,13 @@
 
 unsigned long gt_ltrelement_length(GtLTRElement *e)
 {
-  assert(e && (e->leftLTR_3 >= e->leftLTR_5));
+  gt_assert(e && (e->leftLTR_3 >= e->leftLTR_5));
   return e->rightLTR_3 - e->leftLTR_5;
 }
 
 unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 {
-  assert(e && (e->leftLTR_3 >= e->leftLTR_5));
+  gt_assert(e && (e->leftLTR_3 >= e->leftLTR_5));
   return e->leftLTR_3-e->leftLTR_5+1;
 }
 
@@ -42,7 +41,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   char *out;
   unsigned long len;
 
-  assert(seq && end >= start && end <= gt_seq_length(seq));
+  gt_assert(seq && end >= start && end <= gt_seq_length(seq));
 
   gt_error_check(err);
 
@@ -57,7 +56,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
 
 unsigned long gt_ltrelement_rightltrlen(GtLTRElement *e)
 {
-  assert(e && (e->rightLTR_3 >= e->rightLTR_5));
+  gt_assert(e && (e->rightLTR_3 >= e->rightLTR_5));
   return e->rightLTR_3 - e->rightLTR_5 + 1;
 }
 
@@ -114,7 +113,7 @@ int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
 {
   int ret;
   char *tmpstr;
-  assert(buf && e);
+  gt_assert(buf && e);
   tmpstr = gt_calloc(seqnamelen+1, sizeof (char));
   memset(tmpstr,0,sizeof (char) * (seqnamelen + 1));
   (void) snprintf(tmpstr, seqnamelen, "%s", e->seqid);

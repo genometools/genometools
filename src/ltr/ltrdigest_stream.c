@@ -89,36 +89,32 @@ static int pdom_hit_attach_gff3(void *key, void *value, void *data,
 }
 #endif
 
-static void pbs_attach_results_to_gff3(GtPBSResults *results, GtLTRElement *element,
-                                       GtStr *tag, unsigned int radius)
+static void pbs_attach_results_to_gff3(GtPBSResults *results,
+                                       GtLTRElement *element,
+                                       GtStr *tag)
 {
   GtRange pbs_range;
   GtGenomeNode *gf;
   char buffer[BUFSIZ];
-  pbs_range.start = results->best_hit->start;
-  pbs_range.end   = results->best_hit->end;
-  gt_ltrelement_offset2pos(element, &pbs_range, radius,
-                           GT_OFFSET_END_LEFT_LTR,
-                           results->best_hit->strand);
-  results->best_hit->start = pbs_range.start;
-  results->best_hit->end = pbs_range.end;
+  GtPBSHit* hit = gt_pbs_results_get_ranked_hit(results, 0);
+  pbs_range = gt_pbs_hit_get_coords(hit);
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
                            "primer_binding_site",
                            pbs_range.start,
                            pbs_range.end,
-                           results->best_hit->strand);
+                           gt_pbs_hit_get_strand(hit));
   gt_feature_node_set_source((GtFeatureNode*) gf, tag);
-  gt_feature_node_set_score((GtFeatureNode*) gf, results->best_hit->score);
+  gt_feature_node_set_score((GtFeatureNode*) gf, gt_pbs_hit_get_score(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf,"trna",
-                                 results->best_hit->trna);
+                                 gt_pbs_hit_get_trna(hit));
   gt_feature_node_set_strand((GtGenomeNode*) element->mainnode,
-                              results->best_hit->strand);
-  (void) snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->tstart);
+                              gt_pbs_hit_get_strand(hit));
+  (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_tstart(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf,"trnaoffset", buffer);
-  (void) snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->offset);
+  (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_offset(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf,"pbsoffset", buffer);
-  (void) snprintf(buffer, BUFSIZ-1, "%lu", results->best_hit->edist);
+  (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_edist(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf,"edist", buffer);
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
 }
@@ -148,7 +144,7 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
                           GtLTRdigestStream *ls, GtError *err)
 {
   GtPPTResults *ppt_results;
-  GtPBSResults pbs_results;
+  GtPBSResults *pbs_results;
 #ifdef HAVE_HMMER
   GtPdomResults pdom_results;
 #endif
@@ -163,7 +159,6 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   (void) gt_reverse_complement(rev_seq, seqlen, err);
 
   /* initialize results */
-  memset(&pbs_results, 0, sizeof (GtPBSResults));
 #ifdef HAVE_HMMER
   memset(&pdom_results, 0, sizeof (GtPdomResults));
 #endif
@@ -186,15 +181,14 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
    * ----------- */
   if (ls->tests_to_run & LTRDIGEST_RUN_PBS)
   {
-    gt_pbs_find((const char*) base_seq, (const char*) rev_seq,
-             element, &pbs_results, ls->pbs_opts, err);
-     if (pbs_results.best_hit)
+    pbs_results = gt_pbs_find((const char*) base_seq, (const char*) rev_seq,
+                              element, ls->pbs_opts, err);
+     if (gt_pbs_results_get_number_of_hits(pbs_results) > 0)
      {
-      pbs_attach_results_to_gff3(&pbs_results, element,
-                                 ls->ltrdigest_tag, ls->pbs_opts->radius);
-      gt_feature_node_set_strand((GtGenomeNode *) ls->element.mainnode,
-                                  pbs_results.best_hit->strand);
+      pbs_attach_results_to_gff3(pbs_results, element,
+                                 ls->ltrdigest_tag);
      }
+     gt_pbs_results_delete(pbs_results);
   }
 
 #ifdef HAVE_HMMER
@@ -231,7 +225,6 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   }
 #endif
   gt_free(rev_seq);
-  gt_pbs_clear_results(&pbs_results);
 }
 
 int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
@@ -316,7 +309,7 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts
 #ifdef HAVE_HMMER
-           ,GtPdomOptions *pdom_opts
+           /* HMMER only */ ,GtPdomOptions *pdom_opts
 #endif
            )
 {
