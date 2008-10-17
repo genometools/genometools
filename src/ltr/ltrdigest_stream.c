@@ -143,8 +143,8 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
 static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
                           GtLTRdigestStream *ls, GtError *err)
 {
-  GtPPTResults *ppt_results;
-  GtPBSResults *pbs_results;
+  GtPPTResults *ppt_results = NULL;
+  GtPBSResults *pbs_results = NULL;
 #ifdef HAVE_HMMER
   GtPdomResults pdom_results;
 #endif
@@ -227,7 +227,7 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   gt_free(rev_seq);
 }
 
-int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                              GtError *e)
 {
   GtLTRdigestStream *ls;
@@ -285,7 +285,7 @@ int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-void gt_ltrdigest_stream_free(GtNodeStream *gs)
+static void gt_ltrdigest_stream_free(GtNodeStream *gs)
 {
   GtLTRdigestStream *ls = gt_ltrdigest_stream_cast(gs);
   gt_node_visitor_delete((GtNodeVisitor*) ls->lv);

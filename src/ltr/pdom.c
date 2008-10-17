@@ -36,7 +36,7 @@
 #include "squid.h"
 #include "funcs.h"
 
-typedef struct pdom_shared {
+typedef struct PdomSharedMem {
   pthread_t *thread;
   int nof_threads;
   unsigned long next_hmm;
@@ -46,7 +46,7 @@ typedef struct pdom_shared {
   GtPdomResults *results;
   GtPdomOptions *opts;
   pthread_mutex_t in_lock, out_lock;
-} pdom_shared_s;
+} PdomSharedMem;
 
 void gt_hmmer_search(struct plan7_s *hmm,
                   char *seq,
@@ -152,7 +152,7 @@ int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
     if (hmmfp) HMMFileClose(hmmfp);
   }
   gt_log_log("Loaded %lu HMM model(s)",
-          gt_array_size(opts->plan7_ts));
+             gt_array_size(opts->plan7_ts));
   return had_err;
 }
 
@@ -187,7 +187,7 @@ static int gt_fragcmp(const void *frag1, const void *frag2)
 
 void* gt_pdom_per_domain_worker_thread(void *data)
 {
-  pdom_shared_s *shared;
+  PdomSharedMem *shared;
   struct plan7_s *hmm;
   int rtn;
   struct tophit_s *ghit = NULL, *hits = NULL;
@@ -196,7 +196,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
   Fragment *frags;
   GtPdomHit *hit;
 
-  shared = (pdom_shared_s *) data;
+  shared = (PdomSharedMem *) data;
 
   for (;;)
   {
@@ -346,7 +346,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
   }
 }
 
-static pdom_shared_s* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
+static PdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
                                           char *fwd_fr1,char *fwd_fr2,
                                             char *fwd_fr3,
                                           char *rev_fr1,char *rev_fr2,
@@ -355,13 +355,13 @@ static pdom_shared_s* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
                                           GtPdomOptions *opts)
 {
   int rtn, i;
-  pdom_shared_s *shared;
+  PdomSharedMem *shared;
   pthread_attr_t attr;
 
   gt_assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
           && *rev_fr1 && rev_fr2 && rev_fr3 && results && opts);
 
-  shared = gt_calloc(1, sizeof (pdom_shared_s));
+  shared = gt_calloc(1, sizeof (PdomSharedMem));
 
   shared->nof_threads = nof_threads;
   shared->thread = gt_calloc(nof_threads, sizeof (pthread_t));
@@ -402,7 +402,7 @@ static pdom_shared_s* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
   return shared;
 }
 
-static void gt_pdom_free_shared(pdom_shared_s *shared)
+static void gt_pdom_free_shared(PdomSharedMem *shared)
 {
   gt_free(shared->thread);
   gt_free(shared);
@@ -414,7 +414,7 @@ void gt_pdom_find(const char *seq, const char *rev_seq, GtLTRElement *element,
   char *fwd_fr1, *fwd_fr2, *fwd_fr3,
        *rev_fr1, *rev_fr2, *rev_fr3;
   unsigned long seqlen = gt_ltrelement_length(element);
-  pdom_shared_s *shared;
+  PdomSharedMem *shared;
   int i;
 
   gt_assert(seq && rev_seq && element && results && opts);
