@@ -122,12 +122,14 @@ int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
     {
       gt_error_set(err, "Failed to open HMM file '%s'", hmmfile);
       had_err = -1;
+      if (hmmfp) HMMFileClose(hmmfp);
       break;
     }
     if (!had_err && !HMMFileRead(hmmfp, &hmm))
     {
       gt_error_set(err, "Failed to read any HMMs from file '%s'", hmmfile);
       had_err = -1;
+      if (hmmfp) HMMFileClose(hmmfp);
       break;
     }
     if (!had_err && hmm == NULL)
@@ -135,6 +137,7 @@ int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
       had_err = -1;
       gt_error_set(err, "HMM file '%s' corrupt or in incorrect format?",
                    hmmfile);
+      if (hmmfp) HMMFileClose(hmmfp);
       break;
     }
     if (!had_err)
@@ -142,12 +145,14 @@ int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
       P7Logoddsify(hmm, true);
       gt_array_add(opts->plan7_ts, hmm);
     }
-    if (!SetAutocuts(&opts->thresh, hmm))
+    if (!had_err && !SetAutocuts(&opts->thresh, hmm))
     {
-      fprintf(stderr,"HMM %s did not contain the GA, TC, or NC "
-                     "cutoffs you needed",
-                     hmm->name);
-      exit(EXIT_FAILURE);
+      gt_error_set(err, "HMM %s did not contain the GA, TC, or NC "
+                        "cutoffs you needed",
+                   hmm->name);
+      had_err = -1;
+      if (hmmfp) HMMFileClose(hmmfp);
+      break;
     }
     if (hmmfp) HMMFileClose(hmmfp);
   }
