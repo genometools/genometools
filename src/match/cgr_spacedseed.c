@@ -190,15 +190,20 @@ static void spacedseed_delete(Spacedseed *spse)
   gt_free(spse);
 }
 
-static void singlewindowmatchspacedseed(
-                        GT_UNUSED const Genericindex *genericindex,
-                        GT_UNUSED const Uchar *qptr,
-                        GT_UNUSED const Spacedseed *spse)
+static void singlewindowmatchspacedseed(Limdfsresources *limdfsresources,
+                                        const AbstractDfstransformer *dfst,
+                                        const Uchar *qptr,
+                                        const Spacedseed *spse)
 {
-  return;
+  indexbasedspacedseeds(limdfsresources,
+                        qptr,
+                        spse->seedbitvector,
+                        spse->seedweight,
+                        dfst);
 }
 
-static void singlequerymatchspacedseed(const Genericindex *genericindex,
+static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
+                                       const AbstractDfstransformer *dfst,
                                        const Uchar *query,
                                        unsigned long querylen,
                                        const Spacedseed *spse)
@@ -218,7 +223,7 @@ static void singlequerymatchspacedseed(const Genericindex *genericindex,
     if (skipvalue == spse->seedweight)
     {
       offset = spse->seedweight-1;
-      singlewindowmatchspacedseed(genericindex,qptr,spse);
+      singlewindowmatchspacedseed(limdfsresources,dfst,qptr,spse);
       qptr++;
     } else
     {
@@ -312,7 +317,8 @@ int matchspacedseed(bool withesa,
       {
         break;
       }
-      singlequerymatchspacedseed(genericindex,
+      singlequerymatchspacedseed(limdfsresources,
+                                 dfst,
                                  query,
                                  querylen,
                                  spse);

@@ -65,7 +65,7 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
                                  ...)
                                  /* Variable argument list is as follows:
                                     const Uchar *pattern,
-                                    unsigned long seedbitvector,
+                                    Bitstring seedbitvector,
                                     unsigned long seedweight
                                  */
 {

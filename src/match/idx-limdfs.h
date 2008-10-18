@@ -58,6 +58,12 @@ void indexbasedmstats(Limdfsresources *limdfsresources,
                       unsigned long patternlength,
                       const AbstractDfstransformer *adfst);
 
+void indexbasedspacedseeds(Limdfsresources *limdfsresources,
+                           const Uchar *pattern,
+                           Bitstring seedbitvector,
+                           unsigned long seedweight,
+                           const AbstractDfstransformer *adfst);
+
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend);

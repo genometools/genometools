@@ -808,6 +808,20 @@ void indexbasedmstats(Limdfsresources *limdfsresources,
   runlimdfs(limdfsresources,adfst);
 }
 
+void indexbasedspacedseeds(Limdfsresources *limdfsresources,
+                           const Uchar *pattern,
+                           Bitstring seedbitvector,
+                           unsigned long seedweight,
+                           const AbstractDfstransformer *adfst)
+{
+  adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
+                          (unsigned int) limdfsresources->alphasize,
+                          pattern,
+                          seedbitvector,
+                          seedweight);
+  runlimdfs(limdfsresources,adfst);
+}
+
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend)
