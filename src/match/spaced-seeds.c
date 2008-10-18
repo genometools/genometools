@@ -44,7 +44,6 @@ static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long depth,
                                 const void *dfsconstinfo)
 {
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   const Limdfsstate *col = (const Limdfsstate *) aliascol;
 
   printf("at depth %lu (pathmatches=%s)\n",depth,
@@ -129,10 +128,10 @@ static bool setpathmatch(Bitstring seedbitvector,
 }
 
 static void spse_nextLimdfsstate(const void *dfsconstinfo,
-                                DECLAREPTRDFSSTATE(aliasoutcol),
-                                unsigned long currentdepth,
-                                Uchar currentchar,
-                                GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
+                                 DECLAREPTRDFSSTATE(aliasoutcol),
+                                 unsigned long currentdepth,
+                                 Uchar currentchar,
+                                 const DECLAREPTRDFSSTATE(aliasincol))
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
@@ -151,9 +150,9 @@ static void spse_nextLimdfsstate(const void *dfsconstinfo,
 }
 
 static void spse_inplacenextLimdfsstate(const void *dfsconstinfo,
-                                       DECLAREPTRDFSSTATE(aliascol),
-                                       unsigned long currentdepth,
-                                       Uchar currentchar)
+                                        DECLAREPTRDFSSTATE(aliascol),
+                                        unsigned long currentdepth,
+                                        Uchar currentchar)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascol;
