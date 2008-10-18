@@ -29,7 +29,7 @@
 
 typedef struct
 {
-  bool withesa, verbose;
+  bool withesa, docompare, verbose;
   GtStr *str_inputindex;
   GtStrArray *queryfilenames;
   GtOption *refoptionesaindex, *refoptionpckindex;
@@ -93,6 +93,11 @@ static GtOptionParser
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
+  option = gt_option_new_bool("cmp","compare results of offline and online "
+                              "searches",&arguments->docompare,false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -151,6 +156,7 @@ static int gt_cge_spacedseed_runner(int argc,
     }
   }
   if (matchspacedseed(arguments->withesa,
+                      arguments->docompare,
                       arguments->str_inputindex,
                       arguments->queryfilenames,
                       err) != 0)

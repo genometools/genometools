@@ -132,6 +132,70 @@ static Genericindex *genericindex_new(const GtStr *indexname,
   return genericindex;
 }
 
+static void iteroverallwords(const Encodedsequence *encseq,
+                             unsigned long windowsize)
+{
+  unsigned long firstpos, bufsize;
+  Uchar currentchar;
+  Seqpos pos;
+  Encodedsequencescanstate *esr;
+  Seqpos totallength = getencseqtotallength(encseq);
+  Uchar *buffer;
+  unsigned long windowschecked = 0;
+
+  esr = newEncodedsequencescanstate();
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
+  buffer = gt_malloc(sizeof(Uchar) * windowsize);
+  firstpos = bufsize = 0;
+  for (pos=0; pos < totallength; pos++)
+  {
+    currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
+    if (ISSPECIAL(currentchar))
+    {
+      bufsize = firstpos = 0;
+    } else
+    {
+      if (bufsize < windowsize)
+      {
+        buffer[bufsize++] = currentchar;
+      } else
+      {
+        buffer[firstpos++] = currentchar;
+        if (firstpos == windowsize)
+        {
+          firstpos = 0;
+        }
+      }
+    }
+    if (bufsize == windowsize)
+    {
+      unsigned long idx, bufpos, bfbufpos;
+      Uchar cc;
+
+      gt_assert(pos >= (Seqpos) (windowsize-1));
+      gt_assert(firstpos < windowsize);
+      bufpos = firstpos;
+      for (idx= 0; idx<windowsize; idx++)
+      {
+        bfbufpos = (firstpos + idx) % windowsize;
+        /*
+        printf("bufpos=%lu,(firstpos=%lu + idx=%lu) %% windowsize=%lu)=%lu\n",
+                bufpos,firstpos,idx,windowsize,bfbufpos);
+        */
+        gt_assert(bfbufpos == bufpos);
+        cc = buffer[bfbufpos];
+        currentchar = getencodedchar(encseq,pos-(windowsize-1)+idx,Forwardmode);
+        gt_assert(cc == currentchar);
+        bufpos = (bufpos == windowsize-1) ? 0 : (bufpos + 1);
+      }
+      windowschecked++;
+    }
+  }
+  freeEncodedsequencescanstate(&esr);
+  gt_free(buffer);
+  printf("# %lu windows checked\n",windowschecked);
+}
+
 typedef struct
 {
   unsigned long seedweight, numofonepositions;
@@ -245,6 +309,7 @@ static void showmatch(GT_UNUSED void *processinfo,
 }
 
 int matchspacedseed(bool withesa,
+                    bool docompare,
                     const GtStr *str_inputindex,
                     const GtStrArray *queryfilenames,
                     GtError *err)
@@ -260,11 +325,19 @@ int matchspacedseed(bool withesa,
   }
   if (!haserr)
   {
-    genericindex = genericindex_new(str_inputindex,withesa,false,err);
+    genericindex = genericindex_new(str_inputindex,withesa,docompare,err);
     if (genericindex == NULL)
     {
       haserr = true;
     }
+  }
+  if (!haserr && docompare)
+  {
+    gt_assert(genericindex != NULL);
+    gt_assert(genericindex->suffixarray != NULL);
+    gt_assert(genericindex->suffixarray->encseq != NULL);
+    gt_assert(spse != NULL);
+    iteroverallwords(genericindex->suffixarray->encseq,spse->seedweight);
   }
   if (!haserr)
   {

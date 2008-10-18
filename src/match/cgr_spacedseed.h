@@ -24,6 +24,7 @@
 #include "core/error_api.h"
 
 int matchspacedseed(bool withesa,
+                    bool docompare,
                     const GtStr *str_inputindex,
                     const GtStrArray *queryfilenames,
                     GtError *err);
