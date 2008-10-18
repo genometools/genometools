@@ -32,6 +32,7 @@
 typedef struct
 {
   Suffixarray *suffixarray;
+  Seqpos totallength;
   void *packedindex;
   bool withesa;
   const Matchbound **mbtab; /* only relevant for packedindex */
@@ -59,7 +60,6 @@ static Genericindex *genericindex_new(const GtStr *indexname,
                                       GtError *err)
 {
   unsigned int demand;
-  Seqpos totallength;
   bool haserr = false;
   Genericindex *genericindex;
 
@@ -80,7 +80,7 @@ static Genericindex *genericindex_new(const GtStr *indexname,
   genericindex->withesa = withesa;
   genericindex->suffixarray = gt_malloc(sizeof(*genericindex->suffixarray));
   if (mapsuffixarray(genericindex->suffixarray,
-                     &totallength,
+                     &genericindex->totallength,
                      demand,
                      indexname,
                      NULL,
@@ -112,7 +112,8 @@ static Genericindex *genericindex_new(const GtStr *indexname,
   {
     genericindex->packedindex = loadvoidBWTSeqForSA(indexname,
                                                     genericindex->suffixarray,
-                                                    totallength, true, err);
+                                                    genericindex->totallength,
+                                                    true, err);
     if (genericindex->packedindex == NULL)
     {
       haserr = true;
@@ -289,8 +290,7 @@ int matchspacedseed(bool withesa,
                            true,
                            0,
                            getmapsizeAlphabet(genericindex->suffixarray->alpha),
-                           getencseqtotallength(genericindex->suffixarray
-                                                            ->encseq),
+                           genericindex->totallength,
                            (unsigned long) INTWORDSIZE,
                            showmatch,
                            NULL, /* processmatch info */
