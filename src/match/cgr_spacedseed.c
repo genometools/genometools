@@ -26,6 +26,7 @@
 #include "idx-limdfs.h"
 #include "absdfstrans-def.h"
 #include "spaced-seeds.h"
+#include "iter-window.h"
 
 #include "esa-map.pr"
 
@@ -132,24 +133,51 @@ static Genericindex *genericindex_new(const GtStr *indexname,
   return genericindex;
 }
 
+static void checkcurrentwindow(const Encodedsequence *encseq,
+                               const Uchar *buffer,
+                               unsigned long windowsize,
+                               unsigned long firstpos,
+                               Seqpos currentpos)
+{
+  unsigned long idx, bufpos, bfbufpos;
+  Uchar cc1, cc2;
+
+  bufpos = firstpos;
+  for (idx= 0; idx<windowsize; idx++)
+  {
+    bfbufpos = (firstpos + idx) % windowsize;
+    /*
+    printf("bufpos=%lu,(firstpos=%lu + idx=%lu) %% windowsize=%lu)=%lu\n",
+            bufpos,firstpos,idx,windowsize,bfbufpos);
+    */
+    gt_assert(bfbufpos == bufpos);
+    cc1 = buffer[bfbufpos];
+    cc2 = getencodedchar(encseq,currentpos-(windowsize-1)+idx,Forwardmode);
+    gt_assert(cc1 == cc2);
+    bufpos = (bufpos == windowsize-1) ? 0 : (bufpos + 1);
+  }
+}
+
 static void iteroverallwords(const Encodedsequence *encseq,
-                             unsigned long windowsize)
+                             unsigned long windowsize,
+                             Seqpos startpos,
+                             Seqpos endpos)
 {
   unsigned long firstpos, bufsize;
   Uchar currentchar;
-  Seqpos pos;
+  Seqpos currentpos;
   Encodedsequencescanstate *esr;
-  Seqpos totallength = getencseqtotallength(encseq);
   Uchar *buffer;
   unsigned long windowschecked = 0;
 
+  gt_assert(endpos <= getencseqtotallength(encseq));
   esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,startpos);
   buffer = gt_malloc(sizeof(Uchar) * windowsize);
   firstpos = bufsize = 0;
-  for (pos=0; pos < totallength; pos++)
+  for (currentpos=startpos; currentpos < endpos; currentpos++)
   {
-    currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
+    currentchar = sequentialgetencodedchar(encseq,esr,currentpos,Forwardmode);
     if (ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;
@@ -169,30 +197,47 @@ static void iteroverallwords(const Encodedsequence *encseq,
     }
     if (bufsize == windowsize)
     {
-      unsigned long idx, bufpos, bfbufpos;
-      Uchar cc;
-
-      gt_assert(pos >= (Seqpos) (windowsize-1));
-      gt_assert(firstpos < windowsize);
-      bufpos = firstpos;
-      for (idx= 0; idx<windowsize; idx++)
-      {
-        bfbufpos = (firstpos + idx) % windowsize;
-        /*
-        printf("bufpos=%lu,(firstpos=%lu + idx=%lu) %% windowsize=%lu)=%lu\n",
-                bufpos,firstpos,idx,windowsize,bfbufpos);
-        */
-        gt_assert(bfbufpos == bufpos);
-        cc = buffer[bfbufpos];
-        currentchar = getencodedchar(encseq,pos-(windowsize-1)+idx,Forwardmode);
-        gt_assert(cc == currentchar);
-        bufpos = (bufpos == windowsize-1) ? 0 : (bufpos + 1);
-      }
+      checkcurrentwindow(encseq,
+                         buffer,
+                         windowsize,
+                         firstpos,
+                         currentpos);
       windowschecked++;
     }
   }
   freeEncodedsequencescanstate(&esr);
   gt_free(buffer);
+  printf("# %lu windows checked\n",windowschecked);
+}
+
+static void iteroverallwords2(const Encodedsequence *encseq,
+                              unsigned long windowsize,
+                              Seqpos startpos,
+                              Seqpos endpos)
+{
+  Windowiterator *wit;
+  const Uchar *buffer;
+  Seqpos currentpos;
+  unsigned long firstpos, windowschecked = 0;
+
+  wit = windowiterator_new(encseq,windowsize,startpos,endpos);
+  while (true)
+  {
+    buffer = windowiterator_next(&currentpos,&firstpos,wit);
+    if (buffer != NULL)
+    {
+      checkcurrentwindow(encseq,
+                         buffer,
+                         windowsize,
+                         firstpos,
+                         currentpos);
+      windowschecked++;
+    } else
+    {
+      break;
+    }
+  }
+  windowiterator_delete(wit);
   printf("# %lu windows checked\n",windowschecked);
 }
 
@@ -337,7 +382,11 @@ int matchspacedseed(bool withesa,
     gt_assert(genericindex->suffixarray != NULL);
     gt_assert(genericindex->suffixarray->encseq != NULL);
     gt_assert(spse != NULL);
-    iteroverallwords(genericindex->suffixarray->encseq,spse->seedweight);
+    iteroverallwords(genericindex->suffixarray->encseq,spse->seedweight,
+                     0,getencseqtotallength(genericindex->suffixarray->encseq));
+    iteroverallwords2(genericindex->suffixarray->encseq,spse->seedweight,
+                      0,
+                      getencseqtotallength(genericindex->suffixarray->encseq));
   }
   if (!haserr)
   {
