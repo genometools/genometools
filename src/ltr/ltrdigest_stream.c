@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/codon.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -29,6 +30,8 @@
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltr_visitor.h"
+
+#define GT_LTRDIGEST_TAG "LTRdigest"
 
 struct GtLTRdigestStream {
   const GtNodeStream parent_instance;
@@ -48,28 +51,33 @@ struct GtLTRdigestStream {
 #define gt_ltrdigest_stream_cast(GS)\
         gt_node_stream_cast(gt_ltrdigest_stream_class(), GS)
 
+static inline void convert_frame_position(GtRange *rng, int frame)
+{
+  rng->start = (rng->start - 1)*GT_CODON_LENGTH + frame;
+  rng->end   = (rng->end   - 1)*GT_CODON_LENGTH + frame;
+}
+
 #ifdef HAVE_HMMER
-static int pdom_hit_attach_gff3(void *key, void *value, void *data,
-                                GT_UNUSED GtError *err)
+static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
+                                void *data, GT_UNUSED GtError *err)
 {
   unsigned long i;
   GtRange rng;
-  struct plan7_s *model = (struct plan7_s *) key;
   GtLTRdigestStream  *ls = (GtLTRdigestStream *) data;
-  GtPdomHit *hit = (GtPdomHit*) value;
-  GtStrand strand = hit->strand;
+  GtStrand strand = gt_pdom_hit_get_strand(hit);
+  GtArray *best_chain = gt_pdom_hit_get_best_chain(hit);
 
+  /* ??? */
   if (strand != gt_feature_node_get_strand(ls->element.mainnode))
     return 0;
 
-  for (i=0;i<gt_array_size(hit->best_chain);i++)
+  for (i=0;i<gt_array_size(best_chain);i++)
   {
     GtGenomeNode *gf;
-    struct hit_s *singlehit = *(struct hit_s **) gt_array_get(hit->best_chain,
-                                                              i);
+    struct hit_s *singlehit = *(struct hit_s **) gt_array_get(best_chain, i);
     Phase frame = gt_phase_get(singlehit->name[0]);
     rng.start = singlehit->sqfrom; rng.end = singlehit->sqto;
-    gt_pdom_convert_frame_position(&rng, frame);
+    convert_frame_position(&rng, frame);
     gt_ltrelement_offset2pos(&ls->element, &rng, 0,
                              GT_OFFSET_BEGIN_LEFT_LTR,
                              strand);
@@ -143,11 +151,6 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
 static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
                           GtLTRdigestStream *ls, GtError *err)
 {
-  GtPPTResults *ppt_results = NULL;
-  GtPBSResults *pbs_results = NULL;
-#ifdef HAVE_HMMER
-  GtPdomResults pdom_results;
-#endif
   char *rev_seq;
   const char *base_seq = gt_seq_get_orig(seq)+element->leftLTR_5;
   unsigned long seqlen = gt_ltrelement_length(element);
@@ -158,15 +161,11 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   rev_seq[seqlen] = '\0';
   (void) gt_reverse_complement(rev_seq, seqlen, err);
 
-  /* initialize results */
-#ifdef HAVE_HMMER
-  memset(&pdom_results, 0, sizeof (GtPdomResults));
-#endif
-
   /* PPT finding
    * -----------*/
   if (ls->tests_to_run & LTRDIGEST_RUN_PPT)
   {
+    GtPPTResults *ppt_results = NULL;
     ppt_results = gt_ppt_find((const char*) base_seq, (const char*) rev_seq,
                             element, ls->ppt_opts);
     if (gt_ppt_results_get_number_of_hits(ppt_results) > 0)
@@ -181,6 +180,7 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
    * ----------- */
   if (ls->tests_to_run & LTRDIGEST_RUN_PBS)
   {
+    GtPBSResults *pbs_results = NULL;
     pbs_results = gt_pbs_find((const char*) base_seq, (const char*) rev_seq,
                               element, ls->pbs_opts, err);
      if (gt_pbs_results_get_number_of_hits(pbs_results) > 0)
@@ -196,16 +196,15 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
    * ----------------------*/
   if (ls->tests_to_run & LTRDIGEST_RUN_PDOM)
   {
-    pdom_results.domains = gt_hashmap_new(HASH_DIRECT,
-                                          NULL,
-                                          gt_pdom_clear_domain_hit);
-    gt_pdom_find((const char*) base_seq, (const char*) rev_seq,
-                  element, &pdom_results, ls->pdom_opts);
-    if (!pdom_results.empty)
+    GtPdomResults *pdom_results = NULL;
+    pdom_results = gt_pdom_find((const char*) base_seq, (const char*) rev_seq,
+                                element, ls->pdom_opts);
+    if (!gt_pdom_results_empty(pdom_results))
     {
       /* determine most likely strand from protein domain results */
-      if (gt_double_compare(pdom_results.combined_e_value_fwd,
-           pdom_results.combined_e_value_rev) < 0)
+      if (gt_double_compare(
+                     gt_pdom_results_get_combined_evalue_fwd(pdom_results),
+                     gt_pdom_results_get_combined_evalue_rev(pdom_results)) < 0)
       {
         gt_feature_node_set_strand((GtGenomeNode *) ls->element.mainnode,
                                     GT_STRAND_FORWARD);
@@ -215,20 +214,20 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
         gt_feature_node_set_strand((GtGenomeNode *) ls->element.mainnode,
                                     GT_STRAND_REVERSE);
       }
-
-      (void) gt_hashmap_foreach(pdom_results.domains,
-                                pdom_hit_attach_gff3,
-                                ls,
-                                err);
+      (void) gt_pdom_results_foreach_domain_hit(pdom_results,
+                                                pdom_hit_attach_gff3,
+                                                ls,
+                                                err);
     }
-    gt_hashmap_delete(pdom_results.domains);
+    gt_pdom_results_delete(pdom_results);
   }
 #endif
+
   gt_free(rev_seq);
 }
 
 static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
-                             GtError *e)
+                                    GtError *e)
 {
   GtLTRdigestStream *ls;
   int had_err;
@@ -265,6 +264,8 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
     sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
                                                ls->element.mainnode));
+    /* XXX: this may work for LTRharvest, but not everywhere!
+     * fix mapping (like in other tools)! */
     (void) sscanf(sreg,"seq%lu", &seqid);
     seq = gt_bioseq_get_seq(ls->bioseq, seqid);
 
@@ -325,7 +326,7 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
 #endif
   ls->tests_to_run = tests_to_run;
   ls->bioseq = bioseq;
-  ls->ltrdigest_tag = gt_str_new_cstr("LTRdigest");
+  ls->ltrdigest_tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
   ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);
   return gs;
 }

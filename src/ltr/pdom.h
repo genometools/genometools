@@ -36,25 +36,29 @@ typedef struct GtPdomOptions {
                chain_max_gap_length;
 } GtPdomOptions;
 
-typedef struct GtPdomHit {
-  struct tophit_s *hits_fwd, *hits_rev;
-  GtStrand strand;
-  GtArray *best_chain;
-} GtPdomHit;
+typedef struct GtPdomHit GtPdomHit;
+typedef struct GtPdomResults GtPdomResults;
 
-typedef struct GtPdomResults {
-  GtHashmap *domains;
-  double combined_e_value_fwd,
-         combined_e_value_rev;
-  bool empty;
-} GtPdomResults;
+typedef int (*GtPdomIteratorFunc)(struct plan7_s *model, GtPdomHit *hit,
+                                  void *data, GtError*);
 
-int  gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err);
-void gt_pdom_convert_frame_position(GtRange *rng, int frame);
-void gt_pdom_find(const char *seq, const char *rev_seq, GtLTRElement *element,
-                  GtPdomResults *results, GtPdomOptions *opts);
-void gt_pdom_clear_hmms(GtArray*);
-void gt_pdom_clear_domain_hit(void*);
+int            gt_pdom_load_hmm_files(GtPdomOptions*, GtError*);
+GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
+                            GtLTRElement *element, GtPdomOptions *opts);
+
+int            gt_pdom_results_foreach_domain_hit(GtPdomResults*,
+                                                  GtPdomIteratorFunc,
+                                                  void*,
+                                                  GtError*);
+bool           gt_pdom_results_empty(GtPdomResults*);
+double         gt_pdom_results_get_combined_evalue_fwd(GtPdomResults*);
+double         gt_pdom_results_get_combined_evalue_rev(GtPdomResults*);
+void           gt_pdom_results_delete(GtPdomResults*);
+
+GtArray*       gt_pdom_hit_get_best_chain(const GtPdomHit*);
+GtStrand       gt_pdom_hit_get_strand(const GtPdomHit*);
+
+void           gt_pdom_clear_hmms(GtArray*);
 
 #endif
 #endif

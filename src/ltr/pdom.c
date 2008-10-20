@@ -21,11 +21,11 @@
 #include <ctype.h>
 #include <float.h>
 #include <pthread.h>
-#include "core/codon.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/translate.h"
+#include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/globalchaining.h"
 #include "extended/reverse.h"
@@ -36,7 +36,28 @@
 #include "squid.h"
 #include "funcs.h"
 
-typedef struct PdomSharedMem {
+/* number of tophit_s structs to preallocate in HMMER back-end */
+#define MAX_TOPHITS 50
+
+struct GtPdomHit {
+  struct tophit_s *hits_fwd, *hits_rev;
+  GtStrand strand;
+  GtArray *best_chain;
+};
+
+struct GtPdomResults {
+  GtHashmap *domains;
+  double combined_e_value_fwd,
+         combined_e_value_rev;
+  bool empty;
+};
+
+typedef struct GtPdomDomainTraverseInfo {
+  GtPdomIteratorFunc func;
+  void *data;
+} GtPdomDomainTraverseInfo;
+
+typedef struct GtPdomSharedMem {
   pthread_t *thread;
   int nof_threads;
   unsigned long next_hmm;
@@ -46,22 +67,119 @@ typedef struct PdomSharedMem {
   GtPdomResults *results;
   GtPdomOptions *opts;
   pthread_mutex_t in_lock, out_lock;
-} PdomSharedMem;
+} GtPdomSharedMem;
+
+GtPdomHit* gt_pdom_hit_new(void)
+{
+  GtPdomHit *hit;
+  hit = gt_calloc(1, sizeof (GtPdomHit));
+  hit->hits_fwd   = AllocTophits(MAX_TOPHITS);
+  hit->hits_rev   = AllocTophits(MAX_TOPHITS);
+  hit->strand     = GT_STRAND_UNKNOWN;
+  hit->best_chain = gt_array_new(sizeof (struct hit_s*));
+  return hit;
+}
+
+GtStrand gt_pdom_hit_get_strand(const GtPdomHit *h)
+{
+  gt_assert(h);
+  return h->strand;
+}
+
+GtArray* gt_pdom_hit_get_best_chain(const GtPdomHit *h)
+{
+  gt_assert(h);
+  return h->best_chain;
+}
+
+void gt_pdom_hit_delete(void *value)
+{
+  GtPdomHit *hit;
+  if (!value) return;
+  hit = (GtPdomHit*) value;
+  if (hit->hits_fwd)
+    FreeTophits(hit->hits_fwd);
+  if (hit->hits_rev)
+    FreeTophits(hit->hits_rev);
+  if (hit->best_chain)
+    gt_array_delete(hit->best_chain);
+  gt_free(hit);
+}
+
+static GtPdomResults* gt_pdom_results_new(void)
+{
+  GtPdomResults *res;
+  res = gt_calloc(1, sizeof (GtPdomResults));
+  res->domains = gt_hashmap_new(HASH_DIRECT,
+                                NULL,
+                                gt_pdom_hit_delete);
+  res->empty = TRUE;
+  res->combined_e_value_fwd = res->combined_e_value_rev = 0.0;
+  return res;
+}
+
+bool gt_pdom_results_empty(GtPdomResults *res)
+{
+  gt_assert(res);
+  return res->empty;
+}
+
+double gt_pdom_results_get_combined_evalue_fwd(GtPdomResults *result)
+{
+  gt_assert(result);
+  return result->combined_e_value_fwd;
+}
+
+double gt_pdom_results_get_combined_evalue_rev(GtPdomResults *result)
+{
+  gt_assert(result);
+  return result->combined_e_value_rev;
+}
+
+void gt_pdom_results_delete(GtPdomResults *res)
+{
+  if (!res) return;
+  gt_hashmap_delete(res->domains);
+  gt_free(res);
+}
+
+static int visit_domain(void *key, void *value, void *data,
+                        GT_UNUSED GtError *err)
+{
+  struct plan7_s *model = (struct plan7_s *) key;
+  GtPdomHit *hit = (GtPdomHit*) value;
+  GtPdomDomainTraverseInfo *info = (GtPdomDomainTraverseInfo*) data;
+  return info->func(model, hit, info->data, err);
+}
+
+int gt_pdom_results_foreach_domain_hit(GtPdomResults *results,
+                                       GtPdomIteratorFunc func,
+                                       void *data,
+                                       GtError *err)
+{
+  GtPdomDomainTraverseInfo info;
+  info.func = func;
+  info.data = data;
+  return gt_hashmap_foreach(results->domains,
+                            visit_domain,
+                            &info,
+                            err);
+}
 
 void gt_hmmer_search(struct plan7_s *hmm,
-                  char *seq,
-                  unsigned long seqlen,
-                  char *seqdesc,
-                  struct threshold_s *thresh,
-                  struct tophit_s *ghit,
-                  struct tophit_s *dhit,
-                  pthread_mutex_t *lock)
+                     char *seq,
+                     unsigned long seqlen,
+                     char *seqdesc,
+                     struct threshold_s *thresh,
+                     struct tophit_s *ghit,
+                     struct tophit_s *dhit,
+                     pthread_mutex_t *lock)
 {
   struct dpmatrix_s *mx;
   struct p7trace_s *tr;
   unsigned char *dsq;
   float sc;
-  int rtn;
+  int retval;
   double pvalue, evalue;
 
   mx = CreatePlan7Matrix(1, hmm->M, 25, 0);
@@ -75,9 +193,9 @@ void gt_hmmer_search(struct plan7_s *hmm,
 
   sc -= TraceScoreCorrection(hmm, tr, dsq);
 
-  if ((rtn = pthread_mutex_lock(lock)) != 0)
+  if ((retval = pthread_mutex_lock(lock)) != 0)
   {
-    fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(rtn));
+    fprintf(stderr, "pthread_mutex_lock failure: %s\n", strerror(retval));
     exit(EXIT_FAILURE);
   }
   pvalue = PValue(hmm, sc);
@@ -90,20 +208,14 @@ void gt_hmmer_search(struct plan7_s *hmm,
                                    seqdesc, NULL, NULL,
                                    false, sc, true, thresh, FALSE);
   }
-  if ((rtn = pthread_mutex_unlock(lock)) != 0)
+  if ((retval = pthread_mutex_unlock(lock)) != 0)
   {
-    fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+    fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(retval));
     exit(EXIT_FAILURE);
   }
   P7FreeTrace(tr);
   free(dsq);
   FreePlan7Matrix(mx);
-}
-
-void gt_pdom_convert_frame_position(GtRange *rng, int frame)
-{
-  rng->start = (rng->start - 1)*GT_CODON_LENGTH + frame;
-  rng->end   = (rng->end   - 1)*GT_CODON_LENGTH + frame;
 }
 
 int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
@@ -192,31 +304,31 @@ static int gt_fragcmp(const void *frag1, const void *frag2)
 
 void* gt_pdom_per_domain_worker_thread(void *data)
 {
-  PdomSharedMem *shared;
+  GtPdomSharedMem *shared;
   struct plan7_s *hmm;
-  int rtn;
+  int retval;
   struct tophit_s *ghit = NULL, *hits = NULL;
   bool best_fwd = TRUE;
   unsigned long i;
   Fragment *frags;
   GtPdomHit *hit;
 
-  shared = (PdomSharedMem *) data;
+  shared = (GtPdomSharedMem *) data;
 
   for (;;)
   {
     /* Lock input */
-    if ((rtn = pthread_mutex_lock(&shared->in_lock)) != 0)
+    if ((retval = pthread_mutex_lock(&shared->in_lock)) != 0)
     {
-      fprintf(stderr, "Failed to lock: %s\n", strerror(rtn));
+      fprintf(stderr, "Failed to lock: %s\n", strerror(retval));
       exit(EXIT_FAILURE);
     }
     /* Have all HMMs been distributed? If so, we are done here. */
     if (shared->next_hmm == gt_array_size(shared->opts->plan7_ts))
     {
-      if ((rtn = pthread_mutex_unlock(&shared->in_lock)) != 0)
+      if ((retval = pthread_mutex_unlock(&shared->in_lock)) != 0)
       {
-        fprintf(stderr, "Failed to unlock: %s\n", strerror(rtn));
+        fprintf(stderr, "Failed to unlock: %s\n", strerror(retval));
         exit(EXIT_FAILURE);
       }
       pthread_exit(NULL);
@@ -228,30 +340,30 @@ void* gt_pdom_per_domain_worker_thread(void *data)
     shared->next_hmm++;
 
     /* work claimed, release input */
-    if ((rtn = pthread_mutex_unlock(&shared->in_lock)) != 0)
+    if ((retval = pthread_mutex_unlock(&shared->in_lock)) != 0)
     {
-      fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(rtn));
+      fprintf(stderr, "pthread_mutex_unlock failure: %s\n", strerror(retval));
       exit(EXIT_FAILURE);
     }
 
     hit = gt_malloc(sizeof (GtPdomHit));
-    ghit = AllocTophits(50);
-    hit->hits_fwd = AllocTophits(50);
-    hit->hits_rev = AllocTophits(50);
+    ghit = AllocTophits(MAX_TOPHITS);
+    hit->hits_fwd = AllocTophits(MAX_TOPHITS);
+    hit->hits_rev = AllocTophits(MAX_TOPHITS);
     hit->best_chain = gt_array_new(sizeof (struct hit_s*));
 
     gt_hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
-                 &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
+                 &shared->opts->thresh, ghit, hit->hits_fwd, &shared->out_lock);
     gt_hmmer_search(hmm,shared->fwd_fr2,strlen(shared->fwd_fr2),"1+",
-                 &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
+                 &shared->opts->thresh, ghit, hit->hits_fwd, &shared->out_lock);
     gt_hmmer_search(hmm,shared->fwd_fr3,strlen(shared->fwd_fr3),"2+",
-                 &shared->opts->thresh,ghit, hit->hits_fwd, &shared->out_lock);
+                 &shared->opts->thresh, ghit, hit->hits_fwd, &shared->out_lock);
     gt_hmmer_search(hmm,shared->rev_fr1,strlen(shared->rev_fr1),"0-",
-                 &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
+                 &shared->opts->thresh, ghit, hit->hits_rev, &shared->out_lock);
     gt_hmmer_search(hmm,shared->rev_fr2,strlen(shared->rev_fr2),"1-",
-                 &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
+                 &shared->opts->thresh, ghit, hit->hits_rev, &shared->out_lock);
     gt_hmmer_search(hmm,shared->rev_fr3,strlen(shared->rev_fr3),"2-",
-                 &shared->opts->thresh,ghit, hit->hits_rev, &shared->out_lock);
+                 &shared->opts->thresh, ghit, hit->hits_rev, &shared->out_lock);
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
@@ -316,9 +428,9 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       }
 
       /* Lock results, we want to write to the result hashtable */
-      if ((rtn = pthread_mutex_lock(&(shared->out_lock))) != 0)
+      if ((retval = pthread_mutex_lock(&(shared->out_lock))) != 0)
       {
-        fprintf(stderr, "Failed to lock: %s\n", strerror(rtn));
+        fprintf(stderr, "Failed to lock: %s\n", strerror(retval));
         exit(EXIT_FAILURE);
       }
 
@@ -338,20 +450,20 @@ void* gt_pdom_per_domain_worker_thread(void *data)
        }
 
       /* unlock results */
-      if ((rtn = pthread_mutex_unlock(&(shared->out_lock))) != 0)
+      if ((retval = pthread_mutex_unlock(&(shared->out_lock))) != 0)
       {
-        fprintf(stderr, "Failed to unlock: %s\n", strerror(rtn));
+        fprintf(stderr, "Failed to unlock: %s\n", strerror(retval));
         exit(EXIT_FAILURE);
       }
     }
     else
-      gt_pdom_clear_domain_hit(hit);
+      gt_pdom_hit_delete(hit);
 
     FreeTophits(ghit);
   }
 }
 
-static PdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
+static GtPdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
                                           char *fwd_fr1,char *fwd_fr2,
                                             char *fwd_fr3,
                                           char *rev_fr1,char *rev_fr2,
@@ -359,14 +471,14 @@ static PdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
                                           GtPdomResults *results,
                                           GtPdomOptions *opts)
 {
-  int rtn, i;
-  PdomSharedMem *shared;
+  int retval, i;
+  GtPdomSharedMem *shared;
   pthread_attr_t attr;
 
   gt_assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
           && *rev_fr1 && rev_fr2 && rev_fr3 && results && opts);
 
-  shared = gt_calloc(1, sizeof (PdomSharedMem));
+  shared = gt_calloc(1, sizeof (GtPdomSharedMem));
 
   shared->nof_threads = nof_threads;
   shared->thread = gt_calloc(nof_threads, sizeof (pthread_t));
@@ -381,14 +493,14 @@ static PdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
   shared->results = results;
   shared->opts = opts;
 
-  if ((rtn = pthread_mutex_init(&shared->in_lock, NULL)) != 0)
+  if ((retval = pthread_mutex_init(&shared->in_lock, NULL)) != 0)
   {
-    fprintf(stderr, "Could not initialize lock! %s\n", strerror(rtn));
+    fprintf(stderr, "Could not initialize lock! %s\n", strerror(retval));
     exit(EXIT_FAILURE);
   }
-  if ((rtn = pthread_mutex_init(&shared->out_lock, NULL)) != 0)
+  if ((retval = pthread_mutex_init(&shared->out_lock, NULL)) != 0)
   {
-    fprintf(stderr, "Could not initialize lock! %s\n", strerror(rtn));
+    fprintf(stderr, "Could not initialize lock! %s\n", strerror(retval));
     exit(EXIT_FAILURE);
   }
 
@@ -396,10 +508,10 @@ static PdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
 
   for (i = 0; i < nof_threads; i++)
   {
-    if ((rtn = pthread_create(&(shared->thread[i]), &attr,
+    if ((retval = pthread_create(&(shared->thread[i]), &attr,
            gt_pdom_per_domain_worker_thread, (void *) shared)) != 0)
     {
-      fprintf(stderr,"Failed to create thread %d, return code %d\n", i, rtn);
+      fprintf(stderr,"Failed to create thread %d, return code %d\n", i, retval);
       exit(EXIT_FAILURE);
     }
   }
@@ -407,29 +519,29 @@ static PdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
   return shared;
 }
 
-static void gt_pdom_free_shared(PdomSharedMem *shared)
+static void gt_pdom_free_shared(GtPdomSharedMem *shared)
 {
   gt_free(shared->thread);
   gt_free(shared);
 }
 
-void gt_pdom_find(const char *seq, const char *rev_seq, GtLTRElement *element,
-                  GtPdomResults *results, GtPdomOptions *opts)
+GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
+                             GtLTRElement *element, GtPdomOptions *opts)
 {
   char *fwd_fr1, *fwd_fr2, *fwd_fr3,
        *rev_fr1, *rev_fr2, *rev_fr3;
   unsigned long seqlen = gt_ltrelement_length(element);
-  PdomSharedMem *shared;
+  GtPdomSharedMem *shared = NULL;
+  GtPdomResults *results = NULL;
   int i;
 
-  gt_assert(seq && rev_seq && element && results && opts);
+  gt_assert(seq && rev_seq && element && opts);
 
-  results->empty = TRUE;
-  results->combined_e_value_fwd = results->combined_e_value_rev = 0.0;
+  results = gt_pdom_results_new();
 
   /* create translations */
-  gt_translate_all_frames(&fwd_fr1,&fwd_fr2,&fwd_fr3,    seq,seqlen);
-  gt_translate_all_frames(&rev_fr1,&rev_fr2,&rev_fr3,rev_seq,seqlen);
+  gt_translate_all_frames(&fwd_fr1, &fwd_fr2, &fwd_fr3,     seq, seqlen);
+  gt_translate_all_frames(&rev_fr1, &rev_fr2, &rev_fr3, rev_seq, seqlen);
 
   /* start worker threads */
   shared = gt_pdom_run_threads(opts->plan7_ts, opts->nof_threads,
@@ -450,22 +562,10 @@ void gt_pdom_find(const char *seq, const char *rev_seq, GtLTRElement *element,
   gt_pdom_free_shared(shared);
 
   SqdClean();
-  gt_free(fwd_fr1);gt_free(fwd_fr2);gt_free(fwd_fr3);
-  gt_free(rev_fr1);gt_free(rev_fr2);gt_free(rev_fr3);
-}
+  gt_free(fwd_fr1); gt_free(fwd_fr2); gt_free(fwd_fr3);
+  gt_free(rev_fr1); gt_free(rev_fr2); gt_free(rev_fr3);
 
-void gt_pdom_clear_domain_hit(void *value)
-{
-  GtPdomHit *hit;
-  if (!value) return;
-  hit = (GtPdomHit*) value;
-  if (hit->hits_fwd)
-    FreeTophits(hit->hits_fwd);
-  if (hit->hits_rev)
-    FreeTophits(hit->hits_rev);
-  if (hit->best_chain)
-    gt_array_delete(hit->best_chain);
-  gt_free(hit);
+  return results;
 }
 
 void gt_pdom_clear_hmms(GtArray *hmms)
