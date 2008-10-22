@@ -155,7 +155,7 @@ static GtScoreFunction* gt_dna_scorefunc_new(GtAlpha *a, int match,
   {
     for (n=0;n<5;n++)
     {
-      gt_score_matrix_set_score(sm, m,n,(n==m ? match : mismatch));
+      gt_score_matrix_set_score(sm, m, n, (n==m ? match : mismatch));
     }
   }
   return sf;

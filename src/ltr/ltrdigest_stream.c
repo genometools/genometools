@@ -67,7 +67,8 @@ static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
   GtStrand strand = gt_pdom_hit_get_strand(hit);
   GtArray *best_chain = gt_pdom_hit_get_best_chain(hit);
 
-  /* ??? */
+  /* do not use the hits on the non-predicted strand
+      -- maybe identify nested elements ? */
   if (strand != gt_feature_node_get_strand(ls->element.mainnode))
     return 0;
 
@@ -161,6 +162,39 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   rev_seq[seqlen] = '\0';
   (void) gt_reverse_complement(rev_seq, seqlen, err);
 
+#ifdef HAVE_HMMER
+  /* Protein domain finding
+   * ----------------------*/
+  if (ls->tests_to_run & LTRDIGEST_RUN_PDOM)
+  {
+    GtPdomResults *pdom_results = NULL;
+    pdom_results = gt_pdom_find((const char*) base_seq, (const char*) rev_seq,
+                                element, ls->pdom_opts);
+    if (!gt_pdom_results_empty(pdom_results))
+    {
+      /* determine most likely strand from protein domain results */
+      if (gt_double_compare(
+                     gt_pdom_results_get_combined_evalue_fwd(pdom_results),
+                     gt_pdom_results_get_combined_evalue_rev(pdom_results)) < 0)
+      {
+        gt_feature_node_set_strand((GtGenomeNode*) ls->element.mainnode,
+                                    GT_STRAND_FORWARD);
+      }
+      else
+      {
+        gt_feature_node_set_strand((GtGenomeNode*) ls->element.mainnode,
+                                    GT_STRAND_REVERSE);
+      }
+      /* create nodes for protein match annotations */
+      (void) gt_pdom_results_foreach_domain_hit(pdom_results,
+                                                pdom_hit_attach_gff3,
+                                                ls,
+                                                err);
+    }
+    gt_pdom_results_delete(pdom_results);
+  }
+#endif
+
   /* PPT finding
    * -----------*/
   if (ls->tests_to_run & LTRDIGEST_RUN_PPT)
@@ -191,37 +225,7 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
      gt_pbs_results_delete(pbs_results);
   }
 
-#ifdef HAVE_HMMER
-  /* Protein domain finding
-   * ----------------------*/
-  if (ls->tests_to_run & LTRDIGEST_RUN_PDOM)
-  {
-    GtPdomResults *pdom_results = NULL;
-    pdom_results = gt_pdom_find((const char*) base_seq, (const char*) rev_seq,
-                                element, ls->pdom_opts);
-    if (!gt_pdom_results_empty(pdom_results))
-    {
-      /* determine most likely strand from protein domain results */
-      if (gt_double_compare(
-                     gt_pdom_results_get_combined_evalue_fwd(pdom_results),
-                     gt_pdom_results_get_combined_evalue_rev(pdom_results)) < 0)
-      {
-        gt_feature_node_set_strand((GtGenomeNode *) ls->element.mainnode,
-                                    GT_STRAND_FORWARD);
-      }
-      else
-      {
-        gt_feature_node_set_strand((GtGenomeNode *) ls->element.mainnode,
-                                    GT_STRAND_REVERSE);
-      }
-      (void) gt_pdom_results_foreach_domain_hit(pdom_results,
-                                                pdom_hit_attach_gff3,
-                                                ls,
-                                                err);
-    }
-    gt_pdom_results_delete(pdom_results);
-  }
-#endif
+
 
   gt_free(rev_seq);
 }
