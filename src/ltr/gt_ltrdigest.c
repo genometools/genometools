@@ -26,6 +26,8 @@
 #include "core/unused_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream.h"
+#include "extended/gtdatahelp.h"
+#include "extended/seqid2file.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
@@ -37,8 +39,10 @@ typedef struct GtLTRdigestOptions {
 #ifdef HAVE_HMMER
   GtPdomOptions pdom_opts;
 #endif
-  GtStr *trna_lib;
-  GtStr *prefix;
+  GtStr *trna_lib,
+        *prefix,
+        *regionmapping,
+        *seqfile;
   bool verbose;
   GtOutputFileInfo *ofi;
   GtGenFile *outfp;
@@ -54,6 +58,8 @@ static void* gt_ltrdigest_arguments_new(void)
 #endif
   arguments->trna_lib = gt_str_new();
   arguments->prefix = gt_str_new();
+  arguments->seqfile = gt_str_new();
+  arguments->regionmapping = gt_str_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -65,6 +71,8 @@ static void gt_ltrdigest_arguments_delete(void *tool_arguments)
 #ifdef HAVE_HMMER
   gt_str_array_delete(arguments->pdom_opts.hmm_files);
 #endif
+  gt_str_delete(arguments->regionmapping);
+  gt_str_delete(arguments->seqfile);
   gt_str_delete(arguments->trna_lib);
   gt_str_delete(arguments->prefix);
   gt_genfile_close(arguments->outfp);
@@ -88,7 +96,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] gff3_file sequence_file",
+  op = gt_option_parser_new("[option ...] [gff3_file]",
                          "Discovers and annotates sequence features in LTR "
                          "retrotransposon candidates.");
 
@@ -244,15 +252,20 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                       20);
   gt_option_parser_add_option(op, o);
 
+  /* Add -seqfile and -regionmapping arguments for consistency */
+  gt_seqid2file_options(op, arguments->seqfile, arguments->regionmapping);
+
   /* verbosity */
   o = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, o);
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
-  gt_option_parser_set_mailaddress(op, "<steinbiss@stud.zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op, "<steinbiss@zbh.uni-hamburg.de>");
 
-  gt_option_parser_set_min_max_args(op, 2, 2);
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+  gt_option_parser_refer_to_manual(op);
+  gt_option_parser_set_min_max_args(op, 0, 1);
 
   return op;
 }
@@ -289,6 +302,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                *tab_out_stream   = NULL,
                *last_stream      = NULL;
   GtGenomeNode *gn;
+  GtRegionMapping *regionmapping;
 
   int had_err      = 0,
       tests_to_run = 0,
@@ -306,9 +320,11 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   arguments->pdom_opts.thresh.globE   = arguments->pdom_opts.evalue_cutoff;
 #endif
 
-  /* Open sequence file */
-  GtBioseq *bioseq = gt_bioseq_new(argv[arg+1], err);
-  if (gt_error_is_set(err))
+  /* create region mapping */
+  regionmapping = gt_seqid2file_regionmapping_new(arguments->seqfile,
+                                                  arguments->regionmapping,
+                                                  err);
+  if (!regionmapping)
     had_err = -1;
 
   /* Always search for PPT. */
@@ -343,7 +359,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 
     last_stream = ltrdigest_stream = gt_ltrdigest_stream_new(last_stream,
                                                   tests_to_run,
-                                                  bioseq,
+                                                  regionmapping,
                                                   &arguments->pbs_opts,
                                                   &arguments->ppt_opts
 #ifdef HAVE_HMMER
@@ -356,7 +372,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     {
       last_stream = tab_out_stream = gt_ltr_fileout_stream_new(last_stream,
                                               tests_to_run,
-                                              bioseq,
+                                              regionmapping,
                                               gt_str_get(arguments->prefix),
                                               &arguments->ppt_opts,
                                               &arguments->pbs_opts,
@@ -393,7 +409,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
      gt_array_delete(arguments->pdom_opts.plan7_ts);
 #endif
 
-  gt_bioseq_delete(bioseq);
+  gt_region_mapping_delete(regionmapping);
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);
 
   return had_err;

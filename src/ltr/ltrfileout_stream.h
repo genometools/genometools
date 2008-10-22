@@ -20,6 +20,7 @@
 
 #include "core/bioseq.h"
 #include "extended/node_stream_api.h"
+#include "extended/region_mapping.h"
 #include "ltr/ltrdigest_def.h"
 
 /* implements the ``genome_stream'' interface */
@@ -29,7 +30,7 @@ const GtNodeStreamClass* gt_ltr_fileout_stream_class(void);
 
 GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         int tests_to_run,
-                                        GtBioseq *bioseq,
+                                        GtRegionMapping *regionmapping,
                                         char *file_prefix,
                                         GtPPTOptions *ppt_opts,
                                         GtPBSOptions *pbs_opts,

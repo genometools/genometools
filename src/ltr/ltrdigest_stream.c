@@ -36,7 +36,7 @@
 struct GtLTRdigestStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GtBioseq *bioseq;
+  GtRegionMapping *regionmapping;
   GtPBSOptions *pbs_opts;
   GtPPTOptions *ppt_opts;
 #ifdef HAVE_HMMER
@@ -149,11 +149,11 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
 }
 
-static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
+static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
                           GtLTRdigestStream *ls, GtError *err)
 {
   char *rev_seq;
-  const char *base_seq = gt_seq_get_orig(seq)+element->leftLTR_5;
+  const char *base_seq = rawseq+element->leftLTR_5;
   unsigned long seqlen = gt_ltrelement_length(element);
 
   /* create reverse strand sequence */
@@ -161,6 +161,36 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   memcpy(rev_seq, base_seq, sizeof (char) * seqlen);
   rev_seq[seqlen] = '\0';
   (void) gt_reverse_complement(rev_seq, seqlen, err);
+
+  /* PPT finding
+   * -----------*/
+  if (ls->tests_to_run & LTRDIGEST_RUN_PPT)
+  {
+    GtPPTResults *ppt_results = NULL;
+    ppt_results = gt_ppt_find((const char*) base_seq, (const char*) rev_seq,
+                            element, ls->ppt_opts);
+    if (gt_ppt_results_get_number_of_hits(ppt_results) > 0)
+    {
+      ppt_attach_results_to_gff3(ppt_results, element,
+                                 ls->ltrdigest_tag);
+    }
+    gt_ppt_results_delete(ppt_results);
+  }
+
+  /* PBS finding
+   * ----------- */
+  if (ls->tests_to_run & LTRDIGEST_RUN_PBS)
+  {
+    GtPBSResults *pbs_results = NULL;
+    pbs_results = gt_pbs_find((const char*) base_seq, (const char*) rev_seq,
+                              element, ls->pbs_opts, err);
+     if (gt_pbs_results_get_number_of_hits(pbs_results) > 0)
+     {
+      pbs_attach_results_to_gff3(pbs_results, element,
+                                 ls->ltrdigest_tag);
+     }
+     gt_pbs_results_delete(pbs_results);
+  }
 
 #ifdef HAVE_HMMER
   /* Protein domain finding
@@ -195,38 +225,6 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   }
 #endif
 
-  /* PPT finding
-   * -----------*/
-  if (ls->tests_to_run & LTRDIGEST_RUN_PPT)
-  {
-    GtPPTResults *ppt_results = NULL;
-    ppt_results = gt_ppt_find((const char*) base_seq, (const char*) rev_seq,
-                            element, ls->ppt_opts);
-    if (gt_ppt_results_get_number_of_hits(ppt_results) > 0)
-    {
-      ppt_attach_results_to_gff3(ppt_results, element,
-                                 ls->ltrdigest_tag);
-    }
-    gt_ppt_results_delete(ppt_results);
-  }
-
-  /* PBS finding
-   * ----------- */
-  if (ls->tests_to_run & LTRDIGEST_RUN_PBS)
-  {
-    GtPBSResults *pbs_results = NULL;
-    pbs_results = gt_pbs_find((const char*) base_seq, (const char*) rev_seq,
-                              element, ls->pbs_opts, err);
-     if (gt_pbs_results_get_number_of_hits(pbs_results) > 0)
-     {
-      pbs_attach_results_to_gff3(pbs_results, element,
-                                 ls->ltrdigest_tag);
-     }
-     gt_pbs_results_delete(pbs_results);
-  }
-
-
-
   gt_free(rev_seq);
 }
 
@@ -249,6 +247,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     GtGenomeNodeIterator *gni;
     GtGenomeNode *mygn;
 
+   /* only process feature nodes */
    if (!gt_feature_node_try_cast(*gn))
      return 0;
 
@@ -261,31 +260,43 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
   if (ls->element.mainnode)
   {
-    unsigned long seqid;
-    const char *sreg;
-    GtSeq *seq;
+    unsigned long seqlen;
+    const char *raw_seq;
+    GtStr *seqid;
     GtRange elemrng;
 
-    sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
-                                               ls->element.mainnode));
-    /* XXX: this may work for LTRharvest, but not everywhere!
-     * fix mapping (like in other tools)! */
-    (void) sscanf(sreg,"seq%lu", &seqid);
-    seq = gt_bioseq_get_seq(ls->bioseq, seqid);
-
-    elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
-    if (elemrng.end <= gt_seq_length(seq))
-      /* run LTRdigest core routine */
-      run_ltrdigest(&ls->element, seq, ls, e);
-    else
+    /* get sequence from file according to mapping */
+    seqid = gt_genome_node_get_seqid((GtGenomeNode*) ls->element.mainnode);
+    had_err = gt_region_mapping_get_raw_sequence_length(ls->regionmapping,
+                                                        &seqlen,
+                                                        seqid,
+                                                        e);
+    if (!had_err)
     {
-      /* do not process elements whose positions exceed sequence boundaries
-       (obviously annotation and sequence do not match!) */
-      gt_error_set(e, "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
-        gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-        elemrng.end, gt_seq_length(seq));
-      had_err = -1;
+      gt_region_mapping_get_raw_sequence(ls->regionmapping,
+                                         &raw_seq,
+                                         seqid,
+                                         e);
+
+      elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
+      if (elemrng.end <= seqlen)
+        /* run LTRdigest core routine */
+        run_ltrdigest(&ls->element, raw_seq, ls, e);
+      else
+      {
+        /* do not process elements whose positions exceed sequence boundaries
+           (obviously annotation and sequence do not match!) */
+        gt_error_set(e, "Element '%s' exceeds sequence boundaries! "
+                        "(endposition %lu > sequence length %lu)",
+          gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
+          elemrng.end, seqlen);
+        had_err = -1;
+      }
     }
+  }
+  if (had_err) {
+    gt_genome_node_rec_delete(*gn);
+    *gn = NULL;
   }
   return had_err;
 }
@@ -310,7 +321,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void)
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      GtBioseq *bioseq,
+                                      GtRegionMapping *regionmapping,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts
 #ifdef HAVE_HMMER
@@ -329,7 +340,7 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
   ls->pdom_opts = pdom_opts;
 #endif
   ls->tests_to_run = tests_to_run;
-  ls->bioseq = bioseq;
+  ls->regionmapping = regionmapping;
   ls->ltrdigest_tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
   ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);
   return gs;

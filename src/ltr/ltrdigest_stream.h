@@ -20,6 +20,7 @@
 
 #include "core/bioseq.h"
 #include "extended/node_stream_api.h"
+#include "extended/region_mapping.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
 #ifdef HAVE_HMMER
@@ -33,7 +34,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void);
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      GtBioseq *bioseq,
+                                      GtRegionMapping *regionmapping,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts
 #ifdef HAVE_HMMER

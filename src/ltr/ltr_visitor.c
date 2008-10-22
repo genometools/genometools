@@ -34,7 +34,7 @@ struct GtLTRVisitor {
         gt_node_visitor_cast(gt_ltr_visitor_class(), GV)
 
 static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
-                                    GT_UNUSED GtError *err)
+                                    GtError *err)
 {
   GtLTRVisitor *lv;
   GtRange node_range;
