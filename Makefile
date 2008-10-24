@@ -262,7 +262,6 @@ ifneq ($(cairo),no)
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo \
                  -I/opt/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
-  STEST_FLAGS += -libannotationsketch
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
@@ -270,6 +269,7 @@ ifneq ($(cairo),no)
 else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
+  STEST_FLAGS += -nocairo
 endif
 
 # the GenomeTools library
