@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef OPTIONARGMODE_H
-#define OPTIONARGMODE_H
+#ifndef GT_TALLYMER_H
+#define GT_TALLYMER_H
 
-typedef struct
-{
-  const char *name;
-  unsigned int bitmask;
-} Optionargmodedesc;
+#include "core/tool.h"
 
-int optionaddbitmask(const Optionargmodedesc *modedesc,
-                     size_t numberofentries,
-                     unsigned int *mode,
-                     const char *optname,
-                     const char *optionargument,
-                     GtError *err);
+GtTool* gt_tallymer(void);
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,24 +15,30 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef REPEATS_H
-#define REPEATS_H
+#include "core/symboldef.h"
+#include "readmode-def.h"
 
-#include "core/unused_api.h"
-#include "match/sarr-def.h"
-#include "repeattypes.h"
-#include "ltrharvest-opt.h"
+void inplace_reversecomplement(Uchar *seq,unsigned long len)
+{
+  Uchar tmp, *frontptr, *backptr;
 
-void showrepeats (RepeatInfo * repeatinfo,
-                  unsigned long seedminlength);
+  for (frontptr = seq, backptr = seq + len - 1;
+       frontptr < backptr; frontptr++, backptr--)
+  {
+    tmp = *frontptr;
+    *frontptr = COMPLEMENTBASE(*backptr);
+    *backptr = COMPLEMENTBASE(tmp);
+  }
+}
 
-int simpleexactselfmatchstore(LTRharvestoptions *lo, Seqpos len,
-                              Seqpos pos1, Seqpos pos2);
+void copy_reversecomplement(Uchar *dest,const Uchar *src,unsigned long len)
+{
+  Uchar *destptr;
+  const Uchar *srcptr;
 
-int subsimpleexactselfmatchstore(void *info,unsigned long len,
-                                 Seqpos dbstart,
-                                 GT_UNUSED uint64_t queryoffset,
-                                 unsigned long querystart,
-                                 GtError *err);
-
-#endif
+  for (destptr = dest, srcptr = src + len - 1;
+       destptr < dest + len; destptr++, srcptr--)
+  {
+    *destptr = COMPLEMENTBASE(*srcptr);
+  }
+}

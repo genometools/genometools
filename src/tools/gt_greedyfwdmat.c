@@ -68,13 +68,13 @@ static OPrval parsegfmsub(bool doms,
   OPrval oprval;
   GtStrArray *flagsoutputoption;
   int parsed_args;
-  Optionargmodedesc msgfmsubmodedesctable[] =
+  const Optionargmodedesc msgfmsubmodedesctable[] =
   {
     {"sequence",SHOWSEQUENCE},
     {"querypos",SHOWQUERYPOS},
     {"subjectpos",SHOWSUBJECTPOS}
   };
-  Optionargmodedesc gfmsubmodedesctable[] =
+  const Optionargmodedesc gfmsubmodedesctable[] =
   {
     {"sequence",SHOWSEQUENCE},
     {"querypos",SHOWQUERYPOS}

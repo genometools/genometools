@@ -41,7 +41,7 @@ typedef struct
 #ifdef SKDEBUG
   unsigned long lastscorevalue;   /* the score for the given depth */
 #endif
-} Myerscolumn;
+} Limdfsstate;
 
 typedef struct
 {
@@ -66,12 +66,12 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
   }
 }
 
-static void apm_showMyerscolumn(const DECLAREPTRDFSSTATE(aliascol),
+static void apm_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long score,
                                 const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  const Myerscolumn *col = (const Myerscolumn *) aliascol;
+  const Limdfsstate *col = (const Limdfsstate *) aliascol;
 
   if (col->maxleqk == UNDEFMAXLEQK)
   {
@@ -100,7 +100,7 @@ static void apm_showMyerscolumn(const DECLAREPTRDFSSTATE(aliascol),
 }
 
 static void verifycolumnvalues(const Matchtaskinfo *mti,
-                               const Myerscolumn *col,
+                               const Limdfsstate *col,
                                unsigned long startscore)
 {
   unsigned long idx, score, minscore, mask, bfmaxleqk;
@@ -196,10 +196,10 @@ static void apm_freedfsconstinfo(void **dfsconstinfo)
   *dfsconstinfo = NULL;
 }
 
-static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
+static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
                                 void *dfsconstinfo)
 {
-  Myerscolumn *column = (Myerscolumn *) aliascolumn;
+  Limdfsstate *column = (Limdfsstate *) aliascolumn;
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   column->Mv = 0UL;
@@ -220,16 +220,16 @@ static void apm_initMyerscolumn(DECLAREPTRDFSSTATE(aliascolumn),
   }
 }
 
-static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
-                                             GT_UNUSED Seqpos leftbound,
-                                             GT_UNUSED Seqpos rightbound,
-                                             Seqpos width,
-                                             GT_UNUSED
-                                             unsigned long currentdepth,
-                                             void *dfsconstinfo)
+static unsigned long apm_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+                                              GT_UNUSED Seqpos leftbound,
+                                              GT_UNUSED Seqpos rightbound,
+                                              Seqpos width,
+                                              GT_UNUSED
+                                              unsigned long currentdepth,
+                                              void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
-  Myerscolumn *col = (Myerscolumn *) aliascolumn;
+  Limdfsstate *col = (Limdfsstate *) aliascolumn;
 
   if (col->maxleqk == UNDEFMAXLEQK)
   {
@@ -252,9 +252,7 @@ static unsigned long apm_nextstepfullmatches(DECLAREPTRDFSSTATE(aliascolumn),
   return 1UL; /* continue with depth first traversal */
 }
 
-/* implement types Limdfsstate and all function appearing until here */
-
-static void apm_nextMyercolumn(const void *dfsconstinfo,
+static void apm_nextLimdfsstate(const void *dfsconstinfo,
                                DECLAREPTRDFSSTATE(aliasoutcol),
                                GT_UNUSED unsigned long currentdepth,
                                Uchar currentchar,
@@ -265,8 +263,8 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
                 idx,                    /* a counter */
                 score;                  /* current score */
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  Myerscolumn *outcol = (Myerscolumn *) aliasoutcol;
-  const Myerscolumn *incol = (const Myerscolumn *) aliasincol;
+  Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
+  const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
 
   gt_assert(incol->maxleqk != UNDEFMAXLEQK);
   gt_assert(mti->maxintervalwidth > 0 || incol->maxleqk != SUCCESSMAXLEQK);
@@ -343,17 +341,17 @@ static void apm_nextMyercolumn(const void *dfsconstinfo,
 #endif
 }
 
-static void apm_inplacenextMyercolumn(const void *dfsconstinfo,
-                                      DECLAREPTRDFSSTATE(aliascol),
-                                      GT_UNUSED unsigned long currentdepth,
-                                      Uchar currentchar)
+static void apm_inplacenextLimdfsstate(const void *dfsconstinfo,
+                                       DECLAREPTRDFSSTATE(aliascol),
+                                       GT_UNUSED unsigned long currentdepth,
+                                       Uchar currentchar)
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,           /* only one bit is on */
                 idx,                /* a counter */
                 score;              /* current score */
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  Myerscolumn *col = (Myerscolumn *) aliascol;
+  Limdfsstate *col = (Limdfsstate *) aliascol;
 
   gt_assert(col->maxleqk != UNDEFMAXLEQK);
   gt_assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
@@ -422,17 +420,17 @@ const AbstractDfstransformer *apm_AbstractDfstransformer(void)
 {
   static const AbstractDfstransformer apm_adfst =
   {
-    sizeof (Myerscolumn),
+    sizeof (Limdfsstate),
     apm_allocatedfsconstinfo,
     apm_initdfsconstinfo,
     NULL, /* no extractdfsconstinfo */
     apm_freedfsconstinfo,
-    apm_initMyerscolumn,
-    apm_nextstepfullmatches,
-    apm_nextMyercolumn,
-    apm_inplacenextMyercolumn,
+    apm_initLimdfsstate,
+    apm_fullmatchLimdfsstate,
+    apm_nextLimdfsstate,
+    apm_inplacenextLimdfsstate,
 #ifdef SKDEBUG
-    apm_showMyerscolumn,
+    apm_showLimdfsstate,
 #endif
   };
   return &apm_adfst;

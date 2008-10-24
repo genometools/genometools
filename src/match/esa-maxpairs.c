@@ -46,31 +46,30 @@ typedef struct
                 length;
 } Listtype;
 
-typedef struct
+ struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
   Uchar commonchar;
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
-} Dfsinfo;
+};
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-typedef struct
+ struct Dfsstate /* global information */
 {
   bool initialized;
   unsigned int searchlength,
                alphabetsize;
-  Seqpos depth;            /* value changes with each new match */
   ArraySeqpos uniquechar,
               *poslist;
   const Encodedsequence *encseq;
   Readmode readmode;
   int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,GtError *);
   void *processmaxpairsinfo;
-} Dfsstate;
+};
 
-#include "esa-dfs.pr"
+#include "esa-dfs.h"
 
 static Dfsinfo *allocateDfsinfo(Dfsstate *state)
 {
@@ -115,7 +114,8 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
+static int cartproduct1(Dfsstate *state,Seqpos fatherdepth,
+                        const Dfsinfo *ninfo,unsigned int base,
                         Seqpos leafnumber,GtError *err)
 {
   Listtype *pl;
@@ -126,7 +126,7 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
     if (state->processmaxpairs(state->processmaxpairsinfo,
-                               state->depth,leafnumber,*spptr,err) != 0)
+                               fatherdepth,leafnumber,*spptr,err) != 0)
     {
       return -1;
     }
@@ -135,8 +135,11 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
 }
 
 static int cartproduct2(Dfsstate *state,
-                        const Dfsinfo *ninfo1, unsigned int base1,
-                        const Dfsinfo *ninfo2, unsigned int base2,
+                        Seqpos fatherdepth,
+                        const Dfsinfo *ninfo1,
+                        unsigned int base1,
+                        const Dfsinfo *ninfo2,
+                        unsigned int base2,
                         GtError *err)
 {
   Listtype *pl1, *pl2;
@@ -151,7 +154,7 @@ static int cartproduct2(Dfsstate *state,
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
-                                 state->depth,*spptr1,*spptr2,err) != 0)
+                                 fatherdepth,*spptr1,*spptr2,err) != 0)
       {
         return -1;
       }
@@ -208,7 +211,6 @@ static int processleafedge(bool firstsucc,
                               state->readmode);
   }
   state->initialized = false;
-  state->depth = fatherdepth;
 #ifdef SKDEBUG
   printf("processleafedge: leftchar %u\n",(unsigned int) leftchar);
 #endif
@@ -235,7 +237,7 @@ static int processleafedge(bool firstsucc,
     {
       if (leftchar != (Uchar) base)
       {
-        if (cartproduct1(state,father,base,leafnumber,err) != 0)
+        if (cartproduct1(state,fatherdepth,father,base,leafnumber,err) != 0)
         {
           return -1;
         }
@@ -246,7 +248,7 @@ static int processleafedge(bool firstsucc,
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
-                                 state->depth,leafnumber,*spptr,err) != 0)
+                                 fatherdepth,leafnumber,*spptr,err) != 0)
       {
         return -2;
       }
@@ -261,7 +263,7 @@ static int processbranchedge(bool firstsucc,
                              Dfsinfo *father,
                              Dfsinfo *son,
                              Dfsstate *state,
-                             /*@unused@*/ GtError *err)
+                             GtError *err)
 {
   unsigned int chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
@@ -278,7 +280,6 @@ static int processbranchedge(bool firstsucc,
     return 0;
   }
   state->initialized = false;
-  state->depth = fatherdepth;
   if (firstsucc)
   {
     return 0;
@@ -306,7 +307,8 @@ static int processbranchedge(bool firstsucc,
       {
         if (chson != chfather)
         {
-          if (cartproduct2(state,father,chfather,son,chson,err) != 0)
+          if (cartproduct2(state,fatherdepth,father,chfather,
+                           son,chson,err) != 0)
           {
             return -1;
           }
@@ -314,7 +316,7 @@ static int processbranchedge(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (cartproduct1(state,father,chfather,*spptr,err) != 0)
+        if (cartproduct1(state,fatherdepth,father,chfather,*spptr,err) != 0)
         {
           return -2;
         }
@@ -326,7 +328,7 @@ static int processbranchedge(bool firstsucc,
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
       {
-        if (cartproduct1(state,son,chson,*fptr,err) != 0)
+        if (cartproduct1(state,fatherdepth,son,chson,*fptr,err) != 0)
         {
           return -3;
         }
@@ -334,7 +336,7 @@ static int processbranchedge(bool firstsucc,
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
         if (state->processmaxpairs(state->processmaxpairsinfo,
-                                   state->depth,*fptr,*spptr,err) != 0)
+                                   fatherdepth,*fptr,*spptr,err) != 0)
         {
           return -4;
         }
@@ -381,11 +383,9 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                     freeDfsinfo,
                     processleafedge,
                     processbranchedge,
-                    /*
                     NULL,
                     NULL,
                     NULL,
-                    */
                     &state,
                     verboseinfo,
                     err) != 0)

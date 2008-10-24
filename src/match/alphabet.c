@@ -439,7 +439,6 @@ void freeAlphabet(Alphabet **alpha)
   Alphabet *alpha;
   bool haserr = false;
 
-  gt_error_check(err);
   ALLOCASSIGNSPACE(alpha,NULL,Alphabet,(size_t) 1);
   alpha->characters = NULL;
   alpha->mapdomain = NULL;
@@ -453,6 +452,7 @@ void freeAlphabet(Alphabet **alpha)
       assignProteinalphabet(alpha);
     } else
     {
+      gt_error_check(err);
       if (gt_str_length(smapfile) > 0)
       {
         GtStr *transpath = NULL;

@@ -101,21 +101,24 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);
 
 const Encodedsequence *encseqSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr);
+                          const Sequentialsuffixarrayreader *ssar);
 
 Readmode readmodeSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr);
+                          const Sequentialsuffixarrayreader *ssar);
 
 const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr);
+                          const Sequentialsuffixarrayreader *ssar);
 
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *sarr);
+                    const Sequentialsuffixarrayreader *ssar);
 
 unsigned long destablengthSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *sarr);
+              const Sequentialsuffixarrayreader *ssar);
 
 const char *destabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *sarr);
+              const Sequentialsuffixarrayreader *ssar);
+
+const Seqpos *suftabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *ssar);
 
 #endif

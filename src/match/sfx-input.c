@@ -31,8 +31,8 @@
 #include "sarr-def.h"
 #include "stamp.h"
 #include "sfx-input.h"
+#include "opensfxfile.h"
 
-#include "opensfxfile.pr"
 #include "esa-map.pr"
 #include "fillsci.pr"
 
@@ -78,6 +78,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
 {
   Seqpos totallength;
   bool haserr = false;
+  unsigned int forcetable;
 
   gt_error_check(err);
   sfxseqinfo->voidptr2suffixarray = NULL;
@@ -91,6 +92,13 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                           so->str_smap,
                                           so->filenametab,
                                           err);
+  if (gt_str_length(so->str_sat) > 0)
+  {
+    forcetable = getsatforcevalue(gt_str_get(so->str_sat));
+  } else
+  {
+    forcetable = 3U;
+  }
   if (sfxseqinfo->alpha == NULL)
   {
     haserr = true;
@@ -103,6 +111,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 &sfxseqinfo->numofsequences,
                                 &totallength,
                                 &sfxseqinfo->specialcharinfo,
+                                forcetable,
                                 so->filenametab,
                                 &sfxseqinfo->filelengthtab,
                                 sfxseqinfo->alpha,

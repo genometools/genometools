@@ -1,9 +1,6 @@
 feature requests:
 -----------------
 
-- implement skiplist class
-- replace msort() routine with a routine covered by LICENSE
-- replace the st (hashtable) implementation with own implementation
 - replace sscanf calls
 - consensus_sa: fuzzlength, undetermined strand
 - add more coverage tests

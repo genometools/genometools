@@ -40,7 +40,7 @@ unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                          const char *charlist,
                                          unsigned long len);
 
-void checkgreedyunitedist(/*@unused@*/ bool forward,
+void checkgreedyunitedist(bool forward,
                           const Uchar *useq,
                           unsigned long ulen,
                           const Uchar *vseq,

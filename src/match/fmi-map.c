@@ -29,8 +29,8 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "stamp.h"
+#include "opensfxfile.h"
 
-#include "opensfxfile.pr"
 #include "esa-map.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"

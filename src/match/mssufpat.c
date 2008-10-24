@@ -30,7 +30,7 @@
 typedef struct
 {
   unsigned long prefixofsuffixbits;
-} Parallelmstats;
+} Limdfsstate;
 
 typedef struct
 {
@@ -43,12 +43,12 @@ typedef struct
 
 #ifdef SKDEBUG
 
-static void pms_showParallelmstats(const DECLAREPTRDFSSTATE(aliascol),
-                                   unsigned long depth,
-                                   const void *dfsconstinfo)
+static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
+                                unsigned long depth,
+                                const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  const Parallelmstats *col = (const Parallelmstats *) aliascol;
+  const Limdfsstate *col = (const Limdfsstate *) aliascol;
   bool first = true;
 
   unsigned long idx, backmask;
@@ -168,10 +168,10 @@ static unsigned long zerosontheright(unsigned long v)
   return c;
 }
 
-static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
-                                   void *dfsconstinfo)
+static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+                                void *dfsconstinfo)
 {
-  Parallelmstats *column = (Parallelmstats *) aliascolumn;
+  Limdfsstate *column = (Limdfsstate *) aliascolumn;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   unsigned long idx;
 
@@ -185,15 +185,14 @@ static void pms_initParallelmstats(DECLAREPTRDFSSTATE(aliascolumn),
   }
 }
 
-static unsigned long pms_nextstepfullmatches(
-                              DECLAREPTRDFSSTATE(aliascolumn),
-                              Seqpos leftbound,
-                              Seqpos rightbound,
-                              GT_UNUSED Seqpos width,
-                              unsigned long currentdepth,
-                              void *dfsconstinfo)
+static unsigned long pms_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+                                              Seqpos leftbound,
+                                              Seqpos rightbound,
+                                              GT_UNUSED Seqpos width,
+                                              unsigned long currentdepth,
+                                              void *dfsconstinfo)
 {
-  Parallelmstats *limdfsstate = (Parallelmstats *) aliascolumn;
+  Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
 
   if (limdfsstate->prefixofsuffixbits > 0)
   {
@@ -224,18 +223,18 @@ static unsigned long pms_nextstepfullmatches(
   return 0; /* stop depth first traversal */
 }
 
-static void pms_nextParallelmstats(const void *dfsconstinfo,
-                                   DECLAREPTRDFSSTATE(aliasoutcol),
-                                   unsigned long currentdepth,
-                                   Uchar currentchar,
-                                   const DECLAREPTRDFSSTATE(aliasincol))
+static void pms_nextLimdfsstate(const void *dfsconstinfo,
+                                DECLAREPTRDFSSTATE(aliasoutcol),
+                                unsigned long currentdepth,
+                                Uchar currentchar,
+                                const DECLAREPTRDFSSTATE(aliasincol))
 {
 #ifdef SKDEBUG
   char buffer1[32+1], buffer2[32+1];
 #endif
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  Parallelmstats *outcol = (Parallelmstats *) aliasoutcol;
-  const Parallelmstats *incol = (const Parallelmstats *) aliasincol;
+  Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
+  const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
 
   gt_assert(ISNOTSPECIAL(currentchar));
   gt_assert(currentdepth > 0);
@@ -257,17 +256,17 @@ static void pms_nextParallelmstats(const void *dfsconstinfo,
 #endif
 }
 
-static void pms_inplacenextParallelmstats(const void *dfsconstinfo,
-                                          DECLAREPTRDFSSTATE(aliascol),
-                                          unsigned long currentdepth,
-                                          Uchar currentchar)
+static void pms_inplacenextLimdfsstate(const void *dfsconstinfo,
+                                       DECLAREPTRDFSSTATE(aliascol),
+                                       unsigned long currentdepth,
+                                       Uchar currentchar)
 {
 #ifdef SKDEBUG
   char buffer1[32+1], buffer2[32+1];
   unsigned long tmp;
 #endif
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
-  Parallelmstats *col = (Parallelmstats *) aliascol;
+  Limdfsstate *col = (Limdfsstate *) aliascol;
 
   gt_assert(ISNOTSPECIAL(currentchar));
 #ifdef SKDEBUG
@@ -286,17 +285,17 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
 {
   static const AbstractDfstransformer pms_adfst =
   {
-    sizeof (Parallelmstats),
+    sizeof (Limdfsstate),
     pms_allocatedfsconstinfo,
     pms_initdfsconstinfo,
     pms_extractdfsconstinfo,
     pms_freedfsconstinfo,
-    pms_initParallelmstats,
-    pms_nextstepfullmatches,
-    pms_nextParallelmstats,
-    pms_inplacenextParallelmstats,
+    pms_initLimdfsstate,
+    pms_fullmatchLimdfsstate,
+    pms_nextLimdfsstate,
+    pms_inplacenextLimdfsstate,
 #ifdef SKDEBUG
-    pms_showParallelmstats,
+    pms_showLimdfsstate,
 #endif
   };
   return &pms_adfst;

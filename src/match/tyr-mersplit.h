@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef OPTIONARGMODE_H
-#define OPTIONARGMODE_H
+#ifndef TYR_MERSPLIT_H
+#define TYR_MERSPLIT_H
 
-typedef struct
-{
-  const char *name;
-  unsigned int bitmask;
-} Optionargmodedesc;
+#include "core/str_api.h"
+#include "defined-types.h"
 
-int optionaddbitmask(const Optionargmodedesc *modedesc,
-                     size_t numberofentries,
-                     unsigned int *mode,
-                     const char *optname,
-                     const char *optionargument,
-                     GtError *err);
+int constructmerbuckets(const GtStr *inputindex,
+                        const Definedunsignedint *prefixlength);
 
 #endif

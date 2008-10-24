@@ -58,7 +58,8 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
       if (lastspeciallength > 0)
       {
         /* note that we store one less than the length to prevent overflows */
-        assert(currentspecialchar > 0);
+        gt_assert(currentspecialchar > 0);
+        gt_assert(currentspecialchar - 1 < encseq->numofspecialstostore);
         ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
           = (SPECIALTYPE) (lastspeciallength-1);
 #ifndef NDEBUG
@@ -86,7 +87,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
         if (lastspeciallength == (unsigned int) MAXSPECIALTYPE)
             /* already at maximal length */
         {
-          assert(currentspecialchar > 0);
+          gt_assert(currentspecialchar > 0);
           ACCESSENCSEQ(encseq,specialrangelength)[currentspecialchar-1]
             = (SPECIALTYPE) MAXSPECIALTYPE;
 #ifndef NDEBUG
@@ -119,7 +120,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 #endif
     UPDATESEQBUFFER(cc);
   }
-  assert(sumspecials == countspecials);
+  gt_assert(sumspecials == countspecials);
   UPDATESEQBUFFERFINAL;
 #ifndef NOENDPTR
   while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)

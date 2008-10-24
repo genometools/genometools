@@ -36,8 +36,8 @@
 #include "sfx-outlcp.h"
 #include "sfx-input.h"
 #include "sfx-run.h"
+#include "opensfxfile.h"
 
-#include "opensfxfile.pr"
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.pr"

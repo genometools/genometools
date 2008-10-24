@@ -23,7 +23,7 @@
 #include "core/fileutils.h"
 #include "core/seqiterator.h"
 #include "core/arraydef.h"
-#include "tagerator.h"
+#include "revcompl.h"
 #include "sarr-def.h"
 #include "intbits.h"
 #include "alphadef.h"
@@ -35,6 +35,7 @@
 #include "apmoveridx.h"
 #include "dist-short.h"
 #include "stamp.h"
+#include "tagerator.h"
 
 #include "echoseq.pr"
 #include "esa-map.pr"
@@ -403,19 +404,6 @@ static void compareresults(const ArraySimplematch *storeonline,
   }
 }
 
-static void reversecomplementtag(Uchar *transformedtag,unsigned long taglen)
-{
-  Uchar tmp, *frontptr, *backptr;
-
-  for (frontptr = transformedtag, backptr = transformedtag + taglen - 1;
-       frontptr < backptr; frontptr++, backptr--)
-  {
-    tmp = *frontptr;
-    *frontptr = COMPLEMENTBASE(*backptr);
-    *backptr = COMPLEMENTBASE(tmp);
-  }
-}
-
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
   Suffixarray suffixarray;
@@ -632,7 +620,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         {
           if (try == 1 && !tageratoroptions->norcmatch)
           {
-            reversecomplementtag(twl.transformedtag,twl.taglen);
+            inplace_reversecomplement(twl.transformedtag,twl.taglen);
             twl.rcdir = true;
           }
           performpatternsearch(dfst,

@@ -33,8 +33,7 @@
 #include "spacedef.h"
 #include "bcktab.h"
 #include "stamp.h"
-
-#include "opensfxfile.pr"
+#include "opensfxfile.h"
 
 #define DBFILEKEY "dbfile="
 
@@ -228,62 +227,6 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   return haserr ? -1 : 0;
 }
 
-static void *genericmaponlytable(const GtStr *indexname,const char *suffix,
-                                 size_t *numofbytes,GtError *err)
-{
-  GtStr *tmpfilename;
-  void *ptr;
-  bool haserr = false;
-
-  gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,suffix);
-  ptr = gt_fa_mmap_read(gt_str_get(tmpfilename),numofbytes);
-  if (ptr == NULL)
-  {
-    gt_error_set(err,"cannot map file \"%s\": %s",gt_str_get(tmpfilename),
-                  strerror(errno));
-    haserr = true;
-  }
-  gt_str_delete(tmpfilename);
-  return haserr ? NULL : ptr;
-}
-
-static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
-                               size_t sizeofunit,GtError *err)
-{
-  gt_error_check(err);
-  if (expectedunits != (Seqpos) (numofbytes/sizeofunit))
-  {
-    gt_error_set(err,"number of mapped units = %lu != " FormatSeqpos
-                      " = expected number of integers",
-                      (unsigned long) (numofbytes/sizeofunit),
-                      PRINTSeqposcast(expectedunits));
-    return -1;
-  }
-  return 0;
-}
-
-static void *genericmaptable(const GtStr *indexname,
-                             const char *suffix,
-                             Seqpos expectedunits,size_t sizeofunit,
-                             GtError *err)
-{
-  size_t numofbytes;
-
-  void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,err);
-  if (ptr == NULL)
-  {
-    return NULL;
-  }
-  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
-  {
-    gt_fa_xmunmap(ptr);
-    return NULL;
-  }
-  return ptr;
-}
-
 static void initsuffixarray(Suffixarray *suffixarray)
 {
   suffixarray->filelengthtab = NULL;
@@ -436,7 +379,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->suftab = genericmaptable(indexname,
                                             SUFTABSUFFIX,
-                                            (*totallength)+1,
+                                            (unsigned long) (*totallength)+1,
                                             sizeof (Seqpos),
                                             err);
       if (suffixarray->suftab == NULL)
@@ -459,7 +402,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->lcptab = genericmaptable(indexname,
                                             LCPTABSUFFIX,
-                                            (*totallength)+1,
+                                            (unsigned long) (*totallength)+1,
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->lcptab == NULL)
@@ -485,12 +428,13 @@ static int inputsuffixarray(bool map,
     {
       if (map)
       {
-        suffixarray->llvtab = genericmaptable(indexname,
-                                              LARGELCPTABSUFFIX,
-                                              suffixarray->numoflargelcpvalues.
-                                              valueseqpos,
-                                              sizeof (Largelcpvalue),
-                                              err);
+        suffixarray->llvtab
+          = genericmaptable(indexname,
+                            LARGELCPTABSUFFIX,
+                            (unsigned long) suffixarray->numoflargelcpvalues.
+                            valueseqpos,
+                            sizeof (Largelcpvalue),
+                            err);
         if (suffixarray->llvtab == NULL)
         {
           haserr = true;
@@ -508,7 +452,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->bwttab = genericmaptable(indexname,
                                             BWTTABSUFFIX,
-                                            (*totallength)+1,
+                                            (unsigned long) (*totallength)+1,
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->bwttab == NULL)

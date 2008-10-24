@@ -146,6 +146,14 @@ uint64_t detsizeencseq(int kind,
                        Seqpos specialranges,
                        unsigned int mapsize);
 
+void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
+
+void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
+                     const Seqpos startindex,const Seqpos len);
+
+void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
+                       const Seqpos startindex,const Seqpos len);
+
 #endif
 
 /* the functions with exactly the same interface for both implementation of
@@ -254,5 +262,13 @@ void showsequenceatstartpos(FILE *fp,
                             bool complement,
                             const Encodedsequence *encseq,
                             Seqpos startpos);
+
+bool containsspecial(const Encodedsequence *encseq,
+                     bool moveforward,
+                     Encodedsequencescanstate *esrspace,
+                     Seqpos startpos,
+                     Seqpos len);
+
+unsigned int getsatforcevalue(const char *str);
 
 #endif

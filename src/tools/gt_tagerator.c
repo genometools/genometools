@@ -68,7 +68,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   TageratorOptions *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
-         *optionpckindex, *optionmaxdepth;
+           *optionpckindex, *optionmaxdepth;
 
   gt_assert(arguments != NULL);
   arguments->esaindexname = gt_str_new();
@@ -155,6 +155,41 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   return op;
 }
 
+static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
+                                        void *tool_arguments,
+                                        GtError *err)
+{
+  TageratorOptions *arguments = tool_arguments;
+
+  if (arguments->maxdistance < 0)
+  {
+    if (arguments->online)
+    {
+      gt_error_set(err,"option -online requires option -e");
+      return -1;
+    }
+    if (!arguments->nowildcards)
+    {
+      arguments->nowildcards = true;
+    }
+    if (arguments->maxintervalwidth == 0)
+    {
+      gt_error_set(err,
+                   "if option -e is not used then option -maxocc is required");
+      return -1;
+    }
+  } else
+  {
+    if (arguments->skpp &&
+        (arguments->maxdistance == 0 || arguments->maxintervalwidth == 0))
+    {
+      gt_error_set(err,"option -skpp only works in pdiff mode");
+      return -1;
+    }
+  }
+  return 0;
+}
+
 static int gt_tagerator_runner(GT_UNUSED int argc,
                                GT_UNUSED const char **argv,
                                GT_UNUSED int parsed_args,
@@ -213,46 +248,11 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
   return haserr ? -1 : 0;
 }
 
-static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
-                                        void *tool_arguments,
-                                        GtError *err)
-{
-  TageratorOptions *arguments = tool_arguments;
-
-  if (arguments->maxdistance < 0)
-  {
-    if (arguments->online)
-    {
-      gt_error_set(err,"option -online requires option -e");
-      return -1;
-    }
-    if (!arguments->nowildcards)
-    {
-      arguments->nowildcards = true;
-    }
-    if (arguments->maxintervalwidth == 0)
-    {
-      gt_error_set(err,
-                   "if option -e is not used then option -maxocc is required");
-      return -1;
-    }
-  } else
-  {
-    if (arguments->skpp &&
-        (arguments->maxdistance == 0 || arguments->maxintervalwidth == 0))
-    {
-      gt_error_set(err,"option -skpp only works in pdiff mode");
-      return -1;
-    }
-  }
-  return 0;
-}
-
 GtTool* gt_tagerator(void)
 {
   return gt_tool_new(gt_tagerator_arguments_new,
-                  gt_tagerator_arguments_delete,
-                  gt_tagerator_option_parser_new,
-                  gt_tagerator_arguments_check,
-                  gt_tagerator_runner);
+                     gt_tagerator_arguments_delete,
+                     gt_tagerator_option_parser_new,
+                     gt_tagerator_arguments_check,
+                     gt_tagerator_runner);
 }

@@ -21,6 +21,7 @@
 #include "seqpos-def.h"
 #include "spacedef.h"
 #include "esa-seqread.h"
+#include "esa-dfs.h"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]
@@ -42,9 +43,6 @@
         stackspace[nextfreeItvinfo].depth = D;\
         stackspace[nextfreeItvinfo].lastisleafedge = B;\
         nextfreeItvinfo++
-
-typedef struct Dfsinfo Dfsinfo;
-typedef struct Dfsstate Dfsstate;
 
 typedef struct
 {
@@ -101,14 +99,11 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                           Dfsinfo *,
                                           Dfsstate *,
                                           GtError *),
-                  /*
-                  Integrate these functions later:
-                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,GtError *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,
-                                           GtError *),
-                  int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                            Seqpos,Dfsstate *,GtError *),
-                  */
+                  int(*processcompletenode)(Seqpos,Dfsinfo *,Seqpos,
+                                            Dfsstate *,GtError *),
+                  void (*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *),
+                  void (*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
+                                              Seqpos,Dfsstate *),
                   Dfsstate *state,
                   GT_UNUSED Verboseinfo *verboseinfo,
                   GtError *err)
@@ -133,13 +128,10 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
 #endif
   firstrootedge = true;
   PUSHDFS(0,true,NULL);
-  /*
-  if (assignleftmostleaf != NULL &&
-      assignleftmostleaf(TOP.dfsinfo,0,state,err) != 0)
+  if (assignleftmostleaf != NULL)
   {
-    haserr = true;
+    assignleftmostleaf(TOP.dfsinfo,0,state);
   }
-  */
   for (currentindex = 0; !haserr; currentindex++)
   {
 #ifdef INLINEDSequentialsuffixarrayreader
@@ -194,25 +186,23 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
           break;
         }
       }
-      /*
-      if (assignrightmostleaf != NULL &&
-          assignrightmostleaf(TOP.dfsinfo,
-                              currentindex,
-                              previoussuffix,
-                              currentlcp,
-                              state,
-                              err) != 0)
+      if (assignrightmostleaf != NULL)
       {
-        haserr = true;
-        break;
+        assignrightmostleaf(TOP.dfsinfo,
+                            currentindex,
+                            previoussuffix,
+                            currentlcp,
+                            state);
       }
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,state,err) != 0)
+          processcompletenode(TOP.depth,TOP.dfsinfo,
+                              nextfreeItvinfo >= 2UL ? BELOWTOP.depth
+                                                     : 0,
+                              state,err) != 0)
       {
         haserr = true;
         break;
       }
-      */
       gt_assert(nextfreeItvinfo > 0);
       nextfreeItvinfo--;
     }
@@ -263,14 +253,10 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       PUSHDFS(currentlcp,true,stackspace);
       if (BELOWTOP.lastisleafedge)
       {
-       /*
-       if (assignleftmostleaf != NULL &&
-           assignleftmostleaf(TOP.dfsinfo,currentindex,state,err) != 0)
+       if (assignleftmostleaf != NULL)
         {
-          haserr = true;
-          break;
+          assignleftmostleaf(TOP.dfsinfo,currentindex,state);
         }
-        */
         if (processleafedge != NULL &&
             processleafedge(true,
                             TOP.depth,
@@ -330,29 +316,25 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         haserr = true;
       }
     }
-    /*
     if (!haserr)
     {
-      if (assignrightmostleaf != NULL &&
-          assignrightmostleaf(TOP.dfsinfo,
-                              currentindex,
-                              previoussuffix,
-                              currentlcp,
-                              state,
-                              err) != 0)
+      if (assignrightmostleaf != NULL)
       {
-        haserr = true;
+        assignrightmostleaf(TOP.dfsinfo,
+                            currentindex,
+                            previoussuffix,
+                            currentlcp,
+                            state);
       }
-    }
-    if (!haserr)
-    {
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,state,err) != 0)
+          processcompletenode(TOP.depth,TOP.dfsinfo,
+                              nextfreeItvinfo >= 2UL ? BELOWTOP.depth
+                                                     : 0,
+                              state,err) != 0)
       {
         haserr = true;
       }
     }
-    */
   }
   freeItvinfo(stackspace,
               allocatedItvinfo,

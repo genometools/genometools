@@ -20,8 +20,7 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
-
-#include "opensfxfile.pr"
+#include "opensfxfile.h"
 
 int makeindexfilecopy(const GtStr *destindex,
                       const GtStr *sourceindex,

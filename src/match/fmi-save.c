@@ -18,9 +18,9 @@
 #include <math.h>
 #include "core/fa.h"
 #include "fmindex.h"
+#include "opensfxfile.h"
 
 #include "fmi-mapspec.pr"
-#include "opensfxfile.pr"
 
 static int writefmascii (const GtStr *indexname,
                          const Fmindex *fm,

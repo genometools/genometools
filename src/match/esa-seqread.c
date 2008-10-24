@@ -16,6 +16,7 @@
 */
 
 #include <limits.h>
+#include "core/unused_api.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "esa-seqread.h"
@@ -29,7 +30,7 @@
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                   const GtStr *indexname,
                                   unsigned int demand,
-                                  /*@unused@*/ Sequentialaccesstype seqactype,
+                                  GT_UNUSED Sequentialaccesstype seqactype,
                                   GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
@@ -67,22 +68,22 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              /*@unused@*/ GtError *err)
+                              GT_UNUSED GtError *err)
 {
   *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
   return 1;
 }
 
 const Encodedsequence *encseqSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr)
+                          const Sequentialsuffixarrayreader *ssar)
 {
-  return sarr->suffixarray->encseq;
+  return ssar->suffixarray->encseq;
 }
 
 Readmode readmodeSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr)
+                          const Sequentialsuffixarrayreader *ssar)
 {
-  return sarr->suffixarray->readmode;
+  return ssar->suffixarray->readmode;
 }
 
 #else
@@ -288,40 +289,51 @@ int nextSequentialsuftabvalue(Seqpos *currentsuffix,
 }
 
 const Encodedsequence *encseqSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr)
+                          const Sequentialsuffixarrayreader *ssar)
 {
-  return sarr->encseq;
+  return ssar->encseq;
 }
 
 Readmode readmodeSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr)
+                          const Sequentialsuffixarrayreader *ssar)
 {
-  return sarr->readmode;
+  return ssar->readmode;
 }
 #endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
 const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr)
+                          const Sequentialsuffixarrayreader *ssar)
 {
-  gt_assert(sarr->suffixarray != NULL);
-  return sarr->suffixarray->alpha;
+  gt_assert(ssar->suffixarray != NULL);
+  return ssar->suffixarray->alpha;
 }
 
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *sarr)
+                    const Sequentialsuffixarrayreader *ssar)
 {
-  gt_assert(sarr->suffixarray != NULL);
-  return sarr->suffixarray->numofdbsequences;
+  gt_assert(ssar->suffixarray != NULL);
+  return ssar->suffixarray->numofdbsequences;
 }
 
 unsigned long destablengthSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *sarr)
+              const Sequentialsuffixarrayreader *ssar)
 {
-  return sarr->suffixarray->destablength;
+  return ssar->suffixarray->destablength;
 }
 
 const char *destabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *sarr)
+              const Sequentialsuffixarrayreader *ssar)
 {
-  return sarr->suffixarray->destab;
+  return ssar->suffixarray->destab;
+}
+
+const Seqpos *suftabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *ssar)
+{
+  gt_assert(ssar->seqactype != SEQ_scan);
+  if (ssar->seqactype == SEQ_mappedboth)
+  {
+    return ssar->suffixarray->suftab;
+  }
+  return ssar->suftab;
 }

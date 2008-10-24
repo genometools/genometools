@@ -6,6 +6,7 @@ int fasta2sequencekeyvalues(
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
+        unsigned int forcetable,
         const GtStrArray *filenametab,
         Filelengthvalues **filelengthtab,
         const Alphabet *alpha,
@@ -16,6 +17,7 @@ int fasta2sequencekeyvalues(
         GtError *err);
 
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
+                              unsigned int forcetable,
                               const Uchar *seq,
                               const Seqpos len,
                               unsigned int mapsize,

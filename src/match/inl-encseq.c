@@ -24,8 +24,8 @@
 #include "core/unused_api.h"
 #include "encseq-def.h"
 #include "spacedef.h"
+#include "opensfxfile.h"
 
-#include "opensfxfile.pr"
 #include "fillsci.pr"
 
 #define TISTABFILESUFFIX ".tis"
@@ -83,7 +83,7 @@ Encodedsequencescanstate *newEncodedsequencescanstate(void)
 }
 
 void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
-                                  /*@unused@*/ const Encodedsequence *encseq,
+                                  GT_UNUSED const Encodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos startpos)
 {
@@ -169,10 +169,10 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fbs,
 /*@null@*/ Encodedsequence *mapencodedsequence(
                                    GT_UNUSED bool withrange,
                                    const GtStr *indexname,
-                                   /*@unused@*/ Seqpos totallength,
+                                   GT_UNUSED Seqpos totallength,
                                    Seqpos specialranges,
-                                   /*@unused@*/ unsigned int mapsize,
-                                   /*@unused@*/ Verboseinfo *verboseinfo,
+                                   GT_UNUSED unsigned int mapsize,
+                                   GT_UNUSED Verboseinfo *verboseinfo,
                                    GtError *err)
 {
   Encodedsequence *encseq;
@@ -218,7 +218,7 @@ Encodedsequence *plain2encodedsequence(
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,mapsize,verboseinfo);
+  sequence2specialcharinfo(specialcharinfo,3,seqptr,len,mapsize,verboseinfo);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,1);
   encseq->plainseq = seqptr;
   encseq->mappedfile = false;
@@ -341,7 +341,7 @@ void freespecialrangeiterator(Specialrangeiterator **sri)
   FREESPACE(*sri);
 }
 
-const char *encseqaccessname(/*@unused@*/ const Encodedsequence *encseq)
+const char *encseqaccessname(GT_UNUSED const Encodedsequence *encseq)
 {
   return "direct";
 }
