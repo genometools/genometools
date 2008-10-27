@@ -129,7 +129,6 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
   /* initialize this element */
   memset(&ls->element, 0, sizeof (GtLTRElement));
-  ls->element.pdomorder = gt_array_new(sizeof (const char*));
 
   /* get annotations from parser */
   had_err = gt_node_stream_next(ls->in_stream, gn, e);
@@ -141,6 +140,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     /* only process feature nodes */
     if (!gt_feature_node_try_cast(*gn))
       return 0;
+
+    ls->element.pdomorder = gt_array_new(sizeof (const char*));
 
     /* fill LTRElement structure from GFF3 subgraph */
     gni = gt_genome_node_iterator_new(*gn);
