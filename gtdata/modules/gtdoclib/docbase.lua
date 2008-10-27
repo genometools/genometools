@@ -67,7 +67,7 @@ function DocBase:add_method(funcret, funcname, funcargs, comment, be_verbose)
     return
   end
   local classname, match
-  funcname = string.lower(string.gsub(funcname, "_", ""))
+  funcname = string.lower(string.gsub(desc.name, "_", ""))
   for class_to_search in pairs(self.classes) do
     local class_to_match = "^" .. string.lower(string.gsub(class_to_search, "_", ""))
     if be_verbose then

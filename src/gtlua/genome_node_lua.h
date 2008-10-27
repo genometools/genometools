@@ -23,15 +23,6 @@
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
-   -- Create a new feature node on sequence with ID <seqid> and type <type>
-   -- which lies from <startpos> to <end> on strand <strand>.
-   -- <startpos> and <endpos> always refer to the forward strand, therefore
-   -- <startpos> has to bo smaller or equal than <endpos>.
-   function feature_node_new(seqid, type, startpos, endpos, strand)
-
-   -- Returns a new region node for sequence id <seqid> spanning <range>.
-   function region_node_new(seqid, range)
-
    -- Returns the filename of <genome_node>.
    function genome_node:get_filename()
 
@@ -40,6 +31,31 @@
 
    -- Returns the sequence id of <genome_node>.
    function genome_node:get_seqid()
+
+   -- Accept <genome_visitor>.
+   function genome_node:accept(genome_visitor)
+
+   -- Make <genome_node> the parent of <child_node>.
+   function genome_node:is_part_of_genome_node(child_node)
+
+   -- Mark <genome_node>.
+   function genome_node:mark()
+
+   -- Returns true if <genome_node> is marked, false otherwise.
+   function genome_node:is_marked()
+
+   -- Returns true if <genome_node> contains a marked node, false otherwise.
+   function genome_node:contains_marked()
+
+*/
+
+/* exports the FeatureNode class to Lua:
+
+   -- Create a new feature node on sequence with ID <seqid> and type <type>
+   -- which lies from <startpos> to <end> on strand <strand>.
+   -- <startpos> and <endpos> always refer to the forward strand, therefore
+   -- <startpos> has to bo smaller or equal than <endpos>.
+   function feature_node_new(seqid, type, startpos, endpos, strand)
 
    -- Returns the strand of <feature_node>.
    function feature_node:get_strand()
@@ -59,21 +75,6 @@
    -- Set the source of <feature_node> to <source>.
    function feature_node:set_source(source)
 
-   -- Accept <genome_visitor>.
-   function genome_node:accept(genome_visitor)
-
-   -- Make <genome_node> the parent of <child_node>.
-   function genome_node:is_part_of_genome_node(child_node)
-
-   -- Mark <genome_node>.
-   function genome_node:mark()
-
-   -- Returns true if <genome_node> is marked, false otherwise.
-   function genome_node:is_marked()
-
-   -- Returns true if <genome_node> contains a marked node, false otherwise.
-   function genome_node:contains_marked()
-
    -- Show leading part of GFF3 output for <feature_node>
    function feature_node:output_leading()
 
@@ -87,7 +88,15 @@
    -- joined sequences are returned.
    -- If none of the above applies nil is returned.
    function feature_node:extract_sequence(type, join, region_mapping)
+
 */
+
+/* exports the RegionNode class to Lua:
+
+   -- Returns a new region node for sequence id <seqid> spanning <range>.
+   function region_node_new(seqid, range)
+*/
+
 int gt_lua_open_genome_node(lua_State*);
 
 /* Push a <GtGenomeNode*> to Lua, takes ownership! */

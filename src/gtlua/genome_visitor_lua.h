@@ -22,9 +22,13 @@
 
 /* exports the GtNodeVisitor interface and its implementors to Lua:
 
+*/
+
+/* exports the GFF3Visitor class to Lua:
    -- Returns a new GFF3 visitor.
    function gff3_visitor_new()
 */
+
 int gt_lua_open_genome_visitor(lua_State*);
 
 #define GENOME_VISITOR_METATABLE  "GenomeTools.genome_visitor"

@@ -20,18 +20,21 @@
 
 #include "lua.h"
 
-/* exports the GtNodeStream interface and its implementors of libgtext to Lua:
+/* exports the GenomeStream interface and its implementors to Lua:
+   -- Returns the next genome node for <genome_stream> or nil.
+   function genome_stream:next_tree()
+*/
 
+/* exports the GFF3InStream class to Lua:
    -- Returns a new GFF3 input stream object for <filename>. The file <filename>
    -- has to be a sorted GFF3 file.
    function gff3_in_stream_new_sorted(filename)
+*/
 
+/* exports the GFF3OutStream class to Lua:
    -- Returns a new GFF3 output stream which pulls its features from
    -- <genome_stream>.
    function gff3_out_stream_new(genome_stream)
-
-   -- Returns the next genome node for <genome_stream> or nil.
-   function genome_stream:next_tree()
 */
 int gt_lua_open_genome_stream(lua_State*);
 

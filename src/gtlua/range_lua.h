@@ -38,11 +38,11 @@
 
    -- Returns an array containing the ranges from array <range_array> in sorted
    -- order.
-   function gt_ranges_sort(range_array)
+   function ranges_sort(range_array)
 
    -- Returns true if the ranges in array <range_array> are sorted, false
    -- otherwise.
-   function gt_ranges_are_sorted(range_array)
+   function ranges_are_sorted(range_array)
 */
 int gt_lua_open_range(lua_State*);
 
