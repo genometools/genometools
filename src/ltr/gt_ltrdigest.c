@@ -328,13 +328,13 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     had_err = -1;
 
   /* Always search for PPT. */
-  tests_to_run |= LTRDIGEST_RUN_PPT;
+  tests_to_run |= GT_LTRDIGEST_RUN_PPT;
 
   /* Open tRNA library if given. */
   if (!had_err && arguments->trna_lib
         && gt_str_length(arguments->trna_lib) > 0)
   {
-    tests_to_run |= LTRDIGEST_RUN_PBS;
+    tests_to_run |= GT_LTRDIGEST_RUN_PBS;
    arguments->pbs_opts.trna_lib = gt_bioseq_new(gt_str_get(arguments->trna_lib),
                                                  err);
     if (gt_error_is_set(err))
@@ -345,7 +345,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   /* Open HMMER files if given. */
   if (!had_err && gt_str_array_size(arguments->pdom_opts.hmm_files) > 0)
   {
-    tests_to_run |= LTRDIGEST_RUN_PDOM;
+    tests_to_run |= GT_LTRDIGEST_RUN_PDOM;
     arguments->pdom_opts.plan7_ts = gt_array_new(sizeof (struct plan7_s*));
     had_err = gt_pdom_load_hmm_files(&arguments->pdom_opts, err);
   }

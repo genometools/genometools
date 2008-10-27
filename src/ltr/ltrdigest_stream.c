@@ -31,8 +31,6 @@
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltr_visitor.h"
 
-#define GT_LTRDIGEST_TAG "LTRdigest"
-
 struct GtLTRdigestStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
@@ -84,7 +82,7 @@ static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
                              strand);
     gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                       ls->element.mainnode),
-                             "protein_match",
+                             GT_PDOM_TYPE,
                              rng.start,
                              rng.end,
                              strand);
@@ -100,16 +98,36 @@ static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
 
 static void pbs_attach_results_to_gff3(GtPBSResults *results,
                                        GtLTRElement *element,
+                                       GtStrand *canonical_strand,
                                        GtStr *tag)
 {
   GtRange pbs_range;
   GtGenomeNode *gf;
+  unsigned long i = 0;
   char buffer[BUFSIZ];
-  GtPBSHit* hit = gt_pbs_results_get_ranked_hit(results, 0);
+  GtPBSHit* hit = gt_pbs_results_get_ranked_hit(results, i++);
+  if (*canonical_strand == GT_STRAND_UNKNOWN)
+    *canonical_strand = gt_pbs_hit_get_strand(hit);
+  else
+  {
+    /* do we have to satisfy a strand constraint?
+     * then find best-scoring PBS on the given canonical strand */
+    while (gt_pbs_hit_get_strand(hit) != *canonical_strand
+             && i < gt_pbs_results_get_number_of_hits(results))
+    {
+      gt_log_log("dropping PBS because of nonconsistent strand: %s\n",
+                 gt_feature_node_get_attribute(element->mainnode,
+                                               "ID"));
+      hit = gt_pbs_results_get_ranked_hit(results, i++);
+    }
+    /* if there is none, do not report a PBS */
+    if (gt_pbs_hit_get_strand(hit) != *canonical_strand)
+      return;
+  }
   pbs_range = gt_pbs_hit_get_coords(hit);
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
-                           "primer_binding_site",
+                           GT_PBS_TYPE,
                            pbs_range.start,
                            pbs_range.end,
                            gt_pbs_hit_get_strand(hit));
@@ -130,16 +148,35 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
 
 static void ppt_attach_results_to_gff3(GtPPTResults *results,
                                        GtLTRElement *element,
+                                       GtStrand *canonical_strand,
                                        GtStr *tag)
 {
   GtRange ppt_range;
+  unsigned long i = 0;
   GtGenomeNode *gf;
-  GtPPTHit* hit = gt_ppt_results_get_ranked_hit(results, 0);
+  GtPPTHit* hit = gt_ppt_results_get_ranked_hit(results, i++);
+  if (*canonical_strand == GT_STRAND_UNKNOWN)
+    *canonical_strand = gt_ppt_hit_get_strand(hit);
+  else
+  {
+    /* find best-scoring PPT on the given canonical strand */
+    while (gt_ppt_hit_get_strand(hit) != *canonical_strand
+             && i < gt_ppt_results_get_number_of_hits(results))
+    {
+      gt_log_log("dropping PPT because of nonconsistent strand: %s\n",
+                 gt_feature_node_get_attribute(element->mainnode,
+                                               "ID"));
+      hit = gt_ppt_results_get_ranked_hit(results, i++);
+    }
+    /* if there is none, do not report a PPT */
+    if (gt_ppt_hit_get_strand(hit) != *canonical_strand)
+      return;
+  }
   ppt_range = gt_ppt_hit_get_coords(hit);
 
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
-                           "RR_tract",
+                           GT_PPT_TYPE,
                            ppt_range.start,
                            ppt_range.end,
                            gt_ppt_hit_get_strand(hit));
@@ -155,6 +192,7 @@ static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
   char *rev_seq;
   const char *base_seq = rawseq+element->leftLTR_5;
   unsigned long seqlen = gt_ltrelement_length(element);
+  GtStrand canonical_strand = GT_STRAND_UNKNOWN;
 
   /* create reverse strand sequence */
   rev_seq = gt_calloc(seqlen+1, sizeof (char));
@@ -162,40 +200,10 @@ static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
   rev_seq[seqlen] = '\0';
   (void) gt_reverse_complement(rev_seq, seqlen, err);
 
-  /* PPT finding
-   * -----------*/
-  if (ls->tests_to_run & LTRDIGEST_RUN_PPT)
-  {
-    GtPPTResults *ppt_results = NULL;
-    ppt_results = gt_ppt_find((const char*) base_seq, (const char*) rev_seq,
-                            element, ls->ppt_opts);
-    if (gt_ppt_results_get_number_of_hits(ppt_results) > 0)
-    {
-      ppt_attach_results_to_gff3(ppt_results, element,
-                                 ls->ltrdigest_tag);
-    }
-    gt_ppt_results_delete(ppt_results);
-  }
-
-  /* PBS finding
-   * ----------- */
-  if (ls->tests_to_run & LTRDIGEST_RUN_PBS)
-  {
-    GtPBSResults *pbs_results = NULL;
-    pbs_results = gt_pbs_find((const char*) base_seq, (const char*) rev_seq,
-                              element, ls->pbs_opts, err);
-     if (gt_pbs_results_get_number_of_hits(pbs_results) > 0)
-     {
-      pbs_attach_results_to_gff3(pbs_results, element,
-                                 ls->ltrdigest_tag);
-     }
-     gt_pbs_results_delete(pbs_results);
-  }
-
 #ifdef HAVE_HMMER
   /* Protein domain finding
    * ----------------------*/
-  if (ls->tests_to_run & LTRDIGEST_RUN_PDOM)
+  if (ls->tests_to_run & GT_LTRDIGEST_RUN_PDOM)
   {
     GtPdomResults *pdom_results = NULL;
     pdom_results = gt_pdom_find((const char*) base_seq, (const char*) rev_seq,
@@ -206,15 +214,11 @@ static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
       if (gt_double_compare(
                      gt_pdom_results_get_combined_evalue_fwd(pdom_results),
                      gt_pdom_results_get_combined_evalue_rev(pdom_results)) < 0)
-      {
-        gt_feature_node_set_strand((GtGenomeNode*) ls->element.mainnode,
-                                    GT_STRAND_FORWARD);
-      }
+        canonical_strand = GT_STRAND_FORWARD;
       else
-      {
-        gt_feature_node_set_strand((GtGenomeNode*) ls->element.mainnode,
-                                    GT_STRAND_REVERSE);
-      }
+        canonical_strand = GT_STRAND_REVERSE;
+      gt_feature_node_set_strand((GtGenomeNode*) ls->element.mainnode,
+                                    canonical_strand);
       /* create nodes for protein match annotations */
       (void) gt_pdom_results_foreach_domain_hit(pdom_results,
                                                 pdom_hit_attach_gff3,
@@ -224,6 +228,38 @@ static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
     gt_pdom_results_delete(pdom_results);
   }
 #endif
+
+  /* PPT finding
+   * -----------*/
+  if (ls->tests_to_run & GT_LTRDIGEST_RUN_PPT)
+  {
+    GtPPTResults *ppt_results = NULL;
+    ppt_results = gt_ppt_find((const char*) base_seq, (const char*) rev_seq,
+                            element, ls->ppt_opts);
+    if (gt_ppt_results_get_number_of_hits(ppt_results) > 0)
+    {
+      ppt_attach_results_to_gff3(ppt_results, element, &canonical_strand,
+                                 ls->ltrdigest_tag);
+    }
+    gt_ppt_results_delete(ppt_results);
+  }
+
+  /* PBS finding
+   * ----------- */
+  if (ls->tests_to_run & GT_LTRDIGEST_RUN_PBS)
+  {
+    GtPBSResults *pbs_results = NULL;
+    pbs_results = gt_pbs_find((const char*) base_seq, (const char*) rev_seq,
+                              element, ls->pbs_opts, err);
+     if (gt_pbs_results_get_number_of_hits(pbs_results) > 0)
+     {
+      pbs_attach_results_to_gff3(pbs_results, element, &canonical_strand,
+                                 ls->ltrdigest_tag);
+     }
+     gt_pbs_results_delete(pbs_results);
+  }
+
+
 
   gt_free(rev_seq);
 }

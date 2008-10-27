@@ -22,10 +22,15 @@
 #include "ltr/ppt.h"
 #include "ltr/pdom.h"
 
-enum LTRdigestRunScans {
-  LTRDIGEST_RUN_PPT  = 0x1,
-  LTRDIGEST_RUN_PBS  = 0x2,
-  LTRDIGEST_RUN_PDOM = 0x4
+enum GtLTRdigestRunScans {
+  GT_LTRDIGEST_RUN_PPT  = 0x1,
+  GT_LTRDIGEST_RUN_PBS  = 0x2,
+  GT_LTRDIGEST_RUN_PDOM = 0x4
 };
+
+#define GT_LTRDIGEST_TAG "LTRdigest"
+#define GT_PPT_TYPE      "RR_tract"
+#define GT_PBS_TYPE      "primer_binding_site"
+#define GT_PDOM_TYPE     "protein_match"
 
 #endif

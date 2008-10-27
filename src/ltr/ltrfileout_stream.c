@@ -349,7 +349,7 @@ static void write_metadata(GtGenFile *metadata_file,
     gt_genfile_xprintf(metadata_file,
                        "GFF3 input used\t%s\n", gfffilename);
 
-  if (tests_to_run & LTRDIGEST_RUN_PPT)
+  if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
     gt_genfile_xprintf(metadata_file,
                        "PPT length\t%lu-%lunt\t8-30nt\n",
@@ -363,7 +363,7 @@ static void write_metadata(GtGenFile *metadata_file,
                        "PPT search radius\t%u\t30\n", ppt_opts->radius);
   }
 
-  if (tests_to_run & LTRDIGEST_RUN_PBS)
+  if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
     if (trnafilename[0] != '/' && has_cwd)
       gt_genfile_xprintf(metadata_file,
@@ -396,7 +396,7 @@ static void write_metadata(GtGenFile *metadata_file,
   }
 
 #ifdef HAVE_HMMER
-  if (tests_to_run & LTRDIGEST_RUN_PDOM)
+  if (tests_to_run & GT_LTRDIGEST_RUN_PDOM)
   {
     unsigned long i;
     gt_genfile_xprintf(metadata_file,
@@ -495,12 +495,12 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   ls->fileprefix = file_prefix;
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_tabout.csv", file_prefix);
   ls->tabout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
-  if (tests_to_run & LTRDIGEST_RUN_PPT)
+  if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_ppt.fas", file_prefix);
     ls->pptout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
   }
-  if (tests_to_run & LTRDIGEST_RUN_PBS)
+  if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_pbs.fas", file_prefix);
     ls->pbsout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
