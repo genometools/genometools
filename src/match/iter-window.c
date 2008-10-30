@@ -94,3 +94,113 @@ const Uchar *windowiterator_next(Seqpos *currentpos,unsigned long *firstpos,
   }
   return NULL;
 }
+
+#ifdef  WITHWINDOWCHECK
+static void checkcurrentwindow(const Encodedsequence *encseq,
+                               const Uchar *buffer,
+                               unsigned long windowsize,
+                               unsigned long firstpos,
+                               Seqpos currentpos)
+{
+  unsigned long idx, bufpos, bfbufpos;
+  Uchar cc1, cc2;
+
+  bufpos = firstpos;
+  for (idx= 0; idx<windowsize; idx++)
+  {
+    bfbufpos = (firstpos + idx) % windowsize;
+    /*
+    printf("bufpos=%lu,(firstpos=%lu + idx=%lu) %% windowsize=%lu)=%lu\n",
+            bufpos,firstpos,idx,windowsize,bfbufpos);
+    */
+    gt_assert(bfbufpos == bufpos);
+    cc1 = buffer[bfbufpos];
+    cc2 = getencodedchar(encseq,currentpos-(windowsize-1)+idx,Forwardmode);
+    gt_assert(cc1 == cc2);
+    bufpos = (bufpos == windowsize-1) ? 0 : (bufpos + 1);
+  }
+}
+
+static void iteroverallwords(const Encodedsequence *encseq,
+                             unsigned long windowsize,
+                             Seqpos startpos,
+                             Seqpos endpos)
+{
+  unsigned long firstpos, bufsize;
+  Uchar currentchar;
+  Seqpos currentpos;
+  Encodedsequencescanstate *esr;
+  Uchar *buffer;
+  unsigned long windowschecked = 0;
+
+  gt_assert(endpos <= getencseqtotallength(encseq));
+  esr = newEncodedsequencescanstate();
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,startpos);
+  buffer = gt_malloc(sizeof(Uchar) * windowsize);
+  firstpos = bufsize = 0;
+  for (currentpos=startpos; currentpos < endpos; currentpos++)
+  {
+    currentchar = sequentialgetencodedchar(encseq,esr,currentpos,Forwardmode);
+    if (ISSPECIAL(currentchar))
+    {
+      bufsize = firstpos = 0;
+    } else
+    {
+      if (bufsize < windowsize)
+      {
+        buffer[bufsize++] = currentchar;
+      } else
+      {
+        buffer[firstpos++] = currentchar;
+        if (firstpos == windowsize)
+        {
+          firstpos = 0;
+        }
+      }
+    }
+    if (bufsize == windowsize)
+    {
+      checkcurrentwindow(encseq,
+                         buffer,
+                         windowsize,
+                         firstpos,
+                         currentpos);
+      windowschecked++;
+    }
+  }
+  freeEncodedsequencescanstate(&esr);
+  gt_free(buffer);
+  printf("# %lu windows checked\n",windowschecked);
+}
+
+static void iteroverallwords2(const Encodedsequence *encseq,
+                              unsigned long windowsize,
+                              Seqpos startpos,
+                              Seqpos endpos)
+{
+  Windowiterator *wit;
+  const Uchar *buffer;
+  Seqpos currentpos;
+  unsigned long firstpos, windowschecked = 0;
+
+  wit = windowiterator_new(encseq,windowsize,startpos,endpos);
+  while (true)
+  {
+    buffer = windowiterator_next(&currentpos,&firstpos,wit);
+    if (buffer != NULL)
+    {
+      checkcurrentwindow(encseq,
+                         buffer,
+                         windowsize,
+                         firstpos,
+                         currentpos);
+      windowschecked++;
+    } else
+    {
+      break;
+    }
+  }
+  windowiterator_delete(wit);
+  printf("# %lu windows checked\n",windowschecked);
+}
+#endif

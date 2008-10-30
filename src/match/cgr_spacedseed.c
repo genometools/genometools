@@ -133,117 +133,9 @@ static Genericindex *genericindex_new(const GtStr *indexname,
   return genericindex;
 }
 
-static void checkcurrentwindow(const Encodedsequence *encseq,
-                               const Uchar *buffer,
-                               unsigned long windowsize,
-                               unsigned long firstpos,
-                               Seqpos currentpos)
-{
-  unsigned long idx, bufpos, bfbufpos;
-  Uchar cc1, cc2;
-
-  bufpos = firstpos;
-  for (idx= 0; idx<windowsize; idx++)
-  {
-    bfbufpos = (firstpos + idx) % windowsize;
-    /*
-    printf("bufpos=%lu,(firstpos=%lu + idx=%lu) %% windowsize=%lu)=%lu\n",
-            bufpos,firstpos,idx,windowsize,bfbufpos);
-    */
-    gt_assert(bfbufpos == bufpos);
-    cc1 = buffer[bfbufpos];
-    cc2 = getencodedchar(encseq,currentpos-(windowsize-1)+idx,Forwardmode);
-    gt_assert(cc1 == cc2);
-    bufpos = (bufpos == windowsize-1) ? 0 : (bufpos + 1);
-  }
-}
-
-static void iteroverallwords(const Encodedsequence *encseq,
-                             unsigned long windowsize,
-                             Seqpos startpos,
-                             Seqpos endpos)
-{
-  unsigned long firstpos, bufsize;
-  Uchar currentchar;
-  Seqpos currentpos;
-  Encodedsequencescanstate *esr;
-  Uchar *buffer;
-  unsigned long windowschecked = 0;
-
-  gt_assert(endpos <= getencseqtotallength(encseq));
-  esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,encseq,Forwardmode,startpos);
-  buffer = gt_malloc(sizeof(Uchar) * windowsize);
-  firstpos = bufsize = 0;
-  for (currentpos=startpos; currentpos < endpos; currentpos++)
-  {
-    currentchar = sequentialgetencodedchar(encseq,esr,currentpos,Forwardmode);
-    if (ISSPECIAL(currentchar))
-    {
-      bufsize = firstpos = 0;
-    } else
-    {
-      if (bufsize < windowsize)
-      {
-        buffer[bufsize++] = currentchar;
-      } else
-      {
-        buffer[firstpos++] = currentchar;
-        if (firstpos == windowsize)
-        {
-          firstpos = 0;
-        }
-      }
-    }
-    if (bufsize == windowsize)
-    {
-      checkcurrentwindow(encseq,
-                         buffer,
-                         windowsize,
-                         firstpos,
-                         currentpos);
-      windowschecked++;
-    }
-  }
-  freeEncodedsequencescanstate(&esr);
-  gt_free(buffer);
-  printf("# %lu windows checked\n",windowschecked);
-}
-
-static void iteroverallwords2(const Encodedsequence *encseq,
-                              unsigned long windowsize,
-                              Seqpos startpos,
-                              Seqpos endpos)
-{
-  Windowiterator *wit;
-  const Uchar *buffer;
-  Seqpos currentpos;
-  unsigned long firstpos, windowschecked = 0;
-
-  wit = windowiterator_new(encseq,windowsize,startpos,endpos);
-  while (true)
-  {
-    buffer = windowiterator_next(&currentpos,&firstpos,wit);
-    if (buffer != NULL)
-    {
-      checkcurrentwindow(encseq,
-                         buffer,
-                         windowsize,
-                         firstpos,
-                         currentpos);
-      windowschecked++;
-    } else
-    {
-      break;
-    }
-  }
-  windowiterator_delete(wit);
-  printf("# %lu windows checked\n",windowschecked);
-}
-
 typedef struct
 {
-  unsigned long seedweight, numofonepositions;
+  unsigned long seedwidth, numofonepositions;
   unsigned char *onepositions;
   Bitstring seedbitvector;
 } Spacedseed;
@@ -255,19 +147,19 @@ static Spacedseed *spacedseed_new(const char *seedstring,GtError *err)
   bool haserr = false;
 
   spse = gt_malloc(sizeof(*spse));
-  spse->seedweight = spse->numofonepositions = 0;
+  spse->seedwidth = spse->numofonepositions = 0;
   spse->seedbitvector = 0;
   spse->onepositions = NULL;
   for (idx = 0; seedstring[idx] != '\0'; idx++)
   {
-    if (spse->seedweight == (unsigned long) INTWORDSIZE)
+    if (spse->seedwidth == (unsigned long) INTWORDSIZE)
     {
       gt_error_set(err,"space seed cannot be longer than %u",
                        (unsigned int) INTWORDSIZE);
       haserr = true;
       break;
     }
-    spse->seedweight++;
+    spse->seedwidth++;
     if (seedstring[idx] == '1')
     {
       spse->numofonepositions++;
@@ -308,7 +200,7 @@ static void singlewindowmatchspacedseed(Limdfsresources *limdfsresources,
   indexbasedspacedseeds(limdfsresources,
                         qptr,
                         spse->seedbitvector,
-                        spse->seedweight,
+                        spse->seedwidth,
                         dfst);
 }
 
@@ -321,18 +213,18 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
   const Uchar *qptr;
   unsigned long offset, skipvalue;
 
-  if (spse->seedweight > querylen)
+  if (spse->seedwidth > querylen)
   {
     return;
   }
   qptr = query;
   offset = 0;
-  while (qptr <= query + querylen - spse->seedweight)
+  while (qptr <= query + querylen - spse->seedwidth)
   {
-    skipvalue = containsspecialbytestring(qptr,offset,spse->seedweight);
-    if (skipvalue == spse->seedweight)
+    skipvalue = containsspecialbytestring(qptr,offset,spse->seedwidth);
+    if (skipvalue == spse->seedwidth)
     {
-      offset = spse->seedweight-1;
+      offset = spse->seedwidth-1;
       singlewindowmatchspacedseed(limdfsresources,dfst,qptr,spse);
       qptr++;
     } else
@@ -353,6 +245,48 @@ static void showmatch(GT_UNUSED void *processinfo,
   printf(FormatSeqpos "\n",PRINTSeqposcast(dbstartpos));
 }
 
+#ifdef WITHONLINE
+static void onlinespacedseedsearch(const Encodedsequence *encseq,
+                                   const Spacedseed *spse,
+                                   const Uchar *qptr,qp)
+{
+  Windowiterator *wit;
+  const Uchar *buffer;
+  Seqpos currentpos, totallength;
+  unsigned long firstpos, windowschecked = 0;
+  Bitstring bitmask;
+  bool matched;
+
+  totallength = getencseqtotallength(encseq);
+  wit = windowiterator_new(encseq,spse->seedwidth,0,totallength);
+  while (true)
+  {
+    buffer = windowiterator_next(&currentpos,&firstpos,wit);
+    if (buffer != NULL)
+    {
+      bitmask = FIRSTBIT;
+      matched = true;
+      for (idx=0; idx < spse->seedwidth; idx++)
+      {
+        if ((spse->seedbitvector & bitmask) && qptr[idx] != buffer[idx])
+        {
+          matched = false;
+          break;
+        }
+        bitmask >>= 1;
+      }
+      if (matched)
+      {
+      }
+    } else
+    {
+      break;
+    }
+  }
+  windowiterator_delete(wit);
+}
+#endif
+
 int matchspacedseed(bool withesa,
                     bool docompare,
                     const GtStr *str_inputindex,
@@ -363,7 +297,10 @@ int matchspacedseed(bool withesa,
   bool haserr = false;
   Spacedseed *spse;
 
+  /*
   spse = spacedseed_new("11011011000011011",err);
+  */
+  spse = spacedseed_new("111001001001010111",err);
   if (spse == NULL)
   {
     haserr = true;
@@ -382,11 +319,13 @@ int matchspacedseed(bool withesa,
     gt_assert(genericindex->suffixarray != NULL);
     gt_assert(genericindex->suffixarray->encseq != NULL);
     gt_assert(spse != NULL);
-    iteroverallwords(genericindex->suffixarray->encseq,spse->seedweight,
+    /*
+    iteroverallwords(genericindex->suffixarray->encseq,spse->seedwidth,
                      0,getencseqtotallength(genericindex->suffixarray->encseq));
-    iteroverallwords2(genericindex->suffixarray->encseq,spse->seedweight,
+    iteroverallwords2(genericindex->suffixarray->encseq,spse->seedwidth,
                       0,
                       getencseqtotallength(genericindex->suffixarray->encseq));
+    */
   }
   if (!haserr)
   {
