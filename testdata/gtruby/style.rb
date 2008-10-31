@@ -33,6 +33,10 @@ style = GT::Style.new()
 # load style file
 style.load_file(stylefile)
 
+# clone style file
+clone = style.clone
+raise if not clone
+
 # get color
 color = style.get_color("exon", "fill")
 raise if not color
