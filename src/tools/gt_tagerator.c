@@ -147,10 +147,10 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                            &arguments->skpp, false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_bool("nowildcards","do not output matches containing "
-                           "wildcard characters (e.g. N); only relevant for "
-                           "approximate matching",
-                           &arguments->nowildcards, false);
+  option = gt_option_new_bool("withwildcards","output matches containing "
+                              "wildcard characters (e.g. N); only relevant for "
+                              "approximate matching",
+                              &arguments->nowildcards, true);
   gt_option_parser_add_option(op, option);
   return op;
 }
