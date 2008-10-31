@@ -75,12 +75,13 @@ static void showmatch(void *processinfo,
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
 
   printf(FormatSeqpos,PRINTSeqposcast(dblen));
-  printf(" %c " FormatSeqpos,*showmatchinfo->rcdirptr ? '-' : '+',
-         PRINTSeqposcast(dbstartpos));
+  printf(" %c ",(*showmatchinfo->rcdirptr) ? '-' : '+');
+  printf(FormatSeqpos,PRINTSeqposcast(dbstartpos));
   if (showmatchinfo->tageratoroptions != NULL &&
       showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
     printf(" ");
+    gt_assert(dbsubstring != NULL);
     printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
     if (showmatchinfo->tageratoroptions->skpp)
     {
@@ -296,6 +297,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
   if (tageratoroptions->online || (tageratoroptions->maxdistance >= 0 &&
                                    tageratoroptions->docompare))
   {
+    gt_assert(mor != NULL);
     edistmyersbitvectorAPM(mor,
                            transformedtag,
                            taglen,
@@ -412,7 +414,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   bool haserr = false;
   int retval, try;
   unsigned int demand;
-  Limdfsresources *limdfsresources = NULL;
   Myersonlineresources *mor = NULL;
   ArraySimplematch storeonline, storeoffline;
   void *packedindex = NULL;
@@ -491,12 +492,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     unsigned int mapsize;
     const Uchar *symbolmap, *currenttag;
     char *desc = NULL;
-    const Matchbound **mbtab;
-    unsigned int maxdepth;
-    unsigned long maxpathlength;
     Processmatch processmatch;
     Showmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
+    Limdfsresources *limdfsresources = NULL;
 
     storeonline.rcdirptr = storeoffline.rcdirptr = &twl.rcdir;
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
@@ -510,7 +509,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     } else
     {
       processmatch = showmatch;
-      processmatchinfoonline = NULL;
       showmatchinfo.rcdirptr = &twl.rcdir;
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) (mapsize-1);
@@ -519,6 +517,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
+      processmatchinfoonline = &showmatchinfo;
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
@@ -529,45 +528,52 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     processmatch,
                                     processmatchinfoonline);
     }
-    if (withesa)
+    if (!tageratoroptions->online || tageratoroptions->docompare)
     {
-      mbtab = NULL;
-      maxdepth = 0;
-    } else
-    {
-      mbtab = bwtseq2mbtab(packedindex);
-      maxdepth = bwtseq2maxdepth(packedindex);
-      if (tageratoroptions->userdefinedmaxdepth >= 0 &&
-          maxdepth > (unsigned int) tageratoroptions->userdefinedmaxdepth)
+      const Matchbound **mbtab;
+      unsigned int maxdepth;
+      unsigned long maxpathlength;
+
+      if (withesa)
       {
-        maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
+        mbtab = NULL;
+        maxdepth = 0;
+      } else
+      {
+        mbtab = bwtseq2mbtab(packedindex);
+        maxdepth = bwtseq2maxdepth(packedindex);
+        if (tageratoroptions->userdefinedmaxdepth >= 0 &&
+            maxdepth > (unsigned int) tageratoroptions->userdefinedmaxdepth)
+        {
+          maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
+        }
       }
+      if (tageratoroptions->maxdistance >= 0)
+      {
+        maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
+                                         tageratoroptions->maxdistance);
+      } else
+      {
+        maxpathlength = (unsigned long) (1+MAXTAGSIZE);
+      }
+      limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
+                                           mbtab,
+                                           maxdepth,
+                                           suffixarray.encseq,
+                                           withesa,
+                                           tageratoroptions->nowildcards,
+                                           tageratoroptions->maxintervalwidth,
+                                           mapsize,
+                                           totallength,
+                                           maxpathlength,
+                                           processmatch,
+                                           processmatchinfooffline,
+                                           tageratoroptions->docompare
+                                             ? checkmstats
+                                             : showmstats,
+                                           &twl, /* refer to uninit structure */
+                                           dfst);
     }
-    if (tageratoroptions->maxdistance >= 0)
-    {
-      maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
-                                       tageratoroptions->maxdistance);
-    } else
-    {
-      maxpathlength = (unsigned long) (1+MAXTAGSIZE);
-    }
-    limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
-                                         mbtab,
-                                         maxdepth,
-                                         suffixarray.encseq,
-                                         withesa,
-                                         tageratoroptions->nowildcards,
-                                         tageratoroptions->maxintervalwidth,
-                                         mapsize,
-                                         totallength,
-                                         maxpathlength,
-                                         processmatch,
-                                         processmatchinfooffline,
-                                         tageratoroptions->docompare
-                                           ? checkmstats
-                                           : showmstats,
-                                         &twl, /* refer to uninit structure */
-                                         dfst);
     seqit = gt_seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
@@ -640,13 +646,13 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       gt_free(desc);
     }
     gt_free(showmatchinfo.eqsvector);
+    if (limdfsresources != NULL)
+    {
+      freeLimdfsresources(&limdfsresources,dfst);
+    }
   }
   FREEARRAY(&storeonline,Simplematch);
   FREEARRAY(&storeoffline,Simplematch);
-  if (limdfsresources != NULL)
-  {
-    freeLimdfsresources(&limdfsresources,dfst);
-  }
   if (mor != NULL)
   {
     freeMyersonlineresources(&mor);
