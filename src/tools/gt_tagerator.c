@@ -161,16 +161,16 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
 {
   TageratorOptions *arguments = tool_arguments;
 
+  if (!arguments->nowildcards && arguments->maxdistance <= 0)
+  {
+    arguments->nowildcards = true;
+  }
   if (arguments->maxdistance < 0)
   {
     if (arguments->online)
     {
       gt_error_set(err,"option -online requires option -e");
       return -1;
-    }
-    if (!arguments->nowildcards)
-    {
-      arguments->nowildcards = true;
     }
     if (arguments->maxintervalwidth == 0)
     {

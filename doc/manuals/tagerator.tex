@@ -127,10 +127,17 @@ Specify the maximum number of occurrences of exact prefix matches (in case of
 the matching statistics) or approximate prefix matches.
 }
 
-\Option{nowildcards}{}{
-Do not output matches containing wildcard characters (e.g. N). This
-option is not relevant for the \textit{ms}-mode and for the other modes
-with \(k=0\).
+\Option{withwildcards}{}{
+Output matches containing wildcard characters (e.g. N). This option cannot be
+used in any of the following cases:
+\begin{itemize}
+\item
+with option \Showoption{pck}, 
+\item
+in the \textit{ms}-mode,
+\item
+for all modes with \(k=0\).
+\end{itemize}
 }
 
 \Helpoption
