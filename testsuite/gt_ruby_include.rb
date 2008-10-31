@@ -51,10 +51,10 @@ if not $arguments["nocairo"] then
     run_ruby "#{$testdata}gtruby/view_stream.rb test.png #{$testdata}gff3_file_1_short.txt"
   end
 
-  Name "gtruby: AnnotationSketch bindings (config)"
+  Name "gtruby: AnnotationSketch bindings (style)"
   Keywords "gt_ruby"
   Test do
-    run_ruby "#{$testdata}gtruby/config.rb #{$cur}/gtdata/sketch/default.style"
+    run_ruby "#{$testdata}gtruby/style.rb #{$cur}/gtdata/sketch/default.style"
   end
 
   Name "gtruby: show_seqids"
