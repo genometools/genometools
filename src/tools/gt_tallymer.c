@@ -83,8 +83,7 @@ static void gt_tyr_mkindex_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser
-            *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
+static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option,
@@ -159,8 +158,8 @@ static GtOptionParser
 }
 
 static int gt_tyr_mkindex_arguments_check(int rest_argc,
-                                               void *tool_arguments,
-                                               GtError *err)
+                                          void *tool_arguments,
+                                          GtError *err)
 {
   Tyr_mkindex_options *arguments = tool_arguments;
 
@@ -285,12 +284,117 @@ static GtTool* gt_tyr_mkindex(void)
                      gt_tyr_mkindex_runner);
 }
 
-static int gt_tyr_occratio(GT_UNUSED int argc,
-                                GT_UNUSED const char *argv[],
-                                GtError *err)
+typedef struct
 {
-  gt_error_set(err,"tyr occratio not implemented yet");
-  return -1;
+  GtStrArray *mersizesstrings;
+  GtStr *str_indexname;
+  GtOption *refoptionmersizes;
+} Tyr_occratio_options;
+
+static void *gt_tyr_occratio_arguments_new(void)
+{
+  Tyr_occratio_options *arguments
+    = gt_malloc(sizeof (Tyr_occratio_options));
+  arguments->mersizesstrings = gt_str_array_new();
+  arguments->str_indexname = gt_str_new();
+  return arguments;
+}
+
+static void gt_tyr_occratio_arguments_delete(void *tool_arguments)
+{
+  Tyr_occratio_options *arguments = tool_arguments;
+
+  if (!arguments)
+  {
+    return;
+  }
+  gt_str_array_delete(arguments->mersizesstrings);
+  gt_str_delete(arguments->str_indexname);
+  gt_option_delete(arguments->refoptionmersizes);
+  gt_free(arguments);
+}
+
+static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
+{
+  GtOptionParser *op;
+  GtOption *optionmersizes, *optionesa;
+  Tyr_occratio_options *arguments = tool_arguments;
+
+  op = gt_option_parser_new("[options] enhanced-suffix-array",
+                            "Compute occurrence ratio for a set of sequences "
+                            "represented by an enhanced suffix array.");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  optionmersizes = gt_option_new_stringarray(
+                          "mersizes",
+                          "specify mersizes as non-empty sequences of "
+                          "non decreasing positive integers",
+                          arguments->mersizesstrings);
+  arguments->refoptionmersizes = gt_option_ref(optionmersizes);
+  gt_option_parser_add_option(op, optionmersizes);
+
+  optionesa = gt_option_new_string("esa","specify input index",
+                                   arguments->str_indexname,
+                                   NULL);
+  gt_option_is_mandatory(optionesa);
+  gt_option_parser_add_option(op, optionesa);
+  return op;
+}
+
+static int gt_tyr_occratio_arguments_check(int rest_argc,
+                                           GT_UNUSED void *tool_arguments,
+                                           GtError *err)
+{
+  if (rest_argc != 0)
+  {
+    gt_error_set(err,"superfluous arguments");
+    return -1;
+  }
+  return 0;
+}
+
+static int gt_tyr_occratio_runner(int argc,
+                                  GT_UNUSED const char **argv,
+                                  int parsed_args,
+                                  void *tool_arguments,
+                                  GtError *err)
+{
+  Tyr_occratio_options *arguments = tool_arguments;
+  unsigned long *mersizes = NULL;
+  bool haserr = false;
+
+  gt_assert(parsed_args == argc);
+  if (gt_option_is_set(arguments->refoptionmersizes))
+  {
+    unsigned long idx;
+
+    mersizes = gt_malloc(sizeof(*mersizes) *
+                         gt_str_array_size(arguments->mersizesstrings));
+    for (idx=0; idx<gt_str_array_size(arguments->mersizesstrings); idx++)
+    {
+      long readnum;
+
+      if (sscanf(gt_str_array_get(arguments->mersizesstrings,idx),
+                 "%ld",&readnum) != 1)
+      {
+        gt_error_set(err,"cannot parse argument \"%s\" of option -mersizes: "
+                     "must be a positive integer",
+                     gt_str_array_get(arguments->mersizesstrings,idx));
+        haserr = true;
+        break;
+      }
+    }
+  }
+  gt_free(mersizes);
+  return haserr ? - 1: 0;
+}
+
+static GtTool *gt_tyr_occratio(void)
+{
+  return gt_tool_new(gt_tyr_occratio_arguments_new,
+                     gt_tyr_occratio_arguments_delete,
+                     gt_tyr_occratio_option_parser_new,
+                     gt_tyr_occratio_arguments_check,
+                     gt_tyr_occratio_runner);
 }
 
 typedef struct
@@ -333,8 +437,7 @@ static void gt_tyr_search_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser
-          *gt_tyr_search_option_parser_new(void *tool_arguments)
+static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option;
@@ -374,8 +477,8 @@ static GtOptionParser
 }
 
 static int gt_tyr_search_arguments_check(int rest_argc,
-                                              void *tool_arguments,
-                                              GtError *err)
+                                         void *tool_arguments,
+                                         GtError *err)
 {
   Optionargmodedesc showmodedesctable[] =
   {
@@ -397,7 +500,7 @@ static int gt_tyr_search_arguments_check(int rest_argc,
 
   if (rest_argc < 1)
   {
-    gt_error_set(err,"missing tyr-indexnames and queryfilenames");
+    gt_error_set(err,"missing tyr-indexname and queryfilenames");
     return -1;
   }
   if (rest_argc < 2)
@@ -431,10 +534,10 @@ static int gt_tyr_search_arguments_check(int rest_argc,
 }
 
 static int gt_tyr_search_runner(int argc,
-                                     const char **argv,
-                                     int parsed_args,
-                                     void *tool_arguments,
-                                     GtError *err)
+                                const char **argv,
+                                int parsed_args,
+                                void *tool_arguments,
+                                GtError *err)
 {
   int idx;
   Tyr_search_options *arguments = tool_arguments;
@@ -446,12 +549,12 @@ static int gt_tyr_search_runner(int argc,
     gt_str_array_add_cstr(arguments->queryfilenames,argv[idx]);
   }
   if (tyrsearch(arguments->str_indexname,
-                     arguments->queryfilenames,
-                     arguments->showmode,
-                     arguments->strand,
-                     arguments->verbose,
-                     arguments->performtest,
-                     err) != 0)
+                arguments->queryfilenames,
+                arguments->showmode,
+                arguments->strand,
+                arguments->verbose,
+                arguments->performtest,
+                err) != 0)
   {
     return -1;
   }
@@ -471,7 +574,7 @@ static void *gt_tyr_arguments_new(void)
 {
   GtToolbox *tyr_toolbox = gt_toolbox_new();
   gt_toolbox_add_tool(tyr_toolbox, "mkindex", gt_tyr_mkindex());
-  gt_toolbox_add(tyr_toolbox, "occratio", gt_tyr_occratio);
+  gt_toolbox_add_tool(tyr_toolbox, "occratio", gt_tyr_occratio());
   gt_toolbox_add_tool(tyr_toolbox, "search", gt_tyr_search());
   return tyr_toolbox;
 }
