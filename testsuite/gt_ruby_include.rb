@@ -50,7 +50,8 @@ if not $arguments["nocairo"] then
   Name "gtruby: AnnotationSketch bindings (PNG stream)"
   Keywords "gt_ruby"
   Test do
-    run_ruby "#{$testdata}gtruby/view_stream.rb test.png #{$testdata}gff3_file_1_short.txt"
+    run_ruby "#{$testdata}gtruby/sketch_stream.rb test.png " +
+             "#{$testdata}gff3_file_1_short.txt"
   end
 
   Name "gtruby: AnnotationSketch bindings (style)"

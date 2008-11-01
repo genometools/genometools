@@ -15,7 +15,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# testing the Ruby bindings for libgtview (similar to the view tool)
+# testing the Ruby bindings for AnnotationSketch (similar to the sketch tool)
 
 require 'gtruby'
 
