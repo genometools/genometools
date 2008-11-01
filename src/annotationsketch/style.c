@@ -99,6 +99,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
   int had_err = 0;
   gt_error_check(err);
   gt_assert(sty && sty->L && filename);
+  gt_assert(!lua_gettop(sty->L));
   sty->filename = gt_cstr_dup(filename);
   gt_log_log("Trying to load style file: %s...", filename);
   if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {
@@ -114,6 +115,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
     }
     lua_pop(sty->L, 1);
   }
+  gt_assert(!lua_gettop(sty->L));
   return had_err;
 }
 
@@ -177,12 +179,14 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
 {
   int i = 0;
   gt_assert(sty && section && key && color);
+  gt_assert(!lua_gettop(sty->L));
   /* set default colors */
   color->red=0.5; color->green = 0.5; color->blue=0.5;
   /* get section */
   i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
+    gt_assert(!lua_gettop(sty->L));
     return false;
   }
   /* lookup color entry for given feature */
@@ -196,6 +200,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
       lua_pop(sty->L, 3);
+      gt_assert(!lua_gettop(sty->L));
       return false;
     }
   }
@@ -203,6 +208,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
     gt_log_log("no colors are defined for type '%s', will use defaults.", key);
     lua_pop(sty->L, 3);
+    gt_assert(!lua_gettop(sty->L));
     return false;
   } else i++;
   /* update color struct */
@@ -232,6 +238,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   lua_pop(sty->L, 1);
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
   return true;
 }
 
@@ -240,6 +247,7 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key && color);
+  gt_assert(!lua_gettop(sty->L));
   i = style_find_section_for_setting(sty, section);
   lua_getfield(sty->L, -1, key);
   i++;
@@ -258,6 +266,7 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
   lua_pushnumber(sty->L, color->blue);
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
 }
 
 bool gt_style_get_str(const GtStyle *sty, const char *section,
@@ -265,10 +274,12 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
 {
   int i = 0;
   gt_assert(sty && key && section);
+  gt_assert(!lua_gettop(sty->L));
   /* get section */
   i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
+    gt_assert(!lua_gettop(sty->L));
     return false;
   }
   /* lookup entry for given key */
@@ -282,6 +293,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
       lua_pop(sty->L, 3);
+      gt_assert(!lua_gettop(sty->L));
       return false;
     }
   }
@@ -289,12 +301,14 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   if (lua_isnil(sty->L, -1) || !lua_isstring(sty->L, -1)) {
     gt_log_log("no value is defined for key '%s'", key);
     lua_pop(sty->L, i+1);
+    gt_assert(!lua_gettop(sty->L));
     return false;
   } else i++;
   /* retrieve string */
   gt_str_set(text, lua_tostring(sty->L, -1));
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
   return true;
 }
 
@@ -303,11 +317,13 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key && str);
+  gt_assert(!lua_gettop(sty->L));
   i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushstring(sty->L, gt_str_get(str));
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
 }
 
 bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
@@ -315,10 +331,12 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && key && section && val);
+  gt_assert(!lua_gettop(sty->L));
   /* get section */
   i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
+    gt_assert(!lua_gettop(sty->L));
     return false;
   }
   /* lookup entry for given key */
@@ -332,6 +350,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
       lua_pop(sty->L, 3);
+      gt_assert(!lua_gettop(sty->L));
       return false;
     }
   }
@@ -339,12 +358,14 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
     gt_log_log("no or non-numeric value found for key '%s'", key);
     lua_pop(sty->L, i+1);
+    gt_assert(!lua_gettop(sty->L));
     return false;
   } else i++;
   /* retrieve value */
   *val = lua_tonumber(sty->L, -1);
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
   return true;
 }
 
@@ -353,11 +374,13 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key);
+  gt_assert(!lua_gettop(sty->L));
   i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushnumber(sty->L, number);
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
 }
 
 bool gt_style_get_bool(const GtStyle *sty, const char *section,
@@ -366,10 +389,12 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
 {
   int i = 0;
   gt_assert(sty && key && section);
+  gt_assert(!lua_gettop(sty->L));
   /* get section */
   i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
+    gt_assert(!lua_gettop(sty->L));
     return false;
   }
   /* lookup entry for given key */
@@ -377,12 +402,14 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   if (lua_isnil(sty->L, -1) || !lua_isboolean(sty->L, -1)) {
     gt_log_log("no or non-boolean value found for key '%s'", key);
     lua_pop(sty->L, i+1);
+    gt_assert(!lua_gettop(sty->L));
     return false;
   } else i++;
   /* retrieve value */
   *val = lua_toboolean(sty->L, -1);
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
   return true;
 }
 
@@ -391,16 +418,19 @@ void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key);
+  gt_assert(!lua_gettop(sty->L));
   i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushboolean(sty->L, flag);
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
+  gt_assert(!lua_gettop(sty->L));
 }
 
 void gt_style_unset(GtStyle *sty, const char *section, const char *key)
 {
   gt_assert(sty && section && key);
+  gt_assert(!lua_gettop(sty->L));
   lua_getglobal(sty->L, "style");
   if (!lua_isnil(sty->L, -1)) {
     gt_assert(lua_istable(sty->L, -1));
@@ -414,6 +444,7 @@ void gt_style_unset(GtStyle *sty, const char *section, const char *key)
     lua_pop(sty->L, 1);
   }
   lua_pop(sty->L, 1);
+  gt_assert(!lua_gettop(sty->L));
 }
 
 int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
@@ -421,6 +452,7 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
   int had_err;
   gt_error_check(err);
   gt_assert(sty && outstr);
+  gt_assert(!lua_gettop(sty->L));
   lua_getglobal(sty->L, "style");
   gt_str_append_cstr(outstr, "style = {\n");
   if (lua_istable(sty->L, -1))
@@ -431,6 +463,7 @@ int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
   }
   gt_str_append_cstr(outstr, "}");
   lua_pop(sty->L, 1);
+  gt_assert(!lua_gettop(sty->L));
   return had_err;
 }
 
