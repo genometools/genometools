@@ -55,14 +55,24 @@ static int elemcmp(const void *a, const void *b)
 int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
 {
   GtRange range_a, range_b;
-  int ret;
+  int ret = 0;
   gt_assert(block1 && block2);
   range_a = gt_block_get_range(block1),
   range_b = gt_block_get_range(block2);
   ret = gt_range_compare(&range_a, &range_b);
-  if (ret == 0 && block1 != block2)
-    ret = strcmp(gt_str_get(gt_block_get_caption(block1)),
-                 gt_str_get(gt_block_get_caption(block2)));
+  if (ret == 0 && block1 != block2) {
+    GtStr *caption1, *caption2;
+    caption1 = gt_block_get_caption(block1);
+    caption2 = gt_block_get_caption(block2);
+    /* blocks do not necessarily have captions. If both have a caption, we
+       compare them. If only one block has a caption, this block comes first. */
+    if (caption1 && caption2)
+      ret = strcmp(gt_str_get(caption1), gt_str_get(caption2));
+    else if (caption1)
+      ret = -1;
+    else if (caption2)
+      ret = 1;
+  }
   return ret;
 }
 
