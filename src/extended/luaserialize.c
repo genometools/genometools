@@ -108,9 +108,15 @@ static int parse_table(lua_State *L, GtStr *out, int index, int level,
 
 int gt_lua_table_to_str(lua_State *L, GtStr *out, int index, GtError *err)
 {
+  int had_err;
+#ifndef NDEBUG
+  int stack_size = lua_gettop(L);
+#endif
   gt_error_check(err);
   gt_assert(L && out && lua_istable(L, index));
-  return parse_table(L, out, index, 1, err);
+  had_err = parse_table(L, out, index, 1, err);
+  gt_assert(lua_gettop(L) == stack_size); /* make sure the stack doesn't grow */
+  return had_err;
 }
 
 int gt_lua_serializer_unit_test(GtError *err)
