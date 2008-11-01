@@ -411,7 +411,9 @@ void gt_style_unset(GtStyle *sty, const char *section, const char *key)
       lua_pushnil(sty->L);
       lua_settable(sty->L, -3);
     }
+    lua_pop(sty->L, 1);
   }
+  lua_pop(sty->L, 1);
 }
 
 int gt_style_to_str(const GtStyle *sty, GtStr *outstr, GtError *err)
