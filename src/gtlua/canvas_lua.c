@@ -112,7 +112,13 @@ static const struct luaL_Reg canvas_lib_m [] = {
 
 int gt_lua_open_canvas(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   luaL_newmetatable(L, CANVAS_METATABLE);
   lua_pushvalue(L, -1); /* duplicate the metatable */
   lua_setfield(L, -2, "__index");
@@ -122,7 +128,10 @@ int gt_lua_open_canvas(lua_State *L)
   lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, canvas_lib_m);
+  lua_pop(L, 1);
   luaL_register(L, "gt", canvas_lib_f);
+  lua_pop(L, 1);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
 

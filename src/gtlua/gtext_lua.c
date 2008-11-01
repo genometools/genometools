@@ -28,7 +28,13 @@
 
 int gt_lua_open_extended(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   gt_lua_open_cds_stream(L);
   gt_lua_open_csa_stream(L);
   gt_lua_open_genome_node(L);
@@ -37,5 +43,6 @@ int gt_lua_open_extended(lua_State *L)
   gt_lua_open_genome_visitor(L);
   gt_lua_open_region_mapping(L);
   gt_lua_open_stream_evaluator(L);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }

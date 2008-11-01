@@ -153,7 +153,13 @@ static const struct luaL_Reg range_lib_m [] = {
 
 int gt_lua_open_range(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   luaL_newmetatable(L, RANGE_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
@@ -162,6 +168,8 @@ int gt_lua_open_range(lua_State *L)
   luaL_register(L, NULL, range_lib_m);
   gt_lua_export_metatable(L, RANGE_METATABLE);
   luaL_register(L, "gt", range_lib_f);
+  lua_pop(L, 1);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
 

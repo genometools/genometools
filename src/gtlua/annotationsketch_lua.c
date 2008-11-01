@@ -26,12 +26,19 @@
 
 int gt_lua_open_annotationsketch(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   gt_lua_open_canvas(L);
   gt_lua_open_diagram(L);
   gt_lua_open_feature_index(L);
   gt_lua_open_feature_stream(L);
   gt_lua_open_feature_visitor(L);
   gt_lua_open_imageinfo(L);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }

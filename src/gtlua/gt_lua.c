@@ -26,11 +26,18 @@
 
 int gt_lua_open_lib(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   gt_lua_open_core(L); /* open core */
   gt_lua_open_extended(L); /* open extended */
 #ifndef WITHOUT_CAIRO
   gt_lua_open_annotationsketch(L); /* open annotationsketch */
 #endif
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
