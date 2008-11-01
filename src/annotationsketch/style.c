@@ -112,6 +112,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
     gt_error_set(err, "cannot run style file: %s",
               lua_tostring(sty->L, -1));
     had_err = -1;
+    lua_pop(sty->L, 1);
   }
   if (!had_err) {
     lua_getglobal(sty->L, "style");
