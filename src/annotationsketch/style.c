@@ -40,7 +40,7 @@ struct GtStyle
   char *filename;
 };
 
-static void gt_style_lua_new_table(lua_State *L, const char *key)
+static void style_lua_new_table(lua_State *L, const char *key)
 {
   lua_pushstring(L, key);
   lua_newtable(L);
@@ -128,7 +128,7 @@ void gt_style_reload(GtStyle *sty)
 /* Searches for <section> inside the style table, creating it if it does not
    exist and finally pushing it on the Lua stack (at the top).
    Returns the total number of items pushed on the stack by this function. */
-static int gt_style_find_section_for_setting(GtStyle* sty, const char *section)
+static int style_find_section_for_setting(GtStyle* sty, const char *section)
 {
   int depth = 0;
   gt_assert(sty && section);
@@ -143,7 +143,7 @@ static int gt_style_find_section_for_setting(GtStyle* sty, const char *section)
   lua_getfield(sty->L, -1, section);
   if (lua_isnil(sty->L, -1)) {
     lua_pop(sty->L, 1);
-    gt_style_lua_new_table(sty->L, section);
+    style_lua_new_table(sty->L, section);
     lua_getfield(sty->L, -1, section);
   }
   depth++;
@@ -152,7 +152,7 @@ static int gt_style_find_section_for_setting(GtStyle* sty, const char *section)
 
 /* Searches for <section> inside the style table, returning -1 if it is not
    found. Otherwise the number of items pushed onto the stack is returned. */
-static int gt_style_find_section_for_getting(const GtStyle *sty,
+static int style_find_section_for_getting(const GtStyle *sty,
                                           const char *section)
 {
   int depth = 0;
@@ -180,7 +180,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   /* set default colors */
   color->red=0.5; color->green = 0.5; color->blue=0.5;
   /* get section */
-  i = gt_style_find_section_for_getting(sty, section);
+  i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
     return false;
@@ -240,12 +240,12 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key && color);
-  i = gt_style_find_section_for_setting(sty, section);
+  i = style_find_section_for_setting(sty, section);
   lua_getfield(sty->L, -1, key);
   i++;
   if (lua_isnil(sty->L, -1)) {
     lua_pop(sty->L, 1);
-    gt_style_lua_new_table(sty->L, key);
+    style_lua_new_table(sty->L, key);
     lua_getfield(sty->L, -1, key);
   }
   lua_pushstring(sty->L, "red");
@@ -266,7 +266,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   int i = 0;
   gt_assert(sty && key && section);
   /* get section */
-  i = gt_style_find_section_for_getting(sty, section);
+  i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
     return false;
@@ -303,7 +303,7 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key && str);
-  i = gt_style_find_section_for_setting(sty, section);
+  i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushstring(sty->L, gt_str_get(str));
   lua_settable(sty->L, -3);
@@ -316,7 +316,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   int i = 0;
   gt_assert(sty && key && section && val);
   /* get section */
-  i = gt_style_find_section_for_getting(sty, section);
+  i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
     return false;
@@ -353,7 +353,7 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key);
-  i = gt_style_find_section_for_setting(sty, section);
+  i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushnumber(sty->L, number);
   lua_settable(sty->L, -3);
@@ -367,7 +367,7 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   int i = 0;
   gt_assert(sty && key && section);
   /* get section */
-  i = gt_style_find_section_for_getting(sty, section);
+  i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
   if (i < 0) {
     return false;
@@ -391,7 +391,7 @@ void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,
 {
   int i = 0;
   gt_assert(sty && section && key);
-  i = gt_style_find_section_for_setting(sty, section);
+  i = style_find_section_for_setting(sty, section);
   lua_pushstring(sty->L, key);
   lua_pushboolean(sty->L, flag);
   lua_settable(sty->L, -3);
