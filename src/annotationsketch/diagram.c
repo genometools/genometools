@@ -579,13 +579,12 @@ static void gt_diagram_build(GtDiagram *diagram, GtArray *features)
 
   /* initialise caches */
   diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
-  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT,
-                                                  NULL, gt_free_func);
+  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
+                                                   gt_free_func);
 
   /* do node traversal for each root feature */
   for (i = 0; i < gt_array_size(features); i++) {
-    GtFeatureNode *current_root = *(GtFeatureNode**)
-                                                 gt_array_get(features,i);
+    GtFeatureNode *current_root = *(GtFeatureNode**) gt_array_get(features,i);
     traverse_genome_nodes(current_root, &gt_genome_node_children);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
