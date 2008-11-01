@@ -87,6 +87,7 @@ GTR* gtr_new(GtError *err)
   }
 #ifndef WITHOUT_CAIRO
   if (!had_err) {
+    lua_settop(gtr->L, 0);
     if (!(gtr->style = gt_style_new_with_state(gtr->L)))
       had_err = -1;
   }

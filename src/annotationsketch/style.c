@@ -89,6 +89,7 @@ GtStyle* gt_style_new(GtError *err)
 GtStyle* gt_style_new_with_state(lua_State *L)
 {
   GtStyle *sty;
+  gt_assert(L && !lua_gettop(L));
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->L = L;
   return sty;
