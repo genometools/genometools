@@ -18,7 +18,8 @@ if not $arguments["nocairo"] then
   Name "gtruby: feature_index and feature_stream bindings"
   Keywords "gt_ruby"
   Test do
-    run_ruby "#{$testdata}gtruby/feature_stuff.rb #{$testdata}gff3_file_1_short.txt"
+    run_ruby "#{$testdata}gtruby/feature_stuff.rb " +
+             "#{$testdata}gff3_file_1_short.txt"
     run "env LC_ALL=C sort #{$last_stdout}"
     run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
   end
@@ -26,13 +27,14 @@ if not $arguments["nocairo"] then
   Name "gtruby: AnnotationSketch bindings (valid gff3 file)"
   Keywords "gt_ruby"
   Test do
-    run_ruby "#{$testdata}gtruby/view.rb test.png #{$testdata}gff3_file_1_short.txt"
+    run_ruby "#{$testdata}gtruby/sketch.rb test.png " +
+             "#{$testdata}gff3_file_1_short.txt"
   end
 
   Name "gtruby: AnnotationSketch bindings (corrupt gff3 file)"
   Keywords "gt_ruby"
   Test do
-    run_ruby("#{$testdata}gtruby/view.rb test.png #{$testdata}corrupt.gff3",
+    run_ruby("#{$testdata}gtruby/sketch.rb test.png #{$testdata}corrupt.gff3",
              :retval => 1)
     grep $last_stderr, "GenomeTools error"
   end
@@ -40,8 +42,8 @@ if not $arguments["nocairo"] then
   Name "gtruby: AnnotationSketch bindings (nonexistent gff3 file)"
   Keywords "gt_ruby"
   Test do
-    run_ruby("#{$testdata}gtruby/view.rb test.png #{$testdata}nonexistent_file",
-             :retval => 1)
+    run_ruby("#{$testdata}gtruby/sketch.rb test.png " +
+             "#{$testdata}nonexistent_file", :retval => 1)
     grep $last_stderr, "GenomeTools error"
   end
 
