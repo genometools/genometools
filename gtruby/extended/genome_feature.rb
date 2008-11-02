@@ -26,14 +26,14 @@ module GT
   typealias "bool", "ibool"
   extern "const GtGenomeNodeClass* gt_feature_node_class(void)"
   extern "void* gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*)"
-  extern "const char* gt_feature_node_get_type(Gt_GenomeFeature*)"
-  extern "int gt_feature_node_get_strand(GtGenomeFeature*)"
-  extern "int gt_feature_node_get_phase(GtGenomeFeature*)"
-  extern "float gt_feature_node_get_score(GtGenomeFeature*)"
-  extern "bool gt_feature_node_score_is_defined(const GtGenomeFeature*)"
+  extern "const char* gt_feature_node_get_type(GtFeatureNode*)"
+  extern "int gt_feature_node_get_strand(GtFeatureNode*)"
+  extern "int gt_feature_node_get_phase(GtFeatureNode*)"
+  extern "float gt_feature_node_get_score(GtFeatureNode*)"
+  extern "bool gt_feature_node_score_is_defined(const GtFeatureNode*)"
   extern "const char* gt_feature_node_get_attribute(GtGenomeNode*, " +
                                                      "const char*)"
-  extern "void gt_feature_node_foreach_attribute(GtGenomeFeature*, void*, " +
+  extern "void gt_feature_node_foreach_attribute(GtFeatureNode*, void*, " +
                                                   "void*)"
 
   #callback to populate attribute list
