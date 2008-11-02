@@ -28,12 +28,13 @@
 #include "match/defined-types.h"
 #include "match/intbits.h"
 #include "match/intbits-tab.h"
-#include "tools/gt_tallymer.h"
 #include "match/tyr-mkindex.h"
 #include "match/tyr-show.h"
 #include "match/tyr-search.h"
 #include "match/tyr-mersplit.h"
 #include "match/tyr-occratio.h"
+#include "match/format64.h"
+#include "tools/gt_tallymer.h"
 
 typedef enum
 {
@@ -562,6 +563,159 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
   return haserr ? - 1: 0;
 }
 
+static void showitvdistribution(const Arrayuint64_t *distribution,
+                                const Bitstring *outputvector)
+{
+  unsigned long idx;
+
+  for (idx=0; idx < distribution->nextfreeuint64_t; idx++)
+  {
+    if ((outputvector == NULL || ISIBITSET(outputvector,idx)) &&
+       distribution->spaceuint64_t[idx] > 0)
+    {
+      /*@ignore@*/
+      printf("%lu " Formatuint64_t "\n",
+              idx,
+              PRINTuint64_tcast(distribution->spaceuint64_t[idx]));
+      /*@end@*/
+    }
+  }
+}
+
+typedef enum
+{
+  Onlyshowsum,
+  Showfirst,
+  Showsecond
+} Summode;
+
+static void showitvsumdistributionoftwo(Summode mode,
+                                        const Arrayuint64_t *dist1,
+                                        const Arrayuint64_t *dist2,
+                                        const Bitstring *outputvector)
+{
+  unsigned long idx;
+  uint64_t sumoftwo, tmp;
+
+  for (idx=0; /* Nothing */ ; idx++)
+  {
+    if (outputvector == NULL || ISIBITSET(outputvector,idx))
+    {
+      if (idx < dist1->nextfreeuint64_t)
+      {
+        if (idx < dist2->nextfreeuint64_t)
+        {
+          sumoftwo = dist1->spaceuint64_t[idx] + dist2->spaceuint64_t[idx];
+        } else
+        {
+          sumoftwo = dist1->spaceuint64_t[idx];
+        }
+      } else
+      {
+        if (idx < dist2->nextfreeuint64_t)
+        {
+          sumoftwo = dist2->spaceuint64_t[idx];
+        } else
+        {
+          break;
+        }
+      }
+      if (sumoftwo > 0)
+      {
+        if (mode == Onlyshowsum)
+        {
+          /*@ignore@*/
+          printf("%lu " Formatuint64_t "\n",
+                  idx,
+                  PRINTuint64_tcast(sumoftwo));
+          /*@end@*/
+        } else
+        {
+          if (mode == Showfirst)
+          {
+            tmp = dist1->spaceuint64_t[idx];
+          } else
+          {
+            tmp = dist2->spaceuint64_t[idx];
+          }
+          /*@ignore@*/
+          printf("%lu " Formatuint64_t " %.3f\n",
+                idx,
+                PRINTuint64_tcast(tmp),
+                (double) tmp/(double) sumoftwo);
+          /*@end@*/
+        }
+      }
+    }
+  }
+}
+
+#define ONLYONCE     "(counting each non unique mer only once)"
+#define MORETHANONCE "(counting each non unique mer more than once)"
+
+static void showoccratios(const Arrayuint64_t *uniquedistribution,
+                          const Arrayuint64_t *nonuniquedistribution,
+                          const Arrayuint64_t *nonuniquemultidistribution,
+                          unsigned int outputmode,
+                          const Bitstring *outputvector)
+{
+  if (outputmode & TYROCC_OUTPUTUNIQUE)
+  {
+    printf("# distribution of unique mers\n");
+    if (outputmode & TYROCC_OUTPUTRELATIVE)
+    {
+      showitvsumdistributionoftwo(Showfirst,
+                                  uniquedistribution,
+                                  nonuniquedistribution,
+                                  outputvector);
+    } else
+    {
+      showitvdistribution(uniquedistribution,outputvector);
+    }
+  }
+  if (outputmode & TYROCC_OUTPUTNONUNIQUE)
+  {
+    printf("# distribution of non unique mers " ONLYONCE "\n");
+    if (outputmode & TYROCC_OUTPUTRELATIVE)
+    {
+      showitvsumdistributionoftwo(Showsecond,
+                                  uniquedistribution,
+                                  nonuniquedistribution,
+                                  outputvector);
+    } else
+    {
+      showitvdistribution(nonuniquedistribution,outputvector);
+    }
+  }
+  if (outputmode & TYROCC_OUTPUTNONUNIQUEMULTI)
+  {
+    printf("# distribution of non unique mers " MORETHANONCE "\n");
+    if (outputmode & TYROCC_OUTPUTRELATIVE)
+    {
+      showitvsumdistributionoftwo(Showsecond,
+                                  uniquedistribution,
+                                  nonuniquemultidistribution,
+                                  outputvector);
+    } else
+    {
+      showitvdistribution(nonuniquemultidistribution,outputvector);
+    }
+  }
+  if (outputmode & TYROCC_OUTPUTTOTAL)
+  {
+    printf("# distribution of all mers " ONLYONCE "\n");
+    showitvsumdistributionoftwo(Onlyshowsum,
+                                uniquedistribution,
+                                nonuniquedistribution,
+                                outputvector);
+    printf("# distribution of all mers " MORETHANONCE "\n");
+    showitvsumdistributionoftwo(Onlyshowsum,
+                                uniquedistribution,
+                                nonuniquemultidistribution,
+                                outputvector);
+  }
+}
+
 static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                                   GT_UNUSED const char **argv,
                                   GT_UNUSED int parsed_args,
@@ -590,6 +744,14 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                    err) != 0)
   {
     haserr = true;
+  }
+  if (!haserr)
+  {
+    showoccratios(&uniquedistribution,
+                  &nonuniquedistribution,
+                  &nonuniquemultidistribution,
+                  arguments->outputmode,
+                  arguments->outputvector);
   }
   freeverboseinfo(&verboseinfo);
   FREEARRAY(&uniquedistribution,uint64_t);

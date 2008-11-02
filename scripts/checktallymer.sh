@@ -60,9 +60,22 @@ then
   grep -v '^#' tmp2 > tmp2.2
   mv tmp2.2 tmp2
   cerr "cmp -s tmp1 tmp2"
-  cmd="${PRECMD} bin/gt tallymer occratio -minmersize 10 -maxmersize 500 -esa sfxidx "
-  ${cmd}
-  checkerror
+  if test ${inputfile} = "testdata/Duplicate.fna"
+  then
+    echo "skip ${inputfile}"
+  else
+    cmd="${PRECMD} bin/gt tallymer occratio -minmersize 10 -maxmersize 500 -esa sfxidx -output total unique nonunique nonuniquemulti relative"
+    ${cmd} > tmp1
+    checkerror
+    grep -v '^#' tmp1 > tmp1.2
+    mv tmp1.2 tmp1
+    cmd="tallymer-occratio -minmersize 10 -maxmersize 500 -output total unique nonunique nonuniquemulti relative mkvidx"
+    ${cmd} > tmp2
+    checkerror
+    grep -v '^#' tmp2 > tmp2.2
+    mv tmp2.2 tmp2
+    cerr "cmp -s tmp1 tmp2"
+  fi
 fi
 
 rm -f tmp[12]
