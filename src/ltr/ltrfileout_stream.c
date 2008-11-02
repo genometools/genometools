@@ -58,12 +58,13 @@ struct GtLTRFileOutStream {
 #define gt_ltr_fileout_stream_cast(GS)\
         gt_node_stream_cast(gt_ltr_fileout_stream_class(), GS)
 
-GT_UNUSED static void strip_gaps(char *out, char *in, size_t len)
+GT_UNUSED static inline void strip_gaps(char *out, char *in, size_t len)
 {
   size_t i = 0;
   while (i < len)
   {
-    if (*in != '-') *out++ = toupper(*in);
+    if (*in != '-')
+      *out++ = toupper(*in);
     in++;
     i++;
   }
@@ -76,7 +77,10 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
   GtGenFile *genfile;
   unsigned long i = 0,
                 seq_length = 0;
-  GtStr *pdom_seq = gt_str_new();
+  GtStr *pdom_seq ;
+  gt_error_check(e);
+
+  pdom_seq = gt_str_new();
 
   /* get protein domain output file */
   genfile = (GtGenFile*) gt_hashmap_get(ls->pdomout_files, pdomname);
@@ -86,7 +90,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     char buffer[GT_MAXFILENAMELEN];
     (void) snprintf(buffer, GT_MAXFILENAMELEN-1, "%s_pdom_%s.fas",
                     ls->fileprefix, pdomname);
-    genfile = gt_genfile_open(GFM_UNCOMPRESSED, buffer, "w+", e);
+    genfile = gt_genfile_xopen(buffer, "w+");
     gt_hashmap_add(ls->pdomout_files, gt_cstr_dup(pdomname), genfile);
   }
 
@@ -502,6 +506,7 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   GtNodeStream *gs;
   GtLTRFileOutStream *ls;
   char fn[GT_MAXFILENAMELEN];
+  gt_error_check(e);
 
   gt_assert(file_prefix && in_stream && regionmapping && ppt_opts && pbs_opts
 #ifdef HAVE_HMMER
@@ -521,25 +526,25 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   /* open outfiles */
   ls->fileprefix = gt_str_get(file_prefix);
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_tabout.csv", ls->fileprefix);
-  ls->tabout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->tabout_file = gt_genfile_xopen(fn, "w+");
   if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_ppt.fas", ls->fileprefix);
-    ls->pptout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+    ls->pptout_file = gt_genfile_xopen(fn, "w+");
   }
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
     (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_pbs.fas", ls->fileprefix);
-    ls->pbsout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+    ls->pbsout_file = gt_genfile_xopen(fn, "w+");
   }
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_5ltr.fas", ls->fileprefix);
-  ls->ltr5out_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->ltr5out_file = gt_genfile_xopen(fn, "w+");
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_3ltr.fas", ls->fileprefix);
-  ls->ltr3out_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->ltr3out_file = gt_genfile_xopen(fn, "w+");
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_complete.fas", ls->fileprefix);
-  ls->elemout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->elemout_file = gt_genfile_xopen(fn, "w+");
   (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_conditions.csv", ls->fileprefix);
-  ls->metadata_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  ls->metadata_file = gt_genfile_xopen(fn, "w+");
 
   /* create hashmap to hold protein domain output files */
   ls->pdomout_files = gt_hashmap_new(HASH_STRING,
