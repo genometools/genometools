@@ -60,6 +60,9 @@ then
   grep -v '^#' tmp2 > tmp2.2
   mv tmp2.2 tmp2
   cerr "cmp -s tmp1 tmp2"
+  cmd="${PRECMD} bin/gt tallymer occratio -minmersize 10 -maxmersize 500 -esa sfxidx "
+  ${cmd}
+  checkerror
 fi
 
 rm -f tmp[12]

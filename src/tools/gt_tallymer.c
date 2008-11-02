@@ -23,16 +23,17 @@
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/toolbox.h"
-#include "tools/gt_tallymer.h"
-#include "match/tyr-mkindex.h"
-#include "match/tyr-show.h"
-#include "match/tyr-search.h"
-#include "match/tyr-mersplit.h"
 #include "match/verbose-def.h"
 #include "match/optionargmode.h"
 #include "match/defined-types.h"
 #include "match/intbits.h"
 #include "match/intbits-tab.h"
+#include "tools/gt_tallymer.h"
+#include "match/tyr-mkindex.h"
+#include "match/tyr-show.h"
+#include "match/tyr-search.h"
+#include "match/tyr-mersplit.h"
+#include "match/tyr-occratio.h"
 
 typedef enum
 {
@@ -59,7 +60,8 @@ typedef struct
         *str_inputindex;
   bool storecounts,
        performtest,
-       verbose;
+       verbose,
+       scanfile;
 } Tyr_mkindex_options;
 
 static void *gt_tyr_mkindex_arguments_new(void)
@@ -93,7 +95,8 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
            *optionmaxocc,
            *optionpl,
            *optionstoreindex,
-           *optionstorecounts;
+           *optionstorecounts,
+           *optionscan;
   Tyr_mkindex_options *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] enhanced-suffix-array",
@@ -152,6 +155,13 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
+
+  optionscan = gt_option_new_bool("scan",
+                                  "read enhanced suffix array sequentially "
+                                  "instead of mapping it to memory",
+                                  &arguments->scanfile,
+                                  false);
+  gt_option_parser_add_option(op, optionscan);
 
   gt_option_imply(optionpl, optionstoreindex);
   gt_option_imply(optionstorecounts, optionstoreindex);
@@ -245,8 +255,8 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
                     arguments->userdefinedminocc,
                     arguments->userdefinedmaxocc,
                     arguments->str_storeindex,
-                    true,
                     arguments->storecounts,
+                    arguments->scanfile,
                     arguments->performtest,
                     verboseinfo,
                     err) != 0)
@@ -289,11 +299,13 @@ static GtTool* gt_tyr_mkindex(void)
 typedef struct
 {
   GtStrArray *mersizesstrings, *outputspec;
-  GtStr *str_indexname;
+  GtStr *str_inputindex;
   GtOption *refoptionmersizes;
   unsigned long minmersize, maxmersize, stepmersize;
   Bitstring *outputvector;
   unsigned int outputmode;
+  bool scanfile,
+       verbose;
 } Tyr_occratio_options;
 
 static void *gt_tyr_occratio_arguments_new(void)
@@ -302,7 +314,7 @@ static void *gt_tyr_occratio_arguments_new(void)
     = gt_malloc(sizeof (Tyr_occratio_options));
   arguments->mersizesstrings = gt_str_array_new();
   arguments->outputspec = gt_str_array_new();
-  arguments->str_indexname = gt_str_new();
+  arguments->str_inputindex = gt_str_new();
   arguments->outputvector = NULL;
   arguments->outputmode = 0;
   return arguments;
@@ -318,7 +330,7 @@ static void gt_tyr_occratio_arguments_delete(void *tool_arguments)
   }
   gt_str_array_delete(arguments->mersizesstrings);
   gt_str_array_delete(arguments->outputspec);
-  gt_str_delete(arguments->str_indexname);
+  gt_str_delete(arguments->str_inputindex);
   gt_option_delete(arguments->refoptionmersizes);
   FREESPACE(arguments->outputvector);
   gt_free(arguments);
@@ -328,7 +340,7 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *optionmersizes, *optionesa, *optionminmersize, *optionmaxmersize,
-           *optionstep, *optionoutput;
+           *optionstep, *optionoutput, *option;
   Tyr_occratio_options *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] enhanced-suffix-array",
@@ -373,10 +385,20 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionoutput);
 
   optionesa = gt_option_new_string("esa","specify input index",
-                                   arguments->str_indexname,
+                                   arguments->str_inputindex,
                                    NULL);
   gt_option_is_mandatory(optionesa);
   gt_option_parser_add_option(op, optionesa);
+
+  option = gt_option_new_bool("scan",
+                              "read enhanced suffix array sequentially "
+                              "instead of mapping it to memory",
+                              &arguments->scanfile,
+                              false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   gt_option_exclude(optionmersizes,optionminmersize);
   gt_option_exclude(optionmersizes,optionmaxmersize);
@@ -543,10 +565,26 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
 static int gt_tyr_occratio_runner(GT_UNUSED int argc,
                                   GT_UNUSED const char **argv,
                                   GT_UNUSED int parsed_args,
-                                  GT_UNUSED void *tool_arguments,
-                                  GT_UNUSED GtError *err)
+                                  void *tool_arguments,
+                                  GtError *err)
 {
-  return 0;
+  Verboseinfo *verboseinfo;
+  Tyr_occratio_options *arguments = tool_arguments;
+  bool haserr = false;
+
+  verboseinfo = newverboseinfo(arguments->verbose);
+  if (tyr_occratio(arguments->str_inputindex,
+                   arguments->scanfile,
+                   arguments->minmersize,
+                   arguments->maxmersize,
+                   arguments->outputvector,
+                   verboseinfo,
+                   err) != 0)
+  {
+    haserr = true;
+  }
+  freeverboseinfo(&verboseinfo);
+  return haserr ? -1 : 0;
 }
 
 static GtTool *gt_tyr_occratio(void)
@@ -560,7 +598,7 @@ static GtTool *gt_tyr_occratio(void)
 
 typedef struct
 {
-  GtStr *str_indexname;
+  GtStr *str_inputindex;
   GtStrArray *queryfilenames;
   GtStr *strandspec;
   GtStrArray *showmodespec;
@@ -574,7 +612,7 @@ static void *gt_tyr_search_arguments_new(void)
 {
   Tyr_search_options *arguments
     = gt_malloc(sizeof (Tyr_search_options));
-  arguments->str_indexname = gt_str_new();
+  arguments->str_inputindex = gt_str_new();
   arguments->strandspec = gt_str_new();
   arguments->queryfilenames = gt_str_array_new();
   arguments->showmodespec = gt_str_array_new();
@@ -591,7 +629,7 @@ static void gt_tyr_search_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  gt_str_delete(arguments->str_indexname);
+  gt_str_delete(arguments->str_inputindex);
   gt_str_delete(arguments->strandspec);
   gt_str_array_delete(arguments->queryfilenames);
   gt_str_array_delete(arguments->showmodespec);
@@ -704,12 +742,12 @@ static int gt_tyr_search_runner(int argc,
   Tyr_search_options *arguments = tool_arguments;
 
   gt_assert(parsed_args + 2 <= argc);
-  gt_str_set(arguments->str_indexname,argv[parsed_args]);
+  gt_str_set(arguments->str_inputindex,argv[parsed_args]);
   for (idx=parsed_args+1; idx<argc; idx++)
   {
     gt_str_array_add_cstr(arguments->queryfilenames,argv[idx]);
   }
-  if (tyrsearch(arguments->str_indexname,
+  if (tyrsearch(arguments->str_inputindex,
                 arguments->queryfilenames,
                 arguments->showmode,
                 arguments->strand,
