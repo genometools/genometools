@@ -571,19 +571,30 @@ static int gt_tyr_occratio_runner(GT_UNUSED int argc,
   Verboseinfo *verboseinfo;
   Tyr_occratio_options *arguments = tool_arguments;
   bool haserr = false;
+  Arrayuint64_t uniquedistribution,
+                nonuniquedistribution,
+                nonuniquemultidistribution;
 
   verboseinfo = newverboseinfo(arguments->verbose);
+  INITARRAY(&uniquedistribution,uint64_t);
+  INITARRAY(&nonuniquedistribution,uint64_t);
+  INITARRAY(&nonuniquemultidistribution,uint64_t);
   if (tyr_occratio(arguments->str_inputindex,
                    arguments->scanfile,
                    arguments->minmersize,
                    arguments->maxmersize,
-                   arguments->outputvector,
+                   &uniquedistribution,
+                   &nonuniquedistribution,
+                   &nonuniquemultidistribution,
                    verboseinfo,
                    err) != 0)
   {
     haserr = true;
   }
   freeverboseinfo(&verboseinfo);
+  FREEARRAY(&uniquedistribution,uint64_t);
+  FREEARRAY(&nonuniquedistribution,uint64_t);
+  FREEARRAY(&nonuniquemultidistribution,uint64_t);
   return haserr ? -1 : 0;
 }
 

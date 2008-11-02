@@ -15,17 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <errno.h>
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "core/arraydef.h"
-#include "core/fa.h"
 #include "esa-seqread.h"
-#include "alphadef.h"
 #include "verbose-def.h"
 #include "spacedef.h"
-#include "format64.h"
-#include "divmodmul.h"
+#include "tyr-occratio.h"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {
@@ -35,8 +30,6 @@ struct Dfsinfo /* information stored for each node of the lcp interval tree */
          lcptabrightmostleafplus1;
 };
 
-DECLAREARRAYSTRUCT(uint64_t);
-
 struct Dfsstate /* global information */
 {
   const Encodedsequence *encseq;
@@ -44,10 +37,9 @@ struct Dfsstate /* global information */
   Seqpos totallength;
   unsigned long minmersize,
                 maxmersize;
-  const Bitstring *outputvector;
-  Arrayuint64_t uniquedistribution,
-                nonuniquedistribution,
-                nonuniquemultidistribution;
+  Arrayuint64_t *uniquedistribution,
+                *nonuniquedistribution,
+                *nonuniquemultidistribution;
 };
 
 #include "esa-dfs.h"
@@ -128,7 +120,7 @@ static int processleafedge(GT_UNUSED bool firstsucc,
                            GtError *err)
 {
   gt_error_check(err);
-  iteritvdistribution(&state->uniquedistribution,
+  iteritvdistribution(state->uniquedistribution,
                       state->encseq,
                       state->readmode,
                       state->totallength,
@@ -171,10 +163,10 @@ static int processcompletenode(Seqpos nodeptrdepth,
 
     for (lenval = startlength; lenval <= endlength; lenval++)
     {
-      adddistributionuint64_t(&state->nonuniquemultidistribution,
+      adddistributionuint64_t(state->nonuniquemultidistribution,
                               lenval,
                               (unsigned long) occcount);
-      adddistributionuint64_t(&state->nonuniquedistribution,
+      adddistributionuint64_t(state->nonuniquedistribution,
                               lenval,
                               1UL);
     }
@@ -200,7 +192,9 @@ static void assignrightmostleaf(Dfsinfo *dfsinfo,Seqpos currentindex,
 static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
                                   unsigned long minmersize,
                                   unsigned long maxmersize,
-                                  const Bitstring *outputvector,
+                                  Arrayuint64_t *uniquedistribution,
+                                  Arrayuint64_t *nonuniquedistribution,
+                                  Arrayuint64_t *nonuniquemultidistribution,
                                   Verboseinfo *verboseinfo,
                                   GtError *err)
 {
@@ -213,10 +207,9 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   state.totallength = getencseqtotallength(state.encseq);
   state.minmersize = minmersize;
   state.maxmersize = maxmersize;
-  state.outputvector = outputvector;
-  INITARRAY(&state.uniquedistribution,uint64_t);
-  INITARRAY(&state.nonuniquedistribution,uint64_t);
-  INITARRAY(&state.nonuniquemultidistribution,uint64_t);
+  state.uniquedistribution = uniquedistribution;
+  state.nonuniquedistribution = nonuniquedistribution;
+  state.nonuniquemultidistribution = nonuniquemultidistribution;
   if (depthfirstesa(ssar,
                     allocateDfsinfo,
                     freeDfsinfo,
@@ -231,9 +224,6 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   {
     haserr = true;
   }
-  FREEARRAY(&state.uniquedistribution,uint64_t);
-  FREEARRAY(&state.nonuniquedistribution,uint64_t);
-  FREEARRAY(&state.nonuniquemultidistribution,uint64_t);
   return haserr ? -1 : 0;
 }
 
@@ -241,7 +231,9 @@ int tyr_occratio(const GtStr *str_inputindex,
                  bool scanfile,
                  unsigned long minmersize,
                  unsigned long maxmersize,
-                 const Bitstring *outputvector,
+                 Arrayuint64_t *uniquedistribution,
+                 Arrayuint64_t *nonuniquedistribution,
+                 Arrayuint64_t *nonuniquemultidistribution,
                  Verboseinfo *verboseinfo,
                  GtError *err)
 {
@@ -265,7 +257,9 @@ int tyr_occratio(const GtStr *str_inputindex,
     if (computeoccurrenceratio(ssar,
                                minmersize,
                                maxmersize,
-                               outputvector,
+                               uniquedistribution,
+                               nonuniquedistribution,
+                               nonuniquemultidistribution,
                                verboseinfo,
                                err) != 0)
     {

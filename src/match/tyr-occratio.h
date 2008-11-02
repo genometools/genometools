@@ -21,14 +21,18 @@
 #include <stdbool.h>
 #include "core/str.h"
 #include "core/error_api.h"
-#include "intbits.h"
+#include "core/arraydef.h"
 #include "verbose-def.h"
+
+DECLAREARRAYSTRUCT(uint64_t);
 
 int tyr_occratio(const GtStr *str_inputindex,
                  bool scanfile,
                  unsigned long minmersize,
                  unsigned long maxmersize,
-                 const Bitstring *outputvector,
+                 Arrayuint64_t *uniquedistribution,
+                 Arrayuint64_t *nonuniquedistribution,
+                 Arrayuint64_t *nonuniquemultidistribution,
                  Verboseinfo *verboseinfo,
                  GtError *err);
 
