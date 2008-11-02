@@ -52,7 +52,7 @@ module GT
 
     def get_genome_feature
       #refcount only this FeatureNode!
-      GT::GenomeFeature.new(GT::gt_rec_map_get_genome_feature(@rm), true)
+      GT::FeatureNode.new(GT::gt_rec_map_get_genome_feature(@rm), true)
     end
 
     def has_omitted_children

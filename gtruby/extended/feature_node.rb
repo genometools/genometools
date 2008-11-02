@@ -43,7 +43,7 @@ module GT
   end
   COLLECTFUNC = callback "void collect_attrib(const char*, const char*, void*)"
 
-  class GenomeFeature < GenomeNode
+  class FeatureNode < GenomeNode
 
     def initialize(gn, single=false)
       super(gn, single)

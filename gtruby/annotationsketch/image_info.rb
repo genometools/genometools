@@ -18,7 +18,7 @@
 require 'dl/import'
 require 'dl/struct'
 require 'gthelper'
-require 'extended/genome_feature'
+require 'extended/feature_node'
 require 'annotationsketch/rec_map'
 
 module GT
