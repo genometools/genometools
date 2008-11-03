@@ -22,6 +22,7 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
+#include "core/minmax.h"
 #include "extended/toolbox.h"
 #include "match/verbose-def.h"
 #include "match/optionargmode.h"
@@ -563,20 +564,20 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
   return haserr ? - 1: 0;
 }
 
-static void showitvdistribution(const Arrayuint64_t *distribution,
+static void showitvdistribution(const Arrayuint64_t *dist,
                                 const Bitstring *outputvector)
 {
   unsigned long idx;
 
-  for (idx=0; idx < distribution->nextfreeuint64_t; idx++)
+  gt_assert(outputvector != NULL && dist->nextfreeuint64_t > 0);
+  for (idx=0; idx < dist->nextfreeuint64_t; idx++)
   {
-    if ((outputvector == NULL || ISIBITSET(outputvector,idx)) &&
-       distribution->spaceuint64_t[idx] > 0)
+    if (ISIBITSET(outputvector,idx) && dist->spaceuint64_t[idx] > 0)
     {
       /*@ignore@*/
       printf("%lu " Formatuint64_t "\n",
               idx,
-              PRINTuint64_tcast(distribution->spaceuint64_t[idx]));
+              PRINTuint64_tcast(dist->spaceuint64_t[idx]));
       /*@end@*/
     }
   }
@@ -597,9 +598,11 @@ static void showitvsumdistributionoftwo(Summode mode,
   unsigned long idx;
   uint64_t sumoftwo, tmp;
 
-  for (idx=0; /* Nothing */ ; idx++)
+  gt_assert(outputvector != NULL && dist1->nextfreeuint64_t > 0
+                              && dist2->nextfreeuint64_t > 0);
+  for (idx=0; /* Nothing */; idx++)
   {
-    if (outputvector == NULL || ISIBITSET(outputvector,idx))
+    if (ISIBITSET(outputvector,idx))
     {
       if (idx < dist1->nextfreeuint64_t)
       {
@@ -633,17 +636,24 @@ static void showitvsumdistributionoftwo(Summode mode,
         {
           if (mode == Showfirst)
           {
-            tmp = dist1->spaceuint64_t[idx];
+            tmp = (idx < dist1->nextfreeuint64_t)
+                     ? dist1->spaceuint64_t[idx]
+                     : 0;
           } else
           {
-            tmp = dist2->spaceuint64_t[idx];
+            tmp = (idx < dist2->nextfreeuint64_t)
+                     ? dist2->spaceuint64_t[idx]
+                     : 0;
           }
-          /*@ignore@*/
-          printf("%lu " Formatuint64_t " %.3f\n",
-                idx,
-                PRINTuint64_tcast(tmp),
-                (double) tmp/(double) sumoftwo);
-          /*@end@*/
+          if (tmp > 0)
+          {
+            /*@ignore@*/
+            printf("%lu " Formatuint64_t " %.3f\n",
+                  idx,
+                  PRINTuint64_tcast(tmp),
+                  (double) tmp/(double) sumoftwo);
+            /*@end@*/
+          }
         }
       }
     }
