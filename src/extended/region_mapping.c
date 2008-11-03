@@ -34,7 +34,7 @@ struct GtRegionMapping {
 };
 
 GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
-                                          GtError *err)
+                                               GtError *err)
 {
   GtRegionMapping *rm;
   gt_error_check(err);
@@ -65,8 +65,8 @@ GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *rm)
   return rm;
 }
 
-static GtStr* gt_region_mapping_map(GtRegionMapping *rm,
-                                  const char *sequence_region, GtError *err)
+static GtStr* region_mapping_map(GtRegionMapping *rm,
+                                 const char *sequence_region, GtError *err)
 {
   gt_error_check(err);
   gt_assert(rm && sequence_region);
@@ -76,15 +76,15 @@ static GtStr* gt_region_mapping_map(GtRegionMapping *rm,
     return gt_mapping_map_string(rm->mapping, sequence_region, err);
 }
 
-static int update_gt_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
-                                         GtError *err)
+static int update_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
+                                      GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
   gt_assert(rm && seqid);
   if (!rm->sequence_file || gt_str_cmp(rm->sequence_name, seqid)) {
     gt_str_delete(rm->sequence_file);
-    rm->sequence_file = gt_region_mapping_map(rm, gt_str_get(seqid), err);
+    rm->sequence_file = region_mapping_map(rm, gt_str_get(seqid), err);
     if (!rm->sequence_file)
       had_err = -1;
     else {
@@ -103,25 +103,25 @@ static int update_gt_bioseq_if_necessary(GtRegionMapping *rm, GtStr *seqid,
 }
 
 int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **raw,
-                                    GtStr *seqid, GtError *err)
+                                       GtStr *seqid, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
   gt_assert(rm && seqid);
-  had_err = update_gt_bioseq_if_necessary(rm, seqid, err);
+  had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
     *raw = gt_bioseq_get_raw_sequence(rm->bioseq);
   return had_err;
 }
 
 int gt_region_mapping_get_raw_sequence_length(GtRegionMapping *rm,
-                                           unsigned long *length, GtStr *seqid,
-                                           GtError *err)
+                                              unsigned long *length,
+                                              GtStr *seqid, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
   gt_assert(rm && seqid);
-  had_err = update_gt_bioseq_if_necessary(rm, seqid, err);
+  had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err)
     *length = gt_bioseq_get_raw_sequence_length(rm->bioseq);
   return had_err;
