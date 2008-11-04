@@ -5,6 +5,8 @@ if test $? -ne 0
 then
   echo "failure: ${cmd}"
   exit 1
+else
+  echo "run ${cmd}"
 fi
 }
 
@@ -51,7 +53,7 @@ checkerror
 
 if test -s tyr-index.mct
 then
-  cmd="${PRECMD} bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test tyr-index ${AT}"
+  cmd="${PRECMD} bin/gt tallymer search -strand fp -output qseqnum qpos counts sequence -test -tyr tyr-index -q ${AT}"
   ${cmd} > tmp1
   checkerror
   cmd="tallymer-search -strand fp -output qseqnum qpos counts sequence mkv-tyr-index ${AT}"

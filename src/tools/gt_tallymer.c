@@ -356,7 +356,7 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
                             "represented by an enhanced suffix array.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionesa = gt_option_new_string("esa","specify input index",
+  optionesa = gt_option_new_string("esa","specify enhanced suffix array",
                                    arguments->str_inputindex,
                                    NULL);
   gt_option_is_mandatory(optionesa);
@@ -371,9 +371,9 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
 
   optionmaxmersize
     = gt_option_new_ulong_min("maxmersize",
-                          "specify maximum mer size for which "
-                          "to compute the occurrence distribution",
-                          &arguments->maxmersize,0,1UL);
+                              "specify maximum mer size for which "
+                              "to compute the occurrence distribution",
+                              &arguments->maxmersize,0,1UL);
   gt_option_parser_add_option(op, optionmaxmersize);
 
   optionstep
@@ -829,7 +829,7 @@ static void gt_tyr_search_arguments_delete(void *tool_arguments)
 static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
-  GtOption *option;
+  GtOption *option, *optiontyr, *optionqueries;
   Tyr_search_options *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -tyr tyr-indexname -q queryfile0 "
@@ -837,6 +837,17 @@ static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
                             "Search a set of k-mers in an index constructed "
                             "by \"gt tyr mkindex\".");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  optiontyr = gt_option_new_string("tyr","specify tallymer-index",
+                                   arguments->str_inputindex,
+                                   NULL);
+  gt_option_is_mandatory(optiontyr);
+  gt_option_parser_add_option(op, optiontyr);
+
+  optionqueries = gt_option_new_filenamearray("q","specify query file names",
+                                              arguments->queryfilenames);
+  gt_option_is_mandatory(optionqueries);
+  gt_option_parser_add_option(op, optionqueries);
 
   option = gt_option_new_string("strand",
                                 "specify the strand to be searched: "
@@ -883,18 +894,12 @@ static int gt_tyr_search_arguments_check(int rest_argc,
     {"p",STRAND_REVERSE},
     {"fp",STRAND_FORWARD | STRAND_REVERSE}
   };
-
   unsigned long idx;
   Tyr_search_options *arguments = tool_arguments;
 
-  if (rest_argc < 1)
+  if (rest_argc != 0)
   {
-    gt_error_set(err,"missing tyr-indexname and queryfilenames");
-    return -1;
-  }
-  if (rest_argc < 2)
-  {
-    gt_error_set(err,"missing queryfilenames");
+    gt_error_set(err,"superfluous arguments");
     return -1;
   }
   for (idx=0; idx<gt_str_array_size(arguments->showmodespec); idx++)
@@ -922,21 +927,14 @@ static int gt_tyr_search_arguments_check(int rest_argc,
   return 0;
 }
 
-static int gt_tyr_search_runner(int argc,
-                                const char **argv,
-                                int parsed_args,
+static int gt_tyr_search_runner(GT_UNUSED int argc,
+                                GT_UNUSED const char **argv,
+                                GT_UNUSED int parsed_args,
                                 void *tool_arguments,
                                 GtError *err)
 {
-  int idx;
   Tyr_search_options *arguments = tool_arguments;
 
-  gt_assert(parsed_args + 2 <= argc);
-  gt_str_set(arguments->str_inputindex,argv[parsed_args]);
-  for (idx=parsed_args+1; idx<argc; idx++)
-  {
-    gt_str_array_add_cstr(arguments->queryfilenames,argv[idx]);
-  }
   if (tyrsearch(arguments->str_inputindex,
                 arguments->queryfilenames,
                 arguments->showmode,
