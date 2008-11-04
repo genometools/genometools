@@ -98,10 +98,11 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
            *optionpl,
            *optionstoreindex,
            *optionstorecounts,
-           *optionscan;
+           *optionscan,
+           *optionesa;
   Tyr_mkindex_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] enhanced-suffix-array",
+  op = gt_option_parser_new("[options] -esa enhanced-suffix-array [options]",
                             "Count and index k-mers in the given enhanced "
                             "suffix array for a fixed value of k.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -165,6 +166,13 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
                                   false);
   gt_option_parser_add_option(op, optionscan);
 
+  optionesa = gt_option_new_string("esa","specify enhanced suffix array\n"
+                                   "(mandatory option)",
+                                   arguments->str_inputindex,
+                                   NULL);
+  gt_option_is_mandatory(optionesa);
+  gt_option_parser_add_option(op, optionesa);
+
   gt_option_imply(optionpl, optionstoreindex);
   gt_option_imply(optionstorecounts, optionstoreindex);
   gt_option_imply_either_2(optionstoreindex,optionminocc,optionmaxocc);
@@ -177,6 +185,11 @@ static int gt_tyr_mkindex_arguments_check(int rest_argc,
 {
   Tyr_mkindex_options *arguments = tool_arguments;
 
+  if (rest_argc != 0)
+  {
+    gt_error_set(err,"superfluous arguments");
+    return -1;
+  }
   if (gt_option_is_set(arguments->refoptionpl))
   {
     if (arguments->userdefinedprefixlength == 0)
@@ -193,17 +206,12 @@ static int gt_tyr_mkindex_arguments_check(int rest_argc,
     arguments->prefixlength.flag = Undeterminedprefixlength;
     arguments->prefixlength.value = 0;
   }
-  if (rest_argc != 1)
-  {
-    gt_error_set(err,"missing name of enhanced suffix array index");
-    return -1;
-  }
   return 0;
 }
 
 static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
-                                 const char **argv,
-                                 int parsed_args,
+                                 GT_UNUSED const char **argv,
+                                 GT_UNUSED int parsed_args,
                                  void *tool_arguments,
                                  GtError *err)
 {
@@ -211,8 +219,6 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
   Verboseinfo *verboseinfo;
   bool haserr = false;
 
-  gt_assert(parsed_args + 1 == argc);
-  gt_str_set(arguments->str_inputindex,argv[parsed_args]);
   verboseinfo = newverboseinfo(arguments->verbose);
   if (arguments->verbose)
   {
@@ -289,7 +295,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
   return haserr ? - 1 : 0;
 }
 
-static GtTool* gt_tyr_mkindex(void)
+static GtTool *gt_tyr_mkindex(void)
 {
   return gt_tool_new(gt_tyr_mkindex_arguments_new,
                      gt_tyr_mkindex_arguments_delete,

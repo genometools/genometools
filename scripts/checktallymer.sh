@@ -31,7 +31,7 @@ outoptions="-counts -pl -mersize ${mersize} -minocc 2 -maxocc 30"
 PRECMD="env -i"
 
 cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
-cmd="env -i bin/gt tallymer mkindex -test -mersize ${mersize} sfxidx"
+cmd="env -i bin/gt tallymer mkindex -test -mersize ${mersize} -esa sfxidx"
 ${cmd} > tmp1
 checkerror
 cerr "mkvtree.x -db ${inputfile} -tis -suf -lcp -pl -dna -indexname mkvidx"
@@ -45,7 +45,7 @@ rm -f tmp[12]
 cmd="tallymer-mkindex ${outoptions} -indexname mkv-tyr-index mkvidx" 
 ${cmd}
 checkerror
-cmd="${PRECMD} bin/gt tallymer mkindex ${outoptions} -indexname tyr-index sfxidx"
+cmd="${PRECMD} bin/gt tallymer mkindex ${outoptions} -indexname tyr-index -esa sfxidx"
 ${cmd}
 checkerror
 
