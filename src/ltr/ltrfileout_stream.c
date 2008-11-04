@@ -198,13 +198,49 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                        rltr_rng.end,
                        gt_ltrelement_rightltrlen(&ls->element));
 
+    /* output TSDs */
+    if (ls->element.leftTSD)
+    {
+      GtRange tsd_rng;
+      GtStrand tsd_strand;
+      char *tsd_seq;
+
+      tsd_strand = gt_feature_node_get_strand(ls->element.leftTSD);
+      tsd_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftTSD);
+      tsd_seq = gt_ltrelement_get_sequence(tsd_rng.start-1, tsd_rng.end-1,
+                                           tsd_strand,
+                                           raw_seq, e);
+      gt_genfile_xprintf(ls->tabout_file,
+                         "%lu\t%lu\t%s\t",
+                         tsd_rng.start,
+                         tsd_rng.end,
+                         tsd_seq);
+    } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t");
+    if (ls->element.rightTSD)
+    {
+      GtRange tsd_rng;
+      GtStrand tsd_strand;
+      char *tsd_seq;
+
+      tsd_strand = gt_feature_node_get_strand(ls->element.rightTSD);
+      tsd_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightTSD);
+      tsd_seq = gt_ltrelement_get_sequence(tsd_rng.start-1, tsd_rng.end-1,
+                                           tsd_strand,
+                                           raw_seq, e);
+      gt_genfile_xprintf(ls->tabout_file,
+                         "%lu\t%lu\t%s\t",
+                         tsd_rng.start,
+                         tsd_rng.end,
+                         tsd_seq);
+    } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t");
+
     /* output PPT */
     if (ls->element.ppt)
     {
       GtStrand ppt_strand;
       ppt_strand = gt_feature_node_get_strand(ls->element.ppt);
       ppt_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.ppt);
-      ppt_seq = gt_ltrelement_get_sequence(ppt_rng.start, ppt_rng.end,
+      ppt_seq = gt_ltrelement_get_sequence(ppt_rng.start-1, ppt_rng.end-1,
                                            ppt_strand,
                                            raw_seq, e);
       gt_fasta_show_entry_generic(desc, ppt_seq, gt_range_length(&ppt_rng),
@@ -228,7 +264,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
       pbs_strand = gt_feature_node_get_strand(ls->element.pbs);
       pbs_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.pbs);
-      pbs_seq = gt_ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
+      pbs_seq = gt_ltrelement_get_sequence(pbs_rng.start-1, pbs_rng.end-1,
                                            pbs_strand, raw_seq, e);
       gt_fasta_show_entry_generic(desc, pbs_seq, gt_range_length(&pbs_rng),
                                   GT_FSWIDTH, ls->pbsout_file);
@@ -287,8 +323,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
         ltr3_rng = rltr_rng;
         break;
     }
-    outseq = gt_ltrelement_get_sequence(ltr5_rng.start,
-                              ltr5_rng.end,
+    outseq = gt_ltrelement_get_sequence(ltr5_rng.start-1,
+                              ltr5_rng.end-1,
                               gt_feature_node_get_strand(ls->element.mainnode),
                               raw_seq, e);
     gt_fasta_show_entry_generic(desc,
@@ -297,8 +333,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                 GT_FSWIDTH,
                                 ls->ltr5out_file);
     gt_free(outseq);
-    outseq = gt_ltrelement_get_sequence(rng.start,
-                              rng.end,
+    outseq = gt_ltrelement_get_sequence(rng.start-1,
+                              rng.end-1,
                               gt_feature_node_get_strand(ls->element.mainnode),
                               raw_seq, e);
     gt_fasta_show_entry_generic(desc,
@@ -309,8 +345,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     gt_free(outseq);
 
     /* output complete oriented element */
-    outseq = gt_ltrelement_get_sequence(ltr3_rng.start,
-                              ltr3_rng.end,
+    outseq = gt_ltrelement_get_sequence(ltr3_rng.start-1,
+                              ltr3_rng.end-1,
                               gt_feature_node_get_strand(ls->element.mainnode),
                               raw_seq, e);
     gt_fasta_show_entry_generic(desc,
@@ -569,6 +605,8 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
               "element start\telement end\telement length\tsequence\t"
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
+              "lTSD start\tlTSD end\tlTSD motif"
+              "rTSD start\trTSD end\trTSD motif"
               "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
   gt_genfile_xprintf(ls->tabout_file,
               "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
