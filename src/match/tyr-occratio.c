@@ -119,7 +119,6 @@ static int processleafedge(GT_UNUSED bool firstsucc,
                            Dfsstate *state,
                            GT_UNUSED GtError *err)
 {
-  gt_error_check(err);
   iteritvdistribution(state->uniquedistribution,
                       state->encseq,
                       state->readmode,
@@ -140,7 +139,6 @@ static int processcompletenode(Seqpos nodeptrdepth,
   Seqpos fatherdepth;
   unsigned long startlength, endlength;
 
-  gt_error_check(err);
   fatherdepth = nodeptr->lcptabrightmostleafplus1;
   if (fatherdepth < nodeptrminusonedepth)
   {
