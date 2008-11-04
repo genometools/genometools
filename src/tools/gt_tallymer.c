@@ -163,15 +163,15 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, option);
-
   optionscan = gt_option_new_bool("scan",
                                   "read enhanced suffix array sequentially "
                                   "instead of mapping it to memory",
                                   &arguments->scanfile,
                                   false);
   gt_option_parser_add_option(op, optionscan);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   gt_option_imply(optionpl, optionstoreindex);
   gt_option_imply(optionstorecounts, optionstoreindex);
