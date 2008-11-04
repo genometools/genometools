@@ -117,7 +117,7 @@ static int processleafedge(GT_UNUSED bool firstsucc,
                            GT_UNUSED Dfsinfo *father,
                            Seqpos leafnumber,
                            Dfsstate *state,
-                           GtError *err)
+                           GT_UNUSED GtError *err)
 {
   gt_error_check(err);
   iteritvdistribution(state->uniquedistribution,
@@ -135,7 +135,7 @@ static int processcompletenode(Seqpos nodeptrdepth,
                                Dfsinfo *nodeptr,
                                Seqpos nodeptrminusonedepth,
                                Dfsstate *state,
-                               GtError *err)
+                               GT_UNUSED GtError *err)
 {
   Seqpos fatherdepth;
   unsigned long startlength, endlength;

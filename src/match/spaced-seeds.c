@@ -131,7 +131,7 @@ static void spse_nextLimdfsstate(const void *dfsconstinfo,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
                                  unsigned long currentdepth,
                                  Uchar currentchar,
-                                 const DECLAREPTRDFSSTATE(aliasincol))
+                                 GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;

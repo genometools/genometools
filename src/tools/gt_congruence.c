@@ -131,9 +131,9 @@ static int gt_cge_spacedseed_arguments_check(int rest_argc,
   return 0;
 }
 
-static int gt_cge_spacedseed_runner(int argc,
+static int gt_cge_spacedseed_runner(GT_UNUSED int argc,
                                     GT_UNUSED const char **argv,
-                                    int parsed_args,
+                                    GT_UNUSED int parsed_args,
                                     void *tool_arguments,
                                     GtError *err)
 {
