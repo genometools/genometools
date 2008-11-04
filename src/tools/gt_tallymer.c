@@ -985,7 +985,7 @@ static GtOptionParser* gt_tyr_option_parser_new(void *tool_arguments)
 }
 
 static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
-                                 void *tool_arguments, GtError *err)
+                         void *tool_arguments, GtError *err)
 {
   GtToolbox *index_toolbox = tool_arguments;
   GtToolfunc toolfunc;
@@ -996,11 +996,10 @@ static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
   gt_error_check(err);
   gt_assert(index_toolbox != NULL);
 
-  /* determine tool */
-  if (!gt_toolbox_has_tool(index_toolbox, argv[parsed_args]))
+  if (!had_err && !gt_toolbox_has_tool(index_toolbox, argv[parsed_args]))
   {
-    gt_error_set(err, "tyr tool '%s' not found; option -help lists "
-                   "possible tools", argv[parsed_args]);
+    gt_error_set(err, "tallymer tool '%s' not found; option -help lists "
+                      "possible tools", argv[parsed_args]);
     had_err = -1;
   }
 
