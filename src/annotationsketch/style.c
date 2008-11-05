@@ -182,7 +182,7 @@ static int style_find_section_for_getting(const GtStyle *sty,
 }
 
 bool gt_style_get_color(const GtStyle *sty, const char *section,
-                     const char *key, GtColor *color, GtFeatureNode *gn)
+                        const char *key, GtColor *color, GtFeatureNode *gn)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -193,7 +193,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   stack_size = lua_gettop(sty->L);
 #endif
   /* set default colors */
-  color->red=0.5; color->green = 0.5; color->blue=0.5;
+  color->red = 0.5; color->green = 0.5; color->blue = 0.5;
   /* get section */
   i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
