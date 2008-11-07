@@ -93,7 +93,7 @@ static void showmatch(void *processinfo,
                              showmatchinfo->tagptr,
                              pprefixlen,
                              (unsigned long) showmatchinfo->tageratoroptions
-                                                         ->maxdistance);
+                                                          ->maxdistance);
       gt_assert(pprefixlen >= suffixlength);
       printf(" %lu %lu ",suffixlength,pprefixlen - suffixlength);
       printfsymbolstring(NULL,showmatchinfo->tagptr +
@@ -294,8 +294,8 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  Processmatch processmatch,
                                  void *processmatchinfooffline)
 {
-  if (tageratoroptions->online || (tageratoroptions->maxdistance >= 0 &&
-                                   tageratoroptions->docompare))
+  if (tageratoroptions->online || 
+      (tageratoroptions->maxdistance >= 0 && tageratoroptions->docompare))
   {
     gt_assert(mor != NULL);
     edistmyersbitvectorAPM(mor,
@@ -319,10 +319,8 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
         indexbasedapproxpatternmatching(limdfsresources,
                                         transformedtag,
                                         taglen,
-                                        (tageratoroptions->maxdistance < 0)
-                                          ?  0
-                                          : (unsigned long)
-                                            tageratoroptions->maxdistance,
+                                        (unsigned long) tageratoroptions
+                                                        ->maxdistance,
                                         tageratoroptions->maxintervalwidth,
                                         tageratoroptions->skpp,
                                         dfst);
@@ -609,16 +607,18 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
           twl.taglen <= (unsigned long) tageratoroptions->maxdistance)
       {
         gt_error_set(err,"tag \"%*.*s\" of length %lu; "
-                  "tags must be longer than the allowed number of errors "
-                  "(which is %ld)",
-                   (int) twl.taglen,(int) twl.taglen,currenttag,twl.taglen,
-                   tageratoroptions->maxdistance);
+                     "tags must be longer than the allowed number of errors "
+                     "(which is %ld)",
+                     (int) twl.taglen,
+                     (int) twl.taglen,currenttag,
+                     twl.taglen,
+                     tageratoroptions->maxdistance);
         haserr = true;
         gt_free(desc);
         break;
       }
       gt_assert(tageratoroptions->maxdistance < 0 ||
-             twl.taglen > (unsigned long) tageratoroptions->maxdistance);
+                twl.taglen > (unsigned long) tageratoroptions->maxdistance);
       for (try=0 ; try < 2; try++)
       {
         if ((try == 0 && !tageratoroptions->nofwdmatch) ||
