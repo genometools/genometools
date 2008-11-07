@@ -66,8 +66,8 @@ static GtOptionParser* gt_dev_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   gt_assert(dev_toolbox);
   op = gt_option_parser_new("[option ...] dev_tool_name [argument ...]",
-                         "Call development tool with name dev_tool_name and "
-                         "pass argument(s) to it.");
+                            "Call development tool with name dev_tool_name and "
+                            "pass argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, dev_toolbox);
   gt_option_parser_set_min_args(op, 1);
   return op;
@@ -88,7 +88,7 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
   /* get development tools */
   if (!gt_toolbox_has_tool(dev_toolbox, argv[parsed_args])) {
     gt_error_set(err, "development tool '%s' not found; option -help lists "
-                   "possible tools", argv[parsed_args]);
+                      "possible tools", argv[parsed_args]);
     had_err = -1;
   }
 
@@ -102,9 +102,9 @@ static int gt_dev_runner(int argc, const char **argv, int parsed_args,
                                        gt_error_get_progname(err));
     gt_error_set_progname(err, nargv[0]);
     if (toolfunc)
-      had_err = toolfunc(argc - parsed_args , (const char**) nargv, err);
+      had_err = toolfunc(argc - parsed_args, (const char**) nargv, err);
     else
-      had_err = gt_tool_run(tool, argc - parsed_args , (const char**) nargv,
+      had_err = gt_tool_run(tool, argc - parsed_args, (const char**) nargv,
                             err);
   }
 
