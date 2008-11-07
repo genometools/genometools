@@ -62,6 +62,7 @@ static GtOptionParser* gt_packedindex_option_parser_new(void *tool_arguments)
                          "Call packed index tool with name index_tool and "
                          "pass argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, index_toolbox);
+  gt_option_parser_set_min_args(op, 1);
   gt_option_parser_refer_to_manual(op);
   return op;
 }
