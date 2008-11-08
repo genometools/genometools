@@ -1245,6 +1245,7 @@ static void process_undefined_sequence_regions(GtHashmap
   had_err = gt_hashmap_foreach(undefined_sequence_regions,
                                add_auto_sr_to_queue, genome_nodes, NULL);
   gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
+  gt_hashmap_reset(undefined_sequence_regions);
 }
 
 static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
