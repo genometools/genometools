@@ -711,7 +711,7 @@ def large_gff3_test(name, file)
   Keywords "gt_gff3 large_gff3"
   Test do
     run_test("#{$bin}gt gff3 -width 80 #{$gttestdata}gff3/#{file}.sorted",
-             :matime => 90)
+             :maxtime => 90)
     run      "diff #{$last_stdout} #{$gttestdata}gff3/#{file}.sorted"
   end
 end
