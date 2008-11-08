@@ -12,7 +12,8 @@ if $gttestdata then
   run_test("#{$bin}gt gtf_to_gff3 " +
            "#{$gttestdata}gtf/Drosophila_melanogaster.BDGP5.4.50.gtf",
            :maxtime => 30)
-  run "diff #{$last_stdout} " +
-      "#{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3"
+  run("diff #{$last_stdout} " +
+      "#{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3",
+      :maxtime => 20)
   end
 end
