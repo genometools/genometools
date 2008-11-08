@@ -41,9 +41,9 @@
 struct GtGFF3Parser {
   GtFeatureInfo *feature_info;
   GtHashmap *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
-    *source_to_str_mapping,
-    *undefined_sequence_regions; /* contains all (automatically created)
-                                  * sequence regions */
+            *source_to_str_mapping,
+            *undefined_sequence_regions; /* contains all (automatically created)
+                                            sequence regions */
   bool incomplete_node, /* at least on node is potentially incomplete */
        checkids,
        tidy,
@@ -116,8 +116,8 @@ GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
     HASH_STRING, NULL, (GtFree) simple_sequence_region_delete);
   parser->source_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
                                               (GtFree) gt_str_delete);
-  parser->undefined_sequence_regions = gt_hashmap_new(
-    HASH_STRING, NULL, (GtFree) automatic_sequence_region_delete);
+  parser->undefined_sequence_regions = gt_hashmap_new(HASH_STRING, NULL,
+                                     (GtFree) automatic_sequence_region_delete);
   parser->incomplete_node = false;
   parser->checkids = false;
   parser->tidy = false;
@@ -644,8 +644,8 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
     if (!parent_gf) {
       if (!parser->tidy) {
         gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
-                  "previously defined (via \"%s=\")", PARENT_STRING, parent,
-                  line_number, filename, ID_STRING);
+                     "previously defined (via \"%s=\")", PARENT_STRING, parent,
+                     line_number, filename, ID_STRING);
         had_err = -1;
       }
       else {
@@ -655,13 +655,13 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
       }
     }
     else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
-                     gt_genome_node_get_seqid(genome_feature))) {
+                        gt_genome_node_get_seqid(genome_feature))) {
       gt_error_set(err, "child on line %u in file \"%s\" has different "
-                "sequence id than its parent on line %u ('%s' vs. '%s')",
-                gt_genome_node_get_line_number(genome_feature), filename,
-                gt_genome_node_get_line_number(parent_gf),
-                gt_str_get(gt_genome_node_get_seqid(genome_feature)),
-                gt_str_get(gt_genome_node_get_seqid(parent_gf)));
+                   "sequence id than its parent on line %u ('%s' vs. '%s')",
+                   gt_genome_node_get_line_number(genome_feature), filename,
+                   gt_genome_node_get_line_number(parent_gf),
+                   gt_str_get(gt_genome_node_get_seqid(genome_feature)),
+                   gt_str_get(gt_genome_node_get_seqid(parent_gf)));
       had_err = -1;
     }
     else {
@@ -1264,7 +1264,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
     if (!parser->fasta_parsing) {
       parser->fasta_parsing = true;
       had_err = gt_hashmap_foreach(parser->undefined_sequence_regions,
-                                add_auto_sr_to_queue, genome_nodes, NULL);
+                                   add_auto_sr_to_queue, genome_nodes, NULL);
       gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
     }
   }
