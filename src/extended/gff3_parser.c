@@ -1236,6 +1236,17 @@ static int add_auto_sr_to_queue(GT_UNUSED void *key, void *value, void *data,
   return 0;
 }
 
+static void process_undefined_sequence_regions(GtHashmap
+                                               *undefined_sequence_regions,
+                                               GtQueue *genome_nodes)
+{
+  int had_err;
+  gt_assert(undefined_sequence_regions && genome_nodes);
+  had_err = gt_hashmap_foreach(undefined_sequence_regions,
+                               add_auto_sr_to_queue, genome_nodes, NULL);
+  gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
+}
+
 static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                                 char *line, size_t line_length,
                                 GtStr *filenamestr, unsigned int line_number,
@@ -1263,9 +1274,8 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
   else if (strcmp(line, GFF_FASTA_DIRECTIVE) == 0) {
     if (!parser->fasta_parsing) {
       parser->fasta_parsing = true;
-      had_err = gt_hashmap_foreach(parser->undefined_sequence_regions,
-                                   add_auto_sr_to_queue, genome_nodes, NULL);
-      gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
+      process_undefined_sequence_regions(parser->undefined_sequence_regions,
+                                         genome_nodes);
     }
   }
   else if ((strncmp(line, GFF_SEQUENCE_REGION,
@@ -1417,9 +1427,8 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
     else if (parser->fasta_parsing || line[0] == '>') {
       if (!parser->fasta_parsing) {
         parser->fasta_parsing = true;
-        had_err = gt_hashmap_foreach(parser->undefined_sequence_regions,
-                                     add_auto_sr_to_queue, genome_nodes, NULL);
-        gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
+        process_undefined_sequence_regions(parser->undefined_sequence_regions,
+                                           genome_nodes);
       }
       had_err = parse_fasta_entry(genome_nodes, line, filenamestr, *line_number,
                                   fpin, err);
@@ -1450,9 +1459,8 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
   else if (rval == EOF) {
     /* the file has been parsed completely, add automatically created sequence
        regions to queue */
-    had_err = gt_hashmap_foreach(parser->undefined_sequence_regions,
-                                 add_auto_sr_to_queue, genome_nodes, NULL);
-    gt_assert(!had_err); /* add_auto_sr_to_queue() is sane */
+    process_undefined_sequence_regions(parser->undefined_sequence_regions,
+                                       genome_nodes);
   }
 
   gt_str_delete(line_buffer);
