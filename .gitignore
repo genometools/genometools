@@ -51,3 +51,4 @@ cscope.*
 /doc/manuals/*.bbl
 /doc/manuals/auto
 .gdb_history
+*.pyc
