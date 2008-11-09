@@ -102,12 +102,12 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
            *optionesa;
   Tyr_mkindex_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] -esa enhanced-suffix-array [options]",
+  op = gt_option_parser_new("[options] -esa suffixerator-index [options]",
                             "Count and index k-mers in the given enhanced "
                             "suffix array for a fixed value of k.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionesa = gt_option_new_string("esa","specify enhanced suffix array\n"
+  optionesa = gt_option_new_string("esa","specify suffixerator-index\n"
                                    "(mandatory option)",
                                    arguments->str_inputindex,
                                    NULL);
@@ -351,12 +351,13 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
            *optionstep, *optionoutput, *option;
   Tyr_occratio_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] enhanced-suffix-array",
+  op = gt_option_parser_new("[options] -esa suffixerator-index [options]",
                             "Compute occurrence ratio for a set of sequences "
                             "represented by an enhanced suffix array.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionesa = gt_option_new_string("esa","specify enhanced suffix array",
+  optionesa = gt_option_new_string("esa","specify suffixerator-index\n"
+                                   "(mandatory option)",
                                    arguments->str_inputindex,
                                    NULL);
   gt_option_is_mandatory(optionesa);
@@ -378,14 +379,13 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
 
   optionstep
     = gt_option_new_ulong_min("step",
-                              "specify maximum mer size for which "
-                              "to compute the occurrence distribution",
+                              "specify step size when specifying mer sizes",
                               &arguments->stepmersize,1UL,1UL);
   gt_option_parser_add_option(op, optionstep);
 
   optionmersizes = gt_option_new_stringarray(
                           "mersizes",
-                          "specify mer sizes as non-empty sequences of "
+                          "specify mer sizes as non-empty sequence of "
                           "non decreasing positive integers",
                           arguments->mersizesstrings);
   arguments->refoptionmersizes = gt_option_ref(optionmersizes);
@@ -400,7 +400,7 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionoutput);
 
   option = gt_option_new_bool("scan",
-                              "read enhanced suffix array sequentially "
+                              "read suffixerator-index sequentially "
                               "instead of mapping it to memory",
                               &arguments->scanfile,
                               false);
@@ -832,7 +832,7 @@ static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
   GtOption *option, *optiontyr, *optionqueries;
   Tyr_search_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] -tyr tyr-indexname -q queryfile0 "
+  op = gt_option_parser_new("[options] -tyr tallymer-index -q queryfile0 "
                             "[queryfile1..] [options]",
                             "Search a set of k-mers in an index constructed "
                             "by \"gt tyr mkindex\".");

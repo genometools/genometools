@@ -4,6 +4,8 @@ ALL=ltrharvest.pdf\
     mgth.pdf\
     packedindex.pdf
 
+TALLYMERTMP=tallymer-tmp
+
 all:${ALL}
 
 annotationsketch: annotationsketch.pdf
@@ -29,9 +31,29 @@ annotationsketch: annotationsketch.pdf
 	pdflatex $< && rm $*.pdf
 	mv $*.aux $@
 
+${TALLYMERTMP}.tex:tallymer.tex
+	./findemptyoutfiles.sh
+	head -n 6999 ${GTTESTDATA}/Iowa/at1MB > read1.fna
+	echo ">" > read2.fna
+	tail -n 6946 ${GTTESTDATA}/Iowa/at1MB > read2.fna
+	cp ../../testdata/U89959_genomic.fas U89959.fna
+	./execcommand.pl $< > $@
+
+tallymer.pdf:${TALLYMERTMP}.tex
+	pdflatex ${TALLYMERTMP}
+	pdflatex ${TALLYMERTMP}
+	mv ${TALLYMERTMP}.pdf $@
+
+tallymer.dvi:${TALLYMERTMP}.tex
+	latex ${TALLYMERTMP}
+	latex ${TALLYMERTMP}
+	mv ${TALLYMERTMP}.dvi $@
 
 clean:
-	${RM} *.aux  *.log *.bbl  *.blg *.dvi comment.cut
+	${RM} *.aux  *.log *.bbl  *.blg *.dvi *.mer *.mct *.mbd comment.cut
+	${RM} U89959.fna read[12].fna 
+	${RM} reads.al1 reads.esq reads.lcp reads.llv reads.prj reads.suf
+	${RM} ${TALLYMERTMP}.tex
 
 cleanup:clean
 	${RM} ${ALL}

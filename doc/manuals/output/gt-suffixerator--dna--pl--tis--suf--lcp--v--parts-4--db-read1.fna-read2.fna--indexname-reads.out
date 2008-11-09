@@ -1,0 +1,35 @@
+$ gt suffixerator -dna -pl -tis -suf -lcp -v -parts 4 -db read1.fna read2.fna -indexname reads
+# dna=yes
+# indexname="reads"
+# prefixlength=automatic
+# storespecialcodes=false
+# parts=4
+# inputfile[0]=read1.fna
+# inputfile[1]=read2.fna
+# indexname=reads
+# outtistab=true,outsuftab=true,outlcptab=true,outbwttab=false,outbcktab=false,outdestab=false
+# sizeof (Seqpos)=32
+# specialranges of length 1: 17180
+# specialranges of length 2: 764
+# specialranges of length 3: 53
+# specialranges of length 4: 9
+# specialranges of length 5: 4
+# init character encoding (uchar,241249 bytes,2.50 bits/symbol)
+# deliverchar=delivercharViauchartablesSpecialrange
+# specialcharacters=18923
+# specialranges=18010
+# realspecialranges=18010
+# occurrences(a)=200061
+# occurrences(c)=155192
+# occurrences(g)=167557
+# occurrences(t)=230643
+# automatically determined prefixlength = 8
+# sizeof (leftborder)=262148
+# sizeof (countspecialcodes)=65536
+# sizeof (distpfxidx)=21868
+# widthofpart[0]=188406
+# widthofpart[1]=188330
+# widthofpart[2]=188355
+# widthofpart[3]=188362
+# space peak in megabytes: 1.42
+# mmap space peak in megabytes: 0.00
