@@ -92,8 +92,8 @@ static void showmatch(void *processinfo,
                              (unsigned long) dblen,
                              showmatchinfo->tagptr,
                              pprefixlen,
-                             (unsigned long) showmatchinfo->tageratoroptions
-                                                          ->maxdistance);
+                             (unsigned long) showmatchinfo->tageratoroptions->
+                                                        userdefinedmaxdistance);
       gt_assert(pprefixlen >= suffixlength);
       printf(" %lu %lu ",suffixlength,pprefixlen - suffixlength);
       printfsymbolstring(NULL,showmatchinfo->tagptr +
@@ -295,41 +295,43 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  void *processmatchinfooffline)
 {
   if (tageratoroptions->online ||
-      (tageratoroptions->maxdistance >= 0 && tageratoroptions->docompare))
+      (tageratoroptions->userdefinedmaxdistance >= 0 &&
+       tageratoroptions->docompare))
   {
     gt_assert(mor != NULL);
     edistmyersbitvectorAPM(mor,
                            transformedtag,
                            taglen,
-                           (unsigned long) tageratoroptions->maxdistance);
+                           (unsigned long)
+                           tageratoroptions->userdefinedmaxdistance);
   }
   if (!tageratoroptions->online || tageratoroptions->docompare)
   {
-    if (tageratoroptions->maxdistance == 0)
+    if (tageratoroptions->userdefinedmaxdistance < 0)
     {
-      indexbasedexactpatternmatching(limdfsresources,
-                                     transformedtag,
-                                     taglen,
-                                     processmatch,
-                                     processmatchinfooffline);
+      indexbasedmstats(limdfsresources,
+                       transformedtag,
+                       taglen,
+                       dfst);
     } else
     {
-      if (tageratoroptions->maxdistance > 0)
+      if (tageratoroptions->userdefinedmaxdistance == 0)
+      {
+        indexbasedexactpatternmatching(limdfsresources,
+                                       transformedtag,
+                                       taglen,
+                                       processmatch,
+                                       processmatchinfooffline);
+      } else
       {
         indexbasedapproxpatternmatching(limdfsresources,
                                         transformedtag,
                                         taglen,
-                                        (unsigned long) tageratoroptions
-                                                        ->maxdistance,
+                                        (unsigned long) tageratoroptions->
+                                                        userdefinedmaxdistance,
                                         tageratoroptions->maxintervalwidth,
                                         tageratoroptions->skpp,
                                         dfst);
-      } else
-      {
-        indexbasedmstats(limdfsresources,
-                         transformedtag,
-                         taglen,
-                         dfst);
       }
     }
   }
@@ -417,7 +419,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   void *packedindex = NULL;
   const AbstractDfstransformer *dfst;
 
-  if (tageratoroptions->maxdistance >= 0)
+  if (tageratoroptions->userdefinedmaxdistance >= 0)
   {
     dfst = apm_AbstractDfstransformer();
   } else
@@ -542,10 +544,11 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
           maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
         }
       }
-      if (tageratoroptions->maxdistance >= 0)
+      if (tageratoroptions->userdefinedmaxdistance >= 0)
       {
         maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
-                                         tageratoroptions->maxdistance);
+                                         tageratoroptions->
+                                         userdefinedmaxdistance);
       } else
       {
         maxpathlength = (unsigned long) (1+MAXTAGSIZE);
@@ -600,8 +603,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
       storeonline.nextfreeSimplematch = 0;
-      if (tageratoroptions->maxdistance > 0 &&
-          twl.taglen <= (unsigned long) tageratoroptions->maxdistance)
+      if (tageratoroptions->userdefinedmaxdistance > 0 &&
+          twl.taglen <= (unsigned long)
+                        tageratoroptions->userdefinedmaxdistance)
       {
         gt_error_set(err,"tag \"%*.*s\" of length %lu; "
                      "tags must be longer than the allowed number of errors "
@@ -609,13 +613,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                      (int) twl.taglen,
                      (int) twl.taglen,currenttag,
                      twl.taglen,
-                     tageratoroptions->maxdistance);
+                     tageratoroptions->userdefinedmaxdistance);
         haserr = true;
         gt_free(desc);
         break;
       }
-      gt_assert(tageratoroptions->maxdistance < 0 ||
-                twl.taglen > (unsigned long) tageratoroptions->maxdistance);
+      gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
+                twl.taglen > (unsigned long)
+                             tageratoroptions->userdefinedmaxdistance);
       for (try=0 ; try < 2; try++)
       {
         if ((try == 0 && !tageratoroptions->nofwdmatch) ||

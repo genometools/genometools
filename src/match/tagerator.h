@@ -37,7 +37,7 @@ typedef struct
        norcmatch, /* do not perform matching on reverse complemented strand */
        nowildcards, /* ignore matches containing wildcards */
        skpp; /* Skip prefix of pattern without counting errors */
-  long maxdistance; /* maximal number of allowed differences >= 0 */
+  long userdefinedmaxdistance; /* maximal number of allowed differences */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */
   unsigned long maxintervalwidth; /* max width of interval */
 } TageratorOptions;

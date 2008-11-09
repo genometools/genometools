@@ -66,7 +66,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   option = gt_option_new_long("e",
                            "Specify the allowed number of differences "
                            "(replacements/insertions/deletions)",
-                           &arguments->maxdistance,
+                           &arguments->userdefinedmaxdistance,
                            -1L);
   gt_option_parser_add_option(op, option);
 
@@ -142,7 +142,7 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
 {
   TageratorOptions *arguments = tool_arguments;
 
-  if (!arguments->nowildcards && arguments->maxdistance <= 0)
+  if (!arguments->nowildcards && arguments->userdefinedmaxdistance <= 0)
   {
     arguments->nowildcards = true;
   }
@@ -154,7 +154,7 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
     gt_assert(gt_option_is_set(arguments->refoptionpckindex));
     arguments->withesa = false;
   }
-  if (arguments->maxdistance < 0)
+  if (arguments->userdefinedmaxdistance < 0)
   {
     if (arguments->online)
     {
@@ -170,7 +170,8 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   } else
   {
     if (arguments->skpp &&
-        (arguments->maxdistance == 0 || arguments->maxintervalwidth == 0))
+        (arguments->userdefinedmaxdistance == 0 ||
+         arguments->maxintervalwidth == 0))
     {
       gt_error_set(err,"option -skpp only works in pdiff mode");
       return -1;
@@ -192,7 +193,7 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
   gt_assert(arguments != NULL);
 
   gt_assert(parsed_args == argc);
-  if (arguments->maxdistance == -1L)
+  if (arguments->userdefinedmaxdistance == -1L)
   {
     printf("# computing matching statistics\n");
   } else
@@ -204,12 +205,12 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
     {
       printf("# computing prefix matches");
     }
-    if (arguments->maxdistance == 0)
+    if (arguments->userdefinedmaxdistance == 0)
     {
       printf(" without differences (exact matches)");
     } else
     {
-      printf(" with up to %ld differences",arguments->maxdistance);
+      printf(" with up to %ld differences",arguments->userdefinedmaxdistance);
     }
     if (arguments->maxintervalwidth > 0)
     {
