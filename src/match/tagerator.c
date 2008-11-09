@@ -286,28 +286,25 @@ static int dotransformtag(Uchar *transformedtag,
 }
 
 static void performpatternsearch(const AbstractDfstransformer *dfst,
-                                 const TageratorOptions *tageratoroptions,
+                                 bool domstats,
+                                 unsigned long maxdistance,
+                                 bool online,
+                                 bool docompare,
+                                 unsigned long maxintervalwidth,
+                                 bool skpp,
                                  Myersonlineresources *mor,
                                  Limdfsresources *limdfsresources,
                                  const Uchar *transformedtag,
-                                 unsigned long taglen,
-                                 Processmatch processmatch,
-                                 void *processmatchinfooffline)
+                                 unsigned long taglen)
 {
-  if (tageratoroptions->online ||
-      (tageratoroptions->userdefinedmaxdistance >= 0 &&
-       tageratoroptions->docompare))
+  if (online || (!domstats && docompare))
   {
     gt_assert(mor != NULL);
-    edistmyersbitvectorAPM(mor,
-                           transformedtag,
-                           taglen,
-                           (unsigned long)
-                           tageratoroptions->userdefinedmaxdistance);
+    edistmyersbitvectorAPM(mor,transformedtag,taglen,maxdistance);
   }
-  if (!tageratoroptions->online || tageratoroptions->docompare)
+  if (!online || docompare)
   {
-    if (tageratoroptions->userdefinedmaxdistance < 0)
+    if (domstats)
     {
       indexbasedmstats(limdfsresources,
                        transformedtag,
@@ -315,22 +312,19 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                        dfst);
     } else
     {
-      if (tageratoroptions->userdefinedmaxdistance == 0)
+      if (maxdistance == 0)
       {
         indexbasedexactpatternmatching(limdfsresources,
                                        transformedtag,
-                                       taglen,
-                                       processmatch,
-                                       processmatchinfooffline);
+                                       taglen);
       } else
       {
         indexbasedapproxpatternmatching(limdfsresources,
                                         transformedtag,
                                         taglen,
-                                        (unsigned long) tageratoroptions->
-                                                        userdefinedmaxdistance,
-                                        tageratoroptions->maxintervalwidth,
-                                        tageratoroptions->skpp,
+                                        maxdistance,
+                                        maxintervalwidth,
+                                        skpp,
                                         dfst);
       }
     }
@@ -405,6 +399,54 @@ static void compareresults(const ArraySimplematch *storeonline,
     }
   }
 }
+
+/*
+
+static void searchoverstrands(const Tageratoroptions *tageratoroptions,
+                              Tagwithlength *twl,
+                              const AbstractDfstransformer *dfst,
+                              Myersonlineresources *mor,
+                              Limdfsresources *limdfsresources,
+                              Processmatch processmatch,
+                              )
+{
+  int try;
+
+  for (try=0 ; try < 2; try++)
+  {
+    if ((try == 0 && !tageratoroptions->nofwdmatch) ||
+        (try == 1 && !tageratoroptions->norcmatch))
+    {
+      if (try == 1 && !tageratoroptions->norcmatch)
+      {
+        inplace_reversecomplement(twl.transformedtag,twl.taglen);
+        twl.rcdir = true;
+      }
+      performpatternsearch(dfst,
+                           (tageratoroptions->userdefinedmaxdistance < 0)
+                             ? true : false,
+                           (tageratoroptions->userdefinedmaxdistance < 0)
+                             ? 0
+                             : (unsigned long)
+                               tageratoroptions->userdefinedmaxdistance,
+                           tageratoroptions->online,
+                           tageratoroptions->docompare,
+                           tageratoroptions->maxintervalwidth,
+                           tageratoroptions->skpp,
+                           mor,
+                           limdfsresources,
+                           twl.transformedtag,
+                           twl.taglen,
+                           processmatch,
+                           processmatchinfooffline);
+      if (tageratoroptions->docompare)
+      {
+        compareresults(&storeonline,&storeoffline);
+      }
+    }
+  }
+}
+*/
 
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
@@ -632,13 +674,20 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
             twl.rcdir = true;
           }
           performpatternsearch(dfst,
-                               tageratoroptions,
+                               (tageratoroptions->userdefinedmaxdistance < 0)
+                                 ? true : false,
+                               (tageratoroptions->userdefinedmaxdistance < 0)
+                                 ? 0
+                                 : (unsigned long)
+                                   tageratoroptions->userdefinedmaxdistance,
+                               tageratoroptions->online,
+                               tageratoroptions->docompare,
+                               tageratoroptions->maxintervalwidth,
+                               tageratoroptions->skpp,
                                mor,
                                limdfsresources,
                                twl.transformedtag,
-                               twl.taglen,
-                               processmatch,
-                               processmatchinfooffline);
+                               twl.taglen);
           if (tageratoroptions->docompare)
           {
             compareresults(&storeonline,&storeoffline);

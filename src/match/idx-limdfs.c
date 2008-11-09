@@ -866,9 +866,7 @@ static void esa_exactpatternmatching(const void *genericindex,
 
 void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
-                                    unsigned long patternlength,
-                                    Processmatch processmatch,
-                                    void *processmatchinfo)
+                                    unsigned long patternlength)
 {
   if (limdfsresources->withesa)
   {
@@ -876,8 +874,8 @@ void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                              pattern,
                              patternlength,
                              limdfsresources->currentpathspace,
-                             processmatch,
-                             processmatchinfo);
+                             limdfsresources->processmatch,
+                             limdfsresources->processmatchinfo);
   } else
   {
     pck_exactpatternmatching(limdfsresources->genericindex,
@@ -885,8 +883,8 @@ void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                              patternlength,
                              limdfsresources->totallength,
                              limdfsresources->currentpathspace,
-                             processmatch,
-                             processmatchinfo);
+                             limdfsresources->processmatch,
+                             limdfsresources->processmatchinfo);
   }
 }
 

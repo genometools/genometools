@@ -70,9 +70,7 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
 
 void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
-                                    unsigned long patternlength,
-                                    Processmatch processmatch,
-                                    void *processmatchinfo);
+                                    unsigned long patternlength);
 
 Seqpos bound2startpos(const Limdfsresources *limdfsresources,
                       Seqpos bound,unsigned long matchlength);

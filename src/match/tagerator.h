@@ -36,7 +36,8 @@ typedef struct
        nofwdmatch, /* do not perform matching on forward strand */
        norcmatch, /* do not perform matching on reverse complemented strand */
        nowildcards, /* ignore matches containing wildcards */
-       skpp; /* Skip prefix of pattern without counting errors */
+       skpp, /* Skip prefix of pattern without counting errors */
+       best; /* use best match mode, only for edit distance */
   long userdefinedmaxdistance; /* maximal number of allowed differences */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */
   unsigned long maxintervalwidth; /* max width of interval */

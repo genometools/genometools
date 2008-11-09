@@ -48,7 +48,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   TageratorOptions *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *optionrw, *optiononline, *optioncmp, *optionesaindex,
-           *optionpckindex, *optionmaxdepth;
+           *optionpckindex, *optionmaxdepth, *optionbest;
 
   gt_assert(arguments != NULL);
   arguments->indexname = gt_str_new();
@@ -118,9 +118,16 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                              &arguments->norcmatch, false);
   gt_option_parser_add_option(op, option);
 
+  optionbest = gt_option_new_bool("best","Compute only best matches, i.e. only "
+                                  "for smallest edit distance with matches",
+                                  &arguments->best, false);
+  gt_option_parser_add_option(op, optionbest);
+  gt_option_exclude(optiononline,optionbest);
+  gt_option_exclude(optioncmp,optionbest);
+
   option = gt_option_new_ulong_min("maxocc",
-                                "specify max number of match-occurrences",
-                                &arguments->maxintervalwidth,0,1UL);
+                                   "specify max number of match-occurrences",
+                                   &arguments->maxintervalwidth,0,1UL);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("skpp",
@@ -165,6 +172,11 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
     {
       gt_error_set(err,
                    "if option -e is not used then option -maxocc is required");
+      return -1;
+    }
+    if (arguments->best)
+    {
+      gt_error_set(err,"option -best requires option -e");
       return -1;
     }
   } else
