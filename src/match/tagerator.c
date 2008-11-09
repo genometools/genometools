@@ -294,7 +294,7 @@ static void performpatternsearch(const AbstractDfstransformer *dfst,
                                  Processmatch processmatch,
                                  void *processmatchinfooffline)
 {
-  if (tageratoroptions->online || 
+  if (tageratoroptions->online ||
       (tageratoroptions->maxdistance >= 0 && tageratoroptions->docompare))
   {
     gt_assert(mor != NULL);
@@ -415,7 +415,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   Myersonlineresources *mor = NULL;
   ArraySimplematch storeonline, storeoffline;
   void *packedindex = NULL;
-  bool withesa;
   const AbstractDfstransformer *dfst;
 
   if (tageratoroptions->maxdistance >= 0)
@@ -425,14 +424,13 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     dfst = pms_AbstractDfstransformer();
   }
-  if (gt_str_length(tageratoroptions->esaindexname) > 0)
+  if (tageratoroptions->withesa)
   {
     demand = SARR_ESQTAB;
     if (!tageratoroptions->online)
     {
       demand |= SARR_SUFTAB;
     }
-    withesa = true;
   } else
   {
     if (tageratoroptions->docompare || tageratoroptions->online)
@@ -442,13 +440,11 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       demand = 0;
     }
-    withesa = false;
   }
   if (mapsuffixarray(&suffixarray,
                      &totallength,
                      demand,
-                     withesa ? tageratoroptions->esaindexname
-                             : tageratoroptions->pckindexname,
+                     tageratoroptions->indexname,
                      NULL,
                      err) != 0)
   {
@@ -456,14 +452,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   }
   if (!haserr)
   {
-    if (withesa && suffixarray.readmode != Forwardmode)
+    if (tageratoroptions->withesa && suffixarray.readmode != Forwardmode)
     {
       gt_error_set(err,"using option -esa you can only process index "
                     "in forward mode");
       haserr = true;
     } else
     {
-      if (!withesa && suffixarray.readmode != Reversemode)
+      if (!tageratoroptions->withesa && suffixarray.readmode != Reversemode)
       {
         gt_error_set(err,"with option -pck you can only process index "
                       "in reverse mode");
@@ -471,9 +467,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       }
     }
   }
-  if (!haserr && gt_str_length(tageratoroptions->pckindexname) > 0)
+  if (!haserr && !tageratoroptions->withesa)
   {
-    packedindex = loadvoidBWTSeqForSA(tageratoroptions->pckindexname,
+    packedindex = loadvoidBWTSeqForSA(tageratoroptions->indexname,
                                       &suffixarray,
                                       totallength, true, err);
     if (packedindex == NULL)
@@ -532,7 +528,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       unsigned int maxdepth;
       unsigned long maxpathlength;
 
-      if (withesa)
+      if (tageratoroptions->withesa)
       {
         mbtab = NULL;
         maxdepth = 0;
@@ -554,11 +550,12 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       {
         maxpathlength = (unsigned long) (1+MAXTAGSIZE);
       }
-      limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
+      limdfsresources = newLimdfsresources(tageratoroptions->withesa
+                                             ? &suffixarray : packedindex,
                                            mbtab,
                                            maxdepth,
                                            suffixarray.encseq,
-                                           withesa,
+                                           tageratoroptions->withesa,
                                            tageratoroptions->nowildcards,
                                            tageratoroptions->maxintervalwidth,
                                            mapsize,

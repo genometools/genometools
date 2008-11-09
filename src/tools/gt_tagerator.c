@@ -23,27 +23,6 @@
 #include "match/tagerator.h"
 #include "tools/gt_tagerator.h"
 
-/*
-  Remark Gordon from July 2008: How to have access to an option in the
-  GtTool argument parser framework:
-
-  typedef struct
-  {
-    GtOption *foo;
-  } Arguments;
-
-  foo = gt_option_parser_new();
-  optionparseraddoption(op,foo);
-  arguments->foo = gt_option_ref(foo);
-
-  ...
-
-  arguments_delete()
-  {
-    gt_option_delete(arguments_foo);
-  }
-*/
-
 static void *gt_tagerator_arguments_new(void)
 {
   return gt_malloc(sizeof (TageratorOptions));
@@ -57,9 +36,10 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  gt_str_delete(arguments->esaindexname);
-  gt_str_delete(arguments->pckindexname);
+  gt_str_delete(arguments->indexname);
   gt_str_array_delete(arguments->tagfiles);
+  gt_option_delete(arguments->refoptionesaindex);
+  gt_option_delete(arguments->refoptionpckindex);
   gt_free(arguments);
 }
 
@@ -71,8 +51,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
            *optionpckindex, *optionmaxdepth;
 
   gt_assert(arguments != NULL);
-  arguments->esaindexname = gt_str_new();
-  arguments->pckindexname = gt_str_new();
+  arguments->indexname = gt_str_new();
   arguments->tagfiles = gt_str_array_new();
   op = gt_option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
@@ -93,13 +72,15 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
 
   optionesaindex = gt_option_new_string("esa",
                                      "Specify index (enhanced suffix array)",
-                                     arguments->esaindexname, NULL);
+                                     arguments->indexname, NULL);
   gt_option_parser_add_option(op, optionesaindex);
+  arguments->refoptionesaindex = gt_option_ref(optionesaindex);
 
   optionpckindex = gt_option_new_string("pck",
                                      "Specify index (packed index)",
-                                     arguments->pckindexname, NULL);
+                                     arguments->indexname, NULL);
   gt_option_parser_add_option(op, optionpckindex);
+  arguments->refoptionpckindex = gt_option_ref(optionpckindex);
   gt_option_exclude(optionesaindex,optionpckindex);
   gt_option_is_mandatory_either(optionesaindex,optionpckindex);
 
@@ -165,6 +146,14 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   {
     arguments->nowildcards = true;
   }
+  if (gt_option_is_set(arguments->refoptionesaindex))
+  {
+   arguments->withesa = true;
+  } else
+  {
+    gt_assert(gt_option_is_set(arguments->refoptionpckindex));
+    arguments->withesa = false;
+  }
   if (arguments->maxdistance < 0)
   {
     if (arguments->online)
@@ -229,14 +218,8 @@ static int gt_tagerator_runner(GT_UNUSED int argc,
     }
     printf("\n");
   }
-  if (gt_str_length(arguments->esaindexname) > 0)
-  {
-    printf("# indexname(esa)=%s\n",gt_str_get(arguments->esaindexname));
-  } else
-  {
-    gt_assert(gt_str_length(arguments->pckindexname) > 0);
-    printf("# indexname(pck)=%s\n",gt_str_get(arguments->pckindexname));
-  }
+  printf("# indexname(%s)=%s\n",arguments->withesa ? "esa" : "pck",
+                                gt_str_get(arguments->indexname));
   for (idx=0; idx<gt_str_array_size(arguments->tagfiles); idx++)
   {
     printf("# queryfile=%s\n",gt_str_array_get(arguments->tagfiles,idx));
