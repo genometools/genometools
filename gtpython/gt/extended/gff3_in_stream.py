@@ -22,14 +22,13 @@ from gt.extended.genome_stream import GenomeStream
 
 class GFF3InStream(GenomeStream):
   def __init__(self, filename):
-    from ctypes import c_bool
     try:
       p = open(filename)
       tmp = p.readline()
       p.close()
     except:
       gterror("File " + filename + " not readable!")
-    self.gs = gtlib.gt_gff3_in_stream_new_sorted(filename, c_bool(False))
+    self.gs = gtlib.gt_gff3_in_stream_new_sorted(filename, 0)
     self._as_parameter_ = self.gs
 
   def from_param(cls, obj):
@@ -44,8 +43,8 @@ class GFF3InStream(GenomeStream):
     return used_types.to_list()
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_bool, c_void_p
-    gtlib.gt_gff3_in_stream_new_sorted.argtypes = [c_char_p, c_bool]
+    from ctypes import c_char_p, c_int, c_void_p
+    gtlib.gt_gff3_in_stream_new_sorted.argtypes = [c_char_p, c_int]
     gtlib.gt_gff3_in_stream_get_used_types.restype = c_void_p
     gtlib.gt_gff3_in_stream_new_sorted.restype = c_void_p
   register = classmethod(register)

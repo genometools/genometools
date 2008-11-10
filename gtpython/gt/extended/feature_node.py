@@ -55,7 +55,7 @@ class FeatureNode(GenomeNode):
     return gtlib.gt_feature_node_get_phase(self.gn)
 
   def get_score(self):
-    if gtlib.gt_feature_node_score_is_defined(self.gn):
+    if gtlib.gt_feature_node_score_is_defined(self.gn) == 1:
       return gtlib.gt_feature_node_get_score(self.gn)
     else:
       return None
@@ -68,7 +68,7 @@ class FeatureNode(GenomeNode):
       yield tag, val
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_float, c_bool, c_int, c_void_p
+    from ctypes import c_char_p, c_float, c_int, c_int, c_void_p
     gtlib.gt_feature_node_get_type.restype = c_char_p
     gtlib.gt_feature_node_get_type.argtypes = [c_void_p]
     gtlib.gt_feature_node_get_score.restype = c_float
@@ -77,6 +77,6 @@ class FeatureNode(GenomeNode):
     gtlib.gt_feature_node_get_phase.argtypes = [c_void_p]
     gtlib.gt_feature_node_get_strand.restype = c_int
     gtlib.gt_feature_node_get_strand.argtypes = [c_void_p]
-    gtlib.gt_feature_node_score_is_defined.restype = c_bool
+    gtlib.gt_feature_node_score_is_defined.restype = c_int
     gtlib.gt_feature_node_score_is_defined.argtypes = [c_void_p]
   register = classmethod(register)
