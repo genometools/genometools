@@ -778,7 +778,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
   }
 }
 
-void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
+bool indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
@@ -794,6 +794,7 @@ void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                           maxintervalwidth,
                           skpp);
   runlimdfs(limdfsresources,adfst);
+  return false;
 }
 
 void indexbasedmstats(Limdfsresources *limdfsresources,
@@ -837,7 +838,7 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
                       qend);
 }
 
-static void esa_exactpatternmatching(const void *genericindex,
+static bool esa_exactpatternmatching(const void *genericindex,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      const Uchar *dbsubstring,
@@ -847,6 +848,7 @@ static void esa_exactpatternmatching(const void *genericindex,
   const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
   MMsearchiterator *mmsi;
   Seqpos dbstartpos, totallength = getencseqtotallength(suffixarray->encseq);
+  bool nomatches;
 
   mmsi = newmmsearchiterator(suffixarray->encseq,
                              suffixarray->suftab,
@@ -856,35 +858,38 @@ static void esa_exactpatternmatching(const void *genericindex,
                              suffixarray->readmode,
                              pattern,
                              patternlength);
+
+  nomatches = isemptymmsearchiterator(mmsi);
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
     processmatch(processmatchinfo,dbstartpos,
                  (Seqpos) patternlength,dbsubstring,patternlength);
   }
   freemmsearchiterator(&mmsi);
+  return nomatches ? false : true;
 }
 
-void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
+bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
                                     unsigned long patternlength)
 {
   if (limdfsresources->withesa)
   {
-    esa_exactpatternmatching(limdfsresources->genericindex,
-                             pattern,
-                             patternlength,
-                             limdfsresources->currentpathspace,
-                             limdfsresources->processmatch,
-                             limdfsresources->processmatchinfo);
+    return esa_exactpatternmatching(limdfsresources->genericindex,
+                                    pattern,
+                                    patternlength,
+                                    limdfsresources->currentpathspace,
+                                    limdfsresources->processmatch,
+                                    limdfsresources->processmatchinfo);
   } else
   {
-    pck_exactpatternmatching(limdfsresources->genericindex,
-                             pattern,
-                             patternlength,
-                             limdfsresources->totallength,
-                             limdfsresources->currentpathspace,
-                             limdfsresources->processmatch,
-                             limdfsresources->processmatchinfo);
+    return pck_exactpatternmatching(limdfsresources->genericindex,
+                                    pattern,
+                                    patternlength,
+                                    limdfsresources->totallength,
+                                    limdfsresources->currentpathspace,
+                                    limdfsresources->processmatch,
+                                    limdfsresources->processmatchinfo);
   }
 }
 

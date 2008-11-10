@@ -351,7 +351,7 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
   return matchlength;
 }
 
-void pck_exactpatternmatching(const void *voidbwtseq,
+bool pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,
@@ -360,11 +360,12 @@ void pck_exactpatternmatching(const void *voidbwtseq,
                               void *processmatchinfo)
 {
   BWTSeqExactMatchesIterator *bsemi;
-  Seqpos dbstartpos;
+  Seqpos dbstartpos, numofmatches;
 
   bsemi = newEMIterator((const BWTSeq *) voidbwtseq,
                         pattern,(size_t) patternlength, true);
   gt_assert(bsemi != NULL);
+  numofmatches = EMINumMatchesTotal(bsemi);
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) voidbwtseq))
   {
     gt_assert(totallength >= (dbstartpos + patternlength));
@@ -379,4 +380,5 @@ void pck_exactpatternmatching(const void *voidbwtseq,
     deleteEMIterator(bsemi);
     bsemi = NULL;
   }
+  return numofmatches > 0 ? true : false;
 }

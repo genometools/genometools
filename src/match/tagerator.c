@@ -307,21 +307,21 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
     if (domstats)
     {
       indexbasedmstats(limdfsresources,transformedtag,taglen,dfst);
+      return false;
+    }
+    if (maxdistance == 0)
+    {
+      return indexbasedexactpatternmatching(limdfsresources,
+                                            transformedtag,taglen);
     } else
     {
-      if (maxdistance == 0)
-      {
-        indexbasedexactpatternmatching(limdfsresources,transformedtag,taglen);
-      } else
-      {
-        indexbasedapproxpatternmatching(limdfsresources,
-                                        transformedtag,
-                                        taglen,
-                                        maxdistance,
-                                        maxintervalwidth,
-                                        skpp,
-                                        dfst);
-      }
+      return indexbasedapproxpatternmatching(limdfsresources,
+                                             transformedtag,
+                                             taglen,
+                                             maxdistance,
+                                             maxintervalwidth,
+                                             skpp,
+                                             dfst);
     }
   }
   return false;

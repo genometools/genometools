@@ -45,7 +45,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
                          const AbstractDfstransformer *adfst);
 
-void indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
+bool indexbasedapproxpatternmatching(Limdfsresources *limdfsresources,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      unsigned long maxdistance,
@@ -68,7 +68,7 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend);
 
-void indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
+bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
                                     unsigned long patternlength);
 
