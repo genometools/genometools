@@ -27,7 +27,7 @@
 
 struct GtGTFInStream {
   const GtNodeStream parent_instance;
-  GtQueue *gt_genome_node_buffer;
+  GtQueue *genome_node_buffer;
   GtTypeChecker *type_checker;
   char *filename;
   bool file_processed,
@@ -57,8 +57,7 @@ static int process_file(GtGTFInStream *gtf_in_stream, GtError *err)
   /* parse input file */
   filenamestr = gt_str_new_cstr(gtf_in_stream->filename
                                 ? gtf_in_stream->filename : "stdin");
-  had_err = gt_gtf_parser_parse(gtf_parser,
-                                gtf_in_stream->gt_genome_node_buffer,
+  had_err = gt_gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
                                 filenamestr, fpin, gtf_in_stream->tidy, err);
   gt_str_delete(filenamestr);
 
@@ -83,14 +82,14 @@ static int gtf_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
     had_err = process_file(is, err);
     is->file_processed = true;
   }
-  if (!had_err && gt_queue_size(is->gt_genome_node_buffer)) {
+  if (!had_err && gt_queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
-    *gn = gt_queue_get(is->gt_genome_node_buffer);
+    *gn = gt_queue_get(is->genome_node_buffer);
     return 0;
   }
   if (!had_err) {
     /* the buffer is empty */
-    gt_assert(!gt_queue_size(is->gt_genome_node_buffer));
+    gt_assert(!gt_queue_size(is->genome_node_buffer));
     *gn = NULL;
   }
   return had_err;
@@ -101,7 +100,7 @@ static void gtf_in_stream_free(GtNodeStream *ns)
   GtGTFInStream *gtf_in_stream = gtf_in_stream_cast(ns);
   gt_free(gtf_in_stream->filename);
   gt_type_checker_delete(gtf_in_stream->type_checker);
-  gt_queue_delete(gtf_in_stream->gt_genome_node_buffer);
+  gt_queue_delete(gtf_in_stream->genome_node_buffer);
 }
 
 const GtNodeStreamClass* gt_gtf_in_stream_class(void)
@@ -122,7 +121,7 @@ GtNodeStream* gt_gtf_in_stream_new(const char *filename)
 
   ns = gt_node_stream_create(gt_gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(ns);
-  gtf_in_stream->gt_genome_node_buffer = gt_queue_new();
+  gtf_in_stream->genome_node_buffer = gt_queue_new();
   gtf_in_stream->type_checker = gt_type_checker_builtin_new();
   gtf_in_stream->filename = filename ? gt_cstr_dup(filename) : NULL;
 
