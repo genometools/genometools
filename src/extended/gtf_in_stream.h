@@ -21,5 +21,6 @@
 #include "extended/gtf_in_stream_api.h"
 
 const GtNodeStreamClass* gt_gtf_in_stream_class(void);
+void                     gt_gtf_in_stream_enable_tidy_mode(GtNodeStream*);
 
 #endif

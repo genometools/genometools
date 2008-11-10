@@ -24,8 +24,9 @@
 /* Implements the <GtNodeStream> interface. */
 typedef struct GtGTFInStream GtGTFInStream;
 
-/* filename == NULL -> use stdin */
-GtNodeStream*            gt_gtf_in_stream_new(const char *filename,
-                                              bool be_tolerant, GtError*);
+/* Create a <GtGTFInStream*> which subsequently reads the GTF file with the
+   given <filename>. If <filename> equals <NULL>, the GTF data is read from
+   <stdin>. */
+GtNodeStream* gt_gtf_in_stream_new(const char *filename);
 
 #endif
