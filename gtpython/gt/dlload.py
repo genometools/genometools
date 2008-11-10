@@ -16,8 +16,15 @@
 #
 
 from ctypes import CDLL, CFUNCTYPE, c_char_p, c_void_p
+import sys
 
-gtlib = CDLL("libgenometools.so")
+# inspired from the ruby bindings, maybe there is a better way
+if sys.platform == "darwin":
+  soext = ".dylib"
+else:
+  soext = ".so"
+
+gtlib = CDLL("libgenometools" + soext)
 gtlib.gt_allocators_init()
 gtlib.gt_allocators_reg_atexit_func()
 
