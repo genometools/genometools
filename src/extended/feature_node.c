@@ -185,8 +185,8 @@ static void set_tree_status(unsigned int *bit_field, TreeStatus tree_status)
 }
 
 GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
-                                     unsigned long start, unsigned long end,
-                                     GtStrand strand)
+                                  unsigned long start, unsigned long end,
+                                  GtStrand strand)
 {
   GtGenomeNode *gn;
   GtFeatureNode *fn;
@@ -219,8 +219,8 @@ GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
   gt_assert(fn);
   range = gt_feature_node_get_range((GtGenomeNode*) fn),
   pn = gt_feature_node_new(gt_feature_node_get_seqid((GtGenomeNode*) fn),
-                            gt_feature_node_get_type(fn), range.start,
-                            range.end, gt_feature_node_get_strand(fn));
+                           gt_feature_node_get_type(fn), range.start,
+                           range.end, gt_feature_node_get_strand(fn));
   pf = gt_feature_node_cast(pn);
   pf->type = NULL; /* pseudo features do not have a type */
   gt_feature_node_set_source(pf, fn->source);
