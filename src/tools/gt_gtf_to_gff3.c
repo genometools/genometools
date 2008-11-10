@@ -64,7 +64,7 @@ static int gt_gtf_to_gff3_runner(GT_UNUSED int argc, const char **argv,
   GTFToGFF3Arguments *arguments = tool_arguments;
   GtNodeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
   GtGenomeNode *gn;
-  int had_err = 0;
+  int had_err;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -73,20 +73,14 @@ static int gt_gtf_to_gff3_runner(GT_UNUSED int argc, const char **argv,
   gtf_in_stream = gt_gtf_in_stream_new(argv[parsed_args]);
   if (arguments->be_tolerant)
     gt_gtf_in_stream_enable_tidy_mode(gtf_in_stream);
-  if (!gtf_in_stream)
-    had_err = -1;
 
-  if (!had_err) {
-    /* create a gff3 output stream */
-    /* XXX: use proper genfile */
-    gff3_out_stream = gt_gff3_out_stream_new(gtf_in_stream, NULL);
+  /* create a gff3 output stream */
+  /* XXX: use proper genfile */
+  gff3_out_stream = gt_gff3_out_stream_new(gtf_in_stream, NULL);
 
-    /* pull the features through the stream and free them afterwards */
-    while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
-           gn) {
-      gt_genome_node_rec_delete(gn);
-    }
-  }
+  /* pull the features through the stream and free them afterwards */
+  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) && gn)
+    gt_genome_node_rec_delete(gn);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
