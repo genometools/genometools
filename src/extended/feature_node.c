@@ -140,9 +140,7 @@ void gt_feature_node_set_source(GtFeatureNode *fn, GtStr *source)
 
 void gt_feature_node_set_phase(GtGenomeNode *gn, Phase phase)
 {
-  GtFeatureNode *fn;
-  gt_assert(gn);
-  fn = gt_feature_node_cast(gn); /* XXX */
+  GtFeatureNode *fn = gt_feature_node_cast(gn);
   fn->bit_field &= ~(PHASE_MASK << PHASE_OFFSET);
   fn->bit_field |= phase << PHASE_OFFSET;
 }
@@ -372,6 +370,13 @@ GtStrand gt_feature_node_get_strand(GtFeatureNode *fn)
 {
   gt_assert(fn);
   return (fn->bit_field >> STRAND_OFFSET) & STRAND_MASK;
+}
+
+void gt_feature_node_set_strand(GtGenomeNode *gn, GtStrand strand)
+{
+  GtFeatureNode *fn = gt_feature_node_cast(gn);
+  fn->bit_field &= ~(STRAND_MASK << STRAND_OFFSET);
+  fn->bit_field |= strand << STRAND_OFFSET;
 }
 
 Phase gt_feature_node_get_phase(GtFeatureNode *fn)
