@@ -47,6 +47,7 @@
 #include "extended/tag_value_map.h"
 #include "extended/union_find.h"
 #include "extended/redblack.h"
+#include "tools/gt_bed_to_gff3.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chseqids.h"
@@ -103,6 +104,7 @@ GtToolbox* gtt_tools(void)
   GtToolbox *tools = gt_toolbox_new();
 
   /* add tools */
+  gt_toolbox_add_tool(tools, "bed_to_gff3", gt_bed_to_gff3());
   gt_toolbox_add_tool(tools, "bioseq", gt_bioseq());
   gt_toolbox_add_tool(tools, "cds", gt_cds());
   gt_toolbox_add(tools, "chseqids", gt_chseqids);

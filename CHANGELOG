@@ -3,6 +3,7 @@ changes in version 1.2.2 (2008-11-04)
 - new tool `gt tallymer` added
 - new tool `gt congruence` added
 - the GenomeTools Python bindings (see gtpython/README) have been added
+- new tool `gt bed_to_gff3` added
 
 
 changes in version 1.2.1 (2008-11-03)
