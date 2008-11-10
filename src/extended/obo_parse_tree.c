@@ -284,6 +284,7 @@ static int comment_line(GtIO *obo_file, GtError *err)
         return had_err;
       case END_OF_LINE:
         gt_io_next(obo_file);
+        /*@fallthrough@*/
       case END_OF_FILE:
         return had_err;
       default:
