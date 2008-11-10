@@ -30,7 +30,7 @@ occurs #2\xspace $c$ times in the union of all sequences from the
 \SFXidx. When combined with option \Showoption{indexname},
 this option specifies an occurrence constraint on the $k$-mers stored
 in the generated \Tyridx. That is, a $k$-mer is put into the
-\Tyridx, if it occurs #2\xspace $c$ times in the union of 
+\Tyridx, if it occurs #2\xspace $c$ times in the union of
 all sequences from the \SFXidx.
 }
 \newcommand{\Typrogintro}[1]{
@@ -39,15 +39,15 @@ all sequences from the \SFXidx.
 \SFXidx [\textit{options}]
 \par
 The \SFXidx is an enhanced suffix array computed by the
-program \SFX, which is also part of the genometools-package. Currently, 
-there is no \SFX-manual available, but in Section~\ref{Examples} we show how 
+program \SFX, which is also part of the genometools-package. Currently,
+there is no \SFX-manual available, but in Section~\ref{Examples} we show how
 to call \SFX appropriately in  the context of
 \Tallymer. The following options are available in #1:}
 
 \newcommand{\Esaoption}[0]{
 \Option{esa}{\Showoptionarg{\SFXidx}}{
-Specify the name of an \SFXidx computed by the 
-\SFX-program using the output options \Showoption{suf}, \Showoption{lcp}, 
+Specify the name of an \SFXidx computed by the
+\SFX-program using the output options \Showoption{suf}, \Showoption{lcp},
 and \Showoption{tis}. This option is mandatory.
 }}
 
@@ -61,7 +61,7 @@ than 4~GB. When using this option, the \textsf{lcp}-table and the
 \textsf{suf}-table of the \SFXidx are
 sequentially scanned, so that only a small part of these tables reside
 in memory. This, of course, reduces the memory requirement of
-the program. Note that the sequence is still mapped completely into main 
+the program. Note that the sequence is still mapped completely into main
 memory as it is accessed in random order.}
 }
 
@@ -98,7 +98,7 @@ the reader to \cite{KUR:NER:STE:WAR:2008}. \textit{Tallymer} is part of
 the genometools software (\url{http://genometools.org}). It is implemented
 as part of the \textit{gt}-binary and called as a subprogram. So to
 run \Tallymer, one has to call the \textit{gt}-binary with subprogram
-\texttt{tallymer}. \Tallymer itself has three subprograms 
+\texttt{tallymer}. \Tallymer itself has three subprograms
 \TYmkindex, \TYoccratio, and \TYsearch. These are described below.
 
 \section{\TYmkindex}
@@ -126,7 +126,7 @@ substrings of length $k$ of the given input sequences, given as a
 
 \Option{pl}{$\Showoptionalarg{prefixlength}$}{
 Specify the prefix length to construct a bucket boundary table
-for the generated \Tyridx. This additional table speeds up the 
+for the generated \Tyridx. This additional table speeds up the
 search in the \Tyridx. This option only works for an alphabet
 of size 4, i.e.\ for the DNA alphabet.
 The argument \Showoptionarg{prefixlength} is
@@ -138,10 +138,10 @@ where \(n\) is the total number of $k$-mers in the \Tyridx.
 }
 
 \Option{indexname}{\Showoptionarg{idxname}}{
-Store the  $k$-mers specified according to the options \Showoption{minocc} 
+Store the  $k$-mers specified according to the options \Showoption{minocc}
 and \Showoption{maxocc} in the file named
-\Showoptionarg{idxname}\Filenamesuffix{.mer}. If option 
-\Showoption{pl} is used, then additionally the bucket boundary table is 
+\Showoptionarg{idxname}\Filenamesuffix{.mer}. If option
+\Showoption{pl} is used, then additionally the bucket boundary table is
 stored in a file named \Showoptionarg{idxname}\Filenamesuffix{.mbd}.
 Using the option \Showoption{counts} (see below), an additional file
 \Showoptionarg{idxname}\Filenamesuffix{.mct} is generated. These file
@@ -175,7 +175,7 @@ Option \Showoption{indexname} requires to also use one of the options
 options \Showoption{minocc} and \Showoption{maxocc}.
 \end{enumerate}
 Note that the program ignores all $k$-mers not entirely consisting of
-wildcard characters (i.e. not \texttt{a}, \texttt{c}, \texttt{c}, and 
+wildcard characters (i.e. not \texttt{a}, \texttt{c}, \texttt{c}, and
 \texttt{g} in case of the DNA alphabet).
 
 \section{\TYoccratio}
@@ -189,15 +189,15 @@ of sequences represented by a \SFXidx It is called as follows:
 \Esaoption
 
 \Option{minmersize}{$\Kmin$}{
-Specify the minimum size of the mers which are counted. 
-That is, the program counts the number of unique and nonunique 
-mers of length at least $\Kmin$. This option is mandatory if option 
+Specify the minimum size of the mers which are counted.
+That is, the program counts the number of unique and nonunique
+mers of length at least $\Kmin$. This option is mandatory if option
 \Showoption{mersizes} is not used.}
 
 \Option{maxmersize}{$\Kmax$}{
-Specify the maximum size of the mers which are counted. 
-That is, the program counts the number of unique and nonunique 
-mers of length at most $\Kmax$. This option is mandatory if option 
+Specify the maximum size of the mers which are counted.
+That is, the program counts the number of unique and nonunique
+mers of length at most $\Kmax$. This option is mandatory if option
 \Showoption{mersizes} is not used.}
 
 \Option{step}{$\Kstep$}{
@@ -215,22 +215,22 @@ Specify what to output by giving at least one of the four keywords
 $\Showoptionkey{unique}$,
 $\Showoptionkey{nonunique}$,
 $\Showoptionkey{nonuniquemulti}$,
-$\Showoptionkey{relative}$, and 
+$\Showoptionkey{relative}$, and
 $\Showoptionkey{total}$.
 \end{center}
 The semantics of the used keywords is a follows:
 \begin{description}
 \item[$\Showoptionkey{unique}$:]
-Show the number of 
+Show the number of
 unique $k$-mers for each $k$ between $\Kmin$ and $\Kmax$.
 \item[$\Showoptionkey{nonunique}$:]
-Show the number 
-of non-unique $k$-mers for each $k$ between $\Kmin$ and $\Kmax$. 
+Show the number
+of non-unique $k$-mers for each $k$ between $\Kmin$ and $\Kmax$.
 Only the event that a $k$-mer is unique is counted.
 \item[$\Showoptionkey{nonuniquemulti}$:]
-Show the 
-number of non-unique $k$-mers for each $k$ between $\Kmin$ and $\Kmax$. 
-Each $k$-mer is counted as the number of times it occurs in the indexed 
+Show the
+number of non-unique $k$-mers for each $k$ between $\Kmin$ and $\Kmax$.
+Each $k$-mer is counted as the number of times it occurs in the indexed
 sequences.
 \item[$\Showoptionkey{total}$:]
 Show the number of all
@@ -241,7 +241,7 @@ the indexed sequences.
 \item[$\Showoptionkey{relative}$:]
 Show the fraction of unique/non-unique $k$-mers relative
 to all $k$-mers. This keyword can be combined with the keywords
-$\Showoptionkey{unique}$, $\Showoptionkey{nonunique}$, and 
+$\Showoptionkey{unique}$, $\Showoptionkey{nonunique}$, and
 $\Showoptionkey{nonuniquemulti}$.
 \end{description}
 }
@@ -266,20 +266,20 @@ The program \TYsearch is used to search a set of \(k\)-mers in a
 \Tyridx~\texttt{-q} \textit{queryfile0} \textit{queryfile1} \dots
 \par
 where \Tyridx is an index generated by \TYmkindex, and
-\textit{queryfile0}, \textit{queryfile1}, etc.\ are queryfiles 
+\textit{queryfile0}, \textit{queryfile1}, etc.\ are queryfiles
 (in \Fasta format)
-which are to be matches against the given index. The following options are 
+which are to be matches against the given index. The following options are
 available:
 
 \begin{Justshowoptions}
 \Option{tyr}{\Showoptionarg{\Tyridx}}{
-Specify the name of a \Tyridx computed by the 
+Specify the name of a \Tyridx computed by the
 program \TYmkindex. This option is mandatory.
 }
 
 \Option{q}{$\Showoptionarg{files}$}{
 Specify a white space separated list of query files (in multiple \Fasta
-format). At least one query file must be given. The files may be in 
+format). At least one query file must be given. The files may be in
 gzipped format, in which case they have to end with the suffix \texttt{.gz}.
 }
 
@@ -288,7 +288,7 @@ Specify the strand to be searched. The keyword \Showoptionkey{f} means to
 search on the forward strand, i.e.\ each mer is searched in forward
 direction. The keyword \Showoptionkey{p} means to
 search on the reverse complemented strand, i.e.\ the reverse complement
-of the given mer is searched. The keyword \Showoptionkey{fp} means a 
+of the given mer is searched. The keyword \Showoptionkey{fp} means a
 combination of \Showoptionkey{f} and \Showoptionkey{p}.
 }
 
@@ -317,7 +317,7 @@ sequences.
 Show the sequence content of the mer.
 \end{description}
 For each matching mer, the mentioned values are output on a single line
-in the order the four keywords are specified above. Two consecutive values 
+in the order the four keywords are specified above. Two consecutive values
 are separated by white spaces.
 }
 
@@ -327,29 +327,29 @@ are separated by white spaces.
 \section{Examples}\label{Examples}
 
 Suppose we have a collection of two files \texttt{read1.fna} and
-\texttt{read2.fna}. In the first step, we index 
+\texttt{read2.fna}. In the first step, we index
 both files using the program \SFX:
 
 \EXECUTE{gt suffixerator -dna -pl -tis -suf -lcp -v -parts 4 -db read1.fna read2.fna -indexname reads}
 
 We get the \SFXidx named \texttt{reads}. Note that we have
-used the option \Showoption{parts} with argument 4. This means that 
+used the option \Showoption{parts} with argument 4. This means that
 the \SFXidx is created such that only $\frac{1}{4}$th of the
 \textsf{suf}-table and the \textsf{lcp}-table of the enhanced suffix array
-resided in main memory during the construction. This considerably reduces 
+resided in main memory during the construction. This considerably reduces
 the memory requirement.
 While this was not really necessary for the small files given in the
 index, it is necessary to use this option if the sequence size becomes large.
 
-The created \SFXidx \texttt{reads} 
+The created \SFXidx \texttt{reads}
 is used in the following call to the program \TYoccratio:
 
 \EXECUTE{gt tallymer occratio -output unique nonunique -minmersize 10 -maxmersize 20 -esa reads}
 
 This shows the counts of $k$-mers for $k\in[10,20]$. The first part of the
 output reports counts of unique $k$-mers, while the second is for
-non-unique $k$-mers. For example, there are 223755 unique $10$-mers 
-and 135526 non-unique $10$-mers. If we add the keyword 
+non-unique $k$-mers. For example, there are 223755 unique $10$-mers
+and 135526 non-unique $10$-mers. If we add the keyword
 \Showoptionkey{relative}, then we additionally obtain the fraction
 of counts relative to the total number of $k$-mers:
 
@@ -361,16 +361,16 @@ example 10, 13, and 17, we can use option \Showoption{mersizes}:
 
 \EXECUTE{gt tallymer occratio -output unique nonunique -mersizes 10 13 17 -esa reads}
 
-While \TYoccratio can compute distributions for a range of 
+While \TYoccratio can compute distributions for a range of
 $k$-mers, \TYmkindex runs for a fixed mer-size, as in the following example:
 
 \EXECUTE{gt tallymer mkindex -mersize 19 -minocc 40 -esa reads}
 
 The output, as explained at the beginning of the output, shows the
 distribution of occurrences of 19-mers in the \SFXidx
-\texttt{reads}. The 19-mers occurring more 
+\texttt{reads}. The 19-mers occurring more
 than 40 times are reported with their string content.
-We now add options \Showoption{indexname} and \Showoption{counts} to 
+We now add options \Showoption{indexname} and \Showoption{counts} to
 generate a 19-mer \Tyridx called \texttt{tyr-reads}. The index contains
 information to show the counts.
 
@@ -392,9 +392,9 @@ The number is prefixed by the symbol \texttt{+} if the given mer
 matches on the forward strand.
 The number is prefixed by the symbol \texttt{-} if the given mer
 matches on the reverse complemented strand. The third column shows
-the occurrence count for the mer in the index. There are separated 
+the occurrence count for the mer in the index. There are separated
 counts for the matches on the forward and the reverse complemented strand.
-The fourth column shows the mer in forward direction. 
+The fourth column shows the mer in forward direction.
 %\bibliographystyle{plain}
 %\bibliography{defines,kurtz}
 \begin{thebibliography}{1}
@@ -410,8 +410,8 @@ S.~Kurtz, A.~Narechania, J.C. Stein, and D.~Ware.
 \begin{enumerate}
 \item
 the current version of \TYmkindex and \TYsearch is optimized for short
-mer-sizes (i.e.\ up to length 32 for the DNA alphabet). Longer mer-sizes 
-lead to large space overheads, and should thus be handled in a different way. 
+mer-sizes (i.e.\ up to length 32 for the DNA alphabet). Longer mer-sizes
+lead to large space overheads, and should thus be handled in a different way.
 This has to be implemented.
 \item
 for more than one query file, the program \TYsearch should add the number
@@ -425,14 +425,14 @@ process each query sequence, before inputting the next query sequence.
 check if all indexes have an alphabet of the same size
 \item
 add linear scan over mers to construct bucket boundaries.
-This is more efficient than binary partitioning in case the 
+This is more efficient than binary partitioning in case the
 bucket boundaries become small.
 \item
 change option version such that it does not refer to option Vmatch.
 \item
 preprocess query sequences by sorting them according to some
 prefixlength. Then for the query-substrings beginning with the
-same prefix, find the prefix of the given length once and 
+same prefix, find the prefix of the given length once and
 reuse this information several times.
 \end{comment}
 \end{enumerate}
