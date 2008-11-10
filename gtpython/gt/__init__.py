@@ -15,6 +15,15 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+import sys
+
+try:
+  import ctypes
+except ImportError:
+  sys.stderr.write("The ctypes package could not be found. ")
+  sys.stderr.write("Please make sure it can be imported by Python.")
+  sys.exit(1)
+
 from annotationsketch import *
 from core import *
 from extended import *
