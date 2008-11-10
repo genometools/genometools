@@ -69,12 +69,12 @@ static int gt_gtf_to_gff3_runner(GT_UNUSED int argc, const char **argv,
   gt_error_check(err);
   gt_assert(arguments);
 
-  /* create a gtf input stream */
+  /* create a GTF input stream */
   gtf_in_stream = gt_gtf_in_stream_new(argv[parsed_args]);
   if (arguments->be_tolerant)
     gt_gtf_in_stream_enable_tidy_mode(gtf_in_stream);
 
-  /* create a gff3 output stream */
+  /* create a GFF3 output stream */
   /* XXX: use proper genfile */
   gff3_out_stream = gt_gff3_out_stream_new(gtf_in_stream, NULL);
 

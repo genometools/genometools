@@ -25,7 +25,7 @@
 /* the I/O class */
 typedef struct GtIO GtIO;
 
-GtIO*        gt_io_new(const char *path, const char *mode);
+GtIO*         gt_io_new(const char *path, const char *mode);
 /* Returns -1 if no char is left, 0 otherwise. */
 int           gt_io_get_char(GtIO*, char*);
 /* Can only be used once at a time.*/
@@ -36,7 +36,7 @@ char          gt_io_peek(GtIO*);
 char          gt_io_next(GtIO*);
 unsigned long gt_io_get_line_number(const GtIO*);
 const char*   gt_io_get_filename(const GtIO*);
-GtStr*       gt_io_get_filename_str(const GtIO*);
+GtStr*        gt_io_get_filename_str(const GtIO*);
 void          gt_io_delete(GtIO*);
 
 #endif

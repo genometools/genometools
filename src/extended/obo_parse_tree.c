@@ -526,7 +526,7 @@ void gt_obo_parse_tree_delete(GtOBOParseTree *obo_parse_tree)
 }
 
 const char* gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree
-                                                *obo_parse_tree,
+                                              *obo_parse_tree,
                                               unsigned long stanza_num)
 {
   gt_assert(obo_parse_tree);
@@ -535,7 +535,7 @@ const char* gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree
 }
 
 const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
-                                                 *obo_parse_tree,
+                                               *obo_parse_tree,
                                                unsigned long stanza_num,
                                                const char *stanza_key)
 {
@@ -546,7 +546,7 @@ const char* gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree
 }
 
 unsigned long gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree
-                                                 *obo_parse_tree)
+                                               *obo_parse_tree)
 {
   gt_assert(obo_parse_tree);
   return gt_array_size(obo_parse_tree->stanzas);
