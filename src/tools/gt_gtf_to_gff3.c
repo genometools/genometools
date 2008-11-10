@@ -53,7 +53,6 @@ static GtOptionParser* gt_gtf_to_gff3_option_parser_new(void *tool_arguments)
                               "be tolerant when parsing the GTF file",
                               &arguments->be_tolerant, false);
   gt_option_parser_add_option(op, option);
-  /* parse */
   gt_option_parser_set_max_args(op, 1);
   return op;
 }
