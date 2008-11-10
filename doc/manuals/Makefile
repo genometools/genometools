@@ -2,7 +2,8 @@ ALL=ltrharvest.pdf\
     uniquesub.pdf\
     matstat.pdf\
     mgth.pdf\
-    packedindex.pdf
+    packedindex.pdf\
+    tallymer.pdf
 
 TALLYMERTMP=tallymer-tmp
 
@@ -54,6 +55,14 @@ tallymer.dvi:${TALLYMERTMP}.tex
 	latex ${TALLYMERTMP}
 	latex ${TALLYMERTMP}
 	mv ${TALLYMERTMP}.dvi $@
+
+%.pdf:%.tex
+	pdflatex $<
+	pdflatex $<
+
+%.dvi:%.tex
+	latex $<
+	latex $<
 
 clean:
 	${RM} *.aux  *.log *.bbl  *.blg *.dvi *.mer *.mct *.mbd comment.cut
