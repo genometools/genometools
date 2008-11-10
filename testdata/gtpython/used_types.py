@@ -25,7 +25,7 @@ import re
 if __name__ == "__main__":
   if len(sys.argv) != 2:
     sys.stderr.write("Usage: " + sys.argv[0] + " GFF3_file\n")
-    sys.stderr.write("arse and output the types used in GFF3_file.")
+    sys.stderr.write("Parse and output the types used in GFF3_file.")
     sys.exit(1)
 
   in_stream = GFF3InStream(sys.argv[1])
