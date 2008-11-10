@@ -104,3 +104,12 @@ div.figure div.subfigure {
   float: left;
   margin:12px;
 }
+div.ref {
+  font-size: small;
+  color: #444;
+  line-height: 1.1em;
+}
+ul.pubs li {
+  margin-top: 10px;
+  line-height: 1.2em;
+}
