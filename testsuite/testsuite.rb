@@ -61,6 +61,12 @@ else
   $gtruby=File.join(Dir.pwd, "..", "gtruby", "")
 end
 
+if $arguments["gtpython"] then
+  $gtpython=File.join($arguments["gtpython"], "")
+else
+  $gtpython=File.join(Dir.pwd, "..", "gtpython", "")
+end
+
 if $arguments["gttestdata"] then
   $gttestdata=File.join($arguments["gttestdata"], "")
 end
@@ -88,6 +94,11 @@ def run_ruby(str, opts = {})
   run("env LD_LIBRARY_PATH=#{$cur}/lib ruby -I #{$gtruby} #{$path}#{str}", opts)
 end
 
+def run_python(str, opts = {})
+  run("env PYTHONPATH=#{$gtpython} LD_LIBRARY_PATH=#{$cur}/lib python " + \
+      "#{$path}#{str}", opts)
+end
+
 # include the actual test modules
 require 'gt_include'
 require 'gt_bioseq_include'
@@ -110,6 +121,7 @@ require 'gt_mgth_include'
 require 'gt_mmapandread_include'
 require 'gt_mutate_include'
 require 'gt_packedindex_include'
+require 'gt_python_include'
 require 'gt_regioncov_include'
 require 'gt_ruby_include'
 require 'gt_scripts_include'
