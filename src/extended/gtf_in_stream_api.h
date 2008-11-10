@@ -15,11 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTF_IN_STREAM_H
-#define GTF_IN_STREAM_H
+#ifndef GTF_IN_STREAM_API_H
+#define GTF_IN_STREAM_API_H
 
-#include "extended/gtf_in_stream_api.h"
+#include <stdio.h>
+#include "extended/node_stream_api.h"
 
-const GtNodeStreamClass* gt_gtf_in_stream_class(void);
+/* Implements the <GtNodeStream> interface. */
+typedef struct GtGTFInStream GtGTFInStream;
+
+/* filename == NULL -> use stdin */
+GtNodeStream*            gt_gtf_in_stream_new(const char *filename,
+                                              bool be_tolerant, GtError*);
 
 #endif
