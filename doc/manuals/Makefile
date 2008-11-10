@@ -31,12 +31,18 @@ annotationsketch: annotationsketch.pdf
 	pdflatex $< && rm $*.pdf
 	mv $*.aux $@
 
-${TALLYMERTMP}.tex:tallymer.tex
+read1.fna:${GTTESTDATA}/Iowa/at1MB
+	head -n 6999 $< > $@
+
+read2.fna:${GTTESTDATA}/Iowa/at1MB
+	echo ">" > $@
+	tail -n 6945 $< >> $@
+
+U89959.fna:../../testdata/U89959_genomic.fas
+	cp $< $@
+
+${TALLYMERTMP}.tex:tallymer.tex read1.fna read2.fna U89959.fna
 	./findemptyoutfiles.sh
-	head -n 6999 ${GTTESTDATA}/Iowa/at1MB > read1.fna
-	echo ">" > read2.fna
-	tail -n 6946 ${GTTESTDATA}/Iowa/at1MB > read2.fna
-	cp ../../testdata/U89959_genomic.fas U89959.fna
 	./execcommand.pl $< > $@
 
 tallymer.pdf:${TALLYMERTMP}.tex
