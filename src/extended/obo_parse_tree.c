@@ -270,7 +270,7 @@ static int expect(GtIO *obo_file, char expected_char, GtError *err)
   return 0;
 }
 
-static int gt_comment_line(GtIO *obo_file, GtError *err)
+static int comment_line(GtIO *obo_file, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -301,7 +301,7 @@ static int blank_line(GtIO *obo_file, GtError *err)
   while (!had_err) {
     char cc = gt_io_peek(obo_file);
     if (cc == COMMENT_CHAR)
-      return gt_comment_line(obo_file, err);
+      return comment_line(obo_file, err);
     else if (cc == CARRIAGE_RETURN) {
       gt_io_next(obo_file);
       if (gt_io_peek(obo_file) == END_OF_LINE)
@@ -323,7 +323,7 @@ static bool ignored_line(GtIO *obo_file, GtError *err)
   gt_error_check(err);
   if (gt_io_peek(obo_file) == BLANK_CHAR)
     return blank_line(obo_file, err);
-  return gt_comment_line(obo_file, err);
+  return comment_line(obo_file, err);
 }
 
 static int proc_any_char(GtIO *obo_file, GtStr *capture, bool be_permissive,
@@ -371,7 +371,7 @@ static int tag_line(GtIO *obo_file, GtStr *tag, GtStr *value, GtError *err)
   }
   if (!had_err) {
     if (gt_io_peek(obo_file) == COMMENT_CHAR)
-      had_err = gt_comment_line(obo_file, err);
+      had_err = comment_line(obo_file, err);
     else
       had_err = expect(obo_file, END_OF_LINE, err);
   }
@@ -444,7 +444,7 @@ static int stanza(GtOBOParseTree *obo_parse_tree, GtIO *obo_file, GtError *err)
       gt_str_reset(tag);
       gt_str_reset(value);
       if (gt_io_peek(obo_file) == COMMENT_CHAR)
-        had_err = gt_comment_line(obo_file, err);
+        had_err = comment_line(obo_file, err);
       else {
         had_err = tag_line(obo_file, tag, value, err);
         obo_stanza_add(obo_stanza, gt_str_get(tag), gt_str_get(value));
@@ -474,7 +474,7 @@ static int parse_obo_file(GtOBOParseTree *obo_parse_tree,
         had_err = blank_line(obo_file, err);
         break;
       case COMMENT_CHAR:
-        had_err = gt_comment_line(obo_file, err);
+        had_err = comment_line(obo_file, err);
         break;
       case CARRIAGE_RETURN:
         gt_io_next(obo_file);
