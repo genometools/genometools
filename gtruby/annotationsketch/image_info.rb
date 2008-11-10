@@ -57,7 +57,13 @@ module GT
                           rm.get_southeast_y.to_i, \
                           rm.get_genome_feature])
         end
-        @hotspots.sort!{|hs1,hs2| hs1[2]-hs1[0]+1 <=> hs2[2]-hs2[0]+1}
+        @hotspots.sort!{|hs1,hs2|
+          if hs1[2]-hs1[0]+1 == hs2[2]-hs2[0]+1 then
+            hs1[3] <=> hs2[3]
+          else
+            hs1[2]-hs1[0]+1 <=> hs2[2]-hs2[0]+1
+          end
+        }
       end
       @hotspots.each do |hs|
         yield hs[0],hs[1],hs[2],hs[3],hs[4]

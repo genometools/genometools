@@ -17,6 +17,7 @@
 
 from gt.dlload import gtlib
 from gt.annotationsketch.rec_map import RecMap
+import math
 
 class ImageInfo:
   def __init__(self):
@@ -36,8 +37,13 @@ class ImageInfo:
   def compare_hotspots(cls, hs1, hs2):
     if hs1[2]-hs1[0]+1 > hs2[2]-hs2[0]+1:
       return 1
-    elif hs1[2] - hs1[0] + 1 == hs2[2] - hs2[0] + 1:
-      return 0
+    elif hs1[2]-hs1[0]+1 == hs2[2]-hs2[0]+1:
+      if hs1[3] > hs2[3]:
+        return 1
+      elif hs1[3] == hs2[3]:
+        return 0
+      else:
+        return -1
     else:
       return -1
   compare_hotspots = classmethod(compare_hotspots)
@@ -47,10 +53,10 @@ class ImageInfo:
       self.hotspots = []
       for i in range(self.num_of_rec_maps()):
         rm = RecMap(gtlib.gt_image_info_get_rec_map(self.ii, i))
-        self.hotspots.append([rm.get_northwest_x(), \
-                              rm.get_northwest_y(), \
-                              rm.get_southeast_x(), \
-                              rm.get_southeast_y(), \
+        self.hotspots.append([math.floor(rm.get_northwest_x()), \
+                              math.floor(rm.get_northwest_y()), \
+                              math.floor(rm.get_southeast_x()), \
+                              math.floor(rm.get_southeast_y()), \
                               rm.get_genome_feature()])
       self.hotspots.sort(ImageInfo.compare_hotspots)
     for hs in self.hotspots:
