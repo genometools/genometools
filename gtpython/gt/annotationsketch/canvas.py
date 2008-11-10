@@ -16,6 +16,8 @@
 #
 
 from gt.dlload import gtlib
+from gt.annotationsketch.style import Style
+from gt.annotationsketch.image_info import ImageInfo
 from gt.core.error import Error, gterror
 from gt.core.str import Str
 
@@ -25,12 +27,27 @@ class Canvas:
                                "Canvas implementation."
 
   def __del__(self):
-    gtlib.gt_canvas_delete(self.canvas)
+    try:
+      gtlib.gt_canvas_delete(self.canvas)
+    except AttributeError:
+      pass
+
+  def from_param(cls, obj):
+    if not isinstance(obj, Canvas):
+      raise TypeError, "argument must be a Canvas"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
 class CanvasCairoFile(Canvas):
   def __init__(self, style, width, ii):
     self.canvas = gtlib.gt_canvas_cairo_file_new(style, 1, width, ii)
     self._as_parameter_ = self.canvas
+
+  def from_param(cls, obj):
+    if not isinstance(obj, CanvasCairoFile):
+      raise TypeError, "argument must be a CanvasCairoFile"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
   def to_file(self, filename):
     err = Error()
@@ -45,7 +62,11 @@ class CanvasCairoFile(Canvas):
     return string_at(str.get_mem(), str.length())
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_void_p
+    from ctypes import c_char_p, c_void_p, c_ulong, c_int
+    gtlib.gt_canvas_cairo_file_to_file.restype = c_int
+    gtlib.gt_canvas_cairo_file_to_file.argtypes = [c_void_p, c_char_p, Error]
     gtlib.gt_canvas_cairo_file_to_stream.restype  = c_char_p
+    gtlib.gt_canvas_cairo_file_to_stream.argtypes = [c_void_p, Str]
     gtlib.gt_canvas_cairo_file_new.restype  = c_void_p
+    gtlib.gt_canvas_cairo_file_new.argtypes = [Style, c_int, c_ulong, ImageInfo]
   register = classmethod(register)

@@ -27,8 +27,17 @@ class FeatureIndex:
     raise NotImplementedError, "Please call the constructor of a " \
                                "FeatureIndex implementation."
 
-  def from_param(self):
-    return self._as_parameter_
+  def __del__(self):
+    try:
+      gtlib.gt_feature_index_delete(self.fi)
+    except AttributeError:
+      pass
+
+  def from_param(cls, obj):
+    if not isinstance(obj, FeatureIndex):
+      raise TypeError, "argument must be a FeatureIndex"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
   def get_features_for_seqid(self, seqid):
     rval = gtlib.gt_feature_index_get_features_for_seqid(self.fi, seqid)
@@ -59,23 +68,23 @@ class FeatureIndex:
 
   def get_range_for_seqid(self, seqid):
     from ctypes import byref
-    if not gtlib.gt_feature_index_has_seqid(self.fi, seqid):
+    if (gtlib.gt_feature_index_has_seqid(self.fi, seqid) == 0):
       gterror("feature_index does not contain seqid")
     range = Range()
     gtlib.gt_feature_index_get_range_for_seqid(self.fi, byref(range), seqid)
     return range
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_void_p, c_bool
+    from ctypes import c_char_p, c_void_p, c_int, POINTER
     gtlib.gt_feature_index_get_features_for_seqid.restype = c_void_p
     gtlib.gt_feature_index_add_gff3file.argtypes = [FeatureIndex, c_char_p, \
                                                     Error]
     gtlib.gt_feature_index_get_first_seqid.restype = c_char_p
     gtlib.gt_feature_index_get_seqids.restype = c_void_p
     gtlib.gt_feature_index_has_seqid.argtypes = [c_void_p, c_char_p]
-    gtlib.gt_feature_index_has_seqid.restype = c_bool
+    gtlib.gt_feature_index_has_seqid.restype = c_int
     gtlib.gt_feature_index_get_range_for_seqid.argtypes = [c_void_p, \
-                                                           c_void_p, \
+                                                           POINTER(Range), \
                                                            c_char_p]
   register = classmethod(register)
 
@@ -85,5 +94,8 @@ class FeatureIndexMemory(FeatureIndex):
     self.fi = gtlib.gt_feature_index_memory_new()
     self._as_parameter_ = self.fi
 
-  def __del__(self):
-    gtlib.gt_feature_index_delete(self.fi)
+  def from_param(cls, obj):
+    if not isinstance(obj, FeatureIndexMemory):
+      raise TypeError, "argument must be a FeatureIndexMemory"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)

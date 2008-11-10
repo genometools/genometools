@@ -23,6 +23,12 @@ class RecMap:
     self.rm = rm
     self._as_parameter_ = self.rm
 
+  def from_param(cls, obj):
+    if not isinstance(obj, RecMap):
+      raise TypeError, "argument must be a RecMap"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
   def get_northwest_x(self):
     return gtlib.gt_rec_map_get_northwest_x(self.rm)
 
@@ -40,14 +46,20 @@ class RecMap:
     return FeatureNode(gtlib.gt_rec_map_get_genome_feature(self.rm), True)
 
   def has_omitted_children(self):
-    return gtlib.gt_rec_map_has_omitted_children(self.rm)
+    return (gtlib.gt_rec_map_has_omitted_children(self.rm) == 1)
 
   def register(cls, gtlib):
-    from ctypes import c_bool, c_void_p, c_double
+    from ctypes import c_int, c_void_p, c_double
     gtlib.gt_rec_map_get_northwest_x.restype = c_double
+    gtlib.gt_rec_map_get_northwest_x.argtypes = [c_void_p]
     gtlib.gt_rec_map_get_northwest_y.restype = c_double
+    gtlib.gt_rec_map_get_northwest_y.argtypes = [c_void_p]
     gtlib.gt_rec_map_get_southeast_x.restype = c_double
+    gtlib.gt_rec_map_get_southeast_x.argtypes = [c_void_p]
     gtlib.gt_rec_map_get_southeast_y.restype = c_double
+    gtlib.gt_rec_map_get_southeast_y.argtypes = [c_void_p]
     gtlib.gt_rec_map_get_genome_feature.restype = c_void_p
-    gtlib.gt_rec_map_has_omitted_children.restype = c_bool
+    gtlib.gt_rec_map_get_genome_feature.argtypes = [c_void_p]
+    gtlib.gt_rec_map_has_omitted_children.restype = c_int
+    gtlib.gt_rec_map_has_omitted_children.argtypes = [c_void_p]
   register = classmethod(register)

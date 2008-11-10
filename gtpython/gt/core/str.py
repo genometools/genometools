@@ -23,10 +23,19 @@ class Str:
     self._as_parameter_ = self.strg
 
   def __del__(self):
-    gtlib.gt_str_delete(self.strg)
+    try:
+      gtlib.gt_str_delete(self.strg)
+    except AttributeError:
+      pass
 
   def __str__(self):
     return gtlib.gt_str_get(self.strg)
+
+  def from_param(cls, obj):
+    if not isinstance(obj, Str):
+      raise TypeError, "argument must be a Str"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
   def length(self):
     return gtlib.gt_str_length(self.strg)

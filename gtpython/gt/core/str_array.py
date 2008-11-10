@@ -25,7 +25,16 @@ class StrArray:
     self._as_parameter_ = self.strarr
 
   def __del__(self):
-    gtlib.gt_str_array_delete(self.strarr)
+    try:
+      gtlib.gt_str_array_delete(self.strarr)
+    except AttributeError:
+      pass
+
+  def from_param(cls, obj):
+    if not isinstance(obj, StrArray):
+      raise TypeError, "argument must be a StrArray"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
   #def __str__(self):
     #r = ""

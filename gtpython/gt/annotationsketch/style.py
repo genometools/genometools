@@ -20,6 +20,7 @@ from gt.annotationsketch.color import Color
 from gt.core.error import Error, gterror
 from gt.core.str import Str
 from gt.core.str_array import StrArray
+from gt.extended.genome_node import GenomeNode
 
 class Style:
   def __init__(self):
@@ -30,7 +31,16 @@ class Style:
     self._as_parameter_ = self.style
 
   def __del__(self):
-    gtlib.gt_style_delete(self.style)
+    try:
+      gtlib.gt_style_delete(self.style)
+    except AttributeError:
+      pass
+
+  def from_param(cls, obj):
+    if not isinstance(obj, Style):
+      raise TypeError, "argument must be a Style"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
   def load_file(self, filename):
       err = Error()
@@ -62,7 +72,7 @@ class Style:
   def get_color(self, section, key, gn = None):
     from ctypes import byref
     color = Color()
-    if gtlib.gt_style_get_color(self.style, section, key, byref(color), gn):
+    if gtlib.gt_style_get_color(self.style, section, key, byref(color), gn) == 1:
       return color
     else:
       return None
@@ -73,7 +83,7 @@ class Style:
 
   def get_cstr(self, section, key, gn = None):
     string = Str()
-    if gtlib.gt_style_get_str(self.style, section, key, string, gn):
+    if gtlib.gt_style_get_str(self.style, section, key, string, gn) == 1:
       return str(string)
     else:
       return None
@@ -85,7 +95,7 @@ class Style:
   def get_num(self, section, key, gn = None):
     from ctypes import c_double, byref
     double = c_double()
-    if gtlib.gt_style_get_num(self.style, section, key, byref(double), gn):
+    if gtlib.gt_style_get_num(self.style, section, key, byref(double), gn) == 1:
       return double.value
     else:
       return None
@@ -96,24 +106,41 @@ class Style:
     gtlib.gt_style_set_num(self.style, section, key, num)
 
   def get_bool(self, section, key, gn = None):
-    from ctypes import c_bool, byref
-    bool = c_bool()
-    if gtlib.gt_style_get_bool(self.style, section, key, byref(bool), gn):
-      return bool.value
+    from ctypes import byref, c_int
+    bool = c_int()
+    if gtlib.gt_style_get_bool(self.style, section, key, byref(bool), gn) == 1:
+      if bool.value == 1:
+        return True
+      else:
+        return False
     else:
       return None
 
   def set_bool(self, section, key, val):
-    from ctypes import c_bool
-    gtlib.gt_style_set_bool(self.style, section, key, c_bool(val))
+    if val == True:
+      gtlib.gt_style_set_bool(self.style, section, key, 1)
+    else:
+      gtlib.gt_style_set_bool(self.style, section, key, 0)
 
   def unset(self, section, key):
     gtlib.gt_style_unset(self.style, section, key)
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_bool, c_double, c_float
-    gtlib.gt_style_get_bool.restype = c_bool
-    gtlib.gt_style_get_num.restype = c_bool
-    gtlib.gt_style_get_str.restype = c_bool
-    gtlib.gt_style_get_color.restype = c_bool
+    from ctypes import c_char_p, c_double, c_float, c_void_p, POINTER, c_int
+    gtlib.gt_style_get_bool.restype = c_int
+    gtlib.gt_style_get_bool.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                        POINTER(c_int), c_void_p]
+    gtlib.gt_style_get_num.restype = c_int
+    gtlib.gt_style_get_num.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                       POINTER(c_double), c_void_p]
+    gtlib.gt_style_get_str.restype = c_int
+    gtlib.gt_style_get_str.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                       Str, c_void_p]
+    gtlib.gt_style_get_color.restype = c_int
+    gtlib.gt_style_get_color.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                         POINTER(Color), c_void_p]
+    gtlib.gt_style_load_str.argtypes = [c_void_p, Str, Error]
+    gtlib.gt_style_load_file.argtypes = [c_void_p, c_char_p, Error]
+    gtlib.gt_style_unset.argtypes = [c_void_p, c_char_p, c_char_p]
+    gtlib.gt_style_to_str.argtypes = [c_void_p, Str, Error]
   register = classmethod(register)
