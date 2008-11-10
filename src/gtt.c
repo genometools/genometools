@@ -119,7 +119,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
   gt_toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
   gt_toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
-  gt_toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
+  gt_toolbox_add_tool(tools, "gtf_to_gff3", gt_gtf_to_gff3());
   gt_toolbox_add(tools, "ltrharvest", gt_ltrharvest);
   gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
   gt_toolbox_add(tools, "merge", gt_merge);
