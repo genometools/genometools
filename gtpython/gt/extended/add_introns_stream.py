@@ -22,3 +22,15 @@ class AddIntronsStream(GenomeStream):
   def __init__(self, genome_stream):
     self.gs = gtlib.gt_add_introns_stream_new(genome_stream)
     self._as_parameter_ = self.gs
+
+  def from_param(cls, obj):
+    if not isinstance(obj, AddIntronsStream):
+      raise TypeError, "argument must be a AddIntronsStream"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
+  def register(cls, gtlib):
+    from ctypes import c_void_p
+    gtlib.gt_add_introns_stream_new.restype = c_void_p
+    gtlib.gt_add_introns_stream_new.argtypes = [GenomeStream]
+  register = classmethod(register)

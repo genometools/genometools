@@ -20,6 +20,7 @@ from gt.annotationsketch.color import Color
 from gt.core.error import Error, gterror
 from gt.core.str import Str
 from gt.core.str_array import StrArray
+from gt.extended.genome_node import GenomeNode
 
 class Style:
   def __init__(self):
@@ -30,7 +31,16 @@ class Style:
     self._as_parameter_ = self.style
 
   def __del__(self):
-    gtlib.gt_style_delete(self.style)
+    try:
+      gtlib.gt_style_delete(self.style)
+    except AttributeError:
+      pass
+
+  def from_param(cls, obj):
+    if not isinstance(obj, Style):
+      raise TypeError, "argument must be a Style"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
   def load_file(self, filename):
       err = Error()
@@ -111,9 +121,21 @@ class Style:
     gtlib.gt_style_unset(self.style, section, key)
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_bool, c_double, c_float
+    from ctypes import c_char_p, c_bool, c_double, c_float, c_void_p, POINTER
     gtlib.gt_style_get_bool.restype = c_bool
+    gtlib.gt_style_get_bool.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                        POINTER(c_bool), c_void_p]
     gtlib.gt_style_get_num.restype = c_bool
+    gtlib.gt_style_get_num.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                       POINTER(c_double), c_void_p]
     gtlib.gt_style_get_str.restype = c_bool
+    gtlib.gt_style_get_str.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                       Str, c_void_p]
     gtlib.gt_style_get_color.restype = c_bool
+    gtlib.gt_style_get_color.argtypes = [c_void_p, c_char_p, c_char_p, \
+                                         POINTER(Color), c_void_p]
+    gtlib.gt_style_load_str.argtypes = [c_void_p, Str, Error]
+    gtlib.gt_style_load_file.argtypes = [c_void_p, c_char_p, Error]
+    gtlib.gt_style_unset.argtypes = [c_void_p, c_char_p, c_char_p]
+    gtlib.gt_style_to_str.argtypes = [c_void_p, Str, Error]
   register = classmethod(register)

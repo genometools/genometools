@@ -25,6 +25,7 @@ from rec_map import *
 from style import *
 
 CanvasCairoFile.register(gtlib)
+Diagram.register(gtlib)
 FeatureIndex.register(gtlib)
 ImageInfo.register(gtlib)
 RecMap.register(gtlib)

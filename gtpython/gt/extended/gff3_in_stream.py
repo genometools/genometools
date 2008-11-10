@@ -32,6 +32,12 @@ class GFF3InStream(GenomeStream):
     self.gs = gtlib.gt_gff3_in_stream_new_sorted(filename, c_bool(False))
     self._as_parameter_ = self.gs
 
+  def from_param(cls, obj):
+    if not isinstance(obj, GFF3InStream):
+      raise TypeError, "argument must be a GFF3InStream"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
   def get_used_types(self):
     str_array_ptr = gtlib.gt_gff3_in_stream_get_used_types(self.gs)
     used_types = StrArray(str_array_ptr)

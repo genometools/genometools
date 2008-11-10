@@ -26,7 +26,16 @@ class ImageInfo:
     self.hotspots = None
 
   def __del__(self):
-    return gtlib.gt_image_info_delete(self.ii)
+    try:
+      gtlib.gt_image_info_delete(self.ii)
+    except AttributeError:
+      pass
+
+  def from_param(cls, obj):
+    if not isinstance(obj, ImageInfo):
+      raise TypeError, "argument must be an ImageInfo"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
 
   def get_height(self):
     return gtlib.gt_image_info_get_height(self.ii)
@@ -63,5 +72,12 @@ class ImageInfo:
       yield hs[0],hs[1],hs[2],hs[3],hs[4]
 
   def register(cls, gtlib):
-    from ctypes import c_char_p
+    from ctypes import c_void_p, c_ulong, c_uint
+    gtlib.gt_image_info_get_rec_map.restype = c_void_p
+    gtlib.gt_image_info_get_rec_map.argtypes = [c_void_p, c_ulong]
+    gtlib.gt_image_info_num_of_rec_maps.restype = c_ulong
+    gtlib.gt_image_info_num_of_rec_maps.argtypes = [c_void_p]
+    gtlib.gt_image_info_get_height.restype = c_uint
+    gtlib.gt_image_info_get_height.argtypes = [c_void_p]
+    gtlib.gt_image_info_new.restype = c_void_p
   register = classmethod(register)

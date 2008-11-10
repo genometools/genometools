@@ -24,3 +24,9 @@ class GFF3Visitor:
 
   def __del__(self):
     gtlib.gt_node_visitor_delete(self.gv)
+
+  def from_param(cls, obj):
+    if not isinstance(obj, GFF3Visitor):
+      raise TypeError, "argument must be a GFF3Visitor"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)

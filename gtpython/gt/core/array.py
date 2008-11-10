@@ -25,6 +25,12 @@ class Array:
   def __del__(self):
     gtlib.gt_array_delete(self.array)
 
+  def from_param(cls, obj):
+    if not isinstance(obj, Array):
+      raise TypeError, "argument must be an Array"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
   def get(self, i):
     return gtlib.gt_array_get(self.array, i).contents
 

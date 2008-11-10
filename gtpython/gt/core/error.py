@@ -28,6 +28,12 @@ class Error:
   def __del__(self):
     gtlib.gt_error_delete(self.error)
 
+  def from_param(cls, obj):
+    if not isinstance(obj, Error):
+      raise TypeError, "argument must be an Error"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
   def from_param(self):
     return self._as_parameter_
 
@@ -38,6 +44,7 @@ class Error:
     from ctypes import c_void_p, c_char_p
     gtlib.gt_error_new.restype = c_void_p
     gtlib.gt_error_get.restype = c_char_p
+    gtlib.gt_error_get.argtypes = [c_void_p]
   register = classmethod(register)
 
 def gterror(err):

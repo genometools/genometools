@@ -31,6 +31,12 @@ class GenomeStream:
     except AttributeError:
       pass
 
+  def from_param(cls, obj):
+    if not isinstance(obj, GenomeStream):
+      raise TypeError, "argument must be a GenomeStream"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
   def next_tree(self):
     from ctypes import byref, c_void_p
     err = Error()
