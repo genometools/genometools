@@ -88,15 +88,15 @@ GtGTFParser* gt_gtf_parser_new(GtTypeChecker *type_checker)
 {
   GtGTFParser *parser = gt_malloc(sizeof (GtGTFParser));
   parser->sequence_region_to_range = gt_hashmap_new(HASH_STRING,
-                                                 gt_free_func, gt_free_func);
+                                                    gt_free_func, gt_free_func);
   parser->gene_id_hash = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                     (GtFree) gt_hashmap_delete);
+                                        (GtFree) gt_hashmap_delete);
   parser->seqid_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
-                                             (GtFree) gt_str_delete);
+                                                (GtFree) gt_str_delete);
   parser->source_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
-                                              (GtFree) gt_str_delete);
+                                                 (GtFree) gt_str_delete);
   parser->gene_id_to_name_mapping = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                                gt_free_func);
+                                                   gt_free_func);
   parser->transcript_id_to_name_mapping = gt_hashmap_new(HASH_STRING,
                                                          gt_free_func,
                                                          gt_free_func);
@@ -530,7 +530,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       if (!seqid_str) {
         seqid_str = gt_str_new_cstr(seqname);
         gt_hashmap_add(parser->seqid_to_str_mapping, gt_str_get(seqid_str),
-                    seqid_str);
+                       seqid_str);
       }
       gt_assert(seqid_str);
 
