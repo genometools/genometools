@@ -100,6 +100,8 @@ static void gtf_in_stream_free(GtNodeStream *ns)
   GtGTFInStream *gtf_in_stream = gtf_in_stream_cast(ns);
   gt_free(gtf_in_stream->filename);
   gt_type_checker_delete(gtf_in_stream->type_checker);
+  while (gt_queue_size(gtf_in_stream->genome_node_buffer))
+    gt_genome_node_rec_delete(gt_queue_get(gtf_in_stream->genome_node_buffer));
   gt_queue_delete(gtf_in_stream->genome_node_buffer);
 }
 
@@ -116,15 +118,12 @@ const GtNodeStreamClass* gt_gtf_in_stream_class(void)
 
 GtNodeStream* gt_gtf_in_stream_new(const char *filename)
 {
-  GtNodeStream *ns;
   GtGTFInStream *gtf_in_stream;
-
-  ns = gt_node_stream_create(gt_gtf_in_stream_class(), false);
+  GtNodeStream *ns = gt_node_stream_create(gt_gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(ns);
   gtf_in_stream->genome_node_buffer = gt_queue_new();
   gtf_in_stream->type_checker = gt_type_checker_builtin_new();
   gtf_in_stream->filename = filename ? gt_cstr_dup(filename) : NULL;
-
   return ns;
 }
 
