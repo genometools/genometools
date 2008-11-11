@@ -552,7 +552,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       if (score_is_defined)
         gt_feature_node_set_score((GtFeatureNode*) gn, score_value);
       if (phase_value != GT_PHASE_UNDEFINED)
-        gt_feature_node_set_phase(gn, phase_value);
+        gt_feature_node_set_phase((GtFeatureNode*) gn, phase_value);
       gt_array_add(gt_genome_node_array, gn);
     }
 

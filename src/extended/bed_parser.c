@@ -193,7 +193,7 @@ static void construct_thick_feature(GtFeatureNode *fn, GtRange range)
     gt_feature_node_add_attribute((GtFeatureNode*) thick_feature, "Name", name);
   gt_feature_node_set_score((GtFeatureNode*) thick_feature,
                             gt_feature_node_get_score(fn));
-  gt_feature_node_set_strand(thick_feature,
+  gt_feature_node_set_strand((GtFeatureNode*) thick_feature,
                              gt_feature_node_get_strand(fn));
   gt_feature_node_add_child(fn, (GtFeatureNode*) thick_feature);
 }
@@ -266,7 +266,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
                                 gt_io_get_line_number(bed_file),
                                 gt_io_get_filename(bed_file), err);
       if (!had_err)
-        gt_feature_node_set_strand(gn, strand);
+        gt_feature_node_set_strand((GtFeatureNode*) gn, strand);
     }
   }
   if (!had_err && bed_separator(bed_file))

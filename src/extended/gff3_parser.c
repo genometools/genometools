@@ -1128,7 +1128,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
                                 score_value);
   }
   if (!had_err && phase_value != GT_PHASE_UNDEFINED)
-    gt_feature_node_set_phase(genome_feature, phase_value);
+    gt_feature_node_set_phase((GtFeatureNode*) genome_feature, phase_value);
 
   if (!had_err) {
     gn = (is_child || auto_sr) ? NULL : genome_feature;

@@ -138,9 +138,9 @@ void gt_feature_node_set_source(GtFeatureNode *fn, GtStr *source)
   fn->source = gt_str_ref(source);
 }
 
-void gt_feature_node_set_phase(GtGenomeNode *gn, GtPhase phase)
+void gt_feature_node_set_phase(GtFeatureNode *fn, GtPhase phase)
 {
-  GtFeatureNode *fn = gt_feature_node_cast(gn);
+  gt_assert(fn);
   fn->bit_field &= ~(PHASE_MASK << PHASE_OFFSET);
   fn->bit_field |= phase << PHASE_OFFSET;
 }
@@ -202,7 +202,7 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   fn->bit_field   = 0;
   fn->bit_field |= strand << STRAND_OFFSET;
   fn->children    = NULL; /* the children list is create on demand */
-  gt_feature_node_set_phase(gn, GT_PHASE_UNDEFINED);
+  gt_feature_node_set_phase(fn, GT_PHASE_UNDEFINED);
   set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   set_tree_status(&fn->bit_field, IS_TREE);
   fn->representative = NULL;
@@ -372,9 +372,9 @@ GtStrand gt_feature_node_get_strand(GtFeatureNode *fn)
   return (fn->bit_field >> STRAND_OFFSET) & STRAND_MASK;
 }
 
-void gt_feature_node_set_strand(GtGenomeNode *gn, GtStrand strand)
+void gt_feature_node_set_strand(GtFeatureNode *fn, GtStrand strand)
 {
-  GtFeatureNode *fn = gt_feature_node_cast(gn);
+  gt_assert(fn);
   fn->bit_field &= ~(STRAND_MASK << STRAND_OFFSET);
   fn->bit_field |= strand << STRAND_OFFSET;
 }
