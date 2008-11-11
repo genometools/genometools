@@ -55,17 +55,15 @@ struct GtGFF3Parser {
 };
 
 typedef struct {
-  GtGenomeNode *sequence_region; /* the automatically created sequence
-                                     region */
-  GtArray *genome_features; /* the genome features which belong to this
-                                region */
+  GtGenomeNode *sequence_region; /* the automatically created sequence region */
+  GtArray *feature_nodes; /* the features nodes which belong to this region */
 } AutomaticGtSequenceRegion;
 
 static AutomaticGtSequenceRegion* automatic_sequence_region_new(void)
 {
   AutomaticGtSequenceRegion *auto_sr;
   auto_sr = gt_malloc(sizeof (AutomaticGtSequenceRegion));
-  auto_sr->genome_features = gt_array_new(sizeof (GtFeatureNode*));
+  auto_sr->feature_nodes = gt_array_new(sizeof (GtFeatureNode*));
   return auto_sr;
 }
 
@@ -74,11 +72,11 @@ static void automatic_sequence_region_delete(AutomaticGtSequenceRegion *auto_sr)
   unsigned long i;
   if (!auto_sr) return;
   gt_genome_node_delete(auto_sr->sequence_region);
-  for (i = 0; i < gt_array_size(auto_sr->genome_features); i++) {
+  for (i = 0; i < gt_array_size(auto_sr->feature_nodes); i++) {
     gt_genome_node_delete(*(GtGenomeNode**)
-                          gt_array_get(auto_sr->genome_features, i));
+                          gt_array_get(auto_sr->feature_nodes, i));
   }
-  gt_array_delete(auto_sr->genome_features);
+  gt_array_delete(auto_sr->feature_nodes);
   gt_free(auto_sr);
 }
 
@@ -354,7 +352,7 @@ static void replace_node(GtFeatureNode *node_to_replace,
   /* we go backwards in both cases, because we expect that the <node_to_replace>
      is near the end of the queue */
   if (auto_sr) {
-    rval = gt_array_iterate_reverse(auto_sr->genome_features,
+    rval = gt_array_iterate_reverse(auto_sr->feature_nodes,
                                     (GtArrayProcessor) replace_func,
                                     &replace_info, NULL);
     gt_assert(rval == 1);
@@ -374,14 +372,14 @@ static void remove_node(GtGenomeNode *genome_node, GtQueue *genome_nodes,
     long i;
     /* we go backwards, because we expect that the <genome_node> is near the end
        of the array */
-    for (i = gt_array_size(auto_sr->genome_features) - 1; i >= 0; i--) {
+    for (i = gt_array_size(auto_sr->feature_nodes) - 1; i >= 0; i--) {
       if (genome_node ==
-          *(GtGenomeNode**) gt_array_get(auto_sr->genome_features, i)) {
+          *(GtGenomeNode**) gt_array_get(auto_sr->feature_nodes, i)) {
         break;
       }
     }
-    gt_assert(i < gt_array_size(auto_sr->genome_features));
-    gt_array_rem(auto_sr->genome_features, i);
+    gt_assert(i < gt_array_size(auto_sr->feature_nodes));
+    gt_array_rem(auto_sr->feature_nodes, i);
   }
   else
     gt_queue_remove(genome_nodes, genome_node); /* traverses in reverse order */
@@ -1133,7 +1131,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
   if (!had_err) {
     gn = (is_child || auto_sr) ? NULL : genome_feature;
     if (auto_sr && !is_child)
-      gt_array_add(auto_sr->genome_features, genome_feature);
+      gt_array_add(auto_sr->feature_nodes, genome_feature);
   }
   else if (!is_child)
     gt_genome_node_delete(genome_feature);
@@ -1224,14 +1222,14 @@ static int add_auto_sr_to_queue(GT_UNUSED void *key, void *value, void *data,
   unsigned int i;
   gt_error_check(err);
   gt_assert(key && value && data);
-  if (gt_array_size(auto_sr->genome_features)) {
+  if (gt_array_size(auto_sr->feature_nodes)) {
     gt_queue_add(genome_nodes, auto_sr->sequence_region);
     auto_sr->sequence_region = NULL;
-    for (i = 0; i < gt_array_size(auto_sr->genome_features); i++) {
-      gf = *(GtGenomeNode**) gt_array_get(auto_sr->genome_features, i);
+    for (i = 0; i < gt_array_size(auto_sr->feature_nodes); i++) {
+      gf = *(GtGenomeNode**) gt_array_get(auto_sr->feature_nodes, i);
       gt_queue_add(genome_nodes, gf);
     }
-    gt_array_reset(auto_sr->genome_features);
+    gt_array_reset(auto_sr->feature_nodes);
   }
   return 0;
 }
