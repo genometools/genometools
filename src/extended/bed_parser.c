@@ -132,7 +132,7 @@ static void word(GtStr *word, GtIO *bed_file)
 static GtStr* get_seqid(GtBEDParser *bed_parser)
 {
   GtStr *seqid = gt_hashmap_get(bed_parser->seqid_to_str_mapping,
-                                bed_parser->word);
+                                gt_str_get(bed_parser->word));
   if (!seqid) {
     seqid = gt_str_new_cstr(gt_str_get(bed_parser->word));
     gt_hashmap_add(bed_parser->seqid_to_str_mapping, gt_str_get(seqid), seqid);
