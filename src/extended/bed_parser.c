@@ -164,7 +164,7 @@ static int skip_blanks(GtIO *bed_file, GtError *err)
 static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
                     GtIO *bed_file, GtError *err)
 {
-  GtGenomeNode *gn;
+  GtGenomeNode *gn = NULL;
   GtRange range;
   GtStr *seqid;
   int had_err;
