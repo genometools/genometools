@@ -159,7 +159,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
                           gt_feature_node_get_strand((GtFeatureNode*) gn));
       gt_feature_node_set_source(cds_feature, v->source);
       /* XXX correct this */
-      gt_feature_node_set_phase((GtGenomeNode*) cds_feature, (Phase)
+      gt_feature_node_set_phase((GtGenomeNode*) cds_feature, (GtPhase)
                                gt_splicedseq_map(v->splicedseq, orf.start) % 3);
     }
   }

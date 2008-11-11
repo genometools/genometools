@@ -51,7 +51,7 @@ void           gt_feature_node_set_multi_representative(GtFeatureNode*,
 GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode*);
 float                 gt_feature_node_get_score(GtFeatureNode*);
 GtStrand       gt_feature_node_get_strand(GtFeatureNode*);
-Phase          gt_feature_node_get_phase(GtFeatureNode*);
+GtPhase        gt_feature_node_get_phase(GtFeatureNode*);
 void           gt_feature_node_get_exons(GtFeatureNode*,
                                          GtArray *exon_features);
 void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
@@ -59,7 +59,7 @@ GtTranscriptFeatureType
                gt_feature_node_get_transcriptfeaturetype(GtFeatureNode*);
 void           gt_feature_node_set_source(GtFeatureNode*, GtStr *source);
 void           gt_feature_node_set_strand(GtGenomeNode*, GtStrand);
-void           gt_feature_node_set_phase(GtGenomeNode*, Phase);
+void           gt_feature_node_set_phase(GtGenomeNode*, GtPhase);
 void           gt_feature_node_set_end(GtFeatureNode*, unsigned long);
 void           gt_feature_node_set_score(GtFeatureNode*, float);
 void           gt_feature_node_unset_score(GtFeatureNode*);

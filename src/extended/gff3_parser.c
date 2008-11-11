@@ -1022,7 +1022,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
   GtStr *seqid_str = NULL;
   GtStrand gt_strand_value;
   float score_value;
-  Phase phase_value;
+  GtPhase phase_value;
   GtRange range;
   char *seqid = NULL, *source = NULL, *type = NULL, *start = NULL,
        *end = NULL, *score = NULL, *strand = NULL, *phase = NULL,

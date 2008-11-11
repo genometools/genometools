@@ -211,8 +211,8 @@ int gt_parse_strand(GtStrand *gt_strand_value, const char *strand,
   return 0;
 }
 
-int gt_parse_phase(Phase *phase_value, const char *phase,
-                unsigned int line_number, const char *filename, GtError *err)
+int gt_parse_phase(GtPhase *phase_value, const char *phase,
+                   unsigned int line_number, const char *filename, GtError *err)
 {
   gt_assert(phase && filename);
   gt_error_check(err);

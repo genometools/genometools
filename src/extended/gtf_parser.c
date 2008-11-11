@@ -262,7 +262,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
   unsigned long i, line_number = 0;
   GtGenomeNode *gn;
   GtRange range, *rangeptr;
-  Phase phase_value;
+  GtPhase phase_value;
   GtStrand gt_strand_value;
   GtSplitter *splitter, *attribute_splitter;
   float score_value;

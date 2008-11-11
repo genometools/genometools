@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,11 +23,11 @@ typedef enum {
   GT_PHASE_ONE,      /* '1' */
   GT_PHASE_TWO,      /* '2' */
   GT_PHASE_UNDEFINED /* '.' */
-} Phase;
+} GtPhase;
 
 #define GT_PHASE_CHARS "012."
 
 /* an assertion will fail if <phase_char> is not a valid one */
-Phase gt_phase_get(char phase_char);
+GtPhase gt_phase_get(char phase_char);
 
 #endif
