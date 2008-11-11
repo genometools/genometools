@@ -188,7 +188,8 @@ int gt_parse_score(bool *score_is_defined, float *score_value,
 }
 
 int gt_parse_strand(GtStrand *gt_strand_value, const char *strand,
-                 unsigned int line_number, const char *filename, GtError *err)
+                    unsigned int line_number, const char *filename,
+                    GtError *err)
 {
   gt_assert(strand && filename);
   gt_error_check(err);
