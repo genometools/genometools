@@ -21,7 +21,7 @@
 #include "core/parseutils.h"
 #include "core/str.h"
 #include "extended/bed_parser.h"
-#include "extended/feature_node_api.h"
+#include "extended/feature_node.h"
 
 #define BROWSER_KEYWORD  "browser"
 #define TRACK_KEYWORD    "track"
@@ -205,7 +205,8 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   if (!had_err) {
     word(bed_parser->word, bed_file);
     if (gt_str_length(bed_parser->word)) {
-      /* XXX */
+      gt_feature_node_add_attribute((GtFeatureNode*) gn, "Name",
+                                    gt_str_get(bed_parser->word));
     }
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
@@ -214,21 +215,32 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   if (!had_err) {
     word(bed_parser->word, bed_file);
     if (gt_str_length(bed_parser->word)) {
-      /* XXX */
+      bool score_is_defined;
+      float score_value;
+      had_err = gt_parse_score(&score_is_defined, &score_value,
+                               gt_str_get(bed_parser->word),
+                               gt_io_get_line_number(bed_file),
+                               gt_io_get_filename(bed_file), err);
+      if (!had_err && score_is_defined)
+        gt_feature_node_set_score((GtFeatureNode*) gn, score_value);
     }
-    if (bed_separator(bed_file))
-      had_err = skip_blanks(bed_file, err);
   }
+  if (!had_err && bed_separator(bed_file))
+    had_err = skip_blanks(bed_file, err);
   /* optional column 6.: strand */
   if (!had_err) {
     word(bed_parser->word, bed_file);
     if (gt_str_length(bed_parser->word)) {
-      /* XXX */
+      GtStrand strand;
+      had_err = gt_parse_strand(&strand, gt_str_get(bed_parser->word),
+                                gt_io_get_line_number(bed_file),
+                                gt_io_get_filename(bed_file), err);
+      if (!had_err)
+        gt_feature_node_set_strand(gn, strand);
     }
-    if (bed_separator(bed_file))
-      had_err = skip_blanks(bed_file, err);
   }
-
+  if (!had_err && bed_separator(bed_file))
+    had_err = skip_blanks(bed_file, err);
   /* optional column 7.: thickStart */
   if (!had_err) {
     word(bed_parser->word, bed_file);
@@ -238,7 +250,6 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
-
   /* optional column 8.: thickEnd */
   if (!had_err) {
     word(bed_parser->word, bed_file);
@@ -248,7 +259,6 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
-
   /* optional column 9.: itemRgb */
   if (!had_err) {
     word(bed_parser->word, bed_file);
@@ -258,7 +268,6 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
-
   /* optional column 10.: blockCount */
   if (!had_err) {
     word(bed_parser->word, bed_file);
@@ -268,7 +277,6 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
-
   /* optional column 11.: blockSizes */
   if (!had_err) {
     word(bed_parser->word, bed_file);
@@ -278,7 +286,6 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
-
   /* optional column 12.: blockStarts */
   if (!had_err) {
     word(bed_parser->word, bed_file);
