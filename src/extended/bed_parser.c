@@ -22,11 +22,13 @@
 #include "core/str.h"
 #include "extended/bed_parser.h"
 #include "extended/feature_node.h"
+#include "extended/genome_node.h"
 
 #define BROWSER_KEYWORD  "browser"
 #define TRACK_KEYWORD    "track"
 
-#define BED_FEATURE_TYPE "BED_feature"
+#define BED_FEATURE_TYPE        "BED_feature"
+#define BED_THICK_FEATURE_TYPE  "BED_thick_feature"
 
 #define BLANK_CHAR       ' '
 #define COMMENT_CHAR     '#'
@@ -161,6 +163,41 @@ static int skip_blanks(GtIO *bed_file, GtError *err)
   return 0;
 }
 
+static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
+                           GtIO *bed_file, GtError *err)
+{
+  int had_err;
+  gt_error_check(err);
+  had_err = gt_parse_range(range, gt_str_get(start), gt_str_get(end),
+                           gt_io_get_line_number(bed_file),
+                           gt_io_get_filename(bed_file), err);
+  if (!had_err && range->start == range->end) {
+    gt_error_set(err, "file \"%s\": line %lu: BED feature has length 0",
+                 gt_io_get_filename(bed_file), gt_io_get_line_number(bed_file));
+    had_err = -1;
+  }
+  return had_err;
+}
+
+static void construct_thick_feature(GtFeatureNode *fn, GtRange range)
+{
+  GtGenomeNode *thick_feature;
+  const char *name;
+  gt_assert(fn);
+  thick_feature = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
+                                                               fn),
+                                      BED_THICK_FEATURE_TYPE,
+                                      range.start, range.end,
+                                      gt_feature_node_get_strand(fn));
+  if ((name = gt_feature_node_get_attribute(fn, "Name")))
+    gt_feature_node_add_attribute((GtFeatureNode*) thick_feature, "Name", name);
+  gt_feature_node_set_score((GtFeatureNode*) thick_feature,
+                            gt_feature_node_get_score(fn));
+  gt_feature_node_set_strand(thick_feature,
+                             gt_feature_node_get_strand(fn));
+  gt_feature_node_add_child(fn, (GtFeatureNode*) thick_feature);
+}
+
 static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
                     GtIO *bed_file, GtError *err)
 {
@@ -180,15 +217,8 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   /* column 3.: chromEnd */
   if (!had_err) {
     word(bed_parser->another_word, bed_file);
-    had_err = gt_parse_range(&range, gt_str_get(bed_parser->word),
-                             gt_str_get(bed_parser->another_word),
-                             gt_io_get_line_number(bed_file),
-                             gt_io_get_filename(bed_file), err);
-  }
-  if (!had_err && range.start == range.end) {
-    gt_error_set(err, "file \"%s\": line %lu: BED feature has length 0",
-                 gt_io_get_filename(bed_file), gt_io_get_line_number(bed_file));
-    had_err = -1;
+    had_err = parse_bed_range(&range, bed_parser->word,
+                              bed_parser->another_word, bed_file, err);
   }
   if (!had_err) {
     /* BED has a weird numbering scheme: positions are 0-based, but the end
@@ -244,17 +274,19 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   /* optional column 7.: thickStart */
   if (!had_err) {
     word(bed_parser->word, bed_file);
-    if (gt_str_length(bed_parser->word)) {
-      /* XXX */
-    }
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
   /* optional column 8.: thickEnd */
   if (!had_err) {
-    word(bed_parser->word, bed_file);
-    if (gt_str_length(bed_parser->word)) {
-      /* XXX */
+    word(bed_parser->another_word, bed_file);
+    if (gt_str_length(bed_parser->another_word)) {
+      gt_assert(gt_str_length(bed_parser->word));
+      /* got a thickStart and a thickEnd -> construct corresponding feature */
+      had_err = parse_bed_range(&range, bed_parser->word,
+                                bed_parser->another_word, bed_file, err);
+      if (!had_err)
+        construct_thick_feature((GtFeatureNode*) gn, range);
     }
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
