@@ -386,14 +386,14 @@ static void remove_node(GtGenomeNode *genome_node, GtQueue *genome_nodes,
 }
 
 static void update_pseudo_node_range(GtFeatureNode *pseudo_node,
-                                     GtFeatureNode *genome_feature)
+                                     GtFeatureNode *feature_node)
 {
   GtRange pseudo_range, feature_range;
-  gt_assert(pseudo_node && genome_feature);
+  gt_assert(pseudo_node && feature_node);
   gt_assert(gt_feature_node_is_pseudo(pseudo_node));
-  gt_assert(!gt_feature_node_is_pseudo(genome_feature));
+  gt_assert(!gt_feature_node_is_pseudo(feature_node));
   pseudo_range = gt_genome_node_get_range((GtGenomeNode*) pseudo_node);
-  feature_range = gt_genome_node_get_range((GtGenomeNode*) genome_feature);
+  feature_range = gt_genome_node_get_range((GtGenomeNode*) feature_node);
   gt_genome_node_set_range((GtGenomeNode*) pseudo_node,
                            gt_range_join(&pseudo_range, &feature_range));
 }
@@ -413,7 +413,7 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
   gt_feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
 }
 
-static int store_id(const char *id, GtFeatureNode *genome_feature,
+static int store_id(const char *id, GtFeatureNode *feature_node,
                     bool *is_child, GtGFF3Parser *parser,
                     GtQueue *genome_nodes, AutomaticGtSequenceRegion *auto_sr,
                     const char *filename, unsigned int line_number,
@@ -423,7 +423,7 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
   int had_err = 0;
 
   gt_error_check(err);
-  gt_assert(id && genome_feature && parser);
+  gt_assert(id && feature_node && parser);
 
   if ((fn = gt_feature_info_get(parser->feature_info, id))) {
     /* this id has been used already -> try to make this a multi-feature */
@@ -454,14 +454,14 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
             feature_node_is_part_of_pseudo_node(pseudo_node, fn,
                                                 parser->feature_info);
             replace_node(fn, pseudo_node, genome_nodes, auto_sr);
-            gt_feature_node_add_child(pseudo_node, genome_feature);
+            gt_feature_node_add_child(pseudo_node, feature_node);
             *is_child = true;
           }
         }
         else {
           gt_assert(pseudo_parent);
-          update_pseudo_node_range(pseudo_parent, genome_feature);
-          gt_feature_node_add_child(pseudo_parent, genome_feature);
+          update_pseudo_node_range(pseudo_parent, feature_node);
+          gt_feature_node_add_child(pseudo_parent, feature_node);
           *is_child = true;
         }
       }
@@ -469,11 +469,11 @@ static int store_id(const char *id, GtFeatureNode *genome_feature,
         gt_assert(has_parent);
         gt_assert(gt_feature_node_get_multi_representative(fn) == fn);
       }
-      gt_feature_node_set_multi_representative(genome_feature, fn);
+      gt_feature_node_set_multi_representative(feature_node, fn);
     }
   }
   else
-    gt_feature_info_add(parser->feature_info, id, genome_feature);
+    gt_feature_info_add(parser->feature_info, id, feature_node);
 
   if (!had_err)
     parser->incomplete_node = true;
@@ -614,7 +614,7 @@ static void join_roots(GtArray *roots, GtFeatureInfo *feature_info,
   }
 }
 
-static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
+static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
                                bool *is_child, GtGFF3Parser *parser,
                                GtQueue *genome_nodes,
                                AutomaticGtSequenceRegion *auto_sr,
@@ -653,19 +653,19 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *genome_feature,
       }
     }
     else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
-                        gt_genome_node_get_seqid(genome_feature))) {
+                        gt_genome_node_get_seqid(feature_node))) {
       gt_error_set(err, "child on line %u in file \"%s\" has different "
                    "sequence id than its parent on line %u ('%s' vs. '%s')",
-                   gt_genome_node_get_line_number(genome_feature), filename,
+                   gt_genome_node_get_line_number(feature_node), filename,
                    gt_genome_node_get_line_number(parent_gf),
-                   gt_str_get(gt_genome_node_get_seqid(genome_feature)),
+                   gt_str_get(gt_genome_node_get_seqid(feature_node)),
                    gt_str_get(gt_genome_node_get_seqid(parent_gf)));
       had_err = -1;
     }
     else {
       gt_assert(parser->incomplete_node);
       gt_feature_node_add_child((GtFeatureNode*) parent_gf,
-                                (GtFeatureNode*) genome_feature);
+                                (GtFeatureNode*) feature_node);
       *is_child = true;
       gt_str_array_add_cstr(valid_parents, parent);
     }
@@ -871,7 +871,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
   return had_err;
 }
 
-static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
+static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                             bool *is_child, GtGFF3Parser *parser,
                             GtQueue *genome_nodes,
                             AutomaticGtSequenceRegion *auto_sr,
@@ -943,7 +943,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
     }
     /* check for duplicate attributes */
     if (!had_err && gt_feature_node_get_attribute((GtFeatureNode*)
-                                                  genome_feature, attr_tag)) {
+                                                  feature_node, attr_tag)) {
       gt_error_set(err, "more then one %s attribute on line %u in file \"%s\"",
                 attr_tag, line_number, filename);
       had_err = -1;
@@ -951,18 +951,18 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
     /* save all attributes, although the Parent and ID attribute is newly
        created in GFF3 output */
     if (!had_err) {
-      gt_feature_node_add_attribute((GtFeatureNode*) genome_feature,
+      gt_feature_node_add_attribute((GtFeatureNode*) feature_node,
                                       attr_tag, attr_value);
     }
     /* some attributes require special care */
     if (!had_err) {
       if (!strcmp(attr_tag, ID_STRING)) {
-        had_err = store_id(attr_value, (GtFeatureNode*) genome_feature,
+        had_err = store_id(attr_value, (GtFeatureNode*) feature_node,
                            is_child, parser, genome_nodes, auto_sr, filename,
                            line_number, err);
       }
       else if (!strcmp(attr_tag, PARENT_STRING)) {
-        had_err = process_parent_attr(attr_value, genome_feature, is_child,
+        had_err = process_parent_attr(attr_value, feature_node, is_child,
                                       parser, genome_nodes, auto_sr, filename,
                                       line_number, err);
       }
@@ -977,12 +977,12 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
   }
 
   if (!had_err &&
-      gt_feature_node_is_multi((GtFeatureNode*) genome_feature)) {
+      gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
     had_err =
-      check_multi_feature_constrains(genome_feature, (GtGenomeNode*)
+      check_multi_feature_constrains(feature_node, (GtGenomeNode*)
                   gt_feature_node_get_multi_representative((GtFeatureNode*)
-                                                             genome_feature),
-                  gt_feature_node_get_attribute((GtFeatureNode*) genome_feature,
+                                                             feature_node),
+                  gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
                                                 ID_STRING), filename,
                                                 line_number, err);
   }
@@ -994,18 +994,18 @@ static int parse_attributes(char *attributes, GtGenomeNode *genome_feature,
   return had_err;
 }
 
-static void set_source(GtFeatureNode *genome_feature, const char *source,
+static void set_source(GtFeatureNode *feature_node, const char *source,
                        GtHashmap *source_to_str_mapping)
 {
   GtStr *source_str;
-  gt_assert(genome_feature && source && source_to_str_mapping);
+  gt_assert(feature_node && source && source_to_str_mapping);
   source_str = gt_hashmap_get(source_to_str_mapping, source);
   if (!source_str) {
     source_str = gt_str_new_cstr(source);
     gt_hashmap_add(source_to_str_mapping, gt_str_get(source_str), source_str);
   }
   gt_assert(source_str);
-  gt_feature_node_set_source(genome_feature, source_str);
+  gt_feature_node_set_source(feature_node, source_str);
 }
 
 static int parse_regular_gff3_line(GtGFF3Parser *parser,
@@ -1014,7 +1014,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
                                    size_t line_length, GtStr *filenamestr,
                                    unsigned int line_number, GtError *err)
 {
-  GtGenomeNode *gn = NULL, *genome_feature = NULL;
+  GtGenomeNode *gn = NULL, *feature_node = NULL;
   GtSplitter *splitter;
   AutomaticGtSequenceRegion *auto_sr = NULL;
   GtStr *seqid_str = NULL;
@@ -1103,38 +1103,36 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
 
   /* create the feature */
   if (!had_err) {
-    genome_feature = gt_feature_node_new(seqid_str, type, range.start,
-                                           range.end, gt_strand_value);
-    gt_genome_node_set_origin(genome_feature, filenamestr, line_number);
+    feature_node = gt_feature_node_new(seqid_str, type, range.start, range.end,
+                                       gt_strand_value);
+    gt_genome_node_set_origin(feature_node, filenamestr, line_number);
   }
 
   /* set source */
   if (!had_err) {
-    set_source((GtFeatureNode*) genome_feature, source,
+    set_source((GtFeatureNode*) feature_node, source,
                parser->source_to_str_mapping);
   }
 
   /* parse the attributes */
   if (!had_err) {
-    had_err = parse_attributes(attributes, genome_feature, &is_child, parser,
+    had_err = parse_attributes(attributes, feature_node, &is_child, parser,
                                genome_nodes, auto_sr, filename, line_number,
                                err);
   }
 
-  if (!had_err && score_is_defined) {
-    gt_feature_node_set_score((GtFeatureNode*) genome_feature,
-                                score_value);
-  }
+  if (!had_err && score_is_defined)
+    gt_feature_node_set_score((GtFeatureNode*) feature_node, score_value);
   if (!had_err && phase_value != GT_PHASE_UNDEFINED)
-    gt_feature_node_set_phase((GtFeatureNode*) genome_feature, phase_value);
+    gt_feature_node_set_phase((GtFeatureNode*) feature_node, phase_value);
 
   if (!had_err) {
-    gn = (is_child || auto_sr) ? NULL : genome_feature;
+    gn = (is_child || auto_sr) ? NULL : feature_node;
     if (auto_sr && !is_child)
-      gt_array_add(auto_sr->feature_nodes, genome_feature);
+      gt_array_add(auto_sr->feature_nodes, feature_node);
   }
   else if (!is_child)
-    gt_genome_node_delete(genome_feature);
+    gt_genome_node_delete(feature_node);
 
   if (!had_err && gn)
     gt_queue_add(genome_nodes, gn);
