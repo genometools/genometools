@@ -13,6 +13,6 @@ if $gttestdata then
            "#{$gttestdata}gtf/Drosophila_melanogaster.BDGP5.4.50.gtf",
            :maxtime => 30)
   run "diff #{$last_stdout} " +
-      "#{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3",
+      "#{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3"
   end
 end
