@@ -49,7 +49,7 @@ def checktagerator(queryfile,ms)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile",
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile",
-             :maxtime => 100)
+             :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile " +
              "-maxocc 10",
              :maxtime => 100)
