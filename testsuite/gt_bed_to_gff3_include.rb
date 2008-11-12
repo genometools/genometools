@@ -4,8 +4,8 @@ def process_bed_files(dir)
     Keywords "gt_bed_to_gff3"
     Test do
       run_test "#{$bin}gt bed_to_gff3 #{infile}"
-      #outfile = infile.gsub(/\.bed$/, ".gff3")
-      #run "diff #{$last_stdout} #{outfile}"
+      outfile = infile.gsub(/\.bed$/, ".gff3")
+      run "diff #{$last_stdout} #{outfile}"
     end
   end
 end
