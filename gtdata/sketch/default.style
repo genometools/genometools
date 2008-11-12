@@ -239,6 +239,23 @@ style =
     max_num_lines      = 10,
     max_capt_show_width= 1000,
   },
+--------------------------------------
+  BED_feature = {
+    fill               = {red=0.0, green=0.1, blue=0.0},
+    style              = "box",
+  },
+--------------------------------------
+  BED_thick_feature = {
+    fill               = {red=0.0, green=0.5, blue=0.0},
+    style              = "box",
+    collapse_to_parent = true,
+  },
+--------------------------------------
+  BED_block = {
+    fill               = {red=0.0, green=1.0, blue=0.0},
+    style              = "box",
+    collapse_to_parent = true,
+  },
   -- Defines various format options for drawing.
   format =
   {
