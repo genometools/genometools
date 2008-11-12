@@ -19,6 +19,7 @@
 #include "core/io.h"
 #include "core/ma.h"
 #include "core/parseutils.h"
+#include "core/splitter.h"
 #include "core/str.h"
 #include "extended/bed_parser.h"
 #include "extended/feature_node.h"
@@ -29,6 +30,7 @@
 
 #define BED_FEATURE_TYPE        "BED_feature"
 #define BED_THICK_FEATURE_TYPE  "BED_thick_feature"
+#define BED_BLOCK_TYPE          "BED_block"
 
 #define BLANK_CHAR       ' '
 #define COMMENT_CHAR     '#'
@@ -198,9 +200,124 @@ static void construct_thick_feature(GtFeatureNode *fn, GtRange range)
   gt_feature_node_add_child(fn, (GtFeatureNode*) thick_feature);
 }
 
+static int create_block_features(GtFeatureNode *fn, unsigned long block_count,
+                                  GtSplitter *size_splitter,
+                                  GtSplitter *start_splitter, GtIO *bed_file,
+                                  GtError *err)
+{
+  unsigned long i;
+  int had_err = 0;
+  gt_assert(fn && block_count && size_splitter && start_splitter);
+  gt_assert(gt_splitter_size(size_splitter) == block_count);
+  gt_assert(gt_splitter_size(start_splitter) == block_count);
+  for (i = 0; !had_err && i < block_count; i++) {
+    unsigned long block_size, block_start, start, end;
+    GtGenomeNode *block;
+    const char *name;
+    if (gt_parse_ulong(&block_size, gt_splitter_get_token(size_splitter, i))) {
+      gt_error_set(err, "file \"%s\": line %lu: could not parse blockSize '%s'",
+                   gt_io_get_filename(bed_file),
+                   gt_io_get_line_number(bed_file),
+                   gt_splitter_get_token(size_splitter, i));
+      had_err = -1;
+    }
+    if (!had_err && gt_parse_ulong(&block_start,
+                                   gt_splitter_get_token(start_splitter, i))) {
+      gt_error_set(err, "file \"%s\": line %lu: could not parse blockStart "
+                   "'%s'", gt_io_get_filename(bed_file),
+                   gt_io_get_line_number(bed_file),
+                   gt_splitter_get_token(start_splitter, i));
+      had_err = -1;
+    }
+    if (!had_err) {
+      start = gt_genome_node_get_start((GtGenomeNode*) fn) + block_start;
+      end = start + block_size - 1;
+      block = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) fn),
+                                  BED_BLOCK_TYPE, start, end,
+                                  gt_feature_node_get_strand(fn));
+      if ((name = gt_feature_node_get_attribute(fn, "Name")))
+        gt_feature_node_add_attribute((GtFeatureNode*) block, "Name", name);
+      gt_feature_node_set_score((GtFeatureNode*) block,
+                                gt_feature_node_get_score(fn));
+      gt_feature_node_set_strand((GtFeatureNode*) block,
+                                 gt_feature_node_get_strand(fn));
+      gt_feature_node_add_child(fn, (GtFeatureNode*) block);
+    }
+  }
+  return had_err;
+}
+
+static void remove_terminal_comma(GtStr *str)
+{
+  gt_assert(str && gt_str_length(str));
+  if (gt_str_get(str)[gt_str_length(str)-1] == ',')
+    gt_str_set_length(str, gt_str_length(str)-1);
+}
+
+static int process_blocks(GtFeatureNode *fn, unsigned long block_count,
+                          GtStr *block_sizes, GtStr *block_starts,
+                          GtIO *bed_file, GtError *err)
+{
+  GtSplitter *size_splitter = NULL , *start_splitter = NULL;
+  int had_err = 0;
+  gt_error_check(err);
+  gt_assert(fn && block_count && block_sizes && block_starts);
+  if (!gt_str_length(block_sizes)) {
+    gt_error_set(err,
+                 "file \"%s\": line %lu: blockCount given without blockSizes",
+                 gt_io_get_filename(bed_file),
+                 gt_io_get_line_number(bed_file));
+    had_err = -1;
+  }
+  if (!had_err && !gt_str_length(block_starts)) {
+    gt_error_set(err,
+                 "file \"%s\": line %lu: blockCount given without blockStarts",
+                 gt_io_get_filename(bed_file),
+                 gt_io_get_line_number(bed_file));
+    had_err = -1;
+  }
+  if (!had_err) {
+    /* remove terminal commas found in real-world BED files */
+    remove_terminal_comma(block_sizes);
+    remove_terminal_comma(block_starts);
+  }
+  if (!had_err) {
+    size_splitter = gt_splitter_new();
+    gt_splitter_split(size_splitter, gt_str_get(block_sizes),
+                      gt_str_length(block_sizes), ',');
+    if (gt_splitter_size(size_splitter) != block_count) {
+      gt_error_set(err, "file \"%s\": line %lu: blockSizes column does not "
+                        "have blockCount=%lu many comma separated fields",
+                   gt_io_get_filename(bed_file),
+                   gt_io_get_line_number(bed_file), block_count);
+      had_err = -1;
+    }
+  }
+  if (!had_err) {
+    start_splitter = gt_splitter_new();
+    gt_splitter_split(start_splitter, gt_str_get(block_starts),
+                      gt_str_length(block_starts), ',');
+    if (gt_splitter_size(start_splitter) != block_count) {
+      gt_error_set(err, "file \"%s\": line %lu: blockStarts column does not "
+                        "have " "blockCount=%lu many comma separated fields",
+                   gt_io_get_filename(bed_file),
+                   gt_io_get_line_number(bed_file), block_count);
+      had_err = -1;
+    }
+  }
+  if (!had_err) {
+    had_err = create_block_features(fn, block_count, size_splitter,
+                                    start_splitter, bed_file, err);
+  }
+  gt_splitter_delete(start_splitter);
+  gt_splitter_delete(size_splitter);
+  return had_err;
+}
+
 static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
                     GtIO *bed_file, GtError *err)
 {
+  unsigned long block_count = 0;
   GtGenomeNode *gn = NULL;
   GtRange range;
   GtStr *seqid;
@@ -288,15 +405,13 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
       if (!had_err)
         construct_thick_feature((GtFeatureNode*) gn, range);
     }
-    if (bed_separator(bed_file))
-      had_err = skip_blanks(bed_file, err);
   }
+  if (!had_err && bed_separator(bed_file))
+    had_err = skip_blanks(bed_file, err);
   /* optional column 9.: itemRgb */
   if (!had_err) {
     word(bed_parser->word, bed_file);
-    if (gt_str_length(bed_parser->word)) {
-      /* XXX */
-    }
+    /* we do not use the RGB values */
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
@@ -304,28 +419,37 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   if (!had_err) {
     word(bed_parser->word, bed_file);
     if (gt_str_length(bed_parser->word)) {
-      /* XXX */
+      if (gt_parse_ulong(&block_count, gt_str_get(bed_parser->word))) {
+        gt_error_set(err, "file \"%s\": line %lu: could not parse blockCount",
+                     gt_io_get_filename(bed_file),
+                     gt_io_get_line_number(bed_file));
+        had_err = -1;
+      }
+      else {
+        /* reset to parse/process blockSizes and blockStarts properly */
+        gt_str_reset(bed_parser->word);
+        gt_str_reset(bed_parser->another_word);
+      }
     }
-    if (bed_separator(bed_file))
-      had_err = skip_blanks(bed_file, err);
   }
+  if (!had_err && bed_separator(bed_file))
+    had_err = skip_blanks(bed_file, err);
   /* optional column 11.: blockSizes */
   if (!had_err) {
     word(bed_parser->word, bed_file);
-    if (gt_str_length(bed_parser->word)) {
-      /* XXX */
-    }
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
   /* optional column 12.: blockStarts */
   if (!had_err) {
-    word(bed_parser->word, bed_file);
-    if (gt_str_length(bed_parser->word)) {
-      /* XXX */
-    }
+    word(bed_parser->another_word, bed_file);
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
+  }
+  /* process blocks if necessary */
+  if (!had_err && block_count) {
+    had_err = process_blocks((GtFeatureNode*) gn, block_count, bed_parser->word,
+                             bed_parser->another_word, bed_file, err);
   }
   /* the end of the line should now be reached */
   if (!had_err)
