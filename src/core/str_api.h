@@ -25,14 +25,14 @@
 typedef struct GtStr GtStr;
 
 /* Return an empty <GtStr*> object. */
-GtStr*       gt_str_new(void);
+GtStr*        gt_str_new(void);
 /* Return a new <GtStr*> object whose content is set to <cstr>. */
-GtStr*       gt_str_new_cstr(const char *cstr);
+GtStr*        gt_str_new_cstr(const char *cstr);
 /* Return a clone of <str>. */
-GtStr*       gt_str_clone(const GtStr *str);
+GtStr*        gt_str_clone(const GtStr *str);
 /* Increase the reference count for <str> and return it.
    If <str> is <NULL>, <NULL> is returned without any side effects. */
-GtStr*       gt_str_ref(GtStr *str);
+GtStr*        gt_str_ref(GtStr *str);
 /* Return the content of <str>.  Never returns NULL, and the content is always
    <\0>-terminated */
 char*         gt_str_get(const GtStr *str);
