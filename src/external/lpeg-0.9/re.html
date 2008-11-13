@@ -3,12 +3,14 @@
 <html>
 <head>
     <title>LPeg.re - Regex syntax for LPEG</title>
-    <link rel="stylesheet" href="http://www.keplerproject.org/doc.css" type="text/css"/>
+    <link rel="stylesheet"
+          href="http://www.inf.puc-rio.br/~roberto/lpeg/doc.css"
+          type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
 
-<!-- $Id: re.html,v 1.3 2008/03/07 14:20:55 roberto Exp $ -->
+<!-- $Id: re.html,v 1.11 2008/10/10 18:14:06 roberto Exp $ -->
 
 <div id="container">
 	
@@ -65,17 +67,18 @@ Constructions are listed in order of decreasing precedence.
 <tr><td><code>[class]</code></td> <td>character class</td></tr>
 <tr><td><code>.</code></td> <td>any character</td></tr>
 <tr><td><code>%name</code></td>
-  <td>pattern <code>defs[name] or pre-defined</code></td></tr>
+  <td>pattern <code>defs[name]</code> or a pre-defined pattern</td></tr>
 <tr><td><code>&lt;name&gt;</code></td><td>non terminal</td></tr>
 <tr><td><code>{}</code></td> <td>position capture</td></tr>
 <tr><td><code>{ p }</code></td> <td>simple capture</td></tr>
+<tr><td><code>{: p :}</code></td> <td>anonymous group capture</td></tr>
+<tr><td><code>{:name: p :}</code></td> <td>named group capture</td></tr>
 <tr><td><code>{~ p ~}</code></td> <td>substitution capture</td></tr>
-<tr><td><code>%num</code></td> <td>back reference
-<font color="red"><em>(experimental)</em></font>
+<tr><td><code>=name</code></td> <td>back reference
 </td></tr>
-<tr><td><code>p?</code></td> <td>optional match</td></tr>
-<tr><td><code>p*</code></td> <td>zero or more repetitions</td></tr>
-<tr><td><code>p+</code></td> <td>one or more repetitions</td></tr>
+<tr><td><code>p ?</code></td> <td>optional match</td></tr>
+<tr><td><code>p *</code></td> <td>zero or more repetitions</td></tr>
+<tr><td><code>p +</code></td> <td>one or more repetitions</td></tr>
 <tr><td><code>p^num</code></td> <td>exactly <code>n</code> repetitions</td></tr>
 <tr><td><code>p^+num</code></td>
       <td>at least <code>n</code> repetitions</td></tr>
@@ -88,8 +91,8 @@ Constructions are listed in order of decreasing precedence.
 equivalent to <code>p / defs[name]</code></td></tr>
 <tr><td><code>p =&gt; name</code></td> <td>match-time capture
 equivalent to <code>lpeg.Cmt(p, defs[name])</code></td></tr>
-<tr><td><code>&p</code></td> <td>and predicate</td></tr>
-<tr><td><code>!p</code></td> <td>not predicate</td></tr>
+<tr><td><code>& p</code></td> <td>and predicate</td></tr>
+<tr><td><code>! p</code></td> <td>not predicate</td></tr>
 <tr><td><code>p1 p2</code></td> <td>concatenation</td></tr>
 <tr><td><code>p1 / p2</code></td> <td>ordered choice</td></tr>
 <tr><td>(<code>name &lt;- p</code>)<sup>+</sup></td> <td>grammar</td></tr>
@@ -122,8 +125,11 @@ and <code>-</code>
 Currently the pre-defined classes are similar to those from the
 Lua's string library
 (<code>%a</code> for letters,
-<code>%A</code> for non letters, etc.),
-but they do not follow the localle.
+<code>%A</code> for non letters, etc.).
+There is also a class <code>%nl</code>
+containing only the newline character,
+which is particularly handy for grammars written inside long strings,
+as long strings do not interpret escape sequences like <code>\n</code>.
 </p>
 
 
@@ -152,41 +158,137 @@ Otherwise, returns nil.
 Matches the given pattern against the given subject.
 </p>
 
+<h3><code>re.updatelocale ()</code></h3>
+<p>
+Updates the pre-defined character classes to the current locale.
+</p>
+
 
 <h2><a name="ex">Some Examples</a></h2>
 
+<h3>Balanced parentheses</h3>
 <p>
 As a simple example,
 the following call will produce the same pattern produced by the
-Lua expression in the <a href="#balanced">balanced parentheses</a> example:
+Lua expression in the
+<a href="lpeg.html#balanced">balanced parentheses</a> example:
 </p>
 <pre class="example">
 b = re.compile[[  balanced &lt;- "(" ([^()] / &lt;balanced&gt;)* ")"  ]]
 </pre>
 
+<h3>String reversal</h3>
 <p>
-The next example replicates the <a href="#CSV">CSV decoder</a>:
+The next example reverses a string:
+</p>
+<pre class="example">
+rev = re.compile[[ R &lt;- (!.) -&gt; '' / ({.} &lt;R&gt;) -&gt; '%2%1']]
+print(rev:match"0123456789")   --&gt; 9876543210
+</pre>
+
+<h3>CSV decoder</h3>
+<p>
+The next example replicates the <a href="lpeg.html#CSV">CSV decoder</a>:
 </p>
 <pre class="example">
 record = re.compile[[
-  record &lt;- ( &lt;field&gt; (',' &lt;field&gt;)* ) -&gt; {} ('\n' / !.)
+  record &lt;- ( &lt;field&gt; (',' &lt;field&gt;)* ) -&gt; {} (%nl / !.)
   field &lt;- &lt;escaped&gt; / &lt;nonescaped&gt;
-  nonescaped &lt;- { [^,"\n]* }
+  nonescaped &lt;- { [^,"%nl]* }
   escaped &lt;- '"' {~ ([^"] / '""' -&gt; '"')* ~} '"'
 ]]
 </pre>
 
+<h3>Lua's long strings</h3>
 <p>
 The next example mathes Lua long strings:
 </p>
 <pre class="example">
 c = re.compile([[
-  longstring &lt;- ('[' { '='* } '[' &lt;close&gt;) =&gt; void
-  close &lt;- ']' %1 ']' / . &lt;close&gt;
+  longstring &lt;- ('[' {:eq: '='* :} '[' &lt;close&gt;) =&gt; void
+  close &lt;- ']' =eq ']' / . &lt;close&gt;
 ]], {void = function () return true end})
 
 print(c:match'[==[]]===]]]]==]===[]')   --&gt; 17
 </pre>
+
+<h3>Indented blocks</h3>
+<p>
+This example breaks indented blocks into tables,
+respecting the indentation:
+</p>
+<pre class="example">
+p = re.compile[[
+  block &lt;- ({:ident:' '*:} &lt;line&gt;
+           ((=ident !' ' &lt;line&gt;) / &(=ident ' ') &lt;block&gt;)*) -&gt; {}
+  line &lt;- {[^%nl]*} %nl
+]]
+</pre>
+<p>
+As an example,
+consider the following text:
+</p>
+<pre class="example">
+t = p:match[[
+first line
+  subline 1
+  subline 2
+second line
+third line
+  subline 3.1
+    subline 3.1.1
+  subline 3.2
+]]
+</pre>
+<p>
+The resulting table <code>t</code> will be like this:
+</p>
+<pre class="example">
+   {'first line'; {'subline 1'; 'subline 2'; ident = '  '};
+    'second line';
+    'third line'; { 'subline 3.1'; {'subline 3.1.1'; ident = '    '};
+                    'subline 3.2'; ident = '  '};
+    ident = ''}
+</pre>
+
+<h3>Macro expander</h3>
+<p>
+This example implements a simple macro expander.
+Macros must be defined as part of the pattern,
+following some simple rules:
+</p>
+<pre class="example">
+p = re.compile[[
+      text &lt;- {~ &lt;item&gt;* ~}
+      item &lt;- &lt;macro&gt; / [^()] / '(' &lt;item&gt;* ')'
+      arg &lt;- ' '* {~ (!',' &lt;item&gt;)* ~}
+      args &lt;- '(' &lt;arg&gt; (',' &lt;arg&gt;)* ')'
+      -- now we define some macros
+      macro &lt;- ('apply' &lt;args&gt;) -&gt; '%1(%2)'
+             / ('add' &lt;args&gt;) -&gt; '%1 + %2'
+             / ('mul' &lt;args&gt;) -&gt; '%1 * %2'
+]]
+
+print(p:match"add(mul(a,b), apply(f,x))")   --&gt; a * b + f(x)
+</pre>
+<p>
+A <code>text</code> is a sequence of items,
+wherein we apply a substitution capture to expand any macros.
+An <code>item</code> is either a macro,
+any character different from parentheses,
+or a parenthesized expression.
+A macro argument (<code>arg</code>) is a sequence
+of items different from a comma.
+(Note that a comma may appear inside an item,
+e.g., inside a parenthesized expression.)
+Again we do a substitution capture to expand any macro
+in the argument before expanding the outer macro.
+<code>args</code> is a list of arguments separated by commas.
+Finally we define the macros.
+Each macro is a string substitution;
+it replaces the macro name and its arguments by its corresponding string,
+with each <code>%</code><em>n</em> replaced by the <em>n</em>-th argument.
+</p>
 
 
 
@@ -232,7 +334,7 @@ THE SOFTWARE.
 
 <div id="about">
 <p><small>
-$Id: re.html,v 1.3 2008/03/07 14:20:55 roberto Exp $
+$Id: re.html,v 1.11 2008/10/10 18:14:06 roberto Exp $
 </small></p>
 </div> <!-- id="about" -->
 

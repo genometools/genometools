@@ -178,7 +178,7 @@ end
 Name "LPeg library"
 Keywords "gt_scripts lpeg"
 Test do
-  run_test "#{$bin}gt #{$cur}/src/external/lpeg-0.8.1/test.lua"
+  run_test "#{$bin}gt #{$cur}/src/external/lpeg-0.9/test.lua"
 end
 
 Name "MD5 library"

@@ -1,4 +1,4 @@
--- $Id: re.lua,v 1.26 2008/03/07 14:20:55 roberto Exp $
+-- $Id: re.lua,v 1.32 2008/10/09 20:25:06 roberto Exp $
 
 local m = require"lpeg"
 local _G = _G
@@ -10,31 +10,7 @@ module "re"
 local any = m.P(1)
 
 -- Pre-defined names
-Predef = {
-  l = m.R"az",
-  u = m.R"AZ",
-  d = m.R"09",
-  x = m.R("09", "AF", "af"),
-  s = m.S"\n\r\t\v\f ",
-  p = m.S"!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
-  nl = m.P"\n", 
-}
-
-Predef.a = Predef.l + Predef.u
-Predef.w = Predef.a + Predef.d
-Predef.g = Predef.w + Predef.p
-Predef.c = any - (Predef.g + ' ')
-
-Predef.L = any - Predef.l
-Predef.U = any - Predef.u
-Predef.D = any - Predef.d
-Predef.X = any - Predef.x
-Predef.S = any - Predef.s
-Predef.P = any - Predef.p
-Predef.A = any - Predef.a
-Predef.W = any - Predef.w
-Predef.G = any - Predef.g
-Predef.C = any - Predef.c
+Predef = { nl = m.P"\n" }
 
 
 local I = m.P(function (s,i) print(i, s:sub(1, i-1)); return i end)
@@ -73,19 +49,21 @@ end
 
 local S = (m.S(" \t\n") + "--" * (any - m.S"\n")^0)^0
 
--- identifiers allways need an environment
-local Identifier = m.R("AZ", "az") * m.R("AZ", "az", "09")^0
+local name = m.R("AZ", "az") * m.R("AZ", "az", "09")^0
 
-local exp_follow = m.P"/" + ")" + "}" + "~}" + -1 + "%" + "<" + Identifier
+local exp_follow = m.P"/" + ")" + "}" + ":}" + "~}" + name + -1
 
-Identifier = m.C(Identifier) * m.Carg(1)
+name = m.C(name)
+
+
+-- identifiers only have meaning in a given environment
+local Identifier = name * m.Carg(1)
 
 local num = m.C(m.R"09"^1) * S / tonumber
 
 local String = "'" * m.C((any - "'")^0) * "'" +
                '"' * m.C((any - '"')^0) * '"'
 
-local Range = m.Cs(any * (m.P"-"/"") * (any - "]")) / m.R
 
 local Cat = "%" * Identifier / function (c,Defs)
   local cat =  Defs and Defs[c] or Predef[c]
@@ -93,13 +71,14 @@ local Cat = "%" * Identifier / function (c,Defs)
   return cat
 end
 
+local Range = m.Cs(any * (m.P"-"/"") * (any - "]")) / m.R
 
 local item = Cat + Range + m.C(any)
 
 local Class =
     "["
   * (m.C(m.P"^"^-1))    -- optional complement symbol
-  * m.Ca(item * ((item - "]") / mt.__add)^0) /
+  * m.Cf(item * (item - "]")^0, mt.__add) /
                           function (c, p) return c == "^" and any - p or p end
   * "]"
 
@@ -118,42 +97,44 @@ local function firstdef (n, Defs, r) return adddef({n}, n, Defs, r) end
 
 local exp = m.P{ "Exp",
   Exp = S * ( m.V"Grammar"
-            + m.Ca(m.V"Seq" * ("/" * S * m.V"Seq" / mt.__add)^0) );
-  Seq = m.Ca(m.Cc(m.P"") * (m.V"Prefix" / mt.__mul)^0)
+            + m.Cf(m.V"Seq" * ("/" * S * m.V"Seq")^0, mt.__add) );
+  Seq = m.Cf(m.Cc(m.P"") * m.V"Prefix"^0 , mt.__mul)
         * (#exp_follow + patt_error);
   Prefix = "&" * S * m.V"Prefix" / mt.__len
          + "!" * S * m.V"Prefix" / mt.__unm
          + m.V"Suffix";
-  Suffix = m.Ca(m.V"Primary" * S *
-          ( ( m.P"+" * m.Cc(1) / mt.__pow        -- patt^1
-            + m.P"*" * m.Cc(0) / mt.__pow        -- patt^0
-            + m.P"?" * m.Cc(-1) / mt.__pow   -- patt^-1
-            + "^" * ( num / mult
-                    + "+" * num / mt.__pow
-                    + "-" * num / function (patt,n) return patt^-n end )
-            + "->" * S * ( String / mt.__div
-                         + m.P"{}" / m.Ct
-                         + (Identifier / getdef) / mt.__div )
-            + "=>" * S * (Identifier / getdef) / m.Cmt
+  Suffix = m.Cf(m.V"Primary" * S *
+          ( ( m.P"+" * m.Cc(1, mt.__pow)
+            + m.P"*" * m.Cc(0, mt.__pow)
+            + m.P"?" * m.Cc(-1, mt.__pow)
+            + "^" * ( m.Cg(num * m.Cc(mult))
+                    + m.Cg(m.C(m.S"+-" * m.R"09"^1) * m.Cc(mt.__pow))
+                    )
+            + "->" * S * ( m.Cg(String * m.Cc(mt.__div))
+                         + m.P"{}" * m.Cc(nil, m.Ct)
+                         + m.Cg(Identifier / getdef * m.Cc(mt.__div))
+                         )
+            + "=>" * S * m.Cg(Identifier / getdef * m.Cc(m.Cmt))
             ) * S
-          )^0 );
+          )^0, function (a,b,f) return f(a,b) end );
   Primary = "(" * m.V"Exp" * ")"
-            + m.P"{}" / m.Cp
-            + "{~" * m.V"Exp" * "~}" / m.Cs
-            + "{" * m.V"Exp" * "}" / m.C
             + String / m.P
             + Class
             + Cat
-            + "%" * num / function (n) return m.Cmt(m.Cb(n), equalcap) end
+            + "{:" * (name * ":" + m.Cc(nil)) * m.V"Exp" * ":}" /
+                     function (n, p) return m.Cg(p, n) end
+            + "=" * name / function (n) return m.Cmt(m.Cb(n), equalcap) end
+            + m.P"{}" / m.Cp
+            + "{~" * m.V"Exp" * "~}" / m.Cs
+            + "{" * m.V"Exp" * "}" / m.C
             + m.P"." * m.Cc(any)
-            + "<" * Identifier * ">" / m.V;
+            + "<" * name * ">" / m.V;
   Definition = Identifier * S * '<-' * m.V"Exp";
-  Grammar = m.Ca(m.V"Definition" / firstdef * (m.V"Definition" / adddef)^0) /
+  Grammar = m.Cf(m.V"Definition" / firstdef * m.Cg(m.V"Definition")^0, adddef) /
                 m.P
 }
 
 local pattern = S * exp / m.P * (-any + patt_error)
-                                   
 
 
 function compile (p, defs)
@@ -164,13 +145,10 @@ function compile (p, defs)
 end
 
 
-local mem = {}
-local fmem = {}
-local gmem = {}
+local mem
+local fmem
+local gmem
 local mt = {__mode = "v"}
-_G.setmetatable(mem, mt)
-_G.setmetatable(fmem, mt)
-_G.setmetatable(gmem, mt)
 
 function match (s, p, i)
   local cp = mem[p]
@@ -201,3 +179,38 @@ function gsub (s, p, rep)
   end
   return cp:match(s)
 end
+
+
+function updatelocale ()
+  m.locale(Predef)
+  Predef.a = Predef.alpha
+  Predef.c = Predef.cntrl
+  Predef.d = Predef.digit
+  Predef.g = Predef.graph
+  Predef.l = Predef.lower
+  Predef.p = Predef.punct
+  Predef.s = Predef.space
+  Predef.u = Predef.upper
+  Predef.w = Predef.alnum
+  Predef.x = Predef.xdigit
+  Predef.A = any - Predef.a
+  Predef.C = any - Predef.c
+  Predef.D = any - Predef.d
+  Predef.G = any - Predef.g
+  Predef.L = any - Predef.l
+  Predef.P = any - Predef.p
+  Predef.S = any - Predef.s
+  Predef.U = any - Predef.u
+  Predef.W = any - Predef.w
+  Predef.X = any - Predef.x
+  mem = {}    -- restart memoization
+  fmem = {}
+  gmem = {}
+  _G.setmetatable(mem, mt)
+  _G.setmetatable(fmem, mt)
+  _G.setmetatable(gmem, mt)
+end
+
+
+updatelocale()
+
