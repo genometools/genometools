@@ -74,18 +74,36 @@ class FeatureIndex:
     gtlib.gt_feature_index_get_range_for_seqid(self.fi, byref(range), seqid)
     return range
 
+  def get_features_for_range(self, start, end, seqid):
+    from ctypes import byref
+    a = Array()
+    err = Error()
+    rng = Range(start, end)
+    rval = gtlib.gt_feature_index_get_features_for_range(self.fi, a, \
+                                                         seqid, byref(rng),\
+                                                         err)
+    if rval != 0:
+        gterror(err)
+    result = []
+    for i in range(a.size()):
+        result.append(GenomeNode(gtlib.gt_genome_node_rec_ref(a.get(i))))
+    return result
+
   def register(cls, gtlib):
     from ctypes import c_char_p, c_void_p, c_int, POINTER
     gtlib.gt_feature_index_get_features_for_seqid.restype = c_void_p
-    gtlib.gt_feature_index_add_gff3file.argtypes = [FeatureIndex, c_char_p, \
+    gtlib.gt_feature_index_add_gff3file.argtypes = [c_void_p, c_char_p, \
                                                     Error]
     gtlib.gt_feature_index_get_first_seqid.restype = c_char_p
     gtlib.gt_feature_index_get_seqids.restype = c_void_p
     gtlib.gt_feature_index_has_seqid.argtypes = [c_void_p, c_char_p]
-    gtlib.gt_feature_index_has_seqid.restype = c_int
     gtlib.gt_feature_index_get_range_for_seqid.argtypes = [c_void_p, \
                                                            POINTER(Range), \
                                                            c_char_p]
+    gtlib.gt_feature_index_get_features_for_range.argtypes = [c_void_p, Array, \
+                                                              c_char_p, \
+                                                              POINTER(Range), \
+                                                              Error]
   register = classmethod(register)
 
 

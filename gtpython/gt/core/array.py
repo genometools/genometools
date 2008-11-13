@@ -18,8 +18,12 @@
 from gt.dlload import gtlib
 
 class Array:
-  def __init__(self, arr):
-    self.array = arr
+  def __init__(self, arr = None):
+    from ctypes import sizeof, c_void_p
+    if not arr:
+      self.array = gtlib.gt_array_new(sizeof(c_void_p))
+    else:
+      self.array = arr
     self._as_parameter_ = self.array
 
   def __del__(self):

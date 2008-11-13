@@ -34,9 +34,6 @@ class Error:
     return obj._as_parameter_
   from_param = classmethod(from_param)
 
-  def from_param(self):
-    return self._as_parameter_
-
   def get(self):
     return gtlib.gt_error_get(self.error)
 
