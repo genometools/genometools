@@ -47,6 +47,13 @@ if not $arguments["nocairo"] then
     grep $last_stderr, "GenomeTools error"
   end
 
+  Name "gtpython: AnnotationSketch bindings (simple sketch)"
+  Keywords "gt_python"
+  Test do
+    run_python "#{$testdata}gtpython/sketch_simple.py test.png " +
+             "#{$testdata}gff3_file_1_short.txt"
+  end
+
   Name "gtpython: AnnotationSketch bindings (PNG stream)"
   Keywords "gt_python"
   Test do
