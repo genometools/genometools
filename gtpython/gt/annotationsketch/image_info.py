@@ -32,8 +32,10 @@ class ImageInfo:
       pass
 
   def from_param(cls, obj):
-    if not isinstance(obj, ImageInfo):
+    if not (isinstance(obj, ImageInfo) or obj == None):
       raise TypeError, "argument must be an ImageInfo"
+    if obj == None:
+      return None
     return obj._as_parameter_
   from_param = classmethod(from_param)
 

@@ -39,7 +39,7 @@ class Canvas:
   from_param = classmethod(from_param)
 
 class CanvasCairoFile(Canvas):
-  def __init__(self, style, width, ii):
+  def __init__(self, style, width, ii = None):
     self.canvas = gtlib.gt_canvas_cairo_file_new(style, 1, width, ii)
     self._as_parameter_ = self.canvas
 
