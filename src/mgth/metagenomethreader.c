@@ -214,7 +214,6 @@ static OPrval parse_options(int *parsed_args,
                     &metagenomethreader_arguments->extended_mode, false);
   gt_option_parser_add_option(op, extended_mode_option);
 
-  gt_option_parser_set_mailaddress(op, "<dschmitz@zbh.uni-hamburg.de>");
   gt_option_parser_set_min_max_args(op, 3, 3);
   gt_option_parser_refer_to_manual(op);
 

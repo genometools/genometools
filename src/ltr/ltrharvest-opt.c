@@ -218,7 +218,6 @@ static OPrval parse_options(int *parsed_args,
   gt_error_check(err);
   op = gt_option_parser_new("[option ...] -index filenameindex",
                          "Predict LTR retrotransposons.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   /* -index */
   lo->str_indexname = gt_str_new();
