@@ -373,7 +373,8 @@ bool pck_exactpatternmatching(const void *voidbwtseq,
                  totallength - (dbstartpos + patternlength),
                  (Seqpos) patternlength,
                  dbsubstring,
-                 patternlength);
+                 patternlength,
+                 0);
   }
   if (bsemi != NULL)
   {

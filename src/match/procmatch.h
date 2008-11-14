@@ -21,7 +21,8 @@
 #include "seqpos-def.h"
 
 typedef void (*Processmatch)(void *,Seqpos,Seqpos,
-                             const Uchar *,unsigned long);
+                             const Uchar *,unsigned long,
+                             unsigned long);
 
 typedef void (*Processresult)(void *,const void *,unsigned long,
                               unsigned long,Seqpos,Seqpos);

@@ -70,7 +70,8 @@ static void showmatch(void *processinfo,
                       Seqpos dbstartpos,
                       Seqpos dblen,
                       const Uchar *dbsubstring,
-                      unsigned long pprefixlen)
+                      unsigned long pprefixlen,
+                      GT_UNUSED unsigned long distance)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
 
@@ -119,7 +120,8 @@ static void storematch(void *processinfo,
                        Seqpos dbstartpos,
                        Seqpos dblen,
                        GT_UNUSED const Uchar *dbsubstring,
-                       GT_UNUSED unsigned long pprefixlen)
+                       GT_UNUSED unsigned long pprefixlen,
+                       GT_UNUSED unsigned long distance)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;
