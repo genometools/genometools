@@ -15,14 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TEXT_WIDTH_CALCULATOR_H
-#define TEXT_WIDTH_CALCULATOR_H
+#ifndef TEXT_WIDTH_CALCULATOR_CAIRO_H
+#define TEXT_WIDTH_CALCULATOR_CAIRO_H
 
-#include "annotationsketch/text_width_calculator_api.h"
+#include <cairo.h>
+#include "annotationsketch/text_width_calculator.h"
 
-void* gt_text_width_calculator_cast(const GtTextWidthCalculatorClass*,
-                                    GtTextWidthCalculator*);
-void* gt_text_width_calculator_try_cast(const GtTextWidthCalculatorClass*,
-                                        GtTextWidthCalculator*);
+/* Implements the GtTextWidthCalculator interface */
+typedef struct GtTextWidthCalculatorCairo GtTextWidthCalculatorCairo;
+
+const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void);
+GtTextWidthCalculator*            gt_text_width_calculator_cairo_new(cairo_t*);
 
 #endif

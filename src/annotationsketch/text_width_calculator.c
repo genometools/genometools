@@ -83,9 +83,18 @@ double gt_text_width_calculator_get_text_width(GtTextWidthCalculator *twc,
   return twc->c_class->get_text_width(twc, text);
 }
 
-void* gt_line_breaker_cast(const GtTextWidthCalculatorClass *twcc,
-                           GtTextWidthCalculator *twc)
+void* gt_text_width_calculator_cast(const GtTextWidthCalculatorClass *twcc,
+                                    GtTextWidthCalculator *twc)
 {
   gt_assert(twcc && twc&& twc->c_class == twcc);
   return twc;
+}
+
+void* gt_text_width_calculator_try_cast(const GtTextWidthCalculatorClass *twcc,
+                                        GtTextWidthCalculator *twc)
+{
+  gt_assert(twcc && twc);
+  if (twc->c_class == twcc)
+    return twc;
+  return NULL;
 }
