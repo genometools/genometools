@@ -24,18 +24,21 @@
 #include "match/optionargmode.h"
 #include "tools/gt_tagerator.h"
 
-static Optionargmodedesc outputmodedesctable[] =
+static const Optionargmodedesc outputmodedesctable[] =
 {
-  {"headnum",TAGOUT_HEADNUM},
-  {"headseq",TAGOUT_HEADSEQ},
-  {"dblength",TAGOUT_DBLENGTH},
-  {"dbstartpos",TAGOUT_DBSTARTPOS},
-  {"dbsequence",TAGOUT_DBSEQUENCE},
-  {"edist",TAGOUT_EDIST},
-  {"strand",TAGOUT_STRAND},
-  {"tagstartpos",TAGOUT_TAGSTARTPOS},
-  {"taglength",TAGOUT_TAGLENGTH},
-  {"tagsuffixseq",TAGOUT_TAGSUFFIXSEQ}
+  {"tagnum","ordinal number of tag",TAGOUT_TAGNUM},
+  {"tagseq","tag sequence",TAGOUT_TAGSEQ},
+  {"dblength","length of match in database",TAGOUT_DBLENGTH},
+  {"dbstartpos","starting position of match in database",
+                TAGOUT_DBSTARTPOS},
+  {"dbsequence","sequence of match",TAGOUT_DBSEQUENCE},
+  {"strand","strand",TAGOUT_STRAND},
+  {"edist","edit distance",TAGOUT_EDIST},
+  {"tagstartpos","start position of match in tag (only for -maxocc)",
+                 TAGOUT_TAGSTARTPOS},
+  {"taglength","length of match in tag (only for -maxocc)",TAGOUT_TAGLENGTH},
+  {"tagsuffixseq","suffix tag involved in match (only for -maxocc)",
+                  TAGOUT_TAGSUFFIXSEQ}
 };
 
 static void *gt_tagerator_arguments_new(void)
@@ -47,10 +50,13 @@ static void *gt_tagerator_arguments_new(void)
   arguments->tagfiles = gt_str_array_new();
   arguments->outputspec = gt_str_array_new();
   arguments->outputmode = 0;
-  arguments->outputhelp = getargmodekeywords(outputmodedesctable,
-                                             sizeof (outputmodedesctable)/
-                                             sizeof (outputmodedesctable[0]),
-                                             "output mode");
+  arguments->numberofmodedescentries = sizeof (outputmodedesctable)/
+                                       sizeof (outputmodedesctable[0]);
+  arguments->outputhelp
+    = getargmodekeywords(outputmodedesctable,
+                         arguments->numberofmodedescentries,
+                         "output");
+  arguments->modedesc = outputmodedesctable;
   return arguments;
 }
 

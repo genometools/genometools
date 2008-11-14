@@ -80,7 +80,7 @@ static void showmatch(void *processinfo,
                       Seqpos dblen,
                       const Uchar *dbsubstring,
                       unsigned long pprefixlen,
-                      GT_UNUSED unsigned long distance)
+                      unsigned long distance)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   bool firstitem = true;
@@ -91,11 +91,6 @@ static void showmatch(void *processinfo,
     printf(FormatSeqpos,PRINTSeqposcast(dblen));
     firstitem = false;
   }
-  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
-  {
-    ADDTABULATOR;
-    printf("%c",(*showmatchinfo->rcdirptr) ? '-' : '+');
-  }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
   {
     ADDTABULATOR;
@@ -105,14 +100,25 @@ static void showmatch(void *processinfo,
   {
     ADDTABULATOR;
     gt_assert(dbsubstring != NULL);
-    printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
+    printfsymbolstring(showmatchinfo->alpha,dbsubstring,
+                       (unsigned long) dblen);
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
+  {
+    ADDTABULATOR;
+    printf("%c",(*showmatchinfo->rcdirptr) ? '-' : '+');
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_EDIST)
+  {
+    ADDTABULATOR;
+    printf("%lu",distance);
   }
   if (showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
     if (showmatchinfo->tageratoroptions->skpp)
     {
       if (showmatchinfo->tageratoroptions->outputmode &
-          (TAGOUT_TAGSTARTPOS | TAGOUT_TAGLENGTH))
+          (TAGOUT_TAGSTARTPOS | TAGOUT_TAGLENGTH | TAGOUT_TAGSUFFIXSEQ))
       {
         unsigned long suffixlength
           = reversesuffixmatch(showmatchinfo->eqsvector,
@@ -120,8 +126,8 @@ static void showmatch(void *processinfo,
                                dbsubstring,
                                (unsigned long) dblen,
                                showmatchinfo->tagptr,
-                             pprefixlen,
-                             (unsigned long) showmatchinfo->tageratoroptions->
+                               pprefixlen,
+                               (unsigned long) showmatchinfo->tageratoroptions->
                                                         userdefinedmaxdistance);
         gt_assert(pprefixlen >= suffixlength);
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
@@ -136,6 +142,7 @@ static void showmatch(void *processinfo,
         }
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
         {
+          ADDTABULATOR;
           printfsymbolstring(NULL,showmatchinfo->tagptr +
                                   (pprefixlen - suffixlength),
                                   suffixlength);
@@ -143,11 +150,27 @@ static void showmatch(void *processinfo,
       }
     } else
     {
-      printf(" %lu 0 ",pprefixlen);
-      printfsymbolstring(NULL,showmatchinfo->tagptr, pprefixlen);
+      if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
+      {
+        ADDTABULATOR;
+        printf("0");
+      }
+      if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
+      {
+        ADDTABULATOR;
+        printf("%lu",pprefixlen);
+      }
+      if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
+      {
+        ADDTABULATOR;
+        printfsymbolstring(NULL,showmatchinfo->tagptr, pprefixlen);
+      }
     }
   }
-  printf("\n");
+  if (!firstitem)
+  {
+    printf("\n");
+  }
 }
 
 typedef struct
@@ -674,6 +697,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                            &twl, /* refer to uninit structure */
                                            dfst);
     }
+    printf("# for each match show: ");
+    getsetargmodekeywords(tageratoroptions->modedesc,
+                          tageratoroptions->numberofmodedescentries,
+                          tageratoroptions->outputmode);
     seqit = gt_seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
@@ -699,9 +726,17 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         break;
       }
       twl.rcdir = false;
-      printf("# %lu ",twl.taglen);
-      fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
-                          twl.taglen);
+      printf("#");
+      if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
+      {
+        printf("\t%lu",twl.taglen);
+      }
+      if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
+      {
+        printf("\t");
+        fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
+                            twl.taglen);
+      }
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
       storeonline.nextfreeSimplematch = 0;

@@ -22,6 +22,7 @@
 typedef struct
 {
   const char *name;
+  const char *desc;
   unsigned int bitmask;
 } Optionargmodedesc;
 
@@ -33,7 +34,11 @@ int optionaddbitmask(const Optionargmodedesc *modedesc,
                      GtError *err);
 
 GtStr *getargmodekeywords(const Optionargmodedesc *modedesc,
+                          size_t numberofentries,
+                          const char *what);
+
+void getsetargmodekeywords(const Optionargmodedesc *modedesc,
                            size_t numberofentries,
-                           const char *final);
+                           unsigned int bitfield);
 
 #endif

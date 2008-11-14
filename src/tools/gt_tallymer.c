@@ -430,11 +430,14 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
 
   Optionargmodedesc outputmodedesctable[] =
   {
-    {"unique",TYROCC_OUTPUTUNIQUE},
-    {"nonunique",TYROCC_OUTPUTNONUNIQUE},
-    {"nonuniquemulti",TYROCC_OUTPUTNONUNIQUEMULTI},
-    {"relative",TYROCC_OUTPUTRELATIVE},
-    {"total",TYROCC_OUTPUTTOTAL}
+    {"unique","number of unique mers",TYROCC_OUTPUTUNIQUE},
+    {"nonunique","number of nonunique mers (single count)",
+                 TYROCC_OUTPUTNONUNIQUE},
+    {"nonuniquemulti","number of nonunique mers (multi count)",
+                 TYROCC_OUTPUTNONUNIQUEMULTI},
+    {"relative","fraction of unique/non-unique mers relative to all mers",
+                 TYROCC_OUTPUTRELATIVE},
+    {"total","number of all mers",TYROCC_OUTPUTTOTAL}
   };
   if (rest_argc != 0)
   {
@@ -882,17 +885,17 @@ static int gt_tyr_search_arguments_check(int rest_argc,
 {
   Optionargmodedesc showmodedesctable[] =
   {
-    {"qseqnum",SHOWQSEQNUM},
-    {"qpos",SHOWQPOS},
-    {"counts",SHOWCOUNTS},
-    {"sequence",SHOWSEQUENCE}
+    {"qseqnum","query sequence number",SHOWQSEQNUM},
+    {"qpos","query position",SHOWQPOS},
+    {"counts","number of occurrence counts",SHOWCOUNTS},
+    {"sequence","mer-sequence",SHOWSEQUENCE}
   };
 
   Optionargmodedesc stranddesctable[] =
   {
-    {"f",STRAND_FORWARD},
-    {"p",STRAND_REVERSE},
-    {"fp",STRAND_FORWARD | STRAND_REVERSE}
+    {"f","forward strand",STRAND_FORWARD},
+    {"p","reverse strand",STRAND_REVERSE},
+    {"fp","forward and reverse strand",STRAND_FORWARD | STRAND_REVERSE}
   };
   unsigned long idx;
   Tyr_search_options *arguments = tool_arguments;
