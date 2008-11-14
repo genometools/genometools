@@ -21,11 +21,19 @@
 #include "core/unused_api.h"
 #include "core/tool.h"
 #include "match/tagerator.h"
+#include "match/optionargmode.h"
 #include "tools/gt_tagerator.h"
 
 static void *gt_tagerator_arguments_new(void)
 {
-  return gt_malloc(sizeof (TageratorOptions));
+  TageratorOptions *arguments;
+
+  arguments = gt_malloc(sizeof (TageratorOptions));
+  arguments->indexname = gt_str_new();
+  arguments->tagfiles = gt_str_array_new();
+  arguments->outputspec = gt_str_array_new();
+  arguments->outputmode = 0;
+  return arguments;
 }
 
 static void gt_tagerator_arguments_delete(void *tool_arguments)
@@ -38,6 +46,7 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
   }
   gt_str_delete(arguments->indexname);
   gt_str_array_delete(arguments->tagfiles);
+  gt_str_array_delete(arguments->outputspec);
   gt_option_delete(arguments->refoptionesaindex);
   gt_option_delete(arguments->refoptionpckindex);
   gt_free(arguments);
@@ -51,8 +60,6 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
            *optionpckindex, *optionmaxdepth, *optionbest;
 
   gt_assert(arguments != NULL);
-  arguments->indexname = gt_str_new();
-  arguments->tagfiles = gt_str_array_new();
   op = gt_option_parser_new("[options] -t tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -140,14 +147,40 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                               "approximate matching",
                               &arguments->nowildcards, true);
   gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_stringarray(
+                          "output",
+                          "use combination of the following keywords:\n"
+                          "headnum headseq length edist strand startpos\n"
+                          "to specify kind of output",
+                          arguments->outputspec);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
+
+#define TAGOUT_HEADNUM    1U
+#define TAGOUT_HEADSEQ    (1U << 1)
+#define TAGOUT_LENGTH     (1U << 2)
+#define TAGOUT_EDIST      (1U << 3)
+#define TAGOUT_STRAND     (1U << 4)
+#define TAGOUT_STARTPOS   (1U << 5)
 
 static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
                                         void *tool_arguments,
                                         GtError *err)
 {
   TageratorOptions *arguments = tool_arguments;
+  unsigned long idx;
+  Optionargmodedesc outputmodedesctable[] =
+  {
+    {"headnum",TAGOUT_HEADNUM},
+    {"headseq",TAGOUT_HEADSEQ},
+    {"length",TAGOUT_LENGTH},
+    {"edist",TAGOUT_EDIST},
+    {"strand",TAGOUT_STRAND},
+    {"startpos",TAGOUT_STARTPOS}
+  };
 
   if (!arguments->nowildcards && arguments->userdefinedmaxdistance <= 0)
   {
@@ -186,6 +219,19 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
          arguments->maxintervalwidth == 0))
     {
       gt_error_set(err,"option -skpp only works in pdiff mode");
+      return -1;
+    }
+  }
+  for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
+  {
+    if (optionaddbitmask(outputmodedesctable,
+                         sizeof (outputmodedesctable)/
+                         sizeof (outputmodedesctable[0]),
+                         &arguments->outputmode,
+                         "-output",
+                         gt_str_array_get(arguments->outputspec,idx),
+                         err) != 0)
+    {
       return -1;
     }
   }

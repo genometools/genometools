@@ -25,7 +25,7 @@
 
 typedef struct
 {
-  GtStrArray *tagfiles;
+  GtStrArray *tagfiles, *outputspec;
   GtStr *indexname;
   GtOption *refoptionesaindex,
            *refoptionpckindex;
@@ -40,6 +40,7 @@ typedef struct
        best; /* use best match mode, only for edit distance */
   long userdefinedmaxdistance; /* maximal number of allowed differences */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */
+  unsigned int outputmode;  /* mode of output of tag matches */
   unsigned long maxintervalwidth; /* max width of interval */
 } TageratorOptions;
 
