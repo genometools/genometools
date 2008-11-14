@@ -159,13 +159,6 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   return op;
 }
 
-#define TAGOUT_HEADNUM    1U
-#define TAGOUT_HEADSEQ    (1U << 1)
-#define TAGOUT_LENGTH     (1U << 2)
-#define TAGOUT_EDIST      (1U << 3)
-#define TAGOUT_STRAND     (1U << 4)
-#define TAGOUT_STARTPOS   (1U << 5)
-
 static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
                                         void *tool_arguments,
                                         GtError *err)
