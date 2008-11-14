@@ -32,13 +32,8 @@
 #include "idx-limdfs.h"
 #include "esa-minunique.pr"
 
-#ifdef SKDEBUG
-#define DECLAREDFSSTATE(V)\
-        Aliasdfsstate V[4]
-#else
 #define DECLAREDFSSTATE(V)\
         Aliasdfsstate V[5]
-#endif
 
 typedef struct
 {
@@ -319,7 +314,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 {
   Seqpos pos, startpos;
   Uchar cc;
-  unsigned long pprefixlen;
+  Limdfsresult limdfsresult;
   const Suffixarray *suffixarray
     = (const Suffixarray *) limdfsresources->genericindex;
 
@@ -341,23 +336,24 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                     limdfsresources->currentdfsstate,
                                     (unsigned long) (pos - startpos + 1),
                                     cc);
-      pprefixlen = adfst->fullmatchLimdfsstate(limdfsresources->currentdfsstate,
-                                               leftbound,
-                                               leftbound,
-                                               (Seqpos) 1,
-                                               (unsigned long) (pos-startpos+1),
-                                               limdfsresources->dfsconstinfo);
-      if (pprefixlen == 0) /* failure */
+      adfst->fullmatchLimdfsstate(&limdfsresult,
+                                  limdfsresources->currentdfsstate,
+                                  leftbound,
+                                  leftbound,
+                                  (Seqpos) 1,
+                                  (unsigned long) (pos-startpos+1),
+                                  limdfsresources->dfsconstinfo);
+      if (limdfsresult.status == Limdfsstop)
       {
         break;
       }
-      if (pprefixlen > 1UL) /* match of length pprefixlen - 1 */
+      if (limdfsresult.status == Limdfssuccess)
       {
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       startpos,
                                       pos - startpos + 1,
                                       limdfsresources->currentpathspace,
-                                      pprefixlen-1);
+                                      limdfsresult.pprefixlen);
         limdfsresources->numberofmatches++;
         break;
       }
@@ -383,10 +379,11 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                             const AbstractDfstransformer *adfst)
 {
   Uchar cc;
-  unsigned long contextlength, pprefixlen;
+  unsigned long contextlength;
   bool processinchar = true;
   Seqpos bound = leftbound;
   Bwtseqcontextiterator *bsci;
+  Limdfsresult limdfsresult;
 
   bsci = newBwtseqcontextiterator(limdfsresources->genericindex,bound);
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
@@ -415,18 +412,18 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                     limdfsresources->currentdfsstate,
                                     (unsigned long) (offset + contextlength),
                                     cc);
-      pprefixlen = adfst->fullmatchLimdfsstate(limdfsresources->currentdfsstate,
-                                               bound,
-                                               bound+1,
-                                               (Seqpos) 1,
-                                               (unsigned long)
-                                                 (offset+contextlength),
-                                               limdfsresources->dfsconstinfo);
-      if (pprefixlen == 0)
+      adfst->fullmatchLimdfsstate(&limdfsresult,
+                                  limdfsresources->currentdfsstate,
+                                  bound,
+                                  bound+1,
+                                  (Seqpos) 1,
+                                  (unsigned long) (offset+contextlength),
+                                  limdfsresources->dfsconstinfo);
+      if (limdfsresult.status == Limdfsstop)
       {
         break;
       }
-      if (pprefixlen > 1UL) /* check for success */
+      if (limdfsresult.status == Limdfssuccess)
       {
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,
                                            leftbound);
@@ -435,7 +432,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                            (startpos + offset),
                                       offset + contextlength,
                                       limdfsresources->currentpathspace,
-                                      pprefixlen-1);
+                                      limdfsresult.pprefixlen);
         limdfsresources->numberofmatches++;
         break;
       }
@@ -454,7 +451,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                                const DECLAREPTRDFSSTATE(indfsstate),
                                const AbstractDfstransformer *adfst)
 {
-  unsigned long pprefixlen;
+  Limdfsresult limdfsresult;
   Seqpos width;
   stackptr->lcpitv = *child;
 
@@ -481,20 +478,21 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   {
     width = child->rightbound - child->leftbound;
   }
-  pprefixlen = adfst->fullmatchLimdfsstate(stackptr->aliasstate,
-                                           child->leftbound,
-                                           child->rightbound,
-                                           width,
-                                           (unsigned long) child->offset,
-                                           limdfsresources->dfsconstinfo);
-  if (pprefixlen == 0)
+  adfst->fullmatchLimdfsstate(&limdfsresult,
+                              stackptr->aliasstate,
+                              child->leftbound,
+                              child->rightbound,
+                              width,
+                              (unsigned long) child->offset,
+                              limdfsresources->dfsconstinfo);
+  if (limdfsresult.status == Limdfsstop)
   {
     return true; /* stop traversal without match */
   }
-  if (pprefixlen > 1UL)
+  if (limdfsresult.status == Limdfssuccess)
   {
     (limdfsresources->withesa ? esa_overinterval : pck_overinterval)
-      (limdfsresources,child,pprefixlen-1);
+      (limdfsresources,child,limdfsresult.pprefixlen);
     /* success with match of length pprefixlen - 1 */
     return true;
   }

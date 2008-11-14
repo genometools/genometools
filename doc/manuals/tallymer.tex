@@ -404,6 +404,40 @@ S.~Kurtz, A.~Narechania, J.C. Stein, and D.~Ware.
   annotate large repetitive plant genomes repetitive plant genomes}.
 \newblock {\em {BMC Genomics}}, 9:517, 2008.
 \end{thebibliography}
+
+\appendix
+\section{Remark to users of previous versions of the programs}
+In previous versions of the Tallymer software the programs were 
+named differently. The previous program \texttt{vmerstat}
+corresponds to \texttt{tallymer mkindex}, \texttt{vmersearch}
+corresponds to \texttt{tallymer search}, and \texttt{vmerdist}
+corresponds to \texttt{tallymer occratio}. The output format
+has not changed in the current version. The options of the
+current \Tallymer programs is compatible with the options of the
+previous programs. There are only some extra options required:
+\begin{enumerate}
+\item
+the tallymer mkindex-program requires an extra option -esa to
+specify the enhanced suffix array. The latter is
+constructed by the suffixerator-program which is also part
+of the genometools (see examples in Tallymer manual)
+\item
+seperate runs of constructions of enhanced suffix arrays are no
+longer necessary. Instead use the option -parts in one
+call to the suffixerator-program which creates an enhanced suffix array
+for the entire sequence set. I have tried this for a set of
+ESTs (total length 3.2 GB) and it works well.
+\item
+For very large enhanced suffix arrays (which do not fit into main
+memory) use the option -scan for tallymer mkindex and tallymer occratio.
+\item 
+For tallymer occratio use the option -esa to specify the enhanced suffix
+array.
+\item
+For tallymer search use the option -tyr to specify the input tallymer
+index.
+\end{enumerate}
+
 \end{document}
 
 \section{TODO-list}

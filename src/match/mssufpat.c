@@ -185,12 +185,13 @@ static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   }
 }
 
-static unsigned long pms_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                              Seqpos leftbound,
-                                              Seqpos rightbound,
-                                              GT_UNUSED Seqpos width,
-                                              unsigned long currentdepth,
-                                              void *dfsconstinfo)
+static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
+                                     DECLAREPTRDFSSTATE(aliascolumn),
+                                     Seqpos leftbound,
+                                     Seqpos rightbound,
+                                     GT_UNUSED Seqpos width,
+                                     unsigned long currentdepth,
+                                     void *dfsconstinfo)
 {
   Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
 
@@ -218,9 +219,11 @@ static unsigned long pms_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
       tmp >>= (first1+1);
       bitindex += (first1+1);
     } while (tmp != 0);
-    return 1UL; /* continue with depth first traversal */
+    limdfsresult->status = Limdfscontinue;
+  } else
+  {
+    limdfsresult->status = Limdfsstop;
   }
-  return 0; /* stop depth first traversal */
 }
 
 static void pms_nextLimdfsstate(const void *dfsconstinfo,

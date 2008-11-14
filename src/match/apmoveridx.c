@@ -38,9 +38,7 @@ typedef struct
                           \(m\) is the length of the pattern, \(k\) is the
                           distance threshold, and \(D\) is
                           the current distance column */
-#ifdef SKDEBUG
   unsigned long lastscorevalue;   /* the score for the given depth */
-#endif
 } Limdfsstate;
 
 typedef struct
@@ -207,49 +205,56 @@ static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   {
     column->Pv = 0UL; /* first column consists of 0 => skip pattern prefix */
     column->maxleqk = mti->patternlength;
-#ifdef SKDEBUG
     column->lastscorevalue = 0;
-#endif
   } else
   {
     column->Pv = ~0UL; /* first column: 0 1 2 ... m */
     column->maxleqk = mti->maxdistance;
-#ifdef SKDEBUG
     column->lastscorevalue = mti->maxdistance;
-#endif
   }
 }
 
-static unsigned long apm_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                              GT_UNUSED Seqpos leftbound,
-                                              GT_UNUSED Seqpos rightbound,
-                                              Seqpos width,
-                                              GT_UNUSED
-                                              unsigned long currentdepth,
-                                              void *dfsconstinfo)
+static void apm_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
+                                     DECLAREPTRDFSSTATE(aliascolumn),
+                                     GT_UNUSED Seqpos leftbound,
+                                     GT_UNUSED Seqpos rightbound,
+                                     Seqpos width,
+                                     GT_UNUSED
+                                     unsigned long currentdepth,
+                                     void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascolumn;
 
   if (col->maxleqk == UNDEFMAXLEQK)
   {
-    return 0; /* stop depth first traversal */
+    limdfsresult->status = Limdfsstop; /* stop depth first traversal */
+    return;
   }
   if (mti->maxintervalwidth == 0 || width == (Seqpos) 1)
   {
     if (col->maxleqk == SUCCESSMAXLEQK)
     {
-      return mti->patternlength+1; /* success with match of length plen */
+      /* success with match of length plen */
+      limdfsresult->status = Limdfssuccess;
+      limdfsresult->pprefixlen = mti->patternlength;
+      limdfsresult->distance = col->lastscorevalue;
+      return;
     }
   } else
   {
     if (width <= (Seqpos) mti->maxintervalwidth)
     {
+      /* success with match of length maxleqk */
       gt_assert(col->maxleqk > 0);
-      return col->maxleqk+1; /* success with match of length maxleqk */
+      limdfsresult->status = Limdfssuccess;
+      limdfsresult->pprefixlen = col->maxleqk;
+      limdfsresult->distance = col->lastscorevalue;
+      return;
     }
   }
-  return 1UL; /* continue with depth first traversal */
+  /* continue with depth first traversal */
+  limdfsresult->status = Limdfscontinue;
 }
 
 static void apm_nextLimdfsstate(const void *dfsconstinfo,
@@ -286,9 +291,7 @@ static void apm_nextLimdfsstate(const void *dfsconstinfo,
   if (Eq & backmask || Mh & backmask)
   {
     outcol->maxleqk = incol->maxleqk + 1UL;
-#ifdef SKDEBUG
     outcol->lastscorevalue = incol->lastscorevalue;
-#endif
   } else
   {
     if (Ph & backmask)
@@ -307,9 +310,7 @@ static void apm_nextLimdfsstate(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               outcol->maxleqk = idx;
-#ifdef SKDEBUG
               outcol->lastscorevalue = score;
-#endif
               break;
             }
           } else
@@ -331,9 +332,7 @@ static void apm_nextLimdfsstate(const void *dfsconstinfo,
     } else
     {
       outcol->maxleqk = incol->maxleqk;
-#ifdef SKDEBUG
       outcol->lastscorevalue = incol->lastscorevalue;
-#endif
     }
   }
 #ifdef SKDEBUG
@@ -390,9 +389,7 @@ static void apm_inplacenextLimdfsstate(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               tmpmaxleqk = idx;
-#ifdef SKDEBUG
               col->lastscorevalue = score;
-#endif
               break;
             }
           } else

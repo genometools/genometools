@@ -28,6 +28,20 @@ typedef unsigned long Aliasdfsstate;
 
 #undef SKDEBUG
 
+typedef enum
+{
+  Limdfssuccess,  /* success of traversal */
+  Limdfscontinue, /* no success, but still have the chance to find result */
+  Limdfsstop      /* no success possible */
+} Limdfsstatus;
+
+typedef struct
+{
+  Limdfsstatus status;
+  unsigned long pprefixlen, /* only defined if limdfsstatus = Limdfssuccess */
+                distance;   /* only defined if limdfsstatus = Limdfssuccess */
+} Limdfsresult;
+
 struct AbstractDfstransformer
 {
   size_t sizeofdfsstate;
@@ -42,7 +56,8 @@ struct AbstractDfstransformer
   void (*freedfsconstinfo)(void **dfsconstinfo);
   void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
                           void *dfsconstinfo);
-  unsigned long (*fullmatchLimdfsstate)(DECLAREPTRDFSSTATE(aliascolumn),
+  void (*fullmatchLimdfsstate)(Limdfsresult *limdfsresult,
+                               DECLAREPTRDFSSTATE(aliascolumn),
                                        Seqpos left,
                                        Seqpos right,
                                        Seqpos width,

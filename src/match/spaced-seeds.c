@@ -94,12 +94,13 @@ static void spse_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   column->pathmatches = true;
 }
 
-static unsigned long spse_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                               GT_UNUSED Seqpos leftbound,
-                                               GT_UNUSED Seqpos rightbound,
-                                               GT_UNUSED Seqpos width,
-                                               unsigned long currentdepth,
-                                               void *dfsconstinfo)
+static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
+                                      DECLAREPTRDFSSTATE(aliascolumn),
+                                      GT_UNUSED Seqpos leftbound,
+                                      GT_UNUSED Seqpos rightbound,
+                                      GT_UNUSED Seqpos width,
+                                      unsigned long currentdepth,
+                                      void *dfsconstinfo)
 {
   Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
@@ -108,14 +109,18 @@ static unsigned long spse_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   {
     if (currentdepth == mti->seedweight)
     {
-      return currentdepth + 1; /* match of length currentdepth */
+      limdfsresult->status = Limdfssuccess;
+      limdfsresult->pprefixlen = mti->seedweight;
+      limdfsresult->distance = 0;
+      return;
     }
     if (currentdepth < mti->seedweight)
     {
-      return 1UL; /* continue with depth first traversal */
+      limdfsresult->status = Limdfscontinue;
+      return;
     }
   }
-  return 0; /* stop depth first traversal */
+  limdfsresult->status = Limdfsstop;
 }
 
 static bool setpathmatch(Bitstring seedbitvector,
