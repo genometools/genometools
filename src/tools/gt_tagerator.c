@@ -24,6 +24,20 @@
 #include "match/optionargmode.h"
 #include "tools/gt_tagerator.h"
 
+static Optionargmodedesc outputmodedesctable[] =
+{
+  {"headnum",TAGOUT_HEADNUM},
+  {"headseq",TAGOUT_HEADSEQ},
+  {"dblength",TAGOUT_DBLENGTH},
+  {"dbstartpos",TAGOUT_DBSTARTPOS},
+  {"dbsequence",TAGOUT_DBSEQUENCE},
+  {"edist",TAGOUT_EDIST},
+  {"strand",TAGOUT_STRAND},
+  {"tagstartpos",TAGOUT_TAGSTARTPOS},
+  {"taglength",TAGOUT_TAGLENGTH},
+  {"tagsuffixseq",TAGOUT_TAGSUFFIXSEQ}
+};
+
 static void *gt_tagerator_arguments_new(void)
 {
   TageratorOptions *arguments;
@@ -33,6 +47,10 @@ static void *gt_tagerator_arguments_new(void)
   arguments->tagfiles = gt_str_array_new();
   arguments->outputspec = gt_str_array_new();
   arguments->outputmode = 0;
+  arguments->outputhelp = getargmodekeywords(outputmodedesctable,
+                                             sizeof (outputmodedesctable)/
+                                             sizeof (outputmodedesctable[0]),
+                                             "output mode");
   return arguments;
 }
 
@@ -45,6 +63,7 @@ static void gt_tagerator_arguments_delete(void *tool_arguments)
     return;
   }
   gt_str_delete(arguments->indexname);
+  gt_str_delete(arguments->outputhelp);
   gt_str_array_delete(arguments->tagfiles);
   gt_str_array_delete(arguments->outputspec);
   gt_option_delete(arguments->refoptionesaindex);
@@ -148,12 +167,9 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                               &arguments->nowildcards, true);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_stringarray(
-                          "output",
-                          "use combination of the following keywords:\n"
-                          "headnum headseq length edist strand startpos\n"
-                          "to specify kind of output",
-                          arguments->outputspec);
+  option = gt_option_new_stringarray("output",
+                                     gt_str_get(arguments->outputhelp),
+                                     arguments->outputspec);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -165,15 +181,6 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
 {
   TageratorOptions *arguments = tool_arguments;
   unsigned long idx;
-  Optionargmodedesc outputmodedesctable[] =
-  {
-    {"headnum",TAGOUT_HEADNUM},
-    {"headseq",TAGOUT_HEADSEQ},
-    {"length",TAGOUT_LENGTH},
-    {"edist",TAGOUT_EDIST},
-    {"strand",TAGOUT_STRAND},
-    {"startpos",TAGOUT_STARTPOS}
-  };
 
   if (!arguments->nowildcards && arguments->userdefinedmaxdistance <= 0)
   {

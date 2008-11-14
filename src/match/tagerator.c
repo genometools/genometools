@@ -66,6 +66,15 @@ typedef struct
   bool *rcdirptr;
 } Showmatchinfo;
 
+#define ADDTABULATOR\
+        if (firstitem)\
+        {\
+          firstitem = false;\
+        } else\
+        {\
+          (void) putchar('\t');\
+        }
+
 static void showmatch(void *processinfo,
                       Seqpos dbstartpos,
                       Seqpos dblen,
@@ -74,32 +83,64 @@ static void showmatch(void *processinfo,
                       GT_UNUSED unsigned long distance)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
+  bool firstitem = true;
 
-  printf(FormatSeqpos,PRINTSeqposcast(dblen));
-  printf(" %c ",(*showmatchinfo->rcdirptr) ? '-' : '+');
-  printf(FormatSeqpos,PRINTSeqposcast(dbstartpos));
-  if (showmatchinfo->tageratoroptions != NULL &&
-      showmatchinfo->tageratoroptions->maxintervalwidth > 0)
+  gt_assert(showmatchinfo->tageratoroptions != NULL);
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBLENGTH)
   {
-    printf(" ");
+    printf(FormatSeqpos,PRINTSeqposcast(dblen));
+    firstitem = false;
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
+  {
+    ADDTABULATOR;
+    printf("%c",(*showmatchinfo->rcdirptr) ? '-' : '+');
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
+  {
+    ADDTABULATOR;
+    printf(FormatSeqpos,PRINTSeqposcast(dbstartpos));
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
+  {
+    ADDTABULATOR;
     gt_assert(dbsubstring != NULL);
     printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
+  }
+  if (showmatchinfo->tageratoroptions->maxintervalwidth > 0)
+  {
     if (showmatchinfo->tageratoroptions->skpp)
     {
-      unsigned long suffixlength
-        = reversesuffixmatch(showmatchinfo->eqsvector,
-                             showmatchinfo->alphasize,
-                             dbsubstring,
-                             (unsigned long) dblen,
-                             showmatchinfo->tagptr,
+      if (showmatchinfo->tageratoroptions->outputmode &
+          (TAGOUT_TAGSTARTPOS | TAGOUT_TAGLENGTH))
+      {
+        unsigned long suffixlength
+          = reversesuffixmatch(showmatchinfo->eqsvector,
+                               showmatchinfo->alphasize,
+                               dbsubstring,
+                               (unsigned long) dblen,
+                               showmatchinfo->tagptr,
                              pprefixlen,
                              (unsigned long) showmatchinfo->tageratoroptions->
                                                         userdefinedmaxdistance);
-      gt_assert(pprefixlen >= suffixlength);
-      printf(" %lu %lu ",suffixlength,pprefixlen - suffixlength);
-      printfsymbolstring(NULL,showmatchinfo->tagptr +
-                              (pprefixlen - suffixlength),
-                              suffixlength);
+        gt_assert(pprefixlen >= suffixlength);
+        if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
+        {
+          ADDTABULATOR;
+          printf("%lu",pprefixlen - suffixlength);
+        }
+        if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
+        {
+          ADDTABULATOR;
+          printf("%lu",suffixlength);
+        }
+        if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
+        {
+          printfsymbolstring(NULL,showmatchinfo->tagptr +
+                                  (pprefixlen - suffixlength),
+                                  suffixlength);
+        }
+      }
     } else
     {
       printf(" %lu 0 ",pprefixlen);

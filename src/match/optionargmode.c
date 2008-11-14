@@ -47,3 +47,21 @@ int optionaddbitmask(const Optionargmodedesc *modedesc,
                 optionargument,optname);
   return -2;
 }
+
+GtStr *getargmodekeywords(const Optionargmodedesc *modedesc,
+                          size_t numberofentries,
+                          const char *final)
+{
+  GtStr *helpstring;
+  size_t modecount;
+
+  helpstring = gt_str_new_cstr("use combination of the following keywords:\n");
+  for (modecount=0; modecount < numberofentries; modecount++)
+  {
+    gt_str_append_cstr(helpstring,modedesc[modecount].name);
+    gt_str_append_cstr(helpstring,"\n");
+  }
+  gt_str_append_cstr(helpstring,"to specify ");
+  gt_str_append_cstr(helpstring,final);
+  return helpstring;
+}
