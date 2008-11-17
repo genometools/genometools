@@ -22,6 +22,7 @@
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/luastyle.h"
+#include "core/error.h"
 #include "extended/luahelper.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/diagram_lua.h"
@@ -34,6 +35,7 @@ static int diagram_lua_new(lua_State *L)
   GtDiagram **diagram;
   GtFeatureIndex **feature_index;
   GtRange *range;
+  GtError *err;
   const char *seqid;
   GtStyle *style;
   /* get feature index */
@@ -48,7 +50,11 @@ static int diagram_lua_new(lua_State *L)
   style = gt_lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   gt_assert(diagram);
-  *diagram = gt_diagram_new(*feature_index, seqid, range, style);
+  err = gt_error_new();
+  *diagram = gt_diagram_new(*feature_index, seqid, range, style, err);
+  if (gt_error_is_set(err))
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

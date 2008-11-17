@@ -324,7 +324,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* create and write image file */
-    d = gt_diagram_new(features, seqid, &qry_range, sty);
+    d = gt_diagram_new(features, seqid, &qry_range, sty, err);
     l = gt_layout_new(d, arguments.width, sty);
     height = gt_layout_get_height(l);
     ii = gt_image_info_new();

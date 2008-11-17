@@ -3,7 +3,7 @@
 
 static void handle_error(GtError *err)
 {
-  fprintf(stderr, "error writing canvas %s\n", gt_error_get(err));
+  fprintf(stderr, "error: %s\n", gt_error_get(err));
   exit(EXIT_FAILURE);
 }
 
@@ -46,7 +46,9 @@ int main(int argc, char *argv[])
   /* create diagram for first sequence ID in feature index */
   seqid = gt_feature_index_get_first_seqid(feature_index);
   gt_feature_index_get_range_for_seqid(feature_index, &range, seqid);
-  diagram = gt_diagram_new(feature_index, seqid, &range, style);
+  diagram = gt_diagram_new(feature_index, seqid, &range, style, err);
+  if (gt_error_is_set(err))
+    handle_error(err);
 
   /* create layout with given width, determine resulting image height */
   layout = gt_layout_new(diagram, 600, style);

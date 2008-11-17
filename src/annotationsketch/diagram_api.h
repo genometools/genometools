@@ -30,6 +30,7 @@ typedef struct GtDiagram GtDiagram;
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/style_api.h"
 #include "annotationsketch/block.h"
+#include "core/error.h"
 
 /* A <GtTrackSelectorFunc> is a callback function which returns a string
    which can be used as a track identifier for assignment of a <GtBlock>
@@ -41,7 +42,7 @@ typedef char* (*GtTrackSelectorFunc)(GtBlock*, void*);
    object <style> will be used to determine collapsing options during the
    layout process. */
 GtDiagram* gt_diagram_new(GtFeatureIndex *feature_index, const char *seqid,
-                          const GtRange *range, GtStyle *style);
+                          const GtRange *range, GtStyle *style, GtError*);
 /* Create a new <GtDiagram> object representing the feature nodes in
    <features>. The features must overlap with <range>. The <GtStyle>
    object <style> will be used to determine collapsing options during the

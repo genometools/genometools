@@ -29,10 +29,13 @@ TrackSelectorFunc = CFUNCTYPE(c_char_p, c_void_p, c_void_p)
 class Diagram:
   def __init__(self, feature_index, seqid, range, style):
     from ctypes import byref
+    err = Error()
     if range.start > range.end:
       gterror("range.start > range.end")
     self.diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(range), \
-                                        style)
+                                        style, err)
+    if self.diagram == 0:
+      gterror(err)
     self._as_parameter_ = self.diagram
 
   def __del__(self):
@@ -56,7 +59,7 @@ class Diagram:
     from ctypes import c_char_p, c_void_p, POINTER
     gtlib.gt_diagram_new.restype = c_void_p
     gtlib.gt_diagram_new.argtypes = [c_void_p, c_char_p, POINTER(Range), \
-                                     Style]
+                                     Style, Error]
     gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p, \
                                                          TrackSelectorFunc]
   register = classmethod(register)

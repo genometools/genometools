@@ -23,18 +23,22 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   extern "GT_Diagram* gt_diagram_new(GtFeatureIndex*, const char*, " + \
-                                    "const GtRange*, GtStyle*)"
+                                    "const GtRange*, GtStyle*, GtError*)"
   extern "void gt_diagram_set_track_selector_func(GT_Diagram*, void*)"
   extern "void gt_diagram_delete(GtDiagram*)"
 
   class Diagram
     attr_reader :diagram
     def initialize(feature_index, seqid, range, style)
+      err = GT::Error.new()
       if range.start > range.end
         GT.gterror("range.start > range.end")
       end
       @diagram = GT.gt_diagram_new(feature_index.feature_index, seqid, range,
-                                   style.style)
+                                   style.style, err)
+      if @diagram.nil? then
+        GT::gterror(err)
+      end
       @diagram.free = GT::symbol("gt_diagram_delete", "0P")
     end
 

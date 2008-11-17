@@ -617,7 +617,8 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
 }
 
 GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
-                          const GtRange *range, GtStyle *style)
+                          const GtRange *range, GtStyle *style,
+                          GtError *err)
 {
   GtDiagram *diagram;
   int had_err = 0;
@@ -625,7 +626,12 @@ GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
   gt_assert(features && seqid && range && style);
   had_err = gt_feature_index_get_features_for_range(fi, features, seqid, range,
                                                     NULL);
-  gt_assert(!had_err); /* <fi> must contain <seqid> */
+  if (had_err)
+  {
+    gt_array_delete(features);
+    gt_error_set(err, "FeatureIndex does not contain seqid '%s'", seqid);
+    return NULL;
+  }
   diagram = gt_diagram_new_generic(features, range, style);
   diagram->own_features = true;
   return diagram;
