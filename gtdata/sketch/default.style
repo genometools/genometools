@@ -1,14 +1,27 @@
--- This is the GenomeTools annotation viewer config file.
--- All options must be set inside the 'style' table.
--- All items in this table must be tables, called 'sections'.
+--[[
+  This is the GenomeTools annotation viewer config file.
+  All options must be set inside the 'style' table.
+  All items in this table must be tables, called 'sections'.
+  Typically there is one section per feature type.
+
+  Color definitions
+  -----------------
+  Colors are given as RGB triplets
+       {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
+  where <val> is a decimal value between 0 and 1.
+  The alpha value is optional, as a default 0.5 will be used.
+
+  Global format settings
+  ----------------------
+  Global settings, such as margins, spacers, etc. are found at the end of this
+  file, in the "format" section.
+]]--
+
 
 style =
 {
   gene = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.9, green=0.9, blue=1.0},
@@ -27,9 +40,6 @@ style =
 --------------------------------------
   mRNA = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.4, green=0.5, blue=0.6},
@@ -48,9 +58,6 @@ style =
 --------------------------------------
   exon = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.6, green=0.6, blue=0.9},
@@ -69,9 +76,6 @@ style =
 --------------------------------------
   CDS = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.9, green=0.9, blue=0.2},
@@ -90,9 +94,6 @@ style =
 --------------------------------------
   TF_binding_site = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.8, green=0.6, blue=0.6},
@@ -111,9 +112,6 @@ style =
 --------------------------------------
   intron = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=1.0, green=1.0, blue=1.0},
@@ -132,9 +130,6 @@ style =
 --------------------------------------
   repeat_region = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.8, green=0.3, blue=0.3},
@@ -153,9 +148,6 @@ style =
 --------------------------------------
   LTR_retrotransposon = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.8, green=0.5, blue=0.5},
@@ -174,9 +166,6 @@ style =
 --------------------------------------
   long_terminal_repeat = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.9, green=0.9, blue=0.4},
@@ -198,9 +187,6 @@ style =
 --------------------------------------
     protein_match = {
     -- Color definitions
-    -- RGB triplets {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
-    -- (alpha is optional)
-    -- where <val> is a decimal value between 0 and 1.
     stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = {red=0.1, green=0.1, blue=0.5},
@@ -282,6 +268,7 @@ style =
     style              = "box",
     collapse_to_parent = true,
   },
+--------------------------------------
   -- Defines various format options for drawing.
   format =
   {
