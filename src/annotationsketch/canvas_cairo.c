@@ -88,6 +88,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track)
       red.red   = LINE_EXCEEDED_MSG_R;
       red.green = LINE_EXCEEDED_MSG_G;
       red.blue  = LINE_EXCEEDED_MSG_B;
+      red.alpha = 1.0;
       if (exceeded == 1)
         msg = "(1 block not shown due to exceeded line limit)";
       else
@@ -291,6 +292,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
 
   type = gt_element_get_type(elem);
   grey.red = grey.green = grey.blue = .85;
+  grey.alpha = 0.5;
   if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height,
                         NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
@@ -361,7 +363,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
     return had_err;
   }
 
-  gt_log_log("drawing element from %f to %f, arrow status: %d\n",
+  gt_log_log("drawing element from %f to %f, arrow status: %d",
              draw_range.start, draw_range.end, arrow_status);
 
   /* draw each element according to style set in the style */

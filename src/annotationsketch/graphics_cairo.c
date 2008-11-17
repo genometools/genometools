@@ -290,14 +290,14 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
    cairo_set_source_rgba(g->cr, fill_color.red,
                                 fill_color.green,
                                 fill_color.blue,
-                                0.5);
+                                fill_color.alpha);
    cairo_fill_preserve(g->cr);
    /* draw outline */
    cairo_set_line_width(g->cr, stroke_width);
    cairo_set_source_rgba(g->cr, stroke_color.red,
                                 stroke_color.green,
                                 stroke_color.blue,
-                                0.7);
+                                stroke_color.alpha);
    if (dashed)
      cairo_set_dash(g->cr, dashes, 1, (double) 0);
    cairo_stroke(g->cr);
