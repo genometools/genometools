@@ -153,21 +153,21 @@ Test do
                          :bdx => { '-bsize' => 10 })
 end
 
+Name "gt packedindex check tools for at1MB"
+Keywords "gt_packedindex at1MB"
+Test do
+  runAndCheckPackedIndex('at1MB', ["#{$testdata}at1MB"],
+                         :timeOuts => { :bdxcreat => 400,
+                         :suffixerator => 400,
+                         :chkintegrity => 800, :chksearch => 400 })
+end
+
 if $gttestdata then
   Name "gt packedindex check tools for chr01 yeast"
   Keywords "gt_packedindex"
   Test do
     runAndCheckPackedIndex('chr01.19960731',
       ["#{$gttestdata}ltrharvest/s_cer/chr01.19960731.fsa.gz"])
-  end
-
-  Name "gt packedindex check tools for at1MB"
-  Keywords "gt_packedindex at1MB"
-  Test do
-    runAndCheckPackedIndex('at1MB', ["#{$gttestdata}Iowa/at1MB"],
-                           :timeOuts => { :bdxcreat => 400,
-                             :suffixerator => 400,
-                             :chkintegrity => 800, :chksearch => 400 })
   end
 
   dmelFiles = aPrefix("#{$gttestdata}ltrharvest/d_mel/",

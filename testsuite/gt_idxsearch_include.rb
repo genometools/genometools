@@ -95,12 +95,10 @@ allfiles.each do |reffile|
   end
 end
 
-if $gttestdata then
-  Name "gt greedyfwdmat at1MB U8"
-  Keywords "gt_greedyfwdmat gttestdata"
-  Test do
-    createandcheckgreedyfwdmat("#{$gttestdata}Iowa/at1MB",
-                               "#{$testdata}U89959_genomic.fas")
-    run "rm -f sfx.* fmi.* pck.*"
-  end
+Name "gt greedyfwdmat at1MB U8"
+Keywords "gt_greedyfwdmat gttestdata"
+Test do
+  createandcheckgreedyfwdmat("#{$testdata}at1MB",
+                             "#{$testdata}U89959_genomic.fas")
+  run "rm -f sfx.* fmi.* pck.*"
 end

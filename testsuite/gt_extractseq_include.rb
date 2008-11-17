@@ -142,6 +142,6 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt extractseq -o gi-extract.fna.gz -gzip " +
              "-ginum #{$gttestdata}gi-queries/gi-queries.txt " +
-             "#{$gttestdata}Iowa/at1MB"
+             "#{$testdata}at1MB"
   end
 end

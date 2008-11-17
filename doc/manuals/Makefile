@@ -32,14 +32,14 @@ annotationsketch: annotationsketch.pdf
 	pdflatex $< && rm $*.pdf
 	mv $*.aux $@
 
-read1.fna:${GTTESTDATA}/Iowa/at1MB
+read1.fna: ../../testdata/at1MB
 	head -n 6999 $< > $@
 
-read2.fna:${GTTESTDATA}/Iowa/at1MB
+read2.fna: ../../testdata/at1MB
 	echo ">" > $@
 	tail -n 6945 $< >> $@
 
-U89959.fna:../../testdata/U89959_genomic.fas
+U89959.fna: ../../testdata/U89959_genomic.fas
 	cp $< $@
 
 ${TALLYMERTMP}.tex:tallymer.tex read1.fna read2.fna U89959.fna
