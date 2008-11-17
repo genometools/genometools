@@ -51,7 +51,8 @@ typedef struct
 
 typedef struct
 {
-  Uchar transformedtag[MAXTAGSIZE];
+  Uchar transformedtag[MAXTAGSIZE],
+        rctransformedtag[MAXTAGSIZE];
   unsigned long taglen;
   bool rcdir;
 } Tagwithlength;
@@ -360,29 +361,29 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  bool skpp,
                                  Myersonlineresources *mor,
                                  Limdfsresources *limdfsresources,
-                                 const Uchar *transformedtag,
+                                 const Uchar *transformedtagptr,
                                  unsigned long taglen)
 {
   if (online || (!domstats && docompare))
   {
     gt_assert(mor != NULL);
-    edistmyersbitvectorAPM(mor,transformedtag,taglen,maxdistance);
+    edistmyersbitvectorAPM(mor,transformedtagptr,taglen,maxdistance);
   }
   if (!online || docompare)
   {
     if (domstats)
     {
-      indexbasedmstats(limdfsresources,transformedtag,taglen,dfst);
+      indexbasedmstats(limdfsresources,transformedtagptr,taglen,dfst);
       return false;
     }
     if (maxdistance == 0)
     {
       return indexbasedexactpatternmatching(limdfsresources,
-                                            transformedtag,taglen);
+                                            transformedtagptr,taglen);
     } else
     {
       return indexbasedapproxpatternmatching(limdfsresources,
-                                             transformedtag,
+                                             transformedtagptr,
                                              taglen,
                                              maxdistance,
                                              maxintervalwidth,
@@ -462,11 +463,15 @@ static void compareresults(const ArraySimplematch *storeonline,
   }
 }
 
+#define SETRCDIR(VAL)\
+        printf("line %d: set rcdir = %s\n",__LINE__,(VAL) ? "true" : "false")
+
 static void searchoverstrands(const TageratorOptions *tageratoroptions,
                               Tagwithlength *twl,
                               const AbstractDfstransformer *dfst,
                               Myersonlineresources *mor,
                               Limdfsresources *limdfsresources,
+                              Showmatchinfo *showmatchinfo,
                               ArraySimplematch *storeonline,
                               ArraySimplematch *storeoffline)
 {
@@ -494,6 +499,8 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
   matchfound = false;
   for (distance = mindistance; distance <= maxdistance; distance++)
   {
+    twl->rcdir = false;
+    showmatchinfo->tagptr = twl->transformedtag;
     for (try=0 ; try < 2; try++)
     {
       if ((try == 0 && !tageratoroptions->nofwdmatch) ||
@@ -501,8 +508,8 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
       {
         if (try == 1 && !tageratoroptions->norcmatch)
         {
-          inplace_reversecomplement(twl->transformedtag,twl->taglen);
           twl->rcdir = true;
+          showmatchinfo->tagptr = twl->rctransformedtag;
         }
         if (performpatternsearch(dfst,
                                  domstats,
@@ -513,7 +520,8 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
                                  tageratoroptions->skpp,
                                  mor,
                                  limdfsresources,
-                                 twl->transformedtag,
+                                 twl->rcdir ? twl->rctransformedtag 
+                                            : twl->transformedtag,
                                  twl->taglen) && !matchfound)
         {
           matchfound = true;
@@ -713,7 +721,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         }
         break;
       }
-      if (dotransformtag(&twl.transformedtag[0],
+      if (dotransformtag(twl.transformedtag,
                          symbolmap,
                          currenttag,
                          twl.taglen,
@@ -725,6 +733,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         gt_free(desc);
         break;
       }
+      copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
+                             twl.taglen);
       twl.rcdir = false;
       printf("#");
       if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
@@ -763,6 +773,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                         dfst,
                         mor,
                         limdfsresources,
+                        &showmatchinfo,
                         &storeonline,
                         &storeoffline);
       gt_free(desc);
