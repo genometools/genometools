@@ -20,7 +20,7 @@ from gt.core.array import Array
 from gt.core.error import Error, gterror
 from gt.core.range import Range
 from gt.core.str_array import StrArray
-from gt.extended.genome_node import GenomeNode
+from gt.extended.feature_node import FeatureNode
 
 class FeatureIndex:
   def __init__(self, *args):
@@ -45,7 +45,7 @@ class FeatureIndex:
       a = Array(rval)
       result = []
       for i in range(a.size()):
-        result.append(GenomeNode(gtlib.gt_genome_node_rec_ref(a.get(i))))
+        result.append(FeatureNode(gtlib.gt_genome_node_rec_ref(a.get(i))))
       return result
     else:
       return None
@@ -86,7 +86,7 @@ class FeatureIndex:
         gterror(err)
     result = []
     for i in range(a.size()):
-        result.append(GenomeNode(gtlib.gt_genome_node_rec_ref(a.get(i))))
+        result.append(FeatureNode(gtlib.gt_genome_node_rec_ref(a.get(i))))
     return result
 
   def register(cls, gtlib):
