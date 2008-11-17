@@ -384,6 +384,20 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
                          elem_color,
                          false);
   }
+  else if (strcmp(gt_str_get(style), "rectangle")==0)
+  {
+    gt_graphics_draw_box(canvas->pvt->g,
+                         elem_start,
+                         canvas->pvt->y,
+                         elem_width,
+                         bar_height,
+                         fill_color,
+                         ARROW_NONE,
+                         arrow_width,
+                         stroke_width,
+                         elem_color,
+                         false);
+  }
   else if (strcmp(gt_str_get(style), "caret")==0)
   {
     gt_graphics_draw_caret(canvas->pvt->g,
