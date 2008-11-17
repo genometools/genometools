@@ -25,17 +25,32 @@
 #include "annotationsketch/text_width_calculator_api.h"
 #include "core/range.h"
 
+/* The <GtLayout> class represents contents (tracks) of a <GtDiagram> broken up
+   into lines such that a given horizontal space allotment given in pixels
+   or points is used up most efficiently. This is done using the <GtLineBreaker>
+   and <GtTextWidthCalculator> classes. As defaults, Cairo-based instances of
+   these classes are used but can be specified separately.
+
+   A <GtLayout> can be queried for the height of the laid out representation and
+   finally be rendered to a <GtCanvas>. */
 typedef struct GtLayout GtLayout;
 
-GtLayout*              gt_layout_new(GtDiagram*, unsigned int width, GtStyle*);
+/* Creates a new <GtLayout> object for the contents of <diagram>.
+   The layout is done for a target image width of <width> and using the rules in
+   <GtStyle> object <style>. */
+GtLayout*              gt_layout_new(GtDiagram *diagram, unsigned int width,
+                                     GtStyle*);
+/* Like <gt_layout_new()>, but allows use of a different <GtTextWidthCalculator>
+   implementation. */
 GtLayout*              gt_layout_new_with_twc(GtDiagram*,
                                               unsigned int width,
                                               GtStyle*,
                                               GtTextWidthCalculator*);
-
+/* Returns the height of the layout in pixels. */
 unsigned long          gt_layout_get_height(const GtLayout*);
-int                    gt_layout_sketch(GtLayout*, GtCanvas*);
-
+/* Renders the layout on the <target_canvas>. */
+int                    gt_layout_sketch(GtLayout*, GtCanvas *target_canvas);
+/* Destroys a layout. */
 void                   gt_layout_delete(GtLayout*);
 
 #endif
