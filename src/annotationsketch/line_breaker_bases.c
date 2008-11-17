@@ -30,8 +30,8 @@ struct GtLineBreakerBases {
         gt_line_breaker_cast(gt_line_breaker_bases_class(), LB)
 
 bool gt_line_breaker_bases_is_gt_line_occupied(GtLineBreaker* lb,
-                                         GtLine *line,
-                                         GtBlock *block)
+                                               GtLine *line,
+                                               GtBlock *block)
 {
   GtLineBreakerBases *lbb;
   GtRange r;
@@ -46,8 +46,8 @@ bool gt_line_breaker_bases_is_gt_line_occupied(GtLineBreaker* lb,
 }
 
 void gt_line_breaker_bases_register_block(GtLineBreaker *lb,
-                                       GtLine *line,
-                                       GtBlock *block)
+                                          GtLine *line,
+                                          GtBlock *block)
 {
   GtLineBreakerBases *lbb;
   GtIntervalTree *t;
@@ -93,6 +93,6 @@ GtLineBreaker* gt_line_breaker_bases_new()
   lb = gt_line_breaker_create(gt_line_breaker_bases_class());
   lbb = gt_line_breaker_bases_cast(lb);
   lbb->itrees = gt_hashmap_new(HASH_DIRECT, NULL,
-                            (GtFree) gt_interval_tree_delete);
+                               (GtFree) gt_interval_tree_delete);
   return lb;
 }

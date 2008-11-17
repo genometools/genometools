@@ -15,10 +15,12 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+require 'annotationsketch/block'
 require 'annotationsketch/canvas'
 require 'annotationsketch/style'
 require 'annotationsketch/diagram'
 require 'annotationsketch/feature_index'
 require 'annotationsketch/feature_stream'
 require 'annotationsketch/image_info'
+require 'annotationsketch/layout'
 require 'annotationsketch/rec_map'

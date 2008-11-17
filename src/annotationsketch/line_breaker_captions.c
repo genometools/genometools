@@ -18,28 +18,37 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/str.h"
+#include "annotationsketch/coords.h"
+#include "annotationsketch/default_formats.h"
+#include "annotationsketch/drawing_range.h"
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/line_breaker_rep.h"
 
 struct GtLineBreakerCaptions {
   const GtLineBreaker parent_instance;
-  GtCanvas *canvas;
+  GtLayout *layout;
+  unsigned long width;
+  double margins;
   GtHashmap *linepositions;
 };
 
 #define gt_line_breaker_captions_cast(LB)\
         gt_line_breaker_cast(gt_line_breaker_captions_class(), LB)
 
-static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lcb,
+static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lbc,
                                               GtBlock* block)
 {
   double textwidth = 0.0;
   GtDrawingRange drange;
-  gt_assert(block && lcb);
-  drange = gt_canvas_convert_coords(lcb->canvas, gt_block_get_range(block));
+  gt_assert(block && lbc);
+  drange = gt_coords_calc_generic_range(gt_block_get_range(block),
+                                        gt_layout_get_range(lbc->layout));
+  drange.start *= lbc->width-2*lbc->margins;
+  drange.end *= lbc->width-2*lbc->margins;
   if (gt_block_get_caption(block))
   {
-    textwidth = gt_canvas_get_text_width(lcb->canvas,
+    textwidth = gt_text_width_calculator_get_text_width(
+                                      gt_layout_get_twc(lbc->layout),
                                       gt_str_get(gt_block_get_caption(block)));
   if (textwidth > gt_drawing_range_length(drange))
     drange.end = drange.start + textwidth;
@@ -53,14 +62,14 @@ bool gt_line_breaker_captions_is_gt_line_occupied(GtLineBreaker* lb,
 {
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
-  unsigned long *num;
+  double *num;
   gt_assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
   dr = calculate_drawing_range(lbcap, block);
   if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
     return false;
   else
-    return (dr.start < *num);
+    return (dr.start <= *num);
 }
 
 void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
@@ -69,16 +78,16 @@ void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
 {
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
-  unsigned long *num;
+  double *num;
   gt_assert(lb && block && line);
   lbcap = gt_line_breaker_captions_cast(lb);
   if (!(num = gt_hashmap_get(lbcap->linepositions, line)))
   {
-    num = gt_malloc(sizeof (unsigned long));
+    num = gt_calloc(1, sizeof (double));
     gt_hashmap_add(lbcap->linepositions, line, num);
   }
   dr = calculate_drawing_range(lbcap, block);
-  *num = dr.end + 1;
+  *num = dr.end + 2.0;
 }
 
 void gt_line_breaker_captions_delete(GtLineBreaker *lb)
@@ -102,14 +111,19 @@ const GtLineBreakerClass* gt_line_breaker_captions_class(void)
   return lbc;
 }
 
-GtLineBreaker* gt_line_breaker_captions_new(GtCanvas *canvas)
+GtLineBreaker* gt_line_breaker_captions_new(GtLayout *layout,
+                                            unsigned long width,
+                                            GtStyle *style)
 {
-  gt_assert(canvas);
+  gt_assert(layout);
   GtLineBreakerCaptions *lbcap;
   GtLineBreaker *lb;
   lb = gt_line_breaker_create(gt_line_breaker_captions_class());
   lbcap = gt_line_breaker_captions_cast(lb);
-  lbcap->canvas = canvas;
+  lbcap->layout = layout;
+  lbcap->width = width;
+  if (!gt_style_get_num(style, "format", "margins", &lbcap->margins, NULL))
+    lbcap->margins = MARGINS_DEFAULT;
   lbcap->linepositions = gt_hashmap_new(HASH_DIRECT, NULL, gt_free_func);
   return lb;
 }

@@ -26,6 +26,7 @@
 #ifdef CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
 #endif
+#include <math.h>
 #include "core/fileutils.h"
 #include "core/genfile.h"
 #include "core/ma.h"
@@ -54,6 +55,13 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
   gt_assert(stream);
   gt_str_append_cstr_nt(stream, (char*) data, length);
   return CAIRO_STATUS_SUCCESS;
+}
+
+/* to get crisp vertical lines, round X coordinates to nearest half */
+static inline double rnd_to_nhalf(double num)
+{
+  num = MAX(0, num-0.5);
+  return rint(num)+0.5;
 }
 
 void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
@@ -208,8 +216,8 @@ void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g);
   cairo_save(g->cr);
-  cairo_move_to(g->cr, x, y);
-  cairo_set_line_width(g->cr, 0.7);
+  cairo_move_to(g->cr, rnd_to_nhalf(x), y);
+  cairo_set_line_width(g->cr, 1);
   cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
   cairo_rel_line_to(g->cr, 0, length);
   cairo_stroke(g->cr);
@@ -246,35 +254,37 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
   double dashes[]={2.0};
   /* save cairo context */
   cairo_save(g->cr);
-  cairo_rectangle(g->cr, g->margin_x, g->margin_y,
-                  g->width-2*g->margin_x, g->height-2*g->margin_y);
+  cairo_rectangle(g->cr, rnd_to_nhalf(g->margin_x), g->margin_y,
+                  rnd_to_nhalf(g->width-2*g->margin_x),
+                  g->height-2*g->margin_y);
   cairo_clip(g->cr);
   /* construct shape of the box or arrow */
   switch (arrow_status)
   {
     case ARROW_RIGHT:
-      cairo_move_to(g->cr, x, y);
+      cairo_move_to(g->cr, rnd_to_nhalf(x), y);
       if (width - arrow_width > 0)
         cairo_rel_line_to(g->cr, width - arrow_width, 0);
-      cairo_line_to(g->cr, x + width, y + height / 2);
+      cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height / 2);
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, x + width - arrow_width, y + height);
-      cairo_line_to(g->cr, x, y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y + height);
+      cairo_line_to(g->cr, rnd_to_nhalf(x), y + height);
       cairo_close_path(g->cr);
       break;
     case ARROW_LEFT:
-      cairo_move_to(g->cr, x + width, y);
+      cairo_move_to(g->cr, rnd_to_nhalf(x + width), y);
       if (width - arrow_width > 0)
-        cairo_rel_line_to(g->cr, -(width - arrow_width), 0);
-      cairo_line_to(g->cr, x, y + height / 2);
-      cairo_line_to(g->cr, x + MIN(width, arrow_width), y + height);
+        cairo_rel_line_to(g->cr, -rnd_to_nhalf(width - arrow_width), 0);
+      cairo_line_to(g->cr, rnd_to_nhalf(x), y + height / 2);
+      cairo_line_to(g->cr, rnd_to_nhalf(x + MIN(width, arrow_width)),
+                    y + height);
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, x + width, y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height);
       cairo_close_path(g->cr);
       break;
     case ARROW_BOTH: /* XXX */
     case ARROW_NONE:
-      cairo_rectangle(g->cr, x, y, width, height);
+      cairo_rectangle(g->cr, rnd_to_nhalf(x), y, width, height);
    }
    /* fill area */
    cairo_set_source_rgba(g->cr, fill_color.red,
@@ -523,10 +533,10 @@ void gt_graphics_cairo_delete(GtGraphics *gg)
 {
   if (!gg) return;
   GtGraphicsCairo *g = (GtGraphicsCairo*) gg;
-  if (g->surf);
-    cairo_surface_destroy(g->surf); /* reference counted */
   if (!g->from_context) /* do not attempt to destroy foreign contexts */
     cairo_destroy(g->cr);
+  if (g->surf);
+    cairo_surface_destroy(g->surf); /* reference counted */
   if (g->outbuf)
     gt_str_delete(g->outbuf);
 }

@@ -121,15 +121,6 @@ static int diagram_lua_new_from_array(lua_State *L)
   return 1;
 }
 
-static int diagram_lua_sketch(lua_State *L)
-{
-  GtDiagram **diagram;
-  GtCanvas **canvas;
-  diagram = check_diagram(L,1);
-  canvas = check_canvas(L,2);
-  return gt_diagram_sketch(*diagram, *canvas);
-}
-
 static int diagram_lua_delete(lua_State *L)
 {
   GtDiagram **diagram;
@@ -145,7 +136,6 @@ static const struct luaL_Reg diagram_lib_f [] = {
 };
 
 static const struct luaL_Reg diagram_lib_m [] = {
-  { "sketch",      diagram_lua_sketch },
   { NULL, NULL }
 };
 

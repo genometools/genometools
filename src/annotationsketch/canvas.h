@@ -20,39 +20,39 @@
 
 typedef struct GtCanvasClass GtCanvasClass;
 
+#include <stdio.h>
 #include "annotationsketch/canvas_api.h"
+#include "annotationsketch/layout.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/element.h"
 #include "annotationsketch/track.h"
 
-unsigned long gt_canvas_calculate_height(GtCanvas *canvas, GtDiagram *dia);
-void          gt_canvas_draw_ruler(GtCanvas *canvas);
+unsigned long   gt_canvas_calculate_height(GtCanvas*, GtDiagram*);
+void            gt_canvas_draw_ruler(GtCanvas*, GtRange);
 
-void* gt_canvas_cast(const GtCanvasClass *cc, GtCanvas *c);
-void* gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
+void*           gt_canvas_cast(const GtCanvasClass *cc, GtCanvas *c);
+void*           gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
 
-/* Returns a pixel-based range for a nucleotide-based range
-   using the scaling factor defined for the given <canvas> */
-GtDrawingRange  gt_canvas_convert_coords(GtCanvas *canvas, GtRange);
+void            format_ruler_label(char *txt, unsigned long pos, size_t buflen);
 /* Returns rendered width in pixels of the given text. */
-double        gt_canvas_get_text_width(GtCanvas*, const char *text);
+double          gt_canvas_get_text_width(GtCanvas*, const char *text);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_diagram_pre(GtCanvas*, GtDiagram*);
+int             gt_canvas_visit_layout_pre(GtCanvas*, GtLayout*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_diagram_post(GtCanvas*, GtDiagram*);
+int             gt_canvas_visit_layout_post(GtCanvas*, GtLayout*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_track_pre(GtCanvas*, GtTrack*);
+int             gt_canvas_visit_track_pre(GtCanvas*, GtTrack*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_track_post(GtCanvas*, GtTrack*);
+int             gt_canvas_visit_track_post(GtCanvas*, GtTrack*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_line_pre(GtCanvas*, GtLine*);
+int             gt_canvas_visit_line_pre(GtCanvas*, GtLine*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_line_post(GtCanvas*, GtLine*);
+int             gt_canvas_visit_line_post(GtCanvas*, GtLine*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_block(GtCanvas*, GtBlock*);
+int             gt_canvas_visit_block(GtCanvas*, GtBlock*);
 /* Callback function for Diagram rendering. */
-int           gt_canvas_visit_element(GtCanvas*, GtElement*);
+int             gt_canvas_visit_element(GtCanvas*, GtElement*);
 
 #endif

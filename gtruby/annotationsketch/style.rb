@@ -157,5 +157,9 @@ module GT
     def unset(section, key)
       GT.gt_style_unset(@style, section, key)
     end
+
+    def to_ptr
+      @style
+    end
   end
 end

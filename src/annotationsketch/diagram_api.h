@@ -20,9 +20,6 @@
 #ifndef DIAGRAM_API_H
 #define DIAGRAM_API_H
 
-#include "annotationsketch/feature_index_api.h"
-#include "annotationsketch/style_api.h"
-
 /* The <GtDiagram> class acts as a representation of a sequence annotation
    diagram independent of any output format. It contains code to arrange
    feature nodes into blocks, lines and tracks. A individual graphical
@@ -30,23 +27,35 @@
    <gt_diagram_sketch()> with an appropriate <GtCanvas> object. */
 typedef struct GtDiagram GtDiagram;
 
+#include "annotationsketch/feature_index_api.h"
+#include "annotationsketch/style_api.h"
+#include "annotationsketch/block.h"
+
+/* A <GtTrackSelectorFunc> is a callback function which returns a string
+   which can be used as a track identifier for assignment of a <GtBlock>
+   to a given track. */
+typedef char* (*GtTrackSelectorFunc)(GtBlock*, void*);
+
 /* Create a new <GtDiagram> object representing the feature nodes in
    <feature_index> in region <seqid> overlapping with <range>. The <GtStyle>
    object <style> will be used to determine collapsing options during the
    layout process. */
 GtDiagram* gt_diagram_new(GtFeatureIndex *feature_index, const char *seqid,
-                           const GtRange *range, GtStyle *style);
+                          const GtRange *range, GtStyle *style);
 /* Create a new <GtDiagram> object representing the feature nodes in
    <features>. The features must overlap with <range>. The <GtStyle>
    object <style> will be used to determine collapsing options during the
    layout process.*/
 GtDiagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
-                                      GtStyle *style);
+                                     GtStyle *style);
 /* Returns the sequence position range represented by the <diagram>. */
-GtRange    gt_diagram_get_range(GtDiagram *diagram);
-/* Render <diagram> on the given <canvas>. */
-int        gt_diagram_sketch(GtDiagram *diagram, GtCanvas *canvas);
+GtRange    gt_diagram_get_range(const GtDiagram *diagram);
+/* Assigns a GtTrackSelectorFunc to use to assign blocks to tracks.
+   If none is set, or set to NULL, then track types are used as track keys
+   (default behaviour). */
+void       gt_diagram_set_track_selector_func(GtDiagram*, GtTrackSelectorFunc);
+
 /* Delete the <diagram> and all its components. */
-void       gt_diagram_delete(GtDiagram *diagram);
+void       gt_diagram_delete(GtDiagram*);
 
 #endif

@@ -1,0 +1,8 @@
+TF_binding_site + (1000L, 9000L) 1
+exon + (1050L, 9000L) 3
+exon + (1050L, 9000L) 4
+exon + (1300L, 9000L) 4
+gene + (1000L, 9000L) 1
+mRNA + (1050L, 9000L) 1
+mRNA + (1050L, 9000L) 1
+mRNA + (1300L, 9000L) 1

@@ -43,9 +43,11 @@ if __name__ == "__main__":
 
   style = Style()
   diagram = Diagram(feature_index, seqid, range, style)
+  layout = Layout(diagram, 700, style)
+  height = layout.get_height()
   ii = ImageInfo()
-  canvas = CanvasCairoFile(style, 700, ii)
-  diagram.sketch(canvas)
+  canvas = CanvasCairoFile(style, 700, height, ii)
+  layout.sketch(canvas)
 
   pngstream = canvas.to_stream()
   outfile = open(pngfile, "w")

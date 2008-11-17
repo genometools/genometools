@@ -16,15 +16,16 @@
 #
 
 require 'gtdlload'
+require 'annotationsketch/block'
 require 'core/range'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_Diagram* gt_diagram_new(GT_FeatureIndex*, const char*, const GT_Range*, " +
-                                 "GT_Style*)"
-  extern "int gt_diagram_sketch(GT_Diagram*, GT_Canvas*)"
-  extern "void gt_diagram_delete(GT_Diagram*)"
+  extern "GT_Diagram* gt_diagram_new(GtFeatureIndex*, const char*, " + \
+                                    "const GtRange*, GtStyle*)"
+  extern "void gt_diagram_set_track_selector_func(GT_Diagram*, void*)"
+  extern "void gt_diagram_delete(GtDiagram*)"
 
   class Diagram
     attr_reader :diagram
@@ -37,8 +38,21 @@ module GT
       @diagram.free = GT::symbol("gt_diagram_delete", "0P")
     end
 
-    def sketch(canvas)
-      return GT.gt_diagram_sketch(@diagram, canvas.to_ptr)
+    def set_track_selector_func(proc)
+      @tsf = DL.callback('PPP') do |b_ptr, data_ptr|
+               b = GT::Block.new(b_ptr)
+               s = proc.call(b, data_ptr)
+               if (s.nil?) then
+                 GT::gterror("Track selector callback must return a string!")
+               else
+                 s.to_ptr
+               end
+             end
+      GT.gt_diagram_set_track_selector_func(@diagram, @tsf)
+    end
+
+    def to_ptr
+      @diagram
     end
   end
 end

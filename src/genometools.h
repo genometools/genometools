@@ -47,6 +47,7 @@
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
+#include "annotationsketch/block_api.h"
 #include "annotationsketch/canvas_api.h"
 #include "annotationsketch/canvas_cairo_context_api.h"
 #include "annotationsketch/canvas_cairo_file_api.h"
@@ -56,8 +57,11 @@
 #include "annotationsketch/feature_index_memory_api.h"
 #include "annotationsketch/graphics_api.h"
 #include "annotationsketch/image_info_api.h"
+#include "annotationsketch/layout_api.h"
 #include "annotationsketch/rec_map_api.h"
 #include "annotationsketch/style_api.h"
+#include "annotationsketch/text_width_calculator_api.h"
+#include "annotationsketch/text_width_calculator_cairo_api.h"
 #endif
 
 #endif

@@ -23,7 +23,7 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   extern "GtCanvas* gt_canvas_cairo_file_new(GtStyle*, int, unsigned int, "+
-                                             "GtImageInfo*)"
+                                             "unsigned int, GtImageInfo*)"
   extern "int gt_canvas_cairo_file_to_file(GtCanvasCairoFile*, const char*, " +
                                            "GtError*)"
   extern "int gt_canvas_cairo_file_to_stream(GtCanvasCairoFile*, GtStr*)"
@@ -37,11 +37,13 @@ module GT
   end
 
   class CanvasCairoFile < Canvas
-    def initialize(style, width, ii)
+    def initialize(style, width, height, ii)
       if ii.nil? then
-        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, GT::NULL)
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
+                                              GT::NULL)
       else
-        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, ii.to_ptr)
+        @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
+                                              ii.to_ptr)
       end
       @canvas.free = GT::symbol("gt_canvas_delete", "0P")
     end

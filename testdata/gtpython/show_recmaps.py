@@ -41,9 +41,11 @@ if __name__ == "__main__":
 
   style = Style()
   diagram = Diagram(feature_index, seqid, range, style)
+  layout = Layout(diagram, 700, style)
+  height = layout.get_height()
   image_info = ImageInfo()
-  canvas = CanvasCairoFile(style, 800, image_info)
-  diagram.sketch(canvas)
+  canvas = CanvasCairoFile(style, 800, height, image_info)
+  layout.sketch(canvas)
 
   for x1, y1, x2, y2, gn in image_info.each_hotspot():
     print "x1=%d, y1=%d, x2=%d, y2=%d, gn.type=%s" % (x1,y1,x2,y2,gn.get_type())

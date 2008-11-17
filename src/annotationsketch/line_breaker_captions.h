@@ -19,14 +19,18 @@
 #define LINE_BREAKER_CAPTIONS_H
 
 #include "core/range.h"
-#include "annotationsketch/drawing_range.h"
+#include "annotationsketch/canvas.h"
+#include "annotationsketch/layout.h"
 #include "annotationsketch/line_breaker.h"
+#include "annotationsketch/style.h"
 
-/* Implements the GtLineBreaker interface; breaks GtLines if captions
+/* Implements the GtLineBreaker interface; returns new lines if captions
    overlap. */
 typedef struct GtLineBreakerCaptions GtLineBreakerCaptions;
 
 const GtLineBreakerClass* gt_line_breaker_captions_class(void);
-GtLineBreaker*            gt_line_breaker_captions_new(GtCanvas *canvas);
+GtLineBreaker*            gt_line_breaker_captions_new(GtLayout*,
+                                                       unsigned long width,
+                                                       GtStyle*);
 
 #endif

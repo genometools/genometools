@@ -61,6 +61,15 @@ if not $arguments["nocairo"] then
              "#{$testdata}gff3_file_1_short.txt"
   end
 
+  Name "gtpython: TrackSelector callbacks and Block bindings"
+  Keywords "gt_python"
+  Test do
+    run_python "#{$testdata}gtpython/block_stuff.py " +
+             "#{$testdata}gff3_file_1_short.txt"
+    run "env LC_ALL=C sort #{$last_stdout}"
+    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.blocks"
+  end
+
   Name "gtpython: AnnotationSketch bindings (style)"
   Keywords "gt_python"
   Test do

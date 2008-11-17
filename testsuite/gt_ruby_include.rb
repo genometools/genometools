@@ -54,6 +54,15 @@ if not $arguments["nocairo"] then
              "#{$testdata}gff3_file_1_short.txt"
   end
 
+  Name "gtruby: TrackSelector callbacks and Block bindings"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/block_stuff.rb " +
+             "#{$testdata}gff3_file_1_short.txt"
+    run "env LC_ALL=C sort #{$last_stdout}"
+    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.blocks"
+  end
+
   Name "gtruby: AnnotationSketch bindings (style)"
   Keywords "gt_ruby"
   Test do

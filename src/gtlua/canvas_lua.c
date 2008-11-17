@@ -29,20 +29,22 @@ static int canvas_cairo_file_lua_new_generic(lua_State *L, GtGraphicsOutType t)
 {
   GtCanvas **canvas;
   GtImageInfo **ii;
-  unsigned int width;
+  unsigned int width,
+               height;
   GtStyle *style;
   width = luaL_checkint(L, 1);
+  height = luaL_checkint(L, 2);
   /* create canvas */
   style = gt_lua_get_style_from_registry(L);
   canvas = lua_newuserdata(L, sizeof (GtCanvas*));
   gt_assert(canvas);
   /* if a imageinfo object is passed, it must be correct type */
-  if (lua_isnil(L, 2))
-    *canvas = gt_canvas_cairo_file_new(style, t, width, NULL);
+  if (lua_isnil(L, 3))
+    *canvas = gt_canvas_cairo_file_new(style, t, width, height, NULL);
   else
   {
-    ii = check_imageinfo(L, 2);
-   *canvas = gt_canvas_cairo_file_new(style, t, width, *ii);
+    ii = check_imageinfo(L, 3);
+   *canvas = gt_canvas_cairo_file_new(style, t, width, height, *ii);
   }
   luaL_getmetatable(L, CANVAS_METATABLE);
   lua_setmetatable(L, -2);

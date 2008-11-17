@@ -19,7 +19,7 @@ style =
     -- number of nucleotides. Set to 0 to disable type track.
     max_show_width     = nil,
     -- Limit the number of tracks
---    max_num_lines      = 10,
+    -- max_num_lines      = 10,
   },
 --------------------------------------
   mRNA = {
@@ -262,7 +262,7 @@ style =
     -- Set the following three settings to 'false' to globally disable them.
     split_lines = true, -- generally enable splitting
     show_block_captions = true, -- generally show captions
-    show_track_captions = true,-- generally show track captions
+    show_track_captions = true, -- generally show track captions
     margins = 30,      -- space left and right of diagram, in pixels
     bar_height = 16,   -- height of a feature bar, in pixels
     bar_vspace = 10,   -- space between feature bars, in pixels
@@ -273,7 +273,7 @@ style =
     stroke_width = .5, -- width of outlines, in pixels
     stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
     show_grid = true, -- shows light vertical lines for orientation
-    min_len_block = 0 , -- minimum length of a block in which single elements are shown
+    min_len_block = 20 , -- minimum length of a block in which single elements are shown
     track_title_color     = {red=0.7, green=0.7, blue=0.7},
     default_stroke_color  = {red=0.1, green=0.1, blue=0.1},
   },

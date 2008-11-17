@@ -38,7 +38,6 @@ struct GtTextWidthCalculatorCairo {
         gt_text_width_calculator_cast(gt_text_width_calculator_cairo_class(),\
                                       TWC)
 
-
 double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
                                                      const char *text)
 {

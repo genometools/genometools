@@ -23,9 +23,16 @@
 #include "core/range.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/graphics.h"
-#include "annotationsketch/image_info.h"
+#include "annotationsketch/layout.h"
 
-typedef int  (*GtCanvasVisitDiagramFunc)(GtCanvas*, GtDiagram*);
+typedef int  (*GtCanvasVisitLayoutFunc)(GtCanvas*, GtLayout*);
+typedef int  (*GtCanvasVisitTrackFunc)(GtCanvas*, GtTrack*);
+typedef int  (*GtCanvasVisitLineFunc)(GtCanvas*, GtLine*);
+typedef int  (*GtCanvasVisitBlockFunc)(GtCanvas*, GtBlock*);
+typedef int  (*GtCanvasVisitElementFunc)(GtCanvas*, GtElement*);
+typedef void (*GtCanvasDrawRulerFunc)(GtCanvas*, GtRange);
+/* typedef void (*GtCanvasCallPluginFunc)(GtCanvas*,
+                                       GtAnnotationSketchPlugin*); */
 typedef void (*GtCanvasFreeFunc)(GtCanvas*);
 
 typedef struct GtCanvasMembers GtCanvasMembers;
@@ -35,8 +42,15 @@ struct GtCanvas {
   GtCanvasMembers *pvt;
 };
 const GtCanvasClass* gt_canvas_class_new(size_t size,
-                                         GtCanvasVisitDiagramFunc visit_pre,
-                                         GtCanvasVisitDiagramFunc visit_post,
+                                         GtCanvasVisitLayoutFunc la_visit_pre,
+                                         GtCanvasVisitLayoutFunc la_visit_post,
+                                         GtCanvasVisitTrackFunc t_visit_pre,
+                                         GtCanvasVisitTrackFunc t_visit_post,
+                                         GtCanvasVisitLineFunc l_visit_pre,
+                                         GtCanvasVisitLineFunc l_visit_post,
+                                         GtCanvasVisitBlockFunc block_visit,
+                                         GtCanvasVisitElementFunc element_visit,
+                                         GtCanvasDrawRulerFunc draw_ruler_func,
                                          GtCanvasFreeFunc free);
 GtCanvas* gt_canvas_create(const GtCanvasClass*);
 void*     gt_canvas_cast(const GtCanvasClass*, GtCanvas*);

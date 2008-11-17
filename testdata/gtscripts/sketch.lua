@@ -46,16 +46,19 @@ range = feature_index:get_range_for_seqid(seqid)
 ii = gt.imageinfo_new()
 
 diagram = gt.diagram_new(feature_index, seqid, range)
-canvas = gt.canvas_cairo_file_new_png(800, ii)
-canvas2 = gt.canvas_cairo_file_new_png(800, nil)  -- nil as ImageInfo parameter must be ok
+layout = gt.layout_new(diagram, 800)
+height = layout:get_height()
+canvas = gt.canvas_cairo_file_new_png(800, height, ii)
+-- nil as ImageInfo parameter must be ok
+canvas2 = gt.canvas_cairo_file_new_png(800, height, nil)
 
 -- test sketching with image info
-diagram:sketch(canvas)
+layout:sketch(canvas)
 canvas:to_file(pngfile)
 if #(ii:get_recmaps()) ~= 16 then
   os.exit(1)
 end
 
 -- and without
-diagram:sketch(canvas2)
+layout:sketch(canvas2)
 canvas2:to_file(pngfile)

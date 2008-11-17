@@ -15,12 +15,16 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from ctypes import CFUNCTYPE, c_char_p, c_void_p
 from gt.dlload import gtlib
+from gt.annotationsketch.block import Block
 from gt.annotationsketch.canvas import Canvas
 from gt.annotationsketch.feature_index import FeatureIndex
 from gt.annotationsketch.style import Style
 from gt.core.error import Error, gterror
 from gt.core.range import Range
+
+TrackSelectorFunc = CFUNCTYPE(c_char_p, c_void_p, c_void_p)
 
 class Diagram:
   def __init__(self, feature_index, seqid, range, style):
@@ -37,19 +41,22 @@ class Diagram:
     except AttributeError:
       pass
 
+  def set_track_selector_func(self, func):
+    tsf = TrackSelectorFunc(func)
+    self.tsf = tsf
+    gtlib.gt_diagram_set_track_selector_func(self.diagram, tsf)
+
   def from_param(cls, obj):
     if not isinstance(obj, Diagram):
       raise TypeError, "argument must be a Diagram"
     return obj._as_parameter_
   from_param = classmethod(from_param)
 
-  def sketch(self, canvas):
-    return gtlib.gt_diagram_sketch(self.diagram, canvas)
-
   def register(cls, gtlib):
     from ctypes import c_char_p, c_void_p, POINTER
     gtlib.gt_diagram_new.restype = c_void_p
-    gtlib.gt_diagram_new.argtypes = [FeatureIndex, c_char_p, POINTER(Range), \
+    gtlib.gt_diagram_new.argtypes = [c_void_p, c_char_p, POINTER(Range), \
                                      Style]
-    gtlib.gt_diagram_sketch.argtypes = [c_void_p, Canvas]
+    gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p, \
+                                                         TrackSelectorFunc]
   register = classmethod(register)

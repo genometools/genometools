@@ -18,13 +18,6 @@
 #ifndef TEXT_WIDTH_CALCULATOR_CAIRO_H
 #define TEXT_WIDTH_CALCULATOR_CAIRO_H
 
-#include <cairo.h>
-#include "annotationsketch/text_width_calculator.h"
-
-/* Implements the GtTextWidthCalculator interface */
-typedef struct GtTextWidthCalculatorCairo GtTextWidthCalculatorCairo;
-
-const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void);
-GtTextWidthCalculator*            gt_text_width_calculator_cairo_new(cairo_t*);
+#include "annotationsketch/text_width_calculator_cairo_api.h"
 
 #endif

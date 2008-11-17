@@ -1,4 +1,5 @@
 #include "genometools.h"
+#include "core/strand.h"
 
 static void handle_error(GtError *err)
 {
@@ -13,7 +14,9 @@ int main(int argc, char *argv[])
   GtFeatureIndex *feature_index;
   GtRange range;
   GtDiagram *diagram;
+  GtLayout *layout;
   GtCanvas *canvas;
+  unsigned long height;
   GtError *err = gt_error_new();
 
   if (argc != 4) {
@@ -45,11 +48,15 @@ int main(int argc, char *argv[])
   gt_feature_index_get_range_for_seqid(feature_index, &range, seqid);
   diagram = gt_diagram_new(feature_index, seqid, &range, style);
 
-  /* create canvas */
-  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, NULL);
+  /* create layout with given width, determine resulting image height */
+  layout = gt_layout_new(diagram, 600, style);
+  height = gt_layout_get_height(layout);
 
-  /* sketch diagram on canvas */
-  gt_diagram_sketch(diagram, canvas);
+  /* create PNG canvas */
+  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height, NULL);
+
+  /* sketch layout on canvas */
+  gt_layout_sketch(layout, canvas);
 
   /* write canvas to file */
   if (gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, png_file, err))
@@ -57,6 +64,7 @@ int main(int argc, char *argv[])
 
   /* free */
   gt_canvas_delete(canvas);
+  gt_layout_delete(layout);
   gt_diagram_delete(diagram);
   gt_feature_index_delete(feature_index);
   gt_style_delete(style);

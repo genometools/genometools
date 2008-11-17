@@ -134,13 +134,18 @@ unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track)
 
 int gt_track_sketch(GtTrack* track, GtCanvas *canvas)
 {
-  int i = 0;
+  int i = 0, had_err = 0;
   gt_assert(track && canvas);
   gt_canvas_visit_track_pre(canvas, track);
   for (i = 0; i < gt_array_size(track->lines); i++)
-    gt_line_sketch(*(GtLine**) gt_array_get(track->lines, i), canvas);
-  gt_canvas_visit_track_post(canvas, track);
-  return 0;
+  {
+    had_err = gt_line_sketch(*(GtLine**) gt_array_get(track->lines, i), canvas);
+    if (had_err)
+      break;
+  }
+  if (!had_err)
+    gt_canvas_visit_track_post(canvas, track);
+  return had_err;
 }
 
 int gt_track_unit_test(GtError *err)
