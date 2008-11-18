@@ -1343,14 +1343,14 @@ GtOption* gt_option_new_range(const char *option_str, const char *description,
   return o;
 }
 
-GtOption* gt_option_new_gt_range_min_max(const char *option_str,
-                                 const char *description, GtRange *value,
-                                 GtRange *default_value,
-                                 unsigned long min_value,
-                                 unsigned long max_value)
+GtOption* gt_option_new_range_min_max(const char *option_str,
+                                      const char *description, GtRange *value,
+                                      GtRange *default_value,
+                                      unsigned long min_value,
+                                      unsigned long max_value)
 {
-   GtOption *o = gt_option_new_range(option_str, description,
-                                value, default_value);
+   GtOption *o = gt_option_new_range(option_str, description, value,
+                                     default_value);
    o->min_value_set = true;
    o->min_value.ul = min_value;
    o->max_value_set = true;
