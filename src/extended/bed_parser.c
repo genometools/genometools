@@ -541,7 +541,7 @@ void gt_bed_parser_set_thick_feature_type(GtBEDParser *bed_parser,
 {
   gt_assert(bed_parser && type);
   gt_free(bed_parser->thick_feature_type);
-  bed_parser->feature_type = gt_cstr_dup(type);
+  bed_parser->thick_feature_type = gt_cstr_dup(type);
 }
 
 void gt_bed_parser_set_block_type(GtBEDParser *bed_parser, const char *type)
