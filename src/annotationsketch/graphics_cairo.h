@@ -33,4 +33,10 @@ GtGraphics*            gt_graphics_cairo_new(GtGraphicsOutType type,
 GtGraphics*            gt_graphics_cairo_new_from_context(cairo_t *context,
                                                           unsigned int width,
                                                           unsigned int height);
+void                   gt_graphics_cairo_draw_curve_data(GtGraphics *g,
+                                                         double x, double y,
+                                                         GtColor color,
+                                                         double data[],
+                                                         unsigned long ndata,
+                                                         unsigned long height);
 #endif

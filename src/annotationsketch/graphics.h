@@ -80,10 +80,10 @@ void      gt_graphics_draw_horizontal_line(GtGraphics*, double x, double y,
 void      gt_graphics_draw_vertical_line(GtGraphics*, double x, double y,
                                          GtColor color, double length);
 void      gt_graphics_draw_box(GtGraphics*, double x, double y, double width,
-                            double height, GtColor fill_color,
-                            ArrowStatus arrow_status, double arrow_width,
-                            double stroke_width, GtColor stroke_color,
-                            bool dashed);
+                               double height, GtColor fill_color,
+                               ArrowStatus arrow_status, double arrow_width,
+                               double stroke_width, GtColor stroke_color,
+                               bool dashed);
 void      gt_graphics_draw_dashes(GtGraphics*, double x, double y,
                                   double width, double height,
                                   ArrowStatus arrow_status, double arrow_width,
@@ -99,6 +99,10 @@ void      gt_graphics_draw_rectangle(GtGraphics*, double x, double y,
                                   double outgt_line_width, double width);
 void      gt_graphics_draw_arrowhead(GtGraphics*, double x, double y, GtColor,
                                      ArrowStatus);
+void      gt_graphics_draw_curve_data(GtGraphics *g, double x, double y,
+                                      GtColor color,
+                                      double data[], unsigned long ndata,
+                                      unsigned long height);
 /* Write out the Graphic to the given file with <filename>. */
 int       gt_graphics_save_to_file(const GtGraphics*, const char *filename,
                                    GtError*);

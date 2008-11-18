@@ -215,13 +215,16 @@ void gt_graphics_cairo_set_margins(GtGraphics *gg, double margin_x,
 }
 
 void gt_graphics_cairo_draw_horizontal_line(GtGraphics *gg, double x, double y,
-                                         double width)
+                                            double width)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g);
-  cairo_move_to(g->cr, x, y);
+  cairo_save(g->cr);
+  cairo_set_line_width(g->cr, 1);
+  cairo_move_to(g->cr, x, rnd_to_nhalf(y));
   cairo_rel_line_to(g->cr, width, 0);
   cairo_stroke(g->cr);
+  cairo_restore(g->cr);
 }
 
 void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
@@ -232,7 +235,7 @@ void gt_graphics_cairo_draw_vertical_line(GtGraphics *gg, double x, double y,
   cairo_save(g->cr);
   cairo_move_to(g->cr, rnd_to_nhalf(x), y);
   cairo_set_line_width(g->cr, 1);
-  cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
+  cairo_set_source_rgba(g->cr, color.red, color.green, color.blue, color.alpha);
   cairo_rel_line_to(g->cr, 0, length);
   cairo_stroke(g->cr);
   cairo_restore(g->cr);
@@ -580,6 +583,7 @@ const GtGraphicsClass* gt_graphics_cairo_class(void)
                                gt_graphics_cairo_draw_caret,
                                gt_graphics_cairo_draw_rectangle,
                                gt_graphics_cairo_draw_arrowhead,
+                               gt_graphics_cairo_draw_curve_data,
                                gt_graphics_cairo_save_to_file,
                                gt_graphics_cairo_save_to_stream,
                                gt_graphics_cairo_delete);
@@ -616,4 +620,36 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
   cairo_select_font_face(context, "sans", CAIRO_FONT_SLANT_NORMAL,
                          CAIRO_FONT_WEIGHT_NORMAL);
   return g;
+}
+
+void gt_graphics_cairo_draw_curve_data(GtGraphics *gg, double x, double y,
+                                       GtColor color, double data[],
+                                       unsigned long ndata,
+                                       unsigned long height)
+{
+  unsigned long i;
+  GtGraphicsCairo *g;
+  g = gt_graphics_cairo_cast(gg);
+  double xpos,
+         idbl;
+  xpos = (((double)g->width-2*g->margin_x)/((double)ndata-1));
+  cairo_save(g->cr);
+  cairo_move_to(g->cr, x, y+(1.0-data[0])*height);
+  for(i=1;i<ndata;i++)
+  {
+    idbl = (double) i;
+    cairo_curve_to(g->cr,
+                   x + ((idbl-0.5)*xpos),
+                   y + (1-data[i-1]) * height,
+                   x + ((idbl-0.5)*xpos),
+                   y + (1-data[i]) * height,
+                   x + (idbl*xpos),
+                   y + (1-data[i]) * height);
+  }
+  cairo_set_source_rgba(g->cr, color.red,
+                               color.green,
+                               color.blue,
+                               color.alpha);
+  cairo_stroke(g->cr);
+  cairo_restore(g->cr);
 }

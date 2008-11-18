@@ -46,6 +46,7 @@ struct GtGraphicsClass {
                            draw_caret;
   GtGraphicsDrawRectFunc draw_rectangle;
   GtGraphicsDrawArrowheadFunc draw_arrowhead;
+  GtGraphicsDrawCurveDataFunc draw_curve;
   GtGraphicsSaveToFileFunc save_to_file;
   GtGraphicsSaveToStreamFunc save_to_stream;
   GtGraphicsFreeFunc free;
@@ -84,6 +85,8 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                          GtGraphicsDrawRectFunc draw_rectangle,
                                          GtGraphicsDrawArrowheadFunc
                                                      draw_arrowhead,
+                                         GtGraphicsDrawCurveDataFunc
+                                                     draw_curve,
                                          GtGraphicsSaveToFileFunc save_to_file,
                                          GtGraphicsSaveToStreamFunc
                                                      save_to_stream,
@@ -110,6 +113,7 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
   c_class->draw_caret = draw_caret;
   c_class->draw_rectangle = draw_rectangle;
   c_class->draw_arrowhead = draw_arrowhead;
+  c_class->draw_curve = draw_curve;
   c_class->save_to_file = save_to_file;
   c_class->save_to_stream = save_to_stream;
   c_class->free = free;
@@ -279,6 +283,15 @@ void gt_graphics_draw_arrowhead(GtGraphics *g, double x, double y,
 {
   gt_assert(g && g->c_class);
   g->c_class->draw_arrowhead(g, x, y, col, arrow_status);
+}
+
+void gt_graphics_draw_curve_data(GtGraphics *g, double x, double y,
+                                 GtColor color,
+                                 double data[], unsigned long ndata,
+                                 unsigned long height)
+{
+  gt_assert(g && g->c_class);
+  g->c_class->draw_curve(g, x, y, color, data, ndata, height);
 }
 
 int gt_graphics_save_to_file(const GtGraphics *g, const char *filename,

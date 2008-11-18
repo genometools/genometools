@@ -45,6 +45,12 @@ typedef void    (*GtGraphicsDrawRectFunc)(GtGraphics*, double, double, bool,
                                           double);
 typedef void    (*GtGraphicsDrawArrowheadFunc)(GtGraphics*, double, double,
                                                GtColor, ArrowStatus);
+typedef void    (*GtGraphicsDrawCurveDataFunc)(GtGraphics *g,
+                                               double x, double y,
+                                               GtColor color,
+                                               double data[],
+                                               unsigned long ndata,
+                                               unsigned long height);
 typedef int     (*GtGraphicsSaveToFileFunc)(const GtGraphics*, const char*,
                                             GtError*);
 typedef void    (*GtGraphicsSaveToStreamFunc)(const GtGraphics*, GtStr*);
@@ -90,6 +96,8 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                          GtGraphicsDrawRectFunc draw_rectangle,
                                          GtGraphicsDrawArrowheadFunc
                                                      draw_arrowhead,
+                                         GtGraphicsDrawCurveDataFunc
+                                                     draw_curve,
                                          GtGraphicsSaveToFileFunc save_to_file,
                                          GtGraphicsSaveToStreamFunc
                                                      save_to_stream,
