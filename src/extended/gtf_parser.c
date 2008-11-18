@@ -29,6 +29,7 @@
 #include "core/warning_api.h"
 #include "extended/genome_node.h"
 #include "extended/gtf_parser.h"
+#include "extended/region_node_builder.h"
 
 #define GENE_ID_ATTRIBUTE         "gene_id"
 #define GENE_NAME_ATTRIBUTE       "gene_name"
@@ -36,12 +37,12 @@
 #define TRANSCRIPT_NAME_ATTRIBUTE "transcript_name"
 
 struct GtGTFParser {
-  GtHashmap *sequence_region_to_range, /* map from sequence regions to ranges */
-            *gene_id_hash, /* map from gene_id to transcript_id hash */
+  GtHashmap *gene_id_hash, /* map from gene_id to transcript_id hash */
             *seqid_to_str_mapping,
             *source_to_str_mapping,
             *gene_id_to_name_mapping,
             *transcript_id_to_name_mapping;
+  GtRegionNodeBuilder *region_node_builder;
   GtTypeChecker *type_checker;
 };
 
@@ -87,8 +88,6 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 GtGTFParser* gt_gtf_parser_new(GtTypeChecker *type_checker)
 {
   GtGTFParser *parser = gt_malloc(sizeof (GtGTFParser));
-  parser->sequence_region_to_range = gt_hashmap_new(HASH_STRING,
-                                                    gt_free_func, gt_free_func);
   parser->gene_id_hash = gt_hashmap_new(HASH_STRING, gt_free_func,
                                         (GtFree) gt_hashmap_delete);
   parser->seqid_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
@@ -100,25 +99,9 @@ GtGTFParser* gt_gtf_parser_new(GtTypeChecker *type_checker)
   parser->transcript_id_to_name_mapping = gt_hashmap_new(HASH_STRING,
                                                          gt_free_func,
                                                          gt_free_func);
+  parser->region_node_builder = gt_region_node_builder_new();
   parser->type_checker = type_checker;
   return parser;
-}
-
-static int construct_sequence_regions(void *key, void *value, void *data,
-                                      GT_UNUSED GtError *err)
-{
-  GtStr *seqid;
-  GtRange range;
-  GtGenomeNode *gn;
-  GtQueue *genome_nodes = (GtQueue*) data;
-  gt_error_check(err);
-  gt_assert(key && value && data);
-  seqid = gt_str_new_cstr(key);
-  range = *(GtRange*) value;
-  gn = gt_region_node_new(seqid, range.start, range.end);
-  gt_queue_add(genome_nodes, gn);
-  gt_str_delete(seqid);
-  return 0;
 }
 
 static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
@@ -261,7 +244,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
   size_t line_length;
   unsigned long i, line_number = 0;
   GtGenomeNode *gn;
-  GtRange range, *rangeptr;
+  GtRange range;
   GtPhase phase_value;
   GtStrand gt_strand_value;
   GtSplitter *splitter, *attribute_splitter;
@@ -384,18 +367,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
-      if ((rangeptr = gt_hashmap_get(parser->sequence_region_to_range,
-                                     seqname))) {
-        /* sequence region is already defined -> update range */
-        *rangeptr = gt_range_join(&range, rangeptr);
-      }
-      else {
-        /* sequence region is not already defined -> define it */
-        rangeptr = gt_malloc(sizeof (GtRange));
-        *rangeptr = range;
-        gt_hashmap_add(parser->sequence_region_to_range, gt_cstr_dup(seqname),
-                    rangeptr);
-      }
+      gt_region_node_builder_add_region(parser->region_node_builder, seqname,
+                                        range);
 
       /* parse the score */
       had_err = gt_parse_score(&score_is_defined, &score_value, score,
@@ -559,14 +532,11 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
     gt_str_reset(line_buffer);
   }
 
-  /* process all comments features */
-  if (!had_err) {
-    had_err = gt_hashmap_foreach(parser->sequence_region_to_range,
-                              construct_sequence_regions, genome_nodes, NULL);
-    gt_assert(!had_err); /* construct_sequence_regions() is sane */
-  }
+  /* process all region nodes */
+  if (!had_err)
+    gt_region_node_builder_build(parser->region_node_builder, genome_nodes);
 
-  /* process all genome_features */
+  /* process all feature nodes */
   cinfo.genome_nodes = genome_nodes;
   cinfo.gene_id_to_name_mapping = parser->gene_id_to_name_mapping;
   cinfo.transcript_id_to_name_mapping = parser->transcript_id_to_name_mapping;
@@ -586,7 +556,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
 void gt_gtf_parser_delete(GtGTFParser *parser)
 {
   if (!parser) return;
-  gt_hashmap_delete(parser->sequence_region_to_range);
+  gt_region_node_builder_delete(parser->region_node_builder);
   gt_hashmap_delete(parser->gene_id_hash);
   gt_hashmap_delete(parser->seqid_to_str_mapping);
   gt_hashmap_delete(parser->source_to_str_mapping);
