@@ -29,5 +29,6 @@ void                 gt_region_node_builder_add_region(GtRegionNodeBuilder*,
                                                        GtRange region_range);
 void                 gt_region_node_builder_build(const GtRegionNodeBuilder*,
                                                   GtQueue *genome_nodes);
+void                 gt_region_node_builder_reset(GtRegionNodeBuilder*);
 
 #endif

@@ -1,4 +1,27 @@
 ##gff-version   3
+##sequence-region   chr7 3538564 144670781
+##sequence-region   chrX 3009684 164531393
+##sequence-region   chr8 3622334 126779431
+##sequence-region   chr9 4855449 122696623
+##sequence-region   chr3 3241275 159534406
+##sequence-region   chr4 3016163 152975053
+##sequence-region   chr5 6489488 150790995
+##sequence-region   chr6 4455158 149315651
+##sequence-region   chr14 10074301 102257125
+##sequence-region   chr15 4832309 102863869
+##sequence-region   chr12 3954579 116457835
+##sequence-region   chr13 3172351 112857798
+##sequence-region   chr18 3281799 89668722
+##sequence-region   chr19 3247631 55972867
+##sequence-region   chr16 3493052 97690879
+##sequence-region   chr17 4837106 89109235
+##sequence-region   chr10 3557642 128360798
+##sequence-region   chr13_random 132571 132601
+##sequence-region   chr5_random 345219 2907836
+##sequence-region   chr11 3852159 121112225
+##sequence-region   chrY_random 10870094 13323146
+##sequence-region   chr1 3166625 196792939
+##sequence-region   chr2 7527753 181857052
 chr13	.	BED_feature	12855406	12855438	.	.	.	Name=8065334
 chr13	.	BED_feature	13072136	13072165	.	.	.	Name=8065334
 chr2	.	BED_feature	172240871	172240910	.	.	.	Name=12801994

@@ -86,3 +86,9 @@ void gt_region_node_builder_build(const GtRegionNodeBuilder *rnb,
                                build_region_nodes, genome_nodes, NULL);
   gt_assert(!had_err); /* build_region_nodes() is sane */
 }
+
+void gt_region_node_builder_reset(GtRegionNodeBuilder *rnb)
+{
+  gt_assert(rnb);
+  gt_hashmap_reset(rnb->sequence_region_to_range);
+}

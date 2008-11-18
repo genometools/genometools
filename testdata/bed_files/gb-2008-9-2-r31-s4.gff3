@@ -1,4 +1,10 @@
 ##gff-version   3
+##sequence-region   chrX 420878 14745201
+##sequence-region   chrI 8470264 8470841
+##sequence-region   chrV 4770528 20750890
+##sequence-region   chrIV 383477 11059319
+##sequence-region   chrIII 7676727 7676849
+##sequence-region   chrII 9731984 11928560
 chrV	.	BED_feature	10924507	10924531	.	.	.	Name=16159881
 chrX	.	BED_feature	11351802	11351828	.	.	.	Name=16159881
 chrV	.	BED_feature	13813817	13814105	.	.	.	Name=9425137

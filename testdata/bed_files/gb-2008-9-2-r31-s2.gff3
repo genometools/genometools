@@ -1,4 +1,38 @@
 ##gff-version   3
+##sequence-region   chrX 1693988 153904229
+##sequence-region   chr3_random 648541 648748
+##sequence-region   chrY 1693988 26956687
+##sequence-region   chr14 18654827 105399391
+##sequence-region   chr15 32453091 98071466
+##sequence-region   chr12 3499782 119900981
+##sequence-region   chr13 19032153 112825091
+##sequence-region   chr18 647736 72858327
+##sequence-region   chr16_random 105103 105168
+##sequence-region   chr19 523493 62043207
+##sequence-region   chr16 103420 84509897
+##sequence-region   chr17 4491642 77650042
+##sequence-region   chr7_random 465930 466022
+##sequence-region   chr10 5126490 135190285
+##sequence-region   chr8_random 420977 426932
+##sequence-region   chr11 303950 129670813
+##sequence-region   chrX_random 1443981 1444483
+##sequence-region   chrM 16413 16571
+##sequence-region   chr7 525927 150317059
+##sequence-region   chr8 11603761 145509161
+##sequence-region   chr9 2611471 138991702
+##sequence-region   chr17_random 492578 2614935
+##sequence-region   chr3 4995941 197293473
+##sequence-region   chr9_random 773108 774288
+##sequence-region   chr4 5457317 189161743
+##sequence-region   chr22_random 13235 30260
+##sequence-region   chr5 1348021 176769177
+##sequence-region   chr6 336159 170723871
+##sequence-region   chr22 14635194 49363991
+##sequence-region   chr21 26464852 46846730
+##sequence-region   chr20 1090119 62342693
+##sequence-region   chr1 938617 236157485
+##sequence-region   chr2 1390689 234334518
+##sequence-region   chr19_random 150474 290295
 chr4	.	BED_feature	74488437	74488469	.	.	.	Name=2247076
 chr20	.	BED_feature	22978320	22978355	.	.	.	Name=11257274
 chr1	.	BED_feature	227636540	227636698	.	.	.	Name=2300053

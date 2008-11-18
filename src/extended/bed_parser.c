@@ -25,6 +25,7 @@
 #include "extended/bed_parser.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/region_node_builder.h"
 
 #define BROWSER_KEYWORD  "browser"
 #define TRACK_KEYWORD    "track"
@@ -34,6 +35,8 @@
 #define TABULATOR_CHAR   '\t'
 
 struct GtBEDParser {
+  GtRegionNodeBuilder *region_node_builder;
+  GtQueue *feature_nodes;
   GtHashmap *seqid_to_str_mapping;
   GtStr *word,
         *another_word;
@@ -45,6 +48,8 @@ struct GtBEDParser {
 GtBEDParser* gt_bed_parser_new(void)
 {
   GtBEDParser *bed_parser = gt_calloc(1, sizeof *bed_parser);
+  bed_parser->region_node_builder = gt_region_node_builder_new();
+  bed_parser->feature_nodes = gt_queue_new();
   bed_parser->seqid_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
                                                     (GtFree) gt_str_delete);
   bed_parser->word = gt_str_new();
@@ -61,6 +66,10 @@ void gt_bed_parser_delete(GtBEDParser *bed_parser)
   gt_str_delete(bed_parser->another_word);
   gt_str_delete(bed_parser->word);
   gt_hashmap_delete(bed_parser->seqid_to_str_mapping);
+  while (gt_queue_size(bed_parser->feature_nodes))
+    gt_genome_node_rec_delete(gt_queue_get(bed_parser->feature_nodes));
+  gt_queue_delete(bed_parser->feature_nodes);
+  gt_region_node_builder_delete(bed_parser->region_node_builder);
   gt_free(bed_parser);
 }
 
@@ -176,7 +185,10 @@ static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
   had_err = gt_parse_range(range, gt_str_get(start), gt_str_get(end),
                            gt_io_get_line_number(bed_file),
                            gt_io_get_filename(bed_file), err);
-  if (!had_err && range->start == range->end) {
+  /* BED has a weird numbering scheme: positions are 0-based, but the end
+     position is not part of the feature. Transform to 1-based coordinates. */
+  range->start++;
+  if (!had_err && range->start > range->end) {
     gt_error_set(err, "file \"%s\": line %lu: BED feature has length 0",
                  gt_io_get_filename(bed_file), gt_io_get_line_number(bed_file));
     had_err = -1;
@@ -323,8 +335,7 @@ static int process_blocks(GtBEDParser *bed_parser, GtFeatureNode *fn,
   return had_err;
 }
 
-static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
-                    GtIO *bed_file, GtError *err)
+static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
 {
   unsigned long block_count = 0;
   GtGenomeNode *gn = NULL;
@@ -347,16 +358,16 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
                               bed_parser->another_word, bed_file, err);
   }
   if (!had_err) {
-    /* BED has a weird numbering scheme: positions are 0-based, but the end
-       position is not part of the feature. Transform to 1-based coordinates. */
-    range.start++;
+    /* add region */
+    gt_region_node_builder_add_region(bed_parser->region_node_builder,
+                                      gt_str_get(seqid), range);
     /* create feature */
     gn = gt_feature_node_new(seqid,
                              bed_parser->feature_type
                              ? bed_parser->feature_type
                              : BED_FEATURE_TYPE,
                              range.start, range.end, GT_STRAND_BOTH);
-    gt_queue_add(genome_nodes, gn);
+    gt_queue_add(bed_parser->feature_nodes, gn);
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
   }
@@ -470,8 +481,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   return had_err;
 }
 
-static int bed_line(GtBEDParser *bed_parser, GtQueue *genome_nodes,
-                    GtIO *bed_file, GtError *err)
+static int bed_line(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -481,12 +491,11 @@ static int bed_line(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   else if (!strcmp(gt_str_get(bed_parser->word), TRACK_KEYWORD))
     rest_line(bed_file); /* ignore track lines completely */
   else
-    had_err = bed_rest(bed_parser, genome_nodes, bed_file, err);
+    had_err = bed_rest(bed_parser, bed_file, err);
   return had_err;
 }
 
-static int parse_bed_file(GtBEDParser *bed_parser, GtQueue *genome_nodes,
-                          GtIO *bed_file, GtError *err)
+static int parse_bed_file(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -508,7 +517,7 @@ static int parse_bed_file(GtBEDParser *bed_parser, GtQueue *genome_nodes,
         gt_io_next(bed_file);
         break;
       default:
-        had_err = bed_line(bed_parser, genome_nodes, bed_file, err);
+        had_err = bed_line(bed_parser, bed_file, err);
     }
   }
   if (!had_err)
@@ -524,7 +533,13 @@ int gt_bed_parser_parse(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   gt_error_check(err);
   gt_assert(bed_parser && genome_nodes);
   bed_file = gt_io_new(filename, "r");
-  had_err = parse_bed_file(bed_parser, genome_nodes, bed_file, err);
+  /* parse BED file */
+  had_err = parse_bed_file(bed_parser, bed_file, err);
+  /* process created region and feature nodes */
+  gt_region_node_builder_build(bed_parser->region_node_builder, genome_nodes);
+  gt_region_node_builder_reset(bed_parser->region_node_builder);
+  while (gt_queue_size(bed_parser->feature_nodes))
+    gt_queue_add(genome_nodes, gt_queue_get(bed_parser->feature_nodes));
   gt_io_delete(bed_file);
   return had_err;
 }

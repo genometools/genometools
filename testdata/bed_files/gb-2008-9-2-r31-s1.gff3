@@ -1,4 +1,11 @@
 ##gff-version   3
+##sequence-region   chr2L 1992150 21245560
+##sequence-region   chr3L 1023564 21410397
+##sequence-region   chrX 219433 20229432
+##sequence-region   chr4 727878 1051998
+##sequence-region   chrU 4976167 4976193
+##sequence-region   chr2R 1216943 20734285
+##sequence-region   chr3R 174417 27557046
 chr2L	.	BED_feature	14877643	14877669	.	.	.	Name=15849196
 chr2L	.	BED_feature	14879740	14879766	.	.	.	Name=15849196
 chr3L	.	BED_feature	3176657	3176706	.	.	.	Name=10747896
