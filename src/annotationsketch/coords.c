@@ -49,10 +49,8 @@ GtDrawingRange gt_coords_calc_generic_range(GtRange node_range,
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
                                                       CLIPPED_BOTH :
                                                       CLIPPED_RIGHT);
-    converted_range.end = 1;
   }
-  else
-    converted_range.end = gt_coords_convert_point(viewrange, node_range.end);
+  converted_range.end = gt_coords_convert_point(viewrange, node_range.end);
 
   return converted_range;
 }
