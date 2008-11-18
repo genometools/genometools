@@ -52,6 +52,7 @@ const GtCanvasClass* gt_canvas_cairo_context_class(void)
                                        gt_canvas_cairo_visit_line_post,
                                        gt_canvas_cairo_visit_block,
                                        gt_canvas_cairo_visit_element,
+                                       gt_canvas_cairo_visit_custom_track,
                                        gt_canvas_cairo_draw_ruler,
                                        NULL);
   }

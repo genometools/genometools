@@ -21,11 +21,13 @@
 #include <stdio.h>
 #include "annotationsketch/custom_track.h"
 #include "core/range.h"
+#include "core/str.h"
 
-typedef int           (*GtCustomTrackSketchFunc)(GtCustomTrack*, GtGraphics*,
+typedef int           (*GtCustomTrackRenderFunc)(GtCustomTrack*, GtGraphics*,
                                                  unsigned int, GtRange,
                                                  GtStyle*);
 typedef unsigned long (*GtCustomTrackGetHeightFunc)(GtCustomTrack*);
+typedef GtStr*        (*GtCustomTrackGetTitleFunc)(GtCustomTrack*);
 typedef void          (*GtCustomTrackFreeFunc)(GtCustomTrack*);
 
 typedef struct GtCustomTrackMembers GtCustomTrackMembers;
@@ -36,8 +38,9 @@ struct GtCustomTrack {
 };
 
 const GtCustomTrackClass* gt_custom_track_class_new(size_t size,
-                                          GtCustomTrackSketchFunc sketch,
+                                          GtCustomTrackRenderFunc sketch,
                                           GtCustomTrackGetHeightFunc get_height,
+                                          GtCustomTrackGetTitleFunc get_title,
                                           GtCustomTrackFreeFunc free);
 GtCustomTrack* gt_custom_track_create(const GtCustomTrackClass*);
 void*          gt_custom_track_cast(const GtCustomTrackClass*, GtCustomTrack*);

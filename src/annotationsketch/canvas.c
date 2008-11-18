@@ -43,6 +43,7 @@ struct GtCanvasClass {
                            visit_line_post;
   GtCanvasVisitBlockFunc   visit_block;
   GtCanvasVisitElementFunc visit_element;
+  GtCanvasVisitCustomTrackFunc visit_ct;
   GtCanvasDrawRulerFunc    draw_ruler_func;
   GtCanvasFreeFunc         free;
 };
@@ -56,6 +57,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
                                          GtCanvasVisitLineFunc l_visit_post,
                                          GtCanvasVisitBlockFunc b_visit,
                                          GtCanvasVisitElementFunc e_visit,
+                                         GtCanvasVisitCustomTrackFunc visit_ct,
                                          GtCanvasDrawRulerFunc draw_ruler_func,
                                          GtCanvasFreeFunc free)
 {
@@ -69,6 +71,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
   c_class->visit_line_post    = l_visit_post;
   c_class->visit_block        = b_visit;
   c_class->visit_element      = e_visit;
+  c_class->visit_ct           = visit_ct;
   c_class->draw_ruler_func    = draw_ruler_func;
   c_class->free = free;
   return c_class;
@@ -243,6 +246,15 @@ int gt_canvas_visit_element(GtCanvas *canvas, GtElement *element)
   gt_assert(canvas && element);
   if (canvas->c_class->visit_element)
     return canvas->c_class->visit_element(canvas, element);
+  else
+    return 0;
+}
+
+int gt_canvas_visit_custom_track(GtCanvas *canvas, GtCustomTrack *ct)
+{
+  gt_assert(canvas && ct);
+  if (canvas->c_class->visit_ct)
+    return canvas->c_class->visit_ct(canvas, ct);
   else
     return 0;
 }

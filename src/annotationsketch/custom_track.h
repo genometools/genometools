@@ -20,20 +20,26 @@
 
 typedef struct GtCustomTrackClass GtCustomTrackClass;
 
+#include "annotationsketch/canvas.h"
 #include "annotationsketch/custom_track_api.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/style.h"
 #include "core/range.h"
+#include "core/str.h"
 
+/* Visitor callback for the drawing canvas. */
+int           gt_custom_track_sketch(GtCustomTrack*, GtCanvas*);
 /* Call the drawing functionality for <ctrack>. It will be drawn to <graphics>.
    The values for <start_ypos>, <viewrange> and <style> reflect the settings
    of the current context (this is: the diagram the track was added to). */
-int           gt_custom_track_sketch(GtCustomTrack *ctrack,
+int           gt_custom_track_render(GtCustomTrack *ctrack,
                                      GtGraphics *graphics,
                                      unsigned int start_ypos,
                                      GtRange viewrange,
                                      GtStyle *style);
 /* Returns the height of the given <ctrack> in pixels/points. */
 unsigned long gt_custom_track_get_height(GtCustomTrack *ctrack);
+/* Returns the title of the given <ctrack>. */
+GtStr*        gt_custom_track_get_title(GtCustomTrack *ctrack);
 
 #endif

@@ -22,6 +22,7 @@
 #include "core/bittab.h"
 #include "core/range.h"
 #include "annotationsketch/canvas.h"
+#include "annotationsketch/custom_track.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/layout.h"
 
@@ -30,6 +31,7 @@ typedef int  (*GtCanvasVisitTrackFunc)(GtCanvas*, GtTrack*);
 typedef int  (*GtCanvasVisitLineFunc)(GtCanvas*, GtLine*);
 typedef int  (*GtCanvasVisitBlockFunc)(GtCanvas*, GtBlock*);
 typedef int  (*GtCanvasVisitElementFunc)(GtCanvas*, GtElement*);
+typedef int  (*GtCanvasVisitCustomTrackFunc)(GtCanvas*, GtCustomTrack*);
 typedef void (*GtCanvasDrawRulerFunc)(GtCanvas*, GtRange);
 /* typedef void (*GtCanvasCallPluginFunc)(GtCanvas*,
                                        GtAnnotationSketchPlugin*); */
@@ -50,6 +52,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
                                          GtCanvasVisitLineFunc l_visit_post,
                                          GtCanvasVisitBlockFunc block_visit,
                                          GtCanvasVisitElementFunc element_visit,
+                                         GtCanvasVisitCustomTrackFunc ct_visit,
                                          GtCanvasDrawRulerFunc draw_ruler_func,
                                          GtCanvasFreeFunc free);
 GtCanvas* gt_canvas_create(const GtCanvasClass*);

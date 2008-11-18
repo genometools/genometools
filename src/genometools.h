@@ -52,6 +52,8 @@
 #include "annotationsketch/canvas_cairo_context_api.h"
 #include "annotationsketch/canvas_cairo_file_api.h"
 #include "annotationsketch/color_api.h"
+#include "annotationsketch/custom_track_api.h"
+#include "annotationsketch/custom_track_gc_content_api.h"
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/feature_index_memory_api.h"

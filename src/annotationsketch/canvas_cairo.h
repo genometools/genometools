@@ -32,6 +32,7 @@ int  gt_canvas_cairo_visit_line_pre(GtCanvas*, GtLine*);
 int  gt_canvas_cairo_visit_line_post(GtCanvas*, GtLine*);
 int  gt_canvas_cairo_visit_block(GtCanvas*, GtBlock*);
 int  gt_canvas_cairo_visit_element(GtCanvas*, GtElement*);
+int  gt_canvas_cairo_visit_custom_track(GtCanvas*, GtCustomTrack*);
 /* Renders a ruler with dynamic scale labeling and optional grid. */
 void gt_canvas_cairo_draw_ruler(GtCanvas*, GtRange);
 

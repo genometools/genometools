@@ -61,6 +61,7 @@ struct GtLayout {
   GtStyle *style;
   GtTextWidthCalculator *twc;
   bool own_twc;
+  GtArray *custom_tracks;
   GtHashmap *tracks;
   GtRange viewrange;
   unsigned long nof_tracks;
@@ -157,6 +158,17 @@ static int render_tracks(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
+static int render_custom_tracks(GT_UNUSED void *key, void *value, void *data,
+                                GT_UNUSED GtError *err)
+{
+  GtRenderTraverseInfo *rti = (GtRenderTraverseInfo*) data;
+  GtCustomTrack *ctrack = (GtCustomTrack*) value;
+  int had_err = 0;
+  gt_assert(rti && ctrack);
+  had_err = gt_custom_track_sketch(ctrack, rti->canvas);
+  return had_err;
+}
+
 GtLayout* gt_layout_new(GtDiagram *diagram, unsigned int width, GtStyle *style)
 {
   GtLayout *layout;
@@ -185,6 +197,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   lti.layout = layout;
   lti.twc = twc;
   gt_diagram_build(diagram);
+  layout->custom_tracks = gt_diagram_get_custom_tracks(diagram);
   /* use other container type here! */
   layout->tracks = gt_hashmap_new(HASH_STRING, gt_free_func,
                                   (GtFree) gt_track_delete);
@@ -207,6 +220,7 @@ void gt_layout_delete(GtLayout *layout)
 int gt_layout_sketch(GtLayout *layout, GtCanvas *canvas)
 {
   int had_err = 0;
+  unsigned long i;
   GtRenderTraverseInfo rti;
   gt_assert(layout && canvas);
   rti.layout = layout;
@@ -215,6 +229,12 @@ int gt_layout_sketch(GtLayout *layout, GtCanvas *canvas)
   had_err = gt_hashmap_foreach_in_key_order(layout->tracks, render_tracks,
                                             &rti, NULL);
   gt_canvas_visit_layout_post(canvas, layout);
+  for (i=0;i<gt_array_size(layout->custom_tracks);i++)
+  {
+    GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
+                                                        i);
+    had_err = render_custom_tracks(NULL, ct, &rti, NULL);
+  }
   return had_err;
 }
 
@@ -247,8 +267,9 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   GtTracklineInfo lines;
   double tmp;
   bool show_track_captions;
-  unsigned long height;
-  unsigned long line_height;
+  unsigned long height,
+                line_height,
+                i;
   gt_assert(layout);
 
   /* get line information for height calculation */
@@ -289,6 +310,16 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
                       + TRACK_VSPACE_DEFAULT);
+  }
+
+  /* add custom tracks */
+  for (i=0;i<gt_array_size(layout->custom_tracks);i++)
+  {
+    GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
+                                                        i);
+    height += (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT
+                + TRACK_VSPACE_DEFAULT);
+    height += gt_custom_track_get_height(ct);
   }
 
   /* add header space and footer */

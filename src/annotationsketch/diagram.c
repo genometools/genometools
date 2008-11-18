@@ -47,7 +47,8 @@ struct GtDiagram {
   /* Cache tables for configuration data */
   GtHashmap *collapsingtypes, *caption_display_status;
   GtStyle *style;
-  GtArray *features;
+  GtArray *features,
+          *custom_tracks;
   bool own_features;
   GtRange range;
   void *ptr;
@@ -612,6 +613,7 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
   diagram->range = *range;
   diagram->features = features;
   diagram->select_func = default_track_selector;
+  diagram->custom_tracks = gt_array_new(sizeof (GtCustomTrack*));
   return diagram;
 }
 
@@ -664,6 +666,18 @@ GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram)
   return diagram->blocks;
 }
 
+GtArray* gt_diagram_get_custom_tracks(const GtDiagram *diagram)
+{
+  gt_assert(diagram);
+  return diagram->custom_tracks;
+}
+
+void gt_diagram_add_custom_track(GtDiagram *diagram, GtCustomTrack* ctrack)
+{
+  gt_assert(diagram && ctrack);
+  gt_array_add(diagram->custom_tracks, ctrack);
+}
+
 void gt_diagram_delete(GtDiagram *diagram)
 {
   if (!diagram) return;
@@ -671,5 +685,6 @@ void gt_diagram_delete(GtDiagram *diagram)
     gt_array_delete(diagram->features);
   gt_hashmap_delete(diagram->blocks);
   gt_hashmap_delete(diagram->nodeinfo);
+  gt_array_delete(diagram->custom_tracks);
   gt_free(diagram);
 }

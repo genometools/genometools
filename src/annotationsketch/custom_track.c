@@ -27,20 +27,23 @@ struct GtCustomTrackMembers {
 
 struct GtCustomTrackClass {
   size_t size;
-  GtCustomTrackSketchFunc sketch;
+  GtCustomTrackRenderFunc render;
   GtCustomTrackGetHeightFunc get_height;
+  GtCustomTrackGetTitleFunc get_title;
   GtCustomTrackFreeFunc free;
 };
 
 const GtCustomTrackClass* gt_custom_track_class_new(size_t size,
-                                          GtCustomTrackSketchFunc sketch,
+                                          GtCustomTrackRenderFunc render,
                                           GtCustomTrackGetHeightFunc get_height,
+                                          GtCustomTrackGetTitleFunc get_title,
                                           GtCustomTrackFreeFunc free)
 {
   GtCustomTrackClass *c_class = gt_class_alloc(sizeof *c_class);
   c_class->size = size;
-  c_class->sketch = sketch;
+  c_class->render = render;
   c_class->get_height = get_height;
+  c_class->get_title = get_title;
   c_class->free = free;
   return c_class;
 }
@@ -76,18 +79,30 @@ void gt_custom_track_delete(GtCustomTrack *ct)
   gt_free(ct);
 }
 
-int gt_custom_track_sketch(GtCustomTrack *ct, GtGraphics *graphics,
+int gt_custom_track_render(GtCustomTrack *ct, GtGraphics *graphics,
                            unsigned int start_ypos, GtRange viewrange,
                            GtStyle *style)
 {
   gt_assert(ct && ct->c_class && graphics && style);
-  return ct->c_class->sketch(ct, graphics, start_ypos, viewrange, style);
+  return ct->c_class->render(ct, graphics, start_ypos, viewrange, style);
+}
+
+int gt_custom_track_sketch(GtCustomTrack *ct, GtCanvas *canvas)
+{
+  gt_assert(ct && canvas);
+  return gt_canvas_visit_custom_track(canvas, ct);
 }
 
 unsigned long gt_custom_track_get_height(GtCustomTrack *ct)
 {
   gt_assert(ct && ct->c_class);
   return ct->c_class->get_height(ct);
+}
+
+GtStr* gt_custom_track_get_title(GtCustomTrack *ct)
+{
+  gt_assert(ct && ct->c_class);
+  return ct->c_class->get_title(ct);
 }
 
 void* gt_custom_track_cast(const GtCustomTrackClass *ctc,

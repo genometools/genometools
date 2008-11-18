@@ -463,6 +463,45 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
   return had_err;
 }
 
+int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
+                                       GtCustomTrack *ct)
+{
+  bool show_track_captions = false;
+  double vspace;
+  int had_err = 0;
+  GtColor color;
+  gt_assert(canvas && ct);
+
+  if (!gt_style_get_bool(canvas->pvt->sty, "format", "show_track_captions",
+                         &show_track_captions, NULL))
+    show_track_captions = true;
+  gt_style_get_color(canvas->pvt->sty, "format", "track_title_color", &color,
+                     NULL);
+
+  if (show_track_captions)
+  {
+    /* draw track title */
+    gt_graphics_draw_colored_text(canvas->pvt->g,
+                                  canvas->pvt->margins,
+                                  canvas->pvt->y,
+                                  color,
+                                  gt_str_get(gt_custom_track_get_title(ct)));
+  }
+  canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+  /* simply call rendering function */
+  had_err = gt_custom_track_render(ct, canvas->pvt->g, canvas->pvt->y,
+                                   canvas->pvt->viewrange, canvas->pvt->sty);
+  canvas->pvt->y += gt_custom_track_get_height(ct);
+
+  /* put track spacer after track */
+  if (gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &vspace,
+                       NULL))
+    canvas->pvt->y += vspace;
+  else
+    canvas->pvt->y += TRACK_VSPACE_DEFAULT;
+  return had_err;
+}
+
 /* Renders a ruler with dynamic scale labeling and optional grid. */
 void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
 {
@@ -480,7 +519,9 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
     showgrid = true;
 
   rulercol.red = rulercol.green = rulercol.blue = RULER_GREY;
+  rulercol.alpha = 1.0;
   gridcol.red = gridcol.green = gridcol.blue = GRID_GREY;
+  gridcol.alpha = 1.0;
 
   /* determine range and step of the scale */
   base_length = gt_range_length(&viewrange);

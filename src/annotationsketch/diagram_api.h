@@ -27,9 +27,10 @@
    <gt_diagram_sketch()> with an appropriate <GtCanvas> object. */
 typedef struct GtDiagram GtDiagram;
 
+#include "annotationsketch/custom_track_api.h"
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/style_api.h"
-#include "annotationsketch/block.h"
+#include "annotationsketch/block_api.h"
 #include "core/error.h"
 
 /* A <GtTrackSelectorFunc> is a callback function which returns a string
@@ -56,6 +57,8 @@ GtRange    gt_diagram_get_range(const GtDiagram *diagram);
    (default behaviour). */
 void       gt_diagram_set_track_selector_func(GtDiagram*, GtTrackSelectorFunc,
                                               void*);
+/* Registers a new custom track in the diagram. */
+void       gt_diagram_add_custom_track(GtDiagram*, GtCustomTrack*);
 
 /* Delete the <diagram> and all its components. */
 void       gt_diagram_delete(GtDiagram*);

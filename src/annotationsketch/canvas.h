@@ -22,6 +22,7 @@ typedef struct GtCanvasClass GtCanvasClass;
 
 #include <stdio.h>
 #include "annotationsketch/canvas_api.h"
+#include "annotationsketch/custom_track.h"
 #include "annotationsketch/layout.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -38,21 +39,23 @@ void*           gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
 void            format_ruler_label(char *txt, unsigned long pos, size_t buflen);
 /* Returns rendered width in pixels of the given text. */
 double          gt_canvas_get_text_width(GtCanvas*, const char *text);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_layout_pre(GtCanvas*, GtLayout*);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_layout_post(GtCanvas*, GtLayout*);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_track_pre(GtCanvas*, GtTrack*);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_track_post(GtCanvas*, GtTrack*);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_line_pre(GtCanvas*, GtLine*);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_line_post(GtCanvas*, GtLine*);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_block(GtCanvas*, GtBlock*);
-/* Callback function for Diagram rendering. */
+/* Callback function for rendering. */
 int             gt_canvas_visit_element(GtCanvas*, GtElement*);
+/* Callback function for rendering. */
+int             gt_canvas_visit_custom_track(GtCanvas*, GtCustomTrack*);
 
 #endif
