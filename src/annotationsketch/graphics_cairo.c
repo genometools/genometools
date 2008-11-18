@@ -635,7 +635,7 @@ void gt_graphics_cairo_draw_curve_data(GtGraphics *gg, double x, double y,
   xpos = (((double)g->width-2*g->margin_x)/((double)ndata-1));
   cairo_save(g->cr);
   cairo_move_to(g->cr, x, y+(1.0-data[0])*height);
-  for(i=1;i<ndata;i++)
+  for (i=1;i<ndata;i++)
   {
     idbl = (double) i;
     cairo_curve_to(g->cr,

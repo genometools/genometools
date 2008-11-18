@@ -82,7 +82,8 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                   * (gt_graphics_get_image_width(graphics)
                       - 2*gt_graphics_get_xmargins(graphics));
 
-  data = gt_calloc(ceil(gt_range_length(&viewrange)/iter_step)+1, sizeof (double));
+  data = gt_calloc(ceil(gt_range_length(&viewrange)/iter_step)+1,
+                   sizeof (double));
   i = 0;
   for (iter=viewrange.start+1; iter<viewrange.end; iter+=iter_step)
   {
