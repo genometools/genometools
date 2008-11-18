@@ -28,10 +28,6 @@
 #define BROWSER_KEYWORD  "browser"
 #define TRACK_KEYWORD    "track"
 
-#define BED_FEATURE_TYPE        "BED_feature"
-#define BED_THICK_FEATURE_TYPE  "BED_thick_feature"
-#define BED_BLOCK_TYPE          "BED_block"
-
 #define BLANK_CHAR       ' '
 #define COMMENT_CHAR     '#'
 #define TABULATOR_CHAR   '\t'
@@ -188,7 +184,7 @@ static void construct_thick_feature(GtFeatureNode *fn, GtRange range)
   gt_assert(fn);
   thick_feature = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                                fn),
-                                      BED_THICK_FEATURE_TYPE,
+                                      "BED_thick_feature",
                                       range.start, range.end,
                                       gt_feature_node_get_strand(fn));
   if ((name = gt_feature_node_get_attribute(fn, "Name")))
@@ -233,7 +229,7 @@ static int create_block_features(GtFeatureNode *fn, unsigned long block_count,
       start = gt_genome_node_get_start((GtGenomeNode*) fn) + block_start;
       end = start + block_size - 1;
       block = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) fn),
-                                  BED_BLOCK_TYPE, start, end,
+                                  "BED_block", start, end,
                                   gt_feature_node_get_strand(fn));
       if ((name = gt_feature_node_get_attribute(fn, "Name")))
         gt_feature_node_add_attribute((GtFeatureNode*) block, "Name", name);
@@ -342,7 +338,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
        position is not part of the feature. Transform to 1-based coordinates. */
     range.start++;
     /* create feature */
-    gn = gt_feature_node_new(seqid, BED_FEATURE_TYPE, range.start, range.end,
+    gn = gt_feature_node_new(seqid, "BED_feature", range.start, range.end,
                              GT_STRAND_BOTH);
     gt_queue_add(genome_nodes, gn);
     if (bed_separator(bed_file))
