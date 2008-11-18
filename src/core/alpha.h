@@ -24,11 +24,11 @@
 /* the alphabet class */
 typedef struct GtAlpha GtAlpha; /* XXX: GtAlpha -> GtAlphabet */
 
-GtAlpha*    gt_alpha_new(void);
-GtAlpha*    gt_alpha_new_dna(void);
-GtAlpha*    gt_alpha_new_protein(void);
-GtAlpha*    gt_alpha_guess(const char *seq, unsigned long seqlen);
-GtAlpha*    gt_alpha_ref(GtAlpha*);
+GtAlpha*     gt_alpha_new(void);
+GtAlpha*     gt_alpha_new_dna(void);
+GtAlpha*     gt_alpha_new_protein(void);
+GtAlpha*     gt_alpha_guess(const char *seq, unsigned long seqlen);
+GtAlpha*     gt_alpha_ref(GtAlpha*);
 /* add the mapping of all given characters to the alphabet, the first
    character is the result of subsequent gt_alpha_decode() calls  */
 void         gt_alpha_add_mapping(GtAlpha*, const char *characters);
