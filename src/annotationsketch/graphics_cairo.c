@@ -191,6 +191,20 @@ double gt_graphics_cairo_get_image_width(GtGraphics *gg)
   return g->width;
 }
 
+double gt_graphics_cairo_get_xmargins(GtGraphics *gg)
+{
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  gt_assert(g);
+  return g->margin_x;
+}
+
+double gt_graphics_cairo_get_ymargins(GtGraphics *gg)
+{
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  gt_assert(g);
+  return g->margin_y;
+}
+
 void gt_graphics_cairo_set_margins(GtGraphics *gg, double margin_x,
                                 double margin_y)
 {
@@ -556,6 +570,8 @@ const GtGraphicsClass* gt_graphics_cairo_class(void)
                                gt_graphics_cairo_set_font,
                                gt_graphics_cairo_get_image_width,
                                gt_graphics_cairo_get_image_height,
+                               gt_graphics_cairo_get_xmargins,
+                               gt_graphics_cairo_get_ymargins,
                                gt_graphics_cairo_set_margins,
                                gt_graphics_cairo_draw_horizontal_line,
                                gt_graphics_cairo_draw_vertical_line,

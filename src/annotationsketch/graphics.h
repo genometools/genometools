@@ -72,6 +72,8 @@ double    gt_graphics_get_image_height(GtGraphics*);
    <margin_y> denotes the Margin to the top and bottom, in pixels. */
 void      gt_graphics_set_margins(GtGraphics*, double margin_x,
                                   double margin_y);
+double    gt_graphics_get_xmargins(GtGraphics*);
+double    gt_graphics_get_ymargins(GtGraphics*);
 void      gt_graphics_draw_horizontal_line(GtGraphics*, double x, double y,
                                         double width);
 /* Draws a vertical line beginning at the given coordinates downwards. */

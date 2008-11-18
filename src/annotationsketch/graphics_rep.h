@@ -74,6 +74,10 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                                      get_image_width,
                                          GtGraphicsGetSingleExtentFunc
                                                      get_image_height,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_xmargins,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_ymargins,
                                          GtGraphicsSetMarginsFunc
                                                      set_margins,
                                          GtGraphicsDrawHorizontalLineFunc

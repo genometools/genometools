@@ -35,7 +35,9 @@ struct GtGraphicsClass {
   GtGraphicsGetTextWidthFunc get_text_width;
   GtGraphicsSetFontFunc set_font;
   GtGraphicsGetSingleExtentFunc get_image_width,
-                                get_image_height;
+                                get_image_height,
+                                get_xmargins,
+                                get_ymargins;
   GtGraphicsSetMarginsFunc set_margins;
   GtGraphicsDrawHorizontalLineFunc draw_horizontal_line;
   GtGraphicsDrawVerticalLineFunc draw_vertical_line;
@@ -66,6 +68,10 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                                      get_image_width,
                                          GtGraphicsGetSingleExtentFunc
                                                      get_image_height,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_xmargins,
+                                         GtGraphicsGetSingleExtentFunc
+                                                     get_ymargins,
                                          GtGraphicsSetMarginsFunc
                                                      set_margins,
                                          GtGraphicsDrawHorizontalLineFunc
@@ -94,6 +100,8 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
   c_class->set_font = set_font;
   c_class->get_image_width = get_image_width;
   c_class->get_image_height = get_image_height;
+  c_class->get_xmargins = get_xmargins;
+  c_class->get_ymargins = get_ymargins;
   c_class->set_margins = set_margins;
   c_class->draw_horizontal_line = draw_horizontal_line;
   c_class->draw_vertical_line = draw_vertical_line;
@@ -191,6 +199,18 @@ double gt_graphics_get_image_width(GtGraphics *g)
 {
   gt_assert(g && g->c_class);
   return g->c_class->get_image_width(g);
+}
+
+double gt_graphics_get_xmargins(GtGraphics *g)
+{
+  gt_assert(g && g->c_class);
+  return g->c_class->get_xmargins(g);
+}
+
+double gt_graphics_get_ymargins(GtGraphics *g)
+{
+  gt_assert(g && g->c_class);
+  return g->c_class->get_ymargins(g);
 }
 
 void gt_graphics_set_margins(GtGraphics *g, double margin_x, double margin_y)
