@@ -194,7 +194,7 @@ static void construct_thick_feature(GtBEDParser *bed_parser, GtFeatureNode *fn,
                                                                fn),
                                       bed_parser->thick_feature_type
                                       ? bed_parser->thick_feature_type
-                                      : "BED_thick_feature",
+                                      : BED_THICK_FEATURE_TYPE,
                                       range.start, range.end,
                                       gt_feature_node_get_strand(fn));
   if ((name = gt_feature_node_get_attribute(fn, "Name")))
@@ -242,7 +242,7 @@ static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
       block = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) fn),
                                   bed_parser->block_type
                                   ? bed_parser->block_type
-                                  : "BED_block",
+                                  : BED_BLOCK_TYPE,
                                   start, end, gt_feature_node_get_strand(fn));
       if ((name = gt_feature_node_get_attribute(fn, "Name")))
         gt_feature_node_add_attribute((GtFeatureNode*) block, "Name", name);
@@ -354,7 +354,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
     gn = gt_feature_node_new(seqid,
                              bed_parser->feature_type
                              ? bed_parser->feature_type
-                             : "BED_feature",
+                             : BED_FEATURE_TYPE,
                              range.start, range.end, GT_STRAND_BOTH);
     gt_queue_add(genome_nodes, gn);
     if (bed_separator(bed_file))

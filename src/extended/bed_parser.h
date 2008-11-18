@@ -20,6 +20,10 @@
 #include "core/queue.h"
 #include "extended/type_checker.h"
 
+#define BED_FEATURE_TYPE        "BED_feature"
+#define BED_THICK_FEATURE_TYPE  "BED_thick_feature"
+#define BED_BLOCK_TYPE          "BED_block"
+
 typedef struct GtBEDParser GtBEDParser;
 
 GtBEDParser* gt_bed_parser_new(void);
