@@ -15,6 +15,7 @@
 */
 
 #include <string.h>
+#include "core/cstr.h"
 #include "core/hashmap.h"
 #include "core/io.h"
 #include "core/ma.h"
@@ -36,11 +37,14 @@ struct GtBEDParser {
   GtHashmap *seqid_to_str_mapping;
   GtStr *word,
         *another_word;
+  char *feature_type,
+       *thick_feature_type,
+       *block_type;
 };
 
 GtBEDParser* gt_bed_parser_new(void)
 {
-  GtBEDParser *bed_parser = gt_malloc(sizeof *bed_parser);
+  GtBEDParser *bed_parser = gt_calloc(1, sizeof *bed_parser);
   bed_parser->seqid_to_str_mapping = gt_hashmap_new(HASH_STRING, NULL,
                                                     (GtFree) gt_str_delete);
   bed_parser->word = gt_str_new();
@@ -51,6 +55,9 @@ GtBEDParser* gt_bed_parser_new(void)
 void gt_bed_parser_delete(GtBEDParser *bed_parser)
 {
   if (!bed_parser) return;
+  gt_free(bed_parser->block_type);
+  gt_free(bed_parser->thick_feature_type);
+  gt_free(bed_parser->feature_type);
   gt_str_delete(bed_parser->another_word);
   gt_str_delete(bed_parser->word);
   gt_hashmap_delete(bed_parser->seqid_to_str_mapping);
@@ -177,14 +184,17 @@ static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
   return had_err;
 }
 
-static void construct_thick_feature(GtFeatureNode *fn, GtRange range)
+static void construct_thick_feature(GtBEDParser *bed_parser, GtFeatureNode *fn,
+                                    GtRange range)
 {
   GtGenomeNode *thick_feature;
   const char *name;
   gt_assert(fn);
   thick_feature = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                                fn),
-                                      "BED_thick_feature",
+                                      bed_parser->thick_feature_type
+                                      ? bed_parser->thick_feature_type
+                                      : "BED_thick_feature",
                                       range.start, range.end,
                                       gt_feature_node_get_strand(fn));
   if ((name = gt_feature_node_get_attribute(fn, "Name")))
@@ -196,10 +206,11 @@ static void construct_thick_feature(GtFeatureNode *fn, GtRange range)
   gt_feature_node_add_child(fn, (GtFeatureNode*) thick_feature);
 }
 
-static int create_block_features(GtFeatureNode *fn, unsigned long block_count,
-                                  GtSplitter *size_splitter,
-                                  GtSplitter *start_splitter, GtIO *bed_file,
-                                  GtError *err)
+static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
+                                 unsigned long block_count,
+                                 GtSplitter *size_splitter,
+                                 GtSplitter *start_splitter, GtIO *bed_file,
+                                 GtError *err)
 {
   unsigned long i;
   int had_err = 0;
@@ -229,8 +240,10 @@ static int create_block_features(GtFeatureNode *fn, unsigned long block_count,
       start = gt_genome_node_get_start((GtGenomeNode*) fn) + block_start;
       end = start + block_size - 1;
       block = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) fn),
-                                  "BED_block", start, end,
-                                  gt_feature_node_get_strand(fn));
+                                  bed_parser->block_type
+                                  ? bed_parser->block_type
+                                  : "BED_block",
+                                  start, end, gt_feature_node_get_strand(fn));
       if ((name = gt_feature_node_get_attribute(fn, "Name")))
         gt_feature_node_add_attribute((GtFeatureNode*) block, "Name", name);
       gt_feature_node_set_score((GtFeatureNode*) block,
@@ -250,9 +263,9 @@ static void remove_terminal_comma(GtStr *str)
     gt_str_set_length(str, gt_str_length(str)-1);
 }
 
-static int process_blocks(GtFeatureNode *fn, unsigned long block_count,
-                          GtStr *block_sizes, GtStr *block_starts,
-                          GtIO *bed_file, GtError *err)
+static int process_blocks(GtBEDParser *bed_parser, GtFeatureNode *fn,
+                          unsigned long block_count, GtStr *block_sizes,
+                          GtStr *block_starts, GtIO *bed_file, GtError *err)
 {
   GtSplitter *size_splitter = NULL , *start_splitter = NULL;
   int had_err = 0;
@@ -302,7 +315,7 @@ static int process_blocks(GtFeatureNode *fn, unsigned long block_count,
     }
   }
   if (!had_err) {
-    had_err = create_block_features(fn, block_count, size_splitter,
+    had_err = create_block_features(bed_parser, fn, block_count, size_splitter,
                                     start_splitter, bed_file, err);
   }
   gt_splitter_delete(start_splitter);
@@ -338,8 +351,11 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
        position is not part of the feature. Transform to 1-based coordinates. */
     range.start++;
     /* create feature */
-    gn = gt_feature_node_new(seqid, "BED_feature", range.start, range.end,
-                             GT_STRAND_BOTH);
+    gn = gt_feature_node_new(seqid,
+                             bed_parser->feature_type
+                             ? bed_parser->feature_type
+                             : "BED_feature",
+                             range.start, range.end, GT_STRAND_BOTH);
     gt_queue_add(genome_nodes, gn);
     if (bed_separator(bed_file))
       had_err = skip_blanks(bed_file, err);
@@ -399,7 +415,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
       had_err = parse_bed_range(&range, bed_parser->word,
                                 bed_parser->another_word, bed_file, err);
       if (!had_err)
-        construct_thick_feature((GtFeatureNode*) gn, range);
+        construct_thick_feature(bed_parser, (GtFeatureNode*) gn, range);
     }
   }
   if (!had_err && bed_separator(bed_file))
@@ -444,8 +460,9 @@ static int bed_rest(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   }
   /* process blocks if necessary */
   if (!had_err && block_count) {
-    had_err = process_blocks((GtFeatureNode*) gn, block_count, bed_parser->word,
-                             bed_parser->another_word, bed_file, err);
+    had_err = process_blocks(bed_parser, (GtFeatureNode*) gn, block_count,
+                             bed_parser->word, bed_parser->another_word,
+                             bed_file, err);
   }
   /* the end of the line should now be reached */
   if (!had_err)
@@ -510,4 +527,26 @@ int gt_bed_parser_parse(GtBEDParser *bed_parser, GtQueue *genome_nodes,
   had_err = parse_bed_file(bed_parser, genome_nodes, bed_file, err);
   gt_io_delete(bed_file);
   return had_err;
+}
+
+void gt_bed_parser_set_feature_type(GtBEDParser *bed_parser, const char *type)
+{
+  gt_assert(bed_parser && type);
+  gt_free(bed_parser->feature_type);
+  bed_parser->feature_type = gt_cstr_dup(type);
+}
+
+void gt_bed_parser_set_thick_feature_type(GtBEDParser *bed_parser,
+                                          const char *type)
+{
+  gt_assert(bed_parser && type);
+  gt_free(bed_parser->thick_feature_type);
+  bed_parser->feature_type = gt_cstr_dup(type);
+}
+
+void gt_bed_parser_set_block_type(GtBEDParser *bed_parser, const char *type)
+{
+  gt_assert(bed_parser && type);
+  gt_free(bed_parser->block_type);
+  bed_parser->block_type = gt_cstr_dup(type);
 }

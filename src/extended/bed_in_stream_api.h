@@ -28,4 +28,20 @@ typedef struct GtBEDInStream GtBEDInStream;
    <stdin>. */
 GtNodeStream* gt_bed_in_stream_new(const char *filename);
 
+/* Create BED features parsed by <bed_in_stream> with given <type> (instead of
+   the default "BED_feature"). */
+void          gt_bed_in_stream_set_feature_type(GtBEDInStream *bed_in_stream,
+                                                const char *type);
+
+/* Create thick BED features parsed by <bed_in_stream> with given <type>
+   (instead of the default "BED_thick_feature"). */
+void          gt_bed_in_stream_set_thick_feature_type(GtBEDInStream
+                                                      *bed_in_stream,
+                                                      const char *type);
+
+/* Create BED blocks parsed by <bed_in_stream> with given <type> (instead of
+   the default "BED_block"). */
+void          gt_bed_in_stream_set_block_type(GtBEDInStream *bed_in_stream,
+                                              const char *type);
+
 #endif

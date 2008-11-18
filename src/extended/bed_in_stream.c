@@ -23,6 +23,7 @@
 
 struct GtBEDInStream {
   const GtNodeStream parent_instance;
+  GtBEDParser *bed_parser;
   GtQueue *genome_node_buffer;
   char *filename;
   bool file_processed;
@@ -33,14 +34,12 @@ struct GtBEDInStream {
 
 static int process_file(GtBEDInStream *bed_in_stream, GtError *err)
 {
-  GtBEDParser *bed_parser;
   int had_err;
   gt_error_check(err);
   gt_assert(bed_in_stream);
-  bed_parser = gt_bed_parser_new();
-  had_err = gt_bed_parser_parse(bed_parser, bed_in_stream->genome_node_buffer,
+  had_err = gt_bed_parser_parse(bed_in_stream->bed_parser,
+                                bed_in_stream->genome_node_buffer,
                                 bed_in_stream->filename, err);
-  gt_bed_parser_delete(bed_parser);
   return had_err;
 }
 
@@ -75,6 +74,7 @@ static void bed_in_stream_free(GtNodeStream *ns)
   while (gt_queue_size(bed_in_stream->genome_node_buffer))
     gt_genome_node_rec_delete(gt_queue_get(bed_in_stream->genome_node_buffer));
   gt_queue_delete(bed_in_stream->genome_node_buffer);
+  gt_bed_parser_delete(bed_in_stream->bed_parser);
 }
 
 const GtNodeStreamClass* gt_bed_in_stream_class(void)
@@ -93,7 +93,29 @@ GtNodeStream* gt_bed_in_stream_new(const char *filename)
   GtBEDInStream *bed_in_stream;
   GtNodeStream *ns = gt_node_stream_create(gt_bed_in_stream_class(), false);
   bed_in_stream = bed_in_stream_cast(ns);
+  bed_in_stream->bed_parser = gt_bed_parser_new();
   bed_in_stream->genome_node_buffer = gt_queue_new();
   bed_in_stream->filename = filename ? gt_cstr_dup(filename) : NULL;
   return ns;
+}
+
+void gt_bed_in_stream_set_feature_type(GtBEDInStream *bed_in_stream,
+                                       const char *type)
+{
+  gt_assert(bed_in_stream && type);
+  gt_bed_parser_set_feature_type(bed_in_stream->bed_parser, type);
+}
+
+void gt_bed_in_stream_set_thick_feature_type(GtBEDInStream *bed_in_stream,
+                                             const char *type)
+{
+  gt_assert(bed_in_stream && type);
+  gt_bed_parser_set_thick_feature_type(bed_in_stream->bed_parser, type);
+}
+
+void gt_bed_in_stream_set_block_type(GtBEDInStream *bed_in_stream,
+                                     const char *type)
+{
+  gt_assert(bed_in_stream && type);
+  gt_bed_parser_set_block_type(bed_in_stream->bed_parser, type);
 }

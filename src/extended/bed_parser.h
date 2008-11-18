@@ -26,5 +26,8 @@ GtBEDParser* gt_bed_parser_new(void);
 void         gt_bed_parser_delete(GtBEDParser*);
 int          gt_bed_parser_parse(GtBEDParser*, GtQueue *genome_nodes,
                                  const char *filename, GtError*);
+void         gt_bed_parser_set_feature_type(GtBEDParser*, const char*);
+void         gt_bed_parser_set_thick_feature_type(GtBEDParser*, const char*);
+void         gt_bed_parser_set_block_type(GtBEDParser*, const char*);
 
 #endif
