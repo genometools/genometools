@@ -1,5 +1,4 @@
 #include "genometools.h"
-#include "core/strand.h"
 
 static void handle_error(GtError *err)
 {
