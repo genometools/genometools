@@ -35,7 +35,7 @@ typedef struct GtDiagram GtDiagram;
 /* A <GtTrackSelectorFunc> is a callback function which returns a string
    which can be used as a track identifier for assignment of a <GtBlock>
    to a given track. */
-typedef char* (*GtTrackSelectorFunc)(GtBlock*, void*);
+typedef const char* (*GtTrackSelectorFunc)(GtBlock*, void*);
 
 /* Create a new <GtDiagram> object representing the feature nodes in
    <feature_index> in region <seqid> overlapping with <range>. The <GtStyle>
@@ -54,7 +54,8 @@ GtRange    gt_diagram_get_range(const GtDiagram *diagram);
 /* Assigns a GtTrackSelectorFunc to use to assign blocks to tracks.
    If none is set, or set to NULL, then track types are used as track keys
    (default behaviour). */
-void       gt_diagram_set_track_selector_func(GtDiagram*, GtTrackSelectorFunc);
+void       gt_diagram_set_track_selector_func(GtDiagram*, GtTrackSelectorFunc,
+                                              void*);
 
 /* Delete the <diagram> and all its components. */
 void       gt_diagram_delete(GtDiagram*);

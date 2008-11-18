@@ -50,6 +50,7 @@ struct GtDiagram {
   GtArray *features;
   bool own_features;
   GtRange range;
+  void *ptr;
   GtTrackSelectorFunc select_func;
 };
 
@@ -472,6 +473,12 @@ static int visit_child(GtGenomeNode* gn, void *gt_genome_node_children,
   return 0;
 }
 
+static const char* default_track_selector(GtBlock *block, GT_UNUSED void *data)
+{
+  gt_assert(block);
+  return gt_block_get_type(block);
+}
+
 /* Create lists of all GtBlocks in the diagram. */
 static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
                           GT_UNUSED GtError *err)
@@ -491,11 +498,9 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
     gt_assert(type_struc);
     for (j=0; j<gt_array_size(type_struc->blocktuples); j++)
     {
-      GtStr *trackid = NULL;
       GtBlockTuple *bt;
-      const char *key;
+      const char *tkey;
       bt  = *(GtBlockTuple**) gt_array_get(type_struc->blocktuples, j);
-      key = bt->gft;
       if (bt->rep == UNDEF_REPR && type_struc->must_merge)
       {
         block = mainblock = gt_block_ref(bt->block);
@@ -510,26 +515,19 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
           block = gt_block_clone(mainblock);
           gt_block_merge(block, bt->block);
           gt_block_delete(bt->block);
-        } else
-            block = bt->block;
+        } else block = bt->block;
       }
       gt_assert(block);
-      if (diagram->select_func)
-      {
-        /* execute hook for track selector function */
-        trackid = gt_str_new();
-        key = diagram->select_func(block, trackid);
-      }
-      list = (GtArray*) gt_hashmap_get(diagram->blocks, key);
+      /* execute hook for track selector function */
+      tkey = diagram->select_func(block, diagram->ptr);
+      list = (GtArray*) gt_hashmap_get(diagram->blocks, tkey);
       if (!list)
       {
         list = gt_array_new(sizeof (GtBlock*));
-        gt_hashmap_add(diagram->blocks, (void*) gt_cstr_dup(key), list);
+        gt_hashmap_add(diagram->blocks, (void*) gt_cstr_dup(tkey), list);
       }
       gt_assert(list);
       gt_array_add(list, block);
-      if (trackid)
-        gt_str_delete(trackid);
       gt_free(bt);
     }
     gt_array_delete(type_struc->blocktuples);
@@ -613,6 +611,7 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
   diagram->style = style;
   diagram->range = *range;
   diagram->features = features;
+  diagram->select_func = default_track_selector;
   return diagram;
 }
 
@@ -651,10 +650,12 @@ GtRange gt_diagram_get_range(const GtDiagram *diagram)
 }
 
 void gt_diagram_set_track_selector_func(GtDiagram *diagram,
-                                        GtTrackSelectorFunc bsfunc)
+                                        GtTrackSelectorFunc bsfunc,
+                                        void *ptr)
 {
   gt_assert(diagram);
   diagram->select_func = bsfunc;
+  diagram->ptr = ptr;
 }
 
 GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram)
