@@ -52,7 +52,8 @@ module GT
         a = GT::Array.new(rval)
         result = []
         1.upto(a.size) do |i|
-          result.push(GT::GenomeNode.new(GT.gt_genome_node_rec_ref(a.get(i-1))))
+          fn = GT::FeatureNode.new(GT.gt_genome_node_rec_ref(a.get(i-1)))
+          result.push(fn)
         end
         result
       else
