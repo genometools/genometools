@@ -42,7 +42,7 @@ typedef struct {
        tidy;
   long offset;
   GtStr *offsetfile,
-      *typecheck;
+        *typecheck;
   unsigned long width;
   GtOutputFileInfo *ofi;
   GtGenFile *outfp;
