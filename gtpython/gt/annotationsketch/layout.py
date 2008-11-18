@@ -47,7 +47,7 @@ class Layout:
   def register(cls, gtlib):
     from ctypes import c_ulong, c_void_p
     gtlib.gt_layout_new.restype = c_void_p
-    gtlib.gt_layout_new.argtypes = [c_void_p, c_ulong, Style]
+    gtlib.gt_layout_new.argtypes = [Diagram, c_ulong, Style]
     gtlib.gt_layout_sketch.argtypes = [c_void_p, Canvas]
     gtlib.gt_layout_get_height.restype = c_ulong
     gtlib.gt_layout_get_height.argtypes = [c_void_p]
