@@ -45,11 +45,6 @@ class Diagram:
       pass
 
   def set_track_selector_func(self, func):
-<<<<<<< HEAD:gtpython/gt/annotationsketch/diagram.py
-    tsf = TrackSelectorFunc(func)
-    self.tsf = tsf
-    gtlib.gt_diagram_set_track_selector_func(self.diagram, tsf)
-=======
     def trackselector(block_ptr, data_ptr):
       b = Block(block_ptr)
       ret = func(b)
@@ -59,7 +54,6 @@ class Diagram:
     self.tsf_cb = TrackSelectorFunc(trackselector)
     self.tsf = trackselector
     gtlib.gt_diagram_set_track_selector_func(self.diagram, self.tsf_cb)
->>>>>>> 59b16ba... more:gtpython/gt/annotationsketch/diagram.py
 
   def from_param(cls, obj):
     if not isinstance(obj, Diagram):
