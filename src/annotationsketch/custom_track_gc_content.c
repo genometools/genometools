@@ -87,7 +87,9 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   data = gt_calloc(ceil(gt_range_length(&viewrange)/iter_step)+1,
                    sizeof (double));
   n = 0;
-  for (iter=viewrange.start+1; iter<viewrange.end; iter+=iter_step)
+  for (iter=viewrange.start+1;
+       iter<viewrange.end-ctgc->windowsize;
+       iter+=iter_step)
   {
     data[n++] = get_val_for_pos(ctgc, floor(iter));
   }
