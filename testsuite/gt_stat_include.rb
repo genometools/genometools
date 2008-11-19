@@ -50,7 +50,8 @@ end
 Name "gt stat (count LTR retrotransposons)"
 Keywords "gt_stat"
 Test do
-  run "#{$bin}gt stat #{$testdata}gt_eval_ltr_test_1.in"
+  run "#{$bin}gt stat -v #{$testdata}gt_eval_ltr_test_1.in"
+  run "grep -v 'processing file' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}gt_stat_test_6.out"
 end
 
