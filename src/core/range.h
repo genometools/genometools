@@ -21,25 +21,25 @@
 #include "core/error_api.h"
 #include "core/range_api.h"
 
-GtRange      gt_range_reorder(GtRange);
-int           gt_range_unit_test(GtError*);
+GtRange  gt_range_reorder(GtRange);
+int      gt_range_unit_test(GtError*);
 
-void          gt_ranges_sort(GtArray*);
-void          gt_ranges_sort_by_length_stable(GtArray*);
-bool          gt_ranges_are_sorted(const GtArray*);
-bool          gt_ranges_do_not_overlap(const GtArray*);
-bool          gt_ranges_are_sorted_and_do_not_overlap(const GtArray*);
-bool          gt_ranges_are_equal(const GtArray*, const GtArray*);
+void     gt_ranges_sort(GtArray*);
+void     gt_ranges_sort_by_length_stable(GtArray*);
+bool     gt_ranges_are_sorted(const GtArray*);
+bool     gt_ranges_do_not_overlap(const GtArray*);
+bool     gt_ranges_are_sorted_and_do_not_overlap(const GtArray*);
+bool     gt_ranges_are_equal(const GtArray*, const GtArray*);
 
 /* takes a sorted array of ranges and runs the equivalent of uniq on it. The
    result is returned. */
-void          gt_ranges_uniq(GtArray*, const GtArray*);
+void     gt_ranges_uniq(GtArray*, const GtArray*);
 /* similar to the previous function, just in place */
-void          gt_ranges_uniq_in_place(GtArray*);
+void     gt_ranges_uniq_in_place(GtArray*);
 /* similar to gt_ranges_uniq(), additionally returns an array which contains the
    counts of the occurrences of each elem in the original array */
-GtArray*     gt_ranges_uniq_count(GtArray*, const GtArray*);
+GtArray* gt_ranges_uniq_count(GtArray*, const GtArray*);
 /* similar to the previous function, just in place */
-GtArray*     gt_ranges_uniq_in_place_count(GtArray*);
+GtArray* gt_ranges_uniq_in_place_count(GtArray*);
 
 #endif
