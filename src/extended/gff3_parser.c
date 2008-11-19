@@ -892,8 +892,9 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
 
   for (i = 0; !had_err && i < gt_splitter_size(attribute_splitter); i++) {
     const char *attr_tag = NULL;
-    char *attr_value = NULL, *token = gt_splitter_get_token(attribute_splitter,
-                                                            i);
+    bool attr_valid = true;
+    char *attr_value = NULL,
+         *token = gt_splitter_get_token(attribute_splitter, i);
     if (strncmp(token, ".", 1) == 0) {
       if (gt_splitter_size(attribute_splitter) > 1) {
         gt_error_set(err, "more than one attribute token defined on line %u in "
@@ -932,30 +933,45 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
       }
     }
     if (!had_err && !strlen(attr_tag)) {
-      gt_error_set(err, "attribute \"=%s\" on line %u in file \"%s\" has no "
-                   "tag", attr_value, line_number, filename);
-      had_err = -1;
+      attr_valid = false;
+      if (parser->tidy) {
+        gt_warning("attribute \"=%s\" on line %u in file \"%s\" has no tag; "
+                   "skip it", attr_value, line_number, filename);
+      }
+      else {
+        gt_error_set(err, "attribute \"=%s\" on line %u in file \"%s\" has no "
+                     "tag", attr_value, line_number, filename);
+        had_err = -1;
+      }
     }
     if (!had_err && !strlen(attr_value)) {
-      gt_error_set(err, "attribute \"%s=\" on line %u in file \"%s\" has no "
-                   "value", attr_tag, line_number, filename);
-      had_err = -1;
+      attr_valid = false;
+      if (parser->tidy) {
+        gt_warning("attribute \"%s=\" on line %u in file \"%s\" has no value; "
+                   "skip it", attr_tag, line_number, filename);
+      }
+      else {
+        gt_error_set(err, "attribute \"%s=\" on line %u in file \"%s\" has no "
+                     "value", attr_tag, line_number, filename);
+        had_err = -1;
+      }
     }
     /* check for duplicate attributes */
-    if (!had_err && gt_feature_node_get_attribute((GtFeatureNode*)
-                                                  feature_node, attr_tag)) {
+    if (!had_err && attr_valid &&
+         gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
+                                       attr_tag)) {
       gt_error_set(err, "more then one %s attribute on line %u in file \"%s\"",
                 attr_tag, line_number, filename);
       had_err = -1;
     }
     /* save all attributes, although the Parent and ID attribute is newly
        created in GFF3 output */
-    if (!had_err) {
+    if (!had_err && attr_valid) {
       gt_feature_node_add_attribute((GtFeatureNode*) feature_node,
                                       attr_tag, attr_value);
     }
     /* some attributes require special care */
-    if (!had_err) {
+    if (!had_err && attr_valid) {
       if (!strcmp(attr_tag, ID_STRING)) {
         had_err = store_id(attr_value, (GtFeatureNode*) feature_node,
                            is_child, parser, genome_nodes, auto_sr, filename,
