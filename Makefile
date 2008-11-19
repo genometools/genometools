@@ -248,6 +248,10 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
+ifneq ($(sharedlib),no)
+  SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT)
+endif
+
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/gtlua
@@ -289,7 +293,7 @@ LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 # set prefix for install target
 prefix ?= /usr/local
 
-all: lib/libgenometools.a lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
+all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      bin/skproto bin/gt bin/lua bin/rnv \
      bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
