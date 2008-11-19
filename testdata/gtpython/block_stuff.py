@@ -22,7 +22,7 @@ from gt.annotationsketch import *
 import sys
 import re
 
-def testfunc(bl, d):
+def testfunc(bl):
   b = Block(bl)
   print "%s %s %s %d" % (b.get_type(), b.get_strand(), b.get_range(), b.get_size())
   if not b.get_top_level_feature():
