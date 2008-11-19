@@ -442,7 +442,6 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
   {
     GtFeatureNode *rep;
     rep = gt_feature_node_get_multi_representative((GtFeatureNode*) node);
-    gt_assert(gt_hashmap_get(d->nodeinfo, rep));
   }
   else
     gt_assert(gt_hashmap_get(d->nodeinfo, node));
