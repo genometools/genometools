@@ -16,12 +16,12 @@
 */
 
 #include <math.h>
-#include "core/ma.h"
-#include "core/minmax.h"
-#include "core/unused_api.h"
 #include "annotationsketch/coords.h"
 #include "annotationsketch/custom_track_gc_content.h"
 #include "annotationsketch/custom_track_rep.h"
+#include "core/log.h"
+#include "core/ma.h"
+#include "core/minmax.h"
 
 struct GtCustomTrackGcContent {
   const GtCustomTrack parent_instance;
@@ -45,7 +45,7 @@ static inline double get_val_for_pos(GtCustomTrackGcContent *ctgc,
   for (i=0;i<ctgc->windowsize;i++)
   {
     if (pos + i > gt_seq_length(ctgc->seq))
-      break;
+      return -1;
     if (seq[pos+i] == 'g' || seq[pos+i] == 'c'
          || seq[pos+i] == 'G' || seq[pos+i] == 'C')
     {
@@ -59,43 +59,65 @@ static inline double get_val_for_pos(GtCustomTrackGcContent *ctgc,
 int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                                       unsigned int start_ypos,
                                       GtRange viewrange,
-                                      GT_UNUSED GtStyle *style)
+                                      GtStyle *style)
 {
   GtCustomTrackGcContent *ctgc;
-  double iter,
-         iter_step,
-         drawpos,
-         value,
-         *data;
-  unsigned long i;
-  GtColor color;
+  double iter, iter_step, value, *data;
+  unsigned long n;
+  GtRange value_range = {0, 1};
+  GtColor color, grey, black;
   ctgc = gt_custom_track_gc_content_cast(ct);
 
-  color.red = 1;
-  color.green = color.blue = 0;
-  color.alpha = .8;
-  iter_step = gt_range_length(&viewrange)/gt_graphics_get_image_width(graphics);
-
+  gt_style_get_color(style, "GC_content", "stroke", &color, NULL);
+  grey.red = grey.blue = grey.green = 0.8;
+  grey.alpha = 0.9;
+  black.red = black.blue = black.green = 0.0;
+  black.alpha = 0.9;
   value = get_val_for_pos(ctgc, viewrange.start);
-  drawpos = gt_graphics_get_xmargins(graphics)
-                + gt_coords_convert_point(viewrange, viewrange.start)
-                  * (gt_graphics_get_image_width(graphics)
-                      - 2*gt_graphics_get_xmargins(graphics));
+
+  iter_step = (double) gt_range_length(&viewrange)
+                / ((double) gt_graphics_get_image_width(graphics)
+                   - 2*gt_graphics_get_xmargins(graphics));
+
+  gt_log_log("len=%lu, iter_step = %f, width = %f, margins = %f\n",
+                      gt_range_length(&viewrange),
+                      iter_step, gt_graphics_get_image_width(graphics),
+                      gt_graphics_get_xmargins(graphics));
 
   data = gt_calloc(ceil(gt_range_length(&viewrange)/iter_step)+1,
                    sizeof (double));
-  i = 0;
+  n = 0;
   for (iter=viewrange.start+1; iter<viewrange.end; iter+=iter_step)
   {
-    data[i++] = get_val_for_pos(ctgc, floor(iter));
+    data[n++] = get_val_for_pos(ctgc, floor(iter));
   }
-  gt_graphics_draw_horizontal_line(graphics, gt_graphics_get_xmargins(graphics),
-                                   start_ypos + (1.0-ctgc->avg) * ctgc->height,
-                                   (gt_graphics_get_image_width(graphics)
-                                     - 2*gt_graphics_get_xmargins(graphics)));
-  gt_graphics_draw_curve_data(graphics, gt_graphics_get_xmargins(graphics),
-                              start_ypos, color, data, i, ctgc->height);
 
+  gt_log_log("i=%lu, widthval = %f\n", n,
+                 (gt_graphics_get_image_width(graphics)
+                    - 2*gt_graphics_get_xmargins(graphics)));
+
+  gt_graphics_draw_horizontal_line(graphics,
+                                   gt_graphics_get_xmargins(graphics),
+                                   start_ypos + (1.0-ctgc->avg) * ctgc->height,
+                                   grey,
+                                   (gt_graphics_get_image_width(graphics)
+                                     - 2*gt_graphics_get_xmargins(graphics)),
+                                   1.0);
+  gt_graphics_draw_vertical_line(graphics,
+                                 gt_graphics_get_xmargins(graphics),
+                                 start_ypos,
+                                 black,
+                                 ctgc->height,
+                                 1.0);
+  gt_graphics_draw_curve_data(graphics,
+                              gt_graphics_get_xmargins(graphics),
+                              start_ypos,
+                              color,
+                              data,
+                              n,
+                              value_range,
+                              ctgc->height);
+  gt_free(data);
   return 0;
 }
 
@@ -150,11 +172,13 @@ GtCustomTrack* gt_custom_track_gc_content_new(GtSeq *seq,
   ctgc->seq = seq;
   ctgc->avg = avg;
   /* ctgc->title = gt_str_new_cstr(gt_seq_get_description(seq)); */
-  ctgc->title = gt_str_new_cstr("GC content");
+  ctgc->title = gt_str_new_cstr("GC content (window size ");
+  gt_str_append_ulong(ctgc->title, ctgc->windowsize);
   if (avg > 0)
   {
-    snprintf(buf, BUFSIZ, " (average: %.1f%%)", avg*100);
+    snprintf(buf, BUFSIZ, ", average: %.1f%%", avg*100);
     gt_str_append_cstr(ctgc->title, buf);
   }
+  gt_str_append_cstr(ctgc->title, ")");
   return ct;
 }

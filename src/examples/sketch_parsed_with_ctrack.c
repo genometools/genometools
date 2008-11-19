@@ -1,4 +1,5 @@
 #include "genometools.h"
+#include "annotationsketch/custom_track_example.h"
 #include "core/seq.h"
 #include "core/bioseq.h"
 
@@ -18,12 +19,13 @@ int main(int argc, char *argv[])
   GtDiagram *diagram;
   GtLayout *layout;
   GtCanvas *canvas;
-  GtCustomTrack *custom;
-  unsigned long height;
+  GtCustomTrack *custom, *custom2;
+  unsigned long height, windowsize;
   GtError *err = gt_error_new();
 
-  if (argc != 5) {
-    fprintf(stderr, "Usage: %s style_file PNG_file GFF3_file Seq_file\n",
+  if (argc != 9) {
+    fprintf(stderr, "Usage: %s style_file PNG_file GFF3_file Seq_file seqid"
+                    " start end windowsize\n",
                     argv[0]);
     return EXIT_FAILURE;
   }
@@ -48,8 +50,12 @@ int main(int argc, char *argv[])
     handle_error(err);
 
   /* create diagram for first sequence ID in feature index */
-  seqid = gt_feature_index_get_first_seqid(feature_index);
+  seqid = argv[5];
   gt_feature_index_get_range_for_seqid(feature_index, &range, seqid);
+  sscanf(argv[6], "%lu", &range.start);
+  sscanf(argv[7], "%lu", &range.end);
+  sscanf(argv[8], "%lu", &windowsize);
+
   diagram = gt_diagram_new(feature_index, seqid, &range, style, err);
   if (gt_error_is_set(err))
     handle_error(err);
@@ -62,10 +68,13 @@ int main(int argc, char *argv[])
   /* create custom track with GC plot for first sequence in file,
      window size 1000, 40px height and average line at 16.5% */
   custom = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
-                                          1000,
+                                          windowsize,
                                           40,
                                           0.165);
   gt_diagram_add_custom_track(diagram, custom);
+  /* create example custom track */
+  custom2 = gt_custom_track_example_new();
+  gt_diagram_add_custom_track(diagram, custom2);
 
   /* create layout with given width, determine resulting image height */
   layout = gt_layout_new(diagram, 1000, style);
@@ -83,6 +92,8 @@ int main(int argc, char *argv[])
 
   /* free */
   gt_custom_track_delete(custom);
+  gt_custom_track_delete(custom2);
+  gt_bioseq_delete(bioseq);
   gt_canvas_delete(canvas);
   gt_layout_delete(layout);
   gt_diagram_delete(diagram);

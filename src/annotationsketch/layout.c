@@ -198,7 +198,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   lti.twc = twc;
   gt_diagram_build(diagram);
   layout->custom_tracks = gt_diagram_get_custom_tracks(diagram);
-  /* use other container type here! */
+  /* XXX: use other container type here! */
   layout->tracks = gt_hashmap_new(HASH_STRING, gt_free_func,
                                   (GtFree) gt_track_delete);
   (void) gt_hashmap_foreach(gt_diagram_get_blocks(diagram),
@@ -301,29 +301,36 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   {
     if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
                          NULL))
+    {
       height += gt_layout_get_number_of_tracks(layout)
-                  * (TOY_TEXT_HEIGHT
-                      + CAPTION_BAR_SPACE_DEFAULT
-                      + tmp);
+                  * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
+      /* add custom track captions */
+      height += gt_array_size(layout->custom_tracks)
+                  * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
+    }
     else
+    {
       height += gt_layout_get_number_of_tracks(layout)
                   * (TOY_TEXT_HEIGHT
                       + CAPTION_BAR_SPACE_DEFAULT
                       + TRACK_VSPACE_DEFAULT);
+      /* add custom track captions */
+      height += gt_array_size(layout->custom_tracks)
+                  * (TOY_TEXT_HEIGHT
+                      + CAPTION_BAR_SPACE_DEFAULT
+                      + TRACK_VSPACE_DEFAULT);
+    }
   }
 
-  /* add custom tracks */
+  /* add custom track space allotment */
   for (i=0;i<gt_array_size(layout->custom_tracks);i++)
   {
     GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
                                                         i);
-    height += (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT
-                + TRACK_VSPACE_DEFAULT);
     height += gt_custom_track_get_height(ct);
   }
 
   /* add header space and footer */
   height += HEADER_SPACE + FOOTER_SPACE;
-  gt_log_log("calculated height: %lu", height);
   return height;
 }

@@ -343,7 +343,8 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
                                    elem_start,
                                    canvas->pvt->y,
                                    elem_color,
-                                   bar_height);
+                                   bar_height,
+                                   1.0);
     gt_bittab_set_bit(canvas->pvt->bt, (unsigned long) draw_range.start);
   }
 
@@ -429,7 +430,9 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
     gt_graphics_draw_horizontal_line(canvas->pvt->g,
                                      elem_start,
                                      canvas->pvt->y,
-                                     elem_width);
+                                     elem_color,
+                                     elem_width,
+                                     1.0);
   }
   else
   {
@@ -467,7 +470,7 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
                                        GtCustomTrack *ct)
 {
   bool show_track_captions = false;
-  double vspace;
+  double space;
   int had_err = 0;
   GtColor color;
   gt_assert(canvas && ct);
@@ -494,9 +497,13 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
   canvas->pvt->y += gt_custom_track_get_height(ct);
 
   /* put track spacer after track */
-  if (gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &vspace,
+  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_vspace", &space, NULL))
+    canvas->pvt->y += space;
+  else
+    canvas->pvt->y += BAR_VSPACE_DEFAULT;
+  if (gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &space,
                        NULL))
-    canvas->pvt->y += vspace;
+    canvas->pvt->y += space;
   else
     canvas->pvt->y += TRACK_VSPACE_DEFAULT;
   return had_err;
@@ -544,7 +551,8 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                    drawtick,
                                    30,
                                    rulercol,
-                                   10);
+                                   10,
+                                   1.0);
     format_ruler_label(str, tick, BUFSIZ);
     gt_graphics_draw_text_centered(canvas->pvt->g,
                                    drawtick,
@@ -565,20 +573,24 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                        drawtick,
                                        40,
                                        gridcol,
-                                       canvas->pvt->height-40-15);
+                                       canvas->pvt->height-40-15,
+                                       1.0);
       }
       gt_graphics_draw_vertical_line(canvas->pvt->g,
                                      drawtick,
                                      35,
                                      rulercol,
-                                     5);
+                                     5,
+                                     1.0);
     }
   }
   /* draw ruler line */
   gt_graphics_draw_horizontal_line(canvas->pvt->g,
                                    canvas->pvt->margins,
                                    40,
-                                   canvas->pvt->width-2*margins);
+                                   rulercol,
+                                   canvas->pvt->width-2*margins,
+                                   1.5);
   /* put 3' and 5' captions at the ends */
   gt_graphics_draw_text_centered(canvas->pvt->g,
                                  canvas->pvt->margins-10,

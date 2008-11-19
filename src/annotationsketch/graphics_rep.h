@@ -30,10 +30,8 @@ typedef double (*GtGraphicsGetTextWidthFunc)(GtGraphics*, const char*);
 typedef void   (*GtGraphicsSetMarginsFunc)(GtGraphics*, double, double);
 typedef void   (*GtGraphicsSetFontFunc)(GtGraphics*, const char*, FontSlant,
                                         FontWeight);
-typedef void   (*GtGraphicsDrawHorizontalLineFunc)(GtGraphics*, double, double,
-                                                   double);
-typedef void   (*GtGraphicsDrawVerticalLineFunc)(GtGraphics*, double, double,
-                                                 GtColor, double);
+typedef void   (*GtGraphicsDrawLineFunc)(GtGraphics*, double, double,
+                                         GtColor, double, double);
 typedef void   (*GtGraphicsDrawBoxFunc)(GtGraphics*, double, double, double,
                                         double, GtColor, ArrowStatus, double,
                                         double, GtColor, bool);
@@ -42,7 +40,7 @@ typedef void    (*GtGraphicsDrawSimpleFunc)(GtGraphics*, double, double,
                                             double, double, GtColor);
 typedef void    (*GtGraphicsDrawRectFunc)(GtGraphics*, double, double, bool,
                                           GtColor, bool, GtColor, double,
-                                          double);
+                                          double, double);
 typedef void    (*GtGraphicsDrawArrowheadFunc)(GtGraphics*, double, double,
                                                GtColor, ArrowStatus);
 typedef void    (*GtGraphicsDrawCurveDataFunc)(GtGraphics *g,
@@ -50,6 +48,7 @@ typedef void    (*GtGraphicsDrawCurveDataFunc)(GtGraphics *g,
                                                GtColor color,
                                                double data[],
                                                unsigned long ndata,
+                                               GtRange,
                                                unsigned long height);
 typedef int     (*GtGraphicsSaveToFileFunc)(const GtGraphics*, const char*,
                                             GtError*);
@@ -86,9 +85,9 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                                      get_ymargins,
                                          GtGraphicsSetMarginsFunc
                                                      set_margins,
-                                         GtGraphicsDrawHorizontalLineFunc
+                                         GtGraphicsDrawLineFunc
                                                      draw_horizontal_line,
-                                         GtGraphicsDrawVerticalLineFunc
+                                         GtGraphicsDrawLineFunc
                                                      draw_vertical_line,
                                          GtGraphicsDrawBoxFunc draw_box,
                                          GtGraphicsDrawSimpleFunc draw_dashes,
