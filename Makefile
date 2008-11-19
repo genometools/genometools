@@ -542,7 +542,7 @@ ifeq ($(libannotationsketch),yes)
 endif
 
 .SUFFIXES:
-.PHONY: dist srcdist release gt install docs manuals installwww push \
+.PHONY: dist srcdist release gt install docs manuals installwww patch push \
         splint test clean cleanup
 
 VERSION:="`cat $(CURDIR)/VERSION`"
@@ -616,6 +616,8 @@ installwww:
 # install genometools.org website
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
 
+patch:
+	if test -f $(CURDIR)/src/patches/$(SYSTEMNAME).patch; then patch -p1 < $(CURDIR)/src/patches/$(SYSTEMNAME).patch; fi
 
 push:
 	git push origin master
