@@ -1069,8 +1069,14 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
   }
 
   /* parse the range */
-  if (!had_err)
-    had_err = gt_parse_range(&range, start, end, line_number, filename, err);
+  if (!had_err) {
+    if (parser->tidy) {
+      had_err = gt_parse_range_tidy(&range, start, end, line_number, filename,
+                                    err);
+    }
+    else
+      had_err = gt_parse_range(&range, start, end, line_number, filename, err);
+  }
   if (!had_err && range.start == 0) {
       gt_error_set(err, "illegal feature start 0 on line %u in file \"%s\" "
                    "(GFF3 files are 1-based)", line_number, filename);

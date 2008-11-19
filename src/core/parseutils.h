@@ -47,6 +47,11 @@ int gt_parse_double(double *out, const char *nptr);
 int gt_parse_range(GtRange*, const char *start, const char *end,
                    unsigned int line_number, const char *filename, GtError*);
 
+/* Issues a warning if <start> is larger then <end> and swaps them. */
+int gt_parse_range_tidy(GtRange*, const char *start, const char *end,
+                        unsigned int line_number, const char *filename,
+                        GtError*);
+
 /* Sets <score_is_defined> to false if !strcmp(score, ".").
    Otherwise <score_is_defined> is set to true and the parsed score is stored
    in <score_value>. */
