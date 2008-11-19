@@ -692,6 +692,20 @@ Test do
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
+Name "gt gff3 empty attribute value"
+Keywords "gt_gff3 empty_attribute_value"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}empty_attribute_value.gff3",
+           :retval => 1)
+  grep $last_stderr, "has no value"
+end
+
+Name "gt gff3 empty attribute value (-tidy)"
+Keywords "gt_gff3 empty_attribute_value"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}empty_attribute_value.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

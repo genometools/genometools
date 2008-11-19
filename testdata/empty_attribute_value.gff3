@@ -1,0 +1,40 @@
+##gff-version 3
+167631690	yrGATE	gene	87461	94610	.	-	.	ID=gene1;Name=ZmPLCf;Organism=Zea mays;Submitted_by=xiazhang
+167631690	yrGATE	exon	87461	87831	.	-	.	ID=exon1;Parent=gene1
+167631690	yrGATE	exon	87957	88053	.	-	.	ID=exon2;Parent=gene1
+167631690	yrGATE	exon	88140	88292	.	-	.	ID=exon3;Parent=gene1
+167631690	yrGATE	exon	88768	88885	.	-	.	ID=exon4;Parent=gene1
+167631690	yrGATE	exon	89020	89249	.	-	.	ID=exon5;Parent=gene1
+167631690	yrGATE	exon	89344	89595	.	-	.	ID=exon6;Parent=gene1
+167631690	yrGATE	exon	89669	89804	.	-	.	ID=exon7;Parent=gene1
+167631690	yrGATE	exon	89950	90152	.	-	.	ID=exon8;Parent=gene1
+167631690	yrGATE	exon	94360	94610	.	-	.	ID=exon9;Parent=gene1
+167631690	yrGATE	CDS	87719	87831	.	-	0	ID=CDS1;Parent=gene1;Name=;
+167631690	yrGATE	CDS	87957	88053	.	-	1	ID=CDS2;Parent=gene1;Name=;
+167631690	yrGATE	CDS	88140	88292	.	-	0	ID=CDS3;Parent=gene1;Name=;
+167631690	yrGATE	CDS	88768	88885	.	-	0	ID=CDS4;Parent=gene1;Name=;
+167631690	yrGATE	CDS	89020	89249	.	-	2	ID=CDS5;Parent=gene1;Name=;
+167631690	yrGATE	CDS	89344	89595	.	-	0	ID=CDS6;Parent=gene1;Name=;
+167631690	yrGATE	CDS	89669	89804	.	-	0	ID=CDS7;Parent=gene1;Name=;
+167631690	yrGATE	CDS	89950	90152	.	-	2	ID=CDS8;Parent=gene1;Name=;
+167631690	yrGATE	CDS	94360	94554	.	-	0	ID=CDS9;Parent=gene1;Name=;
+167631690	ZmGDB	GeneSeqer_EST_native	87461	87831	0.992	-	.	ID=evidence1;Evidence_for=exon1;
+167631690	ZmGDB	GeneSeqer_EST_native	87461	87831	1	-	.	ID=evidence3;Evidence_for=exon1;
+167631690	ZmGDB	GenomeThreader_Protein_homologous	87957	88053	0.773	-	.	ID=evidence4;Evidence_for=exon2;
+167631690	ZmGDB	GeneSeqer_EST_native	88140	88292	1	-	.	ID=evidence5;Evidence_for=exon3;
+167631690	ZmGDB	GeneSeqer_EST_native	88140	88292	1	-	.	ID=evidence6;Evidence_for=exon3;
+167631690	ZmGDB	GeneSeqer_EST_native	88140	88292	0.993	-	.	ID=evidence7;Evidence_for=exon3;
+167631690	ZmGDB	GenomeThreader_Protein_homologous	88768	88885	0.941	-	.	ID=evidence8;Evidence_for=exon4;
+167631690	ZmGDB	GenomeThreader_Protein_homologous	89020	89249	0.679	-	.	ID=evidence9;Evidence_for=exon5;
+167631690	ZmGDB	GenomeThreader_Protein_homologous	89344	89595	0.777	-	.	ID=evidence10;Evidence_for=exon6;
+167631690	ZmGDB	GeneSeqer_EST_native	89344	89595	0.992	-	.	ID=evidence11;Evidence_for=exon6;
+167631690	ZmGDB	GenomeThreader_Protein_homologous	89669	89804	0.895	-	.	ID=evidence12;Evidence_for=exon7;
+167631690	ZmGDB	GeneSeqer_EST_native	89669	89804	1	-	.	ID=evidence13;Evidence_for=exon7;
+167631690	ZmGDB	GeneSeqer_EST_native	89669	89804	1	-	.	ID=evidence14;Evidence_for=exon7;
+167631690	ZmGDB	GeneSeqer_EST_native	89669	89804	1	-	.	ID=evidence15;Evidence_for=exon7;
+167631690	ZmGDB	GeneSeqer_EST_native	89669	89804	1	-	.	ID=evidence16;Evidence_for=exon7;
+167631690	ZmGDB	GeneSeqer_EST_native	89669	89804	1	-	.	ID=evidence17;Evidence_for=exon7;
+167631690	ZmGDB	GenomeThreader_Protein_homologous	89950	90152	0.903	-	.	ID=evidence18;Evidence_for=exon8;
+167631690	ZmGDB	GeneSeqer_EST_native	94360	94610	1	-	.	ID=evidence19;Evidence_for=exon9;
+167631690	ZmGDB	GeneSeqer_EST_native	94360	94610	1	-	.	ID=evidence20;Evidence_for=exon9;
+
