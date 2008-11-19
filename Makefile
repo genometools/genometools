@@ -33,7 +33,7 @@ EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
-GT_CFLAGS:=-g -Wall -Werror -Wunused-parameter -pipe -fPIC -Wpointer-arith
+GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
@@ -170,6 +170,10 @@ WWWBASEDIR=/var/www/servers
 # process arguments
 ifeq ($(assert),no)
   EXP_CPPFLAGS += -DNDEBUG
+endif
+
+ifneq ($(errorcheck),no)
+  GT_CFLAGS += -Werror
 endif
 
 ifeq ($(cov),yes)
