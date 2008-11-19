@@ -269,6 +269,11 @@ style =
     collapse_to_parent = true,
   },
 --------------------------------------
+  GC_content = {
+    -- this is for a custom track
+    stroke             = {red=0.2, green=0.2, blue=1.0, alpha = 0.4},
+  },
+--------------------------------------
   -- Defines various format options for drawing.
   format =
   {
