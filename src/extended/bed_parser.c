@@ -29,10 +29,13 @@
 
 #define BROWSER_KEYWORD  "browser"
 #define TRACK_KEYWORD    "track"
+#define OFFSET_KEYWORD   "offset"
 
 #define BLANK_CHAR       ' '
 #define COMMENT_CHAR     '#'
 #define TABULATOR_CHAR   '\t'
+#define PAIR_SEPARATOR   '='
+#define QUOTE_CHAR       '"'
 
 struct GtBEDParser {
   GtRegionNodeBuilder *region_node_builder;
@@ -43,6 +46,7 @@ struct GtBEDParser {
   char *feature_type,
        *thick_feature_type,
        *block_type;
+  long offset;
 };
 
 GtBEDParser* gt_bed_parser_new(void)
@@ -133,6 +137,7 @@ static void word(GtStr *word, GtIO *bed_file)
     switch (gt_io_peek(bed_file)) {
       case BLANK_CHAR:
       case TABULATOR_CHAR:
+      case PAIR_SEPARATOR:
       case GT_CARRIAGE_RETURN:
       case GT_END_OF_LINE:
       case GT_END_OF_FILE:
@@ -141,6 +146,32 @@ static void word(GtStr *word, GtIO *bed_file)
         gt_str_append_char(word, gt_io_next(bed_file));
     }
   }
+}
+
+static int quoted_word(GtStr *word, GtIO *bed_file, GtError *err)
+{
+  bool break_while = false;
+  int had_err;
+  gt_error_check(err);
+  gt_str_reset(word);
+  had_err = gt_io_expect(bed_file, QUOTE_CHAR, err);
+  while (!had_err) {
+    switch (gt_io_peek(bed_file)) {
+      case QUOTE_CHAR:
+      case GT_CARRIAGE_RETURN:
+      case GT_END_OF_LINE:
+      case GT_END_OF_FILE:
+        break_while = true;
+        break;
+      default:
+        gt_str_append_char(word, gt_io_next(bed_file));
+    }
+    if (break_while)
+      break;
+  }
+  if (!had_err)
+    had_err = gt_io_expect(bed_file, QUOTE_CHAR, err);
+  return had_err;
 }
 
 static GtStr* get_seqid(GtBEDParser *bed_parser)
@@ -177,8 +208,50 @@ static int skip_blanks(GtIO *bed_file, GtError *err)
   return 0;
 }
 
+static int track_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
+{
+  char cc;
+  int had_err = 0;
+  gt_error_check(err);
+  bed_parser->offset = 0; /* reset offset for new track line */
+  if (bed_separator(bed_file)) /* skip to first attribute=value pair */
+    had_err = skip_blanks(bed_file, err);
+  while (!had_err &&
+         (cc = gt_io_peek(bed_file)) != GT_END_OF_LINE &&
+         cc != GT_CARRIAGE_RETURN) {
+    /* parse attribute */
+    word(bed_parser->word, bed_file);
+    had_err = gt_io_expect(bed_file, PAIR_SEPARATOR, err);
+    /* parse value */
+    if (!had_err) {
+      if (gt_io_peek(bed_file) == QUOTE_CHAR)
+        had_err = quoted_word(bed_parser->another_word, bed_file, err);
+      else
+        word(bed_parser->another_word, bed_file);
+    }
+    /* process offset if necessary */
+    if (!had_err && !strcmp(gt_str_get(bed_parser->word), OFFSET_KEYWORD)) {
+      if (gt_parse_long(&bed_parser->offset,
+                         gt_str_get(bed_parser->another_word))) {
+        gt_error_set(err, "file \"%s\": line %lu: could not parse offset value "
+                     "'%s'", gt_io_get_filename(bed_file),
+                     gt_io_get_line_number(bed_file),
+                     gt_str_get(bed_parser->another_word));
+        had_err = -1;
+      }
+    }
+    /* skip blanks up to next attribute or end-of-line */
+    if (!had_err && bed_separator(bed_file))
+      had_err = skip_blanks(bed_file, err);
+  }
+  /* the end of the line should now be reached */
+  if (!had_err)
+    had_err = gt_io_expect(bed_file, GT_END_OF_LINE, err);
+  return had_err;
+}
+
 static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
-                           GtIO *bed_file, GtError *err)
+                           long offset, GtIO *bed_file, GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -193,6 +266,8 @@ static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
                  gt_io_get_filename(bed_file), gt_io_get_line_number(bed_file));
     had_err = -1;
   }
+  if (offset)
+    *range = gt_range_offset(range, offset);
   return had_err;
 }
 
@@ -355,7 +430,8 @@ static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
   if (!had_err) {
     word(bed_parser->another_word, bed_file);
     had_err = parse_bed_range(&range, bed_parser->word,
-                              bed_parser->another_word, bed_file, err);
+                              bed_parser->another_word, bed_parser->offset,
+                              bed_file, err);
   }
   if (!had_err) {
     /* add region */
@@ -424,7 +500,8 @@ static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
       gt_assert(gt_str_length(bed_parser->word));
       /* got a thickStart and a thickEnd -> construct corresponding feature */
       had_err = parse_bed_range(&range, bed_parser->word,
-                                bed_parser->another_word, bed_file, err);
+                                bed_parser->another_word, bed_parser->offset,
+                                bed_file, err);
       if (!had_err)
         construct_thick_feature(bed_parser, (GtFeatureNode*) gn, range);
     }
@@ -489,7 +566,7 @@ static int bed_line(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
   if (!strcmp(gt_str_get(bed_parser->word), BROWSER_KEYWORD))
     rest_line(bed_file); /* ignore browser lines completely */
   else if (!strcmp(gt_str_get(bed_parser->word), TRACK_KEYWORD))
-    rest_line(bed_file); /* ignore track lines completely */
+    had_err = track_rest(bed_parser, bed_file, err);
   else
     had_err = bed_rest(bed_parser, bed_file, err);
   return had_err;
