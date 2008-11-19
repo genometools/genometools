@@ -74,3 +74,9 @@ Keywords "gt_stat"
 Test do
   run "#{$bin}gt stat #{$testdata}unsorted_gff3_file.txt"
 end
+
+Name "gt stat (embedded FASTA sequence)"
+Keywords "gt_stat"
+Test do
+  run_test "#{$bin}gt stat #{$testdata}minimal_fasta.gff3"
+end
