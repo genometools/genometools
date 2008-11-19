@@ -126,7 +126,7 @@ void gt_graphics_cairo_set_font(GtGraphics *gg, const char *family,
 }
 
 void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
-                              const char *text)
+                                 const char *text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
@@ -137,6 +137,24 @@ void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
+}
+
+void gt_graphics_cairo_draw_text_clip(GtGraphics *gg, double x, double y,
+                                      const char *text)
+{
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  gt_assert(g && text);
+  cairo_save(g->cr);
+  cairo_rectangle(g->cr,
+                  g->margin_x,
+                  g->margin_y,
+                  g->width-2*g->margin_x,
+                  g->height-2*g->margin_y);
+  cairo_clip(g->cr);
+  cairo_set_source_rgb(g->cr, 0, 0, 0);
+  cairo_move_to(g->cr, x, y);
+  cairo_show_text(g->cr, text);
+  cairo_restore(g->cr);
 }
 
 void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
@@ -575,6 +593,7 @@ const GtGraphicsClass* gt_graphics_cairo_class(void)
   {
     gc = gt_graphics_class_new(sizeof (GtGraphicsCairo),
                                gt_graphics_cairo_draw_text,
+                               gt_graphics_cairo_draw_text_clip,
                                gt_graphics_cairo_draw_text_centered,
                                gt_graphics_cairo_draw_text_right,
                                gt_graphics_cairo_draw_colored_text,

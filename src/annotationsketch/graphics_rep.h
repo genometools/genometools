@@ -64,6 +64,7 @@ struct GtGraphics {
 
 const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                          GtGraphicsDrawTextFunc draw_text,
+                                         GtGraphicsDrawTextFunc draw_text_clip,
                                          GtGraphicsDrawTextFunc
                                                      draw_text_centered,
                                          GtGraphicsDrawTextFunc draw_text_right,

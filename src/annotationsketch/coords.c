@@ -22,7 +22,7 @@
 
 double gt_coords_convert_point(GtRange viewrange, long pos)
 {
-  return ((double) (MAX(0,((long) pos -(long) viewrange.start))))
+  return ((double) (((long) pos -(long) viewrange.start)))
                   / ((double) gt_range_length(&viewrange));
 }
 
@@ -33,23 +33,14 @@ GtDrawingRange gt_coords_calc_generic_range(GtRange node_range,
   converted_range.clip = CLIPPED_NONE;
   node_range.end++;
   /* scale coordinates to target image width */
-  /* first, check if left side has to be clipped */
   if (node_range.start < viewrange.start )
-  {
     converted_range.clip = CLIPPED_LEFT;
-    converted_range.start = 0.0;
-  }
-  else
-    converted_range.start = gt_coords_convert_point(viewrange,
-                                                    node_range.start);
+  converted_range.start = gt_coords_convert_point(viewrange, node_range.start);
 
-  /* then, check right side. */
   if (node_range.end > viewrange.end+1)
-  {
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
                                                       CLIPPED_BOTH :
                                                       CLIPPED_RIGHT);
-  }
   converted_range.end = gt_coords_convert_point(viewrange, node_range.end);
 
   return converted_range;

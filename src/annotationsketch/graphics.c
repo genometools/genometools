@@ -28,6 +28,7 @@ struct GtGraphicsMembers {
 struct GtGraphicsClass {
   size_t size;
   GtGraphicsDrawTextFunc draw_text,
+                         draw_text_clip,
                          draw_text_centered,
                          draw_text_right;
   GtGraphicsDrawColoredTextFunc draw_colored_text;
@@ -54,6 +55,7 @@ struct GtGraphicsClass {
 
 const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                          GtGraphicsDrawTextFunc draw_text,
+                                         GtGraphicsDrawTextFunc draw_text_clip,
                                          GtGraphicsDrawTextFunc
                                                      draw_text_centered,
                                          GtGraphicsDrawTextFunc draw_text_right,
@@ -95,6 +97,7 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
   GtGraphicsClass *c_class = gt_class_alloc(sizeof *c_class);
   c_class->size = size;
   c_class->draw_text = draw_text;
+  c_class->draw_text_clip = draw_text_clip;
   c_class->draw_text_right = draw_text_right;
   c_class->draw_text_centered = draw_text_centered;
   c_class->draw_colored_text = draw_colored_text;
@@ -151,6 +154,13 @@ void gt_graphics_draw_text(GtGraphics *g, double x, double y, const char* txt)
 {
   gt_assert(g && g->c_class && txt);
   g->c_class->draw_text(g, x, y, txt);
+}
+
+void gt_graphics_draw_text_clip(GtGraphics *g, double x, double y,
+                                const char* txt)
+{
+  gt_assert(g && g->c_class && txt);
+  g->c_class->draw_text_clip(g, x, y, txt);
 }
 
 void gt_graphics_draw_text_centered(GtGraphics *g, double x, double y,

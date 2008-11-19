@@ -51,6 +51,7 @@ typedef struct GtGraphics GtGraphics;
 #include "core/str.h"
 
 void   gt_graphics_draw_text(GtGraphics*, double x, double y, const char*);
+void   gt_graphics_draw_text_clip(GtGraphics*, double x, double y, const char*);
 #define gt_graphics_draw_text_left(g,x,y,t) \
         gt_graphics_draw_text(g,x,y,t);
 void   gt_graphics_draw_text_centered(GtGraphics*, double x, double y,

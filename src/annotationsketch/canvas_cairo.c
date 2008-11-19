@@ -196,14 +196,15 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block)
   block_width = draw_range.end - draw_range.start;
 
   /* draw block caption */
-  if (gt_block_caption_is_visible(block)) {
+  if (gt_block_caption_is_visible(block))
+  {
     caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
-      gt_graphics_draw_text(canvas->pvt->g,
-                            MAX(canvas->pvt->margins, block_start),
-                            canvas->pvt->y -CAPTION_BAR_SPACE_DEFAULT,
-                            caption);
+      gt_graphics_draw_text_clip(canvas->pvt->g,
+                                 block_start,
+                                 canvas->pvt->y -CAPTION_BAR_SPACE_DEFAULT,
+                                 caption);
     }
   }
 
