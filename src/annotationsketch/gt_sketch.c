@@ -286,7 +286,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   else if (!had_err && !gt_feature_index_has_seqid(features,
                                                 gt_str_get(arguments.seqid))) {
     gt_error_set(err, "sequence region '%s' does not exist in GFF input file",
-              gt_str_get(arguments.seqid));
+                 gt_str_get(arguments.seqid));
     had_err = -1;
   }
   else if (!had_err)
@@ -325,39 +325,45 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   if (!had_err) {
     /* create and write image file */
     d = gt_diagram_new(features, seqid, &qry_range, sty, err);
-    l = gt_layout_new(d, arguments.width, sty);
-    height = gt_layout_get_height(l);
-    ii = gt_image_info_new();
+    if (!(l = gt_layout_new(d, arguments.width, sty, err)))
+      had_err = -1;
+    if (had_err || !(l = gt_layout_new(d, arguments.width, sty, err)))
+      had_err = -1;
+    if (!had_err)
+    {
+      height = gt_layout_get_height(l);
+      ii = gt_image_info_new();
 
-    if (strcmp(gt_str_get(arguments.format),"pdf")==0) {
-      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PDF, arguments.width,
-                                        height, ii);
-    }
-    else if (strcmp(gt_str_get(arguments.format),"ps")==0) {
-      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PS, arguments.width,
-                                        height, ii);
-    }
-    else if (strcmp(gt_str_get(arguments.format),"svg")==0) {
-      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_SVG, arguments.width,
-                                        height, ii);
-    }
-    else {
-      canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PNG, arguments.width,
-                                        height, ii);
-    }
-    gt_layout_sketch(l, canvas);
-    if (arguments.showrecmaps) {
-      unsigned long i;
-      const GtRecMap *rm;
-      for (i = 0; i < gt_image_info_num_of_rec_maps(ii) ;i++) {
-        char buf[BUFSIZ];
-        rm = gt_image_info_get_rec_map(ii, i);
-        gt_rec_map_format_html_imagemap_coords(rm, buf, BUFSIZ);
-        printf("%s, %s\n", buf, gt_feature_node_get_type(rm->gf));
+      if (strcmp(gt_str_get(arguments.format),"pdf")==0) {
+        canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PDF, arguments.width,
+                                          height, ii);
       }
+      else if (strcmp(gt_str_get(arguments.format),"ps")==0) {
+        canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PS, arguments.width,
+                                          height, ii);
+      }
+      else if (strcmp(gt_str_get(arguments.format),"svg")==0) {
+        canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_SVG, arguments.width,
+                                          height, ii);
+      }
+      else {
+        canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PNG, arguments.width,
+                                          height, ii);
+      }
+      gt_layout_sketch(l, canvas);
+      if (arguments.showrecmaps) {
+        unsigned long i;
+        const GtRecMap *rm;
+        for (i = 0; i < gt_image_info_num_of_rec_maps(ii) ;i++) {
+          char buf[BUFSIZ];
+          rm = gt_image_info_get_rec_map(ii, i);
+          gt_rec_map_format_html_imagemap_coords(rm, buf, BUFSIZ);
+          printf("%s, %s\n", buf, gt_feature_node_get_type(rm->gf));
+        }
+      }
+      had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, file,
+                                             err);
     }
-    had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, file,
-                                           err);
   }
 
   /* free */

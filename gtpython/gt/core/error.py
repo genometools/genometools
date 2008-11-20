@@ -37,11 +37,20 @@ class Error:
   def get(self):
     return gtlib.gt_error_get(self.error)
 
+  def is_set(self):
+    return (gtlib.gt_error_is_set(self.error) == 1)
+
+  def unset(self):
+    gtlib.gt_error_unset(self.error)
+
   def register(cls, gtlib):
-    from ctypes import c_void_p, c_char_p
+    from ctypes import c_void_p, c_char_p, c_int
     gtlib.gt_error_new.restype = c_void_p
     gtlib.gt_error_get.restype = c_char_p
+    gtlib.gt_error_is_set.restype = c_int
     gtlib.gt_error_get.argtypes = [c_void_p]
+    gtlib.gt_error_is_set.argtypes = [c_void_p]
+    gtlib.gt_error_unset.argtypes = [c_void_p]
   register = classmethod(register)
 
 def gterror(err):

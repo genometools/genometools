@@ -34,7 +34,7 @@ class Diagram:
       gterror("range.start > range.end")
     self.diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(range), \
                                         style, err)
-    if self.diagram == 0:
+    if err.is_set():
       gterror(err)
     self._as_parameter_ = self.diagram
 
@@ -64,7 +64,7 @@ class Diagram:
   def register(cls, gtlib):
     from ctypes import c_char_p, c_void_p, POINTER
     gtlib.gt_diagram_new.restype = c_void_p
-    gtlib.gt_diagram_new.argtypes = [c_void_p, c_char_p, POINTER(Range), \
+    gtlib.gt_diagram_new.argtypes = [FeatureIndex, c_char_p, POINTER(Range), \
                                      Style, Error]
     gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p, \
                                                          TrackSelectorFunc]

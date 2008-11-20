@@ -50,7 +50,9 @@ int main(int argc, char *argv[])
     handle_error(err);
 
   /* create layout with given width, determine resulting image height */
-  layout = gt_layout_new(diagram, 600, style);
+  layout = gt_layout_new(diagram, 600, style, err);
+  if (!layout)
+    handle_error(err);
   height = gt_layout_get_height(layout);
 
   /* create PNG canvas */

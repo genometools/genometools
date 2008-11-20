@@ -21,14 +21,19 @@ require 'gthelper'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GtLayout*     gt_layout_new(GtDiagram*, unsigned int, GtStyle*)"
+  extern "GtLayout*     gt_layout_new(GtDiagram*, unsigned int, GtStyle*, " + \
+                                     "GtError*)"
   extern "unsigned long gt_layout_get_height(GtLayout*)"
   extern "int           gt_layout_sketch(GtLayout*, GtCanvas*)"
   extern "void          gt_layout_delete(GtCanvas*)"
 
   class Layout
     def initialize(diagram, width, style)
-      @layout = GT.gt_layout_new(diagram, width, style)
+      err = GT::Error.new()
+      @layout = GT.gt_layout_new(diagram, width, style, err)
+      if @layout.nil? then
+        GT::gterror(err)
+      end
       @layout.free = GT::symbol("gt_layout_delete", "0P")
     end
 

@@ -23,7 +23,10 @@ from gt.core.error import Error, gterror
 
 class Layout:
   def __init__(self, diagram, width, style):
-    self.layout = gtlib.gt_layout_new(diagram, width, style)
+    err = Error()
+    self.layout = gtlib.gt_layout_new(diagram, width, style, err)
+    if err.is_set():
+      gterror(err)
     self._as_parameter_ = self.layout
 
   def __del__(self):

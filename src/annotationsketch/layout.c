@@ -169,13 +169,37 @@ static int render_custom_tracks(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-GtLayout* gt_layout_new(GtDiagram *diagram, unsigned int width, GtStyle *style)
+static int check_width(unsigned int width,
+                       GtStyle *style,
+                       GtError *err)
+{
+  int had_err = 0;
+  double margins = MARGINS_DEFAULT;
+  gt_style_get_num(style, "format", "margins", &margins, NULL);
+  if (width - 2*margins < 0)
+  {
+    gt_error_set(err, "layout width must at least be twice the x-margin size "
+                      "(2*%.1f=%.1f) but was %u",
+                      margins,
+                      2*margins,
+                      width);
+    had_err = -1;
+  }
+  return had_err;
+}
+
+GtLayout* gt_layout_new(GtDiagram *diagram,
+                        unsigned int width,
+                        GtStyle *style,
+                        GtError *err)
 {
   GtLayout *layout;
   GtTextWidthCalculator *twc;
-  gt_assert(diagram && width > 0 && style);
+  gt_assert(diagram && width > 0 && style && err);
+  if (check_width(width, style, err) < 0)
+    return NULL;
   twc = gt_text_width_calculator_cairo_new(NULL);
-  layout = gt_layout_new_with_twc(diagram, width, style, twc);
+  layout = gt_layout_new_with_twc(diagram, width, style, twc, err);
   layout->own_twc = true;
   return layout;
 }
@@ -183,11 +207,14 @@ GtLayout* gt_layout_new(GtDiagram *diagram, unsigned int width, GtStyle *style)
 GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
                                  unsigned int width,
                                  GtStyle *style,
-                                 GtTextWidthCalculator *twc)
+                                 GtTextWidthCalculator *twc,
+                                 GtError *err)
 {
   GtLayout *layout;
   GtLayoutTraverseInfo lti;
-  gt_assert(diagram && width > 0 && style && twc);
+  gt_assert(diagram && style && twc && err);
+  if (check_width(width, style, err) < 0)
+    return NULL;
   layout = gt_calloc(1, sizeof (GtLayout));
   layout->twc = twc;
   layout->style = style;

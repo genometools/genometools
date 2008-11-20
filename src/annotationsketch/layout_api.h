@@ -39,13 +39,14 @@ typedef struct GtLayout GtLayout;
    The layout is done for a target image width of <width> and using the rules in
    <GtStyle> object <style>. */
 GtLayout*              gt_layout_new(GtDiagram *diagram, unsigned int width,
-                                     GtStyle*);
+                                     GtStyle*, GtError *err);
 /* Like <gt_layout_new()>, but allows use of a different <GtTextWidthCalculator>
    implementation. */
 GtLayout*              gt_layout_new_with_twc(GtDiagram*,
                                               unsigned int width,
                                               GtStyle*,
-                                              GtTextWidthCalculator*);
+                                              GtTextWidthCalculator*,
+                                              GtError *err);
 /* Returns the height of the layout in pixels. */
 unsigned long          gt_layout_get_height(const GtLayout*);
 /* Renders the layout on the <target_canvas>. */

@@ -22,6 +22,8 @@ module GT
   gtdlload "libgenometools"
   extern "GtError* gt_error_new()"
   extern "const char* gt_error_get(const GtError*)"
+  extern "ibool gt_error_is_set(const GtError*)"
+  extern "void gt_error_unset(GtError*)"
   extern "void gt_error_delete(GtError*)"
 
   class Error
@@ -32,6 +34,14 @@ module GT
 
     def get
       GT.gt_error_get(@error)
+    end
+
+    def is_set
+      GT.gt_error_is_set(@error)
+    end
+
+    def unset
+      GT.gt_error_unset(@error)
     end
 
     def to_ptr

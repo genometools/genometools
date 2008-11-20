@@ -66,7 +66,9 @@ static void draw_example_features(GtArray *features, const char *style_file,
   diagram = gt_diagram_new_from_array(features, &range, style);
 
   /* create layout with given width, determine resulting image height */
-  layout = gt_layout_new(diagram, 600, style);
+  layout = gt_layout_new(diagram, 600, style, err);
+  if (!layout)
+    handle_error(err);
   height = gt_layout_get_height(layout);
 
   /* create PNG canvas */

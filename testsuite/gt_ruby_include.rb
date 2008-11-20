@@ -54,7 +54,7 @@ if not $arguments["nocairo"] then
              "#{$testdata}gff3_file_1_short.txt"
   end
 
-  Name "gtruby: TrackSelector callbacks and Block bindings"
+  Name "gtruby: AnnotationSketch bindings (TrackSelectorFunc)"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/block_stuff.rb " +
@@ -67,6 +67,13 @@ if not $arguments["nocairo"] then
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/style.rb #{$cur}/gtdata/sketch/default.style"
+  end
+
+  Name "gtruby: AnnotationSketch bindings (error reporting)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/sketch-failures.rb " +
+             "#{$testdata}gff3_file_1_short.txt"
   end
 
   Name "gtruby: show_seqids"
