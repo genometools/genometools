@@ -66,6 +66,10 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   unsigned long n;
   GtRange value_range = {0, 1};
   GtColor color, grey, black;
+  gt_assert(ct && graphics && viewrange.start <= viewrange.end
+             && gt_graphics_get_image_width(graphics)
+                   - 2*gt_graphics_get_xmargins(graphics) > 0);
+
   ctgc = gt_custom_track_gc_content_cast(ct);
 
   gt_style_get_color(style, "GC_content", "stroke", &color, NULL);
