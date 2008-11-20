@@ -321,7 +321,24 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
       cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height);
       cairo_close_path(g->cr);
       break;
-    case ARROW_BOTH: /* XXX */
+    case ARROW_BOTH:
+      cairo_move_to(g->cr, rnd_to_nhalf(x), y + height/2);
+      if (width < 2*arrow_width)
+      {
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width/2), y);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height/2);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width/2), y + height);
+      }
+      else
+      {
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y+height/2);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x), y + height);
+      }
+      cairo_close_path(g->cr);
+      break;
     case ARROW_NONE:
       cairo_rectangle(g->cr, rnd_to_nhalf(x), y, width, height);
    }
