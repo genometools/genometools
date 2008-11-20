@@ -25,7 +25,7 @@ typedef struct GtNodeVisitor GtNodeVisitor;
 #include "extended/comment_node_api.h"
 #include "extended/feature_node.h"
 #include "extended/region_node.h"
-#include "extended/sequence_node.h"
+#include "extended/sequence_node_api.h"
 
 int  gt_node_visitor_visit_comment_node(GtNodeVisitor*, GtCommentNode*,
                                         GtError*);

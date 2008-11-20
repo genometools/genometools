@@ -15,24 +15,33 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQUENCE_NODE_H
-#define SEQUENCE_NODE_H
+#ifndef SEQUENCE_NODE_API_H
+#define SEQUENCE_NODE_API_H
 
-/* implements the ``genome node'' interface */
+/* Implements the <GtGenomeNode> interface. Sequence nodes correspond to
+   embedded FASTA sequences in GFF3 files. */
 typedef struct GtSequenceNode GtSequenceNode;
 
 #include "core/str.h"
 #include "extended/genome_node.h"
 
 const GtGenomeNodeClass* gt_sequence_node_class(void);
-/* Takes ownership of <sequence>. */
+
+/* Create a new <GtSequenceNode*> representing a FASTA entry with the given
+   <description> and <sequence>. Takes ownership of <sequence>. */
 GtGenomeNode*            gt_sequence_node_new(const char *description,
                                               GtStr *sequence);
+/* Return the description of <sequence_node>. */
 const char*              gt_sequence_node_get_description(const
-                                                          GtSequenceNode*);
-const char*              gt_sequence_node_get_sequence(const GtSequenceNode*);
+                                                          GtSequenceNode
+                                                          *sequence_node);
+/* Return the sequence of <sequence_node>. */
+const char*              gt_sequence_node_get_sequence(const GtSequenceNode
+                                                       *sequence_node);
+/* Return the sequence length of <sequence_node>. */
 unsigned long            gt_sequence_node_get_sequence_length(const
-                                                              GtSequenceNode*);
+                                                              GtSequenceNode
+                                                              *sequence_node);
 
 #define gt_sequence_node_cast(genome_node) \
         gt_genome_node_cast(gt_sequence_node_class(), genome_node)
