@@ -40,6 +40,6 @@ int           gt_custom_track_render(GtCustomTrack *ctrack,
 /* Returns the height of the given <ctrack> in pixels/points. */
 unsigned long gt_custom_track_get_height(GtCustomTrack *ctrack);
 /* Returns the title of the given <ctrack>. */
-GtStr*        gt_custom_track_get_title(GtCustomTrack *ctrack);
+const char*   gt_custom_track_get_title(GtCustomTrack *ctrack);
 
 #endif

@@ -99,7 +99,7 @@ unsigned long gt_custom_track_get_height(GtCustomTrack *ct)
   return ct->c_class->get_height(ct);
 }
 
-GtStr* gt_custom_track_get_title(GtCustomTrack *ct)
+const char* gt_custom_track_get_title(GtCustomTrack *ct)
 {
   gt_assert(ct && ct->c_class);
   return ct->c_class->get_title(ct);

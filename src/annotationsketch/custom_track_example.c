@@ -87,11 +87,11 @@ unsigned long gt_custom_track_example_get_height(GtCustomTrack *ct)
   return cte->height;
 }
 
-GtStr* gt_custom_track_example_get_title(GtCustomTrack *ct)
+const char* gt_custom_track_example_get_title(GtCustomTrack *ct)
 {
   GtCustomTrackExample *cte;
   cte = gt_custom_track_example_cast(ct);
-  return cte->title;
+  return gt_str_get(cte->title);
 }
 
 void gt_custom_track_example_delete(GtCustomTrack *ct)

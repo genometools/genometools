@@ -489,7 +489,7 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
                                   canvas->pvt->margins,
                                   canvas->pvt->y,
                                   color,
-                                  gt_str_get(gt_custom_track_get_title(ct)));
+                                  gt_custom_track_get_title(ct));
   }
   canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
   /* simply call rendering function */
