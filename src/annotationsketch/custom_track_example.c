@@ -124,7 +124,6 @@ GtCustomTrack* gt_custom_track_example_new()
   GtCustomTrack *ct;
   ct = gt_custom_track_create(gt_custom_track_example_class());
   cte = gt_custom_track_example_cast(ct);
-  /* cte->title = gt_str_new_cstr(gt_seq_get_description(seq)); */
   cte->title = gt_str_new_cstr("Example custom track for AnnotationSketch");
   cte->height = 40;
   return ct;

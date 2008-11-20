@@ -26,9 +26,9 @@
    size for GC content calculation, <windowsize> is used. */
 typedef struct GtCustomTrackGcContent GtCustomTrackGcContent;
 
-GtCustomTrack*            gt_custom_track_gc_content_new(GtSeq *seq,
-                                                      unsigned long windowsize,
-                                                      unsigned long height,
-                                                      double avg,
-                                                      bool show_scale);
+GtCustomTrack* gt_custom_track_gc_content_new(GtSeq *seq,
+                                              unsigned long windowsize,
+                                              unsigned long height,
+                                              double avg,
+                                              bool show_scale);
 #endif
