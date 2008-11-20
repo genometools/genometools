@@ -28,3 +28,6 @@ from annotationsketch import *
 from core import *
 from extended import *
 
+
+str = __builtins__['str']
+range = __builtins__['range']

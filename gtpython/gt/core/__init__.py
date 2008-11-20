@@ -25,3 +25,7 @@ Array.register(gtlib)
 Error.register(gtlib)
 Str.register(gtlib)
 StrArray.register(gtlib)
+
+
+str = __builtins__['str']
+range = __builtins__['range']
