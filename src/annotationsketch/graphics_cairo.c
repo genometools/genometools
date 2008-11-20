@@ -304,22 +304,21 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
     case ARROW_RIGHT:
       cairo_move_to(g->cr, rnd_to_nhalf(x), y);
       if (width - arrow_width > 0)
-        cairo_rel_line_to(g->cr, width - arrow_width, 0);
-      cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height / 2);
+        cairo_line_to(g->cr, x + width - arrow_width, y);
+      cairo_line_to(g->cr, x + width, y + height / 2);
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y + height);
+        cairo_line_to(g->cr, x + width - arrow_width, y + height);
       cairo_line_to(g->cr, rnd_to_nhalf(x), y + height);
       cairo_close_path(g->cr);
       break;
     case ARROW_LEFT:
       cairo_move_to(g->cr, rnd_to_nhalf(x + width), y);
       if (width - arrow_width > 0)
-        cairo_rel_line_to(g->cr, -rnd_to_nhalf(width - arrow_width), 0);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y);
       cairo_line_to(g->cr, rnd_to_nhalf(x), y + height / 2);
-      cairo_line_to(g->cr, rnd_to_nhalf(x + MIN(width, arrow_width)),
-                    y + height);
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y + height);
+      cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height);
       cairo_close_path(g->cr);
       break;
     case ARROW_BOTH: /* XXX */
