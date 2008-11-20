@@ -136,7 +136,7 @@ int gt_track_sketch(GtTrack* track, GtCanvas *canvas, GtError *err)
 {
   int i = 0, had_err = 0;
   gt_assert(track && canvas);
-  gt_canvas_visit_track_pre(canvas, track, err);
+  had_err = gt_canvas_visit_track_pre(canvas, track, err);
   for (i = 0; i < gt_array_size(track->lines); i++)
   {
     had_err = gt_line_sketch(*(GtLine**) gt_array_get(track->lines, i),
@@ -146,7 +146,7 @@ int gt_track_sketch(GtTrack* track, GtCanvas *canvas, GtError *err)
       break;
   }
   if (!had_err)
-    gt_canvas_visit_track_post(canvas, track, err);
+    had_err = gt_canvas_visit_track_post(canvas, track, err);
   return had_err;
 }
 
