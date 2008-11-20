@@ -101,7 +101,7 @@ static inline NodeInfoElement* nodeinfo_get(GtDiagram *d,
   if (!(ni = gt_hashmap_get(d->nodeinfo, node))) {
     ni = gt_calloc(1, sizeof (NodeInfoElement));
     ni->type_index  = gt_hashmap_new(HASH_STRING, NULL,
-                                  gt_free_func);
+                                     gt_free_func);
     ni->types       = gt_str_array_new();
     gt_hashmap_add(d->nodeinfo, node, ni);
   }
@@ -135,7 +135,7 @@ static inline void nodeinfo_add_block(NodeInfoElement *ni,
   if (!(ni->type_index))
   {
     ni->type_index  = gt_hashmap_new(HASH_STRING, NULL,
-                                  gt_free_func);
+                                     gt_free_func);
   }
   if (!(type_struc = gt_hashmap_get(ni->type_index, gft)))
   {
@@ -447,11 +447,11 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
     gt_assert(gt_hashmap_get(d->nodeinfo, node));
 }
 
-static int visit_child(GtGenomeNode* gn, void *gt_genome_node_children,
+static int visit_child(GtGenomeNode* gn, void *nti,
                        GtError *err)
 {
   NodeTraverseInfo* gt_genome_node_info;
-  gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
+  gt_genome_node_info = (NodeTraverseInfo*) nti;
   gt_error_check(err);
   int had_err;
   if (gt_genome_node_has_children(gn))
@@ -542,12 +542,12 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
 
 /* Traverse a genome node graph with depth first search. */
 static void traverse_genome_nodes(GtFeatureNode *gn,
-                                  void *gt_genome_node_children)
+                                  void *nti)
 {
   NodeTraverseInfo* gt_genome_node_info;
   int had_err;
-  gt_assert(gt_genome_node_children);
-  gt_genome_node_info = (NodeTraverseInfo*) gt_genome_node_children;
+  gt_assert(nti);
+  gt_genome_node_info = (NodeTraverseInfo*) nti;
   gt_genome_node_info->parent = gn;
   /* handle root nodes */
   process_node(gt_genome_node_info->diagram, (GtFeatureNode*)gn, NULL);
@@ -559,44 +559,51 @@ static void traverse_genome_nodes(GtFeatureNode *gn,
   }
 }
 
-int gt_diagram_build(GtDiagram *diagram)
-{
-  unsigned long i = 0;
-  int had_err;
-  NodeTraverseInfo gt_genome_node_children;
-  gt_genome_node_children.diagram = diagram;
-
-  /* initialise caches */
-  diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
-  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
-                                                   gt_free_func);
-
-  /* do node traversal for each root feature */
-  for (i = 0; i < gt_array_size(diagram->features); i++) {
-    GtFeatureNode *current_root = *(GtFeatureNode**)
-                                         gt_array_get(diagram->features,i);
-    traverse_genome_nodes(current_root, &gt_genome_node_children);
-  }
-  /* collect blocks from nodeinfo structures */
-  had_err = gt_hashmap_foreach_ordered(diagram->nodeinfo, collect_blocks,
-                                       diagram, (GtCompare) gt_genome_node_cmp,
-                                       NULL);
-  gt_assert(!had_err); /* collect_blocks() is sane */
-
-  /* clear caches */
-  gt_hashmap_delete(diagram->collapsingtypes);
-  gt_hashmap_delete(diagram->caption_display_status);
-  return had_err;
-}
-
-static int blocklist_delete(void *value)
+static void blocklist_delete(void *value)
 {
   unsigned long i;
   GtArray *a = (GtArray*) value;
   for (i = 0; i < gt_array_size(a); i++)
     gt_block_delete(*(GtBlock**) gt_array_get(a, i));
   gt_array_delete(a);
-  return 0;
+}
+
+int gt_diagram_build(GtDiagram *diagram)
+{
+  unsigned long i = 0;
+  int had_err;
+  NodeTraverseInfo nti;
+  nti.diagram = diagram;
+
+  /* initialise caches */
+  diagram->collapsingtypes = gt_hashmap_new(HASH_STRING, NULL, gt_free_func);
+  diagram->caption_display_status = gt_hashmap_new(HASH_DIRECT, NULL,
+                                                   gt_free_func);
+
+  if (!diagram->blocks)
+  {
+    gt_hashmap_reset(diagram->nodeinfo);
+    /* do node traversal for each root feature */
+    for (i = 0; i < gt_array_size(diagram->features); i++) {
+      GtFeatureNode *current_root = *(GtFeatureNode**)
+                                           gt_array_get(diagram->features,i);
+      traverse_genome_nodes(current_root, &nti);
+    }
+    diagram->blocks = gt_hashmap_new(HASH_STRING, gt_free_func,
+                                    (GtFree) blocklist_delete);
+    /* collect blocks from nodeinfo structures */
+    had_err = gt_hashmap_foreach_ordered(diagram->nodeinfo,
+                                         collect_blocks,
+                                         diagram,
+                                         (GtCompare) gt_genome_node_cmp,
+                                         NULL);
+    gt_assert(!had_err); /* collect_blocks() is sane */
+  }
+
+  /* clear caches */
+  gt_hashmap_delete(diagram->collapsingtypes);
+  gt_hashmap_delete(diagram->caption_display_status);
+  return had_err;
 }
 
 static GtDiagram* gt_diagram_new_generic(GtArray *features,
@@ -605,8 +612,6 @@ static GtDiagram* gt_diagram_new_generic(GtArray *features,
 {
   GtDiagram *diagram;
   diagram = gt_calloc(1, sizeof (GtDiagram));
-  diagram->blocks = gt_hashmap_new(HASH_STRING, gt_free_func,
-                                  (GtFree) blocklist_delete);
   diagram->nodeinfo = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->style = style;
   diagram->range = *range;
@@ -655,8 +660,12 @@ void gt_diagram_set_track_selector_func(GtDiagram *diagram,
                                         void *ptr)
 {
   gt_assert(diagram);
+  /* register selector function and attached pointer */
   diagram->select_func = bsfunc;
   diagram->ptr = ptr;
+  /* this could change track assignment -> discard current blocks and requeue */
+  gt_hashmap_delete(diagram->blocks);
+  diagram->blocks = NULL;
 }
 
 GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram)
@@ -682,7 +691,8 @@ void gt_diagram_delete(GtDiagram *diagram)
   if (!diagram) return;
   if (diagram->own_features)
     gt_array_delete(diagram->features);
-  gt_hashmap_delete(diagram->blocks);
+  if (diagram->blocks)
+    gt_hashmap_delete(diagram->blocks);
   gt_hashmap_delete(diagram->nodeinfo);
   gt_array_delete(diagram->custom_tracks);
   gt_free(diagram);
