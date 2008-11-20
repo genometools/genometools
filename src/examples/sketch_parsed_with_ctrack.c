@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
      window size 1000, 40px height and average line at 16.5% */
   custom = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
                                           windowsize,
-                                          40,
+                                          70,
                                           0.165);
   gt_diagram_add_custom_track(diagram, custom);
   /* create example custom track */
@@ -77,7 +77,9 @@ int main(int argc, char *argv[])
   gt_diagram_add_custom_track(diagram, custom2);
 
   /* create layout with given width, determine resulting image height */
-  layout = gt_layout_new(diagram, 1000, style);
+  layout = gt_layout_new(diagram, 1000, style, err);
+  if (gt_error_is_set(err))
+    handle_error(err);
   height = gt_layout_get_height(layout);
 
   /* create PNG canvas */
