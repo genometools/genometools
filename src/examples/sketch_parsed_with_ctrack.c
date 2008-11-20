@@ -70,7 +70,8 @@ int main(int argc, char *argv[])
   custom = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
                                           windowsize,
                                           70,
-                                          0.165);
+                                          0.165,
+                                          true);
   gt_diagram_add_custom_track(diagram, custom);
   /* create example custom track */
   custom2 = gt_custom_track_example_new();

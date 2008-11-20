@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include "annotationsketch/coords.h"
+#include "annotationsketch/default_formats.h"
 #include "annotationsketch/custom_track_gc_content.h"
 #include "annotationsketch/custom_track_rep.h"
 #include "core/log.h"
@@ -29,6 +30,7 @@ struct GtCustomTrackGcContent {
   unsigned long windowsize,
                 height;
   double avg;
+  bool show_scale;
   GtStr *title;
   GtSeq *seq;
 };
@@ -103,7 +105,32 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
   gt_log_log("i=%lu, widthval = %f\n", n,
                  (gt_graphics_get_image_width(graphics)
                     - 2*gt_graphics_get_xmargins(graphics)));
-
+  if (ctgc->show_scale)
+  {
+    gt_graphics_draw_horizontal_line(graphics,
+                                     gt_graphics_get_xmargins(graphics) + 1,
+                                     start_ypos+1,
+                                     black,
+                                     2,
+                                     1.0);
+    gt_graphics_draw_horizontal_line(graphics,
+                                     gt_graphics_get_xmargins(graphics) + 1,
+                                     start_ypos + ctgc->height,
+                                     black,
+                                     2,
+                                     1.0);
+    gt_graphics_draw_text(graphics,
+                          gt_graphics_get_xmargins(graphics)+ 5,
+                          start_ypos
+                            + gt_graphics_get_text_height(graphics)/2 - 1,
+                          "100\%");
+    gt_graphics_draw_text(graphics,
+                          gt_graphics_get_xmargins(graphics)+ 5,
+                          start_ypos
+                            + ctgc->height
+                            + gt_graphics_get_text_height(graphics)/2 - 1,
+                          "0\%");
+  }
   gt_graphics_draw_horizontal_line(graphics,
                                    gt_graphics_get_xmargins(graphics),
                                    start_ypos + (1.0-ctgc->avg) * ctgc->height,
@@ -111,12 +138,15 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                                    (gt_graphics_get_image_width(graphics)
                                      - 2*gt_graphics_get_xmargins(graphics)),
                                    1.0);
-  gt_graphics_draw_vertical_line(graphics,
-                                 gt_graphics_get_xmargins(graphics),
-                                 start_ypos,
-                                 black,
-                                 ctgc->height,
-                                 1.0);
+  if (ctgc->show_scale)
+  {
+    gt_graphics_draw_vertical_line(graphics,
+                                   gt_graphics_get_xmargins(graphics),
+                                   start_ypos,
+                                   black,
+                                   ctgc->height,
+                                   1.0);
+  }
   gt_graphics_draw_curve_data(graphics,
                               gt_graphics_get_xmargins(graphics),
                               start_ypos,
@@ -168,7 +198,8 @@ const GtCustomTrackClass* gt_custom_track_gc_content_class(void)
 GtCustomTrack* gt_custom_track_gc_content_new(GtSeq *seq,
                                               unsigned long windowsize,
                                               unsigned long height,
-                                              double avg)
+                                              double avg,
+                                              bool show_scale)
 {
   GtCustomTrackGcContent *ctgc;
   GtCustomTrack *ct;
@@ -179,6 +210,7 @@ GtCustomTrack* gt_custom_track_gc_content_new(GtSeq *seq,
   ctgc->height = height;
   ctgc->seq = seq;
   ctgc->avg = avg;
+  ctgc->show_scale = show_scale;
   /* ctgc->title = gt_str_new_cstr(gt_seq_get_description(seq)); */
   ctgc->title = gt_str_new_cstr("GC content (window size ");
   gt_str_append_ulong(ctgc->title, ctgc->windowsize);
