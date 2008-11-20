@@ -39,10 +39,10 @@ static int layout_lua_new(lua_State *L)
   layout = lua_newuserdata(L, sizeof (GtLayout*));
   gt_assert(layout);
   err = gt_error_new();
+  *layout = gt_layout_new(*diagram, width, style, err);
   if (gt_error_is_set(err))
     return gt_lua_error(L, err);
   gt_error_delete(err);
-  *layout = gt_layout_new(*diagram, width, style, err);
   luaL_getmetatable(L, LAYOUT_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -52,10 +52,15 @@ static int layout_lua_sketch(lua_State *L)
 {
   GtLayout **layout;
   GtCanvas **canvas;
+  GtError *err;
   int had_err = 0;
   layout = check_layout(L, 1);
   canvas = check_canvas(L, 2);
-  had_err = gt_layout_sketch(*layout, *canvas);
+  err = gt_error_new();
+  had_err = gt_layout_sketch(*layout, *canvas, err);
+  if (had_err < 0)
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
   return 0;
 }
 

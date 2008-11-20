@@ -42,7 +42,7 @@ void           gt_element_set_type(GtElement*, const char *type);
 GtStrand       gt_element_get_strand(const GtElement*);
 GtFeatureNode* gt_element_get_node_ref(const GtElement*);
 bool           gt_element_is_marked(const GtElement*);
-int            gt_element_sketch(GtElement*, GtCanvas*);
+int            gt_element_sketch(GtElement*, GtCanvas*, GtError*);
 int            gt_element_unit_test(GtError*);
 void           gt_element_delete(GtElement* element);
 

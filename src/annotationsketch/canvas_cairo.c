@@ -35,7 +35,8 @@
 /* this is a Cairo-based implementation of the Canvas interface hooks */
 
 int gt_canvas_cairo_visit_layout_pre(GtCanvas *canvas,
-                                     GtLayout *layout)
+                                     GtLayout *layout,
+                                     GT_UNUSED GtError *err)
 {
   /* get displayed range for internal use */
   canvas->pvt->viewrange = gt_layout_get_range(layout);
@@ -44,12 +45,14 @@ int gt_canvas_cairo_visit_layout_pre(GtCanvas *canvas,
 }
 
 int gt_canvas_cairo_visit_layout_post(GT_UNUSED GtCanvas *canvas,
-                                      GT_UNUSED GtLayout *layout)
+                                      GT_UNUSED GtLayout *layout,
+                                      GT_UNUSED GtError *err)
 {
   return 0;
 }
 
-int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track)
+int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
+                                    GT_UNUSED GtError *err)
 {
   int had_err = 0;
   unsigned long exceeded;
@@ -109,7 +112,8 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track)
   return had_err;
 }
 
-int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GtTrack *track)
+int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GtTrack *track,
+                                     GT_UNUSED GtError *err)
 {
   double vspace;
   gt_assert(canvas && track);
@@ -122,7 +126,8 @@ int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GtTrack *track)
   return 0;
 }
 
-int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line)
+int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line,
+                                   GT_UNUSED GtError *err)
 {
   int had_err = 0;
   gt_assert(canvas && line);
@@ -132,7 +137,8 @@ int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line)
   return had_err;
 }
 
-int gt_canvas_cairo_visit_line_post(GtCanvas *canvas, GtLine *line)
+int gt_canvas_cairo_visit_line_post(GtCanvas *canvas, GtLine *line,
+                                    GT_UNUSED GtError *err)
 {
   int had_err = 0;
   double tmp;
@@ -150,7 +156,8 @@ int gt_canvas_cairo_visit_line_post(GtCanvas *canvas, GtLine *line)
   return had_err;
 }
 
-int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block)
+int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
+                                GT_UNUSED GtError *err)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
   GtRange block_range;
@@ -274,7 +281,8 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block)
   return had_err;
 }
 
-int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
+int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
+                                  GT_UNUSED GtError *err)
 {
   int had_err = 0, arrow_status = ARROW_NONE;
   GtRange elem_range = gt_element_get_range(elem);
@@ -355,8 +363,8 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
     GtRecMap *rm = gt_rec_map_new(elem_start, canvas->pvt->y,
                                   elem_start+elem_width,
                                   canvas->pvt->y+bar_height,
-                                  (GtFeatureNode*) /* XXX */
-                                  gt_element_get_node_ref(elem));
+                                  (GtFeatureNode*)
+                                    gt_element_get_node_ref(elem));
     gt_image_info_add_rec_map(canvas->pvt->ii, rm);
   }
 
@@ -468,7 +476,8 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem)
 }
 
 int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
-                                       GtCustomTrack *ct)
+                                       GtCustomTrack *ct,
+                                       GtError *err)
 {
   bool show_track_captions = false;
   double space;
@@ -492,9 +501,13 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
                                   gt_custom_track_get_title(ct));
   }
   canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
-  /* simply call rendering function */
-  had_err = gt_custom_track_render(ct, canvas->pvt->g, canvas->pvt->y,
-                                   canvas->pvt->viewrange, canvas->pvt->sty);
+  /* call rendering function */
+  had_err = gt_custom_track_render(ct,
+                                   canvas->pvt->g,
+                                   canvas->pvt->y,
+                                   canvas->pvt->viewrange,
+                                   canvas->pvt->sty,
+                                   err);
   canvas->pvt->y += gt_custom_track_get_height(ct);
 
   /* put track spacer after track */

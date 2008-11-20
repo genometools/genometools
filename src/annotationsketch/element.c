@@ -103,11 +103,11 @@ static bool elements_are_equal(const GtElement *e1, const GtElement *e2)
   return false;
 }
 
-int gt_element_sketch(GtElement *elem, GtCanvas *canvas)
+int gt_element_sketch(GtElement *elem, GtCanvas *canvas, GtError *err)
 {
   int had_err = 0;
   gt_assert(elem && canvas);
-  had_err = gt_canvas_visit_element(canvas, elem);
+  had_err = gt_canvas_visit_element(canvas, elem, err);
   return had_err;
 }
 

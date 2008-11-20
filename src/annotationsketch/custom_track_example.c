@@ -19,6 +19,7 @@
 #include "annotationsketch/coords.h"
 #include "annotationsketch/custom_track_example.h"
 #include "annotationsketch/custom_track_rep.h"
+#include "core/unused_api.h"
 
 struct GtCustomTrackExample {
   const GtCustomTrack parent_instance;
@@ -32,8 +33,9 @@ struct GtCustomTrackExample {
 int gt_custom_track_example_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                                    unsigned int start_ypos,
                                    GtRange viewrange,
-                                   GtStyle *style)
+                                   GtStyle *style, GT_UNUSED GtError *err)
 {
+  int had_err = 0;
   GtCustomTrackExample *cte;
   double margins;
   GtColor color;
@@ -77,7 +79,7 @@ int gt_custom_track_example_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                                  start_ypos + 3*gt_graphics_get_text_height(graphics),
                                  ((const char*) buffer));
 
-  return 0;
+  return had_err;
 }
 
 unsigned long gt_custom_track_example_get_height(GtCustomTrack *ct)

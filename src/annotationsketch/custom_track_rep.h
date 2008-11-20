@@ -20,12 +20,13 @@
 
 #include <stdio.h>
 #include "annotationsketch/custom_track.h"
+#include "core/error.h"
 #include "core/range.h"
 #include "core/str.h"
 
 typedef int           (*GtCustomTrackRenderFunc)(GtCustomTrack*, GtGraphics*,
                                                  unsigned int, GtRange,
-                                                 GtStyle*);
+                                                 GtStyle*, GtError*);
 typedef unsigned long (*GtCustomTrackGetHeightFunc)(GtCustomTrack*);
 typedef const char*   (*GtCustomTrackGetTitleFunc)(GtCustomTrack*);
 typedef void          (*GtCustomTrackFreeFunc)(GtCustomTrack*);

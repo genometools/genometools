@@ -22,6 +22,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/minmax.h"
+#include "core/unused_api.h"
 
 struct GtCustomTrackGcContent {
   const GtCustomTrack parent_instance;
@@ -59,8 +60,9 @@ static inline double get_val_for_pos(GtCustomTrackGcContent *ctgc,
 int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                                       unsigned int start_ypos,
                                       GtRange viewrange,
-                                      GtStyle *style)
+                                      GtStyle *style, GT_UNUSED GtError *err)
 {
+  int had_err;
   GtCustomTrackGcContent *ctgc;
   double iter, iter_step, value, *data;
   unsigned long n;
@@ -124,7 +126,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                               value_range,
                               ctgc->height);
   gt_free(data);
-  return 0;
+  return had_err;
 }
 
 unsigned long gt_custom_track_gc_content_get_height(GtCustomTrack *ct)

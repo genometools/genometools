@@ -81,16 +81,16 @@ void gt_custom_track_delete(GtCustomTrack *ct)
 
 int gt_custom_track_render(GtCustomTrack *ct, GtGraphics *graphics,
                            unsigned int start_ypos, GtRange viewrange,
-                           GtStyle *style)
+                           GtStyle *style, GtError *err)
 {
   gt_assert(ct && ct->c_class && graphics && style);
-  return ct->c_class->render(ct, graphics, start_ypos, viewrange, style);
+  return ct->c_class->render(ct, graphics, start_ypos, viewrange, style, err);
 }
 
-int gt_custom_track_sketch(GtCustomTrack *ct, GtCanvas *canvas)
+int gt_custom_track_sketch(GtCustomTrack *ct, GtCanvas *canvas, GtError *err)
 {
   gt_assert(ct && canvas);
-  return gt_canvas_visit_custom_track(canvas, ct);
+  return gt_canvas_visit_custom_track(canvas, ct, err);
 }
 
 unsigned long gt_custom_track_get_height(GtCustomTrack *ct)

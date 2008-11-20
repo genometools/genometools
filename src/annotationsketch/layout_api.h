@@ -50,7 +50,8 @@ GtLayout*              gt_layout_new_with_twc(GtDiagram*,
 /* Returns the height of the layout in pixels. */
 unsigned long          gt_layout_get_height(const GtLayout*);
 /* Renders the layout on the <target_canvas>. */
-int                    gt_layout_sketch(GtLayout*, GtCanvas *target_canvas);
+int                    gt_layout_sketch(GtLayout*, GtCanvas *target_canvas,
+                                        GtError*);
 /* Destroys a layout. */
 void                   gt_layout_delete(GtLayout*);
 

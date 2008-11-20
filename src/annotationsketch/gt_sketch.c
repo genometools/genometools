@@ -324,8 +324,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
   if (!had_err) {
     /* create and write image file */
-    d = gt_diagram_new(features, seqid, &qry_range, sty, err);
-    if (!(l = gt_layout_new(d, arguments.width, sty, err)))
+    if (!(d = gt_diagram_new(features, seqid, &qry_range, sty, err)))
       had_err = -1;
     if (had_err || !(l = gt_layout_new(d, arguments.width, sty, err)))
       had_err = -1;
@@ -350,7 +349,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
         canvas = gt_canvas_cairo_file_new(sty, GT_GRAPHICS_PNG, arguments.width,
                                           height, ii);
       }
-      gt_layout_sketch(l, canvas);
+      had_err = gt_layout_sketch(l, canvas, err);
       if (arguments.showrecmaps) {
         unsigned long i;
         const GtRecMap *rm;

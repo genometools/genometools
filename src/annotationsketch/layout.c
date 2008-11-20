@@ -148,24 +148,24 @@ static int layout_tracks(void *key, void *value, void *data,
 }
 
 static int render_tracks(GT_UNUSED void *key, void *value, void *data,
-                         GT_UNUSED GtError *err)
+                         GtError *err)
 {
   GtRenderTraverseInfo *rti = (GtRenderTraverseInfo*) data;
   GtTrack *track = (GtTrack*) value;
   int had_err = 0;
   gt_assert(rti && track);
-  had_err = gt_track_sketch(track, rti->canvas);
+  had_err = gt_track_sketch(track, rti->canvas, err);
   return had_err;
 }
 
 static int render_custom_tracks(GT_UNUSED void *key, void *value, void *data,
-                                GT_UNUSED GtError *err)
+                                GtError *err)
 {
   GtRenderTraverseInfo *rti = (GtRenderTraverseInfo*) data;
   GtCustomTrack *ctrack = (GtCustomTrack*) value;
   int had_err = 0;
   gt_assert(rti && ctrack);
-  had_err = gt_custom_track_sketch(ctrack, rti->canvas);
+  had_err = gt_custom_track_sketch(ctrack, rti->canvas, err);
   return had_err;
 }
 
@@ -244,7 +244,7 @@ void gt_layout_delete(GtLayout *layout)
   gt_free(layout);
 }
 
-int gt_layout_sketch(GtLayout *layout, GtCanvas *canvas)
+int gt_layout_sketch(GtLayout *layout, GtCanvas *canvas, GtError *err)
 {
   int had_err = 0;
   unsigned long i;
@@ -252,15 +252,18 @@ int gt_layout_sketch(GtLayout *layout, GtCanvas *canvas)
   gt_assert(layout && canvas);
   rti.layout = layout;
   rti.canvas = canvas;
-  gt_canvas_visit_layout_pre(canvas, layout);
+  had_err = gt_canvas_visit_layout_pre(canvas, layout, err);
+  if (had_err) return had_err;
   had_err = gt_hashmap_foreach_in_key_order(layout->tracks, render_tracks,
-                                            &rti, NULL);
-  gt_canvas_visit_layout_post(canvas, layout);
+                                            &rti, err);
+  if (had_err) return had_err;
+  had_err = gt_canvas_visit_layout_post(canvas, layout, err);
+  if (had_err) return had_err;
   for (i=0;i<gt_array_size(layout->custom_tracks);i++)
   {
     GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
                                                         i);
-    had_err = render_custom_tracks(NULL, ct, &rti, NULL);
+    had_err = render_custom_tracks(NULL, ct, &rti, err);
   }
   return had_err;
 }

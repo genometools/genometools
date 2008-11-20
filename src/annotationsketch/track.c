@@ -132,19 +132,21 @@ unsigned long gt_track_get_number_of_lines_with_captions(const GtTrack *track)
   return nof_tracks;
 }
 
-int gt_track_sketch(GtTrack* track, GtCanvas *canvas)
+int gt_track_sketch(GtTrack* track, GtCanvas *canvas, GtError *err)
 {
   int i = 0, had_err = 0;
   gt_assert(track && canvas);
-  gt_canvas_visit_track_pre(canvas, track);
+  gt_canvas_visit_track_pre(canvas, track, err);
   for (i = 0; i < gt_array_size(track->lines); i++)
   {
-    had_err = gt_line_sketch(*(GtLine**) gt_array_get(track->lines, i), canvas);
+    had_err = gt_line_sketch(*(GtLine**) gt_array_get(track->lines, i),
+                             canvas,
+                             err);
     if (had_err)
       break;
   }
   if (!had_err)
-    gt_canvas_visit_track_post(canvas, track);
+    gt_canvas_visit_track_post(canvas, track, err);
   return had_err;
 }
 

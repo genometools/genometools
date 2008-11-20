@@ -178,83 +178,85 @@ unsigned long gt_canvas_get_height(GtCanvas *canvas)
   return canvas->pvt->height;
 }
 
-int gt_canvas_visit_layout_pre(GtCanvas *canvas, GtLayout* layout)
+int gt_canvas_visit_layout_pre(GtCanvas *canvas, GtLayout* layout, GtError *err)
 {
   gt_assert(canvas && layout);
   if (canvas->c_class->visit_layout_pre)
-    return canvas->c_class->visit_layout_pre(canvas, layout);
+    return canvas->c_class->visit_layout_pre(canvas, layout, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_layout_post(GtCanvas *canvas, GtLayout* layout)
+int gt_canvas_visit_layout_post(GtCanvas *canvas, GtLayout* layout,
+                                GtError *err)
 {
   gt_assert(canvas && layout);
   if (canvas->c_class->visit_layout_post)
-    return canvas->c_class->visit_layout_post(canvas, layout);
+    return canvas->c_class->visit_layout_post(canvas, layout, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track)
+int gt_canvas_visit_track_pre(GtCanvas *canvas, GtTrack *track, GtError *err)
 {
   gt_assert(canvas && track);
   if (canvas->c_class->visit_track_pre)
-    return canvas->c_class->visit_track_pre(canvas, track);
+    return canvas->c_class->visit_track_pre(canvas, track, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_track_post(GtCanvas *canvas, GtTrack *track)
+int gt_canvas_visit_track_post(GtCanvas *canvas, GtTrack *track, GtError *err)
 {
   gt_assert(canvas && track);
   if (canvas->c_class->visit_track_post)
-    return canvas->c_class->visit_track_post(canvas, track);
+    return canvas->c_class->visit_track_post(canvas, track, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_line_pre(GtCanvas *canvas, GtLine *line)
+int gt_canvas_visit_line_pre(GtCanvas *canvas, GtLine *line, GtError *err)
 {
   gt_assert(canvas && line);
   if (canvas->c_class->visit_line_pre)
-    return canvas->c_class->visit_line_pre(canvas, line);
+    return canvas->c_class->visit_line_pre(canvas, line, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_line_post(GtCanvas *canvas, GtLine *line)
+int gt_canvas_visit_line_post(GtCanvas *canvas, GtLine *line, GtError *err)
 {
   gt_assert(canvas && line);
   if (canvas->c_class->visit_line_post)
-    return canvas->c_class->visit_line_post(canvas, line);
+    return canvas->c_class->visit_line_post(canvas, line, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block)
+int gt_canvas_visit_block(GtCanvas *canvas, GtBlock *block, GtError *err)
 {
   gt_assert(canvas && block);
   if (canvas->c_class->visit_block)
-    return canvas->c_class->visit_block(canvas, block);
+    return canvas->c_class->visit_block(canvas, block, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_element(GtCanvas *canvas, GtElement *element)
+int gt_canvas_visit_element(GtCanvas *canvas, GtElement *element, GtError *err)
 {
   gt_assert(canvas && element);
   if (canvas->c_class->visit_element)
-    return canvas->c_class->visit_element(canvas, element);
+    return canvas->c_class->visit_element(canvas, element, err);
   else
     return 0;
 }
 
-int gt_canvas_visit_custom_track(GtCanvas *canvas, GtCustomTrack *ct)
+int gt_canvas_visit_custom_track(GtCanvas *canvas, GtCustomTrack *ct,
+                                 GtError *err)
 {
   gt_assert(canvas && ct);
   if (canvas->c_class->visit_ct)
-    return canvas->c_class->visit_ct(canvas, ct);
+    return canvas->c_class->visit_ct(canvas, ct, err);
   else
     return 0;
 }

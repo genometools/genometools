@@ -21,7 +21,11 @@
 #include "annotationsketch/drawing_range.h"
 #include "core/range.h"
 
+/* Returns width-independent coordinates (x,y) with 0 <= x,y <= 1
+   for the given 1D coordinate. */
 double         gt_coords_convert_point(GtRange viewrange, long pos);
+/* Returns width-independent coordinates (x,y) with 0 <= x,y <= 1
+   for the given range in the given layout. Also sets clipping info. */
 GtDrawingRange gt_coords_calc_generic_range(GtRange node_range,
                                             GtRange viewrange);
 

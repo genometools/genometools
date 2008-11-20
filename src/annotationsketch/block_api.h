@@ -46,7 +46,6 @@ void                  gt_block_set_strand(GtBlock*, GtStrand);
 GtFeatureNode*        gt_block_get_top_level_feature(const GtBlock*);
 GtStrand              gt_block_get_strand(const GtBlock*);
 unsigned long         gt_block_get_size(const GtBlock*);
-int                   gt_block_sketch(GtBlock*, GtCanvas*);
 
 void                  gt_block_delete(GtBlock*);
 

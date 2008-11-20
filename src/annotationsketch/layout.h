@@ -20,12 +20,6 @@
 
 #include "annotationsketch/layout_api.h"
 
-/* Returns width-independent coordinates (x,y) with 0 <= x,y <= 1
-   for the given range in the given layout. Also sets clipping info. */
-GtDrawingRange         gt_layout_calc_generic_coords(const GtLayout*, GtRange);
-/* Returns width-independent coordinates (x,y) with 0 <= x,y <= 1
-   for the given 1D coordinate. */
-double                 gt_layout_calc_generic_point(const GtLayout*, long);
 /* Returns the interval shown in the layout. */
 GtRange                gt_layout_get_range(const GtLayout*);
 /* Returns the TextWidthCalculator object used in the layout. */

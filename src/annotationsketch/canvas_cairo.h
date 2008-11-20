@@ -23,16 +23,17 @@
 #include "annotationsketch/element.h"
 #include "annotationsketch/layout.h"
 #include "annotationsketch/track.h"
+#include "core/error.h"
 
-int  gt_canvas_cairo_visit_layout_pre(GtCanvas*, GtLayout*);
-int  gt_canvas_cairo_visit_layout_post(GtCanvas*, GtLayout*);
-int  gt_canvas_cairo_visit_track_pre(GtCanvas*, GtTrack*);
-int  gt_canvas_cairo_visit_track_post(GtCanvas*, GtTrack*);
-int  gt_canvas_cairo_visit_line_pre(GtCanvas*, GtLine*);
-int  gt_canvas_cairo_visit_line_post(GtCanvas*, GtLine*);
-int  gt_canvas_cairo_visit_block(GtCanvas*, GtBlock*);
-int  gt_canvas_cairo_visit_element(GtCanvas*, GtElement*);
-int  gt_canvas_cairo_visit_custom_track(GtCanvas*, GtCustomTrack*);
+int  gt_canvas_cairo_visit_layout_pre(GtCanvas*, GtLayout*, GtError*);
+int  gt_canvas_cairo_visit_layout_post(GtCanvas*, GtLayout*, GtError*);
+int  gt_canvas_cairo_visit_track_pre(GtCanvas*, GtTrack*, GtError*);
+int  gt_canvas_cairo_visit_track_post(GtCanvas*, GtTrack*, GtError*);
+int  gt_canvas_cairo_visit_line_pre(GtCanvas*, GtLine*, GtError*);
+int  gt_canvas_cairo_visit_line_post(GtCanvas*, GtLine*, GtError*);
+int  gt_canvas_cairo_visit_block(GtCanvas*, GtBlock*, GtError*);
+int  gt_canvas_cairo_visit_element(GtCanvas*, GtElement*, GtError*);
+int  gt_canvas_cairo_visit_custom_track(GtCanvas*, GtCustomTrack*, GtError*);
 /* Renders a ruler with dynamic scale labeling and optional grid. */
 void gt_canvas_cairo_draw_ruler(GtCanvas*, GtRange);
 

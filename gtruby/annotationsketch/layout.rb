@@ -42,7 +42,11 @@ module GT
     end
 
     def sketch(canvas)
-      GT.gt_layout_sketch(@layout, canvas)
+      err = GT::Error.new()
+      had_err = GT.gt_layout_sketch(@layout, canvas, err)
+      if had_err < 0 then
+        GT::gterror(err)
+      end
     end
 
     def to_ptr

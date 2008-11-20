@@ -26,12 +26,12 @@
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/layout.h"
 
-typedef int  (*GtCanvasVisitLayoutFunc)(GtCanvas*, GtLayout*);
-typedef int  (*GtCanvasVisitTrackFunc)(GtCanvas*, GtTrack*);
-typedef int  (*GtCanvasVisitLineFunc)(GtCanvas*, GtLine*);
-typedef int  (*GtCanvasVisitBlockFunc)(GtCanvas*, GtBlock*);
-typedef int  (*GtCanvasVisitElementFunc)(GtCanvas*, GtElement*);
-typedef int  (*GtCanvasVisitCustomTrackFunc)(GtCanvas*, GtCustomTrack*);
+typedef int  (*GtCanvasVisitLayoutFunc)(GtCanvas*, GtLayout*, GtError*);
+typedef int  (*GtCanvasVisitTrackFunc)(GtCanvas*, GtTrack*, GtError*);
+typedef int  (*GtCanvasVisitLineFunc)(GtCanvas*, GtLine*, GtError*);
+typedef int  (*GtCanvasVisitBlockFunc)(GtCanvas*, GtBlock*, GtError*);
+typedef int  (*GtCanvasVisitElementFunc)(GtCanvas*, GtElement*, GtError*);
+typedef int  (*GtCanvasVisitCustomTrackFunc)(GtCanvas*, GtCustomTrack*, GtError*);
 typedef void (*GtCanvasDrawRulerFunc)(GtCanvas*, GtRange);
 /* typedef void (*GtCanvasCallPluginFunc)(GtCanvas*,
                                        GtAnnotationSketchPlugin*); */
