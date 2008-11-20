@@ -28,7 +28,7 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "extended/comment_node.h"
+#include "extended/comment_node_api.h"
 #include "extended/feature_info.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"

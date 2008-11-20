@@ -15,18 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COMMENT_NODE_H
-#define COMMENT_NODE_H
+#ifndef COMMENT_NODE_API_H
+#define COMMENT_NODE_API_H
 
 #include "core/error.h"
 
-/* implements the ``genome node'' interface */
+/* Implements the <GtGenomeNode> interface. Comment nodes correspond to comment
+   lines in GFF3 files (i.e., lines which start with a single <#>). */
 typedef struct GtCommentNode GtCommentNode;
 
 #include "extended/genome_node.h"
 
 const GtGenomeNodeClass* gt_comment_node_class(void);
+
+/* Create a new <GtCommentNode*> representing a <comment>. Please note that the
+   single leading <#> which denotes comment lines in GFF3 files should not be
+   part of <comment>. */
 GtGenomeNode*            gt_comment_node_new(const char *comment);
-const char*              gt_comment_node_get_comment(const GtCommentNode*);
+
+/* Return the comment stored in <comment_node>. */
+const char*              gt_comment_node_get_comment(const GtCommentNode
+                                                     *comment_node);
 
 #endif
