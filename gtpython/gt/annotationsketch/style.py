@@ -23,18 +23,24 @@ from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
 
 class Style:
-  def __init__(self):
-    e = Error()
-    self.style = gtlib.gt_style_new(False, e)
-    if self.style == 0 or self.style == None:
-      gterror(e)
+  def __init__(self, ptr = None):
+    if ptr:
+      self.style = ptr
+      self.own = False
+    else:
+      e = Error()
+      self.style = gtlib.gt_style_new(False, e)
+      if self.style == 0 or self.style == None:
+        gterror(e)
+      self.own = True
     self._as_parameter_ = self.style
 
   def __del__(self):
-    try:
-      gtlib.gt_style_delete(self.style)
-    except AttributeError:
-      pass
+    if self.own:
+      try:
+        gtlib.gt_style_delete(self.style)
+      except AttributeError:
+        pass
 
   def from_param(cls, obj):
     if not isinstance(obj, Style):
