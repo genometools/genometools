@@ -45,14 +45,12 @@ void           gt_feature_node_make_multi_representative(GtFeatureNode*);
 void           gt_feature_node_set_multi_representative(GtFeatureNode*,
                                                         GtFeatureNode*);
 GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode*);
-GtStrand       gt_feature_node_get_strand(GtFeatureNode*);
 GtPhase        gt_feature_node_get_phase(GtFeatureNode*);
 void           gt_feature_node_get_exons(GtFeatureNode*,
                                          GtArray *exon_features);
 void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
 GtTranscriptFeatureType
                gt_feature_node_get_transcriptfeaturetype(GtFeatureNode*);
-void           gt_feature_node_set_strand(GtFeatureNode*, GtStrand);
 void           gt_feature_node_set_phase(GtFeatureNode*, GtPhase);
 void           gt_feature_node_set_end(GtFeatureNode*, unsigned long);
 void           gt_feature_node_add_attribute(GtFeatureNode*,

@@ -74,4 +74,12 @@ void          gt_feature_node_set_score(GtFeatureNode *feature_node,
 /* Unset the score of <feature_node>. */
 void          gt_feature_node_unset_score(GtFeatureNode *feature_node);
 
+/* Return the strand of <feature_node>.
+   Corresponds to column 7 of regular GFF3 lines. */
+GtStrand       gt_feature_node_get_strand(GtFeatureNode *feature_node);
+
+/* Set the strand of <feature_node> to <strand>. */
+void           gt_feature_node_set_strand(GtFeatureNode *feature_node,
+                                          GtStrand strand);
+
 #endif
