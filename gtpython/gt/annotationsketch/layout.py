@@ -43,7 +43,7 @@ class Layout:
 
   def sketch(self, canvas):
     err = Error()
-    had_err = gtlib.gt_layout_sketch(self.layout, canvas)
+    had_err = gtlib.gt_layout_sketch(self.layout, canvas, err)
     if had_err < 0:
       gterror(err)
 
@@ -55,7 +55,7 @@ class Layout:
     gtlib.gt_layout_new.restype = c_void_p
     gtlib.gt_layout_new.argtypes = [Diagram, c_ulong, Style]
     gtlib.gt_layout_sketch.restype = c_int
-    gtlib.gt_layout_sketch.argtypes = [c_void_p, Canvas]
+    gtlib.gt_layout_sketch.argtypes = [c_void_p, Canvas, Error]
     gtlib.gt_layout_get_height.restype = c_ulong
     gtlib.gt_layout_get_height.argtypes = [c_void_p]
   register = classmethod(register)
