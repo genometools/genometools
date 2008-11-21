@@ -18,7 +18,7 @@
 from gt.dlload import gtlib, CollectFunc
 from gt.annotationsketch.color import Color
 from gt.core.error import Error, gterror
-from gt.core.str import Str
+from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
 

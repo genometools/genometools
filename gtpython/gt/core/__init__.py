@@ -17,15 +17,11 @@
 
 from array import *
 from error import *
-from range import *
-from str import *
+from gtrange import *
+from gtstr import *
 from str_array import *
 
 Array.register(gtlib)
 Error.register(gtlib)
 Str.register(gtlib)
 StrArray.register(gtlib)
-
-
-str = __builtins__['str']
-range = __builtins__['range']

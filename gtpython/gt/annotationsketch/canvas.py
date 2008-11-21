@@ -19,7 +19,7 @@ from gt.dlload import gtlib
 from gt.annotationsketch.style import Style
 from gt.annotationsketch.image_info import ImageInfo
 from gt.core.error import Error, gterror
-from gt.core.str import Str
+from gt.core.gtstr import Str
 
 class Canvas:
   def __init__(self, *args):

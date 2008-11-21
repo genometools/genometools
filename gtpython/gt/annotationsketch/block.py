@@ -17,8 +17,8 @@
 
 from gt.dlload import gtlib
 from gt.core.error import gterror
-from gt.core.range import Range
-from gt.core.str import Str
+from gt.core.gtrange import Range
+from gt.core.gtstr import Str
 from gt.extended.strand import strandchars
 from gt.extended.feature_node import FeatureNode
 
