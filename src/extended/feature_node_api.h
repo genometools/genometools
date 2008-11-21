@@ -21,6 +21,7 @@
 #include "core/phase_api.h"
 #include "core/str_api.h"
 #include "core/strand_api.h"
+#include "core/str_array_api.h"
 #include "extended/genome_node_api.h"
 
 /* Implements the <GtGenomeNode> interface. A single feature node corresponds
@@ -90,5 +91,22 @@ GtPhase       gt_feature_node_get_phase(GtFeatureNode *feature_node);
 /* Set the phase of <feature_node> to <phase>. */
 void          gt_feature_node_set_phase(GtFeatureNode *feature_node,
                                         GtPhase phase);
+
+/* Return the attribute of <feature_node> with the given <name>.
+   If no such attribute has been added, <NULL> is returned.
+   The attributes are stored in column 9 of regular GFF3 lines. */
+const char*   gt_feature_node_get_attribute(GtFeatureNode *feature_node,
+                                            const char *name);
+
+/* Return a string array containing the used attribute names of <feature_node>.
+   The caller is responsible to free the returned <GtStrArray*>. */
+GtStrArray*   gt_feature_node_get_attribute_list(GtFeatureNode *feature_node);
+
+/* Add attribute <tag>=<value> to <feature_node>. <tag> and <value> must at
+   least have length 1. <feature_node> must not contain an attribute with the
+   given <tag> already. You should not add Parent and ID attributes, use
+   <gt_feature_node_add_child()> to denote part-of relationships. */
+void          gt_feature_node_add_attribute(GtFeatureNode *feature_node,
+                                            const char *tag, const char *value);
 
 #endif

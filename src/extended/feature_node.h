@@ -34,10 +34,6 @@ const GtGenomeNodeClass* gt_feature_node_class(void);
 GtGenomeNode*  gt_feature_node_new_pseudo(GtFeatureNode*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GtGenomeNode*  gt_feature_node_new_standard_gene(void);
-const char*    gt_feature_node_get_attribute(GtFeatureNode *feature_node,
-                                             const char *attr_name);
-/* Return a GtStrArray containing the used attribute names. */
-GtStrArray*    gt_feature_node_get_attribute_list(GtFeatureNode*);
 bool           gt_feature_node_is_multi(const GtFeatureNode*);
 bool           gt_feature_node_is_pseudo(const GtFeatureNode*);
 void           gt_feature_node_make_multi_representative(GtFeatureNode*);
@@ -50,9 +46,6 @@ void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
 GtTranscriptFeatureType
                gt_feature_node_get_transcriptfeaturetype(GtFeatureNode*);
 void           gt_feature_node_set_end(GtFeatureNode*, unsigned long);
-void           gt_feature_node_add_attribute(GtFeatureNode*,
-                                             const char *attr_name,
-                                             const char *attr_value);
 void           gt_feature_node_foreach_attribute(GtFeatureNode*,
                                                  AttributeIterFunc, void *data);
 bool           gt_feature_node_has_CDS(const GtFeatureNode*);

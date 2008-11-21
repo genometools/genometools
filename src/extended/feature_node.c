@@ -511,8 +511,8 @@ void gt_feature_node_unset_score(GtFeatureNode *fn)
 }
 
 void gt_feature_node_add_attribute(GtFeatureNode *fn,
-                                     const char *attr_name,
-                                     const char *attr_value)
+                                   const char *attr_name,
+                                   const char *attr_value)
 {
   gt_assert(fn && attr_name && attr_value);
   gt_assert(strlen(attr_name)); /* attribute name cannot be empty */
