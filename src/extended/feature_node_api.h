@@ -18,6 +18,7 @@
 #ifndef FEATURE_NODE_API_H
 #define FEATURE_NODE_API_H
 
+#include "core/phase_api.h"
 #include "core/str_api.h"
 #include "core/strand_api.h"
 #include "extended/genome_node_api.h"
@@ -76,10 +77,18 @@ void          gt_feature_node_unset_score(GtFeatureNode *feature_node);
 
 /* Return the strand of <feature_node>.
    Corresponds to column 7 of regular GFF3 lines. */
-GtStrand       gt_feature_node_get_strand(GtFeatureNode *feature_node);
+GtStrand      gt_feature_node_get_strand(GtFeatureNode *feature_node);
 
 /* Set the strand of <feature_node> to <strand>. */
-void           gt_feature_node_set_strand(GtFeatureNode *feature_node,
-                                          GtStrand strand);
+void          gt_feature_node_set_strand(GtFeatureNode *feature_node,
+                                         GtStrand strand);
+
+/* Return the phase of <feature_node>.
+   Corresponds to column 8 of regular GFF3 lines. */
+GtPhase       gt_feature_node_get_phase(GtFeatureNode *feature_node);
+
+/* Set the phase of <feature_node> to <phase>. */
+void          gt_feature_node_set_phase(GtFeatureNode *feature_node,
+                                        GtPhase phase);
 
 #endif
