@@ -392,13 +392,20 @@ void gt_graphics_cairo_draw_dashes(GtGraphics *gg, double x, double y,
         cairo_stroke(g->cr);
         break;
       case ARROW_LEFT:
-        cairo_move_to(g->cr, width - arrow_width, y);
-        cairo_line_to(g->cr, x + width, y + height / 2);
-        cairo_line_to(g->cr, x + width - arrow_width, y + height);
+        cairo_move_to(g->cr, x + arrow_width, y);
+        cairo_line_to(g->cr, x, y + height / 2);
+        cairo_line_to(g->cr, x + arrow_width, y + height);
         /* draw arrowhead */
         cairo_stroke(g->cr);
         break;
-      case ARROW_BOTH: /* XXX */
+      case ARROW_BOTH:
+        cairo_move_to(g->cr, x + width - arrow_width, y);
+        cairo_line_to(g->cr, x + width, y + height / 2);
+        cairo_line_to(g->cr, x + width - arrow_width, y + height);
+        cairo_move_to(g->cr, x + arrow_width, y);
+        cairo_line_to(g->cr, x, y + height / 2);
+        cairo_line_to(g->cr, x + arrow_width, y + height);
+        cairo_stroke(g->cr);
       case ARROW_NONE: break;
     }
   }
