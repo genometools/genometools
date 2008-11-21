@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007      Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
@@ -224,7 +224,7 @@ double gt_graphics_cairo_get_ymargins(GtGraphics *gg)
 }
 
 void gt_graphics_cairo_set_margins(GtGraphics *gg, double margin_x,
-                                double margin_y)
+                                   double margin_y)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g);
@@ -335,7 +335,7 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
         cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y);
         cairo_line_to(g->cr, rnd_to_nhalf(x + width), y+height/2);
         cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y + height);
-        cairo_line_to(g->cr, rnd_to_nhalf(x), y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y + height);
       }
       cairo_close_path(g->cr);
       break;
