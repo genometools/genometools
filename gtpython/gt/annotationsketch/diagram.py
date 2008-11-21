@@ -19,10 +19,11 @@ from ctypes import CFUNCTYPE, c_char_p, c_void_p
 from gt.dlload import gtlib
 from gt.annotationsketch.block import Block
 from gt.annotationsketch.canvas import Canvas
+from gt.annotationsketch.custom_track import CustomTrack
 from gt.annotationsketch.feature_index import FeatureIndex
 from gt.annotationsketch.style import Style
 from gt.core.error import Error, gterror
-from gt.core.range import Range
+from gt.core.gtrange import Range
 
 TrackSelectorFunc = CFUNCTYPE(c_char_p, c_void_p, c_void_p)
 
@@ -55,6 +56,9 @@ class Diagram:
     self.tsf = trackselector
     gtlib.gt_diagram_set_track_selector_func(self.diagram, self.tsf_cb)
 
+  def add_custom_track(self, ct):
+    gtlib.gt_diagram_add_custom_track(self.diagram, ct)
+
   def from_param(cls, obj):
     if not isinstance(obj, Diagram):
       raise TypeError, "argument must be a Diagram"
@@ -68,4 +72,6 @@ class Diagram:
                                      Style, Error]
     gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p, \
                                                          TrackSelectorFunc]
+    gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p, \
+                                                  CustomTrack]
   register = classmethod(register)

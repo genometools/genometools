@@ -18,15 +18,15 @@
 #ifndef CUSTOM_TRACK_H
 #define CUSTOM_TRACK_H
 
-typedef struct GtCustomTrackClass GtCustomTrackClass;
-
-#include "annotationsketch/canvas.h"
 #include "annotationsketch/custom_track_api.h"
+#include "annotationsketch/canvas.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/style.h"
 #include "core/error.h"
 #include "core/range.h"
 #include "core/str.h"
+
+typedef struct GtCustomTrackClass GtCustomTrackClass;
 
 /* Visitor callback for the drawing canvas. */
 int           gt_custom_track_sketch(GtCustomTrack*, GtCanvas*, GtError*);
