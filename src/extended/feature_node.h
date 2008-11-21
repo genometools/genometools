@@ -35,7 +35,6 @@ const GtGenomeNodeClass* gt_feature_node_class(void);
 GtGenomeNode*  gt_feature_node_new_pseudo(GtFeatureNode*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GtGenomeNode*  gt_feature_node_new_standard_gene(void);
-const char*    gt_feature_node_get_source(GtFeatureNode*);
 const char*    gt_feature_node_get_attribute(GtFeatureNode *feature_node,
                                              const char *attr_name);
 /* Return a GtStrArray containing the used attribute names. */
@@ -57,7 +56,6 @@ void           gt_feature_node_get_exons(GtFeatureNode*,
 void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
 GtTranscriptFeatureType
                gt_feature_node_get_transcriptfeaturetype(GtFeatureNode*);
-void           gt_feature_node_set_source(GtFeatureNode*, GtStr *source);
 void           gt_feature_node_set_strand(GtFeatureNode*, GtStrand);
 void           gt_feature_node_set_phase(GtFeatureNode*, GtPhase);
 void           gt_feature_node_set_end(GtFeatureNode*, unsigned long);

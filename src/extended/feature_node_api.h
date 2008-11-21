@@ -42,4 +42,13 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
 void          gt_feature_node_add_child(GtFeatureNode *parent,
                                         GtFeatureNode *child);
 
+/* Return the source of <feature_node>. If no source has been set, "." is
+   returned. Corresponds to column 2 of regular GFF3 lines. */
+const char*   gt_feature_node_get_source(GtFeatureNode *feature_node);
+
+/* Set the <source> of <feature_node>. Stores a new reference to <source>.
+   Corresponds to column 2 of regular GFF3 lines. */
+void          gt_feature_node_set_source(GtFeatureNode *feature_node,
+                                         GtStr *source);
+
 #endif
