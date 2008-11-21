@@ -162,14 +162,12 @@ GtStr* gt_genome_node_get_idstr(GtGenomeNode *gn)
 
 unsigned long gt_genome_node_get_start(GtGenomeNode *gn)
 {
-  GtRange range = gt_genome_node_get_range(gn);
-  return range.start;
+  return gt_genome_node_get_range(gn).start;
 }
 
 unsigned long gt_genome_node_get_end(GtGenomeNode *gn)
 {
-  GtRange range = gt_genome_node_get_range(gn);
-  return range.end;
+  return gt_genome_node_get_range(gn).end;
 }
 
 GtRange gt_genome_node_get_range(GtGenomeNode *gn)
