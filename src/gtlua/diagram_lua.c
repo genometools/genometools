@@ -123,7 +123,6 @@ static int diagram_lua_new_from_array(lua_State *L)
   *diagram = gt_diagram_new_from_array(nodes, &range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
-  gt_array_delete(nodes);
   return 1;
 }
 
