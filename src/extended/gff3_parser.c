@@ -296,13 +296,14 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
                      *auto_sr);
     }
     else {
-      GtRange sr_range = gt_genome_node_get_range((*auto_sr)->sequence_region);
+      GtRange joined_range,
+              sr_range = gt_genome_node_get_range((*auto_sr)->sequence_region);
       /* get seqid string */
       *seqid_str =
         gt_str_ref(gt_genome_node_get_seqid((*auto_sr)->sequence_region));
       /* update the range of the sequence region */
-      gt_genome_node_set_range((*auto_sr)->sequence_region,
-                               gt_range_join(&range, &sr_range));
+      joined_range = gt_range_join(&range, &sr_range);
+      gt_genome_node_set_range((*auto_sr)->sequence_region, &joined_range);
     }
   }
   else {
@@ -388,14 +389,14 @@ static void remove_node(GtGenomeNode *genome_node, GtQueue *genome_nodes,
 static void update_pseudo_node_range(GtFeatureNode *pseudo_node,
                                      GtFeatureNode *feature_node)
 {
-  GtRange pseudo_range, feature_range;
+  GtRange pseudo_range, feature_range, joined_range;
   gt_assert(pseudo_node && feature_node);
   gt_assert(gt_feature_node_is_pseudo(pseudo_node));
   gt_assert(!gt_feature_node_is_pseudo(feature_node));
   pseudo_range = gt_genome_node_get_range((GtGenomeNode*) pseudo_node);
   feature_range = gt_genome_node_get_range((GtGenomeNode*) feature_node);
-  gt_genome_node_set_range((GtGenomeNode*) pseudo_node,
-                           gt_range_join(&pseudo_range, &feature_range));
+  joined_range = gt_range_join(&pseudo_range, &feature_range);
+  gt_genome_node_set_range((GtGenomeNode*) pseudo_node, &joined_range);
 }
 
 static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,

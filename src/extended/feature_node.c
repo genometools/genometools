@@ -118,10 +118,10 @@ static GtRange gt_feature_node_get_range(GtGenomeNode *gn)
   return fn->range;
 }
 
-static void gt_feature_node_set_range(GtGenomeNode *gn, GtRange range)
+static void gt_feature_node_set_range(GtGenomeNode *gn, const GtRange *range)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
-  fn->range = range;
+  fn->range = *range;
 }
 
 static void gt_feature_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)

@@ -178,9 +178,10 @@ GtRange gt_genome_node_get_range(GtGenomeNode *gn)
   return gn->c_class->get_range(gn);
 }
 
-void gt_genome_node_set_range(GtGenomeNode *gn, GtRange range)
+void gt_genome_node_set_range(GtGenomeNode *gn, const GtRange *range)
 {
   gt_assert(gn && gn->c_class && gn->c_class->set_range);
+  gt_assert(range->start <= range->end);
   gn->c_class->set_range(gn, range);
 }
 
