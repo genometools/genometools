@@ -354,7 +354,7 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
-                    double *val, GT_UNUSED GtFeatureNode *gn)
+                    double *val, GtFeatureNode *gn)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -421,8 +421,7 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
 }
 
 bool gt_style_get_bool(const GtStyle *sty, const char *section,
-                       const char *key, bool *val,
-                       GT_UNUSED GtFeatureNode *gn)
+                       const char *key, bool *val, GT_UNUSED GtFeatureNode *gn)
 {
 #ifndef NDEBUG
   int stack_size;
