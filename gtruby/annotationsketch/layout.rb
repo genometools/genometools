@@ -24,7 +24,7 @@ module GT
   extern "GtLayout*     gt_layout_new(GtDiagram*, unsigned int, GtStyle*, " + \
                                      "GtError*)"
   extern "unsigned long gt_layout_get_height(GtLayout*)"
-  extern "int           gt_layout_sketch(GtLayout*, GtCanvas*)"
+  extern "int           gt_layout_sketch(GtLayout*, GtCanvas*, GtError*)"
   extern "void          gt_layout_delete(GtCanvas*)"
 
   class Layout
