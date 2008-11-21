@@ -33,10 +33,6 @@ const char*   gt_genome_node_get_filename(const GtGenomeNode*);
 unsigned int  gt_genome_node_get_line_number(const GtGenomeNode*);
 /* used to sort nodes */
 GtStr*        gt_genome_node_get_idstr(GtGenomeNode*);
-unsigned long gt_genome_node_get_start(GtGenomeNode*);
-unsigned long gt_genome_node_get_end(GtGenomeNode*);
-GtRange       gt_genome_node_get_range(GtGenomeNode*);
-void          gt_genome_node_set_range(GtGenomeNode*, const GtRange*);
 void          gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
 int           gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
 int           gt_genome_node_cmp(GtGenomeNode*, GtGenomeNode*);
