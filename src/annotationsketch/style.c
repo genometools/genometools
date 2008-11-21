@@ -585,10 +585,10 @@ int gt_style_unit_test(GtError *err)
   gt_error_check(err);
 
   /* example colors */
-  col1.red=.1;col1.green=.2;col1.blue=.3;
-  col2.red=.4;col2.green=.5;col2.blue=.6;
-  col.red=1.0;col.green=1.0;col.blue=1.0;
-  defcol.red=.5;defcol.green=.5;defcol.blue=.5;
+  col1.red=.1;col1.green=.2;col1.blue=.3;col1.alpha=0.5;
+  col2.red=.4;col2.green=.5;col2.blue=.6;col2.alpha=0.5;
+  col.red=1.0;col.green=1.0;col.blue=1.0;col.alpha=0.5;
+  defcol.red=.5;defcol.green=.5;defcol.blue=.5;defcol.alpha=0.5;
 
   /* instantiate new style object */
   if (!(sty = gt_style_new(err)))
@@ -640,6 +640,7 @@ int gt_style_unit_test(GtError *err)
     gt_str_set(str, "");
   ensure(had_err, (strcmp(gt_str_get(str),"")==0));
 
+  gt_error_check(err);
   /* clone a GtStyle object */
   new_sty = gt_style_clone(sty, err);
   gt_error_check(err);
