@@ -59,4 +59,19 @@ const char*   gt_feature_node_get_type(GtFeatureNode *feature_node);
 bool          gt_feature_node_has_type(GtFeatureNode *feature_node,
                                        const char *type);
 
+/* Return <true> if the score of <feature_node> is defined, <false>
+   otherwise. */
+bool          gt_feature_node_score_is_defined(const GtFeatureNode
+                                               *feature_node);
+/* Return the score of <feature_node>. The score has to be defined.
+   Corresponds to column 6 of regular GFF3 lines. */
+float         gt_feature_node_get_score(const GtFeatureNode *feature_node);
+
+/* Set the score of <feature_node> to <score>. */
+void          gt_feature_node_set_score(GtFeatureNode *feature_node,
+                                        float score);
+
+/* Unset the score of <feature_node>. */
+void          gt_feature_node_unset_score(GtFeatureNode *feature_node);
+
 #endif

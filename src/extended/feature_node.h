@@ -39,14 +39,12 @@ const char*    gt_feature_node_get_attribute(GtFeatureNode *feature_node,
                                              const char *attr_name);
 /* Return a GtStrArray containing the used attribute names. */
 GtStrArray*    gt_feature_node_get_attribute_list(GtFeatureNode*);
-bool           gt_feature_node_score_is_defined(const GtFeatureNode*);
 bool           gt_feature_node_is_multi(const GtFeatureNode*);
 bool           gt_feature_node_is_pseudo(const GtFeatureNode*);
 void           gt_feature_node_make_multi_representative(GtFeatureNode*);
 void           gt_feature_node_set_multi_representative(GtFeatureNode*,
                                                         GtFeatureNode*);
 GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode*);
-float                 gt_feature_node_get_score(GtFeatureNode*);
 GtStrand       gt_feature_node_get_strand(GtFeatureNode*);
 GtPhase        gt_feature_node_get_phase(GtFeatureNode*);
 void           gt_feature_node_get_exons(GtFeatureNode*,
@@ -57,8 +55,6 @@ GtTranscriptFeatureType
 void           gt_feature_node_set_strand(GtFeatureNode*, GtStrand);
 void           gt_feature_node_set_phase(GtFeatureNode*, GtPhase);
 void           gt_feature_node_set_end(GtFeatureNode*, unsigned long);
-void           gt_feature_node_set_score(GtFeatureNode*, float);
-void           gt_feature_node_unset_score(GtFeatureNode*);
 void           gt_feature_node_add_attribute(GtFeatureNode*,
                                              const char *attr_name,
                                              const char *attr_value);

@@ -359,7 +359,7 @@ GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode
   return fn; /* is itself the representative */
 }
 
-float gt_feature_node_get_score(GtFeatureNode *fn)
+float gt_feature_node_get_score(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   gt_assert(gt_feature_node_score_is_defined(fn));
