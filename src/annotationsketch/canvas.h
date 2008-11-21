@@ -18,17 +18,17 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
-typedef struct GtCanvasClass GtCanvasClass;
-
 #include <stdio.h>
 #include "annotationsketch/canvas_api.h"
+#include "annotationsketch/block.h"
 #include "annotationsketch/custom_track.h"
 #include "annotationsketch/layout.h"
-#include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/element.h"
 #include "annotationsketch/track.h"
+
+typedef struct GtCanvasClass GtCanvasClass;
 
 unsigned long   gt_canvas_calculate_height(GtCanvas*, GtDiagram*);
 void            gt_canvas_draw_ruler(GtCanvas*, GtRange);
