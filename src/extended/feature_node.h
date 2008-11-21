@@ -39,8 +39,6 @@ const char*    gt_feature_node_get_attribute(GtFeatureNode *feature_node,
                                              const char *attr_name);
 /* Return a GtStrArray containing the used attribute names. */
 GtStrArray*    gt_feature_node_get_attribute_list(GtFeatureNode*);
-const char*    gt_feature_node_get_type(GtFeatureNode*);
-bool           gt_feature_node_has_type(GtFeatureNode*, const char*);
 bool           gt_feature_node_score_is_defined(const GtFeatureNode*);
 bool           gt_feature_node_is_multi(const GtFeatureNode*);
 bool           gt_feature_node_is_pseudo(const GtFeatureNode*);
