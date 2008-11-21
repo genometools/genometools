@@ -22,6 +22,11 @@ from gt.core.error import Error, gterror
 from gt.core.gtrange import Range
 from gt.core.gtstr import Str
 
+GRAPHICS_PDF = 0
+GRAPHICS_PNG = 1
+GRAPHICS_PS  = 2
+GRAPHICS_SVG = 3
+
 ARROW_LEFT = 0
 ARROW_RIGHT = 1
 ARROW_BOTH = 2
@@ -199,17 +204,57 @@ class Graphics:
 
 
 class GraphicsCairo(Graphics):
-  def __init__(self, p = None, width = None, height = None):
-    if (not p) and (width and height):
-      self.g = gtlib.gt_graphics_cairo_new(1, width, height)
-      self.own = True
-    else:
-      self.g = p
-      self.own = False
+  def __init__(self, p):
+    self.g = p
+    self.own = False
     self._as_parameter_ = self.g
-
   def from_param(cls, obj):
     if not isinstance(obj, GraphicsCairo):
       raise TypeError, "argument must be a GraphicsCairo"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
+
+class GraphicsCairoPNG(GraphicsCairo):
+  def __init__(self, width, height):
+    self.g = gtlib.gt_graphics_cairo_new(GRAPHICS_PNG, width, height)
+    self.own = True
+    self._as_parameter_ = self.g
+  def from_param(cls, obj):
+    if not isinstance(obj, GraphicsCairoPNG):
+      raise TypeError, "argument must be a GraphicsCairoPNG"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
+class GraphicsCairoPDF(GraphicsCairo):
+  def __init__(self, width, height):
+    self.g = gtlib.gt_graphics_cairo_new(GRAPHICS_PDF, width, height)
+    self.own = True
+    self._as_parameter_ = self.g
+  def from_param(cls, obj):
+    if not isinstance(obj, GraphicsCairoPDF):
+      raise TypeError, "argument must be a GraphicsCairoPDF"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
+class GraphicsCairoPS(GraphicsCairo):
+  def __init__(self, width, height):
+    self.g = gtlib.gt_graphics_cairo_new(GRAPHICS_PS, width, height)
+    self.own = True
+    self._as_parameter_ = self.g
+  def from_param(cls, obj):
+    if not isinstance(obj, GraphicsCairoPS):
+      raise TypeError, "argument must be a GraphicsCairoPS"
+    return obj._as_parameter_
+  from_param = classmethod(from_param)
+
+class GraphicsCairoSVG(GraphicsCairo):
+  def __init__(self, width, height):
+    self.g = gtlib.gt_graphics_cairo_new(GRAPHICS_SVG, width, height)
+    self.own = True
+    self._as_parameter_ = self.g
+  def from_param(cls, obj):
+    if not isinstance(obj, GraphicsCairoSVG):
+      raise TypeError, "argument must be a GraphicsCairoSVG"
     return obj._as_parameter_
   from_param = classmethod(from_param)

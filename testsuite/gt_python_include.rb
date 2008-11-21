@@ -83,6 +83,15 @@ if not $arguments["nocairo"] then
                "#{$testdata}gff3_file_1_short.txt"
   end
 
+  Name "gtpython: AnnotationSketch bindings (Graphics)"
+  Keywords "gt_python"
+  Test do
+    run_python "#{$testdata}gtpython/graphics_stuff.py " +
+             "#{$testdata}graphics_curve_test_coords.txt " +
+             "out.svg"
+    run "diff out.svg #{$testdata}graphics_test.out"
+  end
+
   Name "gtpython: show_seqids"
   Keywords "gt_python"
   Test do
