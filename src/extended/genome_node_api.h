@@ -18,6 +18,8 @@
 #ifndef GENOME_NODE_API_H
 #define GENOME_NODE_API_H
 
+#include "core/str_api.h"
+
 typedef struct GtGenomeNodeClass GtGenomeNodeClass;
 
 /* The <GtGenomeNode> interface. */
@@ -33,5 +35,9 @@ void          gt_genome_node_delete(GtGenomeNode *genome_node);
 /* Decrease the reference count for <genome_node> and recursively for all its
    children or delete it, if this was the last reference. */
 void          gt_genome_node_rec_delete(GtGenomeNode *genome_node);
+
+/* Return the sequence ID of <genome_node>. Corresponds to column 1 of regular
+   GFF3 lines. */
+GtStr*        gt_genome_node_get_seqid(GtGenomeNode *genome_node);
 
 #endif

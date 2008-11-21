@@ -31,7 +31,6 @@ void*         gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 void*         gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 const char*   gt_genome_node_get_filename(const GtGenomeNode*);
 unsigned int  gt_genome_node_get_line_number(const GtGenomeNode*);
-GtStr*        gt_genome_node_get_seqid(GtGenomeNode*);
 /* used to sort nodes */
 GtStr*        gt_genome_node_get_idstr(GtGenomeNode*);
 unsigned long gt_genome_node_get_start(GtGenomeNode*);
