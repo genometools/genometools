@@ -19,7 +19,7 @@
 #define GENOME_NODE_H
 
 #include "core/bittab.h"
-#include "core/phase.h"
+#include "core/phase_api.h"
 #include "core/range.h"
 #include "core/str.h"
 #include "extended/genome_node_api.h"

@@ -20,7 +20,7 @@
 
 #include "core/bittab.h"
 #include "core/range.h"
-#include "core/phase.h"
+#include "core/phase_api.h"
 #include "core/strand_api.h"
 #include "core/str_array.h"
 #include "extended/feature_node_api.h"

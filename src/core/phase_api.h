@@ -15,19 +15,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef PHASE_H
-#define PHASE_H
+#ifndef PHASE_API_H
+#define PHASE_API_H
 
-typedef enum {
+/* This enum type defines the possible phases, namely <GT_PHASE_ZERO>,
+   <GT_PHASE_ONE>, <GT_PHASE_TWO>, and <GT_PHASE_UNDEFINED>. */
+typedef enum GtPhase GtPhase;
+
+enum GtPhase{
   GT_PHASE_ZERO,     /* '0' */
   GT_PHASE_ONE,      /* '1' */
   GT_PHASE_TWO,      /* '2' */
   GT_PHASE_UNDEFINED /* '.' */
-} GtPhase;
+};
 
-#define GT_PHASE_CHARS "012."
+/* Use this string to map phase enum types to their corresponding character. */
+#define GT_PHASE_CHARS \
+        "012."
 
-/* an assertion will fail if <phase_char> is not a valid one */
+/* Map <phase_char> to the corresponding phase enum type.
+   An assertion will fail if <phase_char> is not a valid one. */
 GtPhase gt_phase_get(char phase_char);
 
 #endif

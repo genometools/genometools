@@ -20,7 +20,7 @@
 
 #include "core/error.h"
 #include "core/range.h"
-#include "core/phase.h"
+#include "core/phase_api.h"
 #include "core/strand_api.h"
 
 /* Parse integer from <nptr> and store result in <out>.
