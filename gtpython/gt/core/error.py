@@ -21,12 +21,21 @@ class GTError(Exception):
   pass
 
 class Error:
-  def __init__(self):
-    self.error = gtlib.gt_error_new()
+  def __init__(self, ptr = None):
+    if ptr:
+      self.error = ptr
+      self.own = False
+    else:
+      self.error = gtlib.gt_error_new()
+      self.own = True
     self._as_parameter_ = self.error
 
   def __del__(self):
-    gtlib.gt_error_delete(self.error)
+    if self.own:
+      try:
+        gtlib.gt_error_delete(self.error)
+      except AttributeError:
+        pass
 
   def from_param(cls, obj):
     if not isinstance(obj, Error):
