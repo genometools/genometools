@@ -20,6 +20,7 @@
 #define BLOCK_H
 
 #include "annotationsketch/block_api.h"
+#include "annotationsketch/canvas.h"
 #include "core/error.h"
 
 void                  gt_block_insert_element(GtBlock*, GtFeatureNode *node);

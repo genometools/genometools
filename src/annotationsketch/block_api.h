@@ -19,12 +19,12 @@
 #ifndef BLOCK_API_H
 #define BLOCK_API_H
 
-typedef struct GtBlock GtBlock;
+#include "core/range_api.h"
+#include "core/str_api.h"
+#include "core/strand_api.h"
+#include "extended/feature_node_api.h"
 
-#include "annotationsketch/canvas.h"
-#include "core/range.h"
-#include "core/array.h"
-#include "extended/genome_node.h"
+typedef struct GtBlock GtBlock;
 
 GtBlock*              gt_block_new(void);
 GtBlock*              gt_block_ref(GtBlock*);
