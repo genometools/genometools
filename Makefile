@@ -297,6 +297,9 @@ LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 # set prefix for install target
 prefix ?= /usr/local
 
+# allow to set patch program
+patch ?= patch
+
 all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      bin/skproto bin/gt bin/lua bin/rnv \
      bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
@@ -617,7 +620,7 @@ installwww:
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
 
 patch:
-	if test -f $(CURDIR)/src/patches/$(SYSTEMNAME).patch; then patch -p1 < $(CURDIR)/src/patches/$(SYSTEMNAME).patch; fi
+	if test -f $(CURDIR)/src/patches/$(SYSTEMNAME).patch; then $(patch) -p1 < $(CURDIR)/src/patches/$(SYSTEMNAME).patch; fi
 
 push:
 	git push origin master
