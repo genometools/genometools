@@ -83,11 +83,11 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
         (first_score_is_defined && second_score_is_defined &&
          first_score >= second_score)) {
       /* keep first node */
-      gt_genome_node_rec_delete(*second_node);
+      gt_genome_node_delete(*second_node);
     }
     else {
       /* keep second node */
-      gt_genome_node_rec_delete(*first_node);
+      gt_genome_node_delete(*first_node);
       *first_node = *second_node;
     }
     *second_node = NULL;
@@ -142,8 +142,8 @@ static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 static void uniq_stream_free(GtNodeStream *gs)
 {
   GtUniqStream *us = uniq_stream_cast(gs);
-  gt_genome_node_rec_delete(us->first_node);
-  gt_genome_node_rec_delete(us->second_node);
+  gt_genome_node_delete(us->first_node);
+  gt_genome_node_delete(us->second_node);
   gt_node_stream_delete(us->in_stream);
 }
 

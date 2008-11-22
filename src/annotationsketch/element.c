@@ -169,8 +169,8 @@ int gt_element_unit_test(GtError *err)
   gt_element_delete(e);
   gt_element_delete(e2);
   gt_element_delete(e3);
-  gt_genome_node_rec_delete(gn);
-  gt_genome_node_rec_delete(gn2);
+  gt_genome_node_delete(gn);
+  gt_genome_node_delete(gn2);
   gt_str_delete(seqid);
 
   return had_err;

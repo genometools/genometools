@@ -332,8 +332,8 @@ int gt_block_unit_test(GtError *err)
   gt_element_delete(e1);
   gt_element_delete(e2);
   gt_block_delete(b);
-  gt_genome_node_rec_delete(gn1);
-  gt_genome_node_rec_delete(gn2);
+  gt_genome_node_delete(gn1);
+  gt_genome_node_delete(gn2);
 
   return had_err;
 }

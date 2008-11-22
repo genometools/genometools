@@ -72,7 +72,7 @@ static void bed_in_stream_free(GtNodeStream *ns)
   GtBEDInStream *bed_in_stream = bed_in_stream_cast(ns);
   gt_free(bed_in_stream->filename);
   while (gt_queue_size(bed_in_stream->genome_node_buffer))
-    gt_genome_node_rec_delete(gt_queue_get(bed_in_stream->genome_node_buffer));
+    gt_genome_node_delete(gt_queue_get(bed_in_stream->genome_node_buffer));
   gt_queue_delete(bed_in_stream->genome_node_buffer);
   gt_bed_parser_delete(bed_in_stream->bed_parser);
 }

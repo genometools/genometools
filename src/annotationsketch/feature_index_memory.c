@@ -54,7 +54,7 @@ static void region_info_delete(RegionInfo *info)
 {
   gt_interval_tree_delete(info->features);
   if (info->region)
-    gt_genome_node_rec_delete((GtGenomeNode*)info->region);
+    gt_genome_node_delete((GtGenomeNode*)info->region);
   gt_free(info);
 }
 
@@ -71,7 +71,7 @@ void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
     info = gt_calloc(1, sizeof (RegionInfo));
     info->region = (GtRegionNode*) gt_genome_node_ref((GtGenomeNode*) rn);
     info->features = gt_interval_tree_new((GtFree)
-                                          gt_genome_node_rec_delete);
+                                          gt_genome_node_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     gt_hashmap_add(fi->regions, seqid, info);
@@ -106,7 +106,7 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
     info = gt_calloc(1, sizeof (RegionInfo));
     info->region = NULL;
     info->features = gt_interval_tree_new((GtFree)
-                                          gt_genome_node_rec_delete);
+                                          gt_genome_node_delete);
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     gt_hashmap_add(fi->regions, seqid, info);
@@ -392,10 +392,10 @@ int gt_feature_index_memory_unit_test(GtError *err)
   /* delete all generated objects */
   gt_str_array_delete(seqids);
   gt_feature_index_delete(fi);
-  gt_genome_node_rec_delete(gn1);
-  gt_genome_node_rec_delete(gn2);
-  gt_genome_node_rec_delete((GtGenomeNode*) rn1);
-  gt_genome_node_rec_delete((GtGenomeNode*) rn2);
+  gt_genome_node_delete(gn1);
+  gt_genome_node_delete(gn2);
+  gt_genome_node_delete((GtGenomeNode*) rn1);
+  gt_genome_node_delete((GtGenomeNode*) rn2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
   return had_err;

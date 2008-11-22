@@ -71,9 +71,9 @@ static void automatic_sequence_region_delete(AutomaticGtSequenceRegion *auto_sr)
 {
   unsigned long i;
   if (!auto_sr) return;
-  gt_genome_node_rec_delete(auto_sr->sequence_region);
+  gt_genome_node_delete(auto_sr->sequence_region);
   for (i = 0; i < gt_array_size(auto_sr->feature_nodes); i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                               gt_array_get(auto_sr->feature_nodes, i));
   }
   gt_array_delete(auto_sr->feature_nodes);
@@ -1474,7 +1474,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
 
   if (had_err) {
     while (gt_queue_size(genome_nodes))
-      gt_genome_node_rec_delete(gt_queue_get(genome_nodes));
+      gt_genome_node_delete(gt_queue_get(genome_nodes));
   }
   else if (rval == EOF) {
     /* the file has been parsed completely, add automatically created sequence

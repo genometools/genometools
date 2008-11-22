@@ -924,10 +924,10 @@ int gt_diagram_unit_test(GtError *err)
   gt_diagram_delete(dia3);
   gt_canvas_delete(canvas);
   gt_feature_index_delete(fi);
-  gt_genome_node_rec_delete(gn1);
-  gt_genome_node_rec_delete(gn2);
-  gt_genome_node_rec_delete((GtGenomeNode*) rn1);
-  gt_genome_node_rec_delete((GtGenomeNode*) rn2);
+  gt_genome_node_delete(gn1);
+  gt_genome_node_delete(gn2);
+  gt_genome_node_delete((GtGenomeNode*) rn1);
+  gt_genome_node_delete((GtGenomeNode*) rn2);
   gt_str_delete(seqid1);
   gt_str_delete(seqid2);
 

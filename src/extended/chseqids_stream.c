@@ -101,7 +101,7 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       if (gt_genome_nodes_are_equal_region_nodes(*gn_a, *gn_b)) {
         gt_region_node_consolidate(gt_region_node_cast(*gn_b),
                                    gt_region_node_cast(*gn_a));
-        gt_genome_node_rec_delete(*gn_a);
+        gt_genome_node_delete(*gn_a);
         *gn_a = NULL;
       }
     }
@@ -151,7 +151,7 @@ static void chseqids_stream_free(GtNodeStream *gs)
   gt_mapping_delete(cs->chseqids_mapping);
   for (i = cs->buffer_index; i < gt_array_size(cs->gt_genome_node_buffer);
        i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                            gt_array_get(cs->gt_genome_node_buffer, i));
   }
   gt_array_delete(cs->gt_genome_node_buffer);

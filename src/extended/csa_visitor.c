@@ -486,7 +486,7 @@ void gt_csa_visitor_process_cluster(GtNodeVisitor *gv, bool final_cluster)
 
   /* remove the cluster genome nodes */
   for (i = 0; i < gt_array_size(csa_visitor->cluster); i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                               gt_array_get(csa_visitor->cluster, i));
   }
   gt_array_reset(csa_visitor->cluster);

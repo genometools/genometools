@@ -96,7 +96,7 @@ static int gt_bed_to_gff3_runner(GT_UNUSED int argc, const char **argv,
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) && gn)
-    gt_genome_node_rec_delete(gn);
+    gt_genome_node_delete(gn);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);

@@ -313,7 +313,7 @@ static int genome_node_lua_delete(lua_State *L)
 {
   GtGenomeNode **gn;
   gn = check_genome_node(L, 1);
-  gt_genome_node_rec_delete(*gn);
+  gt_genome_node_delete(*gn);
   return 0;
 }
 

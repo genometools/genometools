@@ -26,7 +26,7 @@ module GT
   extern "unsigned long gt_genome_node_get_start(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_end(GtGenomeNode*)"
   extern "const char* gt_genome_node_get_filename(GtGenomeNode*)"
-  extern "void gt_genome_node_rec_delete(GtGenomeNode*)"
+  extern "void gt_genome_node_delete(GtGenomeNode*)"
 
   class GenomeNode
     attr_reader :genome_node
@@ -36,7 +36,7 @@ module GT
       else
         @genome_node = node_ptr
       end
-      @genome_node.free = GT::symbol("gt_genome_node_rec_delete", "0P")
+      @genome_node.free = GT::symbol("gt_genome_node_delete", "0P")
     end
 
     def get_range

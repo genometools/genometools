@@ -66,7 +66,7 @@ static int merge_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
                                                      ms->buffer[j])) {
             gt_region_node_consolidate(gt_region_node_cast(ms->buffer[i]),
                                        gt_region_node_cast(ms->buffer[j]));
-            gt_genome_node_rec_delete(ms->buffer[j]);
+            gt_genome_node_delete(ms->buffer[j]);
             ms->buffer[j] = NULL;
           }
         }

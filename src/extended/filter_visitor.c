@@ -200,7 +200,7 @@ static int filter_visitor_genome_feature(GtNodeVisitor *gv,
     filter_node = filter_min_average_ssp(gf, fv->min_average_splice_site_prob);
 
   if (filter_node)
-    gt_genome_node_rec_delete((GtGenomeNode*) gf);
+    gt_genome_node_delete((GtGenomeNode*) gf);
   else
     gt_queue_add(fv->gt_genome_node_buffer, gf);
 
@@ -226,13 +226,13 @@ static int filter_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
         gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
       }
       else /* contain range does not overlap with <rn> range -> delete <rn> */
-        gt_genome_node_rec_delete((GtGenomeNode*) rn);
+        gt_genome_node_delete((GtGenomeNode*) rn);
     }
     else
       gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
   }
   else
-    gt_genome_node_rec_delete((GtGenomeNode*) rn);
+    gt_genome_node_delete((GtGenomeNode*) rn);
   return 0;
 }
 
@@ -248,7 +248,7 @@ static int filter_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
     gt_queue_add(filter_visitor->gt_genome_node_buffer, sn);
   }
   else
-    gt_genome_node_rec_delete((GtGenomeNode*) sn);
+    gt_genome_node_delete((GtGenomeNode*) sn);
   return 0;
 }
 

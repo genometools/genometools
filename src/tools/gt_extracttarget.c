@@ -180,7 +180,7 @@ static int gt_extracttarget_runner(GT_UNUSED int argc, const char **argv,
 
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn) {
     had_err = extracttarget_from_node(gn, arguments->seqfiles, err);
-    gt_genome_node_rec_delete(gn);
+    gt_genome_node_delete(gn);
   }
 
   gt_node_stream_delete(gff3_in_stream);

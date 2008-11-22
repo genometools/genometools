@@ -288,7 +288,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
          gn) {
-    gt_genome_node_rec_delete(gn);
+    gt_genome_node_delete(gn);
   }
 
   /* free */

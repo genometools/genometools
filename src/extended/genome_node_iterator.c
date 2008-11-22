@@ -115,14 +115,14 @@ int gt_genome_node_iterator_example(GT_UNUSED GtError *err)
   }
   gt_genome_node_iterator_delete(gni);
 
-  gt_genome_node_rec_delete(gn);
+  gt_genome_node_delete(gn);
   return 0;
 }
 
 void gt_genome_node_iterator_delete(GtGenomeNodeIterator *gni)
 {
   if (!gni) return;
-  gt_genome_node_rec_delete(gni->gn);
+  gt_genome_node_delete(gni->gn);
   gt_array_delete(gni->feature_stack);
   gt_free(gni);
 }

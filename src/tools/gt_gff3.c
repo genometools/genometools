@@ -248,7 +248,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   if (!had_err) {
     while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
            gn) {
-      gt_genome_node_rec_delete(gn);
+      gt_genome_node_delete(gn);
     }
   }
 

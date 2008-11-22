@@ -44,7 +44,7 @@ static int extract_feat_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       had_err = gt_genome_node_accept(*gn, efs->extract_feat_visitor, err);
       if (had_err) {
         /* we own the node -> delete it */
-        gt_genome_node_rec_delete(*gn);
+        gt_genome_node_delete(*gn);
         *gn = NULL;
       }
     }

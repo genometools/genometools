@@ -29,7 +29,7 @@ class GenomeNode(object):
 
   def __del__(self):
     try:
-      gtlib.gt_genome_node_rec_delete(self.gn)
+      gtlib.gt_genome_node_delete(self.gn)
     except AttributeError:
       pass
 

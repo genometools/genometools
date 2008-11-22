@@ -191,7 +191,7 @@ static void gff3_in_stream_free(GtNodeStream *gs)
   gt_str_array_delete(gff3_in_stream->files);
   gt_str_delete(gff3_in_stream->stdinstr);
   while (gt_queue_size(gff3_in_stream->genome_node_buffer))
-    gt_genome_node_rec_delete(gt_queue_get(gff3_in_stream->genome_node_buffer));
+    gt_genome_node_delete(gt_queue_get(gff3_in_stream->genome_node_buffer));
   gt_queue_delete(gff3_in_stream->genome_node_buffer);
   gt_gff3_parser_delete(gff3_in_stream->gff3_parser);
   gt_cstr_table_delete(gff3_in_stream->used_types);

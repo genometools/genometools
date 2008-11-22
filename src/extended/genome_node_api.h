@@ -34,7 +34,7 @@ void          gt_genome_node_delete(GtGenomeNode *genome_node);
 
 /* Decrease the reference count for <genome_node> and recursively for all its
    children or delete it, if this was the last reference. */
-void          gt_genome_node_rec_delete(GtGenomeNode *genome_node);
+void          gt_genome_node_delete(GtGenomeNode *genome_node);
 
 /* Return the sequence ID of <genome_node>.
    Corresponds to column 1 of regular GFF3 lines. */

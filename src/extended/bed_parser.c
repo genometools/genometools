@@ -71,7 +71,7 @@ void gt_bed_parser_delete(GtBEDParser *bed_parser)
   gt_str_delete(bed_parser->word);
   gt_hashmap_delete(bed_parser->seqid_to_str_mapping);
   while (gt_queue_size(bed_parser->feature_nodes))
-    gt_genome_node_rec_delete(gt_queue_get(bed_parser->feature_nodes));
+    gt_genome_node_delete(gt_queue_get(bed_parser->feature_nodes));
   gt_queue_delete(bed_parser->feature_nodes);
   gt_region_node_builder_delete(bed_parser->region_node_builder);
   gt_free(bed_parser);

@@ -61,7 +61,7 @@ static void remove_elem(GtDlistelem *elem, GtDlist *trees,
                         GtHashmap *target_to_elem, GtStr *key)
 {
   GtGenomeNode *node = gt_dlistelem_get_data(elem);
-  gt_genome_node_rec_delete(node);
+  gt_genome_node_delete(node);
   gt_dlist_remove(trees, elem);
   gt_hashmap_remove(target_to_elem, gt_str_get(key));
 }
@@ -108,7 +108,7 @@ static void filter_targetbest(GtFeatureNode *current_feature,
                               target_to_elem, key);
       }
       else /* current feature is not better -> remove it */
-        gt_genome_node_rec_delete((GtGenomeNode*) current_feature);
+        gt_genome_node_delete((GtGenomeNode*) current_feature);
     }
     gt_str_delete(key);
   }
@@ -159,7 +159,7 @@ static void targetbest_filter_stream_free(GtNodeStream *gs)
 {
   TargetbestGtFilterStream *tfs = targetbest_filter_stream_cast(gs);
   for (; tfs->next != NULL; tfs->next = gt_dlistelem_next(tfs->next))
-    gt_genome_node_rec_delete(gt_dlistelem_get_data(tfs->next));
+    gt_genome_node_delete(gt_dlistelem_get_data(tfs->next));
   gt_dlist_delete(tfs->trees);
   gt_hashmap_delete(tfs->target_to_elem);
   gt_node_stream_delete(tfs->in_stream);

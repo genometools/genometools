@@ -44,7 +44,7 @@ static int gt_splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       had_err = gt_genome_node_accept(*gn, ssis->splice_site_info_visitor, err);
       if (had_err) {
         /* we own the node -> delete it */
-        gt_genome_node_rec_delete(*gn);
+        gt_genome_node_delete(*gn);
         *gn = NULL;
       }
     }

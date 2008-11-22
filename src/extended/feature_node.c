@@ -626,7 +626,7 @@ int gt_feature_node_unit_test(GtError *err)
 
   ensure(had_err, !gt_feature_node_score_is_defined((GtFeatureNode*) fn));
 
-  gt_genome_node_rec_delete(fn);
+  gt_genome_node_delete(fn);
   gt_str_delete(seqid);
 
   return had_err;
@@ -1117,7 +1117,7 @@ static int free_genome_node(GtGenomeNode *gn, GT_UNUSED void *data,
   return 0;
 }
 
-void gt_genome_node_rec_delete(GtGenomeNode *gn)
+void gt_genome_node_delete(GtGenomeNode *gn)
 {
   GtFeatureNode *fn;
   int had_err;
