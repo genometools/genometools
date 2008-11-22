@@ -128,6 +128,7 @@ void* gt_genome_node_try_cast(const GtGenomeNodeClass *gnc, GtGenomeNode *gn)
 
 GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
 {
+  gt_assert(gn);
   gn->reference_count++;
   return gn;
 }
@@ -218,9 +219,13 @@ int gt_genome_node_compare_delta(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
 void gt_genome_node_delete(GtGenomeNode *gn)
 {
   if (!gn) return;
-  if (gn->reference_count) { gn->reference_count--; return; }
+  if (gn->reference_count) {
+    gn->reference_count--;
+    return;
+  }
   gt_assert(gn->c_class);
-  if (gn->c_class->free) gn->c_class->free(gn);
+  if (gn->c_class->free)
+    gn->c_class->free(gn);
   gt_str_delete(gn->filename);
   gt_free(gn);
 }
