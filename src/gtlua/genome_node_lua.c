@@ -227,7 +227,7 @@ static int genome_node_lua_add_child(lua_State *L)
   cf = gt_feature_node_try_cast(*child);
   luaL_argcheck(L, cf, 2, "not a feature node");
   gt_feature_node_add_child(pf, (GtFeatureNode*)
-                                gt_genome_node_rec_ref((GtGenomeNode*) cf));
+                                gt_genome_node_ref((GtGenomeNode*) cf));
   return 0;
 }
 

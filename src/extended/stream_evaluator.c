@@ -441,11 +441,11 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
   if (gt_feature_node_has_type(gf, gft_gene)) {
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->genes_forward, gn_ref);
         break;
       case GT_STRAND_REVERSE:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->genes_reverse, gn_ref);
         break;
       default:
@@ -458,11 +458,11 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
   else if (gt_feature_node_has_type(gf, gft_mRNA)) {
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->mRNAs_forward, gn_ref);
         break;
       case GT_STRAND_REVERSE:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->mRNAs_reverse, gn_ref);
         break;
       default:
@@ -473,7 +473,7 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
     }
   }
   else if (gt_feature_node_has_type(gf, gft_LTR_retrotransposon)) {
-    gn_ref = gt_genome_node_rec_ref(gn);
+    gn_ref = gt_genome_node_ref(gn);
     gt_array_add(info->slot->LTRs, gn_ref);
   }
   else if (gt_feature_node_has_type(gf, gft_CDS)) {

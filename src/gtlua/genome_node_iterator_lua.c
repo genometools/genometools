@@ -60,7 +60,7 @@ static int genome_node_iterator_lua_next(lua_State *L)
   gni = check_gt_genome_node_iterator(L, 1);
   gn = gt_genome_node_iterator_next(*gni);
   if (gn)
-    gt_lua_genome_node_push(L, gt_genome_node_rec_ref(gn));
+    gt_lua_genome_node_push(L, gt_genome_node_ref(gn));
   else
     lua_pushnil(L);
   return 1;

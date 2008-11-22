@@ -22,7 +22,7 @@ from gt.extended.gff3_visitor import GFF3Visitor
 class GenomeNode(object):
   def __init__(self, node_ptr, newref = False):
     if newref:
-      self.gn = gtlib.gt_genome_node_rec_ref(node_ptr)
+      self.gn = gtlib.gt_genome_node_ref(node_ptr)
     else:
       self.gn = node_ptr
     self._as_parameter_ = self.gn

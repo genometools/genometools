@@ -22,7 +22,7 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   extern "int gt_genome_node_accept(GtGenomeNode*, GenomeVisitor*, GtError*)"
-  extern "GtGenomeNode* gt_genome_node_rec_ref(GtGenomeNode*)"
+  extern "GtGenomeNode* gt_genome_node_ref(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_start(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_end(GtGenomeNode*)"
   extern "const char* gt_genome_node_get_filename(GtGenomeNode*)"
@@ -32,7 +32,7 @@ module GT
     attr_reader :genome_node
     def initialize(node_ptr, newref=false)
       if newref then
-        @genome_node = GT.gt_genome_node_rec_ref(node_ptr)
+        @genome_node = GT.gt_genome_node_ref(node_ptr)
       else
         @genome_node = node_ptr
       end

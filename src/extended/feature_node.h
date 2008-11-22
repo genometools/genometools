@@ -56,7 +56,7 @@ double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*);
 bool           gt_genome_features_are_similar(GtFeatureNode*, GtFeatureNode*);
 int            gt_feature_node_unit_test(GtError*);
 
-GtGenomeNode*  gt_genome_node_rec_ref(GtGenomeNode*);
+GtGenomeNode*  gt_genome_node_ref(GtGenomeNode*);
 
 /* perform depth first traversal of the given genome node */
 int            gt_genome_node_traverse_children(GtGenomeNode*, void*,

@@ -89,7 +89,7 @@ static void push_features_as_table(lua_State *L, GtArray *features)
     lua_newtable(L);
     for (i = 0; i < gt_array_size(features); i++) {
       lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
-      gt_lua_genome_node_push(L, gt_genome_node_rec_ref(*(GtGenomeNode**)
+      gt_lua_genome_node_push(L, gt_genome_node_ref(*(GtGenomeNode**)
                                                   gt_array_get(features, i)));
       lua_rawset(L, -3);
     }

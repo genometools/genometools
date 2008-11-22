@@ -32,7 +32,7 @@ static GtGenomeNodeIterator* genome_node_iterator_new_base(GtGenomeNode *gn)
   GtGenomeNodeIterator *gni;
   gt_assert(gn);
   gni = gt_malloc(sizeof *gni);
-  gni->gn = gt_genome_node_rec_ref(gn);
+  gni->gn = gt_genome_node_ref(gn);
   gni->feature_stack = gt_array_new(sizeof (GtFeatureNode*));
   return gni;
 }

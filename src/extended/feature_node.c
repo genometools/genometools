@@ -833,7 +833,7 @@ static int increase_reference_count(GtGenomeNode *gn, GT_UNUSED void *data,
   return 0;
 }
 
-GtGenomeNode* gt_genome_node_rec_ref(GtGenomeNode *gn)
+GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
 {
   GtFeatureNode *fn;
   int had_err;

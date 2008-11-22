@@ -69,7 +69,7 @@ void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
   seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn));
   if (!gt_hashmap_get(fi->regions, seqid)) {
     info = gt_calloc(1, sizeof (RegionInfo));
-    info->region = (GtRegionNode*) gt_genome_node_rec_ref((GtGenomeNode*) rn);
+    info->region = (GtRegionNode*) gt_genome_node_ref((GtGenomeNode*) rn);
     info->features = gt_interval_tree_new((GtFree)
                                           gt_genome_node_rec_delete);
     info->dyn_range.start = ~0UL;
@@ -92,7 +92,7 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   gt_assert(gfi && gf);
 
   fi = gt_feature_index_memory_cast(gfi);
-  gn = gt_genome_node_rec_ref((GtGenomeNode*) gf);
+  gn = gt_genome_node_ref((GtGenomeNode*) gf);
   /* get information about seqid and range */
   node_range = gt_genome_node_get_range(gn);
   seqid = gt_str_get(gt_genome_node_get_seqid(gn));
