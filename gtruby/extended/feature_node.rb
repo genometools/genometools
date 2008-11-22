@@ -45,8 +45,8 @@ module GT
 
   class FeatureNode < GenomeNode
 
-    def initialize(gn, single=false)
-      super(gn, single)
+    def initialize(gn, newref=false)
+      super(gn, newref)
       attribs = GT::StrArray.new
       GT.gt_feature_node_foreach_attribute(@genome_node, COLLECTFUNC, attribs)
       attr_a = attribs.to_a

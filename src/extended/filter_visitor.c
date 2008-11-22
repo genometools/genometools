@@ -226,7 +226,7 @@ static int filter_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
         gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
       }
       else /* contain range does not overlap with <rn> range -> delete <rn> */
-        gt_genome_node_delete((GtGenomeNode*) rn);
+        gt_genome_node_rec_delete((GtGenomeNode*) rn);
     }
     else
       gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);

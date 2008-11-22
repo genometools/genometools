@@ -26,8 +26,8 @@ def py_collect_func(tag, val, data):
 collect_func = CollectFunc(py_collect_func)
 
 class FeatureNode(GenomeNode):
-  def __init__(self, node_ptr, single = False):
-    super(FeatureNode, self).__init__(node_ptr, single)
+  def __init__(self, node_ptr, newref = False):
+    super(FeatureNode, self).__init__(node_ptr, newref)
     a = StrArray()
     gtlib.gt_feature_node_foreach_attribute(self.gn, \
                                             collect_func, \

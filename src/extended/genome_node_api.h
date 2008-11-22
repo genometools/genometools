@@ -26,12 +26,11 @@ typedef struct GtGenomeNodeClass GtGenomeNodeClass;
 /* The <GtGenomeNode> interface. */
 typedef struct GtGenomeNode GtGenomeNode;
 
-/* Increase the reference count for <genome_node> and return it. */
-GtGenomeNode* gt_genome_node_ref(GtGenomeNode *genome_node);
-
+#if 0
 /* Decrease the reference count for <genome_node> or delete it, if this was the
    last reference. */
 void          gt_genome_node_delete(GtGenomeNode *genome_node);
+#endif
 
 /* Decrease the reference count for <genome_node> and recursively for all its
    children or delete it, if this was the last reference. */

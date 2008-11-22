@@ -139,11 +139,11 @@ int gt_line_unit_test(GtError *err)
   gt_str_delete(seqid3);
   gt_line_delete(l1);
   gt_line_delete(l2);
-  gt_genome_node_delete(parent);
-  gt_genome_node_delete(gn1);
-  gt_genome_node_delete(gn2);
-  gt_genome_node_delete(gn3);
-  gt_genome_node_delete(gn4);
+  gt_genome_node_rec_delete(parent);
+  gt_genome_node_rec_delete(gn1);
+  gt_genome_node_rec_delete(gn2);
+  gt_genome_node_rec_delete(gn3);
+  gt_genome_node_rec_delete(gn4);
 
   return had_err;
 }

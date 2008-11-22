@@ -22,7 +22,7 @@
 #include "extended/tag_value_map.h"
 
 struct GtFeatureNode {
-  const GtGenomeNode parent_instance;
+  GtGenomeNode parent_instance;
   GtStr *seqid,
         *source;
   const char *type;

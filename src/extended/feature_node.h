@@ -99,6 +99,12 @@ bool           gt_genome_node_overlaps_nodes(GtGenomeNode*, GtArray*);
 bool           gt_genome_node_overlaps_nodes_mark(GtGenomeNode*, GtArray*,
                                                   GtBittab*);
 
+/* Increase the reference count for <feature_node> (non-recursively) and return
+   it. */
+GtFeatureNode* gt_feature_node_nonrec_ref(GtFeatureNode *feature_node);
+/* Delete <feature_node> non-recursively. */
+void           gt_feature_node_nonrec_delete(GtFeatureNode *feature_node);
+
 #define gt_feature_node_cast(genome_node) \
         gt_genome_node_cast(gt_feature_node_class(), genome_node)
 

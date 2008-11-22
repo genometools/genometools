@@ -20,20 +20,16 @@ from gt.core.error import Error, gterror
 from gt.extended.gff3_visitor import GFF3Visitor
 
 class GenomeNode(object):
-  def __init__(self, node_ptr, single = False):
-    self.single = single
-    if single:
-      self.gn = gtlib.gt_genome_node_ref(node_ptr)
+  def __init__(self, node_ptr, newref = False):
+    if newref:
+      self.gn = gtlib.gt_genome_node_rec_ref(node_ptr)
     else:
       self.gn = node_ptr
     self._as_parameter_ = self.gn
 
   def __del__(self):
     try:
-      if self.single:
-        gtlib.gt_genome_node_delete(self.gn)
-      else:
-        gtlib.gt_genome_node_rec_delete(self.gn)
+      gtlib.gt_genome_node_rec_delete(self.gn)
     except AttributeError:
       pass
 

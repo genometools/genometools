@@ -126,13 +126,6 @@ void* gt_genome_node_try_cast(const GtGenomeNodeClass *gnc, GtGenomeNode *gn)
   return NULL;
 }
 
-GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
-{
-  gt_assert(gn);
-  gn->reference_count++;
-  return gn;
-}
-
 const char* gt_genome_node_get_filename(const GtGenomeNode *gn)
 {
   gt_assert(gn);
@@ -216,6 +209,7 @@ int gt_genome_node_compare_delta(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
   return compare_genome_nodes_with_delta(*gn_a, *gn_b, *deltaptr);
 }
 
+#if 0
 void gt_genome_node_delete(GtGenomeNode *gn)
 {
   if (!gn) return;
@@ -229,6 +223,7 @@ void gt_genome_node_delete(GtGenomeNode *gn)
   gt_str_delete(gn->filename);
   gt_free(gn);
 }
+#endif
 
 void gt_genome_nodes_sort(GtArray *nodes)
 {

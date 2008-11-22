@@ -71,7 +71,7 @@ static void automatic_sequence_region_delete(AutomaticGtSequenceRegion *auto_sr)
 {
   unsigned long i;
   if (!auto_sr) return;
-  gt_genome_node_delete(auto_sr->sequence_region);
+  gt_genome_node_rec_delete(auto_sr->sequence_region);
   for (i = 0; i < gt_array_size(auto_sr->feature_nodes); i++) {
     gt_genome_node_rec_delete(*(GtGenomeNode**)
                               gt_array_get(auto_sr->feature_nodes, i));
@@ -530,7 +530,7 @@ static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
   gt_genome_node_iterator_delete(gni);
   /* remove pseudo node b from buffer */
   remove_node((GtGenomeNode*) pseudo_b, genome_nodes, auto_sr);
-  gt_genome_node_delete((GtGenomeNode*) pseudo_b);
+  gt_feature_node_nonrec_delete(pseudo_b);
   return pseudo_a;
 }
 
@@ -1155,7 +1155,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
       gt_array_add(auto_sr->feature_nodes, feature_node);
   }
   else if (!is_child)
-    gt_genome_node_delete(feature_node);
+    gt_feature_node_nonrec_delete((GtFeatureNode*) feature_node);
 
   if (!had_err && gn)
     gt_queue_add(genome_nodes, gn);

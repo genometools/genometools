@@ -102,19 +102,17 @@ GtBlock* gt_block_new_from_node(GtFeatureNode *node)
   block->range = gt_genome_node_get_range((GtGenomeNode*) node);
   block->strand = gt_feature_node_get_strand(node);
   block->type = gt_feature_node_get_type(node);
-  block->top_level_feature = (GtFeatureNode*)
-                                   gt_genome_node_ref((GtGenomeNode*) node);
+  block->top_level_feature = gt_feature_node_nonrec_ref(node);
   return block;
 }
 
-void gt_block_insert_element(GtBlock *block, GtFeatureNode *gf)
+void gt_block_insert_element(GtBlock *block, GtFeatureNode *node)
 {
   GtElement *element;
-  gt_assert(block && gf);
+  gt_assert(block && node);
   if (!block->top_level_feature)
-    block->top_level_feature = (GtFeatureNode*)
-                                    gt_genome_node_ref((GtGenomeNode*) gf);
-  element = gt_element_new(gf);
+    block->top_level_feature = gt_feature_node_nonrec_ref(node);
+  element = gt_element_new(node);
   gt_dlist_add(block->elements, element);
 }
 
@@ -156,9 +154,8 @@ GtBlock* gt_block_clone(GtBlock *block)
   newblock->range.end = block->range.end;
   newblock->show_caption = block->show_caption;
   newblock->strand = block->strand;
-  newblock->top_level_feature = (GtFeatureNode*)
-                                   gt_genome_node_ref((GtGenomeNode*)
-                                                block->top_level_feature);
+  newblock->top_level_feature = gt_feature_node_nonrec_ref(block
+                                                           ->top_level_feature);
   return newblock;
 }
 
@@ -335,8 +332,8 @@ int gt_block_unit_test(GtError *err)
   gt_element_delete(e1);
   gt_element_delete(e2);
   gt_block_delete(b);
-  gt_genome_node_delete(gn1);
-  gt_genome_node_delete(gn2);
+  gt_genome_node_rec_delete(gn1);
+  gt_genome_node_rec_delete(gn2);
 
   return had_err;
 }
@@ -358,6 +355,6 @@ void gt_block_delete(GtBlock *block)
     gt_str_delete(block->caption);
   gt_dlist_delete(block->elements);
   if (block->top_level_feature)
-    gt_genome_node_delete((GtGenomeNode*) block->top_level_feature);
+    gt_feature_node_nonrec_delete(block->top_level_feature);
   gt_free(block);
 }
