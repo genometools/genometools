@@ -26,7 +26,8 @@ static gboolean on_expose_event(GtkWidget *widget,
                       widget->allocation.width,
                       gt_layout_get_height(l));
   cr = gdk_cairo_create(GTK_LAYOUT(widget)->bin_window);
-  cairo_rectangle(cr, event->area.x, event->area.y, event->area.width, event->area.height);
+  cairo_rectangle(cr, event->area.x, event->area.y, event->area.width,
+                  event->area.height);
   cairo_clip(cr);
   canvas = gt_canvas_cairo_context_new(sty, cr, widget->allocation.width,
                                        gt_layout_get_height(l), NULL);
@@ -72,7 +73,8 @@ open_file(GtkWidget *widget,  gpointer user_data)
       GtkListStore *store;
       GtBioseq *bioseq;
       GtCustomTrack *custom;
-      bioseq = gt_bioseq_new("Drosophila_melanogaster.BDGP5.4.51.dna.chromosome.4.fa.gz", err);
+      bioseq = gt_bioseq_new("Drosophila_melanogaster.BDGP5.4.51.dna.chromosome"
+                             ".4.fa.gz", err);
       custom = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
                                           200,
                                           40,

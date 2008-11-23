@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height, NULL);
 
   /* sketch layout on canvas */
-  if(gt_layout_sketch(layout, canvas, err))
+  if (gt_layout_sketch(layout, canvas, err))
     handle_error(err);
 
   /* write canvas to file */

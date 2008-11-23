@@ -75,12 +75,14 @@ static void draw_example_features(GtArray *features, const char *style_file,
   canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height, NULL);
 
   /* sketch layout on canvas */
-  if(gt_layout_sketch(layout, canvas, err))
+  if (gt_layout_sketch(layout, canvas, err))
     handle_error(err);
 
   /* write canvas to file */
-  if (gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, output_file, err))
+  if (gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, output_file,
+                                   err)) {
     handle_error(err);
+  }
 
   /* free */
   gt_canvas_delete(canvas);
