@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,14 +15,34 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-require 'annotationsketch/block'
-require 'annotationsketch/canvas'
+require 'dl/import'
+require 'gthelper'
 require 'annotationsketch/custom_track'
-require 'annotationsketch/style'
-require 'annotationsketch/diagram'
-require 'annotationsketch/feature_index'
-require 'annotationsketch/feature_stream'
-require 'annotationsketch/graphics'
-require 'annotationsketch/image_info'
-require 'annotationsketch/layout'
-require 'annotationsketch/rec_map'
+
+module GT
+  extend DL::Importable
+  gtdlload "libgenometools"
+
+  class CustomTrackExample < CustomTrack
+
+
+    def get_height
+       50
+    end
+
+    def get_title
+       "Sample track drawn by a Ruby script"
+    end
+
+    def render(g, ypos, rng, sty, err)
+      data = []
+      120.times do
+        data.push(rand())
+      end
+      g.draw_curve_data(g.get_xmargins(), ypos,
+                        [0,0,1,0.6].pack("DDDD").to_ptr, data, 120, 0, 1, 40)
+      0
+    end
+
+  end
+end

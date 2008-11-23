@@ -25,6 +25,7 @@ module GT
   extern "GT_Diagram* gt_diagram_new(GtFeatureIndex*, const char*, " + \
                                     "const GtRange*, GtStyle*, GtError*)"
   extern "void gt_diagram_set_track_selector_func(GT_Diagram*, void*)"
+  extern "void gt_diagram_add_custom_track(GT_Diagram*, GtCustomTrack*)"
   extern "void gt_diagram_delete(GtDiagram*)"
 
   class Diagram
@@ -53,6 +54,10 @@ module GT
                end
              end
       GT.gt_diagram_set_track_selector_func(@diagram, @tsf)
+    end
+
+    def add_custom_track(ct)
+      GT.gt_diagram_add_custom_track(@diagram, ct)
     end
 
     def to_ptr
