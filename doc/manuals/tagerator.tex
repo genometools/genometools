@@ -170,6 +170,10 @@ tagsuffixseq&   show suffix tag involved in match (only for option
                 \Showoption{maxocc}
 \end{tabular}
 \end{center}
+This option only has an effect when used in the cdiff-mode. If in cdiff
+mode this option is not used, then the output is such as if keywords
+\texttt{tagnum}, \texttt{tagseq}, \texttt{dblength}, \texttt{dbstartpos},
+\texttt{strand} were used.
 }
 
 \Helpoption
@@ -213,33 +217,8 @@ ls -lh human-all.*
 Suppose that the compressed file \texttt{Q1.gz} contains short sequence tags
 in multiple \Fasta format. In a first call we run \Program in \textit{ms}-mode:
 
-\begin{Output}
-gt tagerator -q Q1.gz -maxocc 10 -pck pck-human
-# computing matching statistics
-# indexname(pck)=pck-rev
-# queryfile=Q1.gz
-# 15 aagcttgctgctgca
-10 + 88693
-9 + 88694 213545
-8 + 25583 88695 213546 281700 325202 451235 747565
-12 + 470064
-11 + 470065
-10 + 158315 363967 470066 501203 576660 729958
-9 +
-8 +
-7 +
-6 +
-5 +
-4 +
-3 +
-2 +
-1 +
-11 - 662728
-10 - 662729
-9 - 662730 678998 753601
-12 - 725297
-...
-\end{Output}
+\EXECUTE{gt tagerator -q Q1.gz -maxocc 10 -pck pck-human | head -n 25}
+
 The first line shortly reports the kind of computation performed. The second
 and third line give the name of the index containing the subject sequences.
 It is reported whether it is a packed index or an enhanced suffix array. 
@@ -266,36 +245,8 @@ forward strand.
 
 In a second call, we run \Program in \textit{cdiff}-mode:
 
-\begin{Output}
-gt tagerator -q Q1.gz -pck pck-human -e 2 -nowildcards
-# computing complete matches with up to 2 differences
-# indexname(pck)=pck-human
-# queryfile=Q1.gz
-# 15 aagcttgctgctgca
-14 + 363963
-13 + 576657
-13 + 501200
-13 + 158312
-13 + 180388
-15 + 464008
-14 + 88693
-13 + 576656
-13 + 501199
-14 + 471049
-14 + 78690
-14 + 104932
-14 + 463353
-14 + 317578
-15 + 576655
-15 + 501198
-15 + 317577
-16 - 635853
-16 - 347779
-13 - 639578
-15 - 259681
-15 - 213639
-...
-\end{Output}
+\EXECUTE{gt tagerator -q Q1.gz -pck pck-human -e 2 | head -n 28}
+
 The first line shortly reports the kind of computation performed. The second
 and third line are as in the previous example. Then, for
 each tag its length and the tag itself is shown, followed by 
@@ -309,31 +260,7 @@ refers to the complete pattern.
 
 Our third example concerns the \textit{pdiff}-mode:
 
-\begin{Output}
-gt tagerator -q Q1.gz -pck pck-human -e 1 -nowildcards -maxocc 5
-# computing prefix matches <= 1 differences and at most 5 occurrences in the subject sequences
-# indexname(pck)=pck-human
-# queryfile=Q1.gz
-# 15 aagcttgctgctgca
-8 + 507736 8
-8 + 213544 8
-8 + 289017 8
-9 + 274066 8
-9 + 427225 8
-9 + 632436 9
-9 + 590998 9
-9 + 411370 9
-8 + 616567 7
-8 - 14443 8
-8 - 79251 8
-8 - 606034 8
-8 - 604316 8
-10 - 176215 9
-10 - 662727 9
-9 - 333528 9
-9 - 92052 9
-...
-\end{Output}
+\EXECUTE{gt tagerator -q Q1.gz -pck pck-human -e 1 -maxocc 5 | head -n 20}
 
 The output is similar as in the previous example, except that each match
 is reported by three integers with a sign between the first and the

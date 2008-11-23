@@ -1,0 +1,21 @@
+$ gt tagerator -q Q1.gz -pck pck-human -e 1 -maxocc 5 
+# computing prefix matches with up to 1 differences and at most 5 occurrences in the subject sequences
+# indexname(pck)=pck-human
+# queryfile=Q1.gz
+# for each match show: tagnum tagseq dblength dbstartpos strand taglength 
+#	0	15	aagcttgctgctgca
+8	507736	+	8
+8	213544	+	8
+8	289017	+	8
+9	274066	+	8
+9	427225	+	8
+9	632436	+	9
+9	590998	+	9
+9	411370	+	9
+9	281698	+	9
+9	367734	+	9
+9	331595	+	9
+9	342090	+	9
+8	616567	+	7
+8	507735	+	7
+8	591679	+	7

@@ -3,9 +3,11 @@ ALL=ltrharvest.pdf\
     matstat.pdf\
     mgth.pdf\
     packedindex.pdf\
-    tallymer.pdf
+    tallymer.pdf\
+    tagerator.pdf
 
 TALLYMERTMP=tallymer-tmp
+TAGERATORTMP=tagerator-tmp
 
 all:${ALL}
 
@@ -56,6 +58,28 @@ tallymer.dvi:${TALLYMERTMP}.tex
 	latex ${TALLYMERTMP}
 	mv ${TALLYMERTMP}.dvi $@
 
+${TAGERATORTMP}.tex:tagerator.tex pck-human.prj Q1.gz
+	./findemptyoutfiles.sh
+	./execcommand.pl $< > $@
+
+pck-human.prj:${GTTESTDATA}/Iowa/at1MB
+	../../bin/gt packedindex mkindex -dna -dir rev -parts 12 -bsize 10 \
+                      -sprank -locfreq 32 -indexname pck-human\
+                      -db ${GTTESTDATA}/Iowa/at1MB
+
+Q1.gz:../../Q1.gz
+	cp $< $@
+
+tagerator.pdf:${TAGERATORTMP}.tex
+	pdflatex ${TAGERATORTMP}
+	pdflatex ${TAGERATORTMP}
+	mv ${TAGERATORTMP}.pdf $@
+
+tagerator.dvi:${TAGERATORTMP}.tex
+	latex ${TAGERATORTMP}
+	latex ${TAGERATORTMP}
+	mv ${TAGERATORTMP}.dvi $@
+
 %.pdf:%.tex
 	pdflatex $<
 	pdflatex $<
@@ -69,6 +93,7 @@ clean:
 	${RM} U89959.fna read[12].fna 
 	${RM} reads.al1 reads.esq reads.lcp reads.llv reads.prj reads.suf
 	${RM} ${TALLYMERTMP}.tex
+	${RM} ${TAGERATORTMP}.tex Q1.gz pck-human.*
 
 cleanup:clean
 	${RM} ${ALL}
