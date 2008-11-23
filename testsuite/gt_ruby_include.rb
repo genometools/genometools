@@ -76,6 +76,15 @@ if not $arguments["nocairo"] then
              "#{$testdata}gff3_file_1_short.txt"
   end
 
+  Name "gtruby: AnnotationSketch bindings (Graphics)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/graphics_stuff.rb " +
+             "#{$testdata}graphics_curve_test_coords.txt " +
+             "out.svg"
+    run "diff out.svg #{$testdata}graphics_test.out"
+  end
+
   Name "gtruby: show_seqids"
   Keywords "gt_ruby"
   Test do
