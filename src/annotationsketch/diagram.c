@@ -571,7 +571,7 @@ static void blocklist_delete(void *value)
 int gt_diagram_build(GtDiagram *diagram)
 {
   unsigned long i = 0;
-  int had_err;
+  int had_err = 0;
   NodeTraverseInfo nti;
   nti.diagram = diagram;
 

@@ -64,7 +64,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                                       GtRange viewrange,
                                       GtStyle *style, GT_UNUSED GtError *err)
 {
-  int had_err;
+  int had_err = 0;
   GtCustomTrackGcContent *ctgc;
   double iter, iter_step, value, *data;
   unsigned long n;
