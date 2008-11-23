@@ -22,6 +22,7 @@
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/luastyle.h"
+#include "core/error.h"
 #include "extended/luahelper.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/diagram_lua.h"
@@ -34,6 +35,7 @@ static int diagram_lua_new(lua_State *L)
   GtDiagram **diagram;
   GtFeatureIndex **feature_index;
   GtRange *range;
+  GtError *err;
   const char *seqid;
   GtStyle *style;
   /* get feature index */
@@ -48,7 +50,11 @@ static int diagram_lua_new(lua_State *L)
   style = gt_lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   gt_assert(diagram);
-  *diagram = gt_diagram_new(*feature_index, seqid, range, style);
+  err = gt_error_new();
+  *diagram = gt_diagram_new(*feature_index, seqid, range, style, err);
+  if (gt_error_is_set(err))
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -117,17 +123,7 @@ static int diagram_lua_new_from_array(lua_State *L)
   *diagram = gt_diagram_new_from_array(nodes, &range, style);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
-  gt_array_delete(nodes);
   return 1;
-}
-
-static int diagram_lua_sketch(lua_State *L)
-{
-  GtDiagram **diagram;
-  GtCanvas **canvas;
-  diagram = check_diagram(L,1);
-  canvas = check_canvas(L,2);
-  return gt_diagram_sketch(*diagram, *canvas);
 }
 
 static int diagram_lua_delete(lua_State *L)
@@ -145,7 +141,6 @@ static const struct luaL_Reg diagram_lib_f [] = {
 };
 
 static const struct luaL_Reg diagram_lib_m [] = {
-  { "sketch",      diagram_lua_sketch },
   { NULL, NULL }
 };
 

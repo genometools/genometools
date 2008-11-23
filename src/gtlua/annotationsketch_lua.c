@@ -22,6 +22,7 @@
 #include "gtlua/feature_stream_lua.h"
 #include "gtlua/feature_visitor_lua.h"
 #include "gtlua/image_info_lua.h"
+#include "gtlua/layout_lua.h"
 #include "gtlua/annotationsketch_lua.h"
 
 int gt_lua_open_annotationsketch(lua_State *L)
@@ -39,6 +40,7 @@ int gt_lua_open_annotationsketch(lua_State *L)
   gt_lua_open_feature_stream(L);
   gt_lua_open_feature_visitor(L);
   gt_lua_open_imageinfo(L);
+  gt_lua_open_layout(L);
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }

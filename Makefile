@@ -271,7 +271,8 @@ ifneq ($(cairo),no)
                  -I/opt/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
-                               bin/examples/sketch_parsed
+                               bin/examples/sketch_parsed_with_ctrack \
+			       bin/examples/sketch_parsed
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
 else
@@ -415,6 +416,11 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_constructed, \
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed, \
                                 obj/src/examples/sketch_parsed.o \
                                 lib/libgenometools.a $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ctrack, \
+                                obj/src/examples/sketch_parsed_with_ctrack.o \
+                                lib/libgenometools.a $(OVERRIDELIBS)))
+
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"

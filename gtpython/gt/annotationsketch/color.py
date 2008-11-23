@@ -21,4 +21,5 @@ from ctypes import Structure, c_double
 class Color(Structure):
   _fields_ = [("red",   c_double),
               ("green", c_double),
-              ("blue",  c_double)]
+              ("blue",  c_double),
+              ("alpha",  c_double)]

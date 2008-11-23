@@ -38,6 +38,8 @@ if __name__ == "__main__":
 
   style = Style()
   diagram = Diagram(feature_index, seqid, range, style)
-  canvas = CanvasCairoFile(style, 700)
-  diagram.sketch(canvas)
+  layout = Layout(diagram, 700, style)
+  height = layout.get_height()
+  canvas = CanvasCairoFile(style, 700, height)
+  layout.sketch(canvas)
   canvas.to_file(pngfile)

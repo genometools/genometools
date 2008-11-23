@@ -21,6 +21,7 @@ module GT
   Color = struct [
     "double red",
     "double green",
-    "double blue"
+    "double blue",
+    "double alpha"
   ]
 end

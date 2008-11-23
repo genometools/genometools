@@ -21,7 +21,7 @@
 #include "annotationsketch/color_api.h"
 
 struct GtColor {
-  double red, green, blue;
+  double red, green, blue, alpha;
 };
 
 #endif

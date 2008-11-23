@@ -20,9 +20,11 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/element.h"
 #include "core/cstr.h"
+#include "core/dlist.h"
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/unused_api.h"
 
 struct GtBlock {
   GtDlist *elements;
@@ -256,19 +258,25 @@ unsigned long gt_block_get_size(const GtBlock *block)
   return gt_dlist_size(block->elements);
 }
 
-int gt_block_sketch(GtBlock *block, GtCanvas *canvas)
+int gt_block_sketch(GtBlock *block, GtCanvas *canvas, GtError *err)
 {
- int had_err = 0;
- GtDlistelem *delem;
- gt_assert(block && canvas);
- /* if resulting block was too short,
-    do not traverse this feature tree further */
- if (-1 == gt_canvas_visit_block(canvas, block))
-   return had_err;
- for (delem = gt_dlist_first(block->elements); delem;
-      delem = gt_dlistelem_next(delem)) {
-    GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
-    gt_element_sketch(elem, canvas);
+  int had_err = 0;
+  GtDlistelem *delem;
+  gt_assert(block && canvas);
+  /* if resulting block was too short,
+     do not traverse this feature tree further */
+  had_err = gt_canvas_visit_block(canvas, block, err);
+  if (had_err)
+  {
+    if (had_err == -1)
+      return 0;
+    else
+      return had_err;
+  }
+  for (delem = gt_dlist_first(block->elements); delem;
+       delem = gt_dlistelem_next(delem)) {
+     GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
+     had_err = gt_element_sketch(elem, canvas, err);
   }
   return had_err;
 }

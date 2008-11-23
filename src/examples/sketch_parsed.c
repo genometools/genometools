@@ -2,7 +2,7 @@
 
 static void handle_error(GtError *err)
 {
-  fprintf(stderr, "error writing canvas %s\n", gt_error_get(err));
+  fprintf(stderr, "error: %s\n", gt_error_get(err));
   exit(EXIT_FAILURE);
 }
 
@@ -13,7 +13,9 @@ int main(int argc, char *argv[])
   GtFeatureIndex *feature_index;
   GtRange range;
   GtDiagram *diagram;
+  GtLayout *layout;
   GtCanvas *canvas;
+  unsigned long height;
   GtError *err = gt_error_new();
 
   if (argc != 4) {
@@ -43,13 +45,22 @@ int main(int argc, char *argv[])
   /* create diagram for first sequence ID in feature index */
   seqid = gt_feature_index_get_first_seqid(feature_index);
   gt_feature_index_get_range_for_seqid(feature_index, &range, seqid);
-  diagram = gt_diagram_new(feature_index, seqid, &range, style);
+  diagram = gt_diagram_new(feature_index, seqid, &range, style, err);
+  if (gt_error_is_set(err))
+    handle_error(err);
 
-  /* create canvas */
-  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, NULL);
+  /* create layout with given width, determine resulting image height */
+  layout = gt_layout_new(diagram, 600, style, err);
+  if (!layout)
+    handle_error(err);
+  height = gt_layout_get_height(layout);
 
-  /* sketch diagram on canvas */
-  gt_diagram_sketch(diagram, canvas);
+  /* create PNG canvas */
+  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height, NULL);
+
+  /* sketch layout on canvas */
+  if(gt_layout_sketch(layout, canvas, err))
+    handle_error(err);
 
   /* write canvas to file */
   if (gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, png_file, err))
@@ -57,6 +68,7 @@ int main(int argc, char *argv[])
 
   /* free */
   gt_canvas_delete(canvas);
+  gt_layout_delete(layout);
   gt_diagram_delete(diagram);
   gt_feature_index_delete(feature_index);
   gt_style_delete(style);

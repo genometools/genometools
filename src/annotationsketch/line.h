@@ -29,11 +29,11 @@ typedef struct GtLine GtLine;
 #include "core/range.h"
 #include "extended/genome_node.h"
 
-GtLine*     gt_line_new(void);
+GtLine*   gt_line_new(void);
 void      gt_line_insert_block(GtLine*, GtBlock*); /* takes ownership */
 bool      gt_line_has_captions(const GtLine*);
-GtArray* gt_line_get_blocks(GtLine*);
-int       gt_line_sketch(GtLine*, GtCanvas*);
+GtArray*  gt_line_get_blocks(GtLine*);
+int       gt_line_sketch(GtLine*, GtCanvas*, GtError*);
 int       gt_line_unit_test(GtError*);
 void      gt_line_delete(GtLine*);
 

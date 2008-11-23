@@ -19,7 +19,7 @@ from gt.dlload import gtlib
 from gt.annotationsketch.style import Style
 from gt.annotationsketch.image_info import ImageInfo
 from gt.core.error import Error, gterror
-from gt.core.str import Str
+from gt.core.gtstr import Str
 
 class Canvas:
   def __init__(self, *args):
@@ -39,8 +39,8 @@ class Canvas:
   from_param = classmethod(from_param)
 
 class CanvasCairoFile(Canvas):
-  def __init__(self, style, width, ii = None):
-    self.canvas = gtlib.gt_canvas_cairo_file_new(style, 1, width, ii)
+  def __init__(self, style, width, height, ii = None):
+    self.canvas = gtlib.gt_canvas_cairo_file_new(style, 1, width, height, ii)
     self._as_parameter_ = self.canvas
 
   def from_param(cls, obj):
@@ -68,5 +68,6 @@ class CanvasCairoFile(Canvas):
     gtlib.gt_canvas_cairo_file_to_stream.restype  = c_char_p
     gtlib.gt_canvas_cairo_file_to_stream.argtypes = [c_void_p, Str]
     gtlib.gt_canvas_cairo_file_new.restype  = c_void_p
-    gtlib.gt_canvas_cairo_file_new.argtypes = [Style, c_int, c_ulong, ImageInfo]
+    gtlib.gt_canvas_cairo_file_new.argtypes = [Style, c_int, c_ulong, c_ulong, \
+                                               ImageInfo]
   register = classmethod(register)

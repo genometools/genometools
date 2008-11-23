@@ -31,18 +31,18 @@
 typedef struct GtBioseq GtBioseq;
 
 /* Construct a new bioseq object (and create the bioseq files, if necessary). */
-GtBioseq*       gt_bioseq_new(const char *sequence_file, GtError*);
+GtBioseq*     gt_bioseq_new(const char *sequence_file, GtError*);
 /* Construct a new bioseq object (and always create the the bioseq files). */
-GtBioseq*       gt_bioseq_new_recreate(const char *sequence_file, GtError*);
-GtBioseq*       gt_bioseq_new_str(GtStr* sequence_file, GtError*);
+GtBioseq*     gt_bioseq_new_recreate(const char *sequence_file, GtError*);
+GtBioseq*     gt_bioseq_new_str(GtStr* sequence_file, GtError*);
 /* Construct a new bioseq object (and always create the bioseq files)
    with a certain <fasta_reader>. */
-GtBioseq*       gt_bioseq_new_with_fasta_reader(const char *sequence_file,
+GtBioseq*     gt_bioseq_new_with_fasta_reader(const char *sequence_file,
                                            GtFastaReaderType fasta_reader,
                                            GtError*);
 void          gt_bioseq_delete(GtBioseq*);
-GtAlpha*        gt_bioseq_get_alpha(GtBioseq*);
-GtSeq*          gt_bioseq_get_seq(GtBioseq*, unsigned long);
+GtAlpha*      gt_bioseq_get_alpha(GtBioseq*);
+GtSeq*        gt_bioseq_get_seq(GtBioseq*, unsigned long);
 const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
 const char*   gt_bioseq_get_sequence(GtBioseq*, unsigned long index);

@@ -56,3 +56,8 @@ if __name__ == "__main__":
 
   for feature in features:
     feature.accept(gff3_visitor)
+    if not isinstance (feature, FeatureNode):
+      raise
+    if not isinstance(feature.attribs, dict):
+      raise
+

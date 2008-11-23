@@ -54,10 +54,35 @@ if not $arguments["nocairo"] then
              "#{$testdata}gff3_file_1_short.txt"
   end
 
+  Name "gtruby: AnnotationSketch bindings (TrackSelectorFunc)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/block_stuff.rb " +
+             "#{$testdata}gff3_file_1_short.txt"
+    run "env LC_ALL=C sort #{$last_stdout}"
+    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.blocks"
+  end
+
   Name "gtruby: AnnotationSketch bindings (style)"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/style.rb #{$cur}/gtdata/sketch/default.style"
+  end
+
+  Name "gtruby: AnnotationSketch bindings (error reporting)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/sketch-failures.rb " +
+             "#{$testdata}gff3_file_1_short.txt"
+  end
+
+  Name "gtruby: AnnotationSketch bindings (Graphics)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/graphics_stuff.rb " +
+             "#{$testdata}graphics_curve_test_coords.txt " +
+             "out.svg"
+    run "diff out.svg #{$testdata}graphics_test.out"
   end
 
   Name "gtruby: show_seqids"
