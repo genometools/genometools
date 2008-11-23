@@ -31,7 +31,8 @@ typedef int  (*GtCanvasVisitTrackFunc)(GtCanvas*, GtTrack*, GtError*);
 typedef int  (*GtCanvasVisitLineFunc)(GtCanvas*, GtLine*, GtError*);
 typedef int  (*GtCanvasVisitBlockFunc)(GtCanvas*, GtBlock*, GtError*);
 typedef int  (*GtCanvasVisitElementFunc)(GtCanvas*, GtElement*, GtError*);
-typedef int  (*GtCanvasVisitCustomTrackFunc)(GtCanvas*, GtCustomTrack*, GtError*);
+typedef int  (*GtCanvasVisitCustomTrackFunc)(GtCanvas*, GtCustomTrack*,
+                                             GtError*);
 typedef void (*GtCanvasDrawRulerFunc)(GtCanvas*, GtRange);
 /* typedef void (*GtCanvasCallPluginFunc)(GtCanvas*,
                                        GtAnnotationSketchPlugin*); */

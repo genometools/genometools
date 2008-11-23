@@ -320,10 +320,8 @@ void gt_graphics_save_to_stream(const GtGraphics *g, GtStr *stream)
   return g->c_class->save_to_stream(g, stream);
 }
 
-
-
-
-/* ------------------------------------------------------------------------------------ */
+/* the following are functions for the Ruby wrappers as workarounds for
+   64bit issues */
 
 typedef struct {
   double x,
