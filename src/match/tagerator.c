@@ -733,11 +733,11 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       printf("#");
       if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
       {
-        printf("\t%lu",twl.taglen);
+        printf("\t" Formatuint64_t,PRINTuint64_tcast(tagnumber));
       }
       if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
       {
-        printf("\t");
+        printf("\t%lu\t",twl.taglen);
         fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
                             twl.taglen);
       }
