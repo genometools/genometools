@@ -63,11 +63,16 @@ module GT
   class Style
     attr_reader :style
 
-    def initialize
+    def initialize(s = nil)
       err = GT::Error.new()
-      @style = GT.gt_style_new(false, err.to_ptr)
+      if s.nil? then
+        @style = GT.gt_style_new(false, err.to_ptr)
+        @style.free = GT::symbol("gt_style_delete", "0P")
+      else
+        @style = s
+      end
       if not @style then GT.gterror(err) end
-      @style.free = GT::symbol("gt_style_delete", "0P")
+
     end
 
     def load_file(filename)

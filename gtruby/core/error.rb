@@ -27,9 +27,13 @@ module GT
   extern "void gt_error_delete(GtError*)"
 
   class Error
-    def initialize
-      @error = GT.gt_error_new()
-      @error.free = GT::symbol("gt_error_delete", "0P")
+    def initialize(e = nil)
+      if e.nil? then
+        @error = GT.gt_error_new()
+        @error.free = GT::symbol("gt_error_delete", "0P")
+      else
+        @error = e
+      end
     end
 
     def get
