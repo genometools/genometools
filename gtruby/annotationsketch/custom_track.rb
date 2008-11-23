@@ -27,17 +27,29 @@ module GT
   class CustomTrack
     def initialize()
       @get_height = DL.callback("L") do
-                      puts "calling get_height"
-                      self.get_height()
+                      ret = self.get_height()
+                      if ret.nil? or !ret.is_a?(Numeric) then
+                        GT::gterror("custom track get_height() method must " + \
+                                    "return a numeric value!")
+                      end
+                      ret
                     end
       @get_title = DL.callback("P") do
-                      puts "calling get_title"
-                      self.get_title().to_ptr
+                      ret = self.get_title()
+                      if ret.nil? or !ret.to_s.is_a?(String) then
+                        GT::gterror("custom track get_title() method must " +  \
+                                    "return a string!")
+                      end
+                      ret.to_s.to_ptr
                     end
       @render    = DL.callback("IPLPPP") do |g, ypos, rng, sty, err|
-                      puts "calling render"
-                      self.render(GT::Graphics.new(g), ypos, rng,              \
-                                  GT::Style.new(sty), GT::Error.new(err))
+                      ret = self.render(GT::Graphics.new(g), ypos, rng,        \
+                                        GT::Style.new(sty), GT::Error.new(err))
+                      if ret.nil? or !ret.is_a?(Numeric) then
+                        GT::gterror("custom track render() method must " +     \
+                                    "return a numeric value!")
+                      end
+                      ret
                     end
       @free    = DL.callback("0") do |g, ypos, rng, sty, err|
                       self.free()
