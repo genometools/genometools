@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>The AnnotationSketch module</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+
+<div id="main">
+<h1>Custom tracks</h1>
+<p>
+There are kinds of data which may be interesting to see together with annotation renderings, but that can not be expressed &ndash; or only in a complicated way &ndash; in GFF3 format. It may even be too difficult or counterintuitive to properly represent this data as typical <em>AnnotationSketch</em> box graphics. For example, this may be sequence data, numerical sequence analysis results, or other kinds of data which does not fit into the simple &lsquo;genomic feature&rsquo; scheme. For an example, see Fig. <a href="#fig1">1</a>.
+</p>
+<div class="figure">
+  <p><a name="fig1"></a><img src="images/example_ct.png" alt="[Example custom track]"></p>
+  <p><b>Figure 1: </b> Example <em>AnnotationSketch</em> output with a custom track at the bottom, displaying the GC content over a window size of 200&nbsp;bp. </p>
+</div>
+<p>
+With <em>custom tracks</em>, <em>AnnotationSketch</em> provides a mechanism to use the internal drawing functionality to create user-defined output which can be tailored to fit this kind of data. A custom track looks just like a normal <em>AnnotationSketch</em> track, but is completely in control of the developer.  While native <em>AnnotationSketch</em> primitives such as boxes can of course be used, the author of a custom track is not restricted to the layout algorithm and can draw anything anywhere (as long as it is provided by the <tt>Graphics</tt> class), taking arbitrary external data into account.
+</p>
+<h2>Anatomy of a custom track class</h2>
+<p>
+Simply put, custom tracks are classes which are derived from a <tt>CustomTrack</tt> base class and must implement a set of mandatory methods:
+<ul>
+  <li><tt>get_height()</tt>: Returns the amount of vertical space (in pixels or points) the custom track will occupy in the final image. Must return a numeric value.</li>
+  <li><tt>get_title()</tt>: Returns a title for the custom track which is displayed at the top of the track. Note that, unlike a track identifier string e.g. produced by a track selector function, the string returned by this function is not prepended by a file name. </li>
+  <li><tt>render(graphics, ypos, range, style, error)</tt>: Performs the actual rendering operations. As parameters, this function receives
+    <ul>
+    <li>a <tt>Graphics</tt> object to draw on, </li>
+    <li>the vertical offset <tt>ypos</tt> of the drawing area assigned to the custom track,</li>
+    <li>the <tt>Range</tt> of the sequence positions for which annotations are currently displayed,</li>
+    <li>a <tt>Style</tt> object which can be used to obtain style information specific to this custom track, and</li>
+    <li>an <tt>Error</tt> object which can be used to return an error message if the custom track needs to signal a problem.</li>
+    </ul>
+    The <tt>render()</tt> method must return 0 if drawing was successful, or a negative value if an error occurred.
+  </li>
+</ul>
+Optionally, a <tt>free()</tt> method can be implemented if the subclass needs to clean up any private space allocated by itself.
+
+These methods are then called by the rendering code in <em>AnnotationSketch</em> when a <tt>Diagram</tt> containing a custom track is laid out and rendered. No other constraints apply on such a class besides that these methods are implemented (in the scripting language bindings, the parent classes' constructor must be called once).
+</p>
+
+<h2>Writing an example custom track</h2>
+<p>
+Let's suppose we are not satisfied with the display of single base features, such as transposable element insertion sites or SNPs. Instead of a single line denoting the feature location, we would like to have a small triangle pointing at the location. Suppose we also do not have this data in an annotation graph, so we cannot use the built-in rendering functions. It is straightforward to write a small custom track class which does this for us. <br>This tutorial uses Python code for simplicity, but the general approach is common to all supported languages.
+</p>
+<p>
+First, we need to define a class inheriting from <tt>CustomTrack</tt>, call the parent constructor to register the functions and set instance variables for the triangle sidelength and a dictionary containing the feature positions and a description:
+<pre class="code">
+class CustomTrackInsertions(CustomTrack):
+  def __init__(self, sidelength, data):
+    super(CustomTrackInsertions, self).__init__()
+    self.sidelength = sidelength
+    self.data = data
+</pre>
+We define the height to be 20 pixels:
+<pre class="code">
+  def get_height(self):
+    return 20
+</pre>
+As a track title, we set "Insertion site":
+<pre class="code">
+  def get_title(self):
+    return "Insertion site"
+</pre>
+The rendering code then calculates the triangle coordinates and draws the respective lines:
+<pre class="code">
+  def render(self, graphics, ypos, rng, style, error):
+    height = (self.sidelength*math.sqrt(3))/2
+    margins = graphics.get_xmargins()
+    red = Color(1, 0, 0, 0.7)
+    for pos, desc in self.data.iteritems():
+      drawpos = margins + (float(pos)-rng.start)/(rng.end-rng.start+1)         \
+                  * (graphics.get_image_width()-2*margins)
+      graphics.draw_line(drawpos-self.sidelength/2, ypos + height,             \
+                         drawpos, ypos,                                        \
+                         red, 1)
+      graphics.draw_line(drawpos, ypos,                                        \
+                         drawpos+self.sidelength/2, ypos + height,             \
+                         red, 1)
+      graphics.draw_line(drawpos-self.sidelength/2, ypos + height,             \
+                         drawpos+self.sidelength/2, ypos + height,             \
+                         red, 1)
+      graphics.draw_text_centered(drawpos, ypos + height + 13, str(desc))
+    return 0
+</pre>
+For a Python custom track, that's it! No more code is necessary for this very simple custom track. We can now instantiate this class and attach the instance to a <tt>Diagram</tt> object:
+<pre class="code">
+...
+diagram = Diagram(feature_index, seqid, range, style)
+...
+ctt = CustomTrackInsertions(15, {2000:"foo", 4400:"bar", 8000:"baz"})
+diagram.add_custom_track(ctt)
+...
+</pre>
+Running layout and drawing functions on this diagram then produces the desired image:
+<div class="figure">
+  <p><a name="fig2"></a><img src="images/example_ct2.png" alt="[Example custom track]"></p>
+  <p><b>Figure 2: </b> The example insertion site custom track (at the bottom), displaying three sample data points. </p>
+</div>
+</p>
+<div id="footer">
+Copyright &copy; 2007-2008 Sascha Steinbiss. Last update: 2008-11-24
+</div>
+</div>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-301256-4";
+urchinTracker();
+</script>
+</body>
+</html>
