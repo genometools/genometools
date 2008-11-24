@@ -51,6 +51,10 @@ class Block(object):
   def clone(self):
     return Block(gtlib.gt_block_clone(self.block))
 
+  def get_caption(self):
+    s = Str(gtlib.gt_block_get_caption(self.block))
+    return str(s)
+
   def set_strand(self, strand):
     if not strand in strandchars:
       gterror("Invalid strand '%s' -- must be one of %s" \
@@ -88,7 +92,7 @@ class Block(object):
     gtlib.gt_block_clone.argtypes = [c_void_p]
     gtlib.gt_block_set_caption_visibility.argtypes = [c_void_p, c_int]
     gtlib.gt_block_caption_is_visible.argtypes = [c_void_p]
-    gtlib.gt_block_get_caption.restype = c_char_p
+    gtlib.gt_block_get_caption.restype = c_void_p
     gtlib.gt_block_get_caption.argtypes = [c_void_p]
     gtlib.gt_block_set_strand.argtypes = [c_void_p, c_int]
     gtlib.gt_block_get_strand.restype = c_int

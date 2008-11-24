@@ -19,14 +19,20 @@ from gt.dlload import gtlib
 
 class Str:
   def __init__(self, s = None):
-    self.strg = gtlib.gt_str_new_cstr(s)
+    if s == None or isinstance(s, str):
+      self.strg = gtlib.gt_str_new_cstr(s)
+      self.own = True
+    else:
+      self.strg = s
+      self.own = False
     self._as_parameter_ = self.strg
 
   def __del__(self):
-    try:
-      gtlib.gt_str_delete(self.strg)
-    except AttributeError:
-      pass
+    if self.own:
+      try:
+        gtlib.gt_str_delete(self.strg)
+      except AttributeError:
+        pass
 
   def __str__(self):
     return gtlib.gt_str_get(self.strg)
