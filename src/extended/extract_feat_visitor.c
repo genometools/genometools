@@ -21,7 +21,7 @@
 #include "core/translate.h"
 #include "extended/extract_feat_sequence.h"
 #include "extended/extract_feat_visitor.h"
-#include "extended/feature_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_rep.h"
 
 struct GtExtractFeatVisitor {

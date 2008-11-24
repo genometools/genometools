@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/undef.h"
 #include "extended/feature_node.h"
-#include "extended/feature_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/node_stream_rep.h"
 #include "extended/uniq_stream.h"
 

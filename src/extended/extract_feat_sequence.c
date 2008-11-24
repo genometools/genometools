@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/feature_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
 #include "extended/region_mapping.h"
 #include "extended/reverse.h"

@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "extended/feature_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/feature_node_iterator_lua.h"
 

@@ -23,7 +23,7 @@
 #include "core/option.h"
 #include "core/splitter.h"
 #include "core/unused_api.h"
-#include "extended/feature_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_escaping.h"
 #include "extended/gff3_in_stream.h"

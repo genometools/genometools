@@ -29,7 +29,7 @@
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_rep.h"
-#include "extended/feature_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node_rep.h"
 #include "extended/tag_value_map.h"
 
