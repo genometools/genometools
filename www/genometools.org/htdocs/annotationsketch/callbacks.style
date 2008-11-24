@@ -54,11 +54,11 @@ style =
     stroke_marked      = {red=1.0, green=0.0, blue=0.0},
     fill               = function(gn)
                            if gn:get_score() then
-                             redval = gn:get_score()*1.0
+                             aval = gn:get_score()*1.0
                            else
-                             redval = 0.0
+                             aval = 0.0
                            end
-                           return {red=redval, green=0.0, blue=0.0}
+                           return {red=1.0, green=0.0, blue=0.0, alpha=aval}
                          end,
     style              = "box",
     -- Collapsing options
