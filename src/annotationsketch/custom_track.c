@@ -20,6 +20,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ma.h"
+#include "core/unused_api.h"
 
 struct GtCustomTrackMembers {
   unsigned int reference_count;
@@ -105,7 +106,7 @@ const char* gt_custom_track_get_title(GtCustomTrack *ct)
   return ct->c_class->get_title(ct);
 }
 
-void* gt_custom_track_cast(const GtCustomTrackClass *ctc,
+void* gt_custom_track_cast(GT_UNUSED const GtCustomTrackClass *ctc,
                            GtCustomTrack *ct)
 {
   gt_assert(ctc && ct && ct->c_class == ctc);
