@@ -24,7 +24,7 @@
 #include "annotationsketch/line_breaker_captions.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
-#include "core/basename.h"
+#include "core/basename_api.h"
 #include "core/cstr.h"
 #include "core/ensure.h"
 #include "core/hashmap.h"

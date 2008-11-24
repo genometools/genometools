@@ -18,7 +18,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/error.h"
-#include "core/basename.h"
+#include "core/basename_api.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/str.h"
