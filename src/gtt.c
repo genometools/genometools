@@ -38,6 +38,7 @@
 #include "extended/alignment.h"
 #include "extended/evaluator.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_node.h"
 #include "extended/gff3_escaping.h"
 #include "extended/hmm.h"
 #include "extended/luaserialize.h"
