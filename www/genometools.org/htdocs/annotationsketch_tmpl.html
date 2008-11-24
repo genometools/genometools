@@ -23,71 +23,66 @@
 
 
 <div id="main">
-<h1>The <tt>AnnotationSketch</tt> module</h1>
+<h1>The <tt>AnnotationSketch</tt> annotation drawing library</h1>
 
 <p>
 The <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=tree;f=src/annotationsketch;hb=HEAD"><em>AnnotationSketch</em></a>
-module is a versatile and efficient C-based drawing library for GFF3-compatible genomic annotations. It is included in the <em>GenomeTools</em> <a href="http://genometools.org/pub">distribution</a>.
+module is a versatile and efficient C-based drawing library for GFF3-compatible genomic annotations. It is included in the <em>GenomeTools</em> <a href="http://genometools.org/pub">distribution</a>. Additionally, bindings to the <a href="http://www.lua.org">Lua</a>, <a href="http://www.python.org">Python</a> and <a href="http://www.ruby-lang.org/en">Ruby</a> programming languages are provided.
 <h2>Contents</h2>
 <ul>
  <li><a href="#overview">Overview</a></li>
- <ul>
-   <li><a href="#collapsing">Collapsing</a></li>
-   <li><a href="#styles">Styles</a></li>
- </ul>
-  <li><a href="#gtsketch">The <tt>gt sketch</tt> tool</a></li>
- <li><a href="#examples">Library code examples</a></li>
-  <ul>
-   <li><a href="#examples-parsed">Creating images of GFF3 files</a></li>
-   <li><a href="#examples-generated">Creating images of user-generated annotations</a></li>
- </ul>
+ <li><a href="#collapsing">Collapsing</a></li>
+ <li><a href="#styles">Styles</a></li>
+ <li><a href="#trackselectors">Track assignment</a></li>
+ <li><a href="#customtracks">Custom tracks</a></li>
+ <li><a href="#gtsketch">The <tt>gt sketch</tt> tool</a></li>
+ <li><a href="#examples">Usage examples</a></li>
  <li><a href="#api">API Reference</a></li>
 </ul>
-
+</p>
 <h2>Overview</h2>
 <a name="overview"></a>
-
-<em>AnnotationSketch</em> consists of several classes, which take part in
-three visualization  <em>phases</em>.
+<p>
+<em>AnnotationSketch</em> consists of several classes (see Fig. <a href="#fig1">1</a>), which take part in three visualization <em>phases</em>.
 </p>
 <div class="figure">
   <p><a name="fig1"></a><img src="images/dataflow.png" alt="[Dataflow]"></p>
-  <p><b>Figure 1: </b>Schematic of the classes involved in image creation.</p>
+  <p><b>Figure 1: </b>Schematic of the <em>AnnotationSketch</em> classes involved in image creation. Interfaces are printed in italics. </p>
 </div>
 
 
 <h3>Phase 1: Feature selection</h3>
 <p>
-The GFF3 input data are parsed into a directed acyclic graph (<em>annotation graph</em>, see Fig. <a href="#fig2">2</a> for an example) whose nodes are single features (lines from the GFF3 file). Edges represent the <em>part-of</em> relationships between
-groups of genomic features according to the
-<a href="http://www.sequenceontology.org/">Sequence Ontology</a> hierarchy. A validating GFF3 parser is available in <em>GenomeTools</em>. GFF3 files <em>must</em> be valid according to the <a href="http://www.sequenceontology.org/gff3.shtml">GFF3 specification</a> to ensure that they can be read for <em>AnnotationSketch</em> drawing.
+The GFF3 input data are parsed into a directed acyclic graph (<em>annotation graph</em>, see Fig. <a href="#fig2">2</a> for an example) whose nodes correspond to single features (i.e. lines from the GFF3 file). Consequently, edges in the graph represent the <em>part-of</em> relationships between groups of genomic features according to the <a href="http://www.sequenceontology.org/">Sequence Ontology</a> hierarchy. Note that GFF3 input files <em>must</em> be valid according to the <a href="http://www.sequenceontology.org/gff3.shtml">GFF3 specification</a> to ensure that they can be read for <em>AnnotationSketch</em> drawing or any other kind of manipulation using <em>GenomeTools</em>. A validating GFF3 parser is available in <em>GenomeTools</em> (and can be run using <tt>gt gff3validator</tt>).
 </p>
 <div class="figure">
   <p><a name="fig2"></a><img src="images/gfftree.png" alt="[GFF3 tree]"></p>
   <p><b>Figure 2: </b>Example sequence region containing two genes in an annotation graph depicting the <em>part-of</em> relationships between their components.</p>
 </div>
 <p>
-Each top-level node is then registered into a persistent <em>FeatureIndex</em> object that can be (repeatedly) queried for all the features in a genomic region of interest.
+Each top-level node (which is a node without a parent) is then registered into a persistent <em>FeatureIndex</em> object that can be (repeatedly) queried for all the features in a genomic region of interest. All child nodes of the top-level node are then available by traversal functions.
 </p>
 <p>
 Alternatively, annotation graphs can be built by the user by creating each node explicitly and then connecting the nodes in a way such that the relationships are reflected in the graph structure (see <a href="#examples-generated">example section</a> for example code).
 </p>
 <h3>Phase 2: Layout</h3>
 <p>
-The next step consists of processing the features (given via a <em>FeatureIndex</em> or a simple array of top level nodes) into a structural <em>Diagram</em> object which first builds <em>blocks</em> from features by grouping and overlaying them semantically according to several options (see <a href="#collapsing">Collapsing</a>). During image generation, the <em>Block</em> objects are distributed into <em>Line</em> (each containing non-overlapping blocks) and <em>Track</em> objects (containing all lines of a given type). <em>Tracks</em> and <em>Lines</em> are contained within the <em>Diagram</em> object and correspond to particular building blocks of the resulting diagram (see Fig. <a href="fig3">3</a>). The overall layout of the diagram tries to keep the amount of vertical space as compact as possible. How new <em>Lines</em> are created depends on the chosen  implementation of the <em>LineBreaker</em> interface, by default a <em>Block</em> is pushed into a new <em>Line</em> when either the <em>Block</em> or its caption overlaps with another one.
+The next step consists of processing the features (given via a <em>FeatureIndex</em> or a simple array of top level nodes) into a structural <em>Diagram</em> object which represents a single view of the annotations of a genomic region. First, semantic units are formed from the annotation subgraphs. This is done by building <em>blocks</em> out of connected features by grouping and overlaying them according to several user-defined collapsing options (see <a href="#collapsing">Collapsing</a>). By default, a separate <em>track</em> is then created for each Sequence Ontology feature type. Alternatively, if more granularity in track assignment is desired, <a href="trackselectors.html"><em>track selector functions</em></a> can be used to create tracks and assign blocks to them based on arbitrary feature characteristics. This is simply done by creating a unique identifier string per track. The <em>Diagram</em> object is also used to hold one or more <a href="customtracks.html"><em>custom tracks</em></a>, which allow users to develop their own graphical representations as plugins.
+
+The <em>Diagram</em> is then prepared for image output by calculating a compact <em>layout</em> in which the <em>Block</em> objects in a track are distributed into <em>Line</em> objects, each containing non-overlapping blocks (see Fig. <a href="fig3">3</a>). The overall layout calculated this way tries to keep lines compact as possible, minimizing the amount of used vertical space. How new <em>Lines</em> are created depends on the chosen implementation of the <em>LineBreaker</em> interface, by default a <em>Block</em> is pushed into a new <em>Line</em> when either the <em>Block</em> or its caption overlaps with another one.
 </p>
 
 <div class="figure">
   <p><a name="fig3"></a><img src="images/diagram.png" alt="[Diagram]"></p>
-  <p><b>Figure 3: </b>The components of the <em>Diagram</em> class reflect sections of the resulting image.</p>
+  <p><b>Figure 3: </b>The components of the <em>Layout</em> class reflect sections of the resulting image.</p>
 </div>
 <h3>Phase 3: Rendering</h3>
 <p>
-In the final phase, the <em>Diagram</em> object is used as a blueprint to create an
+In the final phase, the <em>Layout</em> object is used as a blueprint to create an
 image of a given type and size, considering user-defined options.
 
-Rendering logic is implemented in the <em>Canvas</em> class, whose methods are called while traversal of the <em>Diagram</em> structure. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering backend-dependent subclasses of <em>Canvas</em> are closely tied to a specific implementation of the <em>Graphics</em> interface, which provides methods to draw a number of primitives to a
-drawing surface abstraction. It wraps around the low-level graphics library and allows for easy extension or replacement of the graphics back-end. Currently, there are <em>Graphics</em> implementations for the <a href="http://cairographics.org">Cairo</a> 2D graphics library (<em>GraphicsCairo</em>) and two <em>Canvas</em> subclasses providing access to the image file formats supported by Cairo (<em>CanvasCairoFile</em>) and to arbitrary Cairo contexts (<em>CanvasCairoContext</em>, which directly accesses a <a href="http://cairographics.org/manual/cairo-cairo-t.html"><tt>cairo_t</tt></a>). This class can be used, for example, to directly draw <em>AnnotationSketch</em> output in any graphical environment which is supported by Cairo (see <a href="http://www.cairographics.org/manual/Surfaces.html"> list of supported surface types</a>).
+The rendering process is invoked by calling the <em>sketch()</em> method of a <em>Layout</em> object. All rendering logic is implemented in classes implementing the <em>Canvas</em> interface, whose methods are called during traversal of the <em>Layout</em> members. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering backend-dependent subclasses of <em>Canvas</em> are closely tied to a specific implementation of the <em>Graphics</em> interface, which provides methods to draw a number of primitives to a drawing surface abstraction. It wraps around the respective low-level graphics engine and allows for its easy extension or replacement.<br>
+ Currently, there is a <em>Graphics</em> implementation for the <a href="http://cairographics.org">Cairo</a> 2D graphics library (<em>GraphicsCairo</em>) and two <em>Canvas</em> subclasses providing access to the image file formats supported by Cairo (<em>CanvasCairoFile</em>) and to arbitrary Cairo contexts (<em>CanvasCairoContext</em>, which directly accesses a <a href="http://cairographics.org/manual/cairo-cairo-t.html"><tt>cairo_t</tt></a>). This class can be used, for example, to directly draw <em>AnnotationSketch</em> output in any graphical environment which is supported by Cairo (see <a href="http://www.cairographics.org/manual/Surfaces.html"> list of supported surface types</a>).
 </p>
 
 <a name="collapsing"></a>
@@ -127,7 +122,7 @@ would lead to all features of the <em>exon</em>, <em>intron</em> and <em>CDS</em
 </div>
 <div class="figure">
 <p><a name="fig5"></a><a style="background-color: white; border: none;" href="images/cnn_large.png"><img src="images/collapsing.png" alt="[collapsed/uncollapsed views]"></a></p>
-<p><b>Figure 5:</b>(click to enlarge) Example image of the <em>cnn</em> and <em>cbs</em> genes from <em>Drosophila melanogaster</em> (<a href="http://www.ensembl.org/Drosophila_melanogaster/contigview?region=2R&vc_start=9326816&vc_end=9341000">Ensembl release 50, positions 9326816--9341000 on chromosome arm 2R</a>) as drawn by <em>AnnotationSketch</em>. (a) shows a collapsed view in which all <em>exon</em>, <em>intron</em> and <em>CDS</em> types are collapsed into their parent type's track. In contrast, (b) shows the <em>cbs</em> gene with all collapsing options set to <tt>false</tt>, resulting in each type being drawn in its own track.</p>
+<p><b>Figure 5:</b>(click to enlarge) Example image of the <em>cnn</em> and <em>cbs</em> genes from <em>Drosophila melanogaster</em> (<a href="http://www.ensembl.org/Drosophila_melanogaster/contigview?region=2R&amp;vc_start=9326816&amp;vc_end=9341000">Ensembl release 50, positions 9326816--9341000 on chromosome arm 2R</a>) as drawn by <em>AnnotationSketch</em>. (a) shows a collapsed view in which all <em>exon</em>, <em>intron</em> and <em>CDS</em> types are collapsed into their parent type's track. In contrast, (b) shows the <em>cbs</em> gene with all collapsing options set to <tt>false</tt>, resulting in each type being drawn in its own track.</p>
 </div>
 
 <a name="styles"></a>
@@ -161,11 +156,11 @@ config = {
     -- Color definitions
     fill               = function(gn)
                            if gn:get_score() then
-                             redval = gn:get_score()*1.0
+                             aval = gn:get_score()*1.0
                            else
-                             redval = 0.0
+                             aval = 0.0
                            end
-                           return {red=redval, green=0.0, blue=0.0}
+                           return {red=1.0, green=0.0, blue=0.0, alpha=aval}
                          end,
     ...
   },
@@ -177,6 +172,14 @@ config = {
   <p><a name="fig_callbacks"></a><img src="images/callbacks.png" alt="[Example rendering with callback functions]"></p>
   <p><b>Figure 6: </b>Example rendering of a <a href="annotationsketch/callback_examples_with_score.gff3">GFF file</a> using callback functions to enable custom block captions and score-dependent shading of exon features.</p>
 </div>
+
+<a name="trackselectors"></a>
+<h2>Track assignment</h2>
+Tracks are normally created for each annotation source and/or Sequence Ontology type encountered in the annotation graph. More control is possible using <em>track selector functions</em> (<a href="trackselectors.html">read more</a>).
+
+<a name="customtracks"></a>
+<h2>Custom tracks</h2>
+Even more customisability is possible using <em>custom tracks</em>. Custom tracks are classes which contain custom drawing functionality, making it easy to add user-defined graphical content to any <em>AnnotationSketch</em> drawing (<a href="customtracks.html">read more</a>).
 
 <a name="gtsketch"></a>
 <h2>The <tt>gt sketch</tt> tool</h2>
@@ -257,7 +260,7 @@ A function reference for the <em>AnnotationSketch</em> classes can be found in
 the <em>GenomeTools</em> <a href="libgenometools.html">C API reference</a>.
 
 <div id="footer">
-Copyright &copy; 2007-2008 Sascha Steinbiss. Last update: 2008-11-14
+Copyright &copy; 2007-2008 Sascha Steinbiss. Last update: 2008-11-24
 </div>
 </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
