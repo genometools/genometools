@@ -257,7 +257,7 @@ unsigned long gt_bittab_get_next_bitnum(const GtBittab *b,
   return rval;
 }
 
-unsigned long gt_bittab_count_set_bits(GtBittab *b)
+unsigned long gt_bittab_count_set_bits(const GtBittab *b)
 {
   static const unsigned char bits_in_char[256] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2,
                                                    2, 3, 2, 3, 3, 4, 1, 2, 2, 3,

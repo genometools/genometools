@@ -55,7 +55,7 @@ bool          gt_bittab_cmp(const GtBittab*, const GtBittab*);
 unsigned long gt_bittab_get_first_bitnum(const GtBittab*);
 unsigned long gt_bittab_get_last_bitnum(const GtBittab*);
 unsigned long gt_bittab_get_next_bitnum(const GtBittab*, unsigned long);
-unsigned long gt_bittab_count_set_bits(GtBittab*);
+unsigned long gt_bittab_count_set_bits(const GtBittab*);
 unsigned long gt_bittab_size(GtBittab*);
 int           gt_bittab_example(GtError*);
 int           gt_bittab_unit_test(GtError*);
