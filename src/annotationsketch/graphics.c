@@ -42,6 +42,7 @@ struct GtGraphicsClass {
   GtGraphicsSetMarginsFunc set_margins;
   GtGraphicsDrawLineFunc draw_horizontal_line,
                          draw_vertical_line;
+  GtGraphicsDrawLineToFunc draw_line;
   GtGraphicsDrawBoxFunc draw_box;
   GtGraphicsDrawSimpleFunc draw_dashes,
                            draw_caret;
@@ -77,6 +78,8 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                                      get_ymargins,
                                          GtGraphicsSetMarginsFunc
                                                      set_margins,
+                                         GtGraphicsDrawLineToFunc
+                                                     draw_line,
                                          GtGraphicsDrawLineFunc
                                                      draw_horizontal_line,
                                          GtGraphicsDrawLineFunc
@@ -109,6 +112,7 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
   c_class->get_xmargins = get_xmargins;
   c_class->get_ymargins = get_ymargins;
   c_class->set_margins = set_margins;
+  c_class->draw_line = draw_line;
   c_class->draw_horizontal_line = draw_horizontal_line;
   c_class->draw_vertical_line = draw_vertical_line;
   c_class->draw_box = draw_box;
@@ -231,6 +235,14 @@ void gt_graphics_set_margins(GtGraphics *g, double margin_x, double margin_y)
 {
   gt_assert(g && g->c_class);
   g->c_class->set_margins(g, margin_x, margin_y);
+}
+
+void gt_graphics_draw_line(GtGraphics *g, double x, double y,
+                           double xto, double yto, GtColor color,
+                           double stroke_width)
+{
+  gt_assert(g && g->c_class);
+  g->c_class->draw_line(g, x, y, xto, yto, color, stroke_width);
 }
 
 void gt_graphics_draw_horizontal_line(GtGraphics *g, double x, double y,
@@ -381,6 +393,23 @@ void gt_graphics_set_margins_p(GtGraphics *g,
 {
   gt_assert(g && g->c_class && params);
   g->c_class->set_margins(g, params->margin_x, params->margin_y);
+}
+
+typedef struct {
+  double x,
+         y,
+         xto,
+         yto;
+  GtColor color;
+  double stroke_width;
+} GraphicsDrawLineToFuncParams;
+
+void gt_graphics_draw_line_p(GtGraphics *g,
+                             GraphicsDrawLineToFuncParams *params)
+{
+  gt_assert(g && g->c_class && params);
+  g->c_class->draw_line(g, params->x, params->y, params->xto, params->yto,
+                        params->color, params->stroke_width);
 }
 
 typedef struct {

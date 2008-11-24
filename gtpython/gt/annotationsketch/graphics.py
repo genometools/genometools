@@ -84,6 +84,9 @@ class Graphics:
   def get_ymargins(self):
     return gtlib.gt_graphics_get_ymargins(self.g)
 
+  def draw_line(self, x, y, xto, yto, color, stroke_width):
+    gtlib.gt_graphics_draw_line(self.g, x, y, xto, yto, color, stroke_width)
+
   def draw_horizontal_line(self, x, y, color, width, stroke_width):
     gtlib.gt_graphics_draw_horizontal_line(self.g, x, y, color, width,         \
                                            stroke_width)
@@ -177,6 +180,8 @@ class Graphics:
     gtlib.gt_graphics_draw_vertical_line.argtypes = [c_void_p, c_double,       \
                                                      c_double, Color, c_double,\
                                                      c_double]
+    gtlib.gt_graphics_draw_line.argtypes = [c_void_p, c_double, c_double,      \
+                                            c_double, c_double, Color, c_double]
     gtlib.gt_graphics_draw_horizontal_line.argtypes = [c_void_p, c_double,     \
                                                        c_double, Color,        \
                                                        c_double, c_double]

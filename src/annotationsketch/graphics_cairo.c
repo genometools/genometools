@@ -232,6 +232,21 @@ void gt_graphics_cairo_set_margins(GtGraphics *gg, double margin_x,
   g->margin_y = margin_y;
 }
 
+void gt_graphics_cairo_draw_line(GtGraphics *gg, double x, double y,
+                                 double xto, double yto, GtColor color,
+                                 double stroke_width)
+{
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  gt_assert(g);
+  cairo_save(g->cr);
+  cairo_move_to(g->cr, x, rnd_to_nhalf(y));
+  cairo_line_to(g->cr, xto, rnd_to_nhalf(yto));
+  cairo_set_line_width(g->cr, stroke_width);
+  cairo_set_source_rgba(g->cr, color.red, color.green, color.blue, color.alpha);
+  cairo_stroke(g->cr);
+  cairo_restore(g->cr);
+}
+
 void gt_graphics_cairo_draw_horizontal_line(GtGraphics *gg, double x, double y,
                                             GtColor color, double width,
                                             double stroke_width)
@@ -628,6 +643,7 @@ const GtGraphicsClass* gt_graphics_cairo_class(void)
                                gt_graphics_cairo_get_xmargins,
                                gt_graphics_cairo_get_ymargins,
                                gt_graphics_cairo_set_margins,
+                               gt_graphics_cairo_draw_line,
                                gt_graphics_cairo_draw_horizontal_line,
                                gt_graphics_cairo_draw_vertical_line,
                                gt_graphics_cairo_draw_box,
