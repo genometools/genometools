@@ -178,7 +178,7 @@ end
 Name "LPeg library"
 Keywords "gt_scripts lpeg"
 Test do
-  run_test "#{$bin}gt #{$cur}/src/external/lpeg-0.8.1/test.lua"
+  run_test "#{$bin}gt #{$cur}/src/external/lpeg-0.9/test.lua"
 end
 
 Name "MD5 library"
@@ -223,7 +223,8 @@ if not $arguments["nocairo"] then
   Name "AnnotationSketch (general bindings)"
   Keywords "gt_scripts"
   Test do
-    run_test "#{$bin}gt #{$testdata}/gtscripts/view.lua test.png #{$testdata}gff3_file_1_short.txt"
+    run_test "#{$bin}gt #{$testdata}/gtscripts/sketch.lua test.png " +
+             "#{$testdata}gff3_file_1_short.txt"
   end
 
   Name "AnnotationSketch (recmaps)"

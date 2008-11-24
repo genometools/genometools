@@ -26,7 +26,7 @@ module GT
   extern "double gt_rec_map_get_northwest_y(const GtRecMap*)"
   extern "double gt_rec_map_get_southeast_x(const GtRecMap*)"
   extern "double gt_rec_map_get_southeast_y(const GtRecMap*)"
-  extern "const GtGenomeFeature* gt_rec_map_get_genome_feature(const GtRecMap*)"
+  extern "const GtFeatureNode* gt_rec_map_get_genome_feature(const GtRecMap*)"
   extern "bool gt_rec_map_has_omitted_children(const GtRecMap*)"
 
   class RecMap
@@ -51,8 +51,8 @@ module GT
     end
 
     def get_genome_feature
-      #refcount only this GenomeFeature!
-      GT::GenomeFeature.new(GT::gt_rec_map_get_genome_feature(@rm), true)
+      #refcount only this FeatureNode!
+      GT::FeatureNode.new(GT::gt_rec_map_get_genome_feature(@rm), true)
     end
 
     def has_omitted_children

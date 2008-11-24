@@ -1,0 +1,10 @@
+$ gt tallymer mkindex -mersize 19 -minocc 4 -indexname tyr-reads -counts -pl -esa reads
+# construct mer buckets for prefixlength 4
+# numofcodes = 256
+# indexfilename = tyr-reads
+# alphasize = 4
+# mersize = 19
+# numofmers = 3166
+# merbytes = 5
+# space peak in megabytes: 0.06
+# mmap space peak in megabytes: 3.93

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,9 @@
 #ifndef GT_GTF_TO_GFF3_H
 #define GT_GTF_TO_GFF3_H
 
+#include "core/tool.h"
+
 /* the GTF to GFF3 tool */
-int gt_gtf_to_gff3(int argc, const char **argv, GtError*);
+GtTool* gt_gtf_to_gff3(void);
 
 #endif

@@ -449,8 +449,8 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
         }
       }
       /* compare reference with interval tree query result */
-      gt_array_sort(ref, range_ptr_compare);
-      gt_array_sort(res, range_ptr_compare);
+      gt_array_sort_stable(ref, range_ptr_compare);
+      gt_array_sort_stable(res, range_ptr_compare);
       /* must be equal */
       ensure(had_err, gt_array_cmp(ref, res)==0);
       gt_array_delete(ref);

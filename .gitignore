@@ -55,4 +55,4 @@ cscope.*
 src/external/hmmer-2.3.2/squid/squid.h
 src/external/hmmer-2.3.2/squid/squidconf.h
 src/external/hmmer-2.3.2/src/config.h
-
+*.pyc

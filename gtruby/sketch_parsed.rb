@@ -23,11 +23,14 @@ seqid = feature_index.get_first_seqid()
 range = feature_index.get_range_for_seqid(seqid)
 diagram = GT::Diagram.new(feature_index, seqid, range, style)
 
-# create canvas
-canvas = GT::CanvasCairoFile.new(style, 600, nil)
+# create layout for given width
+layout = GT::Layout.new(diagram, 800, style)
 
-# sketch diagram on canvas
-diagram.sketch(canvas)
+# create canvas with given width and computed height
+canvas = GT::CanvasCairoFile.new(style, 800, layout.get_height, nil)
+
+# sketch layout on canvas
+layout.sketch(canvas)
 
 # write canvas to file
 canvas.to_file(pngfile)

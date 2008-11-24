@@ -58,18 +58,22 @@ GtArray* gt_line_get_blocks(GtLine* line)
   return line->blocks;
 }
 
-int gt_line_sketch(GtLine *line, GtCanvas *canvas)
+int gt_line_sketch(GtLine *line, GtCanvas *canvas, GtError *err)
 {
-  int i = 0;
+  int i = 0, had_err = 0;
   gt_assert(line && canvas);
-  gt_canvas_visit_line_pre(canvas, line);
-  for (i = 0; i < gt_array_size(line->blocks); i++) {
-    GtBlock *block;
-    block = *(GtBlock**) gt_array_get(line->blocks, i);
-    gt_block_sketch(block, canvas);
+  had_err = gt_canvas_visit_line_pre(canvas, line, err);
+  if (!had_err)
+  {
+    for (i = 0; i < gt_array_size(line->blocks); i++) {
+      GtBlock *block;
+      block = *(GtBlock**) gt_array_get(line->blocks, i);
+      had_err = gt_block_sketch(block, canvas, err);
+    }
   }
-  gt_canvas_visit_line_post(canvas, line);
-  return 0;
+  if (!had_err)
+    gt_canvas_visit_line_post(canvas, line, err);
+  return had_err;
 }
 
 int gt_line_unit_test(GtError *err)

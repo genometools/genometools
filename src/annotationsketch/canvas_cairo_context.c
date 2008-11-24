@@ -25,12 +25,11 @@
 #include "core/unused_api.h"
 #include "annotationsketch/canvas_members.h"
 #include "annotationsketch/canvas_rep.h"
+#include "annotationsketch/canvas_cairo.h"
 #include "annotationsketch/canvas_cairo_context.h"
+#include "annotationsketch/default_formats.h"
 #include "annotationsketch/graphics_cairo.h"
 #include "annotationsketch/style.h"
-
-#define MARGINS_DEFAULT           10
-#define HEADER_SPACE              70
 
 struct GtCanvasCairoContext {
   const GtCanvas parent_instance;
@@ -40,91 +39,52 @@ struct GtCanvasCairoContext {
 #define canvas_cairo_context_cast(C)\
         gt_canvas_cast(gt_canvas_cairo_context_class(), C)
 
-int gt_canvas_cairo_context_visit_diagram_pre(GtCanvas *canvas,
-                                              GtDiagram *dia)
-{
-  double margins;
-
-  gt_assert(canvas && dia);
-
-  if (gt_style_get_num(canvas->pvt->sty, "format", "margins", &margins, NULL))
-    canvas->pvt->margins = margins;
-  else
-    canvas->pvt->margins = MARGINS_DEFAULT;
-
-  if (!gt_style_get_bool(canvas->pvt->sty, "format", "show_track_captions",
-                         &canvas->pvt->show_track_captions, NULL))
-    canvas->pvt->show_track_captions = true;
-
-  canvas->pvt->viewrange = gt_diagram_get_range(dia);
-  if (canvas->pvt->g)
-  {
-    gt_graphics_delete(canvas->pvt->g);
-    canvas->pvt->g = NULL;
-  }
-  canvas->pvt->g = gt_graphics_cairo_new(GT_GRAPHICS_PNG, canvas->pvt->width,
-                                         1);
-
-  /* calculate scaling factor */
-  canvas->pvt->factor = ((double) canvas->pvt->width
-                     -(2*canvas->pvt->margins))
-                    / gt_range_length(&canvas->pvt->viewrange);
-  return 0;
-}
-
-int gt_canvas_cairo_context_visit_diagram_post(GtCanvas *canvas,
-                                               GtDiagram *dia)
-{
-  int had_err = 0;
-
-  gt_assert(canvas && dia);
-
-  /* set initial image-specific values */
-  canvas->pvt->y += HEADER_SPACE;
-  canvas->pvt->height = gt_canvas_calculate_height(canvas, dia);
-  if (canvas->pvt->ii)
-    gt_image_info_set_height(canvas->pvt->ii, canvas->pvt->height);
-  if (canvas->pvt->g)
-  {
-    gt_graphics_delete(canvas->pvt->g);
-    canvas->pvt->g = NULL;
-  }
-  canvas->pvt->g = gt_graphics_cairo_new_from_context(
-                                 ((GtCanvasCairoContext*) canvas)->context,
-                                 canvas->pvt->width, canvas->pvt->height);
-  gt_graphics_set_margins(canvas->pvt->g, canvas->pvt->margins, 0);
-
-  /* Add ruler/scale to the image */
-  gt_canvas_draw_ruler(canvas);
-
-  return had_err;
-}
-
 const GtCanvasClass* gt_canvas_cairo_context_class(void)
 {
   static const GtCanvasClass *canvas_class = NULL;
   if (!canvas_class) {
     canvas_class = gt_canvas_class_new(sizeof (GtCanvasCairoContext),
-                                     gt_canvas_cairo_context_visit_diagram_pre,
-                                     gt_canvas_cairo_context_visit_diagram_post,
-                                     NULL);
+                                       gt_canvas_cairo_visit_layout_pre,
+                                       gt_canvas_cairo_visit_layout_post,
+                                       gt_canvas_cairo_visit_track_pre,
+                                       gt_canvas_cairo_visit_track_post,
+                                       gt_canvas_cairo_visit_line_pre,
+                                       gt_canvas_cairo_visit_line_post,
+                                       gt_canvas_cairo_visit_block,
+                                       gt_canvas_cairo_visit_element,
+                                       gt_canvas_cairo_visit_custom_track,
+                                       gt_canvas_cairo_draw_ruler,
+                                       NULL);
   }
   return canvas_class;
 }
 
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
-                                       unsigned long width, GtImageInfo *ii)
+                                      unsigned long width,
+                                      unsigned long height,
+                                      GtImageInfo *ii)
 {
   GtCanvas *canvas;
   GtCanvasCairoContext *ccc;
-  gt_assert(sty && width > 0);
+  double margins = 10.0;
+  gt_assert(sty && width > 0 && height > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_context_class());
+  canvas->pvt->y += HEADER_SPACE;
+  canvas->pvt->g = gt_graphics_cairo_new_from_context(context,
+                                                      width,
+                                                      height);
+  gt_style_get_num(sty, "format", "margins", &margins, NULL);
+  gt_graphics_set_margins(canvas->pvt->g, margins, 0);
+  canvas->pvt->margins = margins;
+  if (ii)
+    gt_image_info_set_height(ii, height);
   canvas->pvt->sty = sty;
   canvas->pvt->ii = ii;
   canvas->pvt->width = width;
+  canvas->pvt->height = height;
   canvas->pvt->bt = NULL;
   /* 0.5 displacement to eliminate fuzzy horizontal lines */
-  canvas->pvt->y = 0.5;
+  canvas->pvt->y = 0.5 + HEADER_SPACE;
   ccc = canvas_cairo_context_cast(canvas);
   ccc->context = context;
   return canvas;

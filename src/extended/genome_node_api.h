@@ -18,6 +18,9 @@
 #ifndef GENOME_NODE_API_H
 #define GENOME_NODE_API_H
 
+#include "core/range_api.h"
+#include "core/str_api.h"
+
 typedef struct GtGenomeNodeClass GtGenomeNodeClass;
 
 /* The <GtGenomeNode> interface. */
@@ -33,5 +36,25 @@ void          gt_genome_node_delete(GtGenomeNode *genome_node);
 /* Decrease the reference count for <genome_node> and recursively for all its
    children or delete it, if this was the last reference. */
 void          gt_genome_node_rec_delete(GtGenomeNode *genome_node);
+
+/* Return the sequence ID of <genome_node>.
+   Corresponds to column 1 of regular GFF3 lines. */
+GtStr*        gt_genome_node_get_seqid(GtGenomeNode *genome_node);
+
+/* Return the genomic range of of <genome_node>.
+   Corresponds to columns 4 and 5 of regular GFF3 lines. */
+GtRange       gt_genome_node_get_range(GtGenomeNode *genome_node);
+
+/* Return the start of <genome_node>.
+   Corresponds to column 4 of regular GFF3 lines. */
+unsigned long gt_genome_node_get_start(GtGenomeNode *genome_node);
+
+/* Return the end of <genome_node>.
+   Corresponds to column 5 of regular GFF3 lines. */
+unsigned long gt_genome_node_get_end(GtGenomeNode *genome_Node);
+
+/* Set the genomic range of <genome_node> to given <range>. */
+void          gt_genome_node_set_range(GtGenomeNode *genome_node,
+                                       const GtRange *range);
 
 #endif

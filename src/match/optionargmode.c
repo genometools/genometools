@@ -47,3 +47,56 @@ int optionaddbitmask(const Optionargmodedesc *modedesc,
                 optionargument,optname);
   return -2;
 }
+
+GtStr *getargmodekeywords(const Optionargmodedesc *modedesc,
+                          size_t numberofentries,
+                          const char *what)
+{
+  GtStr *helpstring;
+  size_t idx, modecount, len, maxlen = 0, spacelen;
+  const char *space = "    ";
+
+  for (modecount=0; modecount < numberofentries; modecount++)
+  {
+    len = strlen(modedesc[modecount].name);
+    if (maxlen < len)
+    {
+      maxlen = len;
+    }
+  }
+  helpstring = gt_str_new_cstr("use combination of the following keywords "
+                               "to specify ");
+  gt_str_append_cstr(helpstring,what);
+  gt_str_append_cstr(helpstring,"\n");
+  spacelen = strlen(space);
+  for (modecount=0; modecount < numberofentries; modecount++)
+  {
+    gt_str_append_cstr(helpstring,modedesc[modecount].name);
+    gt_str_append_cstr(helpstring,space);
+    len = strlen(modedesc[modecount].name);
+    for (idx=0; idx<maxlen+-len; idx++)
+    {
+      gt_str_append_cstr(helpstring," ");
+    }
+    gt_str_append_cstr(helpstring,"show ");
+    gt_str_append_cstr(helpstring,modedesc[modecount].desc);
+    gt_str_append_cstr(helpstring,"\n");
+  }
+  return helpstring;
+}
+
+void getsetargmodekeywords(const Optionargmodedesc *modedesc,
+                           size_t numberofentries,
+                           unsigned int bitfield)
+{
+  size_t modecount;
+
+  for (modecount=0; modecount < numberofentries; modecount++)
+  {
+    if (bitfield & modedesc[modecount].bitmask)
+    {
+      printf("%s ",modedesc[modecount].name);
+    }
+  }
+  printf("\n");
+}

@@ -27,8 +27,9 @@ end
 Name "gt uniq test standard gene"
 Keywords "gt_uniq"
 Test do
-  run_test "#{$bin}gt uniq #{$testdata}standard_gene_as_tree.gff3"
-  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+  run_test "#{$bin}gt uniq -v -o test.out " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff test.out #{$testdata}standard_gene_as_tree.gff3"
 end
 
 1.upto(6) do |i|

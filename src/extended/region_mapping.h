@@ -28,7 +28,7 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
 GtRegionMapping* gt_region_mapping_new_seqfile(GtStr *sequence_filename);
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping*);
 int              gt_region_mapping_get_raw_sequence(GtRegionMapping*,
-                                                    const char**,
+                                                    const char **raw,
                                                     GtStr *seqid, GtError*);
 int              gt_region_mapping_get_raw_sequence_length(GtRegionMapping*,
                                                            unsigned long*,

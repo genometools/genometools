@@ -25,11 +25,18 @@
 
 int gt_lua_open_core(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   gt_lua_open_alpha(L);
   gt_lua_open_bittab(L);
   gt_lua_open_range(L);
   gt_lua_open_score_matrix(L);
   gt_lua_open_translate(L);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }

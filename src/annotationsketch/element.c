@@ -60,14 +60,6 @@ GtElement* gt_element_new_empty(void)
   return gt_calloc(1, sizeof (GtElement));
 }
 
-GtDrawingRange gt_element_calculate_drawing_range(GtElement *element,
-                                             GtCanvas *canvas)
-{
-  gt_assert(element && canvas);
-  element->drange = gt_canvas_convert_coords(canvas, element->range);
-  return element->drange;
-}
-
 GtRange gt_element_get_range(const GtElement *element)
 {
   gt_assert(element);
@@ -111,11 +103,11 @@ static bool elements_are_equal(const GtElement *e1, const GtElement *e2)
   return false;
 }
 
-int gt_element_sketch(GtElement *elem, GtCanvas *canvas)
+int gt_element_sketch(GtElement *elem, GtCanvas *canvas, GtError *err)
 {
   int had_err = 0;
   gt_assert(elem && canvas);
-  gt_canvas_visit_element(canvas, elem);
+  had_err = gt_canvas_visit_element(canvas, elem, err);
   return had_err;
 }
 

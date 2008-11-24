@@ -1343,14 +1343,14 @@ GtOption* gt_option_new_range(const char *option_str, const char *description,
   return o;
 }
 
-GtOption* gt_option_new_gt_range_min_max(const char *option_str,
-                                 const char *description, GtRange *value,
-                                 GtRange *default_value,
-                                 unsigned long min_value,
-                                 unsigned long max_value)
+GtOption* gt_option_new_range_min_max(const char *option_str,
+                                      const char *description, GtRange *value,
+                                      GtRange *default_value,
+                                      unsigned long min_value,
+                                      unsigned long max_value)
 {
-   GtOption *o = gt_option_new_range(option_str, description,
-                                value, default_value);
+   GtOption *o = gt_option_new_range(option_str, description, value,
+                                     default_value);
    o->min_value_set = true;
    o->min_value.ul = min_value;
    o->max_value_set = true;
@@ -1359,7 +1359,7 @@ GtOption* gt_option_new_gt_range_min_max(const char *option_str,
 }
 
 GtOption* gt_option_new_string(const char *option_str, const char *description,
-                          GtStr *value, const char *default_value)
+                               GtStr *value, const char *default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_STRING;
@@ -1369,7 +1369,7 @@ GtOption* gt_option_new_string(const char *option_str, const char *description,
 }
 
 GtOption* gt_option_new_stringarray(const char *option_str,
-                               const char *description, GtStrArray *value)
+                                    const char *description, GtStrArray *value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_STRINGARRAY;

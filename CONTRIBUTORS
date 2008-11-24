@@ -7,4 +7,5 @@ gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 - Malte Mader (AnnotationSketch, sketch tool)
 - Christin Schaerfer (AnnotationSketch, sketch tool)
 - David Schmitz-Huebsch (libgtmgth, mgth tool)
-- Sascha Steinbiss (libgtltr, ltrdigest tool, AnnotationSketch, sketch tool)
+- Sascha Steinbiss (libgtltr, ltrdigest tool, AnnotationSketch, sketch tool,
+                    python bindings)

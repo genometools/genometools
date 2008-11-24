@@ -70,14 +70,14 @@ static OPrval parsegfmsub(bool doms,
   int parsed_args;
   const Optionargmodedesc msgfmsubmodedesctable[] =
   {
-    {"sequence",SHOWSEQUENCE},
-    {"querypos",SHOWQUERYPOS},
-    {"subjectpos",SHOWSUBJECTPOS}
+    {"sequence","matching sequence",SHOWSEQUENCE},
+    {"querypos","position in query sequence",SHOWQUERYPOS},
+    {"subjectpos","position in subject sequence",SHOWSUBJECTPOS}
   };
   const Optionargmodedesc gfmsubmodedesctable[] =
   {
-    {"sequence",SHOWSEQUENCE},
-    {"querypos",SHOWQUERYPOS}
+    {"sequence","matching sequence",SHOWSEQUENCE},
+    {"querypos","position in query sequence",SHOWQUERYPOS}
   };
 
   gt_error_check(err);

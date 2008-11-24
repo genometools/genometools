@@ -37,21 +37,21 @@ def checktagerator(queryfile,ms)
   if File.size("patternfile") > 0
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile",
-             :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile",
-             :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile " + 
+             "-withwildcards",:maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile " +
+             "-withwildcards",:maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile " +
-             " -nowildcards -maxocc 10",
+             " -maxocc 10",
              :maxtime => 100)
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
              :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile" +
-             " -nowildcards", :maxtime => 100)
-    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile" +
-             " -nowildcards", :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile",
+             :maxtime => 100)
+    run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile",
+             :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile " +
-             " -nowildcards -maxocc 10",
+             "-maxocc 10",
              :maxtime => 100)
   end
 end
@@ -95,12 +95,10 @@ allfiles.each do |reffile|
   end
 end
 
-if $gttestdata then
-  Name "gt greedyfwdmat at1MB U8"
-  Keywords "gt_greedyfwdmat gttestdata"
-  Test do
-    createandcheckgreedyfwdmat("#{$gttestdata}Iowa/at1MB",
-                               "#{$testdata}U89959_genomic.fas")
-    run "rm -f sfx.* fmi.* pck.*"
-  end
+Name "gt greedyfwdmat at1MB U8"
+Keywords "gt_greedyfwdmat gttestdata"
+Test do
+  createandcheckgreedyfwdmat("#{$testdata}at1MB",
+                             "#{$testdata}U89959_genomic.fas")
+  run "rm -f sfx.* fmi.* pck.*"
 end

@@ -33,9 +33,8 @@ typedef struct
 
 typedef struct
 {
-  unsigned long seedbitvector,
-                spacedseedlength,
-                lasterrorposition;
+  Bitstring seedbitvector;
+  unsigned long seedweight;
   const Uchar *pattern;
 } Matchtaskinfo;
 
@@ -45,7 +44,6 @@ static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long depth,
                                 const void *dfsconstinfo)
 {
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   const Limdfsstate *col = (const Limdfsstate *) aliascol;
 
   printf("at depth %lu (pathmatches=%s)\n",depth,
@@ -66,9 +64,8 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
                                  ...)
                                  /* Variable argument list is as follows:
                                     const Uchar *pattern,
-                                    unsigned long seedbitvector,
-                                    unsigned long spacedseedlength,
-                                    unsigned long lasterrorposition
+                                    Bitstring seedbitvector,
+                                    unsigned long seedweight
                                  */
 {
   va_list ap;
@@ -76,9 +73,8 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
 
   va_start(ap,alphasize);
   mti->pattern = va_arg(ap, const Uchar *);
-  mti->seedbitvector = va_arg(ap, unsigned long);
-  mti->spacedseedlength = va_arg(ap, unsigned long);
-  mti->lasterrorposition = va_arg(ap, unsigned long);
+  mti->seedbitvector = va_arg(ap, Bitstring);
+  mti->seedweight = va_arg(ap, unsigned long);
   va_end(ap);
 }
 
@@ -98,51 +94,49 @@ static void spse_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   column->pathmatches = true;
 }
 
-static unsigned long spse_fullmatchLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                               GT_UNUSED Seqpos leftbound,
-                                               GT_UNUSED Seqpos rightbound,
-                                               GT_UNUSED Seqpos width,
-                                               unsigned long currentdepth,
-                                               void *dfsconstinfo)
+static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
+                                      DECLAREPTRDFSSTATE(aliascolumn),
+                                      GT_UNUSED Seqpos leftbound,
+                                      GT_UNUSED Seqpos rightbound,
+                                      GT_UNUSED Seqpos width,
+                                      unsigned long currentdepth,
+                                      void *dfsconstinfo)
 {
   Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   if (limdfsstate->pathmatches)
   {
-    if (currentdepth == mti->spacedseedlength)
+    if (currentdepth == mti->seedweight)
     {
-      return currentdepth + 1; /* match of length currentdepth */
+      limdfsresult->status = Limdfssuccess;
+      limdfsresult->pprefixlen = mti->seedweight;
+      limdfsresult->distance = 0;
+      return;
     }
-    if (currentdepth < mti->spacedseedlength)
+    if (currentdepth < mti->seedweight)
     {
-      return 1UL; /* continue with depth first traversal */
+      limdfsresult->status = Limdfscontinue;
+      return;
     }
   }
-  return 0; /* stop depth first traversal */
+  limdfsresult->status = Limdfsstop;
 }
 
-static bool setpathmatch(unsigned long seedbitvector,
+static bool setpathmatch(Bitstring seedbitvector,
                          const Uchar *pattern,
                          unsigned long currentdepth,
                          Uchar currentchar)
 {
-  if (ISBITSET(seedbitvector,currentdepth-1))
-  {
-    if (currentchar == pattern[currentdepth-1])
-    {
-      return true;
-    }
-    return false;
-  }
-  return true;
+  return (!ISBITSET(seedbitvector,currentdepth-1) ||
+          currentchar == pattern[currentdepth-1]) ? true : false;
 }
 
 static void spse_nextLimdfsstate(const void *dfsconstinfo,
-                                DECLAREPTRDFSSTATE(aliasoutcol),
-                                unsigned long currentdepth,
-                                Uchar currentchar,
-                                GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
+                                 DECLAREPTRDFSSTATE(aliasoutcol),
+                                 unsigned long currentdepth,
+                                 Uchar currentchar,
+                                 GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
@@ -161,9 +155,9 @@ static void spse_nextLimdfsstate(const void *dfsconstinfo,
 }
 
 static void spse_inplacenextLimdfsstate(const void *dfsconstinfo,
-                                       DECLAREPTRDFSSTATE(aliascol),
-                                       unsigned long currentdepth,
-                                       Uchar currentchar)
+                                        DECLAREPTRDFSSTATE(aliascol),
+                                        unsigned long currentdepth,
+                                        Uchar currentchar)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascol;
@@ -183,7 +177,7 @@ const AbstractDfstransformer *spse_AbstractDfstransformer(void)
     sizeof (Limdfsstate),
     spse_allocatedfsconstinfo,
     spse_initdfsconstinfo,
-    NULL,
+    NULL, /* no extractdfsconstinfo */
     spse_freedfsconstinfo,
     spse_initLimdfsstate,
     spse_fullmatchLimdfsstate,

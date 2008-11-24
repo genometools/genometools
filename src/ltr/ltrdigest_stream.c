@@ -135,8 +135,7 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
   gt_feature_node_set_score((GtFeatureNode*) gf, gt_pbs_hit_get_score(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf,"trna",
                                  gt_pbs_hit_get_trna(hit));
-  gt_feature_node_set_strand((GtGenomeNode*) element->mainnode,
-                              gt_pbs_hit_get_strand(hit));
+  gt_feature_node_set_strand(element->mainnode, gt_pbs_hit_get_strand(hit));
   (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_tstart(hit));
   gt_feature_node_add_attribute((GtFeatureNode*) gf,"trnaoffset", buffer);
   (void) snprintf(buffer, BUFSIZ-1, "%lu", gt_pbs_hit_get_offset(hit));
@@ -181,8 +180,7 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
                            ppt_range.end,
                            gt_ppt_hit_get_strand(hit));
   gt_feature_node_set_source((GtFeatureNode*) gf, tag);
-  gt_feature_node_set_strand((GtGenomeNode*) element->mainnode,
-                            gt_ppt_hit_get_strand(hit));
+  gt_feature_node_set_strand(element->mainnode, gt_ppt_hit_get_strand(hit));
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
 }
 

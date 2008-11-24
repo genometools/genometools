@@ -93,7 +93,13 @@ static const struct luaL_Reg score_matrix_lib_m [] = {
 
 int gt_lua_open_score_matrix(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   luaL_newmetatable(L, SCOREMATRIX_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
@@ -104,6 +110,9 @@ int gt_lua_open_score_matrix(lua_State *L)
   lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, score_matrix_lib_m);
+  lua_pop(L, 1);
   luaL_register(L, "gt", score_matrix_lib_f);
+  lua_pop(L, 1);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }

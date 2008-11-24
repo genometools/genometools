@@ -18,15 +18,23 @@
 #ifndef FEATURE_NODE_API_H
 #define FEATURE_NODE_API_H
 
+#include "core/phase_api.h"
 #include "core/str_api.h"
 #include "core/strand_api.h"
+#include "core/str_array_api.h"
 #include "extended/genome_node_api.h"
 
-/* Implements <GtGenomeNode> interface. */
+/* Implements the <GtGenomeNode> interface. A single feature node corresponds
+   to a regular GFF3 line (i.e., a line which does not start with <#>).
+   Part-of relationships (which are realised in GFF3 with the <Parent> and <ID>
+   attributes) are realised in the C API with the
+   <gt_feature_node_add_child> method(). */
 typedef struct GtFeatureNode GtFeatureNode;
 
 /* Create an new <GtFeatureNode*> on sequence with ID <seqid> and type <type>
    which lies from <start> to <end> on strand <strand>.
+   The <GtFeatureNode*> stores a new reference to <seqid>, so make sure you do
+   not modify the original <seqid> afterwards.
    <start> and <end> always refer to the forward strand, therefore <start> has
    to be smaller or equal than <end>. */
 GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
@@ -35,5 +43,70 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
 /* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
 void          gt_feature_node_add_child(GtFeatureNode *parent,
                                         GtFeatureNode *child);
+
+/* Return the source of <feature_node>. If no source has been set, "." is
+   returned. Corresponds to column 2 of regular GFF3 lines. */
+const char*   gt_feature_node_get_source(GtFeatureNode *feature_node);
+
+/* Set the <source> of <feature_node>. Stores a new reference to <source>.
+   Corresponds to column 2 of regular GFF3 lines. */
+void          gt_feature_node_set_source(GtFeatureNode *feature_node,
+                                         GtStr *source);
+
+/* Return the type of <feature_node>.
+   Corresponds to column 3 of regular GFF3 lines. */
+const char*   gt_feature_node_get_type(GtFeatureNode *feature_node);
+
+/* Return <true> if <feature_node> has given <type>, <false> otherwise. */
+bool          gt_feature_node_has_type(GtFeatureNode *feature_node,
+                                       const char *type);
+
+/* Return <true> if the score of <feature_node> is defined, <false>
+   otherwise. */
+bool          gt_feature_node_score_is_defined(const GtFeatureNode
+                                               *feature_node);
+/* Return the score of <feature_node>. The score has to be defined.
+   Corresponds to column 6 of regular GFF3 lines. */
+float         gt_feature_node_get_score(const GtFeatureNode *feature_node);
+
+/* Set the score of <feature_node> to <score>. */
+void          gt_feature_node_set_score(GtFeatureNode *feature_node,
+                                        float score);
+
+/* Unset the score of <feature_node>. */
+void          gt_feature_node_unset_score(GtFeatureNode *feature_node);
+
+/* Return the strand of <feature_node>.
+   Corresponds to column 7 of regular GFF3 lines. */
+GtStrand      gt_feature_node_get_strand(GtFeatureNode *feature_node);
+
+/* Set the strand of <feature_node> to <strand>. */
+void          gt_feature_node_set_strand(GtFeatureNode *feature_node,
+                                         GtStrand strand);
+
+/* Return the phase of <feature_node>.
+   Corresponds to column 8 of regular GFF3 lines. */
+GtPhase       gt_feature_node_get_phase(GtFeatureNode *feature_node);
+
+/* Set the phase of <feature_node> to <phase>. */
+void          gt_feature_node_set_phase(GtFeatureNode *feature_node,
+                                        GtPhase phase);
+
+/* Return the attribute of <feature_node> with the given <name>.
+   If no such attribute has been added, <NULL> is returned.
+   The attributes are stored in column 9 of regular GFF3 lines. */
+const char*   gt_feature_node_get_attribute(GtFeatureNode *feature_node,
+                                            const char *name);
+
+/* Return a string array containing the used attribute names of <feature_node>.
+   The caller is responsible to free the returned <GtStrArray*>. */
+GtStrArray*   gt_feature_node_get_attribute_list(GtFeatureNode *feature_node);
+
+/* Add attribute <tag>=<value> to <feature_node>. <tag> and <value> must at
+   least have length 1. <feature_node> must not contain an attribute with the
+   given <tag> already. You should not add Parent and ID attributes, use
+   <gt_feature_node_add_child()> to denote part-of relationships. */
+void          gt_feature_node_add_attribute(GtFeatureNode *feature_node,
+                                            const char *tag, const char *value);
 
 #endif

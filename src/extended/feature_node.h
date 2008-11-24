@@ -20,7 +20,6 @@
 
 #include "core/bittab.h"
 #include "core/range.h"
-#include "core/phase.h"
 #include "core/strand_api.h"
 #include "core/str_array.h"
 #include "extended/feature_node_api.h"
@@ -32,76 +31,47 @@ typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
 typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
-GtGenomeNode*        gt_feature_node_new_pseudo(GtFeatureNode*);
+GtGenomeNode*  gt_feature_node_new_pseudo(GtFeatureNode*);
 /* Return the ``standard gene'' (mainly for testing purposes). */
-GtGenomeNode*        gt_feature_node_new_standard_gene(void);
-const char*           gt_feature_node_get_source(GtFeatureNode*);
-const char*           gt_feature_node_get_attribute(GtFeatureNode *feature_node,
-                                                    const char *attr_name);
-/* Return a GtStrArray containing the used attribute names. */
-GtStrArray*          gt_feature_node_get_attribute_list(GtFeatureNode*);
-const char*           gt_feature_node_get_type(GtFeatureNode*);
-bool                  gt_feature_node_has_type(GtFeatureNode*,
-                                                 const char*);
-bool                  gt_feature_node_score_is_defined(const
-                                                         GtFeatureNode*);
-bool                  gt_feature_node_is_multi(const GtFeatureNode*);
-bool                  gt_feature_node_is_pseudo(const GtFeatureNode*);
-void                  gt_feature_node_make_multi_representative(GtFeatureNode*);
-void                  gt_feature_node_set_multi_representative(
-                                                             GtFeatureNode*,
-                                                             GtFeatureNode*);
-GtFeatureNode*     gt_feature_node_get_multi_representative(
-                                                             GtFeatureNode*);
-float                 gt_feature_node_get_score(GtFeatureNode*);
-GtStrand             gt_feature_node_get_strand(GtFeatureNode*);
-Phase                 gt_feature_node_get_phase(GtFeatureNode*);
-void                  gt_feature_node_get_exons(GtFeatureNode*,
-                                                  GtArray *exon_features);
-void                  gt_feature_node_determine_transcripttypes(
-                                                             GtFeatureNode*);
-GtTranscriptFeatureType gt_feature_node_get_transcriptfeaturetype(
-                                                             GtFeatureNode*);
-void                  gt_feature_node_set_source(GtFeatureNode*, GtStr *source);
-void                  gt_feature_node_set_phase(GtGenomeNode*, Phase);
-void                  gt_feature_node_set_strand(GtGenomeNode*, GtStrand);
-void                  gt_feature_node_set_end(GtFeatureNode*,
-                                                unsigned long);
-void                  gt_feature_node_set_score(GtFeatureNode*, float);
-void                  gt_feature_node_unset_score(GtFeatureNode*);
-void                  gt_feature_node_add_attribute(GtFeatureNode*,
-                                                      const char *attr_name,
-                                                      const char *attr_value);
-void                  gt_feature_node_foreach_attribute(GtFeatureNode*,
-                                                          AttributeIterFunc,
-                                                          void *data);
-bool                  gt_feature_node_has_CDS(const GtFeatureNode*);
-bool                  gt_feature_node_has_splice_site(const
+GtGenomeNode*  gt_feature_node_new_standard_gene(void);
+bool           gt_feature_node_is_multi(const GtFeatureNode*);
+bool           gt_feature_node_is_pseudo(const GtFeatureNode*);
+void           gt_feature_node_make_multi_representative(GtFeatureNode*);
+void           gt_feature_node_set_multi_representative(GtFeatureNode*,
                                                         GtFeatureNode*);
-double                gt_feature_node_average_splice_site_prob(const
-                                                             GtFeatureNode*);
+GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode*);
+void           gt_feature_node_get_exons(GtFeatureNode*,
+                                         GtArray *exon_features);
+void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
+GtTranscriptFeatureType
+               gt_feature_node_get_transcriptfeaturetype(GtFeatureNode*);
+void           gt_feature_node_set_end(GtFeatureNode*, unsigned long);
+void           gt_feature_node_foreach_attribute(GtFeatureNode*,
+                                                 AttributeIterFunc, void *data);
+bool           gt_feature_node_has_CDS(const GtFeatureNode*);
+bool           gt_feature_node_has_splice_site(const GtFeatureNode*);
+double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*);
 /* Returns true, if the given features have the same seqid, feature type, range,
    strand, and phase. */
-bool                  gt_genome_features_are_similar(GtFeatureNode*,
-                                                     GtFeatureNode*);
-int                   gt_feature_node_unit_test(GtError*);
+bool           gt_genome_features_are_similar(GtFeatureNode*, GtFeatureNode*);
+int            gt_feature_node_unit_test(GtError*);
 
 GtGenomeNode*  gt_genome_node_rec_ref(GtGenomeNode*);
 
 /* perform depth first traversal of the given genome node */
-int           gt_genome_node_traverse_children(GtGenomeNode*, void*,
-                                               GtGenomeNodeTraverseFunc,
-                                               bool traverse_only_once,
-GtError*);
+int            gt_genome_node_traverse_children(GtGenomeNode*, void*,
+                                                GtGenomeNodeTraverseFunc,
+                                                bool traverse_only_once,
+                                                GtError*);
 /* perform breadth first traversal of the given genome node  */
-int           gt_genome_node_traverse_children_breadth(GtGenomeNode*, void*,
+int            gt_genome_node_traverse_children_breadth(GtGenomeNode*, void*,
                                                        GtGenomeNodeTraverseFunc,
-                                                       bool traverse_only_once,
+                                                        bool traverse_only_once,
+                                                        GtError*);
+int            gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
+                                                       GtGenomeNodeTraverseFunc,
                                                        GtError*);
-int           gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
-                                                      GtGenomeNodeTraverseFunc,
-                                                      GtError*);
-unsigned long gt_genome_node_number_of_children(const GtGenomeNode*);
+unsigned long  gt_genome_node_number_of_children(const GtGenomeNode*);
 /* does not free the leaf, do not use during traversal! */
 void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
                                           GtGenomeNode *leafn);

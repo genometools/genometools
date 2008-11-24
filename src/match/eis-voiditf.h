@@ -83,7 +83,7 @@ unsigned long voidpackedindexmstatsforward(const void *voidbwtseq,
                                            const Uchar *qstart,
                                            const Uchar *qend);
 
-void pck_exactpatternmatching(const void *voidbwtseq,
+bool pck_exactpatternmatching(const void *voidbwtseq,
                               const Uchar *pattern,
                               unsigned long patternlength,
                               Seqpos totallength,

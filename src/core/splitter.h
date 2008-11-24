@@ -22,12 +22,12 @@
 
 typedef struct GtSplitter GtSplitter;
 
-GtSplitter*     gt_splitter_new(void);
+GtSplitter*   gt_splitter_new(void);
 
 /* split <string> of given <length> into tokens delimited by 'delimiter'.
    <string> is modified in the splitting process! */
 void          gt_splitter_split(GtSplitter*, char *string, unsigned long length,
-                             char delimiter);
+                                char delimiter);
 
 /* get all tokens */
 char**        gt_splitter_get_tokens(GtSplitter*);

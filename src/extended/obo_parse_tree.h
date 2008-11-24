@@ -26,15 +26,15 @@ typedef struct GtOBOParseTree GtOBOParseTree;
    GtOBOParseTree.
    If an error occurs during parsing, NULL is returned and <err> is set. */
 GtOBOParseTree* gt_obo_parse_tree_new(const char *obo_file_path, GtError *err);
-void          gt_obo_parse_tree_delete(GtOBOParseTree*);
+void            gt_obo_parse_tree_delete(GtOBOParseTree*);
 /* Return the type of stanza number <stanza_number>. */
-const char*   gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree*,
-                                             unsigned long stanza_num);
+const char*     gt_obo_parse_tree_get_stanza_type(const GtOBOParseTree*,
+                                                  unsigned long stanza_num);
 /* Return the value of entry <stanza_key> in stanza number <stanza_number>. */
-const char*   gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree*,
-                                              unsigned long stanza_num,
-                                              const char *stanza_key);
+const char*     gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree*,
+                                                   unsigned long stanza_num,
+                                                   const char *stanza_key);
 /* Return the number of stanzas. */
-unsigned long gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree*);
+unsigned long   gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree*);
 
 #endif

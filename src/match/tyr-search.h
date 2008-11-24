@@ -18,39 +18,10 @@
 #ifndef TYR_SEARCH_H
 #define TYR_SEARCH_H
 
-#include "core/arraydef.h"
+#include <stdbool.h>
 #include "core/str_api.h"
 #include "core/str_array_api.h"
-#include "intbits.h"
-#include "intbits-tab.h"
-#include "divmodmul.h"
-
-#define MERBYTES(SL)  (DIV4(SL) + ((MOD4(SL) == 0) ? 0 : 1UL))
-#define MERSUFFIX     ".mer"
-#define COUNTSSUFFIX  ".mct"
-#define BUCKETSUFFIX  ".mbd"
-#define EXTRAINTEGERS 2
-
-#define ISBOUNDDEFINED(UDB,IDX)          ISIBITSET(UDB,IDX)
-#define SETDEFINEDBOUND(UDB,IDX)         SETIBIT(UDB,IDX)
-
-#define STRAND_FORWARD 1U
-#define STRAND_REVERSE (STRAND_FORWARD << 1)
-
-#define SHOWQSEQNUM  1U
-#define SHOWQPOS     (SHOWQSEQNUM << 1)
-#define SHOWCOUNTS   (SHOWQSEQNUM << 2)
-#define SHOWSEQUENCE (SHOWQSEQNUM << 3)
-
-typedef struct
-{
-  unsigned long idx, value;
-} Largecount;
-
-DECLAREARRAYSTRUCT(Largecount);
-
-typedef struct Tyrindex Tyrindex;
-typedef struct Tyrcountinfo Tyrcountinfo;
+#include "core/error_api.h"
 
 int tyrsearch(const GtStr *tyrindexname,
               const GtStrArray *queryfilenames,

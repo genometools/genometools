@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -66,45 +66,111 @@ typedef struct
   bool *rcdirptr;
 } Showmatchinfo;
 
+#define ADDTABULATOR\
+        if (firstitem)\
+        {\
+          firstitem = false;\
+        } else\
+        {\
+          (void) putchar('\t');\
+        }
+
 static void showmatch(void *processinfo,
                       Seqpos dbstartpos,
                       Seqpos dblen,
                       const Uchar *dbsubstring,
-                      unsigned long pprefixlen)
+                      unsigned long pprefixlen,
+                      unsigned long distance)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
+  bool firstitem = true;
 
-  printf(FormatSeqpos,PRINTSeqposcast(dblen));
-  printf(" %c " FormatSeqpos,*showmatchinfo->rcdirptr ? '-' : '+',
-         PRINTSeqposcast(dbstartpos));
-  if (showmatchinfo->tageratoroptions != NULL &&
-      showmatchinfo->tageratoroptions->maxintervalwidth > 0)
+  gt_assert(showmatchinfo->tageratoroptions != NULL);
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBLENGTH)
   {
-    printf(" ");
-    printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
+    printf(FormatSeqpos,PRINTSeqposcast(dblen));
+    firstitem = false;
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
+  {
+    ADDTABULATOR;
+    printf(FormatSeqpos,PRINTSeqposcast(dbstartpos));
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
+  {
+    ADDTABULATOR;
+    gt_assert(dbsubstring != NULL);
+    printfsymbolstring(showmatchinfo->alpha,dbsubstring,
+                       (unsigned long) dblen);
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
+  {
+    ADDTABULATOR;
+    printf("%c",(*showmatchinfo->rcdirptr) ? '-' : '+');
+  }
+  if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_EDIST)
+  {
+    ADDTABULATOR;
+    printf("%lu",distance);
+  }
+  if (showmatchinfo->tageratoroptions->maxintervalwidth > 0)
+  {
     if (showmatchinfo->tageratoroptions->skpp)
     {
-      unsigned long suffixlength
-        = reversesuffixmatch(showmatchinfo->eqsvector,
-                             showmatchinfo->alphasize,
-                             dbsubstring,
-                             (unsigned long) dblen,
-                             showmatchinfo->tagptr,
-                             pprefixlen,
-                             (unsigned long) showmatchinfo->tageratoroptions
-                                                         ->maxdistance);
-      gt_assert(pprefixlen >= suffixlength);
-      printf(" %lu %lu ",suffixlength,pprefixlen - suffixlength);
-      printfsymbolstring(NULL,showmatchinfo->tagptr +
-                              (pprefixlen - suffixlength),
-                              suffixlength);
+      if (showmatchinfo->tageratoroptions->outputmode &
+          (TAGOUT_TAGSTARTPOS | TAGOUT_TAGLENGTH | TAGOUT_TAGSUFFIXSEQ))
+      {
+        unsigned long suffixlength
+          = reversesuffixmatch(showmatchinfo->eqsvector,
+                               showmatchinfo->alphasize,
+                               dbsubstring,
+                               (unsigned long) dblen,
+                               showmatchinfo->tagptr,
+                               pprefixlen,
+                               (unsigned long) showmatchinfo->tageratoroptions->
+                                                        userdefinedmaxdistance);
+        gt_assert(pprefixlen >= suffixlength);
+        if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
+        {
+          ADDTABULATOR;
+          printf("%lu",pprefixlen - suffixlength);
+        }
+        if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
+        {
+          ADDTABULATOR;
+          printf("%lu",suffixlength);
+        }
+        if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
+        {
+          ADDTABULATOR;
+          printfsymbolstring(NULL,showmatchinfo->tagptr +
+                                  (pprefixlen - suffixlength),
+                                  suffixlength);
+        }
+      }
     } else
     {
-      printf(" %lu 0 ",pprefixlen);
-      printfsymbolstring(NULL,showmatchinfo->tagptr, pprefixlen);
+      if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
+      {
+        ADDTABULATOR;
+        printf("0");
+      }
+      if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
+      {
+        ADDTABULATOR;
+        printf("%lu",pprefixlen);
+      }
+      if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
+      {
+        ADDTABULATOR;
+        printfsymbolstring(NULL,showmatchinfo->tagptr, pprefixlen);
+      }
     }
   }
-  printf("\n");
+  if (!firstitem)
+  {
+    printf("\n");
+  }
 }
 
 typedef struct
@@ -118,7 +184,8 @@ static void storematch(void *processinfo,
                        Seqpos dbstartpos,
                        Seqpos dblen,
                        GT_UNUSED const Uchar *dbsubstring,
-                       GT_UNUSED unsigned long pprefixlen)
+                       GT_UNUSED unsigned long pprefixlen,
+                       GT_UNUSED unsigned long distance)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;
@@ -284,55 +351,46 @@ static int dotransformtag(Uchar *transformedtag,
   return 0;
 }
 
-static void performpatternsearch(const AbstractDfstransformer *dfst,
-                                 const TageratorOptions *tageratoroptions,
+static bool performpatternsearch(const AbstractDfstransformer *dfst,
+                                 bool domstats,
+                                 unsigned long maxdistance,
+                                 bool online,
+                                 bool docompare,
+                                 unsigned long maxintervalwidth,
+                                 bool skpp,
                                  Myersonlineresources *mor,
                                  Limdfsresources *limdfsresources,
                                  const Uchar *transformedtag,
-                                 unsigned long taglen,
-                                 Processmatch processmatch,
-                                 void *processmatchinfooffline)
+                                 unsigned long taglen)
 {
-  if (tageratoroptions->online || (tageratoroptions->maxdistance >= 0 &&
-                                   tageratoroptions->docompare))
+  if (online || (!domstats && docompare))
   {
-    edistmyersbitvectorAPM(mor,
-                           transformedtag,
-                           taglen,
-                           (unsigned long) tageratoroptions->maxdistance);
+    gt_assert(mor != NULL);
+    edistmyersbitvectorAPM(mor,transformedtag,taglen,maxdistance);
   }
-  if (!tageratoroptions->online || tageratoroptions->docompare)
+  if (!online || docompare)
   {
-    if (tageratoroptions->maxdistance == 0)
+    if (domstats)
     {
-      indexbasedexactpatternmatching(limdfsresources,
-                                     transformedtag,
-                                     taglen,
-                                     processmatch,
-                                     processmatchinfooffline);
+      indexbasedmstats(limdfsresources,transformedtag,taglen,dfst);
+      return false;
+    }
+    if (maxdistance == 0)
+    {
+      return indexbasedexactpatternmatching(limdfsresources,
+                                            transformedtag,taglen);
     } else
     {
-      if (tageratoroptions->maxdistance > 0)
-      {
-        indexbasedapproxpatternmatching(limdfsresources,
-                                        transformedtag,
-                                        taglen,
-                                        (tageratoroptions->maxdistance < 0)
-                                          ?  0
-                                          : (unsigned long)
-                                            tageratoroptions->maxdistance,
-                                        tageratoroptions->maxintervalwidth,
-                                        tageratoroptions->skpp,
-                                        dfst);
-      } else
-      {
-        indexbasedmstats(limdfsresources,
-                         transformedtag,
-                         taglen,
-                         dfst);
-      }
+      return indexbasedapproxpatternmatching(limdfsresources,
+                                             transformedtag,
+                                             taglen,
+                                             maxdistance,
+                                             maxintervalwidth,
+                                             skpp,
+                                             dfst);
     }
   }
+  return false;
 }
 
 static void compareresults(const ArraySimplematch *storeonline,
@@ -404,36 +462,102 @@ static void compareresults(const ArraySimplematch *storeonline,
   }
 }
 
+static void searchoverstrands(const TageratorOptions *tageratoroptions,
+                              Tagwithlength *twl,
+                              const AbstractDfstransformer *dfst,
+                              Myersonlineresources *mor,
+                              Limdfsresources *limdfsresources,
+                              ArraySimplematch *storeonline,
+                              ArraySimplematch *storeoffline)
+{
+  int try;
+  bool domstats, matchfound;
+  unsigned long maxdistance, mindistance, distance;
+
+  if (tageratoroptions->userdefinedmaxdistance < 0)
+  {
+    domstats = true;
+    mindistance = maxdistance = 0;
+  } else
+  {
+    domstats = false;
+    gt_assert(tageratoroptions->userdefinedmaxdistance >= 0);
+    maxdistance = (unsigned long) tageratoroptions->userdefinedmaxdistance;
+    if (tageratoroptions->best)
+    {
+      mindistance = 0;
+    } else
+    {
+      mindistance = maxdistance;
+    }
+  }
+  matchfound = false;
+  for (distance = mindistance; distance <= maxdistance; distance++)
+  {
+    for (try=0 ; try < 2; try++)
+    {
+      if ((try == 0 && !tageratoroptions->nofwdmatch) ||
+          (try == 1 && !tageratoroptions->norcmatch))
+      {
+        if (try == 1 && !tageratoroptions->norcmatch)
+        {
+          inplace_reversecomplement(twl->transformedtag,twl->taglen);
+          twl->rcdir = true;
+        }
+        if (performpatternsearch(dfst,
+                                 domstats,
+                                 distance,
+                                 tageratoroptions->online,
+                                 tageratoroptions->docompare,
+                                 tageratoroptions->maxintervalwidth,
+                                 tageratoroptions->skpp,
+                                 mor,
+                                 limdfsresources,
+                                 twl->transformedtag,
+                                 twl->taglen) && !matchfound)
+        {
+          matchfound = true;
+        }
+        if (tageratoroptions->docompare)
+        {
+          compareresults(storeonline,storeoffline);
+        }
+      }
+    }
+    if (tageratoroptions->best && matchfound)
+    {
+      break;
+    }
+  }
+}
+
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
   GtSeqIterator *seqit = NULL;
   bool haserr = false;
-  int retval, try;
+  int retval;
   unsigned int demand;
-  Limdfsresources *limdfsresources = NULL;
   Myersonlineresources *mor = NULL;
   ArraySimplematch storeonline, storeoffline;
   void *packedindex = NULL;
-  bool withesa;
   const AbstractDfstransformer *dfst;
 
-  if (tageratoroptions->maxdistance >= 0)
+  if (tageratoroptions->userdefinedmaxdistance >= 0)
   {
     dfst = apm_AbstractDfstransformer();
   } else
   {
     dfst = pms_AbstractDfstransformer();
   }
-  if (gt_str_length(tageratoroptions->esaindexname) > 0)
+  if (tageratoroptions->withesa)
   {
     demand = SARR_ESQTAB;
     if (!tageratoroptions->online)
     {
       demand |= SARR_SUFTAB;
     }
-    withesa = true;
   } else
   {
     if (tageratoroptions->docompare || tageratoroptions->online)
@@ -443,13 +567,11 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       demand = 0;
     }
-    withesa = false;
   }
   if (mapsuffixarray(&suffixarray,
                      &totallength,
                      demand,
-                     withesa ? tageratoroptions->esaindexname
-                             : tageratoroptions->pckindexname,
+                     tageratoroptions->indexname,
                      NULL,
                      err) != 0)
   {
@@ -457,14 +579,14 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   }
   if (!haserr)
   {
-    if (withesa && suffixarray.readmode != Forwardmode)
+    if (tageratoroptions->withesa && suffixarray.readmode != Forwardmode)
     {
       gt_error_set(err,"using option -esa you can only process index "
                     "in forward mode");
       haserr = true;
     } else
     {
-      if (!withesa && suffixarray.readmode != Reversemode)
+      if (!tageratoroptions->withesa && suffixarray.readmode != Reversemode)
       {
         gt_error_set(err,"with option -pck you can only process index "
                       "in reverse mode");
@@ -472,9 +594,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       }
     }
   }
-  if (!haserr && gt_str_length(tageratoroptions->pckindexname) > 0)
+  if (!haserr && !tageratoroptions->withesa)
   {
-    packedindex = loadvoidBWTSeqForSA(tageratoroptions->pckindexname,
+    packedindex = loadvoidBWTSeqForSA(tageratoroptions->indexname,
                                       &suffixarray,
                                       totallength, true, err);
     if (packedindex == NULL)
@@ -491,12 +613,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     unsigned int mapsize;
     const Uchar *symbolmap, *currenttag;
     char *desc = NULL;
-    const Matchbound **mbtab;
-    unsigned int maxdepth;
-    unsigned long maxpathlength;
     Processmatch processmatch;
     Showmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
+    Limdfsresources *limdfsresources = NULL;
 
     storeonline.rcdirptr = storeoffline.rcdirptr = &twl.rcdir;
     symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
@@ -510,7 +630,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     } else
     {
       processmatch = showmatch;
-      processmatchinfoonline = NULL;
       showmatchinfo.rcdirptr = &twl.rcdir;
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) (mapsize-1);
@@ -519,6 +638,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
+      processmatchinfoonline = &showmatchinfo;
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
@@ -529,45 +649,58 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     processmatch,
                                     processmatchinfoonline);
     }
-    if (withesa)
+    if (!tageratoroptions->online || tageratoroptions->docompare)
     {
-      mbtab = NULL;
-      maxdepth = 0;
-    } else
-    {
-      mbtab = bwtseq2mbtab(packedindex);
-      maxdepth = bwtseq2maxdepth(packedindex);
-      if (tageratoroptions->userdefinedmaxdepth >= 0 &&
-          maxdepth > (unsigned int) tageratoroptions->userdefinedmaxdepth)
+      const Matchbound **mbtab;
+      unsigned int maxdepth;
+      unsigned long maxpathlength;
+
+      if (tageratoroptions->withesa)
       {
-        maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
+        mbtab = NULL;
+        maxdepth = 0;
+      } else
+      {
+        mbtab = bwtseq2mbtab(packedindex);
+        maxdepth = bwtseq2maxdepth(packedindex);
+        if (tageratoroptions->userdefinedmaxdepth >= 0 &&
+            maxdepth > (unsigned int) tageratoroptions->userdefinedmaxdepth)
+        {
+          maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
+        }
       }
+      if (tageratoroptions->userdefinedmaxdistance >= 0)
+      {
+        maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
+                                         tageratoroptions->
+                                         userdefinedmaxdistance);
+      } else
+      {
+        maxpathlength = (unsigned long) (1+MAXTAGSIZE);
+      }
+      limdfsresources = newLimdfsresources(tageratoroptions->withesa
+                                             ? &suffixarray : packedindex,
+                                           mbtab,
+                                           maxdepth,
+                                           suffixarray.encseq,
+                                           tageratoroptions->withesa,
+                                           tageratoroptions->nowildcards,
+                                           tageratoroptions->maxintervalwidth,
+                                           mapsize,
+                                           totallength,
+                                           maxpathlength,
+                                           processmatch,
+                                           processmatchinfooffline,
+                                           tageratoroptions->docompare
+                                             ? checkmstats
+                                             : showmstats,
+                                           &twl, /* refer to uninit structure */
+                                           dfst);
     }
-    if (tageratoroptions->maxdistance >= 0)
-    {
-      maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
-                                       tageratoroptions->maxdistance);
-    } else
-    {
-      maxpathlength = (unsigned long) (1+MAXTAGSIZE);
-    }
-    limdfsresources = newLimdfsresources(withesa ? &suffixarray : packedindex,
-                                         mbtab,
-                                         maxdepth,
-                                         suffixarray.encseq,
-                                         withesa,
-                                         tageratoroptions->nowildcards,
-                                         tageratoroptions->maxintervalwidth,
-                                         mapsize,
-                                         totallength,
-                                         maxpathlength,
-                                         processmatch,
-                                         processmatchinfooffline,
-                                         tageratoroptions->docompare
-                                           ? checkmstats
-                                           : showmstats,
-                                         &twl, /* refer to uninit structure */
-                                         dfst);
+    printf("# for each match show: ");
+    getsetargmodekeywords(tageratoroptions->modedesc,
+                          tageratoroptions->numberofmodedescentries,
+                          tageratoroptions->outputmode);
     seqit = gt_seqiterator_new(tageratoroptions->tagfiles, NULL, true);
     for (tagnumber = 0; !haserr; tagnumber++)
     {
@@ -593,60 +726,55 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
         break;
       }
       twl.rcdir = false;
-      printf("# %lu ",twl.taglen);
-      fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
-                          twl.taglen);
+      printf("#");
+      if (tageratoroptions->outputmode & TAGOUT_TAGNUM)
+      {
+        printf("\t%lu",twl.taglen);
+      }
+      if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
+      {
+        printf("\t");
+        fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
+                            twl.taglen);
+      }
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
       storeonline.nextfreeSimplematch = 0;
-      if (tageratoroptions->maxdistance > 0 &&
-          twl.taglen <= (unsigned long) tageratoroptions->maxdistance)
+      if (tageratoroptions->userdefinedmaxdistance > 0 &&
+          twl.taglen <= (unsigned long)
+                        tageratoroptions->userdefinedmaxdistance)
       {
         gt_error_set(err,"tag \"%*.*s\" of length %lu; "
-                  "tags must be longer than the allowed number of errors "
-                  "(which is %ld)",
-                   (int) twl.taglen,(int) twl.taglen,currenttag,twl.taglen,
-                   tageratoroptions->maxdistance);
+                     "tags must be longer than the allowed number of errors "
+                     "(which is %ld)",
+                     (int) twl.taglen,
+                     (int) twl.taglen,currenttag,
+                     twl.taglen,
+                     tageratoroptions->userdefinedmaxdistance);
         haserr = true;
         gt_free(desc);
         break;
       }
-      gt_assert(tageratoroptions->maxdistance < 0 ||
-             twl.taglen > (unsigned long) tageratoroptions->maxdistance);
-      for (try=0 ; try < 2; try++)
-      {
-        if ((try == 0 && !tageratoroptions->nofwdmatch) ||
-            (try == 1 && !tageratoroptions->norcmatch))
-        {
-          if (try == 1 && !tageratoroptions->norcmatch)
-          {
-            inplace_reversecomplement(twl.transformedtag,twl.taglen);
-            twl.rcdir = true;
-          }
-          performpatternsearch(dfst,
-                               tageratoroptions,
-                               mor,
-                               limdfsresources,
-                               twl.transformedtag,
-                               twl.taglen,
-                               processmatch,
-                               processmatchinfooffline);
-          if (tageratoroptions->docompare)
-          {
-            compareresults(&storeonline,&storeoffline);
-          }
-        }
-      }
+      gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
+                twl.taglen > (unsigned long)
+                             tageratoroptions->userdefinedmaxdistance);
+      searchoverstrands(tageratoroptions,
+                        &twl,
+                        dfst,
+                        mor,
+                        limdfsresources,
+                        &storeonline,
+                        &storeoffline);
       gt_free(desc);
     }
     gt_free(showmatchinfo.eqsvector);
+    if (limdfsresources != NULL)
+    {
+      freeLimdfsresources(&limdfsresources,dfst);
+    }
   }
   FREEARRAY(&storeonline,Simplematch);
   FREEARRAY(&storeoffline,Simplematch);
-  if (limdfsresources != NULL)
-  {
-    freeLimdfsresources(&limdfsresources,dfst);
-  }
   if (mor != NULL)
   {
     freeMyersonlineresources(&mor);

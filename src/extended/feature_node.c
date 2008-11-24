@@ -118,10 +118,10 @@ static GtRange gt_feature_node_get_range(GtGenomeNode *gn)
   return fn->range;
 }
 
-static void gt_feature_node_set_range(GtGenomeNode *gn, GtRange range)
+static void gt_feature_node_set_range(GtGenomeNode *gn, const GtRange *range)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
-  fn->range = range;
+  fn->range = *range;
 }
 
 static void gt_feature_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
@@ -138,22 +138,11 @@ void gt_feature_node_set_source(GtFeatureNode *fn, GtStr *source)
   fn->source = gt_str_ref(source);
 }
 
-void gt_feature_node_set_phase(GtGenomeNode *gn, Phase phase)
+void gt_feature_node_set_phase(GtFeatureNode *fn, GtPhase phase)
 {
-  GtFeatureNode *fn;
-  gt_assert(gn);
-  fn = gt_feature_node_cast(gn); /* XXX */
+  gt_assert(fn);
   fn->bit_field &= ~(PHASE_MASK << PHASE_OFFSET);
   fn->bit_field |= phase << PHASE_OFFSET;
-}
-
-void gt_feature_node_set_strand(GtGenomeNode *gn, GtStrand strand)
-{
-  GtFeatureNode *fn;
-  gt_assert(gn);
-  fn = gt_feature_node_cast(gn); /* XXX */
-  fn->bit_field &= ~(STRAND_MASK << STRAND_OFFSET);
-  fn->bit_field |= strand << STRAND_OFFSET;
 }
 
 static int gt_feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *gv,
@@ -194,8 +183,8 @@ static void set_tree_status(unsigned int *bit_field, TreeStatus tree_status)
 }
 
 GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
-                                     unsigned long start, unsigned long end,
-                                     GtStrand strand)
+                                  unsigned long start, unsigned long end,
+                                  GtStrand strand)
 {
   GtGenomeNode *gn;
   GtFeatureNode *fn;
@@ -213,7 +202,7 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   fn->bit_field   = 0;
   fn->bit_field |= strand << STRAND_OFFSET;
   fn->children    = NULL; /* the children list is create on demand */
-  gt_feature_node_set_phase(gn, GT_PHASE_UNDEFINED);
+  gt_feature_node_set_phase(fn, GT_PHASE_UNDEFINED);
   set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   set_tree_status(&fn->bit_field, IS_TREE);
   fn->representative = NULL;
@@ -228,8 +217,8 @@ GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
   gt_assert(fn);
   range = gt_feature_node_get_range((GtGenomeNode*) fn),
   pn = gt_feature_node_new(gt_feature_node_get_seqid((GtGenomeNode*) fn),
-                            gt_feature_node_get_type(fn), range.start,
-                            range.end, gt_feature_node_get_strand(fn));
+                           gt_feature_node_get_type(fn), range.start,
+                           range.end, gt_feature_node_get_strand(fn));
   pf = gt_feature_node_cast(pn);
   pf->type = NULL; /* pseudo features do not have a type */
   gt_feature_node_set_source(pf, fn->source);
@@ -370,7 +359,7 @@ GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode
   return fn; /* is itself the representative */
 }
 
-float gt_feature_node_get_score(GtFeatureNode *fn)
+float gt_feature_node_get_score(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   gt_assert(gt_feature_node_score_is_defined(fn));
@@ -383,7 +372,14 @@ GtStrand gt_feature_node_get_strand(GtFeatureNode *fn)
   return (fn->bit_field >> STRAND_OFFSET) & STRAND_MASK;
 }
 
-Phase gt_feature_node_get_phase(GtFeatureNode *fn)
+void gt_feature_node_set_strand(GtFeatureNode *fn, GtStrand strand)
+{
+  gt_assert(fn);
+  fn->bit_field &= ~(STRAND_MASK << STRAND_OFFSET);
+  fn->bit_field |= strand << STRAND_OFFSET;
+}
+
+GtPhase gt_feature_node_get_phase(GtFeatureNode *fn)
 {
   gt_assert(fn);
   return (fn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
@@ -515,8 +511,8 @@ void gt_feature_node_unset_score(GtFeatureNode *fn)
 }
 
 void gt_feature_node_add_attribute(GtFeatureNode *fn,
-                                     const char *attr_name,
-                                     const char *attr_value)
+                                   const char *attr_name,
+                                   const char *attr_value)
 {
   gt_assert(fn && attr_name && attr_value);
   gt_assert(strlen(attr_name)); /* attribute name cannot be empty */

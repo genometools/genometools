@@ -22,6 +22,7 @@
 #include "core/assert_api.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
+#include "core/warning_api.h"
 
 int gt_parse_int(int *out, const char *nptr)
 {
@@ -101,8 +102,9 @@ int gt_parse_double(double *out, const char *nptr)
   return 0;
 }
 
-int gt_parse_range(GtRange *range, const char *start, const char *end,
-                unsigned int line_number, const char *filename, GtError *err)
+static int parse_range(GtRange *range, const char *start, const char *end,
+                       unsigned int line_number, const char *filename,
+                       bool tidy, GtError *err)
 {
   long start_val, end_val;
   char *ep;
@@ -153,9 +155,19 @@ int gt_parse_range(GtRange *range, const char *start, const char *end,
 
   /* check range */
   if (start_val > end_val) {
-    gt_error_set(err, "start '%lu' is larger then end '%lu' on line %u in file "
-              "'%s'", start_val, end_val, line_number, filename);
-    return -1;
+    if (tidy) {
+      long tmp_val;
+      gt_warning("start '%lu' is larger then end '%lu' on line %u in file "
+                 "'%s'; swap them", start_val, end_val, line_number, filename);
+      tmp_val = start_val;
+      start_val = end_val;
+      end_val = tmp_val;
+    }
+    else {
+      gt_error_set(err, "start '%lu' is larger then end '%lu' on line %u in "
+                   "file '%s'", start_val, end_val, line_number, filename);
+      return -1;
+    }
   }
 
   /* set result */
@@ -163,6 +175,19 @@ int gt_parse_range(GtRange *range, const char *start, const char *end,
   range->end = end_val;
 
   return 0;
+}
+
+int gt_parse_range(GtRange *range, const char *start, const char *end,
+                   unsigned int line_number, const char *filename, GtError *err)
+{
+  return parse_range(range, start, end, line_number, filename, false, err);
+}
+
+int gt_parse_range_tidy(GtRange *range, const char *start, const char *end,
+                        unsigned int line_number, const char *filename,
+                        GtError *err)
+{
+  return parse_range(range, start, end, line_number, filename, true, err);
 }
 
 int gt_parse_score(bool *score_is_defined, float *score_value,
@@ -188,7 +213,8 @@ int gt_parse_score(bool *score_is_defined, float *score_value,
 }
 
 int gt_parse_strand(GtStrand *gt_strand_value, const char *strand,
-                 unsigned int line_number, const char *filename, GtError *err)
+                    unsigned int line_number, const char *filename,
+                    GtError *err)
 {
   gt_assert(strand && filename);
   gt_error_check(err);
@@ -210,8 +236,8 @@ int gt_parse_strand(GtStrand *gt_strand_value, const char *strand,
   return 0;
 }
 
-int gt_parse_phase(Phase *phase_value, const char *phase,
-                unsigned int line_number, const char *filename, GtError *err)
+int gt_parse_phase(GtPhase *phase_value, const char *phase,
+                   unsigned int line_number, const char *filename, GtError *err)
 {
   gt_assert(phase && filename);
   gt_error_check(err);

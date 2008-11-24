@@ -1,0 +1,27 @@
+$ gt tallymer occratio -output unique nonunique -minmersize 10 -maxmersize 20 -esa reads
+# distribution of unique mers
+10 223755
+11 373775
+12 444083
+13 465859
+14 468735
+15 465646
+16 460791
+17 455449
+18 450049
+19 444720
+20 439532
+# distribution of non unique mers (counting each non unique mer only once)
+10 135526
+11 92162
+12 62347
+13 49611
+14 44618
+15 42301
+16 40867
+17 39769
+18 38815
+19 37961
+20 37166
+# space peak in megabytes: 0.06
+# mmap space peak in megabytes: 3.93

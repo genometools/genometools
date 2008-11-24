@@ -16,7 +16,7 @@
 */
 
 #include "core/unused_api.h"
-#include "extended/sequence_node.h"
+#include "extended/sequence_node_api.h"
 #include "extended/genome_node_rep.h"
 
 struct GtSequenceNode {

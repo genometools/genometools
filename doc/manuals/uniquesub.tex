@@ -82,8 +82,10 @@ If \(\Substring{s}{i}{n-1}\) is unique in the index, then \(\Mup{i}=m\), where
 Note that it is possible that for all \(i\in[0,n-1]\) we have 
 \(\Mup{i}=\bot\), which means that unit \(s\) does not contain any unique 
 substring. In this case, the program reports nothing for the corresponding
-unit.
+unit. The program was developed for designing whole genome tiling arrays.
+The corresponding publication is \cite{GRAE:NIE:KUR:HUY:BIR:STU:FLI:2007}.
 \end{AboutUniquesub}
+
 \begin{AboutMatstat}
 \Program computes the  \textit{matching statistics} for each unit. That is, 
 for each position \(i\) in 
@@ -265,4 +267,18 @@ length of the matching statistics is between 20 and 30. The second column is
 the corresponding length value. The third column shows position of the
 matching sequence in the index, and the fourth shows the sequence content.
 \end{AboutMatstat}
+
+\begin{AboutUniquesub}
+%\bibliographystyle{plain}
+%\bibliography{defines,kurtz}
+\begin{thebibliography}{1}
+
+\bibitem{GRAE:NIE:KUR:HUY:BIR:STU:FLI:2007}
+S.~Gr{\"a}f, F.G.G. Nielsen, S.~Kurtz, M.A. Huynen, E.~Birney, H.~Stunnenberg,
+  and P.~Flicek.
+\newblock Optimized design and assessment of whole genome tiling arrays.
+\newblock {\em {Bioinformatics}}, {23 ISMB/ECCB 2007}:{i195--i204}, 2007.
+
+\end{thebibliography}
+\end{AboutUniquesub}
 \end{document}

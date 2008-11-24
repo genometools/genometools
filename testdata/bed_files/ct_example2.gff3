@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   chr22 20100001 20120001
+chr22	.	BED_feature	20100001	20100001	.	.	.	.
+chr22	.	BED_feature	20110001	20110001	.	.	.	.
+chr22	.	BED_feature	20120001	20120001	.	.	.	.
+chr22	.	BED_feature	20100001	20100100	.	.	.	Name=first
+chr22	.	BED_feature	20100201	20100300	.	.	.	Name=second
+chr22	.	BED_feature	20100401	20100500	.	.	.	Name=third

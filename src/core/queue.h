@@ -25,7 +25,7 @@ typedef struct GtQueue GtQueue;
 
 typedef int (*GtQueueProcessor)(void **elem, void *info, GtError*);
 
-GtQueue*     gt_queue_new(void);
+GtQueue*      gt_queue_new(void);
 void          gt_queue_delete(GtQueue*);
 void          gt_queue_delete_with_contents(GtQueue*);
 void          gt_queue_add(GtQueue*, void*);
@@ -39,8 +39,7 @@ void          gt_queue_remove(GtQueue *queue, void *elem);
    <info> and <err> are passed to <queue_processor>.
    If <queue_processor> returns a value != 0, the iteration is stopped and the
    return value of <queue_processor> is returned. */
-int           gt_queue_iterate(GtQueue *queue,
-                               GtQueueProcessor queue_processor,
+int           gt_queue_iterate(GtQueue *queue, GtQueueProcessor queue_processor,
                                void *info, GtError *err);
 /* Similar to <gt_queue_iterate>, except that the <queue> is traversed in
    reverse order. */

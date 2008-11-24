@@ -22,14 +22,20 @@
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
+#include "core/minmax.h"
 #include "extended/toolbox.h"
-#include "tools/gt_tallymer.h"
-#include "match/tyr-mkindex.h"
-#include "match/tyr-search.h"
-#include "match/tyr-mersplit.h"
 #include "match/verbose-def.h"
 #include "match/optionargmode.h"
 #include "match/defined-types.h"
+#include "match/intbits.h"
+#include "match/intbits-tab.h"
+#include "match/tyr-mkindex.h"
+#include "match/tyr-show.h"
+#include "match/tyr-search.h"
+#include "match/tyr-mersplit.h"
+#include "match/tyr-occratio.h"
+#include "match/format64.h"
+#include "tools/gt_tallymer.h"
 
 typedef enum
 {
@@ -56,7 +62,8 @@ typedef struct
         *str_inputindex;
   bool storecounts,
        performtest,
-       verbose;
+       verbose,
+       scanfile;
 } Tyr_mkindex_options;
 
 static void *gt_tyr_mkindex_arguments_new(void)
@@ -82,8 +89,7 @@ static void gt_tyr_mkindex_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser
-            *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
+static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option,
@@ -91,13 +97,22 @@ static GtOptionParser
            *optionmaxocc,
            *optionpl,
            *optionstoreindex,
-           *optionstorecounts;
+           *optionstorecounts,
+           *optionscan,
+           *optionesa;
   Tyr_mkindex_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] enhanced-suffix-array",
+  op = gt_option_parser_new("[options] -esa suffixerator-index [options]",
                             "Count and index k-mers in the given enhanced "
                             "suffix array for a fixed value of k.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  optionesa = gt_option_new_string("esa","specify suffixerator-index\n"
+                                   "(mandatory option)",
+                                   arguments->str_inputindex,
+                                   NULL);
+  gt_option_is_mandatory(optionesa);
+  gt_option_parser_add_option(op, optionesa);
 
   option = gt_option_new_ulong("mersize",
                                "Specify the mer size.",
@@ -148,6 +163,13 @@ static GtOptionParser
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  optionscan = gt_option_new_bool("scan",
+                                  "read enhanced suffix array sequentially "
+                                  "instead of mapping it to memory",
+                                  &arguments->scanfile,
+                                  false);
+  gt_option_parser_add_option(op, optionscan);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -158,11 +180,16 @@ static GtOptionParser
 }
 
 static int gt_tyr_mkindex_arguments_check(int rest_argc,
-                                               void *tool_arguments,
-                                               GtError *err)
+                                          void *tool_arguments,
+                                          GtError *err)
 {
   Tyr_mkindex_options *arguments = tool_arguments;
 
+  if (rest_argc != 0)
+  {
+    gt_error_set(err,"superfluous arguments");
+    return -1;
+  }
   if (gt_option_is_set(arguments->refoptionpl))
   {
     if (arguments->userdefinedprefixlength == 0)
@@ -179,17 +206,12 @@ static int gt_tyr_mkindex_arguments_check(int rest_argc,
     arguments->prefixlength.flag = Undeterminedprefixlength;
     arguments->prefixlength.value = 0;
   }
-  if (rest_argc != 1)
-  {
-    gt_error_set(err,"missing name of enhanced suffix array index");
-    return -1;
-  }
   return 0;
 }
 
 static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
-                                 const char **argv,
-                                 int parsed_args,
+                                 GT_UNUSED const char **argv,
+                                 GT_UNUSED int parsed_args,
                                  void *tool_arguments,
                                  GtError *err)
 {
@@ -197,8 +219,6 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
   Verboseinfo *verboseinfo;
   bool haserr = false;
 
-  gt_assert(parsed_args + 1 == argc);
-  gt_str_set(arguments->str_inputindex,argv[parsed_args]);
   verboseinfo = newverboseinfo(arguments->verbose);
   if (arguments->verbose)
   {
@@ -243,8 +263,8 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
                     arguments->userdefinedminocc,
                     arguments->userdefinedmaxocc,
                     arguments->str_storeindex,
-                    true,
                     arguments->storecounts,
+                    arguments->scanfile,
                     arguments->performtest,
                     verboseinfo,
                     err) != 0)
@@ -252,7 +272,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     haserr = true;
   }
   if (!haserr &&
-      gt_str_length(arguments->str_inputindex) > 0 &&
+      gt_str_length(arguments->str_storeindex) > 0 &&
       arguments->prefixlength.flag != Undeterminedprefixlength)
   {
     Definedunsignedint callprefixlength;
@@ -265,7 +285,8 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
     {
       callprefixlength.defined = false;
     }
-    if (constructmerbuckets(arguments->str_inputindex,&callprefixlength) < 0)
+    if (constructmerbuckets(arguments->str_storeindex,&callprefixlength,err)
+        != 0)
     {
       haserr = true;
     }
@@ -274,7 +295,7 @@ static int gt_tyr_mkindex_runner(GT_UNUSED int argc,
   return haserr ? - 1 : 0;
 }
 
-static GtTool* gt_tyr_mkindex(void)
+static GtTool *gt_tyr_mkindex(void)
 {
   return gt_tool_new(gt_tyr_mkindex_arguments_new,
                      gt_tyr_mkindex_arguments_delete,
@@ -283,17 +304,494 @@ static GtTool* gt_tyr_mkindex(void)
                      gt_tyr_mkindex_runner);
 }
 
-static int gt_tyr_occratio(GT_UNUSED int argc,
-                                GT_UNUSED const char *argv[],
-                                GtError *err)
+typedef struct
 {
-  gt_error_set(err,"tyr occratio not implemented yet");
-  return -1;
+  GtStrArray *mersizesstrings, *outputspec;
+  GtStr *str_inputindex;
+  GtOption *refoptionmersizes;
+  unsigned long minmersize, maxmersize, stepmersize;
+  Bitstring *outputvector;
+  unsigned int outputmode;
+  bool scanfile,
+       verbose;
+} Tyr_occratio_options;
+
+static void *gt_tyr_occratio_arguments_new(void)
+{
+  Tyr_occratio_options *arguments
+    = gt_malloc(sizeof (Tyr_occratio_options));
+  arguments->mersizesstrings = gt_str_array_new();
+  arguments->outputspec = gt_str_array_new();
+  arguments->str_inputindex = gt_str_new();
+  arguments->outputvector = NULL;
+  arguments->outputmode = 0;
+  return arguments;
+}
+
+static void gt_tyr_occratio_arguments_delete(void *tool_arguments)
+{
+  Tyr_occratio_options *arguments = tool_arguments;
+
+  if (!arguments)
+  {
+    return;
+  }
+  gt_str_array_delete(arguments->mersizesstrings);
+  gt_str_array_delete(arguments->outputspec);
+  gt_str_delete(arguments->str_inputindex);
+  gt_option_delete(arguments->refoptionmersizes);
+  FREESPACE(arguments->outputvector);
+  gt_free(arguments);
+}
+
+static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
+{
+  GtOptionParser *op;
+  GtOption *optionmersizes, *optionesa, *optionminmersize, *optionmaxmersize,
+           *optionstep, *optionoutput, *option;
+  Tyr_occratio_options *arguments = tool_arguments;
+
+  op = gt_option_parser_new("[options] -esa suffixerator-index [options]",
+                            "Compute occurrence ratio for a set of sequences "
+                            "represented by an enhanced suffix array.");
+  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  optionesa = gt_option_new_string("esa","specify suffixerator-index\n"
+                                   "(mandatory option)",
+                                   arguments->str_inputindex,
+                                   NULL);
+  gt_option_is_mandatory(optionesa);
+  gt_option_parser_add_option(op, optionesa);
+
+  optionminmersize
+    = gt_option_new_ulong_min("minmersize",
+                              "specify minimum mer size for which "
+                              "to compute the occurrence distribution",
+                              &arguments->minmersize,0,1UL);
+  gt_option_parser_add_option(op, optionminmersize);
+
+  optionmaxmersize
+    = gt_option_new_ulong_min("maxmersize",
+                              "specify maximum mer size for which "
+                              "to compute the occurrence distribution",
+                              &arguments->maxmersize,0,1UL);
+  gt_option_parser_add_option(op, optionmaxmersize);
+
+  optionstep
+    = gt_option_new_ulong_min("step",
+                              "specify step size when specifying mer sizes",
+                              &arguments->stepmersize,1UL,1UL);
+  gt_option_parser_add_option(op, optionstep);
+
+  optionmersizes = gt_option_new_stringarray(
+                          "mersizes",
+                          "specify mer sizes as non-empty sequence of "
+                          "non decreasing positive integers",
+                          arguments->mersizesstrings);
+  arguments->refoptionmersizes = gt_option_ref(optionmersizes);
+  gt_option_parser_add_option(op, optionmersizes);
+
+  optionoutput = gt_option_new_stringarray(
+                          "output",
+                          "use combination of the following keywords: "
+                          "unique nonunique nonuniquemulti relative total "
+                          "to specify kind of output",
+                          arguments->outputspec);
+  gt_option_parser_add_option(op, optionoutput);
+
+  option = gt_option_new_bool("scan",
+                              "read suffixerator-index sequentially "
+                              "instead of mapping it to memory",
+                              &arguments->scanfile,
+                              false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
+  gt_option_exclude(optionmersizes,optionminmersize);
+  gt_option_exclude(optionmersizes,optionmaxmersize);
+  gt_option_exclude(optionmersizes,optionstep);
+  return op;
+}
+
+#define TYROCC_OUTPUTUNIQUE          1U
+#define TYROCC_OUTPUTNONUNIQUE       (1U << 1)
+#define TYROCC_OUTPUTNONUNIQUEMULTI  (1U << 2)
+#define TYROCC_OUTPUTRELATIVE        (1U << 3)
+#define TYROCC_OUTPUTTOTAL           (1U << 4)
+
+static int gt_tyr_occratio_arguments_check(int rest_argc,
+                                           void *tool_arguments,
+                                           GtError *err)
+{
+  Tyr_occratio_options *arguments = tool_arguments;
+  bool haserr = false;
+
+  Optionargmodedesc outputmodedesctable[] =
+  {
+    {"unique","number of unique mers",TYROCC_OUTPUTUNIQUE},
+    {"nonunique","number of nonunique mers (single count)",
+                 TYROCC_OUTPUTNONUNIQUE},
+    {"nonuniquemulti","number of nonunique mers (multi count)",
+                 TYROCC_OUTPUTNONUNIQUEMULTI},
+    {"relative","fraction of unique/non-unique mers relative to all mers",
+                 TYROCC_OUTPUTRELATIVE},
+    {"total","number of all mers",TYROCC_OUTPUTTOTAL}
+  };
+  if (rest_argc != 0)
+  {
+    gt_error_set(err,"superfluous arguments");
+    return -1;
+  }
+  if (gt_option_is_set(arguments->refoptionmersizes))
+  {
+    unsigned long *mersizes = NULL;
+    unsigned long idx,
+                  numofmersizes = gt_str_array_size(arguments->mersizesstrings);
+    if (numofmersizes == 0)
+    {
+      gt_error_set(err,"missing argument to option -mersizes:");
+      haserr = true;
+    } else
+    {
+      mersizes = gt_malloc(sizeof(*mersizes) * numofmersizes);
+      for (idx=0; idx<numofmersizes; idx++)
+      {
+        long readnum;
+
+        if (sscanf(gt_str_array_get(arguments->mersizesstrings,idx),
+                   "%ld",&readnum) != 1 || readnum <= 0)
+        {
+          gt_error_set(err,"invalid argument \"%s\" of option -mersizes: "
+                       "must be a positive integer",
+                       gt_str_array_get(arguments->mersizesstrings,idx));
+          haserr = true;
+          break;
+        }
+        mersizes[idx] = (unsigned long) readnum;
+        if (idx > 0 && mersizes[idx-1] >= mersizes[idx])
+        {
+          gt_error_set(err,"invalid argumnt %s to option -mersizes: "
+                       "positive numbers must be strictly increasing",
+                       gt_str_array_get(arguments->mersizesstrings,idx));
+          haserr = true;
+          break;
+        }
+      }
+    }
+    if (!haserr)
+    {
+      gt_assert(mersizes != NULL);
+      arguments->minmersize = mersizes[0];
+      arguments->maxmersize = mersizes[numofmersizes-1];
+      INITBITTAB(arguments->outputvector,arguments->maxmersize+1);
+      for (idx=0; idx<numofmersizes; idx++)
+      {
+        SETIBIT(arguments->outputvector,mersizes[idx]);
+      }
+    }
+    gt_free(mersizes);
+  } else
+  {
+    if (arguments->minmersize == 0)
+    {
+      gt_error_set(err,"if option -mersizes is not used, then option "
+                       "-minmersize is mandatory");
+      haserr = true;
+    }
+    if (!haserr)
+    {
+      if (arguments->maxmersize == 0)
+      {
+        gt_error_set(err,"if option -mersizes is not used, then option "
+                         "-maxmersize is mandatory");
+        haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      if (arguments->minmersize > arguments->maxmersize)
+      {
+        gt_error_set(err,"minimum mer size must not be larger than "
+                         "maximum mer size");
+        haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      if (arguments->minmersize+arguments->stepmersize > arguments->maxmersize)
+      {
+        gt_error_set(err,"minimum mer size + step value must be smaller or "
+                         "equal to maximum mersize");
+        haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      unsigned long outputval;
+
+      INITBITTAB(arguments->outputvector,arguments->maxmersize+1);
+      for (outputval = arguments->minmersize;
+           outputval <= arguments->maxmersize;
+           outputval += arguments->stepmersize)
+      {
+        SETIBIT(arguments->outputvector,outputval);
+      }
+    }
+  }
+  if (!haserr)
+  {
+    unsigned long idx;
+    for (idx=0; idx<gt_str_array_size(arguments->outputspec); idx++)
+    {
+      if (optionaddbitmask(outputmodedesctable,
+                           sizeof (outputmodedesctable)/
+                           sizeof (outputmodedesctable[0]),
+                           &arguments->outputmode,
+                           "-output",
+                           gt_str_array_get(arguments->outputspec,idx),
+                           err) != 0)
+      {
+        haserr = true;
+        break;
+      }
+    }
+  }
+  if (!haserr)
+  {
+    if ((arguments->outputmode & TYROCC_OUTPUTRELATIVE) &&
+        !(arguments->outputmode &
+            (TYROCC_OUTPUTUNIQUE | TYROCC_OUTPUTNONUNIQUE |
+                                   TYROCC_OUTPUTNONUNIQUEMULTI)))
+    {
+      gt_error_set(err,"argument relative to option -output requires that one "
+                   "of the arguments unique, nonunique, or nonuniquemulti "
+                   "is used");
+      haserr = true;
+    }
+  }
+  return haserr ? - 1: 0;
+}
+
+static void showitvdistribution(const Arrayuint64_t *dist,
+                                const Bitstring *outputvector)
+{
+  unsigned long idx;
+
+  gt_assert(outputvector != NULL && dist->nextfreeuint64_t > 0);
+  for (idx=0; idx < dist->nextfreeuint64_t; idx++)
+  {
+    if (ISIBITSET(outputvector,idx) && dist->spaceuint64_t[idx] > 0)
+    {
+      /*@ignore@*/
+      printf("%lu " Formatuint64_t "\n",
+              idx,
+              PRINTuint64_tcast(dist->spaceuint64_t[idx]));
+      /*@end@*/
+    }
+  }
+}
+
+typedef enum
+{
+  Onlyshowsum,
+  Showfirst,
+  Showsecond
+} Summode;
+
+static void showitvsumdistributionoftwo(Summode mode,
+                                        const Arrayuint64_t *dist1,
+                                        const Arrayuint64_t *dist2,
+                                        const Bitstring *outputvector)
+{
+  unsigned long idx;
+  uint64_t sumoftwo, tmp;
+
+  gt_assert(outputvector != NULL && dist1->nextfreeuint64_t > 0
+                              && dist2->nextfreeuint64_t > 0);
+  for (idx=0; /* Nothing */; idx++)
+  {
+    if (ISIBITSET(outputvector,idx))
+    {
+      if (idx < dist1->nextfreeuint64_t)
+      {
+        if (idx < dist2->nextfreeuint64_t)
+        {
+          sumoftwo = dist1->spaceuint64_t[idx] + dist2->spaceuint64_t[idx];
+        } else
+        {
+          sumoftwo = dist1->spaceuint64_t[idx];
+        }
+      } else
+      {
+        if (idx < dist2->nextfreeuint64_t)
+        {
+          sumoftwo = dist2->spaceuint64_t[idx];
+        } else
+        {
+          break;
+        }
+      }
+      if (sumoftwo > 0)
+      {
+        if (mode == Onlyshowsum)
+        {
+          /*@ignore@*/
+          printf("%lu " Formatuint64_t "\n",
+                  idx,
+                  PRINTuint64_tcast(sumoftwo));
+          /*@end@*/
+        } else
+        {
+          if (mode == Showfirst)
+          {
+            tmp = (idx < dist1->nextfreeuint64_t)
+                     ? dist1->spaceuint64_t[idx]
+                     : 0;
+          } else
+          {
+            tmp = (idx < dist2->nextfreeuint64_t)
+                     ? dist2->spaceuint64_t[idx]
+                     : 0;
+          }
+          if (tmp > 0)
+          {
+            /*@ignore@*/
+            printf("%lu " Formatuint64_t " %.3f\n",
+                  idx,
+                  PRINTuint64_tcast(tmp),
+                  (double) tmp/(double) sumoftwo);
+            /*@end@*/
+          }
+        }
+      }
+    }
+  }
+}
+
+#define ONLYONCE     "(counting each non unique mer only once)"
+#define MORETHANONCE "(counting each non unique mer more than once)"
+
+static void showoccratios(const Arrayuint64_t *uniquedistribution,
+                          const Arrayuint64_t *nonuniquedistribution,
+                          const Arrayuint64_t *nonuniquemultidistribution,
+                          unsigned int outputmode,
+                          const Bitstring *outputvector)
+{
+  if (outputmode & TYROCC_OUTPUTUNIQUE)
+  {
+    printf("# distribution of unique mers\n");
+    if (outputmode & TYROCC_OUTPUTRELATIVE)
+    {
+      showitvsumdistributionoftwo(Showfirst,
+                                  uniquedistribution,
+                                  nonuniquedistribution,
+                                  outputvector);
+    } else
+    {
+      showitvdistribution(uniquedistribution,outputvector);
+    }
+  }
+  if (outputmode & TYROCC_OUTPUTNONUNIQUE)
+  {
+    printf("# distribution of non unique mers " ONLYONCE "\n");
+    if (outputmode & TYROCC_OUTPUTRELATIVE)
+    {
+      showitvsumdistributionoftwo(Showsecond,
+                                  uniquedistribution,
+                                  nonuniquedistribution,
+                                  outputvector);
+    } else
+    {
+      showitvdistribution(nonuniquedistribution,outputvector);
+    }
+  }
+  if (outputmode & TYROCC_OUTPUTNONUNIQUEMULTI)
+  {
+    printf("# distribution of non unique mers " MORETHANONCE "\n");
+    if (outputmode & TYROCC_OUTPUTRELATIVE)
+    {
+      showitvsumdistributionoftwo(Showsecond,
+                                  uniquedistribution,
+                                  nonuniquemultidistribution,
+                                  outputvector);
+    } else
+    {
+      showitvdistribution(nonuniquemultidistribution,outputvector);
+    }
+  }
+  if (outputmode & TYROCC_OUTPUTTOTAL)
+  {
+    printf("# distribution of all mers " ONLYONCE "\n");
+    showitvsumdistributionoftwo(Onlyshowsum,
+                                uniquedistribution,
+                                nonuniquedistribution,
+                                outputvector);
+    printf("# distribution of all mers " MORETHANONCE "\n");
+    showitvsumdistributionoftwo(Onlyshowsum,
+                                uniquedistribution,
+                                nonuniquemultidistribution,
+                                outputvector);
+  }
+}
+
+static int gt_tyr_occratio_runner(GT_UNUSED int argc,
+                                  GT_UNUSED const char **argv,
+                                  GT_UNUSED int parsed_args,
+                                  void *tool_arguments,
+                                  GtError *err)
+{
+  Verboseinfo *verboseinfo;
+  Tyr_occratio_options *arguments = tool_arguments;
+  bool haserr = false;
+  Arrayuint64_t uniquedistribution,
+                nonuniquedistribution,
+                nonuniquemultidistribution;
+
+  verboseinfo = newverboseinfo(arguments->verbose);
+  INITARRAY(&uniquedistribution,uint64_t);
+  INITARRAY(&nonuniquedistribution,uint64_t);
+  INITARRAY(&nonuniquemultidistribution,uint64_t);
+  if (tyr_occratio(arguments->str_inputindex,
+                   arguments->scanfile,
+                   arguments->minmersize,
+                   arguments->maxmersize,
+                   &uniquedistribution,
+                   &nonuniquedistribution,
+                   &nonuniquemultidistribution,
+                   verboseinfo,
+                   err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    showoccratios(&uniquedistribution,
+                  &nonuniquedistribution,
+                  &nonuniquemultidistribution,
+                  arguments->outputmode,
+                  arguments->outputvector);
+  }
+  freeverboseinfo(&verboseinfo);
+  FREEARRAY(&uniquedistribution,uint64_t);
+  FREEARRAY(&nonuniquedistribution,uint64_t);
+  FREEARRAY(&nonuniquemultidistribution,uint64_t);
+  return haserr ? -1 : 0;
+}
+
+static GtTool *gt_tyr_occratio(void)
+{
+  return gt_tool_new(gt_tyr_occratio_arguments_new,
+                     gt_tyr_occratio_arguments_delete,
+                     gt_tyr_occratio_option_parser_new,
+                     gt_tyr_occratio_arguments_check,
+                     gt_tyr_occratio_runner);
 }
 
 typedef struct
 {
-  GtStr *str_indexname;
+  GtStr *str_inputindex;
   GtStrArray *queryfilenames;
   GtStr *strandspec;
   GtStrArray *showmodespec;
@@ -307,7 +805,7 @@ static void *gt_tyr_search_arguments_new(void)
 {
   Tyr_search_options *arguments
     = gt_malloc(sizeof (Tyr_search_options));
-  arguments->str_indexname = gt_str_new();
+  arguments->str_inputindex = gt_str_new();
   arguments->strandspec = gt_str_new();
   arguments->queryfilenames = gt_str_array_new();
   arguments->showmodespec = gt_str_array_new();
@@ -324,25 +822,35 @@ static void gt_tyr_search_arguments_delete(void *tool_arguments)
   {
     return;
   }
-  gt_str_delete(arguments->str_indexname);
+  gt_str_delete(arguments->str_inputindex);
   gt_str_delete(arguments->strandspec);
   gt_str_array_delete(arguments->queryfilenames);
   gt_str_array_delete(arguments->showmodespec);
   gt_free(arguments);
 }
 
-static GtOptionParser
-          *gt_tyr_search_option_parser_new(void *tool_arguments)
+static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
-  GtOption *option;
+  GtOption *option, *optiontyr, *optionqueries;
   Tyr_search_options *arguments = tool_arguments;
 
-  op = gt_option_parser_new("[options] tyr-indexname queryfile0 "
-                            "[queryfile1..]",
+  op = gt_option_parser_new("[options] -tyr tallymer-index -q queryfile0 "
+                            "[queryfile1..] [options]",
                             "Search a set of k-mers in an index constructed "
                             "by \"gt tyr mkindex\".");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+
+  optiontyr = gt_option_new_string("tyr","specify tallymer-index",
+                                   arguments->str_inputindex,
+                                   NULL);
+  gt_option_is_mandatory(optiontyr);
+  gt_option_parser_add_option(op, optiontyr);
+
+  optionqueries = gt_option_new_filenamearray("q","specify query file names",
+                                              arguments->queryfilenames);
+  gt_option_is_mandatory(optionqueries);
+  gt_option_parser_add_option(op, optionqueries);
 
   option = gt_option_new_string("strand",
                                 "specify the strand to be searched: "
@@ -372,35 +880,29 @@ static GtOptionParser
 }
 
 static int gt_tyr_search_arguments_check(int rest_argc,
-                                              void *tool_arguments,
-                                              GtError *err)
+                                         void *tool_arguments,
+                                         GtError *err)
 {
   Optionargmodedesc showmodedesctable[] =
   {
-    {"qseqnum",SHOWQSEQNUM},
-    {"qpos",SHOWQPOS},
-    {"counts",SHOWCOUNTS},
-    {"sequence",SHOWSEQUENCE}
+    {"qseqnum","query sequence number",SHOWQSEQNUM},
+    {"qpos","query position",SHOWQPOS},
+    {"counts","number of occurrence counts",SHOWCOUNTS},
+    {"sequence","mer-sequence",SHOWSEQUENCE}
   };
 
   Optionargmodedesc stranddesctable[] =
   {
-    {"f",STRAND_FORWARD},
-    {"p",STRAND_REVERSE},
-    {"fp",STRAND_FORWARD | STRAND_REVERSE}
+    {"f","forward strand",STRAND_FORWARD},
+    {"p","reverse strand",STRAND_REVERSE},
+    {"fp","forward and reverse strand",STRAND_FORWARD | STRAND_REVERSE}
   };
-
   unsigned long idx;
   Tyr_search_options *arguments = tool_arguments;
 
-  if (rest_argc < 1)
+  if (rest_argc != 0)
   {
-    gt_error_set(err,"missing tyr-indexnames and queryfilenames");
-    return -1;
-  }
-  if (rest_argc < 2)
-  {
-    gt_error_set(err,"missing queryfilenames");
+    gt_error_set(err,"superfluous arguments");
     return -1;
   }
   for (idx=0; idx<gt_str_array_size(arguments->showmodespec); idx++)
@@ -428,28 +930,21 @@ static int gt_tyr_search_arguments_check(int rest_argc,
   return 0;
 }
 
-static int gt_tyr_search_runner(int argc,
-                                     const char **argv,
-                                     int parsed_args,
-                                     void *tool_arguments,
-                                     GtError *err)
+static int gt_tyr_search_runner(GT_UNUSED int argc,
+                                GT_UNUSED const char **argv,
+                                GT_UNUSED int parsed_args,
+                                void *tool_arguments,
+                                GtError *err)
 {
-  int idx;
   Tyr_search_options *arguments = tool_arguments;
 
-  gt_assert(parsed_args + 2 <= argc);
-  gt_str_set(arguments->str_indexname,argv[parsed_args]);
-  for (idx=parsed_args+1; idx<argc; idx++)
-  {
-    gt_str_array_add_cstr(arguments->queryfilenames,argv[idx]);
-  }
-  if (tyrsearch(arguments->str_indexname,
-                     arguments->queryfilenames,
-                     arguments->showmode,
-                     arguments->strand,
-                     arguments->verbose,
-                     arguments->performtest,
-                     err) != 0)
+  if (tyrsearch(arguments->str_inputindex,
+                arguments->queryfilenames,
+                arguments->showmode,
+                arguments->strand,
+                arguments->verbose,
+                arguments->performtest,
+                err) != 0)
   {
     return -1;
   }
@@ -469,7 +964,7 @@ static void *gt_tyr_arguments_new(void)
 {
   GtToolbox *tyr_toolbox = gt_toolbox_new();
   gt_toolbox_add_tool(tyr_toolbox, "mkindex", gt_tyr_mkindex());
-  gt_toolbox_add(tyr_toolbox, "occratio", gt_tyr_occratio);
+  gt_toolbox_add_tool(tyr_toolbox, "occratio", gt_tyr_occratio());
   gt_toolbox_add_tool(tyr_toolbox, "search", gt_tyr_search());
   return tyr_toolbox;
 }
@@ -488,16 +983,17 @@ static GtOptionParser* gt_tyr_option_parser_new(void *tool_arguments)
 
   gt_assert(index_toolbox != NULL);
   op = gt_option_parser_new(
-                    "[option ...] [mkindex|occratio|search] [argument ...]",
-                    "Call tyr with specific tool and "
-                    "pass argument(s) to it.");
+                    "[option ...] tallymer_tool [argument ...]",
+                    "Call tallymer tool with name tallymer_tool and pass "
+                    "argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, index_toolbox);
+  gt_option_parser_set_min_args(op, 1U);
   gt_option_parser_refer_to_manual(op);
   return op;
 }
 
 static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
-                                 void *tool_arguments, GtError *err)
+                         void *tool_arguments, GtError *err)
 {
   GtToolbox *index_toolbox = tool_arguments;
   GtToolfunc toolfunc;
@@ -508,11 +1004,10 @@ static int gt_tyr_runner(int argc, const char **argv, int parsed_args,
   gt_error_check(err);
   gt_assert(index_toolbox != NULL);
 
-  /* determine tool */
-  if (!gt_toolbox_has_tool(index_toolbox, argv[parsed_args]))
+  if (!had_err && !gt_toolbox_has_tool(index_toolbox, argv[parsed_args]))
   {
-    gt_error_set(err, "tyr tool '%s' not found; option -help lists "
-                   "possible tools", argv[parsed_args]);
+    gt_error_set(err, "tallymer tool '%s' not found; option -help lists "
+                      "possible tools", argv[parsed_args]);
     had_err = -1;
   }
 

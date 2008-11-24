@@ -29,7 +29,7 @@
    -- The given <region_mapping> is used to map the sequence regions given in
    -- <in_stream> to the actual sequence files necessary for computing the
    -- coding sequences.
-   function cds_stream_new(region_mapping)
+   function cds_stream_new(in_stream, region_mapping)
 */
 int gt_lua_open_cds_stream(lua_State*);
 

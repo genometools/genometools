@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,10 +17,14 @@
 #
 
 # make a new tags file
-ctags -w src/*.[ch]            \
-         src/core/*.[ch]  \
-         src/extended/*.[ch]   \
-         src/ltr/*.[ch]   \
-         src/match/*.[ch] \
-         src/mgth/*.[ch] \
-         src/annotationsketch/*.[ch]
+ctags -w src/*.[ch]                   \
+         src/annotationsketch/*.[ch]  \
+         src/core/*.[ch]              \
+         src/examples/*.[ch]          \
+         src/exercise/*.[ch]          \
+         src/extended/*.[ch]          \
+         src/gtlua/*.[ch]             \
+         src/ltr/*.[ch]               \
+         src/match/*.[ch]             \
+         src/mgth/*.[ch]              \
+         src/tools/*.[ch]

@@ -50,11 +50,13 @@
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrelement.h"
 #include "ltr/ppt.h"
+#include "tools/gt_bed_to_gff3.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chseqids.h"
 #include "tools/gt_clean.h"
 #include "tools/gt_csa.h"
+#include "tools/gt_congruence.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_eval.h"
 #include "tools/gt_exercise.h"
@@ -105,11 +107,13 @@ GtToolbox* gtt_tools(void)
   GtToolbox *tools = gt_toolbox_new();
 
   /* add tools */
+  gt_toolbox_add_tool(tools, "bed_to_gff3", gt_bed_to_gff3());
   gt_toolbox_add_tool(tools, "bioseq", gt_bioseq());
   gt_toolbox_add_tool(tools, "cds", gt_cds());
   gt_toolbox_add(tools, "chseqids", gt_chseqids);
   gt_toolbox_add(tools, "clean", gt_clean);
   gt_toolbox_add_tool(tools, "csa", gt_csa());
+  gt_toolbox_add_tool(tools, "congruence", gt_congruence());
   gt_toolbox_add_tool(tools, "dev", gt_dev());
   gt_toolbox_add(tools, "eval", gt_eval);
   gt_toolbox_add_tool(tools, "exercise", gt_exercise());
@@ -120,8 +124,8 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
   gt_toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
   gt_toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
-  gt_toolbox_add(tools, "gtf_to_gff3", gt_gtf_to_gff3);
   gt_toolbox_add_tool(tools, "ltrdigest", gt_ltrdigest());
+  gt_toolbox_add_tool(tools, "gtf_to_gff3", gt_gtf_to_gff3());
   gt_toolbox_add(tools, "ltrharvest", gt_ltrharvest);
   gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
   gt_toolbox_add(tools, "merge", gt_merge);
@@ -203,7 +207,7 @@ GtHashmap* gtt_unit_tests(void)
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "style class", gt_style_unit_test);
-  gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
+/*  gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test); */
   gt_hashmap_add(unit_tests, "element class", gt_element_unit_test);
   gt_hashmap_add(unit_tests, "memory feature index class",
                  gt_feature_index_memory_unit_test);

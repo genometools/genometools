@@ -159,12 +159,12 @@ GtOption*       gt_option_new_ulong_min_max(const char *option_str,
 GtOption*       gt_option_new_range(const char *option_str,
                                     const char *description,
                                     GtRange *value, GtRange *default_value);
-GtOption*       gt_option_new_gt_range_min_max(const char *option_str,
-                                               const char *description,
-                                               GtRange *value,
-                                               GtRange *default_value,
-                                               unsigned long min_value,
-                                               unsigned long max_value);
+GtOption*       gt_option_new_range_min_max(const char *option_str,
+                                            const char *description,
+                                            GtRange *value,
+                                            GtRange *default_value,
+                                            unsigned long min_value,
+                                            unsigned long max_value);
 GtOption*       gt_option_new_string(const char *option_str,
                                      const char *description,
                                      GtStr *value, const char *default_value);

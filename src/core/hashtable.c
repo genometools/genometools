@@ -443,14 +443,14 @@ gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter, void *data,
 
 extern int
 gt_hashtable_foreach_in_default_order(GtHashtable *ht, Elemvisitfunc iter,
-                                   void *data, GtError *err)
+                                      void *data, GtError *err)
 {
   return gt_hashtable_foreach_ordered(ht, iter, data, ht->table_info.cmp, err);
 }
 
 extern int
 gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
-                  GtError *err)
+                     GtError *err)
 {
   htsize_t i, table_size = ht->table_mask + 1, deletion_count = 0;
   jmp_buf env;

@@ -23,20 +23,34 @@
 
 void gt_lua_put_style_in_registry(lua_State *L, GtStyle *style)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L && style);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   lua_pushlightuserdata(L, STYLE_KEY);
   lua_pushlightuserdata(L, style);
   lua_rawset(L, LUA_REGISTRYINDEX);
+  gt_assert(lua_gettop(L) == stack_size); /* make sure the stack doesn't grow */
 }
 
 GtStyle* gt_lua_get_style_from_registry(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   GtStyle *style;
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   lua_pushlightuserdata(L, STYLE_KEY);
   lua_rawget(L, LUA_REGISTRYINDEX);
   gt_assert(lua_islightuserdata(L, -1));
   style = lua_touserdata(L, -1);
   lua_pop(L, 1);
+  gt_assert(lua_gettop(L) == stack_size); /* make sure the stack doesn't grow */
   return style;
 }

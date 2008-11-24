@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   chr22 10000001 10017000
+chr22	.	BED_feature	10000001	10004000	960	.	.	Name=cloneA
+chr22	.	BED_feature	10002001	10006000	200	.	.	Name=cloneB
+chr22	.	BED_feature	10005001	10009000	700	.	.	Name=cloneC
+chr22	.	BED_feature	10006001	10010000	600	.	.	Name=cloneD
+chr22	.	BED_feature	10011001	10015000	300	.	.	Name=cloneE
+chr22	.	BED_feature	10013001	10017000	100	.	.	Name=cloneF

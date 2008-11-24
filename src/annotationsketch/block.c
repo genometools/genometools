@@ -20,9 +20,11 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/element.h"
 #include "core/cstr.h"
+#include "core/dlist.h"
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/unused_api.h"
 
 struct GtBlock {
   GtDlist *elements;
@@ -55,14 +57,24 @@ static int elemcmp(const void *a, const void *b)
 int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
 {
   GtRange range_a, range_b;
-  int ret;
+  int ret = 0;
   gt_assert(block1 && block2);
   range_a = gt_block_get_range(block1),
   range_b = gt_block_get_range(block2);
   ret = gt_range_compare(&range_a, &range_b);
-  if (ret == 0 && block1 != block2)
-    ret = strcmp(gt_str_get(gt_block_get_caption(block1)),
-                 gt_str_get(gt_block_get_caption(block2)));
+  if (ret == 0 && block1 != block2) {
+    GtStr *caption1, *caption2;
+    caption1 = gt_block_get_caption(block1);
+    caption2 = gt_block_get_caption(block2);
+    /* blocks do not necessarily have captions. If both have a caption, we
+       compare them. If only one block has a caption, this block comes first. */
+    if (caption1 && caption2)
+      ret = strcmp(gt_str_get(caption1), gt_str_get(caption2));
+    else if (caption1)
+      ret = -1;
+    else if (caption2)
+      ret = 1;
+  }
   return ret;
 }
 
@@ -246,19 +258,25 @@ unsigned long gt_block_get_size(const GtBlock *block)
   return gt_dlist_size(block->elements);
 }
 
-int gt_block_sketch(GtBlock *block, GtCanvas *canvas)
+int gt_block_sketch(GtBlock *block, GtCanvas *canvas, GtError *err)
 {
- int had_err = 0;
- GtDlistelem *delem;
- gt_assert(block && canvas);
- /* if resulting block was too short,
-    do not traverse this feature tree further */
- if (-1 == gt_canvas_visit_block(canvas, block))
-   return had_err;
- for (delem = gt_dlist_first(block->elements); delem;
-      delem = gt_dlistelem_next(delem)) {
-    GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
-    gt_element_sketch(elem, canvas);
+  int had_err = 0;
+  GtDlistelem *delem;
+  gt_assert(block && canvas);
+  /* if resulting block was too short,
+     do not traverse this feature tree further */
+  had_err = gt_canvas_visit_block(canvas, block, err);
+  if (had_err)
+  {
+    if (had_err == -1)
+      return 0;
+    else
+      return had_err;
+  }
+  for (delem = gt_dlist_first(block->elements); delem;
+       delem = gt_dlistelem_next(delem)) {
+     GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
+     had_err = gt_element_sketch(elem, canvas, err);
   }
   return had_err;
 }

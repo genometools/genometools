@@ -47,7 +47,13 @@ static const struct luaL_Reg gt_node_visitor_lib_f [] = {
 
 int gt_lua_open_genome_visitor(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   luaL_newmetatable(L, GENOME_VISITOR_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
@@ -56,7 +62,10 @@ int gt_lua_open_genome_visitor(lua_State *L)
   lua_pushstring(L, "__gc");
   lua_pushcfunction(L, gt_node_visitor_lua_delete);
   lua_settable(L, -3);
+  lua_pop(L, 1);
   /* register functions */
   luaL_register(L, "gt", gt_node_visitor_lib_f);
+  lua_pop(L, 1);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }

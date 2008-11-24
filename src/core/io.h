@@ -22,10 +22,15 @@
 #include <stdio.h>
 #include "core/str.h"
 
+#define GT_CARRIAGE_RETURN  '\r'
+#define GT_END_OF_LINE      '\n'
+#define GT_END_OF_FILE      EOF
+
 /* the I/O class */
 typedef struct GtIO GtIO;
 
-GtIO*        gt_io_new(const char *path, const char *mode);
+GtIO*         gt_io_new(const char *path, const char *mode);
+void          gt_io_delete(GtIO*);
 /* Returns -1 if no char is left, 0 otherwise. */
 int           gt_io_get_char(GtIO*, char*);
 /* Can only be used once at a time.*/
@@ -36,7 +41,8 @@ char          gt_io_peek(GtIO*);
 char          gt_io_next(GtIO*);
 unsigned long gt_io_get_line_number(const GtIO*);
 const char*   gt_io_get_filename(const GtIO*);
-GtStr*       gt_io_get_filename_str(const GtIO*);
-void          gt_io_delete(GtIO*);
+GtStr*        gt_io_get_filename_str(const GtIO*);
+
+int           gt_io_expect(GtIO*, char expected_char, GtError*);
 
 #endif

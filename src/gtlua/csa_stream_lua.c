@@ -47,7 +47,15 @@ static const struct luaL_Reg csa_stream_lib_f [] = {
 
 int gt_lua_open_csa_stream(lua_State *L)
 {
+#ifndef NDEBUG
+  int stack_size;
+#endif
   gt_assert(L);
+#ifndef NDEBUG
+  stack_size = lua_gettop(L);
+#endif
   luaL_register(L, "gt", csa_stream_lib_f);
+  lua_pop(L, 1);
+  gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }

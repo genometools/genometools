@@ -128,6 +128,7 @@ void* gt_genome_node_try_cast(const GtGenomeNodeClass *gnc, GtGenomeNode *gn)
 
 GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
 {
+  gt_assert(gn);
   gn->reference_count++;
   return gn;
 }
@@ -162,14 +163,12 @@ GtStr* gt_genome_node_get_idstr(GtGenomeNode *gn)
 
 unsigned long gt_genome_node_get_start(GtGenomeNode *gn)
 {
-  GtRange range = gt_genome_node_get_range(gn);
-  return range.start;
+  return gt_genome_node_get_range(gn).start;
 }
 
 unsigned long gt_genome_node_get_end(GtGenomeNode *gn)
 {
-  GtRange range = gt_genome_node_get_range(gn);
-  return range.end;
+  return gt_genome_node_get_range(gn).end;
 }
 
 GtRange gt_genome_node_get_range(GtGenomeNode *gn)
@@ -178,9 +177,10 @@ GtRange gt_genome_node_get_range(GtGenomeNode *gn)
   return gn->c_class->get_range(gn);
 }
 
-void gt_genome_node_set_range(GtGenomeNode *gn, GtRange range)
+void gt_genome_node_set_range(GtGenomeNode *gn, const GtRange *range)
 {
   gt_assert(gn && gn->c_class && gn->c_class->set_range);
+  gt_assert(range->start <= range->end);
   gn->c_class->set_range(gn, range);
 }
 
@@ -219,9 +219,13 @@ int gt_genome_node_compare_delta(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
 void gt_genome_node_delete(GtGenomeNode *gn)
 {
   if (!gn) return;
-  if (gn->reference_count) { gn->reference_count--; return; }
+  if (gn->reference_count) {
+    gn->reference_count--;
+    return;
+  }
   gt_assert(gn->c_class);
-  if (gn->c_class->free) gn->c_class->free(gn);
+  if (gn->c_class->free)
+    gn->c_class->free(gn);
   gt_str_delete(gn->filename);
   gt_free(gn);
 }

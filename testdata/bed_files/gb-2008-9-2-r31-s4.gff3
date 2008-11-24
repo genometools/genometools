@@ -1,0 +1,37 @@
+##gff-version   3
+##sequence-region   chrX 420878 14745201
+##sequence-region   chrI 8470264 8470841
+##sequence-region   chrV 4770528 20750890
+##sequence-region   chrIV 383477 11059319
+##sequence-region   chrIII 7676727 7676849
+##sequence-region   chrII 9731984 11928560
+chrV	.	BED_feature	10924507	10924531	.	.	.	Name=16159881
+chrX	.	BED_feature	11351802	11351828	.	.	.	Name=16159881
+chrV	.	BED_feature	13813817	13814105	.	.	.	Name=9425137
+chrIV	.	BED_feature	10461778	10462129	.	.	.	Name=1361171
+chrIV	.	BED_feature	11059127	11059319	.	.	.	Name=14660442
+chrX	.	BED_feature	5100805	5100851	.	.	.	Name=9927589
+chrX	.	BED_feature	420878	421717	.	.	.	Name=7671811
+chrII	.	BED_feature	11928524	11928560	.	.	.	Name=7671813
+chrX	.	BED_feature	421408	421433	.	.	.	Name=7671813
+chrIII	.	BED_feature	7676727	7676849	.	.	.	Name=11003845
+chrII	.	BED_feature	9731984	9732106	.	.	.	Name=11003845
+chrV	.	BED_feature	11977978	11978018	.	.	.	Name=9761670
+chrX	.	BED_feature	12467619	12467665	.	.	.	Name=9834189
+chrV	.	BED_feature	20250987	20251013	.	.	.	Name=8798416
+chrX	.	BED_feature	12467633	12467664	.	.	.	Name=11203704
+chrV	.	BED_feature	20250982	20251012	.	.	.	Name=1406665
+chrV	.	BED_feature	20750853	20750890	.	.	.	Name=9584117
+chrX	.	BED_feature	7175609	7175678	.	.	.	Name=15282167
+chrV	.	BED_feature	10673747	10673772	.	.	.	Name=14738885
+chrX	.	BED_feature	14743480	14745201	.	.	.	Name=12871707
+chrV	.	BED_feature	10674212	10678331	.	.	.	Name=7925019
+chrX	.	BED_feature	12467548	12467661	.	.	.	Name=7925019
+chrX	.	BED_feature	12467618	12467660	.	.	.	Name=12095247
+chrV	.	BED_feature	6694720	6694758	.	.	.	Name=10514435
+chrV	.	BED_feature	20250980	20251008	.	.	.	Name=10698188
+chrI	.	BED_feature	8470264	8470841	.	.	.	Name=10882527
+chrV	.	BED_feature	20250983	20251016	.	.	.	Name=11328853
+chrX	.	BED_feature	5909769	5909804	.	.	.	Name=1350087
+chrV	.	BED_feature	4770528	4770557	.	.	.	Name=15734735
+chrIV	.	BED_feature	383477	383519	.	.	.	Name=15734735

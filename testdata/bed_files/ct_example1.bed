@@ -1,0 +1,8 @@
+browser position chr22:20100000-20100900
+track name=coords description="Chromosome coordinates list" visibility=2
+chr22   20100000 20100100
+chr22   20100011 20100200       
+chr22   20100215 20100400
+chr22   20100350 20100500
+chr22   20100700 20100800
+chr22   20100700 20100900

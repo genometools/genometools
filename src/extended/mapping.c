@@ -32,7 +32,7 @@ struct GtMapping {
 };
 
 GtMapping* gt_mapping_new(GtStr *mapping_file, const char *global_name,
-                     GtMappingType type, GtError *err)
+                          GtMappingType type, GtError *err)
 {
   GtMapping *m;
   int had_err = 0;
@@ -49,15 +49,18 @@ GtMapping* gt_mapping_new(GtStr *mapping_file, const char *global_name,
     gt_error_set(err, "out of memory (cannot create new Lua state)");
     had_err = -1;
   }
-  /* load the standard libs into the lua interpreter */
-  if (!had_err)
+  /* load the standard libs into the Lua interpreter */
+  if (!had_err) {
     luaL_openlibs(m->L);
+    gt_assert(!lua_gettop(m->L));
+  }
   /* try to load & run mapping file */
   if (!had_err) {
     if (luaL_loadfile(m->L, gt_str_get(mapping_file)) ||
         lua_pcall(m->L, 0, 0, 0)) {
       gt_error_set(err, "cannot run file: %s", lua_tostring(m->L, -1));
       had_err = -1;
+      lua_pop(m->L, 1);
     }
   }
   /* make sure a global variable with name <global_name> is defined */
@@ -67,6 +70,7 @@ GtMapping* gt_mapping_new(GtStr *mapping_file, const char *global_name,
       gt_error_set(err, "'%s' is not defined in \"%s\"", global_name,
                 gt_str_get(mapping_file));
       had_err = -1;
+      lua_pop(m->L, 1);
     }
   }
   /* make sure it is either a table or a function */
@@ -75,18 +79,19 @@ GtMapping* gt_mapping_new(GtStr *mapping_file, const char *global_name,
       gt_error_set(err, "'%s' must be either a table or a function (defined "
                      "in \"%s\")", global_name, gt_str_get(mapping_file));
       had_err = -1;
+      lua_pop(m->L, 1);
     }
   }
   /* remember if it is a table or a function */
   if (!had_err) {
     if (lua_istable(m->L, -1))
       m->is_table = true;
-    else {
+    else
       m->is_table = false;
-      lua_pop(m->L, 1);
-    }
+    lua_pop(m->L, 1);
   }
   /* return */
+  gt_assert(!lua_gettop(m->L));
   if (had_err) {
     gt_mapping_delete(m);
     return NULL;
@@ -101,13 +106,16 @@ static int map_table(GtMapping *m, GtStr **stroutput, long *integeroutput,
   gt_error_check(err);
   gt_assert(m && input);
   gt_assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
-         (m->type == MAPPINGTYPE_INTEGER && integeroutput));
+            (m->type == MAPPINGTYPE_INTEGER && integeroutput));
+  gt_assert(!lua_gettop(m->L));
+  lua_getglobal(m->L, m->global);
   lua_pushstring(m->L, input);
   lua_gettable(m->L, -2); /* get global[input] */
   /* make sure global[input] is defined */
   if (lua_isnil(m->L, -1)) {
     gt_error_set(err, "%s[%s] is nil (defined in \"%s\")", m->global, input,
-              gt_str_get(m->mapping_file)); had_err = -1;
+                 gt_str_get(m->mapping_file));
+    had_err = -1;
   }
   if (!had_err) {
     switch (m->type) {
@@ -134,6 +142,8 @@ static int map_table(GtMapping *m, GtStr **stroutput, long *integeroutput,
     }
   }
   lua_pop(m->L, 1); /* pop result */
+  lua_pop(m->L, 1); /* pop table */
+  gt_assert(!lua_gettop(m->L));
   return had_err;
 }
 
@@ -144,7 +154,8 @@ static int map_function(GtMapping *m, GtStr **stroutput, long *integeroutput,
   gt_error_check(err);
   gt_assert(m && input);
   gt_assert((m->type == MAPPINGTYPE_STRING  && stroutput) ||
-         (m->type == MAPPINGTYPE_INTEGER && integeroutput));
+            (m->type == MAPPINGTYPE_INTEGER && integeroutput));
+  gt_assert(!lua_gettop(m->L));
   lua_getglobal(m->L, m->global);
   lua_pushstring(m->L, input);
   /* call function */
@@ -177,6 +188,7 @@ static int map_function(GtMapping *m, GtStr **stroutput, long *integeroutput,
     }
   }
   lua_pop(m->L, 1); /* pop result */
+  gt_assert(!lua_gettop(m->L));
   return had_err;
 }
 

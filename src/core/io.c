@@ -43,6 +43,14 @@ GtIO* gt_io_new(const char *path, const char *mode)
   return io;
 }
 
+void gt_io_delete(GtIO *io)
+{
+  if (!io) return;
+  gt_genfile_close(io->fp);
+  gt_str_delete(io->path);
+  gt_free(io);
+}
+
 int gt_io_get_char(GtIO *io, char *c)
 {
   int cc;
@@ -117,10 +125,32 @@ GtStr* gt_io_get_filename_str(const GtIO *io)
   return io->path;
 }
 
-void gt_io_delete(GtIO *io)
+int gt_io_expect(GtIO *io, char expected_char, GtError *err)
 {
-  if (!io) return;
-  gt_genfile_close(io->fp);
-  gt_str_delete(io->path);
-  gt_free(io);
+  char cc;
+  gt_error_check(err);
+  cc = gt_io_next(io);
+  if (cc != expected_char) {
+    if (expected_char == GT_END_OF_LINE && cc == GT_CARRIAGE_RETURN) {
+      if (gt_io_peek(io) == GT_END_OF_LINE)
+        gt_io_next(io);
+      return 0;
+    }
+    if (expected_char == GT_END_OF_FILE) {
+      gt_error_set(err, "file \"%s\": line %lu: expected end-of-file, got '%c'",
+                   gt_io_get_filename(io), gt_io_get_line_number(io), cc);
+    }
+    else if ((cc == GT_CARRIAGE_RETURN) || (cc == GT_END_OF_LINE)) {
+      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got "
+                   "newline", gt_io_get_filename(io), gt_io_get_line_number(io),
+                   expected_char);
+    }
+    else {
+      gt_error_set(err, "file \"%s\": line %lu: expected character '%c', got "
+                   "'%c'", gt_io_get_filename(io), gt_io_get_line_number(io),
+                   expected_char, cc);
+    }
+    return -1;
+  }
+  return 0;
 }

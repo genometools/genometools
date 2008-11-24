@@ -42,7 +42,7 @@ typedef struct {
        tidy;
   long offset;
   GtStr *offsetfile,
-      *typecheck;
+        *typecheck;
   unsigned long width;
   GtOutputFileInfo *ofi;
   GtGenFile *outfp;
@@ -266,8 +266,8 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_gff3(void)
 {
   return gt_tool_new(gt_gff3_arguments_new,
-                  gt_gff3_arguments_delete,
-                  gt_gff3_option_parser_new,
-                  NULL,
-                  gt_gff3_runner);
+                     gt_gff3_arguments_delete,
+                     gt_gff3_option_parser_new,
+                     NULL,
+                     gt_gff3_runner);
 }

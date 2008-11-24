@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   chr22 20100001 20100900
+chr22	.	BED_feature	20100001	20100100	.	.	.	.
+chr22	.	BED_feature	20100012	20100200	.	.	.	.
+chr22	.	BED_feature	20100216	20100400	.	.	.	.
+chr22	.	BED_feature	20100351	20100500	.	.	.	.
+chr22	.	BED_feature	20100701	20100800	.	.	.	.
+chr22	.	BED_feature	20100701	20100900	.	.	.	.

@@ -1,0 +1,29 @@
+##gff-version   3
+##sequence-region   chr7 127471197 127481699
+chr7	.	BED_feature	127471197	127472363	0	+	.	ID=BED_feature1;Name=Pos1
+chr7	.	BED_thick_feature	127471197	127472363	0	+	.	Parent=BED_feature1;Name=Pos1
+###
+chr7	.	BED_feature	127472364	127473530	0	+	.	ID=BED_feature2;Name=Pos2
+chr7	.	BED_thick_feature	127472364	127473530	0	+	.	Parent=BED_feature2;Name=Pos2
+###
+chr7	.	BED_feature	127473531	127474697	0	+	.	ID=BED_feature3;Name=Pos3
+chr7	.	BED_thick_feature	127473531	127474697	0	+	.	Parent=BED_feature3;Name=Pos3
+###
+chr7	.	BED_feature	127474698	127475864	0	+	.	ID=BED_feature4;Name=Pos4
+chr7	.	BED_thick_feature	127474698	127475864	0	+	.	Parent=BED_feature4;Name=Pos4
+###
+chr7	.	BED_feature	127475865	127477031	0	-	.	ID=BED_feature5;Name=Neg1
+chr7	.	BED_thick_feature	127475865	127477031	0	-	.	Parent=BED_feature5;Name=Neg1
+###
+chr7	.	BED_feature	127477032	127478198	0	-	.	ID=BED_feature6;Name=Neg2
+chr7	.	BED_thick_feature	127477032	127478198	0	-	.	Parent=BED_feature6;Name=Neg2
+###
+chr7	.	BED_feature	127478199	127479365	0	-	.	ID=BED_feature7;Name=Neg3
+chr7	.	BED_thick_feature	127478199	127479365	0	-	.	Parent=BED_feature7;Name=Neg3
+###
+chr7	.	BED_feature	127479366	127480532	0	+	.	ID=BED_feature8;Name=Pos5
+chr7	.	BED_thick_feature	127479366	127480532	0	+	.	Parent=BED_feature8;Name=Pos5
+###
+chr7	.	BED_feature	127480533	127481699	0	-	.	ID=BED_feature9;Name=Neg4
+chr7	.	BED_thick_feature	127480533	127481699	0	-	.	Parent=BED_feature9;Name=Neg4
+###

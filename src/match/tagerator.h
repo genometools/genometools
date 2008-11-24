@@ -21,22 +21,41 @@
 #include <stdbool.h>
 #include "core/str_array.h"
 #include "core/error.h"
+#include "core/option.h"
+#include "match/optionargmode.h"
+
+#define TAGOUT_TAGNUM       1U
+#define TAGOUT_TAGSEQ       (1U << 1)
+#define TAGOUT_DBLENGTH     (1U << 2)
+#define TAGOUT_DBSTARTPOS   (1U << 3)
+#define TAGOUT_DBSEQUENCE   (1U << 4)
+#define TAGOUT_STRAND       (1U << 5)
+#define TAGOUT_EDIST        (1U << 6)
+#define TAGOUT_TAGSTARTPOS  (1U << 7)
+#define TAGOUT_TAGLENGTH    (1U << 8)
+#define TAGOUT_TAGSUFFIXSEQ (1U << 9)
 
 typedef struct
 {
-  GtStrArray *tagfiles;
-  GtStr *esaindexname,
-      *pckindexname;
-  bool online,  /* perform online search, for testing */
+  GtStrArray *tagfiles, *outputspec;
+  GtStr *indexname, *outputhelp;
+  GtOption *refoptionesaindex,
+           *refoptionpckindex;
+  const Optionargmodedesc *modedesc;
+  bool withesa,
+       online,  /* perform online search, for testing */
        docompare, /* compare results with online search */
        replacewildcard, /* replace wildcards by random symbol */
        nofwdmatch, /* do not perform matching on forward strand */
        norcmatch, /* do not perform matching on reverse complemented strand */
        nowildcards, /* ignore matches containing wildcards */
-       skpp; /* Skip prefix of pattern without counting errors */
-  long maxdistance; /* maximal number of allowed differences >= 0 */
+       skpp, /* Skip prefix of pattern without counting errors */
+       best; /* use best match mode, only for edit distance */
+  long userdefinedmaxdistance; /* maximal number of allowed differences */
   int userdefinedmaxdepth;   /* use pckbuckets only up to this depth */
+  unsigned int outputmode;  /* mode of output of tag matches */
   unsigned long maxintervalwidth; /* max width of interval */
+  size_t numberofmodedescentries;
 } TageratorOptions;
 
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err);

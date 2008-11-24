@@ -26,11 +26,12 @@ typedef struct GtColor GtColor;
 /* Create a new <GtColor> object with the color given by the <red>, <green>,
    and <blue> arguments. The value for each color channel must be between 0
    and 1. */
-GtColor* gt_color_new(double red, double green, double blue);
+GtColor* gt_color_new(double red, double green, double blue, double alpha);
 /* Change the color of the <color> object to the color given by the <red>,
    <green>, and <blue> arguments. The value for each color channel must be
    between 0 and 1.*/
-void      gt_color_set(GtColor *color, double red, double green, double blue);
+void      gt_color_set(GtColor *color, double red, double green, double blue,
+                       double alpha);
 /* Returns <true> if the colors <c1> and <c2> are equal. */
 bool      gt_color_equals(const GtColor *c1, const GtColor *c2);
 /* Delete the <color> object. */

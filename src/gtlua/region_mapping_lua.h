@@ -20,11 +20,11 @@
 
 #include "lua.h"
 
-/* exports the GtRegionMapping class to Lua:
+/* exports the RegionMapping class to Lua:
 
    -- Returns a new region mapping which maps everything onto sequence file
    -- <seqfile>.
-   function gt_region_mapping_new_seqfile(seqfile)
+   function region_mapping_new_seqfile(seqfile)
 */
 int gt_lua_open_region_mapping(lua_State*);
 

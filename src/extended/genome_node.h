@@ -19,7 +19,7 @@
 #define GENOME_NODE_H
 
 #include "core/bittab.h"
-#include "core/phase.h"
+#include "core/phase_api.h"
 #include "core/range.h"
 #include "core/str.h"
 #include "extended/genome_node_api.h"
@@ -31,13 +31,8 @@ void*         gt_genome_node_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 void*         gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 const char*   gt_genome_node_get_filename(const GtGenomeNode*);
 unsigned int  gt_genome_node_get_line_number(const GtGenomeNode*);
-GtStr*        gt_genome_node_get_seqid(GtGenomeNode*);
 /* used to sort nodes */
 GtStr*        gt_genome_node_get_idstr(GtGenomeNode*);
-unsigned long gt_genome_node_get_start(GtGenomeNode*);
-unsigned long gt_genome_node_get_end(GtGenomeNode*);
-GtRange       gt_genome_node_get_range(GtGenomeNode*);
-void          gt_genome_node_set_range(GtGenomeNode*, GtRange);
 void          gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
 int           gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
 int           gt_genome_node_cmp(GtGenomeNode*, GtGenomeNode*);

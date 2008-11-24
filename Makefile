@@ -20,7 +20,7 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/md5-1.1.2/src \
             -I$(CURDIR)/src/external/lua-5.1.4/src \
             -I$(CURDIR)/src/external/luafilesystem-1.4.1/src \
-            -I$(CURDIR)/src/external/lpeg-0.8.1 \
+            -I$(CURDIR)/src/external/lpeg-0.9 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.5 \
             -I$(CURDIR)/src/external/libtecla-1.6.1
@@ -33,7 +33,7 @@ EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm 
 # ...while those starting with GT_ are for internal purposes only
-GT_CFLAGS:=-g -Wall -Werror -Wunused-parameter -pipe -fPIC -Wpointer-arith
+GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
@@ -54,7 +54,7 @@ BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
-  MACHINE:=$(shell uname -m)
+MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
   SHARED:=-dynamiclib -undefined dynamic_lookup
@@ -111,7 +111,7 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            src/external/md5-1.1.2/src/des56.c\
            src/external/md5-1.1.2/src/ldes56.c\
            src/external/luafilesystem-1.4.1/src/lfs.c\
-           src/external/lpeg-0.8.1/lpeg.c
+           src/external/lpeg-0.9/lpeg.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
@@ -199,6 +199,10 @@ ifeq ($(assert),no)
   EXP_CPPFLAGS += -DNDEBUG
 endif
 
+ifneq ($(errorcheck),no)
+  GT_CFLAGS += -Werror
+endif
+
 ifeq ($(cov),yes)
   export CCACHE_DISABLE # ccache cannot handle coverage objects
   GT_CFLAGS += -fprofile-arcs -ftest-coverage
@@ -275,6 +279,10 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
+ifneq ($(sharedlib),no)
+  SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT)
+endif
+
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/gtlua
@@ -298,7 +306,8 @@ ifneq ($(cairo),no)
                  -I/opt/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
-                               bin/examples/sketch_parsed
+                               bin/examples/sketch_parsed_with_ctrack \
+			       bin/examples/sketch_parsed
   ANNOTATIONSKETCH_MANUAL := doc/manuals/annotationsketch.pdf
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
 else
@@ -328,8 +337,10 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: lib/libgenometools.a lib/libgenometools$(SHARED_OBJ_NAME_EXT) \
-     lib/libgtunstable.a  lib/libgtunstable$(SHARED_OBJ_NAME_EXT) \
+# allow to set patch program
+patch ?= patch
+
+all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      bin/skproto bin/gt bin/lua bin/rnv \
      bin/examples/gff3validator bin/examples/noop $(ANNOTATIONSKETCH_EXAMPLES)
 
@@ -452,6 +463,11 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_constructed, \
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed, \
                                 obj/src/examples/sketch_parsed.o \
                                 lib/libgenometools.a $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ctrack, \
+                                obj/src/examples/sketch_parsed_with_ctrack.o \
+                                lib/libgenometools.a $(OVERRIDELIBS)))
+
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
@@ -698,6 +714,8 @@ installwww:
 # install genometools.org website
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
 
+patch:
+	if test -f $(CURDIR)/src/patches/$(SYSTEMNAME).patch; then $(patch) -p1 < $(CURDIR)/src/patches/$(SYSTEMNAME).patch; fi
 
 push:
 	git push origin master

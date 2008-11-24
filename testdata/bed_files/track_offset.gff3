@@ -1,0 +1,14 @@
+##gff-version   3
+##sequence-region   chr22 2001 8000
+chr22	.	BED_feature	2001	6000	960	+	.	ID=BED_feature1;Name=itemA
+chr22	.	BED_block	2001	3567	960	+	.	Parent=BED_feature1;Name=itemA
+chr22	.	BED_thick_feature	2101	5700	960	+	.	Parent=BED_feature1;Name=itemA
+chr22	.	BED_block	4513	6000	960	+	.	Parent=BED_feature1;Name=itemA
+###
+chr22	.	BED_feature	3001	8000	200	-	.	ID=BED_feature2;Name=itemB
+chr22	.	BED_block	3001	3433	200	-	.	Parent=BED_feature2;Name=itemB
+chr22	.	BED_thick_feature	3201	7950	200	-	.	Parent=BED_feature2;Name=itemB
+chr22	.	BED_block	3501	3600	200	-	.	Parent=BED_feature2;Name=itemB
+chr22	.	BED_block	5001	5550	200	-	.	Parent=BED_feature2;Name=itemB
+chr22	.	BED_block	6501	8000	200	-	.	Parent=BED_feature2;Name=itemB
+###

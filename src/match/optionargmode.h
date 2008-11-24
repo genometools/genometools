@@ -17,10 +17,12 @@
 
 #ifndef OPTIONARGMODE_H
 #define OPTIONARGMODE_H
+#include "core/str_api.h"
 
 typedef struct
 {
   const char *name;
+  const char *desc;
   unsigned int bitmask;
 } Optionargmodedesc;
 
@@ -30,5 +32,13 @@ int optionaddbitmask(const Optionargmodedesc *modedesc,
                      const char *optname,
                      const char *optionargument,
                      GtError *err);
+
+GtStr *getargmodekeywords(const Optionargmodedesc *modedesc,
+                          size_t numberofentries,
+                          const char *what);
+
+void getsetargmodekeywords(const Optionargmodedesc *modedesc,
+                           size_t numberofentries,
+                           unsigned int bitfield);
 
 #endif

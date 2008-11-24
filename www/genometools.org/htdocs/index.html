@@ -11,6 +11,7 @@
       <li><a id="current" href="index.html">Overview</a></li>
       <li><a href="pub/">Download</a></li>
       <li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+      <li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
       <li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
       <li><a href="design.html">Design</a></li>
       <li><a href="libgenometools.html">C API</a></li>
@@ -25,7 +26,7 @@
     The <i>GenomeTools</i> genome analysis system is a <a
     href="license.html">free</a> collection of bioinformatics tools (in the realm of
     genome informatics) combined into a single binary named <tt>gt</tt>.
-    It is based on a C library named ``libgenometools'' which consists of
+    It is based on a C library named &ldquo;libgenometools&rdquo; which consists of
     several modules. For example, the <a
       href="annotationsketch.html"><tt>AnnotationSketch</tt></a> module.
     </p>
@@ -42,6 +43,45 @@
     Mac OS X, and OpenBSD. <strong>It is probably not easy to get it to compile
       and run on Windows.</strong> </p>
     <p>
+    <h2>Published software in <em>GenomeTools</em></h2>
+    <p>
+    The <em>GenomeTools</em> distribution includes several published software
+    tools:
+    </p>
+    <ul class="pubs">
+      <li><tt><a href="http://www.zbh.uni-hamburg.de/LTRharvest">ltrharvest</a></tt>, an efficient and flexible software tool for
+      <em>de novo</em> detection of LTR retrotransposons.
+      <div class="ref">
+       D. Ellinghaus, S. Kurtz, and U. Willhoeft.<br>
+       <i>LTRharvest</i>, a efficient and flexible software for <i> de novo </i>
+       detection of LTR retrotransposons. <br>
+       <a href="http://www.biomedcentral.com/1471-2105/9/18/abstract">
+         BMC Bioinformatics 2008, 9:18
+       </a>
+      </div>
+      </li>
+      <li><tt><a href="http://www.zbh.uni-hamburg.de/tallymer">tallymer</a></tt>, a collection of flexible and memory-efficient
+      programs for <em>k</em>-mer counting and indexing of large sequence sets.
+      <div class="ref">
+       S. Kurtz, A. Narechania, J.C. Stein, and D. Ware.<br>
+       A new method to compute K-mer frequencies and its application to annotate
+        large repetitive plant genomes.<br>
+       <a href="http://www.biomedcentral.com/1471-2164/9/517/abstract">
+         BMC Genomics 2008, 9:517
+       </a>
+      </div>
+      </li>
+      <li><tt>uniquesub</tt>, a program for computing minimum unique substrings.
+      <div class="ref">
+       S. Gr&auml;f, F.G.G. Nielsen, S. Kurtz, M.A. Huynen, E. Birney,
+       H. Stunnenberg, and P. Flicek.<br>
+       Optimized design and assessment of whole genome tiling arrays.<br>
+       <a href="http://bioinformatics.oxfordjournals.org/cgi/content/abstract/23/13/i195">
+         Bioinformatics 2007, 23(13):i195-i204
+       </a>
+      </div>
+      </li>
+    </ul>
     <h2>Visualization</h2>
     <p>
     With the <tt>gt sketch</tt> tool (build with
@@ -59,7 +99,7 @@
     </p>
 <div id="footer">
 Copyright &copy; 2006-2008
-<a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last update: 2008-09-05
+<a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last update: 2008-11-14
 </div>
   </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">

@@ -1,0 +1,11 @@
+$ gt tallymer occratio -output unique nonunique -mersizes 10 13 17 -esa reads
+# distribution of unique mers
+10 223755
+13 465859
+17 455449
+# distribution of non unique mers (counting each non unique mer only once)
+10 135526
+13 49611
+17 39769
+# space peak in megabytes: 0.06
+# mmap space peak in megabytes: 3.93

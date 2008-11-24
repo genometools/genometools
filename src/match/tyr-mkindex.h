@@ -18,6 +18,7 @@
 #ifndef TYR_MKINDEX_H
 #define TYR_MKINDEX_H
 
+#include <stdbool.h>
 #include "core/str.h"
 #include "core/error_api.h"
 #include "verbose-def.h"

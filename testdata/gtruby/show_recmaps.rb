@@ -41,9 +41,11 @@ range = feature_index.get_range_for_seqid(seqid)
 
 style = GT::Style.new()
 diagram = GT::Diagram.new(feature_index, seqid, range, style)
+layout = GT::Layout.new(diagram, 800, style)
+ii = GT::ImageInfo.new()
 image_info = GT::ImageInfo.new()
-canvas = GT::CanvasCairoFile.new(style, 800, image_info)
-diagram.sketch(canvas)
+canvas = GT::CanvasCairoFile.new(style, 800, layout.get_height, image_info)
+layout.sketch(canvas)
 
 image_info.each_hotspot do |x1, y1, x2, y2, gn|
   puts "x1=#{x1}, y1=#{y1}, x2=#{x2}, y2=#{y2}, gn.type=#{gn.get_type}"

@@ -19,9 +19,23 @@
 #define TYR_MERSPLIT_H
 
 #include "core/str_api.h"
+#include "core/error_api.h"
 #include "defined-types.h"
+#include "tyr-map.h"
+
+typedef struct Tyrbckinfo Tyrbckinfo;
 
 int constructmerbuckets(const GtStr *inputindex,
-                        const Definedunsignedint *prefixlength);
+                        const Definedunsignedint *callprefixlength,
+                        GtError *err);
+
+Tyrbckinfo *tyrbckinfo_new(const GtStr *tyrindexname,unsigned int alphasize,
+                           GtError *err);
+
+void tyrbckinfo_delete(Tyrbckinfo **tyrbckinfoptr);
+
+const Uchar *searchinbuckets(const Tyrindex *tyrindex,
+                             const Tyrbckinfo *tyrbckinfo,
+                             const Uchar *bytecode);
 
 #endif

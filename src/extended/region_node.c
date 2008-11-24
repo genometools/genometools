@@ -46,10 +46,10 @@ static GtRange region_node_get_range(GtGenomeNode *gn)
   return rn->range;
 }
 
-static void region_node_set_range(GtGenomeNode *gn, GtRange range)
+static void region_node_set_range(GtGenomeNode *gn, const GtRange *range)
 {
   GtRegionNode *rn = gt_region_node_cast(gn);
-  rn->range = range;
+  rn->range = *range;
 }
 
 static void region_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
@@ -104,5 +104,5 @@ void gt_region_node_consolidate(GtRegionNode *rn_a, GtRegionNode *rn_b)
   range_a = gt_genome_node_get_range((GtGenomeNode*) rn_a);
   range_b = gt_genome_node_get_range((GtGenomeNode*) rn_b);
   range_a = gt_range_join(&range_a, &range_b);
-  gt_genome_node_set_range((GtGenomeNode*) rn_a, range_a);
+  gt_genome_node_set_range((GtGenomeNode*) rn_a, &range_a);
 }

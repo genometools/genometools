@@ -18,7 +18,8 @@
 #ifndef REGION_NODE_API_H
 #define REGION_NODE_API_H
 
-/* Implements the <GtGenomeNode> interface. */
+/* Implements the <GtGenomeNode> interface. Region nodes correspond to the
+   <##sequence-region> lines in GFF3 files.*/
 typedef struct GtRegionNode GtRegionNode;
 
 #include "extended/genome_node_api.h"
