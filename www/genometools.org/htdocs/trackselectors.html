@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>The AnnotationSketch module</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+
+
+<div id="main">
+<h1>Track selector functions</h1>
+
+This page explains how a special kind of function, called <em>track selector function</em>, can be used to customise the <em>AnnotationSketch</em> output by using arbitrary features of a block to assign blocks to tracks (and implicitly creating new tracks this way).
+
+<h2>Default: Top level type decides track membership</h2>
+<p>
+By default, for each block in a <em>Diagram</em>, its source filename and/or the type attribute of its top level element decides into which track the block is finally inserted during the layout phase. So by default, an annotation graph parsed from the GFF3 input file &lsquo;example.gff3&rsquo; with <em>gene</em>, <em>mRNA</em> and <em>exon</em> type nodes will be rendered into two separate tracks (<em>exon</em>&rarr;<em>mRNA</em> collapsing enabled, see Fig. <a href="#fig1">1</a>):
+<ul>
+  <li><tt>example.gff3|gene</tt> and</li>
+  <li><tt>example.gff3|mRNA</tt></li>
+</ul>
+We will call the second part (after the &ldquo;|&rdquo;) of these track titles <em>track identifier strings</em> in the rest of this document.
+<div class="figure">
+  <p><a name="fig1"></a><img src="images/example_nocollapse_noselect.png" alt="[Basic drawing]"></p>
+  <p><b>Figure 1: </b> Default <em>AnnotationSketch</em> output for a simple GFF3 file with simple <em>exon</em>&rarr;<em>mRNA</em> collapsing. </p>
+</div>
+</p>
+<p>
+While automatically determining tracks from the types actually present in the input annotations is convenient in many use cases, one could imagine cases in which more control about block handling may be desired. This leads to the question: How can one extract blocks with specific characteristics and assign them to a special track? The answer is simple: By overriding the default track identifier string, new tracks can be created and named on the fly as soon as a block satisfying user-defined rules is encountered.
+</p>
+<h2>Track selector functions</h2>
+<p>
+These rules take the form of <em>track selector functions</em>. Basically, a track selector function is a function which takes a block reference as an argument, and returns an appropriate track identifier string. For example, in Python the default track selector function would look like this:
+<pre class="code">
+def default_track_selector(block):
+  return block.get_type()
+</pre>
+This function simply returns a string representation of the type of a block's top level element, creating the tracks just like depicted in Fig. <a href="#fig1">1</a>.
+</p>
+<p>
+For a very simple example, let's assume that we want to create separate tracks for all mRNAs on the plus strand and for all mRNAs on the minus strand. The idea now is to change the strand identifier for blocks of the <em>mRNA</em> type to include the strand as additional information, thus creating different track identifiers for plus and minus strand features.
+
+In Python, this track selector function would construct a new string which contains both the type and the strand:
+<pre class="code">
+def strand_track_selector(block):
+  if block.get_type() == "mRNA":
+    return "%s (%s strand)" % (block.get_type(), block.get_strand())
+  else:
+    return block.get_type()
+</pre>
+Using this track selector function would produce the desired result of separate tracks for the mRNAs for each strand (see Fig. <a href="#fig2">2</a>).
+<div class="figure">
+  <p><a name="fig2"></a><img src="images/example_strandselect.png" alt="[Strand Track Selector]"></p>
+  <p><b>Figure 2: </b> <em>AnnotationSketch</em> output with <tt>strand_track_selector()</tt> track selector function. This image now shows separate tracks for plus and minus strand features. </p>
+</div>
+</p>
+<p>A track selector function can be set for a <em>Diagram</em> object using the <tt>diagram.set_track_selector_func()</tt> method. In C, its argument is a pointer to a function of the signature <tt>const char* (*GtTrackSelectorFunc)(GtBlock*, void*)</tt> where arbitrary data can be passed via the second <tt>void*</tt> argument. The Python <tt>set_track_selector_func()</tt> method directly accepts a Python function as an argument, while the Ruby version takes a <tt>Proc</tt> object:
+
+<pre class="code">
+...
+strand_track_selector = Proc.new { |block, data|
+  "#{block.get_type} (#{block.get_strand} strand)"
+}
+...
+diagram.set_track_selector_func(strand_track_selector)
+...
+</pre>
+</p>
+<p>
+Note that in Python and Ruby, it is also possible to reference data declared outside of the track selector function. For example, this can be used to filter blocks by pulling blocks whose description matches a pattern into a separate track:
+
+<pre class="code">
+...
+interesting_genes = ["First test gene", "another gene"]
+
+def filter_track_selector(block):
+  if block.get_caption() in interesting_genes:
+    return "interesting genes"
+  else:
+    return block.get_type()
+...
+diagram.set_track_selector_func(filter_track_selector)
+...
+</pre>
+This code results in the following image (Fig. <a href="#fig3">3</a>):
+<div class="figure">
+  <p><a name="fig3"></a><img src="images/example_filterselect.png" alt="[Filter Track Selector]"></p>
+  <p><b>Figure 3: </b> <em>AnnotationSketch</em> output with <tt>strand_track_selector()</tt> track selector function. This image now shows separate tracks for plus and minus strand features. </p>
+</div>
+</p>
+<div id="footer">
+Copyright &copy; 2007-2008 Sascha Steinbiss. Last update: 2008-11-24
+</div>
+</div>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-301256-4";
+urchinTracker();
+</script>
+</body>
+</html>
