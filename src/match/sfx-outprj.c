@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <limits.h>
-#include "core/endianess.h"
+#include "core/endianess_api.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "core/str_array.h"

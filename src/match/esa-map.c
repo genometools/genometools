@@ -21,7 +21,7 @@
 #include <limits.h>
 #include <string.h>
 #include "core/array.h"
-#include "core/endianess.h"
+#include "core/endianess_api.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "format64.h"
