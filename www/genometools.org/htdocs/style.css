@@ -79,7 +79,7 @@ pre.code {
 div.figure {
   position: relative;
   width: 650px;
-  margin: 20px;
+  margin: 20px auto;
   background-color: white;
   line-height: 1em;
 }
