@@ -257,8 +257,6 @@ static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
      gt_pbs_results_delete(pbs_results);
   }
 
-
-
   gt_free(rev_seq);
 }
 
