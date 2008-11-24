@@ -24,7 +24,7 @@
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "core/xansi.h"
-#include "extended/genome_node_iterator.h"
+#include "extended/feature_node_iterator.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/splice_site_info_visitor.h"
 #include "extended/reverse.h"
@@ -108,22 +108,22 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
 }
 
 static int splice_site_info_visitor_genome_feature(GtNodeVisitor *gv,
-                                                 GtFeatureNode *gf,
-                                                 GtError *err)
+                                                   GtFeatureNode *fn,
+                                                   GtError *err)
 {
   GtSpliceSiteInfoVisitor *ssiv;
-  GtGenomeNodeIterator *gni;
-  GtGenomeNode *node;
+  GtFeatureNodeIterator *fni;
+  GtFeatureNode *node;
   int had_err = 0;
   gt_error_check(err);
   ssiv = splice_site_info_visitor_cast(gv);
   gt_assert(ssiv->region_mapping);
-  gni = gt_genome_node_iterator_new((GtGenomeNode*) gf);
-  while (!had_err && (node = gt_genome_node_iterator_next(gni))) {
+  fni = gt_feature_node_iterator_new(fn);
+  while (!had_err && (node = gt_feature_node_iterator_next(fni))) {
     if (gt_feature_node_has_type((GtFeatureNode*) node, gft_intron))
-      had_err = process_intron(ssiv, node, err);
+      had_err = process_intron(ssiv, (GtGenomeNode*) node, err);
   }
-  gt_genome_node_iterator_delete(gni);
+  gt_feature_node_iterator_delete(fni);
   return had_err;
 }
 

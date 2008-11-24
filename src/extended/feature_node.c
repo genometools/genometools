@@ -29,7 +29,7 @@
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_rep.h"
-#include "extended/genome_node_iterator.h"
+#include "extended/feature_node_iterator.h"
 #include "extended/genome_node_rep.h"
 #include "extended/tag_value_map.h"
 
@@ -227,21 +227,21 @@ GtGenomeNode* gt_feature_node_new_pseudo(GtFeatureNode *fn)
 
 GtGenomeNode* gt_feature_node_new_standard_gene(void)
 {
-  GtGenomeNode *gn, *child, *grandch;
+  GtGenomeNode *fn, *child, *grandch;
   GtStr *seqid;
   seqid = gt_str_new_cstr("ctg123");
 
   /* gene */
-  gn = gt_feature_node_new(seqid, gft_gene, 1000, 9000, GT_STRAND_FORWARD);
+  fn = gt_feature_node_new(seqid, gft_gene, 1000, 9000, GT_STRAND_FORWARD);
 
   /* TF binding site */
   child = gt_feature_node_new(seqid, gft_TF_binding_site, 1000, 1012,
                                 GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
+  gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
 
   /* first mRNA */
   child = gt_feature_node_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
+  gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
   grandch = gt_feature_node_new(seqid, gft_exon, 1050, 1500, GT_STRAND_FORWARD);
   gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
   grandch = gt_feature_node_new(seqid, gft_exon, 3000, 3902, GT_STRAND_FORWARD);
@@ -253,7 +253,7 @@ GtGenomeNode* gt_feature_node_new_standard_gene(void)
 
   /* second mRNA */
   child = gt_feature_node_new(seqid, gft_mRNA, 1050, 9000, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
+  gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
   grandch = gt_feature_node_new(seqid, gft_exon, 1050, 1500, GT_STRAND_FORWARD);
   gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
   grandch = gt_feature_node_new(seqid, gft_exon, 5000, 5500, GT_STRAND_FORWARD);
@@ -263,7 +263,7 @@ GtGenomeNode* gt_feature_node_new_standard_gene(void)
 
   /* third mRNA */
   child = gt_feature_node_new(seqid, gft_mRNA, 1300, 9000, GT_STRAND_FORWARD);
-  gt_feature_node_add_child((GtFeatureNode*) gn, (GtFeatureNode*) child);
+  gt_feature_node_add_child((GtFeatureNode*) fn, (GtFeatureNode*) child);
   grandch = gt_feature_node_new(seqid, gft_exon, 1300, 1500, GT_STRAND_FORWARD);
   gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
   grandch = gt_feature_node_new(seqid, gft_exon, 3000, 3902, GT_STRAND_FORWARD);
@@ -274,7 +274,7 @@ GtGenomeNode* gt_feature_node_new_standard_gene(void)
   gt_feature_node_add_child((GtFeatureNode*) child, (GtFeatureNode*) grandch);
 
   gt_str_delete(seqid);
-  return gn;
+  return fn;
 }
 
 const char* gt_feature_node_get_source(GtFeatureNode *fn)
@@ -536,15 +536,15 @@ void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
 static bool genome_feature_has_gft(const GtFeatureNode *fn,
                                    const char **fnts)
 {
-  GtGenomeNodeIterator *gni;
-  GtGenomeNode *gn;
+  GtFeatureNodeIterator *fni;
+  GtFeatureNode *child;
   bool has_gft = false;
   gt_assert(fn && fnts && fnts[0] != NULL);
-  gni = gt_genome_node_iterator_new((GtGenomeNode*) fn);
-  while ((gn = gt_genome_node_iterator_next(gni))) {
+  fni = gt_feature_node_iterator_new(fn);
+  while ((child = gt_feature_node_iterator_next(fni))) {
     unsigned long i = 0;
     while (fnts[i] != NULL) {
-      if (gt_feature_node_has_type((GtFeatureNode*) gn, fnts[i])) {
+      if (gt_feature_node_has_type((GtFeatureNode*) fn, fnts[i])) {
         has_gft = true;
         break;
       }
@@ -553,7 +553,7 @@ static bool genome_feature_has_gft(const GtFeatureNode *fn,
     if (has_gft)
       break;
   }
-  gt_genome_node_iterator_delete(gni);
+  gt_feature_node_iterator_delete(fni);
   return has_gft;
 }
 
@@ -572,22 +572,20 @@ bool gt_feature_node_has_splice_site(const GtFeatureNode *fn)
 
 double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn)
 {
-  GtGenomeNodeIterator *gni;
-  GtGenomeNode *gn;
+  GtFeatureNodeIterator *fni;
+  GtFeatureNode *child;
   unsigned long num_of_splice_sites = 0;
   double averagessp = 0.0;
   gt_assert(fn);
-  gni = gt_genome_node_iterator_new((GtGenomeNode*) fn);
-  while ((gn = gt_genome_node_iterator_next(gni))) {
-    if (gt_feature_node_has_type((GtFeatureNode*) gn,
-                                 gft_five_prime_splice_site) ||
-        gt_feature_node_has_type((GtFeatureNode*) gn,
-                                 gft_three_prime_splice_site)) {
-      averagessp += gt_feature_node_get_score((GtFeatureNode*) gn);
+  fni = gt_feature_node_iterator_new(fn);
+  while ((child = gt_feature_node_iterator_next(fni))) {
+    if (gt_feature_node_has_type(child, gft_five_prime_splice_site) ||
+        gt_feature_node_has_type(child, gft_three_prime_splice_site)) {
+      averagessp += gt_feature_node_get_score((GtFeatureNode*) child);
       num_of_splice_sites++;
     }
   }
-  gt_genome_node_iterator_delete(gni);
+  gt_feature_node_iterator_delete(fni);
   if (num_of_splice_sites)
     averagessp /= num_of_splice_sites;
   return averagessp;

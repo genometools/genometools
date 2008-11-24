@@ -15,22 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_NODE_ITERATOR_H
-#define GENOME_NODE_ITERATOR_H
+#ifndef FEATURE_NODE_ITERATOR_H
+#define FEATURE_NODE_ITERATOR_H
 
-#include "extended/genome_node.h"
+#include "extended/feature_node_api.h"
 
-typedef struct GtGenomeNodeIterator GtGenomeNodeIterator;
+typedef struct GtFeatureNodeIterator GtFeatureNodeIterator;
 
 /* Return a new genome node iterator which performs a depth-first traversal of
-   <genome_node> (including <genome_node> itself). */
-GtGenomeNodeIterator* gt_genome_node_iterator_new(GtGenomeNode *genome_node);
+   <feature_node> (including <feature_node> itself). */
+GtFeatureNodeIterator* gt_feature_node_iterator_new(const GtFeatureNode
+                                                    *feature_node);
 /* Return a new genome node iterator which iterates over all direct children of
-   <genome_node> (without <genome_node> itself). */
-GtGenomeNodeIterator* gt_genome_node_iterator_new_direct(GtGenomeNode
-                                                          *genome_node);
-GtGenomeNode*         gt_genome_node_iterator_next(GtGenomeNodeIterator*);
-int                    gt_genome_node_iterator_example(GtError *);
-void                   gt_genome_node_iterator_delete(GtGenomeNodeIterator*);
+   <feature_node> (without <feature_node> itself). */
+GtFeatureNodeIterator* gt_feature_node_iterator_new_direct(const GtFeatureNode
+                                                           *feature_node);
+GtFeatureNode*         gt_feature_node_iterator_next(GtFeatureNodeIterator*);
+int                    gt_feature_node_iterator_example(GtError*);
+void                   gt_feature_node_iterator_delete(GtFeatureNodeIterator*);
 
 #endif

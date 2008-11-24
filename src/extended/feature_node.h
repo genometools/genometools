@@ -24,6 +24,7 @@
 #include "core/str_array.h"
 #include "extended/feature_node_api.h"
 #include "extended/feature_type.h"
+#include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
 
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,

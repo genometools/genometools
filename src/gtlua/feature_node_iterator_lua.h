@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GENOME_NODE_ITERATOR_LUA_H
-#define GENOME_NODE_ITERATOR_LUA_H
+#ifndef FEATURE_NODE_ITERATOR_LUA_H
+#define FEATURE_NODE_ITERATOR_LUA_H
 
 #include "lua.h"
 
@@ -24,15 +24,15 @@
 
    -- Returns a new genome node iterator which performs a depth-first traversel
    -- of <genome_node> (including <genome_node> itself).
-   function genome_node_iterator_new(genome_node)
+   function feature_node_iterator_new(genome_node)
 
    -- Returns a noew genome node iterator wich iterates over all direct children
    -- of <genome_node> (without <genome_node> itself).
-   function genome_node_iterator_new_direct(genome_node)
+   function feature_node_iterator_new_direct(genome_node)
 
-   -- Returns the next genome node for <genome_node_iterator> or nil.
-   function genome_node_iterator:next()
+   -- Returns the next genome node for <feature_node_iterator> or nil.
+   function feature_node_iterator:next()
 */
-int gt_lua_open_genome_node_iterator(lua_State*);
+int gt_lua_open_feature_node_iterator(lua_State*);
 
 #endif

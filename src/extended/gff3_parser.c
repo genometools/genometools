@@ -31,8 +31,8 @@
 #include "extended/comment_node_api.h"
 #include "extended/feature_info.h"
 #include "extended/feature_node.h"
+#include "extended/feature_node_iterator.h"
 #include "extended/genome_node.h"
-#include "extended/genome_node_iterator.h"
 #include "extended/gff3_escaping.h"
 #include "extended/gff3_parser.h"
 #include "extended/mapping.h"
@@ -515,19 +515,19 @@ static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
                                          GtQueue *genome_nodes,
                                          AutomaticGtSequenceRegion *auto_sr)
 {
-  GtGenomeNodeIterator *gni;
+  GtFeatureNodeIterator *fni;
   GtFeatureNode *child;
   gt_assert(pseudo_a && gt_feature_node_is_pseudo(pseudo_a));
   gt_assert(pseudo_b && gt_feature_node_is_pseudo(pseudo_b));
   gt_assert(feature_info && genome_nodes);
   /* add children of pseudo node b to pseudo node a */
-  gni = gt_genome_node_iterator_new_direct((GtGenomeNode*) pseudo_b);
+  fni = gt_feature_node_iterator_new_direct(pseudo_b);
   /* XXX: remove cast */
-  while ((child = (GtFeatureNode*) gt_genome_node_iterator_next(gni))) {
+  while ((child = (GtFeatureNode*) gt_feature_node_iterator_next(fni))) {
     gt_feature_node_add_child(pseudo_a, child);
     gt_feature_info_replace_pseudo_parent(feature_info, child, pseudo_a);
   }
-  gt_genome_node_iterator_delete(gni);
+  gt_feature_node_iterator_delete(fni);
   /* remove pseudo node b from buffer */
   remove_node((GtGenomeNode*) pseudo_b, genome_nodes, auto_sr);
   gt_feature_node_nonrec_delete(pseudo_b);

@@ -23,8 +23,8 @@
 #include "core/option.h"
 #include "core/splitter.h"
 #include "core/unused_api.h"
+#include "extended/feature_node_iterator.h"
 #include "extended/genome_node.h"
-#include "extended/genome_node_iterator.h"
 #include "extended/gff3_escaping.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/string_matching.h"
@@ -146,20 +146,20 @@ static int extracttarget_from_seqfiles(const char *target,
 static int extracttarget_from_node(GtGenomeNode *gn, GtStrArray *seqfiles,
                                    GtError *err)
 {
-  GtGenomeNodeIterator *gni;
+  GtFeatureNodeIterator *fni;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(gn && seqfiles);
   if (gt_genome_node_cast(gt_feature_node_class(), gn)) {
     const char *target;
     GtFeatureNode *child;
-    gni = gt_genome_node_iterator_new(gn);
+    fni = gt_feature_node_iterator_new(gt_feature_node_cast(gn));
     while (!had_err && /* XXX remove cast */
-           (child = (GtFeatureNode*) gt_genome_node_iterator_next(gni))) {
+           (child = (GtFeatureNode*) gt_feature_node_iterator_next(fni))) {
       if ((target = gt_feature_node_get_attribute(child, "Target")))
         had_err = extracttarget_from_seqfiles(target, seqfiles, err);
     }
-    gt_genome_node_iterator_delete(gni);
+    gt_feature_node_iterator_delete(fni);
   }
   return had_err;
 }
