@@ -28,7 +28,7 @@
 #include "core/disc_distri.h"
 #include "core/dlist.h"
 #include "core/dynbittab.h"
-#include "core/grep.h"
+#include "core/grep_api.h"
 #include "core/hashmap.h"
 #include "core/hashtable.h"
 #include "core/interval_tree.h"

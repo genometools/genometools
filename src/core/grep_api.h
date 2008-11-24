@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GREP_H
-#define GREP_H
+#ifndef GREP_API_H
+#define GREP_API_H
 
 #include <sys/types.h>
 #include <regex.h>
@@ -26,7 +26,9 @@
 #include "core/assert_api.h"
 #include "core/error.h"
 
-/* Sets <match> to true if <pattern> matches <line>, to false otherwise. */
+/* Grep module */
+
+/* Sets <match> to <true> if <pattern> matches <line>, to <false> otherwise. */
 int  gt_grep(bool *match, const char *pattern, const char *line, GtError*);
 int  gt_grep_unit_test(GtError*);
 
