@@ -193,7 +193,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   stack_size = lua_gettop(sty->L);
 #endif
   /* set default colors */
-  color->red = 0.5; color->green = 0.5; color->blue = 0.5;
+  color->red = 0.5; color->green = 0.5; color->blue = 0.5; color->alpha = 0.5;
   /* get section */
   i = style_find_section_for_getting(sty, section);
   /* could not get section, return default */
@@ -248,6 +248,14 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   else
     color->blue = lua_tonumber(sty->L,-1);
   lua_pop(sty->L, 1);
+  lua_getfield(sty->L, -1, "alpha");
+  if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
+    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
+               "default","alpha", key);
+  }
+  else
+    color->alpha = lua_tonumber(sty->L,-1);
+  lua_pop(sty->L, 1);
   /* reset stack to original state for subsequent calls */
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
@@ -281,6 +289,9 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
   lua_settable(sty->L, -3);
   lua_pushstring(sty->L, "blue");
   lua_pushnumber(sty->L, color->blue);
+  lua_settable(sty->L, -3);
+  lua_pushstring(sty->L, "alpha");
+  lua_pushnumber(sty->L, color->alpha);
   lua_settable(sty->L, -3);
   lua_pop(sty->L, i);
   gt_assert(lua_gettop(sty->L) == stack_size);
@@ -574,10 +585,10 @@ int gt_style_unit_test(GtError *err)
   gt_error_check(err);
 
   /* example colors */
-  col1.red=.1;col1.green=.2;col1.blue=.3;
-  col2.red=.4;col2.green=.5;col2.blue=.6;
-  col.red=1.0;col.green=1.0;col.blue=1.0;
-  defcol.red=.5;defcol.green=.5;defcol.blue=.5;
+  col1.red=.1;col1.green=.2;col1.blue=.3;col1.alpha=0.5;
+  col2.red=.4;col2.green=.5;col2.blue=.6;col2.alpha=0.5;
+  col.red=1.0;col.green=1.0;col.blue=1.0;col.alpha=0.5;
+  defcol.red=.5;defcol.green=.5;defcol.blue=.5;defcol.alpha=0.5;
 
   /* instantiate new style object */
   if (!(sty = gt_style_new(err)))
@@ -629,6 +640,7 @@ int gt_style_unit_test(GtError *err)
     gt_str_set(str, "");
   ensure(had_err, (strcmp(gt_str_get(str),"")==0));
 
+  gt_error_check(err);
   /* clone a GtStyle object */
   new_sty = gt_style_clone(sty, err);
   gt_error_check(err);

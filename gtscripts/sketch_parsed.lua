@@ -26,11 +26,15 @@ seqid = feature_index:get_first_seqid()
 range = feature_index:get_range_for_seqid(seqid)
 diagram = gt.diagram_new(feature_index, seqid, range)
 
--- create canvas
-canvas = gt.canvas_cairo_file_new_png(600, nil)
+-- create layout
+layout = gt.layout_new(diagram, 600)
+height = layout:get_height()
 
--- sketch diagram on canvas
-diagram:sketch(canvas)
+-- create canvas
+canvas = gt.canvas_cairo_file_new_png(600, height, nil)
+
+-- sketch layout on canvas
+layout:sketch(canvas)
 
 -- write canvas to file
 canvas:to_file(png_file)

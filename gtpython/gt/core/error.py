@@ -21,12 +21,21 @@ class GTError(Exception):
   pass
 
 class Error:
-  def __init__(self):
-    self.error = gtlib.gt_error_new()
+  def __init__(self, ptr = None):
+    if ptr:
+      self.error = ptr
+      self.own = False
+    else:
+      self.error = gtlib.gt_error_new()
+      self.own = True
     self._as_parameter_ = self.error
 
   def __del__(self):
-    gtlib.gt_error_delete(self.error)
+    if self.own:
+      try:
+        gtlib.gt_error_delete(self.error)
+      except AttributeError:
+        pass
 
   def from_param(cls, obj):
     if not isinstance(obj, Error):
@@ -37,11 +46,20 @@ class Error:
   def get(self):
     return gtlib.gt_error_get(self.error)
 
+  def is_set(self):
+    return (gtlib.gt_error_is_set(self.error) == 1)
+
+  def unset(self):
+    gtlib.gt_error_unset(self.error)
+
   def register(cls, gtlib):
-    from ctypes import c_void_p, c_char_p
+    from ctypes import c_void_p, c_char_p, c_int
     gtlib.gt_error_new.restype = c_void_p
     gtlib.gt_error_get.restype = c_char_p
+    gtlib.gt_error_is_set.restype = c_int
     gtlib.gt_error_get.argtypes = [c_void_p]
+    gtlib.gt_error_is_set.argtypes = [c_void_p]
+    gtlib.gt_error_unset.argtypes = [c_void_p]
   register = classmethod(register)
 
 def gterror(err):

@@ -2,7 +2,7 @@
   Copyright (c) 2007      Malte Mader <mmader@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2007      Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,16 +21,13 @@
 #define DIAGRAM_H
 
 #include "annotationsketch/diagram_api.h"
+#include "core/error.h"
 #include "core/hashmap.h"
 
-typedef struct GtTracklineInfo {
-  unsigned long total_lines,
-                total_captionlines;
-} GtTracklineInfo;
-
-GtHashmap*    gt_diagram_get_tracks(const GtDiagram*);
-void        gt_diagram_get_lineinfo(const GtDiagram*, GtTracklineInfo*);
-int         gt_diagram_get_number_of_tracks(const GtDiagram*);
-int         gt_diagram_unit_test(GtError*);
+GtHashmap* gt_diagram_get_blocks(const GtDiagram*);
+GtArray*   gt_diagram_get_custom_tracks(const GtDiagram *diagram);
+void       gt_diagram_reset(GtDiagram *diagram);
+int        gt_diagram_build(GtDiagram*);
+int        gt_diagram_unit_test(GtError*);
 
 #endif

@@ -45,8 +45,10 @@ range = feature_index:get_range_for_seqid(seqid)
 ii = gt.imageinfo_new()
 
 diagram = gt.diagram_new(feature_index, seqid, range)
-canvas = gt.canvas_cairo_file_new_png(800, ii)
-diagram:sketch(canvas)
+layout = gt.layout_new(diagram, 800)
+height = layout:get_height()
+canvas = gt.canvas_cairo_file_new_png(800, height, ii)
+layout:sketch(canvas)
 if #(ii:get_recmaps()) ~= 16 then
   os.exit(1)
 end

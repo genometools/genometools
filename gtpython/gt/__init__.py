@@ -27,4 +27,3 @@ except ImportError:
 from annotationsketch import *
 from core import *
 from extended import *
-

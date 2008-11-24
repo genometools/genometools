@@ -30,10 +30,11 @@
    in any Cairo-based graphical application. */
 typedef struct GtCanvasCairoContext GtCanvasCairoContext;
 
-/* Create a new Canvas object tied to the cairo_t <context> and <width>
-   using the style given in <style>. The optional <image_info> is filled when
-   the created Canvas object is used to render a Diagram object. */
+/* Create a new Canvas object tied to the cairo_t <context>, <width> and
+   <height> using the style given in <style>. The optional <image_info> is
+   filled when the created Canvas object is used to render a Diagram object. */
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
                                       unsigned long width,
+                                      unsigned long height,
                                       GtImageInfo *image_info);
 #endif

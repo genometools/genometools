@@ -36,12 +36,14 @@ nodes[2] = reverse_gene
 
 -- create diagram
 diagram = gt.diagram_new_from_array(nodes, 1, 1000)
+layout = gt.layout_new(diagram, 600)
+height = layout:get_height()
 
 -- create canvas
-canvas = gt.canvas_cairo_file_new_png(600, nil)
+canvas = gt.canvas_cairo_file_new_png(600, height, nil)
 
--- sketch diagram on canvas
-diagram:sketch(canvas)
+-- sketch layout on canvas
+layout:sketch(canvas)
 
 -- write canvas to file
 canvas:to_file(png_file)

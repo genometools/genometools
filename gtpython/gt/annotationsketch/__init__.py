@@ -15,18 +15,26 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from block import *
 from canvas import *
 from color import *
+from custom_track import *
 from diagram import *
 from feature_index import *
 from feature_stream import *
+from graphics import *
 from image_info import *
+from layout import *
 from rec_map import *
 from style import *
 
+Block.register(gtlib)
 CanvasCairoFile.register(gtlib)
+CustomTrack.register(gtlib)
 Diagram.register(gtlib)
 FeatureIndex.register(gtlib)
+Graphics.register(gtlib)
 ImageInfo.register(gtlib)
+Layout.register(gtlib)
 RecMap.register(gtlib)
 Style.register(gtlib)

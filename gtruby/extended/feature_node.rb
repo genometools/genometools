@@ -44,7 +44,6 @@ module GT
   COLLECTFUNC = callback "void collect_attrib(const char*, const char*, void*)"
 
   class FeatureNode < GenomeNode
-
     def initialize(gn, newref=false)
       super(gn, newref)
       attribs = GT::StrArray.new

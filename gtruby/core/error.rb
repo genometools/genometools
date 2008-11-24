@@ -22,16 +22,30 @@ module GT
   gtdlload "libgenometools"
   extern "GtError* gt_error_new()"
   extern "const char* gt_error_get(const GtError*)"
+  extern "ibool gt_error_is_set(const GtError*)"
+  extern "void gt_error_unset(GtError*)"
   extern "void gt_error_delete(GtError*)"
 
   class Error
-    def initialize
-      @error = GT.gt_error_new()
-      @error.free = GT::symbol("gt_error_delete", "0P")
+    def initialize(e = nil)
+      if e.nil? then
+        @error = GT.gt_error_new()
+        @error.free = GT::symbol("gt_error_delete", "0P")
+      else
+        @error = e
+      end
     end
 
     def get
       GT.gt_error_get(@error)
+    end
+
+    def is_set
+      GT.gt_error_is_set(@error)
+    end
+
+    def unset
+      GT.gt_error_unset(@error)
     end
 
     def to_ptr

@@ -49,7 +49,9 @@ static void draw_example_features(GtArray *features, const char *style_file,
   GtRange range = { 1, 1000 }; /* the genomic range to draw */
   GtStyle *style;
   GtDiagram *diagram;
+  GtLayout *layout;
   GtCanvas *canvas;
+  unsigned long height;
   GtError *err = gt_error_new();
 
   /* create style */
@@ -63,11 +65,18 @@ static void draw_example_features(GtArray *features, const char *style_file,
   /* create diagram */
   diagram = gt_diagram_new_from_array(features, &range, style);
 
-  /* create canvas */
-  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, NULL);
+  /* create layout with given width, determine resulting image height */
+  layout = gt_layout_new(diagram, 600, style, err);
+  if (!layout)
+    handle_error(err);
+  height = gt_layout_get_height(layout);
 
-  /* sketch diagram on canvas */
-  gt_diagram_sketch(diagram, canvas);
+  /* create PNG canvas */
+  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height, NULL);
+
+  /* sketch layout on canvas */
+  if (gt_layout_sketch(layout, canvas, err))
+    handle_error(err);
 
   /* write canvas to file */
   if (gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas, output_file,
@@ -77,6 +86,7 @@ static void draw_example_features(GtArray *features, const char *style_file,
 
   /* free */
   gt_canvas_delete(canvas);
+  gt_layout_delete(layout);
   gt_diagram_delete(diagram);
   gt_style_delete(style);
   gt_error_delete(err);
