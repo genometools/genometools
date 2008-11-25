@@ -45,7 +45,7 @@ class FeatureIndex:
       a = Array(rval)
       result = []
       for i in range(a.size()):
-        result.append(GenomeNode(gtlib.gt_genome_node_ref(a.get(i))))
+        result.append(FeatureNode(gtlib.gt_genome_node_ref(a.get(i))))
       return result
     else:
       return None
@@ -86,7 +86,7 @@ class FeatureIndex:
         gterror(err)
     result = []
     for i in range(a.size()):
-        result.append(FeatureNode(gtlib.gt_genome_node_rec_ref(a.get(i))))
+        result.append(FeatureNode(gtlib.gt_genome_node_ref(a.get(i))))
     return result
 
   def register(cls, gtlib):
