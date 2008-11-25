@@ -86,11 +86,7 @@ class FeatureIndex:
         gterror(err)
     result = []
     for i in range(a.size()):
-<<<<<<< HEAD:gtpython/gt/annotationsketch/feature_index.py
-        result.append(GenomeNode(gtlib.gt_genome_node_ref(a.get(i))))
-=======
         result.append(FeatureNode(gtlib.gt_genome_node_rec_ref(a.get(i))))
->>>>>>> 3dcca271ac46f6e5c836a9ad4b106e4814060c0c:gtpython/gt/annotationsketch/feature_index.py
     return result
 
   def register(cls, gtlib):
