@@ -605,11 +605,11 @@ docs: bin/gt bin/examples/sketch_parsed bin/examples/sketch_constructed
 	bin/examples/sketch_constructed gtdata/sketch/default.style \
 	  www/genometools.org/htdocs/images/constructed.png
 	sed -nf scripts/incl.sed \
-	  www/genometools.org/htdocs/annotationsketch_tmpl.html | \
+	  www/genometools.org/htdocs/examples_tmpl.html | \
           sed 'N;N;s/\n//' > /tmp/tmp.sed
 	sed -f /tmp/tmp.sed \
-	  www/genometools.org/htdocs/annotationsketch_tmpl.html > \
-	  www/genometools.org/htdocs/annotationsketch.html
+	  www/genometools.org/htdocs/examples_tmpl.html > \
+	  www/genometools.org/htdocs/examples.html
 	bin/gt gtscripts/gtdoc.lua -tex $(CURDIR) \
 	> doc/manuals/api_reference.tex
 	bin/gt gtscripts/gtdoc.lua -lua -tex $(CURDIR) \
