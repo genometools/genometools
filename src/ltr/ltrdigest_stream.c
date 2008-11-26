@@ -74,7 +74,7 @@ static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
   {
     GtGenomeNode *gf;
     struct hit_s *singlehit = *(struct hit_s **) gt_array_get(best_chain, i);
-    Phase frame = gt_phase_get(singlehit->name[0]);
+    GtPhase frame = gt_phase_get(singlehit->name[0]);
     rng.start = singlehit->sqfrom; rng.end = singlehit->sqto;
     convert_frame_position(&rng, frame);
     gt_ltrelement_offset2pos(&ls->element, &rng, 0,
@@ -87,7 +87,7 @@ static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
                              rng.end,
                              strand);
     gt_feature_node_set_source((GtFeatureNode*) gf, ls->ltrdigest_tag);
-    gt_feature_node_set_phase(gf, frame);
+    gt_feature_node_set_phase((GtFeatureNode*) gf, frame);
     gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamname", model->name);
     gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamid", model->acc);
     gt_feature_node_add_child(ls->element.mainnode, (GtFeatureNode*) gf);
@@ -116,8 +116,7 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
              && i < gt_pbs_results_get_number_of_hits(results))
     {
       gt_log_log("dropping PBS because of nonconsistent strand: %s\n",
-                 gt_feature_node_get_attribute(element->mainnode,
-                                               "ID"));
+                 gt_feature_node_get_attribute(element->mainnode, "ID"));
       hit = gt_pbs_results_get_ranked_hit(results, i++);
     }
     /* if there is none, do not report a PBS */
@@ -163,8 +162,7 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
              && i < gt_ppt_results_get_number_of_hits(results))
     {
       gt_log_log("dropping PPT because of nonconsistent strand: %s\n",
-                 gt_feature_node_get_attribute(element->mainnode,
-                                               "ID"));
+                 gt_feature_node_get_attribute(element->mainnode, "ID"));
       hit = gt_ppt_results_get_ranked_hit(results, i++);
     }
     /* if there is none, do not report a PPT */
@@ -215,7 +213,7 @@ static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
         canonical_strand = GT_STRAND_FORWARD;
       else
         canonical_strand = GT_STRAND_REVERSE;
-      gt_feature_node_set_strand((GtGenomeNode*) ls->element.mainnode,
+      gt_feature_node_set_strand(ls->element.mainnode,
                                     canonical_strand);
       /* create nodes for protein match annotations */
       (void) gt_pdom_results_foreach_domain_hit(pdom_results,
