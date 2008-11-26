@@ -605,8 +605,8 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
               "element start\telement end\telement length\tsequence\t"
               "lLTR start\tlLTR end\tlLTR length\t"
               "rLTR start\trLTR end\trLTR length\t"
-              "lTSD start\tlTSD end\tlTSD motif"
-              "rTSD start\trTSD end\trTSD motif"
+              "lTSD start\tlTSD end\tlTSD motif\t"
+              "rTSD start\trTSD end\trTSD motif\t"
               "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
   gt_genfile_xprintf(ls->tabout_file,
               "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
