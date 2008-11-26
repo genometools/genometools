@@ -92,6 +92,12 @@ if not $arguments["nocairo"] then
     run "diff out.svg #{$testdata}graphics_test.out"
   end
 
+  Name "gtpython: AnnotationSketch bindings (FeatureNode(Iterator))"
+  Keywords "gt_python"
+  Test do
+    run_python "#{$testdata}gtpython/feature_node.py"
+  end
+
   Name "gtpython: show_seqids"
   Keywords "gt_python"
   Test do

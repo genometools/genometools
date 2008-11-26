@@ -17,27 +17,41 @@
 
 from gt.dlload import gtlib, CollectFunc
 from gt.core.error import Error, gterror
+from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
-
-def py_collect_func(tag, val, data):
-  gtlib.gt_str_array_add_cstr(data, tag)
-  gtlib.gt_str_array_add_cstr(data, val)
-collect_func = CollectFunc(py_collect_func)
 
 class FeatureNode(GenomeNode):
   def __init__(self, node_ptr, newref = False):
     super(FeatureNode, self).__init__(node_ptr, newref)
-    a = StrArray()
-    gtlib.gt_feature_node_foreach_attribute(self.gn, \
-                                            collect_func, \
-                                            a)
-    attribs_a = a.to_list()
     self.attribs = {}
-    while len(attribs_a) > 0:
-      tagname = attribs_a.pop(0)
-      tagval = attribs_a.pop(0)
-      self.attribs[tagname] = tagval
+    self.update_attrs()
+
+  def create(seqid, type, start, end, strand):
+    from gt.extended.strand import strandchars
+    if not strand in strandchars:
+      gterror("Invalid strand '%s' -- must be one of %s" \
+                 % (strand, strandchars))
+    s = Str(seqid)
+    newfn = gtlib.gt_feature_node_new(s, type, start, end, \
+                                      strandchars.index(strand))
+    fn = FeatureNode(newfn, True)
+    fn.seqid = seqid
+    fn.type = type
+    fn.strand = strand
+    return fn
+  create = staticmethod(create)
+
+  def update_attrs(self):
+    def py_collect_func(tag, val, data):
+      self.attribs[tag] = val
+    self.collect_func = CollectFunc(py_collect_func)
+    gtlib.gt_feature_node_foreach_attribute(self.gn, \
+                                            self.collect_func, \
+                                            None)
+
+  def add_child(self, node):
+    gtlib.gt_feature_node_add_child(self.gn, node)
 
   def from_param(cls, obj):
     if not isinstance(obj, FeatureNode):
@@ -45,14 +59,38 @@ class FeatureNode(GenomeNode):
     return obj._as_parameter_
   from_param = classmethod(from_param)
 
+  def get_source(self):
+    return gtlib.gt_feature_node_get_source(self.gn)
+
+  def set_source(self, source):
+    s = Str(source)
+    gtlib.gt_feature_node_set_source(self.gn, s)
+
   def get_type(self):
     return gtlib.gt_feature_node_get_type(self.gn)
 
+  def has_type(self, type):
+    return (gtlib.gt_feature_node_has_type(self.gn, type) == 1)
+
+  def set_strand(self, strand):
+    from gt.extended.strand import strandchars
+    if not strand in strandchars:
+      gterror("Invalid strand '%s' -- must be one of %s" \
+                 % (strand, strandchars))
+    gtlib.gt_feature_node_set_strand(self.gn, strandchars.index(strand))
+
   def get_strand(self):
-    return gtlib.gt_feature_node_get_strand(self.gn)
+    from gt.extended.strand import strandchars
+    return strandchars[gtlib.gt_feature_node_get_strand(self.gn)]
 
   def get_phase(self):
     return gtlib.gt_feature_node_get_phase(self.gn)
+
+  def set_phase(self, phase):
+    return gtlib.gt_feature_node_set_phase(self.gn, phase)
+
+  def score_is_defined(self):
+    return (gtlib.gt_feature_node_score_is_defined(self.gn) == 1)
 
   def get_score(self):
     if gtlib.gt_feature_node_score_is_defined(self.gn) == 1:
@@ -60,23 +98,77 @@ class FeatureNode(GenomeNode):
     else:
       return None
 
+  def set_score(self, score):
+    gtlib.gt_feature_node_set_score(self.gn, score)
+
+  def unset_score(self):
+    gtlib.gt_feature_node_unset_score(self.gn)
+
   def get_attribute(self, attrib):
     return self.attribs[attrib]
 
+  def add_attribute(self, attrib, value):
+    if attrib == "" or value == "":
+      gterror("attribute keys or values must not be empty!")
+    gtlib.gt_feature_node_add_attribute(self.gn, attrib, value)
+    self.update_attrs()
+
   def each_attribute(self):
-    for tag, val in self.attribs:
-      yield tag, val
+    for tag, val in self.attribs.iteritems():
+      yield (tag, val)
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_float, c_int, c_int, c_void_p
+    from ctypes import c_char_p, c_float, c_int, c_int, c_void_p, c_ulong, \
+                       c_float
+    gtlib.gt_feature_node_new.restype = c_void_p
+    gtlib.gt_feature_node_new.argtypes = [Str, c_char_p, c_ulong, c_ulong,\
+                                          c_int]
+    gtlib.gt_feature_node_add_child.argtypes = [c_void_p, FeatureNode]
+    gtlib.gt_feature_node_set_source.argtypes = [c_void_p, Str]
+    gtlib.gt_feature_node_get_source.restype = c_char_p
+    gtlib.gt_feature_node_get_source.argtypes = [c_void_p]
     gtlib.gt_feature_node_get_type.restype = c_char_p
     gtlib.gt_feature_node_get_type.argtypes = [c_void_p]
+    gtlib.gt_feature_node_has_type.restype = c_int
+    gtlib.gt_feature_node_has_type.argtypes = [c_void_p, c_char_p]
     gtlib.gt_feature_node_get_score.restype = c_float
     gtlib.gt_feature_node_get_score.argtypes = [c_void_p]
+    gtlib.gt_feature_node_set_score.argtypes = [c_void_p, c_float]
     gtlib.gt_feature_node_get_phase.restype = c_int
     gtlib.gt_feature_node_get_phase.argtypes = [c_void_p]
-    gtlib.gt_feature_node_get_strand.restype = c_int
-    gtlib.gt_feature_node_get_strand.argtypes = [c_void_p]
+    gtlib.gt_feature_node_set_phase.argtypes = [c_void_p, c_int]
     gtlib.gt_feature_node_score_is_defined.restype = c_int
     gtlib.gt_feature_node_score_is_defined.argtypes = [c_void_p]
+    gtlib.gt_feature_node_get_strand.restype = c_int
+    gtlib.gt_feature_node_get_strand.argtypes = [c_void_p]
+    gtlib.gt_feature_node_set_strand.argtypes = [c_void_p, c_int]
+    gtlib.gt_feature_node_unset_score.argtypes = [c_void_p]
+    gtlib.gt_feature_node_add_attribute.argtypes = [c_void_p, c_char_p, \
+                                                    c_char_p]
   register = classmethod(register)
+
+class FeatureNodeIterator(object):
+  def next(self):
+    ret = gtlib.gt_feature_node_iterator_next(self.i)
+    if ret != None:
+      return FeatureNode(ret)
+    return ret
+
+  def register(cls, gtlib):
+    from ctypes import c_void_p
+    gtlib.gt_feature_node_iterator_new.restype = c_void_p
+    gtlib.gt_feature_node_iterator_new.argtypes = [FeatureNode]
+    gtlib.gt_feature_node_iterator_new_direct.restype = c_void_p
+    gtlib.gt_feature_node_iterator_new_direct.argtypes = [FeatureNode]
+    gtlib.gt_feature_node_iterator_next.restype = c_void_p
+  register = classmethod(register)
+
+class FeatureNodeIteratorDepthFirst(FeatureNodeIterator):
+  def __init__(self, node):
+    self.i = gtlib.gt_feature_node_iterator_new(node)
+    self._as_parameter_ = self.i
+
+class FeatureNodeIteratorDirect(FeatureNodeIterator):
+  def __init__(self, node):
+    self.i = gtlib.gt_feature_node_iterator_new_direct(node)
+    self._as_parameter_ = self.i
