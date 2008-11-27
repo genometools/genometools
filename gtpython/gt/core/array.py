@@ -41,9 +41,13 @@ class Array:
   def size(self):
     return gtlib.gt_array_size(self.array)
 
+  def add(self, val):
+    gtlib.gt_array_add_ptr(self.array, val._as_parameter_)
+
   def register(cls, gtlib):
     from ctypes import c_void_p, c_ulong, POINTER
     gtlib.gt_str_new_cstr.argtypes = [c_void_p, c_ulong]
     gtlib.gt_array_get.restype = POINTER(c_void_p)
     gtlib.gt_array_size.restype = c_ulong
+    gtlib.gt_array_add_ptr.argtypes = [c_void_p, c_void_p]
   register = classmethod(register)

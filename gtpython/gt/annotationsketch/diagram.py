@@ -22,18 +22,20 @@ from gt.annotationsketch.canvas import Canvas
 from gt.annotationsketch.custom_track import CustomTrack
 from gt.annotationsketch.feature_index import FeatureIndex
 from gt.annotationsketch.style import Style
+from gt.core.array import Array
 from gt.core.error import Error, gterror
 from gt.core.gtrange import Range
+from gt.extended.feature_node import FeatureNode
 
 TrackSelectorFunc = CFUNCTYPE(c_char_p, c_void_p, c_void_p)
 
 class Diagram:
-  def __init__(self, feature_index, seqid, range, style):
+  def __init__(self, feature_index, seqid, rng, style):
     from ctypes import byref
     err = Error()
-    if range.start > range.end:
+    if rng.start > rng.end:
       gterror("range.start > range.end")
-    self.diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(range), \
+    self.diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(rng), \
                                         style, err)
     if err.is_set():
       gterror(err)
@@ -75,3 +77,25 @@ class Diagram:
     gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p, \
                                                   CustomTrack]
   register = classmethod(register)
+
+#class DiagramFromArray(Diagram):
+#  def __init__(self, arr, rng, style):
+#    from ctypes import byref
+#    if rng.start > rng.end:
+#      gterror("range.start > range.end")
+#    gtarr = Array()
+#    for i in arr:
+#      if not isinstance(i, FeatureNode):
+#        gterror("DiagramFromArray array must only contain FeatureNodes!")
+#      gtarr.add(i)
+#    print FeatureNode(gtarr.get(0)).get_type()
+#    print FeatureNode(gtarr.get(1)).get_type()
+#    print gtarr.size()
+#    self.diagram = gtlib.gt_diagram_new_from_array(gtarr, byref(rng), \
+#                                                   style)
+#    self._as_parameter_ = self.diagram
+#  def register(cls, gtlib):
+#    from ctypes import c_void_p, POINTER
+#    gtlib.gt_diagram_new_from_array.restype = c_void_p
+#    gtlib.gt_diagram_new_from_array.argtypes = [Array, POINTER(Range), Style]
+#  register = classmethod(register)
