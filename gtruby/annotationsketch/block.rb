@@ -67,7 +67,7 @@ module GT
       if !GT::STRANDCHARS.include?(strand)
         GT::gterror("Invalid strand: '#{strand}'")
       end
-      GT.gt_block_set_strand(@block, GT::strandchars.index(strand))
+      GT.gt_block_set_strand(@block, GT::STRANDCHARS.index(strand))
     end
 
     def get_strand
