@@ -85,6 +85,12 @@ if not $arguments["nocairo"] then
     run "diff out.svg #{$testdata}graphics_test.out"
   end
 
+  Name "gtruby: AnnotationSketch bindings (FeatureNode(Iterator))"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/feature_node.rb"
+  end
+
   Name "gtruby: show_seqids"
   Keywords "gt_ruby"
   Test do
