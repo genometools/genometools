@@ -21,10 +21,15 @@
 #include <cairo.h>
 #include "annotationsketch/text_width_calculator_api.h"
 
-/* Implements the GtTextWidthCalculator interface */
+/* Implements the GtTextWidthCalculator interface with Cairo as the drawing
+   backend. If text width is to be calculated with regard to a specific
+   transformation etc. which is in effect in a <cairo_t> and which should be
+   used later via a <GtCanvasCairoContext>, create a
+   <GtTextWidthCalculatorCairo> object and pass it to the <GtLayout> via
+   <gt_layout_new_with_twc()>. */
 typedef struct GtTextWidthCalculatorCairo GtTextWidthCalculatorCairo;
 
-const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void);
+/* Creates a new <GtTextWidthCalculatorCairo> object for the given context. */
 GtTextWidthCalculator*            gt_text_width_calculator_cairo_new(cairo_t*);
 
 #endif

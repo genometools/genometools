@@ -61,16 +61,16 @@ The GFF3 input data are parsed into a directed acyclic graph (<em>annotation gra
   <p><b>Figure 2: </b>Example sequence region containing two genes in an annotation graph depicting the <em>part-of</em> relationships between their components.</p>
 </div>
 <p>
-Each top-level node (which is a node without a parent) is then registered into a persistent <em>FeatureIndex</em> object that can be (repeatedly) queried for all the features in a genomic region of interest. All child nodes of the top-level node are then available by traversal functions.
+Each top-level node (which is a node without a parent) is then registered into a persistent <em>FeatureIndex</em> object. The <em>FeatureIndex</em> holds a collection of the top-level nodes of all features in each sequence region in an interval tree data structure that can be efficiently queried for features in a genomic region of interest. All child nodes of the top-level node are then available by the use of traversal functions.
 </p>
 <p>
-Alternatively, annotation graphs can be built by the user by creating each node explicitly and then connecting the nodes in a way such that the relationships are reflected in the graph structure (see <a href="#examples-generated">example section</a> for example code).
+Alternatively, annotation graphs can be built by the user by creating each node explicitly and then connecting the nodes in a way such that the relationships are reflected in the graph structure (see <a href="examples.html">example section</a> for example code).
 </p>
 <h3>Phase 2: Layout</h3>
 <p>
-The next step consists of processing the features (given via a <em>FeatureIndex</em> or a simple array of top level nodes) into a structural <em>Diagram</em> object which represents a single view of the annotations of a genomic region. First, semantic units are formed from the annotation subgraphs. This is done by building <em>blocks</em> out of connected features by grouping and overlaying them according to several user-defined collapsing options (see <a href="#collapsing">Collapsing</a>). By default, a separate <em>track</em> is then created for each Sequence Ontology feature type. Alternatively, if more granularity in track assignment is desired, <a href="trackselectors.html"><em>track selector functions</em></a> can be used to create tracks and assign blocks to them based on arbitrary feature characteristics. This is simply done by creating a unique identifier string per track. The <em>Diagram</em> object is also used to hold one or more <a href="customtracks.html"><em>custom tracks</em></a>, which allow users to develop their own graphical representations as plugins.
+The next step consists of processing the features (given via a <em>FeatureIndex</em> or a simple array of top level nodes) into a structural <em>Diagram</em> object which represents a single view of the annotations of a genomic region. First, semantic units are formed from the annotation subgraphs. This is done by building <em>blocks</em> out of connected features by grouping and overlaying them according to several user-defined collapsing options (see <a href="#collapsing">Collapsing</a>). By default, a separate <em>track</em> is then created for each Sequence Ontology feature type. Alternatively, if more granularity in track assignment is desired, <a href="trackselectors.html"><em>track selector functions</em></a> can be used to create tracks and assign blocks to them based on arbitrary feature characteristics. This is simply done by creating a unique identifier string per track. The <em>Diagram</em> object can also be used to hold one or more <a href="customtracks.html"><em>custom tracks</em></a>, which allow users to develop their own graphical representations as plugins.
 
-The <em>Diagram</em> is then prepared for image output by calculating a compact <em>layout</em> in which the <em>Block</em> objects in a track are distributed into <em>Line</em> objects, each containing non-overlapping blocks (see Fig. <a href="fig3">3</a>). The overall layout calculated this way tries to keep lines compact as possible, minimizing the amount of used vertical space. How new <em>Lines</em> are created depends on the chosen implementation of the <em>LineBreaker</em> interface, by default a <em>Block</em> is pushed into a new <em>Line</em> when either the <em>Block</em> or its caption overlaps with another one.
+The <em>Diagram</em> is then prepared for image output by calculating a compact <em>layout</em> in which the <em>Block</em> objects in a track are distributed into <em>Line</em> objects, each containing non-overlapping blocks (see Fig. <a href="fig3">3</a>). The overall layout calculated this way tries to keep lines compact as possible, minimising the amount of used vertical space. How new <em>Lines</em> are created depends on the chosen implementation of the <em>LineBreaker</em> interface, by default a <em>Block</em> is pushed into a new <em>Line</em> when either the <em>Block</em> or its caption overlaps with another one.
 </p>
 
 <div class="figure">
@@ -83,7 +83,7 @@ In the final phase, the <em>Layout</em> object is used as a blueprint to create 
 image of a given type and size, considering user-defined options.
 
 The rendering process is invoked by calling the <em>sketch()</em> method of a <em>Layout</em> object. All rendering logic is implemented in classes implementing the <em>Canvas</em> interface, whose methods are called during traversal of the <em>Layout</em> members. It encapsulates the state of a drawing and works independently of the chosen rendering back-end. Instead, rendering backend-dependent subclasses of <em>Canvas</em> are closely tied to a specific implementation of the <em>Graphics</em> interface, which provides methods to draw a number of primitives to a drawing surface abstraction. It wraps around the respective low-level graphics engine and allows for its easy extension or replacement.<br>
- Currently, there is a <em>Graphics</em> implementation for the <a href="http://cairographics.org">Cairo</a> 2D graphics library (<em>GraphicsCairo</em>) and two <em>Canvas</em> subclasses providing access to the image file formats supported by Cairo (<em>CanvasCairoFile</em>) and to arbitrary Cairo contexts (<em>CanvasCairoContext</em>, which directly accesses a <a href="http://cairographics.org/manual/cairo-cairo-t.html"><tt>cairo_t</tt></a>). This class can be used, for example, to directly draw <em>AnnotationSketch</em> output in any graphical environment which is supported by Cairo (see <a href="http://www.cairographics.org/manual/Surfaces.html"> list of supported surface types</a>).
+ Currently, there is a <em>Graphics</em> implementation for the <a href="http://cairographics.org">Cairo</a> 2D graphics library (<em>GraphicsCairo</em>) and two <em>Canvas</em> subclasses providing access to the image file formats supported by Cairo (<em>CanvasCairoFile</em>) and to arbitrary Cairo contexts (<em>CanvasCairoContext</em>, which directly accesses a <a href="http://cairographics.org/manual/cairo-cairo-t.html"><tt>cairo_t</tt></a>). This class can be used, for example, to directly draw <em>AnnotationSketch</em> output in any graphical environment which is supported by Cairo (see <a href="http://www.cairographics.org/manual/cairo-surfaces.html"> list of supported surface types</a>).
 </p>
 
 <a name="collapsing"></a>
@@ -201,7 +201,15 @@ $ gt sketch -format pdf -seqid 2R -start 9326816 -end 9332879 output.pdf dmel_an
 $
 </pre>
 to plot the gene from the <a href="http://flybase.org/cgi-bin/gbrowse/dmel/"><em>FlyBase</em> default view</a> in PDF format.
-The <tt>-force</tt> switch is used to force overwriting of an already existing output file. The <tt>-pipe</tt> option additionally allows passing the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the <tt>-help</tt> switch.
+The <tt>-force</tt> switch is used to force overwriting of an already existing output file. The <tt>-pipe</tt> option additionally allows passing the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the <tt>-help</tt> option.
+
+If an input file is not plotted due to parsing errors, <em>GenomeTools</em> includes a strict GFF3 validator tool to check whether the input file is in valid GFF3 format. Simply run a command like the following:
+<pre>
+$ gt gff3validator input_file.gff3
+input is valid GFF3
+$
+</pre>
+This validator also allows to check the SO types occurring in a GFF3 file against a given OBO ontology file. This checking can be enabled by specifying the file as an argument to the <tt>-typecheck</tt> option.
 
 <a name="examples"></a>
 <h2>Code examples</h2>

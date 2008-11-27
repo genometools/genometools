@@ -19,5 +19,8 @@
 #define TEXT_WIDTH_CALCULATOR_CAIRO_H
 
 #include "annotationsketch/text_width_calculator_cairo_api.h"
+#include "annotationsketch/text_width_calculator.h"
+
+const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void);
 
 #endif
