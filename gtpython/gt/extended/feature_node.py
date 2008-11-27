@@ -154,6 +154,12 @@ class FeatureNodeIterator(object):
       return FeatureNode(ret)
     return ret
 
+  def __del__(self):
+    try:
+      gtlib.gt_feature_node_iterator_delete(self.i)
+    except AttributeError:
+      pass
+
   def register(cls, gtlib):
     from ctypes import c_void_p
     gtlib.gt_feature_node_iterator_new.restype = c_void_p
