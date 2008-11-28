@@ -29,7 +29,10 @@
 #include "core/warning_api.h"
 #include "extended/add_introns_stream.h"
 #include "extended/gff3_in_stream.h"
+#include "extended/bed_in_stream.h"
+#include "extended/gtf_in_stream.h"
 #include "extended/gff3_out_stream.h"
+#include "extended/sort_stream.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
@@ -45,7 +48,7 @@ typedef struct {
        verbose,
        addintrons,
        showrecmaps;
-  GtStr *seqid, *format, *stylefile;
+  GtStr *seqid, *format, *stylefile, *input;
   unsigned long start,
                 end;
   unsigned int width;
@@ -61,15 +64,22 @@ static OPrval parse_options(int *parsed_args,
   bool force;
   static const char *formats[] = { "png",
 #ifdef CAIRO_HAS_PDF_SURFACE
-  "pdf",
+    "pdf",
 #endif
 #ifdef CAIRO_HAS_SVG_SURFACE
-  "svg",
+    "svg",
 #endif
 #ifdef CAIRO_HAS_PS_SURFACE
-  "ps",
+    "ps",
 #endif
-  NULL };
+    NULL
+  };
+  static const char *inputs[] = {
+    "gff",
+    "bed",
+    "gtf",
+    NULL
+  };
   gt_error_check(err);
 
   /* init */
@@ -142,6 +152,11 @@ static OPrval parse_options(int *parsed_args,
                              arguments->format, formats[0], formats);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_choice("input", "input data format\n"
+                                       "choose from gff|bed|gtf",
+                             arguments->input, inputs[0], inputs);
+  gt_option_parser_add_option(op, option);
+
   /* -addintrons */
   option = gt_option_new_bool("addintrons", "add intron features between "
                            "existing exon features (before drawing)",
@@ -175,10 +190,11 @@ static OPrval parse_options(int *parsed_args,
 
 int gt_sketch(int argc, const char **argv, GtError *err)
 {
-  GtNodeStream *gff3_in_stream = NULL,
+  GtNodeStream *in_stream = NULL,
                *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
                *feature_stream = NULL,
+               *sort_stream = NULL,
                *last_stream;
   AnnotationSketchArguments arguments;
   GtGenomeNode *gn = NULL;
@@ -188,8 +204,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   GtRange qry_range, sequence_region_range;
   GtArray *results = NULL;
   GtStyle *sty = NULL;
-  GtStr *gt_style_file = NULL;
-  GtStr *prog;
+  GtStr *prog, *gt_style_file = NULL;
   GtDiagram *d = NULL;
   GtLayout *l = NULL;
   GtImageInfo* ii = NULL;
@@ -201,6 +216,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   /* option parsing */
   arguments.seqid = gt_str_new();
   arguments.format = gt_str_new();
+  arguments.input = gt_str_new();
   prog = gt_str_new();
   gt_str_append_cstr_nt(prog, argv[0],
                         gt_cstr_length_up_to_char(argv[0], ' '));
@@ -215,12 +231,14 @@ int gt_sketch(int argc, const char **argv, GtError *err)
       gt_str_delete(gt_style_file);
       gt_str_delete(arguments.seqid);
       gt_str_delete(arguments.format);
+      gt_str_delete(arguments.input);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
       gt_str_delete(arguments.stylefile);
       gt_str_delete(gt_style_file);
       gt_str_delete(arguments.seqid);
       gt_str_delete(arguments.format);
+      gt_str_delete(arguments.input);
       return 0;
   }
 
@@ -233,8 +251,8 @@ int gt_sketch(int argc, const char **argv, GtError *err)
       arguments.end != UNDEF_ULONG &&
       !(arguments.start < arguments.end)) {
     gt_error_set(err, "start of query range (%lu) must be before "
-                   "end of query range (%lu)",
-              arguments.start, arguments.end);
+                      "end of query range (%lu)",
+                      arguments.start, arguments.end);
     had_err = -1;
   }
 
@@ -243,16 +261,32 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     features = gt_feature_index_memory_new();
     parsed_args++;
 
-    /* create a gff3 input stream */
-    gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
-                                                    argv + parsed_args);
-    if (arguments.verbose)
-      gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
-    last_stream = gff3_in_stream;
+    /* create an input stream */
+    if (strcmp(gt_str_get(arguments.input), "gff") == 0)
+    {
+      in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                 argv + parsed_args);
+      if (arguments.verbose)
+        gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) in_stream);
+    } else if (strcmp(gt_str_get(arguments.input), "bed") == 0)
+    {
+      if (argc - parsed_args == 0)
+        in_stream = gt_bed_in_stream_new(NULL);
+      else
+        in_stream = gt_bed_in_stream_new(argv[parsed_args]);
+    } else if (strcmp(gt_str_get(arguments.input), "gtf") == 0)
+    {
+      if (argc - parsed_args == 0)
+        in_stream = gt_gtf_in_stream_new(NULL);
+      else
+        in_stream = gt_gtf_in_stream_new(argv[parsed_args]);
+    }
+    last_stream = in_stream;
 
     /* create add introns stream if -addintrons was used */
     if (arguments.addintrons) {
-      add_introns_stream = gt_add_introns_stream_new(last_stream);
+      sort_stream = gt_sort_stream_new(last_stream);
+      add_introns_stream = gt_add_introns_stream_new(sort_stream);
       last_stream = add_introns_stream;
     }
 
@@ -271,8 +305,9 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
     gt_node_stream_delete(feature_stream);
     gt_node_stream_delete(gff3_out_stream);
+    gt_node_stream_delete(sort_stream);
     gt_node_stream_delete(add_introns_stream);
-    gt_node_stream_delete(gff3_in_stream);
+    gt_node_stream_delete(in_stream);
   }
 
   /* if seqid is empty, take first one added to index */
@@ -375,6 +410,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   gt_str_delete(arguments.seqid);
   gt_str_delete(arguments.stylefile);
   gt_str_delete(arguments.format);
+  gt_str_delete(arguments.input);
   gt_array_delete(results);
   gt_feature_index_delete(features);
 
