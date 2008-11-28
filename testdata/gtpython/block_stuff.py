@@ -49,7 +49,7 @@ if __name__ == "__main__":
   range = feature_index.get_range_for_seqid(seqid)
 
   style = Style()
-  diagram = Diagram(feature_index, seqid, range, style)
+  diagram = Diagram.from_index(feature_index, seqid, range, style)
   diagram.set_track_selector_func(testfunc)
 
   layout = Layout(diagram, 800, style)

@@ -40,7 +40,7 @@ if __name__ == "__main__":
   range = feature_index.get_range_for_seqid(seqid)
 
   style = Style()
-  diagram = Diagram(feature_index, seqid, range, style)
+  diagram = Diagram.from_index(feature_index, seqid, range, style)
   layout = Layout(diagram, 700, style)
   height = layout.get_height()
   image_info = ImageInfo()
