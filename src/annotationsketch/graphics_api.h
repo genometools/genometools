@@ -57,11 +57,11 @@ typedef enum
    for both text and basic primitive shapes. */
 typedef struct GtGraphics GtGraphics;
 
-/* Draws text in black to the right of (<x>,<y>). The coordinate <y> is used as a
-   baseline. */
+/* Draws text in black to the right of (<x>,<y>). The coordinate <y> is used as
+   a baseline. */
 void   gt_graphics_draw_text(GtGraphics*, double x, double y, const char*);
-/* Draws text in black to the right of (<x>,<y>). The coordinate <y> is used as a
-   baseline. If the text exceeds the margins, it is clipped. */
+/* Draws text in black to the right of (<x>,<y>). The coordinate <y> is used as
+   a baseline. If the text exceeds the margins, it is clipped. */
 void   gt_graphics_draw_text_clip(GtGraphics*, double x, double y, const char*);
 /* Synonym to <gt_graphics_draw_text()> */
 #define gt_graphics_draw_text_left(g,x,y,t) \
