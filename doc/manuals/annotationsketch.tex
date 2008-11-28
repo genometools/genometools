@@ -3,10 +3,13 @@
 \usepackage{graphicx}              % figures
 \usepackage{listings}              % source code
 \usepackage{hyperref}              % navigation
-%\usepackage{times}
+\usepackage{mathptmx}
+\usepackage{verbatim}
 \usepackage{bold-extra}            % bold keywords in listings
 \usepackage[small]{caption}        % better-looking captions
 \parindent0mm                      % this looks better in short paragraphs
+
+\hyphenation{An-no-ta-tion-Sketch}
 
 % some colors
 \definecolor{arggrey}{gray}{.6}
@@ -78,7 +81,7 @@ The GFF3 input data are parsed into a directed acyclic graph (\emph{annotation g
 Each top-level node (which is a node without a parent) is then registered into a persistent \emph{FeatureIndex} object. The \emph{FeatureIndex} holds a collection of the top-level nodes of all features in each sequence region in an interval tree data structure that can be efficiently queried for features in a genomic region of interest. All child nodes of the top-level node are then available by the use of traversal functions. Alternatively, annotation graphs can be built by the user by creating each node explicitly and then connecting the nodes in a way such that the relationships are reflected in the graph structure (see examples section for example annotation graph building code).
 
 \subsection{Phase 2: Layout}
-The next step consists of processing the features (given via a \emph{FeatureIndex} or a simple array of top level nodes) into a \emph{Diagram} object which represents a single view of the annotations of a genomic region. First, semantic units are formed from the annotation subgraphs. This is done by building \emph{blocks} from connected features by grouping and overlaying them according to several user-defined collapsing options (see ``Collapsing''). By default, a separate \emph{track} is then created for each Sequence Ontology feature type. Alternatively, if more granularity in track assignment is desired, \emph{track selector} functions can be used to create tracks and assign blocks to them based on arbitrary feature characteristics. This is simply done by creating a unique identifier string per track. The \emph{Diagram} object can also be used to hold one or more \emph{custom tracks}, which allow users to develop their own graphical representations as plugins. The \emph{Diagram} is then prepared for image output by calculating a compact \emph{layout} in which the \emph{Block} objects in a track are distributed into \emph{Line} objects, each containing non-overlapping blocks (see Fig. \ref{diagram}). The overall layout calculated this way tries to keep lines compact as possible, minimising the amount of used vertical space. How new \emph{Lines} are created depends on the chosen implementation of the \emph{LineBreaker} interface, by default a \emph{Block} is pushed into a new \emph{Line} when either the \emph{Block} or its caption overlaps with another one.
+The next step consists of processing the features (given via a \emph{FeatureIndex} or a simple array of top level nodes) into a \emph{Diagram} object which represents a single view of the annotations of a genomic region. First, semantic units are formed from the annotation subgraphs. This is done by building \emph{blocks} from connected features by grouping and overlaying them according to several user-defined collapsing options (see ``Collapsing''). By default, a separate \emph{track} is then created for each Sequence Ontology feature type. Alternatively, if more granularity in track assignment is desired, \emph{track selector} functions can be used to create tracks and assign blocks to them based on arbitrary feature characteristics. This is simply done by creating a unique identifier string per track. The \emph{Diagram} object can also be used to hold one or more \emph{custom tracks}, which allow users to develop their own graphical representations as plugins. The \emph{Diagram} is then prepared for image output by calculating a compact \emph{Layout} in which the \emph{Block} objects in a track are distributed into \emph{Line} objects, each containing non-overlapping blocks (see Fig. \ref{diagram}). The overall layout calculated this way tries to keep lines as compact as possible, minimising the amount of vertical space used. How new \emph{Lines} are created depends on the chosen implementation of the \emph{LineBreaker} interface, by default a \emph{Block} is pushed into a new \emph{Line} when either the \emph{Block} or its caption overlaps with another one.
 
 \begin{figure}[ht]
 \centering{\includegraphics[width=\textwidth]{../../www/genometools.org/htdocs/images/diagram.pdf}}
@@ -122,7 +125,7 @@ would lead to all features of the \emph{exon}, \emph{intron} and \emph{CDS} type
 \end{figure}
 \begin{figure}
 \centering{\includegraphics[width=\textwidth]{../../www/genometools.org/htdocs/images/cnn_large}}
-\caption{Example image of the \emph{cnn} and \emph{cbs} genes from \emph{Drosophila melanogaster} (Ensembl release 50, positions 9326816--9341000 on chromosome arm 2R) as drawn by \emph{AnnotationSketch}. (a) shows a collapsed view in which all \emph{exon}, \emph{intron} and \emph{CDS} types are collapsed into their parent type's track. In contrast, (b) shows the \emph{cbs} gene with all collapsing options set to \texttt{false}, resulting in each type being drawn in its own track.}
+\caption{Example image of the \emph{cnn} and \emph{cbs} genes from \emph{Drosophila melanogaster} (Ensembl release 51, positions 9326816--9341000 on chromosome arm 2R) as drawn by \emph{AnnotationSketch}. At the bottom, the calculated GC content of the respective sequence is drawn via a custom track attached to the diagram. (a) shows a collapsed view in which all \emph{exon}, \emph{intron} and \emph{CDS} types are collapsed into their parent type's track. In contrast, (b) shows the \emph{cbs} gene with all collapsing options set to \texttt{false}, resulting in each type being drawn in its own track.}
 \label{cnn_large}
 \end{figure}
 
@@ -181,37 +184,45 @@ config = {
 
 The \emph{GenomeTools} \texttt{gt} executable provides a new tool which uses the \emph{AnnotationSketch} library to create a drawing in PNG, PDF, PostScript or SVG format from GFF3 annotations. The annotations can be given by supplying one or more file names as command line arguments:
 \small
+\medskip
 \begin{verbatim}
 $ gt sketch output.png annotation.gff3
 $
 \end{verbatim}
 \normalsize
+\medskip
 or by receiving GFF3 data via the standard input, here prepared by the \texttt{gt gff3} tool (here called with the \texttt{-addintrons} option to automatically add intron features between exons):
 \small
+\medskip
 \begin{verbatim}
 $ gt gff3 -addintrons annotation.gff3 | gt sketch output.png
 $
 \end{verbatim}
 \normalsize
+\medskip
 The region to create a diagram for can be specified in detail by using the \texttt{-seqid}, \texttt{-start} and \texttt{-end} parameters. For example, if the \emph{D. melanogaster} gene annotation is given in the \texttt{dmel\_annotation.gff3} file, use
 \small
+\medskip
 \begin{verbatim}
 $ gt sketch -format pdf -seqid 2R -start 9326816 -end 9332879 output.pdf \
   dmel_annotation.gff3
 $
 \end{verbatim}
 \normalsize
+\medskip
 to plot a graphical representation of the \emph{cnn} and \emph{cbs} gene region from the \emph{FlyBase} default view in PDF format.
 The \texttt{-force} option can be used to force overwriting of an already existing output file. The \texttt{-pipe} option additionally allows passing the GFF3 input through the sketch tool via the standard output, allowing the intermediate visualisation of results in a longer pipeline of connected GFF3 tools. More command line options are available; their documentation can be viewed using the \texttt{-help} option.
 
 If an input file is not plotted due to parsing errors, \emph{GenomeTools} includes a strict GFF3 validator tool to check whether the input file is in valid GFF3 format. Simply run a command like the following:
 \small
+\medskip
 \begin{verbatim}
 $ gt gff3validator input_file.gff3
 input is valid GFF3
 $
 \end{verbatim}
 \normalsize
+\medskip
 This validator also allows to check the SO types occurring in a GFF3 file against a given OBO ontology file. This checking can be enabled by specifying the file as an argument to the \texttt{-typecheck} option.
 
 \section{Dynamic track assignment}
@@ -263,11 +274,11 @@ Using this track selector function would produce the desired result of separate 
 \end{figure}
 
 A track selector function can be set for a \emph{Diagram} object using the \texttt{diagram.set\_track\_se\-lec\-tor\_func()} method. In C, its argument is a pointer to a function of the signature
-
+\medskip
 \begin{verbatim}
 const char* (*GtTrackSelectorFunc)(GtBlock*, void*)
 \end{verbatim}
-
+\medskip
 where arbitrary data can be passed via the second \texttt{void*} argument. The Python \texttt{set\_track\_se\-lec\-tor\_func()} method directly accepts a Python function as an argument, while the Ruby version takes a Proc object:
 
 \begin{lstlisting}[language=Ruby, showstringspaces=false,numbers=none,frame=single]
@@ -342,7 +353,7 @@ This tutorial uses Python code for simplicity, but the general approach is commo
 
 First, we need to define a class inheriting from CustomTrack, call the parent constructor to register the functions and set instance variables for the triangle sidelength and a dictionary containing the feature positions and a description:
 
-\begin{lstlisting}[language=Python, showstringspaces=false,numbers=none,frame=single]
+\begin{lstlisting}[language=Python, showstringspaces=false,numbers=left,frame=single]
 class CustomTrackInsertions(CustomTrack):
   def __init__(self, sidelength, data):
     super(CustomTrackInsertions, self).__init__()
@@ -352,21 +363,21 @@ class CustomTrackInsertions(CustomTrack):
 
 We define the height to be 20 pixels:
 
-\begin{lstlisting}[language=Python, showstringspaces=false,numbers=none,frame=single]
+\begin{lstlisting}[language=Python, firstnumber=6, showstringspaces=false,numbers=left,frame=single]
   def get_height(self):
     return 20
 \end{lstlisting}
 
 As a track title, we set ``Insertion site'':
 
-\begin{lstlisting}[language=Python, showstringspaces=false,numbers=none,frame=single]
+\begin{lstlisting}[language=Python, firstnumber=8,  showstringspaces=false,numbers=left,frame=single]
   def get_title(self):
     return "Insertion site"
 \end{lstlisting}
 
 The rendering code then calculates the triangle coordinates and draws the respective lines:
 
-\begin{lstlisting}[language=Python, showstringspaces=false,numbers=none,frame=single]
+\begin{lstlisting}[language=Python, firstnumber=10, showstringspaces=false,numbers=left,frame=single]
   def render(self, graphics, ypos, rng, style, error):
     height = (self.sidelength*math.sqrt(3))/2
     margins = graphics.get_xmargins()
@@ -406,12 +417,9 @@ Running layout and drawing functions on this diagram then produces the desired i
 \label{ctexample2}
 \end{figure}
 
-
-
-
 \section{Examples}
 
-This section will show how to use the \emph{AnnotationSketch} library in custom applications. As \emph{AnnotationSketch} is distributed as a part of \emph{GenomeTools}, its code is compiled into the \texttt{libgenometools.so} shared library. Please refer to the INSTALL file inside the \emph{GenomeTools} distribution for installation instructions.
+This section will show how to use the \emph{AnnotationSketch} library in custom applications. As \emph{AnnotationSketch} is distributed as a part of \emph{GenomeTools}, its code is compiled into the \texttt{lib\-ge\-nome\-tools.so} shared library. Please refer to the INSTALL file inside the \emph{GenomeTools} distribution for installation instructions.
 
 For a general idea about how to use the library, a simple implementation of the GFF3 validator is included in the source package (see \texttt{src/examples/gff3validator.c}) as an example showing how to create \emph{GenomeTools}-based programs. In the same directory, there is also an appropriate \texttt{Makefile} to build and link this application against the installed shared library \texttt{libgenometools.so}.
 
@@ -433,6 +441,9 @@ The following code examples (in C and Lua) illustrate how to produce an image fr
 \subsubsection{Ruby code}
 (See \texttt{gtruby/sketch\_parsed.rb} in the source distribution.)
 \lstinputlisting[language=Ruby, breaklines=true, numbers=left, frame=single,]{../../gtruby/sketch_parsed.rb}
+\subsubsection{Python code}
+(See \texttt{gtpython/sketch\_parsed.py} in the source distribution.)
+\lstinputlisting[language=Python, breaklines=true, numbers=left, frame=single,]{../../gtpython/sketch_parsed.py}
 
 \subsection{Using \emph{AnnotationSketch} to draw user-generated annotations}
 The following C code example illustrates how to produce an image from annotation graphs created by user code.
@@ -450,7 +461,12 @@ The following C code example illustrates how to produce an image from annotation
 \subsubsection{Lua code}
 (See \texttt{gtscripts/sketch\_constructed.lua} in the source distribution.  This example can be run by the command line \texttt{gt gtscripts/sketch\_constructed.lua <style\_file> <PNG\_file>})
 \lstinputlisting[language=Lua, breaklines=true, numbers=left, frame=single,]{../../gtscripts/sketch_constructed.lua}
-
+\subsubsection{Ruby code}
+(See \texttt{gtruby/sketch\_constructed.rb} in the source distribution.)
+\lstinputlisting[language=Ruby, breaklines=true, numbers=left, frame=single,]{../../gtruby/sketch_constructed.rb}
+\subsubsection{Python code}
+(See \texttt{gtpython/sketch\_constructed.py} in the source distribution.)
+\lstinputlisting[language=Python, breaklines=true, numbers=left, frame=single,]{../../gtpython/sketch_constructed.py}
 
 \input{api_reference}
 %\input{gtscript_reference}
