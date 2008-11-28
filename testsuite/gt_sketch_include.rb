@@ -126,3 +126,18 @@ Test do
              "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " +
              "#{$testdata}standard_gene_with_introns_as_tree.gff3"
 end
+
+Name "sketch_constructed (Ruby)"
+Keywords "gt_sketch gt_ruby annotationsketch"
+Test do
+  run_ruby "#{$cur}/gtruby/sketch_constructed.rb " +
+           "#{$cur}/gtdata/sketch/default.style sketch_constructed.png"
+end
+
+Name "sketch_parsed (Ruby)"
+Keywords "gt_sketch gt_ruby annotationsketch"
+Test do
+  run_ruby "#{$cur}/gtruby/sketch_parsed.rb " +
+           "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " +
+           "#{$testdata}standard_gene_with_introns_as_tree.gff3"
+end
