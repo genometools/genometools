@@ -40,7 +40,7 @@ seqid = feature_index.get_first_seqid()
 range = feature_index.get_range_for_seqid(seqid)
 
 style = GT::Style.new()
-diagram = GT::Diagram.new(feature_index, seqid, range, style)
+diagram = GT::Diagram.from_index(feature_index, seqid, range, style)
 layout = GT::Layout.new(diagram, 800, style)
 ii = GT::ImageInfo.new()
 image_info = GT::ImageInfo.new()

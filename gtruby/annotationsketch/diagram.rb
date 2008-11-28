@@ -17,29 +17,56 @@
 
 require 'gtdlload'
 require 'annotationsketch/block'
+require 'core/array'
 require 'core/range'
 
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GT_Diagram* gt_diagram_new(GtFeatureIndex*, const char*, " + \
+  extern "GtDiagram* gt_diagram_new(GtFeatureIndex*, const char*, " + \
                                     "const GtRange*, GtStyle*, GtError*)"
-  extern "void gt_diagram_set_track_selector_func(GT_Diagram*, void*)"
-  extern "void gt_diagram_add_custom_track(GT_Diagram*, GtCustomTrack*)"
+  extern "GtDiagram* gt_diagram_new_from_array(GtArray*, " + \
+                                               "const GtRange*, GtStyle*)"
+  extern "void gt_diagram_set_track_selector_func(GtDiagram*, void*)"
+  extern "void gt_diagram_add_custom_track(GtDiagram*, GtCustomTrack*)"
   extern "void gt_diagram_delete(GtDiagram*)"
 
   class Diagram
     attr_reader :diagram
-    def initialize(feature_index, seqid, range, style)
+
+    def self.from_index(feature_index, seqid, range, style)
       err = GT::Error.new()
       if range.start > range.end
         GT.gterror("range.start > range.end")
       end
-      @diagram = GT.gt_diagram_new(feature_index.feature_index, seqid, range,
-                                   style.style, err)
-      if @diagram.nil? then
+      if !style.is_a?(GT::Style) then
+        GT.gterror("'style' parameter must be a Style object!")
+      end
+      diagram = GT.gt_diagram_new(feature_index.feature_index, seqid, range,
+                                  style, err)
+      if diagram.nil? then
         GT::gterror(err)
       end
+      return GT::Diagram.new(diagram)
+    end
+
+    def self.from_array(array, range, style)
+      if range.start > range.end
+        GT.gterror("range.start > range.end")
+      end
+      gtarr = GT::Array.create(DL.sizeof("P"), false)
+      array.each do |i|
+        if !i.is_a?(GT::FeatureNode) then
+          gterror("Diagram array must only contain FeatureNodes!")
+        end
+        gtarr.add(i)
+      end
+      diagram = GT.gt_diagram_new_from_array(gtarr, range, style)
+      return GT::Diagram.new(diagram)
+    end
+
+    def initialize(ptr)
+      @diagram = ptr
       @diagram.free = GT::symbol("gt_diagram_delete", "0P")
     end
 
