@@ -37,7 +37,7 @@ class Diagram:
     gtarr = Array.create(sizeof(c_void_p), False)
     for i in arr:
       if not isinstance(i, FeatureNode):
-        gterror("DiagramFromArray array must only contain FeatureNodes!")
+        gterror("Diagram array must only contain FeatureNodes!")
       gtarr.add(i)
     diagram = gtlib.gt_diagram_new_from_array(gtarr, byref(rng), \
                                               style)
