@@ -26,7 +26,7 @@
 <h1><em>AnnotationSketch</em> code examples</h1>
 
 <a name="examples-parsed"></a>
-<h3>Using <em>AnnotationSketch</em> to draw annotations from a file</h3>
+<h2>Using <em>AnnotationSketch</em> to draw annotations from a file</h2>
 The following code examples (in C and Lua) illustrate how to produce an image from a given GFF3 file using <em>AnnotationSketch</em>. The result is shown in Fig. <a href="#fig7">7</a>. In essence, these code examples implement something like a simple version of the <tt>gt sketch</tt> tool from <em>GenomeTools</em> without most command-line options.
 <div class="figure">
   <p><a name="fig7"></a><img src="images/parsed.png" alt="[Example rendering from parsed GFF3 file]"></p>
@@ -51,8 +51,15 @@ The following code examples (in C and Lua) illustrate how to produce an image fr
 <!--#include file="gtruby/sketch_parsed.rb"-->
 </pre>
 
+<h4>Python code</h4>
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=gtpython/sketch_parsed.py;hb=HEAD"><tt>gtpython/sketch_parsed.py</tt></a> in the source distribution.)
+<pre class="code">
+<!--#include file="gtpython/sketch_parsed.py"-->
+</pre>
+
+
 <a name="examples-generated"></a>
-<h3>Using <em>AnnotationSketch</em> to draw user-generated annotations</h3>
+<h2>Using <em>AnnotationSketch</em> to draw user-generated annotations</h2>
 The following C code example illustrates how to produce an image from annotation graphs created by user code.
  The result is shown in Fig. <a href="#fig8">8</a>.
 <div class="figure">
@@ -70,6 +77,18 @@ The following C code example illustrates how to produce an image from annotation
 (See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=gtscripts/sketch_constructed.lua;hb=HEAD"><tt>gtscripts/sketch_constructed.lua</tt></a> in the source distribution.  This example can be run by the command line <tt>gt gtscripts/sketch_constructed.lua &lt;style_file&gt; &lt;PNG_file&gt;</tt>)
 <pre class="code">
 <!--#include file="gtscripts/sketch_constructed.lua"-->
+</pre>
+
+<h4>Ruby code</h4>
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=gtruby/sketch_constructed.rb;hb=HEAD"><tt>gtruby/sketch_constructed.rb</tt></a> in the source distribution.)
+<pre class="code">
+<!--#include file="gtruby/sketch_constructed.rb"-->
+</pre>
+
+<h4>Python code</h4>
+(See <a href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob_plain;f=gtpython/sketch_constructed.py;hb=HEAD"><tt>gtpython/sketch_constructed.py</tt></a> in the source distribution.)
+<pre class="code">
+<!--#include file="gtpython/sketch_constructed.py"-->
 </pre>
 
 <div id="footer">
