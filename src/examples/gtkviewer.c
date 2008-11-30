@@ -9,7 +9,6 @@ GtLayout *l = NULL;
 GtStyle *sty = NULL;
 GtError *err = NULL;
 GtkWidget *area;
-gint lastwidth;
 
 static gboolean on_expose_event(GtkWidget *widget,
                                 GdkEventExpose *event,
@@ -18,10 +17,10 @@ static gboolean on_expose_event(GtkWidget *widget,
   cairo_t *cr;
   GtCanvas *canvas = NULL;
   if (!d || widget->allocation.width <= 30) return FALSE;
-  lastwidth = widget->allocation.width;
 
   /* render image */
-  l = gt_layout_new(d, widget->allocation.width, sty);
+  l = gt_layout_new(d, widget->allocation.width, sty, err);
+  if (!l) return FALSE;
   gtk_layout_set_size(GTK_LAYOUT(widget),
                       widget->allocation.width,
                       gt_layout_get_height(l));
@@ -29,9 +28,9 @@ static gboolean on_expose_event(GtkWidget *widget,
   cairo_rectangle(cr, event->area.x, event->area.y, event->area.width,
                   event->area.height);
   cairo_clip(cr);
-  canvas = gt_canvas_cairo_context_new(sty, cr, widget->allocation.width,
+  canvas = gt_canvas_cairo_context_new(sty, cr, 0, widget->allocation.width,
                                        gt_layout_get_height(l), NULL);
-  gt_layout_sketch(l, canvas);
+  gt_layout_sketch(l, canvas, err);
   gt_layout_delete(l);
   gt_canvas_delete(canvas);
   return FALSE;
@@ -72,19 +71,10 @@ open_file(GtkWidget *widget,  gpointer user_data)
       GtkWidget *w = GTK_WIDGET(area);
       GtkListStore *store;
       GtBioseq *bioseq;
-      GtCustomTrack *custom;
-      bioseq = gt_bioseq_new("Drosophila_melanogaster.BDGP5.4.51.dna.chromosome"
-                             ".4.fa.gz", err);
-      custom = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
-                                          200,
-                                          40,
-                                          0.165);
       seqid = gt_feature_index_get_first_seqid(features);
       gt_feature_index_get_range_for_seqid(features, &qry_range, seqid);
       gt_diagram_delete(d);
       d = gt_diagram_new(features, seqid, &qry_range, sty, err);
-      gt_diagram_add_custom_track(d, custom);
-      lastwidth = 0;
       gtk_widget_queue_draw_area (w, 0, 0, w->allocation.width,
                                   w->allocation.height);
       gtk_widget_destroy(dialog);
