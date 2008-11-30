@@ -682,8 +682,8 @@ GtGraphics* gt_graphics_cairo_new_from_context(cairo_t *context,
   gc->margin_x = gc->margin_y = 20;
   gc->from_context = true;
   gc->cr = context;
-  cairo_set_source_rgba(context, 1, 1, 1, 1);
-  cairo_paint(context);
+  /* cairo_set_source_rgba(context, 1, 1, 1, 1);
+  cairo_paint(context); */
   cairo_set_line_join(context, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(context, CAIRO_LINE_CAP_ROUND);
   cairo_select_font_face(context, "sans", CAIRO_FONT_SLANT_NORMAL,
