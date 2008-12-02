@@ -14,6 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef SKETCH_PAGE
+
 #include <cairo.h>
 #include <string.h>
 #if CAIRO_HAS_PS_SURFACE
@@ -287,3 +289,5 @@ GtTool* gt_sketch_page(void)
                      NULL,
                      gt_sketch_page_runner);
 }
+
+#endif
