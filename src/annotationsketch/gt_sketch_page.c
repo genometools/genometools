@@ -236,7 +236,8 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
       gt_log_log("%f+%lu = %f > %f... page break!\n", offsetpos, height,
                  offsetpos+height, mm_to_pt(arguments->pheight)+10);
       cairo_surface_show_page(surf);
-      gt_log_log("sstatus: %s\n", cairo_status_to_string(cairo_surface_status(surf)));
+      gt_log_log("sstatus: %s\n",
+                 cairo_status_to_string(cairo_surface_status(surf)));
       gt_log_log("page shown\n");
       offsetpos = 0;
       num_pages++;
@@ -256,16 +257,19 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     gt_layout_delete(l);
     gt_diagram_delete(d);
     gt_log_log("status: %s\n", cairo_status_to_string(cairo_status(cr)));
-    gt_log_log("sstatus: %s\n", cairo_status_to_string(cairo_surface_status(surf)));
+    gt_log_log("sstatus: %s\n",
+               cairo_status_to_string(cairo_surface_status(surf)));
   }
   cairo_text_extents(cr, "", &ext);
   gt_log_log ("extents: %f, %f\n", ext.width, ext.height);
-  cairo_move_to(cr, mm_to_pt(arguments->pwidth)-ext.width, mm_to_pt(arguments->pheight)-ext.height);
+  cairo_move_to(cr, mm_to_pt(arguments->pwidth)-ext.width,
+                mm_to_pt(arguments->pheight)-ext.height);
   cairo_set_source_rgba(cr, 0,0,0,1);
   cairo_show_text(cr, "");
   gt_log_log("status: %s\n", cairo_status_to_string(cairo_status(cr)));
   cairo_surface_show_page(surf);
-  gt_log_log("sstatus: %s\n", cairo_status_to_string(cairo_surface_status(surf)));
+  gt_log_log("sstatus: %s\n",
+             cairo_status_to_string(cairo_surface_status(surf)));
   num_pages++;
   gt_log_log("finished, should be %lu pages\n", num_pages);
   cairo_destroy(cr);
