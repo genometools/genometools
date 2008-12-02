@@ -67,7 +67,9 @@ int main(int argc, char *argv[])
 
   /* create custom track with GC plot for first sequence in file,
      window size 1000, 40px height and average line at 16.5% */
-  custom = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
+  custom = gt_custom_track_gc_content_new(gt_bioseq_get_sequence(bioseq, 0),
+                                          gt_bioseq_get_sequence_length(bioseq,
+                                                                        0),
                                           windowsize,
                                           70,
                                           0.165,

@@ -220,7 +220,9 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     single_range.start = start;
     single_range.end = start + arguments->width;
     gt_log_log("drawing %lu-%lu\n", single_range.start, single_range.end);
-  /* ct = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
+  /* ct = gt_custom_track_gc_content_new(gt_bioseq_get_sequence(bioseq, 0),
+                                        gt_bioseq_get_sequence_length(bioseq,
+                                                                      0),
                                         300,
                                         40,
                                         0.365,

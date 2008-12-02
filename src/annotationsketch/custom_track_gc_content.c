@@ -32,7 +32,8 @@ struct GtCustomTrackGcContent {
   double avg;
   bool show_scale;
   GtStr *title;
-  GtSeq *seq;
+  const char *seq;
+  unsigned long seqlen;
 };
 
 #define gt_custom_track_gc_content_cast(ct)\
@@ -41,16 +42,15 @@ struct GtCustomTrackGcContent {
 static inline double get_val_for_pos(GtCustomTrackGcContent *ctgc,
                                      unsigned long pos)
 {
-  const char *seq = gt_seq_get_orig(ctgc->seq);
   unsigned long i,
                 gc_count = 0,
                 bases = 0;
   for (i=0;i<ctgc->windowsize;i++)
   {
-    if (pos + i > gt_seq_length(ctgc->seq))
+    if (pos + i > ctgc->seqlen)
       return -1;
-    if (seq[pos+i] == 'g' || seq[pos+i] == 'c'
-         || seq[pos+i] == 'G' || seq[pos+i] == 'C')
+    if (ctgc->seq[pos+i] == 'g' || ctgc->seq[pos+i] == 'c'
+         || ctgc->seq[pos+i] == 'G' || ctgc->seq[pos+i] == 'C')
     {
       gc_count++;
     }
@@ -195,7 +195,8 @@ const GtCustomTrackClass* gt_custom_track_gc_content_class(void)
   return ctc;
 }
 
-GtCustomTrack* gt_custom_track_gc_content_new(GtSeq *seq,
+GtCustomTrack* gt_custom_track_gc_content_new(const char *seq,
+                                              unsigned long seqlen,
                                               unsigned long windowsize,
                                               unsigned long height,
                                               double avg,
@@ -209,9 +210,9 @@ GtCustomTrack* gt_custom_track_gc_content_new(GtSeq *seq,
   ctgc->windowsize = windowsize;
   ctgc->height = height;
   ctgc->seq = seq;
+  ctgc->seqlen = seqlen;
   ctgc->avg = avg;
   ctgc->show_scale = show_scale;
-  /* ctgc->title = gt_str_new_cstr(gt_seq_get_description(seq)); */
   ctgc->title = gt_str_new_cstr("GC content (window size ");
   gt_str_append_ulong(ctgc->title, ctgc->windowsize);
   if (avg > 0)
