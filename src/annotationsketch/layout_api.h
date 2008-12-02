@@ -20,7 +20,6 @@
 
 #include "annotationsketch/canvas_api.h"
 #include "annotationsketch/diagram_api.h"
-#include "annotationsketch/drawing_range.h"
 #include "annotationsketch/style_api.h"
 #include "annotationsketch/text_width_calculator_api.h"
 #include "core/range_api.h"
