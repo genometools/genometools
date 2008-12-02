@@ -242,7 +242,9 @@ if cgi.params.has_key?('submitted') then
     c.to_file("#{SCRIPT_PATH}/#{IMAGE_DIR}/#{originalfilename}.png")
     puts HTML_IMAGE % [originalfilename.strip_html, \
                        "#{IMAGE_DIR}/#{originalfilename}.png"]
-    File.unlink(targetfilename)
+    if not cgi["example"].string == "example" then
+      File.unlink(targetfilename)
+    end
   rescue Exception => err:
     puts "<h2>An error has occurred</h2><p>#{err}</p>"
   end
