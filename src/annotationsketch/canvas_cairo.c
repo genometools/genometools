@@ -568,7 +568,7 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                    rulercol,
                                    10,
                                    1.0);
-    format_ruler_label(str, tick, BUFSIZ);
+    gt_format_ruler_label(str, tick, BUFSIZ);
     gt_graphics_draw_text_centered(canvas->pvt->g,
                                    drawtick,
                                    canvas->pvt->y + 20,
