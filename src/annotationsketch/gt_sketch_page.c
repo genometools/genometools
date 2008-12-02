@@ -237,7 +237,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     {
       gt_log_log("%f+%lu = %f > %f... page break!\n", offsetpos, height,
                  offsetpos+height, mm_to_pt(arguments->pheight)+10);
-      cairo_surface_show_page(surf);
+      cairo_show_page(cr);
       gt_log_log("sstatus: %s\n",
                  cairo_status_to_string(cairo_surface_status(surf)));
       gt_log_log("page shown\n");
@@ -269,7 +269,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   cairo_set_source_rgba(cr, 0,0,0,1);
   cairo_show_text(cr, "");
   gt_log_log("status: %s\n", cairo_status_to_string(cairo_status(cr)));
-  cairo_surface_show_page(surf);
+  cairo_show_page(cr);
   gt_log_log("sstatus: %s\n",
              cairo_status_to_string(cairo_surface_status(surf)));
   num_pages++;
