@@ -20,6 +20,7 @@ GENOMETOOLS_PATH = "/home/gordon/gt_for_annotationsketch_demo"
 GTRUBY_PATH      = "#{GENOMETOOLS_PATH}/gtruby"
 LD_LIBRARY_PATH  = "#{GENOMETOOLS_PATH}/lib"
 STYLE_FILE       = "#{GENOMETOOLS_PATH}/gtdata/sketch/default.style"
+DEFAULT_ANNOTATION_FILE = "#{GENOMETOOLS_PATH}/testdata/standard_gene_as_tree.gff3"
 SCRIPT_PATH      = "/var/www/servers/genometools.org/htdocs/cgi-bin"
 UPLOAD_PATH      = "/tmp"
 IMAGE_DIR        = "imgs"   # relative paths from SCRIPT_PATH please
@@ -29,10 +30,8 @@ $: << (GTRUBY_PATH)
 require "gtruby"
 require "cgi"
 
-
 puts "Content-type: text/html"
 puts ""
-
 
 cgi = CGI.new("html4")
 
@@ -62,6 +61,17 @@ HTML_HEADER = <<END
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <title>The AnnotationSketch module</title>
 <link rel="stylesheet" type="text/css" href="../style.css">
+<script type="text/javascript">
+ function disable(field) {
+   field.disabled = true;
+   field.readonly = true;
+ }
+
+ function enable(field) {
+   field.disabled = false;
+   field.readonly = false;
+ }
+</script>
 </head>
 <body>
 <div id="menu">
@@ -107,7 +117,8 @@ UPLOAD_FORM = <<END
     <table>
       <tr><td>Annotation file:</td>
         <td>
-          <input name="file" type="file">
+          <input type="radio" name="example" value="example" onclick="disable(this.form.file);" %s>Example file<br>
+          <input type="radio" name="example" value="file" onclick="enable(this.form.file);" %s>Custom file: <input name="file" type="file" %s>
           <input type="hidden" name="submitted" value="true">
         </td>
       </tr>
@@ -146,27 +157,44 @@ END
 
 puts HTML_HEADER
 
-
-
 if cgi.params.has_key?('submitted') then
   begin
-    puts UPLOAD_FORM % [cgi['seqid'].string.strip_html, \
+    if cgi["example"].string == "example" then
+      e_str = 'checked="checked"'
+      d_str1 = ""
+      d_str2 = 'disabled="disabled"'
+    elsif cgi["example"].string == "file" then
+      e_str = ""
+      d_str1 = 'checked="checked"'
+      d_str2 = ""
+    end
+    puts UPLOAD_FORM % [e_str, \
+                        d_str1, \
+                        d_str2, \
+                        cgi['seqid'].string.strip_html, \
                         cgi['rangestart'].string.strip_html, \
                         cgi['rangeend'].string.strip_html, \
                         cgi['width'].string.strip_html]
-    ufile = cgi.params['file']
-    if ufile.first.length == 0 then
-      GT::gterror("No file was uploaded!")
-    elsif ufile.first.length > MAXSIZE then
-      GT::gterror("Your uploaded file was too large! This demo service
-                   supports annotation files up to #{(MAXSIZE/1024)}KB. Please
-                   upload a smaller file.")
-    end
-    # mangle file path to avoid directory traversal attacks
-    truncated_filename = File.basename(File.expand_path(ufile.first.original_filename))
-    targetfilename = "#{UPLOAD_PATH}/#{truncated_filename}"
-    File.open(targetfilename, "w+") do |file|
-      file.write(ufile.first.read)
+    if cgi["example"].string == "example" then
+      targetfilename = DEFAULT_ANNOTATION_FILE
+      originalfilename = File.basename(DEFAULT_ANNOTATION_FILE)
+    else
+      ufile = cgi.params['file']
+      if ufile.first.length == 0 then
+        GT::gterror("No file was uploaded!")
+      elsif ufile.first.length > MAXSIZE then
+        GT::gterror("Your uploaded file was too large! This demo service
+                     supports annotation files up to #{(MAXSIZE/1024)}KB. Please
+                     upload a smaller file.")
+      end
+      # mangle file path to avoid directory traversal attacks
+      originalfilename = ufile.first.original_filename
+      truncated_filename = File.basename(File.expand_path(originalfilename))
+      targetfilename = "#{UPLOAD_PATH}/#{truncated_filename}"
+
+      File.open(targetfilename, "w+") do |file|
+        file.write(ufile.first.read)
+      end
     end
     feature_index = GT::FeatureIndexMemory.new()
     feature_index.add_gff3file(targetfilename)
@@ -211,15 +239,16 @@ if cgi.params.has_key?('submitted') then
     l = GT::Layout.new(d, width, style)
     c = GT::CanvasCairoFile.new(style, width, l.get_height())
     l.sketch(c)
-    c.to_file("#{SCRIPT_PATH}/#{IMAGE_DIR}/#{ufile.first.original_filename}.png")
-    puts HTML_IMAGE % [ufile.first.original_filename.strip_html, \
-                       "#{IMAGE_DIR}/#{ufile.first.original_filename}.png"]
+    c.to_file("#{SCRIPT_PATH}/#{IMAGE_DIR}/#{originalfilename}.png")
+    puts HTML_IMAGE % [originalfilename.strip_html, \
+                       "#{IMAGE_DIR}/#{originalfilename}.png"]
     File.unlink(targetfilename)
   rescue Exception => err:
     puts "<h2>An error has occurred</h2><p>#{err}</p>"
   end
 else
-  puts UPLOAD_FORM % ['', '', '', 800]
+  puts UPLOAD_FORM % ['checked="checked"', '', 'disabled="disabled"', '', '', \
+                      '', 800]
 end
 
 print HTML_FOOTER
