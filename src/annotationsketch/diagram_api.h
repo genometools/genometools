@@ -32,7 +32,7 @@ typedef struct GtDiagram GtDiagram;
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/style_api.h"
 #include "annotationsketch/block_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* A <GtTrackSelectorFunc> is a callback function which returns a string
    which can be used as a track identifier for assignment of a <GtBlock>
