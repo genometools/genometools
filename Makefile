@@ -573,6 +573,8 @@ dist: all manuals
 	@strip $(GTDISTDIR)/bin/gt
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
+	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
+	@cp -r $(CURDIR)/gtruby $(GTDISTDIR)
 	@$(MAKE) prefix=$(GTDISTDIR) install
 	@cd $(DISTDIR) && tar cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
 	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
