@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/ma.h"
-#include "annotationsketch/color.h"
+#include "annotationsketch/color_api.h"
 
 GtColor* gt_color_new(double red, double green, double blue, double alpha)
 {

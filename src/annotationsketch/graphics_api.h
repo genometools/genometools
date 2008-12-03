@@ -19,10 +19,10 @@
 #ifndef GRAPHICS_API_H
 #define GRAPHICS_API_H
 
-#include "annotationsketch/color.h"
-#include "core/error.h"
-#include "core/range.h"
-#include "core/str.h"
+#include "annotationsketch/color_api.h"
+#include "core/error_api.h"
+#include "core/range_api.h"
+#include "core/str_api.h"
 
 typedef enum {
   GT_GRAPHICS_PDF,

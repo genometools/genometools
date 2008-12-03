@@ -20,7 +20,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "annotationsketch/color.h"
+#include "annotationsketch/color_api.h"
 #include "annotationsketch/style.h"
 #include "core/assert_api.h"
 #include "core/cstr.h"
