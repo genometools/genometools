@@ -18,7 +18,10 @@
 from gt.dlload import gtlib
 
 class Array:
-  def create(size, own = True):
+  def create(size=None, own = True):
+    if size is None:
+      from ctypes import c_void_p, sizeof
+      size = sizeof(c_void_p)
     return Array(gtlib.gt_array_new(size), own)
   create = staticmethod(create)
 

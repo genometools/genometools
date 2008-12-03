@@ -76,7 +76,7 @@ class FeatureIndex:
 
   def get_features_for_range(self, start, end, seqid):
     from ctypes import byref
-    a = Array()
+    a = Array.create()
     err = Error()
     rng = Range(start, end)
     rval = gtlib.gt_feature_index_get_features_for_range(self.fi, a, \
