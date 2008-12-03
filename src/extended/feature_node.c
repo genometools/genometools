@@ -544,7 +544,7 @@ static bool genome_feature_has_gft(const GtFeatureNode *fn,
   while ((child = gt_feature_node_iterator_next(fni))) {
     unsigned long i = 0;
     while (fnts[i] != NULL) {
-      if (gt_feature_node_has_type((GtFeatureNode*) fn, fnts[i])) {
+      if (gt_feature_node_has_type((GtFeatureNode*) child, fnts[i])) {
         has_gft = true;
         break;
       }
