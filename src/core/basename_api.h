@@ -19,7 +19,7 @@
 #ifndef BASENAME_API_H
 #define BASENAME_API_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* POSIX module */
 

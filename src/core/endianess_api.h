@@ -18,6 +18,8 @@
 #ifndef ENDIANESS_API_H
 #define ENDIANESS_API_H
 
+#include <stdbool.h>
+
 /* Endianess module */
 
 /* Returns <true> if host CPU is little-endian, <false> otherwise. */
