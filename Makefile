@@ -281,10 +281,6 @@ else
   STEST_FLAGS += -nocairo
 endif
 
-ifeq ($(sketch_page),yes)
-  EXP_CPPFLAGS += -DSKETCH_PAGE
-endif
-
 # the GenomeTools library
 LIBGENOMETOOLS_SRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
 LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \

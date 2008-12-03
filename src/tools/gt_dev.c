@@ -55,9 +55,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
 #ifndef WITHOUT_CAIRO
-#ifdef SKETCH_PAGE
   gt_toolbox_add_tool(dev_toolbox, "sketch_page", gt_sketch_page());
-#endif
 #endif
   return dev_toolbox;
 }

@@ -17,13 +17,9 @@
 #ifndef GT_SKETCH_PAGE_H
 #define GT_SKETCH_PAGE_H
 
-#ifdef SKETCH_PAGE
-
 #include "core/tool.h"
 
 /* the SketchPage tool */
 GtTool* gt_sketch_page(void);
-
-#endif
 
 #endif
