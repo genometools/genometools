@@ -158,12 +158,20 @@ END
 puts HTML_HEADER
 
 if cgi.params.has_key?('submitted') then
+  # CGI parameters behave differently with uploaded file size.
+  # StringIO.read does not seem to work right either.
+  # account for that by checking for the type of the parameters
+  if cgi["example"].kind_of?(StringIO) then
+    read_method = :string
+  else
+    read_method = :read
+  end
   begin
-    if cgi["example"].string == "example" then
+    if cgi["example"].nil? or cgi["example"].send(read_method) == "example" then
       e_str = 'checked="checked"'
       d_str1 = ""
       d_str2 = 'disabled="disabled"'
-    elsif cgi["example"].string == "file" then
+    else
       e_str = ""
       d_str1 = 'checked="checked"'
       d_str2 = ""
@@ -175,7 +183,8 @@ if cgi.params.has_key?('submitted') then
                         cgi['rangestart'].string.strip_html, \
                         cgi['rangeend'].string.strip_html, \
                         cgi['width'].string.strip_html]
-    if cgi["example"].string == "example" then
+
+    if cgi["example"].nil? or cgi["example"].send(read_method) == "example" then
       targetfilename = DEFAULT_ANNOTATION_FILE
       originalfilename = File.basename(DEFAULT_ANNOTATION_FILE)
     else
@@ -191,7 +200,6 @@ if cgi.params.has_key?('submitted') then
       originalfilename = ufile.first.original_filename
       truncated_filename = File.basename(File.expand_path(originalfilename))
       targetfilename = "#{UPLOAD_PATH}/#{truncated_filename}"
-
       File.open(targetfilename, "w+") do |file|
         file.write(ufile.first.read)
       end
@@ -200,7 +208,7 @@ if cgi.params.has_key?('submitted') then
     feature_index.add_gff3file(targetfilename)
 
     if cgi['width'].string != "" then
-      width = cgi['width'].string.to_i
+      width = cgi['width'].send(read_method).to_i
       if width < 70 then
         GT::gterror("Please set a width of more than 70 pixels!")
       end
@@ -208,10 +216,13 @@ if cgi.params.has_key?('submitted') then
       width = 800
     end
 
-    if cgi['seqid'].string != "" then
+    if cgi['seqid'].string.to_s != "" then
       seqid = cgi['seqid'].string
       seqids = feature_index.get_seqids
       if !seqids.include?(seqid) then
+        if not cgi["example"].send(read_method) == "example" then
+          File.unlink(targetfilename)
+        end
         GT::gterror("Invalid sequence region '#{seqid}':
                      must be #{"one of" unless seqids.length == 1}
                      #{seqids.collect{|v|"&quot;#{v}&quot;"}.join(" or ")}!")
@@ -242,7 +253,7 @@ if cgi.params.has_key?('submitted') then
     c.to_file("#{SCRIPT_PATH}/#{IMAGE_DIR}/#{originalfilename}.png")
     puts HTML_IMAGE % [originalfilename.strip_html, \
                        "#{IMAGE_DIR}/#{originalfilename}.png"]
-    if not cgi["example"].string == "example" then
+    if not cgi["example"].send(read_method) == "example" then
       File.unlink(targetfilename)
     end
   rescue Exception => err:
