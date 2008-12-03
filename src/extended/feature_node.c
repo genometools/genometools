@@ -533,8 +533,7 @@ void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
   }
 }
 
-static bool genome_feature_has_gft(const GtFeatureNode *fn,
-                                   const char **fnts)
+static bool feature_node_has_gft(const GtFeatureNode *fn, const char **fnts)
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *child;
@@ -560,14 +559,14 @@ static bool genome_feature_has_gft(const GtFeatureNode *fn,
 bool gt_feature_node_has_CDS(const GtFeatureNode *fn)
 {
   static const char *gfts[] = { gft_CDS, NULL };
-  return genome_feature_has_gft(fn, gfts);
+  return feature_node_has_gft(fn, gfts);
 }
 
 bool gt_feature_node_has_splice_site(const GtFeatureNode *fn)
 {
   static const char *gfts[] = { gft_five_prime_splice_site,
                                 gft_three_prime_splice_site, NULL };
-  return genome_feature_has_gft(fn, gfts);
+  return feature_node_has_gft(fn, gfts);
 }
 
 double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn)
