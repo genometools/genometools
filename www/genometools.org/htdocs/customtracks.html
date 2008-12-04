@@ -102,7 +102,7 @@ The rendering code then calculates the triangle coordinates and draws the respec
 For a Python custom track, that's it! No more code is necessary for this very simple custom track. We can now instantiate this class and attach the instance to a <tt>Diagram</tt> object:
 <pre class="code">
 ...
-diagram = Diagram(feature_index, seqid, range, style)
+diagram = Diagram.from_index(feature_index, seqid, range, style)
 ...
 ctt = CustomTrackInsertions(15, {2000:"foo", 4400:"bar", 8000:"baz"})
 diagram.add_custom_track(ctt)
