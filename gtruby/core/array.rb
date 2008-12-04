@@ -28,7 +28,10 @@ module GT
   extern "void  gt_array_delete(GtArray*)"
 
   class Array
-    def self.create(size, own = true)
+    def self.create(size = nil, own = true)
+      if size.nil? then
+        size = DL::sizeof("P")
+      end
       return GT::Array.new(GT.gt_array_new(size), own)
     end
 

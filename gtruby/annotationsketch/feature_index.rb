@@ -37,6 +37,10 @@ module GT
   extern "void gt_feature_index_get_range_for_seqid(GtFeatureIndex*, " +
                                                    "GtRange*, const char*)"
   extern "bool gt_feature_index_has_seqid(const GtFeatureIndex*, const char*)"
+  extern "int  gt_feature_index_get_features_for_range(GtFeatureIndex*,
+                                                       GtArray*, const char*,
+                                                       const GtRange*,
+                                                       GtError*)"
 
   class FeatureIndex
     attr_reader :feature_index
@@ -59,6 +63,25 @@ module GT
       else
         nil
       end
+    end
+
+    def get_features_for_range(start, stop, seqid)
+      a = Array.create()
+      err = Error.new()
+      rng = Range.malloc
+      rng.start = start
+      rng.end = stop
+      rval = GT::gt_feature_index_get_features_for_range(@feature_index, a, \
+                                                         seqid, rng, err)
+      if rval != 0 then
+          GT.gterror(err)
+      end
+      result = []
+      1.upto(a.size) do |i|
+        fn = GT::FeatureNode.new(GT.gt_genome_node_ref(a.get(i-1)))
+        result.push(fn)
+      end
+      result
     end
 
     def add_gff3file(filename)
