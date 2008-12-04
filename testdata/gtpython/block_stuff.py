@@ -22,11 +22,14 @@ from gt.annotationsketch import *
 import sys
 import re
 
+class TestFailedError(Exception):
+  pass
+
 def testfunc(bl):
   b = Block(bl)
   print "%s %s %s %d" % (b.get_type(), b.get_strand(), b.get_range(), b.get_size())
   if not b.get_top_level_feature():
-    raise
+    raise TestFailedError
   return b.get_type()
 
 if __name__ == "__main__":

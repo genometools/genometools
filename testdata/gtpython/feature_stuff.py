@@ -22,6 +22,9 @@ from gt.annotationsketch import *
 import sys
 import re
 
+class TestFailedError(Exception):
+  pass
+
 if __name__ == "__main__":
   if len(sys.argv) != 2:
     sys.stderr.write("Usage: " + sys.argv[0] + " GFF3_file\n")
@@ -50,14 +53,20 @@ if __name__ == "__main__":
   seqid = feature_index.get_first_seqid()
   features = feature_index.get_features_for_seqid(seqid)
   if not features:
-    raise
+    raise TestFailedError
+
+  rng = feature_index.get_range_for_seqid(seqid)
+  features_r = feature_index.get_features_for_range(rng.start, rng.end, seqid)
+
+  if not len(features) == len(features_r):
+    raise TestFailedError
 
   gff3_visitor = GFF3Visitor()
 
   for feature in features:
     feature.accept(gff3_visitor)
     if not isinstance (feature, FeatureNode):
-      raise
+      raise TestFailedError
     if not isinstance(feature.attribs, dict):
-      raise
+      raise TestFailedError
 
