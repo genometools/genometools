@@ -23,6 +23,7 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/custom_track.h"
 #include "annotationsketch/layout.h"
+#include "annotationsketch/line.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/element.h"

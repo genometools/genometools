@@ -21,6 +21,8 @@
 #include "core/ma.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "annotationsketch/default_formats.h"
+#include "annotationsketch/line.h"
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
@@ -150,55 +152,106 @@ int gt_track_sketch(GtTrack* track, GtCanvas *canvas, GtError *err)
   return had_err;
 }
 
+double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
+{
+  unsigned long i;
+  double track_height = 0;
+  gt_assert(track && sty);
+  for (i = 0; i < gt_array_size(track->lines); i++)
+  {
+    GtLine *line = *(GtLine**) gt_array_get(track->lines, i);
+    track_height += gt_line_get_height(line, sty);
+  }
+  return track_height;
+}
+
 int gt_track_unit_test(GtError *err)
 {
   int had_err = 0;
-  GtBlock *b1, *b2, *b3, *b4;
-  GtRange r1, r2, r3, r4;
+  GtBlock *b[4];
+  GtRange r[4];
   GtTrack *track;
+  GtGenomeNode *parent[4], *gn[4];
   GtStr *title;
-  gt_error_check(err);
+  GtStyle *sty;
+  unsigned long i;
   GtLineBreaker *lb;
+  gt_error_check(err);
 
   title = gt_str_new_cstr("test");
 
-  r1.start=100UL;  r1.end=1000UL;
-  r2.start=1001UL; r2.end=1500UL;
-  r3.start=700UL;  r3.end=1200UL;
-  r4.start=10UL;   r4.end=200UL;
+  r[0].start=100UL;  r[0].end=1000UL;
+  r[1].start=1001UL; r[1].end=1500UL;
+  r[2].start=700UL;  r[2].end=1200UL;
+  r[3].start=10UL;   r[3].end=200UL;
 
-  b1 = gt_block_new();
-  gt_block_set_range(b1, r1);
-  b2 = gt_block_new();
-  gt_block_set_range(b2, r2);
-  b3 = gt_block_new();
-  gt_block_set_range(b3, r3);
-  b4 = gt_block_new();
-  gt_block_set_range(b4, r4);
+  for (i=0;i<4;i++)
+  {
+    parent[i] = gt_feature_node_new(title, gft_gene, r[i].start, r[i].end,
+                                    GT_STRAND_FORWARD);
+    gn[i] = gt_feature_node_new(title, gft_exon, r[i].start, r[i].end,
+                                 GT_STRAND_FORWARD);
+
+    gt_feature_node_add_child((GtFeatureNode*) parent[i],
+                              (GtFeatureNode*) gn[i]);
+
+    gt_feature_node_add_attribute((GtFeatureNode*) parent[i], "Name", "parent");
+    gt_feature_node_add_attribute((GtFeatureNode*) gn[i], "Name", "child");
+  }
+
+  for (i=0;i<4;i++)
+  {
+    b[i] = gt_block_new();
+    gt_block_set_range(b[i], r[i]);
+    gt_block_insert_element(b[i], (GtFeatureNode*) parent[i]);
+    gt_block_insert_element(b[i], (GtFeatureNode*) gn[i]);
+  }
 
   lb = gt_line_breaker_bases_new();
+
+  sty = gt_style_new(err);
 
   track = gt_track_new(title, UNDEF_ULONG, true, lb);
   ensure(had_err, track);
   ensure(had_err, gt_track_get_title(track) == title);
 
   ensure(had_err, gt_track_get_number_of_lines(track) == 0);
-  gt_track_insert_block(track, b1);
+  ensure(had_err, gt_track_get_height(track, sty) == 0);
+
+  gt_track_insert_block(track, b[0]);
   ensure(had_err, gt_track_get_number_of_lines(track) == 1);
-  gt_track_insert_block(track, b2);
+  ensure(had_err, gt_track_get_height(track, sty) == BAR_HEIGHT_DEFAULT);
+
+  gt_track_insert_block(track, b[1]);
   ensure(had_err, gt_track_get_number_of_lines(track) == 1);
-  gt_track_insert_block(track, b3);
+  ensure(had_err, gt_track_get_height(track, sty) == BAR_HEIGHT_DEFAULT);
+
+  gt_track_insert_block(track, b[2]);
   ensure(had_err, gt_track_get_number_of_lines(track) == 2);
-  gt_track_insert_block(track, b4);
+  gt_track_insert_block(track, b[3]);
   ensure(had_err, gt_track_get_number_of_lines(track) == 2);
+  ensure(had_err, gt_track_get_height(track, sty) == 2*BAR_HEIGHT_DEFAULT);
+
+  gt_style_set_num(sty, "exon", "bar_height", 42);
+  ensure(had_err, gt_track_get_height(track, sty) == 2*42);
+  gt_style_set_num(sty, "gene", "bar_height", 23);
+  ensure(had_err, gt_track_get_height(track, sty) == 2*42);
+  gt_style_unset(sty, "exon", "bar_height");
+  ensure(had_err, gt_track_get_height(track, sty) == 2*23);
+  gt_style_unset(sty, "gene", "bar_height");
+  gt_style_set_num(sty, "format", "bar_height", 99);
+  ensure(had_err, gt_track_get_height(track, sty) == 2*99);
+
+  ensure(had_err, gt_track_get_number_of_discarded_blocks(track) == 0);
 
   gt_track_delete(track);
   gt_str_delete(title);
-  gt_block_delete(b1);
-  gt_block_delete(b2);
-  gt_block_delete(b3);
-  gt_block_delete(b4);
-
+  gt_style_delete(sty);
+  for (i=0;i<4;i++)
+  {
+    gt_block_delete(b[i]);
+    gt_genome_node_delete(parent[i]);
+  }
   return had_err;
 }
 

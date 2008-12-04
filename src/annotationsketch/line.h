@@ -19,21 +19,22 @@
 #ifndef LINE_H
 #define LINE_H
 
-/* A line contains block objects. */
+/* A GtLine contains GtBlock objects. */
 typedef struct GtLine GtLine;
 
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"
-#include "annotationsketch/drawing_range.h"
+#include "annotationsketch/style.h"
 #include "core/array.h"
-#include "core/range.h"
-#include "extended/genome_node.h"
+#include "core/error.h"
 
 GtLine*   gt_line_new(void);
 void      gt_line_insert_block(GtLine*, GtBlock*); /* takes ownership */
 bool      gt_line_has_captions(const GtLine*);
 GtArray*  gt_line_get_blocks(GtLine*);
 int       gt_line_sketch(GtLine*, GtCanvas*, GtError*);
+double    gt_line_get_height(const GtLine *line, const GtStyle *sty);
+
 int       gt_line_unit_test(GtError*);
 void      gt_line_delete(GtLine*);
 
