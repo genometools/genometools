@@ -84,7 +84,7 @@ HTML_HEADER = <<END
 <li><a href="../design.html">Design</a></li>
 <li><a href="../libgenometools.html">C API</a></li>
 <li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
-<li><a id="current" href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a id="current" href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
 <li><a href="../license.html">License</a></li>
 </ul>
 </div>
