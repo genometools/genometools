@@ -53,8 +53,8 @@ typedef struct {
 } GtRenderTraverseInfo;
 
 typedef struct {
-  unsigned long total_lines,
-                total_captionlines;
+  unsigned long height;
+  GtStyle *style;
 } GtTracklineInfo;
 
 struct GtLayout {
@@ -78,9 +78,7 @@ static int add_tracklines(GT_UNUSED void *key, void *value,
                           void *data, GT_UNUSED GtError *err)
 {
   GtTracklineInfo *add = (GtTracklineInfo*) data;
-  add->total_lines += gt_track_get_number_of_lines((GtTrack*) value);
-  add->total_captionlines += gt_track_get_number_of_lines_with_captions(
-                                                             (GtTrack*) value);
+  add->height += gt_track_get_height((GtTrack*) value, add->style);
   return 0;
 }
 
@@ -303,10 +301,11 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
                 i;
   gt_assert(layout);
 
-  /* get line information for height calculation */
-  lines.total_captionlines = lines.total_lines = 0;
+  /* get dynamic heights from tracks */
+  lines.style = layout->style; lines.height = 0;
   gt_hashmap_foreach(layout->tracks, add_tracklines,
                      &lines, NULL);
+  height = lines.height;
 
   /* obtain line height and spacer from style */
   if (gt_style_get_num(layout->style, "format", "bar_height", &tmp, NULL))
@@ -334,33 +333,21 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
                           &show_track_captions, NULL)))
     show_track_captions = true;
 
-  /* add track caption height and spacer */
+  /* add custom track space allotment */
   if (show_track_captions)
   {
-    if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
-                         NULL))
+    if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp, NULL))
     {
-      height += gt_layout_get_number_of_tracks(layout)
-                  * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
-      /* add custom track captions */
       height += gt_array_size(layout->custom_tracks)
-                  * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
+                    * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
     }
     else
     {
-      height += gt_layout_get_number_of_tracks(layout)
-                  * (TOY_TEXT_HEIGHT
-                      + CAPTION_BAR_SPACE_DEFAULT
-                      + TRACK_VSPACE_DEFAULT);
-      /* add custom track captions */
       height += gt_array_size(layout->custom_tracks)
-                  * (TOY_TEXT_HEIGHT
-                      + CAPTION_BAR_SPACE_DEFAULT
-                      + TRACK_VSPACE_DEFAULT);
+                    * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT
+                                       + TRACK_VSPACE_DEFAULT);
     }
   }
-
-  /* add custom track space allotment */
   for (i=0;i<gt_array_size(layout->custom_tracks);i++)
   {
     GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
