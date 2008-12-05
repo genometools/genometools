@@ -17,7 +17,6 @@ int fasta2sequencekeyvalues(
         GtError *err);
 
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
-                              unsigned int forcetable,
                               const Uchar *seq,
                               const Seqpos len,
                               unsigned int mapsize,

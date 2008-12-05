@@ -278,7 +278,6 @@ int fasta2sequencekeyvalues(
 }
 
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
-                              unsigned int forcetable,
                               const Uchar *seq,
                               const Seqpos len,
                               unsigned int mapsize,
@@ -332,7 +331,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
     gt_disc_distri_add(distspralen,idx);
   }
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  doupdatesumranges(specialcharinfo,forcetable,len,mapsize,
+  doupdatesumranges(specialcharinfo,3U,len,mapsize,
                     distspralen,verboseinfo);
   gt_disc_distri_delete(distspralen);
 }
