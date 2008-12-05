@@ -29,6 +29,7 @@ alphabet.c
 apmoveridx.c
 bcktab.c
 cutendpfx.c
+cgr_spacedseed.c
 dist-short.c
 eis-blockcomp.c
 eis-blockcomp-param.c
@@ -63,6 +64,7 @@ greedyfwdmat.c
 idx-limdfs.c
 initeqsvec.c
 inl-encseq.c
+iter-window.c
 mapspec-gen.c
 measure-time.c
 merger-trie.c
@@ -74,6 +76,7 @@ opensfxfile.c
 pckbucket.c
 pssm.c
 nullcols.c
+revcompl.c
 sfx-bentsedg.c
 sfx-enumcodes.c
 sfx-input.c
@@ -82,12 +85,17 @@ sfx-partssuf.c
 sfx-readint.c
 sfx-run.c
 sfx-suffixer.c
+spaced-seeds.c
 substriter.c
 tagerator.c
 test-pairwise.c
 trie-ssort.c
 turnwheels.c
 tyr-mkindex.c
+tyr-map.c
+tyr-mersplit.c
+tyr-occratio.c
+tyr-search.c
 uniquesub.c
 verbose.c
 END_OF_TEXT
