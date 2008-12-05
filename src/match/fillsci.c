@@ -28,6 +28,7 @@
 #include "verbose-def.h"
 #include "spacedef.h"
 #include "safecast-gen.h"
+#include "alphadef.h"
 #include "encseq-def.h"
 #include "stamp.h"
 #include "opensfxfile.h"
@@ -86,18 +87,11 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-static void doupdatesumranges(Specialcharinfo *specialcharinfo,
-                              unsigned int forcetable,
-                              Seqpos totallength,
-                              unsigned int mapsize,
-                              GtDiscDistri *distspralen,
-                              Verboseinfo *verboseinfo)
+static Seqpos calcspecialranges(Seqpos *specialrangestab,
+                                GtDiscDistri *distspralen,
+                                Verboseinfo *verboseinfo)
 {
   Updatesumrangeinfo updatesumrangeinfo;
-  uint64_t smallestsize = 0, tmp;
-  Seqpos specialrangestab[3];
-  bool smallestdefined = false;
-  int c;
 
   updatesumrangeinfo.specialrangesUchar = 0;
   updatesumrangeinfo.specialrangesUshort = 0;
@@ -105,9 +99,29 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   updatesumrangeinfo.realspecialranges = 0;
   updatesumrangeinfo.verboseinfo = verboseinfo;
   gt_disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
-  specialrangestab[0] = updatesumrangeinfo.specialrangesUchar;
-  specialrangestab[1] = updatesumrangeinfo.specialrangesUshort;
-  specialrangestab[2] = updatesumrangeinfo.specialrangesUint32;
+  if (specialrangestab != NULL)
+  {
+    specialrangestab[0] = updatesumrangeinfo.specialrangesUchar;
+    specialrangestab[1] = updatesumrangeinfo.specialrangesUshort;
+    specialrangestab[2] = updatesumrangeinfo.specialrangesUint32;
+  }
+  return updatesumrangeinfo.realspecialranges;
+}
+
+static void doupdatesumranges(Specialcharinfo *specialcharinfo,
+                              unsigned int forcetable,
+                              Seqpos *specialrangestab,
+                              Seqpos totallength,
+                              unsigned int mapsize,
+                              GtDiscDistri *distspralen,
+                              Verboseinfo *verboseinfo)
+{
+  uint64_t smallestsize = 0, tmp;
+  bool smallestdefined = false;
+  int c;
+
+  specialcharinfo->realspecialranges
+    = calcspecialranges(specialrangestab,distspralen,verboseinfo);
   assert (forcetable <= 3U);
   for (c = 0; c<3; c++)
   {
@@ -132,7 +146,6 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   printf("specialranges%lu\n",
          (unsigned long) specialcharinfo->specialranges);
   */
-  specialcharinfo->realspecialranges = updatesumrangeinfo.realspecialranges;
 }
 
 int fasta2sequencekeyvalues(
@@ -141,6 +154,7 @@ int fasta2sequencekeyvalues(
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
         unsigned int forcetable,
+        Seqpos *specialrangestab,
         const GtStrArray *filenametab,
         Filelengthvalues **filelengthtab,
         const Alphabet *alpha,
@@ -266,7 +280,7 @@ int fasta2sequencekeyvalues(
     }
     *totallength = pos;
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-    doupdatesumranges(specialcharinfo,forcetable,pos,
+    doupdatesumranges(specialcharinfo,forcetable,specialrangestab,pos,
                       getmapsizeAlphabet(alpha),distspralen,verboseinfo);
     (*numofsequences)++;
   }
@@ -280,7 +294,6 @@ int fasta2sequencekeyvalues(
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                               const Uchar *seq,
                               const Seqpos len,
-                              unsigned int mapsize,
                               Verboseinfo *verboseinfo)
 {
   Uchar charcode;
@@ -331,7 +344,8 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
     gt_disc_distri_add(distspralen,idx);
   }
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  doupdatesumranges(specialcharinfo,3U,len,mapsize,
-                    distspralen,verboseinfo);
+  specialcharinfo->realspecialranges
+    = calcspecialranges(NULL,distspralen,verboseinfo);
+  specialcharinfo->specialranges = specialcharinfo->realspecialranges;
   gt_disc_distri_delete(distspralen);
 }

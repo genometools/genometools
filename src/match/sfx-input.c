@@ -79,6 +79,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   Seqpos totallength;
   bool haserr = false;
   unsigned int forcetable;
+  Seqpos specialrangestab[3];
 
   gt_error_check(err);
   sfxseqinfo->voidptr2suffixarray = NULL;
@@ -112,6 +113,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 &totallength,
                                 &sfxseqinfo->specialcharinfo,
                                 forcetable,
+                                specialrangestab,
                                 so->filenametab,
                                 &sfxseqinfo->filelengthtab,
                                 sfxseqinfo->alpha,
@@ -144,7 +146,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                               so->filenametab,
                               so->isplain,
                               totallength,
-                              sfxseqinfo->specialcharinfo.specialranges,
+                              specialrangestab,
                               sfxseqinfo->alpha,
                               gt_str_length(so->str_sat) > 0
                                 ? gt_str_get(so->str_sat)
