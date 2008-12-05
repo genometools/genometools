@@ -62,10 +62,10 @@ ${TAGERATORTMP}.tex:tagerator.tex pck-human.prj Q1.gz
 	./findemptyoutfiles.sh
 	./execcommand.pl $< > $@
 
-pck-human.prj:${GTTESTDATA}/Iowa/at1MB
+pck-human.prj: ../../testdata/at1MB
 	../../bin/gt packedindex mkindex -dna -dir rev -parts 12 -bsize 10 \
                       -sprank -locfreq 32 -indexname pck-human\
-                      -db ${GTTESTDATA}/Iowa/at1MB
+                      -db ../../testdata/at1MB
 
 Q1.gz:../../Q1.gz
 	cp $< $@
