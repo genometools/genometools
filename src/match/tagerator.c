@@ -32,7 +32,7 @@
 #include "format64.h"
 #include "idx-limdfs.h"
 #include "mssufpat.h"
-#include "apmoveridx.h"
+#include "apmeoveridx.h"
 #include "dist-short.h"
 #include "stamp.h"
 #include "tagerator.h"
@@ -549,7 +549,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 
   if (tageratoroptions->userdefinedmaxdistance >= 0)
   {
-    dfst = apm_AbstractDfstransformer();
+    dfst = apme_AbstractDfstransformer();
   } else
   {
     dfst = pms_AbstractDfstransformer();

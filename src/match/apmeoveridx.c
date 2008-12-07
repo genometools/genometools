@@ -23,7 +23,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "defined-types.h"
-#include "apmoveridx.h"
+#include "apmeoveridx.h"
 #include "absdfstrans-imp.h"
 #include "initeqsvec.h"
 
@@ -38,7 +38,7 @@ typedef struct
                           \(m\) is the length of the pattern, \(k\) is the
                           distance threshold, and \(D\) is
                           the current distance column */
-  unsigned long lastscorevalue;   /* the score for the given depth */
+  unsigned long lastdistvalue;   /* the score for the given depth */
 } Limdfsstate;
 
 typedef struct
@@ -64,9 +64,9 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
   }
 }
 
-static void apm_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
-                                unsigned long score,
-                                const void *dfsconstinfo)
+static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
+                                 unsigned long score,
+                                 const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   const Limdfsstate *col = (const Limdfsstate *) aliascol;
@@ -140,19 +140,19 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
     fprintf(stderr," = col->maxleqk\n");
     exit(EXIT_FAILURE);
   }
-  if (bfmaxleqk != UNDEFMAXLEQK && minscore != col->lastscorevalue)
+  if (bfmaxleqk != UNDEFMAXLEQK && minscore != col->lastdistvalue)
   {
     fprintf(stderr,"correct score = %lu != %lu = col->score\n",
                  minscore,
-                 col->lastscorevalue);
+                 col->lastdistvalue);
     exit(EXIT_FAILURE);
   }
 }
 
 #endif
 
-static void apm_initdfsconstinfo(void *dfsconstinfo,
-                                 unsigned int alphasize,
+static void apme_initdfsconstinfo(void *dfsconstinfo,
+                                  unsigned int alphasize,
                                  ...)
                                  /* Variable argument list is as follows:
                                     const Uchar *pattern,
@@ -178,14 +178,14 @@ static void apm_initdfsconstinfo(void *dfsconstinfo,
                 pattern,mti->patternlength);
 }
 
-static void *apm_allocatedfsconstinfo(unsigned int alphasize)
+static void *apme_allocatedfsconstinfo(unsigned int alphasize)
 {
   Matchtaskinfo *mti = gt_malloc(sizeof(Matchtaskinfo));
   mti->eqsvector = gt_malloc(sizeof(*mti->eqsvector) * alphasize);
   return mti;
 }
 
-static void apm_freedfsconstinfo(void **dfsconstinfo)
+static void apme_freedfsconstinfo(void **dfsconstinfo)
 {
   Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
 
@@ -194,8 +194,8 @@ static void apm_freedfsconstinfo(void **dfsconstinfo)
   *dfsconstinfo = NULL;
 }
 
-static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                void *dfsconstinfo)
+static void apme_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
+                                 void *dfsconstinfo)
 {
   Limdfsstate *column = (Limdfsstate *) aliascolumn;
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
@@ -205,23 +205,22 @@ static void apm_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
   {
     column->Pv = 0UL; /* first column consists of 0 => skip pattern prefix */
     column->maxleqk = mti->patternlength;
-    column->lastscorevalue = 0;
+    column->lastdistvalue = 0;
   } else
   {
     column->Pv = ~0UL; /* first column: 0 1 2 ... m */
     column->maxleqk = mti->maxdistance;
-    column->lastscorevalue = mti->maxdistance;
+    column->lastdistvalue = mti->maxdistance;
   }
 }
 
-static void apm_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
-                                     DECLAREPTRDFSSTATE(aliascolumn),
-                                     GT_UNUSED Seqpos leftbound,
-                                     GT_UNUSED Seqpos rightbound,
-                                     Seqpos width,
-                                     GT_UNUSED
-                                     unsigned long currentdepth,
-                                     void *dfsconstinfo)
+static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
+                                      DECLAREPTRDFSSTATE(aliascolumn),
+                                      GT_UNUSED Seqpos leftbound,
+                                      GT_UNUSED Seqpos rightbound,
+                                      Seqpos width,
+                                      GT_UNUSED unsigned long currentdepth,
+                                      void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascolumn;
@@ -238,7 +237,7 @@ static void apm_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
       /* success with match of length plen */
       limdfsresult->status = Limdfssuccess;
       limdfsresult->pprefixlen = mti->patternlength;
-      limdfsresult->distance = col->lastscorevalue;
+      limdfsresult->distance = col->lastdistvalue;
       return;
     }
   } else
@@ -249,7 +248,7 @@ static void apm_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
       gt_assert(col->maxleqk > 0);
       limdfsresult->status = Limdfssuccess;
       limdfsresult->pprefixlen = col->maxleqk;
-      limdfsresult->distance = col->lastscorevalue;
+      limdfsresult->distance = col->lastdistvalue;
       return;
     }
   }
@@ -257,11 +256,11 @@ static void apm_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
   limdfsresult->status = Limdfscontinue;
 }
 
-static void apm_nextLimdfsstate(const void *dfsconstinfo,
-                               DECLAREPTRDFSSTATE(aliasoutcol),
-                               GT_UNUSED unsigned long currentdepth,
-                               Uchar currentchar,
-                               const DECLAREPTRDFSSTATE(aliasincol))
+static void apme_nextLimdfsstate(const void *dfsconstinfo,
+                                 DECLAREPTRDFSSTATE(aliasoutcol),
+                                 GT_UNUSED unsigned long currentdepth,
+                                 Uchar currentchar,
+                                 const DECLAREPTRDFSSTATE(aliasincol))
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,               /* only one bit is on */
@@ -291,7 +290,7 @@ static void apm_nextLimdfsstate(const void *dfsconstinfo,
   if (Eq & backmask || Mh & backmask)
   {
     outcol->maxleqk = incol->maxleqk + 1UL;
-    outcol->lastscorevalue = incol->lastscorevalue;
+    outcol->lastdistvalue = incol->lastdistvalue;
   } else
   {
     if (Ph & backmask)
@@ -310,7 +309,7 @@ static void apm_nextLimdfsstate(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               outcol->maxleqk = idx;
-              outcol->lastscorevalue = score;
+              outcol->lastdistvalue = score;
               break;
             }
           } else
@@ -332,7 +331,7 @@ static void apm_nextLimdfsstate(const void *dfsconstinfo,
     } else
     {
       outcol->maxleqk = incol->maxleqk;
-      outcol->lastscorevalue = incol->lastscorevalue;
+      outcol->lastdistvalue = incol->lastdistvalue;
     }
   }
 #ifdef SKDEBUG
@@ -340,10 +339,10 @@ static void apm_nextLimdfsstate(const void *dfsconstinfo,
 #endif
 }
 
-static void apm_inplacenextLimdfsstate(const void *dfsconstinfo,
-                                       DECLAREPTRDFSSTATE(aliascol),
-                                       GT_UNUSED unsigned long currentdepth,
-                                       Uchar currentchar)
+static void apme_inplacenextLimdfsstate(const void *dfsconstinfo,
+                                        DECLAREPTRDFSSTATE(aliascol),
+                                        GT_UNUSED unsigned long currentdepth,
+                                        Uchar currentchar)
 {
   unsigned long Eq = 0, Xv, Xh, Ph, Mh, /* as in Myers Paper */
                 backmask,           /* only one bit is on */
@@ -389,7 +388,7 @@ static void apm_inplacenextLimdfsstate(const void *dfsconstinfo,
             if (score <= mti->maxdistance)
             {
               tmpmaxleqk = idx;
-              col->lastscorevalue = score;
+              col->lastdistvalue = score;
               break;
             }
           } else
@@ -413,22 +412,22 @@ static void apm_inplacenextLimdfsstate(const void *dfsconstinfo,
   }
 }
 
-const AbstractDfstransformer *apm_AbstractDfstransformer(void)
+const AbstractDfstransformer *apme_AbstractDfstransformer(void)
 {
-  static const AbstractDfstransformer apm_adfst =
+  static const AbstractDfstransformer apme_adfst =
   {
     sizeof (Limdfsstate),
-    apm_allocatedfsconstinfo,
-    apm_initdfsconstinfo,
+    apme_allocatedfsconstinfo,
+    apme_initdfsconstinfo,
     NULL, /* no extractdfsconstinfo */
-    apm_freedfsconstinfo,
-    apm_initLimdfsstate,
-    apm_fullmatchLimdfsstate,
-    apm_nextLimdfsstate,
-    apm_inplacenextLimdfsstate,
+    apme_freedfsconstinfo,
+    apme_initLimdfsstate,
+    apme_fullmatchLimdfsstate,
+    apme_nextLimdfsstate,
+    apme_inplacenextLimdfsstate,
 #ifdef SKDEBUG
-    apm_showLimdfsstate,
+    apme_showLimdfsstate,
 #endif
   };
-  return &apm_adfst;
+  return &apme_adfst;
 }

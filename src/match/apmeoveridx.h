@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef APMOVERIDX_H
-#define APMOVERIDX_H
+#ifndef APMEOVERIDX_H
+#define APMEOVERIDX_H
 #include "absdfstrans-def.h"
 
-const AbstractDfstransformer *apm_AbstractDfstransformer(void);
+const AbstractDfstransformer *apme_AbstractDfstransformer(void);
 
 #endif
