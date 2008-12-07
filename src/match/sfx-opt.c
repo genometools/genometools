@@ -27,7 +27,7 @@
 #include "sfx-optdef.h"
 #include "verbose-def.h"
 #include "stamp.h"
-#include "match/eis-bwtseq-param.h"
+#include "eis-bwtseq-param.h"
 
 static OPrval parse_options(int *parsed_args,
                             bool doesa,
@@ -60,66 +60,68 @@ static OPrval parse_options(int *parsed_args,
 
   gt_error_check(err);
   op = gt_option_parser_new("[option ...] (-db file [...] | -ii index)",
-                         doesa ? "Compute enhanced suffix array."
-                               : "Compute packed index.");
+                            doesa ? "Compute enhanced suffix array."
+                                  : "Compute packed index.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optiondb = gt_option_new_filenamearray("db","specify database files",
-                                      so->filenametab);
+                                         so->filenametab);
   gt_option_parser_add_option(op, optiondb);
 
   optionii = gt_option_new_filename("ii","specify sequence index created "
-                                      " previously by -tis option",
-                                 so->str_inputindex);
+                                    "previously by -tis option",
+                                    so->str_inputindex);
   gt_option_is_mandatory_either(optiondb,optionii);
   gt_option_parser_add_option(op, optionii);
 
   optionsmap = gt_option_new_string("smap",
-                                 "specify file containing a symbol mapping",
-                                 so->str_smap, NULL);
+                                    "specify file containing a symbol mapping",
+                                    so->str_smap, NULL);
   gt_option_parser_add_option(op, optionsmap);
 
   optiondna = gt_option_new_bool("dna","input is DNA sequence",
-                              &so->isdna,false);
+                                 &so->isdna,false);
   gt_option_parser_add_option(op, optiondna);
 
   optionprotein = gt_option_new_bool("protein","input is Protein sequence",
-                                  &so->isprotein,false);
+                                     &so->isprotein,false);
   gt_option_parser_add_option(op, optionprotein);
 
   optionplain = gt_option_new_bool("plain","process as plain text",
-                                &so->isplain,false);
+                                   &so->isplain,false);
   gt_option_parser_add_option(op, optionplain);
 
   optiondir = gt_option_new_string("dir",
-                                "specify reading direction "
-                                "(fwd, cpl, rev, rcl)",
-                                 dirarg, "fwd");
+                                   "specify reading direction "
+                                   "(fwd, cpl, rev, rcl)",
+                                   dirarg, "fwd");
   gt_option_parser_add_option(op, optiondir);
 
   optionindexname = gt_option_new_string("indexname",
-                                      "specify name for index to be generated",
-                                      so->str_indexname, NULL);
+                                         "specify name for index to "
+                                         "be generated",
+                                         so->str_indexname, NULL);
   gt_option_parser_add_option(op, optionindexname);
 
   optionpl = gt_option_new_uint_min("pl",
-                                 "specify prefix length for bucket sort\n"
-                                 "recommendation: use without argument;\n"
-                                 "then a reasonable prefix length is "
-                                 "automatically determined",
-                                 &so->prefixlength,
-                                 PREFIXLENGTH_AUTOMATIC,
-                                 1U);
+                                    "specify prefix length for bucket sort\n"
+                                    "recommendation: use without argument;\n"
+                                    "then a reasonable prefix length is "
+                                    "automatically determined",
+                                    &so->prefixlength,
+                                    PREFIXLENGTH_AUTOMATIC,
+                                    1U);
   gt_option_argument_is_optional(optionpl);
   gt_option_parser_add_option(op, optionpl);
 
   if (doesa)
   {
     optionmaxdepth = gt_option_new_uint_min("maxdepth",
-                                         "restrict suffix sorting to prefixes "
-                                         "of the given length",
-                                         &so->maxdepth.valueunsignedint,
-                                         MAXDEPTH_AUTOMATIC,
-                                         1U);
+                                            "restrict suffix sorting "
+                                            "to prefixes "
+                                            "of the given length",
+                                            &so->maxdepth.valueunsignedint,
+                                            MAXDEPTH_AUTOMATIC,
+                                            1U);
     gt_option_is_development_option(optionmaxdepth);
     gt_option_argument_is_optional(optionmaxdepth);
     gt_option_parser_add_option(op, optionmaxdepth);
@@ -129,91 +131,100 @@ static OPrval parse_options(int *parsed_args,
     optionmaxdepth = NULL;
   }
   optioncmpcharbychar = gt_option_new_bool("cmpcharbychar",
-                         "compare suffixes by character wise comparisons",
-                         &so->sfxstrategy.cmpcharbychar,false);
+                                           "compare suffixes by character "
+                                           "by character",
+                                           &so->sfxstrategy.cmpcharbychar,
+                                           false);
   gt_option_is_development_option(optioncmpcharbychar);
   gt_option_parser_add_option(op, optioncmpcharbychar);
 
-  optionmaxwidthrealmedian = gt_option_new_ulong(
-                                     "maxwidthrealmedian",
-                                     "compute real median for intervals of "
-                                     "at most the given widthprefixes",
-                                     &so->sfxstrategy.maxwidthrealmedian,
-                                     1U);
+  optionmaxwidthrealmedian = gt_option_new_ulong("maxwidthrealmedian",
+                                                 "compute real median for "
+                                                 "intervals of at most the "
+                                                 "given widthprefixes",
+                                                 &so->sfxstrategy.
+                                                      maxwidthrealmedian,
+                                                 1U);
   gt_option_is_development_option(optionmaxwidthrealmedian);
   gt_option_parser_add_option(op, optionmaxwidthrealmedian);
 
   optionmaxbltriesort = gt_option_new_ulong("maxbltriesort",
-                                         "all intervals of specified size and "
-                                         "smaller are sorted by blind trie "
-                                         "sorting algorithm",
-                                         &so->sfxstrategy.maxbltriesort,
-                                         10U);
+                                            "all intervals of specified size "
+                                            "and smaller are sorted by blind "
+                                            "trie sorting algorithm",
+                                            &so->sfxstrategy.maxbltriesort,
+                                            10U);
   gt_option_is_development_option(optionmaxbltriesort);
   gt_option_parser_add_option(op, optionmaxbltriesort);
 
   optionstorespecialcodes
     = gt_option_new_bool("storespecialcodes",
-                      "store special codes (this may speed up the program)",
-                      &so->sfxstrategy.storespecialcodes,false);
+                         "store special codes (this may speed up the program)",
+                         &so->sfxstrategy.storespecialcodes,false);
   gt_option_is_development_option(optionstorespecialcodes);
   gt_option_parser_add_option(op, optionstorespecialcodes);
 
   option = gt_option_new_uint_min("parts",
-                               "specify number of parts in which the "
-                               "sequence is processed",
-                               &so->numofparts,
-                               1U,
-                               1U);
+                                  "specify number of parts in which the "
+                                  "sequence is processed",
+                                  &so->numofparts,
+                                  1U,
+                                  1U);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   optionsat = gt_option_new_string("sat",
-                                "specify kind of sequence representation",
-                                so->str_sat, NULL);
+                                   "specify kind of sequence representation",
+                                   so->str_sat, NULL);
   gt_option_parser_add_option(op, optionsat);
 
   option = gt_option_new_bool("tis",
-                           "output transformed and encoded input "
-                           "sequence to file",
-                           &so->outtistab,
-                           false);
+                              "output transformed and encoded input "
+                              "sequence to file",
+                              &so->outtistab,
+                              false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("ssp",
+                              "output sequence separator positions to file",
+                              &so->outssptab,
+                              false);
   gt_option_parser_add_option(op, option);
 
   optiondes = gt_option_new_bool("des",
-                              "output sequence descriptions to file ",
-                              &so->outdestab,
-                              false);
+                                 "output sequence descriptions to file ",
+                                 &so->outdestab,
+                                 false);
   gt_option_parser_add_option(op, optiondes);
 
   if (doesa)
   {
     optionsuf = gt_option_new_bool("suf",
-                                "output suffix array (suftab) to file",
-                                &so->outsuftab,
-                                false);
+                                   "output suffix array (suftab) to file",
+                                   &so->outsuftab,
+                                   false);
     gt_option_parser_add_option(op, optionsuf);
 
     optionlcp = gt_option_new_bool("lcp",
-                                "output lcp table (lcptab) to file",
-                                &so->outlcptab,
-                                false);
+                                   "output lcp table (lcptab) to file",
+                                   &so->outlcptab,
+                                   false);
     gt_option_parser_add_option(op, optionlcp);
 
     optionbwt = gt_option_new_bool("bwt",
-                                "output Burrows-Wheeler Transformation "
-                                "(bwttab) to file",
-                                &so->outbwttab,
-                                false);
+                                   "output Burrows-Wheeler Transformation "
+                                   "(bwttab) to file",
+                                   &so->outbwttab,
+                                   false);
     gt_option_parser_add_option(op, optionbwt);
   } else
   {
     optionsuf = optionlcp = optionbwt = NULL;
   }
   option = gt_option_new_bool("bck",
-                           "output bucket table to file",
-                           &so->outbcktab,
-                           false);
+                              "output bucket table to file",
+                              &so->outbcktab,
+                              false);
   gt_option_parser_add_option(op, option);
 
   if (!doesa)
@@ -222,15 +233,16 @@ static OPrval parse_options(int *parsed_args,
                                so->str_indexname);
   }
   option = gt_option_new_bool("showtime",
-                           "show the time of the different computation phases",
-                           &so->showtime,
-                           false);
+                              "show the time of the different computation "
+                              "phases",
+                              &so->showtime,
+                              false);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("v",
-                           "be verbose ",
-                           &so->beverbose,
-                           false);
+                              "be verbose ",
+                              &so->beverbose,
+                              false);
   gt_option_parser_add_option(op, option);
 
   gt_option_exclude(optionii, optiondb);
@@ -268,7 +280,7 @@ static OPrval parse_options(int *parsed_args,
           if (gt_str_array_size(so->filenametab) > 1UL)
           {
             gt_error_set(err,"if more than one input file is given, then "
-                              "option -indexname is mandatory");
+                             "option -indexname is mandatory");
             oprval = OPTIONPARSER_ERROR;
           } else
           {
@@ -298,7 +310,7 @@ static OPrval parse_options(int *parsed_args,
          !gt_option_is_set(optionsmap))
       {
         gt_error_set(err,"if option -plain is used, then any of the options "
-                          "-dna, -protein, or -smap is mandatory");
+                         "-dna, -protein, or -smap is mandatory");
         oprval = OPTIONPARSER_ERROR;
       }
     }

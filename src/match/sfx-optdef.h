@@ -50,6 +50,7 @@ typedef struct
        outbwttab,
        outdestab,
        outbcktab,
+       outssptab,
        showtime;
   Sfxstrategy sfxstrategy;
   struct bwtOptions bwtIdxParams;
