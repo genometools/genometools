@@ -121,6 +121,7 @@ static int diagram_lua_new_from_array(lua_State *L)
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   gt_assert(diagram);
   *diagram = gt_diagram_new_from_array(nodes, &range, style);
+  gt_array_delete(nodes);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

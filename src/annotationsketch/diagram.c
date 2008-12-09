@@ -49,7 +49,6 @@ struct GtDiagram {
   GtStyle *style;
   GtArray *features,
           *custom_tracks;
-  bool own_features;
   GtRange range;
   void *ptr;
   GtTrackSelectorFunc select_func;
@@ -608,14 +607,18 @@ int gt_diagram_build(GtDiagram *diagram)
 
 static GtDiagram* gt_diagram_new_generic(GtArray *features,
                                          const GtRange *range,
-                                         GtStyle *style)
+                                         GtStyle *style,
+                                         bool ref_features)
 {
   GtDiagram *diagram;
   diagram = gt_calloc(1, sizeof (GtDiagram));
   diagram->nodeinfo = gt_hashmap_new(HASH_DIRECT, NULL, NULL);
   diagram->style = style;
   diagram->range = *range;
-  diagram->features = features;
+  if (ref_features)
+    diagram->features = gt_array_ref(features);
+  else
+    diagram->features = features;
   diagram->select_func = default_track_selector;
   diagram->custom_tracks = gt_array_new(sizeof (GtCustomTrack*));
   return diagram;
@@ -637,8 +640,7 @@ GtDiagram* gt_diagram_new(GtFeatureIndex *fi, const char *seqid,
     gt_error_set(err, "FeatureIndex does not contain seqid '%s'", seqid);
     return NULL;
   }
-  diagram = gt_diagram_new_generic(features, range, style);
-  diagram->own_features = true;
+  diagram = gt_diagram_new_generic(features, range, style, false);
   return diagram;
 }
 
@@ -646,7 +648,7 @@ GtDiagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
                                      GtStyle *style)
 {
   gt_assert(features && range && style);
-  return gt_diagram_new_generic(features, range, style);
+  return gt_diagram_new_generic(features, range, style, true);
 }
 
 GtRange gt_diagram_get_range(const GtDiagram *diagram)
@@ -689,8 +691,7 @@ void gt_diagram_add_custom_track(GtDiagram *diagram, GtCustomTrack* ctrack)
 void gt_diagram_delete(GtDiagram *diagram)
 {
   if (!diagram) return;
-  if (diagram->own_features)
-    gt_array_delete(diagram->features);
+  gt_array_delete(diagram->features);
   if (diagram->blocks)
     gt_hashmap_delete(diagram->blocks);
   gt_hashmap_delete(diagram->nodeinfo);
