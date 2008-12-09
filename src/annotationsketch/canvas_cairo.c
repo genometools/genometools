@@ -345,8 +345,10 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   gt_style_get_color(canvas->pvt->sty, type, "fill", &fill_color,
                   gt_element_get_node_ref(elem));
 
-  if (draw_range.end-draw_range.start <= 1.1)
+  if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
   {
+    if ((unsigned long) draw_range.start > gt_bittab_size(canvas->pvt->bt))
+      return had_err;
     if (gt_bittab_bit_is_set(canvas->pvt->bt, (unsigned long) draw_range.start))
       return had_err;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
@@ -369,7 +371,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
     gt_image_info_add_rec_map(canvas->pvt->ii, rm);
   }
 
-  if (draw_range.end-draw_range.start <= 1.1)
+  if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
   {
     return had_err;
   }
