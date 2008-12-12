@@ -84,6 +84,16 @@ unsigned long gt_array_size(const GtArray *array);
 void          gt_array_sort(GtArray *array, GtCompare compar);
 /* Sort <array> in a stable way with the given compare function <compar>. */
 void          gt_array_sort_stable(GtArray *array, GtCompare compar);
+/* Sort <array> with the given compare function <compar>. Passes a pointer to
+   userdata at <data>. */
+void          gt_array_sort_with_data(GtArray *array,
+                                      GtCompareWithData compar,
+                                      void *data);
+/* Sort <array> in a stable way with the given compare function <compar>. Passes
+   a pointer to userdata at <data>. */
+void          gt_array_sort_stable_with_data(GtArray *array,
+                                             GtCompareWithData compar,
+                                             void *data);
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */

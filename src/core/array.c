@@ -24,6 +24,7 @@
 #include "core/ma.h"
 #include "core/msort.h"
 #include "core/mathsupport.h"
+#include "core/qsort_r.h"
 #include "core/range.h"
 #include "core/unused_api.h"
 #include "core/xansi.h"
@@ -205,6 +206,19 @@ void gt_array_sort_stable(GtArray *a, GtCompare compar)
 {
   gt_assert(a && compar);
   gt_msort(a->space, a->next_free, a->size_of_elem, compar);
+}
+
+void gt_array_sort_with_data(GtArray *a, GtCompareWithData compar, void *data)
+{
+  gt_assert(a && compar);
+  gt_qsort_r(a->space, a->next_free, a->size_of_elem, data, compar);
+}
+
+void gt_array_sort_stable_with_data(GtArray *a, GtCompareWithData compar,
+                                    void *data)
+{
+  gt_assert(a && compar);
+  gt_msort_r(a->space, a->next_free, a->size_of_elem, data, compar);
 }
 
 int gt_array_cmp(const GtArray *array_a, const GtArray *array_b)
