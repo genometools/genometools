@@ -260,3 +260,9 @@ int gt_canvas_visit_custom_track(GtCanvas *canvas, GtCustomTrack *ct,
   else
     return 0;
 }
+
+GtStyle* gt_canvas_get_style(GtCanvas *canvas)
+{
+  gt_assert(canvas);
+  return canvas->pvt->sty;
+}
