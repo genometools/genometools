@@ -399,7 +399,8 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 
   /* check if this type is to be displayed at all */
   if (max_show_width != UNDEF_ULONG &&
-      gt_range_length(&d->range) > max_show_width) {
+      gt_range_length(&d->range) > max_show_width)
+  {
     return;
   }
 
