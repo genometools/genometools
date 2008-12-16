@@ -296,7 +296,8 @@ ifeq ($(with-hmmer),yes)
   LIBGTUNSTABLE_DIRS := src/external/hmmer-2.3.2  $(LIBGTUNSTABLE_DIRS) 
   EXP_CPPFLAGS += -DHAVE_HMMER
   GT_CPPFLAGS +=  -I$(CURDIR)/$(HMMER_DIR) -I$(CURDIR)/$(SQUID_DIR)
-  EXP_LDLIBS += -lhmmer -lpthread
+  EXP_LDLIBS += -lpthread
+  OVERRIDELIBS += lib/libhmmer.a
   STEST_FLAGS += -hmmer
 endif
 
@@ -331,7 +332,7 @@ LIBGTUNSTABLE_OBJ:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.o)
 LIBGTUNSTABLE_DEP:=$(LIBGTUNSTABLE_SRC:%.c=obj/%.d)
 
 ifeq ($(with-hmmer),yes)
-  LIBGTUNSTABLE_OBJ := lib/libhmmer.a $(LIBGTUNSTABLE_OBJ)
+  LIBGTUNSTABLE_OBJ := $(LIBGTUNSTABLE_OBJ) lib/libhmmer.a
 endif
 
 # set prefix for install target
