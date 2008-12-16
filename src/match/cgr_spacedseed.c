@@ -36,7 +36,7 @@ typedef struct
   Seqpos totallength;
   void *packedindex;
   bool withesa;
-  const Matchbound **mbtab; /* only relevant for packedindex */
+  const Mbtab **mbtab; /* only relevant for packedindex */
   unsigned int maxdepth;    /* maximaldepth of boundaries */
 } Genericindex;
 

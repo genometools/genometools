@@ -69,7 +69,7 @@ struct Limdfsresources
   DECLAREDFSSTATE(currentdfsstate);
   Seqpos *rangeOccs;
   unsigned int maxdepth;
-  const Matchbound **mbtab;
+  const Mbtab **mbtab;
   const Encodedsequence *encseq;
   ArraySeqpos mstatspos;
   Uchar *currentpathspace;
@@ -78,7 +78,7 @@ struct Limdfsresources
 };
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
-                                    const Matchbound **mbtab,
+                                    const Mbtab **mbtab,
                                     unsigned int maxdepth,
                                     const Encodedsequence *encseq,
                                     bool withesa,
@@ -648,13 +648,13 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
 }
 
 static void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
-                                                  const Matchbound **mbtab,
+                                                  const Mbtab **mbtab,
                                                   Uchar alphasize,
                                                   Codetype parentcode,
                                                   unsigned long childdepth)
 {
   Codetype childcode;
-  const Matchbound *mbptr;
+  const Mbtab *mbptr;
 
   gt_assert(childdepth > 0);
   bwci->nextfreeBoundswithchar = 0;
@@ -673,6 +673,36 @@ static void smalldepthbwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
         = mbptr->upperbound;
     }
   }
+}
+
+unsigned long exactmatchuptomaxdepth(const Mbtab *mbptr,
+                                     const Mbtab **mbtab,
+                                     Uchar alphasize,
+                                     unsigned int maxdepth,
+                                     const Uchar *sequence,
+                                     unsigned long seqlen)
+{
+  Codetype code = 0;
+  unsigned int depth = 0;
+  Uchar cc;
+
+  gt_assert(seqlen > 0);
+  for (depth = 0, code = 0;  depth <= maxdepth;
+       depth++, code = code * alphasize + cc)
+  {
+    if (seqlen <= (unsigned long) depth)
+    {
+      return seqlen;
+    }
+    cc = sequence[depth];
+    gt_assert(ISNOTSPECIAL(cc));
+    mbptr = mbtab[depth] + code + cc;
+    if (mbptr->lowerbound >= mbptr->upperbound)
+    {
+      break;
+    }
+  }
+  return (unsigned long) depth;
 }
 
 static void pck_splitandprocess(Limdfsresources *limdfsresources,

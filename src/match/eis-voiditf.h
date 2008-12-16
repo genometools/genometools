@@ -98,9 +98,9 @@ Seqpos voidpackedfindfirstmatchconvert(const void *voidbwtseq,
 typedef struct
 {
   Seqpos lowerbound, upperbound;
-} Matchbound;
+} Mbtab;
 
-unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
+unsigned long bwtrangesplitallwithoutspecial(Mbtab *mbtab,
                                              Seqpos *rangeOccs,
                                              const void *voidBwtSeq,
                                              Seqpos lbound,
@@ -108,6 +108,6 @@ unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
 
 unsigned int bwtseq2maxdepth(const void *voidbwtseq);
 
-const Matchbound **bwtseq2mbtab(const void *voidbwtseq);
+const Mbtab **bwtseq2mbtab(const void *voidbwtseq);
 
 #endif

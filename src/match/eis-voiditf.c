@@ -215,13 +215,13 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
   }
 }
 
-const Matchbound **bwtseq2mbtab(const void *voidbwtseq)
+const Mbtab **bwtseq2mbtab(const void *voidbwtseq)
 {
   if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
   {
     return NULL;
   }
-  return (const Matchbound **)
+  return (const Mbtab **)
          pcktb2mbtab(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
@@ -234,7 +234,7 @@ unsigned int bwtseq2maxdepth(const void *voidbwtseq)
   return pcktb2maxdepth(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
-unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
+unsigned long bwtrangesplitallwithoutspecial(Mbtab *mbtab,
                                              Seqpos *rangeOccs,
                                              const void *voidBwtSeq,
                                              Seqpos lbound,

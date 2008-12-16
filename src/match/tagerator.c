@@ -653,7 +653,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
     if (!tageratoroptions->online || tageratoroptions->docompare)
     {
-      const Matchbound **mbtab;
+      const Mbtab **mbtab;
       unsigned int maxdepth;
       unsigned long maxpathlength;
 
