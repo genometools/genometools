@@ -16,8 +16,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BASENAME_H
-#define BASENAME_H
+#ifndef BASENAME_API_H
+#define BASENAME_API_H
+
+#include "core/error_api.h"
+
+/* POSIX module */
 
 /*
   This module implements the function gt_basename() according to the
@@ -43,9 +47,6 @@
 
   The caller is responsible for freeing the received pointer!
 */
-
-#include "core/error.h"
-
 char* gt_basename(const char *path);
 int   gt_basename_unit_test(GtError*);
 

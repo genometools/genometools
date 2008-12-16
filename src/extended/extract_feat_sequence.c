@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
-#include "extended/genome_node_iterator.h"
 #include "extended/region_mapping.h"
 #include "extended/reverse.h"
 
@@ -74,18 +74,18 @@ int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode *gn,
   gt_assert(gf);
 
   if (join) {
-    GtGenomeNodeIterator *gni;
-    GtGenomeNode *child;
+    GtFeatureNodeIterator *fni;
+    GtFeatureNode *child;
     bool reverse_strand = false;
     /* in this case we have to traverse the children */
-    gni = gt_genome_node_iterator_new_direct(gn);
-    while (!had_err && (child = gt_genome_node_iterator_next(gni))) {
-      if (extract_join_feature(child, type, region_mapping, sequence,
-                               &reverse_strand, err)) {
+    fni = gt_feature_node_iterator_new_direct(gt_feature_node_cast(gn));
+    while (!had_err && (child = gt_feature_node_iterator_next(fni))) {
+      if (extract_join_feature((GtGenomeNode*) child, type, region_mapping,
+                               sequence, &reverse_strand, err)) {
         had_err = -1;
       }
     }
-    gt_genome_node_iterator_delete(gni);
+    gt_feature_node_iterator_delete(fni);
     if (!had_err && gt_str_length(sequence)) {
       if (reverse_strand) {
         had_err = gt_reverse_complement(gt_str_get(sequence),

@@ -83,7 +83,8 @@ double gt_text_width_calculator_get_text_width(GtTextWidthCalculator *twc,
   return twc->c_class->get_text_width(twc, text);
 }
 
-void* gt_text_width_calculator_cast(const GtTextWidthCalculatorClass *twcc,
+void* gt_text_width_calculator_cast(GT_UNUSED
+                                    const GtTextWidthCalculatorClass *twcc,
                                     GtTextWidthCalculator *twc)
 {
   gt_assert(twcc && twc&& twc->c_class == twcc);

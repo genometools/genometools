@@ -37,7 +37,7 @@ module GT
   end
 
   class CanvasCairoFile < Canvas
-    def initialize(style, width, height, ii)
+    def initialize(style, width, height, ii = nil)
       if ii.nil? then
         @canvas = GT.gt_canvas_cairo_file_new(style.style, 1, width, height, \
                                               GT::NULL)

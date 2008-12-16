@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include "core/ensure.h"
-#include "core/basename.h"
+#include "core/basename_api.h"
 #include "core/ma.h"
 
 char *gt_basename(const char *path)

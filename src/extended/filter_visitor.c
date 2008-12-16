@@ -48,29 +48,29 @@ struct GtFilterVisitor {
 #define filter_visitor_cast(GV)\
         gt_node_visitor_cast(gt_filter_visitor_class(), GV)
 
-static void filter_visitor_free(GtNodeVisitor *gv)
+static void filter_visitor_free(GtNodeVisitor *nv)
 {
-  GtFilterVisitor *filter_visitor = filter_visitor_cast(gv);
+  GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
   gt_queue_delete(filter_visitor->gt_genome_node_buffer);
   gt_str_delete(filter_visitor->seqid);
   gt_str_delete(filter_visitor->typefilter);
 }
 
-static int filter_visitor_comment(GtNodeVisitor *gv, GtCommentNode *c,
+static int filter_visitor_comment(GtNodeVisitor *nv, GtCommentNode *c,
                                   GT_UNUSED GtError *err)
 {
   GtFilterVisitor *filter_visitor;
   gt_error_check(err);
-  filter_visitor = filter_visitor_cast(gv);
+  filter_visitor = filter_visitor_cast(nv);
   gt_queue_add(filter_visitor->gt_genome_node_buffer, c);
   return 0;
 }
 
-static bool filter_contain_range(GtFeatureNode *gf, GtRange contain_range)
+static bool filter_contain_range(GtFeatureNode *fn, GtRange contain_range)
 {
   GtRange range;
-  gt_assert(gf);
-  range = gt_genome_node_get_range((GtGenomeNode*) gf);
+  gt_assert(fn);
+  range = gt_genome_node_get_range((GtGenomeNode*) fn);
   if (contain_range.start != UNDEF_ULONG &&
       !gt_range_contains(&contain_range, &range)) {
     return true;
@@ -78,22 +78,22 @@ static bool filter_contain_range(GtFeatureNode *gf, GtRange contain_range)
   return false;
 }
 
-static bool filter_overlap_range(GtFeatureNode *gf, GtRange overlap_range)
+static bool filter_overlap_range(GtFeatureNode *fn, GtRange overlap_range)
 {
   GtRange feature_range;
-  gt_assert(gf);
-  feature_range = gt_genome_node_get_range((GtGenomeNode*) gf);
+  gt_assert(fn);
+  feature_range = gt_genome_node_get_range((GtGenomeNode*) fn);
   if (overlap_range.start != UNDEF_ULONG &&
       !gt_range_overlap(&overlap_range, &feature_range))
     return true;
   return false;
 }
 
-static bool filter_strand(GtFeatureNode *gf, GtStrand strand)
+static bool filter_strand(GtFeatureNode *fn, GtStrand strand)
 {
-  gt_assert(gf);
+  gt_assert(fn);
   if (strand != GT_NUM_OF_STRAND_TYPES &&
-      gt_feature_node_get_strand(gf) != strand)
+      gt_feature_node_get_strand(fn) != strand)
     return true;
   return false;
 }
@@ -119,41 +119,41 @@ static bool filter_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
   return false;
 }
 
-static bool filter_has_CDS(GtFeatureNode *gf, bool has_CDS)
+static bool filter_has_CDS(GtFeatureNode *fn, bool has_CDS)
 {
-  gt_assert(gf);
-  if (has_CDS && !gt_feature_node_has_CDS(gf))
+  gt_assert(fn);
+  if (has_CDS && !gt_feature_node_has_CDS(fn))
     return true;
   return false;
 }
 
-static bool filter_min_average_ssp(GtFeatureNode *gf, double minaveragessp)
+static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp)
 {
-  gt_assert(gf);
+  gt_assert(fn);
   if (minaveragessp != UNDEF_DOUBLE &&
-      gt_feature_node_has_splice_site(gf) &&
-      gt_feature_node_average_splice_site_prob(gf) < minaveragessp) {
+      gt_feature_node_has_splice_site(fn) &&
+      gt_feature_node_average_splice_site_prob(fn) < minaveragessp) {
     return true;
   }
   return false;
 }
 
-static int filter_visitor_genome_feature(GtNodeVisitor *gv,
-                                         GtFeatureNode *gf,
+static int filter_visitor_genome_feature(GtNodeVisitor *nv,
+                                         GtFeatureNode *fn,
                                          GT_UNUSED GtError *err)
 {
   GtFilterVisitor *fv;
   bool filter_node = false;
   gt_error_check(err);
-  fv = filter_visitor_cast(gv);
+  fv = filter_visitor_cast(nv);
   fv->current_feature++;
   if (!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are
                                       equal */
-      !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GtGenomeNode*) gf))) {
-    GtRange range = gt_genome_node_get_range((GtGenomeNode*) gf);
+      !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GtGenomeNode*) fn))) {
+    GtRange range = gt_genome_node_get_range((GtGenomeNode*) fn);
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
-    if (gf && gt_feature_node_has_type(gf, gft_gene)) {
+    if (fn && gt_feature_node_has_type(fn, gft_gene)) {
       if (fv->max_gene_length != UNDEF_ULONG &&
           gt_range_length(&range) > fv->max_gene_length) {
         filter_node = true;
@@ -163,11 +163,11 @@ static int filter_visitor_genome_feature(GtNodeVisitor *gv,
         filter_node = true;
       }
       else if (fv->min_gene_score != UNDEF_DOUBLE &&
-               gt_feature_node_get_score(gf) < fv->min_gene_score) {
+               gt_feature_node_get_score(fn) < fv->min_gene_score) {
         filter_node = true;
       }
       else if (fv->max_gene_score != UNDEF_DOUBLE &&
-               gt_feature_node_get_score(gf) > fv->max_gene_score) {
+               gt_feature_node_get_score(fn) > fv->max_gene_score) {
         filter_node = true;
       }
       else if (fv->feature_num != UNDEF_ULONG &&
@@ -182,37 +182,37 @@ static int filter_visitor_genome_feature(GtNodeVisitor *gv,
     filter_node = true;
 
   if (!filter_node)
-    filter_node = filter_contain_range(gf, fv->contain_range);
+    filter_node = filter_contain_range(fn, fv->contain_range);
 
   if (!filter_node)
-    filter_node = filter_overlap_range(gf, fv->overlap_range);
+    filter_node = filter_overlap_range(fn, fv->overlap_range);
 
   if (!filter_node)
-    filter_node = filter_strand(gf, fv->strand);
+    filter_node = filter_strand(fn, fv->strand);
 
   if (!filter_node)
-    filter_node = filter_targetstrand(gf, fv->targetstrand);
+    filter_node = filter_targetstrand(fn, fv->targetstrand);
 
   if (!filter_node)
-    filter_node = filter_has_CDS(gf, fv->has_CDS);
+    filter_node = filter_has_CDS(fn, fv->has_CDS);
 
   if (!filter_node)
-    filter_node = filter_min_average_ssp(gf, fv->min_average_splice_site_prob);
+    filter_node = filter_min_average_ssp(fn, fv->min_average_splice_site_prob);
 
   if (filter_node)
-    gt_genome_node_rec_delete((GtGenomeNode*) gf);
+    gt_genome_node_delete((GtGenomeNode*) fn);
   else
-    gt_queue_add(fv->gt_genome_node_buffer, gf);
+    gt_queue_add(fv->gt_genome_node_buffer, fn);
 
   return 0;
 }
 
-static int filter_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
+static int filter_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
                                       GT_UNUSED GtError *err)
 {
   GtFilterVisitor *filter_visitor;
   gt_error_check(err);
-  filter_visitor = filter_visitor_cast(gv);
+  filter_visitor = filter_visitor_cast(nv);
   if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
                gt_genome_node_get_seqid((GtGenomeNode*) rn))) {
@@ -232,38 +232,38 @@ static int filter_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
       gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
   }
   else
-    gt_genome_node_rec_delete((GtGenomeNode*) rn);
+    gt_genome_node_delete((GtGenomeNode*) rn);
   return 0;
 }
 
-static int filter_visitor_sequence_node(GtNodeVisitor *gv, GtSequenceNode *sn,
+static int filter_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
                                         GT_UNUSED GtError *err)
 {
   GtFilterVisitor *filter_visitor;
   gt_error_check(err);
-  filter_visitor = filter_visitor_cast(gv);
+  filter_visitor = filter_visitor_cast(nv);
   if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
                gt_genome_node_get_seqid((GtGenomeNode*) sn))) {
     gt_queue_add(filter_visitor->gt_genome_node_buffer, sn);
   }
   else
-    gt_genome_node_rec_delete((GtGenomeNode*) sn);
+    gt_genome_node_delete((GtGenomeNode*) sn);
   return 0;
 }
 
 const GtNodeVisitorClass* gt_filter_visitor_class()
 {
-  static const GtNodeVisitorClass *gvc = NULL;
-  if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (GtFilterVisitor),
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+    nvc = gt_node_visitor_class_new(sizeof (GtFilterVisitor),
                                     filter_visitor_free,
                                     filter_visitor_comment,
                                     filter_visitor_genome_feature,
                                     filter_visitor_region_node,
                                     filter_visitor_sequence_node);
   }
-  return gvc;
+  return nvc;
 }
 
 GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid, GtStr *typefilter,
@@ -278,8 +278,8 @@ GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid, GtStr *typefilter,
                                      double min_average_splice_site_prob,
                                      unsigned long feature_num)
 {
-  GtNodeVisitor *gv = gt_node_visitor_create(gt_filter_visitor_class());
-  GtFilterVisitor *filter_visitor = filter_visitor_cast(gv);
+  GtNodeVisitor *nv = gt_node_visitor_create(gt_filter_visitor_class());
+  GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
   filter_visitor->gt_genome_node_buffer = gt_queue_new();
   filter_visitor->seqid = gt_str_ref(seqid);
   filter_visitor->typefilter = gt_str_ref(typefilter);
@@ -295,18 +295,18 @@ GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid, GtStr *typefilter,
   filter_visitor->max_gene_score = max_gene_score;
   filter_visitor->min_average_splice_site_prob = min_average_splice_site_prob;
   filter_visitor->feature_num = feature_num;
-  return gv;
+  return nv;
 }
 
-unsigned long gt_filter_visitor_node_buffer_size(GtNodeVisitor *gv)
+unsigned long gt_filter_visitor_node_buffer_size(GtNodeVisitor *nv)
 {
-  GtFilterVisitor *filter_visitor = filter_visitor_cast(gv);
+  GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
   return gt_queue_size(filter_visitor->gt_genome_node_buffer);
 }
 
-GtGenomeNode* gt_filter_visitor_get_node(GtNodeVisitor *gv)
+GtGenomeNode* gt_filter_visitor_get_node(GtNodeVisitor *nv)
 {
   GtFilterVisitor *filter_visitor;
-  filter_visitor = filter_visitor_cast(gv);
+  filter_visitor = filter_visitor_cast(nv);
   return gt_queue_get(filter_visitor->gt_genome_node_buffer);
 }

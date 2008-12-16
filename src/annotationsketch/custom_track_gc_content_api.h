@@ -19,14 +19,19 @@
 #define CUSTOM_TRACK_GC_CONTENT_API_H
 
 #include "annotationsketch/custom_track_api.h"
-#include "core/seq.h"
 
-/* Implements the GtCustomTrack interface. This custom track draws a plot of
+/* Implements the <GtCustomTrack> interface. This custom track draws a plot of
    the GC content of a given sequence in the displayed range. As a window
    size for GC content calculation, <windowsize> is used. */
 typedef struct GtCustomTrackGcContent GtCustomTrackGcContent;
 
-GtCustomTrack* gt_custom_track_gc_content_new(GtSeq *seq,
+/* Creates a new <GtCustomTrackGcContent> for sequence <seq> with length
+   <seqlen> of height <height> with windowsize <windowsize>.
+   A horizontal line is drawn for the percentage value <avg>,
+   with <avg> between 0 and 1. If <show_scale> is set to true, then a vertical
+   scale rule is drawn at the left end of the curve. */
+GtCustomTrack* gt_custom_track_gc_content_new(const char *seq,
+                                              unsigned long seqlen,
                                               unsigned long windowsize,
                                               unsigned long height,
                                               double avg,

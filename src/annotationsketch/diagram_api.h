@@ -21,17 +21,18 @@
 #define DIAGRAM_API_H
 
 /* The <GtDiagram> class acts as a representation of a sequence annotation
-   diagram independent of any output format. It contains code to arrange
-   feature nodes into blocks, lines and tracks. A individual graphical
-   representation of the <GtDiagram> contents is created by calling
-   <gt_diagram_sketch()> with an appropriate <GtCanvas> object. */
+   diagram independent of any output format. Besides annotation features as
+   annotation graphs, it can contain one or more custom tracks. A individual
+   graphical representation of the <GtDiagram> contents is created by creating a
+   <GtLayout> object using the <GtDiagram> and then calling
+   <gt_layout_sketch()> with an appropriate <GtCanvas> object. */
 typedef struct GtDiagram GtDiagram;
 
 #include "annotationsketch/custom_track_api.h"
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/style_api.h"
 #include "annotationsketch/block_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* A <GtTrackSelectorFunc> is a callback function which returns a string
    which can be used as a track identifier for assignment of a <GtBlock>

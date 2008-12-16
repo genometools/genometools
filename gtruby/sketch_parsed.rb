@@ -21,7 +21,7 @@ feature_index.add_gff3file(gff3file)
 # create diagram for first sequence ID in feature index
 seqid = feature_index.get_first_seqid()
 range = feature_index.get_range_for_seqid(seqid)
-diagram = GT::Diagram.new(feature_index, seqid, range, style)
+diagram = GT::Diagram.from_index(feature_index, seqid, range, style)
 
 # create layout for given width
 layout = GT::Layout.new(diagram, 800, style)

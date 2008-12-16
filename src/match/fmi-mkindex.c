@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/basename.h"
+#include "core/basename_api.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "divmodmul.h"

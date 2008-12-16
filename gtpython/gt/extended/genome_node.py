@@ -20,11 +20,10 @@ from gt.core.error import Error, gterror
 from gt.extended.gff3_visitor import GFF3Visitor
 
 class GenomeNode(object):
-  def __init__(self, node_ptr, single = False):
+  def __init__(self, node_ptr, newref = False):
     if node_ptr == 0 or node_ptr == None:
       gterror("GenomeNode pointer cannot be NULL (was: " + str(node_ptr) + ")")
-    self.single = single
-    if single:
+    if newref:
       self.gn = gtlib.gt_genome_node_ref(node_ptr)
     else:
       self.gn = node_ptr
@@ -32,10 +31,7 @@ class GenomeNode(object):
 
   def __del__(self):
     try:
-      if self.single:
-        gtlib.gt_genome_node_delete(self.gn)
-      else:
-        gtlib.gt_genome_node_rec_delete(self.gn)
+      gtlib.gt_genome_node_delete(self.gn)
     except AttributeError:
       pass
 

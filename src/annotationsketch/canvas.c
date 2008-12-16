@@ -78,7 +78,7 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
 }
 
 /* Formats a given position number for short display in the ruler. */
-void format_ruler_label(char *txt, unsigned long pos, size_t buflen)
+void gt_format_ruler_label(char *txt, unsigned long pos, size_t buflen)
 {
   gt_assert(txt);
   double fpos;

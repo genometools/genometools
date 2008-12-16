@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include "annotationsketch/block.h"
+#include "annotationsketch/default_formats.h"
 #include "annotationsketch/element.h"
 #include "core/cstr.h"
 #include "core/dlist.h"
@@ -104,19 +105,17 @@ GtBlock* gt_block_new_from_node(GtFeatureNode *node)
   block->range = gt_genome_node_get_range((GtGenomeNode*) node);
   block->strand = gt_feature_node_get_strand(node);
   block->type = gt_feature_node_get_type(node);
-  block->top_level_feature = (GtFeatureNode*)
-                                   gt_genome_node_ref((GtGenomeNode*) node);
+  block->top_level_feature = gt_feature_node_nonrec_ref(node);
   return block;
 }
 
-void gt_block_insert_element(GtBlock *block, GtFeatureNode *gf)
+void gt_block_insert_element(GtBlock *block, GtFeatureNode *node)
 {
   GtElement *element;
-  gt_assert(block && gf);
+  gt_assert(block && node);
   if (!block->top_level_feature)
-    block->top_level_feature = (GtFeatureNode*)
-                                    gt_genome_node_ref((GtGenomeNode*) gf);
-  element = gt_element_new(gf);
+    block->top_level_feature = gt_feature_node_nonrec_ref(node);
+  element = gt_element_new(node);
   gt_dlist_add(block->elements, element);
 }
 
@@ -158,9 +157,8 @@ GtBlock* gt_block_clone(GtBlock *block)
   newblock->range.end = block->range.end;
   newblock->show_caption = block->show_caption;
   newblock->strand = block->strand;
-  newblock->top_level_feature = (GtFeatureNode*)
-                                   gt_genome_node_ref((GtGenomeNode*)
-                                                block->top_level_feature);
+  newblock->top_level_feature = gt_feature_node_nonrec_ref(block
+                                                           ->top_level_feature);
   return newblock;
 }
 
@@ -252,6 +250,27 @@ const char* gt_block_get_type(const GtBlock *block)
   return block->type;
 }
 
+double gt_block_get_max_height(const GtBlock *block, const GtStyle *sty)
+{
+  GtDlistelem *delem;
+  double max_height = 0;
+  gt_assert(block && sty);
+  for (delem = gt_dlist_first(block->elements); delem;
+       delem = gt_dlistelem_next(delem)) {
+     GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
+     double height = 0;
+     /* get default or image-wide bar height */
+     if (!gt_style_get_num(sty, "format", "bar_height", &height, NULL))
+       height = BAR_HEIGHT_DEFAULT;
+     /* try to get type-specific bar height */
+     gt_style_get_num(sty, gt_element_get_type(elem), "bar_height", &height,
+                      gt_element_get_node_ref(elem));
+     if (height > max_height)
+       max_height = height;
+  }
+  return max_height;
+}
+
 unsigned long gt_block_get_size(const GtBlock *block)
 {
   gt_assert(block && block->elements);
@@ -290,6 +309,7 @@ int gt_block_unit_test(GtError *err)
   GtBlock * b;
   GtStr *seqid, *caption1, *caption2;
   int had_err = 0;
+  GtStyle *sty;
   gt_error_check(err);
 
   seqid = gt_str_new_cstr("seqid");
@@ -338,11 +358,22 @@ int gt_block_unit_test(GtError *err)
   s = gt_block_get_strand(b);
   ensure(had_err, (GT_STRAND_FORWARD == s));
 
+  /* test gt_block_get_max_height() */
+  sty = gt_style_new(err);
+  ensure(had_err, gt_block_get_max_height(b, sty) == BAR_HEIGHT_DEFAULT);
+  gt_style_set_num(sty, "exon", "bar_height", 42);
+  ensure(had_err, gt_block_get_max_height(b, sty) == 42);
+  gt_style_set_num(sty, "gene", "bar_height", 23);
+  ensure(had_err, gt_block_get_max_height(b, sty) == 42);
+  gt_style_unset(sty, "exon", "bar_height");
+  ensure(had_err, gt_block_get_max_height(b, sty) == 23);
+
   gt_str_delete(caption2);
   gt_str_delete(seqid);
   gt_element_delete(e1);
   gt_element_delete(e2);
   gt_block_delete(b);
+  gt_style_delete(sty);
   gt_genome_node_delete(gn1);
   gt_genome_node_delete(gn2);
 
@@ -366,6 +397,6 @@ void gt_block_delete(GtBlock *block)
     gt_str_delete(block->caption);
   gt_dlist_delete(block->elements);
   if (block->top_level_feature)
-    gt_genome_node_delete((GtGenomeNode*) block->top_level_feature);
+    gt_feature_node_nonrec_delete(block->top_level_feature);
   gt_free(block);
 }

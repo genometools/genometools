@@ -22,7 +22,7 @@
 #include "core/assert_api.h"
 #include "core/cstr.h"
 #include "core/fileutils.h"
-#include "core/basename.h"
+#include "core/basename_api.h"
 #include "core/gtdatapath.h"
 #include "core/ma.h"
 #include "core/splitter.h"

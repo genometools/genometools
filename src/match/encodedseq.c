@@ -44,12 +44,14 @@
 #include "sfx-cmpsuf.pr"
 #include "fillsci.pr"
 
-#define CHECKANDUPDATE(VAL)\
-        tmp = localdetsizeencseq(VAL,totallength,specialranges,mapsize);\
+#define CHECKANDUPDATE(VAL,IDX)\
+        tmp = localdetsizeencseq(VAL,totallength,\
+                                 specialrangestab[IDX],mapsize);\
         if (tmp < cmin)\
         {\
           cmin = tmp;\
           cret = VAL;\
+          *specialranges = specialrangestab[IDX];\
         }
 
 /* The following implements the access functions to the bit encoding */
@@ -734,18 +736,21 @@ uint64_t detsizeencseq(int kind,
   return localdetsizeencseq(sat[kind],totallength,specialranges,mapsize);
 }
 
-static Positionaccesstype determinesmallestrep(Seqpos totallength,
-                                               Seqpos specialranges,
+static Positionaccesstype determinesmallestrep(Seqpos *specialranges,
+                                               Seqpos totallength,
+                                               const Seqpos *specialrangestab,
                                                unsigned int mapsize)
 {
   Positionaccesstype cret;
   uint64_t tmp, cmin;
 
-  cmin = localdetsizeencseq(Viabitaccess,totallength,specialranges,mapsize);
+  cmin = localdetsizeencseq(Viabitaccess,totallength,
+                            specialrangestab[0],mapsize);
   cret = Viabitaccess;
-  CHECKANDUPDATE(Viauchartables);
-  CHECKANDUPDATE(Viaushorttables);
-  CHECKANDUPDATE(Viauint32tables);
+  *specialranges = specialrangestab[0];
+  CHECKANDUPDATE(Viauchartables,0);
+  CHECKANDUPDATE(Viaushorttables,1);
+  CHECKANDUPDATE(Viauint32tables,2);
   return cret;
 }
 
@@ -2101,8 +2106,9 @@ static int readsatfromfile(const GtStr *indexname,GtError *err)
   return haserr ? -1 : cc;
 }
 
-static int determinesattype(Seqpos totallength,
-                            Seqpos specialranges,
+static int determinesattype(Seqpos *specialranges,
+                            Seqpos totallength,
+                            const Seqpos *specialrangestab,
                             unsigned int mapsize,
                             const char *str_sat,
                             GtError *err)
@@ -2110,18 +2116,29 @@ static int determinesattype(Seqpos totallength,
   Positionaccesstype sat;
   bool haserr = false;
 
+  *specialranges = specialrangestab[0];
   if (mapsize == DNAALPHASIZE + 1)
   {
     if (str_sat == NULL)
     {
-      sat = determinesmallestrep(totallength,specialranges,mapsize);
+      sat = determinesmallestrep(specialranges,
+                                 totallength,specialrangestab,mapsize);
     } else
     {
       sat = str2positionaccesstype(str_sat);
-      if (sat == Undefpositionaccesstype)
+      switch (sat)
       {
-        gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
-        haserr = true;
+        case Undefpositionaccesstype:
+           gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
+           haserr = true;
+           break;
+        case Viauchartables: *specialranges = specialrangestab[0];
+                             break;
+        case Viaushorttables: *specialranges = specialrangestab[1];
+                              break;
+        case Viauint32tables: *specialranges = specialrangestab[2];
+                              break;
+        default: break;
       }
     }
   } else
@@ -2221,28 +2238,30 @@ static Encodedsequencefunctions encodedseqfunctab[] =
         encseq->delivercontainsspecialname\
           = encodedseqfunctab[(int) sat].delivercontainsspecial.funcname
 
-/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
-                                                  const GtStrArray
-                                                  *filenametab,
-                                                  bool plainformat,
-                                                  Seqpos totallength,
-                                                  Seqpos specialranges,
-                                                  const Alphabet *alphabet,
-                                                  const char *str_sat,
-                                                  unsigned long
-                                                     *characterdistribution,
-                                                  Verboseinfo *verboseinfo,
-                                                  GtError *err)
+/*@null@*/ Encodedsequence *files2encodedsequence(
+                                bool withrange,
+                                const GtStrArray
+                                *filenametab,
+                                bool plainformat,
+                                Seqpos totallength,
+                                const Seqpos *specialrangestab,
+                                const Alphabet *alphabet,
+                                const char *str_sat,
+                                unsigned long *characterdistribution,
+                                Verboseinfo *verboseinfo,
+                                GtError *err)
 {
   Encodedsequence *encseq = NULL;
   Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
   GtFastaBuffer *fb = NULL;
+  Seqpos specialranges;
 
   gt_error_check(err);
-  retcode = determinesattype(totallength,
-                             specialranges,
+  retcode = determinesattype(&specialranges,
+                             totallength,
+                             specialrangestab,
                              getmapsizeAlphabet(alphabet),
                              str_sat,
                              err);
@@ -2364,7 +2383,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,3U,seqptr,len,mapsize,verboseinfo);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     specialcharinfo->specialranges,

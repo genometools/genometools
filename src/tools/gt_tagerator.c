@@ -241,6 +241,16 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
       return -1;
     }
   }
+  if (arguments->outputmode == 0)
+  {
+    arguments->outputmode = TAGOUT_TAGSEQ | TAGOUT_TAGNUM |
+                            TAGOUT_DBLENGTH | TAGOUT_DBSTARTPOS |
+                            TAGOUT_STRAND;
+    if (arguments->maxintervalwidth > 0)
+    {
+      arguments->outputmode |= TAGOUT_TAGLENGTH;
+    }
+  }
   return 0;
 }
 

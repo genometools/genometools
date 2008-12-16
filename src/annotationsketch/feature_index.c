@@ -143,7 +143,7 @@ int gt_feature_index_add_gff3file(GtFeatureIndex *fi,
   }
   gt_node_stream_delete(gff3_in_stream);
   for (i=0;i<gt_array_size(tmp);i++)
-    gt_genome_node_rec_delete(*(GtGenomeNode**) gt_array_get(tmp, i));
+    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(tmp, i));
   gt_array_delete(tmp);
   return had_err;
 }

@@ -76,7 +76,7 @@ void gt_node_stream_delete(GtNodeStream *ns)
   }
   gt_assert(ns->c_class);
   if (ns->c_class->free) ns->c_class->free(ns);
-  gt_genome_node_rec_delete(ns->members->buffer);
+  gt_genome_node_delete(ns->members->buffer);
   gt_free(ns->members);
   gt_free(ns);
 }

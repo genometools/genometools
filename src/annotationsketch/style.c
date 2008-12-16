@@ -20,7 +20,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "annotationsketch/color.h"
+#include "annotationsketch/color_api.h"
 #include "annotationsketch/style.h"
 #include "core/assert_api.h"
 #include "core/cstr.h"
@@ -207,7 +207,7 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1) && gn)
   {
-    GtGenomeNode *gn_lua = gt_genome_node_rec_ref((GtGenomeNode*) gn);
+    GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
     gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
@@ -321,7 +321,7 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1) && gn)
   {
-    GtGenomeNode *gn_lua = gt_genome_node_rec_ref((GtGenomeNode*) gn);
+    GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
     gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {
@@ -388,7 +388,7 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1) && gn)
   {
-    GtGenomeNode *gn_lua = gt_genome_node_rec_ref((GtGenomeNode*) gn);
+    GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
     gt_lua_genome_node_push(sty->L, gn_lua);
     if (lua_pcall(sty->L, 1, 1, 0) != 0)
     {

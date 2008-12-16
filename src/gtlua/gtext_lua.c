@@ -18,8 +18,8 @@
 #include "core/assert_api.h"
 #include "gtlua/cds_stream_lua.h"
 #include "gtlua/csa_stream_lua.h"
+#include "gtlua/feature_node_iterator_lua.h"
 #include "gtlua/genome_node_lua.h"
-#include "gtlua/genome_node_iterator_lua.h"
 #include "gtlua/genome_stream_lua.h"
 #include "gtlua/genome_visitor_lua.h"
 #include "gtlua/gtext_lua.h"
@@ -37,8 +37,8 @@ int gt_lua_open_extended(lua_State *L)
 #endif
   gt_lua_open_cds_stream(L);
   gt_lua_open_csa_stream(L);
+  gt_lua_open_feature_node_iterator(L);
   gt_lua_open_genome_node(L);
-  gt_lua_open_genome_node_iterator(L);
   gt_lua_open_genome_stream(L);
   gt_lua_open_genome_visitor(L);
   gt_lua_open_region_mapping(L);

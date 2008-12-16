@@ -32,6 +32,8 @@ typedef void   (*GtGraphicsSetFontFunc)(GtGraphics*, const char*, FontSlant,
                                         FontWeight);
 typedef void   (*GtGraphicsDrawLineFunc)(GtGraphics*, double, double,
                                          GtColor, double, double);
+typedef void   (*GtGraphicsDrawLineToFunc)(GtGraphics*, double, double,
+                                           double, double, GtColor, double);
 typedef void   (*GtGraphicsDrawBoxFunc)(GtGraphics*, double, double, double,
                                         double, GtColor, ArrowStatus, double,
                                         double, GtColor, bool);
@@ -86,6 +88,8 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                                      get_ymargins,
                                          GtGraphicsSetMarginsFunc
                                                      set_margins,
+                                         GtGraphicsDrawLineToFunc
+                                                     draw_line,
                                          GtGraphicsDrawLineFunc
                                                      draw_horizontal_line,
                                          GtGraphicsDrawLineFunc

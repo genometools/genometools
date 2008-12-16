@@ -341,5 +341,7 @@ int gt_non_r_cmpfunc(void *compar, const void *a, const void *b)
 void gt_msort(void *base, size_t nmemb, size_t size,
               int (*compar)(const void *, const void *))
 {
-  gt_msort_r(base, nmemb, size, compar, gt_non_r_cmpfunc);
+  /* do not try to sort an array of size 0 */
+  if (nmemb > 0)
+    gt_msort_r(base, nmemb, size, compar, gt_non_r_cmpfunc);
 }

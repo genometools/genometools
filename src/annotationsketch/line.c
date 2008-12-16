@@ -21,8 +21,8 @@
 #include "core/ma.h"
 #include "core/range.h"
 #include "annotationsketch/block.h"
+#include "annotationsketch/default_formats.h"
 #include "annotationsketch/line.h"
-#include "annotationsketch/style.h"
 
 struct GtLine {
   bool has_captions;
@@ -76,15 +76,32 @@ int gt_line_sketch(GtLine *line, GtCanvas *canvas, GtError *err)
   return had_err;
 }
 
+double gt_line_get_height(const GtLine *line, const GtStyle *sty)
+{
+  double line_height = 0;
+  unsigned long i;
+  gt_assert(line && sty);
+  for (i = 0; i < gt_array_size(line->blocks); i++) {
+    GtBlock *block;
+    double height;
+    block = *(GtBlock**) gt_array_get(line->blocks, i);
+    height = gt_block_get_max_height(block, sty);
+    if (height > line_height)
+      line_height = height;
+  }
+  return line_height;
+}
+
 int gt_line_unit_test(GtError *err)
 {
-  GtRange r1, r2;
+  GtRange r1, r2, r3;
   GtArray* blocks;
-  GtStr *seqid1, *seqid2, *seqid3;
+  GtStr *seqid1;
   int had_err = 0;
-  GtGenomeNode *parent, *gn1, *gn2, *gn3, *gn4;
-  GtLine *l1, *l2;
+  GtGenomeNode *parent, *gn1, *gn2, *gn3;
+  GtLine *l1;
   GtBlock *b1, *b2;
+  GtStyle *sty = NULL;
   gt_error_check(err);
 
   const char* foo = "foo";
@@ -92,38 +109,40 @@ int gt_line_unit_test(GtError *err)
   const char* blub = "blub";
 
   r1.start = 10;
-  r1.end = 50;
-
+  r1.end = 40;
   r2.start = 51;
   r2.end = 80;
+  r3.start = 0;
+  r3.end = 7;
 
   seqid1 = gt_str_new_cstr("test1");
-  seqid2 = gt_str_new_cstr("test2");
-  seqid3 = gt_str_new_cstr("foo");
 
-  parent = gt_feature_node_new(seqid1, gft_gene, 10, 80, GT_STRAND_FORWARD);
-  gn1 = gt_feature_node_new(seqid3, gft_exon, r1.start, r1.end,
-                              GT_STRAND_FORWARD);
-  gn2 = gt_feature_node_new(seqid3, gft_exon, r2.start, r2.end,
-                             GT_STRAND_FORWARD);
-  gn3 = gt_feature_node_new(seqid2, gft_exon, 70, 100, GT_STRAND_FORWARD);
-  gn4 = gt_feature_node_new(seqid3, gft_TF_binding_site, 10, 20,
-                              GT_STRAND_FORWARD);
+  parent = gt_feature_node_new(seqid1, gft_gene, r1.start, r2.end,
+                               GT_STRAND_FORWARD);
+  gn1 = gt_feature_node_new(seqid1, gft_exon, r1.start, r1.end,
+                            GT_STRAND_FORWARD);
+  gn2 = gt_feature_node_new(seqid1, gft_exon, r2.start, r2.end,
+                            GT_STRAND_FORWARD);
+  gn3 = gt_feature_node_new(seqid1, gft_TF_binding_site, r3.start, r3.end,
+                            GT_STRAND_FORWARD);
+
+  gt_feature_node_add_child((GtFeatureNode*) parent, (GtFeatureNode*) gn1);
+  gt_feature_node_add_child((GtFeatureNode*) parent, (GtFeatureNode*) gn2);
 
   l1 = gt_line_new();
-  l2 = gt_line_new();
 
   gt_feature_node_add_attribute((GtFeatureNode*) parent, "Name", foo);
   gt_feature_node_add_attribute((GtFeatureNode*) gn1, "Name", bar);
   gt_feature_node_add_attribute((GtFeatureNode*) gn2, "Name", bar);
   gt_feature_node_add_attribute((GtFeatureNode*) gn3, "Name", blub);
-  gt_feature_node_add_attribute((GtFeatureNode*) gn4, "Name", bar);
 
   b1 = gt_block_new();
   b2 = gt_block_new();
 
+  gt_block_insert_element(b1, (GtFeatureNode*) parent);
   gt_block_insert_element(b1, (GtFeatureNode*) gn1);
-  gt_block_insert_element(b2, (GtFeatureNode*) gn2);
+  gt_block_insert_element(b1, (GtFeatureNode*) gn2);
+  gt_block_insert_element(b2, (GtFeatureNode*) gn3);
   gt_block_set_range(b1, r1);
   gt_block_set_range(b2, r2);
 
@@ -138,17 +157,27 @@ int gt_line_unit_test(GtError *err)
   blocks = gt_line_get_blocks(l1);
   ensure(had_err, (2 == gt_array_size(blocks)));
 
-  gt_str_delete(seqid1);
-  gt_str_delete(seqid2);
-  gt_str_delete(seqid3);
-  gt_line_delete(l1);
-  gt_line_delete(l2);
-  gt_genome_node_delete(parent);
-  gt_genome_node_delete(gn1);
-  gt_genome_node_delete(gn2);
-  gt_genome_node_delete(gn3);
-  gt_genome_node_delete(gn4);
+  /* test gt_line_get_height() */
+  if (!had_err)
+  {
+    sty = gt_style_new(err);
+    ensure(had_err, gt_line_get_height(l1, sty) == BAR_HEIGHT_DEFAULT);
+    gt_style_set_num(sty, "exon", "bar_height", 42);
+    ensure(had_err, gt_line_get_height(l1, sty) == 42);
+    gt_style_set_num(sty, "gene", "bar_height", 23);
+    ensure(had_err, gt_line_get_height(l1, sty) == 42);
+    gt_style_unset(sty, "exon", "bar_height");
+    ensure(had_err, gt_line_get_height(l1, sty) == 23);
+    gt_style_unset(sty, "gene", "bar_height");
+    gt_style_set_num(sty, "format", "bar_height", 99);
+    ensure(had_err, gt_line_get_height(l1, sty) == 99);
+  }
 
+  gt_str_delete(seqid1);
+  gt_line_delete(l1);
+  gt_style_delete(sty);
+  gt_genome_node_delete(parent);
+  gt_genome_node_delete(gn3);
   return had_err;
 }
 

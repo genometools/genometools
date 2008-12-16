@@ -177,18 +177,18 @@ void initEncodedsequencescanstategeneric(Encodedsequencescanstate *esr,
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
-/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
-                                                  const GtStrArray
-                                                  *filenametab,
-                                                  bool plainformat,
-                                                  Seqpos totallength,
-                                                  Seqpos specialranges,
-                                                  const Alphabet *alphabet,
-                                                  const char *str_sat,
-                                                  unsigned long
-                                                    *characterdistribution,
-                                                  Verboseinfo *verboseinfo,
-                                                  GtError *err);
+/*@null@*/ Encodedsequence *files2encodedsequence(
+                                    bool withrange,
+                                    const GtStrArray
+                                    *filenametab,
+                                    bool plainformat,
+                                    Seqpos totallength,
+                                    const Seqpos *specialrangestab,
+                                    const Alphabet *alphabet,
+                                    const char *str_sat,
+                                    unsigned long *characterdistribution,
+                                    Verboseinfo *verboseinfo,
+                                    GtError *err);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,

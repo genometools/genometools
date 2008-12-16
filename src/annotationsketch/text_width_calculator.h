@@ -20,6 +20,8 @@
 
 #include "annotationsketch/text_width_calculator_api.h"
 
+typedef struct GtTextWidthCalculatorClass GtTextWidthCalculatorClass;
+
 void* gt_text_width_calculator_cast(const GtTextWidthCalculatorClass*,
                                     GtTextWidthCalculator*);
 void* gt_text_width_calculator_try_cast(const GtTextWidthCalculatorClass*,

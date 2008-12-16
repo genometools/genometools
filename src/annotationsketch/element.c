@@ -35,16 +35,16 @@ struct GtElement {
   bool mark;
 };
 
-GtElement* gt_element_new(GtFeatureNode *gf)
+GtElement* gt_element_new(GtFeatureNode *node)
 {
   GtElement *element;
-  gt_assert(gf);
+  gt_assert(node);
   element = gt_element_new_empty();
-  gt_element_set_type(element, gt_feature_node_get_type(gf));
-  gt_element_set_range(element, gt_genome_node_get_range((GtGenomeNode*) gf));
-  element->strand = gt_feature_node_get_strand(gf);
-  element->mark = gt_genome_node_is_marked((GtGenomeNode*) gf);
-  element->gn = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) gf);
+  gt_element_set_type(element, gt_feature_node_get_type(node));
+  gt_element_set_range(element, gt_genome_node_get_range((GtGenomeNode*) node));
+  element->strand = gt_feature_node_get_strand(node);
+  element->mark = gt_genome_node_is_marked((GtGenomeNode*) node);
+  element->gn = gt_feature_node_nonrec_ref(node);
   return element;
 }
 
@@ -177,6 +177,6 @@ void gt_element_delete(GtElement *element)
     return;
   }
   if (element->gn)
-    gt_genome_node_delete((GtGenomeNode*) element->gn);
+    gt_feature_node_nonrec_delete(element->gn);
   gt_free(element);
 }

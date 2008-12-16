@@ -18,16 +18,24 @@
 from gt.dlload import gtlib
 
 class Array:
-  def __init__(self, arr = None):
-    from ctypes import sizeof, c_void_p
-    if not arr:
-      self.array = gtlib.gt_array_new(sizeof(c_void_p))
-    else:
-      self.array = arr
+  def create(size=None, own = True):
+    if size is None:
+      from ctypes import c_void_p, sizeof
+      size = sizeof(c_void_p)
+    return Array(gtlib.gt_array_new(size), own)
+  create = staticmethod(create)
+
+  def __init__(self, arr, own = False):
+    self.array = arr
     self._as_parameter_ = self.array
+    self.own = own
 
   def __del__(self):
-    gtlib.gt_array_delete(self.array)
+    if self.own:
+      try:
+        gtlib.gt_array_delete(self.array)
+      except AttributeError:
+        pass
 
   def from_param(cls, obj):
     if not isinstance(obj, Array):
@@ -41,9 +49,17 @@ class Array:
   def size(self):
     return gtlib.gt_array_size(self.array)
 
+  def add(self, val):
+    gtlib.gt_array_add_ptr(self.array, val._as_parameter_)
+
   def register(cls, gtlib):
-    from ctypes import c_void_p, c_ulong, POINTER
-    gtlib.gt_str_new_cstr.argtypes = [c_void_p, c_ulong]
+    from ctypes import c_void_p, c_uint, c_ulong, POINTER
+    gtlib.gt_array_new.restype = c_void_p
+    gtlib.gt_array_new.argtypes = [c_uint]
+    gtlib.gt_array_ref.restype = c_void_p
+    gtlib.gt_array_ref.argtypes = [c_void_p]
     gtlib.gt_array_get.restype = POINTER(c_void_p)
+    gtlib.gt_array_get.argtypes = [c_ulong]
     gtlib.gt_array_size.restype = c_ulong
+    gtlib.gt_array_add_ptr.argtypes = [c_void_p, c_void_p]
   register = classmethod(register)

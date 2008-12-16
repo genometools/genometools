@@ -30,7 +30,7 @@
 #include "core/fasta_reader_seqit.h"
 #include "core/fileutils.h"
 #include "core/gc_content.h"
-#include "core/grep.h"
+#include "core/grep_api.h"
 #include "core/ma.h"
 #include "core/md5_fingerprint.h"
 #include "core/parseutils.h"

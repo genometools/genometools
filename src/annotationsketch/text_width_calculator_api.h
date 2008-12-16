@@ -18,14 +18,19 @@
 #ifndef TEXT_WIDTH_CALCULATOR_API_H
 #define TEXT_WIDTH_CALCULATOR_API_H
 
-/* The GtTextWidthCalculator interface. */
-typedef struct GtTextWidthCalculatorClass GtTextWidthCalculatorClass;
+/* The GtTextWidthCalculator interface answers queries w.r.t.
+   text width in a specific drawing backend. This interface is needed to do
+   proper line breaking in a <GtLayout> even if there is no <GtCanvas> or
+   <GtGraphics> created yet. */
 typedef struct GtTextWidthCalculator GtTextWidthCalculator;
 
+/* Increases the reference count of the <GtTextWidthCalculator>. */
 GtTextWidthCalculator* gt_text_width_calculator_ref(GtTextWidthCalculator*);
+/* Requests the width of <text> from the <GtTextWidthCalculator>. */
 double                 gt_text_width_calculator_get_text_width(
                                                     GtTextWidthCalculator*,
-                                                    const char*);
+                                                    const char *text);
+/* Deletes a <GtTextWidthCalculator> instance. */
 void                   gt_text_width_calculator_delete(GtTextWidthCalculator*);
 
 #endif

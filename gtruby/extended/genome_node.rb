@@ -22,25 +22,21 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   extern "int gt_genome_node_accept(GtGenomeNode*, GenomeVisitor*, GtError*)"
-  extern "GtGenomeNode* gt_genome_node_rec_ref(GtGenomeNode*)"
   extern "GtGenomeNode* gt_genome_node_ref(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_start(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_end(GtGenomeNode*)"
   extern "const char* gt_genome_node_get_filename(GtGenomeNode*)"
-  extern "void gt_genome_node_rec_delete(GtGenomeNode*)"
   extern "void gt_genome_node_delete(GtGenomeNode*)"
 
   class GenomeNode
     attr_reader :genome_node
-    def initialize(node_ptr, single=false)
-      # use 'single' if not referencing root nodes
-      if single then
+    def initialize(node_ptr, newref=false)
+      if newref then
         @genome_node = GT.gt_genome_node_ref(node_ptr)
-        @genome_node.free = GT::symbol("gt_genome_node_delete", "0P")
       else
         @genome_node = node_ptr
-        @genome_node.free = GT::symbol("gt_genome_node_rec_delete", "0P")
       end
+      @genome_node.free = GT::symbol("gt_genome_node_delete", "0P")
     end
 
     def get_range

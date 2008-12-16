@@ -35,34 +35,34 @@ style = GT::Style.new()
 style.set_num("format","margins",100)
 
 begin
-  diagram = GT::Diagram.new(feature_index, "nonexist", range, style)
+  diagram = GT::Diagram.from_index(feature_index, "nonexist", range, style)
 rescue GT::GTError => msg
     raise if !/does not contain seqid 'nonexist'/.match(msg)
 else
   raise TestFailedError
 end
 begin
-  diagram = GT::Diagram.new(nil, seqid, range, style)
+  diagram = GT::Diagram.from_index(nil, seqid, range, style)
 rescue
   # exception expected
 else
   raise TestFailedError
 end
 begin
-  diagram = GT::Diagram.new(feature_index, seqid, nil, style)
+  diagram = GT::Diagram.from_index(feature_index, seqid, nil, style)
 rescue
   # exception expected
 else
   raise TestFailedError
 end
 begin
-  diagram = GT::Diagram.new(feature_index, seqid, range, "Dd")
+  diagram = GT::Diagram.from_index(feature_index, seqid, range, "Dd")
 rescue
   # exception expected
 else
   raise TestFailedError
 end
-diagram = GT::Diagram.new(feature_index, seqid, range, style)
+diagram = GT::Diagram.from_index(feature_index, seqid, range, style)
 
 begin
   layout = GT::Layout.new(diagram, 70, style)

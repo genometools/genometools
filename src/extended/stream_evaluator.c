@@ -167,27 +167,27 @@ static void slot_delete(Slot *s)
   unsigned long i;
   gt_assert(s);
   for (i = 0; i < gt_array_size(s->genes_forward); i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                               gt_array_get(s->genes_forward, i));
   }
   gt_array_delete(s->genes_forward);
   for (i = 0; i < gt_array_size(s->genes_reverse); i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                               gt_array_get(s->genes_reverse, i));
   }
   gt_array_delete(s->genes_reverse);
   for (i = 0; i < gt_array_size(s->mRNAs_forward); i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                               gt_array_get(s->mRNAs_forward, i));
   }
   gt_array_delete(s->mRNAs_forward);
   for (i = 0; i < gt_array_size(s->mRNAs_reverse); i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                               gt_array_get(s->mRNAs_reverse, i));
   }
   gt_array_delete(s->mRNAs_reverse);
   for (i = 0; i < gt_array_size(s->LTRs); i++)
-    gt_genome_node_rec_delete(*(GtGenomeNode**) gt_array_get(s->LTRs, i));
+    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(s->LTRs, i));
   gt_array_delete(s->LTRs);
   gt_transcript_exons_delete(s->mRNA_exons_forward);
   gt_transcript_exons_delete(s->mRNA_exons_reverse);
@@ -441,11 +441,11 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
   if (gt_feature_node_has_type(gf, gft_gene)) {
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->genes_forward, gn_ref);
         break;
       case GT_STRAND_REVERSE:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->genes_reverse, gn_ref);
         break;
       default:
@@ -458,11 +458,11 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
   else if (gt_feature_node_has_type(gf, gft_mRNA)) {
     switch (gt_feature_node_get_strand(gf)) {
       case GT_STRAND_FORWARD:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->mRNAs_forward, gn_ref);
         break;
       case GT_STRAND_REVERSE:
-        gn_ref = gt_genome_node_rec_ref(gn);
+        gn_ref = gt_genome_node_ref(gn);
         gt_array_add(info->slot->mRNAs_reverse, gn_ref);
         break;
       default:
@@ -473,7 +473,7 @@ static int process_real_feature(GtGenomeNode *gn, void *data,
     }
   }
   else if (gt_feature_node_has_type(gf, gft_LTR_retrotransposon)) {
-    gn_ref = gt_genome_node_rec_ref(gn);
+    gn_ref = gt_genome_node_ref(gn);
     gt_array_add(info->slot->LTRs, gn_ref);
   }
   else if (gt_feature_node_has_type(gf, gft_CDS)) {
@@ -1326,7 +1326,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
     }
     if (gv)
       gt_genome_node_accept(gn, gv, err);
-    gt_genome_node_rec_delete(gn);
+    gt_genome_node_delete(gn);
   }
 
   /* set the actuals and sort them */
@@ -1362,7 +1362,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
       }
       if (gv)
         had_err = gt_genome_node_accept(gn, gv, err);
-      gt_genome_node_rec_delete(gn);
+      gt_genome_node_delete(gn);
     }
   }
 

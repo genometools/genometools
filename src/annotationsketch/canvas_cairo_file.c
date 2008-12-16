@@ -100,7 +100,6 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,
   double margins = 10.0;
   gt_assert(sty && width > 0 && height > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_file_class());
-  canvas->pvt->y += HEADER_SPACE;
   canvas->pvt->g = gt_graphics_cairo_new(type, width, height);
   gt_style_get_num(sty, "format", "margins", &margins, NULL);
   gt_graphics_set_margins(canvas->pvt->g, margins, 0);
@@ -113,7 +112,7 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,
   canvas->pvt->height = height;
   canvas->pvt->bt = NULL;
   /* 0.5 displacement to eliminate fuzzy horizontal lines */
-  canvas->pvt->y = 0.5 + HEADER_SPACE;
+  canvas->pvt->y += 0.5;
   ccf = canvas_cairo_file_cast(canvas);
   ccf->type = type;
   return canvas;

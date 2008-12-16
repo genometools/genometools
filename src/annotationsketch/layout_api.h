@@ -20,10 +20,9 @@
 
 #include "annotationsketch/canvas_api.h"
 #include "annotationsketch/diagram_api.h"
-#include "annotationsketch/drawing_range.h"
 #include "annotationsketch/style_api.h"
 #include "annotationsketch/text_width_calculator_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 
 /* The <GtLayout> class represents contents (tracks) of a <GtDiagram> broken up
    into lines such that a given horizontal space allotment given in pixels

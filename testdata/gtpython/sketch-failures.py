@@ -43,34 +43,34 @@ if __name__ == "__main__":
 
   # check error reporting in the Diagram class
   try:
-    diagram = Diagram(feature_index, "nonexist", range, style)
+    diagram = Diagram.from_index(feature_index, "nonexist", range, style)
   except GTError, strerr:
     if -1 == str(strerr).find("FeatureIndex does not contain seqid"):
       raise TestFailedError
   else:
     raise TestFailedError
   try:
-    diagram = Diagram(feature_index, seqid, range, 42)
+    diagram = Diagram.from_index(feature_index, seqid, range, 42)
   except ArgumentError, strerr:
     if -1 == str(strerr).find("must be a Style"):
       raise TestFailedError
   else:
     raise TestFailedError
   try:
-    diagram = Diagram(feature_index, seqid, 42, style)
+    diagram = Diagram.from_index(feature_index, seqid, 42, style)
   except AttributeError, strerr:
     if -1 == str(strerr).find("object has no attribute 'start'"):
       raise TestFailedError
   else:
     raise TestFailedError
   try:
-    diagram = Diagram(42, seqid, range, style)
+    diagram = Diagram.from_index(42, seqid, range, style)
   except ArgumentError, strerr:
     if -1 == str(strerr).find("must be a FeatureIndex"):
       raise TestFailedError
   else:
     raise TestFailedError
-  diagram = Diagram(feature_index, seqid, range, style)
+  diagram = Diagram.from_index(feature_index, seqid, range, style)
 
   # check error reporting in the Layout class
   try:
@@ -92,5 +92,3 @@ if __name__ == "__main__":
   else:
     raise TestFailedError
   canvas = CanvasCairoFile(style, 700, height, None)
-
-

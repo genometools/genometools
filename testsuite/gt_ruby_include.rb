@@ -82,7 +82,15 @@ if not $arguments["nocairo"] then
     run_ruby "#{$testdata}gtruby/graphics_stuff.rb " +
              "#{$testdata}graphics_curve_test_coords.txt " +
              "out.svg"
-    run "diff out.svg #{$testdata}graphics_test.out"
+    # will fail e.g. if cairo toy font setup is different from test machine
+    # disabled for now
+    # run "diff out.svg #{$testdata}graphics_test.out"
+  end
+
+  Name "gtruby: AnnotationSketch bindings (FeatureNode(Iterator))"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/feature_node.rb"
   end
 
   Name "gtruby: show_seqids"

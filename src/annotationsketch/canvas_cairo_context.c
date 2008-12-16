@@ -60,6 +60,7 @@ const GtCanvasClass* gt_canvas_cairo_context_class(void)
 }
 
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
+                                      double offsetpos,
                                       unsigned long width,
                                       unsigned long height,
                                       GtImageInfo *ii)
@@ -69,10 +70,10 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
   double margins = 10.0;
   gt_assert(sty && width > 0 && height > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_context_class());
-  canvas->pvt->y += HEADER_SPACE;
+  canvas->pvt->y += offsetpos;
   canvas->pvt->g = gt_graphics_cairo_new_from_context(context,
                                                       width,
-                                                      height);
+                                                      height+offsetpos);
   gt_style_get_num(sty, "format", "margins", &margins, NULL);
   gt_graphics_set_margins(canvas->pvt->g, margins, 0);
   canvas->pvt->margins = margins;
@@ -84,7 +85,7 @@ GtCanvas* gt_canvas_cairo_context_new(GtStyle *sty, cairo_t *context,
   canvas->pvt->height = height;
   canvas->pvt->bt = NULL;
   /* 0.5 displacement to eliminate fuzzy horizontal lines */
-  canvas->pvt->y = 0.5 + HEADER_SPACE;
+  canvas->pvt->y += 0.5;
   ccc = canvas_cairo_context_cast(canvas);
   ccc->context = context;
   return canvas;

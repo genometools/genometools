@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
   GtDiagram *diagram;
   GtLayout *layout;
   GtCanvas *canvas;
-  GtCustomTrack *custom, *custom2;
+  GtCustomTrack *custom;
   unsigned long height, windowsize;
   GtError *err = gt_error_new();
 
@@ -67,24 +67,23 @@ int main(int argc, char *argv[])
 
   /* create custom track with GC plot for first sequence in file,
      window size 1000, 40px height and average line at 16.5% */
-  custom = gt_custom_track_gc_content_new(gt_bioseq_get_seq(bioseq, 0),
+  custom = gt_custom_track_gc_content_new(gt_bioseq_get_sequence(bioseq, 0),
+                                          gt_bioseq_get_sequence_length(bioseq,
+                                                                        0),
                                           windowsize,
                                           70,
                                           0.165,
                                           true);
   gt_diagram_add_custom_track(diagram, custom);
-  /* create example custom track */
-  custom2 = gt_custom_track_example_new();
-  gt_diagram_add_custom_track(diagram, custom2);
 
   /* create layout with given width, determine resulting image height */
-  layout = gt_layout_new(diagram, 1000, style, err);
+  layout = gt_layout_new(diagram, 600, style, err);
   if (gt_error_is_set(err))
     handle_error(err);
   height = gt_layout_get_height(layout);
 
   /* create PNG canvas */
-  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 1000, height, NULL);
+  canvas = gt_canvas_cairo_file_new(style, GT_GRAPHICS_PNG, 600, height, NULL);
 
   /* sketch layout on canvas */
   if (gt_layout_sketch(layout, canvas, err))
@@ -96,7 +95,6 @@ int main(int argc, char *argv[])
 
   /* free */
   gt_custom_track_delete(custom);
-  gt_custom_track_delete(custom2);
   gt_bioseq_delete(bioseq);
   gt_canvas_delete(canvas);
   gt_layout_delete(layout);

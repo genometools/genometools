@@ -32,8 +32,10 @@ typedef struct GtCanvasCairoContext GtCanvasCairoContext;
 
 /* Create a new Canvas object tied to the cairo_t <context>, <width> and
    <height> using the style given in <style>. The optional <image_info> is
-   filled when the created Canvas object is used to render a Diagram object. */
+   filled when the created Canvas object is used to render a Diagram object.
+   <offsetpos> determines where to start drawing on the surface. */
 GtCanvas* gt_canvas_cairo_context_new(GtStyle *style, cairo_t *context,
+                                      double offsetpos,
                                       unsigned long width,
                                       unsigned long height,
                                       GtImageInfo *image_info);

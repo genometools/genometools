@@ -16,7 +16,7 @@
 */
 
 #include <stdbool.h>
-#include "core/endianess.h"
+#include "core/endianess_api.h"
 
 bool gt_is_little_endian(void)
 {

@@ -127,6 +127,11 @@ void* gt_array_get_space(const GtArray *a)
   return a->space;
 }
 
+void gt_array_add_ptr(GtArray *a, void *elem)
+{
+  gt_array_add(a, elem);
+}
+
 void gt_array_add_elem(GtArray *a, void *elem, size_t size_of_elem)
 {
   gt_assert(a && elem);

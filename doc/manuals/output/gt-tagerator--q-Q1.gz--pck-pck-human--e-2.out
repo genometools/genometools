@@ -1,0 +1,29 @@
+$ gt tagerator -q Q1.gz -pck pck-human -e 2 
+# computing complete matches with up to 2 differences
+# indexname(pck)=pck-human
+# queryfile=Q1.gz
+# for each match show: tagnum tagseq dblength dbstartpos strand 
+#	0	15	aagcttgctgctgca
+14	363963	+
+13	576657	+
+13	501200	+
+13	158312	+
+13	180388	+
+15	464008	+
+14	88693	+
+13	576544	+
+15	191866	+
+15	135753	+
+15	668836	+
+13	576656	+
+13	501199	+
+14	471049	+
+14	78690	+
+14	104932	+
+14	463353	+
+14	317578	+
+15	576655	+
+15	501198	+
+15	317577	+
+16	590702	-
+#	1	18	atttgggactgtatctca

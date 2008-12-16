@@ -1,0 +1,26 @@
+$ gt tagerator -q Q1.gz -maxocc 10 -pck pck-human 
+# computing matching statistics
+# indexname(pck)=pck-human
+# queryfile=Q1.gz
+# for each match show: tagnum tagseq dblength dbstartpos strand taglength 
+#	0	15	aagcttgctgctgca
+10 + 88693
+9 + 88694 213545
+8 + 25583 88695 213546 281700 325202 451235 747565
+12 + 470064
+11 + 470065
+10 + 158315 363967 470066 501203 576660 729958
+9 +
+8 +
+7 +
+6 +
+5 +
+4 +
+3 +
+2 +
+1 +
+12 - 271321
+11 - 271322
+10 - 271323
+9 - 217234 271324 762404
+8 - 146318 216480 217235 271325 294145 762405

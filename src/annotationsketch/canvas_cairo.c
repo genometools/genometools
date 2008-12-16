@@ -41,6 +41,7 @@ int gt_canvas_cairo_visit_layout_pre(GtCanvas *canvas,
   /* get displayed range for internal use */
   canvas->pvt->viewrange = gt_layout_get_range(layout);
   gt_canvas_draw_ruler(canvas, canvas->pvt->viewrange);
+  canvas->pvt->y += HEADER_SPACE;
   return 0;
 }
 
@@ -112,7 +113,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
   return had_err;
 }
 
-int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GtTrack *track,
+int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track,
                                      GT_UNUSED GtError *err)
 {
   double vspace;
@@ -137,7 +138,7 @@ int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line,
   return had_err;
 }
 
-int gt_canvas_cairo_visit_line_post(GtCanvas *canvas, GtLine *line,
+int gt_canvas_cairo_visit_line_post(GtCanvas *canvas, GT_UNUSED GtLine *line,
                                     GT_UNUSED GtError *err)
 {
   int had_err = 0;
@@ -344,8 +345,10 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   gt_style_get_color(canvas->pvt->sty, type, "fill", &fill_color,
                   gt_element_get_node_ref(elem));
 
-  if (draw_range.end-draw_range.start <= 1.1)
+  if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
   {
+    if ((unsigned long) draw_range.start > gt_bittab_size(canvas->pvt->bt))
+      return had_err;
     if (gt_bittab_bit_is_set(canvas->pvt->bt, (unsigned long) draw_range.start))
       return had_err;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
@@ -368,7 +371,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
     gt_image_info_add_rec_map(canvas->pvt->ii, rm);
   }
 
-  if (draw_range.end-draw_range.start <= 1.1)
+  if (canvas->pvt->bt && draw_range.end-draw_range.start <= 1.1)
   {
     return had_err;
   }
@@ -563,14 +566,14 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
     if (tick < viewrange.start) continue;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
                                    drawtick,
-                                   30,
+                                   canvas->pvt->y + 30,
                                    rulercol,
                                    10,
                                    1.0);
-    format_ruler_label(str, tick, BUFSIZ);
+    gt_format_ruler_label(str, tick, BUFSIZ);
     gt_graphics_draw_text_centered(canvas->pvt->g,
                                    drawtick,
-                                   20,
+                                   canvas->pvt->y + 20,
                                    str);
   }
   /* draw minor ticks */
@@ -585,14 +588,14 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
       {
         gt_graphics_draw_vertical_line(canvas->pvt->g,
                                        drawtick,
-                                       40,
+                                       canvas->pvt->y + 40,
                                        gridcol,
                                        canvas->pvt->height-40-15,
                                        1.0);
       }
       gt_graphics_draw_vertical_line(canvas->pvt->g,
                                      drawtick,
-                                     35,
+                                     canvas->pvt->y + 35,
                                      rulercol,
                                      5,
                                      1.0);
@@ -601,17 +604,17 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
   /* draw ruler line */
   gt_graphics_draw_horizontal_line(canvas->pvt->g,
                                    canvas->pvt->margins,
-                                   40,
+                                   canvas->pvt->y + 40,
                                    rulercol,
                                    canvas->pvt->width-2*margins,
                                    1.5);
   /* put 3' and 5' captions at the ends */
   gt_graphics_draw_text_centered(canvas->pvt->g,
                                  canvas->pvt->margins-10,
-                                 45-(TOY_TEXT_HEIGHT/2),
+                                 canvas->pvt->y + 45-(TOY_TEXT_HEIGHT/2),
                                  FIVE_PRIME_STRING);
   gt_graphics_draw_text_centered(canvas->pvt->g,
                                  canvas->pvt->width-canvas->pvt->margins+10,
-                                 45-(TOY_TEXT_HEIGHT/2),
+                                 canvas->pvt->y + 45-(TOY_TEXT_HEIGHT/2),
                                  THREE_PRIME_STRING);
 }

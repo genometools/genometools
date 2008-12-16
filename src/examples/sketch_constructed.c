@@ -96,7 +96,7 @@ static void delete_example_features(GtArray *features)
 {
   unsigned long i;
   for (i = 0; i < gt_array_size(features); i++)
-    gt_genome_node_rec_delete(*(GtGenomeNode**) gt_array_get(features, i));
+    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(features, i));
   gt_array_delete(features);
 }
 

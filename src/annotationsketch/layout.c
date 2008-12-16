@@ -25,7 +25,7 @@
 #include "annotationsketch/style.h"
 #include "annotationsketch/text_width_calculator_cairo.h"
 #include "annotationsketch/track.h"
-#include "core/basename.h"
+#include "core/basename_api.h"
 #include "core/cstr.h"
 #include "core/ensure.h"
 #include "core/hashmap.h"
@@ -223,6 +223,7 @@ GtLayout* gt_layout_new_with_twc(GtDiagram *diagram,
   layout->nof_tracks = 0;
   lti.layout = layout;
   lti.twc = twc;
+  layout->own_twc = false;
   gt_diagram_build(diagram);
   layout->custom_tracks = gt_diagram_get_custom_tracks(diagram);
   /* XXX: use other container type here! */

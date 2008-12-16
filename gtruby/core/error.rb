@@ -40,7 +40,7 @@ module GT
       GT.gt_error_get(@error)
     end
 
-    def is_set
+    def is_set?
       GT.gt_error_is_set(@error)
     end
 

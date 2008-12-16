@@ -89,7 +89,15 @@ if not $arguments["nocairo"] then
     run_python "#{$testdata}gtpython/graphics_stuff.py " +
              "#{$testdata}graphics_curve_test_coords.txt " +
              "out.svg"
-    run "diff out.svg #{$testdata}graphics_test.out"
+    # will fail e.g. if cairo toy font setup is different from test machine
+    # disabled for now
+    # run "diff out.svg #{$testdata}graphics_test.out"
+  end
+
+  Name "gtpython: AnnotationSketch bindings (FeatureNode(Iterator))"
+  Keywords "gt_python"
+  Test do
+    run_python "#{$testdata}gtpython/feature_node.py"
   end
 
   Name "gtpython: show_seqids"

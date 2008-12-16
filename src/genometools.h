@@ -28,22 +28,32 @@
 /* the core module */
 #include "core/array_api.h"
 #include "core/assert_api.h"
+#include "core/basename_api.h"
+#include "core/endianess_api.h"
 #include "core/error_api.h"
 #include "core/fptr_api.h"
+#include "core/grep_api.h"
 #include "core/ma_api.h"
+#include "core/phase_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
+#include "core/strand_api.h"
 #include "core/unused_api.h"
 #include "core/version_api.h"
 #include "core/warning_api.h"
 
 /* the extended module */
+#include "extended/bed_in_stream_api.h"
+#include "extended/comment_node_api.h"
 #include "extended/feature_node_api.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node_api.h"
 #include "extended/gff3_in_stream_api.h"
+#include "extended/gtf_in_stream_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/region_node_api.h"
+#include "extended/sequence_node_api.h"
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */

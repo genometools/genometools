@@ -22,21 +22,42 @@ from gt.annotationsketch.canvas import Canvas
 from gt.annotationsketch.custom_track import CustomTrack
 from gt.annotationsketch.feature_index import FeatureIndex
 from gt.annotationsketch.style import Style
+from gt.core.array import Array
 from gt.core.error import Error, gterror
 from gt.core.gtrange import Range
+from gt.extended.feature_node import FeatureNode
 
 TrackSelectorFunc = CFUNCTYPE(c_char_p, c_void_p, c_void_p)
 
 class Diagram:
-  def __init__(self, feature_index, seqid, range, style):
+  def from_array(arr, rng, style):
+    from ctypes import byref, sizeof
+    if rng.start > rng.end:
+      gterror("range.start > range.end")
+    gtarr = Array.create(sizeof(c_void_p), False)
+    for i in arr:
+      if not isinstance(i, FeatureNode):
+        gterror("Diagram array must only contain FeatureNodes!")
+      gtarr.add(i)
+    diagram = gtlib.gt_diagram_new_from_array(gtarr, byref(rng), \
+                                              style)
+    return Diagram(diagram)
+  from_array = staticmethod(from_array)
+
+  def from_index(feature_index, seqid, rng, style):
     from ctypes import byref
     err = Error()
-    if range.start > range.end:
+    if rng.start > rng.end:
       gterror("range.start > range.end")
-    self.diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(range), \
-                                        style, err)
+    diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(rng), \
+                                   style, err)
     if err.is_set():
       gterror(err)
+    return Diagram(diagram)
+  from_index = staticmethod(from_index)
+
+  def __init__(self, ptr):
+    self.diagram = ptr
     self._as_parameter_ = self.diagram
 
   def __del__(self):
@@ -68,10 +89,12 @@ class Diagram:
   def register(cls, gtlib):
     from ctypes import c_char_p, c_void_p, POINTER
     gtlib.gt_diagram_new.restype = c_void_p
-    gtlib.gt_diagram_new.argtypes = [FeatureIndex, c_char_p, POINTER(Range), \
+    gtlib.gt_diagram_new.argtypes = [FeatureIndex, c_char_p, POINTER(Range),   \
                                      Style, Error]
-    gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p, \
+    gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p,             \
                                                          TrackSelectorFunc]
-    gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p, \
+    gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p,                    \
                                                   CustomTrack]
+    gtlib.gt_diagram_new_from_array.restype = c_void_p
+    gtlib.gt_diagram_new_from_array.argtypes = [Array, POINTER(Range), Style]
   register = classmethod(register)

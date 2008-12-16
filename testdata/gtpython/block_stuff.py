@@ -22,11 +22,14 @@ from gt.annotationsketch import *
 import sys
 import re
 
+class TestFailedError(Exception):
+  pass
+
 def testfunc(bl):
   b = Block(bl)
   print "%s %s %s %d" % (b.get_type(), b.get_strand(), b.get_range(), b.get_size())
   if not b.get_top_level_feature():
-    raise
+    raise TestFailedError
   return b.get_type()
 
 if __name__ == "__main__":
@@ -49,7 +52,7 @@ if __name__ == "__main__":
   range = feature_index.get_range_for_seqid(seqid)
 
   style = Style()
-  diagram = Diagram(feature_index, seqid, range, style)
+  diagram = Diagram.from_index(feature_index, seqid, range, style)
   diagram.set_track_selector_func(testfunc)
 
   layout = Layout(diagram, 800, style)

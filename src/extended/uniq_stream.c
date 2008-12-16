@@ -17,7 +17,8 @@
 
 #include "core/assert_api.h"
 #include "core/undef.h"
-#include "extended/genome_node_iterator.h"
+#include "extended/feature_node.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/node_stream_rep.h"
 #include "extended/uniq_stream.h"
 
@@ -35,26 +36,26 @@ static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
                                           GtGenomeNode *second_node)
 {
   bool equal = false;
-  GtGenomeNodeIterator *gni_a, *gni_b;
-  GtFeatureNode *gf_a, *gf_b;
-  gf_a = gt_feature_node_try_cast(first_node);
-  gf_b = gt_feature_node_try_cast(second_node);
-  if (gf_a && gf_b) {
-    gni_a = gt_genome_node_iterator_new(first_node);
-    gni_b = gt_genome_node_iterator_new(second_node);
-    for (gf_a = (GtFeatureNode*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GtFeatureNode*) gt_genome_node_iterator_next(gni_b);
-         gf_a && gf_b;
-         gf_a = (GtFeatureNode*) gt_genome_node_iterator_next(gni_a),
-         gf_b = (GtFeatureNode*) gt_genome_node_iterator_next(gni_b)) {
-      if (!gf_b || !gt_genome_features_are_similar(gf_a, gf_b))
+  GtFeatureNodeIterator *fni_a, *fni_b;
+  GtFeatureNode *fn_a, *fn_b;
+  fn_a = gt_feature_node_try_cast(first_node);
+  fn_b = gt_feature_node_try_cast(second_node);
+  if (fn_a && fn_b) {
+    fni_a = gt_feature_node_iterator_new((GtFeatureNode*) first_node);
+    fni_b = gt_feature_node_iterator_new((GtFeatureNode*) second_node);
+    for (fn_a = gt_feature_node_iterator_next(fni_a),
+         fn_b = gt_feature_node_iterator_next(fni_b);
+         fn_a && fn_b;
+         fn_a = gt_feature_node_iterator_next(fni_a),
+         fn_b = gt_feature_node_iterator_next(fni_b)) {
+      if (!fn_b || !gt_genome_features_are_similar(fn_a, fn_b))
         break;
     }
-    gf_b = (GtFeatureNode*) gt_genome_node_iterator_next(gni_b);
-    if (!gf_a && !gf_b)
+    fn_b = (GtFeatureNode*) gt_feature_node_iterator_next(fni_b);
+    if (!fn_a && !fn_b)
       equal = true;
-    gt_genome_node_iterator_delete(gni_a);
-    gt_genome_node_iterator_delete(gni_b);
+    gt_feature_node_iterator_delete(fni_a);
+    gt_feature_node_iterator_delete(fni_b);
     return equal;
   }
   return false;
@@ -83,11 +84,11 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
         (first_score_is_defined && second_score_is_defined &&
          first_score >= second_score)) {
       /* keep first node */
-      gt_genome_node_rec_delete(*second_node);
+      gt_genome_node_delete(*second_node);
     }
     else {
       /* keep second node */
-      gt_genome_node_rec_delete(*first_node);
+      gt_genome_node_delete(*first_node);
       *first_node = *second_node;
     }
     *second_node = NULL;
@@ -142,8 +143,8 @@ static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
 static void uniq_stream_free(GtNodeStream *gs)
 {
   GtUniqStream *us = uniq_stream_cast(gs);
-  gt_genome_node_rec_delete(us->first_node);
-  gt_genome_node_rec_delete(us->second_node);
+  gt_genome_node_delete(us->first_node);
+  gt_genome_node_delete(us->second_node);
   gt_node_stream_delete(us->in_stream);
 }
 

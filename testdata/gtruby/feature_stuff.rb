@@ -52,6 +52,11 @@ end
 seqid = feature_index.get_first_seqid()
 features = feature_index.get_features_for_seqid(seqid)
 raise if not features
+
+rng = feature_index.get_range_for_seqid(seqid)
+features_r = feature_index.get_features_for_range(rng.start, rng.end, seqid)
+raise unless features.length == features_r.length
+
 gff3_visitor = GT::GFF3Visitor.new()
 
 features.each do |feature|

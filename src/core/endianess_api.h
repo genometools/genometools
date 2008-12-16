@@ -15,10 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENDIANESS_H
-#define ENDIANESS_H
+#ifndef ENDIANESS_API_H
+#define ENDIANESS_API_H
 
-/* returns true if host CPU is little-endian, false otherwise */
+#include <stdbool.h>
+
+/* Endianess module */
+
+/* Returns <true> if host CPU is little-endian, <false> otherwise. */
 bool gt_is_little_endian(void);
 
 #endif

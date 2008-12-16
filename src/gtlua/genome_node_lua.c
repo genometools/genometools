@@ -177,8 +177,9 @@ static int feature_node_lua_get_exons(lua_State *L)
   lua_newtable(L);
   for (i = 0; i < gt_array_size(exons); i++) {
     lua_pushnumber(L, i+1);
-    gt_lua_genome_node_push(L, gt_genome_node_ref(*(GtGenomeNode**)
-                            gt_array_get(exons, i)));
+    gt_lua_genome_node_push(L, (GtGenomeNode*)
+                            gt_feature_node_nonrec_ref(*(GtFeatureNode**)
+                                                       gt_array_get(exons, i)));
     lua_rawset(L, -3);
   }
   gt_array_delete(exons);
@@ -226,7 +227,7 @@ static int genome_node_lua_add_child(lua_State *L)
   cf = gt_feature_node_try_cast(*child);
   luaL_argcheck(L, cf, 2, "not a feature node");
   gt_feature_node_add_child(pf, (GtFeatureNode*)
-                                gt_genome_node_rec_ref((GtGenomeNode*) cf));
+                                gt_genome_node_ref((GtGenomeNode*) cf));
   return 0;
 }
 
@@ -312,7 +313,7 @@ static int genome_node_lua_delete(lua_State *L)
 {
   GtGenomeNode **gn;
   gn = check_genome_node(L, 1);
-  gt_genome_node_rec_delete(*gn);
+  gt_genome_node_delete(*gn);
   return 0;
 }
 

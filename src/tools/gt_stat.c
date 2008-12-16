@@ -114,7 +114,7 @@ int gt_stat(int argc, const char **argv, GtError *err)
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
   while (!(had_err = gt_node_stream_next(stat_stream, &gn, err)) && gn) {
-    gt_genome_node_rec_delete(gn);
+    gt_genome_node_delete(gn);
   }
 
   /* show statistics */

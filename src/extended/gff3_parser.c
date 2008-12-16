@@ -31,8 +31,8 @@
 #include "extended/comment_node_api.h"
 #include "extended/feature_info.h"
 #include "extended/feature_node.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
-#include "extended/genome_node_iterator.h"
 #include "extended/gff3_escaping.h"
 #include "extended/gff3_parser.h"
 #include "extended/mapping.h"
@@ -73,7 +73,7 @@ static void automatic_sequence_region_delete(AutomaticGtSequenceRegion *auto_sr)
   if (!auto_sr) return;
   gt_genome_node_delete(auto_sr->sequence_region);
   for (i = 0; i < gt_array_size(auto_sr->feature_nodes); i++) {
-    gt_genome_node_rec_delete(*(GtGenomeNode**)
+    gt_genome_node_delete(*(GtGenomeNode**)
                               gt_array_get(auto_sr->feature_nodes, i));
   }
   gt_array_delete(auto_sr->feature_nodes);
@@ -515,22 +515,22 @@ static GtFeatureNode* merge_pseudo_roots(GtFeatureNode *pseudo_a,
                                          GtQueue *genome_nodes,
                                          AutomaticGtSequenceRegion *auto_sr)
 {
-  GtGenomeNodeIterator *gni;
+  GtFeatureNodeIterator *fni;
   GtFeatureNode *child;
   gt_assert(pseudo_a && gt_feature_node_is_pseudo(pseudo_a));
   gt_assert(pseudo_b && gt_feature_node_is_pseudo(pseudo_b));
   gt_assert(feature_info && genome_nodes);
   /* add children of pseudo node b to pseudo node a */
-  gni = gt_genome_node_iterator_new_direct((GtGenomeNode*) pseudo_b);
+  fni = gt_feature_node_iterator_new_direct(pseudo_b);
   /* XXX: remove cast */
-  while ((child = (GtFeatureNode*) gt_genome_node_iterator_next(gni))) {
+  while ((child = (GtFeatureNode*) gt_feature_node_iterator_next(fni))) {
     gt_feature_node_add_child(pseudo_a, child);
     gt_feature_info_replace_pseudo_parent(feature_info, child, pseudo_a);
   }
-  gt_genome_node_iterator_delete(gni);
+  gt_feature_node_iterator_delete(fni);
   /* remove pseudo node b from buffer */
   remove_node((GtGenomeNode*) pseudo_b, genome_nodes, auto_sr);
-  gt_genome_node_delete((GtGenomeNode*) pseudo_b);
+  gt_feature_node_nonrec_delete(pseudo_b);
   return pseudo_a;
 }
 
@@ -1155,7 +1155,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
       gt_array_add(auto_sr->feature_nodes, feature_node);
   }
   else if (!is_child)
-    gt_genome_node_delete(feature_node);
+    gt_feature_node_nonrec_delete((GtFeatureNode*) feature_node);
 
   if (!had_err && gn)
     gt_queue_add(genome_nodes, gn);
@@ -1474,7 +1474,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
 
   if (had_err) {
     while (gt_queue_size(genome_nodes))
-      gt_genome_node_rec_delete(gt_queue_get(genome_nodes));
+      gt_genome_node_delete(gt_queue_get(genome_nodes));
   }
   else if (rval == EOF) {
     /* the file has been parsed completely, add automatically created sequence

@@ -23,6 +23,10 @@
 /* The <GtColor> class holds a RGB color definition. */
 typedef struct GtColor GtColor;
 
+struct GtColor {
+    double red, green, blue, alpha;
+};
+
 /* Create a new <GtColor> object with the color given by the <red>, <green>,
    and <blue> arguments. The value for each color channel must be between 0
    and 1. */

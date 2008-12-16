@@ -26,7 +26,7 @@ int main(int argc, const char *argv[])
 
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
-    gt_genome_node_rec_delete(gn);
+    gt_genome_node_delete(gn);
 
   /* handle error */
   if (had_err)

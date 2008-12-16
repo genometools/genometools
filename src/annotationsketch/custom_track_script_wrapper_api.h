@@ -24,6 +24,12 @@
 #include "core/error_api.h"
 #include "core/range_api.h"
 
+/* Implements the <GtCustomTrackScriptWrapper> interface. This custom track is
+   only used to store pointers to external callbacks, e.g. written in a
+   scripting language. This class does not store any state, relying on the
+   developer of the external custom track class to do so.  */
+typedef struct GtCustomTrackScriptWrapper GtCustomTrackScriptWrapper;
+
 typedef int           (*GtCtScriptRenderFunc)(GtGraphics*,
                                               unsigned int,
                                               GtRange,
@@ -33,12 +39,7 @@ typedef unsigned long (*GtCtScriptGetHeightFunc)(void*);
 typedef const char*   (*GtCtScriptGetTitleFunc)(void*);
 typedef void          (*GtCtScriptFreeFunc)(void*);
 
-/* Implements the GtCustomTrackScriptWrapper interface. This custom track is
-   only used to store pointers to external callbacks, e.g. written in a
-   scripting language. This class does not store any state, relying on the
-   developer of the external custom track class to do so.  */
-typedef struct GtCustomTrackScriptWrapper GtCustomTrackScriptWrapper;
-
+/* Creates a new <GtCustomTrackScriptWrapper> object. */
 GtCustomTrack* gt_custom_track_script_wrapper_new(GtCtScriptRenderFunc
                                                              render_func,
                                                   GtCtScriptGetHeightFunc

@@ -21,7 +21,7 @@
 #include "core/translate.h"
 #include "extended/extract_feat_sequence.h"
 #include "extended/extract_feat_visitor.h"
-#include "extended/genome_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_rep.h"
 
 struct GtExtractFeatVisitor {
@@ -72,25 +72,25 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate)
   }
 }
 
-static int extract_feat_visitor_genome_feature(GtNodeVisitor *gv,
-                                               GtFeatureNode *gf,
+static int extract_feat_visitor_genome_feature(GtNodeVisitor *nv,
+                                               GtFeatureNode *fn,
                                                GtError *err)
 {
   GtExtractFeatVisitor *efv;
-  GtGenomeNodeIterator *gni;
-  GtGenomeNode *gn;
+  GtFeatureNodeIterator *fni;
+  GtFeatureNode *child;
   GtStr *description,
       *sequence;
   int had_err = 0;
   gt_error_check(err);
-  efv = gt_extract_feat_visitor_cast(gv);
+  efv = gt_extract_feat_visitor_cast(nv);
   gt_assert(efv->region_mapping);
-  gni = gt_genome_node_iterator_new((GtGenomeNode*) gf);
+  fni = gt_feature_node_iterator_new(fn);
   description = gt_str_new();
   sequence = gt_str_new();
-  while (!had_err && (gn = gt_genome_node_iterator_next(gni))) {
-    if (gt_extract_feat_sequence(sequence, gn, efv->type, efv->join,
-                              efv->region_mapping, err)) {
+  while (!had_err && (child = gt_feature_node_iterator_next(fni))) {
+    if (gt_extract_feat_sequence(sequence, (GtGenomeNode*) child, efv->type,
+                                 efv->join, efv->region_mapping, err)) {
       had_err = -1;
     }
 
@@ -105,7 +105,7 @@ static int extract_feat_visitor_genome_feature(GtNodeVisitor *gv,
   }
   gt_str_delete(sequence);
   gt_str_delete(description);
-  gt_genome_node_iterator_delete(gni);
+  gt_feature_node_iterator_delete(fni);
   return had_err;
 }
 

@@ -24,6 +24,7 @@
 #include "core/str_array.h"
 #include "extended/feature_node_api.h"
 #include "extended/feature_type.h"
+#include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
 
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
@@ -56,7 +57,7 @@ double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*);
 bool           gt_genome_features_are_similar(GtFeatureNode*, GtFeatureNode*);
 int            gt_feature_node_unit_test(GtError*);
 
-GtGenomeNode*  gt_genome_node_rec_ref(GtGenomeNode*);
+GtGenomeNode*  gt_genome_node_ref(GtGenomeNode*);
 
 /* perform depth first traversal of the given genome node */
 int            gt_genome_node_traverse_children(GtGenomeNode*, void*,
@@ -98,6 +99,12 @@ bool           gt_genome_node_overlaps_nodes(GtGenomeNode*, GtArray*);
    corresponding to overlapped nodes are marked (i.e., set) */
 bool           gt_genome_node_overlaps_nodes_mark(GtGenomeNode*, GtArray*,
                                                   GtBittab*);
+
+/* Increase the reference count for <feature_node> (non-recursively) and return
+   it. */
+GtFeatureNode* gt_feature_node_nonrec_ref(GtFeatureNode *feature_node);
+/* Delete <feature_node> non-recursively. */
+void           gt_feature_node_nonrec_delete(GtFeatureNode *feature_node);
 
 #define gt_feature_node_cast(genome_node) \
         gt_genome_node_cast(gt_feature_node_class(), genome_node)

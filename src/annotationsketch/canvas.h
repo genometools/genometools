@@ -23,6 +23,7 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/custom_track.h"
 #include "annotationsketch/layout.h"
+#include "annotationsketch/line.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/element.h"
@@ -36,7 +37,8 @@ void            gt_canvas_draw_ruler(GtCanvas*, GtRange);
 void*           gt_canvas_cast(const GtCanvasClass *cc, GtCanvas *c);
 void*           gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
 
-void            format_ruler_label(char *txt, unsigned long pos, size_t buflen);
+void            gt_format_ruler_label(char *txt, unsigned long pos,
+                                      size_t buflen);
 /* Callback function for rendering. */
 int             gt_canvas_visit_layout_pre(GtCanvas*, GtLayout*, GtError*);
 /* Callback function for rendering. */

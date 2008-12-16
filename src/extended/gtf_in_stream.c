@@ -101,7 +101,7 @@ static void gtf_in_stream_free(GtNodeStream *ns)
   gt_free(gtf_in_stream->filename);
   gt_type_checker_delete(gtf_in_stream->type_checker);
   while (gt_queue_size(gtf_in_stream->genome_node_buffer))
-    gt_genome_node_rec_delete(gt_queue_get(gtf_in_stream->genome_node_buffer));
+    gt_genome_node_delete(gt_queue_get(gtf_in_stream->genome_node_buffer));
   gt_queue_delete(gtf_in_stream->genome_node_buffer);
 }
 

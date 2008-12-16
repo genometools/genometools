@@ -22,8 +22,8 @@
    embedded FASTA sequences in GFF3 files. */
 typedef struct GtSequenceNode GtSequenceNode;
 
-#include "core/str.h"
-#include "extended/genome_node.h"
+#include "core/str_api.h"
+#include "extended/genome_node_api.h"
 
 const GtGenomeNodeClass* gt_sequence_node_class(void);
 

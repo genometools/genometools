@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,13 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COLOR_H
-#define COLOR_H
+#ifndef GT_SKETCH_PAGE_H
+#define GT_SKETCH_PAGE_H
 
-#include "annotationsketch/color_api.h"
+#include "core/tool.h"
 
-struct GtColor {
-  double red, green, blue, alpha;
-};
+/* the SketchPage tool */
+GtTool* gt_sketch_page(void);
 
 #endif

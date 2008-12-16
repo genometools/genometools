@@ -18,6 +18,10 @@
 #ifndef CUSTOM_TRACK_API_H
 #define CUSTOM_TRACK_API_H
 
+/* The <GtCustomTrack> interface allows the <GtCanvas> to call user-defined
+   drawing functions on a <GtGraphics> object. Please refer to the specific
+   implementations' documentation for more information on a particular
+   custom track. */
 typedef struct GtCustomTrack GtCustomTrack;
 
 /* Increase the reference count for <ctrack>. */

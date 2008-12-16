@@ -25,6 +25,7 @@ from add_introns_stream import *
 
 GenomeNode.register(gtlib)
 FeatureNode.register(gtlib)
+FeatureNodeIterator.register(gtlib)
 GFF3InStream.register(gtlib)
 AddIntronsStream.register(gtlib)
 
