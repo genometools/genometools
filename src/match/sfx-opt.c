@@ -185,20 +185,20 @@ static OPrval parse_options(int *parsed_args,
                               false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_bool("ssp",
-                              "output sequence separator positions to file",
-                              &so->outssptab,
-                              false);
-  gt_option_parser_add_option(op, option);
-
-  optiondes = gt_option_new_bool("des",
-                                 "output sequence descriptions to file ",
-                                 &so->outdestab,
-                                 false);
-  gt_option_parser_add_option(op, optiondes);
-
   if (doesa)
   {
+    option = gt_option_new_bool("ssp",
+                                "output sequence separator positions to file",
+                                &so->outssptab,
+                                false);
+    gt_option_parser_add_option(op, option);
+
+    optiondes = gt_option_new_bool("des",
+                                   "output sequence descriptions to file ",
+                                   &so->outdestab,
+                                   false);
+    gt_option_parser_add_option(op, optiondes);
+
     optionsuf = gt_option_new_bool("suf",
                                    "output suffix array (suftab) to file",
                                    &so->outsuftab,
@@ -217,18 +217,15 @@ static OPrval parse_options(int *parsed_args,
                                    &so->outbwttab,
                                    false);
     gt_option_parser_add_option(op, optionbwt);
+
+    option = gt_option_new_bool("bck",
+                                "output bucket table to file",
+                                &so->outbcktab,
+                                false);
+    gt_option_parser_add_option(op, option);
   } else
   {
     optionsuf = optionlcp = optionbwt = NULL;
-  }
-  option = gt_option_new_bool("bck",
-                              "output bucket table to file",
-                              &so->outbcktab,
-                              false);
-  gt_option_parser_add_option(op, option);
-
-  if (!doesa)
-  {
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                so->str_indexname);
   }
