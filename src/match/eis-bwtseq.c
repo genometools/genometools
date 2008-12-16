@@ -152,6 +152,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   const Symbol *qptr, *qend;
   Symbol curSym;
   const MRAEnc *alphabet;
+  /* Mbtab *mbtab; */
 
   gt_assert(bwtSeq && query);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
@@ -164,6 +165,13 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     qptr = query + queryLen - 1;
     qend = query - 1;
   }
+  /*
+  mbtab = pcktb2mbtab(bwtSeq->pckbuckettable);
+  if (mbtab != NULL)
+  {
+  }
+  */
+  /* Add code here to handle the case that MBtab is available */
   curSym = MRAEncMapSymbol(alphabet, *qptr);
   /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
   qptr = forward ? (qptr+1) : (qptr-1);
