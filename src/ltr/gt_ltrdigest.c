@@ -394,7 +394,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     while (!(had_err = gt_node_stream_next(last_stream, &gn, err)) &&
            gn)
     {
-      gt_genome_node_rec_delete(gn);
+      gt_genome_node_delete(gn);
     }
     gt_node_stream_delete(gff3_out_stream);
     gt_node_stream_delete(ltrdigest_stream);

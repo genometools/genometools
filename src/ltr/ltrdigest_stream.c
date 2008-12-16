@@ -25,7 +25,7 @@
 #include "core/unused_api.h"
 #include "extended/node_stream_rep.h"
 #include "extended/feature_node.h"
-#include "extended/genome_node_iterator.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/reverse.h"
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
@@ -262,6 +262,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                     GtError *e)
 {
   GtLTRdigestStream *ls;
+  GtFeatureNode *fn;
   int had_err;
 
   gt_error_check(e);
@@ -274,18 +275,20 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   had_err = gt_node_stream_next(ls->in_stream, gn, e);
   if (!had_err && *gn)
   {
-    GtGenomeNodeIterator *gni;
-    GtGenomeNode *mygn;
+    GtFeatureNodeIterator *gni;
+    GtFeatureNode *mygn;
 
    /* only process feature nodes */
-   if (!gt_feature_node_try_cast(*gn))
+   if (!(fn = gt_feature_node_try_cast(*gn)))
      return 0;
 
     /* fill LTRElement structure from GFF3 subgraph */
-    gni = gt_genome_node_iterator_new(*gn);
-    for (mygn = *gn; mygn; mygn = gt_genome_node_iterator_next(gni))
-      (void) gt_genome_node_accept(mygn, (GtNodeVisitor*) ls->lv, e);
-    gt_genome_node_iterator_delete(gni);
+    gni = gt_feature_node_iterator_new(fn);
+    for (mygn = fn; mygn; mygn = gt_feature_node_iterator_next(gni))
+      (void) gt_genome_node_accept((GtGenomeNode*) mygn,
+                                   (GtNodeVisitor*) ls->lv,
+                                   e);
+    gt_feature_node_iterator_delete(gni);
   }
 
   if (ls->element.mainnode)
@@ -325,7 +328,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     }
   }
   if (had_err) {
-    gt_genome_node_rec_delete(*gn);
+    gt_genome_node_delete(*gn);
     *gn = NULL;
   }
   return had_err;
