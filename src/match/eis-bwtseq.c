@@ -380,12 +380,11 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   gt_assert(bwtSeq && query);
   iter = gt_malloc(sizeof (*iter));
   if (initEMIterator(iter, bwtSeq, query, queryLen,forward))
-    return iter;
-  else
   {
-    gt_free(iter);
-    return NULL;
+    return iter;
   }
+  gt_free(iter);
+  return NULL;
 }
 
 extern bool

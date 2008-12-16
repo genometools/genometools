@@ -168,32 +168,23 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
   }
   if (!haserr)
   {
-    if (withpckbt)
+    if (withpckbt && pckbuckettableexists(indexname))
     {
-      if (pckbuckettableexists(indexname))
+      unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
+      bwtseq->pckbuckettable = mappckbuckettable(indexname,numofchars,err);
+      if (bwtseq->pckbuckettable == NULL)
       {
-        unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
-        bwtseq->pckbuckettable = mappckbuckettable(indexname,numofchars,err);
-        if (bwtseq->pckbuckettable == NULL)
-        {
-          haserr = true;
-        }
-      } else
-      {
-        bwtseq->pckbuckettable = NULL;
+        haserr = true;
       }
     } else
     {
       bwtseq->pckbuckettable = NULL;
     }
   }
-  if (haserr)
+  if (haserr && bwtseq != NULL)
   {
-    if (bwtseq != NULL)
-    {
-      deletevoidBWTSeq(bwtseq);
-      bwtseq = NULL;
-    }
+    deletevoidBWTSeq(bwtseq);
+    bwtseq = NULL;
   }
   return haserr ? NULL : bwtseq;
 }
