@@ -373,15 +373,14 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
       last_stream = tab_out_stream = gt_ltr_fileout_stream_new(last_stream,
                                               tests_to_run,
                                               regionmapping,
-                                              arguments->prefix,
+                                              gt_str_get(arguments->prefix),
                                               &arguments->ppt_opts,
                                               &arguments->pbs_opts,
 #ifdef HAVE_HMMER
                                               &arguments->pdom_opts,
 #endif
-                                              arguments->trna_lib,
-                                              arguments->seqfile,
-                                              arguments->regionmapping,
+                                              gt_str_get(arguments->trna_lib),
+                                              argv[arg+1],
                                               argv[arg],
                                               arguments->seqnamelen,
                                               err);

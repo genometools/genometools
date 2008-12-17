@@ -373,9 +373,8 @@ static void write_metadata(GtGenFile *metadata_file,
 #ifdef HAVE_HMMER
                            GtPdomOptions *pdom_opts,
 #endif
-                           GtStr *trnafilename,
-                           GtStr *seqfilename,
-                           GtStr *mapfilename,
+                           const char *trnafilename,
+                           const char *seqfilename,
                            const char *gfffilename)
 {
   char buffer[PATH_MAX+1];
@@ -386,30 +385,12 @@ static void write_metadata(GtGenFile *metadata_file,
   has_cwd = (getcwd(buffer, PATH_MAX) != NULL);
 
   /* append working dir to relative paths if necessary */
-  if (gt_str_length(seqfilename) > 0)
-  {
-    const char *seqfilename_cstr = gt_str_get(seqfilename);
-    if (seqfilename_cstr[0] != '/' && has_cwd)
-      gt_genfile_xprintf(metadata_file,
-                         "Sequence file used\t%s/%s\n",
-                         buffer,
-                         seqfilename_cstr);
-    else
-      gt_genfile_xprintf(metadata_file,
-                         "Sequence file used\t%s\n", seqfilename_cstr);
-  }
-  else if (gt_str_length(mapfilename) > 0)
-  {
-    const char *mapfilename_cstr = gt_str_get(mapfilename);
-    if (mapfilename_cstr[0] != '/' && has_cwd)
-      gt_genfile_xprintf(metadata_file,
-                         "Region mapping file used\t%s/%s\n",
-                         buffer,
-                         mapfilename_cstr);
-    else
-      gt_genfile_xprintf(metadata_file,
-                         "Region mapping file used\t%s\n", mapfilename_cstr);
-  }
+  if (seqfilename[0] != '/' && has_cwd)
+    gt_genfile_xprintf(metadata_file,
+                       "Sequence file used\t%s/%s\n", buffer, seqfilename);
+  else
+    gt_genfile_xprintf(metadata_file,
+                       "Sequence file used\t%s\n", seqfilename);
   if (gfffilename[0] != '/' && has_cwd)
     gt_genfile_xprintf(metadata_file,
                        "GFF3 input used\t%s/%s\n", buffer, gfffilename);
@@ -433,15 +414,14 @@ static void write_metadata(GtGenFile *metadata_file,
 
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
-    const char *trnafilename_cstr = gt_str_get(trnafilename);
-    if (trnafilename_cstr[0] != '/' && has_cwd)
+    if (trnafilename[0] != '/' && has_cwd)
       gt_genfile_xprintf(metadata_file,
                          "tRNA library for PBS detection\t%s/%s\n",
-                         buffer, trnafilename_cstr);
+                         buffer, trnafilename);
     else
       gt_genfile_xprintf(metadata_file,
                          "tRNA library for PBS detection\t%s\n",
-                         trnafilename_cstr);
+                         trnafilename);
     gt_genfile_xprintf(metadata_file,
                        "allowed PBS/tRNA alignment length"
                        " range\t%lu-%lunt\t11-30nt\n",
@@ -529,15 +509,14 @@ const GtNodeStreamClass* gt_ltr_fileout_stream_class(void)
 GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                      int tests_to_run,
                                      GtRegionMapping *regionmapping,
-                                     GtStr *file_prefix,
+                                     char *file_prefix,
                                      GtPPTOptions *ppt_opts,
                                      GtPBSOptions *pbs_opts,
 #ifdef HAVE_HMMER
                                      GtPdomOptions *pdom_opts,
 #endif
-                                     GtStr *trnafilename,
-                                     GtStr *seqfilename,
-                                     GtStr *mapfilename,
+                                     const char *trnafilename,
+                                     const char *seqfilename,
                                      const char *gfffilename,
                                      unsigned int seqnamelen,
                                      GtError* e)
@@ -563,27 +542,27 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
   ls->seqnamelen = seqnamelen;
 
   /* open outfiles */
-  ls->fileprefix = gt_str_get(file_prefix);
-  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_tabout.csv", ls->fileprefix);
-  ls->tabout_file = gt_genfile_xopen(fn, "w+");
+  ls->fileprefix = file_prefix;
+  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_tabout.csv", file_prefix);
+  ls->tabout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
   if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
   {
-    (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_ppt.fas", ls->fileprefix);
-    ls->pptout_file = gt_genfile_xopen(fn, "w+");
+    (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_ppt.fas", file_prefix);
+    ls->pptout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
   }
   if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
   {
-    (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_pbs.fas", ls->fileprefix);
-    ls->pbsout_file = gt_genfile_xopen(fn, "w+");
+    (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_pbs.fas", file_prefix);
+    ls->pbsout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
   }
-  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_5ltr.fas", ls->fileprefix);
-  ls->ltr5out_file = gt_genfile_xopen(fn, "w+");
-  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_3ltr.fas", ls->fileprefix);
-  ls->ltr3out_file = gt_genfile_xopen(fn, "w+");
-  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_complete.fas", ls->fileprefix);
-  ls->elemout_file = gt_genfile_xopen(fn, "w+");
-  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_conditions.csv", ls->fileprefix);
-  ls->metadata_file = gt_genfile_xopen(fn, "w+");
+  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_5ltr.fas", file_prefix);
+  ls->ltr5out_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_3ltr.fas", file_prefix);
+  ls->ltr3out_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_complete.fas", file_prefix);
+  ls->elemout_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
+  (void) snprintf(fn, GT_MAXFILENAMELEN-1, "%s_conditions.csv", file_prefix);
+  ls->metadata_file = gt_genfile_open(GFM_UNCOMPRESSED, fn, "w+", e);
 
   /* create hashmap to hold protein domain output files */
   ls->pdomout_files = gt_hashmap_new(HASH_STRING,
@@ -600,7 +579,6 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
 #endif
                  trnafilename,
                  seqfilename,
-                 mapfilename,
                  gfffilename);
 
   /* print tabular outfile headline */

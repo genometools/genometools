@@ -31,15 +31,14 @@ const GtNodeStreamClass* gt_ltr_fileout_stream_class(void);
 GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         int tests_to_run,
                                         GtRegionMapping *regionmapping,
-                                        GtStr *file_prefix,
+                                        char *file_prefix,
                                         GtPPTOptions *ppt_opts,
                                         GtPBSOptions *pbs_opts,
 #ifdef HAVE_HMMER
                                         GtPdomOptions *pdom_opts,
 #endif
-                                        GtStr *trnafilename,
-                                        GtStr *seqfilename,
-                                        GtStr *mapfilename,
+                                        const char *trnafilename,
+                                        const char *seqfilename,
                                         const char *gfffilename,
                                         unsigned int seqnamelen,
                                         GtError *e);

@@ -107,6 +107,7 @@ if $gttestdata then
     Name "gt ltrdigest D. mel. chromosome single region #{chr} w/ mapping"
     Keywords "gt_ltrdigest"
     Test do
+
       txt = "function mapping(sequence_region)
                if sequence_region == 'seq0' then
                  return \"#{$gttestdata}/ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz\"
@@ -117,9 +118,8 @@ if $gttestdata then
       File.open("mapping.lua","w+") do |file|
         file.write(txt)
       end
-      run_test "#{$bin}gt ltrdigest -outfileprefix out#{chr} -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa -regionmapping mapping.lua #{$gttestdata}/ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted", :retval => 0, :maxtime => 1000
+      run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa -regionmapping mapping.lua #{$gttestdata}/ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted", :retval => 0, :maxtime => 1000
       run "diff #{$last_stdout} #{$gttestdata}/ltrdigest/#{chr}_ref_noHMM.gff3"
-      run "test -e out#{chr}_conditions.csv"
     end
   end
 
