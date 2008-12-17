@@ -51,7 +51,7 @@ typedef struct GtLTRElement {
 
 unsigned long gt_ltrelement_length(GtLTRElement *e);
 char*         gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
-                                         GtStrand strand, const char *seq,
+                                         GtStrand strand, GtSeq *seq,
                                          GtError *err);
 unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e);
 unsigned long gt_ltrelement_rightltrlen(GtLTRElement *e);

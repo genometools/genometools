@@ -34,7 +34,7 @@
 struct GtLTRdigestStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
-  GtRegionMapping *regionmapping;
+  GtBioseq *bioseq;
   GtPBSOptions *pbs_opts;
   GtPPTOptions *ppt_opts;
 #ifdef HAVE_HMMER
@@ -182,11 +182,11 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
 }
 
-static void run_ltrdigest(GtLTRElement *element, const char *rawseq,
+static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
                           GtLTRdigestStream *ls, GtError *err)
 {
   char *rev_seq;
-  const char *base_seq = rawseq+element->leftLTR_5;
+  const char *base_seq = gt_seq_get_orig(seq)+element->leftLTR_5;
   unsigned long seqlen = gt_ltrelement_length(element);
   GtStrand canonical_strand = GT_STRAND_UNKNOWN;
 
@@ -293,38 +293,30 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
   if (ls->element.mainnode)
   {
-    unsigned long seqlen;
-    const char *raw_seq;
-    GtStr *seqid;
+    unsigned long seqid;
+    const char *sreg;
+    GtSeq *seq;
     GtRange elemrng;
 
-    /* get sequence from file according to mapping */
-    seqid = gt_genome_node_get_seqid((GtGenomeNode*) ls->element.mainnode);
-    had_err = gt_region_mapping_get_raw_sequence_length(ls->regionmapping,
-                                                        &seqlen,
-                                                        seqid,
-                                                        e);
-    if (!had_err)
-    {
-      gt_region_mapping_get_raw_sequence(ls->regionmapping,
-                                         &raw_seq,
-                                         seqid,
-                                         e);
+    sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
+                                               ls->element.mainnode));
+    /* XXX: this may work for LTRharvest, but not everywhere!
+     * fix mapping (like in other tools)! */
+    (void) sscanf(sreg,"seq%lu", &seqid);
+    seq = gt_bioseq_get_seq(ls->bioseq, seqid);
 
-      elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
-      if (elemrng.end <= seqlen)
-        /* run LTRdigest core routine */
-        run_ltrdigest(&ls->element, raw_seq, ls, e);
-      else
-      {
-        /* do not process elements whose positions exceed sequence boundaries
-           (obviously annotation and sequence do not match!) */
-        gt_error_set(e, "Element '%s' exceeds sequence boundaries! "
-                        "(endposition %lu > sequence length %lu)",
-          gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-          elemrng.end, seqlen);
-        had_err = -1;
-      }
+    elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
+    if (elemrng.end <= gt_seq_length(seq))
+      /* run LTRdigest core routine */
+      run_ltrdigest(&ls->element, seq, ls, e);
+    else
+    {
+      /* do not process elements whose positions exceed sequence boundaries
+       (obviously annotation and sequence do not match!) */
+      gt_error_set(e, "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
+        gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
+        elemrng.end, gt_seq_length(seq));
+      had_err = -1;
     }
   }
   if (had_err) {
@@ -354,7 +346,7 @@ const GtNodeStreamClass* gt_ltrdigest_stream_class(void)
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
-                                      GtRegionMapping *regionmapping,
+                                      GtBioseq *bioseq,
                                       GtPBSOptions *pbs_opts,
                                       GtPPTOptions *ppt_opts
 #ifdef HAVE_HMMER
@@ -373,7 +365,7 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
   ls->pdom_opts = pdom_opts;
 #endif
   ls->tests_to_run = tests_to_run;
-  ls->regionmapping = regionmapping;
+  ls->bioseq = bioseq;
   ls->ltrdigest_tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
   ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);
   return gs;
