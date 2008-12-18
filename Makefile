@@ -95,17 +95,7 @@ LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
 LIBEXPAT_DEP:=$(LIBEXPAT_SRC:%.c=obj/%.d)
 
-LUA_DIR:=src/external/lua-5.1.4/src
-LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
-           $(LUA_DIR)/ldo.c $(LUA_DIR)/ldump.c $(LUA_DIR)/lfunc.c \
-           $(LUA_DIR)/lgc.c $(LUA_DIR)/llex.c $(LUA_DIR)/lmem.c \
-           $(LUA_DIR)/lobject.c $(LUA_DIR)/lopcodes.c $(LUA_DIR)/lparser.c \
-           $(LUA_DIR)/lstate.c $(LUA_DIR)/lstring.c $(LUA_DIR)/ltable.c \
-           $(LUA_DIR)/ltm.c $(LUA_DIR)/lundump.c $(LUA_DIR)/lvm.c \
-           $(LUA_DIR)/lzio.c $(LUA_DIR)/lauxlib.c $(LUA_DIR)/lbaselib.c \
-           $(LUA_DIR)/ldblib.c $(LUA_DIR)/liolib.c $(LUA_DIR)/lmathlib.c \
-           $(LUA_DIR)/loslib.c $(LUA_DIR)/ltablib.c $(LUA_DIR)/lstrlib.c \
-           $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c \
+LIBLUA_SRC=src/lualib.c\
            src/external/md5-1.1.2/src/md5.c\
            src/external/md5-1.1.2/src/md5lib.c\
            src/external/md5-1.1.2/src/des56.c\
@@ -115,7 +105,7 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
-LUAMAIN_SRC:=$(LUA_DIR)/lua.c
+LUAMAIN_SRC:=src/external/lua-5.1.4/etc/all.c
 LUAMAIN_OBJ:=$(LUAMAIN_SRC:%.c=obj/%.o)
 LUAMAIN_DEP:=$(LUAMAIN_SRC:%.c=obj/%.d)
 
@@ -422,7 +412,7 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ctrack, \
                                 lib/libgenometools.a $(OVERRIDELIBS)))
 
 
-bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
+bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm -o $@
