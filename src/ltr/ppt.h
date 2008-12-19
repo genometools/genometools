@@ -25,13 +25,30 @@
 #include "extended/hmm.h"
 #include "ltr/ltrelement.h"
 
+#define PPT_PURINE_PROB     0.97
+#define PPT_PYRIMIDINE_PROB 0.03
+#define BKG_A_PROB          0.25
+#define BKG_C_PROB          0.25
+#define BKG_G_PROB          0.25
+#define BKG_T_PROB          0.25
+#define UBOX_U_PROB         0.91
+
 typedef struct {
   GtRange ppt_len, ubox_len;
+  double ppt_pyrimidine_prob,
+         ppt_purine_prob,
+         bkg_a_prob,
+         bkg_g_prob,
+         bkg_t_prob,
+         bkg_c_prob,
+         ubox_u_prob;
   unsigned int radius;
 } GtPPTOptions;
 
 typedef struct GtPPTHit GtPPTHit;
 typedef struct GtPPTResults GtPPTResults;
+
+GtHMM* gt_ppt_hmm_new(const GtAlpha *alpha, GtPPTOptions *opts);
 
 GtPPTResults*   gt_ppt_find(const char *seq,
                             const char *rev_seq,

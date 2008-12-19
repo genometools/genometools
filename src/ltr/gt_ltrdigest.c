@@ -95,100 +95,151 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   /* PPT search options */
 
   o = gt_option_new_range("pptlen",
-                       "required PPT length range",
-                       &arguments->ppt_opts.ppt_len,
-                       &pptlen_defaults);
+                          "required PPT length range",
+                          &arguments->ppt_opts.ppt_len,
+                          &pptlen_defaults);
   gt_option_parser_add_option(op, o);
 
   o = gt_option_new_range("uboxlen",
-                       "required U-box length range",
-                       &arguments->ppt_opts.ubox_len,
-                       &uboxlen_defaults);
+                          "required U-box length range",
+                          &arguments->ppt_opts.ubox_len,
+                          &uboxlen_defaults);
   gt_option_parser_add_option(op, o);
 
   o = gt_option_new_uint("pptradius",
-                      "radius around beginning of 3' LTR "
-                      "to search for PPT",
-                      &arguments->ppt_opts.radius,
-                      30);
+                         "radius around beginning of 3' LTR "
+                         "to search for PPT",
+                         &arguments->ppt_opts.radius,
+                         30);
   gt_option_parser_add_option(op, o);
+
+  o = gt_option_new_probability("pptrprob",
+                                "purine emission probability inside PPT",
+                                &arguments->ppt_opts.ppt_purine_prob,
+                                PPT_PURINE_PROB);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
+
+  o = gt_option_new_probability("pptyprob",
+                                "pyrimidine emission probability inside PPT",
+                                &arguments->ppt_opts.ppt_pyrimidine_prob,
+                                PPT_PYRIMIDINE_PROB);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
+
+  o = gt_option_new_probability("pptgprob",
+                                "background G emission probability outside PPT",
+                                &arguments->ppt_opts.bkg_g_prob,
+                                BKG_G_PROB);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
+
+  o = gt_option_new_probability("pptcprob",
+                                "background C emission probability outside PPT",
+                                &arguments->ppt_opts.bkg_c_prob,
+                                BKG_C_PROB);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
+
+  o = gt_option_new_probability("pptaprob",
+                                "background A emission probability outside PPT",
+                                &arguments->ppt_opts.bkg_a_prob,
+                                BKG_A_PROB);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
+
+  o = gt_option_new_probability("ppttprob",
+                                "background T emission probability outside PPT",
+                                &arguments->ppt_opts.bkg_t_prob,
+                                BKG_T_PROB);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
+
+  o = gt_option_new_probability("pptuprob",
+                                "U/T emission probability inside U-box",
+                                &arguments->ppt_opts.ubox_u_prob,
+                                UBOX_U_PROB);
+  gt_option_parser_add_option(op, o);
+  gt_option_is_extended_option(o);
 
   /* PBS search options */
 
   ot = gt_option_new_filename("trnas",
-                          "tRNA library in multiple FASTA format for PBS "
-                          "detection\n"
-                          "Omit this option to disable PBS search.",
-                          arguments->trna_lib);
+                              "tRNA library in multiple FASTA format for PBS "
+                              "detection\n"
+                              "Omit this option to disable PBS search.",
+                              arguments->trna_lib);
   gt_option_parser_add_option(op, ot);
   gt_option_hide_default(ot);
 
   o = gt_option_new_range("pbsalilen",
-                       "required PBS/tRNA alignment length range",
-                       &arguments->pbs_opts.alilen,
-                       &pbsalilen_defaults);
+                          "required PBS/tRNA alignment length range",
+                          &arguments->pbs_opts.alilen,
+                          &pbsalilen_defaults);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, ot);
 
   o = gt_option_new_range("pbsoffset",
-                       "allowed PBS offset from LTR boundary range",
-                       &arguments->pbs_opts.offsetlen,
-                       &pbsoffsetlen_defaults);
+                          "allowed PBS offset from LTR boundary range",
+                          &arguments->pbs_opts.offsetlen,
+                          &pbsoffsetlen_defaults);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, ot);
 
   o = gt_option_new_range("pbstrnaoffset",
-                       "allowed PBS/tRNA 3' end alignment offset range",
-                       &arguments->pbs_opts.trnaoffsetlen,
-                       &pbstrnaoffsetlen_defaults);
+                          "allowed PBS/tRNA 3' end alignment offset range",
+                          &arguments->pbs_opts.trnaoffsetlen,
+                          &pbstrnaoffsetlen_defaults);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, ot);
 
   o = gt_option_new_uint("pbsmaxedist",
-                      "maximal allowed PBS/tRNA alignment unit edit distance",
-                      &arguments->pbs_opts.max_edist,
-                      1);
+                         "maximal allowed PBS/tRNA alignment unit "
+                         "edit distance",
+                         &arguments->pbs_opts.max_edist,
+                         1);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, ot);
 
   o = gt_option_new_uint("pbsradius",
-                      "radius around end of 5' LTR "
-                      " to search for PBS",
-                      &arguments->pbs_opts.radius,
-                      30);
+                         "radius around end of 5' LTR "
+                         "to search for PBS",
+                         &arguments->pbs_opts.radius,
+                         30);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, ot);
 
  /* Protein domain search options */
+
 #ifdef HAVE_HMMER
   oh = gt_option_new_filenamearray("hmms",
-                               "profile HMM models for domain detection "
-                               "(separate by spaces, finish with --) in HMMER"
-                               "2 format\n"
-                               "Omit this option to disable pHMM search.",
-                               arguments->pdom_opts.hmm_files);
+                                   "profile HMM models for domain detection "
+                                   "(separate by spaces, finish with --) in "
+                                   "HMMER2 format\n"
+                                   "Omit this option to disable pHMM search.",
+                                   arguments->pdom_opts.hmm_files);
   gt_option_parser_add_option(op, oh);
 
   o = gt_option_new_probability("pdomevalcutoff",
-                             "E-value cutoff for pHMM search",
-                             &arguments->pdom_opts.evalue_cutoff,
-                             0.000001);
+                                "E-value cutoff for pHMM search",
+                                &arguments->pdom_opts.evalue_cutoff,
+                                0.000001);
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
   gt_option_imply(o, oh);
 
   o = gt_option_new_uint_min("threads",
-                          "number of concurrent worker threads to use in "
-                          "pHMM scanning",
-                          &arguments->pdom_opts.nof_threads,
-                          2, 1);
+                             "number of concurrent worker threads to use in "
+                             "pHMM scanning",
+                             &arguments->pdom_opts.nof_threads,
+                             2, 1);
   gt_option_parser_add_option(op, o);
 
   o = gt_option_new_uint("maxgaplen",
-                      "maximal allowed gap size between fragments (in amino "
-                      "acids) when chaining pHMM hits for a protein domain",
-                      &arguments->pdom_opts.chain_max_gap_length,
-                      50);
+                         "maximal allowed gap size between fragments (in amino "
+                         "acids) when chaining pHMM hits for a protein domain",
+                         &arguments->pdom_opts.chain_max_gap_length,
+                         50);
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
 #endif
@@ -196,61 +247,63 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   /* Extended PBS options */
 
   o = gt_option_new_int("pbsmatchscore",
-                     "match score for PBS/tRNA alignments",
-                      &arguments->pbs_opts.ali_score_match,
-                      5);
+                        "match score for PBS/tRNA alignments",
+                        &arguments->pbs_opts.ali_score_match,
+                        5);
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
   gt_option_imply(o, ot);
 
   o = gt_option_new_int("pbsmismatchscore",
-                     "mismatch score for PBS/tRNA alignments",
-                      &arguments->pbs_opts.ali_score_mismatch,
-                      -10);
+                        "mismatch score for PBS/tRNA alignments",
+                        &arguments->pbs_opts.ali_score_mismatch,
+                        -10);
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
   gt_option_imply(o, ot);
 
   o = gt_option_new_int("pbsinsertionscore",
-                     "insertion score for PBS/tRNA alignments",
-                      &arguments->pbs_opts.ali_score_insertion,
-                      -20);
+                        "insertion score for PBS/tRNA alignments",
+                        &arguments->pbs_opts.ali_score_insertion,
+                        -20);
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
   gt_option_imply(o, ot);
 
   o = gt_option_new_int("pbsdeletionscore",
-                     "deletion score for PBS/tRNA alignments",
-                      &arguments->pbs_opts.ali_score_deletion,
-                      -20);
+                        "deletion score for PBS/tRNA alignments",
+                        &arguments->pbs_opts.ali_score_deletion,
+                        -20);
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
   gt_option_imply(o, ot);
 
   /* Output files */
+
   oto = gt_option_new_string("outfileprefix",
-                          "prefix for output files (e.g. 'foo' will create "
-                          "files called 'foo_*.csv' and 'foo_*.fas')\n"
-                          "Omit this option for GFF3 output only.",
-                          arguments->prefix,
-                          NULL);
+                             "prefix for output files (e.g. 'foo' will create "
+                             "files called 'foo_*.csv' and 'foo_*.fas')\n"
+                             "Omit this option for GFF3 output only.",
+                             arguments->prefix,
+                             NULL);
   gt_option_parser_add_option(op, oto);
   gt_option_hide_default(oto);
 
   o = gt_option_new_uint("seqnamelen",
-                      "set maximal length of sequence names in FASTA headers "
-                      "(e.g. for clustalw or similar tools)",
-                      &arguments->seqnamelen,
-                      20);
+                         "set maximal length of sequence names in FASTA headers"
+                         " (e.g. for clustalw or similar tools)",
+                         &arguments->seqnamelen,
+                         20);
   gt_option_parser_add_option(op, o);
 
   /* verbosity */
+
   o = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, o);
 
   /* output file options */
+
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
-  gt_option_parser_set_mailaddress(op, "<steinbiss@stud.zbh.uni-hamburg.de>");
 
   gt_option_parser_set_min_max_args(op, 2, 2);
 
@@ -273,6 +326,22 @@ int gt_ltrdigest_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
                         gt_str_get(arguments->trna_lib));
       had_err = -1;
     }
+  }
+
+  if (!had_err)
+  {
+    GtHMM *hmm;
+    GtAlpha *alpha;
+    alpha = gt_alpha_new_dna();
+    hmm = gt_ppt_hmm_new(alpha, &arguments->ppt_opts);
+    if (!hmm)
+    {
+      gt_error_set(err, "PPT HMM parameters are not valid!");
+      had_err = -1;
+    }
+    else
+      gt_hmm_delete(hmm);
+    gt_alpha_delete(alpha);
   }
 
   return had_err;
