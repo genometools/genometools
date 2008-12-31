@@ -22,8 +22,6 @@
 #include "divmodmul.h"
 #include "spacedef.h"
 
-DECLAREARRAYSTRUCT(Seqpos);
-
 static int addmarkpos(ArraySeqpos *asp,
                       const Encodedsequence *encseq,
                       Encodedsequencescanstate *esr,

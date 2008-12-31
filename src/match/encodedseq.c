@@ -42,7 +42,7 @@
 #include "stamp.h"
 
 #include "sfx-cmpsuf.pr"
-#include "fillsci.pr"
+#include "fillsci.h"
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,\

@@ -60,6 +60,7 @@ esa-mmsearch.c
 esa-ppbuckwid.c
 esa-seqread.c
 esa-splititv.c
+fillsci.c
 greedyfwdmat.c
 idx-limdfs.c
 initeqsvec.c

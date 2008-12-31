@@ -150,11 +150,11 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fbs,
 
   gt_error_check(err);
   fb = gt_fastabuffer_new(filenametab,
-                       plainformat ? NULL : getsymbolmapAlphabet(alphabet),
-                       plainformat,
-                       NULL,
-                       NULL,
-                       NULL);
+                          plainformat ? NULL : getsymbolmapAlphabet(alphabet),
+                          plainformat,
+                          NULL,
+                          NULL,
+                          NULL);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->totallength = totallength;
   if (fillplainseq(encseq,fb,err) != 0)

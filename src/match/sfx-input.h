@@ -19,6 +19,7 @@
 #define SFX_INPUT_H
 
 #include "core/filelengthvalues.h"
+#include "core/arraydef.h"
 #include "alphadef.h"
 #include "seqpos-def.h"
 #include "measure-time-if.h"
@@ -36,6 +37,7 @@ typedef struct
   Readmode readmode;
   GtStrArray *filenametab;
   void *voidptr2suffixarray;
+  ArraySeqpos *sequenceseppos;
 } Sfxseqinfo;
 
 int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,

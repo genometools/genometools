@@ -102,8 +102,6 @@ void makeitmthresholds(Profilematrix *prof,
   FREESPACE(maxscore);
 }
 
-DECLAREARRAYSTRUCT(Seqpos);
-
 void lookaheadsearchPSSM(const Encodedsequence *encseq,
                                 const Profilematrix *prof)
 {

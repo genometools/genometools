@@ -84,8 +84,6 @@ Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound);
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound);
 
-DECLAREARRAYSTRUCT(Seqpos);
-
 ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
                                           Seqpos leftbound,
                                           Seqpos rightbound,

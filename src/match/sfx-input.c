@@ -32,9 +32,9 @@
 #include "stamp.h"
 #include "sfx-input.h"
 #include "opensfxfile.h"
+#include "fillsci.h"
 
 #include "esa-map.pr"
-#include "fillsci.pr"
 
 static int outal1file(const GtStr *indexname,const Alphabet *alpha,
                       GtError *err)
@@ -88,6 +88,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = so->readmode;
   sfxseqinfo->filenametab = so->filenametab;
+  sfxseqinfo->sequenceseppos = NULL;
   sfxseqinfo->alpha = assigninputalphabet(so->isdna,
                                           so->isprotein,
                                           so->str_smap,
@@ -120,6 +121,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 so->isplain,
                                 so->outdestab,
                                 sfxseqinfo->characterdistribution,
+                                so->outssptab ? sfxseqinfo->sequenceseppos
+                                              : NULL,
                                 verboseinfo,
                                 err) != 0)
     {

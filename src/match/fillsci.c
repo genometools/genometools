@@ -32,6 +32,7 @@
 #include "encseq-def.h"
 #include "stamp.h"
 #include "opensfxfile.h"
+#include "fillsci.h"
 
 static unsigned long currentspecialrangevalue(
                              unsigned long len,
@@ -161,12 +162,13 @@ int fasta2sequencekeyvalues(
         bool plainformat,
         bool withdestab,
         unsigned long *characterdistribution,
+        ArraySeqpos *sequenceseppos,
         Verboseinfo *verboseinfo,
         GtError *err)
 {
   GtFastaBuffer *fb = NULL;
   Uchar charcode;
-  Seqpos pos = 0;
+  Seqpos currentpos = 0;
   int retval;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
@@ -182,7 +184,10 @@ int fasta2sequencekeyvalues(
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-
+  if (sequenceseppos != NULL)
+  {
+    INITARRAY(sequenceseppos,Seqpos);
+  }
   if (withdestab)
   {
     descqueue = gt_queue_new();
@@ -195,13 +200,13 @@ int fasta2sequencekeyvalues(
   if (!haserr)
   {
     fb = gt_fastabuffer_new(filenametab,
-                         getsymbolmapAlphabet(alpha),
-                         plainformat,
-                         filelengthtab,
-                         descqueue,
-                         characterdistribution);
+                            getsymbolmapAlphabet(alpha),
+                            plainformat,
+                            filelengthtab,
+                            descqueue,
+                            characterdistribution);
     distspralen = gt_disc_distri_new();
-    for (pos = 0; /* Nothing */; pos++)
+    for (currentpos = 0; /* Nothing */; currentpos++)
     {
       retval = gt_fastabuffer_next(fb,&charcode,err);
       if (retval < 0)
@@ -248,6 +253,10 @@ int fasta2sequencekeyvalues(
         if (charcode == (Uchar) SEPARATOR)
         {
           (*numofsequences)++;
+          if (sequenceseppos != NULL)
+          {
+            STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
+          }
         }
       } else
       {
@@ -278,9 +287,9 @@ int fasta2sequencekeyvalues(
       (void) putc((int) '\n',desfp);
       FREESPACE(desc);
     }
-    *totallength = pos;
+    *totallength = currentpos;
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-    doupdatesumranges(specialcharinfo,forcetable,specialrangestab,pos,
+    doupdatesumranges(specialcharinfo,forcetable,specialrangestab,currentpos,
                       getmapsizeAlphabet(alpha),distspralen,verboseinfo);
     (*numofsequences)++;
   }

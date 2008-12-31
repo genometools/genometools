@@ -54,8 +54,6 @@ typedef struct
   Listtype *nodeposlist;
 };
 
-DECLAREARRAYSTRUCT(Seqpos);
-
  struct Dfsstate /* global information */
 {
   bool initialized;

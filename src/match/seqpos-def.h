@@ -100,4 +100,11 @@ typedef struct
          right;
 } Lcpinterval;
 
+typedef struct
+{
+  Seqpos *spaceSeqpos;
+  unsigned long allocatedSeqpos,
+                nextfreeSeqpos;
+} ArraySeqpos;
+
 #endif

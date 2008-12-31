@@ -389,13 +389,15 @@ static void showoptions(const Suffixeratoroptions *so)
   gt_assert(gt_str_length(so->str_indexname) > 0);
   showdefinitelyverbose("indexname=%s",gt_str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
-                        "outbwttab=%s,outbcktab=%s,outdestab=%s",
+                        "outbwttab=%s,outbcktab=%s,outdestab=%s,"
+                        "outssptab=%s",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
           so->outbwttab ? "true" : "false",
           so->outbcktab ? "true" : "false",
-          so->outdestab ? "true" : "false");
+          so->outdestab ? "true" : "false",
+          so->outssptab ? "true" : "false");
 }
 
 void wrapsfxoptions(Suffixeratoroptions *so)
@@ -428,7 +430,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->maxdepth.defined = false;
   so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
-  so->outsuftab = false;
+  so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;
   so->outbcktab = false;
