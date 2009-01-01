@@ -236,14 +236,12 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->lcptab = NULL;
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
-  suffixarray->destab = NULL;
   suffixarray->alpha = NULL;
   suffixarray->encseq = NULL;
   suffixarray->bwttabstream.fp = NULL;
   suffixarray->suftabstream.fp = NULL;
   suffixarray->llvtabstream.fp = NULL;
   suffixarray->lcptabstream.fp = NULL;
-  suffixarray->destablength = 0;
   suffixarray->bcktab = NULL;
 }
 
@@ -302,8 +300,6 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtab = NULL;
   gt_fa_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  gt_fa_xmunmap((void *) suffixarray->destab);
-  suffixarray->destab = NULL;
   gt_fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
   gt_fa_xfclose(suffixarray->lcptabstream.fp);
@@ -343,10 +339,14 @@ static int inputsuffixarray(bool map,
   {
     haserr = scanal1file(suffixarray,indexname,err);
   }
-  if (!haserr && (demand & SARR_ESQTAB))
+  if (!haserr && (demand & (SARR_ESQTAB | SARR_DESTAB | SARR_SSPTAB)))
   {
     suffixarray->encseq = mapencodedsequence(true,
                                              indexname,
+                                             (demand & SARR_DESTAB) ? true
+                                                                    : false,
+                                             (demand & SARR_SSPTAB) ? true
+                                                                    : false,
                                              *totallength,
                                              suffixarray->specialcharinfo.
                                                           specialranges,
@@ -355,20 +355,6 @@ static int inputsuffixarray(bool map,
                                              verboseinfo,
                                              err);
     if (suffixarray->encseq == NULL)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr && (demand & SARR_DESTAB))
-  {
-    size_t numofbytes;
-
-    suffixarray->destab = genericmaponlytable(indexname,
-                                              DESTABSUFFIX,
-                                              &numofbytes,
-                                              err);
-    suffixarray->destablength = (unsigned long) numofbytes;
-    if (suffixarray->destab == NULL)
     {
       haserr = true;
     }

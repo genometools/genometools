@@ -22,13 +22,14 @@
 #include "match/verbose-def.h"
 #include "match/stamp.h"
 #include "match/esa-seqread.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
+#include "match/echoseq.h"
+#include "tools/gt_sfxmap.h"
+
 #include "match/test-encseq.pr"
 #include "match/pos2seqnum.pr"
 #include "match/test-mappedstr.pr"
 #include "match/sfx-suftaborder.pr"
-#include "match/echoseq.pr"
-#include "tools/gt_sfxmap.h"
 
 typedef struct
 {
@@ -337,9 +338,9 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   }
   if (sfxmapoptions.inputdes && !haserr)
   {
-    showverbose(verboseinfo,"checkalldescriptions");
-    checkalldescriptions(suffixarray.destab,suffixarray.destablength,
-                         suffixarray.numofdbsequences);
+    showverbose(verboseinfo,"checkallsequencedescriptions");
+    checkallsequencedescriptions(suffixarray.encseq,
+                                 suffixarray.numofdbsequences);
   }
   gt_str_delete(indexname);
   freesuffixarray(&suffixarray);

@@ -25,7 +25,7 @@
 #include "core/yarandom.h"
 #include "match/seqpos-def.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
 
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"

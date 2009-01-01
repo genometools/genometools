@@ -33,8 +33,7 @@
 #include "sfx-input.h"
 #include "opensfxfile.h"
 #include "fillsci.h"
-
-#include "esa-map.pr"
+#include "esa-map.h"
 
 static int outal1file(const GtStr *indexname,const Alphabet *alpha,
                       GtError *err)

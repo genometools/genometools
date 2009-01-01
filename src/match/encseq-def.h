@@ -192,11 +192,24 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
+                                               bool withdestab,
+                                               bool withssptab,
                                                Seqpos totallength,
                                                Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                GtError *err);
+
+void checkallsequencedescriptions(const Encodedsequence *encseq,
+                                  unsigned long numofsequences);
+
+unsigned long *calcdescendpositions(const Encodedsequence *encseq,
+                                    unsigned long numofsequences);
+
+const char *retrievesequencedescription(unsigned long *desclen,
+                                        const Encodedsequence *encseq,
+                                        const unsigned long *descendtab,
+                                        unsigned long seqnum);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
                                        Specialcharinfo *specialcharinfo,

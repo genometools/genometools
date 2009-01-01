@@ -27,8 +27,8 @@
 #include "match/qgram2code.h"
 #include "match/spacedef.h"
 #include "match/cutendpfx.h"
+#include "match/esa-map.h"
 
-#include "match/esa-map.pr"
 #include "match/sfx-cmpsuf.pr"
 
 #include "tools/gt_patternmatch.h"

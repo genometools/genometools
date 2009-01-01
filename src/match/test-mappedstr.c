@@ -29,10 +29,10 @@
 #include "sarr-def.h"
 #include "sfx-nextchar.h"
 #include "stamp.h"
+#include "esa-map.h"
 
 #include "kmer2string.pr"
 #include "sfx-mappedstr.pr"
-#include "esa-map.pr"
 
 static Codetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,

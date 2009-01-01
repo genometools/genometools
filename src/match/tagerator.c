@@ -36,9 +36,8 @@
 #include "dist-short.h"
 #include "stamp.h"
 #include "tagerator.h"
-
-#include "echoseq.pr"
-#include "esa-map.pr"
+#include "esa-map.h"
+#include "echoseq.h"
 
 #define MAXTAGSIZE INTWORDSIZE
 

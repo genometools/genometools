@@ -22,8 +22,7 @@
 #include "esa-seqread.h"
 #include "esa-lcpval.h"
 #include "lcpoverflow.h"
-
-#include "esa-map.pr"
+#include "esa-map.h"
 
 #ifdef INLINEDSequentialsuffixarrayreader
 
@@ -313,18 +312,6 @@ unsigned long numofdbsequencesSequentialsuffixarrayreader(
 {
   gt_assert(ssar->suffixarray != NULL);
   return ssar->suffixarray->numofdbsequences;
-}
-
-unsigned long destablengthSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar)
-{
-  return ssar->suffixarray->destablength;
-}
-
-const char *destabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar)
-{
-  return ssar->suffixarray->destab;
 }
 
 const Seqpos *suftabSequentialsuffixarrayreader(

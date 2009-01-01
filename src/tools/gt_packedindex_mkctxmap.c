@@ -25,8 +25,7 @@
 #include "match/eis-bwtseq-sass.h"
 #include "match/seqpos-def.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
-
+#include "match/esa-map.h"
 #include "tools/gt_packedindex_mkctxmap.h"
 
 struct mkCtxMapOptions

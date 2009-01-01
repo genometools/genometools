@@ -22,7 +22,7 @@
 #include "match/sarr-def.h"
 #include "match/pckbucket.h"
 #include "match/eis-voiditf.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
 
 typedef struct
 {

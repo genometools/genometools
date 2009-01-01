@@ -27,10 +27,10 @@
 #include "match/enum-patt-def.h"
 #include "match/esa-mmsearch-def.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
-#include "match/sfx-apfxlen.pr"
+#include "match/esa-map.h"
 #include "match/verbose-def.h"
 #include "tools/gt_packedindex_chk_search.h"
+#include "match/sfx-apfxlen.pr"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
 

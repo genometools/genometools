@@ -112,12 +112,6 @@ const Alphabet *alphabetSequentialsuffixarrayreader(
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
                     const Sequentialsuffixarrayreader *ssar);
 
-unsigned long destablengthSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar);
-
-const char *destabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar);
-
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 

@@ -21,8 +21,7 @@
 #include "merger-trie.h"
 #include "encseq-def.h"
 #include "alphadef.h"
-
-#include "esa-map.pr"
+#include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,
                      GT_UNUSED const Uchar *characters,

@@ -30,8 +30,8 @@
 #include "spacedef.h"
 #include "stamp.h"
 #include "opensfxfile.h"
+#include "esa-map.h"
 
-#include "esa-map.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 

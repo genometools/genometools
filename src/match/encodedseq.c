@@ -147,6 +147,9 @@ typedef uint32_t Uint32;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long *characterdistribution;
 
+  const char *destab;
+  unsigned long destablength;
+
   /* only for Viabitaccess,
               Viauchartables,
               Viaushorttables,
@@ -800,6 +803,11 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
         break;
       default: break;
     }
+  }
+  if (encseq->destab != NULL)
+  {
+    gt_fa_xmunmap((void *) encseq->destab);
+    encseq->destab = NULL;
   }
   FREESPACE(*encseqptr);
 }
@@ -2032,6 +2040,8 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->mapsize = mapsize;
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;
+  encseq->destab = NULL;
+  encseq->destablength = 0;
   encseq->numofspecialstostore = CALLCASTFUNC(Seqpos,unsigned_long,
                                               specialranges);
   encseq->totallength = totallength;
@@ -2311,6 +2321,8 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
+                                               bool withdestab,
+                                               GT_UNUSED bool withssptab,
                                                Seqpos totallength,
                                                Seqpos specialranges,
                                                unsigned int mapsize,
@@ -2352,7 +2364,87 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     showallspecialpositions(encseq);
   }
 #endif
+  if (!haserr && withdestab)
+  {
+    size_t numofbytes;
+
+    encseq->destab = genericmaponlytable(indexname,
+                                         DESTABSUFFIX,
+                                         &numofbytes,
+                                         err);
+    encseq->destablength = (unsigned long) numofbytes;
+    if (encseq->destab == NULL)
+    {
+      haserr = true;
+      freeEncodedsequence(&encseq);
+    }
+  }
   return haserr ? NULL : encseq;
+}
+
+unsigned long *calcdescendpositions(const Encodedsequence *encseq,
+                                    unsigned long numofsequences)
+{
+  unsigned long *descendtab, i, idx = 0;
+
+  ALLOCASSIGNSPACE(descendtab,NULL,unsigned long,numofsequences);
+  gt_assert(encseq->destab != NULL);
+  for (i=0; i<encseq->destablength; i++)
+  {
+    if (encseq->destab[i] == '\n')
+    {
+      gt_assert(idx < numofsequences);
+      descendtab[idx++] = i;
+    }
+  }
+  gt_assert(idx == numofsequences);
+  return descendtab;
+}
+
+const char *retrievesequencedescription(unsigned long *desclen,
+                                        const Encodedsequence *encseq,
+                                        const unsigned long *descendtab,
+                                        unsigned long seqnum)
+{
+  if (seqnum == 0)
+  {
+    *desclen = descendtab[0];
+    return encseq->destab;
+  }
+  gt_assert(descendtab[seqnum-1] < descendtab[seqnum]);
+  *desclen = descendtab[seqnum] - descendtab[seqnum-1] - 1;
+  return encseq->destab + descendtab[seqnum-1] + 1;
+}
+
+void checkallsequencedescriptions(const Encodedsequence *encseq,
+                                  unsigned long numofsequences)
+{
+  unsigned long *descendtab, desclen, seqnum, totaldesclength, offset = 0;
+  const char *desptr;
+  char *copydestab;
+
+  descendtab = calcdescendpositions(encseq,numofsequences);
+  totaldesclength = numofsequences; /* for each new line */
+  for (seqnum = 0; seqnum < numofsequences; seqnum++)
+  {
+    desptr = retrievesequencedescription(&desclen,encseq,descendtab,seqnum);
+    totaldesclength += desclen;
+  }
+  ALLOCASSIGNSPACE(copydestab,NULL,char,totaldesclength);
+  for (seqnum = 0; seqnum < numofsequences; seqnum++)
+  {
+    desptr = retrievesequencedescription(&desclen,encseq,descendtab,seqnum);
+    strncpy(copydestab + offset,desptr,(size_t) desclen);
+    copydestab[offset+desclen] = '\n';
+    offset += (desclen+1);
+  }
+  if (strncmp(copydestab,encseq->destab,(size_t) totaldesclength) != 0)
+  {
+    fprintf(stderr,"different descriptions\n");
+    exit(EXIT_FAILURE); /* Programm error */
+  }
+  FREESPACE(copydestab);
+  FREESPACE(descendtab);
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,

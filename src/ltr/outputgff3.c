@@ -18,7 +18,7 @@
 #include "core/fa.h"
 #include "core/str.h"
 #include "match/esa-seqread.h"
-#include "match/echoseq.pr"
+#include "match/echoseq.h"
 #include "ltr/ltrharvest-opt.h"
 #include "ltr/repeattypes.h"
 
@@ -38,24 +38,23 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
        idcounterMotif = 0;
 
   unsigned long *descendtab = NULL,
-                destablength,
                 desclen;
-  const char *destab = NULL;
   const char *desptr = NULL;
 
-  unsigned long numofdbsequences =
-                numofdbsequencesSequentialsuffixarrayreader(ssar);
-  Seqpos totallength = getencseqtotallength(
-                               encseqSequentialsuffixarrayreader(ssar));
+  unsigned long numofdbsequences;
+  const Encodedsequence *encseq;
+  Seqpos totallength;
+  FILE *fp;
 
-  FILE *fp = gt_fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
+  numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
+  encseq = encseqSequentialsuffixarrayreader(ssar);
+
+  totallength = getencseqtotallength(encseq);
+
+  fp = gt_fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
 
   /* for getting descriptions */
-  destablength = destablengthSequentialsuffixarrayreader(ssar);
-  destab = destabSequentialsuffixarrayreader(ssar);
-  descendtab = calcdescendpositions(destab,
-                                    destablength,
-                                    numofdbsequences);
+  descendtab = calcdescendpositions(encseq,numofdbsequences);
 
   if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
   {
@@ -96,10 +95,10 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
                   h, PRINTSeqposcast(contiglen));
       /* write description of sequence */
       fprintf(fp, "# ");
-      desptr = retriesequencedescription(&desclen,
-                                     destab,
-                                     descendtab,
-                                     h);
+      desptr = retrievesequencedescription(&desclen,
+                                           encseq,
+                                           descendtab,
+                                           h);
       for (i=0; i < desclen; i++)
       {
         fprintf(fp, "%c", desptr[i]);

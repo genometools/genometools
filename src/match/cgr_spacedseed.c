@@ -27,8 +27,7 @@
 #include "absdfstrans-def.h"
 #include "spaced-seeds.h"
 #include "iter-window.h"
-
-#include "esa-map.pr"
+#include "esa-map.h"
 
 typedef struct
 {

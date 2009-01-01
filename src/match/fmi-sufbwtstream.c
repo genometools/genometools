@@ -23,9 +23,9 @@
 #include "divmodmul.h"
 #include "spacedef.h"
 #include "opensfxfile.h"
+#include "esa-map.h"
 
 #include "esa-merge.pr"
-#include "esa-map.pr"
 #include "encseq2offset.pr"
 #include "mkidxcpy.pr"
 #include "fmi-keyval.pr"

@@ -28,10 +28,10 @@
 #include "measure-time-if.h"
 #include "format64.h"
 #include "stamp.h"
+#include "esa-map.h"
+#include "echoseq.h"
 
 #include "sfx-apfxlen.pr"
-#include "esa-map.pr"
-#include "echoseq.pr"
 
 #define COMPARE(OFFSET,LCPLEN)\
         sidx = (OFFSET) + (LCPLEN);\

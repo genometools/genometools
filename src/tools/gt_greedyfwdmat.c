@@ -24,15 +24,15 @@
 #include "match/defined-types.h"
 #include "match/optionargmode.h"
 #include "match/greedyfwdmat.h"
-
+#include "match/esa-map.h"
 #include "match/stamp.h"
-#include "match/fmi-fwduni.pr"
-#include "match/fmi-map.pr"
-#include "match/esa-map.pr"
-#include "match/esa-minunique.pr"
 #include "match/eis-voiditf.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_matchingstatistics.h"
+
+#include "match/fmi-fwduni.pr"
+#include "match/fmi-map.pr"
+#include "match/esa-minunique.pr"
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)

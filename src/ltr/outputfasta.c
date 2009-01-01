@@ -24,8 +24,7 @@
 #include "match/spacedef.h"
 #include "match/encseq-def.h"
 #include "match/esa-seqread.h"
-#include "match/echoseq.pr"
-
+#include "match/echoseq.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 
@@ -43,7 +42,6 @@ typedef struct
   const Encodedsequence *encseq; /* encoded sequence */
   const Alphabet *alpha;         /* the alphabet */
   const Uchar *characters;       /* for visible characters */
-  const char *destab;            /* pointer on descriptions */
   unsigned long *descendtab;     /* positions of desc-separators */
   Seqpos totallength;            /* totallength of encseq */
   unsigned long numofdbsequences; /* num of sequences in suffix array */
@@ -120,10 +118,10 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                                      info->totallength, startpos, err);
 
   /* if there are sequence descriptions */
-  desptr = retriesequencedescription(&desclen,
-                                     info->destab,
-                                     info->descendtab,
-                                     seqnum);
+  desptr = retrievesequencedescription(&desclen,
+                                       info->encseq,
+                                       info->descendtab,
+                                       seqnum);
 
   ALLOCASSIGNSPACE(destab_seqnum, NULL, char, desclen);
   for (i=0; i < desclen; i++)
@@ -196,9 +194,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
-  unsigned long *descendtab = NULL,
-                destablength;
-  const char *destab = NULL;
+  unsigned long *descendtab = NULL;
   int had_err;
 
   formatout = gt_fa_xfopen(innerregion
@@ -219,14 +215,8 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.formatout = formatout;
   fastaoutinfo.markpos = markpos;
 
-  destablength = destablengthSequentialsuffixarrayreader(ssar);
-  destab = destabSequentialsuffixarrayreader(ssar);
-  descendtab = calcdescendpositions(destab,
-                                    destablength,
+  descendtab = calcdescendpositions(fastaoutinfo.encseq,
                                     fastaoutinfo.numofdbsequences);
-  fastaoutinfo.destab = destab;
-  fastaoutinfo.descendtab = descendtab;
-
   had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
                                        showpredictionfastasequence, err);
 

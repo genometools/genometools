@@ -17,7 +17,7 @@
 #include "match/eis-blockcomp-construct.h"
 #include "match/eis-encidxseq-construct.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
 
 static EISeq *
 createEncIdxSeqFromSASeqSrc(SASeqSrc *src,

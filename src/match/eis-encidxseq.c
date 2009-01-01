@@ -20,7 +20,7 @@
 
 #include "match/seqpos-def.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
 
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"

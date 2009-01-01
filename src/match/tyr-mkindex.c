@@ -30,8 +30,7 @@
 #include "opensfxfile.h"
 #include "tyr-basic.h"
 #include "tyr-mkindex.h"
-
-#include "echoseq.pr"
+#include "echoseq.h"
 
 struct Dfsinfo /* information stored for each node of the lcp interval tree */
 {

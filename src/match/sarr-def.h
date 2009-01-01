@@ -113,8 +113,6 @@ typedef struct
   UcharBufferedfile bwttabstream,
                     lcptabstream;
   LargelcpvalueBufferedfile llvtabstream;
-  const char *destab;         /* XXX: move to encoded sequence */
-  unsigned long destablength; /* XXX: move to encoded sequence */
 } Suffixarray;
 
 #endif

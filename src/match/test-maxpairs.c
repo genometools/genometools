@@ -42,12 +42,12 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "esa-mmsearch-def.h"
 #include "alphadef.h"
 #include "format64.h"
+#include "esa-map.h"
+#include "echoseq.h"
 
-#include "esa-map.pr"
 #include "esa-selfmatch.pr"
 #include "arrcmp.pr"
 #include "pos2seqnum.pr"
-#include "echoseq.pr"
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,

@@ -26,7 +26,7 @@
 #include "lcpoverflow.h"
 #include "verbose-def.h"
 
-#include "esa-map.pr"
+#include "esa-map.h"
 
  DECLAREREADFUNCTION(Seqpos);
 
