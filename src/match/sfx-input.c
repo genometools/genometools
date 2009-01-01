@@ -88,7 +88,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = so->readmode;
   sfxseqinfo->filenametab = so->filenametab;
-  sfxseqinfo->sequenceseppos = NULL;
+  INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   sfxseqinfo->alpha = assigninputalphabet(so->isdna,
                                           so->isprotein,
                                           so->str_smap,
@@ -121,7 +121,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 so->isplain,
                                 so->outdestab,
                                 sfxseqinfo->characterdistribution,
-                                so->outssptab ? sfxseqinfo->sequenceseppos
+                                so->outssptab ? &sfxseqinfo->sequenceseppos
                                               : NULL,
                                 verboseinfo,
                                 err) != 0)
@@ -187,6 +187,7 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   ALLOCASSIGNSPACE(suffixarray,NULL,Suffixarray,1);
   sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->voidptr2suffixarray = NULL;
+  INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   if (mapsuffixarray(suffixarray,
                      &totallength,
                      SARR_ESQTAB,
@@ -222,6 +223,7 @@ void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped)
     FREESPACE(sfxseqinfo->voidptr2suffixarray);
   } else
   {
+    FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
     FREESPACE(sfxseqinfo->filelengthtab);
     if (sfxseqinfo->alpha != NULL)
     {

@@ -461,6 +461,34 @@ static int runsuffixerator(bool doesa,
     {
       haserr = true;
     }
+    if (!haserr && so->outssptab)
+    {
+      FILE *outfp;
+
+      outfp = opensfxfile(so->str_indexname,SSPTABSUFFIX,"wb",err);
+      if (outfp == NULL)
+      {
+        haserr = true;
+      } else
+      {
+        if (fwrite(sfxseqinfo.sequenceseppos.spaceSeqpos,
+                   sizeof (*sfxseqinfo.sequenceseppos.spaceSeqpos),
+                   (size_t) sfxseqinfo.sequenceseppos.nextfreeSeqpos,
+                   outfp)
+                   != (size_t) sfxseqinfo.sequenceseppos.nextfreeSeqpos)
+        {
+          gt_error_set(err,"cannot write %lu items of size %u: "
+                           "errormsg=\"%s\"",
+                            sfxseqinfo.sequenceseppos.nextfreeSeqpos,
+                            (unsigned int) sizeof (*sfxseqinfo.sequenceseppos.
+                                                   spaceSeqpos),
+                            strerror(errno));
+          haserr = true;
+        }
+      }
+      FREEARRAY(&sfxseqinfo.sequenceseppos,Seqpos);
+      gt_fa_fclose(outfp);
+    }
   }
   if (!haserr)
   {

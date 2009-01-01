@@ -1,5 +1,5 @@
 def outoptionsnobck()
-  return "-tis -suf -bwt -lcp -des"
+  return "-tis -suf -bwt -lcp -des -ssp"
 end
 
 def outoptions()
@@ -122,7 +122,7 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
            "-db #{$testdata}Random.fna"
-  run_test "#{$bin}gt dev sfxmap -tis -suf -des #{trials()} localidx",
+  run_test "#{$bin}gt dev sfxmap -tis -suf -des -ssp #{trials()} localidx",
            :retval => 1
 end
 

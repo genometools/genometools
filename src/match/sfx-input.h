@@ -37,7 +37,7 @@ typedef struct
   Readmode readmode;
   GtStrArray *filenametab;
   void *voidptr2suffixarray;
-  ArraySeqpos *sequenceseppos;
+  ArraySeqpos sequenceseppos;
 } Sfxseqinfo;
 
 int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,

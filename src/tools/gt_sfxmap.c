@@ -39,7 +39,8 @@ typedef struct
        inputdes,
        inputbwt,
        inputlcp,
-       inputbck;
+       inputbck,
+       inputssp;
   unsigned long scantrials,
                 multicharcmptrials;
   unsigned long delspranges;
@@ -104,7 +105,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   GtOptionParser *op;
   GtOption *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
-         *optiondes, *optionbwt, *optionlcp, *optiontis,
+         *optiondes, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges;
   OPrval oprval;
 
@@ -164,6 +165,11 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                               false);
   gt_option_parser_add_option(op, optionbck);
 
+  optionssp = gt_option_new_bool("ssp","input the sequence separator table",
+                                 &sfxmapoptions->inputssp,
+                                 false);
+  gt_option_parser_add_option(op, optionssp);
+
   optionverbose = gt_option_new_bool("v","be verbose",&sfxmapoptions->verbose,
                                   false);
   gt_option_parser_add_option(op, optionverbose);
@@ -222,6 +228,10 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   if (sfxmapoptions.inputbck)
   {
     demand |= SARR_BCKTAB;
+  }
+  if (sfxmapoptions.inputssp)
+  {
+    demand |= SARR_SSPTAB;
   }
   if ((sfxmapoptions.usestream ? streamsuffixarray
                                : mapsuffixarray)(&suffixarray,

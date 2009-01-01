@@ -79,6 +79,17 @@
 #define DESTABSUFFIX ".des"
 
 /*
+  The following defines the suffix of a file to store sequence seperator
+  positions.
+*/
+
+#define SSPTABSUFFIX ".ssp"
+
+/*
+  The following defines the suffix of the project file.
+*/
+
+/*
   The following defines the suffix of the project file.
 */
 
