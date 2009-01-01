@@ -127,13 +127,14 @@ typedef uint32_t Uint32;
  struct Encodedsequence
 {
   /* Common part */
-  Uchar *satcharptr;
+  Uchar *satcharptr; /* need for writing char */
   Positionaccesstype sat;
   unsigned int mapsize;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
   Seqpos totallength;
-  unsigned long numofdbsequences;
+  unsigned long numofdbsequences,
+                *numofdbsequencesptr; /* need for writing numofdbsequences */
   unsigned long sizeofrep;
   const char *name;
   Uchar(*deliverchar)(const Encodedsequence *,Seqpos);
@@ -557,9 +558,11 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   {
     ALLOCASSIGNSPACE(encseq->satcharptr,NULL,Uchar,1);
     encseq->satcharptr[0] = (Uchar) encseq->sat;
+    ALLOCASSIGNSPACE(encseq->numofdbsequencesptr,NULL,unsigned long,1);
+    encseq->numofdbsequencesptr[0] = encseq->numofdbsequences;
   }
   NEWMAPSPEC(encseq->satcharptr,Uchar,1UL);
-  NEWMAPSPEC(encseq->numofdbsequences,Unsignedlong,1UL);
+  NEWMAPSPEC(encseq->numofdbsequencesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) (encseq->mapsize-1));
   switch (encseq->sat)
@@ -648,6 +651,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
     }
   }
   FREESPACE(encseq->satcharptr);
+  FREESPACE(encseq->numofdbsequencesptr);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
