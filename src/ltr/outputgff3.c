@@ -46,15 +46,14 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
   Seqpos totallength;
   FILE *fp;
 
-  numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
   encseq = encseqSequentialsuffixarrayreader(ssar);
-
+  numofdbsequences = getencseqnumofdbsequences(encseq);
   totallength = getencseqtotallength(encseq);
 
   fp = gt_fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
 
   /* for getting descriptions */
-  descendtab = calcdescendpositions(encseq,numofdbsequences);
+  descendtab = calcdescendpositions(encseq);
 
   if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
   {

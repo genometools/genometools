@@ -289,8 +289,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       if (!haserr)
       {
         showverbose(verboseinfo,"checkmarkpos");
-        if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
-                         err) != 0)
+        if (checkmarkpos(suffixarray.encseq,err) != 0)
         {
           haserr = true;
         }
@@ -339,8 +338,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   if (sfxmapoptions.inputdes && !haserr)
   {
     showverbose(verboseinfo,"checkallsequencedescriptions");
-    checkallsequencedescriptions(suffixarray.encseq,
-                                 suffixarray.numofdbsequences);
+    checkallsequencedescriptions(suffixarray.encseq);
   }
   gt_str_delete(indexname);
   freesuffixarray(&suffixarray);

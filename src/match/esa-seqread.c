@@ -311,7 +311,8 @@ unsigned long numofdbsequencesSequentialsuffixarrayreader(
                     const Sequentialsuffixarrayreader *ssar)
 {
   gt_assert(ssar->suffixarray != NULL);
-  return ssar->suffixarray->numofdbsequences;
+  gt_assert(ssar->suffixarray->encseq != NULL);
+  return getencseqnumofdbsequences(ssar->suffixarray->encseq);
 }
 
 const Seqpos *suftabSequentialsuffixarrayreader(

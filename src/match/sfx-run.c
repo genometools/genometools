@@ -486,7 +486,7 @@ static int runsuffixerator(bool doesa,
           haserr = true;
         }
       }
-      FREEARRAY(&sfxseqinfo.sequenceseppos,Seqpos);
+      FREESPACE(sfxseqinfo.sequenceseppos.spaceSeqpos);
       gt_fa_fclose(outfp);
     }
   }

@@ -46,7 +46,7 @@ typedef struct
   Seqpos totallength;            /* totallength of encseq */
   unsigned long numofdbsequences; /* num of sequences in suffix array */
   unsigned int linewidth;        /* the line width to show the alignment */
-  Seqpos *markpos;     /* positions of SEPARATOR symbols */
+  const Seqpos *markpos;     /* positions of SEPARATOR symbols */
   bool showseqnum;     /* with or without the sequence number */
   FILE *formatout;     /* file pointer to show the alignment */
 } Fastaoutinfo;
@@ -185,7 +185,7 @@ static int overallpredictionsequences(const LTRharvestoptions *lo,
  specified output.
 */
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-                                 Seqpos *markpos,
+                                 const Seqpos *markpos,
                                  bool innerregion,
                                  unsigned int linewidth,
                                  Sequentialsuffixarrayreader *ssar,
@@ -206,17 +206,15 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
   fastaoutinfo.alpha = alphabetSequentialsuffixarrayreader(ssar);
   fastaoutinfo.characters = getcharactersAlphabet(fastaoutinfo.alpha);
-  fastaoutinfo.totallength = getencseqtotallength(
-                               encseqSequentialsuffixarrayreader(ssar));
-  fastaoutinfo.numofdbsequences =
-                      numofdbsequencesSequentialsuffixarrayreader(ssar);
+  fastaoutinfo.totallength = getencseqtotallength(fastaoutinfo.encseq);
+  fastaoutinfo.numofdbsequences
+    = getencseqnumofdbsequences(fastaoutinfo.encseq);
   fastaoutinfo.linewidth = linewidth;
   fastaoutinfo.showseqnum = showseqnum;
   fastaoutinfo.formatout = formatout;
   fastaoutinfo.markpos = markpos;
 
-  descendtab = calcdescendpositions(fastaoutinfo.encseq,
-                                    fastaoutinfo.numofdbsequences);
+  descendtab = calcdescendpositions(fastaoutinfo.encseq);
   had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
                                        showpredictionfastasequence, err);
 

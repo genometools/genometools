@@ -20,9 +20,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
                                 unsigned long position,
                                 GtError *err);
 
-int checkmarkpos(const Encodedsequence *encseq,
-                 unsigned long numofdbsequences,
-                 GtError *err);
+int checkmarkpos(const Encodedsequence *encseq,GtError *err);
 
 #ifdef __cplusplus
 }

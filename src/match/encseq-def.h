@@ -117,6 +117,8 @@ typedef struct Specialrangeiterator Specialrangeiterator;
 
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
+unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
+
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
 
@@ -183,6 +185,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                     *filenametab,
                                     bool plainformat,
                                     Seqpos totallength,
+                                    unsigned long numofsequences,
                                     const Seqpos *specialrangestab,
                                     const Alphabet *alphabet,
                                     const char *str_sat,
@@ -200,11 +203,9 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                Verboseinfo *verboseinfo,
                                                GtError *err);
 
-void checkallsequencedescriptions(const Encodedsequence *encseq,
-                                  unsigned long numofsequences);
+void checkallsequencedescriptions(const Encodedsequence *encseq);
 
-unsigned long *calcdescendpositions(const Encodedsequence *encseq,
-                                    unsigned long numofsequences);
+unsigned long *calcdescendpositions(const Encodedsequence *encseq);
 
 const char *retrievesequencedescription(unsigned long *desclen,
                                         const Encodedsequence *encseq,

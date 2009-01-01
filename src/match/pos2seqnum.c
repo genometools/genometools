@@ -213,11 +213,10 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
   return numofrecords; /* failure */
 }
 
-int checkmarkpos(const Encodedsequence *encseq,
-                 unsigned long numofdbsequences,
-                 GtError *err)
+int checkmarkpos(const Encodedsequence *encseq,GtError *err)
 {
   bool haserr = false;
+  unsigned long numofdbsequences = getencseqnumofdbsequences(encseq);
 
   if (numofdbsequences > 1UL)
   {

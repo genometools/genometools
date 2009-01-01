@@ -148,6 +148,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                               so->filenametab,
                               so->isplain,
                               totallength,
+                              sfxseqinfo->sequenceseppos.nextfreeSeqpos,
                               specialrangestab,
                               sfxseqinfo->alpha,
                               gt_str_length(so->str_sat) > 0
@@ -199,7 +200,7 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   } else
   {
     sfxseqinfo->voidptr2suffixarray = suffixarray; /* for freeing it later */
-    sfxseqinfo->numofsequences = suffixarray->numofdbsequences;
+    sfxseqinfo->numofsequences = getencseqnumofdbsequences(suffixarray->encseq);
     sfxseqinfo->alpha = suffixarray->alpha;
     sfxseqinfo->specialcharinfo = suffixarray->specialcharinfo;
     sfxseqinfo->filelengthtab = suffixarray->filelengthtab;
