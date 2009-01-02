@@ -151,7 +151,6 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
 
 int fasta2sequencekeyvalues(
         const GtStr *indexname,
-        unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
         unsigned int forcetable,
@@ -162,6 +161,7 @@ int fasta2sequencekeyvalues(
         bool plainformat,
         bool withdestab,
         unsigned long *characterdistribution,
+        bool withssptab,
         ArraySeqpos *sequenceseppos,
         Verboseinfo *verboseinfo,
         GtError *err)
@@ -180,14 +180,9 @@ int fasta2sequencekeyvalues(
   FILE *desfp = NULL;
 
   gt_error_check(err);
-  *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  if (sequenceseppos != NULL)
-  {
-    INITARRAY(sequenceseppos,Seqpos);
-  }
   if (withdestab)
   {
     descqueue = gt_queue_new();
@@ -252,10 +247,12 @@ int fasta2sequencekeyvalues(
         }
         if (charcode == (Uchar) SEPARATOR)
         {
-          (*numofsequences)++;
-          if (sequenceseppos != NULL)
+          if (withssptab)
           {
             STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
+          } else
+          {
+            sequenceseppos->nextfreeSeqpos++;
           }
         }
       } else
@@ -291,7 +288,6 @@ int fasta2sequencekeyvalues(
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     doupdatesumranges(specialcharinfo,forcetable,specialrangestab,currentpos,
                       getmapsizeAlphabet(alpha),distspralen,verboseinfo);
-    (*numofsequences)++;
   }
   gt_fa_xfclose(desfp);
   gt_disc_distri_delete(distspralen);

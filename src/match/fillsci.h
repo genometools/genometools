@@ -31,7 +31,6 @@
 
 int fasta2sequencekeyvalues(
         const GtStr *indexname,
-        unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
         unsigned int forcetable,
@@ -42,6 +41,7 @@ int fasta2sequencekeyvalues(
         bool plainformat,
         bool withdestab,
         unsigned long *characterdistribution,
+        bool withssptab,
         ArraySeqpos *sequenceseppos,
         Verboseinfo *verboseinfo,
         GtError *err);

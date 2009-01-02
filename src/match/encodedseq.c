@@ -41,9 +41,9 @@
 #include "verbose-def.h"
 #include "opensfxfile.h"
 #include "stamp.h"
+#include "fillsci.h"
 
 #include "sfx-cmpsuf.pr"
-#include "fillsci.h"
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,\
@@ -676,6 +676,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   {
     haserr = true;
   }
+  encseq->numofdbsequences = *encseq->numofdbsequencesptr;
   showverbose(verboseinfo,"sat=%s",encseqaccessname(encseq));
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
@@ -738,7 +739,10 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          fprintf(stderr,"localdetsizeencseq(%d) undefined\n",(int) sat);
          exit(EXIT_FAILURE); /* programming error */
   }
-  return sum + 1 + sizeof (unsigned long) * (mapsize-1);
+  sum += 1; /* for sat type */
+  sum += sizeof (unsigned long); /* for numofdbsequences type */
+  sum += sizeof (unsigned long) * (mapsize-1); /* for characterdistribution */
+  return sum;
 }
 
 uint64_t detsizeencseq(int kind,
@@ -2052,6 +2056,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->mapsize = mapsize;
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;
+  encseq->numofdbsequencesptr = NULL;
   encseq->destab = NULL;
   encseq->destablength = 0;
   encseq->numofspecialstostore = CALLCASTFUNC(Seqpos,unsigned_long,

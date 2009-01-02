@@ -109,7 +109,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     sfxseqinfo->characterdistribution
       = initcharacterdistribution(sfxseqinfo->alpha);
     if (fasta2sequencekeyvalues(so->str_indexname,
-                                &sfxseqinfo->numofsequences,
                                 &totallength,
                                 &sfxseqinfo->specialcharinfo,
                                 forcetable,
@@ -120,14 +119,15 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 so->isplain,
                                 so->outdestab,
                                 sfxseqinfo->characterdistribution,
-                                so->outssptab ? &sfxseqinfo->sequenceseppos
-                                              : NULL,
+                                so->outssptab,
+                                &sfxseqinfo->sequenceseppos,
                                 verboseinfo,
                                 err) != 0)
     {
       haserr = true;
       FREESPACE(sfxseqinfo->characterdistribution);
     }
+    sfxseqinfo->numofsequences = sfxseqinfo->sequenceseppos.nextfreeSeqpos+1;
   }
   if (!haserr)
   {
@@ -148,7 +148,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                               so->filenametab,
                               so->isplain,
                               totallength,
-                              sfxseqinfo->sequenceseppos.nextfreeSeqpos,
+                              sfxseqinfo->sequenceseppos.nextfreeSeqpos+1,
                               specialrangestab,
                               sfxseqinfo->alpha,
                               gt_str_length(so->str_sat) > 0
