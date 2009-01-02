@@ -37,6 +37,7 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/array.h"
 #include "core/arraydef.h"
 #include "core/unused_api.h"
+#include "divmodmul.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
@@ -47,7 +48,58 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 
 #include "esa-selfmatch.pr"
 #include "arrcmp.pr"
-#include "pos2seqnum.pr"
+
+static unsigned long getrecordnumulong(const unsigned long *recordseps,
+                                       unsigned long numofrecords,
+                                       unsigned long totalwidth,
+                                       unsigned long position,
+                                       GtError *err)
+{
+  unsigned long left, mid, right, len;
+
+  gt_assert(numofrecords > 0);
+  if (numofrecords == 1UL || position < recordseps[0])
+  {
+    return 0;
+  }
+  if (position > recordseps[numofrecords-2])
+  {
+    if (position < totalwidth)
+    {
+      return numofrecords - 1;
+    }
+    gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
+    return numofrecords; /* failure */
+  }
+  left = 0;
+  right = numofrecords - 2;
+  while (left<=right)
+  {
+    len = (unsigned long) (right-left);
+    mid = left + DIV2(len);
+#ifdef SKDEBUG
+    printf("left=%lu,right = %lu\n",left,right);
+    printf("mid=%lu\n",mid);
+#endif
+    if (recordseps[mid] < position)
+    {
+      if (position < recordseps[mid+1])
+      {
+        return mid + 1;
+      }
+      left = mid + 1;
+    } else
+    {
+      if (recordseps[mid-1] < position)
+      {
+        return mid;
+      }
+      right = mid-1;
+    }
+  }
+  gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
+  return numofrecords; /* failure */
+}
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
@@ -208,6 +260,36 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
            PRINTuint64_tcast(m->queryseqnum),
            m->querystart);
   return 0;
+}
+
+static unsigned long *sequence2markpositions(unsigned long *numofsequences,
+                                             const Uchar *seq,
+                                             unsigned long seqlen)
+{
+  unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
+
+  *numofsequences = 1UL;
+  for (i=0; i<seqlen; i++)
+  {
+    if (seq[i] == (Uchar) SEPARATOR)
+    {
+      (*numofsequences)++;
+    }
+  }
+  if (*numofsequences == 1UL)
+  {
+    return NULL;
+  }
+  allocatedmarkpos = (*numofsequences)-1;
+  ALLOCASSIGNSPACE(spacemarkpos,NULL,unsigned long,allocatedmarkpos);
+  for (i=0, nextfreemarkpos = 0; i<seqlen; i++)
+  {
+    if (seq[i] == (Uchar) SEPARATOR)
+    {
+      spacemarkpos[nextfreemarkpos++] = i;
+    }
+  }
+  return spacemarkpos;
 }
 
 int testmaxpairs(const GtStr *indexname,

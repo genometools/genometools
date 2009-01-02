@@ -23,8 +23,6 @@
 #include "match/spacedef.h"
 #include "ltrharvest-opt.h"
 
-#include "match/pos2seqnum.pr"
-
 /*
    The following function prints the predicted LTR retrotransposon
    results to stdout.
@@ -55,9 +53,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
   /* calculate markpos array for sequence offset */
   if ( numofdbsequences > 1UL)
   {
-    markpos = encseq2markpositions(
-        encseqSequentialsuffixarrayreader(ssar),
-        numofdbsequencesSequentialsuffixarrayreader(ssar));
+    markpos = encseq2markpositions(encseqSequentialsuffixarrayreader(ssar));
     if (markpos == NULL)
     {
       return -1;

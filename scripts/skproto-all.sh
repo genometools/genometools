@@ -77,6 +77,7 @@ optionargmode.c
 overallseq.c
 opensfxfile.c
 pckbucket.c
+pos2seqnum.c
 pssm.c
 nullcols.c
 revcompl.c

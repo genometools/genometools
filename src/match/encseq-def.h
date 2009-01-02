@@ -285,4 +285,14 @@ bool containsspecial(const Encodedsequence *encseq,
 
 unsigned int getsatforcevalue(const char *str);
 
+Seqpos *encseq2markpositions(const Encodedsequence *encseq);
+
+int checkmarkpos(const Encodedsequence *encseq,GtError *err);
+
+unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
+                                 unsigned long numofrecords,
+                                 Seqpos totalwidth,
+                                 Seqpos position,
+                                 GtError *err);
+
 #endif

@@ -35,7 +35,6 @@
 #include "outputgff3.h"
 
 #include "match/esa-maxpairs.pr"
-#include "match/pos2seqnum.pr"
 
 static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 {
@@ -58,8 +57,8 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 
   /* test if motif is valid and encode motif */
   if (testmotifandencodemotif (&lo->motif,
-                             alphabetSequentialsuffixarrayreader(ssar),
-                             err) != 0)
+                               alphabetSequentialsuffixarrayreader(ssar),
+                               err) != 0)
   {
     had_err = true;
   }
@@ -74,8 +73,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* calculate markpos array for sequences offset */
   if (!had_err && numofdbsequences > 1UL)
   {
-    markpos = encseq2markpositions(encseqSequentialsuffixarrayreader(ssar),
-                            numofdbsequencesSequentialsuffixarrayreader(ssar));
+    markpos = encseq2markpositions(encseqSequentialsuffixarrayreader(ssar));
     lo->markpos = markpos;
     if (markpos == NULL)
     {

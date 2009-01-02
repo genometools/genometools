@@ -26,8 +26,6 @@
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
-#include "match/pos2seqnum.pr"
-
 void showrepeats (
   RepeatInfo * repeatinfo,
   unsigned long seedminlength)

@@ -2037,6 +2037,166 @@ static unsigned int sat2maxspecialtype(Positionaccesstype sat)
   exit(EXIT_FAILURE); /* programming error */
 }
 
+static int addmarkpos(ArraySeqpos *asp,
+                      const Encodedsequence *encseq,
+                      Encodedsequencescanstate *esr,
+                      const Sequencerange *seqrange)
+{
+  Seqpos pos;
+  Uchar currentchar;
+
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,seqrange->leftpos);
+  for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
+  {
+    currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
+    gt_assert(ISSPECIAL(currentchar));
+    if (currentchar == (Uchar) SEPARATOR)
+    {
+      gt_assert(asp->nextfreeSeqpos < asp->allocatedSeqpos);
+      asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos;
+    }
+  }
+  return 0;
+}
+
+Seqpos *encseq2markpositions(const Encodedsequence *encseq)
+{
+  ArraySeqpos asp;
+  Specialrangeiterator *sri;
+  Sequencerange range;
+  bool haserr = false;
+  Encodedsequencescanstate *esr;
+
+  assert (encseq->numofdbsequences > 1UL);
+  asp.allocatedSeqpos = encseq->numofdbsequences-1;
+  asp.nextfreeSeqpos = 0;
+  ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
+  sri = newspecialrangeiterator(encseq,true);
+  esr = newEncodedsequencescanstate();
+  while (nextspecialrangeiterator(&range,sri))
+  {
+    if (addmarkpos(&asp,encseq,esr,&range) != 0)
+    {
+      haserr = true;
+      break;
+    }
+  }
+  freespecialrangeiterator(&sri);
+  freeEncodedsequencescanstate(&esr);
+  if (haserr)
+  {
+    FREEARRAY(&asp,Seqpos);
+    return NULL;
+  }
+  return asp.spaceSeqpos;
+}
+
+unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
+                                 unsigned long numofrecords,
+                                 Seqpos totalwidth,
+                                 Seqpos position,
+                                 GtError *err)
+{
+  unsigned long left, mid, right, len;
+
+  gt_assert(numofrecords > 0);
+  if (numofrecords == 1UL || position < recordseps[0])
+  {
+    return 0;
+  }
+  if (position > recordseps[numofrecords-2])
+  {
+    if (position < totalwidth)
+    {
+      return numofrecords - 1;
+    }
+    gt_error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+                  PRINTSeqposcast(position));
+    return numofrecords; /* failure */
+  }
+  left = 0;
+  right = numofrecords - 2;
+  while (left<=right)
+  {
+    len = (unsigned long) (right-left);
+    mid = left + DIV2(len);
+#ifdef SKDEBUG
+    printf("left=%lu,right = %lu\n",left,right);
+    printf("mid=%lu\n",mid);
+#endif
+    if (recordseps[mid] < position)
+    {
+      if (position < recordseps[mid+1])
+      {
+        return mid + 1;
+      }
+      left = mid + 1;
+    } else
+    {
+      if (recordseps[mid-1] < position)
+      {
+        return mid;
+      }
+      right = mid-1;
+    }
+  }
+  gt_error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+                PRINTSeqposcast(position));
+  return numofrecords; /* failure */
+}
+
+int checkmarkpos(const Encodedsequence *encseq,GtError *err)
+{
+  bool haserr = false;
+
+  if (encseq->numofdbsequences > 1UL)
+  {
+    Seqpos *markpos, totallength, pos;
+    unsigned long currentseqnum = 0, seqnum;
+    Uchar currentchar;
+    Encodedsequencescanstate *esr;
+
+    markpos = encseq2markpositions(encseq);
+    if (markpos == NULL)
+    {
+      return -1;
+    }
+    totallength = getencseqtotallength(encseq);
+    esr = newEncodedsequencescanstate();
+    initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
+    for (pos=0; pos<totallength; pos++)
+    {
+      currentchar = sequentialgetencodedchar(encseq,esr,pos,Forwardmode);
+      if (currentchar == (Uchar) SEPARATOR)
+      {
+        currentseqnum++;
+      } else
+      {
+        seqnum = getrecordnumSeqpos(markpos,
+                                    encseq->numofdbsequences,
+                                    totallength,
+                                    pos,
+                                    err);
+        if (seqnum == encseq->numofdbsequences)
+        {
+          haserr = true;
+          break;
+        }
+        if (seqnum != currentseqnum)
+        {
+          fprintf(stderr,"pos= " FormatSeqpos
+                         " seqnum = %lu != %lu = currentseqnum\n",
+                          PRINTSeqposcast(pos),seqnum,currentseqnum);
+          exit(EXIT_FAILURE); /* programming error */
+        }
+      }
+    }
+    freeEncodedsequencescanstate(&esr);
+    FREESPACE(markpos);
+  }
+  return haserr ? -1 : 0;
+}
+
 static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                                  Seqpos totallength,
                                                  unsigned long numofsequences,

@@ -27,7 +27,6 @@
 #include "tools/gt_sfxmap.h"
 
 #include "match/test-encseq.pr"
-#include "match/pos2seqnum.pr"
 #include "match/test-mappedstr.pr"
 #include "match/sfx-suftaborder.pr"
 

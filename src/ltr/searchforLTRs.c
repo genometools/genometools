@@ -30,7 +30,6 @@
 #include "searchTSDandmotif.h"
 
 #include "match/greedyedist.pr"
-#include "match/pos2seqnum.pr"
 
 /*
  The following function checks, if the remaining candidate pairs still

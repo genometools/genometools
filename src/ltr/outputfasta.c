@@ -28,8 +28,6 @@
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 
-#include "match/pos2seqnum.pr"
-
 /*
  The datetype Fastaoutinfo aggregates the values needed to show a fasta file.
  */
