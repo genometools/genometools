@@ -28,7 +28,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
   LTRboundaries *boundaries;
   Seqpos contiglen,
          offset;
-  unsigned long h,
+  unsigned long seqnum,
                 i,
                 contignumber,
        idcounterRepregion = 0,
@@ -63,41 +63,41 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
   {
     fprintf(fp, "##gff-version 3\n");
     /* print output sorted by contignumber */
-    for (h = 0; h < numofdbsequences; h++)
+    for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
     {
       /* contig is first sequence, and only one sequence in multiseq */
-      if ( h == 0 && numofdbsequences == 1UL)
+      if ( seqnum == 0 && numofdbsequences == 1UL)
       {
         contiglen = totallength;
       }
       else
       {
         /* first sequence and more than one sequence in suffixarray */
-        if ( h == 0)
+        if ( seqnum == 0)
         {
-          contiglen = markpos[h];
+          contiglen = markpos[seqnum];
         }
         else
         {
           /* last sequence in suffixarray */
-          if (h == numofdbsequences - 1)
+          if (seqnum == numofdbsequences - 1)
           {
-            contiglen = totallength - 1 - markpos[h-1];
+            contiglen = totallength - 1 - markpos[seqnum-1];
           }
           else
           {
-            contiglen = markpos[h] - markpos[h-1] - 1;
+            contiglen = markpos[seqnum] - markpos[seqnum-1] - 1;
           }
         }
       }
       fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
-                  h, PRINTSeqposcast(contiglen));
+                  seqnum, PRINTSeqposcast(contiglen));
       /* write description of sequence */
       fprintf(fp, "# ");
       desptr = retrievesequencedescription(&desclen,
                                            encseq,
                                            descendtab,
-                                           h);
+                                           seqnum);
       for (i=0; i < desclen; i++)
       {
         fprintf(fp, "%c", desptr[i]);
@@ -108,7 +108,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
       {
         boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
         contignumber = boundaries->contignumber;
-        if ( (!boundaries->skipped) && contignumber == h)
+        if ( (!boundaries->skipped) && contignumber == seqnum)
         {
           if ( contignumber == 0)
           {
