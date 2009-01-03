@@ -35,7 +35,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     const Sequentialsuffixarrayreader *ssar)
 {
   LTRboundaries *boundaries;
-  unsigned long h,
+  unsigned long seqnum,
                 i,
                 contignumber;
   Seqpos offset;
@@ -109,13 +109,13 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       printf("# seq-nr = sequence number\n");
 
       /* print output sorted by contignumber*/
-      for (h = 0; h < numofdbsequences; h++)
+      for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
       {
         for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
         {
           boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
           contignumber = boundaries->contignumber;
-          if ( (!boundaries->skipped) && contignumber == h)
+          if ( (!boundaries->skipped) && contignumber == seqnum)
           {
             if ( contignumber == 0)
             {
@@ -242,13 +242,13 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       printf("# seq-nr = sequence number\n");
 
       /* print output sorted by contignumber*/
-      for (h = 0; h < numofdbsequences; h++)
+      for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
       {
         for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
         {
           boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
           contignumber = boundaries->contignumber;
-          if ( (!boundaries->skipped) && contignumber == h)
+          if ( (!boundaries->skipped) && contignumber == seqnum)
           {
             if ( contignumber == 0)
             {
