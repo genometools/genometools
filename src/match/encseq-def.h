@@ -295,4 +295,6 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
                                  Seqpos position,
                                  GtError *err);
 
+const Seqpos *getencseqssptab(const Encodedsequence *encseq);
+
 #endif

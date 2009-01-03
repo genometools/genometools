@@ -19,11 +19,10 @@
 #define OUTPUTFASTA_H
 
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-                       Seqpos *markpos,
-                       bool innerregion,
-                       unsigned int linewidth,
-                       Sequentialsuffixarrayreader *ssar,
-                       bool showseqnum,
-                       GtError *err);
+                                 bool innerregion,
+                                 unsigned int linewidth,
+                                 Sequentialsuffixarrayreader *ssar,
+                                 bool showseqnum,
+                                 GtError *err);
 
 #endif

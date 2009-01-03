@@ -69,9 +69,7 @@ int simpleexactselfmatchstore (
           encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
   unsigned long numofdbsequences =
        numofdbsequencesSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
-  Seqpos *markpos = info->markpos;
-  unsigned long i,
-                contignumber = 0,
+  unsigned long contignumber = 0,
                 seqnum1,
                 seqnum2;
   bool samecontig = false;
@@ -94,37 +92,29 @@ int simpleexactselfmatchstore (
   /* at least two db sequences */
   else
   {
-    if (markpos == NULL)
+    gt_assert(info->markpos != NULL);
+    totallength = getencseqtotallength(encseq);
+    seqnum1 = getrecordnumSeqpos(info->markpos, numofdbsequences,
+                      totallength, pos1, err);
+    if ( seqnum1 == numofdbsequences)
     {
       return -1;
     }
-    totallength = getencseqtotallength(encseq);
-    for ( i = 0; i < numofdbsequences - 1; i++)
+
+    seqnum2 = getrecordnumSeqpos(info->markpos, numofdbsequences,
+                      totallength, pos2, err);
+    if ( seqnum2 == numofdbsequences)
     {
-      seqnum1 = getrecordnumSeqpos(markpos, numofdbsequences,
-                        totallength, pos1, err);
-      if ( seqnum1 == numofdbsequences)
-      {
-        return -1;
-      }
+      return -1;
+    }
 
-      seqnum2 = getrecordnumSeqpos(markpos, numofdbsequences,
-                        totallength, pos2, err);
-      if ( seqnum2 == numofdbsequences)
-      {
-        return -1;
-      }
-
-      if ( seqnum1 == seqnum2 )
-      {
-        gt_log_log("accepted:\n");
-        gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-        gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-        gt_log_log("i: %lu\n", i);
-        samecontig = true;
-        contignumber = seqnum1;
-        break;
-      }
+    if ( seqnum1 == seqnum2 )
+    {
+      gt_log_log("accepted:\n");
+      gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+      gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+      samecontig = true;
+      contignumber = seqnum1;
     }
   }
 

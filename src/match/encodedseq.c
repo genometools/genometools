@@ -311,6 +311,11 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq)
   return encseq->numofdbsequences;
 }
 
+const Seqpos *getencseqssptab(const Encodedsequence *encseq)
+{
+  return encseq->ssptab;
+}
+
 Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)

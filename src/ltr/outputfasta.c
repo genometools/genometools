@@ -183,7 +183,6 @@ static int overallpredictionsequences(const LTRharvestoptions *lo,
  specified output.
 */
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-                                 const Seqpos *markpos,
                                  bool innerregion,
                                  unsigned int linewidth,
                                  Sequentialsuffixarrayreader *ssar,
@@ -210,7 +209,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.linewidth = linewidth;
   fastaoutinfo.showseqnum = showseqnum;
   fastaoutinfo.formatout = formatout;
-  fastaoutinfo.markpos = markpos;
+  fastaoutinfo.markpos = lo->markpos;
 
   descendtab = calcdescendpositions(fastaoutinfo.encseq);
   had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,

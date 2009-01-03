@@ -35,30 +35,21 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     const Sequentialsuffixarrayreader *ssar)
 {
   LTRboundaries *boundaries;
-  unsigned long seqnum,
+  unsigned long numofdbsequences,
+                seqnum,
                 i,
                 contignumber;
   Seqpos offset;
-  unsigned long numofdbsequences =
-     numofdbsequencesSequentialsuffixarrayreader(ssar);
   const Uchar *characters;
   const Encodedsequence *encseq =
      encseqSequentialsuffixarrayreader(ssar);
-  Seqpos *markpos = NULL;
 
   /* in order to get to visible dna characters */
   characters = getcharactersAlphabet(
                  alphabetSequentialsuffixarrayreader(ssar));
 
   /* calculate markpos array for sequence offset */
-  if ( numofdbsequences > 1UL)
-  {
-    markpos = encseq2markpositions(encseqSequentialsuffixarrayreader(ssar));
-    if (markpos == NULL)
-    {
-      return -1;
-    }
-  }
+  numofdbsequences = getencseqnumofdbsequences(encseq);
 
   if (lo->longoutput)
   {
@@ -123,8 +114,8 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
             }
             else
             {
-              gt_assert(markpos != NULL);
-              offset = markpos[contignumber-1]+(Seqpos)1;
+              gt_assert(lo->markpos != NULL);
+              offset = lo->markpos[contignumber-1]+(Seqpos)1;
             }
             /* increase positions by 1 */
             printf(FormatSeqpos "  ",
@@ -256,8 +247,8 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
             }
             else
             {
-              gt_assert(markpos != NULL);
-              offset = markpos[contignumber-1]+(Seqpos)1;
+              gt_assert(lo->markpos != NULL);
+              offset = lo->markpos[contignumber-1]+(Seqpos)1;
             }
 
             /* increase positions by 1 */
@@ -292,9 +283,5 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     }
   }
 
-  if ( numofdbsequences > 1UL)
-  {
-    FREESPACE(markpos);
-  }
   return 0;
 }

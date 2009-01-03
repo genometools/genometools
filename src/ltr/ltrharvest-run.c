@@ -39,21 +39,22 @@
 static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 {
   Sequentialsuffixarrayreader *ssar; /* suffix array */
-  Seqpos *markpos = NULL;
-  unsigned long numofdbsequences;
   bool had_err = false;
+  const Encodedsequence *encseq;
 
   gt_error_check(err);
 
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
                                   SARR_LCPTAB | SARR_SUFTAB |
-                                  SARR_ESQTAB | SARR_DESTAB,
+                                  SARR_ESQTAB | SARR_DESTAB |
+                                  SARR_SSPTAB,
                                   SEQ_mappedboth,
                                   err);
   if (ssar == NULL)
   {
     return -1;
   }
+  encseq = encseqSequentialsuffixarrayreader(ssar);
 
   /* test if motif is valid and encode motif */
   if (testmotifandencodemotif (&lo->motif,
@@ -69,17 +70,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
     showuserdefinedoptionsandvalues(lo);
   }
 
-  numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
-  /* calculate markpos array for sequences offset */
-  if (!had_err && numofdbsequences > 1UL)
-  {
-    markpos = encseq2markpositions(encseqSequentialsuffixarrayreader(ssar));
-    lo->markpos = markpos;
-    if (markpos == NULL)
-    {
-      had_err = true;
-    }
-  }
+  lo->markpos = getencseqssptab(encseq);
 
   /* init array for maximal repeats */
   INITARRAY (&lo->repeatinfo.repeats, Repeat);
@@ -89,7 +80,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   if (!had_err && enumeratemaxpairs(ssar,
                        getnumofcharsAlphabet(
                          alphabetSequentialsuffixarrayreader(ssar)),
-                       encseqSequentialsuffixarrayreader(ssar),
+                       encseq,
                        readmodeSequentialsuffixarrayreader(ssar),
                        (unsigned int)lo->minseedlength,
                        (void*)simpleexactselfmatchstore,
@@ -104,7 +95,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if (!had_err && searchforLTRs (ssar, lo, markpos, err) != 0)
+  if (!had_err && searchforLTRs (ssar, lo, lo->markpos, err) != 0)
   {
     had_err = true;
   }
@@ -129,12 +120,11 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   if (!had_err && lo->fastaoutput)
   {
     if (showpredictionsmultiplefasta(lo,
-          markpos,
-          false,
-          60U,
-          ssar,
-          true,
-          err) != 0)
+                                     false,
+                                     60U,
+                                     ssar,
+                                     true,
+                                     err) != 0)
     {
       had_err = true;
     }
@@ -144,12 +134,11 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   if (!had_err && lo->fastaoutputinnerregion)
   {
     if (showpredictionsmultiplefasta(lo,
-          markpos,
-          true,
-          60U,
-          ssar,
-          true,
-          err) != 0)
+                                     true,
+                                     60U,
+                                     ssar,
+                                     true,
+                                     err) != 0)
     {
       had_err = true;
     }
@@ -158,12 +147,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* print GFF3 format file of predictions */
   if (!had_err && lo->gff3output)
   {
-    printgff3format(lo, ssar, markpos);
-  }
-
-  if (!had_err && numofdbsequences > 1UL)
-  {
-    FREESPACE(markpos);
+    printgff3format(lo, ssar, lo->markpos);
   }
 
   /* print predictions to stdout */
@@ -175,9 +159,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
     }
   }
 
-  /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
-  /* free suffixarray */
   freeSequentialsuffixarrayreader(&ssar);
 
   return had_err ? -1 : 0;
