@@ -60,6 +60,11 @@ allfiles = ["Atinsert.fna",
             "TTT-small.fna",
             "trna_glutamine.fna"]
 
+allmultifiles = ["Atinsert.fna",
+                 "Duplicate.fna",
+                 "Random159.fna",
+                 "Random160.fna"]
+
 alldir = ["fwd","cpl","rev","rcl"]
 
 # put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
@@ -117,13 +122,21 @@ runsfxfail "-dna -db #{$testdata}Random.fna RandomN.fna"
 runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
 runsfxfail "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"
 
-Name "gt suffixerator failure"
-Keywords "gt_suffixerator"
-Test do
-  run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
-           "-db #{$testdata}Random.fna"
-  run_test "#{$bin}gt dev sfxmap -tis -suf -des -ssp #{trials()} localidx",
-           :retval => 1
+allmultifiles.each do |filename|
+  Name "gt suffixerator sfxmap-failure"
+  Keywords "gt_suffixerator"
+  Test do
+    run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
+             "-db #{$testdata}#{filename}"
+    run_test "#{$bin}gt dev sfxmap -tis -des localidx",
+             :retval => 1
+    run_test "#{$bin}gt dev sfxmap -tis -ssp localidx",
+             :retval => 1
+    run_test "#{$bin}gt dev sfxmap -des localidx",
+             :retval => 1
+    run_test "#{$bin}gt dev sfxmap -ssp localidx",
+             :retval => 1
+  end
 end
 
 Name "gt suffixerator bwt"

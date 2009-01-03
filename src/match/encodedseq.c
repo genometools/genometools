@@ -153,6 +153,10 @@ typedef uint32_t Uint32;
   const char *destab;
   unsigned long destablength;
 
+  const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
+                                                         numofdbsequences  -1)
+                           entries */
+
   /* only for Viabitaccess,
               Viauchartables,
               Viaushorttables,
@@ -824,6 +828,11 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   {
     gt_fa_xmunmap((void *) encseq->destab);
     encseq->destab = NULL;
+  }
+  if (encseq->ssptab != NULL)
+  {
+    gt_fa_xmunmap((void *) encseq->ssptab);
+    encseq->ssptab = NULL;
   }
   FREESPACE(*encseqptr);
 }
@@ -2219,6 +2228,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->numofdbsequencesptr = NULL;
   encseq->destab = NULL;
   encseq->destablength = 0;
+  encseq->ssptab = NULL;
   encseq->numofspecialstostore = CALLCASTFUNC(Seqpos,unsigned_long,
                                               specialranges);
   encseq->totallength = totallength;
@@ -2522,7 +2532,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
                                                bool withdestab,
-                                               GT_UNUSED bool withssptab,
+                                               bool withssptab,
                                                Seqpos totallength,
                                                Seqpos specialranges,
                                                unsigned int mapsize,
@@ -2575,6 +2585,22 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     {
       haserr = true;
       freeEncodedsequence(&encseq);
+    }
+  }
+  if (!haserr && withssptab)
+  {
+    if (encseq->numofdbsequences > 1UL)
+    {
+      encseq->ssptab = genericmaptable(indexname,
+                                       SSPTABSUFFIX,
+                                       encseq->numofdbsequences - 1,
+                                       sizeof (Seqpos),
+                                       err);
+      if (encseq->ssptab == NULL)
+      {
+        haserr = true;
+        freeEncodedsequence(&encseq);
+      }
     }
   }
   return haserr ? NULL : encseq;
