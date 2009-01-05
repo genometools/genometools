@@ -14,8 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <cairo.h>
+#include <time.h>
 #include <string.h>
+#include <cairo.h>
 #if CAIRO_HAS_PS_SURFACE
 #include <cairo-ps.h>
 #endif
@@ -43,11 +44,16 @@
 #include "annotationsketch/layout.h"
 #include "annotationsketch/style.h"
 
+#define HEADER_TEXT_HEIGHT 20  /* pt */
+#define FOOTER_TEXT_HEIGHT 20  /* pt */
+#define TEXT_SPACER         8  /* pt */
+#define TIME_DATE_FORMAT    "%a, %b %d %Y - %T"
+
 typedef struct {
   unsigned long width;
   double pwidth, pheight;
   GtRange range;
-  GtStr *seqid, *format;
+  GtStr *seqid, *format, *text;
 } SketchPageArguments;
 
 static void *gt_sketch_page_arguments_new(void)
@@ -55,6 +61,7 @@ static void *gt_sketch_page_arguments_new(void)
   SketchPageArguments *arguments = gt_malloc(sizeof *arguments);
   arguments->format = gt_str_new();
   arguments->seqid = gt_str_new();
+  arguments->text = gt_str_new();
   arguments->range.start = arguments->range.end == UNDEF_ULONG;
   return arguments;
 }
@@ -65,6 +72,7 @@ static void gt_sketch_page_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->seqid);
   gt_str_delete(arguments->format);
+  gt_str_delete(arguments->text);
   gt_free(arguments);
 }
 
@@ -88,6 +96,11 @@ static GtOptionParser* gt_sketch_page_option_parser_new(void *tool_arguments)
   o = gt_option_new_string("seqid", "sequence region to draw",
                            arguments->seqid, NULL);
   gt_option_parser_add_option(op, o);
+
+  o = gt_option_new_string("text", "text to show in header",
+                           arguments->text, NULL);
+  gt_option_parser_add_option(op, o);
+
   o = gt_option_new_range("range", "range to draw",
                           &arguments->range, NULL);
   gt_option_parser_add_option(op, o);
@@ -127,6 +140,47 @@ static inline double mm_to_pt(double mm)
   return 2.8457598*mm;
 }
 
+static void draw_header(cairo_t *cr, const char *text, GT_UNUSED const char *fn,
+                        const char *seqid, GT_UNUSED unsigned long pagenum,
+                        GT_UNUSED double width, GT_UNUSED double height)
+{
+  cairo_text_extents_t ext;
+  time_t t;
+  char buffer[BUFSIZ];
+  struct tm *tmp;
+  double xpos = TEXT_SPACER;
+  cairo_save(cr);
+  t = time(NULL);
+  tmp = localtime(&t);
+  cairo_set_font_size(cr, HEADER_TEXT_HEIGHT);
+  if (tmp)
+  {
+    strftime(buffer, BUFSIZ, TIME_DATE_FORMAT, tmp);
+    cairo_text_extents(cr, buffer, &ext);
+    cairo_move_to(cr, width - TEXT_SPACER - ext.width, TEXT_SPACER + HEADER_TEXT_HEIGHT);
+    cairo_set_source_rgba(cr, 0,0,0,1);
+    cairo_show_text(cr, buffer);
+  }
+  cairo_text_extents(cr, text, &ext);
+  cairo_move_to(cr, xpos, TEXT_SPACER + HEADER_TEXT_HEIGHT);
+  cairo_set_source_rgba(cr, 0,0,0,1);
+  cairo_show_text(cr, text);
+  xpos += ext.width+3;
+  cairo_move_to(cr, xpos, TEXT_SPACER + HEADER_TEXT_HEIGHT);
+  cairo_set_source_rgba(cr, 0.7, 0.7, 0.7, 1);
+  cairo_show_text(cr, ", sequence region: ");
+  cairo_text_extents(cr, ", sequence region: ", &ext);
+  xpos += ext.width + 10;
+  cairo_move_to(cr, xpos, TEXT_SPACER + HEADER_TEXT_HEIGHT);
+  cairo_set_source_rgba(cr, 0,0,0,1);
+  cairo_show_text(cr, seqid);
+  xpos = TEXT_SPACER;
+  cairo_move_to(cr, xpos, height - 2*TEXT_SPACER - FOOTER_TEXT_HEIGHT);
+  snprintf(buffer, BUFSIZ, "Page %lu", pagenum+1);
+  cairo_show_text(cr, buffer);
+  cairo_restore(cr);
+}
+
 static int gt_sketch_page_runner(GT_UNUSED int argc,
                                  const char **argv,
                                  int parsed_args,
@@ -145,13 +199,14 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   GtCanvas *canvas = NULL;
   const char *seqid = NULL, *outfile;
   unsigned long start, height, num_pages = 0;
-  double offsetpos;
+  double offsetpos, usable_height;
   gt_error_check(err);
   cairo_surface_t *surf = NULL;
-  cairo_text_extents_t ext;
   cairo_t *cr = NULL;
 
   features = gt_feature_index_memory_new();
+
+  /* get style */
   sty = gt_style_new(err);
   prog = gt_str_new();
   gt_str_append_cstr_nt(prog, argv[0],
@@ -161,17 +216,19 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   gt_str_append_cstr(gt_style_file, "/sketch/default.style");
   gt_style_load_file(sty, gt_str_get(gt_style_file), err);
 
+  /* get features */
   outfile = argv[parsed_args];
   had_err = gt_feature_index_add_gff3file(features, argv[parsed_args+1], err);
    if (!had_err && gt_str_length(arguments->seqid) == 0) {
     seqid = gt_feature_index_get_first_seqid(features);
-    if (seqid == NULL) {
+    if (seqid == NULL)
+    {
       gt_error_set(err, "GFF input file must contain a sequence region!");
       had_err = -1;
     }
   }
   else if (!had_err && !gt_feature_index_has_seqid(features,
-                                                gt_str_get(arguments->seqid)))
+                                                   gt_str_get(arguments->seqid)))
   {
     gt_error_set(err, "sequence region '%s' does not exist in GFF input file",
                  gt_str_get(arguments->seqid));
@@ -180,6 +237,14 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   else if (!had_err)
     seqid = gt_str_get(arguments->seqid);
 
+  /* set text */
+  if (gt_str_length(arguments->text) == 0)
+  {
+    gt_str_delete(arguments->text);
+    arguments->text = gt_str_new_cstr(argv[parsed_args+1]);
+  }
+
+  /* set display range */
   gt_feature_index_get_range_for_seqid(features, &sequence_region_range, seqid);
   qry_range.start = (arguments->range.start == UNDEF_ULONG ?
                        sequence_region_range.start :
@@ -187,9 +252,11 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   qry_range.end   = (arguments->range.end == UNDEF_ULONG ?
                        sequence_region_range.end :
                        arguments->range.end);
+
+  /* set output format */
   if (strcmp(gt_str_get(arguments->format), "pdf") == 0)
   {
-    surf =  cairo_pdf_surface_create(outfile,
+    surf = cairo_pdf_surface_create(outfile,
                                     mm_to_pt(arguments->pwidth),
                                     mm_to_pt(arguments->pheight));
   }
@@ -205,11 +272,15 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
 
 /*  bioseq = gt_bioseq_new("Drosophila_melanogaster"
  *                         ".BDGP5.4.51.dna.chromosome.2R.fa.gz", err); */
-  gt_log_log("linewidth: %lu\n", arguments->width);
-  offsetpos = 0;
+  offsetpos = TEXT_SPACER + HEADER_TEXT_HEIGHT + TEXT_SPACER;
+  usable_height = mm_to_pt(arguments->pheight)
+                            - HEADER_TEXT_HEIGHT
+                            - FOOTER_TEXT_HEIGHT
+                            - 4*TEXT_SPACER;
 
   /* do it! */
   cr = cairo_create(surf);
+  cairo_set_font_size(cr, 8);
   for (start = qry_range.start; start <= qry_range.end;
        start += arguments->width)
   {
@@ -217,12 +288,11 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     /* GtCustomTrack *ct; */
     single_range.start = start;
     single_range.end = start + arguments->width;
-    gt_log_log("drawing %lu-%lu\n", single_range.start, single_range.end);
   /* ct = gt_custom_track_gc_content_new(gt_bioseq_get_sequence(bioseq, 0),
                                         gt_bioseq_get_sequence_length(bioseq,
                                                                       0),
                                         300,
-                                        40,
+                                        20,
                                         0.365,
                                         true); */
     d = gt_diagram_new(features, seqid, &single_range, sty, err);
@@ -231,15 +301,12 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     l = gt_layout_new(d, mm_to_pt(arguments->pwidth), sty, err);
     gt_error_check(err);
     height = gt_layout_get_height(l);
-    if (offsetpos + height > mm_to_pt(arguments->pheight)+10)
+    if (offsetpos + height > usable_height - 10 - 2*TEXT_SPACER - FOOTER_TEXT_HEIGHT)
     {
-      gt_log_log("%f+%lu = %f > %f... page break!\n", offsetpos, height,
-                 offsetpos+height, mm_to_pt(arguments->pheight)+10);
+        draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1], seqid, num_pages,
+                    mm_to_pt(arguments->pwidth), mm_to_pt(arguments->pheight));
       cairo_show_page(cr);
-      gt_log_log("sstatus: %s\n",
-                 cairo_status_to_string(cairo_surface_status(surf)));
-      gt_log_log("page shown\n");
-      offsetpos = 0;
+      offsetpos = TEXT_SPACER + HEADER_TEXT_HEIGHT + TEXT_SPACER;
       num_pages++;
     }
     canvas = gt_canvas_cairo_context_new(sty,
@@ -249,27 +316,16 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
                                          height,
                                          NULL);
     offsetpos += height;
-    gt_log_log("%lu, offsetpos: %.2f\n", height, offsetpos);
     gt_layout_sketch(l, canvas, err);
     gt_error_check(err);
     /* gt_custom_track_delete(ct); */
     gt_canvas_delete(canvas);
     gt_layout_delete(l);
     gt_diagram_delete(d);
-    gt_log_log("status: %s\n", cairo_status_to_string(cairo_status(cr)));
-    gt_log_log("sstatus: %s\n",
-               cairo_status_to_string(cairo_surface_status(surf)));
   }
-  cairo_text_extents(cr, "", &ext);
-  gt_log_log ("extents: %f, %f\n", ext.width, ext.height);
-  cairo_move_to(cr, mm_to_pt(arguments->pwidth)-ext.width,
-                mm_to_pt(arguments->pheight)-ext.height);
-  cairo_set_source_rgba(cr, 0,0,0,1);
-  cairo_show_text(cr, "");
-  gt_log_log("status: %s\n", cairo_status_to_string(cairo_status(cr)));
+  draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1], seqid, num_pages,
+              mm_to_pt(arguments->pwidth), mm_to_pt(arguments->pheight));
   cairo_show_page(cr);
-  gt_log_log("sstatus: %s\n",
-             cairo_status_to_string(cairo_surface_status(surf)));
   num_pages++;
   gt_log_log("finished, should be %lu pages\n", num_pages);
   cairo_destroy(cr);
