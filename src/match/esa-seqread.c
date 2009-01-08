@@ -307,14 +307,6 @@ const Alphabet *alphabetSequentialsuffixarrayreader(
   return ssar->suffixarray->alpha;
 }
 
-unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar)
-{
-  gt_assert(ssar->suffixarray != NULL);
-  gt_assert(ssar->suffixarray->encseq != NULL);
-  return getencseqnumofdbsequences(ssar->suffixarray->encseq);
-}
-
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)
 {

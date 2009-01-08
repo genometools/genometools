@@ -109,9 +109,6 @@ Readmode readmodeSequentialsuffixarrayreader(
 const Alphabet *alphabetSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar);
-
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 
