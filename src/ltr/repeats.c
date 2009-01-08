@@ -65,17 +65,16 @@ int simpleexactselfmatchstore (
 {
   Seqpos tmp,
          totallength;
-  const Encodedsequence *encseq =
-          encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
-  unsigned long numofdbsequences =
-       numofdbsequencesSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
+  const Encodedsequence *encseq;
+  unsigned long numofdbsequences;
   unsigned long contignumber = 0,
                 seqnum1,
                 seqnum2;
   bool samecontig = false;
 
   gt_error_check(err);
-
+  encseq = encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
+  numofdbsequences = getencseqnumofdbsequences(encseq);
   if (pos1 > pos2)
   {
     tmp = pos1;

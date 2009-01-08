@@ -559,15 +559,15 @@ static int searchforTSDandorMotifoutside(
          rightlen;
   unsigned long contignumber = boundaries->contignumber;
   Seqpos offset;
-  unsigned long numofdbsequences
-                  = numofdbsequencesSequentialsuffixarrayreader(ssar);
-  Seqpos totallength =
-            getencseqtotallength(encseqSequentialsuffixarrayreader(ssar));
+  const Encodedsequence *encseq;
+  unsigned long numofdbsequences;
+  Seqpos totallength;
   SubRepeatInfo subrepeatinfo;
-  const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
   gt_error_check(err);
-
+  encseq = encseqSequentialsuffixarrayreader(ssar);
+  numofdbsequences = getencseqnumofdbsequences(encseq);
+  totallength = getencseqtotallength(encseq);
   if ( contignumber == 0)
   {
     offset = 0;
