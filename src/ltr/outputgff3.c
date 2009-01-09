@@ -22,37 +22,156 @@
 #include "ltr/ltrharvest-opt.h"
 #include "ltr/repeattypes.h"
 
+typedef struct
+{
+  unsigned long idcounterRepregion,
+                idcounterRetrotrans,
+                idcounterLTR,
+                idcounterTSD,
+                idcounterMotif;
+} LTRcounter;
+
+static void showboundaries(FILE *fp,
+                           const LTRharvestoptions *lo,
+                           const LTRboundaries *boundaries,
+                           unsigned long contignumber,
+                           Seqpos offset,
+                           LTRcounter *ltrc)
+{
+
+  /* repeat-region */
+  fprintf(fp, "seq%lu\tLTRharvest\trepeat_region\t" FormatSeqpos
+              "\t" FormatSeqpos "\t" ".\t?\t.\tID=RepeatReg%lu\n",
+      contignumber,
+      /* increase boundary position by one for output */
+      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1
+                  - boundaries->lenleftTSD),
+      PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1
+                  + boundaries->lenrightTSD),
+      ltrc->idcounterRepregion++ );
+
+  /* LTR retrotransposon */
+  fprintf(fp, "seq%lu\tLTRharvest\tLTR_retrotransposon\t"
+              FormatSeqpos "\t" FormatSeqpos "\t"
+              ".\t?\t.\tID=LTRret%lu;Parent=RepeatReg%lu\n",
+      contignumber,
+      /* increase boundary position by one for output */
+      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
+      PRINTSeqposcast(boundaries->rightLTR_3 -offset  + 1),
+      ltrc->idcounterRetrotrans++,
+      ltrc->idcounterRepregion-1 );
+
+  /* LTRs */
+  fprintf(fp, "seq%lu\tLTRharvest\tlong_terminal_repeat\t"
+              FormatSeqpos "\t" FormatSeqpos "\t"
+              ".\t?\t.\tID=LTR%lu;Parent=LTRret%lu\n",
+      contignumber,
+      /* increase boundary position by one for output */
+      PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
+      PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
+      ltrc->idcounterLTR++,
+      ltrc->idcounterRetrotrans-1 );
+  fprintf(fp, "seq%lu\tLTRharvest\tlong_terminal_repeat\t"
+              FormatSeqpos "\t" FormatSeqpos "\t"
+              ".\t?\t.\tID=LTR%lu;Parent=LTRret%lu\n",
+      contignumber,
+      /* increase boundary position by one for output */
+      PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
+      PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
+      ltrc->idcounterLTR++,
+      ltrc->idcounterRetrotrans-1 );
+
+  if (lo->minlengthTSD > 1U)
+  {
+    /* TSDs */
+    fprintf(fp, "seq%lu\tLTRharvest\ttarget_site_duplication\t"
+                FormatSeqpos "\t" FormatSeqpos "\t"
+                ".\t?\t.\tID=TSD%lu;Parent=RepeatReg%lu\n",
+        contignumber,
+        /* increase boundary position by one for output */
+        PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1
+                  - boundaries->lenleftTSD),
+        PRINTSeqposcast(boundaries->leftLTR_5 -offset),
+        ltrc->idcounterTSD++,
+        ltrc->idcounterRepregion-1 );
+
+    fprintf(fp, "seq%lu\tLTRharvest\ttarget_site_duplication\t"
+                FormatSeqpos "\t" FormatSeqpos "\t"
+                ".\t?\t.\tID=TSD%lu;Parent=RepeatReg%lu\n",
+        contignumber,
+        /* increase boundary position by one for output */
+        PRINTSeqposcast(boundaries->rightLTR_3 -offset + 2),
+        PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1
+                  + boundaries->lenrightTSD),
+        ltrc->idcounterTSD++,
+        ltrc->idcounterRepregion-1 );
+  }
+
+  if (lo->motif.allowedmismatches < 4U)
+  {
+    fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
+                FormatSeqpos "\t" FormatSeqpos "\t"
+                ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
+        contignumber,
+        /* increase boundary position by one for output */
+        PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
+        PRINTSeqposcast(boundaries->leftLTR_5 -offset + 2),
+        ltrc->idcounterMotif++,
+        ltrc->idcounterRepregion-1 );
+    fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
+		FormatSeqpos "\t" FormatSeqpos "\t"
+		".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
+	contignumber,
+	/* increase boundary position by one for output */
+	PRINTSeqposcast(boundaries->leftLTR_3 -offset),
+	PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
+	ltrc->idcounterMotif++,
+	ltrc->idcounterRepregion-1 );
+
+    fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
+		FormatSeqpos "\t" FormatSeqpos "\t"
+		".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
+	contignumber,
+	/* increase boundary position by one for output */
+	PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
+	PRINTSeqposcast(boundaries->rightLTR_5 -offset + 2),
+	ltrc->idcounterMotif++,
+	ltrc->idcounterRepregion-1 );
+    fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
+		FormatSeqpos "\t" FormatSeqpos "\t"
+		".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
+	contignumber,
+	/* increase boundary position by one for output */
+	PRINTSeqposcast(boundaries->rightLTR_3 -offset),
+	PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
+	ltrc->idcounterMotif++,
+	ltrc->idcounterRepregion-1 );
+  }
+}
+
 void printgff3format(const LTRharvestoptions *lo,
                      const Encodedsequence *encseq)
 {
   LTRboundaries *boundaries;
-  Seqpos contiglen,
-         offset;
-  unsigned long seqnum,
-                i,
-                contignumber,
-       idcounterRepregion = 0,
-       idcounterRetrotrans = 0,
-       idcounterLTR = 0,
-       idcounterTSD = 0,
-       idcounterMotif = 0;
-
-  unsigned long *descendtab = NULL,
-                desclen;
+  unsigned long seqnum, i, contignumber,
+                *descendtab = NULL,
+                desclen, numofdbsequences;
+  LTRcounter ltrc;
   const char *desptr = NULL;
-  const Seqpos *markpos = getencseqssptab(encseq);
-
-  unsigned long numofdbsequences;
-  Seqpos totallength;
   FILE *fp;
+  Seqinfo seqinfo;
 
   numofdbsequences = getencseqnumofdbsequences(encseq);
-  totallength = getencseqtotallength(encseq);
 
   fp = gt_fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
 
   /* for getting descriptions */
   descendtab = calcdescendpositions(encseq);
+
+  ltrc.idcounterRepregion = ltrc.idcounterRetrotrans 
+                          = ltrc.idcounterLTR
+                          = ltrc.idcounterTSD
+                          = ltrc.idcounterMotif = 0;
 
   if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
   {
@@ -65,32 +184,9 @@ void printgff3format(const LTRharvestoptions *lo,
     for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
     {
       /* contig is first sequence, and only one sequence in multiseq */
-      if ( seqnum == 0 && numofdbsequences == 1UL)
-      {
-        contiglen = totallength;
-      }
-      else
-      {
-        /* first sequence and more than one sequence in suffixarray */
-        if ( seqnum == 0)
-        {
-          contiglen = markpos[seqnum];
-        }
-        else
-        {
-          /* last sequence in suffixarray */
-          if (seqnum == numofdbsequences - 1)
-          {
-            contiglen = totallength - 1 - markpos[seqnum-1];
-          }
-          else
-          {
-            contiglen = markpos[seqnum] - markpos[seqnum-1] - 1;
-          }
-        }
-      }
+      getencseqSeqinfo(&seqinfo,encseq,seqnum);
       fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
-                  seqnum, PRINTSeqposcast(contiglen));
+                  seqnum, PRINTSeqposcast(seqinfo.seqlength));
       /* write description of sequence */
       fprintf(fp, "# ");
       desptr = retrievesequencedescription(&desclen,
@@ -109,123 +205,12 @@ void printgff3format(const LTRharvestoptions *lo,
         contignumber = boundaries->contignumber;
         if ( (!boundaries->skipped) && contignumber == seqnum)
         {
-          if ( contignumber == 0)
-          {
-            offset = 0;
-          }
-          else
-          {
-            offset = markpos[contignumber-1]+1;
-          }
-
-          /* repeat-region */
-          fprintf(fp, "seq%lu\tLTRharvest\trepeat_region\t" FormatSeqpos
-                      "\t" FormatSeqpos "\t" ".\t?\t.\tID=RepeatReg%lu\n",
-              contignumber,
-              /* increase boundary position by one for output */
-              PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1
-                          - boundaries->lenleftTSD),
-              PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1
-                          + boundaries->lenrightTSD),
-              idcounterRepregion++ );
-
-          /* LTR retrotransposon */
-          fprintf(fp, "seq%lu\tLTRharvest\tLTR_retrotransposon\t"
-                      FormatSeqpos "\t" FormatSeqpos "\t"
-                      ".\t?\t.\tID=LTRret%lu;Parent=RepeatReg%lu\n",
-              contignumber,
-              /* increase boundary position by one for output */
-              PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
-              PRINTSeqposcast(boundaries->rightLTR_3 -offset  + 1),
-              idcounterRetrotrans++,
-              idcounterRepregion-1 );
-
-          /* LTRs */
-          fprintf(fp, "seq%lu\tLTRharvest\tlong_terminal_repeat\t"
-                      FormatSeqpos "\t" FormatSeqpos "\t"
-                      ".\t?\t.\tID=LTR%lu;Parent=LTRret%lu\n",
-              contignumber,
-              /* increase boundary position by one for output */
-              PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
-              PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
-              idcounterLTR++,
-              idcounterRetrotrans-1 );
-          fprintf(fp, "seq%lu\tLTRharvest\tlong_terminal_repeat\t"
-                      FormatSeqpos "\t" FormatSeqpos "\t"
-                      ".\t?\t.\tID=LTR%lu;Parent=LTRret%lu\n",
-              contignumber,
-              /* increase boundary position by one for output */
-              PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
-              PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
-              idcounterLTR++,
-              idcounterRetrotrans-1 );
-
-          if (lo->minlengthTSD > 1U)
-          {
-            /* TSDs */
-            fprintf(fp, "seq%lu\tLTRharvest\ttarget_site_duplication\t"
-                        FormatSeqpos "\t" FormatSeqpos "\t"
-                        ".\t?\t.\tID=TSD%lu;Parent=RepeatReg%lu\n",
-                contignumber,
-                /* increase boundary position by one for output */
-                PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1
-                          - boundaries->lenleftTSD),
-                PRINTSeqposcast(boundaries->leftLTR_5 -offset),
-                idcounterTSD++,
-                idcounterRepregion-1 );
-
-            fprintf(fp, "seq%lu\tLTRharvest\ttarget_site_duplication\t"
-                        FormatSeqpos "\t" FormatSeqpos "\t"
-                        ".\t?\t.\tID=TSD%lu;Parent=RepeatReg%lu\n",
-                contignumber,
-                /* increase boundary position by one for output */
-                PRINTSeqposcast(boundaries->rightLTR_3 -offset + 2),
-                PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1
-                          + boundaries->lenrightTSD),
-                idcounterTSD++,
-                idcounterRepregion-1 );
-          }
-
-          if (lo->motif.allowedmismatches < 4U)
-          {
-            fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
-                        FormatSeqpos "\t" FormatSeqpos "\t"
-                        ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
-                contignumber,
-                /* increase boundary position by one for output */
-                PRINTSeqposcast(boundaries->leftLTR_5 -offset + 1),
-                PRINTSeqposcast(boundaries->leftLTR_5 -offset + 2),
-                idcounterMotif++,
-                idcounterRepregion-1 );
-            fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
-                        FormatSeqpos "\t" FormatSeqpos "\t"
-                        ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
-                contignumber,
-                /* increase boundary position by one for output */
-                PRINTSeqposcast(boundaries->leftLTR_3 -offset),
-                PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
-                idcounterMotif++,
-                idcounterRepregion-1 );
-
-            fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
-                        FormatSeqpos "\t" FormatSeqpos "\t"
-                        ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
-                contignumber,
-                /* increase boundary position by one for output */
-                PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
-                PRINTSeqposcast(boundaries->rightLTR_5 -offset + 2),
-                idcounterMotif++,
-                idcounterRepregion-1 );
-            fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
-                        FormatSeqpos "\t" FormatSeqpos "\t"
-                        ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
-                contignumber,
-                /* increase boundary position by one for output */
-                PRINTSeqposcast(boundaries->rightLTR_3 -offset),
-                PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
-                idcounterMotif++,
-                idcounterRepregion-1 );
-          }
+          showboundaries(fp,
+                         lo,
+                         boundaries,
+                         contignumber,
+                         seqinfo.seqstartpos,
+                         &ltrc);
         }
       }
     }

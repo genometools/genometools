@@ -2159,6 +2159,45 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   return numofrecords; /* failure */
 }
 
+static void getunitSeqinfo(Seqinfo *seqinfo,
+                           const Seqpos *unitseps,
+                           unsigned long numofunits,
+                           Seqpos totalwidth,
+                           unsigned long unitnum)
+{
+  if (unitnum == 0)
+  {
+    seqinfo->seqstartpos = 0;
+    if (numofunits == 1UL)
+    {
+      seqinfo->seqlength = totalwidth;
+    } else
+    {
+      seqinfo->seqlength = unitseps[0];
+    }
+  } else
+  {
+    seqinfo->seqstartpos = unitseps[unitnum-1] + 1;
+    if (unitnum == numofunits - 1)
+    {
+      seqinfo->seqlength = totalwidth - seqinfo->seqstartpos;
+    } else
+    {
+      seqinfo->seqlength = unitseps[unitnum] - seqinfo->seqstartpos;
+    }
+  }
+}
+
+void getencseqSeqinfo(Seqinfo *seqinfo,const Encodedsequence *encseq,
+                      unsigned long seqnum)
+{
+  getunitSeqinfo(seqinfo,
+                 encseq->ssptab,
+                 encseq->numofdbsequences,
+                 encseq->totallength,
+                 seqnum);
+}
+
 int checkmarkpos(const Encodedsequence *encseq,GtError *err)
 {
   bool haserr = false;

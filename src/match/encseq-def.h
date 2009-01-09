@@ -55,6 +55,12 @@ typedef struct
          rightpos;
 } Sequencerange;          /* \Typedef{Sequencerange} */
 
+typedef struct
+{
+  Seqpos seqstartpos,  /* the position of the first character in the encseq */
+         seqlength;    /* the length of the sequence */
+} Seqinfo;             /* \Typedef{Seqinfo} */
+
 #ifdef INLINEDENCSEQ
 
 typedef struct
@@ -296,5 +302,8 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
                                  GtError *err);
 
 const Seqpos *getencseqssptab(const Encodedsequence *encseq);
+
+void getencseqSeqinfo(Seqinfo *seqinfo,const Encodedsequence *encseq,
+                      unsigned long seqnum);
 
 #endif
