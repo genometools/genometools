@@ -119,33 +119,33 @@ static void showboundaries(FILE *fp,
         ltrc->idcounterMotif++,
         ltrc->idcounterRepregion-1 );
     fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
-		FormatSeqpos "\t" FormatSeqpos "\t"
-		".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
-	contignumber,
-	/* increase boundary position by one for output */
-	PRINTSeqposcast(boundaries->leftLTR_3 -offset),
-	PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
-	ltrc->idcounterMotif++,
-	ltrc->idcounterRepregion-1 );
+                FormatSeqpos "\t" FormatSeqpos "\t"
+                ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
+        contignumber,
+        /* increase boundary position by one for output */
+        PRINTSeqposcast(boundaries->leftLTR_3 -offset),
+        PRINTSeqposcast(boundaries->leftLTR_3 -offset + 1),
+        ltrc->idcounterMotif++,
+        ltrc->idcounterRepregion-1 );
 
     fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
-		FormatSeqpos "\t" FormatSeqpos "\t"
-		".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
-	contignumber,
-	/* increase boundary position by one for output */
-	PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
-	PRINTSeqposcast(boundaries->rightLTR_5 -offset + 2),
-	ltrc->idcounterMotif++,
-	ltrc->idcounterRepregion-1 );
+                FormatSeqpos "\t" FormatSeqpos "\t"
+                ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
+        contignumber,
+        /* increase boundary position by one for output */
+        PRINTSeqposcast(boundaries->rightLTR_5 -offset + 1),
+        PRINTSeqposcast(boundaries->rightLTR_5 -offset + 2),
+        ltrc->idcounterMotif++,
+        ltrc->idcounterRepregion-1 );
     fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
-		FormatSeqpos "\t" FormatSeqpos "\t"
-		".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
-	contignumber,
-	/* increase boundary position by one for output */
-	PRINTSeqposcast(boundaries->rightLTR_3 -offset),
-	PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
-	ltrc->idcounterMotif++,
-	ltrc->idcounterRepregion-1 );
+                FormatSeqpos "\t" FormatSeqpos "\t"
+                ".\t?\t.\tID=Motif%lu;Parent=RepeatReg%lu\n",
+        contignumber,
+        /* increase boundary position by one for output */
+        PRINTSeqposcast(boundaries->rightLTR_3 -offset),
+        PRINTSeqposcast(boundaries->rightLTR_3 -offset + 1),
+        ltrc->idcounterMotif++,
+        ltrc->idcounterRepregion-1 );
   }
 }
 
@@ -168,7 +168,7 @@ void printgff3format(const LTRharvestoptions *lo,
   /* for getting descriptions */
   descendtab = calcdescendpositions(encseq);
 
-  ltrc.idcounterRepregion = ltrc.idcounterRetrotrans 
+  ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
                           = ltrc.idcounterLTR
                           = ltrc.idcounterTSD
                           = ltrc.idcounterMotif = 0;
