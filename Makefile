@@ -678,7 +678,7 @@ SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
 spgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
-                     ${wildcard ${CURDIR}/src/libgtltr/*.c}\
+                     ${wildcard ${CURDIR}/src/ltr/*.c}\
                                 ${SKTOOLS}}}}\
      obj/redblack.splint
 

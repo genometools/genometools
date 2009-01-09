@@ -18,7 +18,7 @@
 #ifndef OUTPUTGFF3_H
 #define OUTPUTGFF3_H
 
-void printgff3format(LTRharvestoptions*, Sequentialsuffixarrayreader*,
-                     const Seqpos *markpos);
+void printgff3format(const LTRharvestoptions *lo,
+                     const Encodedsequence *encseq);
 
 #endif

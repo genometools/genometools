@@ -17,13 +17,13 @@
 
 #include "core/fa.h"
 #include "core/str.h"
-#include "match/esa-seqread.h"
 #include "match/echoseq.h"
+#include "match/encseq-def.h"
 #include "ltr/ltrharvest-opt.h"
 #include "ltr/repeattypes.h"
 
-void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
-                     const Seqpos *markpos)
+void printgff3format(const LTRharvestoptions *lo,
+                     const Encodedsequence *encseq)
 {
   LTRboundaries *boundaries;
   Seqpos contiglen,
@@ -40,13 +40,12 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
   unsigned long *descendtab = NULL,
                 desclen;
   const char *desptr = NULL;
+  const Seqpos *markpos = getencseqssptab(encseq);
 
   unsigned long numofdbsequences;
-  const Encodedsequence *encseq;
   Seqpos totallength;
   FILE *fp;
 
-  encseq = encseqSequentialsuffixarrayreader(ssar);
   numofdbsequences = getencseqnumofdbsequences(encseq);
   totallength = getencseqtotallength(encseq);
 
