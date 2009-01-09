@@ -191,7 +191,6 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
-  unsigned long *descendtab = NULL;
   int had_err;
 
   formatout = gt_fa_xfopen(innerregion
@@ -210,12 +209,11 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.showseqnum = showseqnum;
   fastaoutinfo.formatout = formatout;
   fastaoutinfo.markpos = lo->markpos;
-
-  descendtab = calcdescendpositions(fastaoutinfo.encseq);
+  fastaoutinfo.descendtab = calcdescendpositions(fastaoutinfo.encseq);
   had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
                                        showpredictionfastasequence, err);
 
-  gt_free(descendtab);
+  gt_free(fastaoutinfo.descendtab);
   gt_fa_xfclose(formatout);
 
   return 0;
