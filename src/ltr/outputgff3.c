@@ -152,33 +152,28 @@ static void showboundaries(FILE *fp,
 void printgff3format(const LTRharvestoptions *lo,
                      const Encodedsequence *encseq)
 {
-  LTRboundaries *boundaries;
-  unsigned long seqnum, i, contignumber,
-                *descendtab = NULL,
-                desclen, numofdbsequences;
-  LTRcounter ltrc;
-  const char *desptr = NULL;
-  FILE *fp;
-  Seqinfo seqinfo;
-
-  numofdbsequences = getencseqnumofdbsequences(encseq);
-
-  fp = gt_fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
-
-  /* for getting descriptions */
-  descendtab = calcdescendpositions(encseq);
-
-  ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
-                          = ltrc.idcounterLTR
-                          = ltrc.idcounterTSD
-                          = ltrc.idcounterMotif = 0;
-
-  if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
+  if (lo->arrayLTRboundaries.nextfreeLTRboundaries > 0)
   {
-    /* no LTR-pairs predicted */
-  }
-  else
-  {
+    LTRboundaries *boundaries;
+    unsigned long seqnum, i, contignumber,
+                  *descendtab = NULL,
+                  desclen, numofdbsequences;
+    LTRcounter ltrc;
+    const char *desptr = NULL;
+    FILE *fp;
+    Seqinfo seqinfo;
+  
+    numofdbsequences = getencseqnumofdbsequences(encseq);
+    /* for getting descriptions */
+    descendtab = calcdescendpositions(encseq);
+  
+    ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
+                            = ltrc.idcounterLTR
+                            = ltrc.idcounterTSD
+                            = ltrc.idcounterMotif = 0;
+
+    fp = gt_fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
+
     fprintf(fp, "##gff-version 3\n");
     /* print output sorted by contignumber */
     for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
@@ -214,7 +209,7 @@ void printgff3format(const LTRharvestoptions *lo,
         }
       }
     }
+    gt_free(descendtab);
+    gt_fa_xfclose(fp);
   }
-  gt_free(descendtab);
-  gt_fa_xfclose(fp);
 }
