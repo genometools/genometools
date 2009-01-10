@@ -58,6 +58,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                          FILE *fpout,
                          unsigned long seqnum,
                          const char *desc,
+                         unsigned long desclength,
                          const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
@@ -73,7 +74,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
     fprintf(fpout,">");
   } else
   {
-    fprintf(fpout,">%s",desc);
+    fprintf(fpout,">%*.*s",(int) desclength,(int) desclength,desc);
   }
 
   fprintf(info->formatout," (dbseq-nr");
@@ -108,9 +109,8 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                                        GT_UNUSED GtStr *str_indexfilename,
                                        GtError *err)
 {
-  unsigned long i, desclen;
+  unsigned long desclen;
   const char *desptr;
-  char *destab_seqnum;
   unsigned long seqnum =
                   getrecordnumSeqpos(info->markpos, info->numofdbsequences,
                                      info->totallength, startpos, err);
@@ -121,19 +121,13 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                                        info->descendtab,
                                        seqnum);
 
-  ALLOCASSIGNSPACE(destab_seqnum, NULL, char, desclen);
-  for (i=0; i < desclen; i++)
-  {
-    destab_seqnum[i] = desptr[i];
-  }
-
   myencseq2symbolstring(info, info->formatout,
-                      seqnum, destab_seqnum,
-                      info->alpha, info->encseq,
-                      Forwardmode, startpos,
-                      len,
-                      60UL);
-  FREESPACE(destab_seqnum);
+                        seqnum, desptr,
+                        desclen,
+                        info->alpha, info->encseq,
+                        Forwardmode, startpos,
+                        len,
+                        60UL);
   return 0;
 }
 
