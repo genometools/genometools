@@ -50,7 +50,7 @@
         {\
           unsigned int nextfree,\
                        nextread;\
-          TYPE bufferedfilespace[FILEBUFFERSIZE];\
+          TYPE *bufferedfilespace;\
           FILE *fp;\
         } TYPE ## Bufferedfile
 
@@ -60,14 +60,10 @@ DECLAREBufferedfiletype(Uchar);
 
 DECLAREBufferedfiletype(Largelcpvalue);
 
-/*
-  XXX eliminate gt_error_set in read function.
-*/
-
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
                                                   TYPE ## Bufferedfile *buf,\
-                                                  GtError *err)\
+                                                  GT_UNUSED GtError *err)\
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
@@ -77,8 +73,8 @@ DECLAREBufferedfiletype(Largelcpvalue);
                                                  buf->fp);\
             if (ferror(buf->fp))\
             {\
-              gt_error_set(err,"error when trying to read next %s",#TYPE);\
-              return -2;\
+              fprintf(stderr,"error when trying to read next %s",#TYPE);\
+              exit(EXIT_FAILURE);\
             }\
             buf->nextread = 0;\
             if (buf->nextfree == 0)\

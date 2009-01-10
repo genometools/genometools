@@ -37,15 +37,18 @@
 
 #define DBFILEKEY "dbfile="
 
-#define INITBufferedfile(INDEXNAME,STREAM,SUFFIX)\
+#define INITBufferedfile(INDEXNAME,STREAM,TYPE,SUFFIX)\
         (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",err);\
         if ((STREAM)->fp == NULL)\
         {\
           haserr = true;\
+          (STREAM)->bufferedfilespace = NULL;\
         } else\
         {\
           (STREAM)->nextread = 0;\
           (STREAM)->nextfree = 0;\
+          ALLOCASSIGNSPACE((STREAM)->bufferedfilespace,NULL,TYPE,\
+                           FILEBUFFERSIZE);\
         }
 
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
@@ -244,6 +247,10 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->suftabstream.fp = NULL;
   suffixarray->llvtabstream.fp = NULL;
   suffixarray->lcptabstream.fp = NULL;
+  suffixarray->suftabstream.bufferedfilespace = NULL;
+  suffixarray->lcptabstream.bufferedfilespace = NULL;
+  suffixarray->llvtabstream.bufferedfilespace = NULL;
+  suffixarray->bwttabstream.bufferedfilespace = NULL;
   suffixarray->bcktab = NULL;
 }
 
@@ -304,12 +311,16 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttab = NULL;
   gt_fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
+  FREESPACE(suffixarray->suftabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
+  FREESPACE(suffixarray->lcptabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->llvtabstream.fp);
   suffixarray->llvtabstream.fp = NULL;
+  FREESPACE(suffixarray->llvtabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
+  FREESPACE(suffixarray->bwttabstream.bufferedfilespace);
   if (suffixarray->alpha != NULL)
   {
     freeAlphabet(&suffixarray->alpha);
@@ -376,7 +387,8 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->suftabstream,SUFTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->suftabstream,Seqpos,
+                       SUFTABSUFFIX);
     }
     if (!haserr && !suffixarray->longest.defined)
     {
@@ -399,7 +411,7 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->lcptabstream,Uchar,LCPTABSUFFIX);
       if (!haserr &&
           fseek(suffixarray->lcptabstream.fp,(long) sizeof (Uchar),SEEK_SET))
       {
@@ -429,7 +441,7 @@ static int inputsuffixarray(bool map,
         }
       } else
       {
-        INITBufferedfile(indexname,&suffixarray->llvtabstream,
+        INITBufferedfile(indexname,&suffixarray->llvtabstream,Largelcpvalue,
                          LARGELCPTABSUFFIX);
       }
     }
@@ -449,7 +461,7 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->bwttabstream,BWTTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->bwttabstream,Uchar,BWTTABSUFFIX);
     }
   }
   if (!haserr && (demand & SARR_BCKTAB))
@@ -503,6 +515,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    GtError *err)
 {
   gt_error_check(err);
+  /* printf("sizeof(Suffixarray)=%lu\n",sizeof(Suffixarray)); */
   return inputsuffixarray(true,
                           suffixarray,
                           totallength,
