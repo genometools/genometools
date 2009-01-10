@@ -180,8 +180,7 @@ static BitOffset
 appendCallBackOutput(struct appendState *state,
                      const struct blockCompositionSeq *seqIdx,
                      bitInsertFunc biFunc, Seqpos start, Seqpos len,
-                     unsigned callBackDataOffsetBits, void *cbState,
-                     GtError *err);
+                     unsigned callBackDataOffsetBits, void *cbState);
 
 typedef Seqpos partialSymSum;
 
@@ -285,12 +284,12 @@ writeOutputBuffer(struct blockCompositionSeq *newSeqIdx,
                   struct appendState *aState, bitInsertFunc biFunc,
                   Seqpos lastUpdatePos, size_t bucketLen,
                   unsigned callBackDataOffsetBits, void *cbState,
-                  const partialSymSum *buckLast, GtError *err)
+                  const partialSymSum *buckLast)
 {
   if (biFunc)
     if (appendCallBackOutput(aState, newSeqIdx, biFunc,
                              lastUpdatePos, bucketLen,
-                             callBackDataOffsetBits, cbState, err)
+                             callBackDataOffsetBits, cbState)
         == (BitOffset)-1)
     {
       perror("error condition while writing block-compressed"
@@ -552,7 +551,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
           {
             size_t readResult;
             /* 3. for each chunk: */
-            readResult = SDRRead(BWTGenerator, block, blockSize, err);
+            readResult = SDRRead(BWTGenerator, block, blockSize);
             if (readResult != blockSize)
             {
               hadGtError = 1;
@@ -572,7 +571,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
               Seqpos pos = blockNum * blockSize;
               if (writeOutputBuffer(newSeqIdx, &aState, biFunc, lastUpdatePos,
                                     bucketLen, callBackDataOffsetBits, cbState,
-                                    buckLast, err) < 0)
+                                    buckLast) < 0)
               {
                 hadGtError = 1;
                 break;
@@ -589,7 +588,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
             if (symbolsLeft)
             {
               size_t readResult;
-              readResult = SDRRead(BWTGenerator, block, symbolsLeft, err);
+              readResult = SDRRead(BWTGenerator, block, symbolsLeft);
               if (readResult < symbolsLeft)
               {
                 hadGtError = 1;
@@ -615,7 +614,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const GtStr *projectName,
               if (writeOutputBuffer(newSeqIdx, &aState, biFunc, lastUpdatePos,
                                     totalLen - lastUpdatePos,
                                     callBackDataOffsetBits, cbState,
-                                    buckLast, err) < 0)
+                                    buckLast) < 0)
               {
                 hadGtError = 1;
                 break;
@@ -1787,8 +1786,7 @@ static BitOffset
 appendCallBackOutput(struct appendState *state,
                      const struct blockCompositionSeq *seqIdx,
                      bitInsertFunc biFunc, Seqpos start, Seqpos len,
-                     unsigned callBackDataOffsetBits, void *cbState,
-                     GtError *err)
+                     unsigned callBackDataOffsetBits, void *cbState)
 {
   BitOffset bitsWritten;
   gt_assert(state);
@@ -1801,8 +1799,7 @@ appendCallBackOutput(struct appendState *state,
   }
   bitsWritten = biFunc(state->compCache, state->cwMemOldBits
                        + cwPreCWExtBits(seqIdx),
-                       state->permCache, state->varMemPos, start, len, cbState,
-                       err);
+                       state->permCache, state->varMemPos, start, len, cbState);
   if (bitsWritten == (BitOffset)-1)
     return bitsWritten;
   state->cwMemPos = cwPreCWExtBits(seqIdx) + state->cwMemOldBits

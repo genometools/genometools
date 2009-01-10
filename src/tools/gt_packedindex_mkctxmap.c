@@ -112,7 +112,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
         BWTSeqContextRetriever *bwtSeqCR;
         BWTSeqContextRetrieverFactory *bwtSeqCRF
           = newBWTSeqContextRetrieverFactory(len, params.mapIntervalLog2);
-        if (BWTSCRFReadAdvance(bwtSeqCRF, len, readSfxIdx, err)
+        if (BWTSCRFReadAdvance(bwtSeqCRF, len, readSfxIdx)
             != len)
         {
           gt_error_set(err, "Creation of context map unsuccessful: %s",

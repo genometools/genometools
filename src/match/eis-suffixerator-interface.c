@@ -149,7 +149,7 @@ deleteSfxInterfaceBase(SASeqSrc *baseClass)
 static size_t
 SfxIGenerate(void *iface, void *backlogState,
              move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
-             size_t len, SeqDataTranslator xltor, GtError *err);
+             size_t len, SeqDataTranslator xltor);
 
 extern sfxInterface *
 newSfxInterface(Readmode readmode,
@@ -359,7 +359,7 @@ SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 static size_t
 SfxIGenerate(void *iface, void *backlogState,
              move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
-             size_t len, SeqDataTranslator xltor, GT_UNUSED GtError *err)
+             size_t len, SeqDataTranslator xltor)
 {
   sfxInterface *sfxi = iface;
   size_t elemsLeft = len;

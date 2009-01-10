@@ -334,25 +334,14 @@ int sufbwt2fmindex(Fmindex *fmindex,
         if (storeindexpos)
         {
           retval = readnextSeqposfromstream(&tmpsuftabvalue,
-                                            &suffixarray.suftabstream,
-                                            err);
-          if (retval < 0)
-          {
-            haserr = true;
-            break;
-          }
+                                            &suffixarray.suftabstream);
           if (retval == 0)
           {
             break;
           }
           suftabvalue = (Seqpos) tmpsuftabvalue;
         }
-        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream,err);
-        if (retval < 0)
-        {
-          haserr = true;
-          break;
-        }
+        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream);
         if (retval == 0)
         {
           break;

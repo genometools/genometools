@@ -53,8 +53,8 @@
  */
 typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    BitString varDest, BitOffset varOffset,
-                                   Seqpos start, Seqpos len, void *cbState,
-                                   GtError *err);
+                                   Seqpos start, Seqpos len,
+                                   void *cbState);
 
 /**
  * Callback to insert one header field. The data written can later be

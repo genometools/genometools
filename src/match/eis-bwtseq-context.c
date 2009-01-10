@@ -135,14 +135,14 @@ addMapVal(BWTSeqContextRetrieverFactory *factory,
  */
 extern Seqpos
 BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory, Seqpos chunkSize,
-                   SeqDataReader readSfxIdx, GtError *err)
+                   SeqDataReader readSfxIdx)
 {
   Seqpos buf[BLOCK_IO_SIZE], sfxIdxLeft = chunkSize;
   gt_assert(factory);
   while (sfxIdxLeft)
   {
     Seqpos len = MIN(BLOCK_IO_SIZE, sfxIdxLeft);
-    if (SDRRead(readSfxIdx, buf, len, err)
+    if (SDRRead(readSfxIdx, buf, len)
         != len)
     {
       fputs("error: short read when building context retriever!\n", stderr);

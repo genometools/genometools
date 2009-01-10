@@ -148,12 +148,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     {
       break;
     }
-    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,err);
-    if (retval < 0)
-    {
-      haserr = true;
-      break;
-    }
+    retval = nextSequentialsuftabvalue(&previoussuffix,ssar);
     if (retval == 0)
     {
       haserr = true;
@@ -291,16 +286,10 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
 #ifdef INLINEDSequentialsuffixarrayreader
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
 #else
-    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,err);
-    if (retval < 0)
+    retval = nextSequentialsuftabvalue(&previoussuffix,ssar);
+    if (retval == 0)
     {
       haserr = true;
-    } else
-    {
-      if (retval == 0)
-      {
-        haserr = true;
-      }
     }
 #endif
     if (!haserr)

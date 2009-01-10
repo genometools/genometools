@@ -87,8 +87,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
                            GtError *err);
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
-                              Sequentialsuffixarrayreader *ssar,
-                              GtError *err);
+                              Sequentialsuffixarrayreader *ssar);
 
 #endif
 

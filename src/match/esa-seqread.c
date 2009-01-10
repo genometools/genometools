@@ -222,12 +222,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
     } else
     {
       retval = readnextUcharfromstream(&tmpsmalllcpvalue,
-                                       &ssar->suffixarray->lcptabstream,
-                                       err);
-      if (retval < 0)
-      {
-        return -1;
-      }
+                                       &ssar->suffixarray->lcptabstream);
       if (retval == 0)
       {
         return 0;
@@ -246,12 +241,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
       {
         retval = readnextLargelcpvaluefromstream(
                                           &tmpexception,
-                                          &ssar->suffixarray->llvtabstream,
-                                          err);
-        if (retval < 0)
-        {
-          return -1;
-        }
+                                          &ssar->suffixarray->llvtabstream);
         if (retval == 0)
         {
           gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -269,14 +259,12 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
 }
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
-                              Sequentialsuffixarrayreader *ssar,
-                              GtError *err)
+                              Sequentialsuffixarrayreader *ssar)
 {
   if (ssar->seqactype == SEQ_scan)
   {
     return readnextSeqposfromstream(currentsuffix,
-                                    &ssar->suffixarray->suftabstream,
-                                    err);
+                                    &ssar->suffixarray->suftabstream);
   }
   if (ssar->seqactype == SEQ_mappedboth)
   {

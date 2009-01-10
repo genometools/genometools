@@ -26,8 +26,6 @@
 #include "encseq-def.h"
 #include "bcktab.h"
 
-/* use dynamic allocation for buffers */
-
 #define FILEBUFFERSIZE 4096
 
 #define SARR_ESQTAB 1U
@@ -62,8 +60,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
-                                                  TYPE ## Bufferedfile *buf,\
-                                                  GT_UNUSED GtError *err)\
+                                                  TYPE ## Bufferedfile *buf)\
         {\
           if (buf->nextread >= buf->nextfree)\
           {\

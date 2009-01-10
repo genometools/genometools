@@ -99,12 +99,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   for (idx=0; idx<numofindexes; idx++)
   {
     retval = readnextSeqposfromstream(&suftabvalue,
-                                      &suffixarraytable[idx].suftabstream,
-                                      err);
-    if (retval < 0)
-    {
-      return -1;
-    }
+                                      &suffixarraytable[idx].suftabstream);
     if (retval == 0)
     {
       gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -173,7 +168,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
     {
       retval = readnextUcharfromstream(&tmpsmalllcpvalue,
                                        &emmesa->suffixarraytable[tmpidx].
-                                                lcptabstream,err);
+                                                lcptabstream);
       if (retval < 0)
       {
         return -1;
@@ -188,8 +183,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
       {
         retval = readnextLargelcpvaluefromstream(
                                &tmpexception,
-                               &emmesa->suffixarraytable[tmpidx].llvtabstream,
-                               err);
+                               &emmesa->suffixarraytable[tmpidx].llvtabstream);
         if (retval < 0)
         {
           return -3;
@@ -212,12 +206,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
       tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,err);
       retval = readnextSeqposfromstream(&tmpsuftabvalue,
                                         &emmesa->suffixarraytable[tmpidx].
-                                        suftabstream,
-                                        err);
-      if (retval < 0)
-      {
-        return -5;
-      }
+                                        suftabstream);
       if (retval == 0)
       {
         gt_error_set(err,"file %s: line %d: unexpected end of file when "

@@ -63,7 +63,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
                          Seqpos requestStart, size_t requestLen);
 
 static size_t
-seqReaderSetRead(void *state, void *dest, size_t len, GtError *err);
+seqReaderSetRead(void *state, void *dest, size_t len);
 
 extern int
 initSeqReaderSet(SeqReaderSet *readerSet, int initialSuperSet,
@@ -162,7 +162,7 @@ seqReaderSetRegisterAutoConsumer(SeqReaderSet *readerSet, int tag,
 }
 
 static size_t
-seqReaderSetRead(void *src, void *dest, size_t len, GtError *err)
+seqReaderSetRead(void *src, void *dest, size_t len)
 {
   struct seqReaderState *state = src;
   struct seqReaderSet *readerSet;
@@ -180,7 +180,7 @@ seqReaderSetRead(void *src, void *dest, size_t len, GtError *err)
       size_t elemsGenerated =
         readerSet->generator(readerSet->generatorState, readerSet,
                              seqReaderSetMove2Backlog, dest, pos, elemsLeft,
-                             state->xltor, err);
+                             state->xltor);
       seqReaderSetSetConsumerNextPos(state, pos += elemsGenerated);
       elemsLeft -= elemsGenerated;
       break;
