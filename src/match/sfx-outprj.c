@@ -31,12 +31,13 @@
 #include "spacedef.h"
 #include "esa-fileend.h"
 #include "readmode-def.h"
+#include "encseq-def.h"
 #include "stamp.h"
 #include "opensfxfile.h"
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s=" FormatSeqpos "\n",#VAL,\
-                PRINTSeqposcast(specialcharinfo->VAL))
+                PRINTSeqposcast(getencseq##VAL(encseq)))
 
 static void showprjinfo(FILE *outprj,
                         const GtStrArray *filenametab,
@@ -44,7 +45,7 @@ static void showprjinfo(FILE *outprj,
                         const Filelengthvalues *filelengthtab,
                         Seqpos totallength,
                         unsigned long numofsequences,
-                        const Specialcharinfo *specialcharinfo,
+                        const Encodedsequence *encseq,
                         unsigned int prefixlength,
                         GT_UNUSED const Definedunsignedint *maxdepth,
                         Seqpos numoflargelcpvalues,
@@ -99,7 +100,7 @@ int outprjfile(const GtStr *indexname,
                const Filelengthvalues *filelengthtab,
                Seqpos totallength,
                unsigned long numofsequences,
-               const Specialcharinfo *specialcharinfo,
+               const Encodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
                Seqpos numoflargelcpvalues,
@@ -124,7 +125,7 @@ int outprjfile(const GtStr *indexname,
                 filelengthtab,
                 totallength,
                 numofsequences,
-                specialcharinfo,
+                encseq,
                 prefixlength,
                 maxdepth,
                 numoflargelcpvalues,

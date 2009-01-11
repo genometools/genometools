@@ -437,8 +437,6 @@ int callenumquerymatches(const GtStr *indexname,
 }
 
 static int constructsarrandrunmmsearch(
-                 Seqpos specialcharacters,
-                 Seqpos realspecialranges,
                  const Encodedsequence *dbencseq,
                  Readmode readmode,
                  unsigned int numofchars,
@@ -459,9 +457,7 @@ static int constructsarrandrunmmsearch(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
-  sfi = newSfxiterator(specialcharacters,
-                       realspecialranges,
-                       dbencseq,
+  sfi = newSfxiterator(dbencseq,
                        readmode,
                        numofchars,
                        characters,
@@ -535,9 +531,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                    getmapsizeAlphabet(alpha),
                                    verboseinfo);
   numofchars = getnumofcharsAlphabet(alpha);
-  if (constructsarrandrunmmsearch(samplespecialcharinfo.specialcharacters,
-                                  samplespecialcharinfo.realspecialranges,
-                                  dbencseq,
+  if (constructsarrandrunmmsearch(dbencseq,
                                   Forwardmode,
                                   numofchars,
                                   getcharactersAlphabet(alpha),

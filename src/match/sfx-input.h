@@ -30,7 +30,6 @@ typedef struct
 {
   unsigned long numofsequences;
   Alphabet *alpha;
-  Specialcharinfo specialcharinfo;
   Filelengthvalues *filelengthtab;
   Encodedsequence *encseq;
   unsigned long *characterdistribution;

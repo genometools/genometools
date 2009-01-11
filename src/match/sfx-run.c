@@ -185,8 +185,6 @@ static int suftab2file(Outfileinfo *outfileinfo,
 
 static int suffixeratorwithoutput(
                  Outfileinfo *outfileinfo,
-                 Seqpos specialcharacters,
-                 Seqpos realspecialranges,
                  const Encodedsequence *encseq,
                  Readmode readmode,
                  unsigned int numofchars,
@@ -203,9 +201,7 @@ static int suffixeratorwithoutput(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
-  sfi = newSfxiterator(specialcharacters,
-                       realspecialranges,
-                       encseq,
+  sfi = newSfxiterator(encseq,
                        readmode,
                        numofchars,
                        characters,
@@ -268,17 +264,17 @@ static void showcharacterdistribution(
 }
 
 static void showsequencefeatures(Verboseinfo *verboseinfo,
-                                 const Specialcharinfo *specialcharinfo,
+                                 const Encodedsequence *encseq,
                                  const Alphabet *alpha,
                                  const unsigned long
                                    *characterdistribution)
 {
   showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
-              PRINTSeqposcast(specialcharinfo->specialcharacters));
+              PRINTSeqposcast(getencseqspecialcharacters(encseq)));
   showverbose(verboseinfo,"specialranges=" FormatSeqpos,
-              PRINTSeqposcast(specialcharinfo->specialranges));
+              PRINTSeqposcast(getencseqspecialranges(encseq)));
   showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
-              PRINTSeqposcast(specialcharinfo->realspecialranges));
+              PRINTSeqposcast(getencseqrealspecialranges(encseq)));
   if (characterdistribution != NULL)
   {
     showcharacterdistribution(alpha,characterdistribution,verboseinfo);
@@ -377,7 +373,6 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        so->numofparts,
                        sfxstrategy,
                        sfxseqinfo->encseq,
-                       &sfxseqinfo->specialcharinfo,
                        sfxseqinfo->numofsequences,
                        mtime,
                        getencseqtotallength(sfxseqinfo->encseq) + 1,
@@ -497,7 +492,7 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     showsequencefeatures(verboseinfo,
-                         &sfxseqinfo.specialcharinfo,
+                         sfxseqinfo.encseq,
                          sfxseqinfo.alpha,
                          sfxseqinfo.characterdistribution);
     if (sfxseqinfo.characterdistribution != NULL)
@@ -567,8 +562,6 @@ static int runsuffixerator(bool doesa,
       {
         if (suffixeratorwithoutput(
                            &outfileinfo,
-                           sfxseqinfo.specialcharinfo.specialcharacters,
-                           sfxseqinfo.specialcharinfo.realspecialranges,
                            sfxseqinfo.encseq,
                            so->readmode,
                            getnumofcharsAlphabet(sfxseqinfo.alpha),
@@ -622,7 +615,7 @@ static int runsuffixerator(bool doesa,
                    sfxseqinfo.filelengthtab,
                    totallength,
                    sfxseqinfo.numofsequences,
-                   &sfxseqinfo.specialcharinfo,
+                   sfxseqinfo.encseq,
                    prefixlength,
                    &sfxstrategy.maxdepth,
                    numoflargelcpvalues,

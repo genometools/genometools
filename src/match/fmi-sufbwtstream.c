@@ -224,18 +224,18 @@ int sufbwt2fmindex(Fmindex *fmindex,
     GtStr *indexname = gt_str_array_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
-                         &totallength,
-                         SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
-                         indexname,
-                         verboseinfo,
-                         err) != 0)
+                          &totallength,
+                          SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
+                          indexname,
+                          verboseinfo,
+                          err) != 0)
     {
       haserr = true;
     }
     if (!haserr)
     {
       mapsize = getmapsizeAlphabet(suffixarray.alpha);
-      specialcharinfo = suffixarray.specialcharinfo;
+      COPYSPECIALCHARINFO(specialcharinfo,suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo.specialcharacters;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {

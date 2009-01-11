@@ -204,7 +204,6 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                bool withdestab,
                                                bool withssptab,
                                                Seqpos totallength,
-                                               Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                GtError *err);
@@ -305,5 +304,27 @@ const Seqpos *getencseqssptab(const Encodedsequence *encseq);
 
 void getencseqSeqinfo(Seqinfo *seqinfo,const Encodedsequence *encseq,
                       unsigned long seqnum);
+
+Seqpos getencseqspecialcharacters(const Encodedsequence *encseq);
+
+Seqpos getencseqspecialranges(const Encodedsequence *encseq);
+
+Seqpos getencseqrealspecialranges(const Encodedsequence *encseq);
+
+Seqpos getencseqlengthofspecialprefix(const Encodedsequence *encseq);
+
+Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq);
+
+void setencseqspecialcharinfo(Encodedsequence *encseq,
+                              const Specialcharinfo *specialcharinfo);
+
+#define COPYSPECIALCHARINFO(DEST,ENCSEQSRC)\
+        (DEST).specialcharacters = getencseqspecialcharacters(ENCSEQSRC);\
+        (DEST).specialranges = getencseqspecialranges(ENCSEQSRC);\
+        (DEST).realspecialranges = getencseqrealspecialranges(ENCSEQSRC);\
+        (DEST).lengthofspecialprefix\
+          = getencseqlengthofspecialprefix(ENCSEQSRC);\
+        (DEST).lengthofspecialsuffix\
+          = getencseqlengthofspecialsuffix(ENCSEQSRC)
 
 #endif

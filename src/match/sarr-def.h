@@ -90,7 +90,6 @@ typedef struct
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   DefinedSeqpos longest;
-  Specialcharinfo specialcharinfo; /* XXX: move to encoded sequence */
   Alphabet *alpha;                 /* XXX: move to encoded sequence */
   Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */

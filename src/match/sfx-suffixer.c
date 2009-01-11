@@ -455,9 +455,7 @@ static void showleftborder(const Seqpos *leftborder,
 }
 #endif
 
-Sfxiterator *newSfxiterator(Seqpos specialcharacters,
-                            Seqpos realspecialranges,
-                            const Encodedsequence *encseq,
+Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             Readmode readmode,
                             unsigned int numofchars,
                             const Uchar *characters,
@@ -470,10 +468,12 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             GtError *err)
 {
   Sfxiterator *sfi = NULL;
-  Seqpos *optr;
+  Seqpos *optr, realspecialranges, specialcharacters;
   bool haserr = false;
 
   gt_error_check(err);
+  realspecialranges = getencseqrealspecialranges(encseq);
+  specialcharacters = getencseqspecialcharacters(encseq);
   gt_assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
       prefixlength > MAXPREFIXLENGTH)

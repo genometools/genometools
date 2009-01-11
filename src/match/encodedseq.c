@@ -149,6 +149,7 @@ typedef uint32_t Uint32;
   const char *delivercontainsspecialname;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long *characterdistribution;
+  Specialcharinfo specialcharinfo; /* information about specialcharacters */
 
   const char *destab;
   unsigned long destablength;
@@ -572,6 +573,11 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
   NEWMAPSPEC(encseq->satcharptr,Uchar,1UL);
   NEWMAPSPEC(encseq->numofdbsequencesptr,Unsignedlong,1UL);
+  NEWMAPSPEC(encseq->specialcharinfo.specialcharacters,Seqpos,1UL);
+  NEWMAPSPEC(encseq->specialcharinfo.specialranges,Seqpos,1UL);
+  NEWMAPSPEC(encseq->specialcharinfo.realspecialranges,Seqpos,1UL);
+  NEWMAPSPEC(encseq->specialcharinfo.lengthofspecialprefix,Seqpos,1UL);
+  NEWMAPSPEC(encseq->specialcharinfo.lengthofspecialsuffix,Seqpos,1UL);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) (encseq->mapsize-1));
   switch (encseq->sat)
@@ -2315,9 +2321,22 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
 
 typedef struct
 {
-  unsigned long numofdbsequences;
   Positionaccesstype sat;
+  unsigned long numofdbsequences;
+  Seqpos specialranges;
 } Firstencseqvalues;
+
+#define NEXTFREAD(VAL)\
+        if (!haserr)\
+        {\
+          (void) fread(&(VAL),sizeof (VAL), (size_t) 1, fp);\
+          if (ferror(fp))\
+          {\
+            gt_error_set(err,"error when trying to read numofdbsequences: %s",\
+                              strerror(errno));\
+            haserr = true;\
+          }\
+        }
 
 static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
                                    const GtStr *indexname,GtError *err)
@@ -2325,6 +2344,7 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
   FILE *fp;
   int cc = 0;
   bool haserr = false;
+  Seqpos tmpspecialcharacters;
 
   gt_error_check(err);
   fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",err);
@@ -2352,19 +2372,9 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
     }
   }
   firstencseqvalues->sat = (Positionaccesstype) cc;
-  if (!haserr)
-  {
-    (void) fread(&firstencseqvalues->numofdbsequences,
-                 sizeof (firstencseqvalues->numofdbsequences),
-                 (size_t) 1,
-                 fp);
-    if (ferror(fp))
-    {
-      gt_error_set(err,"error when trying to read numofdbsequences: %s",
-                        strerror(errno));
-      haserr = true;
-    }
-  }
+  NEXTFREAD(firstencseqvalues->numofdbsequences);
+  NEXTFREAD(tmpspecialcharacters);
+  NEXTFREAD(firstencseqvalues->specialranges);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
@@ -2578,7 +2588,6 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                bool withdestab,
                                                bool withssptab,
                                                Seqpos totallength,
-                                               Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                GtError *err)
@@ -2599,7 +2608,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     encseq = determineencseqkeyvalues(firstencseqvalues.sat,
                                       totallength,
                                       firstencseqvalues.numofdbsequences,
-                                      specialranges,
+                                      firstencseqvalues.specialranges,
                                       mapsize,
                                       verboseinfo);
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
@@ -2711,6 +2720,37 @@ void checkallsequencedescriptions(const Encodedsequence *encseq)
   }
   FREESPACE(copydestab);
   FREESPACE(descendtab);
+}
+
+Seqpos getencseqspecialcharacters(const Encodedsequence *encseq)
+{
+  return encseq->specialcharinfo.specialcharacters;
+}
+
+Seqpos getencseqspecialranges(const Encodedsequence *encseq)
+{
+  return encseq->specialcharinfo.specialranges;
+}
+
+Seqpos getencseqrealspecialranges(const Encodedsequence *encseq)
+{
+  return encseq->specialcharinfo.realspecialranges;
+}
+
+Seqpos getencseqlengthofspecialprefix(const Encodedsequence *encseq)
+{
+  return encseq->specialcharinfo.lengthofspecialprefix;
+}
+
+Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq)
+{
+  return encseq->specialcharinfo.lengthofspecialsuffix;
+}
+
+void setencseqspecialcharinfo(Encodedsequence *encseq,
+                              const Specialcharinfo *specialcharinfo)
+{
+  encseq->specialcharinfo = *specialcharinfo;
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,

@@ -64,6 +64,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                 numofdbsequences,
                 numofquerysequences,
                 numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
+  Specialcharinfo specialcharinfo;
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
@@ -74,15 +75,15 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   riktab = gt_array_new(sizeofReadintkeys());
   SETREADINTKEYS("totallength",totallength,NULL);
   SETREADINTKEYS("specialcharacters",
-                 &suffixarray->specialcharinfo.specialcharacters,NULL);
+                 &specialcharinfo.specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
-                 &suffixarray->specialcharinfo.specialranges,NULL);
+                 &specialcharinfo.specialranges,NULL);
   SETREADINTKEYS("realspecialranges",
-                 &suffixarray->specialcharinfo.realspecialranges,NULL);
+                 &specialcharinfo.realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
-                 &suffixarray->specialcharinfo.lengthofspecialprefix,NULL);
+                 &specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
-                 &suffixarray->specialcharinfo.lengthofspecialsuffix,NULL);
+                 &specialcharinfo.lengthofspecialsuffix,NULL);
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
   setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
@@ -361,8 +362,6 @@ static int inputsuffixarray(bool map,
                                              (demand & SARR_SSPTAB) ? true
                                                                     : false,
                                              *totallength,
-                                             suffixarray->specialcharinfo.
-                                                          specialranges,
                                              getmapsizeAlphabet(suffixarray->
                                                                 alpha),
                                              verboseinfo,
