@@ -44,6 +44,8 @@
 #include "annotationsketch/gt_sketch_page.h"
 #include "annotationsketch/layout.h"
 #include "annotationsketch/style.h"
+#include "annotationsketch/text_width_calculator.h"
+#include "annotationsketch/text_width_calculator_cairo.h"
 
 #define HEADER_TEXT_HEIGHT 20  /* pt */
 #define FOOTER_TEXT_HEIGHT 20  /* pt */
@@ -223,6 +225,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   gt_error_check(err);
   cairo_surface_t *surf = NULL;
   cairo_t *cr = NULL;
+  GtTextWidthCalculator *twc;
 
   features = gt_feature_index_memory_new();
 
@@ -315,6 +318,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     /* do it! */
     cr = cairo_create(surf);
     cairo_set_font_size(cr, 8);
+    twc = gt_text_width_calculator_cairo_new(cr);
     for (start = qry_range.start; start <= qry_range.end;
          start += arguments->width)
     {
@@ -332,7 +336,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
       d = gt_diagram_new(features, seqid, &single_range, sty, err);
       gt_error_check(err);
       /* gt_diagram_add_custom_track(d, ct); */
-      l = gt_layout_new(d, mm_to_pt(arguments->pwidth), sty, err);
+      l = gt_layout_new_with_twc(d, mm_to_pt(arguments->pwidth), sty, twc, err);
       gt_error_check(err);
       height = gt_layout_get_height(l);
       if (offsetpos + height > usable_height - 10 - 2*TEXT_SPACER
@@ -365,6 +369,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     cairo_show_page(cr);
     num_pages++;
     gt_log_log("finished, should be %lu pages\n", num_pages);
+    gt_text_width_calculator_delete(twc);
     cairo_destroy(cr);
     cairo_surface_flush(surf);
     cairo_surface_finish(surf);
