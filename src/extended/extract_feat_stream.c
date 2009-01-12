@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -71,14 +71,15 @@ const GtNodeStreamClass* gt_extract_feat_stream_class(void)
 }
 
 GtNodeStream* gt_extract_feat_stream_new(GtNodeStream *in_stream,
-                                      GtRegionMapping *rm, const char *type,
-                                      bool join, bool translate)
+                                         GtRegionMapping *rm, const char *type,
+                                         bool join, bool translate,
+                                         GtGenFile *outfp)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_extract_feat_stream_class(),
                                            true);
   GtExtractFeatStream *efs = gt_extract_feat_stream_cast(gs);
   efs->in_stream = gt_node_stream_ref(in_stream);
   efs->extract_feat_visitor = gt_extract_feat_visitor_new(rm, type, join,
-                                                             translate);
+                                                          translate, outfp);
   return gs;
 }
