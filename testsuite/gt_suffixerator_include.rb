@@ -136,6 +136,8 @@ allmultifiles.each do |filename|
              :retval => 1
     run_test "#{$bin}gt dev sfxmap -ssp localidx",
              :retval => 1
+    run_test "#{$bin}gt dev sfxmap -tis -bck localidx",
+             :retval => 1
   end
 end
 

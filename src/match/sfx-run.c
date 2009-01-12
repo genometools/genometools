@@ -37,6 +37,7 @@
 #include "sfx-input.h"
 #include "sfx-run.h"
 #include "opensfxfile.h"
+#include "stamp.h"
 
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"

@@ -517,13 +517,11 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             Verboseinfo *verboseinfo,
                             GtError *err)
 {
-  Specialcharinfo samplespecialcharinfo;
   unsigned int numofchars;
   bool haserr = false;
   Encodedsequence *dbencseq;
 
   dbencseq = plain2encodedsequence(true,
-                                   &samplespecialcharinfo,
                                    dbseq,
                                    dblen,
                                    NULL,

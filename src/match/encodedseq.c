@@ -127,7 +127,7 @@ typedef uint32_t Uint32;
  struct Encodedsequence
 {
   /* Common part */
-  Uchar *satcharptr; /* need for writing char */
+  unsigned long *satcharptr; /* need for writing char */
   Positionaccesstype sat;
   unsigned int mapsize;
   void *mappedptr; /* NULL or pointer to the mapped space block */
@@ -135,6 +135,7 @@ typedef uint32_t Uint32;
   Seqpos totallength;
   unsigned long numofdbsequences,
                 *numofdbsequencesptr; /* need for writing numofdbsequences */
+  Specialcharinfo *specialcharinfoptr; /* need for writing specialcharinfo */
   unsigned long sizeofrep;
   const char *name;
   Uchar(*deliverchar)(const Encodedsequence *,Seqpos);
@@ -566,18 +567,16 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
 
   if (writemode)
   {
-    ALLOCASSIGNSPACE(encseq->satcharptr,NULL,Uchar,1);
-    encseq->satcharptr[0] = (Uchar) encseq->sat;
+    ALLOCASSIGNSPACE(encseq->satcharptr,NULL,unsigned long,1);
+    encseq->satcharptr[0] = (unsigned long) encseq->sat;
     ALLOCASSIGNSPACE(encseq->numofdbsequencesptr,NULL,unsigned long,1);
     encseq->numofdbsequencesptr[0] = encseq->numofdbsequences;
+    ALLOCASSIGNSPACE(encseq->specialcharinfoptr,NULL,Specialcharinfo,1);
+    encseq->specialcharinfoptr[0] = encseq->specialcharinfo;
   }
-  NEWMAPSPEC(encseq->satcharptr,Uchar,1UL);
+  NEWMAPSPEC(encseq->satcharptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->numofdbsequencesptr,Unsignedlong,1UL);
-  NEWMAPSPEC(encseq->specialcharinfo.specialcharacters,Seqpos,1UL);
-  NEWMAPSPEC(encseq->specialcharinfo.specialranges,Seqpos,1UL);
-  NEWMAPSPEC(encseq->specialcharinfo.realspecialranges,Seqpos,1UL);
-  NEWMAPSPEC(encseq->specialcharinfo.lengthofspecialprefix,Seqpos,1UL);
-  NEWMAPSPEC(encseq->specialcharinfo.lengthofspecialsuffix,Seqpos,1UL);
+  NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) (encseq->mapsize-1));
   switch (encseq->sat)
@@ -667,6 +666,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,
   }
   FREESPACE(encseq->satcharptr);
   FREESPACE(encseq->numofdbsequencesptr);
+  FREESPACE(encseq->specialcharinfoptr);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
@@ -692,6 +692,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
     haserr = true;
   }
   encseq->numofdbsequences = *encseq->numofdbsequencesptr;
+  encseq->specialcharinfo = *encseq->specialcharinfoptr;
   showverbose(verboseinfo,"sat=%s",encseqaccessname(encseq));
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
@@ -754,8 +755,9 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          fprintf(stderr,"localdetsizeencseq(%d) undefined\n",(int) sat);
          exit(EXIT_FAILURE); /* programming error */
   }
-  sum += 1; /* for sat type */
+  sum += sizeof (unsigned long); /* for sat type */
   sum += sizeof (unsigned long); /* for numofdbsequences type */
+  sum += sizeof (Specialcharinfo); /* for specialcharinfo */
   sum += sizeof (unsigned long) * (mapsize-1); /* for characterdistribution */
   return sum;
 }
@@ -2276,6 +2278,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;
   encseq->numofdbsequencesptr = NULL;
+  encseq->specialcharinfoptr = NULL;
   encseq->destab = NULL;
   encseq->destablength = 0;
   encseq->ssptab = NULL;
@@ -2332,8 +2335,8 @@ typedef struct
           (void) fread(&(VAL),sizeof (VAL), (size_t) 1, fp);\
           if (ferror(fp))\
           {\
-            gt_error_set(err,"error when trying to read numofdbsequences: %s",\
-                              strerror(errno));\
+            gt_error_set(err,"error when trying to read %s: %s",\
+                              #VAL,strerror(errno));\
             haserr = true;\
           }\
         }
@@ -2342,9 +2345,9 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
                                    const GtStr *indexname,GtError *err)
 {
   FILE *fp;
-  int cc = 0;
   bool haserr = false;
   Seqpos tmpspecialcharacters;
+  unsigned long cc;
 
   gt_error_check(err);
   fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",err);
@@ -2352,21 +2355,12 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
   {
     haserr = true;
   }
+  NEXTFREAD(cc);
   if (!haserr)
   {
-    cc = fgetc(fp);
-    if (cc == EOF)
+    if (cc >= (unsigned long) Undefpositionaccesstype)
     {
-      gt_error_set(err,"illegal EOF symbol in \"%s%s\"",
-                    gt_str_get(indexname),ENCSEQFILESUFFIX);
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    if (cc < 0 || cc >= (int) Undefpositionaccesstype)
-    {
-      gt_error_set(err,"illegal type %d in \"%s%s\"",cc,
+      gt_error_set(err,"illegal type %lu in \"%s%s\"",cc,
                     gt_str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
@@ -2754,7 +2748,6 @@ void setencseqspecialcharinfo(Encodedsequence *encseq,
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,
-                                       Specialcharinfo *specialcharinfo,
                                        const Uchar *seq1,
                                        Seqpos len1,
                                        const Uchar *seq2,
@@ -2766,6 +2759,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   Uchar *seqptr;
   Seqpos len;
   const Positionaccesstype sat = Viadirectaccess;
+  Specialcharinfo samplespecialcharinfo;
 
   gt_assert(seq1 != NULL);
   gt_assert(len1 > 0);
@@ -2781,13 +2775,14 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo);
+  sequence2specialcharinfo(&samplespecialcharinfo,seqptr,len,verboseinfo);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     2UL,
-                                    specialcharinfo->specialranges,
+                                    samplespecialcharinfo.specialranges,
                                     mapsize,
                                     verboseinfo);
+  encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = seqptr;
   encseq->plainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC(sat);

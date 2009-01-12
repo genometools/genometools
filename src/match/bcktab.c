@@ -27,6 +27,7 @@
 #include "mapspec-def.h"
 #include "spacedef.h"
 #include "bcktab.h"
+#include "stamp.h"
 
 #include "initbasepower.pr"
 
@@ -47,6 +48,7 @@ struct Bcktab
                 *countspecialcodes,
                 **distpfxidx;
   Uchar *qgrambuffer;
+  bool allocated;
   void *mappedptr;
 };
 
@@ -150,6 +152,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = initmultimappower(numofchars,prefixlength);
+  bcktab->allocated = false;
   ALLOCASSIGNSPACE(bcktab->qgrambuffer,NULL,Uchar,prefixlength);
   bcktab->sizeofrep
     = (unsigned long)
@@ -172,6 +175,7 @@ Bcktab *allocBcktab(Seqpos totallength,
   bool haserr = false;
 
   bcktab = newBcktab(numofchars,prefixlength,totallength);
+  bcktab->allocated = true;
   if (maxcodevalue > 0 && bcktab->numofallcodes-1 > maxcodevalue)
   {
     gt_error_set(err,"alphasize^prefixlength-1 = " FormatCodetype
@@ -279,6 +283,7 @@ Bcktab *mapbcktab(const GtStr *indexname,
   Bcktab *bcktab;
 
   bcktab = newBcktab(numofchars,prefixlength,totallength);
+  bcktab->allocated = false;
   if (fillbcktabmapspecstartptr(bcktab,
                                 indexname,
                                 err) != 0)
@@ -320,23 +325,26 @@ void freebcktab(Bcktab **bcktab)
   Bcktab *bcktabptr = *bcktab;
 
   /* showbcktab(bcktabptr); */
-  if (bcktabptr->mappedptr != NULL) /* use mapped file */
-  {
-    gt_fa_xmunmap(bcktabptr->mappedptr);
-    bcktabptr->mappedptr = NULL;
-    bcktabptr->leftborder = NULL;
-    bcktabptr->countspecialcodes = NULL;
-    if (bcktabptr->distpfxidx != NULL)
-    {
-      bcktabptr->distpfxidx[0] = NULL;
-    }
-  } else
+  if (bcktabptr->allocated)
   {
     FREESPACE(bcktabptr->leftborder);
     FREESPACE(bcktabptr->countspecialcodes);
     if (bcktabptr->distpfxidx != NULL)
     {
       FREESPACE(bcktabptr->distpfxidx[0]);
+    }
+  } else
+  {
+    if (bcktabptr->mappedptr != NULL)
+    {
+      gt_fa_xmunmap(bcktabptr->mappedptr);
+    }
+    bcktabptr->mappedptr = NULL;
+    bcktabptr->leftborder = NULL;
+    bcktabptr->countspecialcodes = NULL;
+    if (bcktabptr->distpfxidx != NULL)
+    {
+      bcktabptr->distpfxidx[0] = NULL;
     }
   }
   FREESPACE(bcktabptr->distpfxidx);

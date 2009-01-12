@@ -126,6 +126,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case TwobitencodingType:
       ASSIGNPTR2STARTPTR(Twobitencoding);
       break;
+    case SpecialcharinfoType:
+      ASSIGNPTR2STARTPTR(Specialcharinfo);
+      break;
     default:
       gt_error_set(err,"no assignment specification for size %lu",
                     (unsigned long) mapspec->sizeofunit);
@@ -291,6 +294,9 @@ int flushtheindex2file(FILE *fp,
           break;
         case TwobitencodingType:
           WRITEACTIONWITHTYPE(Twobitencoding);
+          break;
+        case SpecialcharinfoType:
+          WRITEACTIONWITHTYPE(Specialcharinfo);
           break;
         default:
            gt_error_set(err,"no map specification for size %lu",

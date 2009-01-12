@@ -43,7 +43,8 @@ typedef enum
   SeqposType,
   BwtboundType,
   PairBwtidxType,
-  TwobitencodingType
+  TwobitencodingType,
+  SpecialcharinfoType
 } Typespec;
 
 typedef struct

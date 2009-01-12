@@ -121,13 +121,11 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            Verboseinfo *verboseinfo,
                            GtError *err)
 {
-  Specialcharinfo samplespecialcharinfo;
   Substringmatchinfo ssi;
   unsigned int numofchars;
   bool haserr = false;
 
   ssi.encseq = plain2encodedsequence(true,
-                                     &samplespecialcharinfo,
                                      dbseq,
                                      dblen,
                                      query,
