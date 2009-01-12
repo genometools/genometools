@@ -162,11 +162,11 @@ void printgff3format(const LTRharvestoptions *lo,
     const char *desptr = NULL;
     FILE *fp;
     Seqinfo seqinfo;
-  
+
     numofdbsequences = getencseqnumofdbsequences(encseq);
     /* for getting descriptions */
     descendtab = calcdescendpositions(encseq);
-  
+
     ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
                             = ltrc.idcounterLTR
                             = ltrc.idcounterTSD
