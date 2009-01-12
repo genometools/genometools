@@ -30,8 +30,8 @@ typedef struct {
        translate,
        verbose;
   GtStr *type,
-         *seqfile,
-         *regionmapping;
+        *seqfile,
+        *regionmapping;
 } GtExtractFeatArguments;
 
 static void* gt_extractfeat_arguments_new(void)
