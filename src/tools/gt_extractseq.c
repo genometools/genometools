@@ -248,8 +248,8 @@ static int gt_extractseq_runner(int argc, const char **argv, int parsed_args,
 GtTool* gt_extractseq(void)
 {
   return gt_tool_new(gt_extractseq_arguments_new,
-                  gt_extractseq_arguments_delete,
-                  gt_extractseq_option_parser_new,
-                  gt_extractseq_arguments_check,
-                  gt_extractseq_runner);
+                     gt_extractseq_arguments_delete,
+                     gt_extractseq_option_parser_new,
+                     gt_extractseq_arguments_check,
+                     gt_extractseq_runner);
 }
