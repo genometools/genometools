@@ -75,13 +75,23 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 
   if (show_track_captions)
   {
+    double theight = TOY_TEXT_HEIGHT,
+           captionspace = CAPTION_BAR_SPACE_DEFAULT;
+    gt_style_get_num(canvas->pvt->sty, "format", "track_caption_font_size",
+                     &theight, NULL);
+    gt_style_get_num(canvas->pvt->sty, "format", "track_caption_space",
+                     &captionspace, NULL);
+    gt_graphics_set_font(canvas->pvt->g,
+                         "sans-serif",
+                         SLANT_NORMAL,
+                         WEIGHT_NORMAL,
+                         theight);
     /* draw track title */
     gt_graphics_draw_colored_text(canvas->pvt->g,
                                   canvas->pvt->margins,
                                   canvas->pvt->y,
                                   color,
                                   gt_str_get(gt_track_get_title(track)));
-
     /* draw 'line maximum exceeded' message */
     if ((exceeded = gt_track_get_number_of_discarded_blocks(track)) > 0)
     {
@@ -108,7 +118,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
                                     red,
                                     buf);
     }
-    canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+    canvas->pvt->y += theight + captionspace;
   }
   return had_err;
 }
@@ -131,16 +141,20 @@ int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line,
                                    GT_UNUSED GtError *err)
 {
   int had_err = 0;
-  double lheight, bar_vspace = BAR_VSPACE_DEFAULT;
+  double lheight, bar_vspace = BAR_VSPACE_DEFAULT, theight = TOY_TEXT_HEIGHT,
+         captionspace = CAPTION_BAR_SPACE_DEFAULT;
   bool show_block_captions = true;
   gt_assert(canvas && line);
-  canvas->pvt->bt = gt_bittab_new(canvas->pvt->width);
+  gt_style_get_num(canvas->pvt->sty, "format", "block_caption_space",
+                   &captionspace, NULL);
   gt_style_get_bool(canvas->pvt->sty, "format", "show_block_captions",
                     &show_block_captions, NULL);
   lheight = gt_line_get_height(line, canvas->pvt->sty);
   gt_style_get_num(canvas->pvt->sty, "format", "bar_vspace", &bar_vspace, NULL);
+  gt_style_get_num(canvas->pvt->sty, "format", "block_caption_font_size",
+                   &theight, NULL);
   if (gt_line_has_captions(line) && show_block_captions)
-    canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+    canvas->pvt->y +=  theight + captionspace;
   canvas->pvt->bt = gt_bittab_new(canvas->pvt->width);
   canvas->pvt->y += lheight/2;
   return had_err;
@@ -211,10 +225,21 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
     caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
+      double theight = TOY_TEXT_HEIGHT,
+             captionspace = CAPTION_BAR_SPACE_DEFAULT;
+      gt_style_get_num(canvas->pvt->sty, "format", "block_caption_space",
+                   &captionspace, NULL);
+      gt_style_get_num(canvas->pvt->sty, "format", "block_caption_font_size",
+                       &theight, NULL);
+      gt_graphics_set_font(canvas->pvt->g,
+                           "sans-serif",
+                           SLANT_NORMAL,
+                           WEIGHT_NORMAL,
+                           theight);
       gt_graphics_draw_text_clip(canvas->pvt->g,
                                  block_start,
                                  canvas->pvt->y - bar_height/2
-                                                - CAPTION_BAR_SPACE_DEFAULT,
+                                                - captionspace,
                                  caption);
     }
   }
@@ -506,13 +531,21 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 
   if (show_track_captions)
   {
+    double theight = TOY_TEXT_HEIGHT;
+    gt_style_get_num(canvas->pvt->sty, "format", "track_caption_font_size",
+                     &theight, NULL);
     /* draw track title */
+    gt_graphics_set_font(canvas->pvt->g,
+                           "sans-serif",
+                           SLANT_NORMAL,
+                           WEIGHT_NORMAL,
+                           theight);
     gt_graphics_draw_colored_text(canvas->pvt->g,
                                   canvas->pvt->margins,
                                   canvas->pvt->y,
                                   color,
                                   gt_custom_track_get_title(ct));
-    canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+    canvas->pvt->y += theight + CAPTION_BAR_SPACE_DEFAULT;
   }
 
   /* call rendering function */
@@ -552,6 +585,13 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
   if (!(gt_style_get_bool(canvas->pvt->sty, "format", "show_grid", &showgrid,
                           NULL)))
     showgrid = true;
+
+  /* reset font to default */
+  gt_graphics_set_font(canvas->pvt->g,
+                       "sans-serif",
+                       SLANT_NORMAL,
+                       WEIGHT_NORMAL,
+                       TOY_TEXT_HEIGHT);
 
   rulercol.red = rulercol.green = rulercol.blue = RULER_GREY;
   rulercol.alpha = 1.0;

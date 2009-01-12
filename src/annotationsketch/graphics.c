@@ -211,10 +211,10 @@ int gt_graphics_set_background_color(GtGraphics *g, GtColor color)
 }
 
 void gt_graphics_set_font(GtGraphics *g, const char *family,
-                       FontSlant slant, FontWeight weight)
+                       FontSlant slant, FontWeight weight, double size)
 {
   gt_assert(g && g->c_class && family);
-  g->c_class->set_font(g, family, slant, weight);
+  g->c_class->set_font(g, family, slant, weight, size);
 }
 
 double gt_graphics_get_image_height(GtGraphics *g)

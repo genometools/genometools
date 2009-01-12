@@ -30,7 +30,7 @@
 #define FONT_SIZE_DEFAULT         10
 
 #define HEADER_SPACE              70
-#define FOOTER_SPACE              20
+#define FOOTER_SPACE              7
 #define DEFAULT_GREY_TONE        .85
 
 #define FIVE_PRIME_STRING        "5'"

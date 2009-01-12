@@ -155,9 +155,15 @@ int gt_track_sketch(GtTrack* track, GtCanvas *canvas, GtError *err)
 double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
 {
   unsigned long i;
-  double track_height = 0;
+  double track_height = 0, bheight = TOY_TEXT_HEIGHT, theight = TOY_TEXT_HEIGHT,
+         tcaptionspace = CAPTION_BAR_SPACE_DEFAULT,
+         bcaptionspace = CAPTION_BAR_SPACE_DEFAULT;
   bool show_track_captions = true;
   gt_assert(track && sty);
+  gt_style_get_num(sty, "format", "block_caption_font_size", &bheight, NULL);
+  gt_style_get_num(sty, "format", "track_caption_font_size", &theight, NULL);
+  gt_style_get_num(sty, "format", "track_caption_space", &tcaptionspace, NULL);
+  gt_style_get_num(sty, "format", "block_caption_space", &bcaptionspace, NULL);
   for (i = 0; i < gt_array_size(track->lines); i++)
   {
     double tmp = BAR_VSPACE_DEFAULT;
@@ -166,7 +172,7 @@ double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
     /* add caption space if necessary */
     if (gt_line_has_captions(line))
     {
-      track_height += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+      track_height += bheight + bcaptionspace;
     }
     /* add vertical spacer */
     gt_style_get_num(sty, "format", "bar_vspace", &tmp, NULL);
@@ -182,12 +188,11 @@ double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
     double tmp;
     if (gt_style_get_num(sty, "format", "track_vspace", &tmp, NULL))
     {
-      track_height += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp;
+      track_height += theight + tcaptionspace + tmp;
     }
     else
     {
-      track_height += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT
-                                      + TRACK_VSPACE_DEFAULT;
+      track_height += theight + tcaptionspace + TRACK_VSPACE_DEFAULT;
     }
   }
   return track_height;

@@ -336,15 +336,18 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   /* add custom track space allotment */
   if (show_track_captions)
   {
+    double theight = TOY_TEXT_HEIGHT;
+    gt_style_get_num(layout->style, "format", "track_caption_font_size",
+                     &theight, NULL);
     if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp, NULL))
     {
       height += gt_array_size(layout->custom_tracks)
-                    * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
+                    * (theight + CAPTION_BAR_SPACE_DEFAULT + tmp);
     }
     else
     {
       height += gt_array_size(layout->custom_tracks)
-                    * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT
+                    * (theight + CAPTION_BAR_SPACE_DEFAULT
                                        + TRACK_VSPACE_DEFAULT);
     }
   }

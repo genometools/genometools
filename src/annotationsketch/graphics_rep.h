@@ -30,7 +30,7 @@ typedef double (*GtGraphicsGetTextWidthFunc)(GtGraphics*, const char*);
 typedef void   (*GtGraphicsSetMarginsFunc)(GtGraphics*, double, double);
 typedef int    (*GtGraphicsSetColorFunc)(GtGraphics*, GtColor);
 typedef void   (*GtGraphicsSetFontFunc)(GtGraphics*, const char*, FontSlant,
-                                        FontWeight);
+                                        FontWeight, double);
 typedef void   (*GtGraphicsDrawLineFunc)(GtGraphics*, double, double,
                                          GtColor, double, double);
 typedef void   (*GtGraphicsDrawLineToFunc)(GtGraphics*, double, double,
