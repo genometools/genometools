@@ -307,8 +307,6 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
                                                   mm_to_pt(arguments->pwidth),
                                                   mm_to_pt(arguments->pheight));
 
-  /*  bioseq = gt_bioseq_new("Drosophila_melanogaster"
-   *                         ".BDGP5.4.51.dna.chromosome.2R.fa.gz", err); */
     offsetpos = TEXT_SPACER + HEADER_TEXT_HEIGHT + TEXT_SPACER;
     usable_height = mm_to_pt(arguments->pheight)
                               - HEADER_TEXT_HEIGHT
@@ -323,19 +321,10 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
          start += arguments->width)
     {
       GtRange single_range;
-      /* GtCustomTrack *ct; */
       single_range.start = start;
       single_range.end = start + arguments->width;
-    /* ct = gt_custom_track_gc_content_new(gt_bioseq_get_sequence(bioseq, 0),
-                                          gt_bioseq_get_sequence_length(bioseq,
-                                                                        0),
-                                          300,
-                                          20,
-                                          0.365,
-                                          true); */
       d = gt_diagram_new(features, seqid, &single_range, sty, err);
       gt_error_check(err);
-      /* gt_diagram_add_custom_track(d, ct); */
       l = gt_layout_new_with_twc(d, mm_to_pt(arguments->pwidth), sty, twc, err);
       gt_error_check(err);
       height = gt_layout_get_height(l);
@@ -358,7 +347,6 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
       offsetpos += height;
       gt_layout_sketch(l, canvas, err);
       gt_error_check(err);
-      /* gt_custom_track_delete(ct); */
       gt_canvas_delete(canvas);
       gt_layout_delete(l);
       gt_diagram_delete(d);
