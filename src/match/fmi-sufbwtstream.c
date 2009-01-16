@@ -46,6 +46,7 @@ static void allocatefmtables(Fmindex *fm,
   {
     Seqpos specialcharacters;
 
+    gt_assert(specialcharinfo != NULL);
     if (specialcharinfo != NULL)
     {
       specialcharacters = specialcharinfo->specialcharacters;
@@ -57,7 +58,7 @@ static void allocatefmtables(Fmindex *fm,
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
     fm->specpos.nextfreePairBwtidx = 0;
     fm->specpos.allocatedPairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(fm,specialcharinfo);
+      = (unsigned long) determinenumberofspecialstostore(specialcharinfo);
     printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
            (unsigned long) specialcharacters - fm->specpos.allocatedPairBwtidx,

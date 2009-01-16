@@ -209,14 +209,10 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   }
   if (!haserr)
   {
-    setencseqspecialcharinfo(fmindex->bwtformatching,&specialcharinfo);
-  }
-  if (!haserr)
-  {
     GtStr *tmpfilename;
 
     fmindex->specpos.nextfreePairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(fmindex,NULL);
+      = (unsigned long) determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
     tmpfilename = gt_str_clone(indexname);
@@ -237,7 +233,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     GtStr *tmpfilename;
 
     computefmkeyvalues (fmindex,
-                        NULL,
+                        &specialcharinfo,
                         fmindex->bwtlength,
                         fmindex->log2bsize,
                         fmindex->log2markdist,

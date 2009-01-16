@@ -78,6 +78,7 @@ typedef int(*FMprocessqhit)(void *,Seqpos,Seqpos);
 
 typedef struct
 {
+  /* Note: do not use specialcharinfo of bwtformatching */
   Encodedsequence *bwtformatching;
   Uchar *bfreq;            /* bfreq[c][i] = #c in block i */
   Seqpos bwtlength,        /* also totallength + 1 */

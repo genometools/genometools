@@ -26,34 +26,19 @@ Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength)
   return (Seqpos) pow((double) numofchars,(double) prefixlength);
 }
 
-Seqpos determinenumberofspecialstostore(const Fmindex *fm,const
-                                        Specialcharinfo *specialcharinfo)
+Seqpos determinenumberofspecialstostore(const Specialcharinfo *specialcharinfo)
 {
   Seqpos addprefixsuffix = 0;
 
-  if (specialcharinfo != NULL)
+  if (specialcharinfo->lengthofspecialprefix > 0)
   {
-    if (specialcharinfo->lengthofspecialprefix > 0)
-    {
-      addprefixsuffix++;
-    }
-    if (specialcharinfo->lengthofspecialsuffix > 0)
-    {
-      addprefixsuffix++;
-    }
-    return specialcharinfo->realspecialranges + 1 - addprefixsuffix;
-  } else
-  {
-    if (getencseqlengthofspecialprefix(fm->bwtformatching) > 0)
-    {
-      addprefixsuffix++;
-    }
-    if (getencseqlengthofspecialsuffix(fm->bwtformatching) > 0)
-    {
-      addprefixsuffix++;
-    }
-    return getencseqrealspecialranges(fm->bwtformatching) + 1 - addprefixsuffix;
+    addprefixsuffix++;
   }
+  if (specialcharinfo->lengthofspecialsuffix > 0)
+  {
+    addprefixsuffix++;
+  }
+  return specialcharinfo->realspecialranges + 1 - addprefixsuffix;
 }
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
@@ -81,7 +66,7 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   if (storeindexpos)
   {
     sumsize += (uint64_t) sizeof (PairBwtidx) *
-               (uint64_t) determinenumberofspecialstostore(fm,specialcharinfo);
+               (uint64_t) determinenumberofspecialstostore(specialcharinfo);
   }
   sumsize += (uint64_t) sizeof (Uchar) *
              (uint64_t) BFREQSIZE(fm->mapsize,fm->nofblocks);
