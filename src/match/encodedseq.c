@@ -2326,7 +2326,7 @@ typedef struct
 {
   Positionaccesstype sat;
   unsigned long numofdbsequences;
-  Seqpos specialranges;
+  Specialcharinfo specialcharinfo;
 } Firstencseqvalues;
 
 #define NEXTFREAD(VAL)\
@@ -2346,7 +2346,6 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
 {
   FILE *fp;
   bool haserr = false;
-  Seqpos tmpspecialcharacters;
   unsigned long cc;
 
   gt_error_check(err);
@@ -2367,10 +2366,23 @@ static int readfirstvaluesfromfile(Firstencseqvalues *firstencseqvalues,
   }
   firstencseqvalues->sat = (Positionaccesstype) cc;
   NEXTFREAD(firstencseqvalues->numofdbsequences);
-  NEXTFREAD(tmpspecialcharacters);
-  NEXTFREAD(firstencseqvalues->specialranges);
+  NEXTFREAD(firstencseqvalues->specialcharinfo);
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
+}
+
+int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
+                        const GtStr *indexname,GtError *err)
+{
+  Firstencseqvalues firstencseqvalues;
+
+  int retval = readfirstvaluesfromfile(&firstencseqvalues,indexname,err);
+  if (retval != 0)
+  {
+    return -1;
+  }
+  *specialcharinfo = firstencseqvalues.specialcharinfo;
+  return 0;
 }
 
 static int determinesattype(Seqpos *specialranges,
@@ -2602,7 +2614,8 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     encseq = determineencseqkeyvalues(firstencseqvalues.sat,
                                       totallength,
                                       firstencseqvalues.numofdbsequences,
-                                      firstencseqvalues.specialranges,
+                                      firstencseqvalues.specialcharinfo
+                                                       .specialranges,
                                       mapsize,
                                       verboseinfo);
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);

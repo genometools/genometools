@@ -77,7 +77,6 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                  &specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
                  &specialcharinfo.lengthofspecialsuffix,NULL);
-  setencseqspecialcharinfo(fmindex->bwtformatching,&specialcharinfo);
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
@@ -133,15 +132,21 @@ void freefmindex(Fmindex *fmindex)
 {
   if (fmindex->mappedptr != NULL)
   {
+    STAMP;
     gt_fa_xmunmap(fmindex->mappedptr);
+    STAMP;
   }
   if (fmindex->bwtformatching != NULL)
   {
+    STAMP;
     freeEncodedsequence(&fmindex->bwtformatching);
+    STAMP;
   }
   if (fmindex->alphabet != NULL)
   {
+    STAMP;
     freeAlphabet(&fmindex->alphabet);
+    STAMP;
   }
 }
 
@@ -184,17 +189,19 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   if (fpin == NULL)
   {
     haserr = true;
+      STAMP;
   }
   if (!haserr)
   {
     if (scanfmafileviafileptr(fmindex,
-                             &storeindexpos,
-                             indexname,
-                             fpin,
-                             verboseinfo,
-                             err) != 0)
+                              &storeindexpos,
+                              indexname,
+                              fpin,
+                              verboseinfo,
+                              err) != 0)
     {
       haserr = true;
+      STAMP;
     }
   }
   gt_fa_xfclose(fpin);
@@ -204,6 +211,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     if (fmindex->bwtformatching == NULL)
     {
       haserr = true;
+      STAMP;
     }
   }
   if (!haserr)
@@ -211,7 +219,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     GtStr *tmpfilename;
 
     fmindex->specpos.nextfreePairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(fmindex);
+      = (unsigned long) determinenumberofspecialstostore(fmindex,NULL);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
     tmpfilename = gt_str_clone(indexname);
@@ -224,6 +232,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     if (fmindex->alphabet == NULL)
     {
       haserr = true;
+      STAMP;
     }
     gt_str_delete(tmpfilename);
   }
@@ -232,24 +241,27 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     GtStr *tmpfilename;
 
     computefmkeyvalues (fmindex,
+                        NULL,
                         fmindex->bwtlength,
                         fmindex->log2bsize,
                         fmindex->log2markdist,
                         getmapsizeAlphabet(fmindex->alphabet),
                         fmindex->suffixlength,
-                        storeindexpos,
-                        NULL);
+                        storeindexpos);
     tmpfilename = gt_str_clone(indexname);
     gt_str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
     if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)
     {
       haserr = true;
+      STAMP;
     }
     gt_str_delete(tmpfilename);
   }
   if (haserr)
   {
+    STAMP;
     freefmindex(fmindex);
+    STAMP;
   }
   return haserr ? -1 : 0;
 }

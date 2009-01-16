@@ -26,24 +26,41 @@ Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength)
   return (Seqpos) pow((double) numofchars,(double) prefixlength);
 }
 
-Seqpos determinenumberofspecialstostore(const Fmindex *fm)
+Seqpos determinenumberofspecialstostore(const Fmindex *fm,const
+                                        Specialcharinfo *specialcharinfo)
 {
   Seqpos addprefixsuffix = 0;
 
-  if (getencseqlengthofspecialprefix(fm->bwtformatching) > 0)
+  if (specialcharinfo != NULL)
   {
-    addprefixsuffix++;
-  }
-  if (getencseqlengthofspecialsuffix(fm->bwtformatching) > 0)
+    if (specialcharinfo->lengthofspecialprefix > 0)
+    {
+      addprefixsuffix++;
+    }
+    if (specialcharinfo->lengthofspecialsuffix > 0)
+    {
+      addprefixsuffix++;
+    }
+    return specialcharinfo->realspecialranges + 1 - addprefixsuffix;
+  } else
   {
-    addprefixsuffix++;
+    if (getencseqlengthofspecialprefix(fm->bwtformatching) > 0)
+    {
+      addprefixsuffix++;
+    }
+    if (getencseqlengthofspecialsuffix(fm->bwtformatching) > 0)
+    {
+      addprefixsuffix++;
+    }
+    return getencseqrealspecialranges(fm->bwtformatching) + 1 - addprefixsuffix;
   }
-  return getencseqrealspecialranges(fm->bwtformatching) + 1 - addprefixsuffix;
 }
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
 static unsigned long determinefmindexsize (const Fmindex *fm,
+                                           const Specialcharinfo
+                                              *specialcharinfo,
                                            unsigned int suffixlength,
                                            bool storeindexpos)
 {
@@ -64,7 +81,7 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   if (storeindexpos)
   {
     sumsize += (uint64_t) sizeof (PairBwtidx) *
-               (uint64_t) determinenumberofspecialstostore(fm);
+               (uint64_t) determinenumberofspecialstostore(fm,specialcharinfo);
   }
   sumsize += (uint64_t) sizeof (Uchar) *
              (uint64_t) BFREQSIZE(fm->mapsize,fm->nofblocks);
@@ -72,13 +89,13 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
 }
 
 void computefmkeyvalues (Fmindex *fm,
+                         const Specialcharinfo *specialcharinfo,
                          Seqpos bwtlength,
                          unsigned int log2bsize,
                          unsigned int log2markdist,
                          unsigned int mapsize,
                          unsigned int suffixlength,
-                         bool storeindexpos,
-                         const Specialcharinfo *specialcharinfo)
+                         bool storeindexpos)
 {
   fm->mappedptr = NULL;
   fm->log2bsize = log2bsize;
@@ -104,11 +121,8 @@ void computefmkeyvalues (Fmindex *fm,
   {
     fm->numofcodes = 0;
   }
-  if (specialcharinfo != NULL)
-  {
-    setencseqspecialcharinfo(fm->bwtformatching,specialcharinfo);
-  }
   fm->sizeofindex = determinefmindexsize (fm,
+                                          specialcharinfo,
                                           suffixlength,
                                           storeindexpos);
 }

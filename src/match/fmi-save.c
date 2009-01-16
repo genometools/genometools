@@ -24,6 +24,7 @@
 
 static int writefmascii (const GtStr *indexname,
                          const Fmindex *fm,
+                         const Specialcharinfo *specialcharinfo,
                          bool storeindexpos,
                          GtError *err)
 {
@@ -42,15 +43,15 @@ static int writefmascii (const GtStr *indexname,
   fprintf (fmafp, "log2blocksize=%u\n", fm->log2bsize);
   fprintf (fmafp, "log2markdist=%u\n", fm->log2markdist);
   fprintf (fmafp, "specialcharacters=" FormatSeqpos "\n",
-               PRINTSeqposcast(getencseqspecialcharacters(fm->bwtformatching)));
+               PRINTSeqposcast(specialcharinfo->specialcharacters));
   fprintf (fmafp, "specialranges=" FormatSeqpos "\n",
-               PRINTSeqposcast(getencseqspecialranges(fm->bwtformatching)));
+               PRINTSeqposcast(specialcharinfo->specialranges));
   fprintf (fmafp, "realspecialranges=" FormatSeqpos "\n",
-               PRINTSeqposcast(getencseqrealspecialranges(fm->bwtformatching)));
+               PRINTSeqposcast(specialcharinfo->realspecialranges));
   fprintf (fmafp, "lengthofspecialprefix=" FormatSeqpos "\n",
-           PRINTSeqposcast(getencseqlengthofspecialprefix(fm->bwtformatching)));
+           PRINTSeqposcast(specialcharinfo->lengthofspecialprefix));
   fprintf (fmafp, "lengthofspecialsuffix=" FormatSeqpos "\n",
-           PRINTSeqposcast(getencseqlengthofspecialsuffix(fm->bwtformatching)));
+           PRINTSeqposcast(specialcharinfo->lengthofspecialsuffix));
   fprintf (fmafp, "suffixlength=%u\n", fm->suffixlength);
   gt_fa_xfclose(fmafp);
   return 0;
@@ -77,10 +78,11 @@ static int writefmdata (const GtStr *indexname,
 }
 
 int saveFmindex (const GtStr *indexname,Fmindex *fm,
+                 const Specialcharinfo *specialcharinfo,
                  bool storeindexpos,GtError *err)
 {
   gt_error_check(err);
-  if (writefmascii (indexname, fm, storeindexpos,err) != 0)
+  if (writefmascii (indexname, fm, specialcharinfo,storeindexpos,err) != 0)
   {
     return -1;
   }

@@ -320,4 +320,7 @@ void setencseqspecialcharinfo(Encodedsequence *encseq,
 void getencseqspecialcharinfo(Specialcharinfo *specialcharinfo,
                               const Encodedsequence *encseq);
 
+int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
+                        const GtStr *indexname,GtError *err);
+
 #endif

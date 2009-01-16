@@ -35,7 +35,9 @@
 
  DECLAREREADFUNCTION(Seqpos);
 
-static void allocatefmtables(Fmindex *fm,bool storeindexpos)
+static void allocatefmtables(Fmindex *fm,
+                             const Specialcharinfo *specialcharinfo,
+                             bool storeindexpos)
 {
   ALLOCASSIGNSPACE (fm->tfreq, NULL, Seqpos,TFREQSIZE(fm->mapsize));
   ALLOCASSIGNSPACE (fm->superbfreq, NULL, Seqpos ,
@@ -47,7 +49,7 @@ static void allocatefmtables(Fmindex *fm,bool storeindexpos)
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
     fm->specpos.nextfreePairBwtidx = 0;
     fm->specpos.allocatedPairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(fm);
+      = (unsigned long) determinenumberofspecialstostore(fm,specialcharinfo);
     printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
            (unsigned long) specialcharacters - fm->specpos.allocatedPairBwtidx,
@@ -182,6 +184,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
 }
 
 int sufbwt2fmindex(Fmindex *fmindex,
+                   Specialcharinfo *specialcharinfo,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
                    const GtStr *outfmindex,
@@ -211,7 +214,6 @@ int sufbwt2fmindex(Fmindex *fmindex,
   PairBwtidx *pairptr;
   FILE *outbwt = NULL;
   GtStr *tmpfilename = NULL;
-  Specialcharinfo specialcharinfo;
   bool haserr = false;
 
   gt_error_check(err);
@@ -231,11 +233,14 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       haserr = true;
     }
+    if (!haserr && readSpecialcharinfo(specialcharinfo,indexname,err) != 0)
+    {
+      haserr = true;
+    }
     if (!haserr)
     {
       mapsize = getmapsizeAlphabet(suffixarray.alpha);
-      getencseqspecialcharinfo(&specialcharinfo,suffixarray.encseq);
-      firstignorespecial = totallength - specialcharinfo.specialcharacters;
+      firstignorespecial = totallength - specialcharinfo->specialcharacters;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
@@ -274,7 +279,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (!haserr)
     {
       sequenceoffsettable = encseqtable2seqoffsets(&totallength,
-                                                   &specialcharinfo,
+                                                   specialcharinfo,
                                                    emmesa.suffixarraytable,
                                                    numofindexes);
       if (sequenceoffsettable == NULL)
@@ -295,7 +300,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (!haserr)
     {
       mapsize = getmapsizeAlphabet(emmesa.alpha);
-      firstignorespecial = totallength - specialcharinfo.specialcharacters;
+      firstignorespecial = totallength - specialcharinfo->specialcharacters;
     }
   }
   if (!haserr)
@@ -303,20 +308,20 @@ int sufbwt2fmindex(Fmindex *fmindex,
     printf("# firstignorespecial=" FormatSeqpos "\n",
               PRINTSeqposcast(firstignorespecial));
     computefmkeyvalues (fmindex,
+                        specialcharinfo,
                         totallength+1,
                         log2bsize,
                         log2markdist,
                         mapsize,
                         suffixlength,
-                        storeindexpos,
-                        &specialcharinfo);
+                        storeindexpos);
     showconstructionmessage(outfmindex,
                             totallength,
                             fmindex->sizeofindex,
                             log2bsize,
                             log2markdist,
                             mapsize);
-    allocatefmtables(fmindex,storeindexpos);
+    allocatefmtables(fmindex,specialcharinfo,storeindexpos);
     set0frequencies(fmindex);
     if (storeindexpos)
     {

@@ -281,6 +281,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   Alphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
   Seqpos totallength;
+  bool mapfmindexfail = false;
 
   gt_error_check(err);
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
@@ -301,6 +302,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
                     verboseinfo,err) != 0)
     {
       haserr = true;
+      mapfmindexfail = true;
     } else
     {
       alphabet = fmindex.alphabet;
@@ -441,7 +443,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   }
   if (gfmsubcallinfo.indextype == Fmindextype)
   {
-    freefmindex(&fmindex);
+    if (!mapfmindexfail)
+    {
+      freefmindex(&fmindex);
+    }
   } else
   {
     if (gfmsubcallinfo.indextype == Packedindextype && packedindex != NULL)
