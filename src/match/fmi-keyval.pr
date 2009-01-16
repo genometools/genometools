@@ -3,8 +3,7 @@ extern "C" {
 #endif
 Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength);
 
-Seqpos determinenumberofspecialstostore(
-                    const Specialcharinfo *specialcharinfo);
+Seqpos determinenumberofspecialstostore(const Fmindex *fm);
 
 void computefmkeyvalues (Fmindex *fm,
                          Seqpos bwtlength,

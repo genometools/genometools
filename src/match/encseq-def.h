@@ -317,13 +317,7 @@ Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq);
 void setencseqspecialcharinfo(Encodedsequence *encseq,
                               const Specialcharinfo *specialcharinfo);
 
-#define COPYSPECIALCHARINFO(DEST,ENCSEQSRC)\
-        (DEST).specialcharacters = getencseqspecialcharacters(ENCSEQSRC);\
-        (DEST).specialranges = getencseqspecialranges(ENCSEQSRC);\
-        (DEST).realspecialranges = getencseqrealspecialranges(ENCSEQSRC);\
-        (DEST).lengthofspecialprefix\
-          = getencseqlengthofspecialprefix(ENCSEQSRC);\
-        (DEST).lengthofspecialsuffix\
-          = getencseqlengthofspecialsuffix(ENCSEQSRC)
+void getencseqspecialcharinfo(Specialcharinfo *specialcharinfo,
+                              const Encodedsequence *encseq);
 
 #endif

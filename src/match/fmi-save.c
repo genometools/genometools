@@ -42,15 +42,15 @@ static int writefmascii (const GtStr *indexname,
   fprintf (fmafp, "log2blocksize=%u\n", fm->log2bsize);
   fprintf (fmafp, "log2markdist=%u\n", fm->log2markdist);
   fprintf (fmafp, "specialcharacters=" FormatSeqpos "\n",
-                  PRINTSeqposcast(fm->specialcharinfo.specialcharacters));
+               PRINTSeqposcast(getencseqspecialcharacters(fm->bwtformatching)));
   fprintf (fmafp, "specialranges=" FormatSeqpos "\n",
-                  PRINTSeqposcast(fm->specialcharinfo.specialranges));
+               PRINTSeqposcast(getencseqspecialranges(fm->bwtformatching)));
   fprintf (fmafp, "realspecialranges=" FormatSeqpos "\n",
-                  PRINTSeqposcast(fm->specialcharinfo.realspecialranges));
+               PRINTSeqposcast(getencseqrealspecialranges(fm->bwtformatching)));
   fprintf (fmafp, "lengthofspecialprefix=" FormatSeqpos "\n",
-                  PRINTSeqposcast(fm->specialcharinfo.lengthofspecialprefix));
+           PRINTSeqposcast(getencseqlengthofspecialprefix(fm->bwtformatching)));
   fprintf (fmafp, "lengthofspecialsuffix=" FormatSeqpos "\n",
-                  PRINTSeqposcast(fm->specialcharinfo.lengthofspecialsuffix));
+           PRINTSeqposcast(getencseqlengthofspecialsuffix(fm->bwtformatching)));
   fprintf (fmafp, "suffixlength=%u\n", fm->suffixlength);
   gt_fa_xfclose(fmafp);
   return 0;

@@ -89,7 +89,6 @@ typedef struct
          negatebsizeones,
          negatesuperbsizeones,
          markdistminus1;   /* markdist - 1 */
-  Specialcharinfo specialcharinfo;
   ArrayPairBwtidx specpos; /* positions of special characters */
   Alphabet *alphabet;
   void *mappedptr; /* NULL or pointer to the mapped space block */

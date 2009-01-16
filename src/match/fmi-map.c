@@ -58,6 +58,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   bool haserr = false;
   GtArray *riktab;
   unsigned int intstoreindexpos;
+  Specialcharinfo specialcharinfo;
 
   gt_error_check(err);
   riktab = gt_array_new(sizeofReadintkeys());
@@ -67,15 +68,16 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("log2blocksize",&fmindex->log2bsize,NULL);
   SETREADINTKEYS("log2markdist",&fmindex->log2markdist,NULL);
   SETREADINTKEYS("specialcharacters",
-                 &fmindex->specialcharinfo.specialcharacters,NULL);
+                 &specialcharinfo.specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
-                 &fmindex->specialcharinfo.specialranges,NULL);
+                 &specialcharinfo.specialranges,NULL);
   SETREADINTKEYS("realspecialranges",
-                 &fmindex->specialcharinfo.realspecialranges,NULL);
+                 &specialcharinfo.realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
-                 &fmindex->specialcharinfo.lengthofspecialprefix,NULL);
+                 &specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
-                 &fmindex->specialcharinfo.lengthofspecialsuffix,NULL);
+                 &specialcharinfo.lengthofspecialsuffix,NULL);
+  setencseqspecialcharinfo(fmindex->bwtformatching,&specialcharinfo);
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
@@ -209,8 +211,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     GtStr *tmpfilename;
 
     fmindex->specpos.nextfreePairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(
-                                          &fmindex->specialcharinfo);
+      = (unsigned long) determinenumberofspecialstostore(fmindex);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
     tmpfilename = gt_str_clone(indexname);
@@ -237,7 +238,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                         getmapsizeAlphabet(fmindex->alphabet),
                         fmindex->suffixlength,
                         storeindexpos,
-                        &fmindex->specialcharinfo);
+                        NULL);
     tmpfilename = gt_str_clone(indexname);
     gt_str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
     if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)

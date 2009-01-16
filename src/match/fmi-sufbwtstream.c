@@ -42,19 +42,18 @@ static void allocatefmtables(Fmindex *fm,bool storeindexpos)
                     SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
   if (storeindexpos)
   {
+    Seqpos specialcharacters = getencseqspecialcharacters(fm->bwtformatching);
     ALLOCASSIGNSPACE (fm->markpostable,NULL,Seqpos,
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
     fm->specpos.nextfreePairBwtidx = 0;
     fm->specpos.allocatedPairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(&fm->specialcharinfo);
+      = (unsigned long) determinenumberofspecialstostore(fm);
     printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
-            (unsigned long) (fm->specialcharinfo.specialcharacters -
-                             fm->specpos.allocatedPairBwtidx),
-            PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
-            (double) (fm->specialcharinfo.specialcharacters -
-                      fm->specpos.allocatedPairBwtidx)/
-                          fm->specialcharinfo.specialcharacters);
+           (unsigned long) specialcharacters - fm->specpos.allocatedPairBwtidx,
+           PRINTSeqposcast(specialcharacters),
+            (double) (specialcharacters - fm->specpos.allocatedPairBwtidx)/
+                     specialcharacters);
     ALLOCASSIGNSPACE(fm->specpos.spacePairBwtidx,NULL,PairBwtidx,
                      fm->specpos.allocatedPairBwtidx);
   } else
@@ -235,7 +234,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (!haserr)
     {
       mapsize = getmapsizeAlphabet(suffixarray.alpha);
-      COPYSPECIALCHARINFO(specialcharinfo,suffixarray.encseq);
+      getencseqspecialcharinfo(&specialcharinfo,suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo.specialcharacters;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {

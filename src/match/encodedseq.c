@@ -2744,7 +2744,19 @@ Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq)
 void setencseqspecialcharinfo(Encodedsequence *encseq,
                               const Specialcharinfo *specialcharinfo)
 {
-  encseq->specialcharinfo = *specialcharinfo;
+  if (&encseq->specialcharinfo != specialcharinfo)
+  {
+    encseq->specialcharinfo = *specialcharinfo;
+  }
+}
+
+void getencseqspecialcharinfo(Specialcharinfo *specialcharinfo,
+                              const Encodedsequence *encseq)
+{
+  if (&encseq->specialcharinfo != specialcharinfo)
+  {
+    *specialcharinfo = encseq->specialcharinfo;
+  }
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,
