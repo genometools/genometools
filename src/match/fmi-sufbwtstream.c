@@ -44,7 +44,15 @@ static void allocatefmtables(Fmindex *fm,
                     SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
   if (storeindexpos)
   {
-    Seqpos specialcharacters = getencseqspecialcharacters(fm->bwtformatching);
+    Seqpos specialcharacters;
+
+    if (specialcharinfo != NULL)
+    {
+      specialcharacters = specialcharinfo->specialcharacters;
+    } else
+    {
+      specialcharacters = getencseqspecialcharacters(fm->bwtformatching);
+    }
     ALLOCASSIGNSPACE (fm->markpostable,NULL,Seqpos,
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
     fm->specpos.nextfreePairBwtidx = 0;

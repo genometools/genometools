@@ -49,6 +49,7 @@ bool fmindexexists(const GtStr *indexname)
 }
 
 static int scanfmafileviafileptr(Fmindex *fmindex,
+                                 Specialcharinfo *specialcharinfo,
                                  bool *storeindexpos,
                                  const GtStr *indexname,
                                  FILE *fpin,
@@ -58,7 +59,6 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   bool haserr = false;
   GtArray *riktab;
   unsigned int intstoreindexpos;
-  Specialcharinfo specialcharinfo;
 
   gt_error_check(err);
   riktab = gt_array_new(sizeofReadintkeys());
@@ -68,15 +68,15 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("log2blocksize",&fmindex->log2bsize,NULL);
   SETREADINTKEYS("log2markdist",&fmindex->log2markdist,NULL);
   SETREADINTKEYS("specialcharacters",
-                 &specialcharinfo.specialcharacters,NULL);
+                 &specialcharinfo->specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
-                 &specialcharinfo.specialranges,NULL);
+                 &specialcharinfo->specialranges,NULL);
   SETREADINTKEYS("realspecialranges",
-                 &specialcharinfo.realspecialranges,NULL);
+                 &specialcharinfo->realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
-                 &specialcharinfo.lengthofspecialprefix,NULL);
+                 &specialcharinfo->lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
-                 &specialcharinfo.lengthofspecialsuffix,NULL);
+                 &specialcharinfo->lengthofspecialsuffix,NULL);
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
@@ -132,21 +132,15 @@ void freefmindex(Fmindex *fmindex)
 {
   if (fmindex->mappedptr != NULL)
   {
-    STAMP;
     gt_fa_xmunmap(fmindex->mappedptr);
-    STAMP;
   }
   if (fmindex->bwtformatching != NULL)
   {
-    STAMP;
     freeEncodedsequence(&fmindex->bwtformatching);
-    STAMP;
   }
   if (fmindex->alphabet != NULL)
   {
-    STAMP;
     freeAlphabet(&fmindex->alphabet);
-    STAMP;
   }
 }
 
@@ -180,6 +174,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
 {
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
+  Specialcharinfo specialcharinfo;
 
   gt_error_check(err);
   fmindex->mappedptr = NULL;
@@ -189,11 +184,11 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   if (fpin == NULL)
   {
     haserr = true;
-      STAMP;
   }
   if (!haserr)
   {
     if (scanfmafileviafileptr(fmindex,
+                              &specialcharinfo,
                               &storeindexpos,
                               indexname,
                               fpin,
@@ -201,7 +196,6 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                               err) != 0)
     {
       haserr = true;
-      STAMP;
     }
   }
   gt_fa_xfclose(fpin);
@@ -211,8 +205,11 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     if (fmindex->bwtformatching == NULL)
     {
       haserr = true;
-      STAMP;
     }
+  }
+  if (!haserr)
+  {
+    setencseqspecialcharinfo(fmindex->bwtformatching,&specialcharinfo);
   }
   if (!haserr)
   {
@@ -232,7 +229,6 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     if (fmindex->alphabet == NULL)
     {
       haserr = true;
-      STAMP;
     }
     gt_str_delete(tmpfilename);
   }
@@ -253,15 +249,12 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)
     {
       haserr = true;
-      STAMP;
     }
     gt_str_delete(tmpfilename);
   }
   if (haserr)
   {
-    STAMP;
     freefmindex(fmindex);
-    STAMP;
   }
   return haserr ? -1 : 0;
 }
