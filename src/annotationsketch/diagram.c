@@ -37,7 +37,7 @@
 #include "extended/genome_node.h"
 
 /* used to index non-multiline-feature blocks */
-#define UNDEF_REPR               (void*)"UNDEF"
+#define UNDEF_REPR               (void*)0x0DEFD
 
 struct GtDiagram {
   /* GtBlock lists indexed by track keys */
@@ -353,7 +353,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 {
   GtRange elem_range;
   bool *collapse;
-  bool do_not_overlap=false;
+  bool do_not_overlap = false;
   const char *feature_type = NULL, *parent_gft = NULL;
   double tmp;
   unsigned long max_show_width = UNDEF_ULONG,
@@ -361,9 +361,11 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 
   gt_assert(d && node);
 
+  /* skip pseudonodes */
+  if (gt_feature_node_is_pseudo(node))
+    return;
   feature_type = gt_feature_node_get_type(node);
-  if (parent)
-    parent_gft = gt_feature_node_get_type(parent);
+  gt_assert(feature_type);
 
   /* discard elements that do not overlap with visible range */
   elem_range = gt_genome_node_get_range((GtGenomeNode*) node);
@@ -375,26 +377,40 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
     max_show_width = tmp;
   else
     max_show_width = UNDEF_ULONG;
+
+  /* for non-root nodes... */
   if (parent)
   {
-    if (gt_style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
-    par_max_show_width = tmp;
-  else
-    par_max_show_width = UNDEF_ULONG;
-
+    if (!gt_feature_node_is_pseudo(parent))
+    {
+      parent_gft = gt_feature_node_get_type(parent);
+      if (gt_style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
+        par_max_show_width = tmp;
+      else
+        par_max_show_width = UNDEF_ULONG;
+    }
+    else
+    {
+      /* ...ignore pseudo nodes as parents */
+      par_max_show_width = UNDEF_ULONG;
+      parent = NULL;
+    }
   }
+
   /* check if this type is to be displayed at all */
   if (max_show_width != UNDEF_ULONG &&
       gt_range_length(&d->range) > max_show_width) {
     return;
   }
+
+  /* disregard parent node if it is configured not to be shown */
   if (parent && par_max_show_width != UNDEF_ULONG
         && gt_range_length(&d->range) > par_max_show_width)
     parent = NULL;
 
   /* check if this is a collapsing type, cache result */
   if ((collapse = (bool*) gt_hashmap_get(d->collapsingtypes,
-                                        feature_type)) == NULL)
+                                         feature_type)) == NULL)
   {
     collapse = gt_malloc(sizeof (bool));
     if (!gt_style_get_bool(d->style, feature_type, "collapse_to_parent",
