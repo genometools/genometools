@@ -317,9 +317,6 @@ Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq);
 void setencseqspecialcharinfo(Encodedsequence *encseq,
                               const Specialcharinfo *specialcharinfo);
 
-void getencseqspecialcharinfo(Specialcharinfo *specialcharinfo,
-                              const Encodedsequence *encseq);
-
 int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
                         const GtStr *indexname,GtError *err);
 

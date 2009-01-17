@@ -85,8 +85,8 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 typedef struct
 {
-  GtStrArray *filenametab;
-  Filelengthvalues *filelengthtab;
+  GtStrArray *filenametab;    /* XXX: move to encoded sequence */
+  Filelengthvalues *filelengthtab;  /* XXX: move to encoded sequence */
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   DefinedSeqpos longest;

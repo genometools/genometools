@@ -2763,15 +2763,6 @@ void setencseqspecialcharinfo(Encodedsequence *encseq,
   }
 }
 
-void getencseqspecialcharinfo(Specialcharinfo *specialcharinfo,
-                              const Encodedsequence *encseq)
-{
-  if (&encseq->specialcharinfo != specialcharinfo)
-  {
-    *specialcharinfo = encseq->specialcharinfo;
-  }
-}
-
 Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq1,
                                        Seqpos len1,
