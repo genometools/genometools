@@ -35,20 +35,20 @@ availBWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
   Seqpos len;
   gt_assert(params && err);
   gt_error_check(err);
-  if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB
+  if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_BWTTAB
                         | SARR_ESQTAB, params->projectName, verbosity, err))
   {
     gt_error_unset(err);
-    if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
+    if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_ESQTAB,
                           params->projectName, verbosity, err))
     {
       gt_error_unset(err);
-      if (streamsuffixarray(&suffixArray, &len, 0,
+      if (streamsuffixarray(&suffixArray, 0,
                             params->projectName, verbosity, err))
         return NULL;
     }
   }
-  ++len;
+  len = getencseqtotallength(suffixArray.encseq) + 1;
   bwtSeq = availBWTSeqFromSA(params, &suffixArray, len, err);
   freesuffixarray(&suffixArray);
   return bwtSeq;
@@ -65,12 +65,12 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
   gt_error_check(err);
   do
   {
-    if (streamsuffixarray(&suffixArray, &len,
+    if (streamsuffixarray(&suffixArray,
                           SARR_SUFTAB | SARR_BWTTAB | SARR_ESQTAB,
                           params->projectName, verbosity, err))
     {
       gt_error_unset(err);
-      if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_ESQTAB,
+      if (streamsuffixarray(&suffixArray, SARR_SUFTAB | SARR_ESQTAB,
                             params->projectName, verbosity, err))
       {
         gt_error_set(err, "suffix array project %s does not hold required "
@@ -79,7 +79,7 @@ trSuftab2BWTSeq(const struct bwtParam *params, Verboseinfo *verbosity,
         break;
       }
     }
-    ++len;
+    len = getencseqtotallength(suffixArray.encseq) + 1;
     bwtSeq = createBWTSeqFromSA(params, &suffixArray, len, err);
     freesuffixarray(&suffixArray);
   } while (0);
@@ -130,9 +130,9 @@ loadBWTSeq(const GtStr *projectName, int BWTOptFlags, Verboseinfo *verbosity,
   Seqpos len;
   gt_assert(projectName && err);
   gt_error_check(err);
-  if (mapsuffixarray(&suffixArray, &len, 0, projectName, verbosity, err))
+  if (mapsuffixarray(&suffixArray, 0, projectName, verbosity, err))
     return NULL;
-  ++len;
+  len = getencseqtotallength(suffixArray.encseq) + 1;
   bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC, BWTOptFlags,
                            &suffixArray, len, err);
   freesuffixarray(&suffixArray);

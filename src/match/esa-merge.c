@@ -60,14 +60,12 @@ static int inputthesequences(Alphabet **alpha,
 {
   unsigned long idx;
   GtStr *indexname;
-  Seqpos totallength;
 
   gt_error_check(err);
   for (idx=0; idx<gt_str_array_size(indexnametab); idx++)
   {
     indexname = gt_str_array_get_str(indexnametab,idx);
     if (streamsuffixarray(&suffixarraytable[idx],
-                          &totallength,
                           demand,
                           indexname,
                           verboseinfo,

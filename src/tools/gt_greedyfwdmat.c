@@ -331,17 +331,18 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       }
     }
     if (mapsuffixarray(&suffixarray,
-                       &totallength,
                        mappedbits,
                        gfmsubcallinfo.indexname,
                        verboseinfo,
                        err) != 0)
     {
       haserr = true;
+      totallength = 0;
     } else
     {
       alphabet = suffixarray.alpha;
       prefixlength = suffixarray.prefixlength;
+      totallength = getencseqtotallength(suffixarray.encseq);
     }
     if (!haserr)
     {

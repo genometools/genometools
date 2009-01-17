@@ -33,12 +33,10 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                   GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
-  Seqpos totallength;
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   if (mapsuffixarray (ssar->suffixarray,
-                      &totallength,
                       demand,
                       indexname,
                       NULL,
@@ -114,14 +112,12 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
-  Seqpos totallength;
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   gt_assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
   if (((seqactype == SEQ_mappedboth)
          ? mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
-                                               &totallength,
                                                demand,
                                                indexname,
                                                NULL,
@@ -138,7 +134,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
   ssar->suftab = NULL;
   ssar->encseq = ssar->suffixarray->encseq;
   ssar->readmode = ssar->suffixarray->readmode;
-  ssar->numberofsuffixes = totallength+1;
+  ssar->numberofsuffixes = getencseqtotallength(ssar->encseq) + 1;
   ssar->lvi = NULL;
   return ssar;
 }

@@ -77,19 +77,21 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                             void *tool_arguments, GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength;
+  Seqpos totallength = 0;
   void *packedindex = NULL;
   bool haserr = false;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
 
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      0,
                      prebwtoptions->indexname,
                      NULL,
                      err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr)
   {

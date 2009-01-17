@@ -91,15 +91,14 @@ EISVerifyIntegrity(EISeq *seqIdx, const GtStr *projectName, Seqpos skip,
   Symbol symOrig;
   unsigned symEnc;
   EISHint hint;
-  Seqpos seqLastPos, rankQueryResult, rankExpect;
+  Seqpos rankQueryResult, rankExpect;
   const MRAEnc *alphabet;
   AlphabetRangeSize alphabetSize;
   AlphabetRangeID numRanges;
   enum EISIntegrityCheckResults retval = EIS_INTEGRITY_CHECK_NO_ERROR;
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
-  if (streamsuffixarray(&suffixArray, &seqLastPos,
-                        SARR_BWTTAB, projectName, verbosity, err))
+  if (streamsuffixarray(&suffixArray, SARR_BWTTAB, projectName, verbosity, err))
   {
     gt_error_set(err, "Cannot load suffix array project with"
                   " demand for BWT file\n");

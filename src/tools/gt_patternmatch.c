@@ -70,7 +70,7 @@ static void comparemmsis(const MMsearchiterator *mmsi1,
 static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength;
+  Seqpos totallength = 0;
   bool haserr = false;
   const Uchar *pptr;
   unsigned long patternlen;
@@ -81,13 +81,15 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     demand |= SARR_BCKTAB;
   }
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      demand,
                      pmopt->indexname,
                      NULL,
                      err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr)
   {

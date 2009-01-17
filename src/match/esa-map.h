@@ -24,14 +24,12 @@
 void freesuffixarray(Suffixarray *suffixarray);
 
 int streamsuffixarray(Suffixarray *suffixarray,
-                      Seqpos *totallength,
                       unsigned int demand,
                       const GtStr *indexname,
                       Verboseinfo *verboseinfo,
                       GtError *err);
 
 int mapsuffixarray(Suffixarray *suffixarray,
-                   Seqpos *totallength,
                    unsigned int demand,
                    const GtStr *indexname,
                    Verboseinfo *verboseinfo,

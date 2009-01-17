@@ -300,8 +300,8 @@ int testmaxpairs(const GtStr *indexname,
                  GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength, dblen, querylen;
-  Uchar *dbseq, *query;
+  Seqpos totallength = 0, dblen, querylen;
+  Uchar *dbseq = NULL, *query = NULL;
   bool haserr = false;
   unsigned long s;
   GtArray *tabmaxquerymatches;
@@ -309,21 +309,26 @@ int testmaxpairs(const GtStr *indexname,
 
   showverbose(verboseinfo,"draw %lu samples",samples);
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      SARR_ESQTAB,
                      indexname,
                      verboseinfo,
                      err) != 0)
   {
     haserr = true;
-  }
-  srand48(42349421);
-  if (substringlength > totallength/2)
+  } else
   {
-    substringlength = totallength/2;
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
-  ALLOCASSIGNSPACE(dbseq,NULL,Uchar,substringlength);
-  ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
+  if (!haserr)
+  {
+    srand48(42349421);
+    if (substringlength > totallength/2)
+    {
+      substringlength = totallength/2;
+    }
+    ALLOCASSIGNSPACE(dbseq,NULL,Uchar,substringlength);
+    ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
+  }
   for (s=0; s<samples && !haserr; s++)
   {
     dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);

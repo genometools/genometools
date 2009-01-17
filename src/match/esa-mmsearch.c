@@ -366,17 +366,19 @@ int callenumquerymatches(const GtStr *indexname,
                          GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength;
+  Seqpos totallength = 0;
   bool haserr = false;
 
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      SARR_ESQTAB | SARR_SUFTAB,
                      indexname,
                      verboseinfo,
                      err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr && echoquery)
   {

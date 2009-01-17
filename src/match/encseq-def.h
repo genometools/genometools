@@ -201,9 +201,9 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
+                                               bool withesqtab,
                                                bool withdestab,
                                                bool withssptab,
-                                               Seqpos totallength,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                GtError *err);

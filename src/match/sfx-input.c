@@ -182,7 +182,6 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                         Verboseinfo *verboseinfo,
                         GtError *err)
 {
-  Seqpos totallength;
   bool haserr = false;
   Suffixarray *suffixarray;
 
@@ -191,7 +190,6 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   sfxseqinfo->voidptr2suffixarray = NULL;
   INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   if (mapsuffixarray(suffixarray,
-                     &totallength,
                      SARR_ESQTAB,
                      indexname,
                      verboseinfo,

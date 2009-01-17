@@ -118,13 +118,14 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       unsigned long trial, patternLen;
 
       if ((had_err =
-           mapsuffixarray(&suffixarray, &totalLen, SARR_SUFTAB | SARR_ESQTAB,
+           mapsuffixarray(&suffixarray, SARR_SUFTAB | SARR_ESQTAB,
                           inputProject, NULL, err) != 0))
       {
         gt_error_set(err, "Can't load suffix array project with"
                   " demand for encoded sequence and suffix table files\n");
         break;
       }
+      totalLen = getencseqtotallength(suffixarray.encseq);
       saIsLoaded = true;
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))

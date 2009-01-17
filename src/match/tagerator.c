@@ -536,7 +536,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength;
+  Seqpos totallength = 0;
   GtSeqIterator *seqit = NULL;
   bool haserr = false;
   int retval;
@@ -571,13 +571,15 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
   }
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      demand,
                      tageratoroptions->indexname,
                      NULL,
                      err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr)
   {

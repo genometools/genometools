@@ -80,13 +80,17 @@ static Genericindex *genericindex_new(const GtStr *indexname,
   genericindex->withesa = withesa;
   genericindex->suffixarray = gt_malloc(sizeof(*genericindex->suffixarray));
   if (mapsuffixarray(genericindex->suffixarray,
-                     &genericindex->totallength,
                      demand,
                      indexname,
                      NULL,
                      err) != 0)
   {
     haserr = true;
+    genericindex->totallength = 0;
+  } else
+  {
+    genericindex->totallength = getencseqtotallength(genericindex->suffixarray
+                                                                 ->encseq);
   }
   if (!haserr)
   {

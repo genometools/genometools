@@ -464,7 +464,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
     initExtBitsRetrieval(&extBits);
     extBitsAreInitialized = true;
 
-    if (mapsuffixarray(&suffixArray, &seqLen,
+    if (mapsuffixarray(&suffixArray,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
     {
       gt_error_set(err, "Cannot load reference suffix array project with"
@@ -474,7 +474,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       break;
     }
     suffixArrayIsInitialized = true;
-    ++seqLen;
+    seqLen = getencseqtotallength(suffixArray.encseq) + 1;
     if (BWTSeqLength(bwtSeq) != seqLen)
     {
       gt_error_set(err, "length mismatch for suffix array project %s and "

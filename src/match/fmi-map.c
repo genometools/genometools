@@ -150,11 +150,9 @@ static Encodedsequence *mapbwtencoding(const GtStr *indexname,
 {
   Suffixarray suffixarray;
   bool haserr = false;
-  Seqpos totallength;
 
   gt_error_check(err);
-  if (mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
-                     verboseinfo,err) != 0)
+  if (mapsuffixarray(&suffixarray,SARR_ESQTAB,indexname, verboseinfo,err) != 0)
   {
     haserr = true;
   }

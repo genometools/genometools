@@ -77,16 +77,15 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
     /* try to find appropriate suffix source */
     {
       Seqpos len;
-      if (streamsuffixarray(&sa, &len, SARR_SUFTAB, projectName, verbosity,
-                            err))
+      if (streamsuffixarray(&sa, SARR_SUFTAB, projectName, verbosity, err))
       {
         gt_error_unset(err);
-        if (streamsuffixarray(&sa, &len, 0, projectName, verbosity, err))
+        if (streamsuffixarray(&sa, 0, projectName, verbosity, err))
         {
           had_err = true;
           break;
         }
-        ++len;
+        len = getencseqtotallength(sa.encseq) + 1;
         saInitialized = true;
         bwtSeq = loadBWTSeqForSA(projectName, BWT_ON_BLOCK_ENC,
                                  BWTDEFOPT_MULTI_QUERY, &sa, len, err);
@@ -101,7 +100,7 @@ gt_packedindex_mkctxmap(int argc, const char *argv[], GtError *err)
       }
       else
       {
-        ++len;
+        len = getencseqtotallength(sa.encseq) + 1;
         saInitialized = true;
         initSuffixarrayFileInterface(&sai, len, &sa);
         src = SAI2SASS(&sai);

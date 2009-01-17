@@ -198,7 +198,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Emissionmergedesa emmesa;
   Uchar cc;
   Seqpos bwtpos,
-         totallength,
+         totallength = 0,
          suftabvalue = 0,
          *sequenceoffsettable = NULL,
          firstignorespecial = 0,
@@ -226,13 +226,15 @@ int sufbwt2fmindex(Fmindex *fmindex,
     GtStr *indexname = gt_str_array_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
-                          &totallength,
                           SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
                           indexname,
                           verboseinfo,
                           err) != 0)
     {
       haserr = true;
+    } else
+    {
+      totallength = getencseqtotallength(suffixarray.encseq);
     }
     if (!haserr && readSpecialcharinfo(specialcharinfo,indexname,err) != 0)
     {

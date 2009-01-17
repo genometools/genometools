@@ -186,7 +186,6 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   GtStr *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
-  Seqpos totallength;
   int parsed_args;
   Verboseinfo *verboseinfo;
   Sfxmapoptions sfxmapoptions;
@@ -235,7 +234,6 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   }
   if ((sfxmapoptions.usestream ? streamsuffixarray
                                : mapsuffixarray)(&suffixarray,
-                                                 &totallength,
                                                  demand,
                                                  indexname,
                                                  verboseinfo,

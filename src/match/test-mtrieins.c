@@ -76,17 +76,19 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;
-  Seqpos totallength;
+  Seqpos totallength = 0;
 
   gt_error_check(err);
   if (streamsuffixarray(&suffixarray,
-                        &totallength,
                         SARR_ESQTAB,
                         indexname,
                         NULL,
                         err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr)
   {

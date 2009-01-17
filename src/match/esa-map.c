@@ -52,7 +52,6 @@
         }
 
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
-                                 Seqpos *totallength,
                                  const GtStr *indexname,
                                  Verboseinfo *verboseinfo,
                                  FILE *fpin,
@@ -60,22 +59,24 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 {
   uint32_t integersize, littleendian, readmodeint;
   unsigned int linenum;
-  unsigned long numofsequences,
-                numofdbsequences,
-                numofquerysequences,
-                numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
-  Specialcharinfo specialcharinfo; /* local as values are not required:
-                                      they are determined by reading the
-                                      encodedsequence */
+  unsigned long numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
+
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   GtArray *riktab;
   GtStr *currentline;
+  /* the following five variables are local as the parsed values are 
+     not required: they are determined by reading the encodedsequence */
+  Seqpos totallength;
+  Specialcharinfo specialcharinfo;
+  unsigned long numofsequences,
+                numofdbsequences,
+                numofquerysequences;
 
   gt_error_check(err);
   riktab = gt_array_new(sizeofReadintkeys());
-  SETREADINTKEYS("totallength",totallength,NULL);
+  SETREADINTKEYS("totallength",&totallength,NULL);
   SETREADINTKEYS("specialcharacters",
                  &specialcharinfo.specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
@@ -257,7 +258,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->bcktab = NULL;
 }
 
-static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
+static bool scanprjfile(Suffixarray *suffixarray,
                         const GtStr *indexname,Verboseinfo *verboseinfo,
                         GtError *err)
 {
@@ -270,7 +271,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   {
     haserr = true;
   }
-  if (!haserr && scanprjfileviafileptr(suffixarray,totallength,
+  if (!haserr && scanprjfileviafileptr(suffixarray,
                                        indexname,verboseinfo,
                                        fp,err) != 0)
   {
@@ -340,30 +341,31 @@ void freesuffixarray(Suffixarray *suffixarray)
 
 static int inputsuffixarray(bool map,
                             Suffixarray *suffixarray,
-                            Seqpos *totallength,
                             unsigned int demand,
                             const GtStr *indexname,
                             Verboseinfo *verboseinfo,
                             GtError *err)
 {
   bool haserr = false;
+  Seqpos totallength = 0;
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,totallength,indexname,verboseinfo,err);
+  haserr = scanprjfile(suffixarray,indexname,verboseinfo,err);
   if (!haserr)
   {
     haserr = scanal1file(suffixarray,indexname,err);
   }
-  if (!haserr && (demand & (SARR_ESQTAB | SARR_DESTAB | SARR_SSPTAB)))
+  if (!haserr)
   {
     suffixarray->encseq = mapencodedsequence(true,
                                              indexname,
+                                             (demand & SARR_ESQTAB) ? true
+                                                                    : false,
                                              (demand & SARR_DESTAB) ? true
                                                                     : false,
                                              (demand & SARR_SSPTAB) ? true
                                                                     : false,
-                                             *totallength,
                                              getmapsizeAlphabet(suffixarray->
                                                                 alpha),
                                              verboseinfo,
@@ -371,6 +373,9 @@ static int inputsuffixarray(bool map,
     if (suffixarray->encseq == NULL)
     {
       haserr = true;
+    } else
+    {
+      totallength = getencseqtotallength(suffixarray->encseq);
     }
   }
   if (!haserr && (demand & SARR_SUFTAB))
@@ -379,7 +384,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->suftab = genericmaptable(indexname,
                                             SUFTABSUFFIX,
-                                            (unsigned long) (*totallength)+1,
+                                            (unsigned long) (totallength+1),
                                             sizeof (Seqpos),
                                             err);
       if (suffixarray->suftab == NULL)
@@ -403,7 +408,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->lcptab = genericmaptable(indexname,
                                             LCPTABSUFFIX,
-                                            (unsigned long) (*totallength)+1,
+                                            (unsigned long) (totallength+1),
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->lcptab == NULL)
@@ -453,7 +458,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->bwttab = genericmaptable(indexname,
                                             BWTTABSUFFIX,
-                                            (unsigned long) (*totallength)+1,
+                                            (unsigned long) (totallength+1),
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->bwttab == NULL)
@@ -470,7 +475,7 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->bcktab = mapbcktab(indexname,
-                                      *totallength,
+                                      totallength,
                                       getnumofcharsAlphabet(suffixarray->alpha),
                                       suffixarray->prefixlength,
                                       err);
@@ -492,7 +497,6 @@ static int inputsuffixarray(bool map,
 }
 
 int streamsuffixarray(Suffixarray *suffixarray,
-                      Seqpos *totallength,
                       unsigned int demand,
                       const GtStr *indexname,
                       Verboseinfo *verboseinfo,
@@ -501,7 +505,6 @@ int streamsuffixarray(Suffixarray *suffixarray,
   gt_error_check(err);
   return inputsuffixarray(false,
                           suffixarray,
-                          totallength,
                           demand,
                           indexname,
                           verboseinfo,
@@ -509,7 +512,6 @@ int streamsuffixarray(Suffixarray *suffixarray,
 }
 
 int mapsuffixarray(Suffixarray *suffixarray,
-                   Seqpos *totallength,
                    unsigned int demand,
                    const GtStr *indexname,
                    Verboseinfo *verboseinfo,
@@ -519,7 +521,6 @@ int mapsuffixarray(Suffixarray *suffixarray,
   /* printf("sizeof(Suffixarray)=%lu\n",sizeof(Suffixarray)); */
   return inputsuffixarray(true,
                           suffixarray,
-                          totallength,
                           demand,
                           indexname,
                           verboseinfo,
