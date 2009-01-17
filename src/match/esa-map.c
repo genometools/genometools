@@ -64,7 +64,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                 numofdbsequences,
                 numofquerysequences,
                 numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
-  Specialcharinfo specialcharinfo;
+  Specialcharinfo specialcharinfo; /* local as values are not required:
+                                      they are determined by reading the
+                                      encodedsequence */
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;

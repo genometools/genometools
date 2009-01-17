@@ -22,6 +22,9 @@
 
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
 
+/* XXX replace suffixarraytable by structure consisting of encseq and readmode
+ * */
+
 Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
                                Specialcharinfo *specialcharinfo,
                                const Suffixarray *suffixarraytable,

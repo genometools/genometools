@@ -44,16 +44,6 @@ static void allocatefmtables(Fmindex *fm,
                     SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
   if (storeindexpos)
   {
-    Seqpos specialcharacters;
-
-    gt_assert(specialcharinfo != NULL);
-    if (specialcharinfo != NULL)
-    {
-      specialcharacters = specialcharinfo->specialcharacters;
-    } else
-    {
-      specialcharacters = getencseqspecialcharacters(fm->bwtformatching);
-    }
     ALLOCASSIGNSPACE (fm->markpostable,NULL,Seqpos,
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
     fm->specpos.nextfreePairBwtidx = 0;
@@ -61,10 +51,12 @@ static void allocatefmtables(Fmindex *fm,
       = (unsigned long) determinenumberofspecialstostore(specialcharinfo);
     printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
-           (unsigned long) specialcharacters - fm->specpos.allocatedPairBwtidx,
-           PRINTSeqposcast(specialcharacters),
-            (double) (specialcharacters - fm->specpos.allocatedPairBwtidx)/
-                     specialcharacters);
+           (unsigned long) specialcharinfo->specialcharacters -
+                           fm->specpos.allocatedPairBwtidx,
+           PRINTSeqposcast(specialcharinfo->specialcharacters),
+            (double) (specialcharinfo->specialcharacters -
+                      fm->specpos.allocatedPairBwtidx)/
+                     specialcharinfo->specialcharacters);
     ALLOCASSIGNSPACE(fm->specpos.spacePairBwtidx,NULL,PairBwtidx,
                      fm->specpos.allocatedPairBwtidx);
   } else
