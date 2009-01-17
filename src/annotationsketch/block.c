@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
-  Copyright (c)      2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -105,7 +105,8 @@ GtBlock* gt_block_new_from_node(GtFeatureNode *node)
   block->range = gt_genome_node_get_range((GtGenomeNode*) node);
   block->strand = gt_feature_node_get_strand(node);
   block->type = gt_feature_node_get_type(node);
-  block->top_level_feature = gt_feature_node_nonrec_ref(node);
+  if (!gt_feature_node_is_pseudo(node))
+    block->top_level_feature = gt_feature_node_nonrec_ref(node);
   return block;
 }
 

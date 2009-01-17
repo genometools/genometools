@@ -66,6 +66,13 @@ Test do
   run "test -e out.png"
 end
 
+Name "gt sketch multiline without parent"
+Keywords "gt_sketch"
+Test do
+  run_test "#{$bin}gt sketch out.png #{$testdata}gt_sketch_multiline_without_parent.gff3"
+  run "test -e out.png"
+end
+
 Name "gt sketch pipe"
 Keywords "gt_sketch"
 Test do
