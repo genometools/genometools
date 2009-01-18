@@ -810,7 +810,6 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
 
   if (encseq == NULL)
   {
-    STAMP;
     return;
   }
   if (encseq->mappedptr != NULL)
@@ -868,10 +867,8 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   }
   gt_str_array_delete((GtStrArray *) encseq->filenametab);
   encseq->filenametab = NULL;
-    STAMP;
   gt_free((Filelengthvalues *) encseq->filelengthtab);
   encseq->filelengthtab = NULL;
-    STAMP;
   FREESPACE(*encseqptr);
 }
 

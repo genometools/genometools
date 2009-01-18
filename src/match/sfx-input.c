@@ -125,7 +125,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 verboseinfo,
                                 err) != 0)
     {
-      STAMP;
       haserr = true;
       FREESPACE(sfxseqinfo->characterdistribution);
       gt_free(filelengthtab);
@@ -138,6 +137,8 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     {
       haserr = true;
       FREESPACE(sfxseqinfo->characterdistribution);
+      gt_free(filelengthtab);
+      filelengthtab = NULL;
     }
   }
   if (!haserr)
@@ -225,9 +226,7 @@ void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped)
     FREESPACE(sfxseqinfo->voidptr2suffixarray);
   } else
   {
-    STAMP;
     FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
     freeEncodedsequence(&sfxseqinfo->encseq);
-    STAMP;
   }
 }
