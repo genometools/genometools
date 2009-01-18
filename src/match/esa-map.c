@@ -51,11 +51,68 @@
                            FILEBUFFERSIZE);\
         }
 
-static int scanprjfileviafileptr(Suffixarray *suffixarray,
-                                 const GtStr *indexname,
-                                 Verboseinfo *verboseinfo,
-                                 FILE *fpin,
-                                 GtError *err)
+static int scandbfileline(Suffixarray *suffixarray,
+                          unsigned long numoffiles,
+                          const GtStr *currentline,
+                          Verboseinfo *verboseinfo,
+                          GtError *err)
+{
+  char *tmpfilename;
+  int64_t readint1, readint2;
+  unsigned long currentlinelength;
+  bool haserr = false;
+
+  gt_assert(suffixarray->filelengthtab != NULL);
+  currentlinelength = gt_str_length(currentline);
+  ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
+  if (sscanf((const char *) gt_str_get(currentline),
+              "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
+               tmpfilename,
+               SCANint64_tcast(&readint1),
+               SCANint64_tcast(&readint2)) != 3)
+  {
+    gt_error_set(err,"cannot parse line %*.*s",
+                      (int) currentlinelength,
+                      (int) currentlinelength,
+                      (const char *) gt_str_get(currentline));
+    FREESPACE(tmpfilename);
+    FREESPACE(suffixarray->filelengthtab);
+    haserr = true;
+  }
+  if (!haserr && (readint1 < (int64_t) 1 || readint2 < (int64_t) 1))
+  {
+    gt_error_set(err,"need positive integers in line %*.*s",
+                      (int) currentlinelength,
+                      (int) currentlinelength,
+                      (const char *) gt_str_get(currentline));
+    FREESPACE(tmpfilename);
+    FREESPACE(suffixarray->filelengthtab);
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    gt_str_array_add_cstr(suffixarray->filenametab,tmpfilename);
+    FREESPACE(tmpfilename);
+    gt_assert(suffixarray->filelengthtab != NULL);
+    suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
+    suffixarray->filelengthtab[numoffiles].effectivelength = (Seqpos) readint2;
+    showverbose(verboseinfo,
+                "%s%s " Formatuint64_t " " Formatuint64_t,
+                DBFILEKEY,
+                gt_str_array_get(suffixarray->filenametab,numoffiles),
+                PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
+                                  length),
+                PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
+                                  effectivelength));
+  }
+  return haserr ? -1 : 0;
+}
+
+static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
+                                         const GtStr *indexname,
+                                         Verboseinfo *verboseinfo,
+                                         FILE *fpin,
+                                         GtError *err)
 {
   uint32_t integersize, littleendian, readmodeint;
   unsigned int linenum;
@@ -109,61 +166,19 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     if (dbfilelen <= (size_t) currentlinelength &&
        memcmp(DBFILEKEY,gt_str_get(currentline),dbfilelen) == 0)
     {
-      char *tmpfilename;
-      int64_t readint1, readint2;
-
       if (numoffiles >= numofallocatedfiles)
       {
         numofallocatedfiles += 2;
         ALLOCASSIGNSPACE(suffixarray->filelengthtab,suffixarray->filelengthtab,
                          Filelengthvalues,numofallocatedfiles);
       }
-      gt_assert(suffixarray->filelengthtab != NULL);
-      ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
-      if (sscanf((const char *) gt_str_get(currentline),
-                  "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
-                   tmpfilename,
-                   SCANint64_tcast(&readint1),
-                   SCANint64_tcast(&readint2)) != 3)
+      if (scandbfileline(suffixarray,numoffiles,currentline,verboseinfo,
+                         err) != 0)
       {
-        gt_error_set(err,"cannot parse line %*.*s",
-                          (int) currentlinelength,
-                          (int) currentlinelength,
-                          (const char *) gt_str_get(currentline));
-        FREESPACE(tmpfilename);
-        FREESPACE(suffixarray->filelengthtab);
         haserr = true;
         break;
       }
-      if (readint1 < (int64_t) 1 || readint2 < (int64_t) 1)
-      {
-        gt_error_set(err,"need positive integers in line %*.*s",
-                          (int) currentlinelength,
-                          (int) currentlinelength,
-                          (const char *) gt_str_get(currentline));
-        FREESPACE(tmpfilename);
-        FREESPACE(suffixarray->filelengthtab);
-        haserr = true;
-        break;
-      }
-      if (!haserr)
-      {
-        gt_str_array_add_cstr(suffixarray->filenametab,tmpfilename);
-        FREESPACE(tmpfilename);
-        gt_assert(suffixarray->filelengthtab != NULL);
-        suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
-        suffixarray->filelengthtab[numoffiles].effectivelength
-                                               = (Seqpos) readint2;
-        showverbose(verboseinfo,
-                    "%s%s " Formatuint64_t " " Formatuint64_t,
-                    DBFILEKEY,
-                    gt_str_array_get(suffixarray->filenametab,numoffiles),
-                    PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                      length),
-                    PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                      effectivelength));
-        numoffiles++;
-      }
+      numoffiles++;
     } else
     {
       if (analyzeuintline(indexname,
@@ -270,9 +285,9 @@ static bool scanprjfile(Suffixarray *suffixarray,
   {
     haserr = true;
   }
-  if (!haserr && scanprjfileviafileptr(suffixarray,
-                                       indexname,verboseinfo,
-                                       fp,err) != 0)
+  if (!haserr && scanprjfileuintkeysviafileptr(suffixarray,
+                                               indexname,verboseinfo,
+                                               fp,err) != 0)
   {
     haserr = true;
   }
