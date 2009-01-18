@@ -107,6 +107,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     Seqpos idx, maxlcp;
     Codetype code = 0;
     const Codetype **multimappower;
+    const Alphabet *alpha;
 
     if (pmopt->usebcktab)
     {
@@ -118,16 +119,16 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
-                                 getnumofcharsAlphabet(suffixarray.alpha),
                                  err);
     esr1 = newEncodedsequencescanstate();
     esr2 = newEncodedsequencescanstate();
+    alpha = getencseqAlphabet(suffixarray.encseq);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
       if (pmopt->showpatt)
       {
-        printfsymbolstring(suffixarray.alpha,pptr,patternlen);
+        printfsymbolstring(alpha,pptr,patternlen);
         printf("\n");
       }
       if (pmopt->usebcktab)

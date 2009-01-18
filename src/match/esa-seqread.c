@@ -284,13 +284,6 @@ Readmode readmodeSequentialsuffixarrayreader(
 }
 #endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
-const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *ssar)
-{
-  gt_assert(ssar->suffixarray != NULL);
-  return ssar->suffixarray->alpha;
-}
-
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)
 {

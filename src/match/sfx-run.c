@@ -71,7 +71,6 @@ typedef struct
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int prefixlength,
-                           unsigned int numofchars,
                            const Encodedsequence *encseq,
                            const Suffixeratoroptions *so,
                            GtError *err)
@@ -89,7 +88,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
     outfileinfo->outlcpinfo
       = newlcpoutinfo(so->outlcptab ? so->str_indexname : NULL,
                       prefixlength,
-                      numofchars,
+                      getencseqAlphabetnumofchars(encseq),
                       getencseqtotallength(encseq),err);
     if (outfileinfo->outlcpinfo == NULL)
     {
@@ -188,8 +187,6 @@ static int suffixeratorwithoutput(
                  Outfileinfo *outfileinfo,
                  const Encodedsequence *encseq,
                  Readmode readmode,
-                 unsigned int numofchars,
-                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  const Sfxstrategy *sfxstrategy,
@@ -204,8 +201,6 @@ static int suffixeratorwithoutput(
 
   sfi = newSfxiterator(encseq,
                        readmode,
-                       numofchars,
-                       characters,
                        prefixlength,
                        numofparts,
                        outfileinfo->outlcpinfo,
@@ -266,9 +261,7 @@ static void showcharacterdistribution(
 
 static void showsequencefeatures(Verboseinfo *verboseinfo,
                                  const Encodedsequence *encseq,
-                                 const Alphabet *alpha,
-                                 const unsigned long
-                                   *characterdistribution)
+                                 const unsigned long *characterdistribution)
 {
   showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
               PRINTSeqposcast(getencseqspecialcharacters(encseq)));
@@ -278,6 +271,7 @@ static void showsequencefeatures(Verboseinfo *verboseinfo,
               PRINTSeqposcast(getencseqrealspecialranges(encseq)));
   if (characterdistribution != NULL)
   {
+    const Alphabet *alpha = getencseqAlphabet(encseq);
     showcharacterdistribution(alpha,characterdistribution,verboseinfo);
   }
 }
@@ -377,7 +371,6 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        sfxseqinfo->numofsequences,
                        mtime,
                        getencseqtotallength(sfxseqinfo->encseq) + 1,
-                       sfxseqinfo->alpha,
                        sfxseqinfo->characterdistribution,
                        verboseinfo, err);
   if (si == NULL)
@@ -494,14 +487,13 @@ static int runsuffixerator(bool doesa,
   {
     showsequencefeatures(verboseinfo,
                          sfxseqinfo.encseq,
-                         sfxseqinfo.alpha,
                          sfxseqinfo.characterdistribution);
     if (sfxseqinfo.characterdistribution != NULL)
     {
       if (so->readmode == Complementmode ||
           so->readmode == Reversecomplementmode)
       {
-        if (!isdnaalphabet(sfxseqinfo.alpha))
+        if (!isdnaalphabet(getencseqAlphabet(sfxseqinfo.encseq)))
         {
           gt_error_set(err,"option -%s only can be used for DNA alphabets",
                             so->readmode == Complementmode ? "cpl" : "rcl");
@@ -518,7 +510,7 @@ static int runsuffixerator(bool doesa,
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
         !doesa)
     {
-      unsigned int numofchars = getnumofcharsAlphabet(sfxseqinfo.alpha);
+      unsigned int numofchars = getencseqAlphabetnumofchars(sfxseqinfo.encseq);
 
       if (detpfxlenandmaxdepth(&prefixlength,
                                &sfxstrategy.maxdepth,
@@ -549,7 +541,6 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     if (initoutfileinfo(&outfileinfo,prefixlength,
-                        getnumofcharsAlphabet(sfxseqinfo.alpha),
                         sfxseqinfo.encseq,so,err) != 0)
     {
       haserr = true;
@@ -565,8 +556,6 @@ static int runsuffixerator(bool doesa,
                            &outfileinfo,
                            sfxseqinfo.encseq,
                            so->readmode,
-                           getnumofcharsAlphabet(sfxseqinfo.alpha),
-                           getcharactersAlphabet(sfxseqinfo.alpha),
                            prefixlength,
                            so->numofparts,
                            &sfxstrategy,

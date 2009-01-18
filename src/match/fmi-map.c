@@ -148,23 +148,15 @@ static Encodedsequence *mapbwtencoding(const GtStr *indexname,
                                        Verboseinfo *verboseinfo,
                                        GtError *err)
 {
-  Suffixarray suffixarray;
-  bool haserr = false;
-
   gt_error_check(err);
-  if (mapsuffixarray(&suffixarray,SARR_ESQTAB,indexname, verboseinfo,err) != 0)
-  {
-    haserr = true;
-  }
-  freeAlphabet(&suffixarray.alpha);
-  gt_str_array_delete(suffixarray.filenametab);
-  FREESPACE(suffixarray.filelengthtab);
-  if (haserr)
-  {
-    freeEncodedsequence(&suffixarray.encseq);
-    return NULL;
-  }
-  return suffixarray.encseq;
+
+  return mapencodedsequence(true,
+                            indexname,
+                            true,
+                            false,
+                            false,
+                            verboseinfo,
+                            err);
 }
 
 int mapfmindex (Fmindex *fmindex,const GtStr *indexname,

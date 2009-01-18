@@ -70,7 +70,6 @@ void symbolstring2fasta(FILE *fpout,
 }
 
 void encseq2symbolstring(FILE *fpout,
-                         const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
@@ -81,11 +80,13 @@ void encseq2symbolstring(FILE *fpout,
   Seqpos idx, lastpos;
   Uchar currentchar;
   Encodedsequencescanstate *esr;
+  const Alphabet *alpha;
 
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,start);
   gt_assert(width > 0);
   lastpos = start + wlen - 1;
+  alpha = getencseqAlphabet(encseq);
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
     currentchar = sequentialgetencodedchar(encseq,esr,idx,readmode);
@@ -116,14 +117,15 @@ void encseq2symbolstring(FILE *fpout,
 }
 
 void fprintfencseq(FILE *fpout,
-                   const Alphabet *alpha,
                    const Encodedsequence *encseq,
                    Seqpos start,
                    Seqpos wlen)
 {
   Seqpos idx;
   Uchar currentchar;
+  const Alphabet *alpha;
 
+  alpha = getencseqAlphabet(encseq);
   for (idx = start; idx < start + wlen; idx++)
   {
     currentchar = getencodedchar(encseq,idx,Forwardmode);
@@ -134,7 +136,6 @@ void fprintfencseq(FILE *fpout,
 
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
-                        const Alphabet *alpha,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         Seqpos start,
@@ -150,7 +151,6 @@ void encseq2fastaoutput(FILE *fpout,
     fprintf(fpout,">%s\n",desc);
   }
   encseq2symbolstring(fpout,
-                      alpha,
                       encseq,
                       readmode,
                       start,

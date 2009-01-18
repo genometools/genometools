@@ -160,7 +160,6 @@ newSfxInterface(Readmode readmode,
                 unsigned long numofsequences,
                 Measuretime *mtime,
                 Seqpos length,
-                const Alphabet *alpha,
                 const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
                 GtError *err)
@@ -169,7 +168,7 @@ newSfxInterface(Readmode readmode,
                                     numofparts,
                                     sfxstrategy, 0, NULL, NULL, encseq,
                                     numofsequences, mtime,
-                                    length, alpha, characterdistribution,
+                                    length, characterdistribution,
                                     verbosity, err);
 }
 
@@ -222,7 +221,6 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            unsigned long numofsequences,
                            Measuretime *mtime,
                            Seqpos length,
-                           const Alphabet *alpha,
                            const unsigned long *characterdistribution,
                            Verboseinfo *verbosity, GtError *err)
 {
@@ -239,15 +237,13 @@ newSfxInterfaceWithReaders(Readmode readmode,
   }
   sfxi->readmode = readmode;
   sfxi->mtime = mtime;
-  sfxi->alpha = alpha;
   sfxi->encseq = encseq;
+  sfxi->alpha = getencseqAlphabet(encseq);
   sfxi->stats = newSeqStatsFromCharDist(sfxi->alpha, length,
                                          numofsequences,
                                          characterdistribution);
   if (!(sfxi->sfi = newSfxiterator(encseq,
                                    readmode,
-                                   getnumofcharsAlphabet(alpha),
-                                   getcharactersAlphabet(alpha),
                                    prefixlength,
                                    numofparts,
                                    NULL,

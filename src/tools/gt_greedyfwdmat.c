@@ -278,7 +278,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   void *packedindex = NULL;
   Verboseinfo *verboseinfo;
   bool haserr = false;
-  Alphabet *alphabet = NULL;
+  const Alphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
   Seqpos totallength;
   bool mapfmindexfail = false;
@@ -340,7 +340,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       totallength = 0;
     } else
     {
-      alphabet = suffixarray.alpha;
+      alphabet = getencseqAlphabet(suffixarray.encseq);
       prefixlength = suffixarray.prefixlength;
       totallength = getencseqtotallength(suffixarray.encseq);
     }

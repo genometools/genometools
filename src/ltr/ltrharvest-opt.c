@@ -115,13 +115,14 @@ void printargsline(const char **argv, int argc)
 }
 
 /* test the motif and encode the characters by using alpha */
-int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, GtError *err)
+int testmotifandencodemotif (Motif *motif, const Encodedsequence *encseq,
+                             GtError *err)
 {
   const Uchar *symbolmap;
   Uchar c_tab[UCHAR_MAX+1];
   unsigned int i;
 
-  symbolmap = getsymbolmapAlphabet(alpha);
+  symbolmap = getencseqAlphabetsymbolmap(encseq);
   if ( symbolmap[(unsigned int)motif->firstleft] == (Uchar) UNDEFCHAR)
   {
     gt_error_set(err,"Illegal nucleotide character %c "

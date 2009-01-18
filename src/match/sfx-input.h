@@ -29,7 +29,6 @@
 typedef struct
 {
   unsigned long numofsequences;
-  Alphabet *alpha;
   Filelengthvalues *filelengthtab;
   Encodedsequence *encseq;
   unsigned long *characterdistribution;

@@ -354,7 +354,6 @@ int matchspacedseed(bool withesa,
                            withesa,
                            true,
                            0,
-                           getmapsizeAlphabet(genericindex->suffixarray->alpha),
                            genericindex->totallength,
                            (unsigned long) INTWORDSIZE,
                            showmatch,
@@ -363,8 +362,8 @@ int matchspacedseed(bool withesa,
                            NULL, /* processresult info */
                            dfst);
     seqit = gt_seqiterator_new(queryfilenames,
-                               getsymbolmapAlphabet(genericindex->suffixarray
-                                                                ->alpha),
+                               getencseqAlphabetsymbolmap(genericindex->
+                                                          suffixarray->encseq),
                                true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {

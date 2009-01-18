@@ -204,7 +204,6 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                bool withesqtab,
                                                bool withdestab,
                                                bool withssptab,
-                                               unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                GtError *err);
 
@@ -222,7 +221,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       unsigned int mapsize,
+                                       const Alphabet *alpha,
                                        Verboseinfo *verboseinfo);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
@@ -319,5 +318,15 @@ void setencseqspecialcharinfo(Encodedsequence *encseq,
 
 int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
                         const GtStr *indexname,GtError *err);
+
+unsigned int getencseqAlphabetmapsize(const Encodedsequence *encseq);
+
+unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq);
+
+const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq);
+
+const Alphabet *getencseqAlphabet(const Encodedsequence *encseq);
+
+const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
 
 #endif

@@ -64,7 +64,6 @@ struct Dfsstate /* global information */
                 maxocc;
   const Encodedsequence *encseq;
   Readmode readmode;
-  const Alphabet *alpha;
   Processoccurrencecount processoccurrencecount;
   ArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
@@ -180,7 +179,6 @@ static void wrapListSeqpos(ListSeqpos *node)
 }
 
 static void showListSeqpos(const Encodedsequence *encseq,
-                           const Alphabet *alpha,
                            Seqpos mersize,
                            const ListSeqpos *node)
 {
@@ -188,7 +186,7 @@ static void showListSeqpos(const Encodedsequence *encseq,
 
   for (tmp = node; tmp != NULL; tmp = tmp->nextptr)
   {
-    fprintfencseq(stdout,alpha,encseq,tmp->position,mersize);
+    fprintfencseq(stdout,encseq,tmp->position,mersize);
     (void) putchar((int) '\n');
   }
 }
@@ -255,7 +253,6 @@ static void showmerdistribution(const Dfsstate *state)
       if (decideifocc(state,countocc))
       {
         showListSeqpos(state->encseq,
-                       state->alpha,
                        state->mersize,
                        state->occdistribution.spaceCountwithpositions[countocc].
                                               positionlist);
@@ -575,14 +572,13 @@ static int enumeratelcpintervals(const GtStr *str_inputindex,
   INITARRAY(&state.occdistribution,Countwithpositions);
   state.esrspace = newEncodedsequencescanstate();
   state.mersize = (Seqpos) mersize;
-  state.alpha = alphabetSequentialsuffixarrayreader(ssar);
-  alphasize = getnumofcharsAlphabet(state.alpha);
+  state.encseq = encseqSequentialsuffixarrayreader(ssar);
+  alphasize = getencseqAlphabetnumofchars(state.encseq);
   state.readmode = readmodeSequentialsuffixarrayreader(ssar);
   state.storecounts = storecounts;
   state.minocc = minocc;
   state.maxocc = maxocc;
   state.moveforward = ISDIRREVERSE(state.readmode) ? false : true;
-  state.encseq = encseqSequentialsuffixarrayreader(ssar);
   state.totallength = getencseqtotallength(state.encseq);
   state.performtest = performtest;
   state.countoutputmers = 0;

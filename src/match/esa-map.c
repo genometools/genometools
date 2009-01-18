@@ -66,7 +66,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   bool haserr = false;
   GtArray *riktab;
   GtStr *currentline;
-  /* the following five variables are local as the parsed values are 
+  /* the following five variables are local as the parsed values are
      not required: they are determined by reading the encodedsequence */
   Seqpos totallength;
   Specialcharinfo specialcharinfo;
@@ -245,7 +245,6 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->lcptab = NULL;
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
-  suffixarray->alpha = NULL;
   suffixarray->encseq = NULL;
   suffixarray->bwttabstream.fp = NULL;
   suffixarray->suftabstream.fp = NULL;
@@ -281,28 +280,6 @@ static bool scanprjfile(Suffixarray *suffixarray,
   return haserr;
 }
 
-static bool scanal1file(Suffixarray *suffixarray,const GtStr *indexname,
-                        GtError *err)
-{
-  GtStr *tmpfilename;
-  bool haserr = false;
-
-  gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
-  suffixarray->alpha = assigninputalphabet(false,
-                                           false,
-                                           tmpfilename,
-                                           NULL,
-                                           err);
-  if (suffixarray->alpha == NULL)
-  {
-    haserr = true;
-  }
-  gt_str_delete(tmpfilename);
-  return haserr;
-}
-
 void freesuffixarray(Suffixarray *suffixarray)
 {
   gt_fa_xmunmap((void *) suffixarray->suftab);
@@ -325,10 +302,6 @@ void freesuffixarray(Suffixarray *suffixarray)
   gt_fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
   FREESPACE(suffixarray->bwttabstream.bufferedfilespace);
-  if (suffixarray->alpha != NULL)
-  {
-    freeAlphabet(&suffixarray->alpha);
-  }
   freeEncodedsequence(&suffixarray->encseq);
   gt_str_array_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
@@ -351,32 +324,26 @@ static int inputsuffixarray(bool map,
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,indexname,verboseinfo,err);
-  if (!haserr)
+  suffixarray->encseq = mapencodedsequence(true,
+                                           indexname,
+                                           (demand & SARR_ESQTAB) ? true
+                                                                  : false,
+                                           (demand & SARR_DESTAB) ? true
+                                                                  : false,
+                                           (demand & SARR_SSPTAB) ? true
+                                                                  : false,
+                                           verboseinfo,
+                                           err);
+  if (suffixarray->encseq == NULL)
   {
-    haserr = scanal1file(suffixarray,indexname,err);
+    haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray->encseq);
   }
   if (!haserr)
   {
-    suffixarray->encseq = mapencodedsequence(true,
-                                             indexname,
-                                             (demand & SARR_ESQTAB) ? true
-                                                                    : false,
-                                             (demand & SARR_DESTAB) ? true
-                                                                    : false,
-                                             (demand & SARR_SSPTAB) ? true
-                                                                    : false,
-                                             getmapsizeAlphabet(suffixarray->
-                                                                alpha),
-                                             verboseinfo,
-                                             err);
-    if (suffixarray->encseq == NULL)
-    {
-      haserr = true;
-    } else
-    {
-      totallength = getencseqtotallength(suffixarray->encseq);
-    }
+    haserr = scanprjfile(suffixarray,indexname,verboseinfo,err);
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
@@ -476,7 +443,8 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->bcktab = mapbcktab(indexname,
                                       totallength,
-                                      getnumofcharsAlphabet(suffixarray->alpha),
+                                      getencseqAlphabetnumofchars(suffixarray->
+                                                                  encseq),
                                       suffixarray->prefixlength,
                                       err);
       if (suffixarray->bcktab == NULL)

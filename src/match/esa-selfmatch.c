@@ -37,8 +37,6 @@ typedef struct
 static int constructsarrandrunmaxpairs(
                  Substringmatchinfo *ssi,
                  Readmode readmode,
-                 unsigned int numofchars,
-                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Measuretime *mtime,
@@ -53,8 +51,6 @@ static int constructsarrandrunmaxpairs(
 
   sfi = newSfxiterator(ssi->encseq,
                        readmode,
-                       numofchars,
-                       characters,
                        prefixlength,
                        numofparts,
                        NULL, /* oulcpinfo */
@@ -85,7 +81,6 @@ static int constructsarrandrunmaxpairs(
                                                numberofsuffixes);
       firstpage = false;
       if (enumeratemaxpairs(ssar,
-                            numofchars,
                             ssi->encseq,
                             readmode,
                             ssi->minlength,
@@ -130,7 +125,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                      dblen,
                                      query,
                                      querylen,
-                                     getmapsizeAlphabet(alpha),
+                                     alpha,
                                      verboseinfo);
   ssi.minlength = minlength;
   ssi.processmaxmatch = processmaxmatch;
@@ -138,8 +133,6 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmaxpairs(&ssi,
                                   Forwardmode,
-                                  numofchars,
-                                  getcharactersAlphabet(alpha),
                                   recommendedprefixlength(numofchars,
                                                           dblen+querylen+1),
                                   1U, /* parts */

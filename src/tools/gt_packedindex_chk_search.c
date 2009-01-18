@@ -137,7 +137,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       }
       if (params.minPatLen < 0 || params.maxPatLen < 0)
       {
-        unsigned int numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+        unsigned int numofchars
+          = getencseqAlphabetnumofchars(suffixarray.encseq);
         if (params.minPatLen < 0)
           params.minPatLen = recommendedprefixlength(numofchars, totalLen);
         if (params.maxPatLen < 0)
@@ -159,8 +160,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       if ((had_err =
            (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
                                          suffixarray.encseq,
-                                         getnumofcharsAlphabet(
-                                           suffixarray.alpha),
                                          err)) == NULL))
       {
         fputs("Creation of pattern iterator failed!\n", stderr);

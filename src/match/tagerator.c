@@ -104,8 +104,7 @@ static void showmatch(void *processinfo,
   {
     ADDTABULATOR;
     gt_assert(dbsubstring != NULL);
-    printfsymbolstring(showmatchinfo->alpha,dbsubstring,
-                       (unsigned long) dblen);
+    printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
   {
@@ -623,8 +622,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Limdfsresources *limdfsresources = NULL;
 
     storeonline.twlptr = storeoffline.twlptr = &twl;
-    symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
-    mapsize = getmapsizeAlphabet(suffixarray.alpha);
+    symbolmap = getencseqAlphabetsymbolmap(suffixarray.encseq);
+    mapsize = getencseqAlphabetmapsize(suffixarray.encseq);
     if (tageratoroptions->docompare)
     {
       processmatch = storematch;
@@ -637,7 +636,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.twlptr = &twl;
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) (mapsize-1);
-      showmatchinfo.alpha = suffixarray.alpha;
+      showmatchinfo.alpha = getencseqAlphabet(suffixarray.encseq);
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
@@ -689,7 +688,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                            tageratoroptions->withesa,
                                            tageratoroptions->nowildcards,
                                            tageratoroptions->maxintervalwidth,
-                                           mapsize,
                                            totallength,
                                            maxpathlength,
                                            processmatch,
@@ -739,8 +737,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
       {
         printf("\t%lu\t",twl.taglen);
-        fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
-                            twl.taglen);
+        fprintfsymbolstring(stdout,getencseqAlphabet(suffixarray.encseq),
+                            twl.transformedtag,twl.taglen);
       }
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;

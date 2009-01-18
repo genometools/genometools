@@ -397,8 +397,8 @@ int callenumquerymatches(const GtStr *indexname,
     uint64_t unitnum;
 
     seqit = gt_seqiterator_new(queryfiles,
-                              getsymbolmapAlphabet(suffixarray.alpha),
-                              true);
+                               getencseqAlphabetsymbolmap(suffixarray.encseq),
+                               true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
       retval = gt_seqiterator_next(seqit,
@@ -441,8 +441,6 @@ int callenumquerymatches(const GtStr *indexname,
 static int constructsarrandrunmmsearch(
                  const Encodedsequence *dbencseq,
                  Readmode readmode,
-                 unsigned int numofchars,
-                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  const Uchar *query,
@@ -461,8 +459,6 @@ static int constructsarrandrunmmsearch(
 
   sfi = newSfxiterator(dbencseq,
                        readmode,
-                       numofchars,
-                       characters,
                        prefixlength,
                        numofparts,
                        NULL, /* outlcpinfo */
@@ -528,13 +524,11 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                    dblen,
                                    NULL,
                                    0,
-                                   getmapsizeAlphabet(alpha),
+                                   alpha,
                                    verboseinfo);
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
                                   Forwardmode,
-                                  numofchars,
-                                  getcharactersAlphabet(alpha),
                                   recommendedprefixlength(numofchars,dblen),
                                   1U, /* parts */
                                   query,

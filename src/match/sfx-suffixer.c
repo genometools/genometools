@@ -457,8 +457,6 @@ static void showleftborder(const Seqpos *leftborder,
 
 Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             Readmode readmode,
-                            unsigned int numofchars,
-                            const Uchar *characters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
@@ -502,8 +500,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
-    sfi->numofchars = numofchars;
-    sfi->characters = characters;
+    sfi->numofchars = getencseqAlphabetnumofchars(encseq);
+    sfi->characters = getencseqAlphabetcharacters(encseq);
     sfi->prefixlength = prefixlength;
     if (sfxstrategy != NULL)
     {
@@ -534,7 +532,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
     sfi->bcktab = allocBcktab(sfi->totallength,
-                              numofchars,
+                              sfi->numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
                               sfi->storespecialcodes
@@ -565,7 +563,6 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                    readmode,
                    updatekmercount,
                    sfi,
-                   numofchars,
                    prefixlength);
     if (sfi->storespecialcodes)
     {
@@ -577,7 +574,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                               readmode,
                               realspecialranges,
                               prefixlength,
-                              numofchars,
+                              sfi->numofchars,
                               sfi->nextfreeCodeatposition,
                               sfi->spaceCodeatposition);
 #endif
@@ -657,7 +654,6 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->readmode,
                  insertwithoutspecial,
                  sfi,
-                 sfi->numofchars,
                  sfi->prefixlength);
   if (mtime != NULL)
   {

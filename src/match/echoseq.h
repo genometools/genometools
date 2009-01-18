@@ -34,7 +34,6 @@ void symbolstring2fasta(FILE *fpout,
                         unsigned long width);
 
 void encseq2symbolstring(FILE *fpout,
-                         const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
@@ -42,14 +41,12 @@ void encseq2symbolstring(FILE *fpout,
                          unsigned long width);
 
 void fprintfencseq(FILE *fpout,
-                   const Alphabet *alpha,
                    const Encodedsequence *encseq,
                    Seqpos start,
                    Seqpos wlen);
 
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
-                        const Alphabet *alpha,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         Seqpos start,

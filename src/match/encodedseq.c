@@ -129,7 +129,6 @@ typedef uint32_t Uint32;
   /* Common part */
   unsigned long *satcharptr; /* need for writing char */
   Positionaccesstype sat;
-  unsigned int mapsize;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
   Seqpos *totallengthptr,
@@ -155,6 +154,7 @@ typedef uint32_t Uint32;
 
   const char *destab;
   unsigned long destablength;
+  const Alphabet *alpha;      /* alphabet representation */
 
   const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                          numofdbsequences  -1)
@@ -565,6 +565,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   Encodedsequence *encseq = (Encodedsequence *) voidinfo;
   Mapspecification *mapspecptr;
   unsigned long numofunits;
+  unsigned int mapsize;
 
   if (writemode)
   {
@@ -581,8 +582,9 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->totallengthptr,Seqpos,1UL);
   NEWMAPSPEC(encseq->numofdbsequencesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
+  mapsize = getencseqAlphabetmapsize(encseq);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
-             (unsigned long) (encseq->mapsize-1));
+             (unsigned long) (mapsize-1));
   switch (encseq->sat)
   {
     case Viadirectaccess:
@@ -853,6 +855,10 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   {
     gt_fa_xmunmap((void *) encseq->ssptab);
     encseq->ssptab = NULL;
+  }
+  if (encseq->alpha != NULL)
+  {
+    freeAlphabet((Alphabet **) &encseq->alpha);
   }
   FREESPACE(*encseqptr);
 }
@@ -2269,11 +2275,12 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                                  Seqpos totallength,
                                                  unsigned long numofsequences,
                                                  Seqpos specialranges,
-                                                 unsigned int mapsize,
+                                                 const Alphabet *alpha,
                                                  Verboseinfo *verboseinfo)
 {
   double spaceinbitsperchar;
   Encodedsequence *encseq;
+  unsigned int mapsize;
 
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
@@ -2281,7 +2288,6 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   {
     encseq->maxspecialtype = sat2maxspecialtype(sat);
   }
-  encseq->mapsize = mapsize;
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;
   encseq->numofdbsequencesptr = NULL;
@@ -2289,10 +2295,12 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->destab = NULL;
   encseq->destablength = 0;
   encseq->ssptab = NULL;
+  encseq->alpha = alpha;
   encseq->numofspecialstostore = CALLCASTFUNC(Seqpos,unsigned_long,
                                               specialranges);
   encseq->totallength = totallength;
   encseq->numofdbsequences = numofsequences;
+  mapsize = getmapsizeAlphabet(alpha);
   encseq->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,
                                    localdetsizeencseq(sat,totallength,
                                                       specialranges,mapsize));
@@ -2392,6 +2400,31 @@ int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
   }
   *specialcharinfo = firstencseqvalues.specialcharinfo;
   return 0;
+}
+
+unsigned int getencseqAlphabetmapsize(const Encodedsequence *encseq)
+{
+  return getmapsizeAlphabet(encseq->alpha);
+}
+
+unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq)
+{
+  return getnumofcharsAlphabet(encseq->alpha);
+}
+
+const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
+{
+  return getsymbolmapAlphabet(encseq->alpha);
+}
+
+const Alphabet *getencseqAlphabet(const Encodedsequence *encseq)
+{
+  return encseq->alpha;
+}
+
+const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq)
+{
+  return getcharactersAlphabet(encseq->alpha);
 }
 
 static int determinesattype(Seqpos *specialranges,
@@ -2566,7 +2599,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       totallength,
                                       numofsequences,
                                       specialranges,
-                                      getmapsizeAlphabet(alphabet),
+                                      alphabet,
                                       verboseinfo);
     ALLASSIGNAPPENDFUNC(sat);
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
@@ -2598,12 +2631,33 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   return haserr ? NULL : encseq;
 }
 
+static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
+{
+  GtStr *tmpfilename;
+  bool haserr = false;
+  const Alphabet *alpha;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_clone(indexname);
+  gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
+  alpha = assigninputalphabet(false,false,tmpfilename,NULL,err);
+  if (alpha == NULL)
+  {
+    haserr = true;
+  }
+  gt_str_delete(tmpfilename);
+  if (haserr)
+  {
+    freeAlphabet((Alphabet **) &alpha);
+  }
+  return haserr ? NULL : alpha;
+}
+
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
                                                bool withesqtab,
                                                bool withdestab,
                                                bool withssptab,
-                                               unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                GtError *err)
 {
@@ -2611,12 +2665,21 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   bool haserr = false;
   int retcode;
   Firstencseqvalues firstencseqvalues;
+  const Alphabet *alpha;
 
   gt_error_check(err);
-  retcode = readfirstvaluesfromfile(&firstencseqvalues,indexname,err);
-  if (retcode < 0)
+  alpha = scanal1file(indexname,err);
+  if (alpha == NULL)
   {
     haserr = true;
+  }
+  if (!haserr)
+  {
+    retcode = readfirstvaluesfromfile(&firstencseqvalues,indexname,err);
+    if (retcode < 0)
+    {
+      haserr = true;
+    }
   }
   if (!haserr)
   {
@@ -2625,7 +2688,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       firstencseqvalues.numofdbsequences,
                                       firstencseqvalues.specialcharinfo
                                                        .specialranges,
-                                      mapsize,
+                                      alpha,
                                       verboseinfo);
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
@@ -2780,7 +2843,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       unsigned int mapsize,
+                                       const Alphabet *alpha,
                                        Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
@@ -2808,7 +2871,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                     len,
                                     2UL,
                                     samplespecialcharinfo.specialranges,
-                                    mapsize,
+                                    alpha,
                                     verboseinfo);
   encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = seqptr;

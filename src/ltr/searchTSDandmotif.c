@@ -685,7 +685,7 @@ static int searchforTSDandorMotifoutside(
           query,
           (unsigned long) rightlen,
           lo->minlengthTSD,
-          alphabetSequentialsuffixarrayreader(ssar),
+          getencseqAlphabet(encseq),
           subsimpleexactselfmatchstore,
           &subrepeatinfo,
           NULL,

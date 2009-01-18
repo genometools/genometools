@@ -84,7 +84,6 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     bool withesa,
                                     bool nowildcards,
                                     unsigned long maxintervalwidth,
-                                    unsigned int mapsize,
                                     Seqpos totallength,
                                     unsigned long maxpathlength,
                                     Processmatch processmatch,
@@ -94,6 +93,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     const AbstractDfstransformer *adfst)
 {
   Limdfsresources *limdfsresources;
+  unsigned int mapsize = getencseqAlphabetmapsize(encseq);
 
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->bwci.spaceBoundswithchar,NULL,

@@ -57,9 +57,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   encseq = encseqSequentialsuffixarrayreader(ssar);
 
   /* test if motif is valid and encode motif */
-  if (testmotifandencodemotif (&lo->motif,
-                               alphabetSequentialsuffixarrayreader(ssar),
-                               err) != 0)
+  if (testmotifandencodemotif (&lo->motif, encseq, err) != 0)
   {
     had_err = true;
   }
@@ -77,16 +75,13 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   lo->repeatinfo.ssarptr = ssar;
 
   /* search for maximal repeats */
-  if (!had_err && enumeratemaxpairs(ssar,
-                       getnumofcharsAlphabet(
-                         alphabetSequentialsuffixarrayreader(ssar)),
-                       encseq,
-                       readmodeSequentialsuffixarrayreader(ssar),
-                       (unsigned int)lo->minseedlength,
-                       (void*)simpleexactselfmatchstore,
-                       lo,
-                       NULL,
-                       err) != 0)
+  if (!had_err && enumeratemaxpairs(ssar,encseq,
+                                    readmodeSequentialsuffixarrayreader(ssar),
+                                    (unsigned int)lo->minseedlength,
+                                    (void*) simpleexactselfmatchstore,
+                                    lo,
+                                    NULL,
+                                    err) != 0)
   {
     had_err = true;
   }

@@ -47,7 +47,6 @@ typedef struct
 } Sfxmapoptions;
 
 static void deletethespranges(const Encodedsequence *encseq,
-                              const Alphabet *alpha,
                               unsigned long delspranges)
 {
   Specialrangeiterator *sri;
@@ -71,7 +70,6 @@ static void deletethespranges(const Encodedsequence *encseq,
         if (range.leftpos > nextpos)
         {
           encseq2symbolstring(stdout,
-                              alpha,
                               encseq,
                               Forwardmode,
                               nextpos,
@@ -86,7 +84,6 @@ static void deletethespranges(const Encodedsequence *encseq,
   if (nextpos < totallength-1)
   {
     encseq2symbolstring(stdout,
-                        alpha,
                         encseq,
                         Forwardmode,
                         nextpos,
@@ -245,8 +242,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   {
     if (sfxmapoptions.delspranges > 0)
     {
-      deletethespranges(suffixarray.encseq,suffixarray.alpha,
-                        sfxmapoptions.delspranges);
+      deletethespranges(suffixarray.encseq,sfxmapoptions.delspranges);
     } else
     {
       if (!haserr)
@@ -255,7 +251,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
 
         for (readmode = 0; readmode < 4; readmode++)
         {
-          if (isdnaalphabet(suffixarray.alpha) ||
+          if (isdnaalphabet(getencseqAlphabet(suffixarray.encseq)) ||
              ((Readmode) readmode) == Forwardmode ||
              ((Readmode) readmode) == Reversemode)
           {
@@ -264,7 +260,6 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
             if (testencodedsequence(suffixarray.filenametab,
                                     suffixarray.encseq,
                                     (Readmode) readmode,
-                                    getsymbolmapAlphabet(suffixarray.alpha),
                                     sfxmapoptions.scantrials,
                                     sfxmapoptions.multicharcmptrials,
                                     err) != 0)
@@ -317,7 +312,6 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         showverbose(verboseinfo,"checkentiresuftab");
         checkentiresuftab(suffixarray.encseq,
                           suffixarray.readmode,
-                          getcharactersAlphabet(suffixarray.alpha),
                           suffixarray.suftab,
                           ssar,
                           false, /* specialsareequal  */

@@ -105,9 +105,6 @@ const Encodedsequence *encseqSequentialsuffixarrayreader(
 Readmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
-const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *ssar);
-
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);
 

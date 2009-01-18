@@ -217,14 +217,14 @@ int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
   bool haserr = false;
 
   gt_error_check(err);
-  numofchars = getnumofcharsAlphabet(suffixarray->alpha);
+  numofchars = getencseqAlphabetnumofchars(suffixarray->encseq);
   INITARRAY(&codeliststream,Codetype);
   if (getfastastreamkmers(suffixarray->filenametab,
                           outkmeroccurrence,
                           &codeliststream,
                           numofchars,
                           suffixarray->prefixlength,
-                          getsymbolmapAlphabet(suffixarray->alpha),
+                          getencseqAlphabetsymbolmap(suffixarray->encseq),
                           false,
                           err) != 0)
   {
@@ -233,7 +233,7 @@ int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
   if (!haserr)
   {
     if (verifycodelists(suffixarray->encseq,
-                        getcharactersAlphabet(suffixarray->alpha),
+                        getencseqAlphabetcharacters(suffixarray->encseq),
                         suffixarray->prefixlength,
                         numofchars,
                         getencseqtotallength(suffixarray->encseq),

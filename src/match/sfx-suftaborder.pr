@@ -3,7 +3,6 @@ extern "C" {
 #endif
 void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  Readmode readmode,
-                                 const Uchar *characters,
                                  const Seqpos *suftab,
                                  unsigned int prefixlength,
                                  Seqpos depth,
@@ -12,13 +11,11 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
 
 void showentiresuftab(const Encodedsequence *encseq,
                       Readmode readmode,
-                      const Uchar *characters,
                       const Seqpos *suftab,
                       Seqpos depth);
 
 void checkentiresuftab(const Encodedsequence *encseq,
                        Readmode readmode,
-                       const Uchar *characters,
                        const Seqpos *suftab,
                        Sequentialsuffixarrayreader *ssar,
                        bool specialsareequal,

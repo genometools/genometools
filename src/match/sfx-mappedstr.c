@@ -442,15 +442,16 @@ void getencseqkmers(
         Readmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
         void *processkmercodeinfo,
-        unsigned int numofchars,
         unsigned int kmersize)
 {
   Seqpos currentposition = 0, totallength;
   Streamstate spwp;
   Uchar charcode;
   Encodedsequencescanstate *esr;
+  unsigned int numofchars;
 
   totallength = getencseqtotallength(encseq);
+  numofchars = getencseqAlphabetnumofchars(encseq);
   initstreamstate(&spwp,numofchars,kmersize);
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,0);

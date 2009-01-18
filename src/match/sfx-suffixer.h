@@ -31,8 +31,6 @@ void freeSfxiterator(Sfxiterator **sfi);
 
 Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             Readmode readmode,
-                            unsigned int numofchars,
-                            const Uchar *characters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,

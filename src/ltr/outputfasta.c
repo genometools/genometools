@@ -38,8 +38,6 @@ typedef struct
 {
   Sequentialsuffixarrayreader *ssar;
   const Encodedsequence *encseq; /* encoded sequence */
-  const Alphabet *alpha;         /* the alphabet */
-  const Uchar *characters;       /* for visible characters */
   unsigned long *descendtab;     /* positions of desc-separators */
   Seqpos totallength;            /* totallength of encseq */
   unsigned long numofdbsequences; /* num of sequences in suffix array */
@@ -59,7 +57,6 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                          unsigned long seqnum,
                          const char *desc,
                          unsigned long desclength,
-                         const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
@@ -96,7 +93,6 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + wlen));
   encseq2symbolstring(fpout,
-                      alpha,
                       encseq,
                       readmode,
                       start,
@@ -124,7 +120,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   myencseq2symbolstring(info, info->formatout,
                         seqnum, desptr,
                         desclen,
-                        info->alpha, info->encseq,
+                        info->encseq,
                         Forwardmode, startpos,
                         len,
                         60UL);
@@ -194,8 +190,6 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
 
   fastaoutinfo.ssar = ssar;
   fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
-  fastaoutinfo.alpha = alphabetSequentialsuffixarrayreader(ssar);
-  fastaoutinfo.characters = getcharactersAlphabet(fastaoutinfo.alpha);
   fastaoutinfo.totallength = getencseqtotallength(fastaoutinfo.encseq);
   fastaoutinfo.numofdbsequences
     = getencseqnumofdbsequences(fastaoutinfo.encseq);

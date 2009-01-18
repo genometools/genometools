@@ -242,7 +242,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      mapsize = getmapsizeAlphabet(suffixarray.alpha);
+      mapsize = getencseqAlphabetmapsize(suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
@@ -302,7 +302,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      mapsize = getmapsizeAlphabet(emmesa.alpha);
+      mapsize = emmesa.mapsize;
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
     }
   }

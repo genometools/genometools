@@ -41,12 +41,11 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
                 contignumber;
   Seqpos offset;
   const Uchar *characters;
-  const Encodedsequence *encseq =
-     encseqSequentialsuffixarrayreader(ssar);
+  const Encodedsequence *encseq;
 
+  encseq = encseqSequentialsuffixarrayreader(ssar);
   /* in order to get to visible dna characters */
-  characters = getcharactersAlphabet(
-                 alphabetSequentialsuffixarrayreader(ssar));
+  characters = getencseqAlphabetcharacters(encseq);
 
   /* calculate markpos array for sequence offset */
   numofdbsequences = getencseqnumofdbsequences(encseq);

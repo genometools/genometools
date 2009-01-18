@@ -79,6 +79,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   bool haserr = false;
   unsigned int forcetable;
   Specialcharinfo specialcharinfo;
+  const Alphabet *alpha;
   Seqpos specialrangestab[3];
 
   gt_error_check(err);
@@ -89,11 +90,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   sfxseqinfo->readmode = so->readmode;
   sfxseqinfo->filenametab = so->filenametab;
   INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
-  sfxseqinfo->alpha = assigninputalphabet(so->isdna,
-                                          so->isprotein,
-                                          so->str_smap,
-                                          so->filenametab,
-                                          err);
   if (gt_str_length(so->str_sat) > 0)
   {
     forcetable = getsatforcevalue(gt_str_get(so->str_sat));
@@ -101,14 +97,18 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   {
     forcetable = 3U;
   }
-  if (sfxseqinfo->alpha == NULL)
+  alpha = assigninputalphabet(so->isdna,
+                              so->isprotein,
+                              so->str_smap,
+                              so->filenametab,
+                              err);
+  if (alpha == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    sfxseqinfo->characterdistribution
-      = initcharacterdistribution(sfxseqinfo->alpha);
+    sfxseqinfo->characterdistribution = initcharacterdistribution(alpha);
     if (fasta2sequencekeyvalues(so->str_indexname,
                                 &totallength,
                                 &specialcharinfo,
@@ -116,7 +116,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 specialrangestab,
                                 so->filenametab,
                                 &sfxseqinfo->filelengthtab,
-                                sfxseqinfo->alpha,
+                                alpha,
                                 so->isplain,
                                 so->outdestab,
                                 sfxseqinfo->characterdistribution,
@@ -132,7 +132,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (!haserr)
   {
-    if (outal1file(so->str_indexname,sfxseqinfo->alpha,err) != 0)
+    if (outal1file(so->str_indexname,alpha,err) != 0)
     {
       haserr = true;
       FREESPACE(sfxseqinfo->characterdistribution);
@@ -151,7 +151,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                               totallength,
                               sfxseqinfo->sequenceseppos.nextfreeSeqpos+1,
                               specialrangestab,
-                              sfxseqinfo->alpha,
+                              alpha,
                               gt_str_length(so->str_sat) > 0
                                 ? gt_str_get(so->str_sat)
                                 : NULL,
@@ -201,7 +201,6 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   {
     sfxseqinfo->voidptr2suffixarray = suffixarray; /* for freeing it later */
     sfxseqinfo->numofsequences = getencseqnumofdbsequences(suffixarray->encseq);
-    sfxseqinfo->alpha = suffixarray->alpha;
     sfxseqinfo->filelengthtab = suffixarray->filelengthtab;
     sfxseqinfo->readmode = suffixarray->readmode;
     sfxseqinfo->filenametab = suffixarray->filenametab;
@@ -224,10 +223,6 @@ void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped)
   {
     FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
     FREESPACE(sfxseqinfo->filelengthtab);
-    if (sfxseqinfo->alpha != NULL)
-    {
-      freeAlphabet(&sfxseqinfo->alpha);
-    }
     freeEncodedsequence(&sfxseqinfo->encseq);
   }
 }

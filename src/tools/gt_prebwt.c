@@ -105,7 +105,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    unsigned int numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+    unsigned int numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
     Pckbuckettable *pckbt;
 
     pckbt = pckbuckettable_new((const void *) packedindex,

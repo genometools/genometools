@@ -170,7 +170,8 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
   {
     if (withpckbt && pckbuckettableexists(indexname))
     {
-      unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
+      unsigned int numofchars
+        = getencseqAlphabetnumofchars(suffixarray->encseq);
       bwtseq->pckbuckettable = mappckbuckettable(indexname,numofchars,err);
       if (bwtseq->pckbuckettable == NULL)
       {

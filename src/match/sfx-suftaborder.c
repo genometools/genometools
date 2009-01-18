@@ -89,7 +89,6 @@ static void showcomparisonfailure(const char *where,
 
 void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  Readmode readmode,
-                                 const Uchar *characters,
                                  const Seqpos *suftab,
                                  unsigned int prefixlength,
                                  Seqpos depth,
@@ -101,7 +100,9 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   int cmp;
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
+  const Uchar *characters;
 
+  characters = getencseqAlphabetcharacters(encseq);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
@@ -139,13 +140,14 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
 
 void showentiresuftab(const Encodedsequence *encseq,
                       Readmode readmode,
-                      const Uchar *characters,
                       const Seqpos *suftab,
                       Seqpos depth)
 {
   const Seqpos *ptr;
   Seqpos totallength = getencseqtotallength(encseq);
+  const Uchar *characters;
 
+  characters = getencseqAlphabetcharacters(encseq);
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
     printf("suftab[" FormatSeqpos "]=" FormatSeqpos " ",
@@ -158,7 +160,6 @@ void showentiresuftab(const Encodedsequence *encseq,
 
 void checkentiresuftab(const Encodedsequence *encseq,
                        Readmode readmode,
-                       const Uchar *characters,
                        const Seqpos *suftab,
                        Sequentialsuffixarrayreader *ssar,
                        bool specialsareequal,
@@ -173,6 +174,8 @@ void checkentiresuftab(const Encodedsequence *encseq,
   int cmp;
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
+  const Uchar *characters;
+
 #ifdef INLINEDSequentialsuffixarrayreader
   Uchar tmpsmalllcpvalue;
 #else
@@ -202,6 +205,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   FREESPACE(startposoccurs);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
+  characters = getencseqAlphabetcharacters(encseq);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
   {
