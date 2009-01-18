@@ -2081,7 +2081,7 @@ static unsigned int sat2maxspecialtype(Positionaccesstype sat)
   exit(EXIT_FAILURE); /* programming error */
 }
 
-static int addmarkpos(ArraySeqpos *asp,
+static void addmarkpos(ArraySeqpos *asp,
                       const Encodedsequence *encseq,
                       Encodedsequencescanstate *esr,
                       const Sequencerange *seqrange)
@@ -2100,7 +2100,6 @@ static int addmarkpos(ArraySeqpos *asp,
       asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos;
     }
   }
-  return 0;
 }
 
 Seqpos *encseq2markpositions(const Encodedsequence *encseq)
@@ -2108,7 +2107,6 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq)
   ArraySeqpos asp;
   Specialrangeiterator *sri;
   Sequencerange range;
-  bool haserr = false;
   Encodedsequencescanstate *esr;
 
   assert (encseq->numofdbsequences > 1UL);
@@ -2119,27 +2117,17 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq)
   esr = newEncodedsequencescanstate();
   while (nextspecialrangeiterator(&range,sri))
   {
-    if (addmarkpos(&asp,encseq,esr,&range) != 0)
-    {
-      haserr = true;
-      break;
-    }
+    addmarkpos(&asp,encseq,esr,&range);
   }
   freespecialrangeiterator(&sri);
   freeEncodedsequencescanstate(&esr);
-  if (haserr)
-  {
-    FREEARRAY(&asp,Seqpos);
-    return NULL;
-  }
   return asp.spaceSeqpos;
 }
 
 unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
                                  unsigned long numofrecords,
                                  Seqpos totalwidth,
-                                 Seqpos position,
-                                 GtError *err)
+                                 Seqpos position)
 {
   unsigned long left, mid, right, len;
 
@@ -2154,9 +2142,9 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
     {
       return numofrecords - 1;
     }
-    gt_error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
-                  PRINTSeqposcast(position));
-    return numofrecords; /* failure */
+    fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+                  PRINTSeqposcast(position)); /* program error */
+    exit(EXIT_FAILURE); /* program failure */
   }
   left = 0;
   right = numofrecords - 2;
@@ -2184,9 +2172,9 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
       right = mid-1;
     }
   }
-  gt_error_set(err,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
+  fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                 PRINTSeqposcast(position));
-  return numofrecords; /* failure */
+  exit(EXIT_FAILURE);
 }
 
 static void getunitSeqinfo(Seqinfo *seqinfo,
@@ -2228,10 +2216,8 @@ void getencseqSeqinfo(Seqinfo *seqinfo,const Encodedsequence *encseq,
                  seqnum);
 }
 
-int checkmarkpos(const Encodedsequence *encseq,GtError *err)
+void checkmarkpos(const Encodedsequence *encseq)
 {
-  bool haserr = false;
-
   if (encseq->numofdbsequences > 1UL)
   {
     Seqpos *markpos, totallength, pos;
@@ -2240,10 +2226,6 @@ int checkmarkpos(const Encodedsequence *encseq,GtError *err)
     Encodedsequencescanstate *esr;
 
     markpos = encseq2markpositions(encseq);
-    if (markpos == NULL)
-    {
-      return -1;
-    }
     totallength = getencseqtotallength(encseq);
     esr = newEncodedsequencescanstate();
     initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
@@ -2258,13 +2240,7 @@ int checkmarkpos(const Encodedsequence *encseq,GtError *err)
         seqnum = getrecordnumSeqpos(markpos,
                                     encseq->numofdbsequences,
                                     totallength,
-                                    pos,
-                                    err);
-        if (seqnum == encseq->numofdbsequences)
-        {
-          haserr = true;
-          break;
-        }
+                                    pos);
         if (seqnum != currentseqnum)
         {
           fprintf(stderr,"pos= " FormatSeqpos
@@ -2277,7 +2253,6 @@ int checkmarkpos(const Encodedsequence *encseq,GtError *err)
     freeEncodedsequencescanstate(&esr);
     FREESPACE(markpos);
   }
-  return haserr ? -1 : 0;
 }
 
 static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,

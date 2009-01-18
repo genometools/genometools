@@ -292,13 +292,12 @@ unsigned int getsatforcevalue(const char *str);
 
 Seqpos *encseq2markpositions(const Encodedsequence *encseq);
 
-int checkmarkpos(const Encodedsequence *encseq,GtError *err);
+void checkmarkpos(const Encodedsequence *encseq);
 
 unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
                                  unsigned long numofrecords,
                                  Seqpos totalwidth,
-                                 Seqpos position,
-                                 GtError *err);
+                                 Seqpos position);
 
 const Seqpos *getencseqssptab(const Encodedsequence *encseq);
 

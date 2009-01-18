@@ -86,7 +86,7 @@ int simpleexactselfmatchstore (
   if ( numofdbsequences < 2UL )
   {
     samecontig = true;
-    contignumber = (unsigned long)0;
+    contignumber = 0;
   }
   /* at least two db sequences */
   else
@@ -94,18 +94,10 @@ int simpleexactselfmatchstore (
     gt_assert(info->markpos != NULL);
     totallength = getencseqtotallength(encseq);
     seqnum1 = getrecordnumSeqpos(info->markpos, numofdbsequences,
-                      totallength, pos1, err);
-    if ( seqnum1 == numofdbsequences)
-    {
-      return -1;
-    }
+                                 totallength, pos1);
 
     seqnum2 = getrecordnumSeqpos(info->markpos, numofdbsequences,
-                      totallength, pos2, err);
-    if ( seqnum2 == numofdbsequences)
-    {
-      return -1;
-    }
+                                 totallength, pos2);
 
     if ( seqnum1 == seqnum2 )
     {

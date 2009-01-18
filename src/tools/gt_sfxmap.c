@@ -281,10 +281,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       if (!haserr)
       {
         showverbose(verboseinfo,"checkmarkpos");
-        if (checkmarkpos(suffixarray.encseq,err) != 0)
-        {
-          haserr = true;
-        }
+        checkmarkpos(suffixarray.encseq);
       }
       if (!haserr && suffixarray.readmode == Forwardmode &&
           suffixarray.prefixlength > 0)

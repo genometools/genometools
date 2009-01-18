@@ -171,7 +171,7 @@ static void sortedltrboundaries(const ArrayLTRboundaries *ltr)
   unsigned long countboundaries = 0, nextfill = 0;
   const LTRboundaries *bd, **bdptrtab;
 
-  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries + 
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
                                           ltr->nextfreeLTRboundaries; bd++)
   {
     if (!bd->skipped)
@@ -181,7 +181,7 @@ static void sortedltrboundaries(const ArrayLTRboundaries *ltr)
   }
   bdptrtab = gt_malloc(sizeof(LTRboundaries *) * countboundaries);
   nextfill = 0;
-  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries + 
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
                                           ltr->nextfreeLTRboundaries; bd++)
   {
     if (!bd->skipped)
@@ -189,7 +189,7 @@ static void sortedltrboundaries(const ArrayLTRboundaries *ltr)
       bdptrtab[nextfill++] = bd;
     }
   }
-  qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *), 
+  qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *),
         bdptrcompare);
   gt_free(bdptrtab);
 }

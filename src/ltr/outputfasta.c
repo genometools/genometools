@@ -100,16 +100,15 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                       width);
 }
 
-static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
+static void showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                                        Seqpos len,
-                                       GT_UNUSED GtStr *str_indexfilename,
-                                       GtError *err)
+                                       GT_UNUSED GtStr *str_indexfilename)
 {
   unsigned long desclen;
   const char *desptr;
   unsigned long seqnum =
                   getrecordnumSeqpos(info->markpos, info->numofdbsequences,
-                                     info->totallength, startpos, err);
+                                     info->totallength, startpos);
 
   /* if there are sequence descriptions */
   desptr = retrievesequencedescription(&desclen,
@@ -124,18 +123,16 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                         Forwardmode, startpos,
                         len,
                         60UL);
-  return 0;
 }
 
 /*
  The following function processes all predicted LTR elements with
  the function from the apply pointer.
  */
-static int overallpredictionsequences(const LTRharvestoptions *lo,
+static void overallpredictionsequences(const LTRharvestoptions *lo,
     bool innerregion,
     void *applyinfo,
-    int(*apply)(Fastaoutinfo *,Seqpos, Seqpos, GtStr*, GtError *err),
-    GtError *err)
+    void(*apply)(Fastaoutinfo *,Seqpos, Seqpos, GtStr*))
 {
   unsigned long i;
   Seqpos start,
@@ -157,15 +154,11 @@ static int overallpredictionsequences(const LTRharvestoptions *lo,
         start = boundaries->leftLTR_5;
         end = boundaries->rightLTR_3;
       }
-      if (apply(applyinfo,
-               innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
-               end - start + 1, lo->str_indexname, err) != 0)
-      {
-        return -1;
-      }
+      apply(applyinfo,
+            innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
+            end - start + 1, lo->str_indexname);
     }
   }
-  return 0;
 }
 
 /*
@@ -204,11 +197,8 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
     fastaoutinfo.formatout = formatout;
     fastaoutinfo.markpos = lo->markpos;
     fastaoutinfo.descendtab = calcdescendpositions(fastaoutinfo.encseq);
-    if (overallpredictionsequences(lo, innerregion, &fastaoutinfo,
-                                   showpredictionfastasequence, err) != 0)
-    {
-      had_err = true;
-    }
+    overallpredictionsequences(lo, innerregion, &fastaoutinfo,
+                               showpredictionfastasequence);
     gt_free(fastaoutinfo.descendtab);
   }
   gt_fa_xfclose(formatout);
