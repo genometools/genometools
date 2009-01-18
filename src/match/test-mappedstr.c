@@ -219,7 +219,7 @@ int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
   gt_error_check(err);
   numofchars = getencseqAlphabetnumofchars(suffixarray->encseq);
   INITARRAY(&codeliststream,Codetype);
-  if (getfastastreamkmers(suffixarray->filenametab,
+  if (getfastastreamkmers(getencseqfilenametab(suffixarray->encseq),
                           outkmeroccurrence,
                           &codeliststream,
                           numofchars,

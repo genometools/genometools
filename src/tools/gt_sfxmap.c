@@ -257,7 +257,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           {
             showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
                                     showreadmode((Readmode) readmode));
-            if (testencodedsequence(suffixarray.filenametab,
+            if (testencodedsequence(getencseqfilenametab(suffixarray.encseq),
                                     suffixarray.encseq,
                                     (Readmode) readmode,
                                     sfxmapoptions.scantrials,

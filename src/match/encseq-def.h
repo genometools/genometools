@@ -23,6 +23,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
+#include "core/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "intbits.h"
@@ -30,6 +31,7 @@
 #include "verbose-def.h"
 
 #define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
+#define DBFILEKEY "dbfile="
 
 #ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
@@ -187,8 +189,8 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
 /*@null@*/ Encodedsequence *files2encodedsequence(
                                     bool withrange,
-                                    const GtStrArray
-                                    *filenametab,
+                                    const GtStrArray *filenametab,
+                                    const Filelengthvalues *filelengthtab,
                                     bool plainformat,
                                     Seqpos totallength,
                                     unsigned long numofsequences,
@@ -330,5 +332,11 @@ const Alphabet *getencseqAlphabet(const Encodedsequence *encseq);
 const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
 
 void removealpharef(Encodedsequence *encseq);
+
+const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
+
+const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
+
+void removefilenametabref(Encodedsequence *encseq);
 
 #endif

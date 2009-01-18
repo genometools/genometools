@@ -35,8 +35,6 @@
 #include "stamp.h"
 #include "opensfxfile.h"
 
-#define DBFILEKEY "dbfile="
-
 #define INITBufferedfile(INDEXNAME,STREAM,TYPE,SUFFIX)\
         (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",err);\
         if ((STREAM)->fp == NULL)\
@@ -51,63 +49,6 @@
                            FILEBUFFERSIZE);\
         }
 
-static int scandbfileline(Suffixarray *suffixarray,
-                          unsigned long numoffiles,
-                          const GtStr *currentline,
-                          Verboseinfo *verboseinfo,
-                          GtError *err)
-{
-  char *tmpfilename;
-  int64_t readint1, readint2;
-  unsigned long currentlinelength;
-  bool haserr = false;
-
-  gt_assert(suffixarray->filelengthtab != NULL);
-  currentlinelength = gt_str_length(currentline);
-  ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
-  if (sscanf((const char *) gt_str_get(currentline),
-              "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
-               tmpfilename,
-               SCANint64_tcast(&readint1),
-               SCANint64_tcast(&readint2)) != 3)
-  {
-    gt_error_set(err,"cannot parse line %*.*s",
-                      (int) currentlinelength,
-                      (int) currentlinelength,
-                      (const char *) gt_str_get(currentline));
-    FREESPACE(tmpfilename);
-    FREESPACE(suffixarray->filelengthtab);
-    haserr = true;
-  }
-  if (!haserr && (readint1 < (int64_t) 1 || readint2 < (int64_t) 1))
-  {
-    gt_error_set(err,"need positive integers in line %*.*s",
-                      (int) currentlinelength,
-                      (int) currentlinelength,
-                      (const char *) gt_str_get(currentline));
-    FREESPACE(tmpfilename);
-    FREESPACE(suffixarray->filelengthtab);
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    gt_str_array_add_cstr(suffixarray->filenametab,tmpfilename);
-    FREESPACE(tmpfilename);
-    gt_assert(suffixarray->filelengthtab != NULL);
-    suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
-    suffixarray->filelengthtab[numoffiles].effectivelength = (Seqpos) readint2;
-    showverbose(verboseinfo,
-                "%s%s " Formatuint64_t " " Formatuint64_t,
-                DBFILEKEY,
-                gt_str_array_get(suffixarray->filenametab,numoffiles),
-                PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                  length),
-                PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                  effectivelength));
-  }
-  return haserr ? -1 : 0;
-}
-
 static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                                          const GtStr *indexname,
                                          Verboseinfo *verboseinfo,
@@ -116,7 +57,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
 {
   uint32_t integersize, littleendian, readmodeint;
   unsigned int linenum;
-  unsigned long numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
+  unsigned long currentlinelength;
 
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
@@ -157,8 +98,6 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
   SETREADINTKEYS("readmode",&readmodeint,NULL);
-  suffixarray->filenametab = gt_str_array_new();
-  suffixarray->filelengthtab = NULL;
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
   {
@@ -166,19 +105,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
     if (dbfilelen <= (size_t) currentlinelength &&
        memcmp(DBFILEKEY,gt_str_get(currentline),dbfilelen) == 0)
     {
-      if (numoffiles >= numofallocatedfiles)
-      {
-        numofallocatedfiles += 2;
-        ALLOCASSIGNSPACE(suffixarray->filelengthtab,suffixarray->filelengthtab,
-                         Filelengthvalues,numofallocatedfiles);
-      }
-      if (scandbfileline(suffixarray,numoffiles,currentline,verboseinfo,
-                         err) != 0)
-      {
-        haserr = true;
-        break;
-      }
-      numoffiles++;
+      /* Nothing */
     } else
     {
       if (analyzeuintline(indexname,
@@ -253,8 +180,6 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
 
 static void initsuffixarray(Suffixarray *suffixarray)
 {
-  suffixarray->filelengthtab = NULL;
-  suffixarray->filenametab = NULL;
   suffixarray->encseq = NULL;
   suffixarray->suftab = NULL;
   suffixarray->lcptab = NULL;
@@ -272,9 +197,10 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->bcktab = NULL;
 }
 
-static bool scanprjfile(Suffixarray *suffixarray,
-                        const GtStr *indexname,Verboseinfo *verboseinfo,
-                        GtError *err)
+static bool scanprjfileuintkeys(Suffixarray *suffixarray,
+                                const GtStr *indexname,
+                                Verboseinfo *verboseinfo,
+                                GtError *err)
 {
   bool haserr = false;
   FILE *fp;
@@ -318,9 +244,6 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttabstream.fp = NULL;
   FREESPACE(suffixarray->bwttabstream.bufferedfilespace);
   freeEncodedsequence(&suffixarray->encseq);
-  gt_str_array_delete(suffixarray->filenametab);
-  suffixarray->filenametab = NULL;
-  FREESPACE(suffixarray->filelengthtab);
   if (suffixarray->bcktab != NULL)
   {
     freebcktab(&suffixarray->bcktab);
@@ -358,7 +281,7 @@ static int inputsuffixarray(bool map,
   }
   if (!haserr)
   {
-    haserr = scanprjfile(suffixarray,indexname,verboseinfo,err);
+    haserr = scanprjfileuintkeys(suffixarray,indexname,verboseinfo,err);
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {

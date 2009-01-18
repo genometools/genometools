@@ -506,6 +506,7 @@ static int runsuffixerator(bool doesa,
   sfxstrategy.maxdepth.defined = false;
   if (!haserr)
   {
+    STAMP;
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
         !doesa)
     {
@@ -539,14 +540,17 @@ static int runsuffixerator(bool doesa,
   outfileinfo.outfpbcktab = NULL;
   if (!haserr)
   {
+    STAMP;
     if (initoutfileinfo(&outfileinfo,prefixlength,
                         sfxseqinfo.encseq,so,err) != 0)
     {
+      STAMP;
       haserr = true;
     }
   }
   if (!haserr)
   {
+    STAMP;
     if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
     {
       if (doesa)
@@ -596,11 +600,8 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-    gt_assert(sfxseqinfo.filelengthtab != NULL);
     if (outprjfile(so->str_indexname,
-                   sfxseqinfo.filenametab,
                    sfxseqinfo.readmode,
-                   sfxseqinfo.filelengthtab,
                    sfxseqinfo.encseq,
                    prefixlength,
                    &sfxstrategy.maxdepth,
@@ -610,6 +611,10 @@ static int runsuffixerator(bool doesa,
                    err) != 0)
     {
       haserr = true;
+    }
+    if (gt_str_length(so->str_inputindex) == 0)
+    {
+      removefilenametabref(sfxseqinfo.encseq);
     }
   }
   if (outfileinfo.outlcpinfo != NULL)

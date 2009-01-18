@@ -28,11 +28,9 @@
 
 typedef struct
 {
-  Filelengthvalues *filelengthtab;
   Encodedsequence *encseq;
   unsigned long *characterdistribution;
   Readmode readmode;
-  GtStrArray *filenametab;
   void *voidptr2suffixarray;
   ArraySeqpos sequenceseppos;
 } Sfxseqinfo;

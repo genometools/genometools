@@ -81,15 +81,14 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   Specialcharinfo specialcharinfo;
   const Alphabet *alpha;
   bool alphaisbound = false;
+  Filelengthvalues *filelengthtab = NULL;
   Seqpos specialrangestab[3];
 
   gt_error_check(err);
   sfxseqinfo->voidptr2suffixarray = NULL;
-  sfxseqinfo->filelengthtab = NULL;
   sfxseqinfo->encseq = NULL;
   sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = so->readmode;
-  sfxseqinfo->filenametab = so->filenametab;
   INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
   if (gt_str_length(so->str_sat) > 0)
   {
@@ -116,7 +115,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 forcetable,
                                 specialrangestab,
                                 so->filenametab,
-                                &sfxseqinfo->filelengthtab,
+                                &filelengthtab,
                                 alpha,
                                 so->isplain,
                                 so->outdestab,
@@ -126,8 +125,11 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 verboseinfo,
                                 err) != 0)
     {
+      STAMP;
       haserr = true;
       FREESPACE(sfxseqinfo->characterdistribution);
+      gt_free(filelengthtab);
+      filelengthtab = NULL;
     }
   }
   if (!haserr)
@@ -147,6 +149,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     sfxseqinfo->encseq
       = files2encodedsequence(true,
                               so->filenametab,
+                              filelengthtab,
                               so->isplain,
                               totallength,
                               sfxseqinfo->sequenceseppos.nextfreeSeqpos+1,
@@ -205,10 +208,7 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   } else
   {
     sfxseqinfo->voidptr2suffixarray = suffixarray; /* for freeing it later */
-    sfxseqinfo->filelengthtab = suffixarray->filelengthtab;
     sfxseqinfo->readmode = suffixarray->readmode;
-    sfxseqinfo->filenametab = suffixarray->filenametab;
-    gt_assert(sfxseqinfo->filelengthtab != NULL);
     sfxseqinfo->encseq = suffixarray->encseq;
   }
   return haserr ? -1 : 0;
@@ -225,8 +225,9 @@ void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped)
     FREESPACE(sfxseqinfo->voidptr2suffixarray);
   } else
   {
+    STAMP;
     FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
-    FREESPACE(sfxseqinfo->filelengthtab);
     freeEncodedsequence(&sfxseqinfo->encseq);
+    STAMP;
   }
 }

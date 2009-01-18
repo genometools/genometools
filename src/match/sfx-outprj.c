@@ -40,9 +40,7 @@
                 PRINTSeqposcast(getencseq##VAL(encseq)))
 
 static void showprjinfo(FILE *outprj,
-                        const GtStrArray *filenametab,
                         Readmode readmode,
-                        const Filelengthvalues *filelengthtab,
                         const Encodedsequence *encseq,
                         unsigned int prefixlength,
                         GT_UNUSED const Definedunsignedint *maxdepth,
@@ -53,7 +51,11 @@ static void showprjinfo(FILE *outprj,
   unsigned long i;
   Seqpos totallength;
   unsigned long numofsequences;
+  const GtStrArray *filenametab;
+  const Filelengthvalues *filelengthtab;
 
+  filenametab = getencseqfilenametab(encseq);
+  filelengthtab = getencseqfilelengthtab(encseq);
   gt_assert(filelengthtab != NULL);
   gt_assert(filenametab != NULL);
   for (i=0; i<gt_str_array_size(filenametab); i++)
@@ -97,9 +99,7 @@ static void showprjinfo(FILE *outprj,
 }
 
 int outprjfile(const GtStr *indexname,
-               const GtStrArray *filenametab,
                Readmode readmode,
-               const Filelengthvalues *filelengthtab,
                const Encodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
@@ -120,9 +120,7 @@ int outprjfile(const GtStr *indexname,
   if (!haserr)
   {
     showprjinfo(prjfp,
-                filenametab,
                 readmode,
-                filelengthtab,
                 encseq,
                 prefixlength,
                 maxdepth,
