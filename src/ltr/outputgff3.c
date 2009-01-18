@@ -149,6 +149,51 @@ static void showboundaries(FILE *fp,
   }
 }
 
+static int bdptrcompare(const void *a, const void *b)
+{
+  const LTRboundaries *bda, *bdb;
+
+  bda = (const LTRboundaries *) a;
+  bdb = (const LTRboundaries *) b;
+  if (bda->contignumber < bdb->contignumber)
+  {
+    return -1;
+  }
+  if (bda->contignumber > bdb->contignumber)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+static void sortedltrboundaries(const ArrayLTRboundaries *ltr)
+{
+  unsigned long countboundaries = 0, nextfill = 0;
+  const LTRboundaries *bd, **bdptrtab;
+
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries + 
+                                          ltr->nextfreeLTRboundaries; bd++)
+  {
+    if (!bd->skipped)
+    {
+      countboundaries++;
+    }
+  }
+  bdptrtab = gt_malloc(sizeof(LTRboundaries *) * countboundaries);
+  nextfill = 0;
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries + 
+                                          ltr->nextfreeLTRboundaries; bd++)
+  {
+    if (!bd->skipped)
+    {
+      bdptrtab[nextfill++] = bd;
+    }
+  }
+  qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *), 
+        bdptrcompare);
+  gt_free(bdptrtab);
+}
+
 int printgff3format(const LTRharvestoptions *lo,
                     const Encodedsequence *encseq,
                     GtError *err)
@@ -180,6 +225,7 @@ int printgff3format(const LTRharvestoptions *lo,
                               = ltrc.idcounterTSD
                               = ltrc.idcounterMotif = 0;
 
+      sortedltrboundaries(&lo->arrayLTRboundaries);
       fprintf(fp, "##gff-version 3\n");
       /* print output sorted by contignumber */
       for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
