@@ -38,13 +38,12 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "divmodmul.h"
-#include "sarr-def.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "alphadef.h"
 #include "format64.h"
-#include "esa-map.h"
 #include "echoseq.h"
+#include "encseq-def.h"
 
 #include "esa-selfmatch.pr"
 #include "arrcmp.pr"
@@ -299,7 +298,7 @@ int testmaxpairs(const GtStr *indexname,
                  Verboseinfo *verboseinfo,
                  GtError *err)
 {
-  Suffixarray suffixarray;
+  Encodedsequence *encseq;
   Seqpos totallength = 0, dblen, querylen;
   Uchar *dbseq = NULL, *query = NULL;
   bool haserr = false;
@@ -308,16 +307,19 @@ int testmaxpairs(const GtStr *indexname,
   Maxmatchselfinfo maxmatchselfinfo;
 
   showverbose(verboseinfo,"draw %lu samples",samples);
-  if (mapsuffixarray(&suffixarray,
-                     SARR_ESQTAB,
-                     indexname,
-                     verboseinfo,
-                     err) != 0)
+  encseq = mapencodedsequence(true,
+                              indexname,
+                              true,
+                              false,
+                              false,
+                              verboseinfo,
+                              err);
+  if (encseq == NULL)
   {
     haserr = true;
   } else
   {
-    totallength = getencseqtotallength(suffixarray.encseq);
+    totallength = getencseqtotallength(encseq);
   }
   if (!haserr)
   {
@@ -331,8 +333,8 @@ int testmaxpairs(const GtStr *indexname,
   }
   for (s=0; s<samples && !haserr; s++)
   {
-    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
-    querylen = samplesubstring(query,suffixarray.encseq,substringlength);
+    dblen = samplesubstring(dbseq,encseq,substringlength);
+    querylen = samplesubstring(query,encseq,substringlength);
     showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
@@ -342,7 +344,7 @@ int testmaxpairs(const GtStr *indexname,
                                 query,
                                 (unsigned long) querylen,
                                 minlength,
-                                getencseqAlphabet(suffixarray.encseq),
+                                getencseqAlphabet(encseq),
                                 storemaxmatchquery,
                                 tabmaxquerymatches,
                                 verboseinfo,
@@ -365,7 +367,7 @@ int testmaxpairs(const GtStr *indexname,
                                query,
                                (unsigned long) querylen,
                                minlength,
-                               getencseqAlphabet(suffixarray.encseq),
+                               getencseqAlphabet(encseq),
                                storemaxmatchself,
                                &maxmatchselfinfo,
                                verboseinfo,
@@ -387,12 +389,12 @@ int testmaxpairs(const GtStr *indexname,
       (void) gt_array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,err);
       symbolstring2fasta(stdout,"dbseq",
-                         getencseqAlphabet(suffixarray.encseq),
+                         getencseqAlphabet(encseq),
                          dbseq,
                          (unsigned long) dblen,
                          width);
       symbolstring2fasta(stdout,"queryseq",
-                         getencseqAlphabet(suffixarray.encseq),
+                         getencseqAlphabet(encseq),
                          query,
                          (unsigned long) querylen,
                          width);
@@ -405,7 +407,7 @@ int testmaxpairs(const GtStr *indexname,
   }
   FREESPACE(dbseq);
   FREESPACE(query);
-  freesuffixarray(&suffixarray);
+  freeEncodedsequence(&encseq);
   return haserr ? -1 : 0;
 }
 
