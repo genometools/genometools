@@ -368,7 +368,6 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        so->numofparts,
                        sfxstrategy,
                        sfxseqinfo->encseq,
-                       sfxseqinfo->numofsequences,
                        mtime,
                        getencseqtotallength(sfxseqinfo->encseq) + 1,
                        sfxseqinfo->characterdistribution,
@@ -597,14 +596,11 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-    gt_assert(sfxseqinfo.numofsequences > 0);
     gt_assert(sfxseqinfo.filelengthtab != NULL);
     if (outprjfile(so->str_indexname,
                    sfxseqinfo.filenametab,
                    sfxseqinfo.readmode,
                    sfxseqinfo.filelengthtab,
-                   totallength,
-                   sfxseqinfo.numofsequences,
                    sfxseqinfo.encseq,
                    prefixlength,
                    &sfxstrategy.maxdepth,
@@ -620,12 +616,6 @@ static int runsuffixerator(bool doesa,
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
-  /*
-  if (haserr && sfxseqinfo.characterdistribution != NULL)
-  {
-    FREESPACE(sfxseqinfo.characterdistribution);
-  }
-  */
   freeSfxseqinfo(&sfxseqinfo,
                  (gt_str_length(so->str_inputindex) > 0) ? true : false);
   if (mtime != NULL)

@@ -329,4 +329,6 @@ const Alphabet *getencseqAlphabet(const Encodedsequence *encseq);
 
 const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
 
+void removealpharef(Encodedsequence *encseq);
+
 #endif

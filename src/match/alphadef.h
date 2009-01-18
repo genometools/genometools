@@ -37,6 +37,8 @@ typedef struct Alphabet Alphabet;
                                          const GtStrArray *filenametab,
                                          GtError *err);
 
+Alphabet *copyAlphabet(const Alphabet *alpha2);
+
 const Uchar *getsymbolmapAlphabet(const Alphabet *alpha);
 
 unsigned int getnumofcharsAlphabet(const Alphabet *alpha);

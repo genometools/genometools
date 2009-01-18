@@ -2427,6 +2427,11 @@ const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq)
   return getcharactersAlphabet(encseq->alpha);
 }
 
+void removealpharef(Encodedsequence *encseq)
+{
+  encseq->alpha = NULL;
+}
+
 static int determinesattype(Seqpos *specialranges,
                             Seqpos totallength,
                             const Seqpos *specialrangestab,
@@ -2649,8 +2654,9 @@ static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
   if (haserr)
   {
     freeAlphabet((Alphabet **) &alpha);
+    return NULL;
   }
-  return haserr ? NULL : alpha;
+  return alpha;
 }
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,

@@ -142,6 +142,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   {
     haserr = true;
   }
+  removealpharef(ssi.encseq);
   freeEncodedsequence(&ssi.encseq);
   return haserr ? -1 : 0;
 }

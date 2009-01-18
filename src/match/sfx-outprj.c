@@ -43,8 +43,6 @@ static void showprjinfo(FILE *outprj,
                         const GtStrArray *filenametab,
                         Readmode readmode,
                         const Filelengthvalues *filelengthtab,
-                        Seqpos totallength,
-                        unsigned long numofsequences,
                         const Encodedsequence *encseq,
                         unsigned int prefixlength,
                         GT_UNUSED const Definedunsignedint *maxdepth,
@@ -53,6 +51,8 @@ static void showprjinfo(FILE *outprj,
                         const DefinedSeqpos *longest)
 {
   unsigned long i;
+  Seqpos totallength;
+  unsigned long numofsequences;
 
   gt_assert(filelengthtab != NULL);
   gt_assert(filenametab != NULL);
@@ -63,12 +63,14 @@ static void showprjinfo(FILE *outprj,
                     PRINTuint64_tcast(filelengthtab[i].length),
                     PRINTuint64_tcast(filelengthtab[i].effectivelength));
   }
+  totallength = getencseqtotallength(encseq);
   fprintf(outprj,"totallength=" FormatSeqpos "\n",PRINTSeqposcast(totallength));
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
   PRJSPECIALOUT(realspecialranges);
   PRJSPECIALOUT(lengthofspecialprefix);
   PRJSPECIALOUT(lengthofspecialsuffix);
+  numofsequences = getencseqnumofdbsequences(encseq);
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
@@ -98,8 +100,6 @@ int outprjfile(const GtStr *indexname,
                const GtStrArray *filenametab,
                Readmode readmode,
                const Filelengthvalues *filelengthtab,
-               Seqpos totallength,
-               unsigned long numofsequences,
                const Encodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
@@ -123,8 +123,6 @@ int outprjfile(const GtStr *indexname,
                 filenametab,
                 readmode,
                 filelengthtab,
-                totallength,
-                numofsequences,
                 encseq,
                 prefixlength,
                 maxdepth,

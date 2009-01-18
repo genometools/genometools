@@ -80,6 +80,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   unsigned int forcetable;
   Specialcharinfo specialcharinfo;
   const Alphabet *alpha;
+  bool alphaisbound = false;
   Seqpos specialrangestab[3];
 
   gt_error_check(err);
@@ -128,7 +129,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
       haserr = true;
       FREESPACE(sfxseqinfo->characterdistribution);
     }
-    sfxseqinfo->numofsequences = sfxseqinfo->sequenceseppos.nextfreeSeqpos+1;
   }
   if (!haserr)
   {
@@ -164,6 +164,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
       FREESPACE(sfxseqinfo->characterdistribution);
     } else
     {
+      alphaisbound = true;
       setencseqspecialcharinfo(sfxseqinfo->encseq,&specialcharinfo);
       if (so->outtistab)
       {
@@ -173,6 +174,10 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
         }
       }
     }
+  }
+  if (haserr && alpha != NULL && !alphaisbound)
+  {
+    freeAlphabet((Alphabet **) &alpha);
   }
   return haserr ? -1 : 0;
 }
@@ -200,7 +205,6 @@ int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   } else
   {
     sfxseqinfo->voidptr2suffixarray = suffixarray; /* for freeing it later */
-    sfxseqinfo->numofsequences = getencseqnumofdbsequences(suffixarray->encseq);
     sfxseqinfo->filelengthtab = suffixarray->filelengthtab;
     sfxseqinfo->readmode = suffixarray->readmode;
     sfxseqinfo->filenametab = suffixarray->filenametab;
