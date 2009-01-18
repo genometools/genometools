@@ -18,7 +18,12 @@
 #ifndef OUTPUTGFF3_H
 #define OUTPUTGFF3_H
 
-void printgff3format(const LTRharvestoptions *lo,
-                     const Encodedsequence *encseq);
+#include "core/error.h"
+#include "match/encseq-def.h"
+#include "ltrharvest-opt.h"
+
+int printgff3format(const LTRharvestoptions *lo,
+                    const Encodedsequence *encseq,
+                    GtError *err);
 
 #endif

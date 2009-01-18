@@ -263,10 +263,10 @@ int sufbwt2fmindex(Fmindex *fmindex,
   } else
   {
     if (initEmissionmergedesa(&emmesa,
-                             indexnametab,
-                             SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
-                             verboseinfo,
-                             err) != 0)
+                              indexnametab,
+                              SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
+                              verboseinfo,
+                              err) != 0)
     {
       haserr = true;
     }

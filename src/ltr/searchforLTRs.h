@@ -19,8 +19,6 @@
 #define SEARCHFORLTRS_H
 
 #include "core/error.h"
-#include "match/sarr-def.h"
-
 #include "ltrharvest-opt.h"
 
 int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,

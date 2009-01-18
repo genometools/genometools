@@ -22,7 +22,6 @@
 
 #include "core/arraydef.h"
 #include "match/esa-seqread.h"
-#include "match/sarr-def.h"
 
 /* The datatype Repeat stores information about the maximal repeats (seeds).*/
 typedef struct
@@ -70,8 +69,8 @@ typedef struct
   Seqpos leftLTR_5,    /* 5' boundary of left LTR */
          leftLTR_3,    /* 3' boundary of left LTR */
          rightLTR_5,   /* 5' boundary of right LTR */
-         rightLTR_3;   /* 3' boundary of right LTR */
-  Seqpos lenleftTSD,
+         rightLTR_3,   /* 3' boundary of right LTR */
+         lenleftTSD,
          lenrightTSD;
   bool tsd,            /* If true, then TSDs exist. */
        motif_near_tsd, /* If true, then motif near the TSD exists. */
@@ -98,4 +97,5 @@ typedef struct
   unsigned int allowedmismatches; /* number of allowed mismatches in the four */
                                   /*character motif */
 } Motif;
+
 #endif

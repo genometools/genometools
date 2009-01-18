@@ -84,7 +84,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
 typedef struct
 {
   Encodedsequence *encseq;
-  DefinedSeqpos numoflargelcpvalues;
+  DefinedSeqpos numoflargelcpvalues; /* only in esa-map.c */
   DefinedSeqpos longest; /* for BWT */
   Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */

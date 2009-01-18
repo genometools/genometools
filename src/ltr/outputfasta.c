@@ -181,28 +181,36 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
-  int had_err;
+  bool had_err = false;
 
-  formatout = gt_fa_xfopen(innerregion
-                           ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
-                           : gt_str_get(lo->str_fastaoutputfilename),
-                           "w");
+  formatout = gt_fa_fopen(innerregion
+                          ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
+                          : gt_str_get(lo->str_fastaoutputfilename),
+                          "w",err);
+  if (formatout == NULL)
+  {
+    had_err = true;
+  }
 
-  fastaoutinfo.ssar = ssar;
-  fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
-  fastaoutinfo.totallength = getencseqtotallength(fastaoutinfo.encseq);
-  fastaoutinfo.numofdbsequences
-    = getencseqnumofdbsequences(fastaoutinfo.encseq);
-  fastaoutinfo.linewidth = linewidth;
-  fastaoutinfo.showseqnum = showseqnum;
-  fastaoutinfo.formatout = formatout;
-  fastaoutinfo.markpos = lo->markpos;
-  fastaoutinfo.descendtab = calcdescendpositions(fastaoutinfo.encseq);
-  had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
-                                       showpredictionfastasequence, err);
-
-  gt_free(fastaoutinfo.descendtab);
+  if (!had_err)
+  {
+    fastaoutinfo.ssar = ssar;
+    fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
+    fastaoutinfo.totallength = getencseqtotallength(fastaoutinfo.encseq);
+    fastaoutinfo.numofdbsequences
+      = getencseqnumofdbsequences(fastaoutinfo.encseq);
+    fastaoutinfo.linewidth = linewidth;
+    fastaoutinfo.showseqnum = showseqnum;
+    fastaoutinfo.formatout = formatout;
+    fastaoutinfo.markpos = lo->markpos;
+    fastaoutinfo.descendtab = calcdescendpositions(fastaoutinfo.encseq);
+    if (overallpredictionsequences(lo, innerregion, &fastaoutinfo,
+                                   showpredictionfastasequence, err) != 0)
+    {
+      had_err = true;
+    }
+    gt_free(fastaoutinfo.descendtab);
+  }
   gt_fa_xfclose(formatout);
-
-  return 0;
+  return had_err ? -1 : 0;
 }

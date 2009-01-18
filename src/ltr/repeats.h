@@ -19,7 +19,6 @@
 #define REPEATS_H
 
 #include "core/unused_api.h"
-#include "match/sarr-def.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 

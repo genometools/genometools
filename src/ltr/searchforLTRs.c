@@ -98,20 +98,6 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  */
 }
 
-#define INITBOUNDARIES(B)\
-        (B)->contignumber = repeatptr->contignumber;\
-        (B)->leftLTR_5 = (Seqpos)0;\
-        (B)->leftLTR_3 = (Seqpos)0;\
-        (B)->rightLTR_5 = (Seqpos)0;\
-        (B)->rightLTR_3 = (Seqpos)0;\
-        (B)->lenleftTSD = (Seqpos)0;\
-        (B)->lenrightTSD = (Seqpos)0;\
-        (B)->tsd = false;\
-        (B)->motif_near_tsd = false;\
-        (B)->motif_far_tsd = false;\
-        (B)->skipped = false;\
-        (B)->similarity = 0.0;
-
 /*
  The following function applies the filter algorithms one after another
  to all candidate pairs.
@@ -126,13 +112,16 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
   Seqpos alilen = 0,
          totallength,
          ulen,
-         vlen;
+         vlen,
+         maxulen = 0,
+         maxvlen = 0;
   Uchar *useq = NULL,
         *vseq = NULL;
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
   Seqpos offset = 0;
+  bool haserr = false;
   const Encodedsequence *encseq =
           encseqSequentialsuffixarrayreader(ssar);
 
@@ -159,6 +148,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     INITARRAY (&fronts, Myfrontvalue);
     if (alilen <= repeatptr->pos1)
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
@@ -173,6 +163,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     }
     else /* do not align over left sequence boundary */
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
@@ -193,6 +184,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresright (&lo->arbitscores,
                                  &xdropbest_right,
                                  &fronts,
@@ -208,6 +200,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     }
     else /* do not align over right sequence boundary */
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresright(&lo->arbitscores,
                                 &xdropbest_right,
                                 &fronts,
@@ -230,13 +223,24 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                        &lo->arrayLTRboundaries,
                        LTRboundaries,
                        5);
-    INITBOUNDARIES(boundaries);
+
+    boundaries->contignumber = repeatptr->contignumber;
+    boundaries->leftLTR_5 = (Seqpos) 0;
+    boundaries->leftLTR_3 = (Seqpos) 0;
+    boundaries->rightLTR_5 = (Seqpos) 0;
+    boundaries->rightLTR_3 = (Seqpos) 0;
+    boundaries->lenleftTSD = (Seqpos) 0;
+    boundaries->lenrightTSD = (Seqpos) 0;
+    boundaries->tsd = false;
+    boundaries->motif_near_tsd = false;
+    boundaries->motif_far_tsd = false;
+    boundaries->skipped = false;
+    boundaries->similarity = 0.0;
 
     if ( boundaries->contignumber == 0)
     {
       offset = 0;
-    }
-    else
+    } else
     {
       offset = markpos[boundaries->contignumber-1];
     }
@@ -285,7 +289,8 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
       if ( findcorrectboundaries(lo, boundaries, ssar,
                                 markpos, err) != 0 )
       {
-        return -1;
+        haserr = true;
+        break;
       }
 
       /* if search for TSDs and (not) motif */
@@ -324,8 +329,16 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
        copy LTR sequences for greedyunitedist function */
     ulen = boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1;
     vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
-    ALLOCASSIGNSPACE(useq, NULL, Uchar, ulen);
-    ALLOCASSIGNSPACE(vseq, NULL, Uchar, vlen);
+    if (ulen > maxulen)
+    {
+      maxulen = ulen;
+      ALLOCASSIGNSPACE(useq, useq, Uchar, maxulen);
+    }
+    if (vlen > maxvlen)
+    {
+      maxvlen = vlen;
+      ALLOCASSIGNSPACE(vseq, vseq, Uchar, maxvlen);
+    }
 
     encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3);
     encseqextract(vseq,encseq,boundaries->rightLTR_5,boundaries->rightLTR_3);
@@ -334,7 +347,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
 
     /* determine similarity */
     boundaries->similarity = 100.0 *
-    (1 - (((double) edist)/(MAX(ulen,vlen))));
+                             (1 - (((double) edist)/(MAX(ulen,vlen))));
 
     if ( boundaries->similarity < lo->similaritythreshold )
     {
@@ -342,9 +355,9 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
       lo->arrayLTRboundaries.nextfreeLTRboundaries--;
     }
 
-    FREESPACE(useq);
-    FREESPACE(vseq);
   }
+  FREESPACE(useq);
+  FREESPACE(vseq);
 
-  return 0;
+  return haserr ? -1 : 0;
 }

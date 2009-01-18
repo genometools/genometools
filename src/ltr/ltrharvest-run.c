@@ -142,7 +142,10 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* print GFF3 format file of predictions */
   if (!had_err && lo->gff3output)
   {
-    printgff3format(lo, encseq);
+    if (printgff3format(lo, encseq,err) != 0)
+    {
+      had_err = true;
+    }
   }
 
   /* print predictions to stdout */

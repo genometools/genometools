@@ -149,67 +149,68 @@ static void showboundaries(FILE *fp,
   }
 }
 
-void printgff3format(const LTRharvestoptions *lo,
-                     const Encodedsequence *encseq)
+int printgff3format(const LTRharvestoptions *lo,
+                    const Encodedsequence *encseq,
+                    GtError *err)
 {
+  bool haserr = false;
+
   if (lo->arrayLTRboundaries.nextfreeLTRboundaries > 0)
   {
-    LTRboundaries *boundaries;
-    unsigned long seqnum, i, contignumber,
-                  *descendtab = NULL,
-                  desclen, numofdbsequences;
-    LTRcounter ltrc;
-    const char *desptr = NULL;
     FILE *fp;
-    Seqinfo seqinfo;
 
-    numofdbsequences = getencseqnumofdbsequences(encseq);
-    /* for getting descriptions */
-    descendtab = calcdescendpositions(encseq);
-
-    ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
-                            = ltrc.idcounterLTR
-                            = ltrc.idcounterTSD
-                            = ltrc.idcounterMotif = 0;
-
-    fp = gt_fa_xfopen(gt_str_get(lo->str_gff3filename), "w");
-
-    fprintf(fp, "##gff-version 3\n");
-    /* print output sorted by contignumber */
-    for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
+    fp = gt_fa_fopen(gt_str_get(lo->str_gff3filename), "w",err);
+    if (fp == NULL)
     {
-      /* contig is first sequence, and only one sequence in multiseq */
-      getencseqSeqinfo(&seqinfo,encseq,seqnum);
-      fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
-                  seqnum, PRINTSeqposcast(seqinfo.seqlength));
-      /* write description of sequence */
-      fprintf(fp, "# ");
-      desptr = retrievesequencedescription(&desclen,
-                                           encseq,
-                                           descendtab,
-                                           seqnum);
-      for (i=0; i < desclen; i++)
-      {
-        fprintf(fp, "%c", desptr[i]);
-      }
-      fprintf(fp, "\n");
+      haserr = true;
+    } else
+    {
+      LTRboundaries *boundaries;
+      LTRcounter ltrc;
+      Seqinfo seqinfo;
+      const char *desptr = NULL;
+      unsigned long seqnum, i, *descendtab = NULL, desclen, numofdbsequences;
 
-      for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
+      numofdbsequences = getencseqnumofdbsequences(encseq);
+      /* for getting descriptions */
+      descendtab = calcdescendpositions(encseq);
+
+      ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
+                              = ltrc.idcounterLTR
+                              = ltrc.idcounterTSD
+                              = ltrc.idcounterMotif = 0;
+
+      fprintf(fp, "##gff-version 3\n");
+      /* print output sorted by contignumber */
+      for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
       {
-        boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
-        contignumber = boundaries->contignumber;
-        if ( (!boundaries->skipped) && contignumber == seqnum)
+        /* contig is first sequence, and only one sequence in multiseq */
+        getencseqSeqinfo(&seqinfo,encseq,seqnum);
+        fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
+                    seqnum, PRINTSeqposcast(seqinfo.seqlength));
+        /* write description of sequence */
+        desptr = retrievesequencedescription(&desclen,
+                                             encseq,
+                                             descendtab,
+                                             seqnum);
+        fprintf(fp,"# %*.*s\n",(int) desclen,(int) desclen,desptr);
+        for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
         {
-          showboundaries(fp,
-                         lo,
-                         boundaries,
-                         contignumber,
-                         seqinfo.seqstartpos,
-                         &ltrc);
+          boundaries = lo->arrayLTRboundaries.spaceLTRboundaries + i;
+          if ( (!boundaries->skipped) && boundaries->contignumber == seqnum)
+          {
+            showboundaries(fp,
+                           lo,
+                           boundaries,
+                           boundaries->contignumber,
+                           seqinfo.seqstartpos,
+                           &ltrc);
+          }
         }
       }
+      gt_free(descendtab);
     }
-    gt_free(descendtab);
     gt_fa_xfclose(fp);
   }
+  return haserr ? -1 : 0;
 }

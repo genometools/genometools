@@ -18,6 +18,11 @@
 #ifndef OUTPUTFASTA_H
 #define OUTPUTFASTA_H
 
+#include <stdbool.h>
+#include "core/error.h"
+#include "match/esa-seqread.h"
+#include "ltrharvest-opt.h"
+
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                  bool innerregion,
                                  unsigned int linewidth,

@@ -91,7 +91,8 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("longest",&suffixarray->longest.valueseqpos,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
-  SETREADINTKEYS("largelcpvalues",&suffixarray->numoflargelcpvalues.valueseqpos,
+  SETREADINTKEYS("largelcpvalues",
+                 &suffixarray->numoflargelcpvalues.valueseqpos,
                  &suffixarray->numoflargelcpvalues.defined);
   SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.valueseqpos,
                  &maxbranchdepth.defined);
@@ -185,7 +186,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->lcptab = NULL;
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
-  suffixarray->encseq = NULL;
+  suffixarray->bcktab = NULL;
   suffixarray->bwttabstream.fp = NULL;
   suffixarray->suftabstream.fp = NULL;
   suffixarray->llvtabstream.fp = NULL;
@@ -194,7 +195,6 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->lcptabstream.bufferedfilespace = NULL;
   suffixarray->llvtabstream.bufferedfilespace = NULL;
   suffixarray->bwttabstream.bufferedfilespace = NULL;
-  suffixarray->bcktab = NULL;
 }
 
 static bool scanprjfileuintkeys(Suffixarray *suffixarray,

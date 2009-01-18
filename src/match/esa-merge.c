@@ -251,12 +251,12 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   ALLOCASSIGNSPACE(emmesa->suffixarraytable,NULL,Suffixarray,numofindexes);
   ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,Seqpos,numofindexes);
   if (inputthesequences(&emmesa->mapsize,
-                       emmesa->nextpostable,
-                       emmesa->suffixarraytable,
-                       indexnametab,
-                       demand,
-                       verboseinfo,
-                       err) != 0)
+                        emmesa->nextpostable,
+                        emmesa->suffixarraytable,
+                        indexnametab,
+                        demand,
+                        verboseinfo,
+                        err) != 0)
   {
     haserr = true;
     return -1;

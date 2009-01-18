@@ -20,8 +20,8 @@
 
 #include "core/arraydef.h"
 #include "core/unused_api.h"
-#include "match/sarr-def.h"
 #include "match/seqpos-def.h"
+#include "match/encseq-def.h"
 
 typedef struct
 {
