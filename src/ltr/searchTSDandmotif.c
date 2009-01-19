@@ -44,7 +44,6 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                                                 LTRharvestoptions *lo,
                                                 Sequentialsuffixarrayreader
                                                 *ssar,
-                                                Seqpos *markpos,
                                                 LTRboundaries *boundaries,
                                                 unsigned int
                                                 *motifmismatchesleftLTR,
@@ -52,27 +51,17 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                                                 *motifmismatchesrightLTR)
 {
   unsigned long i;
-  Seqpos offset,
-         motifpos1,
-         motifpos2;
-  Seqpos back, forward;
+  Seqpos motifpos1,
+         motifpos2,
+         back, forward,
+         oldleftLTR_5  = boundaries->leftLTR_5,
+         oldrightLTR_3 = boundaries->rightLTR_3,
+         difffromoldboundary1 = 0,
+         difffromoldboundary2 = 0;
   unsigned int tmp_motifmismatchesleftLTR,
-               tmp_motifmismatchesrightLTR;
-  Seqpos oldleftLTR_5  = boundaries->leftLTR_5,
-       oldrightLTR_3 = boundaries->rightLTR_3,
-       difffromoldboundary1 = 0,
-       difffromoldboundary2 = 0;
-  unsigned int hitcounter = 0;
+               tmp_motifmismatchesrightLTR,
+               hitcounter = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
-
-  if (boundaries->contignumber == 0)
-  {
-    offset = 0;
-  }
-  else
-  {
-    offset = markpos[boundaries->contignumber-1]+1;
-  }
 
   if (info->repeats.nextfreeRepeat > 0 )
   {
@@ -90,13 +79,13 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
                   + info->repeats.spaceRepeat[i].offset - 2;
 
     for (back = 0;
-        back < info->repeats.spaceRepeat[i].len - info->lmin + 1;
-        back++)
+         back < info->repeats.spaceRepeat[i].len - info->lmin + 1;
+         back++)
     {
       for (forward = 0;
-          forward < info->repeats.spaceRepeat[i].len -
-                    info->lmin + 1 - back;
-          forward++)
+           forward < info->repeats.spaceRepeat[i].len -
+                     info->lmin + 1 - back;
+           forward++)
       {
         tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
         if (getencodedchar(/* Random access */ encseq,
@@ -125,77 +114,76 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
         }
 
         if (tmp_motifmismatchesleftLTR <= lo->motif.allowedmismatches
-           &&
-           tmp_motifmismatchesrightLTR <= lo->motif.allowedmismatches
-          )
+            &&
+            tmp_motifmismatchesrightLTR <= lo->motif.allowedmismatches)
         {
-           Seqpos tsd_len;
-           tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
+          Seqpos tsd_len;
+          tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
 
-           /* TSD length too big */
-           if (tsd_len > (Seqpos)info->lmax)
-           {
-             /* nothing */
-           }
-           /* first hit */
-           else if ( !boundaries->motif_near_tsd )
-           {
-             Seqpos max, min;
+          /* TSD length too big */
+          if (tsd_len > (Seqpos)info->lmax)
+          {
+            /* nothing */
+          }
+          /* first hit */
+          else if ( !boundaries->motif_near_tsd )
+          {
+            Seqpos max, min;
 
-             /* save number of mismatches */
-             *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
-             *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
+            /* save number of mismatches */
+            *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
+            *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
 
-             /* adjust boundaries */
-             boundaries->motif_near_tsd = true;
-             boundaries->leftLTR_5  = motifpos1 - back;
-             boundaries->rightLTR_3 = motifpos2 + 1 + forward;
+            /* adjust boundaries */
+            boundaries->motif_near_tsd = true;
+            boundaries->leftLTR_5  = motifpos1 - back;
+            boundaries->rightLTR_3 = motifpos2 + 1 + forward;
 
-             /* store TSD length */
-             boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
+            /* store TSD length */
+            boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
 
-             max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
-             min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
-             difffromoldboundary1 = max - min;
+            max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
+            min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
+            difffromoldboundary1 = max - min;
 
-             max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
-             min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
-             difffromoldboundary2 = max - min;
+            max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
+            min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
+            difffromoldboundary2 = max - min;
 
-             hitcounter++;
-           }
-           else
-           {
-             Seqpos max, min, difffromnewboundary1,
-                  difffromnewboundary2;
+            hitcounter++;
+          }
+          else
+          {
+            Seqpos max, min, difffromnewboundary1,
+                 difffromnewboundary2;
 
-             /* test if hit is nearer to old boundaries than previous hit */
-             max = MAX(oldleftLTR_5, (motifpos1 - back));
-             min = MIN(oldleftLTR_5, (motifpos1 - back));
-             difffromnewboundary1 = max - min;
-             max = MAX(oldrightLTR_3, (motifpos2 + 1 + forward));
-             min = MIN(oldrightLTR_3, (motifpos2 + 1 + forward));
-             difffromnewboundary2 = max - min;
+            /* test if hit is nearer to old boundaries than previous hit */
+            max = MAX(oldleftLTR_5, (motifpos1 - back));
+            min = MIN(oldleftLTR_5, (motifpos1 - back));
+            difffromnewboundary1 = max - min;
+            max = MAX(oldrightLTR_3, (motifpos2 + 1 + forward));
+            min = MIN(oldrightLTR_3, (motifpos2 + 1 + forward));
+            difffromnewboundary2 = max - min;
 
-             if (difffromnewboundary1 + difffromnewboundary2 <
-                 difffromoldboundary1 + difffromoldboundary2)
-             {
-                 /* save number of mismatches */
-                 *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
-                 *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
+            if (difffromnewboundary1 + difffromnewboundary2 <
+                difffromoldboundary1 + difffromoldboundary2)
+            {
+              /* save number of mismatches */
+              *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
+              *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
 
-                 /* adjust boundaries */
-                 boundaries->leftLTR_5  = motifpos1 - back;
-                 boundaries->rightLTR_3 = motifpos2 + 1 + forward;
+              /* adjust boundaries */
+              boundaries->leftLTR_5  = motifpos1 - back;
+              boundaries->rightLTR_3 = motifpos2 + 1 + forward;
 
-                 /* store TSD length */
-                 boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
+              /* store TSD length */
+              boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
 
-                 difffromoldboundary1 = difffromnewboundary1;
-                 difffromoldboundary2 = difffromnewboundary2;
-                 hitcounter++;
-             }
-           }
+              difffromoldboundary1 = difffromnewboundary1;
+              difffromoldboundary2 = difffromnewboundary2;
+              hitcounter++;
+            }
+          }
         }
       }
     }
@@ -210,7 +198,6 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
 static void searchformotifonlyborders(LTRharvestoptions *lo,
     LTRboundaries *boundaries,
     Sequentialsuffixarrayreader *ssar,
-    Seqpos *markpos,
     Seqpos startleftLTR,
     Seqpos endleftLTR,
     Seqpos startrightLTR,
@@ -219,26 +206,16 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
     unsigned int *motifmismatchesrightLTR
     )
 {
-  Seqpos offset = 0,
-         idx;
   bool motif1 = false,
        motif2 = false;
   unsigned int tmp_motifmismatchesleftLTR,
          tmp_motifmismatchesrightLTR,
          motifmismatches_frombestmatch = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
-  Seqpos oldleftLTR_5  = boundaries->leftLTR_5,
+  Seqpos idx,
+         oldleftLTR_5  = boundaries->leftLTR_5,
          oldrightLTR_3 = boundaries->rightLTR_3,
          difffromoldboundary = 0;
-
-  if ( boundaries->contignumber == 0)
-  {
-    offset = 0;
-  }
-  else
-  {
-    offset = markpos[boundaries->contignumber-1]+1;
-  }
 
   /**** search for left motif around leftLTR_5 ****/
 
@@ -363,7 +340,6 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
 static void searchformotifonlyinside(LTRharvestoptions *lo,
     LTRboundaries *boundaries,
     Sequentialsuffixarrayreader *ssar,
-    Seqpos *markpos,
     unsigned int *motifmismatchesleftLTR,
     unsigned int *motifmismatchesrightLTR
     )
@@ -377,21 +353,11 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
          oldleftLTR_3  = boundaries->leftLTR_3,
          oldrightLTR_5 = boundaries->rightLTR_5,
          difffromoldboundary = 0,
-         offset = 0,
          idx;
   unsigned int tmp_motifmismatchesleftLTR,
                tmp_motifmismatchesrightLTR,
                motifmismatches_frombestmatch = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
-
-  if ( boundaries->contignumber == 0)
-  {
-    offset = 0;
-  }
-  else
-  {
-    offset = markpos[boundaries->contignumber-1]+(Seqpos)1;
-  }
 
   /** vicinity of 3'-border of left LTR **/
   /* do not align over 5'border of left LTR,
@@ -546,7 +512,6 @@ static int searchforTSDandorMotifoutside(
   LTRharvestoptions *lo,
   LTRboundaries *boundaries,
   Sequentialsuffixarrayreader *ssar,
-  Seqpos *markpos,
   unsigned int *motifmismatchesleftLTR,
   unsigned int *motifmismatchesrightLTR,
   GtError *err)
@@ -556,63 +521,52 @@ static int searchforTSDandorMotifoutside(
          startrightLTR,
          endrightLTR,
          leftlen,
-         rightlen;
+         rightlen,
+         sequenceendpos;
   unsigned long contignumber = boundaries->contignumber;
-  Seqpos offset;
   const Encodedsequence *encseq;
   unsigned long numofdbsequences;
-  Seqpos totallength;
   SubRepeatInfo subrepeatinfo;
+  Seqinfo seqinfo;
 
   gt_error_check(err);
   encseq = encseqSequentialsuffixarrayreader(ssar);
   numofdbsequences = getencseqnumofdbsequences(encseq);
-  totallength = getencseqtotallength(encseq);
-  if ( contignumber == 0)
-  {
-    offset = 0;
-  }
-  else
-  {
-    offset = markpos[contignumber-1]+1;
-  }
 
   /* check border cases */
 
   /* vicinity of 5'-border of left LTR */
+  getencseqSeqinfo(&seqinfo,encseq,contignumber);
   if (contignumber == 0)
   {
     /* do not align over left sequence boundary,
        in case of need decrease alignment length */
     if ( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries)
     {
-      startleftLTR = 0;
-    }
-    else
+      startleftLTR = seqinfo.seqstartpos;
+    } else
     {
-      startleftLTR =
-        boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries;
+      startleftLTR = boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries;
     }
   }
   else
   {
     /* do not align over left separator symbol
-       at markpos.spaceunsigned int[contignumber-1],
        in case of need decrease alignment length */
     if ( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries )
     {
-      startleftLTR = markpos[contignumber-1]+1;
+      startleftLTR = seqinfo.seqstartpos;
     }
     else
     {
       if ( ((startleftLTR =
               boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
-                markpos[contignumber-1]+1)
+                seqinfo.seqstartpos)
             &&
-          (boundaries->leftLTR_5 >= markpos[contignumber-1]+1)
+          (boundaries->leftLTR_5 >= seqinfo.seqstartpos)
         )
       {
-        startleftLTR = markpos[contignumber-1]+1;
+        startleftLTR = seqinfo.seqstartpos;
       }
     }
   }
@@ -634,30 +588,31 @@ static int searchforTSDandorMotifoutside(
   {
     startrightLTR = boundaries->rightLTR_5 + 2;
   }
+  sequenceendpos = seqinfo.seqstartpos + seqinfo.seqlength - 1;
+  /* XXX do not make the following case distiction */
   if (contignumber == numofdbsequences - 1)
   {
     /* do not align over right sequence boundary,
        in case of need decrease alignment length */
     if ( (endrightLTR =
            boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries)
-        > totallength - 1)
+        > sequenceendpos)
     {
-      endrightLTR = totallength - 1;
+      endrightLTR = sequenceendpos;
     }
   }
   else
   {
     /* do not align over right separator symbol
-       at markpos.spaceunsigned int[contignumber],
        in case of need decrease alignment length */
     if ( ((endrightLTR =
             boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries) >
-          markpos[contignumber]-1)
+          sequenceendpos)
         &&
-        (boundaries->rightLTR_3 < markpos[contignumber])
+        (boundaries->rightLTR_3 <= sequenceendpos)
       )
     {
-      endrightLTR = markpos[contignumber]-1;
+      endrightLTR = sequenceendpos;
     }
   }
   rightlen = endrightLTR - startrightLTR + 1;
@@ -700,7 +655,6 @@ static int searchforTSDandorMotifoutside(
     searchforbestTSDandormotifatborders(&subrepeatinfo,
                                         lo,
                                         ssar,
-                                        markpos,
                                         boundaries,
                                         motifmismatchesleftLTR,
                                         motifmismatchesrightLTR);
@@ -712,7 +666,6 @@ static int searchforTSDandorMotifoutside(
     searchformotifonlyborders(lo,
                               boundaries,
                               ssar,
-                              markpos,
                               startleftLTR,
                               endleftLTR,
                               startrightLTR,
@@ -727,25 +680,21 @@ static int searchforTSDandorMotifoutside(
  The following function searches for TSD and/or a specified palindromic motif
  at the borders of left LTR and the right LTR, respectively.
  */
-int findcorrectboundaries(
-    LTRharvestoptions *lo,
-    LTRboundaries *boundaries,
-    Sequentialsuffixarrayreader *ssar,
-    Seqpos *markpos,
-    GtError *err)
+int findcorrectboundaries(LTRharvestoptions *lo,
+                          LTRboundaries *boundaries,
+                          Sequentialsuffixarrayreader *ssar,
+                          GtError *err)
 {
   unsigned int motifmismatchesleftLTR = 0,
                motifmismatchesrightLTR = 0;
 
   gt_error_check(err);
-
   gt_log_log("searching for correct boundaries in vicinity...\n");
   /* first: 5'-border of left LTR and 3'-border of right LTR */
 
   if (searchforTSDandorMotifoutside(lo,
                                     boundaries,
                                     ssar,
-                                    markpos,
                                     &motifmismatchesleftLTR,
                                     &motifmismatchesrightLTR,
                                     err) != 0 )
@@ -761,10 +710,8 @@ int findcorrectboundaries(
     searchformotifonlyinside(lo,
         boundaries,
         ssar,
-        markpos,
         &motifmismatchesleftLTR,
         &motifmismatchesrightLTR);
   }
-
   return 0;
 }

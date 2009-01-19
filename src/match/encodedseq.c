@@ -319,11 +319,6 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq)
   return encseq->numofdbsequences;
 }
 
-const Seqpos *getencseqssptab(const Encodedsequence *encseq)
-{
-  return encseq->ssptab;
-}
-
 Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
@@ -2124,10 +2119,10 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq)
   return asp.spaceSeqpos;
 }
 
-unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
-                                 unsigned long numofrecords,
-                                 Seqpos totalwidth,
-                                 Seqpos position)
+static unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
+                                        unsigned long numofrecords,
+                                        Seqpos totalwidth,
+                                        Seqpos position)
 {
   unsigned long left, mid, right, len;
 
@@ -2175,6 +2170,15 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   fprintf(stderr,"getrecordnumSeqpos: cannot find position " FormatSeqpos,
                 PRINTSeqposcast(position));
   exit(EXIT_FAILURE);
+}
+
+unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
+                                      Seqpos position)
+{
+  return getrecordnumSeqpos(encseq->ssptab,
+                            encseq->numofdbsequences,
+                            encseq->totallength,
+                            position);
 }
 
 static void getunitSeqinfo(Seqinfo *seqinfo,

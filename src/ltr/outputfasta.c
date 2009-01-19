@@ -39,10 +39,7 @@ typedef struct
   Sequentialsuffixarrayreader *ssar;
   const Encodedsequence *encseq; /* encoded sequence */
   unsigned long *descendtab;     /* positions of desc-separators */
-  Seqpos totallength;            /* totallength of encseq */
-  unsigned long numofdbsequences; /* num of sequences in suffix array */
-  unsigned int linewidth;        /* the line width to show the alignment */
-  const Seqpos *markpos;     /* positions of SEPARATOR symbols */
+  unsigned long linewidth;        /* the line width to show the alignment */
   bool showseqnum;     /* with or without the sequence number */
   FILE *formatout;     /* file pointer to show the alignment */
 } Fastaoutinfo;
@@ -53,19 +50,18 @@ typedef struct
  */
 
 static void myencseq2symbolstring(Fastaoutinfo *info,
-                         FILE *fpout,
-                         unsigned long seqnum,
-                         const char *desc,
-                         unsigned long desclength,
-                         const Encodedsequence *encseq,
-                         Readmode readmode,
-                         Seqpos start,
-                         Seqpos wlen,
-                         unsigned long width)
+                                  FILE *fpout,
+                                  unsigned long seqnum,
+                                  Seqpos offset,
+                                  const char *desc,
+                                  unsigned long desclength,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos start,
+                                  Seqpos wlen,
+                                  unsigned long linewidth)
 {
-  Seqpos offset;
-
-  gt_assert(width > 0);
+  gt_assert(linewidth > 0);
   if (desc == NULL)
   {
     fprintf(fpout,">");
@@ -79,14 +75,6 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
   {
     fprintf(info->formatout," %lu) ", seqnum);
   }
-  if (seqnum == 0)
-  {
-    offset = 0;
-  }
-  else
-  {
-    offset = info->markpos[seqnum-1]+1;
-  }
   fprintf(info->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + 1),
@@ -97,18 +85,16 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                       readmode,
                       start,
                       wlen,
-                      width);
+                      linewidth);
 }
 
 static void showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
-                                       Seqpos len,
-                                       GT_UNUSED GtStr *str_indexfilename)
+                                        Seqpos len)
 {
   unsigned long desclen;
   const char *desptr;
-  unsigned long seqnum =
-                  getrecordnumSeqpos(info->markpos, info->numofdbsequences,
-                                     info->totallength, startpos);
+  Seqinfo seqinfo;
+  unsigned long seqnum = getencseqfrompos2seqnum(info->encseq,startpos);
 
   /* if there are sequence descriptions */
   desptr = retrievesequencedescription(&desclen,
@@ -116,27 +102,33 @@ static void showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                                        info->descendtab,
                                        seqnum);
 
-  myencseq2symbolstring(info, info->formatout,
-                        seqnum, desptr,
+  getencseqSeqinfo(&seqinfo,info->encseq,seqnum);
+  myencseq2symbolstring(info,
+                        info->formatout,
+                        seqnum, 
+                        seqinfo.seqstartpos,
+                        desptr,
                         desclen,
                         info->encseq,
-                        Forwardmode, startpos,
+                        Forwardmode, 
+                        startpos,
                         len,
-                        60UL);
+                        info->linewidth);
 }
 
 /*
  The following function processes all predicted LTR elements with
  the function from the apply pointer.
  */
+
 static void overallpredictionsequences(const LTRharvestoptions *lo,
-    bool innerregion,
-    void *applyinfo,
-    void(*apply)(Fastaoutinfo *,Seqpos, Seqpos, GtStr*))
+                                       bool innerregion,
+                                       void *applyinfo,
+                                       void(*apply)(Fastaoutinfo *,Seqpos,
+                                                    Seqpos))
 {
   unsigned long i;
-  Seqpos start,
-         end;
+  Seqpos start, end;
   LTRboundaries *boundaries;
 
   for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
@@ -148,15 +140,14 @@ static void overallpredictionsequences(const LTRharvestoptions *lo,
       {
         start = boundaries->leftLTR_3 + 1;
         end = boundaries->rightLTR_5 - 1;
-      }
-      else
+      } else
       {
         start = boundaries->leftLTR_5;
         end = boundaries->rightLTR_3;
       }
       apply(applyinfo,
             innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
-            end - start + 1, lo->str_indexname);
+            end - start + 1);
     }
   }
 }
@@ -165,6 +156,7 @@ static void overallpredictionsequences(const LTRharvestoptions *lo,
  The following function prints sequences in multiple FASTA format to the
  specified output.
 */
+
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                  bool innerregion,
                                  unsigned int linewidth,
@@ -189,13 +181,9 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   {
     fastaoutinfo.ssar = ssar;
     fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
-    fastaoutinfo.totallength = getencseqtotallength(fastaoutinfo.encseq);
-    fastaoutinfo.numofdbsequences
-      = getencseqnumofdbsequences(fastaoutinfo.encseq);
-    fastaoutinfo.linewidth = linewidth;
+    fastaoutinfo.linewidth = (unsigned long) linewidth;
     fastaoutinfo.showseqnum = showseqnum;
     fastaoutinfo.formatout = formatout;
-    fastaoutinfo.markpos = lo->markpos;
     fastaoutinfo.descendtab = calcdescendpositions(fastaoutinfo.encseq);
     overallpredictionsequences(lo, innerregion, &fastaoutinfo,
                                showpredictionfastasequence);

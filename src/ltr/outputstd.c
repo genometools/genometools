@@ -27,14 +27,16 @@
    The following function prints the predicted LTR retrotransposon
    results to stdout.
  */
-/* CAUTION: For output the positions will be decreased by one,
+
+/* CAUTION: For output the positions will be incremened by one,
  *          since normally in annotation first base in sequence
  *          is position 1 instead of 0.
  */
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
-    const Sequentialsuffixarrayreader *ssar)
+                            const Sequentialsuffixarrayreader *ssar)
 {
   LTRboundaries *boundaries;
+  Seqinfo seqinfo;
   unsigned long numofdbsequences,
                 seqnum,
                 i,
@@ -47,7 +49,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
   /* in order to get to visible dna characters */
   characters = getencseqAlphabetcharacters(encseq);
 
-  /* calculate markpos array for sequence offset */
   numofdbsequences = getencseqnumofdbsequences(encseq);
 
   if (lo->longoutput)
@@ -107,15 +108,8 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
           contignumber = boundaries->contignumber;
           if ( (!boundaries->skipped) && contignumber == seqnum)
           {
-            if ( contignumber == 0)
-            {
-              offset = (Seqpos)0;
-            }
-            else
-            {
-              gt_assert(lo->markpos != NULL);
-              offset = lo->markpos[contignumber-1]+(Seqpos)1;
-            }
+            getencseqSeqinfo(&seqinfo,encseq,contignumber);
+            offset = seqinfo.seqstartpos;
             /* increase positions by 1 */
             printf(FormatSeqpos "  ",
                 PRINTSeqposcast(boundaries->leftLTR_5 -offset + (Seqpos)1));
@@ -240,15 +234,8 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
           contignumber = boundaries->contignumber;
           if ( (!boundaries->skipped) && contignumber == seqnum)
           {
-            if ( contignumber == 0)
-            {
-              offset = (Seqpos)0;
-            }
-            else
-            {
-              gt_assert(lo->markpos != NULL);
-              offset = lo->markpos[contignumber-1]+(Seqpos)1;
-            }
+            getencseqSeqinfo(&seqinfo,encseq,contignumber);
+            offset = seqinfo.seqstartpos;
 
             /* increase positions by 1 */
             printf(FormatSeqpos "  ",
@@ -281,6 +268,5 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       }
     }
   }
-
   return 0;
 }

@@ -31,8 +31,6 @@ typedef struct
   RepeatInfo repeatinfo;                  /* stores all repeats */
   ArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
                                           /*   LTR elements */
-  const Seqpos *markpos;                  /* positions of SEPARATOR symbols */
-                                          /* in encseq */
 
   GtStr *str_indexname;           /* name of the suffix array index */
   GtStr *str_fastaoutputfilename; /* name of the FASTA output file */

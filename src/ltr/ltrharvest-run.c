@@ -68,8 +68,6 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
     showuserdefinedoptionsandvalues(lo);
   }
 
-  lo->markpos = getencseqssptab(encseq);
-
   /* init array for maximal repeats */
   INITARRAY (&lo->repeatinfo.repeats, Repeat);
   lo->repeatinfo.ssarptr = ssar;
@@ -90,7 +88,7 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if (!had_err && searchforLTRs (ssar, lo, lo->markpos, err) != 0)
+  if (!had_err && searchforLTRs (ssar, lo, err) != 0)
   {
     had_err = true;
   }

@@ -68,8 +68,7 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
                                                Seqpos seed2_startpos,
                                                Seqpos seed1_endpos,
                                                Seqpos seed2_endpos,
-                                               LTRboundaries *boundaries,
-                                               GT_UNUSED Seqpos offset)
+                                               LTRboundaries *boundaries)
 {
   /* left alignment */
   boundaries->leftLTR_5  = seed1_startpos - xdropbest_left.ivalue;
@@ -102,8 +101,8 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  The following function applies the filter algorithms one after another
  to all candidate pairs.
 */
-int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, GtError *err)
+int searchforLTRs(Sequentialsuffixarrayreader *ssar, 
+                  LTRharvestoptions *lo, GtError *err)
 {
   unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;
@@ -120,7 +119,6 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
-  Seqpos offset = 0;
   bool haserr = false;
   const Encodedsequence *encseq =
           encseqSequentialsuffixarrayreader(ssar);
@@ -237,14 +235,6 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     boundaries->skipped = false;
     boundaries->similarity = 0.0;
 
-    if ( boundaries->contignumber == 0)
-    {
-      offset = 0;
-    } else
-    {
-      offset = markpos[boundaries->contignumber-1];
-    }
-
     /* test
     printf("contig number: %lu\n",
                boundaries->contignumber);
@@ -280,14 +270,12 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                    repeatptr->pos1 + repeatptr->len - 1, /*seed1 endpos*/
                    repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1,
                                                          /*seed2 endpos*/
-                   boundaries,
-                   offset);
+                   boundaries);
 
     /* if search for motif and/or TSD */
     if ( lo->motif.allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
-      if ( findcorrectboundaries(lo, boundaries, ssar,
-                                markpos, err) != 0 )
+      if ( findcorrectboundaries(lo, boundaries, ssar, err) != 0 )
       {
         haserr = true;
         break;

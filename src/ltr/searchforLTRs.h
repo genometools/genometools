@@ -19,9 +19,11 @@
 #define SEARCHFORLTRS_H
 
 #include "core/error.h"
+#include "match/esa-seqread.h"
 #include "ltrharvest-opt.h"
 
-int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, GtError *err);
+int searchforLTRs(Sequentialsuffixarrayreader *ssar, 
+                  LTRharvestoptions *lo,
+                  GtError *err);
 
 #endif

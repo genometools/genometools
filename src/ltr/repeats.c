@@ -63,10 +63,8 @@ int simpleexactselfmatchstore (
   Seqpos pos2,
   GtError *err)
 {
-  Seqpos tmp,
-         totallength;
+  Seqpos tmp;
   const Encodedsequence *encseq;
-  unsigned long numofdbsequences;
   unsigned long contignumber = 0,
                 seqnum1,
                 seqnum2;
@@ -74,7 +72,6 @@ int simpleexactselfmatchstore (
 
   gt_error_check(err);
   encseq = encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
-  numofdbsequences = getencseqnumofdbsequences(encseq);
   if (pos1 > pos2)
   {
     tmp = pos1;
@@ -83,35 +80,20 @@ int simpleexactselfmatchstore (
   }
 
   tmp = (pos2 - pos1);
-  if ( numofdbsequences < 2UL )
+  seqnum1 = getencseqfrompos2seqnum(encseq,pos1);
+  seqnum2 = getencseqfrompos2seqnum(encseq,pos2);
+  if (seqnum1 == seqnum2)
   {
+    gt_log_log("accepted:\n");
+    gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+    gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
     samecontig = true;
-    contignumber = 0;
-  }
-  /* at least two db sequences */
-  else
-  {
-    gt_assert(info->markpos != NULL);
-    totallength = getencseqtotallength(encseq);
-    seqnum1 = getrecordnumSeqpos(info->markpos, numofdbsequences,
-                                 totallength, pos1);
-
-    seqnum2 = getrecordnumSeqpos(info->markpos, numofdbsequences,
-                                 totallength, pos2);
-
-    if ( seqnum1 == seqnum2 )
-    {
-      gt_log_log("accepted:\n");
-      gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-      gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-      samecontig = true;
-      contignumber = seqnum1;
-    }
+    contignumber = seqnum1;
   }
 
   /*test maximal length of candidate pair and distance constraints*/
   if ( samecontig && (len <= (Seqpos) info->repeatinfo.lmax) &&
-      ( (Seqpos) info->repeatinfo.dmin <= tmp) &&
+    ( (Seqpos) info->repeatinfo.dmin <= tmp) &&
         (tmp <= (Seqpos) info->repeatinfo.dmax) )
   {
     Repeat *nextfreerepeatptr;

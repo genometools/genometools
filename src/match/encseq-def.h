@@ -294,12 +294,8 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq);
 
 void checkmarkpos(const Encodedsequence *encseq);
 
-unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
-                                 unsigned long numofrecords,
-                                 Seqpos totalwidth,
-                                 Seqpos position);
-
-const Seqpos *getencseqssptab(const Encodedsequence *encseq);
+unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
+                                      Seqpos position);
 
 void getencseqSeqinfo(Seqinfo *seqinfo,const Encodedsequence *encseq,
                       unsigned long seqnum);
