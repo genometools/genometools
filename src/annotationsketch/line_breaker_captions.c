@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <math.h>
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/str.h"
@@ -87,7 +88,7 @@ void gt_line_breaker_captions_register_block(GtLineBreaker *lb,
     gt_hashmap_add(lbcap->linepositions, line, num);
   }
   dr = calculate_drawing_range(lbcap, block);
-  *num = dr.end + 2.0;
+  *num = floor(dr.end);
 }
 
 void gt_line_breaker_captions_delete(GtLineBreaker *lb)
