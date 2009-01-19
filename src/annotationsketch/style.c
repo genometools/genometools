@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,7 @@
 struct GtStyle
 {
   lua_State *L;
+  unsigned long reference_count;
   char *filename;
 };
 
@@ -93,6 +94,13 @@ GtStyle* gt_style_new_with_state(lua_State *L)
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->L = L;
   return sty;
+}
+
+GtStyle* gt_style_ref(GtStyle *style)
+{
+  gt_assert(style);
+  style->reference_count++;
+  return style;
 }
 
 int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
@@ -650,6 +658,11 @@ int gt_style_unit_test(GtError *err)
 void gt_style_delete_without_state(GtStyle *sty)
 {
   if (!sty) return;
+  if (sty->reference_count)
+  {
+    sty->reference_count--;
+    return;
+  }
   gt_free(sty->filename);
   gt_free(sty);
 }
@@ -657,6 +670,11 @@ void gt_style_delete_without_state(GtStyle *sty)
 void gt_style_delete(GtStyle *sty)
 {
   if (!sty) return;
+  if (sty->reference_count)
+  {
+    sty->reference_count--;
+    return;
+  }
   if (sty->L) lua_close(sty->L);
   gt_style_delete_without_state(sty);
 }
