@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -196,7 +196,7 @@ GtLayout* gt_layout_new(GtDiagram *diagram,
   gt_assert(diagram && width > 0 && style && err);
   if (check_width(width, style, err) < 0)
     return NULL;
-  twc = gt_text_width_calculator_cairo_new(NULL);
+  twc = gt_text_width_calculator_cairo_new(NULL, style);
   layout = gt_layout_new_with_twc(diagram, width, style, twc, err);
   layout->own_twc = true;
   return layout;
@@ -295,7 +295,7 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
 {
   GtTracklineInfo lines;
   double tmp;
-  bool show_track_captions, show_block_captions;
+  bool show_track_captions;
   unsigned long height,
                 line_height,
                 i;
@@ -317,18 +317,6 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   else
     line_height += BAR_VSPACE_DEFAULT;
 
-  if (!(gt_style_get_bool(layout->style, "format","show_block_captions",
-                          &show_block_captions, NULL)))
-    show_block_captions = true;
-
-  /* get total height of all lines */
-  height  = lines.total_lines * line_height;
-  if (show_block_captions)
-  {
-  height += lines.total_captionlines * (TOY_TEXT_HEIGHT
-                                          + CAPTION_BAR_SPACE_DEFAULT);
-  }
-
   if (!(gt_style_get_bool(layout->style, "format","show_track_captions",
                           &show_track_captions, NULL)))
     show_track_captions = true;
@@ -336,26 +324,24 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   /* add custom track space allotment */
   if (show_track_captions)
   {
-    double theight = TOY_TEXT_HEIGHT;
+    double theight = TOY_TEXT_HEIGHT,
+           captionspace = CAPTION_BAR_SPACE_DEFAULT;
     gt_style_get_num(layout->style, "format", "track_caption_font_size",
                      &theight, NULL);
-    if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp, NULL))
-    {
-      height += gt_array_size(layout->custom_tracks)
-                    * (theight + CAPTION_BAR_SPACE_DEFAULT + tmp);
-    }
-    else
-    {
-      height += gt_array_size(layout->custom_tracks)
-                    * (theight + CAPTION_BAR_SPACE_DEFAULT
-                                       + TRACK_VSPACE_DEFAULT);
-    }
+    gt_style_get_num(layout->style, "format", "track_caption_space",
+                     &captionspace, NULL);
+    height += gt_array_size(layout->custom_tracks)
+                  * (theight + captionspace);
   }
+
   for (i=0;i<gt_array_size(layout->custom_tracks);i++)
   {
     GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
                                                         i);
     height += gt_custom_track_get_height(ct);
+    gt_style_get_num(layout->style, "format", "track_vspace", &tmp, NULL);
+    height += tmp;
+
   }
 
   /* add header space and footer */

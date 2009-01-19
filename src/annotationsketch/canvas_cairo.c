@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -75,7 +75,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 
   if (show_track_captions)
   {
-    double theight = TOY_TEXT_HEIGHT,
+    double theight      = TOY_TEXT_HEIGHT,
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
     gt_style_get_num(canvas->pvt->sty, "format", "track_caption_font_size",
                      &theight, NULL);
@@ -86,6 +86,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
                          SLANT_NORMAL,
                          WEIGHT_NORMAL,
                          theight);
+    canvas->pvt->y += theight;
     /* draw track title */
     gt_graphics_draw_colored_text(canvas->pvt->g,
                                   canvas->pvt->margins,
@@ -118,7 +119,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
                                     red,
                                     buf);
     }
-    canvas->pvt->y += theight + captionspace;
+    canvas->pvt->y += captionspace;
   }
   return had_err;
 }
@@ -126,14 +127,11 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GtTrack *track,
                                      GT_UNUSED GtError *err)
 {
-  double vspace;
+  double vspace = TRACK_VSPACE_DEFAULT;
   gt_assert(canvas && track);
   /* put track spacer after track */
-  if (gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &vspace,
-                       NULL))
-    canvas->pvt->y += vspace;
-  else
-    canvas->pvt->y += TRACK_VSPACE_DEFAULT;
+  gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &vspace, NULL);
+  canvas->pvt->y += vspace;
   return 0;
 }
 

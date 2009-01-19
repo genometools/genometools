@@ -157,8 +157,9 @@ double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
   unsigned long i;
   double track_height = 0, bheight = TOY_TEXT_HEIGHT, theight = TOY_TEXT_HEIGHT,
          tcaptionspace = CAPTION_BAR_SPACE_DEFAULT,
-         bcaptionspace = CAPTION_BAR_SPACE_DEFAULT;
-  bool show_track_captions = true;
+         bcaptionspace = CAPTION_BAR_SPACE_DEFAULT,
+         tmp = TRACK_VSPACE_DEFAULT;
+  bool show_track_captions = true, show_block_captions = true;
   gt_assert(track && sty);
   gt_style_get_num(sty, "format", "block_caption_font_size", &bheight, NULL);
   gt_style_get_num(sty, "format", "track_caption_font_size", &theight, NULL);
@@ -169,8 +170,13 @@ double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
     double tmp = BAR_VSPACE_DEFAULT;
     GtLine *line = *(GtLine**) gt_array_get(track->lines, i);
     track_height += gt_line_get_height(line, sty);
+
+    if (!(gt_style_get_bool(sty, "format","show_block_captions",
+                            &show_block_captions, NULL)))
+    show_block_captions = true;
+
     /* add caption space if necessary */
-    if (gt_line_has_captions(line))
+    if (gt_line_has_captions(line) && show_block_captions)
     {
       track_height += bheight + bcaptionspace;
     }
@@ -178,23 +184,17 @@ double gt_track_get_height(const GtTrack *track, const GtStyle *sty)
     gt_style_get_num(sty, "format", "bar_vspace", &tmp, NULL);
     track_height += tmp;
   }
+
   /* determine display of track captions */
-  if (!(gt_style_get_bool(sty, "format","show_track_captions",
-                          &show_track_captions, NULL)))
-    show_track_captions = true;
+  gt_style_get_bool(sty, "format","show_track_captions",
+                    &show_track_captions, NULL);
+
   /* add track caption height and spacer */
   if (show_track_captions)
-  {
-    double tmp;
-    if (gt_style_get_num(sty, "format", "track_vspace", &tmp, NULL))
-    {
-      track_height += theight + tcaptionspace + tmp;
-    }
-    else
-    {
-      track_height += theight + tcaptionspace + TRACK_VSPACE_DEFAULT;
-    }
-  }
+    track_height += theight + tcaptionspace;
+  gt_style_get_num(sty, "format", "track_vspace", &tmp, NULL);
+  track_height += tmp;
+
   return track_height;
 }
 

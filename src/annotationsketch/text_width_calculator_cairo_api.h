@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #define TEXT_WIDTH_CALCULATOR_CAIRO_API_H
 
 #include <cairo.h>
+#include "annotationsketch/style_api.h"
 #include "annotationsketch/text_width_calculator_api.h"
 
 /* Implements the GtTextWidthCalculator interface with Cairo as the drawing
@@ -29,7 +30,10 @@
    <gt_layout_new_with_twc()>. */
 typedef struct GtTextWidthCalculatorCairo GtTextWidthCalculatorCairo;
 
-/* Creates a new <GtTextWidthCalculatorCairo> object for the given context. */
-GtTextWidthCalculator*            gt_text_width_calculator_cairo_new(cairo_t*);
+/* Creates a new <GtTextWidthCalculatorCairo> object for the given context
+   using the text size options given in the <GtStyle>. If the <GtStyle> is NULL,
+   the current font settings in the <cairo_t> will be used for all text
+   width calculations. */
+GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t*, GtStyle*);
 
 #endif
