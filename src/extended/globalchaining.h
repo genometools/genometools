@@ -1,5 +1,5 @@
 /*
-  Copyright (c)       2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007, 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004       Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2004, 2007 Center for Bioinformatics, University of Hamburg
 
@@ -30,7 +30,8 @@ typedef struct {
   long weight;             /* weight of fragment */
 } Fragment;
 
-typedef void (*GtChainProc)(GtChain*, Fragment*, void*);
+typedef void (*GtChainProc)(GtChain*, Fragment*, unsigned long num_of_fragments,
+                            unsigned long max_gap_width, void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
    in O(<num_of_fragments>^2) time.
