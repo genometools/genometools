@@ -36,6 +36,62 @@
 
 #include "match/esa-maxpairs.pr"
 
+static int bdptrcompare(const void *a, const void *b)
+{
+  const LTRboundaries **bda, **bdb;
+
+  bda = (const LTRboundaries **) a;
+  bdb = (const LTRboundaries **) b;
+  if ((*bda)->contignumber < (*bdb)->contignumber)
+  {
+    return -1;
+  }
+  if ((*bda)->contignumber > (*bdb)->contignumber)
+  {
+    return 1;
+  }
+  if ((*bda)->leftLTR_5 < (*bdb)->leftLTR_5)
+  {
+    return -1;
+  }
+  if ((*bda)->leftLTR_5 > (*bdb)->leftLTR_5)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
+                                                 const ArrayLTRboundaries *ltr)
+{
+  unsigned long countboundaries = 0, nextfill = 0;
+  const LTRboundaries *bd, **bdptrtab;
+
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
+                                          ltr->nextfreeLTRboundaries; bd++)
+  {
+    if (!bd->skipped)
+    {
+      countboundaries++;
+    }
+  }
+  bdptrtab = gt_malloc(sizeof(LTRboundaries *) * countboundaries);
+  nextfill = 0;
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
+                                          ltr->nextfreeLTRboundaries; bd++)
+  {
+    if (!bd->skipped)
+    {
+      bdptrtab[nextfill++] = bd;
+    }
+  }
+  qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *),
+        bdptrcompare);
+  *numofboundaries = countboundaries;
+  return bdptrtab;
+}
+
+
 static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 {
   Sequentialsuffixarrayreader *ssar; /* suffix array */
@@ -138,12 +194,18 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   }
 
   /* print GFF3 format file of predictions */
-  if (!had_err && lo->gff3output)
+  if (!had_err && lo->gff3output && 
+      lo->arrayLTRboundaries.nextfreeLTRboundaries > 0)
   {
-    if (printgff3format(lo, encseq,err) != 0)
+    unsigned long numofboundaries;
+    const LTRboundaries **bdptrtab;
+
+    bdptrtab = sortedltrboundaries(&numofboundaries,&lo->arrayLTRboundaries);
+    if (printgff3format(lo,bdptrtab,numofboundaries,encseq,err) != 0)
     {
       had_err = true;
     }
+    gt_free(bdptrtab);
   }
 
   /* print predictions to stdout */

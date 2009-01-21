@@ -32,22 +32,145 @@
  *          since normally in annotation first base in sequence
  *          is position 1 instead of 0.
  */
-int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
+
+static void producelongutput(const LTRharvestoptions *lo,
+                             const LTRboundaries *boundaries,
+                             const Encodedsequence *encseq,
+                             Seqpos offset)
+{
+  const Uchar *characters = getencseqAlphabetcharacters(encseq);
+
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast(boundaries->leftLTR_5 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast(boundaries->rightLTR_3 -offset  + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast((boundaries->rightLTR_3 - boundaries->leftLTR_5
+          + 1)));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast(boundaries->leftLTR_5 -offset  + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast(boundaries->leftLTR_3 -offset  + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast((boundaries->leftLTR_3 - boundaries->leftLTR_5
+          + (Seqpos)1)));
+  if (lo->minlengthTSD > 1U)
+  {
+    Seqpos j;
+
+    for (j = 0; j < boundaries->lenleftTSD; j++)
+    {
+      printf("%c",
+       (char) characters[getencodedchar(encseq,/* XXX */
+          boundaries->leftLTR_5 - boundaries->lenleftTSD + j,
+          Forwardmode)]);
+    }
+    printf("  " FormatSeqpos "  ",
+           PRINTSeqposcast(boundaries->lenleftTSD));
+  }
+  if (lo->motif.allowedmismatches < 4U)
+  {
+    printf("%c%c..%c%c  ",
+        (char) characters[getencodedchar(encseq,/* Random access */
+                       boundaries->leftLTR_5,
+                       Forwardmode)],
+        (char) characters[getencodedchar(encseq,/* Random access */
+                       boundaries->leftLTR_5+(Seqpos)1,
+                       Forwardmode)],
+        (char) characters[getencodedchar(encseq,/* Random access */
+                       boundaries->leftLTR_3-(Seqpos)1,
+                       Forwardmode)],
+        (char) characters[getencodedchar(encseq,/* Random access */
+                       boundaries->leftLTR_3,
+                       Forwardmode)] );
+  }
+  /* increase by 1 */
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast(boundaries->rightLTR_5 -offset + (Seqpos)1));
+  /* increase by 1 */
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast(boundaries->rightLTR_3 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast((boundaries->rightLTR_3
+          - boundaries->rightLTR_5 + 1)));
+  if (lo->minlengthTSD > 1U)
+  {
+    Seqpos j;
+
+    for (j = 0; j < boundaries->lenrightTSD; j++)
+    {
+      printf("%c", (char) characters[getencodedchar(encseq,/* XXX */
+          boundaries->rightLTR_3 + j + 1,
+          Forwardmode)]);
+    }
+    printf("  " FormatSeqpos "  ",
+           PRINTSeqposcast(boundaries->lenrightTSD));
+  }
+  if (lo->motif.allowedmismatches < 4U)
+  {
+    printf("%c%c..%c%c",
+        (char) characters[getencodedchar(encseq,/* Randomaccess */
+                       boundaries->rightLTR_5,
+                       Forwardmode)],
+        (char) characters[getencodedchar(encseq,/* Randomaccess */
+                       boundaries->rightLTR_5+(Seqpos)1,
+                       Forwardmode)],
+        (char) characters[getencodedchar(encseq,/* Randomaccess */
+                       boundaries->rightLTR_3-(Seqpos)1,
+                       Forwardmode)],
+        (char) characters[getencodedchar(encseq,/* Random access */
+                       boundaries->rightLTR_3,/* Randomaccess */
+                       Forwardmode)] );
+  }
+  /* print similarity */
+  printf("  %.2f", boundaries->similarity);
+  /* print sequence number */
+  printf("  %lu\n", boundaries->contignumber);
+}
+
+static void produceshortoutput(const LTRboundaries *boundaries,Seqpos offset)
+{
+
+  /* increase positions by 1 */
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( boundaries->leftLTR_5 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( boundaries->rightLTR_3 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( (boundaries->rightLTR_3
+          - boundaries->leftLTR_5 + (Seqpos)1)));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( boundaries->leftLTR_5 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( boundaries->leftLTR_3 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( (boundaries->leftLTR_3
+          - boundaries->leftLTR_5 + (Seqpos)1)));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( boundaries->rightLTR_5 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( boundaries->rightLTR_3 -offset + (Seqpos)1));
+  printf(FormatSeqpos "  ",
+      PRINTSeqposcast( (boundaries->rightLTR_3
+          - boundaries->rightLTR_5 + (Seqpos)1)));
+  /* print similarity */
+  printf("%.2f  ", boundaries->similarity);
+  /* print sequence number */
+  printf("%lu\n", boundaries->contignumber);
+}
+
+int showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
                             const Sequentialsuffixarrayreader *ssar)
 {
   LTRboundaries *boundaries;
   Seqinfo seqinfo;
   unsigned long numofdbsequences,
                 seqnum,
-                i,
-                contignumber;
-  Seqpos offset;
-  const Uchar *characters;
+                i;
   const Encodedsequence *encseq;
 
   encseq = encseqSequentialsuffixarrayreader(ssar);
   /* in order to get to visible dna characters */
-  characters = getencseqAlphabetcharacters(encseq);
 
   numofdbsequences = getencseqnumofdbsequences(encseq);
 
@@ -56,8 +179,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
     {
       printf("No full LTR-pair predicted.\n");
-    }
-    else
+    } else
     {
       printf("# predictions are reported in the following way\n");
       printf("# s(ret) e(ret) l(ret) ");
@@ -105,111 +227,20 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
         for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
         {
           boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
-          contignumber = boundaries->contignumber;
-          if ( (!boundaries->skipped) && contignumber == seqnum)
+          if ( (!boundaries->skipped) && boundaries->contignumber == seqnum)
           {
-            getencseqSeqinfo(&seqinfo,encseq,contignumber);
-            offset = seqinfo.seqstartpos;
-            /* increase positions by 1 */
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast(boundaries->leftLTR_5 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast(boundaries->rightLTR_3 -offset  + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast((boundaries->rightLTR_3 - boundaries->leftLTR_5
-                    + 1)));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast(boundaries->leftLTR_5 -offset  + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast(boundaries->leftLTR_3 -offset  + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast((boundaries->leftLTR_3 - boundaries->leftLTR_5
-                    + (Seqpos)1)));
-            if (lo->minlengthTSD > 1U)
-            {
-              Seqpos j;
-
-              for (j = 0; j < boundaries->lenleftTSD; j++)
-              {
-                printf("%c",
-                 (char) characters[getencodedchar(encseq,/* XXX */
-                    boundaries->leftLTR_5 - boundaries->lenleftTSD + j,
-                    Forwardmode)]);
-              }
-              printf("  " FormatSeqpos "  ",
-                     PRINTSeqposcast(boundaries->lenleftTSD));
-            }
-            if (lo->motif.allowedmismatches < 4U)
-            {
-              printf("%c%c..%c%c  ",
-                  (char) characters[getencodedchar(encseq,/* Random access */
-                                 boundaries->leftLTR_5,
-                                 Forwardmode)],
-                  (char) characters[getencodedchar(encseq,/* Random access */
-                                 boundaries->leftLTR_5+(Seqpos)1,
-                                 Forwardmode)],
-                  (char) characters[getencodedchar(encseq,/* Random access */
-                                 boundaries->leftLTR_3-(Seqpos)1,
-                                 Forwardmode)],
-                  (char) characters[getencodedchar(encseq,/* Random access */
-                                 boundaries->leftLTR_3,
-                                 Forwardmode)] );
-            }
-            /* increase by 1 */
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast(boundaries->rightLTR_5 -offset + (Seqpos)1));
-            /* increase by 1 */
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast(boundaries->rightLTR_3 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast((boundaries->rightLTR_3
-                    - boundaries->rightLTR_5 + 1)));
-            if (lo->minlengthTSD > 1U)
-            {
-              Seqpos j;
-
-              for (j = 0; j < boundaries->lenrightTSD; j++)
-              {
-                printf("%c", (char) characters[getencodedchar(encseq,/* XXX */
-                    boundaries->rightLTR_3 + j + 1,
-                    Forwardmode)]);
-              }
-              printf("  " FormatSeqpos "  ",
-                     PRINTSeqposcast(boundaries->lenrightTSD));
-            }
-            if (lo->motif.allowedmismatches < 4U)
-            {
-              printf("%c%c..%c%c",
-                  (char) characters[getencodedchar(encseq,/* Randomaccess */
-                                 boundaries->rightLTR_5,
-                                 Forwardmode)],
-                  (char) characters[getencodedchar(encseq,/* Randomaccess */
-                                 boundaries->rightLTR_5+(Seqpos)1,
-                                 Forwardmode)],
-                  (char) characters[getencodedchar(encseq,/* Randomaccess */
-                                 boundaries->rightLTR_3-(Seqpos)1,
-                                 Forwardmode)],
-                  (char) characters[getencodedchar(encseq,/* Random access */
-                                 boundaries->rightLTR_3,/* Randomaccess */
-                                 Forwardmode)] );
-            }
-            /* print similarity */
-            printf("  %.2f", boundaries->similarity);
-            /* print sequence number */
-            printf("  %lu\n", contignumber);
+            getencseqSeqinfo(&seqinfo,encseq,boundaries->contignumber);
+            producelongutput(lo,
+                             boundaries,
+                             encseq,
+                             seqinfo.seqstartpos);
           }
         }
       }
     }
-  }
-  /* short output */
-  else
+  } else
   {
-    if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
-    {
-      /* nothing */
-    }
-    else
+    if (lo->arrayLTRboundaries.nextfreeLTRboundaries > 0)
     {
       /* print short output of full length LTR-retrotransposon(s) */
       printf("# predictions are reported in the following way\n");
@@ -231,38 +262,10 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
         for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
         {
           boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
-          contignumber = boundaries->contignumber;
-          if ( (!boundaries->skipped) && contignumber == seqnum)
+          if ( (!boundaries->skipped) && boundaries->contignumber == seqnum)
           {
-            getencseqSeqinfo(&seqinfo,encseq,contignumber);
-            offset = seqinfo.seqstartpos;
-
-            /* increase positions by 1 */
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( boundaries->leftLTR_5 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( boundaries->rightLTR_3 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( (boundaries->rightLTR_3
-                    - boundaries->leftLTR_5 + (Seqpos)1)));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( boundaries->leftLTR_5 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( boundaries->leftLTR_3 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( (boundaries->leftLTR_3
-                    - boundaries->leftLTR_5 + (Seqpos)1)));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( boundaries->rightLTR_5 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( boundaries->rightLTR_3 -offset + (Seqpos)1));
-            printf(FormatSeqpos "  ",
-                PRINTSeqposcast( (boundaries->rightLTR_3
-                    - boundaries->rightLTR_5 + (Seqpos)1)));
-            /* print similarity */
-            printf("%.2f  ", boundaries->similarity);
-            /* print sequence number */
-            printf("%lu\n", contignumber);
+            getencseqSeqinfo(&seqinfo,encseq,boundaries->contignumber);
+            produceshortoutput(boundaries,seqinfo.seqstartpos);
           }
         }
       }

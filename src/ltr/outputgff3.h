@@ -21,8 +21,11 @@
 #include "core/error.h"
 #include "match/encseq-def.h"
 #include "ltrharvest-opt.h"
+#include "repeattypes.h"
 
 int printgff3format(const LTRharvestoptions *lo,
+                    const LTRboundaries **bdptrtab,
+                    unsigned long numofentries,
                     const Encodedsequence *encseq,
                     GtError *err);
 

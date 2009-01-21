@@ -64,8 +64,7 @@ typedef struct
 /* LTR element. */
 typedef struct
 {
-  unsigned long contignumber; /* number of sequence in multiseq of
-                                 virtualtree */
+  unsigned long contignumber; /* ordinal number of sequence in encseq */
   Seqpos leftLTR_5,    /* 5' boundary of left LTR */
          leftLTR_3,    /* 3' boundary of left LTR */
          rightLTR_5,   /* 5' boundary of right LTR */

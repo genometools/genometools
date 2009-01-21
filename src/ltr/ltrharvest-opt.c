@@ -570,5 +570,5 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
       rval = OPTIONPARSER_ERROR;
     }
   }
-  return (rval == OPTIONPARSER_OK) ? 0: - 1;
+  return (rval == OPTIONPARSER_OK) ? 0: -1;
 }
