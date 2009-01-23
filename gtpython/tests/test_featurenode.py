@@ -80,6 +80,30 @@ class TestFeatureNodeChildren(unittest.TestCase):
         self.assertEqual(num_features, 3)
 
 
+class TestFeatureNodeProperties(unittest.TestCase):
+    def setUp(self):
+        self.fn  = FeatureNode("test", "type", 100, 500, "+")
+
+    def test_strand(self):
+        fn = self.fn
+        self.assertEqual("+", fn.strand)
+        fn.strand = "-"
+        self.assertEqual("-", fn.strand)
+
+    def test_score(self):
+        fn = self.fn
+        self.assert_(not fn.score_is_defined())
+        fn.score = 2
+        self.assert_(fn.score_is_defined())
+        self.assertEqual(2, fn.get_score())
+        self.assertEqual(2, fn.score)
+
+        fn.set_score(4)
+
+        self.assertEqual(2, fn.score)
+    def test_range(self):
+        fn = self.fn
+        self.assertEqual((100, 500), fn.range)
 
 if __name__ == "__main__":
     unittest.main()

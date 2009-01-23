@@ -20,6 +20,7 @@ from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
+from gt.props import cachedproperty
 
 class FeatureNode(GenomeNode):
 
@@ -67,7 +68,9 @@ class FeatureNode(GenomeNode):
   def set_source(self, source):
     s = Str(source)
     gtlib.gt_feature_node_set_source(self.gn, s)
+  source = cachedproperty(get_source, set_source)
 
+  @cachedproperty
   def get_type(self):
     return gtlib.gt_feature_node_get_type(self.gn)
 
@@ -85,11 +88,14 @@ class FeatureNode(GenomeNode):
     from gt.extended.strand import strandchars
     return strandchars[gtlib.gt_feature_node_get_strand(self.gn)]
 
+  strand = cachedproperty(get_strand, set_strand)
+
   def get_phase(self):
     return gtlib.gt_feature_node_get_phase(self.gn)
 
   def set_phase(self, phase):
     return gtlib.gt_feature_node_set_phase(self.gn, phase)
+  phase = cachedproperty(get_phase, set_phase)
 
   def score_is_defined(self):
     return (gtlib.gt_feature_node_score_is_defined(self.gn) == 1)
@@ -105,6 +111,8 @@ class FeatureNode(GenomeNode):
 
   def unset_score(self):
     gtlib.gt_feature_node_unset_score(self.gn)
+
+  score = cachedproperty(get_score, set_score, unset_score)
 
   def get_attribute(self, attrib):
     return self.attribs[attrib]

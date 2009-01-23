@@ -48,9 +48,11 @@ class GenomeNode(object):
   def get_range(self):
     return (gtlib.gt_genome_node_get_start(self.gn), \
             gtlib.gt_genome_node_get_end(self.gn))
+  range = property(get_range)
 
   def get_filename(self):
     return gtlib.gt_genome_node_get_filename(self.gn)
+  filename = property(get_filename)
 
   def accept(self, visitor):
     err = Error()
