@@ -22,12 +22,16 @@ from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
 
 class FeatureNode(GenomeNode):
-  def __init__(self, node_ptr, newref = False):
-    super(FeatureNode, self).__init__(node_ptr, newref)
-    self.attribs = {}
-    self.update_attrs()
 
-  def create(seqid, type, start, end, strand):
+  @classmethod
+  def create_from_ptr(cls, node_ptr, newref=False):
+    fn = GenomeNode.__new__(cls, node_ptr, newref)
+    fn.gn = node_ptr
+    fn.attribs = {}
+    fn.update_attrs()
+    return fn
+
+  def __init__(self, seqid, type, start, end, strand):
     from gt.extended.strand import strandchars
     if not strand in strandchars:
       gterror("Invalid strand '%s' -- must be one of %s" \
@@ -35,13 +39,11 @@ class FeatureNode(GenomeNode):
     s = Str(seqid)
     newfn = gtlib.gt_feature_node_new(s, type, start, end, \
                                       strandchars.index(strand))
-    fn = FeatureNode(newfn, True)
-    fn.seqid = seqid
-    fn.type = type
-    fn.strand = strand
-    return fn
-  create = staticmethod(create)
+    super(FeatureNode, self).__init__(newfn, True)
+    self.attribs = {}
+    self.update_attrs()
 
+  
   def update_attrs(self):
     def py_collect_func(tag, val, data):
       self.attribs[tag] = val
@@ -151,7 +153,7 @@ class FeatureNodeIterator(object):
   def next(self):
     ret = gtlib.gt_feature_node_iterator_next(self.i)
     if ret != None:
-      return FeatureNode(ret)
+      return FeatureNode.create_from_ptr(ret)
     return ret
 
   def __del__(self):

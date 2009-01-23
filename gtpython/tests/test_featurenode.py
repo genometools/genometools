@@ -5,7 +5,7 @@ from gt import FeatureNode, FeatureNodeIteratorDepthFirst
 class FeatureNodeTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.fn = FeatureNode.create("test", "type", 100, 500, "+")
+        self.fn = FeatureNode("test", "type", 100, 500, "+")
 
 
     def test_score(self):
@@ -45,8 +45,8 @@ class FeatureNodeTestCase(unittest.TestCase):
 
 class TestFeatureNodeChildren(unittest.TestCase):
     def setUp(self):
-        self.fn  = FeatureNode.create("test", "type", 100, 500, "+")
-        self.fn2 = FeatureNode.create("test", "type2", 200,300,"+")
+        self.fn  = FeatureNode("test", "type", 100, 500, "+")
+        self.fn2 = FeatureNode("test", "type2", 200,300,"+")
         self.fn.add_child(self.fn2)
 
     def test_phase(self):
@@ -68,7 +68,7 @@ class TestFeatureNodeChildren(unittest.TestCase):
 
 
 
-        fn3 = FeatureNode.create("test", "type3", 250,300,"+")
+        fn3 = FeatureNode("test", "type3", 250,300,"+")
         fn.add_child(fn3)
         fni = FeatureNodeIteratorDepthFirst(fn)
 
