@@ -43,7 +43,7 @@ class RecMap:
 
   def get_genome_feature(self):
     #refcount only this FeatureNode!
-    return FeatureNode(gtlib.gt_rec_map_get_genome_feature(self.rm), True)
+    return FeatureNode.create_from_ptr(gtlib.gt_rec_map_get_genome_feature(self.rm), True)
 
   def has_omitted_children(self):
     return (gtlib.gt_rec_map_has_omitted_children(self.rm) == 1)

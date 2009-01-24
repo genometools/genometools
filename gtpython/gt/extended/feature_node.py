@@ -44,7 +44,7 @@ class FeatureNode(GenomeNode):
     self.attribs = {}
     self.update_attrs()
 
-  
+
   def update_attrs(self):
     def py_collect_func(tag, val, data):
       self.attribs[tag] = val
@@ -87,7 +87,6 @@ class FeatureNode(GenomeNode):
   def get_strand(self):
     from gt.extended.strand import strandchars
     return strandchars[gtlib.gt_feature_node_get_strand(self.gn)]
-
   strand = cachedproperty(get_strand, set_strand)
 
   def get_phase(self):
@@ -111,7 +110,6 @@ class FeatureNode(GenomeNode):
 
   def unset_score(self):
     gtlib.gt_feature_node_unset_score(self.gn)
-
   score = cachedproperty(get_score, set_score, unset_score)
 
   def get_attribute(self, attrib):
