@@ -106,7 +106,7 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
   g->width = width;
   g->height = height;
   g->margin_x = g->margin_y = 20;
-  cairo_set_source_rgba(g->cr, 1, 1, 1, 1);
+  cairo_set_source_rgba(g->cr, 1, 1, 1, 0);
   cairo_paint(g->cr);
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
