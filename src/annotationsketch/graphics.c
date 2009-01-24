@@ -34,6 +34,7 @@ struct GtGraphicsClass {
   GtGraphicsDrawColoredTextFunc draw_colored_text;
   GtGraphicsGetSingleExtentFunc get_text_height;
   GtGraphicsGetTextWidthFunc get_text_width;
+  GtGraphicsSetColorFunc set_background_color;
   GtGraphicsSetFontFunc set_font;
   GtGraphicsGetSingleExtentFunc get_image_width,
                                 get_image_height,
@@ -66,6 +67,8 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                                      get_text_height,
                                          GtGraphicsGetTextWidthFunc
                                                      get_text_width,
+                                         GtGraphicsSetColorFunc
+                                                     set_background_color,
                                          GtGraphicsSetFontFunc
                                                      set_font,
                                          GtGraphicsGetSingleExtentFunc
@@ -106,6 +109,7 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
   c_class->draw_colored_text = draw_colored_text;
   c_class->get_text_height = get_text_height;
   c_class->get_text_width = get_text_width;
+  c_class->set_background_color = set_background_color;
   c_class->set_font = set_font;
   c_class->get_image_width = get_image_width;
   c_class->get_image_height = get_image_height;
@@ -198,6 +202,12 @@ double gt_graphics_get_text_width(GtGraphics *g, const char *txt)
 {
   gt_assert(g && g->c_class && txt);
   return g->c_class->get_text_width(g, txt);
+}
+
+int gt_graphics_set_background_color(GtGraphics *g, GtColor color)
+{
+  gt_assert(g && g->c_class);
+  return g->c_class->set_background_color(g, color);
 }
 
 void gt_graphics_set_font(GtGraphics *g, const char *family,
