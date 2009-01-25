@@ -128,6 +128,7 @@ allmultifiles.each do |filename|
   Test do
     run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
              "-db #{$testdata}#{filename}"
+    run_test "#{$bin}gt suffixerator -suf -lcp -pl -dir rev -ii localidx"
     run_test "#{$bin}gt dev sfxmap -tis -des localidx",
              :retval => 1
     run_test "#{$bin}gt dev sfxmap -tis -ssp localidx",

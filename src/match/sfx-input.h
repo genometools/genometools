@@ -31,7 +31,6 @@ typedef struct
   Encodedsequence *encseq;
   unsigned long *characterdistribution;
   Readmode readmode;
-  void *voidptr2suffixarray;
   ArraySeqpos sequenceseppos;
 } Sfxseqinfo;
 
@@ -43,9 +42,10 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
 
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                         const GtStr *indexname,
+                        Readmode readmodeoption,
                         Verboseinfo *verboseinfo,
                         GtError *err);
 
-void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped);
+void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo);
 
 #endif

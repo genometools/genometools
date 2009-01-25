@@ -85,7 +85,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   Seqpos specialrangestab[3];
 
   gt_error_check(err);
-  sfxseqinfo->voidptr2suffixarray = NULL;
   sfxseqinfo->encseq = NULL;
   sfxseqinfo->characterdistribution = NULL;
   sfxseqinfo->readmode = so->readmode;
@@ -188,45 +187,28 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
 
 int fromsarr2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                         const GtStr *indexname,
+                        Readmode readmodeoption,
                         Verboseinfo *verboseinfo,
                         GtError *err)
 {
-  bool haserr = false;
-  Suffixarray *suffixarray;
-
-  ALLOCASSIGNSPACE(suffixarray,NULL,Suffixarray,1);
   sfxseqinfo->characterdistribution = NULL;
-  sfxseqinfo->voidptr2suffixarray = NULL;
+  sfxseqinfo->readmode = readmodeoption;
   INITARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
-  if (mapsuffixarray(suffixarray,
-                     SARR_ESQTAB,
-                     indexname,
-                     verboseinfo,
-                     err) != 0)
-  {
-    haserr = true;
-    FREESPACE(suffixarray);
-  } else
-  {
-    sfxseqinfo->voidptr2suffixarray = suffixarray; /* for freeing it later */
-    sfxseqinfo->readmode = suffixarray->readmode;
-    sfxseqinfo->encseq = suffixarray->encseq;
-  }
-  return haserr ? -1 : 0;
+  sfxseqinfo->encseq = mapencodedsequence(true,
+                                          indexname,
+                                          true,
+                                          false,
+                                          false,
+                                          verboseinfo,
+                                          err);
+  return (sfxseqinfo->encseq == NULL) ? -1 : 0;
 }
 
-void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo,bool mapped)
+void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
 {
-  if (mapped)
+  if (sfxseqinfo->encseq != NULL)
   {
-    if (sfxseqinfo->voidptr2suffixarray != NULL)
-    {
-      freesuffixarray((Suffixarray *) sfxseqinfo->voidptr2suffixarray);
-    }
-    FREESPACE(sfxseqinfo->voidptr2suffixarray);
-  } else
-  {
-    FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
     freeEncodedsequence(&sfxseqinfo->encseq);
   }
+  FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
 }

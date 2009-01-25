@@ -243,7 +243,6 @@ static OPrval parse_options(int *parsed_args,
   gt_option_parser_add_option(op, option);
 
   gt_option_exclude(optionii, optiondb);
-  gt_option_exclude(optionii, optiondir);
   gt_option_exclude(optionii, optionsmap);
   gt_option_exclude(optionii, optiondna);
   gt_option_exclude(optionii, optionprotein);

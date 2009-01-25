@@ -426,6 +426,7 @@ static int runsuffixerator(bool doesa,
   {
     if (fromsarr2Sfxseqinfo(&sfxseqinfo,
                             so->str_inputindex,
+                            so->readmode,
                             verboseinfo,
                             err) != 0)
     {
@@ -617,8 +618,7 @@ static int runsuffixerator(bool doesa,
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
-  freeSfxseqinfo(&sfxseqinfo,
-                 (gt_str_length(so->str_inputindex) > 0) ? true : false);
+  freeSfxseqinfo(&sfxseqinfo);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,NULL);
