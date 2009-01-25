@@ -32,7 +32,6 @@
 typedef struct
 {
   const Encodedsequence *encseq; /* encoded sequence */
-  unsigned long *descendtab;     /* positions of desc-separators */
   unsigned long linewidth;        /* the line width to show the alignment */
   bool showseqnum;     /* with or without the sequence number */
   FILE *formatout;     /* file pointer to show the alignment */
@@ -89,12 +88,7 @@ static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
   Seqinfo seqinfo;
   unsigned long seqnum = getencseqfrompos2seqnum(fastainfo->encseq,startpos);
 
-  /* if there are sequence descriptions */
-  desptr = retrievesequencedescription(&desclen,
-                                       fastainfo->encseq,
-                                       fastainfo->descendtab,
-                                       seqnum);
-
+  desptr = retrievesequencedescription(&desclen,fastainfo->encseq,seqnum);
   getencseqSeqinfo(&seqinfo,fastainfo->encseq,seqnum);
   myencseq2symbolstring(fastainfo,
                         seqnum,
@@ -168,10 +162,8 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
     fastaoutinfo.linewidth = (unsigned long) linewidth;
     fastaoutinfo.showseqnum = showseqnum;
     fastaoutinfo.formatout = formatout;
-    fastaoutinfo.descendtab = calcdescendpositions(fastaoutinfo.encseq);
     overallpredictionsequences(bdptrtab, numofboundaries, innerregion,
                                &fastaoutinfo);
-    gt_free(fastaoutinfo.descendtab);
   }
   gt_fa_xfclose(formatout);
   return had_err ? -1 : 0;

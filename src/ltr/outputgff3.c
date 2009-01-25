@@ -169,9 +169,8 @@ int printgff3format(const LTRharvestoptions *lo,
     Seqinfo seqinfo;
     const char *desptr = NULL;
     Definedunsignedlong previouscontignum = {false, 0};
-    unsigned long seqnum, i, *descendtab = NULL, desclen;
+    unsigned long seqnum, i, desclen;
 
-    descendtab = calcdescendpositions(encseq);
     ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
                             = ltrc.idcounterLTR
                             = ltrc.idcounterTSD
@@ -190,7 +189,6 @@ int printgff3format(const LTRharvestoptions *lo,
                     seqnum, PRINTSeqposcast(seqinfo.seqlength));
         desptr = retrievesequencedescription(&desclen,
                                              encseq,
-                                             descendtab,
                                              seqnum);
         fprintf(fp,"# %*.*s\n",(int) desclen,(int) desclen,desptr);
       }
@@ -200,7 +198,6 @@ int printgff3format(const LTRharvestoptions *lo,
                      seqinfo.seqstartpos,
                      &ltrc);
     }
-    gt_free(descendtab);
   }
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;

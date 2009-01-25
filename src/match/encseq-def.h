@@ -211,11 +211,8 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
 void checkallsequencedescriptions(const Encodedsequence *encseq);
 
-unsigned long *calcdescendpositions(const Encodedsequence *encseq);
-
 const char *retrievesequencedescription(unsigned long *desclen,
                                         const Encodedsequence *encseq,
-                                        const unsigned long *descendtab,
                                         unsigned long seqnum);
 
 Encodedsequence *plain2encodedsequence(bool withrange,

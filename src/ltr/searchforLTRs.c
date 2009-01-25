@@ -18,11 +18,9 @@
 #include "core/arraydef.h"
 #include "core/error.h"
 #include "core/minmax.h"
-#include "core/unused_api.h"
-#include "match/sarr-def.h"
 #include "match/encseq-def.h"
 #include "match/spacedef.h"
-#include "match/intcode-def.h"
+
 #include "searchforLTRs.h"
 #include "repeattypes.h"
 #include "repeats.h"
@@ -36,7 +34,7 @@
  fulfill the length and distance constraints of LTRs.
  */
 
-static int checklengthanddistanceconstraints(LTRboundaries *boundaries,
+static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
                                              RepeatInfo *repeatinfo)
 {
   Seqpos ulen, vlen, dist_between_LTRs;
@@ -52,14 +50,12 @@ static int checklengthanddistanceconstraints(LTRboundaries *boundaries,
   {
     boundaries->lengthdistconstraint = false;
     boundaries->similarity = 0.0;
-    return -1;
-  }
-  else
+    return false;
+  } else
   {
     boundaries->lengthdistconstraint = true;
   }
-
-  return 0;
+  return true;
 }
 
 static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
@@ -304,7 +300,7 @@ int searchforLTRs(LTRharvestoptions *lo,
     }
 
     /* check length and distance constraints again */
-    if (checklengthanddistanceconstraints(boundaries, &lo->repeatinfo))
+    if (!checklengthanddistanceconstraints(boundaries, &lo->repeatinfo))
     {
       /* delete this LTR-pair candidate */
       arrayLTRboundaries->nextfreeLTRboundaries--;

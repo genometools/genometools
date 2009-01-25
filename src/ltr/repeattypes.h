@@ -21,7 +21,8 @@
 #include <stdbool.h>
 
 #include "core/arraydef.h"
-#include "match/esa-seqread.h"
+#include "match/seqpos-def.h"
+#include "match/encseq-def.h"
 
 /* The datatype Repeat stores information about the maximal repeats (seeds).*/
 typedef struct
@@ -44,8 +45,6 @@ typedef struct
   unsigned long dmin;        /* minimum distance between LTRs */
   unsigned long dmax;        /* maximum distance between LTRs */
   const Encodedsequence *encseq;
-/* pointer on suffixarray, is needed in function simpleexactselfmatchstore,
-   repeats.c */
 } RepeatInfo;
 
 /* The datatype SubRepeatInfo stores information about the maximal repeats */

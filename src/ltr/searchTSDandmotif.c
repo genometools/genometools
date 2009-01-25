@@ -22,10 +22,9 @@
 #include "core/minmax.h"
 #include "core/symboldef.h"
 #include "match/encseq-def.h"
-#include "match/sarr-def.h"
 #include "match/spacedef.h"
 #include "match/esa-mmsearch-def.h"
-#include "match/intcode-def.h"
+
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 #include "repeats.h"
@@ -521,6 +520,7 @@ static int searchforTSDandorMotifoutside(
   unsigned long contignumber = boundaries->contignumber;
   SubRepeatInfo subrepeatinfo;
   Seqinfo seqinfo;
+  bool haserr = false;
 
   gt_error_check(err);
 
@@ -619,21 +619,22 @@ static int searchforTSDandorMotifoutside(
           NULL,
           err) != 0)
     {
-       return -1; /* XXX Fix me */
+       haserr = true;
     }
 
     FREESPACE(dbseq);
     FREESPACE(query);
 
-    searchforbestTSDandormotifatborders(&subrepeatinfo,
-                                        lo,
-                                        encseq,
-                                        boundaries,
-                                        motifmismatchesleftLTR,
-                                        motifmismatchesrightLTR);
-
+    if (!haserr)
+    {
+      searchforbestTSDandormotifatborders(&subrepeatinfo,
+                                          lo,
+                                          encseq,
+                                          boundaries,
+                                          motifmismatchesleftLTR,
+                                          motifmismatchesrightLTR);
+    }
     FREEARRAY (&subrepeatinfo.repeats, Repeat);
-
   } else /* no search for TSDs, search for motif only */
   {
     searchformotifonlyborders(lo,
@@ -646,7 +647,7 @@ static int searchforTSDandorMotifoutside(
                               motifmismatchesleftLTR,
                               motifmismatchesrightLTR);
   }
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 /*

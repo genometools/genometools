@@ -21,10 +21,7 @@
 
 #include "core/error.h"
 #include "core/str.h"
-#include "match/sarr-def.h"
-#include "match/spacedef.h"
 #include "match/esa-seqread.h"
-#include "match/intcode-def.h"
 
 #include "ltrharvest-opt.h"
 #include "ltrharvest-run.h"
@@ -94,7 +91,7 @@ static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
 
 static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 {
-  Sequentialsuffixarrayreader *ssar; /* suffix array */
+  Sequentialsuffixarrayreader *ssar;
   bool had_err = false;
   unsigned long numofboundaries;
   const LTRboundaries **bdptrtab = NULL;

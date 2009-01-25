@@ -20,9 +20,8 @@
 #include "core/error.h"
 #include "core/log.h"
 #include "core/unused_api.h"
-#include "match/sarr-def.h"
 #include "match/encseq-def.h"
-#include "match/intcode-def.h"
+
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 #include "repeats.h"

@@ -158,7 +158,8 @@ typedef uint32_t Uint32;
   const Filelengthvalues *filelengthtab;  /* table of length of files */
 
   const char *destab;
-  unsigned long destablength;
+  unsigned long destablength, *descendtab;
+
   const Alphabet *alpha;      /* alphabet representation */
 
   const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
@@ -850,6 +851,10 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   {
     gt_fa_xmunmap((void *) encseq->destab);
     encseq->destab = NULL;
+  }
+  if (encseq->descendtab != NULL)
+  {
+    FREESPACE(encseq->descendtab);
   }
   if (encseq->ssptab != NULL)
   {
@@ -1808,18 +1813,13 @@ static bool containsspecialViatables(const Encodedsequence *encseq,
 
 bool hasspecialranges(const Encodedsequence *encseq)
 {
-  if (encseq->numofspecialstostore > 0)
-  {
-    return true;
-  }
-  return false;
+  return (encseq->numofspecialstostore > 0) ? true : false;
 }
 
 bool hasfastspecialrangeenumerator(const Encodedsequence *encseq)
 {
   return (encseq->sat == Viadirectaccess ||
           encseq->sat == Viabitaccess) ? false : true;
-          /* XXX remove bitaccess */
 }
 
 bool possibletocmpbitwise(const Encodedsequence *encseq)
@@ -2283,6 +2283,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->numofdbsequencesptr = NULL;
   encseq->specialcharinfoptr = NULL;
   encseq->destab = NULL;
+  encseq->descendtab = NULL;
   encseq->destablength = 0;
   encseq->ssptab = NULL;
   encseq->alpha = alpha;
@@ -2795,6 +2796,24 @@ static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
   return alpha;
 }
 
+static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
+{
+  unsigned long *descendtab, i, idx = 0;
+
+  ALLOCASSIGNSPACE(descendtab,NULL,unsigned long,encseq->numofdbsequences);
+  gt_assert(encseq->destab != NULL);
+  for (i=0; i<encseq->destablength; i++)
+  {
+    if (encseq->destab[i] == '\n')
+    {
+      gt_assert(idx < encseq->numofdbsequences);
+      descendtab[idx++] = i;
+    }
+  }
+  gt_assert(idx == encseq->numofdbsequences);
+  return descendtab;
+}
+
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
                                                bool withesqtab,
@@ -2866,6 +2885,9 @@ static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
     {
       haserr = true;
       freeEncodedsequence(&encseq);
+    } else
+    {
+      encseq->descendtab = calcdescendpositions(encseq);
     }
   }
   if (!haserr && withssptab)
@@ -2887,56 +2909,36 @@ static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
   return haserr ? NULL : encseq;
 }
 
-unsigned long *calcdescendpositions(const Encodedsequence *encseq)
-{
-  unsigned long *descendtab, i, idx = 0;
-
-  ALLOCASSIGNSPACE(descendtab,NULL,unsigned long,encseq->numofdbsequences);
-  gt_assert(encseq->destab != NULL);
-  for (i=0; i<encseq->destablength; i++)
-  {
-    if (encseq->destab[i] == '\n')
-    {
-      gt_assert(idx < encseq->numofdbsequences);
-      descendtab[idx++] = i;
-    }
-  }
-  gt_assert(idx == encseq->numofdbsequences);
-  return descendtab;
-}
-
 const char *retrievesequencedescription(unsigned long *desclen,
                                         const Encodedsequence *encseq,
-                                        const unsigned long *descendtab,
                                         unsigned long seqnum)
 {
   if (seqnum == 0)
   {
-    *desclen = descendtab[0];
+    *desclen = encseq->descendtab[0];
     return encseq->destab;
   }
-  gt_assert(descendtab[seqnum-1] < descendtab[seqnum]);
-  *desclen = descendtab[seqnum] - descendtab[seqnum-1] - 1;
-  return encseq->destab + descendtab[seqnum-1] + 1;
+  gt_assert(encseq->descendtab[seqnum-1] < encseq->descendtab[seqnum]);
+  *desclen = encseq->descendtab[seqnum] - encseq->descendtab[seqnum-1] - 1;
+  return encseq->destab + encseq->descendtab[seqnum-1] + 1;
 }
 
 void checkallsequencedescriptions(const Encodedsequence *encseq)
 {
-  unsigned long *descendtab, desclen, seqnum, totaldesclength, offset = 0;
+  unsigned long desclen, seqnum, totaldesclength, offset = 0;
   const char *desptr;
   char *copydestab;
 
-  descendtab = calcdescendpositions(encseq);
   totaldesclength = encseq->numofdbsequences; /* for each new line */
   for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
-    desptr = retrievesequencedescription(&desclen,encseq,descendtab,seqnum);
+    desptr = retrievesequencedescription(&desclen,encseq,seqnum);
     totaldesclength += desclen;
   }
   ALLOCASSIGNSPACE(copydestab,NULL,char,totaldesclength);
   for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
-    desptr = retrievesequencedescription(&desclen,encseq,descendtab,seqnum);
+    desptr = retrievesequencedescription(&desclen,encseq,seqnum);
     strncpy(copydestab + offset,desptr,(size_t) desclen);
     copydestab[offset+desclen] = '\n';
     offset += (desclen+1);
@@ -2947,7 +2949,6 @@ void checkallsequencedescriptions(const Encodedsequence *encseq)
     exit(EXIT_FAILURE); /* Programm error */
   }
   FREESPACE(copydestab);
-  FREESPACE(descendtab);
 }
 
 Seqpos getencseqspecialcharacters(const Encodedsequence *encseq)
