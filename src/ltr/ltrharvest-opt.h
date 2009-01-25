@@ -29,8 +29,6 @@
 typedef struct
 {
   RepeatInfo repeatinfo;                  /* stores all repeats */
-  ArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
-                                          /*   LTR elements */
 
   GtStr *str_indexname;           /* name of the suffix array index */
   GtStr *str_fastaoutputfilename; /* name of the FASTA output file */
@@ -61,7 +59,7 @@ typedef struct
                                           motif */
 } LTRharvestoptions;
 
-void showuserdefinedoptionsandvalues(LTRharvestoptions *lo);
+void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo);
 
 void printargsline(const char **argv, int argc);
 

@@ -20,8 +20,9 @@
 #include "match/echoseq.h"
 #include "match/encseq-def.h"
 #include "match/defined-types.h"
-#include "ltr/ltrharvest-opt.h"
-#include "ltr/repeattypes.h"
+#include "ltrharvest-opt.h"
+#include "repeattypes.h"
+#include "outputgff3.h"
 
 typedef struct
 {
@@ -172,26 +173,26 @@ int printgff3format(const LTRharvestoptions *lo,
 
     descendtab = calcdescendpositions(encseq);
     ltrc.idcounterRepregion = ltrc.idcounterRetrotrans
-			    = ltrc.idcounterLTR
-			    = ltrc.idcounterTSD
-			    = ltrc.idcounterMotif = 0;
+                            = ltrc.idcounterLTR
+                            = ltrc.idcounterTSD
+                            = ltrc.idcounterMotif = 0;
     fprintf(fp, "##gff-version 3\n");
     for (i = 0; i<numofboundaries; i++)
     {
       seqnum = bdptrtab[i]->contignumber;
-      if (!previouscontignum.defined || 
-	  previouscontignum.valueunsignedlong != seqnum)
+      if (!previouscontignum.defined ||
+          previouscontignum.valueunsignedlong != seqnum)
       {
-	previouscontignum.defined = true;
-	previouscontignum.valueunsignedlong = seqnum;
-	getencseqSeqinfo(&seqinfo,encseq,seqnum);
-	fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
-		    seqnum, PRINTSeqposcast(seqinfo.seqlength));
-	desptr = retrievesequencedescription(&desclen,
-					     encseq,
-					     descendtab,
-					     seqnum);
-	fprintf(fp,"# %*.*s\n",(int) desclen,(int) desclen,desptr);
+        previouscontignum.defined = true;
+        previouscontignum.valueunsignedlong = seqnum;
+        getencseqSeqinfo(&seqinfo,encseq,seqnum);
+        fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n",
+                    seqnum, PRINTSeqposcast(seqinfo.seqlength));
+        desptr = retrievesequencedescription(&desclen,
+                                             encseq,
+                                             descendtab,
+                                             seqnum);
+        fprintf(fp,"# %*.*s\n",(int) desclen,(int) desclen,desptr);
       }
       showboundaries(fp,
                      lo,

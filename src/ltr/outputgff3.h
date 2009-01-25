@@ -25,7 +25,7 @@
 
 int printgff3format(const LTRharvestoptions *lo,
                     const LTRboundaries **bdptrtab,
-                    unsigned long numofentries,
+                    unsigned long numofboundaries,
                     const Encodedsequence *encseq,
                     GtError *err);
 

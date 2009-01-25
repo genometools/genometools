@@ -43,7 +43,7 @@ typedef struct
   unsigned long lmax;        /* maximum allowed length of a LTR */
   unsigned long dmin;        /* minimum distance between LTRs */
   unsigned long dmax;        /* maximum distance between LTRs */
-  Sequentialsuffixarrayreader *ssarptr;
+  const Encodedsequence *encseq;
 /* pointer on suffixarray, is needed in function simpleexactselfmatchstore,
    repeats.c */
 } RepeatInfo;

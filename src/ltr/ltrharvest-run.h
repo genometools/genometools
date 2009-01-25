@@ -18,7 +18,8 @@
 #ifndef LTRHARVEST_RUN_H
 #define LTRHARVEST_RUN_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
-int parseargsandcallltrharvest(int argc,const char *argv[],GtError *err);
+int parseargsandcallltrharvest(int argc,const char **argv,GtError *err);
+
 #endif

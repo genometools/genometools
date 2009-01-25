@@ -27,6 +27,7 @@
 #include "match/intcode-def.h"
 
 #include "ltrharvest-opt.h"
+#include "ltrharvest-run.h"
 #include "repeats.h"
 #include "searchforLTRs.h"
 #include "duplicates.h"
@@ -91,21 +92,24 @@ static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
   return bdptrtab;
 }
 
-
 static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 {
   Sequentialsuffixarrayreader *ssar; /* suffix array */
   bool had_err = false;
+  unsigned long numofboundaries;
+  const LTRboundaries **bdptrtab = NULL;
+  ArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
+                                          /*   LTR elements */
   const Encodedsequence *encseq;
 
   gt_error_check(err);
 
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
-                                  SARR_LCPTAB | SARR_SUFTAB |
-                                  SARR_ESQTAB | SARR_DESTAB |
-                                  SARR_SSPTAB,
-                                  SEQ_mappedboth,
-                                  err);
+                                                SARR_LCPTAB | SARR_SUFTAB |
+                                                SARR_ESQTAB | SARR_DESTAB |
+                                                SARR_SSPTAB,
+                                                SEQ_mappedboth,
+                                                err);
   if (ssar == NULL)
   {
     return -1;
@@ -126,14 +130,15 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 
   /* init array for maximal repeats */
   INITARRAY (&lo->repeatinfo.repeats, Repeat);
-  lo->repeatinfo.ssarptr = ssar;
+  lo->repeatinfo.encseq = encseq;
 
   /* search for maximal repeats */
-  if (!had_err && enumeratemaxpairs(ssar,encseq,
+  if (!had_err && enumeratemaxpairs(ssar,
+                                    encseq,
                                     readmodeSequentialsuffixarrayreader(ssar),
-                                    (unsigned int)lo->minseedlength,
-                                    (void*) simpleexactselfmatchstore,
-                                    lo,
+                                    (unsigned int) lo->minseedlength,
+                                    simpleexactselfmatchstore,
+                                    &lo->repeatinfo,
                                     NULL,
                                     err) != 0)
   {
@@ -141,10 +146,10 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   }
 
   /* init array for candidate pairs */
-  INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
+  INITARRAY(&arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if (!had_err && searchforLTRs (ssar, lo, err) != 0)
+  if (!had_err && searchforLTRs (lo, &arrayLTRboundaries, encseq, err) != 0)
   {
     had_err = true;
   }
@@ -155,23 +160,28 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* remove exact duplicates */
   if (!had_err)
   {
-    removeduplicates(&lo->arrayLTRboundaries);
+    removeduplicates(&arrayLTRboundaries);
   }
 
   /* remove overlapping predictions if desired */
   if (!had_err && (lo->nooverlapallowed || lo->bestofoverlap))
   {
-    removeoverlapswithlowersimilarity(&lo->arrayLTRboundaries,
-                                      lo->nooverlapallowed);
+    removeoverlapswithlowersimilarity(&arrayLTRboundaries,lo->nooverlapallowed);
+  }
+
+  if (!had_err)
+  {
+    bdptrtab = sortedltrboundaries(&numofboundaries,&arrayLTRboundaries);
   }
 
   /* print multiple FASTA file of predictions */
   if (!had_err && lo->fastaoutput)
   {
     if (showpredictionsmultiplefasta(lo,
+                                     bdptrtab,
+                                     numofboundaries,
                                      false,
                                      60U,
-                                     ssar,
                                      true,
                                      err) != 0)
     {
@@ -183,9 +193,10 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   if (!had_err && lo->fastaoutputinnerregion)
   {
     if (showpredictionsmultiplefasta(lo,
+                                     bdptrtab,
+                                     numofboundaries,
                                      true,
                                      60U,
-                                     ssar,
                                      true,
                                      err) != 0)
     {
@@ -194,31 +205,23 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   }
 
   /* print GFF3 format file of predictions */
-  if (!had_err && lo->gff3output && 
-      lo->arrayLTRboundaries.nextfreeLTRboundaries > 0)
+  if (!had_err && lo->gff3output && numofboundaries > 0)
   {
-    unsigned long numofboundaries;
-    const LTRboundaries **bdptrtab;
-
-    bdptrtab = sortedltrboundaries(&numofboundaries,&lo->arrayLTRboundaries);
     if (printgff3format(lo,bdptrtab,numofboundaries,encseq,err) != 0)
     {
       had_err = true;
     }
-    gt_free(bdptrtab);
   }
 
   /* print predictions to stdout */
   if (!had_err)
   {
-    if (showinfoiffoundfullLTRs(lo, ssar) != 0)
-    {
-      had_err = true;
-    }
+    showinfoiffoundfullLTRs(lo,bdptrtab,numofboundaries,encseq);
   }
 
-  FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
+  FREEARRAY(&arrayLTRboundaries, LTRboundaries);
   freeSequentialsuffixarrayreader(&ssar);
+  gt_free(bdptrtab);
 
   return had_err ? -1 : 0;
 }

@@ -18,15 +18,10 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
-#include "core/unused_api.h"
-#include "match/alphadef.h"
-#include "match/sarr-def.h"
-#include "match/spacedef.h"
 #include "match/encseq-def.h"
-#include "match/esa-seqread.h"
 #include "match/echoseq.h"
+#include "outputfasta.h"
 #include "ltrharvest-opt.h"
-#include "repeattypes.h"
 
 /*
  The datetype Fastaoutinfo aggregates the values needed to show a fasta file.
@@ -36,7 +31,6 @@
 
 typedef struct
 {
-  Sequentialsuffixarrayreader *ssar;
   const Encodedsequence *encseq; /* encoded sequence */
   unsigned long *descendtab;     /* positions of desc-separators */
   unsigned long linewidth;        /* the line width to show the alignment */
@@ -49,71 +43,67 @@ typedef struct
  a FASTA entry is created from the predicted LTR element.
  */
 
-static void myencseq2symbolstring(Fastaoutinfo *info,
-                                  FILE *fpout,
+static void myencseq2symbolstring(Fastaoutinfo *fastainfo,
                                   unsigned long seqnum,
                                   Seqpos offset,
                                   const char *desc,
                                   unsigned long desclength,
-                                  const Encodedsequence *encseq,
                                   Readmode readmode,
                                   Seqpos start,
-                                  Seqpos wlen,
-                                  unsigned long linewidth)
+                                  Seqpos wlen)
 {
-  gt_assert(linewidth > 0);
+  gt_assert(fastainfo->linewidth > 0);
   if (desc == NULL)
   {
-    fprintf(fpout,">");
+    fprintf(fastainfo->formatout,">");
   } else
   {
-    fprintf(fpout,">%*.*s",(int) desclength,(int) desclength,desc);
+    fprintf(fastainfo->formatout,">%*.*s",
+            (int) desclength,(int) desclength,desc);
   }
 
-  fprintf(info->formatout," (dbseq-nr");
-  if (info->showseqnum)
+  fprintf(fastainfo->formatout," (dbseq-nr");
+  if (fastainfo->showseqnum)
   {
-    fprintf(info->formatout," %lu) ", seqnum);
+    fprintf(fastainfo->formatout," %lu) ", seqnum);
   }
-  fprintf(info->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
+  fprintf(fastainfo->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + 1),
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + wlen));
-  encseq2symbolstring(fpout,
-                      encseq,
+  encseq2symbolstring(fastainfo->formatout,
+                      fastainfo->encseq,
                       readmode,
                       start,
                       wlen,
-                      linewidth);
+                      fastainfo->linewidth);
 }
 
-static void showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
+static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
+                                        Seqpos startpos,
                                         Seqpos len)
 {
   unsigned long desclen;
   const char *desptr;
   Seqinfo seqinfo;
-  unsigned long seqnum = getencseqfrompos2seqnum(info->encseq,startpos);
+  unsigned long seqnum = getencseqfrompos2seqnum(fastainfo->encseq,startpos);
 
   /* if there are sequence descriptions */
   desptr = retrievesequencedescription(&desclen,
-                                       info->encseq,
-                                       info->descendtab,
+                                       fastainfo->encseq,
+                                       fastainfo->descendtab,
                                        seqnum);
 
-  getencseqSeqinfo(&seqinfo,info->encseq,seqnum);
-  myencseq2symbolstring(info,
-                        info->formatout,
-                        seqnum, 
+  getencseqSeqinfo(&seqinfo,fastainfo->encseq,seqnum);
+  myencseq2symbolstring(fastainfo,
+                        seqnum,
                         seqinfo.seqstartpos,
                         desptr,
                         desclen,
-                        info->encseq,
-                        Forwardmode, 
+                        Forwardmode,
                         startpos,
-                        len,
-                        info->linewidth);
+                        len);
 }
 
 /*
@@ -121,34 +111,29 @@ static void showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
  the function from the apply pointer.
  */
 
-static void overallpredictionsequences(const LTRharvestoptions *lo,
+static void overallpredictionsequences(const LTRboundaries **bdptrtab,
+                                       unsigned long numofboundaries,
                                        bool innerregion,
-                                       void *applyinfo,
-                                       void(*apply)(Fastaoutinfo *,Seqpos,
-                                                    Seqpos))
+                                       Fastaoutinfo *fastainfo)
 {
   unsigned long i;
   Seqpos start, end;
-  LTRboundaries *boundaries;
 
-  for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
+  for (i = 0; i < numofboundaries; i++)
   {
-    boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
-    if ( !boundaries->skipped )
+    if (innerregion)
     {
-      if (innerregion)
-      {
-        start = boundaries->leftLTR_3 + 1;
-        end = boundaries->rightLTR_5 - 1;
-      } else
-      {
-        start = boundaries->leftLTR_5;
-        end = boundaries->rightLTR_3;
-      }
-      apply(applyinfo,
-            innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
-            end - start + 1);
+      start = bdptrtab[i]->leftLTR_3 + 1;
+      end = bdptrtab[i]->rightLTR_5 - 1;
+    } else
+    {
+      start = bdptrtab[i]->leftLTR_5;
+      end = bdptrtab[i]->rightLTR_3;
     }
+    showpredictionfastasequence(fastainfo,
+                                innerregion ? bdptrtab[i]->leftLTR_3 + 1
+                                            : bdptrtab[i]->leftLTR_5,
+                                end - start + 1);
   }
 }
 
@@ -158,13 +143,13 @@ static void overallpredictionsequences(const LTRharvestoptions *lo,
 */
 
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
+                                 const LTRboundaries **bdptrtab,
+                                 unsigned long numofboundaries,
                                  bool innerregion,
                                  unsigned int linewidth,
-                                 Sequentialsuffixarrayreader *ssar,
                                  bool showseqnum,
                                  GtError *err)
 {
-  Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
   bool had_err = false;
 
@@ -175,18 +160,17 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   if (formatout == NULL)
   {
     had_err = true;
-  }
-
-  if (!had_err)
+  } else
   {
-    fastaoutinfo.ssar = ssar;
-    fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
+    Fastaoutinfo fastaoutinfo;
+
+    fastaoutinfo.encseq = lo->repeatinfo.encseq;
     fastaoutinfo.linewidth = (unsigned long) linewidth;
     fastaoutinfo.showseqnum = showseqnum;
     fastaoutinfo.formatout = formatout;
     fastaoutinfo.descendtab = calcdescendpositions(fastaoutinfo.encseq);
-    overallpredictionsequences(lo, innerregion, &fastaoutinfo,
-                               showpredictionfastasequence);
+    overallpredictionsequences(bdptrtab, numofboundaries, innerregion,
+                               &fastaoutinfo);
     gt_free(fastaoutinfo.descendtab);
   }
   gt_fa_xfclose(formatout);

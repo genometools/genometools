@@ -20,13 +20,13 @@
 
 #include <stdbool.h>
 #include "core/error.h"
-#include "match/esa-seqread.h"
 #include "ltrharvest-opt.h"
 
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
+                                 const LTRboundaries **bdptrtab,
+                                 unsigned long numofboundaries,
                                  bool innerregion,
                                  unsigned int linewidth,
-                                 Sequentialsuffixarrayreader *ssar,
                                  bool showseqnum,
                                  GtError *err);
 

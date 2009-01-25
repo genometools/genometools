@@ -33,7 +33,7 @@
  The following function shows all options that are set by default or from
  the user on stdout.
 */
-void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
+void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo)
 {
   printf("# user defined options and values:\n");
   if (lo->verbosemode)

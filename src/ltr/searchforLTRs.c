@@ -101,8 +101,10 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  The following function applies the filter algorithms one after another
  to all candidate pairs.
 */
-int searchforLTRs(Sequentialsuffixarrayreader *ssar, 
-                  LTRharvestoptions *lo, GtError *err)
+int searchforLTRs(LTRharvestoptions *lo,
+                  ArrayLTRboundaries *arrayLTRboundaries,
+                  const Encodedsequence *encseq,
+                  GtError *err)
 {
   unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;
@@ -120,8 +122,6 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar,
   Repeat *repeatptr;
   LTRboundaries *boundaries;
   bool haserr = false;
-  const Encodedsequence *encseq =
-          encseqSequentialsuffixarrayreader(ssar);
 
   gt_error_check(err);
 
@@ -217,10 +217,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar,
     }
     FREEARRAY (&fronts, Myfrontvalue);
 
-    GETNEXTFREEINARRAY(boundaries,
-                       &lo->arrayLTRboundaries,
-                       LTRboundaries,
-                       5);
+    GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
 
     boundaries->contignumber = repeatptr->contignumber;
     boundaries->leftLTR_5 = (Seqpos) 0;
@@ -275,7 +272,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar,
     /* if search for motif and/or TSD */
     if ( lo->motif.allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
-      if ( findcorrectboundaries(lo, boundaries, ssar, err) != 0 )
+      if ( findcorrectboundaries(lo, boundaries, encseq, err) != 0 )
       {
         haserr = true;
         break;
@@ -300,16 +297,17 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar,
         else
         {
           /* delete this LTR-pair candidate */
-          lo->arrayLTRboundaries.nextfreeLTRboundaries--;
+          arrayLTRboundaries->nextfreeLTRboundaries--;
           continue;
         }
       }
     }
 
     /* check length and distance constraints again */
-    if (checklengthanddistanceconstraints(boundaries, &lo->repeatinfo)) {
+    if (checklengthanddistanceconstraints(boundaries, &lo->repeatinfo))
+    {
       /* delete this LTR-pair candidate */
-      lo->arrayLTRboundaries.nextfreeLTRboundaries--;
+      arrayLTRboundaries->nextfreeLTRboundaries--;
       continue;
     }
 
@@ -340,7 +338,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar,
     if ( boundaries->similarity < lo->similaritythreshold )
     {
       /* delete this LTR-pair candidate */
-      lo->arrayLTRboundaries.nextfreeLTRboundaries--;
+      arrayLTRboundaries->nextfreeLTRboundaries--;
     }
 
   }

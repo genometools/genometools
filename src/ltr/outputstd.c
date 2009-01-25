@@ -16,12 +16,9 @@
 */
 
 #include "core/symboldef.h"
-#include "match/sarr-def.h"
 #include "match/encseq-def.h"
-#include "match/readmode-def.h"
-#include "match/intcode-def.h"
-#include "match/spacedef.h"
 #include "ltrharvest-opt.h"
+#include "outputstd.h"
 
 /*
    The following function prints the predicted LTR retrotransposon
@@ -32,6 +29,49 @@
  *          since normally in annotation first base in sequence
  *          is position 1 instead of 0.
  */
+
+static void printlongheader(const LTRharvestoptions *lo)
+{
+  printf("# predictions are reported in the following way\n");
+  printf("# s(ret) e(ret) l(ret) ");
+  printf("s(lLTR) e(lLTR) l(lLTR)");
+  if (lo->minlengthTSD > 1U)
+  {
+    printf(" TSD l(TSD)");
+  }
+  if (lo->motif.allowedmismatches < 4U)
+  {
+    printf(" m(lLTR)");
+  }
+  printf(" s(rLTR) e(rLTR) l(rLTR)");
+  if (lo->minlengthTSD > 1U)
+  {
+    printf(" TSD l(TSD)");
+  }
+  if (lo->motif.allowedmismatches < 4U)
+  {
+    printf(" m(rLTR)");
+  }
+  printf(" sim(LTRs)");
+  printf(" seq-nr");
+  printf("\n# where:\n");
+  printf("# s = starting position\n");
+  printf("# e = ending position\n");
+  printf("# l = length\n");
+  if (lo->motif.allowedmismatches < 4U)
+  {
+    printf("# m = motif\n");
+  }
+  printf("# ret = LTR-retrotransposon\n");
+  printf("# lLTR = left LTR\n");
+  printf("# rLTR = right LTR\n");
+  if (lo->minlengthTSD > 1U)
+  {
+    printf("# TSD = target site duplication\n");
+  }
+  printf("# sim = similarity\n");
+  printf("# seq-nr = sequence number\n");
+}
 
 static void producelongutput(const LTRharvestoptions *lo,
                              const LTRboundaries *boundaries,
@@ -128,6 +168,22 @@ static void producelongutput(const LTRharvestoptions *lo,
   printf("  %lu\n", boundaries->contignumber);
 }
 
+static void printshortheader(void)
+{
+  printf("# predictions are reported in the following way\n");
+  printf("# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR)"
+      " s(rLTR) e(rLTR) l(rLTR) sim(LTRs) seq-nr \n");
+  printf("# where:\n");
+  printf("# s = starting position\n");
+  printf("# e = ending position\n");
+  printf("# l = length\n");
+  printf("# ret = LTR-retrotransposon\n");
+  printf("# lLTR = left LTR\n");
+  printf("# rLTR = right LTR\n");
+  printf("# sim = similarity\n");
+  printf("# seq-nr = sequence number\n");
+}
+
 static void produceshortoutput(const LTRboundaries *boundaries,Seqpos offset)
 {
 
@@ -159,117 +215,43 @@ static void produceshortoutput(const LTRboundaries *boundaries,Seqpos offset)
   printf("%lu\n", boundaries->contignumber);
 }
 
-int showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
-                            const Sequentialsuffixarrayreader *ssar)
+void showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
+                             const LTRboundaries **bdptrtab,
+                             unsigned long numofboundaries,
+                             const Encodedsequence *encseq)
 {
-  LTRboundaries *boundaries;
   Seqinfo seqinfo;
-  unsigned long numofdbsequences,
-                seqnum,
-                i;
-  const Encodedsequence *encseq;
-
-  encseq = encseqSequentialsuffixarrayreader(ssar);
-  /* in order to get to visible dna characters */
-
-  numofdbsequences = getencseqnumofdbsequences(encseq);
+  unsigned long i;
 
   if (lo->longoutput)
   {
-    if (lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
+    if (numofboundaries == 0)
     {
       printf("No full LTR-pair predicted.\n");
     } else
     {
-      printf("# predictions are reported in the following way\n");
-      printf("# s(ret) e(ret) l(ret) ");
-      printf("s(lLTR) e(lLTR) l(lLTR)");
-      if (lo->minlengthTSD > 1U)
-      {
-        printf(" TSD l(TSD)");
-      }
-      if (lo->motif.allowedmismatches < 4U)
-      {
-        printf(" m(lLTR)");
-      }
-      printf(" s(rLTR) e(rLTR) l(rLTR)");
-      if (lo->minlengthTSD > 1U)
-      {
-        printf(" TSD l(TSD)");
-      }
-      if (lo->motif.allowedmismatches < 4U)
-      {
-        printf(" m(rLTR)");
-      }
-      printf(" sim(LTRs)");
-      printf(" seq-nr");
-      printf("\n# where:\n");
-      printf("# s = starting position\n");
-      printf("# e = ending position\n");
-      printf("# l = length\n");
-      if (lo->motif.allowedmismatches < 4U)
-      {
-        printf("# m = motif\n");
-      }
-      printf("# ret = LTR-retrotransposon\n");
-      printf("# lLTR = left LTR\n");
-      printf("# rLTR = right LTR\n");
-      if (lo->minlengthTSD > 1U)
-      {
-        printf("# TSD = target site duplication\n");
-      }
-      printf("# sim = similarity\n");
-      printf("# seq-nr = sequence number\n");
-
+      printlongheader(lo);
       /* print output sorted by contignumber*/
-      for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
+      for (i = 0; i<numofboundaries; i++)
       {
-        for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
-        {
-          boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
-          if ( (!boundaries->skipped) && boundaries->contignumber == seqnum)
-          {
-            getencseqSeqinfo(&seqinfo,encseq,boundaries->contignumber);
-            producelongutput(lo,
-                             boundaries,
-                             encseq,
-                             seqinfo.seqstartpos);
-          }
-        }
+        getencseqSeqinfo(&seqinfo,encseq,bdptrtab[i]->contignumber);
+        producelongutput(lo,
+                         bdptrtab[i],
+                         encseq,
+                         seqinfo.seqstartpos);
       }
     }
   } else
   {
-    if (lo->arrayLTRboundaries.nextfreeLTRboundaries > 0)
+    if (numofboundaries > 0)
     {
-      /* print short output of full length LTR-retrotransposon(s) */
-      printf("# predictions are reported in the following way\n");
-      printf("# s(ret) e(ret) l(ret) s(lLTR) e(lLTR) l(lLTR)"
-          " s(rLTR) e(rLTR) l(rLTR) sim(LTRs) seq-nr \n");
-      printf("# where:\n");
-      printf("# s = starting position\n");
-      printf("# e = ending position\n");
-      printf("# l = length\n");
-      printf("# ret = LTR-retrotransposon\n");
-      printf("# lLTR = left LTR\n");
-      printf("# rLTR = right LTR\n");
-      printf("# sim = similarity\n");
-      printf("# seq-nr = sequence number\n");
-
+      printshortheader();
       /* print output sorted by contignumber*/
-      for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
+      for (i = 0; i<numofboundaries; i++)
       {
-        for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
-        {
-          boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
-          if ( (!boundaries->skipped) && boundaries->contignumber == seqnum)
-          {
-            getencseqSeqinfo(&seqinfo,encseq,boundaries->contignumber);
-            produceshortoutput(boundaries,seqinfo.seqstartpos);
-          }
-        }
+        getencseqSeqinfo(&seqinfo,encseq,bdptrtab[i]->contignumber);
+        produceshortoutput(bdptrtab[i],seqinfo.seqstartpos);
       }
     }
   }
-  return 0;
 }
