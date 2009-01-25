@@ -519,12 +519,10 @@ static int searchforTSDandorMotifoutside(
          rightlen,
          sequenceendpos;
   unsigned long contignumber = boundaries->contignumber;
-  unsigned long numofdbsequences;
   SubRepeatInfo subrepeatinfo;
   Seqinfo seqinfo;
 
   gt_error_check(err);
-  numofdbsequences = getencseqnumofdbsequences(encseq);
 
   /* check border cases */
 
@@ -582,31 +580,13 @@ static int searchforTSDandorMotifoutside(
     startrightLTR = boundaries->rightLTR_5 + 2;
   }
   sequenceendpos = seqinfo.seqstartpos + seqinfo.seqlength - 1;
-  /* XXX do not make the following case distiction */
-  if (contignumber == numofdbsequences - 1)
+  /* do not align into next sequence in case of need decrease alignment
+     length */
+  endrightLTR = boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries;
+  if (endrightLTR > sequenceendpos &&
+      boundaries->rightLTR_3 <= sequenceendpos)
   {
-    /* do not align over right sequence boundary,
-       in case of need decrease alignment length */
-    if ( (endrightLTR =
-           boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries)
-        > sequenceendpos)
-    {
-      endrightLTR = sequenceendpos;
-    }
-  }
-  else
-  {
-    /* do not align over right separator symbol
-       in case of need decrease alignment length */
-    if ( ((endrightLTR =
-            boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries) >
-          sequenceendpos)
-        &&
-        (boundaries->rightLTR_3 <= sequenceendpos)
-      )
-    {
-      endrightLTR = sequenceendpos;
-    }
+    endrightLTR = sequenceendpos;
   }
   rightlen = endrightLTR - startrightLTR + 1;
 
