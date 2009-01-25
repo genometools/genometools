@@ -29,14 +29,16 @@
 static void showlocalsuffix(FILE *fpout,
                             const Encodedsequence *encseq,
                             Readmode readmode,
-                            const Uchar *characters,
                             Seqpos start,
                             Seqpos depth)
 {
-  Seqpos i, end, totallength = getencseqtotallength(encseq);
+  Seqpos i, end, totallength;
   Uchar cc;
   const Seqpos maxshow = (Seqpos) 30;
+  const Uchar *characters;
 
+  totallength = getencseqtotallength(encseq);
+  characters = getencseqAlphabetcharacters(encseq);
   if (depth == 0)
   {
     end = MIN(start + maxshow,totallength);
@@ -64,7 +66,6 @@ static void showlocalsuffix(FILE *fpout,
 static void showcomparisonfailure(const char *where,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
-                                  const Uchar *characters,
                                   const Seqpos *suftab,
                                   Seqpos depth,
                                   const Seqpos *ptr1,
@@ -78,9 +79,9 @@ static void showcomparisonfailure(const char *where,
                        PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
                        PRINTSeqposcast((Seqpos) (ptr2 - suftab)),
                        PRINTSeqposcast(*ptr1));
-  showlocalsuffix(stderr,encseq,readmode,characters,*ptr1,depth);
+  showlocalsuffix(stderr,encseq,readmode,*ptr1,depth);
   fprintf(stderr,"\",\"");
-  showlocalsuffix(stderr,encseq,readmode,characters,*ptr2,depth);
+  showlocalsuffix(stderr,encseq,readmode,*ptr2,depth);
   fprintf(stderr,"\"=" FormatSeqpos ")=%d with maxlcp " FormatSeqpos "\n",
               PRINTSeqposcast(*ptr2),
               cmp,
@@ -100,9 +101,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   int cmp;
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
-  const Uchar *characters;
 
-  characters = getencseqAlphabetcharacters(encseq);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
@@ -122,7 +121,6 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
       showcomparisonfailure("checkifprefixesareidentical",
                             encseq,
                             readmode,
-                            characters,
                             suftab,
                             depth,
                             ptr,ptr+1,cmp,maxlcp);
@@ -145,15 +143,13 @@ void showentiresuftab(const Encodedsequence *encseq,
 {
   const Seqpos *ptr;
   Seqpos totallength = getencseqtotallength(encseq);
-  const Uchar *characters;
 
-  characters = getencseqAlphabetcharacters(encseq);
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
     printf("suftab[" FormatSeqpos "]=" FormatSeqpos " ",
             PRINTSeqposcast((Seqpos) (ptr-suftab)),
             PRINTSeqposcast(*ptr));
-    showlocalsuffix(stdout,encseq,readmode,characters,*ptr,depth);
+    showlocalsuffix(stdout,encseq,readmode,*ptr,depth);
     printf("\n");
   }
 }
@@ -174,7 +170,6 @@ void checkentiresuftab(const Encodedsequence *encseq,
   int cmp;
   Encodedsequencescanstate *esr1, *esr2;
   bool haserr = false;
-  const Uchar *characters;
 
 #ifdef INLINEDSequentialsuffixarrayreader
   Uchar tmpsmalllcpvalue;
@@ -205,7 +200,6 @@ void checkentiresuftab(const Encodedsequence *encseq,
   FREESPACE(startposoccurs);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
-  characters = getencseqAlphabetcharacters(encseq);
   gt_assert(*suftab < totallength);
   for (ptr = suftab + 1; !haserr && ptr <= suftab + totallength; ptr++)
   {
@@ -227,7 +221,6 @@ void checkentiresuftab(const Encodedsequence *encseq,
         showcomparisonfailure("checkentiresuftab",
                               encseq,
                               readmode,
-                              characters,
                               suftab,
                               depth,
                               ptr-1,

@@ -35,7 +35,6 @@
 #include "sfx-outlcp.h"
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
-#include "stamp.h"
 
 #include "sfx-mappedstr.pr"
 
@@ -70,7 +69,6 @@ struct Sfxiterator
   unsigned int part,
                numofchars,
                prefixlength;
-  const Uchar *characters;
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
   Sequencerange overhang;
@@ -501,7 +499,6 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->encseq = encseq;
     sfi->readmode = readmode;
     sfi->numofchars = getencseqAlphabetnumofchars(encseq);
-    sfi->characters = getencseqAlphabetcharacters(encseq);
     sfi->prefixlength = prefixlength;
     if (sfxstrategy != NULL)
     {

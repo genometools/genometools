@@ -180,17 +180,19 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 }
 
 static int verifycodelists(const Encodedsequence *encseq,
-                           const Uchar *characters,
                            unsigned int kmersize,
                            unsigned int numofchars,
-                           Seqpos stringtotallength,
                            const ArrayCodetype *codeliststream,
                            GtError *err)
 {
   bool haserr = false;
   ArrayCodetype codeliststring;
+  const Uchar *characters;
+  Seqpos stringtotallength;
 
   gt_error_check(err);
+  stringtotallength = getencseqtotallength(encseq);
+  characters = getencseqAlphabetcharacters(encseq);
   INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
@@ -233,10 +235,8 @@ int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
   if (!haserr)
   {
     if (verifycodelists(suffixarray->encseq,
-                        getencseqAlphabetcharacters(suffixarray->encseq),
                         suffixarray->prefixlength,
                         numofchars,
-                        getencseqtotallength(suffixarray->encseq),
                         &codeliststream,
                         err) != 0)
     {
