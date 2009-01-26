@@ -70,9 +70,9 @@ class FeatureNode(GenomeNode):
     gtlib.gt_feature_node_set_source(self.gn, s)
   source = cachedproperty(get_source, set_source)
 
-  @cachedproperty
   def get_type(self):
     return gtlib.gt_feature_node_get_type(self.gn)
+  type = cachedproperty(get_type, None)
 
   def has_type(self, type):
     return (gtlib.gt_feature_node_has_type(self.gn, type) == 1)
