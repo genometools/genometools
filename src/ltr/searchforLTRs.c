@@ -142,7 +142,6 @@ int searchforLTRs(LTRharvestoptions *lo,
     INITARRAY (&fronts, Myfrontvalue);
     if (alilen <= repeatptr->pos1)
     {
-      /* XXX what about the exit code */
       evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
@@ -152,12 +151,10 @@ int searchforLTRs(LTRharvestoptions *lo,
                                repeatptr->pos1 + repeatptr->offset,
                                (int) alilen,
                                (int) alilen,
-                               (Xdropscore)lo->xdropbelowscore,
-                               err);
+                               (Xdropscore)lo->xdropbelowscore);
     }
     else /* do not align over left sequence boundary */
     {
-      /* XXX what about the exit code */
       evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
@@ -167,8 +164,7 @@ int searchforLTRs(LTRharvestoptions *lo,
                                repeatptr->pos1 + repeatptr->offset,
                                (int) repeatptr->pos1,
                                (int) (repeatptr->pos1 + repeatptr->offset),
-                               (Xdropscore)lo->xdropbelowscore,
-                               err);
+                               (Xdropscore)lo->xdropbelowscore);
     }
     FREEARRAY (&fronts, Myfrontvalue);
 
@@ -178,7 +174,6 @@ int searchforLTRs(LTRharvestoptions *lo,
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
     {
-      /* XXX what about the exit code */
       evalxdroparbitscoresright (&lo->arbitscores,
                                  &xdropbest_right,
                                  &fronts,
@@ -189,12 +184,10 @@ int searchforLTRs(LTRharvestoptions *lo,
                                  repeatptr->len,
                                  (int) alilen,
                                  (int) alilen,
-                                 lo->xdropbelowscore,
-                                 err);
+                                 lo->xdropbelowscore);
     }
     else /* do not align over right sequence boundary */
     {
-      /* XXX what about the exit code */
       evalxdroparbitscoresright(&lo->arbitscores,
                                 &xdropbest_right,
                                 &fronts,
@@ -208,8 +201,7 @@ int searchforLTRs(LTRharvestoptions *lo,
                                 (int) (totallength -
                                 (repeatptr->pos1 + repeatptr->offset +
                                  repeatptr->len)),
-                                lo->xdropbelowscore,
-                                err);
+                                lo->xdropbelowscore);
     }
     FREEARRAY (&fronts, Myfrontvalue);
 

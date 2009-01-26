@@ -38,8 +38,6 @@ EVALXDROPARBITSCORES
   int allowedMININFINITYINTgenerations = 0,
       currentMININFINITYINTgeneration = 0;
 
-  gt_error_check(err);
-
   calculatedistancesfromscores(arbitscores, &arbitdistances);
   calculateallowedMININFINITYINTgenerations(
      &allowedMININFINITYINTgenerations,
