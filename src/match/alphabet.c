@@ -538,11 +538,6 @@ unsigned int getnumofcharsAlphabet(const Alphabet *alpha)
   return alpha->mapsize-1;
 }
 
-unsigned int getmapsizeAlphabet(const Alphabet *alpha)
-{
-  return alpha->mapsize;
-}
-
 const Uchar *getcharactersAlphabet(const Alphabet *alpha)
 {
   return alpha->characters;
