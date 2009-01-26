@@ -58,7 +58,7 @@ int simpleexactselfmatchstore (void *info,
                                Seqpos len,
                                Seqpos pos1,
                                Seqpos pos2,
-                               GtError *err)
+                               GT_UNUSED GtError *err)
 {
   Seqpos tmp;
   unsigned long contignumber = 0,
