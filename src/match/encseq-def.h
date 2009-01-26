@@ -154,7 +154,7 @@ int compareTwobitencodings(bool fwd,
 uint64_t detsizeencseq(int kind,
                        Seqpos totallength,
                        Seqpos specialranges,
-                       unsigned int mapsize);
+                       unsigned int numofchars);
 
 void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
 
@@ -198,6 +198,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                     const Alphabet *alphabet,
                                     const char *str_sat,
                                     unsigned long *characterdistribution,
+                                    const Specialcharinfo *specialcharinfo,
                                     Verboseinfo *verboseinfo,
                                     GtError *err);
 
@@ -210,10 +211,6 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                                GtError *err);
 
 void checkallsequencedescriptions(const Encodedsequence *encseq);
-
-const char *retrievesequencedescription(unsigned long *desclen,
-                                        const Encodedsequence *encseq,
-                                        unsigned long seqnum);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq1,
@@ -287,15 +284,33 @@ bool containsspecial(const Encodedsequence *encseq,
 
 unsigned int getsatforcevalue(const char *str);
 
-Seqpos *encseq2markpositions(const Encodedsequence *encseq);
+/* check if the marked positions are correct */
 
 void checkmarkpos(const Encodedsequence *encseq);
+
+/* for a given Encodedsequence mapped with withssptab=true, obtain the sequence
+ * number from the given position */
 
 unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
                                       Seqpos position);
 
-void getencseqSeqinfo(Seqinfo *seqinfo,const Encodedsequence *encseq,
+/* for a given Encodedsequence and a sequencenumber, fill the Seqinfo
+ * structure */
+
+void getencseqSeqinfo(Seqinfo *seqinfo,
+                      const Encodedsequence *encseq,
                       unsigned long seqnum);
+
+/* for a give  Encodedsequence and a sequencenumber return a pointer to
+   the description of the sequence and store the length of the description
+   in desclen */
+
+const char *retrievesequencedescription(unsigned long *desclen,
+                                        const Encodedsequence *encseq,
+                                        unsigned long seqnum);
+
+/* here are some functions to extract the different components of the
+ * specialcharinfo included in encseq */
 
 Seqpos getencseqspecialcharacters(const Encodedsequence *encseq);
 
@@ -307,13 +322,14 @@ Seqpos getencseqlengthofspecialprefix(const Encodedsequence *encseq);
 
 Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq);
 
-void setencseqspecialcharinfo(Encodedsequence *encseq,
-                              const Specialcharinfo *specialcharinfo);
+/* In case an Encodedsequence is not mapped, we still need to obtain the
+   Specialcharainfo. This is done by the following function */
 
 int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
                         const GtStr *indexname,GtError *err);
 
-unsigned int getencseqAlphabetmapsize(const Encodedsequence *encseq);
+/* some functions to obtain some components from the Alphabet pointed to
+   by encseq->alpha */
 
 unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq);
 
@@ -323,11 +339,17 @@ const Alphabet *getencseqAlphabet(const Encodedsequence *encseq);
 
 const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
 
-void removealpharef(Encodedsequence *encseq);
+/* Obtain the filenametable and the filelengthtable from the
+   Encodedsequence */
 
 const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
 
 const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
+
+/* some function to remove reference from an Encodedsequence to prevent that
+   the referenced alphabet or filenametab are freed */
+
+void removealpharef(Encodedsequence *encseq);
 
 void removefilenametabref(Encodedsequence *encseq);
 

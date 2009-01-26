@@ -50,7 +50,7 @@ static void fillandinsert(Mergertrierep *trierep,
   insertsuffixintomergertrie(trierep,node,&sinfo);
 }
 
-static int inputthesequences(unsigned int *mapsize,
+static int inputthesequences(unsigned int *numofchars,
                              Seqpos *nextpostable,
                              Suffixarray *suffixarraytable,
                              const GtStrArray *indexnametab,
@@ -76,7 +76,7 @@ static int inputthesequences(unsigned int *mapsize,
     }
     if (idx == 0)
     {
-      *mapsize = getencseqAlphabetmapsize(suffixarraytable[idx].encseq);
+      *numofchars = getencseqAlphabetnumofchars(suffixarraytable[idx].encseq);
     }
     nextpostable[idx] = 0;
   }
@@ -250,7 +250,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   emmesa->trierep.encseqreadinfo = NULL;
   ALLOCASSIGNSPACE(emmesa->suffixarraytable,NULL,Suffixarray,numofindexes);
   ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,Seqpos,numofindexes);
-  if (inputthesequences(&emmesa->mapsize,
+  if (inputthesequences(&emmesa->numofchars,
                         emmesa->nextpostable,
                         emmesa->suffixarraytable,
                         indexnametab,

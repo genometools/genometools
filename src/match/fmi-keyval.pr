@@ -10,7 +10,7 @@ void computefmkeyvalues (Fmindex *fm,
                          Seqpos bwtlength,
                          unsigned int log2bsize,
                          unsigned int log2markdist,
-                         unsigned int mapsize,
+                         unsigned int numofchars,
                          unsigned int suffixlength,
                          bool storeindexpos);
 

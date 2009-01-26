@@ -22,14 +22,9 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
-#include "alphadef.h"
 #include "encseq-def.h"
 #include "intcode-def.h"
-#include "sarr-def.h"
 #include "sfx-nextchar.h"
-#include "stamp.h"
-#include "esa-map.h"
 
 #include "kmer2string.pr"
 #include "sfx-mappedstr.pr"
@@ -212,21 +207,22 @@ static int verifycodelists(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
+int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
+                    GtError *err)
 {
   unsigned int numofchars;
   ArrayCodetype codeliststream;
   bool haserr = false;
 
   gt_error_check(err);
-  numofchars = getencseqAlphabetnumofchars(suffixarray->encseq);
+  numofchars = getencseqAlphabetnumofchars(encseq);
   INITARRAY(&codeliststream,Codetype);
-  if (getfastastreamkmers(getencseqfilenametab(suffixarray->encseq),
+  if (getfastastreamkmers(getencseqfilenametab(encseq),
                           outkmeroccurrence,
                           &codeliststream,
                           numofchars,
-                          suffixarray->prefixlength,
-                          getencseqAlphabetsymbolmap(suffixarray->encseq),
+                          prefixlength,
+                          getencseqAlphabetsymbolmap(encseq),
                           false,
                           err) != 0)
   {
@@ -234,8 +230,8 @@ int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
   }
   if (!haserr)
   {
-    if (verifycodelists(suffixarray->encseq,
-                        suffixarray->prefixlength,
+    if (verifycodelists(encseq,
+                        prefixlength,
                         numofchars,
                         &codeliststream,
                         err) != 0)

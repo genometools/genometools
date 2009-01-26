@@ -78,7 +78,7 @@ void computefmkeyvalues (Fmindex *fm,
                          Seqpos bwtlength,
                          unsigned int log2bsize,
                          unsigned int log2markdist,
-                         unsigned int mapsize,
+                         unsigned int numofchars,
                          unsigned int suffixlength,
                          bool storeindexpos)
 {
@@ -97,7 +97,7 @@ void computefmkeyvalues (Fmindex *fm,
   fm->negatebsizeones = ~ (Seqpos) (fm->bsize - 1);
   fm->negatesuperbsizeones = ~ (Seqpos) (fm->superbsize - 1);
   fm->log2superbsizeminuslog2bsize = fm->log2superbsize - fm->log2bsize;
-  fm->mapsize = mapsize;
+  fm->mapsize = numofchars+1;
   fm->suffixlength = suffixlength;
   if (fm->suffixlength > 0)
   {

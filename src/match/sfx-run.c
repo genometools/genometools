@@ -247,11 +247,11 @@ static void showcharacterdistribution(
                    const unsigned long *characterdistribution,
                    Verboseinfo *verboseinfo)
 {
-  unsigned int mapsize, idx;
+  unsigned int numofchars, idx;
 
-  mapsize = getmapsizeAlphabet(alpha);
+  numofchars = getnumofcharsAlphabet(alpha);
   gt_assert(characterdistribution != NULL);
-  for (idx=0; idx<mapsize-1; idx++)
+  for (idx=0; idx<numofchars; idx++)
   {
     showverbose(verboseinfo,"occurrences(%c)=%lu",
                 (int) getprettysymbol(alpha,idx),

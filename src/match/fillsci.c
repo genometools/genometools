@@ -113,7 +113,7 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
                               unsigned int forcetable,
                               Seqpos *specialrangestab,
                               Seqpos totallength,
-                              unsigned int mapsize,
+                              unsigned int numofchars,
                               GtDiscDistri *distspralen,
                               Verboseinfo *verboseinfo)
 {
@@ -128,7 +128,7 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   {
     if (forcetable == 3U || c == (int) forcetable)
     {
-      tmp = detsizeencseq(c,totallength,specialrangestab[c],mapsize);
+      tmp = detsizeencseq(c,totallength,specialrangestab[c],numofchars);
       if (!smallestdefined || tmp < smallestsize)
       {
         smallestdefined = true;
@@ -277,7 +277,7 @@ int fasta2sequencekeyvalues(
     *totallength = currentpos;
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     doupdatesumranges(specialcharinfo,forcetable,specialrangestab,currentpos,
-                      getmapsizeAlphabet(alpha),distspralen,verboseinfo);
+                      getnumofcharsAlphabet(alpha),distspralen,verboseinfo);
   }
   gt_fa_xfclose(desfp);
   gt_disc_distri_delete(distspralen);

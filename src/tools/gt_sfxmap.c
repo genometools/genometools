@@ -287,7 +287,8 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
           suffixarray.prefixlength > 0)
       {
         showverbose(verboseinfo,"verifymappedstr");
-        if (verifymappedstr(&suffixarray,err) != 0)
+        if (verifymappedstr(suffixarray.encseq,suffixarray.prefixlength,
+                            err) != 0)
         {
           haserr = true;
         }

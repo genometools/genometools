@@ -111,7 +111,7 @@ static void showconstructionmessage(const GtStr *indexname,
                                     unsigned long fmsize,
                                     unsigned int log2bsize,
                                     unsigned int log2markdist,
-                                    unsigned int mapsize)
+                                    unsigned int numofchars)
 {
   printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
           gt_str_get(indexname),
@@ -119,7 +119,7 @@ static void showconstructionmessage(const GtStr *indexname,
           (unsigned long) POW2(log2markdist));
   printf(" len=" FormatSeqpos ", alphasize=%u: size ",
           PRINTSeqposcast(totallength),
-          mapsize-1);
+          numofchars);
   printf("%lu bytes, space overhead %.2f\n",
           fmsize,
           (double) fmsize/(double) (totallength+1));
@@ -207,7 +207,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
          nextprogress,
          tmpsuftabvalue,
          stepprogress;
-  unsigned int mapsize = 0,
+  unsigned int numofchars = 0,
                suffixlength = 0,
                numofindexes;
   int retval;
@@ -242,7 +242,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      mapsize = getencseqAlphabetmapsize(suffixarray.encseq);
+      numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
@@ -302,7 +302,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      mapsize = emmesa.mapsize;
+      numofchars = emmesa.numofchars;
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
     }
   }
@@ -315,7 +315,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                         totallength+1,
                         log2bsize,
                         log2markdist,
-                        mapsize,
+                        numofchars,
                         suffixlength,
                         storeindexpos);
     showconstructionmessage(outfmindex,
@@ -323,7 +323,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                             fmindex->sizeofindex,
                             log2bsize,
                             log2markdist,
-                            mapsize);
+                            numofchars);
     allocatefmtables(fmindex,specialcharinfo,storeindexpos);
     set0frequencies(fmindex);
     if (storeindexpos)

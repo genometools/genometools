@@ -176,7 +176,7 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
                         const unsigned long *characterdistribution)
 {
   struct seqStats *stats = NULL;
-  unsigned i, mapSize;
+  unsigned i, numofchars;
   Seqpos regularSymsSum = 0;
   stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (Seqpos))
                     + (UINT8_MAX + 1) * sizeof (Seqpos));
@@ -184,8 +184,8 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
   stats->symbolDistributionTable =
     (Seqpos *)((char *)stats + offsetAlign(sizeof (*stats), sizeof (Seqpos)));
   memset(stats->symbolDistributionTable, 0, sizeof (Seqpos) * (UINT8_MAX + 1));
-  mapSize = getmapsizeAlphabet(alpha);
-  for (i = 0; i < mapSize - 1; ++i)
+  numofchars = getnumofcharsAlphabet(alpha);
+  for (i = 0; i < numofchars; ++i)
     regularSymsSum +=
       (stats->symbolDistributionTable[i] = (Seqpos) characterdistribution[i]);
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;

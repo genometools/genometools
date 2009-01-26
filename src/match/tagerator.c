@@ -341,7 +341,7 @@ static int dotransformtag(Uchar *transformedtag,
     {
       if (replacewildcard)
       {
-        charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
+        charcode = 0;
       } else
       {
         gt_error_set(err,"wildcard in tag number " Formatuint64_t,
@@ -613,7 +613,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     Tagwithlength twl;
     uint64_t tagnumber;
-    unsigned int mapsize;
+    unsigned int numofchars;
     const Uchar *symbolmap, *currenttag;
     char *desc = NULL;
     Processmatch processmatch;
@@ -623,7 +623,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 
     storeonline.twlptr = storeoffline.twlptr = &twl;
     symbolmap = getencseqAlphabetsymbolmap(suffixarray.encseq);
-    mapsize = getencseqAlphabetmapsize(suffixarray.encseq);
+    numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
     if (tageratoroptions->docompare)
     {
       processmatch = storematch;
@@ -635,7 +635,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       processmatch = showmatch;
       showmatchinfo.twlptr = &twl;
       showmatchinfo.tageratoroptions = tageratoroptions;
-      showmatchinfo.alphasize = (unsigned int) (mapsize-1);
+      showmatchinfo.alphasize = (unsigned int) numofchars;
       showmatchinfo.alpha = getencseqAlphabet(suffixarray.encseq);
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
@@ -645,7 +645,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
       gt_assert(suffixarray.encseq != NULL);
-      mor = newMyersonlineresources(mapsize,
+      mor = newMyersonlineresources(numofchars,
                                     tageratoroptions->nowildcards,
                                     suffixarray.encseq,
                                     processmatch,

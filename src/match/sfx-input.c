@@ -58,11 +58,11 @@ static int outal1file(const GtStr *indexname,const Alphabet *alpha,
 static unsigned long *initcharacterdistribution(const Alphabet *alpha)
 {
   unsigned long *characterdistribution;
-  unsigned int mapsize, idx;
+  unsigned int numofchars, idx;
 
-  mapsize = getmapsizeAlphabet(alpha);
-  ALLOCASSIGNSPACE(characterdistribution,NULL,unsigned long,mapsize-1);
-  for (idx=0; idx<mapsize-1; idx++)
+  numofchars = getnumofcharsAlphabet(alpha);
+  ALLOCASSIGNSPACE(characterdistribution,NULL,unsigned long,numofchars);
+  for (idx=0; idx<numofchars; idx++)
   {
     characterdistribution[idx] = 0;
   }
@@ -159,6 +159,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
                                 ? gt_str_get(so->str_sat)
                                 : NULL,
                               sfxseqinfo->characterdistribution,
+                              &specialcharinfo,
                               verboseinfo,
                               err);
     if (sfxseqinfo->encseq == NULL)
@@ -168,7 +169,6 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
     } else
     {
       alphaisbound = true;
-      setencseqspecialcharinfo(sfxseqinfo->encseq,&specialcharinfo);
       if (so->outtistab)
       {
         if (flushencseqfile(so->str_indexname,sfxseqinfo->encseq,err) != 0)

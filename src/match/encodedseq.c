@@ -49,7 +49,7 @@
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,\
-                                 specialrangestab[IDX],mapsize);\
+                                 specialrangestab[IDX],numofchars);\
         if (tmp < cmin)\
         {\
           cmin = tmp;\
@@ -566,7 +566,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   Encodedsequence *encseq = (Encodedsequence *) voidinfo;
   Mapspecification *mapspecptr;
   unsigned long numofunits;
-  unsigned int mapsize;
+  unsigned int numofchars;
 
   if (writemode)
   {
@@ -583,9 +583,9 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->totallengthptr,Seqpos,1UL);
   NEWMAPSPEC(encseq->numofdbsequencesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
-  mapsize = getencseqAlphabetmapsize(encseq);
+  numofchars = getencseqAlphabetnumofchars(encseq);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
-             (unsigned long) (mapsize-1));
+             (unsigned long) numofchars);
   switch (encseq->sat)
   {
     case Viadirectaccess:
@@ -710,7 +710,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 static uint64_t localdetsizeencseq(Positionaccesstype sat,
                                    Seqpos totallength,
                                    Seqpos specialranges,
-                                   unsigned int mapsize)
+                                   unsigned int numofchars)
 {
   uint64_t sum,
            sizeoftwobitencoding
@@ -768,30 +768,30 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
   sum += sizeof (totallength); /* for totallength */
   sum += sizeof (unsigned long); /* for numofdbsequences type */
   sum += sizeof (Specialcharinfo); /* for specialcharinfo */
-  sum += sizeof (unsigned long) * (mapsize-1); /* for characterdistribution */
+  sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
   return sum;
 }
 
 uint64_t detsizeencseq(int kind,
                        Seqpos totallength,
                        Seqpos specialranges,
-                       unsigned int mapsize)
+                       unsigned int numofchars)
 {
   Positionaccesstype sat[] = {Viauchartables,Viaushorttables,Viauint32tables};
 
-  return localdetsizeencseq(sat[kind],totallength,specialranges,mapsize);
+  return localdetsizeencseq(sat[kind],totallength,specialranges,numofchars);
 }
 
 static Positionaccesstype determinesmallestrep(Seqpos *specialranges,
                                                Seqpos totallength,
                                                const Seqpos *specialrangestab,
-                                               unsigned int mapsize)
+                                               unsigned int numofchars)
 {
   Positionaccesstype cret;
   uint64_t tmp, cmin;
 
   cmin = localdetsizeencseq(Viabitaccess,totallength,
-                            specialrangestab[0],mapsize);
+                            specialrangestab[0],numofchars);
   cret = Viabitaccess;
   *specialranges = specialrangestab[0];
   CHECKANDUPDATE(Viauchartables,0);
@@ -2097,7 +2097,7 @@ static void addmarkpos(ArraySeqpos *asp,
   }
 }
 
-Seqpos *encseq2markpositions(const Encodedsequence *encseq)
+static Seqpos *encseq2markpositions(const Encodedsequence *encseq)
 {
   ArraySeqpos asp;
   Specialrangeiterator *sri;
@@ -2268,7 +2268,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
 {
   double spaceinbitsperchar;
   Encodedsequence *encseq;
-  unsigned int mapsize;
+  unsigned int numofchars;
 
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
@@ -2291,10 +2291,11 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                               specialranges);
   encseq->totallength = totallength;
   encseq->numofdbsequences = numofsequences;
-  mapsize = getmapsizeAlphabet(alpha);
+  numofchars = getnumofcharsAlphabet(alpha);
   encseq->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,
                                    localdetsizeencseq(sat,totallength,
-                                                      specialranges,mapsize));
+                                                      specialranges,
+                                                      numofchars));
   encseq->name = accesstype2name(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
@@ -2391,11 +2392,6 @@ int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
   }
   *specialcharinfo = firstencseqvalues.specialcharinfo;
   return 0;
-}
-
-unsigned int getencseqAlphabetmapsize(const Encodedsequence *encseq)
-{
-  return getmapsizeAlphabet(encseq->alpha);
 }
 
 unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq)
@@ -2569,7 +2565,7 @@ static bool scanprjfiledbfile(Encodedsequence *encseq,
 static int determinesattype(Seqpos *specialranges,
                             Seqpos totallength,
                             const Seqpos *specialrangestab,
-                            unsigned int mapsize,
+                            unsigned int numofchars,
                             const char *str_sat,
                             GtError *err)
 {
@@ -2577,12 +2573,12 @@ static int determinesattype(Seqpos *specialranges,
   bool haserr = false;
 
   *specialranges = specialrangestab[0];
-  if (mapsize == DNAALPHASIZE + 1)
+  if (numofchars == DNAALPHASIZE)
   {
     if (str_sat == NULL)
     {
       sat = determinesmallestrep(specialranges,
-                                 totallength,specialrangestab,mapsize);
+                                 totallength,specialrangestab,numofchars);
     } else
     {
       sat = str2positionaccesstype(str_sat);
@@ -2709,6 +2705,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                 const Alphabet *alphabet,
                                 const char *str_sat,
                                 unsigned long *characterdistribution,
+                                const Specialcharinfo *specialcharinfo,
                                 Verboseinfo *verboseinfo,
                                 GtError *err)
 {
@@ -2723,7 +2720,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   retcode = determinesattype(&specialranges,
                              totallength,
                              specialrangestab,
-                             getmapsizeAlphabet(alphabet),
+                             getnumofcharsAlphabet(alphabet),
                              str_sat,
                              err);
   if (retcode < 0)
@@ -2747,6 +2744,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     encseq->characterdistribution = characterdistribution;
     encseq->filenametab = filenametab;
     encseq->filelengthtab = filelengthtab;
+    encseq->specialcharinfo = *specialcharinfo;
     gt_assert(filenametab != NULL);
     fb = gt_fastabuffer_new(filenametab,
       plainformat ? NULL : getsymbolmapAlphabet(alphabet),
@@ -2974,15 +2972,6 @@ Seqpos getencseqlengthofspecialprefix(const Encodedsequence *encseq)
 Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq)
 {
   return encseq->specialcharinfo.lengthofspecialsuffix;
-}
-
-void setencseqspecialcharinfo(Encodedsequence *encseq,
-                              const Specialcharinfo *specialcharinfo)
-{
-  if (&encseq->specialcharinfo != specialcharinfo)
-  {
-    encseq->specialcharinfo = *specialcharinfo;
-  }
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,

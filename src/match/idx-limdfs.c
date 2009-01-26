@@ -93,16 +93,17 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     const AbstractDfstransformer *adfst)
 {
   Limdfsresources *limdfsresources;
-  unsigned int mapsize = getencseqAlphabetmapsize(encseq);
+  unsigned int numofchars = getencseqAlphabetnumofchars(encseq);
 
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->bwci.spaceBoundswithchar,NULL,
-                   Boundswithchar,mapsize);
+                   Boundswithchar,numofchars+1);
   limdfsresources->bwci.nextfreeBoundswithchar = 0;
-  limdfsresources->bwci.allocatedBoundswithchar = (unsigned long) mapsize;
+  limdfsresources->bwci.allocatedBoundswithchar
+    = (unsigned long) (numofchars+1);
   INITARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
-  gt_assert(mapsize-1 <= MAXALPHABETCHARACTER);
-  limdfsresources->alphasize = (Uchar) (mapsize-1);
+  gt_assert(numofchars <= MAXALPHABETCHARACTER);
+  limdfsresources->alphasize = (Uchar) numofchars;
   limdfsresources->processmatch = processmatch;
   limdfsresources->processmatchinfo = processmatchinfo;
   limdfsresources->processresult = processresult;

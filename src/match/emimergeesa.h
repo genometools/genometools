@@ -50,7 +50,7 @@ typedef struct
   Suflcpbuffer buf;
   Mergertrierep trierep;
   Suffixarray *suffixarraytable;
-  unsigned int mapsize;
+  unsigned int numofchars;
 } Emissionmergedesa;
 
 #endif

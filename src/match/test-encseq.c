@@ -129,11 +129,11 @@ static int testfullscan(const GtStrArray *filenametab,
   if (filenametab != NULL)
   {
     fb = gt_fastabuffer_new(filenametab,
-                         getencseqAlphabetsymbolmap(encseq),
-                         false,
-                         NULL,
-                         NULL,
-                         NULL);
+                            getencseqAlphabetsymbolmap(encseq),
+                            false,
+                            NULL,
+                            NULL,
+                            NULL);
   }
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,0);

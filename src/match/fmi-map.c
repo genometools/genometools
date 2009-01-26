@@ -227,7 +227,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
                         fmindex->bwtlength,
                         fmindex->log2bsize,
                         fmindex->log2markdist,
-                        getmapsizeAlphabet(fmindex->alphabet),
+                        getnumofcharsAlphabet(fmindex->alphabet),
                         fmindex->suffixlength,
                         storeindexpos);
     tmpfilename = gt_str_clone(indexname);

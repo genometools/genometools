@@ -43,8 +43,6 @@ const Uchar *getsymbolmapAlphabet(const Alphabet *alpha);
 
 unsigned int getnumofcharsAlphabet(const Alphabet *alpha);
 
-unsigned int getmapsizeAlphabet(const Alphabet *alpha);
-
 const Uchar *getcharactersAlphabet(const Alphabet *alpha);
 
 void freeAlphabet(Alphabet **alpha);
