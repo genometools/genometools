@@ -39,7 +39,7 @@
 
 #define COMPAREOFFSET   (MAXALPHABETCHARACTER + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
-#define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode) /* XXX */
+#define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode)
 #define ISNOTEND(POS)   ((POS) < totallength && ISNOTSPECIAL(ACCESSCHAR(POS)))
 
 #define DEREF(VAR,PTR,STOPPOS)\

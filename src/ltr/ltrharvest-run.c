@@ -59,6 +59,10 @@ static int bdptrcompare(const void *a, const void *b)
   return 0;
 }
 
+/*
+  XXX: better directly sort the ArrayLTRboundaries
+*/
+
 static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
                                                  const ArrayLTRboundaries *ltr)
 {

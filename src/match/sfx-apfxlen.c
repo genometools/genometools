@@ -145,7 +145,6 @@ void showmaximalprefixlength(Verboseinfo *verboseinfo,
                              unsigned int maxprefixlen,
                              unsigned int recommended)
 {
-  /* XXX: use one call of showverbose to display this */
   showverbose(verboseinfo,
               "for this input size and alphabet size, "
               "the maximal prefixlength");
