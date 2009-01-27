@@ -80,6 +80,9 @@ void   gt_graphics_draw_colored_text(GtGraphics*, double x, double y,
                                      GtColor, const char*);
 /* Returns the height of a capital letter in pixels/points. */
 double gt_graphics_get_text_height(GtGraphics*);
+/* Sets the background color of the <GtGraphics> to a specific color.
+   Note that this may only be supported for bitmap output formats. */
+int gt_graphics_set_background_color(GtGraphics*, GtColor);
 /* Returns the width of the given string in pixels/points. */
 double gt_graphics_get_text_width(GtGraphics*, const char *text);
 /* Sets basic font family, slant and weight options. Font families are

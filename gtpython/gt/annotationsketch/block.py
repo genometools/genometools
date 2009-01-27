@@ -67,7 +67,7 @@ class Block(object):
   def get_top_level_feature(self):
     f = gtlib.gt_block_get_top_level_feature(self.block)
     if f != 0:
-      return FeatureNode(f, True)
+      return FeatureNode.create_from_ptr(f, True)
     else:
       return None
 

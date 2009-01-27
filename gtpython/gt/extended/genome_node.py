@@ -20,7 +20,7 @@ from gt.core.error import Error, gterror
 from gt.extended.gff3_visitor import GFF3Visitor
 
 class GenomeNode(object):
-  def __init__(self, node_ptr, newref = False):
+  def __init__(self, node_ptr, newref=False):
     if node_ptr == 0 or node_ptr == None:
       gterror("GenomeNode pointer cannot be NULL (was: " + str(node_ptr) + ")")
     if newref:
@@ -28,6 +28,10 @@ class GenomeNode(object):
     else:
       self.gn = node_ptr
     self._as_parameter_ = self.gn
+
+  @classmethod
+  def create_from_ptr(cls, node_ptr, newref=False):
+    return cls(node_ptr, newref)
 
   def __del__(self):
     try:
@@ -44,9 +48,11 @@ class GenomeNode(object):
   def get_range(self):
     return (gtlib.gt_genome_node_get_start(self.gn), \
             gtlib.gt_genome_node_get_end(self.gn))
+  range = property(get_range)
 
   def get_filename(self):
     return gtlib.gt_genome_node_get_filename(self.gn)
+  filename = property(get_filename)
 
   def accept(self, visitor):
     err = Error()

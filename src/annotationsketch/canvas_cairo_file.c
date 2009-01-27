@@ -96,11 +96,14 @@ GtCanvas* gt_canvas_cairo_file_new(GtStyle *sty, GtGraphicsOutType type,
                                    GtImageInfo *ii)
 {
   GtCanvas *canvas;
+  GtColor bgcolor = {1.0, 1.0, 1.0, 1.0};
   GtCanvasCairoFile *ccf;
   double margins = 10.0;
   gt_assert(sty && width > 0 && height > 0);
   canvas = gt_canvas_create(gt_canvas_cairo_file_class());
   canvas->pvt->g = gt_graphics_cairo_new(type, width, height);
+  gt_style_get_color(sty, "format", "background_color", &bgcolor, NULL);
+  gt_graphics_set_background_color(canvas->pvt->g, bgcolor);
   gt_style_get_num(sty, "format", "margins", &margins, NULL);
   gt_graphics_set_margins(canvas->pvt->g, margins, 0);
   canvas->pvt->margins = margins;
