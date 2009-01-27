@@ -26,8 +26,7 @@ Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength)
   return (Seqpos) pow((double) numofchars,(double) prefixlength);
 }
 
-Seqpos determinenumberofspecialstostore(
-                    const Specialcharinfo *specialcharinfo)
+Seqpos determinenumberofspecialstostore(const Specialcharinfo *specialcharinfo)
 {
   Seqpos addprefixsuffix = 0;
 
@@ -45,6 +44,8 @@ Seqpos determinenumberofspecialstostore(
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
 static unsigned long determinefmindexsize (const Fmindex *fm,
+                                           const Specialcharinfo
+                                              *specialcharinfo,
                                            unsigned int suffixlength,
                                            bool storeindexpos)
 {
@@ -65,8 +66,7 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   if (storeindexpos)
   {
     sumsize += (uint64_t) sizeof (PairBwtidx) *
-               (uint64_t) determinenumberofspecialstostore(
-                                 &fm->specialcharinfo);
+               (uint64_t) determinenumberofspecialstostore(specialcharinfo);
   }
   sumsize += (uint64_t) sizeof (Uchar) *
              (uint64_t) BFREQSIZE(fm->mapsize,fm->nofblocks);
@@ -74,13 +74,13 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
 }
 
 void computefmkeyvalues (Fmindex *fm,
+                         const Specialcharinfo *specialcharinfo,
                          Seqpos bwtlength,
                          unsigned int log2bsize,
                          unsigned int log2markdist,
-                         unsigned int mapsize,
+                         unsigned int numofchars,
                          unsigned int suffixlength,
-                         bool storeindexpos,
-                         const Specialcharinfo *specialcharinfo)
+                         bool storeindexpos)
 {
   fm->mappedptr = NULL;
   fm->log2bsize = log2bsize;
@@ -97,7 +97,7 @@ void computefmkeyvalues (Fmindex *fm,
   fm->negatebsizeones = ~ (Seqpos) (fm->bsize - 1);
   fm->negatesuperbsizeones = ~ (Seqpos) (fm->superbsize - 1);
   fm->log2superbsizeminuslog2bsize = fm->log2superbsize - fm->log2bsize;
-  fm->mapsize = mapsize;
+  fm->mapsize = numofchars+1;
   fm->suffixlength = suffixlength;
   if (fm->suffixlength > 0)
   {
@@ -106,11 +106,8 @@ void computefmkeyvalues (Fmindex *fm,
   {
     fm->numofcodes = 0;
   }
-  if (&fm->specialcharinfo != specialcharinfo)
-  {
-    fm->specialcharinfo = *specialcharinfo;
-  }
   fm->sizeofindex = determinefmindexsize (fm,
+                                          specialcharinfo,
                                           suffixlength,
                                           storeindexpos);
 }

@@ -21,8 +21,7 @@
 #include "merger-trie.h"
 #include "encseq-def.h"
 #include "alphadef.h"
-
-#include "esa-map.pr"
+#include "esa-map.h"
 
 static void maketrie(Mergertrierep *trierep,
                      GT_UNUSED const Uchar *characters,
@@ -77,17 +76,19 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
 {
   Suffixarray suffixarray;
   bool haserr = false;
-  Seqpos totallength;
+  Seqpos totallength = 0;
 
   gt_error_check(err);
   if (streamsuffixarray(&suffixarray,
-                        &totallength,
                         SARR_ESQTAB,
                         indexname,
                         NULL,
                         err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -97,7 +98,7 @@ int test_trieins(bool onlyins,const GtStr *indexname,GtError *err)
     ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
-    characters = getcharactersAlphabet(suffixarray.alpha);
+    characters = getencseqAlphabetcharacters(suffixarray.encseq);
     initmergertrienodetable(&trierep,totallength,1U);
     maketrie(&trierep,characters,totallength);
     if (onlyins)

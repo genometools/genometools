@@ -23,6 +23,7 @@
 #include "core/str_array.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
+#include "core/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "intbits.h"
@@ -30,6 +31,7 @@
 #include "verbose-def.h"
 
 #define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
+#define DBFILEKEY "dbfile="
 
 #ifdef SKDEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
@@ -54,6 +56,12 @@ typedef struct
   Seqpos leftpos,
          rightpos;
 } Sequencerange;          /* \Typedef{Sequencerange} */
+
+typedef struct
+{
+  Seqpos seqstartpos,  /* the position of the first character in the encseq */
+         seqlength;    /* the length of the sequence */
+} Seqinfo;             /* \Typedef{Seqinfo} */
 
 #ifdef INLINEDENCSEQ
 
@@ -117,6 +125,8 @@ typedef struct Specialrangeiterator Specialrangeiterator;
 
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
+unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
+
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
 
@@ -144,7 +154,7 @@ int compareTwobitencodings(bool fwd,
 uint64_t detsizeencseq(int kind,
                        Seqpos totallength,
                        Seqpos specialranges,
-                       unsigned int mapsize);
+                       unsigned int numofchars);
 
 void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
 
@@ -179,32 +189,35 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
 
 /*@null@*/ Encodedsequence *files2encodedsequence(
                                     bool withrange,
-                                    const GtStrArray
-                                    *filenametab,
+                                    const GtStrArray *filenametab,
+                                    const Filelengthvalues *filelengthtab,
                                     bool plainformat,
                                     Seqpos totallength,
+                                    unsigned long numofsequences,
                                     const Seqpos *specialrangestab,
                                     const Alphabet *alphabet,
                                     const char *str_sat,
                                     unsigned long *characterdistribution,
+                                    const Specialcharinfo *specialcharinfo,
                                     Verboseinfo *verboseinfo,
                                     GtError *err);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const GtStr *indexname,
-                                               Seqpos totallength,
-                                               Seqpos specialranges,
-                                               unsigned int mapsize,
+                                               bool withesqtab,
+                                               bool withdestab,
+                                               bool withssptab,
                                                Verboseinfo *verboseinfo,
                                                GtError *err);
 
+void checkallsequencedescriptions(const Encodedsequence *encseq);
+
 Encodedsequence *plain2encodedsequence(bool withrange,
-                                       Specialcharinfo *specialcharinfo,
                                        const Uchar *seq1,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       unsigned int mapsize,
+                                       const Alphabet *alpha,
                                        Verboseinfo *verboseinfo);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
@@ -270,5 +283,74 @@ bool containsspecial(const Encodedsequence *encseq,
                      Seqpos len);
 
 unsigned int getsatforcevalue(const char *str);
+
+/* check if the marked positions are correct */
+
+void checkmarkpos(const Encodedsequence *encseq);
+
+/* for a given Encodedsequence mapped with withssptab=true, obtain the sequence
+ * number from the given position */
+
+unsigned long getencseqfrompos2seqnum(const Encodedsequence *encseq,
+                                      Seqpos position);
+
+/* for a given Encodedsequence and a sequencenumber, fill the Seqinfo
+ * structure */
+
+void getencseqSeqinfo(Seqinfo *seqinfo,
+                      const Encodedsequence *encseq,
+                      unsigned long seqnum);
+
+/* for a give  Encodedsequence and a sequencenumber return a pointer to
+   the description of the sequence and store the length of the description
+   in desclen */
+
+const char *retrievesequencedescription(unsigned long *desclen,
+                                        const Encodedsequence *encseq,
+                                        unsigned long seqnum);
+
+/* here are some functions to extract the different components of the
+ * specialcharinfo included in encseq */
+
+Seqpos getencseqspecialcharacters(const Encodedsequence *encseq);
+
+Seqpos getencseqspecialranges(const Encodedsequence *encseq);
+
+Seqpos getencseqrealspecialranges(const Encodedsequence *encseq);
+
+Seqpos getencseqlengthofspecialprefix(const Encodedsequence *encseq);
+
+Seqpos getencseqlengthofspecialsuffix(const Encodedsequence *encseq);
+
+/* In case an Encodedsequence is not mapped, we still need to obtain the
+   Specialcharainfo. This is done by the following function */
+
+int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
+                        const GtStr *indexname,GtError *err);
+
+/* some functions to obtain some components from the Alphabet pointed to
+   by encseq->alpha */
+
+unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq);
+
+const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq);
+
+const Alphabet *getencseqAlphabet(const Encodedsequence *encseq);
+
+const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
+
+/* Obtain the filenametable and the filelengthtable from the
+   Encodedsequence */
+
+const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
+
+const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
+
+/* some function to remove reference from an Encodedsequence to prevent that
+   the referenced alphabet or filenametab are freed */
+
+void removealpharef(Encodedsequence *encseq);
+
+void removefilenametabref(Encodedsequence *encseq);
 
 #endif

@@ -168,32 +168,24 @@ void *loadvoidBWTSeqForSA(const GtStr *indexname,
   }
   if (!haserr)
   {
-    if (withpckbt)
+    if (withpckbt && pckbuckettableexists(indexname))
     {
-      if (pckbuckettableexists(indexname))
+      unsigned int numofchars
+        = getencseqAlphabetnumofchars(suffixarray->encseq);
+      bwtseq->pckbuckettable = mappckbuckettable(indexname,numofchars,err);
+      if (bwtseq->pckbuckettable == NULL)
       {
-        unsigned int numofchars = getnumofcharsAlphabet(suffixarray->alpha);
-        bwtseq->pckbuckettable = mappckbuckettable(indexname,numofchars,err);
-        if (bwtseq->pckbuckettable == NULL)
-        {
-          haserr = true;
-        }
-      } else
-      {
-        bwtseq->pckbuckettable = NULL;
+        haserr = true;
       }
     } else
     {
       bwtseq->pckbuckettable = NULL;
     }
   }
-  if (haserr)
+  if (haserr && bwtseq != NULL)
   {
-    if (bwtseq != NULL)
-    {
-      deletevoidBWTSeq(bwtseq);
-      bwtseq = NULL;
-    }
+    deletevoidBWTSeq(bwtseq);
+    bwtseq = NULL;
   }
   return haserr ? NULL : bwtseq;
 }
@@ -224,13 +216,13 @@ void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
   }
 }
 
-const Matchbound **bwtseq2mbtab(const void *voidbwtseq)
+const Mbtab **bwtseq2mbtab(const void *voidbwtseq)
 {
   if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
   {
     return NULL;
   }
-  return (const Matchbound **)
+  return (const Mbtab **)
          pcktb2mbtab(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
@@ -243,7 +235,7 @@ unsigned int bwtseq2maxdepth(const void *voidbwtseq)
   return pcktb2maxdepth(((const BWTSeq *) voidbwtseq)->pckbuckettable);
 }
 
-unsigned long bwtrangesplitallwithoutspecial(Matchbound *mbtab,
+unsigned long bwtrangesplitallwithoutspecial(Mbtab *mbtab,
                                              Seqpos *rangeOccs,
                                              const void *voidBwtSeq,
                                              Seqpos lbound,

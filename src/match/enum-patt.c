@@ -39,7 +39,6 @@
 Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const Encodedsequence *encseq,
-                                            unsigned int alphasize,
                                             GtError *err)
 {
   Enumpatterniterator *epi = NULL;
@@ -72,7 +71,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->maxpatternlen = maxpatternlen;
   epi->sampleencseq = encseq;
   epi->samplecount = 0;
-  epi->alphasize = alphasize;
+  epi->alphasize = getencseqAlphabetnumofchars(encseq);
   epi->esr = newEncodedsequencescanstate();
   srand48(42349421);
   return epi;

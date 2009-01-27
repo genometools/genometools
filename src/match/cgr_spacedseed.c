@@ -27,8 +27,7 @@
 #include "absdfstrans-def.h"
 #include "spaced-seeds.h"
 #include "iter-window.h"
-
-#include "esa-map.pr"
+#include "esa-map.h"
 
 typedef struct
 {
@@ -36,7 +35,7 @@ typedef struct
   Seqpos totallength;
   void *packedindex;
   bool withesa;
-  const Matchbound **mbtab; /* only relevant for packedindex */
+  const Mbtab **mbtab; /* only relevant for packedindex */
   unsigned int maxdepth;    /* maximaldepth of boundaries */
 } Genericindex;
 
@@ -81,13 +80,17 @@ static Genericindex *genericindex_new(const GtStr *indexname,
   genericindex->withesa = withesa;
   genericindex->suffixarray = gt_malloc(sizeof(*genericindex->suffixarray));
   if (mapsuffixarray(genericindex->suffixarray,
-                     &genericindex->totallength,
                      demand,
                      indexname,
                      NULL,
                      err) != 0)
   {
     haserr = true;
+    genericindex->totallength = 0;
+  } else
+  {
+    genericindex->totallength = getencseqtotallength(genericindex->suffixarray
+                                                                 ->encseq);
   }
   if (!haserr)
   {
@@ -351,7 +354,6 @@ int matchspacedseed(bool withesa,
                            withesa,
                            true,
                            0,
-                           getmapsizeAlphabet(genericindex->suffixarray->alpha),
                            genericindex->totallength,
                            (unsigned long) INTWORDSIZE,
                            showmatch,
@@ -360,8 +362,8 @@ int matchspacedseed(bool withesa,
                            NULL, /* processresult info */
                            dfst);
     seqit = gt_seqiterator_new(queryfilenames,
-                               getsymbolmapAlphabet(genericindex->suffixarray
-                                                                ->alpha),
+                               getencseqAlphabetsymbolmap(genericindex->
+                                                          suffixarray->encseq),
                                true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {

@@ -30,8 +30,8 @@
 #include "spacedef.h"
 #include "stamp.h"
 #include "opensfxfile.h"
+#include "esa-map.h"
 
-#include "esa-map.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
@@ -49,6 +49,7 @@ bool fmindexexists(const GtStr *indexname)
 }
 
 static int scanfmafileviafileptr(Fmindex *fmindex,
+                                 Specialcharinfo *specialcharinfo,
                                  bool *storeindexpos,
                                  const GtStr *indexname,
                                  FILE *fpin,
@@ -67,15 +68,15 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("log2blocksize",&fmindex->log2bsize,NULL);
   SETREADINTKEYS("log2markdist",&fmindex->log2markdist,NULL);
   SETREADINTKEYS("specialcharacters",
-                 &fmindex->specialcharinfo.specialcharacters,NULL);
+                 &specialcharinfo->specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
-                 &fmindex->specialcharinfo.specialranges,NULL);
+                 &specialcharinfo->specialranges,NULL);
   SETREADINTKEYS("realspecialranges",
-                 &fmindex->specialcharinfo.realspecialranges,NULL);
+                 &specialcharinfo->realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
-                 &fmindex->specialcharinfo.lengthofspecialprefix,NULL);
+                 &specialcharinfo->lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
-                 &fmindex->specialcharinfo.lengthofspecialsuffix,NULL);
+                 &specialcharinfo->lengthofspecialsuffix,NULL);
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
@@ -147,25 +148,15 @@ static Encodedsequence *mapbwtencoding(const GtStr *indexname,
                                        Verboseinfo *verboseinfo,
                                        GtError *err)
 {
-  Suffixarray suffixarray;
-  bool haserr = false;
-  Seqpos totallength;
-
   gt_error_check(err);
-  if (mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
-                     verboseinfo,err) != 0)
-  {
-    haserr = true;
-  }
-  freeAlphabet(&suffixarray.alpha);
-  gt_str_array_delete(suffixarray.filenametab);
-  FREESPACE(suffixarray.filelengthtab);
-  if (haserr)
-  {
-    freeEncodedsequence(&suffixarray.encseq);
-    return NULL;
-  }
-  return suffixarray.encseq;
+
+  return mapencodedsequence(true,
+                            indexname,
+                            true,
+                            false,
+                            false,
+                            verboseinfo,
+                            err);
 }
 
 int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
@@ -173,6 +164,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
 {
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
+  Specialcharinfo specialcharinfo;
 
   gt_error_check(err);
   fmindex->mappedptr = NULL;
@@ -186,11 +178,12 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
   if (!haserr)
   {
     if (scanfmafileviafileptr(fmindex,
-                             &storeindexpos,
-                             indexname,
-                             fpin,
-                             verboseinfo,
-                             err) != 0)
+                              &specialcharinfo,
+                              &storeindexpos,
+                              indexname,
+                              fpin,
+                              verboseinfo,
+                              err) != 0)
     {
       haserr = true;
     }
@@ -209,8 +202,7 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     GtStr *tmpfilename;
 
     fmindex->specpos.nextfreePairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(
-                                          &fmindex->specialcharinfo);
+      = (unsigned long) determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
     tmpfilename = gt_str_clone(indexname);
@@ -231,13 +223,13 @@ int mapfmindex (Fmindex *fmindex,const GtStr *indexname,
     GtStr *tmpfilename;
 
     computefmkeyvalues (fmindex,
+                        &specialcharinfo,
                         fmindex->bwtlength,
                         fmindex->log2bsize,
                         fmindex->log2markdist,
-                        getmapsizeAlphabet(fmindex->alphabet),
+                        getnumofcharsAlphabet(fmindex->alphabet),
                         fmindex->suffixlength,
-                        storeindexpos,
-                        &fmindex->specialcharinfo);
+                        storeindexpos);
     tmpfilename = gt_str_clone(indexname);
     gt_str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
     if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)

@@ -23,7 +23,6 @@ typedef struct Enumpatterniterator Enumpatterniterator;
 Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const Encodedsequence *encseq,
-                                            unsigned int alphasize,
                                             GtError *err);
 
 const Uchar *nextEnumpatterniterator(unsigned long *patternlen,

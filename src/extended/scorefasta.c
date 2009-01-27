@@ -29,7 +29,7 @@ unsigned long gt_calc_scorefasta(const char *u, unsigned long ulen,
                 *count, maxcount = 0;
 
   /* some checks */
-  if (q > ulen || q > ulen)
+  if (q > ulen || q > wlen)
     return 0;
 
   /* preprocess function h */
@@ -49,7 +49,7 @@ unsigned long gt_calc_scorefasta(const char *u, unsigned long ulen,
   for (i = 1; i < wlen - q + 1; i++) {
     /* update code */
     code = gt_qgram_step(code, w[i-1], w[i+q-1], alphabet_size,
-                      r_raised_to_the_power_of_q_minus_1);
+                         r_raised_to_the_power_of_q_minus_1);
     /* store startposition in h[code] */
     gt_array_add(h[code], i);
   }

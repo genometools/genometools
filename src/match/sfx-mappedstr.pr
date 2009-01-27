@@ -6,7 +6,6 @@ void getencseqkmers(
         Readmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,const Firstspecialpos *),
         void *processkmercodeinfo,
-        unsigned int numofchars,
         unsigned int kmersize);
 
 int getfastastreamkmers(

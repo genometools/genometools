@@ -136,6 +136,7 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fbs,
                                                   *filenametab,
                                                   bool plainformat,
                                                   Seqpos totallength,
+                                                  unsigned long numofsequences,
                                                   Seqpos specialranges,
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
@@ -150,11 +151,11 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fbs,
 
   gt_error_check(err);
   fb = gt_fastabuffer_new(filenametab,
-                       plainformat ? NULL : getsymbolmapAlphabet(alphabet),
-                       plainformat,
-                       NULL,
-                       NULL,
-                       NULL);
+                          plainformat ? NULL : getsymbolmapAlphabet(alphabet),
+                          plainformat,
+                          NULL,
+                          NULL,
+                          NULL);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->totallength = totallength;
   if (fillplainseq(encseq,fb,err) != 0)
@@ -171,7 +172,7 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fbs,
                                    const GtStr *indexname,
                                    GT_UNUSED Seqpos totallength,
                                    Seqpos specialranges,
-                                   GT_UNUSED unsigned int mapsize,
+                                   GT_UNUSED unsigned int numofchars,
                                    GT_UNUSED Verboseinfo *verboseinfo,
                                    GtError *err)
 {
@@ -197,7 +198,7 @@ Encodedsequence *plain2encodedsequence(
                          Seqpos len1,
                          const Uchar *seq2,
                          unsigned long len2,
-                         unsigned int mapsize,
+                         unsigned int numofchars,
                          Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;

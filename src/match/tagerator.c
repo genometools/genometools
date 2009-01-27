@@ -36,9 +36,8 @@
 #include "dist-short.h"
 #include "stamp.h"
 #include "tagerator.h"
-
-#include "echoseq.pr"
-#include "esa-map.pr"
+#include "esa-map.h"
+#include "echoseq.h"
 
 #define MAXTAGSIZE INTWORDSIZE
 
@@ -105,8 +104,7 @@ static void showmatch(void *processinfo,
   {
     ADDTABULATOR;
     gt_assert(dbsubstring != NULL);
-    printfsymbolstring(showmatchinfo->alpha,dbsubstring,
-                       (unsigned long) dblen);
+    printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
   {
@@ -343,7 +341,7 @@ static int dotransformtag(Uchar *transformedtag,
     {
       if (replacewildcard)
       {
-        charcode = 0; /* (Uchar) (drand48() * (mapsize-1)); */
+        charcode = 0;
       } else
       {
         gt_error_set(err,"wildcard in tag number " Formatuint64_t,
@@ -537,7 +535,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength;
+  Seqpos totallength = 0;
   GtSeqIterator *seqit = NULL;
   bool haserr = false;
   int retval;
@@ -572,13 +570,15 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
   }
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      demand,
                      tageratoroptions->indexname,
                      NULL,
                      err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -613,7 +613,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     Tagwithlength twl;
     uint64_t tagnumber;
-    unsigned int mapsize;
+    unsigned int numofchars;
     const Uchar *symbolmap, *currenttag;
     char *desc = NULL;
     Processmatch processmatch;
@@ -622,8 +622,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Limdfsresources *limdfsresources = NULL;
 
     storeonline.twlptr = storeoffline.twlptr = &twl;
-    symbolmap = getsymbolmapAlphabet(suffixarray.alpha);
-    mapsize = getmapsizeAlphabet(suffixarray.alpha);
+    symbolmap = getencseqAlphabetsymbolmap(suffixarray.encseq);
+    numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
     if (tageratoroptions->docompare)
     {
       processmatch = storematch;
@@ -635,8 +635,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       processmatch = showmatch;
       showmatchinfo.twlptr = &twl;
       showmatchinfo.tageratoroptions = tageratoroptions;
-      showmatchinfo.alphasize = (unsigned int) (mapsize-1);
-      showmatchinfo.alpha = suffixarray.alpha;
+      showmatchinfo.alphasize = (unsigned int) numofchars;
+      showmatchinfo.alpha = getencseqAlphabet(suffixarray.encseq);
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
@@ -645,7 +645,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
       gt_assert(suffixarray.encseq != NULL);
-      mor = newMyersonlineresources(mapsize,
+      mor = newMyersonlineresources(numofchars,
                                     tageratoroptions->nowildcards,
                                     suffixarray.encseq,
                                     processmatch,
@@ -653,7 +653,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
     if (!tageratoroptions->online || tageratoroptions->docompare)
     {
-      const Matchbound **mbtab;
+      const Mbtab **mbtab;
       unsigned int maxdepth;
       unsigned long maxpathlength;
 
@@ -688,7 +688,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                            tageratoroptions->withesa,
                                            tageratoroptions->nowildcards,
                                            tageratoroptions->maxintervalwidth,
-                                           mapsize,
                                            totallength,
                                            maxpathlength,
                                            processmatch,
@@ -738,8 +737,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
       {
         printf("\t%lu\t",twl.taglen);
-        fprintfsymbolstring(stdout,suffixarray.alpha,twl.transformedtag,
-                            twl.taglen);
+        fprintfsymbolstring(stdout,getencseqAlphabet(suffixarray.encseq),
+                            twl.transformedtag,twl.taglen);
       }
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;

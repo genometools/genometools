@@ -4,7 +4,6 @@ extern "C" {
 int testencodedsequence(const GtStrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
-                        const Uchar *symbolmap,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
                         GtError *err);

@@ -25,7 +25,7 @@
 #include "core/yarandom.h"
 #include "match/seqpos-def.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
 
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
@@ -152,6 +152,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   const Symbol *qptr, *qend;
   Symbol curSym;
   const MRAEnc *alphabet;
+  /* Mbtab *mbtab; */
 
   gt_assert(bwtSeq && query);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
@@ -164,6 +165,13 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     qptr = query + queryLen - 1;
     qend = query - 1;
   }
+  /*
+  mbtab = pcktb2mbtab(bwtSeq->pckbuckettable);
+  if (mbtab != NULL)
+  {
+  }
+  */
+  /* Add code here to handle the case that MBtab is available */
   curSym = MRAEncMapSymbol(alphabet, *qptr);
   /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
   qptr = forward ? (qptr+1) : (qptr-1);
@@ -380,12 +388,11 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   gt_assert(bwtSeq && query);
   iter = gt_malloc(sizeof (*iter));
   if (initEMIterator(iter, bwtSeq, query, queryLen,forward))
-    return iter;
-  else
   {
-    gt_free(iter);
-    return NULL;
+    return iter;
   }
+  gt_free(iter);
+  return NULL;
 }
 
 extern bool
@@ -457,7 +464,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
     initExtBitsRetrieval(&extBits);
     extBitsAreInitialized = true;
 
-    if (mapsuffixarray(&suffixArray, &seqLen,
+    if (mapsuffixarray(&suffixArray,
                        SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, err))
     {
       gt_error_set(err, "Cannot load reference suffix array project with"
@@ -467,7 +474,7 @@ BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const GtStr *projectName,
       break;
     }
     suffixArrayIsInitialized = true;
-    ++seqLen;
+    seqLen = getencseqtotallength(suffixArray.encseq) + 1;
     if (BWTSeqLength(bwtSeq) != seqLen)
     {
       gt_error_set(err, "length mismatch for suffix array project %s and "

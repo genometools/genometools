@@ -23,80 +23,6 @@
 #include "alphadef.h"
 #include "encseq-def.h"
 
-unsigned long *calcdescendpositions(const char *destab,
-                                    unsigned long destablength,
-                                    unsigned long numofsequences)
-{
-  unsigned long *descendtab, i, idx = 0;
-
-  ALLOCASSIGNSPACE(descendtab,NULL,unsigned long,numofsequences);
-  gt_assert(destab != NULL);
-  for (i=0; i<destablength; i++)
-  {
-    if (destab[i] == '\n')
-    {
-      gt_assert(idx < numofsequences);
-      descendtab[idx++] = i;
-    }
-  }
-  gt_assert(idx == numofsequences);
-  return descendtab;
-}
-
-const char *retriesequencedescription(unsigned long *desclen,
-                                      const char *destab,
-                                      const unsigned long *descendtab,
-                                      unsigned long seqnum)
-{
-  if (seqnum == 0)
-  {
-    *desclen = descendtab[0];
-    return destab;
-  }
-  gt_assert(descendtab[seqnum-1] < descendtab[seqnum]);
-  *desclen = descendtab[seqnum] - descendtab[seqnum-1] - 1;
-  return destab + descendtab[seqnum-1] + 1;
-}
-
-void checkalldescriptions(const char *destab,unsigned long destablength,
-                          unsigned long numofsequences)
-{
-  unsigned long *descendtab, desclen, seqnum, totaldesclength, offset = 0;
-  const char *desptr;
-  char *copydestab;
-
-  descendtab = calcdescendpositions(destab,
-                                    destablength,
-                                    numofsequences);
-  totaldesclength = numofsequences; /* for each new line */
-  for (seqnum = 0; seqnum < numofsequences; seqnum++)
-  {
-    desptr = retriesequencedescription(&desclen,
-                                       destab,
-                                       descendtab,
-                                       seqnum);
-    totaldesclength += desclen;
-  }
-  ALLOCASSIGNSPACE(copydestab,NULL,char,totaldesclength);
-  for (seqnum = 0; seqnum < numofsequences; seqnum++)
-  {
-    desptr = retriesequencedescription(&desclen,
-                                       destab,
-                                       descendtab,
-                                       seqnum);
-    strncpy(copydestab + offset,desptr,(size_t) desclen);
-    copydestab[offset+desclen] = '\n';
-    offset += (desclen+1);
-  }
-  if (strncmp(copydestab,destab,(size_t) totaldesclength) != 0)
-  {
-    fprintf(stderr,"different descriptions\n");
-    exit(EXIT_FAILURE); /* Programm error */
-  }
-  FREESPACE(copydestab);
-  FREESPACE(descendtab);
-}
-
 void symbolstring2fasta(FILE *fpout,
                         const char *desc,
                         const Alphabet *alpha,
@@ -144,7 +70,6 @@ void symbolstring2fasta(FILE *fpout,
 }
 
 void encseq2symbolstring(FILE *fpout,
-                         const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
@@ -155,11 +80,13 @@ void encseq2symbolstring(FILE *fpout,
   Seqpos idx, lastpos;
   Uchar currentchar;
   Encodedsequencescanstate *esr;
+  const Alphabet *alpha;
 
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,start);
   gt_assert(width > 0);
   lastpos = start + wlen - 1;
+  alpha = getencseqAlphabet(encseq);
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
     currentchar = sequentialgetencodedchar(encseq,esr,idx,readmode);
@@ -190,14 +117,15 @@ void encseq2symbolstring(FILE *fpout,
 }
 
 void fprintfencseq(FILE *fpout,
-                   const Alphabet *alpha,
                    const Encodedsequence *encseq,
                    Seqpos start,
                    Seqpos wlen)
 {
   Seqpos idx;
   Uchar currentchar;
+  const Alphabet *alpha;
 
+  alpha = getencseqAlphabet(encseq);
   for (idx = start; idx < start + wlen; idx++)
   {
     currentchar = getencodedchar(encseq,idx,Forwardmode);
@@ -208,7 +136,6 @@ void fprintfencseq(FILE *fpout,
 
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
-                        const Alphabet *alpha,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         Seqpos start,
@@ -224,7 +151,6 @@ void encseq2fastaoutput(FILE *fpout,
     fprintf(fpout,">%s\n",desc);
   }
   encseq2symbolstring(fpout,
-                      alpha,
                       encseq,
                       readmode,
                       start,

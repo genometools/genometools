@@ -18,11 +18,9 @@
 #include "core/arraydef.h"
 #include "core/error.h"
 #include "core/minmax.h"
-#include "core/unused_api.h"
-#include "match/sarr-def.h"
 #include "match/encseq-def.h"
 #include "match/spacedef.h"
-#include "match/intcode-def.h"
+
 #include "searchforLTRs.h"
 #include "repeattypes.h"
 #include "repeats.h"
@@ -30,14 +28,13 @@
 #include "searchTSDandmotif.h"
 
 #include "match/greedyedist.pr"
-#include "match/pos2seqnum.pr"
 
 /*
  The following function checks, if the remaining candidate pairs still
  fulfill the length and distance constraints of LTRs.
  */
 
-static int checklengthanddistanceconstraints(LTRboundaries *boundaries,
+static bool checklengthanddistanceconstraints(LTRboundaries *boundaries,
                                              RepeatInfo *repeatinfo)
 {
   Seqpos ulen, vlen, dist_between_LTRs;
@@ -53,14 +50,12 @@ static int checklengthanddistanceconstraints(LTRboundaries *boundaries,
   {
     boundaries->lengthdistconstraint = false;
     boundaries->similarity = 0.0;
-    return -1;
-  }
-  else
+    return false;
+  } else
   {
     boundaries->lengthdistconstraint = true;
   }
-
-  return 0;
+  return true;
 }
 
 static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
@@ -69,8 +64,7 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
                                                Seqpos seed2_startpos,
                                                Seqpos seed1_endpos,
                                                Seqpos seed2_endpos,
-                                               LTRboundaries *boundaries,
-                                               GT_UNUSED Seqpos offset)
+                                               LTRboundaries *boundaries)
 {
   /* left alignment */
   boundaries->leftLTR_5  = seed1_startpos - xdropbest_left.ivalue;
@@ -99,26 +93,14 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
  */
 }
 
-#define INITBOUNDARIES(B)\
-        (B)->contignumber = repeatptr->contignumber;\
-        (B)->leftLTR_5 = (Seqpos)0;\
-        (B)->leftLTR_3 = (Seqpos)0;\
-        (B)->rightLTR_5 = (Seqpos)0;\
-        (B)->rightLTR_3 = (Seqpos)0;\
-        (B)->lenleftTSD = (Seqpos)0;\
-        (B)->lenrightTSD = (Seqpos)0;\
-        (B)->tsd = false;\
-        (B)->motif_near_tsd = false;\
-        (B)->motif_far_tsd = false;\
-        (B)->skipped = false;\
-        (B)->similarity = 0.0;
-
 /*
  The following function applies the filter algorithms one after another
  to all candidate pairs.
 */
-int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, GtError *err)
+int searchforLTRs(LTRharvestoptions *lo,
+                  ArrayLTRboundaries *arrayLTRboundaries,
+                  const Encodedsequence *encseq,
+                  GtError *err)
 {
   unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;
@@ -127,15 +109,15 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
   Seqpos alilen = 0,
          totallength,
          ulen,
-         vlen;
+         vlen,
+         maxulen = 0,
+         maxvlen = 0;
   Uchar *useq = NULL,
         *vseq = NULL;
   unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
-  Seqpos offset = 0;
-  const Encodedsequence *encseq =
-          encseqSequentialsuffixarrayreader(ssar);
+  bool haserr = false;
 
   gt_error_check(err);
 
@@ -160,6 +142,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     INITARRAY (&fronts, Myfrontvalue);
     if (alilen <= repeatptr->pos1)
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
@@ -174,6 +157,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     }
     else /* do not align over left sequence boundary */
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresleft(&lo->arbitscores,
                                &xdropbest_left,
                                &fronts,
@@ -194,6 +178,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
                                 repeatptr->len) )
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresright (&lo->arbitscores,
                                  &xdropbest_right,
                                  &fronts,
@@ -209,6 +194,7 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     }
     else /* do not align over right sequence boundary */
     {
+      /* XXX what about the exit code */
       evalxdroparbitscoresright(&lo->arbitscores,
                                 &xdropbest_right,
                                 &fronts,
@@ -227,20 +213,20 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
     }
     FREEARRAY (&fronts, Myfrontvalue);
 
-    GETNEXTFREEINARRAY(boundaries,
-                       &lo->arrayLTRboundaries,
-                       LTRboundaries,
-                       5);
-    INITBOUNDARIES(boundaries);
+    GETNEXTFREEINARRAY(boundaries,arrayLTRboundaries,LTRboundaries,5);
 
-    if ( boundaries->contignumber == 0)
-    {
-      offset = 0;
-    }
-    else
-    {
-      offset = markpos[boundaries->contignumber-1];
-    }
+    boundaries->contignumber = repeatptr->contignumber;
+    boundaries->leftLTR_5 = (Seqpos) 0;
+    boundaries->leftLTR_3 = (Seqpos) 0;
+    boundaries->rightLTR_5 = (Seqpos) 0;
+    boundaries->rightLTR_3 = (Seqpos) 0;
+    boundaries->lenleftTSD = (Seqpos) 0;
+    boundaries->lenrightTSD = (Seqpos) 0;
+    boundaries->tsd = false;
+    boundaries->motif_near_tsd = false;
+    boundaries->motif_far_tsd = false;
+    boundaries->skipped = false;
+    boundaries->similarity = 0.0;
 
     /* test
     printf("contig number: %lu\n",
@@ -277,16 +263,15 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
                    repeatptr->pos1 + repeatptr->len - 1, /*seed1 endpos*/
                    repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1,
                                                          /*seed2 endpos*/
-                   boundaries,
-                   offset);
+                   boundaries);
 
     /* if search for motif and/or TSD */
     if ( lo->motif.allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
-      if ( findcorrectboundaries(lo, boundaries, ssar,
-                                markpos, err) != 0 )
+      if ( findcorrectboundaries(lo, boundaries, encseq, err) != 0 )
       {
-        return -1;
+        haserr = true;
+        break;
       }
 
       /* if search for TSDs and (not) motif */
@@ -308,16 +293,17 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
         else
         {
           /* delete this LTR-pair candidate */
-          lo->arrayLTRboundaries.nextfreeLTRboundaries--;
+          arrayLTRboundaries->nextfreeLTRboundaries--;
           continue;
         }
       }
     }
 
     /* check length and distance constraints again */
-    if (checklengthanddistanceconstraints(boundaries, &lo->repeatinfo)) {
+    if (!checklengthanddistanceconstraints(boundaries, &lo->repeatinfo))
+    {
       /* delete this LTR-pair candidate */
-      lo->arrayLTRboundaries.nextfreeLTRboundaries--;
+      arrayLTRboundaries->nextfreeLTRboundaries--;
       continue;
     }
 
@@ -325,8 +311,16 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
        copy LTR sequences for greedyunitedist function */
     ulen = boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1;
     vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
-    ALLOCASSIGNSPACE(useq, NULL, Uchar, ulen);
-    ALLOCASSIGNSPACE(vseq, NULL, Uchar, vlen);
+    if (ulen > maxulen)
+    {
+      maxulen = ulen;
+      ALLOCASSIGNSPACE(useq, useq, Uchar, maxulen);
+    }
+    if (vlen > maxvlen)
+    {
+      maxvlen = vlen;
+      ALLOCASSIGNSPACE(vseq, vseq, Uchar, maxvlen);
+    }
 
     encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3);
     encseqextract(vseq,encseq,boundaries->rightLTR_5,boundaries->rightLTR_3);
@@ -335,17 +329,17 @@ int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
 
     /* determine similarity */
     boundaries->similarity = 100.0 *
-    (1 - (((double) edist)/(MAX(ulen,vlen))));
+                             (1 - (((double) edist)/(MAX(ulen,vlen))));
 
     if ( boundaries->similarity < lo->similaritythreshold )
     {
       /* delete this LTR-pair candidate */
-      lo->arrayLTRboundaries.nextfreeLTRboundaries--;
+      arrayLTRboundaries->nextfreeLTRboundaries--;
     }
 
-    FREESPACE(useq);
-    FREESPACE(vseq);
   }
+  FREESPACE(useq);
+  FREESPACE(vseq);
 
-  return 0;
+  return haserr ? -1 : 0;
 }

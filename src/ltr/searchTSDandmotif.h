@@ -18,15 +18,14 @@
 #ifndef SEARCHTSDANDMOTIF_H
 #define SEARCHTSDANDMOTIF_H
 
-int findcorrectboundaries(LTRharvestoptions *lo, LTRboundaries *boundaries,
-    Sequentialsuffixarrayreader *ssar, const Seqpos *markpos, GtError *err);
+#include <stdbool.h>
+#include "core/error.h"
+#include "match/seqpos-def.h"
+#include "match/encseq-def.h"
+#include "repeattypes.h"
+#include "ltrharvest-opt.h"
 
-int searchformotifonlyinside(LTRharvestoptions *lo,
-                             LTRboundaries *boundaries,
-                             Sequentialsuffixarrayreader *ssar,
-                             const Seqpos *markpos,
-                             unsigned int *motifmismatchesleftLTR,
-                             unsigned int *motifmismatchesrightLTR,
-                             GtError *err);
+int findcorrectboundaries(LTRharvestoptions *lo, LTRboundaries *boundaries,
+                          const Encodedsequence *encseq, GtError *err);
 
 #endif

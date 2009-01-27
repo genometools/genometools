@@ -32,7 +32,7 @@ struct GtLine {
 GtLine* gt_line_new(void)
 {
   GtLine *line;
-  line = gt_malloc(sizeof (GtLine));
+  line = gt_calloc(1, sizeof (GtLine));
   line->blocks = gt_array_new(sizeof (GtBlock*));
   line->has_captions = false;
   return line;

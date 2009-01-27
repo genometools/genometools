@@ -26,7 +26,7 @@
 #include "lcpoverflow.h"
 #include "verbose-def.h"
 
-#include "esa-map.pr"
+#include "esa-map.h"
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -50,7 +50,7 @@ static void fillandinsert(Mergertrierep *trierep,
   insertsuffixintomergertrie(trierep,node,&sinfo);
 }
 
-static int inputthesequences(Alphabet **alpha,
+static int inputthesequences(unsigned int *numofchars,
                              Seqpos *nextpostable,
                              Suffixarray *suffixarraytable,
                              const GtStrArray *indexnametab,
@@ -60,14 +60,12 @@ static int inputthesequences(Alphabet **alpha,
 {
   unsigned long idx;
   GtStr *indexname;
-  Seqpos totallength;
 
   gt_error_check(err);
   for (idx=0; idx<gt_str_array_size(indexnametab); idx++)
   {
     indexname = gt_str_array_get_str(indexnametab,idx);
     if (streamsuffixarray(&suffixarraytable[idx],
-                          &totallength,
                           demand,
                           indexname,
                           verboseinfo,
@@ -78,7 +76,7 @@ static int inputthesequences(Alphabet **alpha,
     }
     if (idx == 0)
     {
-      *alpha = suffixarraytable[idx].alpha;
+      *numofchars = getencseqAlphabetnumofchars(suffixarraytable[idx].encseq);
     }
     nextpostable[idx] = 0;
   }
@@ -99,12 +97,7 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   for (idx=0; idx<numofindexes; idx++)
   {
     retval = readnextSeqposfromstream(&suftabvalue,
-                                      &suffixarraytable[idx].suftabstream,
-                                      err);
-    if (retval < 0)
-    {
-      return -1;
-    }
+                                      &suffixarraytable[idx].suftabstream);
     if (retval == 0)
     {
       gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -173,7 +166,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
     {
       retval = readnextUcharfromstream(&tmpsmalllcpvalue,
                                        &emmesa->suffixarraytable[tmpidx].
-                                                lcptabstream,err);
+                                                lcptabstream);
       if (retval < 0)
       {
         return -1;
@@ -188,8 +181,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
       {
         retval = readnextLargelcpvaluefromstream(
                                &tmpexception,
-                               &emmesa->suffixarraytable[tmpidx].llvtabstream,
-                               err);
+                               &emmesa->suffixarraytable[tmpidx].llvtabstream);
         if (retval < 0)
         {
           return -3;
@@ -212,12 +204,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, GtError *err)
       tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,err);
       retval = readnextSeqposfromstream(&tmpsuftabvalue,
                                         &emmesa->suffixarraytable[tmpidx].
-                                        suftabstream,
-                                        err);
-      if (retval < 0)
-      {
-        return -5;
-      }
+                                        suftabstream);
       if (retval == 0)
       {
         gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -263,13 +250,13 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   emmesa->trierep.encseqreadinfo = NULL;
   ALLOCASSIGNSPACE(emmesa->suffixarraytable,NULL,Suffixarray,numofindexes);
   ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,Seqpos,numofindexes);
-  if (inputthesequences(&emmesa->alpha,
-                       emmesa->nextpostable,
-                       emmesa->suffixarraytable,
-                       indexnametab,
-                       demand,
-                       verboseinfo,
-                       err) != 0)
+  if (inputthesequences(&emmesa->numofchars,
+                        emmesa->nextpostable,
+                        emmesa->suffixarraytable,
+                        indexnametab,
+                        demand,
+                        verboseinfo,
+                        err) != 0)
   {
     haserr = true;
     return -1;

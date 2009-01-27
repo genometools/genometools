@@ -117,6 +117,7 @@
         if ((A)->space##TYPE != NULL)\
         {\
           gt_free((A)->space##TYPE);\
+          (A)->space##TYPE = NULL;\
         }
 
 /*

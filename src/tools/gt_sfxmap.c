@@ -22,13 +22,13 @@
 #include "match/verbose-def.h"
 #include "match/stamp.h"
 #include "match/esa-seqread.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
+#include "match/echoseq.h"
+#include "tools/gt_sfxmap.h"
+
 #include "match/test-encseq.pr"
-#include "match/pos2seqnum.pr"
 #include "match/test-mappedstr.pr"
 #include "match/sfx-suftaborder.pr"
-#include "match/echoseq.pr"
-#include "tools/gt_sfxmap.h"
 
 typedef struct
 {
@@ -39,14 +39,14 @@ typedef struct
        inputdes,
        inputbwt,
        inputlcp,
-       inputbck;
+       inputbck,
+       inputssp;
   unsigned long scantrials,
                 multicharcmptrials;
   unsigned long delspranges;
 } Sfxmapoptions;
 
 static void deletethespranges(const Encodedsequence *encseq,
-                              const Alphabet *alpha,
                               unsigned long delspranges)
 {
   Specialrangeiterator *sri;
@@ -70,7 +70,6 @@ static void deletethespranges(const Encodedsequence *encseq,
         if (range.leftpos > nextpos)
         {
           encseq2symbolstring(stdout,
-                              alpha,
                               encseq,
                               Forwardmode,
                               nextpos,
@@ -85,7 +84,6 @@ static void deletethespranges(const Encodedsequence *encseq,
   if (nextpos < totallength-1)
   {
     encseq2symbolstring(stdout,
-                        alpha,
                         encseq,
                         Forwardmode,
                         nextpos,
@@ -104,7 +102,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   GtOptionParser *op;
   GtOption *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
-         *optiondes, *optionbwt, *optionlcp, *optiontis,
+         *optiondes, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges;
   OPrval oprval;
 
@@ -164,6 +162,11 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                               false);
   gt_option_parser_add_option(op, optionbck);
 
+  optionssp = gt_option_new_bool("ssp","input the sequence separator table",
+                                 &sfxmapoptions->inputssp,
+                                 false);
+  gt_option_parser_add_option(op, optionssp);
+
   optionverbose = gt_option_new_bool("v","be verbose",&sfxmapoptions->verbose,
                                   false);
   gt_option_parser_add_option(op, optionverbose);
@@ -180,7 +183,6 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   GtStr *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
-  Seqpos totallength;
   int parsed_args;
   Verboseinfo *verboseinfo;
   Sfxmapoptions sfxmapoptions;
@@ -223,9 +225,12 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   {
     demand |= SARR_BCKTAB;
   }
+  if (sfxmapoptions.inputssp)
+  {
+    demand |= SARR_SSPTAB;
+  }
   if ((sfxmapoptions.usestream ? streamsuffixarray
                                : mapsuffixarray)(&suffixarray,
-                                                 &totallength,
                                                  demand,
                                                  indexname,
                                                  verboseinfo,
@@ -237,8 +242,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   {
     if (sfxmapoptions.delspranges > 0)
     {
-      deletethespranges(suffixarray.encseq,suffixarray.alpha,
-                        sfxmapoptions.delspranges);
+      deletethespranges(suffixarray.encseq,sfxmapoptions.delspranges);
     } else
     {
       if (!haserr)
@@ -247,16 +251,15 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
 
         for (readmode = 0; readmode < 4; readmode++)
         {
-          if (isdnaalphabet(suffixarray.alpha) ||
+          if (isdnaalphabet(getencseqAlphabet(suffixarray.encseq)) ||
              ((Readmode) readmode) == Forwardmode ||
              ((Readmode) readmode) == Reversemode)
           {
             showverbose(verboseinfo,"testencodedsequence(readmode=%s)",
                                     showreadmode((Readmode) readmode));
-            if (testencodedsequence(suffixarray.filenametab,
+            if (testencodedsequence(getencseqfilenametab(suffixarray.encseq),
                                     suffixarray.encseq,
                                     (Readmode) readmode,
-                                    getsymbolmapAlphabet(suffixarray.alpha),
                                     sfxmapoptions.scantrials,
                                     sfxmapoptions.multicharcmptrials,
                                     err) != 0)
@@ -278,17 +281,14 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       if (!haserr)
       {
         showverbose(verboseinfo,"checkmarkpos");
-        if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,
-                         err) != 0)
-        {
-          haserr = true;
-        }
+        checkmarkpos(suffixarray.encseq);
       }
       if (!haserr && suffixarray.readmode == Forwardmode &&
           suffixarray.prefixlength > 0)
       {
         showverbose(verboseinfo,"verifymappedstr");
-        if (verifymappedstr(&suffixarray,err) != 0)
+        if (verifymappedstr(suffixarray.encseq,suffixarray.prefixlength,
+                            err) != 0)
         {
           haserr = true;
         }
@@ -310,7 +310,6 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         showverbose(verboseinfo,"checkentiresuftab");
         checkentiresuftab(suffixarray.encseq,
                           suffixarray.readmode,
-                          getcharactersAlphabet(suffixarray.alpha),
                           suffixarray.suftab,
                           ssar,
                           false, /* specialsareequal  */
@@ -327,9 +326,8 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   }
   if (sfxmapoptions.inputdes && !haserr)
   {
-    showverbose(verboseinfo,"checkalldescriptions");
-    checkalldescriptions(suffixarray.destab,suffixarray.destablength,
-                         suffixarray.numofdbsequences);
+    showverbose(verboseinfo,"checkallsequencedescriptions");
+    checkallsequencedescriptions(suffixarray.encseq);
   }
   gt_str_delete(indexname);
   freesuffixarray(&suffixarray);

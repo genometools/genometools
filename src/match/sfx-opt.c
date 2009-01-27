@@ -217,18 +217,15 @@ static OPrval parse_options(int *parsed_args,
                                    &so->outbwttab,
                                    false);
     gt_option_parser_add_option(op, optionbwt);
+
+    option = gt_option_new_bool("bck",
+                                "output bucket table to file",
+                                &so->outbcktab,
+                                false);
+    gt_option_parser_add_option(op, option);
   } else
   {
     optionsuf = optionlcp = optionbwt = NULL;
-  }
-  option = gt_option_new_bool("bck",
-                              "output bucket table to file",
-                              &so->outbcktab,
-                              false);
-  gt_option_parser_add_option(op, option);
-
-  if (!doesa)
-  {
     registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                so->str_indexname);
   }
@@ -246,7 +243,6 @@ static OPrval parse_options(int *parsed_args,
   gt_option_parser_add_option(op, option);
 
   gt_option_exclude(optionii, optiondb);
-  gt_option_exclude(optionii, optiondir);
   gt_option_exclude(optionii, optionsmap);
   gt_option_exclude(optionii, optiondna);
   gt_option_exclude(optionii, optionprotein);
@@ -392,13 +388,15 @@ static void showoptions(const Suffixeratoroptions *so)
   gt_assert(gt_str_length(so->str_indexname) > 0);
   showdefinitelyverbose("indexname=%s",gt_str_get(so->str_indexname));
   showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
-                        "outbwttab=%s,outbcktab=%s,outdestab=%s",
+                        "outbwttab=%s,outbcktab=%s,outdestab=%s,"
+                        "outssptab=%s",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
           so->outbwttab ? "true" : "false",
           so->outbcktab ? "true" : "false",
-          so->outdestab ? "true" : "false");
+          so->outdestab ? "true" : "false",
+          so->outssptab ? "true" : "false");
 }
 
 void wrapsfxoptions(Suffixeratoroptions *so)
@@ -431,7 +429,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->maxdepth.defined = false;
   so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
-  so->outsuftab = false;
+  so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;
   so->outbcktab = false;

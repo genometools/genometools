@@ -28,10 +28,10 @@
 #include "measure-time-if.h"
 #include "format64.h"
 #include "stamp.h"
+#include "esa-map.h"
+#include "echoseq.h"
 
 #include "sfx-apfxlen.pr"
-#include "esa-map.pr"
-#include "echoseq.pr"
 
 #define COMPARE(OFFSET,LCPLEN)\
         sidx = (OFFSET) + (LCPLEN);\
@@ -366,17 +366,19 @@ int callenumquerymatches(const GtStr *indexname,
                          GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength;
+  Seqpos totallength = 0;
   bool haserr = false;
 
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      SARR_ESQTAB | SARR_SUFTAB,
                      indexname,
                      verboseinfo,
                      err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr && echoquery)
   {
@@ -395,8 +397,8 @@ int callenumquerymatches(const GtStr *indexname,
     uint64_t unitnum;
 
     seqit = gt_seqiterator_new(queryfiles,
-                              getsymbolmapAlphabet(suffixarray.alpha),
-                              true);
+                               getencseqAlphabetsymbolmap(suffixarray.encseq),
+                               true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
       retval = gt_seqiterator_next(seqit,
@@ -437,12 +439,8 @@ int callenumquerymatches(const GtStr *indexname,
 }
 
 static int constructsarrandrunmmsearch(
-                 Seqpos specialcharacters,
-                 Seqpos realspecialranges,
                  const Encodedsequence *dbencseq,
                  Readmode readmode,
-                 unsigned int numofchars,
-                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  const Uchar *query,
@@ -459,12 +457,8 @@ static int constructsarrandrunmmsearch(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
-  sfi = newSfxiterator(specialcharacters,
-                       realspecialranges,
-                       dbencseq,
+  sfi = newSfxiterator(dbencseq,
                        readmode,
-                       numofchars,
-                       characters,
                        prefixlength,
                        numofparts,
                        NULL, /* outlcpinfo */
@@ -521,26 +515,20 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             Verboseinfo *verboseinfo,
                             GtError *err)
 {
-  Specialcharinfo samplespecialcharinfo;
   unsigned int numofchars;
   bool haserr = false;
   Encodedsequence *dbencseq;
 
   dbencseq = plain2encodedsequence(true,
-                                   &samplespecialcharinfo,
                                    dbseq,
                                    dblen,
                                    NULL,
                                    0,
-                                   getmapsizeAlphabet(alpha),
+                                   alpha,
                                    verboseinfo);
   numofchars = getnumofcharsAlphabet(alpha);
-  if (constructsarrandrunmmsearch(samplespecialcharinfo.specialcharacters,
-                                  samplespecialcharinfo.realspecialranges,
-                                  dbencseq,
+  if (constructsarrandrunmmsearch(dbencseq,
                                   Forwardmode,
-                                  numofchars,
-                                  getcharactersAlphabet(alpha),
                                   recommendedprefixlength(numofchars,dblen),
                                   1U, /* parts */
                                   query,
@@ -553,6 +541,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
   {
     haserr = true;
   }
+  removealpharef(dbencseq);
   freeEncodedsequence(&dbencseq);
   return haserr ? -1 : 0;
 }

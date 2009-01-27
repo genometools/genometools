@@ -18,7 +18,13 @@
 #ifndef OUTPUTSTD_H
 #define OUTPUTSTD_H
 
-int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
-                            const Sequentialsuffixarrayreader *ssar);
+#include "match/encseq-def.h"
+#include "repeattypes.h"
+#include "ltrharvest-opt.h"
+
+void showinfoiffoundfullLTRs(const LTRharvestoptions *lo,
+                             const LTRboundaries **bdptrtab,
+                             unsigned long numofboundaries,
+                             const Encodedsequence *encseq);
 
 #endif

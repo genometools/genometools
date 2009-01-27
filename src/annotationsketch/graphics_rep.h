@@ -28,6 +28,7 @@ typedef void   (*GtGraphicsDrawColoredTextFunc)(GtGraphics*, double, double,
 typedef double (*GtGraphicsGetSingleExtentFunc)(GtGraphics*);
 typedef double (*GtGraphicsGetTextWidthFunc)(GtGraphics*, const char*);
 typedef void   (*GtGraphicsSetMarginsFunc)(GtGraphics*, double, double);
+typedef int    (*GtGraphicsSetColorFunc)(GtGraphics*, GtColor);
 typedef void   (*GtGraphicsSetFontFunc)(GtGraphics*, const char*, FontSlant,
                                         FontWeight);
 typedef void   (*GtGraphicsDrawLineFunc)(GtGraphics*, double, double,
@@ -76,6 +77,8 @@ const GtGraphicsClass* gt_graphics_class_new(size_t size,
                                                      get_text_height,
                                          GtGraphicsGetTextWidthFunc
                                                      get_text_width,
+                                         GtGraphicsSetColorFunc
+                                                     set_background_color,
                                          GtGraphicsSetFontFunc
                                                      set_font,
                                          GtGraphicsGetSingleExtentFunc

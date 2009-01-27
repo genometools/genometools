@@ -19,14 +19,10 @@
 #define SARR_DEF_H
 
 #include <stdio.h>
-#include "core/filelengthvalues.h"
 #include "seqpos-def.h"
-#include "alphadef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "bcktab.h"
-
-/* use dynamic allocation for buffers */
 
 #define FILEBUFFERSIZE 4096
 
@@ -36,19 +32,21 @@
 #define SARR_BWTTAB (1U << 3)
 #define SARR_DESTAB (1U << 4)
 #define SARR_BCKTAB (1U << 5)
+#define SARR_SSPTAB (1U << 6)
 
 #define SARR_ALLTAB (SARR_ESQTAB |\
                      SARR_SUFTAB |\
                      SARR_LCPTAB |\
                      SARR_BWTTAB |\
-                     SARR_DESTAB)
+                     SARR_DESTAB |\
+                     SARR_SSPTAB)
 
 #define DECLAREBufferedfiletype(TYPE)\
         typedef struct\
         {\
           unsigned int nextfree,\
                        nextread;\
-          TYPE bufferedfilespace[FILEBUFFERSIZE];\
+          TYPE *bufferedfilespace;\
           FILE *fp;\
         } TYPE ## Bufferedfile
 
@@ -58,14 +56,9 @@ DECLAREBufferedfiletype(Uchar);
 
 DECLAREBufferedfiletype(Largelcpvalue);
 
-/*
-  XXX eliminate gt_error_set in read function.
-*/
-
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
-                                                  TYPE ## Bufferedfile *buf,\
-                                                  GtError *err)\
+                                                  TYPE ## Bufferedfile *buf)\
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
@@ -75,8 +68,8 @@ DECLAREBufferedfiletype(Largelcpvalue);
                                                  buf->fp);\
             if (ferror(buf->fp))\
             {\
-              gt_error_set(err,"error when trying to read next %s",#TYPE);\
-              return -2;\
+              fprintf(stderr,"error when trying to read next %s",#TYPE);\
+              exit(EXIT_FAILURE);\
             }\
             buf->nextread = 0;\
             if (buf->nextfree == 0)\
@@ -90,14 +83,9 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 typedef struct
 {
-  GtStrArray *filenametab;
-  Filelengthvalues *filelengthtab;
-  DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
-  DefinedSeqpos longest;
-  unsigned long numofdbsequences;  /* XXX: move to encoded sequence */
-  Specialcharinfo specialcharinfo; /* XXX: move to encoded sequence */
-  Alphabet *alpha;                 /* XXX: move to encoded sequence */
+  DefinedSeqpos numoflargelcpvalues; /* only in esa-map.c */
+  DefinedSeqpos longest; /* for BWT */
   Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
   const Seqpos *suftab;
@@ -111,8 +99,6 @@ typedef struct
   UcharBufferedfile bwttabstream,
                     lcptabstream;
   LargelcpvalueBufferedfile llvtabstream;
-  const char *destab;
-  unsigned long destablength;
 } Suffixarray;
 
 #endif

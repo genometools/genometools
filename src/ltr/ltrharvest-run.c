@@ -21,12 +21,10 @@
 
 #include "core/error.h"
 #include "core/str.h"
-#include "match/sarr-def.h"
-#include "match/spacedef.h"
 #include "match/esa-seqread.h"
-#include "match/intcode-def.h"
 
 #include "ltrharvest-opt.h"
+#include "ltrharvest-run.h"
 #include "repeats.h"
 #include "searchforLTRs.h"
 #include "duplicates.h"
@@ -35,31 +33,88 @@
 #include "outputgff3.h"
 
 #include "match/esa-maxpairs.pr"
-#include "match/pos2seqnum.pr"
+
+static int bdptrcompare(const void *a, const void *b)
+{
+  const LTRboundaries **bda, **bdb;
+
+  bda = (const LTRboundaries **) a;
+  bdb = (const LTRboundaries **) b;
+  if ((*bda)->contignumber < (*bdb)->contignumber)
+  {
+    return -1;
+  }
+  if ((*bda)->contignumber > (*bdb)->contignumber)
+  {
+    return 1;
+  }
+  if ((*bda)->leftLTR_5 < (*bdb)->leftLTR_5)
+  {
+    return -1;
+  }
+  if ((*bda)->leftLTR_5 > (*bdb)->leftLTR_5)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
+                                                 const ArrayLTRboundaries *ltr)
+{
+  unsigned long countboundaries = 0, nextfill = 0;
+  const LTRboundaries *bd, **bdptrtab;
+
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
+                                          ltr->nextfreeLTRboundaries; bd++)
+  {
+    if (!bd->skipped)
+    {
+      countboundaries++;
+    }
+  }
+  bdptrtab = gt_malloc(sizeof(LTRboundaries *) * countboundaries);
+  nextfill = 0;
+  for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
+                                          ltr->nextfreeLTRboundaries; bd++)
+  {
+    if (!bd->skipped)
+    {
+      bdptrtab[nextfill++] = bd;
+    }
+  }
+  qsort(bdptrtab,(size_t) countboundaries, sizeof (LTRboundaries *),
+        bdptrcompare);
+  *numofboundaries = countboundaries;
+  return bdptrtab;
+}
 
 static int runltrharvest(LTRharvestoptions *lo, GtError *err)
 {
-  Sequentialsuffixarrayreader *ssar; /* suffix array */
-  Seqpos *markpos = NULL;
-  unsigned long numofdbsequences;
+  Sequentialsuffixarrayreader *ssar;
   bool had_err = false;
+  unsigned long numofboundaries;
+  const LTRboundaries **bdptrtab = NULL;
+  ArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
+                                          /*   LTR elements */
+  const Encodedsequence *encseq;
 
   gt_error_check(err);
 
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
-                                  SARR_LCPTAB | SARR_SUFTAB |
-                                  SARR_ESQTAB | SARR_DESTAB,
-                                  SEQ_mappedboth,
-                                  err);
+                                                SARR_LCPTAB | SARR_SUFTAB |
+                                                SARR_ESQTAB | SARR_DESTAB |
+                                                SARR_SSPTAB,
+                                                SEQ_mappedboth,
+                                                err);
   if (ssar == NULL)
   {
     return -1;
   }
+  encseq = encseqSequentialsuffixarrayreader(ssar);
 
   /* test if motif is valid and encode motif */
-  if (testmotifandencodemotif (&lo->motif,
-                             alphabetSequentialsuffixarrayreader(ssar),
-                             err) != 0)
+  if (testmotifandencodemotif (&lo->motif, encseq, err) != 0)
   {
     had_err = true;
   }
@@ -70,43 +125,28 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
     showuserdefinedoptionsandvalues(lo);
   }
 
-  numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
-  /* calculate markpos array for sequences offset */
-  if (!had_err && numofdbsequences > 1UL)
-  {
-    markpos = encseq2markpositions(encseqSequentialsuffixarrayreader(ssar),
-                            numofdbsequencesSequentialsuffixarrayreader(ssar));
-    lo->markpos = markpos;
-    if (markpos == NULL)
-    {
-      had_err = true;
-    }
-  }
-
   /* init array for maximal repeats */
   INITARRAY (&lo->repeatinfo.repeats, Repeat);
-  lo->repeatinfo.ssarptr = ssar;
+  lo->repeatinfo.encseq = encseq;
 
   /* search for maximal repeats */
   if (!had_err && enumeratemaxpairs(ssar,
-                       getnumofcharsAlphabet(
-                         alphabetSequentialsuffixarrayreader(ssar)),
-                       encseqSequentialsuffixarrayreader(ssar),
-                       readmodeSequentialsuffixarrayreader(ssar),
-                       (unsigned int)lo->minseedlength,
-                       (void*)simpleexactselfmatchstore,
-                       lo,
-                       NULL,
-                       err) != 0)
+                                    encseq,
+                                    readmodeSequentialsuffixarrayreader(ssar),
+                                    (unsigned int) lo->minseedlength,
+                                    simpleexactselfmatchstore,
+                                    &lo->repeatinfo,
+                                    NULL,
+                                    err) != 0)
   {
     had_err = true;
   }
 
   /* init array for candidate pairs */
-  INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
+  INITARRAY(&arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if (!had_err && searchforLTRs (ssar, lo, markpos, err) != 0)
+  if (!had_err && searchforLTRs (lo, &arrayLTRboundaries, encseq, err) != 0)
   {
     had_err = true;
   }
@@ -117,26 +157,30 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   /* remove exact duplicates */
   if (!had_err)
   {
-    removeduplicates(&lo->arrayLTRboundaries);
+    removeduplicates(&arrayLTRboundaries);
   }
 
   /* remove overlapping predictions if desired */
   if (!had_err && (lo->nooverlapallowed || lo->bestofoverlap))
   {
-    removeoverlapswithlowersimilarity(&lo->arrayLTRboundaries,
-                                      lo->nooverlapallowed);
+    removeoverlapswithlowersimilarity(&arrayLTRboundaries,lo->nooverlapallowed);
+  }
+
+  if (!had_err)
+  {
+    bdptrtab = sortedltrboundaries(&numofboundaries,&arrayLTRboundaries);
   }
 
   /* print multiple FASTA file of predictions */
   if (!had_err && lo->fastaoutput)
   {
     if (showpredictionsmultiplefasta(lo,
-          markpos,
-          false,
-          60U,
-          ssar,
-          true,
-          err) != 0)
+                                     bdptrtab,
+                                     numofboundaries,
+                                     false,
+                                     60U,
+                                     true,
+                                     err) != 0)
     {
       had_err = true;
     }
@@ -146,41 +190,35 @@ static int runltrharvest(LTRharvestoptions *lo, GtError *err)
   if (!had_err && lo->fastaoutputinnerregion)
   {
     if (showpredictionsmultiplefasta(lo,
-          markpos,
-          true,
-          60U,
-          ssar,
-          true,
-          err) != 0)
+                                     bdptrtab,
+                                     numofboundaries,
+                                     true,
+                                     60U,
+                                     true,
+                                     err) != 0)
     {
       had_err = true;
     }
   }
 
   /* print GFF3 format file of predictions */
-  if (!had_err && lo->gff3output)
+  if (!had_err && lo->gff3output && numofboundaries > 0)
   {
-    printgff3format(lo, ssar, markpos);
-  }
-
-  if (!had_err && numofdbsequences > 1UL)
-  {
-    FREESPACE(markpos);
-  }
-
-  /* print predictions to stdout */
-  if (!had_err)
-  {
-    if (showinfoiffoundfullLTRs(lo, ssar) != 0)
+    if (printgff3format(lo,bdptrtab,numofboundaries,encseq,err) != 0)
     {
       had_err = true;
     }
   }
 
-  /* free prediction array */
-  FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
-  /* free suffixarray */
+  /* print predictions to stdout */
+  if (!had_err)
+  {
+    showinfoiffoundfullLTRs(lo,bdptrtab,numofboundaries,encseq);
+  }
+
+  FREEARRAY(&arrayLTRboundaries, LTRboundaries);
   freeSequentialsuffixarrayreader(&ssar);
+  gt_free(bdptrtab);
 
   return had_err ? -1 : 0;
 }

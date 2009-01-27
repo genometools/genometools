@@ -41,7 +41,7 @@ struct Myersonlineresources
 };
 
 Myersonlineresources *newMyersonlineresources(
-                            unsigned int mapsize,
+                            unsigned int numofchars,
                             bool nowildcards,
                             const Encodedsequence *encseq,
                             Processmatch processmatch,
@@ -50,12 +50,12 @@ Myersonlineresources *newMyersonlineresources(
   Myersonlineresources *mor;
 
   ALLOCASSIGNSPACE(mor,NULL,Myersonlineresources,1);
-  ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,mapsize-1);
-  ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,mapsize-1);
+  ALLOCASSIGNSPACE(mor->eqsvectorrev,NULL,unsigned long,numofchars);
+  ALLOCASSIGNSPACE(mor->eqsvector,NULL,unsigned long,numofchars);
   mor->encseq = encseq;
   mor->esr = newEncodedsequencescanstate();
-  gt_assert(mapsize > 0 && mapsize-1 <= MAXALPHABETCHARACTER);
-  mor->alphasize = mapsize-1;
+  gt_assert(numofchars <= MAXALPHABETCHARACTER);
+  mor->alphasize = numofchars;
   mor->totallength = getencseqtotallength(encseq);
   mor->nowildcards = nowildcards;
   mor->processmatch = processmatch;

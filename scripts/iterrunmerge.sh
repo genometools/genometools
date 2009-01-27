@@ -15,7 +15,7 @@ INDEXNAME=${INDEXDIR}/at1MB
 if test ! "X${GTTESTDATA}" = "X"
 then
   QUERY=../testdata/U89959_genomic.fas
-  AT=${GTTESTDATA}/Iowa/at1MB
+  AT=../testdata/at1MB
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1
   mkdir -p ${INDEXDIR}
   mkvtree.sh -indexname ${INDEXNAME} -db ${AT} -dna -pl -ois -tis

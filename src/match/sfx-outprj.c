@@ -31,20 +31,17 @@
 #include "spacedef.h"
 #include "esa-fileend.h"
 #include "readmode-def.h"
+#include "encseq-def.h"
 #include "stamp.h"
 #include "opensfxfile.h"
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s=" FormatSeqpos "\n",#VAL,\
-                PRINTSeqposcast(specialcharinfo->VAL))
+                PRINTSeqposcast(getencseq##VAL(encseq)))
 
 static void showprjinfo(FILE *outprj,
-                        const GtStrArray *filenametab,
                         Readmode readmode,
-                        const Filelengthvalues *filelengthtab,
-                        Seqpos totallength,
-                        unsigned long numofsequences,
-                        const Specialcharinfo *specialcharinfo,
+                        const Encodedsequence *encseq,
                         unsigned int prefixlength,
                         GT_UNUSED const Definedunsignedint *maxdepth,
                         Seqpos numoflargelcpvalues,
@@ -52,7 +49,13 @@ static void showprjinfo(FILE *outprj,
                         const DefinedSeqpos *longest)
 {
   unsigned long i;
+  Seqpos totallength;
+  unsigned long numofsequences;
+  const GtStrArray *filenametab;
+  const Filelengthvalues *filelengthtab;
 
+  filenametab = getencseqfilenametab(encseq);
+  filelengthtab = getencseqfilelengthtab(encseq);
   gt_assert(filelengthtab != NULL);
   gt_assert(filenametab != NULL);
   for (i=0; i<gt_str_array_size(filenametab); i++)
@@ -62,12 +65,14 @@ static void showprjinfo(FILE *outprj,
                     PRINTuint64_tcast(filelengthtab[i].length),
                     PRINTuint64_tcast(filelengthtab[i].effectivelength));
   }
+  totallength = getencseqtotallength(encseq);
   fprintf(outprj,"totallength=" FormatSeqpos "\n",PRINTSeqposcast(totallength));
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
   PRJSPECIALOUT(realspecialranges);
   PRJSPECIALOUT(lengthofspecialprefix);
   PRJSPECIALOUT(lengthofspecialsuffix);
+  numofsequences = getencseqnumofdbsequences(encseq);
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
@@ -94,12 +99,8 @@ static void showprjinfo(FILE *outprj,
 }
 
 int outprjfile(const GtStr *indexname,
-               const GtStrArray *filenametab,
                Readmode readmode,
-               const Filelengthvalues *filelengthtab,
-               Seqpos totallength,
-               unsigned long numofsequences,
-               const Specialcharinfo *specialcharinfo,
+               const Encodedsequence *encseq,
                unsigned int prefixlength,
                const Definedunsignedint *maxdepth,
                Seqpos numoflargelcpvalues,
@@ -119,12 +120,8 @@ int outprjfile(const GtStr *indexname,
   if (!haserr)
   {
     showprjinfo(prjfp,
-                filenametab,
                 readmode,
-                filelengthtab,
-                totallength,
-                numofsequences,
-                specialcharinfo,
+                encseq,
                 prefixlength,
                 maxdepth,
                 numoflargelcpvalues,

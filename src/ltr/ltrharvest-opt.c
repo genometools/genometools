@@ -33,7 +33,7 @@
  The following function shows all options that are set by default or from
  the user on stdout.
 */
-void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
+void showuserdefinedoptionsandvalues(const LTRharvestoptions *lo)
 {
   printf("# user defined options and values:\n");
   if (lo->verbosemode)
@@ -115,13 +115,14 @@ void printargsline(const char **argv, int argc)
 }
 
 /* test the motif and encode the characters by using alpha */
-int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, GtError *err)
+int testmotifandencodemotif (Motif *motif, const Encodedsequence *encseq,
+                             GtError *err)
 {
   const Uchar *symbolmap;
   Uchar c_tab[UCHAR_MAX+1];
   unsigned int i;
 
-  symbolmap = getsymbolmapAlphabet(alpha);
+  symbolmap = getencseqAlphabetsymbolmap(encseq);
   if ( symbolmap[(unsigned int)motif->firstleft] == (Uchar) UNDEFCHAR)
   {
     gt_error_set(err,"Illegal nucleotide character %c "
@@ -569,5 +570,5 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
       rval = OPTIONPARSER_ERROR;
     }
   }
-  return (rval == OPTIONPARSER_OK) ? 0: - 1;
+  return (rval == OPTIONPARSER_OK) ? 0: -1;
 }

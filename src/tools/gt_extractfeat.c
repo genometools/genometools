@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,6 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "extended/extract_feat_stream.h"
 #include "extended/genome_node.h"
@@ -30,8 +31,10 @@ typedef struct {
        translate,
        verbose;
   GtStr *type,
-         *seqfile,
-         *regionmapping;
+        *seqfile,
+        *regionmapping;
+  GtOutputFileInfo *ofi;
+  GtGenFile *outfp;
 } GtExtractFeatArguments;
 
 static void* gt_extractfeat_arguments_new(void)
@@ -40,6 +43,7 @@ static void* gt_extractfeat_arguments_new(void)
   arguments->type = gt_str_new();
   arguments->seqfile = gt_str_new();
   arguments->regionmapping = gt_str_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -47,6 +51,8 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
 {
   GtExtractFeatArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_genfile_close(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->regionmapping);
   gt_str_delete(arguments->seqfile);
   gt_str_delete(arguments->type);
@@ -89,6 +95,9 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_max_args(op, 1, 1);
 
@@ -127,11 +136,12 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                                      regionmapping,
                                                     gt_str_get(arguments->type),
                                                      arguments->join,
-                                                     arguments->translate);
+                                                     arguments->translate,
+                                                     arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = gt_node_stream_next(extract_feat_stream, &gn,
-                                               err)) && gn) {
+    while (!(had_err = gt_node_stream_next(extract_feat_stream, &gn, err)) &&
+           gn) {
       gt_genome_node_delete(gn);
     }
   }
@@ -146,8 +156,8 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
 GtTool* gt_extractfeat(void)
 {
   return gt_tool_new(gt_extractfeat_arguments_new,
-                  gt_extractfeat_arguments_delete,
-                  gt_extractfeat_option_parser_new,
-                  NULL,
-                  gt_extractfeat_runner);
+                     gt_extractfeat_arguments_delete,
+                     gt_extractfeat_option_parser_new,
+                     NULL,
+                     gt_extractfeat_runner);
 }

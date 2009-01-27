@@ -53,11 +53,11 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
         = sequenceoffsettable[idx-1] + tmplength + (Seqpos) 1;
     }
     tmpspecialcharacters
-      += (uint64_t) suffixarraytable[idx].specialcharinfo.specialcharacters;
+      += (uint64_t) getencseqspecialcharacters(suffixarraytable[idx].encseq);
     tmpspecialranges
-      += (uint64_t) suffixarraytable[idx].specialcharinfo.specialranges;
+      += (uint64_t) getencseqspecialranges(suffixarraytable[idx].encseq);
     tmprealspecialranges
-      += (uint64_t) suffixarraytable[idx].specialcharinfo.realspecialranges;
+      += (uint64_t) getencseqrealspecialranges(suffixarraytable[idx].encseq);
     if (idx > 0)
     {
       lastofprevious
@@ -100,8 +100,8 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
   specialcharinfo->specialranges = (Seqpos) tmpspecialranges;
   specialcharinfo->realspecialranges = (Seqpos) tmprealspecialranges;
   specialcharinfo->lengthofspecialprefix
-    = suffixarraytable[0].specialcharinfo.lengthofspecialprefix;
+    = getencseqlengthofspecialprefix(suffixarraytable[0].encseq);
   specialcharinfo->lengthofspecialsuffix
-    = suffixarraytable[idx-1].specialcharinfo.lengthofspecialsuffix;
+    = getencseqlengthofspecialsuffix(suffixarraytable[idx-1].encseq);
   return sequenceoffsettable;
 }

@@ -35,64 +35,70 @@
 #include "stamp.h"
 #include "opensfxfile.h"
 
-#define DBFILEKEY "dbfile="
-
-#define INITBufferedfile(INDEXNAME,STREAM,SUFFIX)\
+#define INITBufferedfile(INDEXNAME,STREAM,TYPE,SUFFIX)\
         (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",err);\
         if ((STREAM)->fp == NULL)\
         {\
           haserr = true;\
+          (STREAM)->bufferedfilespace = NULL;\
         } else\
         {\
           (STREAM)->nextread = 0;\
           (STREAM)->nextfree = 0;\
+          ALLOCASSIGNSPACE((STREAM)->bufferedfilespace,NULL,TYPE,\
+                           FILEBUFFERSIZE);\
         }
 
-static int scanprjfileviafileptr(Suffixarray *suffixarray,
-                                 Seqpos *totallength,
-                                 const GtStr *indexname,
-                                 Verboseinfo *verboseinfo,
-                                 FILE *fpin,
-                                 GtError *err)
+static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
+                                         const GtStr *indexname,
+                                         Verboseinfo *verboseinfo,
+                                         FILE *fpin,
+                                         GtError *err)
 {
   uint32_t integersize, littleendian, readmodeint;
   unsigned int linenum;
-  unsigned long numofsequences, numofquerysequences,
-                numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
+  unsigned long currentlinelength;
+
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   GtArray *riktab;
   GtStr *currentline;
+  /* the following five variables are local as the parsed values are
+     not required: they are determined by reading the encodedsequence */
+  Seqpos totallength;
+  Specialcharinfo specialcharinfo;
+  unsigned long numofsequences,
+                numofdbsequences,
+                numofquerysequences;
 
   gt_error_check(err);
   riktab = gt_array_new(sizeofReadintkeys());
-  SETREADINTKEYS("totallength",totallength,NULL);
+  SETREADINTKEYS("totallength",&totallength,NULL);
   SETREADINTKEYS("specialcharacters",
-                 &suffixarray->specialcharinfo.specialcharacters,NULL);
+                 &specialcharinfo.specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
-                 &suffixarray->specialcharinfo.specialranges,NULL);
+                 &specialcharinfo.specialranges,NULL);
   SETREADINTKEYS("realspecialranges",
-                 &suffixarray->specialcharinfo.realspecialranges,NULL);
+                 &specialcharinfo.realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
-                 &suffixarray->specialcharinfo.lengthofspecialprefix,NULL);
+                 &specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
-                 &suffixarray->specialcharinfo.lengthofspecialsuffix,NULL);
+                 &specialcharinfo.lengthofspecialsuffix,NULL);
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
-  SETREADINTKEYS("numofdbsequences",&suffixarray->numofdbsequences,NULL);
+  SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
   setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
   SETREADINTKEYS("longest",&suffixarray->longest.valueseqpos,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
-  SETREADINTKEYS("largelcpvalues",&suffixarray->numoflargelcpvalues.valueseqpos,
+  SETREADINTKEYS("largelcpvalues",
+                 &suffixarray->numoflargelcpvalues.valueseqpos,
                  &suffixarray->numoflargelcpvalues.defined);
   SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.valueseqpos,
                  &maxbranchdepth.defined);
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
   SETREADINTKEYS("readmode",&readmodeint,NULL);
-  suffixarray->filenametab = gt_str_array_new();
-  suffixarray->filelengthtab = NULL;
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
   {
@@ -100,61 +106,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     if (dbfilelen <= (size_t) currentlinelength &&
        memcmp(DBFILEKEY,gt_str_get(currentline),dbfilelen) == 0)
     {
-      char *tmpfilename;
-      int64_t readint1, readint2;
-
-      if (numoffiles >= numofallocatedfiles)
-      {
-        numofallocatedfiles += 2;
-        ALLOCASSIGNSPACE(suffixarray->filelengthtab,suffixarray->filelengthtab,
-                         Filelengthvalues,numofallocatedfiles);
-      }
-      gt_assert(suffixarray->filelengthtab != NULL);
-      ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
-      if (sscanf((const char *) gt_str_get(currentline),
-                  "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
-                   tmpfilename,
-                   SCANint64_tcast(&readint1),
-                   SCANint64_tcast(&readint2)) != 3)
-      {
-        gt_error_set(err,"cannot parse line %*.*s",
-                          (int) currentlinelength,
-                          (int) currentlinelength,
-                          (const char *) gt_str_get(currentline));
-        FREESPACE(tmpfilename);
-        FREESPACE(suffixarray->filelengthtab);
-        haserr = true;
-        break;
-      }
-      if (readint1 < (int64_t) 1 || readint2 < (int64_t) 1)
-      {
-        gt_error_set(err,"need positive integers in line %*.*s",
-                          (int) currentlinelength,
-                          (int) currentlinelength,
-                          (const char *) gt_str_get(currentline));
-        FREESPACE(tmpfilename);
-        FREESPACE(suffixarray->filelengthtab);
-        haserr = true;
-        break;
-      }
-      if (!haserr)
-      {
-        gt_str_array_add_cstr(suffixarray->filenametab,tmpfilename);
-        FREESPACE(tmpfilename);
-        gt_assert(suffixarray->filelengthtab != NULL);
-        suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
-        suffixarray->filelengthtab[numoffiles].effectivelength
-                                               = (Seqpos) readint2;
-        showverbose(verboseinfo,
-                    "%s%s " Formatuint64_t " " Formatuint64_t,
-                    DBFILEKEY,
-                    gt_str_array_get(suffixarray->filenametab,numoffiles),
-                    PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                      length),
-                    PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                      effectivelength));
-        numoffiles++;
-      }
+      /* Nothing */
     } else
     {
       if (analyzeuintline(indexname,
@@ -229,27 +181,26 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 
 static void initsuffixarray(Suffixarray *suffixarray)
 {
-  suffixarray->filelengthtab = NULL;
-  suffixarray->filenametab = NULL;
   suffixarray->encseq = NULL;
   suffixarray->suftab = NULL;
   suffixarray->lcptab = NULL;
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
-  suffixarray->destab = NULL;
-  suffixarray->alpha = NULL;
-  suffixarray->encseq = NULL;
+  suffixarray->bcktab = NULL;
   suffixarray->bwttabstream.fp = NULL;
   suffixarray->suftabstream.fp = NULL;
   suffixarray->llvtabstream.fp = NULL;
   suffixarray->lcptabstream.fp = NULL;
-  suffixarray->destablength = 0;
-  suffixarray->bcktab = NULL;
+  suffixarray->suftabstream.bufferedfilespace = NULL;
+  suffixarray->lcptabstream.bufferedfilespace = NULL;
+  suffixarray->llvtabstream.bufferedfilespace = NULL;
+  suffixarray->bwttabstream.bufferedfilespace = NULL;
 }
 
-static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
-                        const GtStr *indexname,Verboseinfo *verboseinfo,
-                        GtError *err)
+static bool scanprjfileuintkeys(Suffixarray *suffixarray,
+                                const GtStr *indexname,
+                                Verboseinfo *verboseinfo,
+                                GtError *err)
 {
   bool haserr = false;
   FILE *fp;
@@ -260,35 +211,13 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   {
     haserr = true;
   }
-  if (!haserr && scanprjfileviafileptr(suffixarray,totallength,
-                                       indexname,verboseinfo,
-                                       fp,err) != 0)
+  if (!haserr && scanprjfileuintkeysviafileptr(suffixarray,
+                                               indexname,verboseinfo,
+                                               fp,err) != 0)
   {
     haserr = true;
   }
   gt_fa_xfclose(fp);
-  return haserr;
-}
-
-static bool scanal1file(Suffixarray *suffixarray,const GtStr *indexname,
-                        GtError *err)
-{
-  GtStr *tmpfilename;
-  bool haserr = false;
-
-  gt_error_check(err);
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
-  suffixarray->alpha = assigninputalphabet(false,
-                                           false,
-                                           tmpfilename,
-                                           NULL,
-                                           err);
-  if (suffixarray->alpha == NULL)
-  {
-    haserr = true;
-  }
-  gt_str_delete(tmpfilename);
   return haserr;
 }
 
@@ -302,24 +231,19 @@ void freesuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtab = NULL;
   gt_fa_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  gt_fa_xmunmap((void *) suffixarray->destab);
-  suffixarray->destab = NULL;
   gt_fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
+  FREESPACE(suffixarray->suftabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
+  FREESPACE(suffixarray->lcptabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->llvtabstream.fp);
   suffixarray->llvtabstream.fp = NULL;
+  FREESPACE(suffixarray->llvtabstream.bufferedfilespace);
   gt_fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
-  if (suffixarray->alpha != NULL)
-  {
-    freeAlphabet(&suffixarray->alpha);
-  }
+  FREESPACE(suffixarray->bwttabstream.bufferedfilespace);
   freeEncodedsequence(&suffixarray->encseq);
-  gt_str_array_delete(suffixarray->filenametab);
-  suffixarray->filenametab = NULL;
-  FREESPACE(suffixarray->filelengthtab);
   if (suffixarray->bcktab != NULL)
   {
     freebcktab(&suffixarray->bcktab);
@@ -328,50 +252,36 @@ void freesuffixarray(Suffixarray *suffixarray)
 
 static int inputsuffixarray(bool map,
                             Suffixarray *suffixarray,
-                            Seqpos *totallength,
                             unsigned int demand,
                             const GtStr *indexname,
                             Verboseinfo *verboseinfo,
                             GtError *err)
 {
   bool haserr = false;
+  Seqpos totallength = 0;
 
   gt_error_check(err);
   initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,totallength,indexname,verboseinfo,err);
+  suffixarray->encseq = mapencodedsequence(true,
+                                           indexname,
+                                           (demand & SARR_ESQTAB) ? true
+                                                                  : false,
+                                           (demand & SARR_DESTAB) ? true
+                                                                  : false,
+                                           (demand & SARR_SSPTAB) ? true
+                                                                  : false,
+                                           verboseinfo,
+                                           err);
+  if (suffixarray->encseq == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray->encseq);
+  }
   if (!haserr)
   {
-    haserr = scanal1file(suffixarray,indexname,err);
-  }
-  if (!haserr && (demand & SARR_ESQTAB))
-  {
-    suffixarray->encseq = mapencodedsequence(true,
-                                             indexname,
-                                             *totallength,
-                                             suffixarray->specialcharinfo.
-                                                          specialranges,
-                                             getmapsizeAlphabet(suffixarray->
-                                                                alpha),
-                                             verboseinfo,
-                                             err);
-    if (suffixarray->encseq == NULL)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr && (demand & SARR_DESTAB))
-  {
-    size_t numofbytes;
-
-    suffixarray->destab = genericmaponlytable(indexname,
-                                              DESTABSUFFIX,
-                                              &numofbytes,
-                                              err);
-    suffixarray->destablength = (unsigned long) numofbytes;
-    if (suffixarray->destab == NULL)
-    {
-      haserr = true;
-    }
+    haserr = scanprjfileuintkeys(suffixarray,indexname,verboseinfo,err);
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
@@ -379,7 +289,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->suftab = genericmaptable(indexname,
                                             SUFTABSUFFIX,
-                                            (unsigned long) (*totallength)+1,
+                                            (unsigned long) (totallength+1),
                                             sizeof (Seqpos),
                                             err);
       if (suffixarray->suftab == NULL)
@@ -388,7 +298,8 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->suftabstream,SUFTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->suftabstream,Seqpos,
+                       SUFTABSUFFIX);
     }
     if (!haserr && !suffixarray->longest.defined)
     {
@@ -402,7 +313,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->lcptab = genericmaptable(indexname,
                                             LCPTABSUFFIX,
-                                            (unsigned long) (*totallength)+1,
+                                            (unsigned long) (totallength+1),
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->lcptab == NULL)
@@ -411,7 +322,7 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->lcptabstream,Uchar,LCPTABSUFFIX);
       if (!haserr &&
           fseek(suffixarray->lcptabstream.fp,(long) sizeof (Uchar),SEEK_SET))
       {
@@ -441,7 +352,7 @@ static int inputsuffixarray(bool map,
         }
       } else
       {
-        INITBufferedfile(indexname,&suffixarray->llvtabstream,
+        INITBufferedfile(indexname,&suffixarray->llvtabstream,Largelcpvalue,
                          LARGELCPTABSUFFIX);
       }
     }
@@ -452,7 +363,7 @@ static int inputsuffixarray(bool map,
     {
       suffixarray->bwttab = genericmaptable(indexname,
                                             BWTTABSUFFIX,
-                                            (unsigned long) (*totallength)+1,
+                                            (unsigned long) (totallength+1),
                                             sizeof (Uchar),
                                             err);
       if (suffixarray->bwttab == NULL)
@@ -461,7 +372,7 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->bwttabstream,BWTTABSUFFIX);
+      INITBufferedfile(indexname,&suffixarray->bwttabstream,Uchar,BWTTABSUFFIX);
     }
   }
   if (!haserr && (demand & SARR_BCKTAB))
@@ -469,8 +380,9 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->bcktab = mapbcktab(indexname,
-                                      *totallength,
-                                      getnumofcharsAlphabet(suffixarray->alpha),
+                                      totallength,
+                                      getencseqAlphabetnumofchars(suffixarray->
+                                                                  encseq),
                                       suffixarray->prefixlength,
                                       err);
       if (suffixarray->bcktab == NULL)
@@ -491,7 +403,6 @@ static int inputsuffixarray(bool map,
 }
 
 int streamsuffixarray(Suffixarray *suffixarray,
-                      Seqpos *totallength,
                       unsigned int demand,
                       const GtStr *indexname,
                       Verboseinfo *verboseinfo,
@@ -500,7 +411,6 @@ int streamsuffixarray(Suffixarray *suffixarray,
   gt_error_check(err);
   return inputsuffixarray(false,
                           suffixarray,
-                          totallength,
                           demand,
                           indexname,
                           verboseinfo,
@@ -508,16 +418,15 @@ int streamsuffixarray(Suffixarray *suffixarray,
 }
 
 int mapsuffixarray(Suffixarray *suffixarray,
-                   Seqpos *totallength,
                    unsigned int demand,
                    const GtStr *indexname,
                    Verboseinfo *verboseinfo,
                    GtError *err)
 {
   gt_error_check(err);
+  /* printf("sizeof(Suffixarray)=%lu\n",sizeof(Suffixarray)); */
   return inputsuffixarray(true,
                           suffixarray,
-                          totallength,
                           demand,
                           indexname,
                           verboseinfo,

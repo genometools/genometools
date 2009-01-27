@@ -54,8 +54,6 @@ typedef struct
   Listtype *nodeposlist;
 };
 
-DECLAREARRAYSTRUCT(Seqpos);
-
  struct Dfsstate /* global information */
 {
   bool initialized;
@@ -348,7 +346,6 @@ static int processbranchedge(bool firstsucc,
 }
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      unsigned int alphabetsize,
                       const Encodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
@@ -363,7 +360,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize = alphabetsize;
+  state.alphabetsize = getencseqAlphabetnumofchars(encseq);
   state.searchlength = searchlength;
   state.processmaxpairs = processmaxpairs;
   state.processmaxpairsinfo = processmaxpairsinfo;
@@ -372,7 +369,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state.readmode = readmode;
 
   INITARRAY(&state.uniquechar,Seqpos);
-  ALLOCASSIGNSPACE(state.poslist,NULL,ArraySeqpos,alphabetsize);
+  ALLOCASSIGNSPACE(state.poslist,NULL,ArraySeqpos,state.alphabetsize);
   for (base = 0; base < state.alphabetsize; base++)
   {
     ptr = &state.poslist[base];
@@ -428,8 +425,6 @@ int callenummaxpairs(const GtStr *indexname,
   }
   if (!haserr &&
       enumeratemaxpairs(ssar,
-                        getnumofcharsAlphabet(
-                                 alphabetSequentialsuffixarrayreader(ssar)),
                         encseqSequentialsuffixarrayreader(ssar),
                         readmodeSequentialsuffixarrayreader(ssar),
                         userdefinedleastlength,

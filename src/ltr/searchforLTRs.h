@@ -19,11 +19,13 @@
 #define SEARCHFORLTRS_H
 
 #include "core/error.h"
-#include "match/sarr-def.h"
-
+#include "match/encseq-def.h"
+#include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
-int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
-                  const Seqpos *markpos, GtError *err);
+int searchforLTRs(LTRharvestoptions *lo,
+                  ArrayLTRboundaries *arrayLTRboundaries,
+                  const Encodedsequence *encseq,
+                  GtError *err);
 
 #endif

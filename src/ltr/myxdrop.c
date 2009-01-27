@@ -31,12 +31,12 @@
 /* CAUTION: fronts, that run over the matrix boundaries are not shown in
    the printed matrix.
  */
-int showmatrix ( ArrayMyfrontvalue * fronts,
-  int distance,
-  unsigned char * useq,
-  unsigned char * vseq,
-  int ulen,
-  int vlen)
+int showmatrix (ArrayMyfrontvalue * fronts,
+                int distance,
+                unsigned char *useq,
+                unsigned char *vseq,
+                int ulen,
+                int vlen)
 {
   int i, j, k, d = distance + 1, filled = 0;
   unsigned long l;
@@ -44,7 +44,7 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
 
   integermax = MAX (ulen, vlen), integermin = -integermax;
 
-  printf( "ACHTUNG: Fronten, die ueber die boundaries gehen,"
+  printf( ": Fronten, die ueber die boundaries gehen,"
                   " erscheinen nicht in Matrix.\n");
   printf("matrix:\n");
   printf("        ");

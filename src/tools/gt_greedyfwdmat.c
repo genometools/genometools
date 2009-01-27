@@ -24,15 +24,15 @@
 #include "match/defined-types.h"
 #include "match/optionargmode.h"
 #include "match/greedyfwdmat.h"
-
+#include "match/esa-map.h"
 #include "match/stamp.h"
-#include "match/fmi-fwduni.pr"
-#include "match/fmi-map.pr"
-#include "match/esa-map.pr"
-#include "match/esa-minunique.pr"
 #include "match/eis-voiditf.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_matchingstatistics.h"
+
+#include "match/fmi-fwduni.pr"
+#include "match/fmi-map.pr"
+#include "match/esa-minunique.pr"
 
 #define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
@@ -278,9 +278,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   void *packedindex = NULL;
   Verboseinfo *verboseinfo;
   bool haserr = false;
-  Alphabet *alphabet = NULL;
+  const Alphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
   Seqpos totallength;
+  bool mapfmindexfail = false;
 
   gt_error_check(err);
   switch (parsegfmsub(doms,&gfmsubcallinfo, argc, argv, err)) {
@@ -301,6 +302,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
                     verboseinfo,err) != 0)
     {
       haserr = true;
+      mapfmindexfail = true;
     } else
     {
       alphabet = fmindex.alphabet;
@@ -329,17 +331,18 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       }
     }
     if (mapsuffixarray(&suffixarray,
-                       &totallength,
                        mappedbits,
                        gfmsubcallinfo.indexname,
                        verboseinfo,
                        err) != 0)
     {
       haserr = true;
+      totallength = 0;
     } else
     {
-      alphabet = suffixarray.alpha;
+      alphabet = getencseqAlphabet(suffixarray.encseq);
       prefixlength = suffixarray.prefixlength;
+      totallength = getencseqtotallength(suffixarray.encseq);
     }
     if (!haserr)
     {
@@ -441,7 +444,10 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   }
   if (gfmsubcallinfo.indextype == Fmindextype)
   {
-    freefmindex(&fmindex);
+    if (!mapfmindexfail)
+    {
+      freefmindex(&fmindex);
+    }
   } else
   {
     if (gfmsubcallinfo.indextype == Packedindextype && packedindex != NULL)

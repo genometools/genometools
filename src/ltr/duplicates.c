@@ -18,6 +18,7 @@
 #include <stdbool.h>
 
 #include "repeattypes.h"
+#include "duplicates.h"
 
 /*
  The following function removes exact duplicates from the array of

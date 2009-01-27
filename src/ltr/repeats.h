@@ -19,17 +19,17 @@
 #define REPEATS_H
 
 #include "core/unused_api.h"
-#include "match/sarr-def.h"
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
-void showrepeats (RepeatInfo * repeatinfo,
+void showrepeats (RepeatInfo *repeatinfo,
                   unsigned long seedminlength);
 
-int simpleexactselfmatchstore(LTRharvestoptions *lo, Seqpos len,
-                              Seqpos pos1, Seqpos pos2);
+int simpleexactselfmatchstore(void *info,Seqpos len,Seqpos pos1, Seqpos pos2,
+                              GtError *err);
 
-int subsimpleexactselfmatchstore(void *info,unsigned long len,
+int subsimpleexactselfmatchstore(void *info,
+                                 unsigned long len,
                                  Seqpos dbstart,
                                  GT_UNUSED uint64_t queryoffset,
                                  unsigned long querystart,

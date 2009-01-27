@@ -86,7 +86,7 @@ fi
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/TTT-small.fna
 if test ! "X${GTTESTDATA}" = "X"
 then
-  AT=${GTTESTDATA}/Iowa/at1MB
+  AT=../testdata/at1MB
   U8=../testdata/U89959_genomic.fas
   ATK=${GTTESTDATA}/Iowa/at100K1
   GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna

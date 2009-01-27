@@ -113,7 +113,6 @@ static void testmulticharactercompare(const Encodedsequence *encseq,
 static int testfullscan(const GtStrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
-                        const Uchar *symbolmap,
                         GtError *err)
 {
   Seqpos pos, totallength;
@@ -130,11 +129,11 @@ static int testfullscan(const GtStrArray *filenametab,
   if (filenametab != NULL)
   {
     fb = gt_fastabuffer_new(filenametab,
-                         symbolmap,
-                         false,
-                         NULL,
-                         NULL,
-                         NULL);
+                            getencseqAlphabetsymbolmap(encseq),
+                            false,
+                            NULL,
+                            NULL,
+                            NULL);
   }
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,0);
@@ -208,7 +207,6 @@ static int testfullscan(const GtStrArray *filenametab,
 int testencodedsequence(const GtStrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
-                        const Uchar *symbolmap,
                         unsigned long scantrials,
                         unsigned long multicharcmptrials,
                         GtError *err)
@@ -226,7 +224,7 @@ int testencodedsequence(const GtStrArray *filenametab,
   {
     testscanatpos(encseq,readmode,scantrials);
   }
-  return testfullscan(filenametab,encseq,readmode,symbolmap,err);
+  return testfullscan(filenametab,encseq,readmode,err);
 }
 
 static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,

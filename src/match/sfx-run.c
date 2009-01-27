@@ -37,6 +37,7 @@
 #include "sfx-input.h"
 #include "sfx-run.h"
 #include "opensfxfile.h"
+#include "stamp.h"
 
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
@@ -70,7 +71,6 @@ typedef struct
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int prefixlength,
-                           unsigned int numofchars,
                            const Encodedsequence *encseq,
                            const Suffixeratoroptions *so,
                            GtError *err)
@@ -88,7 +88,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
     outfileinfo->outlcpinfo
       = newlcpoutinfo(so->outlcptab ? so->str_indexname : NULL,
                       prefixlength,
-                      numofchars,
+                      getencseqAlphabetnumofchars(encseq),
                       getencseqtotallength(encseq),err);
     if (outfileinfo->outlcpinfo == NULL)
     {
@@ -185,12 +185,8 @@ static int suftab2file(Outfileinfo *outfileinfo,
 
 static int suffixeratorwithoutput(
                  Outfileinfo *outfileinfo,
-                 Seqpos specialcharacters,
-                 Seqpos realspecialranges,
                  const Encodedsequence *encseq,
                  Readmode readmode,
-                 unsigned int numofchars,
-                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  const Sfxstrategy *sfxstrategy,
@@ -203,12 +199,8 @@ static int suffixeratorwithoutput(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
-  sfi = newSfxiterator(specialcharacters,
-                       realspecialranges,
-                       encseq,
+  sfi = newSfxiterator(encseq,
                        readmode,
-                       numofchars,
-                       characters,
                        prefixlength,
                        numofparts,
                        outfileinfo->outlcpinfo,
@@ -255,11 +247,11 @@ static void showcharacterdistribution(
                    const unsigned long *characterdistribution,
                    Verboseinfo *verboseinfo)
 {
-  unsigned int mapsize, idx;
+  unsigned int numofchars, idx;
 
-  mapsize = getmapsizeAlphabet(alpha);
+  numofchars = getnumofcharsAlphabet(alpha);
   gt_assert(characterdistribution != NULL);
-  for (idx=0; idx<mapsize-1; idx++)
+  for (idx=0; idx<numofchars; idx++)
   {
     showverbose(verboseinfo,"occurrences(%c)=%lu",
                 (int) getprettysymbol(alpha,idx),
@@ -268,19 +260,18 @@ static void showcharacterdistribution(
 }
 
 static void showsequencefeatures(Verboseinfo *verboseinfo,
-                                 const Specialcharinfo *specialcharinfo,
-                                 const Alphabet *alpha,
-                                 const unsigned long
-                                   *characterdistribution)
+                                 const Encodedsequence *encseq,
+                                 const unsigned long *characterdistribution)
 {
   showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
-              PRINTSeqposcast(specialcharinfo->specialcharacters));
+              PRINTSeqposcast(getencseqspecialcharacters(encseq)));
   showverbose(verboseinfo,"specialranges=" FormatSeqpos,
-              PRINTSeqposcast(specialcharinfo->specialranges));
+              PRINTSeqposcast(getencseqspecialranges(encseq)));
   showverbose(verboseinfo,"realspecialranges=" FormatSeqpos,
-              PRINTSeqposcast(specialcharinfo->realspecialranges));
+              PRINTSeqposcast(getencseqrealspecialranges(encseq)));
   if (characterdistribution != NULL)
   {
+    const Alphabet *alpha = getencseqAlphabet(encseq);
     showcharacterdistribution(alpha,characterdistribution,verboseinfo);
   }
 }
@@ -377,11 +368,8 @@ static int run_packedindexconstruction(Verboseinfo *verboseinfo,
                        so->numofparts,
                        sfxstrategy,
                        sfxseqinfo->encseq,
-                       &sfxseqinfo->specialcharinfo,
-                       sfxseqinfo->numofsequences,
                        mtime,
                        getencseqtotallength(sfxseqinfo->encseq) + 1,
-                       sfxseqinfo->alpha,
                        sfxseqinfo->characterdistribution,
                        verboseinfo, err);
   if (si == NULL)
@@ -438,6 +426,7 @@ static int runsuffixerator(bool doesa,
   {
     if (fromsarr2Sfxseqinfo(&sfxseqinfo,
                             so->str_inputindex,
+                            so->readmode,
                             verboseinfo,
                             err) != 0)
     {
@@ -461,6 +450,34 @@ static int runsuffixerator(bool doesa,
     {
       haserr = true;
     }
+    if (!haserr && so->outssptab)
+    {
+      FILE *outfp;
+
+      outfp = opensfxfile(so->str_indexname,SSPTABSUFFIX,"wb",err);
+      if (outfp == NULL)
+      {
+        haserr = true;
+      } else
+      {
+        if (fwrite(sfxseqinfo.sequenceseppos.spaceSeqpos,
+                   sizeof (*sfxseqinfo.sequenceseppos.spaceSeqpos),
+                   (size_t) sfxseqinfo.sequenceseppos.nextfreeSeqpos,
+                   outfp)
+                   != (size_t) sfxseqinfo.sequenceseppos.nextfreeSeqpos)
+        {
+          gt_error_set(err,"cannot write %lu items of size %u: "
+                           "errormsg=\"%s\"",
+                            sfxseqinfo.sequenceseppos.nextfreeSeqpos,
+                            (unsigned int) sizeof (*sfxseqinfo.sequenceseppos.
+                                                   spaceSeqpos),
+                            strerror(errno));
+          haserr = true;
+        }
+      }
+      FREESPACE(sfxseqinfo.sequenceseppos.spaceSeqpos);
+      gt_fa_fclose(outfp);
+    }
   }
   if (!haserr)
   {
@@ -469,15 +486,14 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     showsequencefeatures(verboseinfo,
-                         &sfxseqinfo.specialcharinfo,
-                         sfxseqinfo.alpha,
+                         sfxseqinfo.encseq,
                          sfxseqinfo.characterdistribution);
     if (sfxseqinfo.characterdistribution != NULL)
     {
       if (so->readmode == Complementmode ||
           so->readmode == Reversecomplementmode)
       {
-        if (!isdnaalphabet(sfxseqinfo.alpha))
+        if (!isdnaalphabet(getencseqAlphabet(sfxseqinfo.encseq)))
         {
           gt_error_set(err,"option -%s only can be used for DNA alphabets",
                             so->readmode == Complementmode ? "cpl" : "rcl");
@@ -494,7 +510,7 @@ static int runsuffixerator(bool doesa,
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
         !doesa)
     {
-      unsigned int numofchars = getnumofcharsAlphabet(sfxseqinfo.alpha);
+      unsigned int numofchars = getencseqAlphabetnumofchars(sfxseqinfo.encseq);
 
       if (detpfxlenandmaxdepth(&prefixlength,
                                &sfxstrategy.maxdepth,
@@ -525,7 +541,6 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     if (initoutfileinfo(&outfileinfo,prefixlength,
-                        getnumofcharsAlphabet(sfxseqinfo.alpha),
                         sfxseqinfo.encseq,so,err) != 0)
     {
       haserr = true;
@@ -539,12 +554,8 @@ static int runsuffixerator(bool doesa,
       {
         if (suffixeratorwithoutput(
                            &outfileinfo,
-                           sfxseqinfo.specialcharinfo.specialcharacters,
-                           sfxseqinfo.specialcharinfo.realspecialranges,
                            sfxseqinfo.encseq,
                            so->readmode,
-                           getnumofcharsAlphabet(sfxseqinfo.alpha),
-                           getcharactersAlphabet(sfxseqinfo.alpha),
                            prefixlength,
                            so->numofparts,
                            &sfxstrategy,
@@ -586,15 +597,9 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-    gt_assert(sfxseqinfo.numofsequences > 0);
-    gt_assert(sfxseqinfo.filelengthtab != NULL);
     if (outprjfile(so->str_indexname,
-                   sfxseqinfo.filenametab,
                    sfxseqinfo.readmode,
-                   sfxseqinfo.filelengthtab,
-                   totallength,
-                   sfxseqinfo.numofsequences,
-                   &sfxseqinfo.specialcharinfo,
+                   sfxseqinfo.encseq,
                    prefixlength,
                    &sfxstrategy.maxdepth,
                    numoflargelcpvalues,
@@ -605,18 +610,15 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
+  if (gt_str_length(so->str_inputindex) == 0 && sfxseqinfo.encseq != NULL)
+  {
+    removefilenametabref(sfxseqinfo.encseq);
+  }
   if (outfileinfo.outlcpinfo != NULL)
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
   }
-  /*
-  if (haserr && sfxseqinfo.characterdistribution != NULL)
-  {
-    FREESPACE(sfxseqinfo.characterdistribution);
-  }
-  */
-  freeSfxseqinfo(&sfxseqinfo,
-                 (gt_str_length(so->str_inputindex) > 0) ? true : false);
+  freeSfxseqinfo(&sfxseqinfo);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,NULL);

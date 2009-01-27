@@ -18,7 +18,15 @@
 #ifndef OUTPUTGFF3_H
 #define OUTPUTGFF3_H
 
-void printgff3format(LTRharvestoptions*, Sequentialsuffixarrayreader*,
-                     const Seqpos *markpos);
+#include "core/error.h"
+#include "match/encseq-def.h"
+#include "ltrharvest-opt.h"
+#include "repeattypes.h"
+
+int printgff3format(const LTRharvestoptions *lo,
+                    const LTRboundaries **bdptrtab,
+                    unsigned long numofboundaries,
+                    const Encodedsequence *encseq,
+                    GtError *err);
 
 #endif

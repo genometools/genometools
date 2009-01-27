@@ -39,6 +39,7 @@ struct GtGraphicsCairo {
   const GtGraphics parent_instance;
   cairo_t *cr;
   cairo_surface_t *surf;
+  GtColor bg_color;
   GtStr *outbuf;
   GtGraphicsOutType type;
   double margin_x, margin_y, height, width;
@@ -65,7 +66,7 @@ static inline double rnd_to_nhalf(double num)
 }
 
 void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
-                               unsigned int width, unsigned int height)
+                                  unsigned int width, unsigned int height)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   g->outbuf = gt_str_new();
@@ -103,11 +104,12 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
   gt_assert(g->surf && cairo_surface_status(g->surf) == CAIRO_STATUS_SUCCESS);
   g->cr = cairo_create(g->surf);
   gt_assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
+  /* set background default to transparent */
+  g->bg_color.red = g->bg_color.green  = 0.0;
+  g->bg_color.blue = g->bg_color.alpha = 0.0;
   g->width = width;
   g->height = height;
   g->margin_x = g->margin_y = 20;
-  cairo_set_source_rgba(g->cr, 1, 1, 1, 1);
-  cairo_paint(g->cr);
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
   cairo_select_font_face(g->cr, "sans", CAIRO_FONT_SLANT_NORMAL,
@@ -115,8 +117,27 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
   g->type = type;
 }
 
+int gt_graphics_cairo_set_background_color(GtGraphics *gg, GtColor color)
+{
+  GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
+  gt_assert(g);
+  if (g->type != GT_GRAPHICS_PNG)
+  {
+    /* blending with a background is only supported with image output type */
+    return -1;
+  }
+  else
+  {
+    g->bg_color.red = color.red;
+    g->bg_color.green = color.green;
+    g->bg_color.blue = color.blue;
+    g->bg_color.alpha = color.alpha;
+    return 0;
+  }
+}
+
 void gt_graphics_cairo_set_font(GtGraphics *gg, const char *family,
-                             FontSlant slant, FontWeight weight)
+                                FontSlant slant, FontWeight weight)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g && family);
@@ -565,6 +586,8 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
                                 GtError *err)
 {
   const GtGraphicsCairo *g = (const GtGraphicsCairo*) gg;
+  cairo_surface_t *bgsurf = NULL;
+  cairo_t *bgc = NULL;
   cairo_status_t rval;
   gt_error_check(err);
   GtGenFile *outfile;
@@ -575,15 +598,28 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
   switch (g->type)
   {
     case GT_GRAPHICS_PNG:
-      rval = cairo_surface_write_to_png(g->surf, filename);
+      /* blend rendered image with background color */
+      bgsurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, g->width,
+                                          g->height);
+      bgc = cairo_create(bgsurf);
+      cairo_set_source_rgba(bgc, g->bg_color.red, g->bg_color.green,
+                                 g->bg_color.blue, g->bg_color.alpha);
+      cairo_paint(bgc);
+      cairo_set_source_surface(bgc, g->surf, 0, 0);
+      cairo_paint(bgc);
+      rval = cairo_surface_write_to_png(bgsurf, filename);
       gt_assert(rval == CAIRO_STATUS_SUCCESS ||
                 rval == CAIRO_STATUS_WRITE_ERROR);
       if (rval == CAIRO_STATUS_WRITE_ERROR)
       {
+        cairo_destroy(bgc);
+        cairo_surface_destroy(bgsurf);
         gt_error_set(err, "an I/O error occurred while attempting "
                           "to write image file \"%s\"", filename);
         return -1;
       }
+      cairo_destroy(bgc);
+      cairo_surface_destroy(bgsurf);
       break;
     default:
       cairo_show_page(g->cr);
@@ -637,6 +673,7 @@ const GtGraphicsClass* gt_graphics_cairo_class(void)
                                gt_graphics_cairo_draw_colored_text,
                                gt_graphics_cairo_get_text_height,
                                gt_graphics_cairo_get_text_width,
+                               gt_graphics_cairo_set_background_color,
                                gt_graphics_cairo_set_font,
                                gt_graphics_cairo_get_image_width,
                                gt_graphics_cairo_get_image_height,

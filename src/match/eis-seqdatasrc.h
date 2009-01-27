@@ -30,8 +30,7 @@ typedef void *SeqDataSrc;
  * @param len number of elements (objects) to read
  * @return number of elements read (less then len on end-of-file etc.)
  */
-typedef size_t (*seqDataReadFunc)(SeqDataSrc src, void *dest, size_t len,
-                                  GtError *err);
+typedef size_t (*seqDataReadFunc)(SeqDataSrc src, void *dest, size_t len);
 
 struct seqDataReader
 {
@@ -48,9 +47,9 @@ SDRIsValid(SeqDataReader sr)
 }
 
 static inline size_t
-SDRRead(SeqDataReader sr, void *dest, size_t len, GtError *err)
+SDRRead(SeqDataReader sr, void *dest, size_t len)
 {
-  return sr.readData(sr.src, dest, len, err);
+  return sr.readData(sr.src, dest, len);
 }
 
 /* while the above describes a data source, this is a corresponding sink */

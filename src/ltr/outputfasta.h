@@ -18,12 +18,16 @@
 #ifndef OUTPUTFASTA_H
 #define OUTPUTFASTA_H
 
+#include <stdbool.h>
+#include "core/error.h"
+#include "ltrharvest-opt.h"
+
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-                       Seqpos *markpos,
-                       bool innerregion,
-                       unsigned int linewidth,
-                       Sequentialsuffixarrayreader *ssar,
-                       bool showseqnum,
-                       GtError *err);
+                                 const LTRboundaries **bdptrtab,
+                                 unsigned long numofboundaries,
+                                 bool innerregion,
+                                 unsigned int linewidth,
+                                 bool showseqnum,
+                                 GtError *err);
 
 #endif

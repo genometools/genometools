@@ -21,8 +21,8 @@
 #include <stdbool.h>
 
 #include "core/arraydef.h"
-#include "match/esa-seqread.h"
-#include "match/sarr-def.h"
+#include "match/seqpos-def.h"
+#include "match/encseq-def.h"
 
 /* The datatype Repeat stores information about the maximal repeats (seeds).*/
 typedef struct
@@ -44,9 +44,7 @@ typedef struct
   unsigned long lmax;        /* maximum allowed length of a LTR */
   unsigned long dmin;        /* minimum distance between LTRs */
   unsigned long dmax;        /* maximum distance between LTRs */
-  Sequentialsuffixarrayreader *ssarptr;
-/* pointer on suffixarray, is needed in function simpleexactselfmatchstore,
-   repeats.c */
+  const Encodedsequence *encseq;
 } RepeatInfo;
 
 /* The datatype SubRepeatInfo stores information about the maximal repeats */
@@ -65,13 +63,12 @@ typedef struct
 /* LTR element. */
 typedef struct
 {
-  unsigned long contignumber; /* number of sequence in multiseq of
-                                 virtualtree */
+  unsigned long contignumber; /* ordinal number of sequence in encseq */
   Seqpos leftLTR_5,    /* 5' boundary of left LTR */
          leftLTR_3,    /* 3' boundary of left LTR */
          rightLTR_5,   /* 5' boundary of right LTR */
-         rightLTR_3;   /* 3' boundary of right LTR */
-  Seqpos lenleftTSD,
+         rightLTR_3,   /* 3' boundary of right LTR */
+         lenleftTSD,
          lenrightTSD;
   bool tsd,            /* If true, then TSDs exist. */
        motif_near_tsd, /* If true, then motif near the TSD exists. */
@@ -98,4 +95,5 @@ typedef struct
   unsigned int allowedmismatches; /* number of allowed mismatches in the four */
                                   /*character motif */
 } Motif;
+
 #endif

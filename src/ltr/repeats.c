@@ -20,17 +20,13 @@
 #include "core/error.h"
 #include "core/log.h"
 #include "core/unused_api.h"
-#include "match/sarr-def.h"
 #include "match/encseq-def.h"
-#include "match/intcode-def.h"
+
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
+#include "repeats.h"
 
-#include "match/pos2seqnum.pr"
-
-void showrepeats (
-  RepeatInfo * repeatinfo,
-  unsigned long seedminlength)
+void showrepeats (RepeatInfo *repeatinfo,unsigned long seedminlength)
 {
   ArrayRepeat *repeats = &repeatinfo->repeats;
   Repeat *reptab = repeats->spaceRepeat;
@@ -58,28 +54,20 @@ void showrepeats (
   printf ("\n");
 }
 
-int simpleexactselfmatchstore (
-  LTRharvestoptions *info,
-  Seqpos len,
-  Seqpos pos1,
-  Seqpos pos2,
-  GtError *err)
+int simpleexactselfmatchstore (void *info,
+                               Seqpos len,
+                               Seqpos pos1,
+                               Seqpos pos2,
+                               GT_UNUSED GtError *err)
 {
-  Seqpos tmp,
-         totallength;
-  const Encodedsequence *encseq =
-          encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
-  unsigned long numofdbsequences =
-       numofdbsequencesSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
-  Seqpos *markpos = info->markpos;
-  unsigned long i,
-                contignumber = 0,
+  Seqpos tmp;
+  unsigned long contignumber = 0,
                 seqnum1,
                 seqnum2;
   bool samecontig = false;
+  RepeatInfo *repeatinfo = (RepeatInfo *) info;
 
   gt_error_check(err);
-
   if (pos1 > pos2)
   {
     tmp = pos1;
@@ -88,56 +76,25 @@ int simpleexactselfmatchstore (
   }
 
   tmp = (pos2 - pos1);
-  if ( numofdbsequences < 2UL )
+  seqnum1 = getencseqfrompos2seqnum(repeatinfo->encseq,pos1);
+  seqnum2 = getencseqfrompos2seqnum(repeatinfo->encseq,pos2);
+  if (seqnum1 == seqnum2)
   {
+    gt_log_log("accepted:\n");
+    gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+    gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
     samecontig = true;
-    contignumber = (unsigned long)0;
-  }
-  /* at least two db sequences */
-  else
-  {
-    if (markpos == NULL)
-    {
-      return -1;
-    }
-    totallength = getencseqtotallength(encseq);
-    for ( i = 0; i < numofdbsequences - 1; i++)
-    {
-      seqnum1 = getrecordnumSeqpos(markpos, numofdbsequences,
-                        totallength, pos1, err);
-      if ( seqnum1 == numofdbsequences)
-      {
-        return -1;
-      }
-
-      seqnum2 = getrecordnumSeqpos(markpos, numofdbsequences,
-                        totallength, pos2, err);
-      if ( seqnum2 == numofdbsequences)
-      {
-        return -1;
-      }
-
-      if ( seqnum1 == seqnum2 )
-      {
-        gt_log_log("accepted:\n");
-        gt_log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-        gt_log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-        gt_log_log("i: %lu\n", i);
-        samecontig = true;
-        contignumber = seqnum1;
-        break;
-      }
-    }
+    contignumber = seqnum1;
   }
 
   /*test maximal length of candidate pair and distance constraints*/
-  if ( samecontig && (len <= (Seqpos) info->repeatinfo.lmax) &&
-      ( (Seqpos) info->repeatinfo.dmin <= tmp) &&
-        (tmp <= (Seqpos) info->repeatinfo.dmax) )
+  if ( samecontig && (len <= (Seqpos) repeatinfo->lmax) &&
+    ( (Seqpos) repeatinfo->dmin <= tmp) &&
+        (tmp <= (Seqpos) repeatinfo->dmax) )
   {
     Repeat *nextfreerepeatptr;
 
-    GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats,
+    GETNEXTFREEINARRAY(nextfreerepeatptr, &repeatinfo->repeats,
                        Repeat, 10);
     gt_log_log("maximal repeat pos1: " FormatSeqpos "\n",
                PRINTSeqposcast(pos1));
@@ -150,11 +107,12 @@ int simpleexactselfmatchstore (
     nextfreerepeatptr->len = len;
     nextfreerepeatptr->contignumber = contignumber;
   }
-
   return 0;
 }
 
-int subsimpleexactselfmatchstore(void *info, unsigned long len, Seqpos dbstart,
+int subsimpleexactselfmatchstore(void *info,
+                                 unsigned long len,
+                                 Seqpos dbstart,
                                  GT_UNUSED uint64_t queryoffset,
                                  unsigned long querystart,
                                  GT_UNUSED GtError *err)
@@ -165,8 +123,8 @@ int subsimpleexactselfmatchstore(void *info, unsigned long len, Seqpos dbstart,
   GETNEXTFREEINARRAY (nextfreerepeatptr, &sri->repeats, Repeat, 10);
   nextfreerepeatptr->pos1 = sri->offset1 + dbstart;
   nextfreerepeatptr->offset = sri->offset2 + (Seqpos)querystart -
-    (sri->offset1 + dbstart);
-  nextfreerepeatptr->len = (Seqpos)len;
+                              (sri->offset1 + dbstart);
+  nextfreerepeatptr->len = (Seqpos) len;
 
   return 0;
 }

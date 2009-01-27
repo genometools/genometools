@@ -149,7 +149,7 @@ deleteSfxInterfaceBase(SASeqSrc *baseClass)
 static size_t
 SfxIGenerate(void *iface, void *backlogState,
              move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
-             size_t len, SeqDataTranslator xltor, GtError *err);
+             size_t len, SeqDataTranslator xltor);
 
 extern sfxInterface *
 newSfxInterface(Readmode readmode,
@@ -157,11 +157,8 @@ newSfxInterface(Readmode readmode,
                 unsigned int numofparts,
                 const Sfxstrategy *sfxstrategy,
                 const Encodedsequence *encseq,
-                const Specialcharinfo *specialcharinfo,
-                unsigned long numofsequences,
                 Measuretime *mtime,
                 Seqpos length,
-                const Alphabet *alpha,
                 const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
                 GtError *err)
@@ -169,8 +166,8 @@ newSfxInterface(Readmode readmode,
   return newSfxInterfaceWithReaders(readmode, prefixlength,
                                     numofparts,
                                     sfxstrategy, 0, NULL, NULL, encseq,
-                                    specialcharinfo, numofsequences, mtime,
-                                    length, alpha, characterdistribution,
+                                    mtime,
+                                    length, characterdistribution,
                                     verbosity, err);
 }
 
@@ -179,7 +176,7 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
                         const unsigned long *characterdistribution)
 {
   struct seqStats *stats = NULL;
-  unsigned i, mapSize;
+  unsigned i, numofchars;
   Seqpos regularSymsSum = 0;
   stats = gt_malloc(offsetAlign(sizeof (*stats), sizeof (Seqpos))
                     + (UINT8_MAX + 1) * sizeof (Seqpos));
@@ -187,8 +184,8 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
   stats->symbolDistributionTable =
     (Seqpos *)((char *)stats + offsetAlign(sizeof (*stats), sizeof (Seqpos)));
   memset(stats->symbolDistributionTable, 0, sizeof (Seqpos) * (UINT8_MAX + 1));
-  mapSize = getmapsizeAlphabet(alpha);
-  for (i = 0; i < mapSize - 1; ++i)
+  numofchars = getnumofcharsAlphabet(alpha);
+  for (i = 0; i < numofchars; ++i)
     regularSymsSum +=
       (stats->symbolDistributionTable[i] = (Seqpos) characterdistribution[i]);
   stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
@@ -220,11 +217,8 @@ newSfxInterfaceWithReaders(Readmode readmode,
                            enum sfxDataRequest readerRequests[],
                            SeqDataReader readers[],
                            const Encodedsequence *encseq,
-                           const Specialcharinfo *specialcharinfo,
-                           unsigned long numofsequences,
                            Measuretime *mtime,
                            Seqpos length,
-                           const Alphabet *alpha,
                            const unsigned long *characterdistribution,
                            Verboseinfo *verbosity, GtError *err)
 {
@@ -241,17 +235,13 @@ newSfxInterfaceWithReaders(Readmode readmode,
   }
   sfxi->readmode = readmode;
   sfxi->mtime = mtime;
-  sfxi->alpha = alpha;
   sfxi->encseq = encseq;
+  sfxi->alpha = getencseqAlphabet(encseq);
   sfxi->stats = newSeqStatsFromCharDist(sfxi->alpha, length,
-                                         numofsequences,
+                                         getencseqnumofdbsequences(encseq),
                                          characterdistribution);
-  if (!(sfxi->sfi = newSfxiterator(specialcharinfo->specialcharacters,
-                                   specialcharinfo->realspecialranges,
-                                   encseq,
+  if (!(sfxi->sfi = newSfxiterator(encseq,
                                    readmode,
-                                   getnumofcharsAlphabet(alpha),
-                                   getcharactersAlphabet(alpha),
                                    prefixlength,
                                    numofparts,
                                    NULL,
@@ -359,7 +349,7 @@ SfxIGetOrigSeq(const void *state, Symbol *dest, Seqpos pos, size_t len)
 static size_t
 SfxIGenerate(void *iface, void *backlogState,
              move2BacklogFunc move2Backlog, void *output, Seqpos generateStart,
-             size_t len, SeqDataTranslator xltor, GT_UNUSED GtError *err)
+             size_t len, SeqDataTranslator xltor)
 {
   sfxInterface *sfxi = iface;
   size_t elemsLeft = len;

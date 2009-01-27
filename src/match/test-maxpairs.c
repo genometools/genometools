@@ -37,17 +37,68 @@ int testmaxpairs(GT_UNUSED const GtStr *indexname,
 #include "core/array.h"
 #include "core/arraydef.h"
 #include "core/unused_api.h"
-#include "sarr-def.h"
+#include "divmodmul.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "alphadef.h"
 #include "format64.h"
+#include "echoseq.h"
+#include "encseq-def.h"
 
-#include "esa-map.pr"
 #include "esa-selfmatch.pr"
 #include "arrcmp.pr"
-#include "pos2seqnum.pr"
-#include "echoseq.pr"
+
+static unsigned long getrecordnumulong(const unsigned long *recordseps,
+                                       unsigned long numofrecords,
+                                       unsigned long totalwidth,
+                                       unsigned long position,
+                                       GtError *err)
+{
+  unsigned long left, mid, right, len;
+
+  gt_assert(numofrecords > 0);
+  if (numofrecords == 1UL || position < recordseps[0])
+  {
+    return 0;
+  }
+  if (position > recordseps[numofrecords-2])
+  {
+    if (position < totalwidth)
+    {
+      return numofrecords - 1;
+    }
+    gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
+    return numofrecords; /* failure */
+  }
+  left = 0;
+  right = numofrecords - 2;
+  while (left<=right)
+  {
+    len = (unsigned long) (right-left);
+    mid = left + DIV2(len);
+#ifdef SKDEBUG
+    printf("left=%lu,right = %lu\n",left,right);
+    printf("mid=%lu\n",mid);
+#endif
+    if (recordseps[mid] < position)
+    {
+      if (position < recordseps[mid+1])
+      {
+        return mid + 1;
+      }
+      left = mid + 1;
+    } else
+    {
+      if (recordseps[mid-1] < position)
+      {
+        return mid;
+      }
+      right = mid-1;
+    }
+  }
+  gt_error_set(err,"getrecordnumulong: cannot find position %lu",position);
+  return numofrecords; /* failure */
+}
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
@@ -210,6 +261,36 @@ static int showSubstringmatch(void *a, GT_UNUSED void *info,
   return 0;
 }
 
+static unsigned long *sequence2markpositions(unsigned long *numofsequences,
+                                             const Uchar *seq,
+                                             unsigned long seqlen)
+{
+  unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
+
+  *numofsequences = 1UL;
+  for (i=0; i<seqlen; i++)
+  {
+    if (seq[i] == (Uchar) SEPARATOR)
+    {
+      (*numofsequences)++;
+    }
+  }
+  if (*numofsequences == 1UL)
+  {
+    return NULL;
+  }
+  allocatedmarkpos = (*numofsequences)-1;
+  ALLOCASSIGNSPACE(spacemarkpos,NULL,unsigned long,allocatedmarkpos);
+  for (i=0, nextfreemarkpos = 0; i<seqlen; i++)
+  {
+    if (seq[i] == (Uchar) SEPARATOR)
+    {
+      spacemarkpos[nextfreemarkpos++] = i;
+    }
+  }
+  return spacemarkpos;
+}
+
 int testmaxpairs(const GtStr *indexname,
                  unsigned long samples,
                  unsigned int minlength,
@@ -217,35 +298,43 @@ int testmaxpairs(const GtStr *indexname,
                  Verboseinfo *verboseinfo,
                  GtError *err)
 {
-  Suffixarray suffixarray;
-  Seqpos totallength, dblen, querylen;
-  Uchar *dbseq, *query;
+  Encodedsequence *encseq;
+  Seqpos totallength = 0, dblen, querylen;
+  Uchar *dbseq = NULL, *query = NULL;
   bool haserr = false;
   unsigned long s;
   GtArray *tabmaxquerymatches;
   Maxmatchselfinfo maxmatchselfinfo;
 
   showverbose(verboseinfo,"draw %lu samples",samples);
-  if (mapsuffixarray(&suffixarray,
-                     &totallength,
-                     SARR_ESQTAB,
-                     indexname,
-                     verboseinfo,
-                     err) != 0)
+  encseq = mapencodedsequence(true,
+                              indexname,
+                              true,
+                              false,
+                              false,
+                              verboseinfo,
+                              err);
+  if (encseq == NULL)
   {
     haserr = true;
-  }
-  srand48(42349421);
-  if (substringlength > totallength/2)
+  } else
   {
-    substringlength = totallength/2;
+    totallength = getencseqtotallength(encseq);
   }
-  ALLOCASSIGNSPACE(dbseq,NULL,Uchar,substringlength);
-  ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
+  if (!haserr)
+  {
+    srand48(42349421);
+    if (substringlength > totallength/2)
+    {
+      substringlength = totallength/2;
+    }
+    ALLOCASSIGNSPACE(dbseq,NULL,Uchar,substringlength);
+    ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
+  }
   for (s=0; s<samples && !haserr; s++)
   {
-    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
-    querylen = samplesubstring(query,suffixarray.encseq,substringlength);
+    dblen = samplesubstring(dbseq,encseq,substringlength);
+    querylen = samplesubstring(query,encseq,substringlength);
     showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
@@ -255,7 +344,7 @@ int testmaxpairs(const GtStr *indexname,
                                 query,
                                 (unsigned long) querylen,
                                 minlength,
-                                suffixarray.alpha,
+                                getencseqAlphabet(encseq),
                                 storemaxmatchquery,
                                 tabmaxquerymatches,
                                 verboseinfo,
@@ -278,7 +367,7 @@ int testmaxpairs(const GtStr *indexname,
                                query,
                                (unsigned long) querylen,
                                minlength,
-                               suffixarray.alpha,
+                               getencseqAlphabet(encseq),
                                storemaxmatchself,
                                &maxmatchselfinfo,
                                verboseinfo,
@@ -300,12 +389,12 @@ int testmaxpairs(const GtStr *indexname,
       (void) gt_array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,err);
       symbolstring2fasta(stdout,"dbseq",
-                         suffixarray.alpha,
+                         getencseqAlphabet(encseq),
                          dbseq,
                          (unsigned long) dblen,
                          width);
       symbolstring2fasta(stdout,"queryseq",
-                         suffixarray.alpha,
+                         getencseqAlphabet(encseq),
                          query,
                          (unsigned long) querylen,
                          width);
@@ -318,7 +407,7 @@ int testmaxpairs(const GtStr *indexname,
   }
   FREESPACE(dbseq);
   FREESPACE(query);
-  freesuffixarray(&suffixarray);
+  freeEncodedsequence(&encseq);
   return haserr ? -1 : 0;
 }
 

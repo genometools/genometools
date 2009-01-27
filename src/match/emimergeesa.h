@@ -50,7 +50,7 @@ typedef struct
   Suflcpbuffer buf;
   Mergertrierep trierep;
   Suffixarray *suffixarraytable;
-  Alphabet *alpha;
+  unsigned int numofchars;
 } Emissionmergedesa;
 
 #endif

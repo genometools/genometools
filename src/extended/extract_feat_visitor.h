@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,6 +29,7 @@ const GtNodeVisitorClass* gt_extract_feat_visitor_class(void);
 /* takes ownership of <rm> */
 GtNodeVisitor*            gt_extract_feat_visitor_new(GtRegionMapping *rm,
                                                    const char*, bool join,
-                                                   bool translate);
+                                                   bool translate,
+                                                   GtGenFile *outfp);
 
 #endif

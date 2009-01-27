@@ -39,7 +39,7 @@ struct Pckbuckettable
   unsigned int numofchars;
   unsigned long numofvalues, maxnumofvalues;
   unsigned int maxdepth;
-  Matchbound **mbtab;
+  Mbtab **mbtab;
   void *mapptr;
   Codetype *basepower;
 };
@@ -58,7 +58,7 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
                                                   unsigned int maxdepth,
                                                   bool writemode)
 {
-  Matchbound *cptr;
+  Mbtab *cptr;
   unsigned int idx;
   Pckbuckettable *pckbt;
 
@@ -72,13 +72,13 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
     /*printf("basepower[%u]=%lu\n",idx,pckbt->basepower[idx]); */
     pckbt->maxnumofvalues += pckbt->basepower[idx];
   }
-  pckbt->mbtab = gt_malloc(sizeof(Matchbound *) * (maxdepth+1));
+  pckbt->mbtab = gt_malloc(sizeof(Mbtab *) * (maxdepth+1));
   if (writemode)
   {
     pckbt->mapptr = NULL;
-    pckbt->mbtab[0] = gt_malloc(sizeof(Matchbound) * pckbt->maxnumofvalues);
+    pckbt->mbtab[0] = gt_malloc(sizeof(Mbtab) * pckbt->maxnumofvalues);
     /*
-    printf("allocated = %u * %lu\n",sizeof(Matchbound),pckbt->maxnumofvalues);
+    printf("allocated = %u * %lu\n",sizeof(Mbtab),pckbt->maxnumofvalues);
     */
     for (cptr = pckbt->mbtab[0];
          cptr < pckbt->mbtab[0] + pckbt->maxnumofvalues; cptr++)
@@ -116,7 +116,7 @@ static void storeBoundsatdepth(Pckbuckettable *pckbt,
   printf("bd->depth=%u,bd->code=%lu\n",bd->depth,bd->code);
   */
   gt_assert(pckbt->mbtab[bd->depth][bd->code].lowerbound == 0 &&
-         pckbt->mbtab[bd->depth][bd->code].upperbound == 0);
+            pckbt->mbtab[bd->depth][bd->code].upperbound == 0);
   gt_assert(pckbt->numofvalues < pckbt->maxnumofvalues);
   pckbt->numofvalues++;
   pckbt->mbtab[bd->depth][bd->code].lowerbound = bd->lowerbound;
@@ -159,7 +159,7 @@ Pckbuckettable *pckbuckettable_new(const void *voidbwtseq,
   unsigned long rangesize, idx;
   Seqpos *rangeOccs;
   Pckbuckettable *pckbt;
-  Matchbound *tmpmbtab;
+  Mbtab *tmpmbtab;
 
   INITARRAY(&stack,Boundsatdepth);
   child.lowerbound = 0;
@@ -229,7 +229,7 @@ int pckbucket2file(const GtStr *indexname,const Pckbuckettable *pckbuckettable,
   }
   seqposmaxdepth = (Seqpos) pckbuckettable->maxdepth;
   gt_xfwrite(&seqposmaxdepth,sizeof (Seqpos),(size_t) 1,fp);
-  gt_xfwrite(pckbuckettable->mbtab[0],sizeof (Matchbound),
+  gt_xfwrite(pckbuckettable->mbtab[0],sizeof (Mbtab),
              (size_t) pckbuckettable->maxnumofvalues,fp);
   gt_fa_fclose(fp);
   return 0;
@@ -265,10 +265,10 @@ Pckbuckettable *mappckbuckettable(const GtStr *indexname,
   maxdepth = (unsigned int) ((Seqpos *) mapptr)[0];
   pckbt = allocandinitpckbuckettable(numofchars,maxdepth,false);
   pckbt->mapptr = mapptr;
-  pckbt->mbtab[0] = (Matchbound *) (((Seqpos *) mapptr) + 1);
+  pckbt->mbtab[0] = (Mbtab *) (((Seqpos *) mapptr) + 1);
   setbcktaboffsets(pckbt);
   gt_assert(numofbytes ==
-            sizeof (Seqpos) + sizeof (Matchbound) * pckbt->maxnumofvalues);
+            sizeof (Seqpos) + sizeof (Mbtab) * pckbt->maxnumofvalues);
   return pckbt;
 }
 

@@ -18,7 +18,6 @@
 #define EIS_BLOCKCOMP_CONSTRUCT_H
 
 #include "match/eis-encidxseq.h"
-#include "match/sarr-def.h"
 
 /**
  * @param alphabet ownership of alphabet is transferred to the sequence

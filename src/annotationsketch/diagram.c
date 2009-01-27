@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007      Malte Mader <mmader@zbh.uni-hamburg.de>
   Copyright (c) 2007      Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,7 @@
 #include "extended/genome_node.h"
 
 /* used to index non-multiline-feature blocks */
-#define UNDEF_REPR               (void*)"UNDEF"
+#define UNDEF_REPR               (void*)0x0DEFD
 
 struct GtDiagram {
   /* GtBlock lists indexed by track keys */
@@ -301,7 +301,12 @@ static void add_to_rep(GtDiagram *d, GtFeatureNode *node,
   if (!block) {
     block = gt_block_new_from_node(parent);
     gt_block_set_type(block, gt_feature_node_get_type(node));
-    assign_block_caption(d, node, parent, block);
+    /* if parent is a pseudonode, then we have a multiline feature without
+       a parent. we must not access the parent in this case! */
+    if (gt_feature_node_is_pseudo(parent))
+      assign_block_caption(d, node, NULL, block);
+    else
+      assign_block_caption(d, node, parent, block);
     nodeinfo_add_block(ni, gt_feature_node_get_type(node),
                        rep, block);
   }
@@ -353,7 +358,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 {
   GtRange elem_range;
   bool *collapse;
-  bool do_not_overlap=false;
+  bool do_not_overlap = false;
   const char *feature_type = NULL, *parent_gft = NULL;
   double tmp;
   unsigned long max_show_width = UNDEF_ULONG,
@@ -361,9 +366,11 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
 
   gt_assert(d && node);
 
+  /* skip pseudonodes */
+  if (gt_feature_node_is_pseudo(node))
+    return;
   feature_type = gt_feature_node_get_type(node);
-  if (parent)
-    parent_gft = gt_feature_node_get_type(parent);
+  gt_assert(feature_type);
 
   /* discard elements that do not overlap with visible range */
   elem_range = gt_genome_node_get_range((GtGenomeNode*) node);
@@ -375,30 +382,39 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
     max_show_width = tmp;
   else
     max_show_width = UNDEF_ULONG;
+
+  /* for non-root nodes... */
   if (parent)
   {
-    if (gt_style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
-    par_max_show_width = tmp;
-  else
-    par_max_show_width = UNDEF_ULONG;
-
+    if (!gt_feature_node_is_pseudo(parent))
+    {
+      parent_gft = gt_feature_node_get_type(parent);
+      if (gt_style_get_num(d->style, parent_gft, "max_show_width", &tmp, NULL))
+        par_max_show_width = tmp;
+      else
+        par_max_show_width = UNDEF_ULONG;
+    }
+    else par_max_show_width = UNDEF_ULONG;
   }
+
   /* check if this type is to be displayed at all */
   if (max_show_width != UNDEF_ULONG &&
       gt_range_length(&d->range) > max_show_width) {
     return;
   }
+
+  /* disregard parent node if it is configured not to be shown */
   if (parent && par_max_show_width != UNDEF_ULONG
         && gt_range_length(&d->range) > par_max_show_width)
     parent = NULL;
 
   /* check if this is a collapsing type, cache result */
   if ((collapse = (bool*) gt_hashmap_get(d->collapsingtypes,
-                                        feature_type)) == NULL)
+                                         feature_type)) == NULL)
   {
     collapse = gt_malloc(sizeof (bool));
     if (!gt_style_get_bool(d->style, feature_type, "collapse_to_parent",
-                        collapse, NULL))
+                           collapse, NULL))
       *collapse = false;
     gt_hashmap_add(d->collapsingtypes, (void*) feature_type, collapse);
   }
@@ -410,12 +426,13 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
                                                        (GtGenomeNode*) node);
 
   /* decide how to continue: */
-  if (*collapse && parent)
+  if (*collapse && parent && !gt_feature_node_is_pseudo(parent))
   {
-    /* collapsing child nodes are added to upwards blocks */
+    /* collapsing child nodes are added to upwards blocks,
+       but never collapse into pseudo nodes */
     add_recursive(d, node, parent, node);
   }
-  else if (!(*collapse)
+  else if ((!*collapse || gt_feature_node_is_pseudo(parent))
              && gt_feature_node_is_multi(node))
   {
     /* multi line features are added to their representative's blocks */

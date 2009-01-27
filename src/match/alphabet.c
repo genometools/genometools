@@ -311,6 +311,36 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
 }
 
 /*EE
+  The following function copies the alphabet \texttt{alpha2} into the alphabet
+  \texttt{alpha1}.
+*/
+
+Alphabet *copyAlphabet(const Alphabet *alpha2)
+{
+  unsigned int i;
+  Alphabet *alpha1;
+
+  ALLOCASSIGNSPACE(alpha1,NULL,Alphabet,(size_t) 1);
+  alpha1->domainsize = alpha2->domainsize;
+  alpha1->mapsize = alpha2->mapsize;
+  alpha1->mappedwildcards = alpha2->mappedwildcards;
+  alpha1->wildcardshow = alpha2->wildcardshow;
+  for (i=0; i<=(unsigned int) MAXALPHABETCHARACTER; i++)
+  {
+    alpha1->symbolmap[i] = alpha2->symbolmap[i];
+  }
+  for (i=0; i<alpha1->mapsize; i++)
+  {
+    alpha1->characters[i] = alpha2->characters[i];
+  }
+  for (i=0; i<alpha1->domainsize; i++)
+  {
+    alpha1->mapdomain[i] = alpha2->mapdomain[i];
+  }
+  return alpha1;
+}
+
+/*EE
   The following function initializes the alphabet \texttt{alpha}
   in the same way as \texttt{readsymbolmap}, if it would be
   applied to a map file with the following content:

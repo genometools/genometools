@@ -22,7 +22,7 @@
 #include "match/sarr-def.h"
 #include "match/pckbucket.h"
 #include "match/eis-voiditf.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
 
 typedef struct
 {
@@ -77,19 +77,21 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                             void *tool_arguments, GtError *err)
 {
   Suffixarray suffixarray;
-  Seqpos totallength;
+  Seqpos totallength = 0;
   void *packedindex = NULL;
   bool haserr = false;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
 
   if (mapsuffixarray(&suffixarray,
-                     &totallength,
                      0,
                      prebwtoptions->indexname,
                      NULL,
                      err) != 0)
   {
     haserr = true;
+  } else
+  {
+    totallength = getencseqtotallength(suffixarray.encseq);
   }
   if (!haserr)
   {
@@ -103,7 +105,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    unsigned int numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+    unsigned int numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
     Pckbuckettable *pckbt;
 
     pckbt = pckbuckettable_new((const void *) packedindex,

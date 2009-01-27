@@ -189,6 +189,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
   unsigned int log2bsize,
                log2markdist;
   bool haserr = false;
+  Specialcharinfo specialcharinfo;
 
   gt_error_check(err);
   INITARRAY(&fm.specpos, PairBwtidx);
@@ -208,6 +209,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
     haserr = true;
   }
   if (!haserr && sufbwt2fmindex(&fm,
+                                &specialcharinfo,
                                 log2bsize,
                                 log2markdist,
                                 mkfmcallinfo->outfmindex,
@@ -219,9 +221,10 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
     haserr = true;
   }
   if (!haserr && saveFmindex(mkfmcallinfo->outfmindex,
-                            &fm,
-                            mkfmcallinfo->noindexpos ? false : true,
-                            err) < 0)
+                             &fm,
+                             &specialcharinfo,
+                             mkfmcallinfo->noindexpos ? false : true,
+                             err) < 0)
   {
     haserr = true;
   }

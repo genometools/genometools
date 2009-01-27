@@ -87,8 +87,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
                            GtError *err);
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
-                              Sequentialsuffixarrayreader *ssar,
-                              GtError *err);
+                              Sequentialsuffixarrayreader *ssar);
 
 #endif
 
@@ -105,18 +104,6 @@ const Encodedsequence *encseqSequentialsuffixarrayreader(
 
 Readmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
-
-const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *ssar);
-
-unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar);
-
-unsigned long destablengthSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar);
-
-const char *destabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar);
 
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar);

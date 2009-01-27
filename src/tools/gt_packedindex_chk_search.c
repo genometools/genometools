@@ -27,10 +27,10 @@
 #include "match/enum-patt-def.h"
 #include "match/esa-mmsearch-def.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
-#include "match/sfx-apfxlen.pr"
+#include "match/esa-map.h"
 #include "match/verbose-def.h"
 #include "tools/gt_packedindex_chk_search.h"
+#include "match/sfx-apfxlen.pr"
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
 
@@ -118,13 +118,14 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       unsigned long trial, patternLen;
 
       if ((had_err =
-           mapsuffixarray(&suffixarray, &totalLen, SARR_SUFTAB | SARR_ESQTAB,
+           mapsuffixarray(&suffixarray, SARR_SUFTAB | SARR_ESQTAB,
                           inputProject, NULL, err) != 0))
       {
         gt_error_set(err, "Can't load suffix array project with"
                   " demand for encoded sequence and suffix table files\n");
         break;
       }
+      totalLen = getencseqtotallength(suffixarray.encseq);
       saIsLoaded = true;
       if ((had_err = (params.minPatLen >= 0L && params.maxPatLen >= 0L
                       && params.minPatLen > params.maxPatLen)))
@@ -136,7 +137,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       }
       if (params.minPatLen < 0 || params.maxPatLen < 0)
       {
-        unsigned int numofchars = getnumofcharsAlphabet(suffixarray.alpha);
+        unsigned int numofchars
+          = getencseqAlphabetnumofchars(suffixarray.encseq);
         if (params.minPatLen < 0)
           params.minPatLen = recommendedprefixlength(numofchars, totalLen);
         if (params.maxPatLen < 0)
@@ -158,8 +160,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
       if ((had_err =
            (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
                                          suffixarray.encseq,
-                                         getnumofcharsAlphabet(
-                                           suffixarray.alpha),
                                          err)) == NULL))
       {
         fputs("Creation of pattern iterator failed!\n", stderr);

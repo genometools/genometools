@@ -1,5 +1,5 @@
 /*
-  Copyright (c)       2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007, 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004       Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2004, 2007 Center for Bioinformatics, University of Hamburg
 
@@ -290,6 +290,7 @@ static bool retrievemaximalscore(long *maxscore, GtChaininfo *chaininfo,
 
 static void retrievechainthreshold(GtChaininfo *chaininfo, Fragment *fragments,
                                    unsigned long num_of_fragments,
+                                   unsigned long max_gap_width,
                                    GtChain *chain, long minscore,
                                    GtChainProc chainprocessor,
                                    void *cpinfo)
@@ -302,7 +303,8 @@ static void retrievechainthreshold(GtChaininfo *chaininfo, Fragment *fragments,
         gt_chain_reset(chain);
         gt_chain_set_score(chain, chaininfo[i].score);
         retracepreviousinchain(chain, chaininfo, num_of_fragments, i);
-        chainprocessor(chain, fragments, cpinfo);
+        chainprocessor(chain, fragments, num_of_fragments, max_gap_width,
+                       cpinfo);
       }
     }
   }
@@ -311,6 +313,7 @@ static void retrievechainthreshold(GtChaininfo *chaininfo, Fragment *fragments,
 static void findmaximalscores(GtChain *chain, GtChaininfo *chaininfo,
                               Fragment *fragments,
                               unsigned long num_of_fragments,
+                              unsigned long max_gap_width,
                               GtChainProc chainprocessor, void *cpinfo)
 {
   long minscore;
@@ -320,8 +323,9 @@ static void findmaximalscores(GtChain *chain, GtChaininfo *chaininfo,
                                          num_of_fragments);
 
   if (minscoredefined) {
-    retrievechainthreshold(chaininfo, fragments, num_of_fragments, chain,
-                           minscore, chainprocessor, cpinfo);
+    retrievechainthreshold(chaininfo, fragments, num_of_fragments,
+                           max_gap_width, chain, minscore, chainprocessor,
+                           cpinfo);
   }
 }
 
@@ -329,6 +333,7 @@ static void findmaximalscores_withoverlaps(GtChain *chain,
                                            GtChaininfo *chaininfo,
                                            Fragment *fragments,
                                            unsigned long num_of_fragments,
+                                           unsigned long max_gap_width,
                                            unsigned long seqlen1,
                                            double mincoverage,
                                            GtChainProc chainprocessor,
@@ -378,7 +383,7 @@ static void findmaximalscores_withoverlaps(GtChain *chain,
                        chaininfo[overlapinfo[startfrag].chainarray].score);
     retracepreviousinchain(chain, chaininfo, num_of_fragments,
                            overlapinfo[startfrag].chainarray);
-    chainprocessor(chain, fragments, cpinfo);
+    chainprocessor(chain, fragments, num_of_fragments, max_gap_width, cpinfo);
   }
 
   gt_array_delete(startfragments);
@@ -422,12 +427,13 @@ static void globalchaining_generic(bool maxscore_chains,
                              num_of_fragments, overlapinfo);
     if (maxscore_chains) {
       findmaximalscores(chain, chaininfo, fragments, num_of_fragments,
-                        chainprocessor, cpinfo);
+                        max_gap_width, chainprocessor, cpinfo);
     }
     else {
       findmaximalscores_withoverlaps(chain, chaininfo, fragments,
-                                     num_of_fragments, seqlen1, mincoverage,
-                                     chainprocessor, cpinfo, overlapinfo);
+                                     num_of_fragments, max_gap_width, seqlen1,
+                                     mincoverage, chainprocessor, cpinfo,
+                                     overlapinfo);
       gt_free(overlapinfo);
     }
   }
@@ -435,7 +441,7 @@ static void globalchaining_generic(bool maxscore_chains,
     chainingboundarycases(chain, fragments, num_of_fragments);
     if (maxscore_chains ||
         ((double) GETSTOREDLENGTH(1, 0) / (double) seqlen1) >= mincoverage) {
-      chainprocessor(chain, fragments, cpinfo);
+      chainprocessor(chain, fragments, num_of_fragments, max_gap_width, cpinfo);
     }
   }
   gt_free(chaininfo);

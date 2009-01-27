@@ -23,9 +23,9 @@
 #include "divmodmul.h"
 #include "spacedef.h"
 #include "opensfxfile.h"
+#include "esa-map.h"
 
 #include "esa-merge.pr"
-#include "esa-map.pr"
 #include "encseq2offset.pr"
 #include "mkidxcpy.pr"
 #include "fmi-keyval.pr"
@@ -35,7 +35,9 @@
 
  DECLAREREADFUNCTION(Seqpos);
 
-static void allocatefmtables(Fmindex *fm,bool storeindexpos)
+static void allocatefmtables(Fmindex *fm,
+                             const Specialcharinfo *specialcharinfo,
+                             bool storeindexpos)
 {
   ALLOCASSIGNSPACE (fm->tfreq, NULL, Seqpos,TFREQSIZE(fm->mapsize));
   ALLOCASSIGNSPACE (fm->superbfreq, NULL, Seqpos ,
@@ -46,15 +48,15 @@ static void allocatefmtables(Fmindex *fm,bool storeindexpos)
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
     fm->specpos.nextfreePairBwtidx = 0;
     fm->specpos.allocatedPairBwtidx
-      = (unsigned long) determinenumberofspecialstostore(&fm->specialcharinfo);
+      = (unsigned long) determinenumberofspecialstostore(specialcharinfo);
     printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
-            (unsigned long) (fm->specialcharinfo.specialcharacters -
-                             fm->specpos.allocatedPairBwtidx),
-            PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
-            (double) (fm->specialcharinfo.specialcharacters -
+           (unsigned long) specialcharinfo->specialcharacters -
+                           fm->specpos.allocatedPairBwtidx,
+           PRINTSeqposcast(specialcharinfo->specialcharacters),
+            (double) (specialcharinfo->specialcharacters -
                       fm->specpos.allocatedPairBwtidx)/
-                          fm->specialcharinfo.specialcharacters);
+                     specialcharinfo->specialcharacters);
     ALLOCASSIGNSPACE(fm->specpos.spacePairBwtidx,NULL,PairBwtidx,
                      fm->specpos.allocatedPairBwtidx);
   } else
@@ -109,7 +111,7 @@ static void showconstructionmessage(const GtStr *indexname,
                                     unsigned long fmsize,
                                     unsigned int log2bsize,
                                     unsigned int log2markdist,
-                                    unsigned int mapsize)
+                                    unsigned int numofchars)
 {
   printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
           gt_str_get(indexname),
@@ -117,7 +119,7 @@ static void showconstructionmessage(const GtStr *indexname,
           (unsigned long) POW2(log2markdist));
   printf(" len=" FormatSeqpos ", alphasize=%u: size ",
           PRINTSeqposcast(totallength),
-          mapsize-1);
+          numofchars);
   printf("%lu bytes, space overhead %.2f\n",
           fmsize,
           (double) fmsize/(double) (totallength+1));
@@ -183,6 +185,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
 }
 
 int sufbwt2fmindex(Fmindex *fmindex,
+                   Specialcharinfo *specialcharinfo,
                    unsigned int log2bsize,
                    unsigned int log2markdist,
                    const GtStr *outfmindex,
@@ -195,7 +198,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Emissionmergedesa emmesa;
   Uchar cc;
   Seqpos bwtpos,
-         totallength,
+         totallength = 0,
          suftabvalue = 0,
          *sequenceoffsettable = NULL,
          firstignorespecial = 0,
@@ -204,7 +207,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
          nextprogress,
          tmpsuftabvalue,
          stepprogress;
-  unsigned int mapsize = 0,
+  unsigned int numofchars = 0,
                suffixlength = 0,
                numofindexes;
   int retval;
@@ -212,7 +215,6 @@ int sufbwt2fmindex(Fmindex *fmindex,
   PairBwtidx *pairptr;
   FILE *outbwt = NULL;
   GtStr *tmpfilename = NULL;
-  Specialcharinfo specialcharinfo;
   bool haserr = false;
 
   gt_error_check(err);
@@ -224,19 +226,24 @@ int sufbwt2fmindex(Fmindex *fmindex,
     GtStr *indexname = gt_str_array_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
-                         &totallength,
-                         SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
-                         indexname,
-                         verboseinfo,
-                         err) != 0)
+                          SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
+                          indexname,
+                          verboseinfo,
+                          err) != 0)
+    {
+      haserr = true;
+    } else
+    {
+      totallength = getencseqtotallength(suffixarray.encseq);
+    }
+    if (!haserr && readSpecialcharinfo(specialcharinfo,indexname,err) != 0)
     {
       haserr = true;
     }
     if (!haserr)
     {
-      mapsize = getmapsizeAlphabet(suffixarray.alpha);
-      specialcharinfo = suffixarray.specialcharinfo;
-      firstignorespecial = totallength - specialcharinfo.specialcharacters;
+      numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
+      firstignorespecial = totallength - specialcharinfo->specialcharacters;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,err) != 0)
       {
         haserr = true;
@@ -256,10 +263,10 @@ int sufbwt2fmindex(Fmindex *fmindex,
   } else
   {
     if (initEmissionmergedesa(&emmesa,
-                             indexnametab,
-                             SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
-                             verboseinfo,
-                             err) != 0)
+                              indexnametab,
+                              SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
+                              verboseinfo,
+                              err) != 0)
     {
       haserr = true;
     }
@@ -275,7 +282,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (!haserr)
     {
       sequenceoffsettable = encseqtable2seqoffsets(&totallength,
-                                                   &specialcharinfo,
+                                                   specialcharinfo,
                                                    emmesa.suffixarraytable,
                                                    numofindexes);
       if (sequenceoffsettable == NULL)
@@ -295,8 +302,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      mapsize = getmapsizeAlphabet(emmesa.alpha);
-      firstignorespecial = totallength - specialcharinfo.specialcharacters;
+      numofchars = emmesa.numofchars;
+      firstignorespecial = totallength - specialcharinfo->specialcharacters;
     }
   }
   if (!haserr)
@@ -304,20 +311,20 @@ int sufbwt2fmindex(Fmindex *fmindex,
     printf("# firstignorespecial=" FormatSeqpos "\n",
               PRINTSeqposcast(firstignorespecial));
     computefmkeyvalues (fmindex,
+                        specialcharinfo,
                         totallength+1,
                         log2bsize,
                         log2markdist,
-                        mapsize,
+                        numofchars,
                         suffixlength,
-                        storeindexpos,
-                        &specialcharinfo);
+                        storeindexpos);
     showconstructionmessage(outfmindex,
                             totallength,
                             fmindex->sizeofindex,
                             log2bsize,
                             log2markdist,
-                            mapsize);
-    allocatefmtables(fmindex,storeindexpos);
+                            numofchars);
+    allocatefmtables(fmindex,specialcharinfo,storeindexpos);
     set0frequencies(fmindex);
     if (storeindexpos)
     {
@@ -334,25 +341,14 @@ int sufbwt2fmindex(Fmindex *fmindex,
         if (storeindexpos)
         {
           retval = readnextSeqposfromstream(&tmpsuftabvalue,
-                                            &suffixarray.suftabstream,
-                                            err);
-          if (retval < 0)
-          {
-            haserr = true;
-            break;
-          }
+                                            &suffixarray.suftabstream);
           if (retval == 0)
           {
             break;
           }
           suftabvalue = (Seqpos) tmpsuftabvalue;
         }
-        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream,err);
-        if (retval < 0)
-        {
-          haserr = true;
-          break;
-        }
+        retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream);
         if (retval == 0)
         {
           break;

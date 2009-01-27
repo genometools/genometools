@@ -36,11 +36,7 @@ typedef struct
 
 static int constructsarrandrunmaxpairs(
                  Substringmatchinfo *ssi,
-                 Seqpos specialcharacters,
-                 Seqpos realspecialranges,
                  Readmode readmode,
-                 unsigned int numofchars,
-                 const Uchar *characters,
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Measuretime *mtime,
@@ -53,12 +49,8 @@ static int constructsarrandrunmaxpairs(
   Sfxiterator *sfi;
   bool specialsuffixes = false;
 
-  sfi = newSfxiterator(specialcharacters,
-                       realspecialranges,
-                       ssi->encseq,
+  sfi = newSfxiterator(ssi->encseq,
                        readmode,
-                       numofchars,
-                       characters,
                        prefixlength,
                        numofparts,
                        NULL, /* oulcpinfo */
@@ -89,7 +81,6 @@ static int constructsarrandrunmaxpairs(
                                                numberofsuffixes);
       firstpage = false;
       if (enumeratemaxpairs(ssar,
-                            numofchars,
                             ssi->encseq,
                             readmode,
                             ssi->minlength,
@@ -125,29 +116,23 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            Verboseinfo *verboseinfo,
                            GtError *err)
 {
-  Specialcharinfo samplespecialcharinfo;
   Substringmatchinfo ssi;
   unsigned int numofchars;
   bool haserr = false;
 
   ssi.encseq = plain2encodedsequence(true,
-                                     &samplespecialcharinfo,
                                      dbseq,
                                      dblen,
                                      query,
                                      querylen,
-                                     getmapsizeAlphabet(alpha),
+                                     alpha,
                                      verboseinfo);
   ssi.minlength = minlength;
   ssi.processmaxmatch = processmaxmatch;
   ssi.processmaxmatchinfo = processmaxmatchinfo;
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmaxpairs(&ssi,
-                                  samplespecialcharinfo.specialcharacters,
-                                  samplespecialcharinfo.realspecialranges,
                                   Forwardmode,
-                                  numofchars,
-                                  getcharactersAlphabet(alpha),
                                   recommendedprefixlength(numofchars,
                                                           dblen+querylen+1),
                                   1U, /* parts */
@@ -157,6 +142,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   {
     haserr = true;
   }
+  removealpharef(ssi.encseq);
   freeEncodedsequence(&ssi.encseq);
   return haserr ? -1 : 0;
 }

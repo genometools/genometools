@@ -56,10 +56,13 @@ encseq-specialsrank.c
 enum-patt.c
 esa-dfs.c
 esa-lcpval.c
+esa-map.c
 esa-mmsearch.c
 esa-ppbuckwid.c
 esa-seqread.c
 esa-splititv.c
+echoseq.c
+fillsci.c
 greedyfwdmat.c
 idx-limdfs.c
 initeqsvec.c
@@ -74,6 +77,7 @@ optionargmode.c
 overallseq.c
 opensfxfile.c
 pckbucket.c
+pos2seqnum.c
 pssm.c
 nullcols.c
 revcompl.c

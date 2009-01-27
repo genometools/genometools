@@ -35,7 +35,6 @@
 #include "sfx-outlcp.h"
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
-#include "stamp.h"
 
 #include "sfx-mappedstr.pr"
 
@@ -50,8 +49,6 @@ typedef struct
   unsigned int code:CODEBITS;
   Seqpos position; /* get rid of this by using information from encseq */
 } Codeatposition;
-
-DECLAREARRAYSTRUCT(Seqpos);
 
 struct Sfxiterator
 {
@@ -72,7 +69,6 @@ struct Sfxiterator
   unsigned int part,
                numofchars,
                prefixlength;
-  const Uchar *characters;
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
   Sequencerange overhang;
@@ -457,12 +453,8 @@ static void showleftborder(const Seqpos *leftborder,
 }
 #endif
 
-Sfxiterator *newSfxiterator(Seqpos specialcharacters,
-                            Seqpos realspecialranges,
-                            const Encodedsequence *encseq,
+Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             Readmode readmode,
-                            unsigned int numofchars,
-                            const Uchar *characters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Outlcpinfo *outlcpinfo,
@@ -472,10 +464,12 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             GtError *err)
 {
   Sfxiterator *sfi = NULL;
-  Seqpos *optr;
+  Seqpos *optr, realspecialranges, specialcharacters;
   bool haserr = false;
 
   gt_error_check(err);
+  realspecialranges = getencseqrealspecialranges(encseq);
+  specialcharacters = getencseqspecialcharacters(encseq);
   gt_assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
       prefixlength > MAXPREFIXLENGTH)
@@ -504,8 +498,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
-    sfi->numofchars = numofchars;
-    sfi->characters = characters;
+    sfi->numofchars = getencseqAlphabetnumofchars(encseq);
     sfi->prefixlength = prefixlength;
     if (sfxstrategy != NULL)
     {
@@ -536,7 +529,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
     sfi->bcktab = allocBcktab(sfi->totallength,
-                              numofchars,
+                              sfi->numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
                               sfi->storespecialcodes
@@ -567,7 +560,6 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                    readmode,
                    updatekmercount,
                    sfi,
-                   numofchars,
                    prefixlength);
     if (sfi->storespecialcodes)
     {
@@ -579,7 +571,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                               readmode,
                               realspecialranges,
                               prefixlength,
-                              numofchars,
+                              sfi->numofchars,
                               sfi->nextfreeCodeatposition,
                               sfi->spaceCodeatposition);
 #endif
@@ -659,7 +651,6 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->readmode,
                  insertwithoutspecial,
                  sfi,
-                 sfi->numofchars,
                  sfi->prefixlength);
   if (mtime != NULL)
   {

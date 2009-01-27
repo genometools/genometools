@@ -61,7 +61,7 @@ static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
             Seqpos generateStart, size_t len,
-            SeqDataTranslator xltor, GtError *err);
+            SeqDataTranslator xltor);
 
 extern void
 initSuffixarrayFileInterface(SuffixarrayFileInterface *sai, Seqpos seqLen,
@@ -255,7 +255,7 @@ SANewMRAEnc(const Suffixarray *sa)
 {
   MRAEnc *alphabet;
   gt_assert(sa);
-  alphabet = MRAEncGTAlphaNew(sa->alpha);
+  alphabet = MRAEncGTAlphaNew(getencseqAlphabet(sa->encseq));
   MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
   return alphabet;
 }
@@ -264,7 +264,7 @@ static size_t
 SAIGenerate(void *generatorState, void *backlogState,
             move2BacklogFunc move2Backlog, void *output,
             Seqpos generateStart, size_t len,
-            SeqDataTranslator xltor, GtError *err)
+            SeqDataTranslator xltor)
 {
   size_t i;
   SuffixarrayFileInterface *sai = generatorState;
@@ -273,7 +273,7 @@ SAIGenerate(void *generatorState, void *backlogState,
   gt_assert(sai);
   sa = sai->sa;
   for (i = 0; i < len; ++i)
-    if (readnextSeqposfromstream(buf + i, &sa->suftabstream, err) != 1)
+    if (readnextSeqposfromstream(buf + i, &sa->suftabstream) != 1)
       break;
   move2Backlog(backlogState, buf, generateStart, i);
   SDRTranslate(xltor, output, buf, i);

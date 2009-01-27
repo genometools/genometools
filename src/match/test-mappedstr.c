@@ -22,17 +22,12 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
-#include "alphadef.h"
 #include "encseq-def.h"
 #include "intcode-def.h"
-#include "sarr-def.h"
 #include "sfx-nextchar.h"
-#include "stamp.h"
 
 #include "kmer2string.pr"
 #include "sfx-mappedstr.pr"
-#include "esa-map.pr"
 
 static Codetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,
@@ -180,17 +175,19 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 }
 
 static int verifycodelists(const Encodedsequence *encseq,
-                           const Uchar *characters,
                            unsigned int kmersize,
                            unsigned int numofchars,
-                           Seqpos stringtotallength,
                            const ArrayCodetype *codeliststream,
                            GtError *err)
 {
   bool haserr = false;
   ArrayCodetype codeliststring;
+  const Uchar *characters;
+  Seqpos stringtotallength;
 
   gt_error_check(err);
+  stringtotallength = getencseqtotallength(encseq);
+  characters = getencseqAlphabetcharacters(encseq);
   INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
@@ -210,21 +207,22 @@ static int verifycodelists(const Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
+int verifymappedstr(const Encodedsequence *encseq,unsigned int prefixlength,
+                    GtError *err)
 {
   unsigned int numofchars;
   ArrayCodetype codeliststream;
   bool haserr = false;
 
   gt_error_check(err);
-  numofchars = getnumofcharsAlphabet(suffixarray->alpha);
+  numofchars = getencseqAlphabetnumofchars(encseq);
   INITARRAY(&codeliststream,Codetype);
-  if (getfastastreamkmers(suffixarray->filenametab,
+  if (getfastastreamkmers(getencseqfilenametab(encseq),
                           outkmeroccurrence,
                           &codeliststream,
                           numofchars,
-                          suffixarray->prefixlength,
-                          getsymbolmapAlphabet(suffixarray->alpha),
+                          prefixlength,
+                          getencseqAlphabetsymbolmap(encseq),
                           false,
                           err) != 0)
   {
@@ -232,11 +230,9 @@ int verifymappedstr(const Suffixarray *suffixarray,GtError *err)
   }
   if (!haserr)
   {
-    if (verifycodelists(suffixarray->encseq,
-                        getcharactersAlphabet(suffixarray->alpha),
-                        suffixarray->prefixlength,
+    if (verifycodelists(encseq,
+                        prefixlength,
                         numofchars,
-                        getencseqtotallength(suffixarray->encseq),
                         &codeliststream,
                         err) != 0)
     {

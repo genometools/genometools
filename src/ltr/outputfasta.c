@@ -18,18 +18,10 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
-#include "core/unused_api.h"
-#include "match/alphadef.h"
-#include "match/sarr-def.h"
-#include "match/spacedef.h"
 #include "match/encseq-def.h"
-#include "match/esa-seqread.h"
-#include "match/echoseq.pr"
-
+#include "match/echoseq.h"
+#include "outputfasta.h"
 #include "ltrharvest-opt.h"
-#include "repeattypes.h"
-
-#include "match/pos2seqnum.pr"
 
 /*
  The datetype Fastaoutinfo aggregates the values needed to show a fasta file.
@@ -39,16 +31,8 @@
 
 typedef struct
 {
-  Sequentialsuffixarrayreader *ssar;
   const Encodedsequence *encseq; /* encoded sequence */
-  const Alphabet *alpha;         /* the alphabet */
-  const Uchar *characters;       /* for visible characters */
-  const char *destab;            /* pointer on descriptions */
-  unsigned long *descendtab;     /* positions of desc-separators */
-  Seqpos totallength;            /* totallength of encseq */
-  unsigned long numofdbsequences; /* num of sequences in suffix array */
-  unsigned int linewidth;        /* the line width to show the alignment */
-  Seqpos *markpos;     /* positions of SEPARATOR symbols */
+  unsigned long linewidth;        /* the line width to show the alignment */
   bool showseqnum;     /* with or without the sequence number */
   FILE *formatout;     /* file pointer to show the alignment */
 } Fastaoutinfo;
@@ -58,180 +42,129 @@ typedef struct
  a FASTA entry is created from the predicted LTR element.
  */
 
-static void myencseq2symbolstring(Fastaoutinfo *info,
-                         FILE *fpout,
-                         unsigned long seqnum,
-                         const char *desc,
-                         const Alphabet *alpha,
-                         const Encodedsequence *encseq,
-                         Readmode readmode,
-                         Seqpos start,
-                         Seqpos wlen,
-                         unsigned long width)
+static void myencseq2symbolstring(Fastaoutinfo *fastainfo,
+                                  unsigned long seqnum,
+                                  Seqpos offset,
+                                  const char *desc,
+                                  unsigned long desclength,
+                                  Readmode readmode,
+                                  Seqpos start,
+                                  Seqpos wlen)
 {
-  Seqpos offset;
-
-  gt_assert(width > 0);
+  gt_assert(fastainfo->linewidth > 0);
   if (desc == NULL)
   {
-    fprintf(fpout,">");
+    fprintf(fastainfo->formatout,">");
   } else
   {
-    fprintf(fpout,">%s",desc);
+    fprintf(fastainfo->formatout,">%*.*s",
+            (int) desclength,(int) desclength,desc);
   }
 
-  fprintf(info->formatout," (dbseq-nr");
-  if (info->showseqnum)
+  fprintf(fastainfo->formatout," (dbseq-nr");
+  if (fastainfo->showseqnum)
   {
-    fprintf(info->formatout," %lu) ", seqnum);
+    fprintf(fastainfo->formatout," %lu) ", seqnum);
   }
-  if (seqnum == 0)
-  {
-    offset = 0;
-  }
-  else
-  {
-    offset = info->markpos[seqnum-1]+1;
-  }
-  fprintf(info->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
+  fprintf(fastainfo->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + 1),
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + wlen));
-  encseq2symbolstring(fpout,
-                      alpha,
-                      encseq,
+  encseq2symbolstring(fastainfo->formatout,
+                      fastainfo->encseq,
                       readmode,
                       start,
                       wlen,
-                      width);
+                      fastainfo->linewidth);
 }
 
-static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
-                                       Seqpos len,
-                                       GT_UNUSED GtStr *str_indexfilename,
-                                       GtError *err)
+static void showpredictionfastasequence(Fastaoutinfo *fastainfo,
+                                        Seqpos startpos,
+                                        Seqpos len)
 {
-  unsigned long i, desclen;
+  unsigned long desclen;
   const char *desptr;
-  char *destab_seqnum;
-  unsigned long seqnum =
-                  getrecordnumSeqpos(info->markpos, info->numofdbsequences,
-                                     info->totallength, startpos, err);
+  Seqinfo seqinfo;
+  unsigned long seqnum = getencseqfrompos2seqnum(fastainfo->encseq,startpos);
 
-  /* if there are sequence descriptions */
-  desptr = retriesequencedescription(&desclen,
-                                     info->destab,
-                                     info->descendtab,
-                                     seqnum);
-
-  ALLOCASSIGNSPACE(destab_seqnum, NULL, char, desclen);
-  for (i=0; i < desclen; i++)
-  {
-    destab_seqnum[i] = desptr[i];
-  }
-
-  myencseq2symbolstring(info, info->formatout,
-                      seqnum, destab_seqnum,
-                      info->alpha, info->encseq,
-                      Forwardmode, startpos,
-                      len,
-                      60UL);
-  FREESPACE(destab_seqnum);
-  return 0;
+  desptr = retrievesequencedescription(&desclen,fastainfo->encseq,seqnum);
+  getencseqSeqinfo(&seqinfo,fastainfo->encseq,seqnum);
+  myencseq2symbolstring(fastainfo,
+                        seqnum,
+                        seqinfo.seqstartpos,
+                        desptr,
+                        desclen,
+                        Forwardmode,
+                        startpos,
+                        len);
 }
 
 /*
  The following function processes all predicted LTR elements with
  the function from the apply pointer.
  */
-static int overallpredictionsequences(const LTRharvestoptions *lo,
-    bool innerregion,
-    void *applyinfo,
-    int(*apply)(Fastaoutinfo *,Seqpos, Seqpos, GtStr*, GtError *err),
-    GtError *err)
+
+static void overallpredictionsequences(const LTRboundaries **bdptrtab,
+                                       unsigned long numofboundaries,
+                                       bool innerregion,
+                                       Fastaoutinfo *fastainfo)
 {
   unsigned long i;
-  Seqpos start,
-         end;
-  LTRboundaries *boundaries;
+  Seqpos start, end;
 
-  for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
+  for (i = 0; i < numofboundaries; i++)
   {
-    boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
-    if ( !boundaries->skipped )
+    if (innerregion)
     {
-      if (innerregion)
-      {
-        start = boundaries->leftLTR_3 + 1;
-        end = boundaries->rightLTR_5 - 1;
-      }
-      else
-      {
-        start = boundaries->leftLTR_5;
-        end = boundaries->rightLTR_3;
-      }
-      if (apply(applyinfo,
-               innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
-               end - start + 1, lo->str_indexname, err) != 0)
-      {
-        return -1;
-      }
+      start = bdptrtab[i]->leftLTR_3 + 1;
+      end = bdptrtab[i]->rightLTR_5 - 1;
+    } else
+    {
+      start = bdptrtab[i]->leftLTR_5;
+      end = bdptrtab[i]->rightLTR_3;
     }
+    showpredictionfastasequence(fastainfo,
+                                innerregion ? bdptrtab[i]->leftLTR_3 + 1
+                                            : bdptrtab[i]->leftLTR_5,
+                                end - start + 1);
   }
-  return 0;
 }
 
 /*
  The following function prints sequences in multiple FASTA format to the
  specified output.
 */
+
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-                                 Seqpos *markpos,
+                                 const LTRboundaries **bdptrtab,
+                                 unsigned long numofboundaries,
                                  bool innerregion,
                                  unsigned int linewidth,
-                                 Sequentialsuffixarrayreader *ssar,
                                  bool showseqnum,
                                  GtError *err)
 {
-  Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
-  unsigned long *descendtab = NULL,
-                destablength;
-  const char *destab = NULL;
-  int had_err;
+  bool had_err = false;
 
-  formatout = gt_fa_xfopen(innerregion
-                           ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
-                           : gt_str_get(lo->str_fastaoutputfilename),
-                           "w");
+  formatout = gt_fa_fopen(innerregion
+                          ? gt_str_get(lo->str_fastaoutputfilenameinnerregion)
+                          : gt_str_get(lo->str_fastaoutputfilename),
+                          "w",err);
+  if (formatout == NULL)
+  {
+    had_err = true;
+  } else
+  {
+    Fastaoutinfo fastaoutinfo;
 
-  fastaoutinfo.ssar = ssar;
-  fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
-  fastaoutinfo.alpha = alphabetSequentialsuffixarrayreader(ssar);
-  fastaoutinfo.characters = getcharactersAlphabet(fastaoutinfo.alpha);
-  fastaoutinfo.totallength = getencseqtotallength(
-                               encseqSequentialsuffixarrayreader(ssar));
-  fastaoutinfo.numofdbsequences =
-                      numofdbsequencesSequentialsuffixarrayreader(ssar);
-  fastaoutinfo.linewidth = linewidth;
-  fastaoutinfo.showseqnum = showseqnum;
-  fastaoutinfo.formatout = formatout;
-  fastaoutinfo.markpos = markpos;
-
-  destablength = destablengthSequentialsuffixarrayreader(ssar);
-  destab = destabSequentialsuffixarrayreader(ssar);
-  descendtab = calcdescendpositions(destab,
-                                    destablength,
-                                    fastaoutinfo.numofdbsequences);
-  fastaoutinfo.destab = destab;
-  fastaoutinfo.descendtab = descendtab;
-
-  had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
-                                       showpredictionfastasequence, err);
-
-  gt_free(descendtab);
+    fastaoutinfo.encseq = lo->repeatinfo.encseq;
+    fastaoutinfo.linewidth = (unsigned long) linewidth;
+    fastaoutinfo.showseqnum = showseqnum;
+    fastaoutinfo.formatout = formatout;
+    overallpredictionsequences(bdptrtab, numofboundaries, innerregion,
+                               &fastaoutinfo);
+  }
   gt_fa_xfclose(formatout);
-
-  return 0;
+  return had_err ? -1 : 0;
 }

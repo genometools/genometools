@@ -92,18 +92,18 @@ MRAEncGTAlphaNew(const Alphabet *alpha)
   AlphabetRangeSize symsPerRange[2];
   uint8_t *mappings;
   MRAEnc *result;
-  uint32_t numSyms = getmapsizeAlphabet(alpha);
+  uint32_t numofchars = getnumofcharsAlphabet(alpha);
   mappings = gt_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
   memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
   {
     /* handle regular symbols */
     int i;
-    for (i = 0; i < numSyms - 1; ++i)
+    for (i = 0; i < numofchars; ++i)
       mappings[i] = i;
-    symsPerRange[0] = numSyms - 1;
+    symsPerRange[0] = numofchars;
   }
   /* handle special symbols */
-  mappings[WILDCARD] = numSyms - 1;
+  mappings[WILDCARD] = numofchars;
   symsPerRange[1] = 1;
   result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings);
   gt_free(mappings);

@@ -22,8 +22,7 @@
 #include "esa-seqread.h"
 #include "esa-lcpval.h"
 #include "lcpoverflow.h"
-
-#include "esa-map.pr"
+#include "esa-map.h"
 
 #ifdef INLINEDSequentialsuffixarrayreader
 
@@ -34,12 +33,10 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                   GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
-  Seqpos totallength;
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   if (mapsuffixarray (ssar->suffixarray,
-                      &totallength,
                       demand,
                       indexname,
                       NULL,
@@ -115,14 +112,12 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
-  Seqpos totallength;
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   gt_assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
   if (((seqactype == SEQ_mappedboth)
          ? mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
-                                               &totallength,
                                                demand,
                                                indexname,
                                                NULL,
@@ -139,7 +134,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
   ssar->suftab = NULL;
   ssar->encseq = ssar->suffixarray->encseq;
   ssar->readmode = ssar->suffixarray->readmode;
-  ssar->numberofsuffixes = totallength+1;
+  ssar->numberofsuffixes = getencseqtotallength(ssar->encseq) + 1;
   ssar->lvi = NULL;
   return ssar;
 }
@@ -223,12 +218,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
     } else
     {
       retval = readnextUcharfromstream(&tmpsmalllcpvalue,
-                                       &ssar->suffixarray->lcptabstream,
-                                       err);
-      if (retval < 0)
-      {
-        return -1;
-      }
+                                       &ssar->suffixarray->lcptabstream);
       if (retval == 0)
       {
         return 0;
@@ -247,12 +237,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
       {
         retval = readnextLargelcpvaluefromstream(
                                           &tmpexception,
-                                          &ssar->suffixarray->llvtabstream,
-                                          err);
-        if (retval < 0)
-        {
-          return -1;
-        }
+                                          &ssar->suffixarray->llvtabstream);
         if (retval == 0)
         {
           gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -270,14 +255,12 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
 }
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
-                              Sequentialsuffixarrayreader *ssar,
-                              GtError *err)
+                              Sequentialsuffixarrayreader *ssar)
 {
   if (ssar->seqactype == SEQ_scan)
   {
     return readnextSeqposfromstream(currentsuffix,
-                                    &ssar->suffixarray->suftabstream,
-                                    err);
+                                    &ssar->suffixarray->suftabstream);
   }
   if (ssar->seqactype == SEQ_mappedboth)
   {
@@ -300,32 +283,6 @@ Readmode readmodeSequentialsuffixarrayreader(
   return ssar->readmode;
 }
 #endif /* ifdef INLINEDSequentialsuffixarrayreader */
-
-const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *ssar)
-{
-  gt_assert(ssar->suffixarray != NULL);
-  return ssar->suffixarray->alpha;
-}
-
-unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar)
-{
-  gt_assert(ssar->suffixarray != NULL);
-  return ssar->suffixarray->numofdbsequences;
-}
-
-unsigned long destablengthSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar)
-{
-  return ssar->suffixarray->destablength;
-}
-
-const char *destabSequentialsuffixarrayreader(
-              const Sequentialsuffixarrayreader *ssar)
-{
-  return ssar->suffixarray->destab;
-}
 
 const Seqpos *suftabSequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)

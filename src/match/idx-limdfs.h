@@ -27,13 +27,12 @@
 typedef struct Limdfsresources Limdfsresources;
 
 Limdfsresources *newLimdfsresources(const void *genericindex,
-                                    const Matchbound **mbtab,
+                                    const Mbtab **mbtab,
                                     unsigned int maxdepth,
                                     const Encodedsequence *encseq,
                                     bool withesa,
                                     bool nowildcards,
                                     unsigned long maxintervalwidth,
-                                    unsigned int mapsize,
                                     Seqpos totallength,
                                     unsigned long maxpathlength,
                                     Processmatch processmatch,
@@ -83,8 +82,6 @@ Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound);
 
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound);
-
-DECLAREARRAYSTRUCT(Seqpos);
 
 ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
                                           Seqpos leftbound,

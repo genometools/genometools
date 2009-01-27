@@ -382,7 +382,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, Seqpos seqLen,
 static BitOffset
 addLocateInfo(BitString cwDest, BitOffset cwOffset,
               BitString varDest, BitOffset varOffset,
-              GT_UNUSED Seqpos start, Seqpos len, void *cbState, GtError *err)
+              GT_UNUSED Seqpos start, Seqpos len, void *cbState)
 {
   BitOffset bitsWritten = 0;
   struct addLocateInfoState *state = cbState;
@@ -422,7 +422,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       {
         int insertExtraLocateMark = 0;
         /* 1.a read array index*/
-        if ((retcode = SDRRead(state->readSeqpos, &mapVal, 1, err)) != 1)
+        if ((retcode = SDRRead(state->readSeqpos, &mapVal, 1)) != 1)
           return (BitOffset)-1;
         /* 1.b find current symbol and compare to special ranges */
         insertExtraLocateMark = !reversiblySorted &&

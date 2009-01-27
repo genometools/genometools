@@ -17,7 +17,7 @@
 #include "match/eis-blockcomp-construct.h"
 #include "match/eis-encidxseq-construct.h"
 #include "match/sarr-def.h"
-#include "match/esa-map.pr"
+#include "match/esa-map.h"
 
 static EISeq *
 createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
@@ -46,10 +46,10 @@ createEncIdxSeq(const GtStr *projectName,
   Seqpos length;
   gt_assert(projectName);
   /* map and interpret index project file */
-  if (streamsuffixarray(&suffixArray, &length,
+  if (streamsuffixarray(&suffixArray,
                        SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, err))
     return NULL;
-  ++length;
+  length = getencseqtotallength(suffixArray.encseq) + 1;
   newSeqIdx = createEncIdxSeqFromSA(&suffixArray, length,
                                       projectName, params,
                                       numExtHeaders, headerIDs,
@@ -218,10 +218,9 @@ loadEncIdxSeq(const GtStr *projectName,
   Seqpos len;
   do
   {
-    if (streamsuffixarray(&suffixArray, &len,
-                          0, projectName, verbosity, err))
+    if (streamsuffixarray(&suffixArray, 0, projectName, verbosity, err))
       break;
-    ++len;
+    len = getencseqtotallength(suffixArray.encseq) + 1;
     newSeqIdx = loadEncIdxSeqForSA(&suffixArray, len, projectName,
                                    encType, features, err);
     freesuffixarray(&suffixArray);
