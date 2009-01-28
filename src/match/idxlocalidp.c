@@ -5,12 +5,15 @@
 #include "absdfstrans-imp.h"
 
 #define INFTY -1L
+#define REPLACEMENTSCORE(A,B) ((A) == (B) ? cost->matchscore\
+                                          : cost->mismatchscore)
 
 typedef struct
 {
-  long **alpha,
-       gapstart,   /* must be negative */
-       gapextend;  /* must be negative */
+  long matchscore,   /* must be positive */
+       mismatchscore,/* must be negative */
+       gapstart,     /* must be negative */
+       gapextend;    /* must be negative */
 } Cost;
 
 typedef struct
@@ -159,7 +162,7 @@ static void nextcolumn (Column *outcol,
     if (incol->colvalues[j - 1].bestvalue > 0)
     {
       outcol->colvalues[j].Rvalue = incol->colvalues[j - 1].bestvalue +
-                                    cost->alpha[dbchar][qseq[j]];
+                                    REPLACEMENTSCORE(dbchar,qseq[j]);
     } else
     {
       outcol->colvalues[j].Rvalue = INFTY;
@@ -268,7 +271,8 @@ static void inplacenextcolumn (const Cost *cost,
     west = column->colvalues[j];
     if (nw.bestvalue > 0)
     {
-      column->colvalues[j].Rvalue = nw.bestvalue + cost->alpha[dbchar][qseq[j]];
+      column->colvalues[j].Rvalue = nw.bestvalue +
+                                    REPLACEMENTSCORE(dbchar,qseq[j]);
     } else
     {
       column->colvalues[j].Rvalue = INFTY;
