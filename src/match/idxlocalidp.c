@@ -26,9 +26,9 @@ typedef struct
 
 typedef struct
 {
-  long Rvalue,
-       Dvalue,
-       Ivalue,
+  long repvalue,
+       insvalue,
+       delvalue,
        bestvalue;
 } Matrixvalue;
 
@@ -63,53 +63,54 @@ static void firstcolumn (Column *column,
                          const Cost *cost,
                          unsigned long lengthofqseq)
 {
-  unsigned long j;
+  unsigned long i;
 
   if (column->colvalues == NULL)
   {
     column->colvalues == gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
   }
   column->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
-  column->colvalues[0].Rvalue = 0;
-  column->colvalues[0].Dvalue = cost->gapstart;
-  column->colvalues[0].Ivalue = cost->gapstart;
+  column->colvalues[0].repvalue = 0;
+  column->colvalues[0].insvalue = cost->gapstart;
+  column->colvalues[0].delvalue = cost->gapstart;
   column->colvalues[0].bestvalue = 0;
   column->maxvalue = 0;
-  for (j = 1UL; j <= lengthofqseq; j++)
+  column->pprefixlen = 0;
+  for (i = 1UL; i <= lengthofqseq; i++)
   {
-    column->colvalues[j].Rvalue = INFTY;
-    column->colvalues[j].Dvalue = INFTY;
-    if (column->colvalues[j - 1].Ivalue > 0)
+    column->colvalues[i].repvalue = INFTY;
+    column->colvalues[i].insvalue = INFTY;
+    if (column->colvalues[i-1].delvalue > 0)
     {
-      if (column->colvalues[j - 1].bestvalue > 0)
+      if (column->colvalues[i-1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue
-          = max2 (column->colvalues[j - 1].Ivalue + cost->gapextend,
-                  column->colvalues[j - 1].bestvalue + cost->gapstart +
-                                                       cost->gapextend);
+        column->colvalues[i].delvalue
+          = max2 (column->colvalues[i-1].delvalue + cost->gapextend,
+                  column->colvalues[i-1].bestvalue + cost->gapstart +
+                                                     cost->gapextend);
       } else
       {
-        column->colvalues[j].Ivalue = column->colvalues[j - 1].Ivalue +
-                                      cost->gapextend;
+        column->colvalues[i].delvalue = column->colvalues[i-1].delvalue +
+                                        cost->gapextend;
       }
     } else
     {
-      if (column->colvalues[j - 1].bestvalue > 0)
+      if (column->colvalues[i-1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue = column->colvalues[j - 1].bestvalue +
-                                      cost->gapstart + cost->gapextend;
+        column->colvalues[i].delvalue = column->colvalues[i-1].bestvalue +
+                                        cost->gapstart + cost->gapextend;
       } else
       {
-        column->colvalues[j].Ivalue = INFTY;
+        column->colvalues[i].delvalue = INFTY;
       }
     }
-    column->colvalues[j].bestvalue = max3 (column->colvalues[j].Rvalue,
-                                           column->colvalues[j].Dvalue,
-                                           column->colvalues[j].Ivalue);
-    if (column->colvalues[j].bestvalue > (long) column->maxvalue)
+    column->colvalues[i].bestvalue = max3 (column->colvalues[i].repvalue,
+                                           column->colvalues[i].insvalue,
+                                           column->colvalues[i].delvalue);
+    if (column->colvalues[i].bestvalue > (long) column->maxvalue)
     {
-      column->maxvalue = (unsigned long) column->colvalues[j].bestvalue;
-      column->pprefixlen = j;
+      column->maxvalue = (unsigned long) column->colvalues[i].bestvalue;
+      column->pprefixlen = i;
     }
   }
 }
@@ -121,107 +122,107 @@ static void nextcolumn (Column *outcol,
                         unsigned long lengthofqseq,
                         const Column *incol)
 {
-  unsigned long j;
+  unsigned long i;
 
   if (outcol->colvalues == NULL)
   {
     outcol->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
   }
-  outcol->colvalues[0].Rvalue = outcol->colvalues[0].Ivalue = INFTY;
-  if (incol->colvalues[0].Dvalue > 0)
+  outcol->colvalues[0].repvalue = outcol->colvalues[0].delvalue = INFTY;
+  if (incol->colvalues[0].insvalue > 0)
   {
     if (incol->colvalues[0].bestvalue > 0)
     {
-      outcol->colvalues[0].Dvalue
-        = max2 (incol->colvalues[0].Dvalue + cost->gapextend,
+      outcol->colvalues[0].insvalue
+        = max2 (incol->colvalues[0].insvalue + cost->gapextend,
                 incol->colvalues[0].bestvalue + cost->gapstart +
                                                 cost->gapextend);
     } else
     {
-      outcol->colvalues[0].Dvalue = incol->colvalues[0].Dvalue +
-                                    cost->gapextend;
+      outcol->colvalues[0].insvalue = incol->colvalues[0].insvalue +
+                                      cost->gapextend;
     }
   } else
   {
     if (incol->colvalues[0].bestvalue > 0)
     {
-      outcol->colvalues[0].Dvalue = incol->colvalues[0].bestvalue +
-                                    cost->gapstart + cost->gapextend;
+      outcol->colvalues[0].insvalue = incol->colvalues[0].bestvalue +
+                                      cost->gapstart + cost->gapextend;
     } else
     {
-      outcol->colvalues[0].Dvalue = INFTY;
+      outcol->colvalues[0].insvalue = INFTY;
     }
   }
-  outcol->colvalues[0].bestvalue = max3 (outcol->colvalues[0].Rvalue,
-                                         outcol->colvalues[0].Dvalue,
-                                         outcol->colvalues[0].Ivalue);
-  outcol->maxvalue = 0;
+  outcol->colvalues[0].bestvalue = max3 (outcol->colvalues[0].repvalue,
+                                         outcol->colvalues[0].insvalue,
+                                         outcol->colvalues[0].delvalue);
+  outcol->maxvalue = (unsigned long) outcol->colvalues[0].bestvalue;
   outcol->pprefixlen = 0;
-  for (j = 1UL; j <= lengthofqseq; j++)
+  for (i = 1UL; i <= lengthofqseq; i++)
   {
-    if (incol->colvalues[j - 1].bestvalue > 0)
+    if (incol->colvalues[i-1].bestvalue > 0)
     {
-      outcol->colvalues[j].Rvalue = incol->colvalues[j - 1].bestvalue +
-                                    REPLACEMENTSCORE(dbchar,qseq[j]);
+      outcol->colvalues[i].repvalue = incol->colvalues[i-1].bestvalue +
+                                      REPLACEMENTSCORE(dbchar,qseq[i]);
     } else
     {
-      outcol->colvalues[j].Rvalue = INFTY;
+      outcol->colvalues[i].repvalue = INFTY;
     }
-    if (incol->colvalues[j].Dvalue > 0)
+    if (incol->colvalues[i].insvalue > 0)
     {
-      if (incol->colvalues[j].bestvalue > 0)
+      if (incol->colvalues[i].bestvalue > 0)
       {
-        outcol->colvalues[j].Dvalue
-          = max2 (incol->colvalues[j].Dvalue + cost->gapextend,
-                  incol->colvalues[j].bestvalue + cost->gapstart +
+        outcol->colvalues[i].insvalue
+          = max2 (incol->colvalues[i].insvalue + cost->gapextend,
+                  incol->colvalues[i].bestvalue + cost->gapstart +
                                                   cost->gapextend);
       } else
       {
-        outcol->colvalues[j].Dvalue = incol->colvalues[j].Dvalue +
-                                      cost->gapextend;
+        outcol->colvalues[i].insvalue = incol->colvalues[i].insvalue +
+                                        cost->gapextend;
       }
     } else
     {
-      if (incol->colvalues[j].bestvalue > 0)
+      if (incol->colvalues[i].bestvalue > 0)
       {
-        outcol->colvalues[j].Dvalue = incol->colvalues[j].bestvalue +
-                                      cost->gapstart + cost->gapextend;
+        outcol->colvalues[i].insvalue = incol->colvalues[i].bestvalue +
+                                        cost->gapstart + cost->gapextend;
       } else
       {
-        outcol->colvalues[j].Dvalue = INFTY;
+        outcol->colvalues[i].insvalue = INFTY;
       }
     }
-    if (outcol->colvalues[j - 1].Ivalue > 0)
+    if (outcol->colvalues[i-1].delvalue > 0)
     {
-      if (outcol->colvalues[j - 1].bestvalue > 0)
+      if (outcol->colvalues[i-1].bestvalue > 0)
       {
-        outcol->colvalues[j].Ivalue
-          = max2 (outcol->colvalues[j - 1].Ivalue + cost->gapextend,
-                  outcol->colvalues[j - 1].bestvalue + cost->gapstart +
-                                                       cost->gapextend);
+        outcol->colvalues[i].delvalue
+          = max2 (outcol->colvalues[i-1].delvalue + cost->gapextend,
+                  outcol->colvalues[i-1].bestvalue + cost->gapstart +
+                                                     cost->gapextend);
       } else
       {
-        outcol->colvalues[j].Ivalue = outcol->colvalues[j - 1].Ivalue +
-                                      cost->gapextend;
+        outcol->colvalues[i].delvalue = outcol->colvalues[i-1].delvalue +
+                                        cost->gapextend;
       }
     } else
     {
-      if (outcol->colvalues[j - 1].bestvalue > 0)
+      if (outcol->colvalues[i-1].bestvalue > 0)
       {
-        outcol->colvalues[j].Ivalue = outcol->colvalues[j - 1].bestvalue +
-                                      cost->gapstart + cost->gapextend;
+        outcol->colvalues[i].delvalue = outcol->colvalues[i-1].bestvalue +
+                                        cost->gapstart + cost->gapextend;
       } else
       {
-        outcol->colvalues[j].Ivalue = INFTY;
+        outcol->colvalues[i].delvalue = INFTY;
       }
     }
-    outcol->colvalues[j].bestvalue = max3 (outcol->colvalues[j].Rvalue,
-                                           outcol->colvalues[j].Dvalue,
-                                           outcol->colvalues[j].Ivalue);
-    if (outcol->colvalues[j].bestvalue > (long) outcol->maxvalue)
+    outcol->colvalues[i].bestvalue = max3 (outcol->colvalues[i].repvalue,
+                                           outcol->colvalues[i].insvalue,
+                                           outcol->colvalues[i].delvalue);
+    if (outcol->colvalues[i].bestvalue > (long) outcol->maxvalue)
     {
-      outcol->maxvalue = (unsigned long) outcol->colvalues[j].bestvalue;
-      outcol->pprefixlen = j;
+      outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestvalue;
+      outcol->pprefixlen = i;
     }
   }
 }
@@ -232,106 +233,106 @@ static void inplacenextcolumn (const Cost *cost,
                                unsigned long lengthofqseq,
                                Column *column)
 {
-  unsigned long j;
+  unsigned long i;
   Matrixvalue nw, west;
 
-  column->colvalues[0].Rvalue = column->colvalues[0].Ivalue = INFTY;
-  if (column->colvalues[0].Dvalue > 0)
+  column->colvalues[0].repvalue = column->colvalues[0].delvalue = INFTY;
+  if (column->colvalues[0].insvalue > 0)
   {
     if (column->colvalues[0].bestvalue > 0)
     {
-      column->colvalues[0].Dvalue
-        = max2 (column->colvalues[0].Dvalue + cost->gapextend,
+      column->colvalues[0].insvalue
+        = max2 (column->colvalues[0].insvalue + cost->gapextend,
                 column->colvalues[0].bestvalue + cost->gapstart +
                                                  cost->gapextend);
     } else
     {
-      column->colvalues[0].Dvalue
-        = column->colvalues[0].Dvalue + cost->gapextend;
+      column->colvalues[0].insvalue
+        = column->colvalues[0].insvalue + cost->gapextend;
     }
   } else
   {
     if (column->colvalues[0].bestvalue > 0)
     {
-      column->colvalues[0].Dvalue = column->colvalues[0].bestvalue +
-                                    cost->gapstart + cost->gapextend;
+      column->colvalues[0].insvalue = column->colvalues[0].bestvalue +
+                                      cost->gapstart + cost->gapextend;
     } else
     {
-      column->colvalues[0].Dvalue = INFTY;
+      column->colvalues[0].insvalue = INFTY;
     }
   }
-  column->colvalues[0].bestvalue = max3 (column->colvalues[0].Rvalue,
-                                         column->colvalues[0].Dvalue,
-                                         column->colvalues[0].Ivalue);
-  column->maxvalue = 0;
+  column->colvalues[0].bestvalue = max3 (column->colvalues[0].repvalue,
+                                         column->colvalues[0].insvalue,
+                                         column->colvalues[0].delvalue);
+  column->maxvalue = (unsigned long) column->colvalues[0].bestvalue;
+  column->pprefixlen = 0;
   nw = column->colvalues[0];
-  for (j = 1UL; j <= lengthofqseq; j++)
+  for (i = 1UL; i <= lengthofqseq; i++)
 
   {
-    west = column->colvalues[j];
+    west = column->colvalues[i];
     if (nw.bestvalue > 0)
     {
-      column->colvalues[j].Rvalue = nw.bestvalue +
-                                    REPLACEMENTSCORE(dbchar,qseq[j]);
+      column->colvalues[i].repvalue = nw.bestvalue +
+                                      REPLACEMENTSCORE(dbchar,qseq[i]);
     } else
     {
-      column->colvalues[j].Rvalue = INFTY;
+      column->colvalues[i].repvalue = INFTY;
     }
-
-    if (west.Dvalue > 0)
+    if (west.insvalue > 0)
     {
       if (west.bestvalue > 0)
       {
-        column->colvalues[j].Dvalue
-          = max2 (west.Dvalue + cost->gapextend,
+        column->colvalues[i].insvalue
+          = max2 (west.insvalue + cost->gapextend,
                   west.bestvalue + cost->gapstart + cost->gapextend);
       } else
       {
-        column->colvalues[j].Dvalue = west.Dvalue + cost->gapextend;
+        column->colvalues[i].insvalue = west.insvalue + cost->gapextend;
       }
     } else
     {
       if (west.bestvalue > 0)
       {
-        column->colvalues[j].Dvalue = west.bestvalue + cost->gapstart +
-                                                       cost->gapextend;
+        column->colvalues[i].insvalue = west.bestvalue + cost->gapstart +
+                                                         cost->gapextend;
       } else
       {
-        column->colvalues[j].Dvalue = INFTY;
+        column->colvalues[i].insvalue = INFTY;
       }
     }
-    if (column->colvalues[j - 1].Ivalue > 0)
+    if (column->colvalues[i-1].delvalue > 0)
     {
-      if (column->colvalues[j - 1].bestvalue > 0)
+      if (column->colvalues[i-1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue
-          = max2 (column->colvalues[j - 1].Ivalue + cost->gapextend,
-                  column->colvalues[j - 1].bestvalue + cost->gapstart +
-                  cost->gapextend);
+        column->colvalues[i].delvalue
+          = max2 (column->colvalues[i-1].delvalue + cost->gapextend,
+                  column->colvalues[i-1].bestvalue + cost->gapstart +
+                                                     cost->gapextend);
       } else
       {
-        column->colvalues[j].Ivalue = column->colvalues[j - 1].Ivalue +
-                                      cost->gapextend;
+        column->colvalues[i].delvalue = column->colvalues[i-1].delvalue +
+                                        cost->gapextend;
       }
     } else
     {
-      if (column->colvalues[j - 1].bestvalue > 0)
+      if (column->colvalues[i-1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue = column->colvalues[j - 1].bestvalue +
-                                      cost->gapstart + cost->gapextend;
+        column->colvalues[i].delvalue = column->colvalues[i-1].bestvalue +
+                                        cost->gapstart + cost->gapextend;
       } else
       {
-        column->colvalues[j].Ivalue = INFTY;
+        column->colvalues[i].delvalue = INFTY;
       }
     }
     nw = west;
-    column->colvalues[j].bestvalue = max3 (column->colvalues[j].Rvalue,
-                                           column->colvalues[j].Dvalue,
-                                           column->colvalues[j].Ivalue);
-    if (column->colvalues[j].bestvalue > (long) column->maxvalue)
+    column->colvalues[i].bestvalue = max3 (column->colvalues[i].repvalue,
+                                           column->colvalues[i].insvalue,
+                                           column->colvalues[i].delvalue);
+    if (column->colvalues[i].bestvalue > (long) column->maxvalue)
     {
-      column->maxvalue = (unsigned long) column->colvalues[j].bestvalue;
-      column->pprefixlen = j;
+      column->maxvalue = (unsigned long) column->colvalues[i].bestvalue;
+      column->pprefixlen = i;
     }
   }
 }
@@ -398,8 +399,8 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
   if (column->maxvalue >= lci->threshold)
   {
     limdfsresult->status = Limdfssuccess;
-    limdfsresult->pprefixlen = column->pprefixlen;
     limdfsresult->distance = column->maxvalue;
+    limdfsresult->pprefixlen = column->pprefixlen;
   } else
   {
     if (column->maxvalue > 0)
