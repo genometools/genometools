@@ -9,7 +9,7 @@ set -e -x
 
 # the make call normally used for development
 cd testsuite
-env -i ./testsuite.rb -keywords gt_ltr
+#env -i ./testsuite.rb -keywords gt_ltr
 env -i ./testsuite.rb -keywords 'gt_ltrharvest' -gttestdata ${GTTESTDATA}
 cd ..
 # optional -memcheck   (run valgrind)
