@@ -17,7 +17,6 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "core/bioseq.h"
 #include "core/fileutils.h"
 #include "core/log.h"
 #include "core/ma.h"
@@ -31,6 +30,8 @@
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_stream.h"
 #include "ltr/ltrfileout_stream.h"
+#include "match/encseq-def.h"
+#include "match/verbose-def.h"
 
 typedef struct GtLTRdigestOptions {
   GtPBSOptions  pbs_opts;
@@ -359,15 +360,22 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                *tab_out_stream   = NULL,
                *last_stream      = NULL;
   GtGenomeNode *gn;
-
   int had_err      = 0,
       tests_to_run = 0,
       arg = parsed_args;
+  GtStr *indexname = gt_str_new_cstr(argv[arg+1]);
+  Verboseinfo *vbi = newverboseinfo(arguments->verbose);
   gt_error_check(err);
   gt_assert(arguments);
 
   /* Open sequence file */
-  GtBioseq *bioseq = gt_bioseq_new(argv[arg+1], err);
+  Encodedsequence *encseq = mapencodedsequence(true,
+                                               indexname,
+                                               true,
+                                               true,
+                                               true,
+                                               vbi,
+                                               err);
   if (gt_error_is_set(err))
     had_err = -1;
 
@@ -401,7 +409,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 
     last_stream = ltrdigest_stream = gt_ltrdigest_stream_new(last_stream,
                                                   tests_to_run,
-                                                  bioseq,
+                                                  encseq,
                                                   &arguments->pbs_opts,
                                                   &arguments->ppt_opts
 #ifdef HAVE_HMMER
@@ -414,7 +422,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     {
       last_stream = tab_out_stream = gt_ltr_fileout_stream_new(last_stream,
                                               tests_to_run,
-                                              bioseq,
+                                              encseq,
                                               gt_str_get(arguments->prefix),
                                               &arguments->ppt_opts,
                                               &arguments->pbs_opts,
@@ -444,8 +452,10 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     gt_node_stream_delete(gff3_in_stream);
   }
 
-  gt_bioseq_delete(bioseq);
+  gt_str_delete(indexname);
+  freeEncodedsequence(&encseq);
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);
+  freeverboseinfo(&vbi);
 
   return had_err;
 }

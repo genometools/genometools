@@ -26,28 +26,29 @@
 unsigned long gt_ltrelement_length(GtLTRElement *e)
 {
   gt_assert(e && (e->leftLTR_3 >= e->leftLTR_5));
-  return e->rightLTR_3 - e->leftLTR_5;
+  return e->rightLTR_3 - e->leftLTR_5 + 1;
 }
 
 unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 {
   gt_assert(e && (e->leftLTR_3 >= e->leftLTR_5));
-  return e->leftLTR_3-e->leftLTR_5+1;
+  return e->leftLTR_3-e->leftLTR_5 + 1;
 }
 
 char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
-                                 GtStrand strand, GtSeq *seq, GtError *err)
+                                 GtStrand strand, const char *seq,
+                                 unsigned long slen, GtError *err)
 {
   char *out;
   unsigned long len;
 
-  gt_assert(seq && end >= start && end <= gt_seq_length(seq));
+  gt_assert(seq && end >= start && end <= slen);
 
   gt_error_check(err);
 
   len = end - start + 1;
   out = gt_calloc(len+1, sizeof (char));
-  memcpy(out, gt_seq_get_orig(seq)+start, sizeof (char) * len);
+  memcpy(out, seq+start, sizeof (char) * len);
   if (strand == GT_STRAND_REVERSE)
     (void) gt_reverse_complement(out, len, err);
   out[len]='\0';
@@ -168,12 +169,16 @@ int gt_ltrelement_unit_test(GtError *err)
   ensure(had_err, 451 == rng1.start);
   ensure(had_err, 477 == rng1.end);
 
-  cseq = gt_ltrelement_get_sequence(2, 6, GT_STRAND_FORWARD, seq, err);
+  cseq = gt_ltrelement_get_sequence(2, 6, GT_STRAND_FORWARD,
+                                    gt_seq_get_orig(seq),
+                                    gt_seq_length(seq), err);
   ensure(had_err,
          !strcmp("CGAGG\0", cseq));
   gt_free(cseq);
 
-  cseq = gt_ltrelement_get_sequence(2, 6, GT_STRAND_REVERSE, seq, err);
+  cseq = gt_ltrelement_get_sequence(2, 6, GT_STRAND_REVERSE,
+                                    gt_seq_get_orig(seq),
+                                    gt_seq_length(seq), err);
   ensure(had_err,
          !strcmp("CCTCG\0", cseq));
   gt_free(cseq);
