@@ -180,6 +180,8 @@ const AbstractDfstransformer *spse_AbstractDfstransformer(void)
     NULL, /* no extractdfsconstinfo */
     spse_freedfsconstinfo,
     spse_initLimdfsstate,
+    NULL,
+    NULL,
     spse_fullmatchLimdfsstate,
     spse_nextLimdfsstate,
     spse_inplacenextLimdfsstate,

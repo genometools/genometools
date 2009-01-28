@@ -422,6 +422,8 @@ const AbstractDfstransformer *apme_AbstractDfstransformer(void)
     NULL, /* no extractdfsconstinfo */
     apme_freedfsconstinfo,
     apme_initLimdfsstate,
+    NULL,
+    NULL,
     apme_fullmatchLimdfsstate,
     apme_nextLimdfsstate,
     apme_inplacenextLimdfsstate,

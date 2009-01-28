@@ -294,6 +294,8 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
     pms_extractdfsconstinfo,
     pms_freedfsconstinfo,
     pms_initLimdfsstate,
+    NULL,
+    NULL,
     pms_fullmatchLimdfsstate,
     pms_nextLimdfsstate,
     pms_inplacenextLimdfsstate,

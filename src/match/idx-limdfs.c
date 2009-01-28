@@ -19,7 +19,6 @@
 #include "core/chardef.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
-#include "core/arraydef.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
@@ -146,6 +145,33 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   return limdfsresources;
 }
 
+static Lcpintervalwithinfo *allocateStackspace(ArrayLcpintervalwithinfo *stack,
+                                               const AbstractDfstransformer
+                                                      *adfst)
+{
+  if (stack->nextfreeLcpintervalwithinfo >= stack->allocatedLcpintervalwithinfo)
+  {
+    unsigned long idx;
+    const unsigned long addelems = 128UL;
+
+    ALLOCASSIGNSPACE(stack->spaceLcpintervalwithinfo,
+                     stack->spaceLcpintervalwithinfo,
+                     Lcpintervalwithinfo,
+                     stack->allocatedLcpintervalwithinfo + addelems);
+    if (adfst->initLimdfsstackelem != NULL)
+    {
+      for (idx = stack->allocatedLcpintervalwithinfo;
+           idx < stack->allocatedLcpintervalwithinfo + addelems; idx++)
+      {
+        adfst->initLimdfsstackelem(stack->spaceLcpintervalwithinfo[idx].
+                                   aliasstate);
+      }
+    }
+    stack->allocatedLcpintervalwithinfo += addelems;
+  }
+  return stack->spaceLcpintervalwithinfo + stack->nextfreeLcpintervalwithinfo++;
+}
+
 static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
                              Seqpos leftbound,
                              Seqpos rightbound,
@@ -155,7 +181,7 @@ static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
   Lcpintervalwithinfo *stackptr;
 
   stack->nextfreeLcpintervalwithinfo = 0;
-  GETNEXTFREEINARRAY(stackptr,stack,Lcpintervalwithinfo,128);
+  stackptr = allocateStackspace(stack,adfst);
   stackptr->lcpitv.offset = 0;
   stackptr->lcpitv.leftbound = leftbound;
   stackptr->lcpitv.rightbound = rightbound;
@@ -170,6 +196,17 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 
   adfst->freedfsconstinfo(&limdfsresources->dfsconstinfo);
   FREEARRAY(&limdfsresources->bwci,Boundswithchar);
+  if (adfst->initLimdfsstackelem != NULL)
+  {
+    unsigned long idx;
+
+    for (idx = 0; idx < limdfsresources->stack.allocatedLcpintervalwithinfo;
+         idx++)
+    {
+      adfst->freeLimdfsstackelem(limdfsresources->stack.
+                                 spaceLcpintervalwithinfo[idx].aliasstate);
+    }
+  }
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
   FREESPACE(limdfsresources->currentpathspace);
@@ -523,8 +560,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
   {
     Lcpintervalwithinfo *stackptr;
 
-    GETNEXTFREEINARRAY(stackptr,&limdfsresources->stack,
-                       Lcpintervalwithinfo,128);
+    stackptr = allocateStackspace(&limdfsresources->stack,adfst);
     if (pushandpossiblypop(limdfsresources,
                            stackptr,
                            child,

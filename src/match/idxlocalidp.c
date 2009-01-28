@@ -374,6 +374,16 @@ static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliascolumn),
   firstcolumn (column, lci->cost, lci->lengthofqseq);
 }
 
+static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
+{
+  ((Column *) aliascolumn)->colvalues = NULL;
+}
+
+static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
+{
+  gt_free(((Column *) aliascolumn)->colvalues);
+}
+
 static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
                                          DECLAREPTRDFSSTATE(aliascolumn),
                                          GT_UNUSED Seqpos leftbound,
@@ -436,6 +446,8 @@ const AbstractDfstransformer *locali_AbstractDfstransformer (void)
     NULL,
     locali_freedfsconstinfo,
     locali_initLimdfsstate,
+    locali_initLimdfsstackelem,
+    locali_freeLimdfsstackelem,
     locali_fullmatchLimdfsstate,
     locali_nextLimdfsstate,
     locali_inplacenextLimdfsstate,

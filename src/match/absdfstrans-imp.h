@@ -56,6 +56,8 @@ struct AbstractDfstransformer
   void (*freedfsconstinfo)(void **dfsconstinfo);
   void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
                           void *dfsconstinfo);
+  void (*initLimdfsstackelem)(DECLAREPTRDFSSTATE(aliasstate));
+  void (*freeLimdfsstackelem)(DECLAREPTRDFSSTATE(aliasstate));
   void (*fullmatchLimdfsstate)(Limdfsresult *limdfsresult,
                                DECLAREPTRDFSSTATE(aliascolumn),
                                        Seqpos left,
