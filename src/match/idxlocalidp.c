@@ -4,11 +4,13 @@
 #include "core/unused_api.h"
 #include "absdfstrans-imp.h"
 
+#define INFTY -1L
+
 typedef struct
 {
   long **alpha,
-    g,
-    s;                          /* g and s must be negative */
+       gapstart,   /* must be negative */
+       gapextend;  /* must be negative */
 } Cost;
 
 typedef struct
@@ -30,8 +32,8 @@ typedef struct
 typedef struct
 {
   Matrixvalue *colvalues;
-  unsigned long pprefixlen;
-  long maxvalue;
+  unsigned long pprefixlen,
+                maxvalue;
 } Column;
 
 typedef struct
@@ -41,12 +43,12 @@ typedef struct
   long alignmentscore;
 } Idxlocaliresult;
 
-static long max2 (long a,long b)
+static inline long max2 (long a,long b)
 {
   return (a < b) ? b : a;
 }
 
-static long max3 (long a,long b,long c)
+static inline long max3 (long a,long b,long c)
 {
   long temp;
 
@@ -60,46 +62,50 @@ static void firstcolumn (Column *column,
 {
   unsigned long j;
 
+  if (column->colvalues == NULL)
+  {
+    column->colvalues == gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
+  }
+  column->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
   column->colvalues[0].Rvalue = 0;
-  column->colvalues[0].Dvalue = cost->g;
-  column->colvalues[0].Ivalue = cost->g;
+  column->colvalues[0].Dvalue = cost->gapstart;
+  column->colvalues[0].Ivalue = cost->gapstart;
   column->colvalues[0].bestvalue = 0;
   column->maxvalue = 0;
-  for (j = 1; j <= lengthofqseq; j++)
+  for (j = 1UL; j <= lengthofqseq; j++)
   {
-    column->colvalues[j].Rvalue = -1;
-    column->colvalues[j].Dvalue = -1;
+    column->colvalues[j].Rvalue = INFTY;
+    column->colvalues[j].Dvalue = INFTY;
     if (column->colvalues[j - 1].Ivalue > 0)
     {
       if (column->colvalues[j - 1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue =
-          max2 (column->colvalues[j - 1].Ivalue + cost->s,
-                column->colvalues[j - 1].bestvalue + cost->g +
-                cost->s);
+        column->colvalues[j].Ivalue
+          = max2 (column->colvalues[j - 1].Ivalue + cost->gapextend,
+                  column->colvalues[j - 1].bestvalue + cost->gapstart +
+                                                       cost->gapextend);
       } else
       {
-        column->colvalues[j].Ivalue =
-          column->colvalues[j - 1].Ivalue + cost->s;
+        column->colvalues[j].Ivalue = column->colvalues[j - 1].Ivalue +
+                                      cost->gapextend;
       }
     } else
     {
       if (column->colvalues[j - 1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue =
-          column->colvalues[j - 1].bestvalue + cost->g + cost->s;
+        column->colvalues[j].Ivalue = column->colvalues[j - 1].bestvalue +
+                                      cost->gapstart + cost->gapextend;
       } else
       {
-        column->colvalues[j].Ivalue = -1;
+        column->colvalues[j].Ivalue = INFTY;
       }
     }
-    column->colvalues[j].bestvalue =
-      max3 (column->colvalues[j].Rvalue,
-            column->colvalues[j].Dvalue,
-            column->colvalues[j].Ivalue);
-    if (column->colvalues[j].bestvalue > column->maxvalue)
+    column->colvalues[j].bestvalue = max3 (column->colvalues[j].Rvalue,
+                                           column->colvalues[j].Dvalue,
+                                           column->colvalues[j].Ivalue);
+    if (column->colvalues[j].bestvalue > (long) column->maxvalue)
     {
-      column->maxvalue = column->colvalues[j].bestvalue;
+      column->maxvalue = (unsigned long) column->colvalues[j].bestvalue;
       column->pprefixlen = j;
     }
   }
@@ -114,109 +120,104 @@ static void nextcolumn (Column *outcol,
 {
   unsigned long j;
 
-  /*
-  outcol = gt_malloc (sizeof (Column));
-  outcol->colvalues =
-    gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
-  */
-  outcol->colvalues[0].Rvalue = outcol->colvalues[0].Ivalue = -1;
+  if (outcol->colvalues == NULL)
+  {
+    outcol->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
+  }
+  outcol->colvalues[0].Rvalue = outcol->colvalues[0].Ivalue = INFTY;
   if (incol->colvalues[0].Dvalue > 0)
   {
     if (incol->colvalues[0].bestvalue > 0)
     {
-      outcol->colvalues[0].Dvalue =
-        max2 (incol->colvalues[0].Dvalue + cost->s,
-              incol->colvalues[0].bestvalue + cost->g + cost->s);
+      outcol->colvalues[0].Dvalue
+        = max2 (incol->colvalues[0].Dvalue + cost->gapextend,
+                incol->colvalues[0].bestvalue + cost->gapstart +
+                                                cost->gapextend);
     } else
     {
-      outcol->colvalues[0].Dvalue =
-        incol->colvalues[0].Dvalue + cost->s;
+      outcol->colvalues[0].Dvalue = incol->colvalues[0].Dvalue +
+                                    cost->gapextend;
     }
   } else
   {
     if (incol->colvalues[0].bestvalue > 0)
     {
-      outcol->colvalues[0].Dvalue =
-        incol->colvalues[0].bestvalue + cost->g + cost->s;
+      outcol->colvalues[0].Dvalue = incol->colvalues[0].bestvalue +
+                                    cost->gapstart + cost->gapextend;
     } else
     {
-      outcol->colvalues[0].Dvalue = -1;
+      outcol->colvalues[0].Dvalue = INFTY;
     }
   }
-  outcol->colvalues[0].bestvalue =
-    max3 (outcol->colvalues[0].Rvalue,
-          outcol->colvalues[0].Dvalue,
-          outcol->colvalues[0].Ivalue);
+  outcol->colvalues[0].bestvalue = max3 (outcol->colvalues[0].Rvalue,
+                                         outcol->colvalues[0].Dvalue,
+                                         outcol->colvalues[0].Ivalue);
   outcol->maxvalue = 0;
   outcol->pprefixlen = 0;
-  for (j = 1; j <= lengthofqseq; j++)
+  for (j = 1UL; j <= lengthofqseq; j++)
   {
-    //replacement
     if (incol->colvalues[j - 1].bestvalue > 0)
     {
-      outcol->colvalues[j].Rvalue = incol->colvalues[j - 1].bestvalue + 
-                                    cost->alpha[dbchar][qseq[j]];   //compare
+      outcol->colvalues[j].Rvalue = incol->colvalues[j - 1].bestvalue +
+                                    cost->alpha[dbchar][qseq[j]];
     } else
     {
-      outcol->colvalues[j].Rvalue = -1;
+      outcol->colvalues[j].Rvalue = INFTY;
     }
-    //deletion
     if (incol->colvalues[j].Dvalue > 0)
     {
       if (incol->colvalues[j].bestvalue > 0)
       {
-        outcol->colvalues[j].Dvalue =
-          max2 (incol->colvalues[j].Dvalue + cost->s,
-                incol->colvalues[j].bestvalue + cost->g + cost->s);
+        outcol->colvalues[j].Dvalue
+          = max2 (incol->colvalues[j].Dvalue + cost->gapextend,
+                  incol->colvalues[j].bestvalue + cost->gapstart +
+                                                  cost->gapextend);
       } else
       {
-        outcol->colvalues[j].Dvalue = incol->colvalues[j].Dvalue + cost->s;
+        outcol->colvalues[j].Dvalue = incol->colvalues[j].Dvalue +
+                                      cost->gapextend;
       }
     } else
     {
       if (incol->colvalues[j].bestvalue > 0)
       {
-        outcol->colvalues[j].Dvalue =
-          incol->colvalues[j].bestvalue + cost->g + cost->s;
+        outcol->colvalues[j].Dvalue = incol->colvalues[j].bestvalue +
+                                      cost->gapstart + cost->gapextend;
       } else
       {
-        outcol->colvalues[j].Dvalue = -1;
+        outcol->colvalues[j].Dvalue = INFTY;
       }
     }
-    //insertion
     if (outcol->colvalues[j - 1].Ivalue > 0)
     {
       if (outcol->colvalues[j - 1].bestvalue > 0)
       {
-        outcol->colvalues[j].Ivalue =
-          max2 (outcol->colvalues[j - 1].Ivalue + cost->s,
-                outcol->colvalues[j - 1].bestvalue + cost->g +
-                cost->s);
+        outcol->colvalues[j].Ivalue
+          = max2 (outcol->colvalues[j - 1].Ivalue + cost->gapextend,
+                  outcol->colvalues[j - 1].bestvalue + cost->gapstart +
+                                                       cost->gapextend);
       } else
       {
-        outcol->colvalues[j].Ivalue =
-          outcol->colvalues[j - 1].Ivalue + cost->s;
+        outcol->colvalues[j].Ivalue = outcol->colvalues[j - 1].Ivalue +
+                                      cost->gapextend;
       }
     } else
     {
       if (outcol->colvalues[j - 1].bestvalue > 0)
       {
-        outcol->colvalues[j].Ivalue =
-          outcol->colvalues[j - 1].bestvalue + cost->g + cost->s;
+        outcol->colvalues[j].Ivalue = outcol->colvalues[j - 1].bestvalue +
+                                      cost->gapstart + cost->gapextend;
       } else
       {
-        outcol->colvalues[j].Ivalue = -1;
+        outcol->colvalues[j].Ivalue = INFTY;
       }
     }
-
-    //best score
-    outcol->colvalues[j].bestvalue =
-      max3 (outcol->colvalues[j].Rvalue,
-            outcol->colvalues[j].Dvalue,
-            outcol->colvalues[j].Ivalue);
-    if (outcol->colvalues[j].bestvalue > outcol->maxvalue)
+    outcol->colvalues[j].bestvalue = max3 (outcol->colvalues[j].Rvalue,
+                                           outcol->colvalues[j].Dvalue,
+                                           outcol->colvalues[j].Ivalue);
+    if (outcol->colvalues[j].bestvalue > (long) outcol->maxvalue)
     {
-      outcol->maxvalue = outcol->colvalues[j].bestvalue;
+      outcol->maxvalue = (unsigned long) outcol->colvalues[j].bestvalue;
       outcol->pprefixlen = j;
     }
   }
@@ -231,38 +232,37 @@ static void inplacenextcolumn (const Cost *cost,
   unsigned long j;
   Matrixvalue nw, west;
 
-  column->colvalues[0].Rvalue = column->colvalues[0].Ivalue = -1;
+  column->colvalues[0].Rvalue = column->colvalues[0].Ivalue = INFTY;
   if (column->colvalues[0].Dvalue > 0)
   {
     if (column->colvalues[0].bestvalue > 0)
     {
-      column->colvalues[0].Dvalue =
-        max2 (column->colvalues[0].Dvalue + cost->s,
-              column->colvalues[0].bestvalue + cost->g +
-              cost->s);
+      column->colvalues[0].Dvalue
+        = max2 (column->colvalues[0].Dvalue + cost->gapextend,
+                column->colvalues[0].bestvalue + cost->gapstart +
+                                                 cost->gapextend);
     } else
     {
-      column->colvalues[0].Dvalue =
-        column->colvalues[0].Dvalue + cost->s;
+      column->colvalues[0].Dvalue
+        = column->colvalues[0].Dvalue + cost->gapextend;
     }
   } else
   {
     if (column->colvalues[0].bestvalue > 0)
     {
-      column->colvalues[0].Dvalue =
-      column->colvalues[0].bestvalue + cost->g + cost->s;
+      column->colvalues[0].Dvalue = column->colvalues[0].bestvalue +
+                                    cost->gapstart + cost->gapextend;
     } else
     {
-      column->colvalues[0].Dvalue = -1;
+      column->colvalues[0].Dvalue = INFTY;
     }
   }
-  column->colvalues[0].bestvalue =
-    max3 (column->colvalues[0].Rvalue,
-          column->colvalues[0].Dvalue,
-          column->colvalues[0].Ivalue);
+  column->colvalues[0].bestvalue = max3 (column->colvalues[0].Rvalue,
+                                         column->colvalues[0].Dvalue,
+                                         column->colvalues[0].Ivalue);
   column->maxvalue = 0;
   nw = column->colvalues[0];
-  for (j = 1; j <= lengthofqseq; j++)
+  for (j = 1UL; j <= lengthofqseq; j++)
 
   {
     west = column->colvalues[j];
@@ -271,76 +271,66 @@ static void inplacenextcolumn (const Cost *cost,
       column->colvalues[j].Rvalue = nw.bestvalue + cost->alpha[dbchar][qseq[j]];
     } else
     {
-      column->colvalues[j].Rvalue = -1;
+      column->colvalues[j].Rvalue = INFTY;
     }
 
-    //deletion
     if (west.Dvalue > 0)
     {
       if (west.bestvalue > 0)
       {
-        column->colvalues[j].Dvalue =
-          max2 (west.Dvalue + cost->s,
-                west.bestvalue + cost->g + cost->s);
+        column->colvalues[j].Dvalue
+          = max2 (west.Dvalue + cost->gapextend,
+                  west.bestvalue + cost->gapstart + cost->gapextend);
       } else
       {
-        column->colvalues[j].Dvalue = west.Dvalue + cost->s;
+        column->colvalues[j].Dvalue = west.Dvalue + cost->gapextend;
       }
     } else
     {
       if (west.bestvalue > 0)
       {
-        column->colvalues[j].Dvalue = west.bestvalue + cost->g + cost->s;
+        column->colvalues[j].Dvalue = west.bestvalue + cost->gapstart +
+                                                       cost->gapextend;
       } else
       {
-        column->colvalues[j].Dvalue = -1;
+        column->colvalues[j].Dvalue = INFTY;
       }
     }
-
-    //insertion
     if (column->colvalues[j - 1].Ivalue > 0)
     {
       if (column->colvalues[j - 1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue =
-          max2 (column->colvalues[j - 1].Ivalue + cost->s,
-                column->colvalues[j - 1].bestvalue + cost->g +
-                cost->s);
+        column->colvalues[j].Ivalue
+          = max2 (column->colvalues[j - 1].Ivalue + cost->gapextend,
+                  column->colvalues[j - 1].bestvalue + cost->gapstart +
+                  cost->gapextend);
       } else
       {
-        column->colvalues[j].Ivalue =
-          column->colvalues[j - 1].Ivalue + cost->s;
+        column->colvalues[j].Ivalue = column->colvalues[j - 1].Ivalue +
+                                      cost->gapextend;
       }
     } else
     {
       if (column->colvalues[j - 1].bestvalue > 0)
       {
-        column->colvalues[j].Ivalue =
-          column->colvalues[j - 1].bestvalue + cost->g + cost->s;
+        column->colvalues[j].Ivalue = column->colvalues[j - 1].bestvalue +
+                                      cost->gapstart + cost->gapextend;
       } else
       {
-        column->colvalues[j].Ivalue = -1;
+        column->colvalues[j].Ivalue = INFTY;
       }
     }
-
-    //best score
     nw = west;
-    column->colvalues[j].bestvalue =
-      max3 (column->colvalues[j].Rvalue,
-            column->colvalues[j].Dvalue,
-            column->colvalues[j].Ivalue);
-    if (column->colvalues[j].bestvalue > column->maxvalue)
+    column->colvalues[j].bestvalue = max3 (column->colvalues[j].Rvalue,
+                                           column->colvalues[j].Dvalue,
+                                           column->colvalues[j].Ivalue);
+    if (column->colvalues[j].bestvalue > (long) column->maxvalue)
     {
-      column->maxvalue = column->colvalues[j].bestvalue;
+      column->maxvalue = (unsigned long) column->colvalues[j].bestvalue;
       column->pprefixlen = j;
     }
   }
 }
-
-  /*
-     allokiert eine strukur vom Typ Limdfsconstrinfo und liefert einen 
-     Zeiger darauf zr"uck 
-   */
 
 static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
 {
@@ -351,7 +341,7 @@ static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
 
 static void locali_initdfsconstinfo (void *dfsconstinfo,
                                      unsigned int alphasize,
-                                     ...) /* initializiert Limdfsconstinfo */
+                                     ...)
 {
   va_list ap;
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
@@ -364,7 +354,6 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
 }
 
 static void locali_freedfsconstinfo (void **dfsconstinfo)
-          /* gibt Limdfsconstinfo wieder frei */
 {
   Limdfsconstinfo *lci = (Limdfsconstinfo *) *dfsconstinfo;
 
@@ -374,9 +363,6 @@ static void locali_freedfsconstinfo (void **dfsconstinfo)
 
 static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliascolumn),
                                     void *dfsconstinfo)
-  /*
-     initializiert die erste Spalte mit firstcolumn 
-   */
 {
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
@@ -412,56 +398,45 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
   }
 }
 
-  /*
-     caste die void Zeiger f"ur Limdfsconstinfo und Idxlocaliresult und 
-     rufe nextcolumn auf 
-   */
-
-static void locali_nextLimdfsstate (
-  const void *dfsconstinfo,
-  DECLAREPTRDFSSTATE (aliasoutcol),
-  GT_UNUSED unsigned long currentdepth,
-  Uchar currentchar,
-  const DECLAREPTRDFSSTATE (aliasincol))
+static void locali_nextLimdfsstate (const void *dfsconstinfo,
+                                    DECLAREPTRDFSSTATE (aliasoutcol),
+                                    GT_UNUSED unsigned long currentdepth,
+                                    Uchar currentchar,
+                                    const DECLAREPTRDFSSTATE (aliasincol))
 {
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
   Column *outcol = (Column *) aliasoutcol;
   const Column *incol = (const Column *) aliasincol;
 
   nextcolumn (outcol,lci->cost,currentchar,lci->qseq,lci->lengthofqseq,incol);
-} 
+}
 
-  /*
-     sowie vorherige Funktion aber mit nur einer Spalte,
-     auf der inplace gearbeitet wird 
-   */
-
-static void locali_inplacenextLimdfsstate (
-  const void *dfsconstinfo,
-  DECLAREPTRDFSSTATE (aliascolumn),
-  GT_UNUSED unsigned long currentdepth,
-  Uchar currentchar)
+static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
+                                           DECLAREPTRDFSSTATE (aliascolumn),
+                                           GT_UNUSED unsigned long currentdepth,
+                                           Uchar currentchar)
 {
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
   inplacenextcolumn (lci->cost,currentchar,lci->qseq,lci->lengthofqseq,column);
-} 
+}
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
 {
-  static const AbstractDfstransformer locali_adfst = 
-  { sizeof (Column),
-    locali_allocatedfsconstinfo, /* allokiert eine strukur vom Typ Limddfsconstrinfo und liefert einen Zeiger darauf zr"uck */
-    locali_initdfsconstinfo,           /* initializiert Limdfsconstinfo */
-    NULL,                              /* no extract dfsconstinfo */
-    locali_freedfsconstinfo,           /* gibt Limdfsconstinfo wieder frei */
-    locali_initLimdfsstate,            /* initializiere die erste Spalte mit firstcolumn */
-    locali_fullmatchLimdfsstate,       /* "ubertrage die status und qseqendpos aufden Idxlocaliresult zeiger */
-    locali_nextLimdfsstate,            /* caste die void Zeiger f"ur Limdfsconstinfo und Idxlocaliresult und rufe nextcolumn auf */
-    locali_inplacenextLimdfsstate,     /* sowie vorherige Funktion aber mit nureiner Spalte,auf der inplace gearbeitet wird */
+  static const AbstractDfstransformer locali_adfst =
+  {
+    sizeof (Column),
+    locali_allocatedfsconstinfo,
+    locali_initdfsconstinfo,
+    NULL,
+    locali_freedfsconstinfo,
+    locali_initLimdfsstate,
+    locali_fullmatchLimdfsstate,
+    locali_nextLimdfsstate,
+    locali_inplacenextLimdfsstate,
 #ifdef SKDEBUG
-    locali_showLimdfsstate,
+    NULL
 #endif /*  */
   };
   return &locali_adfst;
