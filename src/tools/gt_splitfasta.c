@@ -28,6 +28,7 @@
 
 typedef struct {
   unsigned long max_filesize_in_MB;
+  unsigned int num_files;
   GtStr *splitdesc;
   bool force;
 } SplitfastaArguments;
@@ -51,10 +52,18 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
 {
   SplitfastaArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *targetsize_option, *splitdesc_option, *o;
+  GtOption *targetsize_option, *splitdesc_option, *o, *numfiles_option;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] fastafile","Split the supplied fasta "
                          "file.");
+
+  numfiles_option = gt_option_new_uint_min("numfiles",
+                                           "set the number of target files to create "
+                                           "# target files",
+                                           &arguments->num_files, 0,
+                                           1);
+  gt_option_parser_add_option(op, numfiles_option);
+
   targetsize_option = gt_option_new_ulong_min("targetsize",
                                            "set the target file "
                                            "size in MB",
@@ -68,6 +77,9 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
                                        arguments->splitdesc, NULL);
   gt_option_parser_add_option(op, splitdesc_option);
   gt_option_exclude(targetsize_option, splitdesc_option);
+  gt_option_exclude(numfiles_option, splitdesc_option);
+  gt_option_exclude(numfiles_option, targetsize_option);
+
   o = gt_option_new_bool(FORCE_OPT_CSTR, "force writing to output file",
                       &arguments->force, false);
   gt_option_parser_add_option(op, o);
@@ -145,6 +157,7 @@ static int split_fasta_file(const char *filename,
   unsigned long filenum = 0, bytecount = 0, separator_pos;
   int read_bytes, had_err = 0;
   char buf[BUFSIZ];
+
   gt_error_check(err);
   gt_assert(filename && max_filesize_in_bytes);
 
@@ -232,19 +245,30 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
 {
   SplitfastaArguments *arguments = tool_arguments;
   unsigned long max_filesize_in_bytes;
+  unsigned int num_files;
   int had_err;
+  off_t file_size;
+  const char* filename;
   gt_error_check(err);
   gt_assert(arguments);
 
   max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
+  num_files = arguments->num_files;
+  filename = argv[parsed_args];
 
   if (gt_str_length(arguments->splitdesc)) {
-    had_err = split_description(argv[parsed_args], arguments->splitdesc,
+    had_err = split_description(filename, arguments->splitdesc,
                                 arguments->force, err);
   }
   else {
-    had_err = split_fasta_file(argv[parsed_args], max_filesize_in_bytes,
-                               arguments->force, err);
+    /* manually set the maxfile size based on requested numfiles */
+	if (num_files != 0){
+	  file_size = gt_file_estimate_size(filename);
+      max_filesize_in_bytes = file_size / num_files ;
+    }
+	
+    had_err = split_fasta_file(filename, max_filesize_in_bytes, 
+							   arguments->force, err);
   }
 
   return had_err;
