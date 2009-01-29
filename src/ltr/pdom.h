@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,44 +21,67 @@
 #ifdef HAVE_HMMER
 
 #include "core/array.h"
+#include "core/error.h"
 #include "core/hashmap.h"
 #include "core/strand.h"
 #include "core/str_array.h"
 #include "ltr/ltrelement.h"
-#include "structs.h"
 
 typedef struct GtPdomOptions {
   double evalue_cutoff;
   GtStrArray *hmm_files;
-  GtArray *plan7_ts;
-  struct threshold_s thresh;
   unsigned int nof_threads,
                chain_max_gap_length;
 } GtPdomOptions;
 
-typedef struct GtPdomHit GtPdomHit;
+typedef struct GtPdomFinder GtPdomFinder;
+typedef struct GtPdomModel GtPdomModel;
+typedef struct GtPdomSingleHit GtPdomSingleHit;
+typedef struct GtPdomModelHit GtPdomModelHit;
 typedef struct GtPdomResults GtPdomResults;
 
-typedef int (*GtPdomIteratorFunc)(struct plan7_s *model, GtPdomHit *hit,
+typedef int (*GtPdomIteratorFunc)(GtPdomModel *model, GtPdomModelHit *hit,
                                   void *data, GtError*);
 
-int            gt_pdom_load_hmm_files(GtPdomOptions*, GtError*);
-GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
-                            GtLTRElement *element, GtPdomOptions *opts);
+/* acts as a factory for GtPdomResults */
+GtPdomFinder*    gt_pdom_finder_new(GtStrArray *hmmfiles,
+                                    double eval_cutoff,
+                                    unsigned int nof_threads,
+                                    unsigned int chain_max_gap_length,
+                                    GtError*);
+unsigned int     gt_pdom_finder_get_nof_threads(const GtPdomFinder*);
+unsigned int     gt_pdom_finder_get_max_gap_length(const GtPdomFinder*);
+double           gt_pdom_finder_get_eval_cutoff(const GtPdomFinder*);
+GtStrArray*      gt_pdom_finder_get_model_filenames(const GtPdomFinder*);
+unsigned long    gt_pdom_finder_get_number_of_models(const GtPdomFinder*);
+GtPdomModel*     gt_pdom_finder_get_model(const GtPdomModel*, unsigned long);
+GtPdomResults*   gt_pdom_finder_find(GtPdomFinder*, const char *seq,
+                                     const char *rev_seq, GtLTRElement*);
+void             gt_pdom_finder_delete(GtPdomFinder*);
 
-int            gt_pdom_results_foreach_domain_hit(GtPdomResults*,
-                                                  GtPdomIteratorFunc,
-                                                  void*,
-                                                  GtError*);
-bool           gt_pdom_results_empty(GtPdomResults*);
-double         gt_pdom_results_get_combined_evalue_fwd(GtPdomResults*);
-double         gt_pdom_results_get_combined_evalue_rev(GtPdomResults*);
-void           gt_pdom_results_delete(GtPdomResults*);
+/* holds results for all models */
+int              gt_pdom_results_foreach_domain_hit(GtPdomResults*,
+                                                    GtPdomIteratorFunc,
+                                                    void*,
+                                                    GtError*);
+bool             gt_pdom_results_empty(GtPdomResults*);
+double           gt_pdom_results_get_combined_evalue_fwd(GtPdomResults*);
+double           gt_pdom_results_get_combined_evalue_rev(GtPdomResults*);
+void             gt_pdom_results_delete(GtPdomResults*);
 
-GtArray*       gt_pdom_hit_get_best_chain(const GtPdomHit*);
-GtStrand       gt_pdom_hit_get_strand(const GtPdomHit*);
+/* holds information about a single domain model */
+const char*      gt_pdom_model_get_name(const GtPdomModel*);
+const char*      gt_pdom_model_get_acc(const GtPdomModel*);
 
-void           gt_pdom_clear_hmms(GtArray*);
+/* holds hits for a single domain model */
+unsigned long    gt_pdom_model_hit_best_chain_length(const GtPdomModelHit*);
+GtPdomSingleHit* gt_pdom_model_hit_best_single_hit(const GtPdomModelHit*,
+                                                   unsigned long i);
+GtStrand         gt_pdom_model_hit_get_best_strand(const GtPdomModelHit*);
+
+/* holds information about an individual hit */
+GtPhase          gt_pdom_single_hit_get_phase(const GtPdomSingleHit*);
+GtRange          gt_pdom_single_hit_get_range(const GtPdomSingleHit*);
 
 #endif
 #endif

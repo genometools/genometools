@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/fileutils.h"
+#include "core/log.h"
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
@@ -365,16 +366,6 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_error_check(err);
   gt_assert(arguments);
 
-#ifdef HAVE_HMMER
-  /* set additional arguments/options */
-  arguments->pdom_opts.thresh.globT   = -FLT_MAX;
-  arguments->pdom_opts.thresh.domT    = -FLT_MAX;
-  arguments->pdom_opts.thresh.domE    = FLT_MAX;
-  arguments->pdom_opts.thresh.autocut = CUT_NONE;
-  arguments->pdom_opts.thresh.Z       = 1;
-  arguments->pdom_opts.thresh.globE   = arguments->pdom_opts.evalue_cutoff;
-#endif
-
   /* Open sequence file */
   GtBioseq *bioseq = gt_bioseq_new(argv[arg+1], err);
   if (gt_error_is_set(err))
@@ -399,8 +390,6 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err && gt_str_array_size(arguments->pdom_opts.hmm_files) > 0)
   {
     tests_to_run |= GT_LTRDIGEST_RUN_PDOM;
-    arguments->pdom_opts.plan7_ts = gt_array_new(sizeof (struct plan7_s*));
-    had_err = gt_pdom_load_hmm_files(&arguments->pdom_opts, err);
   }
 #endif
 
@@ -453,14 +442,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     if (tab_out_stream)
       gt_node_stream_delete(tab_out_stream);
     gt_node_stream_delete(gff3_in_stream);
-#ifdef HAVE_HMMER
-    gt_pdom_clear_hmms(arguments->pdom_opts.plan7_ts);
-#endif
   }
-#ifdef HAVE_HMMER
-  else
-     gt_array_delete(arguments->pdom_opts.plan7_ts);
-#endif
 
   gt_bioseq_delete(bioseq);
   gt_bioseq_delete(arguments->pbs_opts.trna_lib);

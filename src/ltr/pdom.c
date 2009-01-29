@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,6 +32,7 @@
 #include "ltr/pdom.h"
 
 /* HMMER related includes */
+#include "structs.h"
 #include "globals.h"
 #include "squid.h"
 #include "funcs.h"
@@ -39,10 +40,30 @@
 /* number of tophit_s structs to preallocate in HMMER back-end */
 #define MAX_TOPHITS 50
 
-struct GtPdomHit {
+struct GtPdomFinder {
+  GtStrArray *hmm_files;
+  GtArray *models;
+  struct threshold_s thresh;
+  unsigned int nof_threads,
+               chain_max_gap_length;
+};
+
+struct GtPdomModel {
+  struct plan7_s *model;
+  unsigned long reference_count;
+};
+
+struct GtPdomSingleHit {
+  GtPhase phase;
+  GtRange range;
+  unsigned long reference_count;
+};
+
+struct GtPdomModelHit {
   struct tophit_s *hits_fwd, *hits_rev;
   GtStrand strand;
   GtArray *best_chain;
+  unsigned long reference_count;
 };
 
 struct GtPdomResults {
@@ -60,59 +81,176 @@ typedef struct GtPdomDomainTraverseInfo {
 typedef struct GtPdomSharedMem {
   pthread_t *thread;
   int nof_threads;
+  GtPdomFinder *gpf;
   unsigned long next_hmm;
   GtArray *hmms;
   char *fwd_fr1, *fwd_fr2, *fwd_fr3,
        *rev_fr1, *rev_fr2, *rev_fr3;
   GtPdomResults *results;
-  GtPdomOptions *opts;
   pthread_mutex_t in_lock, out_lock;
 } GtPdomSharedMem;
 
-GtPdomHit* gt_pdom_hit_new(void)
+/* --------------- GtPdomSingleHit ---------------------------------- */
+
+static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
 {
-  GtPdomHit *hit;
-  hit = gt_calloc(1, sizeof (GtPdomHit));
-  hit->hits_fwd   = AllocTophits(MAX_TOPHITS);
-  hit->hits_rev   = AllocTophits(MAX_TOPHITS);
-  hit->strand     = GT_STRAND_UNKNOWN;
-  hit->best_chain = gt_array_new(sizeof (struct hit_s*));
+  GtPdomSingleHit *hit;
+  gt_assert(singlehit);
+  hit = gt_calloc(1, sizeof (GtPdomSingleHit));
+  hit->phase = gt_phase_get(singlehit->name[0]);
+  hit->range.start = singlehit->sqfrom;
+  hit->range.end = singlehit->sqto;
+  gt_assert(hit->range.start <= hit->range.end);
   return hit;
 }
 
-GtStrand gt_pdom_hit_get_strand(const GtPdomHit *h)
+GtPdomSingleHit *gt_pdom_single_hit_ref(GtPdomSingleHit *sh)
+{
+  gt_assert(sh);
+  sh->reference_count++;
+  return sh;
+}
+
+GtPhase gt_pdom_single_hit_get_phase(const GtPdomSingleHit *singlehit)
+{
+  gt_assert(singlehit);
+  return singlehit->phase;
+}
+
+GtRange gt_pdom_single_hit_get_range(const GtPdomSingleHit *singlehit)
+{
+  gt_assert(singlehit);
+  return singlehit->range;
+}
+
+void gt_pdom_single_hit_delete(void *value)
+{
+  GtPdomSingleHit *sh;
+  if (!value) return;
+  sh = (GtPdomSingleHit*) value;
+  if (sh->reference_count) {
+    sh->reference_count--;
+    return;
+  }
+  gt_free(sh);
+}
+
+/* --------------- GtPdomModelHit ---------------------------------- */
+
+static GtPdomModelHit* gt_pdom_model_hit_new(void)
+{
+  GtPdomModelHit *hit;
+  hit = gt_calloc(1, sizeof (GtPdomModelHit));
+  hit->hits_fwd   = AllocTophits(MAX_TOPHITS);
+  hit->hits_rev   = AllocTophits(MAX_TOPHITS);
+  hit->strand     = GT_STRAND_UNKNOWN;
+  hit->best_chain = gt_array_new(sizeof (GtPdomSingleHit*));
+  return hit;
+}
+
+GtPdomModelHit *gt_pdom_model_hit_ref(GtPdomModelHit *mh)
+{
+  gt_assert(mh);
+  mh->reference_count++;
+  return mh;
+}
+
+GtStrand gt_pdom_model_hit_get_best_strand(const GtPdomModelHit *h)
 {
   gt_assert(h);
   return h->strand;
 }
 
-GtArray* gt_pdom_hit_get_best_chain(const GtPdomHit *h)
+unsigned long gt_pdom_model_hit_best_chain_length(const GtPdomModelHit *h)
 {
   gt_assert(h);
-  return h->best_chain;
+  return gt_array_size(h->best_chain);
 }
 
-void gt_pdom_hit_delete(void *value)
+GtPdomSingleHit* gt_pdom_model_hit_best_single_hit(const GtPdomModelHit *h,
+                                                   unsigned long nth)
 {
-  GtPdomHit *hit;
+  gt_assert(h);
+  return *(GtPdomSingleHit**) gt_array_get(h->best_chain, nth);
+}
+
+void gt_pdom_model_hit_delete(void *value)
+{
+  GtPdomModelHit *hit;
   if (!value) return;
-  hit = (GtPdomHit*) value;
+  hit = (GtPdomModelHit*) value;
+  if (hit->reference_count) {
+    hit->reference_count--;
+    return;
+  }
   if (hit->hits_fwd)
     FreeTophits(hit->hits_fwd);
   if (hit->hits_rev)
     FreeTophits(hit->hits_rev);
   if (hit->best_chain)
+  {
+    unsigned long i;
+    for (i=0;i<gt_array_size(hit->best_chain);i++)
+    {
+      gt_pdom_single_hit_delete(*(GtPdomSingleHit**)
+                                 gt_array_get(hit->best_chain, i));
+    }
     gt_array_delete(hit->best_chain);
+  }
   gt_free(hit);
 }
+
+/* --------------- GtPdomModel ------------------------------------ */
+
+static GtPdomModel* gt_pdom_model_new(struct plan7_s *model)
+{
+  GtPdomModel *newmodel;
+  gt_assert(model);
+  newmodel = gt_calloc(1, sizeof (GtPdomModel));
+  newmodel->model = model;
+  return newmodel;
+}
+
+GtPdomModel *gt_pdom_model_ref(GtPdomModel *m)
+{
+  gt_assert(m);
+  m->reference_count++;
+  return m;
+}
+
+const char* gt_pdom_model_get_name(const GtPdomModel *model)
+{
+  gt_assert(model);
+  return model->model->name;
+}
+
+const char* gt_pdom_model_get_acc(const GtPdomModel *model)
+{
+  gt_assert(model);
+  return model->model->acc;
+}
+
+void gt_pdom_model_delete(void *value)
+{
+  GtPdomModel *model;
+  if (!value) return;
+  model = (GtPdomModel*) value;
+  if (model->reference_count) {
+    model->reference_count--;
+    return;
+  }
+  FreePlan7(model->model);
+  gt_free(model);
+}
+
+/* --------------- GtPdomResults ---------------------------------- */
 
 static GtPdomResults* gt_pdom_results_new(void)
 {
   GtPdomResults *res;
   res = gt_calloc(1, sizeof (GtPdomResults));
-  res->domains = gt_hashmap_new(HASH_DIRECT,
-                                NULL,
-                                gt_pdom_hit_delete);
+  res->domains = gt_hashmap_new(HASH_DIRECT, gt_pdom_model_delete,
+                                gt_pdom_model_hit_delete);
   res->empty = TRUE;
   res->combined_e_value_fwd = res->combined_e_value_rev = 0.0;
   return res;
@@ -143,11 +281,14 @@ void gt_pdom_results_delete(GtPdomResults *res)
   gt_free(res);
 }
 
+/* ---------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------- */
+
 static int visit_domain(void *key, void *value, void *data,
                         GT_UNUSED GtError *err)
 {
-  struct plan7_s *model = (struct plan7_s *) key;
-  GtPdomHit *hit = (GtPdomHit*) value;
+  GtPdomModel *model = (GtPdomModel *) key;
+  GtPdomModelHit *hit = (GtPdomModelHit*) value;
   GtPdomDomainTraverseInfo *info = (GtPdomDomainTraverseInfo*) data;
   return info->func(model, hit, info->data, err);
 }
@@ -218,68 +359,13 @@ void gt_hmmer_search(struct plan7_s *hmm,
   FreePlan7Matrix(mx);
 }
 
-int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
-{
-  unsigned long i;
-  int had_err = 0;
-
-  gt_assert(opts && err);
-
-  for (i=0;i<gt_str_array_size(opts->hmm_files);i++)
-  {
-    struct plan7_s *hmm;
-    HMMFILE *hmmfp;
-    char *hmmfile = (char*) gt_str_array_get(opts->hmm_files, i);
-    if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
-    {
-      gt_error_set(err, "Failed to open HMM file '%s'", hmmfile);
-      had_err = -1;
-      if (hmmfp) HMMFileClose(hmmfp);
-      break;
-    }
-    if (!had_err && !HMMFileRead(hmmfp, &hmm))
-    {
-      gt_error_set(err, "Failed to read any HMMs from file '%s'", hmmfile);
-      had_err = -1;
-      if (hmmfp) HMMFileClose(hmmfp);
-      break;
-    }
-    if (!had_err && hmm == NULL)
-    {
-      had_err = -1;
-      gt_error_set(err, "HMM file '%s' corrupt or in incorrect format?",
-                   hmmfile);
-      if (hmmfp) HMMFileClose(hmmfp);
-      break;
-    }
-    if (!had_err)
-    {
-      P7Logoddsify(hmm, true);
-      gt_array_add(opts->plan7_ts, hmm);
-    }
-    if (!had_err && !SetAutocuts(&opts->thresh, hmm))
-    {
-      gt_error_set(err, "HMM %s did not contain the GA, TC, or NC "
-                        "cutoffs you needed",
-                   hmm->name);
-      had_err = -1;
-      if (hmmfp) HMMFileClose(hmmfp);
-      break;
-    }
-    if (hmmfp) HMMFileClose(hmmfp);
-  }
-  gt_log_log("Loaded %lu HMM model(s)",
-             gt_array_size(opts->plan7_ts));
-  return had_err;
-}
-
 static void chainproc(GtChain *c, Fragment *f,
                       GT_UNUSED unsigned long nof_frags,
                       GT_UNUSED unsigned long gap_length, void *data)
 {
   unsigned long i;
-  GtPdomHit *hit;
-  hit = (GtPdomHit*) data;
+  GtPdomModelHit *hit;
+  hit = (GtPdomModelHit*) data;
 
   gt_log_log("resulting chain has %ld fragments, score %ld",
              gt_chain_size(c),
@@ -290,7 +376,8 @@ static void chainproc(GtChain *c, Fragment *f,
     gt_log_log("(%lu %lu) (%lu %lu), %p", frag.startpos1, frag.endpos1,
                                           frag.startpos2, frag.endpos2,
                                           frag.data);
-    gt_array_add(hit->best_chain, frag.data);
+    GtPdomSingleHit *sh = gt_pdom_single_hit_new(frag.data);
+    gt_array_add(hit->best_chain, sh);
   }
   gt_log_log("\n");
 }
@@ -307,15 +394,15 @@ static int gt_fragcmp(const void *frag1, const void *frag2)
 void* gt_pdom_per_domain_worker_thread(void *data)
 {
   GtPdomSharedMem *shared;
-  struct plan7_s *hmm;
+  GtPdomModel *hmm;
   int retval;
   struct tophit_s *ghit = NULL, *hits = NULL;
   bool best_fwd = TRUE;
   unsigned long i;
   Fragment *frags;
-  GtPdomHit *hit;
+  GtPdomModelHit *hit;
 
-  shared = (GtPdomSharedMem *) data;
+  shared = (GtPdomSharedMem*) data;
 
   for (;;)
   {
@@ -326,7 +413,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       exit(EXIT_FAILURE);
     }
     /* Have all HMMs been distributed? If so, we are done here. */
-    if (shared->next_hmm == gt_array_size(shared->opts->plan7_ts))
+    if (shared->next_hmm == gt_array_size(shared->gpf->models))
     {
       if ((retval = pthread_mutex_unlock(&shared->in_lock)) != 0)
       {
@@ -337,8 +424,8 @@ void* gt_pdom_per_domain_worker_thread(void *data)
     }
 
     /* Get work from HMM list */
-    hmm = *(struct plan7_s**) gt_array_get(shared->opts->plan7_ts,
-                                           shared->next_hmm);
+    hmm = *(GtPdomModel**) gt_array_get(shared->gpf->models,
+                                        shared->next_hmm);
     shared->next_hmm++;
 
     /* work claimed, release input */
@@ -348,24 +435,21 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       exit(EXIT_FAILURE);
     }
 
-    hit = gt_malloc(sizeof (GtPdomHit));
+    hit = gt_pdom_model_hit_new();
     ghit = AllocTophits(MAX_TOPHITS);
-    hit->hits_fwd = AllocTophits(MAX_TOPHITS);
-    hit->hits_rev = AllocTophits(MAX_TOPHITS);
-    hit->best_chain = gt_array_new(sizeof (struct hit_s*));
 
-    gt_hmmer_search(hmm,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
-                 &shared->opts->thresh, ghit, hit->hits_fwd, &shared->out_lock);
-    gt_hmmer_search(hmm,shared->fwd_fr2,strlen(shared->fwd_fr2),"1+",
-                 &shared->opts->thresh, ghit, hit->hits_fwd, &shared->out_lock);
-    gt_hmmer_search(hmm,shared->fwd_fr3,strlen(shared->fwd_fr3),"2+",
-                 &shared->opts->thresh, ghit, hit->hits_fwd, &shared->out_lock);
-    gt_hmmer_search(hmm,shared->rev_fr1,strlen(shared->rev_fr1),"0-",
-                 &shared->opts->thresh, ghit, hit->hits_rev, &shared->out_lock);
-    gt_hmmer_search(hmm,shared->rev_fr2,strlen(shared->rev_fr2),"1-",
-                 &shared->opts->thresh, ghit, hit->hits_rev, &shared->out_lock);
-    gt_hmmer_search(hmm,shared->rev_fr3,strlen(shared->rev_fr3),"2-",
-                 &shared->opts->thresh, ghit, hit->hits_rev, &shared->out_lock);
+    gt_hmmer_search(hmm->model,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
+                 &shared->gpf->thresh, ghit, hit->hits_fwd, &shared->out_lock);
+    gt_hmmer_search(hmm->model,shared->fwd_fr2,strlen(shared->fwd_fr2),"1+",
+                 &shared->gpf->thresh, ghit, hit->hits_fwd, &shared->out_lock);
+    gt_hmmer_search(hmm->model,shared->fwd_fr3,strlen(shared->fwd_fr3),"2+",
+                 &shared->gpf->thresh, ghit, hit->hits_fwd, &shared->out_lock);
+    gt_hmmer_search(hmm->model,shared->rev_fr1,strlen(shared->rev_fr1),"0-",
+                 &shared->gpf->thresh, ghit, hit->hits_rev, &shared->out_lock);
+    gt_hmmer_search(hmm->model,shared->rev_fr2,strlen(shared->rev_fr2),"1-",
+                 &shared->gpf->thresh, ghit, hit->hits_rev, &shared->out_lock);
+    gt_hmmer_search(hmm->model,shared->rev_fr3,strlen(shared->rev_fr3),"2-",
+                 &shared->gpf->thresh, ghit, hit->hits_rev, &shared->out_lock);
 
     FullSortTophits(hit->hits_fwd);
     FullSortTophits(hit->hits_rev);
@@ -420,13 +504,14 @@ void* gt_pdom_per_domain_worker_thread(void *data)
         gt_log_log("chaining %d frags", hits->num);
         /* do chaining */
         gt_globalchaining_max(frags, hits->num,
-                              shared->opts->chain_max_gap_length,
+                              shared->gpf->chain_max_gap_length,
                               chainproc, hit);
         gt_free(frags);
       }
       else
       {
-        gt_array_add(hit->best_chain, hits->hit[0]);
+        GtPdomSingleHit *sh = gt_pdom_single_hit_new(hits->hit[0]);
+        gt_array_add(hit->best_chain, sh);
       }
 
       /* Lock results, we want to write to the result hashtable */
@@ -437,7 +522,9 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       }
 
       /* register results */
-      gt_hashmap_add(shared->results->domains, hmm, hit);
+      gt_hashmap_add(shared->results->domains,
+                     gt_pdom_model_ref(hmm),
+                     hit);
       if (best_fwd)
       {
         shared->results->combined_e_value_fwd
@@ -459,26 +546,26 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       }
     }
     else
-      gt_pdom_hit_delete(hit);
+      gt_pdom_model_hit_delete(hit);
 
     FreeTophits(ghit);
   }
 }
 
 static GtPdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
-                                          char *fwd_fr1,char *fwd_fr2,
+                                            char *fwd_fr1,char *fwd_fr2,
                                             char *fwd_fr3,
-                                          char *rev_fr1,char *rev_fr2,
+                                            char *rev_fr1,char *rev_fr2,
                                             char *rev_fr3,
-                                          GtPdomResults *results,
-                                          GtPdomOptions *opts)
+                                            GtPdomResults *results,
+                                            GtPdomFinder *gpf)
 {
   int retval, i;
   GtPdomSharedMem *shared;
   pthread_attr_t attr;
 
   gt_assert(hmms && nof_threads > 0 && *fwd_fr1 && *fwd_fr2 && *fwd_fr3
-          && *rev_fr1 && rev_fr2 && rev_fr3 && results && opts);
+          && *rev_fr1 && rev_fr2 && rev_fr3 && results && gpf);
 
   shared = gt_calloc(1, sizeof (GtPdomSharedMem));
 
@@ -493,7 +580,7 @@ static GtPdomSharedMem* gt_pdom_run_threads(GtArray *hmms, int nof_threads,
   shared->rev_fr3 = rev_fr3;
   shared->next_hmm = 0;
   shared->results = results;
-  shared->opts = opts;
+  shared->gpf = gpf;
 
   if ((retval = pthread_mutex_init(&shared->in_lock, NULL)) != 0)
   {
@@ -527,8 +614,8 @@ static void gt_pdom_free_shared(GtPdomSharedMem *shared)
   gt_free(shared);
 }
 
-GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
-                             GtLTRElement *element, GtPdomOptions *opts)
+GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
+                                   const char *rev_seq, GtLTRElement *element)
 {
   char *fwd_fr1, *fwd_fr2, *fwd_fr3,
        *rev_fr1, *rev_fr2, *rev_fr3;
@@ -537,7 +624,7 @@ GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
   GtPdomResults *results = NULL;
   int i;
 
-  gt_assert(seq && rev_seq && element && opts);
+  gt_assert(seq && rev_seq && element);
 
   results = gt_pdom_results_new();
 
@@ -546,10 +633,10 @@ GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
   gt_translate_all_frames(&rev_fr1, &rev_fr2, &rev_fr3, rev_seq, seqlen);
 
   /* start worker threads */
-  shared = gt_pdom_run_threads(opts->plan7_ts, opts->nof_threads,
+  shared = gt_pdom_run_threads(gpf->models, gpf->nof_threads,
                                fwd_fr1, fwd_fr2, fwd_fr3,
                                rev_fr1, rev_fr2, rev_fr3,
-                               results, opts);
+                               results, gpf);
 
   /* continue when all threads are done */
   for (i = 0; i < shared->nof_threads; i++)
@@ -561,8 +648,8 @@ GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
     }
   }
 
+  /* cleanup */
   gt_pdom_free_shared(shared);
-
   SqdClean();
   gt_free(fwd_fr1); gt_free(fwd_fr2); gt_free(fwd_fr3);
   gt_free(rev_fr1); gt_free(rev_fr2); gt_free(rev_fr3);
@@ -570,15 +657,110 @@ GtPdomResults* gt_pdom_find(const char *seq, const char *rev_seq,
   return results;
 }
 
-void gt_pdom_clear_hmms(GtArray *hmms)
+/* --------------- GtPdomFinder ------------------------------------- */
+
+static int gt_pdom_finder_load_files(GtPdomFinder *gpf, GtStrArray *files,
+                                     GtError *err)
+{
+  int had_err = 0;
+  unsigned long i;
+  gt_assert(gpf && files && err);
+  for (i=0;i<gt_str_array_size(files);i++)
+  {
+    struct plan7_s *hmm;
+    HMMFILE *hmmfp;
+    char *hmmfile = (char*) gt_str_array_get(files, i);
+    gt_log_log("trying to load HMM file '%s'...", hmmfile);
+    if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
+    {
+      gt_error_set(err, "Failed to open HMM file '%s'", hmmfile);
+      had_err = -1;
+      if (hmmfp) HMMFileClose(hmmfp);
+      break;
+    }
+    if (!had_err && !HMMFileRead(hmmfp, &hmm))
+    {
+      gt_error_set(err, "Failed to read any HMMs from file '%s'", hmmfile);
+      had_err = -1;
+      if (hmmfp) HMMFileClose(hmmfp);
+      break;
+    }
+    if (!had_err && hmm == NULL)
+    {
+      had_err = -1;
+      gt_error_set(err, "HMM file '%s' corrupt or in incorrect format?",
+                   hmmfile);
+      if (hmmfp) HMMFileClose(hmmfp);
+      break;
+    }
+    if (!had_err)
+    {
+      GtPdomModel *gpm;
+      gpm = gt_pdom_model_new(hmm);
+      P7Logoddsify(hmm, true);
+      gt_array_add(gpf->models, gpm);
+    }
+    if (!had_err && !SetAutocuts(&gpf->thresh, hmm))
+    {
+      gt_error_set(err, "HMM %s did not contain the GA, TC, or NC "
+                        "cutoffs you needed",
+                   hmm->name);
+      had_err = -1;
+      if (hmmfp) HMMFileClose(hmmfp);
+      break;
+    }
+    if (hmmfp) HMMFileClose(hmmfp);
+  }
+  return had_err;
+}
+
+static void gt_pdom_clear_hmms(GtArray *hmms)
 {
   unsigned long i;
   if (!hmms) return;
   for (i=0;i<gt_array_size(hmms);i++)
   {
-    FreePlan7(*(struct plan7_s**) gt_array_get(hmms,i));
+    gt_pdom_model_delete(*(GtPdomModel**) gt_array_get(hmms,i));
   }
   gt_array_delete(hmms);
+}
+
+GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
+                                 unsigned int nof_threads,
+                                 unsigned int chain_max_gap_length,
+                                 GtError *e)
+{
+  int had_err = 0;
+  GtPdomFinder *gpf;
+  gt_assert(hmmfiles && e && nof_threads);
+  gpf = gt_calloc(1, sizeof (GtPdomFinder));
+  gpf->nof_threads = nof_threads;
+  gpf->hmm_files = gt_str_array_ref(hmmfiles);
+  gpf->chain_max_gap_length = chain_max_gap_length;
+  gpf->thresh.globT   = -FLT_MAX;
+  gpf->thresh.domT    = -FLT_MAX;
+  gpf->thresh.domE    = FLT_MAX;
+  gpf->thresh.autocut = CUT_NONE;
+  gpf->thresh.Z       = 1;
+  gpf->thresh.globE   = eval_cutoff;
+  gpf->models = gt_array_new(sizeof (struct GtPdomModel*));
+
+  had_err = gt_pdom_finder_load_files(gpf, hmmfiles, e);
+  if (had_err)
+  {
+    gt_pdom_clear_hmms(gpf->models);
+    gt_str_array_delete(gpf->hmm_files);
+    gt_free(gpf);
+    return NULL;
+  } else return gpf;
+}
+
+void gt_pdom_finder_delete(GtPdomFinder *gpf)
+{
+  if (!gpf) return;
+  gt_pdom_clear_hmms(gpf->models);
+  gt_str_array_delete(gpf->hmm_files);
+  gt_free(gpf);
 }
 
 #endif

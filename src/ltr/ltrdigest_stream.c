@@ -56,26 +56,25 @@ static inline void convert_frame_position(GtRange *rng, int frame)
 }
 
 #ifdef HAVE_HMMER
-static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
+static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
                                 void *data, GT_UNUSED GtError *err)
 {
   unsigned long i;
   GtRange rng;
   GtLTRdigestStream  *ls = (GtLTRdigestStream *) data;
-  GtStrand strand = gt_pdom_hit_get_strand(hit);
-  GtArray *best_chain = gt_pdom_hit_get_best_chain(hit);
+  GtStrand strand = gt_pdom_model_hit_get_best_strand(hit);
 
   /* do not use the hits on the non-predicted strand
       -- maybe identify nested elements ? */
   if (strand != gt_feature_node_get_strand(ls->element.mainnode))
     return 0;
 
-  for (i=0;i<gt_array_size(best_chain);i++)
+  for (i=0;i<gt_pdom_model_hit_best_chain_length(hit);i++)
   {
     GtGenomeNode *gf;
-    struct hit_s *singlehit = *(struct hit_s **) gt_array_get(best_chain, i);
-    GtPhase frame = gt_phase_get(singlehit->name[0]);
-    rng.start = singlehit->sqfrom; rng.end = singlehit->sqto;
+    GtPdomSingleHit *singlehit = gt_pdom_model_hit_best_single_hit(hit, i);
+    GtPhase frame = gt_pdom_single_hit_get_phase(singlehit);
+    rng = gt_pdom_single_hit_get_range(singlehit);
     convert_frame_position(&rng, frame);
     gt_ltrelement_offset2pos(&ls->element, &rng, 0,
                              GT_OFFSET_BEGIN_LEFT_LTR,
@@ -88,8 +87,10 @@ static int pdom_hit_attach_gff3(struct plan7_s *model, GtPdomHit *hit,
                              strand);
     gt_feature_node_set_source((GtFeatureNode*) gf, ls->ltrdigest_tag);
     gt_feature_node_set_phase((GtFeatureNode*) gf, frame);
-    gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamname", model->name);
-    gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamid", model->acc);
+    gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamname",
+                                  gt_pdom_model_get_name(model));
+    gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamid",
+                                  gt_pdom_model_get_acc(model));
     gt_feature_node_add_child(ls->element.mainnode, (GtFeatureNode*) gf);
   }
   return 0;
@@ -182,10 +183,11 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
 }
 
-static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
+static int run_ltrdigest(GtLTRElement *element, GtSeq *seq,
                           GtLTRdigestStream *ls, GtError *err)
 {
   char *rev_seq;
+  int had_err = 0;
   const char *base_seq = gt_seq_get_orig(seq)+element->leftLTR_5;
   unsigned long seqlen = gt_ltrelement_length(element);
   GtStrand canonical_strand = GT_STRAND_UNKNOWN;
@@ -202,26 +204,37 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
   if (ls->tests_to_run & GT_LTRDIGEST_RUN_PDOM)
   {
     GtPdomResults *pdom_results = NULL;
-    pdom_results = gt_pdom_find((const char*) base_seq, (const char*) rev_seq,
-                                element, ls->pdom_opts);
-    if (!gt_pdom_results_empty(pdom_results))
+    GtPdomFinder *gpf = gt_pdom_finder_new(ls->pdom_opts->hmm_files,
+                                           ls->pdom_opts->evalue_cutoff,
+                                           ls->pdom_opts->nof_threads,
+                                           ls->pdom_opts->chain_max_gap_length,
+                                           err);
+    if (!gpf)
     {
-      /* determine most likely strand from protein domain results */
-      if (gt_double_compare(
+      had_err = -1;
+    } else
+    {
+      pdom_results = gt_pdom_finder_find(gpf, (const char*) base_seq,
+                                         (const char*) rev_seq, element);
+      if (pdom_results && !gt_pdom_results_empty(pdom_results))
+      {
+        /* determine most likely strand from protein domain results */
+        if (gt_double_compare(
                      gt_pdom_results_get_combined_evalue_fwd(pdom_results),
                      gt_pdom_results_get_combined_evalue_rev(pdom_results)) < 0)
-        canonical_strand = GT_STRAND_FORWARD;
-      else
-        canonical_strand = GT_STRAND_REVERSE;
-      gt_feature_node_set_strand(ls->element.mainnode,
-                                    canonical_strand);
-      /* create nodes for protein match annotations */
-      (void) gt_pdom_results_foreach_domain_hit(pdom_results,
-                                                pdom_hit_attach_gff3,
-                                                ls,
-                                                err);
+          canonical_strand = GT_STRAND_FORWARD;
+        else
+          canonical_strand = GT_STRAND_REVERSE;
+        gt_feature_node_set_strand(ls->element.mainnode, canonical_strand);
+        /* create nodes for protein match annotations */
+        (void) gt_pdom_results_foreach_domain_hit(pdom_results,
+                                                  pdom_hit_attach_gff3,
+                                                  ls,
+                                                  err);
+      }
+      gt_pdom_results_delete(pdom_results);
+      gt_pdom_finder_delete(gpf);
     }
-    gt_pdom_results_delete(pdom_results);
   }
 #endif
 
@@ -254,8 +267,8 @@ static void run_ltrdigest(GtLTRElement *element, GtSeq *seq,
      }
      gt_pbs_results_delete(pbs_results);
   }
-
   gt_free(rev_seq);
+  return had_err;
 }
 
 static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
@@ -308,7 +321,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     elemrng = gt_genome_node_get_range((GtGenomeNode*) ls->element.mainnode);
     if (elemrng.end <= gt_seq_length(seq))
       /* run LTRdigest core routine */
-      run_ltrdigest(&ls->element, seq, ls, e);
+      had_err = run_ltrdigest(&ls->element, seq, ls, e);
     else
     {
       /* do not process elements whose positions exceed sequence boundaries

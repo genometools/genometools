@@ -211,6 +211,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                          tsd_rng.start,
                          tsd_rng.end,
                          tsd_seq);
+      gt_free((char*) tsd_seq);
     } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t");
     if (ls->element.rightTSD)
     {
@@ -228,6 +229,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                          tsd_rng.start,
                          tsd_rng.end,
                          tsd_seq);
+      gt_free((char*) tsd_seq);
     } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t");
 
     /* output PPT */
@@ -443,14 +445,13 @@ static void write_metadata(GtGenFile *metadata_file,
   {
     unsigned long i;
     gt_genfile_xprintf(metadata_file,
-                       "Protein domains\t%lu (",
-                       gt_array_size(pdom_opts->plan7_ts));
-    for (i=0;i<gt_array_size(pdom_opts->plan7_ts);i++)
+                       "Protein domain models\t%lu (",
+                       gt_str_array_size(pdom_opts->hmm_files));
+    for (i=0;i<gt_str_array_size(pdom_opts->hmm_files);i++)
     {
-      struct plan7_s *model = *(struct plan7_s **)
-                                  gt_array_get(pdom_opts->plan7_ts, i);
-      gt_genfile_xprintf(metadata_file, "%s", model->name);
-      if (i != gt_array_size(pdom_opts->plan7_ts)-1)
+      gt_genfile_xprintf(metadata_file, "%s",
+                         gt_str_array_get(pdom_opts->hmm_files, i));
+      if (i != gt_str_array_size(pdom_opts->hmm_files)-1)
         gt_genfile_xprintf(metadata_file, ", ");
     }
     gt_genfile_xprintf(metadata_file, ")\n");
