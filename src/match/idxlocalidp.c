@@ -19,17 +19,17 @@ typedef struct
 typedef struct
 {
   Scorevalues scorevalues;
-  const Uchar *qseq;
-  unsigned long lengthofqseq,
+  const Uchar *query;
+  unsigned long querylength,
                 threshold;
 } Limdfsconstinfo;
 
 typedef struct
 {
-  long repvalue,
-       insvalue,
-       delvalue,
-       bestvalue;
+  long repcell,
+       inscell,
+       delcell,
+       bestcell;
 } Matrixvalue;
 
 typedef struct
@@ -61,55 +61,55 @@ static inline long max3 (long a,long b,long c)
 
 static void firstcolumn (Column *column,
                          const Scorevalues *scorevalues,
-                         unsigned long lengthofqseq)
+                         unsigned long querylength)
 {
   unsigned long i;
 
   if (column->colvalues == NULL)
   {
-    column->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
+    column->colvalues = gt_malloc (sizeof (Matrixvalue) * (querylength + 1));
   }
-  column->colvalues[0].repvalue = 0;
-  column->colvalues[0].insvalue = scorevalues->gapstart;
-  column->colvalues[0].delvalue = scorevalues->gapstart;
-  column->colvalues[0].bestvalue = 0;
+  column->colvalues[0].repcell = 0;
+  column->colvalues[0].inscell = scorevalues->gapstart;
+  column->colvalues[0].delcell = scorevalues->gapstart;
+  column->colvalues[0].bestcell = 0;
   column->maxvalue = 0;
   column->pprefixlen = 0;
-  for (i = 1UL; i <= lengthofqseq; i++)
+  for (i = 1UL; i <= querylength; i++)
   {
-    column->colvalues[i].repvalue = INFTY;
-    column->colvalues[i].insvalue = INFTY;
-    if (column->colvalues[i-1].delvalue > 0)
+    column->colvalues[i].repcell = INFTY;
+    column->colvalues[i].inscell = INFTY;
+    if (column->colvalues[i-1].delcell > 0)
     {
-      if (column->colvalues[i-1].bestvalue > 0)
+      if (column->colvalues[i-1].bestcell > 0)
       {
-        column->colvalues[i].delvalue
-          = max2 (column->colvalues[i-1].delvalue + scorevalues->gapextend,
-                  column->colvalues[i-1].bestvalue + scorevalues->gapstart +
-                                                     scorevalues->gapextend);
+        column->colvalues[i].delcell
+          = max2 (column->colvalues[i-1].delcell + scorevalues->gapextend,
+                  column->colvalues[i-1].bestcell + scorevalues->gapstart +
+                                                    scorevalues->gapextend);
       } else
       {
-        column->colvalues[i].delvalue = column->colvalues[i-1].delvalue +
-                                        scorevalues->gapextend;
+        column->colvalues[i].delcell = column->colvalues[i-1].delcell +
+                                       scorevalues->gapextend;
       }
     } else
     {
-      if (column->colvalues[i-1].bestvalue > 0)
+      if (column->colvalues[i-1].bestcell > 0)
       {
-        column->colvalues[i].delvalue = column->colvalues[i-1].bestvalue +
-                                        scorevalues->gapstart +
-                                        scorevalues->gapextend;
+        column->colvalues[i].delcell = column->colvalues[i-1].bestcell +
+                                       scorevalues->gapstart +
+                                       scorevalues->gapextend;
       } else
       {
-        column->colvalues[i].delvalue = INFTY;
+        column->colvalues[i].delcell = INFTY;
       }
     }
-    column->colvalues[i].bestvalue = max3 (column->colvalues[i].repvalue,
-                                           column->colvalues[i].insvalue,
-                                           column->colvalues[i].delvalue);
-    if (column->colvalues[i].bestvalue > (long) column->maxvalue)
+    column->colvalues[i].bestcell = max3 (column->colvalues[i].repcell,
+                                          column->colvalues[i].inscell,
+                                          column->colvalues[i].delcell);
+    if (column->colvalues[i].bestcell > (long) column->maxvalue)
     {
-      column->maxvalue = (unsigned long) column->colvalues[i].bestvalue;
+      column->maxvalue = (unsigned long) column->colvalues[i].bestcell;
       column->pprefixlen = i;
     }
   }
@@ -118,111 +118,113 @@ static void firstcolumn (Column *column,
 static void nextcolumn (Column *outcol,
                         const Scorevalues *scorevalues,
                         const Uchar dbchar,
-                        const Uchar *qseq,
-                        unsigned long lengthofqseq,
+                        const Uchar *query,
+                        unsigned long querylength,
                         const Column *incol)
 {
   unsigned long i;
 
   if (outcol->colvalues == NULL)
   {
-    outcol->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
+    outcol->colvalues = gt_malloc (sizeof (Matrixvalue) * (querylength + 1));
   }
-  outcol->colvalues[0].repvalue = outcol->colvalues[0].delvalue = INFTY;
-  if (incol->colvalues[0].insvalue > 0)
+  outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = INFTY;
+  if (incol->colvalues[0].inscell > 0)
   {
-    if (incol->colvalues[0].bestvalue > 0)
+    if (incol->colvalues[0].bestcell > 0)
     {
-      outcol->colvalues[0].insvalue
-        = max2 (incol->colvalues[0].insvalue + scorevalues->gapextend,
-                incol->colvalues[0].bestvalue + scorevalues->gapstart +
-                                                scorevalues->gapextend);
+      outcol->colvalues[0].inscell
+        = max2 (incol->colvalues[0].inscell + scorevalues->gapextend,
+                incol->colvalues[0].bestcell + scorevalues->gapstart +
+                                               scorevalues->gapextend);
     } else
     {
-      outcol->colvalues[0].insvalue = incol->colvalues[0].insvalue +
-                                      scorevalues->gapextend;
+      outcol->colvalues[0].inscell = incol->colvalues[0].inscell +
+                                     scorevalues->gapextend;
     }
   } else
   {
-    if (incol->colvalues[0].bestvalue > 0)
+    if (incol->colvalues[0].bestcell > 0)
     {
-      outcol->colvalues[0].insvalue = incol->colvalues[0].bestvalue +
-                                      scorevalues->gapstart + scorevalues->gapextend;
+      outcol->colvalues[0].inscell = incol->colvalues[0].bestcell +
+                                     scorevalues->gapstart +
+                                     scorevalues->gapextend;
     } else
     {
-      outcol->colvalues[0].insvalue = INFTY;
+      outcol->colvalues[0].inscell = INFTY;
     }
   }
-  outcol->colvalues[0].bestvalue = max3 (outcol->colvalues[0].repvalue,
-                                         outcol->colvalues[0].insvalue,
-                                         outcol->colvalues[0].delvalue);
-  outcol->maxvalue = (unsigned long) outcol->colvalues[0].bestvalue;
+  outcol->colvalues[0].bestcell = max3 (outcol->colvalues[0].repcell,
+                                        outcol->colvalues[0].inscell,
+                                        outcol->colvalues[0].delcell);
+  outcol->maxvalue = (unsigned long) outcol->colvalues[0].bestcell;
   outcol->pprefixlen = 0;
-  for (i = 1UL; i <= lengthofqseq; i++)
+  for (i = 1UL; i <= querylength; i++)
   {
-    if (incol->colvalues[i-1].bestvalue > 0)
+    if (incol->colvalues[i-1].bestcell > 0)
     {
-      outcol->colvalues[i].repvalue = incol->colvalues[i-1].bestvalue +
-                                      REPLACEMENTSCORE(dbchar,qseq[i]);
+      outcol->colvalues[i].repcell = incol->colvalues[i-1].bestcell +
+                                     REPLACEMENTSCORE(dbchar,query[i]);
     } else
     {
-      outcol->colvalues[i].repvalue = INFTY;
+      outcol->colvalues[i].repcell = INFTY;
     }
-    if (incol->colvalues[i].insvalue > 0)
+    if (incol->colvalues[i].inscell > 0)
     {
-      if (incol->colvalues[i].bestvalue > 0)
+      if (incol->colvalues[i].bestcell > 0)
       {
-        outcol->colvalues[i].insvalue
-          = max2 (incol->colvalues[i].insvalue + scorevalues->gapextend,
-                  incol->colvalues[i].bestvalue + scorevalues->gapstart +
-                                                  scorevalues->gapextend);
+        outcol->colvalues[i].inscell
+          = max2 (incol->colvalues[i].inscell + scorevalues->gapextend,
+                  incol->colvalues[i].bestcell + scorevalues->gapstart +
+                                                 scorevalues->gapextend);
       } else
       {
-        outcol->colvalues[i].insvalue = incol->colvalues[i].insvalue +
-                                        scorevalues->gapextend;
-      }
-    } else
-    {
-      if (incol->colvalues[i].bestvalue > 0)
-      {
-        outcol->colvalues[i].insvalue = incol->colvalues[i].bestvalue +
-                                        scorevalues->gapstart + scorevalues->gapextend;
-      } else
-      {
-        outcol->colvalues[i].insvalue = INFTY;
-      }
-    }
-    if (outcol->colvalues[i-1].delvalue > 0)
-    {
-      if (outcol->colvalues[i-1].bestvalue > 0)
-      {
-        outcol->colvalues[i].delvalue
-          = max2 (outcol->colvalues[i-1].delvalue + scorevalues->gapextend,
-                  outcol->colvalues[i-1].bestvalue + scorevalues->gapstart +
-                                                     scorevalues->gapextend);
-      } else
-      {
-        outcol->colvalues[i].delvalue = outcol->colvalues[i-1].delvalue +
-                                        scorevalues->gapextend;
+        outcol->colvalues[i].inscell = incol->colvalues[i].inscell +
+                                       scorevalues->gapextend;
       }
     } else
     {
-      if (outcol->colvalues[i-1].bestvalue > 0)
+      if (incol->colvalues[i].bestcell > 0)
       {
-        outcol->colvalues[i].delvalue = outcol->colvalues[i-1].bestvalue +
-                                        scorevalues->gapstart +
-                                        scorevalues->gapextend;
+        outcol->colvalues[i].inscell = incol->colvalues[i].bestcell +
+                                       scorevalues->gapstart +
+                                       scorevalues->gapextend;
       } else
       {
-        outcol->colvalues[i].delvalue = INFTY;
+        outcol->colvalues[i].inscell = INFTY;
       }
     }
-    outcol->colvalues[i].bestvalue = max3 (outcol->colvalues[i].repvalue,
-                                           outcol->colvalues[i].insvalue,
-                                           outcol->colvalues[i].delvalue);
-    if (outcol->colvalues[i].bestvalue > (long) outcol->maxvalue)
+    if (outcol->colvalues[i-1].delcell > 0)
     {
-      outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestvalue;
+      if (outcol->colvalues[i-1].bestcell > 0)
+      {
+        outcol->colvalues[i].delcell
+          = max2 (outcol->colvalues[i-1].delcell + scorevalues->gapextend,
+                  outcol->colvalues[i-1].bestcell + scorevalues->gapstart +
+                                                    scorevalues->gapextend);
+      } else
+      {
+        outcol->colvalues[i].delcell = outcol->colvalues[i-1].delcell +
+                                       scorevalues->gapextend;
+      }
+    } else
+    {
+      if (outcol->colvalues[i-1].bestcell > 0)
+      {
+        outcol->colvalues[i].delcell = outcol->colvalues[i-1].bestcell +
+                                       scorevalues->gapstart +
+                                       scorevalues->gapextend;
+      } else
+      {
+        outcol->colvalues[i].delcell = INFTY;
+      }
+    }
+    outcol->colvalues[i].bestcell = max3 (outcol->colvalues[i].repcell,
+                                          outcol->colvalues[i].inscell,
+                                          outcol->colvalues[i].delcell);
+    if (outcol->colvalues[i].bestcell > (long) outcol->maxvalue)
+    {
+      outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestcell;
       outcol->pprefixlen = i;
     }
   }
@@ -230,112 +232,112 @@ static void nextcolumn (Column *outcol,
 
 static void inplacenextcolumn (const Scorevalues *scorevalues,
                                const Uchar dbchar,
-                               const Uchar *qseq,
-                               unsigned long lengthofqseq,
+                               const Uchar *query,
+                               unsigned long querylength,
                                Column *column)
 {
   unsigned long i;
   Matrixvalue nw, west;
 
-  column->colvalues[0].repvalue = column->colvalues[0].delvalue = INFTY;
-  if (column->colvalues[0].insvalue > 0)
+  column->colvalues[0].repcell = column->colvalues[0].delcell = INFTY;
+  if (column->colvalues[0].inscell > 0)
   {
-    if (column->colvalues[0].bestvalue > 0)
+    if (column->colvalues[0].bestcell > 0)
     {
-      column->colvalues[0].insvalue
-        = max2 (column->colvalues[0].insvalue + scorevalues->gapextend,
-                column->colvalues[0].bestvalue + scorevalues->gapstart +
-                                                 scorevalues->gapextend);
+      column->colvalues[0].inscell
+        = max2 (column->colvalues[0].inscell + scorevalues->gapextend,
+                column->colvalues[0].bestcell + scorevalues->gapstart +
+                                                scorevalues->gapextend);
     } else
     {
-      column->colvalues[0].insvalue
-        = column->colvalues[0].insvalue + scorevalues->gapextend;
+      column->colvalues[0].inscell
+        = column->colvalues[0].inscell + scorevalues->gapextend;
     }
   } else
   {
-    if (column->colvalues[0].bestvalue > 0)
+    if (column->colvalues[0].bestcell > 0)
     {
-      column->colvalues[0].insvalue = column->colvalues[0].bestvalue +
-                                      scorevalues->gapstart +
-                                      scorevalues->gapextend;
+      column->colvalues[0].inscell = column->colvalues[0].bestcell +
+                                     scorevalues->gapstart +
+                                     scorevalues->gapextend;
     } else
     {
-      column->colvalues[0].insvalue = INFTY;
+      column->colvalues[0].inscell = INFTY;
     }
   }
-  column->colvalues[0].bestvalue = max3 (column->colvalues[0].repvalue,
-                                         column->colvalues[0].insvalue,
-                                         column->colvalues[0].delvalue);
-  column->maxvalue = (unsigned long) column->colvalues[0].bestvalue;
+  column->colvalues[0].bestcell = max3 (column->colvalues[0].repcell,
+                                        column->colvalues[0].inscell,
+                                        column->colvalues[0].delcell);
+  column->maxvalue = (unsigned long) column->colvalues[0].bestcell;
   column->pprefixlen = 0;
   nw = column->colvalues[0];
-  for (i = 1UL; i <= lengthofqseq; i++)
+  for (i = 1UL; i <= querylength; i++)
 
   {
     west = column->colvalues[i];
-    if (nw.bestvalue > 0)
+    if (nw.bestcell > 0)
     {
-      column->colvalues[i].repvalue = nw.bestvalue +
-                                      REPLACEMENTSCORE(dbchar,qseq[i]);
+      column->colvalues[i].repcell = nw.bestcell +
+                                      REPLACEMENTSCORE(dbchar,query[i]);
     } else
     {
-      column->colvalues[i].repvalue = INFTY;
+      column->colvalues[i].repcell = INFTY;
     }
-    if (west.insvalue > 0)
+    if (west.inscell > 0)
     {
-      if (west.bestvalue > 0)
+      if (west.bestcell > 0)
       {
-        column->colvalues[i].insvalue
-          = max2 (west.insvalue + scorevalues->gapextend,
-                  west.bestvalue + scorevalues->gapstart
+        column->colvalues[i].inscell
+          = max2 (west.inscell + scorevalues->gapextend,
+                  west.bestcell + scorevalues->gapstart
                                  + scorevalues->gapextend);
       } else
       {
-        column->colvalues[i].insvalue = west.insvalue + scorevalues->gapextend;
+        column->colvalues[i].inscell = west.inscell + scorevalues->gapextend;
       }
     } else
     {
-      if (west.bestvalue > 0)
+      if (west.bestcell > 0)
       {
-        column->colvalues[i].insvalue = west.bestvalue + scorevalues->gapstart +
+        column->colvalues[i].inscell = west.bestcell + scorevalues->gapstart +
                                                          scorevalues->gapextend;
       } else
       {
-        column->colvalues[i].insvalue = INFTY;
+        column->colvalues[i].inscell = INFTY;
       }
     }
-    if (column->colvalues[i-1].delvalue > 0)
+    if (column->colvalues[i-1].delcell > 0)
     {
-      if (column->colvalues[i-1].bestvalue > 0)
+      if (column->colvalues[i-1].bestcell > 0)
       {
-        column->colvalues[i].delvalue
-          = max2 (column->colvalues[i-1].delvalue + scorevalues->gapextend,
-                  column->colvalues[i-1].bestvalue + scorevalues->gapstart +
-                                                     scorevalues->gapextend);
+        column->colvalues[i].delcell
+          = max2 (column->colvalues[i-1].delcell + scorevalues->gapextend,
+                  column->colvalues[i-1].bestcell + scorevalues->gapstart +
+                                                    scorevalues->gapextend);
       } else
       {
-        column->colvalues[i].delvalue = column->colvalues[i-1].delvalue +
-                                        scorevalues->gapextend;
+        column->colvalues[i].delcell = column->colvalues[i-1].delcell +
+                                       scorevalues->gapextend;
       }
     } else
     {
-      if (column->colvalues[i-1].bestvalue > 0)
+      if (column->colvalues[i-1].bestcell > 0)
       {
-        column->colvalues[i].delvalue = column->colvalues[i-1].bestvalue +
-                                        scorevalues->gapstart +
-                                        scorevalues->gapextend;
+        column->colvalues[i].delcell = column->colvalues[i-1].bestcell +
+                                       scorevalues->gapstart +
+                                       scorevalues->gapextend;
       } else
       {
-        column->colvalues[i].delvalue = INFTY;
+        column->colvalues[i].delcell = INFTY;
       }
     }
     nw = west;
-    column->colvalues[i].bestvalue = max3 (column->colvalues[i].repvalue,
-                                           column->colvalues[i].insvalue,
-                                           column->colvalues[i].delvalue);
-    if (column->colvalues[i].bestvalue > (long) column->maxvalue)
+    column->colvalues[i].bestcell = max3 (column->colvalues[i].repcell,
+                                          column->colvalues[i].inscell,
+                                          column->colvalues[i].delcell);
+    if (column->colvalues[i].bestcell > (long) column->maxvalue)
     {
-      column->maxvalue = (unsigned long) column->colvalues[i].bestvalue;
+      column->maxvalue = (unsigned long) column->colvalues[i].bestcell;
       column->pprefixlen = i;
     }
   }
@@ -360,8 +362,8 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   lci->scorevalues.mismatchscore = va_arg (ap, long);
   lci->scorevalues.gapstart = va_arg (ap, long);
   lci->scorevalues.gapextend = va_arg (ap, long);
-  lci->qseq = va_arg (ap, const Uchar *);
-  lci->lengthofqseq = va_arg (ap, unsigned long);
+  lci->query = va_arg (ap, const Uchar *);
+  lci->querylength = va_arg (ap, unsigned long);
   lci->threshold = va_arg (ap, unsigned long);
 }
 
@@ -379,7 +381,7 @@ static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliascolumn),
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  firstcolumn (column, &lci->scorevalues, lci->lengthofqseq);
+  firstcolumn (column, &lci->scorevalues, lci->querylength);
 }
 
 static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
@@ -431,7 +433,7 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   const Column *incol = (const Column *) aliasincol;
 
   nextcolumn (outcol,&lci->scorevalues,currentchar,
-              lci->qseq,lci->lengthofqseq,incol);
+              lci->query,lci->querylength,incol);
 }
 
 static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
@@ -443,7 +445,7 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
   inplacenextcolumn (&lci->scorevalues,currentchar,
-                     lci->qseq,lci->lengthofqseq,column);
+                     lci->query,lci->querylength,column);
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
