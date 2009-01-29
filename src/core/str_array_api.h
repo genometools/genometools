@@ -25,6 +25,8 @@ typedef struct GtStrArray GtStrArray;
 
 /* Return a new <GtStrArray*> object. */
 GtStrArray*   gt_str_array_new(void);
+/* Increases the reference to a GtStrArray. */
+GtStrArray*   gt_str_array_ref(GtStrArray*);
 /* Add <cstr> to <str_array>. Thereby, an internal copy of <cstr> is created. */
 void          gt_str_array_add_cstr(GtStrArray *str_array, const char *cstr);
 /* Add the non <\0>-terminated <cstr> with given <length> to <str_array>.

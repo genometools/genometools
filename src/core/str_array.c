@@ -22,12 +22,21 @@
 
 struct GtStrArray {
   GtArray *strings;
+  unsigned int reference_count;
 };
 
 GtStrArray* gt_str_array_new(void)
 {
   GtStrArray *sa = gt_malloc(sizeof *sa);
   sa->strings = gt_array_new(sizeof (GtStr*));
+  sa->reference_count = 0;
+  return sa;
+}
+
+GtStrArray* gt_str_array_ref(GtStrArray *sa)
+{
+  if (!sa) return NULL;
+  sa->reference_count++;
   return sa;
 }
 
@@ -106,6 +115,10 @@ void gt_str_array_delete(GtStrArray *sa)
 {
   unsigned long i;
   if (!sa) return;
+  if (sa->reference_count) {
+    sa->reference_count--;
+    return;
+  }
   for (i = 0; i < gt_array_size(sa->strings); i++)
     gt_str_delete(*(GtStr**) gt_array_get(sa->strings, i));
   gt_array_delete(sa->strings);
