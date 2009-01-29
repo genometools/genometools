@@ -315,7 +315,7 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
   \texttt{alpha1}.
 */
 
-Alphabet *copyAlphabet(const Alphabet *alpha2)
+Alphabet *gt_copyAlphabet(const Alphabet *alpha2)
 {
   unsigned int i;
   Alphabet *alpha1;
