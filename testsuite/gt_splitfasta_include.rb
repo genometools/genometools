@@ -27,8 +27,11 @@ Test do
   if not File.exists?("U89959_ests.fas.1") then
     raise TestFailed, "file 'U89959_ests.fas.1' does not exist"
   end
-  if not File.exists?("U89959_ests.fas.7") then
-    raise TestFailed, "file 'U89959_ests.fas.7' does not exist"
+  if not File.exists?("U89959_ests.fas.8") then
+    raise TestFailed, "file 'U89959_ests.fas.8' does not exist"
+  end
+  if File.exists?("U89959_ests.fas.9") then
+    raise TestFailed, "file 'U89959_ests.fas.9' does exist"
   end
 end
 
