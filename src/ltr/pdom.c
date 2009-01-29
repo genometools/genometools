@@ -273,7 +273,9 @@ int gt_pdom_load_hmm_files(GtPdomOptions *opts, GtError *err)
   return had_err;
 }
 
-static void chainproc(GtChain *c, Fragment *f, void *data)
+static void chainproc(GtChain *c, Fragment *f,
+                      GT_UNUSED unsigned long nof_frags,
+                      GT_UNUSED unsigned long gap_length, void *data)
 {
   unsigned long i;
   GtPdomHit *hit;
