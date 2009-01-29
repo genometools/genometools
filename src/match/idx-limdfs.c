@@ -907,7 +907,6 @@ void indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            const AbstractDfstransformer *adfst)
 {
   adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
-                          (unsigned int) limdfsresources->alphasize,
                           pattern,
                           seedbitvector,
                           seedweight);
@@ -1065,11 +1064,3 @@ bool intervalwidthleq(const Limdfsresources *limdfsresources,
   }
   return false;
 }
-
-/*
-  Specification steve: only output sequences which occur at most
-  t times, where t is a parameter given by the user.
-  Output all matches involving a prefix of the pattern and the current
-  path with up to k error (k=2 for tagsize around 25).
-  Output exakt matching statistics for each suffix of the pattern
-*/

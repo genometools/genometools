@@ -47,7 +47,6 @@ struct AbstractDfstransformer
   size_t sizeofdfsstate;
   void *(*allocatedfsconstinfo)(unsigned int alphasize);
   void (*initdfsconstinfo)(void *dfsconstinfo,
-                           unsigned int alphasize,
                            ...);
   void (*extractdfsconstinfo)(Processresult processresult,
                               void *processinfo,

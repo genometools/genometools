@@ -351,13 +351,12 @@ static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
 }
 
 static void locali_initdfsconstinfo (void *dfsconstinfo,
-                                     unsigned int alphasize,
                                      ...)
 {
   va_list ap;
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  va_start (ap, alphasize);
+  va_start (ap, dfsconstinfo);
   lci->scorevalues.matchscore = va_arg (ap, long);
   lci->scorevalues.mismatchscore = va_arg (ap, long);
   lci->scorevalues.gapstart = va_arg (ap, long);
