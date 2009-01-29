@@ -914,6 +914,28 @@ void indexbasedspacedseeds(Limdfsresources *limdfsresources,
   runlimdfs(limdfsresources,adfst);
 }
 
+void indexbasedlocali(Limdfsresources *limdfsresources,
+                      long matchscore,
+                      long mismatchscore,
+                      long gapstart,
+                      long gapextend,
+                      unsigned long threshold,
+                      const Uchar *query,
+                      unsigned long querylength,
+                      const AbstractDfstransformer *adfst)
+{
+  adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
+                          (unsigned int) limdfsresources->alphasize,
+                          matchscore,
+                          mismatchscore,
+                          gapstart,
+                          gapextend,
+                          query,
+                          querylength,
+                          threshold);
+  runlimdfs(limdfsresources,adfst);
+}
+
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend)

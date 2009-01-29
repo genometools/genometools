@@ -18,7 +18,7 @@ typedef struct
 
 typedef struct
 {
-  const Cost *cost;
+  Cost cost;
   const Uchar *qseq;
   unsigned long lengthofqseq,
                 threshold;
@@ -352,7 +352,10 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
   va_start (ap, alphasize);
-  lci->cost = va_arg (ap, const Cost *);
+  lci->cost.matchscore = va_arg (ap, long);
+  lci->cost.mismatchscore = va_arg (ap, long);
+  lci->cost.gapstart = va_arg (ap, long);
+  lci->cost.gapextend = va_arg (ap, long);
   lci->qseq = va_arg (ap, const Uchar *);
   lci->lengthofqseq = va_arg (ap, unsigned long);
   lci->threshold = va_arg (ap, unsigned long);
@@ -372,7 +375,7 @@ static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliascolumn),
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  firstcolumn (column, lci->cost, lci->lengthofqseq);
+  firstcolumn (column, &lci->cost, lci->lengthofqseq);
 }
 
 static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
@@ -423,7 +426,7 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   Column *outcol = (Column *) aliasoutcol;
   const Column *incol = (const Column *) aliasincol;
 
-  nextcolumn (outcol,lci->cost,currentchar,lci->qseq,lci->lengthofqseq,incol);
+  nextcolumn (outcol,&lci->cost,currentchar,lci->qseq,lci->lengthofqseq,incol);
 }
 
 static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
@@ -434,7 +437,7 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
-  inplacenextcolumn (lci->cost,currentchar,lci->qseq,lci->lengthofqseq,column);
+  inplacenextcolumn (&lci->cost,currentchar,lci->qseq,lci->lengthofqseq,column);
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)

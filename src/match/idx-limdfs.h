@@ -63,6 +63,16 @@ void indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            unsigned long seedweight,
                            const AbstractDfstransformer *adfst);
 
+void indexbasedlocali(Limdfsresources *limdfsresources,
+                      long matchscore,
+                      long mismatchscore,
+                      long gapstart,
+                      long gapextend,
+                      unsigned long threshold,
+                      const Uchar *query,
+                      unsigned long querylength,
+                      const AbstractDfstransformer *adfst);
+
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend);
