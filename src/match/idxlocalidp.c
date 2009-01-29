@@ -69,7 +69,6 @@ static void firstcolumn (Column *column,
   {
     column->colvalues == gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
   }
-  column->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
   column->colvalues[0].repvalue = 0;
   column->colvalues[0].insvalue = cost->gapstart;
   column->colvalues[0].delvalue = cost->gapstart;
