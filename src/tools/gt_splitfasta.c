@@ -244,7 +244,6 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
                                 GtError *err)
 {
   SplitfastaArguments *arguments = tool_arguments;
-  unsigned long max_filesize_in_bytes;
   unsigned int num_files;
   int had_err;
   off_t file_size;
@@ -252,7 +251,6 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
   gt_error_check(err);
   gt_assert(arguments);
 
-  max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
   num_files = arguments->num_files;
   filename = argv[parsed_args];
 
@@ -261,14 +259,16 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
                                 arguments->force, err);
   }
   else {
-    /* manually set the maxfile size based on requested numfiles */
-    if (num_files != 0) {
+    unsigned long max_filesize_in_bytes;
+    if (num_files) {
+      /* set the maxfile size based on requested number of files */
       file_size = gt_file_estimate_size(filename);
       max_filesize_in_bytes = file_size / num_files ;
     }
-
+    else
+      max_filesize_in_bytes = arguments->max_filesize_in_MB << 20;
     had_err = split_fasta_file(filename, max_filesize_in_bytes,
-           arguments->force, err);
+                               arguments->force, err);
   }
 
   return had_err;
