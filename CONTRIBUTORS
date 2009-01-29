@@ -5,6 +5,7 @@ gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 - David Ellinghaus (libgtltr, ltrharvest tool)
 - Thomas Jahns (BitPackArray and BitPackString class, block-compressed fm-index)
 - Malte Mader (AnnotationSketch, sketch tool)
+- Brent Pedersen (python bindings, patches)
 - Christin Schaerfer (AnnotationSketch, sketch tool)
 - David Schmitz-Huebsch (libgtmgth, mgth tool)
 - Sascha Steinbiss (AnnotationSketch, sketch tool, python bindings)
