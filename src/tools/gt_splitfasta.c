@@ -58,8 +58,8 @@ static GtOptionParser* gt_splitfasta_option_parser_new(void *tool_arguments)
                          "file.");
 
   numfiles_option = gt_option_new_uint_min("numfiles",
-                                           "set the number of target files to create "
-                                           "# target files",
+                                           "set the number of target files "
+                                           "",
                                            &arguments->num_files, 0,
                                            1);
   gt_option_parser_add_option(op, numfiles_option);
@@ -262,13 +262,13 @@ static int gt_splitfasta_runner(GT_UNUSED int argc, const char **argv,
   }
   else {
     /* manually set the maxfile size based on requested numfiles */
-	if (num_files != 0){
-	  file_size = gt_file_estimate_size(filename);
+    if (num_files != 0) {
+      file_size = gt_file_estimate_size(filename);
       max_filesize_in_bytes = file_size / num_files ;
     }
-	
-    had_err = split_fasta_file(filename, max_filesize_in_bytes, 
-							   arguments->force, err);
+
+    had_err = split_fasta_file(filename, max_filesize_in_bytes,
+           arguments->force, err);
   }
 
   return had_err;
