@@ -5,8 +5,8 @@
 #include "absdfstrans-imp.h"
 
 #define INFTY -1L
-#define REPLACEMENTSCORE(A,B) ((A) == (B) ? cost->matchscore\
-                                          : cost->mismatchscore)
+#define REPLACEMENTSCORE(A,B) ((A) == (B) ? scorevalues->matchscore\
+                                          : scorevalues->mismatchscore)
 
 typedef struct
 {
@@ -14,11 +14,11 @@ typedef struct
        mismatchscore,/* must be negative */
        gapstart,     /* must be negative */
        gapextend;    /* must be negative */
-} Cost;
+} Scorevalues;
 
 typedef struct
 {
-  Cost cost;
+  Scorevalues scorevalues;
   const Uchar *qseq;
   unsigned long lengthofqseq,
                 threshold;
@@ -60,18 +60,18 @@ static inline long max3 (long a,long b,long c)
 }
 
 static void firstcolumn (Column *column,
-                         const Cost *cost,
+                         const Scorevalues *scorevalues,
                          unsigned long lengthofqseq)
 {
   unsigned long i;
 
   if (column->colvalues == NULL)
   {
-    column->colvalues == gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
+    column->colvalues = gt_malloc (sizeof (Matrixvalue) * (lengthofqseq + 1));
   }
   column->colvalues[0].repvalue = 0;
-  column->colvalues[0].insvalue = cost->gapstart;
-  column->colvalues[0].delvalue = cost->gapstart;
+  column->colvalues[0].insvalue = scorevalues->gapstart;
+  column->colvalues[0].delvalue = scorevalues->gapstart;
   column->colvalues[0].bestvalue = 0;
   column->maxvalue = 0;
   column->pprefixlen = 0;
@@ -84,20 +84,21 @@ static void firstcolumn (Column *column,
       if (column->colvalues[i-1].bestvalue > 0)
       {
         column->colvalues[i].delvalue
-          = max2 (column->colvalues[i-1].delvalue + cost->gapextend,
-                  column->colvalues[i-1].bestvalue + cost->gapstart +
-                                                     cost->gapextend);
+          = max2 (column->colvalues[i-1].delvalue + scorevalues->gapextend,
+                  column->colvalues[i-1].bestvalue + scorevalues->gapstart +
+                                                     scorevalues->gapextend);
       } else
       {
         column->colvalues[i].delvalue = column->colvalues[i-1].delvalue +
-                                        cost->gapextend;
+                                        scorevalues->gapextend;
       }
     } else
     {
       if (column->colvalues[i-1].bestvalue > 0)
       {
         column->colvalues[i].delvalue = column->colvalues[i-1].bestvalue +
-                                        cost->gapstart + cost->gapextend;
+                                        scorevalues->gapstart +
+                                        scorevalues->gapextend;
       } else
       {
         column->colvalues[i].delvalue = INFTY;
@@ -115,7 +116,7 @@ static void firstcolumn (Column *column,
 }
 
 static void nextcolumn (Column *outcol,
-                        const Cost *cost,
+                        const Scorevalues *scorevalues,
                         const Uchar dbchar,
                         const Uchar *qseq,
                         unsigned long lengthofqseq,
@@ -133,20 +134,20 @@ static void nextcolumn (Column *outcol,
     if (incol->colvalues[0].bestvalue > 0)
     {
       outcol->colvalues[0].insvalue
-        = max2 (incol->colvalues[0].insvalue + cost->gapextend,
-                incol->colvalues[0].bestvalue + cost->gapstart +
-                                                cost->gapextend);
+        = max2 (incol->colvalues[0].insvalue + scorevalues->gapextend,
+                incol->colvalues[0].bestvalue + scorevalues->gapstart +
+                                                scorevalues->gapextend);
     } else
     {
       outcol->colvalues[0].insvalue = incol->colvalues[0].insvalue +
-                                      cost->gapextend;
+                                      scorevalues->gapextend;
     }
   } else
   {
     if (incol->colvalues[0].bestvalue > 0)
     {
       outcol->colvalues[0].insvalue = incol->colvalues[0].bestvalue +
-                                      cost->gapstart + cost->gapextend;
+                                      scorevalues->gapstart + scorevalues->gapextend;
     } else
     {
       outcol->colvalues[0].insvalue = INFTY;
@@ -172,20 +173,20 @@ static void nextcolumn (Column *outcol,
       if (incol->colvalues[i].bestvalue > 0)
       {
         outcol->colvalues[i].insvalue
-          = max2 (incol->colvalues[i].insvalue + cost->gapextend,
-                  incol->colvalues[i].bestvalue + cost->gapstart +
-                                                  cost->gapextend);
+          = max2 (incol->colvalues[i].insvalue + scorevalues->gapextend,
+                  incol->colvalues[i].bestvalue + scorevalues->gapstart +
+                                                  scorevalues->gapextend);
       } else
       {
         outcol->colvalues[i].insvalue = incol->colvalues[i].insvalue +
-                                        cost->gapextend;
+                                        scorevalues->gapextend;
       }
     } else
     {
       if (incol->colvalues[i].bestvalue > 0)
       {
         outcol->colvalues[i].insvalue = incol->colvalues[i].bestvalue +
-                                        cost->gapstart + cost->gapextend;
+                                        scorevalues->gapstart + scorevalues->gapextend;
       } else
       {
         outcol->colvalues[i].insvalue = INFTY;
@@ -196,20 +197,21 @@ static void nextcolumn (Column *outcol,
       if (outcol->colvalues[i-1].bestvalue > 0)
       {
         outcol->colvalues[i].delvalue
-          = max2 (outcol->colvalues[i-1].delvalue + cost->gapextend,
-                  outcol->colvalues[i-1].bestvalue + cost->gapstart +
-                                                     cost->gapextend);
+          = max2 (outcol->colvalues[i-1].delvalue + scorevalues->gapextend,
+                  outcol->colvalues[i-1].bestvalue + scorevalues->gapstart +
+                                                     scorevalues->gapextend);
       } else
       {
         outcol->colvalues[i].delvalue = outcol->colvalues[i-1].delvalue +
-                                        cost->gapextend;
+                                        scorevalues->gapextend;
       }
     } else
     {
       if (outcol->colvalues[i-1].bestvalue > 0)
       {
         outcol->colvalues[i].delvalue = outcol->colvalues[i-1].bestvalue +
-                                        cost->gapstart + cost->gapextend;
+                                        scorevalues->gapstart +
+                                        scorevalues->gapextend;
       } else
       {
         outcol->colvalues[i].delvalue = INFTY;
@@ -226,7 +228,7 @@ static void nextcolumn (Column *outcol,
   }
 }
 
-static void inplacenextcolumn (const Cost *cost,
+static void inplacenextcolumn (const Scorevalues *scorevalues,
                                const Uchar dbchar,
                                const Uchar *qseq,
                                unsigned long lengthofqseq,
@@ -241,20 +243,21 @@ static void inplacenextcolumn (const Cost *cost,
     if (column->colvalues[0].bestvalue > 0)
     {
       column->colvalues[0].insvalue
-        = max2 (column->colvalues[0].insvalue + cost->gapextend,
-                column->colvalues[0].bestvalue + cost->gapstart +
-                                                 cost->gapextend);
+        = max2 (column->colvalues[0].insvalue + scorevalues->gapextend,
+                column->colvalues[0].bestvalue + scorevalues->gapstart +
+                                                 scorevalues->gapextend);
     } else
     {
       column->colvalues[0].insvalue
-        = column->colvalues[0].insvalue + cost->gapextend;
+        = column->colvalues[0].insvalue + scorevalues->gapextend;
     }
   } else
   {
     if (column->colvalues[0].bestvalue > 0)
     {
       column->colvalues[0].insvalue = column->colvalues[0].bestvalue +
-                                      cost->gapstart + cost->gapextend;
+                                      scorevalues->gapstart +
+                                      scorevalues->gapextend;
     } else
     {
       column->colvalues[0].insvalue = INFTY;
@@ -283,18 +286,19 @@ static void inplacenextcolumn (const Cost *cost,
       if (west.bestvalue > 0)
       {
         column->colvalues[i].insvalue
-          = max2 (west.insvalue + cost->gapextend,
-                  west.bestvalue + cost->gapstart + cost->gapextend);
+          = max2 (west.insvalue + scorevalues->gapextend,
+                  west.bestvalue + scorevalues->gapstart
+                                 + scorevalues->gapextend);
       } else
       {
-        column->colvalues[i].insvalue = west.insvalue + cost->gapextend;
+        column->colvalues[i].insvalue = west.insvalue + scorevalues->gapextend;
       }
     } else
     {
       if (west.bestvalue > 0)
       {
-        column->colvalues[i].insvalue = west.bestvalue + cost->gapstart +
-                                                         cost->gapextend;
+        column->colvalues[i].insvalue = west.bestvalue + scorevalues->gapstart +
+                                                         scorevalues->gapextend;
       } else
       {
         column->colvalues[i].insvalue = INFTY;
@@ -305,20 +309,21 @@ static void inplacenextcolumn (const Cost *cost,
       if (column->colvalues[i-1].bestvalue > 0)
       {
         column->colvalues[i].delvalue
-          = max2 (column->colvalues[i-1].delvalue + cost->gapextend,
-                  column->colvalues[i-1].bestvalue + cost->gapstart +
-                                                     cost->gapextend);
+          = max2 (column->colvalues[i-1].delvalue + scorevalues->gapextend,
+                  column->colvalues[i-1].bestvalue + scorevalues->gapstart +
+                                                     scorevalues->gapextend);
       } else
       {
         column->colvalues[i].delvalue = column->colvalues[i-1].delvalue +
-                                        cost->gapextend;
+                                        scorevalues->gapextend;
       }
     } else
     {
       if (column->colvalues[i-1].bestvalue > 0)
       {
         column->colvalues[i].delvalue = column->colvalues[i-1].bestvalue +
-                                        cost->gapstart + cost->gapextend;
+                                        scorevalues->gapstart +
+                                        scorevalues->gapextend;
       } else
       {
         column->colvalues[i].delvalue = INFTY;
@@ -351,10 +356,10 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
   va_start (ap, alphasize);
-  lci->cost.matchscore = va_arg (ap, long);
-  lci->cost.mismatchscore = va_arg (ap, long);
-  lci->cost.gapstart = va_arg (ap, long);
-  lci->cost.gapextend = va_arg (ap, long);
+  lci->scorevalues.matchscore = va_arg (ap, long);
+  lci->scorevalues.mismatchscore = va_arg (ap, long);
+  lci->scorevalues.gapstart = va_arg (ap, long);
+  lci->scorevalues.gapextend = va_arg (ap, long);
   lci->qseq = va_arg (ap, const Uchar *);
   lci->lengthofqseq = va_arg (ap, unsigned long);
   lci->threshold = va_arg (ap, unsigned long);
@@ -374,7 +379,7 @@ static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliascolumn),
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  firstcolumn (column, &lci->cost, lci->lengthofqseq);
+  firstcolumn (column, &lci->scorevalues, lci->lengthofqseq);
 }
 
 static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
@@ -425,7 +430,8 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   Column *outcol = (Column *) aliasoutcol;
   const Column *incol = (const Column *) aliasincol;
 
-  nextcolumn (outcol,&lci->cost,currentchar,lci->qseq,lci->lengthofqseq,incol);
+  nextcolumn (outcol,&lci->scorevalues,currentchar,
+              lci->qseq,lci->lengthofqseq,incol);
 }
 
 static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
@@ -436,7 +442,8 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
-  inplacenextcolumn (&lci->cost,currentchar,lci->qseq,lci->lengthofqseq,column);
+  inplacenextcolumn (&lci->scorevalues,currentchar,
+                     lci->qseq,lci->lengthofqseq,column);
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
