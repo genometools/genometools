@@ -43,7 +43,7 @@ struct GtGFF3Visitor {
 typedef struct {
   GtHashmap *gt_feature_node_to_id_array;
   const char *id;
-} Add_id_info;
+} AddIDInfo;
 
 typedef struct {
   bool *attribute_shown;
@@ -88,7 +88,7 @@ static int gff3_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
 
 static int add_id(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
 {
-  Add_id_info *info = (Add_id_info*) data;
+  AddIDInfo *info = (AddIDInfo*) data;
   GtArray *parent_features = NULL;
   gt_error_check(err);
   gt_assert(gn && info && info->gt_feature_node_to_id_array && info->id);
@@ -194,7 +194,7 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
 {
   GtGFF3Visitor *gff3_visitor = (GtGFF3Visitor*) data;
   GtFeatureNode *gf = (GtFeatureNode*) gn;
-  Add_id_info add_id_info;
+  AddIDInfo add_id_info;
   int had_err = 0;
   GtStr *id;
 
@@ -211,7 +211,7 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
       }
       if (gt_feature_node_get_multi_representative(gf) != gf) {
         gt_hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf,
-                    gt_str_ref(id));
+                       gt_str_ref(id));
       }
     }
     else
@@ -222,7 +222,7 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
       gff3_visitor->gt_feature_node_to_id_array,
     add_id_info.id = gt_str_get(id);
     had_err = gt_genome_node_traverse_direct_children(gn, &add_id_info, add_id,
-                                                   err);
+                                                      err);
   }
   return had_err;
 }
@@ -238,7 +238,7 @@ static int gff3_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
   gff3_version_string(gv);
 
   had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf, gff3_visitor,
-                                          store_ids, true, err);
+                                             store_ids, true, err);
   if (!had_err) {
     if (gt_genome_node_is_tree((GtGenomeNode*) gf)) {
       had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf,
@@ -250,9 +250,9 @@ static int gff3_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
       /* got a DAG -> traverse bin breadth first fashion to make sure that the
          'Parent' attributes are shown in correct order */
       had_err = gt_genome_node_traverse_children_breadth((GtGenomeNode*) gf,
-                                                      gff3_visitor,
-                                                      gff3_show_genome_feature,
-                                                      true, err);
+                                                         gff3_visitor,
+                                                       gff3_show_genome_feature,
+                                                         true, err);
     }
   }
 
