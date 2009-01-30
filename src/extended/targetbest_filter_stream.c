@@ -27,8 +27,7 @@
 #include "extended/node_stream_rep.h"
 #include "extended/targetbest_filter_stream.h"
 
-struct TargetbestGtFilterStream
-{
+struct GtTargetbestFilterStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtDlist *trees;
@@ -120,7 +119,7 @@ static void filter_targetbest(GtFeatureNode *current_feature,
 static int targetbest_filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                          GtError *err)
 {
-  TargetbestGtFilterStream *tfs;
+  GtTargetbestFilterStream *tfs;
   GtGenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
@@ -157,7 +156,7 @@ static int targetbest_filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
 static void targetbest_filter_stream_free(GtNodeStream *gs)
 {
-  TargetbestGtFilterStream *tfs = targetbest_filter_stream_cast(gs);
+  GtTargetbestFilterStream *tfs = targetbest_filter_stream_cast(gs);
   for (; tfs->next != NULL; tfs->next = gt_dlistelem_next(tfs->next))
     gt_genome_node_delete(gt_dlistelem_get_data(tfs->next));
   gt_dlist_delete(tfs->trees);
@@ -169,7 +168,7 @@ const GtNodeStreamClass* gt_targetbest_filter_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (TargetbestGtFilterStream),
+    nsc = gt_node_stream_class_new(sizeof (GtTargetbestFilterStream),
                                    targetbest_filter_stream_free,
                                    targetbest_filter_stream_next);
   }
@@ -178,7 +177,7 @@ const GtNodeStreamClass* gt_targetbest_filter_stream_class(void)
 
 GtNodeStream* gt_targetbest_filter_stream_new(GtNodeStream *in_stream)
 {
-  TargetbestGtFilterStream *tfs;
+  GtTargetbestFilterStream *tfs;
   GtNodeStream *gs;
   gt_assert(in_stream);
   gs = gt_node_stream_create(gt_targetbest_filter_stream_class(),

@@ -35,13 +35,13 @@ typedef struct {
        has_CDS,
        targetbest;
   GtStr *seqid,
-      *typefilter,
-      *gt_strand_char,
-      *targetgt_strand_char;
+        *typefilter,
+        *gt_strand_char,
+        *targetgt_strand_char;
   GtRange contain_range,
-        overlap_range;
+          overlap_range;
   GtStrand strand,
-         targetstrand;
+           targetstrand;
   unsigned long max_gene_length,
                 max_gene_num,
                 feature_num;
