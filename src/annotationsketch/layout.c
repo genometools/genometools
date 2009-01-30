@@ -297,7 +297,7 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
 {
   GtTracklineInfo lines;
   double tmp;
-  bool show_track_captions;
+  bool show_track_captions, show_block_captions;
   unsigned long height,
                 line_height,
                 i;
@@ -318,10 +318,17 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   else
     line_height += BAR_VSPACE_DEFAULT;
 
+  if (!(gt_style_get_bool(layout->style, "format","show_block_captions",
+                          &show_block_captions, NULL)))
+    show_block_captions = true;
+
   /* get total height of all lines */
   height  = lines.total_lines * line_height;
+  if (show_block_captions)
+  {
   height += lines.total_captionlines * (TOY_TEXT_HEIGHT
                                           + CAPTION_BAR_SPACE_DEFAULT);
+  }
 
   if (!(gt_style_get_bool(layout->style, "format","show_track_captions",
                           &show_track_captions, NULL)))

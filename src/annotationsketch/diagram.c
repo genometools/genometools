@@ -221,7 +221,7 @@ static void add_to_current(GtDiagram *d, GtFeatureNode *node,
 {
   GtBlock *block;
   NodeInfoElement *ni;
-  GtStr *caption;
+  GtStr *caption = NULL;
   const char *nnid_p = NULL, *nnid_n = NULL;
   gt_assert(d && node);
   /* Get nodeinfo element and set itself as parent */

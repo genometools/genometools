@@ -131,9 +131,12 @@ int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line,
                                    GT_UNUSED GtError *err)
 {
   int had_err = 0;
+  bool show_block_captions = true;
   gt_assert(canvas && line);
   canvas->pvt->bt = gt_bittab_new(canvas->pvt->width);
-  if (gt_line_has_captions(line))
+  gt_style_get_bool(canvas->pvt->sty, "format", "show_block_captions",
+                    &show_block_captions, NULL);
+  if (gt_line_has_captions(line) && show_block_captions)
     canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
   return had_err;
 }
