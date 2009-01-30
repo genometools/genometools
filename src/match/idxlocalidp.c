@@ -104,10 +104,9 @@ static void firstcolumn (Column *column,
         column->colvalues[i].delcell = INFTY;
       }
     }
-    column->colvalues[i].bestcell = max3 (column->colvalues[i].repcell,
-                                          column->colvalues[i].inscell,
-                                          column->colvalues[i].delcell);
-    if (column->colvalues[i].bestcell > (long) column->maxvalue)
+    column->colvalues[i].bestcell = 0;
+    if (column->colvalues[i].bestcell > 0 &&
+        column->colvalues[i].bestcell > (long) column->maxvalue)
     {
       column->maxvalue = (unsigned long) column->colvalues[i].bestcell;
       column->pprefixlen = i;
@@ -157,7 +156,7 @@ static void nextcolumn (Column *outcol,
   outcol->colvalues[0].bestcell = max3 (outcol->colvalues[0].repcell,
                                         outcol->colvalues[0].inscell,
                                         outcol->colvalues[0].delcell);
-  outcol->maxvalue = (unsigned long) outcol->colvalues[0].bestcell;
+  outcol->maxvalue = (unsigned long) max2 (0,outcol->colvalues[0].bestcell);
   outcol->pprefixlen = 0;
   for (i = 1UL; i <= querylength; i++)
   {
@@ -222,7 +221,8 @@ static void nextcolumn (Column *outcol,
     outcol->colvalues[i].bestcell = max3 (outcol->colvalues[i].repcell,
                                           outcol->colvalues[i].inscell,
                                           outcol->colvalues[i].delcell);
-    if (outcol->colvalues[i].bestcell > (long) outcol->maxvalue)
+    if (outcol->colvalues[i].bestcell > 0 &&
+        outcol->colvalues[i].bestcell > (long) outcol->maxvalue)
     {
       outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestcell;
       outcol->pprefixlen = i;
@@ -268,7 +268,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
   column->colvalues[0].bestcell = max3 (column->colvalues[0].repcell,
                                         column->colvalues[0].inscell,
                                         column->colvalues[0].delcell);
-  column->maxvalue = (unsigned long) column->colvalues[0].bestcell;
+  column->maxvalue = (unsigned long) max2(0,column->colvalues[0].bestcell);
   column->pprefixlen = 0;
   nw = column->colvalues[0];
   for (i = 1UL; i <= querylength; i++)
@@ -278,7 +278,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
     if (nw.bestcell > 0)
     {
       column->colvalues[i].repcell = nw.bestcell +
-                                      REPLACEMENTSCORE(dbchar,query[i]);
+                                     REPLACEMENTSCORE(dbchar,query[i]);
     } else
     {
       column->colvalues[i].repcell = INFTY;
@@ -290,7 +290,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
         column->colvalues[i].inscell
           = max2 (west.inscell + scorevalues->gapextend,
                   west.bestcell + scorevalues->gapstart
-                                 + scorevalues->gapextend);
+                                + scorevalues->gapextend);
       } else
       {
         column->colvalues[i].inscell = west.inscell + scorevalues->gapextend;
@@ -300,7 +300,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
       if (west.bestcell > 0)
       {
         column->colvalues[i].inscell = west.bestcell + scorevalues->gapstart +
-                                                         scorevalues->gapextend;
+                                                       scorevalues->gapextend;
       } else
       {
         column->colvalues[i].inscell = INFTY;
@@ -335,7 +335,8 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
     column->colvalues[i].bestcell = max3 (column->colvalues[i].repcell,
                                           column->colvalues[i].inscell,
                                           column->colvalues[i].delcell);
-    if (column->colvalues[i].bestcell > (long) column->maxvalue)
+    if (column->colvalues[i].bestcell > 0 &&
+        column->colvalues[i].bestcell > (long) column->maxvalue)
     {
       column->maxvalue = (unsigned long) column->colvalues[i].bestcell;
       column->pprefixlen = i;
@@ -351,12 +352,12 @@ static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
 }
 
 static void locali_initdfsconstinfo (void *dfsconstinfo,
-                                     ...)
+                                     unsigned int alphasize,...)
 {
   va_list ap;
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  va_start (ap, dfsconstinfo);
+  va_start (ap, alphasize);
   lci->scorevalues.matchscore = va_arg (ap, long);
   lci->scorevalues.mismatchscore = va_arg (ap, long);
   lci->scorevalues.gapstart = va_arg (ap, long);
@@ -364,6 +365,9 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   lci->query = va_arg (ap, const Uchar *);
   lci->querylength = va_arg (ap, unsigned long);
   lci->threshold = va_arg (ap, unsigned long);
+  va_end(ap);
+  printf("querylength = %lu\n",lci->querylength);
+  printf("threshold = %lu\n",lci->threshold);
 }
 
 static void locali_freedfsconstinfo (void **dfsconstinfo)
@@ -406,6 +410,7 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
 
   if (column->maxvalue >= lci->threshold)
   {
+    printf("maxvalue = %lu\n",column->maxvalue);
     limdfsresult->status = Limdfssuccess;
     limdfsresult->distance = column->maxvalue;
     limdfsresult->pprefixlen = column->pprefixlen;
@@ -413,6 +418,7 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
   {
     if (column->maxvalue > 0)
     {
+      printf("maxvalue = %lu\n",column->maxvalue);
       limdfsresult->status = Limdfscontinue;
     } else
     {

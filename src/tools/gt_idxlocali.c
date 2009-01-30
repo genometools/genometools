@@ -82,10 +82,10 @@ static GtOptionParser *gt_idxlocali_option_parser_new (void *tool_arguments)
 
   option = gt_option_new_long ("gapextend",
                                "Specify gap extension score",
-                               &arguments->gapextend, -1L);
+                               &arguments->gapextend, -2L);
   gt_option_parser_add_option (op, option);
 
-  option = gt_option_new_ulong_min ("td",
+  option = gt_option_new_ulong_min ("th",
                                     "Specify the threshold",
                                      &arguments->threshold, 0, 1UL);
   gt_option_parser_add_option (op, option);

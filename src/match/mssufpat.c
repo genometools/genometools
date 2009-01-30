@@ -81,6 +81,7 @@ static void *pms_allocatedfsconstinfo(unsigned int alphasize)
 }
 
 static void pms_initdfsconstinfo(void *dfsconstinfo,
+                                 unsigned int alphasize,
                                  ...)
                                  /* Variable argument list is as follows:
                                     unsigned int alphasize
@@ -90,11 +91,9 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
 {
   va_list ap;
   const Uchar *pattern;
-  unsigned int alphasize;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
-  va_start(ap,dfsconstinfo);
-  alphasize = va_arg(ap, unsigned int);
+  va_start(ap,alphasize);
   pattern = va_arg(ap, const Uchar *);
   mti->patternlength = va_arg(ap, unsigned long);
   va_end(ap);

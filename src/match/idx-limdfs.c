@@ -907,6 +907,7 @@ void indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            const AbstractDfstransformer *adfst)
 {
   adfst->initdfsconstinfo(limdfsresources->dfsconstinfo,
+                          (unsigned int) limdfsresources->alphasize,
                           pattern,
                           seedbitvector,
                           seedweight);

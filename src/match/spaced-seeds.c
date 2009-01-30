@@ -60,7 +60,8 @@ static void *spse_allocatedfsconstinfo(GT_UNUSED unsigned int alphasize)
 }
 
 static void spse_initdfsconstinfo(void *dfsconstinfo,
-                                 ...)
+                                  unsigned int alphasize,
+                                  ...)
                                  /* Variable argument list is as follows:
                                     const Uchar *pattern,
                                     Bitstring seedbitvector,
@@ -70,7 +71,7 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
   va_list ap;
   Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
-  va_start(ap,dfsconstinfo);
+  va_start(ap,alphasize);
   mti->pattern = va_arg(ap, const Uchar *);
   mti->seedbitvector = va_arg(ap, Bitstring);
   mti->seedweight = va_arg(ap, unsigned long);
