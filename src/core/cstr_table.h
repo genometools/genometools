@@ -33,7 +33,7 @@ void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
 const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
-GtStrArray*  gt_cstr_table_get_all(const GtCstrTable *table);
-int          gt_cstr_table_unit_test(GtError*);
+GtStrArray*   gt_cstr_table_get_all(const GtCstrTable *table);
+int           gt_cstr_table_unit_test(GtError*);
 
 #endif
