@@ -433,7 +433,7 @@ static void process_node(GtDiagram *d, GtFeatureNode *node,
        but never collapse into pseudo nodes */
     add_recursive(d, node, parent, node);
   }
-  else if ((!*collapse || gt_feature_node_is_pseudo(parent))
+  else if ((!*collapse || (parent && gt_feature_node_is_pseudo(parent)))
              && gt_feature_node_is_multi(node))
   {
     /* multi line features are added to their representative's blocks */
