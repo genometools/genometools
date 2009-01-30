@@ -4,7 +4,7 @@
 #include "core/unused_api.h"
 #include "absdfstrans-imp.h"
 
-#define INFTY -1L
+#define MINUSINFTY (-1L)
 #define REPLACEMENTSCORE(A,B) ((A) == (B) ? scorevalues->matchscore\
                                           : scorevalues->mismatchscore)
 
@@ -77,8 +77,8 @@ static void firstcolumn (Column *column,
   column->pprefixlen = 0;
   for (i = 1UL; i <= querylength; i++)
   {
-    column->colvalues[i].repcell = INFTY;
-    column->colvalues[i].inscell = INFTY;
+    column->colvalues[i].repcell = MINUSINFTY;
+    column->colvalues[i].inscell = MINUSINFTY;
     if (column->colvalues[i-1].delcell > 0)
     {
       if (column->colvalues[i-1].bestcell > 0)
@@ -101,7 +101,7 @@ static void firstcolumn (Column *column,
                                        scorevalues->gapextend;
       } else
       {
-        column->colvalues[i].delcell = INFTY;
+        column->colvalues[i].delcell = MINUSINFTY;
       }
     }
     column->colvalues[i].bestcell = 0;
@@ -127,7 +127,7 @@ static void nextcolumn (Column *outcol,
   {
     outcol->colvalues = gt_malloc (sizeof (Matrixvalue) * (querylength + 1));
   }
-  outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = INFTY;
+  outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = MINUSINFTY;
   if (incol->colvalues[0].inscell > 0)
   {
     if (incol->colvalues[0].bestcell > 0)
@@ -150,7 +150,7 @@ static void nextcolumn (Column *outcol,
                                      scorevalues->gapextend;
     } else
     {
-      outcol->colvalues[0].inscell = INFTY;
+      outcol->colvalues[0].inscell = MINUSINFTY;
     }
   }
   outcol->colvalues[0].bestcell = max3 (outcol->colvalues[0].repcell,
@@ -166,7 +166,7 @@ static void nextcolumn (Column *outcol,
                                      REPLACEMENTSCORE(dbchar,query[i]);
     } else
     {
-      outcol->colvalues[i].repcell = INFTY;
+      outcol->colvalues[i].repcell = MINUSINFTY;
     }
     if (incol->colvalues[i].inscell > 0)
     {
@@ -190,7 +190,7 @@ static void nextcolumn (Column *outcol,
                                        scorevalues->gapextend;
       } else
       {
-        outcol->colvalues[i].inscell = INFTY;
+        outcol->colvalues[i].inscell = MINUSINFTY;
       }
     }
     if (outcol->colvalues[i-1].delcell > 0)
@@ -215,7 +215,7 @@ static void nextcolumn (Column *outcol,
                                        scorevalues->gapextend;
       } else
       {
-        outcol->colvalues[i].delcell = INFTY;
+        outcol->colvalues[i].delcell = MINUSINFTY;
       }
     }
     outcol->colvalues[i].bestcell = max3 (outcol->colvalues[i].repcell,
@@ -239,7 +239,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
   unsigned long i;
   Matrixvalue nw, west;
 
-  column->colvalues[0].repcell = column->colvalues[0].delcell = INFTY;
+  column->colvalues[0].repcell = column->colvalues[0].delcell = MINUSINFTY;
   if (column->colvalues[0].inscell > 0)
   {
     if (column->colvalues[0].bestcell > 0)
@@ -262,7 +262,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
                                      scorevalues->gapextend;
     } else
     {
-      column->colvalues[0].inscell = INFTY;
+      column->colvalues[0].inscell = MINUSINFTY;
     }
   }
   column->colvalues[0].bestcell = max3 (column->colvalues[0].repcell,
@@ -281,7 +281,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
                                      REPLACEMENTSCORE(dbchar,query[i]);
     } else
     {
-      column->colvalues[i].repcell = INFTY;
+      column->colvalues[i].repcell = MINUSINFTY;
     }
     if (west.inscell > 0)
     {
@@ -303,7 +303,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
                                                        scorevalues->gapextend;
       } else
       {
-        column->colvalues[i].inscell = INFTY;
+        column->colvalues[i].inscell = MINUSINFTY;
       }
     }
     if (column->colvalues[i-1].delcell > 0)
@@ -328,7 +328,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
                                        scorevalues->gapextend;
       } else
       {
-        column->colvalues[i].delcell = INFTY;
+        column->colvalues[i].delcell = MINUSINFTY;
       }
     }
     nw = west;

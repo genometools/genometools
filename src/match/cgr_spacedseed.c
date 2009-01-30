@@ -19,7 +19,6 @@
 #include "core/ma_api.h"
 #include "core/seqiterator.h"
 #include "cgr_spacedseed.h"
-#include "alphadef.h"
 #include "sarr-def.h"
 #include "intbits.h"
 #include "eis-voiditf.h"

@@ -18,7 +18,6 @@
 #include "core/unused_api.h"
 #include "core/ma_api.h"
 #include "core/seqiterator.h"
-#include "alphadef.h"
 #include "sarr-def.h"
 #include "intbits.h"
 #include "eis-voiditf.h"

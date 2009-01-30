@@ -20,7 +20,6 @@
 
 #include "core/filelengthvalues.h"
 #include "core/arraydef.h"
-#include "alphadef.h"
 #include "seqpos-def.h"
 #include "measure-time-if.h"
 #include "encseq-def.h"
