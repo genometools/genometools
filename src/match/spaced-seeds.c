@@ -182,6 +182,7 @@ const AbstractDfstransformer *spse_AbstractDfstransformer(void)
     spse_initLimdfsstate,
     NULL,
     NULL,
+    NULL,
     spse_fullmatchLimdfsstate,
     spse_nextLimdfsstate,
     spse_inplacenextLimdfsstate,

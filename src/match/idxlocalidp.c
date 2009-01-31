@@ -161,7 +161,7 @@ static void nextcolumn (Column *outcol,
     {
       if (dbchar == query[i-1])
       {
-        printf("match dbchar = %u\n",dbchar);
+        printf("match dbchar = %u\n",(unsigned int) dbchar);
       }
       outcol->colvalues[i].repcell = incol->colvalues[i-1].bestcell +
                                      REPLACEMENTSCORE(dbchar,query[i-1]);
@@ -397,6 +397,26 @@ static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
   gt_free(((Column *) aliascolumn)->colvalues);
 }
 
+static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
+                                    const DECLAREPTRDFSSTATE(srcstate),
+                                    void *dfsconstinfo)
+{
+  unsigned long idx;
+  Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
+  Column *destcol = (Column *) deststate;
+  const Column *srccol = (const Column *) srcstate;
+
+  if (destcol->colvalues == NULL)
+  {
+    destcol->colvalues = gt_malloc (sizeof (Matrixvalue) *
+                                    (lci->querylength + 1));
+  }
+  for (idx = 0; idx<=lci->querylength; idx++)
+  {
+    destcol->colvalues[idx] = srccol->colvalues[idx];
+  }
+}
+
 static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
                                          DECLAREPTRDFSSTATE(aliascolumn),
                                          GT_UNUSED Seqpos leftbound,
@@ -445,12 +465,12 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
 
   if (incol->colvalues == NULL)
   {
-    gt_assert(currentdepth == 1);
+    gt_assert(currentdepth == 1UL);
     secondcolumn (outcol, &lci->scorevalues, lci->query, lci->querylength,
                   currentchar);
   } else
   {
-    printf("process char %u for column\n",currentchar);
+    printf("process char %u for column\n",(unsigned int) currentchar);
     showscorecolumn(incol,lci->querylength,currentdepth);
     nextcolumn (outcol,&lci->scorevalues,currentchar,
                 lci->query,lci->querylength,incol);
@@ -468,12 +488,12 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
 
   if (column->colvalues == NULL)
   {
-    gt_assert(currentdepth == 1);
+    gt_assert(currentdepth == 1UL);
     secondcolumn (column, &lci->scorevalues, lci->query, lci->querylength,
                   currentchar);
   } else
   {
-    printf("process char %u for column\n",currentchar);
+    printf("process char %u for column\n",(unsigned int) currentchar);
     showscorecolumn(column,lci->querylength,currentdepth);
     inplacenextcolumn (&lci->scorevalues,currentchar,
                        lci->query,lci->querylength,column);
@@ -493,6 +513,7 @@ const AbstractDfstransformer *locali_AbstractDfstransformer (void)
     locali_initLimdfsstate,
     locali_initLimdfsstackelem,
     locali_freeLimdfsstackelem,
+    locali_copyLimdfsstate,
     locali_fullmatchLimdfsstate,
     locali_nextLimdfsstate,
     locali_inplacenextLimdfsstate,
