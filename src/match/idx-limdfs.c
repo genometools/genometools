@@ -455,8 +455,11 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      addpathchar(limdfsresources,(unsigned long) (offset - 1 + contextlength),
-                  cc);
+      if (limdfsresources->maxpathlength > 0)
+      {
+        addpathchar(limdfsresources,
+                    (unsigned long) (offset - 1 + contextlength),cc);
+      }
       adfst->inplacenextLimdfsstate(limdfsresources->dfsconstinfo,
                                     limdfsresources->currentdfsstate,
                                     (unsigned long) (offset + contextlength),
@@ -780,7 +783,10 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     gt_assert(inchar < limdfsresources->alphasize);
     child.code = startcode + inchar;
     child.inchar = inchar;
-    addpathchar(limdfsresources,(unsigned long) parent->offset,inchar);
+    if (limdfsresources->maxpathlength > 0)
+    {
+      addpathchar(limdfsresources,(unsigned long) parent->offset,inchar);
+    }
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
@@ -849,7 +855,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
     SHOWSTACKTOP(stackptr);
     parentwithinfo = *stackptr; /* make a copy */
-    if (parentwithinfo.lcpitv.offset > 0)
+    if (parentwithinfo.lcpitv.offset > 0 && limdfsresources->maxpathlength > 0)
     {
       addpathchar(limdfsresources,
                   (unsigned long) (parentwithinfo.lcpitv.offset-1),

@@ -2,6 +2,7 @@
 #include "core/ma_api.h"
 #include "core/symboldef.h"
 #include "core/unused_api.h"
+#include "core/assert_api.h"
 #include "absdfstrans-imp.h"
 
 #define MINUSINFTY (-1L)
@@ -59,9 +60,27 @@ static inline long max3 (long a,long b,long c)
   return (temp < c) ? c : temp;
 }
 
-static void firstcolumn (Column *column,
-                         const Scorevalues *scorevalues,
-                         unsigned long querylength)
+static void showscorecolumn(const Column *column,unsigned long querylength,
+                            unsigned long currentdepth)
+{
+  unsigned long idx;
+
+  printf("at depth %lu\n",currentdepth);
+  for (idx = 0; idx <= querylength; idx++)
+  {
+    if (column->colvalues[idx].bestcell > 0)
+    {
+      printf("(%lu,%ld) ",idx,column->colvalues[idx].bestcell);
+    }
+  }
+  printf("max=%lu\n",column->maxvalue);
+}
+
+static void secondcolumn (Column *column,
+                          const Scorevalues *scorevalues,
+                          const Uchar *query,
+                          unsigned long querylength,
+                          Uchar dbchar)
 {
   unsigned long i;
 
@@ -69,42 +88,20 @@ static void firstcolumn (Column *column,
   {
     column->colvalues = gt_malloc (sizeof (Matrixvalue) * (querylength + 1));
   }
-  column->colvalues[0].repcell = 0;
-  column->colvalues[0].inscell = scorevalues->gapstart;
-  column->colvalues[0].delcell = scorevalues->gapstart;
-  column->colvalues[0].bestcell = 0;
+  column->colvalues[0].repcell = MINUSINFTY;
+  column->colvalues[0].inscell = scorevalues->gapstart +
+                                 scorevalues->gapextend;
+  column->colvalues[0].delcell = MINUSINFTY;
+  column->colvalues[0].bestcell = MINUSINFTY;
   column->maxvalue = 0;
   column->pprefixlen = 0;
   for (i = 1UL; i <= querylength; i++)
   {
-    column->colvalues[i].repcell = MINUSINFTY;
+    column->colvalues[i].delcell = MINUSINFTY;
     column->colvalues[i].inscell = MINUSINFTY;
-    if (column->colvalues[i-1].delcell > 0)
-    {
-      if (column->colvalues[i-1].bestcell > 0)
-      {
-        column->colvalues[i].delcell
-          = max2 (column->colvalues[i-1].delcell + scorevalues->gapextend,
-                  column->colvalues[i-1].bestcell + scorevalues->gapstart +
-                                                    scorevalues->gapextend);
-      } else
-      {
-        column->colvalues[i].delcell = column->colvalues[i-1].delcell +
-                                       scorevalues->gapextend;
-      }
-    } else
-    {
-      if (column->colvalues[i-1].bestcell > 0)
-      {
-        column->colvalues[i].delcell = column->colvalues[i-1].bestcell +
-                                       scorevalues->gapstart +
-                                       scorevalues->gapextend;
-      } else
-      {
-        column->colvalues[i].delcell = MINUSINFTY;
-      }
-    }
-    column->colvalues[i].bestcell = 0;
+    column->colvalues[i].repcell = REPLACEMENTSCORE(dbchar,query[i-1]);
+    column->colvalues[i].bestcell = max2(column->colvalues[i].delcell,
+                                         column->colvalues[i].repcell);
     if (column->colvalues[i].bestcell > 0 &&
         column->colvalues[i].bestcell > (long) column->maxvalue)
     {
@@ -162,8 +159,12 @@ static void nextcolumn (Column *outcol,
   {
     if (incol->colvalues[i-1].bestcell > 0)
     {
+      if (dbchar == query[i-1])
+      {
+        printf("match dbchar = %u\n",dbchar);
+      }
       outcol->colvalues[i].repcell = incol->colvalues[i-1].bestcell +
-                                     REPLACEMENTSCORE(dbchar,query[i]);
+                                     REPLACEMENTSCORE(dbchar,query[i-1]);
     } else
     {
       outcol->colvalues[i].repcell = MINUSINFTY;
@@ -278,7 +279,7 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
     if (nw.bestcell > 0)
     {
       column->colvalues[i].repcell = nw.bestcell +
-                                     REPLACEMENTSCORE(dbchar,query[i]);
+                                     REPLACEMENTSCORE(dbchar,query[i-1]);
     } else
     {
       column->colvalues[i].repcell = MINUSINFTY;
@@ -379,12 +380,11 @@ static void locali_freedfsconstinfo (void **dfsconstinfo)
 }
 
 static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliascolumn),
-                                    void *dfsconstinfo)
+                                    GT_UNUSED void *dfsconstinfo)
 {
   Column *column = (Column *) aliascolumn;
-  const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  firstcolumn (column, &lci->scorevalues, lci->querylength);
+  column->colvalues = NULL;
 }
 
 static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
@@ -408,28 +408,34 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  if (column->maxvalue >= lci->threshold)
+  if (column->colvalues != NULL)
   {
-    printf("maxvalue = %lu\n",column->maxvalue);
-    limdfsresult->status = Limdfssuccess;
-    limdfsresult->distance = column->maxvalue;
-    limdfsresult->pprefixlen = column->pprefixlen;
-  } else
-  {
-    if (column->maxvalue > 0)
+    if (column->maxvalue >= lci->threshold)
     {
       printf("maxvalue = %lu\n",column->maxvalue);
-      limdfsresult->status = Limdfscontinue;
+      limdfsresult->status = Limdfssuccess;
+      limdfsresult->distance = column->maxvalue;
+      limdfsresult->pprefixlen = column->pprefixlen;
     } else
     {
-      limdfsresult->status = Limdfsstop;
+      if (column->maxvalue > 0)
+      {
+        printf("maxvalue = %lu\n",column->maxvalue);
+        limdfsresult->status = Limdfscontinue;
+      } else
+      {
+        limdfsresult->status = Limdfsstop;
+      }
     }
+  } else
+  {
+    limdfsresult->status = Limdfscontinue;
   }
 }
 
 static void locali_nextLimdfsstate (const void *dfsconstinfo,
                                     DECLAREPTRDFSSTATE (aliasoutcol),
-                                    GT_UNUSED unsigned long currentdepth,
+                                    unsigned long currentdepth,
                                     Uchar currentchar,
                                     const DECLAREPTRDFSSTATE (aliasincol))
 {
@@ -437,20 +443,42 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   Column *outcol = (Column *) aliasoutcol;
   const Column *incol = (const Column *) aliasincol;
 
-  nextcolumn (outcol,&lci->scorevalues,currentchar,
-              lci->query,lci->querylength,incol);
+  if (incol->colvalues == NULL)
+  {
+    gt_assert(currentdepth == 1);
+    secondcolumn (outcol, &lci->scorevalues, lci->query, lci->querylength,
+                  currentchar);
+  } else
+  {
+    printf("process char %u for column\n",currentchar);
+    showscorecolumn(incol,lci->querylength,currentdepth);
+    nextcolumn (outcol,&lci->scorevalues,currentchar,
+                lci->query,lci->querylength,incol);
+  }
+  showscorecolumn(outcol,lci->querylength,currentdepth);
 }
 
 static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
                                            DECLAREPTRDFSSTATE (aliascolumn),
-                                           GT_UNUSED unsigned long currentdepth,
+                                           unsigned long currentdepth,
                                            Uchar currentchar)
 {
   Column *column = (Column *) aliascolumn;
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
-  inplacenextcolumn (&lci->scorevalues,currentchar,
-                     lci->query,lci->querylength,column);
+  if (column->colvalues == NULL)
+  {
+    gt_assert(currentdepth == 1);
+    secondcolumn (column, &lci->scorevalues, lci->query, lci->querylength,
+                  currentchar);
+  } else
+  {
+    printf("process char %u for column\n",currentchar);
+    showscorecolumn(column,lci->querylength,currentdepth);
+    inplacenextcolumn (&lci->scorevalues,currentchar,
+                       lci->query,lci->querylength,column);
+  }
+  showscorecolumn(column,lci->querylength,currentdepth);
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
