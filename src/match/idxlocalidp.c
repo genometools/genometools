@@ -60,21 +60,39 @@ static inline long max3 (long a,long b,long c)
   return (temp < c) ? c : temp;
 }
 
-static void showscorecolumn(const Column *column,unsigned long querylength,
+#ifdef SKDEBUG
+static void showscorecolumn(const Column *column,
+                            unsigned long querylength,
                             unsigned long currentdepth)
 {
-  unsigned long idx;
-
   printf("at depth %lu\n",currentdepth);
-  for (idx = 0; idx <= querylength; idx++)
+  if (column->colvalues == NULL)
   {
-    if (column->colvalues[idx].bestcell > 0)
+    printf("empty column\n");
+  } else
+  {
+    unsigned long idx;
+
+    for (idx = 0; idx <= querylength; idx++)
     {
-      printf("(%lu,%ld) ",idx,column->colvalues[idx].bestcell);
+      if (column->colvalues[idx].bestcell > 0)
+      {
+        printf("(%lu,%ld) ",idx,column->colvalues[idx].bestcell);
+      }
     }
+    printf("max=%lu\n",column->maxvalue);
   }
-  printf("max=%lu\n",column->maxvalue);
 }
+
+void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
+                            unsigned long currentdepth,
+                            const void *dfsconstinfo)
+{
+  const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
+
+  showscorecolumn((const Column *) aliasstate,lci->querylength,currentdepth);
+}
+#endif
 
 static void secondcolumn (Column *column,
                           const Scorevalues *scorevalues,
@@ -120,6 +138,8 @@ static void nextcolumn (Column *outcol,
 {
   unsigned long i;
 
+  gt_assert(outcol != incol);
+  gt_assert(outcol->colvalues != incol->colvalues);
   if (outcol->colvalues == NULL)
   {
     outcol->colvalues = gt_malloc (sizeof (Matrixvalue) * (querylength + 1));
@@ -159,10 +179,6 @@ static void nextcolumn (Column *outcol,
   {
     if (incol->colvalues[i-1].bestcell > 0)
     {
-      if (dbchar == query[i-1])
-      {
-        printf("match dbchar = %u\n",(unsigned int) dbchar);
-      }
       outcol->colvalues[i].repcell = incol->colvalues[i-1].bestcell +
                                      REPLACEMENTSCORE(dbchar,query[i-1]);
     } else
@@ -273,7 +289,6 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
   column->pprefixlen = 0;
   nw = column->colvalues[0];
   for (i = 1UL; i <= querylength; i++)
-
   {
     west = column->colvalues[i];
     if (nw.bestcell > 0)
@@ -367,8 +382,6 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   lci->querylength = va_arg (ap, unsigned long);
   lci->threshold = va_arg (ap, unsigned long);
   va_end(ap);
-  printf("querylength = %lu\n",lci->querylength);
-  printf("threshold = %lu\n",lci->threshold);
 }
 
 static void locali_freedfsconstinfo (void **dfsconstinfo)
@@ -379,22 +392,22 @@ static void locali_freedfsconstinfo (void **dfsconstinfo)
   *dfsconstinfo = NULL;
 }
 
-static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliascolumn),
+static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliasstate),
                                     GT_UNUSED void *dfsconstinfo)
 {
-  Column *column = (Column *) aliascolumn;
+  Column *column = (Column *) aliasstate;
 
   column->colvalues = NULL;
 }
 
-static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
+static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 {
-  ((Column *) aliascolumn)->colvalues = NULL;
+  ((Column *) aliasstate)->colvalues = NULL;
 }
 
-static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliascolumn))
+static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 {
-  gt_free(((Column *) aliascolumn)->colvalues);
+  gt_free(((Column *) aliasstate)->colvalues);
 }
 
 static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
@@ -406,33 +419,35 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
   Column *destcol = (Column *) deststate;
   const Column *srccol = (const Column *) srcstate;
 
-  if (destcol->colvalues == NULL)
+  if (srccol->colvalues != NULL)
   {
-    destcol->colvalues = gt_malloc (sizeof (Matrixvalue) *
-                                    (lci->querylength + 1));
-  }
-  for (idx = 0; idx<=lci->querylength; idx++)
-  {
-    destcol->colvalues[idx] = srccol->colvalues[idx];
+    if (destcol->colvalues == NULL)
+    {
+      destcol->colvalues = gt_malloc (sizeof (Matrixvalue) *
+                                      (lci->querylength + 1));
+    }
+    for (idx = 0; idx<=lci->querylength; idx++)
+    {
+      destcol->colvalues[idx] = srccol->colvalues[idx];
+    }
   }
 }
 
 static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
-                                         DECLAREPTRDFSSTATE(aliascolumn),
+                                         DECLAREPTRDFSSTATE(aliasstate),
                                          GT_UNUSED Seqpos leftbound,
                                          GT_UNUSED Seqpos rightbound,
                                          GT_UNUSED Seqpos width,
                                          GT_UNUSED unsigned long currentdepth,
                                          void *dfsconstinfo)
 {
-  Column *column = (Column *) aliascolumn;
+  Column *column = (Column *) aliasstate;
   const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
   if (column->colvalues != NULL)
   {
     if (column->maxvalue >= lci->threshold)
     {
-      printf("maxvalue = %lu\n",column->maxvalue);
       limdfsresult->status = Limdfssuccess;
       limdfsresult->distance = column->maxvalue;
       limdfsresult->pprefixlen = column->pprefixlen;
@@ -440,7 +455,6 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
     {
       if (column->maxvalue > 0)
       {
-        printf("maxvalue = %lu\n",column->maxvalue);
         limdfsresult->status = Limdfscontinue;
       } else
       {
@@ -470,20 +484,17 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
                   currentchar);
   } else
   {
-    printf("process char %u for column\n",(unsigned int) currentchar);
-    showscorecolumn(incol,lci->querylength,currentdepth);
     nextcolumn (outcol,&lci->scorevalues,currentchar,
                 lci->query,lci->querylength,incol);
   }
-  showscorecolumn(outcol,lci->querylength,currentdepth);
 }
 
 static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
-                                           DECLAREPTRDFSSTATE (aliascolumn),
+                                           DECLAREPTRDFSSTATE (aliasstate),
                                            unsigned long currentdepth,
                                            Uchar currentchar)
 {
-  Column *column = (Column *) aliascolumn;
+  Column *column = (Column *) aliasstate;
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
   if (column->colvalues == NULL)
@@ -493,12 +504,9 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
                   currentchar);
   } else
   {
-    printf("process char %u for column\n",(unsigned int) currentchar);
-    showscorecolumn(column,lci->querylength,currentdepth);
     inplacenextcolumn (&lci->scorevalues,currentchar,
                        lci->query,lci->querylength,column);
   }
-  showscorecolumn(column,lci->querylength,currentdepth);
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
@@ -518,7 +526,7 @@ const AbstractDfstransformer *locali_AbstractDfstransformer (void)
     locali_nextLimdfsstate,
     locali_inplacenextLimdfsstate,
 #ifdef SKDEBUG
-    NULL
+    locali_showLimdfsstate
 #endif /*  */
   };
   return &locali_adfst;

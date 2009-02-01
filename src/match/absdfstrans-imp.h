@@ -79,7 +79,7 @@ struct AbstractDfstransformer
                               Uchar currentchar);
 #ifdef SKDEBUG
   void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
-                          unsigned long score,
+                          unsigned long currentdepth,
                           const void *dfsconstinfo);
 #endif
 };

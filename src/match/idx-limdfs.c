@@ -858,9 +858,12 @@ static void runlimdfs(Limdfsresources *limdfsresources,
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
     SHOWSTACKTOP(stackptr);
-    parentwithinfo = *stackptr; /* make a copy */
-    if (adfst->copyLimdfsstate != NULL)
+    if (adfst->copyLimdfsstate == NULL)
     {
+      parentwithinfo = *stackptr; /* make a copy */
+    } else
+    {
+      parentwithinfo.lcpitv = stackptr->lcpitv;
       adfst->copyLimdfsstate(parentwithinfo.aliasstate,stackptr->aliasstate,
                              limdfsresources->dfsconstinfo);
     }
