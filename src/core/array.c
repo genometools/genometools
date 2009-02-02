@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -96,13 +96,29 @@ void gt_array_rem(GtArray *a, unsigned long idx)
   unsigned long i;
   gt_assert(a && idx < a->next_free);
   /* move elements */
-  for (i = idx+1; i < a->next_free; i++) {
+  for (i = idx + 1; i < a->next_free; i++) {
     memcpy((char*) a->space + (i-1) * a->size_of_elem,
            (char*) a->space + i * a->size_of_elem,
            a->size_of_elem);
   }
   /* remove last (now duplicated) element */
   a->next_free--;
+}
+
+void gt_array_rem_span(GtArray *a, unsigned long frompos, unsigned long topos)
+{
+  unsigned long i, len;
+  gt_assert(a && frompos <= topos);
+  gt_assert(frompos < a->next_free && topos < a->next_free);
+  /* move elements */
+  len = topos - frompos + 1;
+  for (i = topos + 1; i < a->next_free; i++) {
+    memcpy((char*) a->space + (i-len) * a->size_of_elem,
+           (char*) a->space + i * a->size_of_elem,
+           a->size_of_elem);
+  }
+  /* remove last (now duplicated) elements */
+  a->next_free -= len;
 }
 
 void gt_array_reverse(GtArray *a)
@@ -271,7 +287,7 @@ int gt_array_example(GT_UNUSED GtError *err)
 
 int gt_array_unit_test(GtError *err)
 {
-  GtArray *char_array, *int_array, *a = NULL, *aref, *aclone;
+  GtArray *char_array, *int_array, *a = NULL, *aref, *aclone = NULL;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
@@ -338,9 +354,8 @@ int gt_array_unit_test(GtError *err)
     }
   }
 
-  /* test gt_array_reverse(), gt_array_iterate(), gt_array_rem(), and
-     gt_array_ref()
-   */
+  /* test gt_array_reverse(), gt_array_iterate(), gt_array_rem(),
+     gt_array_rem_span(), and gt_array_ref() */
   if (!had_err) {
     a = gt_array_new(sizeof (GtRange));
     for (i = 0; i < 24; i++) {
@@ -374,7 +389,6 @@ int gt_array_unit_test(GtError *err)
       ensure(had_err, !gt_range_compare(gt_array_get(a, i),
                                         gt_array_get(aclone, i)));
     }
-    gt_array_delete(aclone);
   }
   if (!had_err) {
     gt_array_rem(a, 13);
@@ -393,6 +407,21 @@ int gt_array_unit_test(GtError *err)
       ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
     }
   }
+  if (!had_err) {
+    gt_array_rem_span(aclone, 10, 13);
+    ensure(had_err, gt_array_size(aclone) == 20);
+    for (i = 0; !had_err && i < 10; i++) {
+      range.start = i + 1;
+      range.end   = i + 101;
+      ensure(had_err, !gt_range_compare(&range, gt_array_get(aclone, i)));
+    }
+    for (i = 10; !had_err && i < 20; i++) {
+      range.start = 4 + i + 1;
+      range.end   = 4 + i + 101;
+      ensure(had_err, !gt_range_compare(&range, gt_array_get(aclone, i)));
+    }
+  }
+  gt_array_delete(aclone);
   gt_array_delete(a);
 
   gt_array_delete(char_array);
