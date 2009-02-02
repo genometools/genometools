@@ -243,6 +243,28 @@ int gt_array_iterate_reverse(GtArray *a, GtArrayProcessor array_processor,
   return 0;
 }
 
+void gt_array_prepend_array(GtArray *dest, const GtArray *src)
+{
+  unsigned long i;
+  gt_assert(dest && src && dest->size_of_elem == src->size_of_elem);
+  if (!src->next_free)
+    return; /* nothing to do */
+  /* make sure <dest> is large enough */
+  dest->space = gt_dynalloc(dest->space, &dest->allocated,
+                            (dest->next_free + src->next_free) *
+                            dest->size_of_elem);
+  /* move elements in <dest> to the back */
+  for (i = dest->next_free; i > 0; i--) {
+    memcpy((char*) dest->space + (i-1+src->next_free) * dest->size_of_elem,
+           (char*) dest->space + (i-1) * dest->size_of_elem,
+           dest->size_of_elem);
+  }
+  /* copy <src> to the start of <dest> */
+  memcpy((char*) dest->space, (char*) src->space,
+         src->size_of_elem * src->next_free);
+  dest->next_free += src->next_free;
+}
+
 static int iterate_test_func(void *value, void *info, GT_UNUSED GtError *err)
 {
   unsigned long *i;
@@ -419,6 +441,26 @@ int gt_array_unit_test(GtError *err)
       range.start = 4 + i + 1;
       range.end   = 4 + i + 101;
       ensure(had_err, !gt_range_compare(&range, gt_array_get(aclone, i)));
+    }
+  }
+  if (!had_err) {
+    gt_array_rem_span(aclone, 10, 19);
+    gt_array_prepend_array(a, aclone);
+    ensure(had_err, gt_array_size(a) == 30);
+    for (i = 0; !had_err && i < 10; i++) {
+      range.start = i + 1;
+      range.end   = i + 101;
+      ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
+    }
+    for (i = 10; !had_err && i < 20; i++) {
+      range.start = i + 1 - 10;
+      range.end   = i + 101 - 10;
+      ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
+    }
+    for (i = 20; !had_err && i < 30; i++) {
+      range.start = 4 + i + 1 - 10;
+      range.end   = 4 + i + 101 - 10;
+      ensure(had_err, !gt_range_compare(&range, gt_array_get(a, i)));
     }
   }
   gt_array_delete(aclone);

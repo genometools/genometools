@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -39,6 +39,7 @@ int           gt_array_iterate(GtArray *array,
 int           gt_array_iterate_reverse(GtArray *array,
                                        GtArrayProcessor array_processor,
                                        void *info, GtError *err);
+void          gt_array_prepend_array(GtArray *dest, const GtArray *src);
 int           gt_array_example(GtError*);
 int           gt_array_unit_test(GtError*);
 
