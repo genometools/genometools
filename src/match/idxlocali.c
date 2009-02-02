@@ -31,11 +31,12 @@ static void showmatch(GT_UNUSED void *processinfo,
                       Seqpos dbstartpos,
                       Seqpos dblen,
                       GT_UNUSED const Uchar *dbsubstring,
-                      GT_UNUSED unsigned long pprefixlen,
-                      GT_UNUSED unsigned long distance)
+                      unsigned long pprefixlen,
+                      unsigned long distance)
 {
   printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
-  printf(FormatSeqpos "\n",PRINTSeqposcast(dbstartpos));
+  printf(FormatSeqpos "\t",PRINTSeqposcast(dbstartpos));
+  printf("%lu\t%lu",pprefixlen,distance);
 }
 
 int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
@@ -65,14 +66,14 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     dfst = locali_AbstractDfstransformer();
     gt_assert(genericindex != NULL);
     limdfsresources = newLimdfsresources(genericindex,
-                           true,
-                           0,
-                           0,
-                           showmatch,
-                           NULL, /* processmatch info */
-                           NULL, /* processresult */
-                           NULL, /* processresult info */
-                           dfst);
+                                         true,
+                                         0,
+                                         0,
+                                         showmatch,
+                                         NULL, /* processmatch info */
+                                         NULL, /* processresult */
+                                         NULL, /* processresult info */
+                                         dfst);
     encseq = genericindex_getencseq(genericindex);
     seqit = gt_seqiterator_new(arguments->queryfiles,
                                getencseqAlphabetsymbolmap(encseq),
