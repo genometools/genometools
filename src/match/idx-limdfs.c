@@ -29,10 +29,124 @@
 #include "esa-mmsearch-def.h"
 #include "absdfstrans-imp.h"
 #include "idx-limdfs.h"
+#include "esa-map.h"
 #include "esa-minunique.pr"
 
 #define DECLAREDFSSTATE(V)\
         Aliasdfsstate V[5]
+
+struct Genericindex
+{
+  Suffixarray *suffixarray;
+  Seqpos totallength;
+  void *packedindex;
+  bool withesa;
+  const Mbtab **mbtab;      /* only relevant for packedindex */
+  unsigned int maxdepth;    /* maximaldepth of boundaries */
+};
+
+void genericindex_delete(Genericindex *genericindex)
+{
+  if (genericindex == NULL)
+  {
+    return;
+  }
+  freesuffixarray(genericindex->suffixarray);
+  gt_free(genericindex->suffixarray);
+  if (genericindex->packedindex != NULL)
+  {
+    deletevoidBWTSeq(genericindex->packedindex);
+  }
+  gt_free(genericindex);
+}
+
+const Encodedsequence *genericindex_getencseq(const Genericindex *genericindex)
+{
+  return genericindex->suffixarray->encseq;
+}
+
+Genericindex *genericindex_new(const GtStr *indexname,
+                               bool withesa,
+                               bool withencseq,
+                               int userdefinedmaxdepth,
+                               GtError *err)
+{
+  unsigned int demand = 0;
+  bool haserr = false;
+  Genericindex *genericindex;
+
+  genericindex = gt_malloc(sizeof(*genericindex));
+  if (withesa)
+  {
+    demand |= SARR_SUFTAB;
+  }
+  if (withencseq)
+  {
+    demand |= SARR_ESQTAB;
+  }
+  genericindex->withesa = withesa;
+  genericindex->suffixarray = gt_malloc(sizeof(*genericindex->suffixarray));
+  if (mapsuffixarray(genericindex->suffixarray,
+                     demand,
+                     indexname,
+                     NULL,
+                     err) != 0)
+  {
+    haserr = true;
+    genericindex->totallength = 0;
+  } else
+  {
+    genericindex->totallength = getencseqtotallength(genericindex->suffixarray
+                                                                 ->encseq);
+  }
+  if (!haserr)
+  {
+    if (withesa && genericindex->suffixarray->readmode != Forwardmode)
+    {
+      gt_error_set(err,"using option -esa you can only process index "
+                       "in forward mode");
+      haserr = true;
+    } else
+    {
+      if (!withesa && genericindex->suffixarray->readmode != Reversemode)
+      {
+        gt_error_set(err,"with option -pck you can only process index "
+                         "in reverse mode");
+        haserr = true;
+      }
+    }
+  }
+  genericindex->packedindex = NULL;
+  genericindex->mbtab = NULL;
+  genericindex->maxdepth = 0;
+  if (!haserr && !withesa)
+  {
+    genericindex->packedindex = loadvoidBWTSeqForSA(indexname,
+                                                    genericindex->suffixarray,
+                                                    genericindex->totallength,
+                                                    true, err);
+    if (genericindex->packedindex == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && !withesa)
+  {
+    genericindex->mbtab = bwtseq2mbtab(genericindex->packedindex);
+    genericindex->maxdepth = bwtseq2maxdepth(genericindex->packedindex);
+    if (userdefinedmaxdepth >= 0 &&
+        genericindex->maxdepth > (unsigned int) userdefinedmaxdepth)
+    {
+      genericindex->maxdepth = (unsigned int) userdefinedmaxdepth;
+    }
+  }
+  if (haserr)
+  {
+    genericindex_delete(genericindex);
+    return NULL;
+  }
+  return genericindex;
+}
 
 typedef struct
 {
@@ -57,18 +171,15 @@ struct Limdfsresources
   ArrayBoundswithchar bwci;
   ArrayLcpintervalwithinfo stack;
   Uchar alphasize;
-  Seqpos totallength;
   Processmatch processmatch;
   void *processmatchinfo;
   Processresult processresult;
   void *patterninfo;
-  const void *genericindex;
-  bool withesa, nowildcards;
+  const Genericindex *genericindex;
+  bool nowildcards;
   unsigned long maxintervalwidth;
   DECLAREDFSSTATE(currentdfsstate);
   Seqpos *rangeOccs;
-  unsigned int maxdepth;
-  const Mbtab **mbtab;
   const Encodedsequence *encseq;
   ArraySeqpos mstatspos;
   Uchar *currentpathspace;
@@ -76,14 +187,9 @@ struct Limdfsresources
   Seqpos numberofmatches;
 };
 
-Limdfsresources *newLimdfsresources(const void *genericindex,
-                                    const Mbtab **mbtab,
-                                    unsigned int maxdepth,
-                                    const Encodedsequence *encseq,
-                                    bool withesa,
+Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
                                     unsigned long maxintervalwidth,
-                                    Seqpos totallength,
                                     unsigned long maxpathlength,
                                     Processmatch processmatch,
                                     void *processmatchinfo,
@@ -92,8 +198,11 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
                                     const AbstractDfstransformer *adfst)
 {
   Limdfsresources *limdfsresources;
-  unsigned int numofchars = getencseqAlphabetnumofchars(encseq);
+  unsigned int numofchars;
+  const Encodedsequence *encseq;
 
+  encseq = genericindex->suffixarray->encseq;
+  numofchars = getencseqAlphabetnumofchars(encseq);
   ALLOCASSIGNSPACE(limdfsresources,NULL,Limdfsresources,1);
   ALLOCASSIGNSPACE(limdfsresources->bwci.spaceBoundswithchar,NULL,
                    Boundswithchar,numofchars+1);
@@ -108,12 +217,8 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   limdfsresources->processresult = processresult;
   limdfsresources->patterninfo = patterninfo;
   limdfsresources->genericindex = genericindex;
-  limdfsresources->totallength = totallength;
-  limdfsresources->withesa = withesa;
   limdfsresources->nowildcards = nowildcards;
   limdfsresources->encseq = encseq;
-  limdfsresources->maxdepth = maxdepth;
-  limdfsresources->mbtab = mbtab;
   limdfsresources->maxintervalwidth = maxintervalwidth;
   limdfsresources->maxpathlength = maxpathlength;
   if (maxpathlength > 0)
@@ -127,7 +232,7 @@ Limdfsresources *newLimdfsresources(const void *genericindex,
   /* Application specific */
   limdfsresources->dfsconstinfo
     = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
-  if (withesa)
+  if (genericindex->withesa)
   {
     limdfsresources->rangeOccs = NULL;
   } else
@@ -216,7 +321,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 
 /* enumerate the suffixes in an LCP-interval */
 
-static void gen_esa_overinterval(const void *voidsuffixarray,
+static void gen_esa_overinterval(const Genericindex *genericindex,
                                  Processmatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
@@ -225,13 +330,12 @@ static void gen_esa_overinterval(const void *voidsuffixarray,
                                  GT_UNUSED Seqpos totallength,
                                  const Uchar *dbsubstring)
 {
-  const Suffixarray *suffixarray = (const Suffixarray *) voidsuffixarray;
   Seqpos idx;
 
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
     processmatch(processmatchinfo,
-                 suffixarray->suftab[idx],
+                 genericindex->suffixarray->suftab[idx],
                  itv->offset,
                  dbsubstring,
                  pprefixlen,
@@ -244,18 +348,18 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
                              unsigned long pprefixlen,
                              unsigned long distance)
 {
-  gen_esa_overinterval((const Suffixarray *) limdfsresources->genericindex,
+  gen_esa_overinterval(limdfsresources->genericindex,
                        limdfsresources->processmatch,
                        limdfsresources->processmatchinfo,
                        itv,
                        pprefixlen,
                        distance,
-                       limdfsresources->totallength,
+                       limdfsresources->genericindex->totallength,
                        limdfsresources->currentpathspace);
   limdfsresources->numberofmatches += (itv->rightbound - itv->leftbound + 1);
 }
 
-static void gen_pck_overinterval(const void *voidbwtseq,
+static void gen_pck_overinterval(const Genericindex *genericindex,
                                  Processmatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
@@ -268,7 +372,8 @@ static void gen_pck_overinterval(const void *voidbwtseq,
   Seqpos dbstartpos;
 
   gt_assert(itv->leftbound < itv->rightbound);
-  bspi = newBwtseqpositioniterator (voidbwtseq,itv->leftbound,itv->rightbound);
+  bspi = newBwtseqpositioniterator (genericindex->packedindex,
+                                    itv->leftbound,itv->rightbound);
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
     gt_assert(totallength >= (dbstartpos + itv->offset));
@@ -293,7 +398,7 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
                        itv,
                        pprefixlen,
                        distance,
-                       limdfsresources->totallength,
+                       limdfsresources->genericindex->totallength,
                        limdfsresources->currentpathspace);
   limdfsresources->numberofmatches += (itv->rightbound - itv->leftbound);
 }
@@ -330,19 +435,21 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
   itv.leftbound = leftbound;
   itv.rightbound = rightbound;
   itv.offset = (Seqpos) offset;
-  (limdfsresources->withesa ? gen_esa_overinterval : gen_pck_overinterval)
+  (limdfsresources->genericindex->withesa
+       ? gen_esa_overinterval
+       : gen_pck_overinterval)
     (limdfsresources->genericindex,
      storemstatsposition,
      &limdfsresources->mstatspos,
      &itv,
      offset,
      0,
-     limdfsresources->totallength,
+     limdfsresources->genericindex->totallength,
      limdfsresources->currentpathspace);
   qsort(limdfsresources->mstatspos.spaceSeqpos,
         (size_t) limdfsresources->mstatspos.nextfreeSeqpos,
         sizeof (Seqpos), comparepositions);
-  if (limdfsresources->withesa)
+  if (limdfsresources->genericindex->withesa)
   {
     limdfsresources->numberofmatches += (rightbound - leftbound + 1);
   } else
@@ -363,17 +470,18 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   Seqpos pos, startpos;
   Uchar cc;
   Limdfsresult limdfsresult;
-  const Suffixarray *suffixarray
-    = (const Suffixarray *) limdfsresources->genericindex;
 
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
-  startpos = suffixarray->suftab[leftbound];
+  startpos = limdfsresources->genericindex->suffixarray->suftab[leftbound];
 #ifdef SKDEBUG
   printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
 #endif
-  for (pos = startpos + offset - 1; pos < limdfsresources->totallength; pos++)
+  for (pos = startpos + offset - 1;
+       pos < limdfsresources->genericindex->totallength; pos++)
   {
-    cc = getencodedchar(suffixarray->encseq,pos,suffixarray->readmode);
+    cc = getencodedchar(limdfsresources->genericindex->suffixarray->encseq,
+                        pos,
+                        limdfsresources->genericindex->suffixarray->readmode);
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nowildcards || cc != (Uchar) WILDCARD))
     {
@@ -480,7 +588,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
         Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,
                                            leftbound);
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
-                                      limdfsresources->totallength -
+                                      limdfsresources->genericindex->
+                                                       totallength -
                                            (startpos + offset),
                                       offset + contextlength,
                                       limdfsresources->currentpathspace,
@@ -524,7 +633,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                          limdfsresources->dfsconstinfo);
   printf("\n");
 #endif
-  if (limdfsresources->withesa)
+  if (limdfsresources->genericindex->withesa)
   {
     width = child->rightbound - child->leftbound + 1;
   } else
@@ -544,7 +653,9 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   if (limdfsresult.status == Limdfssuccess)
   {
-    (limdfsresources->withesa ? esa_overinterval : pck_overinterval)
+    (limdfsresources->genericindex->withesa
+         ? esa_overinterval
+         : pck_overinterval)
       (limdfsresources,child,limdfsresult.pprefixlen,limdfsresult.distance);
     /* success with match of length pprefixlen - 1 */
     return true;
@@ -559,7 +670,8 @@ static void processchildinterval(Limdfsresources *limdfsresources,
                                  const AbstractDfstransformer *adfst)
 {
   if (child->leftbound + 1 < child->rightbound ||
-      (limdfsresources->withesa && child->leftbound + 1 == child->rightbound))
+      (limdfsresources->genericindex->withesa &&
+       child->leftbound + 1 == child->rightbound))
   {
     Lcpintervalwithinfo *stackptr;
 
@@ -575,7 +687,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     }
   } else
   {
-    if (limdfsresources->withesa)
+    if (limdfsresources->genericindex->withesa)
     {
       esa_overcontext(limdfsresources,
                       previousdfsstate,
@@ -617,18 +729,17 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   Seqpos firstnonspecial;
   Uchar extendchar;
   unsigned long idx;
-  const Suffixarray *suffixarray
-    = (const Suffixarray *) limdfsresources->genericindex;
   const Indexbounds *parent = &parentwithinfo->lcpitv;
 
-  extendchar = lcpintervalextendlcp(suffixarray->encseq,
-                                    suffixarray->readmode,
-                                    suffixarray->suftab,
-                                    limdfsresources->totallength,
-                                    limdfsresources->alphasize,
-                                    parent->offset,
-                                    parent->leftbound,
-                                    parent->rightbound);
+  extendchar = lcpintervalextendlcp(
+                       limdfsresources->genericindex->suffixarray->encseq,
+                       limdfsresources->genericindex->suffixarray->readmode,
+                       limdfsresources->genericindex->suffixarray->suftab,
+                       limdfsresources->genericindex->totallength,
+                       limdfsresources->alphasize,
+                       parent->offset,
+                       parent->leftbound,
+                       parent->rightbound);
   if (extendchar < limdfsresources->alphasize)
   {
     limdfsresources->bwci.spaceBoundswithchar[0].lbound = parent->leftbound;
@@ -638,14 +749,15 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   } else
   {
     limdfsresources->bwci.nextfreeBoundswithchar = 0;
-    lcpintervalsplitwithoutspecial(&limdfsresources->bwci,
-                                   suffixarray->encseq,
-                                   suffixarray->readmode,
-                                   limdfsresources->totallength,
-                                   suffixarray->suftab,
-                                   parent->offset,
-                                   parent->leftbound,
-                                   parent->rightbound);
+    lcpintervalsplitwithoutspecial(
+                     &limdfsresources->bwci,
+                     limdfsresources->genericindex->suffixarray->encseq,
+                     limdfsresources->genericindex->suffixarray->readmode,
+                     limdfsresources->genericindex->totallength,
+                     limdfsresources->genericindex->suffixarray->suftab,
+                     parent->offset,
+                     parent->leftbound,
+                     parent->rightbound);
   }
   firstnonspecial = parent->leftbound;
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
@@ -660,9 +772,9 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     child.inchar = inchar;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
-    showLCPinterval(limdfsresources->withesa,parent);
+    showLCPinterval(limdfsresources->genericindex->withesa,parent);
     printf(" is ");
-    showLCPinterval(limdfsresources->withesa,&child);
+    showLCPinterval(limdfsresources->genericindex->withesa,&child);
     printf("\n");
 #endif
     processchildinterval(limdfsresources,
@@ -754,10 +866,10 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   const Indexbounds *parent = &parentwithinfo->lcpitv;
   Codetype startcode;
 
-  if (parent->offset < (Seqpos) limdfsresources->maxdepth)
+  if (parent->offset < (Seqpos) limdfsresources->genericindex->maxdepth)
   {
     smalldepthbwtrangesplitwithoutspecial(&limdfsresources->bwci,
-                                          limdfsresources->mbtab,
+                                          limdfsresources->genericindex->mbtab,
                                           limdfsresources->alphasize,
                                           parent->code,
                                           (unsigned long) (parent->offset + 1));
@@ -790,9 +902,9 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
-    showLCPinterval(limdfsresources->withesa,parent);
+    showLCPinterval(limdfsresources->genericindex->withesa,parent);
     printf(" is ");
-    showLCPinterval(limdfsresources->withesa,&child);
+    showLCPinterval(limdfsresources->genericindex->withesa,&child);
     printf("\n");
 #endif
     processchildinterval(limdfsresources,
@@ -825,7 +937,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
 #define SHOWSTACKTOP(STACKPTR)\
         printf("top=");\
-        showLCPinterval(limdfsresources->withesa,&STACKPTR->lcpitv);\
+        showLCPinterval(limdfsresources->genericindex->withesa,\
+                        &STACKPTR->lcpitv);\
         adfst->showLimdfsstate(STACKPTR->aliasstate,\
                                (unsigned long) STACKPTR->lcpitv.offset,\
                                limdfsresources->dfsconstinfo);\
@@ -843,9 +956,9 @@ static void runlimdfs(Limdfsresources *limdfsresources,
   limdfsresources->numberofmatches = 0;
   initlcpinfostack(&limdfsresources->stack,
                    0,
-                   limdfsresources->withesa
-                     ? limdfsresources->totallength
-                     : limdfsresources->totallength+1,
+                   limdfsresources->genericindex->withesa
+                     ? limdfsresources->genericindex->totallength
+                     : limdfsresources->genericindex->totallength+1,
                    limdfsresources->dfsconstinfo,
                    adfst);
   if (adfst->initLimdfsstackelem != NULL)
@@ -875,7 +988,9 @@ static void runlimdfs(Limdfsresources *limdfsresources,
     }
     gt_assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;
-    (limdfsresources->withesa ? esa_splitandprocess : pck_splitandprocess)
+    (limdfsresources->genericindex->withesa
+        ? esa_splitandprocess
+        : pck_splitandprocess)
         (limdfsresources,&parentwithinfo,adfst);
   }
   if (adfst->freeLimdfsstackelem != NULL)
@@ -962,25 +1077,24 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend)
 {
-  return (limdfsresources->withesa ?
+  return (limdfsresources->genericindex->withesa ?
              suffixarraymstats : voidpackedindexmstatsforward)
                      (limdfsresources->genericindex,
                       0,
                       0,
-                      limdfsresources->totallength,
+                      limdfsresources->genericindex->totallength,
                       NULL,
                       qstart,
                       qend);
 }
 
-static bool esa_exactpatternmatching(const void *genericindex,
+static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                                      const Uchar *pattern,
                                      unsigned long patternlength,
                                      const Uchar *dbsubstring,
                                      Processmatch processmatch,
                                      void *processmatchinfo)
 {
-  const Suffixarray *suffixarray = (const Suffixarray *) genericindex;
   MMsearchiterator *mmsi;
   Seqpos dbstartpos, totallength = getencseqtotallength(suffixarray->encseq);
   bool nomatches;
@@ -1008,9 +1122,9 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
                                     unsigned long patternlength)
 {
-  if (limdfsresources->withesa)
+  if (limdfsresources->genericindex->withesa)
   {
-    return esa_exactpatternmatching(limdfsresources->genericindex,
+    return esa_exactpatternmatching(limdfsresources->genericindex->suffixarray,
                                     pattern,
                                     patternlength,
                                     limdfsresources->currentpathspace,
@@ -1018,10 +1132,10 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     limdfsresources->processmatchinfo);
   } else
   {
-    return pck_exactpatternmatching(limdfsresources->genericindex,
+    return pck_exactpatternmatching(limdfsresources->genericindex->packedindex,
                                     pattern,
                                     patternlength,
-                                    limdfsresources->totallength,
+                                    limdfsresources->genericindex->totallength,
                                     limdfsresources->currentpathspace,
                                     limdfsresources->processmatch,
                                     limdfsresources->processmatchinfo);
@@ -1031,9 +1145,9 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
 Seqpos bound2startpos(const Limdfsresources *limdfsresources,
                       Seqpos bound,unsigned long matchlength)
 {
-  if (limdfsresources->withesa)
+  if (limdfsresources->genericindex->withesa)
   {
-    return ((const Suffixarray *) limdfsresources->genericindex)->suftab[bound];
+    return limdfsresources->genericindex->suffixarray->suftab[bound];
   }
   return voidpackedfindfirstmatchconvert(limdfsresources->genericindex,
                                          bound,matchlength);
@@ -1050,7 +1164,7 @@ Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
 
 Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound)
 {
-  if (limdfsresources->withesa)
+  if (limdfsresources->genericindex->withesa)
   {
     return rightbound;
   }
@@ -1062,7 +1176,7 @@ bool intervalwidthleq(const Limdfsresources *limdfsresources,
 {
   Seqpos width;
 
-  if (limdfsresources->withesa)
+  if (limdfsresources->genericindex->withesa)
   {
     if (leftbound > rightbound)
     {

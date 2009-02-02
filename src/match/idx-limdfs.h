@@ -24,16 +24,24 @@
 #include "procmatch.h"
 #include "absdfstrans-def.h"
 
+typedef struct Genericindex Genericindex;
+
+void genericindex_delete(Genericindex *genericindex);
+
+const Encodedsequence *genericindex_getencseq(const Genericindex
+                                              *genericindex);
+
+Genericindex *genericindex_new(const GtStr *indexname,
+                               bool withesa,
+                               bool withencseq,
+                               int userdefinedmaxdepth,
+                               GtError *err);
+
 typedef struct Limdfsresources Limdfsresources;
 
-Limdfsresources *newLimdfsresources(const void *genericindex,
-                                    const Mbtab **mbtab,
-                                    unsigned int maxdepth,
-                                    const Encodedsequence *encseq,
-                                    bool withesa,
+Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
                                     unsigned long maxintervalwidth,
-                                    Seqpos totallength,
                                     unsigned long maxpathlength,
                                     Processmatch processmatch,
                                     void *processmatchinfo,
