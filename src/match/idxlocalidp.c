@@ -469,7 +469,7 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
 
 static void locali_nextLimdfsstate (const void *dfsconstinfo,
                                     DECLAREPTRDFSSTATE (aliasoutcol),
-                                    unsigned long currentdepth,
+                                    GT_UNUSED unsigned long currentdepth,
                                     Uchar currentchar,
                                     const DECLAREPTRDFSSTATE (aliasincol))
 {
@@ -491,7 +491,7 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
 
 static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
                                            DECLAREPTRDFSSTATE (aliasstate),
-                                           unsigned long currentdepth,
+                                           GT_UNUSED unsigned long currentdepth,
                                            Uchar currentchar)
 {
   Column *column = (Column *) aliasstate;
