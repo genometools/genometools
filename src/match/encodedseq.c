@@ -180,7 +180,7 @@ typedef uint32_t Uint32;
 
   /* only for Viadirectaccess */
   Uchar *plainseq;
-  bool plainseqptr;
+  bool hasplainseqptr;
 
   /* only for Viabitaccess */
   Bitstring *specialbits;
@@ -817,7 +817,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
     switch (encseq->sat)
     {
       case Viadirectaccess:
-        if (!encseq->plainseqptr)
+        if (!encseq->hasplainseqptr)
         {
           FREESPACE(encseq->plainseq);
         }
@@ -1140,7 +1140,7 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fb,
 
   gt_error_check(err);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
-  encseq->plainseqptr = false;
+  encseq->hasplainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_fastabuffer_next(fb,&cc,err);
@@ -2311,6 +2311,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->ushortspecialrangelength = NULL;
   encseq->uint32specialrangelength = NULL;
   encseq->plainseq = NULL;
+  encseq->hasplainseqptr = false;
   encseq->specialbits = NULL;
   encseq->ucharspecialpositions = NULL;
   encseq->ucharendspecialsubsUint = NULL;
@@ -3011,7 +3012,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                     verboseinfo);
   encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = seqptr;
-  encseq->plainseqptr = (seq2 == NULL) ? true : false;
+  encseq->hasplainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC(sat);
   encseq->mappedptr = NULL;
   return encseq;
