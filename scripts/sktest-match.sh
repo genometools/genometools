@@ -12,6 +12,7 @@ cerr()
 
 cd testsuite
 
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_greedyfwdmat'
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_tallymer'
 
 cd ..
@@ -34,8 +35,3 @@ do
   fi
 done
 
-cd testsuite
-
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -keywords 'gt_greedyfwdmat'
-
-cd ..

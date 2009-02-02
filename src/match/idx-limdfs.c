@@ -542,7 +542,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   Bwtseqcontextiterator *bsci;
   Limdfsresult limdfsresult;
 
-  bsci = newBwtseqcontextiterator(limdfsresources->genericindex,bound);
+  bsci = newBwtseqcontextiterator(limdfsresources->genericindex->packedindex,
+                                  bound);
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
 #ifdef SKDEBUG
   printf("retrieve context for bound = %lu\n",(unsigned long) bound);
@@ -585,7 +586,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       }
       if (limdfsresult.status == Limdfssuccess)
       {
-        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex,
+        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex->
+                                                            packedindex,
                                            leftbound);
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       limdfsresources->genericindex->
@@ -878,7 +880,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   {
     bwtrangesplitwithoutspecial(&limdfsresources->bwci,
                                 limdfsresources->rangeOccs,
-                                limdfsresources->genericindex,
+                                limdfsresources->genericindex->packedindex,
                                 parent->leftbound,
                                 parent->rightbound);
     startcode = 0;
@@ -1077,15 +1079,25 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend)
 {
-  return (limdfsresources->genericindex->withesa ?
-             suffixarraymstats : voidpackedindexmstatsforward)
-                     (limdfsresources->genericindex,
-                      0,
-                      0,
-                      limdfsresources->genericindex->totallength,
-                      NULL,
-                      qstart,
-                      qend);
+  if (limdfsresources->genericindex->withesa)
+  {
+    return suffixarraymstats (limdfsresources->genericindex->suffixarray,
+                              0,
+                              0,
+                              limdfsresources->genericindex->totallength,
+                              NULL,
+                              qstart,
+                              qend);
+  }
+  return voidpackedindexmstatsforward(limdfsresources->genericindex->
+                                                       packedindex,
+                                      0,
+                                      0,
+                                      limdfsresources->genericindex->
+                                                       totallength,
+                                      NULL,
+                                      qstart,
+                                      qend);
 }
 
 static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
