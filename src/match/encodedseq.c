@@ -2850,6 +2850,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
                                                        .specialranges,
                                       alpha,
                                       verboseinfo);
+    alpha = NULL;
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     if (withesqtab)
