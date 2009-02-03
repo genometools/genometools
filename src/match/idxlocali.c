@@ -20,7 +20,6 @@
 #include "core/seqiterator.h"
 #include "sarr-def.h"
 #include "intbits.h"
-#include "eis-voiditf.h"
 #include "idx-limdfs.h"
 #include "idxlocali.h"
 #include "idxlocalidp.h"

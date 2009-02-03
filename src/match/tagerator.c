@@ -28,7 +28,6 @@
 #include "intbits.h"
 #include "alphadef.h"
 #include "myersapm.h"
-#include "eis-voiditf.h"
 #include "format64.h"
 #include "idx-limdfs.h"
 #include "mssufpat.h"
