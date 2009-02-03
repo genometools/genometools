@@ -1,13 +1,15 @@
 #include <stdarg.h>
 #include "core/ma_api.h"
 #include "core/symboldef.h"
+#include "core/chardef.h"
 #include "core/unused_api.h"
 #include "core/assert_api.h"
 #include "absdfstrans-imp.h"
 
 #define MINUSINFTY (-1L)
-#define REPLACEMENTSCORE(A,B) ((A) == (B) ? scorevalues->matchscore\
-                                          : scorevalues->mismatchscore)
+#define REPLACEMENTSCORE(A,B) (((A) != (B) || ISSPECIAL(A))\
+                                   ? scorevalues->mismatchscore\
+                                   : scorevalues->matchscore)
 
 typedef struct
 {
