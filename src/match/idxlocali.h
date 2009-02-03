@@ -31,6 +31,7 @@ typedef struct
   GtOption *refoptionesaindex,
            *refoptionpckindex;
   bool withesa,
+       verbose,
        dosort;
   unsigned long threshold;
   long matchscore,

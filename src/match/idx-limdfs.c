@@ -69,6 +69,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
                                bool withesa,
                                bool withencseq,
                                int userdefinedmaxdepth,
+                               Verboseinfo *verboseinfo,
                                GtError *err)
 {
   unsigned int demand = 0;
@@ -89,7 +90,7 @@ Genericindex *genericindex_new(const GtStr *indexname,
   if (mapsuffixarray(genericindex->suffixarray,
                      demand,
                      indexname,
-                     NULL,
+                     verboseinfo,
                      err) != 0)
   {
     haserr = true;

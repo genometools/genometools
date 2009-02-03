@@ -36,17 +36,20 @@ static void showmatch(GT_UNUSED void *processinfo,
 {
   printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
   printf(FormatSeqpos "\t",PRINTSeqposcast(dbstartpos));
-  printf("%lu\t%lu",pprefixlen,distance);
+  printf("%lu\t%lu\n",pprefixlen,distance);
 }
 
 int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
 {
   Genericindex *genericindex = NULL;
   bool haserr = false;
+  Verboseinfo *verboseinfo;
 
+  verboseinfo = newverboseinfo(arguments->verbose);
   genericindex = genericindex_new(arguments->indexname,
                                   arguments->withesa,
-                                  false,0,err);
+                                  arguments->withesa,0,
+                                  verboseinfo,err);
   if (genericindex == NULL)
   {
     haserr = true;
@@ -112,5 +115,6 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     gt_seqiterator_delete(seqit);
   }
   genericindex_delete(genericindex);
+  freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }

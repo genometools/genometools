@@ -42,7 +42,8 @@ typedef struct
   GtOption *refoptionesaindex,
            *refoptionpckindex;
   const Optionargmodedesc *modedesc;
-  bool withesa,
+  bool verbose,
+       withesa,
        online,  /* perform online search, for testing */
        docompare, /* compare results with online search */
        replacewildcard, /* replace wildcards by random symbol */

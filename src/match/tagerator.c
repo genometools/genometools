@@ -542,7 +542,9 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   const AbstractDfstransformer *dfst;
   Genericindex *genericindex = NULL;
   const Encodedsequence *encseq = NULL;
+  Verboseinfo *verboseinfo;
 
+  verboseinfo = newverboseinfo(tageratoroptions->verbose);
   if (tageratoroptions->userdefinedmaxdistance >= 0)
   {
     dfst = apme_AbstractDfstransformer();
@@ -557,7 +559,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                  true,
                                  false,
                                  false,
-                                 NULL,
+                                 verboseinfo,
                                  err);
     if (encseq == NULL)
     {
@@ -569,6 +571,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     tageratoroptions->withesa,
                                     tageratoroptions->docompare,
                                     tageratoroptions->userdefinedmaxdepth,
+                                    verboseinfo,
                                     err);
     if (genericindex == NULL)
     {
@@ -741,5 +744,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     genericindex_delete(genericindex);
   }
   gt_seqiterator_delete(seqit);
+  freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }

@@ -187,12 +187,15 @@ int matchspacedseed(bool withesa,
                     bool docompare,
                     const GtStr *str_inputindex,
                     const GtStrArray *queryfilenames,
+                    bool verbose,
                     GtError *err)
 {
   Genericindex *genericindex = NULL;
   bool haserr = false;
   Spacedseed *spse;
+  Verboseinfo *verboseinfo;
 
+  verboseinfo = newverboseinfo(verbose);
   /*
   spse = spacedseed_new("11011011000011011",err);
   */
@@ -204,7 +207,7 @@ int matchspacedseed(bool withesa,
   if (!haserr)
   {
     genericindex = genericindex_new(str_inputindex,withesa,
-                                    withesa && docompare,0,err);
+                                    withesa && docompare,0,verboseinfo,err);
     if (genericindex == NULL)
     {
       haserr = true;
@@ -280,5 +283,6 @@ int matchspacedseed(bool withesa,
   }
   genericindex_delete(genericindex);
   spacedseed_delete(spse);
+  freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }
