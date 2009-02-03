@@ -26,6 +26,7 @@
 #include "tools/gt_maxpairs.h"
 #include "tools/gt_mergeesa.h"
 #include "tools/gt_paircmp.h"
+#include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_regioncov.h"
 #include "tools/gt_seqiterator.h"
@@ -42,6 +43,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   gt_toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
+  gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);

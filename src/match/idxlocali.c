@@ -25,6 +25,7 @@
 #include "idxlocalidp.h"
 #include "absdfstrans-def.h"
 #include "esa-map.h"
+#include "stamp.h"
 
 static void showmatch(GT_UNUSED void *processinfo,
                       Seqpos dbstartpos,
@@ -45,6 +46,7 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
   Verboseinfo *verboseinfo;
 
   verboseinfo = newverboseinfo(arguments->verbose);
+
   genericindex = genericindex_new(arguments->indexname,
                                   arguments->withesa,
                                   arguments->withesa,0,

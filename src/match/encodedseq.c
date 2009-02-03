@@ -2821,7 +2821,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
                                                Verboseinfo *verboseinfo,
                                                GtError *err)
 {
-  Encodedsequence *encseq;
+  Encodedsequence *encseq = NULL;
   bool haserr = false;
   int retcode;
   Firstencseqvalues firstencseqvalues;
@@ -2857,7 +2857,6 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
       if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,err) != 0)
       {
         haserr = true;
-        freeEncodedsequence(&encseq);
       }
     }
   }
@@ -2875,6 +2874,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   {
     size_t numofbytes;
 
+    gt_assert(encseq != NULL);
     encseq->destab = genericmaponlytable(indexname,
                                          DESTABSUFFIX,
                                          &numofbytes,
@@ -2883,7 +2883,6 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
     if (encseq->destab == NULL)
     {
       haserr = true;
-      freeEncodedsequence(&encseq);
     } else
     {
       encseq->descendtab = calcdescendpositions(encseq);
@@ -2891,6 +2890,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   }
   if (!haserr && withssptab)
   {
+    gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
     {
       encseq->ssptab = genericmaptable(indexname,
@@ -2901,11 +2901,22 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
       if (encseq->ssptab == NULL)
       {
         haserr = true;
-        freeEncodedsequence(&encseq);
       }
     }
   }
-  return haserr ? NULL : encseq;
+  if (haserr)
+  {
+    if (alpha != NULL)
+    {
+      freeAlphabet((Alphabet **) &alpha);
+    }
+    if (encseq != NULL)
+    {
+      freeEncodedsequence(&encseq);
+    }
+    return NULL;
+  }
+  return encseq;
 }
 
 const char *retrievesequencedescription(unsigned long *desclen,

@@ -29,6 +29,7 @@
 #include "esa-mmsearch-def.h"
 #include "absdfstrans-imp.h"
 #include "idx-limdfs.h"
+#include "stamp.h"
 #include "esa-map.h"
 #include "esa-minunique.pr"
 
