@@ -172,6 +172,7 @@ struct Limdfsresources
   void *dfsconstinfo;
   ArrayBoundswithchar bwci;
   ArrayLcpintervalwithinfo stack;
+  Lcpintervalwithinfo parentwithinfo;
   Uchar alphasize;
   Processmatch processmatch;
   void *processmatchinfo;
@@ -249,6 +250,11 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
                      maxintervalwidth);
     limdfsresources->mstatspos.allocatedSeqpos = maxintervalwidth;
   }
+  if (adfst->initLimdfsstackelem != NULL)
+  {
+    adfst->initLimdfsstackelem(limdfsresources->currentdfsstate);
+    adfst->initLimdfsstackelem(limdfsresources->parentwithinfo.aliasstate);
+  }
   return limdfsresources;
 }
 
@@ -293,7 +299,10 @@ static void initlcpinfostack(ArrayLcpintervalwithinfo *stack,
   stackptr->lcpitv.leftbound = leftbound;
   stackptr->lcpitv.rightbound = rightbound;
   stackptr->lcpitv.code = 0;
-  adfst->initLimdfsstate(stackptr->aliasstate,dfsconstinfo);
+  if (adfst->initLimdfsstate != NULL)
+  {
+    adfst->initLimdfsstate(stackptr->aliasstate,dfsconstinfo);
+  }
 }
 
 void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
@@ -313,6 +322,8 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
       adfst->freeLimdfsstackelem(limdfsresources->stack.
                                  spaceLcpintervalwithinfo[idx].aliasstate);
     }
+    adfst->freeLimdfsstackelem(limdfsresources->currentdfsstate);
+    adfst->freeLimdfsstackelem(limdfsresources->parentwithinfo.aliasstate);
   }
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
@@ -473,8 +484,14 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   Uchar cc;
   Limdfsresult limdfsresult;
 
-  memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
-  /* XXX also copy the entire column */
+  if (adfst->copyLimdfsstate == NULL)
+  {
+    memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
+  } else
+  {
+    adfst->copyLimdfsstate(limdfsresources->currentdfsstate, dfsstate,
+                           limdfsresources->dfsconstinfo);
+  }
   startpos = limdfsresources->genericindex->suffixarray->suftab[leftbound];
 #ifdef SKDEBUG
   printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
@@ -547,8 +564,14 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 
   bsci = newBwtseqcontextiterator(limdfsresources->genericindex->packedindex,
                                   bound);
-  memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
-  /* XXX also copy the entire column */
+  if (adfst->copyLimdfsstate == NULL)
+  {
+    memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
+  } else
+  {
+    adfst->copyLimdfsstate(limdfsresources->currentdfsstate, dfsstate,
+                           limdfsresources->dfsconstinfo);
+  }
 #ifdef SKDEBUG
   printf("retrieve context for bound = %lu\n",(unsigned long) bound);
 #endif
@@ -956,9 +979,10 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 static void runlimdfs(Limdfsresources *limdfsresources,
                       const AbstractDfstransformer *adfst)
 {
-  Lcpintervalwithinfo *stackptr, parentwithinfo;
+  Lcpintervalwithinfo *stackptr;
 
-  gt_assert(adfst->sizeofdfsstate <= sizeof (parentwithinfo.aliasstate));
+  gt_assert(adfst->sizeofdfsstate <=
+            sizeof (limdfsresources->parentwithinfo.aliasstate));
   limdfsresources->numberofmatches = 0;
   initlcpinfostack(&limdfsresources->stack,
                    0,
@@ -967,10 +991,6 @@ static void runlimdfs(Limdfsresources *limdfsresources,
                      : limdfsresources->genericindex->totallength+1,
                    limdfsresources->dfsconstinfo,
                    adfst);
-  if (adfst->initLimdfsstackelem != NULL)
-  {
-    adfst->initLimdfsstackelem(parentwithinfo.aliasstate);
-  }
   while (limdfsresources->stack.nextfreeLcpintervalwithinfo > 0)
   {
     gt_assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
@@ -979,29 +999,28 @@ static void runlimdfs(Limdfsresources *limdfsresources,
     SHOWSTACKTOP(stackptr);
     if (adfst->copyLimdfsstate == NULL)
     {
-      parentwithinfo = *stackptr; /* make a copy */
+      limdfsresources->parentwithinfo = *stackptr; /* make a copy */
     } else
     {
-      parentwithinfo.lcpitv = stackptr->lcpitv;
-      adfst->copyLimdfsstate(parentwithinfo.aliasstate,stackptr->aliasstate,
+      limdfsresources->parentwithinfo.lcpitv = stackptr->lcpitv;
+      adfst->copyLimdfsstate(limdfsresources->parentwithinfo.aliasstate,
+                             stackptr->aliasstate,
                              limdfsresources->dfsconstinfo);
     }
-    if (parentwithinfo.lcpitv.offset > 0 && limdfsresources->maxpathlength > 0)
+    if (limdfsresources->parentwithinfo.lcpitv.offset > 0 &&
+        limdfsresources->maxpathlength > 0)
     {
       addpathchar(limdfsresources,
-                  (unsigned long) (parentwithinfo.lcpitv.offset-1),
-                  parentwithinfo.lcpitv.inchar);
+                  (unsigned long)
+                   (limdfsresources->parentwithinfo.lcpitv.offset-1),
+                  limdfsresources->parentwithinfo.lcpitv.inchar);
     }
     gt_assert(limdfsresources->stack.nextfreeLcpintervalwithinfo > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;
     (limdfsresources->genericindex->withesa
         ? esa_splitandprocess
         : pck_splitandprocess)
-        (limdfsresources,&parentwithinfo,adfst);
-  }
-  if (adfst->freeLimdfsstackelem != NULL)
-  {
-    adfst->freeLimdfsstackelem(parentwithinfo.aliasstate);
+        (limdfsresources,&limdfsresources->parentwithinfo,adfst);
   }
   if (adfst->extractdfsconstinfo != NULL)
   {

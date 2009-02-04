@@ -4,6 +4,7 @@
 #include "core/chardef.h"
 #include "core/unused_api.h"
 #include "core/assert_api.h"
+#include "match/stamp.h"
 #include "absdfstrans-imp.h"
 
 #define MINUSINFTY (-1L)
@@ -98,37 +99,46 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 }
 #endif
 
-static void secondcolumn (const Limdfsconstinfo *lci,Column *column,
+#define REALLOCMSG(COL)\
+        printf("line %d: %salloc %lu entries ",\
+                __LINE__,(COL)->colvalues == NULL ? "m" : "re",\
+                lci->maxquerylength+1)
+
+#define ATADDRESS(COL)\
+        printf(" at adress %0X\n",(unsigned int) (COL)->colvalues)
+
+static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
                           Uchar dbchar)
 {
   unsigned long i;
 
-  if (column->colvalues == NULL || lci->extendcolumnspace)
+  if (outcol->colvalues == NULL || lci->extendcolumnspace)
   {
-    column->colvalues = gt_realloc (column->colvalues,
+    REALLOCMSG(outcol);
+    outcol->colvalues = gt_realloc (outcol->colvalues,
                                     sizeof (Matrixvalue) *
                                     (lci->maxquerylength + 1));
-    printf("realloc %lu entries\n",lci->maxquerylength+1);
+    ATADDRESS(outcol);
   }
-  column->colvalues[0].repcell = MINUSINFTY;
-  column->colvalues[0].inscell = lci->scorevalues.gapstart +
+  outcol->colvalues[0].repcell = MINUSINFTY;
+  outcol->colvalues[0].inscell = lci->scorevalues.gapstart +
                                  lci->scorevalues.gapextend;
-  column->colvalues[0].delcell = MINUSINFTY;
-  column->colvalues[0].bestcell = MINUSINFTY;
-  column->maxvalue = 0;
-  column->pprefixlen = 0;
+  outcol->colvalues[0].delcell = MINUSINFTY;
+  outcol->colvalues[0].bestcell = MINUSINFTY;
+  outcol->maxvalue = 0;
+  outcol->pprefixlen = 0;
   for (i = 1UL; i <= lci->querylength; i++)
   {
-    column->colvalues[i].delcell = MINUSINFTY;
-    column->colvalues[i].inscell = MINUSINFTY;
-    column->colvalues[i].repcell = REPLACEMENTSCORE(dbchar,lci->query[i-1]);
-    column->colvalues[i].bestcell = max2(column->colvalues[i].delcell,
-                                         column->colvalues[i].repcell);
-    if (column->colvalues[i].bestcell > 0 &&
-        column->colvalues[i].bestcell > (long) column->maxvalue)
+    outcol->colvalues[i].delcell = MINUSINFTY;
+    outcol->colvalues[i].inscell = MINUSINFTY;
+    outcol->colvalues[i].repcell = REPLACEMENTSCORE(dbchar,lci->query[i-1]);
+    outcol->colvalues[i].bestcell = max2(outcol->colvalues[i].delcell,
+                                         outcol->colvalues[i].repcell);
+    if (outcol->colvalues[i].bestcell > 0 &&
+        outcol->colvalues[i].bestcell > (long) outcol->maxvalue)
     {
-      column->maxvalue = (unsigned long) column->colvalues[i].bestcell;
-      column->pprefixlen = i;
+      outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestcell;
+      outcol->pprefixlen = i;
     }
   }
 }
@@ -144,10 +154,11 @@ static void nextcolumn (const Limdfsconstinfo *lci,
   gt_assert(outcol->colvalues != incol->colvalues);
   if (outcol->colvalues == NULL || lci->extendcolumnspace)
   {
+    REALLOCMSG(outcol);
     outcol->colvalues = gt_realloc (outcol->colvalues,
                                     sizeof (Matrixvalue) *
                                     (lci->maxquerylength + 1));
-    printf("realloc %lu entries\n",lci->maxquerylength+1);
+    ATADDRESS(outcol);
   }
   outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = MINUSINFTY;
   if (incol->colvalues[0].inscell > 0)
@@ -390,7 +401,10 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   lci->threshold = va_arg (ap, unsigned long);
   if (lci->maxquerylength < lci->querylength)
   {
-    lci->extendcolumnspace = true;
+    if (lci->maxquerylength > 0)
+    {
+      lci->extendcolumnspace = true;
+    }
     lci->maxquerylength = lci->querylength;
   } else
   {
@@ -407,14 +421,6 @@ static void locali_freedfsconstinfo (void **dfsconstinfo)
   *dfsconstinfo = NULL;
 }
 
-static void locali_initLimdfsstate (DECLAREPTRDFSSTATE (aliasstate),
-                                    GT_UNUSED void *dfsconstinfo)
-{
-  Column *column = (Column *) aliasstate;
-
-  column->colvalues = NULL;
-}
-
 static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 {
   ((Column *) aliasstate)->colvalues = NULL;
@@ -426,8 +432,9 @@ static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 
   if (column ->colvalues != NULL)
   {
+    printf("free ");
+    ATADDRESS(column);
     gt_free(column->colvalues);
-    printf("free\n");
     column->colvalues = NULL;
   }
 }
@@ -445,10 +452,11 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
   {
     if (destcol->colvalues == NULL || lci->extendcolumnspace)
     {
+      REALLOCMSG(destcol);
       destcol->colvalues = gt_realloc (destcol->colvalues,
                                        sizeof (Matrixvalue) *
                                        (lci->maxquerylength + 1));
-      printf("realloc %lu entries\n",lci->maxquerylength+1);
+      ATADDRESS(destcol);
     }
     for (idx = 0; idx<=lci->querylength; idx++)
     {
@@ -501,9 +509,8 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   Column *outcol = (Column *) aliasoutcol;
   const Column *incol = (const Column *) aliasincol;
 
-  if (incol->colvalues == NULL)
+  if (currentdepth == 1UL)
   {
-    gt_assert(currentdepth == 1UL);
     secondcolumn (lci, outcol, currentchar);
   } else
   {
@@ -519,9 +526,8 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
   Column *column = (Column *) aliasstate;
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
-  if (column->colvalues == NULL)
+  if (currentdepth == 1UL)
   {
-    gt_assert(currentdepth == 1UL);
     secondcolumn (lci,column, currentchar);
   } else
   {
@@ -538,7 +544,7 @@ const AbstractDfstransformer *locali_AbstractDfstransformer (void)
     locali_initdfsconstinfo,
     NULL,
     locali_freedfsconstinfo,
-    locali_initLimdfsstate,
+    NULL,
     locali_initLimdfsstackelem,
     locali_freeLimdfsstackelem,
     locali_copyLimdfsstate,
