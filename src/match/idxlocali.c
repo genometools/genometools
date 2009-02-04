@@ -20,6 +20,7 @@
 #include "core/seqiterator.h"
 #include "sarr-def.h"
 #include "intbits.h"
+#include "format64.h"
 #include "idx-limdfs.h"
 #include "idxlocali.h"
 #include "idxlocalidp.h"
@@ -98,6 +99,8 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
       {
         break;
       }
+      printf("process sequence " Formatuint64_t "\n",
+              PRINTuint64_tcast(unitnum));
       indexbasedlocali(limdfsresources,
                        arguments->matchscore,
                        arguments->mismatchscore,

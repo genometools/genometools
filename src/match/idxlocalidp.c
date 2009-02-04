@@ -8,8 +8,8 @@
 
 #define MINUSINFTY (-1L)
 #define REPLACEMENTSCORE(A,B) (((A) != (B) || ISSPECIAL(A))\
-                                   ? scorevalues->mismatchscore\
-                                   : scorevalues->matchscore)
+                                   ? lci->scorevalues.mismatchscore\
+                                   : lci->scorevalues.matchscore)
 
 typedef struct
 {
@@ -23,7 +23,9 @@ typedef struct
 {
   Scorevalues scorevalues;
   const Uchar *query;
-  unsigned long querylength,
+  bool extendcolumnspace;
+  unsigned long maxquerylength,
+                querylength,
                 threshold;
 } Limdfsconstinfo;
 
@@ -96,30 +98,30 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 }
 #endif
 
-static void secondcolumn (Column *column,
-                          const Scorevalues *scorevalues,
-                          const Uchar *query,
-                          unsigned long querylength,
+static void secondcolumn (const Limdfsconstinfo *lci,Column *column,
                           Uchar dbchar)
 {
   unsigned long i;
 
-  if (column->colvalues == NULL)
+  if (column->colvalues == NULL || lci->extendcolumnspace)
   {
-    column->colvalues = gt_malloc (sizeof (Matrixvalue) * (querylength + 1));
+    column->colvalues = gt_realloc (column->colvalues,
+                                    sizeof (Matrixvalue) *
+                                    (lci->maxquerylength + 1));
+    printf("realloc %lu entries\n",lci->maxquerylength+1);
   }
   column->colvalues[0].repcell = MINUSINFTY;
-  column->colvalues[0].inscell = scorevalues->gapstart +
-                                 scorevalues->gapextend;
+  column->colvalues[0].inscell = lci->scorevalues.gapstart +
+                                 lci->scorevalues.gapextend;
   column->colvalues[0].delcell = MINUSINFTY;
   column->colvalues[0].bestcell = MINUSINFTY;
   column->maxvalue = 0;
   column->pprefixlen = 0;
-  for (i = 1UL; i <= querylength; i++)
+  for (i = 1UL; i <= lci->querylength; i++)
   {
     column->colvalues[i].delcell = MINUSINFTY;
     column->colvalues[i].inscell = MINUSINFTY;
-    column->colvalues[i].repcell = REPLACEMENTSCORE(dbchar,query[i-1]);
+    column->colvalues[i].repcell = REPLACEMENTSCORE(dbchar,lci->query[i-1]);
     column->colvalues[i].bestcell = max2(column->colvalues[i].delcell,
                                          column->colvalues[i].repcell);
     if (column->colvalues[i].bestcell > 0 &&
@@ -131,20 +133,21 @@ static void secondcolumn (Column *column,
   }
 }
 
-static void nextcolumn (Column *outcol,
-                        const Scorevalues *scorevalues,
+static void nextcolumn (const Limdfsconstinfo *lci,
+                        Column *outcol,
                         const Uchar dbchar,
-                        const Uchar *query,
-                        unsigned long querylength,
                         const Column *incol)
 {
   unsigned long i;
 
   gt_assert(outcol != incol);
   gt_assert(outcol->colvalues != incol->colvalues);
-  if (outcol->colvalues == NULL)
+  if (outcol->colvalues == NULL || lci->extendcolumnspace)
   {
-    outcol->colvalues = gt_malloc (sizeof (Matrixvalue) * (querylength + 1));
+    outcol->colvalues = gt_realloc (outcol->colvalues,
+                                    sizeof (Matrixvalue) *
+                                    (lci->maxquerylength + 1));
+    printf("realloc %lu entries\n",lci->maxquerylength+1);
   }
   outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = MINUSINFTY;
   if (incol->colvalues[0].inscell > 0)
@@ -152,21 +155,21 @@ static void nextcolumn (Column *outcol,
     if (incol->colvalues[0].bestcell > 0)
     {
       outcol->colvalues[0].inscell
-        = max2 (incol->colvalues[0].inscell + scorevalues->gapextend,
-                incol->colvalues[0].bestcell + scorevalues->gapstart +
-                                               scorevalues->gapextend);
+        = max2 (incol->colvalues[0].inscell + lci->scorevalues.gapextend,
+                incol->colvalues[0].bestcell + lci->scorevalues.gapstart +
+                                               lci->scorevalues.gapextend);
     } else
     {
       outcol->colvalues[0].inscell = incol->colvalues[0].inscell +
-                                     scorevalues->gapextend;
+                                     lci->scorevalues.gapextend;
     }
   } else
   {
     if (incol->colvalues[0].bestcell > 0)
     {
       outcol->colvalues[0].inscell = incol->colvalues[0].bestcell +
-                                     scorevalues->gapstart +
-                                     scorevalues->gapextend;
+                                     lci->scorevalues.gapstart +
+                                     lci->scorevalues.gapextend;
     } else
     {
       outcol->colvalues[0].inscell = MINUSINFTY;
@@ -177,12 +180,12 @@ static void nextcolumn (Column *outcol,
                                         outcol->colvalues[0].delcell);
   outcol->maxvalue = (unsigned long) max2 (0,outcol->colvalues[0].bestcell);
   outcol->pprefixlen = 0;
-  for (i = 1UL; i <= querylength; i++)
+  for (i = 1UL; i <= lci->querylength; i++)
   {
     if (incol->colvalues[i-1].bestcell > 0)
     {
       outcol->colvalues[i].repcell = incol->colvalues[i-1].bestcell +
-                                     REPLACEMENTSCORE(dbchar,query[i-1]);
+                                     REPLACEMENTSCORE(dbchar,lci->query[i-1]);
     } else
     {
       outcol->colvalues[i].repcell = MINUSINFTY;
@@ -192,21 +195,21 @@ static void nextcolumn (Column *outcol,
       if (incol->colvalues[i].bestcell > 0)
       {
         outcol->colvalues[i].inscell
-          = max2 (incol->colvalues[i].inscell + scorevalues->gapextend,
-                  incol->colvalues[i].bestcell + scorevalues->gapstart +
-                                                 scorevalues->gapextend);
+          = max2 (incol->colvalues[i].inscell + lci->scorevalues.gapextend,
+                  incol->colvalues[i].bestcell + lci->scorevalues.gapstart +
+                                                 lci->scorevalues.gapextend);
       } else
       {
         outcol->colvalues[i].inscell = incol->colvalues[i].inscell +
-                                       scorevalues->gapextend;
+                                       lci->scorevalues.gapextend;
       }
     } else
     {
       if (incol->colvalues[i].bestcell > 0)
       {
         outcol->colvalues[i].inscell = incol->colvalues[i].bestcell +
-                                       scorevalues->gapstart +
-                                       scorevalues->gapextend;
+                                       lci->scorevalues.gapstart +
+                                       lci->scorevalues.gapextend;
       } else
       {
         outcol->colvalues[i].inscell = MINUSINFTY;
@@ -217,21 +220,21 @@ static void nextcolumn (Column *outcol,
       if (outcol->colvalues[i-1].bestcell > 0)
       {
         outcol->colvalues[i].delcell
-          = max2 (outcol->colvalues[i-1].delcell + scorevalues->gapextend,
-                  outcol->colvalues[i-1].bestcell + scorevalues->gapstart +
-                                                    scorevalues->gapextend);
+          = max2 (outcol->colvalues[i-1].delcell + lci->scorevalues.gapextend,
+                  outcol->colvalues[i-1].bestcell + lci->scorevalues.gapstart +
+                                                    lci->scorevalues.gapextend);
       } else
       {
         outcol->colvalues[i].delcell = outcol->colvalues[i-1].delcell +
-                                       scorevalues->gapextend;
+                                       lci->scorevalues.gapextend;
       }
     } else
     {
       if (outcol->colvalues[i-1].bestcell > 0)
       {
         outcol->colvalues[i].delcell = outcol->colvalues[i-1].bestcell +
-                                       scorevalues->gapstart +
-                                       scorevalues->gapextend;
+                                       lci->scorevalues.gapstart +
+                                       lci->scorevalues.gapextend;
       } else
       {
         outcol->colvalues[i].delcell = MINUSINFTY;
@@ -249,10 +252,8 @@ static void nextcolumn (Column *outcol,
   }
 }
 
-static void inplacenextcolumn (const Scorevalues *scorevalues,
+static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                const Uchar dbchar,
-                               const Uchar *query,
-                               unsigned long querylength,
                                Column *column)
 {
   unsigned long i;
@@ -264,21 +265,21 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
     if (column->colvalues[0].bestcell > 0)
     {
       column->colvalues[0].inscell
-        = max2 (column->colvalues[0].inscell + scorevalues->gapextend,
-                column->colvalues[0].bestcell + scorevalues->gapstart +
-                                                scorevalues->gapextend);
+        = max2 (column->colvalues[0].inscell + lci->scorevalues.gapextend,
+                column->colvalues[0].bestcell + lci->scorevalues.gapstart +
+                                                lci->scorevalues.gapextend);
     } else
     {
       column->colvalues[0].inscell
-        = column->colvalues[0].inscell + scorevalues->gapextend;
+        = column->colvalues[0].inscell + lci->scorevalues.gapextend;
     }
   } else
   {
     if (column->colvalues[0].bestcell > 0)
     {
       column->colvalues[0].inscell = column->colvalues[0].bestcell +
-                                     scorevalues->gapstart +
-                                     scorevalues->gapextend;
+                                     lci->scorevalues.gapstart +
+                                     lci->scorevalues.gapextend;
     } else
     {
       column->colvalues[0].inscell = MINUSINFTY;
@@ -290,13 +291,13 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
   column->maxvalue = (unsigned long) max2(0,column->colvalues[0].bestcell);
   column->pprefixlen = 0;
   nw = column->colvalues[0];
-  for (i = 1UL; i <= querylength; i++)
+  for (i = 1UL; i <= lci->querylength; i++)
   {
     west = column->colvalues[i];
     if (nw.bestcell > 0)
     {
       column->colvalues[i].repcell = nw.bestcell +
-                                     REPLACEMENTSCORE(dbchar,query[i-1]);
+                                     REPLACEMENTSCORE(dbchar,lci->query[i-1]);
     } else
     {
       column->colvalues[i].repcell = MINUSINFTY;
@@ -306,19 +307,21 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
       if (west.bestcell > 0)
       {
         column->colvalues[i].inscell
-          = max2 (west.inscell + scorevalues->gapextend,
-                  west.bestcell + scorevalues->gapstart
-                                + scorevalues->gapextend);
+          = max2 (west.inscell + lci->scorevalues.gapextend,
+                  west.bestcell + lci->scorevalues.gapstart
+                                + lci->scorevalues.gapextend);
       } else
       {
-        column->colvalues[i].inscell = west.inscell + scorevalues->gapextend;
+        column->colvalues[i].inscell = west.inscell +
+                                       lci->scorevalues.gapextend;
       }
     } else
     {
       if (west.bestcell > 0)
       {
-        column->colvalues[i].inscell = west.bestcell + scorevalues->gapstart +
-                                                       scorevalues->gapextend;
+        column->colvalues[i].inscell = west.bestcell +
+                                       lci->scorevalues.gapstart +
+                                       lci->scorevalues.gapextend;
       } else
       {
         column->colvalues[i].inscell = MINUSINFTY;
@@ -329,21 +332,21 @@ static void inplacenextcolumn (const Scorevalues *scorevalues,
       if (column->colvalues[i-1].bestcell > 0)
       {
         column->colvalues[i].delcell
-          = max2 (column->colvalues[i-1].delcell + scorevalues->gapextend,
-                  column->colvalues[i-1].bestcell + scorevalues->gapstart +
-                                                    scorevalues->gapextend);
+          = max2 (column->colvalues[i-1].delcell + lci->scorevalues.gapextend,
+                  column->colvalues[i-1].bestcell + lci->scorevalues.gapstart +
+                                                    lci->scorevalues.gapextend);
       } else
       {
         column->colvalues[i].delcell = column->colvalues[i-1].delcell +
-                                       scorevalues->gapextend;
+                                       lci->scorevalues.gapextend;
       }
     } else
     {
       if (column->colvalues[i-1].bestcell > 0)
       {
         column->colvalues[i].delcell = column->colvalues[i-1].bestcell +
-                                       scorevalues->gapstart +
-                                       scorevalues->gapextend;
+                                       lci->scorevalues.gapstart +
+                                       lci->scorevalues.gapextend;
       } else
       {
         column->colvalues[i].delcell = MINUSINFTY;
@@ -366,6 +369,8 @@ static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
 {
   Limdfsconstinfo *lci = gt_malloc (sizeof (Limdfsconstinfo));
 
+  lci->maxquerylength = 0;
+  lci->extendcolumnspace = false;
   return lci;
 }
 
@@ -383,6 +388,14 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   lci->query = va_arg (ap, const Uchar *);
   lci->querylength = va_arg (ap, unsigned long);
   lci->threshold = va_arg (ap, unsigned long);
+  if (lci->maxquerylength < lci->querylength)
+  {
+    lci->extendcolumnspace = true;
+    lci->maxquerylength = lci->querylength;
+  } else
+  {
+    lci->extendcolumnspace = false;
+  }
   va_end(ap);
 }
 
@@ -409,7 +422,14 @@ static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 
 static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 {
-  gt_free(((Column *) aliasstate)->colvalues);
+  Column *column = (Column *) aliasstate;
+
+  if (column ->colvalues != NULL)
+  {
+    gt_free(column->colvalues);
+    printf("free\n");
+    column->colvalues = NULL;
+  }
 }
 
 static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
@@ -423,10 +443,12 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
 
   if (srccol->colvalues != NULL)
   {
-    if (destcol->colvalues == NULL)
+    if (destcol->colvalues == NULL || lci->extendcolumnspace)
     {
-      destcol->colvalues = gt_malloc (sizeof (Matrixvalue) *
-                                      (lci->querylength + 1));
+      destcol->colvalues = gt_realloc (destcol->colvalues,
+                                       sizeof (Matrixvalue) *
+                                       (lci->maxquerylength + 1));
+      printf("realloc %lu entries\n",lci->maxquerylength+1);
     }
     for (idx = 0; idx<=lci->querylength; idx++)
     {
@@ -482,12 +504,10 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   if (incol->colvalues == NULL)
   {
     gt_assert(currentdepth == 1UL);
-    secondcolumn (outcol, &lci->scorevalues, lci->query, lci->querylength,
-                  currentchar);
+    secondcolumn (lci, outcol, currentchar);
   } else
   {
-    nextcolumn (outcol,&lci->scorevalues,currentchar,
-                lci->query,lci->querylength,incol);
+    nextcolumn (lci,outcol,currentchar,incol);
   }
 }
 
@@ -502,12 +522,10 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
   if (column->colvalues == NULL)
   {
     gt_assert(currentdepth == 1UL);
-    secondcolumn (column, &lci->scorevalues, lci->query, lci->querylength,
-                  currentchar);
+    secondcolumn (lci,column, currentchar);
   } else
   {
-    inplacenextcolumn (&lci->scorevalues,currentchar,
-                       lci->query,lci->querylength,column);
+    inplacenextcolumn (lci,currentchar,column);
   }
 }
 

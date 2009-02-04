@@ -303,7 +303,7 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 
   adfst->freedfsconstinfo(&limdfsresources->dfsconstinfo);
   FREEARRAY(&limdfsresources->bwci,Boundswithchar);
-  if (adfst->initLimdfsstackelem != NULL)
+  if (adfst->freeLimdfsstackelem != NULL)
   {
     unsigned long idx;
 
@@ -474,6 +474,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   Limdfsresult limdfsresult;
 
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
+  /* XXX also copy the entire column */
   startpos = limdfsresources->genericindex->suffixarray->suftab[leftbound];
 #ifdef SKDEBUG
   printf("retrieve context of startpos=%lu\n",(unsigned long) startpos);
@@ -547,6 +548,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   bsci = newBwtseqcontextiterator(limdfsresources->genericindex->packedindex,
                                   bound);
   memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
+  /* XXX also copy the entire column */
 #ifdef SKDEBUG
   printf("retrieve context for bound = %lu\n",(unsigned long) bound);
 #endif
