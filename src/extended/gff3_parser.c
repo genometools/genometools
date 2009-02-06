@@ -360,7 +360,7 @@ static void replace_node(GtFeatureNode *node_to_replace,
   }
   else {
     rval = gt_queue_iterate_reverse(genome_nodes, replace_func, &replace_info,
-                                 NULL);
+                                    NULL);
     gt_assert(rval == 1);
   }
 }
@@ -431,10 +431,10 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
     if (gt_genome_node_get_line_number((GtGenomeNode*) fn) <
         parser->last_terminator) {
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
-                "\"%s\" is separated from its counterpart on line %u by "
-                "terminator %s on line %u", ID_STRING, id, line_number,
-                filename, gt_genome_node_get_line_number((GtGenomeNode*) fn),
-                GFF_TERMINATOR, parser->last_terminator);
+                   "\"%s\" is separated from its counterpart on line %u by "
+                   "terminator %s on line %u", ID_STRING, id, line_number,
+                   filename, gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                   GFF_TERMINATOR, parser->last_terminator);
       had_err = -1;
     }
     if (!had_err) {
