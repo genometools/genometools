@@ -475,7 +475,6 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
 /* iterate myers algorithm over a sequence context */
 
 static void esa_overcontext(Limdfsresources *limdfsresources,
-                            const DECLAREPTRDFSSTATE(dfsstate),
                             Seqpos leftbound,
                             Seqpos offset,
                             const AbstractDfstransformer *adfst)
@@ -486,11 +485,15 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 
   if (adfst->copyLimdfsstate == NULL)
   {
-    memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
+    memcpy(limdfsresources->currentdfsstate,
+           limdfsresources->parentwithinfo.aliasstate,
+           adfst->sizeofdfsstate);
   } else
   {
-    adfst->copyLimdfsstate(limdfsresources->currentdfsstate, dfsstate,
-                           limdfsresources->dfsconstinfo);
+    adfst->copyLimdfsstate(limdfsresources->currentdfsstate,
+                           limdfsresources->parentwithinfo.aliasstate,
+                           limdfsresources->dfsconstinfo,
+                           true);
   }
   startpos = limdfsresources->genericindex->suffixarray->suftab[leftbound];
 #ifdef SKDEBUG
@@ -549,7 +552,6 @@ static void addpathchar(Limdfsresources *limdfsresources,unsigned long idx,
 }
 
 static void pck_overcontext(Limdfsresources *limdfsresources,
-                            const DECLAREPTRDFSSTATE(dfsstate),
                             Seqpos leftbound,
                             Seqpos offset,
                             Uchar inchar,
@@ -566,11 +568,14 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                   bound);
   if (adfst->copyLimdfsstate == NULL)
   {
-    memcpy(limdfsresources->currentdfsstate,dfsstate,adfst->sizeofdfsstate);
+    memcpy(limdfsresources->currentdfsstate,
+           limdfsresources->parentwithinfo.aliasstate,adfst->sizeofdfsstate);
   } else
   {
-    adfst->copyLimdfsstate(limdfsresources->currentdfsstate, dfsstate,
-                           limdfsresources->dfsconstinfo);
+    adfst->copyLimdfsstate(limdfsresources->currentdfsstate,
+                           limdfsresources->parentwithinfo.aliasstate,
+                           limdfsresources->dfsconstinfo,
+                           true);
   }
 #ifdef SKDEBUG
   printf("retrieve context for bound = %lu\n",(unsigned long) bound);
@@ -638,27 +643,27 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                                Lcpintervalwithinfo *stackptr,
                                const Indexbounds *child,
-                               Uchar inchar,
-                               const DECLAREPTRDFSSTATE(indfsstate),
                                const AbstractDfstransformer *adfst)
 {
   Limdfsresult limdfsresult;
   Seqpos width;
-  stackptr->lcpitv = *child;
 
+  stackptr->lcpitv = *child;
 #ifdef SKDEBUG
   printf("(2) nextLimdfsstate(");
-  adfst->showLimdfsstate(indfsstate,(unsigned long) (child->offset-1),
+  adfst->showLimdfsstate(limdfsresources->parentwithinfo.aliasstate,
+                         (unsigned long) (child->offset-1),
                          limdfsresources->dfsconstinfo);
-  printf(",%u)=",(unsigned int) inchar);
+  printf(",%u)=",(unsigned int) child->inchar);
 #endif
   adfst->nextLimdfsstate(limdfsresources->dfsconstinfo,
                          stackptr->aliasstate,
                          (unsigned long) child->offset,
-                         inchar,
-                         indfsstate);
+                         child->inchar,
+                         limdfsresources->parentwithinfo.aliasstate);
 #ifdef SKDEBUG
-  adfst->showLimdfsstate(stackptr->aliasstate,(unsigned long) child->offset,
+  adfst->showLimdfsstate(stackptr->aliasstate,
+                         (unsigned long) child->offset,
                          limdfsresources->dfsconstinfo);
   printf("\n");
 #endif
@@ -694,8 +699,6 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
 
 static void processchildinterval(Limdfsresources *limdfsresources,
                                  const Indexbounds *child,
-                                 Uchar inchar,
-                                 const DECLAREPTRDFSSTATE(previousdfsstate),
                                  const AbstractDfstransformer *adfst)
 {
   if (child->leftbound + 1 < child->rightbound ||
@@ -705,12 +708,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     Lcpintervalwithinfo *stackptr;
 
     stackptr = allocateStackspace(&limdfsresources->stack,adfst);
-    if (pushandpossiblypop(limdfsresources,
-                           stackptr,
-                           child,
-                           inchar,
-                           previousdfsstate,
-                           adfst))
+    if (pushandpossiblypop(limdfsresources, stackptr, child, adfst))
     {
       limdfsresources->stack.nextfreeLcpintervalwithinfo--;
     }
@@ -719,17 +717,15 @@ static void processchildinterval(Limdfsresources *limdfsresources,
     if (limdfsresources->genericindex->withesa)
     {
       esa_overcontext(limdfsresources,
-                      previousdfsstate,
                       child->leftbound,
                       child->offset,
                       adfst);
     } else
     {
       pck_overcontext(limdfsresources,
-                      previousdfsstate,
                       child->leftbound,
                       child->offset,
-                      inchar,
+                      child->inchar,
                       adfst);
     }
   }
@@ -752,13 +748,12 @@ static void showLCPinterval(bool withesa,const Indexbounds *itv)
 #endif
 
 static void esa_splitandprocess(Limdfsresources *limdfsresources,
-                                const Lcpintervalwithinfo *parentwithinfo,
                                 const AbstractDfstransformer *adfst)
 {
   Seqpos firstnonspecial;
   Uchar extendchar;
   unsigned long idx;
-  const Indexbounds *parent = &parentwithinfo->lcpitv;
+  const Indexbounds *parent = &limdfsresources->parentwithinfo.lcpitv;
 
   extendchar = lcpintervalextendlcp(
                        limdfsresources->genericindex->suffixarray->encseq,
@@ -797,7 +792,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
-    child.code = 0; /* not used, but we better defined it */
+    child.code = 0; /* not used, but we better define it */
     child.inchar = inchar;
 #ifdef SKDEBUG
     printf("%u-child of ",(unsigned int) inchar);
@@ -806,11 +801,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     showLCPinterval(limdfsresources->genericindex->withesa,&child);
     printf("\n");
 #endif
-    processchildinterval(limdfsresources,
-                         &child,
-                         inchar,
-                         parentwithinfo->aliasstate,
-                         adfst);
+    processchildinterval(limdfsresources, &child, adfst);
     firstnonspecial = child.rightbound+1;
   }
   if (!limdfsresources->nowildcards)
@@ -820,7 +811,6 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     for (bound=firstnonspecial; bound <= parent->rightbound; bound++)
     {
       esa_overcontext(limdfsresources,
-                      parentwithinfo->aliasstate,
                       bound,
                       parent->offset+1,
                       adfst);
@@ -887,12 +877,11 @@ unsigned long exactmatchuptomaxdepth(const Mbtab *mbptr,
 }
 
 static void pck_splitandprocess(Limdfsresources *limdfsresources,
-                                const Lcpintervalwithinfo *parentwithinfo,
                                 const AbstractDfstransformer *adfst)
 {
   unsigned long idx;
   Seqpos sumwidth = 0;
-  const Indexbounds *parent = &parentwithinfo->lcpitv;
+  const Indexbounds *parent = &limdfsresources->parentwithinfo.lcpitv;
   Codetype startcode;
 
   if (parent->offset < (Seqpos) limdfsresources->genericindex->maxdepth)
@@ -936,11 +925,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     showLCPinterval(limdfsresources->genericindex->withesa,&child);
     printf("\n");
 #endif
-    processchildinterval(limdfsresources,
-                         &child,
-                         inchar,
-                         parentwithinfo->aliasstate,
-                         adfst);
+    processchildinterval(limdfsresources, &child, adfst);
   }
   if (!limdfsresources->nowildcards)
   {
@@ -953,7 +938,6 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
       if (cc != (Uchar) SEPARATOR)
       {
         pck_overcontext(limdfsresources,
-                        parentwithinfo->aliasstate,
                         bound,
                         parent->offset+1,
                         cc,
@@ -994,9 +978,12 @@ static void runlimdfs(Limdfsresources *limdfsresources,
   while (limdfsresources->stack.nextfreeLcpintervalwithinfo > 0)
   {
     gt_assert(limdfsresources->stack.spaceLcpintervalwithinfo != NULL);
+    printf("nextfreeLcpintervalwithinfo=%lu\n",
+               limdfsresources->stack.nextfreeLcpintervalwithinfo);
     stackptr = limdfsresources->stack.spaceLcpintervalwithinfo +
                limdfsresources->stack.nextfreeLcpintervalwithinfo - 1;
     SHOWSTACKTOP(stackptr);
+    /* no make a copy of the top most stack element to be used as source */
     if (adfst->copyLimdfsstate == NULL)
     {
       limdfsresources->parentwithinfo = *stackptr; /* make a copy */
@@ -1005,7 +992,8 @@ static void runlimdfs(Limdfsresources *limdfsresources,
       limdfsresources->parentwithinfo.lcpitv = stackptr->lcpitv;
       adfst->copyLimdfsstate(limdfsresources->parentwithinfo.aliasstate,
                              stackptr->aliasstate,
-                             limdfsresources->dfsconstinfo);
+                             limdfsresources->dfsconstinfo,
+                             true);
     }
     if (limdfsresources->parentwithinfo.lcpitv.offset > 0 &&
         limdfsresources->maxpathlength > 0)
@@ -1019,8 +1007,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
     limdfsresources->stack.nextfreeLcpintervalwithinfo--;
     (limdfsresources->genericindex->withesa
         ? esa_splitandprocess
-        : pck_splitandprocess)
-        (limdfsresources,&limdfsresources->parentwithinfo,adfst);
+        : pck_splitandprocess) (limdfsresources,adfst);
   }
   if (adfst->extractdfsconstinfo != NULL)
   {

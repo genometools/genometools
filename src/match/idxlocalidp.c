@@ -70,7 +70,7 @@ static void showscorecolumn(const Column *column,
                             unsigned long querylength,
                             unsigned long currentdepth)
 {
-  printf("at depth %lu\n",currentdepth);
+  printf("at depth %lu: ",currentdepth);
   if (column->colvalues == NULL)
   {
     printf("empty column\n");
@@ -441,9 +441,9 @@ static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 
 static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
                                     const DECLAREPTRDFSSTATE(srcstate),
-                                    void *dfsconstinfo)
+                                    void *dfsconstinfo,
+                                    bool docopy)
 {
-  unsigned long idx;
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
   Column *destcol = (Column *) deststate;
   const Column *srccol = (const Column *) srcstate;
@@ -458,11 +458,18 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
                                        (lci->maxquerylength + 1));
       ATADDRESS(destcol);
     }
-    for (idx = 0; idx<=lci->querylength; idx++)
+    if (docopy)
     {
-      destcol->colvalues[idx] = srccol->colvalues[idx];
+      unsigned long idx;
+
+      for (idx = 0; idx<=lci->querylength; idx++)
+      {
+        destcol->colvalues[idx] = srccol->colvalues[idx];
+      }
     }
   }
+  destcol->maxvalue = srccol->maxvalue;
+  destcol->pprefixlen = srccol->pprefixlen;
 }
 
 static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
