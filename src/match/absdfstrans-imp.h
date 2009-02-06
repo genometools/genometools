@@ -26,7 +26,7 @@ typedef unsigned long Aliasdfsstate;
 #define DECLAREPTRDFSSTATE(V)\
         Aliasdfsstate * V
 
-#define SKDEBUG
+#undef SKDEBUG
 
 typedef enum
 {
@@ -54,14 +54,13 @@ struct AbstractDfstransformer
                               const void *patterninfo,
                               void *dfsconstinfo);
   void (*freedfsconstinfo)(void **dfsconstinfo);
-  void (*initLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
-                          void *dfsconstinfo);
+  void (*initrootLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
+                              void *dfsconstinfo);
   void (*initLimdfsstackelem)(DECLAREPTRDFSSTATE(aliasstate));
   void (*freeLimdfsstackelem)(DECLAREPTRDFSSTATE(aliasstate));
   void (*copyLimdfsstate)(DECLAREPTRDFSSTATE(deststate),
                           const DECLAREPTRDFSSTATE(srcstate),
-                          void *dfsconstinfo,
-                          bool);
+                          void *dfsconstinfo);
   void (*fullmatchLimdfsstate)(Limdfsresult *limdfsresult,
                                DECLAREPTRDFSSTATE(aliascolumn),
                                        Seqpos left,
