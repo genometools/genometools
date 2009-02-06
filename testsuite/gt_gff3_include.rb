@@ -634,6 +634,14 @@ Test do
   grep $last_stderr, "has not been previously defined"
 end
 
+Name "gt gff3 multi-feature (different sequence ID)"
+Keywords "gt_gff3 multi-feature"
+Test do
+  run_test("#{$bin}gt gff3 " +
+           "#{$testdata}multi_feature_different_sequence_id.gff3", :retval => 1)
+  grep $last_stderr, "has a different sequence id than its counterpart on line"
+end
+
 Name "gt gff3 multi-feature (with pseudo-feature)"
 Keywords "gt_gff3 multi-feature pseudo-feature"
 Test do

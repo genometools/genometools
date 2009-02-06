@@ -437,6 +437,16 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
                    GFF_TERMINATOR, parser->last_terminator);
       had_err = -1;
     }
+    /* check seqid */
+    if (!had_err &&
+        gt_str_cmp(gt_genome_node_get_seqid((GtGenomeNode*) feature_node),
+                   gt_genome_node_get_seqid((GtGenomeNode*) fn))) {
+      gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
+                   "\"%s\" has a different sequence id than its counterpart on "
+                   "line %u", ID_STRING, id, line_number, filename,
+                   gt_genome_node_get_line_number((GtGenomeNode*) fn));
+      had_err = -1;
+    }
     if (!had_err) {
       GtFeatureNode *pseudo_parent;
       bool has_parent ;
@@ -798,15 +808,9 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
   gt_assert(new_gf && old_gf);
   gt_assert(!gt_feature_node_is_pseudo((GtFeatureNode*) new_gf));
   gt_assert(!gt_feature_node_is_pseudo((GtFeatureNode*) old_gf));
-  /* check seqid */
-  if (gt_str_cmp(gt_genome_node_get_seqid(new_gf),
-                 gt_genome_node_get_seqid(old_gf))) {
-    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
-                 "\"%s\" has a different sequence id than its counterpart on "
-                 "line %u", ID_STRING, id, line_number, filename,
-                 gt_genome_node_get_line_number(old_gf));
-    had_err = -1;
-  }
+  /* the seqids have been compared already */
+  gt_assert(!gt_str_cmp(gt_genome_node_get_seqid(new_gf),
+                        gt_genome_node_get_seqid(old_gf)));
   /* check source */
   if (!had_err &&
       strcmp(gt_feature_node_get_source((GtFeatureNode*) new_gf),
