@@ -427,7 +427,7 @@ static void assignProteinalphabet(Alphabet *alpha)
          (Uchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEPROTEIN;
   ALLOCASSIGNSPACE(alpha->characters,NULL,char,MAPSIZEPROTEIN-1);
-  memcpy(alpha->characters,PROTEINUPPERAMINOACIDS,(size_t) MAPSIZEPROTEIN-1);
+  memcpy(alpha->characters,PROTEINUPPERAMINOACIDS,(size_t) (MAPSIZEPROTEIN-1));
   assignproteinsymbolmap(alpha->symbolmap);
 }
 

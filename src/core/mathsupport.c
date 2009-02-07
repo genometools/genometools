@@ -44,6 +44,11 @@ bool gt_double_equals_double(double d1, double d2)
   return false;
 }
 
+bool gt_double_smaller_double(double d1, double d2)
+{
+  return (d1 - d2 < EPSILON) ? true : false;
+}
+
 unsigned long gt_rand_max(unsigned long maximal_value)
 {
   unsigned long r;

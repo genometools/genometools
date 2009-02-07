@@ -18,6 +18,7 @@
 #include "core/arraydef.h"
 #include "core/error.h"
 #include "core/minmax.h"
+#include "core/mathsupport.h"
 #include "match/encseq-def.h"
 #include "match/spacedef.h"
 
@@ -323,7 +324,9 @@ int searchforLTRs(LTRharvestoptions *lo,
     boundaries->similarity = 100.0 *
                              (1 - (((double) edist)/(MAX(ulen,vlen))));
 
-    if ( boundaries->similarity < lo->similaritythreshold )
+    if (gt_double_smaller_double(boundaries->similarity,
+                                 lo->similaritythreshold))
+    /* if ( boundaries->similarity < lo->similaritythreshold ) */
     {
       /* delete this LTR-pair candidate */
       arrayLTRboundaries->nextfreeLTRboundaries--;

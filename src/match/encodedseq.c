@@ -3219,10 +3219,11 @@ void extract2bitenc(bool fwd,
 }
 
 #define MASKPREFIX(PREFIX)\
-        (~(((Twobitencoding) 1 << MULT2(UNITSIN2BITENC - (PREFIX))) - 1))
+        (Twobitencoding)\
+        (~((((Twobitencoding) 1) << MULT2(UNITSIN2BITENC - (PREFIX))) - 1))
 
 #define MASKSUFFIX(SUFFIX)\
-        (((Twobitencoding) 1 << MULT2((int) SUFFIX)) - 1)
+        ((((Twobitencoding) 1) << MULT2((int) SUFFIX)) - 1)
 
 #define MASKEND(FWD,END)\
         (((END) == 0) ? 0 : ((FWD) ? MASKPREFIX(END) : MASKSUFFIX(END)))
