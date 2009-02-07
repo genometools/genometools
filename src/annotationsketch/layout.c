@@ -294,7 +294,7 @@ GtTextWidthCalculator* gt_layout_get_twc(const GtLayout *layout)
 unsigned long gt_layout_get_height(const GtLayout *layout)
 {
   GtTracklineInfo lines;
-  double tmp;
+  double tmp, head_track_space = HEAD_TRACK_SPACE_DEFAULT;
   bool show_track_captions;
   unsigned long height,
                 line_height,
@@ -345,6 +345,8 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   }
 
   /* add header space and footer */
-  height += HEADER_SPACE + FOOTER_SPACE;
+  gt_style_get_num(layout->style, "format", "ruler_space", &head_track_space,
+                   NULL);
+  height += HEADER_SPACE + head_track_space + FOOTER_SPACE;
   return height;
 }

@@ -30,6 +30,8 @@ style =
     bar_height = 16,   -- height of a feature bar, in pixels
     bar_vspace = 10,   -- space between feature bars, in pixels
     track_vspace = 20, -- space between tracks, in pixels
+    ruler_font_size = 10, -- size of scale labels
+    ruler_space = 20, -- space between ruler and first track
     block_caption_font_size = 19, -- size of block captions
     block_caption_space = 7, -- space between blocks and their captions
     track_caption_font_size = 8, -- size of track captions
@@ -41,7 +43,8 @@ style =
     stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
     show_grid = true, -- shows light vertical lines for orientation
     min_len_block = 20 , -- minimum length of a block in which single elements are shown
-    track_title_color     = {red=0.7, green=0.7, blue=0.7},
-    default_stroke_color  = {red=0.1, green=0.1, blue=0.1},
+    track_title_color     = {red=0.7, green=0.7, blue=0.7, alpha = 1.0},
+    default_stroke_color  = {red=0.1, green=0.1, blue=0.1, alpha = 1.0},
+    background_color      = {red=1.0, green=1.0, blue=1.0, alpha = 1.0},
   },
 }

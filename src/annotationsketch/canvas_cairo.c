@@ -38,10 +38,13 @@ int gt_canvas_cairo_visit_layout_pre(GtCanvas *canvas,
                                      GtLayout *layout,
                                      GT_UNUSED GtError *err)
 {
+  double head_track_space = HEAD_TRACK_SPACE_DEFAULT;
   /* get displayed range for internal use */
   canvas->pvt->viewrange = gt_layout_get_range(layout);
   gt_canvas_draw_ruler(canvas, canvas->pvt->viewrange);
-  canvas->pvt->y += HEADER_SPACE;
+  gt_style_get_num(canvas->pvt->sty, "format", "ruler_space",
+                   &head_track_space, NULL);
+  canvas->pvt->y += HEADER_SPACE + head_track_space;
   return 0;
 }
 
@@ -57,16 +60,14 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 {
   int had_err = 0;
   unsigned long exceeded;
-  bool show_track_captions;
+  bool show_track_captions = true;
 
   GtColor color;
 
   gt_assert(canvas && track);
 
-  if (!gt_style_get_bool(canvas->pvt->sty, "format", "show_track_captions",
-                         &show_track_captions, NULL))
-    show_track_captions = true;
-
+  gt_style_get_bool(canvas->pvt->sty, "format", "show_track_captions",
+                    &show_track_captions, NULL);
   gt_style_get_color(canvas->pvt->sty, "format", "track_title_color", &color,
                      NULL);
 
@@ -571,25 +572,23 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 /* Renders a ruler with dynamic scale labeling and optional grid. */
 void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
 {
-  double step, minorstep, vmajor, vminor, margins;
+  double step, minorstep, vmajor, vminor, theight = TOY_TEXT_HEIGHT;
   long base_length, tick;
   GtColor rulercol, gridcol;
   char str[BUFSIZ];
-  bool showgrid;
+  bool showgrid = true;
   gt_assert(canvas);
 
-  margins = canvas->pvt->margins;
-
-  if (!(gt_style_get_bool(canvas->pvt->sty, "format", "show_grid", &showgrid,
-                          NULL)))
-    showgrid = true;
+  gt_style_get_bool(canvas->pvt->sty, "format", "show_grid", &showgrid, NULL);
+  gt_style_get_num(canvas->pvt->sty, "format", "ruler_font_size", &theight,
+                   NULL);
 
   /* reset font to default */
   gt_graphics_set_font(canvas->pvt->g,
                        "sans-serif",
                        SLANT_NORMAL,
                        WEIGHT_NORMAL,
-                       TOY_TEXT_HEIGHT);
+                       theight);
 
   rulercol.red = rulercol.green = rulercol.blue = RULER_GREY;
   rulercol.alpha = 1.0;
@@ -610,8 +609,9 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
   /* draw major ticks */
   for (tick = vmajor; tick <= viewrange.end; tick += step)
   {
-    double drawtick = gt_coords_convert_point(viewrange, tick)
-                       * (canvas->pvt->width-2*margins) + margins;
+    double drawtick = (gt_coords_convert_point(viewrange, tick)
+                       * (canvas->pvt->width-2*canvas->pvt->margins))
+                       + canvas->pvt->margins;
     if (tick < viewrange.start) continue;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
                                    drawtick,
@@ -631,8 +631,9 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
     for (tick = vminor; tick <= viewrange.end; tick += minorstep)
     {
       if (tick < viewrange.start) continue;
-      double drawtick = gt_coords_convert_point(viewrange, tick)
-                       * (canvas->pvt->width-2*margins) + margins;
+      double drawtick = (gt_coords_convert_point(viewrange, tick)
+                       * (canvas->pvt->width-2*canvas->pvt->margins))
+                       + canvas->pvt->margins;
       if (showgrid)
       {
         gt_graphics_draw_vertical_line(canvas->pvt->g,
@@ -655,15 +656,16 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                    canvas->pvt->margins,
                                    canvas->pvt->y + 40,
                                    rulercol,
-                                   canvas->pvt->width-2*margins,
+                                   canvas->pvt->width - 2
+                                     * canvas->pvt->margins,
                                    1.5);
   /* put 3' and 5' captions at the ends */
   gt_graphics_draw_text_centered(canvas->pvt->g,
-                                 canvas->pvt->margins-10,
-                                 canvas->pvt->y + 45 - (TOY_TEXT_HEIGHT/2),
+                                 canvas->pvt->margins - 10,
+                                 canvas->pvt->y + 45 - (theight/2),
                                  FIVE_PRIME_STRING);
   gt_graphics_draw_text_centered(canvas->pvt->g,
-                                 canvas->pvt->width-canvas->pvt->margins+10,
-                                 canvas->pvt->y + 45-(TOY_TEXT_HEIGHT/2),
+                                 canvas->pvt->width - canvas->pvt->margins + 10,
+                                 canvas->pvt->y + 45 - (theight/2),
                                  THREE_PRIME_STRING);
 }
