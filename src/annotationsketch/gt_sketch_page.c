@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -47,14 +47,12 @@
 #include "annotationsketch/text_width_calculator.h"
 #include "annotationsketch/text_width_calculator_cairo.h"
 
-#define HEADER_TEXT_HEIGHT 20  /* pt */
-#define FOOTER_TEXT_HEIGHT 20  /* pt */
 #define TEXT_SPACER         8  /* pt */
 #define TIME_DATE_FORMAT    "%a, %b %d %Y - %T"
 
 typedef struct {
   unsigned long width;
-  double pwidth, pheight;
+  double pwidth, pheight, theight;
   GtRange range;
   GtStr *seqid, *format, *stylefile, *text;
 } SketchPageArguments;
@@ -110,6 +108,11 @@ static GtOptionParser* gt_sketch_page_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o);
   gt_option_hide_default(o);
 
+  o = gt_option_new_double("fontsize", "header and footer font size "
+                                       "(in points)",
+                           &arguments->theight, 10.0);
+  gt_option_parser_add_option(op, o);
+
   o = gt_option_new_range("range", "range to draw (e.g. 100 10000)\n"
                                    "default: full range",
                           &arguments->range, NULL);
@@ -121,14 +124,17 @@ static GtOptionParser* gt_sketch_page_option_parser_new(void *tool_arguments)
                               &arguments->width, 2000, 1000);
   gt_option_is_mandatory(o);
   gt_option_parser_add_option(op, o);
+
   o = gt_option_new_double("width", "page width in millimeters "
                                     "(default: DIN A4)",
                            &arguments->pwidth, 210.0);
   gt_option_parser_add_option(op, o);
+
   o = gt_option_new_double("height", "page height in millimeters "
                                      "(default: DIN A4)",
                            &arguments->pheight, 297.0);
   gt_option_parser_add_option(op, o);
+
   o = gt_option_new_choice("format", "output format\n"
                                      "choose from: "
 #ifdef CAIRO_HAS_PDF_SURFACE
@@ -163,7 +169,8 @@ static inline double mm_to_pt(double mm)
 
 static void draw_header(cairo_t *cr, const char *text, GT_UNUSED const char *fn,
                         const char *seqid, GT_UNUSED unsigned long pagenum,
-                        GT_UNUSED double width, GT_UNUSED double height)
+                        GT_UNUSED double width, GT_UNUSED double height,
+                        double theight)
 {
   cairo_text_extents_t ext;
   time_t t;
@@ -173,31 +180,30 @@ static void draw_header(cairo_t *cr, const char *text, GT_UNUSED const char *fn,
   cairo_save(cr);
   t = time(NULL);
   tmp = localtime(&t);
-  cairo_set_font_size(cr, HEADER_TEXT_HEIGHT);
+  cairo_set_font_size(cr, theight);
   if (tmp)
   {
     strftime(buffer, BUFSIZ, TIME_DATE_FORMAT, tmp);
     cairo_text_extents(cr, buffer, &ext);
     cairo_move_to(cr, width - TEXT_SPACER - ext.width, TEXT_SPACER
-                    + HEADER_TEXT_HEIGHT);
+                    + theight);
     cairo_set_source_rgba(cr, 0,0,0,1);
     cairo_show_text(cr, buffer);
   }
   cairo_text_extents(cr, text, &ext);
-  cairo_move_to(cr, xpos, TEXT_SPACER + HEADER_TEXT_HEIGHT);
+  cairo_move_to(cr, xpos, TEXT_SPACER + theight);
   cairo_set_source_rgba(cr, 0,0,0,1);
   cairo_show_text(cr, text);
   xpos += ext.width+3;
-  cairo_move_to(cr, xpos, TEXT_SPACER + HEADER_TEXT_HEIGHT);
+  cairo_move_to(cr, xpos, TEXT_SPACER + theight);
   cairo_set_source_rgba(cr, 0.7, 0.7, 0.7, 1);
   cairo_show_text(cr, ", sequence region: ");
   cairo_text_extents(cr, ", sequence region: ", &ext);
   xpos += ext.width + 10;
-  cairo_move_to(cr, xpos, TEXT_SPACER + HEADER_TEXT_HEIGHT);
   cairo_set_source_rgba(cr, 0,0,0,1);
   cairo_show_text(cr, seqid);
   xpos = TEXT_SPACER;
-  cairo_move_to(cr, xpos, height - 2*TEXT_SPACER - FOOTER_TEXT_HEIGHT);
+  cairo_move_to(cr, xpos, height - 2*TEXT_SPACER - theight);
   snprintf(buffer, BUFSIZ, "Page %lu", pagenum+1);
   cairo_show_text(cr, buffer);
   cairo_restore(cr);
@@ -307,10 +313,10 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
                                                   mm_to_pt(arguments->pwidth),
                                                   mm_to_pt(arguments->pheight));
 
-    offsetpos = TEXT_SPACER + HEADER_TEXT_HEIGHT + TEXT_SPACER;
+    offsetpos = TEXT_SPACER + arguments->theight + TEXT_SPACER;
     usable_height = mm_to_pt(arguments->pheight)
-                              - HEADER_TEXT_HEIGHT
-                              - FOOTER_TEXT_HEIGHT
+                              - arguments->theight
+                              - arguments->theight
                               - 4*TEXT_SPACER;
 
     /* do it! */
@@ -329,13 +335,14 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
       gt_error_check(err);
       height = gt_layout_get_height(l);
       if (offsetpos + height > usable_height - 10 - 2*TEXT_SPACER
-            - FOOTER_TEXT_HEIGHT)
+            - arguments->theight)
       {
           draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1],
                       seqid, num_pages, mm_to_pt(arguments->pwidth),
-                      mm_to_pt(arguments->pheight));
+                      mm_to_pt(arguments->pheight),
+                      arguments->theight);
         cairo_show_page(cr);
-        offsetpos = TEXT_SPACER + HEADER_TEXT_HEIGHT + TEXT_SPACER;
+        offsetpos = TEXT_SPACER + arguments->theight + TEXT_SPACER;
         num_pages++;
       }
       canvas = gt_canvas_cairo_context_new(sty,
@@ -353,7 +360,8 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     }
     draw_header(cr, gt_str_get(arguments->text), argv[parsed_args+1], seqid,
                 num_pages, mm_to_pt(arguments->pwidth),
-                mm_to_pt(arguments->pheight));
+                mm_to_pt(arguments->pheight),
+                arguments->theight);
     cairo_show_page(cr);
     num_pages++;
     gt_log_log("finished, should be %lu pages\n", num_pages);
