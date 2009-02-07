@@ -1078,9 +1078,9 @@ void indexbasedlocali(Limdfsresources *limdfsresources,
                           mismatchscore,
                           gapstart,
                           gapextend,
+                          threshold,
                           query,
-                          querylength,
-                          threshold);
+                          querylength);
   runlimdfs(limdfsresources,adfst);
 }
 

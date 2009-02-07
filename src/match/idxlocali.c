@@ -99,8 +99,8 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
       {
         break;
       }
-      printf("process sequence " Formatuint64_t "\n",
-              PRINTuint64_tcast(unitnum));
+      printf("process sequence " Formatuint64_t " of length %lu\n",
+              PRINTuint64_tcast(unitnum),querylen);
       indexbasedlocali(limdfsresources,
                        arguments->matchscore,
                        arguments->mismatchscore,

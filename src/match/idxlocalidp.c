@@ -24,8 +24,7 @@ typedef struct
 {
   Scorevalues scorevalues;
   const Uchar *query;
-  bool extendcolumnspace;
-  unsigned long maxquerylength,
+  unsigned long maxcollen,
                 querylength,
                 threshold;
 } Limdfsconstinfo;
@@ -105,7 +104,7 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 #define REALLOCMSG(COL)\
         printf("line %d: %salloc %lu entries",\
                 __LINE__,(COL)->colvalues == NULL ? "m" : "re",\
-                lci->maxquerylength+1)
+                lci->maxcollen)
 
 #define ATADDRESS(S,COL)\
         printf("%s at address %0X\n",S,(unsigned int) (COL)->colvalues)
@@ -119,13 +118,12 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
 {
   unsigned long i;
 
-  if (outcol->colvalues == NULL || lci->extendcolumnspace)
+  if (outcol->lenval < lci->maxcollen)
   {
     REALLOCMSG(outcol);
     outcol->colvalues = gt_realloc (outcol->colvalues,
-                                    sizeof (Matrixvalue) *
-                                    (lci->maxquerylength + 1));
-    outcol->lenval = lci->maxquerylength + 1;
+                                    sizeof (Matrixvalue) * lci->maxcollen);
+    outcol->lenval = lci->maxcollen;
     ATADDRESS("",outcol);
   }
   outcol->colvalues[0].repcell = MINUSINFTY;
@@ -160,15 +158,16 @@ static void nextcolumn (const Limdfsconstinfo *lci,
 
   gt_assert(outcol != incol);
   gt_assert(outcol->colvalues != incol->colvalues);
-  if (outcol->colvalues == NULL || lci->extendcolumnspace)
+  gt_assert(incol->lenval >= lci->querylength+1);
+  if (outcol->lenval < lci->querylength+1)
   {
     REALLOCMSG(outcol);
     outcol->colvalues = gt_realloc (outcol->colvalues,
-                                    sizeof (Matrixvalue) *
-                                    (lci->maxquerylength + 1));
-    outcol->lenval = lci->maxquerylength + 1;
+                                    sizeof (Matrixvalue) * lci->maxcollen);
+    outcol->lenval = lci->maxcollen;
     ATADDRESS("",outcol);
   }
+  gt_assert(outcol->lenval >= lci->querylength+1);
   outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = MINUSINFTY;
   if (incol->colvalues[0].inscell > 0)
   {
@@ -389,8 +388,7 @@ static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
 {
   Limdfsconstinfo *lci = gt_malloc (sizeof (Limdfsconstinfo));
 
-  lci->maxquerylength = 0;
-  lci->extendcolumnspace = false;
+  lci->maxcollen = 0;
   return lci;
 }
 
@@ -405,19 +403,12 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   lci->scorevalues.mismatchscore = va_arg (ap, long);
   lci->scorevalues.gapstart = va_arg (ap, long);
   lci->scorevalues.gapextend = va_arg (ap, long);
+  lci->threshold = va_arg (ap, unsigned long);
   lci->query = va_arg (ap, const Uchar *);
   lci->querylength = va_arg (ap, unsigned long);
-  lci->threshold = va_arg (ap, unsigned long);
-  if (lci->maxquerylength < lci->querylength)
+  if (lci->maxcollen < lci->querylength + 1)
   {
-    if (lci->maxquerylength > 0)
-    {
-      lci->extendcolumnspace = true;
-    }
-    lci->maxquerylength = lci->querylength;
-  } else
-  {
-    lci->extendcolumnspace = false;
+    lci->maxcollen = lci->querylength+1;
   }
   va_end(ap);
 }
@@ -436,13 +427,12 @@ static void locali_initrootLimdfsstate(DECLAREPTRDFSSTATE(aliasstate),
   Column *column = (Column *) aliasstate;
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
-  if (column->colvalues == NULL || lci->extendcolumnspace)
+  if (column->lenval < lci->maxcollen)
   {
     REALLOCMSG(column);
     column->colvalues = gt_realloc (column->colvalues,
-                                    sizeof (Matrixvalue) *
-                                    (lci->maxquerylength + 1));
-    column->lenval = lci->maxquerylength + 1;
+                                    sizeof (Matrixvalue) * lci->maxcollen);
+    column->lenval = lci->maxcollen;
     ATADDRESS("",column);
   }
 }
@@ -480,31 +470,26 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
   {
     unsigned long idx;
 
-    if (destcol->colvalues == NULL || lci->extendcolumnspace)
+    if (destcol->lenval < lci->maxcollen)
     {
       REALLOCMSG(destcol);
       destcol->colvalues = gt_realloc (destcol->colvalues,
-                                       sizeof (Matrixvalue) *
-                                       (lci->maxquerylength + 1));
-      destcol->lenval = lci->maxquerylength + 1;
+                                       sizeof (Matrixvalue) * lci->maxcollen);
+      destcol->lenval = lci->maxcollen;
       ATADDRESS("",destcol);
     }
-#ifdef SKDEBUG
-    if(destcol->lenval < lci->querylength+1)
+    if (destcol->lenval < lci->querylength+1)
     {
-      fprintf(stderr,"line=%d,nextfree=%lu\n",line,nextfree);
       fprintf(stderr,"destcol->lenval = %lu < %lu lci->querylength+1\n",
                       destcol->lenval,lci->querylength+1);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* Programming error */
     }
-    if(srccol->lenval < lci->querylength+1)
+    if (srccol->lenval < lci->querylength+1)
     {
-      fprintf(stderr,"line=%d,nextfree=%lu\n",line,nextfree);
       fprintf(stderr,"srccol->lenval = %lu < %lu lci->querylength+1\n",
                       srccol->lenval,lci->querylength+1);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* Programming error */
     }
-#endif
     for (idx = 0; idx<=lci->querylength; idx++)
     {
       destcol->colvalues[idx] = srccol->colvalues[idx];
@@ -523,10 +508,11 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
                                          void *dfsconstinfo)
 {
   Column *column = (Column *) aliasstate;
-  const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
   if (column->colvalues != NULL)
   {
+    const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
+
     if (column->maxvalue >= lci->threshold)
     {
       limdfsresult->status = Limdfssuccess;
@@ -558,12 +544,12 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   Column *outcol = (Column *) aliasoutcol;
   const Column *incol = (const Column *) aliasincol;
 
-  if (currentdepth == 1UL)
-  {
-    secondcolumn (lci, outcol, currentchar);
-  } else
+  if (currentdepth > 1UL)
   {
     nextcolumn (lci,outcol,currentchar,incol);
+  } else
+  {
+    secondcolumn (lci, outcol, currentchar);
   }
 }
 
@@ -575,12 +561,12 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
   Column *column = (Column *) aliasstate;
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
-  if (currentdepth == 1UL)
-  {
-    secondcolumn (lci,column, currentchar);
-  } else
+  if (currentdepth > 1UL)
   {
     inplacenextcolumn (lci,currentchar,column);
+  } else
+  {
+    secondcolumn (lci,column,currentchar);
   }
 }
 

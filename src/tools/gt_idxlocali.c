@@ -167,5 +167,6 @@ GtTool *gt_idxlocali (void)
   return gt_tool_new (gt_idxlocali_arguments_new,
                       gt_idxlocali_arguments_delete,
                       gt_idxlocali_option_parser_new,
-                      gt_idxlocali_arguments_check, gt_idxlocali_runner);
+                      gt_idxlocali_arguments_check,
+                      gt_idxlocali_runner);
 }
