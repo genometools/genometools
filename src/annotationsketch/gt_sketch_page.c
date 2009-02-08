@@ -37,6 +37,7 @@
 #include "core/unused_api.h"
 #include "core/undef.h"
 #include "core/versionfunc.h"
+#include "core/warning_api.h"
 #include "annotationsketch/canvas_cairo_context.h"
 #include "annotationsketch/custom_track_gc_content_api.h"
 #include "annotationsketch/diagram.h"
@@ -234,6 +235,11 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   GtTextWidthCalculator *twc;
 
   features = gt_feature_index_memory_new();
+
+  if (cairo_version() < CAIRO_VERSION_ENCODE(1, 8, 6))
+    gt_warning("Your cairo library (version %s) is older than version 1.8.6! "
+               "These versions contain a bug which may result in "
+               "corrupted PDF output!", cairo_version_string());
 
   /* get style */
   sty = gt_style_new(err);
