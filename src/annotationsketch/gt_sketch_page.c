@@ -96,7 +96,7 @@ static GtOptionParser* gt_sketch_page_option_parser_new(void *tool_arguments)
   GtOption *o;
   op = gt_option_parser_new("outfile annotationfile",
                             "Draw a multi-page PDF/PS representation of "
-                            "an annotation file (needs cairo).");
+                            "an annotation file.");
   o = gt_option_new_string("seqid", "sequence region to draw\n"
                                     "default: first in file",
                            arguments->seqid, NULL);
