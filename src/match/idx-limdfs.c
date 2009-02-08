@@ -638,15 +638,14 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   freeBwtseqcontextiterator(&bsci);
 }
 
-static bool pushandpossiblypop(Limdfsresources *limdfsresources,
-                               Lcpintervalwithinfo *stackptr,
+static void pushandpossiblypop(Limdfsresources *limdfsresources,
                                const Indexbounds *child,
                                const AbstractDfstransformer *adfst)
 {
   Limdfsresult limdfsresult;
   Seqpos width;
+  Lcpintervalwithinfo *stackptr;
 
-  stackptr->lcpitv = *child;
 #ifdef SKDEBUG
   printf("(2) nextLimdfsstate(");
   adfst->showLimdfsstate(limdfsresources->copyofparent.aliasstate,
@@ -654,6 +653,7 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                          limdfsresources->dfsconstinfo);
   printf(",%u)=",(unsigned int) child->inchar);
 #endif
+  stackptr = allocateStackspace(&limdfsresources->stack,adfst);
   adfst->nextLimdfsstate(limdfsresources->dfsconstinfo,
                          stackptr->aliasstate,
                          (unsigned long) child->offset,
@@ -679,9 +679,10 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
                               width,
                               (unsigned long) child->offset,
                               limdfsresources->dfsconstinfo);
-  if (limdfsresult.status == Limdfsstop)
+  if (limdfsresult.status == Limdfscontinue)
   {
-    return true; /* stop traversal without match */
+    stackptr->lcpitv = *child;
+    return; /* no success, but still have the chance to find result */
   }
   if (limdfsresult.status == Limdfssuccess)
   {
@@ -689,10 +690,11 @@ static bool pushandpossiblypop(Limdfsresources *limdfsresources,
          ? esa_overinterval
          : pck_overinterval)
       (limdfsresources,child,limdfsresult.pprefixlen,limdfsresult.distance);
-    /* success with match of length pprefixlen - 1 */
-    return true;
+    /* success with match of length pprefixlen */
   }
-  return false; /* continue with depth first traversal */
+  /* now status == Limdfssuccess || status == Limdfsstop */
+  /* pop the element from the stack as there has been success or stop event */
+  limdfsresources->stack.nextfreeLcpintervalwithinfo--;
 }
 
 static void processchildinterval(Limdfsresources *limdfsresources,
@@ -703,13 +705,7 @@ static void processchildinterval(Limdfsresources *limdfsresources,
       (limdfsresources->genericindex->withesa &&
        child->leftbound + 1 == child->rightbound))
   {
-    Lcpintervalwithinfo *stackptr;
-
-    stackptr = allocateStackspace(&limdfsresources->stack,adfst);
-    if (pushandpossiblypop(limdfsresources, stackptr, child, adfst))
-    {
-      limdfsresources->stack.nextfreeLcpintervalwithinfo--;
-    }
+    pushandpossiblypop(limdfsresources, child, adfst);
   } else
   {
     if (limdfsresources->genericindex->withesa)
@@ -901,23 +897,21 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   }
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
-    Uchar inchar;
     Indexbounds child;
 
-    inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
+    child.inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
-    gt_assert(inchar < limdfsresources->alphasize);
-    child.code = startcode + inchar;
-    child.inchar = inchar;
+    gt_assert(child.inchar < limdfsresources->alphasize);
+    child.code = startcode + child.inchar;
     if (limdfsresources->maxpathlength > 0)
     {
-      addpathchar(limdfsresources,(unsigned long) parent->offset,inchar);
+      addpathchar(limdfsresources,(unsigned long) parent->offset,child.inchar);
     }
     sumwidth += child.rightbound - child.leftbound;
 #ifdef SKDEBUG
-    printf("%u-child of ",(unsigned int) inchar);
+    printf("%u-child of ",(unsigned int) child.inchar);
     showLCPinterval(limdfsresources->genericindex->withesa,parent);
     printf(" is ");
     showLCPinterval(limdfsresources->genericindex->withesa,&child);

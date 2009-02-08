@@ -230,7 +230,7 @@ const Uchar *searchinbuckets(const Tyrindex *tyrindex,
       } else
       {
         result = tyrindex_binmersearch(tyrindex,
-                                       1UL + (unsigned long) 
+                                       1UL + (unsigned long)
                                              DIV4(tyrbckinfo->prefixlength),
                                        bytecode,
                                        merbounds.leftmer,
