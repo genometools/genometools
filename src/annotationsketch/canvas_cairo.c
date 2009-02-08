@@ -125,7 +125,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
   return had_err;
 }
 
-int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GtTrack *track,
+int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track,
                                      GT_UNUSED GtError *err)
 {
   double vspace = TRACK_VSPACE_DEFAULT;
