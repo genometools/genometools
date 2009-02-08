@@ -593,10 +593,12 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Showmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;
+    const Alphabet *alpha;
 
     storeonline.twlptr = storeoffline.twlptr = &twl;
-    symbolmap = getencseqAlphabetsymbolmap(encseq);
-    numofchars = getencseqAlphabetnumofchars(encseq);
+    alpha = getencseqAlphabet(encseq);
+    symbolmap = getsymbolmapAlphabet(alpha);
+    numofchars = getnumofcharsAlphabet(alpha);
     if (tageratoroptions->docompare)
     {
       processmatch = storematch;
@@ -609,7 +611,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.twlptr = &twl;
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) numofchars;
-      showmatchinfo.alpha = getencseqAlphabet(encseq);
+      showmatchinfo.alpha = alpha;
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
@@ -688,8 +690,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
       {
         printf("\t%lu\t",twl.taglen);
-        fprintfsymbolstring(stdout,getencseqAlphabet(encseq),
-                            twl.transformedtag,twl.taglen);
+        fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
       }
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;

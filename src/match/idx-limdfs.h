@@ -98,8 +98,6 @@ Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
                            Seqpos pos,
                            Readmode readmode);
 
-Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound);
-
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound);
 

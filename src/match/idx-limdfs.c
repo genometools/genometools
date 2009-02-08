@@ -1177,15 +1177,6 @@ Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
   return getencodedchar(limdfsresources->encseq,pos,readmode);
 }
 
-Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound)
-{
-  if (limdfsresources->genericindex->withesa)
-  {
-    return rightbound;
-  }
-  return rightbound - 1;
-}
-
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound)
 {
