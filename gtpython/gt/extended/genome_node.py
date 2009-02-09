@@ -73,6 +73,10 @@ class GenomeNode(object):
     return gtlib.gt_genome_node_get_filename(self.gn)
   filename = property(get_filename)
 
+  def get_line_number(self):
+    return gtlib.gt_genome_node_get_line_number(self.gn)
+  line_number = property(get_line_number)
+
   def accept(self, visitor):
     err = Error()
     rval = gtlib.gt_genome_node_accept(self.gn, visitor, err)
@@ -80,17 +84,19 @@ class GenomeNode(object):
       gterror(err)
 
   def register(cls, gtlib):
-    from ctypes import c_char_p, c_ulong, c_int, c_void_p
+    from ctypes import c_char_p, c_ulong, c_int, c_void_p, c_uint
     gtlib.gt_genome_node_get_filename.restype = c_char_p
     gtlib.gt_genome_node_get_filename.argtypes = [c_void_p]
     gtlib.gt_genome_node_get_start.restype = c_ulong
     gtlib.gt_genome_node_get_start.argtypes = [c_void_p]
     gtlib.gt_genome_node_get_end.restype = c_ulong
     gtlib.gt_genome_node_get_end.argtypes = [c_void_p]
-
     gtlib.gt_genome_node_get_seqid.argtypes = [c_void_p]
     gtlib.gt_genome_node_get_seqid.restype = Str
-
+    gtlib.gt_genome_node_get_filename.argtypes = [c_void_p]
+    gtlib.gt_genome_node_get_filename.restype = c_char_p
+    gtlib.gt_genome_node_get_line_number.argtypes = [c_void_p]
+    gtlib.gt_genome_node_get_line_number.restype = c_uint
     gtlib.gt_genome_node_accept.restype = c_int
     gtlib.gt_genome_node_accept.argtypes = [c_void_p, GFF3Visitor, Error]
   register = classmethod(register)
