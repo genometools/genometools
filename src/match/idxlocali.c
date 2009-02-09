@@ -74,6 +74,7 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
                                          true,
                                          0,
                                          0,
+                                         true, /* keepexpandedonstack */
                                          showmatch,
                                          NULL, /* processmatch info */
                                          NULL, /* processresult */

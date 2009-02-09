@@ -643,6 +643,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                            tageratoroptions->nowildcards,
                                            tageratoroptions->maxintervalwidth,
                                            maxpathlength,
+                                           false, /* keepexpandedonstack */
                                            processmatch,
                                            processmatchinfooffline,
                                            tageratoroptions->docompare

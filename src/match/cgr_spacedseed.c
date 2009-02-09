@@ -242,6 +242,7 @@ int matchspacedseed(bool withesa,
                            true,
                            0,
                            (unsigned long) INTWORDSIZE,
+                           false, /* keepexpandedonstack */
                            showmatch,
                            NULL, /* processmatch info */
                            NULL, /* processresult */

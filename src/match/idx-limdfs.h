@@ -45,6 +45,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
                                     unsigned long maxintervalwidth,
                                     unsigned long maxpathlength,
+                                    bool keepexpandedonstack,
                                     Processmatch processmatch,
                                     void *processmatchinfo,
                                     Processresult processresult,
@@ -90,9 +91,6 @@ unsigned long genericmstats(const Limdfsresources *limdfsresources,
 bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
                                     unsigned long patternlength);
-
-Seqpos bound2startpos(const Limdfsresources *limdfsresources,
-                      Seqpos bound,unsigned long matchlength);
 
 Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
                            Seqpos pos,
