@@ -28,6 +28,7 @@ class FeatureNode(GenomeNode):
   def create_from_ptr(cls, node_ptr, newref=False):
     fn = GenomeNode.__new__(cls, node_ptr, newref)
     fn.gn = node_ptr
+    fn._as_parameter_ = fn.gn
     fn.attribs = {}
     fn.update_attrs()
     return fn
