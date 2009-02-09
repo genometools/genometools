@@ -25,6 +25,7 @@
 #include "core/option.h"
 #include "core/splitter.h"
 #include "core/undef.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
 #include "extended/add_introns_stream.h"
@@ -33,7 +34,8 @@
 #include "extended/gtf_in_stream.h"
 #include "extended/gff3_out_stream.h"
 #include "extended/sort_stream.h"
-#include "annotationsketch/canvas.h"
+#include "annotationsketch/block.h"
+#include "annotationsketch/canvas_api.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index_memory_api.h"
@@ -47,7 +49,8 @@ typedef struct {
   bool pipe,
        verbose,
        addintrons,
-       showrecmaps;
+       showrecmaps,
+       flattenfiles;
   GtStr *seqid, *format, *stylefile, *input;
   unsigned long start,
                 end;
@@ -94,6 +97,12 @@ static OPrval parse_options(int *parsed_args,
   /* -pipe */
   option = gt_option_new_bool("pipe", "use pipe mode (i.e., show all gff3 "
                            "features on stdout)", &arguments->pipe, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -flattenfiles */
+  option = gt_option_new_bool("flattenfiles", "do not group tracks by source "
+                              "file name and remove file names from track "
+                              "description", &arguments->flattenfiles, false);
   gt_option_parser_add_option(op, option);
 
   /* -force */
@@ -186,6 +195,16 @@ static OPrval parse_options(int *parsed_args,
   gt_option_parser_delete(op);
 
   return oprval;
+}
+
+/* this track selector function is used to disregard file names in track
+   identifiers */
+static void flattened_file_track_selector(GtBlock *block, GtStr *result,
+                                   GT_UNUSED void *data)
+{
+  gt_assert(block && result);
+  gt_str_reset(result);
+  gt_str_append_cstr(result, gt_block_get_type(block));
 }
 
 int gt_sketch(int argc, const char **argv, GtError *err)
@@ -361,6 +380,9 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     /* create and write image file */
     if (!(d = gt_diagram_new(features, seqid, &qry_range, sty, err)))
       had_err = -1;
+    if (!had_err && arguments.flattenfiles)
+      gt_diagram_set_track_selector_func(d, flattened_file_track_selector,
+                                         NULL);
     if (had_err || !(l = gt_layout_new(d, arguments.width, sty, err)))
       had_err = -1;
     if (!had_err)
