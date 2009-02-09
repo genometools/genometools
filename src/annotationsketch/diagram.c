@@ -38,6 +38,8 @@
 
 /* used to index non-multiline-feature blocks */
 #define UNDEF_REPR               (void*)0x0DEFD
+/* used to separate a filename from the type in a track name */
+#define FILENAME_TYPE_SEPARATOR  '|'
 
 struct GtDiagram {
   /* GtBlock lists indexed by track keys */
@@ -490,10 +492,22 @@ static int visit_child(GtGenomeNode* gn, void *nti,
   return 0;
 }
 
-static const char* default_track_selector(GtBlock *block, GT_UNUSED void *data)
+static void default_track_selector(GtBlock *block, GtStr *result,
+                                   GT_UNUSED void *data)
 {
-  gt_assert(block);
-  return gt_block_get_type(block);
+  GtGenomeNode *top;
+  char *basename;
+  gt_assert(block && result);
+  gt_str_reset(result);
+  top = (GtGenomeNode*) gt_block_get_top_level_feature(block);
+  /* we take the basename of the filename to have nicer output in the
+     generated graphic. this might lead to ``collapsed'' tracks, if two files
+     with different paths have the same basename. */
+  basename = gt_basename(gt_genome_node_get_filename(top));
+  gt_str_append_cstr(result, basename);
+  gt_free(basename);
+  gt_str_append_char(result, FILENAME_TYPE_SEPARATOR);
+  gt_str_append_cstr(result, gt_block_get_type(block));
 }
 
 /* Create lists of all GtBlocks in the diagram. */
@@ -503,7 +517,9 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
   NodeInfoElement *ni = (NodeInfoElement*) value;
   GtDiagram *diagram = (GtDiagram*) data;
   GtBlock *block = NULL;
+  GtStr *trackid_str;
   unsigned long i = 0;
+  trackid_str = gt_str_new();
   for (i = 0; i < gt_str_array_size(ni->types); i++) {
     const char *type;
     unsigned long j;
@@ -516,7 +532,6 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
     for (j=0; j<gt_array_size(type_struc->blocktuples); j++)
     {
       GtBlockTuple *bt;
-      const char *tkey;
       bt  = *(GtBlockTuple**) gt_array_get(type_struc->blocktuples, j);
       if (bt->rep == UNDEF_REPR && type_struc->must_merge)
       {
@@ -535,14 +550,17 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
         } else block = bt->block;
       }
       gt_assert(block);
+      gt_str_reset(trackid_str);
       /* execute hook for track selector function */
-      tkey = diagram->select_func(block, diagram->ptr);
-      list = (GtArray*) gt_hashmap_get(diagram->blocks, tkey);
-      if (!list)
+      diagram->select_func(block, trackid_str, diagram->ptr);
+
+      if (!(list = (GtArray*) gt_hashmap_get(diagram->blocks,
+                                             gt_str_get(trackid_str))))
       {
         list = gt_array_new(sizeof (GtBlock*));
-        gt_hashmap_add(diagram->blocks, (void*) gt_cstr_dup(tkey), list);
-      }
+        gt_hashmap_add(diagram->blocks, gt_cstr_dup(gt_str_get(trackid_str)),
+                       list);
+      };
       gt_assert(list);
       gt_array_add(list, block);
       gt_free(bt);
@@ -554,6 +572,7 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
   gt_hashmap_delete(ni->type_index);
   gt_str_array_delete(ni->types);
   gt_free(ni);
+  gt_str_delete(trackid_str);
   return 0;
 }
 
@@ -579,7 +598,9 @@ static void traverse_genome_nodes(GtFeatureNode *gn,
 static void blocklist_delete(void *value)
 {
   unsigned long i;
-  GtArray *a = (GtArray*) value;
+  GtArray *a;
+  if (!value) return;
+  a = (GtArray*) value;
   for (i = 0; i < gt_array_size(a); i++)
     gt_block_delete(*(GtBlock**) gt_array_get(a, i));
   gt_array_delete(a);
@@ -590,6 +611,8 @@ int gt_diagram_build(GtDiagram *diagram)
   unsigned long i = 0;
   int had_err = 0;
   NodeTraverseInfo nti;
+
+  gt_assert(diagram);
   nti.diagram = diagram;
 
   /* initialise caches */
@@ -601,7 +624,8 @@ int gt_diagram_build(GtDiagram *diagram)
   {
     gt_hashmap_reset(diagram->nodeinfo);
     /* do node traversal for each root feature */
-    for (i = 0; i < gt_array_size(diagram->features); i++) {
+    for (i = 0; i < gt_array_size(diagram->features); i++)
+    {
       GtFeatureNode *current_root = *(GtFeatureNode**)
                                            gt_array_get(diagram->features,i);
       traverse_genome_nodes(current_root, &nti);

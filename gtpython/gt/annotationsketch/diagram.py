@@ -15,7 +15,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from ctypes import CFUNCTYPE, c_char_p, c_void_p
+from ctypes import CFUNCTYPE, c_char_p, c_void_p, c_int
 from gt.dlload import gtlib
 from gt.annotationsketch.block import Block
 from gt.annotationsketch.canvas import Canvas
@@ -25,9 +25,10 @@ from gt.annotationsketch.style import Style
 from gt.core.array import Array
 from gt.core.error import Error, gterror
 from gt.core.gtrange import Range
+from gt.core.gtstr import Str
 from gt.extended.feature_node import FeatureNode
 
-TrackSelectorFunc = CFUNCTYPE(c_char_p, c_void_p, c_void_p)
+TrackSelectorFunc = CFUNCTYPE(c_void_p, c_void_p, c_void_p, c_void_p)
 
 class Diagram:
   def from_array(arr, rng, style):
@@ -67,12 +68,13 @@ class Diagram:
       pass
 
   def set_track_selector_func(self, func):
-    def trackselector(block_ptr, data_ptr):
+    def trackselector(block_ptr, string_ptr, data_ptr):
       b = Block(block_ptr)
+      string = Str(string_ptr)
       ret = func(b)
       if not ret:
         gterror("Track selector callback function must return a string!")
-      return ret
+      string.append_cstr(ret)
     self.tsf_cb = TrackSelectorFunc(trackselector)
     self.tsf = trackselector
     gtlib.gt_diagram_set_track_selector_func(self.diagram, self.tsf_cb)

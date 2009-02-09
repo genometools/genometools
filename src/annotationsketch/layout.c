@@ -39,9 +39,6 @@
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 
-/* used to separate a filename from the type in a track name */
-#define FILENAME_TYPE_SEPARATOR  '|'
-
 typedef struct {
   GtTextWidthCalculator *twc;
   GtLayout *layout;
@@ -82,15 +79,6 @@ static int add_tracklines(GT_UNUSED void *key, void *value,
   return 0;
 }
 
-static GtStr* track_key_new(const char *filename, const char *type)
-{
-  GtStr *track_key;
-  track_key = gt_str_new_cstr(filename);
-  gt_str_append_char(track_key, FILENAME_TYPE_SEPARATOR);
-  gt_str_append_cstr(track_key, type);
-  return track_key;
-}
-
 static int layout_tracks(void *key, void *value, void *data,
                          GT_UNUSED GtError *err)
 {
@@ -98,7 +86,6 @@ static int layout_tracks(void *key, void *value, void *data,
   GtTrack *track;
   GtLayoutTraverseInfo *lti = (GtLayoutTraverseInfo*) data;
   GtArray *list = (GtArray*) value;
-  char *filename;
   GtStr *gt_track_key;
   const char *type = key;
   GtBlock *block;
@@ -108,15 +95,9 @@ static int layout_tracks(void *key, void *value, void *data,
 
   /* to get a deterministic layout, we sort the GtBlocks for each type */
   gt_array_sort_stable(list, blocklist_block_compare);
-  /* we take the basename of the filename to have nicer output in the
-     generated graphic. this might lead to ``collapsed'' tracks, if two files
-     with different paths have the same basename. */
+
   block = *(GtBlock**) gt_array_get(list, 0);
-  filename = gt_basename(gt_genome_node_get_filename(
-                                     (GtGenomeNode*)
-                                       gt_block_get_top_level_feature(block)));
-  gt_track_key = track_key_new(filename, type);
-  gt_free(filename);
+  gt_track_key = gt_str_new_cstr((char*) key);
 
   if (!gt_style_get_bool(lti->layout->style, "format", "split_lines", &split,
                          NULL))

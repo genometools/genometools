@@ -27,7 +27,7 @@ module GT
                                     "const GtRange*, GtStyle*, GtError*)"
   extern "GtDiagram* gt_diagram_new_from_array(GtArray*, " + \
                                                "const GtRange*, GtStyle*)"
-  extern "void gt_diagram_set_track_selector_func(GtDiagram*, void*)"
+  extern "void gt_diagram_set_track_selector_func(GtDiagram*, void*, void*)"
   extern "void gt_diagram_add_custom_track(GtDiagram*, GtCustomTrack*)"
   extern "void gt_diagram_delete(GtDiagram*)"
 
@@ -71,16 +71,17 @@ module GT
     end
 
     def set_track_selector_func(proc)
-      @tsf = DL.callback('PPP') do |b_ptr, data_ptr|
+      @tsf = DL.callback('0PPP') do |b_ptr, string_ptr, data_ptr|
                b = GT::Block.new(b_ptr)
+               string = GT::Str.new(string_ptr)
                s = proc.call(b, data_ptr)
                if (s.nil?) then
                  GT::gterror("Track selector callback must return a string!")
                else
-                 s.to_ptr
+                 string.append_cstr(s)
                end
              end
-      GT.gt_diagram_set_track_selector_func(@diagram, @tsf)
+      GT.gt_diagram_set_track_selector_func(@diagram, @tsf, GT::NULL)
     end
 
     def add_custom_track(ct)

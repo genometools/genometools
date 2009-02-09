@@ -24,6 +24,7 @@ module GT
   extern "GtStr* gt_str_new_cstr(const char*)"
   extern "void* gt_str_get_mem(const GtStr*)"
   extern "void gt_str_append_str(GtStr*, const GtStr*)"
+  extern "void gt_str_append_cstr(GtStr*, const char*)"
   # we declare the return value as const char* instead of char*, because
   # otherwise dl/import wrongly assumes that it has responsibility for the
   # returned memory region (which leads to a double free())
@@ -33,16 +34,24 @@ module GT
 
   class Str
     def initialize(cstr)
-      if cstr
+      if cstr.is_a?(String) then
         @str = GT.gt_str_new_cstr(cstr)
+        @str.free = GT::symbol("gt_str_delete", "0P")
+      elsif cstr.is_a?(DL::PtrData) then
+        @str = cstr
       else
         @str = GT.gt_str_new()
+        @str.free = GT::symbol("gt_str_delete", "0P")
       end
-      @str.free = GT::symbol("gt_str_delete", "0P")
+
     end
 
     def append_str(str)
       GT.gt_str_append_str(@str, str)
+    end
+
+    def append_cstr(cstr)
+      GT.gt_str_append_cstr(@str, cstr)
     end
 
     def to_s

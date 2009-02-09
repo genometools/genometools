@@ -43,6 +43,9 @@ class Str:
     return obj._as_parameter_
   from_param = classmethod(from_param)
 
+  def append_cstr(self, string):
+    gtlib.gt_str_append_cstr(self.strg, string)
+
   def length(self):
     return gtlib.gt_str_length(self.strg)
 
@@ -54,6 +57,7 @@ class Str:
     gtlib.gt_str_new.restype  = c_void_p
     gtlib.gt_str_new_cstr.restype  = c_void_p
     gtlib.gt_str_new_cstr.argtypes = [c_char_p]
+    gtlib.gt_str_append_cstr.argtypes = [c_void_p, c_char_p]
     gtlib.gt_str_get.restype  = c_char_p
     gtlib.gt_str_get_mem.restype  = c_void_p
     gtlib.gt_str_length.restype = c_ulong
