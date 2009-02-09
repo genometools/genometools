@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c)      2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +27,7 @@ module GT
   extern "unsigned long gt_genome_node_get_start(GtGenomeNode*)"
   extern "unsigned long gt_genome_node_get_end(GtGenomeNode*)"
   extern "const char* gt_genome_node_get_filename(GtGenomeNode*)"
+  extern "unsigned int gt_genome_node_get_line_number(GtGenomeNode*)"
   extern "void gt_genome_node_delete(GtGenomeNode*)"
 
   class GenomeNode
@@ -46,6 +48,10 @@ module GT
 
     def get_filename
       GT.gt_genome_node_get_filename(@genome_node)
+    end
+
+    def get_line_number
+      GT.gt_genome_node_get_line_number(@genome_node)
     end
 
     def to_ptr
