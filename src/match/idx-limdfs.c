@@ -278,9 +278,8 @@ static unsigned long getparentidx(const Limdfsresources *limdfsresources)
   const ArrayLcpintervalwithinfo *stack = &limdfsresources->stack;
 
   gt_assert(limdfsresources->parentptr >= stack->spaceLcpintervalwithinfo &&
-                limdfsresources->parentptr <
-                    stack->spaceLcpintervalwithinfo +
-                    stack->nextfreeLcpintervalwithinfo);
+            limdfsresources->parentptr < stack->spaceLcpintervalwithinfo +
+                                         stack->nextfreeLcpintervalwithinfo);
   return (unsigned long) (limdfsresources->parentptr -
                           stack->spaceLcpintervalwithinfo);
 }
@@ -854,6 +853,8 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     Indexbounds child;
     Uchar inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
 
+    /* reset as parentptr may have been moved */
+    parent = &limdfsresources->parentptr->lcpitv; 
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
@@ -970,6 +971,8 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
   {
     Indexbounds child;
 
+    /* reset as parentptr may have been moved */
+    parent = &limdfsresources->parentptr->lcpitv; 
     child.inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
