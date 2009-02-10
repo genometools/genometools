@@ -20,6 +20,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/range.h"
+#include "core/unused_api.h"
 #include "extended/reverse.h"
 #include "ltr/ltrelement.h"
 
@@ -37,7 +38,7 @@ unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 
 char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
                                  GtStrand strand, const char *seq,
-                                 unsigned long slen, GtError *err)
+                                 GT_UNUSED unsigned long slen, GtError *err)
 {
   char *out;
   unsigned long len;
