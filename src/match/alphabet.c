@@ -638,6 +638,30 @@ void printfsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
   fprintfsymbolstring(stdout,alpha,w,wlen);
 }
 
+static char converttoprettysymbol(const Alphabet *alpha,Uchar currentchar)
+{
+  char ret = '\0';
+  if (alpha == NULL)
+  {
+    ret = (char) currentchar;
+  } else
+  {
+    if (currentchar == WILDCARD)
+    {
+      ret = (char) alpha->wildcardshow;
+    } else
+    {
+      if (currentchar != SEPARATOR)
+      {
+        gt_assert((unsigned int) currentchar < alpha->mapsize-1);
+        ret = (char) alpha->characters[(int) currentchar];
+      }
+    }
+  }
+  gt_assert(ret != '\0');
+  return ret;
+}
+
 void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
                           const Uchar *w,unsigned long wlen)
 {
@@ -645,39 +669,19 @@ void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
 
   for (i = 0; i < wlen; i++)
   {
-    buffer[i] = (int) alpha->characters[(int) w[i]];
+    buffer[i] = converttoprettysymbol(alpha, (int) w[i]);
   }
   buffer[wlen] = '\0';
 }
 
 void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
 {
-  if (alpha == NULL)
-  {
-    (void) putc((int) currentchar,fpout);
-  } else
-  {
-    if (currentchar == (Uchar) WILDCARD)
-    {
-      (void) putc((int) alpha->wildcardshow,fpout);
-    } else
-    {
-      if (currentchar == (Uchar) SEPARATOR)
-      {
-        (void) fprintf(fpout,">\n");
-      } else
-      {
-        gt_assert((unsigned int) currentchar < alpha->mapsize-1);
-        (void) putc((int) alpha->characters[(int) currentchar],fpout);
-      }
-    }
-  }
+  (void) putc((int) converttoprettysymbol(alpha, currentchar), fpout);
 }
 
 Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar)
 {
-   gt_assert(currentchar < alpha->mapsize-1);
-   return alpha->characters[currentchar];
+   return (Uchar) converttoprettysymbol(alpha, currentchar);
 }
 
 static unsigned int removelowercaseproteinchars(Uchar *domainbuf,
