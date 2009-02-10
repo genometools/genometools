@@ -63,20 +63,20 @@ struct AbstractDfstransformer
                           void *dfsconstinfo);
   void (*fullmatchLimdfsstate)(Limdfsresult *limdfsresult,
                                DECLAREPTRDFSSTATE(aliascolumn),
-                                       Seqpos left,
-                                       Seqpos right,
-                                       Seqpos width,
-                                       unsigned long currentdepth,
-                                       void *dfsconstinfo);
+                               Seqpos left,
+                               Seqpos right,
+                               Seqpos width,
+                               unsigned long currentdepth,
+                               void *dfsconstinfo);
   void (*nextLimdfsstate)(const void *dfsconstinfo,
-                       DECLAREPTRDFSSTATE(aliasoutstate),
-                       unsigned long currentdepth,
-                       Uchar currentchar,
-                       const DECLAREPTRDFSSTATE(aliasinstate));
+                          DECLAREPTRDFSSTATE(aliasoutstate),
+                          unsigned long currentdepth,
+                          Uchar currentchar,
+                          const DECLAREPTRDFSSTATE(aliasinstate));
   void (*inplacenextLimdfsstate)(const void *dfsconstinfo,
-                              DECLAREPTRDFSSTATE(aliasstate),
-                              unsigned long currentdepth,
-                              Uchar currentchar);
+                                 DECLAREPTRDFSSTATE(aliasstate),
+                                 unsigned long currentdepth,
+                                 Uchar currentchar);
 #ifdef SKDEBUG
   void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
                           unsigned long currentdepth,
