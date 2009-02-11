@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -66,7 +66,6 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
   GtNodeStream *gff3_in_stream = NULL,
                *add_introns_stream = NULL,
                *splice_site_info_stream = NULL;
-  GtGenomeNode *gn;
   SpliceSiteInfoArguments arguments;
   GtRegionMapping *regionmapping;
   int parsed_args, had_err = 0;
@@ -112,10 +111,7 @@ int gt_splicesiteinfo(int argc, const char **argv, GtError *err)
                                                           regionmapping);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = gt_node_stream_next(splice_site_info_stream, &gn,
-                                               err)) && gn) {
-      gt_genome_node_delete(gn);
-    }
+    had_err = gt_node_stream_pull(splice_site_info_stream, err);
   }
 
   if (!had_err) {

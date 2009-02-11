@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -67,7 +67,6 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   GFF3ValidatorArguments *arguments = tool_arguments;
   GtTypeChecker *type_checker = NULL;
   GtNodeStream *gff3_in_stream;
-  GtGenomeNode *gn;
   int had_err = 0;
 
   gt_error_check(err);
@@ -89,10 +88,8 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* pull the features through the stream and free them afterwards */
-  if (!had_err) {
-    while (!(had_err = gt_node_stream_next(gff3_in_stream, &gn, err)) && gn)
-      gt_genome_node_delete(gn);
-  }
+  if (!had_err)
+    had_err = gt_node_stream_pull(gff3_in_stream, err);
 
   if (!had_err)
     printf("input is valid GFF3\n");

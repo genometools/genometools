@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -175,7 +175,6 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                *gff3_out_stream = NULL,
                *last_stream;
   GFF3Arguments *arguments = tool_arguments;
-  GtGenomeNode *gn;
   int had_err = 0;
 
   gt_error_check(err);
@@ -245,12 +244,8 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* pull the features through the stream and free them afterwards */
-  if (!had_err) {
-    while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
-           gn) {
-      gt_genome_node_delete(gn);
-    }
-  }
+  if (!had_err)
+    had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);

@@ -216,7 +216,6 @@ int gt_sketch(int argc, const char **argv, GtError *err)
                *sort_stream = NULL,
                *last_stream;
   AnnotationSketchArguments arguments;
-  GtGenomeNode *gn = NULL;
   GtFeatureIndex *features = NULL;
   int parsed_args, had_err=0;
   const char *file, *seqid = NULL;
@@ -319,8 +318,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     feature_stream = gt_feature_stream_new(last_stream, features);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = gt_node_stream_next(feature_stream, &gn, err)) && gn)
-      gt_genome_node_delete(gn);
+    had_err = gt_node_stream_pull(feature_stream, err);
 
     gt_node_stream_delete(feature_stream);
     gt_node_stream_delete(gff3_out_stream);

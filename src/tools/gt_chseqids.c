@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -81,7 +81,6 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
 {
   GtNodeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
                *gff3_out_stream = NULL;
-  GtGenomeNode *gn;
   ChseqidsArguments arguments;
   GtStr *chseqids;
   int parsed_args, had_err = 0;
@@ -116,12 +115,8 @@ int gt_chseqids(int argc, const char **argv, GtError *err)
   }
 
   /* pull the features through the stream and free them afterwards */
-  if (!had_err) {
-    while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
-           gn) {
-      gt_genome_node_delete(gn);
-    }
-  }
+  if (!had_err)
+    had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
