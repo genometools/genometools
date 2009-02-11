@@ -88,7 +88,7 @@ HTML_HEADER = <<END
   <ul class="submenu">
     <li><a href="annotationsketch.html#collapsing">Collapsing</a></li>
     <li><a href="annotationsketch.html#styles">Styles</a></li>
-    <li><a id="current" href="trackselectors.html">Track assignment</a></li>
+    <li><a href="trackselectors.html">Track assignment</a></li>
     <li><a href="customtracks.html">Custom tracks</a></li>
     <li><a href="annotationsketch.html#gtsketch">The <tt>gt sketch</tt> tool</a></li>
     <li><a href="examples.html">Code examples</a></li>
