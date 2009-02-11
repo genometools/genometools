@@ -189,7 +189,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                  gt_lua_serializer_unit_test);
-  gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
+/*  gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test); */
   gt_hashmap_add(unit_tests, "PPT module", gt_ppt_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);

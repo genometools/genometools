@@ -114,17 +114,18 @@ if $gttestdata then
     Name "gt ltrdigest D. melanogaster chromosome #{chr} basic test w/ RT"
     Keywords "gt_ltrdigest"
     Test do
-      run_test "#{$bin}gt ltrdigest -threads 2 -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm --  #{$gttestdata}/ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{$gttestdata}/ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
-       :retval => 0, :maxtime => 2000
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz"
+      run_test "#{$bin}gt ltrdigest -threads 2 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}/ltrdigest/hmms/RVT_1_fs.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
       run "diff #{$last_stdout} #{$gttestdata}/ltrdigest/#{chr}_ref.gff3"
     end
   else
     Name "gt ltrdigest D. mel. chromosome #{chr} basic test, no HMM"
     Keywords "gt_ltrdigest"
     Test do
-        run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}/ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{$gttestdata}/ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
-       :retval => 0, :maxtime => 500
-        run "diff #{$last_stdout} #{$gttestdata}/ltrdigest/#{chr}_ref_noHMM.gff3"
+      run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}/ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz"
+      run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}/ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
+     :retval => 0, :maxtime => 500
+      run "diff #{$last_stdout} #{$gttestdata}/ltrdigest/#{chr}_ref_noHMM.gff3"
     end
   end
 end

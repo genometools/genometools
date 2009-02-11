@@ -23,6 +23,7 @@
 #include "core/unused_api.h"
 #include "extended/reverse.h"
 #include "ltr/ltrelement.h"
+#include "match/alphadef.h"
 
 unsigned long gt_ltrelement_length(GtLTRElement *e)
 {
@@ -37,19 +38,37 @@ unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 }
 
 char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
-                                 GtStrand strand, const char *seq,
-                                 GT_UNUSED unsigned long slen, GtError *err)
+                                         GtStrand strand, Encodedsequence *seq,
+                                         Seqinfo *seqinfo, GtError *err)
 {
   char *out;
-  unsigned long len;
+  Uchar *symbolstring;
+  const Alphabet *alpha;
+  Encodedsequencescanstate *ess;
+  unsigned long len, i;
 
-  gt_assert(seq && end >= start && end <= slen);
-
+  gt_assert(seq && end >= start);
   gt_error_check(err);
 
+  ess = newEncodedsequencescanstate();
+  alpha = getencseqAlphabet(seq);
   len = end - start + 1;
-  out = gt_calloc(len+1, sizeof (char));
-  memcpy(out, seq+start, sizeof (char) * len);
+
+  out          = gt_malloc((len + 1) * sizeof (char));
+  symbolstring = gt_malloc((len + 1) * sizeof (Uchar));
+
+  initEncodedsequencescanstate(ess, seq, Forwardmode,
+                               seqinfo->seqstartpos + start);
+  for (i=0;i<len;i++)
+  {
+    symbolstring[i] = sequentialgetencodedchar(seq, ess,
+                                               seqinfo->seqstartpos + start + i,
+                                               Forwardmode);
+  }
+  sprintfsymbolstring(out, alpha, symbolstring, len);
+  gt_free(symbolstring);
+  freeEncodedsequencescanstate(&ess);
+
   if (strand == GT_STRAND_REVERSE)
     (void) gt_reverse_complement(out, len, err);
   out[len]='\0';
@@ -126,6 +145,7 @@ int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
   return ret;
 }
 
+/*
 int gt_ltrelement_unit_test(GtError *err)
 {
   int had_err = 0;
@@ -189,3 +209,4 @@ int gt_ltrelement_unit_test(GtError *err)
 
   return had_err;
 }
+*/

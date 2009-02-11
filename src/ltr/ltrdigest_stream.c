@@ -335,20 +335,17 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       unsigned long length;
       const Alphabet *alpha;
 
-      alpha = getencseqAlphabet(ls->encseq);
-      length  = gt_ltrelement_length(&ls->element);
-      seq          = gt_calloc(length+1,  sizeof(char));
-      symbolstring = gt_calloc(length+1, sizeof(Uchar));
+      alpha        = getencseqAlphabet(ls->encseq);
+      length       = gt_ltrelement_length(&ls->element);
+      seq          = gt_malloc((length+1) * sizeof(char));
+      symbolstring = gt_malloc((length+1) * sizeof(Uchar));
       getencseqSeqinfo(&seqinfo, ls->encseq, seqid);
       encseqextract(symbolstring,
                     ls->encseq,
                     seqinfo.seqstartpos + (ls->element.leftLTR_5 - 1),
                     seqinfo.seqstartpos + (ls->element.leftLTR_5 - 1) + length);
       sprintfsymbolstring(seq, alpha, symbolstring, length);
-      free(symbolstring);
-
-      /*printf("seq%lu (%lu-%lu len %lu, starting from %lu):\nseq\n%s\n", seqid, ls->element.leftLTR_5,
-             ls->element.rightLTR_3, length,  seqinfo.seqstartpos, seq); */
+      gt_free(symbolstring);
 
       if (ls->element.rightLTR_3 <= seqinfo.seqlength)
       {
