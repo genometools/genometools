@@ -84,7 +84,17 @@ HTML_HEADER = <<END
 <li><a href="../design.html">Design</a></li>
 <li><a href="../libgenometools.html">C API</a></li>
 <li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
-<li><a id="current" href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+  <ul class="submenu">
+    <li><a href="annotationsketch.html#collapsing">Collapsing</a></li>
+    <li><a href="annotationsketch.html#styles">Styles</a></li>
+    <li><a id="current" href="trackselectors.html">Track assignment</a></li>
+    <li><a href="customtracks.html">Custom tracks</a></li>
+    <li><a href="annotationsketch.html#gtsketch">The <tt>gt sketch</tt> tool</a></li>
+    <li><a href="examples.html">Code examples</a></li>
+    <li><a id="current" href="cgi-bin/annotationsketch_demo.cgi">Try it online</a></li>
+    <li><a href="libgenometools.html">API reference</a></li>
+  </ul>
 <li><a href="../license.html">License</a></li>
 </ul>
 </div>

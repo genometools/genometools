@@ -48,6 +48,13 @@ img {
   color: gray;
   background: rgb(90%, 90%, 20%);
 }
+#menu ul.submenu li a {
+  font-size: small;
+  background: rgb(70%, 70%, 90%);
+}
+#menu ul.submenu li a:hover {
+  color: black;
+}
 #main {
   margin-left: 220px;
   margin-right: 10%;
