@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -38,6 +38,14 @@ GtNodeStream* gt_node_stream_ref(GtNodeStream *node_stream);
 int           gt_node_stream_next(GtNodeStream *node_stream,
                                   GtGenomeNode **genome_node,
                                   GtError *err);
+/* Calls <gt_node_stream_next()> on <node_stream> repeatedly until the
+   <node_stream> is exhausted (0 is returned) or an error occurs (-1 is returned
+   and <err> is set). All retrieved <GtGenomeNode>s are deleted automatically
+   with calls to <gt_genome_node_delete()>.
+   This method is basically a convenience method which simplifies calls to
+   <gt_node_stream_next()> in a loop where retrieved <GtGenomeNode>s are not
+   processed any further. */
+int           gt_node_stream_pull(GtNodeStream *node_stream, GtError *err);
 /* Return <true> if <node_stream> is a sorted stream, <false> otherwise. */
 bool          gt_node_stream_is_sorted(GtNodeStream *node_stream);
 /* Decrease the reference count for <node_stream> or delete it, if this was the
