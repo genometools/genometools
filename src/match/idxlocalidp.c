@@ -12,12 +12,14 @@
                                    ? lci->scorevalues.mismatchscore\
                                    : lci->scorevalues.matchscore)
 
+typedef long Scoretype;
+
 typedef struct
 {
-  long matchscore,   /* must be positive */
-       mismatchscore,/* must be negative */
-       gapstart,     /* must be negative */
-       gapextend;    /* must be negative */
+  Scoretype matchscore,   /* must be positive */
+            mismatchscore,/* must be negative */
+            gapstart,     /* must be negative */
+            gapextend;    /* must be negative */
 } Scorevalues;
 
 typedef struct
@@ -31,17 +33,20 @@ typedef struct
 
 typedef struct
 {
-  long repcell,
-       inscell,
-       delcell,
-       bestcell;
+#undef AFFINE
+#ifdef AFFINE
+  Scoretype repcell,
+            inscell,
+            delcell;
+#endif
+  Scoretype bestcell;
 } Matrixvalue;
 
 typedef struct
 {
   Matrixvalue *colvalues;
-  unsigned long lenval;
-  unsigned long pprefixlen,
+  unsigned long lenval,
+                pprefixlen,
                 maxvalue;
 } Column;
 
@@ -49,21 +54,23 @@ typedef struct
 {
   Limdfsstatus status;
   unsigned long qseqendpos;
-  long alignmentscore;
+  Scoretype alignmentscore;
 } Idxlocaliresult;
 
-static inline long max2 (long a,long b)
+#ifdef AFFINE
+static inline Scoretype max2 (Scoretype a,Scoretype b)
 {
   return (a < b) ? b : a;
 }
 
-static inline long max3 (long a,long b,long c)
+static inline Scoretype max3 (Scoretype a,Scoretype b,Scoretype c)
 {
-  long temp;
+  Scoretype temp;
 
   temp = (a < b) ? b : a;
   return (temp < c) ? c : temp;
 }
+#endif
 
 #ifdef SKDEBUG
 static void showscorecolumn(const Column *column,
@@ -115,6 +122,13 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
 #define ATADDRESS(S,COL)  /* Nothing */
 #endif
 
+#define UPDATEMAX(EXPR)\
+        temp = EXPR;\
+        if (temp > outcol->colvalues[i].bestcell)\
+        {\
+          outcol->colvalues[i].bestcell = temp;\
+        }
+
 static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
                           Uchar dbchar)
 {
@@ -128,22 +142,38 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
     outcol->lenval = lci->maxcollen;
     ATADDRESS("",outcol);
   }
+#ifdef AFFINE
   outcol->colvalues[0].repcell = MINUSINFTY;
   outcol->colvalues[0].inscell = lci->scorevalues.gapstart +
                                  lci->scorevalues.gapextend;
   outcol->colvalues[0].delcell = MINUSINFTY;
+#endif
   outcol->colvalues[0].bestcell = MINUSINFTY;
   outcol->maxvalue = 0;
   outcol->pprefixlen = 0;
   for (i = 1UL; i <= lci->querylength; i++)
   {
+#ifdef AFFINE
     outcol->colvalues[i].delcell = MINUSINFTY;
     outcol->colvalues[i].inscell = MINUSINFTY;
     outcol->colvalues[i].repcell = REPLACEMENTSCORE(dbchar,lci->query[i-1]);
     outcol->colvalues[i].bestcell = max2(outcol->colvalues[i].delcell,
                                          outcol->colvalues[i].repcell);
+#else
+    Scoretype temp;
+
+    outcol->colvalues[i].bestcell = REPLACEMENTSCORE(dbchar,lci->query[i-1]);
+    if (outcol->colvalues[i].bestcell < lci->scorevalues.gapextend)
+    {
+      outcol->colvalues[i].bestcell = lci->scorevalues.gapextend;
+    }
+    if (outcol->colvalues[i-1].bestcell > 0)
+    {
+      UPDATEMAX(outcol->colvalues[i-1].bestcell + lci->scorevalues.gapextend);
+    }
+#endif
     if (outcol->colvalues[i].bestcell > 0 &&
-        outcol->colvalues[i].bestcell > (long) outcol->maxvalue)
+        outcol->colvalues[i].bestcell > (Scoretype) outcol->maxvalue)
     {
       outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestcell;
       outcol->pprefixlen = i;
@@ -157,6 +187,9 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                         const Column *incol)
 {
   unsigned long i;
+#ifndef AFFINE
+  Scoretype temp;
+#endif
 
   gt_assert(outcol != incol);
   gt_assert(outcol->colvalues != incol->colvalues);
@@ -170,6 +203,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
     ATADDRESS("",outcol);
   }
   gt_assert(outcol->lenval >= lci->querylength+1);
+#ifdef AFFINE
   outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = MINUSINFTY;
   if (incol->colvalues[0].inscell > 0)
   {
@@ -199,10 +233,14 @@ static void nextcolumn (const Limdfsconstinfo *lci,
   outcol->colvalues[0].bestcell = max3 (outcol->colvalues[0].repcell,
                                         outcol->colvalues[0].inscell,
                                         outcol->colvalues[0].delcell);
-  outcol->maxvalue = (unsigned long) max2 (0,outcol->colvalues[0].bestcell);
+#else
+  outcol->colvalues[0].bestcell = MINUSINFTY;
+#endif
+  outcol->maxvalue = 0;
   outcol->pprefixlen = 0;
   for (i = 1UL; i <= lci->querylength; i++)
   {
+#ifdef AFFINE
     if (incol->colvalues[i-1].bestcell > 0)
     {
       outcol->colvalues[i].repcell = incol->colvalues[i-1].bestcell +
@@ -264,8 +302,24 @@ static void nextcolumn (const Limdfsconstinfo *lci,
     outcol->colvalues[i].bestcell = max3 (outcol->colvalues[i].repcell,
                                           outcol->colvalues[i].inscell,
                                           outcol->colvalues[i].delcell);
+#else
+    outcol->colvalues[i].bestcell = MINUSINFTY;
+    if (incol->colvalues[i].bestcell > 0)
+    {
+      UPDATEMAX(incol->colvalues[i].bestcell + lci->scorevalues.gapextend);
+    }
+    if (incol->colvalues[i-1].bestcell > 0)
+    {
+      UPDATEMAX(incol->colvalues[i-1].bestcell +
+                REPLACEMENTSCORE(dbchar,lci->query[i-1]));
+    }
+    if (outcol->colvalues[i-1].bestcell > 0)
+    {
+      UPDATEMAX(outcol->colvalues[i-1].bestcell + lci->scorevalues.gapextend);
+    }
+#endif
     if (outcol->colvalues[i].bestcell > 0 &&
-        outcol->colvalues[i].bestcell > (long) outcol->maxvalue)
+        outcol->colvalues[i].bestcell > (Scoretype) outcol->maxvalue)
     {
       outcol->maxvalue = (unsigned long) outcol->colvalues[i].bestcell;
       outcol->pprefixlen = i;
@@ -273,6 +327,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
   }
 }
 
+#ifdef AFFINE
 static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                const Uchar dbchar,
                                Column *column)
@@ -378,13 +433,14 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                           column->colvalues[i].inscell,
                                           column->colvalues[i].delcell);
     if (column->colvalues[i].bestcell > 0 &&
-        column->colvalues[i].bestcell > (long) column->maxvalue)
+        column->colvalues[i].bestcell > (Scoretype) column->maxvalue)
     {
       column->maxvalue = (unsigned long) column->colvalues[i].bestcell;
       column->pprefixlen = i;
     }
   }
 }
+#endif
 
 static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
 {
@@ -401,10 +457,10 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
   va_start (ap, alphasize);
-  lci->scorevalues.matchscore = va_arg (ap, long);
-  lci->scorevalues.mismatchscore = va_arg (ap, long);
-  lci->scorevalues.gapstart = va_arg (ap, long);
-  lci->scorevalues.gapextend = va_arg (ap, long);
+  lci->scorevalues.matchscore = va_arg (ap, Scoretype);
+  lci->scorevalues.mismatchscore = va_arg (ap, Scoretype);
+  lci->scorevalues.gapstart = va_arg (ap, Scoretype);
+  lci->scorevalues.gapextend = va_arg (ap, Scoretype);
   lci->threshold = va_arg (ap, unsigned long);
   lci->query = va_arg (ap, const Uchar *);
   lci->querylength = va_arg (ap, unsigned long);
@@ -555,6 +611,7 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
   }
 }
 
+#ifdef AFFINE
 static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
                                            DECLAREPTRDFSSTATE (aliasstate),
                                            GT_UNUSED unsigned long currentdepth,
@@ -571,6 +628,7 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
     secondcolumn (lci,column,currentchar);
   }
 }
+#endif
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
 {
@@ -587,7 +645,11 @@ const AbstractDfstransformer *locali_AbstractDfstransformer (void)
     locali_copyLimdfsstate,
     locali_fullmatchLimdfsstate,
     locali_nextLimdfsstate,
+#ifdef AFFINE
     locali_inplacenextLimdfsstate,
+#else
+    NULL,
+#endif
 #ifdef SKDEBUG
     locali_showLimdfsstate
 #endif /*  */
