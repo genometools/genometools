@@ -43,7 +43,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
 {
   char *out;
   Uchar *symbolstring;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
   Encodedsequencescanstate *ess;
   unsigned long len, i;
 

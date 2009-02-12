@@ -333,7 +333,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       Uchar *symbolstring;
       Seqinfo seqinfo;
       unsigned long length;
-      const Alphabet *alpha;
+      const SfxAlphabet *alpha;
 
       alpha        = getencseqAlphabet(ls->encseq);
       length       = gt_ltrelement_length(&ls->element);

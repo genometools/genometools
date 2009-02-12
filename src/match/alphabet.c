@@ -634,7 +634,7 @@ void printfsymbolstring(const SfxAlphabet *alpha,
   fprintfsymbolstring(stdout,alpha,w,wlen);
 }
 
-static char converttoprettysymbol(const Alphabet *alpha,Uchar currentchar)
+static char converttoprettysymbol(const SfxAlphabet *alpha,Uchar currentchar)
 {
   char ret = '\0';
   if (alpha == NULL)
@@ -658,7 +658,7 @@ static char converttoprettysymbol(const Alphabet *alpha,Uchar currentchar)
   return ret;
 }
 
-void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
+void sprintfsymbolstring(char *buffer,const SfxAlphabet *alpha,
                           const Uchar *w,unsigned long wlen)
 {
   unsigned long i;
@@ -670,7 +670,7 @@ void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
   buffer[wlen] = '\0';
 }
 
-void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
+void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,Uchar currentchar)
 {
   (void) putc((int) converttoprettysymbol(alpha, currentchar), fpout);
 }
