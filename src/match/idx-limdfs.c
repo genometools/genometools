@@ -809,11 +809,9 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
       (limdfsresources,child,limdfsresult.pprefixlen,limdfsresult.distance);
     if (limdfsresources->keepexpandedonstack)
     {
-      const ArrayLcpintervalwithinfo *stack = &limdfsresources->stack;
-
-      gt_assert(stackptr >= stack->spaceLcpintervalwithinfo &&
-                stackptr < stack->spaceLcpintervalwithinfo +
-                           stack->nextfreeLcpintervalwithinfo);
+      gt_assert(stackptr >= limdfsresources->stack.spaceLcpintervalwithinfo &&
+                stackptr < limdfsresources->stack.spaceLcpintervalwithinfo +
+                           limdfsresources->stack.nextfreeLcpintervalwithinfo);
       stackptr->lcpitv = *child;
       stackptr->keeponstack = true;
       stackptr->previousstackelem = limdfsresources->parentindex;
