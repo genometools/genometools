@@ -64,7 +64,7 @@ typedef struct
   const TageratorOptions *tageratoroptions;
   unsigned int alphasize;
   const Uchar *tagptr;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
 } Showmatchinfo;
@@ -593,7 +593,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Showmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;
-    const Alphabet *alpha;
+    const SfxAlphabet *alpha;
 
     storeonline.twlptr = storeoffline.twlptr = &twl;
     alpha = getencseqAlphabet(encseq);

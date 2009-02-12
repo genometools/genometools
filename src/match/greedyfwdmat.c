@@ -44,13 +44,13 @@ typedef struct
 typedef void (*Preprocessgmatchlength)(uint64_t,
                                        const char *,
                                        void *);
-typedef void (*Processgmatchlength)(const Alphabet *,
+typedef void (*Processgmatchlength)(const SfxAlphabet *,
                                     const Uchar *,
                                     unsigned long,
                                     unsigned long,
                                     Seqpos,
                                     void *);
-typedef void (*Postprocessgmatchlength)(const Alphabet *,
+typedef void (*Postprocessgmatchlength)(const SfxAlphabet *,
                                         uint64_t,
                                         const char *,
                                         const Uchar *,
@@ -61,7 +61,7 @@ typedef struct
 {
   const void *genericindex;
   Seqpos totallength;
-  const Alphabet *alphabet;
+  const SfxAlphabet *alphabet;
   Greedygmatchforwardfunction gmatchforward;
   Preprocessgmatchlength preprocessgmatchlength;
   Processgmatchlength processgmatchlength;
@@ -172,7 +172,7 @@ static void showunitnum(uint64_t unitnum,
   printf("\n");
 }
 
-static void showifinlengthrange(const Alphabet *alphabet,
+static void showifinlengthrange(const SfxAlphabet *alphabet,
                                 const Uchar *start,
                                 unsigned long gmatchlength,
                                 unsigned long querystart,
@@ -208,7 +208,7 @@ int findsubquerygmatchforward(const Encodedsequence *encseq,
                               const void *genericindex,
                               Seqpos totallength,
                               Greedygmatchforwardfunction gmatchforward,
-                              const Alphabet *alphabet,
+                              const SfxAlphabet *alphabet,
                               const GtStrArray *queryfilenames,
                               Definedunsignedlong minlength,
                               Definedunsignedlong maxlength,

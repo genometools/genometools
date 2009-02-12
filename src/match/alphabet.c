@@ -37,7 +37,7 @@
 
 #include "guessprot.pr"
 
- struct Alphabet                /* initial blank prevents select by skproto */
+struct SfxAlphabet                /* initial blank prevents select by skproto */
 {
   unsigned int domainsize,           /* size of domain of symbolmap */
                mapsize,              /* size of image of map, i.e. */
@@ -134,7 +134,7 @@
   \texttt{alpha}.
 */
 
-static int readsymbolmapfromlines(Alphabet *alpha,
+static int readsymbolmapfromlines(SfxAlphabet *alpha,
                                   const GtStr *mapfile,
                                   const GtStrArray *lines,
                                   GtError *err)
@@ -270,7 +270,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   \texttt{alpha}.
 */
 
-static int readsymbolmap(Alphabet *alpha,const GtStr *mapfile,GtError *err)
+static int readsymbolmap(SfxAlphabet *alpha,const GtStr *mapfile,GtError *err)
 {
   bool haserr = false;
   GtStrArray *lines;
@@ -315,12 +315,12 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
   \texttt{alpha1}.
 */
 
-Alphabet *gt_copyAlphabet(const Alphabet *alpha2)
+SfxAlphabet *gt_copyAlphabet(const SfxAlphabet *alpha2)
 {
   unsigned int i;
-  Alphabet *alpha1;
+  SfxAlphabet *alpha1;
 
-  ALLOCASSIGNSPACE(alpha1,NULL,Alphabet,(size_t) 1);
+  ALLOCASSIGNSPACE(alpha1,NULL,SfxAlphabet,(size_t) 1);
   alpha1->domainsize = alpha2->domainsize;
   alpha1->mapsize = alpha2->mapsize;
   alpha1->mappedwildcards = alpha2->mappedwildcards;
@@ -353,7 +353,7 @@ Alphabet *gt_copyAlphabet(const Alphabet *alpha2)
   \end{alltt}
 */
 
-static void assignDNAalphabet(Alphabet *alpha)
+static void assignDNAalphabet(SfxAlphabet *alpha)
 {
   alpha->wildcardshow = (Uchar) DNAWILDCARDS[0];
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
@@ -417,7 +417,7 @@ static void assignproteinsymbolmap(Uchar *symbolmap)
   the character \texttt{WILDCARD}, as defined in \texttt{chardef.h}
 */
 
-static void assignProteinalphabet(Alphabet *alpha)
+static void assignProteinalphabet(SfxAlphabet *alpha)
 {
   alpha->wildcardshow = (Uchar) PROTEINWILDCARDS[0];
   alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
@@ -431,7 +431,7 @@ static void assignProteinalphabet(Alphabet *alpha)
   assignproteinsymbolmap(alpha->symbolmap);
 }
 
-static int assignProteinorDNAalphabet(Alphabet *alpha,
+static int assignProteinorDNAalphabet(SfxAlphabet *alpha,
                                       const GtStrArray *filenametab,
                                       GtError *err)
 {
@@ -453,23 +453,23 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
   return 0;
 }
 
-void freeAlphabet(Alphabet **alpha)
+void freeSfxAlphabet(SfxAlphabet **alpha)
 {
   FREESPACE((*alpha)->mapdomain);
   FREESPACE((*alpha)->characters);
   FREESPACE(*alpha);
 }
 
-/*@null@*/ Alphabet *assigninputalphabet(bool isdna,
+/*@null@*/ SfxAlphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
                                          const GtStr *smapfile,
                                          const GtStrArray *filenametab,
                                          GtError *err)
 {
-  Alphabet *alpha;
+  SfxAlphabet *alpha;
   bool haserr = false;
 
-  ALLOCASSIGNSPACE(alpha,NULL,Alphabet,(size_t) 1);
+  ALLOCASSIGNSPACE(alpha,NULL,SfxAlphabet,(size_t) 1);
   alpha->characters = NULL;
   alpha->mapdomain = NULL;
   if (isdna)
@@ -521,29 +521,29 @@ void freeAlphabet(Alphabet **alpha)
   {
     if (alpha != NULL)
     {
-      freeAlphabet(&alpha);
+      freeSfxAlphabet(&alpha);
     }
     return NULL;
   }
   return alpha;
 }
 
-const Uchar *getsymbolmapAlphabet(const Alphabet *alpha)
+const Uchar *getsymbolmapAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->symbolmap;
 }
 
-unsigned int getnumofcharsAlphabet(const Alphabet *alpha)
+unsigned int getnumofcharsAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->mapsize-1;
 }
 
-const Uchar *getcharactersAlphabet(const Alphabet *alpha)
+const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->characters;
 }
 
-void outputalphabet(FILE *fpout,const Alphabet *alpha)
+void outputalphabet(FILE *fpout,const SfxAlphabet *alpha)
 {
   Uchar chartoshow, currentcc, previouscc = 0, firstinline = 0;
   unsigned int cnum, linenum = 0;
@@ -604,7 +604,7 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
   The output goes to the given file pointer.
  */
 
-void fprintfsymbolstring(FILE *fpout,const Alphabet *alpha,
+void fprintfsymbolstring(FILE *fpout,const SfxAlphabet *alpha,
                          const Uchar *w,unsigned long wlen)
 {
   unsigned long i;
@@ -628,12 +628,13 @@ void fprintfsymbolstring(FILE *fpout,const Alphabet *alpha,
   function showing the output on stdout.
 */
 
-void printfsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
+void printfsymbolstring(const SfxAlphabet *alpha,
+                        const Uchar *w,unsigned long wlen)
 {
   fprintfsymbolstring(stdout,alpha,w,wlen);
 }
 
-void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
+void sprintfsymbolstring(char *buffer,const SfxAlphabet *alpha,
                           const Uchar *w,unsigned long wlen)
 {
   unsigned long i;
@@ -645,7 +646,7 @@ void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
   buffer[wlen] = '\0';
 }
 
-void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
+void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,Uchar currentchar)
 {
   if (alpha == NULL)
   {
@@ -669,14 +670,14 @@ void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
   }
 }
 
-Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar)
+Uchar getprettysymbol(const SfxAlphabet *alpha,unsigned int currentchar)
 {
    gt_assert(currentchar < alpha->mapsize-1);
    return alpha->characters[currentchar];
 }
 
 static unsigned int removelowercaseproteinchars(Uchar *domainbuf,
-                                                const Alphabet *alpha)
+                                                const SfxAlphabet *alpha)
 {
   unsigned int i, j = 0;
 
@@ -713,9 +714,9 @@ static Qsortcomparereturntype comparechar(const void *a,const void *b)
   lower or upper case.
 */
 
-bool isproteinalphabet(const Alphabet *alpha)
+bool isproteinalphabet(const SfxAlphabet *alpha)
 {
-  Alphabet proteinalphabet;
+  SfxAlphabet proteinalphabet;
   unsigned int i, reduceddomainsize1, reduceddomainsize2;
   bool isprot = false;
   Uchar domainbuf1[MAXALPHABETCHARACTER+1],
@@ -781,7 +782,7 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
   alphabet with the bases A, C, G, T written in lower or upper case.
 */
 
-bool isdnaalphabet(const Alphabet *alpha)
+bool isdnaalphabet(const SfxAlphabet *alpha)
 {
   if (isproteinalphabet(alpha))
   {

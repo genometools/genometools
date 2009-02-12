@@ -25,7 +25,7 @@
 
 void symbolstring2fasta(FILE *fpout,
                         const char *desc,
-                        const Alphabet *alpha,
+                        const SfxAlphabet *alpha,
                         const Uchar *w,
                         unsigned long wlen,
                         unsigned long width)
@@ -80,7 +80,7 @@ void encseq2symbolstring(FILE *fpout,
   Seqpos idx, lastpos;
   Uchar currentchar;
   Encodedsequencescanstate *esr;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
 
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,start);
@@ -123,7 +123,7 @@ void fprintfencseq(FILE *fpout,
 {
   Seqpos idx;
   Uchar currentchar;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
 
   alpha = getencseqAlphabet(encseq);
   for (idx = start; idx < start + wlen; idx++)

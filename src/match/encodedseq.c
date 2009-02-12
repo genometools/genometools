@@ -160,7 +160,7 @@ typedef uint32_t Uint32;
   const char *destab;
   unsigned long destablength, *descendtab;
 
-  const Alphabet *alpha;      /* alphabet representation */
+  const SfxAlphabet *alpha;   /* alphabet representation */
 
   const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                          numofdbsequences  -1)
@@ -863,7 +863,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   }
   if (encseq->alpha != NULL)
   {
-    freeAlphabet((Alphabet **) &encseq->alpha);
+    freeSfxAlphabet((SfxAlphabet **) &encseq->alpha);
   }
   gt_str_array_delete((GtStrArray *) encseq->filenametab);
   encseq->filenametab = NULL;
@@ -2263,7 +2263,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                                  Seqpos totallength,
                                                  unsigned long numofsequences,
                                                  Seqpos specialranges,
-                                                 const Alphabet *alpha,
+                                                 const SfxAlphabet *alpha,
                                                  Verboseinfo *verboseinfo)
 {
   double spaceinbitsperchar;
@@ -2405,7 +2405,7 @@ const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
   return getsymbolmapAlphabet(encseq->alpha);
 }
 
-const Alphabet *getencseqAlphabet(const Encodedsequence *encseq)
+const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq)
 {
   return encseq->alpha;
 }
@@ -2703,7 +2703,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                 Seqpos totallength,
                                 unsigned long numofsequences,
                                 const Seqpos *specialrangestab,
-                                const Alphabet *alphabet,
+                                const SfxAlphabet *alphabet,
                                 const char *str_sat,
                                 unsigned long *characterdistribution,
                                 const Specialcharinfo *specialcharinfo,
@@ -2772,11 +2772,11 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   return haserr ? NULL : encseq;
 }
 
-static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
+static const SfxAlphabet *scanal1file(const GtStr *indexname,GtError *err)
 {
   GtStr *tmpfilename;
   bool haserr = false;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
@@ -2789,7 +2789,7 @@ static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
   gt_str_delete(tmpfilename);
   if (haserr)
   {
-    freeAlphabet((Alphabet **) &alpha);
+    freeSfxAlphabet((SfxAlphabet **) &alpha);
     return NULL;
   }
   return alpha;
@@ -2825,7 +2825,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   bool haserr = false;
   int retcode;
   Firstencseqvalues firstencseqvalues;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
 
   gt_error_check(err);
   alpha = scanal1file(indexname,err);
@@ -2909,7 +2909,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   {
     if (alpha != NULL)
     {
-      freeAlphabet((Alphabet **) &alpha);
+      freeSfxAlphabet((SfxAlphabet **) &alpha);
     }
     if (encseq != NULL)
     {
@@ -2992,7 +2992,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       const Alphabet *alpha,
+                                       const SfxAlphabet *alpha,
                                        Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;

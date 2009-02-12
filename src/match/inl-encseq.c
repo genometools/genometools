@@ -138,7 +138,7 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fbs,
                                                   Seqpos totallength,
                                                   unsigned long numofsequences,
                                                   Seqpos specialranges,
-                                                  const Alphabet *alphabet,
+                                                  const SfxAlphabet *alphabet,
                                                   const char *str_sat,
                                                   Verboseinfo *verboseinfo,
                                                   unsigned long

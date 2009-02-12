@@ -146,7 +146,7 @@ SfxINewMRAEnc(const sfxInterface *si);
  * @param si reference of interface to suffixerator
  * @return reference of alphabet object
  */
-extern const Alphabet *
+extern const SfxAlphabet *
 SfxIGetAlphabet(const sfxInterface *si);
 
 /**

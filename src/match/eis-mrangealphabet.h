@@ -87,7 +87,7 @@ MRAEncUInt8New(AlphabetRangeID numRanges, AlphabetRangeSize symbolsPerRange[],
  * @param alpha original alphabet
  */
 extern MRAEnc *
-MRAEncGTAlphaNew(const Alphabet *alpha);
+MRAEncGTAlphaNew(const SfxAlphabet *alpha);
 
 /**
  * \brief alias of MRAEncUInt8New

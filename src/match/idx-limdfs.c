@@ -594,7 +594,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                             const AbstractDfstransformer *adfst)
 {
   Seqpos pos, startpos;
-  unsigned long resetvalue = 0;;
+  unsigned long resetvalue = 0;
   Uchar cc;
   Limdfsresult limdfsresult;
 

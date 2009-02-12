@@ -35,7 +35,7 @@
 #include "fillsci.h"
 #include "esa-map.h"
 
-static int outal1file(const GtStr *indexname,const Alphabet *alpha,
+static int outal1file(const GtStr *indexname,const SfxAlphabet *alpha,
                       GtError *err)
 {
   FILE *al1fp;
@@ -55,7 +55,7 @@ static int outal1file(const GtStr *indexname,const Alphabet *alpha,
   return haserr ? -1 : 0;
 }
 
-static unsigned long *initcharacterdistribution(const Alphabet *alpha)
+static unsigned long *initcharacterdistribution(const SfxAlphabet *alpha)
 {
   unsigned long *characterdistribution;
   unsigned int numofchars, idx;
@@ -79,7 +79,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   bool haserr = false;
   unsigned int forcetable;
   Specialcharinfo specialcharinfo;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
   bool alphaisbound = false;
   Filelengthvalues *filelengthtab = NULL;
   Seqpos specialrangestab[3];
@@ -180,7 +180,7 @@ int fromfiles2Sfxseqinfo(Sfxseqinfo *sfxseqinfo,
   }
   if (haserr && alpha != NULL && !alphaisbound)
   {
-    freeAlphabet((Alphabet **) &alpha);
+    freeSfxAlphabet((SfxAlphabet **) &alpha);
   }
   return haserr ? -1 : 0;
 }
