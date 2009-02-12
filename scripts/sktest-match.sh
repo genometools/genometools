@@ -33,13 +33,16 @@ cerr()
 
 cd testsuite
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_idxlocali'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_greedyfwdmat'
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_tallymer'
+for keyword in gt_idxlocali gt_greedyfwdmat gt_tallymer
+do
+  env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords ${keyword}
+  if test $? -ne 0
+  then
+    exit 1
+  fi
+done
 
 cd ..
-
-# exit 0
 
 for inputfile in `ls testdata/*.fna` ${AT} ${U8} ${ATK} `ls ${GTTESTDATA}/DNA-mix/Grumbach.fna/*.fna`
 do

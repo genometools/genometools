@@ -70,6 +70,7 @@ static void showscorecolumn(const Column *column,
                             unsigned long querylength,
                             unsigned long currentdepth)
 {
+  gt_assert(column != NULL);
   printf("at depth %lu: ",currentdepth);
   if (column->colvalues == NULL)
   {
@@ -79,6 +80,7 @@ static void showscorecolumn(const Column *column,
   {
     unsigned long idx;
 
+    gt_assert(column->colvalues != NULL);
     for (idx = 0; idx <= querylength; idx++)
     {
       if (column->colvalues[idx].bestcell > 0)
