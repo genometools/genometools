@@ -19,6 +19,22 @@ Test do
   end
 end
 
+Name "gt splitfasta (-numfiles)"
+Keywords "gt_splitfasta"
+Test do
+  run "cp #{$testdata}U89959_ests.fas ."
+  run_test "#{$bin}gt splitfasta -numfiles 8 U89959_ests.fas"
+  if not File.exists?("U89959_ests.fas.1") then
+    raise TestFailed, "file 'U89959_ests.fas.1' does not exist"
+  end
+  if not File.exists?("U89959_ests.fas.8") then
+    raise TestFailed, "file 'U89959_ests.fas.8' does not exist"
+  end
+  if File.exists?("U89959_ests.fas.9") then
+    raise TestFailed, "file 'U89959_ests.fas.9' does exist"
+  end
+end
+
 Name "gt splitfasta (file exists)"
 Keywords "gt_splitfasta"
 Test do

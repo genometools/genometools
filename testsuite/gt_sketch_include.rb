@@ -89,6 +89,30 @@ Test do
   run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
 end
 
+Name "gt sketch -showrecmaps (normal text size)"
+Keywords "gt_sketch showrecmaps"
+Test do
+  run_test "#{$bin}gt sketch -showrecmaps out.png " +
+           "#{$testdata}gt_sketch_textwidth.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_sketch_textwidth_0.recmaps"
+end
+
+Name "gt sketch -showrecmaps (narrow image)"
+Keywords "gt_sketch showrecmaps"
+Test do
+  run_test "#{$bin}gt sketch -width 300 -showrecmaps out.png " +
+           "#{$testdata}gt_sketch_textwidth.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_sketch_textwidth_1.recmaps"
+end
+
+Name "gt sketch -showrecmaps (large text size)"
+Keywords "gt_sketch showrecmaps"
+Test do
+  run_test "#{$bin}gt sketch -style #{$testdata}/bigfonts.style -showrecmaps out.png " +
+           "#{$testdata}gt_sketch_textwidth.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
+end
+
 Name "sketch_constructed (C)"
 Keywords "gt_sketch annotationsketch"
 Test do

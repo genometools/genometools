@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -68,7 +68,6 @@ int gt_uniq(int argc, const char **argv, GtError *err)
                *uniq_stream = NULL,
                *gff3_out_stream = NULL;
   UniqArguments arguments;
-  GtGenomeNode *gn;
   int parsed_args, had_err;
   gt_error_check(err);
 
@@ -91,8 +90,7 @@ int gt_uniq(int argc, const char **argv, GtError *err)
   gff3_out_stream = gt_gff3_out_stream_new(uniq_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) && gn)
-    gt_genome_node_delete(gn);
+  had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);

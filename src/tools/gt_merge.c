@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -48,7 +48,6 @@ int gt_merge(int argc, const char **argv, GtError *err)
                 *merge_stream,
                 *gff3_out_stream;
   GtArray *genome_streams;
-  GtGenomeNode *gn;
   unsigned long i;
   int parsed_args, had_err;
   GtGenFile *outfp;
@@ -86,10 +85,7 @@ int gt_merge(int argc, const char **argv, GtError *err)
   gff3_out_stream = gt_gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
-         gn) {
-    gt_genome_node_delete(gn);
-  }
+  had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);

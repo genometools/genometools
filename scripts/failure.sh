@@ -2,14 +2,15 @@
 
 set -e -x
 
-if test $# -ne 2
+if test $# -ne 3
 then
-  echo "Usage: $0 <Referencefile> <Queryfile>"
+  echo "Usage: $0 <Referencefile> <Queryfile> <threshold>"
   exit 1
 fi  
 
 reference=$1
 query=$2
+threshold=$3
 
 # exec in gt root dir
 
@@ -19,5 +20,5 @@ query=$2
 # gt tagerator -e 2 -maxocc 20 -rw -esa esa-fwd -q ${query}
 gt packedindex mkindex -tis -indexname pck-rev -db ${reference} -sprank -dna -pl -bsize 10 -locfreq 32 -dir rev
 gt prebwt -maxdepth 4 -pck pck-rev
-gt tagerator -e 2 -maxocc 20 -rw -pck pck-rev -q ${query}
+valgrind.sh gt dev idxlocali -pck pck-rev -q ${query} -th ${threshold}
 # gt tagerator -maxocc 10 -rw -pck pck-rev -q ${query}

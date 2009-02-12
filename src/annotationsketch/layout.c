@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -39,9 +39,6 @@
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 
-/* used to separate a filename from the type in a track name */
-#define FILENAME_TYPE_SEPARATOR  '|'
-
 typedef struct {
   GtTextWidthCalculator *twc;
   GtLayout *layout;
@@ -53,8 +50,8 @@ typedef struct {
 } GtRenderTraverseInfo;
 
 typedef struct {
-  unsigned long total_lines,
-                total_captionlines;
+  unsigned long height;
+  GtStyle *style;
 } GtTracklineInfo;
 
 struct GtLayout {
@@ -78,19 +75,8 @@ static int add_tracklines(GT_UNUSED void *key, void *value,
                           void *data, GT_UNUSED GtError *err)
 {
   GtTracklineInfo *add = (GtTracklineInfo*) data;
-  add->total_lines += gt_track_get_number_of_lines((GtTrack*) value);
-  add->total_captionlines += gt_track_get_number_of_lines_with_captions(
-                                                             (GtTrack*) value);
+  add->height += gt_track_get_height((GtTrack*) value, add->style);
   return 0;
-}
-
-static GtStr* track_key_new(const char *filename, const char *type)
-{
-  GtStr *track_key;
-  track_key = gt_str_new_cstr(filename);
-  gt_str_append_char(track_key, FILENAME_TYPE_SEPARATOR);
-  gt_str_append_cstr(track_key, type);
-  return track_key;
 }
 
 static int layout_tracks(void *key, void *value, void *data,
@@ -100,7 +86,6 @@ static int layout_tracks(void *key, void *value, void *data,
   GtTrack *track;
   GtLayoutTraverseInfo *lti = (GtLayoutTraverseInfo*) data;
   GtArray *list = (GtArray*) value;
-  char *filename;
   GtStr *gt_track_key;
   const char *type = key;
   GtBlock *block;
@@ -110,15 +95,9 @@ static int layout_tracks(void *key, void *value, void *data,
 
   /* to get a deterministic layout, we sort the GtBlocks for each type */
   gt_array_sort_stable(list, blocklist_block_compare);
-  /* we take the basename of the filename to have nicer output in the
-     generated graphic. this might lead to ``collapsed'' tracks, if two files
-     with different paths have the same basename. */
+
   block = *(GtBlock**) gt_array_get(list, 0);
-  filename = gt_basename(gt_genome_node_get_filename(
-                                     (GtGenomeNode*)
-                                       gt_block_get_top_level_feature(block)));
-  gt_track_key = track_key_new(filename, type);
-  gt_free(filename);
+  gt_track_key = gt_str_new_cstr((char*) key);
 
   if (!gt_style_get_bool(lti->layout->style, "format", "split_lines", &split,
                          NULL))
@@ -198,7 +177,7 @@ GtLayout* gt_layout_new(GtDiagram *diagram,
   gt_assert(diagram && width > 0 && style && err);
   if (check_width(width, style, err) < 0)
     return NULL;
-  twc = gt_text_width_calculator_cairo_new(NULL);
+  twc = gt_text_width_calculator_cairo_new(NULL, style);
   layout = gt_layout_new_with_twc(diagram, width, style, twc, err);
   layout->own_twc = true;
   return layout;
@@ -296,17 +275,18 @@ GtTextWidthCalculator* gt_layout_get_twc(const GtLayout *layout)
 unsigned long gt_layout_get_height(const GtLayout *layout)
 {
   GtTracklineInfo lines;
-  double tmp;
+  double tmp, head_track_space = HEAD_TRACK_SPACE_DEFAULT;
   bool show_track_captions;
   unsigned long height,
                 line_height,
                 i;
   gt_assert(layout);
 
-  /* get line information for height calculation */
-  lines.total_captionlines = lines.total_lines = 0;
+  /* get dynamic heights from tracks */
+  lines.style = layout->style; lines.height = 0;
   gt_hashmap_foreach(layout->tracks, add_tracklines,
                      &lines, NULL);
+  height = lines.height;
 
   /* obtain line height and spacer from style */
   if (gt_style_get_num(layout->style, "format", "bar_height", &tmp, NULL))
@@ -318,50 +298,36 @@ unsigned long gt_layout_get_height(const GtLayout *layout)
   else
     line_height += BAR_VSPACE_DEFAULT;
 
-  /* get total height of all lines */
-  height  = lines.total_lines * line_height;
-  height += lines.total_captionlines * (TOY_TEXT_HEIGHT
-                                          + CAPTION_BAR_SPACE_DEFAULT);
-
   if (!(gt_style_get_bool(layout->style, "format","show_track_captions",
                           &show_track_captions, NULL)))
     show_track_captions = true;
 
-  /* add track caption height and spacer */
+  /* add custom track space allotment */
   if (show_track_captions)
   {
-    if (gt_style_get_num(layout->style, "format", "track_vspace", &tmp,
-                         NULL))
-    {
-      height += gt_layout_get_number_of_tracks(layout)
-                  * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
-      /* add custom track captions */
-      height += gt_array_size(layout->custom_tracks)
-                  * (TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT + tmp);
-    }
-    else
-    {
-      height += gt_layout_get_number_of_tracks(layout)
-                  * (TOY_TEXT_HEIGHT
-                      + CAPTION_BAR_SPACE_DEFAULT
-                      + TRACK_VSPACE_DEFAULT);
-      /* add custom track captions */
-      height += gt_array_size(layout->custom_tracks)
-                  * (TOY_TEXT_HEIGHT
-                      + CAPTION_BAR_SPACE_DEFAULT
-                      + TRACK_VSPACE_DEFAULT);
-    }
+    double theight = TOY_TEXT_HEIGHT,
+           captionspace = CAPTION_BAR_SPACE_DEFAULT;
+    gt_style_get_num(layout->style, "format", "track_caption_font_size",
+                     &theight, NULL);
+    gt_style_get_num(layout->style, "format", "track_caption_space",
+                     &captionspace, NULL);
+    height += gt_array_size(layout->custom_tracks)
+                  * (theight + captionspace);
   }
 
-  /* add custom track space allotment */
   for (i=0;i<gt_array_size(layout->custom_tracks);i++)
   {
     GtCustomTrack *ct = *(GtCustomTrack**) gt_array_get(layout->custom_tracks,
                                                         i);
     height += gt_custom_track_get_height(ct);
+    gt_style_get_num(layout->style, "format", "track_vspace", &tmp, NULL);
+    height += tmp;
+
   }
 
   /* add header space and footer */
-  height += HEADER_SPACE + FOOTER_SPACE;
+  gt_style_get_num(layout->style, "format", "ruler_space", &head_track_space,
+                   NULL);
+  height += HEADER_SPACE + head_track_space + FOOTER_SPACE;
   return height;
 }

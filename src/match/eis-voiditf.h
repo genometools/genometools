@@ -20,18 +20,17 @@
 
 #include "seqpos-def.h"
 #include "sarr-def.h"
-#include "intcode-def.h"
 #include "splititv.h"
 #include "procmatch.h"
 
-Seqpos bwtseqfirstmatch(const void *voidbwtSeq,Seqpos bound);
+Seqpos bwtseqfirstmatch(const void *voidbwtseq,Seqpos bound);
 
 /** Iterator for positions defined by a lower and upper bound
  */
 
 typedef struct Bwtseqpositioniterator Bwtseqpositioniterator;
 
-Bwtseqpositioniterator *newBwtseqpositioniterator(const void *bwtSeq,
+Bwtseqpositioniterator *newBwtseqpositioniterator(const void *voidbwtseq,
                                                   Seqpos lowerbound,
                                                   Seqpos upperbound);
 
@@ -40,13 +39,13 @@ bool nextBwtseqpositioniterator(Seqpos *pos,Bwtseqpositioniterator *bspi);
 bool nextBwtseqpositionwithoutSEPiterator(Seqpos *pos,
                                           Bwtseqpositioniterator *bspi);
 
-Uchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtSeq);
+Uchar bwtseqgetsymbol(Seqpos bound,const void *voidbwtseq);
 
 void freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi);
 
 typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
 
-Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtSeq,
+Bwtseqcontextiterator *newBwtseqcontextiterator(const void *voidbwtseq,
                                                 Seqpos bound);
 
 Uchar nextBwtseqcontextiterator(Seqpos *bound,Bwtseqcontextiterator *bsci);
@@ -55,7 +54,7 @@ void freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
 
 void bwtrangesplitwithoutspecial(ArrayBoundswithchar *bwci,
                                  Seqpos *rangeOccs,
-                                 const void *voidBwtSeq,
+                                 const void *voidbwtseq,
                                  Seqpos lbound,
                                  Seqpos ubound);
 
@@ -102,7 +101,7 @@ typedef struct
 
 unsigned long bwtrangesplitallwithoutspecial(Mbtab *mbtab,
                                              Seqpos *rangeOccs,
-                                             const void *voidBwtSeq,
+                                             const void *voidbwtseq,
                                              Seqpos lbound,
                                              Seqpos ubound);
 

@@ -2,12 +2,13 @@
 #define MSORT_H
 
 #include <stdlib.h>
+#include "core/fptr_api.h"
 
 /* merge sort; the interface equals qsort(3) */
 void gt_msort(void *base, size_t nmemb, size_t size,
-              int (*compar)(const void *, const void *));
+              GtCompare compar);
 
 void gt_msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
-                int(*compar)(void *, const void *, const void *));
+                GtCompareWithData compar);
 
 #endif

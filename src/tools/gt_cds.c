@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -79,7 +79,6 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GtError *err)
 {
   GtNodeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
-  GtGenomeNode *gn;
   CDSArguments *arguments = tool_arguments;
   GtRegionMapping *regionmapping;
   int had_err = 0;
@@ -112,10 +111,7 @@ static int gt_cds_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
     gff3_out_stream = gt_gff3_out_stream_new(cds_stream, NULL);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
-         gn) {
-    gt_genome_node_delete(gn);
-  }
+  had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);

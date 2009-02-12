@@ -41,6 +41,9 @@ gn = feature_stream.next_tree()
 # fill feature index
 while (gn) do
   gn = feature_stream.next_tree()
+  if !gn.nil? and gn.get_filename != gff3file then
+    raise TestFailedError
+  end
 end
 
 seqid = feature_index.get_first_seqid()

@@ -28,7 +28,7 @@
 
 void symbolstring2fasta(FILE *fpout,
                         const char *desc,
-                        const Alphabet *alpha,
+                        const SfxAlphabet *alpha,
                         const Uchar *w,
                         unsigned long wlen,
                         unsigned long width);

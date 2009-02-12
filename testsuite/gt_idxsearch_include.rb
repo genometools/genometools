@@ -85,6 +85,29 @@ allfiles.each do |reffile|
 end
 
 allfiles.each do |reffile|
+  allfiles.each do |queryfile|
+    if queryfile != reffile
+      Name "gt idxlocali #{reffile} #{queryfile}"
+      Keywords "gt_idxlocali"
+      Test do
+        run("#{$bin}gt packedindex mkindex -tis -indexname pck -db " +
+            "#{$testdata}/#{reffile} -sprank -dna -pl -bsize 10 " +
+            "-locfreq 32 -dir rev", 
+            :maxtime => 100)
+        run_test("#{$bin}gt dev idxlocali -th 8 -pck pck " +
+                 "-q #{$testdata}/#{queryfile}",
+                 :maxtime => 100)
+        run "#{$bin}gt suffixerator -indexname sfx -tis -suf -dna -v " +
+            "-db #{$testdata}/#{reffile}"
+        run_test("#{$bin}gt dev idxlocali -th 8 -esa sfx " +
+                 "-q #{$testdata}/#{queryfile}",
+                 :maxtime => 100)
+      end
+    end
+  end
+end
+
+allfiles.each do |reffile|
   Name "gt packedindex #{reffile}"
   Keywords "gt_packedindex small"
   Test do

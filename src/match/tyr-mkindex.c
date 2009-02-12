@@ -18,7 +18,6 @@
 #include <errno.h>
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "core/arraydef.h"
 #include "core/fa.h"
 #include "esa-seqread.h"
 #include "alphadef.h"

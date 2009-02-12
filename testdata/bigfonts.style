@@ -1,0 +1,50 @@
+--[[
+  This is the GenomeTools annotation viewer config file.
+  All options must be set inside the 'style' table.
+  All items in this table must be tables, called 'sections'.
+  Typically there is one section per feature type.
+
+  Color definitions
+  -----------------
+  Colors are given as RGB triplets
+       {red=<val>,green=<val>,blue=<val>(,alpha=<val>)}
+  where <val> is a decimal value between 0 and 1.
+  The alpha value is optional, as a default 0.5 will be used.
+
+  Global format settings
+  ----------------------
+  Global settings, such as margins, spacers, etc. are found at the end of this
+  file, in the "format" section.
+]]--
+
+
+style =
+{
+  format =
+  {
+    -- Set the following three settings to 'false' to globally disable them.
+    split_lines = true, -- generally enable splitting
+    show_block_captions = true, -- generally show captions
+    show_track_captions = true, -- generally show track captions
+    margins = 30,      -- space left and right of diagram, in pixels
+    bar_height = 16,   -- height of a feature bar, in pixels
+    bar_vspace = 10,   -- space between feature bars, in pixels
+    track_vspace = 20, -- space between tracks, in pixels
+    ruler_font_size = 10, -- size of scale labels
+    ruler_space = 20, -- space between ruler and first track
+    block_caption_font_size = 19, -- size of block captions
+    block_caption_space = 7, -- space between blocks and their captions
+    track_caption_font_size = 8, -- size of track captions
+    track_caption_space = 7, -- space between tracks and their captions
+    scale_arrow_width = 6,     -- width of scale arrowheads, in pixels
+    scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
+    arrow_width = 6,   -- width of feature arrowheads, in pixels
+    stroke_width = .5, -- width of outlines, in pixels
+    stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
+    show_grid = true, -- shows light vertical lines for orientation
+    min_len_block = 20 , -- minimum length of a block in which single elements are shown
+    track_title_color     = {red=0.7, green=0.7, blue=0.7, alpha = 1.0},
+    default_stroke_color  = {red=0.1, green=0.1, blue=0.1, alpha = 1.0},
+    background_color      = {red=1.0, green=1.0, blue=1.0, alpha = 1.0},
+  },
+}

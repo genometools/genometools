@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -84,7 +84,6 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   GtNodeStream *gff3_in_stream,
                *csa_stream,
                *gff3_out_stream;
-  GtGenomeNode *gn;
   CSAArguments *arguments = tool_arguments;
   int had_err;
 
@@ -99,10 +98,7 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
   gff3_out_stream = gt_gff3_out_stream_new(csa_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) &&
-         gn) {
-    gt_genome_node_delete(gn);
-  }
+  had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);

@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>The AnnotationSketch module</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<style type="text/css">
+  .line {
+    font-family: monospace;
+    font-size: large;
+  }
+  .desc {
+    font-size:small;
+  }
+  li.item {
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="index.html">Overview</a></li>
+<li><a href="pub/">Download</a></li>
+<li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse source</a></li>
+<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
+<li><a href="http://genometools.lighthouseapp.com/">Issue tracker</a></li>
+<li><a href="design.html">Design</a></li>
+<li><a href="libgenometools.html">C API</a></li>
+<li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
+<li><a id="current" href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+  <ul class="submenu">
+    <li><a href="annotationsketch.html#collapsing">Collapsing</a></li>
+    <li><a href="annotationsketch.html#styles">Styles</a></li>
+    <li><a href="trackselectors.html">Track assignment</a></li>
+    <li><a href="customtracks.html">Custom tracks</a></li>
+    <li><a href="annotationsketch.html#gtsketch">The <tt>gt sketch</tt> tool</a></li>
+    <li><a href="examples.html">Code examples</a></li>
+    <li><a href="cgi-bin/annotationsketch_demo.cgi">Try it online</a></li>
+    <li><a href="libgenometools.html">API reference</a></li>
+  </ul>
+<li><a href="license.html">License</a></li>
+</ul>
+</div>
+
+
+<div id="main">
+
+<h1>Per-type settings</h1>
+<p>
+These settings must be given for a specific type, e.g. for the <em>gene</em> type it could look like this:
+</p>
+<pre>
+  gene = {
+    stroke             = {red=0.0, green=0.0, blue=0.0, alpha = 1.0},
+    stroke_marked      = {red=1.0, green=0.0, blue=0.0},
+    fill               = {red=0.9, green=0.9, blue=1.0},
+    style              = "box",
+    collapse_to_parent = false,
+    split_lines        = true,
+    max_num_lines      = 10,
+  },
+</pre>
+<h2>Color options</h2>
+<p>
+These settings need to be set to a table with the <tt>red</tt>, <tt>blue</tt>, <tt>green</tt> and <tt>alpha</tt> keys. Alternatively, they can be set to a Lua function which returns such a table, given a <em>FeatureNode</em> object of the current element:</p>
+<pre>
+fill = function(gn)
+         if gn:get_score() then
+           aval = gn:get_score()*1.0
+         else
+           aval = 0.0
+         end
+         return {red=1.0, green=0.0, blue=0.0, alpha=aval}
+       end
+</pre>
+<p>
+which would scale the transparency of the red element with the score value of  the associated feature. The following settings are available:
+</p>
+<ul>
+  <li class="item">
+    <div class="line">
+       stroke = {red=<em>redval</em>, green=<em>greenval</em>, blue=<em>blueval</em>, alpha=<em>alphaval</em>}
+    </div>
+    <div class="desc">
+      Sets the outline color of elements of this type to the given RGBA color. All values
+      must be decimal values between 0 and 1.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+       stroke_marked = {red=<em>redval</em>, green=<em>greenval</em>, blue=<em>blueval</em>, alpha=<em>alphaval</em>}
+    </div>
+    <div class="desc">
+      Similar to <tt>stroke</tt>, but applies only to marked elements.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      fill = {red=<em>redval</em>, green=<em>greenval</em>, blue=<em>blueval</em>, alpha=<em>alphaval</em>}
+    </div>
+    <div class="desc">
+      Sets the fill color of all elements of this type to the given RGBA color.
+    </div>
+  </li>
+</ul>
+<h2>Drawing options</h2>
+<ul>
+  <li class="item">
+    <div class="line">
+      style = <em>"box"/"line"/"rectangle"/"dashes"/"caret"</em>
+    </div>
+    <div class="desc">
+      Defines the visual style in which the elements of this type are drawn. Possible values are:
+      <ul>
+        <li>"box", which draws the elements as an box with arrowheads depending on their strand property.</li>
+        <li>"line", which draws the elements as straight lines with arrowheads depending on their strand property.</li>
+        <li>"rectangle", which draws the elements as a box without arrowheads.</li>
+        <li>"dashes", which draws the elements as straight lines with arrowheads depending on their strand property.</li>
+        <li>"caret", which draws the elements as a '^'-like glyph (often used for introns). Arrowheads are drawn depending on the strand property.</li>
+      </ul>
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      bar_height = <em>value</em>
+    </div>
+    <div class="desc">
+      Sets the height of elements of this type to <em>n</em> pixels/points.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      z_index = <em>value</em>
+    </div>
+    <div class="desc">
+      Sets the z-index of the given type. The z-indices of collapsed types determine the order in which features are drawn on each other. Particularly, element with types with higher index numbers are drawn on top of elements with lower-numbered types. Elements whose types
+      do not have a no z-index are always drawn below those with indices and their internal ordering is determined alphabetically.
+    </div>
+  </li>
+</ul>
+<h2>Track layout options</h2>
+<ul>
+  <li class="item">
+    <div class="line">
+      collapse_to_parent = <em>true/false</em>
+    </div>
+    <div class="desc">
+      This boolean value determines whether the elements of this type should be drawn on top of their parent type's elements.
+      This property can be used to recursively collapse feature trees by setting it in the parent type to true as well.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      split_lines = <em>true/false</em>
+    </div>
+    <div class="desc">
+      If this option set to false, all blocks for this type track are drawn in one line, instead of breaking lines if blocks overlap.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      max_num_lines = <em>value</em>
+    </div>
+    <div class="desc">
+      This value limits the number of lines per track. If the line breaker tries to create more tracks that set here (e.g. if many blocks overlap or if the displayed range is extremely wide), no more tracks are created. If the existing lines fill up, no more blocks will be drawn and the number of discarded blocks will be displayed next to the track title. This can be used to prevent the layouter from generating images of extreme height if a lot of features is packed at a very far zoom level.
+    </div>
+  </li>
+
+</ul>
+
+<h2>Caption options</h2>
+<ul>
+  <li class="item">
+    <div class="line">
+      max_capt_show_width = <em>value</em>,
+    </div>
+    <div class="desc">
+      This value determines up to which zoom width block captions are shown. If the width of the displayed sequence region (in characters) exceeds this value, then captions are omitted. If set to 0, captions are never shown for this type. If set to <tt>nil</tt>, then captions are always shown.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      max_show_width = <em>value</em>,
+    </div>
+    <div class="desc">
+      This value determines up to which zoom width blocks of this type are shown. It behaves just like <tt>max_capt_show_width</tt>.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      block_caption = <em>string/function</em>
+    </div>
+    <div class="desc">
+      This value determines how a block caption of a block of this top-level type should be generated. For example, it can be set to a Lua function which returns a string and receives a <em>FeatureNode</em> object of the top-level feature in the block:
+    <pre>
+block_caption = function(gn)
+                  rng = gn:get_range()
+                  return string.format("%s/%s (%dbp)",
+                                       gn:get_attribute("Parent"),
+                                       gn:get_attribute("ID"),
+                                       rng:get_end() - rng:get_start() + 1)
+                end,
+      </pre>
+      This function creates a block caption which consists of IDs of the parent feature and the feature itself followed by the length of the feature, for example:   <pre>gene1/mRNA1 (3400bp)</pre>
+    </div>
+  </li>
+</ul>
+<h1>Per-image settings</h1>
+<h2>Ruler options</h2>
+<ul>
+  <li class="item">
+    <div class="line">
+      ruler_font_size = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the font size (in pixels/points) of the top ruler.
+    </div>
+  </li>
+  <li class="item">
+  <div class="line">
+      ruler_space = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the amount of vertical space (in pixels/points) between the ruler and the first track.
+    </div>
+  </li>
+</ul>
+<h2>Caption options</h2>
+<ul>
+  <li class="item">
+    <div class="line">
+      show_block_captions = <em>true/false</em>
+    </div>
+    <div class="desc">
+      If set to false, no block captions are shown at all for all type tracks.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      block_caption_font_size = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the font size (in pixels/points) of the block captions.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      block_caption_space = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the amount of space (in pixels/points) between a block caption and the corresponding block.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      show_track_captions = <em>true/false</em>
+    </div>
+    <div class="desc">
+      If set to false, no track captions are shown at all.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      track_caption_font_size = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the font size (in pixels/points) of the track captions.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      track_caption_space = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the amount of space (in pixels/points) between a track caption and the lines in the track.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      track_title_color = {red=<em>redval</em>, green=<em>greenval</em>, blue=<em>blueval</em>, alpha=<em>alphaval</em>}
+    </div>
+    <div class="desc">
+      Defines the color in which track captions are drawn.
+    </div>
+  </li>
+</ul>
+<h2>Image options</h2>
+<ul>
+<li class="item">
+    <div class="line">
+      background_color = {red=<em>redval</em>, green=<em>greenval</em>, blue=<em>blueval</em>, alpha=<em>alphaval</em>}
+    </div>
+    <div class="desc">
+      Defines the background color of the image. If PNG output is used, this alpha value can be used to produce images with transparent backgrounds (e.g. for layering).
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      margins = <em>value</em>
+    </div>
+    <div class="desc">
+      This value defines the amount of space left to the left and right of the diagram (in pixels/points).
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      bar_height = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the default height of a single line (in pixels/points). Can be overridden by a per-type setting.
+    </div>
+  </li>
+ <li class="item">
+    <div class="line">
+      bar_vspace = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the space left between lines (in pixels/points).
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      track_vspace = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the space left between tracks (in pixels/points).
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      arrow_width = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the width of an arrowhead in the "box", "dashes", "line" or "caret" element styles.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      stroke_width = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the width of the outline of an element.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      stroke_marked_width = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines the width of the outline of a marked element.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      default_stroke_color = {red=<em>redval</em>, green=<em>greenval</em>, blue=<em>blueval</em>, alpha=<em>alphaval</em>}
+    </div>
+    <div class="desc">
+      Defines the default color of the outline of an element. Can be overidden by a per-type setting.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      show_grid = <em>true/false</em>
+    </div>
+    <div class="desc">
+      If set to true, then light vertical lines are drawn at minor ticks of the ruler for better orientation.
+    </div>
+  </li>
+
+  <li class="item">
+    <div class="line">
+      split_lines = <em>true/false</em>
+    </div>
+    <div class="desc">
+      If this option set to false, all blocks for each type are drawn in one line per type track, instead of breaking lines if blocks overlap.
+    </div>
+  </li>
+  <li class="item">
+    <div class="line">
+      min_len_block = <em>value</em>
+    </div>
+    <div class="desc">
+      Defines minimum pixel or point size of a block in which single collapsed elements are shown. If a block is more narrow then this threshold, only its outline will be drawn and its outline will be dashed. Set this to nil to always draw all elements in collapsed blocks.
+    </div>
+  </li>
+</ul>
+<div id="footer">
+Copyright &copy; 2009 Sascha Steinbiss. Last update: 2009-01-30
+</div>
+</div>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-301256-4";
+urchinTracker();
+</script>
+</body>
+</html>

@@ -44,7 +44,7 @@ typedef struct
 #ifdef SKDEBUG
 
 static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
-                                unsigned long depth,
+                                unsigned long currentdepth,
                                 const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
@@ -53,7 +53,7 @@ static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 
   unsigned long idx, backmask;
 
-  printf("at depth %lu: [",depth);
+  printf("at depth %lu: [",currentdepth);
   for (idx=0, backmask = 1UL; idx<mti->patternlength; idx++, backmask <<= 1)
   {
     if (col->prefixofsuffixbits & backmask)
@@ -84,6 +84,7 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
                                  unsigned int alphasize,
                                  ...)
                                  /* Variable argument list is as follows:
+                                    unsigned int alphasize
                                     const Uchar *pattern,
                                     unsigned long patternlength
                                  */
@@ -294,6 +295,9 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
     pms_extractdfsconstinfo,
     pms_freedfsconstinfo,
     pms_initLimdfsstate,
+    NULL,
+    NULL,
+    NULL,
     pms_fullmatchLimdfsstate,
     pms_nextLimdfsstate,
     pms_inplacenextLimdfsstate,

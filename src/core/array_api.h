@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,12 +27,12 @@ typedef struct GtArray GtArray;
 
 /* Return a new <GtArray*> object whose elements have the size
    <size_of_elem>. */
-GtArray*     gt_array_new(size_t size_of_elem);
+GtArray*      gt_array_new(size_t size_of_elem);
 /* Increase the reference count for <array> and return it.
    If <array> is <NULL>, <NULL> is returned without any side effects. */
-GtArray*     gt_array_ref(GtArray *array);
+GtArray*      gt_array_ref(GtArray *array);
 /* Return a clone of <array>. */
-GtArray*     gt_array_clone(const GtArray *array);
+GtArray*      gt_array_clone(const GtArray *array);
 /* Return pointer to element number <index> of <array>. <index> has to be
    smaller than <gt_array_size(array)>. */
 void*         gt_array_get(const GtArray *array, unsigned long index);
@@ -62,6 +62,12 @@ void          gt_array_add_array(GtArray *dest, const GtArray *src);
 /* Remove element with number <index> from <array> in O(<gt_array_size(array)>)
    time. <index> has to be smaller than <gt_array_size(array)>. */
 void          gt_array_rem(GtArray *array, unsigned long index);
+/* Remove elements starting with number <frompos> up to (and including) <topos>
+   from <array> in O(<gt_array_size(array)>) time. <frompos> has to be smaller
+   or equal than <topos> and both have to be smaller than
+   <gt_array_size(array)>. */
+void          gt_array_rem_span(GtArray *array, unsigned long frompos,
+                                unsigned long topos);
 /* Reverse the order of the elements in <array>. */
 void          gt_array_reverse(GtArray *array);
 /* Set the size of <array> to <size>. <size> must be smaller or equal than
@@ -78,6 +84,16 @@ unsigned long gt_array_size(const GtArray *array);
 void          gt_array_sort(GtArray *array, GtCompare compar);
 /* Sort <array> in a stable way with the given compare function <compar>. */
 void          gt_array_sort_stable(GtArray *array, GtCompare compar);
+/* Sort <array> with the given compare function <compar>. Passes a pointer to
+   userdata at <data>. */
+void          gt_array_sort_with_data(GtArray *array,
+                                      GtCompareWithData compar,
+                                      void *data);
+/* Sort <array> in a stable way with the given compare function <compar>. Passes
+   a pointer to userdata at <data>. */
+void          gt_array_sort_stable_with_data(GtArray *array,
+                                             GtCompareWithData compar,
+                                             void *data);
 /* Compare the content of <array_a> with the content of <array_b>.
    <array_a> and <array_b> must have the same gt_array_size() and
    gt_array_elem_size(). */

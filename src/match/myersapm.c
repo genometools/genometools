@@ -22,7 +22,6 @@
 #include "encseq-def.h"
 #include "myersapm.h"
 #include "defined-types.h"
-#include "alphadef.h"
 #include "procmatch.h"
 #include "dist-short.h"
 #include "initeqsvec.h"

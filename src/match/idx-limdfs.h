@@ -22,19 +22,30 @@
 #include "seqpos-def.h"
 #include "readmode-def.h"
 #include "procmatch.h"
+#include "verbose-def.h"
 #include "absdfstrans-def.h"
+
+typedef struct Genericindex Genericindex;
+
+void genericindex_delete(Genericindex *genericindex);
+
+const Encodedsequence *genericindex_getencseq(const Genericindex
+                                              *genericindex);
+
+Genericindex *genericindex_new(const GtStr *indexname,
+                               bool withesa,
+                               bool withencseq,
+                               int userdefinedmaxdepth,
+                               Verboseinfo *verboseinfo,
+                               GtError *err);
 
 typedef struct Limdfsresources Limdfsresources;
 
-Limdfsresources *newLimdfsresources(const void *genericindex,
-                                    const Mbtab **mbtab,
-                                    unsigned int maxdepth,
-                                    const Encodedsequence *encseq,
-                                    bool withesa,
+Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
                                     unsigned long maxintervalwidth,
-                                    Seqpos totallength,
                                     unsigned long maxpathlength,
+                                    bool keepexpandedonstack,
                                     Processmatch processmatch,
                                     void *processmatchinfo,
                                     Processresult processresult,
@@ -63,6 +74,16 @@ void indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            unsigned long seedweight,
                            const AbstractDfstransformer *adfst);
 
+void indexbasedlocali(Limdfsresources *limdfsresources,
+                      long matchscore,
+                      long mismatchscore,
+                      long gapstart,
+                      long gapextend,
+                      unsigned long threshold,
+                      const Uchar *query,
+                      unsigned long querylength,
+                      const AbstractDfstransformer *adfst);
+
 unsigned long genericmstats(const Limdfsresources *limdfsresources,
                             const Uchar *qstart,
                             const Uchar *qend);
@@ -71,14 +92,9 @@ bool indexbasedexactpatternmatching(const Limdfsresources *limdfsresources,
                                     const Uchar *pattern,
                                     unsigned long patternlength);
 
-Seqpos bound2startpos(const Limdfsresources *limdfsresources,
-                      Seqpos bound,unsigned long matchlength);
-
 Uchar limdfsgetencodedchar(const Limdfsresources *limdfsresources,
                            Seqpos pos,
                            Readmode readmode);
-
-Seqpos getlastbound(const Limdfsresources *limdfsresources,Seqpos rightbound);
 
 bool intervalwidthleq(const Limdfsresources *limdfsresources,
                       Seqpos leftbound,Seqpos rightbound);

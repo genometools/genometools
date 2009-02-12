@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
@@ -43,6 +43,12 @@ void           gt_file_dirname(GtStr *path, const char *file);
    Sets <path> to the empty string if <file> could not be found in $PATH. */
 int            gt_file_find_in_path(GtStr *path, const char *file, GtError*);
 
+/* Return the (estimated) size of <file>. If <file> is uncompressed, the exact
+   size is returned. If <file> is compressed, an estimation which assumes that
+   <file> contains a sequence is returned. */
+off_t          gt_file_estimate_size(const char *file);
+/* Return the (estimated) total size of all files given in <filenames>.
+   Uses <gt_file_estimate_size()>. */
 off_t          gt_files_estimate_total_size(const GtStrArray *filenames);
 
 #endif

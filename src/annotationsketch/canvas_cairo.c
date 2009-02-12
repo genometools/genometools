@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -38,10 +38,13 @@ int gt_canvas_cairo_visit_layout_pre(GtCanvas *canvas,
                                      GtLayout *layout,
                                      GT_UNUSED GtError *err)
 {
+  double head_track_space = HEAD_TRACK_SPACE_DEFAULT;
   /* get displayed range for internal use */
   canvas->pvt->viewrange = gt_layout_get_range(layout);
   gt_canvas_draw_ruler(canvas, canvas->pvt->viewrange);
-  canvas->pvt->y += HEADER_SPACE;
+  gt_style_get_num(canvas->pvt->sty, "format", "ruler_space",
+                   &head_track_space, NULL);
+  canvas->pvt->y += HEADER_SPACE + head_track_space;
   return 0;
 }
 
@@ -57,16 +60,14 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 {
   int had_err = 0;
   unsigned long exceeded;
-  bool show_track_captions;
+  bool show_track_captions = true;
 
   GtColor color;
 
   gt_assert(canvas && track);
 
-  if (!gt_style_get_bool(canvas->pvt->sty, "format", "show_track_captions",
-                         &show_track_captions, NULL))
-    show_track_captions = true;
-
+  gt_style_get_bool(canvas->pvt->sty, "format", "show_track_captions",
+                    &show_track_captions, NULL);
   gt_style_get_color(canvas->pvt->sty, "format", "track_title_color", &color,
                      NULL);
 
@@ -75,13 +76,24 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 
   if (show_track_captions)
   {
+    double theight      = TOY_TEXT_HEIGHT,
+           captionspace = CAPTION_BAR_SPACE_DEFAULT;
+    gt_style_get_num(canvas->pvt->sty, "format", "track_caption_font_size",
+                     &theight, NULL);
+    gt_style_get_num(canvas->pvt->sty, "format", "track_caption_space",
+                     &captionspace, NULL);
+    gt_graphics_set_font(canvas->pvt->g,
+                         "sans-serif",
+                         SLANT_NORMAL,
+                         WEIGHT_NORMAL,
+                         theight);
+    canvas->pvt->y += theight;
     /* draw track title */
     gt_graphics_draw_colored_text(canvas->pvt->g,
                                   canvas->pvt->margins,
                                   canvas->pvt->y,
                                   color,
                                   gt_str_get(gt_track_get_title(track)));
-
     /* draw 'line maximum exceeded' message */
     if ((exceeded = gt_track_get_number_of_discarded_blocks(track)) > 0)
     {
@@ -108,7 +120,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
                                     red,
                                     buf);
     }
-    canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+    canvas->pvt->y += captionspace;
   }
   return had_err;
 }
@@ -116,14 +128,11 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
 int gt_canvas_cairo_visit_track_post(GtCanvas *canvas, GT_UNUSED GtTrack *track,
                                      GT_UNUSED GtError *err)
 {
-  double vspace;
+  double vspace = TRACK_VSPACE_DEFAULT;
   gt_assert(canvas && track);
   /* put track spacer after track */
-  if (gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &vspace,
-                       NULL))
-    canvas->pvt->y += vspace;
-  else
-    canvas->pvt->y += TRACK_VSPACE_DEFAULT;
+  gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &vspace, NULL);
+  canvas->pvt->y += vspace;
   return 0;
 }
 
@@ -131,27 +140,34 @@ int gt_canvas_cairo_visit_line_pre(GtCanvas *canvas, GtLine *line,
                                    GT_UNUSED GtError *err)
 {
   int had_err = 0;
+  double lheight, bar_vspace = BAR_VSPACE_DEFAULT, theight = TOY_TEXT_HEIGHT,
+         captionspace = CAPTION_BAR_SPACE_DEFAULT;
+  bool show_block_captions = true;
   gt_assert(canvas && line);
+  gt_style_get_num(canvas->pvt->sty, "format", "block_caption_space",
+                   &captionspace, NULL);
+  gt_style_get_bool(canvas->pvt->sty, "format", "show_block_captions",
+                    &show_block_captions, NULL);
+  lheight = gt_line_get_height(line, canvas->pvt->sty);
+  gt_style_get_num(canvas->pvt->sty, "format", "bar_vspace", &bar_vspace, NULL);
+  gt_style_get_num(canvas->pvt->sty, "format", "block_caption_font_size",
+                   &theight, NULL);
+  if (gt_line_has_captions(line) && show_block_captions)
+    canvas->pvt->y +=  theight + captionspace;
   canvas->pvt->bt = gt_bittab_new(canvas->pvt->width);
-  if (gt_line_has_captions(line))
-    canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+  canvas->pvt->y += lheight/2;
   return had_err;
 }
 
-int gt_canvas_cairo_visit_line_post(GtCanvas *canvas, GT_UNUSED GtLine *line,
+int gt_canvas_cairo_visit_line_post(GtCanvas *canvas, GtLine *line,
                                     GT_UNUSED GtError *err)
 {
   int had_err = 0;
-  double tmp;
+  double lheight, bar_vspace = BAR_VSPACE_DEFAULT;
   gt_assert(canvas && line);
-  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &tmp, NULL))
-    canvas->pvt->y += tmp;
-  else
-    canvas->pvt->y += BAR_HEIGHT_DEFAULT;
-  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_vspace", &tmp, NULL))
-    canvas->pvt->y += tmp;
-  else
-    canvas->pvt->y += BAR_VSPACE_DEFAULT;
+  lheight = gt_line_get_height(line, canvas->pvt->sty);
+  gt_style_get_num(canvas->pvt->sty, "format", "bar_vspace", &bar_vspace, NULL);
+  canvas->pvt->y += bar_vspace + lheight/2;
   gt_bittab_delete(canvas->pvt->bt);
   canvas->pvt->bt = NULL;
   return had_err;
@@ -166,17 +182,16 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
   GtColor grey, fillcolor, strokecolor;
   double block_start, block_width, bar_height, min_len_block,
          arrow_width, stroke_width;
-  const char* caption;
+  const char* caption, *btype;
   GtStrand strand;
+  btype = gt_block_get_type(block);
 
   gt_assert(canvas && block);
 
   grey.red = grey.green = grey.blue = DEFAULT_GREY_TONE;
   strand = gt_block_get_strand(block);
   block_range = gt_block_get_range(block);
-  if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height,
-                        NULL))
-    bar_height = BAR_HEIGHT_DEFAULT;
+  bar_height = gt_block_get_max_height(block, canvas->pvt->sty);
   if (!gt_style_get_num(canvas->pvt->sty, "format", "min_len_block",
                         &min_len_block,
                         NULL))
@@ -209,9 +224,21 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
     caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
+      double theight = TOY_TEXT_HEIGHT,
+             captionspace = CAPTION_BAR_SPACE_DEFAULT;
+      gt_style_get_num(canvas->pvt->sty, "format", "block_caption_space",
+                   &captionspace, NULL);
+      gt_style_get_num(canvas->pvt->sty, "format", "block_caption_font_size",
+                       &theight, NULL);
+      gt_graphics_set_font(canvas->pvt->g,
+                           "sans-serif",
+                           SLANT_NORMAL,
+                           WEIGHT_NORMAL,
+                           theight);
       gt_graphics_draw_text_clip(canvas->pvt->g,
                                  block_start,
-                                 canvas->pvt->y -CAPTION_BAR_SPACE_DEFAULT,
+                                 canvas->pvt->y - bar_height/2
+                                                - captionspace,
                                  caption);
     }
   }
@@ -220,14 +247,13 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
   if (!gt_block_has_only_one_fullsize_element(block)
        && block_width < min_len_block)
   {
-    const char *btype = gt_block_get_type(block);
     gt_style_get_color(canvas->pvt->sty, btype, "fill", &fillcolor,
                        gt_block_get_top_level_feature(block));
     gt_style_get_color(canvas->pvt->sty, btype, "stroke", &strokecolor,
                        gt_block_get_top_level_feature(block));
     gt_graphics_draw_box(canvas->pvt->g,
                          block_start,
-                         canvas->pvt->y,
+                         canvas->pvt->y - bar_height/2,
                          block_width,
                          bar_height,
                          fillcolor,
@@ -240,23 +266,23 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
     /* draw arrowheads at clipped margins */
     if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
         gt_graphics_draw_arrowhead(canvas->pvt->g,
-                                   canvas->pvt->margins-10,
-                                   canvas->pvt->y+((bar_height-8)/2),
+                                   canvas->pvt->margins - 10,
+                                   canvas->pvt->y - 4,
                                    grey,
                                    ARROW_LEFT);
     if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
         gt_graphics_draw_arrowhead(canvas->pvt->g,
-                                   canvas->pvt->width-canvas->pvt->margins+10,
-                                   canvas->pvt->y+((bar_height-8)/2),
+                                   canvas->pvt->width-canvas->pvt->margins + 10,
+                                   canvas->pvt->y - 4,
                                    grey,
                                    ARROW_RIGHT);
     /* register coordinates in GtImageInfo object if available */
     if (canvas->pvt->ii)
     {
       GtRecMap *rm = gt_rec_map_new(block_start,
-                                    canvas->pvt->y,
+                                    canvas->pvt->y - bar_height/2,
                                     block_start + block_width,
-                                    canvas->pvt->y + bar_height,
+                                    canvas->pvt->y + bar_height/2,
                                     (GtFeatureNode*) /* XXX */
                                       gt_block_get_top_level_feature(block));
       gt_image_info_add_rec_map(canvas->pvt->ii, rm);
@@ -272,7 +298,7 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
   /* draw parent block boundaries */
   gt_graphics_draw_dashes(canvas->pvt->g,
                           block_start,
-                          canvas->pvt->y,
+                          canvas->pvt->y - bar_height/2,
                           block_width,
                           bar_height,
                           ARROW_NONE,
@@ -303,13 +329,21 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   type = gt_element_get_type(elem);
   grey.red = grey.green = grey.blue = .85;
   grey.alpha = 0.5;
+
+  /* get default or image-wide bar height */
   if (!gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height,
                         NULL))
     bar_height = BAR_HEIGHT_DEFAULT;
+  /* try to get type-specific bar height */
+  gt_style_get_num(canvas->pvt->sty, type, "bar_height", &bar_height,
+                   gt_element_get_node_ref(elem));
+  /* get default or image-wide arrow width */
   if (!gt_style_get_num(canvas->pvt->sty, "format", "arrow_width", &arrow_width,
-                        NULL)) {
+                        NULL))
     arrow_width = ARROW_WIDTH_DEFAULT;
-  }
+  /* try to get type-specific arrow width */
+  gt_style_get_num(canvas->pvt->sty, type, "arrow_width", &arrow_width,
+                   gt_element_get_node_ref(elem));
 
   if ((strand == GT_STRAND_REVERSE || strand == GT_STRAND_BOTH)
          /*&& delem == gt_dlist_first(elems)*/)
@@ -353,7 +387,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
       return had_err;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
                                    elem_start,
-                                   canvas->pvt->y,
+                                   canvas->pvt->y - bar_height/2,
                                    elem_color,
                                    bar_height,
                                    1.0);
@@ -363,9 +397,9 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   /* register coordinates in GtImageInfo object if available */
   if (canvas->pvt->ii)
   {
-    GtRecMap *rm = gt_rec_map_new(elem_start, canvas->pvt->y,
+    GtRecMap *rm = gt_rec_map_new(elem_start, canvas->pvt->y - bar_height/2,
                                   elem_start+elem_width,
-                                  canvas->pvt->y+bar_height,
+                                  canvas->pvt->y+bar_height/2,
                                   (GtFeatureNode*)
                                     gt_element_get_node_ref(elem));
     gt_image_info_add_rec_map(canvas->pvt->ii, rm);
@@ -389,7 +423,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   {
     gt_graphics_draw_box(canvas->pvt->g,
                          elem_start,
-                         canvas->pvt->y,
+                         canvas->pvt->y - bar_height/2,
                          elem_width,
                          bar_height,
                          fill_color,
@@ -403,7 +437,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   {
     gt_graphics_draw_box(canvas->pvt->g,
                          elem_start,
-                         canvas->pvt->y,
+                         canvas->pvt->y - bar_height/2,
                          elem_width,
                          bar_height,
                          fill_color,
@@ -417,7 +451,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   {
     gt_graphics_draw_caret(canvas->pvt->g,
                            elem_start,
-                           canvas->pvt->y,
+                           canvas->pvt->y - bar_height/2,
                            elem_width,
                            bar_height,
                            ARROW_NONE,
@@ -429,7 +463,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   {
     gt_graphics_draw_dashes(canvas->pvt->g,
                             elem_start,
-                            canvas->pvt->y,
+                            canvas->pvt->y - bar_height/2,
                             elem_width,
                             bar_height,
                             arrow_status,
@@ -441,7 +475,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   {
     gt_graphics_draw_horizontal_line(canvas->pvt->g,
                                      elem_start,
-                                     canvas->pvt->y,
+                                     canvas->pvt->y - bar_height/2,
                                      elem_color,
                                      elem_width,
                                      1.0);
@@ -450,7 +484,7 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   {
      gt_graphics_draw_box(canvas->pvt->g,
                           elem_start,
-                          canvas->pvt->y,
+                          canvas->pvt->y - bar_height/2,
                           elem_width,
                           bar_height,
                           fill_color,
@@ -465,14 +499,14 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   /* draw arrowheads at clipped margins */
   if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
       gt_graphics_draw_arrowhead(canvas->pvt->g,
-                                 canvas->pvt->margins-10,
-                                 canvas->pvt->y+((bar_height-8)/2),
+                                 canvas->pvt->margins - 10,
+                                 canvas->pvt->y - 4,
                                  grey,
                                  ARROW_LEFT);
   if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
       gt_graphics_draw_arrowhead(canvas->pvt->g,
-                                 canvas->pvt->width-canvas->pvt->margins+10,
-                                 canvas->pvt->y+((bar_height-8)/2),
+                                 canvas->pvt->width-canvas->pvt->margins + 10,
+                                 canvas->pvt->y - 4,
                                  grey,
                                  ARROW_RIGHT);
   return had_err;
@@ -496,14 +530,23 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 
   if (show_track_captions)
   {
+    double theight = TOY_TEXT_HEIGHT;
+    gt_style_get_num(canvas->pvt->sty, "format", "track_caption_font_size",
+                     &theight, NULL);
     /* draw track title */
+    gt_graphics_set_font(canvas->pvt->g,
+                           "sans-serif",
+                           SLANT_NORMAL,
+                           WEIGHT_NORMAL,
+                           theight);
     gt_graphics_draw_colored_text(canvas->pvt->g,
                                   canvas->pvt->margins,
                                   canvas->pvt->y,
                                   color,
                                   gt_custom_track_get_title(ct));
+    canvas->pvt->y += theight + CAPTION_BAR_SPACE_DEFAULT;
   }
-  canvas->pvt->y += TOY_TEXT_HEIGHT + CAPTION_BAR_SPACE_DEFAULT;
+
   /* call rendering function */
   had_err = gt_custom_track_render(ct,
                                    canvas->pvt->g,
@@ -529,18 +572,23 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 /* Renders a ruler with dynamic scale labeling and optional grid. */
 void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
 {
-  double step, minorstep, vmajor, vminor, margins;
+  double step, minorstep, vmajor, vminor, theight = TOY_TEXT_HEIGHT;
   long base_length, tick;
   GtColor rulercol, gridcol;
   char str[BUFSIZ];
-  bool showgrid;
+  bool showgrid = true;
   gt_assert(canvas);
 
-  margins = canvas->pvt->margins;
+  gt_style_get_bool(canvas->pvt->sty, "format", "show_grid", &showgrid, NULL);
+  gt_style_get_num(canvas->pvt->sty, "format", "ruler_font_size", &theight,
+                   NULL);
 
-  if (!(gt_style_get_bool(canvas->pvt->sty, "format", "show_grid", &showgrid,
-                          NULL)))
-    showgrid = true;
+  /* reset font to default */
+  gt_graphics_set_font(canvas->pvt->g,
+                       "sans-serif",
+                       SLANT_NORMAL,
+                       WEIGHT_NORMAL,
+                       theight);
 
   rulercol.red = rulercol.green = rulercol.blue = RULER_GREY;
   rulercol.alpha = 1.0;
@@ -561,8 +609,9 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
   /* draw major ticks */
   for (tick = vmajor; tick <= viewrange.end; tick += step)
   {
-    double drawtick = gt_coords_convert_point(viewrange, tick)
-                       * (canvas->pvt->width-2*margins) + margins;
+    double drawtick = (gt_coords_convert_point(viewrange, tick)
+                       * (canvas->pvt->width-2*canvas->pvt->margins))
+                       + canvas->pvt->margins;
     if (tick < viewrange.start) continue;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
                                    drawtick,
@@ -582,15 +631,16 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
     for (tick = vminor; tick <= viewrange.end; tick += minorstep)
     {
       if (tick < viewrange.start) continue;
-      double drawtick = gt_coords_convert_point(viewrange, tick)
-                       * (canvas->pvt->width-2*margins) + margins;
+      double drawtick = (gt_coords_convert_point(viewrange, tick)
+                       * (canvas->pvt->width-2*canvas->pvt->margins))
+                       + canvas->pvt->margins;
       if (showgrid)
       {
         gt_graphics_draw_vertical_line(canvas->pvt->g,
                                        drawtick,
                                        canvas->pvt->y + 40,
                                        gridcol,
-                                       canvas->pvt->height-40-15,
+                                       canvas->pvt->height - 40 - 15,
                                        1.0);
       }
       gt_graphics_draw_vertical_line(canvas->pvt->g,
@@ -606,15 +656,16 @@ void gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange)
                                    canvas->pvt->margins,
                                    canvas->pvt->y + 40,
                                    rulercol,
-                                   canvas->pvt->width-2*margins,
+                                   canvas->pvt->width - 2
+                                     * canvas->pvt->margins,
                                    1.5);
   /* put 3' and 5' captions at the ends */
   gt_graphics_draw_text_centered(canvas->pvt->g,
-                                 canvas->pvt->margins-10,
-                                 canvas->pvt->y + 45-(TOY_TEXT_HEIGHT/2),
+                                 canvas->pvt->margins - 10,
+                                 canvas->pvt->y + 45 - (theight/2),
                                  FIVE_PRIME_STRING);
   gt_graphics_draw_text_centered(canvas->pvt->g,
-                                 canvas->pvt->width-canvas->pvt->margins+10,
-                                 canvas->pvt->y + 45-(TOY_TEXT_HEIGHT/2),
+                                 canvas->pvt->width - canvas->pvt->margins + 10,
+                                 canvas->pvt->y + 45 - (theight/2),
                                  THREE_PRIME_STRING);
 }

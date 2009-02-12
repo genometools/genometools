@@ -65,6 +65,8 @@ echoseq.c
 fillsci.c
 greedyfwdmat.c
 idx-limdfs.c
+idxlocali.c
+idxlocalidp.c
 initeqsvec.c
 inl-encseq.c
 iter-window.c

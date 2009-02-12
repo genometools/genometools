@@ -18,7 +18,6 @@
 #include <math.h>
 #include "divmodmul.h"
 #include "fmindex.h"
-#include "alphadef.h"
 #include "safecast-gen.h"
 
 Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength)

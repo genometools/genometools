@@ -21,7 +21,7 @@
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome stream'' interface */
-typedef struct TargetbestGtFilterStream TargetbestGtFilterStream;
+typedef struct GtTargetbestFilterStream GtTargetbestFilterStream;
 
 const GtNodeStreamClass* gt_targetbest_filter_stream_class(void);
 GtNodeStream*            gt_targetbest_filter_stream_new(GtNodeStream*);

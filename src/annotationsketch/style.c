@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,7 @@
 struct GtStyle
 {
   lua_State *L;
+  unsigned long reference_count;
   char *filename;
 };
 
@@ -93,6 +94,13 @@ GtStyle* gt_style_new_with_state(lua_State *L)
   sty = gt_calloc(1, sizeof (GtStyle));
   sty->L = L;
   return sty;
+}
+
+GtStyle* gt_style_ref(GtStyle *style)
+{
+  gt_assert(style);
+  style->reference_count++;
+  return style;
 }
 
 int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
@@ -174,7 +182,6 @@ static int style_find_section_for_getting(const GtStyle *sty,
   } else depth++;
   lua_getfield(sty->L, -1, section);
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-    gt_log_log("section '%s' is not defined", section);
     lua_pop(sty->L, 2);
     return -1;
   } else depth++;
@@ -218,42 +225,25 @@ bool gt_style_get_color(const GtStyle *sty, const char *section,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-    gt_log_log("no colors are defined for type '%s', will use defaults.", key);
     lua_pop(sty->L, 3);
     gt_assert(lua_gettop(sty->L) == stack_size);
     return false;
   } else i++;
   /* update color struct */
   lua_getfield(sty->L, -1, "red");
-  if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
-               "default","red", key);
-  }
-  else
+  if (!lua_isnil(sty->L, -1) && lua_isnumber(sty->L, -1))
     color->red = lua_tonumber(sty->L,-1);
   lua_pop(sty->L, 1);
   lua_getfield(sty->L, -1, "green");
-  if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
-               "default","green", key);
-  }
-  else
+  if (!lua_isnil(sty->L, -1) && lua_isnumber(sty->L, -1))
     color->green = lua_tonumber(sty->L,-1);
   lua_pop(sty->L, 1);
   lua_getfield(sty->L, -1, "blue");
-  if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
-               "default","blue", key);
-  }
-  else
+  if (!lua_isnil(sty->L, -1) && lua_isnumber(sty->L, -1))
     color->blue = lua_tonumber(sty->L,-1);
   lua_pop(sty->L, 1);
   lua_getfield(sty->L, -1, "alpha");
-  if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_log_log("%s  value for type '%s' is undefined or not numeric, using "
-               "default","alpha", key);
-  }
-  else
+  if (!lua_isnil(sty->L, -1) && lua_isnumber(sty->L, -1))
     color->alpha = lua_tonumber(sty->L,-1);
   lua_pop(sty->L, 1);
   /* reset stack to original state for subsequent calls */
@@ -332,7 +322,6 @@ bool gt_style_get_str(const GtStyle *sty, const char *section,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_isstring(sty->L, -1)) {
-    gt_log_log("no value is defined for key '%s'", key);
     lua_pop(sty->L, i+1);
     gt_assert(lua_gettop(sty->L) == stack_size);
     return false;
@@ -399,7 +388,6 @@ bool gt_style_get_num(const GtStyle *sty, const char *section, const char *key,
   }
 
   if (lua_isnil(sty->L, -1) || !lua_isnumber(sty->L, -1)) {
-    gt_log_log("no or non-numeric value found for key '%s'", key);
     lua_pop(sty->L, i+1);
     gt_assert(lua_gettop(sty->L) == stack_size);
     return false;
@@ -452,7 +440,6 @@ bool gt_style_get_bool(const GtStyle *sty, const char *section,
   /* lookup entry for given key */
   lua_getfield(sty->L, -1, key);
   if (lua_isnil(sty->L, -1) || !lua_isboolean(sty->L, -1)) {
-    gt_log_log("no or non-boolean value found for key '%s'", key);
     lua_pop(sty->L, i+1);
     gt_assert(lua_gettop(sty->L) == stack_size);
     return false;
@@ -671,6 +658,11 @@ int gt_style_unit_test(GtError *err)
 void gt_style_delete_without_state(GtStyle *sty)
 {
   if (!sty) return;
+  if (sty->reference_count)
+  {
+    sty->reference_count--;
+    return;
+  }
   gt_free(sty->filename);
   gt_free(sty);
 }
@@ -678,6 +670,11 @@ void gt_style_delete_without_state(GtStyle *sty)
 void gt_style_delete(GtStyle *sty)
 {
   if (!sty) return;
+  if (sty->reference_count)
+  {
+    sty->reference_count--;
+    return;
+  }
   if (sty->L) lua_close(sty->L);
   gt_style_delete_without_state(sty);
 }

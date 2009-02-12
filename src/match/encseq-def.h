@@ -195,7 +195,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr);
                                     Seqpos totallength,
                                     unsigned long numofsequences,
                                     const Seqpos *specialrangestab,
-                                    const Alphabet *alphabet,
+                                    const SfxAlphabet *alphabet,
                                     const char *str_sat,
                                     unsigned long *characterdistribution,
                                     const Specialcharinfo *specialcharinfo,
@@ -217,7 +217,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       const Alphabet *alpha,
+                                       const SfxAlphabet *alpha,
                                        Verboseinfo *verboseinfo);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
@@ -335,7 +335,7 @@ unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq);
 
 const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq);
 
-const Alphabet *getencseqAlphabet(const Encodedsequence *encseq);
+const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq);
 
 const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
 

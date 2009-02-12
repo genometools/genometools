@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,8 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "annotationsketch/default_formats.h"
+#include "annotationsketch/style.h"
 #include "annotationsketch/text_width_calculator.h"
 #include "annotationsketch/text_width_calculator_cairo.h"
 #include "annotationsketch/text_width_calculator_rep.h"
@@ -29,6 +31,7 @@
 
 struct GtTextWidthCalculatorCairo {
   const GtTextWidthCalculator parent_instance;
+  GtStyle *style;
   cairo_t *context;
   cairo_surface_t *mysurf;
   bool own_context;
@@ -42,11 +45,21 @@ double gt_text_width_calculator_cairo_get_text_width(GtTextWidthCalculator *twc,
                                                      const char *text)
 {
   GtTextWidthCalculatorCairo *twcc;
+  double theight = TOY_TEXT_HEIGHT;
   cairo_text_extents_t ext;
   gt_assert(twc && text);
   twcc = gt_text_width_calculator_cairo_cast(twc);
+  if (twcc->style)
+  {
+    gt_style_get_num(twcc->style, "format", "block_caption_font_size",
+                     &theight, NULL);
+    cairo_save(twcc->context);
+    cairo_set_font_size(twcc->context, theight);
+  }
   /* get text extents */
   cairo_text_extents(twcc->context, text, &ext);
+  if (twcc->style)
+    cairo_restore(twcc->context);
   return ext.width;
 }
 
@@ -55,6 +68,8 @@ void gt_text_width_calculator_cairo_delete(GtTextWidthCalculator *twc)
   GtTextWidthCalculatorCairo *twcc;
   if (!twc) return;
   twcc = gt_text_width_calculator_cairo_cast(twc);
+  if (twcc->style)
+    gt_style_delete(twcc->style);
   if (twcc->own_context)
   {
     cairo_destroy(twcc->context);
@@ -75,13 +90,15 @@ const GtTextWidthCalculatorClass* gt_text_width_calculator_cairo_class(void)
   return twcc;
 }
 
-GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context)
+GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
+                                                          GtStyle *style)
 {
   GtTextWidthCalculatorCairo *twcc;
   GtTextWidthCalculator *twc;
   twc = gt_text_width_calculator_create(gt_text_width_calculator_cairo_class());
   twcc = gt_text_width_calculator_cairo_cast(twc);
-
+  if (style)
+    twcc->style = gt_style_ref(style);
   if (!context)
   {
     twcc->mysurf = cairo_image_surface_create(GT_TWC_FORMAT, GT_TWC_WIDTH,

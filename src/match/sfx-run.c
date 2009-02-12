@@ -243,7 +243,7 @@ static int suffixeratorwithoutput(
 }
 
 static void showcharacterdistribution(
-                   const  Alphabet *alpha,
+                   const SfxAlphabet *alpha,
                    const unsigned long *characterdistribution,
                    Verboseinfo *verboseinfo)
 {
@@ -271,7 +271,7 @@ static void showsequencefeatures(Verboseinfo *verboseinfo,
               PRINTSeqposcast(getencseqrealspecialranges(encseq)));
   if (characterdistribution != NULL)
   {
-    const Alphabet *alpha = getencseqAlphabet(encseq);
+    const SfxAlphabet *alpha = getencseqAlphabet(encseq);
     showcharacterdistribution(alpha,characterdistribution,verboseinfo);
   }
 }

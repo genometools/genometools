@@ -19,7 +19,6 @@
 #include "core/chardef.h"
 #include "core/symboldef.h"
 #include "encseq-def.h"
-#include "alphadef.h"
 #include "spacedef.h"
 #include "enum-patt-def.h"
 

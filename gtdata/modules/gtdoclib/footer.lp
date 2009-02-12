@@ -1,5 +1,5 @@
 <div id="footer">
-Copyright &copy; 2008
+Copyright &copy; 2008-2009
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
 Last update: <%=os.date("%Y-%m-%d")%>
 </div>

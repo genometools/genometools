@@ -96,6 +96,7 @@
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_index_memory.h"
 #include "annotationsketch/gt_sketch.h"
+#include "annotationsketch/gt_sketch_page.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/track.h"
 #include "annotationsketch/rec_map.h"
@@ -149,6 +150,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "uniquesub", gt_uniquesub);
 #ifndef WITHOUT_CAIRO
   gt_toolbox_add(tools, "sketch", gt_sketch);
+  gt_toolbox_add_tool(tools, "sketch_page", gt_sketch_page());
 #endif
 
   return tools;

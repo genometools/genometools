@@ -34,10 +34,10 @@ typedef struct GtDiagram GtDiagram;
 #include "annotationsketch/block_api.h"
 #include "core/error_api.h"
 
-/* A <GtTrackSelectorFunc> is a callback function which returns a string
-   which can be used as a track identifier for assignment of a <GtBlock>
+/* A <GtTrackSelectorFunc> is a callback function which sets a <GtStr> to a
+   string to be used as a track identifier for assignment of a <GtBlock>
    to a given track. */
-typedef const char* (*GtTrackSelectorFunc)(GtBlock*, void*);
+typedef void (*GtTrackSelectorFunc)(GtBlock*, GtStr*, void*);
 
 /* Create a new <GtDiagram> object representing the feature nodes in
    <feature_index> in region <seqid> overlapping with <range>. The <GtStyle>

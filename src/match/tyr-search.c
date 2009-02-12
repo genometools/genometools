@@ -37,7 +37,7 @@ typedef struct
   unsigned long mersize;
   unsigned int showmode,
                searchstrand;
-  Alphabet *dnaalpha;
+  SfxAlphabet *dnaalpha;
 } Tyrsearchinfo;
 
 static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
@@ -60,7 +60,7 @@ static void tyrsearchinfo_init(Tyrsearchinfo *tyrsearchinfo,
 
 void tyrsearchinfo_delete(Tyrsearchinfo *tyrsearchinfo)
 {
-  freeAlphabet(&tyrsearchinfo->dnaalpha);
+  freeSfxAlphabet(&tyrsearchinfo->dnaalpha);
   FREESPACE(tyrsearchinfo->bytecode);
   FREESPACE(tyrsearchinfo->rcbuf);
 }

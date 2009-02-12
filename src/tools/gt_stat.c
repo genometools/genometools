@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -85,7 +85,6 @@ static OPrval parse_options(int *parsed_args, StatArguments *arguments,
 int gt_stat(int argc, const char **argv, GtError *err)
 {
   GtNodeStream *gff3_in_stream, *stat_stream;
-  GtGenomeNode *gn;
   int parsed_args, had_err;
   StatArguments arguments;
   gt_error_check(err);
@@ -113,9 +112,7 @@ int gt_stat(int argc, const char **argv, GtError *err)
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
-  while (!(had_err = gt_node_stream_next(stat_stream, &gn, err)) && gn) {
-    gt_genome_node_delete(gn);
-  }
+  had_err = gt_node_stream_pull(stat_stream, err);
 
   /* show statistics */
   if (!had_err)

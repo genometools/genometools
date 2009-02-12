@@ -29,41 +29,41 @@
   The following type is for storing alphabets.
 */
 
-typedef struct Alphabet Alphabet;
+typedef struct SfxAlphabet SfxAlphabet;
 
-/*@null@*/ Alphabet *assigninputalphabet(bool isdna,
-                                         bool isprotein,
-                                         const GtStr *smapfile,
-                                         const GtStrArray *filenametab,
-                                         GtError *err);
+/*@null@*/ SfxAlphabet *assigninputalphabet(bool isdna,
+                                            bool isprotein,
+                                            const GtStr *smapfile,
+                                            const GtStrArray *filenametab,
+                                            GtError *err);
 
-Alphabet *copyAlphabet(const Alphabet *alpha2);
+SfxAlphabet *gt_copyAlphabet(const SfxAlphabet *alpha2);
 
-const Uchar *getsymbolmapAlphabet(const Alphabet *alpha);
+const Uchar *getsymbolmapAlphabet(const SfxAlphabet *alpha);
 
-unsigned int getnumofcharsAlphabet(const Alphabet *alpha);
+unsigned int getnumofcharsAlphabet(const SfxAlphabet *alpha);
 
-const Uchar *getcharactersAlphabet(const Alphabet *alpha);
+const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha);
 
-void freeAlphabet(Alphabet **alpha);
+void freeSfxAlphabet(SfxAlphabet **alpha);
 
-void outputalphabet(FILE *fpout,const Alphabet *alpha);
+void outputalphabet(FILE *fpout,const SfxAlphabet *alpha);
 
-void fprintfsymbolstring(FILE *fpout,const Alphabet *alpha,
+void fprintfsymbolstring(FILE *fpout,const SfxAlphabet *alpha,
                          const Uchar *w,unsigned long wlen);
 
-void printfsymbolstring(const Alphabet *alpha,const Uchar *w,
+void printfsymbolstring(const SfxAlphabet *alpha,const Uchar *w,
                         unsigned long wlen);
 
-void sprintfsymbolstring(char *buffer,const Alphabet *alpha,
+void sprintfsymbolstring(char *buffer,const SfxAlphabet *alpha,
                          const Uchar *w,unsigned long wlen);
 
-void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar);
+void echoprettysymbol(FILE *fpout,const SfxAlphabet *alpha,Uchar currentchar);
 
-Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar);
+Uchar getprettysymbol(const SfxAlphabet *alpha,unsigned int currentchar);
 
-bool isproteinalphabet(const Alphabet *alpha);
+bool isproteinalphabet(const SfxAlphabet *alpha);
 
-bool isdnaalphabet(const Alphabet *alpha);
+bool isdnaalphabet(const SfxAlphabet *alpha);
 
 #endif

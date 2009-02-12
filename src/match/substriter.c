@@ -36,7 +36,7 @@ struct Substriter
   Codetype **multimappower;
 };
 
-Substriter *substriter_new(const Alphabet *alphabet,unsigned int qvalue)
+Substriter *substriter_new(const SfxAlphabet *alphabet,unsigned int qvalue)
 {
   Substriter *substriter;
   ALLOCASSIGNSPACE(substriter,NULL,Substriter,1);

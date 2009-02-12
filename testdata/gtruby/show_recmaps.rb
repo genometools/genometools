@@ -41,7 +41,7 @@ range = feature_index.get_range_for_seqid(seqid)
 
 style = GT::Style.new()
 diagram = GT::Diagram.from_index(feature_index, seqid, range, style)
-layout = GT::Layout.new(diagram, 800, style)
+layout = GT::Layout.new(diagram, 700, style)
 ii = GT::ImageInfo.new()
 image_info = GT::ImageInfo.new()
 canvas = GT::CanvasCairoFile.new(style, 800, layout.get_height, image_info)

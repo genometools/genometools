@@ -178,6 +178,9 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                                      arguments->outputspec);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
 

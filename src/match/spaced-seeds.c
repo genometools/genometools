@@ -41,12 +41,12 @@ typedef struct
 #ifdef SKDEBUG
 
 static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
-                                unsigned long depth,
-                                const void *dfsconstinfo)
+                                unsigned long currentdepth,
+                                GT_UNUSED const void *dfsconstinfo)
 {
   const Limdfsstate *col = (const Limdfsstate *) aliascol;
 
-  printf("at depth %lu (pathmatches=%s)\n",depth,
+  printf("at depth %lu (pathmatches=%s)\n",currentdepth,
                                             col->pathmatches
                                               ? "true" : "false");
 }
@@ -60,8 +60,8 @@ static void *spse_allocatedfsconstinfo(GT_UNUSED unsigned int alphasize)
 }
 
 static void spse_initdfsconstinfo(void *dfsconstinfo,
-                                 unsigned int alphasize,
-                                 ...)
+                                  unsigned int alphasize,
+                                  ...)
                                  /* Variable argument list is as follows:
                                     const Uchar *pattern,
                                     Bitstring seedbitvector,
@@ -180,6 +180,9 @@ const AbstractDfstransformer *spse_AbstractDfstransformer(void)
     NULL, /* no extractdfsconstinfo */
     spse_freedfsconstinfo,
     spse_initLimdfsstate,
+    NULL,
+    NULL,
+    NULL,
     spse_fullmatchLimdfsstate,
     spse_nextLimdfsstate,
     spse_inplacenextLimdfsstate,

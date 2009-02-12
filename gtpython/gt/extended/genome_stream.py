@@ -18,6 +18,7 @@
 from gt.dlload import gtlib
 from gt.core.error import Error, gterror
 from gt.extended.genome_node import GenomeNode
+from ctypes import byref, c_void_p
 
 
 class GenomeStream:
@@ -38,7 +39,6 @@ class GenomeStream:
   from_param = classmethod(from_param)
 
   def next_tree(self):
-    from ctypes import byref, c_void_p
     err = Error()
     genome_node = c_void_p()
     rval = gtlib.gt_node_stream_next(self.gs, byref(genome_node), err)
@@ -48,3 +48,10 @@ class GenomeStream:
       return None
     else:
       return GenomeNode(genome_node.value)
+
+  def pull(self):
+    err = Error()
+    rval = gtlib.gt_node_stream_pull(self.gs, err)
+    if rval != 0:
+      gterror(err)
+

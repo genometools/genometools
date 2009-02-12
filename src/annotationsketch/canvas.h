@@ -27,6 +27,7 @@
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/drawing_range.h"
 #include "annotationsketch/element.h"
+#include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
 
 typedef struct GtCanvasClass GtCanvasClass;
@@ -39,6 +40,8 @@ void*           gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
 
 void            gt_format_ruler_label(char *txt, unsigned long pos,
                                       size_t buflen);
+GtStyle*        gt_canvas_get_style(GtCanvas *canvas);
+
 /* Callback function for rendering. */
 int             gt_canvas_visit_layout_pre(GtCanvas*, GtLayout*, GtError*);
 /* Callback function for rendering. */

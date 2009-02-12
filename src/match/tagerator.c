@@ -28,7 +28,6 @@
 #include "intbits.h"
 #include "alphadef.h"
 #include "myersapm.h"
-#include "eis-voiditf.h"
 #include "format64.h"
 #include "idx-limdfs.h"
 #include "mssufpat.h"
@@ -65,7 +64,7 @@ typedef struct
   const TageratorOptions *tageratoroptions;
   unsigned int alphasize;
   const Uchar *tagptr;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
   unsigned long *eqsvector;
   const Tagwithlength *twlptr;
 } Showmatchinfo;
@@ -534,17 +533,17 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
-  Suffixarray suffixarray;
-  Seqpos totallength = 0;
   GtSeqIterator *seqit = NULL;
   bool haserr = false;
   int retval;
-  unsigned int demand;
   Myersonlineresources *mor = NULL;
   ArraySimplematch storeonline, storeoffline;
-  void *packedindex = NULL;
   const AbstractDfstransformer *dfst;
+  Genericindex *genericindex = NULL;
+  const Encodedsequence *encseq = NULL;
+  Verboseinfo *verboseinfo;
 
+  verboseinfo = newverboseinfo(tageratoroptions->verbose);
   if (tageratoroptions->userdefinedmaxdistance >= 0)
   {
     dfst = apme_AbstractDfstransformer();
@@ -552,59 +551,33 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     dfst = pms_AbstractDfstransformer();
   }
-  if (tageratoroptions->withesa)
+  if (tageratoroptions->online)
   {
-    demand = SARR_ESQTAB;
-    if (!tageratoroptions->online)
+    encseq = mapencodedsequence (true,
+                                 tageratoroptions->indexname,
+                                 true,
+                                 false,
+                                 false,
+                                 verboseinfo,
+                                 err);
+    if (encseq == NULL)
     {
-      demand |= SARR_SUFTAB;
+      haserr = true;
     }
   } else
   {
-    if (tageratoroptions->docompare || tageratoroptions->online)
+    genericindex = genericindex_new(tageratoroptions->indexname,
+                                    tageratoroptions->withesa,
+                                    tageratoroptions->docompare,
+                                    tageratoroptions->userdefinedmaxdepth,
+                                    verboseinfo,
+                                    err);
+    if (genericindex == NULL)
     {
-      demand = SARR_ESQTAB;
-    } else
-    {
-      demand = 0;
-    }
-  }
-  if (mapsuffixarray(&suffixarray,
-                     demand,
-                     tageratoroptions->indexname,
-                     NULL,
-                     err) != 0)
-  {
-    haserr = true;
-  } else
-  {
-    totallength = getencseqtotallength(suffixarray.encseq);
-  }
-  if (!haserr)
-  {
-    if (tageratoroptions->withesa && suffixarray.readmode != Forwardmode)
-    {
-      gt_error_set(err,"using option -esa you can only process index "
-                    "in forward mode");
       haserr = true;
     } else
     {
-      if (!tageratoroptions->withesa && suffixarray.readmode != Reversemode)
-      {
-        gt_error_set(err,"with option -pck you can only process index "
-                      "in reverse mode");
-        haserr = true;
-      }
-    }
-  }
-  if (!haserr && !tageratoroptions->withesa)
-  {
-    packedindex = loadvoidBWTSeqForSA(tageratoroptions->indexname,
-                                      &suffixarray,
-                                      totallength, true, err);
-    if (packedindex == NULL)
-    {
-      haserr = true;
+      encseq = genericindex_getencseq(genericindex);
     }
   }
   INITARRAY(&storeonline,Simplematch);
@@ -620,10 +593,12 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     Showmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;
+    const SfxAlphabet *alpha;
 
     storeonline.twlptr = storeoffline.twlptr = &twl;
-    symbolmap = getencseqAlphabetsymbolmap(suffixarray.encseq);
-    numofchars = getencseqAlphabetnumofchars(suffixarray.encseq);
+    alpha = getencseqAlphabet(encseq);
+    symbolmap = getsymbolmapAlphabet(alpha);
+    numofchars = getnumofcharsAlphabet(alpha);
     if (tageratoroptions->docompare)
     {
       processmatch = storematch;
@@ -636,7 +611,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       showmatchinfo.twlptr = &twl;
       showmatchinfo.tageratoroptions = tageratoroptions;
       showmatchinfo.alphasize = (unsigned int) numofchars;
-      showmatchinfo.alpha = getencseqAlphabet(suffixarray.encseq);
+      showmatchinfo.alpha = alpha;
       showmatchinfo.eqsvector = gt_malloc(sizeof(*showmatchinfo.eqsvector) *
                                           showmatchinfo.alphasize);
       processmatchinfooffline = &showmatchinfo;
@@ -644,33 +619,17 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     }
     if (tageratoroptions->online || tageratoroptions->docompare)
     {
-      gt_assert(suffixarray.encseq != NULL);
+      gt_assert(encseq != NULL);
       mor = newMyersonlineresources(numofchars,
                                     tageratoroptions->nowildcards,
-                                    suffixarray.encseq,
+                                    encseq,
                                     processmatch,
                                     processmatchinfoonline);
     }
     if (!tageratoroptions->online || tageratoroptions->docompare)
     {
-      const Mbtab **mbtab;
-      unsigned int maxdepth;
       unsigned long maxpathlength;
 
-      if (tageratoroptions->withesa)
-      {
-        mbtab = NULL;
-        maxdepth = 0;
-      } else
-      {
-        mbtab = bwtseq2mbtab(packedindex);
-        maxdepth = bwtseq2maxdepth(packedindex);
-        if (tageratoroptions->userdefinedmaxdepth >= 0 &&
-            maxdepth > (unsigned int) tageratoroptions->userdefinedmaxdepth)
-        {
-          maxdepth = (unsigned int) tageratoroptions->userdefinedmaxdepth;
-        }
-      }
       if (tageratoroptions->userdefinedmaxdistance >= 0)
       {
         maxpathlength = (unsigned long) (1+ MAXTAGSIZE +
@@ -680,16 +639,11 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       {
         maxpathlength = (unsigned long) (1+MAXTAGSIZE);
       }
-      limdfsresources = newLimdfsresources(tageratoroptions->withesa
-                                             ? &suffixarray : packedindex,
-                                           mbtab,
-                                           maxdepth,
-                                           suffixarray.encseq,
-                                           tageratoroptions->withesa,
+      limdfsresources = newLimdfsresources(genericindex,
                                            tageratoroptions->nowildcards,
                                            tageratoroptions->maxintervalwidth,
-                                           totallength,
                                            maxpathlength,
+                                           false, /* keepexpandedonstack */
                                            processmatch,
                                            processmatchinfooffline,
                                            tageratoroptions->docompare
@@ -737,8 +691,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       if (tageratoroptions->outputmode & TAGOUT_TAGSEQ)
       {
         printf("\t%lu\t",twl.taglen);
-        fprintfsymbolstring(stdout,getencseqAlphabet(suffixarray.encseq),
-                            twl.transformedtag,twl.taglen);
+        fprintfsymbolstring(stdout,alpha,twl.transformedtag,twl.taglen);
       }
       printf("\n");
       storeoffline.nextfreeSimplematch = 0;
@@ -783,11 +736,15 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     freeMyersonlineresources(&mor);
   }
-  gt_seqiterator_delete(seqit);
-  freesuffixarray(&suffixarray);
-  if (packedindex != NULL)
+  if (genericindex == NULL)
   {
-    deletevoidBWTSeq(packedindex);
+    gt_assert(encseq != NULL);
+    freeEncodedsequence((Encodedsequence **) &encseq);
+  } else
+  {
+    genericindex_delete(genericindex);
   }
+  gt_seqiterator_delete(seqit);
+  freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }

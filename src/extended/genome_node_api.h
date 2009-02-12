@@ -46,6 +46,15 @@ unsigned long gt_genome_node_get_start(GtGenomeNode *genome_node);
    Corresponds to column 5 of regular GFF3 lines. */
 unsigned long gt_genome_node_get_end(GtGenomeNode *genome_Node);
 
+/* Return the filename the <genome_node> was read from.
+   If the node did not originate from a file, an appropriate string is
+   returned. */
+const char*   gt_genome_node_get_filename(const GtGenomeNode* genome_node);
+
+/* Return the line of the source file the <genome_node> was encountered on
+   (if the node was read from a file) */
+unsigned int  gt_genome_node_get_line_number(const GtGenomeNode*);
+
 /* Set the genomic range of <genome_node> to given <range>. */
 void          gt_genome_node_set_range(GtGenomeNode *genome_node,
                                        const GtRange *range);

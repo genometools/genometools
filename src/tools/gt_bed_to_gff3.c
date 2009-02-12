@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -75,7 +75,6 @@ static int gt_bed_to_gff3_runner(GT_UNUSED int argc, const char **argv,
 {
   GtNodeStream *bed_in_stream = NULL, *gff3_out_stream = NULL;
   BEDToGFF3Arguments *arguments = tool_arguments;
-  GtGenomeNode *gn;
   int had_err;
 
   gt_error_check(err);
@@ -95,8 +94,7 @@ static int gt_bed_to_gff3_runner(GT_UNUSED int argc, const char **argv,
   gff3_out_stream = gt_gff3_out_stream_new(bed_in_stream, NULL);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = gt_node_stream_next(gff3_out_stream, &gn, err)) && gn)
-    gt_genome_node_delete(gn);
+  had_err = gt_node_stream_pull(gff3_out_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);

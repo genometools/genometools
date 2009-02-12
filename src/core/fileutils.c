@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
@@ -143,28 +143,34 @@ int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
   return had_err;
 }
 
-off_t gt_files_estimate_total_size(const GtStrArray *filenames)
+off_t gt_file_estimate_size(const char *filename)
 {
-  unsigned long filenum;
-  off_t totalsize = 0;
+  off_t size;
   struct stat sb;
   GtGenFileMode gfm;
   int fd;
 
+  gt_assert(filename);
+
+  fd = gt_xopen(filename, O_RDONLY, 0);
+  gt_xfstat(fd, &sb);
+  gfm = gt_genfilemode_determine(filename);
+  if (gfm == GFM_UNCOMPRESSED)
+    size = sb.st_size;
+  else
+    size = sb.st_size  * 4; /* expected compression rate for sequence is 0.25 */
+  gt_xclose(fd);
+
+  return size;
+}
+
+off_t gt_files_estimate_total_size(const GtStrArray *filenames)
+{
+  unsigned long filenum;
+  off_t totalsize = 0;
+
   for (filenum = 0; filenum < gt_str_array_size(filenames); filenum++)
-  {
-    fd = gt_xopen(gt_str_array_get(filenames,filenum), O_RDONLY, 0);
-    gt_xfstat(fd, &sb);
-    gfm = gt_genfilemode_determine(gt_str_array_get(filenames,filenum));
-    if (gfm == GFM_UNCOMPRESSED)
-    {
-      totalsize += sb.st_size;
-    } else
-    {
-      totalsize += (4*sb.st_size); /* expected compression rate for
-                                      sequence is 0.25 */
-    }
-    gt_xclose(fd);
-  }
+    totalsize += gt_file_estimate_size(gt_str_array_get(filenames, filenum));
+
   return totalsize;
 }

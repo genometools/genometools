@@ -140,7 +140,7 @@ void freefmindex(Fmindex *fmindex)
   }
   if (fmindex->alphabet != NULL)
   {
-    freeAlphabet(&fmindex->alphabet);
+    freeSfxAlphabet(&fmindex->alphabet);
   }
 }
 

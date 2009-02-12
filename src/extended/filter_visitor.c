@@ -29,11 +29,11 @@ struct GtFilterVisitor {
   const GtNodeVisitor parent_instance;
   GtQueue *gt_genome_node_buffer;
   GtStr *seqid,
-      *typefilter;
+        *typefilter;
   GtRange contain_range,
-        overlap_range;
+          overlap_range;
   GtStrand strand,
-         targetstrand;
+           targetstrand;
   bool has_CDS;
   unsigned long max_gene_length,
                 gene_num,     /* the number of passed genes */

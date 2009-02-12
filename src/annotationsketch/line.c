@@ -76,7 +76,7 @@ int gt_line_sketch(GtLine *line, GtCanvas *canvas, GtError *err)
   return had_err;
 }
 
-double gt_line_get_height(const GtLine *line, const GtStyle *sty)
+double gt_line_get_height(GtLine *line, const GtStyle *sty)
 {
   double line_height = 0;
   unsigned long i;
@@ -85,6 +85,9 @@ double gt_line_get_height(const GtLine *line, const GtStyle *sty)
     GtBlock *block;
     double height;
     block = *(GtBlock**) gt_array_get(line->blocks, i);
+    /* check again for caption presence, may have changed in the meantime */
+    if (!line->has_captions && gt_block_get_caption(block) != NULL)
+      line->has_captions = true;
     height = gt_block_get_max_height(block, sty);
     if (height > line_height)
       line_height = height;

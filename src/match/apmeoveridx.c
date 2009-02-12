@@ -65,7 +65,7 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
 }
 
 static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
-                                 unsigned long score,
+                                 unsigned long currentdepth,
                                  const void *dfsconstinfo)
 {
   const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
@@ -76,7 +76,7 @@ static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
     printf("[]");
   } else
   {
-    unsigned long idx, backmask;
+    unsigned long idx, backmask, score = currentdepth;
 
     printf("[%lu",score);
     for (idx=1UL, backmask = 1UL; idx<=col->maxleqk; idx++, backmask <<= 1)
@@ -155,6 +155,7 @@ static void apme_initdfsconstinfo(void *dfsconstinfo,
                                   unsigned int alphasize,
                                  ...)
                                  /* Variable argument list is as follows:
+                                    unsigned int alphasize
                                     const Uchar *pattern,
                                     unsigned long patternlength,
                                     unsigned long maxdistance,
@@ -422,6 +423,9 @@ const AbstractDfstransformer *apme_AbstractDfstransformer(void)
     NULL, /* no extractdfsconstinfo */
     apme_freedfsconstinfo,
     apme_initLimdfsstate,
+    NULL,
+    NULL,
+    NULL,
     apme_fullmatchLimdfsstate,
     apme_nextLimdfsstate,
     apme_inplacenextLimdfsstate,

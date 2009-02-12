@@ -19,7 +19,6 @@
 #define MYERSAPM_H
 
 #include "seqpos-def.h"
-#include "alphadef.h"
 #include "encseq-def.h"
 #include "procmatch.h"
 

@@ -160,7 +160,7 @@ typedef uint32_t Uint32;
   const char *destab;
   unsigned long destablength, *descendtab;
 
-  const Alphabet *alpha;      /* alphabet representation */
+  const SfxAlphabet *alpha;   /* alphabet representation */
 
   const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                          numofdbsequences  -1)
@@ -180,7 +180,7 @@ typedef uint32_t Uint32;
 
   /* only for Viadirectaccess */
   Uchar *plainseq;
-  bool plainseqptr;
+  bool hasplainseqptr;
 
   /* only for Viabitaccess */
   Bitstring *specialbits;
@@ -817,7 +817,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
     switch (encseq->sat)
     {
       case Viadirectaccess:
-        if (!encseq->plainseqptr)
+        if (!encseq->hasplainseqptr)
         {
           FREESPACE(encseq->plainseq);
         }
@@ -863,7 +863,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   }
   if (encseq->alpha != NULL)
   {
-    freeAlphabet((Alphabet **) &encseq->alpha);
+    freeSfxAlphabet((SfxAlphabet **) &encseq->alpha);
   }
   gt_str_array_delete((GtStrArray *) encseq->filenametab);
   encseq->filenametab = NULL;
@@ -1140,7 +1140,7 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fb,
 
   gt_error_check(err);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
-  encseq->plainseqptr = false;
+  encseq->hasplainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_fastabuffer_next(fb,&cc,err);
@@ -2263,7 +2263,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                                  Seqpos totallength,
                                                  unsigned long numofsequences,
                                                  Seqpos specialranges,
-                                                 const Alphabet *alpha,
+                                                 const SfxAlphabet *alpha,
                                                  Verboseinfo *verboseinfo)
 {
   double spaceinbitsperchar;
@@ -2311,6 +2311,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->ushortspecialrangelength = NULL;
   encseq->uint32specialrangelength = NULL;
   encseq->plainseq = NULL;
+  encseq->hasplainseqptr = false;
   encseq->specialbits = NULL;
   encseq->ucharspecialpositions = NULL;
   encseq->ucharendspecialsubsUint = NULL;
@@ -2404,7 +2405,7 @@ const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
   return getsymbolmapAlphabet(encseq->alpha);
 }
 
-const Alphabet *getencseqAlphabet(const Encodedsequence *encseq)
+const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq)
 {
   return encseq->alpha;
 }
@@ -2702,7 +2703,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                 Seqpos totallength,
                                 unsigned long numofsequences,
                                 const Seqpos *specialrangestab,
-                                const Alphabet *alphabet,
+                                const SfxAlphabet *alphabet,
                                 const char *str_sat,
                                 unsigned long *characterdistribution,
                                 const Specialcharinfo *specialcharinfo,
@@ -2771,11 +2772,11 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   return haserr ? NULL : encseq;
 }
 
-static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
+static const SfxAlphabet *scanal1file(const GtStr *indexname,GtError *err)
 {
   GtStr *tmpfilename;
   bool haserr = false;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
 
   gt_error_check(err);
   tmpfilename = gt_str_clone(indexname);
@@ -2788,7 +2789,7 @@ static const Alphabet *scanal1file(const GtStr *indexname,GtError *err)
   gt_str_delete(tmpfilename);
   if (haserr)
   {
-    freeAlphabet((Alphabet **) &alpha);
+    freeSfxAlphabet((SfxAlphabet **) &alpha);
     return NULL;
   }
   return alpha;
@@ -2820,11 +2821,11 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
                                                Verboseinfo *verboseinfo,
                                                GtError *err)
 {
-  Encodedsequence *encseq;
+  Encodedsequence *encseq = NULL;
   bool haserr = false;
   int retcode;
   Firstencseqvalues firstencseqvalues;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
 
   gt_error_check(err);
   alpha = scanal1file(indexname,err);
@@ -2849,6 +2850,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
                                                        .specialranges,
                                       alpha,
                                       verboseinfo);
+    alpha = NULL;
     ALLASSIGNAPPENDFUNC(firstencseqvalues.sat);
     showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     if (withesqtab)
@@ -2856,7 +2858,6 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
       if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,err) != 0)
       {
         haserr = true;
-        freeEncodedsequence(&encseq);
       }
     }
   }
@@ -2874,6 +2875,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   {
     size_t numofbytes;
 
+    gt_assert(encseq != NULL);
     encseq->destab = genericmaponlytable(indexname,
                                          DESTABSUFFIX,
                                          &numofbytes,
@@ -2882,7 +2884,6 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
     if (encseq->destab == NULL)
     {
       haserr = true;
-      freeEncodedsequence(&encseq);
     } else
     {
       encseq->descendtab = calcdescendpositions(encseq);
@@ -2890,6 +2891,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
   }
   if (!haserr && withssptab)
   {
+    gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
     {
       encseq->ssptab = genericmaptable(indexname,
@@ -2900,11 +2902,22 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
       if (encseq->ssptab == NULL)
       {
         haserr = true;
-        freeEncodedsequence(&encseq);
       }
     }
   }
-  return haserr ? NULL : encseq;
+  if (haserr)
+  {
+    if (alpha != NULL)
+    {
+      freeSfxAlphabet((SfxAlphabet **) &alpha);
+    }
+    if (encseq != NULL)
+    {
+      freeEncodedsequence(&encseq);
+    }
+    return NULL;
+  }
+  return encseq;
 }
 
 const char *retrievesequencedescription(unsigned long *desclen,
@@ -2979,7 +2992,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       const Alphabet *alpha,
+                                       const SfxAlphabet *alpha,
                                        Verboseinfo *verboseinfo)
 {
   Encodedsequence *encseq;
@@ -3011,7 +3024,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                     verboseinfo);
   encseq->specialcharinfo = samplespecialcharinfo;
   encseq->plainseq = seqptr;
-  encseq->plainseqptr = (seq2 == NULL) ? true : false;
+  encseq->hasplainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC(sat);
   encseq->mappedptr = NULL;
   return encseq;
@@ -3206,10 +3219,11 @@ void extract2bitenc(bool fwd,
 }
 
 #define MASKPREFIX(PREFIX)\
-        (~(((Twobitencoding) 1 << MULT2(UNITSIN2BITENC - (PREFIX))) - 1))
+        (Twobitencoding)\
+        (~((((Twobitencoding) 1) << MULT2(UNITSIN2BITENC - (PREFIX))) - 1))
 
 #define MASKSUFFIX(SUFFIX)\
-        (((Twobitencoding) 1 << MULT2((int) SUFFIX)) - 1)
+        ((((Twobitencoding) 1) << MULT2((int) SUFFIX)) - 1)
 
 #define MASKEND(FWD,END)\
         (((END) == 0) ? 0 : ((FWD) ? MASKPREFIX(END) : MASKSUFFIX(END)))

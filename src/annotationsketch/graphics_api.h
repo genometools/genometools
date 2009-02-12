@@ -91,7 +91,7 @@ double gt_graphics_get_text_width(GtGraphics*, const char *text);
    names, ("serif", "sans-serif", "cursive", "fantasy", "monospace"), are
    likely to work as expected.*/
 void   gt_graphics_set_font(GtGraphics *g, const char *family,
-                            FontSlant slant, FontWeight weight);
+                            FontSlant slant, FontWeight weight, double size);
 /* Returns the width of the image in pixels/points. */
 double gt_graphics_get_image_width(GtGraphics*);
 /* Returns the height of the image in pixels/points. */

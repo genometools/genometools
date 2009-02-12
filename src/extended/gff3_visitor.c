@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -43,7 +43,7 @@ struct GtGFF3Visitor {
 typedef struct {
   GtHashmap *gt_feature_node_to_id_array;
   const char *id;
-} Add_id_info;
+} AddIDInfo;
 
 typedef struct {
   bool *attribute_shown;
@@ -88,7 +88,7 @@ static int gff3_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
 
 static int add_id(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
 {
-  Add_id_info *info = (Add_id_info*) data;
+  AddIDInfo *info = (AddIDInfo*) data;
   GtArray *parent_features = NULL;
   gt_error_check(err);
   gt_assert(gn && info && info->gt_feature_node_to_id_array && info->id);
@@ -115,33 +115,33 @@ static void show_attribute(const char *attr_name, const char *attr_value,
   }
 }
 
-static int gff3_show_genome_feature(GtGenomeNode *gn, void *data,
-                                    GT_UNUSED GtError *err)
+static int gff3_show_feature_node(GtGenomeNode *gn, void *data,
+                                  GT_UNUSED GtError *err)
 {
   bool part_shown = false;
   GtGFF3Visitor *gff3_visitor = (GtGFF3Visitor*) data;
-  GtFeatureNode *gf = (GtFeatureNode*) gn;
+  GtFeatureNode *fn = (GtFeatureNode*) gn;
   GtArray *parent_features = NULL;
   ShowAttributeInfo info;
   unsigned long i;
   GtStr *id;
 
   gt_error_check(err);
-  gt_assert(gn && gf && gff3_visitor);
+  gt_assert(gn && fn && gff3_visitor);
 
   /* output leading part */
-  gt_gff3_output_leading(gf, gff3_visitor->outfp);
+  gt_gff3_output_leading(fn, gff3_visitor->outfp);
 
   /* show unique id part of attributes */
   if ((id = gt_hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,
-                        gn))) {
+                           gn))) {
     gt_genfile_xprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, gt_str_get(id));
     part_shown = true;
   }
 
   /* show parent part of attributes */
   parent_features = gt_hashmap_get(gff3_visitor->gt_feature_node_to_id_array,
-                                  gn);
+                                   gn);
   if (gt_array_size(parent_features)) {
     if (part_shown)
       gt_genfile_xfputc(';', gff3_visitor->outfp);
@@ -150,7 +150,7 @@ static int gff3_show_genome_feature(GtGenomeNode *gn, void *data,
       if (i)
         gt_genfile_xfputc(',', gff3_visitor->outfp);
       gt_genfile_xprintf(gff3_visitor->outfp, "%s",
-                      *(char**) gt_array_get(parent_features, i));
+                         *(char**) gt_array_get(parent_features, i));
     }
     part_shown = true;
   }
@@ -158,7 +158,7 @@ static int gff3_show_genome_feature(GtGenomeNode *gn, void *data,
   /* show missing part of attributes */
   info.attribute_shown = &part_shown;
   info.outfp = gff3_visitor->outfp;
-  gt_feature_node_foreach_attribute(gf, show_attribute, &info);
+  gt_feature_node_foreach_attribute(fn, show_attribute, &info);
 
   /* show dot if no attributes have been shown */
   if (!part_shown)
@@ -194,7 +194,7 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
 {
   GtGFF3Visitor *gff3_visitor = (GtGFF3Visitor*) data;
   GtFeatureNode *gf = (GtFeatureNode*) gn;
-  Add_id_info add_id_info;
+  AddIDInfo add_id_info;
   int had_err = 0;
   GtStr *id;
 
@@ -204,14 +204,14 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
   if (gt_genome_node_has_children(gn) || gt_feature_node_is_multi(gf)) {
     if (gt_feature_node_is_multi(gf)) {
       id = gt_hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,
-                       gt_feature_node_get_multi_representative(gf));
+                          gt_feature_node_get_multi_representative(gf));
       if (!id) { /* the representative does not have its own id */
         id = create_unique_id(gff3_visitor,
                               gt_feature_node_get_multi_representative(gf));
       }
       if (gt_feature_node_get_multi_representative(gf) != gf) {
         gt_hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf,
-                    gt_str_ref(id));
+                       gt_str_ref(id));
       }
     }
     else
@@ -222,13 +222,13 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
       gff3_visitor->gt_feature_node_to_id_array,
     add_id_info.id = gt_str_get(id);
     had_err = gt_genome_node_traverse_direct_children(gn, &add_id_info, add_id,
-                                                   err);
+                                                      err);
   }
   return had_err;
 }
 
-static int gff3_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
-                                       GtError *err)
+static int gff3_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *fn,
+                                     GtError *err)
 {
   GtGFF3Visitor *gff3_visitor;
   int had_err;
@@ -237,22 +237,22 @@ static int gff3_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
 
   gff3_version_string(gv);
 
-  had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf, gff3_visitor,
-                                          store_ids, true, err);
+  had_err = gt_genome_node_traverse_children((GtGenomeNode*) fn, gff3_visitor,
+                                             store_ids, true, err);
   if (!had_err) {
-    if (gt_genome_node_is_tree((GtGenomeNode*) gf)) {
-      had_err = gt_genome_node_traverse_children((GtGenomeNode*) gf,
+    if (gt_genome_node_is_tree((GtGenomeNode*) fn)) {
+      had_err = gt_genome_node_traverse_children((GtGenomeNode*) fn,
                                                  gff3_visitor,
-                                                 gff3_show_genome_feature, true,
+                                                 gff3_show_feature_node, true,
                                                  err);
     }
     else {
       /* got a DAG -> traverse bin breadth first fashion to make sure that the
          'Parent' attributes are shown in correct order */
-      had_err = gt_genome_node_traverse_children_breadth((GtGenomeNode*) gf,
-                                                      gff3_visitor,
-                                                      gff3_show_genome_feature,
-                                                      true, err);
+      had_err = gt_genome_node_traverse_children_breadth((GtGenomeNode*) fn,
+                                                         gff3_visitor,
+                                                         gff3_show_feature_node,
+                                                         true, err);
     }
   }
 
@@ -262,7 +262,7 @@ static int gff3_visitor_genome_feature(GtNodeVisitor *gv, GtFeatureNode *gf,
 
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
-  if (gt_genome_node_has_children((GtGenomeNode*) gf))
+  if (gt_genome_node_has_children((GtGenomeNode*) fn))
     gt_genfile_xprintf(gff3_visitor->outfp, "%s\n", GFF_TERMINATOR);
 
   return had_err;
@@ -309,7 +309,7 @@ const GtNodeVisitorClass* gt_gff3_visitor_class()
     gvc = gt_node_visitor_class_new(sizeof (GtGFF3Visitor),
                                     gff3_visitor_free,
                                     gff3_visitor_comment_node,
-                                    gff3_visitor_genome_feature,
+                                    gff3_visitor_feature_node,
                                     gff3_visitor_region_node,
                                     gff3_visitor_sequence_node);
   }

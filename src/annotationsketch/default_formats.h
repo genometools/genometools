@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -29,17 +29,18 @@
 #define STROKE_WIDTH_DEFAULT     0.6
 #define FONT_SIZE_DEFAULT         10
 
-#define HEADER_SPACE              70
-#define FOOTER_SPACE              20
-#define DEFAULT_GREY_TONE        .85
+#define HEADER_SPACE              40
+#define HEAD_TRACK_SPACE_DEFAULT  15
+#define FOOTER_SPACE              7
+#define DEFAULT_GREY_TONE       0.85
 
 #define FIVE_PRIME_STRING        "5'"
 #define THREE_PRIME_STRING       "3'"
 
-#define RULER_GREY                 .1
-#define GRID_GREY                  .94
-#define LINE_EXCEEDED_MSG_R        .7
-#define LINE_EXCEEDED_MSG_G        .4
-#define LINE_EXCEEDED_MSG_B        .4
+#define RULER_GREY                .1
+#define GRID_GREY                 .94
+#define LINE_EXCEEDED_MSG_R       .7
+#define LINE_EXCEEDED_MSG_G       .4
+#define LINE_EXCEEDED_MSG_B       .4
 
 #endif

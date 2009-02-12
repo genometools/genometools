@@ -33,6 +33,8 @@ typedef struct GtStyle GtStyle;
 
 /* Creates a new <GtStyle> object. */
 GtStyle*      gt_style_new(GtError*);
+/* Increments the reference count of the given <GtStyle>. */
+GtStyle*      gt_style_ref(GtStyle*);
 /* Creates a independent (``deep'') copy of the given <GtStyle> object. */
 GtStyle*      gt_style_clone(const GtStyle*, GtError*);
 /* Loads and executes Lua style file with given <filename>.

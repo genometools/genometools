@@ -278,7 +278,7 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   void *packedindex = NULL;
   Verboseinfo *verboseinfo;
   bool haserr = false;
-  const Alphabet *alphabet = NULL;
+  const SfxAlphabet *alphabet = NULL;
   unsigned int prefixlength = 0;
   Seqpos totallength;
   bool mapfmindexfail = false;

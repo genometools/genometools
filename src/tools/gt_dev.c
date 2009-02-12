@@ -26,16 +26,13 @@
 #include "tools/gt_maxpairs.h"
 #include "tools/gt_mergeesa.h"
 #include "tools/gt_paircmp.h"
+#include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_regioncov.h"
 #include "tools/gt_seqiterator.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
 #include "tools/gt_trieins.h"
-
-#ifndef WITHOUT_CAIRO
-#include "annotationsketch/gt_sketch_page.h"
-#endif
 
 static void* gt_dev_arguments_new(void)
 {
@@ -46,6 +43,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   gt_toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
+  gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
@@ -54,9 +52,6 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
-#ifndef WITHOUT_CAIRO
-  gt_toolbox_add_tool(dev_toolbox, "sketch_page", gt_sketch_page());
-#endif
   return dev_toolbox;
 }
 

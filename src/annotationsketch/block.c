@@ -20,39 +20,67 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/element.h"
+#include "core/array.h"
 #include "core/cstr.h"
-#include "core/dlist.h"
 #include "core/ensure.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/undef.h"
 #include "core/unused_api.h"
 
 struct GtBlock {
-  GtDlist *elements;
+  GtArray *elements;
   GtRange range;
   GtStr *caption;
-  bool show_caption;
+  bool show_caption,
+       sorted;
   GtStrand strand;
   const char *type;
   GtFeatureNode *top_level_feature;
   unsigned long reference_count;
 };
 
-/* GtCompare function used to insert GtElements into dlist, order by type */
-static int elemcmp(const void *a, const void *b)
+/* This function orders GtElements by z-index or type. This enables the sketch
+   function to paint elements in a specific order based on their type
+   (painter's algorithm-like) */
+static int elemcmp(const void *a, const void *b, void *data)
 {
   const char *type_a, *type_b;
-  GtElement *elem_a = (GtElement*) a;
-  GtElement *elem_b = (GtElement*) b;
+  double zindex_a = UNDEF_DOUBLE, zindex_b= UNDEF_DOUBLE;
+  GtStyle *sty = (GtStyle*) data;
+  GtElement *elem_a = *(GtElement**) a;
+  GtElement *elem_b = *(GtElement**) b;
 
   type_a = gt_element_get_type(elem_a);
   type_b = gt_element_get_type(elem_b);
 
+  /* same types are equal, no further action needed */
   if (type_a == type_b)
     return 0;
-  if (strcmp(type_a, type_b) < 0)
+  /* if not, then get z-index from style */
+  if (sty)
+  {
+    gt_style_get_num(sty, type_a, "z_index", &zindex_a, NULL);
+    gt_style_get_num(sty, type_b, "z_index", &zindex_b, NULL);
+  }
+  /* only one is set -> put types with set z-indices always on top of others*/
+  if (zindex_a == UNDEF_DOUBLE && zindex_b != UNDEF_DOUBLE)
+    return -1;
+  if (zindex_b == UNDEF_DOUBLE && zindex_a != UNDEF_DOUBLE)
     return 1;
-  return -1;
+  /* none is set, fall back to default alphabetic ordering */
+  if (zindex_a == UNDEF_DOUBLE && zindex_b == UNDEF_DOUBLE)
+  {
+    if (strcmp(type_a, type_b) < 0)
+      return 1;
+    return -1;
+  }
+  /* both z-indices are set */
+  if (zindex_a == zindex_b)
+    return 0;
+  if (zindex_a < zindex_b)
+    return -1;
+  return 1;
 }
 
 int gt_block_compare(const GtBlock *block1, const GtBlock *block2)
@@ -89,9 +117,10 @@ GtBlock* gt_block_ref(GtBlock *block)
 GtBlock* gt_block_new(void)
 {
   GtBlock *block = gt_calloc(1, sizeof (GtBlock));
-  block->elements = gt_dlist_new(elemcmp);
+  block->elements = gt_array_new(sizeof (GtElement*));
   block->caption = NULL;
   block->show_caption = true;
+  block->sorted = false;
   block->strand = GT_STRAND_UNKNOWN;
   block->top_level_feature = NULL;
   return block;
@@ -117,39 +146,39 @@ void gt_block_insert_element(GtBlock *block, GtFeatureNode *node)
   if (!block->top_level_feature)
     block->top_level_feature = gt_feature_node_nonrec_ref(node);
   element = gt_element_new(node);
-  gt_dlist_add(block->elements, element);
+  /* invalidate sortedness flag because insertion of element at the end
+     may break ordering */
+  block->sorted = false;
+  gt_array_add(block->elements, element);
 }
 
 void gt_block_merge(GtBlock *b1, GtBlock *b2)
 {
-  GtDlistelem *delem;
-  unsigned int oldsize;
+  unsigned int merged_size, i;
   gt_assert(b1 && b2);
-  oldsize = gt_block_get_size(b1) + gt_block_get_size(b2);
-  for (delem = gt_dlist_first(b2->elements); delem;
-       delem = gt_dlistelem_next(delem))
+  merged_size = gt_block_get_size(b1) + gt_block_get_size(b2);
+  for (i=0;i<gt_array_size(b2->elements);i++)
   {
     GtElement *elem;
-    elem = (GtElement*) gt_dlistelem_get_data(delem);
+    elem = gt_element_ref(*(GtElement**) gt_array_get(b2->elements, i));
     gt_assert(elem);
-    gt_dlist_add(b1->elements, gt_element_ref(elem));
+    gt_array_add(b1->elements, elem);
   }
-  gt_assert(gt_block_get_size(b1) == oldsize);
+  gt_assert(gt_block_get_size(b1) == merged_size);
 }
 
 GtBlock* gt_block_clone(GtBlock *block)
 {
   GtBlock* newblock;
-  GtDlistelem *delem;
+  unsigned long i;
   gt_assert(block);
   newblock = gt_block_new();
-  for (delem = gt_dlist_first(block->elements); delem;
-       delem = gt_dlistelem_next(delem))
+  for (i=0;i<gt_array_size(block->elements);i++)
   {
     GtElement *elem;
-    elem = (GtElement*) gt_dlistelem_get_data(delem);
+    elem = gt_element_ref(*(GtElement**) gt_array_get(block->elements, i));
     gt_assert(elem);
-    gt_dlist_add(newblock->elements, gt_element_ref(elem));
+    gt_array_add(newblock->elements, elem);
   }
   gt_assert(gt_block_get_size(newblock) == gt_block_get_size(block));
   newblock->caption = gt_str_ref(block->caption);
@@ -158,8 +187,8 @@ GtBlock* gt_block_clone(GtBlock *block)
   newblock->range.end = block->range.end;
   newblock->show_caption = block->show_caption;
   newblock->strand = block->strand;
-  newblock->top_level_feature = gt_feature_node_nonrec_ref(block
-                                                           ->top_level_feature);
+  newblock->top_level_feature =
+                           gt_feature_node_nonrec_ref(block->top_level_feature);
   return newblock;
 }
 
@@ -190,13 +219,15 @@ void gt_block_set_range(GtBlock *block, GtRange r)
 bool gt_block_has_only_one_fullsize_element(const GtBlock *block)
 {
   bool ret = false;
+  unsigned long bsize;
   gt_assert(block);
-  if (gt_dlist_size(block->elements) == 1UL) {
+  bsize = gt_array_size(block->elements);
+  if (bsize == 1) {
     GtRange elem_range, block_range;
-    gt_assert(gt_dlist_first(block->elements) ==
-              gt_dlist_last(block->elements));
-    elem_range = gt_element_get_range(
-                   gt_dlistelem_get_data(gt_dlist_first(block->elements)));
+    gt_assert(*(GtElement**) gt_array_get(block->elements, 0) ==
+              *(GtElement**) gt_array_get(block->elements, bsize-1));
+    elem_range = gt_element_get_range(*(GtElement**)
+                                             gt_array_get(block->elements, 0));
     block_range = gt_block_get_range(block);
     ret = (gt_range_compare(&block_range, &elem_range) == 0);
   }
@@ -253,12 +284,11 @@ const char* gt_block_get_type(const GtBlock *block)
 
 double gt_block_get_max_height(const GtBlock *block, const GtStyle *sty)
 {
-  GtDlistelem *delem;
   double max_height = 0;
+  unsigned long i;
   gt_assert(block && sty);
-  for (delem = gt_dlist_first(block->elements); delem;
-       delem = gt_dlistelem_next(delem)) {
-     GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
+  for (i=0;i<gt_array_size(block->elements);i++) {
+     GtElement *elem = *(GtElement**) gt_array_get(block->elements, i);
      double height = 0;
      /* get default or image-wide bar height */
      if (!gt_style_get_num(sty, "format", "bar_height", &height, NULL))
@@ -275,14 +305,14 @@ double gt_block_get_max_height(const GtBlock *block, const GtStyle *sty)
 unsigned long gt_block_get_size(const GtBlock *block)
 {
   gt_assert(block && block->elements);
-  return gt_dlist_size(block->elements);
+  return gt_array_size(block->elements);
 }
 
 int gt_block_sketch(GtBlock *block, GtCanvas *canvas, GtError *err)
 {
   int had_err = 0;
-  GtDlistelem *delem;
-  gt_assert(block && canvas);
+  unsigned long i;
+  gt_assert(block && canvas && err);
   /* if resulting block was too short,
      do not traverse this feature tree further */
   had_err = gt_canvas_visit_block(canvas, block, err);
@@ -292,10 +322,17 @@ int gt_block_sketch(GtBlock *block, GtCanvas *canvas, GtError *err)
       return 0;
     else
       return had_err;
+  } /* we have in any case returned if had_err was set */
+  if (!block->sorted)
+  {
+    GtStyle *sty = gt_canvas_get_style(canvas);
+    /* sort elements if they have changed since last sketch operation */
+    gt_array_sort_with_data(block->elements, elemcmp, sty);
+    block->sorted = true;
   }
-  for (delem = gt_dlist_first(block->elements); delem;
-       delem = gt_dlistelem_next(delem)) {
-     GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
+  /* delegate sketch request to elements */
+  for (i=0;i<gt_array_size(block->elements);i++) {
+     GtElement *elem = *(GtElement**) gt_array_get(block->elements, i);
      had_err = gt_element_sketch(elem, canvas, err);
   }
   return had_err;
@@ -383,20 +420,19 @@ int gt_block_unit_test(GtError *err)
 
 void gt_block_delete(GtBlock *block)
 {
-  GtDlistelem *delem;
+  unsigned long i;
   if (!block) return;
   if (block->reference_count) {
     block->reference_count--;
     return;
   }
-  for (delem = gt_dlist_first(block->elements); delem;
-       delem = gt_dlistelem_next(delem)) {
-    GtElement* elem = (GtElement*) gt_dlistelem_get_data(delem);
+  for (i=0;i<gt_array_size(block->elements);i++) {
+    GtElement *elem = *(GtElement**) gt_array_get(block->elements, i);
     gt_element_delete(elem);
   }
   if (block->caption)
     gt_str_delete(block->caption);
-  gt_dlist_delete(block->elements);
+  gt_array_delete(block->elements);
   if (block->top_level_feature)
     gt_feature_node_nonrec_delete(block->top_level_feature);
   gt_free(block);

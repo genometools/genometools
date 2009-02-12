@@ -47,7 +47,7 @@ struct sfxInterface
   unsigned int prefixlength, numofparts;
   const Sfxstrategy *sfxstrategy;
   Measuretime *mtime;
-  const Alphabet *alpha;
+  const SfxAlphabet *alpha;
   const Encodedsequence *encseq;
   struct seqStats *stats;
   Sfxiterator *sfi;
@@ -172,7 +172,8 @@ newSfxInterface(Readmode readmode,
 }
 
 static struct seqStats *
-newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
+newSeqStatsFromCharDist(const SfxAlphabet *alpha, Seqpos len,
+                        unsigned numOfSeqs,
                         const unsigned long *characterdistribution)
 {
   struct seqStats *stats = NULL;
@@ -281,7 +282,7 @@ deleteSfxInterface(sfxInterface *sfxi)
   gt_free(sfxi);
 }
 
-extern const Alphabet *
+extern const SfxAlphabet *
 SfxIGetAlphabet(const sfxInterface *si)
 {
   return si->alpha;

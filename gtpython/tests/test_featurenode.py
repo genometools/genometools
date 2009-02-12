@@ -1,11 +1,15 @@
 
 import unittest
-from gt import FeatureNode, FeatureNodeIteratorDepthFirst
+from gt import FeatureNode, FeatureNodeIteratorDepthFirst, GenomeNode
 
 class FeatureNodeTestCase(unittest.TestCase):
 
     def setUp(self):
         self.fn = FeatureNode("test", "type", 100, 500, "+")
+
+    def test_repr(self):
+        self.assertEqual(str(self.fn),
+            'FeatureNode(start=100, end=500, seqid="test")')
 
 
     def test_score(self):
@@ -27,6 +31,15 @@ class FeatureNodeTestCase(unittest.TestCase):
     def test_strand(self):
         fn = self.fn
         self.assertEqual(fn.get_strand(), "+")
+
+    def test_seqid(self):
+        fn = self.fn
+        self.assertEqual(fn.seqid, "test")
+
+    def test_start_end(self):
+        fn = self.fn
+        self.assertEqual(fn.start, 100)
+        self.assertEqual(fn.end, 500)
        
     def test_attributes(self):
         fn = self.fn
@@ -104,6 +117,14 @@ class TestFeatureNodeProperties(unittest.TestCase):
     def test_range(self):
         fn = self.fn
         self.assertEqual((100, 500), fn.range)
+
+    def test_conversion(self):
+        fn = self.fn
+        g = GenomeNode(fn.gn, True)
+        self.assertEqual((100, 500), g.range)
+
+        f2 = FeatureNode.create_from_ptr(g.gn, True)
+        self.assertEqual((100, 500), f2.range)
 
 if __name__ == "__main__":
     unittest.main()

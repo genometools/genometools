@@ -58,7 +58,9 @@ struct matchBound
 };
 
 /** Object holding a BWT sequence index */
+
 typedef struct BWTSeq BWTSeq;
+
 /** Iterator of Matches produced by a search query from a BWT
  * sequence index */
 typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;

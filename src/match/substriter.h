@@ -27,7 +27,7 @@
 
 typedef struct Substriter Substriter;
 
-Substriter *substriter_new(const Alphabet *alphabet,unsigned int qvalue);
+Substriter *substriter_new(const SfxAlphabet *alphabet,unsigned int qvalue);
 
 void substriter_init(Substriter *substriter,const Uchar *start,
                      unsigned long len);

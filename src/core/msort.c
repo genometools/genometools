@@ -50,6 +50,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include "core/msort.h"
 
 #define ISIZE sizeof (int)
 #define PSIZE sizeof (u_char *)
@@ -104,7 +105,7 @@
  */
 static void
 insertionsort(u_char *a, size_t n, size_t size, void *cmpinfo,
-              int (*cmp)(void *, const void *, const void *))
+              GtCompareWithData cmp)
 {
   u_char *ai, *s, *t, *u, tmp;
   int i;
@@ -112,7 +113,7 @@ insertionsort(u_char *a, size_t n, size_t size, void *cmpinfo,
   for (ai = a+size; --n >= 1; ai += size)
     for (t = ai; t > a; t -= size) {
       u = t - size;
-      if (cmp(cmpinfo, u, t) <= 0)
+      if (cmp(u, t, cmpinfo) <= 0)
         break;
       swap(u, t);
     }
@@ -126,7 +127,7 @@ insertionsort(u_char *a, size_t n, size_t size, void *cmpinfo,
  */
 static void
 setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
-    int (*cmp)(void *, const void *, const void *))
+      GtCompareWithData cmp)
 {
   int i, length, size2, tmp, sense;
   u_char *f1, *f2, *s, *l2, *last, *p2;
@@ -149,12 +150,12 @@ setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
 #ifdef NATURAL
   p2 = list2;
   f1 = list1;
-  sense = (cmp(cmpinfo, f1, f1 + size) > 0);
+  sense = (cmp(f1, f1 + size, cmpinfo) > 0);
   for (; f1 < last; sense = !sense) {
     length = 2;
           /* Find pairs with same sense. */
     for (f2 = f1 + size2; f2 < last; f2 += size2) {
-      if ((cmp(cmpinfo, f2, f2+ size) > 0) != sense)
+      if ((cmp(f2, f2+ size, cmpinfo) > 0) != sense)
         break;
       length += 2;
     }
@@ -167,7 +168,7 @@ setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
     } else {        /* Natural merge */
       l2 = f2;
       for (f2 = f1 + size2; f2 < l2; f2 += size2) {
-        if ((cmp(cmpinfo, f2-size, f2) > 0) != sense) {
+        if ((cmp(f2-size, f2, cmpinfo) > 0) != sense) {
           p2 = *EVAL(p2) = f2 - list1 + list2;
           if (sense > 0)
             reverse(f1, f2-size);
@@ -177,7 +178,7 @@ setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
       if (sense > 0)
         reverse (f1, f2-size);
       f1 = f2;
-      if (f2 < last || cmp(cmpinfo, f2 - size, f2) > 0)
+      if (f2 < last || cmp(f2 - size, f2, cmpinfo) > 0)
         p2 = *EVAL(p2) = f2 - list1 + list2;
       else
         p2 = *EVAL(p2) = list2 + n*size;
@@ -186,7 +187,7 @@ setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
 #else   /* pairwise merge only. */
   for (f1 = list1, p2 = list2; f1 < last; f1 += size2) {
     p2 = *EVAL(p2) = p2 + size2;
-    if (cmp (cmpinfo, f1, f1 + size) > 0)
+    if (cmp (f1, f1 + size, cmpinfo) > 0)
       swap(f1, f1 + size);
   }
 #endif /* NATURAL */
@@ -194,7 +195,7 @@ setup(u_char *list1, u_char *list2, size_t n, size_t size,  void *cmpinfo,
 
 static int
 msort_r(void *base, size_t nmemb, size_t size, void *cmpinfo,
-      int (*cmp)(void *, const void *, const void *))
+        GtCompareWithData cmp)
 {
   int i, sense;
   int big, iflag;
@@ -232,7 +233,7 @@ msort_r(void *base, size_t nmemb, size_t size, void *cmpinfo,
           p2 = *EVAL(p2);
         l2 = list1 + (p2 - list2);
         while (f1 < l1 && f2 < l2) {
-          if ((*cmp)(cmpinfo, f1, f2) <= 0) {
+          if ((*cmp)(f1, f2, cmpinfo) <= 0) {
             q = f2;
             b = f1, t = l1;
             sense = -1;
@@ -242,7 +243,7 @@ msort_r(void *base, size_t nmemb, size_t size, void *cmpinfo,
             sense = 0;
           }
           if (!big) { /* here i = 0 */
-            while ((b += size) < t && cmp(cmpinfo, q, b) >sense)
+            while ((b += size) < t && cmp(q, b, cmpinfo) >sense)
               if (++i == 6) {
                 big = 1;
                 goto EXPONENTIAL;
@@ -251,12 +252,12 @@ msort_r(void *base, size_t nmemb, size_t size, void *cmpinfo,
 EXPONENTIAL:          for (i = size; ; i <<= 1)
               if ((p = (b + i)) >= t) {
                 if ((p = t - size) > b &&
-                (*cmp)(cmpinfo, q, p) <= sense)
+                (*cmp)(q, p, cmpinfo) <= sense)
                   t = p;
                 else
                   b = p;
                 break;
-              } else if ((*cmp)(cmpinfo, q, p) <= sense) {
+              } else if ((*cmp)(q, p, cmpinfo) <= sense) {
                 t = p;
                 if (i == size)
                   big = 0;
@@ -265,16 +266,16 @@ EXPONENTIAL:          for (i = size; ; i <<= 1)
                 b = p;
             while (t > b+size) {
               i = (((t - b) / size) >> 1) * size;
-              if ((*cmp)(cmpinfo, q, p = b + i) <= sense)
+              if ((*cmp)(q, p = b + i, cmpinfo) <= sense)
                 t = p;
               else
                 b = p;
             }
             goto COPY;
 FASTCASE:         while (i > size)
-              if ((*cmp)(cmpinfo,
-                q,
-                p = b + (i >>= 1)) <= sense)
+              if ((*cmp)(q,
+                p = b + (i >>= 1),
+                cmpinfo) <= sense)
                 t = p;
               else
                 b = p;
@@ -326,12 +327,14 @@ COPY:           b = t;
 }
 
 void gt_msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
-                int (*compar)(void *, const void *, const void *))
+                GtCompareWithData compar)
 {
-  (void) msort_r(base, nmemb, size, comparinfo, compar);
+  /* do not try to sort an array of size 0 */
+  if (nmemb > 0)
+    (void) msort_r(base, nmemb, size, comparinfo, compar);
 }
 
-int gt_non_r_cmpfunc(void *compar, const void *a, const void *b)
+int gt_non_r_cmpfunc(const void *a, const void *b, void *compar)
 {
   int (*cmpfunc)(const void *, const void *) = compar, rval;
   rval = (*cmpfunc)(a, b);
@@ -339,9 +342,7 @@ int gt_non_r_cmpfunc(void *compar, const void *a, const void *b)
 }
 
 void gt_msort(void *base, size_t nmemb, size_t size,
-              int (*compar)(const void *, const void *))
+              GtCompare compar)
 {
-  /* do not try to sort an array of size 0 */
-  if (nmemb > 0)
-    gt_msort_r(base, nmemb, size, compar, gt_non_r_cmpfunc);
+  gt_msort_r(base, nmemb, size, compar, gt_non_r_cmpfunc);
 }

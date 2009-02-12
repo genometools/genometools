@@ -66,6 +66,9 @@ fn.set_phase(0)
 if fn.get_phase != 0 then   #zero
   raise TestFailedError
 end
+if fn.get_filename != "generated" then
+  raise TestFailedError
+end
 
 fni = GT::FeatureNodeIteratorDepthFirst.new(fn)
 num_features = 0

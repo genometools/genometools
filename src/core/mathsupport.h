@@ -25,6 +25,7 @@ double        gt_logsum(double p1, double p2);
 bool          gt_double_equals_one(double);
 bool          gt_double_equals_double(double, double);
 int           gt_double_compare(double, double);
+bool          gt_double_smaller_double(double, double);
 
 /* Returns a random number between 0 and maximal_value. */
 unsigned long gt_rand_max(unsigned long maximal_value);

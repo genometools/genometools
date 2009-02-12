@@ -58,11 +58,11 @@ static cairo_status_t str_write_func(void *closure, const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
-/* to get crisp vertical lines, round X coordinates to nearest half */
+/* to get crisp lines, round coordinates to .5 */
 static inline double rnd_to_nhalf(double num)
 {
   num = MAX(0, num-0.5);
-  return rint(num)+0.5;
+  return ceil(num)+0.5;
 }
 
 void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
@@ -137,13 +137,14 @@ int gt_graphics_cairo_set_background_color(GtGraphics *gg, GtColor color)
 }
 
 void gt_graphics_cairo_set_font(GtGraphics *gg, const char *family,
-                                FontSlant slant, FontWeight weight)
+                                FontSlant slant, FontWeight weight, double size)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g && family);
   cairo_select_font_face(g->cr, family,
                          (cairo_font_slant_t) slant,
                          (cairo_font_weight_t) weight);
+  cairo_set_font_size(g->cr, size);
 }
 
 void gt_graphics_cairo_draw_text(GtGraphics *gg, double x, double y,
@@ -179,7 +180,7 @@ void gt_graphics_cairo_draw_text_clip(GtGraphics *gg, double x, double y,
 }
 
 void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
-                                       const char *text)
+                                          const char *text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
@@ -193,7 +194,7 @@ void gt_graphics_cairo_draw_text_centered(GtGraphics *gg, double x, double y,
 }
 
 void gt_graphics_cairo_draw_text_right(GtGraphics *gg, double x, double y,
-                                    const char *text)
+                                       const char *text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   cairo_text_extents_t ext;
@@ -207,7 +208,7 @@ void gt_graphics_cairo_draw_text_right(GtGraphics *gg, double x, double y,
 }
 
 void gt_graphics_cairo_draw_colored_text(GtGraphics *gg, double x, double y,
-                                      GtColor color, const char *text)
+                                         GtColor color, const char *text)
 {
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g && text);
@@ -338,45 +339,51 @@ void gt_graphics_cairo_draw_box(GtGraphics *gg, double x, double y,
   switch (arrow_status)
   {
     case ARROW_RIGHT:
-      cairo_move_to(g->cr, rnd_to_nhalf(x), y);
+      cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y));
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, x + width - arrow_width, y);
+        cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y));
       cairo_line_to(g->cr, x + width, y + height / 2);
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, x + width - arrow_width, y + height);
-      cairo_line_to(g->cr, rnd_to_nhalf(x), y + height);
+        cairo_line_to(g->cr, x + width - arrow_width, rnd_to_nhalf(y + height));
+      cairo_line_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height));
       cairo_close_path(g->cr);
       break;
     case ARROW_LEFT:
-      cairo_move_to(g->cr, rnd_to_nhalf(x + width), y);
+      cairo_move_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y));
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y);
-      cairo_line_to(g->cr, rnd_to_nhalf(x), y + height / 2);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), rnd_to_nhalf(y));
+      cairo_line_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height / 2));
       if (width - arrow_width > 0)
-        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y + height);
-      cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width),
+                             rnd_to_nhalf(y + height));
+      cairo_line_to(g->cr, rnd_to_nhalf(x + width), rnd_to_nhalf(y + height));
       cairo_close_path(g->cr);
       break;
     case ARROW_BOTH:
-      cairo_move_to(g->cr, rnd_to_nhalf(x), y + height/2);
+      cairo_move_to(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y + height/2));
       if (width < 2*arrow_width)
       {
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width/2), y);
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y + height/2);
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width/2), y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width/2), rnd_to_nhalf(y));
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width),
+                             rnd_to_nhalf(y + height/2));
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width/2),
+                             rnd_to_nhalf(y + height));
       }
       else
       {
-        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y);
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y);
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width), y+height/2);
-        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width), y + height);
+        cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), rnd_to_nhalf(y));
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width),
+                             rnd_to_nhalf(y));
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width),
+                             rnd_to_nhalf(y + height/2));
+        cairo_line_to(g->cr, rnd_to_nhalf(x + width - arrow_width),
+                             rnd_to_nhalf(y + height));
         cairo_line_to(g->cr, rnd_to_nhalf(x + arrow_width), y + height);
       }
       cairo_close_path(g->cr);
       break;
     case ARROW_NONE:
-      cairo_rectangle(g->cr, rnd_to_nhalf(x), y, width, height);
+      cairo_rectangle(g->cr, rnd_to_nhalf(x), rnd_to_nhalf(y), width, height);
    }
    /* fill area */
    cairo_set_source_rgba(g->cr, fill_color.red,

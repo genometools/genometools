@@ -109,7 +109,6 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                  GtError *err)
 {
   GtNodeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
-  GtGenomeNode *gn;
   GtExtractFeatArguments *arguments = tool_arguments;
   GtRegionMapping *regionmapping;
   int had_err = 0;
@@ -140,10 +139,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                                      arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = gt_node_stream_next(extract_feat_stream, &gn, err)) &&
-           gn) {
-      gt_genome_node_delete(gn);
-    }
+    had_err = gt_node_stream_pull(extract_feat_stream, err);
   }
 
   /* free */
