@@ -189,7 +189,7 @@ struct Limdfsresources
   const Encodedsequence *encseq;
   ArraySeqpos mstatspos;
   Uchar *currentpathspace;
-  unsigned long maxpathlength;
+  unsigned long allocatedpathspace;
   Seqpos numberofmatches;
   Processmatch processmatch;
   void *processmatchinfo;
@@ -247,12 +247,12 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   limdfsresources->nowildcards = nowildcards;
   limdfsresources->encseq = encseq;
   limdfsresources->maxintervalwidth = maxintervalwidth;
-  limdfsresources->maxpathlength = maxpathlength;
   limdfsresources->keepexpandedonstack = keepexpandedonstack;
-  if (maxpathlength > 0)
+  if (maxpathlength == 0)
   {
     ALLOCASSIGNSPACE(limdfsresources->currentpathspace,NULL,Uchar,
                      maxpathlength);
+    limdfsresources->allocatedpathspace = maxpathlength;
   } else
   {
     limdfsresources->currentpathspace = NULL;
@@ -659,7 +659,13 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 static void addpathchar(Limdfsresources *limdfsresources,unsigned long idx,
                         Uchar cc)
 {
-  gt_assert(idx < limdfsresources->maxpathlength);
+  while (idx >= limdfsresources->allocatedpathspace)
+  {
+    const unsigned long addelems = 32UL;
+    ALLOCASSIGNSPACE(limdfsresources->currentpathspace,NULL,Uchar,
+                     limdfsresources->allocatedpathspace+addelems);
+    limdfsresources->allocatedpathspace += addelems;
+  }
   limdfsresources->currentpathspace[idx] = cc;
 }
 
@@ -699,7 +705,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      if (limdfsresources->maxpathlength > 0)
+      if (limdfsresources->currentpathspace != NULL)
       {
         addpathchar(limdfsresources,
                     (unsigned long) (offset - 1 + contextlength),cc);
@@ -1030,7 +1036,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
     gt_assert(child.inchar < limdfsresources->alphasize);
     child.code = startcode + child.inchar;
-    if (limdfsresources->maxpathlength > 0)
+    if (limdfsresources->currentpathspace != NULL)
     {
       addpathchar(limdfsresources,(unsigned long) parent->offset,child.inchar);
     }
@@ -1123,7 +1129,7 @@ static void runlimdfs(Limdfsresources *limdfsresources,
       /* now parentptr always points to copyofparent */
     }
     if (currentparent(limdfsresources)->lcpitv.offset > 0 &&
-        limdfsresources->maxpathlength > 0)
+        limdfsresources->currentpathspace != NULL)
     {
       addpathchar(limdfsresources,
                   (unsigned long)
