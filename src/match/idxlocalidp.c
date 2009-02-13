@@ -648,8 +648,9 @@ static void locali_processstackelemLimdfsstate(
                              Currentprefixlengths *cpls,
                              GT_UNUSED const DECLAREPTRDFSSTATE(aliasstate))
 {
-  /* Column *column = (Column *) aliasstate; */
+  Column *column = (Column *) aliasstate;
 
+  gt_assert(column->colvalues[cpls->pprefixlen].tracebit != Notraceback);
   gt_assert(cpls->dbprefixlen > 0);
   cpls->dbprefixlen--;
   return;
