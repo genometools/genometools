@@ -301,6 +301,7 @@ const AbstractDfstransformer *pms_AbstractDfstransformer(void)
     pms_fullmatchLimdfsstate,
     pms_nextLimdfsstate,
     pms_inplacenextLimdfsstate,
+    NULL,
 #ifdef SKDEBUG
     pms_showLimdfsstate,
 #endif

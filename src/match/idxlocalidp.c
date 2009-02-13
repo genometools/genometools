@@ -644,6 +644,17 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
 }
 #endif
 
+static void locali_processstackelemLimdfsstate(
+                             Currentprefixlengths *cpls,
+                             GT_UNUSED const DECLAREPTRDFSSTATE(aliasstate))
+{
+  /* Column *column = (Column *) aliasstate; */
+
+  gt_assert(cpls->dbprefixlen > 0);
+  cpls->dbprefixlen--;
+  return;
+}
+
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
 {
   static const AbstractDfstransformer locali_adfst =
@@ -664,6 +675,7 @@ const AbstractDfstransformer *locali_AbstractDfstransformer (void)
 #else
     NULL,
 #endif
+   locali_processstackelemLimdfsstate,
 #ifdef SKDEBUG
     locali_showLimdfsstate
 #endif /*  */

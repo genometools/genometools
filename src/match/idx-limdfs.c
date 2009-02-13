@@ -284,18 +284,31 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   return limdfsresources;
 }
 
-static void tracethestackelems(const Limdfsresources *limdfsresources,
+static void tracethestackelems(const ArrayLcpintervalwithinfo *stack,
+                               const AbstractDfstransformer *adfst,
+                               unsigned long pprefixlen,
                                const Lcpintervalwithinfo *runptr)
 {
+  Seqpos previous = 0;
+  Currentprefixlengths cpls;
+
+  gt_assert(adfst->processstackelemLimdfsstate != NULL);
+  cpls.dbprefixlen = runptr->lcpitv.offset;
+  cpls.pprefixlen = pprefixlen;
   do
   {
     printf("\ttrace %lu %lu %lu\n",(unsigned long) runptr->lcpitv.offset,
                                    (unsigned long) runptr->lcpitv.leftbound,
                                    (unsigned long) runptr->lcpitv.rightbound);
-    gt_assert(runptr->previousstackelem <
-              limdfsresources->stack.nextfreeLcpintervalwithinfo);
-    runptr = limdfsresources->stack.spaceLcpintervalwithinfo +
-             runptr->previousstackelem;
+    if (previous > 0)
+    {
+      gt_assert(previous - 1 == runptr->lcpitv.offset);
+    }
+    previous = runptr->lcpitv.offset;
+    gt_assert(previous > 0);
+    gt_assert(runptr->previousstackelem < stack->nextfreeLcpintervalwithinfo);
+    adfst->processstackelemLimdfsstate(&cpls,runptr->aliasstate);
+    runptr = stack->spaceLcpintervalwithinfo + runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
 }
 
@@ -809,6 +822,7 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   if (limdfsresult.status == Limdfssuccess)
   {
+    /* success with match of length pprefixlen */
     (limdfsresources->genericindex->withesa
          ? esa_overinterval
          : pck_overinterval)
@@ -821,9 +835,9 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
       stackptr->lcpitv = *child;
       stackptr->keeponstack = true;
       stackptr->previousstackelem = limdfsresources->parentindex;
-      tracethestackelems(limdfsresources,stackptr);
+      tracethestackelems(&limdfsresources->stack,adfst,limdfsresult.pprefixlen,
+                         stackptr);
     }
-    /* success with match of length pprefixlen */
   }
   /* now status == Limdfssuccess || status == Limdfsstop */
   /* pop the element from the stack as there has been success or stop event */
