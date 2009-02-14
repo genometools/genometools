@@ -646,14 +646,39 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
 
 static void locali_processstackelemLimdfsstate(
                              Currentprefixlengths *cpls,
-                             GT_UNUSED const DECLAREPTRDFSSTATE(aliasstate))
+                             const DECLAREPTRDFSSTATE(aliasstate))
 {
   Column *column = (Column *) aliasstate;
 
-  gt_assert(column->colvalues[cpls->pprefixlen].tracebit != Notraceback);
-  gt_assert(cpls->dbprefixlen > 0);
-  cpls->dbprefixlen--;
-  return;
+  while(true)
+  {
+    printf("coord(i=%lu,j=%lu)\n",cpls->pprefixlen,
+                                  (unsigned long) cpls->dbprefixlen);
+    switch(column->colvalues[cpls->pprefixlen].tracebit)
+    {
+      case Notraceback:
+        fprintf(stderr,"tracebit = Notraceback not allowed\n");
+        exit(EXIT_FAILURE); /* programming error */
+      case Insertbit:
+        gt_assert(cpls->dbprefixlen > 0);
+        cpls->dbprefixlen--;
+        return;
+      case Replacebit:
+        gt_assert(cpls->dbprefixlen > 0);
+        cpls->dbprefixlen--;
+        gt_assert(cpls->pprefixlen > 0);
+        cpls->pprefixlen--;
+        return;
+      case Deletebit:
+        gt_assert(cpls->pprefixlen > 0);
+        cpls->pprefixlen--;
+        break;
+      default:
+        fprintf(stderr,"tracebit = %d not allowed\n",
+                column->colvalues[cpls->pprefixlen].tracebit);
+        exit(EXIT_FAILURE); /* programming error */
+    }
+  }
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
