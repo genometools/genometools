@@ -186,7 +186,6 @@ const AbstractDfstransformer *spse_AbstractDfstransformer(void)
     spse_fullmatchLimdfsstate,
     spse_nextLimdfsstate,
     spse_inplacenextLimdfsstate,
-    NULL,
 #ifdef SKDEBUG
     spse_showLimdfsstate,
 #endif

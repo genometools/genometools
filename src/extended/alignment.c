@@ -111,6 +111,11 @@ void gt_alignment_add_insertion(GtAlignment *a)
   gt_alignment_add_eop(a, Insertion);
 }
 
+void gt_alignment_reset(GtAlignment *a)
+{
+  gt_array_reset(a->eops);
+}
+
 void gt_alignment_remove_last(GtAlignment *a)
 {
   Multieop *meop_ptr;

@@ -31,6 +31,7 @@
 #include "idx-limdfs.h"
 #include "stamp.h"
 #include "esa-map.h"
+#include "idxlocalidp.h"
 #include "esa-minunique.pr"
 
 #define DECLAREDFSSTATE(V)\
@@ -193,25 +194,9 @@ struct Limdfsresources
   Seqpos numberofmatches;
   Processmatch processmatch;
   void *processmatchinfo;
+  Localitracebackstate *tbs;
   Processresult processresult;
 };
-
-static const Lcpintervalwithinfo *currentparent(const Limdfsresources
-                                                *limdfsresources)
-{
-  const Lcpintervalwithinfo *ptr;
-
-  if (limdfsresources->keepexpandedonstack)
-  {
-    gt_assert(limdfsresources->parentindex <
-              limdfsresources->stack.nextfreeLcpintervalwithinfo);
-  }
-  ptr = limdfsresources->keepexpandedonstack
-           ? (limdfsresources->stack.spaceLcpintervalwithinfo +
-              limdfsresources->parentindex)
-           : &limdfsresources->copyofparent;
-  return ptr;
-}
 
 Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
                                     bool nowildcards,
@@ -248,6 +233,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   limdfsresources->encseq = encseq;
   limdfsresources->maxintervalwidth = maxintervalwidth;
   limdfsresources->keepexpandedonstack = keepexpandedonstack;
+  limdfsresources->tbs = newLocalitracebackstate();
   if (maxpathlength == 0)
   {
     ALLOCASSIGNSPACE(limdfsresources->currentpathspace,NULL,Uchar,
@@ -285,16 +271,13 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
 }
 
 static void tracethestackelems(const ArrayLcpintervalwithinfo *stack,
-                               const AbstractDfstransformer *adfst,
+                               Localitracebackstate *tbs,
                                unsigned long pprefixlen,
                                const Lcpintervalwithinfo *runptr)
 {
   Seqpos previous = 0;
-  Currentprefixlengths cpls;
 
-  gt_assert(adfst->processstackelemLimdfsstate != NULL);
-  cpls.dbprefixlen = runptr->lcpitv.offset;
-  cpls.pprefixlen = pprefixlen;
+  reinitLocalitracebackstate(tbs,runptr->lcpitv.offset,pprefixlen);
   do
   {
     if (previous > 0)
@@ -304,7 +287,7 @@ static void tracethestackelems(const ArrayLcpintervalwithinfo *stack,
     previous = runptr->lcpitv.offset;
     gt_assert(previous > 0);
     gt_assert(runptr->previousstackelem < stack->nextfreeLcpintervalwithinfo);
-    adfst->processstackelemLimdfsstate(&cpls,runptr->aliasstate);
+    processelemLocalitracebackstate(tbs,runptr->aliasstate);
     runptr = stack->spaceLcpintervalwithinfo + runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
 }
@@ -386,6 +369,8 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
       adfst->freeLimdfsstackelem(limdfsresources->copyofparent.aliasstate);
     }
   }
+  freeLocalitracebackstate(limdfsresources->tbs);
+  limdfsresources->tbs = NULL;
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
   FREESPACE(limdfsresources->currentpathspace);
@@ -659,6 +644,12 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                       limdfsresult.pprefixlen,
                                       limdfsresult.distance);
         limdfsresources->numberofmatches++;
+        if (limdfsresources->keepexpandedonstack)
+        {
+          tracethestackelems(&limdfsresources->stack,
+                             limdfsresources->tbs,
+                             limdfsresult.pprefixlen,outstate);
+        }
         break;
       }
     } else
@@ -762,7 +753,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
         limdfsresources->numberofmatches++;
         if (limdfsresources->keepexpandedonstack)
         {
-          tracethestackelems(&limdfsresources->stack,adfst,
+          tracethestackelems(&limdfsresources->stack,
+                             limdfsresources->tbs,
                              limdfsresult.pprefixlen,outstate);
         }
         break;
@@ -778,6 +770,23 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     limdfsresources->stack.nextfreeLcpintervalwithinfo = resetvalue;
   }
   freeBwtseqcontextiterator(&bsci);
+}
+
+static const Lcpintervalwithinfo *currentparent(const Limdfsresources
+                                                *limdfsresources)
+{
+  const Lcpintervalwithinfo *ptr;
+
+  if (limdfsresources->keepexpandedonstack)
+  {
+    gt_assert(limdfsresources->parentindex <
+              limdfsresources->stack.nextfreeLcpintervalwithinfo);
+  }
+  ptr = limdfsresources->keepexpandedonstack
+           ? (limdfsresources->stack.spaceLcpintervalwithinfo +
+              limdfsresources->parentindex)
+           : &limdfsresources->copyofparent;
+  return ptr;
 }
 
 static void pushandpossiblypop(Limdfsresources *limdfsresources,
@@ -846,7 +855,8 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
       stackptr->lcpitv = *child;
       stackptr->keeponstack = true;
       stackptr->previousstackelem = limdfsresources->parentindex;
-      tracethestackelems(&limdfsresources->stack,adfst,limdfsresult.pprefixlen,
+      tracethestackelems(&limdfsresources->stack,limdfsresources->tbs,
+                         limdfsresult.pprefixlen,
                          stackptr);
     }
   }

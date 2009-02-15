@@ -28,12 +28,6 @@ typedef unsigned long Aliasdfsstate;
 
 #undef SKDEBUG
 
-typedef struct
-{
-  Seqpos dbprefixlen;
-  unsigned long pprefixlen;
-} Currentprefixlengths;
-
 typedef enum
 {
   Limdfssuccess,  /* success of traversal */
@@ -83,8 +77,6 @@ struct AbstractDfstransformer
                                  DECLAREPTRDFSSTATE(aliasstate),
                                  unsigned long currentdepth,
                                  Uchar currentchar);
-  void (*processstackelemLimdfsstate)(Currentprefixlengths *cpls,
-                                      const DECLAREPTRDFSSTATE(aliasstate));
 #ifdef SKDEBUG
   void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
                           unsigned long currentdepth,

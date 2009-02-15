@@ -17,8 +17,21 @@
 
 #ifndef IDXLOCALIDP_H
 #define IDXLOCALIDP_H
+#include "seqpos-def.h"
 #include "absdfstrans-def.h"
 
-const AbstractDfstransformer *locali_AbstractDfstransformer (void);
+const AbstractDfstransformer *locali_AbstractDfstransformer(void);
+
+typedef struct Localitracebackstate Localitracebackstate;
+
+Localitracebackstate *newLocalitracebackstate(void);
+
+void reinitLocalitracebackstate(Localitracebackstate *tbs,
+                                Seqpos dbprefixlen,unsigned long pprefixlen);
+
+void processelemLocalitracebackstate(Localitracebackstate *tbs,
+                                     const void *aliasstate);
+
+void freeLocalitracebackstate(Localitracebackstate *);
 
 #endif

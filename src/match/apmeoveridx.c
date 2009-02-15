@@ -429,7 +429,6 @@ const AbstractDfstransformer *apme_AbstractDfstransformer(void)
     apme_fullmatchLimdfsstate,
     apme_nextLimdfsstate,
     apme_inplacenextLimdfsstate,
-    NULL,
 #ifdef SKDEBUG
     apme_showLimdfsstate,
 #endif

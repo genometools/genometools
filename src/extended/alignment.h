@@ -35,6 +35,8 @@ void          gt_alignment_add_deletion(GtAlignment*);
 void          gt_alignment_add_insertion(GtAlignment*);
 /* undo last add operation */
 void          gt_alignment_remove_last(GtAlignment*);
+/* reset list of edit operations to empty */
+void          gt_alignment_reset(GtAlignment *a);
 /* returns unit cost */
 unsigned long gt_alignment_eval(const GtAlignment*);
 void          gt_alignment_show(const GtAlignment*, FILE*);

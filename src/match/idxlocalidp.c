@@ -4,8 +4,10 @@
 #include "core/chardef.h"
 #include "core/unused_api.h"
 #include "core/assert_api.h"
-#include "match/stamp.h"
+#include "core/ma_api.h"
+#include "extended/alignment.h"
 #include "absdfstrans-imp.h"
+#include "idxlocalidp.h"
 
 #define MINUSINFTY (-1L)
 #define REPLACEMENTSCORE(A,B) (((A) != (B) || ISSPECIAL(A))\
@@ -645,47 +647,80 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
 }
 #endif
 
-static void locali_processstackelemLimdfsstate(
-                             Currentprefixlengths *cpls,
-                             const DECLAREPTRDFSSTATE(aliasstate))
+struct Localitracebackstate
 {
-  Column *column = (Column *) aliasstate;
+  Seqpos dbprefixlen;
+  unsigned long pprefixlen;
+  GtAlignment* alignment;
+};
+
+Localitracebackstate *newLocalitracebackstate(void)
+{
+  Localitracebackstate *tbs;
+
+  tbs = gt_malloc(sizeof(Localitracebackstate));
+  tbs->alignment = gt_alignment_new();
+  return tbs;
+}
+
+void reinitLocalitracebackstate(Localitracebackstate *tbs,
+                                Seqpos dbprefixlen,
+                                unsigned long pprefixlen)
+{
+  tbs->dbprefixlen = dbprefixlen;
+  tbs->pprefixlen = pprefixlen;
+  gt_alignment_reset(tbs->alignment);
+}
+
+void processelemLocalitracebackstate(Localitracebackstate *tbs,
+                                     const void *aliasstate)
+{
+  const Column *column = (const Column *) aliasstate;
 
   while (true)
   {
-    printf(" coord(i=%lu,j=%lu) with ",cpls->pprefixlen,
-                                       (unsigned long) cpls->dbprefixlen);
-    printf("cellvalue=%ld, ",column->colvalues[cpls->pprefixlen].bestcell);
-    switch (column->colvalues[cpls->pprefixlen].tracebit)
+    printf(" coord(i=%lu,j=%lu) with ",tbs->pprefixlen,
+                                       (unsigned long) tbs->dbprefixlen);
+    printf("cellvalue=%ld, ",column->colvalues[tbs->pprefixlen].bestcell);
+    switch (column->colvalues[tbs->pprefixlen].tracebit)
     {
       case Notraceback:
         fprintf(stderr,"tracebit = Notraceback not allowed\n");
-        fprintf(stderr,"column->colvalues[cpls->pprefixlen].bestcell=%ld\n",
-                        column->colvalues[cpls->pprefixlen].bestcell);
+        fprintf(stderr,"column->colvalues[tbs->pprefixlen].bestcell=%ld\n",
+                        column->colvalues[tbs->pprefixlen].bestcell);
         exit(EXIT_FAILURE); /* programming error */
       case Insertbit:
-        gt_assert(cpls->dbprefixlen > 0);
         printf("insertbit\n");
-        cpls->dbprefixlen--;
+        gt_alignment_add_insertion(tbs->alignment);
+        gt_assert(tbs->dbprefixlen > 0);
+        tbs->dbprefixlen--;
         return;
       case Replacebit:
         printf("replacebit\n");
-        gt_assert(cpls->dbprefixlen > 0);
-        cpls->dbprefixlen--;
-        gt_assert(cpls->pprefixlen > 0);
-        cpls->pprefixlen--;
+        gt_alignment_add_replacement(tbs->alignment);
+        gt_assert(tbs->dbprefixlen > 0);
+        tbs->dbprefixlen--;
+        gt_assert(tbs->pprefixlen > 0);
+        tbs->pprefixlen--;
         return;
       case Deletebit:
         printf("deletebit\n");
-        gt_assert(cpls->pprefixlen > 0);
-        cpls->pprefixlen--;
+        gt_alignment_add_deletion(tbs->alignment);
+        gt_assert(tbs->pprefixlen > 0);
+        tbs->pprefixlen--;
         break; /* stay in the same column => so next iteration */
       default:
         fprintf(stderr,"tracebit = %d not allowed\n",
-                (int) column->colvalues[cpls->pprefixlen].tracebit);
+                (int) column->colvalues[tbs->pprefixlen].tracebit);
         exit(EXIT_FAILURE); /* programming error */
     }
   }
+}
+
+void freeLocalitracebackstate(Localitracebackstate *tbs)
+{
+  gt_alignment_delete(tbs->alignment);
+  gt_free(tbs);
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)
@@ -708,7 +743,6 @@ const AbstractDfstransformer *locali_AbstractDfstransformer (void)
 #else
     NULL,
 #endif
-   locali_processstackelemLimdfsstate,
 #ifdef SKDEBUG
     locali_showLimdfsstate
 #endif /*  */
