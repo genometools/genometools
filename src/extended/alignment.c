@@ -20,6 +20,8 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/xansi.h"
+#include "core/symboldef.h"
+#include "core/chardef.h"
 #include "extended/alignment.h"
 
 #define GAPSYMBOL      '-'
@@ -27,8 +29,8 @@
 #define MISMATCHSYMBOL ' '
 
 struct GtAlignment {
-  const char *u,
-             *v;
+  const Uchar *u,
+              *v;
   unsigned long ulen,
                 vlen;
   GtArray *eops;
@@ -55,8 +57,8 @@ GtAlignment* gt_alignment_new(void)
   return a;
 }
 
-GtAlignment* gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                   const char *v, unsigned long vlen)
+GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
+                                   const Uchar *v, unsigned long vlen)
 {
   GtAlignment *a;
   gt_assert(u && v);
@@ -65,8 +67,8 @@ GtAlignment* gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
   return a;
 }
 
-void gt_alignment_set_seqs(GtAlignment *a, const char *u, unsigned long ulen,
-                        const char *v, unsigned long vlen)
+void gt_alignment_set_seqs(GtAlignment *a, const Uchar *u, unsigned long ulen,
+                        const Uchar *v, unsigned long vlen)
 {
   gt_assert(a && u && v);
   a->u = u;
@@ -188,6 +190,49 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
   return sumcost;
 }
 
+long gt_alignment_evalwithscore(const GtAlignment *a,
+                                long matchscore,
+                                long mismatchscore,
+				long gapscore)
+{
+  unsigned long i, j, uctr = 0, vctr = 0;
+  long sumscore = 0;
+  Multieop meop;
+
+  gt_assert(a && gt_alignment_is_valid(a));
+  for (i = gt_array_size(a->eops); i > 0; i--) {
+    meop = *(Multieop*) gt_array_get(a->eops, i-1);
+    switch (meop.type) {
+      case Replacement:
+        for (j = 0; j < meop.steps; j++) {
+          if (a->u[uctr] == a->v[vctr] && ISNOTSPECIAL(a->u[uctr]))
+          {
+            sumscore += matchscore;
+          } else
+          {
+            sumscore += mismatchscore;
+          }
+          uctr++;
+          vctr++;
+        }
+        break;
+      case Deletion:
+        for (j = 0; j < meop.steps; j++) {
+          sumscore += gapscore;
+          uctr++;
+        }
+        break;
+      case Insertion:
+        for (j = 0; j < meop.steps; j++) {
+          sumscore += gapscore;
+          vctr++;
+        }
+        break;
+    }
+  }
+  return sumscore;
+}
+
 /* XXX: add width parameter and format the GtAlignment accordingly */
 void gt_alignment_show(const GtAlignment *a, FILE *fp)
 {
@@ -300,7 +345,8 @@ int gt_alignment_unit_test(GtError *err)
      agaaagaggta-agaggga
   */
 
-  a = gt_alignment_new_with_seqs(u, strlen(u), v, strlen(v));
+  a = gt_alignment_new_with_seqs((const Uchar *) u, strlen(u), 
+                                 (const Uchar *) v, strlen(v));
   gt_alignment_add_replacement(a);
   gt_alignment_add_replacement(a);
   gt_alignment_add_replacement(a);

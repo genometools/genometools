@@ -32,7 +32,9 @@ void reinitLocalitracebackstate(Localitracebackstate *tbs,
 void processelemLocalitracebackstate(Localitracebackstate *tbs,
                                      const void *aliasstate);
 
-void showLocalitracebackstate(Localitracebackstate *tbs);
+void showLocalitracebackstate(const void *dfsconstinfo,
+                              const Uchar *dbsubstring,
+                              const Localitracebackstate *tbs);
 
 void freeLocalitracebackstate(Localitracebackstate *);
 

@@ -20,5 +20,5 @@ threshold=$3
 # gt tagerator -e 2 -maxocc 20 -rw -esa esa-fwd -q ${query}
 gt packedindex mkindex -tis -indexname pck-rev -db ${reference} -sprank -dna -pl -bsize 10 -locfreq 32 -dir rev
 gt prebwt -maxdepth 4 -pck pck-rev
-valgrind.sh gt dev idxlocali -pck pck-rev -q ${query} -th ${threshold}
+gt dev idxlocali -pck pck-rev -q ${query} -th ${threshold}
 # gt tagerator -maxocc 10 -rw -pck pck-rev -q ${query}

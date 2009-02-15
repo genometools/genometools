@@ -679,9 +679,11 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
 
   while (true)
   {
+    /*
     printf(" coord(i=%lu,j=%lu) with ",tbs->querycurrent,
                                        (unsigned long) tbs->dbcurrent);
     printf("cellvalue=%ld, ",column->colvalues[tbs->querycurrent].bestcell);
+    */
     switch (column->colvalues[tbs->querycurrent].tracebit)
     {
       case Notraceback:
@@ -690,13 +692,13 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
                         column->colvalues[tbs->querycurrent].bestcell);
         exit(EXIT_FAILURE); /* programming error */
       case Insertbit:
-        printf("insertbit\n");
+        /* printf("insertbit\n"); */
         gt_alignment_add_insertion(tbs->alignment);
         gt_assert(tbs->dbcurrent > 0);
         tbs->dbcurrent--;
         return;
       case Replacebit:
-        printf("replacebit\n");
+        /* printf("replacebit\n"); */
         gt_alignment_add_replacement(tbs->alignment);
         gt_assert(tbs->dbcurrent > 0);
         tbs->dbcurrent--;
@@ -704,7 +706,7 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
         tbs->querycurrent--;
         return;
       case Deletebit:
-        printf("deletebit\n");
+        /* printf("deletebit\n"); */
         gt_alignment_add_deletion(tbs->alignment);
         gt_assert(tbs->querycurrent > 0);
         tbs->querycurrent--;
@@ -717,9 +719,25 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
   }
 }
 
-void showLocalitracebackstate(GT_UNUSED Localitracebackstate *tbs)
+void showLocalitracebackstate(const void *dfsconstinfo,
+                              const Uchar *dbsubstring,
+                              const Localitracebackstate *tbs)
 {
-  return;
+  const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
+  unsigned long alignedquerylength;
+  const Uchar *querysubstart;
+
+  gt_assert(tbs->queryend >= tbs->querycurrent);
+  alignedquerylength = tbs->queryend - tbs->querycurrent;
+  querysubstart = lci->query + tbs->querycurrent;
+  gt_assert(querysubstart != NULL);
+  gt_assert(dbsubstring != NULL);
+  gt_alignment_set_seqs(tbs->alignment,
+                        querysubstart,
+                        alignedquerylength,
+                        dbsubstring,
+                        (unsigned long) tbs->dbprefixlen);
+  gt_alignment_show_multieop_list(tbs->alignment,stdout);
 }
 
 void freeLocalitracebackstate(Localitracebackstate *tbs)

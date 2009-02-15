@@ -19,17 +19,18 @@
 #define ALIGNMENT_H
 
 #include <stdio.h>
-#include "core/error.h"
+#include "core/symboldef.h"
+#include "core/error_api.h"
 
 /* the GtAlignment class (an object has to be contructed backwards) */
 typedef struct GtAlignment GtAlignment;
 
 GtAlignment*    gt_alignment_new(void);
-GtAlignment*    gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                           const char *v, unsigned long vlen);
-void          gt_alignment_set_seqs(GtAlignment*, const char *u,
+GtAlignment*    gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
+                                           const Uchar *v, unsigned long vlen);
+void          gt_alignment_set_seqs(GtAlignment*, const Uchar *u,
                                     unsigned long ulen,
-                                    const char *v, unsigned long vlen);
+                                    const Uchar *v, unsigned long vlen);
 void          gt_alignment_add_replacement(GtAlignment*);
 void          gt_alignment_add_deletion(GtAlignment*);
 void          gt_alignment_add_insertion(GtAlignment*);
