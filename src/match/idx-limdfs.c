@@ -290,6 +290,7 @@ static void tracethestackelems(const ArrayLcpintervalwithinfo *stack,
     processelemLocalitracebackstate(tbs,runptr->aliasstate);
     runptr = stack->spaceLcpintervalwithinfo + runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
+  showLocalitracebackstate(tbs);
 }
 
 static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,

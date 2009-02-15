@@ -649,8 +649,8 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
 
 struct Localitracebackstate
 {
-  Seqpos dbprefixlen;
-  unsigned long pprefixlen;
+  Seqpos dbcurrent, dbprefixlen;
+  unsigned long querycurrent, queryend;
   GtAlignment* alignment;
 };
 
@@ -667,8 +667,8 @@ void reinitLocalitracebackstate(Localitracebackstate *tbs,
                                 Seqpos dbprefixlen,
                                 unsigned long pprefixlen)
 {
-  tbs->dbprefixlen = dbprefixlen;
-  tbs->pprefixlen = pprefixlen;
+  tbs->dbprefixlen = tbs->dbcurrent = dbprefixlen;
+  tbs->queryend = tbs->querycurrent = pprefixlen;
   gt_alignment_reset(tbs->alignment);
 }
 
@@ -679,42 +679,47 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
 
   while (true)
   {
-    printf(" coord(i=%lu,j=%lu) with ",tbs->pprefixlen,
-                                       (unsigned long) tbs->dbprefixlen);
-    printf("cellvalue=%ld, ",column->colvalues[tbs->pprefixlen].bestcell);
-    switch (column->colvalues[tbs->pprefixlen].tracebit)
+    printf(" coord(i=%lu,j=%lu) with ",tbs->querycurrent,
+                                       (unsigned long) tbs->dbcurrent);
+    printf("cellvalue=%ld, ",column->colvalues[tbs->querycurrent].bestcell);
+    switch (column->colvalues[tbs->querycurrent].tracebit)
     {
       case Notraceback:
         fprintf(stderr,"tracebit = Notraceback not allowed\n");
-        fprintf(stderr,"column->colvalues[tbs->pprefixlen].bestcell=%ld\n",
-                        column->colvalues[tbs->pprefixlen].bestcell);
+        fprintf(stderr,"column->colvalues[tbs->querycurrent].bestcell=%ld\n",
+                        column->colvalues[tbs->querycurrent].bestcell);
         exit(EXIT_FAILURE); /* programming error */
       case Insertbit:
         printf("insertbit\n");
         gt_alignment_add_insertion(tbs->alignment);
-        gt_assert(tbs->dbprefixlen > 0);
-        tbs->dbprefixlen--;
+        gt_assert(tbs->dbcurrent > 0);
+        tbs->dbcurrent--;
         return;
       case Replacebit:
         printf("replacebit\n");
         gt_alignment_add_replacement(tbs->alignment);
-        gt_assert(tbs->dbprefixlen > 0);
-        tbs->dbprefixlen--;
-        gt_assert(tbs->pprefixlen > 0);
-        tbs->pprefixlen--;
+        gt_assert(tbs->dbcurrent > 0);
+        tbs->dbcurrent--;
+        gt_assert(tbs->querycurrent > 0);
+        tbs->querycurrent--;
         return;
       case Deletebit:
         printf("deletebit\n");
         gt_alignment_add_deletion(tbs->alignment);
-        gt_assert(tbs->pprefixlen > 0);
-        tbs->pprefixlen--;
+        gt_assert(tbs->querycurrent > 0);
+        tbs->querycurrent--;
         break; /* stay in the same column => so next iteration */
       default:
         fprintf(stderr,"tracebit = %d not allowed\n",
-                (int) column->colvalues[tbs->pprefixlen].tracebit);
+                (int) column->colvalues[tbs->querycurrent].tracebit);
         exit(EXIT_FAILURE); /* programming error */
     }
   }
+}
+
+void showLocalitracebackstate(GT_UNUSED Localitracebackstate *tbs)
+{
+  return;
 }
 
 void freeLocalitracebackstate(Localitracebackstate *tbs)

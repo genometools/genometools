@@ -32,6 +32,8 @@ void reinitLocalitracebackstate(Localitracebackstate *tbs,
 void processelemLocalitracebackstate(Localitracebackstate *tbs,
                                      const void *aliasstate);
 
+void showLocalitracebackstate(Localitracebackstate *tbs);
+
 void freeLocalitracebackstate(Localitracebackstate *);
 
 #endif
