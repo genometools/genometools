@@ -297,9 +297,6 @@ static void tracethestackelems(const ArrayLcpintervalwithinfo *stack,
   cpls.pprefixlen = pprefixlen;
   do
   {
-    printf("\ttrace %lu %lu %lu\n",(unsigned long) runptr->lcpitv.offset,
-                                   (unsigned long) runptr->lcpitv.leftbound,
-                                   (unsigned long) runptr->lcpitv.rightbound);
     if (previous > 0)
     {
       gt_assert(previous - 1 == runptr->lcpitv.offset);
@@ -555,25 +552,28 @@ static void initparentcopy(Limdfsresources *limdfsresources,
   }
 }
 
-static Aliasdfsstate *expandsingleton(Limdfsresources *limdfsresources,
-                                      unsigned long *resetvalue,
-                                      bool notfirst,
-                                      Uchar cc,
-                                      unsigned long currentdepth,
-                                      const AbstractDfstransformer *adfst)
+static Lcpintervalwithinfo *expandsingleton(Limdfsresources *limdfsresources,
+                                            unsigned long *resetvalue,
+                                            bool notfirst,
+                                            Uchar cc,
+                                            unsigned long currentdepth,
+                                            const AbstractDfstransformer *adfst)
 {
-  DECLAREPTRDFSSTATE(outstate);
+  Lcpintervalwithinfo *outstate;
 
   if (limdfsresources->keepexpandedonstack)
   {
-    Lcpintervalwithinfo *stackptr, *instate;
+    Lcpintervalwithinfo *instate;
 
-    stackptr = allocateStackspace(limdfsresources,adfst);
-    stackptr->keeponstack = true;
-    outstate = stackptr->aliasstate;
+    outstate = allocateStackspace(limdfsresources,adfst);
+    outstate->keeponstack = true;
+    outstate->lcpitv.offset = (Seqpos) currentdepth;
     if (notfirst)
     {
-      instate = stackptr-1;
+      instate = outstate-1;
+      gt_assert(limdfsresources->stack.nextfreeLcpintervalwithinfo >= 2UL);
+      outstate->previousstackelem
+        = limdfsresources->stack.nextfreeLcpintervalwithinfo - 2;
     } else
     {
       gt_assert(limdfsresources->parentindex <
@@ -581,22 +581,23 @@ static Aliasdfsstate *expandsingleton(Limdfsresources *limdfsresources,
       *resetvalue = limdfsresources->stack.nextfreeLcpintervalwithinfo-1;
       instate = limdfsresources->stack.spaceLcpintervalwithinfo +
                 limdfsresources->parentindex;
+      outstate->previousstackelem = limdfsresources->parentindex;
     }
-    gt_assert(instate < stackptr);
+    gt_assert(instate < outstate);
     adfst->nextLimdfsstate(limdfsresources->dfsconstinfo,
-                           outstate,
+                           outstate->aliasstate,
                            currentdepth,
                            cc,
                            instate->aliasstate);
+    return outstate;
   } else
   {
-    outstate = limdfsresources->copyofcopyofparentstate;
     adfst->inplacenextLimdfsstate(limdfsresources->dfsconstinfo,
-                                  outstate,
+                                  limdfsresources->copyofcopyofparentstate,
                                   currentdepth,
                                   cc);
+    return NULL;
   }
-  return outstate;
 }
 
 /* iterate transformation algorithm over a sequence context */
@@ -628,7 +629,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
-      DECLAREPTRDFSSTATE(outstate);
+      Lcpintervalwithinfo *outstate;
+
       outstate = expandsingleton(limdfsresources,
                                  &resetvalue,
                                  (pos > startpos + offset - 1) ? true : false,
@@ -636,7 +638,9 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                  (unsigned long) (pos - startpos + 1),
                                  adfst);
       adfst->fullmatchLimdfsstate(&limdfsresult,
-                                  outstate,
+                                  limdfsresources->keepexpandedonstack
+                                    ?  outstate->aliasstate
+                                    :  limdfsresources->copyofcopyofparentstate,
                                   leftbound,
                                   leftbound,
                                   (Seqpos) 1,
@@ -714,7 +718,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     if (cc != (Uchar) SEPARATOR &&
         (!limdfsresources->nowildcards || cc != (Uchar) WILDCARD))
     {
-      DECLAREPTRDFSSTATE(outstate);
+      Lcpintervalwithinfo *outstate;
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
 #endif
@@ -730,7 +734,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                  (unsigned long) (offset + contextlength),
                                  adfst);
       adfst->fullmatchLimdfsstate(&limdfsresult,
-                                  outstate,
+                                  limdfsresources->keepexpandedonstack
+                                    ?  outstate->aliasstate
+                                    :  limdfsresources->copyofcopyofparentstate,
                                   bound,
                                   bound+1,
                                   (Seqpos) 1,
@@ -754,6 +760,11 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                       limdfsresult.pprefixlen,
                                       limdfsresult.distance);
         limdfsresources->numberofmatches++;
+        if (limdfsresources->keepexpandedonstack)
+        {
+          tracethestackelems(&limdfsresources->stack,adfst,
+                             limdfsresult.pprefixlen,outstate);
+        }
         break;
       }
     } else

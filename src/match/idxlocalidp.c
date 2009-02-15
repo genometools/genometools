@@ -177,12 +177,11 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
     outcol->colvalues[i].tracebit = Notraceback;
     if (outcol->colvalues[i-1].bestcell > 0)
     {
-      outcol->colvalues[i].tracebit = Insertbit;
-      UPDATEMAX(outcol->colvalues[i-1].bestcell + lci->scorevalues.gapextend,
-                Insertbit);
+      UPDATEMAX(outcol->colvalues[i-1].bestcell +
+                lci->scorevalues.gapextend,Deletebit);
     }
     UPDATEMAX(REPLACEMENTSCORE(dbchar,lci->query[i-1]),Replacebit);
-    UPDATEMAX(lci->scorevalues.gapextend,Deletebit);
+    UPDATEMAX(lci->scorevalues.gapextend,Insertbit);
 #endif
     if (outcol->colvalues[i].bestcell > 0 &&
         outcol->colvalues[i].bestcell > (Scoretype) outcol->maxvalue)
@@ -247,6 +246,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                                         outcol->colvalues[0].delcell);
 #else
   outcol->colvalues[0].bestcell = MINUSINFTY;
+  outcol->colvalues[0].tracebit = Notraceback;
 #endif
   outcol->maxvalue = 0;
   outcol->pprefixlen = 0;
@@ -316,10 +316,11 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                                           outcol->colvalues[i].delcell);
 #else
     outcol->colvalues[i].bestcell = MINUSINFTY;
+    outcol->colvalues[i].tracebit = Notraceback;
     if (outcol->colvalues[i-1].bestcell > 0)
     {
       UPDATEMAX(outcol->colvalues[i-1].bestcell + lci->scorevalues.gapextend,
-                Insertbit);
+                Deletebit);
     }
     if (incol->colvalues[i-1].bestcell > 0)
     {
@@ -329,7 +330,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
     if (incol->colvalues[i].bestcell > 0)
     {
       UPDATEMAX(incol->colvalues[i].bestcell + lci->scorevalues.gapextend,
-                Deletebit);
+                Insertbit);
     }
 #endif
     if (outcol->colvalues[i].bestcell > 0 &&
@@ -650,32 +651,38 @@ static void locali_processstackelemLimdfsstate(
 {
   Column *column = (Column *) aliasstate;
 
-  while(true)
+  while (true)
   {
-    printf("coord(i=%lu,j=%lu)\n",cpls->pprefixlen,
-                                  (unsigned long) cpls->dbprefixlen);
-    switch(column->colvalues[cpls->pprefixlen].tracebit)
+    printf(" coord(i=%lu,j=%lu) with ",cpls->pprefixlen,
+                                       (unsigned long) cpls->dbprefixlen);
+    printf("cellvalue=%ld, ",column->colvalues[cpls->pprefixlen].bestcell);
+    switch (column->colvalues[cpls->pprefixlen].tracebit)
     {
       case Notraceback:
         fprintf(stderr,"tracebit = Notraceback not allowed\n");
+        fprintf(stderr,"column->colvalues[cpls->pprefixlen].bestcell=%ld\n",
+                        column->colvalues[cpls->pprefixlen].bestcell);
         exit(EXIT_FAILURE); /* programming error */
       case Insertbit:
         gt_assert(cpls->dbprefixlen > 0);
+        printf("insertbit\n");
         cpls->dbprefixlen--;
         return;
       case Replacebit:
+        printf("replacebit\n");
         gt_assert(cpls->dbprefixlen > 0);
         cpls->dbprefixlen--;
         gt_assert(cpls->pprefixlen > 0);
         cpls->pprefixlen--;
         return;
       case Deletebit:
+        printf("deletebit\n");
         gt_assert(cpls->pprefixlen > 0);
         cpls->pprefixlen--;
-        break;
+        break; /* stay in the same column => so next iteration */
       default:
         fprintf(stderr,"tracebit = %d not allowed\n",
-                column->colvalues[cpls->pprefixlen].tracebit);
+                (int) column->colvalues[cpls->pprefixlen].tracebit);
         exit(EXIT_FAILURE); /* programming error */
     }
   }
