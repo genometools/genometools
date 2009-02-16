@@ -543,6 +543,11 @@ const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha)
   return alpha->characters;
 }
 
+Uchar getwildcardshowAlphabet(const SfxAlphabet *alpha)
+{
+  return alpha->wildcardshow;
+}
+
 void outputalphabet(FILE *fpout,const SfxAlphabet *alpha)
 {
   Uchar chartoshow, currentcc, previouscc = 0, firstinline = 0;

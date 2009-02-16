@@ -339,6 +339,8 @@ const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq);
 
 const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
 
+Uchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq);
+
 /* Obtain the filenametable and the filelengthtable from the
    Encodedsequence */
 

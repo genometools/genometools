@@ -651,15 +651,24 @@ struct Localitracebackstate
 {
   Seqpos dbcurrent, dbprefixlen;
   unsigned long querycurrent, queryend;
-  GtAlignment* alignment;
+  Uchar *spaceUchardbsubstring;
+  unsigned long allocatedUchardbsubstring;
+  GtAlignment *alignment;
+  const Uchar *characters;
+  Uchar wildcardshow;
 };
 
-Localitracebackstate *newLocalitracebackstate(void)
+Localitracebackstate *newLocalitracebackstate(const Uchar *characters,
+                                              Uchar wildcardshow)
 {
   Localitracebackstate *tbs;
 
   tbs = gt_malloc(sizeof(Localitracebackstate));
   tbs->alignment = gt_alignment_new();
+  tbs->spaceUchardbsubstring = NULL;
+  tbs->allocatedUchardbsubstring = 0;
+  tbs->characters = characters;
+  tbs->wildcardshow = wildcardshow;
   return tbs;
 }
 
@@ -669,10 +678,16 @@ void reinitLocalitracebackstate(Localitracebackstate *tbs,
 {
   tbs->dbprefixlen = tbs->dbcurrent = dbprefixlen;
   tbs->queryend = tbs->querycurrent = pprefixlen;
+  if (dbprefixlen > (Seqpos) tbs->allocatedUchardbsubstring)
+  {
+    tbs->spaceUchardbsubstring = gt_realloc(tbs->spaceUchardbsubstring,
+                                            sizeof (Uchar) * dbprefixlen);
+  }
   gt_alignment_reset(tbs->alignment);
 }
 
 void processelemLocalitracebackstate(Localitracebackstate *tbs,
+                                     Uchar currentchar,
                                      const void *aliasstate)
 {
   const Column *column = (const Column *) aliasstate;
@@ -696,12 +711,14 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
         gt_alignment_add_insertion(tbs->alignment);
         gt_assert(tbs->dbcurrent > 0);
         tbs->dbcurrent--;
+        tbs->spaceUchardbsubstring[tbs->dbcurrent] = currentchar;
         return;
       case Replacebit:
         /* printf("replacebit\n"); */
         gt_alignment_add_replacement(tbs->alignment);
         gt_assert(tbs->dbcurrent > 0);
         tbs->dbcurrent--;
+        tbs->spaceUchardbsubstring[tbs->dbcurrent] = currentchar;
         gt_assert(tbs->querycurrent > 0);
         tbs->querycurrent--;
         return;
@@ -720,29 +737,42 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
 }
 
 void showLocalitracebackstate(const void *dfsconstinfo,
-                              const Uchar *dbsubstring,
                               const Localitracebackstate *tbs)
 {
   const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
+  Scoretype evalscore;
   unsigned long alignedquerylength;
   const Uchar *querysubstart;
 
+  gt_alignment_show_multieop_list(tbs->alignment,stdout);
   gt_assert(tbs->queryend >= tbs->querycurrent);
   alignedquerylength = tbs->queryend - tbs->querycurrent;
   querysubstart = lci->query + tbs->querycurrent;
   gt_assert(querysubstart != NULL);
-  gt_assert(dbsubstring != NULL);
   gt_alignment_set_seqs(tbs->alignment,
                         querysubstart,
                         alignedquerylength,
-                        dbsubstring,
+                        tbs->spaceUchardbsubstring,
                         (unsigned long) tbs->dbprefixlen);
-  gt_alignment_show_multieop_list(tbs->alignment,stdout);
+  evalscore = gt_alignment_evalwithscore(tbs->alignment,
+                                         lci->scorevalues.matchscore,
+                                         lci->scorevalues.mismatchscore,
+                                         lci->scorevalues.gapextend);
+  if (evalscore < 0 || (unsigned long) evalscore < lci->threshold)
+  {
+    fprintf(stderr,"unexpected eval score %ld\n",evalscore);
+    exit(EXIT_FAILURE); /* programming error */
+  }
+  gt_alignment_showwithmappedcharacters(tbs->alignment,
+                                        tbs->characters,
+                                        tbs->wildcardshow,
+                                        stdout);
 }
 
 void freeLocalitracebackstate(Localitracebackstate *tbs)
 {
   gt_alignment_delete(tbs->alignment);
+  gt_free(tbs->spaceUchardbsubstring);
   gt_free(tbs);
 }
 

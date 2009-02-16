@@ -73,7 +73,7 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     limdfsresources = newLimdfsresources(genericindex,
                                          true,
                                          0,
-                                         16UL,  /* maxpathlength */
+                                         0,    /* maxpathlength */
                                          true, /* keepexpandedonstack */
                                          showmatch,
                                          NULL, /* processmatch info */

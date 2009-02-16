@@ -2415,6 +2415,11 @@ const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq)
   return getcharactersAlphabet(encseq->alpha);
 }
 
+Uchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq)
+{
+  return getwildcardshowAlphabet(encseq->alpha);
+}
+
 void removealpharef(Encodedsequence *encseq)
 {
   encseq->alpha = NULL;

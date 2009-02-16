@@ -233,7 +233,9 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   limdfsresources->encseq = encseq;
   limdfsresources->maxintervalwidth = maxintervalwidth;
   limdfsresources->keepexpandedonstack = keepexpandedonstack;
-  limdfsresources->tbs = newLocalitracebackstate();
+  limdfsresources->tbs
+    = newLocalitracebackstate(getencseqAlphabetcharacters(encseq),
+                              getencseqAlphabetwildcardshow(encseq));
   if (maxpathlength > 0)
   {
     ALLOCASSIGNSPACE(limdfsresources->currentpathspace,NULL,Uchar,
@@ -288,12 +290,12 @@ static void tracethestackelems(Limdfsresources *limdfsresources,
     gt_assert(previous > 0);
     gt_assert(runptr->previousstackelem <
               limdfsresources->stack.nextfreeLcpintervalwithinfo);
-    processelemLocalitracebackstate(limdfsresources->tbs,runptr->aliasstate);
+    processelemLocalitracebackstate(limdfsresources->tbs,
+                                    runptr->lcpitv.inchar,runptr->aliasstate);
     runptr = limdfsresources->stack.spaceLcpintervalwithinfo +
              runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
   showLocalitracebackstate(limdfsresources->dfsconstinfo,
-                           limdfsresources->currentpathspace,
                            limdfsresources->tbs);
 }
 
@@ -558,6 +560,7 @@ static Lcpintervalwithinfo *expandsingleton(Limdfsresources *limdfsresources,
     outstate = allocateStackspace(limdfsresources,adfst);
     outstate->keeponstack = true;
     outstate->lcpitv.offset = (Seqpos) currentdepth;
+    outstate->lcpitv.inchar = cc;
     if (notfirst)
     {
       instate = outstate-1;
@@ -587,6 +590,16 @@ static Lcpintervalwithinfo *expandsingleton(Limdfsresources *limdfsresources,
                                   currentdepth,
                                   cc);
     return NULL;
+  }
+}
+
+static void addpathchar(Limdfsresources *limdfsresources,unsigned long idx,
+                        Uchar cc)
+{
+  if (limdfsresources->currentpathspace != NULL)
+  {
+    gt_assert(idx < limdfsresources->allocatedpathspace);
+    limdfsresources->currentpathspace[idx] = cc;
   }
 }
 
@@ -621,6 +634,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
 #endif
       Lcpintervalwithinfo *outstate;
 
+      addpathchar(limdfsresources,(unsigned long) (pos - startpos),cc);
       outstate = expandsingleton(limdfsresources,
                                  &resetvalue,
                                  (pos > startpos + offset - 1) ? true : false,
@@ -666,24 +680,6 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   {
     gt_assert(resetvalue > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo = resetvalue;
-  }
-}
-
-static void addpathchar(Limdfsresources *limdfsresources,unsigned long idx,
-                        Uchar cc)
-{
-  if (limdfsresources->currentpathspace != NULL)
-  {
-    while (idx >= limdfsresources->allocatedpathspace)
-    {
-      const unsigned long addelems = 32UL;
-      ALLOCASSIGNSPACE(limdfsresources->currentpathspace,
-                       limdfsresources->currentpathspace,
-                       Uchar,
-                       limdfsresources->allocatedpathspace+addelems);
-      limdfsresources->allocatedpathspace += addelems;
-    }
-    limdfsresources->currentpathspace[idx] = cc;
   }
 }
 
@@ -948,17 +944,17 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
   for (idx = 0; idx < limdfsresources->bwci.nextfreeBoundswithchar; idx++)
   {
     Indexbounds child;
-    Uchar inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
 
     /* reset as parentptr may have been moved */
     parent = &(currentparent(limdfsresources)->lcpitv);
+    child.inchar = limdfsresources->bwci.spaceBoundswithchar[idx].inchar;
     child.offset = parent->offset+1;
     child.leftbound = limdfsresources->bwci.spaceBoundswithchar[idx].lbound;
     child.rightbound = limdfsresources->bwci.spaceBoundswithchar[idx].rbound;
     child.code = 0; /* not used, but we better define it */
-    child.inchar = inchar;
+    addpathchar(limdfsresources,(unsigned long) parent->offset,child.inchar);
 #ifdef SKDEBUG
-    printf("%u-child of ",(unsigned int) inchar);
+    printf("%u-child of ",(unsigned int) child.inchar);
     showLCPinterval(limdfsresources->genericindex->withesa,parent);
     printf(" is ");
     showLCPinterval(limdfsresources->genericindex->withesa,&child);
