@@ -20,4 +20,6 @@
 
 typedef struct AbstractDfstransformer AbstractDfstransformer;
 
+typedef struct Limdfsconstinfo Limdfsconstinfo;
+
 #endif

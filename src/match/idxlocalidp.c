@@ -26,12 +26,24 @@ typedef struct
 
 typedef struct
 {
+  const Uchar *characters;
+  Uchar wildcardshow;
+  Seqpos dbcurrent, dbprefixlen;
+  unsigned long querypos, queryend;
+  Uchar *spaceUchardbsubstring;
+  unsigned long allocatedUchardbsubstring;
+  GtAlignment *alignment;
+} Localitracebackstate;
+
+struct Limdfsconstinfo
+{
   Scorevalues scorevalues;
   const Uchar *query;
   unsigned long maxcollen,
                 querylength,
                 threshold;
-} Limdfsconstinfo;
+  Localitracebackstate tbs;
+};
 
 typedef enum
 {
@@ -112,10 +124,8 @@ static void showscorecolumn(const Column *column,
 
 void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
                             unsigned long currentdepth,
-                            const void *dfsconstinfo)
+                            const Limdfsconstinfo *lci)
 {
-  const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
-
   showscorecolumn((const Column *) aliasstate,lci->querylength,currentdepth);
 }
 #endif
@@ -459,19 +469,38 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
 }
 #endif
 
-static void *locali_allocatedfsconstinfo (GT_UNUSED unsigned int alphasize)
+static void fillLocalitracebackstate(Localitracebackstate *tbs,
+                                     const Uchar *characters,
+                                     Uchar wildcardshow)
 {
-  Limdfsconstinfo *lci = gt_malloc (sizeof (Limdfsconstinfo));
+  tbs->alignment = gt_alignment_new();
+  tbs->spaceUchardbsubstring = NULL;
+  tbs->allocatedUchardbsubstring = 0;
+  tbs->characters = characters;
+  tbs->wildcardshow = wildcardshow;
+}
 
+static Limdfsconstinfo *locali_allocatedfsconstinfo (unsigned int alphasize,...)
+{
+  va_list ap;
+  Limdfsconstinfo *lci;
+  const Uchar *characters;
+  Uchar wildcardshow;
+
+  va_start (ap, alphasize);
+  characters = va_arg(ap, const Uchar *);
+  wildcardshow = (Uchar) va_arg(ap, int);
+  lci = gt_malloc (sizeof (Limdfsconstinfo));
   lci->maxcollen = 0;
+  fillLocalitracebackstate(&lci->tbs,characters,wildcardshow);
+  va_end(ap);
   return lci;
 }
 
-static void locali_initdfsconstinfo (void *dfsconstinfo,
+static void locali_initdfsconstinfo (Limdfsconstinfo *lci,
                                      unsigned int alphasize,...)
 {
   va_list ap;
-  Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
   va_start (ap, alphasize);
   lci->scorevalues.matchscore = va_arg (ap, Scoretype);
@@ -488,19 +517,20 @@ static void locali_initdfsconstinfo (void *dfsconstinfo,
   va_end(ap);
 }
 
-static void locali_freedfsconstinfo (void **dfsconstinfo)
+static void locali_freedfsconstinfo (Limdfsconstinfo **lci)
 {
-  Limdfsconstinfo *lci = (Limdfsconstinfo *) *dfsconstinfo;
-
-  gt_free (lci);
-  *dfsconstinfo = NULL;
+  gt_alignment_delete((*lci)->tbs.alignment);
+  (*lci)->tbs.alignment = NULL;
+  gt_free((*lci)->tbs.spaceUchardbsubstring);
+  (*lci)->tbs.spaceUchardbsubstring = NULL;
+  gt_free (*lci);
+  *lci = NULL;
 }
 
 static void locali_initrootLimdfsstate(DECLAREPTRDFSSTATE(aliasstate),
-                                       void *dfsconstinfo)
+                                       Limdfsconstinfo *lci)
 {
   Column *column = (Column *) aliasstate;
-  Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
 
   if (column->lenval < lci->maxcollen)
   {
@@ -535,9 +565,8 @@ static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 
 static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
                                     const DECLAREPTRDFSSTATE(srcstate),
-                                    void *dfsconstinfo)
+                                    Limdfsconstinfo *lci)
 {
-  Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
   Column *destcol = (Column *) deststate;
   const Column *srccol = (const Column *) srcstate;
 
@@ -580,14 +609,12 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
                                          GT_UNUSED Seqpos rightbound,
                                          GT_UNUSED Seqpos width,
                                          GT_UNUSED unsigned long currentdepth,
-                                         void *dfsconstinfo)
+                                         Limdfsconstinfo *lci)
 {
   Column *column = (Column *) aliasstate;
 
   if (column->colvalues != NULL)
   {
-    const Limdfsconstinfo *lci = (Limdfsconstinfo *) dfsconstinfo;
-
     if (column->maxvalue >= lci->threshold)
     {
       limdfsresult->status = Limdfssuccess;
@@ -609,13 +636,12 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
   }
 }
 
-static void locali_nextLimdfsstate (const void *dfsconstinfo,
+static void locali_nextLimdfsstate (const Limdfsconstinfo *lci,
                                     DECLAREPTRDFSSTATE (aliasoutcol),
                                     GT_UNUSED unsigned long currentdepth,
                                     Uchar currentchar,
                                     const DECLAREPTRDFSSTATE (aliasincol))
 {
-  const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
   Column *outcol = (Column *) aliasoutcol;
   const Column *incol = (const Column *) aliasincol;
 
@@ -629,13 +655,12 @@ static void locali_nextLimdfsstate (const void *dfsconstinfo,
 }
 
 #ifdef AFFINE
-static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
+static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
                                            DECLAREPTRDFSSTATE (aliasstate),
                                            GT_UNUSED unsigned long currentdepth,
                                            Uchar currentchar)
 {
   Column *column = (Column *) aliasstate;
-  const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
 
   if (currentdepth > 1UL)
   {
@@ -647,37 +672,14 @@ static void locali_inplacenextLimdfsstate (const void *dfsconstinfo,
 }
 #endif
 
-struct Localitracebackstate
-{
-  Seqpos dbcurrent, dbprefixlen;
-  unsigned long querycurrent, queryend;
-  Uchar *spaceUchardbsubstring;
-  unsigned long allocatedUchardbsubstring;
-  GtAlignment *alignment;
-  const Uchar *characters;
-  Uchar wildcardshow;
-};
-
-Localitracebackstate *newLocalitracebackstate(const Uchar *characters,
-                                              Uchar wildcardshow)
-{
-  Localitracebackstate *tbs;
-
-  tbs = gt_malloc(sizeof(Localitracebackstate));
-  tbs->alignment = gt_alignment_new();
-  tbs->spaceUchardbsubstring = NULL;
-  tbs->allocatedUchardbsubstring = 0;
-  tbs->characters = characters;
-  tbs->wildcardshow = wildcardshow;
-  return tbs;
-}
-
-void reinitLocalitracebackstate(Localitracebackstate *tbs,
+void reinitLocalitracebackstate(Limdfsconstinfo *lci,
                                 Seqpos dbprefixlen,
                                 unsigned long pprefixlen)
 {
+  Localitracebackstate *tbs = &lci->tbs;
+
   tbs->dbprefixlen = tbs->dbcurrent = dbprefixlen;
-  tbs->queryend = tbs->querycurrent = pprefixlen;
+  tbs->queryend = tbs->querypos = pprefixlen;
   if (dbprefixlen > (Seqpos) tbs->allocatedUchardbsubstring)
   {
     tbs->spaceUchardbsubstring = gt_realloc(tbs->spaceUchardbsubstring,
@@ -686,25 +688,26 @@ void reinitLocalitracebackstate(Localitracebackstate *tbs,
   gt_alignment_reset(tbs->alignment);
 }
 
-void processelemLocalitracebackstate(Localitracebackstate *tbs,
+void processelemLocalitracebackstate(Limdfsconstinfo *lci,
                                      Uchar currentchar,
                                      const void *aliasstate)
 {
+  Localitracebackstate *tbs = &lci->tbs;
   const Column *column = (const Column *) aliasstate;
 
   while (true)
   {
     /*
-    printf(" coord(i=%lu,j=%lu) with ",tbs->querycurrent,
+    printf(" coord(i=%lu,j=%lu) with ",tbs->querypos,
                                        (unsigned long) tbs->dbcurrent);
-    printf("cellvalue=%ld, ",column->colvalues[tbs->querycurrent].bestcell);
+    printf("cellvalue=%ld, ",column->colvalues[tbs->querypos].bestcell);
     */
-    switch (column->colvalues[tbs->querycurrent].tracebit)
+    switch (column->colvalues[tbs->querypos].tracebit)
     {
       case Notraceback:
         fprintf(stderr,"tracebit = Notraceback not allowed\n");
-        fprintf(stderr,"column->colvalues[tbs->querycurrent].bestcell=%ld\n",
-                        column->colvalues[tbs->querycurrent].bestcell);
+        fprintf(stderr,"column->colvalues[tbs->querypos].bestcell=%ld\n",
+                        column->colvalues[tbs->querypos].bestcell);
         exit(EXIT_FAILURE); /* programming error */
       case Insertbit:
         /* printf("insertbit\n"); */
@@ -719,42 +722,40 @@ void processelemLocalitracebackstate(Localitracebackstate *tbs,
         gt_assert(tbs->dbcurrent > 0);
         tbs->dbcurrent--;
         tbs->spaceUchardbsubstring[tbs->dbcurrent] = currentchar;
-        gt_assert(tbs->querycurrent > 0);
-        tbs->querycurrent--;
+        gt_assert(tbs->querypos > 0);
+        tbs->querypos--;
         return;
       case Deletebit:
         /* printf("deletebit\n"); */
         gt_alignment_add_deletion(tbs->alignment);
-        gt_assert(tbs->querycurrent > 0);
-        tbs->querycurrent--;
+        gt_assert(tbs->querypos > 0);
+        tbs->querypos--;
         break; /* stay in the same column => so next iteration */
       default:
         fprintf(stderr,"tracebit = %d not allowed\n",
-                (int) column->colvalues[tbs->querycurrent].tracebit);
+                (int) column->colvalues[tbs->querypos].tracebit);
         exit(EXIT_FAILURE); /* programming error */
     }
   }
 }
 
-void showLocalitracebackstate(const void *dfsconstinfo,
-                              const Localitracebackstate *tbs)
+void showLocalitracebackstate(const Limdfsconstinfo *lci)
 {
-  const Limdfsconstinfo *lci = (const Limdfsconstinfo *) dfsconstinfo;
   Scoretype evalscore;
   unsigned long alignedquerylength;
   const Uchar *querysubstart;
 
-  gt_alignment_show_multieop_list(tbs->alignment,stdout);
-  gt_assert(tbs->queryend >= tbs->querycurrent);
-  alignedquerylength = tbs->queryend - tbs->querycurrent;
-  querysubstart = lci->query + tbs->querycurrent;
+  gt_alignment_show_multieop_list(lci->tbs.alignment,stdout);
+  gt_assert(lci->tbs.queryend >= lci->tbs.querypos);
+  alignedquerylength = lci->tbs.queryend - lci->tbs.querypos;
+  querysubstart = lci->query + lci->tbs.querypos;
   gt_assert(querysubstart != NULL);
-  gt_alignment_set_seqs(tbs->alignment,
+  gt_alignment_set_seqs(lci->tbs.alignment,
                         querysubstart,
                         alignedquerylength,
-                        tbs->spaceUchardbsubstring,
-                        (unsigned long) tbs->dbprefixlen);
-  evalscore = gt_alignment_evalwithscore(tbs->alignment,
+                        lci->tbs.spaceUchardbsubstring,
+                        (unsigned long) lci->tbs.dbprefixlen);
+  evalscore = gt_alignment_evalwithscore(lci->tbs.alignment,
                                          lci->scorevalues.matchscore,
                                          lci->scorevalues.mismatchscore,
                                          lci->scorevalues.gapextend);
@@ -763,17 +764,10 @@ void showLocalitracebackstate(const void *dfsconstinfo,
     fprintf(stderr,"unexpected eval score %ld\n",evalscore);
     exit(EXIT_FAILURE); /* programming error */
   }
-  gt_alignment_showwithmappedcharacters(tbs->alignment,
-                                        tbs->characters,
-                                        tbs->wildcardshow,
+  gt_alignment_showwithmappedcharacters(lci->tbs.alignment,
+                                        lci->tbs.characters,
+                                        lci->tbs.wildcardshow,
                                         stdout);
-}
-
-void freeLocalitracebackstate(Localitracebackstate *tbs)
-{
-  gt_alignment_delete(tbs->alignment);
-  gt_free(tbs->spaceUchardbsubstring);
-  gt_free(tbs);
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)

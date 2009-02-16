@@ -23,21 +23,14 @@
 
 const AbstractDfstransformer *locali_AbstractDfstransformer(void);
 
-typedef struct Localitracebackstate Localitracebackstate;
+void reinitLocalitracebackstate(Limdfsconstinfo *lci,
+                                Seqpos dbprefixlen,
+                                unsigned long pprefixlen);
 
-Localitracebackstate *newLocalitracebackstate(const Uchar *characters,
-                                              Uchar wildcardshow);
-
-void reinitLocalitracebackstate(Localitracebackstate *tbs,
-                                Seqpos dbprefixlen,unsigned long pprefixlen);
-
-void processelemLocalitracebackstate(Localitracebackstate *tbs,
+void processelemLocalitracebackstate(Limdfsconstinfo *lci,
                                      Uchar currentchar,
                                      const void *aliasstate);
 
-void showLocalitracebackstate(const void *dfsconstinfo,
-                              const Localitracebackstate *tbs);
-
-void freeLocalitracebackstate(Localitracebackstate *);
+void showLocalitracebackstate(const Limdfsconstinfo *lci);
 
 #endif

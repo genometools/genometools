@@ -174,7 +174,7 @@ DECLAREARRAYSTRUCT(Lcpintervalwithinfo);
 
 struct Limdfsresources
 {
-  void *dfsconstinfo;
+  Limdfsconstinfo *dfsconstinfo;
   ArrayBoundswithchar bwci;
   ArrayLcpintervalwithinfo stack;
   Lcpintervalwithinfo copyofparent;
@@ -194,7 +194,6 @@ struct Limdfsresources
   Seqpos numberofmatches;
   Processmatch processmatch;
   void *processmatchinfo;
-  Localitracebackstate *tbs;
   Processresult processresult;
 };
 
@@ -233,9 +232,6 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   limdfsresources->encseq = encseq;
   limdfsresources->maxintervalwidth = maxintervalwidth;
   limdfsresources->keepexpandedonstack = keepexpandedonstack;
-  limdfsresources->tbs
-    = newLocalitracebackstate(getencseqAlphabetcharacters(encseq),
-                              getencseqAlphabetwildcardshow(encseq));
   if (maxpathlength > 0)
   {
     ALLOCASSIGNSPACE(limdfsresources->currentpathspace,NULL,Uchar,
@@ -247,7 +243,9 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   }
   /* Application specific */
   limdfsresources->dfsconstinfo
-    = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
+    = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize,
+                                  getencseqAlphabetcharacters(encseq),
+                                  getencseqAlphabetwildcardshow(encseq));
   if (genericindex->withesa)
   {
     limdfsresources->rangeOccs = NULL;
@@ -278,7 +276,8 @@ static void tracethestackelems(Limdfsresources *limdfsresources,
 {
   Seqpos previous = 0;
 
-  reinitLocalitracebackstate(limdfsresources->tbs,runptr->lcpitv.offset,
+  reinitLocalitracebackstate(limdfsresources->dfsconstinfo,
+                             runptr->lcpitv.offset,
                              pprefixlen);
   do
   {
@@ -290,13 +289,12 @@ static void tracethestackelems(Limdfsresources *limdfsresources,
     gt_assert(previous > 0);
     gt_assert(runptr->previousstackelem <
               limdfsresources->stack.nextfreeLcpintervalwithinfo);
-    processelemLocalitracebackstate(limdfsresources->tbs,
+    processelemLocalitracebackstate(limdfsresources->dfsconstinfo,
                                     runptr->lcpitv.inchar,runptr->aliasstate);
     runptr = limdfsresources->stack.spaceLcpintervalwithinfo +
              runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
-  showLocalitracebackstate(limdfsresources->dfsconstinfo,
-                           limdfsresources->tbs);
+  showLocalitracebackstate(limdfsresources->dfsconstinfo);
 }
 
 static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,
@@ -376,8 +374,6 @@ void freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
       adfst->freeLimdfsstackelem(limdfsresources->copyofparent.aliasstate);
     }
   }
-  freeLocalitracebackstate(limdfsresources->tbs);
-  limdfsresources->tbs = NULL;
   FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   FREESPACE(limdfsresources->rangeOccs);
   FREESPACE(limdfsresources->currentpathspace);
@@ -1107,9 +1103,9 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 #define SHOWSTACKTOP(STACKPTR)\
         printf("top=");\
         showLCPinterval(limdfsresources->genericindex->withesa,\
-                        &STACKPTR->lcpitv);\
-        adfst->showLimdfsstate(STACKPTR->aliasstate,\
-                               (unsigned long) STACKPTR->lcpitv.offset,\
+                        &(STACKPTR)->lcpitv);\
+        adfst->showLimdfsstate((STACKPTR)->aliasstate,\
+                               (unsigned long) (STACKPTR)->lcpitv.offset,\
                                limdfsresources->dfsconstinfo);\
         printf("\n")
 #else

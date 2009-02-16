@@ -32,22 +32,21 @@ typedef struct
   unsigned long prefixofsuffixbits;
 } Limdfsstate;
 
-typedef struct
+struct Limdfsconstinfo
 {
   unsigned long patternlength,
                 mstatlength[INTWORDSIZE],
                 *eqsvector;
   Seqpos mstatwitnessleftbound[INTWORDSIZE],
          mstatwitnessrightbound[INTWORDSIZE];
-} Matchtaskinfo;
+};
 
 #ifdef SKDEBUG
 
 static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long currentdepth,
-                                const void *dfsconstinfo)
+                                const Limdfsconstinfo *mti)
 {
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   const Limdfsstate *col = (const Limdfsstate *) aliascol;
   bool first = true;
 
@@ -73,14 +72,14 @@ static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 
 #endif
 
-static void *pms_allocatedfsconstinfo(unsigned int alphasize)
+static Limdfsconstinfo *pms_allocatedfsconstinfo(unsigned int alphasize,...)
 {
-  Matchtaskinfo *mti = gt_malloc(sizeof(Matchtaskinfo));
+  Limdfsconstinfo *mti = gt_malloc(sizeof(Limdfsconstinfo));
   mti->eqsvector = gt_malloc(sizeof(*mti->eqsvector) * alphasize);
   return mti;
 }
 
-static void pms_initdfsconstinfo(void *dfsconstinfo,
+static void pms_initdfsconstinfo(Limdfsconstinfo *mti,
                                  unsigned int alphasize,
                                  ...)
                                  /* Variable argument list is as follows:
@@ -91,7 +90,6 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
 {
   va_list ap;
   const Uchar *pattern;
-  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   va_start(ap,alphasize);
   pattern = va_arg(ap, const Uchar *);
@@ -104,10 +102,9 @@ static void pms_initdfsconstinfo(void *dfsconstinfo,
 static void pms_extractdfsconstinfo(Processresult processresult,
                                     void *processinfo,
                                     const void *patterninfo,
-                                    void *dfsconstinfo)
+                                    Limdfsconstinfo *mti)
 {
   unsigned long idx;
-  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   for (idx=0; idx<mti->patternlength; idx++)
   {
@@ -117,13 +114,11 @@ static void pms_extractdfsconstinfo(Processresult processresult,
   }
 }
 
-static void pms_freedfsconstinfo(void **dfsconstinfo)
+static void pms_freedfsconstinfo(Limdfsconstinfo **mtiptr)
 {
-  Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
-
-  gt_free(mti->eqsvector);
-  gt_free(mti);
-  *dfsconstinfo = NULL;
+  gt_free((*mtiptr)->eqsvector);
+  gt_free((*mtiptr));
+  *mtiptr = NULL;
 }
 
 static unsigned long zerosontheright(unsigned long v)
@@ -170,10 +165,9 @@ static unsigned long zerosontheright(unsigned long v)
 }
 
 static void pms_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                void *dfsconstinfo)
+                                Limdfsconstinfo *mti)
 {
   Limdfsstate *column = (Limdfsstate *) aliascolumn;
-  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   unsigned long idx;
 
   column->prefixofsuffixbits = ~0UL;
@@ -192,13 +186,12 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                      Seqpos rightbound,
                                      GT_UNUSED Seqpos width,
                                      unsigned long currentdepth,
-                                     void *dfsconstinfo)
+                                     Limdfsconstinfo *mti)
 {
   Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
 
   if (limdfsstate->prefixofsuffixbits > 0)
   {
-    Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
     unsigned long bitindex = 0,
                   first1,
                   tmp = limdfsstate->prefixofsuffixbits;
@@ -227,7 +220,7 @@ static void pms_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
   }
 }
 
-static void pms_nextLimdfsstate(const void *dfsconstinfo,
+static void pms_nextLimdfsstate(const Limdfsconstinfo *mti,
                                 DECLAREPTRDFSSTATE(aliasoutcol),
                                 unsigned long currentdepth,
                                 Uchar currentchar,
@@ -236,7 +229,6 @@ static void pms_nextLimdfsstate(const void *dfsconstinfo,
 #ifdef SKDEBUG
   char buffer1[32+1], buffer2[32+1];
 #endif
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
   const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
 
@@ -260,7 +252,7 @@ static void pms_nextLimdfsstate(const void *dfsconstinfo,
 #endif
 }
 
-static void pms_inplacenextLimdfsstate(const void *dfsconstinfo,
+static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                        DECLAREPTRDFSSTATE(aliascol),
                                        unsigned long currentdepth,
                                        Uchar currentchar)
@@ -269,7 +261,6 @@ static void pms_inplacenextLimdfsstate(const void *dfsconstinfo,
   char buffer1[32+1], buffer2[32+1];
   unsigned long tmp;
 #endif
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascol;
 
   gt_assert(ISNOTSPECIAL(currentchar));
