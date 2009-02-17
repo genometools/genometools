@@ -739,13 +739,15 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
   }
 }
 
-void showLocalitracebackstate(const Limdfsconstinfo *lci)
+void completealignmentfromLocalitracebackstate(const Limdfsconstinfo *lci)
 {
   Scoretype evalscore;
   unsigned long alignedquerylength;
   const Uchar *querysubstart;
 
+#ifdef SKDEBUG
   gt_alignment_show_multieop_list(lci->tbs.alignment,stdout);
+#endif
   gt_assert(lci->tbs.queryend >= lci->tbs.querypos);
   alignedquerylength = lci->tbs.queryend - lci->tbs.querypos;
   querysubstart = lci->query + lci->tbs.querypos;
@@ -755,6 +757,7 @@ void showLocalitracebackstate(const Limdfsconstinfo *lci)
                         alignedquerylength,
                         lci->tbs.spaceUchardbsubstring,
                         (unsigned long) lci->tbs.dbprefixlen);
+#ifndef NDEBUG
   evalscore = gt_alignment_evalwithscore(lci->tbs.alignment,
                                          lci->scorevalues.matchscore,
                                          lci->scorevalues.mismatchscore,
@@ -764,6 +767,7 @@ void showLocalitracebackstate(const Limdfsconstinfo *lci)
     fprintf(stderr,"unexpected eval score %ld\n",evalscore);
     exit(EXIT_FAILURE); /* programming error */
   }
+#endif
   gt_alignment_showwithmappedcharacters(lci->tbs.alignment,
                                         lci->tbs.characters,
                                         lci->tbs.wildcardshow,

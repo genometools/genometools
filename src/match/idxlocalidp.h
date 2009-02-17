@@ -31,6 +31,6 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
                                      Uchar currentchar,
                                      const void *aliasstate);
 
-void showLocalitracebackstate(const Limdfsconstinfo *lci);
+void completealignmentfromLocalitracebackstate(const Limdfsconstinfo *lci);
 
 #endif

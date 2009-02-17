@@ -294,7 +294,7 @@ static void tracethestackelems(Limdfsresources *limdfsresources,
     runptr = limdfsresources->stack.spaceLcpintervalwithinfo +
              runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
-  showLocalitracebackstate(limdfsresources->dfsconstinfo);
+  completealignmentfromLocalitracebackstate(limdfsresources->dfsconstinfo);
 }
 
 static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,
@@ -396,6 +396,7 @@ static void gen_esa_overinterval(const Genericindex *genericindex,
 
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
+    /* call processmatch */
     processmatch(processmatchinfo,
                  genericindex->suffixarray->suftab[idx],
                  itv->offset,
@@ -439,7 +440,8 @@ static void gen_pck_overinterval(const Genericindex *genericindex,
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
     gt_assert(totallength >= (dbstartpos + itv->offset));
-    processmatch(processmatchinfo,
+    /* call processmatch */
+    processmatch(processmatchinfo, 
                  totallength - (dbstartpos + itv->offset),
                  itv->offset,
                  dbsubstring,
@@ -652,6 +654,11 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
       }
       if (limdfsresult.status == Limdfssuccess)
       {
+        if (limdfsresources->keepexpandedonstack)
+        {
+          tracethestackelems(limdfsresources,limdfsresult.pprefixlen,outstate);
+        }
+        /* call processmatch */
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       startpos,
                                       pos - startpos + 1,
@@ -659,12 +666,6 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                                       limdfsresult.pprefixlen,
                                       limdfsresult.distance);
         limdfsresources->numberofmatches++;
-        if (limdfsresources->keepexpandedonstack)
-        {
-          tracethestackelems(limdfsresources,
-                             limdfsresult.pprefixlen,
-                             outstate);
-        }
         break;
       }
     } else
@@ -738,9 +739,15 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       }
       if (limdfsresult.status == Limdfssuccess)
       {
-        Seqpos startpos = bwtseqfirstmatch(limdfsresources->genericindex->
-                                                            packedindex,
-                                           leftbound);
+        Seqpos startpos;
+
+        if (limdfsresources->keepexpandedonstack)
+        {
+          tracethestackelems(limdfsresources,limdfsresult.pprefixlen,outstate);
+        }
+        startpos = bwtseqfirstmatch(limdfsresources->genericindex->packedindex,
+                                    leftbound);
+        /* call processmatch */
         limdfsresources->processmatch(limdfsresources->processmatchinfo,
                                       limdfsresources->genericindex->
                                                        totallength -
@@ -750,10 +757,6 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                                       limdfsresult.pprefixlen,
                                       limdfsresult.distance);
         limdfsresources->numberofmatches++;
-        if (limdfsresources->keepexpandedonstack)
-        {
-          tracethestackelems(limdfsresources,limdfsresult.pprefixlen,outstate);
-        }
         break;
       }
     } else
@@ -839,11 +842,6 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   if (limdfsresult.status == Limdfssuccess)
   {
-    /* success with match of length pprefixlen */
-    (limdfsresources->genericindex->withesa
-         ? esa_overinterval
-         : pck_overinterval)
-      (limdfsresources,child,limdfsresult.pprefixlen,limdfsresult.distance);
     if (limdfsresources->keepexpandedonstack)
     {
       gt_assert(stackptr >= limdfsresources->stack.spaceLcpintervalwithinfo &&
@@ -852,10 +850,13 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
       stackptr->lcpitv = *child;
       stackptr->keeponstack = true;
       stackptr->previousstackelem = limdfsresources->parentindex;
-      tracethestackelems(limdfsresources,
-                         limdfsresult.pprefixlen,
-                         stackptr);
+      tracethestackelems(limdfsresources,limdfsresult.pprefixlen,stackptr);
     }
+    /* success with match of length pprefixlen */
+    (limdfsresources->genericindex->withesa
+         ? esa_overinterval
+         : pck_overinterval)
+      (limdfsresources,child,limdfsresult.pprefixlen,limdfsresult.distance);
   }
   /* now status == Limdfssuccess || status == Limdfsstop */
   /* pop the element from the stack as there has been success or stop event */
@@ -1301,6 +1302,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
   nomatches = isemptymmsearchiterator(mmsi);
   while (nextmmsearchiterator(&dbstartpos,mmsi))
   {
+    /* call processmatch */
     processmatch(processmatchinfo,dbstartpos,
                  (Seqpos) patternlength,dbsubstring,patternlength,0);
   }
