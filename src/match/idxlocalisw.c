@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "idxlocalidp.h"
+#include "encseq-def.h"
 #include "idxlocalidp.h"
 
 typedef struct
@@ -29,25 +29,29 @@ Scoretype localsimilarityscore(Scoretype *scol,
                                const Scorevalues *scorevalues,
                                const Uchar *useq,
                                unsigned long ulen,
-                               const Uchar *vseq,
-                               unsigned long vlen)
+                               const Encodedsequence *vencseq,
+                               Seqpos startpos,
+                               Seqpos endpos)
 {
   Scoretype val, we, nw, *scolptr, maximalscore = 0;
-  const Uchar *uptr, *vptr;
+  const Uchar *uptr;
+  Uchar vcurrent;
+  Seqpos j;
 
   maxpair->umax = maxpair->vmax = 0;
   for (scolptr = scol; scolptr <= scol + ulen; scolptr++)
   {
     *scolptr = 0;
   }
-  for (vptr = vseq; vptr < vseq + vlen; vptr++)
+  for (j = startpos; j < endpos; j++)
   {
     nw = 0;
+    vcurrent = getencodedchar(vencseq,j,Forwardmode);
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
       we = *scolptr;
       *scolptr = *(scolptr-1) + scorevalues->gapextend;
-      if ((val = nw + REPLACEMENTSCORE(scorevalues,*uptr,*vptr)) > *scolptr)
+      if ((val = nw + REPLACEMENTSCORE(scorevalues,*uptr,vcurrent)) > *scolptr)
       {
         *scolptr = val;
       }
@@ -64,7 +68,7 @@ Scoretype localsimilarityscore(Scoretype *scol,
         {
           maximalscore = *scolptr;
           maxpair->umax = (unsigned long) (uptr - useq + 1);
-          maxpair->vmax = (unsigned long) (vptr - vseq + 1);
+          maxpair->vmax = (unsigned long) (j - startpos + 1);
         }
       }
       nw = we;
