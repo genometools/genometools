@@ -18,11 +18,17 @@
 #include "encseq-def.h"
 #include "idxlocalidp.h"
 
+#define REPLACEMENTBIT   ((Uchar) 1)
+#define DELETIONBIT      (((Uchar) 1) << 1)
+#define INSERTIONBIT     (((Uchar) 1) << 2)
+
 typedef struct
 {
   unsigned long umax,
                 vmax;
 } Maxscorecoord;
+
+typedef Uchar Retracebits;
 
 Scoretype localsimilarityscore(Scoretype *scol,
                                Maxscorecoord *maxpair,
@@ -159,6 +165,70 @@ void localsimilarityregion(DPpoint *scol,
           maxentry->start1 = (unsigned long) (uptr - useq) - scolptr->lu + 1;
           maxentry->start2 = (unsigned long) (j - startpos) - scolptr->lv + 1;
         }
+      }
+      nw = we;
+    }
+  }
+}
+
+void maximalDPedges(Retracebits *edges,
+                    Scoretype *scol,
+                    const Scorevalues *scorevalues,
+                    const Uchar *useq,unsigned long ulen,
+                    const Encodedsequence *vencseq,
+                    Seqpos startpos,
+                    Seqpos endpos)
+{
+  Scoretype val, we, nw, *scolptr;
+  const Uchar *uptr;
+  Uchar vcurrent;
+  Seqpos j;
+  Retracebits *eptr;
+
+  eptr = edges;
+  *eptr = 0;
+  for (*scol = 0, scolptr = scol+1, uptr = useq, eptr++; uptr < useq + ulen;
+       scolptr++, uptr++, eptr++)
+  {
+    *scolptr = *(scolptr-1) + scorevalues->gapextend;
+    *eptr = DELETIONBIT;
+  }
+  for (j = startpos; j < endpos; j++)
+  {
+    vcurrent = getencodedchar(vencseq,j,Forwardmode);
+    gt_assert(vcurrent != (Uchar) SEPARATOR);
+    nw = *scol;
+    *scol = nw + scorevalues->gapextend;
+    *eptr = INSERTIONBIT;
+    for (scolptr = scol+1, uptr = useq, eptr++; uptr < useq + ulen;
+         scolptr++, uptr++, eptr++)
+    {
+      gt_assert(*uptr != (Uchar) SEPARATOR);
+      we = *scolptr;
+      *scolptr = *(scolptr-1) + scorevalues->gapextend;
+      *eptr = DELETIONBIT;
+      if ((val = nw + REPLACEMENTSCORE(scorevalues,*uptr,vcurrent))
+               >= *scolptr)
+      {
+        if (val == *scolptr)
+        {
+          *eptr = *eptr | REPLACEMENTBIT;
+        } else
+        {
+          *eptr = REPLACEMENTBIT;
+        }
+        *scolptr = val;
+      }
+      if ((val = we + scorevalues->gapextend) >= *scolptr)
+      {
+        if (val == *scolptr)
+        {
+          *eptr = *eptr | INSERTIONBIT;
+        } else
+        {
+          *eptr = INSERTIONBIT;
+        }
+        *scolptr = val;
       }
       nw = we;
     }
