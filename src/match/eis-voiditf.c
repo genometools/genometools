@@ -353,21 +353,22 @@ bool pck_exactpatternmatching(const void *voidbwtseq,
 {
   BWTSeqExactMatchesIterator *bsemi;
   Seqpos dbstartpos, numofmatches;
+  GtMatch match;
 
   bsemi = newEMIterator((const BWTSeq *) voidbwtseq,
                         pattern,(size_t) patternlength, true);
   gt_assert(bsemi != NULL);
   numofmatches = EMINumMatchesTotal(bsemi);
+  match.dblen = patternlength;
+  match.dbsubstring = dbsubstring;
+  match.pprefixlen = patternlength;
+  match.distance = 0;
+  match.alignment = NULL;
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) voidbwtseq))
   {
     gt_assert(totallength >= (dbstartpos + patternlength));
-    processmatch(processmatchinfo,
-                 totallength - (dbstartpos + patternlength),
-                 (Seqpos) patternlength,
-                 dbsubstring,
-                 patternlength,
-                 0,
-                 NULL); /* XXX Missing alignment */
+    match.dbstartpos = totallength - (dbstartpos + patternlength);
+    processmatch(processmatchinfo,&match);
   }
   if (bsemi != NULL)
   {

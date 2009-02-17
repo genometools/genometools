@@ -29,16 +29,11 @@
 #include "stamp.h"
 
 static void showmatch(GT_UNUSED void *processinfo,
-                      Seqpos dbstartpos,
-                      Seqpos dblen,
-                      GT_UNUSED const Uchar *dbsubstring,
-                      unsigned long pprefixlen,
-                      unsigned long distance,
-                      GT_UNUSED const void *voidal)
+                      const GtMatch *match)
 {
-  printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
-  printf(FormatSeqpos "\t",PRINTSeqposcast(dbstartpos));
-  printf("%lu\t%lu\n",pprefixlen,distance);
+  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
+  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dbstartpos));
+  printf("%lu\t%lu\n",match->pprefixlen,match->distance);
 }
 
 int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)

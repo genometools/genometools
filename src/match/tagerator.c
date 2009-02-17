@@ -79,12 +79,7 @@ typedef struct
         }
 
 static void showmatch(void *processinfo,
-                      Seqpos dbstartpos,
-                      Seqpos dblen,
-                      const Uchar *dbsubstring,
-                      unsigned long pprefixlen,
-                      unsigned long distance,
-                      GT_UNUSED const void *voidal)
+                      const GtMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   bool firstitem = true;
@@ -92,19 +87,20 @@ static void showmatch(void *processinfo,
   gt_assert(showmatchinfo->tageratoroptions != NULL);
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBLENGTH)
   {
-    printf(FormatSeqpos,PRINTSeqposcast(dblen));
+    printf(FormatSeqpos,PRINTSeqposcast(match->dblen));
     firstitem = false;
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
   {
     ADDTABULATOR;
-    printf(FormatSeqpos,PRINTSeqposcast(dbstartpos));
+    printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
   {
     ADDTABULATOR;
-    gt_assert(dbsubstring != NULL);
-    printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
+    gt_assert(match->dbsubstring != NULL);
+    printfsymbolstring(showmatchinfo->alpha,match->dbsubstring,
+                       (unsigned long) match->dblen);
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
   {
@@ -114,7 +110,7 @@ static void showmatch(void *processinfo,
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_EDIST)
   {
     ADDTABULATOR;
-    printf("%lu",distance);
+    printf("%lu",match->distance);
   }
   if (showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
@@ -126,17 +122,17 @@ static void showmatch(void *processinfo,
         unsigned long suffixlength
           = reversesuffixmatch(showmatchinfo->eqsvector,
                                showmatchinfo->alphasize,
-                               dbsubstring,
-                               (unsigned long) dblen,
+                               match->dbsubstring,
+                               (unsigned long) match->dblen,
                                showmatchinfo->tagptr,
-                               pprefixlen,
+                               match->pprefixlen,
                                (unsigned long) showmatchinfo->tageratoroptions->
                                                         userdefinedmaxdistance);
-        gt_assert(pprefixlen >= suffixlength);
+        gt_assert(match->pprefixlen >= suffixlength);
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
         {
           ADDTABULATOR;
-          printf("%lu",pprefixlen - suffixlength);
+          printf("%lu",match->pprefixlen - suffixlength);
         }
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
         {
@@ -147,7 +143,7 @@ static void showmatch(void *processinfo,
         {
           ADDTABULATOR;
           printfsymbolstring(NULL,showmatchinfo->tagptr +
-                                  (pprefixlen - suffixlength),
+                                  (match->pprefixlen - suffixlength),
                                   suffixlength);
         }
       }
@@ -161,12 +157,12 @@ static void showmatch(void *processinfo,
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
       {
         ADDTABULATOR;
-        printf("%lu",pprefixlen);
+        printf("%lu",match->pprefixlen);
       }
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
       {
         ADDTABULATOR;
-        printfsymbolstring(NULL,showmatchinfo->tagptr, pprefixlen);
+        printfsymbolstring(NULL,showmatchinfo->tagptr, match->pprefixlen);
       }
     }
   }
@@ -183,21 +179,15 @@ typedef struct
   const Tagwithlength *twlptr;
 } ArraySimplematch;
 
-static void storematch(void *processinfo,
-                       Seqpos dbstartpos,
-                       Seqpos dblen,
-                       GT_UNUSED const Uchar *dbsubstring,
-                       GT_UNUSED unsigned long pprefixlen,
-                       GT_UNUSED unsigned long distance,
-                       GT_UNUSED const void *voidal)
+static void storematch(void *processinfo,const GtMatch *match)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
-  Simplematch *match;
+  Simplematch *simplematch;
 
-  GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
-  match->dbstartpos = dbstartpos;
-  match->matchlength = dblen;
-  match->rcmatch = ISRCDIR(storetab->twlptr);
+  GETNEXTFREEINARRAY(simplematch,storetab,Simplematch,32);
+  simplematch->dbstartpos = match->dbstartpos;
+  simplematch->matchlength = match->dblen;
+  simplematch->rcmatch = ISRCDIR(storetab->twlptr);
 }
 
 static void checkmstats(void *processinfo,

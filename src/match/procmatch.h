@@ -21,13 +21,18 @@
 #include "core/symboldef.h"
 #include "seqpos-def.h"
 
-typedef void (*Processmatch)(void *,
-                             Seqpos,
-                             Seqpos,
-                             const Uchar *,
-                             unsigned long,
-                             unsigned long,
-                             const void *);
+typedef struct
+{
+  Seqpos dbstartpos,
+         dblen;
+  const Uchar *dbsubstring;
+  unsigned long pprefixlen;
+  unsigned long distance;
+  const void *alignment;
+} GtMatch;
+
+typedef void (*Processmatch)(void *processinfo,
+                             const GtMatch *match);
 
 typedef void (*Processresult)(void *,
                               const void *,

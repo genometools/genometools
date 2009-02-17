@@ -130,15 +130,10 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
 }
 
 static void showmatch(GT_UNUSED void *processinfo,
-                      Seqpos dbstartpos,
-                      Seqpos dblen,
-                      GT_UNUSED const Uchar *dbsubstring,
-                      GT_UNUSED unsigned long pprefixlen,
-                      GT_UNUSED unsigned long distance,
-                      GT_UNUSED const void *voidal)
+                      const GtMatch *match)
 {
-  printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
-  printf(FormatSeqpos "\n",PRINTSeqposcast(dbstartpos));
+  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
+  printf(FormatSeqpos "\n",PRINTSeqposcast(match->dbstartpos));
 }
 
 #ifdef WITHONLINE
