@@ -26,12 +26,12 @@
 typedef struct GtSeqIterator GtSeqIterator;
 
 GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
-                             const Uchar *symbolmap, bool withsequence);
-int          gt_seqiterator_next(GtSeqIterator*, const Uchar **sequence,
-                              unsigned long *len, char **desc, GtError*);
-const unsigned long long*
-             gt_seqiterator_getcurrentcounter(GtSeqIterator*,
-                                              unsigned long long);
-void         gt_seqiterator_delete(GtSeqIterator*);
+                                  const Uchar *symbolmap, bool withsequence);
+int            gt_seqiterator_next(GtSeqIterator*, const Uchar **sequence,
+                                   unsigned long *len, char **desc, GtError*);
+const unsigned
+long long*     gt_seqiterator_getcurrentcounter(GtSeqIterator*,
+                                                unsigned long long);
+void           gt_seqiterator_delete(GtSeqIterator*);
 
 #endif
