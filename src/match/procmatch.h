@@ -26,7 +26,8 @@ typedef void (*Processmatch)(void *,
                              Seqpos,
                              const Uchar *,
                              unsigned long,
-                             unsigned long);
+                             unsigned long,
+                             const void *);
 
 typedef void (*Processresult)(void *,
                               const void *,

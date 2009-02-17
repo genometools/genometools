@@ -134,7 +134,8 @@ static void showmatch(GT_UNUSED void *processinfo,
                       Seqpos dblen,
                       GT_UNUSED const Uchar *dbsubstring,
                       GT_UNUSED unsigned long pprefixlen,
-                      GT_UNUSED unsigned long distance)
+                      GT_UNUSED unsigned long distance,
+                      GT_UNUSED const void *voidal)
 {
   printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
   printf(FormatSeqpos "\n",PRINTSeqposcast(dbstartpos));
@@ -239,15 +240,15 @@ int matchspacedseed(bool withesa,
     dfst = spse_AbstractDfstransformer();
     gt_assert(genericindex != NULL);
     limdfsresources = newLimdfsresources(genericindex,
-                           true,
-                           0,
-                           (unsigned long) INTWORDSIZE,
-                           false, /* keepexpandedonstack */
-                           showmatch,
-                           NULL, /* processmatch info */
-                           NULL, /* processresult */
-                           NULL, /* processresult info */
-                           dfst);
+                                         true,
+                                         0,
+                                         (unsigned long) INTWORDSIZE,
+                                         false, /* keepexpandedonstack */
+                                         showmatch,
+                                         NULL, /* processmatch info */
+                                         NULL, /* processresult */
+                                         NULL, /* processresult info */
+                                         dfst);
     encseq = genericindex_getencseq(genericindex);
     seqit = gt_seqiterator_new(queryfilenames,
                                getencseqAlphabetsymbolmap(encseq),

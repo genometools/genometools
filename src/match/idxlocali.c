@@ -33,7 +33,8 @@ static void showmatch(GT_UNUSED void *processinfo,
                       Seqpos dblen,
                       GT_UNUSED const Uchar *dbsubstring,
                       unsigned long pprefixlen,
-                      unsigned long distance)
+                      unsigned long distance,
+                      GT_UNUSED const void *voidal)
 {
   printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
   printf(FormatSeqpos "\t",PRINTSeqposcast(dbstartpos));

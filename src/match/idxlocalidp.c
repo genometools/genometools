@@ -739,7 +739,8 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
   }
 }
 
-void completealignmentfromLocalitracebackstate(const Limdfsconstinfo *lci)
+const void *completealignmentfromLocalitracebackstate(
+                                        const Limdfsconstinfo *lci)
 {
   Scoretype evalscore;
   unsigned long alignedquerylength;
@@ -768,10 +769,13 @@ void completealignmentfromLocalitracebackstate(const Limdfsconstinfo *lci)
     exit(EXIT_FAILURE); /* programming error */
   }
 #endif
+  /*
   gt_alignment_showwithmappedcharacters(lci->tbs.alignment,
                                         lci->tbs.characters,
                                         lci->tbs.wildcardshow,
                                         stdout);
+  */
+  return (const void *) lci->tbs.alignment;
 }
 
 const AbstractDfstransformer *locali_AbstractDfstransformer (void)

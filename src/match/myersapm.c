@@ -167,7 +167,8 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                             (Seqpos) matchlength.valueunsignedlong,
                             NULL,
                             patternlength,
-                            score);
+                            score,
+                            NULL); /* XXX no alignment */
         }
       }
     }

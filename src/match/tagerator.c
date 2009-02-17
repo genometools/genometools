@@ -83,7 +83,8 @@ static void showmatch(void *processinfo,
                       Seqpos dblen,
                       const Uchar *dbsubstring,
                       unsigned long pprefixlen,
-                      unsigned long distance)
+                      unsigned long distance,
+                      GT_UNUSED const void *voidal)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   bool firstitem = true;
@@ -187,7 +188,8 @@ static void storematch(void *processinfo,
                        Seqpos dblen,
                        GT_UNUSED const Uchar *dbsubstring,
                        GT_UNUSED unsigned long pprefixlen,
-                       GT_UNUSED unsigned long distance)
+                       GT_UNUSED unsigned long distance,
+                       GT_UNUSED const void *voidal)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
   Simplematch *match;

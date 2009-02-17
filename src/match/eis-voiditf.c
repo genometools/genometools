@@ -366,7 +366,8 @@ bool pck_exactpatternmatching(const void *voidbwtseq,
                  (Seqpos) patternlength,
                  dbsubstring,
                  patternlength,
-                 0);
+                 0,
+                 NULL); /* XXX Missing alignment */
   }
   if (bsemi != NULL)
   {
