@@ -172,13 +172,13 @@ void swlocalsimilarityregion(DPpoint *scol,
   }
 }
 
-void swmaximalDPedges(Retracebits *edges,
-                      Scoretype *scol,
-                      const Scorevalues *scorevalues,
-                      const Uchar *useq,unsigned long ulen,
-                      const Encodedsequence *vencseq,
-                      Seqpos startpos,
-                      Seqpos endpos)
+static void swmaximalDPedges(Retracebits *edges,
+                             Scoretype *scol,
+                             const Scorevalues *scorevalues,
+                             const Uchar *useq,unsigned long ulen,
+                             const Encodedsequence *vencseq,
+                             Seqpos startpos,
+                             Seqpos endpos)
 {
   Scoretype val, we, nw, *scolptr;
   const Uchar *uptr;
@@ -237,7 +237,7 @@ void swmaximalDPedges(Retracebits *edges,
 }
 
 void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
-                        unsigned long vlen,const Retracebits *edges)
+                        Seqpos vlen,const Retracebits *edges)
 {
   const Retracebits *eptr = edges + (ulen+1) * (vlen+1) - 1;
 
@@ -266,4 +266,16 @@ void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
       }
     }
   }
+}
+
+void swproducealignment(GtAlignment *alignment,
+                        Retracebits *edges,Scoretype *scol,
+                        const Scorevalues *scorevalues,
+                        const Uchar *useq,unsigned long ulen,
+                        const Encodedsequence *vencseq,
+                        Seqpos startpos,
+                        Seqpos endpos)
+{
+  swmaximalDPedges(edges,scol,scorevalues,useq,ulen,vencseq,startpos,endpos);
+  swtracebackDPedges(alignment,ulen,endpos - startpos,edges);
 }
