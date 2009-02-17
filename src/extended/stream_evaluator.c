@@ -1383,7 +1383,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   return had_err;
 }
 
-static void show_gt_transcript_values(GtTranscriptEvaluators *te,
+static void show_transcript_values(GtTranscriptEvaluators *te,
                                       const char *level,
                                       const char *additional_info, FILE *outfp)
 {
@@ -1491,13 +1491,13 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, FILE *outfp)
     fprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
 
     /* mRNA exon level */
-    show_gt_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
-    show_gt_transcript_values(se->mRNA_exon_evaluators_collapsed, "mRNA",
+    show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
+    show_transcript_values(se->mRNA_exon_evaluators_collapsed, "mRNA",
                            ", collapsed", outfp);
 
     /* CDS exon level */
-    show_gt_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
-    show_gt_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
+    show_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
+    show_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
                            ", collapsed", outfp);
 
     if (se->nuceval) {

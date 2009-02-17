@@ -26,7 +26,7 @@ struct GtCstrTable {
   GtHashtable *strings;
 };
 
-static void free_gt_cstr_table_entry(void *cstr_entry)
+static void free_cstr_table_entry(void *cstr_entry)
 {
   gt_free(*(char**) cstr_entry);
 }
@@ -34,7 +34,7 @@ static void free_gt_cstr_table_entry(void *cstr_entry)
 GtCstrTable* gt_cstr_table_new()
 {
   HashElemInfo cstr_table = {
-    gt_ht_cstr_elem_hash, { free_gt_cstr_table_entry }, sizeof (char*),
+    gt_ht_cstr_elem_hash, { free_cstr_table_entry }, sizeof (char*),
     gt_ht_cstr_elem_cmp, NULL, NULL };
   GtCstrTable *table = gt_malloc(sizeof (GtCstrTable));
   table->strings = gt_hashtable_new(cstr_table);

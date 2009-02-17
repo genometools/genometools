@@ -54,7 +54,7 @@ const GtTypeCheckerClass* gt_type_checker_obo_class(void)
   return &gt_type_checker_class;
 }
 
-static void add_gt_feature_node_from_tree(GtTypeCheckerOBO *tco,
+static void add_feature_node_from_tree(GtTypeCheckerOBO *tco,
                                             GtOBOParseTree *obo_parse_tree,
                                             unsigned long stanza_num,
                                             const char *stanza_key)
@@ -83,8 +83,8 @@ static int create_genome_features(GtTypeCheckerOBO *tco,
           gt_obo_parse_tree_get_stanza_value(obo_parse_tree, i, "is_obsolete");
         /* do not add obsolete types */
         if (!is_obsolete || strcmp(is_obsolete, "true")) {
-          add_gt_feature_node_from_tree(tco, obo_parse_tree, i, "id");
-          add_gt_feature_node_from_tree(tco, obo_parse_tree, i, "name");
+          add_feature_node_from_tree(tco, obo_parse_tree, i, "id");
+          add_feature_node_from_tree(tco, obo_parse_tree, i, "name");
         }
       }
     }

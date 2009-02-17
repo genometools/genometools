@@ -29,9 +29,8 @@ struct GtLineBreakerBases {
 #define gt_line_breaker_bases_cast(LB)\
         gt_line_breaker_cast(gt_line_breaker_bases_class(), LB)
 
-bool gt_line_breaker_bases_is_gt_line_occupied(GtLineBreaker* lb,
-                                               GtLine *line,
-                                               GtBlock *block)
+bool gt_line_breaker_bases_is_line_occupied(GtLineBreaker* lb, GtLine *line,
+                                            GtBlock *block)
 {
   GtLineBreakerBases *lbb;
   GtRange r;
@@ -79,7 +78,7 @@ const GtLineBreakerClass* gt_line_breaker_bases_class(void)
   if (!lbc)
   {
     lbc = gt_line_breaker_class_new(sizeof (GtLineBreakerBases),
-                                    gt_line_breaker_bases_is_gt_line_occupied,
+                                    gt_line_breaker_bases_is_line_occupied,
                                     gt_line_breaker_bases_register_block,
                                     gt_line_breaker_bases_delete);
   }

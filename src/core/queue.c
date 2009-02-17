@@ -270,7 +270,7 @@ static int check_queue(void **elem, void *info, GtError *err)
   return had_err;
 }
 
-static int check_gt_queue_reverse(void **elem, void *info, GtError *err)
+static int check_queue_reverse(void **elem, void *info, GtError *err)
 {
   long *check_counter_reverse = info;
   int had_err = 0;
@@ -307,7 +307,7 @@ int gt_queue_unit_test(GtError *err)
   if (!had_err)
     had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
   if (!had_err) {
-    had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
+    had_err = gt_queue_iterate_reverse(q, check_queue_reverse,
                                     &check_counter_reverse, err);
   }
   ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
@@ -339,8 +339,8 @@ int gt_queue_unit_test(GtError *err)
     ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
     ensure(had_err, gt_queue_iterate_reverse(q, fail_func, NULL, NULL));
     if (!had_err) {
-      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
-                                      &check_counter_reverse, err);
+      had_err = gt_queue_iterate_reverse(q, check_queue_reverse,
+                                         &check_counter_reverse, err);
     }
     for (i = 0; !had_err && i < 512; i++) {
       ensure(had_err, gt_queue_head(q) == (void*) i);
@@ -356,8 +356,8 @@ int gt_queue_unit_test(GtError *err)
     if (!had_err)
       had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
     if (!had_err) {
-      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
-                                      &check_counter_reverse, err);
+      had_err = gt_queue_iterate_reverse(q, check_queue_reverse,
+                                         &check_counter_reverse, err);
     }
     ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
     ensure(had_err, gt_queue_iterate_reverse(q, fail_func, NULL, NULL));
@@ -387,7 +387,7 @@ int gt_queue_unit_test(GtError *err)
     if (!had_err)
       had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
     if (!had_err) {
-      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
+      had_err = gt_queue_iterate_reverse(q, check_queue_reverse,
                                       &check_counter_reverse, err);
     }
     ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));
@@ -406,7 +406,7 @@ int gt_queue_unit_test(GtError *err)
     if (!had_err)
       had_err = gt_queue_iterate(q, check_queue, &check_counter, err);
     if (!had_err) {
-      had_err = gt_queue_iterate_reverse(q, check_gt_queue_reverse,
+      had_err = gt_queue_iterate_reverse(q, check_queue_reverse,
                                       &check_counter_reverse, err);
     }
     ensure(had_err, gt_queue_iterate(q, fail_func, NULL, NULL));

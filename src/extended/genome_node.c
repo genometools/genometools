@@ -25,7 +25,7 @@
 #include "extended/genome_node_rep.h"
 #include "extended/region_node_api.h"
 
-static int compare_gt_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
+static int compare_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
   void *sr_a, *sr_b, *sn_a, *sn_b;
 
@@ -57,7 +57,7 @@ int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
   gt_assert(gn_a && gn_b);
   /* ensure that region nodes come first and sequence nodes come last,
      otherwise we don't get a valid GFF3 stream */
-  if ((rval = compare_gt_genome_node_type(gn_a, gn_b)))
+  if ((rval = compare_genome_node_type(gn_a, gn_b)))
     return rval;
 
   if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),
@@ -78,7 +78,7 @@ static int compare_genome_nodes_with_delta(GtGenomeNode *gn_a,
   gt_assert(gn_a && gn_b);
   /* ensure that sequence regions come first, otherwise we don't get a valid
      gff3 stream */
-  if ((rval = compare_gt_genome_node_type(gn_a, gn_b)))
+  if ((rval = compare_genome_node_type(gn_a, gn_b)))
     return rval;
 
   if ((rval = gt_str_cmp(gt_genome_node_get_idstr(gn_a),

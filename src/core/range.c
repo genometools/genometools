@@ -325,8 +325,8 @@ bool gt_ranges_are_equal(const GtArray *ranges_1, const GtArray *ranges_2)
   return true;
 }
 
-static GtArray* generic_gt_ranges_uniq(GtArray *out_ranges,
-                                     const GtArray *in_ranges, bool count)
+static GtArray* generic_ranges_uniq(GtArray *out_ranges,
+                                    const GtArray *in_ranges, bool count)
 {
   unsigned long i, *ctr_ptr, ctr = 1;
   GtArray *count_array = NULL;
@@ -361,12 +361,12 @@ static GtArray* generic_gt_ranges_uniq(GtArray *out_ranges,
   return count_array;
 }
 
-static GtArray* generic_gt_ranges_uniq_in_place(GtArray *ranges, bool count)
+static GtArray* generic_ranges_uniq_in_place(GtArray *ranges, bool count)
 {
   GtArray *out_ranges, *count_array;
   gt_assert(ranges);
   out_ranges = gt_array_new(sizeof (GtRange));
-  count_array = generic_gt_ranges_uniq(out_ranges, ranges, count);
+  count_array = generic_ranges_uniq(out_ranges, ranges, count);
   gt_array_reset(ranges);
   gt_array_add_array(ranges, out_ranges); /* XXX: could be more efficient
                                                with something like
@@ -379,23 +379,23 @@ static GtArray* generic_gt_ranges_uniq_in_place(GtArray *ranges, bool count)
 void gt_ranges_uniq(GtArray *out_ranges, const GtArray *in_ranges)
 {
   gt_assert(out_ranges && in_ranges);
-  (void) generic_gt_ranges_uniq(out_ranges, in_ranges, false);
+  (void) generic_ranges_uniq(out_ranges, in_ranges, false);
 }
 
 void gt_ranges_uniq_in_place(GtArray *ranges)
 {
   gt_assert(ranges);
-  (void) generic_gt_ranges_uniq_in_place(ranges, false);
+  (void) generic_ranges_uniq_in_place(ranges, false);
 }
 
 GtArray* gt_ranges_uniq_count(GtArray *out_ranges, const GtArray *in_ranges)
 {
   gt_assert(out_ranges && in_ranges);
-  return generic_gt_ranges_uniq(out_ranges, in_ranges, true);
+  return generic_ranges_uniq(out_ranges, in_ranges, true);
 }
 
 GtArray* gt_ranges_uniq_in_place_count(GtArray *ranges)
 {
   gt_assert(ranges);
-  return generic_gt_ranges_uniq_in_place(ranges, true);
+  return generic_ranges_uniq_in_place(ranges, true);
 }

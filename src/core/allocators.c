@@ -47,7 +47,7 @@ static OPrval parse_env_options(int argc, const char **argv, GtError *err)
   return oprval;
 }
 
-static void proc_gt_env_options(void)
+static void proc_env_options(void)
 {
   int argc;
   char *env_options, **argv;
@@ -85,7 +85,7 @@ void gt_allocators_init(void)
   const char *bookkeeping;
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
   gt_ma_init(bookkeeping && !strcmp(bookkeeping, "on"));
-  proc_gt_env_options();
+  proc_env_options();
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
 }
