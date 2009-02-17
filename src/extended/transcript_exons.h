@@ -46,7 +46,7 @@ void               gt_transcript_exons_sort(const GtTranscriptExons*);
 GtTranscriptCounts* gt_transcript_exons_uniq_in_place_count(GtTranscriptExons*);
 
 bool               gt_transcript_exons_are_sorted(const GtTranscriptExons*);
-GtTranscriptGtBittabs*
+GtTranscriptBittabs*
                    gt_transcript_exons_create_bittabs(const GtTranscriptExons*);
 
 void               gt_transcript_exons_delete(GtTranscriptExons*);

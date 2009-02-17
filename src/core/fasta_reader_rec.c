@@ -86,9 +86,9 @@ static int parse_fasta_entry(GtStr *description, GtStr *sequence,
 static int gt_fasta_reader_rec_run(GtFastaReader *fasta_reader,
                                    GtFastaReaderProcDescription
                                    proc_description,
-                                   GtFastaReaderProcGtSequencePart
+                                   GtFastaReaderProcSequencePart
                                    proc_sequence_part,
-                                   GtFastaReaderProcGtSequenceLength
+                                   GtFastaReaderProcSequenceLength
                                    proc_sequence_length, void *data,
                                    GtError *err)
 {

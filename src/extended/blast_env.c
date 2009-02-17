@@ -35,7 +35,7 @@ DEFINE_HASHMAP(unsigned long, ul, GtArray *, array, gt_ht_ul_elem_hash,
                inline)
 DECLARE_SAFE_DEREF(GtArray *,array)
 
-/* Return a new GtGtPos object. */
+/* Return a new GtPos object. */
 GtPos* gt_pos_new(void)
 {
   GtPos *pos = gt_malloc(sizeof *pos);

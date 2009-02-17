@@ -38,8 +38,8 @@ void gt_fasta_reader_delete(GtFastaReader *fr)
 
 int gt_fasta_reader_run(GtFastaReader *fr,
                      GtFastaReaderProcDescription proc_description,
-                     GtFastaReaderProcGtSequencePart proc_sequence_part,
-                     GtFastaReaderProcGtSequenceLength proc_sequence_length,
+                     GtFastaReaderProcSequencePart proc_sequence_part,
+                     GtFastaReaderProcSequenceLength proc_sequence_length,
                      void *data, GtError *err)
 {
   gt_error_check(err);

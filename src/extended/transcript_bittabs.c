@@ -18,21 +18,21 @@
 #include "core/ma.h"
 #include "extended/transcript_bittabs.h"
 
-struct GtTranscriptGtBittabs {
+struct GtTranscriptBittabs {
   GtBittab *gt_bittab_all,
-         *gt_bittab_single,
-         *gt_bittab_initial,
-         *gt_bittab_internal,
-         *gt_bittab_terminal;
+           *gt_bittab_single,
+           *gt_bittab_initial,
+           *gt_bittab_internal,
+           *gt_bittab_terminal;
 };
 
-GtTranscriptGtBittabs* gt_transcript_bittabs_new(unsigned long size_all,
-                                          unsigned long size_single,
-                                          unsigned long size_initial,
-                                          unsigned long size_internal,
-                                          unsigned long size_terminal)
+GtTranscriptBittabs* gt_transcript_bittabs_new(unsigned long size_all,
+                                               unsigned long size_single,
+                                               unsigned long size_initial,
+                                               unsigned long size_internal,
+                                               unsigned long size_terminal)
 {
-  GtTranscriptGtBittabs *tb = gt_calloc(1, sizeof (GtTranscriptGtBittabs));
+  GtTranscriptBittabs *tb = gt_calloc(1, sizeof (GtTranscriptBittabs));
   if (size_all) tb->gt_bittab_all = gt_bittab_new(size_all);
   if (size_single) tb->gt_bittab_single = gt_bittab_new(size_single);
   if (size_initial) tb->gt_bittab_initial = gt_bittab_new(size_initial);
@@ -41,37 +41,37 @@ GtTranscriptGtBittabs* gt_transcript_bittabs_new(unsigned long size_all,
   return tb;
 }
 
-GtBittab* gt_transcript_bittabs_get_all(const GtTranscriptGtBittabs *tb)
+GtBittab* gt_transcript_bittabs_get_all(const GtTranscriptBittabs *tb)
 {
   gt_assert(tb);
   return tb->gt_bittab_all;
 }
 
-GtBittab* gt_transcript_bittabs_get_single(const GtTranscriptGtBittabs *tb)
+GtBittab* gt_transcript_bittabs_get_single(const GtTranscriptBittabs *tb)
 {
   gt_assert(tb);
   return tb->gt_bittab_single;
 }
 
-GtBittab* gt_transcript_bittabs_get_initial(const GtTranscriptGtBittabs *tb)
+GtBittab* gt_transcript_bittabs_get_initial(const GtTranscriptBittabs *tb)
 {
   gt_assert(tb);
   return tb->gt_bittab_initial;
 }
 
-GtBittab* gt_transcript_bittabs_get_internal(const GtTranscriptGtBittabs *tb)
+GtBittab* gt_transcript_bittabs_get_internal(const GtTranscriptBittabs *tb)
 {
   gt_assert(tb);
   return tb->gt_bittab_internal;
 }
 
-GtBittab* gt_transcript_bittabs_get_terminal(const GtTranscriptGtBittabs *tb)
+GtBittab* gt_transcript_bittabs_get_terminal(const GtTranscriptBittabs *tb)
 {
   gt_assert(tb);
   return tb->gt_bittab_terminal;
 }
 
-void gt_transcript_bittabs_delete(GtTranscriptGtBittabs *tb)
+void gt_transcript_bittabs_delete(GtTranscriptBittabs *tb)
 {
   if (!tb) return;
   gt_bittab_delete(tb->gt_bittab_all);

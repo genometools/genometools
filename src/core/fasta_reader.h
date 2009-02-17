@@ -36,18 +36,18 @@ typedef int (*GtFastaReaderProcDescription)(const char *description,
                                             unsigned long length, void *data,
                                             GtError*);
 /* Gets called for each sequence part of a fasta entry. */
-typedef int (*GtFastaReaderProcGtSequencePart)(const char *seqpart,
-                                               unsigned long length, void *data,
-                                               GtError*);
+typedef int (*GtFastaReaderProcSequencePart)(const char *seqpart,
+                                             unsigned long length, void *data,
+                                             GtError*);
 /* Gets called after a fasta entry has been read */
-typedef int (*GtFastaReaderProcGtSequenceLength)(unsigned long, void *data,
-                                                 GtError*);
+typedef int (*GtFastaReaderProcSequenceLength)(unsigned long, void *data,
+                                               GtError*);
 
 /* Construct a new fasta reader for the file named <sequence_filename>, pass
    <NULL> to read from stdin. */
 int          gt_fasta_reader_run(GtFastaReader*, GtFastaReaderProcDescription,
-                                 GtFastaReaderProcGtSequencePart,
-                                 GtFastaReaderProcGtSequenceLength, void *data,
+                                 GtFastaReaderProcSequencePart,
+                                 GtFastaReaderProcSequenceLength, void *data,
                                  GtError*);
 void         gt_fasta_reader_delete(GtFastaReader*);
 
