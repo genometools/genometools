@@ -36,7 +36,7 @@ struct GtUPGMA {
                 num_of_clusters; /* 2 * num_of_taxa - 1 */
 };
 
-static void gt_upggt_init(GtUPGMA *upgma, unsigned long num_of_taxa, void *data,
+static void upgma_init(GtUPGMA *upgma, unsigned long num_of_taxa, void *data,
                        GtUPGMADistFunc distfunc)
 {
   unsigned long i, j;
@@ -89,7 +89,7 @@ static double distance(const GtUPGMA *upgma, unsigned long i, unsigned long j)
   return distance;
 }
 
-static void gt_upggt_compute(GtUPGMA *upgma)
+static void upgma_compute(GtUPGMA *upgma)
 {
   unsigned long i, j, k, step, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG,
                 newclusternum = upgma->num_of_taxa; /* denoted 'l' in script */
@@ -157,18 +157,18 @@ static void gt_upggt_compute(GtUPGMA *upgma)
   gt_bittab_delete(clustertab);
 }
 
-GtUPGMA* gt_upggt_new(unsigned long num_of_taxa, void *data,
+GtUPGMA* gt_upgma_new(unsigned long num_of_taxa, void *data,
                       GtUPGMADistFunc distfunc)
 {
   GtUPGMA *upgma;
   gt_assert(num_of_taxa && distfunc);
   upgma = gt_malloc(sizeof (GtUPGMA));
-  gt_upggt_init(upgma, num_of_taxa, data, distfunc);
-  gt_upggt_compute(upgma);
+  upgma_init(upgma, num_of_taxa, data, distfunc);
+  upgma_compute(upgma);
   return upgma;
 }
 
-static void gt_upggt_show_node(const GtUPGMA *upgma, unsigned long nodenum,
+static void upgma_show_node(const GtUPGMA *upgma, unsigned long nodenum,
                             unsigned int level, FILE *fp)
 {
   gt_assert(upgma);
@@ -177,20 +177,18 @@ static void gt_upggt_show_node(const GtUPGMA *upgma, unsigned long nodenum,
   fprintf(fp, "%lu, %.4f\n", nodenum, upgma->clusters[nodenum].height);
   if (upgma->clusters[nodenum].leftdaughter != UNDEF_ULONG) {
     /* in this case the node has always two daughters, show them recursively */
-    gt_upggt_show_node(upgma, upgma->clusters[nodenum].leftdaughter, level+1,
-                       fp);
-    gt_upggt_show_node(upgma, upgma->clusters[nodenum].rightdaughter, level+1,
-                       fp);
+    upgma_show_node(upgma, upgma->clusters[nodenum].leftdaughter, level+1, fp);
+    upgma_show_node(upgma, upgma->clusters[nodenum].rightdaughter, level+1, fp);
   }
 }
 
-void gt_upggt_show_tree(const GtUPGMA *upgma, FILE *fp)
+void gt_upgma_show_tree(const GtUPGMA *upgma, FILE *fp)
 {
   gt_assert(upgma);
-  gt_upggt_show_node(upgma, upgma->num_of_clusters-1, 0, fp);
+  upgma_show_node(upgma, upgma->num_of_clusters-1, 0, fp);
 }
 
-void gt_upggt_delete(GtUPGMA *upgma)
+void gt_upgma_delete(GtUPGMA *upgma)
 {
   unsigned long i;
   if (!upgma) return;
