@@ -47,10 +47,10 @@ Scoretype localsimilarityscore(Scoretype *scol,
   {
     nw = 0;
     vcurrent = getencodedchar(vencseq,j,Forwardmode);
-    gt_assert(vcurrent != SEPARATOR);
+    gt_assert(vcurrent != (Uchar) SEPARATOR);
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
-      gt_assert(*uptr != SEPARATOR);
+      gt_assert(*uptr != (Uchar) SEPARATOR);
       we = *scolptr;
       *scolptr = *(scolptr-1) + scorevalues->gapextend;
       if ((val = nw + REPLACEMENTSCORE(scorevalues,*uptr,vcurrent)) > *scolptr)
@@ -77,4 +77,90 @@ Scoretype localsimilarityscore(Scoretype *scol,
     }
   }
   return maximalscore;
+}
+
+typedef struct
+{
+  Scoretype similarity;
+  unsigned long lu, lv;
+} DPpoint;
+
+typedef struct
+{
+  unsigned long len1,
+                len2,
+                start1,
+                start2;
+  Scoretype similarity;
+} DPregion;
+
+void localsimilarityregion(DPpoint *scol,
+                           DPregion *maxentry,
+                           const Scorevalues *scorevalues,
+                           const Uchar *useq,
+                           unsigned long ulen,
+                           const Encodedsequence *vencseq,
+                           Seqpos startpos,
+                           Seqpos endpos)
+{
+  Scoretype val;
+  DPpoint *scolptr, we, nw;
+  const Uchar *uptr;
+  Uchar vcurrent;
+  Seqpos j;
+
+  maxentry->similarity = 0;
+  maxentry->len1 = 0;
+  maxentry->len2 = 0;
+  maxentry->start1 = 0;
+  maxentry->start1 = 0;
+  for (scolptr = scol; scolptr <= scol + ulen; scolptr++)
+  {
+    scolptr->similarity = 0;
+    scolptr->lu = scolptr->lv = 0;
+  }
+  for (j = startpos; j < endpos; j++)
+  {
+    vcurrent = getencodedchar(vencseq,j,Forwardmode);
+    gt_assert(vcurrent != (Uchar) SEPARATOR);
+    nw = *scol;
+    for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
+    {
+      gt_assert(*uptr != (Uchar) SEPARATOR);
+      we = *scolptr;
+      scolptr->similarity = (scolptr-1)->similarity + scorevalues->gapextend;
+      scolptr->lu = (scolptr-1)->lu + 1;
+      scolptr->lv = (scolptr-1)->lv;
+      if ((val = nw.similarity + REPLACEMENTSCORE(scorevalues,*uptr,vcurrent))
+               > scolptr->similarity)
+      {
+        scolptr->similarity = val;
+        scolptr->lu = nw.lu + 1;
+        scolptr->lv = nw.lv + 1;
+      }
+      if ((val = we.similarity + scorevalues->gapextend)
+               > scolptr->similarity)
+      {
+        scolptr->similarity = val;
+        scolptr->lu = we.lu;
+        scolptr->lv = we.lv + 1;
+      }
+      if (scolptr->similarity < 0)
+      {
+        scolptr->similarity = 0;
+        scolptr->lu = scolptr->lv = 0;
+      } else
+      {
+        if (scolptr->similarity > maxentry->similarity)
+        {
+          maxentry->similarity = scolptr->similarity;
+          maxentry->len1 = scolptr->lu;
+          maxentry->len2 = scolptr->lv;
+          maxentry->start1 = (unsigned long) (uptr - useq) - scolptr->lu + 1;
+          maxentry->start2 = (unsigned long) (j - startpos) - scolptr->lv + 1;
+        }
+      }
+      nw = we;
+    }
+  }
 }
