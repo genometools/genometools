@@ -25,10 +25,19 @@
 
 typedef struct GtSeqIterator GtSeqIterator;
 
+/* Create a new <GtSeqIterator> for all FASTA files in <filenametab>.
+   If a <symbolmap> is given, all read in sequences are transformed with it.
+   If <withsequence> equals <true>, FASTA sequences and descriptions are
+   processed (otherwise only the descriptions). */
 GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
                                   const Uchar *symbolmap, bool withsequence);
-int            gt_seqiterator_next(GtSeqIterator*, const Uchar **sequence,
-                                   unsigned long *len, char **desc, GtError*);
+/* Get next <sequence> (of length <len>) and <description> from <seq_iterator>.
+   The caller is responsible to free the received <description>.
+   Returns 1, if another sequence could be parsed. 0, if all given sequence
+   files are exhaused. And -1, if an error occured (err> is set accordingly). */
+int            gt_seqiterator_next(GtSeqIterator *seq_iterator,
+                                   const Uchar **sequence, unsigned long *len,
+                                   char **description, GtError*);
 const unsigned
 long long*     gt_seqiterator_getcurrentcounter(GtSeqIterator*,
                                                 unsigned long long);
