@@ -47,8 +47,10 @@ Scoretype localsimilarityscore(Scoretype *scol,
   {
     nw = 0;
     vcurrent = getencodedchar(vencseq,j,Forwardmode);
+    gt_assert(vcurrent != SEPARATOR);
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
+      gt_assert(*uptr != SEPARATOR);
       we = *scolptr;
       *scolptr = *(scolptr-1) + scorevalues->gapextend;
       if ((val = nw + REPLACEMENTSCORE(scorevalues,*uptr,vcurrent)) > *scolptr)
