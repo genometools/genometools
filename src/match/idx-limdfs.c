@@ -243,9 +243,7 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   }
   /* Application specific */
   limdfsresources->dfsconstinfo
-    = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize,
-                                  getencseqAlphabetcharacters(encseq),
-                                  getencseqAlphabetwildcardshow(encseq));
+    = adfst->allocatedfsconstinfo((unsigned int) limdfsresources->alphasize);
   if (genericindex->withesa)
   {
     limdfsresources->rangeOccs = NULL;
@@ -295,9 +293,11 @@ static void tracethestackelems(GtMatch *match,
     runptr = limdfsresources->stack.spaceLcpintervalwithinfo +
              runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
-  match->alignment 
-    = completealignmentfromLocalitracebackstate(&match->querystartpos,
+  match->alignment
+    = completealignmentfromLocalitracebackstate(&match->querylen,
                                                 limdfsresources->dfsconstinfo);
+  gt_assert(pprefixlen >= match->querylen);
+  match->querystartpos = pprefixlen - match->querylen;
 }
 
 static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,
@@ -412,7 +412,7 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
                        limdfsresources->processmatchinfo,
                        itv,
                        limdfsresources->genericindex->totallength,
-                       match); 
+                       match);
   limdfsresources->numberofmatches += (itv->rightbound - itv->leftbound + 1);
 }
 

@@ -26,8 +26,6 @@ typedef struct
 
 typedef struct
 {
-  const Uchar *characters;
-  Uchar wildcardshow;
   Seqpos dbcurrent, dbprefixlen;
   unsigned long querypos, queryend;
   Uchar *spaceUchardbsubstring;
@@ -469,31 +467,16 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
 }
 #endif
 
-static void fillLocalitracebackstate(Localitracebackstate *tbs,
-                                     const Uchar *characters,
-                                     Uchar wildcardshow)
+static Limdfsconstinfo *locali_allocatedfsconstinfo (GT_UNUSED
+                                                     unsigned int alphasize)
 {
-  tbs->alignment = gt_alignment_new();
-  tbs->spaceUchardbsubstring = NULL;
-  tbs->allocatedUchardbsubstring = 0;
-  tbs->characters = characters;
-  tbs->wildcardshow = wildcardshow;
-}
-
-static Limdfsconstinfo *locali_allocatedfsconstinfo (unsigned int alphasize,...)
-{
-  va_list ap;
   Limdfsconstinfo *lci;
-  const Uchar *characters;
-  Uchar wildcardshow;
 
-  va_start (ap, alphasize);
-  characters = va_arg(ap, const Uchar *);
-  wildcardshow = (Uchar) va_arg(ap, int);
   lci = gt_malloc (sizeof (Limdfsconstinfo));
   lci->maxcollen = 0;
-  fillLocalitracebackstate(&lci->tbs,characters,wildcardshow);
-  va_end(ap);
+  lci->tbs.alignment = gt_alignment_new();
+  lci->tbs.spaceUchardbsubstring = NULL;
+  lci->tbs.allocatedUchardbsubstring = 0;
   return lci;
 }
 
@@ -740,23 +723,22 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
 }
 
 const void *completealignmentfromLocalitracebackstate(
-                                        unsigned long *querystartpos,
+                                        unsigned long *alignedquerylength,
                                         const Limdfsconstinfo *lci)
 {
   Scoretype evalscore;
-  unsigned long alignedquerylength;
   const Uchar *querysubstart;
 
 #ifdef SKDEBUG
   gt_alignment_show_multieop_list(lci->tbs.alignment,stdout);
 #endif
   gt_assert(lci->tbs.queryend >= lci->tbs.querypos);
-  alignedquerylength = lci->tbs.queryend - lci->tbs.querypos;
+  *alignedquerylength = lci->tbs.queryend - lci->tbs.querypos;
   querysubstart = lci->query + lci->tbs.querypos;
   gt_assert(querysubstart != NULL);
   gt_alignment_set_seqs(lci->tbs.alignment,
                         querysubstart,
-                        alignedquerylength,
+                        *alignedquerylength,
                         lci->tbs.spaceUchardbsubstring,
                         (unsigned long) lci->tbs.dbprefixlen);
 #ifndef NDEBUG
@@ -770,13 +752,6 @@ const void *completealignmentfromLocalitracebackstate(
     exit(EXIT_FAILURE); /* programming error */
   }
 #endif
-  /*
-  gt_alignment_showwithmappedcharacters(lci->tbs.alignment,
-                                        lci->tbs.characters,
-                                        lci->tbs.wildcardshow,
-                                        stdout);
-  */
-  *querystartpos = lci->tbs.querypos;
   return (const void *) lci->tbs.alignment;
 }
 

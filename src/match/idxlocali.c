@@ -18,6 +18,7 @@
 #include "core/unused_api.h"
 #include "core/ma_api.h"
 #include "core/seqiterator.h"
+#include "extended/alignment.h"
 #include "sarr-def.h"
 #include "intbits.h"
 #include "format64.h"
@@ -28,12 +29,30 @@
 #include "esa-map.h"
 #include "stamp.h"
 
-static void showmatch(GT_UNUSED void *processinfo,
-                      const GtMatch *match)
+typedef struct
 {
+  const Uchar *characters;
+  Uchar wildcardshow;
+  bool showalignment;
+} Showmatchinfo;
+
+static void showmatch(void *processinfo,const GtMatch *match)
+{
+  Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
+
   printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
   printf(FormatSeqpos "\t",PRINTSeqposcast(match->dbstartpos));
-  printf("%lu\t%lu\n",match->querylen,match->distance);
+  printf("\t%lu\t%lu\t%lu\n",match->querystartpos,
+                             match->querylen,
+                             match->distance);
+  if (showmatchinfo->showalignment)
+  {
+    gt_alignment_showwithmappedcharacters(
+                (const GtAlignment *) match->alignment,
+                showmatchinfo->characters,
+                showmatchinfo->wildcardshow,
+                stdout);
+  }
 }
 
 int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
@@ -63,7 +82,12 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     Limdfsresources *limdfsresources = NULL;
     const AbstractDfstransformer *dfst;
     const Encodedsequence *encseq;
+    Showmatchinfo showmatchinfo;
 
+    encseq = genericindex_getencseq(genericindex);
+    showmatchinfo.characters = getencseqAlphabetcharacters(encseq);
+    showmatchinfo.wildcardshow = getencseqAlphabetwildcardshow(encseq);
+    showmatchinfo.showalignment = arguments->showalignment;
     dfst = locali_AbstractDfstransformer();
     gt_assert(genericindex != NULL);
     limdfsresources = newLimdfsresources(genericindex,
@@ -72,11 +96,10 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
                                          0,    /* maxpathlength */
                                          true, /* keepexpandedonstack */
                                          showmatch,
-                                         NULL, /* processmatch info */
+                                         &showmatchinfo,
                                          NULL, /* processresult */
                                          NULL, /* processresult info */
                                          dfst);
-    encseq = genericindex_getencseq(genericindex);
     seqit = gt_seqiterator_new(arguments->queryfiles,
                                getencseqAlphabetsymbolmap(encseq),
                                true);

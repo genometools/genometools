@@ -45,7 +45,7 @@ typedef struct
 struct AbstractDfstransformer
 {
   size_t sizeofdfsstate;
-  Limdfsconstinfo *(*allocatedfsconstinfo)(unsigned int alphasize,...);
+  Limdfsconstinfo *(*allocatedfsconstinfo)(unsigned int alphasize);
   void (*initdfsconstinfo)(Limdfsconstinfo *dfsconstinfo,
                            unsigned int alphasize,
                            ...);

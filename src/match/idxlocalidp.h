@@ -32,7 +32,7 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
                                      const void *aliasstate);
 
 const void *completealignmentfromLocalitracebackstate(
-                                      unsigned long *querystartpos,
+                                      unsigned long *alignedquerylength,
                                       const Limdfsconstinfo *lci);
 
 #endif

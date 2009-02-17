@@ -72,9 +72,10 @@ static void pms_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
 
 #endif
 
-static Limdfsconstinfo *pms_allocatedfsconstinfo(unsigned int alphasize,...)
+static Limdfsconstinfo *pms_allocatedfsconstinfo(unsigned int alphasize)
 {
   Limdfsconstinfo *mti = gt_malloc(sizeof(Limdfsconstinfo));
+
   mti->eqsvector = gt_malloc(sizeof(*mti->eqsvector) * alphasize);
   return mti;
 }

@@ -106,10 +106,9 @@ static GtOptionParser *gt_idxlocali_option_parser_new (void *tool_arguments)
   gt_option_exclude (optionesaindex, optionpckindex);
   gt_option_is_mandatory_either (optionesaindex, optionpckindex);
 
-  option = gt_option_new_bool ("ns",
-                               "do not sort results in terms of "
-                               "alignment scores",
-                               &arguments->dosort, false);
+  option = gt_option_new_bool ("s",
+                               "show alignments",
+                               &arguments->showalignment, false);
   gt_option_parser_add_option (op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);

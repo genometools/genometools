@@ -32,7 +32,7 @@ typedef struct
            *refoptionpckindex;
   bool withesa,
        verbose,
-       dosort;
+       showalignment;
   unsigned long threshold;
   long matchscore,
        mismatchscore,
