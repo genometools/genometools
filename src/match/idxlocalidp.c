@@ -10,19 +10,6 @@
 #include "idxlocalidp.h"
 
 #define MINUSINFTY (-1L)
-#define REPLACEMENTSCORE(A,B) (((A) != (B) || ISSPECIAL(A))\
-                                   ? lci->scorevalues.mismatchscore\
-                                   : lci->scorevalues.matchscore)
-
-typedef long Scoretype;
-
-typedef struct
-{
-  Scoretype matchscore,   /* must be positive */
-            mismatchscore,/* must be negative */
-            gapstart,     /* must be negative */
-            gapextend;    /* must be negative */
-} Scorevalues;
 
 typedef struct
 {
@@ -177,7 +164,8 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
 #ifdef AFFINE
     outcol->colvalues[i].delcell = MINUSINFTY;
     outcol->colvalues[i].inscell = MINUSINFTY;
-    outcol->colvalues[i].repcell = REPLACEMENTSCORE(dbchar,lci->query[i-1]);
+    outcol->colvalues[i].repcell = REPLACEMENTSCORE(&lci->scorevalues,
+                                                    dbchar,lci->query[i-1]);
     outcol->colvalues[i].bestcell = max2(outcol->colvalues[i].delcell,
                                          outcol->colvalues[i].repcell);
 #else
@@ -190,7 +178,8 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
       UPDATEMAX(outcol->colvalues[i-1].bestcell +
                 lci->scorevalues.gapextend,Deletebit);
     }
-    UPDATEMAX(REPLACEMENTSCORE(dbchar,lci->query[i-1]),Replacebit);
+    UPDATEMAX(REPLACEMENTSCORE(&lci->scorevalues,
+                               dbchar,lci->query[i-1]),Replacebit);
     UPDATEMAX(lci->scorevalues.gapextend,Insertbit);
 #endif
     if (outcol->colvalues[i].bestcell > 0 &&
@@ -266,7 +255,8 @@ static void nextcolumn (const Limdfsconstinfo *lci,
     if (incol->colvalues[i-1].bestcell > 0)
     {
       outcol->colvalues[i].repcell = incol->colvalues[i-1].bestcell +
-                                     REPLACEMENTSCORE(dbchar,lci->query[i-1]);
+                                     REPLACEMENTSCORE(&lci->scorevalues,
+                                                      dbchar,lci->query[i-1]);
     } else
     {
       outcol->colvalues[i].repcell = MINUSINFTY;
@@ -335,7 +325,8 @@ static void nextcolumn (const Limdfsconstinfo *lci,
     if (incol->colvalues[i-1].bestcell > 0)
     {
       UPDATEMAX(incol->colvalues[i-1].bestcell +
-                REPLACEMENTSCORE(dbchar,lci->query[i-1]),Replacebit);
+                REPLACEMENTSCORE(&lci->scorevalues,
+                                 dbchar,lci->query[i-1]),Replacebit);
     }
     if (incol->colvalues[i].bestcell > 0)
     {
@@ -398,7 +389,8 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
     if (nw.bestcell > 0)
     {
       column->colvalues[i].repcell = nw.bestcell +
-                                     REPLACEMENTSCORE(dbchar,lci->query[i-1]);
+                                     REPLACEMENTSCORE(&lci->scorevalues,
+                                                      dbchar,lci->query[i-1]);
     } else
     {
       column->colvalues[i].repcell = MINUSINFTY;

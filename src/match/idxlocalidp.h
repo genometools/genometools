@@ -18,8 +18,23 @@
 #ifndef IDXLOCALIDP_H
 #define IDXLOCALIDP_H
 #include "core/symboldef.h"
+#include "core/chardef.h"
 #include "seqpos-def.h"
 #include "absdfstrans-def.h"
+
+typedef long Scoretype;
+
+typedef struct
+{
+  Scoretype matchscore,   /* must be positive */
+            mismatchscore,/* must be negative */
+            gapstart,     /* must be negative */
+            gapextend;    /* must be negative */
+} Scorevalues;
+
+#define REPLACEMENTSCORE(SV,A,B) (((A) != (B) || ISSPECIAL(A))\
+                                   ? (SV)->mismatchscore\
+                                   : (SV)->matchscore)
 
 const AbstractDfstransformer *locali_AbstractDfstransformer(void);
 

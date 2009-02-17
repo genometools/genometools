@@ -98,9 +98,9 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     Showmatchinfo showmatchinfo;
 
     showmatchinfo.encseq = genericindex_getencseq(genericindex);
-    showmatchinfo.characters 
+    showmatchinfo.characters
       = getencseqAlphabetcharacters(showmatchinfo.encseq);
-    showmatchinfo.wildcardshow 
+    showmatchinfo.wildcardshow
       = getencseqAlphabetwildcardshow(showmatchinfo.encseq);
     showmatchinfo.showalignment = arguments->showalignment;
     dfst = locali_AbstractDfstransformer();
