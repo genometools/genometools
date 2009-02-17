@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2008 Z. Tang <tangzhihao0117@hotmail.com> Copyright (c)
- * 2008 Center for Bioinformatics, University of Hamburg
+ * Copyright (c) 2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+ * 2009 Center for Bioinformatics, University of Hamburg
 
  * Permission to use, copy, modify, and distribute this software for any
  *  with or without fee is hereby granted, provided that the above copyright

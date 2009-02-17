@@ -560,6 +560,8 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     genericindex = genericindex_new(tageratoroptions->indexname,
                                     tageratoroptions->withesa,
                                     tageratoroptions->docompare,
+                                    false,
+                                    false,
                                     tageratoroptions->userdefinedmaxdepth,
                                     verboseinfo,
                                     err);

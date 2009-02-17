@@ -35,6 +35,8 @@ const Encodedsequence *genericindex_getencseq(const Genericindex
 Genericindex *genericindex_new(const GtStr *indexname,
                                bool withesa,
                                bool withencseq,
+                               bool withdestab,
+                               bool withssptab,
                                int userdefinedmaxdepth,
                                Verboseinfo *verboseinfo,
                                GtError *err);

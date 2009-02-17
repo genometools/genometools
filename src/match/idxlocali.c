@@ -34,17 +34,28 @@ typedef struct
   const Uchar *characters;
   Uchar wildcardshow;
   bool showalignment;
+  uint64_t unitnum;
+  const Encodedsequence *encseq;
 } Showmatchinfo;
 
 static void showmatch(void *processinfo,const GtMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
+  Seqinfo seqinfo;
+  unsigned long seqnum;
 
+  seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,match->dbstartpos);
+  getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
+  gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
+  printf("%lu\t" FormatSeqpos "\t",
+         seqnum,
+         PRINTSeqposcast(match->dbstartpos - seqinfo.seqstartpos));
   printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
-  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dbstartpos));
-  printf("\t%lu\t%lu\t%lu\n",match->querystartpos,
-                             match->querylen,
-                             match->distance);
+  printf("\t" Formatuint64_t "\t%lu\t%lu\t%lu\n",
+              PRINTuint64_tcast(showmatchinfo->unitnum),
+              match->querystartpos,
+              match->querylen,
+              match->distance);
   if (showmatchinfo->showalignment)
   {
     gt_alignment_showwithmappedcharacters(
@@ -65,8 +76,12 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
 
   genericindex = genericindex_new(arguments->indexname,
                                   arguments->withesa,
-                                  arguments->withesa,0,
-                                  verboseinfo,err);
+                                  arguments->withesa,
+                                  false,
+                                  true,
+                                  0,
+                                  verboseinfo,
+                                  err);
   if (genericindex == NULL)
   {
     haserr = true;
@@ -77,16 +92,16 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     const Uchar *query;
     unsigned long querylen;
     char *desc = NULL;
-    uint64_t unitnum;
     int retval;
     Limdfsresources *limdfsresources = NULL;
     const AbstractDfstransformer *dfst;
-    const Encodedsequence *encseq;
     Showmatchinfo showmatchinfo;
 
-    encseq = genericindex_getencseq(genericindex);
-    showmatchinfo.characters = getencseqAlphabetcharacters(encseq);
-    showmatchinfo.wildcardshow = getencseqAlphabetwildcardshow(encseq);
+    showmatchinfo.encseq = genericindex_getencseq(genericindex);
+    showmatchinfo.characters 
+      = getencseqAlphabetcharacters(showmatchinfo.encseq);
+    showmatchinfo.wildcardshow 
+      = getencseqAlphabetwildcardshow(showmatchinfo.encseq);
     showmatchinfo.showalignment = arguments->showalignment;
     dfst = locali_AbstractDfstransformer();
     gt_assert(genericindex != NULL);
@@ -101,9 +116,9 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
                                          NULL, /* processresult info */
                                          dfst);
     seqit = gt_seqiterator_new(arguments->queryfiles,
-                               getencseqAlphabetsymbolmap(encseq),
+                               getencseqAlphabetsymbolmap(showmatchinfo.encseq),
                                true);
-    for (unitnum = 0; /* Nothing */; unitnum++)
+    for (showmatchinfo.unitnum = 0; /* Nothing */; showmatchinfo.unitnum++)
     {
       retval = gt_seqiterator_next(seqit,
                                    &query,
@@ -120,7 +135,7 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
         break;
       }
       printf("process sequence " Formatuint64_t " of length %lu\n",
-              PRINTuint64_tcast(unitnum),querylen);
+              PRINTuint64_tcast(showmatchinfo.unitnum),querylen);
       indexbasedlocali(limdfsresources,
                        arguments->matchscore,
                        arguments->mismatchscore,

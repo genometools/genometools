@@ -58,8 +58,7 @@ static GtOptionParser *gt_idxlocali_option_parser_new (void *tool_arguments)
     ("[options] -q query-file-names [-esa|-pck] indexname",
      "Find all local alignments using suffix tree.");
 
-  gt_option_parser_set_mailaddress (op, "<tangzhihao0117@hotmail.com>");
-
+  gt_option_parser_set_mailaddress (op, "<kurtz@zbh.uni-hamburg.de>");
   option = gt_option_new_filenamearray ("q","Specify files containing the "
                                             "query sequences",
                                         arguments->queryfiles);

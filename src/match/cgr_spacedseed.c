@@ -202,7 +202,8 @@ int matchspacedseed(bool withesa,
   if (!haserr)
   {
     genericindex = genericindex_new(str_inputindex,withesa,
-                                    withesa && docompare,0,verboseinfo,err);
+                                    withesa && docompare,false,false,
+                                    0,verboseinfo,err);
     if (genericindex == NULL)
     {
       haserr = true;

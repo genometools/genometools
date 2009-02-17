@@ -70,6 +70,8 @@ const Encodedsequence *genericindex_getencseq(const Genericindex *genericindex)
 Genericindex *genericindex_new(const GtStr *indexname,
                                bool withesa,
                                bool withencseq,
+                               bool withdestab,
+                               bool withssptab,
                                int userdefinedmaxdepth,
                                Verboseinfo *verboseinfo,
                                GtError *err)
@@ -86,6 +88,14 @@ Genericindex *genericindex_new(const GtStr *indexname,
   if (withencseq)
   {
     demand |= SARR_ESQTAB;
+  }
+  if (withdestab)
+  {
+    demand |= SARR_DESTAB;
+  }
+  if (withssptab)
+  {
+    demand |= SARR_SSPTAB;
   }
   genericindex->withesa = withesa;
   genericindex->suffixarray = gt_malloc(sizeof(*genericindex->suffixarray));
