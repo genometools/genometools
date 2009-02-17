@@ -37,19 +37,19 @@ struct GtSeqIterator
 };
 
 GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
-                             const Uchar *symbolmap,
-                             bool withsequence)
+                                  const Uchar *symbolmap,
+                                  bool withsequence)
 {
   GtSeqIterator *seqit;
   seqit = gt_malloc(sizeof (GtSeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
   seqit->descptr = gt_queue_new();
   seqit->fb = gt_fastabuffer_new(filenametab,
-                              symbolmap,
-                              false,
-                              NULL,
-                              seqit->descptr,
-                              NULL);
+                                 symbolmap,
+                                 false,
+                                 NULL,
+                                 seqit->descptr,
+                                 NULL);
   seqit->exhausted = false;
   seqit->unitnum = 0;
   seqit->withsequence = withsequence;
@@ -59,10 +59,10 @@ GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
 }
 
 int gt_seqiterator_next(GtSeqIterator *seqit,
-                     const Uchar **sequence,
-                     unsigned long *len,
-                     char **desc,
-                     GtError *err)
+                        const Uchar **sequence,
+                        unsigned long *len,
+                        char **desc,
+                        GtError *err)
 {
   Uchar charcode;
   int retval;
@@ -150,8 +150,8 @@ int gt_seqiterator_next(GtSeqIterator *seqit,
 }
 
 const unsigned long long *gt_seqiterator_getcurrentcounter(GtSeqIterator *seqit,
-                                                        unsigned long long
-                                                        maxread)
+                                                           unsigned long long
+                                                           maxread)
 {
   seqit->maxread = maxread;
   return &seqit->currentread;
