@@ -740,6 +740,7 @@ void processelemLocalitracebackstate(Limdfsconstinfo *lci,
 }
 
 const void *completealignmentfromLocalitracebackstate(
+                                        unsigned long *querystartpos,
                                         const Limdfsconstinfo *lci)
 {
   Scoretype evalscore;
@@ -775,6 +776,7 @@ const void *completealignmentfromLocalitracebackstate(
                                         lci->tbs.wildcardshow,
                                         stdout);
   */
+  *querystartpos = lci->tbs.querypos;
   return (const void *) lci->tbs.alignment;
 }
 

@@ -270,9 +270,10 @@ Limdfsresources *newLimdfsresources(const Genericindex *genericindex,
   return limdfsresources;
 }
 
-static const void *tracethestackelems(Limdfsresources *limdfsresources,
-                                      unsigned long pprefixlen,
-                                      const Lcpintervalwithinfo *runptr)
+static void tracethestackelems(GtMatch *match,
+                               Limdfsresources *limdfsresources,
+                               unsigned long pprefixlen,
+                               const Lcpintervalwithinfo *runptr)
 {
   Seqpos previous = 0;
 
@@ -294,8 +295,9 @@ static const void *tracethestackelems(Limdfsresources *limdfsresources,
     runptr = limdfsresources->stack.spaceLcpintervalwithinfo +
              runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
-  return completealignmentfromLocalitracebackstate(
-                                  limdfsresources->dfsconstinfo);
+  match->alignment 
+    = completealignmentfromLocalitracebackstate(&match->querystartpos,
+                                                limdfsresources->dfsconstinfo);
 }
 
 static Lcpintervalwithinfo *allocateStackspace(Limdfsresources *limdfsresources,
@@ -388,44 +390,29 @@ static void gen_esa_overinterval(const Genericindex *genericindex,
                                  Processmatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
-                                 unsigned long pprefixlen,
-                                 unsigned long distance,
                                  GT_UNUSED Seqpos totallength,
-                                 const Uchar *dbsubstring,
-                                 const void *voidal)
+                                 GtMatch *match)
 {
   Seqpos idx;
-  GtMatch match;
 
-  match.dblen = itv->offset;
-  match.dbsubstring = dbsubstring;
-  match.querystartpos = 0; /* XXX modify */
-  match.querylen = pprefixlen;
-  match.distance = distance;
-  match.alignment = voidal;
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
   {
-    match.dbstartpos = genericindex->suffixarray->suftab[idx];
+    match->dbstartpos = genericindex->suffixarray->suftab[idx];
     /* call processmatch */
-    processmatch(processmatchinfo,&match);
+    processmatch(processmatchinfo,match);
   }
 }
 
 static void esa_overinterval(Limdfsresources *limdfsresources,
                              const Indexbounds *itv,
-                             unsigned long pprefixlen,
-                             unsigned long distance,
-                             const void *voidal)
+                             GtMatch *match)
 {
   gen_esa_overinterval(limdfsresources->genericindex,
                        limdfsresources->processmatch,
                        limdfsresources->processmatchinfo,
                        itv,
-                       pprefixlen,
-                       distance,
                        limdfsresources->genericindex->totallength,
-                       limdfsresources->currentpathspace,
-                       voidal);
+                       match); 
   limdfsresources->numberofmatches += (itv->rightbound - itv->leftbound + 1);
 }
 
@@ -433,50 +420,35 @@ static void gen_pck_overinterval(const Genericindex *genericindex,
                                  Processmatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
-                                 unsigned long pprefixlen,
-                                 unsigned long distance,
                                  Seqpos totallength,
-                                 const Uchar *dbsubstring,
-                                 const void *voidal)
+                                 GtMatch *match)
 {
   Bwtseqpositioniterator *bspi;
   Seqpos dbstartpos;
-  GtMatch match;
 
   gt_assert(itv->leftbound < itv->rightbound);
-  match.dblen = itv->offset;
-  match.dbsubstring = dbsubstring;
-  match.querystartpos = 0; /* XXX modify */
-  match.querylen = pprefixlen;
-  match.distance = distance;
-  match.alignment = voidal;
   bspi = newBwtseqpositioniterator (genericindex->packedindex,
                                     itv->leftbound,itv->rightbound);
   while (nextBwtseqpositioniterator(&dbstartpos,bspi))
   {
     gt_assert(totallength >= (dbstartpos + itv->offset));
     /* call processmatch */
-    match.dbstartpos = totallength - (dbstartpos + itv->offset);
-    processmatch(processmatchinfo,&match);
+    match->dbstartpos = totallength - (dbstartpos + itv->offset);
+    processmatch(processmatchinfo,match);
   }
   freeBwtseqpositioniterator(&bspi);
 }
 
 static void pck_overinterval(Limdfsresources *limdfsresources,
                              const Indexbounds *itv,
-                             unsigned long pprefixlen,
-                             unsigned long distance,
-                             const void *voidal)
+                             GtMatch *match)
 {
   gen_pck_overinterval(limdfsresources->genericindex,
                        limdfsresources->processmatch,
                        limdfsresources->processmatchinfo,
                        itv,
-                       pprefixlen,
-                       distance,
                        limdfsresources->genericindex->totallength,
-                       limdfsresources->currentpathspace,
-                       voidal);
+                       match);
   limdfsresources->numberofmatches += (itv->rightbound - itv->leftbound);
 }
 
@@ -502,11 +474,18 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
                                           unsigned long offset)
 {
   Indexbounds itv;
+  GtMatch match;
 
   limdfsresources->mstatspos.nextfreeSeqpos = 0;
   itv.leftbound = leftbound;
   itv.rightbound = rightbound;
   itv.offset = (Seqpos) offset;
+  match.dblen = itv.offset;
+  match.dbsubstring = limdfsresources->currentpathspace;
+  match.querystartpos = 0;
+  match.querylen = offset;
+  match.distance = 0;
+  match.alignment = NULL;
   (limdfsresources->genericindex->withesa
        ? gen_esa_overinterval
        : gen_pck_overinterval)
@@ -514,11 +493,8 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
      storemstatsposition,
      &limdfsresources->mstatspos,
      &itv,
-     offset,
-     0,
      limdfsresources->genericindex->totallength,
-     limdfsresources->currentpathspace,
-     NULL); /* XXX no aligment provided */
+     &match);
   qsort(limdfsresources->mstatspos.spaceSeqpos,
         (size_t) limdfsresources->mstatspos.nextfreeSeqpos,
         sizeof (Seqpos), comparepositions);
@@ -667,16 +643,15 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
         match.dbstartpos = startpos;
         match.dblen = pos - startpos + 1;
         match.dbsubstring = limdfsresources->currentpathspace;
-        match.querystartpos = 0; /* XXX modify */
         match.querylen = limdfsresult.pprefixlen;
         match.distance = limdfsresult.distance;
         if (limdfsresources->keepexpandedonstack)
         {
-          match.alignment = tracethestackelems(limdfsresources,
-                                               limdfsresult.pprefixlen,
-                                               outstate);
+          tracethestackelems(&match,limdfsresources,limdfsresult.pprefixlen,
+                             outstate);
         } else
         {
+          match.querystartpos = 0;
           match.alignment = NULL;
         }
         /* call processmatch */
@@ -764,16 +739,15 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                            (startpos + offset);
         match.dblen = offset + contextlength;
         match.dbsubstring = limdfsresources->currentpathspace;
-        match.querystartpos = 0; /* XXX modify */
         match.querylen = limdfsresult.pprefixlen;
         match.distance = limdfsresult.distance;
         if (limdfsresources->keepexpandedonstack)
         {
-          match.alignment = tracethestackelems(limdfsresources,
-                                               limdfsresult.pprefixlen,
-                                               outstate);
+          tracethestackelems(&match,limdfsresources,limdfsresult.pprefixlen,
+                             outstate);
         } else
         {
+          match.querystartpos = 0;
           match.alignment = NULL;
         }
         /* call processmatch */
@@ -864,8 +838,12 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   if (limdfsresult.status == Limdfssuccess)
   {
-    const void *voidal;
+    GtMatch match;
 
+    match.querylen = limdfsresult.pprefixlen;
+    match.distance = limdfsresult.distance;
+    match.dblen = child->offset;
+    match.dbsubstring = limdfsresources->currentpathspace;
     if (limdfsresources->keepexpandedonstack)
     {
       gt_assert(stackptr >= limdfsresources->stack.spaceLcpintervalwithinfo &&
@@ -874,18 +852,17 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
       stackptr->lcpitv = *child;
       stackptr->keeponstack = true;
       stackptr->previousstackelem = limdfsresources->parentindex;
-      voidal = tracethestackelems(limdfsresources,limdfsresult.pprefixlen,
-                                  stackptr);
+      tracethestackelems(&match,limdfsresources,limdfsresult.pprefixlen,
+                         stackptr);
     } else
     {
-      voidal = NULL;
+      match.querystartpos = 0;
+      match.alignment = NULL;
     }
     /* success with match of length pprefixlen */
     (limdfsresources->genericindex->withesa
          ? esa_overinterval
-         : pck_overinterval)
-      (limdfsresources,child,limdfsresult.pprefixlen,limdfsresult.distance,
-       voidal);
+         : pck_overinterval) (limdfsresources,child,&match);
   }
   /* now status == Limdfssuccess || status == Limdfsstop */
   /* pop the element from the stack as there has been success or stop event */
