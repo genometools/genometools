@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "extended/alignment.h"
 #include "encseq-def.h"
 #include "idxlocalidp.h"
 
@@ -30,14 +31,14 @@ typedef struct
 
 typedef Uchar Retracebits;
 
-Scoretype localsimilarityscore(Scoretype *scol,
-                               Maxscorecoord *maxpair,
-                               const Scorevalues *scorevalues,
-                               const Uchar *useq,
-                               unsigned long ulen,
-                               const Encodedsequence *vencseq,
-                               Seqpos startpos,
-                               Seqpos endpos)
+Scoretype swlocalsimilarityscore(Scoretype *scol,
+                                 Maxscorecoord *maxpair,
+                                 const Scorevalues *scorevalues,
+                                 const Uchar *useq,
+                                 unsigned long ulen,
+                                 const Encodedsequence *vencseq,
+                                 Seqpos startpos,
+                                 Seqpos endpos)
 {
   Scoretype val, we, nw, *scolptr, maximalscore = 0;
   const Uchar *uptr;
@@ -100,14 +101,14 @@ typedef struct
   Scoretype similarity;
 } DPregion;
 
-void localsimilarityregion(DPpoint *scol,
-                           DPregion *maxentry,
-                           const Scorevalues *scorevalues,
-                           const Uchar *useq,
-                           unsigned long ulen,
-                           const Encodedsequence *vencseq,
-                           Seqpos startpos,
-                           Seqpos endpos)
+void swlocalsimilarityregion(DPpoint *scol,
+                             DPregion *maxentry,
+                             const Scorevalues *scorevalues,
+                             const Uchar *useq,
+                             unsigned long ulen,
+                             const Encodedsequence *vencseq,
+                             Seqpos startpos,
+                             Seqpos endpos)
 {
   Scoretype val;
   DPpoint *scolptr, we, nw;
@@ -171,13 +172,13 @@ void localsimilarityregion(DPpoint *scol,
   }
 }
 
-void maximalDPedges(Retracebits *edges,
-                    Scoretype *scol,
-                    const Scorevalues *scorevalues,
-                    const Uchar *useq,unsigned long ulen,
-                    const Encodedsequence *vencseq,
-                    Seqpos startpos,
-                    Seqpos endpos)
+void swmaximalDPedges(Retracebits *edges,
+                      Scoretype *scol,
+                      const Scorevalues *scorevalues,
+                      const Uchar *useq,unsigned long ulen,
+                      const Encodedsequence *vencseq,
+                      Seqpos startpos,
+                      Seqpos endpos)
 {
   Scoretype val, we, nw, *scolptr;
   const Uchar *uptr;
@@ -231,6 +232,38 @@ void maximalDPedges(Retracebits *edges,
         *scolptr = val;
       }
       nw = we;
+    }
+  }
+}
+
+void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
+                        unsigned long vlen,const Retracebits *edges)
+{
+  const Retracebits *eptr = edges + (ulen+1) * (vlen+1) - 1;
+
+  while (true)
+  {
+    if (*eptr & DELETIONBIT)
+    {
+      gt_alignment_add_deletion(alignment);
+      eptr--;
+    } else
+    {
+      if (*eptr & REPLACEMENTBIT)
+      {
+        gt_alignment_add_replacement(alignment);
+        eptr -= (ulen+2);
+      } else
+      {
+        if (*eptr & INSERTIONBIT)
+        {
+          gt_alignment_add_insertion(alignment);
+          eptr -= (ulen+1);
+        } else
+        {
+          break;
+        }
+      }
     }
   }
 }
