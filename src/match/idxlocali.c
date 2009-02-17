@@ -33,7 +33,7 @@ static void showmatch(GT_UNUSED void *processinfo,
 {
   printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
   printf(FormatSeqpos "\t",PRINTSeqposcast(match->dbstartpos));
-  printf("%lu\t%lu\n",match->pprefixlen,match->distance);
+  printf("%lu\t%lu\n",match->querylen,match->distance);
 }
 
 int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)

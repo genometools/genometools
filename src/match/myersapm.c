@@ -100,7 +100,8 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                                readmode,
                                0);
   match.dbsubstring = NULL;
-  match.pprefixlen = patternlength;
+  match.querystartpos = 0;
+  match.querylen = patternlength;
   match.alignment = NULL;
   for (pos = 0; pos < mor->totallength; pos++)
   {

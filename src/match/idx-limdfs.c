@@ -399,7 +399,8 @@ static void gen_esa_overinterval(const Genericindex *genericindex,
 
   match.dblen = itv->offset;
   match.dbsubstring = dbsubstring;
-  match.pprefixlen = pprefixlen;
+  match.querystartpos = 0; /* XXX modify */
+  match.querylen = pprefixlen;
   match.distance = distance;
   match.alignment = voidal;
   for (idx = itv->leftbound; idx <= itv->rightbound; idx++)
@@ -445,7 +446,8 @@ static void gen_pck_overinterval(const Genericindex *genericindex,
   gt_assert(itv->leftbound < itv->rightbound);
   match.dblen = itv->offset;
   match.dbsubstring = dbsubstring;
-  match.pprefixlen = pprefixlen;
+  match.querystartpos = 0; /* XXX modify */
+  match.querylen = pprefixlen;
   match.distance = distance;
   match.alignment = voidal;
   bspi = newBwtseqpositioniterator (genericindex->packedindex,
@@ -665,7 +667,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
         match.dbstartpos = startpos;
         match.dblen = pos - startpos + 1;
         match.dbsubstring = limdfsresources->currentpathspace;
-        match.pprefixlen = limdfsresult.pprefixlen;
+        match.querystartpos = 0; /* XXX modify */
+        match.querylen = limdfsresult.pprefixlen;
         match.distance = limdfsresult.distance;
         if (limdfsresources->keepexpandedonstack)
         {
@@ -761,7 +764,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
                            (startpos + offset);
         match.dblen = offset + contextlength;
         match.dbsubstring = limdfsresources->currentpathspace;
-        match.pprefixlen = limdfsresult.pprefixlen;
+        match.querystartpos = 0; /* XXX modify */
+        match.querylen = limdfsresult.pprefixlen;
         match.distance = limdfsresult.distance;
         if (limdfsresources->keepexpandedonstack)
         {
@@ -1328,7 +1332,8 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
   nomatches = isemptymmsearchiterator(mmsi);
   match.dblen = (Seqpos) patternlength;
   match.dbsubstring = dbsubstring;
-  match.pprefixlen = patternlength;
+  match.querystartpos = 0; /* XXX modify */
+  match.querylen = patternlength;
   match.distance = 0;
   match.alignment = NULL;
   while (nextmmsearchiterator(&dbstartpos,mmsi))

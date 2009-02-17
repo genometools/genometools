@@ -26,8 +26,9 @@ typedef struct
   Seqpos dbstartpos,
          dblen;
   const Uchar *dbsubstring;
-  unsigned long pprefixlen;
-  unsigned long distance;
+  unsigned long querystartpos,
+                querylen,
+                distance;
   const void *alignment;
 } GtMatch;
 

@@ -78,8 +78,7 @@ typedef struct
           (void) putchar('\t');\
         }
 
-static void showmatch(void *processinfo,
-                      const GtMatch *match)
+static void showmatch(void *processinfo,const GtMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   bool firstitem = true;
@@ -125,14 +124,14 @@ static void showmatch(void *processinfo,
                                match->dbsubstring,
                                (unsigned long) match->dblen,
                                showmatchinfo->tagptr,
-                               match->pprefixlen,
+                               match->querylen,
                                (unsigned long) showmatchinfo->tageratoroptions->
                                                         userdefinedmaxdistance);
-        gt_assert(match->pprefixlen >= suffixlength);
+        gt_assert(match->querylen >= suffixlength);
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
         {
           ADDTABULATOR;
-          printf("%lu",match->pprefixlen - suffixlength);
+          printf("%lu",match->querylen - suffixlength);
         }
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
         {
@@ -143,7 +142,7 @@ static void showmatch(void *processinfo,
         {
           ADDTABULATOR;
           printfsymbolstring(NULL,showmatchinfo->tagptr +
-                                  (match->pprefixlen - suffixlength),
+                                  (match->querylen - suffixlength),
                                   suffixlength);
         }
       }
@@ -157,12 +156,12 @@ static void showmatch(void *processinfo,
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
       {
         ADDTABULATOR;
-        printf("%lu",match->pprefixlen);
+        printf("%lu",match->querylen);
       }
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
       {
         ADDTABULATOR;
-        printfsymbolstring(NULL,showmatchinfo->tagptr, match->pprefixlen);
+        printfsymbolstring(NULL,showmatchinfo->tagptr, match->querylen);
       }
     }
   }

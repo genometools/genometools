@@ -361,7 +361,8 @@ bool pck_exactpatternmatching(const void *voidbwtseq,
   numofmatches = EMINumMatchesTotal(bsemi);
   match.dblen = patternlength;
   match.dbsubstring = dbsubstring;
-  match.pprefixlen = patternlength;
+  match.querystartpos = 0;
+  match.querylen = patternlength;
   match.distance = 0;
   match.alignment = NULL;
   while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) voidbwtseq))
