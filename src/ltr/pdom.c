@@ -56,6 +56,7 @@ struct GtPdomModel {
 struct GtPdomSingleHit {
   GtPhase phase;
   GtRange range;
+  double eval;
   unsigned long reference_count;
 };
 
@@ -100,6 +101,7 @@ static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
   hit->phase = gt_phase_get(singlehit->name[0]);
   hit->range.start = singlehit->sqfrom;
   hit->range.end = singlehit->sqto;
+  hit->eval = singlehit->pvalue;
   gt_assert(hit->range.start <= hit->range.end);
   return hit;
 }
@@ -121,6 +123,12 @@ GtRange gt_pdom_single_hit_get_range(const GtPdomSingleHit *singlehit)
 {
   gt_assert(singlehit);
   return singlehit->range;
+}
+
+double gt_pdom_single_hit_get_evalue(const GtPdomSingleHit *singlehit)
+{
+  gt_assert(singlehit);
+  return singlehit->eval;
 }
 
 void gt_pdom_single_hit_delete(void *value)

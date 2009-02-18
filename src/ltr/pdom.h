@@ -82,6 +82,8 @@ GtStrand         gt_pdom_model_hit_get_best_strand(const GtPdomModelHit*);
 /* holds information about an individual hit */
 GtPhase          gt_pdom_single_hit_get_phase(const GtPdomSingleHit*);
 GtRange          gt_pdom_single_hit_get_range(const GtPdomSingleHit*);
+double           gt_pdom_single_hit_get_evalue(const GtPdomSingleHit
+                                                                *singlehit);
 
 #endif
 #endif
