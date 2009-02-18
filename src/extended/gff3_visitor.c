@@ -23,21 +23,27 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/string_distri.h"
+#include "core/cstr_table.h"
+#include "core/str_api.h"
+#include "core/warning_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_output.h"
 #include "extended/gff3_parser.h"
 #include "extended/gff3_visitor.h"
 #include "extended/node_visitor_rep.h"
+#include <stdbool.h>
 
 struct GtGFF3Visitor {
   const GtNodeVisitor parent_instance;
   bool version_string_shown,
+       retain_ids,
        fasta_directive_shown;
   GtStringDistri *id_counter;
   GtHashmap *gt_feature_node_to_id_array,
             *gt_feature_node_to_unique_id_str;
   unsigned long fasta_width;
   GtGenFile *outfp;
+  GtCstrTable *gt_used_ids;
 };
 
 typedef struct {
@@ -71,6 +77,7 @@ static void gff3_visitor_free(GtNodeVisitor *gv)
   gt_string_distri_delete(gff3_visitor->id_counter);
   gt_hashmap_delete(gff3_visitor->gt_feature_node_to_id_array);
   gt_hashmap_delete(gff3_visitor->gt_feature_node_to_unique_id_str);
+  gt_cstr_table_delete(gff3_visitor->gt_used_ids);
 }
 
 static int gff3_visitor_comment_node(GtNodeVisitor *gv, GtCommentNode *cn,
@@ -190,18 +197,63 @@ static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *gf)
   return id;
 }
 
+static void make_unique_id_string(GtStr *current_id, unsigned long counter)
+{
+  /* name => name.1 */
+  gt_str_append_char(current_id, '.');
+  gt_str_append_ulong(current_id, counter);
+}
+
+static bool id_string_is_unique(GtStr *id, GtStr *buf, GtCstrTable *tab,
+                                unsigned long i)
+{
+  gt_str_reset(buf);
+  gt_str_append_str(buf, id);
+  make_unique_id_string(buf, i);
+  return (gt_cstr_table_get(tab, gt_str_get(buf)) == NULL);
+}
+static void make_id_unique(GtGFF3Visitor *gff3_visitor, GtStr *id)
+{
+  unsigned long i = 1;
+
+  if (gt_cstr_table_get(gff3_visitor->gt_used_ids, gt_str_get(id)))
+  {
+    GtStr *buf = gt_str_new();
+    while (!id_string_is_unique(id, buf, gff3_visitor->gt_used_ids, i++));
+    gt_warning("feature ID \"%s\" not unique: changing to %s", gt_str_get(id),
+                                                               gt_str_get(buf));
+    gt_str_set(id, gt_str_get(buf));
+    gt_str_delete(buf);
+  }
+  /* update table with the new id */
+  gt_cstr_table_add(gff3_visitor->gt_used_ids, gt_str_get(id));
+}
+
 static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
 {
   GtGFF3Visitor *gff3_visitor = (GtGFF3Visitor*) data;
   GtFeatureNode *gf = (GtFeatureNode*) gn;
   AddIDInfo add_id_info;
   int had_err = 0;
-  GtStr *id;
+  bool has_id = false;
+  const char *id_string = gt_feature_node_get_attribute(gf, "ID");
+  GtStr *id; /* = gt_str_new_cstr(id_string); */
+  bool retain_ids = gff3_visitor->retain_ids;
 
   gt_error_check(err);
   gt_assert(gn && gf && gff3_visitor);
 
-  if (gt_genome_node_has_children(gn) || gt_feature_node_is_multi(gf)) {
+  if (retain_ids && id_string) {
+    id = gt_str_new_cstr(id_string);
+    if (!gt_feature_node_is_multi(gf) ||
+           (gt_feature_node_is_multi(gf)
+            && gt_feature_node_get_multi_representative(gf) == gf)) {
+        make_id_unique(gff3_visitor, id);
+    }
+    gt_hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf, id);
+    has_id = true;
+  }
+  else if (gt_genome_node_has_children(gn) || gt_feature_node_is_multi(gf)) {
     if (gt_feature_node_is_multi(gf)) {
       id = gt_hashmap_get(gff3_visitor->gt_feature_node_to_unique_id_str,
                           gt_feature_node_get_multi_representative(gf));
@@ -209,14 +261,18 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
         id = create_unique_id(gff3_visitor,
                               gt_feature_node_get_multi_representative(gf));
       }
+
       if (gt_feature_node_get_multi_representative(gf) != gf) {
         gt_hashmap_add(gff3_visitor->gt_feature_node_to_unique_id_str, gf,
                        gt_str_ref(id));
       }
     }
-    else
+    else {
       id = create_unique_id(gff3_visitor, gf);
-
+    }
+    has_id = true;
+  }
+  if (has_id) {
     /* for each child -> store the parent feature in the hash map */
     add_id_info.gt_feature_node_to_id_array =
       gff3_visitor->gt_feature_node_to_id_array,
@@ -224,6 +280,7 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
     had_err = gt_genome_node_traverse_direct_children(gn, &add_id_info, add_id,
                                                       err);
   }
+  /* gt_str_delete(id); */
   return had_err;
 }
 
@@ -329,7 +386,16 @@ GtNodeVisitor* gt_gff3_visitor_new(GtGenFile *outfp)
     HASH_DIRECT, NULL, (GtFree) gt_str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
+  /* if retain_ids is set to true, hen gt_used_ids is .. used. */
+  gff3_visitor->gt_used_ids = gt_cstr_table_new();
+  gff3_visitor->retain_ids = false;
   return gv;
+}
+
+void gt_gff3_visitor_retain_id_attributes(GtNodeVisitor *gv)
+{
+    GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
+    gff3_visitor->retain_ids = true;
 }
 
 void gt_gff3_visitor_set_fasta_width(GtNodeVisitor *gv,

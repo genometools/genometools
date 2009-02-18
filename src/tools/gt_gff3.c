@@ -35,6 +35,7 @@
 typedef struct {
   bool sort,
        checkids,
+       retainids,
        mergefeat,
        addintrons,
        verbose,
@@ -89,6 +90,14 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   /* -tidy */
   option = gt_option_new_bool("tidy", "try to tidy the GFF3 files up during "
                            "parsing", &arguments->tidy, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -retainids */
+  option = gt_option_new_bool("retainids",
+                           "when available, use the original IDs provided"
+                           "in the source file\n"
+                           "(memory consumption is O(file_size))",
+                           &arguments->retainids, false);
   gt_option_parser_add_option(op, option);
 
   /* -checkids */
@@ -187,6 +196,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
   if (arguments->checkids)
     gt_gff3_in_stream_check_id_attributes((GtGFF3InStream*) gff3_in_stream);
+
   last_stream = gff3_in_stream;
 
   /* set different type checker if necessary */
@@ -242,6 +252,9 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
     gt_gff3_out_stream_set_fasta_width(gff3_out_stream, arguments->width);
   }
+
+  if (!had_err && arguments->retainids)
+    gt_gff3_out_stream_retain_id_attributes(gff3_out_stream);
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err)

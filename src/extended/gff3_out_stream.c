@@ -18,6 +18,7 @@
 #include "extended/gff3_out_stream.h"
 #include "extended/gff3_visitor.h"
 #include "extended/node_stream_rep.h"
+#include "core/cstr_table.h"
 
 struct GtGFF3OutStream {
   const GtNodeStream parent_instance;
@@ -75,4 +76,12 @@ void gt_gff3_out_stream_set_fasta_width(GtNodeStream *gs,
   GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gt_assert(gff3_out_stream);
   gt_gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
+}
+
+void gt_gff3_out_stream_retain_id_attributes(GtNodeStream *gs)
+{
+  GtGFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
+  gt_assert(gff3_out_stream);
+  gt_gff3_visitor_retain_id_attributes(gff3_out_stream->gff3_visitor);
+
 }
