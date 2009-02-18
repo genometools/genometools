@@ -296,14 +296,14 @@ typedef struct
   const Scorevalues *scorevalues;
 } DPresource;
 
-void applysmithwaterman(DPresource *dpresource,
-                        const Encodedsequence *encseq,
-                        unsigned long encsequnit,
-                        Seqpos startpos,
-                        Seqpos endpos,
-                        uint64_t queryunit,
-                        const Uchar *query,
-                        unsigned long querylen)
+static void applysmithwaterman(DPresource *dpresource,
+                               const Encodedsequence *encseq,
+                               unsigned long encsequnit,
+                               Seqpos startpos,
+                               Seqpos endpos,
+                               uint64_t queryunit,
+                               const Uchar *query,
+                               unsigned long querylen)
 {
   Scoretype score;
   Maxscorecoord maxpair;
@@ -353,5 +353,28 @@ void applysmithwaterman(DPresource *dpresource,
                          encseq, maxentry.start2,
                          maxentry.start2 + maxentry.len2);
     }
+  }
+}
+
+void multiapplysmithwaterman(DPresource *dpresource,
+                             const Encodedsequence *encseq,
+                             uint64_t queryunit,
+                             const Uchar *query,
+                             unsigned long querylen)
+{
+  Seqinfo seqinfo;
+  unsigned long seqnum, numofdbsequences = getencseqnumofdbsequences(encseq);
+
+  for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
+  {
+    getencseqSeqinfo(&seqinfo,encseq,seqnum);
+    applysmithwaterman(dpresource,
+                       encseq,
+                       seqnum,
+                       seqinfo.seqstartpos,
+                       seqinfo.seqstartpos + seqinfo.seqlength,
+                       queryunit,
+                       query,
+                       querylen);
   }
 }
