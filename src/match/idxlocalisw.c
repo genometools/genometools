@@ -17,6 +17,8 @@
 
 #include "extended/alignment.h"
 #include "encseq-def.h"
+#include "spacedef.h"
+#include "format64.h"
 #include "idxlocalidp.h"
 
 #define REPLACEMENTBIT   ((Uchar) 1)
@@ -31,14 +33,14 @@ typedef struct
 
 typedef Uchar Retracebits;
 
-Scoretype swlocalsimilarityscore(Scoretype *scol,
-                                 Maxscorecoord *maxpair,
-                                 const Scorevalues *scorevalues,
-                                 const Uchar *useq,
-                                 unsigned long ulen,
-                                 const Encodedsequence *vencseq,
-                                 Seqpos startpos,
-                                 Seqpos endpos)
+static Scoretype swlocalsimilarityscore(Scoretype *scol,
+                                        Maxscorecoord *maxpair,
+                                        const Scorevalues *scorevalues,
+                                        const Uchar *useq,
+                                        unsigned long ulen,
+                                        const Encodedsequence *vencseq,
+                                        Seqpos startpos,
+                                        Seqpos endpos)
 {
   Scoretype val, we, nw, *scolptr, maximalscore = 0;
   const Uchar *uptr;
@@ -89,26 +91,26 @@ Scoretype swlocalsimilarityscore(Scoretype *scol,
 typedef struct
 {
   Scoretype similarity;
-  unsigned long lu, lv;
+  unsigned long lu;
+  Seqpos lv;
 } DPpoint;
 
 typedef struct
 {
   unsigned long len1,
-                len2,
-                start1,
-                start2;
+                start1;
+  Seqpos start2, len2;
   Scoretype similarity;
 } DPregion;
 
-void swlocalsimilarityregion(DPpoint *scol,
-                             DPregion *maxentry,
-                             const Scorevalues *scorevalues,
-                             const Uchar *useq,
-                             unsigned long ulen,
-                             const Encodedsequence *vencseq,
-                             Seqpos startpos,
-                             Seqpos endpos)
+static void swlocalsimilarityregion(DPpoint *scol,
+                                    DPregion *maxentry,
+                                    const Scorevalues *scorevalues,
+                                    const Uchar *useq,
+                                    unsigned long ulen,
+                                    const Encodedsequence *vencseq,
+                                    Seqpos startpos,
+                                    Seqpos endpos)
 {
   Scoretype val;
   DPpoint *scolptr, we, nw;
@@ -120,11 +122,12 @@ void swlocalsimilarityregion(DPpoint *scol,
   maxentry->len1 = 0;
   maxentry->len2 = 0;
   maxentry->start1 = 0;
-  maxentry->start1 = 0;
+  maxentry->start2 = 0;
   for (scolptr = scol; scolptr <= scol + ulen; scolptr++)
   {
     scolptr->similarity = 0;
-    scolptr->lu = scolptr->lv = 0;
+    scolptr->lu = 0;
+    scolptr->lv = 0;
   }
   for (j = startpos; j < endpos; j++)
   {
@@ -155,7 +158,8 @@ void swlocalsimilarityregion(DPpoint *scol,
       if (scolptr->similarity < 0)
       {
         scolptr->similarity = 0;
-        scolptr->lu = scolptr->lv = 0;
+        scolptr->lu = 0;
+        scolptr->lv = 0;
       } else
       {
         if (scolptr->similarity > maxentry->similarity)
@@ -164,7 +168,7 @@ void swlocalsimilarityregion(DPpoint *scol,
           maxentry->len1 = scolptr->lu;
           maxentry->len2 = scolptr->lv;
           maxentry->start1 = (unsigned long) (uptr - useq) - scolptr->lu + 1;
-          maxentry->start2 = (unsigned long) (j - startpos) - scolptr->lv + 1;
+          maxentry->start2 = (j - startpos) - scolptr->lv + 1;
         }
       }
       nw = we;
@@ -236,8 +240,8 @@ static void swmaximalDPedges(Retracebits *edges,
   }
 }
 
-void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
-                        Seqpos vlen,const Retracebits *edges)
+static void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
+                               Seqpos vlen,const Retracebits *edges)
 {
   const Retracebits *eptr = edges + (ulen+1) * (vlen+1) - 1;
 
@@ -268,14 +272,78 @@ void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
   }
 }
 
-void swproducealignment(GtAlignment *alignment,
-                        Retracebits *edges,Scoretype *scol,
-                        const Scorevalues *scorevalues,
-                        const Uchar *useq,unsigned long ulen,
-                        const Encodedsequence *vencseq,
-                        Seqpos startpos,
-                        Seqpos endpos)
+static void swproducealignment(GtAlignment *alignment,
+                               Retracebits *edges,Scoretype *scol,
+                               const Scorevalues *scorevalues,
+                               const Uchar *useq,unsigned long ulen,
+                               const Encodedsequence *vencseq,
+                               Seqpos startpos,
+                               Seqpos endpos)
 {
   swmaximalDPedges(edges,scol,scorevalues,useq,ulen,vencseq,startpos,endpos);
   swtracebackDPedges(alignment,ulen,endpos - startpos,edges);
+}
+
+typedef struct
+{
+  GtAlignment *alignment;
+  Scoretype *swcol, thresholdscore;
+  unsigned long allocatedswcol;
+  DPpoint *swentrycolumn;
+  bool showalignment;
+  Retracebits *maxedges;
+  unsigned long allocatedmaxedges;
+  const Scorevalues *scorevalues;
+} DPresource;
+
+void applysmithwaterman(DPresource *dpresource,
+                        const Encodedsequence *encseq,
+                        unsigned long encsequnit,
+                        Seqpos startpos,
+                        Seqpos endpos,
+                        uint64_t queryunit,
+                        const Uchar *query,
+                        unsigned long querylen)
+{
+  Scoretype score;
+  Maxscorecoord maxpair;
+  DPregion maxentry;
+
+  if (dpresource->allocatedswcol < querylen + 1)
+  {
+    dpresource->allocatedswcol = querylen + 1;
+    ALLOCASSIGNSPACE(dpresource->swcol,dpresource->swcol,Scoretype,
+                     dpresource->allocatedswcol);
+  }
+  score = swlocalsimilarityscore(dpresource->swcol,&maxpair,
+                                 dpresource->scorevalues,
+                                 query,querylen,encseq,startpos,endpos);
+  if (score >= dpresource->thresholdscore)
+  {
+    swlocalsimilarityregion(dpresource->swentrycolumn,
+                            &maxentry,
+                            dpresource->scorevalues,
+                            query,maxpair.umax,
+                            encseq,startpos,startpos + maxpair.vmax);
+    printf("%lu\t" FormatSeqpos "\t" FormatSeqpos "\t" Formatuint64_t
+           "\t%lu%lu\t%ld\n",
+            encsequnit,
+            PRINTSeqposcast(maxentry.start2),
+            PRINTSeqposcast(maxentry.len2),
+            PRINTuint64_tcast(queryunit),
+            maxentry.start1,
+            maxentry.len1,
+            maxentry.similarity);
+    if (dpresource->showalignment)
+    {
+      gt_alignment_reset(dpresource->alignment);
+      swproducealignment(dpresource->alignment,
+                         dpresource->maxedges,
+                         dpresource->swcol,
+                         dpresource->scorevalues,
+                         query + maxentry.start1,maxentry.len1,
+                         encseq, maxentry.start2,
+                         maxentry.start2 + maxentry.len2);
+    }
+  }
 }
