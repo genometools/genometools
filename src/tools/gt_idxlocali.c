@@ -48,7 +48,7 @@ static GtOptionParser *gt_idxlocali_option_parser_new (void *tool_arguments)
 {
   IdxlocaliOptions *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionesaindex, *optionpckindex;
+  GtOption *option, *optionesaindex, *optionpckindex, *optiononline, *optioncmp;
 
   gt_assert (arguments != NULL);
   arguments->indexname = gt_str_new ();
@@ -105,9 +105,20 @@ static GtOptionParser *gt_idxlocali_option_parser_new (void *tool_arguments)
   gt_option_exclude (optionesaindex, optionpckindex);
   gt_option_is_mandatory_either (optionesaindex, optionpckindex);
 
-  option = gt_option_new_bool ("s",
-                               "show alignments",
-                               &arguments->showalignment, false);
+  optiononline = gt_option_new_bool("online","Perform online searches",
+                                    &arguments->online, false);
+  gt_option_parser_add_option(op, optiononline);
+  gt_option_is_development_option(optiononline);
+
+  optioncmp = gt_option_new_bool("cmp","Compare results of offline and online "
+                                 "searches",
+                                 &arguments->docompare, false);
+  gt_option_parser_add_option(op,optioncmp);
+  gt_option_exclude(optiononline,optioncmp);
+
+  option = gt_option_new_bool("s",
+                              "Show alignments",
+                              &arguments->showalignment, false);
   gt_option_parser_add_option (op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);
