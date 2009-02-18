@@ -289,10 +289,10 @@ typedef struct
   GtAlignment *alignment;
   Scoretype *swcol, thresholdscore;
   unsigned long allocatedswcol;
-  DPpoint *swentrycolumn;
+  DPpoint *swentrycol;
   bool showalignment;
   Retracebits *maxedges;
-  unsigned long allocatedmaxedges;
+  unsigned long allocatedmaxedges, allocatedges;
   const Scorevalues *scorevalues;
 } DPresource;
 
@@ -314,13 +314,15 @@ void applysmithwaterman(DPresource *dpresource,
     dpresource->allocatedswcol = querylen + 1;
     ALLOCASSIGNSPACE(dpresource->swcol,dpresource->swcol,Scoretype,
                      dpresource->allocatedswcol);
+    ALLOCASSIGNSPACE(dpresource->swentrycol,dpresource->swentrycol,DPpoint,
+                     dpresource->allocatedswcol);
   }
   score = swlocalsimilarityscore(dpresource->swcol,&maxpair,
                                  dpresource->scorevalues,
                                  query,querylen,encseq,startpos,endpos);
   if (score >= dpresource->thresholdscore)
   {
-    swlocalsimilarityregion(dpresource->swentrycolumn,
+    swlocalsimilarityregion(dpresource->swentrycol,
                             &maxentry,
                             dpresource->scorevalues,
                             query,maxpair.umax,
@@ -336,6 +338,12 @@ void applysmithwaterman(DPresource *dpresource,
             maxentry.similarity);
     if (dpresource->showalignment)
     {
+      if (dpresource->allocatedges < (querylen + 1) * (endpos - startpos + 1))
+      {
+        dpresource->allocatedges = (querylen + 1) * (endpos - startpos + 1);
+        ALLOCASSIGNSPACE(dpresource->maxedges,dpresource->maxedges,Retracebits,
+                         dpresource->allocatedges);
+      }
       gt_alignment_reset(dpresource->alignment);
       swproducealignment(dpresource->alignment,
                          dpresource->maxedges,
