@@ -403,14 +403,21 @@ int gt_ppt_unit_test(GtError *err)
   o.ubox_len.start = 2;
   o.ubox_len.end = 15;
   o.radius = 12;
+  o.ppt_pyrimidine_prob = PPT_PYRIMIDINE_PROB;
+  o.ppt_purine_prob = PPT_PURINE_PROB;
+  o.bkg_a_prob = BKG_A_PROB;
+  o.bkg_g_prob = BKG_G_PROB;
+  o.bkg_t_prob = BKG_T_PROB;
+  o.bkg_c_prob = BKG_C_PROB;
+  o.ubox_u_prob = UBOX_U_PROB;
   rs = gt_ppt_find(seq, rev_seq, &element, &o);
 
   ensure(had_err, gt_ppt_results_get_number_of_hits(rs));
   h = gt_ppt_results_get_ranked_hit(rs, 0);
   ensure(had_err, h);
   rng = gt_ppt_hit_get_coords(h);
-  ensure(had_err, rng.start == 61);
-  ensure(had_err, rng.end == 72);
+  ensure(had_err, rng.start == 60);
+  ensure(had_err, rng.end == 71);
   gt_free(rev_seq);
 
   gt_ppt_results_delete(rs);

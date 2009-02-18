@@ -38,8 +38,8 @@ unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e)
 }
 
 char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
-                                         GtStrand strand, Encodedsequence *seq,
-                                         Seqinfo *seqinfo, GtError *err)
+                                 GtStrand strand, Encodedsequence *seq,
+                                 Seqinfo *seqinfo, GtError *err)
 {
   char *out;
   Uchar *symbolstring;
@@ -96,10 +96,10 @@ void gt_ltrelement_offset2pos(GtLTRElement *e, GtRange *rng,
           rng->start = e->leftLTR_5 - radius + rng->start;
           break;
         case GT_OFFSET_END_RIGHT_LTR:
-          rng->start = e->rightLTR_3 - radius + rng->start;
+          rng->start = e->rightLTR_3 - radius + rng->start - 1;
           break;
         case GT_OFFSET_END_LEFT_LTR:
-          rng->start = e->leftLTR_3 - radius + rng->start;
+          rng->start = e->leftLTR_3 - radius + rng->start - 1;
           break;
         case GT_OFFSET_BEGIN_RIGHT_LTR:
           rng->start = e->rightLTR_5 - radius + rng->start;
@@ -116,7 +116,7 @@ void gt_ltrelement_offset2pos(GtLTRElement *e, GtRange *rng,
           rng->start = e->rightLTR_3 + radius - rng->end;
           break;
         case GT_OFFSET_END_LEFT_LTR:
-          rng->start = e->rightLTR_5 + radius - rng->end  - 1;
+          rng->start = e->rightLTR_5 + radius - rng->end - 1;
           break;
         case GT_OFFSET_BEGIN_RIGHT_LTR:
           rng->start = e->leftLTR_3 + radius - rng->end;
@@ -126,7 +126,7 @@ void gt_ltrelement_offset2pos(GtLTRElement *e, GtRange *rng,
     default:
       break;
   }
-  rng->end = rng->start + len -1 ;
+  rng->end = rng->start + len - 1 ;
 }
 
 int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
@@ -136,30 +136,22 @@ int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
   char *tmpstr;
   gt_assert(buf && e);
   tmpstr = gt_calloc(seqnamelen+1, sizeof (char));
-  memset(tmpstr,0,sizeof (char) * (seqnamelen + 1));
   (void) snprintf(tmpstr, seqnamelen, "%s", e->seqid);
   gt_cstr_rep(tmpstr, ' ', '_');
-  ret = snprintf(buf, buflen, "%s_%lu_%lu",
-                 tmpstr, e->leftLTR_5, e->rightLTR_3);
+  ret = snprintf(buf, buflen, "%s_%lu_%lu", tmpstr, e->leftLTR_5,
+                 e->rightLTR_3);
   gt_free(tmpstr);
   return ret;
 }
 
-/*
 int gt_ltrelement_unit_test(GtError *err)
 {
   int had_err = 0;
   GtLTRElement element;
   GtRange rng1;
-  GtSeq *seq;
-  char *testseq = "ATCGAGGGGTCGAAT", *cseq;
-  GtAlpha *alpha;
   unsigned long radius = 30;
 
   gt_error_check(err);
-
-  alpha = gt_alpha_new_dna();
-  seq = gt_seq_new(testseq, 15, alpha);
 
   element.leftLTR_5 = 100;
   element.leftLTR_3 = 150;
@@ -171,8 +163,8 @@ int gt_ltrelement_unit_test(GtError *err)
 
   gt_ltrelement_offset2pos(&element, &rng1, radius, GT_OFFSET_END_LEFT_LTR,
                            GT_STRAND_FORWARD);
-  ensure(had_err, 122 == rng1.start);
-  ensure(had_err, 148 == rng1.end);
+  ensure(had_err, 121 == rng1.start);
+  ensure(had_err, 147 == rng1.end);
 
   rng1.start = 2;
   rng1.end = 28;
@@ -190,23 +182,5 @@ int gt_ltrelement_unit_test(GtError *err)
   ensure(had_err, 451 == rng1.start);
   ensure(had_err, 477 == rng1.end);
 
-  cseq = gt_ltrelement_get_sequence(2, 6, GT_STRAND_FORWARD,
-                                    gt_seq_get_orig(seq),
-                                    gt_seq_length(seq), err);
-  ensure(had_err,
-         !strcmp("CGAGG\0", cseq));
-  gt_free(cseq);
-
-  cseq = gt_ltrelement_get_sequence(2, 6, GT_STRAND_REVERSE,
-                                    gt_seq_get_orig(seq),
-                                    gt_seq_length(seq), err);
-  ensure(had_err,
-         !strcmp("CCTCG\0", cseq));
-  gt_free(cseq);
-
-  gt_alpha_delete(alpha);
-  gt_seq_delete(seq);
-
   return had_err;
 }
-*/
