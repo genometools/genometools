@@ -19,7 +19,7 @@
 #include "encseq-def.h"
 #include "spacedef.h"
 #include "format64.h"
-#include "idxlocalidp.h"
+#include "idxlocalisw.h"
 
 #define REPLACEMENTBIT   ((Uchar) 1)
 #define DELETIONBIT      (((Uchar) 1) << 1)
@@ -284,7 +284,7 @@ static void swproducealignment(GtAlignment *alignment,
   swtracebackDPedges(alignment,ulen,endpos - startpos,edges);
 }
 
-typedef struct
+struct SWdpresource
 {
   bool showalignment;
   GtAlignment *alignment;
@@ -293,7 +293,7 @@ typedef struct
   DPpoint *swentrycol;
   unsigned long allocatedswcol, allocatedmaxedges;
   Retracebits *maxedges;
-} SWdpresource;
+};
 
 static void applysmithwaterman(SWdpresource *dpresource,
                                const Encodedsequence *encseq,

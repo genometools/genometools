@@ -24,6 +24,7 @@
 #include "core/ma_api.h"
 #include "extended/alignment.h"
 #include "absdfstrans-imp.h"
+#include "idxlocalisw.h"
 #include "idxlocalidp.h"
 
 #define MINUSINFTY (-1L)
