@@ -288,8 +288,9 @@ struct SWdpresource
 {
   bool showalignment;
   GtAlignment *alignment;
-  const Scorevalues *scorevalues;
-  Scoretype *swcol, scorethreshold;
+  Scorevalues scorevalues;
+  Scoretype *swcol;
+  unsigned long scorethreshold;
   DPpoint *swentrycol;
   unsigned long allocatedswcol, allocatedmaxedges;
   Retracebits *maxedges;
@@ -317,13 +318,13 @@ static void applysmithwaterman(SWdpresource *dpresource,
                      dpresource->allocatedswcol);
   }
   score = swlocalsimilarityscore(dpresource->swcol,&maxpair,
-                                 dpresource->scorevalues,
+                                 &dpresource->scorevalues,
                                  query,querylen,encseq,startpos,endpos);
-  if (score >= dpresource->scorethreshold)
+  if (score >= (Scoretype) dpresource->scorethreshold)
   {
     swlocalsimilarityregion(dpresource->swentrycol,
                             &maxentry,
-                            dpresource->scorevalues,
+                            &dpresource->scorevalues,
                             query,maxpair.umax,
                             encseq,startpos,startpos + maxpair.vmax);
     printf("%lu\t" FormatSeqpos "\t" FormatSeqpos "\t" Formatuint64_t
@@ -349,7 +350,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
       swproducealignment(dpresource->alignment,
                          dpresource->maxedges,
                          dpresource->swcol,
-                         dpresource->scorevalues,
+                         &dpresource->scorevalues,
                          query + maxentry.start1,maxentry.len1,
                          encseq, maxentry.start2,
                          maxentry.start2 + maxentry.len2);
@@ -380,15 +381,19 @@ void multiapplysmithwaterman(SWdpresource *dpresource,
   }
 }
 
-SWdpresource *newSWdpresource(const Scorevalues *scorevalues,
-                              Scoretype scorethreshold,
+SWdpresource *newSWdpresource(Scoretype matchscore,
+                              Scoretype mismatchscore,
+                              Scoretype gapextend,
+                              unsigned long scorethreshold,
                               bool showalignment)
 {
   SWdpresource *swdpresource;
 
   ALLOCASSIGNSPACE(swdpresource,NULL,SWdpresource,1);
   swdpresource->showalignment = showalignment;
-  swdpresource->scorevalues = scorevalues;
+  swdpresource->scorevalues.matchscore = matchscore;
+  swdpresource->scorevalues.mismatchscore = mismatchscore;
+  swdpresource->scorevalues.gapextend = gapextend;
   swdpresource->scorethreshold = scorethreshold;
   swdpresource->alignment = gt_alignment_new();
   swdpresource->swcol = NULL;

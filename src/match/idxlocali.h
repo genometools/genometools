@@ -34,7 +34,7 @@ typedef struct
   bool withesa,
        verbose,
        showalignment,
-       online,
+       doonline,
        docompare;
   unsigned long threshold;
   long matchscore,
@@ -43,6 +43,6 @@ typedef struct
        gapextend;
 } IdxlocaliOptions;
 
-int runidxlocali(const IdxlocaliOptions *arguments,GtError *err);
+int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err);
 
 #endif

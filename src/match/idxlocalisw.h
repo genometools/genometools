@@ -36,8 +36,10 @@ typedef struct
 
 typedef struct SWdpresource SWdpresource;
 
-SWdpresource *newSWdpresource(const Scorevalues *scorevalues,
-                              Scoretype scorethreshold,
+SWdpresource *newSWdpresource(Scoretype matchscore,
+                              Scoretype mismatchscore,
+                              Scoretype gapextend,
+                              unsigned long scorethreshold,
                               bool showalignment);
 
 void multiapplysmithwaterman(SWdpresource *dpresource,

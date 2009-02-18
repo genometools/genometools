@@ -347,7 +347,7 @@ static int dotransformtag(Uchar *transformedtag,
 static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  bool domstats,
                                  unsigned long maxdistance,
-                                 bool online,
+                                 bool doonline,
                                  bool docompare,
                                  unsigned long maxintervalwidth,
                                  bool skpp,
@@ -356,12 +356,12 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  const Uchar *tagptr,
                                  unsigned long taglen)
 {
-  if (online || (!domstats && docompare))
+  if (doonline || (!domstats && docompare))
   {
     gt_assert(mor != NULL);
     edistmyersbitvectorAPM(mor,tagptr,taglen,maxdistance);
   }
-  if (!online || docompare)
+  if (!doonline || docompare)
   {
     if (domstats)
     {
@@ -498,7 +498,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
         if (performpatternsearch(dfst,
                                  domstats,
                                  distance,
-                                 tageratoroptions->online,
+                                 tageratoroptions->doonline,
                                  tageratoroptions->docompare,
                                  tageratoroptions->maxintervalwidth,
                                  tageratoroptions->skpp,
@@ -542,7 +542,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     dfst = pms_AbstractDfstransformer();
   }
-  if (tageratoroptions->online)
+  if (tageratoroptions->doonline)
   {
     encseq = mapencodedsequence (true,
                                  tageratoroptions->indexname,
@@ -610,7 +610,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       processmatchinfooffline = &showmatchinfo;
       processmatchinfoonline = &showmatchinfo;
     }
-    if (tageratoroptions->online || tageratoroptions->docompare)
+    if (tageratoroptions->doonline || tageratoroptions->docompare)
     {
       gt_assert(encseq != NULL);
       mor = newMyersonlineresources(numofchars,
@@ -619,7 +619,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     processmatch,
                                     processmatchinfoonline);
     }
-    if (!tageratoroptions->online || tageratoroptions->docompare)
+    if (!tageratoroptions->doonline || tageratoroptions->docompare)
     {
       unsigned long maxpathlength;
 

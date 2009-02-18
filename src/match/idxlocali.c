@@ -25,6 +25,7 @@
 #include "idx-limdfs.h"
 #include "idxlocali.h"
 #include "idxlocalidp.h"
+#include "idxlocalisw.h"
 #include "absdfstrans-def.h"
 #include "esa-map.h"
 #include "stamp.h"
@@ -66,25 +67,45 @@ static void showmatch(void *processinfo,const GtMatch *match)
   }
 }
 
-int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
+int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
 {
   Genericindex *genericindex = NULL;
   bool haserr = false;
   Verboseinfo *verboseinfo;
+  const Encodedsequence *encseq = NULL;
 
-  verboseinfo = newverboseinfo(arguments->verbose);
+  verboseinfo = newverboseinfo(idxlocalioptions->verbose);
 
-  genericindex = genericindex_new(arguments->indexname,
-                                  arguments->withesa,
-                                  arguments->withesa,
-                                  false,
-                                  true,
-                                  0,
-                                  verboseinfo,
-                                  err);
-  if (genericindex == NULL)
+  if (idxlocalioptions->doonline)
   {
-    haserr = true;
+    encseq = mapencodedsequence (true,
+                                 idxlocalioptions->indexname,
+                                 true,
+                                 false,
+                                 false,
+                                 verboseinfo,
+                                 err);
+    if (encseq == NULL)
+    {
+      haserr = true;
+    }
+  } else
+  {
+    genericindex = genericindex_new(idxlocalioptions->indexname,
+                                    idxlocalioptions->withesa,
+                                    idxlocalioptions->withesa,
+                                    false,
+                                    true,
+                                    0,
+                                    verboseinfo,
+                                    err);
+    if (genericindex == NULL)
+    {
+      haserr = true;
+    } else
+    {
+      encseq = genericindex_getencseq(genericindex);
+    }
   }
   if (!haserr)
   {
@@ -95,27 +116,37 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     int retval;
     Limdfsresources *limdfsresources = NULL;
     const AbstractDfstransformer *dfst;
+    SWdpresource *swdpresource = NULL;
     Showmatchinfo showmatchinfo;
 
-    showmatchinfo.encseq = genericindex_getencseq(genericindex);
-    showmatchinfo.characters
-      = getencseqAlphabetcharacters(showmatchinfo.encseq);
-    showmatchinfo.wildcardshow
-      = getencseqAlphabetwildcardshow(showmatchinfo.encseq);
-    showmatchinfo.showalignment = arguments->showalignment;
+    showmatchinfo.encseq = encseq;
+    showmatchinfo.characters = getencseqAlphabetcharacters(encseq);
+    showmatchinfo.wildcardshow = getencseqAlphabetwildcardshow(encseq);
+    showmatchinfo.showalignment = idxlocalioptions->showalignment;
+    if (idxlocalioptions->doonline || idxlocalioptions->docompare)
+    {
+      swdpresource = newSWdpresource(idxlocalioptions->matchscore,
+                                     idxlocalioptions->mismatchscore,
+                                     idxlocalioptions->gapextend,
+                                     idxlocalioptions->threshold,
+                                     idxlocalioptions->showalignment);
+    }
     dfst = locali_AbstractDfstransformer();
-    gt_assert(genericindex != NULL);
-    limdfsresources = newLimdfsresources(genericindex,
-                                         true,
-                                         0,
-                                         0,    /* maxpathlength */
-                                         true, /* keepexpandedonstack */
-                                         showmatch,
-                                         &showmatchinfo,
-                                         NULL, /* processresult */
-                                         NULL, /* processresult info */
-                                         dfst);
-    seqit = gt_seqiterator_new(arguments->queryfiles,
+    if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
+    {
+      gt_assert(genericindex != NULL);
+      limdfsresources = newLimdfsresources(genericindex,
+                                           true,
+                                           0,
+                                           0,    /* maxpathlength */
+                                           true, /* keepexpandedonstack */
+                                           showmatch,
+                                           &showmatchinfo,
+                                           NULL, /* processresult */
+                                           NULL, /* processresult info */
+                                           dfst);
+    }
+    seqit = gt_seqiterator_new(idxlocalioptions->queryfiles,
                                getencseqAlphabetsymbolmap(showmatchinfo.encseq),
                                true);
     for (showmatchinfo.unitnum = 0; /* Nothing */; showmatchinfo.unitnum++)
@@ -136,24 +167,48 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
       }
       printf("process sequence " Formatuint64_t " of length %lu\n",
               PRINTuint64_tcast(showmatchinfo.unitnum),querylen);
-      indexbasedlocali(limdfsresources,
-                       arguments->matchscore,
-                       arguments->mismatchscore,
-                       arguments->gapstart,
-                       arguments->gapextend,
-                       arguments->threshold,
-                       query,
-                       querylen,
-                       dfst);
+      if (idxlocalioptions->doonline || idxlocalioptions->docompare)
+      {
+        multiapplysmithwaterman(swdpresource,
+                                encseq,
+                                showmatchinfo.unitnum,
+                                query,
+                                querylen);
+
+      }
+      if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
+      {
+        indexbasedlocali(limdfsresources,
+                         idxlocalioptions->matchscore,
+                         idxlocalioptions->mismatchscore,
+                         idxlocalioptions->gapstart,
+                         idxlocalioptions->gapextend,
+                         idxlocalioptions->threshold,
+                         query,
+                         querylen,
+                         dfst);
+      }
       gt_free(desc);
     }
     if (limdfsresources != NULL)
     {
       freeLimdfsresources(&limdfsresources,dfst);
     }
+    if (swdpresource != NULL)
+    {
+      freeSWdpresource(swdpresource);
+      swdpresource = NULL;
+    }
     gt_seqiterator_delete(seqit);
   }
-  genericindex_delete(genericindex);
+  if (genericindex == NULL)
+  {
+    gt_assert(encseq != NULL);
+    freeEncodedsequence((Encodedsequence **) &encseq);
+  } else
+  {
+    genericindex_delete(genericindex);
+  }
   freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }
