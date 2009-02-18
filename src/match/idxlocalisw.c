@@ -286,14 +286,13 @@ static void swproducealignment(GtAlignment *alignment,
 
 typedef struct
 {
-  GtAlignment *alignment;
-  Scoretype *swcol, scorethreshold;
-  unsigned long allocatedswcol;
-  DPpoint *swentrycol;
   bool showalignment;
-  Retracebits *maxedges;
-  unsigned long allocatedmaxedges;
+  GtAlignment *alignment;
   const Scorevalues *scorevalues;
+  Scoretype *swcol, scorethreshold;
+  DPpoint *swentrycol;
+  unsigned long allocatedswcol, allocatedmaxedges;
+  Retracebits *maxedges;
 } SWdpresource;
 
 static void applysmithwaterman(SWdpresource *dpresource,
@@ -388,15 +387,25 @@ SWdpresource *newSWdpresource(const Scorevalues *scorevalues,
   SWdpresource *swdpresource;
 
   ALLOCASSIGNSPACE(swdpresource,NULL,SWdpresource,1);
-
+  swdpresource->showalignment = showalignment;
+  swdpresource->scorevalues = scorevalues;
+  swdpresource->scorethreshold = scorethreshold;
   swdpresource->alignment = gt_alignment_new();
   swdpresource->swcol = NULL;
   swdpresource->swentrycol = NULL;
-  swdpresource->scorethreshold = scorethreshold;
-  swdpresource->swentrycol = NULL;
-  swdpresource->showalignment = showalignment;
+  swdpresource->maxedges = NULL;
   swdpresource->allocatedswcol = 0;
   swdpresource->allocatedmaxedges = 0;
-  swdpresource->scorevalues = scorevalues;
   return swdpresource;
+}
+
+void freeSWdpresource(SWdpresource *swdpresource)
+{
+  gt_alignment_delete(swdpresource->alignment);
+  swdpresource->alignment = NULL;
+  FREESPACE(swdpresource->swcol);
+  FREESPACE(swdpresource->swentrycol);
+  FREESPACE(swdpresource->maxedges);
+  swdpresource->allocatedswcol = 0;
+  swdpresource->allocatedmaxedges = 0;
 }
