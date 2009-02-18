@@ -287,16 +287,16 @@ static void swproducealignment(GtAlignment *alignment,
 typedef struct
 {
   GtAlignment *alignment;
-  Scoretype *swcol, thresholdscore;
+  Scoretype *swcol, scorethreshold;
   unsigned long allocatedswcol;
   DPpoint *swentrycol;
   bool showalignment;
   Retracebits *maxedges;
-  unsigned long allocatedmaxedges, allocatedges;
+  unsigned long allocatedmaxedges;
   const Scorevalues *scorevalues;
-} DPresource;
+} SWdpresource;
 
-static void applysmithwaterman(DPresource *dpresource,
+static void applysmithwaterman(SWdpresource *dpresource,
                                const Encodedsequence *encseq,
                                unsigned long encsequnit,
                                Seqpos startpos,
@@ -320,7 +320,7 @@ static void applysmithwaterman(DPresource *dpresource,
   score = swlocalsimilarityscore(dpresource->swcol,&maxpair,
                                  dpresource->scorevalues,
                                  query,querylen,encseq,startpos,endpos);
-  if (score >= dpresource->thresholdscore)
+  if (score >= dpresource->scorethreshold)
   {
     swlocalsimilarityregion(dpresource->swentrycol,
                             &maxentry,
@@ -338,11 +338,13 @@ static void applysmithwaterman(DPresource *dpresource,
             maxentry.similarity);
     if (dpresource->showalignment)
     {
-      if (dpresource->allocatedges < (querylen + 1) * (endpos - startpos + 1))
+      if (dpresource->allocatedmaxedges
+          < (querylen + 1) * (endpos - startpos + 1))
       {
-        dpresource->allocatedges = (querylen + 1) * (endpos - startpos + 1);
+        dpresource->allocatedmaxedges
+          = (querylen + 1) * (endpos - startpos + 1);
         ALLOCASSIGNSPACE(dpresource->maxedges,dpresource->maxedges,Retracebits,
-                         dpresource->allocatedges);
+                         dpresource->allocatedmaxedges);
       }
       gt_alignment_reset(dpresource->alignment);
       swproducealignment(dpresource->alignment,
@@ -356,7 +358,7 @@ static void applysmithwaterman(DPresource *dpresource,
   }
 }
 
-void multiapplysmithwaterman(DPresource *dpresource,
+void multiapplysmithwaterman(SWdpresource *dpresource,
                              const Encodedsequence *encseq,
                              uint64_t queryunit,
                              const Uchar *query,
@@ -377,4 +379,24 @@ void multiapplysmithwaterman(DPresource *dpresource,
                        query,
                        querylen);
   }
+}
+
+SWdpresource *newSWdpresource(const Scorevalues *scorevalues,
+                              Scoretype scorethreshold,
+                              bool showalignment)
+{
+  SWdpresource *swdpresource;
+
+  ALLOCASSIGNSPACE(swdpresource,NULL,SWdpresource,1);
+
+  swdpresource->alignment = gt_alignment_new();
+  swdpresource->swcol = NULL;
+  swdpresource->swentrycol = NULL;
+  swdpresource->scorethreshold = scorethreshold;
+  swdpresource->swentrycol = NULL;
+  swdpresource->showalignment = showalignment;
+  swdpresource->allocatedswcol = 0;
+  swdpresource->allocatedmaxedges = 0;
+  swdpresource->scorevalues = scorevalues;
+  return swdpresource;
 }
