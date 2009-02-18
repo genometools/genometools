@@ -198,9 +198,17 @@ static void swmaximalDPedges(Retracebits *edges,
     *scolptr = *(scolptr-1) + scorevalues->gapextend;
     *eptr = DELETIONBIT;
   }
+  printf("startpos=%lu,endpos=%lu\n",(unsigned long) startpos,
+                                     (unsigned long) endpos);
   for (j = startpos; j < endpos; j++)
   {
     vcurrent = getencodedchar(vencseq,j,Forwardmode);
+    if (vcurrent == (Uchar) SEPARATOR);
+    {
+      fprintf(stderr,"at pos %lu: vcurrent=SEPARATOR not allowed\n",
+                      (unsigned long) j);
+      exit(EXIT_FAILURE);
+    }
     gt_assert(vcurrent != (Uchar) SEPARATOR);
     nw = *scol;
     *scol = nw + scorevalues->gapextend;
@@ -370,6 +378,9 @@ void multiapplysmithwaterman(SWdpresource *dpresource,
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
   {
     getencseqSeqinfo(&seqinfo,encseq,seqnum);
+    printf("startpos=%lu,endpos=%lu\n",
+                 (unsigned long) seqinfo.seqstartpos,
+                 (unsigned long) (seqinfo.seqstartpos + seqinfo.seqlength));
     applysmithwaterman(dpresource,
                        encseq,
                        seqnum,
@@ -413,4 +424,5 @@ void freeSWdpresource(SWdpresource *swdpresource)
   FREESPACE(swdpresource->maxedges);
   swdpresource->allocatedswcol = 0;
   swdpresource->allocatedmaxedges = 0;
+  FREESPACE(swdpresource);
 }

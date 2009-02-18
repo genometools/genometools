@@ -82,7 +82,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                  idxlocalioptions->indexname,
                                  true,
                                  false,
-                                 false,
+                                 true,
                                  verboseinfo,
                                  err);
     if (encseq == NULL)
@@ -147,7 +147,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                            dfst);
     }
     seqit = gt_seqiterator_new(idxlocalioptions->queryfiles,
-                               getencseqAlphabetsymbolmap(showmatchinfo.encseq),
+                               getencseqAlphabetsymbolmap(encseq),
                                true);
     for (showmatchinfo.unitnum = 0; /* Nothing */; showmatchinfo.unitnum++)
     {
