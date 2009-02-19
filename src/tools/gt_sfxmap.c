@@ -180,7 +180,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
 
 int gt_sfxmap(int argc, const char **argv, GtError *err)
 {
-  GtStr *indexname;
+  GtStr *indexname = NULL;
   bool haserr = false;
   Suffixarray suffixarray;
   int parsed_args;
@@ -190,15 +190,22 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
 
   gt_error_check(err);
 
-  switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv,
-                        err))
+  switch (parse_options(&sfxmapoptions,&parsed_args, argc, argv, err))
   {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  gt_assert(argc >= 2 && parsed_args == argc - 1);
-
+  if (argc < 2)
+  {
+    gt_error_set(err,"missing arguments");
+    return -1;
+  }
+  if (parsed_args != argc - 1)
+  {
+    gt_error_set(err,"last argument must be indexname");
+    return -1;
+  }
   indexname = gt_str_new_cstr(argv[parsed_args]);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose);
   if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0)
@@ -238,7 +245,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   {
     haserr = true;
   }
-  if (suffixarray.encseq != NULL)
+  if (!haserr && suffixarray.encseq != NULL)
   {
     if (sfxmapoptions.delspranges > 0)
     {
@@ -324,7 +331,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       }
     }
   }
-  if (sfxmapoptions.inputdes && !haserr)
+  if (!haserr && sfxmapoptions.inputdes)
   {
     showverbose(verboseinfo,"checkallsequencedescriptions");
     checkallsequencedescriptions(suffixarray.encseq);

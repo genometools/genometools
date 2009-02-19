@@ -179,7 +179,8 @@ static void swlocalsimilarityregion(DPpoint *scol,
 static void swmaximalDPedges(Retracebits *edges,
                              Scoretype *scol,
                              const Scorevalues *scorevalues,
-                             const Uchar *useq,unsigned long ulen,
+                             const Uchar *useq,
+                             unsigned long ulen,
                              const Encodedsequence *vencseq,
                              Seqpos startpos,
                              Seqpos endpos)
@@ -198,17 +199,9 @@ static void swmaximalDPedges(Retracebits *edges,
     *scolptr = *(scolptr-1) + scorevalues->gapextend;
     *eptr = DELETIONBIT;
   }
-  printf("startpos=%lu,endpos=%lu\n",(unsigned long) startpos,
-                                     (unsigned long) endpos);
   for (j = startpos; j < endpos; j++)
   {
     vcurrent = getencodedchar(vencseq,j,Forwardmode);
-    if (vcurrent == (Uchar) SEPARATOR);
-    {
-      fprintf(stderr,"at pos %lu: vcurrent=SEPARATOR not allowed\n",
-                      (unsigned long) j);
-      exit(EXIT_FAILURE);
-    }
     gt_assert(vcurrent != (Uchar) SEPARATOR);
     nw = *scol;
     *scol = nw + scorevalues->gapextend;
@@ -281,9 +274,11 @@ static void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
 }
 
 static void swproducealignment(GtAlignment *alignment,
-                               Retracebits *edges,Scoretype *scol,
+                               Retracebits *edges,
+                               Scoretype *scol,
                                const Scorevalues *scorevalues,
-                               const Uchar *useq,unsigned long ulen,
+                               const Uchar *useq,
+                               unsigned long ulen,
                                const Encodedsequence *vencseq,
                                Seqpos startpos,
                                Seqpos endpos)
@@ -336,9 +331,9 @@ static void applysmithwaterman(SWdpresource *dpresource,
                             query,maxpair.umax,
                             encseq,startpos,startpos + maxpair.vmax);
     printf("%lu\t" FormatSeqpos "\t" FormatSeqpos "\t" Formatuint64_t
-           "\t%lu%lu\t%ld\n",
+           "\t%lu\t%lu\t%ld\n",
             encsequnit,
-            PRINTSeqposcast(maxentry.start2),
+            PRINTSeqposcast(startpos + maxentry.start2),
             PRINTSeqposcast(maxentry.len2),
             PRINTuint64_tcast(queryunit),
             maxentry.start1,
@@ -346,11 +341,11 @@ static void applysmithwaterman(SWdpresource *dpresource,
             maxentry.similarity);
     if (dpresource->showalignment)
     {
-      if (dpresource->allocatedmaxedges
-          < (querylen + 1) * (endpos - startpos + 1))
+      if (dpresource->allocatedmaxedges <
+          (maxentry.len1 + 1) * (maxentry.len2 + 1))
       {
         dpresource->allocatedmaxedges
-          = (querylen + 1) * (endpos - startpos + 1);
+          = (maxentry.len1 + 1) * (maxentry.len2 + 1);
         ALLOCASSIGNSPACE(dpresource->maxedges,dpresource->maxedges,Retracebits,
                          dpresource->allocatedmaxedges);
       }
@@ -359,9 +354,11 @@ static void applysmithwaterman(SWdpresource *dpresource,
                          dpresource->maxedges,
                          dpresource->swcol,
                          &dpresource->scorevalues,
-                         query + maxentry.start1,maxentry.len1,
-                         encseq, maxentry.start2,
-                         maxentry.start2 + maxentry.len2);
+                         query + maxentry.start1,
+                         maxentry.len1,
+                         encseq,
+                         startpos + maxentry.start2,
+                         startpos + maxentry.start2 + maxentry.len2);
     }
   }
 }
@@ -378,9 +375,6 @@ void multiapplysmithwaterman(SWdpresource *dpresource,
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
   {
     getencseqSeqinfo(&seqinfo,encseq,seqnum);
-    printf("startpos=%lu,endpos=%lu\n",
-                 (unsigned long) seqinfo.seqstartpos,
-                 (unsigned long) (seqinfo.seqstartpos + seqinfo.seqlength));
     applysmithwaterman(dpresource,
                        encseq,
                        seqnum,
