@@ -99,6 +99,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                                mor->encseq,
                                readmode,
                                0);
+  match.dbabsolute = NULL;
   match.dbsubstring = NULL;
   match.querystartpos = 0;
   match.querylen = patternlength;

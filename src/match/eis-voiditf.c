@@ -359,6 +359,7 @@ bool pck_exactpatternmatching(const void *voidbwtseq,
                         pattern,(size_t) patternlength, true);
   gt_assert(bsemi != NULL);
   numofmatches = EMINumMatchesTotal(bsemi);
+  match.dbabsolute = true;
   match.dblen = patternlength;
   match.dbsubstring = dbsubstring;
   match.querystartpos = 0;

@@ -42,15 +42,23 @@ typedef struct
 static void showmatch(void *processinfo,const GtMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
-  Seqinfo seqinfo;
   unsigned long seqnum;
+  Seqpos relpos;
 
-  seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,match->dbstartpos);
-  getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
-  gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
-  printf("%lu\t" FormatSeqpos "\t",
-         seqnum,
-         PRINTSeqposcast(match->dbstartpos - seqinfo.seqstartpos));
+  if (match->dbabsolute)
+  {
+    Seqinfo seqinfo;
+
+    seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,match->dbstartpos);
+    getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
+    gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
+    relpos = match->dbstartpos - seqinfo.seqstartpos;
+  } else
+  {
+    relpos = match->dbstartpos;
+    seqnum = match->dbseqnum;
+  }
+  printf("%lu\t" FormatSeqpos "\t",seqnum,PRINTSeqposcast(relpos));
   printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
   printf("\t" Formatuint64_t "\t%lu\t%lu\t%lu\n",
               PRINTuint64_tcast(showmatchinfo->unitnum),
@@ -129,7 +137,9 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                      idxlocalioptions->mismatchscore,
                                      idxlocalioptions->gapextend,
                                      idxlocalioptions->threshold,
-                                     idxlocalioptions->showalignment);
+                                     idxlocalioptions->showalignment,
+                                     showmatch,
+                                     &showmatchinfo);
     }
     dfst = locali_AbstractDfstransformer();
     if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
@@ -169,12 +179,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
               PRINTuint64_tcast(showmatchinfo.unitnum),querylen);
       if (idxlocalioptions->doonline || idxlocalioptions->docompare)
       {
-        multiapplysmithwaterman(swdpresource,
-                                encseq,
-                                showmatchinfo.unitnum,
-                                query,
-                                querylen);
-
+        multiapplysmithwaterman(swdpresource,encseq,query,querylen);
       }
       if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
       {

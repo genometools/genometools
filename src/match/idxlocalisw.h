@@ -19,6 +19,7 @@
 #define IDXLOCALISW_H
 #include <inttypes.h>
 #include "encseq-def.h"
+#include "procmatch.h"
 
 typedef long Scoretype;
 
@@ -40,11 +41,12 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
                               Scoretype mismatchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
-                              bool showalignment);
+                              bool showalignment,
+                              Processmatch procmatch,
+                              void *procmatchinfo);
 
 void multiapplysmithwaterman(SWdpresource *dpresource,
                              const Encodedsequence *encseq,
-                             uint64_t queryunit,
                              const Uchar *query,
                              unsigned long querylen);
 

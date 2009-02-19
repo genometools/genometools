@@ -20,6 +20,7 @@
 #include "spacedef.h"
 #include "format64.h"
 #include "idxlocalisw.h"
+#include "procmatch.h"
 
 #define REPLACEMENTBIT   ((Uchar) 1)
 #define DELETIONBIT      (((Uchar) 1) << 1)
@@ -241,8 +242,11 @@ static void swmaximalDPedges(Retracebits *edges,
   }
 }
 
-static void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
-                               Seqpos vlen,const Retracebits *edges)
+static void swtracebackDPedges(GtAlignment *alignment,
+                               const Encodedsequence *encseq,
+                               Uchar *dbsubstring,
+                               unsigned long ulen,Seqpos vlen,
+                               const Retracebits *edges)
 {
   const Retracebits *eptr = edges + (ulen+1) * (vlen+1) - 1;
 
@@ -269,11 +273,15 @@ static void swtracebackDPedges(GtAlignment *alignment,unsigned long ulen,
           break;
         }
       }
+      gt_assert(vlen > 0);
+      vlen--;
+      dbsubstring[vlen] = getencodedchar(encseq,vlen,Forwardmode);
     }
   }
 }
 
 static void swproducealignment(GtAlignment *alignment,
+                               Uchar *dbsubstring,
                                Retracebits *edges,
                                Scoretype *scol,
                                const Scorevalues *scorevalues,
@@ -283,8 +291,11 @@ static void swproducealignment(GtAlignment *alignment,
                                Seqpos startpos,
                                Seqpos endpos)
 {
+  Seqpos vlen = endpos - startpos;
+
   swmaximalDPedges(edges,scol,scorevalues,useq,ulen,vencseq,startpos,endpos);
-  swtracebackDPedges(alignment,ulen,endpos - startpos,edges);
+  swtracebackDPedges(alignment,vencseq,dbsubstring,ulen,vlen,edges);
+  gt_alignment_set_seqs(alignment,useq,ulen,dbsubstring,(unsigned long) vlen);
 }
 
 struct SWdpresource
@@ -295,8 +306,11 @@ struct SWdpresource
   Scoretype *swcol;
   unsigned long scorethreshold;
   DPpoint *swentrycol;
-  unsigned long allocatedswcol, allocatedmaxedges;
+  Uchar *dbsubstring;
+  unsigned long allocatedswcol, allocatedmaxedges, allocateddbsubstring;
   Retracebits *maxedges;
+  Processmatch procmatch;
+  void *procmatchinfo;
 };
 
 static void applysmithwaterman(SWdpresource *dpresource,
@@ -304,7 +318,6 @@ static void applysmithwaterman(SWdpresource *dpresource,
                                unsigned long encsequnit,
                                Seqpos startpos,
                                Seqpos endpos,
-                               uint64_t queryunit,
                                const Uchar *query,
                                unsigned long querylen)
 {
@@ -325,20 +338,22 @@ static void applysmithwaterman(SWdpresource *dpresource,
                                  query,querylen,encseq,startpos,endpos);
   if (score >= (Scoretype) dpresource->scorethreshold)
   {
+    GtMatch match;
+
     swlocalsimilarityregion(dpresource->swentrycol,
                             &maxentry,
                             &dpresource->scorevalues,
                             query,maxpair.umax,
                             encseq,startpos,startpos + maxpair.vmax);
-    printf("%lu\t" FormatSeqpos "\t" FormatSeqpos "\t" Formatuint64_t
-           "\t%lu\t%lu\t%ld\n",
-            encsequnit,
-            PRINTSeqposcast(startpos + maxentry.start2),
-            PRINTSeqposcast(maxentry.len2),
-            PRINTuint64_tcast(queryunit),
-            maxentry.start1,
-            maxentry.len1,
-            maxentry.similarity);
+    gt_assert(maxentry.similarity == score);
+    match.dbabsolute = false;
+    match.dbstartpos = maxentry.start2;
+    match.dblen = maxentry.len2;
+    match.dbseqnum = encsequnit;
+    match.querystartpos = maxentry.start1;
+    match.querylen = maxentry.len1;
+    gt_assert(maxentry.similarity >= 0);
+    match.distance = (unsigned long) maxentry.similarity;
     if (dpresource->showalignment)
     {
       if (dpresource->allocatedmaxedges <
@@ -350,7 +365,14 @@ static void applysmithwaterman(SWdpresource *dpresource,
                          dpresource->allocatedmaxedges);
       }
       gt_alignment_reset(dpresource->alignment);
+      if (dpresource->allocateddbsubstring < (unsigned long) maxentry.len2)
+      {
+        dpresource->allocateddbsubstring = (unsigned long) maxentry.len2;
+        ALLOCASSIGNSPACE(dpresource->dbsubstring,dpresource->dbsubstring,
+                         Uchar,dpresource->allocateddbsubstring);
+      }
       swproducealignment(dpresource->alignment,
+                         dpresource->dbsubstring,
                          dpresource->maxedges,
                          dpresource->swcol,
                          &dpresource->scorevalues,
@@ -359,13 +381,19 @@ static void applysmithwaterman(SWdpresource *dpresource,
                          encseq,
                          startpos + maxentry.start2,
                          startpos + maxentry.start2 + maxentry.len2);
+      match.alignment = dpresource->alignment;
+      match.dbsubstring = dpresource->dbsubstring;
+    } else
+    {
+      match.dbsubstring = NULL;
+      match.alignment = NULL;
     }
+    dpresource->procmatch(dpresource->procmatchinfo,&match);
   }
 }
 
 void multiapplysmithwaterman(SWdpresource *dpresource,
                              const Encodedsequence *encseq,
-                             uint64_t queryunit,
                              const Uchar *query,
                              unsigned long querylen)
 {
@@ -380,7 +408,6 @@ void multiapplysmithwaterman(SWdpresource *dpresource,
                        seqnum,
                        seqinfo.seqstartpos,
                        seqinfo.seqstartpos + seqinfo.seqlength,
-                       queryunit,
                        query,
                        querylen);
   }
@@ -390,7 +417,9 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
                               Scoretype mismatchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
-                              bool showalignment)
+                              bool showalignment,
+                              Processmatch procmatch,
+                              void *procmatchinfo)
 {
   SWdpresource *swdpresource;
 
@@ -406,6 +435,10 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
   swdpresource->maxedges = NULL;
   swdpresource->allocatedswcol = 0;
   swdpresource->allocatedmaxedges = 0;
+  swdpresource->procmatch = procmatch;
+  swdpresource->procmatchinfo = procmatchinfo;
+  swdpresource->dbsubstring = NULL;
+  swdpresource->allocateddbsubstring = 0;
   return swdpresource;
 }
 
@@ -416,6 +449,7 @@ void freeSWdpresource(SWdpresource *swdpresource)
   FREESPACE(swdpresource->swcol);
   FREESPACE(swdpresource->swentrycol);
   FREESPACE(swdpresource->maxedges);
+  FREESPACE(swdpresource->dbsubstring);
   swdpresource->allocatedswcol = 0;
   swdpresource->allocatedmaxedges = 0;
   FREESPACE(swdpresource);

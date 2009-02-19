@@ -490,6 +490,7 @@ ArraySeqpos *fromitv2sortedmatchpositions(Limdfsresources *limdfsresources,
   itv.leftbound = leftbound;
   itv.rightbound = rightbound;
   itv.offset = (Seqpos) offset;
+  match.dbabsolute = true;
   match.dblen = itv.offset;
   match.dbsubstring = limdfsresources->currentpathspace;
   match.querystartpos = 0;
@@ -650,6 +651,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
       }
       if (limdfsresult.status == Limdfssuccess)
       {
+        match.dbabsolute = true;
         match.dbstartpos = startpos;
         match.dblen = pos - startpos + 1;
         match.dbsubstring = limdfsresources->currentpathspace;
@@ -745,6 +747,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 
         startpos = bwtseqfirstmatch(limdfsresources->genericindex->packedindex,
                                     leftbound);
+        match.dbabsolute = true;
         match.dbstartpos = limdfsresources->genericindex->totallength -
                            (startpos + offset);
         match.dblen = offset + contextlength;
@@ -850,6 +853,7 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
   {
     GtMatch match;
 
+    match.dbabsolute = true;
     match.querylen = limdfsresult.pprefixlen;
     match.distance = limdfsresult.distance;
     match.dblen = child->offset;
@@ -1317,6 +1321,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                              patternlength);
 
   nomatches = isemptymmsearchiterator(mmsi);
+  match.dbabsolute = true;
   match.dblen = (Seqpos) patternlength;
   match.dbsubstring = dbsubstring;
   match.querystartpos = 0; /* XXX modify */

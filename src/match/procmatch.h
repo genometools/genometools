@@ -23,6 +23,8 @@
 
 typedef struct
 {
+  bool dbabsolute;
+  unsigned long dbseqnum;
   Seqpos dbstartpos,
          dblen;
   const Uchar *dbsubstring;
