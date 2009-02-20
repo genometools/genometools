@@ -615,8 +615,8 @@ end
 Name "gt gff3 (-retainids)"
 Keywords "gt_gff3 retainids"
 Test do
-  run_test "#{$bin}gt gff3 -retainids #{$testdata}png_test_2.gff3"
-  run "diff #{$last_stdout} #{$testdata}png_test_2_out.gff3"
+  run_test "#{$bin}gt gff3 -retainids #{$testdata}retainids.gff3"
+  run "diff #{$last_stdout} #{$testdata}retainids.gff3"
 end
 
 Name "gt gff3 multi-feature (-retainids)"
