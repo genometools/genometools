@@ -524,24 +524,14 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
-  GtSeqIterator *seqit = NULL;
   bool haserr = false;
   int retval;
   Myersonlineresources *mor = NULL;
-  ArraySimplematch storeonline, storeoffline;
-  const AbstractDfstransformer *dfst;
   Genericindex *genericindex = NULL;
   const Encodedsequence *encseq = NULL;
   Verboseinfo *verboseinfo;
 
   verboseinfo = newverboseinfo(tageratoroptions->verbose);
-  if (tageratoroptions->userdefinedmaxdistance >= 0)
-  {
-    dfst = apme_AbstractDfstransformer();
-  } else
-  {
-    dfst = pms_AbstractDfstransformer();
-  }
   if (tageratoroptions->doonline)
   {
     encseq = mapencodedsequence (true,
@@ -559,6 +549,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     genericindex = genericindex_new(tageratoroptions->indexname,
                                     tageratoroptions->withesa,
+                                    tageratoroptions->withesa ||
                                     tageratoroptions->docompare,
                                     false,
                                     false,
@@ -573,8 +564,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       encseq = genericindex_getencseq(genericindex);
     }
   }
-  INITARRAY(&storeonline,Simplematch);
-  INITARRAY(&storeoffline,Simplematch);
   if (!haserr)
   {
     Tagwithlength twl;
@@ -587,7 +576,19 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;
     const SfxAlphabet *alpha;
+    ArraySimplematch storeonline, storeoffline;
+    const AbstractDfstransformer *dfst;
+    GtSeqIterator *seqit = NULL;
 
+    if (tageratoroptions->userdefinedmaxdistance >= 0)
+    {
+      dfst = apme_AbstractDfstransformer();
+    } else
+    {
+      dfst = pms_AbstractDfstransformer();
+    }
+    INITARRAY(&storeonline,Simplematch);
+    INITARRAY(&storeoffline,Simplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
     alpha = getencseqAlphabet(encseq);
     symbolmap = getsymbolmapAlphabet(alpha);
@@ -722,9 +723,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       freeLimdfsresources(&limdfsresources,dfst);
     }
+    FREEARRAY(&storeonline,Simplematch);
+    FREEARRAY(&storeoffline,Simplematch);
+    gt_seqiterator_delete(seqit);
   }
-  FREEARRAY(&storeonline,Simplematch);
-  FREEARRAY(&storeoffline,Simplematch);
   if (mor != NULL)
   {
     freeMyersonlineresources(&mor);
@@ -737,7 +739,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     genericindex_delete(genericindex);
   }
-  gt_seqiterator_delete(seqit);
   freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }

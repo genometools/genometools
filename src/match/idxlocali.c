@@ -83,7 +83,6 @@ typedef struct
 
 void initstorematch(GT_UNUSED Storematchinfo *storematch)
 {
-  STAMP;
   return;
 }
 
@@ -95,13 +94,11 @@ static void storematch(GT_UNUSED void *processinfo,
 
 void reinitstorematch(GT_UNUSED Storematchinfo *storematch)
 {
-  STAMP;
   return;
 }
 
 void freestorematch(GT_UNUSED Storematchinfo *storematch)
 {
-  STAMP;
   return;
 }
 
@@ -131,7 +128,8 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   {
     genericindex = genericindex_new(idxlocalioptions->indexname,
                                     idxlocalioptions->withesa,
-                                    idxlocalioptions->withesa,
+                                    idxlocalioptions->withesa ||
+                                    idxlocalioptions->docompare,
                                     false,
                                     true,
                                     0,
@@ -178,7 +176,6 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     }
     if (idxlocalioptions->doonline || idxlocalioptions->docompare)
     {
-      STAMP;
       swdpresource = newSWdpresource(idxlocalioptions->matchscore,
                                      idxlocalioptions->mismatchscore,
                                      idxlocalioptions->gapextend,
@@ -186,7 +183,6 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                      idxlocalioptions->showalignment,
                                      processmatch,
                                      processmatchinfoonline);
-      STAMP;
     }
     dfst = locali_AbstractDfstransformer();
     if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
@@ -226,13 +222,11 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
               PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
       if (idxlocalioptions->doonline || idxlocalioptions->docompare)
       {
-      STAMP;
         if (idxlocalioptions->docompare)
         {
           reinitstorematch(&storeonline);
         }
         multiapplysmithwaterman(swdpresource,encseq,query,querylen);
-      STAMP;
       }
       if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
       {

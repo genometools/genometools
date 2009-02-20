@@ -21,6 +21,7 @@
 #include "format64.h"
 #include "idxlocalisw.h"
 #include "procmatch.h"
+#include "stamp.h"
 
 #define REPLACEMENTBIT   ((Uchar) 1)
 #define DELETIONBIT      (((Uchar) 1) << 1)
@@ -455,7 +456,7 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
   swdpresource->allocatedswcol = 0;
   swdpresource->allocatedmaxedges = 0;
   swdpresource->processmatch = processmatch;
-  swdpresource->processmatch = processmatchinfo;
+  swdpresource->processmatchinfo = processmatchinfo;
   swdpresource->dbsubstring = NULL;
   swdpresource->allocateddbsubstring = 0;
   return swdpresource;
