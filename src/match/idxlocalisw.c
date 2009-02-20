@@ -243,9 +243,11 @@ static void swmaximalDPedges(Retracebits *edges,
 }
 
 static void swtracebackDPedges(GtAlignment *alignment,
+                               unsigned long ulen,
                                const Encodedsequence *encseq,
+                               Seqpos vlen,
                                Uchar *dbsubstring,
-                               unsigned long ulen,Seqpos vlen,
+                               Seqpos startpos,
                                const Retracebits *edges)
 {
   const Retracebits *eptr = edges + (ulen+1) * (vlen+1) - 1;
@@ -275,7 +277,7 @@ static void swtracebackDPedges(GtAlignment *alignment,
       }
       gt_assert(vlen > 0);
       vlen--;
-      dbsubstring[vlen] = getencodedchar(encseq,vlen,Forwardmode);
+      dbsubstring[vlen] = getencodedchar(encseq,startpos + vlen,Forwardmode);
     }
   }
 }
@@ -285,6 +287,7 @@ static void swproducealignment(GtAlignment *alignment,
                                Retracebits *edges,
                                Scoretype *scol,
                                const Scorevalues *scorevalues,
+                               unsigned long scorethreshold,
                                const Uchar *useq,
                                unsigned long ulen,
                                const Encodedsequence *vencseq,
@@ -294,8 +297,23 @@ static void swproducealignment(GtAlignment *alignment,
   Seqpos vlen = endpos - startpos;
 
   swmaximalDPedges(edges,scol,scorevalues,useq,ulen,vencseq,startpos,endpos);
-  swtracebackDPedges(alignment,vencseq,dbsubstring,ulen,vlen,edges);
+  swtracebackDPedges(alignment,ulen,vencseq,vlen,dbsubstring,startpos,edges);
   gt_alignment_set_seqs(alignment,useq,ulen,dbsubstring,(unsigned long) vlen);
+#ifndef NDEBUG
+  {
+    Scoretype evalscore;
+
+    evalscore = gt_alignment_evalwithscore(alignment,
+                                           scorevalues->matchscore,
+                                           scorevalues->mismatchscore,
+                                           scorevalues->gapextend);
+    if (evalscore < 0 || (unsigned long) evalscore < scorethreshold)
+    {
+      fprintf(stderr,"unexpected eval score %ld\n",evalscore);
+      exit(EXIT_FAILURE); /* programming error */
+    }
+  }
+#endif
 }
 
 struct SWdpresource
@@ -376,6 +394,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
                          dpresource->maxedges,
                          dpresource->swcol,
                          &dpresource->scorevalues,
+                         dpresource->scorethreshold,
                          query + maxentry.start1,
                          maxentry.len1,
                          encseq,

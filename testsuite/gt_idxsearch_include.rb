@@ -97,9 +97,15 @@ allfiles.each do |reffile|
         run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck " +
                  "-q #{$testdata}/#{queryfile}",
                  :maxtime => 100)
-        run "#{$bin}gt suffixerator -indexname sfx -ssp -tis -suf -dna -v " +
-            "-db #{$testdata}/#{reffile}"
+        run_test("#{$bin}gt dev idxlocali -online -s -th 7 -pck pck " +
+                 "-q #{$testdata}/#{queryfile}",
+                 :maxtime => 100)
+        run_test "#{$bin}gt suffixerator -indexname sfx -ssp -tis -suf -dna " +
+                 "-v -db #{$testdata}/#{reffile}"
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx " +
+                 "-q #{$testdata}/#{queryfile}", 
+                 :maxtime => 100)
+        run_test("#{$bin}gt dev idxlocali -online -s -th 7 -esa sfx " +
                  "-q #{$testdata}/#{queryfile}",
                  :maxtime => 100)
       end
