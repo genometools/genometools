@@ -619,6 +619,14 @@ Test do
   run "diff #{$last_stdout} #{$testdata}retainids.gff3"
 end
 
+Name "gt gff3 ID not unique (-retainids)"
+Keywords "gt_gff3 retainids"
+Test do
+  run_test "#{$bin}gt gff3 -retainids #{$testdata}retain_1.gff3 " +
+           "#{$testdata}retain_2.gff3"
+  run "diff #{$last_stdout} #{$testdata}retain_both.gff3"
+end
+
 Name "gt gff3 multi-feature (-retainids)"
 Keywords "gt_gff3 multi-feature retainids"
 Test do
