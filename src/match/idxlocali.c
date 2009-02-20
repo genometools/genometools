@@ -20,7 +20,7 @@
 #include "core/seqiterator.h"
 #include "extended/alignment.h"
 #include "sarr-def.h"
-#include "intbits.h"
+#include "intbits-tab.h"
 #include "format64.h"
 #include "idx-limdfs.h"
 #include "idxlocali.h"
@@ -78,28 +78,69 @@ static void showmatch(void *processinfo,const GtMatch *match)
 typedef struct
 {
   const Encodedsequence *encseq;
-  Bitstring *hasmatchtab;
+  Bitstring *hasmatch;
 } Storematchinfo;
 
-void initstorematch(GT_UNUSED Storematchinfo *storematch)
+void initstorematch(Storematchinfo *storematch,
+                    const Encodedsequence *encseq)
 {
-  return;
+  unsigned long numofdbsequences = getencseqnumofdbsequences(encseq);
+
+  storematch->encseq = encseq;
+  INITBITTAB(storematch->hasmatch,numofdbsequences);
 }
 
-static void storematch(GT_UNUSED void *processinfo,
-                       GT_UNUSED const GtMatch *match)
+static void storematch(void *info,const GtMatch *match)
 {
-  return;
+  Storematchinfo *storematch = (Storematchinfo *) info;
+  unsigned long seqnum;
+
+  if (match->dbabsolute)
+  {
+    seqnum = getencseqfrompos2seqnum(storematch->encseq,match->dbstartpos);
+  } else
+  {
+    seqnum = match->dbseqnum;
+  }
+  if (!ISIBITSET(storematch->hasmatch,seqnum))
+  {
+    SETIBIT(storematch->hasmatch,seqnum);
+  }
 }
 
-void reinitstorematch(GT_UNUSED Storematchinfo *storematch)
+void checkandresetstorematch(uint64_t queryunit,
+                             Storematchinfo *storeonline,
+                             Storematchinfo *storeoffline)
 {
-  return;
+  unsigned long seqnum,
+    numofdbsequences = getencseqnumofdbsequences(storeonline->encseq);
+
+  for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
+  {
+    if (ISIBITSET(storeonline->hasmatch,seqnum) &&
+        !ISIBITSET(storeoffline->hasmatch,seqnum))
+    {
+      fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
+                     "online has match but offline not\n",
+                     PRINTuint64_tcast(queryunit),seqnum);
+      exit(EXIT_FAILURE);
+    }
+    if (!ISIBITSET(storeonline->hasmatch,seqnum) &&
+        ISIBITSET(storeoffline->hasmatch,seqnum))
+    {
+      fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
+                     "offline has match but online not\n",
+                     PRINTuint64_tcast(queryunit),seqnum);
+      exit(EXIT_FAILURE);
+    }
+  }
+  CLEARBITTAB(storeonline->hasmatch,numofdbsequences);
+  CLEARBITTAB(storeoffline->hasmatch,numofdbsequences);
 }
 
-void freestorematch(GT_UNUSED Storematchinfo *storematch)
+void freestorematch(Storematchinfo *storematch)
 {
-  return;
+  gt_free(storematch->hasmatch);
 }
 
 int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
@@ -161,8 +202,8 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     if (idxlocalioptions->docompare)
     {
       processmatch = storematch;
-      initstorematch(&storeonline);
-      initstorematch(&storeoffline);
+      initstorematch(&storeonline,encseq);
+      initstorematch(&storeoffline,encseq);
       processmatchinfoonline = &storeonline;
       processmatchinfooffline = &storeoffline;
     } else
@@ -222,18 +263,10 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
               PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
       if (idxlocalioptions->doonline || idxlocalioptions->docompare)
       {
-        if (idxlocalioptions->docompare)
-        {
-          reinitstorematch(&storeonline);
-        }
         multiapplysmithwaterman(swdpresource,encseq,query,querylen);
       }
       if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
       {
-        if (idxlocalioptions->docompare)
-        {
-          reinitstorematch(&storeoffline);
-        }
         indexbasedlocali(limdfsresources,
                          idxlocalioptions->matchscore,
                          idxlocalioptions->mismatchscore,
@@ -243,6 +276,11 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                          query,
                          querylen,
                          dfst);
+      }
+      if (idxlocalioptions->docompare)
+      {
+        checkandresetstorematch(showmatchinfo.queryunit,
+                                &storeonline,&storeoffline);
       }
       gt_free(desc);
     }
