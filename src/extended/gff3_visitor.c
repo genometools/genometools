@@ -175,12 +175,12 @@ static int gff3_show_feature_node(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *gf)
+static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
 {
   const char *type;
   GtStr *id;
-  gt_assert(gff3_visitor && gf);
-  type = gt_feature_node_get_type(gf);
+  gt_assert(gff3_visitor && fn);
+  type = gt_feature_node_get_type(fn);
 
   /* increase id counter */
   gt_string_distri_add(gff3_visitor->id_counter, type);
@@ -190,7 +190,7 @@ static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *gf)
   gt_str_append_ulong(id, gt_string_distri_get(gff3_visitor->id_counter, type));
 
   /* store (unique) id */
-  gt_hashmap_add(gff3_visitor->feature_node_to_unique_id_str, gf, id);
+  gt_hashmap_add(gff3_visitor->feature_node_to_unique_id_str, fn, id);
 
   return id;
 }
@@ -234,37 +234,37 @@ static GtStr* make_id_unique(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
 static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
 {
   GtGFF3Visitor *gff3_visitor = (GtGFF3Visitor*) data;
-  GtFeatureNode *gf = (GtFeatureNode*) gn;
+  GtFeatureNode *fn = (GtFeatureNode*) gn;
   AddIDInfo add_id_info;
   int had_err = 0;
   GtStr *id;
 
   gt_error_check(err);
-  gt_assert(gn && gf && gff3_visitor);
+  gt_assert(gn && fn && gff3_visitor);
 
-  if (gt_genome_node_has_children(gn) || gt_feature_node_is_multi(gf) ||
-      (gff3_visitor->retain_ids && gt_feature_node_get_attribute(gf, "ID"))) {
-    if (gt_feature_node_is_multi(gf)) {
+  if (gt_genome_node_has_children(gn) || gt_feature_node_is_multi(fn) ||
+      (gff3_visitor->retain_ids && gt_feature_node_get_attribute(fn, "ID"))) {
+    if (gt_feature_node_is_multi(fn)) {
       id = gt_hashmap_get(gff3_visitor->feature_node_to_unique_id_str,
-                          gt_feature_node_get_multi_representative(gf));
+                          gt_feature_node_get_multi_representative(fn));
       if (!id) { /* the representative does not have its own id */
         if (gff3_visitor->retain_ids)
-          id = make_id_unique(gff3_visitor, gf);
+          id = make_id_unique(gff3_visitor, fn);
         else {
           id = create_unique_id(gff3_visitor,
-                                gt_feature_node_get_multi_representative(gf));
+                                gt_feature_node_get_multi_representative(fn));
         }
       }
-      if (gt_feature_node_get_multi_representative(gf) != gf) {
-        gt_hashmap_add(gff3_visitor->feature_node_to_unique_id_str, gf,
+      if (gt_feature_node_get_multi_representative(fn) != fn) {
+        gt_hashmap_add(gff3_visitor->feature_node_to_unique_id_str, fn,
                        gt_str_ref(id));
       }
     }
     else {
       if (gff3_visitor->retain_ids)
-        id = make_id_unique(gff3_visitor, gf);
+        id = make_id_unique(gff3_visitor, fn);
       else
-        id = create_unique_id(gff3_visitor, gf);
+        id = create_unique_id(gff3_visitor, fn);
     }
     /* for each child -> store the parent feature in the hash map */
     add_id_info.gt_feature_node_to_id_array =
