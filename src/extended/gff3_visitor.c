@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
@@ -31,7 +32,6 @@
 #include "extended/gff3_parser.h"
 #include "extended/gff3_visitor.h"
 #include "extended/node_visitor_rep.h"
-#include <stdbool.h>
 
 struct GtGFF3Visitor {
   const GtNodeVisitor parent_instance;
@@ -216,8 +216,7 @@ static void make_id_unique(GtGFF3Visitor *gff3_visitor, GtStr *id)
 {
   unsigned long i = 1;
 
-  if (gt_cstr_table_get(gff3_visitor->gt_used_ids, gt_str_get(id)))
-  {
+  if (gt_cstr_table_get(gff3_visitor->gt_used_ids, gt_str_get(id))) {
     GtStr *buf = gt_str_new();
     while (!id_string_is_unique(id, buf, gff3_visitor->gt_used_ids, i++));
     gt_warning("feature ID \"%s\" not unique: changing to %s", gt_str_get(id),
@@ -280,7 +279,6 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
     had_err = gt_genome_node_traverse_direct_children(gn, &add_id_info, add_id,
                                                       err);
   }
-  /* gt_str_delete(id); */
   return had_err;
 }
 
@@ -386,7 +384,6 @@ GtNodeVisitor* gt_gff3_visitor_new(GtGenFile *outfp)
     HASH_DIRECT, NULL, (GtFree) gt_str_delete);
   gff3_visitor->fasta_width = 0;
   gff3_visitor->outfp = outfp;
-  /* if retain_ids is set to true, hen gt_used_ids is .. used. */
   gff3_visitor->gt_used_ids = gt_cstr_table_new();
   gff3_visitor->retain_ids = false;
   return gv;
