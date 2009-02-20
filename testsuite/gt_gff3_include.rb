@@ -623,7 +623,7 @@ Name "gt gff3 multi-feature (-retainids)"
 Keywords "gt_gff3 multi-feature retainids"
 Test do
   run_test "#{$bin}gt gff3 -retainids #{$testdata}multi_feature_simple.gff3"
-  run "diff #{$last_stdout} #{$testdata}multi_feature_simple_retain.gff3"
+  run "diff #{$last_stdout} #{$testdata}multi_feature_simple.gff3"
 end
 
 Name "gt gff3 simple multi-feature (round-trip)"
