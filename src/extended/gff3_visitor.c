@@ -65,7 +65,7 @@ static void gff3_version_string(GtNodeVisitor *gv)
   gt_assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
     gt_genfile_xprintf(gff3_visitor->outfp, "%s   %u\n", GFF_VERSION_PREFIX,
-                    GFF_VERSION);
+                       GFF_VERSION);
     gff3_visitor->version_string_shown = true;
   }
 }
@@ -208,7 +208,7 @@ static bool id_string_is_unique(GtStr *id, GtStr *buf, GtCstrTable *tab,
   gt_str_reset(buf);
   gt_str_append_str(buf, id);
   make_unique_id_string(buf, i);
-  return (gt_cstr_table_get(tab, gt_str_get(buf)) == NULL);
+  return !gt_cstr_table_get(tab, gt_str_get(buf));
 }
 static void make_id_unique(GtGFF3Visitor *gff3_visitor, GtStr *id)
 {
@@ -235,12 +235,11 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
   bool has_id = false;
   const char *id_string = gt_feature_node_get_attribute(gf, "ID");
   GtStr *id; /* = gt_str_new_cstr(id_string); */
-  bool retain_ids = gff3_visitor->retain_ids;
 
   gt_error_check(err);
   gt_assert(gn && gf && gff3_visitor);
 
-  if (retain_ids && id_string) {
+  if (gff3_visitor->retain_ids && id_string) {
     id = gt_str_new_cstr(id_string);
     if (!gt_feature_node_is_multi(gf) ||
            (gt_feature_node_is_multi(gf)
