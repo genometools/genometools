@@ -327,8 +327,8 @@ struct SWdpresource
   Uchar *dbsubstring;
   unsigned long allocatedswcol, allocatedmaxedges, allocateddbsubstring;
   Retracebits *maxedges;
-  Processmatch procmatch;
-  void *procmatchinfo;
+  Processmatch processmatch;
+  void *processmatchinfo;
 };
 
 static void applysmithwaterman(SWdpresource *dpresource,
@@ -407,7 +407,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
       match.dbsubstring = NULL;
       match.alignment = NULL;
     }
-    dpresource->procmatch(dpresource->procmatchinfo,&match);
+    dpresource->processmatch(dpresource->processmatchinfo,&match);
   }
 }
 
@@ -437,8 +437,8 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
                               bool showalignment,
-                              Processmatch procmatch,
-                              void *procmatchinfo)
+                              Processmatch processmatch,
+                              void *processmatchinfo)
 {
   SWdpresource *swdpresource;
 
@@ -454,8 +454,8 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
   swdpresource->maxedges = NULL;
   swdpresource->allocatedswcol = 0;
   swdpresource->allocatedmaxedges = 0;
-  swdpresource->procmatch = procmatch;
-  swdpresource->procmatchinfo = procmatchinfo;
+  swdpresource->processmatch = processmatch;
+  swdpresource->processmatch = processmatchinfo;
   swdpresource->dbsubstring = NULL;
   swdpresource->allocateddbsubstring = 0;
   return swdpresource;

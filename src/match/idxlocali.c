@@ -33,9 +33,9 @@
 typedef struct
 {
   const Uchar *characters;
+  uint64_t queryunit;
   Uchar wildcardshow;
   bool showalignment;
-  uint64_t unitnum;
   const Encodedsequence *encseq;
 } Showmatchinfo;
 
@@ -61,7 +61,7 @@ static void showmatch(void *processinfo,const GtMatch *match)
   printf("%lu\t" FormatSeqpos "\t",seqnum,PRINTSeqposcast(relpos));
   printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
   printf("\t" Formatuint64_t "\t%lu\t%lu\t%lu\n",
-              PRINTuint64_tcast(showmatchinfo->unitnum),
+              PRINTuint64_tcast(showmatchinfo->queryunit),
               match->querystartpos,
               match->querylen,
               match->distance);
@@ -73,6 +73,36 @@ static void showmatch(void *processinfo,const GtMatch *match)
                 showmatchinfo->wildcardshow,
                 stdout);
   }
+}
+
+typedef struct
+{
+  const Encodedsequence *encseq;
+  Bitstring *hasmatchtab;
+} Storematchinfo;
+
+void initstorematch(GT_UNUSED Storematchinfo *storematch)
+{
+  STAMP;
+  return;
+}
+
+static void storematch(GT_UNUSED void *processinfo,
+                       GT_UNUSED const GtMatch *match)
+{
+  return;
+}
+
+void reinitstorematch(GT_UNUSED Storematchinfo *storematch)
+{
+  STAMP;
+  return;
+}
+
+void freestorematch(GT_UNUSED Storematchinfo *storematch)
+{
+  STAMP;
+  return;
 }
 
 int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
@@ -126,20 +156,37 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     const AbstractDfstransformer *dfst;
     SWdpresource *swdpresource = NULL;
     Showmatchinfo showmatchinfo;
+    Processmatch processmatch;
+    void *processmatchinfoonline, *processmatchinfooffline;
+    Storematchinfo storeonline, storeoffline;
 
-    showmatchinfo.encseq = encseq;
-    showmatchinfo.characters = getencseqAlphabetcharacters(encseq);
-    showmatchinfo.wildcardshow = getencseqAlphabetwildcardshow(encseq);
-    showmatchinfo.showalignment = idxlocalioptions->showalignment;
+    if (idxlocalioptions->docompare)
+    {
+      processmatch = storematch;
+      initstorematch(&storeonline);
+      initstorematch(&storeoffline);
+      processmatchinfoonline = &storeonline;
+      processmatchinfooffline = &storeoffline;
+    } else
+    {
+      processmatch = showmatch;
+      showmatchinfo.encseq = encseq;
+      showmatchinfo.characters = getencseqAlphabetcharacters(encseq);
+      showmatchinfo.wildcardshow = getencseqAlphabetwildcardshow(encseq);
+      showmatchinfo.showalignment = idxlocalioptions->showalignment;
+      processmatchinfoonline = processmatchinfooffline = &showmatchinfo;
+    }
     if (idxlocalioptions->doonline || idxlocalioptions->docompare)
     {
+      STAMP;
       swdpresource = newSWdpresource(idxlocalioptions->matchscore,
                                      idxlocalioptions->mismatchscore,
                                      idxlocalioptions->gapextend,
                                      idxlocalioptions->threshold,
                                      idxlocalioptions->showalignment,
-                                     showmatch,
-                                     &showmatchinfo);
+                                     processmatch,
+                                     processmatchinfoonline);
+      STAMP;
     }
     dfst = locali_AbstractDfstransformer();
     if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
@@ -150,8 +197,8 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
                                            0,
                                            0,    /* maxpathlength */
                                            true, /* keepexpandedonstack */
-                                           showmatch,
-                                           &showmatchinfo,
+                                           processmatch,
+                                           processmatchinfooffline,
                                            NULL, /* processresult */
                                            NULL, /* processresult info */
                                            dfst);
@@ -159,7 +206,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     seqit = gt_seqiterator_new(idxlocalioptions->queryfiles,
                                getencseqAlphabetsymbolmap(encseq),
                                true);
-    for (showmatchinfo.unitnum = 0; /* Nothing */; showmatchinfo.unitnum++)
+    for (showmatchinfo.queryunit = 0; /* Nothing */; showmatchinfo.queryunit++)
     {
       retval = gt_seqiterator_next(seqit,
                                    &query,
@@ -176,13 +223,23 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
         break;
       }
       printf("process sequence " Formatuint64_t " of length %lu\n",
-              PRINTuint64_tcast(showmatchinfo.unitnum),querylen);
+              PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
       if (idxlocalioptions->doonline || idxlocalioptions->docompare)
       {
+      STAMP;
+        if (idxlocalioptions->docompare)
+        {
+          reinitstorematch(&storeonline);
+        }
         multiapplysmithwaterman(swdpresource,encseq,query,querylen);
+      STAMP;
       }
       if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
       {
+        if (idxlocalioptions->docompare)
+        {
+          reinitstorematch(&storeoffline);
+        }
         indexbasedlocali(limdfsresources,
                          idxlocalioptions->matchscore,
                          idxlocalioptions->mismatchscore,
@@ -205,6 +262,11 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
       swdpresource = NULL;
     }
     gt_seqiterator_delete(seqit);
+    if (idxlocalioptions->docompare)
+    {
+      freestorematch(&storeonline);
+      freestorematch(&storeoffline);
+    }
   }
   if (genericindex == NULL)
   {

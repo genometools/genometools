@@ -42,8 +42,8 @@ SWdpresource *newSWdpresource(Scoretype matchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
                               bool showalignment,
-                              Processmatch procmatch,
-                              void *procmatchinfo);
+                              Processmatch processmatch,
+                              void *processmatchinfo);
 
 void multiapplysmithwaterman(SWdpresource *dpresource,
                              const Encodedsequence *encseq,

@@ -30,6 +30,7 @@
 #include "core/minmax.h"
 #include "core/unused_api.h"
 #include "core/filelengthvalues.h"
+#include "spacedef.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "format64.h"
@@ -824,7 +825,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
         break;
       case Viabitaccess:
         FREESPACE(encseq->twobitencoding);
-        FREESPACE(encseq->specialbits);
+        gt_free(encseq->specialbits);
         break;
       case Viauchartables:
         FREESPACE(encseq->twobitencoding);

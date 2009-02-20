@@ -25,6 +25,7 @@
 #include "defined-types.h"
 #include "intbits.h"
 #include "intbits-tab.h"
+#include "spacedef.h"
 #include "tyr-map.h"
 #include "tyr-mersplit.h"
 #include "opensfxfile.h"
@@ -406,7 +407,7 @@ int constructmerbuckets(const GtStr *inputindex,
     tyrindex_delete(&tyrindex);
   }
   FREESPACE(tyrbckinfo.bounds);
-  FREESPACE(tyrbckinfo.boundisdefined);
+  gt_free(tyrbckinfo.boundisdefined);
   return haserr ? -1 : 0;
 }
 

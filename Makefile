@@ -714,7 +714,7 @@ obj/%.prepro: ${CURDIR}/src/match/%.c
 	@echo "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
-	indent $@
+	/sw/bin/indent $@
 
 RUBY:=ruby
 
