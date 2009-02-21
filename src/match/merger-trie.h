@@ -22,8 +22,6 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 
-/* XXX make this type opaque */
-
 typedef struct
 {
   unsigned int idx;
