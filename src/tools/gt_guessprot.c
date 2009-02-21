@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdlib.h>
 #include "core/versionfunc.h"
 #include "core/option.h"
 #include "match/guessprot.pr"
@@ -62,7 +63,7 @@ int gt_guessprot(int argc, const char **argv, GtError *err)
   if (retval == 1)
   {
     /*@ignore@*/
-    exit(1); /* XXX */
+    exit(EXIT_FAILURE);
     /*@end@*/
 
   } else
