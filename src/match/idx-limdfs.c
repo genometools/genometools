@@ -1324,7 +1324,7 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
   match.dbabsolute = true;
   match.dblen = (Seqpos) patternlength;
   match.dbsubstring = dbsubstring;
-  match.querystartpos = 0; /* XXX modify */
+  match.querystartpos = 0;
   match.querylen = patternlength;
   match.distance = 0;
   match.alignment = NULL;
