@@ -26,7 +26,7 @@
 #include "spacedef.h"
 #include "opensfxfile.h"
 
-#include "fillsci.pr"
+#include "fillsci.h"
 
 #define TISTABFILESUFFIX ".tis"
 
