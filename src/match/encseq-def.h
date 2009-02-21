@@ -65,50 +65,7 @@ typedef struct
 
 #ifdef INLINEDENCSEQ
 
-typedef struct
-{
-  Uchar *plainseq;
-  Seqpos totallength;
-  bool hasownmemory, mappedfile, hasspecialcharacters;
-} Encodedsequence;
-
-typedef struct
-{
-  bool moveforward, exhausted;
-  const Encodedsequence *encseq;
-  Seqpos pos,
-         lengthofspecialrange;
-} Specialrangeiterator;
-
-typedef struct
-{
-  Readmode readmode;
-} Encodedsequencescanstate;
-
-#define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
-
-#define MAKECOMPL(CC)\
-        (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
-
-#define getencodedchar(ENCSEQ,POS,RM)\
-        (((RM) == Forwardmode)\
-          ? (ENCSEQ)->plainseq[POS]\
-          : (((RM) == Reversemode)\
-            ? (ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)]\
-            : (((RM) == Complementmode) \
-              ? MAKECOMPL((ENCSEQ)->plainseq[POS])\
-              : (MAKECOMPL((ENCSEQ)->plainseq[\
-                           REVERSEPOS((ENCSEQ)->totallength,POS)])\
-              )\
-            )\
-          )\
-        )
-
-#define getencodedcharnospecial(ENCSEQ,POS,RM)\
-        getencodedchar(ENCSEQ,POS,RM)
-
-#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS,READMODE)\
-        getencodedchar(ENCSEQ,POS,READMODE)
+#include "inl-encseq.h"
 
 #else
 
