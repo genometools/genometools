@@ -16,6 +16,8 @@ then
 fi
 
 # modify the following if you need larger files.
+# but only use an extractfile that does not contain wildcard characters,
+# i.e. N etc.
 
 extractfile=testdata/U89959_genomic.fas
 lines=$1
