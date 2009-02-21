@@ -112,7 +112,7 @@ void checkandresetstorematch(uint64_t queryunit,
                              Storematchinfo *storeonline,
                              Storematchinfo *storeoffline)
 {
-  unsigned long seqnum,
+  unsigned long seqnum, countmatchseq = 0,
     numofdbsequences = getencseqnumofdbsequences(storeonline->encseq);
 
   for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
@@ -133,9 +133,14 @@ void checkandresetstorematch(uint64_t queryunit,
                      PRINTuint64_tcast(queryunit),seqnum);
       exit(EXIT_FAILURE);
     }
+    if (ISIBITSET(storeonline->hasmatch,seqnum))
+    {
+      countmatchseq++;
+    }
   }
   CLEARBITTAB(storeonline->hasmatch,numofdbsequences);
   CLEARBITTAB(storeoffline->hasmatch,numofdbsequences);
+  printf("matching sequences: %lu\n",countmatchseq);
 }
 
 void freestorematch(Storematchinfo *storematch)
