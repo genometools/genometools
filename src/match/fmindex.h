@@ -18,6 +18,7 @@
 #ifndef FMINDEX_H
 #define FMINDEX_H
 
+#include <stdbool.h>
 #include "core/arraydef.h"
 #include "seqpos-def.h"
 #include "alphadef.h"

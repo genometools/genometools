@@ -63,12 +63,6 @@ typedef struct
          seqlength;    /* the length of the sequence */
 } Seqinfo;             /* \Typedef{Seqinfo} */
 
-#ifdef INLINEDENCSEQ
-
-#include "inl-encseq.h"
-
-#else
-
 typedef struct
 {
   Twobitencoding tbe;           /* two bit encoding */
@@ -80,12 +74,40 @@ typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 typedef struct Specialrangeiterator Specialrangeiterator;
 
+#ifdef INLINEDENCSEQ
+#include "encseq-type.h"
+#endif
+
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
 unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
 
+#ifdef INLINEDENCSEQ
+
+#define MAKECOMPL(CC)\
+        (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
+
+static inline Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
+                                   Readmode readmode)
+{
+  return (readmode == Forwardmode)
+          ? encseq->plainseq[pos]
+          : ((readmode == Reversemode)
+            ? encseq->plainseq[REVERSEPOS(encseq->totallength,pos)]
+            : ((readmode == Complementmode)
+              ? MAKECOMPL(encseq->plainseq[pos])
+              : MAKECOMPL(encseq->plainseq[
+                           REVERSEPOS(encseq->totallength,pos)])
+              )
+            );
+         ;
+}
+
+#else
+
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
+#endif
 
 Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
@@ -120,8 +142,6 @@ void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
 
 void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
                        const Seqpos startindex,const Seqpos len);
-
-#endif
 
 /* the functions with exactly the same interface for both implementation of
    encodedsequences */

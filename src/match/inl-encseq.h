@@ -22,6 +22,13 @@ typedef struct
 {
   Uchar *plainseq;
   Seqpos totallength;
+  unsigned long numofdbsequences;
+
+  NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
+  numofchars = getencseqAlphabetnumofchars(encseq);
+  NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
+             (unsigned long) numofchars);
+  switch (encseq->sat)
   bool hasownmemory, mappedfile, hasspecialcharacters;
 } Encodedsequence;
 
@@ -39,6 +46,8 @@ typedef struct
 } Encodedsequencescanstate;
 
 #define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
+
+#define getencseqnumofdbsequences(ENCSEQ) ((ENCSEQ)->numofdbsequences)
 
 #define MAKECOMPL(CC)\
         (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))

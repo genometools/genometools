@@ -15,8 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef INLINEDENCSEQ
-
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
@@ -38,13 +36,16 @@
 #include "alphadef.h"
 #include "divmodmul.h"
 #include "mapspec-def.h"
-#include "encseq-def.h"
 #include "safecast-gen.h"
 #include "esa-fileend.h"
 #include "verbose-def.h"
 #include "opensfxfile.h"
 #include "stamp.h"
 #include "fillsci.h"
+#include "encseq-def.h"
+#ifndef INLINEDENCSEQ
+#include "encseq-type.h"
+#endif
 
 #include "sfx-cmpsuf.pr"
 
@@ -114,93 +115,6 @@
 #define ENCSEQFILESUFFIX     ".esq"
 
 #define NAMEDFUNCTION(F) {#F,F}
-
-typedef enum
-{
-  Viadirectaccess,
-  Viabitaccess,
-  Viauchartables,
-  Viaushorttables,
-  Viauint32tables,
-  Undefpositionaccesstype
-} Positionaccesstype;
-
-typedef uint32_t Uint32;
-
- struct Encodedsequence
-{
-  /* Common part */
-  unsigned long *satcharptr; /* need for writing char */
-  Positionaccesstype sat;
-  void *mappedptr; /* NULL or pointer to the mapped space block */
-  unsigned long numofspecialstostore;
-  Seqpos *totallengthptr,
-         totallength;
-  unsigned long numofdbsequences,
-                *numofdbsequencesptr; /* need for writing numofdbsequences */
-  unsigned long sizeofrep;
-  const char *name;
-  Uchar(*deliverchar)(const Encodedsequence *,Seqpos);
-  const char *delivercharname;
-  Uchar(*delivercharnospecial)(const Encodedsequence *,Seqpos);
-  const char *delivercharnospecialname;
-  Uchar(*seqdeliverchar)(const Encodedsequence *,
-                         Encodedsequencescanstate *,Seqpos);
-  const char *seqdelivercharname;
-  bool(*delivercontainsspecial)(const Encodedsequence *,
-                                bool,Encodedsequencescanstate *,Seqpos,Seqpos);
-  const char *delivercontainsspecialname;
-  unsigned int maxspecialtype;  /* maximal value of special type */
-  unsigned long *characterdistribution;
-  Specialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
-                  specialcharinfo; /* information about specialcharacters */
-
-  const GtStrArray *filenametab;    /* table of filenames */
-  const Filelengthvalues *filelengthtab;  /* table of length of files */
-
-  const char *destab;
-  unsigned long destablength, *descendtab;
-
-  const SfxAlphabet *alpha;   /* alphabet representation */
-
-  const Seqpos *ssptab; /* (if numofdbsequences = 1 then NULL  else
-                                                         numofdbsequences  -1)
-                           entries */
-
-  /* only for Viabitaccess,
-              Viauchartables,
-              Viaushorttables,
-              Viauint32tables */
-
-  Twobitencoding *twobitencoding;
-  unsigned long unitsoftwobitencoding;
-
-  /* only for Viauchartables,
-              Viaushorttables,
-              Viauint32tables */
-
-  /* only for Viadirectaccess */
-  Uchar *plainseq;
-  bool hasplainseqptr;
-
-  /* only for Viabitaccess */
-  Bitstring *specialbits;
-
-  /* only for Viauchartables */
-  Uchar *ucharspecialpositions,
-        *ucharspecialrangelength;
-  unsigned long *ucharendspecialsubsUint;
-
-  /* only for Viaushorttables */
-  Ushort *ushortspecialpositions,
-         *ushortspecialrangelength;
-  unsigned long *ushortendspecialsubsUint;
-
-  /* only for Viauint32tables */
-  Uint32 *uint32specialpositions,
-         *uint32specialrangelength;
-  unsigned long *uint32endspecialsubsUint;
-};
 
 typedef struct
 {
@@ -321,6 +235,7 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq)
   return encseq->numofdbsequences;
 }
 
+#ifndef INLINEDENCSEQ
 Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
@@ -349,6 +264,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
       exit(EXIT_FAILURE); /* programming error */
   }
 }
+#endif
 
 Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
@@ -783,6 +699,17 @@ uint64_t detsizeencseq(int kind,
   return localdetsizeencseq(sat[kind],totallength,specialranges,numofchars);
 }
 
+#ifdef INLINEDENCSEQ
+static Positionaccesstype determinesmallestrep(
+                              GT_UNUSED Seqpos *specialranges,
+                              GT_UNUSED Seqpos totallength,
+                              GT_UNUSED const Seqpos *specialrangestab,
+                              GT_UNUSED unsigned int numofchars)
+{
+  return Viadirectaccess;
+}
+#else
+
 static Positionaccesstype determinesmallestrep(Seqpos *specialranges,
                                                Seqpos totallength,
                                                const Seqpos *specialrangestab,
@@ -800,6 +727,7 @@ static Positionaccesstype determinesmallestrep(Seqpos *specialranges,
   CHECKANDUPDATE(Viauint32tables,2);
   return cret;
 }
+#endif
 
 void freeEncodedsequence(Encodedsequence **encseqptr)
 {
@@ -3835,5 +3763,3 @@ void multicharactercompare_withtest(const Encodedsequence *encseq,
     exit(EXIT_FAILURE);
   }
 }
-
-#endif /* ifndef INLINEDENCSEQ */

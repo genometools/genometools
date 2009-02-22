@@ -716,6 +716,12 @@ obj/%.prepro: ${CURDIR}/src/match/%.c
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	/sw/bin/indent $@
 
+obj/%.prepro: ${CURDIR}/src/tools/%.c
+	@echo "[generate $@]"
+	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -DINLINEDENCSEQ \
+	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
+	/sw/bin/indent $@
+
 RUBY:=ruby
 
 test: all

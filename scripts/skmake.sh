@@ -50,7 +50,7 @@ makecompilerflags()
     printf " 64bit=yes"
   fi
   printf " CFLAGS='${GPROF} -O3 -m$1"
-  # printf " -DINLINEDENCSEQ"
+  printf " -DINLINEDENCSEQ"
   # printf " -DINLINEDSequentialsuffixarrayreader"
   if test $2 -eq 1
   then
