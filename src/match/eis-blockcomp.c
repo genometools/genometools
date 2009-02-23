@@ -13,6 +13,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 /**
  * \file eis-blockcomp.c
  * \brief Methods to build block-compressed representation of indexed

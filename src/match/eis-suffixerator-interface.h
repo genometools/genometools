@@ -13,6 +13,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 /**
  * \file eis-suffixerator-interface.h
  * \brief Methods to call suffixerator functions through one object,

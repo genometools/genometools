@@ -692,12 +692,12 @@ splintclean:
 
 obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
-	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DBIGSEQPOS -DINLINEDENCSEQ -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c
 	@echo "splint $<"
-	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DBIGSEQPOS -DINLINEDENCSEQ -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/ltr/%.c

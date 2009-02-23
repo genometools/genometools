@@ -13,9 +13,9 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #include <stdlib.h>
 #include <string.h>
-
 #include "core/yarandom.h"
 
 #include "match/seqpos-def.h"

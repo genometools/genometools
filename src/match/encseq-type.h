@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,14 @@
 */
 #ifndef ENCSEQ_TYPE_H
 #define ENCSEQ_TYPE_H
+
+/*
+  The contents of this file is to be considered private
+  implementation detail but, whenever the code is compiled with option
+  INLINEDENCSEQ, is exposed to the compiler solely for performance reasons.
+  So we can compare the time overhead of a bytearray implementation of
+  strings to all other represenations implemented in encodedseq.c.
+*/
 
 #include "core/symboldef.h"
 #include "core/str_array_api.h"

@@ -225,6 +225,7 @@ void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
   }
 }
 
+#ifndef INLINEDENCSEQ
 Seqpos getencseqtotallength(const Encodedsequence *encseq)
 {
   return encseq->totallength;
@@ -235,7 +236,6 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq)
   return encseq->numofdbsequences;
 }
 
-#ifndef INLINEDENCSEQ
 Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
@@ -264,7 +264,6 @@ Uchar getencodedchar(const Encodedsequence *encseq,
       exit(EXIT_FAILURE); /* programming error */
   }
 }
-#endif
 
 Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
@@ -296,6 +295,7 @@ Uchar getencodedcharnospecial(const Encodedsequence *encseq,
       exit(EXIT_FAILURE); /* programming error */
   }
 }
+#endif
 
 struct Encodedsequencescanstate
 {
@@ -311,6 +311,41 @@ struct Encodedsequencescanstate
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
 };
+
+#ifndef INLINEDENCSEQ
+Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
+                               Encodedsequencescanstate *esr,
+                               Seqpos pos,
+                               Readmode readmode)
+{
+  gt_assert(pos < encseq->totallength);
+  switch (readmode)
+  {
+    case Forwardmode:
+      return encseq->seqdeliverchar(encseq,esr,pos);
+    case Reversemode:
+      return encseq->seqdeliverchar(encseq,esr,
+                                    REVERSEPOS(encseq->totallength,pos));
+    case Complementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->seqdeliverchar(encseq,esr,pos);
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    case Reversecomplementmode: /* only works with dna */
+      {
+        Uchar cc = encseq->seqdeliverchar(encseq,esr,
+                                          REVERSEPOS(encseq->totallength,pos));
+        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
+      }
+    default:
+      fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
+                     (int) readmode);
+      exit(EXIT_FAILURE); /* programming error */
+  }
+}
+#endif
+
+/* The following function is only used in tyr-mkindex.c */
 
 bool containsspecial(const Encodedsequence *encseq,
                      bool moveforward,
@@ -343,37 +378,6 @@ static void showsequencerange(const Sequencerange *range)
   }
 }
 #endif
-
-Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
-                               Encodedsequencescanstate *esr,
-                               Seqpos pos,
-                               Readmode readmode)
-{
-  gt_assert(pos < encseq->totallength);
-  switch (readmode)
-  {
-    case Forwardmode:
-      return encseq->seqdeliverchar(encseq,esr,pos);
-    case Reversemode:
-      return encseq->seqdeliverchar(encseq,esr,
-                                    REVERSEPOS(encseq->totallength,pos));
-    case Complementmode: /* only works with dna */
-      {
-        Uchar cc = encseq->seqdeliverchar(encseq,esr,pos);
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
-      }
-    case Reversecomplementmode: /* only works with dna */
-      {
-        Uchar cc = encseq->seqdeliverchar(encseq,esr,
-                                          REVERSEPOS(encseq->totallength,pos));
-        return ISSPECIAL(cc) ? cc : COMPLEMENTBASE(cc);
-      }
-    default:
-      fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
-                     (int) readmode);
-      exit(EXIT_FAILURE); /* programming error */
-  }
-}
 
 void encseqextract(Uchar *buffer,
                    const Encodedsequence *encseq,

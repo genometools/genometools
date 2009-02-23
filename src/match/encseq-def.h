@@ -78,17 +78,24 @@ typedef struct Specialrangeiterator Specialrangeiterator;
 #include "encseq-type.h"
 #endif
 
+#ifdef INLINEDENCSEQ
+#define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
+#else
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
-
-unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
+#endif
 
 #ifdef INLINEDENCSEQ
+#define getencseqnumofdbsequences(ENCSEQ) ((ENCSEQ)->numofdbsequences)
+#else
+unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
+#endif
 
+#ifdef INLINEDENCSEQ
 #define MAKECOMPL(CC)\
         (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
-
-static inline Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
-                                   Readmode readmode)
+/*@unused@*/ static inline Uchar getencodedchar(const Encodedsequence *encseq,
+                                                Seqpos pos,
+                                                Readmode readmode)
 {
   return (readmode == Forwardmode)
           ? encseq->plainseq[pos]
@@ -99,24 +106,33 @@ static inline Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
               : MAKECOMPL(encseq->plainseq[
                            REVERSEPOS(encseq->totallength,pos)])
               )
-            );
+            )
          ;
 }
-
 #else
-
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
+
 #endif
 
+#ifdef INLINEDENCSEQ
+#define getencodedcharnospecial(ENCSEQ,POS,RM)\
+        getencodedchar(ENCSEQ,POS,RM)
+#else
 Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
                               Readmode readmode);
+#endif
 
+#ifdef INLINEDENCSEQ
+#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS,READMODE)\
+        getencodedchar(ENCSEQ,POS,READMODE)
+#else
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos,
                                Readmode readmode);
+#endif
 
 void extract2bitenc(bool fwd,
                     EndofTwobitencoding *ptbe,

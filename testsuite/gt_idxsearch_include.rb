@@ -100,18 +100,12 @@ allfiles.each do |reffile|
         run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck -online " +
                  "-q #{$testdata}/#{queryfile}",
                  :maxtime => 100)
-        run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck -cmp " +
-                 "-q #{$testdata}/#{queryfile}",
-                 :maxtime => 100)
         run_test "#{$bin}gt suffixerator -indexname sfx -ssp -tis -suf -dna " +
                  "-v -db #{$testdata}/#{reffile}"
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx " +
                  "-q #{$testdata}/#{queryfile}", 
                  :maxtime => 100)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx -online " +
-                 "-q #{$testdata}/#{queryfile}",
-                 :maxtime => 100)
-        run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx -cmp " +
                  "-q #{$testdata}/#{queryfile}",
                  :maxtime => 100)
       end
