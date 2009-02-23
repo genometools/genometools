@@ -153,10 +153,10 @@ uint64_t detsizeencseq(int kind,
 void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
 
 void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
-                     const Seqpos startindex,const Seqpos len);
+                     Seqpos startindex,Seqpos len);
 
 void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
-                       const Seqpos startindex,const Seqpos len);
+                       Seqpos startindex,Seqpos len);
 
 int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,GtError*);
 
@@ -229,14 +229,6 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
-int multicharactercompare(const Encodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          Encodedsequencescanstate *esr1,
-                          Seqpos pos1,
-                          Encodedsequencescanstate *esr2,
-                          Seqpos pos2);
-
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            bool fwd,
@@ -247,6 +239,14 @@ int compareEncseqsequences(Seqpos *lcp,
                            Seqpos depth);
 
 /* some check functions called in test-encseq.c */
+
+int multicharactercompare(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Encodedsequencescanstate *esr1,
+                          Seqpos pos1,
+                          Encodedsequencescanstate *esr2,
+                          Seqpos pos2);
 
 void checkextractunitatpos(const Encodedsequence *encseq,
                            bool fwd,bool complement);

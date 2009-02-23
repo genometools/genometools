@@ -214,7 +214,7 @@ void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
 }
 
 void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
-                       const Seqpos startindex,const Seqpos len)
+                       Seqpos startindex,Seqpos len)
 {
   if (encseq->sat == Viadirectaccess)
   {
