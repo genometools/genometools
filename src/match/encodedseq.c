@@ -2671,6 +2671,9 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   {
     sat = (Positionaccesstype) retcode;
   }
+#ifdef INLINEDENCSEQ
+  showverbose(verboseinfo,"inlined encodeded sequence");
+#endif
   if (!haserr)
   {
     encseq = determineencseqkeyvalues(sat,

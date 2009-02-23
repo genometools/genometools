@@ -641,9 +641,6 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
 
     showverbose(verboseinfo,"sizeof (Seqpos)=%lu",
                 (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
-#ifdef INLINEDENCSEQ
-    showverbose(verboseinfo,"inlined encodeded sequence");
-#endif
     if (runsuffixerator(doesa,&so,verboseinfo,err) < 0)
     {
       haserr = true;
