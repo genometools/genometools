@@ -703,17 +703,7 @@ uint64_t detsizeencseq(int kind,
   return localdetsizeencseq(sat[kind],totallength,specialranges,numofchars);
 }
 
-#ifdef INLINEDENCSEQ
-static Positionaccesstype determinesmallestrep(
-                              GT_UNUSED Seqpos *specialranges,
-                              GT_UNUSED Seqpos totallength,
-                              GT_UNUSED const Seqpos *specialrangestab,
-                              GT_UNUSED unsigned int numofchars)
-{
-  return Viadirectaccess;
-}
-#else
-
+#ifndef INLINEDENCSEQ
 static Positionaccesstype determinesmallestrep(Seqpos *specialranges,
                                                Seqpos totallength,
                                                const Seqpos *specialrangestab,
@@ -730,6 +720,60 @@ static Positionaccesstype determinesmallestrep(Seqpos *specialranges,
   CHECKANDUPDATE(Viaushorttables,1);
   CHECKANDUPDATE(Viauint32tables,2);
   return cret;
+}
+
+static int determinesattype(Seqpos *specialranges,
+                            Seqpos totallength,
+                            const Seqpos *specialrangestab,
+                            unsigned int numofchars,
+                            const char *str_sat,
+                            GtError *err)
+{
+  Positionaccesstype sat;
+  bool haserr = false;
+
+  *specialranges = specialrangestab[0];
+  if (numofchars == DNAALPHASIZE)
+  {
+    if (str_sat == NULL)
+    {
+      sat = determinesmallestrep(specialranges,
+                                 totallength,specialrangestab,numofchars);
+    } else
+    {
+      sat = str2positionaccesstype(str_sat);
+      switch (sat)
+      {
+        case Undefpositionaccesstype:
+           gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
+           haserr = true;
+           break;
+        case Viauchartables: *specialranges = specialrangestab[0];
+                             break;
+        case Viaushorttables: *specialranges = specialrangestab[1];
+                              break;
+        case Viauint32tables: *specialranges = specialrangestab[2];
+                              break;
+        default: break;
+      }
+    }
+  } else
+  {
+    sat = Viadirectaccess;
+  }
+  return haserr ? -1 : (int) sat;
+}
+
+#else
+static int determinesattype(Seqpos *specialranges,
+                            GT_UNUSED Seqpos totallength,
+                            const Seqpos *specialrangestab,
+                            GT_UNUSED unsigned int numofchars,
+                            GT_UNUSED const char *str_sat,
+                            GT_UNUSED GtError *err)
+{
+  *specialranges = specialrangestab[0];
+  return (int) Viadirectaccess;
 }
 #endif
 
@@ -2499,48 +2543,6 @@ static bool scanprjfiledbfile(Encodedsequence *encseq,
   }
   gt_fa_xfclose(fp);
   return haserr;
-}
-
-static int determinesattype(Seqpos *specialranges,
-                            Seqpos totallength,
-                            const Seqpos *specialrangestab,
-                            unsigned int numofchars,
-                            const char *str_sat,
-                            GtError *err)
-{
-  Positionaccesstype sat;
-  bool haserr = false;
-
-  *specialranges = specialrangestab[0];
-  if (numofchars == DNAALPHASIZE)
-  {
-    if (str_sat == NULL)
-    {
-      sat = determinesmallestrep(specialranges,
-                                 totallength,specialrangestab,numofchars);
-    } else
-    {
-      sat = str2positionaccesstype(str_sat);
-      switch (sat)
-      {
-        case Undefpositionaccesstype:
-           gt_error_set(err,"illegal argument \"%s\" to option -sat",str_sat);
-           haserr = true;
-           break;
-        case Viauchartables: *specialranges = specialrangestab[0];
-                             break;
-        case Viaushorttables: *specialranges = specialrangestab[1];
-                              break;
-        case Viauint32tables: *specialranges = specialrangestab[2];
-                              break;
-        default: break;
-      }
-    }
-  } else
-  {
-    sat = Viadirectaccess;
-  }
-  return haserr ? -1 : (int) sat;
 }
 
 static Encodedsequencefunctions encodedseqfunctab[] =
