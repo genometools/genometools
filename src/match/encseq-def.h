@@ -22,7 +22,6 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
-#include "core/unused_api.h"
 #include "core/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
@@ -30,7 +29,6 @@
 #include "readmode-def.h"
 #include "verbose-def.h"
 
-#define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
 #define DBFILEKEY "dbfile="
 
 #ifdef SKDEBUG
@@ -90,6 +88,8 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq);
 unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
 #endif
 
+#define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
+
 #ifdef INLINEDENCSEQ
 #define MAKECOMPL(CC)\
         (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
@@ -112,7 +112,6 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
 #else
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
-
 #endif
 
 #ifdef INLINEDENCSEQ
@@ -158,9 +157,6 @@ void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
 
 void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
                        const Seqpos startindex,const Seqpos len);
-
-/* the functions with exactly the same interface for both implementation of
-   encodedsequences */
 
 int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,GtError*);
 
