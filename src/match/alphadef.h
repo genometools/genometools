@@ -26,6 +26,13 @@
 #define MAXALPHABETCHARACTER UCHAR_MAX
 
 /*
+  the size of the DNA alphabet
+*/
+
+#define DNAALPHASIZE        4U
+#define PROTEINALPHASIZE   20U
+
+/*
   The following type is for storing alphabets.
 */
 

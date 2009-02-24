@@ -36,6 +36,7 @@
 typedef enum
 {
   Viadirectaccess,
+  Viabytecompress,
   Viabitaccess,
   Viauchartables,
   Viaushorttables,
@@ -48,8 +49,8 @@ typedef uint32_t Uint32;
 struct Encodedsequence
 {
   /* Common part */
- unsigned long *satcharptr; /* need for writing char */
- Positionaccesstype sat;
+  unsigned long *satcharptr; /* need for writing char */
+  Positionaccesstype sat;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
   Seqpos *totallengthptr,

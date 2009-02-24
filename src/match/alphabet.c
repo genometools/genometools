@@ -59,10 +59,10 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
 
 #define DNABASES                     "aAcCgGtTuU"
 #define DNAWILDCARDS                 "nsywrkvbdhmNSYWRKVBDHM"
-#define MAPSIZEDNA                   5U
+#define MAPSIZEDNA                   (DNAALPHASIZE+1U)
 #define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
-#define MAPSIZEPROTEIN               21U
+#define MAPSIZEPROTEIN               (PROTEINALPHASIZE+1U)
 #define PROTEINWILDCARDS             "XUBZ*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
 
