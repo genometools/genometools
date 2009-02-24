@@ -41,6 +41,18 @@ struct BitPackArray
 typedef struct BitPackArray BitPackArray;
 
 /**
+ * determine size of BitPackArray structure.
+ * @param bits number of bits to encode each value stored with
+ * @param numValues number of values to store
+ * @return size
+ */
+
+static inline size_t sizeofbitarray(unsigned bits, BitOffset numValues)
+{
+  return bitElemsAllocSize(bits * numValues) * sizeof(BitElem);
+}
+
+/**
  * Create new BitPackArray structure.
  * @param bits number of bits to encode each value stored with
  * @param numValues number of values to store

@@ -44,7 +44,8 @@ typedef enum
   BwtboundType,
   PairBwtidxType,
   TwobitencodingType,
-  SpecialcharinfoType
+  SpecialcharinfoType,
+  BitStringType
 } Typespec;
 
 typedef struct

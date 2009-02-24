@@ -102,6 +102,11 @@ struct Encodedsequence
   Uchar *plainseq;
   bool hasplainseqptr;
 
+#ifndef S_SPLINT_S
+  /* only for Viabytecompress */
+  BitString *bytecompressedarray;
+#endif
+
   /* only for Viabitaccess */
   Bitstring *specialbits;
 

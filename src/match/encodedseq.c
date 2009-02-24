@@ -28,6 +28,9 @@
 #include "core/minmax.h"
 #include "core/unused_api.h"
 #include "core/filelengthvalues.h"
+#ifndef S_SPLINT_S
+#include "core/bitpackarray.h"
+#endif
 #include "spacedef.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
@@ -517,7 +520,10 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->plainseq,Uchar,numofunits);
       break;
     case Viabytecompress:
-      gt_assert(false);
+#ifndef S_SPLINT_S
+      numofunits = (unsigned long) sizeofbitarray(5,encseq->totallength);
+      NEWMAPSPEC(encseq->bytecompressedarray,BitString,numofunits);
+#endif
       break;
     case Viabitaccess:
       NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
