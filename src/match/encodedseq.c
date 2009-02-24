@@ -532,7 +532,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       {
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   NUMOFINTSFORBITS(encseq->totallength));
-        NEWMAPSPEC(encseq->specialbits,Bitstring,numofunits);
+        NEWMAPSPEC(encseq->specialbits,BitString,numofunits);
       }
       break;
     case Viauchartables:
@@ -662,7 +662,7 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          sum = sizeoftwobitencoding;
          if (specialranges > 0)
          {
-           sum += (uint64_t) sizeof (Bitstring) *
+           sum += (uint64_t) sizeof (Bitsequence) *
                   (uint64_t) NUMOFINTSFORBITS(totallength);
          }
          break;
@@ -1991,7 +1991,7 @@ static bool bitaccessnextspecialrangeiterator(Sequencerange *range,
                                               Specialrangeiterator *sri)
 {
   bool success = false;
-  Bitstring currentword;
+  Bitsequence currentword;
 
   while (!success)
   {

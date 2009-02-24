@@ -78,7 +78,7 @@ static void showmatch(void *processinfo,const GtMatch *match)
 typedef struct
 {
   const Encodedsequence *encseq;
-  Bitstring *hasmatch;
+  Bitsequence *hasmatch;
 } Storematchinfo;
 
 void initstorematch(Storematchinfo *storematch,

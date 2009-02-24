@@ -108,7 +108,7 @@ struct Encodedsequence
 #endif
 
   /* only for Viabitaccess */
-  Bitstring *specialbits;
+  Bitsequence *specialbits;
 
   /* only for Viauchartables */
   Uchar *ucharspecialpositions,

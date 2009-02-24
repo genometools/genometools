@@ -31,7 +31,7 @@ typedef struct
 {
   unsigned long seedwidth, numofonepositions;
   unsigned char *onepositions;
-  Bitstring seedbitvector;
+  Bitsequence seedbitvector;
 } Spacedseed;
 
 static Spacedseed *spacedseed_new(const char *seedstring,GtError *err)
@@ -145,7 +145,7 @@ static void onlinespacedseedsearch(const Encodedsequence *encseq,
   const Uchar *buffer;
   Seqpos currentpos, totallength;
   unsigned long firstpos, windowschecked = 0;
-  Bitstring bitmask;
+  Bitsequence bitmask;
   bool matched;
 
   totallength = getencseqtotallength(encseq);

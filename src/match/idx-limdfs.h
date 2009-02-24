@@ -72,7 +72,7 @@ void indexbasedmstats(Limdfsresources *limdfsresources,
 
 void indexbasedspacedseeds(Limdfsresources *limdfsresources,
                            const Uchar *pattern,
-                           Bitstring seedbitvector,
+                           Bitsequence seedbitvector,
                            unsigned long seedweight,
                            const AbstractDfstransformer *adfst);
 
