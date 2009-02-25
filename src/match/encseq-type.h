@@ -105,6 +105,7 @@ struct Encodedsequence
 
   /* only for Viabytecompress */
   BitPackArray *bitpackarray;
+  unsigned int numofchars; /* used to have faster access in getencodedchar */
 
   /* only for Viabitaccess */
   Bitsequence *specialbits;

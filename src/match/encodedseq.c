@@ -1042,19 +1042,18 @@ static bool containsspecialViabytecompress(GT_UNUSED
 static Uchar delivercharViabytecompress(const Encodedsequence *encseq,
                                         Seqpos pos)
 {
-  uint32_t cc, numofchars;
+  uint32_t cc;
 
   cc = bitpackarray_get_uint32(encseq->bitpackarray,(BitOffset) pos);
-  numofchars = (uint32_t) getnumofcharsAlphabet(encseq->alpha);
-  if (cc < numofchars)
+  if (cc < (uint32_t) encseq->numofchars)
   {
     return (Uchar) cc;
   }
-  if (cc == numofchars)
+  if (cc == (uint32_t) encseq->numofchars)
   {
     return (Uchar) WILDCARD;
   }
-  if (cc == (numofchars+1))
+  if (cc == (uint32_t) (encseq->numofchars+1))
   {
     return (Uchar) SEPARATOR;
   }
@@ -2389,7 +2388,6 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
 {
   double spaceinbitsperchar;
   Encodedsequence *encseq;
-  unsigned int numofchars;
 
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
@@ -2412,12 +2410,12 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
                                               specialranges);
   encseq->totallength = totallength;
   encseq->numofdbsequences = numofsequences;
-  numofchars = getnumofcharsAlphabet(alpha);
+  encseq->numofchars = getnumofcharsAlphabet(alpha);
   encseq->sizeofrep
     = CALLCASTFUNC(uint64_t,unsigned_long,
                    localdetsizeencseq(sat,totallength,
                                       specialranges,
-                                      numofchars,
+                                      encseq->numofchars,
                                       getbitspersymbolAlphabet(alpha)));
   encseq->name = accesstype2name(sat);
   encseq->deliverchar = NULL;
@@ -2521,7 +2519,7 @@ int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
 
 unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq)
 {
-  return getnumofcharsAlphabet(encseq->alpha);
+  return encseq->alpha->numofchars;
 }
 
 const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
