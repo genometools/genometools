@@ -67,7 +67,7 @@
           *bptr++ = temp;\
         }
 
-#define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
+#define SUBSORT(WIDTH,MAXBLTRIESORT,LEFT,RIGHT,DEPTH)\
         /*checksuffixrange(encseq,\
                          fwd,\
                          complement,\
@@ -79,7 +79,7 @@
         if (!maxdepth->defined ||\
             (DEPTH) < (Seqpos) maxdepth->valueunsignedint)\
         {\
-          if ((WIDTH) <= (BORDER))\
+          if ((WIDTH) <= (MAXBLTRIESORT))\
           {\
             if ((LEFT) < (RIGHT))\
             {\
