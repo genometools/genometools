@@ -754,10 +754,10 @@ const void *completealignmentfromLocalitracebackstate(
                         lci->tbs.spaceUchardbsubstring,
                         (unsigned long) lci->tbs.dbprefixlen);
 #ifndef NDEBUG
-  evalscore = gt_alignment_evalwithscore(lci->tbs.alignment,
-                                         lci->scorevalues.matchscore,
-                                         lci->scorevalues.mismatchscore,
-                                         lci->scorevalues.gapextend);
+  evalscore = gt_alignment_eval_with_score(lci->tbs.alignment,
+                                           lci->scorevalues.matchscore,
+                                           lci->scorevalues.mismatchscore,
+                                           lci->scorevalues.gapextend);
   if (evalscore < 0 || (unsigned long) evalscore < lci->threshold)
   {
     fprintf(stderr,"unexpected eval score %ld\n",evalscore);

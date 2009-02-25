@@ -40,15 +40,15 @@ void          gt_alignment_remove_last(GtAlignment*);
 void          gt_alignment_reset(GtAlignment *a);
 /* returns unit cost */
 unsigned long gt_alignment_eval(const GtAlignment*);
-long gt_alignment_evalwithscore(const GtAlignment *a,
-                                long matchscore,
-                                long mismatchscore,
-                                long gapscore);
+long          gt_alignment_eval_with_score(const GtAlignment *a,
+                                           long matchscore,
+                                           long mismatchscore,
+                                           long gapscore);
 void          gt_alignment_show(const GtAlignment*, FILE*);
-void          gt_alignment_showwithmappedcharacters(const GtAlignment *a,
-                                                    const Uchar *characters,
-                                                    Uchar wildcardshow,
-                                                    FILE *fp);
+void          gt_alignment_show_with_mapped_chars(const GtAlignment*,
+                                                  const Uchar *characters,
+                                                  Uchar wildcardshow,
+                                                  FILE *fp);
 void          gt_alignment_show_multieop_list(const GtAlignment*, FILE*);
 int           gt_alignment_unit_test(GtError*);
 void          gt_alignment_delete(GtAlignment*);

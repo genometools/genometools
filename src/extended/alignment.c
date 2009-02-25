@@ -186,10 +186,10 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
   return sumcost;
 }
 
-long gt_alignment_evalwithscore(const GtAlignment *a,
-                                long matchscore,
-                                long mismatchscore,
-                                long gapscore)
+long gt_alignment_eval_with_score(const GtAlignment *a,
+                                  long matchscore,
+                                  long mismatchscore,
+                                  long gapscore)
 {
   unsigned long i, j, uctr = 0, vctr = 0;
   long sumscore = 0;
@@ -295,10 +295,10 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
   gt_xfputc('\n', fp);
 }
 
-void gt_alignment_showwithmappedcharacters(const GtAlignment *a,
-                                           const Uchar *characters,
-                                           Uchar wildcardshow,
-                                           FILE *fp)
+void gt_alignment_show_with_mapped_chars(const GtAlignment *a,
+                                         const Uchar *characters,
+                                         Uchar wildcardshow,
+                                         FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
   Multieop meop;

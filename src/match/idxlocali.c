@@ -67,7 +67,7 @@ static void showmatch(void *processinfo,const GtMatch *match)
               match->distance);
   if (showmatchinfo->showalignment)
   {
-    gt_alignment_showwithmappedcharacters(
+    gt_alignment_show_with_mapped_chars(
                 (const GtAlignment *) match->alignment,
                 showmatchinfo->characters,
                 showmatchinfo->wildcardshow,

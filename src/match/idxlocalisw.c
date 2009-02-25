@@ -304,10 +304,10 @@ static void swproducealignment(GtAlignment *alignment,
   {
     Scoretype evalscore;
 
-    evalscore = gt_alignment_evalwithscore(alignment,
-                                           scorevalues->matchscore,
-                                           scorevalues->mismatchscore,
-                                           scorevalues->gapextend);
+    evalscore = gt_alignment_eval_with_score(alignment,
+                                             scorevalues->matchscore,
+                                             scorevalues->mismatchscore,
+                                             scorevalues->gapextend);
     if (evalscore < 0 || (unsigned long) evalscore < scorethreshold)
     {
       fprintf(stderr,"unexpected eval score %ld\n",evalscore);
