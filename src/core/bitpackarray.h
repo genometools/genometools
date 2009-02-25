@@ -26,6 +26,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
@@ -59,30 +60,24 @@ static inline size_t sizeofbitarray(unsigned bits, BitOffset numValues)
  * @return pointer to new BitPackArray structure or NULL on failure
  */
 static inline BitPackArray *
-bitpackarray_new(unsigned bits, BitOffset numValues)
+bitpackarray_new(unsigned bits, BitOffset numValues, bool withalloc)
 {
   BitPackArray *newBPA = gt_malloc(sizeof (*newBPA));
   if (newBPA)
   {
-    if (!(newBPA->store = gt_malloc(bitElemsAllocSize(bits*numValues)
-                                    * sizeof (BitElem))))
+    if (withalloc)
     {
-      gt_free(newBPA);
-      return NULL;
+      if (!(newBPA->store = gt_malloc(bitElemsAllocSize(bits*numValues)
+                                    * sizeof (BitElem))))
+      {
+        gt_free(newBPA);
+        return NULL;
+      }
+      memset(newBPA->store,0,sizeofbitarray(bits,numValues));
+    } else
+    {
+      newBPA->store = NULL;
     }
-    newBPA->bitsPerElem = bits;
-    newBPA->numElems = numValues;
-  }
-  return newBPA;
-}
-
-static inline BitPackArray *
-fillbitpackarray_new(unsigned bits, BitOffset numValues, BitElem *tab)
-{
-  BitPackArray *newBPA = gt_malloc(sizeof (*newBPA));
-  if (newBPA)
-  {
-    newBPA->store = tab;
     newBPA->bitsPerElem = bits;
     newBPA->numElems = numValues;
   }
@@ -167,5 +162,23 @@ bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
  */
 extern int
 gt_bitpackarray_unit_test(GtError*);
+
+/*
+static inline void showbitpackarray(const BitPackArray *bitpackarray)
+{
+  unsigned long numofunits, idx;
+
+  gt_assert(bitpackarray != NULL);
+  gt_assert(bitpackarray->store != NULL);
+  numofunits = (unsigned long) sizeofbitarray(bitpackarray->bitsPerElem,
+                                              bitpackarray->numElems);
+  printf("numofunits=%lu\n",numofunits);
+  for(idx=0; idx < numofunits; idx++)
+  {
+    printf("%lu: %u\n",idx,(unsigned int) bitpackarray->store[idx]);
+    fflush(stdout);
+  }
+}
+*/
 
 #endif

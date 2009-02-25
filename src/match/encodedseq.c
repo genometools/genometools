@@ -521,22 +521,15 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       numofunits
         = (unsigned long) sizeofbitarray(BITSFORAMINOACID,
                                          (BitOffset) encseq->totallength);
-      if (writemode)
+      if (!writemode)
       {
-        gt_assert(encseq->bitpackarray != NULL &&
-                  encseq->bitpackarray->store != NULL);
-        NEWMAPSPEC(encseq->bitpackarray->store,BitElem,numofunits);
-      } else
-      {
-        BitElem *tmpbitpackarraystore;
-
-        NEWMAPSPEC(tmpbitpackarraystore,BitElem,numofunits);
         gt_assert(encseq->bitpackarray == NULL);
         encseq->bitpackarray
-          = fillbitpackarray_new(BITSFORAMINOACID,
-                                 (BitOffset) encseq->totallength,
-                                 tmpbitpackarraystore);
+          = bitpackarray_new(BITSFORAMINOACID,(BitOffset) encseq->totallength,
+                             false);
       }
+      gt_assert(encseq->bitpackarray != NULL);
+      NEWMAPSPEC(encseq->bitpackarray->store,BitElem,numofunits);
       break;
     case Viabitaccess:
       NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
@@ -824,6 +817,12 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   }
   if (encseq->mappedptr != NULL)
   {
+    if (encseq->bitpackarray != NULL)
+    {
+      encseq->bitpackarray->store = NULL;
+      bitpackarray_delete(encseq->bitpackarray);
+      encseq->bitpackarray = NULL;
+    }
     gt_fa_xmunmap(encseq->mappedptr);
   } else
   {
@@ -1221,7 +1220,7 @@ static int fillbitpackarray(Encodedsequence *encseq,
 
   gt_error_check(err);
   encseq->bitpackarray = bitpackarray_new(BITSFORAMINOACID,
-                                          (BitOffset) encseq->totallength);
+                                          (BitOffset) encseq->totallength,true);
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_fastabuffer_next(fb,&cc,err);
