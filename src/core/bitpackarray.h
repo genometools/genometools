@@ -76,6 +76,19 @@ bitpackarray_new(unsigned bits, BitOffset numValues)
   return newBPA;
 }
 
+static inline BitPackArray *
+fillbitpackarray_new(unsigned bits, BitOffset numValues, BitElem *tab)
+{
+  BitPackArray *newBPA = gt_malloc(sizeof (*newBPA));
+  if (newBPA)
+  {
+    newBPA->store = tab;
+    newBPA->bitsPerElem = bits;
+    newBPA->numElems = numValues;
+  }
+  return newBPA;
+}
+
 static inline void
 bitpackarray_delete(BitPackArray *bpa)
 {

@@ -521,7 +521,22 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       numofunits
         = (unsigned long) sizeofbitarray(BITSFORAMINOACID,
                                          (BitOffset) encseq->totallength);
-      NEWMAPSPEC(encseq->bitpackarray->store,BitElem,numofunits);
+      if (writemode)
+      {
+        gt_assert(encseq->bitpackarray != NULL &&
+                  encseq->bitpackarray->store != NULL);
+        NEWMAPSPEC(encseq->bitpackarray->store,BitElem,numofunits);
+      } else
+      {
+        BitElem *tmpbitpackarraystore;
+
+        NEWMAPSPEC(tmpbitpackarraystore,BitElem,numofunits);
+        gt_assert(encseq->bitpackarray == NULL);
+        encseq->bitpackarray
+          = fillbitpackarray_new(BITSFORAMINOACID,
+                                 (BitOffset) encseq->totallength,
+                                 tmpbitpackarraystore);
+      }
       break;
     case Viabitaccess:
       NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
@@ -2414,6 +2429,7 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->ushortspecialrangelength = NULL;
   encseq->uint32specialrangelength = NULL;
   encseq->plainseq = NULL;
+  encseq->bitpackarray = NULL;
   encseq->hasplainseqptr = false;
   encseq->specialbits = NULL;
   encseq->ucharspecialpositions = NULL;
