@@ -43,9 +43,9 @@ unsigned long gt_alignment_eval(const GtAlignment*);
 long gt_alignment_evalwithscore(const GtAlignment *a,
                                 long matchscore,
                                 long mismatchscore,
-				long gapscore);
+                                long gapscore);
 void          gt_alignment_show(const GtAlignment*, FILE*);
-void          gt_alignment_showwithmappedcharacters(const GtAlignment *a, 
+void          gt_alignment_showwithmappedcharacters(const GtAlignment *a,
                                                     const Uchar *characters,
                                                     Uchar wildcardshow,
                                                     FILE *fp);

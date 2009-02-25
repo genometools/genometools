@@ -189,7 +189,7 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
 long gt_alignment_evalwithscore(const GtAlignment *a,
                                 long matchscore,
                                 long mismatchscore,
-				long gapscore)
+                                long gapscore)
 {
   unsigned long i, j, uctr = 0, vctr = 0;
   long sumscore = 0;
@@ -295,7 +295,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
   gt_xfputc('\n', fp);
 }
 
-void gt_alignment_showwithmappedcharacters(const GtAlignment *a, 
+void gt_alignment_showwithmappedcharacters(const GtAlignment *a,
                                            const Uchar *characters,
                                            Uchar wildcardshow,
                                            FILE *fp)
@@ -305,10 +305,10 @@ void gt_alignment_showwithmappedcharacters(const GtAlignment *a,
   gt_assert(a && gt_alignment_is_valid(a));
   /* output first line */
   uctr = 0;
-  for (i = gt_array_size(a->eops); i > 0; i--) 
+  for (i = gt_array_size(a->eops); i > 0; i--)
   {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
-    switch (meop.type) 
+    switch (meop.type)
     {
       case Replacement:
       case Deletion:
@@ -330,13 +330,13 @@ void gt_alignment_showwithmappedcharacters(const GtAlignment *a,
   gt_xfputc('\n', fp);
   /* output middle line */
   uctr = vctr = 0;
-  for (i = gt_array_size(a->eops); i > 0; i--) 
+  for (i = gt_array_size(a->eops); i > 0; i--)
   {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
-    switch (meop.type) 
+    switch (meop.type)
     {
       case Replacement:
-        for (j = 0; j < meop.steps; j++) 
+        for (j = 0; j < meop.steps; j++)
         {
           if (a->u[uctr] == a->v[vctr] && ISNOTSPECIAL(a->u[uctr]))
           {
@@ -350,14 +350,14 @@ void gt_alignment_showwithmappedcharacters(const GtAlignment *a,
         }
         break;
       case Deletion:
-        for (j = 0; j < meop.steps; j++) 
+        for (j = 0; j < meop.steps; j++)
         {
           gt_xfputc(MISMATCHSYMBOL, fp);
           uctr++;
         }
         break;
       case Insertion:
-        for (j = 0; j < meop.steps; j++) 
+        for (j = 0; j < meop.steps; j++)
         {
           gt_xfputc(MISMATCHSYMBOL, fp);
           vctr++;
@@ -368,10 +368,10 @@ void gt_alignment_showwithmappedcharacters(const GtAlignment *a,
   gt_xfputc('\n', fp);
   /* ouput last line */
   vctr = 0;
-  for (i = gt_array_size(a->eops); i > 0; i--) 
+  for (i = gt_array_size(a->eops); i > 0; i--)
   {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
-    switch (meop.type) 
+    switch (meop.type)
     {
       case Replacement:
       case Insertion:
@@ -435,7 +435,7 @@ int gt_alignment_unit_test(GtError *err)
      agaaagaggta-agaggga
   */
 
-  a = gt_alignment_new_with_seqs((const Uchar *) u, strlen(u), 
+  a = gt_alignment_new_with_seqs((const Uchar *) u, strlen(u),
                                  (const Uchar *) v, strlen(v));
   gt_alignment_add_replacement(a);
   gt_alignment_add_replacement(a);
