@@ -2519,7 +2519,7 @@ int readSpecialcharinfo(Specialcharinfo *specialcharinfo,
 
 unsigned int getencseqAlphabetnumofchars(const Encodedsequence *encseq)
 {
-  return encseq->alpha->numofchars;
+  return getnumofcharsAlphabet(encseq->alpha);
 }
 
 const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq)
