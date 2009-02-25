@@ -28,9 +28,7 @@
 #include "core/minmax.h"
 #include "core/unused_api.h"
 #include "core/filelengthvalues.h"
-#ifndef S_SPLINT_S
-#include "core/bitpackarray.h"
-#endif
+#include "bitpack-itf.h"
 #include "spacedef.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
@@ -520,10 +518,10 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->plainseq,Uchar,numofunits);
       break;
     case Viabytecompress:
-#ifndef S_SPLINT_S
-      numofunits = (unsigned long) sizeofbitarray(5,encseq->totallength);
-      NEWMAPSPEC(encseq->bytecompressedarray,BitString,numofunits);
-#endif
+      numofunits
+        = (unsigned long) sizeofbitarray(BITSFORAMINOACID,
+                                         (BitOffset) encseq->totallength);
+      NEWMAPSPEC(encseq->bitpackarray->store,BitElem,numofunits);
       break;
     case Viabitaccess:
       NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
@@ -532,7 +530,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       {
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   NUMOFINTSFORBITS(encseq->totallength));
-        NEWMAPSPEC(encseq->specialbits,BitString,numofunits);
+        NEWMAPSPEC(encseq->specialbits,Bitsequence,numofunits);
       }
       break;
     case Viauchartables:
@@ -656,7 +654,8 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          sum = totallength * (uint64_t) sizeof (Uchar);
          break;
     case Viabytecompress:
-         gt_assert(false);
+         sum = (uint64_t) sizeofbitarray(BITSFORAMINOACID,
+                                         (BitOffset) totallength);
          break;
     case Viabitaccess:
          sum = sizeoftwobitencoding;
@@ -823,7 +822,8 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
         }
         break;
       case Viabytecompress:
-        gt_assert(false);
+        bitpackarray_delete(encseq->bitpackarray);
+        encseq->bitpackarray = NULL;
         break;
       case Viabitaccess:
         FREESPACE(encseq->twobitencoding);
@@ -1026,12 +1026,27 @@ static bool containsspecialViabytecompress(GT_UNUSED
   return false;
 }
 
-static Uchar delivercharViabytecompress(
-                        GT_UNUSED const Encodedsequence *encseq,
-                        GT_UNUSED Seqpos pos)
+static Uchar delivercharViabytecompress(const Encodedsequence *encseq,
+                                        Seqpos pos)
 {
-  gt_assert(false);
-  return 0;
+  uint32_t cc;
+
+  cc = bitpackarray_get_uint32(encseq->bitpackarray,(BitOffset) pos);
+  if (cc < (uint32_t) PROTEINALPHASIZE)
+  {
+    return (Uchar) cc;
+  }
+  if (cc == (uint32_t) PROTEINALPHASIZE)
+  {
+    return (Uchar) WILDCARD;
+  }
+  if (cc == (uint32_t) (PROTEINALPHASIZE+1U))
+  {
+    return (Uchar) SEPARATOR;
+  }
+  fprintf(stderr,"delivercharViabytecompress: cc=%lu\n not possible\n",
+                  (unsigned long) cc);
+  exit(EXIT_FAILURE); /* programming error */
 }
 
 /* generic for the case that there are no specialsymbols */
@@ -1181,11 +1196,46 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fb,
   return 0;
 }
 
-static int fillbytecompress(GT_UNUSED Encodedsequence *encseq,
-                            GT_UNUSED GtFastaBuffer *fb,
-                            GT_UNUSED GtError *err)
+static int fillbitpackarray(Encodedsequence *encseq,
+                            GtFastaBuffer *fb,
+                            GtError *err)
 {
-  gt_assert(false);
+  Seqpos pos;
+  int retval;
+  Uchar cc;
+
+  gt_error_check(err);
+  encseq->bitpackarray = bitpackarray_new(BITSFORAMINOACID,
+                                          (BitOffset) encseq->totallength);
+  for (pos=0; /* Nothing */; pos++)
+  {
+    retval = gt_fastabuffer_next(fb,&cc,err);
+    if (retval < 0)
+    {
+      bitpackarray_delete(encseq->bitpackarray);
+      encseq->bitpackarray = NULL;
+      return -1;
+    }
+    if (retval == 0)
+    {
+      break;
+    }
+    if (cc == (Uchar) WILDCARD)
+    {
+      cc = (Uchar) PROTEINALPHASIZE;
+    } else
+    {
+      if (cc == (Uchar) SEPARATOR)
+      {
+        cc = (Uchar) (PROTEINALPHASIZE+1);
+      } else
+      {
+        gt_assert(cc < (Uchar) PROTEINALPHASIZE);
+      }
+    }
+    bitpackarray_store_uint32(encseq->bitpackarray,(BitOffset) pos,
+                              (uint32_t) cc);
+  }
   return 0;
 }
 
@@ -1735,12 +1785,11 @@ static Uchar seqdelivercharViadirectaccess(
 }
 
 static Uchar seqdelivercharViabytecompress(
-                        GT_UNUSED const Encodedsequence *encseq,
+                        const Encodedsequence *encseq,
                         GT_UNUSED Encodedsequencescanstate *esr,
-                        GT_UNUSED Seqpos pos)
+                        Seqpos pos)
 {
-  gt_assert(false);
-  return 0;
+  return delivercharViabytecompress(encseq,pos);
 }
 
 static Uchar seqdelivercharnoSpecial(
@@ -1919,14 +1968,23 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   return sri;
 }
 
-static bool directaccessnextspecialrangeiterator(Sequencerange *range,
-                                                 Specialrangeiterator *sri)
+static bool dabcnextspecialrangeiterator(bool directaccess,
+                                         Sequencerange *range,
+                                         Specialrangeiterator *sri)
 {
   bool success = false;
+  Uchar cc;
 
   while (!success)
   {
-    if (ISSPECIAL(sri->encseq->plainseq[sri->pos]))
+    if (directaccess)
+    {
+      cc = sri->encseq->plainseq[sri->pos];
+    } else
+    {
+      cc = delivercharViabytecompress(sri->encseq,sri->pos);
+    }
+    if (ISSPECIAL(cc))
     {
       sri->lengthofspecialrange++;
     } else
@@ -1977,14 +2035,6 @@ static bool directaccessnextspecialrangeiterator(Sequencerange *range,
     }
   }
   return success;
-}
-
-static bool bytecompressnextspecialrangeiterator(
-                             GT_UNUSED Sequencerange *range,
-                             GT_UNUSED Specialrangeiterator *sri)
-{
-  gt_assert(false);
-  return false;
 }
 
 static bool bitaccessnextspecialrangeiterator(Sequencerange *range,
@@ -2082,9 +2132,9 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
   switch (sri->encseq->sat)
   {
     case Viadirectaccess:
-      return directaccessnextspecialrangeiterator(range,sri);
+      return dabcnextspecialrangeiterator(true,range,sri);
     case Viabytecompress:
-      return bytecompressnextspecialrangeiterator(range,sri);
+      return dabcnextspecialrangeiterator(false,range,sri);
     case Viabitaccess:
       return bitaccessnextspecialrangeiterator(range,sri);
     default:
@@ -2634,7 +2684,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     },
 
     { /* Viabytecompress */
-      NAMEDFUNCTION(fillbytecompress),
+      NAMEDFUNCTION(fillbitpackarray),
       NAMEDFUNCTION(delivercharViabytecompress),
       NAMEDFUNCTION(delivercharViabytecompress),
       NAMEDFUNCTION(delivercharViabytecompress),

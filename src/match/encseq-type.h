@@ -28,6 +28,7 @@
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
 #include "core/filelengthvalues.h"
+#include "bitpack-itf.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "intbits.h"
@@ -102,10 +103,8 @@ struct Encodedsequence
   Uchar *plainseq;
   bool hasplainseqptr;
 
-#ifndef S_SPLINT_S
   /* only for Viabytecompress */
-  BitString *bytecompressedarray;
-#endif
+  BitPackArray *bitpackarray;
 
   /* only for Viabitaccess */
   Bitsequence *specialbits;

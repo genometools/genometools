@@ -31,6 +31,7 @@
 
 #define DNAALPHASIZE        4U
 #define PROTEINALPHASIZE   20U
+#define BITSFORAMINOACID    5U
 
 /*
   The following type is for storing alphabets.

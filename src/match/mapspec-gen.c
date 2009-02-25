@@ -20,6 +20,7 @@
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
+#include "bitpack-itf.h"
 #include "ushort-def.h"
 #include "fmi-bwtbound.h"
 #include "intbits.h"
@@ -128,6 +129,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
       break;
     case SpecialcharinfoType:
       ASSIGNPTR2STARTPTR(Specialcharinfo);
+      break;
+    case BitElemType:
+      ASSIGNPTR2STARTPTR(BitElem);
       break;
     default:
       gt_error_set(err,"no assignment specification for size %lu",
@@ -297,6 +301,9 @@ int flushtheindex2file(FILE *fp,
           break;
         case SpecialcharinfoType:
           WRITEACTIONWITHTYPE(Specialcharinfo);
+          break;
+        case BitElemType:
+          WRITEACTIONWITHTYPE(BitElem);
           break;
         default:
            gt_error_set(err,"no map specification for size %lu",
