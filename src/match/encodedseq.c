@@ -773,8 +773,8 @@ static int determinesattype(Seqpos *specialranges,
     {
       if (numofchars == PROTEINALPHASIZE)
       {
-        /* sat = Viabytecompress; */
-        sat = Viadirectaccess;
+        sat = Viabytecompress;
+        /*sat = Viadirectaccess;*/
       } else
       {
         sat = Viadirectaccess;
@@ -1217,7 +1217,7 @@ static int fillbitpackarray(Encodedsequence *encseq,
 {
   Seqpos pos;
   int retval;
-  Uchar cc;
+  Uchar cc, cc2;
 
   gt_error_check(err);
   encseq->bitpackarray = bitpackarray_new(BITSFORAMINOACID,
@@ -1248,8 +1248,11 @@ static int fillbitpackarray(Encodedsequence *encseq,
         gt_assert(cc < (Uchar) PROTEINALPHASIZE);
       }
     }
+    gt_assert(pos < encseq->totallength);
     bitpackarray_store_uint32(encseq->bitpackarray,(BitOffset) pos,
                               (uint32_t) cc);
+    cc2 = bitpackarray_get_uint32(encseq->bitpackarray,(BitOffset) pos);
+    gt_assert(cc2 == cc);
   }
   return 0;
 }
