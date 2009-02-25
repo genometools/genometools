@@ -52,7 +52,9 @@
 
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = localdetsizeencseq(VAL,totallength,\
-                                 specialrangestab[IDX],numofchars);\
+                                 specialrangestab[IDX],\
+                                 numofchars,\
+                                 0);\
         if (tmp < cmin)\
         {\
           cmin = tmp;\
@@ -491,7 +493,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   Encodedsequence *encseq = (Encodedsequence *) voidinfo;
   Mapspecification *mapspecptr;
   unsigned long numofunits;
-  unsigned int numofchars;
+  unsigned int numofchars, bitspersymbol;
 
   if (writemode)
   {
@@ -508,7 +510,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   NEWMAPSPEC(encseq->totallengthptr,Seqpos,1UL);
   NEWMAPSPEC(encseq->numofdbsequencesptr,Unsignedlong,1UL);
   NEWMAPSPEC(encseq->specialcharinfoptr,Specialcharinfo,1UL);
-  numofchars = getencseqAlphabetnumofchars(encseq);
+  numofchars = getnumofcharsAlphabet(encseq->alpha);
   NEWMAPSPEC(encseq->characterdistribution,Unsignedlong,
              (unsigned long) numofchars);
   switch (encseq->sat)
@@ -518,18 +520,19 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->plainseq,Uchar,numofunits);
       break;
     case Viabytecompress:
+      bitspersymbol = getbitspersymbolAlphabet(encseq->alpha);
       numofunits
-        = (unsigned long) sizeofbitarray(BITSFORAMINOACID,
+        = (unsigned long) sizeofbitarray(bitspersymbol,
                                          (BitOffset) encseq->totallength);
       if (!writemode)
       {
         gt_assert(encseq->bitpackarray == NULL);
         encseq->bitpackarray
-          = bitpackarray_new(BITSFORAMINOACID,(BitOffset) encseq->totallength,
+          = bitpackarray_new(bitspersymbol,(BitOffset) encseq->totallength,
                              false);
       }
       gt_assert(encseq->bitpackarray != NULL);
-      NEWMAPSPEC(encseq->bitpackarray->store,BitElem,numofunits);
+      NEWMAPSPEC(BITPACKARRAYSTOREVAR(encseq->bitpackarray),BitElem,numofunits);
       break;
     case Viabitaccess:
       NEWMAPSPEC(encseq->twobitencoding,Twobitencoding,
@@ -649,7 +652,8 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 static uint64_t localdetsizeencseq(Positionaccesstype sat,
                                    Seqpos totallength,
                                    Seqpos specialranges,
-                                   unsigned int numofchars)
+                                   unsigned int numofchars,
+                                   unsigned int bitspersymbol)
 {
   uint64_t sum,
            sizeoftwobitencoding
@@ -662,8 +666,8 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
          sum = totallength * (uint64_t) sizeof (Uchar);
          break;
     case Viabytecompress:
-         sum = (uint64_t) sizeofbitarray(BITSFORAMINOACID,
-                                         (BitOffset) totallength);
+         gt_assert(bitspersymbol > 0);
+         sum = (uint64_t) sizeofbitarray(bitspersymbol,(BitOffset) totallength);
          break;
     case Viabitaccess:
          sum = sizeoftwobitencoding;
@@ -715,15 +719,15 @@ static uint64_t localdetsizeencseq(Positionaccesstype sat,
   return sum;
 }
 
-uint64_t detsizeencseq(int kind,
-                       Seqpos totallength,
-                       Seqpos specialranges,
-                       unsigned int numofchars)
+uint64_t detencseqofsatviatables(int kind,
+                                 Seqpos totallength,
+                                 Seqpos specialranges,
+                                 unsigned int numofchars)
 {
   Positionaccesstype sat[] = {Viauchartables,Viaushorttables,Viauint32tables};
 
   gt_assert(kind < (int) (sizeof (sat)/sizeof (sat[0])));
-  return localdetsizeencseq(sat[kind],totallength,specialranges,numofchars);
+  return localdetsizeencseq(sat[kind],totallength,specialranges,numofchars,0);
 }
 
 #ifndef INLINEDENCSEQ
@@ -736,7 +740,7 @@ static Positionaccesstype determinesmallestrep(Seqpos *specialranges,
   uint64_t tmp, cmin;
 
   cmin = localdetsizeencseq(Viabitaccess,totallength,
-                            specialrangestab[0],numofchars);
+                            specialrangestab[0],numofchars,0);
   cret = Viabitaccess;
   *specialranges = specialrangestab[0];
   CHECKANDUPDATE(Viauchartables,0);
@@ -764,14 +768,7 @@ static int determinesattype(Seqpos *specialranges,
                                  totallength,specialrangestab,numofchars);
     } else
     {
-      if (numofchars == PROTEINALPHASIZE)
-      {
-        sat = Viabytecompress;
-        /*sat = Viadirectaccess;*/
-      } else
-      {
-        sat = Viadirectaccess;
-      }
+      sat = Viabytecompress;
     }
   } else
   {
@@ -819,7 +816,9 @@ void freeEncodedsequence(Encodedsequence **encseqptr)
   {
     if (encseq->bitpackarray != NULL)
     {
-      encseq->bitpackarray->store = NULL;
+      /* store points to some subarea of the region mapped by mappedptr:
+         therefor we have to set it to NULL to prevent that it is freed */
+      BITPACKARRAYSTOREVAR(encseq->bitpackarray) = NULL;
       bitpackarray_delete(encseq->bitpackarray);
       encseq->bitpackarray = NULL;
     }
@@ -1043,18 +1042,19 @@ static bool containsspecialViabytecompress(GT_UNUSED
 static Uchar delivercharViabytecompress(const Encodedsequence *encseq,
                                         Seqpos pos)
 {
-  uint32_t cc;
+  uint32_t cc, numofchars;
 
   cc = bitpackarray_get_uint32(encseq->bitpackarray,(BitOffset) pos);
-  if (cc < (uint32_t) PROTEINALPHASIZE)
+  numofchars = (uint32_t) getnumofcharsAlphabet(encseq->alpha);
+  if (cc < numofchars)
   {
     return (Uchar) cc;
   }
-  if (cc == (uint32_t) PROTEINALPHASIZE)
+  if (cc == numofchars)
   {
     return (Uchar) WILDCARD;
   }
-  if (cc == (uint32_t) (PROTEINALPHASIZE+1U))
+  if (cc == (numofchars+1))
   {
     return (Uchar) SEPARATOR;
   }
@@ -1216,11 +1216,14 @@ static int fillbitpackarray(Encodedsequence *encseq,
 {
   Seqpos pos;
   int retval;
-  Uchar cc, cc2;
+  Uchar cc;
+  unsigned int numofchars;
 
   gt_error_check(err);
-  encseq->bitpackarray = bitpackarray_new(BITSFORAMINOACID,
-                                          (BitOffset) encseq->totallength,true);
+  numofchars = getnumofcharsAlphabet(encseq->alpha);
+  encseq->bitpackarray
+    = bitpackarray_new(getbitspersymbolAlphabet(encseq->alpha),
+                       (BitOffset) encseq->totallength,true);
   for (pos=0; /* Nothing */; pos++)
   {
     retval = gt_fastabuffer_next(fb,&cc,err);
@@ -1236,22 +1239,20 @@ static int fillbitpackarray(Encodedsequence *encseq,
     }
     if (cc == (Uchar) WILDCARD)
     {
-      cc = (Uchar) PROTEINALPHASIZE;
+      cc = (Uchar) numofchars;
     } else
     {
       if (cc == (Uchar) SEPARATOR)
       {
-        cc = (Uchar) (PROTEINALPHASIZE+1);
+        cc = (Uchar) (numofchars+1);
       } else
       {
-        gt_assert(cc < (Uchar) PROTEINALPHASIZE);
+        gt_assert(cc < (Uchar) numofchars);
       }
     }
     gt_assert(pos < encseq->totallength);
     bitpackarray_store_uint32(encseq->bitpackarray,(BitOffset) pos,
                               (uint32_t) cc);
-    cc2 = bitpackarray_get_uint32(encseq->bitpackarray,(BitOffset) pos);
-    gt_assert(cc2 == cc);
   }
   return 0;
 }
@@ -2412,10 +2413,12 @@ static Encodedsequence *determineencseqkeyvalues(Positionaccesstype sat,
   encseq->totallength = totallength;
   encseq->numofdbsequences = numofsequences;
   numofchars = getnumofcharsAlphabet(alpha);
-  encseq->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,
-                                   localdetsizeencseq(sat,totallength,
-                                                      specialranges,
-                                                      numofchars));
+  encseq->sizeofrep
+    = CALLCASTFUNC(uint64_t,unsigned_long,
+                   localdetsizeencseq(sat,totallength,
+                                      specialranges,
+                                      numofchars,
+                                      getbitspersymbolAlphabet(alpha)));
   encseq->name = accesstype2name(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
@@ -2843,7 +2846,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     encseq->filenametab = filenametab;
     encseq->filelengthtab = filelengthtab;
     encseq->specialcharinfo = *specialcharinfo;
-    gt_assert(filenametab != NULL);
+    gt_assert(filenametab != NULL && alphabet != NULL);
     fb = gt_fastabuffer_new(filenametab,
                             plainformat ? NULL : getsymbolmapAlphabet(alphabet),
                             plainformat,

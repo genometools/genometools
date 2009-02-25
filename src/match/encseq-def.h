@@ -145,10 +145,10 @@ int compareTwobitencodings(bool fwd,
                            const EndofTwobitencoding *ptbe1,
                            const EndofTwobitencoding *ptbe2);
 
-uint64_t detsizeencseq(int kind,
-                       Seqpos totallength,
-                       Seqpos specialranges,
-                       unsigned int numofchars);
+uint64_t detencseqofsatviatables(int kind,
+                                 Seqpos totallength,
+                                 Seqpos specialranges,
+                                 unsigned int numofchars);
 
 void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
 

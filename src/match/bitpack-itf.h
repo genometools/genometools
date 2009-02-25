@@ -38,7 +38,7 @@ typedef unsigned long long BitOffset;
 size_t sizeofbitarray(unsigned bits, BitOffset numValues);
 void bitpackarray_delete(BitPackArray *bpa);
 BitPackArray *bitpackarray_new(unsigned bits, BitOffset numValues,
-                               bool withalloc);
+                               bool withstorealloc);
 void bitpackarray_store_uint32(BitPackArray *array, BitOffset index,
                                uint32_t val);
 uint32_t bitpackarray_get_uint32(const BitPackArray *array, BitOffset index);

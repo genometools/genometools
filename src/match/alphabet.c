@@ -42,7 +42,9 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
   unsigned int domainsize,           /* size of domain of symbolmap */
                mapsize,              /* size of image of map, i.e. */
                                      /* mapping to [0..mapsize-1] */
-               mappedwildcards;      /* number of mapped wildcards */
+               mappedwildcards,      /* number of mapped wildcards */
+               bitspersymbol;        /* number of bits per symbol in
+                                        bitspackedarray */
   Uchar wildcardshow,
         symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
         *mapdomain,                  /* list of characters mapped */
@@ -62,6 +64,7 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
 #define MAPSIZEDNA                   (DNAALPHASIZE+1U)
 #define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
+#define PROTEINALPHASIZE             20U
 #define MAPSIZEPROTEIN               (PROTEINALPHASIZE+1U)
 #define PROTEINWILDCARDS             "XUBZ*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
@@ -133,6 +136,9 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
   in (counting from 1). The result of the parsing is stored in
   \texttt{alpha}.
 */
+
+#define LOGof2  0.693147
+#define LOG2(D) log((double) (D))/LOGof2
 
 static int readsymbolmapfromlines(SfxAlphabet *alpha,
                                   const GtStr *mapfile,
@@ -255,6 +261,7 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
         alpha->mappedwildcards++;
       }
     }
+    alpha->bitspersymbol = (unsigned int) ceil(LOG2(alpha->mapsize+1));
   }
   return haserr ? -1 : 0;
 }
@@ -358,6 +365,7 @@ static void assignDNAalphabet(SfxAlphabet *alpha)
   alpha->wildcardshow = (Uchar) DNAWILDCARDS[0];
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
   alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
+  alpha->bitspersymbol = 3U; /* as we have to represent 4 + 2 characters */
   ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
   memcpy(alpha->mapdomain,(Uchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
@@ -422,6 +430,7 @@ static void assignProteinalphabet(SfxAlphabet *alpha)
   alpha->wildcardshow = (Uchar) PROTEINWILDCARDS[0];
   alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
   alpha->mappedwildcards = (unsigned int) strlen(PROTEINWILDCARDS);
+  alpha->bitspersymbol = 5U; /* as we have to represent 20 + 2 characters */
   ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
   memcpy(alpha->mapdomain,
          (Uchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
@@ -546,6 +555,11 @@ const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha)
 Uchar getwildcardshowAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->wildcardshow;
+}
+
+unsigned int getbitspersymbolAlphabet(const SfxAlphabet *alpha)
+{
+  return alpha->bitspersymbol;
 }
 
 void outputalphabet(FILE *fpout,const SfxAlphabet *alpha)

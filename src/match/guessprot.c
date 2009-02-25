@@ -33,11 +33,11 @@ int guessifproteinsequencestream(const GtStrArray *filenametab,GtError *err)
 
   gt_error_check(err);
   fb = gt_fastabuffer_new(filenametab,
-                       NULL,
-                       false,
-                       NULL,
-                       NULL,
-                       NULL);
+                          NULL,
+                          false,
+                          NULL,
+                          NULL,
+                          NULL);
   for (currentposition = 0; currentposition < 1000U;
        currentposition++)
   {

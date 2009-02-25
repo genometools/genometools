@@ -129,7 +129,8 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   {
     if (forcetable == 3U || c == (int) forcetable)
     {
-      tmp = detsizeencseq(c,totallength,specialrangestab[c],numofchars);
+      tmp = detencseqofsatviatables(c,totallength,specialrangestab[c],
+                                    numofchars);
       if (!smallestdefined || tmp < smallestsize)
       {
         smallestdefined = true;

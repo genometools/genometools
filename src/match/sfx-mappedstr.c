@@ -494,11 +494,11 @@ int getfastastreamkmers(
   gt_error_check(err);
   initstreamstate(&spwp,numofchars,kmersize);
   fb = gt_fastabuffer_new(filenametab,
-                       symbolmap,
-                       plainformat,
-                       NULL,
-                       NULL,
-                       NULL);
+                          symbolmap,
+                          plainformat,
+                          NULL,
+                          NULL,
+                          NULL);
   for (currentposition = 0; /* Nothing */; currentposition++)
   {
     retval = gt_fastabuffer_next(fb,&charcode,err);

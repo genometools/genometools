@@ -39,6 +39,12 @@ struct BitPackArray
   unsigned bitsPerElem;
 };
 
+/* SK added the following macro, as we need the structure component,
+   to store a pointer to the address, which is used when mapping the
+   bitpackarray as part of a larger memory map */
+
+#define BITPACKARRAYSTOREVAR(BPA) (BPA)->store
+
 typedef struct BitPackArray BitPackArray;
 
 /**
@@ -60,20 +66,19 @@ static inline size_t sizeofbitarray(unsigned bits, BitOffset numValues)
  * @return pointer to new BitPackArray structure or NULL on failure
  */
 static inline BitPackArray *
-bitpackarray_new(unsigned bits, BitOffset numValues, bool withalloc)
+bitpackarray_new(unsigned bits, BitOffset numValues, bool withstorealloc)
 {
   BitPackArray *newBPA = gt_malloc(sizeof (*newBPA));
   if (newBPA)
   {
-    if (withalloc)
+    if (withstorealloc)
     {
-      if (!(newBPA->store = gt_malloc(bitElemsAllocSize(bits*numValues)
-                                    * sizeof (BitElem))))
+      if (!(newBPA->store = gt_calloc(bitElemsAllocSize(bits*numValues),
+                                      sizeof (BitElem))))
       {
         gt_free(newBPA);
         return NULL;
       }
-      memset(newBPA->store,0,sizeofbitarray(bits,numValues));
     } else
     {
       newBPA->store = NULL;

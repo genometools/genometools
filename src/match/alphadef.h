@@ -30,8 +30,6 @@
 */
 
 #define DNAALPHASIZE        4U
-#define PROTEINALPHASIZE   20U
-#define BITSFORAMINOACID    5U
 
 /*
   The following type is for storing alphabets.
@@ -54,6 +52,8 @@ unsigned int getnumofcharsAlphabet(const SfxAlphabet *alpha);
 const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha);
 
 Uchar getwildcardshowAlphabet(const SfxAlphabet *alpha);
+
+unsigned int getbitspersymbolAlphabet(const SfxAlphabet *alpha);
 
 void freeSfxAlphabet(SfxAlphabet **alpha);
 
