@@ -504,7 +504,7 @@ static int runsuffixerator(bool doesa,
   }
   prefixlength = so->prefixlength;
   sfxstrategy = so->sfxstrategy;
-  sfxstrategy.maxdepth.defined = false;
+  sfxstrategy.ssortmaxdepth.defined = false;
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
@@ -513,7 +513,7 @@ static int runsuffixerator(bool doesa,
       unsigned int numofchars = getencseqAlphabetnumofchars(sfxseqinfo.encseq);
 
       if (detpfxlenandmaxdepth(&prefixlength,
-                               &sfxstrategy.maxdepth,
+                               &sfxstrategy.ssortmaxdepth,
                                so,
                                numofchars,
                                totallength,
@@ -601,7 +601,7 @@ static int runsuffixerator(bool doesa,
                    sfxseqinfo.readmode,
                    sfxseqinfo.encseq,
                    prefixlength,
-                   &sfxstrategy.maxdepth,
+                   &sfxstrategy.ssortmaxdepth,
                    numoflargelcpvalues,
                    maxbranchdepth,
                    &outfileinfo.longest,

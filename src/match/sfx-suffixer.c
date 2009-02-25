@@ -77,7 +77,7 @@ struct Sfxiterator
   Codetype numofallcodes;
   Seqpos *leftborder; /* points to bcktab->leftborder */
   bool storespecialcodes;
-  Definedunsignedint maxdepth;
+  Definedunsignedint ssortmaxdepth;
   bool cmpcharbychar;
   unsigned long maxwidthrealmedian,
                 maxbltriesort;
@@ -503,7 +503,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     if (sfxstrategy != NULL)
     {
        sfi->storespecialcodes = sfxstrategy->storespecialcodes;
-       sfi->maxdepth = sfxstrategy->maxdepth;
+       sfi->ssortmaxdepth = sfxstrategy->ssortmaxdepth;
        sfi->maxwidthrealmedian = sfxstrategy->maxwidthrealmedian;
        sfi->maxbltriesort = sfxstrategy->maxbltriesort;
        if (sfxstrategy->cmpcharbychar || !possibletocmpbitwise(encseq))
@@ -516,7 +516,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     } else
     {
        sfi->storespecialcodes = false;
-       sfi->maxdepth.defined = false;
+       sfi->ssortmaxdepth.defined = false;
        sfi->cmpcharbychar = possibletocmpbitwise(encseq) ? false : true;
        sfi->maxbltriesort = 10UL;
        sfi->maxwidthrealmedian = 1UL;
@@ -657,8 +657,8 @@ static void preparethispart(Sfxiterator *sfi,
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
   totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  if (!sfi->maxdepth.defined ||
-      sfi->prefixlength < sfi->maxdepth.valueunsignedint)
+  if (!sfi->ssortmaxdepth.defined ||
+      sfi->prefixlength < sfi->ssortmaxdepth.valueunsignedint)
   {
     sortallbuckets(sfi->suftabptr,
                    sfi->encseq,
@@ -670,7 +670,7 @@ static void preparethispart(Sfxiterator *sfi,
                    sfi->numofchars,
                    sfi->prefixlength,
                    sfi->outlcpinfo,
-                   &sfi->maxdepth,
+                   &sfi->ssortmaxdepth,
                    sfi->cmpcharbychar,
                    sfi->maxwidthrealmedian,
                    sfi->maxbltriesort,

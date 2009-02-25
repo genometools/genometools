@@ -23,7 +23,7 @@
 
 typedef struct
 {
-  Definedunsignedint maxdepth;
+  Definedunsignedint ssortmaxdepth;
   unsigned long maxwidthrealmedian,
                 maxbltriesort;
   bool cmpcharbychar, /* compare suffixes character by character instead
