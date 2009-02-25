@@ -131,7 +131,7 @@ static OPrval parse_options(int *parsed_args,
     optionmaxdepth = NULL;
   }
   optioncmpcharbychar = gt_option_new_bool("cmpcharbychar",
-                                           "compare suffixes by character "
+                                           "compare suffixes character "
                                            "by character",
                                            &so->sfxstrategy.cmpcharbychar,
                                            false);
