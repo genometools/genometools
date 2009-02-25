@@ -736,7 +736,9 @@ const void *completealignmentfromLocalitracebackstate(
                                         unsigned long *alignedquerylength,
                                         const Limdfsconstinfo *lci)
 {
+#ifndef NDEBUG
   Scoretype evalscore;
+#endif
   const Uchar *querysubstart;
 
 #ifdef SKDEBUG
