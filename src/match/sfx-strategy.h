@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include "defined-types.h"
 
+#define MAXBLTRIEDEFAULT 100UL
+
 typedef struct
 {
   Definedunsignedint ssortmaxdepth;

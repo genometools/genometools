@@ -518,7 +518,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
        sfi->storespecialcodes = false;
        sfi->ssortmaxdepth.defined = false;
        sfi->cmpcharbychar = possibletocmpbitwise(encseq) ? false : true;
-       sfi->maxbltriesort = 10UL;
+       sfi->maxbltriesort = MAXBLTRIEDEFAULT;
        sfi->maxwidthrealmedian = 1UL;
     }
     sfi->totallength = getencseqtotallength(encseq);

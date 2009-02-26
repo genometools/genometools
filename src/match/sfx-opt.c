@@ -150,10 +150,10 @@ static OPrval parse_options(int *parsed_args,
 
   optionmaxbltriesort = gt_option_new_ulong("maxbltriesort",
                                             "all intervals of specified size "
-                                            "and smaller are sorted by blind "
-                                            "trie sorting algorithm",
+                                            "and smaller are sorted by the "
+                                            "blind trie sorting algorithm",
                                             &so->sfxstrategy.maxbltriesort,
-                                            10U);
+                                            MAXBLTRIEDEFAULT);
   gt_option_is_development_option(optionmaxbltriesort);
   gt_option_parser_add_option(op, optionmaxbltriesort);
 
