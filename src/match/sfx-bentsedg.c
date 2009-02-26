@@ -107,10 +107,6 @@
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack++].depth = D
 
 #define POPMKVstack(L,R,D)\
-        if (mkvauxstack->nextfreeMKVstack == 0)\
-        {\
-          break;\
-        }\
         L = mkvauxstack->spaceMKVstack[--mkvauxstack->nextfreeMKVstack].left;\
         R = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right;\
         D = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth;\
@@ -1040,6 +1036,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                          totallength,
                          maxbltriesort,
                          trierep);
+        if (mkvauxstack->nextfreeMKVstack == 0)
+        {
+          break;
+        }
         POPMKVstack(left,right,depth); /* new values for left, right, depth */
         continue;
       }
@@ -1140,7 +1140,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
           pc--;
         }
         if (pb > pc)
-        { /* interval is empty small */
+        { /* interval is empty */
           break;
         }
         SWAP(pb, pc);
@@ -1219,6 +1219,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       quicksortdiff += (unsigned long) (pb-pa) - (unsigned long) (pd-pc);
     }
 #endif
+    if (mkvauxstack->nextfreeMKVstack == 0)
+    {
+      break;
+    }
     POPMKVstack(left,right,depth); /* new values for left, right, depth */
   }
 }
