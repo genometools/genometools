@@ -76,7 +76,6 @@ struct Sfxiterator
   Bcktab *bcktab;
   Codetype numofallcodes;
   Seqpos *leftborder; /* points to bcktab->leftborder */
-  bool storespecialcodes;
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
 };
@@ -225,7 +224,7 @@ static void updatekmercount(void *processinfo,
     {
       if (firstspecial->specialpos > 0)
       {
-        if (sfi->storespecialcodes)
+        if (sfi->sfxstrategy.storespecialcodes)
         {
           Codeatposition *cp;
 
@@ -518,18 +517,21 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
          = possibletocmpbitwise(encseq) ? false : true;
        sfi->sfxstrategy.storespecialcodes = false;
     }
-    printf("maxinsertionsort = %lu\n",sfi->sfxstrategy.maxinsertionsort);
-    printf("maxbltriesort = %lu\n",sfi->sfxstrategy.maxbltriesort);
-    printf("maxcountingsort = %lu\n",sfi->sfxstrategy.maxcountingsort);
-    printf("storespecialcounts = %s\n",
-            sfi->storespecialcodes ? "true" : "false");
+    showverbose(verboseinfo,"maxinsertionsort = %lu",
+                sfi->sfxstrategy.maxinsertionsort);
+    showverbose(verboseinfo,"maxbltriesort = %lu",
+                sfi->sfxstrategy.maxbltriesort);
+    showverbose(verboseinfo,"maxcountingsort = %lu",
+                sfi->sfxstrategy.maxcountingsort);
+    showverbose(verboseinfo,"storespecialcodes = %s",
+                sfi->sfxstrategy.storespecialcodes ? "true" : "false");
     if (sfi->sfxstrategy.ssortmaxdepth.defined)
     {
-      printf("ssortmaxdepth = %u\n",sfi->sfxstrategy.
+      showverbose(verboseinfo,"ssortmaxdepth = %u",sfi->sfxstrategy.
                                     ssortmaxdepth.valueunsignedint);
     } else
     {
-      printf("ssortmaxdepth is undefined\n");
+      showverbose(verboseinfo,"ssortmaxdepth is undefined");
     }
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
@@ -542,7 +544,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                               sfi->numofchars,
                               prefixlength,
                               (unsigned int) CODEBITS,
-                              sfi->storespecialcodes
+                              sfi->sfxstrategy.storespecialcodes
                                 ? (Codetype) MAXCODEVALUE
                                 : 0,
                               verboseinfo,
@@ -571,7 +573,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                    updatekmercount,
                    sfi,
                    prefixlength);
-    if (sfi->storespecialcodes)
+    if (sfi->sfxstrategy.storespecialcodes)
     {
       gt_assert(realspecialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
       reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
@@ -646,7 +648,7 @@ static void preparethispart(Sfxiterator *sfi,
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
   sfi->suftabptr = sfi->suftab -
                    stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
-  if (sfi->storespecialcodes)
+  if (sfi->sfxstrategy.storespecialcodes)
   {
     derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
   } else
