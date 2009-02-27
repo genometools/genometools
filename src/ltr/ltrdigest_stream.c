@@ -189,7 +189,12 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
 }
 
 static int run_ltrdigest(GtLTRElement *element, char *seq,
-                         GtLTRdigestStream *ls, GtError *err)
+                         GtLTRdigestStream *ls,
+#ifdef HAVE_HMMER
+                         GtError *err)
+#else
+                         GT_UNUSED GtError *err)
+#endif
 {
   int had_err = 0;
   char *rev_seq;
@@ -400,8 +405,10 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER
                                       GtPdomOptions *pdom_opts,
-#endif
                                       GtError *err)
+#else
+                                      GT_UNUSED GtError *err)
+#endif
 {
   GtNodeStream *gs;
   GtLTRdigestStream *ls;
