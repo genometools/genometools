@@ -18,6 +18,7 @@
 #ifndef GENOME_NODE_API_H
 #define GENOME_NODE_API_H
 
+#include "core/fptr_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
 
@@ -58,5 +59,19 @@ unsigned int  gt_genome_node_get_line_number(const GtGenomeNode*);
 /* Set the genomic range of <genome_node> to given <range>. */
 void          gt_genome_node_set_range(GtGenomeNode *genome_node,
                                        const GtRange *range);
+
+/* Attaches a pointer to <data> to the <node> using a given string as <key>. */
+void          gt_genome_node_add_user_data(GtGenomeNode *node,
+                                           const char *key,
+                                           void *data,
+                                           GtFree free_func);
+
+/* Returns the pointer attached to the node for a given <key>. */
+void*         gt_genome_node_get_user_data(const GtGenomeNode*,
+                                           const char *key);
+
+/* Calls the destructor function associated with the user data attached under
+   the <key> on the attached data. */
+void          gt_genome_node_release_user_data(GtGenomeNode*, const char *key);
 
 #endif

@@ -1135,6 +1135,8 @@ void gt_genome_node_delete(GtGenomeNode *gn)
     if (gn->c_class->free)
       gn->c_class->free(gn);
     gt_str_delete(gn->filename);
+    if (gn->userdata)
+      gt_hashmap_delete(gn->userdata);
     gt_free(gn);
   }
 }
@@ -1157,5 +1159,7 @@ void gt_feature_node_nonrec_delete(GtFeatureNode *fn)
   if (fn->parent_instance.c_class->free)
     fn->parent_instance.c_class->free((GtGenomeNode*) fn);
   gt_str_delete(fn->parent_instance.filename);
+  if (fn->parent_instance.userdata)
+      gt_hashmap_delete(fn->parent_instance.userdata);
   gt_free(fn);
 }

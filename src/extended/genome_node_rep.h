@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include "core/dlist.h"
+#include "core/hashmap.h"
 #include "extended/genome_node.h"
 
 /* the ``genome node'' interface */
@@ -39,8 +40,10 @@ struct GtGenomeNode
 {
   const GtGenomeNodeClass *c_class;
   GtStr *filename;
+  GtHashmap *userdata;
   unsigned int line_number,
-               reference_count;
+               reference_count,
+               userdata_nof_items;
 };
 
 GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass*);

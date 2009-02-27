@@ -47,4 +47,6 @@ bool          gt_genome_nodes_are_equal_region_nodes(GtGenomeNode*,
                                                      GtGenomeNode*);
 bool          gt_genome_nodes_are_sorted(const GtArray*);
 
+int           gt_genome_node_unit_test(GtError*);
+
 #endif

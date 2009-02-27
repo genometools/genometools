@@ -17,6 +17,7 @@
 
 #include <stdarg.h>
 #include "core/assert_api.h"
+#include "core/ensure.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/msort.h"
@@ -24,6 +25,22 @@
 #include "core/unused_api.h"
 #include "extended/genome_node_rep.h"
 #include "extended/region_node_api.h"
+
+typedef struct {
+  void *ptr;
+  GtFree free_func;
+} GtGenomeNodeUserData;
+
+static void userdata_delete(void *data)
+{
+  GtGenomeNodeUserData *ud;
+  if (!data) return;
+  ud = (GtGenomeNodeUserData*) data;
+  if (ud->free_func)
+    ud->free_func(ud->ptr);
+  ud->free_func = ud->ptr = NULL;
+  gt_free(ud);
+}
 
 static int compare_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
@@ -94,11 +111,13 @@ GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass *gnc)
 {
   GtGenomeNode *gn;
   gt_assert(gnc && gnc->size);
-  gn                  = gt_malloc(gnc->size);
-  gn->c_class         = gnc;
-  gn->filename        = NULL; /* means the node is generated */
-  gn->line_number     = 0;
-  gn->reference_count = 0;
+  gn                     = gt_malloc(gnc->size);
+  gn->c_class            = gnc;
+  gn->filename           = NULL; /* means the node is generated */
+  gn->line_number        = 0;
+  gn->reference_count    = 0;
+  gn->userdata           = NULL;
+  gn->userdata_nof_items = 0;
   return gn;
 }
 
@@ -263,4 +282,100 @@ bool gt_genome_nodes_are_sorted(const GtArray *nodes)
     }
   }
   return true;
+}
+
+void gt_genome_node_add_user_data(GtGenomeNode *gn, const char *key, void *data,
+                                  GtFree free_func)
+{
+  GtGenomeNodeUserData *ud;
+  gt_assert(gn && key);
+  ud = gt_malloc(sizeof (GtGenomeNodeUserData));
+  ud->ptr = data;
+  ud->free_func = free_func;
+  if (!gn->userdata) {
+    gn->userdata = gt_hashmap_new(HASH_STRING, NULL, userdata_delete);
+  } else /* free old data if overwriting */
+    gt_genome_node_release_user_data(gn, key);
+  gt_hashmap_add(gn->userdata, (char*) key, ud);
+  gn->userdata_nof_items++;
+}
+
+void* gt_genome_node_get_user_data(const GtGenomeNode *gn, const char *key)
+{
+  GtGenomeNodeUserData *ud;
+  gt_assert(gn && key);
+  if (!gn->userdata)
+    return NULL;
+  ud = (GtGenomeNodeUserData*) gt_hashmap_get(gn->userdata, key);
+  return (ud ? ud->ptr : NULL);
+}
+
+void gt_genome_node_release_user_data(GtGenomeNode *gn, const char *key)
+{
+  GtGenomeNodeUserData *ud;
+  gt_assert(gn && key);
+  if (!gn->userdata)
+    return;
+  if ((ud = (GtGenomeNodeUserData*) gt_hashmap_get(gn->userdata, key))) {
+    gt_hashmap_add(gn->userdata, (char*) key, NULL);
+    userdata_delete(ud);
+    if (--gn->userdata_nof_items == 0) {
+      gt_hashmap_delete(gn->userdata);
+      gn->userdata = NULL;
+    }
+  }
+}
+
+int gt_genome_node_unit_test(GtError *err)
+{
+  int had_err = 0;
+  GtGenomeNodeClass *gnc;
+  GtGenomeNode *gn;
+  void *testptr1 = "foo bar",
+       *testptr2 = NULL;
+  const char *testkey1 = "key1",
+             *testkey2 = "key2";
+  gt_error_check(err);
+
+  testptr2 = gt_malloc(sizeof (char)*4);
+
+  /* this is a very simple GtGenomeNodeClass without any callbacks */
+  gnc = gt_calloc(1, sizeof (GtGenomeNodeClass));
+  gnc->size = sizeof (GtGenomeNode);
+
+  gn = gt_genome_node_create(gnc);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == NULL);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == NULL);
+  ensure(had_err, gn->userdata_nof_items == 0);
+  ensure(had_err, gn->userdata == NULL);
+
+  gt_genome_node_add_user_data(gn, testkey1, testptr1, NULL);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) != NULL);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == testptr1);
+  ensure(had_err, gn->userdata_nof_items == 1);
+  ensure(had_err, gn->userdata != NULL);
+
+  gt_genome_node_add_user_data(gn, testkey2, testptr2, gt_free_func);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) != NULL);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == testptr2);
+  ensure(had_err, gn->userdata_nof_items == 2);
+
+  gt_genome_node_release_user_data(gn, testkey1);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == NULL);
+  ensure(had_err, gn->userdata_nof_items == 1);
+
+  gt_genome_node_release_user_data(gn, testkey2);
+  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == NULL);
+  ensure(had_err, gn->userdata_nof_items == 0);
+  ensure(had_err, gn->userdata == NULL);
+
+  testptr2 = gt_malloc(sizeof (char)*4);
+  gt_genome_node_add_user_data(gn, testkey1, testptr1, NULL);
+  gt_genome_node_add_user_data(gn, testkey2, testptr2, gt_free_func);
+  ensure(had_err, gn->userdata != NULL);
+  gt_genome_node_delete(gn);
+
+  gt_free(gnc);
+
+  return had_err;
 }
