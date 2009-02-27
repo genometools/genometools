@@ -21,16 +21,20 @@
 #include <stdbool.h>
 #include "defined-types.h"
 
-#define MAXBLTRIEDEFAULT 100UL
+#define MAXCOUNTINGSORTDEFAULT   1000UL
+#define MAXBLTRIESORTDEFAULT     100UL
+#define MAXINSERTIONSORTDEFAULT  10UL
 
 typedef struct
 {
   Definedunsignedint ssortmaxdepth;
   unsigned long maxwidthrealmedian,
+                maxcountingsort,
+                maxinsertionsort,
                 maxbltriesort;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
-                         encoding */
+                         encoding) */
        storespecialcodes;
 } Sfxstrategy;
 

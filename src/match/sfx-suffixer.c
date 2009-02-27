@@ -77,11 +77,8 @@ struct Sfxiterator
   Codetype numofallcodes;
   Seqpos *leftborder; /* points to bcktab->leftborder */
   bool storespecialcodes;
-  Definedunsignedint ssortmaxdepth;
-  bool cmpcharbychar;
-  unsigned long maxwidthrealmedian,
-                maxbltriesort;
   unsigned long long bucketiterstep; /* for progressbar */
+  Sfxstrategy sfxstrategy;
 };
 
 #ifdef SKDEBUG
@@ -502,24 +499,24 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->prefixlength = prefixlength;
     if (sfxstrategy != NULL)
     {
-       sfi->storespecialcodes = sfxstrategy->storespecialcodes;
-       sfi->ssortmaxdepth = sfxstrategy->ssortmaxdepth;
-       sfi->maxwidthrealmedian = sfxstrategy->maxwidthrealmedian;
-       sfi->maxbltriesort = sfxstrategy->maxbltriesort;
+       sfi->sfxstrategy = *sfxstrategy;
        if (sfxstrategy->cmpcharbychar || !possibletocmpbitwise(encseq))
        {
-         sfi->cmpcharbychar = true;
+         sfi->sfxstrategy.cmpcharbychar = true;
        } else
        {
-         sfi->cmpcharbychar = false;
+         sfi->sfxstrategy.cmpcharbychar = false;
        }
     } else
     {
-       sfi->storespecialcodes = false;
-       sfi->ssortmaxdepth.defined = false;
-       sfi->cmpcharbychar = possibletocmpbitwise(encseq) ? false : true;
-       sfi->maxbltriesort = MAXBLTRIEDEFAULT;
-       sfi->maxwidthrealmedian = 1UL;
+       sfi->sfxstrategy.storespecialcodes = false;
+       sfi->sfxstrategy.ssortmaxdepth.defined = false;
+       sfi->sfxstrategy.cmpcharbychar
+         = possibletocmpbitwise(encseq) ? false : true;
+       sfi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
+       sfi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
+       sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
+       sfi->sfxstrategy.maxwidthrealmedian = 1UL;
     }
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
@@ -657,8 +654,8 @@ static void preparethispart(Sfxiterator *sfi,
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
   totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  if (!sfi->ssortmaxdepth.defined ||
-      sfi->prefixlength < sfi->ssortmaxdepth.valueunsignedint)
+  if (!sfi->sfxstrategy.ssortmaxdepth.defined ||
+      sfi->prefixlength < sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
   {
     sortallbuckets(sfi->suftabptr,
                    sfi->encseq,
@@ -670,10 +667,7 @@ static void preparethispart(Sfxiterator *sfi,
                    sfi->numofchars,
                    sfi->prefixlength,
                    sfi->outlcpinfo,
-                   &sfi->ssortmaxdepth,
-                   sfi->cmpcharbychar,
-                   sfi->maxwidthrealmedian,
-                   sfi->maxbltriesort,
+                   &sfi->sfxstrategy,
                    &sfi->bucketiterstep);
   }
   sfi->part++;

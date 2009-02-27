@@ -24,6 +24,7 @@
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
+#include "sfx-strategy.h"
 #include "bcktab.h"
 
 Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
@@ -48,10 +49,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     Outlcpinfo *outlcpinfo,
-                    const Definedunsignedint *maxdepth,
-                    bool cmpcharbychar,
-                    unsigned long maxwidthrealmedian,
-                    unsigned long maxbltriesort,
+                    const Sfxstrategy *sfxstrategy,
                     unsigned long long *bucketiterstep);
 
 #endif

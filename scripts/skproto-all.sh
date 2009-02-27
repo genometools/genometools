@@ -67,6 +67,7 @@ greedyfwdmat.c
 idx-limdfs.c
 idxlocali.c
 idxlocalidp.c
+idxlocalisw.c
 initeqsvec.c
 inl-encseq.c
 iter-window.c

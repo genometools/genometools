@@ -72,7 +72,7 @@ typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 typedef struct Specialrangeiterator Specialrangeiterator;
 
-#undef INLINEDENCSEQ 
+#undef INLINEDENCSEQ
 #ifdef INLINEDENCSEQ
 #include "encseq-type.h"
 #endif

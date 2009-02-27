@@ -67,7 +67,7 @@
           *bptr++ = temp;\
         }
 
-#define SUBSORT(WIDTH,MAXBLTRIESORT,LEFT,RIGHT,DEPTH)\
+#define SUBSORT(WIDTH,LEFT,RIGHT,DEPTH)\
         /*checksuffixrange(encseq,\
                          fwd,\
                          complement,\
@@ -76,22 +76,26 @@
                          RIGHT,\
                          DEPTH,\
                          __LINE__);*/\
-        if (!maxdepth->defined ||\
-            (DEPTH) < (Seqpos) maxdepth->valueunsignedint)\
+        if (!sfxstrategy->ssortmaxdepth.defined ||\
+            (DEPTH) < (Seqpos) sfxstrategy->ssortmaxdepth.valueunsignedint)\
         {\
-          if ((WIDTH) <= (MAXBLTRIESORT))\
+          if ((WIDTH) <= sfxstrategy->maxbltriesort)\
           {\
             if ((LEFT) < (RIGHT))\
             {\
-              blindtriesuffixsort(trierep,LEFT,\
-                                  lcpsubtab == NULL\
-                                    ? NULL \
-                                    : lcpsubtab->spaceSeqpos+LCPINDEX(LEFT),\
-                                  WIDTH,DEPTH);\
+              if (width <= sfxstrategy->maxinsertionsort)\
               {\
-                /*insertionsort(encseq,esr1,esr2,\
+                insertionsort(encseq,esr1,esr2,\
                               lcpsubtab,readmode,totallength,\
-                              LEFT,RIGHT,DEPTH,maxdepth,cmpcharbychar);*/\
+                              LEFT,RIGHT,DEPTH,&sfxstrategy->ssortmaxdepth,\
+                              sfxstrategy->cmpcharbychar);\
+              } else\
+              {\
+                blindtriesuffixsort(trierep,LEFT,\
+                                    lcpsubtab == NULL\
+                                      ? NULL \
+                                      : lcpsubtab->spaceSeqpos+LCPINDEX(LEFT),\
+                                    WIDTH,DEPTH);\
               }\
             }\
           } else\
@@ -395,7 +399,6 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
       : (SfxcmpGREATER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? a : c));
 }
 
-#ifdef WITHINSERTIONSORT
 static void insertionsort(const Encodedsequence *encseq,
                           Encodedsequencescanstate *esr1,
                           Encodedsequencescanstate *esr2,
@@ -405,7 +408,7 @@ static void insertionsort(const Encodedsequence *encseq,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
                           Seqpos depth,
-                          const Definedunsignedint *maxdepth,
+                          const Definedunsignedint *ssortmaxdepth,
                           bool cmpcharbychar)
 {
   Suffixptr *pi, *pj;
@@ -431,12 +434,13 @@ static void insertionsort(const Encodedsequence *encseq,
         {
           Seqpos ccs, cct;
           Uchar tmpsvar, tmptvar;
-          if (maxdepth->defined)
+          if (ssortmaxdepth->defined)
           {
             ccs = DEREF(tmpsvar,sptr,
-                        MIN(totallength,*(pj-1)+maxdepth->valueunsignedint));
+                        MIN(totallength,
+                        *(pj-1)+ssortmaxdepth->valueunsignedint));
             cct = DEREF(tmptvar,tptr,
-                        MIN(totallength,*pj+maxdepth->valueunsignedint));
+                        MIN(totallength,*pj+ssortmaxdepth->valueunsignedint));
           } else
           {
             ccs = DEREF(tmpsvar,sptr,totallength);
@@ -486,7 +490,6 @@ static void insertionsort(const Encodedsequence *encseq,
     }
   }
 }
-#endif
 
 typedef struct
 {
@@ -698,6 +701,8 @@ static unsigned long lcpdistribution[UNITSIN2BITENC] = {0};
 #define UPDATELCPDISTRIBUTION(COMMON) /* Nothing */
 #endif
 
+#define MINMEDIANOF9WIDTH 31UL
+
 static Suffixptr *cmpcharbychardelivermedian(const Encodedsequence *encseq,
                                              Readmode readmode,
                                              Seqpos *left,
@@ -708,7 +713,7 @@ static Suffixptr *cmpcharbychardelivermedian(const Encodedsequence *encseq,
 {
   Seqpos *pl = left, *pm = left + DIV2(width), *pr = right;
 
-  if (width > 30UL)
+  if (width >= MINMEDIANOF9WIDTH)
   { /* On big arrays, pseudomedian of 9 */
     unsigned long offset, doubleoffset;
     offset = DIV8(width);
@@ -723,21 +728,21 @@ static Suffixptr *cmpcharbychardelivermedian(const Encodedsequence *encseq,
   return medianof3cmpcharbychar(encseq,readmode,totallength,depth,pl,pm,pr);
 }
 
-static Suffixptr *delivermedian(const Encodedsequence *encseq,
-                                Encodedsequencescanstate *esr,
-                                Medianinfo *medianinfospace,
-                                bool fwd,
-                                bool complement,
-                                Seqpos *left,
-                                Seqpos *right,
-                                Seqpos depth,
-                                unsigned long width,
-                                Seqpos totallength,
-                                unsigned long maxwidthrealmedian)
+static Suffixptr *blockcmpdelivermedian(const Encodedsequence *encseq,
+                                        Encodedsequencescanstate *esr,
+                                        Medianinfo *medianinfospace,
+                                        bool fwd,
+                                        bool complement,
+                                        Seqpos *left,
+                                        Seqpos *right,
+                                        Seqpos depth,
+                                        unsigned long width,
+                                        Seqpos totallength,
+                                        unsigned long maxwidthrealmedian)
 {
   Suffixptr *pl = left, *pm = left + DIV2(width), *pr = right;
 
-  if (width > 30UL)
+  if (width >= MINMEDIANOF9WIDTH)
   {
     if (width > maxwidthrealmedian)
     { /* On big arrays, pseudomedian of 9 */
@@ -751,7 +756,7 @@ static Suffixptr *delivermedian(const Encodedsequence *encseq,
       pr = medianof3(encseq,esr,fwd,complement,totallength,depth,
                      pr-doubleoffset,pr-offset,pr);
       pm = medianof3(encseq,esr,fwd,complement,totallength,depth,pl,pm,pr);
-    } else
+    } else /* width <= maxwidthrealmedian */
     {
       pm = realmedian(medianinfospace,
                       encseq,
@@ -801,11 +806,10 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              Sfxcmp *pivot,
                              Seqpos depth,
                              unsigned long width,
-                             const Definedunsignedint *maxdepth,
                              unsigned long *leftlcpdist,
                              unsigned long *rightlcpdist,
                              Seqpos totallength,
-                             unsigned long maxbltriesort,
+                             const Sfxstrategy *sfxstrategy,
                              Blindtrierep *trierep)
 {
   int cmp;
@@ -893,8 +897,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     if (leftlcpdist[idx] + 1 < end) /* at least two elements */
     {
       currentwidth = end - leftlcpdist[idx];
-      SUBSORT(currentwidth,maxbltriesort,
-              left + leftlcpdist[idx],left + end - 1,depth + idx);
+      SUBSORT(currentwidth,left + leftlcpdist[idx],left + end - 1,depth + idx);
     }
     if (lcpsubtab != NULL && leftlcpdist[idx] < end) /* at least one element */
     {
@@ -905,7 +908,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   if (width - smaller - larger > 1UL)
   {
     currentwidth = width - smaller - larger;
-    SUBSORT(currentwidth,maxbltriesort,left+smaller,left+width-larger-1,
+    SUBSORT(currentwidth,left+smaller,left+width-larger-1,
             depth + UNITSIN2BITENC);
   }
   for (idx = 0; idx <= (unsigned long) maxlargerwithlcp; idx++)
@@ -920,7 +923,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     if (rightlcpdist[idx] + 1 < end) /* at least two elements */
     {
       currentwidth = end - rightlcpdist[idx];
-      SUBSORT(currentwidth,maxbltriesort,left+width-end,
+      SUBSORT(currentwidth,left+width-end,
               left + width - 1 - rightlcpdist[idx],depth + idx);
     }
     if (lcpsubtab != NULL && rightlcpdist[idx] < end) /* at least one element */
@@ -941,13 +944,9 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Suffixptr *r,
                              Seqpos d,
                              Lcpsubtab *lcpsubtab,
-                             const Definedunsignedint *maxdepth,
-                             bool cmpcharbychar,
                              Medianinfo *medianinfospace,
-                             unsigned long maxwidthrealmedian,
                              Countingsortinfo *countingsortinfo,
-                             unsigned long maxcountingsort,
-                             unsigned long maxbltriesort,
+                             const Sfxstrategy *sfxstrategy,
                              Blindtrierep *trierep)
 {
   Suffixptr *left, *right, *leftplusw;
@@ -964,21 +963,25 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                 rightlcpdist[UNITSIN2BITENC] = {0};
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
-  const int commonunitsequal = cmpcharbychar ? 1 : UNITSIN2BITENC;
+  const int commonunitsequal = sfxstrategy->cmpcharbychar ? 1 : UNITSIN2BITENC;
 
   width = (unsigned long) (r - l + 1);
-  if (width <= maxbltriesort)
+  if (width <= sfxstrategy->maxbltriesort)
   {
     if (l < r)
     {
-      /*
-      insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
-                    l,r,d,maxdepth,cmpcharbychar);
-      */
-      blindtriesuffixsort(trierep,l,lcpsubtab == NULL
-                                    ? NULL
-                                    : lcpsubtab->spaceSeqpos+LCPINDEX(l),
-                                    width,d);
+      if (width <= sfxstrategy->maxinsertionsort)
+      {
+        insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
+                      l,r,d,&sfxstrategy->ssortmaxdepth,
+                      sfxstrategy->cmpcharbychar);
+      } else
+      {
+        blindtriesuffixsort(trierep,l,lcpsubtab == NULL
+                                      ? NULL
+                                      : lcpsubtab->spaceSeqpos+LCPINDEX(l),
+                                      width,d);
+      }
     }
     return;
   }
@@ -989,7 +992,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
 
   for (;;)
   {
-    if (cmpcharbychar)
+    if (sfxstrategy->cmpcharbychar)
     {
       pm = cmpcharbychardelivermedian(encseq,
                                       readmode,
@@ -1002,20 +1005,21 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       CMPCHARBYCHARPTR2INT(pivotcmpcharbychar,tmpvar,left);
     } else
     {
-      pm = delivermedian(encseq,
-                         esr1,
-                         medianinfospace,
-                         fwd,
-                         complement,
-                         left,
-                         right,
-                         depth,
-                         width,
-                         totallength,
-                         maxwidthrealmedian);
+      pm = blockcmpdelivermedian(encseq,
+                                 esr1,
+                                 medianinfospace,
+                                 fwd,
+                                 complement,
+                                 left,
+                                 right,
+                                 depth,
+                                 width,
+                                 totallength,
+                                 sfxstrategy->maxwidthrealmedian);
       SWAP(left, pm);
       PTR2INT(pivot,left);
-      if (width <= (unsigned long) maxcountingsort && width >= 30UL)
+      if (width <= (unsigned long) sfxstrategy->maxcountingsort &&
+          width >= MINMEDIANOF9WIDTH)
       {
         sarrcountingsort(mkvauxstack,
                          encseq,
@@ -1030,11 +1034,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                          &pivot,
                          depth,
                          width,
-                         maxdepth,
                          leftlcpdist,
                          rightlcpdist,
                          totallength,
-                         maxbltriesort,
+                         sfxstrategy,
                          trierep);
         if (mkvauxstack->nextfreeMKVstack == 0)
         {
@@ -1052,7 +1055,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
        pivot element is inserted at */
     pa = pb = left + 1;
     pc = pd = right;
-    if (cmpcharbychar)
+    if (sfxstrategy->cmpcharbychar)
     {
       smallerminlcp = greaterminlcp = smallermaxlcp = greatermaxlcp = 0;
       for (;;)
@@ -1180,7 +1183,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         */
         SETLCP(LCPINDEX(leftplusw),depth + smallermaxlcp);
       }
-      SUBSORT(w,maxbltriesort,left,leftplusw-1,depth + smallerminlcp);
+      SUBSORT(w,left,leftplusw-1,depth + smallerminlcp);
     } else
     {
       leftplusw = left;
@@ -1190,8 +1193,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     if (ISNOTEND(cptr))
     {
       width = (unsigned long) (right-(pd-pb)-leftplusw);
-      SUBSORT(width,maxbltriesort,leftplusw,right-(pd-pb)-1,
-              depth+commonunitsequal);
+      SUBSORT(width,leftplusw,right-(pd-pb)-1,depth+commonunitsequal);
     }
 
     gt_assert(pd >= pc);
@@ -1207,7 +1209,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         */
         SETLCP(LCPINDEX(right-w+1),depth + greatermaxlcp);
       }
-      SUBSORT(w,maxbltriesort,right-w+1,right,depth + greaterminlcp);
+      SUBSORT(w,right-w+1,right,depth + greaterminlcp);
     }
 #ifdef QUICKSORTSTEPS
     quicksortsteps++;
@@ -1564,10 +1566,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     Outlcpinfo *outlcpinfo,
-                    const Definedunsignedint *maxdepth,
-                    bool cmpcharbychar,
-                    unsigned long maxwidthrealmedian,
-                    unsigned long maxbltriesort,
+                    const Sfxstrategy *sfxstrategy,
                     unsigned long long *bucketiterstep)
 {
   Codetype code;
@@ -1584,7 +1583,6 @@ void sortallbuckets(Seqpos *suftabptr,
   Encodedsequencescanstate *esr1 = NULL,
                            *esr2 = NULL;
   Countingsortinfo *countingsortinfo;
-  unsigned long maxcountingsort;
   Medianinfo *medianinfospace;
   Blindtrierep *trierep;
 
@@ -1595,7 +1593,7 @@ void sortallbuckets(Seqpos *suftabptr,
   {
     lcpsubtab = &outlcpinfo->lcpsubtab;
   }
-  if (!cmpcharbychar) /* && hasspecialranges(encseq)) */
+  if (!sfxstrategy->cmpcharbychar) /* && hasspecialranges(encseq)) */
   {
     esr1 = newEncodedsequencescanstate();
     esr2 = newEncodedsequencescanstate();
@@ -1614,10 +1612,25 @@ void sortallbuckets(Seqpos *suftabptr,
     lcpsubtab->smalllcpvalues = (Uchar *) lcpsubtab->spaceSeqpos;
   }
   INITARRAY(&mkvauxstack,MKVstack);
-  maxcountingsort = maxbucketsize;
-  ALLOCASSIGNSPACE(countingsortinfo,NULL,Countingsortinfo,maxcountingsort);
-  ALLOCASSIGNSPACE(medianinfospace,NULL,Medianinfo,maxwidthrealmedian);
-  trierep = newBlindtrierep(maxbltriesort,encseq,cmpcharbychar,readmode);
+  if (sfxstrategy->cmpcharbychar)
+  {
+    countingsortinfo = NULL;
+    medianinfospace = NULL;
+  } else
+  {
+    ALLOCASSIGNSPACE(countingsortinfo,NULL,Countingsortinfo,maxbucketsize);
+    if (sfxstrategy->maxwidthrealmedian >= MINMEDIANOF9WIDTH)
+    {
+      ALLOCASSIGNSPACE(medianinfospace,NULL,Medianinfo,
+                       sfxstrategy->maxwidthrealmedian);
+    } else
+    {
+      medianinfospace = NULL;
+    }
+  }
+  trierep = newBlindtrierep(sfxstrategy->maxbltriesort,encseq,
+                            sfxstrategy->cmpcharbychar,
+                            readmode);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -1658,13 +1671,9 @@ void sortallbuckets(Seqpos *suftabptr,
                                      bucketspec.nonspecialsinbucket - 1,
                          (Seqpos) prefixlength,
                          lcpsubtab,
-                         maxdepth,
-                         cmpcharbychar,
                          medianinfospace,
-                         maxwidthrealmedian,
                          countingsortinfo,
-                         maxcountingsort,
-                         maxbltriesort,
+                         sfxstrategy,
                          trierep);
       }
       if (outlcpinfo != NULL)
@@ -1777,7 +1786,7 @@ void sortallbuckets(Seqpos *suftabptr,
   FREESPACE(countingsortinfo);
   FREESPACE(medianinfospace);
   freeBlindtrierep(&trierep);
-  if (!cmpcharbychar) /* && hasspecialranges(encseq)) */
+  if (!sfxstrategy->cmpcharbychar) /* && hasspecialranges(encseq)) */
   {
     gt_assert(esr1 != NULL);
     freeEncodedsequencescanstate(&esr1);
@@ -1787,7 +1796,7 @@ void sortallbuckets(Seqpos *suftabptr,
   FREEARRAY(&mkvauxstack,MKVstack);
   /* The following output is for test purpose only */
 #ifdef QUICKSORTSTEPS
-  if (!cmpcharbychar)
+  if (!sfxstrategy->cmpcharbychar)
   {
     printf("# quicksortsteps: %lu, avg diff %.2f\n",
             quicksortsteps,(double) quicksortdiff/quicksortsteps);

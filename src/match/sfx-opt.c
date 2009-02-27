@@ -53,7 +53,7 @@ static OPrval parse_options(int *parsed_args,
          *optiondir,
          *optionstorespecialcodes,
          *optionmaxwidthrealmedian,
-         *optionmaxbltriesort,
+         *optionalgbounds,
          *optiondes;
   OPrval oprval;
   GtStr *dirarg = gt_str_new();
@@ -148,14 +148,17 @@ static OPrval parse_options(int *parsed_args,
   gt_option_is_development_option(optionmaxwidthrealmedian);
   gt_option_parser_add_option(op, optionmaxwidthrealmedian);
 
-  optionmaxbltriesort = gt_option_new_ulong("maxbltriesort",
-                                            "all intervals of specified size "
-                                            "and smaller are sorted by the "
-                                            "blind trie sorting algorithm",
-                                            &so->sfxstrategy.maxbltriesort,
-                                            MAXBLTRIEDEFAULT);
-  gt_option_is_development_option(optionmaxbltriesort);
-  gt_option_parser_add_option(op, optionmaxbltriesort);
+  optionalgbounds
+    = gt_option_new_stringarray("algbds",
+                                "length boundaries for the different "
+                                "algorithms to sort buckets of suffixes\n"
+                                "first number: maxbound for insertion sort\n"
+                                "second number: maxbound for blindtrie sort\n"
+                                "third number: maxbound for counting sort\n",
+                                so->algbounds);
+  gt_option_is_development_option(optionalgbounds);
+  gt_option_parser_add_option(op, optionalgbounds);
+  so->optionalgboundsref = gt_option_ref(optionalgbounds);
 
   optionstorespecialcodes
     = gt_option_new_bool("storespecialcodes",
@@ -407,6 +410,8 @@ void wrapsfxoptions(Suffixeratoroptions *so)
   gt_str_delete(so->str_smap);
   gt_str_delete(so->str_sat);
   gt_str_array_delete(so->filenametab);
+  gt_str_array_delete(so->algbounds);
+  gt_option_delete(so->optionalgboundsref);
 }
 
 int suffixeratoroptions(Suffixeratoroptions *so,
@@ -426,6 +431,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = gt_str_new();
   so->str_sat = gt_str_new();
   so->filenametab = gt_str_array_new();
+  so->algbounds = gt_str_array_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->maxdepth.defined = false;
   so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
@@ -452,6 +458,33 @@ int suffixeratoroptions(Suffixeratoroptions *so,
         }
       }
     }
+  }
+  if (gt_option_is_set(so->optionalgboundsref))
+  {
+    const char *arg;
+    long readint;
+
+    if (gt_str_array_size(so->algbounds) != 3)
+    {
+      gt_error_set(err,"option -algbds must have exactly 3 arguments");
+      retval = -1;
+    }
+    if (retval == 0)
+    {
+      arg = gt_str_array_get(so->algbounds,0);
+      if (sscanf(arg,"%ld",&readint) != 1 || readint <= 0)
+      {
+        gt_error_set(err,"option -algbds: all arguments must be positive "
+                         "numbers");
+        retval = -1;
+      }
+      so->sfxstrategy.maxinsertionsort = (unsigned long) readint;
+    }
+  } else
+  {
+    so->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
+    so->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
+    so->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
   return retval;
 }

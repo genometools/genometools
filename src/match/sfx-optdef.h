@@ -38,7 +38,8 @@ typedef struct
       *str_indexname,
       *str_smap,
       *str_sat;
-  GtStrArray *filenametab;
+  GtOption *optionalgboundsref;
+  GtStrArray *filenametab, *algbounds;
   Readmode readmode;
   bool isdna,
        isprotein,
