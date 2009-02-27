@@ -174,6 +174,8 @@ Bcktab *allocBcktab(Seqpos totallength,
   Bcktab *bcktab;
   bool haserr = false;
 
+  printf("numofchars=%u,prefixlength=%u,totallength=%lu\n",
+          numofchars,prefixlength,(unsigned long) totallength);
   bcktab = newBcktab(numofchars,prefixlength,totallength);
   bcktab->allocated = true;
   if (maxcodevalue > 0 && bcktab->numofallcodes-1 > maxcodevalue)

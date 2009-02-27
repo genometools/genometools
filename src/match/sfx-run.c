@@ -315,9 +315,9 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                               totallength));
     }
   }
-  if (!haserr && so->maxdepth.defined)
+  if (!haserr && so->ssortmaxdepth.defined)
   {
-    if (so->maxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
+    if (so->ssortmaxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
     {
       maxdepth->defined = true;
       maxdepth->valueunsignedint = *prefixlength;
@@ -326,7 +326,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                   maxdepth->valueunsignedint);
     } else
     {
-      if (so->maxdepth.valueunsignedint < *prefixlength)
+      if (so->ssortmaxdepth.valueunsignedint < *prefixlength)
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint = *prefixlength;
@@ -335,7 +335,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
       } else
       {
         maxdepth->defined = true;
-        maxdepth->valueunsignedint = so->maxdepth.valueunsignedint;
+        maxdepth->valueunsignedint = so->ssortmaxdepth.valueunsignedint;
         showverbose(verboseinfo,
                     "use maxdepth = %u",maxdepth->valueunsignedint);
       }

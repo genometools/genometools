@@ -33,7 +33,7 @@ typedef struct
 {
   unsigned int numofparts,
                prefixlength;
-  Definedunsignedint maxdepth;
+  Definedunsignedint ssortmaxdepth;
   GtStr *str_inputindex,
       *str_indexname,
       *str_smap,

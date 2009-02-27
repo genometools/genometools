@@ -521,6 +521,16 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     printf("maxinsertionsort = %lu\n",sfi->sfxstrategy.maxinsertionsort);
     printf("maxbltriesort = %lu\n",sfi->sfxstrategy.maxbltriesort);
     printf("maxcountingsort = %lu\n",sfi->sfxstrategy.maxcountingsort);
+    printf("storespecialcounts = %s\n",
+            sfi->storespecialcodes ? "true" : "false");
+    if (sfi->sfxstrategy.ssortmaxdepth.defined)
+    {
+      printf("ssortmaxdepth = %u\n",sfi->sfxstrategy.
+                                    ssortmaxdepth.valueunsignedint);
+    } else
+    {
+      printf("ssortmaxdepth is undefined\n");
+    }
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;
