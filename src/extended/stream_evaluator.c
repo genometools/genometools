@@ -78,31 +78,31 @@ typedef struct {
                 FP_CDS_nucleotides_forward,
                 FP_CDS_nucleotides_reverse;
   GtBittab *real_mRNA_nucleotides_forward,
-         *pred_mRNA_nucleotides_forward,
-         *real_mRNA_nucleotides_reverse,
-         *pred_mRNA_nucleotides_reverse,
-         *real_CDS_nucleotides_forward,
-         *pred_CDS_nucleotides_forward,
-         *real_CDS_nucleotides_reverse,
-         *pred_CDS_nucleotides_reverse,
-         *true_genes_forward,
-         *true_genes_reverse,
-         *true_mRNAs_forward,
-         *true_mRNAs_reverse,
-         *true_LTRs,
-         *overlapped_genes_forward,
-         *overlapped_genes_reverse,
-         *overlapped_mRNAs_forward,
-         *overlapped_mRNAs_reverse,
-         *overlapped_LTRs;
-  GtTranscriptGtBittabs *mRNA_exon_bittabs_forward,
-                    *mRNA_exon_bittabs_reverse,
-                    *CDS_exon_bittabs_forward,
-                    *CDS_exon_bittabs_reverse;
+           *pred_mRNA_nucleotides_forward,
+           *real_mRNA_nucleotides_reverse,
+           *pred_mRNA_nucleotides_reverse,
+           *real_CDS_nucleotides_forward,
+           *pred_CDS_nucleotides_forward,
+           *real_CDS_nucleotides_reverse,
+           *pred_CDS_nucleotides_reverse,
+           *true_genes_forward,
+           *true_genes_reverse,
+           *true_mRNAs_forward,
+           *true_mRNAs_reverse,
+           *true_LTRs,
+           *overlapped_genes_forward,
+           *overlapped_genes_reverse,
+           *overlapped_mRNAs_forward,
+           *overlapped_mRNAs_reverse,
+           *overlapped_LTRs;
+  GtTranscriptBittabs *mRNA_exon_bittabs_forward,
+                      *mRNA_exon_bittabs_reverse,
+                      *CDS_exon_bittabs_forward,
+                      *CDS_exon_bittabs_reverse;
   GtTranscriptUsedExons *used_mRNA_exons_forward,
-                      *used_mRNA_exons_reverse,
-                      *used_CDS_exons_forward,
-                      *used_CDS_exons_reverse;
+                        *used_mRNA_exons_reverse,
+                        *used_CDS_exons_forward,
+                        *used_CDS_exons_reverse;
 } Slot;
 
 typedef struct
@@ -110,7 +110,7 @@ typedef struct
   Slot *slot;
   bool nuceval,
        verbose;
-} ProcessRealGtFeatureInfo;
+} ProcessRealFeatureInfo;
 
 typedef struct {
   Slot *slot;
@@ -128,7 +128,7 @@ typedef struct {
   unsigned long *wrong_genes,
                 *wrong_mRNAs,
                 *wrong_LTRs;
-} ProcessPredictedGtFeatureInfo;
+} ProcessPredictedFeatureInfo;
 
 static Slot* slot_new(bool nuceval, GtRange range)
 {
@@ -429,7 +429,7 @@ static void add_nucleotide_exon(GtBittab *nucleotides, GtRange range,
 static int process_real_feature(GtGenomeNode *gn, void *data,
                                 GT_UNUSED GtError *err)
 {
-  ProcessRealGtFeatureInfo *info = (ProcessRealGtFeatureInfo*) data;
+  ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
   GtGenomeNode *gn_ref;
   GtFeatureNode *gf;
   GtRange range;
@@ -810,8 +810,8 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
                             GtTranscriptExons *exons_reverse,
                             GtTranscriptCounts *counts_forward,
                             GtTranscriptCounts *counts_reverse,
-                            GtTranscriptGtBittabs *exon_bittabs_forward,
-                            GtTranscriptGtBittabs *exon_bittabs_reverse,
+                            GtTranscriptBittabs *exon_bittabs_forward,
+                            GtTranscriptBittabs *exon_bittabs_reverse,
                             GtTranscriptEvaluators *exon_evaluators,
                             GtTranscriptEvaluators *exon_evaluators_collapsed)
 {
@@ -892,7 +892,7 @@ static void store_true_exon(GtGenomeNode *gn, GtStrand predicted_strand,
 static int process_predicted_feature(GtGenomeNode *gn, void *data,
                                      GT_UNUSED GtError *err)
 {
-  ProcessPredictedGtFeatureInfo *info = (ProcessPredictedGtFeatureInfo*) data;
+  ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
   GtRange predicted_range;
   unsigned long i, num;
   GtStrand predicted_strand;
@@ -1269,8 +1269,8 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   GtGenomeNode *gn;
   GtFeatureNode *gf;
   Slot *slot;
-  ProcessRealGtFeatureInfo real_info;
-  ProcessPredictedGtFeatureInfo predicted_info;
+  ProcessRealFeatureInfo real_info;
+  ProcessPredictedFeatureInfo predicted_info;
   int had_err;
 
   gt_error_check(err);
@@ -1383,7 +1383,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   return had_err;
 }
 
-static void show_gt_transcript_values(GtTranscriptEvaluators *te,
+static void show_transcript_values(GtTranscriptEvaluators *te,
                                       const char *level,
                                       const char *additional_info, FILE *outfp)
 {
@@ -1491,13 +1491,13 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, FILE *outfp)
     fprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
 
     /* mRNA exon level */
-    show_gt_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
-    show_gt_transcript_values(se->mRNA_exon_evaluators_collapsed, "mRNA",
+    show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
+    show_transcript_values(se->mRNA_exon_evaluators_collapsed, "mRNA",
                            ", collapsed", outfp);
 
     /* CDS exon level */
-    show_gt_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
-    show_gt_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
+    show_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
+    show_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
                            ", collapsed", outfp);
 
     if (se->nuceval) {

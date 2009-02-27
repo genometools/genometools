@@ -170,12 +170,12 @@ typedef struct {
        *gt_bioseq_raw;
   unsigned long offset;
   GtBioseq *bs;
-} Construct_gt_bioseq_files_info;
+} ConstructBioseqFilesInfo;
 
 static int proc_description(const char *description, unsigned long length,
                             void *data, GT_UNUSED GtError *err)
 {
-  Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
+  ConstructBioseqFilesInfo *info = (ConstructBioseqFilesInfo*) data;
   char *description_cstr;
   gt_error_check(err);
   if (info->bs->use_stdin) {
@@ -193,7 +193,7 @@ static int proc_description(const char *description, unsigned long length,
 static int proc_sequence_part(const char *seqpart, unsigned long length,
                               void *data, GT_UNUSED GtError *err)
 {
-  Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
+  ConstructBioseqFilesInfo *info = (ConstructBioseqFilesInfo*) data;
   gt_error_check(err);
   gt_assert(seqpart);
   if (info->bs->use_stdin) {
@@ -213,7 +213,7 @@ static int proc_sequence_part(const char *seqpart, unsigned long length,
 static int proc_sequence_length(unsigned long sequence_length, void *data,
                                 GT_UNUSED GtError *err)
 {
-  Construct_gt_bioseq_files_info *info = (Construct_gt_bioseq_files_info*) data;
+  ConstructBioseqFilesInfo *info = (ConstructBioseqFilesInfo*) data;
   GtRange range;
   gt_error_check(err);
   if (info->bs->use_stdin) {
@@ -231,12 +231,12 @@ static int proc_sequence_length(unsigned long sequence_length, void *data,
 }
 
 /* this global variables are necessary for the signal handler below */
-static Construct_gt_bioseq_files_info gt_bioseq_files_info;
+static ConstructBioseqFilesInfo gt_bioseq_files_info;
 static const char *gt_bioseq_index_filename,
                   *gt_bioseq_raw_filename;
 
 /* removes the incomplete bioseq files */
-static void remove_gt_bioseq_files(int sigraised)
+static void remove_bioseq_files(int sigraised)
 {
   /* we don't care if fclose() succeeds, xunlink() will take care of it */
   (void) fclose(gt_bioseq_files_info.gt_bioseq_index);
@@ -335,7 +335,7 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *gt_bioseq_index_file,
   if (!bs->use_stdin) {
     gt_bioseq_index_filename = gt_str_get(gt_bioseq_index_file);
     gt_bioseq_raw_filename = gt_str_get(gt_bioseq_raw_file);
-    gt_sig_register_all(remove_gt_bioseq_files);
+    gt_sig_register_all(remove_bioseq_files);
   }
 
   /* read fasta file */
@@ -513,7 +513,7 @@ void gt_bioseq_delete(GtBioseq *bs)
   gt_free(bs);
 }
 
-static void determine_gt_alpha_if_necessary(GtBioseq *bs)
+static void determine_alpha_if_necessary(GtBioseq *bs)
 {
   gt_assert(bs);
   if (!bs->alpha) {
@@ -525,7 +525,7 @@ static void determine_gt_alpha_if_necessary(GtBioseq *bs)
 GtAlpha* gt_bioseq_get_alpha(GtBioseq *bs)
 {
   gt_assert(bs);
-  determine_gt_alpha_if_necessary(bs);
+  determine_alpha_if_necessary(bs);
   gt_assert(bs->alpha);
   return bs->alpha;
 }
@@ -536,7 +536,7 @@ GtSeq* gt_bioseq_get_seq(GtBioseq *bs, unsigned long idx)
   gt_assert(idx < gt_array_size(bs->descriptions));
   if (!bs->seqs)
     bs->seqs = gt_calloc(gt_array_size(bs->descriptions), sizeof (GtSeq*));
-  determine_gt_alpha_if_necessary(bs);
+  determine_alpha_if_necessary(bs);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = gt_seq_new(gt_bioseq_get_sequence(bs, idx),
                             gt_bioseq_get_sequence_length(bs, idx),
@@ -622,7 +622,7 @@ void gt_bioseq_show_gc_content(GtBioseq *bs)
 {
   GtAlpha *dna_alpha;
   gt_assert(bs);
-  determine_gt_alpha_if_necessary(bs);
+  determine_alpha_if_necessary(bs);
   dna_alpha = gt_alpha_new_dna();
   if (gt_alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
     printf("showing GC-content for sequence file \"%s\"\n",

@@ -18,43 +18,176 @@
 #include "core/unused_api.h"
 #include "core/ma_api.h"
 #include "core/seqiterator.h"
+#include "extended/alignment.h"
 #include "sarr-def.h"
-#include "intbits.h"
+#include "intbits-tab.h"
 #include "format64.h"
 #include "idx-limdfs.h"
 #include "idxlocali.h"
 #include "idxlocalidp.h"
+#include "idxlocalisw.h"
 #include "absdfstrans-def.h"
 #include "esa-map.h"
 #include "stamp.h"
 
-static void showmatch(GT_UNUSED void *processinfo,
-                      Seqpos dbstartpos,
-                      Seqpos dblen,
-                      GT_UNUSED const Uchar *dbsubstring,
-                      unsigned long pprefixlen,
-                      unsigned long distance)
+typedef struct
 {
-  printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
-  printf(FormatSeqpos "\t",PRINTSeqposcast(dbstartpos));
-  printf("%lu\t%lu\n",pprefixlen,distance);
+  const Uchar *characters;
+  uint64_t queryunit;
+  Uchar wildcardshow;
+  bool showalignment;
+  const Encodedsequence *encseq;
+} Showmatchinfo;
+
+static void showmatch(void *processinfo,const GtMatch *match)
+{
+  Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
+  unsigned long seqnum;
+  Seqpos relpos;
+
+  if (match->dbabsolute)
+  {
+    Seqinfo seqinfo;
+
+    seqnum = getencseqfrompos2seqnum(showmatchinfo->encseq,match->dbstartpos);
+    getencseqSeqinfo(&seqinfo,showmatchinfo->encseq,seqnum);
+    gt_assert(seqinfo.seqstartpos <= match->dbstartpos);
+    relpos = match->dbstartpos - seqinfo.seqstartpos;
+  } else
+  {
+    relpos = match->dbstartpos;
+    seqnum = match->dbseqnum;
+  }
+  printf("%lu\t" FormatSeqpos "\t",seqnum,PRINTSeqposcast(relpos));
+  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
+  printf("\t" Formatuint64_t "\t%lu\t%lu\t%lu\n",
+              PRINTuint64_tcast(showmatchinfo->queryunit),
+              match->querystartpos,
+              match->querylen,
+              match->distance);
+  if (showmatchinfo->showalignment)
+  {
+    gt_alignment_show_with_mapped_chars(
+                (const GtAlignment *) match->alignment,
+                showmatchinfo->characters,
+                showmatchinfo->wildcardshow,
+                stdout);
+  }
 }
 
-int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
+typedef struct
+{
+  const Encodedsequence *encseq;
+  Bitstring *hasmatch;
+} Storematchinfo;
+
+void initstorematch(Storematchinfo *storematch,
+                    const Encodedsequence *encseq)
+{
+  unsigned long numofdbsequences = getencseqnumofdbsequences(encseq);
+
+  storematch->encseq = encseq;
+  INITBITTAB(storematch->hasmatch,numofdbsequences);
+}
+
+static void storematch(void *info,const GtMatch *match)
+{
+  Storematchinfo *storematch = (Storematchinfo *) info;
+  unsigned long seqnum;
+
+  if (match->dbabsolute)
+  {
+    seqnum = getencseqfrompos2seqnum(storematch->encseq,match->dbstartpos);
+  } else
+  {
+    seqnum = match->dbseqnum;
+  }
+  if (!ISIBITSET(storematch->hasmatch,seqnum))
+  {
+    SETIBIT(storematch->hasmatch,seqnum);
+  }
+}
+
+void checkandresetstorematch(uint64_t queryunit,
+                             Storematchinfo *storeonline,
+                             Storematchinfo *storeoffline)
+{
+  unsigned long seqnum, countmatchseq = 0,
+    numofdbsequences = getencseqnumofdbsequences(storeonline->encseq);
+
+  for (seqnum = 0; seqnum < numofdbsequences; seqnum++)
+  {
+    if (ISIBITSET(storeonline->hasmatch,seqnum) &&
+        !ISIBITSET(storeoffline->hasmatch,seqnum))
+    {
+      fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
+                     "online has match but offline not\n",
+                     PRINTuint64_tcast(queryunit),seqnum);
+      exit(EXIT_FAILURE);
+    }
+    if (!ISIBITSET(storeonline->hasmatch,seqnum) &&
+        ISIBITSET(storeoffline->hasmatch,seqnum))
+    {
+      fprintf(stderr,"query " Formatuint64_t " refseq %lu: "
+                     "offline has match but online not\n",
+                     PRINTuint64_tcast(queryunit),seqnum);
+      exit(EXIT_FAILURE);
+    }
+    if (ISIBITSET(storeonline->hasmatch,seqnum))
+    {
+      countmatchseq++;
+    }
+  }
+  CLEARBITTAB(storeonline->hasmatch,numofdbsequences);
+  CLEARBITTAB(storeoffline->hasmatch,numofdbsequences);
+  printf("matching sequences: %lu\n",countmatchseq);
+}
+
+void freestorematch(Storematchinfo *storematch)
+{
+  gt_free(storematch->hasmatch);
+}
+
+int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
 {
   Genericindex *genericindex = NULL;
   bool haserr = false;
   Verboseinfo *verboseinfo;
+  const Encodedsequence *encseq = NULL;
 
-  verboseinfo = newverboseinfo(arguments->verbose);
+  verboseinfo = newverboseinfo(idxlocalioptions->verbose);
 
-  genericindex = genericindex_new(arguments->indexname,
-                                  arguments->withesa,
-                                  arguments->withesa,0,
-                                  verboseinfo,err);
-  if (genericindex == NULL)
+  if (idxlocalioptions->doonline)
   {
-    haserr = true;
+    encseq = mapencodedsequence (true,
+                                 idxlocalioptions->indexname,
+                                 true,
+                                 false,
+                                 true,
+                                 verboseinfo,
+                                 err);
+    if (encseq == NULL)
+    {
+      haserr = true;
+    }
+  } else
+  {
+    genericindex = genericindex_new(idxlocalioptions->indexname,
+                                    idxlocalioptions->withesa,
+                                    idxlocalioptions->withesa ||
+                                    idxlocalioptions->docompare,
+                                    false,
+                                    true,
+                                    0,
+                                    verboseinfo,
+                                    err);
+    if (genericindex == NULL)
+    {
+      haserr = true;
+    } else
+    {
+      encseq = genericindex_getencseq(genericindex);
+    }
   }
   if (!haserr)
   {
@@ -62,29 +195,60 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
     const Uchar *query;
     unsigned long querylen;
     char *desc = NULL;
-    uint64_t unitnum;
     int retval;
     Limdfsresources *limdfsresources = NULL;
     const AbstractDfstransformer *dfst;
-    const Encodedsequence *encseq;
+    SWdpresource *swdpresource = NULL;
+    Showmatchinfo showmatchinfo;
+    Processmatch processmatch;
+    void *processmatchinfoonline, *processmatchinfooffline;
+    Storematchinfo storeonline, storeoffline;
 
+    if (idxlocalioptions->docompare)
+    {
+      processmatch = storematch;
+      initstorematch(&storeonline,encseq);
+      initstorematch(&storeoffline,encseq);
+      processmatchinfoonline = &storeonline;
+      processmatchinfooffline = &storeoffline;
+    } else
+    {
+      processmatch = showmatch;
+      showmatchinfo.encseq = encseq;
+      showmatchinfo.characters = getencseqAlphabetcharacters(encseq);
+      showmatchinfo.wildcardshow = getencseqAlphabetwildcardshow(encseq);
+      showmatchinfo.showalignment = idxlocalioptions->showalignment;
+      processmatchinfoonline = processmatchinfooffline = &showmatchinfo;
+    }
+    if (idxlocalioptions->doonline || idxlocalioptions->docompare)
+    {
+      swdpresource = newSWdpresource(idxlocalioptions->matchscore,
+                                     idxlocalioptions->mismatchscore,
+                                     idxlocalioptions->gapextend,
+                                     idxlocalioptions->threshold,
+                                     idxlocalioptions->showalignment,
+                                     processmatch,
+                                     processmatchinfoonline);
+    }
     dfst = locali_AbstractDfstransformer();
-    gt_assert(genericindex != NULL);
-    limdfsresources = newLimdfsresources(genericindex,
-                                         true,
-                                         0,
-                                         0,
-                                         true, /* keepexpandedonstack */
-                                         showmatch,
-                                         NULL, /* processmatch info */
-                                         NULL, /* processresult */
-                                         NULL, /* processresult info */
-                                         dfst);
-    encseq = genericindex_getencseq(genericindex);
-    seqit = gt_seqiterator_new(arguments->queryfiles,
+    if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
+    {
+      gt_assert(genericindex != NULL);
+      limdfsresources = newLimdfsresources(genericindex,
+                                           true,
+                                           0,
+                                           0,    /* maxpathlength */
+                                           true, /* keepexpandedonstack */
+                                           processmatch,
+                                           processmatchinfooffline,
+                                           NULL, /* processresult */
+                                           NULL, /* processresult info */
+                                           dfst);
+    }
+    seqit = gt_seqiterator_new(idxlocalioptions->queryfiles,
                                getencseqAlphabetsymbolmap(encseq),
                                true);
-    for (unitnum = 0; /* Nothing */; unitnum++)
+    for (showmatchinfo.queryunit = 0; /* Nothing */; showmatchinfo.queryunit++)
     {
       retval = gt_seqiterator_next(seqit,
                                    &query,
@@ -101,25 +265,54 @@ int runidxlocali(const IdxlocaliOptions *arguments,GtError *err)
         break;
       }
       printf("process sequence " Formatuint64_t " of length %lu\n",
-              PRINTuint64_tcast(unitnum),querylen);
-      indexbasedlocali(limdfsresources,
-                       arguments->matchscore,
-                       arguments->mismatchscore,
-                       arguments->gapstart,
-                       arguments->gapextend,
-                       arguments->threshold,
-                       query,
-                       querylen,
-                       dfst);
+              PRINTuint64_tcast(showmatchinfo.queryunit),querylen);
+      if (idxlocalioptions->doonline || idxlocalioptions->docompare)
+      {
+        multiapplysmithwaterman(swdpresource,encseq,query,querylen);
+      }
+      if (!idxlocalioptions->doonline || idxlocalioptions->docompare)
+      {
+        indexbasedlocali(limdfsresources,
+                         idxlocalioptions->matchscore,
+                         idxlocalioptions->mismatchscore,
+                         idxlocalioptions->gapstart,
+                         idxlocalioptions->gapextend,
+                         idxlocalioptions->threshold,
+                         query,
+                         querylen,
+                         dfst);
+      }
+      if (idxlocalioptions->docompare)
+      {
+        checkandresetstorematch(showmatchinfo.queryunit,
+                                &storeonline,&storeoffline);
+      }
       gt_free(desc);
     }
     if (limdfsresources != NULL)
     {
       freeLimdfsresources(&limdfsresources,dfst);
     }
+    if (swdpresource != NULL)
+    {
+      freeSWdpresource(swdpresource);
+      swdpresource = NULL;
+    }
     gt_seqiterator_delete(seqit);
+    if (idxlocalioptions->docompare)
+    {
+      freestorematch(&storeonline);
+      freestorematch(&storeoffline);
+    }
   }
-  genericindex_delete(genericindex);
+  if (genericindex == NULL)
+  {
+    gt_assert(encseq != NULL);
+    freeEncodedsequence((Encodedsequence **) &encseq);
+  } else
+  {
+    genericindex_delete(genericindex);
+  }
   freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }

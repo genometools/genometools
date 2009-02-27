@@ -41,19 +41,19 @@ typedef struct
   unsigned long lastdistvalue;   /* the score for the given depth */
 } Limdfsstate;
 
-typedef struct
+struct Limdfsconstinfo
 {
   bool skpp;
   unsigned long maxintervalwidth,
                 patternlength,
                 maxdistance,
                 *eqsvector;
-} Matchtaskinfo;
+};
 
 #ifdef SKDEBUG
 
 static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
-                            const Matchtaskinfo *mti)
+                            const Limdfsconstinfo *mti)
 {
   if (maxleqk == UNDEFMAXLEQK)
   {
@@ -66,9 +66,8 @@ static void showmaxleqvalue(FILE *fp,unsigned long maxleqk,
 
 static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                  unsigned long currentdepth,
-                                 const void *dfsconstinfo)
+                                 const Limdfsconstinfo *mti)
 {
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   const Limdfsstate *col = (const Limdfsstate *) aliascol;
 
   if (col->maxleqk == UNDEFMAXLEQK)
@@ -97,7 +96,7 @@ static void apme_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
   }
 }
 
-static void verifycolumnvalues(const Matchtaskinfo *mti,
+static void verifycolumnvalues(const Limdfsconstinfo *mti,
                                const Limdfsstate *col,
                                unsigned long startscore)
 {
@@ -151,9 +150,9 @@ static void verifycolumnvalues(const Matchtaskinfo *mti,
 
 #endif
 
-static void apme_initdfsconstinfo(void *dfsconstinfo,
+static void apme_initdfsconstinfo(Limdfsconstinfo *mti,
                                   unsigned int alphasize,
-                                 ...)
+                                  ...)
                                  /* Variable argument list is as follows:
                                     unsigned int alphasize
                                     const Uchar *pattern,
@@ -165,7 +164,6 @@ static void apme_initdfsconstinfo(void *dfsconstinfo,
 {
   va_list ap;
   const Uchar *pattern;
-  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   va_start(ap,alphasize);
   pattern = va_arg(ap, const Uchar *);
@@ -179,27 +177,24 @@ static void apme_initdfsconstinfo(void *dfsconstinfo,
                 pattern,mti->patternlength);
 }
 
-static void *apme_allocatedfsconstinfo(unsigned int alphasize)
+static Limdfsconstinfo *apme_allocatedfsconstinfo(unsigned int alphasize)
 {
-  Matchtaskinfo *mti = gt_malloc(sizeof(Matchtaskinfo));
+  Limdfsconstinfo *mti = gt_malloc(sizeof(Limdfsconstinfo));
   mti->eqsvector = gt_malloc(sizeof(*mti->eqsvector) * alphasize);
   return mti;
 }
 
-static void apme_freedfsconstinfo(void **dfsconstinfo)
+static void apme_freedfsconstinfo(Limdfsconstinfo **mtiptr)
 {
-  Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
-
-  gt_free(mti->eqsvector);
-  gt_free(mti);
-  *dfsconstinfo = NULL;
+  gt_free((*mtiptr)->eqsvector);
+  gt_free(*mtiptr);
+  *mtiptr = NULL;
 }
 
 static void apme_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                 void *dfsconstinfo)
+                                 Limdfsconstinfo *mti)
 {
   Limdfsstate *column = (Limdfsstate *) aliascolumn;
-  const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   column->Mv = 0UL;
   if (mti->skpp)
@@ -221,9 +216,8 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                       GT_UNUSED Seqpos rightbound,
                                       Seqpos width,
                                       GT_UNUSED unsigned long currentdepth,
-                                      void *dfsconstinfo)
+                                      Limdfsconstinfo *mti)
 {
-  const Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascolumn;
 
   if (col->maxleqk == UNDEFMAXLEQK)
@@ -257,7 +251,7 @@ static void apme_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
   limdfsresult->status = Limdfscontinue;
 }
 
-static void apme_nextLimdfsstate(const void *dfsconstinfo,
+static void apme_nextLimdfsstate(const Limdfsconstinfo *mti,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
                                  GT_UNUSED unsigned long currentdepth,
                                  Uchar currentchar,
@@ -267,7 +261,6 @@ static void apme_nextLimdfsstate(const void *dfsconstinfo,
                 backmask,               /* only one bit is on */
                 idx,                    /* a counter */
                 score;                  /* current score */
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
   const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
 
@@ -340,7 +333,7 @@ static void apme_nextLimdfsstate(const void *dfsconstinfo,
 #endif
 }
 
-static void apme_inplacenextLimdfsstate(const void *dfsconstinfo,
+static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                         DECLAREPTRDFSSTATE(aliascol),
                                         GT_UNUSED unsigned long currentdepth,
                                         Uchar currentchar)
@@ -349,7 +342,6 @@ static void apme_inplacenextLimdfsstate(const void *dfsconstinfo,
                 backmask,           /* only one bit is on */
                 idx,                /* a counter */
                 score;              /* current score */
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascol;
 
   gt_assert(col->maxleqk != UNDEFMAXLEQK);

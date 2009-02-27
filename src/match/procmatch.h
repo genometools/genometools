@@ -18,13 +18,30 @@
 #ifndef PROCMATCH_H
 #define PROCMATCH_H
 
+#include "core/symboldef.h"
 #include "seqpos-def.h"
 
-typedef void (*Processmatch)(void *,Seqpos,Seqpos,
-                             const Uchar *,unsigned long,
-                             unsigned long);
+typedef struct
+{
+  bool dbabsolute;
+  unsigned long dbseqnum;
+  Seqpos dbstartpos,
+         dblen;
+  const Uchar *dbsubstring;
+  unsigned long querystartpos,
+                querylen,
+                distance;
+  const void *alignment;
+} GtMatch;
 
-typedef void (*Processresult)(void *,const void *,unsigned long,
-                              unsigned long,Seqpos,Seqpos);
+typedef void (*Processmatch)(void *processinfo,
+                             const GtMatch *match);
+
+typedef void (*Processresult)(void *,
+                              const void *,
+                              unsigned long,
+                              unsigned long,
+                              Seqpos,
+                              Seqpos);
 
 #endif

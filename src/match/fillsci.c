@@ -74,7 +74,8 @@ static void updatesumranges(unsigned long key, unsigned long long value,
   unsigned long distvalue;
   Updatesumrangeinfo *updatesumrangeinfo = (Updatesumrangeinfo *) data;
 
-  distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
+  gt_assert(value <= (unsigned long long) ULONG_MAX);
+  distvalue = (unsigned long) value;
   updatesumrangeinfo->specialrangesUchar
      += currentspecialrangevalue(key,distvalue,(unsigned long) UCHAR_MAX);
   updatesumrangeinfo->specialrangesUshort

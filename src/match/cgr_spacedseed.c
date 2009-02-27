@@ -130,14 +130,10 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
 }
 
 static void showmatch(GT_UNUSED void *processinfo,
-                      Seqpos dbstartpos,
-                      Seqpos dblen,
-                      GT_UNUSED const Uchar *dbsubstring,
-                      GT_UNUSED unsigned long pprefixlen,
-                      GT_UNUSED unsigned long distance)
+                      const GtMatch *match)
 {
-  printf(FormatSeqpos "\t",PRINTSeqposcast(dblen));
-  printf(FormatSeqpos "\n",PRINTSeqposcast(dbstartpos));
+  printf(FormatSeqpos "\t",PRINTSeqposcast(match->dblen));
+  printf(FormatSeqpos "\n",PRINTSeqposcast(match->dbstartpos));
 }
 
 #ifdef WITHONLINE
@@ -206,7 +202,8 @@ int matchspacedseed(bool withesa,
   if (!haserr)
   {
     genericindex = genericindex_new(str_inputindex,withesa,
-                                    withesa && docompare,0,verboseinfo,err);
+                                    withesa && docompare,false,false,
+                                    0,verboseinfo,err);
     if (genericindex == NULL)
     {
       haserr = true;
@@ -239,15 +236,15 @@ int matchspacedseed(bool withesa,
     dfst = spse_AbstractDfstransformer();
     gt_assert(genericindex != NULL);
     limdfsresources = newLimdfsresources(genericindex,
-                           true,
-                           0,
-                           (unsigned long) INTWORDSIZE,
-                           false, /* keepexpandedonstack */
-                           showmatch,
-                           NULL, /* processmatch info */
-                           NULL, /* processresult */
-                           NULL, /* processresult info */
-                           dfst);
+                                         true,
+                                         0,
+                                         (unsigned long) INTWORDSIZE,
+                                         false, /* keepexpandedonstack */
+                                         showmatch,
+                                         NULL, /* processmatch info */
+                                         NULL, /* processresult */
+                                         NULL, /* processresult info */
+                                         dfst);
     encseq = genericindex_getencseq(genericindex);
     seqit = gt_seqiterator_new(queryfilenames,
                                getencseqAlphabetsymbolmap(encseq),

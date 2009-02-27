@@ -57,9 +57,8 @@ static GtDrawingRange calculate_drawing_range(GtLineBreakerCaptions *lbc,
   return drange;
 }
 
-bool gt_line_breaker_captions_is_gt_line_occupied(GtLineBreaker* lb,
-                                                  GtLine *line,
-                                                  GtBlock *block)
+bool gt_line_breaker_captions_is_line_occupied(GtLineBreaker* lb, GtLine *line,
+                                               GtBlock *block)
 {
   GtDrawingRange dr;
   GtLineBreakerCaptions *lbcap;
@@ -105,7 +104,7 @@ const GtLineBreakerClass* gt_line_breaker_captions_class(void)
   if (!lbc)
   {
     lbc = gt_line_breaker_class_new(sizeof (GtLineBreakerCaptions),
-                                   gt_line_breaker_captions_is_gt_line_occupied,
+                                   gt_line_breaker_captions_is_line_occupied,
                                    gt_line_breaker_captions_register_block,
                                    gt_line_breaker_captions_delete);
   }

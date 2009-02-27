@@ -57,8 +57,8 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
   return fb;
 }
 
-static inline int ownbuffergt_genfile_getc(GtFastaBuffer *fb,
-                                           GtGenFile *inputstream)
+static inline int ownbuffer_genfile_getc(GtFastaBuffer *fb,
+                                         GtGenFile *inputstream)
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {
@@ -114,7 +114,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
       fb->currentfillpos = 0;
     } else
     {
-      currentchar = ownbuffergt_genfile_getc(fb,fb->inputstream);
+      currentchar = ownbuffer_genfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
         gt_genfile_close(fb->inputstream);
@@ -268,7 +268,7 @@ static int advancePlainbufferstate(GtFastaBuffer *fb, GtError *err)
       fb->currentfillpos = 0;
     } else
     {
-      currentchar = ownbuffergt_genfile_getc(fb,fb->inputstream);
+      currentchar = ownbuffer_genfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
         gt_genfile_close(fb->inputstream);

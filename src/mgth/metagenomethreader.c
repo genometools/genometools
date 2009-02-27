@@ -565,8 +565,6 @@ int metagenomethreader(int argc, const char **argv, GtError * err)
         {
           had_err = 0;
         }
-        /* XXX else XXX */
-
         if (!had_err)
         {
           parsestruct.hitseq = gt_bioseq_new(argv[parsed_args + 2], err);

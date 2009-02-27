@@ -109,8 +109,8 @@ bool gt_transcript_exons_are_sorted(const GtTranscriptExons *te)
   return true;
 }
 
-GtTranscriptGtBittabs* gt_transcript_exons_create_bittabs(const
-                                                          GtTranscriptExons *te)
+GtTranscriptBittabs* gt_transcript_exons_create_bittabs(const
+                                                        GtTranscriptExons *te)
 {
   gt_assert(te);
   return gt_transcript_bittabs_new(gt_array_size(te->exon_array_all),

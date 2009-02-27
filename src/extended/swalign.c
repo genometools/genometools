@@ -113,13 +113,13 @@ static GtAlignment* smith_waterman_align(const char *u_orig, const char *v_orig,
     urange.end = --alignment_end.x;
     vrange.end = --alignment_end.y;
     /* employ sequence positions to set alignment sequences */
-    gt_alignment_set_seqs(a,
-                          u_orig,
-                          urange.end - urange.start + 1,
-                          urange,
-                          v_orig,
-                          vrange.end - vrange.start + 1,
-                          vrange);
+    gt_alignment_set_seqs_with_range(a,
+                                     (const Uchar *) u_orig,
+                                     urange.end - urange.start + 1,
+                                     urange,
+                                     (const Uchar *) v_orig,
+                                     vrange.end - vrange.start + 1,
+                                     vrange);
   }
   gt_array2dim_delete(dptable);
   return a;

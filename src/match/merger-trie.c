@@ -21,6 +21,7 @@
 #include "format64.h"
 #include "intbits-tab.h"
 #include "divmodmul.h"
+#include "spacedef.h"
 #include "encseq-def.h"
 
 #include "merger-trie.h"
@@ -260,7 +261,7 @@ void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
                       numberofleaves);
       exit(EXIT_FAILURE); /* programming error */
     }
-    FREESPACE(leafused);
+    gt_free(leafused);
   }
 }
 

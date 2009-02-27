@@ -125,13 +125,13 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(optionmaxdepth);
 
   optiononline = gt_option_new_bool("online","Perform online searches",
-                            &arguments->online, false);
+                                    &arguments->doonline, false);
   gt_option_parser_add_option(op, optiononline);
   gt_option_is_development_option(optiononline);
 
   optioncmp = gt_option_new_bool("cmp","compare results of offline and online "
-                              "searches",
-                            &arguments->docompare, false);
+                                 "searches",
+                                 &arguments->docompare, false);
   gt_option_parser_add_option(op, optioncmp);
   gt_option_exclude(optiononline,optioncmp);
   gt_option_is_development_option(optioncmp);
@@ -205,7 +205,7 @@ static int gt_tagerator_arguments_check(GT_UNUSED int rest_argc,
   }
   if (arguments->userdefinedmaxdistance < 0)
   {
-    if (arguments->online)
+    if (arguments->doonline)
     {
       gt_error_set(err,"option -online requires option -e");
       return -1;

@@ -38,9 +38,9 @@ typedef enum {
 static int gt_fasta_reader_fsm_run(GtFastaReader *fasta_reader,
                                    GtFastaReaderProcDescription
                                    proc_description,
-                                   GtFastaReaderProcGtSequencePart
+                                   GtFastaReaderProcSequencePart
                                    proc_sequence_part,
-                                   GtFastaReaderProcGtSequenceLength
+                                   GtFastaReaderProcSequenceLength
                                    proc_sequence_length,
                                    void *data, GtError *err)
 {

@@ -1,0 +1,16 @@
+##gff-version   3
+##sequence-region   ctg123 1 1497228
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1
+ctg123	.	CDS	1201	1500	.	+	0	ID=CDS1;Parent=gene1
+ctg123	.	CDS	3000	3902	.	+	0	ID=CDS1;Parent=gene1
+###
+##sequence-region   ctg123 1 1497228
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1.1
+ctg123	.	CDS	1201	1500	.	+	0	ID=CDS1.1;Parent=gene1.1
+ctg123	.	CDS	3000	3902	.	+	0	ID=CDS1.1;Parent=gene1.1
+###
+##sequence-region   ctg123 1 1497228
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1.2
+ctg123	.	CDS	1201	1500	.	+	0	ID=CDS1.2;Parent=gene1.2
+ctg123	.	CDS	3000	3902	.	+	0	ID=CDS1.2;Parent=gene1.2
+###

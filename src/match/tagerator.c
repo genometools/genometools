@@ -78,12 +78,7 @@ typedef struct
           (void) putchar('\t');\
         }
 
-static void showmatch(void *processinfo,
-                      Seqpos dbstartpos,
-                      Seqpos dblen,
-                      const Uchar *dbsubstring,
-                      unsigned long pprefixlen,
-                      unsigned long distance)
+static void showmatch(void *processinfo,const GtMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   bool firstitem = true;
@@ -91,19 +86,20 @@ static void showmatch(void *processinfo,
   gt_assert(showmatchinfo->tageratoroptions != NULL);
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBLENGTH)
   {
-    printf(FormatSeqpos,PRINTSeqposcast(dblen));
+    printf(FormatSeqpos,PRINTSeqposcast(match->dblen));
     firstitem = false;
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSTARTPOS)
   {
     ADDTABULATOR;
-    printf(FormatSeqpos,PRINTSeqposcast(dbstartpos));
+    printf(FormatSeqpos,PRINTSeqposcast(match->dbstartpos));
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_DBSEQUENCE)
   {
     ADDTABULATOR;
-    gt_assert(dbsubstring != NULL);
-    printfsymbolstring(showmatchinfo->alpha,dbsubstring,(unsigned long) dblen);
+    gt_assert(match->dbsubstring != NULL);
+    printfsymbolstring(showmatchinfo->alpha,match->dbsubstring,
+                       (unsigned long) match->dblen);
   }
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_STRAND)
   {
@@ -113,7 +109,7 @@ static void showmatch(void *processinfo,
   if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_EDIST)
   {
     ADDTABULATOR;
-    printf("%lu",distance);
+    printf("%lu",match->distance);
   }
   if (showmatchinfo->tageratoroptions->maxintervalwidth > 0)
   {
@@ -125,17 +121,17 @@ static void showmatch(void *processinfo,
         unsigned long suffixlength
           = reversesuffixmatch(showmatchinfo->eqsvector,
                                showmatchinfo->alphasize,
-                               dbsubstring,
-                               (unsigned long) dblen,
+                               match->dbsubstring,
+                               (unsigned long) match->dblen,
                                showmatchinfo->tagptr,
-                               pprefixlen,
+                               match->querylen,
                                (unsigned long) showmatchinfo->tageratoroptions->
                                                         userdefinedmaxdistance);
-        gt_assert(pprefixlen >= suffixlength);
+        gt_assert(match->querylen >= suffixlength);
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSTARTPOS)
         {
           ADDTABULATOR;
-          printf("%lu",pprefixlen - suffixlength);
+          printf("%lu",match->querylen - suffixlength);
         }
         if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
         {
@@ -146,7 +142,7 @@ static void showmatch(void *processinfo,
         {
           ADDTABULATOR;
           printfsymbolstring(NULL,showmatchinfo->tagptr +
-                                  (pprefixlen - suffixlength),
+                                  (match->querylen - suffixlength),
                                   suffixlength);
         }
       }
@@ -160,12 +156,12 @@ static void showmatch(void *processinfo,
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGLENGTH)
       {
         ADDTABULATOR;
-        printf("%lu",pprefixlen);
+        printf("%lu",match->querylen);
       }
       if (showmatchinfo->tageratoroptions->outputmode & TAGOUT_TAGSUFFIXSEQ)
       {
         ADDTABULATOR;
-        printfsymbolstring(NULL,showmatchinfo->tagptr, pprefixlen);
+        printfsymbolstring(NULL,showmatchinfo->tagptr, match->querylen);
       }
     }
   }
@@ -182,20 +178,15 @@ typedef struct
   const Tagwithlength *twlptr;
 } ArraySimplematch;
 
-static void storematch(void *processinfo,
-                       Seqpos dbstartpos,
-                       Seqpos dblen,
-                       GT_UNUSED const Uchar *dbsubstring,
-                       GT_UNUSED unsigned long pprefixlen,
-                       GT_UNUSED unsigned long distance)
+static void storematch(void *processinfo,const GtMatch *match)
 {
   ArraySimplematch *storetab = (ArraySimplematch *) processinfo;
-  Simplematch *match;
+  Simplematch *simplematch;
 
-  GETNEXTFREEINARRAY(match,storetab,Simplematch,32);
-  match->dbstartpos = dbstartpos;
-  match->matchlength = dblen;
-  match->rcmatch = ISRCDIR(storetab->twlptr);
+  GETNEXTFREEINARRAY(simplematch,storetab,Simplematch,32);
+  simplematch->dbstartpos = match->dbstartpos;
+  simplematch->matchlength = match->dblen;
+  simplematch->rcmatch = ISRCDIR(storetab->twlptr);
 }
 
 static void checkmstats(void *processinfo,
@@ -356,7 +347,7 @@ static int dotransformtag(Uchar *transformedtag,
 static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  bool domstats,
                                  unsigned long maxdistance,
-                                 bool online,
+                                 bool doonline,
                                  bool docompare,
                                  unsigned long maxintervalwidth,
                                  bool skpp,
@@ -365,12 +356,12 @@ static bool performpatternsearch(const AbstractDfstransformer *dfst,
                                  const Uchar *tagptr,
                                  unsigned long taglen)
 {
-  if (online || (!domstats && docompare))
+  if (doonline || (!domstats && docompare))
   {
     gt_assert(mor != NULL);
     edistmyersbitvectorAPM(mor,tagptr,taglen,maxdistance);
   }
-  if (!online || docompare)
+  if (!doonline || docompare)
   {
     if (domstats)
     {
@@ -507,7 +498,7 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
         if (performpatternsearch(dfst,
                                  domstats,
                                  distance,
-                                 tageratoroptions->online,
+                                 tageratoroptions->doonline,
                                  tageratoroptions->docompare,
                                  tageratoroptions->maxintervalwidth,
                                  tageratoroptions->skpp,
@@ -533,25 +524,15 @@ static void searchoverstrands(const TageratorOptions *tageratoroptions,
 
 int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
 {
-  GtSeqIterator *seqit = NULL;
   bool haserr = false;
   int retval;
   Myersonlineresources *mor = NULL;
-  ArraySimplematch storeonline, storeoffline;
-  const AbstractDfstransformer *dfst;
   Genericindex *genericindex = NULL;
   const Encodedsequence *encseq = NULL;
   Verboseinfo *verboseinfo;
 
   verboseinfo = newverboseinfo(tageratoroptions->verbose);
-  if (tageratoroptions->userdefinedmaxdistance >= 0)
-  {
-    dfst = apme_AbstractDfstransformer();
-  } else
-  {
-    dfst = pms_AbstractDfstransformer();
-  }
-  if (tageratoroptions->online)
+  if (tageratoroptions->doonline)
   {
     encseq = mapencodedsequence (true,
                                  tageratoroptions->indexname,
@@ -568,7 +549,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     genericindex = genericindex_new(tageratoroptions->indexname,
                                     tageratoroptions->withesa,
+                                    tageratoroptions->withesa ||
                                     tageratoroptions->docompare,
+                                    false,
+                                    false,
                                     tageratoroptions->userdefinedmaxdepth,
                                     verboseinfo,
                                     err);
@@ -580,8 +564,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       encseq = genericindex_getencseq(genericindex);
     }
   }
-  INITARRAY(&storeonline,Simplematch);
-  INITARRAY(&storeoffline,Simplematch);
   if (!haserr)
   {
     Tagwithlength twl;
@@ -594,7 +576,19 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;
     const SfxAlphabet *alpha;
+    ArraySimplematch storeonline, storeoffline;
+    const AbstractDfstransformer *dfst;
+    GtSeqIterator *seqit = NULL;
 
+    if (tageratoroptions->userdefinedmaxdistance >= 0)
+    {
+      dfst = apme_AbstractDfstransformer();
+    } else
+    {
+      dfst = pms_AbstractDfstransformer();
+    }
+    INITARRAY(&storeonline,Simplematch);
+    INITARRAY(&storeoffline,Simplematch);
     storeonline.twlptr = storeoffline.twlptr = &twl;
     alpha = getencseqAlphabet(encseq);
     symbolmap = getsymbolmapAlphabet(alpha);
@@ -617,7 +611,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
       processmatchinfooffline = &showmatchinfo;
       processmatchinfoonline = &showmatchinfo;
     }
-    if (tageratoroptions->online || tageratoroptions->docompare)
+    if (tageratoroptions->doonline || tageratoroptions->docompare)
     {
       gt_assert(encseq != NULL);
       mor = newMyersonlineresources(numofchars,
@@ -626,7 +620,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                     processmatch,
                                     processmatchinfoonline);
     }
-    if (!tageratoroptions->online || tageratoroptions->docompare)
+    if (!tageratoroptions->doonline || tageratoroptions->docompare)
     {
       unsigned long maxpathlength;
 
@@ -729,9 +723,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     {
       freeLimdfsresources(&limdfsresources,dfst);
     }
+    FREEARRAY(&storeonline,Simplematch);
+    FREEARRAY(&storeoffline,Simplematch);
+    gt_seqiterator_delete(seqit);
   }
-  FREEARRAY(&storeonline,Simplematch);
-  FREEARRAY(&storeoffline,Simplematch);
   if (mor != NULL)
   {
     freeMyersonlineresources(&mor);
@@ -744,7 +739,6 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     genericindex_delete(genericindex);
   }
-  gt_seqiterator_delete(seqit);
   freeverboseinfo(&verboseinfo);
   return haserr ? -1 : 0;
 }

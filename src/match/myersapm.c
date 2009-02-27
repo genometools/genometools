@@ -89,6 +89,7 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
   Uchar cc;
   Seqpos pos;
   const Readmode readmode = Reversemode;
+  GtMatch match;
 
   initeqsvectorrev(mor->eqsvectorrev,
                    (unsigned long) mor->alphasize,
@@ -98,6 +99,11 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
                                mor->encseq,
                                readmode,
                                0);
+  match.dbabsolute = NULL;
+  match.dbsubstring = NULL;
+  match.querystartpos = 0;
+  match.querylen = patternlength;
+  match.alignment = NULL;
   for (pos = 0; pos < mor->totallength; pos++)
   {
     cc = sequentialgetencodedchar(mor->encseq,
@@ -162,12 +168,10 @@ void edistmyersbitvectorAPM(Myersonlineresources *mor,
         assert (matchlength.defined || mor->nowildcards);
         if (matchlength.defined)
         {
-          mor->processmatch(mor->processmatchinfo,
-                            dbstartpos,
-                            (Seqpos) matchlength.valueunsignedlong,
-                            NULL,
-                            patternlength,
-                            score);
+          match.dbstartpos = dbstartpos;
+          match.dblen = (Seqpos) matchlength.valueunsignedlong;
+          match.distance = score;
+          mor->processmatch(mor->processmatchinfo,&match);
         }
       }
     }

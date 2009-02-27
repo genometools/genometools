@@ -19,19 +19,28 @@
 #define ALIGNMENT_H
 
 #include <stdio.h>
-#include "core/error.h"
 #include "core/range.h"
+#include "core/symboldef.h"
+#include "core/error_api.h"
 
 /* the GtAlignment class (an object has to be contructed backwards) */
 typedef struct GtAlignment GtAlignment;
 
 GtAlignment*  gt_alignment_new(void);
-GtAlignment*  gt_alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                         const char *v, unsigned long vlen);
-void          gt_alignment_set_seqs(GtAlignment*, const char *u,
+GtAlignment*  gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
+                                         const Uchar *v, unsigned long vlen);
+void          gt_alignment_set_seqs(GtAlignment*,
+                                    const Uchar *u,
                                     unsigned long ulen,
-                                    GtRange urange, const char *v,
-                                    unsigned long vlen, GtRange vrange);
+                                    const Uchar *v,
+                                    unsigned long vlen);
+void          gt_alignment_set_seqs_with_range(GtAlignment*,
+                                               const Uchar *u,
+                                               unsigned long ulen,
+                                               GtRange urange,
+                                               const Uchar *v,
+                                               unsigned long vlen,
+                                               GtRange vrange);
 GtRange       gt_alignment_get_urange(GtAlignment*);
 GtRange       gt_alignment_get_vrange(GtAlignment*);
 void          gt_alignment_add_replacement(GtAlignment*);
@@ -39,9 +48,19 @@ void          gt_alignment_add_deletion(GtAlignment*);
 void          gt_alignment_add_insertion(GtAlignment*);
 /* undo last add operation */
 void          gt_alignment_remove_last(GtAlignment*);
+/* reset list of edit operations to empty */
+void          gt_alignment_reset(GtAlignment *a);
 /* returns unit cost */
 unsigned long gt_alignment_eval(const GtAlignment*);
+long          gt_alignment_eval_with_score(const GtAlignment *a,
+                                           long matchscore,
+                                           long mismatchscore,
+                                           long gapscore);
 void          gt_alignment_show(const GtAlignment*, FILE*);
+void          gt_alignment_show_with_mapped_chars(const GtAlignment*,
+                                                  const Uchar *characters,
+                                                  Uchar wildcardshow,
+                                                  FILE *fp);
 void          gt_alignment_show_multieop_list(const GtAlignment*, FILE*);
 int           gt_alignment_unit_test(GtError*);
 void          gt_alignment_delete(GtAlignment*);

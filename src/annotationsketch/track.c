@@ -60,7 +60,7 @@ static GtLine* get_next_free_line(GtTrack *track, GtBlock *block)
   /* find unoccupied line -- may need optimisation */
   for (i = 0; i < gt_array_size(track->lines); i++) {
     line = *(GtLine**) gt_array_get(track->lines, i);
-    if (!gt_line_breaker_gt_line_is_occupied(track->lb, line, block))
+    if (!gt_line_breaker_line_is_occupied(track->lb, line, block))
       return line;
   }
   /* if line limit is hit, do not create any more lines! */

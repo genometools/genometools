@@ -84,21 +84,21 @@ int gt_upgma(int argc, const char **argv, GtError *err)
     use_hard_coded_example = true;
 
   if (use_hard_coded_example)
-    upgma = gt_upggt_new(5, NULL, exampledistfunc);
+    upgma = gt_upgma_new(5, NULL, exampledistfunc);
   else {
     bioseq = gt_bioseq_new(argv[parsed_args], err);
     if (!bioseq)
       had_err = -1;
     if (!had_err)
-      upgma = gt_upggt_new(gt_bioseq_number_of_sequences(bioseq), bioseq,
+      upgma = gt_upgma_new(gt_bioseq_number_of_sequences(bioseq), bioseq,
                            distfunc);
   }
 
   if (!had_err)
-    gt_upggt_show_tree(upgma, stdout);
+    gt_upgma_show_tree(upgma, stdout);
 
   gt_bioseq_delete(bioseq);
-  gt_upggt_delete(upgma);
+  gt_upgma_delete(upgma);
 
   return had_err;
 }

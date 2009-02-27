@@ -45,42 +45,42 @@ typedef struct
 struct AbstractDfstransformer
 {
   size_t sizeofdfsstate;
-  void *(*allocatedfsconstinfo)(unsigned int alphasize);
-  void (*initdfsconstinfo)(void *dfsconstinfo,
+  Limdfsconstinfo *(*allocatedfsconstinfo)(unsigned int alphasize);
+  void (*initdfsconstinfo)(Limdfsconstinfo *dfsconstinfo,
                            unsigned int alphasize,
                            ...);
   void (*extractdfsconstinfo)(Processresult processresult,
                               void *processinfo,
                               const void *patterninfo,
-                              void *dfsconstinfo);
-  void (*freedfsconstinfo)(void **dfsconstinfo);
+                              Limdfsconstinfo *dfsconstinfo);
+  void (*freedfsconstinfo)(Limdfsconstinfo **dfsconstinfo);
   void (*initrootLimdfsstate)(DECLAREPTRDFSSTATE(aliasstate),
-                              void *dfsconstinfo);
+                              Limdfsconstinfo *dfsconstinfo);
   void (*initLimdfsstackelem)(DECLAREPTRDFSSTATE(aliasstate));
   void (*freeLimdfsstackelem)(DECLAREPTRDFSSTATE(aliasstate));
   void (*copyLimdfsstate)(DECLAREPTRDFSSTATE(deststate),
                           const DECLAREPTRDFSSTATE(srcstate),
-                          void *dfsconstinfo);
+                          Limdfsconstinfo *dfsconstinfo);
   void (*fullmatchLimdfsstate)(Limdfsresult *limdfsresult,
                                DECLAREPTRDFSSTATE(aliascolumn),
                                Seqpos left,
                                Seqpos right,
                                Seqpos width,
                                unsigned long currentdepth,
-                               void *dfsconstinfo);
-  void (*nextLimdfsstate)(const void *dfsconstinfo,
+                               Limdfsconstinfo *dfsconstinfo);
+  void (*nextLimdfsstate)(const Limdfsconstinfo *dfsconstinfo,
                           DECLAREPTRDFSSTATE(aliasoutstate),
                           unsigned long currentdepth,
                           Uchar currentchar,
                           const DECLAREPTRDFSSTATE(aliasinstate));
-  void (*inplacenextLimdfsstate)(const void *dfsconstinfo,
+  void (*inplacenextLimdfsstate)(const Limdfsconstinfo *dfsconstinfo,
                                  DECLAREPTRDFSSTATE(aliasstate),
                                  unsigned long currentdepth,
                                  Uchar currentchar);
 #ifdef SKDEBUG
   void (*showLimdfsstate)(const DECLAREPTRDFSSTATE(aliasstate),
                           unsigned long currentdepth,
-                          const void *dfsconstinfo);
+                          const Limdfsconstinfo *dfsconstinfo);
 #endif
 };
 

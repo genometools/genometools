@@ -25,9 +25,9 @@ typedef struct GtUPGMA GtUPGMA;
 
 typedef double (*GtUPGMADistFunc)(unsigned long, unsigned long, void *data);
 
-GtUPGMA* gt_upggt_new(unsigned long num_of_taxa, void *data,
+GtUPGMA* gt_upgma_new(unsigned long num_of_taxa, void *data,
                       GtUPGMADistFunc distfunc);
-void     gt_upggt_show_tree(const GtUPGMA*, FILE*);
-void     gt_upggt_delete(GtUPGMA*);
+void     gt_upgma_show_tree(const GtUPGMA*, FILE*);
+void     gt_upgma_delete(GtUPGMA*);
 
 #endif

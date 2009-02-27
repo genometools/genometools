@@ -18,7 +18,7 @@ threshold=$3
 # vstree2tex.x -tis -suf -s esa-mkv > tmp.tex
 # gt suffixerator -tis -suf -dna -pl -db ${reference} -indexname esa-fwd
 # gt tagerator -e 2 -maxocc 20 -rw -esa esa-fwd -q ${query}
-gt packedindex mkindex -tis -indexname pck-rev -db ${reference} -sprank -dna -pl -bsize 10 -locfreq 32 -dir rev
+gt packedindex mkindex -ssp -tis -indexname pck-rev -db ${reference} -sprank -dna -pl -bsize 10 -locfreq 32 -dir rev
 gt prebwt -maxdepth 4 -pck pck-rev
-valgrind.sh gt dev idxlocali -pck pck-rev -q ${query} -th ${threshold}
+gt dev idxlocali -s -pck pck-rev -q ${query} -th ${threshold} -cmp 
 # gt tagerator -maxocc 10 -rw -pck pck-rev -q ${query}

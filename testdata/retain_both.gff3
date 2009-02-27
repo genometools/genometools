@@ -1,0 +1,9 @@
+##gff-version   3
+##sequence-region   1 2 2
+1	ucb	gene	2	2	.	-	.	ID=geneA
+###
+1	ucb	gene	2	2	.	+	.	ID=geneB
+###
+##sequence-region   1 4 4
+1	ucb	gene	4	4	.	-	.	ID=geneA.1
+###

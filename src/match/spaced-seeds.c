@@ -31,35 +31,35 @@ typedef struct
   bool pathmatches;
 } Limdfsstate;
 
-typedef struct
+struct Limdfsconstinfo
 {
   Bitstring seedbitvector;
   unsigned long seedweight;
   const Uchar *pattern;
-} Matchtaskinfo;
+};
 
 #ifdef SKDEBUG
 
 static void spse_showLimdfsstate(const DECLAREPTRDFSSTATE(aliascol),
                                 unsigned long currentdepth,
-                                GT_UNUSED const void *dfsconstinfo)
+                                GT_UNUSED const Limdfsconstinfo *mti)
 {
   const Limdfsstate *col = (const Limdfsstate *) aliascol;
 
   printf("at depth %lu (pathmatches=%s)\n",currentdepth,
-                                            col->pathmatches
-                                              ? "true" : "false");
+                                           col->pathmatches ? "true" : "false");
 }
 
 #endif
 
-static void *spse_allocatedfsconstinfo(GT_UNUSED unsigned int alphasize)
+static Limdfsconstinfo *spse_allocatedfsconstinfo(
+                               GT_UNUSED unsigned int alphasize)
 {
-  Matchtaskinfo *mti = gt_malloc(sizeof(Matchtaskinfo));
+  Limdfsconstinfo *mti = gt_malloc(sizeof(Limdfsconstinfo));
   return mti;
 }
 
-static void spse_initdfsconstinfo(void *dfsconstinfo,
+static void spse_initdfsconstinfo(Limdfsconstinfo *mti,
                                   unsigned int alphasize,
                                   ...)
                                  /* Variable argument list is as follows:
@@ -69,7 +69,6 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
                                  */
 {
   va_list ap;
-  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   va_start(ap,alphasize);
   mti->pattern = va_arg(ap, const Uchar *);
@@ -78,16 +77,14 @@ static void spse_initdfsconstinfo(void *dfsconstinfo,
   va_end(ap);
 }
 
-static void spse_freedfsconstinfo(void **dfsconstinfo)
+static void spse_freedfsconstinfo(Limdfsconstinfo **mtiptr)
 {
-  Matchtaskinfo *mti = (Matchtaskinfo *) *dfsconstinfo;
-
-  gt_free(mti);
-  *dfsconstinfo = NULL;
+  gt_free(*mtiptr);
+  *mtiptr = NULL;
 }
 
 static void spse_initLimdfsstate(DECLAREPTRDFSSTATE(aliascolumn),
-                                 GT_UNUSED void *dfsconstinfo)
+                                 GT_UNUSED Limdfsconstinfo *mti)
 {
   Limdfsstate *column = (Limdfsstate *) aliascolumn;
 
@@ -100,10 +97,9 @@ static void spse_fullmatchLimdfsstate(Limdfsresult *limdfsresult,
                                       GT_UNUSED Seqpos rightbound,
                                       GT_UNUSED Seqpos width,
                                       unsigned long currentdepth,
-                                      void *dfsconstinfo)
+                                      Limdfsconstinfo *mti)
 {
   Limdfsstate *limdfsstate = (Limdfsstate *) aliascolumn;
-  Matchtaskinfo *mti = (Matchtaskinfo *) dfsconstinfo;
 
   if (limdfsstate->pathmatches)
   {
@@ -132,13 +128,12 @@ static bool setpathmatch(Bitstring seedbitvector,
           currentchar == pattern[currentdepth-1]) ? true : false;
 }
 
-static void spse_nextLimdfsstate(const void *dfsconstinfo,
+static void spse_nextLimdfsstate(const Limdfsconstinfo *mti,
                                  DECLAREPTRDFSSTATE(aliasoutcol),
                                  unsigned long currentdepth,
                                  Uchar currentchar,
                                  GT_UNUSED const DECLAREPTRDFSSTATE(aliasincol))
 {
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *outcol = (Limdfsstate *) aliasoutcol;
 #ifndef NDEBUG
   const Limdfsstate *incol = (const Limdfsstate *) aliasincol;
@@ -154,12 +149,11 @@ static void spse_nextLimdfsstate(const void *dfsconstinfo,
                                      currentchar);
 }
 
-static void spse_inplacenextLimdfsstate(const void *dfsconstinfo,
+static void spse_inplacenextLimdfsstate(const Limdfsconstinfo *mti,
                                         DECLAREPTRDFSSTATE(aliascol),
                                         unsigned long currentdepth,
                                         Uchar currentchar)
 {
-  const Matchtaskinfo *mti = (const Matchtaskinfo *) dfsconstinfo;
   Limdfsstate *col = (Limdfsstate *) aliascol;
 
   gt_assert(ISNOTSPECIAL(currentchar));

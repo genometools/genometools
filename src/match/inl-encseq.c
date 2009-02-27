@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifdef INLINEDENCSEQ
+#ifdef INLINEDENCSEQXXXX
 #include "core/chardef.h"
 #include "core/filelengthvalues.h"
 #include "core/fa.h"
@@ -26,7 +26,7 @@
 #include "spacedef.h"
 #include "opensfxfile.h"
 
-#include "fillsci.pr"
+#include "fillsci.h"
 
 #define TISTABFILESUFFIX ".tis"
 

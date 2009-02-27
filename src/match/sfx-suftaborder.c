@@ -197,7 +197,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
     fprintf(stderr,"ERROR: not all bits are set\n");
     exit(EXIT_FAILURE); /* programming error */
   }
-  FREESPACE(startposoccurs);
+  gt_free(startposoccurs);
   esr1 = newEncodedsequencescanstate();
   esr2 = newEncodedsequencescanstate();
   gt_assert(*suftab < totallength);

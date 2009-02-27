@@ -340,7 +340,7 @@ static void gt_tyr_occratio_arguments_delete(void *tool_arguments)
   gt_str_array_delete(arguments->outputspec);
   gt_str_delete(arguments->str_inputindex);
   gt_option_delete(arguments->refoptionmersizes);
-  FREESPACE(arguments->outputvector);
+  gt_free(arguments->outputvector);
   gt_free(arguments);
 }
 

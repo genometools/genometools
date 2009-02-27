@@ -45,6 +45,8 @@ unsigned int getnumofcharsAlphabet(const SfxAlphabet *alpha);
 
 const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha);
 
+Uchar getwildcardshowAlphabet(const SfxAlphabet *alpha);
+
 void freeSfxAlphabet(SfxAlphabet **alpha);
 
 void outputalphabet(FILE *fpout,const SfxAlphabet *alpha);

@@ -117,68 +117,66 @@ static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
           Seqpos tsd_len;
           tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
 
-          /* TSD length too big */
-          if (tsd_len > (Seqpos)info->lmax)
+          /* TSD length not too big */
+          if (tsd_len <= (Seqpos)info->lmax)
           {
-            /* nothing */
-          }
-          /* first hit */
-          else if ( !boundaries->motif_near_tsd )
-          {
-            Seqpos max, min;
-
-            /* save number of mismatches */
-            *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
-            *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
-
-            /* adjust boundaries */
-            boundaries->motif_near_tsd = true;
-            boundaries->leftLTR_5  = motifpos1 - back;
-            boundaries->rightLTR_3 = motifpos2 + 1 + forward;
-
-            /* store TSD length */
-            boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
-
-            max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
-            min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
-            difffromoldboundary1 = max - min;
-
-            max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
-            min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
-            difffromoldboundary2 = max - min;
-
-            hitcounter++;
-          }
-          else
-          {
-            Seqpos max, min, difffromnewboundary1,
-                 difffromnewboundary2;
-
-            /* test if hit is nearer to old boundaries than previous hit */
-            max = MAX(oldleftLTR_5, (motifpos1 - back));
-            min = MIN(oldleftLTR_5, (motifpos1 - back));
-            difffromnewboundary1 = max - min;
-            max = MAX(oldrightLTR_3, (motifpos2 + 1 + forward));
-            min = MIN(oldrightLTR_3, (motifpos2 + 1 + forward));
-            difffromnewboundary2 = max - min;
-
-            if (difffromnewboundary1 + difffromnewboundary2 <
-                difffromoldboundary1 + difffromoldboundary2)
+            if ( !boundaries->motif_near_tsd )
             {
+              Seqpos max, min;
+
               /* save number of mismatches */
               *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
               *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
 
               /* adjust boundaries */
+              boundaries->motif_near_tsd = true;
               boundaries->leftLTR_5  = motifpos1 - back;
               boundaries->rightLTR_3 = motifpos2 + 1 + forward;
 
               /* store TSD length */
               boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
 
-              difffromoldboundary1 = difffromnewboundary1;
-              difffromoldboundary2 = difffromnewboundary2;
+              max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
+              min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
+              difffromoldboundary1 = max - min;
+
+              max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
+              min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
+              difffromoldboundary2 = max - min;
+
               hitcounter++;
+            }
+            else
+            {
+              Seqpos max, min, difffromnewboundary1,
+                   difffromnewboundary2;
+
+              /* test if hit is nearer to old boundaries than previous hit */
+              max = MAX(oldleftLTR_5, (motifpos1 - back));
+              min = MIN(oldleftLTR_5, (motifpos1 - back));
+              difffromnewboundary1 = max - min;
+              max = MAX(oldrightLTR_3, (motifpos2 + 1 + forward));
+              min = MIN(oldrightLTR_3, (motifpos2 + 1 + forward));
+              difffromnewboundary2 = max - min;
+
+              if (difffromnewboundary1 + difffromnewboundary2 <
+                  difffromoldboundary1 + difffromoldboundary2)
+              {
+                /* save number of mismatches */
+                *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
+                *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
+
+                /* adjust boundaries */
+                boundaries->leftLTR_5  = motifpos1 - back;
+                boundaries->rightLTR_3 = motifpos2 + 1 + forward;
+
+                /* store TSD length */
+                boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
+
+                difffromoldboundary1 = difffromnewboundary1;
+                difffromoldboundary2 = difffromnewboundary2;
+                hitcounter++;
+              }
             }
           }
         }

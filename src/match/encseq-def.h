@@ -63,55 +63,6 @@ typedef struct
          seqlength;    /* the length of the sequence */
 } Seqinfo;             /* \Typedef{Seqinfo} */
 
-#ifdef INLINEDENCSEQ
-
-typedef struct
-{
-  Uchar *plainseq;
-  Seqpos totallength;
-  bool hasownmemory, mappedfile, hasspecialcharacters;
-} Encodedsequence;
-
-typedef struct
-{
-  bool moveforward, exhausted;
-  const Encodedsequence *encseq;
-  Seqpos pos,
-         lengthofspecialrange;
-} Specialrangeiterator;
-
-typedef struct
-{
-  Readmode readmode;
-} Encodedsequencescanstate;
-
-#define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
-
-#define MAKECOMPL(CC)\
-        (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
-
-#define getencodedchar(ENCSEQ,POS,RM)\
-        (((RM) == Forwardmode)\
-          ? (ENCSEQ)->plainseq[POS]\
-          : (((RM) == Reversemode)\
-            ? (ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)]\
-            : (((RM) == Complementmode) \
-              ? MAKECOMPL((ENCSEQ)->plainseq[POS])\
-              : (MAKECOMPL((ENCSEQ)->plainseq[\
-                           REVERSEPOS((ENCSEQ)->totallength,POS)])\
-              )\
-            )\
-          )\
-        )
-
-#define getencodedcharnospecial(ENCSEQ,POS,RM)\
-        getencodedchar(ENCSEQ,POS,RM)
-
-#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS,READMODE)\
-        getencodedchar(ENCSEQ,POS,READMODE)
-
-#else
-
 typedef struct
 {
   Twobitencoding tbe;           /* two bit encoding */
@@ -123,21 +74,65 @@ typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 typedef struct Specialrangeiterator Specialrangeiterator;
 
+#ifdef INLINEDENCSEQ
+#include "encseq-type.h"
+#endif
+
+#ifdef INLINEDENCSEQ
+#define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
+#else
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
+#endif
 
+#ifdef INLINEDENCSEQ
+#define getencseqnumofdbsequences(ENCSEQ) ((ENCSEQ)->numofdbsequences)
+#else
 unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
+#endif
 
+#ifdef INLINEDENCSEQ
+#define MAKECOMPL(CC)\
+        (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
+/*@unused@*/ static inline Uchar getencodedchar(const Encodedsequence *encseq,
+                                                Seqpos pos,
+                                                Readmode readmode)
+{
+  return (readmode == Forwardmode)
+          ? encseq->plainseq[pos]
+          : ((readmode == Reversemode)
+            ? encseq->plainseq[REVERSEPOS(encseq->totallength,pos)]
+            : ((readmode == Complementmode)
+              ? MAKECOMPL(encseq->plainseq[pos])
+              : MAKECOMPL(encseq->plainseq[
+                           REVERSEPOS(encseq->totallength,pos)])
+              )
+            )
+         ;
+}
+#else
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
 
+#endif
+
+#ifdef INLINEDENCSEQ
+#define getencodedcharnospecial(ENCSEQ,POS,RM)\
+        getencodedchar(ENCSEQ,POS,RM)
+#else
 Uchar getencodedcharnospecial(const Encodedsequence *encseq,
                               Seqpos pos,
                               Readmode readmode);
+#endif
 
+#ifdef INLINEDENCSEQ
+#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS,READMODE)\
+        getencodedchar(ENCSEQ,POS,READMODE)
+#else
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos,
                                Readmode readmode);
+#endif
 
 void extract2bitenc(bool fwd,
                     EndofTwobitencoding *ptbe,
@@ -163,8 +158,6 @@ void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
 
 void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
                        const Seqpos startindex,const Seqpos len);
-
-#endif
 
 /* the functions with exactly the same interface for both implementation of
    encodedsequences */
@@ -338,6 +331,8 @@ const Uchar *getencseqAlphabetsymbolmap(const Encodedsequence *encseq);
 const SfxAlphabet *getencseqAlphabet(const Encodedsequence *encseq);
 
 const Uchar *getencseqAlphabetcharacters(const Encodedsequence *encseq);
+
+Uchar getencseqAlphabetwildcardshow(const Encodedsequence *encseq);
 
 /* Obtain the filenametable and the filelengthtable from the
    Encodedsequence */

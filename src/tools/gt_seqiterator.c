@@ -18,6 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <limits.h>
 #include "core/fileutils.h"
 #include "core/ma.h"
 #include "core/option.h"
@@ -81,7 +82,8 @@ static void showdistseqlen(unsigned long key, unsigned long long value,
 {
   unsigned long distvalue;
 
-  distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
+  gt_assert(value <= (unsigned long long) ULONG_MAX);
+  distvalue = (unsigned long) value;
   printf("%lu--%lu %lu\n",
          BUCKETSIZE * key,
          BUCKETSIZE * (key+1) - 1,

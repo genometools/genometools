@@ -76,8 +76,8 @@ void gt_line_breaker_delete(GtLineBreaker *lb)
   gt_free(lb);
 }
 
-bool gt_line_breaker_gt_line_is_occupied(GtLineBreaker *lb, GtLine *line,
-                                         GtBlock *block)
+bool gt_line_breaker_line_is_occupied(GtLineBreaker *lb, GtLine *line,
+                                      GtBlock *block)
 {
   gt_assert(lb && lb->c_class && line && block);
   return lb->c_class->is_occupied(lb, line, block);

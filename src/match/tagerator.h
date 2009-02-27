@@ -44,7 +44,7 @@ typedef struct
   const Optionargmodedesc *modedesc;
   bool verbose,
        withesa,
-       online,  /* perform online search, for testing */
+       doonline,  /* perform online search, for testing */
        docompare, /* compare results with online search */
        replacewildcard, /* replace wildcards by random symbol */
        nofwdmatch, /* do not perform matching on forward strand */

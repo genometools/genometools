@@ -18,8 +18,8 @@
 #ifndef INTBITS_TAB_H
 #define INTBITS_TAB_H
 #include <string.h>
+#include "core/ma_api.h"
 #include "intbits.h"
-#include "spacedef.h"
 
 #define DIVWORDSIZE(I)\
         ((I) >> LOGWORDSIZE)              /* \((I) div w\) */
@@ -47,7 +47,7 @@
 #define INITBITTABGENERIC(TAB,OLDTAB,NUMOFBITS)\
         {\
           size_t tabsize = NUMOFINTSFORBITS(NUMOFBITS);\
-          ALLOCASSIGNSPACE(TAB,OLDTAB,Bitstring,tabsize);\
+          TAB = gt_realloc(OLDTAB,sizeof(Bitstring) * tabsize);\
           (void) memset(TAB,0,sizeof(Bitstring) * tabsize);\
         }
 
