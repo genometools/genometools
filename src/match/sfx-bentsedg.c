@@ -91,6 +91,7 @@
                               sfxstrategy->cmpcharbychar);\
               } else\
               {\
+                countbltriesort++;\
                 blindtriesuffixsort(trierep,LEFT,\
                                     lcpsubtab == NULL\
                                       ? NULL \
@@ -127,6 +128,11 @@
         {\
           MAXVAL = commonunits;\
         }
+
+static unsigned long countinsertionsort = 0,
+                     countbltriesort = 0,
+                     countcountingsort = 0,
+                     countqsort = 0;
 
 DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -423,6 +429,7 @@ static void insertionsort(const Encodedsequence *encseq,
   showsuffixrange(encseq,fwd,complement,lcpsubtab,leftptr,rightptr,
                   depth);
 #endif
+  countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
   {
     for (pj = pi; pj > leftptr; pj--)
@@ -819,6 +826,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                 insertindex, end, equaloffset, currentwidth;
   /* const bool cmpcharbychar = false; */
 
+  countcountingsort++;
   countingsortinfo[0].suffix = left[0];
   countingsortinfo[0].lcpwithpivot = (unsigned char) UNITSIN2BITENC;
   countingsortinfo[0].cmpresult = (char) 0;
@@ -977,6 +985,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                       sfxstrategy->cmpcharbychar);
       } else
       {
+        countbltriesort++;
         blindtriesuffixsort(trierep,l,lcpsubtab == NULL
                                       ? NULL
                                       : lcpsubtab->spaceSeqpos+LCPINDEX(l),
@@ -1047,6 +1056,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         continue;
       }
     }
+    countqsort++;
     /* now pivot element is at index left */
     /* all elements to be compared are between pb and pc */
     /* pa is the position at which the next element smaller than the
@@ -1816,4 +1826,8 @@ void sortallbuckets(Seqpos *suftabptr,
     }
   }
 #endif
+  printf("countinsertionsort = %lu\n",countinsertionsort);
+  printf("countbltriesort = %lu\n",countbltriesort);
+  printf("countcountingsort = %lu\n",countcountingsort);
+  printf("countqsort = %lu\n",countqsort);
 }

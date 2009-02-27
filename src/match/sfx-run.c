@@ -414,7 +414,6 @@ static int runsuffixerator(bool doesa,
   bool haserr = false;
   Sfxseqinfo sfxseqinfo;
   unsigned int prefixlength;
-  Seqpos totallength = 0;
   Sfxstrategy sfxstrategy;
 
   gt_error_check(err);
@@ -482,10 +481,6 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    totallength = getencseqtotallength(sfxseqinfo.encseq);
-  }
-  if (!haserr)
-  {
     showsequencefeatures(verboseinfo,
                          sfxseqinfo.encseq,
                          sfxseqinfo.characterdistribution);
@@ -517,7 +512,7 @@ static int runsuffixerator(bool doesa,
                                &sfxstrategy.ssortmaxdepth,
                                so,
                                numofchars,
-                               totallength,
+                               getencseqtotallength(sfxseqinfo.encseq),
                                verboseinfo,
                                err) != 0)
       {
@@ -647,6 +642,7 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
       haserr = true;
     }
     freeverboseinfo(&verboseinfo);
+    showgetencodedcharcounters();
   } else
   {
     if (retval < 0)

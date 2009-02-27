@@ -525,6 +525,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                 sfi->sfxstrategy.maxcountingsort);
     showverbose(verboseinfo,"storespecialcodes = %s",
                 sfi->sfxstrategy.storespecialcodes ? "true" : "false");
+    showverbose(verboseinfo,"cmpcharbychar = %s",
+                sfi->sfxstrategy.cmpcharbychar ? "true" : "false");
     if (sfi->sfxstrategy.ssortmaxdepth.defined)
     {
       showverbose(verboseinfo,"ssortmaxdepth = %u",

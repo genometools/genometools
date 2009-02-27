@@ -240,10 +240,13 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq)
   return encseq->numofdbsequences;
 }
 
+static uint64_t countgetencodedchar = 0;
+
 Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
 {
+  countgetencodedchar++;
   gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
@@ -317,11 +320,14 @@ struct Encodedsequencescanstate
 };
 
 #ifndef INLINEDENCSEQ
+static uint64_t countsequentialgetencodedchar = 0;
+
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos,
                                Readmode readmode)
 {
+  countsequentialgetencodedchar++;
   gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
@@ -348,6 +354,14 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
   }
 }
 #endif
+
+void showgetencodedcharcounters(void)
+{
+  printf("calls of getencodedchar = " Formatuint64_t "\n",
+          PRINTuint64_tcast(countgetencodedchar));
+  printf("calls of sequentialgetencodedchar = " Formatuint64_t "\n",
+          PRINTuint64_tcast(countsequentialgetencodedchar));
+}
 
 /* The following function is only used in tyr-mkindex.c */
 
@@ -3193,13 +3207,11 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
 {
   Seqpos stoppos;
 
-  gt_assert(encseq->sat != Viadirectaccess && encseq->sat != Viabytecompress);
+  gt_assert(encseq->sat != Viadirectaccess &&
+            encseq->sat != Viabytecompress &&
+            encseq->sat != Viabitaccess);
+  /* fwdextract2bitenc for bitaccess not implemented yet */
   gt_assert(startpos < encseq->totallength);
-  if (encseq->sat == Viabitaccess)
-  {
-    fprintf(stderr,"fwdextract2bitenc for bitaccess not implemented yet\n");
-    exit(EXIT_FAILURE);
-  }
   if (hasspecialranges(encseq))
   {
     stoppos = fwdgetnextstoppos(encseq,esr,startpos);
@@ -3208,11 +3220,7 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
     stoppos = encseq->totallength;
   }
   ptbe->position = startpos;
-  if (startpos >= stoppos)
-  {
-    ptbe->unitsnotspecial = 0;
-    ptbe->tbe = 0;
-  } else
+  if (startpos < stoppos)
   {
     unsigned long remain;
 
@@ -3241,6 +3249,10 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
     {
       ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(startpos)];
     }
+  } else
+  {
+    ptbe->unitsnotspecial = 0;
+    ptbe->tbe = 0;
   }
 }
 
@@ -3251,12 +3263,10 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
 {
   Seqpos stoppos;
 
-  gt_assert(encseq->sat != Viadirectaccess && encseq->sat != Viabytecompress);
-  if (encseq->sat == Viabitaccess)
-  {
-    fprintf(stderr,"revextract2bitenc for bitaccess not implemented yet\n");
-    exit(EXIT_FAILURE);
-  }
+  gt_assert(encseq->sat != Viadirectaccess &&
+            encseq->sat != Viabytecompress &&
+            encseq->sat != Viabitaccess);
+  /* revextract2bitenc for bitaccess not implemented yet */
   if (hasspecialranges(encseq))
   {
     stoppos = revgetnextstoppos(encseq,esr,startpos);
@@ -3265,11 +3275,7 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
     stoppos = 0;
   }
   ptbe->position = startpos;
-  if (startpos < stoppos)
-  {
-    ptbe->unitsnotspecial = 0;
-    ptbe->tbe = 0;
-  } else
+  if (startpos >= stoppos)
   {
     unsigned int remain;
 
@@ -3298,6 +3304,10 @@ static void revextract2bitenc(EndofTwobitencoding *ptbe,
         gt_assert(ptbe->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
       }
     }
+  } else
+  {
+    ptbe->unitsnotspecial = 0;
+    ptbe->tbe = 0;
   }
 }
 

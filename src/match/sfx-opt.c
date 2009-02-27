@@ -492,5 +492,19 @@ int suffixeratoroptions(Suffixeratoroptions *so,
     so->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
     so->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
+  if (so->sfxstrategy.maxinsertionsort > so->sfxstrategy.maxbltriesort)
+  {
+    gt_error_set(err,"first argument of option -algbds must not be larger "
+                     "than second argument");
+    retval = -1;
+  } else
+  {
+    if (so->sfxstrategy.maxbltriesort > so->sfxstrategy.maxcountingsort)
+    {
+      gt_error_set(err,"second argument of option -algbds must not be larger "
+                       "than third argument");
+      retval = -1;
+    }
+  }
   return retval;
 }

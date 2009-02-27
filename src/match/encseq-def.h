@@ -345,4 +345,6 @@ void removealpharef(Encodedsequence *encseq);
 
 void removefilenametabref(Encodedsequence *encseq);
 
+void showgetencodedcharcounters(void);
+
 #endif
