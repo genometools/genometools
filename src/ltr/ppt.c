@@ -75,12 +75,12 @@ GtRange gt_ppt_hit_get_coords(const GtPPTHit *h)
   gt_assert(h);
   rng.start = h->rng.start;
   rng.end = h->rng.end;
-/*  printf("%lu-%lu", rng.start, rng.end); */
   switch (h->strand)
   {
     case GT_STRAND_FORWARD:
     default:
-      rng.start = h->res->elem->rightLTR_5 - 1 - h->res->opts->radius + rng.start;
+      rng.start = h->res->elem->rightLTR_5 - 1 - h->res->opts->radius
+                    + rng.start;
       rng.end = rng.start + (gt_range_length(&h->rng) - 1);
       break;
     case GT_STRAND_REVERSE:
@@ -88,8 +88,6 @@ GtRange gt_ppt_hit_get_coords(const GtPPTHit *h)
       rng.start = rng.end - (gt_range_length(&h->rng) - 1);
       break;
   }
-/*  printf("%lu-%lu", rng.start, rng.end);
-  printf("old: %lu, new %lu\n", gt_range_length(&h->rng) , gt_range_length(&rng)); */
   gt_assert(gt_range_length(&rng) == gt_range_length(&h->rng));
   return rng;
 }

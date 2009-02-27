@@ -88,7 +88,8 @@ GtRange gt_pbs_hit_get_coords(const GtPBSHit *h)
   {
     case GT_STRAND_FORWARD:
     default:
-      rng.start = h->res->elem->leftLTR_3 + 1 - h->res->opts->radius + rng.start;
+      rng.start = h->res->elem->leftLTR_3 + 1 - h->res->opts->radius
+                    + rng.start;
       rng.end = rng.start + (h->end - h->start);
       break;
     case GT_STRAND_REVERSE:
@@ -199,7 +200,7 @@ static void gt_pbs_add_hit(GtArray *hitlist, GtAlignment *ali, GtPBSOptions *o,
   urange = gt_alignment_get_urange(ali);
   vrange = gt_alignment_get_vrange(ali);
   offset = abs(o->radius - urange.start);
-  
+
   if (dist <= o->max_edist
         && abs(o->radius-urange.start) <= o->offsetlen.end
         && abs(o->radius-urange.start) >= o->offsetlen.start
@@ -440,4 +441,3 @@ int gt_pbs_unit_test(GtError *err)
 
   return had_err;
 }
-

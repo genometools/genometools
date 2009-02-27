@@ -64,7 +64,7 @@ GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
                                         const Uchar *v, unsigned long vlen)
 {
   GtAlignment *a;
-  assert(u && v);
+  gt_assert(u && v);
   a = gt_alignment_new();
   gt_alignment_set_seqs(a, u, ulen,  v, vlen);
   return a;
@@ -73,7 +73,7 @@ GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
 void gt_alignment_set_seqs(GtAlignment *a, const Uchar *u, unsigned long ulen,
                            const Uchar *v, unsigned long vlen)
 {
-  assert(a && u && v);
+  gt_assert(a && u && v);
   GtRange urng, vrng;
   urng.start = vrng.start = 0;
   urng.end = ulen - 1;
@@ -86,7 +86,7 @@ void gt_alignment_set_seqs_with_range(GtAlignment *a, const Uchar *u,
                                       const Uchar *v, unsigned long vlen,
                                       GtRange vrange)
 {
-  assert(a && u && v);
+  gt_assert(a && u && v);
   a->u = u;
   a->v = v;
   a->ulen = ulen;
@@ -99,13 +99,13 @@ void gt_alignment_set_seqs_with_range(GtAlignment *a, const Uchar *u,
 
 GtRange gt_alignment_get_urange(GtAlignment *a)
 {
-  assert(a);
+  gt_assert(a);
   return a->urange;
 }
 
 GtRange gt_alignment_get_vrange(GtAlignment *a)
 {
-  assert(a);
+  gt_assert(a);
   return a->vrange;
 }
 
@@ -193,7 +193,7 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
 {
   unsigned long i, j, uctr = 0, vctr = 0, sumcost = 0;
   Multieop meop;
-  assert(a && gt_alignment_is_valid(a));
+  gt_assert(a && gt_alignment_is_valid(a));
   for (i = gt_array_size(a->eops); i > 0; i--) {
     meop = *(Multieop*) gt_array_get(a->eops, i-1);
     switch (meop.type) {
@@ -262,7 +262,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
 {
   unsigned long i, j, uctr, vctr;
   Multieop meop;
-  assert(a && gt_alignment_is_valid(a));
+  gt_assert(a && gt_alignment_is_valid(a));
   /* output first line */
   uctr = 0;
   for (i = gt_array_size(a->eops); i > 0; i--) {

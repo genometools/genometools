@@ -111,7 +111,6 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
   unsigned long i = 0;
   char buffer[BUFSIZ];
   GtPBSHit* hit = gt_pbs_results_get_ranked_hit(results, i++);
-  //printf("PBS: prev canonicalstrand: %c\n", GT_STRAND_CHARS[*canonical_strand]);
   if (*canonical_strand == GT_STRAND_UNKNOWN)
     *canonical_strand = gt_pbs_hit_get_strand(hit);
   else
@@ -129,9 +128,7 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
     if (gt_pbs_hit_get_strand(hit) != *canonical_strand)
       return;
   }
-  //printf("PBS:  now canonicalstrand: %c\n", GT_STRAND_CHARS[*canonical_strand]);
   pbs_range = gt_pbs_hit_get_coords(hit);
-  //printf("range is %lu-%lu\n", pbs_range.start, pbs_range.end);
   pbs_range.start++; pbs_range.end++;  /* GFF3 is 1-based */
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
@@ -236,7 +233,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
                                                   err);
       }
       gt_pdom_results_delete(pdom_results);
-      
+
     }
   }
 #endif
@@ -340,8 +337,8 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
       alpha        = getencseqAlphabet(ls->encseq);
       length       = gt_ltrelement_length(&ls->element);
-      seq          = gt_malloc((length+1) * sizeof(char));
-      symbolstring = gt_malloc((length+1) * sizeof(Uchar));
+      seq          = gt_malloc((length+1) * sizeof (char));
+      symbolstring = gt_malloc((length+1) * sizeof (Uchar));
       getencseqSeqinfo(&seqinfo, ls->encseq, seqid);
       encseqextract(symbolstring,
                     ls->encseq,

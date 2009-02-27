@@ -77,7 +77,7 @@ static const LTRboundaries **sortedltrboundaries(unsigned long *numofboundaries,
       countboundaries++;
     }
   }
-  bdptrtab = gt_malloc(sizeof(LTRboundaries *) * countboundaries);
+  bdptrtab = gt_malloc(sizeof (LTRboundaries *) * countboundaries);
   nextfill = 0;
   for (bd = ltr->spaceLTRboundaries; bd < ltr->spaceLTRboundaries +
                                           ltr->nextfreeLTRboundaries; bd++)

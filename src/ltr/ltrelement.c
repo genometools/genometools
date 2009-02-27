@@ -185,7 +185,7 @@ int gt_ltrelement_unit_test(GtError *err)
                               "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
                               "cgaa" ) == 0);
 
-  /* check right LTR */  
+  /* check right LTR */
   element.rightLTR_5 = 520;
   element.rightLTR_3 = 619;
   ensure(had_err, gt_ltrelement_rightltrlen(&element) == 100);
@@ -196,6 +196,5 @@ int gt_ltrelement_unit_test(GtError *err)
                               "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
                               "cgaa" ) == 0);
 
-  
   return had_err;
 }
