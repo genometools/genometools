@@ -341,22 +341,26 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       unsigned long length;
       const SfxAlphabet *alpha;
 
-      alpha        = getencseqAlphabet(ls->encseq);
-      length       = gt_ltrelement_length(&ls->element);
-      seq          = gt_malloc((length+1) * sizeof (char));
-      symbolstring = gt_malloc((length+1) * sizeof (Uchar));
       getencseqSeqinfo(&seqinfo, ls->encseq, seqid);
-      encseqextract(symbolstring,
-                    ls->encseq,
-                    seqinfo.seqstartpos + (ls->element.leftLTR_5),
-                    seqinfo.seqstartpos + (ls->element.leftLTR_5) + length - 1);
-      sprintfsymbolstring(seq, alpha, symbolstring, length);
-      gt_free(symbolstring);
 
       if (ls->element.rightLTR_3 <= seqinfo.seqlength)
       {
+        alpha        = getencseqAlphabet(ls->encseq);
+        length       = gt_ltrelement_length(&ls->element);
+        seq          = gt_malloc((length+1) * sizeof (char));
+        symbolstring = gt_malloc((length+1) * sizeof (Uchar));
+        encseqextract(symbolstring,
+                      ls->encseq,
+                      seqinfo.seqstartpos + (ls->element.leftLTR_5),
+                      seqinfo.seqstartpos + (ls->element.leftLTR_5)
+                        + length - 1);
+        sprintfsymbolstring(seq, alpha, symbolstring, length);
+        gt_free(symbolstring);
+        
         /* run LTRdigest core routine */
         had_err = run_ltrdigest(&ls->element, seq, ls, e);
+
+        gt_free(seq);
       }
       else
       {
@@ -367,7 +371,6 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
           ls->element.rightLTR_3, seqinfo.seqlength);
         had_err = -1;
       }
-      gt_free(seq);
     }
   }
   if (had_err) {
@@ -429,5 +432,14 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
   ls->encseq = encseq;
   ls->ltrdigest_tag = gt_str_new_cstr(GT_LTRDIGEST_TAG);
   ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);
+#ifdef HAVE_HMMER
+  if (!ls->pdf)
+  {
+    /* An error occurred, do not return a stream.
+       We assume that the error message has been set. */
+    gt_node_stream_delete(gs);
+    return NULL;
+  } else
+#endif
   return gs;
 }

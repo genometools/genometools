@@ -416,7 +416,12 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                                   &arguments->pdom_opts,
 #endif
                                                   err);
+    if (!ltrdigest_stream)
+      had_err = -1;
+  }
 
+  if (!had_err)
+  {
     /* attach tabular output stream, if requested */
     if (gt_str_length(arguments->prefix) > 0)
     {
@@ -445,12 +450,13 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
     {
       gt_genome_node_delete(gn);
     }
-    gt_node_stream_delete(gff3_out_stream);
-    gt_node_stream_delete(ltrdigest_stream);
-    if (tab_out_stream)
-      gt_node_stream_delete(tab_out_stream);
-    gt_node_stream_delete(gff3_in_stream);
   }
+
+  gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(ltrdigest_stream);
+  if (tab_out_stream)
+    gt_node_stream_delete(tab_out_stream);
+  gt_node_stream_delete(gff3_in_stream);
 
   gt_str_delete(indexname);
   freeEncodedsequence(&encseq);
