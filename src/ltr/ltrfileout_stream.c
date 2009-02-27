@@ -90,8 +90,8 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     char *tmpstr = NULL;
 
     pdom_rng = gt_genome_node_get_range((GtGenomeNode*) gf);
-    tmpstr =  gt_ltrelement_get_sequence(pdom_rng.start,
-                                         pdom_rng.end,
+    tmpstr =  gt_ltrelement_get_sequence(pdom_rng.start-1,
+                                         pdom_rng.end-1,
                                          gt_feature_node_get_strand(gf),
                                          seq, seqinfo, e);
     gt_str_append_cstr(pdom_seq, tmpstr);
@@ -253,9 +253,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
       pbs_strand = gt_feature_node_get_strand(ls->element.pbs);
       pbs_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.pbs);
-      pbs_seq = gt_ltrelement_get_sequence(pbs_rng.start, pbs_rng.end,
+      pbs_seq = gt_ltrelement_get_sequence(pbs_rng.start-1, pbs_rng.end-1,
                                            pbs_strand, ls->encseq, &seqinfo, e);
-
       gt_fasta_show_entry_generic(desc, pbs_seq, gt_range_length(&pbs_rng),
                                   GT_FSWIDTH, ls->pbsout_file);
       gt_genfile_xprintf(ls->tabout_file,
