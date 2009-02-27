@@ -63,4 +63,6 @@ GtPBSHit*      gt_pbs_results_get_ranked_hit(const GtPBSResults*,
                                              unsigned long);
 void           gt_pbs_results_delete(GtPBSResults*);
 
+int            gt_pbs_unit_test(GtError*);
+
 #endif
