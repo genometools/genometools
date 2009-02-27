@@ -23,7 +23,7 @@
 #include "core/symboldef.h"
 #include "core/error_api.h"
 
-/* the GtAlignment class (an object has to be contructed backwards) */
+/* the GtAlignment class (an object has to be constructed backwards) */
 typedef struct GtAlignment GtAlignment;
 
 GtAlignment*  gt_alignment_new(void);
