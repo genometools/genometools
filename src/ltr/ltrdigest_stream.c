@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -38,6 +38,7 @@ struct GtLTRdigestStream {
   GtPBSOptions *pbs_opts;
   GtPPTOptions *ppt_opts;
 #ifdef HAVE_HMMER
+  GtPdomFinder *pdf;
   GtPdomOptions *pdom_opts;
 #endif
   GtLTRVisitor *lv;
@@ -79,6 +80,7 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
     gt_ltrelement_offset2pos(&ls->element, &rng, 0,
                              GT_OFFSET_BEGIN_LEFT_LTR,
                              strand);
+    rng.start++; rng.end++;  /* GFF3 is 1-based */
     gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                       ls->element.mainnode),
                              GT_PDOM_TYPE,
@@ -86,6 +88,8 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
                              rng.end,
                              strand);
     gt_feature_node_set_source((GtFeatureNode*) gf, ls->ltrdigest_tag);
+    gt_feature_node_set_score((GtFeatureNode*) gf,
+                              gt_pdom_single_hit_get_evalue(singlehit));
     gt_feature_node_set_phase((GtFeatureNode*) gf, frame);
     gt_feature_node_add_attribute((GtFeatureNode*) gf,"pfamname",
                                   gt_pdom_model_get_name(model));
@@ -107,6 +111,7 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
   unsigned long i = 0;
   char buffer[BUFSIZ];
   GtPBSHit* hit = gt_pbs_results_get_ranked_hit(results, i++);
+  //printf("PBS: prev canonicalstrand: %c\n", GT_STRAND_CHARS[*canonical_strand]);
   if (*canonical_strand == GT_STRAND_UNKNOWN)
     *canonical_strand = gt_pbs_hit_get_strand(hit);
   else
@@ -124,7 +129,10 @@ static void pbs_attach_results_to_gff3(GtPBSResults *results,
     if (gt_pbs_hit_get_strand(hit) != *canonical_strand)
       return;
   }
+  //printf("PBS:  now canonicalstrand: %c\n", GT_STRAND_CHARS[*canonical_strand]);
   pbs_range = gt_pbs_hit_get_coords(hit);
+  //printf("range is %lu-%lu\n", pbs_range.start, pbs_range.end);
+  pbs_range.start++; pbs_range.end++;  /* GFF3 is 1-based */
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
                            GT_PBS_TYPE,
@@ -171,7 +179,7 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
       return;
   }
   ppt_range = gt_ppt_hit_get_coords(hit);
-
+  ppt_range.start++; ppt_range.end++;  /* GFF3 is 1-based */
   gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                     element->mainnode),
                            GT_PPT_TYPE,
@@ -204,17 +212,12 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
     if (ls->tests_to_run & GT_LTRDIGEST_RUN_PDOM)
     {
     GtPdomResults *pdom_results = NULL;
-    GtPdomFinder *gpf = gt_pdom_finder_new(ls->pdom_opts->hmm_files,
-                                           ls->pdom_opts->evalue_cutoff,
-                                           ls->pdom_opts->nof_threads,
-                                           ls->pdom_opts->chain_max_gap_length,
-                                           err);
-    if (!gpf)
+    if (!ls->pdf)
     {
       had_err = -1;
     } else
     {
-      pdom_results = gt_pdom_finder_find(gpf, (const char*) seq,
+      pdom_results = gt_pdom_finder_find(ls->pdf, (const char*) seq,
                                          (const char*) rev_seq, element);
       if (pdom_results && !gt_pdom_results_empty(pdom_results))
       {
@@ -233,7 +236,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
                                                   err);
       }
       gt_pdom_results_delete(pdom_results);
-      gt_pdom_finder_delete(gpf);
+      
     }
   }
 #endif
@@ -342,8 +345,8 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       getencseqSeqinfo(&seqinfo, ls->encseq, seqid);
       encseqextract(symbolstring,
                     ls->encseq,
-                    seqinfo.seqstartpos + (ls->element.leftLTR_5 - 1),
-                    seqinfo.seqstartpos + (ls->element.leftLTR_5 - 1) + length);
+                    seqinfo.seqstartpos + (ls->element.leftLTR_5),
+                    seqinfo.seqstartpos + (ls->element.leftLTR_5) + length - 1);
       sprintfsymbolstring(seq, alpha, symbolstring, length);
       gt_free(symbolstring);
 
@@ -361,7 +364,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
           ls->element.rightLTR_3, seqinfo.seqlength);
         had_err = -1;
       }
-      free(seq);
+      gt_free(seq);
     }
   }
   if (had_err) {
@@ -377,6 +380,9 @@ static void gt_ltrdigest_stream_free(GtNodeStream *gs)
   gt_node_visitor_delete((GtNodeVisitor*) ls->lv);
   gt_str_delete(ls->ltrdigest_tag);
   gt_node_stream_delete(ls->in_stream);
+#ifdef HAVE_HMMER
+  gt_pdom_finder_delete(ls->pdf);
+#endif
 }
 
 const GtNodeStreamClass* gt_ltrdigest_stream_class(void)
@@ -393,11 +399,11 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
                                       Encodedsequence *encseq,
                                       GtPBSOptions *pbs_opts,
-                                      GtPPTOptions *ppt_opts
+                                      GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER
-           /* HMMER only */ ,GtPdomOptions *pdom_opts
+                                      GtPdomOptions *pdom_opts,
 #endif
-           )
+                                      GtError *err)
 {
   GtNodeStream *gs;
   GtLTRdigestStream *ls;
@@ -408,6 +414,11 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
   ls->pbs_opts = pbs_opts;
 #ifdef HAVE_HMMER
   ls->pdom_opts = pdom_opts;
+  ls->pdf = gt_pdom_finder_new(ls->pdom_opts->hmm_files,
+                               ls->pdom_opts->evalue_cutoff,
+                               ls->pdom_opts->nof_threads,
+                               ls->pdom_opts->chain_max_gap_length,
+                               err);
 #endif
   ls->tests_to_run = tests_to_run;
   ls->encseq = encseq;

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,7 @@
 #ifndef LTRDIGEST_STREAM_H
 #define LTRDIGEST_STREAM_H
 
+#include "core/error_api.h"
 #include "extended/node_stream_api.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
@@ -35,10 +36,10 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       int tests_to_run,
                                       Encodedsequence *encseq,
                                       GtPBSOptions *pbs_opts,
-                                      GtPPTOptions *ppt_opts
+                                      GtPPTOptions *ppt_opts,
 #ifdef HAVE_HMMER
-           /* HMMER only */ ,GtPdomOptions *pdom_opts
+                                      GtPdomOptions *pdom_opts,
 #endif
-           );
+                                      GtError *err);
 
 #endif

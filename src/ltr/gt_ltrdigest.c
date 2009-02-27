@@ -411,11 +411,11 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                                   tests_to_run,
                                                   encseq,
                                                   &arguments->pbs_opts,
-                                                  &arguments->ppt_opts
+                                                  &arguments->ppt_opts,
 #ifdef HAVE_HMMER
-                                                 /*  */,&arguments->pdom_opts
+                                                  &arguments->pdom_opts,
 #endif
-                                      );
+                                                  err);
 
     /* attach tabular output stream, if requested */
     if (gt_str_length(arguments->prefix) > 0)
