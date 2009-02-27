@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/unused_api.h"
 #include "extended/alignment.h"
 #include "encseq-def.h"
 #include "spacedef.h"
