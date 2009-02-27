@@ -50,6 +50,7 @@
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrelement.h"
 #include "ltr/ppt.h"
+#include "ltr/pbs.h"
 #include "tools/gt_bed_to_gff3.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
@@ -192,7 +193,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "Lua serializer module",
                  gt_lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
-  gt_hashmap_add(unit_tests, "PPT module", gt_ppt_unit_test);
+  gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
+  gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbt_unit_test);
