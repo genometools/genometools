@@ -509,15 +509,18 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
        }
     } else
     {
-       sfi->sfxstrategy.storespecialcodes = false;
        sfi->sfxstrategy.ssortmaxdepth.defined = false;
-       sfi->sfxstrategy.cmpcharbychar
-         = possibletocmpbitwise(encseq) ? false : true;
+       sfi->sfxstrategy.maxwidthrealmedian = 1UL;
+       sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
        sfi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
        sfi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
-       sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
-       sfi->sfxstrategy.maxwidthrealmedian = 1UL;
+       sfi->sfxstrategy.cmpcharbychar
+         = possibletocmpbitwise(encseq) ? false : true;
+       sfi->sfxstrategy.storespecialcodes = false;
     }
+    printf("maxinsertionsort = %lu\n",sfi->sfxstrategy.maxinsertionsort);
+    printf("maxbltriesort = %lu\n",sfi->sfxstrategy.maxbltriesort);
+    printf("maxcountingsort = %lu\n",sfi->sfxstrategy.maxcountingsort);
     sfi->totallength = getencseqtotallength(encseq);
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;

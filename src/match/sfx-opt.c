@@ -414,6 +414,19 @@ void wrapsfxoptions(Suffixeratoroptions *so)
   gt_option_delete(so->optionalgboundsref);
 }
 
+#define READMAXBOUND(COMP,IDX)\
+        if (retval == 0)\
+        {\
+          arg = gt_str_array_get(so->algbounds,IDX);\
+          if (sscanf(arg,"%ld",&readint) != 1 || readint <= 0)\
+          {\
+            gt_error_set(err,"option -algbds: all arguments must be positive "\
+                             "numbers");\
+            retval = -1;\
+          }\
+          so->sfxstrategy.COMP = (unsigned long) readint;\
+        }
+
 int suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
                         int argc,
@@ -469,17 +482,9 @@ int suffixeratoroptions(Suffixeratoroptions *so,
       gt_error_set(err,"option -algbds must have exactly 3 arguments");
       retval = -1;
     }
-    if (retval == 0)
-    {
-      arg = gt_str_array_get(so->algbounds,0);
-      if (sscanf(arg,"%ld",&readint) != 1 || readint <= 0)
-      {
-        gt_error_set(err,"option -algbds: all arguments must be positive "
-                         "numbers");
-        retval = -1;
-      }
-      so->sfxstrategy.maxinsertionsort = (unsigned long) readint;
-    }
+    READMAXBOUND(maxinsertionsort,0);
+    READMAXBOUND(maxbltriesort,1);
+    READMAXBOUND(maxcountingsort,2);
   } else
   {
     so->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
