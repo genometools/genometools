@@ -57,15 +57,17 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
     {
       node_range = gt_genome_node_get_range((GtGenomeNode*) gf);
       lv->element->leftLTR = gf;
-      lv->element->leftLTR_5 = node_range.start;
-      lv->element->leftLTR_3 = node_range.end;
+      /* compensate for 1-based node coords */
+      lv->element->leftLTR_5 = node_range.start - 1;
+      lv->element->leftLTR_3 = node_range.end - 1;
     }
     else
     {
       node_range = gt_genome_node_get_range((GtGenomeNode*) gf);
       lv->element->rightLTR = gf;
-      lv->element->rightLTR_5 = node_range.start;
-      lv->element->rightLTR_3 = node_range.end;
+      /* compensate for 1-based node coords */
+      lv->element->rightLTR_5 = node_range.start - 1;
+      lv->element->rightLTR_3 = node_range.end - 1;
     }
   } else if (strcmp(gft, "target_site_duplication") == 0)
   {
