@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -93,40 +93,49 @@ void gt_ltrelement_offset2pos(GtLTRElement *e, GtRange *rng,
       switch (o)
       {
         case GT_OFFSET_BEGIN_LEFT_LTR:
-          rng->start = e->leftLTR_5 - radius + rng->start;
-          break;
-        case GT_OFFSET_END_RIGHT_LTR:
-          rng->start = e->rightLTR_3 - radius + rng->start - 1;
+          rng->start = e->leftLTR_5 - (radius - 1) + rng->start;
           break;
         case GT_OFFSET_END_LEFT_LTR:
-          rng->start = e->leftLTR_3 - radius + rng->start - 1;
+          rng->start = e->leftLTR_5 + (gt_ltrelement_leftltrlen(e) - 1)
+                                    - (radius - 1) + rng->start;
           break;
         case GT_OFFSET_BEGIN_RIGHT_LTR:
-          rng->start = e->rightLTR_5 - radius + rng->start;
+          rng->start = e->leftLTR_5 + (gt_ltrelement_length(e) - 1)
+                                    - (gt_ltrelement_rightltrlen(e) - 1)
+                                    - (radius - 1) + rng->start;
+          break;
+        case GT_OFFSET_END_RIGHT_LTR:
+          rng->start = e->leftLTR_5 + (gt_ltrelement_length(e) - 1)
+                                    - (radius - 1) + rng->start;
           break;
       }
       break;
     case GT_STRAND_REVERSE:
       switch (o)
       {
-        case GT_OFFSET_END_RIGHT_LTR:
-          rng->start = e->leftLTR_5 + radius - rng->end - 1;
-          break;
         case GT_OFFSET_BEGIN_LEFT_LTR:
-          rng->start = e->rightLTR_3 + radius - rng->end;
+          rng->start = e->rightLTR_3 + (radius - 1) - rng->end;
           break;
         case GT_OFFSET_END_LEFT_LTR:
-          rng->start = e->rightLTR_5 + radius - rng->end - 1;
+          rng->start = e->rightLTR_3 - (gt_ltrelement_rightltrlen(e) - 1)
+                                    + (radius - 1) - rng->end;
           break;
         case GT_OFFSET_BEGIN_RIGHT_LTR:
-          rng->start = e->leftLTR_3 + radius - rng->end;
+          rng->start = e->rightLTR_3 - (gt_ltrelement_length(e) - 1)
+                                     + (gt_ltrelement_leftltrlen(e) - 1)
+                                     + (radius - 1) - rng->end;
           break;
+        case GT_OFFSET_END_RIGHT_LTR:
+          rng->start = e->rightLTR_3 - (gt_ltrelement_length(e) - 1)
+                                     + (radius - 1) - rng->end;
+          break;
+
       }
       break;
     default:
       break;
   }
-  rng->end = rng->start + len - 1 ;
+  rng->end = rng->start + len - 1;
 }
 
 int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
@@ -138,8 +147,8 @@ int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
   tmpstr = gt_calloc(seqnamelen+1, sizeof (char));
   (void) snprintf(tmpstr, seqnamelen, "%s", e->seqid);
   gt_cstr_rep(tmpstr, ' ', '_');
-  ret = snprintf(buf, buflen, "%s_%lu_%lu", tmpstr, e->leftLTR_5,
-                 e->rightLTR_3);
+  ret = snprintf(buf, buflen, "%s_%lu_%lu", tmpstr, e->leftLTR_5+1,
+                 e->rightLTR_3+1);
   gt_free(tmpstr);
   return ret;
 }
@@ -148,39 +157,45 @@ int gt_ltrelement_unit_test(GtError *err)
 {
   int had_err = 0;
   GtLTRElement element;
-  GtRange rng1;
-  unsigned long radius = 30;
+  char tmp[BUFSIZ];
+  const char *fullseq =                           "aaaaaaaaaaaaaaaaaaaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "acatactaggatgctagaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatataggatcctaaggctac"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "aaaaaaaaaaaaaaaaaaaa";
 
   gt_error_check(err);
 
-  element.leftLTR_5 = 100;
-  element.leftLTR_3 = 150;
-  element.rightLTR_5 = 450;
-  element.rightLTR_3 = 600;
+  element.leftLTR_5 = 20;
+  element.leftLTR_3 = 119;
+  ensure(had_err, gt_ltrelement_leftltrlen(&element) == 100);
+  memset(tmp, 0, BUFSIZ);
+  memcpy(tmp, fullseq + (element.leftLTR_5 * sizeof (char)),
+         (element.leftLTR_3 - element.leftLTR_5+ 1) * sizeof (char));
+  ensure(had_err, strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
+                              "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
+                              "cgaa" ) == 0);
 
-  rng1.start = 2;
-  rng1.end = 28;
+  /* check right LTR */  
+  element.rightLTR_5 = 520;
+  element.rightLTR_3 = 619;
+  ensure(had_err, gt_ltrelement_rightltrlen(&element) == 100);
+  memset(tmp, 0, BUFSIZ);
+  memcpy(tmp, fullseq + (element.rightLTR_5 * sizeof (char)),
+         (element.rightLTR_3 - element.rightLTR_5+ 1) * sizeof (char));
+  ensure(had_err, strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
+                              "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
+                              "cgaa" ) == 0);
 
-  gt_ltrelement_offset2pos(&element, &rng1, radius, GT_OFFSET_END_LEFT_LTR,
-                           GT_STRAND_FORWARD);
-  ensure(had_err, 121 == rng1.start);
-  ensure(had_err, 147 == rng1.end);
-
-  rng1.start = 2;
-  rng1.end = 28;
-
-  gt_ltrelement_offset2pos(&element, &rng1, radius, GT_OFFSET_BEGIN_RIGHT_LTR,
-                           GT_STRAND_FORWARD);
-  ensure(had_err, 422 == rng1.start);
-  ensure(had_err, 448 == rng1.end);
-
-  rng1.start = 2;
-  rng1.end = 28;
-
-  gt_ltrelement_offset2pos(&element, &rng1, radius, GT_OFFSET_END_LEFT_LTR,
-                           GT_STRAND_REVERSE);
-  ensure(had_err, 451 == rng1.start);
-  ensure(had_err, 477 == rng1.end);
-
+  
   return had_err;
 }
