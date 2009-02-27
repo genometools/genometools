@@ -84,6 +84,7 @@
           = detunitsoftwobitencoding(encseq->totallength);\
         ALLOCASSIGNSPACE(TABLE,NULL,Twobitencoding,\
                          encseq->unitsoftwobitencoding);\
+        TABLE[encseq->unitsoftwobitencoding-1] = 0;\
         tbeptr = TABLE
 
 #define UPDATESEQBUFFER(CC)\
@@ -491,9 +492,9 @@ static unsigned long detunitsoftwobitencoding(Seqpos totallength)
 
   if (totallength < (Seqpos) UNITSIN2BITENC)
   {
-    return 1UL;
+    return 2UL;
   }
-  unitsoftwobitencoding = (uint64_t) 1 +
+  unitsoftwobitencoding = (uint64_t) 2 +
                           DIVBYUNITSIN2BITENC(totallength - 1);
   return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
 }
@@ -3235,16 +3236,10 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
     if (remain > 0)
     {
       unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
-      ptbe->tbe = (Twobitencoding) (encseq->twobitencoding[unit] <<
-                                    MULT2(remain));
-      if (unit < encseq->unitsoftwobitencoding - 1)
-      {
-        ptbe->tbe |= encseq->twobitencoding[unit+1] >>
-                     MULT2(UNITSIN2BITENC - remain);
-      } else
-      {
-        gt_assert(ptbe->unitsnotspecial < (unsigned int) UNITSIN2BITENC);
-      }
+      ptbe->tbe = (Twobitencoding) 
+                  (encseq->twobitencoding[unit] << MULT2(remain)) |
+                  (encseq->twobitencoding[unit+1] >> 
+                   MULT2(UNITSIN2BITENC - remain));
     } else
     {
       ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(startpos)];
