@@ -39,6 +39,7 @@
 #include "extended/evaluator.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_node.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_escaping.h"
 #include "extended/hmm.h"
 #include "extended/luaserialize.h"
@@ -182,7 +183,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
   gt_hashmap_add(unit_tests, "feature node iterator example",
                  gt_feature_node_iterator_example);
-  gt_hashmap_add(unit_tests, "genome feature class", gt_feature_node_unit_test);
+  gt_hashmap_add(unit_tests, "feature node class", gt_feature_node_unit_test);
+  gt_hashmap_add(unit_tests, "genome node class", gt_genome_node_unit_test);
   gt_hashmap_add(unit_tests, "gff3 escaping module",
                  gt_gff3_escaping_unit_test);
   gt_hashmap_add(unit_tests, "grep module", gt_grep_unit_test);
