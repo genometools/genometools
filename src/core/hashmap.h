@@ -31,7 +31,7 @@ typedef enum {
 
 typedef int (*Mapentryvisitfunc)(void *key, void *value, void *data, GtError*);
 
-GtHashmap*   gt_hashmap_new(HashType, GtFree keyfree, GtFree valuefree);
+GtHashmap* gt_hashmap_new(HashType, GtFree keyfree, GtFree valuefree);
 void*      gt_hashmap_get(GtHashmap*, const void*);
 void       gt_hashmap_add(GtHashmap*, void*, void*);
 void       gt_hashmap_remove(GtHashmap*, const void*);
