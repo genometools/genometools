@@ -211,6 +211,7 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
     GtPdomResults *pdom_results = NULL;
     if (!ls->pdf)
     {
+      gt_error_set(err, "No PdomFinder object found -- how could that happen?");
       had_err = -1;
     } else
     {
