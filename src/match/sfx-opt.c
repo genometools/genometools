@@ -119,7 +119,8 @@ static OPrval parse_options(int *parsed_args,
                                             "restrict suffix sorting "
                                             "to prefixes "
                                             "of the given length",
-                                            &so->ssortmaxdepth.valueunsignedint,
+                                            &so->sfxstrategy.ssortmaxdepth.
+                                                 valueunsignedint,
                                             MAXDEPTH_AUTOMATIC,
                                             1U);
     gt_option_is_development_option(optionmaxdepth);
@@ -319,7 +320,7 @@ static OPrval parse_options(int *parsed_args,
     gt_assert(optionmaxdepth != NULL);
     if (gt_option_is_set(optionmaxdepth))
     {
-      so->ssortmaxdepth.defined = true;
+      so->sfxstrategy.ssortmaxdepth.defined = true;
     }
   }
   if (oprval == OPTIONPARSER_OK && !doesa)
@@ -446,8 +447,8 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->filenametab = gt_str_array_new();
   so->algbounds = gt_str_array_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
-  so->ssortmaxdepth.defined = false;
-  so->ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
+  so->sfxstrategy.ssortmaxdepth.defined = false;
+  so->sfxstrategy.ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
   so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;

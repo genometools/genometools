@@ -508,14 +508,14 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
        }
     } else
     {
-       sfi->sfxstrategy.ssortmaxdepth.defined = false;
-       sfi->sfxstrategy.maxwidthrealmedian = 1UL;
-       sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
-       sfi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
-       sfi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
-       sfi->sfxstrategy.cmpcharbychar
-         = possibletocmpbitwise(encseq) ? false : true;
-       sfi->sfxstrategy.storespecialcodes = false;
+      sfi->sfxstrategy.ssortmaxdepth.defined = false;
+      sfi->sfxstrategy.maxwidthrealmedian = 1UL;
+      sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
+      sfi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
+      sfi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
+      sfi->sfxstrategy.cmpcharbychar = possibletocmpbitwise(encseq) ? false
+                                                                    : true;
+      sfi->sfxstrategy.storespecialcodes = false;
     }
     showverbose(verboseinfo,"maxinsertionsort = %lu",
                 sfi->sfxstrategy.maxinsertionsort);
@@ -527,8 +527,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                 sfi->sfxstrategy.storespecialcodes ? "true" : "false");
     if (sfi->sfxstrategy.ssortmaxdepth.defined)
     {
-      showverbose(verboseinfo,"ssortmaxdepth = %u",sfi->sfxstrategy.
-                                    ssortmaxdepth.valueunsignedint);
+      showverbose(verboseinfo,"ssortmaxdepth = %u",
+                               sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
     } else
     {
       showverbose(verboseinfo,"ssortmaxdepth is undefined");
