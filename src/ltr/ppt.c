@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -71,16 +71,27 @@ static GtPPTHit* gt_ppt_hit_new(GtStrand strand, GtPPTResults *r)
 
 GtRange gt_ppt_hit_get_coords(const GtPPTHit *h)
 {
-  GtRange r;
+  GtRange rng;
   gt_assert(h);
-  r.start = h->rng.start;
-  r.end = h->rng.end;
-  gt_ltrelement_offset2pos(h->res->elem,
-                           &r,
-                           h->res->opts->radius,
-                           GT_OFFSET_BEGIN_RIGHT_LTR,
-                           h->strand);
-  return r;
+  rng.start = h->rng.start;
+  rng.end = h->rng.end;
+/*  printf("%lu-%lu", rng.start, rng.end); */
+  switch (h->strand)
+  {
+    case GT_STRAND_FORWARD:
+    default:
+      rng.start = h->res->elem->rightLTR_5 - 1 - h->res->opts->radius + rng.start;
+      rng.end = rng.start + (gt_range_length(&h->rng) - 1);
+      break;
+    case GT_STRAND_REVERSE:
+      rng.end = h->res->elem->leftLTR_3 + 1 + h->res->opts->radius - rng.start;
+      rng.start = rng.end - (gt_range_length(&h->rng) - 1);
+      break;
+  }
+/*  printf("%lu-%lu", rng.start, rng.end);
+  printf("old: %lu, new %lu\n", gt_range_length(&h->rng) , gt_range_length(&rng)); */
+  gt_assert(gt_range_length(&rng) == gt_range_length(&h->rng));
+  return rng;
 }
 
 GtPPTHit* gt_ppt_hit_get_ubox(const GtPPTHit *h)
@@ -222,9 +233,8 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
                           unsigned long radius, GtStrand strand)
 {
   GtPPTHit *cur_hit = NULL,
-         *tmp = NULL;
-  unsigned long i = 0,
-                ltrlen = 0;
+           *tmp = NULL;
+  unsigned long i = 0;
 
   gt_assert(decoded && results && strand != GT_STRAND_UNKNOWN);
 
@@ -233,7 +243,7 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
   for (i=0;i<2*radius-1;i++)
   {
     cur_hit->state = decoded[i];
-    cur_hit->rng.end=i;
+    cur_hit->rng.end = i;
     if (decoded[i+1] != decoded[i] || i+2==2*radius)
     {
       switch (cur_hit->state)
@@ -252,9 +262,6 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
         case PPT_IN:
           if (gt_ppt_ok(cur_hit, results->opts->ppt_len))
           {
-            ltrlen = (cur_hit->strand == GT_STRAND_FORWARD ?
-                             gt_ltrelement_rightltrlen(results->elem) :
-                             gt_ltrelement_leftltrlen(results->elem));
             cur_hit->score = gt_ppt_score(radius, cur_hit->rng.end);
             gt_array_add(results->hits, cur_hit);
             if (tmp)
@@ -289,7 +296,6 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
   if (cur_hit)
     cur_hit->rng.end++;
   gt_free(tmp);
-  tmp = NULL;
 }
 
 GtPPTResults* gt_ppt_find(const char *seq,
@@ -326,15 +332,16 @@ GtPPTResults* gt_ppt_find(const char *seq,
     encoded_seq[i] = gt_alpha_encode(alpha, seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
-  decoded = gt_malloc(sizeof (unsigned int) * 2*radius+1);
-  gt_hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius+1, 2*radius);
+  decoded = gt_malloc(sizeof (unsigned int) * (2*radius+1));
+  gt_hmm_decode(hmm, decoded,
+                encoded_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
+                2*radius+1);
   gt_group_hits(decoded, results, radius, GT_STRAND_FORWARD);
   /* radius length may change in the next strand, so reallocate */
   gt_free(decoded);
 
   /* do PPT finding on reverse strand
    * -------------------------------- */
-
   ltrlen = gt_ltrelement_leftltrlen(element);
   /* make sure that we do not cross the LTR boundary */
   radius = MIN(o->radius, ltrlen-1);
@@ -344,8 +351,10 @@ GtPPTResults* gt_ppt_find(const char *seq,
     encoded_seq[i] = gt_alpha_encode(alpha, rev_seq[i]);
   }
   /* use Viterbi algorithm to decode emissions within radius */
-  decoded = gt_malloc(sizeof (unsigned int) * 2*radius+1);
-  gt_hmm_decode(hmm, decoded, encoded_seq+seqlen-ltrlen-radius, 2*radius);
+  decoded = gt_malloc(sizeof (unsigned int) * (2*radius+1));
+  gt_hmm_decode(hmm, decoded,
+                encoded_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
+                2*radius+1);
   gt_group_hits(decoded, results, radius, GT_STRAND_REVERSE);
 
   /* rank hits by descending score */
@@ -387,22 +396,45 @@ int gt_ppt_unit_test(GtError *err)
   GtPPTHit *h;
   GtLTRElement element;
   GtRange rng;
-  const char *seq = "gatcagtcgactcgatcgactcgatcgactcgagcacggcgacgat"
-                    "gctggtcggctaactggggggggaggatcgacttcgactcgacgatcgactcga";
-  char *rev_seq = gt_malloc(strlen(seq)*sizeof (char*));
+  char *rev_seq,
+       *seq,
+       tmp[BUFSIZ];
+  const char *fullseq =                           "aaaaaaaaaaaaaaaaaaaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "aaag"
+                        "tcttctttct" /* <- PPT reverse */
+                                  "aaaaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatttt"
+                                   /* PPT forward -> */  "gggatagggggag"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcgaa"
+                    "aaaaaaaaaaaaaaaaaaaa";
 
-  memcpy(rev_seq, seq, sizeof (char) * strlen(seq));
-  gt_reverse_complement(rev_seq,strlen(seq),err);
-  element.leftLTR_3 = 21;
-  element.leftLTR_5 = 0;
-  element.rightLTR_3 = 99;
-  element.rightLTR_5 = 72;
+  seq     = gt_malloc(600 * sizeof (char));
+  rev_seq = gt_malloc(600 * sizeof (char));
+  memcpy(seq,     fullseq + 20, 600);
+  memcpy(rev_seq, fullseq + 20, 600);
+  gt_reverse_complement(rev_seq, 600, err);
+
+  element.leftLTR_5 = 20;
+  element.leftLTR_3 = 119;
+  element.rightLTR_5 = 520;
+  element.rightLTR_3 = 619;
+
+  /* run PPT finding */
   memset(&o, 0, sizeof (GtPPTOptions));
   o.ppt_len.start = 5;
   o.ppt_len.end = 15;
   o.ubox_len.start = 2;
   o.ubox_len.end = 15;
-  o.radius = 12;
+  o.radius = 30;
   o.ppt_pyrimidine_prob = PPT_PYRIMIDINE_PROB;
   o.ppt_purine_prob = PPT_PURINE_PROB;
   o.bkg_a_prob = BKG_A_PROB;
@@ -412,13 +444,29 @@ int gt_ppt_unit_test(GtError *err)
   o.ubox_u_prob = UBOX_U_PROB;
   rs = gt_ppt_find(seq, rev_seq, &element, &o);
 
-  ensure(had_err, gt_ppt_results_get_number_of_hits(rs));
+  ensure(had_err, gt_ppt_results_get_number_of_hits(rs) == 2);
   h = gt_ppt_results_get_ranked_hit(rs, 0);
   ensure(had_err, h);
   rng = gt_ppt_hit_get_coords(h);
-  ensure(had_err, rng.start == 60);
-  ensure(had_err, rng.end == 71);
+  ensure(had_err, rng.start == 507);
+  ensure(had_err, rng.end == 519);
+  memset(tmp, 0, BUFSIZ);
+  memcpy(tmp, fullseq + (rng.start * sizeof (char)),
+         (rng.end - rng.start + 1) * sizeof (char));
+  ensure(had_err, strcmp(tmp, "gggatagggggag" ) == 0);
+
+  h = gt_ppt_results_get_ranked_hit(rs, 1);
+  ensure(had_err, h);
+  rng = gt_ppt_hit_get_coords(h);
+  ensure(had_err, rng.start == 124);
+  ensure(had_err, rng.end == 133);
+  memset(tmp, 0, BUFSIZ);
+  memcpy(tmp, fullseq + (rng.start * sizeof (char)),
+         (rng.end - rng.start + 1) * sizeof (char));
+  ensure(had_err, strcmp(tmp, "tcttctttct" ) == 0);
+
   gt_free(rev_seq);
+  gt_free(seq);
 
   gt_ppt_results_delete(rs);
   return had_err;
