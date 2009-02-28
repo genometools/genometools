@@ -359,7 +359,6 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                *ltrdigest_stream = NULL,
                *tab_out_stream   = NULL,
                *last_stream      = NULL;
-  GtGenomeNode *gn;
   int had_err      = 0,
       tests_to_run = 0,
       arg = parsed_args;
@@ -445,11 +444,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                                            arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(had_err = gt_node_stream_next(last_stream, &gn, err)) &&
-           gn)
-    {
-      gt_genome_node_delete(gn);
-    }
+    had_err = gt_node_stream_pull(last_stream, err);
   }
 
   gt_node_stream_delete(gff3_out_stream);
