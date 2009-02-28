@@ -1826,8 +1826,8 @@ void sortallbuckets(Seqpos *suftabptr,
     }
   }
 #endif
-  printf("countinsertionsort = %lu\n",countinsertionsort);
-  printf("countbltriesort = %lu\n",countbltriesort);
-  printf("countcountingsort = %lu\n",countcountingsort);
-  printf("countqsort = %lu\n",countqsort);
+  printf("# countinsertionsort = %lu\n",countinsertionsort);
+  printf("# countbltriesort = %lu\n",countbltriesort);
+  printf("# countcountingsort = %lu\n",countcountingsort);
+  printf("# countqsort = %lu\n",countqsort);
 }

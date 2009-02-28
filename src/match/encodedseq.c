@@ -241,13 +241,17 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq)
   return encseq->numofdbsequences;
 }
 
+#ifdef WITHshowgetencodedcharcounters
 static uint64_t countgetencodedchar = 0;
+#endif
 
 Uchar getencodedchar(const Encodedsequence *encseq,
                      Seqpos pos,
                      Readmode readmode)
 {
+#ifdef WITHshowgetencodedcharcounters
   countgetencodedchar++;
+#endif
   gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
@@ -321,14 +325,18 @@ struct Encodedsequencescanstate
 };
 
 #ifndef INLINEDENCSEQ
+#ifdef WITHshowgetencodedcharcounters
 static uint64_t countsequentialgetencodedchar = 0;
+#endif
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos,
                                Readmode readmode)
 {
+#ifdef WITHshowgetencodedcharcounters
   countsequentialgetencodedchar++;
+#endif
   gt_assert(pos < encseq->totallength);
   switch (readmode)
   {
@@ -356,6 +364,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
 }
 #endif
 
+#ifdef WITHshowgetencodedcharcounters
 void showgetencodedcharcounters(void)
 {
   printf("calls of getencodedchar = " Formatuint64_t "\n",
@@ -363,6 +372,7 @@ void showgetencodedcharcounters(void)
   printf("calls of sequentialgetencodedchar = " Formatuint64_t "\n",
           PRINTuint64_tcast(countsequentialgetencodedchar));
 }
+#endif
 
 /* The following function is only used in tyr-mkindex.c */
 

@@ -642,7 +642,7 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
       haserr = true;
     }
     freeverboseinfo(&verboseinfo);
-    showgetencodedcharcounters();
+    /*showgetencodedcharcounters(); */
   } else
   {
     if (retval < 0)

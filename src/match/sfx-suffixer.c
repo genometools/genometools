@@ -536,6 +536,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
       showverbose(verboseinfo,"ssortmaxdepth is undefined");
     }
     sfi->totallength = getencseqtotallength(encseq);
+    showverbose(verboseinfo,"totallength = " FormatSeqpos,
+                        PRINTSeqposcast(sfi->totallength));
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;
     sfi->sri = NULL;
