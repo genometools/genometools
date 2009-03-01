@@ -3246,10 +3246,10 @@ static void fwdextract2bitenc(EndofTwobitencoding *ptbe,
     if (remain > 0)
     {
       unsigned long unit = (unsigned long) DIVBYUNITSIN2BITENC(startpos);
-      ptbe->tbe = (Twobitencoding) 
-                  (encseq->twobitencoding[unit] << MULT2(remain)) |
-                  (encseq->twobitencoding[unit+1] >> 
-                   MULT2(UNITSIN2BITENC - remain));
+      ptbe->tbe = (Twobitencoding)
+                  ((encseq->twobitencoding[unit] << MULT2(remain)) |
+                   (encseq->twobitencoding[unit+1] >>
+                    MULT2(UNITSIN2BITENC - remain)));
     } else
     {
       ptbe->tbe = encseq->twobitencoding[DIVBYUNITSIN2BITENC(startpos)];

@@ -427,6 +427,10 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
   trierep->allocatedBlindtrienode = MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->spaceBlindtrienode,NULL,Blindtrienode,
                    trierep->allocatedBlindtrienode);
+  printf("# blindtrie requires %lu bytes\n",
+            (unsigned long) (sizeof (Blindtrierep) +
+                             trierep->allocatedBlindtrienode *
+                             sizeof (Blindtrienode)));
   trierep->nextfreeBlindtrienode = 0;
   trierep->encseq = encseq;
   trierep->readmode = readmode;
@@ -543,18 +547,43 @@ static int suffixcompare(const void *a, const void *b)
   return 1;
 }
 
+static void checksorting(const Seqpos *suffixtable,
+                         unsigned long numberofsuffixes)
+{
+  unsigned long idx;
+
+  gt_assert(numberofsuffixes > 1UL);
+  for (idx = 0; idx < numberofsuffixes - 1; idx++)
+  {
+    if (suffixtable[idx] <= suffixtable[idx+1])
+    {
+      fprintf(stderr,"suffixtable[%lu]=%lu <= %lu=suffixtable[%lu]\n",
+                      idx,(unsigned long) suffixtable[idx],
+                          (unsigned long) suffixtable[idx+1],idx+1);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
 void blindtriesuffixsort(Blindtrierep *trierep,
                          Seqpos *suffixtable,
                          Seqpos *lcpsubtab,
                          unsigned long numberofsuffixes,
-                         Seqpos offset)
+                         Seqpos offset,
+                         bool dosort)
 {
   unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;
   Seqpos lcp;
   Uchar mm_oldsuffix, mm_newsuffix;
 
-  qsort(suffixtable,(size_t) numberofsuffixes, sizeof (Seqpos), suffixcompare);
+  if (dosort)
+  {
+    qsort(suffixtable,(size_t) numberofsuffixes,sizeof (Seqpos), suffixcompare);
+  } else
+  {
+    checksorting(suffixtable,numberofsuffixes);
+  }
   trierep->nextfreeBlindtrienode = 0;
   trierep->root = makeroot(trierep,suffixtable[0] + offset);
 #ifdef SKDEBUG
