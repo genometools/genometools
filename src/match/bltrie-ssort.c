@@ -547,7 +547,10 @@ static int suffixcompare(const void *a, const void *b)
   return 1;
 }
 
-static void checksorting(const Seqpos *suffixtable,
+#ifndef NDEBUG
+
+static void checksorting(bool ascending,
+                         const Seqpos *suffixtable,
                          unsigned long numberofsuffixes)
 {
   unsigned long idx;
@@ -555,13 +558,30 @@ static void checksorting(const Seqpos *suffixtable,
   gt_assert(numberofsuffixes > 1UL);
   for (idx = 0; idx < numberofsuffixes - 1; idx++)
   {
-    if (suffixtable[idx] <= suffixtable[idx+1])
+    if ((ascending && suffixtable[idx] >= suffixtable[idx+1]) ||
+        (!ascending && suffixtable[idx] <= suffixtable[idx+1]))
     {
-      fprintf(stderr,"suffixtable[%lu]=%lu <= %lu=suffixtable[%lu]\n",
+      fprintf(stderr,"not %s: ",ascending ? "ascending" : "descending");
+      fprintf(stderr,"suffixtable[%lu]=%lu vs %lu=suffixtable[%lu]\n",
                       idx,(unsigned long) suffixtable[idx],
                           (unsigned long) suffixtable[idx+1],idx+1);
       exit(EXIT_FAILURE);
     }
+  }
+}
+
+#endif
+
+static void inplace_reverseSeqpos(Seqpos *tab,unsigned long len)
+{
+  Seqpos tmp, *frontptr, *backptr;
+
+  for (frontptr = tab, backptr = tab + len - 1;
+       frontptr < backptr; frontptr++, backptr--)
+  {
+    tmp = *frontptr;
+    *frontptr = *backptr;
+    *backptr = tmp;
   }
 }
 
@@ -579,10 +599,16 @@ void blindtriesuffixsort(Blindtrierep *trierep,
 
   if (dosort)
   {
+#ifndef NDEBUG
+    // checksorting(false,suffixtable,numberofsuffixes);
+#endif
     qsort(suffixtable,(size_t) numberofsuffixes,sizeof (Seqpos), suffixcompare);
   } else
   {
-    checksorting(suffixtable,numberofsuffixes);
+#ifndef NDEBUG
+    checksorting(false,suffixtable,numberofsuffixes);
+#endif
+    inplace_reverseSeqpos(suffixtable,numberofsuffixes);
   }
   trierep->nextfreeBlindtrienode = 0;
   trierep->root = makeroot(trierep,suffixtable[0] + offset);
