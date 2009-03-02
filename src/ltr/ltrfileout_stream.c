@@ -265,9 +265,9 @@ int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                       gt_feature_node_get_attribute(ls->element.pbs, "trna"),
                       pbs_seq,
                       gt_feature_node_get_attribute(ls->element.pbs,
-                                                    "trnaoffset"),
-                      gt_feature_node_get_attribute(ls->element.pbs,
                                                     "pbsoffset"),
+                      gt_feature_node_get_attribute(ls->element.pbs,
+                                                    "trnaoffset"),
                       gt_feature_node_get_attribute(ls->element.pbs, "edist"));
       gt_free((char*) pbs_seq);
     } else gt_genfile_xprintf(ls->tabout_file, "\t\t\t\t\t\t\t\t");
