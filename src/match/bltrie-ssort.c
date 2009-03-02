@@ -56,7 +56,8 @@ struct Blindtrierep
   const Encodedsequence *encseq;
   Encodedsequencescanstate *esr1, *esr2;
   Readmode readmode;
-  Seqpos totallength;
+  Seqpos totallength,
+         offset;
   Nodeptr root;
   bool cmpcharbychar;
   unsigned long allocatedBlindtrienode,
@@ -72,13 +73,13 @@ static Nodeptr newBlindtrienode(Blindtrierep *trierep)
 }
 
 static Blindtrienode *makenewleaf(Blindtrierep *trierep,
-                                  Seqpos startpos,
+                                  Seqpos currentstartpos,
                                   Uchar firstchar)
 {
   Blindtrienode *newleaf;
 
   newleaf = newBlindtrienode(trierep);
-  newleaf->either.startpos = startpos;
+  newleaf->either.startpos = currentstartpos + trierep->offset;
   newleaf->depth = 0;
   SETLEAF(newleaf,true);
   newleaf->firstchar = firstchar;
@@ -86,7 +87,7 @@ static Blindtrienode *makenewleaf(Blindtrierep *trierep,
   return newleaf;
 }
 
-static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
+static Nodeptr makeroot(Blindtrierep *trierep,Seqpos currentstartpos)
 {
   Blindtrienode *root;
   Uchar firstchar;
@@ -96,21 +97,21 @@ static Nodeptr makeroot(Blindtrierep *trierep,Seqpos startpos)
   root->firstchar = 0; /* undefined */
   root->rightsibling = NULL;
   SETLEAF(root,false);
-  gt_assert(startpos < trierep->totallength);
-  if (startpos >= trierep->totallength)
+  gt_assert(currentstartpos + trierep->offset < trierep->totallength);
+  if (currentstartpos + trierep->offset >= trierep->totallength)
   {
     firstchar = (Uchar) SEPARATOR;
   } else
   {
     firstchar = getencodedchar(trierep->encseq, /* Random access */
-                               startpos,
+                               currentstartpos + trierep->offset ,
                                trierep->readmode);
     if (firstchar == (Uchar) WILDCARD)
     {
       firstchar = (Uchar) SEPARATOR;
     }
   }
-  root->either.firstchild = makenewleaf(trierep,startpos,firstchar);
+  root->either.firstchild = makenewleaf(trierep,currentstartpos,firstchar);
   return root;
 }
 
@@ -160,7 +161,7 @@ static Nodeptr findsucc(Nodeptr node,Uchar newchar)
   }
 }
 
-static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
+static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos currentstartpos)
 {
   Uchar newchar;
   Nodeptr head, succ;
@@ -170,13 +171,13 @@ static Nodeptr findcompanion(Blindtrierep *trierep,Seqpos startpos)
   while (ISNOTLEAF(head))
   {
     STOREINARRAY (&trierep->stack, Nodeptr, 128, head);
-    if (startpos + head->depth >= trierep->totallength)
+    if (currentstartpos + trierep->offset + head->depth >= trierep->totallength)
     {
       newchar = (Uchar) SEPARATOR;
     } else
     {
       newchar = getencodedchar(trierep->encseq, /* Random access */
-                               startpos + head->depth,
+                               currentstartpos + trierep->offset + head->depth,
                                trierep->readmode);
       if (newchar == (Uchar) WILDCARD)
       {
@@ -231,7 +232,7 @@ static void insertsuffixintoblindtrie(Blindtrierep *trierep,
   newleaf->depth = 0;
   SETLEAF(newleaf,true);
   newleaf->firstchar = mm_newsuffix;
-  newleaf->either.startpos = currentstartpos;
+  newleaf->either.startpos = currentstartpos + trierep->offset;
   previous = NULL;
   current = oldnode->either.firstchild;
   while (current != NULL &&
@@ -253,26 +254,25 @@ static void insertsuffixintoblindtrie(Blindtrierep *trierep,
 
 static Seqpos cmpcharbychargetlcp(Uchar *mm_oldsuffix,
                                   Uchar *mm_newsuffix,
-                                  const Encodedsequence *encseq,
-                                  Encodedsequencescanstate *esr1,
-                                  Encodedsequencescanstate *esr2,
-                                  Readmode readmode,
-                                  Seqpos totallength,
+                                  Blindtrierep *trierep,
                                   Seqpos leafpos,
                                   Seqpos currentstartpos)
 {
   Seqpos idx1, idx2;
   Uchar cc1, cc2;
 
-  initEncodedsequencescanstate(esr1,encseq,readmode,leafpos);
-  initEncodedsequencescanstate(esr2,encseq,readmode,currentstartpos);
-  for (idx1 = leafpos, idx2=currentstartpos;
+  initEncodedsequencescanstate(trierep->esr1,trierep->encseq,trierep->readmode,
+                               leafpos);
+  initEncodedsequencescanstate(trierep->esr2,trierep->encseq,trierep->readmode,
+                               currentstartpos + trierep->offset);
+  for (idx1 = leafpos, idx2=currentstartpos + trierep->offset;
        /* Nothing */;
        idx1++, idx2++)
   {
-    if (idx1 < totallength)
+    if (idx1 < trierep->totallength)
     {
-      cc1 = sequentialgetencodedchar(encseq,esr1,idx1,readmode);
+      cc1 = sequentialgetencodedchar(trierep->encseq,trierep->esr1,idx1,
+                                     trierep->readmode);
       if (cc1 == (Uchar) WILDCARD)
       {
         cc1 = (Uchar) SEPARATOR;
@@ -281,9 +281,10 @@ static Seqpos cmpcharbychargetlcp(Uchar *mm_oldsuffix,
     {
       cc1 = (Uchar) SEPARATOR;
     }
-    if (idx2 < totallength)
+    if (idx2 < trierep->totallength)
     {
-      cc2 = sequentialgetencodedchar(encseq,esr2,idx2,readmode);
+      cc2 = sequentialgetencodedchar(trierep->encseq,trierep->esr2,idx2,
+                                     trierep->readmode);
       if (cc2 == (Uchar) WILDCARD)
       {
         cc2 = (Uchar) SEPARATOR;
@@ -304,46 +305,43 @@ static Seqpos cmpcharbychargetlcp(Uchar *mm_oldsuffix,
 
 static Seqpos fastgetlcp(Uchar *mm_oldsuffix,
                          Uchar *mm_newsuffix,
-                         const Encodedsequence *encseq,
-                         Encodedsequencescanstate *esr1,
-                         Encodedsequencescanstate *esr2,
-                         Readmode readmode,
-                         Seqpos totallength,
+                         Blindtrierep *trierep,
                          Seqpos leafpos,
                          Seqpos currentstartpos)
 {
   Seqpos lcp;
 
   (void) compareEncseqsequences(&lcp,
-                                encseq,
-                                ISDIRREVERSE(readmode) ? false : true,
-                                ISDIRCOMPLEMENT(readmode) ? true : false,
-                                esr1,
-                                esr2,
+                                trierep->encseq,
+                                ISDIRREVERSE(trierep->readmode) ? false : true,
+                                ISDIRCOMPLEMENT(trierep->readmode) ? true
+                                                                   : false,
+                                trierep->esr1,
+                                trierep->esr2,
                                 leafpos,
-                                currentstartpos,
+                                currentstartpos + trierep->offset,
                                 0);
-  if (leafpos + lcp >= totallength)
+  if (leafpos + lcp >= trierep->totallength)
   {
     *mm_oldsuffix = (Uchar) SEPARATOR;
   } else
   {
-    *mm_oldsuffix = getencodedchar(encseq, /* Random access */
+    *mm_oldsuffix = getencodedchar(trierep->encseq, /* Random access */
                                    leafpos + lcp,
-                                   readmode);
+                                   trierep->readmode);
     if (*mm_oldsuffix == (Uchar) WILDCARD)
     {
       *mm_oldsuffix = (Uchar) SEPARATOR;
     }
   }
-  if (currentstartpos + lcp >= totallength)
+  if (currentstartpos + trierep->offset + lcp >= trierep->totallength)
   {
     *mm_newsuffix = (Uchar) SEPARATOR;
   } else
   {
-    *mm_newsuffix = getencodedchar(encseq, /* Random access */
-                                   currentstartpos + lcp,
-                                   readmode);
+    *mm_newsuffix = getencodedchar(trierep->encseq, /* Random access */
+                                   currentstartpos + trierep->offset + lcp,
+                                   trierep->readmode);
     if (*mm_newsuffix == (Uchar) WILDCARD)
     {
       *mm_newsuffix = (Uchar) SEPARATOR;
@@ -358,8 +356,7 @@ static Seqpos fastgetlcp(Uchar *mm_oldsuffix,
 
 static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
                                           Seqpos *lcpsubtab,
-                                          Blindtrierep *trierep,
-                                          Seqpos offset)
+                                          Blindtrierep *trierep)
 {
   bool readyforpop = false, currentnodeisleaf;
   Nodeptr currentnode, siblval, lcpnode = trierep->root;
@@ -372,12 +369,12 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
   {
     if (currentnodeisleaf)
     {
-      assert (currentnode->either.startpos >= offset);
+      assert (currentnode->either.startpos >= trierep->offset);
       if (lcpsubtab != NULL && nextfree > 0)
       {
-        lcpsubtab[nextfree] = lcpnode->depth + offset;
+        lcpsubtab[nextfree] = lcpnode->depth + trierep->offset;
       }
-      suffixtable[nextfree++] = currentnode->either.startpos - offset;
+      suffixtable[nextfree++] = currentnode->either.startpos - trierep->offset;
       siblval = currentnode->rightsibling;
       if (siblval == NULL)
       {
@@ -453,15 +450,14 @@ void freeBlindtrierep(Blindtrierep **trierep)
 }
 
 #ifdef SKDEBUG
-static void checkcurrentblindtrie(Blindtrierep *trierep,
-                                  Seqpos offset)
+static void checkcurrentblindtrie(Blindtrierep *trierep)
 {
   Seqpos suffixtable[6];
   unsigned long idx, numofsuffixes;
   Seqpos maxcommon;
   int retval;
 
-  numofsuffixes = enumeratetrieleaves (&suffixtable[0], NULL, trierep, offset);
+  numofsuffixes = enumeratetrieleaves (&suffixtable[0], NULL, trierep);
   for (idx=1UL; idx < numofsuffixes; idx++)
   {
     maxcommon = 0;
@@ -615,36 +611,33 @@ void blindtriesuffixsort(Blindtrierep *trierep,
 #endif
     }
   }
+  trierep->offset = offset;
   trierep->nextfreeBlindtrienode = 0;
-  trierep->root = makeroot(trierep,suffixtable[0] + offset);
+  trierep->root = makeroot(trierep,suffixtable[0]);
 #ifdef SKDEBUG
   printf("insert suffixes at offset " FormatSeqpos ":\n",
-          PRINTSeqposcast(offset));
+          PRINTSeqposcast(trierep->offset));
   for (i=0; i < numberofsuffixes; i++)
   {
-    printf(FormatSeqpos " ",PRINTSeqposcast(suffixtable[i] + offset));
+    printf(FormatSeqpos " ",PRINTSeqposcast(suffixtable[i] + trierep->offset));
   }
   printf("\nstep 0\n");
   showblindtrie(trierep);
 #endif
   for (idx=1UL; idx < numberofsuffixes; idx++)
   {
-    if (suffixtable[idx] + offset >= trierep->totallength)
+    if (suffixtable[idx] + trierep->offset >= trierep->totallength)
     {
       break;
     }
-    leafinsubtree = findcompanion(trierep, suffixtable[idx] + offset);
+    leafinsubtree = findcompanion(trierep, suffixtable[idx]);
     gt_assert(ISLEAF(leafinsubtree));
     lcp = (trierep->cmpcharbychar ? cmpcharbychargetlcp : fastgetlcp)
                              (&mm_oldsuffix,
                               &mm_newsuffix,
-                              trierep->encseq,
-                              trierep->esr1,
-                              trierep->esr2,
-                              trierep->readmode,
-                              trierep->totallength,
+                              trierep,
                               leafinsubtree->either.startpos,
-                              suffixtable[idx] + offset);
+                              suffixtable[idx]);
     currentnode = trierep->root;
     for (stackidx=0;stackidx<trierep->stack.nextfreeNodeptr;stackidx++)
     {
@@ -659,19 +652,19 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                               mm_oldsuffix,
                               lcp,
                               mm_newsuffix,
-                              suffixtable[idx] + offset);
+                              suffixtable[idx]);
 #ifdef SKDEBUG
     printf("step %lu\n",i);
     showblindtrie(trierep);
-    checkcurrentblindtrie(trierep,offset);
+    checkcurrentblindtrie(trierep);
 #endif
   }
-  (void) enumeratetrieleaves (suffixtable, lcpsubtab, trierep, offset);
+  (void) enumeratetrieleaves (suffixtable, lcpsubtab, trierep);
   if (lcpsubtab != NULL)
   {
     while (idx < numberofsuffixes)
     {
-      lcpsubtab[idx++] = offset;
+      lcpsubtab[idx++] = trierep->offset;
     }
   }
 }
