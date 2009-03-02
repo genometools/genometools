@@ -20,6 +20,13 @@
 
 typedef struct Blindtrierep Blindtrierep;
 
+typedef enum
+{
+  Ascending,
+  Descending,
+  Noorder
+} Ordertype;
+
 Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
                               const Encodedsequence *encseq,
                               bool cmpcharbychar,
@@ -30,7 +37,7 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                          Seqpos *lcpsubtab,
                          unsigned long numberofsuffixes,
                          Seqpos offset,
-                         bool dosort);
+                         Ordertype ordertype);
 
 void freeBlindtrierep(Blindtrierep **trierep);
 

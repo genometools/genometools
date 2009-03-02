@@ -67,7 +67,7 @@
           *bptr++ = temp;\
         }
 
-#define SUBSORT(WIDTH,LEFT,RIGHT,DEPTH)\
+#define SUBSORT(WIDTH,LEFT,RIGHT,DEPTH,ORDERTYPE)\
         /*checksuffixrange(encseq,\
                          fwd,\
                          complement,\
@@ -96,27 +96,31 @@
                                     lcpsubtab == NULL\
                                       ? NULL \
                                       : lcpsubtab->spaceSeqpos+LCPINDEX(LEFT),\
-                                    WIDTH,DEPTH,true);\
+                                    WIDTH,DEPTH,ORDERTYPE);\
               }\
             }\
           } else\
-          {\
-            PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
+         {\
+            PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
           }\
         }
 
-#define PUSHMKVSTACK(L,R,D)\
+#define PUSHMKVSTACK(L,R,D,ORDERTYPE)\
         CHECKARRAYSPACE(mkvauxstack,MKVstack,1024);\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].left = L;\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right = R;\
+        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].ordertype =\
+          ORDERTYPE;\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack++].depth = D
 
-#define POPMKVstack(L,R,D)\
+#define POPMKVstack(L,R,D,OT)\
         L = mkvauxstack->spaceMKVstack[--mkvauxstack->nextfreeMKVstack].left;\
         R = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right;\
         D = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth;\
+        OT = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].\
+             ordertype;\
         width = (unsigned long) ((R) - (L) + 1);\
-        widthdistrib[width]++
+        ADDWIDTHDISTRIB(width)
 
 #define UPDATELCP(MINVAL,MAXVAL)\
         gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);\
@@ -505,6 +509,7 @@ typedef struct
   Suffixptr *left,
             *right;
   Seqpos depth;
+  Ordertype ordertype;
 } MKVstack;
 
 typedef struct
@@ -802,6 +807,19 @@ static void showcountingsortinfo(const Countingsortinfo *countingsortinfo,
 }
 */
 
+static Ordertype deriveordertype(Ordertype parentordertype,bool turn)
+{
+  switch (parentordertype)
+  {
+    case Noorder : return Noorder;
+    case Descending: return turn ? Ascending : Descending;
+    case Ascending: return turn ? Descending : Ascending;
+  }
+  /*@ignore@*/
+  return Noorder;
+  /*@end@*/
+}
+
 static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              const Encodedsequence *encseq,
                              Countingsortinfo *countingsortinfo,
@@ -814,6 +832,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              Seqpos *left,
                              const Sfxcmp *pivotcmpbits,
                              unsigned long pivotidx,
+                             Ordertype parentordertype,
                              Seqpos depth,
                              unsigned long width,
                              unsigned long *leftlcpdist,
@@ -837,34 +856,34 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     {
       PTR2INT(etbecurrent,left+idx);
       cmp = compareTwobitencodings(fwd,complement,&commonunits,
-				   &etbecurrent,pivotcmpbits);
+                                   &etbecurrent,pivotcmpbits);
       countingsortinfo[idx].suffix = left[idx];
       gt_assert(commonunits <= (unsigned int) UNITSIN2BITENC);
       countingsortinfo[idx].lcpwithpivot = commonunits;
       if (cmp > 0)
       {
-	gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-	rightlcpdist[commonunits]++;
-	if (maxlargerwithlcp < commonunits)
-	{
-	  maxlargerwithlcp = commonunits;
-	}
-	countingsortinfo[idx].cmpresult = (char) 1;
-	larger++;
+        gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
+        rightlcpdist[commonunits]++;
+        if (maxlargerwithlcp < commonunits)
+        {
+          maxlargerwithlcp = commonunits;
+        }
+        countingsortinfo[idx].cmpresult = (char) 1;
+        larger++;
       } else
       {
-	if (cmp < 0)
-	{
-	  gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-	  leftlcpdist[commonunits]++;
-	  if (maxsmallerwithlcp < commonunits)
-	  {
-	    maxsmallerwithlcp = commonunits;
-	  }
-	  countingsortinfo[idx].cmpresult = (char) -1;
-	  smaller++;
-	} else
-	{
+        if (cmp < 0)
+        {
+          gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
+          leftlcpdist[commonunits]++;
+          if (maxsmallerwithlcp < commonunits)
+          {
+            maxsmallerwithlcp = commonunits;
+          }
+          countingsortinfo[idx].cmpresult = (char) -1;
+          smaller++;
+        } else
+        {
           gt_assert(commonunits == (unsigned int) UNITSIN2BITENC);
           countingsortinfo[idx].cmpresult = 0;
         }
@@ -885,7 +904,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     rightlcpdist[idx] += rightlcpdist[idx-1];
   }
   equaloffset = width - larger;
-  for (csiptr = countingsortinfo + width -1; csiptr >= countingsortinfo; 
+  for (csiptr = countingsortinfo + width -1; csiptr >= countingsortinfo;
        csiptr--)
   {
     switch (csiptr->cmpresult)
@@ -915,7 +934,8 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     if (leftlcpdist[idx] + 1 < end) /* at least two elements */
     {
       currentwidth = end - leftlcpdist[idx];
-      SUBSORT(currentwidth,left + leftlcpdist[idx],left + end - 1,depth + idx);
+      SUBSORT(currentwidth,left + leftlcpdist[idx],left + end - 1,depth + idx,
+              deriveordertype(parentordertype,false));
     }
     if (lcpsubtab != NULL && leftlcpdist[idx] < end) /* at least one element */
     {
@@ -927,7 +947,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   {
     currentwidth = width - smaller - larger;
     SUBSORT(currentwidth,left+smaller,left+width-larger-1,
-            depth + UNITSIN2BITENC);
+            depth + UNITSIN2BITENC,deriveordertype(parentordertype,false));
   }
   for (idx = 0; idx <= (unsigned long) maxlargerwithlcp; idx++)
   {
@@ -942,7 +962,8 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     {
       currentwidth = end - rightlcpdist[idx];
       SUBSORT(currentwidth,left+width-end,
-              left + width - 1 - rightlcpdist[idx],depth + idx);
+              left + width - 1 - rightlcpdist[idx],depth + idx,
+              deriveordertype(parentordertype,true));
     }
     if (lcpsubtab != NULL && rightlcpdist[idx] < end) /* at least one element */
     {
@@ -951,6 +972,27 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
     rightlcpdist[idx] = 0;
   }
 }
+
+#ifdef WIDTHDISTRIB
+#define ADDWIDTHDISTRIB(W)  widthdistrib[W]++
+
+static void showwidthdistrib(const unsigned long *widthdistrib,
+                             unsigned long nonspecialsmaxbucketsize)
+{
+  unsigned long idx;
+
+  for (idx = 0; idx <= nonspecialsmaxbucketsize; idx++)
+  {
+    if (widthdistrib[idx] > 0)
+    {
+      printf("%lu %lu\n",idx,widthdistrib[idx]);
+    }
+  }
+}
+
+#else
+#define ADDWIDTHDISTRIB(W)   /* nothing */
+#endif
 
 static void bentleysedgewick(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr1,
@@ -966,13 +1008,14 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Countingsortinfo *countingsortinfo,
                              const Sfxstrategy *sfxstrategy,
                              Blindtrierep *trierep,
-                             unsigned long *widthdistrib)
+                             GT_UNUSED unsigned long *widthdistrib)
 {
   Suffixptr *left, *right, *leftplusw;
   Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
   Sfxcmp pivotcmpbits, val;
   Seqpos depth;
   Suffixptr *pa, *pb, *pc, *pd, *pm, *aptr, *bptr, cptr, temp;
+  Ordertype parentordertype;
   bool fwd = ISDIRREVERSE(readmode) ? false : true,
        complement = ISDIRCOMPLEMENT(readmode) ? true : false;
   int retvalpivotcmpbits;
@@ -985,7 +1028,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   const int commonunitsequal = sfxstrategy->cmpcharbychar ? 1 : UNITSIN2BITENC;
 
   width = (unsigned long) (r - l + 1);
-  widthdistrib[width]++;
+  ADDWIDTHDISTRIB(width);
+  parentordertype = Descending;
   if (width <= sfxstrategy->maxbltriesort)
   {
     if (l < r)
@@ -1001,7 +1045,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         blindtriesuffixsort(trierep,l,lcpsubtab == NULL
                                       ? NULL
                                       : lcpsubtab->spaceSeqpos+LCPINDEX(l),
-                                      width,d,false);
+                                      width,d,Descending);
       }
     }
     return;
@@ -1053,6 +1097,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                          left,
                          &pivotcmpbits,
                          (unsigned long) (pm - left),
+                         parentordertype,
                          depth,
                          width,
                          leftlcpdist,
@@ -1064,7 +1109,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         {
           break;
         }
-        POPMKVstack(left,right,depth); /* new values for left, right, depth */
+        POPMKVstack(left,right,depth,parentordertype);
+        /* new values for left, right, depth and parentordertype */
         continue;
       }
       SWAP(left, pm);
@@ -1206,7 +1252,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         */
         SETLCP(LCPINDEX(leftplusw),depth + smallermaxlcp);
       }
-      SUBSORT(w,left,leftplusw-1,depth + smallerminlcp);
+      SUBSORT(w,left,leftplusw-1,depth + smallerminlcp,Noorder);
     } else
     {
       leftplusw = left;
@@ -1216,7 +1262,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     if (ISNOTEND(cptr))
     {
       width = (unsigned long) (right-(pd-pb)-leftplusw);
-      SUBSORT(width,leftplusw,right-(pd-pb)-1,depth+commonunitsequal);
+      SUBSORT(width,leftplusw,right-(pd-pb)-1,depth+commonunitsequal,Noorder);
     }
 
     gt_assert(pd >= pc);
@@ -1232,7 +1278,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         */
         SETLCP(LCPINDEX(right-w+1),depth + greatermaxlcp);
       }
-      SUBSORT(w,right-w+1,right,depth + greaterminlcp);
+      SUBSORT(w,right-w+1,right,depth + greaterminlcp,Noorder);
     }
 #ifdef QUICKSORTSTEPS
     quicksortsteps++;
@@ -1248,7 +1294,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     {
       break;
     }
-    POPMKVstack(left,right,depth); /* new values for left, right, depth */
+    POPMKVstack(left,right,depth,parentordertype);
+    /* new values for left, right, depth and parentordertype */
   }
 }
 
@@ -1606,8 +1653,7 @@ void sortallbuckets(Seqpos *suftabptr,
   ArrayMKVstack mkvauxstack;
   Bucketspecification bucketspec;
   unsigned long nonspecialsmaxbucketsize,
-                specialsmaxbucketsize,
-                *widthdistrib;
+                specialsmaxbucketsize;
   Seqpos lcpvalue;
   Lcpsubtab *lcpsubtab;
   Suffixwithcode firstsuffixofbucket;
@@ -1616,6 +1662,7 @@ void sortallbuckets(Seqpos *suftabptr,
   Countingsortinfo *countingsortinfo;
   Medianinfo *medianinfospace;
   Blindtrierep *trierep;
+  unsigned long *widthdistrib = NULL;
 
   if (outlcpinfo == NULL)
   {
@@ -1676,8 +1723,10 @@ void sortallbuckets(Seqpos *suftabptr,
                             encseq,
                             sfxstrategy->cmpcharbychar,
                             readmode);
+#ifdef WIDTHDISTRIB
   ALLOCASSIGNSPACE(widthdistrib,NULL,unsigned long,nonspecialsmaxbucketsize+1);
   memset(widthdistrib,0,sizeof (unsigned long) * (nonspecialsmaxbucketsize+1));
+#endif
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -1831,19 +1880,10 @@ void sortallbuckets(Seqpos *suftabptr,
       }
     }
   }
-  /*
-  {
-    unsigned long idx;
-
-    for (idx = 0; idx <= nonspecialsmaxbucketsize; idx++)
-    {
-      if (widthdistrib[idx] > 0)
-      {
-        printf("%lu %lu\n",idx,widthdistrib[idx]);
-      }
-    }
-  }
-  */
+#ifdef WIDTHDISTRIB
+  showwidthdistrib(const unsigned long *widthdistrib,
+                   unsigned long nonspecialsmaxbucketsize);
+#endif
   FREESPACE(widthdistrib);
   FREESPACE(countingsortinfo);
   FREESPACE(medianinfospace);

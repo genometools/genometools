@@ -590,25 +590,30 @@ void blindtriesuffixsort(Blindtrierep *trierep,
                          Seqpos *lcpsubtab,
                          unsigned long numberofsuffixes,
                          Seqpos offset,
-                         bool dosort)
+                         Ordertype ordertype)
 {
   unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;
   Seqpos lcp;
   Uchar mm_oldsuffix, mm_newsuffix;
 
-  if (dosort)
+  if (ordertype == Noorder)
   {
-#ifndef NDEBUG
-    // checksorting(false,suffixtable,numberofsuffixes);
-#endif
     qsort(suffixtable,(size_t) numberofsuffixes,sizeof (Seqpos), suffixcompare);
   } else
   {
+    if (ordertype == Descending)
+    {
 #ifndef NDEBUG
-    checksorting(false,suffixtable,numberofsuffixes);
+      checksorting(false,suffixtable,numberofsuffixes);
 #endif
-    inplace_reverseSeqpos(suffixtable,numberofsuffixes);
+      inplace_reverseSeqpos(suffixtable,numberofsuffixes);
+    } else
+    {
+#ifndef NDEBUG
+      checksorting(true,suffixtable,numberofsuffixes);
+#endif
+    }
   }
   trierep->nextfreeBlindtrienode = 0;
   trierep->root = makeroot(trierep,suffixtable[0] + offset);
