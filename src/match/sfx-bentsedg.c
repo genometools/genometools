@@ -1721,6 +1721,7 @@ void sortallbuckets(Seqpos *suftabptr,
   }
   trierep = newBlindtrierep(sfxstrategy->maxbltriesort,
                             encseq,
+                            &sfxstrategy->ssortmaxdepth,
                             sfxstrategy->cmpcharbychar,
                             readmode);
 #ifdef WIDTHDISTRIB
