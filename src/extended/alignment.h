@@ -34,15 +34,10 @@ void          gt_alignment_set_seqs(GtAlignment*,
                                     unsigned long ulen,
                                     const Uchar *v,
                                     unsigned long vlen);
-void          gt_alignment_set_seqs_with_range(GtAlignment*,
-                                               const Uchar *u,
-                                               unsigned long ulen,
-                                               GtRange urange,
-                                               const Uchar *v,
-                                               unsigned long vlen,
-                                               GtRange vrange);
-GtRange       gt_alignment_get_urange(GtAlignment*);
-GtRange       gt_alignment_get_vrange(GtAlignment*);
+GtRange       gt_alignment_get_urange(const GtAlignment*);
+GtRange       gt_alignment_get_vrange(const GtAlignment*);
+void          gt_alignment_set_urange(GtAlignment*, GtRange);
+void          gt_alignment_set_vrange(GtAlignment*, GtRange);
 void          gt_alignment_add_replacement(GtAlignment*);
 void          gt_alignment_add_deletion(GtAlignment*);
 void          gt_alignment_add_insertion(GtAlignment*);

@@ -34,8 +34,8 @@ struct GtAlignment {
               *v;
   unsigned long ulen,
                 vlen;
-  GtRange urange,
-         vrange;
+  GtRange aligned_range_u,
+          aligned_range_v;
   GtArray *eops;
 };
 
@@ -66,7 +66,10 @@ GtAlignment* gt_alignment_new_with_seqs(const Uchar *u, unsigned long ulen,
   GtAlignment *a;
   gt_assert(u && v);
   a = gt_alignment_new();
-  gt_alignment_set_seqs(a, u, ulen,  v, vlen);
+  gt_alignment_set_seqs(a, u, ulen, v, vlen);
+  a->aligned_range_u.start = a->aligned_range_v.start = 0;
+  a->aligned_range_u.end = ulen - 1;
+  a->aligned_range_v.end = vlen - 1;
   return a;
 }
 
@@ -74,39 +77,13 @@ void gt_alignment_set_seqs(GtAlignment *a, const Uchar *u, unsigned long ulen,
                            const Uchar *v, unsigned long vlen)
 {
   gt_assert(a && u && v);
-  GtRange urng, vrng;
-  urng.start = vrng.start = 0;
-  urng.end = ulen - 1;
-  vrng.end = vlen - 1;
-  gt_alignment_set_seqs_with_range(a, u, ulen, urng, v, vlen, vrng);
-}
-
-void gt_alignment_set_seqs_with_range(GtAlignment *a, const Uchar *u,
-                                      unsigned long ulen, GtRange urange,
-                                      const Uchar *v, unsigned long vlen,
-                                      GtRange vrange)
-{
-  gt_assert(a && u && v);
   a->u = u;
   a->v = v;
   a->ulen = ulen;
   a->vlen = vlen;
-  a->urange.start = urange.start;
-  a->urange.end   = urange.end;
-  a->vrange.start = vrange.start;
-  a->vrange.end   = vrange.end;
-}
-
-GtRange gt_alignment_get_urange(GtAlignment *a)
-{
-  gt_assert(a);
-  return a->urange;
-}
-
-GtRange gt_alignment_get_vrange(GtAlignment *a)
-{
-  gt_assert(a);
-  return a->vrange;
+  a->aligned_range_u.start = a->aligned_range_v.start = 0;
+  a->aligned_range_u.end = ulen - 1;
+  a->aligned_range_v.end = vlen - 1;
 }
 
 static void gt_alignment_add_eop(GtAlignment *a, Eoptype type)
@@ -128,6 +105,32 @@ static void gt_alignment_add_eop(GtAlignment *a, Eoptype type)
       gt_array_add(a->eops, meop);
     }
   }
+}
+
+GtRange gt_alignment_get_urange(const GtAlignment *a)
+{
+  gt_assert(a);
+  return a->aligned_range_u;
+}
+
+void gt_alignment_set_urange(GtAlignment *a, GtRange r)
+{
+  gt_assert(a && r.start <= r.end);
+  a->aligned_range_u.start = r.start;
+  a->aligned_range_u.end = r.end;
+}
+
+GtRange gt_alignment_get_vrange(const GtAlignment *a)
+{
+  gt_assert(a);
+  return a->aligned_range_v;
+}
+
+void gt_alignment_set_vrange(GtAlignment *a, GtRange r)
+{
+  gt_assert(a && r.start <= r.end);
+  a->aligned_range_v.start = r.start;
+  a->aligned_range_v.end = r.end;
 }
 
 void gt_alignment_add_replacement(GtAlignment *a)
@@ -199,8 +202,7 @@ unsigned long gt_alignment_eval(const GtAlignment *a)
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (tolower(a->u[a->urange.start + uctr])
-                != tolower(a->v[a->vrange.start + vctr]))
+          if (tolower(a->u[uctr] )!= tolower(a->v[vctr]))
             sumcost++;
           uctr++;
           vctr++;
@@ -257,6 +259,7 @@ long gt_alignment_eval_with_score(const GtAlignment *a,
   }
   return sumscore;
 }
+
 /* XXX: add width parameter and format the GtAlignment accordingly */
 void gt_alignment_show(const GtAlignment *a, FILE *fp)
 {
@@ -271,7 +274,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
       case Replacement:
       case Deletion:
         for (j = 0; j < meop.steps; j++)
-          gt_xfputc(a->u[a->urange.start + uctr++], fp);
+          gt_xfputc(a->u[uctr++], fp);
         break;
       case Insertion:
         for (j = 0; j < meop.steps; j++)
@@ -287,8 +290,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
     switch (meop.type) {
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
-          if (tolower(a->u[a->urange.start + uctr++])
-                == tolower(a->v[a->vrange.start + vctr++]))
+          if (tolower(a->u[uctr++]) == tolower(a->v[vctr++]))
             gt_xfputc(MATCHSYMBOL, fp);
           else
             gt_xfputc(MISMATCHSYMBOL, fp);
@@ -317,7 +319,7 @@ void gt_alignment_show(const GtAlignment *a, FILE *fp)
       case Replacement:
       case Insertion:
         for (j = 0; j < meop.steps; j++)
-          gt_xfputc(a->v[a->vrange.start + vctr++], fp);
+          gt_xfputc(a->v[vctr++], fp);
         break;
       case Deletion:
         for (j = 0; j < meop.steps; j++)
