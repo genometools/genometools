@@ -56,6 +56,9 @@ struct GtPdomModel {
 struct GtPdomSingleHit {
   GtPhase phase;
   GtRange range;
+  GtStr *aa_seq_model,
+        *mline,
+        *aa_seq_matched;
   double eval;
   unsigned long reference_count;
 };
@@ -93,6 +96,47 @@ typedef struct GtPdomSharedMem {
 
 /* --------------- GtPdomSingleHit ---------------------------------- */
 
+void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
+                                         unsigned long width,
+                                         GtStr *dest)
+{
+  unsigned long pos,
+                match_start,
+                match_end,
+                i;
+  char *buffer, cpbuf[BUFSIZ];
+  const char *model,
+             *mline,
+             *matched;
+  gt_assert(sh && width > 0 && dest && width < BUFSIZ);
+  buffer = gt_calloc(width+1, sizeof (char));
+  model = gt_str_get(sh->aa_seq_model);
+  mline = gt_str_get(sh->mline);
+  matched = gt_str_get(sh->aa_seq_matched);
+  gt_str_reset(dest);
+  
+  match_end = sh->range.start - 1;
+  for (pos = 0; pos < gt_range_length(&sh->range) + width; pos += width)
+  {
+    match_start = match_end + 1;
+    for (i = pos; matched[i] != '\0' && i < pos + width; i++)
+      if (!isgap(matched[i])) match_end++;
+    strncpy(buffer, model+pos, width);
+    snprintf(cpbuf, BUFSIZ, "%6s %s\n", " ", buffer);
+    gt_str_append_cstr(dest, cpbuf);
+    strncpy(buffer, mline+pos, width);
+    snprintf(cpbuf, BUFSIZ, "%6s %s\n", " ", buffer);
+    gt_str_append_cstr(dest, cpbuf);
+    strncpy(buffer, matched+pos, width);
+    snprintf(cpbuf, BUFSIZ, "%6lu %s %6lu\n",
+                            match_start,
+                            buffer,
+                            match_end);
+    gt_str_append_cstr(dest, cpbuf);
+  }
+  gt_free(buffer);
+}
+
 static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
 {
   GtPdomSingleHit *hit;
@@ -101,8 +145,16 @@ static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
   hit->phase = gt_phase_get(singlehit->name[0]);
   hit->range.start = singlehit->sqfrom;
   hit->range.end = singlehit->sqto;
+  gt_assert(hit->range.end - hit->range.start + 1 == singlehit->ali->len);
   hit->eval = singlehit->pvalue;
+  if (singlehit->ali && singlehit->ali->aseq)
+    hit->aa_seq_matched = gt_str_new_cstr(singlehit->ali->aseq);
+  if (singlehit->ali && singlehit->ali->model)
+    hit->aa_seq_model = gt_str_new_cstr(singlehit->ali->model);
+  if (singlehit->ali && singlehit->ali->mline)
+    hit->mline = gt_str_new_cstr(singlehit->ali->mline);
   gt_assert(hit->range.start <= hit->range.end);
+
   return hit;
 }
 
