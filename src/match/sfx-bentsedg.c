@@ -87,7 +87,7 @@
               {\
                 insertionsort(encseq,esr1,esr2,\
                               lcpsubtab,readmode,totallength,\
-                              LEFT,RIGHT,DEPTH,&sfxstrategy->ssortmaxdepth,\
+                              LEFT,RIGHT,DEPTH,\
                               sfxstrategy->cmpcharbychar);\
               } else\
               {\
@@ -420,7 +420,6 @@ static void insertionsort(const Encodedsequence *encseq,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
                           Seqpos depth,
-                          const Definedunsignedint *ssortmaxdepth,
                           bool cmpcharbychar)
 {
   Suffixptr *pi, *pj;
@@ -447,18 +446,9 @@ static void insertionsort(const Encodedsequence *encseq,
         {
           Seqpos ccs, cct;
           Uchar tmpsvar, tmptvar;
-          if (ssortmaxdepth->defined)
-          {
-            ccs = DEREF(tmpsvar,sptr,
-                        MIN(totallength,
-                        *(pj-1)+ssortmaxdepth->valueunsignedint));
-            cct = DEREF(tmptvar,tptr,
-                        MIN(totallength,*pj+ssortmaxdepth->valueunsignedint));
-          } else
-          {
-            ccs = DEREF(tmpsvar,sptr,totallength);
-            cct = DEREF(tmptvar,tptr,totallength);
-          }
+
+          ccs = DEREF(tmpsvar,sptr,totallength);
+          cct = DEREF(tmptvar,tptr,totallength);
           if (ccs != cct)
           {
             lcplen = (Seqpos) (tptr - *pj);
@@ -1037,8 +1027,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       if (width <= sfxstrategy->maxinsertionsort)
       {
         insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
-                      l,r,d,&sfxstrategy->ssortmaxdepth,
-                      sfxstrategy->cmpcharbychar);
+                      l,r,d,sfxstrategy->cmpcharbychar);
       } else
       {
         countbltriesort++;
@@ -1721,7 +1710,6 @@ void sortallbuckets(Seqpos *suftabptr,
   }
   trierep = newBlindtrierep(sfxstrategy->maxbltriesort,
                             encseq,
-                            &sfxstrategy->ssortmaxdepth,
                             sfxstrategy->cmpcharbychar,
                             readmode);
 #ifdef WIDTHDISTRIB

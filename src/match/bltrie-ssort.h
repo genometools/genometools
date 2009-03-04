@@ -19,7 +19,6 @@
 #define BLTRIE_SSORT_H
 
 #include "seqpos-def.h"
-#include "defined-types.h"
 
 typedef struct Blindtrierep Blindtrierep;
 
@@ -32,7 +31,6 @@ typedef enum
 
 Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
                               const Encodedsequence *encseq,
-                              const Definedunsignedint *ssortmaxdepth,
                               bool cmpcharbychar,
                               Readmode readmode);
 
