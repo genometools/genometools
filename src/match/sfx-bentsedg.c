@@ -1062,24 +1062,25 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (unsigned long) (r - l + 1);
   ADDWIDTHDISTRIB(width);
   parentordertype = Descending;
-  /*
-  if (comparisonsort(trierep,
-                     lcpsubtab,
-                     encseq,
-                     esr1,
-                     esr2,
-                     readmode,
-                     totallength,
-                     sfxstrategy,
-                     l,
-                     r,
-                     d,
-                     width,
-                     parentordertype))
+  if (!sfxstrategy->ssortmaxdepth.defined)
   {
-    return;
+    if (comparisonsort(trierep,
+                       lcpsubtab,
+                       encseq,
+                       esr1,
+                       esr2,
+                       readmode,
+                       totallength,
+                       sfxstrategy,
+                       l,
+                       r,
+                       d,
+                       width,
+                       parentordertype))
+    {
+      return;
+    }
   }
-  */
   left = l;
   right = r;
   depth = d;
