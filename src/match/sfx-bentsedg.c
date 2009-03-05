@@ -76,32 +76,35 @@
                          RIGHT,\
                          DEPTH,\
                          __LINE__);*/\
-        if (!sfxstrategy->ssortmaxdepth.defined ||\
-            (DEPTH) < (Seqpos) sfxstrategy->ssortmaxdepth.valueunsignedint)\
+        if ((LEFT) >= (RIGHT))\
         {\
-          if ((WIDTH) <= sfxstrategy->maxbltriesort)\
+          /*printf("solved singleton at depth %lu\n",(unsigned long) DEPTH);*/\
+        } else\
+        {\
+          if (sfxstrategy->ssortmaxdepth.defined)\
           {\
-            if ((LEFT) < (RIGHT))\
+            if ((DEPTH) >= (Seqpos) sfxstrategy->ssortmaxdepth.valueunsignedint)\
             {\
-              if (width <= sfxstrategy->maxinsertionsort)\
-              {\
-                insertionsort(encseq,esr1,esr2,\
-                              lcpsubtab,readmode,totallength,\
-                              LEFT,RIGHT,DEPTH,\
-                              sfxstrategy->cmpcharbychar);\
-              } else\
-              {\
-                countbltriesort++;\
-                blindtriesuffixsort(trierep,LEFT,\
-                                    lcpsubtab == NULL\
-                                      ? NULL \
-                                      : lcpsubtab->spaceSeqpos+LCPINDEX(LEFT),\
-                                    WIDTH,DEPTH,ORDERTYPE);\
-              }\
+              printf("add interval to queue\n");\
             }\
           } else\
-         {\
-            PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
+          {\
+            if (!comparisonsort(trierep,\
+                                lcpsubtab,\
+                                encseq,\
+                                esr1,\
+                                esr2,\
+                                readmode,\
+                                totallength,\
+                                sfxstrategy,\
+                                LEFT,\
+                                RIGHT,\
+                                DEPTH,\
+                                WIDTH,\
+                                ORDERTYPE))\
+            {\
+              PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
+            }\
           }\
         }
 
@@ -109,9 +112,9 @@
         CHECKARRAYSPACE(mkvauxstack,MKVstack,1024);\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].left = L;\
         mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right = R;\
-        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].ordertype =\
-          ORDERTYPE;\
-        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack++].depth = D
+        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth = D;\
+        mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack++].ordertype =\
+          ORDERTYPE
 
 #define POPMKVstack(L,R,D,OT)\
         L = mkvauxstack->spaceMKVstack[--mkvauxstack->nextfreeMKVstack].left;\
@@ -810,6 +813,45 @@ static Ordertype deriveordertype(Ordertype parentordertype,bool turn)
   /*@end@*/
 }
 
+static bool comparisonsort(Blindtrierep *trierep,
+                           Lcpsubtab *lcpsubtab,
+                           const Encodedsequence *encseq,
+                           Encodedsequencescanstate *esr1,
+                           Encodedsequencescanstate *esr2,
+                           Readmode readmode,
+                           Seqpos totallength,
+                           const Sfxstrategy *sfxstrategy,
+                           Suffixptr *left,
+                           Suffixptr *right,
+                           Seqpos depth,
+                           unsigned long width,
+                           Ordertype ordertype)
+{
+  if (width <= sfxstrategy->maxbltriesort)
+  {
+    if (left < right)
+    {
+      if (width <= sfxstrategy->maxinsertionsort)
+      {
+        insertionsort(encseq,esr1,esr2,
+                      lcpsubtab,readmode,totallength,
+                      left,right,depth,
+                      sfxstrategy->cmpcharbychar);
+      } else
+      {
+        countbltriesort++;
+        blindtriesuffixsort(trierep,left,
+                            lcpsubtab == NULL
+                              ? NULL
+                              : lcpsubtab->spaceSeqpos+LCPINDEX(left),
+                            width,depth,ordertype);
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
                              const Encodedsequence *encseq,
                              Countingsortinfo *countingsortinfo,
@@ -1020,25 +1062,24 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (unsigned long) (r - l + 1);
   ADDWIDTHDISTRIB(width);
   parentordertype = Descending;
-  if (width <= sfxstrategy->maxbltriesort)
+  /*
+  if (comparisonsort(trierep,
+                     lcpsubtab,
+                     encseq,
+                     esr1,
+                     esr2,
+                     readmode,
+                     totallength,
+                     sfxstrategy,
+                     l,
+                     r,
+                     d,
+                     width,
+                     parentordertype))
   {
-    if (l < r)
-    {
-      if (width <= sfxstrategy->maxinsertionsort)
-      {
-        insertionsort(encseq,esr1,esr2,lcpsubtab,readmode,totallength,
-                      l,r,d,sfxstrategy->cmpcharbychar);
-      } else
-      {
-        countbltriesort++;
-        blindtriesuffixsort(trierep,l,lcpsubtab == NULL
-                                      ? NULL
-                                      : lcpsubtab->spaceSeqpos+LCPINDEX(l),
-                                      width,d,Descending);
-      }
-    }
     return;
   }
+  */
   left = l;
   right = r;
   depth = d;
@@ -1716,6 +1757,13 @@ void sortallbuckets(Seqpos *suftabptr,
   ALLOCASSIGNSPACE(widthdistrib,NULL,unsigned long,nonspecialsmaxbucketsize+1);
   memset(widthdistrib,0,sizeof (unsigned long) * (nonspecialsmaxbucketsize+1));
 #endif
+  if (sfxstrategy->ssortmaxdepth.defined)
+  {
+    printf("ssortmax=%u\n",sfxstrategy->ssortmaxdepth.valueunsignedint);
+  } else
+  {
+    printf("ssortmax=undefined\n");
+  }
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -1745,22 +1793,29 @@ void sortallbuckets(Seqpos *suftabptr,
         {
           lcpsubtab->suftabbase = suftabptr + bucketspec.left;
         }
-        bentleysedgewick(encseq,
-                         esr1,
-                         esr2,
-                         readmode,
-                         totallength,
-                         &mkvauxstack,
-                         suftabptr + bucketspec.left,
-                         suftabptr + bucketspec.left +
-                                     bucketspec.nonspecialsinbucket - 1,
-                         (Seqpos) prefixlength,
-                         lcpsubtab,
-                         medianinfospace,
-                         countingsortinfo,
-                         sfxstrategy,
-                         trierep,
-                         widthdistrib);
+        if (sfxstrategy->ssortmaxdepth.defined &&
+            prefixlength >= sfxstrategy->ssortmaxdepth.valueunsignedint)
+        {
+          printf("add interval to queue\n");
+        } else
+        {
+          bentleysedgewick(encseq,
+                           esr1,
+                           esr2,
+                           readmode,
+                           totallength,
+                           &mkvauxstack,
+                           suftabptr + bucketspec.left,
+                           suftabptr + bucketspec.left +
+                                       bucketspec.nonspecialsinbucket - 1,
+                           (Seqpos) prefixlength,
+                           lcpsubtab,
+                           medianinfospace,
+                           countingsortinfo,
+                           sfxstrategy,
+                           trierep,
+                           widthdistrib);
+        }
       }
       if (outlcpinfo != NULL)
       {
