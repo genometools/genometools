@@ -882,6 +882,7 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   /* const bool cmpcharbychar = false; */
 
   countcountingsort++;
+  pivotidx = 0;
   for (idx = 0; idx < width; idx++)
   {
     if (idx != pivotidx)
@@ -1112,10 +1113,12 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                                  width,
                                  totallength,
                                  sfxstrategy->maxwidthrealmedian);
+      SWAP(left, pm);
       if (width <= (unsigned long) sfxstrategy->maxcountingsort &&
           width >= MINMEDIANOF9WIDTH)
       {
-        PTR2INT(pivotcmpbits,pm);
+        //PTR2INT(pivotcmpbits,pm);
+        PTR2INT(pivotcmpbits,left);
         sarrcountingsort(mkvauxstack,
                          encseq,
                          countingsortinfo,
@@ -1144,7 +1147,6 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         /* new values for left, right, depth and parentordertype */
         continue;
       }
-      SWAP(left, pm);
     }
     countqsort++;
     /* now pivot element is at index left */
@@ -1758,13 +1760,6 @@ void sortallbuckets(Seqpos *suftabptr,
   ALLOCASSIGNSPACE(widthdistrib,NULL,unsigned long,nonspecialsmaxbucketsize+1);
   memset(widthdistrib,0,sizeof (unsigned long) * (nonspecialsmaxbucketsize+1));
 #endif
-  if (sfxstrategy->ssortmaxdepth.defined)
-  {
-    printf("ssortmax=%u\n",sfxstrategy->ssortmaxdepth.valueunsignedint);
-  } else
-  {
-    printf("ssortmax=undefined\n");
-  }
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;

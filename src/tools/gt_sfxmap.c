@@ -42,8 +42,8 @@ typedef struct
        inputbck,
        inputssp;
   unsigned long scantrials,
-                multicharcmptrials;
-  unsigned long delspranges;
+                multicharcmptrials,
+                delspranges;
 } Sfxmapoptions;
 
 static void deletethespranges(const Encodedsequence *encseq,
@@ -126,9 +126,9 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   gt_option_parser_add_option(op, optionmulticharcmptrials);
 
   optiondelspranges = gt_option_new_ulong("delspranges",
-                                      "delete ranges of special values",
-                                       &sfxmapoptions->delspranges,
-                                       0);
+                                          "delete ranges of special values",
+                                           &sfxmapoptions->delspranges,
+                                           0);
   gt_option_parser_add_option(op, optiondelspranges);
 
   optiontis = gt_option_new_bool("tis","input the transformed input sequence",
@@ -208,9 +208,10 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   }
   indexname = gt_str_new_cstr(argv[parsed_args]);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose);
-  if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0)
+  if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0 ||
+      sfxmapoptions.inputsuf)
   {
-    demand |= SARR_ESQTAB;
+    demand |= SARR_ESQTAB; 
   }
   if (sfxmapoptions.inputdes)
   {
@@ -252,7 +253,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
       deletethespranges(suffixarray.encseq,sfxmapoptions.delspranges);
     } else
     {
-      if (!haserr)
+      if (!haserr && sfxmapoptions.inputtis)
       {
         int readmode;
 
