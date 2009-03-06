@@ -23,7 +23,7 @@
 #include "core/ma_api.h"
 #include "divmodmul.h"
 #include "seqpos-def.h"
-#include "encseq-def.h"
+#include "sfx-remainsort.h"
 
 typedef struct
 {
@@ -38,17 +38,16 @@ typedef struct
          depth;
 } Pairsuffixptr;
 
-typedef struct
+struct Rmnsufinfo
 {
   Seqpos *inversesuftab, *sortedsuffixes;
   unsigned long countovermaxdepthsingle;
   GtQueue *rangestobesorted;
   DefinedSeqpos previousdepth;
   Seqpos totallength;
-  const Encodedsequence *encseq;
-} Rmnsufinfo;
+};
 
-Rmnsufinfo *initRmnsufinfo(Seqpos *sortedsuffixes,const Encodedsequence *encseq)
+Rmnsufinfo *initRmnsufinfo(Seqpos *sortedsuffixes,Seqpos totallength)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -58,8 +57,7 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *sortedsuffixes,const Encodedsequence *encseq)
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->previousdepth.defined = false;
   rmnsufinfo->previousdepth.valueseqpos = 0;
-  rmnsufinfo->totallength = getencseqtotallength(encseq);
-  rmnsufinfo->encseq = encseq;
+  rmnsufinfo->totallength = totallength;
   return rmnsufinfo;
 }
 
