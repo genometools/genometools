@@ -256,10 +256,10 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optiondna);
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
-  gt_option_exclude(optionparts, optionmaxdepth);
   if (doesa)
   {
     gt_assert(optionmaxdepth != NULL);
+    gt_option_exclude(optionparts, optionmaxdepth);
     gt_option_exclude(optionmaxdepth, optionlcp);
                    /* because lcp table may be incorrect. XXX change later */
     gt_option_exclude(optionmaxdepth, optionbwt);
