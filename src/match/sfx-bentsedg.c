@@ -389,6 +389,8 @@ typedef struct
   const Sfxstrategy *sfxstrategy;
   Blindtrierep *trierep;
   Rmnsufinfo *rmnsufinfo;
+  unsigned long leftlcpdist[UNITSIN2BITENC],
+                rightlcpdist[UNITSIN2BITENC];
 #ifdef WIDTHDISTRIB
   unsigned long *widthdistrib;
 #endif
@@ -464,8 +466,8 @@ static void insertionsort(const Bentsedgresources *bsr,
 
 #ifdef SKDEBUG
   printf("insertion sort ");
-  showsuffixrange(encseq,bsr->fwd,bsr->complement,lcpsubtab,leftptr,rightptr,
-                  depth);
+  showsuffixrange(bsr->encseq,bsr->fwd,bsr->complement,bsr->lcpsubtab,
+                  leftptr,rightptr,depth);
 #endif
   countinsertionsort++;
   for (pi = leftptr + 1; pi <= rightptr; pi++)
@@ -686,7 +688,7 @@ static void checkmedian(bool fwd,
 }
 */
 
-static Suffixptr *realmedian(Bentsedgresources *bsr,
+static Suffixptr *realmedian(const Bentsedgresources *bsr,
                              Suffixptr *left,
                              Seqpos depth,
                              unsigned long width)
@@ -738,7 +740,7 @@ static Suffixptr *cmpcharbychardelivermedian(const Bentsedgresources *bsr,
   return medianof3cmpcharbychar(bsr,depth,pl,pm,pr);
 }
 
-static Suffixptr *blockcmpdelivermedian(Bentsedgresources *bsr,
+static Suffixptr *blockcmpdelivermedian(const Bentsedgresources *bsr,
                                         Seqpos *left,
                                         Seqpos *right,
                                         Seqpos depth,
@@ -793,7 +795,7 @@ static Ordertype deriveordertype(Ordertype parentordertype,bool turn)
   /*@end@*/
 }
 
-static bool comparisonsort(Bentsedgresources *bsr,
+static bool comparisonsort(const Bentsedgresources *bsr,
                            Suffixptr *left,
                            Suffixptr *right,
                            Seqpos depth,
@@ -823,16 +825,12 @@ static bool comparisonsort(Bentsedgresources *bsr,
 }
 
 static void sarrcountingsort(Bentsedgresources *bsr,
-                             bool fwd,
-                             bool complement,
                              Seqpos *left,
                              const Sfxcmp *pivotcmpbits,
                              unsigned long pivotidx,
                              Ordertype parentordertype,
                              Seqpos depth,
-                             unsigned long width,
-                             unsigned long *leftlcpdist,
-                             unsigned long *rightlcpdist)
+                             unsigned long width)
 {
   int cmp;
   unsigned int commonunits, maxsmallerwithlcp = 0, maxlargerwithlcp = 0;
@@ -848,7 +846,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (idx != pivotidx)
     {
       PTR2INT(etbecurrent,left+idx);
-      cmp = compareTwobitencodings(fwd,complement,&commonunits,
+      cmp = compareTwobitencodings(bsr->fwd,bsr->complement,&commonunits,
                                    &etbecurrent,pivotcmpbits);
       bsr->countingsortinfo[idx].suffix = left[idx];
       gt_assert(commonunits <= (unsigned int) UNITSIN2BITENC);
@@ -856,7 +854,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       if (cmp > 0)
       {
         gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-        rightlcpdist[commonunits]++;
+        bsr->rightlcpdist[commonunits]++;
         if (maxlargerwithlcp < commonunits)
         {
           maxlargerwithlcp = commonunits;
@@ -868,7 +866,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
         if (cmp < 0)
         {
           gt_assert(commonunits < (unsigned int) UNITSIN2BITENC);
-          leftlcpdist[commonunits]++;
+          bsr->leftlcpdist[commonunits]++;
           if (maxsmallerwithlcp < commonunits)
           {
             maxsmallerwithlcp = commonunits;
@@ -890,11 +888,11 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   }
   for (idx = 1UL; idx <= (unsigned long) maxsmallerwithlcp; idx++)
   {
-    leftlcpdist[idx] += leftlcpdist[idx-1];
+    bsr->leftlcpdist[idx] += bsr->leftlcpdist[idx-1];
   }
   for (idx = 1UL; idx <= (unsigned long) maxlargerwithlcp; idx++)
   {
-    rightlcpdist[idx] += rightlcpdist[idx-1];
+    bsr->rightlcpdist[idx] += bsr->rightlcpdist[idx-1];
   }
   equaloffset = width - larger;
   for (csiptr = bsr->countingsortinfo + width -1;
@@ -904,14 +902,14 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     switch (csiptr->cmpresult)
     {
       case -1:
-        insertindex = --leftlcpdist[csiptr->lcpwithpivot];
+        insertindex = --(bsr->leftlcpdist[csiptr->lcpwithpivot]);
         left[insertindex] = csiptr->suffix;
         break;
       case 0:
         left[--equaloffset] = csiptr->suffix;
         break;
       case 1:
-        insertindex = --rightlcpdist[csiptr->lcpwithpivot];
+        insertindex = --(bsr->rightlcpdist[csiptr->lcpwithpivot]);
         left[width - 1 - insertindex] = csiptr->suffix;
         break;
     }
@@ -920,22 +918,22 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   {
     if (idx < (unsigned long) maxsmallerwithlcp)
     {
-      end = leftlcpdist[idx+1];
+      end = bsr->leftlcpdist[idx+1];
     } else
     {
       end = smaller;
     }
-    if (leftlcpdist[idx] + 1 < end) /* at least two elements */
+    if (bsr->leftlcpdist[idx] + 1 < end) /* at least two elements */
     {
-      currentwidth = end - leftlcpdist[idx];
-      SUBSORT(currentwidth,left + leftlcpdist[idx],left + end - 1,depth + idx,
-              deriveordertype(parentordertype,false));
+      currentwidth = end - bsr->leftlcpdist[idx];
+      SUBSORT(currentwidth,left + bsr->leftlcpdist[idx],left + end - 1,
+              depth + idx,deriveordertype(parentordertype,false));
     }
-    if (bsr->lcpsubtab != NULL && leftlcpdist[idx] < end)
+    if (bsr->lcpsubtab != NULL && bsr->leftlcpdist[idx] < end)
     { /* at least one element */
       SETLCP(bsr,LCPINDEX(bsr,left + end),depth + idx);
     }
-    leftlcpdist[idx] = 0;
+    bsr->leftlcpdist[idx] = 0;
   }
   if (width - smaller - larger > 1UL)
   {
@@ -947,23 +945,23 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   {
     if (idx < (unsigned long) maxlargerwithlcp)
     {
-      end = rightlcpdist[idx+1];
+      end = bsr->rightlcpdist[idx+1];
     } else
     {
       end = larger;
     }
-    if (rightlcpdist[idx] + 1 < end) /* at least two elements */
+    if (bsr->rightlcpdist[idx] + 1 < end) /* at least two elements */
     {
-      currentwidth = end - rightlcpdist[idx];
+      currentwidth = end - bsr->rightlcpdist[idx];
       SUBSORT(currentwidth,left+width-end,
-              left + width - 1 - rightlcpdist[idx],depth + idx,
+              left + width - 1 - bsr->rightlcpdist[idx],depth + idx,
               deriveordertype(parentordertype,true));
     }
-    if (bsr->lcpsubtab != NULL && rightlcpdist[idx] < end)
+    if (bsr->lcpsubtab != NULL && bsr->rightlcpdist[idx] < end)
     { /* at least one element */
       SETLCP(bsr,LCPINDEX(bsr,left + width - end),depth + idx);
     }
-    rightlcpdist[idx] = 0;
+    bsr->rightlcpdist[idx] = 0;
   }
 }
 
@@ -993,19 +991,15 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                              Suffixptr *r,
                              Seqpos d)
 {
-  Suffixptr *left, *right, *leftplusw;
+  Suffixptr *left, *right, *leftplusw,
+            *pa, *pb, *pc, *pd, *pm, *aptr, *bptr, cptr, temp;
   Seqpos pivotcmpcharbychar = 0, valcmpcharbychar;
   Sfxcmp pivotcmpbits, val;
   Seqpos depth;
-  Suffixptr *pa, *pb, *pc, *pd, *pm, *aptr, *bptr, cptr, temp;
   Ordertype parentordertype;
-  bool fwd = ISDIRREVERSE(bsr->readmode) ? false : true,
-       complement = ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   int retvalpivotcmpbits;
   Uchar tmpvar;
-  unsigned long width, w,
-                leftlcpdist[UNITSIN2BITENC] = {0},
-                rightlcpdist[UNITSIN2BITENC] = {0};
+  unsigned long width, w;
   unsigned int commonunits, smallermaxlcp, greatermaxlcp,
                smallerminlcp, greaterminlcp;
   const int commonunitsequal = bsr->sfxstrategy->cmpcharbychar ? 1
@@ -1059,16 +1053,12 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       {
         PTR2INT(pivotcmpbits,pm);
         sarrcountingsort(bsr,
-                         fwd,
-                         complement,
                          left,
                          &pivotcmpbits,
                          (unsigned long) (pm - left),
                          parentordertype,
                          depth,
-                         width,
-                         leftlcpdist,
-                         rightlcpdist);
+                         width);
         if (bsr->mkvauxstack.nextfreeMKVstack == 0)
         {
           break;
@@ -1609,8 +1599,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   Outlcpinfo *outlcpinfo,
                                   const Sfxstrategy *sfxstrategy)
 {
-  unsigned long nonspecialsmaxbucketsize,
-                specialsmaxbucketsize;
+  unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize;
 
   bsr->readmode = readmode;
   bsr->totallength = getencseqtotallength(encseq);
@@ -1618,6 +1607,10 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->encseq = encseq;
   bsr->fwd = ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
+  for (idx = 0; idx < (unsigned long) UNITSIN2BITENC; idx++)
+  {
+    bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
+  }
   if (outlcpinfo == NULL)
   {
     bsr->lcpsubtab = NULL;
