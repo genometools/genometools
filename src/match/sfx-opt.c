@@ -54,6 +54,7 @@ static OPrval parse_options(int *parsed_args,
          *optionstorespecialcodes,
          *optionmaxwidthrealmedian,
          *optionalgbounds,
+         *optionparts,
          *optiondes;
   OPrval oprval;
   GtStr *dirarg = gt_str_new();
@@ -168,14 +169,14 @@ static OPrval parse_options(int *parsed_args,
   gt_option_is_development_option(optionstorespecialcodes);
   gt_option_parser_add_option(op, optionstorespecialcodes);
 
-  option = gt_option_new_uint_min("parts",
-                                  "specify number of parts in which the "
-                                  "sequence is processed",
-                                  &so->numofparts,
-                                  1U,
-                                  1U);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  optionparts = gt_option_new_uint_min("parts",
+                                       "specify number of parts in which the "
+                                       "sequence is processed",
+                                       &so->numofparts,
+                                       1U,
+                                       1U);
+  gt_option_is_development_option(optionparts);
+  gt_option_parser_add_option(op, optionparts);
 
   optionsat = gt_option_new_string("sat",
                                    "specify kind of sequence representation",
@@ -255,6 +256,7 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optiondna);
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
+  gt_option_exclude(optionparts, optionmaxdepth);
   if (doesa)
   {
     gt_assert(optionmaxdepth != NULL);

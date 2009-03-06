@@ -15,16 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RMNSUFINFO_H
-#define RMNSUFINFO_H
+#ifndef SFX_REMAINSORT_H
+#define SFX_REMAINSORT_H
 
 #include "seqpos-def.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
+Rmnsufinfo *initRmnsufinfo(Seqpos *sortedsuffixes,Seqpos totallength);
+
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfo,Seqpos totallength);
+void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfo);
 
 #endif

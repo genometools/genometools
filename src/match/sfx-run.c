@@ -221,6 +221,7 @@ static int suffixeratorwithoutput(
       {
         break;
       }
+      printf("output %lu suffixes\n",(unsigned long) numberofsuffixes);
       if (suftab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
       {
         haserr = true;

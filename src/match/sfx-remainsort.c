@@ -200,7 +200,7 @@ static int putleftbound(void **elem,void *info, GT_UNUSED GtError *err)
   return 0;
 }
 
-static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo,Seqpos totallength)
+static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
 {
   Pairsuffixptr *pairptr;
   Seqpos idx;
@@ -209,8 +209,9 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo,Seqpos totallength)
            gt_queue_size(rmnsufinfo->rangestobesorted));
   printf("# countovermaxdepthsingle=%lu\n",
           rmnsufinfo->countovermaxdepthsingle);
-  rmnsufinfo->inversesuftab = gt_malloc(sizeof(Seqpos) * (totallength+1));
-  for (idx=0; idx<= totallength; idx++)
+  rmnsufinfo->inversesuftab
+    = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
+  for (idx=0; idx <= rmnsufinfo->totallength; idx++)
   {
     rmnsufinfo->inversesuftab[rmnsufinfo->sortedsuffixes[idx]] = idx;
   }
@@ -234,9 +235,9 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo,Seqpos totallength)
   gt_free(rmnsufinfo->inversesuftab);
 }
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfo,Seqpos totallength)
+void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfo)
 {
-  processRmnsufinfo(*rmnsufinfo,totallength);
+  processRmnsufinfo(*rmnsufinfo);
   gt_free(*rmnsufinfo);
   *rmnsufinfo = NULL;
 }
