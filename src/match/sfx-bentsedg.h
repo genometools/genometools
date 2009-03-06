@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_OUTLCP_H
-#define SFX_OUTLCP_H
+#ifndef SFX_BENTSEDG_H
+#define SFX_BENTSEDG_H
 #include <stdio.h>
 #include "core/error.h"
 #include "core/str.h"

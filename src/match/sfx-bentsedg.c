@@ -28,7 +28,7 @@
 #include "encseq-def.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
-#include "sfx-outlcp.h"
+#include "sfx-bentsedg.h"
 #include "bcktab.h"
 #include "bltrie-ssort.h"
 #include "lcpoverflow.h"
@@ -138,6 +138,8 @@
           MAXVAL = commonunits;\
         }
 
+typedef Seqpos Suffixptr;
+
 static unsigned long countinsertionsort = 0,
                      countbltriesort = 0,
                      countcountingsort = 0,
@@ -180,8 +182,6 @@ struct Outlcpinfo
   Suffixwithcode previoussuffix;
   bool previousbucketwasempty;
 };
-
-typedef Seqpos Suffixptr;
 
 #define CMPCHARBYCHARPTR2INT(VAR,TMPVAR,I)\
         VAR = (((cptr = *(I)+depth) < totallength &&\

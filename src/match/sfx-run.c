@@ -33,7 +33,7 @@
 #include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"
-#include "sfx-outlcp.h"
+#include "sfx-bentsedg.h"
 #include "sfx-input.h"
 #include "sfx-run.h"
 #include "opensfxfile.h"

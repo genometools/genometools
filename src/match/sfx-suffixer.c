@@ -32,7 +32,7 @@
 #include "safecast-gen.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
-#include "sfx-outlcp.h"
+#include "sfx-bentsedg.h"
 #include "sfx-enumcodes.h"
 #include "sfx-strategy.h"
 

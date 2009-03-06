@@ -21,7 +21,7 @@
 #include "readmode-def.h"
 #include "measure-time-if.h"
 #include "sfx-strategy.h"
-#include "sfx-outlcp.h"
+#include "sfx-bentsedg.h"
 #include "verbose-def.h"
 #include "seqpos-def.h"
 
