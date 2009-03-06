@@ -211,7 +211,7 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
   if (sfxmapoptions.inputtis || sfxmapoptions.delspranges > 0 ||
       sfxmapoptions.inputsuf)
   {
-    demand |= SARR_ESQTAB; 
+    demand |= SARR_ESQTAB;
   }
   if (sfxmapoptions.inputdes)
   {

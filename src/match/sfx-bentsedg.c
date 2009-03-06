@@ -83,7 +83,8 @@
         {\
           if (sfxstrategy->ssortmaxdepth.defined)\
           {\
-            if ((DEPTH) >= (Seqpos) sfxstrategy->ssortmaxdepth.valueunsignedint)\
+            if ((DEPTH) >= \
+                (Seqpos) sfxstrategy->ssortmaxdepth.valueunsignedint)\
             {\
               printf("add interval to queue\n");\
             }\
