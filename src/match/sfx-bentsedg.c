@@ -76,17 +76,17 @@
                          RIGHT,\
                          DEPTH,\
                          __LINE__);*/\
-        if ((LEFT) >= (RIGHT))\
-        {\
-          /*printf("solved singleton at depth %lu\n",(unsigned long) DEPTH);*/\
-        } else\
+        if ((WIDTH) > 1UL)\
         {\
           if (sfxstrategy->ssortmaxdepth.defined)\
           {\
-            if ((DEPTH) >= \
+            if ((DEPTH) > \
                 (Seqpos) sfxstrategy->ssortmaxdepth.valueunsignedint)\
             {\
-              printf("add interval to queue\n");\
+              queuesize++;\
+            } else\
+            {\
+              PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
             }\
           } else\
           {\
@@ -141,7 +141,8 @@
 static unsigned long countinsertionsort = 0,
                      countbltriesort = 0,
                      countcountingsort = 0,
-                     countqsort = 0;
+                     countqsort = 0,
+                     queuesize;
 
 DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -1063,7 +1064,15 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (unsigned long) (r - l + 1);
   ADDWIDTHDISTRIB(width);
   parentordertype = Descending;
-  if (!sfxstrategy->ssortmaxdepth.defined)
+
+  if (sfxstrategy->ssortmaxdepth.defined)
+  {
+    if (d > (Seqpos) sfxstrategy->ssortmaxdepth.valueunsignedint)
+    {
+      queuesize++;
+      return;
+    }
+  } else
   {
     if (comparisonsort(trierep,
                        lcpsubtab,
@@ -1789,29 +1798,22 @@ void sortallbuckets(Seqpos *suftabptr,
         {
           lcpsubtab->suftabbase = suftabptr + bucketspec.left;
         }
-        if (sfxstrategy->ssortmaxdepth.defined &&
-            prefixlength >= sfxstrategy->ssortmaxdepth.valueunsignedint)
-        {
-          printf("add interval to queue\n");
-        } else
-        {
-          bentleysedgewick(encseq,
-                           esr1,
-                           esr2,
-                           readmode,
-                           totallength,
-                           &mkvauxstack,
-                           suftabptr + bucketspec.left,
-                           suftabptr + bucketspec.left +
-                                       bucketspec.nonspecialsinbucket - 1,
-                           (Seqpos) prefixlength,
-                           lcpsubtab,
-                           medianinfospace,
-                           countingsortinfo,
-                           sfxstrategy,
-                           trierep,
-                           widthdistrib);
-        }
+        bentleysedgewick(encseq,
+                         esr1,
+                         esr2,
+                         readmode,
+                         totallength,
+                         &mkvauxstack,
+                         suftabptr + bucketspec.left,
+                         suftabptr + bucketspec.left +
+                                     bucketspec.nonspecialsinbucket - 1,
+                         (Seqpos) prefixlength,
+                         lcpsubtab,
+                         medianinfospace,
+                         countingsortinfo,
+                         sfxstrategy,
+                         trierep,
+                         widthdistrib);
       }
       if (outlcpinfo != NULL)
       {
@@ -1962,4 +1964,5 @@ void sortallbuckets(Seqpos *suftabptr,
   printf("# countbltriesort=%lu\n",countbltriesort);
   printf("# countcountingsort=%lu\n",countcountingsort);
   printf("# countqsort=%lu\n",countqsort);
+  printf("# queuesize=%lu\n",queuesize);
 }
