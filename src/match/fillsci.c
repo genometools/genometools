@@ -84,7 +84,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
      += currentspecialrangevalue(key,distvalue,(unsigned long) UINT32_MAX);
   updatesumrangeinfo->realspecialranges += distvalue;
   showverbose(updatesumrangeinfo->verboseinfo,
-              "specialranges of length %lu: %lu",key,distvalue);
+              "specialranges of length %lu=%lu",key,distvalue);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)

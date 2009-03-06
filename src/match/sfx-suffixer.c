@@ -517,26 +517,26 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                                                                     : true;
       sfi->sfxstrategy.storespecialcodes = false;
     }
-    showverbose(verboseinfo,"maxinsertionsort = %lu",
+    showverbose(verboseinfo,"maxinsertionsort=%lu",
                 sfi->sfxstrategy.maxinsertionsort);
-    showverbose(verboseinfo,"maxbltriesort = %lu",
+    showverbose(verboseinfo,"maxbltriesort=%lu",
                 sfi->sfxstrategy.maxbltriesort);
-    showverbose(verboseinfo,"maxcountingsort = %lu",
+    showverbose(verboseinfo,"maxcountingsort=%lu",
                 sfi->sfxstrategy.maxcountingsort);
-    showverbose(verboseinfo,"storespecialcodes = %s",
+    showverbose(verboseinfo,"storespecialcodes=%s",
                 sfi->sfxstrategy.storespecialcodes ? "true" : "false");
-    showverbose(verboseinfo,"cmpcharbychar = %s",
+    showverbose(verboseinfo,"cmpcharbychar=%s",
                 sfi->sfxstrategy.cmpcharbychar ? "true" : "false");
     if (sfi->sfxstrategy.ssortmaxdepth.defined)
     {
-      showverbose(verboseinfo,"ssortmaxdepth = %u",
+      showverbose(verboseinfo,"ssortmaxdepth=%u",
                                sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
     } else
     {
-      showverbose(verboseinfo,"ssortmaxdepth is undefined");
+      showverbose(verboseinfo,"ssortmaxdepth=undefined");
     }
     sfi->totallength = getencseqtotallength(encseq);
-    showverbose(verboseinfo,"totallength = " FormatSeqpos,
+    showverbose(verboseinfo,"totallength=" FormatSeqpos,
                         PRINTSeqposcast(sfi->totallength));
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = outlcpinfo;

@@ -426,7 +426,7 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
   trierep->allocatedBlindtrienode = MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->spaceBlindtrienode,NULL,Blindtrienode,
                    trierep->allocatedBlindtrienode);
-  printf("# blindtrie requires %lu bytes\n",
+  printf("# sizeof (blindtrie)=%lu\n",
             (unsigned long) (sizeof (Blindtrierep) +
                              trierep->allocatedBlindtrienode *
                              sizeof (Blindtrienode)));

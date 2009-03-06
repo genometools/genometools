@@ -1381,8 +1381,8 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
       *specialsmaxbucketsize = bucketspec.specialsinbucket;
     }
   }
-  printf("maxbucket (specials) = %lu, (nonspecials) = %lu\n",
-          *specialsmaxbucketsize,*nonspecialsmaxbucketsize);
+  printf("# maxbucket (specials)=%lu\n",*specialsmaxbucketsize);
+  printf("# maxbucket (nonspecials)=%lu\n",*nonspecialsmaxbucketsize);
 }
 
 static void multilcpvalue(Outlcpinfo *outlcpinfo,
@@ -1957,8 +1957,8 @@ void sortallbuckets(Seqpos *suftabptr,
     }
   }
 #endif
-  printf("# countinsertionsort = %lu\n",countinsertionsort);
-  printf("# countbltriesort = %lu\n",countbltriesort);
-  printf("# countcountingsort = %lu\n",countcountingsort);
-  printf("# countqsort = %lu\n",countqsort);
+  printf("# countinsertionsort=%lu\n",countinsertionsort);
+  printf("# countbltriesort=%lu\n",countbltriesort);
+  printf("# countcountingsort=%lu\n",countcountingsort);
+  printf("# countqsort=%lu\n",countqsort);
 }

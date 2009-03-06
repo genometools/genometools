@@ -290,7 +290,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
   {
     *prefixlength = recommendedprefixlength(numofchars,totallength);
     showverbose(verboseinfo,
-                "automatically determined prefixlength = %u",
+                "automatically determined prefixlength=%u",
                 *prefixlength);
   } else
   {
