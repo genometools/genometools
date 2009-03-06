@@ -322,7 +322,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
       maxdepth->defined = true;
       maxdepth->valueunsignedint = *prefixlength;
       showverbose(verboseinfo,
-                  "automatically determined maxdepth = %u",
+                  "automatically determined maxdepth=%u",
                   maxdepth->valueunsignedint);
     } else
     {
@@ -331,14 +331,14 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
         maxdepth->defined = true;
         maxdepth->valueunsignedint = *prefixlength;
         showverbose(verboseinfo,
-                    "set maxdepth = %u",maxdepth->valueunsignedint);
+                    "set maxdepth=%u",maxdepth->valueunsignedint);
       } else
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint
           = so->sfxstrategy.ssortmaxdepth.valueunsignedint;
         showverbose(verboseinfo,
-                    "use maxdepth = %u",maxdepth->valueunsignedint);
+                    "use maxdepth=%u",maxdepth->valueunsignedint);
       }
     }
   }
