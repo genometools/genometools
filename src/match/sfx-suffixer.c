@@ -640,7 +640,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
 static void preparethispart(Sfxiterator *sfi,
                             Measuretime *mtime)
 {
-  Seqpos totalwidth;
+  Seqpos partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
   if (sfi->part == 0 && mtime == NULL)
   {
@@ -672,13 +672,13 @@ static void preparethispart(Sfxiterator *sfi,
   {
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
-  totalwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
+  partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   sortallbuckets(sfi->suftabptr,
                  sfi->encseq,
                  sfi->readmode,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
-                 totalwidth,
+                 partwidth,
                  sfi->bcktab,
                  sfi->numofchars,
                  sfi->prefixlength,

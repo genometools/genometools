@@ -23,6 +23,7 @@
 #include "core/ma_api.h"
 #include "divmodmul.h"
 #include "seqpos-def.h"
+#include "encseq-def.h"
 #include "sfx-remainsort.h"
 
 typedef struct
@@ -40,24 +41,33 @@ typedef struct
 
 struct Rmnsufinfo
 {
-  Seqpos *inversesuftab, *sortedsuffixes;
+  Seqpos *inversesuftab, *presortedsuffixes;
   unsigned long countovermaxdepthsingle;
   GtQueue *rangestobesorted;
   DefinedSeqpos previousdepth;
+  Seqpos partwidth;
+  const Encodedsequence *encseq;
   Seqpos totallength;
+  Readmode readmode;
 };
 
-Rmnsufinfo *initRmnsufinfo(Seqpos *sortedsuffixes,Seqpos totallength)
+Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
+                           const Encodedsequence *encseq,
+                           Readmode readmode,
+                           Seqpos partwidth)
 {
   Rmnsufinfo *rmnsufinfo;
 
   rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
-  rmnsufinfo->sortedsuffixes = sortedsuffixes;
+  rmnsufinfo->presortedsuffixes = presortedsuffixes;
   rmnsufinfo->countovermaxdepthsingle = 0;
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->previousdepth.defined = false;
   rmnsufinfo->previousdepth.valueseqpos = 0;
-  rmnsufinfo->totallength = totallength;
+  rmnsufinfo->partwidth = partwidth;
+  rmnsufinfo->totallength = getencseqtotallength(encseq);
+  rmnsufinfo->encseq = encseq;
+  rmnsufinfo->readmode = readmode;
   return rmnsufinfo;
 }
 
@@ -68,8 +78,8 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
   {
     printf("already sorted(%lu,%lu,%lu)\n",
             (unsigned long) depth,
-            (unsigned long) (left-rmnsufinfo->sortedsuffixes),
-            (unsigned long) (right-rmnsufinfo->sortedsuffixes));
+            (unsigned long) (left-rmnsufinfo->presortedsuffixes),
+            (unsigned long) (right-rmnsufinfo->presortedsuffixes));
     rmnsufinfo->countovermaxdepthsingle++;
   } else
   {
@@ -118,7 +128,7 @@ static void inverserange(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
 {
   Seqpos *ptr, startindex;
 
-  startindex = (Seqpos) (left - rmnsufinfo->sortedsuffixes);
+  startindex = (Seqpos) (left - rmnsufinfo->presortedsuffixes);
   for (ptr = left; ptr <= right; ptr++)
   {
     setinversesuftab(rmnsufinfo,*ptr,startindex);
@@ -155,7 +165,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
     left[idx] = itvinfo[idx].suffixstart;
   }
   rangestart = 0;
-  startindex = (Seqpos) (left - rmnsufinfo->sortedsuffixes);
+  startindex = (Seqpos) (left - rmnsufinfo->presortedsuffixes);
   for (idx=1UL; idx<width; idx++)
   {
     if (itvinfo[idx-1].key != itvinfo[idx].key)
@@ -211,10 +221,31 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
           rmnsufinfo->countovermaxdepthsingle);
   rmnsufinfo->inversesuftab
     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
-  for (idx=0; idx <= rmnsufinfo->totallength; idx++)
+  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rmnsufinfo->inversesuftab[rmnsufinfo->sortedsuffixes[idx]] = idx;
+    rmnsufinfo->inversesuftab[rmnsufinfo->presortedsuffixes[idx]] = idx;
   }
+  if (hasspecialranges(rmnsufinfo->encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos specialidx;
+
+    sri = newspecialrangeiterator(rmnsufinfo->encseq,
+                                  ISDIRREVERSE(rmnsufinfo->readmode) 
+                                  ? false : true);
+    specialidx = rmnsufinfo->partwidth;
+    while (nextspecialrangeiterator(&range,sri))
+    {
+      for (idx = range.leftpos; idx < range.rightpos; idx++)
+      {
+        rmnsufinfo->inversesuftab[idx] = specialidx++;
+      }
+    }
+    gt_assert(specialidx == rmnsufinfo->totallength);
+    freespecialrangeiterator(&sri);
+  }
+  rmnsufinfo->inversesuftab[rmnsufinfo->totallength] = rmnsufinfo->totallength;
   (void) gt_queue_iterate(rmnsufinfo->rangestobesorted,
                           putleftbound,
                           rmnsufinfo,

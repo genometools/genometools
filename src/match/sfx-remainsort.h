@@ -22,7 +22,10 @@
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
-Rmnsufinfo *initRmnsufinfo(Seqpos *sortedsuffixes,Seqpos totallength);
+Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
+                           const Encodedsequence *encseq,
+                           Readmode readmode,
+                           Seqpos partwidth);
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);

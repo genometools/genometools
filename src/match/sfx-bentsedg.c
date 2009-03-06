@@ -381,7 +381,8 @@ typedef struct
                            *esr2;
   Readmode readmode;
   bool fwd, complement;
-  Seqpos totallength;
+  Seqpos totallength,
+         partwidth;
   ArrayMKVstack mkvauxstack;
   Lcpsubtab *lcpsubtab;
   Medianinfo *medianinfospace;
@@ -1607,6 +1608,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->encseq = encseq;
   bsr->fwd = ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
+  bsr->partwidth = partwidth;
   for (idx = 0; idx < (unsigned long) UNITSIN2BITENC; idx++)
   {
     bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
@@ -1671,7 +1673,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo = initRmnsufinfo(suftabptr,bsr->totallength);
+    bsr->rmnsufinfo = initRmnsufinfo(suftabptr,bsr->encseq,
+                                     bsr->readmode,bsr->partwidth);
     bsr->trierep = NULL;
   } else
   {
