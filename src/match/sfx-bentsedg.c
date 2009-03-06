@@ -882,7 +882,6 @@ static void sarrcountingsort(ArrayMKVstack *mkvauxstack,
   /* const bool cmpcharbychar = false; */
 
   countcountingsort++;
-  pivotidx = 0;
   for (idx = 0; idx < width; idx++)
   {
     if (idx != pivotidx)
@@ -1113,12 +1112,10 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                                  width,
                                  totallength,
                                  sfxstrategy->maxwidthrealmedian);
-      SWAP(left, pm);
       if (width <= (unsigned long) sfxstrategy->maxcountingsort &&
           width >= MINMEDIANOF9WIDTH)
       {
-        //PTR2INT(pivotcmpbits,pm);
-        PTR2INT(pivotcmpbits,left);
+        PTR2INT(pivotcmpbits,pm);
         sarrcountingsort(mkvauxstack,
                          encseq,
                          countingsortinfo,
@@ -1147,6 +1144,8 @@ static void bentleysedgewick(const Encodedsequence *encseq,
         /* new values for left, right, depth and parentordertype */
         continue;
       }
+      SWAP(left, pm);
+      PTR2INT(pivotcmpbits,left);
     }
     countqsort++;
     /* now pivot element is at index left */

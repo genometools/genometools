@@ -20,7 +20,8 @@ def checksfx(parts,pl,withsmap,sat,cmp,filelist)
     filearg += "#{$testdata}#{filename} "
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
-           "#{extra} #{outoptions()} -indexname sfx -db " + filearg
+           "-algbds 10 31 80 #{extra} #{outoptions()} -indexname sfx -db " +
+           filearg
   run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions()} -v sfx",
            :maxtime => 600
 end
@@ -207,7 +208,8 @@ def checkmapped(args)
   Name "gt suffixerator checkmapped"
   Keywords "gt_suffixerator gttestdata"
   Test do
-    run_test "#{$bin}gt suffixerator #{outoptions()} -indexname sfxidx #{args}",
+    run_test "#{$bin}gt suffixerator #{outoptions()} -algbds 3 34 90 " +
+             "-indexname sfxidx #{args}",
              :maxtime => 1200
     run_test "#{$bin}gt dev sfxmap #{outoptions()} #{trials()} -v sfxidx",
              :maxtime => 2400

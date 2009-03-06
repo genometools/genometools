@@ -32,7 +32,7 @@ outoptions="-counts -pl -mersize ${mersize} -minocc 2 -maxocc 30"
 #PRECMD="valgrind.sh"
 PRECMD="env -i"
 
-cerr "bin/gt suffixerator -db ${inputfile} -tis -suf -lcp -pl -dna -indexname sfxidx"
+cerr "bin/gt suffixerator -db ${inputfile} -algbds 3 40 120 -tis -suf -lcp -pl -dna -indexname sfxidx"
 cmd="env -i bin/gt tallymer mkindex -test -mersize ${mersize} -esa sfxidx"
 ${cmd} > tmp1
 checkerror

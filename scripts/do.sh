@@ -1,4 +1,14 @@
 #!/bin/sh
+checkerror() {
+if test $? -ne 0
+then
+  echo "failure: ${cmd}"
+  exit 1
+else
+  echo "okay: ${cmd}"
+fi
+}
+
 
 for cmpcharbychar in 0 1
 do
@@ -9,14 +19,11 @@ do
     then
       extra="-cmpcharbychar"
     fi
-    cmd="gt suffixerator -dir ${dir} -parts 5 -dna -v -pl -bck -tis -suf -lcp -bwt -des -db ${AT} -showtime ${extra}"
+    cmd="gt suffixerator -dir ${dir} -algbds 3 40 120 -parts 5 -dna -v -pl -bck -tis -suf -lcp -bwt -des -db ${AT} -showtime ${extra}"
     ${cmd}
-    if test $? -ne 0
-    then
-      echo "failure: ${cmd}"
-      exit 1
-    else
-      echo "success: ${cmd}"
-    fi
+    checkerror
+    cmd="gt dev sfxmap -tis -suf -lcp -bwt -des at1MB"
+    ${cmd}
+    checkerror
   done
 done
