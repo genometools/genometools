@@ -259,7 +259,6 @@ static OPrval parse_options(int *parsed_args,
   if (doesa)
   {
     gt_assert(optionmaxdepth != NULL);
-    gt_option_exclude(optionparts, optionmaxdepth);
     gt_option_exclude(optionmaxdepth, optionlcp);
                    /* because lcp table may be incorrect. XXX change later */
     gt_option_exclude(optionmaxdepth, optionbwt);
@@ -322,6 +321,12 @@ static OPrval parse_options(int *parsed_args,
     gt_assert(optionmaxdepth != NULL);
     if (gt_option_is_set(optionmaxdepth))
     {
+      if (so->numofparts > 1U)
+      {
+        gt_error_set(err,"option -maxdepth can only be used either without "
+                         "option -parts or with option -parts 1");
+        oprval = OPTIONPARSER_ERROR;
+      }
       so->sfxstrategy.ssortmaxdepth.defined = true;
     }
   }
@@ -494,21 +499,24 @@ int suffixeratoroptions(Suffixeratoroptions *so,
     so->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
     so->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
-  printf("maxinsertionsort=%lu\n",so->sfxstrategy.maxinsertionsort);
-  printf("maxbltriesort=%lu\n",so->sfxstrategy.maxbltriesort);
-  printf("maxcountingsort=%lu\n",so->sfxstrategy.maxcountingsort);
-  if (so->sfxstrategy.maxinsertionsort > so->sfxstrategy.maxbltriesort)
+  if (retval != -1)
   {
-    gt_error_set(err,"first argument of option -algbds must not be larger "
-                     "than second argument");
-    retval = -1;
-  } else
-  {
-    if (so->sfxstrategy.maxbltriesort > so->sfxstrategy.maxcountingsort)
+    printf("maxinsertionsort=%lu\n",so->sfxstrategy.maxinsertionsort);
+    printf("maxbltriesort=%lu\n",so->sfxstrategy.maxbltriesort);
+    printf("maxcountingsort=%lu\n",so->sfxstrategy.maxcountingsort);
+    if (so->sfxstrategy.maxinsertionsort > so->sfxstrategy.maxbltriesort)
     {
-      gt_error_set(err,"second argument of option -algbds must not be larger "
-                       "than third argument");
+      gt_error_set(err,"first argument of option -algbds must not be larger "
+                       "than second argument");
       retval = -1;
+    } else
+    {
+      if (so->sfxstrategy.maxbltriesort > so->sfxstrategy.maxcountingsort)
+      {
+        gt_error_set(err,"second argument of option -algbds must not be larger "
+                         "than third argument");
+        retval = -1;
+      }
     }
   }
   return retval;

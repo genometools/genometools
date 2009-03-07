@@ -1,9 +1,14 @@
-def outoptionsnobck()
-  return "-tis -suf -bwt -lcp -des -ssp"
+def outoptionsnobck(doubling)
+  opts="-tis -suf -des -ssp"
+  if doubling 
+    return opts
+  else
+     return opts + " -bwt -lcp"
+  end
 end
 
-def outoptions()
-  return outoptionsnobck() + " -bck"
+def outoptions(doubling)
+  return outoptionsnobck(doubling) + " -bck"
 end
 
 def trials()
@@ -23,9 +28,9 @@ def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist)
     filearg += "#{$testdata}#{filename} "
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
-           "-algbds 10 31 80 #{extra} #{outoptions()} -indexname sfx -db " +
-           filearg
-  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions()} -v sfx",
+           "-algbds 10 31 80 #{extra} #{outoptions(doubling)} " +
+           "-indexname sfx -db " + filearg
+  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions(doubling)} -v sfx",
            :maxtime => 600
 end
 
@@ -42,7 +47,7 @@ def checkbwt(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -pl #{outoptions()} -indexname sfx -db " +
+  run_test "#{$bin}gt suffixerator -pl #{outoptions(false)} -indexname sfx -db " +
            flattenfilelist(filelist)
 end
 
@@ -199,6 +204,7 @@ end
           extra="-smap TransDNA"
           extraname="TransDNA"
         end
+        doublingname=""
         if cmpval == 0
           cmp=false
           doubling=false
@@ -207,9 +213,15 @@ end
           doubling=false
         else
           cmp=true
-          doubling=true
+          if parts == 1
+            doubling=true
+            doublingname=" doubling "
+          else
+            doubling=false
+          end
         end
-        Name "gt suffixerator+sfxmap dna #{extraname} #{sat} #{parts} parts"
+        Name "gt suffixerator+sfxmap dna #{extraname} #{sat} " +
+             "#{parts} parts #{doubling}"
         Keywords "gt_suffixerator"
         Test do
           checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.fna"])
@@ -229,12 +241,12 @@ def checkmapped(args)
   Name "gt suffixerator checkmapped"
   Keywords "gt_suffixerator gttestdata"
   Test do
-    run_test "#{$bin}gt suffixerator #{outoptions()} -algbds 3 34 90 " +
+    run_test "#{$bin}gt suffixerator #{outoptions(false)} -algbds 3 34 90 " +
              "-indexname sfxidx #{args}",
              :maxtime => 1200
-    run_test "#{$bin}gt dev sfxmap #{outoptions()} #{trials()} -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptions(false)} #{trials()} -v sfxidx",
              :maxtime => 2400
-    run_test "#{$bin}gt dev sfxmap #{outoptionsnobck()} -stream -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptionsnobck(false)} -stream -v sfxidx",
              :maxtime => 2400
   end
 end
