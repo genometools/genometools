@@ -494,6 +494,9 @@ int suffixeratoroptions(Suffixeratoroptions *so,
     so->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
     so->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
+  printf("maxinsertionsort=%lu\n",so->sfxstrategy.maxinsertionsort);
+  printf("maxbltriesort=%lu\n",so->sfxstrategy.maxbltriesort);
+  printf("maxcountingsort=%lu\n",so->sfxstrategy.maxcountingsort);
   if (so->sfxstrategy.maxinsertionsort > so->sfxstrategy.maxbltriesort)
   {
     gt_error_set(err,"first argument of option -algbds must not be larger "

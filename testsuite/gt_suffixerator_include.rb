@@ -10,10 +10,13 @@ def trials()
   return "-scantrials 10 -multicharcmptrials 1000"
 end
 
-def checksfx(parts,pl,withsmap,sat,cmp,filelist)
+def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist)
   extra=withsmap
   if cmp
     extra=extra + " -cmpcharbychar"
+    if doubling
+      extra=extra + " -maxdepth 30"
+    end
   end
   filearg=""
   filelist.each do |filename|
@@ -106,10 +109,10 @@ alldir.each do |dir|
   Test do
      run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
               "-indexname sfx -pl -db " + 
-         flattenfilelist(allfiles)
-     run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis -suf -lcp " +
-              "-indexname sfx -pl -db " +
-         flattenfilelist(allfiles)
+              flattenfilelist(allfiles)
+     run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis " +
+              "-suf -lcp -indexname sfx -pl -db " +
+              flattenfilelist(allfiles)
      run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
   end
 end
@@ -168,15 +171,23 @@ end
       extra="-smap TransProt11"
       extraname="TransProt11"
     end
+    if parts == 1
+     doubling=true
+    else
+     doubling=false
+    end
     Name "gt suffixerator+sfxmap protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
-      checksfx(parts,2,extra,"direct",true,["sw100K1.fsa","sw100K2.fsa"])
+      checksfx(parts,2,extra,"direct",true,doubling,
+               ["sw100K1.fsa","sw100K2.fsa"])
+      checksfx(parts,2,extra,"bytecompress",true,doubling,
+               ["sw100K1.fsa","sw100K2.fsa"])
     end
   end
 end
 
-[true,false].each do |cmp|
+0.upto(2) do |cmpval|
   1.upto(2) do |parts|
     ["direct", "bit", "uchar", "ushort", "uint"].each do |sat|
       [0,2].each do |withsmap|
@@ -188,16 +199,26 @@ end
           extra="-smap TransDNA"
           extraname="TransDNA"
         end
+        if cmpval == 0
+          cmp=false
+          doubling=false
+        elsif cmpval == 1
+          cmp=true
+          doubling=false
+        else
+          cmp=true
+          doubling=true
+        end
         Name "gt suffixerator+sfxmap dna #{extraname} #{sat} #{parts} parts"
         Keywords "gt_suffixerator"
         Test do
-          checksfx(parts,1,extra,sat,cmp,["Random-Small.fna"])
-          checksfx(parts,3,extra,sat,cmp,["Random.fna"])
-          checksfx(parts,3,extra,sat,cmp,["RandomN.fna"])
-          checksfx(parts,2,extra,sat,cmp,["trna_glutamine.fna"])
-          checksfx(parts,1,extra,sat,cmp,["TTT-small.fna"])
-          checksfx(parts,3,extra,sat,cmp,["RandomN.fna","Random.fna",
-                                          "Atinsert.fna"])
+          checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.fna"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["Random.fna"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.fna"])
+          checksfx(parts,2,extra,sat,cmp,doubling,["trna_glutamine.fna"])
+          checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.fna"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.fna","Random.fna",
+                                                   "Atinsert.fna"])
         end
       end
     end
