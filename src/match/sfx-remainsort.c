@@ -42,7 +42,6 @@ typedef struct
 struct Rmnsufinfo
 {
   Seqpos *inversesuftab, *presortedsuffixes;
-  unsigned long countovermaxdepthsingle;
   GtQueue *rangestobesorted;
   DefinedSeqpos previousdepth;
   Seqpos partwidth;
@@ -60,7 +59,6 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
 
   rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
   rmnsufinfo->presortedsuffixes = presortedsuffixes;
-  rmnsufinfo->countovermaxdepthsingle = 0;
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->previousdepth.defined = false;
   rmnsufinfo->previousdepth.valueseqpos = 0;
@@ -74,32 +72,23 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth)
 {
-  if (left == right)
-  {
-    printf("already sorted(%lu,%lu,%lu)\n",
-            (unsigned long) depth,
-            (unsigned long) (left-rmnsufinfo->presortedsuffixes),
-            (unsigned long) (right-rmnsufinfo->presortedsuffixes));
-    rmnsufinfo->countovermaxdepthsingle++;
-  } else
-  {
-    Pairsuffixptr *pairptr;
+  Pairsuffixptr *pairptr;
 
-    pairptr = gt_malloc(sizeof(Pairsuffixptr));
-    gt_assert(!rmnsufinfo->previousdepth.defined ||
-              rmnsufinfo->previousdepth.valueseqpos <= depth);
-    if (!rmnsufinfo->previousdepth.defined ||
-        rmnsufinfo->previousdepth.valueseqpos < depth)
-    {
-      printf("new level with depth = %lu\n",(unsigned long) depth);
-      rmnsufinfo->previousdepth.defined = true;
-      rmnsufinfo->previousdepth.valueseqpos = depth;
-    }
-    pairptr->depth = depth;
-    pairptr->left = left;
-    pairptr->right = right;
-    gt_queue_add(rmnsufinfo->rangestobesorted,pairptr);
+  gt_assert(left < right);
+  pairptr = gt_malloc(sizeof(Pairsuffixptr));
+  gt_assert(!rmnsufinfo->previousdepth.defined ||
+            rmnsufinfo->previousdepth.valueseqpos <= depth);
+  if (!rmnsufinfo->previousdepth.defined ||
+      rmnsufinfo->previousdepth.valueseqpos < depth)
+  {
+    printf("new level with depth = %lu\n",(unsigned long) depth);
+    rmnsufinfo->previousdepth.defined = true;
+    rmnsufinfo->previousdepth.valueseqpos = depth;
   }
+  pairptr->depth = depth;
+  pairptr->left = left;
+  pairptr->right = right;
+  gt_queue_add(rmnsufinfo->rangestobesorted,pairptr);
 }
 
 static int compareitv(const void *a,const void *b)
@@ -217,8 +206,6 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
 
   printf("# countovermaxdepth=%lu\n",
            gt_queue_size(rmnsufinfo->rangestobesorted));
-  printf("# countovermaxdepthsingle=%lu\n",
-          rmnsufinfo->countovermaxdepthsingle);
   rmnsufinfo->inversesuftab
     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
