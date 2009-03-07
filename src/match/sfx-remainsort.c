@@ -107,12 +107,6 @@ static int compareitv(const void *a,const void *b)
   return 0;
 }
 
-static void setinversesuftab(Rmnsufinfo *rmnsufinfo,Seqpos idx,
-                             Seqpos value)
-{
-  rmnsufinfo->inversesuftab[idx] = value;
-}
-
 static void inverserange(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
 {
   Seqpos *ptr, startindex;
@@ -120,7 +114,7 @@ static void inverserange(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
   startindex = (Seqpos) (left - rmnsufinfo->presortedsuffixes);
   for (ptr = left; ptr <= right; ptr++)
   {
-    setinversesuftab(rmnsufinfo,*ptr,startindex);
+    rmnsufinfo->inversesuftab[*ptr] = startindex;
   }
 }
 
@@ -170,7 +164,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
                      left + idx - 1);
       } else
       {
-        setinversesuftab(rmnsufinfo,left[rangestart],startindex+rangestart);
+        rmnsufinfo->inversesuftab[left[rangestart]] = startindex+rangestart;
       }
       rangestart = idx;
     }
@@ -186,7 +180,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
                  left + width - 1);
   } else
   {
-    setinversesuftab(rmnsufinfo,left[rangestart],startindex+rangestart);
+    rmnsufinfo->inversesuftab[left[rangestart]] = startindex+rangestart;
   }
   gt_free(itvinfo);
 }
