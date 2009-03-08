@@ -40,7 +40,10 @@ typedef struct
 
 typedef struct
 {
-  Seqpos *left, *right, depth;
+  Seqpos *left,
+         *right,
+         depth;
+  unsigned long count, totalwidth;
 } Firstwithnewdepth;
 
 struct Rmnsufinfo
@@ -78,6 +81,8 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->currentqueuesize = 0;
   rmnsufinfo->maxqueuesize = 0;
   rmnsufinfo->firstwithnewdepth.depth = 0;
+  rmnsufinfo->firstwithnewdepth.totalwidth = 0;
+  rmnsufinfo->firstwithnewdepth.count = 0;
   rmnsufinfo->firstwithnewdepth.left = NULL;
   rmnsufinfo->firstwithnewdepth.right = NULL;
   rmnsufinfo->currentdepth = 0;
@@ -90,16 +95,36 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
   Pairsuffixptr *pairptr;
   unsigned long width;
 
-  gt_assert(left < right);
+  gt_assert(left < right && depth > 0);
   gt_assert(rmnsufinfo->firstwithnewdepth.left == NULL ||
-            rmnsufinfo->firstwithnewdepth.depth <= depth);
+            (rmnsufinfo->firstwithnewdepth.depth > 0 &&
+             rmnsufinfo->firstwithnewdepth.depth <= depth));
   if (rmnsufinfo->firstwithnewdepth.left == NULL ||
       rmnsufinfo->firstwithnewdepth.depth < depth)
   {
-    printf("new level with depth = %lu\n",(unsigned long) depth);
+    if (rmnsufinfo->firstwithnewdepth.left != NULL)
+    {
+      printf("intervals in previous level=%lu (total=%lu,avg=%.2f,"
+             "%.2f%% of all)\n",
+              rmnsufinfo->firstwithnewdepth.count,
+              rmnsufinfo->firstwithnewdepth.totalwidth,
+              (double) rmnsufinfo->firstwithnewdepth.totalwidth/
+                       rmnsufinfo->firstwithnewdepth.count,
+              100.0 * (double) rmnsufinfo->firstwithnewdepth.totalwidth/
+                               rmnsufinfo->totallength);
+    }
+    printf("enter new level with depth=%lu\n",(unsigned long) depth);
     rmnsufinfo->firstwithnewdepth.left = left;
     rmnsufinfo->firstwithnewdepth.right = right;
     rmnsufinfo->firstwithnewdepth.depth = depth;
+    rmnsufinfo->firstwithnewdepth.count = 1UL;
+    rmnsufinfo->firstwithnewdepth.totalwidth
+      = (unsigned long) (right - left + 1);
+  } else
+  {
+    rmnsufinfo->firstwithnewdepth.count++;
+    rmnsufinfo->firstwithnewdepth.totalwidth
+      += (unsigned long) (right - left + 1);
   }
   width = (unsigned long) (right - left + 1);
   if (rmnsufinfo->allocateditvinfo < width)
@@ -168,9 +193,9 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
               (unsigned long) rmnsufinfo->currentdepth,
               (unsigned long) (left[idx]+rmnsufinfo->currentdepth),
               (unsigned long) rmnsufinfo->totallength);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programm error */
     }
-    rmnsufinfo->itvinfo[idx].key 
+    rmnsufinfo->itvinfo[idx].key
       = rmnsufinfo->inversesuftab[left[idx]+rmnsufinfo->currentdepth];
   }
   qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
