@@ -48,6 +48,8 @@ struct Rmnsufinfo
   const Encodedsequence *encseq;
   Seqpos totallength;
   Readmode readmode;
+  unsigned long allocateditvinfo;
+  Itventry *itvinfo;
 };
 
 Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
@@ -66,6 +68,8 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->totallength = getencseqtotallength(encseq);
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;
+  rmnsufinfo->allocateditvinfo = 0;
+  rmnsufinfo->itvinfo = NULL;
   return rmnsufinfo;
 }
 
@@ -73,6 +77,7 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth)
 {
   Pairsuffixptr *pairptr;
+  unsigned long width;
 
   gt_assert(left < right);
   pairptr = gt_malloc(sizeof(Pairsuffixptr));
@@ -88,6 +93,12 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
   pairptr->depth = depth;
   pairptr->left = left;
   pairptr->right = right;
+  width = (unsigned long) (right - left + 1);
+  if (rmnsufinfo->allocateditvinfo < width)
+  {
+    gt_assert(rmnsufinfo->itvinfo == NULL);
+    rmnsufinfo->allocateditvinfo = width;
+  }
   gt_queue_add(rmnsufinfo->rangestobesorted,pairptr);
 }
 
@@ -121,15 +132,14 @@ static void inverserange(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
 static void sortitv(Rmnsufinfo *rmnsufinfo,
                     Seqpos *left,Seqpos *right,Seqpos depth)
 {
-  Itventry *itvinfo;
   Seqpos startindex;
   unsigned long idx, rangestart;
   const unsigned long width = (unsigned long) (right - left + 1);
 
-  itvinfo = gt_malloc(sizeof(Itventry) * width);
+  gt_assert(rmnsufinfo->allocateditvinfo >= width);
   for (idx=0; idx<width; idx++)
   {
-    itvinfo[idx].suffixstart = left[idx];
+    rmnsufinfo->itvinfo[idx].suffixstart = left[idx];
     if (left[idx]+depth > rmnsufinfo->totallength)
     {
       fprintf(stderr,"left[%lu]+depth=%lu+%lu=%lu>%lu\n",
@@ -140,18 +150,18 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
               (unsigned long) rmnsufinfo->totallength);
       exit(EXIT_FAILURE);
     }
-    itvinfo[idx].key = rmnsufinfo->inversesuftab[left[idx]+depth];
+    rmnsufinfo->itvinfo[idx].key = rmnsufinfo->inversesuftab[left[idx]+depth];
   }
-  qsort(itvinfo,(size_t) width,sizeof(Itventry),compareitv);
+  qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
   for (idx=0; idx<width; idx++)
   {
-    left[idx] = itvinfo[idx].suffixstart;
+    left[idx] = rmnsufinfo->itvinfo[idx].suffixstart;
   }
   rangestart = 0;
   startindex = (Seqpos) (left - rmnsufinfo->presortedsuffixes);
   for (idx=1UL; idx<width; idx++)
   {
-    if (itvinfo[idx-1].key != itvinfo[idx].key)
+    if (rmnsufinfo->itvinfo[idx-1].key != rmnsufinfo->itvinfo[idx].key)
     {
       if (rangestart + 1 < idx)
       {
@@ -182,7 +192,6 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
   {
     rmnsufinfo->inversesuftab[left[rangestart]] = startindex+rangestart;
   }
-  gt_free(itvinfo);
 }
 
 static int putleftbound(void **elem,void *info, GT_UNUSED GtError *err)
@@ -213,7 +222,7 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
     Seqpos specialidx;
 
     sri = newspecialrangeiterator(rmnsufinfo->encseq,
-                                  ISDIRREVERSE(rmnsufinfo->readmode) 
+                                  ISDIRREVERSE(rmnsufinfo->readmode)
                                   ? false : true);
     specialidx = rmnsufinfo->partwidth;
     while (nextspecialrangeiterator(&range,sri))
@@ -231,8 +240,8 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
                           putleftbound,
                           rmnsufinfo,
                           NULL);
-  printf("# countovermaxdepth=%lu\n",
-         gt_queue_size(rmnsufinfo->rangestobesorted));
+  rmnsufinfo->itvinfo
+    = gt_malloc(sizeof(Itventry) * (rmnsufinfo->allocateditvinfo));
   while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
   {
     pairptr = gt_queue_get(rmnsufinfo->rangestobesorted);
@@ -242,9 +251,12 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
             pairptr->depth);
     gt_free(pairptr);
   }
+  gt_free(rmnsufinfo->itvinfo);
+  rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
   gt_free(rmnsufinfo->inversesuftab);
+  rmnsufinfo->inversesuftab = NULL;
 }
 
 void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfo)
