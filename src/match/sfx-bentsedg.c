@@ -86,7 +86,6 @@
                 (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)\
             {\
               addunsortedrange(bsr->rmnsufinfo,LEFT,RIGHT,DEPTH);\
-              queuesize++;\
             } else\
             {\
               PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
@@ -137,8 +136,7 @@ typedef Seqpos Suffixptr;
 static unsigned long countinsertionsort = 0,
                      countbltriesort = 0,
                      countcountingsort = 0,
-                     countqsort = 0,
-                     queuesize;
+                     countqsort = 0;
 
 DECLAREARRAYSTRUCT(Largelcpvalue);
 
@@ -1003,7 +1001,6 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     if (depth >= (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
     {
       addunsortedrange(bsr->rmnsufinfo,left,right,depth);
-      queuesize++;
       return;
     }
   } else
@@ -1920,5 +1917,4 @@ void sortallbuckets(Seqpos *suftabptr,
   printf("# countbltriesort=%lu\n",countbltriesort);
   printf("# countcountingsort=%lu\n",countcountingsort);
   printf("# countqsort=%lu\n",countqsort);
-  printf("# queuesize=%lu\n",queuesize);
 }

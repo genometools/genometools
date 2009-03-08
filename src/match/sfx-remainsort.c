@@ -35,8 +35,7 @@ typedef struct
 typedef struct
 {
   Seqpos *left,
-         *right,
-         depth;
+         *right;
 } Pairsuffixptr;
 
 typedef struct
@@ -48,9 +47,10 @@ struct Rmnsufinfo
 {
   Seqpos *inversesuftab, *presortedsuffixes;
   GtQueue *rangestobesorted;
-  Seqpos partwidth;
+  Seqpos partwidth,
+         totallength,
+         currentdepth;
   const Encodedsequence *encseq;
-  Seqpos totallength;
   Readmode readmode;
   unsigned long allocateditvinfo,
                 currentqueuesize,
@@ -80,6 +80,7 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.depth = 0;
   rmnsufinfo->firstwithnewdepth.left = NULL;
   rmnsufinfo->firstwithnewdepth.right = NULL;
+  rmnsufinfo->currentdepth = 0;
   return rmnsufinfo;
 }
 
@@ -107,7 +108,6 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
     rmnsufinfo->allocateditvinfo = width;
   }
   pairptr = gt_malloc(sizeof(Pairsuffixptr));
-  pairptr->depth = depth;
   pairptr->left = left;
   pairptr->right = right;
   gt_queue_add(rmnsufinfo->rangestobesorted,pairptr);
@@ -145,8 +145,7 @@ static void inverserange(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
   }
 }
 
-static void sortitv(Rmnsufinfo *rmnsufinfo,
-                    Seqpos *left,Seqpos *right,Seqpos depth)
+static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
 {
   Seqpos startindex;
   unsigned long idx, rangestart;
@@ -155,23 +154,24 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
   if (rmnsufinfo->firstwithnewdepth.left == left &&
       rmnsufinfo->firstwithnewdepth.right == right)
   {
-    gt_assert(depth == rmnsufinfo->firstwithnewdepth.depth);
+    rmnsufinfo->currentdepth = rmnsufinfo->firstwithnewdepth.depth;
   }
   gt_assert(rmnsufinfo->allocateditvinfo >= width);
   for (idx=0; idx<width; idx++)
   {
     rmnsufinfo->itvinfo[idx].suffixstart = left[idx];
-    if (left[idx]+depth > rmnsufinfo->totallength)
+    if (left[idx]+rmnsufinfo->currentdepth > rmnsufinfo->totallength)
     {
       fprintf(stderr,"left[%lu]+depth=%lu+%lu=%lu>%lu\n",
               idx,
               (unsigned long) left[idx],
-              (unsigned long) depth,
-              (unsigned long) (left[idx]+depth),
+              (unsigned long) rmnsufinfo->currentdepth,
+              (unsigned long) (left[idx]+rmnsufinfo->currentdepth),
               (unsigned long) rmnsufinfo->totallength);
       exit(EXIT_FAILURE);
     }
-    rmnsufinfo->itvinfo[idx].key = rmnsufinfo->inversesuftab[left[idx]+depth];
+    rmnsufinfo->itvinfo[idx].key 
+      = rmnsufinfo->inversesuftab[left[idx]+rmnsufinfo->currentdepth];
   }
   qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
   for (idx=0; idx<width; idx++)
@@ -189,7 +189,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
         addunsortedrange(rmnsufinfo,
                          left + rangestart,
                          left + idx - 1,
-                         MULT2(depth));
+                         MULT2(rmnsufinfo->currentdepth));
         inverserange(rmnsufinfo,
                      left + rangestart,
                      left + idx - 1);
@@ -205,7 +205,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
     addunsortedrange(rmnsufinfo,
                      left + rangestart,
                      left + width - 1,
-                     MULT2(depth));
+                     MULT2(rmnsufinfo->currentdepth));
     inverserange(rmnsufinfo,
                  left + rangestart,
                  left + width - 1);
@@ -272,8 +272,7 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
     rmnsufinfo->currentqueuesize--;
     sortitv(rmnsufinfo,
             pairptr->left,
-            pairptr->right,
-            pairptr->depth);
+            pairptr->right);
     gt_free(pairptr);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
