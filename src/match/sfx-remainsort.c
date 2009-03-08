@@ -39,17 +39,24 @@ typedef struct
          depth;
 } Pairsuffixptr;
 
+typedef struct
+{
+  Seqpos *left, *right, depth;
+} Firstwithnewdepth;
+
 struct Rmnsufinfo
 {
   Seqpos *inversesuftab, *presortedsuffixes;
   GtQueue *rangestobesorted;
-  DefinedSeqpos previousdepth;
   Seqpos partwidth;
   const Encodedsequence *encseq;
   Seqpos totallength;
   Readmode readmode;
-  unsigned long allocateditvinfo;
+  unsigned long allocateditvinfo,
+                currentqueuesize,
+                maxqueuesize;
   Itventry *itvinfo;
+  Firstwithnewdepth firstwithnewdepth;
 };
 
 Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
@@ -62,14 +69,17 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
   rmnsufinfo->presortedsuffixes = presortedsuffixes;
   rmnsufinfo->rangestobesorted = gt_queue_new();
-  rmnsufinfo->previousdepth.defined = false;
-  rmnsufinfo->previousdepth.valueseqpos = 0;
   rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->totallength = getencseqtotallength(encseq);
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;
   rmnsufinfo->allocateditvinfo = 0;
   rmnsufinfo->itvinfo = NULL;
+  rmnsufinfo->currentqueuesize = 0;
+  rmnsufinfo->maxqueuesize = 0;
+  rmnsufinfo->firstwithnewdepth.depth = 0;
+  rmnsufinfo->firstwithnewdepth.left = NULL;
+  rmnsufinfo->firstwithnewdepth.right = NULL;
   return rmnsufinfo;
 }
 
@@ -80,26 +90,32 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
   unsigned long width;
 
   gt_assert(left < right);
-  pairptr = gt_malloc(sizeof(Pairsuffixptr));
-  gt_assert(!rmnsufinfo->previousdepth.defined ||
-            rmnsufinfo->previousdepth.valueseqpos <= depth);
-  if (!rmnsufinfo->previousdepth.defined ||
-      rmnsufinfo->previousdepth.valueseqpos < depth)
+  gt_assert(rmnsufinfo->firstwithnewdepth.left == NULL ||
+            rmnsufinfo->firstwithnewdepth.depth <= depth);
+  if (rmnsufinfo->firstwithnewdepth.left == NULL ||
+      rmnsufinfo->firstwithnewdepth.depth < depth)
   {
     printf("new level with depth = %lu\n",(unsigned long) depth);
-    rmnsufinfo->previousdepth.defined = true;
-    rmnsufinfo->previousdepth.valueseqpos = depth;
+    rmnsufinfo->firstwithnewdepth.left = left;
+    rmnsufinfo->firstwithnewdepth.right = right;
+    rmnsufinfo->firstwithnewdepth.depth = depth;
   }
-  pairptr->depth = depth;
-  pairptr->left = left;
-  pairptr->right = right;
   width = (unsigned long) (right - left + 1);
   if (rmnsufinfo->allocateditvinfo < width)
   {
     gt_assert(rmnsufinfo->itvinfo == NULL);
     rmnsufinfo->allocateditvinfo = width;
   }
+  pairptr = gt_malloc(sizeof(Pairsuffixptr));
+  pairptr->depth = depth;
+  pairptr->left = left;
+  pairptr->right = right;
   gt_queue_add(rmnsufinfo->rangestobesorted,pairptr);
+  rmnsufinfo->currentqueuesize++;
+  if (rmnsufinfo->maxqueuesize < rmnsufinfo->currentqueuesize)
+  {
+    rmnsufinfo->maxqueuesize = rmnsufinfo->currentqueuesize;
+  }
 }
 
 static int compareitv(const void *a,const void *b)
@@ -136,6 +152,11 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,
   unsigned long idx, rangestart;
   const unsigned long width = (unsigned long) (right - left + 1);
 
+  if (rmnsufinfo->firstwithnewdepth.left == left &&
+      rmnsufinfo->firstwithnewdepth.right == right)
+  {
+    gt_assert(depth == rmnsufinfo->firstwithnewdepth.depth);
+  }
   gt_assert(rmnsufinfo->allocateditvinfo >= width);
   for (idx=0; idx<width; idx++)
   {
@@ -242,15 +263,20 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
                           NULL);
   rmnsufinfo->itvinfo
     = gt_malloc(sizeof(Itventry) * (rmnsufinfo->allocateditvinfo));
+  gt_assert(rmnsufinfo->currentqueuesize  ==
+            gt_queue_size(rmnsufinfo->rangestobesorted));
   while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
   {
     pairptr = gt_queue_get(rmnsufinfo->rangestobesorted);
+    gt_assert(rmnsufinfo->currentqueuesize > 0);
+    rmnsufinfo->currentqueuesize--;
     sortitv(rmnsufinfo,
             pairptr->left,
             pairptr->right,
             pairptr->depth);
     gt_free(pairptr);
   }
+  printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
