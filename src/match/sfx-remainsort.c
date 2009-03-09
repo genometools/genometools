@@ -333,13 +333,19 @@ static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
 
         cc1 = getencodedchar(rmnsufinfo->encseq,idx+h,rmnsufinfo->readmode);
         cc2 = getencodedchar(rmnsufinfo->encseq,jdx+h,rmnsufinfo->readmode);
-        if (cc1 != cc2 || ISSPECIAL(cc1))
+        if (cc1 == cc2 && ISNOTSPECIAL(cc1))
         {
-          lcptab[k] = h;
+          h++;
+        } else
+        {
           break;
         }
-        h++;
       }
+      lcptab[k] = h;
+    }
+    if (h > 0)
+    {
+      h--;
     }
   }
   gt_free(lcptab);
