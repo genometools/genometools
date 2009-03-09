@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if test $# -ne 1
+then
+  echo "Usage: $0 <inputfile>"
+  exit 1
+fi
+
+time mkesa -p mkesa-idx -d $1 -b D -g suf -g lcp -v
+time gt suffixerator -db $1 -dna -v -suf -tis -maxdepth

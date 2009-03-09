@@ -281,6 +281,7 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
     gt_assert(specialidx == rmnsufinfo->totallength);
     freespecialrangeiterator(&sri);
   }
+  /* now we can unmap the encoded sequence */
   rmnsufinfo->inversesuftab[rmnsufinfo->totallength] = rmnsufinfo->totallength;
   (void) gt_queue_iterate(rmnsufinfo->rangestobesorted,
                           putleftbound,
