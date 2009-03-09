@@ -302,17 +302,19 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
     gt_free(pairptr);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
+}
+
+void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr)
+{
+  Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
+
+  processRmnsufinfo(rmnsufinfo);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
   gt_free(rmnsufinfo->inversesuftab);
   rmnsufinfo->inversesuftab = NULL;
-}
-
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfo)
-{
-  processRmnsufinfo(*rmnsufinfo);
-  gt_free(*rmnsufinfo);
-  *rmnsufinfo = NULL;
+  gt_free(rmnsufinfo);
+  rmnsufinfoptr = NULL;
 }

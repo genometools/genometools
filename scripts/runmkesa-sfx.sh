@@ -6,5 +6,5 @@ then
   exit 1
 fi
 
-time mkesa -p mkesa-idx -d $1 -b D -g suf -g lcp -v
-time gt suffixerator -db $1 -dna -v -suf -tis -maxdepth
+time mkesa -p mkesa-idx -b D -g suf -g lcp -v -d $1 
+time gt suffixerator -dna -v -suf -tis -maxdepth -db $1 

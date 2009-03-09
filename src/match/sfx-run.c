@@ -83,7 +83,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->pageoffset = 0;
   outfileinfo->longest.defined = false;
   outfileinfo->longest.valueseqpos = 0;
-  if (so->outlcptab)
+  if (so->outlcptab && !so->sfxstrategy.ssortmaxdepth.defined)
   {
     outfileinfo->outlcpinfo
       = newlcpoutinfo(so->outlcptab ? so->str_indexname : NULL,
@@ -613,6 +613,13 @@ static int runsuffixerator(bool doesa,
   if (outfileinfo.outlcpinfo != NULL)
   {
     freeoutlcptab(&outfileinfo.outlcpinfo);
+  } else
+  {
+    if (so->outlcptab)
+    {
+      gt_assert(so->sfxstrategy.ssortmaxdepth.defined);
+      printf("linear time computation of lcp-table\n");
+    }
   }
   freeSfxseqinfo(&sfxseqinfo);
   if (mtime != NULL)
