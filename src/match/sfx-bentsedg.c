@@ -1744,7 +1744,8 @@ void sortallbuckets(Seqpos *suftabptr,
         SETLCP(&bsr,0,lcpvalue);
         /* all other lcp-values are computed and they can be output */
         multilcpvalue(&outlcpinfo->lcpsubtab,
-                      bucketspec.nonspecialsinbucket,
+                      0,
+                      bucketspec.nonspecialsinbucket-1,
                       bucketspec.left,
                       outlcpinfo->outfplcptab,
                       outlcpinfo->outfpllvtab);

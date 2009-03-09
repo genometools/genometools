@@ -39,7 +39,8 @@ typedef struct
 } Lcpsubtab;
 
 void multilcpvalue(Lcpsubtab *lcpsubtab,
-                   unsigned long bucketsize,
+                   unsigned long bucketleft,
+                   unsigned long bucketright,
                    Seqpos posoffset,
                    FILE *fplcptab,
                    FILE *fpllvtab);

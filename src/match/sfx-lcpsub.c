@@ -24,7 +24,8 @@
 #include "lcpoverflow.h"
 
 void multilcpvalue(Lcpsubtab *lcpsubtab,
-                   unsigned long bucketsize,
+                   unsigned long bucketleft,
+                   unsigned long bucketright,
                    Seqpos posoffset,
                    FILE *fplcptab,
                    FILE *fpllvtab)
@@ -34,7 +35,7 @@ void multilcpvalue(Lcpsubtab *lcpsubtab,
   Largelcpvalue *largelcpvalueptr;
 
   lcpsubtab->largelcpvalues.nextfreeLargelcpvalue = 0;
-  for (idx=0; idx<bucketsize; idx++)
+  for (idx=bucketleft; idx<=bucketright; idx++)
   {
     lcpvalue = lcpsubtab->spaceSeqpos[idx];
     if (lcpsubtab->maxbranchdepth < lcpvalue)
@@ -54,9 +55,9 @@ void multilcpvalue(Lcpsubtab *lcpsubtab,
       lcpsubtab->smalllcpvalues[idx] = LCPOVERFLOW;
     }
   }
-  lcpsubtab->countoutputlcpvalues += bucketsize;
+  lcpsubtab->countoutputlcpvalues += (bucketright - bucketleft + 1);
   gt_xfwrite(lcpsubtab->smalllcpvalues,
-             sizeof (Uchar),(size_t) bucketsize,fplcptab);
+             sizeof (Uchar),(size_t) (bucketright - bucketleft + 1),fplcptab);
   if (lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
     gt_xfwrite(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
