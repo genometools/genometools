@@ -145,7 +145,9 @@ typedef struct
   void *reservoir;
   size_t sizereservoir;
   Seqpos *spaceSeqpos, /* pointer into reservoir */
-         maxbranchdepth;
+         maxbranchdepth,
+         numoflargelcpvalues,
+         countoutputlcpvalues;
   Uchar *smalllcpvalues; /* pointer into reservoir */
   ArrayLargelcpvalue largelcpvalues;
   const Seqpos *suftabbase;
@@ -166,9 +168,7 @@ struct Outlcpinfo
 {
   FILE *outfplcptab,
        *outfpllvtab;
-  Seqpos totallength,
-         countoutputlcpvalues,
-         numoflargelcpvalues;
+  Seqpos totallength;
   Turningwheel *tw;
   Lcpsubtab lcpsubtab;
   Suffixwithcode previoussuffix;
@@ -1308,7 +1308,9 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
 
 static void multilcpvalue(Outlcpinfo *outlcpinfo,
                           unsigned long bucketsize,
-                          Seqpos posoffset)
+                          Seqpos posoffset,
+                          FILE *fplcptab,
+                          FILE *fpllvtab)
 {
   unsigned long idx;
   Seqpos lcpvalue;
@@ -1327,7 +1329,7 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
       outlcpinfo->lcpsubtab.smalllcpvalues[idx] = (Uchar) lcpvalue;
     } else
     {
-      outlcpinfo->numoflargelcpvalues++;
+      outlcpinfo->lcpsubtab.numoflargelcpvalues++;
       GETNEXTFREEINARRAY(largelcpvalueptr,&outlcpinfo->lcpsubtab.largelcpvalues,
                          Largelcpvalue,32);
       largelcpvalueptr->position = posoffset+idx;
@@ -1335,16 +1337,16 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
       outlcpinfo->lcpsubtab.smalllcpvalues[idx] = LCPOVERFLOW;
     }
   }
-  outlcpinfo->countoutputlcpvalues += bucketsize;
+  outlcpinfo->lcpsubtab.countoutputlcpvalues += bucketsize;
   gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
-             sizeof (Uchar),(size_t) bucketsize,outlcpinfo->outfplcptab);
+             sizeof (Uchar),(size_t) bucketsize,fplcptab);
   if (outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue > 0)
   {
     gt_xfwrite(outlcpinfo->lcpsubtab.largelcpvalues.spaceLargelcpvalue,
                sizeof (Largelcpvalue),
                (size_t)
                outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue,
-               outlcpinfo->outfpllvtab);
+               fpllvtab);
   }
 }
 
@@ -1498,7 +1500,7 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
     outlcpinfo->lcpsubtab.maxbranchdepth = lcpvalue;
   }
   outlcpinfo->lcpsubtab.smalllcpvalues[0] = (Uchar) lcpvalue;
-  outlcpinfo->countoutputlcpvalues += specialsinbucket;
+  outlcpinfo->lcpsubtab.countoutputlcpvalues += specialsinbucket;
   gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
              sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
   return minprefixindex;
@@ -1535,9 +1537,9 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
       }
     }
   }
-  outlcpinfo->numoflargelcpvalues = 0;
-  outlcpinfo->countoutputlcpvalues = 0;
+  outlcpinfo->lcpsubtab.countoutputlcpvalues = 0;
   outlcpinfo->totallength = totallength;
+  outlcpinfo->lcpsubtab.numoflargelcpvalues = 0;
   outlcpinfo->lcpsubtab.maxbranchdepth = 0;
   outlcpinfo->lcpsubtab.reservoir = NULL;
   outlcpinfo->lcpsubtab.sizereservoir = 0;
@@ -1563,14 +1565,14 @@ void freeoutlcptab(Outlcpinfo **outlcpinfoptr)
 {
   Outlcpinfo *outlcpinfo = *outlcpinfoptr;
 
-  if (outlcpinfo->countoutputlcpvalues < outlcpinfo->totallength + 1)
+  if (outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength + 1)
   {
-    outlcpinfo->countoutputlcpvalues
-      += outmany0lcpvalues(outlcpinfo->countoutputlcpvalues,
+    outlcpinfo->lcpsubtab.countoutputlcpvalues
+      += outmany0lcpvalues(outlcpinfo->lcpsubtab.countoutputlcpvalues,
                            outlcpinfo->totallength,
                            outlcpinfo->outfplcptab);
   }
-  gt_assert(outlcpinfo->countoutputlcpvalues ==
+  gt_assert(outlcpinfo->lcpsubtab.countoutputlcpvalues ==
             outlcpinfo->totallength + 1);
   gt_fa_fclose(outlcpinfo->outfplcptab);
   gt_fa_fclose(outlcpinfo->outfpllvtab);
@@ -1583,7 +1585,7 @@ void freeoutlcptab(Outlcpinfo **outlcpinfoptr)
 
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
 {
-  return outlcpinfo->numoflargelcpvalues;
+  return outlcpinfo->lcpsubtab.numoflargelcpvalues;
 }
 
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
@@ -1823,7 +1825,9 @@ void sortallbuckets(Seqpos *suftabptr,
         /* all other lcp-values are computed and they can be output */
         multilcpvalue(outlcpinfo,
                       bucketspec.nonspecialsinbucket,
-                      bucketspec.left);
+                      bucketspec.left,
+                      outlcpinfo->outfplcptab,
+                      outlcpinfo->outfpllvtab);
         /* previoussuffix becomes last nonspecial element in current bucket */
         outlcpinfo->previoussuffix.code = code;
         outlcpinfo->previoussuffix.prefixindex = prefixlength;
