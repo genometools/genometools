@@ -18,9 +18,33 @@
 #ifndef SFX_LCPSUB_H
 #define SFX_LCPSUB_H
 
-typedef struct Lcpsubtab Lcpsubtab;
+#include <stdio.h>
+#include "core/symboldef.h"
+#include "core/arraydef.h"
+#include "seqpos-def.h"
 
-void freelcpsubtab(Lcpsubtab **lcpsubtab);
-Lcpsubtab *newlcpsubtab(unsigned int prefixlength,unsigned int numofchars);
+DECLAREARRAYSTRUCT(Largelcpvalue);
+
+typedef struct
+{
+  void *reservoir;
+  size_t sizereservoir;
+  Seqpos *spaceSeqpos, /* pointer into reservoir */
+         maxbranchdepth,
+         numoflargelcpvalues,
+         countoutputlcpvalues;
+  Uchar *smalllcpvalues; /* pointer into reservoir */
+  ArrayLargelcpvalue largelcpvalues;
+  const Seqpos *suftabbase;
+} Lcpsubtab;
+
+void multilcpvalue(Lcpsubtab *lcpsubtab,
+                   unsigned long bucketsize,
+                   Seqpos posoffset,
+                   FILE *fplcptab,
+                   FILE *fpllvtab);
+
+void outmany0lcpvalues(Lcpsubtab *lcpsubtab,Seqpos totallength,
+                       FILE *outfplcptab);
 
 #endif
