@@ -1253,20 +1253,21 @@ static void bentleysedgewick(Bentsedgresources *bsr,
 
 #define NUMBEROFZEROS 1024
 
-static void outmany0lcpvalues(Seqpos many,Outlcpinfo *outlcpinfo)
+static Seqpos outmany0lcpvalues(Seqpos alreadyoutput,Seqpos totallength,
+                                FILE *outfplcptab)
 {
-  Seqpos i, countout;
+  Seqpos i, countout, many;
   Uchar outvalues[NUMBEROFZEROS] = {0};
 
+  many = totallength + 1 - alreadyoutput;
   countout = many/NUMBEROFZEROS;
   for (i=0; i<countout; i++)
   {
-    gt_xfwrite(outvalues,sizeof (Uchar),(size_t) NUMBEROFZEROS,
-               outlcpinfo->outfplcptab);
+    gt_xfwrite(outvalues,sizeof (Uchar),(size_t) NUMBEROFZEROS,outfplcptab);
   }
   gt_xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
-             outlcpinfo->outfplcptab);
-  outlcpinfo->countoutputlcpvalues += many;
+             outfplcptab);
+  return many;
 }
 
 static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
@@ -1337,11 +1338,14 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
   outlcpinfo->countoutputlcpvalues += bucketsize;
   gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
              sizeof (Uchar),(size_t) bucketsize,outlcpinfo->outfplcptab);
-  gt_xfwrite(outlcpinfo->lcpsubtab.largelcpvalues.spaceLargelcpvalue,
-             sizeof (Largelcpvalue),
-             (size_t)
-             outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue,
-             outlcpinfo->outfpllvtab);
+  if (outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue > 0)
+  {
+    gt_xfwrite(outlcpinfo->lcpsubtab.largelcpvalues.spaceLargelcpvalue,
+               sizeof (Largelcpvalue),
+               (size_t)
+               outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue,
+               outlcpinfo->outfpllvtab);
+  }
 }
 
 #ifdef SKDEBUG
@@ -1555,23 +1559,26 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
   return outlcpinfo;
 }
 
-void freeoutlcptab(Outlcpinfo **outlcpinfo)
+void freeoutlcptab(Outlcpinfo **outlcpinfoptr)
 {
-  if ((*outlcpinfo)->countoutputlcpvalues < (*outlcpinfo)->totallength + 1)
+  Outlcpinfo *outlcpinfo = *outlcpinfoptr;
+
+  if (outlcpinfo->countoutputlcpvalues < outlcpinfo->totallength + 1)
   {
-    outmany0lcpvalues((*outlcpinfo)->totallength + 1 -
-                      (*outlcpinfo)->countoutputlcpvalues,
-                      *outlcpinfo);
+    outlcpinfo->countoutputlcpvalues
+      += outmany0lcpvalues(outlcpinfo->countoutputlcpvalues,
+                           outlcpinfo->totallength,
+                           outlcpinfo->outfplcptab);
   }
-  gt_assert((*outlcpinfo)->countoutputlcpvalues ==
-            (*outlcpinfo)->totallength + 1);
-  gt_fa_fclose((*outlcpinfo)->outfplcptab);
-  gt_fa_fclose((*outlcpinfo)->outfpllvtab);
-  FREESPACE((*outlcpinfo)->lcpsubtab.reservoir);
-  (*outlcpinfo)->lcpsubtab.sizereservoir = 0;
-  freeTurningwheel(&(*outlcpinfo)->tw);
-  FREEARRAY(&(*outlcpinfo)->lcpsubtab.largelcpvalues,Largelcpvalue);
-  FREESPACE(*outlcpinfo);
+  gt_assert(outlcpinfo->countoutputlcpvalues ==
+            outlcpinfo->totallength + 1);
+  gt_fa_fclose(outlcpinfo->outfplcptab);
+  gt_fa_fclose(outlcpinfo->outfpllvtab);
+  FREESPACE(outlcpinfo->lcpsubtab.reservoir);
+  outlcpinfo->lcpsubtab.sizereservoir = 0;
+  freeTurningwheel(&outlcpinfo->tw);
+  FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
+  FREESPACE(*outlcpinfoptr);
 }
 
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)

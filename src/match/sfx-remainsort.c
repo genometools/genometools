@@ -310,13 +310,39 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 
 static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos idx;
+  Seqpos idx, h, *lcptab;
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
     gt_assert(rmnsufinfo->inversesuftab[rmnsufinfo->presortedsuffixes[idx]]
               == idx);
   }
+  h = 0;
+  lcptab = gt_malloc(sizeof(Seqpos) * rmnsufinfo->partwidth);
+  lcptab[0] = 0;
+  for (idx=0; idx <= rmnsufinfo->totallength; idx++)
+  {
+    Seqpos k = rmnsufinfo->inversesuftab[idx];
+    if (k > 0 && k < rmnsufinfo->partwidth)
+    {
+      Seqpos jdx = rmnsufinfo->presortedsuffixes[k-1];
+      while (idx+h < rmnsufinfo->totallength &&
+             jdx+h < rmnsufinfo->totallength)
+      {
+        Uchar cc1, cc2;
+
+        cc1 = getencodedchar(rmnsufinfo->encseq,idx+h,rmnsufinfo->readmode);
+        cc2 = getencodedchar(rmnsufinfo->encseq,jdx+h,rmnsufinfo->readmode);
+        if (cc1 != cc2 || ISSPECIAL(cc1))
+        {
+          lcptab[k] = h;
+          break;
+        }
+        h++;
+      }
+    }
+  }
+  gt_free(lcptab);
 }
 
 void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr)

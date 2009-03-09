@@ -33,7 +33,7 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
                           Seqpos totallength,
                           GtError *err);
 
-void freeoutlcptab(Outlcpinfo **outlcpinfo);
+void freeoutlcptab(Outlcpinfo **outlcpinfoptr);
 
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
