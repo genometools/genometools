@@ -144,7 +144,8 @@ typedef struct
 {
   void *reservoir;
   size_t sizereservoir;
-  Seqpos *spaceSeqpos; /* pointer into reservoir */
+  Seqpos *spaceSeqpos, /* pointer into reservoir */
+         maxbranchdepth;
   Uchar *smalllcpvalues; /* pointer into reservoir */
   ArrayLargelcpvalue largelcpvalues;
   const Seqpos *suftabbase;
@@ -167,8 +168,7 @@ struct Outlcpinfo
        *outfpllvtab;
   Seqpos totallength,
          countoutputlcpvalues,
-         numoflargelcpvalues,
-         maxbranchdepth;
+         numoflargelcpvalues;
   Turningwheel *tw;
   Lcpsubtab lcpsubtab;
   Suffixwithcode previoussuffix;
@@ -1310,29 +1310,29 @@ static void multilcpvalue(Outlcpinfo *outlcpinfo,
                           unsigned long bucketsize,
                           Seqpos posoffset)
 {
-  unsigned long i;
+  unsigned long idx;
   Seqpos lcpvalue;
   Largelcpvalue *largelcpvalueptr;
 
   outlcpinfo->lcpsubtab.largelcpvalues.nextfreeLargelcpvalue = 0;
-  for (i=0; i<bucketsize; i++)
+  for (idx=0; idx<bucketsize; idx++)
   {
-    lcpvalue = outlcpinfo->lcpsubtab.spaceSeqpos[i];
-    if (outlcpinfo->maxbranchdepth < lcpvalue)
+    lcpvalue = outlcpinfo->lcpsubtab.spaceSeqpos[idx];
+    if (outlcpinfo->lcpsubtab.maxbranchdepth < lcpvalue)
     {
-      outlcpinfo->maxbranchdepth = lcpvalue;
+      outlcpinfo->lcpsubtab.maxbranchdepth = lcpvalue;
     }
-    if (lcpvalue >= (Seqpos) LCPOVERFLOW)
+    if (lcpvalue < (Seqpos) LCPOVERFLOW)
+    {
+      outlcpinfo->lcpsubtab.smalllcpvalues[idx] = (Uchar) lcpvalue;
+    } else
     {
       outlcpinfo->numoflargelcpvalues++;
       GETNEXTFREEINARRAY(largelcpvalueptr,&outlcpinfo->lcpsubtab.largelcpvalues,
                          Largelcpvalue,32);
-      largelcpvalueptr->position = posoffset+i;
+      largelcpvalueptr->position = posoffset+idx;
       largelcpvalueptr->value = lcpvalue;
-      outlcpinfo->lcpsubtab.smalllcpvalues[i] = LCPOVERFLOW;
-    } else
-    {
-      outlcpinfo->lcpsubtab.smalllcpvalues[i] = (Uchar) lcpvalue;
+      outlcpinfo->lcpsubtab.smalllcpvalues[idx] = LCPOVERFLOW;
     }
   }
   outlcpinfo->countoutputlcpvalues += bucketsize;
@@ -1472,9 +1472,9 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
                                       specialsinbucket,
                                       bcktab,
                                       code);
-    if (outlcpinfo->maxbranchdepth < (Seqpos) maxprefixindex)
+    if (outlcpinfo->lcpsubtab.maxbranchdepth < (Seqpos) maxprefixindex)
     {
-      outlcpinfo->maxbranchdepth = (Seqpos) maxprefixindex;
+      outlcpinfo->lcpsubtab.maxbranchdepth = (Seqpos) maxprefixindex;
     }
   } else
   {
@@ -1493,9 +1493,9 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   lcpvalue = computelocallcpvalue(previoussuffix,
                                   &firstspecialsuffixwithcode,
                                   minchanged);
-  if (outlcpinfo->maxbranchdepth < lcpvalue)
+  if (outlcpinfo->lcpsubtab.maxbranchdepth < lcpvalue)
   {
-    outlcpinfo->maxbranchdepth = lcpvalue;
+    outlcpinfo->lcpsubtab.maxbranchdepth = lcpvalue;
   }
   outlcpinfo->lcpsubtab.smalllcpvalues[0] = (Uchar) lcpvalue;
   outlcpinfo->countoutputlcpvalues += specialsinbucket;
@@ -1536,9 +1536,9 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
     }
   }
   outlcpinfo->numoflargelcpvalues = 0;
-  outlcpinfo->maxbranchdepth = 0;
   outlcpinfo->countoutputlcpvalues = 0;
   outlcpinfo->totallength = totallength;
+  outlcpinfo->lcpsubtab.maxbranchdepth = 0;
   outlcpinfo->lcpsubtab.reservoir = NULL;
   outlcpinfo->lcpsubtab.sizereservoir = 0;
   INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
@@ -1588,7 +1588,7 @@ Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
 
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 {
-  return outlcpinfo->maxbranchdepth;
+  return outlcpinfo->lcpsubtab.maxbranchdepth;
 }
 
 static void initBentsedgresources(Bentsedgresources *bsr,
