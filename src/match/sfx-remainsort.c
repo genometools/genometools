@@ -48,7 +48,8 @@ typedef struct
 
 struct Rmnsufinfo
 {
-  Seqpos *inversesuftab, *presortedsuffixes;
+  Seqpos *inversesuftab,
+         *presortedsuffixes;
   GtQueue *rangestobesorted;
   Seqpos partwidth,
          totallength,
@@ -60,12 +61,14 @@ struct Rmnsufinfo
                 maxqueuesize;
   Itventry *itvinfo;
   Firstwithnewdepth firstwithnewdepth;
+  bool withpostlcptab;
 };
 
-Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
-                           const Encodedsequence *encseq,
-                           Readmode readmode,
-                           Seqpos partwidth)
+Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
+                          const Encodedsequence *encseq,
+                          Readmode readmode,
+                          Seqpos partwidth,
+                          bool withpostlcptab)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -86,6 +89,7 @@ Rmnsufinfo *initRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.left = NULL;
   rmnsufinfo->firstwithnewdepth.right = NULL;
   rmnsufinfo->currentdepth = 0;
+  rmnsufinfo->withpostlcptab = withpostlcptab;
   return rmnsufinfo;
 }
 
@@ -248,7 +252,7 @@ static int putleftbound(void **elem,void *info, GT_UNUSED GtError *err)
   return 0;
 }
 
-static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
+static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 {
   Pairsuffixptr *pairptr;
   Seqpos idx;
@@ -304,11 +308,26 @@ static void processRmnsufinfo(Rmnsufinfo *rmnsufinfo)
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
 }
 
+static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
+{
+  Seqpos idx;
+
+  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
+  {
+    gt_assert(rmnsufinfo->inversesuftab[rmnsufinfo->presortedsuffixes[idx]]
+              == idx);
+  }
+}
+
 void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
 
-  processRmnsufinfo(rmnsufinfo);
+  sortremainingsuffixes(rmnsufinfo);
+  if (rmnsufinfo->withpostlcptab)
+  {
+    lineartimelcpcomputation(rmnsufinfo);
+  }
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);

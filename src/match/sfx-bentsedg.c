@@ -1669,8 +1669,9 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo = initRmnsufinfo(suftabptr,bsr->encseq,
-                                     bsr->readmode,bsr->partwidth);
+    bsr->rmnsufinfo = newRmnsufinfo(suftabptr,bsr->encseq,
+                                    bsr->readmode,bsr->partwidth,
+                                    sfxstrategy->withpostlcptab);
     bsr->trierep = NULL;
   } else
   {

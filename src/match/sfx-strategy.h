@@ -35,7 +35,8 @@ typedef struct
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
                          encoding) */
-       storespecialcodes;
+       storespecialcodes,
+       withpostlcptab;
 } Sfxstrategy;
 
 #endif

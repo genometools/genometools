@@ -501,6 +501,7 @@ static int runsuffixerator(bool doesa,
   prefixlength = so->prefixlength;
   sfxstrategy = so->sfxstrategy;
   sfxstrategy.ssortmaxdepth.defined = false;
+  sfxstrategy.withpostlcptab = false;
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
@@ -540,6 +541,14 @@ static int runsuffixerator(bool doesa,
                         sfxseqinfo.encseq,so,err) != 0)
     {
       haserr = true;
+    }
+  }
+  if (!haserr && so->outlcptab)
+  {
+    if (outfileinfo.outlcpinfo == NULL)
+    {
+      gt_assert(so->sfxstrategy.ssortmaxdepth.defined);
+      sfxstrategy.withpostlcptab = true;
     }
   }
   if (!haserr)
@@ -615,11 +624,6 @@ static int runsuffixerator(bool doesa,
     freeoutlcptab(&outfileinfo.outlcpinfo);
   } else
   {
-    if (so->outlcptab)
-    {
-      gt_assert(so->sfxstrategy.ssortmaxdepth.defined);
-      printf("linear time computation of lcp-table\n");
-    }
   }
   freeSfxseqinfo(&sfxseqinfo);
   if (mtime != NULL)

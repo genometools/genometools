@@ -510,6 +510,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       sfi->sfxstrategy.ssortmaxdepth.defined = false;
       sfi->sfxstrategy.maxwidthrealmedian = 1UL;
+      sfi->sfxstrategy.withpostlcptab = false;
       sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
       sfi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
       sfi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
