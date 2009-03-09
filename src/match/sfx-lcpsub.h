@@ -32,6 +32,7 @@ typedef struct
   Seqpos *spaceSeqpos, /* pointer into reservoir */
          maxbranchdepth,
          numoflargelcpvalues,
+         totalnumoflargelcpvalues,
          countoutputlcpvalues;
   Uchar *smalllcpvalues; /* pointer into reservoir */
   ArrayLargelcpvalue largelcpvalues;

@@ -35,6 +35,15 @@ void outlcpvalues(Lcpsubtab *lcpsubtab,
   Largelcpvalue *largelcpvalueptr;
 
   lcpsubtab->largelcpvalues.nextfreeLargelcpvalue = 0;
+  if (lcpsubtab->numoflargelcpvalues >=
+      (Seqpos) lcpsubtab->largelcpvalues.allocatedLargelcpvalue)
+  {
+    lcpsubtab->largelcpvalues.spaceLargelcpvalue
+      = gt_realloc(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
+                   sizeof (Largelcpvalue) * lcpsubtab->numoflargelcpvalues);
+    lcpsubtab->largelcpvalues.allocatedLargelcpvalue
+      = (unsigned long) lcpsubtab->numoflargelcpvalues;
+  }
   for (idx=bucketleft; idx<=bucketright; idx++)
   {
     lcpvalue = lcpsubtab->spaceSeqpos[idx];
@@ -47,9 +56,21 @@ void outlcpvalues(Lcpsubtab *lcpsubtab,
       lcpsubtab->smalllcpvalues[idx] = (Uchar) lcpvalue;
     } else
     {
-      lcpsubtab->numoflargelcpvalues++;
-      GETNEXTFREEINARRAY(largelcpvalueptr,&lcpsubtab->largelcpvalues,
-                         Largelcpvalue,32);
+      if (lcpsubtab->largelcpvalues.nextfreeLargelcpvalue >=
+          lcpsubtab->largelcpvalues.allocatedLargelcpvalue)
+      {
+        fprintf(stderr,"at pos %lu: lcpvalue= %lu, "
+                       "nextfreeLargelcpvalue = %lu >= %lu\n",
+                 (unsigned long) (posoffset+idx),
+                 (unsigned long) lcpvalue,
+                 lcpsubtab->largelcpvalues.nextfreeLargelcpvalue,
+                 lcpsubtab->largelcpvalues.allocatedLargelcpvalue);
+        exit(EXIT_FAILURE);
+      }
+      gt_assert(lcpsubtab->largelcpvalues.nextfreeLargelcpvalue <
+                lcpsubtab->largelcpvalues.allocatedLargelcpvalue);
+      largelcpvalueptr = lcpsubtab->largelcpvalues.spaceLargelcpvalue +
+                         lcpsubtab->largelcpvalues.nextfreeLargelcpvalue++;
       largelcpvalueptr->position = posoffset+idx;
       largelcpvalueptr->value = lcpvalue;
       lcpsubtab->smalllcpvalues[idx] = LCPOVERFLOW;
@@ -60,6 +81,11 @@ void outlcpvalues(Lcpsubtab *lcpsubtab,
              sizeof (Uchar),(size_t) (bucketright - bucketleft + 1),fplcptab);
   if (lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
+    printf("add %lu large lcps to obtain",
+            (unsigned long) lcpsubtab->numoflargelcpvalues);
+    lcpsubtab->totalnumoflargelcpvalues += lcpsubtab->numoflargelcpvalues;
+    printf("%lu\n",
+            (unsigned long) lcpsubtab->totalnumoflargelcpvalues);
     gt_xfwrite(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
                sizeof (Largelcpvalue),
                (size_t)

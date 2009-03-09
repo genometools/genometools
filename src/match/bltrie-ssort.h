@@ -34,12 +34,12 @@ Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
                               bool cmpcharbychar,
                               Readmode readmode);
 
-void blindtriesuffixsort(Blindtrierep *trierep,
-                         Seqpos *suffixtable,
-                         Seqpos *lcpsubtab,
-                         unsigned long numberofsuffixes,
-                         Seqpos offset,
-                         Ordertype ordertype);
+Seqpos blindtriesuffixsort(Blindtrierep *trierep,
+                           Seqpos *suffixtable,
+                           Seqpos *lcpsubtab,
+                           unsigned long numberofsuffixes,
+                           Seqpos offset,
+                           Ordertype ordertype);
 
 void freeBlindtrierep(Blindtrierep **trierep);
 

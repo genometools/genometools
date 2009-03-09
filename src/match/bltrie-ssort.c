@@ -21,6 +21,7 @@
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "bltrie-ssort.h"
+#include "lcpoverflow.h"
 
 #undef SKDEBUG
 #ifdef SKDEBUG
@@ -358,6 +359,7 @@ static Seqpos fastgetlcp(Uchar *mm_oldsuffix,
 
 static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
                                           Seqpos *lcpsubtab,
+                                          Seqpos *numoflargelcpvalues,
                                           Blindtrierep *trierep)
 {
   bool readyforpop = false, currentnodeisleaf;
@@ -374,6 +376,10 @@ static unsigned long enumeratetrieleaves (Seqpos *suffixtable,
       if (lcpsubtab != NULL && nextfree > 0)
       {
         lcpsubtab[nextfree] = lcpnode->depth + trierep->offset;
+        if (lcpnode->depth + trierep->offset >= (Seqpos) LCPOVERFLOW)
+        {
+          (*numoflargelcpvalues)++;
+        }
       }
       suffixtable[nextfree++]
         = currentnode->either.nodestartpos - trierep->offset;
@@ -459,7 +465,7 @@ static void checkcurrentblindtrie(Blindtrierep *trierep)
   Seqpos maxcommon;
   int retval;
 
-  numofsuffixes = enumeratetrieleaves (&suffixtable[0], NULL, trierep);
+  numofsuffixes = enumeratetrieleaves (&suffixtable[0], NULL, NULL, trierep);
   for (idx=1UL; idx < numofsuffixes; idx++)
   {
     maxcommon = 0;
@@ -583,16 +589,16 @@ static void inplace_reverseSeqpos(Seqpos *tab,unsigned long len)
   }
 }
 
-void blindtriesuffixsort(Blindtrierep *trierep,
-                         Seqpos *suffixtable,
-                         Seqpos *lcpsubtab,
-                         unsigned long numberofsuffixes,
-                         Seqpos offset,
-                         Ordertype ordertype)
+Seqpos blindtriesuffixsort(Blindtrierep *trierep,
+                           Seqpos *suffixtable,
+                           Seqpos *lcpsubtab,
+                           unsigned long numberofsuffixes,
+                           Seqpos offset,
+                           Ordertype ordertype)
 {
   unsigned long idx, stackidx;
   Nodeptr leafinsubtree, currentnode;
-  Seqpos lcp;
+  Seqpos lcp, numoflargelcpvalues = 0;
   Uchar mm_oldsuffix, mm_newsuffix;
 
   if (ordertype == Noorder)
@@ -663,12 +669,18 @@ void blindtriesuffixsort(Blindtrierep *trierep,
       break;
     }
   }
-  (void) enumeratetrieleaves (suffixtable, lcpsubtab, trierep);
+  (void) enumeratetrieleaves (suffixtable, lcpsubtab, &numoflargelcpvalues, 
+                              trierep);
   if (lcpsubtab != NULL)
   {
+    if (idx < numberofsuffixes && offset >= (Seqpos) LCPOVERFLOW)
+    {
+      numoflargelcpvalues += numberofsuffixes - idx;
+    }
     while (idx < numberofsuffixes)
     {
       lcpsubtab[idx++] = offset;
     }
   }
+  return numoflargelcpvalues;
 }

@@ -50,7 +50,6 @@
         ((Seqpos) VAR) : UNIQUEINT(PTR))
 
 #define LCPINDEX(BSR,I)   (Seqpos) ((I) - (BSR)->lcpsubtab->suftabbase)
-#define SETLCP(BSR,I,V)   (BSR)->lcpsubtab->spaceSeqpos[I] = V
 
 #define SWAP(A,B)\
         if ((A) != (B))\
@@ -439,7 +438,16 @@ static Suffixptr *medianof3(const Bentsedgresources *bsr,
       : (SfxcmpGREATER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? a : c));
 }
 
-static void insertionsort(const Bentsedgresources *bsr,
+static void updatelcpvalue(Bentsedgresources *bsr,Seqpos idx,Seqpos value)
+{
+  bsr->lcpsubtab->spaceSeqpos[idx] = value;
+  if (value >= (Seqpos) LCPOVERFLOW)
+  {
+    bsr->lcpsubtab->numoflargelcpvalues++;
+  }
+}
+
+static void insertionsort(Bentsedgresources *bsr,
                           Suffixptr *leftptr,
                           Suffixptr *rightptr,
                           Seqpos depth)
@@ -461,6 +469,7 @@ static void insertionsort(const Bentsedgresources *bsr,
     {
       if (bsr->sfxstrategy->cmpcharbychar)
       {
+        /* XXX use scanning of characters */
         for (sptr = (*(pj-1))+depth, tptr = (*pj)+depth; /* Nothing */;
              sptr++, tptr++)
         {
@@ -502,9 +511,9 @@ static void insertionsort(const Bentsedgresources *bsr,
         lcpindex = LCPINDEX(bsr,pj);
         if (pj < pi && retval > 0)
         {
-          SETLCP(bsr,lcpindex+1,bsr->lcpsubtab->spaceSeqpos[lcpindex]);
+          updatelcpvalue(bsr,lcpindex+1,bsr->lcpsubtab->spaceSeqpos[lcpindex]);
         }
-        SETLCP(bsr,lcpindex,lcplen);
+        updatelcpvalue(bsr,lcpindex,lcplen);
       }
       if (retval < 0)
       {
@@ -780,7 +789,7 @@ static Ordertype deriveordertype(Ordertype parentordertype,bool turn)
   /*@end@*/
 }
 
-static bool comparisonsort(const Bentsedgresources *bsr,
+static bool comparisonsort(Bentsedgresources *bsr,
                            Suffixptr *left,
                            Suffixptr *right,
                            Seqpos depth,
@@ -796,12 +805,20 @@ static bool comparisonsort(const Bentsedgresources *bsr,
         insertionsort(bsr,left,right,depth);
       } else
       {
+        Seqpos numoflargelcpvalues;
+        
+        numoflargelcpvalues 
+          = blindtriesuffixsort(bsr->trierep,left,
+                                bsr->lcpsubtab == NULL
+                                  ? NULL
+                                  : bsr->lcpsubtab->spaceSeqpos + 
+                                    LCPINDEX(bsr,left),
+                              width,depth,ordertype);
+        if (bsr->lcpsubtab != NULL)
+        {
+          bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
+        }
         countbltriesort++;
-        blindtriesuffixsort(bsr->trierep,left,
-                            bsr->lcpsubtab == NULL
-                              ? NULL
-                              : bsr->lcpsubtab->spaceSeqpos+LCPINDEX(bsr,left),
-                            width,depth,ordertype);
       }
     }
     return true;
@@ -916,7 +933,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     }
     if (bsr->lcpsubtab != NULL && bsr->leftlcpdist[idx] < end)
     { /* at least one element */
-      SETLCP(bsr,LCPINDEX(bsr,left + end),depth + idx);
+      updatelcpvalue(bsr,LCPINDEX(bsr,left + end),depth + idx);
     }
     bsr->leftlcpdist[idx] = 0;
   }
@@ -944,7 +961,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     }
     if (bsr->lcpsubtab != NULL && bsr->rightlcpdist[idx] < end)
     { /* at least one element */
-      SETLCP(bsr,LCPINDEX(bsr,left + width - end),depth + idx);
+      updatelcpvalue(bsr,LCPINDEX(bsr,left + width - end),depth + idx);
     }
     bsr->rightlcpdist[idx] = 0;
   }
@@ -1187,7 +1204,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
             which is at a minimum distance to the pivot and thus to an
             element in the final part of the left side.
           */
-          SETLCP(bsr,LCPINDEX(bsr,leftplusw),depth + smallermaxlcp);
+          updatelcpvalue(bsr,LCPINDEX(bsr,leftplusw),depth + smallermaxlcp);
         }
         SUBSORT(w,left,leftplusw-1,depth + smallerminlcp,Noorder);
       } else
@@ -1213,7 +1230,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
             which is at a minimum distance to the pivot and thus to an
             element in the first part of the right side.
           */
-          SETLCP(bsr,LCPINDEX(bsr,right-w+1),depth + greatermaxlcp);
+          updatelcpvalue(bsr,LCPINDEX(bsr,right-w+1),depth + greatermaxlcp);
         }
         SUBSORT(w,right-w+1,right,depth + greaterminlcp,Noorder);
       }
@@ -1460,7 +1477,7 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
   }
   outlcpinfo->lcpsubtab.countoutputlcpvalues = 0;
   outlcpinfo->totallength = totallength;
-  outlcpinfo->lcpsubtab.numoflargelcpvalues = 0;
+  outlcpinfo->lcpsubtab.totalnumoflargelcpvalues = 0;
   outlcpinfo->lcpsubtab.maxbranchdepth = 0;
   outlcpinfo->lcpsubtab.reservoir = NULL;
   outlcpinfo->lcpsubtab.sizereservoir = 0;
@@ -1505,7 +1522,7 @@ void freeoutlcptab(Outlcpinfo **outlcpinfoptr)
 
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo)
 {
-  return outlcpinfo->lcpsubtab.numoflargelcpvalues;
+  return outlcpinfo->lcpsubtab.totalnumoflargelcpvalues;
 }
 
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
@@ -1690,6 +1707,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                       numofchars);
     if (outlcpinfo != NULL && code > 0)
     {
+      bsr.lcpsubtab->numoflargelcpvalues = 0;
       (void) nextTurningwheel(outlcpinfo->tw);
       if (outlcpinfo->previousbucketwasempty)
       {
@@ -1741,113 +1759,113 @@ void sortallbuckets(Seqpos *suftabptr,
 #ifdef SKDEBUG
         baseptr = bucketspec.left;
 #endif
-        SETLCP(&bsr,0,lcpvalue);
-        /* all other lcp-values are computed and they can be output */
-        outlcpvalues(&outlcpinfo->lcpsubtab,
-                     0,
-                     bucketspec.nonspecialsinbucket-1,
-                     bucketspec.left,
-                     outlcpinfo->outfplcptab,
-                     outlcpinfo->outfpllvtab);
-        /* previoussuffix becomes last nonspecial element in current bucket */
-        outlcpinfo->previoussuffix.code = code;
-        outlcpinfo->previoussuffix.prefixindex = prefixlength;
-#ifdef SKDEBUG
-        outlcpinfo->previoussuffix.startpos
-          = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
-        /*
-        consistencyofsuffix(__LINE__,
-                            encseq,readmode,bcktab,numofchars,
-                            &outlcpinfo->previoussuffix);
-        */
-#endif
-      }
-    }
-    if (outlcpinfo != NULL)
-    {
-      if (bucketspec.specialsinbucket > 0)
-      {
-        minprefixindex = bucketends(outlcpinfo,
-                                    &outlcpinfo->previoussuffix,
-                                    /* first special element in bucket */
-                                    suftabptr[bucketspec.left +
-                                              bucketspec.nonspecialsinbucket],
-                                    minchanged,
-                                    bucketspec.specialsinbucket,
-                                    code,
-                                    bcktab);
-        /* there is at least one special element: this is the last element
-           in the bucket, and thus the previoussuffix for the next round */
-        outlcpinfo->previoussuffix.defined = true;
-        outlcpinfo->previoussuffix.code = code;
-        outlcpinfo->previoussuffix.prefixindex = minprefixindex;
-#ifdef SKDEBUG
-        outlcpinfo->previoussuffix.startpos
-           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
-                                         bucketspec.specialsinbucket - 1];
-        /*
-        consistencyofsuffix(__LINE__,
-                            encseq,readmode,bcktab,numofchars,
-                            &outlcpinfo->previoussuffix);
-        */
-#endif
-      } else
-      {
-        if (bucketspec.nonspecialsinbucket > 0)
-        {
-          /* if there is at least one element in the bucket, then the last
-             one becomes the next previous suffix */
-          outlcpinfo->previoussuffix.defined = true;
-          outlcpinfo->previoussuffix.code = code;
-          outlcpinfo->previoussuffix.prefixindex = prefixlength;
-#ifdef SKDEBUG
-          outlcpinfo->previoussuffix.startpos
-            = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
-          /*
-          consistencyofsuffix(__LINE__,
-                              encseq,readmode,bcktab,numofchars,
-                              &outlcpinfo->previoussuffix);
-          */
-#endif
-        }
-      }
-    }
-    if (outlcpinfo != NULL)
-    {
-      if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)
-      {
-        outlcpinfo->previousbucketwasempty = true;
-      } else
-      {
-        outlcpinfo->previousbucketwasempty = false;
-      }
-    }
-  }
-  wraptBentsedgresources(&bsr);
-  /* The following output is for test purpose only */
-#ifdef QUICKSORTSTEPS
-  if (!sfxstrategy->cmpcharbychar)
-  {
-    printf("# quicksortsteps: %lu, avg diff %.2f\n",
-            quicksortsteps,(double) quicksortdiff/quicksortsteps);
-    {
-      int i;
-      unsigned long sumevents = 0;
+         updatelcpvalue(&bsr,0,lcpvalue);
+         /* all other lcp-values are computed and they can be output */
+         outlcpvalues(&outlcpinfo->lcpsubtab,
+                      0,
+                      bucketspec.nonspecialsinbucket-1,
+                      bucketspec.left,
+                      outlcpinfo->outfplcptab,
+                      outlcpinfo->outfpllvtab);
+         /* previoussuffix becomes last nonspecial element in current bucket */
+         outlcpinfo->previoussuffix.code = code;
+         outlcpinfo->previoussuffix.prefixindex = prefixlength;
+ #ifdef SKDEBUG
+         outlcpinfo->previoussuffix.startpos
+           = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+         /*
+         consistencyofsuffix(__LINE__,
+                             encseq,readmode,bcktab,numofchars,
+                             &outlcpinfo->previoussuffix);
+         */
+ #endif
+       }
+     }
+     if (outlcpinfo != NULL)
+     {
+       if (bucketspec.specialsinbucket > 0)
+       {
+         minprefixindex = bucketends(outlcpinfo,
+                                     &outlcpinfo->previoussuffix,
+                                     /* first special element in bucket */
+                                     suftabptr[bucketspec.left +
+                                               bucketspec.nonspecialsinbucket],
+                                     minchanged,
+                                     bucketspec.specialsinbucket,
+                                     code,
+                                     bcktab);
+         /* there is at least one special element: this is the last element
+            in the bucket, and thus the previoussuffix for the next round */
+         outlcpinfo->previoussuffix.defined = true;
+         outlcpinfo->previoussuffix.code = code;
+         outlcpinfo->previoussuffix.prefixindex = minprefixindex;
+ #ifdef SKDEBUG
+         outlcpinfo->previoussuffix.startpos
+            = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket +
+                                          bucketspec.specialsinbucket - 1];
+         /*
+         consistencyofsuffix(__LINE__,
+                             encseq,readmode,bcktab,numofchars,
+                             &outlcpinfo->previoussuffix);
+         */
+ #endif
+       } else
+       {
+         if (bucketspec.nonspecialsinbucket > 0)
+         {
+           /* if there is at least one element in the bucket, then the last
+              one becomes the next previous suffix */
+           outlcpinfo->previoussuffix.defined = true;
+           outlcpinfo->previoussuffix.code = code;
+           outlcpinfo->previoussuffix.prefixindex = prefixlength;
+ #ifdef SKDEBUG
+           outlcpinfo->previoussuffix.startpos
+             = suftabptr[bucketspec.left + bucketspec.nonspecialsinbucket - 1];
+           /*
+           consistencyofsuffix(__LINE__,
+                               encseq,readmode,bcktab,numofchars,
+                               &outlcpinfo->previoussuffix);
+           */
+ #endif
+         }
+       }
+     }
+     if (outlcpinfo != NULL)
+     {
+       if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)
+       {
+         outlcpinfo->previousbucketwasempty = true;
+       } else
+       {
+         outlcpinfo->previousbucketwasempty = false;
+       }
+     }
+   }
+   wraptBentsedgresources(&bsr);
+   /* The following output is for test purpose only */
+ #ifdef QUICKSORTSTEPS
+   if (!sfxstrategy->cmpcharbychar)
+   {
+     printf("# quicksortsteps: %lu, avg diff %.2f\n",
+             quicksortsteps,(double) quicksortdiff/quicksortsteps);
+     {
+       int i;
+       unsigned long sumevents = 0;
 
-      for (i=0; i<UNITSIN2BITENC; i++)
-      {
-        sumevents += lcpdistribution[i];
-      }
-      for (i=0; i<UNITSIN2BITENC; i++)
-      {
-        printf("# lcpdist[%d]=%lu (%.4f)\n",i,lcpdistribution[i],
-                                        (double) lcpdistribution[i]/sumevents);
-      }
-    }
-  }
-#endif
-  printf("# countinsertionsort=%lu\n",countinsertionsort);
-  printf("# countbltriesort=%lu\n",countbltriesort);
-  printf("# countcountingsort=%lu\n",countcountingsort);
-  printf("# countqsort=%lu\n",countqsort);
+       for (i=0; i<UNITSIN2BITENC; i++)
+       {
+         sumevents += lcpdistribution[i];
+       }
+       for (i=0; i<UNITSIN2BITENC; i++)
+       {
+         printf("# lcpdist[%d]=%lu (%.4f)\n",i,lcpdistribution[i],
+                                         (double) lcpdistribution[i]/sumevents);
+       }
+     }
+   }
+ #endif
+   printf("# countinsertionsort=%lu\n",countinsertionsort);
+   printf("# countbltriesort=%lu\n",countbltriesort);
+   printf("# countcountingsort=%lu\n",countcountingsort);
+   printf("# countqsort=%lu\n",countqsort);
 }

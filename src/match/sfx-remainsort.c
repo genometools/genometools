@@ -25,6 +25,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
+#include "sfx-lcpsub.h"
 
 typedef struct
 {
@@ -311,6 +312,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx, h, *lcptab;
+  /* Lcpsubtab lcpsubtab; */
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
