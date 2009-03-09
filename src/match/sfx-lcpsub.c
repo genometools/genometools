@@ -23,12 +23,12 @@
 #include "sfx-lcpsub.h"
 #include "lcpoverflow.h"
 
-void multilcpvalue(Lcpsubtab *lcpsubtab,
-                   unsigned long bucketleft,
-                   unsigned long bucketright,
-                   Seqpos posoffset,
-                   FILE *fplcptab,
-                   FILE *fpllvtab)
+void outlcpvalues(Lcpsubtab *lcpsubtab,
+                  unsigned long bucketleft,
+                  unsigned long bucketright,
+                  Seqpos posoffset,
+                  FILE *fplcptab,
+                  FILE *fpllvtab)
 {
   unsigned long idx;
   Seqpos lcpvalue;

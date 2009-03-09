@@ -1743,12 +1743,12 @@ void sortallbuckets(Seqpos *suftabptr,
 #endif
         SETLCP(&bsr,0,lcpvalue);
         /* all other lcp-values are computed and they can be output */
-        multilcpvalue(&outlcpinfo->lcpsubtab,
-                      0,
-                      bucketspec.nonspecialsinbucket-1,
-                      bucketspec.left,
-                      outlcpinfo->outfplcptab,
-                      outlcpinfo->outfpllvtab);
+        outlcpvalues(&outlcpinfo->lcpsubtab,
+                     0,
+                     bucketspec.nonspecialsinbucket-1,
+                     bucketspec.left,
+                     outlcpinfo->outfplcptab,
+                     outlcpinfo->outfpllvtab);
         /* previoussuffix becomes last nonspecial element in current bucket */
         outlcpinfo->previoussuffix.code = code;
         outlcpinfo->previoussuffix.prefixindex = prefixlength;
