@@ -62,14 +62,14 @@ struct Rmnsufinfo
                 maxqueuesize;
   Itventry *itvinfo;
   Firstwithnewdepth firstwithnewdepth;
-  bool withpostlcptab;
+  const GtStr *indexname;
 };
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
                           Seqpos partwidth,
-                          bool withpostlcptab)
+                          const GtStr *indexname)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -90,7 +90,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.left = NULL;
   rmnsufinfo->firstwithnewdepth.right = NULL;
   rmnsufinfo->currentdepth = 0;
-  rmnsufinfo->withpostlcptab = withpostlcptab;
+  rmnsufinfo->indexname = indexname;
   return rmnsufinfo;
 }
 
@@ -309,10 +309,10 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
 }
 
-static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
+static int lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx, h, *lcptab;
-  /* Lcpsubtab lcpsubtab; */
+  bool haserr = false;
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
@@ -350,17 +350,29 @@ static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
       h--;
     }
   }
+  if (multioutlcpvalues(lcptab,
+                        rmnsufinfo->partwidth,
+                        rmnsufinfo->indexname,
+                        err) != 0)
+  {
+    haserr = true;
+  }
   gt_free(lcptab);
+  return haserr ? -1 : 0;
 }
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr)
+int wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,GtError *err)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
+  bool haserr = false;
 
   sortremainingsuffixes(rmnsufinfo);
-  if (rmnsufinfo->withpostlcptab)
+  if (rmnsufinfo->indexname != NULL)
   {
-    lineartimelcpcomputation(rmnsufinfo);
+    if (lineartimelcpcomputation(rmnsufinfo,err) != 0)
+    {
+      haserr = true;
+    }
   }
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
@@ -370,4 +382,5 @@ void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr)
   rmnsufinfo->inversesuftab = NULL;
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
+  return haserr ? -1 : 0;
 }

@@ -18,6 +18,7 @@
 #ifndef SFX_REMAINSORT_H
 #define SFX_REMAINSORT_H
 
+#include "core/error_api.h"
 #include "seqpos-def.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
@@ -26,11 +27,11 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
                           Seqpos partwidth,
-                          bool withpostlcptab);
+                          const GtStr *indexname);
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr);
+int wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,GtError *err);
 
 #endif

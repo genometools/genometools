@@ -21,7 +21,7 @@
 #include <errno.h>
 #include "core/arraydef.h"
 #include "core/assert_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/unused_api.h"
 #include "core/progressbar.h"
 #include "core/minmax.h"
@@ -643,6 +643,8 @@ static void preparethispart(Sfxiterator *sfi,
 {
   Seqpos partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
+  bool haserr = false;
+
   if (sfi->part == 0 && mtime == NULL)
   {
     gt_progressbar_start(&sfi->bucketiterstep,
@@ -674,7 +676,7 @@ static void preparethispart(Sfxiterator *sfi,
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  sortallbuckets(sfi->suftabptr,
+  if (sortallbuckets(sfi->suftabptr,
                  sfi->encseq,
                  sfi->readmode,
                  sfi->currentmincode,
@@ -685,8 +687,12 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->prefixlength,
                  sfi->outlcpinfo,
                  &sfi->sfxstrategy,
-                 &sfi->bucketiterstep);
+                 &sfi->bucketiterstep) != 0)
+  {
+    haserr = true;
+  }
   sfi->part++;
+  return haserr ? -1 : 0;
 }
 
 static void insertfullspecialrange(Sfxiterator *sfi,
