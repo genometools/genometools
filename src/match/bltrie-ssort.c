@@ -669,7 +669,7 @@ Seqpos blindtriesuffixsort(Blindtrierep *trierep,
       break;
     }
   }
-  (void) enumeratetrieleaves (suffixtable, lcpsubtab, &numoflargelcpvalues, 
+  (void) enumeratetrieleaves (suffixtable, lcpsubtab, &numoflargelcpvalues,
                               trierep);
   if (lcpsubtab != NULL)
   {

@@ -440,11 +440,13 @@ static Suffixptr *medianof3(const Bentsedgresources *bsr,
 
 static void updatelcpvalue(Bentsedgresources *bsr,Seqpos idx,Seqpos value)
 {
-  bsr->lcpsubtab->spaceSeqpos[idx] = value;
   if (value >= (Seqpos) LCPOVERFLOW)
   {
-    bsr->lcpsubtab->numoflargelcpvalues++;
+    bsr->lcpsubtab->numoflargelcpvalues++; /* this may overcount as
+                                              there may be some value
+                                              which was already overflowing */
   }
+  bsr->lcpsubtab->spaceSeqpos[idx] = value;
 }
 
 static void insertionsort(Bentsedgresources *bsr,
@@ -806,12 +808,12 @@ static bool comparisonsort(Bentsedgresources *bsr,
       } else
       {
         Seqpos numoflargelcpvalues;
-        
-        numoflargelcpvalues 
+
+        numoflargelcpvalues
           = blindtriesuffixsort(bsr->trierep,left,
                                 bsr->lcpsubtab == NULL
                                   ? NULL
-                                  : bsr->lcpsubtab->spaceSeqpos + 
+                                  : bsr->lcpsubtab->spaceSeqpos +
                                     LCPINDEX(bsr,left),
                               width,depth,ordertype);
         if (bsr->lcpsubtab != NULL)
@@ -1705,16 +1707,19 @@ void sortallbuckets(Seqpos *suftabptr,
                                       partwidth,
                                       rightchar,
                                       numofchars);
-    if (outlcpinfo != NULL && code > 0)
+    if (outlcpinfo != NULL)
     {
       bsr.lcpsubtab->numoflargelcpvalues = 0;
-      (void) nextTurningwheel(outlcpinfo->tw);
-      if (outlcpinfo->previousbucketwasempty)
+      if (code > 0)
       {
-        minchanged = MIN(minchanged,minchangedTurningwheel(outlcpinfo->tw));
-      } else
-      {
-        minchanged = minchangedTurningwheel(outlcpinfo->tw);
+        (void) nextTurningwheel(outlcpinfo->tw);
+        if (outlcpinfo->previousbucketwasempty)
+        {
+          minchanged = MIN(minchanged,minchangedTurningwheel(outlcpinfo->tw));
+        } else
+        {
+          minchanged = minchangedTurningwheel(outlcpinfo->tw);
+        }
       }
     }
     if (bucketspec.nonspecialsinbucket > 0)
