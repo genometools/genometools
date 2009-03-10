@@ -1636,9 +1636,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->rmnsufinfo
       = newRmnsufinfo(suftabptr,bsr->encseq,
-                      bsr->readmode,bsr->partwidth,
-                      outlcpinfo == NULL ? NULL : outlcpinfo->outfplcptab,
-                      outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab);
+                      bsr->readmode,bsr->partwidth);
     bsr->trierep = NULL;
   } else
   {
@@ -1656,7 +1654,10 @@ static void initBentsedgresources(Bentsedgresources *bsr,
 #endif
 }
 
-static void wraptBentsedgresources(Bentsedgresources *bsr)
+static void wrapBentsedgresources(Bentsedgresources *bsr,
+                                  Lcpsubtab *lcpsubtab,
+                                  FILE *outfplcptab,
+                                  FILE *outfpllvtab)
 {
 #ifdef WIDTHDISTRIB
   showwidthdistrib(bsr->widthdistrib,nonspecialsmaxbucketsize);
@@ -1670,7 +1671,7 @@ static void wraptBentsedgresources(Bentsedgresources *bsr)
   }
   if (bsr->rmnsufinfo != NULL)
   {
-    wrapRmnsufinfo(&bsr->rmnsufinfo);
+    wrapRmnsufinfo(&bsr->rmnsufinfo,lcpsubtab,outfplcptab,outfpllvtab);
   }
   if (bsr->esr1 != NULL)
   {
@@ -1865,7 +1866,10 @@ void sortallbuckets(Seqpos *suftabptr,
        }
      }
    }
-   wraptBentsedgresources(&bsr);
+   wrapBentsedgresources(&bsr,
+                         outlcpinfo == NULL ? NULL : &outlcpinfo->lcpsubtab,
+                         outlcpinfo == NULL ? NULL : outlcpinfo->outfplcptab,
+                         outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab);
    /* The following output is for test purpose only */
  #ifdef QUICKSORTSTEPS
    if (!sfxstrategy->cmpcharbychar)

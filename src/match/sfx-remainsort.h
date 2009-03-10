@@ -20,19 +20,21 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
+#include "sfx-lcpsub.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
-                          Seqpos partwidth,
-                          FILE *fplcptab,
-                          FILE *fpllvtab);
+                          Seqpos partwidth);
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr);
+void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,
+                    Lcpsubtab *lcpsubtab,
+                    FILE *fplcptab,
+                    FILE *fpllvtab);
 
 #endif

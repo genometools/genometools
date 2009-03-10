@@ -57,7 +57,7 @@ void outlcpvalues(Lcpsubtab *lcpsubtab,
     }
     if (lcpvalue < (Seqpos) LCPOVERFLOW)
     {
-      lcpsubtab->smalllcpvalues[idx] = (Uchar) lcpvalue;
+      lcpsubtab->smalllcpvalues[idx-bucketleft] = (Uchar) lcpvalue;
     } else
     {
       gt_assert(lcpsubtab->largelcpvalues.nextfreeLargelcpvalue <
@@ -66,7 +66,7 @@ void outlcpvalues(Lcpsubtab *lcpsubtab,
                          lcpsubtab->largelcpvalues.nextfreeLargelcpvalue++;
       largelcpvalueptr->position = posoffset+idx;
       largelcpvalueptr->value = lcpvalue;
-      lcpsubtab->smalllcpvalues[idx] = LCPOVERFLOW;
+      lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
   }
   lcpsubtab->countoutputlcpvalues += (bucketright - bucketleft + 1);
@@ -103,29 +103,29 @@ Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
   return many;
 }
 
-void multioutlcpvalues(const Seqpos *lcptab,
+void multioutlcpvalues(Lcpsubtab *lcpsubtab,
+                       const Seqpos *lcptab,
                        unsigned long bucketsize,
                        FILE *fplcptab,
                        FILE *fpllvtab)
 {
-  Lcpsubtab lcpsubtab;
   const unsigned long fixedwidth = 512UL;
   unsigned long remaining, left, width;
 
-  lcpsubtab.numoflargelcpvalues = (Seqpos) 64;
-  INITARRAY(&lcpsubtab.largelcpvalues,Largelcpvalue);
-  lcpsubtab.spaceSeqpos = (Seqpos *) lcptab;
-  lcpsubtab.maxbranchdepth = 0;
-  lcpsubtab.smalllcpvalues = (Uchar *) lcptab;
-  lcpsubtab.countoutputlcpvalues = 0;
-  lcpsubtab.totalnumoflargelcpvalues = 0;
+  lcpsubtab->numoflargelcpvalues = (Seqpos) 64;
+  INITARRAY(&lcpsubtab->largelcpvalues,Largelcpvalue);
+  lcpsubtab->spaceSeqpos = (Seqpos *) lcptab;
+  lcpsubtab->maxbranchdepth = 0;
+  lcpsubtab->smalllcpvalues = (Uchar *) lcptab;
+  lcpsubtab->countoutputlcpvalues = 0;
+  lcpsubtab->totalnumoflargelcpvalues = 0;
   remaining = bucketsize;
   left = 0;
   gt_assert(fplcptab != NULL && fpllvtab != NULL);
   while (remaining > 0)
   {
     width = MIN(remaining, fixedwidth);
-    outlcpvalues(&lcpsubtab,
+    outlcpvalues(lcpsubtab,
                  left,
                  left + width - 1,
                  0,
@@ -134,5 +134,5 @@ void multioutlcpvalues(const Seqpos *lcptab,
     remaining -= width;
     left += width;
   }
-  FREEARRAY(&lcpsubtab.largelcpvalues,Largelcpvalue);
+  FREEARRAY(&lcpsubtab->largelcpvalues,Largelcpvalue);
 }

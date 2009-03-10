@@ -1,10 +1,5 @@
 def outoptionsnobck(doubling)
-  opts="-tis -suf -des -ssp"
-  if doubling 
-    return opts
-  else
-     return opts + " -bwt -lcp"
-  end
+  return "-tis -suf -des -ssp -lcp -bwt"
 end
 
 def outoptions(doubling)
@@ -20,7 +15,7 @@ def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist)
   if cmp
     extra=extra + " -cmpcharbychar"
     if doubling
-      extra=extra + " -maxdepth 30"
+      extra=extra + " -maxdepth"
     end
   end
   filearg=""

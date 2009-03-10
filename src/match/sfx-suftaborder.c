@@ -266,7 +266,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                           FormatSeqpos "(fast)\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));
-        /* exit(EXIT_FAILURE); programming error */
+        exit(EXIT_FAILURE); /* programming error */
       }
     }
   }

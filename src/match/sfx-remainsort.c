@@ -63,15 +63,12 @@ struct Rmnsufinfo
                 maxqueuesize;
   Itventry *itvinfo;
   Firstwithnewdepth firstwithnewdepth;
-  FILE *fplcptab, *fpllvtab;
 };
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
-                          Seqpos partwidth,
-                          FILE *fplcptab,
-                          FILE *fpllvtab)
+                          Seqpos partwidth)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -92,8 +89,6 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.left = NULL;
   rmnsufinfo->firstwithnewdepth.right = NULL;
   rmnsufinfo->currentdepth = 0;
-  rmnsufinfo->fplcptab = fplcptab;
-  rmnsufinfo->fpllvtab = fpllvtab;
   return rmnsufinfo;
 }
 
@@ -312,17 +307,13 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
 }
 
-static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
+static void lineartimelcpcomputation(Rmnsufinfo *rmnsufinfo,
+                                     Lcpsubtab *lcpsubtab,
+                                     FILE *fplcptab,
+                                     FILE *fpllvtab)
 {
   Seqpos idx, h = 0, *lcptab;
 
-#ifndef NDEBUG
-  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
-  {
-    gt_assert(rmnsufinfo->inversesuftab[rmnsufinfo->presortedsuffixes[idx]]
-              == idx);
-  }
-#endif
   lcptab = gt_malloc(sizeof(Seqpos) * rmnsufinfo->partwidth);
   lcptab[0] = 0;
   for (idx=0; idx <= rmnsufinfo->totallength; idx++)
@@ -353,22 +344,24 @@ static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
       h--;
     }
   }
-  multioutlcpvalues(lcptab,(unsigned long) rmnsufinfo->partwidth,
-                    rmnsufinfo->fplcptab,rmnsufinfo->fpllvtab);
+  multioutlcpvalues(lcpsubtab,lcptab,(unsigned long) rmnsufinfo->partwidth,
+                    fplcptab,fpllvtab);
   (void) outmany0lcpvalues(rmnsufinfo->partwidth,rmnsufinfo->totallength,
-                           rmnsufinfo->fplcptab);
+                           fplcptab);
   gt_free(lcptab);
 }
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr)
+void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,Lcpsubtab *lcpsubtab,
+                    FILE *fplcptab,
+                    FILE *fpllvtab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
 
   sortremainingsuffixes(rmnsufinfo);
-  if (rmnsufinfo->fplcptab != NULL)
+  if (lcpsubtab != NULL)
   {
-    gt_assert(rmnsufinfo->fpllvtab != NULL);
-    lineartimelcpcomputation(rmnsufinfo);
+    gt_assert(fplcptab != NULL && fpllvtab != NULL);
+    lineartimelcpcomputation(rmnsufinfo,lcpsubtab,fplcptab,fpllvtab);
   }
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
