@@ -51,7 +51,7 @@ void multioutlcpvalues(const Seqpos *lcptab,
                       FILE *fplcptab,
                       FILE *fpllvtab);
 
-void outmany0lcpvalues(Lcpsubtab *lcpsubtab,Seqpos totallength,
-                       FILE *outfplcptab);
+Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
+                         FILE *outfplcptab);
 
 #endif

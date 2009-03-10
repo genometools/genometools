@@ -86,13 +86,13 @@ void outlcpvalues(Lcpsubtab *lcpsubtab,
 
 #define NUMBEROFZEROS 1024
 
-void outmany0lcpvalues(Lcpsubtab *lcpsubtab,Seqpos totallength,
-                       FILE *outfplcptab)
+Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
+                         FILE *outfplcptab)
 {
   Seqpos i, countout, many;
   Uchar outvalues[NUMBEROFZEROS] = {0};
 
-  many = totallength + 1 - lcpsubtab->countoutputlcpvalues;
+  many = totallength + 1 - countoutputlcpvalues;
   countout = many/NUMBEROFZEROS;
   for (i=0; i<countout; i++)
   {
@@ -100,7 +100,7 @@ void outmany0lcpvalues(Lcpsubtab *lcpsubtab,Seqpos totallength,
   }
   gt_xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
              outfplcptab);
-  lcpsubtab->countoutputlcpvalues += many;
+  return many;
 }
 
 void multioutlcpvalues(const Seqpos *lcptab,

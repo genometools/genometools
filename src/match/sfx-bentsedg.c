@@ -1518,9 +1518,10 @@ void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
   {
     if (outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength+1)
     {
-      outmany0lcpvalues(&outlcpinfo->lcpsubtab,
-                        outlcpinfo->totallength,
-                        outlcpinfo->outfplcptab);
+      outlcpinfo->lcpsubtab.countoutputlcpvalues
+        += outmany0lcpvalues(outlcpinfo->lcpsubtab.countoutputlcpvalues,
+                             outlcpinfo->totallength,
+                             outlcpinfo->outfplcptab);
     }
     gt_assert(outlcpinfo->lcpsubtab.countoutputlcpvalues ==
               outlcpinfo->totallength + 1);
