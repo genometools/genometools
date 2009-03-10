@@ -46,10 +46,10 @@ void outlcpvalues(Lcpsubtab *lcpsubtab,
                   FILE *fplcptab,
                   FILE *fpllvtab);
 
-int multioutlcpvalues(const Seqpos *lcptab,
+void multioutlcpvalues(const Seqpos *lcptab,
                       unsigned long bucketsize,
-                      const GtStr *indexname,
-                      GtError *err);
+                      FILE *fplcptab,
+                      FILE *fpllvtab);
 
 void outmany0lcpvalues(Lcpsubtab *lcpsubtab,Seqpos totallength,
                        FILE *outfplcptab);

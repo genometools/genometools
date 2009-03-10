@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdio.h>
 #include "core/chardef.h"
 #include "core/queue.h"
 #include "core/chardef.h"
@@ -62,14 +63,15 @@ struct Rmnsufinfo
                 maxqueuesize;
   Itventry *itvinfo;
   Firstwithnewdepth firstwithnewdepth;
-  const GtStr *indexname;
+  FILE *fplcptab, *fpllvtab;
 };
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
                           Seqpos partwidth,
-                          const GtStr *indexname)
+                          FILE *fplcptab,
+                          FILE *fpllvtab)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -90,7 +92,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.left = NULL;
   rmnsufinfo->firstwithnewdepth.right = NULL;
   rmnsufinfo->currentdepth = 0;
-  rmnsufinfo->indexname = indexname;
+  rmnsufinfo->fplcptab = fplcptab;
+  rmnsufinfo->fpllvtab = fpllvtab;
   return rmnsufinfo;
 }
 
@@ -309,17 +312,17 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
 }
 
-static int lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
+static void lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos idx, h, *lcptab;
-  bool haserr = false;
+  Seqpos idx, h = 0, *lcptab;
 
+#ifndef NDEBUG
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
     gt_assert(rmnsufinfo->inversesuftab[rmnsufinfo->presortedsuffixes[idx]]
               == idx);
   }
-  h = 0;
+#endif
   lcptab = gt_malloc(sizeof(Seqpos) * rmnsufinfo->partwidth);
   lcptab[0] = 0;
   for (idx=0; idx <= rmnsufinfo->totallength; idx++)
@@ -350,29 +353,20 @@ static int lineartimelcpcomputation(const Rmnsufinfo *rmnsufinfo)
       h--;
     }
   }
-  if (multioutlcpvalues(lcptab,
-                        rmnsufinfo->partwidth,
-                        rmnsufinfo->indexname,
-                        err) != 0)
-  {
-    haserr = true;
-  }
+  multioutlcpvalues(lcptab,(unsigned long) rmnsufinfo->partwidth,
+                    rmnsufinfo->fplcptab,rmnsufinfo->fpllvtab);
   gt_free(lcptab);
-  return haserr ? -1 : 0;
 }
 
-int wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,GtError *err)
+void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
-  bool haserr = false;
 
   sortremainingsuffixes(rmnsufinfo);
-  if (rmnsufinfo->indexname != NULL)
+  if (rmnsufinfo->fplcptab != NULL)
   {
-    if (lineartimelcpcomputation(rmnsufinfo,err) != 0)
-    {
-      haserr = true;
-    }
+    gt_assert(rmnsufinfo->fpllvtab != NULL);
+    lineartimelcpcomputation(rmnsufinfo);
   }
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
@@ -382,5 +376,4 @@ int wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,GtError *err)
   rmnsufinfo->inversesuftab = NULL;
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
-  return haserr ? -1 : 0;
 }

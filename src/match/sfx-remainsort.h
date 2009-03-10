@@ -27,11 +27,12 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           Readmode readmode,
                           Seqpos partwidth,
-                          const GtStr *indexname);
+                          FILE *fplcptab,
+                          FILE *fpllvtab);
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-int wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,GtError *err);
+void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr);
 
 #endif

@@ -1619,7 +1619,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->rmnsufinfo = newRmnsufinfo(suftabptr,bsr->encseq,
                                     bsr->readmode,bsr->partwidth,
-                                    NULL);
+                                    NULL,NULL);
     bsr->trierep = NULL;
   } else
   {
@@ -1637,10 +1637,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
 #endif
 }
 
-static int wraptBentsedgresources(Bentsedgresources *bsr,GtError *err)
+static void wraptBentsedgresources(Bentsedgresources *bsr)
 {
-  bool haserr = false;
-
 #ifdef WIDTHDISTRIB
   showwidthdistrib(bsr->widthdistrib,nonspecialsmaxbucketsize);
   FREESPACE(bsr->widthdistrib);
@@ -1653,10 +1651,7 @@ static int wraptBentsedgresources(Bentsedgresources *bsr,GtError *err)
   }
   if (bsr->rmnsufinfo != NULL)
   {
-    if (wrapRmnsufinfo(&bsr->rmnsufinfo,err) != 0)
-    {
-      haserr = true;
-    }
+    wrapRmnsufinfo(&bsr->rmnsufinfo);
   }
   if (bsr->esr1 != NULL)
   {
@@ -1667,10 +1662,9 @@ static int wraptBentsedgresources(Bentsedgresources *bsr,GtError *err)
     freeEncodedsequencescanstate(&bsr->esr2);
   }
   FREEARRAY(&bsr->mkvauxstack,MKVstack);
-  return haserr ? -1 : 0;
 }
 
-int sortallbuckets(Seqpos *suftabptr,
+void sortallbuckets(Seqpos *suftabptr,
                    const Encodedsequence *encseq,
                    Readmode readmode,
                    Codetype mincode,
@@ -1681,8 +1675,7 @@ int sortallbuckets(Seqpos *suftabptr,
                    unsigned int prefixlength,
                    Outlcpinfo *outlcpinfo,
                    const Sfxstrategy *sfxstrategy,
-                   unsigned long long *bucketiterstep,
-                   GtError *err)
+                   unsigned long long *bucketiterstep)
 {
   Codetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
@@ -1692,7 +1685,6 @@ int sortallbuckets(Seqpos *suftabptr,
   Seqpos lcpvalue;
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
-  bool haserr = false;
 
   initBentsedgresources(&bsr,
                         suftabptr,
@@ -1854,13 +1846,10 @@ int sortallbuckets(Seqpos *suftabptr,
        }
      }
    }
-   if (wraptBentsedgresources(&bsr,err) != 0)
-   {
-     haserr = true;
-   }
+   wraptBentsedgresources(&bsr);
    /* The following output is for test purpose only */
  #ifdef QUICKSORTSTEPS
-   if (!haserr && !sfxstrategy->cmpcharbychar)
+   if (!sfxstrategy->cmpcharbychar)
    {
      printf("# quicksortsteps: %lu, avg diff %.2f\n",
              quicksortsteps,(double) quicksortdiff/quicksortsteps);
@@ -1880,12 +1869,8 @@ int sortallbuckets(Seqpos *suftabptr,
      }
    }
  #endif
-   if (!haserr)
-   {
-     printf("# countinsertionsort=%lu\n",countinsertionsort);
-     printf("# countbltriesort=%lu\n",countbltriesort);
-     printf("# countcountingsort=%lu\n",countcountingsort);
-     printf("# countqsort=%lu\n",countqsort);
-   }
-   return haserr ? -1 : 0;
+   printf("# countinsertionsort=%lu\n",countinsertionsort);
+   printf("# countbltriesort=%lu\n",countbltriesort);
+   printf("# countcountingsort=%lu\n",countcountingsort);
+   printf("# countqsort=%lu\n",countqsort);
 }

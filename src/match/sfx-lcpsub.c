@@ -20,9 +20,6 @@
 #include "core/xansi.h"
 #include "core/minmax.h"
 #include "core/arraydef.h"
-#include "core/str_api.h"
-#include "core/error_api.h"
-#include "core/fa.h"
 #include "seqpos-def.h"
 #include "sfx-lcpsub.h"
 #include "lcpoverflow.h"
@@ -108,17 +105,15 @@ void outmany0lcpvalues(Lcpsubtab *lcpsubtab,Seqpos totallength,
 
 #define FIXEDLARGELCPVALUES 64
 
-int multioutlcpvalues(const Seqpos *lcptab,
-                      unsigned long bucketsize,
-                      const GtStr *indexname,
-                      GtError *err)
+void multioutlcpvalues(const Seqpos *lcptab,
+                       unsigned long bucketsize,
+                       FILE *fplcptab,
+                       FILE *fpllvtab)
 {
   Lcpsubtab lcpsubtab;
   Largelcpvalue largelcpvaluebuffer[FIXEDLARGELCPVALUES];
   const unsigned long fixedwidth = 512UL;
   unsigned long remaining, left, width;
-  FILE *fplcptab = NULL, *fpllvtab = NULL;
-  bool haserr = false;
 
   lcpsubtab.numoflargelcpvalues = (Seqpos) FIXEDLARGELCPVALUES;
   lcpsubtab.largelcpvalues.allocatedLargelcpvalue = 0;
@@ -128,38 +123,19 @@ int multioutlcpvalues(const Seqpos *lcptab,
   lcpsubtab.smalllcpvalues = (Uchar *) lcptab;
   lcpsubtab.countoutputlcpvalues = 0;
   lcpsubtab.totalnumoflargelcpvalues = 0;
-  fplcptab = opensfxfile(indexname,LCPTABSUFFIX,"wb",err);
-  if (fplcptab == NULL)
+  remaining = bucketsize;
+  left = 0;
+  gt_assert(fplcptab != NULL && fpllvtab != NULL);
+  while (remaining > 0)
   {
-    haserr = true;
+    width = MIN(remaining, fixedwidth);
+    outlcpvalues(&lcpsubtab,
+                 left,
+                 left + width - 1,
+                 0,
+                 fplcptab,
+                 fpllvtab);
+    remaining -= width;
+    left += width;
   }
-  if (!haserr)
-  {
-    fpllvtab = opensfxfile(indexname,LARGELCPTABSUFFIX,"wb",err);
-    if (fpllvtab == NULL)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    remaining = bucketsize;
-    left = 0;
-    gt_assert(fplcptab != NULL && fpllvtab != NULL);
-    while (remaining > 0)
-    {
-      width = MIN(remaining, fixedwidth);
-      outlcpvalues(&lcpsubtab,
-                   left,
-                   left + width - 1,
-                   0,
-                   fplcptab,
-                   fpllvtab);
-      remaining -= width;
-      left += width;
-    }
-  }
-  gt_fa_fclose(fplcptab);
-  gt_fa_fclose(fpllvtab);
-  return haserr ? -1 : 0;
 }
