@@ -83,13 +83,15 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->pageoffset = 0;
   outfileinfo->longest.defined = false;
   outfileinfo->longest.valueseqpos = 0;
-  if (so->outlcptab && !so->sfxstrategy.ssortmaxdepth.defined)
+  if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
-      = newlcpoutinfo(so->outlcptab ? so->str_indexname : NULL,
+      = newOutlcpinfo(so->outlcptab ? so->str_indexname : NULL,
                       prefixlength,
                       getencseqAlphabetnumofchars(encseq),
-                      getencseqtotallength(encseq),err);
+                      getencseqtotallength(encseq),
+                      so->sfxstrategy.ssortmaxdepth.defined ? false : true,
+                      err);
     if (outfileinfo->outlcpinfo == NULL)
     {
       haserr = true;
@@ -501,7 +503,6 @@ static int runsuffixerator(bool doesa,
   prefixlength = so->prefixlength;
   sfxstrategy = so->sfxstrategy;
   sfxstrategy.ssortmaxdepth.defined = false;
-  sfxstrategy.withpostlcptab = false;
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
@@ -541,14 +542,6 @@ static int runsuffixerator(bool doesa,
                         sfxseqinfo.encseq,so,err) != 0)
     {
       haserr = true;
-    }
-  }
-  if (!haserr && so->outlcptab)
-  {
-    if (outfileinfo.outlcpinfo == NULL)
-    {
-      gt_assert(so->sfxstrategy.ssortmaxdepth.defined);
-      sfxstrategy.withpostlcptab = true;
     }
   }
   if (!haserr)
@@ -621,9 +614,7 @@ static int runsuffixerator(bool doesa,
   }
   if (outfileinfo.outlcpinfo != NULL)
   {
-    freeoutlcptab(&outfileinfo.outlcpinfo);
-  } else
-  {
+    freeOutlcptab(&outfileinfo.outlcpinfo);
   }
   freeSfxseqinfo(&sfxseqinfo);
   if (mtime != NULL)

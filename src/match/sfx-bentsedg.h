@@ -27,13 +27,16 @@
 #include "sfx-strategy.h"
 #include "bcktab.h"
 
-Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
+typedef struct Outlcpinfo Outlcpinfo;
+
+Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           Seqpos totallength,
+                          bool assideeffect,
                           GtError *err);
 
-void freeoutlcptab(Outlcpinfo **outlcpinfoptr);
+void freeOutlcptab(Outlcpinfo **outlcpinfoptr);
 
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 

@@ -157,7 +157,8 @@ struct Outlcpinfo
   Turningwheel *tw;
   Lcpsubtab lcpsubtab;
   Suffixwithcode previoussuffix;
-  bool previousbucketwasempty;
+  bool previousbucketwasempty,
+       assideeffect;
 };
 
 #define CMPCHARBYCHARPTR2INT(VAR,TMPVAR,I)\
@@ -1446,10 +1447,11 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   return minprefixindex;
 }
 
-Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
+Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           Seqpos totallength,
+                          bool assideeffect,
                           GtError *err)
 {
   bool haserr = false;
@@ -1477,6 +1479,7 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
       }
     }
   }
+  outlcpinfo->assideeffect = assideeffect;
   outlcpinfo->lcpsubtab.countoutputlcpvalues = 0;
   outlcpinfo->totallength = totallength;
   outlcpinfo->lcpsubtab.totalnumoflargelcpvalues = 0;
@@ -1485,7 +1488,13 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
   outlcpinfo->lcpsubtab.sizereservoir = 0;
   INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
-  outlcpinfo->tw = newTurningwheel(prefixlength,numofchars);
+  if (assideeffect)
+  {
+    outlcpinfo->tw = newTurningwheel(prefixlength,numofchars);
+  } else
+  {
+    outlcpinfo->tw = NULL;
+  }
 #ifdef SKDEBUG
   outlcpinfo->previoussuffix.startpos = 0;
 #endif
@@ -1501,24 +1510,30 @@ Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
   return outlcpinfo;
 }
 
-void freeoutlcptab(Outlcpinfo **outlcpinfoptr)
+void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
 {
   Outlcpinfo *outlcpinfo = *outlcpinfoptr;
 
-  if (outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength + 1)
+  if (outlcpinfo->assideeffect)
   {
-    outmany0lcpvalues(&outlcpinfo->lcpsubtab,
-                      outlcpinfo->totallength,
-                      outlcpinfo->outfplcptab);
+    if (outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength+1)
+    {
+      outmany0lcpvalues(&outlcpinfo->lcpsubtab,
+                        outlcpinfo->totallength,
+                        outlcpinfo->outfplcptab);
+    }
+    gt_assert(outlcpinfo->lcpsubtab.countoutputlcpvalues ==
+              outlcpinfo->totallength + 1);
+    FREESPACE(outlcpinfo->lcpsubtab.reservoir);
+    outlcpinfo->lcpsubtab.sizereservoir = 0;
+    if (outlcpinfo->tw != NULL)
+    {
+      freeTurningwheel(&outlcpinfo->tw);
+    }
+    FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   }
-  gt_assert(outlcpinfo->lcpsubtab.countoutputlcpvalues ==
-            outlcpinfo->totallength + 1);
   gt_fa_fclose(outlcpinfo->outfplcptab);
   gt_fa_fclose(outlcpinfo->outfpllvtab);
-  FREESPACE(outlcpinfo->lcpsubtab.reservoir);
-  outlcpinfo->lcpsubtab.sizereservoir = 0;
-  freeTurningwheel(&outlcpinfo->tw);
-  FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   FREESPACE(*outlcpinfoptr);
 }
 
@@ -1557,12 +1572,12 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
   }
-  if (outlcpinfo == NULL)
-  {
-    bsr->lcpsubtab = NULL;
-  } else
+  if (outlcpinfo != NULL)
   {
     bsr->lcpsubtab = &outlcpinfo->lcpsubtab;
+  } else
+  {
+    bsr->lcpsubtab = NULL;
   }
   if (!sfxstrategy->cmpcharbychar && hasspecialranges(encseq))
   {
@@ -1579,10 +1594,11 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                          maxcode,
                          partwidth,
                          numofchars);
-  if (bsr->lcpsubtab != NULL)
+  if (outlcpinfo != NULL && outlcpinfo->assideeffect)
   {
     size_t sizespeciallcps, sizelcps;
 
+    gt_assert(bsr->lcpsubtab != NULL);
     sizespeciallcps = sizeof (*bsr->lcpsubtab->smalllcpvalues) *
                       specialsmaxbucketsize;
     sizelcps = sizeof (*bsr->lcpsubtab->spaceSeqpos) * nonspecialsmaxbucketsize;
@@ -1617,9 +1633,11 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo = newRmnsufinfo(suftabptr,bsr->encseq,
-                                    bsr->readmode,bsr->partwidth,
-                                    NULL,NULL);
+    bsr->rmnsufinfo
+      = newRmnsufinfo(suftabptr,bsr->encseq,
+                      bsr->readmode,bsr->partwidth,
+                      outlcpinfo == NULL ? NULL : outlcpinfo->outfplcptab,
+                      outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab);
     bsr->trierep = NULL;
   } else
   {
@@ -1707,7 +1725,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                       partwidth,
                                       rightchar,
                                       numofchars);
-    if (outlcpinfo != NULL)
+    if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
       bsr.lcpsubtab->numoflargelcpvalues = 0;
       if (code > 0)
@@ -1736,7 +1754,7 @@ void sortallbuckets(Seqpos *suftabptr,
                                      bucketspec.nonspecialsinbucket - 1,
                          (Seqpos) prefixlength);
       }
-      if (outlcpinfo != NULL)
+      if (outlcpinfo != NULL && outlcpinfo->assideeffect)
       {
         if (outlcpinfo->previoussuffix.defined)
         {
@@ -1786,7 +1804,7 @@ void sortallbuckets(Seqpos *suftabptr,
  #endif
        }
      }
-     if (outlcpinfo != NULL)
+     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
      {
        if (bucketspec.specialsinbucket > 0)
        {
@@ -1835,7 +1853,7 @@ void sortallbuckets(Seqpos *suftabptr,
          }
        }
      }
-     if (outlcpinfo != NULL)
+     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
      {
        if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)
        {

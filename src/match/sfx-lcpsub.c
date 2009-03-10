@@ -103,21 +103,17 @@ void outmany0lcpvalues(Lcpsubtab *lcpsubtab,Seqpos totallength,
   lcpsubtab->countoutputlcpvalues += many;
 }
 
-#define FIXEDLARGELCPVALUES 64
-
 void multioutlcpvalues(const Seqpos *lcptab,
                        unsigned long bucketsize,
                        FILE *fplcptab,
                        FILE *fpllvtab)
 {
   Lcpsubtab lcpsubtab;
-  Largelcpvalue largelcpvaluebuffer[FIXEDLARGELCPVALUES];
   const unsigned long fixedwidth = 512UL;
   unsigned long remaining, left, width;
 
-  lcpsubtab.numoflargelcpvalues = (Seqpos) FIXEDLARGELCPVALUES;
-  lcpsubtab.largelcpvalues.allocatedLargelcpvalue = 0;
-  lcpsubtab.largelcpvalues.spaceLargelcpvalue = largelcpvaluebuffer;
+  lcpsubtab.numoflargelcpvalues = (Seqpos) 64;
+  INITARRAY(&lcpsubtab.largelcpvalues,Largelcpvalue);
   lcpsubtab.spaceSeqpos = (Seqpos *) lcptab;
   lcpsubtab.maxbranchdepth = 0;
   lcpsubtab.smalllcpvalues = (Uchar *) lcptab;
@@ -138,4 +134,5 @@ void multioutlcpvalues(const Seqpos *lcptab,
     remaining -= width;
     left += width;
   }
+  FREEARRAY(&lcpsubtab.largelcpvalues,Largelcpvalue);
 }

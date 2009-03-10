@@ -33,8 +33,6 @@ typedef struct
                 specialsinbucket;
 } Bucketspecification;
 
-typedef struct Outlcpinfo Outlcpinfo;
-
 typedef struct Bcktab Bcktab;
 
 Bcktab *mapbcktab(const GtStr *indexname,
