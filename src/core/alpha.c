@@ -40,7 +40,7 @@ struct GtAlpha {
 
 GtAlpha* gt_alpha_new(void)
 {
-  GtAlpha *a = gt_calloc(1, sizeof (GtAlpha));
+  GtAlpha *a = gt_calloc(1, sizeof *a);
   memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
   memset(a->character_to_code_map, UNDEF_UCHAR, UCHAR_MAX);
   return a;

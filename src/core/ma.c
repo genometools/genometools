@@ -80,7 +80,7 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    mainfo = gt_xmalloc(sizeof (MAInfo));
+    mainfo = gt_xmalloc(sizeof *mainfo);
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
@@ -101,7 +101,7 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    mainfo = gt_xmalloc(sizeof (MAInfo));
+    mainfo = gt_xmalloc(sizeof *mainfo);
     mainfo->size = nmemb * size;
     mainfo->filename = filename;
     mainfo->line = line;
@@ -128,7 +128,7 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
       subtract_size(ma, mainfo->size);
       gt_hashmap_remove(ma->allocated_pointer, ptr);
     }
-    mainfo = gt_xmalloc(sizeof (MAInfo));
+    mainfo = gt_xmalloc(sizeof *mainfo);
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
@@ -208,7 +208,7 @@ int gt_ma_check_space_leak(void)
   gt_assert(ma);
   info.has_leak = false;
   had_err = gt_hashmap_foreach(ma->allocated_pointer, check_space_leak, &info,
-                              NULL);
+                               NULL);
   gt_assert(!had_err); /* cannot happen, check_space_leak() is sane */
   if (info.has_leak)
     return -1;

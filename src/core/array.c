@@ -129,8 +129,7 @@ void gt_array_reverse(GtArray *a)
   tmp = gt_malloc(a->size_of_elem);
   for (front = a->space,
        back = (char*) a->space + (a->next_free-1) * a->size_of_elem;
-       front < back;
-       front += a->size_of_elem, back -= a->size_of_elem) {
+       front < back; front += a->size_of_elem, back -= a->size_of_elem) {
     memcpy(tmp, front, a->size_of_elem);
     memcpy(front, back, a->size_of_elem);
     memcpy(back, tmp, a->size_of_elem);
