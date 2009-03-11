@@ -16,6 +16,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include "core/chardef.h"
 #include "core/queue.h"
 #include "core/chardef.h"
@@ -26,6 +27,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
+#include "intbits-tab.h"
 
 typedef struct
 {
@@ -306,40 +308,161 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
 }
 
-static Seqpos *lineartimelcpcomputation(Rmnsufinfo *rmnsufinfo)
+Seqpos *lcp13_manzini(Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos idx, h = 0, *lcptab;
+  Seqpos pos, lcpvalue = 0, *lcptab;
 
   lcptab = gt_malloc(sizeof(Seqpos) * rmnsufinfo->partwidth);
   lcptab[0] = 0;
-  for (idx=0; idx <= rmnsufinfo->totallength; idx++)
+  for (pos=0; pos <= rmnsufinfo->totallength; pos++)
   {
-    Seqpos k = rmnsufinfo->inversesuftab[idx];
-    if (k > 0 && k < rmnsufinfo->partwidth)
+    Seqpos fillpos = rmnsufinfo->inversesuftab[pos];
+    if (fillpos > 0 && fillpos < rmnsufinfo->partwidth)
     {
-      Seqpos jdx = rmnsufinfo->presortedsuffixes[k-1];
-      while (idx+h < rmnsufinfo->totallength &&
-             jdx+h < rmnsufinfo->totallength)
+      Seqpos previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
+      while (pos+lcpvalue < rmnsufinfo->totallength &&
+             previousstart+lcpvalue < rmnsufinfo->totallength)
       {
         Uchar cc1, cc2;
 
-        cc1 = getencodedchar(rmnsufinfo->encseq,idx+h,rmnsufinfo->readmode);
-        cc2 = getencodedchar(rmnsufinfo->encseq,jdx+h,rmnsufinfo->readmode);
+        cc1 = getencodedchar(rmnsufinfo->encseq,pos+lcpvalue,
+                             rmnsufinfo->readmode);
+        cc2 = getencodedchar(rmnsufinfo->encseq,previousstart+lcpvalue,
+                             rmnsufinfo->readmode);
         if (cc1 == cc2 && ISNOTSPECIAL(cc1))
         {
-          h++;
+          lcpvalue++;
         } else
         {
           break;
         }
       }
-      lcptab[k] = h;
+      lcptab[fillpos] = lcpvalue;
     }
-    if (h > 0)
+    if (lcpvalue > 0)
     {
-      h--;
+      lcpvalue--;
     }
   }
+  return lcptab;
+}
+
+static unsigned long *computecounttab(const Rmnsufinfo *rmnsufinfo)
+{
+  Seqpos pos;
+  unsigned long idx, *count, alphasize;
+
+  /* XXX use parameter alphasize here and distribution of characters */
+  alphasize = (unsigned long) (UCHAR_MAX+1);
+  count = gt_calloc(sizeof (unsigned long),(size_t) (alphasize + 1));
+  for (pos = 0; pos < rmnsufinfo->totallength; pos++)
+  {
+    Uchar cc = getencodedchar(rmnsufinfo->encseq,pos,rmnsufinfo->readmode);
+    count[cc+1]++;
+  }
+  for (idx = 1UL; idx <= (unsigned long) alphasize; idx++)
+  {
+    count[idx] += count[idx - 1];
+  }
+  return count;
+}
+
+static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
+{
+  Seqpos idx, pos, longest = 0;
+  unsigned long *count;
+  Bitsequence *setranknext;
+
+  gt_assert(rmnsufinfo->partwidth > 0);
+  count = computecounttab(rmnsufinfo);
+  INITBITTAB(setranknext,rmnsufinfo->totallength+1);
+  if ((pos = rmnsufinfo->presortedsuffixes[0]) > (Seqpos) 1)
+  {
+    Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,rmnsufinfo->readmode);
+    if (ISNOTSPECIAL(cc))
+    {
+      gt_assert(!ISIBITSET(setranknext,count[(int) cc]));
+      SETIBIT(setranknext,count[(int) cc]);
+      ranknext[count[(int) cc]++] = 0;
+    }  else
+    {
+      gt_assert(false);
+    }
+    idx = (Seqpos) 1;
+  } else
+  {
+    idx = 0;
+  }
+  for (/* nothing */ ; idx < rmnsufinfo->totallength; idx++)
+  {
+    if ((pos = rmnsufinfo->presortedsuffixes[idx]) > (Seqpos) 0)
+    {
+      Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,rmnsufinfo->readmode);
+      if (ISNOTSPECIAL(cc))
+      {
+        gt_assert(!ISIBITSET(setranknext,count[(int) cc]));
+        SETIBIT(setranknext,count[(int) cc]);
+        ranknext[count[cc]++] = idx;
+      } else
+      {
+        gt_assert(false);
+      }
+    } else
+    {
+      longest = idx;
+    }
+  }
+  gt_free(setranknext);
+  gt_free(count);
+  return longest;
+}
+
+Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
+{
+  Seqpos pos, previousstart, nextfillpos, fillpos, lcpvalue = 0, *lcptab;
+  Bitsequence *setlcptab;
+
+  lcptab = rmnsufinfo->inversesuftab; /* inverssuftab is no longer needed */
+  fillpos = sa2ranknext(lcptab,rmnsufinfo);
+  printf("longest=%lu\n",(unsigned long) fillpos);
+  lcptab[0] = 0;
+  INITBITTAB(setlcptab,rmnsufinfo->totallength+1);
+  for (pos = 0; pos < rmnsufinfo->totallength; pos++)
+  {
+    nextfillpos = lcptab[fillpos];
+    if (fillpos > 0)
+    {
+      previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
+      while (pos+lcpvalue < rmnsufinfo->totallength &&
+             previousstart+lcpvalue < rmnsufinfo->totallength)
+      {
+        Uchar cc1, cc2;
+
+        cc1 = getencodedchar(rmnsufinfo->encseq,pos+lcpvalue,
+                             rmnsufinfo->readmode);
+        cc2 = getencodedchar(rmnsufinfo->encseq,previousstart+lcpvalue,
+                             rmnsufinfo->readmode);
+        if (cc1 == cc2 && ISNOTSPECIAL(cc1))
+        {
+          lcpvalue++;
+        } else
+        {
+          break;
+        }
+      }
+      gt_assert(!ISIBITSET(setlcptab,fillpos));
+      SETIBIT(setlcptab,fillpos);
+      lcptab[fillpos] = lcpvalue;
+      if (lcpvalue > 0)
+      {
+        lcpvalue--;
+      }
+      fillpos = nextfillpos;
+    }
+    fillpos = nextfillpos;
+  }
+  rmnsufinfo->inversesuftab = NULL;
+  gt_free(setlcptab);
   return lcptab;
 }
 
@@ -351,7 +474,7 @@ Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
   sortremainingsuffixes(rmnsufinfo);
   if (withlcptab)
   {
-    lcptab = lineartimelcpcomputation(rmnsufinfo);
+    lcptab = lcp9_manzini(rmnsufinfo);
   } else
   {
     lcptab = NULL;
