@@ -338,6 +338,8 @@ const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
 
 const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
 
+unsigned long getencseqcharactercount(const Encodedsequence *encseq,Uchar cc);
+
 /* some function to remove reference from an Encodedsequence to prevent that
    the referenced alphabet or filenametab are freed */
 

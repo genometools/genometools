@@ -117,7 +117,8 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
               100.0 * (double) rmnsufinfo->firstwithnewdepth.totalwidth/
                                rmnsufinfo->totallength);
     }
-    printf("enter new level with depth=%lu\n",(unsigned long) depth);
+    printf("enter new level with depth=" FormatSeqpos "\n",
+            PRINTSeqposcast(depth));
     rmnsufinfo->firstwithnewdepth.left = left;
     rmnsufinfo->firstwithnewdepth.right = right;
     rmnsufinfo->firstwithnewdepth.depth = depth;
@@ -197,7 +198,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
               (unsigned long) rmnsufinfo->currentdepth,
               (unsigned long) (left[idx]+rmnsufinfo->currentdepth),
               (unsigned long) rmnsufinfo->totallength);
-      exit(EXIT_FAILURE); /* programm error */
+      exit(EXIT_FAILURE); /* programming error */
     }
     rmnsufinfo->itvinfo[idx].key
       = rmnsufinfo->inversesuftab[left[idx]+rmnsufinfo->currentdepth];
@@ -308,7 +309,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
 }
 
-Seqpos *lcp13_manzini(Rmnsufinfo *rmnsufinfo)
+Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
 {
   Seqpos pos, lcpvalue = 0, *lcptab;
 
@@ -349,20 +350,21 @@ Seqpos *lcp13_manzini(Rmnsufinfo *rmnsufinfo)
 
 static unsigned long *computecounttab(const Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos pos;
-  unsigned long idx, *count, alphasize;
+  unsigned long *count, numofchars, idx, specialcharacters;
 
-  /* XXX use parameter alphasize here and distribution of characters */
-  alphasize = (unsigned long) (UCHAR_MAX+1);
-  count = gt_calloc(sizeof (unsigned long),(size_t) (alphasize + 1));
-  for (pos = 0; pos < rmnsufinfo->totallength; pos++)
+  numofchars = (unsigned long) getencseqAlphabetnumofchars(rmnsufinfo->encseq);
+  specialcharacters
+    = (unsigned long) getencseqspecialcharacters(rmnsufinfo->encseq);
+  count = gt_malloc(sizeof (unsigned long) * (numofchars+specialcharacters+1));
+  count[0] = 0;
+  for (idx = 1UL; idx <= numofchars; idx++)
   {
-    Uchar cc = getencodedchar(rmnsufinfo->encseq,pos,rmnsufinfo->readmode);
-    count[cc+1]++;
+    count[idx] = count[idx - 1] +
+                 getencseqcharactercount(rmnsufinfo->encseq,(Uchar) (idx-1));
   }
-  for (idx = 1UL; idx <= (unsigned long) alphasize; idx++)
+  for (idx = numofchars+1; idx <= numofchars+specialcharacters; idx++)
   {
-    count[idx] += count[idx - 1];
+    count[idx] = count[idx - 1] + 1;
   }
   return count;
 }
@@ -384,7 +386,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
       gt_assert(!ISIBITSET(setranknext,count[(int) cc]));
       SETIBIT(setranknext,count[(int) cc]);
       ranknext[count[(int) cc]++] = 0;
-    }  else
+    } else
     {
       gt_assert(false);
     }
@@ -425,7 +427,6 @@ Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   lcptab = rmnsufinfo->inversesuftab; /* inverssuftab is no longer needed */
   fillpos = sa2ranknext(lcptab,rmnsufinfo);
   printf("longest=%lu\n",(unsigned long) fillpos);
-  lcptab[0] = 0;
   INITBITTAB(setlcptab,rmnsufinfo->totallength+1);
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
@@ -457,7 +458,6 @@ Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
       {
         lcpvalue--;
       }
-      fillpos = nextfillpos;
     }
     fillpos = nextfillpos;
   }

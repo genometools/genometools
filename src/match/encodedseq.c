@@ -2587,6 +2587,13 @@ const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq)
   return encseq->filelengthtab;
 }
 
+unsigned long getencseqcharactercount(const Encodedsequence *encseq,Uchar cc)
+{
+  gt_assert(encseq != NULL &&
+            (unsigned int) cc < getnumofcharsAlphabet(encseq->alpha));
+  return encseq->characterdistribution[cc];
+}
+
 static int scandbfileline(GtStrArray *filenametab,
                           Filelengthvalues *filelengthtab,
                           unsigned long numoffiles,
