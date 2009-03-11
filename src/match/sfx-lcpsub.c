@@ -112,7 +112,7 @@ void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   const unsigned long fixedwidth = 512UL;
   unsigned long remaining, left, width;
 
-  lcpsubtab->numoflargelcpvalues = (Seqpos) 64;
+  lcpsubtab->numoflargelcpvalues = (Seqpos) fixedwidth;
   INITARRAY(&lcpsubtab->largelcpvalues,Largelcpvalue);
   lcpsubtab->spaceSeqpos = (Seqpos *) lcptab;
   lcpsubtab->maxbranchdepth = 0;
