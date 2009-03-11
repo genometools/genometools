@@ -1,9 +1,9 @@
-def outoptionsnobck(doubling)
+def outoptionsnobck
   return "-tis -suf -des -ssp -lcp -bwt"
 end
 
-def outoptions(doubling)
-  return outoptionsnobck(doubling) + " -bck"
+def outoptions
+  return outoptionsnobck + " -bck"
 end
 
 def trials()
@@ -23,9 +23,9 @@ def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist)
     filearg += "#{$testdata}#{filename} "
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
-           "-algbds 10 31 80 #{extra} #{outoptions(doubling)} " +
+           "-algbds 10 31 80 #{extra} #{outoptions} " +
            "-indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions(doubling)} -v sfx",
+  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v sfx",
            :maxtime => 600
 end
 
@@ -42,7 +42,7 @@ def checkbwt(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -pl #{outoptions(false)} -indexname sfx -db " +
+  run_test "#{$bin}gt suffixerator -pl #{outoptions} -indexname sfx -db " +
            flattenfilelist(filelist)
 end
 
@@ -236,12 +236,12 @@ def checkmapped(args)
   Name "gt suffixerator checkmapped"
   Keywords "gt_suffixerator gttestdata"
   Test do
-    run_test "#{$bin}gt suffixerator #{outoptions(false)} -algbds 3 34 90 " +
+    run_test "#{$bin}gt suffixerator #{outoptions} -algbds 3 34 90 " +
              "-indexname sfxidx #{args}",
              :maxtime => 1200
-    run_test "#{$bin}gt dev sfxmap #{outoptions(false)} #{trials()} -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptions} #{trials()} -v sfxidx",
              :maxtime => 2400
-    run_test "#{$bin}gt dev sfxmap #{outoptionsnobck(false)} -stream -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptionsnobck} -stream -v sfxidx",
              :maxtime => 2400
   end
 end

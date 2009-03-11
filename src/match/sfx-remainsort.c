@@ -346,8 +346,7 @@ static void lineartimelcpcomputation(Rmnsufinfo *rmnsufinfo,
   }
   multioutlcpvalues(lcpsubtab,lcptab,(unsigned long) rmnsufinfo->partwidth,
                     fplcptab,fpllvtab);
-  (void) outmany0lcpvalues(rmnsufinfo->partwidth,rmnsufinfo->totallength,
-                           fplcptab);
+  lcpsubtab->countoutputlcpvalues = rmnsufinfo->partwidth;
   gt_free(lcptab);
 }
 

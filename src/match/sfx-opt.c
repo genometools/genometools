@@ -320,6 +320,10 @@ static OPrval parse_options(int *parsed_args,
         oprval = OPTIONPARSER_ERROR;
       }
       so->sfxstrategy.ssortmaxdepth.defined = true;
+      if (so->sfxstrategy.ssortmaxdepth.valueunsignedint != MAXDEPTH_AUTOMATIC)
+      {
+        so->sfxstrategy.cmpcharbychar = true;
+      }
     }
   }
   if (oprval == OPTIONPARSER_OK && !doesa)
