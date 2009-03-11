@@ -16,6 +16,7 @@
 */
 
 #include <limits.h>
+#include <stdio.h>
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/minmax.h"
@@ -23,18 +24,19 @@
 #include "core/fa.h"
 #include "core/arraydef.h"
 #include "core/unused_api.h"
+#include "core/symboldef.h"
 #include "divmodmul.h"
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "turnwheels.h"
 #include "esa-fileend.h"
 #include "sfx-bentsedg.h"
+#include "seqpos-def.h"
 #include "bcktab.h"
 #include "bltrie-ssort.h"
 #include "lcpoverflow.h"
 #include "opensfxfile.h"
 #include "sfx-remainsort.h"
-#include "sfx-lcpsub.h"
 
 #include "sfx-cmpsuf.pr"
 #include "kmer2string.pr"
@@ -137,6 +139,22 @@ static unsigned long countinsertionsort = 0,
                      countbltriesort = 0,
                      countcountingsort = 0,
                      countqsort = 0;
+
+DECLAREARRAYSTRUCT(Largelcpvalue);
+
+typedef struct
+{
+  void *reservoir;
+  size_t sizereservoir;
+  Seqpos *spaceSeqpos, /* pointer into reservoir */
+         maxbranchdepth,
+         numoflargelcpvalues,
+         totalnumoflargelcpvalues,
+         countoutputlcpvalues;
+  Uchar *smalllcpvalues; /* pointer into reservoir */
+  ArrayLargelcpvalue largelcpvalues;
+  const Seqpos *suftabbase;
+} Lcpsubtab;
 
 typedef struct
 {
@@ -1510,6 +1528,113 @@ Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
     return NULL;
   }
   return outlcpinfo;
+}
+
+static void outlcpvalues(Lcpsubtab *lcpsubtab,
+                         unsigned long bucketleft,
+                         unsigned long bucketright,
+                         Seqpos posoffset,
+                         FILE *fplcptab,
+                         FILE *fpllvtab)
+{
+  unsigned long idx;
+  Seqpos lcpvalue;
+  Largelcpvalue *largelcpvalueptr;
+
+  lcpsubtab->largelcpvalues.nextfreeLargelcpvalue = 0;
+  if (lcpsubtab->numoflargelcpvalues > 0 &&
+      lcpsubtab->numoflargelcpvalues >=
+      (Seqpos) lcpsubtab->largelcpvalues.allocatedLargelcpvalue)
+  {
+    lcpsubtab->largelcpvalues.spaceLargelcpvalue
+      = gt_realloc(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
+                   sizeof (Largelcpvalue) * lcpsubtab->numoflargelcpvalues);
+    lcpsubtab->largelcpvalues.allocatedLargelcpvalue
+      = (unsigned long) lcpsubtab->numoflargelcpvalues;
+  }
+  for (idx=bucketleft; idx<=bucketright; idx++)
+  {
+    lcpvalue = lcpsubtab->spaceSeqpos[idx];
+    if (lcpsubtab->maxbranchdepth < lcpvalue)
+    {
+      lcpsubtab->maxbranchdepth = lcpvalue;
+    }
+    if (lcpvalue < (Seqpos) LCPOVERFLOW)
+    {
+      lcpsubtab->smalllcpvalues[idx-bucketleft] = (Uchar) lcpvalue;
+    } else
+    {
+      gt_assert(lcpsubtab->largelcpvalues.nextfreeLargelcpvalue <
+                lcpsubtab->largelcpvalues.allocatedLargelcpvalue);
+      largelcpvalueptr = lcpsubtab->largelcpvalues.spaceLargelcpvalue +
+                         lcpsubtab->largelcpvalues.nextfreeLargelcpvalue++;
+      largelcpvalueptr->position = posoffset+idx;
+      largelcpvalueptr->value = lcpvalue;
+      lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
+    }
+  }
+  lcpsubtab->countoutputlcpvalues += (bucketright - bucketleft + 1);
+  gt_xfwrite(lcpsubtab->smalllcpvalues,
+             sizeof (Uchar),(size_t) (bucketright - bucketleft + 1),fplcptab);
+  if (lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
+  {
+    lcpsubtab->totalnumoflargelcpvalues
+      += lcpsubtab->largelcpvalues.nextfreeLargelcpvalue;
+    gt_xfwrite(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
+               sizeof (Largelcpvalue),
+               (size_t)
+               lcpsubtab->largelcpvalues.nextfreeLargelcpvalue,
+               fpllvtab);
+  }
+}
+
+#define NUMBEROFZEROS 1024
+
+static Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
+                                FILE *outfplcptab)
+{
+  Seqpos i, countout, many;
+  Uchar outvalues[NUMBEROFZEROS] = {0};
+
+  many = totallength + 1 - countoutputlcpvalues;
+  countout = many/NUMBEROFZEROS;
+  for (i=0; i<countout; i++)
+  {
+    gt_xfwrite(outvalues,sizeof (Uchar),(size_t) NUMBEROFZEROS,outfplcptab);
+  }
+  gt_xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
+             outfplcptab);
+  return many;
+}
+
+static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
+                              const Seqpos *lcptab,
+                              unsigned long bucketsize,
+                              FILE *fplcptab,
+                              FILE *fpllvtab)
+{
+  const unsigned long fixedwidth = 512UL;
+  unsigned long remaining, left, width;
+
+  lcpsubtab->numoflargelcpvalues = (Seqpos) fixedwidth;
+  lcpsubtab->spaceSeqpos = (Seqpos *) lcptab;
+  lcpsubtab->smalllcpvalues = (Uchar *) lcptab;
+  remaining = bucketsize;
+  left = 0;
+  gt_assert(fplcptab != NULL && fpllvtab != NULL);
+  while (remaining > 0)
+  {
+    width = MIN(remaining, fixedwidth);
+    outlcpvalues(lcpsubtab,
+                 left,
+                 left + width - 1,
+                 0,
+                 fplcptab,
+                 fpllvtab);
+    remaining -= width;
+    left += width;
+  }
+  lcpsubtab->countoutputlcpvalues = (Seqpos) bucketsize;
 }
 
 void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
