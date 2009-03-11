@@ -411,8 +411,10 @@ static Seqpos searchspecialrank(const Rankedbounds *leftptr,
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    /*
     printf("check (%lu,%lu)\n",(unsigned long) midptr->lowerbound,
                                (unsigned long) midptr->upperbound);
+    */
     if (specialpos < midptr->lowerbound)
     {
       rightptr = midptr-1;
@@ -433,6 +435,34 @@ static Seqpos searchspecialrank(const Rankedbounds *leftptr,
   /*@ignore@*/
   return 0;
   /*@end@*/
+}
+
+static void updateranknext(const Rmnsufinfo *rmnsufinfo,
+                           Seqpos *ranknext,unsigned long *count,
+                           Bitsequence *setranknext,Rankedbounds *rankedbounds,
+                           Seqpos realspecialranges,
+                           Seqpos pos,Seqpos idx)
+{
+  Uchar cc = getencodedchar(rmnsufinfo->encseq,pos,rmnsufinfo->readmode);
+
+  if (ISNOTSPECIAL(cc))
+  {
+    gt_assert(!ISIBITSET(setranknext,count[(int) cc]));
+    SETIBIT(setranknext,count[(int) cc]);
+    ranknext[count[cc]++] = idx;
+  } else
+  {
+    Seqpos rank;
+
+    rank = rmnsufinfo->partwidth +
+           searchspecialrank(rankedbounds,
+                             rankedbounds + realspecialranges,
+                             pos);
+    gt_assert(rank <= rmnsufinfo->totallength &&
+              !ISIBITSET(setranknext,rank));
+    SETIBIT(setranknext,rank);
+    ranknext[rank] = idx;
+  }
 }
 
 static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
@@ -456,10 +486,10 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
       ranknext[count[(int) cc]++] = 0;
     } else
     {
-      rank = rmnsufinfo->partwidth + 
+      rank = rmnsufinfo->partwidth +
              searchspecialrank(rankedbounds,rankedbounds + realspecialranges,
                                pos-1);
-      gt_assert(rank <= rmnsufinfo->totallength && 
+      gt_assert(rank <= rmnsufinfo->totallength &&
                 !ISIBITSET(setranknext,rank));
       SETIBIT(setranknext,rank);
       ranknext[rank] = 0;
@@ -469,30 +499,43 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
   {
     idx = 0;
   }
-  for (/* nothing */ ; idx < rmnsufinfo->totallength; idx++)
+  for (/* nothing */ ; idx < rmnsufinfo->partwidth; idx++)
   {
-    if ((pos = rmnsufinfo->presortedsuffixes[idx]) > (Seqpos) 0)
+    if (rmnsufinfo->presortedsuffixes[idx] > 0)
     {
-      Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,rmnsufinfo->readmode);
-      if (ISNOTSPECIAL(cc))
-      {
-        gt_assert(!ISIBITSET(setranknext,count[(int) cc]));
-        SETIBIT(setranknext,count[(int) cc]);
-        ranknext[count[cc]++] = idx;
-      } else
-      {
-        rank = rmnsufinfo->partwidth + 
-               searchspecialrank(rankedbounds,
-                                 rankedbounds + realspecialranges,
-                                 pos-1);
-        gt_assert(rank <= rmnsufinfo->totallength && 
-                  !ISIBITSET(setranknext,rank));
-        SETIBIT(setranknext,rank);
-        ranknext[rank] = idx;
-      }
+      updateranknext(rmnsufinfo,ranknext,count,setranknext,rankedbounds,
+                     realspecialranges,rmnsufinfo->presortedsuffixes[idx]-1,
+                     idx);
     } else
     {
       longest = idx;
+    }
+  }
+  if (hasspecialranges(rmnsufinfo->encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos specialidx, specialpos;
+
+    sri = newspecialrangeiterator(rmnsufinfo->encseq,
+                                  ISDIRREVERSE(rmnsufinfo->readmode)
+                                  ? false : true);
+    specialidx = rmnsufinfo->partwidth;
+    while (nextspecialrangeiterator(&range,sri))
+    {
+      for (specialpos = range.leftpos; specialpos < range.rightpos;
+           specialpos++)
+      {
+        if (specialpos > 0)
+        {
+          updateranknext(rmnsufinfo,ranknext,count,setranknext,rankedbounds,
+                         realspecialranges,specialpos-1,specialidx);
+        } else
+        {
+          longest = idx;
+        }
+        specialidx++;
+      }
     }
   }
   gt_free(setranknext);
@@ -515,7 +558,13 @@ Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
     nextfillpos = lcptab[fillpos];
     if (fillpos > 0)
     {
-      previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
+      if (fillpos - 1 < rmnsufinfo->partwidth)
+      {
+        previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
+      } else
+      {
+        previousstart =  ??
+      }
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
