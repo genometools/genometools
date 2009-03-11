@@ -28,6 +28,7 @@
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
 #include "intbits-tab.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -369,26 +370,99 @@ static unsigned long *computecounttab(const Rmnsufinfo *rmnsufinfo)
   return count;
 }
 
+typedef struct
+{
+  Seqpos lowerbound, upperbound, rank;
+} Rankedbounds;
+
+static Rankedbounds *fillrankinfo(const Rmnsufinfo *rmnsufinfo)
+{
+  if (hasspecialranges(rmnsufinfo->encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos currentrank = 0, realspecialranges;
+    Rankedbounds *rankedbounds, *rbptr;
+
+    realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
+    rankedbounds = gt_malloc(sizeof(Rankedbounds) * realspecialranges);
+    sri = newspecialrangeiterator(rmnsufinfo->encseq,
+                                  ISDIRREVERSE(rmnsufinfo->readmode)
+                                  ? false : true);
+    for (rbptr = rankedbounds; nextspecialrangeiterator(&range,sri); rbptr++)
+    {
+      rbptr->lowerbound = range.leftpos;
+      rbptr->upperbound = range.rightpos;
+      rbptr->rank = currentrank;
+      currentrank += rbptr->upperbound - rbptr->lowerbound;
+    }
+    gt_assert(rbptr == rankedbounds + realspecialranges);
+    return rankedbounds;
+  }
+  return NULL;
+}
+
+static Seqpos searchspecialrank(const Rankedbounds *leftptr,
+                                const Rankedbounds *rightptr,
+                                Seqpos specialpos)
+{
+  const Rankedbounds *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    printf("check (%lu,%lu)\n",(unsigned long) midptr->lowerbound,
+                               (unsigned long) midptr->upperbound);
+    if (specialpos < midptr->lowerbound)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (specialpos >= midptr->upperbound)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr->rank + specialpos - midptr->lowerbound;
+      }
+    }
+  }
+  fprintf(stderr,"searchspecialrank: cannot find pos " FormatSeqpos
+                 " in ranges",PRINTSeqposcast(specialpos));
+  exit(EXIT_FAILURE); /* programming error */
+  /*@ignore@*/
+  return 0;
+  /*@end@*/
+}
+
 static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos idx, pos, longest = 0;
+  Seqpos idx, pos, longest = 0, realspecialranges, rank;
   unsigned long *count;
+  Rankedbounds *rankedbounds;
   Bitsequence *setranknext;
 
   gt_assert(rmnsufinfo->partwidth > 0);
   count = computecounttab(rmnsufinfo);
+  rankedbounds = fillrankinfo(rmnsufinfo);
+  realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
   INITBITTAB(setranknext,rmnsufinfo->totallength+1);
   if ((pos = rmnsufinfo->presortedsuffixes[0]) > (Seqpos) 1)
   {
     Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,rmnsufinfo->readmode);
     if (ISNOTSPECIAL(cc))
     {
-      gt_assert(!ISIBITSET(setranknext,count[(int) cc]));
       SETIBIT(setranknext,count[(int) cc]);
       ranknext[count[(int) cc]++] = 0;
     } else
     {
-      gt_assert(false);
+      rank = rmnsufinfo->partwidth + 
+             searchspecialrank(rankedbounds,rankedbounds + realspecialranges,
+                               pos-1);
+      gt_assert(rank <= rmnsufinfo->totallength && 
+                !ISIBITSET(setranknext,rank));
+      SETIBIT(setranknext,rank);
+      ranknext[rank] = 0;
     }
     idx = (Seqpos) 1;
   } else
@@ -407,7 +481,14 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
         ranknext[count[cc]++] = idx;
       } else
       {
-        gt_assert(false);
+        rank = rmnsufinfo->partwidth + 
+               searchspecialrank(rankedbounds,
+                                 rankedbounds + realspecialranges,
+                                 pos-1);
+        gt_assert(rank <= rmnsufinfo->totallength && 
+                  !ISIBITSET(setranknext,rank));
+        SETIBIT(setranknext,rank);
+        ranknext[rank] = idx;
       }
     } else
     {
@@ -416,6 +497,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
   }
   gt_free(setranknext);
   gt_free(count);
+  gt_free(rankedbounds);
   return longest;
 }
 
