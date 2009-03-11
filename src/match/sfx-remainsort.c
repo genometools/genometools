@@ -26,7 +26,6 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
-#include "sfx-lcpsub.h"
 
 typedef struct
 {
@@ -307,10 +306,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
 }
 
-static void lineartimelcpcomputation(Rmnsufinfo *rmnsufinfo,
-                                     Lcpsubtab *lcpsubtab,
-                                     FILE *fplcptab,
-                                     FILE *fpllvtab)
+static Seqpos *lineartimelcpcomputation(Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx, h = 0, *lcptab;
 
@@ -344,23 +340,21 @@ static void lineartimelcpcomputation(Rmnsufinfo *rmnsufinfo,
       h--;
     }
   }
-  multioutlcpvalues(lcpsubtab,lcptab,(unsigned long) rmnsufinfo->partwidth,
-                    fplcptab,fpllvtab);
-  lcpsubtab->countoutputlcpvalues = rmnsufinfo->partwidth;
-  gt_free(lcptab);
+  return lcptab;
 }
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,Lcpsubtab *lcpsubtab,
-                    FILE *fplcptab,
-                    FILE *fpllvtab)
+Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
+  Seqpos *lcptab;
 
   sortremainingsuffixes(rmnsufinfo);
-  if (lcpsubtab != NULL)
+  if (withlcptab)
   {
-    gt_assert(fplcptab != NULL && fpllvtab != NULL);
-    lineartimelcpcomputation(rmnsufinfo,lcpsubtab,fplcptab,fpllvtab);
+    lcptab = lineartimelcpcomputation(rmnsufinfo);
+  } else
+  {
+    lcptab = NULL;
   }
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
@@ -370,4 +364,5 @@ void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,Lcpsubtab *lcpsubtab,
   rmnsufinfo->inversesuftab = NULL;
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
+  return lcptab;
 }

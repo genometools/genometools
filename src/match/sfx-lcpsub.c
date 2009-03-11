@@ -113,12 +113,8 @@ void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   unsigned long remaining, left, width;
 
   lcpsubtab->numoflargelcpvalues = (Seqpos) fixedwidth;
-  INITARRAY(&lcpsubtab->largelcpvalues,Largelcpvalue);
   lcpsubtab->spaceSeqpos = (Seqpos *) lcptab;
-  lcpsubtab->maxbranchdepth = 0;
   lcpsubtab->smalllcpvalues = (Uchar *) lcptab;
-  lcpsubtab->countoutputlcpvalues = 0;
-  lcpsubtab->totalnumoflargelcpvalues = 0;
   remaining = bucketsize;
   left = 0;
   gt_assert(fplcptab != NULL && fpllvtab != NULL);
@@ -134,5 +130,5 @@ void multioutlcpvalues(Lcpsubtab *lcpsubtab,
     remaining -= width;
     left += width;
   }
-  FREEARRAY(&lcpsubtab->largelcpvalues,Largelcpvalue);
+  lcpsubtab->countoutputlcpvalues = (Seqpos) bucketsize;
 }

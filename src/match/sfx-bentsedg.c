@@ -1516,6 +1516,15 @@ void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
 {
   Outlcpinfo *outlcpinfo = *outlcpinfoptr;
 
+  if (outlcpinfo->assideeffect)
+  {
+    FREESPACE(outlcpinfo->lcpsubtab.reservoir);
+    outlcpinfo->lcpsubtab.sizereservoir = 0;
+    if (outlcpinfo->tw != NULL)
+    {
+      freeTurningwheel(&outlcpinfo->tw);
+    }
+  }
   if (outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength+1)
   {
     outlcpinfo->lcpsubtab.countoutputlcpvalues
@@ -1525,16 +1534,7 @@ void freeOutlcptab(Outlcpinfo **outlcpinfoptr)
   }
   gt_assert(outlcpinfo->lcpsubtab.countoutputlcpvalues ==
             outlcpinfo->totallength + 1);
-  if (outlcpinfo->assideeffect)
-  {
-    FREESPACE(outlcpinfo->lcpsubtab.reservoir);
-    outlcpinfo->lcpsubtab.sizereservoir = 0;
-    if (outlcpinfo->tw != NULL)
-    {
-      freeTurningwheel(&outlcpinfo->tw);
-    }
-    FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
-  }
+  FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   gt_fa_fclose(outlcpinfo->outfplcptab);
   gt_fa_fclose(outlcpinfo->outfpllvtab);
   FREESPACE(*outlcpinfoptr);
@@ -1637,9 +1637,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo
-      = newRmnsufinfo(suftabptr,bsr->encseq,
-                      bsr->readmode,bsr->partwidth);
+    bsr->rmnsufinfo = newRmnsufinfo(suftabptr,bsr->encseq,bsr->readmode,
+                                    bsr->partwidth);
     bsr->trierep = NULL;
   } else
   {
@@ -1674,7 +1673,16 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   }
   if (bsr->rmnsufinfo != NULL)
   {
-    wrapRmnsufinfo(&bsr->rmnsufinfo,lcpsubtab,outfplcptab,outfpllvtab);
+    Seqpos *lcptab;
+
+    lcptab = wrapRmnsufinfo(&bsr->rmnsufinfo,
+                            bsr->lcpsubtab == NULL ? false : true);
+    if (lcptab != NULL)
+    {
+      multioutlcpvalues(lcpsubtab,lcptab,(unsigned long) bsr->partwidth,
+                        outfplcptab,outfpllvtab);
+      gt_free(lcptab);
+    }
   }
   if (bsr->esr1 != NULL)
   {

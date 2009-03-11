@@ -20,7 +20,6 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
-#include "sfx-lcpsub.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
@@ -32,9 +31,6 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-void wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,
-                    Lcpsubtab *lcpsubtab,
-                    FILE *fplcptab,
-                    FILE *fpllvtab);
+Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 
 #endif
