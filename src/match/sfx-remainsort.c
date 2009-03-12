@@ -397,14 +397,15 @@ static Rankedbounds *fillrankinfo(const Rmnsufinfo *rmnsufinfo)
       currentrank += rbptr->upperbound - rbptr->lowerbound;
     }
     gt_assert(rbptr == rankedbounds + realspecialranges);
+    freespecialrangeiterator(&sri);
     return rankedbounds;
   }
   return NULL;
 }
 
-static Seqpos searchspecialrank(const Rankedbounds *leftptr,
-                                const Rankedbounds *rightptr,
-                                Seqpos specialpos)
+static Seqpos frompos2rank(const Rankedbounds *leftptr,
+                           const Rankedbounds *rightptr,
+                           Seqpos specialpos)
 {
   const Rankedbounds *midptr;
 
@@ -429,7 +430,7 @@ static Seqpos searchspecialrank(const Rankedbounds *leftptr,
       }
     }
   }
-  fprintf(stderr,"searchspecialrank: cannot find pos " FormatSeqpos
+  fprintf(stderr,"frompos2rank: cannot find pos " FormatSeqpos
                  " in ranges",PRINTSeqposcast(specialpos));
   exit(EXIT_FAILURE); /* programming error */
   /*@ignore@*/
@@ -437,9 +438,45 @@ static Seqpos searchspecialrank(const Rankedbounds *leftptr,
   /*@end@*/
 }
 
+static Seqpos fromrank2pos(const Rankedbounds *leftptr,
+                           const Rankedbounds *rightptr,
+                           Seqpos rank)
+{
+  const Rankedbounds *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
+    /*
+    printf("check (%lu,%lu)\n",(unsigned long) midptr->lowerbound,
+                               (unsigned long) midptr->upperbound);
+    */
+    if (rank < midptr->rank)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (rank >= midptr->rank + (midptr->upperbound - midptr->lowerbound))
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr->lowerbound + (rank - midptr->rank);
+      }
+    }
+  }
+  fprintf(stderr,"fromrank2rank: cannot find rank " FormatSeqpos
+                 " in ranges",PRINTSeqposcast(rank));
+  exit(EXIT_FAILURE); /* programming error */
+  /*@ignore@*/
+  return 0;
+  /*@end@*/
+}
+
 static void updateranknext(const Rmnsufinfo *rmnsufinfo,
-                           Seqpos *ranknext,unsigned long *count,
-                           Bitsequence *setranknext,Rankedbounds *rankedbounds,
+                           Seqpos *ranknext,
+                           unsigned long *count,
+                           const Rankedbounds *rankedbounds,
                            Seqpos realspecialranges,
                            Seqpos pos,Seqpos idx)
 {
@@ -447,53 +484,33 @@ static void updateranknext(const Rmnsufinfo *rmnsufinfo,
 
   if (ISNOTSPECIAL(cc))
   {
-    gt_assert(!ISIBITSET(setranknext,count[(int) cc]));
-    SETIBIT(setranknext,count[(int) cc]);
     ranknext[count[cc]++] = idx;
   } else
   {
     Seqpos rank;
 
     rank = rmnsufinfo->partwidth +
-           searchspecialrank(rankedbounds,
-                             rankedbounds + realspecialranges,
-                             pos);
-    gt_assert(rank <= rmnsufinfo->totallength &&
-              !ISIBITSET(setranknext,rank));
-    SETIBIT(setranknext,rank);
+           frompos2rank(rankedbounds,
+                        rankedbounds + realspecialranges,
+                        pos);
+    gt_assert(rank <= rmnsufinfo->totallength);
     ranknext[rank] = idx;
   }
 }
 
-static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
+static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
+                          const Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos idx, pos, longest = 0, realspecialranges, rank;
+  Seqpos idx, longest = 0, realspecialranges;
   unsigned long *count;
-  Rankedbounds *rankedbounds;
-  Bitsequence *setranknext;
 
   gt_assert(rmnsufinfo->partwidth > 0);
   count = computecounttab(rmnsufinfo);
-  rankedbounds = fillrankinfo(rmnsufinfo);
   realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
-  INITBITTAB(setranknext,rmnsufinfo->totallength+1);
-  if ((pos = rmnsufinfo->presortedsuffixes[0]) > (Seqpos) 1)
+  if (rmnsufinfo->presortedsuffixes[0] > (Seqpos) 1)
   {
-    Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,rmnsufinfo->readmode);
-    if (ISNOTSPECIAL(cc))
-    {
-      SETIBIT(setranknext,count[(int) cc]);
-      ranknext[count[(int) cc]++] = 0;
-    } else
-    {
-      rank = rmnsufinfo->partwidth +
-             searchspecialrank(rankedbounds,rankedbounds + realspecialranges,
-                               pos-1);
-      gt_assert(rank <= rmnsufinfo->totallength &&
-                !ISIBITSET(setranknext,rank));
-      SETIBIT(setranknext,rank);
-      ranknext[rank] = 0;
-    }
+    updateranknext(rmnsufinfo,ranknext,count,rankedbounds,
+                   realspecialranges,rmnsufinfo->presortedsuffixes[0]-1,0);
     idx = (Seqpos) 1;
   } else
   {
@@ -503,7 +520,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
   {
     if (rmnsufinfo->presortedsuffixes[idx] > 0)
     {
-      updateranknext(rmnsufinfo,ranknext,count,setranknext,rankedbounds,
+      updateranknext(rmnsufinfo,ranknext,count,rankedbounds,
                      realspecialranges,rmnsufinfo->presortedsuffixes[idx]-1,
                      idx);
     } else
@@ -528,7 +545,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
       {
         if (specialpos > 0)
         {
-          updateranknext(rmnsufinfo,ranknext,count,setranknext,rankedbounds,
+          updateranknext(rmnsufinfo,ranknext,count,rankedbounds,
                          realspecialranges,specialpos-1,specialidx);
         } else
         {
@@ -537,20 +554,23 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
         specialidx++;
       }
     }
+    freespecialrangeiterator(&sri);
   }
-  gt_free(setranknext);
   gt_free(count);
-  gt_free(rankedbounds);
   return longest;
 }
 
-Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
+static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos pos, previousstart, nextfillpos, fillpos, lcpvalue = 0, *lcptab;
+  Seqpos pos, previousstart, nextfillpos, fillpos, lcpvalue = 0, *lcptab,
+         realspecialranges;
   Bitsequence *setlcptab;
+  Rankedbounds *rankedbounds;
 
   lcptab = rmnsufinfo->inversesuftab; /* inverssuftab is no longer needed */
-  fillpos = sa2ranknext(lcptab,rmnsufinfo);
+  rankedbounds = fillrankinfo(rmnsufinfo);
+  realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
+  fillpos = sa2ranknext(lcptab,rankedbounds,rmnsufinfo);
   printf("longest=%lu\n",(unsigned long) fillpos);
   INITBITTAB(setlcptab,rmnsufinfo->totallength+1);
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
@@ -563,7 +583,9 @@ Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
         previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
       } else
       {
-        previousstart =  ??
+        previousstart = fromrank2pos(rankedbounds,
+                                     rankedbounds + realspecialranges,
+                                     fillpos - 1 - rmnsufinfo->partwidth);
       }
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
@@ -593,6 +615,7 @@ Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
     fillpos = nextfillpos;
   }
   rmnsufinfo->inversesuftab = NULL;
+  gt_free(rankedbounds);
   gt_free(setlcptab);
   return lcptab;
 }
