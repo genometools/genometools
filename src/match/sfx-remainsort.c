@@ -429,6 +429,7 @@ static Seqpos frompos2rank(const Rankedbounds *leftptr,
   /*@end@*/
 }
 
+#ifdef WIHTRANK2POS
 static Seqpos fromrank2pos(const Rankedbounds *leftptr,
                            const Rankedbounds *rightptr,
                            Seqpos rank)
@@ -459,6 +460,7 @@ static Seqpos fromrank2pos(const Rankedbounds *leftptr,
   return 0;
   /*@end@*/
 }
+#endif
 
 static void updateranknext(const Rmnsufinfo *rmnsufinfo,
                            Seqpos *ranknext,
@@ -494,16 +496,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
   gt_assert(rmnsufinfo->partwidth > 0);
   occless = computeocclesstab(rmnsufinfo);
   realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
-  if (rmnsufinfo->presortedsuffixes[0] > (Seqpos) 1)
-  {
-    updateranknext(rmnsufinfo,ranknext,occless,rankedbounds,
-                   realspecialranges,rmnsufinfo->presortedsuffixes[0]-1,0);
-    idx = (Seqpos) 1;
-  } else
-  {
-    idx = 0;
-  }
-  for (/* nothing */ ; idx < rmnsufinfo->partwidth; idx++)
+  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
     if (rmnsufinfo->presortedsuffixes[idx] > 0)
     {
@@ -562,17 +555,9 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
     nextfillpos = lcptab[fillpos];
-    if (fillpos > 0) /* XXX eval fillpos - 1 < partwidth  here */
+    if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
     {
-      if (fillpos - 1 < rmnsufinfo->partwidth)
-      {
-        previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
-      } else
-      {
-        previousstart = fromrank2pos(rankedbounds,
-                                     rankedbounds + realspecialranges,
-                                     fillpos - 1 - rmnsufinfo->partwidth);
-      }
+      previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
