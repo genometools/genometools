@@ -27,7 +27,6 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
-#include "intbits-tab.h"
 #include "stamp.h"
 
 typedef struct
@@ -349,30 +348,26 @@ Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
   return lcptab;
 }
 
-static unsigned long *computecounttab(const Rmnsufinfo *rmnsufinfo)
+static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
 {
-  unsigned long *count, numofchars, idx, specialcharacters;
+  unsigned long *occless, numofchars, idx;
 
   numofchars = (unsigned long) getencseqAlphabetnumofchars(rmnsufinfo->encseq);
-  specialcharacters
-    = (unsigned long) getencseqspecialcharacters(rmnsufinfo->encseq);
-  count = gt_malloc(sizeof (unsigned long) * (numofchars+specialcharacters+1));
-  count[0] = 0;
-  for (idx = 1UL; idx <= numofchars; idx++)
+  occless = gt_malloc(sizeof (unsigned long) * numofchars);
+  occless[0] = 0;
+  for (idx = 1UL; idx < numofchars; idx++)
   {
-    count[idx] = count[idx - 1] +
-                 getencseqcharactercount(rmnsufinfo->encseq,(Uchar) (idx-1));
+    occless[idx] = occless[idx-1] +
+                   getencseqcharactercount(rmnsufinfo->encseq,(Uchar) (idx-1));
   }
-  for (idx = numofchars+1; idx <= numofchars+specialcharacters; idx++)
-  {
-    count[idx] = count[idx - 1] + 1;
-  }
-  return count;
+  return occless;
 }
 
 typedef struct
 {
-  Seqpos lowerbound, upperbound, rank;
+  Seqpos lowerbound,
+         upperbound,
+         rank;
 } Rankedbounds;
 
 static Rankedbounds *fillrankinfo(const Rmnsufinfo *rmnsufinfo)
@@ -412,10 +407,6 @@ static Seqpos frompos2rank(const Rankedbounds *leftptr,
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
-    /*
-    printf("check (%lu,%lu)\n",(unsigned long) midptr->lowerbound,
-                               (unsigned long) midptr->upperbound);
-    */
     if (specialpos < midptr->lowerbound)
     {
       rightptr = midptr-1;
@@ -447,10 +438,6 @@ static Seqpos fromrank2pos(const Rankedbounds *leftptr,
   while (leftptr <= rightptr)
   {
     midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
-    /*
-    printf("check (%lu,%lu)\n",(unsigned long) midptr->lowerbound,
-                               (unsigned long) midptr->upperbound);
-    */
     if (rank < midptr->rank)
     {
       rightptr = midptr-1;
@@ -475,7 +462,7 @@ static Seqpos fromrank2pos(const Rankedbounds *leftptr,
 
 static void updateranknext(const Rmnsufinfo *rmnsufinfo,
                            Seqpos *ranknext,
-                           unsigned long *count,
+                           unsigned long *occless,
                            const Rankedbounds *rankedbounds,
                            Seqpos realspecialranges,
                            Seqpos pos,Seqpos idx)
@@ -484,7 +471,7 @@ static void updateranknext(const Rmnsufinfo *rmnsufinfo,
 
   if (ISNOTSPECIAL(cc))
   {
-    ranknext[count[cc]++] = idx;
+    ranknext[occless[cc]++] = idx;
   } else
   {
     Seqpos rank;
@@ -502,14 +489,14 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
                           const Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx, longest = 0, realspecialranges;
-  unsigned long *count;
+  unsigned long *occless;
 
   gt_assert(rmnsufinfo->partwidth > 0);
-  count = computecounttab(rmnsufinfo);
+  occless = computeocclesstab(rmnsufinfo);
   realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
   if (rmnsufinfo->presortedsuffixes[0] > (Seqpos) 1)
   {
-    updateranknext(rmnsufinfo,ranknext,count,rankedbounds,
+    updateranknext(rmnsufinfo,ranknext,occless,rankedbounds,
                    realspecialranges,rmnsufinfo->presortedsuffixes[0]-1,0);
     idx = (Seqpos) 1;
   } else
@@ -520,7 +507,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
   {
     if (rmnsufinfo->presortedsuffixes[idx] > 0)
     {
-      updateranknext(rmnsufinfo,ranknext,count,rankedbounds,
+      updateranknext(rmnsufinfo,ranknext,occless,rankedbounds,
                      realspecialranges,rmnsufinfo->presortedsuffixes[idx]-1,
                      idx);
     } else
@@ -545,7 +532,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
       {
         if (specialpos > 0)
         {
-          updateranknext(rmnsufinfo,ranknext,count,rankedbounds,
+          updateranknext(rmnsufinfo,ranknext,occless,rankedbounds,
                          realspecialranges,specialpos-1,specialidx);
         } else
         {
@@ -556,7 +543,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
     }
     freespecialrangeiterator(&sri);
   }
-  gt_free(count);
+  gt_free(occless);
   return longest;
 }
 
@@ -564,7 +551,6 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
 {
   Seqpos pos, previousstart, nextfillpos, fillpos, lcpvalue = 0, *lcptab,
          realspecialranges;
-  Bitsequence *setlcptab;
   Rankedbounds *rankedbounds;
 
   lcptab = rmnsufinfo->inversesuftab; /* inverssuftab is no longer needed */
@@ -572,11 +558,11 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
   fillpos = sa2ranknext(lcptab,rankedbounds,rmnsufinfo);
   printf("longest=%lu\n",(unsigned long) fillpos);
-  INITBITTAB(setlcptab,rmnsufinfo->totallength+1);
+  /* XXX determine z to estimate the space requirement for lcp6+\delta */
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
     nextfillpos = lcptab[fillpos];
-    if (fillpos > 0)
+    if (fillpos > 0) /* XXX eval fillpos - 1 < partwidth  here */
     {
       if (fillpos - 1 < rmnsufinfo->partwidth)
       {
@@ -604,8 +590,6 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
           break;
         }
       }
-      gt_assert(!ISIBITSET(setlcptab,fillpos));
-      SETIBIT(setlcptab,fillpos);
       lcptab[fillpos] = lcpvalue;
       if (lcpvalue > 0)
       {
@@ -616,7 +600,6 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   }
   rmnsufinfo->inversesuftab = NULL;
   gt_free(rankedbounds);
-  gt_free(setlcptab);
   return lcptab;
 }
 
