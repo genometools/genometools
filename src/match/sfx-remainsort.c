@@ -398,6 +398,38 @@ static Rankedbounds *fillrankinfo(const Rmnsufinfo *rmnsufinfo)
   return NULL;
 }
 
+#ifdef WITHfillrankarray
+static Seqpos *fillrankarray(const Rmnsufinfo *rmnsufinfo)
+{
+  if (hasspecialranges(rmnsufinfo->encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos currentrank = 0, realspecialranges, *rankarray, nextfree = 0;
+
+    realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
+    specialcharacters = getencseqspecialcharacters(rmnsufinfo->encseq);
+    rankarray = gt_malloc(sizeof(Seqpos) * specialcharacters);
+    sri = newspecialrangeiterator(rmnsufinfo->encseq,
+                                  ISDIRREVERSE(rmnsufinfo->readmode)
+                                  ? false : true);
+    while (nextspecialrangeiterator(&range,sri))
+    {
+      Seqpos idx;
+
+      for (idx = range.leftpos; idx < range.rightpos; idx++)
+      {
+        rankarray[nextfree++] = nextfree+++1
+      }
+    }
+    gt_assert(rbptr == rankedbounds + realspecialranges);
+    freespecialrangeiterator(&sri);
+    return rankedbounds;
+  }
+  return NULL;
+}
+#endif
+
 static Seqpos frompos2rank(const Rankedbounds *leftptr,
                            const Rankedbounds *rightptr,
                            Seqpos specialpos)
@@ -467,12 +499,14 @@ static void updateranknext(const Rmnsufinfo *rmnsufinfo,
                            unsigned long *occless,
                            const Rankedbounds *rankedbounds,
                            Seqpos realspecialranges,
-                           Seqpos pos,Seqpos idx)
+                           Seqpos pos,
+                           Seqpos idx)
 {
   Uchar cc = getencodedchar(rmnsufinfo->encseq,pos,rmnsufinfo->readmode);
 
   if (ISNOTSPECIAL(cc))
   {
+    gt_assert(occless[cc] < (unsigned long) rmnsufinfo->partwidth);
     ranknext[occless[cc]++] = idx;
   } else
   {
@@ -551,7 +585,6 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
   fillpos = sa2ranknext(lcptab,rankedbounds,rmnsufinfo);
   printf("longest=%lu\n",(unsigned long) fillpos);
-  /* XXX determine z to estimate the space requirement for lcp6+\delta */
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
     nextfillpos = lcptab[fillpos];

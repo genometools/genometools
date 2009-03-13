@@ -46,6 +46,8 @@ typedef struct
                 delspranges;
 } Sfxmapoptions;
 
+DECLAREREADFUNCTION(Uchar);
+
 static void deletethespranges(const Encodedsequence *encseq,
                               unsigned long delspranges)
 {
@@ -339,12 +341,31 @@ int gt_sfxmap(int argc, const char **argv, GtError *err)
         longest = suffixarray.longest.valueseqpos;
         printf("longest=%lu\n",(unsigned long) longest);
         totallength = getencseqtotallength(suffixarray.encseq);
-        for (idx = (Seqpos) 1; idx<=totallength; idx++)
+        printf("totallength=%lu\n",(unsigned long) totallength);
+        if (!sfxmapoptions.usestream)
         {
-          if (suffixarray.bwttab[idx-1] != suffixarray.bwttab[idx] ||
-              ISSPECIAL(suffixarray.bwttab[idx]))
+          for (idx = (Seqpos) 1; idx<totallength; idx++)
           {
-            bwtdifferentconsecutive++;
+            if (suffixarray.bwttab[idx-1] != suffixarray.bwttab[idx] ||
+                ISSPECIAL(suffixarray.bwttab[idx]))
+            {
+              bwtdifferentconsecutive++;
+            }
+          }
+        } else
+        {
+          Uchar prevcc;
+
+          if (readnextUcharfromstream(&prevcc,&suffixarray.bwttabstream) == 1)
+          {
+            Uchar cc;
+            while (readnextUcharfromstream(&cc,&suffixarray.bwttabstream) == 1)
+            {
+              if (prevcc != cc || ISSPECIAL(cc))
+              {
+                bwtdifferentconsecutive++;
+              }
+            }
           }
         }
         printf("bwtdifferentconsecutive=" FormatSeqpos " (%.4f)\n",
