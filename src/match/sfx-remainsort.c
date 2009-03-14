@@ -50,12 +50,6 @@ typedef struct
   unsigned long count, totalwidth;
 } Firstwithnewdepth;
 
-typedef struct
-{
-  Seqpos rank,
-         suffix;
-} Rankwithpos;
-
 struct Rmnsufinfo
 {
   Seqpos *inversesuftab,
@@ -72,7 +66,6 @@ struct Rmnsufinfo
   Itventry *itvinfo;
   Firstwithnewdepth firstwithnewdepth;
   unsigned long ranknext2index;
-  Rankwithpos *rankwithpos;
 };
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
@@ -271,19 +264,9 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
            gt_queue_size(rmnsufinfo->rangestobesorted));
   rmnsufinfo->inversesuftab
     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
-  rmnsufinfo->rankwithpos = gt_malloc(sizeof(Seqpos) * specialcharacters);
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    Uchar cc;
-    pos = rmnsufinfo->presortedsuffixes[idx];
-    rmnsufinfo->inversesuftab[pos] = idx;
-    cc = getencodedchar(rmnsufinfo->encseq,pos,rmnsufinfo->readmode);
-    if (ISSPECIAL(CC))
-    {
-      rmsufinfo->rankwithpos[specialindex].pos = pos;
-      rmsufinfo->rankwithpos[specialindex].rank = specialindex;
-      specialindex++;
-    }
+    rmnsufinfo->inversesuftab[rmnsufinfo->presortedsuffixes[idx]] = idx;
   }
   if (hasspecialranges(rmnsufinfo->encseq))
   {
@@ -417,7 +400,7 @@ static Rankedbounds *fillrankbounds(const Rmnsufinfo *rmnsufinfo)
   return NULL;
 }
 
-static Seqpos frompos2pos(const Rankedbounds *leftptr,
+static Seqpos frompos2rank(const Rankedbounds *leftptr,
                            const Rankedbounds *rightptr,
                            Seqpos specialpos)
 {
@@ -481,9 +464,69 @@ static Seqpos fromrank2pos(const Rankedbounds *leftptr,
 }
 #endif
 
+typedef struct
+{
+  Seqpos specialrank,
+         key;
+} Rankwithpos;
+
+static int compareRankwithpos(const void *a,const void *b)
+{
+  const Rankwithpos *aptr = (const Rankwithpos *) a,
+                    *bptr = (const Rankwithpos *) b;
+
+  if (aptr->key < bptr->key)
+  {
+    return -1;
+  }
+  if (aptr->key > bptr->key)
+  {
+    return 1;
+  }
+  gt_assert(false);
+  return 0;
+}
+
+static Rankwithpos *fillrankwithpos(const Rmnsufinfo *rmnsufinfo)
+{
+  if (hasspecialranges(rmnsufinfo->encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos idx, specialcharacters;
+    Rankwithpos *rankwithpos, *rbptr;
+
+    specialcharacters = getencseqrealspecialranges(rmnsufinfo->encseq);
+    rankwithpos = gt_malloc(sizeof(Rankwithpos) * specialcharacters);
+    sri = newspecialrangeiterator(rmnsufinfo->encseq,
+                                  ISDIRREVERSE(rmnsufinfo->readmode)
+                                  ? false : true);
+    rbptr = rankwithpos;
+    STAMP;
+    while (nextspecialrangeiterator(&range,sri))
+    {
+      for (idx = range.leftpos; idx < range.rightpos; idx++)
+      {
+        gt_assert(rbptr < rankwithpos + specialcharacters);
+        rbptr->specialrank = (Seqpos) (rbptr - rankwithpos);
+        gt_assert(idx+1<=rmnsufinfo->totallength);
+        rbptr->key = rmnsufinfo->inversesuftab[idx+1];
+        rbptr++;
+      }
+    }
+    STAMP;
+    gt_assert(rbptr == rankwithpos + specialcharacters);
+    freespecialrangeiterator(&sri);
+    qsort(rankwithpos,(size_t) specialcharacters,
+          sizeof (Rankwithpos),compareRankwithpos);
+    return rankwithpos;
+  }
+  return NULL;
+}
+
 static void updateranknext(/*const */Rmnsufinfo *rmnsufinfo,
                            Seqpos *ranknext,
-                           GT_UNUSED Seqpos *ranknext2,
+                           Rankwithpos *rankwithpos,
                            unsigned long *occless,
                            GT_UNUSED const Rankedbounds *rankedbounds,
                            GT_UNUSED Seqpos realspecialranges,
@@ -506,10 +549,12 @@ static void updateranknext(/*const */Rmnsufinfo *rmnsufinfo,
                         pos);
     gt_assert(rank <= rmnsufinfo->totallength);
     ranknext[rank] = idx;
-    ranknext2[rmnsufinfo->ranknext2index++] = idx;
+    gt_assert(rank == rankwithpos[rmnsufinfo->ranknext2index].specialrank);
+    rmnsufinfo->ranknext2index++;
   }
 }
 
+#ifdef WITHcomparewithsuffixarray
 static int comparewithsuffixarray(const void *a,const void *b,void *data)
 {
   const Rmnsufinfo *rmnsufinfo = (const Rmnsufinfo *) data;
@@ -553,25 +598,28 @@ static int comparewithsuffixarray(const void *a,const void *b,void *data)
   gt_assert(false);
   return 0;
 }
+#endif
 
 static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
                           /*const*/ Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx, longest = 0, realspecialranges, specialcharacters;
   unsigned long *occless;
-  Seqpos *ranknext2;
+  Rankwithpos *rankwithpos;
 
   gt_assert(rmnsufinfo->partwidth > 0);
   occless = computeocclesstab(rmnsufinfo);
   realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
   specialcharacters = getencseqspecialcharacters(rmnsufinfo->encseq);
-  ranknext2 = gt_malloc(sizeof(Seqpos) * specialcharacters);
+  STAMP;
+  rankwithpos = fillrankwithpos(rmnsufinfo);
+  STAMP;
   rmnsufinfo->ranknext2index = 0;
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
     if (rmnsufinfo->presortedsuffixes[idx] > 0)
     {
-      updateranknext(rmnsufinfo,ranknext,ranknext2,occless,rankedbounds,
+      updateranknext(rmnsufinfo,ranknext,rankwithpos,occless,rankedbounds,
                      realspecialranges,rmnsufinfo->presortedsuffixes[idx]-1,
                      idx);
     } else
@@ -596,7 +644,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
       {
         if (specialpos > 0)
         {
-          updateranknext(rmnsufinfo,ranknext,ranknext2,occless,rankedbounds,
+          updateranknext(rmnsufinfo,ranknext,rankwithpos,occless,rankedbounds,
                          realspecialranges,specialpos-1,specialidx);
         } else
         {
@@ -607,35 +655,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rankedbounds *rankedbounds,
     }
     freespecialrangeiterator(&sri);
   }
-  gt_assert(rmnsufinfo->ranknext2index == specialcharacters ||
-            (getencseqlengthofspecialsuffix(rmnsufinfo->encseq) &&
-             rmnsufinfo->ranknext2index + 1 == specialcharacters));
-  gt_qsort_r(ranknext2,rmnsufinfo->ranknext2index,
-             sizeof(Seqpos),rmnsufinfo,comparewithsuffixarray);
-  {
-    Seqpos i;
-    bool failure = false;
-
-    for (i=0; i<rmnsufinfo->ranknext2index; i++)
-    {
-      if (ranknext2[i] != ranknext[rmnsufinfo->partwidth+i])
-      {
-        failure = true;
-        break;
-      }
-    }
-    if (failure)
-    {
-      unsigned long j;
-      for (j=0; j<rmnsufinfo->ranknext2index; j++)
-      {
-        printf("j=%lu: ranknext=%lu, ranknext2=%lu\n",
-                j,(unsigned long) ranknext[rmnsufinfo->partwidth+j],
-                  (unsigned long) ranknext2[j]);
-      }
-    }
-  }
-  gt_free(ranknext2);
+  gt_free(rankwithpos);
   gt_free(occless);
   return longest;
 }
@@ -649,7 +669,9 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   lcptab = rmnsufinfo->inversesuftab; /* inverssuftab is no longer needed */
   rankedbounds = fillrankbounds(rmnsufinfo);
   realspecialranges = getencseqrealspecialranges(rmnsufinfo->encseq);
+  STAMP;
   fillpos = sa2ranknext(lcptab,rankedbounds,rmnsufinfo);
+  STAMP;
   printf("longest=%lu\n",(unsigned long) fillpos);
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
@@ -706,8 +728,6 @@ Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
   rmnsufinfo->rangestobesorted = NULL;
   gt_free(rmnsufinfo->inversesuftab);
   rmnsufinfo->inversesuftab = NULL;
-  gt_free(rmnsufinfo->rankwithpos);
-  rmnsufinfo->rankwithpos = NULL;
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;
