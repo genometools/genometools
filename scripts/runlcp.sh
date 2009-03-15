@@ -1,17 +1,15 @@
 #!/bin/sh
-checkerror() {
-if test $? -ne 0
-then
-  echo "failure: ${cmd}"
-  exit 1
-else
-  echo "okay: ${cmd}"
-fi
-}
-
 set -e -x
 
-for filename in `find testdata/ -name '*.fna'`
+if test $# -eq 0
+then
+  filenames=`find testdata/ -name '*.fna'`
+else
+  filenames=$*
+fi
+
+for filename in ${filenames}
 do
-  valgrind.sh gt suffixerator -dna  -suf -lcp -tis -maxdepth -indexname sfx-idx -db ${filename}
+  gt suffixerator -dna -v -tis -suf -des -ssp -lcp -bwt -bck  -maxdepth -indexname sfx-idx -db ${filename}
+  gt dev sfxmap -tis -suf -des -ssp -lcp -bwt -bck sfx-idx
 done

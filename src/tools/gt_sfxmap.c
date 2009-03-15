@@ -174,6 +174,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   gt_option_parser_add_option(op, optionverbose);
 
   gt_option_parser_set_min_max_args(op, 1U, 2U);
+  gt_option_imply(optionlcp,optionsuf);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   gt_option_parser_delete(op);
