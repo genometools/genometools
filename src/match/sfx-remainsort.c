@@ -584,8 +584,10 @@ static Seqpos *fillnextinverselist(GT_UNUSED Seqpos *ranknext,
                    (unsigned long) (idx+1),
                    (unsigned long) rmnsufinfo->inversesuftab[idx+1],
                    (unsigned long) rmnsufinfo->partwidth+specialranklistindex);
+        /*
         gt_assert(rmnsufinfo->partwidth+specialranklistindex + 1 ==
                   rmnsufinfo->inversesuftab[idx+1]);
+        */
         specialranklist[specialranklistindex]
           = rmnsufinfo->partwidth + specialranklistindex + 1;
         specialranklistindex++;
@@ -821,10 +823,6 @@ static Seqpos sa2ranknext(Seqpos *ranknext,Rmnsufinfo *rmnsufinfo)
         }
         specialidx++;
       }
-      if (range.rightpos == rmnsufinfo->totallength)
-      {
-        ranknext[rmnsufinfo->totallength-1] = rmnsufinfo->totallength;
-      }
     }
     freespecialrangeiterator(&sri);
   }
@@ -841,6 +839,10 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
          *ranknext, *specialranklist2;
 
   ranknext = rmnsufinfo->inversesuftab;
+  if (getencseqlengthofspecialsuffix(rmnsufinfo->encseq) > 0)
+  {
+    ranknext[rmnsufinfo->totallength-1] = rmnsufinfo->totallength;
+  }
   specialranklist2 = fillnextinverselist(ranknext,rmnsufinfo);
   fillpos = sa2ranknext(ranknext,rmnsufinfo);
   printf("longest=%lu\n",(unsigned long) fillpos);
