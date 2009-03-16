@@ -49,7 +49,7 @@ typedef struct
 struct Rmnsufinfo
 {
   Seqpos *inversesuftab,
-         *presortedsuffixes;
+         *suftab;
   GtQueue *rangestobesorted;
   Seqpos partwidth,
          totallength,
@@ -71,7 +71,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   Rmnsufinfo *rmnsufinfo;
 
   rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
-  rmnsufinfo->presortedsuffixes = presortedsuffixes;
+  rmnsufinfo->suftab = presortedsuffixes;
   rmnsufinfo->rangestobesorted = gt_queue_new();
   rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->totallength = getencseqtotallength(encseq);
@@ -165,7 +165,7 @@ static void inverserange(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
 {
   Seqpos *ptr, startindex;
 
-  startindex = (Seqpos) (left - rmnsufinfo->presortedsuffixes);
+  startindex = (Seqpos) (left - rmnsufinfo->suftab);
   for (ptr = left; ptr <= right; ptr++)
   {
     rmnsufinfo->inversesuftab[*ptr] = startindex;
@@ -197,7 +197,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
     left[idx] = rmnsufinfo->itvinfo[idx].suffixstart;
   }
   rangestart = 0;
-  startindex = (Seqpos) (left - rmnsufinfo->presortedsuffixes);
+  startindex = (Seqpos) (left - rmnsufinfo->suftab);
   for (idx=1UL; idx<width; idx++)
   {
     if (rmnsufinfo->itvinfo[idx-1].key != rmnsufinfo->itvinfo[idx].key)
@@ -252,7 +252,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rmnsufinfo->inversesuftab[rmnsufinfo->presortedsuffixes[idx]] = idx;
+    rmnsufinfo->inversesuftab[rmnsufinfo->suftab[idx]] = idx;
   }
   if (hasspecialranges(rmnsufinfo->encseq))
   {
@@ -308,7 +308,7 @@ Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
     Seqpos fillpos = rmnsufinfo->inversesuftab[pos];
     if (fillpos > 0 && fillpos < rmnsufinfo->partwidth)
     {
-      Seqpos previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
+      Seqpos previousstart = rmnsufinfo->suftab[fillpos-1];
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
@@ -357,10 +357,10 @@ static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
 
 /* for computing the ranknext-values of special positions, we only
    need the values inversesuftab[range.rightpos] in this order,
-   where range a special range 
+   where range a special range
    Now, if range.rightpos = suffixarray[i] for some i, then
    inversesuftab[range.rightpos] = inversesuftab[suffixarray[i]] = i.
-   Thus, in case where the inversesuftab is not available, 
+   Thus, in case where the inversesuftab is not available,
    we obtain these values by the following function:
 */
 
@@ -370,12 +370,12 @@ static void setrelevantfrominversetab(Seqpos *rightposinverse,
   if (hasspecialranges(rmnsufinfo->encseq))
   {
     Seqpos idx;
-  
+
     for (idx = 0; idx < rmnsufinfo->partwidth; idx++)
     {
-      if (rmnsufinfo->presortedsuffixes[idx] > 0)
+      if (rmnsufinfo->suftab[idx] > 0)
       {
-        Seqpos pos = rmnsufinfo->presortedsuffixes[idx];
+        Seqpos pos = rmnsufinfo->suftab[idx];
         Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,
                                   rmnsufinfo->readmode);
         if (ISSPECIAL(cc))
@@ -503,10 +503,10 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    if (rmnsufinfo->presortedsuffixes[idx] > 0)
+    if (rmnsufinfo->suftab[idx] > 0)
     {
       Uchar cc = getencodedchar(rmnsufinfo->encseq,
-                                rmnsufinfo->presortedsuffixes[idx]-1,
+                                rmnsufinfo->suftab[idx]-1,
                                 rmnsufinfo->readmode);
       if (ISNOTSPECIAL(cc))
       {
@@ -574,7 +574,7 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
 
   if (rmnsufinfo->inversesuftab == NULL)
   {
-    rightposinverse = ranknext 
+    rightposinverse = ranknext
                     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
     ranknext[rmnsufinfo->totallength] = rmnsufinfo->totallength;
     setrelevantfrominversetab(rightposinverse,rmnsufinfo);
@@ -601,7 +601,7 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
     }
     if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
     {
-      previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
+      previousstart = rmnsufinfo->suftab[fillpos-1];
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
@@ -627,7 +627,8 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
     }
     fillpos = nextfillpos;
   }
-  rmnsufinfo->inversesuftab = NULL;
+  rmnsufinfo->inversesuftab = NULL; /* since lcptab point to this memory */
+                                    /* and is freed later */
   return lcptab;
 }
 
