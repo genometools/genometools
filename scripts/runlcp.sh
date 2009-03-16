@@ -10,6 +10,6 @@ fi
 
 for filename in ${filenames}
 do
-  valgrind.sh gt suffixerator -protein -v -tis -suf -des -ssp -lcp -bwt -bck  -maxdepth -indexname sfx-idx -db ${filename}
+  valgrind.sh gt suffixerator -protein -tis -suf -des -ssp -lcp -bwt -bck  -maxdepth -indexname sfx-idx -db ${filename}
   gt dev sfxmap -suf -lcp sfx-idx
 done

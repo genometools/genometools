@@ -246,7 +246,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   Pairsuffixptr *pairptr;
   Seqpos idx;
 
-  printf("# countovermaxdepth=%lu\n",
+  printf("countovermaxdepth=%lu\n",
            gt_queue_size(rmnsufinfo->rangestobesorted));
   rmnsufinfo->inversesuftab
     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
@@ -347,6 +347,10 @@ static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
   {
     occless[idx] = occless[idx-1] +
                    getencseqcharactercount(rmnsufinfo->encseq,(Uchar) (idx-1));
+    /*
+    printf("occless[%lu]=%lu\n",(unsigned long) idx,
+                                (unsigned long) occless[idx]);
+    */
   }
   return occless;
 }
@@ -377,9 +381,11 @@ static void setrelevantfrominversetab(Seqpos *rightposinverse,
         if (ISSPECIAL(cc))
         {
           rightposinverse[pos] = idx;
+          /*
           printf("(1) store rightposinverse[%lu]=%lu\n",
                (unsigned long) pos,
                (unsigned long) idx);
+          */
         }
       }
     }
@@ -409,7 +415,7 @@ static Seqpos *fillrightofpartwidth(const Seqpos *rightposinverse,
       {
         size_t allocsize = sizeof (Seqpos) * (realspecialranges - countranges);
         rightofpartwidth = gt_malloc(allocsize);
-        printf("# allocated %lu bytes for rightofpartwidth (%.2f)\n",
+        printf("allocated %lu bytes for rightofpartwidth (%.2f)\n",
                  (unsigned long) allocsize,
                  (double) allocsize/rmnsufinfo->totallength);
       }
@@ -417,12 +423,13 @@ static Seqpos *fillrightofpartwidth(const Seqpos *rightposinverse,
                 (realspecialranges - countranges));
       rightofpartwidth[nextrightofpartwidth++]
         = rightposinverse[range.rightpos];
+      /*
       printf("(1) access rightposinverse[%lu]=%lu\n",
              (unsigned long) range.rightpos,
              (unsigned long) rightposinverse[range.rightpos]);
+      */
     }
   }
-  printf("countranges = %lu\n",(unsigned long) countranges);
   freespecialrangeiterator(&sri);
   return rightofpartwidth;
 }
@@ -452,21 +459,25 @@ static void inversesuffixarray2specialranknext(const Seqpos *rightposinverse,
       {
         gt_assert(specialranklistindex < rmnsufinfo->totallength);
         ranknext[specialranklistindex] = specialranklistindex + 1;
+        /*
         printf("(1) set ranknext[%lu] = %lu\n",
                   (unsigned long) specialranklistindex,
                   (unsigned long) ranknext[specialranklistindex]);
         fflush(stdout);
+        */
         specialranklistindex++;
       }
       gt_assert(specialranklistindex < rmnsufinfo->totallength);
       if (range.rightpos < rmnsufinfo->partwidth)
       {
         ranknext[specialranklistindex] = rightposinverse[range.rightpos];
+        /*
         printf("(2) set ranknext[%lu] = %lu = rightposinverse[%lu]\n",
                   (unsigned long) specialranklistindex,
                   (unsigned long) ranknext[specialranklistindex],
                   (unsigned long) range.rightpos);
         fflush(stdout);
+        */
       } else
       {
         ranknext[specialranklistindex] = rightofpartwidth[nextrightofpartwidth];
@@ -500,8 +511,12 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < (unsigned long) rmnsufinfo->partwidth);
-        printf("(2) set ranknext[%lu]=%lu\n",(unsigned long) occless[cc],
-                                             (unsigned long) idx);
+        /*
+        printf("(2) cc=%u: set ranknext[%lu]=%lu\n",
+                        (unsigned int) cc,
+                        (unsigned long) occless[cc],
+                        (unsigned long) idx);
+        */
         ranknext[occless[cc]++] = idx;
       }
     } else
@@ -554,7 +569,7 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
 
 static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos pos, previousstart, nextfillpos, fillpos, lcpvalue = 0, *lcptab,
+  Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0, *lcptab,
          *ranknext, *rightposinverse;
 
   if (rmnsufinfo->inversesuftab == NULL)
@@ -576,9 +591,14 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
      the determined lcp-value */
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
-    printf("ranknext[%lu]=",(unsigned long) fillpos);
-    printf("%lu\n",(unsigned long) ranknext[fillpos]);
-    nextfillpos = ranknext[fillpos];
+    if (pos < rmnsufinfo->totallength - 1)
+    {
+      /*
+      printf("ranknext[%lu]=",(unsigned long) fillpos);
+      printf("%lu\n",(unsigned long) ranknext[fillpos]);
+      */
+      nextfillpos = ranknext[fillpos];
+    }
     if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
     {
       previousstart = rmnsufinfo->presortedsuffixes[fillpos-1];
@@ -619,8 +639,8 @@ Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
   sortremainingsuffixes(rmnsufinfo);
   if (withlcptab)
   {
-    /*gt_free(rmnsufinfo->inversesuftab);
-    rmnsufinfo->inversesuftab = NULL;*/
+    gt_free(rmnsufinfo->inversesuftab);
+    rmnsufinfo->inversesuftab = NULL;
     lcptab = lcp9_manzini(rmnsufinfo);
   } else
   {
