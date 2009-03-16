@@ -23,7 +23,8 @@
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/fa.h"
-#include "core/fastabuffer.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_plain.h"
 #include "core/str.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
@@ -123,7 +124,7 @@
 typedef struct
 {
   const char *funcname;
-  int(*function)(Encodedsequence *,GtFastaBuffer *,GtError *);
+  int(*function)(Encodedsequence *,GtSequenceBuffer *,GtError *);
 } Fillencposfunc;
 
 typedef struct
@@ -1207,7 +1208,7 @@ static Uchar delivercharViauint32tablesSpecialrange(
   return (Uchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fb,
+static int fillplainseq(Encodedsequence *encseq,GtSequenceBuffer *fb,
                         GtError *err)
 {
   Seqpos pos;
@@ -1219,7 +1220,7 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fb,
   encseq->hasplainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = gt_fastabuffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next(fb,&cc,err);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -1235,7 +1236,7 @@ static int fillplainseq(Encodedsequence *encseq,GtFastaBuffer *fb,
 }
 
 static int fillbitpackarray(Encodedsequence *encseq,
-                            GtFastaBuffer *fb,
+                            GtSequenceBuffer *fb,
                             GtError *err)
 {
   Seqpos pos;
@@ -1250,7 +1251,7 @@ static int fillbitpackarray(Encodedsequence *encseq,
                        (BitOffset) encseq->totallength,true);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = gt_fastabuffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next(fb,&cc,err);
     if (retval < 0)
     {
       bitpackarray_delete(encseq->bitpackarray);
@@ -1282,7 +1283,7 @@ static int fillbitpackarray(Encodedsequence *encseq,
 }
 
 static int fillbitaccesstab(Encodedsequence *encseq,
-                            GtFastaBuffer *fb,
+                            GtSequenceBuffer *fb,
                             GtError *err)
 {
   Uchar cc;
@@ -1295,7 +1296,7 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   INITBITTAB(encseq->specialbits,encseq->totallength);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = gt_fastabuffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next(fb,&cc,err);
     if (retval < 0)
     {
       return -1;
@@ -2841,7 +2842,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
-  GtFastaBuffer *fb = NULL;
+  GtSequenceBuffer *fb = NULL;
   Seqpos specialranges;
 
   gt_error_check(err);
@@ -2876,13 +2877,13 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     encseq->filenametab = filenametab;
     encseq->filelengthtab = filelengthtab;
     encseq->specialcharinfo = *specialcharinfo;
-    gt_assert(filenametab != NULL && alphabet != NULL);
-    fb = gt_fastabuffer_new(filenametab,
-                            plainformat ? NULL : getsymbolmapAlphabet(alphabet),
-                            plainformat,
-                            NULL,
-                            NULL,
-                            NULL);
+    gt_assert(filenametab != NULL);
+    if (plainformat) {
+      fb = gt_sequence_buffer_plain_new(filenametab);
+    } else {
+      fb = gt_sequence_buffer_fasta_new(filenametab);
+      gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alphabet));
+    }
     if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,err) != 0)
     {
       haserr = true;
@@ -2898,7 +2899,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   {
     freeEncodedsequence(&encseq);
   }
-  gt_fastabuffer_delete(fb);
+  gt_sequence_buffer_delete(fb);
   return haserr ? NULL : encseq;
 }
 

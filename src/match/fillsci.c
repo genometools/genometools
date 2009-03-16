@@ -21,7 +21,8 @@
 #include "core/disc_distri.h"
 #include "core/error.h"
 #include "core/fa.h"
-#include "core/fastabuffer.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_plain.h"
 #include "core/str_array.h"
 #include "esa-fileend.h"
 #include "seqpos-def.h"
@@ -158,7 +159,7 @@ int fasta2sequencekeyvalues(
         Verboseinfo *verboseinfo,
         GtError *err)
 {
-  GtFastaBuffer *fb = NULL;
+  GtSequenceBuffer *fb = NULL;
   Uchar charcode;
   Seqpos currentpos = 0;
   int retval;
@@ -186,16 +187,23 @@ int fasta2sequencekeyvalues(
   }
   if (!haserr)
   {
-    fb = gt_fastabuffer_new(filenametab,
-                            getsymbolmapAlphabet(alpha),
-                            plainformat,
-                            filelengthtab,
-                            descqueue,
-                            characterdistribution);
+    if (plainformat) {
+      fb = gt_sequence_buffer_plain_new(filenametab);
+    } else {
+      fb = gt_sequence_buffer_fasta_new(filenametab);
+    }
+    gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alpha));
+    *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
+                               sizeof (Filelengthvalues));
+    gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
+    if (descqueue)
+      gt_sequence_buffer_set_desc_queue(fb, descqueue);
+    gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
+
     distspralen = gt_disc_distri_new();
     for (currentpos = 0; /* Nothing */; currentpos++)
     {
-      retval = gt_fastabuffer_next(fb,&charcode,err);
+      retval = gt_sequence_buffer_next(fb,&charcode,err);
       if (retval < 0)
       {
         haserr = true;
@@ -283,7 +291,7 @@ int fasta2sequencekeyvalues(
   }
   gt_fa_xfclose(desfp);
   gt_disc_distri_delete(distspralen);
-  gt_fastabuffer_delete(fb);
+  gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
 }

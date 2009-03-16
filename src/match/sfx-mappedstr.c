@@ -23,7 +23,8 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/error.h"
-#include "core/fastabuffer.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_plain.h"
 #include "core/str_array.h"
 #include "spacedef.h"
 #include "intcode-def.h"
@@ -488,20 +489,20 @@ int getfastastreamkmers(
   Streamstate spwp;
   Uchar charcode;
   bool haserr = false;
-  GtFastaBuffer *fb;
+  GtSequenceBuffer *fb;
   int retval;
 
   gt_error_check(err);
   initstreamstate(&spwp,numofchars,kmersize);
-  fb = gt_fastabuffer_new(filenametab,
-                          symbolmap,
-                          plainformat,
-                          NULL,
-                          NULL,
-                          NULL);
+  if (plainformat)
+    fb = gt_sequence_buffer_plain_new(filenametab);
+  else
+    fb = gt_sequence_buffer_fasta_new(filenametab);
+  gt_sequence_buffer_set_symbolmap(fb, symbolmap);
+
   for (currentposition = 0; /* Nothing */; currentposition++)
   {
-    retval = gt_fastabuffer_next(fb,&charcode,err);
+    retval = gt_sequence_buffer_next(fb,&charcode,err);
     if (retval < 0)
     {
       haserr = true;
@@ -514,7 +515,7 @@ int getfastastreamkmers(
     shiftrightwithchar(processkmercode,processkmercodeinfo,
                        &spwp,currentposition,charcode);
   }
-  gt_fastabuffer_delete(fb);
+  gt_sequence_buffer_delete(fb);
   if (!haserr)
   {
     doovershoot(&spwp,

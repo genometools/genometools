@@ -17,7 +17,8 @@
 
 #include "core/error.h"
 #include "core/array.h"
-#include "core/fastabuffer.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_plain.h"
 #include "core/progressbar.h"
 #include "spacedef.h"
 #include "readmode-def.h"
@@ -117,7 +118,7 @@ static int testfullscan(const GtStrArray *filenametab,
 {
   Seqpos pos, totallength;
   Uchar ccscan = 0, ccra, ccsr;
-  GtFastaBuffer *fb = NULL;
+  GtSequenceBuffer *fb = NULL;
   int retval;
   bool haserr = false;
   Encodedsequencescanstate *esr;
@@ -128,12 +129,8 @@ static int testfullscan(const GtStrArray *filenametab,
   gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
-    fb = gt_fastabuffer_new(filenametab,
-                            getencseqAlphabetsymbolmap(encseq),
-                            false,
-                            NULL,
-                            NULL,
-                            NULL);
+    fb = gt_sequence_buffer_fasta_new(filenametab);
+    gt_sequence_buffer_set_symbolmap(fb, getencseqAlphabetsymbolmap(encseq));
   }
   esr = newEncodedsequencescanstate();
   initEncodedsequencescanstate(esr,encseq,readmode,0);
@@ -141,7 +138,7 @@ static int testfullscan(const GtStrArray *filenametab,
   {
     if (filenametab != NULL && readmode == Forwardmode)
     {
-      retval = gt_fastabuffer_next(fb,&ccscan,err);
+      retval = gt_sequence_buffer_next(fb,&ccscan,err);
       if (retval < 0)
       {
         haserr = true;
@@ -200,7 +197,7 @@ static int testfullscan(const GtStrArray *filenametab,
     }
   }
   freeEncodedsequencescanstate(&esr);
-  gt_fastabuffer_delete(fb);
+  gt_sequence_buffer_delete(fb);
   return haserr ? -1 : 0;
 }
 
