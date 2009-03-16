@@ -161,7 +161,8 @@ static int compareitv(const void *a,const void *b)
   return 0;
 }
 
-static void inverserange(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
+static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                               Seqpos *right)
 {
   Seqpos *ptr, startindex;
 
@@ -208,9 +209,9 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
                          left + rangestart,
                          left + idx - 1,
                          MULT2(rmnsufinfo->currentdepth));
-        inverserange(rmnsufinfo,
-                     left + rangestart,
-                     left + idx - 1);
+        inversesuftabrange(rmnsufinfo,
+                           left + rangestart,
+                           left + idx - 1);
       } else
       {
         rmnsufinfo->inversesuftab[left[rangestart]] = startindex+rangestart;
@@ -224,9 +225,9 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
                      left + rangestart,
                      left + width - 1,
                      MULT2(rmnsufinfo->currentdepth));
-    inverserange(rmnsufinfo,
-                 left + rangestart,
-                 left + width - 1);
+    inversesuftabrange(rmnsufinfo,
+                       left + rangestart,
+                       left + width - 1);
   } else
   {
     rmnsufinfo->inversesuftab[left[rangestart]] = startindex+rangestart;
@@ -237,7 +238,7 @@ static int putleftbound(void **elem,void *info, GT_UNUSED GtError *err)
 {
   Pairsuffixptr *pairptr = *(Pairsuffixptr**) elem;
 
-  inverserange((Rmnsufinfo *) info,pairptr->left,pairptr->right);
+  inversesuftabrange((Rmnsufinfo *) info,pairptr->left,pairptr->right);
   return 0;
 }
 
