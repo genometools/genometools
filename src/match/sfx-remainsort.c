@@ -351,7 +351,43 @@ static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
   return occless;
 }
 
-static Seqpos *fillrightofpartwidth(const Rmnsufinfo *rmnsufinfo)
+/* for computing the ranknext-values of special positions, we only
+   need the values inversesuftab[range.rightpos] in this order,
+   where range a special range 
+   Now, if range.rightpos = suffixarray[i] for some i, then
+   inversesuftab[range.rightpos] = inversesuftab[suffixarray[i]] = i.
+   Thus, in case where the inversesuftab is not available, 
+   we obtain these values by the following function:
+*/
+
+static void setrelevantfrominversetab(Seqpos *rightposinverse,
+                                      const Rmnsufinfo *rmnsufinfo)
+{
+  if (hasspecialranges(rmnsufinfo->encseq))
+  {
+    Seqpos idx;
+  
+    for (idx = 0; idx < rmnsufinfo->partwidth; idx++)
+    {
+      if (rmnsufinfo->presortedsuffixes[idx] > 0)
+      {
+        Seqpos pos = rmnsufinfo->presortedsuffixes[idx];
+        Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,
+                                  rmnsufinfo->readmode);
+        if (ISSPECIAL(cc))
+        {
+          rightposinverse[pos] = idx;
+          printf("(1) store rightposinverse[%lu]=%lu\n",
+               (unsigned long) pos,
+               (unsigned long) idx);
+        }
+      }
+    }
+  }
+}
+
+static Seqpos *fillrightofpartwidth(const Seqpos *rightposinverse,
+                                    const Rmnsufinfo *rmnsufinfo)
 {
   Specialrangeiterator *sri;
   Sequencerange range;
@@ -380,14 +416,19 @@ static Seqpos *fillrightofpartwidth(const Rmnsufinfo *rmnsufinfo)
       gt_assert(rightofpartwidth != NULL && (Seqpos) nextrightofpartwidth <
                 (realspecialranges - countranges));
       rightofpartwidth[nextrightofpartwidth++]
-        = rmnsufinfo->inversesuftab[range.rightpos];
+        = rightposinverse[range.rightpos];
+      printf("(1) access rightposinverse[%lu]=%lu\n",
+             (unsigned long) range.rightpos,
+             (unsigned long) rightposinverse[range.rightpos]);
     }
   }
+  printf("countranges = %lu\n",(unsigned long) countranges);
   freespecialrangeiterator(&sri);
   return rightofpartwidth;
 }
 
-static void inversesuffixarray2specialranknext(Seqpos *ranknext,
+static void inversesuffixarray2specialranknext(const Seqpos *rightposinverse,
+                                               Seqpos *ranknext,
                                                const Rmnsufinfo *rmnsufinfo)
 {
   if (hasspecialranges(rmnsufinfo->encseq))
@@ -397,7 +438,7 @@ static void inversesuffixarray2specialranknext(Seqpos *ranknext,
     Seqpos specialcharacters, idx, *rightofpartwidth = NULL;
     Seqpos specialranklistindex, nextrightofpartwidth = 0;
 
-    rightofpartwidth = fillrightofpartwidth(rmnsufinfo);
+    rightofpartwidth = fillrightofpartwidth(rightposinverse,rmnsufinfo);
     specialcharacters = getencseqspecialcharacters(rmnsufinfo->encseq);
     specialranklistindex = rmnsufinfo->partwidth;
     sri = newspecialrangeiterator(rmnsufinfo->encseq,
@@ -411,17 +452,24 @@ static void inversesuffixarray2specialranknext(Seqpos *ranknext,
       {
         gt_assert(specialranklistindex < rmnsufinfo->totallength);
         ranknext[specialranklistindex] = specialranklistindex + 1;
+        printf("(1) set ranknext[%lu] = %lu\n",
+                  (unsigned long) specialranklistindex,
+                  (unsigned long) ranknext[specialranklistindex]);
+        fflush(stdout);
         specialranklistindex++;
       }
       gt_assert(specialranklistindex < rmnsufinfo->totallength);
       if (range.rightpos < rmnsufinfo->partwidth)
       {
-        ranknext[specialranklistindex]
-          = rmnsufinfo->inversesuftab[range.rightpos];
+        ranknext[specialranklistindex] = rightposinverse[range.rightpos];
+        printf("(2) set ranknext[%lu] = %lu = rightposinverse[%lu]\n",
+                  (unsigned long) specialranklistindex,
+                  (unsigned long) ranknext[specialranklistindex],
+                  (unsigned long) range.rightpos);
+        fflush(stdout);
       } else
       {
-        ranknext[specialranklistindex]
-          = rightofpartwidth[nextrightofpartwidth];
+        ranknext[specialranklistindex] = rightofpartwidth[nextrightofpartwidth];
         nextrightofpartwidth++;
       }
       specialranklistindex++;
@@ -432,7 +480,7 @@ static void inversesuffixarray2specialranknext(Seqpos *ranknext,
   }
 }
 
-static Seqpos sa2ranknext(Seqpos *ranknext,Rmnsufinfo *rmnsufinfo)
+static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx, longest = 0;
   unsigned long *occless;
@@ -452,6 +500,8 @@ static Seqpos sa2ranknext(Seqpos *ranknext,Rmnsufinfo *rmnsufinfo)
       if (ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < (unsigned long) rmnsufinfo->partwidth);
+        printf("(2) set ranknext[%lu]=%lu\n",(unsigned long) occless[cc],
+                                             (unsigned long) idx);
         ranknext[occless[cc]++] = idx;
       }
     } else
@@ -505,18 +555,29 @@ static Seqpos sa2ranknext(Seqpos *ranknext,Rmnsufinfo *rmnsufinfo)
 static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
 {
   Seqpos pos, previousstart, nextfillpos, fillpos, lcpvalue = 0, *lcptab,
-         *ranknext;
+         *ranknext, *rightposinverse;
 
-  ranknext = rmnsufinfo->inversesuftab;
-  inversesuffixarray2specialranknext(ranknext,rmnsufinfo);
+  if (rmnsufinfo->inversesuftab == NULL)
+  {
+    rightposinverse = ranknext 
+                    = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
+    ranknext[rmnsufinfo->totallength] = rmnsufinfo->totallength;
+    setrelevantfrominversetab(rightposinverse,rmnsufinfo);
+  } else
+  {
+    rightposinverse = ranknext = rmnsufinfo->inversesuftab;
+  }
+  inversesuffixarray2specialranknext(rightposinverse,ranknext,rmnsufinfo);
   fillpos = sa2ranknext(ranknext,rmnsufinfo);
   printf("longest=" FormatSeqpos "\n",PRINTSeqposcast(fillpos));
-  lcptab = rmnsufinfo->inversesuftab;
+  lcptab = ranknext;
   /* now ranknext and lcptab point to the same memory area. After reading
      ranknext at position fillpos, the same cell is used for storing
      the determined lcp-value */
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
+    printf("ranknext[%lu]=",(unsigned long) fillpos);
+    printf("%lu\n",(unsigned long) ranknext[fillpos]);
     nextfillpos = ranknext[fillpos];
     if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
     {
@@ -558,6 +619,8 @@ Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
   sortremainingsuffixes(rmnsufinfo);
   if (withlcptab)
   {
+    /*gt_free(rmnsufinfo->inversesuftab);
+    rmnsufinfo->inversesuftab = NULL;*/
     lcptab = lcp9_manzini(rmnsufinfo);
   } else
   {
