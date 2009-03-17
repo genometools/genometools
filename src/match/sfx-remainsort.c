@@ -46,10 +46,15 @@ typedef struct
   unsigned long count, totalwidth, maxwidth;
 } Firstwithnewdepth;
 
+typedef struct
+{
+  Seqpos *plain;
+} Inversesuftab;
+
 struct Rmnsufinfo
 {
-  Seqpos *inversesuftab,
-         *suftab;
+  Inversesuftab inversesuftab;
+  Seqpos *suftab;
   GtQueue *rangestobesorted;
   Seqpos partwidth,
          totallength,
@@ -174,7 +179,7 @@ static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
   startindex = (Seqpos) (left - rmnsufinfo->suftab);
   for (ptr = left; ptr <= right; ptr++)
   {
-    rmnsufinfo->inversesuftab[*ptr] = startindex;
+    rmnsufinfo->inversesuftab.plain[*ptr] = startindex;
   }
 }
 
@@ -195,7 +200,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
     rmnsufinfo->itvinfo[idx].suffixstart = left[idx];
     gt_assert(left[idx]+rmnsufinfo->currentdepth <= rmnsufinfo->totallength);
     rmnsufinfo->itvinfo[idx].key
-      = rmnsufinfo->inversesuftab[left[idx]+rmnsufinfo->currentdepth];
+      = rmnsufinfo->inversesuftab.plain[left[idx]+rmnsufinfo->currentdepth];
   }
   qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
   for (idx=0; idx<width; idx++)
@@ -219,7 +224,8 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
                            left + idx - 1);
       } else
       {
-        rmnsufinfo->inversesuftab[left[rangestart]] = startindex+rangestart;
+        rmnsufinfo->inversesuftab.plain[left[rangestart]]
+          = startindex+rangestart;
       }
       rangestart = idx;
     }
@@ -235,7 +241,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
                        left + width - 1);
   } else
   {
-    rmnsufinfo->inversesuftab[left[rangestart]] = startindex+rangestart;
+    rmnsufinfo->inversesuftab.plain[left[rangestart]] = startindex+rangestart;
   }
 }
 
@@ -254,11 +260,11 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 
   printf("countovermaxdepth=%lu\n",
            gt_queue_size(rmnsufinfo->rangestobesorted));
-  rmnsufinfo->inversesuftab
+  rmnsufinfo->inversesuftab.plain
     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rmnsufinfo->inversesuftab[rmnsufinfo->suftab[idx]] = idx;
+    rmnsufinfo->inversesuftab.plain[rmnsufinfo->suftab[idx]] = idx;
   }
   if (hasspecialranges(rmnsufinfo->encseq))
   {
@@ -274,7 +280,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     {
       for (idx = range.leftpos; idx < range.rightpos; idx++)
       {
-        rmnsufinfo->inversesuftab[idx] = specialidx++;
+        rmnsufinfo->inversesuftab.plain[idx] = specialidx++;
       }
     }
     gt_assert(specialidx == rmnsufinfo->totallength);
@@ -282,7 +288,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   }
   /* now we can unmap the encoded sequence if only suffix sorting is
    * necessary */
-  rmnsufinfo->inversesuftab[rmnsufinfo->totallength] = rmnsufinfo->totallength;
+  rmnsufinfo->inversesuftab.plain[rmnsufinfo->totallength]
+    = rmnsufinfo->totallength;
   (void) gt_queue_iterate(rmnsufinfo->rangestobesorted,
                           putleftbound,
                           rmnsufinfo,
@@ -312,7 +319,7 @@ Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
   lcptab[0] = 0;
   for (pos=0; pos <= rmnsufinfo->totallength; pos++)
   {
-    Seqpos fillpos = rmnsufinfo->inversesuftab[pos];
+    Seqpos fillpos = rmnsufinfo->inversesuftab.plain[pos];
     if (fillpos > 0 && fillpos < rmnsufinfo->partwidth)
     {
       Seqpos previousstart = rmnsufinfo->suftab[fillpos-1];
@@ -364,7 +371,7 @@ static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
 
 /* for computing the ranknext-values of special positions, we only
    need the values inversesuftab[range.rightpos] in this order,
-   where range a special range
+   where range is a special range
    Now, if range.rightpos = suffixarray[i] for some i, then
    inversesuftab[range.rightpos] = inversesuftab[suffixarray[i]] = i.
    Thus, in case where the inversesuftab is not available,
@@ -579,7 +586,7 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0, *lcptab,
          *ranknext, *rightposinverse;
 
-  if (rmnsufinfo->inversesuftab == NULL)
+  if (rmnsufinfo->inversesuftab.plain == NULL)
   {
     rightposinverse = ranknext
                     = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
@@ -587,7 +594,7 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
     setrelevantfrominversetab(rightposinverse,rmnsufinfo);
   } else
   {
-    rightposinverse = ranknext = rmnsufinfo->inversesuftab;
+    rightposinverse = ranknext = rmnsufinfo->inversesuftab.plain;
   }
   inversesuffixarray2specialranknext(rightposinverse,ranknext,rmnsufinfo);
   fillpos = sa2ranknext(ranknext,rmnsufinfo);
@@ -634,8 +641,9 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
     }
     fillpos = nextfillpos;
   }
-  rmnsufinfo->inversesuftab = NULL; /* since lcptab point to this memory */
-                                    /* and is freed later */
+  /* since lcptab points to this memory we set it to NULL, so that it
+     is not freed later */
+  rmnsufinfo->inversesuftab.plain = NULL;
   return lcptab;
 }
 
@@ -647,8 +655,10 @@ Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
   sortremainingsuffixes(rmnsufinfo);
   if (withlcptab)
   {
-    /*gt_free(rmnsufinfo->inversesuftab);
-    rmnsufinfo->inversesuftab = NULL; */
+#ifdef NOINVERSESUFTAB
+    gt_free(rmnsufinfo->inversesuftab.plain);
+    rmnsufinfo->inversesuftab.plain = NULL;
+#endif
     lcptab = lcp9_manzini(rmnsufinfo);
   } else
   {
@@ -658,8 +668,8 @@ Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
   rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
-  gt_free(rmnsufinfo->inversesuftab);
-  rmnsufinfo->inversesuftab = NULL;
+  gt_free(rmnsufinfo->inversesuftab.plain);
+  rmnsufinfo->inversesuftab.plain = NULL;
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;
