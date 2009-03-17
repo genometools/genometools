@@ -232,9 +232,12 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       case IN_DESCRIPTION:
         if (lc != DESCRIPTION) {
           /* save description */
-          if (pvt->descptr)
-            gt_queue_add(pvt->descptr,
-                         gt_cstr_dup(gt_str_get(sbe->headerbuffer)));
+          if (pvt->descptr) {
+            char *header;
+            header = gt_cstr_rtrim(gt_cstr_dup(gt_str_get(sbe->headerbuffer)),
+                                   ' ');
+            gt_queue_add(pvt->descptr, header);
+          }
           gt_str_reset(sbe->headerbuffer);
           sbe->state = UNDEFINED;
         }
