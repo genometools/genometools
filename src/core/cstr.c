@@ -71,3 +71,12 @@ unsigned long gt_cstr_length_up_to_char(const char *cstr, char c)
     return suffix - cstr;
   return strlen(cstr);
 }
+
+char* gt_cstr_rtrim(char *cstr, char remove)
+{
+  char *tmp;
+  gt_assert(cstr);
+  for (tmp = cstr + strlen(cstr) - 1; tmp >= cstr && *tmp == remove; --tmp);
+  *(tmp+1) = '\0';
+  return cstr;
+}
