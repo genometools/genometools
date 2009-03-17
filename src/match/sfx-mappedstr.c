@@ -497,25 +497,29 @@ int getfastastreamkmers(
   if (plainformat)
     fb = gt_sequence_buffer_plain_new(filenametab);
   else
-    fb = gt_sequence_buffer_fasta_new(filenametab);
-  gt_sequence_buffer_set_symbolmap(fb, symbolmap);
+    fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
+  if (!fb)
+    haserr = true;
+  if (!haserr) {
+    gt_sequence_buffer_set_symbolmap(fb, symbolmap);
 
-  for (currentposition = 0; /* Nothing */; currentposition++)
-  {
-    retval = gt_sequence_buffer_next(fb,&charcode,err);
-    if (retval < 0)
+    for (currentposition = 0; /* Nothing */; currentposition++)
     {
-      haserr = true;
-      break;
+      retval = gt_sequence_buffer_next(fb,&charcode,err);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      shiftrightwithchar(processkmercode,processkmercodeinfo,
+                         &spwp,currentposition,charcode);
     }
-    if (retval == 0)
-    {
-      break;
-    }
-    shiftrightwithchar(processkmercode,processkmercodeinfo,
-                       &spwp,currentposition,charcode);
+    gt_sequence_buffer_delete(fb);
   }
-  gt_sequence_buffer_delete(fb);
   if (!haserr)
   {
     doovershoot(&spwp,

@@ -2881,12 +2881,16 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     if (plainformat) {
       fb = gt_sequence_buffer_plain_new(filenametab);
     } else {
-      fb = gt_sequence_buffer_fasta_new(filenametab);
-      gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alphabet));
+      fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
     }
-    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,err) != 0)
-    {
+    if (!fb)
       haserr = true;
+    if (!haserr) {
+      gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alphabet));
+      if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
 #ifdef RANGEDEBUG

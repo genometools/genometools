@@ -129,64 +129,69 @@ static int testfullscan(const GtStrArray *filenametab,
   gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
-    fb = gt_sequence_buffer_fasta_new(filenametab);
-    gt_sequence_buffer_set_symbolmap(fb, getencseqAlphabetsymbolmap(encseq));
-  }
-  esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,encseq,readmode,0);
-  for (pos=0; /* Nothing */; pos++)
-  {
-    if (filenametab != NULL && readmode == Forwardmode)
-    {
-      retval = gt_sequence_buffer_next(fb,&ccscan,err);
-      if (retval < 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (retval == 0)
-      {
-        break;
-      }
-    } else
-    {
-      if (pos >= totallength)
-      {
-        break;
-      }
-    }
-    ccra = getencodedchar(encseq,pos,readmode); /* Random access */
-    if (filenametab != NULL && readmode == Forwardmode)
-    {
-      if (ccscan != ccra)
-      {
-        gt_error_set(err,"access=%s, position=" FormatSeqpos
-                          ": scan (readnextchar) = %u != "
-                          "%u = random access",
-                          encseqaccessname(encseq),
-                          pos,
-                          (unsigned int) ccscan,
-                          (unsigned int) ccra);
-        haserr = true;
-        break;
-      }
-    }
-    ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
-    if (ccra != ccsr)
-    {
-      gt_error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
-                        ": random access = %u != %u = sequential read",
-                        encseqaccessname(encseq),
-                        showreadmode(readmode),
-                        pos,
-                        (unsigned int) ccra,
-                        (unsigned int) ccsr);
+    fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
+    if (!fb)
       haserr = true;
-      break;
-    }
-    fullscanpbar++;
+    if (!haserr)
+      gt_sequence_buffer_set_symbolmap(fb, getencseqAlphabetsymbolmap(encseq));
   }
-  gt_progressbar_stop();
+  if (!haserr) {
+    esr = newEncodedsequencescanstate();
+    initEncodedsequencescanstate(esr,encseq,readmode,0);
+    for (pos=0; /* Nothing */; pos++)
+    {
+      if (filenametab != NULL && readmode == Forwardmode)
+      {
+        retval = gt_sequence_buffer_next(fb,&ccscan,err);
+        if (retval < 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (retval == 0)
+        {
+          break;
+        }
+      } else
+      {
+        if (pos >= totallength)
+        {
+          break;
+        }
+      }
+      ccra = getencodedchar(encseq,pos,readmode); /* Random access */
+      if (filenametab != NULL && readmode == Forwardmode)
+      {
+        if (ccscan != ccra)
+        {
+          gt_error_set(err,"access=%s, position=" FormatSeqpos
+                            ": scan (readnextchar) = %u != "
+                            "%u = random access",
+                            encseqaccessname(encseq),
+                            pos,
+                            (unsigned int) ccscan,
+                            (unsigned int) ccra);
+          haserr = true;
+          break;
+        }
+      }
+      ccsr = sequentialgetencodedchar(encseq,esr,pos,readmode);
+      if (ccra != ccsr)
+      {
+        gt_error_set(err,"access=%s, mode=%s: position=" FormatSeqpos
+                          ": random access = %u != %u = sequential read",
+                          encseqaccessname(encseq),
+                          showreadmode(readmode),
+                          pos,
+                          (unsigned int) ccra,
+                          (unsigned int) ccsr);
+        haserr = true;
+        break;
+      }
+      fullscanpbar++;
+    }
+    gt_progressbar_stop();
+  }
   if (!haserr)
   {
     if (pos != totallength)

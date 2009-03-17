@@ -64,10 +64,27 @@ allfiles = ["Atinsert.fna",
             "TTT-small.fna",
             "trna_glutamine.fna"]
 
-allmultifiles = ["Atinsert.fna",
-                 "Duplicate.fna",
-                 "Random159.fna",
-                 "Random160.fna"]
+allfiles += all_fastafiles
+allfiles += (all_genbankfiles = all_fastafiles.collect{ |f|
+                                                        f.gsub(".fna",".gbk")
+                                                      })
+allfiles += (all_emblfiles = all_fastafiles.collect{ |f|
+                                                     f.gsub(".fna",".embl")
+                                                   })
+
+allmultifiles = []
+all_multifastafiles = ["Atinsert.fna",
+                       "Duplicate.fna",
+                       "Random159.fna",
+                       "Random160.fna"]
+
+allmultifiles += all_multifastafiles
+allmultifiles += (all_multigenbankfiles = all_multifastafiles.collect{ |f|
+                                                         f.gsub(".fna",".gbk")
+                                                                     })
+allmultifiles += (all_multiemblfiles = all_multifastafiles.collect{ |f|
+                                                         f.gsub(".fna",".embl")
+                                                                  })
 
 alldir = ["fwd","cpl","rev","rcl"]
 
@@ -104,16 +121,19 @@ Test do
 end
 
 alldir.each do |dir|
-  Name "gt suffixerator #{dir}"
-  Keywords "gt_suffixerator"
-  Test do
-     run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
-              "-indexname sfx -pl -db " + 
-              flattenfilelist(allfiles)
-     run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis " +
-              "-suf -lcp -indexname sfx -pl -db " +
-              flattenfilelist(allfiles)
-     run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
+  {"FASTA" => all_fastafiles,
+   "EMBL" => all_emblfiles, "GenBank" => all_genbankfiles}.each do |k,filelist|
+    Name "gt suffixerator #{dir} (#{k})"
+    Keywords "gt_suffixerator"
+    Test do
+       run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
+                "-indexname sfx -pl -db " + 
+                flattenfilelist(filelist)
+       run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis " +
+                "-suf -lcp -indexname sfx -pl -db " +
+                flattenfilelist(filelist)
+       run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
+    end
   end
 end
 
