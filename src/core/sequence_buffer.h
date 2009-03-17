@@ -22,6 +22,7 @@
 #include "core/error_api.h"
 #include "core/filelengthvalues.h"
 #include "core/queue.h"
+#include "core/str_array.h"
 
 /* the GtSequenceBuffer interface */
 typedef struct GtSequenceBuffer GtSequenceBuffer;
@@ -29,6 +30,11 @@ typedef struct GtSequenceBufferClass GtSequenceBufferClass;
 
 /* Increases the reference count of the <GtSequenceBuffer>. */
 GtSequenceBuffer*  gt_sequence_buffer_ref(GtSequenceBuffer*);
+
+/* Creates a new <GtSequenceBuffer>, choosing the appropriate type by looking
+   at the first input file. All files must be of the same type.
+   If NULL is returned, an error occurred. */
+GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(GtStrArray*, GtError*);
 
 /* Fetches next character from <GtSequenceBuffer>. */
 int           gt_sequence_buffer_next(GtSequenceBuffer*, Uchar*, GtError*);
@@ -68,6 +74,8 @@ uint64_t      gt_sequence_buffer_get_lastspeciallength(const GtSequenceBuffer*);
    read altogether in this sequence of files. */
 const unsigned long long*
               gt_sequence_buffer_get_counter(const GtSequenceBuffer *si);
+
+int           gt_sequence_buffer_unit_test(GtError*);
 
 void          gt_sequence_buffer_delete(GtSequenceBuffer*);
 

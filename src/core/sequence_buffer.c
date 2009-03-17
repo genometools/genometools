@@ -15,9 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/sequence_buffer_rep.h"
+#include "core/ensure.h"
+#include "core/fa.h"
+#include "core/fileutils.h"
 #include "core/ma.h"
+#include "core/sequence_buffer_rep.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_embl.h"
 #include "core/unused_api.h"
+#include "core/xansi.h"
 
 GtSequenceBuffer*
 gt_sequence_buffer_create(const GtSequenceBufferClass *sic)
@@ -47,6 +53,38 @@ GtSequenceBuffer* gt_sequence_buffer_ref(GtSequenceBuffer *sb)
 {
   gt_assert(sb);
   sb->pvt->reference_count++;
+  return sb;
+}
+
+GtSequenceBuffer* gt_sequence_buffer_new_guess_type(GtStrArray *seqs,
+                                                    GtError *err)
+{
+  GtGenFile *file;
+  GtSequenceBuffer *sb;
+  char firstcontents[BUFSIZ];
+  gt_assert(seqs);
+  gt_error_check(err);
+  
+  if (gt_str_array_size(seqs) == 0) {
+    gt_error_set(err, "cannot guess file type of file %s -- no sequence files "
+                      "given",
+                      gt_str_array_get(seqs, 0));
+    return NULL;
+  }
+  file = gt_genfile_xopen(gt_str_array_get(seqs, 0), "rb");
+  gt_genfile_xread(file, &firstcontents, BUFSIZ);
+  gt_genfile_close(file);
+  
+  if (gt_sequence_buffer_embl_guess(firstcontents)) {
+    sb = gt_sequence_buffer_embl_new(seqs);
+  } else if (gt_sequence_buffer_fasta_guess(firstcontents)) {
+    sb = gt_sequence_buffer_fasta_new(seqs);
+  } else {
+    gt_error_set(err, "cannot guess file type of file %s -- unknown file "
+                      "contents",
+                      gt_str_array_get(seqs, 0));
+    return NULL;
+  }
   return sb;
 }
 
@@ -100,4 +138,52 @@ int gt_sequence_buffer_advance(GtSequenceBuffer *sb, GtError *err)
 {
   gt_assert(sb && sb->c_class && sb->c_class->advance);
   return sb->c_class->advance(sb, err);
+}
+
+int gt_sequence_buffer_unit_test(GtError *err)
+{
+  int had_err = 0;
+  GtSequenceBuffer *sb;
+  GtStrArray *testfiles;
+  GtStr *tmpfilename;
+  unsigned long i;
+  FILE *tmpfp;
+
+  gt_error_check(err);
+
+  /* create test seqs */
+  testfiles = gt_str_array_new();
+  tmpfilename = gt_str_new();
+  tmpfp = gt_xtmpfp(tmpfilename);
+  fprintf(tmpfp, "ID   Foo\n"
+                 "XX\n"
+                 "DE   Bar\n"
+                 "SQ\n"
+                 "     gatcgcgcta\n"
+                 "//\n");
+  gt_fa_xfclose(tmpfp);
+  ensure(had_err, gt_file_exists(gt_str_get(tmpfilename)));
+  gt_str_array_add(testfiles, tmpfilename);
+  gt_str_reset(tmpfilename);
+  tmpfp = gt_xtmpfp(tmpfilename);
+  fprintf(tmpfp, ">test3\nseq3xx\n"
+                 ">test4\nseq4xxx\n");
+  gt_fa_xfclose(tmpfp);
+  ensure(had_err, gt_file_exists(gt_str_get(tmpfilename)));
+  gt_str_array_add(testfiles, tmpfilename);
+  gt_str_delete(tmpfilename);
+
+  sb = gt_sequence_buffer_new_guess_type(testfiles, err);
+  ensure(had_err, sb != NULL);
+
+  gt_sequence_buffer_delete(sb);  
+  for (i=0;i<gt_str_array_size(testfiles);i++) {
+    const char *fn;
+    fn = gt_str_array_get(testfiles, i);
+    gt_xremove(fn);
+    ensure(had_err, !gt_file_exists(fn));
+  }
+  gt_str_array_delete(testfiles);
+
+  return had_err;
 }

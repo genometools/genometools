@@ -33,6 +33,7 @@
 #include "core/hashtable.h"
 #include "core/interval_tree.h"
 #include "core/queue.h"
+#include "core/sequence_buffer.h"
 #include "core/splitter.h"
 #include "core/tokenizer.h"
 #include "extended/alignment.h"
@@ -194,6 +195,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbt_unit_test);
   gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
   gt_hashmap_add(unit_tests, "safearith example", gt_safearith_example);
+  gt_hashmap_add(unit_tests, "sequence buffer class",
+                 gt_sequence_buffer_unit_test);
   gt_hashmap_add(unit_tests, "splicedseq class", gt_splicedseq_unit_test);
   gt_hashmap_add(unit_tests, "splitter class", gt_splitter_unit_test);
   gt_hashmap_add(unit_tests, "string class", gt_str_unit_test);
