@@ -182,6 +182,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
   GtSeqIterator *seqit;
+  GtSequenceBuffer *sb;
   const Uchar *sequence;
   char *desc;
   unsigned long len;
@@ -214,7 +215,9 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   totalsize = gt_files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
-  seqit = gt_seqiterator_new(files, NULL, true);
+  sb = gt_sequence_buffer_new_guess_type(files, err);
+  /* read input using seqiterator */
+  seqit = gt_seqiterator_new_with_buffer(sb, NULL, true);
   if (seqiteroptions.dodistlen)
   {
     distseqlen = gt_disc_distri_new();
@@ -263,6 +266,7 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   {
     gt_progressbar_stop();
   }
+  gt_sequence_buffer_delete(sb);
   gt_seqiterator_delete(seqit);
   gt_str_array_delete(files);
   if (seqiteroptions.dodistlen)

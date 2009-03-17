@@ -27,25 +27,27 @@ static inline int process_char(GtSequenceBuffer *sb,
                                GtError *err)
 {
   GtSequenceBufferMembers *pvt;
+  Uchar charcode;
   pvt = sb->pvt;
   if (pvt->symbolmap) {
-    cc = pvt->symbolmap[(unsigned int) cc];
-    if (cc == UNDEFCHAR) {
+    charcode = pvt->symbolmap[(unsigned int) cc];
+    if (charcode == UNDEFCHAR) {
       gt_error_set(err, "illegal character '%c': file \"%s\", line %llu",
                         cc, gt_str_array_get(pvt->filenametab, pvt->filenum),
                         (unsigned long long) pvt->linenum);
       return -1;
     }
-    if (ISSPECIAL(cc)) {
+    if (ISSPECIAL(charcode)) {
       pvt->lastspeciallength++;
     } else {
       if (pvt->lastspeciallength > 0)
         pvt->lastspeciallength = 0;
       if (pvt->chardisttab)
-        pvt->chardisttab[(int) cc]++;
+        pvt->chardisttab[(int) charcode]++;
     }
-  }
-  pvt->outbuf[currentoutpos] = cc;
+    pvt->outbuf[currentoutpos] = charcode;
+  } else
+    pvt->outbuf[currentoutpos] = cc;
   pvt->counter++;
   return 0;
 }

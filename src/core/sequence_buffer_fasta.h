@@ -27,4 +27,6 @@ typedef struct GtSequenceBufferFasta GtSequenceBufferFasta;
 const GtSequenceBufferClass* gt_sequence_buffer_fasta_class(void);
 GtSequenceBuffer*            gt_sequence_buffer_fasta_new(const GtStrArray*);
 
+bool                         gt_sequence_buffer_fasta_guess(const char* txt);
+
 #endif

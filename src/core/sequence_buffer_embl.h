@@ -27,4 +27,6 @@ typedef struct GtSequenceBufferEMBL GtSequenceBufferEMBL;
 const GtSequenceBufferClass* gt_sequence_buffer_embl_class(void);
 GtSequenceBuffer*            gt_sequence_buffer_embl_new(const GtStrArray*);
 
+bool                         gt_sequence_buffer_embl_guess(const char* txt);
+
 #endif

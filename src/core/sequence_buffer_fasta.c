@@ -17,6 +17,7 @@
 */
 
 #include <ctype.h>
+#include <string.h>
 #include "core/cstr.h"
 #include "core/error.h"
 #include "core/sequence_buffer_fasta.h"
@@ -40,7 +41,7 @@ struct GtSequenceBufferFasta {
 
 static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
 {
-  int currentchar;
+  int currentchar, ret = 0;
   unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
   GtSequenceBufferMembers *pvt;
   GtSequenceBufferFasta *sbf;
@@ -147,7 +148,8 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
               sbf->indesc = true;
             } else
             {
-              process_char(sb, currentoutpos, currentchar, err);
+              if ((ret = process_char(sb, currentoutpos, currentchar, err)))
+                return ret;
               currentoutpos++;
               currentfileadd++;
             }
@@ -178,6 +180,13 @@ gt_sequence_buffer_fasta_get_file_index(GtSequenceBuffer *sb)
 {
   gt_assert(sb);
   return sb->pvt->filenum;
+}
+
+bool gt_sequence_buffer_fasta_guess(const char* txt)
+{
+  char *hit = NULL;
+  hit = strstr(txt, ">");
+  return (hit == txt);
 }
 
 const GtSequenceBufferClass* gt_sequence_buffer_fasta_class(void)
