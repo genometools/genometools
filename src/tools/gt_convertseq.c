@@ -76,10 +76,12 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   const Uchar *sequence;
   char *desc;
   unsigned long len, j;
-  int i, parsed_args, had_err;
+  int i, parsed_args, had_err = 0;
   off_t totalsize;
   ConvertseqOptions opts;
   Filelengthvalues *flv;
+  GtSeqIterator *seqit;
+  GtSequenceBuffer *sb = NULL;
 
   gt_error_check(err);
 
@@ -101,49 +103,54 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
   
   flv = gt_calloc(gt_str_array_size(files), sizeof (Filelengthvalues));
 
-  GtSeqIterator *seqit;
-  GtSequenceBuffer *eb = gt_sequence_buffer_embl_new(files);
-  /* read input using seqiterator */
-  seqit = gt_seqiterator_new_with_buffer(eb, NULL, true);
-  if (opts.verbose)
-  {
-    gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
-                                                         (unsigned long long)
-                                                         totalsize),
-                         (unsigned long long) totalsize);
+  sb = gt_sequence_buffer_new_guess_type(files, err);
+  if (!sb) {
+    had_err = -1;
   }
-  while (true)
-  {
-    desc = NULL;
-    i = 0;
-    j = 1;
-    had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
-    if (had_err != 1)
-      break;
-    printf(">%s\n", desc);
-    for(i=0;i<len;i++) {
-      putc(sequence[i], stdout);
-      if ((j % opts.fastawidth) == 0) {
-        j=0;
-        printf("\n");
+  if (!had_err) {
+    gt_sequence_buffer_set_filelengthtab(sb, flv);
+    /* read input using seqiterator */
+    seqit = gt_seqiterator_new_with_buffer(sb, NULL, true);
+    if (opts.verbose)
+    {
+      gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+                                                           (unsigned long long)
+                                                           totalsize),
+                           (unsigned long long) totalsize);
+    }
+    while (true)
+    {
+      desc = NULL;
+      i = 0;
+      j = 1;
+      had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
+      if (had_err != 1)
+        break;
+      printf(">%s\n", desc);
+      for(i=0;i<len;i++) {
+        putc(sequence[i], stdout);
+        if ((j % opts.fastawidth) == 0) {
+          j=0;
+          printf("\n");
+        }
+        j++;
       }
-      j++;
+      printf("\n");
+      gt_free(desc);
     }
-    printf("\n");
-    gt_free(desc);
-  }
-  if (opts.showflv) {
-    unsigned long j;
-    for (j=0;j<gt_str_array_size(files);j++) {
-      printf("file %lu (%s): %lu/%lu\n", j, gt_str_array_get(files, j),
-                                      flv[j].length, flv[j].effectivelength);
+    if (opts.showflv) {
+      unsigned long j;
+      for (j=0;j<gt_str_array_size(files);j++) {
+        printf("file %lu (%s): %lu/%lu\n", j, gt_str_array_get(files, j),
+                                        flv[j].length, flv[j].effectivelength);
+      }
     }
-  }
-  gt_sequence_buffer_delete(eb);
-  gt_seqiterator_delete(seqit);
-  if (opts.verbose)
-  {
-    gt_progressbar_stop();
+    gt_sequence_buffer_delete(sb);
+    gt_seqiterator_delete(seqit);
+    if (opts.verbose)
+    {
+      gt_progressbar_stop();
+    }
   }
   gt_str_array_delete(files);
   gt_free(flv);
