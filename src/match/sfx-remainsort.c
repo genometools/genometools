@@ -43,7 +43,7 @@ typedef struct
   Seqpos *left,
          *right,
          depth;
-  unsigned long count, totalwidth;
+  unsigned long count, totalwidth, maxwidth;
 } Firstwithnewdepth;
 
 struct Rmnsufinfo
@@ -86,6 +86,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.count = 0;
   rmnsufinfo->firstwithnewdepth.left = NULL;
   rmnsufinfo->firstwithnewdepth.right = NULL;
+  rmnsufinfo->firstwithnewdepth.maxwidth = 0;
   rmnsufinfo->currentdepth = 0;
   return rmnsufinfo;
 }
@@ -100,19 +101,21 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
   gt_assert(rmnsufinfo->firstwithnewdepth.left == NULL ||
             (rmnsufinfo->firstwithnewdepth.depth > 0 &&
              rmnsufinfo->firstwithnewdepth.depth <= depth));
+  width = (unsigned long) (right - left + 1);
   if (rmnsufinfo->firstwithnewdepth.left == NULL ||
       rmnsufinfo->firstwithnewdepth.depth < depth)
   {
     if (rmnsufinfo->firstwithnewdepth.left != NULL)
     {
       printf("intervals in previous level=%lu (total=%lu,avg=%.2f,"
-             "%.2f%% of all)\n",
+             "%.2f%% of all, maxwidth=%lu)\n",
               rmnsufinfo->firstwithnewdepth.count,
               rmnsufinfo->firstwithnewdepth.totalwidth,
               (double) rmnsufinfo->firstwithnewdepth.totalwidth/
                        rmnsufinfo->firstwithnewdepth.count,
               100.0 * (double) rmnsufinfo->firstwithnewdepth.totalwidth/
-                               rmnsufinfo->totallength);
+                               rmnsufinfo->totallength,
+              rmnsufinfo->firstwithnewdepth.maxwidth);
     }
     printf("enter new level with depth=" FormatSeqpos "\n",
             PRINTSeqposcast(depth));
@@ -120,15 +123,17 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
     rmnsufinfo->firstwithnewdepth.right = right;
     rmnsufinfo->firstwithnewdepth.depth = depth;
     rmnsufinfo->firstwithnewdepth.count = 1UL;
-    rmnsufinfo->firstwithnewdepth.totalwidth
-      = (unsigned long) (right - left + 1);
+    rmnsufinfo->firstwithnewdepth.totalwidth = width;
+    rmnsufinfo->firstwithnewdepth.maxwidth = width;
   } else
   {
     rmnsufinfo->firstwithnewdepth.count++;
-    rmnsufinfo->firstwithnewdepth.totalwidth
-      += (unsigned long) (right - left + 1);
+    rmnsufinfo->firstwithnewdepth.totalwidth += width;
+    if (rmnsufinfo->firstwithnewdepth.maxwidth < width)
+    {
+      rmnsufinfo->firstwithnewdepth.maxwidth = width;
+    }
   }
-  width = (unsigned long) (right - left + 1);
   if (rmnsufinfo->allocateditvinfo < width)
   {
     gt_assert(rmnsufinfo->itvinfo == NULL);
@@ -275,7 +280,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     gt_assert(specialidx == rmnsufinfo->totallength);
     freespecialrangeiterator(&sri);
   }
-  /* now we can unmap the encoded sequence */
+  /* now we can unmap the encoded sequence if only suffix sorting is
+   * necessary */
   rmnsufinfo->inversesuftab[rmnsufinfo->totallength] = rmnsufinfo->totallength;
   (void) gt_queue_iterate(rmnsufinfo->rangestobesorted,
                           putleftbound,
@@ -641,8 +647,8 @@ Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
   sortremainingsuffixes(rmnsufinfo);
   if (withlcptab)
   {
-    gt_free(rmnsufinfo->inversesuftab);
-    rmnsufinfo->inversesuftab = NULL;
+    /*gt_free(rmnsufinfo->inversesuftab);
+    rmnsufinfo->inversesuftab = NULL; */
     lcptab = lcp9_manzini(rmnsufinfo);
   } else
   {
