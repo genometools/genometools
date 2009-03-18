@@ -45,8 +45,9 @@ struct GtSequenceBuffer {
 struct GtSequenceBufferMembers {
   unsigned int filenum;
   uint64_t linenum;
-  bool complete;
   Filelengthvalues *filelengthtab;
+  bool complete,
+       use_ungetchar;
   GtQueue *descptr;
   GtGenFile *inputstream;
   unsigned long reference_count,
@@ -58,7 +59,8 @@ struct GtSequenceBufferMembers {
   uint64_t lastspeciallength;
   unsigned long long counter;
   const GtStrArray *filenametab;
-  Uchar inbuf[INBUFSIZE],
+  Uchar ungetchar,
+        inbuf[INBUFSIZE],
         outbuf[OUTBUFSIZE];
   const Uchar *symbolmap;
 };

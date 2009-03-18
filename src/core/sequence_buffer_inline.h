@@ -56,13 +56,25 @@ static inline int inlinebuf_getchar(GtSequenceBuffer *sb, GtGenFile *f)
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
-  if (pvt->currentinpos >= pvt->currentfillpos) {
-    pvt->currentfillpos = gt_genfile_xread(f, pvt->inbuf, INBUFSIZE);
-    if (pvt->currentfillpos == 0)
-       return EOF;
-    pvt->currentinpos = 0;
+  if (pvt->use_ungetchar) {
+    pvt->use_ungetchar = false;
+    return pvt->ungetchar;
+  } else {
+    if (pvt->currentinpos >= pvt->currentfillpos) {
+      pvt->currentfillpos = gt_genfile_xread(f, pvt->inbuf, INBUFSIZE);
+      if (pvt->currentfillpos == 0)
+         return EOF;
+      pvt->currentinpos = 0;
+    }
+    pvt->ungetchar = pvt->inbuf[pvt->currentinpos++];
+    return pvt->ungetchar;
   }
-  return pvt->inbuf[pvt->currentinpos++];
+}
+
+static inline void inlinebuf_ungetchar(GtSequenceBuffer *sb)
+{
+  gt_assert(!sb->pvt->use_ungetchar);
+  sb->pvt->use_ungetchar = true;
 }
 
 #endif
