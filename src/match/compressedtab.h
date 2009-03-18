@@ -26,11 +26,12 @@
 
 typedef struct
 {
-  size_t sizeofplain;
-#define PLAIN
+#undef PLAIN
 #ifdef PLAIN
+  size_t sizeofplain;
   Seqpos *plain;
 #else
+  Seqpos maxvalue;
   BitPackArray *bitpackarray;
 #endif
 } Compressedtable;
@@ -41,7 +42,7 @@ typedef struct
 {
   Compressedtable *compressedtable;
 #ifndef PLAIN
-  unsigned int bitsvalue = (unsigned int) ceil(LOG2(maxvalue));
+  unsigned int bitspervalue = (unsigned int) ceil(LOG2(maxvalue));
 #endif
 
   compressedtable = gt_malloc(sizeof (Compressedtable));
@@ -50,11 +51,11 @@ typedef struct
     = sizeof (Seqpos) * numofvalues;
   compressedtable->plain = gt_malloc(compressedtable->sizeofplain);
 #else
-  compressedtable->sizeofplain = 0;
+  compressedtable->maxvalue = maxvalue;
   compressedtable->bitpackarray
     = bitpackarray_new(bitspervalue,(BitOffset) numofvalues,true);
-  printf("allocated compressed table: %lu entries with %u bits\n",
-          numofvalues,bitspervalue);
+  printf("allocated compressed table: " FormatSeqpos " entries with %u bits\n",
+          PRINTSeqposcast(numofvalues),bitspervalue);
 #endif
   return compressedtable;
 }
@@ -63,10 +64,15 @@ typedef struct
                                        Compressedtable *compressedtable,
                                        Seqpos idx,Seqpos value)
 {
+#ifdef _LP64
+#error "not implemented yet"
+#endif
 #ifdef PLAIN
   compressedtable->plain[idx] = value;
 #else
-  return;
+  gt_assert(value <= compressedtable->maxvalue);
+  bitpackarray_store_uint32(compressedtable->bitpackarray,(BitOffset) idx,
+                              (uint32_t) value);
 #endif
 }
 
@@ -74,10 +80,13 @@ typedef struct
                                          const Compressedtable *compressedtable,
                                          Seqpos idx)
 {
+#ifdef _LP64
+#error "not implemented yet"
+#endif
 #ifdef PLAIN
   return compressedtable->plain[idx];
 #else
-  return 0;
+  return bitpackarray_get_uint32(compressedtable->bitpackarray,(BitOffset) idx);
 #endif
 }
 
@@ -97,17 +106,15 @@ typedef struct
 }
 
 /*@unused@*/ static inline void *compressedtable_unusedmem(
-                                        const Compressedtable *compressedtable,
-                                        size_t requestedbytes)
+                              GT_UNUSED const Compressedtable *compressedtable,
+                              GT_UNUSED size_t requestedbytes)
 {
+#ifdef PLAIN
   if (compressedtable->sizeofplain >= requestedbytes)
   {
-#ifdef PLAIN
     return compressedtable->plain;
-#else
-    return NULL;
-#endif
   }
+#endif
   return NULL;
 }
 
