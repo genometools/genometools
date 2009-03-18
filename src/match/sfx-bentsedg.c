@@ -1619,20 +1619,35 @@ static Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
 }
 
 static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
+                              Seqpos totallength,
                               const Compressedtable *lcptab,
                               unsigned long bucketsize,
                               FILE *fplcptab,
                               FILE *fpllvtab)
 {
-  /* XXX in case the sequence is small, use totallength as buffersize */
-  const unsigned long buffersize = 512UL;
+  unsigned long buffersize = 512UL, sizeforsmalllcpvalues;
   unsigned long remaining, left, width;
+  bool mallocsmalllcpvalues;
 
+  if ((Seqpos) buffersize > totallength + 1)
+  {
+    buffersize = (unsigned long) (totallength+1);
+  }
   lcpsubtab->numoflargelcpvalues = (Seqpos) buffersize;
   lcpsubtab->bucketoflcpvalues = NULL;
   lcpsubtab->completelcpvalues = lcptab;
-  lcpsubtab->smalllcpvalues
-    = gt_malloc(sizeof(*lcpsubtab->smalllcpvalues) * buffersize);
+  sizeforsmalllcpvalues = (unsigned long)
+                          sizeof (*lcpsubtab->smalllcpvalues) * buffersize;
+  lcpsubtab->smalllcpvalues = compressedtable_unusedmem(lcptab,
+                                                        sizeforsmalllcpvalues);
+  if (lcpsubtab->smalllcpvalues == NULL)
+  {
+    lcpsubtab->smalllcpvalues = gt_malloc((size_t) sizeforsmalllcpvalues);
+    mallocsmalllcpvalues = true;
+  } else
+  {
+    mallocsmalllcpvalues = false;
+  }
   remaining = bucketsize;
   left = 0;
   gt_assert(fplcptab != NULL && fpllvtab != NULL);
@@ -1648,7 +1663,10 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
     remaining -= width;
     left += width;
   }
-  gt_free(lcpsubtab->smalllcpvalues);
+  if (mallocsmalllcpvalues)
+  {
+    gt_free(lcpsubtab->smalllcpvalues);
+  }
   lcpsubtab->countoutputlcpvalues = (Seqpos) bucketsize;
 }
 
@@ -1820,7 +1838,8 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
                             bsr->lcpsubtab == NULL ? false : true);
     if (lcptab != NULL)
     {
-      multioutlcpvalues(lcpsubtab,lcptab,(unsigned long) bsr->partwidth,
+      multioutlcpvalues(lcpsubtab,bsr->totallength,
+                        lcptab,(unsigned long) bsr->partwidth,
                         outfplcptab,outfpllvtab);
       compressedtable_free(lcptab,true);
     }

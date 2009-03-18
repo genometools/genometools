@@ -23,6 +23,7 @@
 
 typedef struct
 {
+  unsigned long sizeofplain;
   Seqpos *plain;
 } Compressedtable;
 
@@ -32,7 +33,8 @@ typedef struct
   Compressedtable *compressedtable;
 
   compressedtable = gt_malloc(sizeof (Compressedtable));
-  compressedtable->plain = gt_malloc(sizeof (Seqpos) * (maxvalue+1));
+  compressedtable->sizeofplain = (unsigned long) sizeof (Seqpos) * (maxvalue+1);
+  compressedtable->plain = gt_malloc((size_t) compressedtable->sizeofplain);
   return compressedtable;
 }
 
@@ -59,6 +61,17 @@ typedef struct
     gt_free(compressedtable->plain);
   }
   gt_free(compressedtable);
+}
+
+/*@unused@*/ static inline void *compressedtable_unusedmem(
+                                        const Compressedtable *compressedtable,
+                                        unsigned long requested)
+{
+  if (compressedtable->sizeofplain >= requested)
+  {
+    return compressedtable->plain;
+  }
+  return NULL;
 }
 
 #endif
