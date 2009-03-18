@@ -19,7 +19,8 @@
 #define LCPOVERFLOW_H
 
 #include <limits.h>
+#include <inttypes.h>
 
-#define LCPOVERFLOW ((Uchar) UCHAR_MAX)
+#define LCPOVERFLOW ((uint8_t) UCHAR_MAX)
 
 #endif

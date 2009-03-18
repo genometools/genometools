@@ -146,12 +146,13 @@ typedef struct
 {
   void *reservoir;
   size_t sizereservoir;
-  Seqpos *spaceSeqpos, /* pointer into reservoir */
+  Seqpos *bucketoflcpvalues, /* pointer into reservoir */
          maxbranchdepth,
          numoflargelcpvalues,
          totalnumoflargelcpvalues,
          countoutputlcpvalues;
-  Uchar *smalllcpvalues; /* pointer into reservoir */
+  uint8_t *smalllcpvalues; /* pointer into reservoir */
+  const Compressedtable *completelcpvalues;
   ArrayLargelcpvalue largelcpvalues;
   const Seqpos *suftabbase;
 } Lcpsubtab;
@@ -465,7 +466,7 @@ static void updatelcpvalue(Bentsedgresources *bsr,Seqpos idx,Seqpos value)
                                               there may be some value
                                               which was already overflowing */
   }
-  bsr->lcpsubtab->spaceSeqpos[idx] = value;
+  bsr->lcpsubtab->bucketoflcpvalues[idx] = value;
 }
 
 static void insertionsort(Bentsedgresources *bsr,
@@ -532,7 +533,8 @@ static void insertionsort(Bentsedgresources *bsr,
         lcpindex = LCPINDEX(bsr,pj);
         if (pj < pi && retval > 0)
         {
-          updatelcpvalue(bsr,lcpindex+1,bsr->lcpsubtab->spaceSeqpos[lcpindex]);
+          updatelcpvalue(bsr,lcpindex+1,
+                         bsr->lcpsubtab->bucketoflcpvalues[lcpindex]);
         }
         updatelcpvalue(bsr,lcpindex,lcplen);
       }
@@ -832,7 +834,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
           = blindtriesuffixsort(bsr->trierep,left,
                                 bsr->lcpsubtab == NULL
                                   ? NULL
-                                  : bsr->lcpsubtab->spaceSeqpos +
+                                  : bsr->lcpsubtab->bucketoflcpvalues +
                                     LCPINDEX(bsr,left),
                               width,depth,ordertype);
         if (bsr->lcpsubtab != NULL)
@@ -1460,10 +1462,12 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   {
     outlcpinfo->lcpsubtab.maxbranchdepth = lcpvalue;
   }
-  outlcpinfo->lcpsubtab.smalllcpvalues[0] = (Uchar) lcpvalue;
+  outlcpinfo->lcpsubtab.smalllcpvalues[0] = (uint8_t) lcpvalue;
   outlcpinfo->lcpsubtab.countoutputlcpvalues += specialsinbucket;
   gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
-             sizeof (Uchar),(size_t) specialsinbucket,outlcpinfo->outfplcptab);
+             sizeof (*outlcpinfo->lcpsubtab.smalllcpvalues),
+             (size_t) specialsinbucket,
+             outlcpinfo->outfplcptab);
   return minprefixindex;
 }
 
@@ -1554,14 +1558,20 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   }
   for (idx=bucketleft; idx<=bucketright; idx++)
   {
-    lcpvalue = lcpsubtab->spaceSeqpos[idx];
+    if (lcpsubtab->bucketoflcpvalues != NULL)
+    {
+      lcpvalue = lcpsubtab->bucketoflcpvalues[idx];
+    } else
+    {
+      lcpvalue = compressedtable_get(lcpsubtab->completelcpvalues,(Seqpos) idx);
+    }
     if (lcpsubtab->maxbranchdepth < lcpvalue)
     {
       lcpsubtab->maxbranchdepth = lcpvalue;
     }
     if (lcpvalue < (Seqpos) LCPOVERFLOW)
     {
-      lcpsubtab->smalllcpvalues[idx-bucketleft] = (Uchar) lcpvalue;
+      lcpsubtab->smalllcpvalues[idx-bucketleft] = (uint8_t) lcpvalue;
     } else
     {
       gt_assert(lcpsubtab->largelcpvalues.nextfreeLargelcpvalue <
@@ -1575,7 +1585,8 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   }
   lcpsubtab->countoutputlcpvalues += (bucketright - bucketleft + 1);
   gt_xfwrite(lcpsubtab->smalllcpvalues,
-             sizeof (Uchar),(size_t) (bucketright - bucketleft + 1),fplcptab);
+             sizeof (*lcpsubtab->smalllcpvalues),
+             (size_t) (bucketright - bucketleft + 1),fplcptab);
   if (lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
     lcpsubtab->totalnumoflargelcpvalues
@@ -1594,21 +1605,21 @@ static Seqpos outmany0lcpvalues(Seqpos countoutputlcpvalues,Seqpos totallength,
                                 FILE *outfplcptab)
 {
   Seqpos i, countout, many;
-  Uchar outvalues[NUMBEROFZEROS] = {0};
+  uint8_t outvalues[NUMBEROFZEROS] = {0};
 
   many = totallength + 1 - countoutputlcpvalues;
   countout = many/NUMBEROFZEROS;
   for (i=0; i<countout; i++)
   {
-    gt_xfwrite(outvalues,sizeof (Uchar),(size_t) NUMBEROFZEROS,outfplcptab);
+    gt_xfwrite(outvalues,sizeof (uint8_t),(size_t) NUMBEROFZEROS,outfplcptab);
   }
-  gt_xfwrite(outvalues,sizeof (Uchar),(size_t) many % NUMBEROFZEROS,
+  gt_xfwrite(outvalues,sizeof (uint8_t),(size_t) many % NUMBEROFZEROS,
              outfplcptab);
   return many;
 }
 
 static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
-                              const Seqpos *lcptab,
+                              const Compressedtable *lcptab,
                               unsigned long bucketsize,
                               FILE *fplcptab,
                               FILE *fpllvtab)
@@ -1617,8 +1628,10 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   unsigned long remaining, left, width;
 
   lcpsubtab->numoflargelcpvalues = (Seqpos) fixedwidth;
-  lcpsubtab->spaceSeqpos = (Seqpos *) lcptab;
-  lcpsubtab->smalllcpvalues = (Uchar *) lcptab;
+  lcpsubtab->bucketoflcpvalues = NULL;
+  lcpsubtab->completelcpvalues = lcptab;
+  lcpsubtab->smalllcpvalues
+    = gt_malloc(sizeof(*lcpsubtab->smalllcpvalues) * fixedwidth);
   remaining = bucketsize;
   left = 0;
   gt_assert(fplcptab != NULL && fpllvtab != NULL);
@@ -1634,6 +1647,7 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
     remaining -= width;
     left += width;
   }
+  gt_free(lcpsubtab->smalllcpvalues);
   lcpsubtab->countoutputlcpvalues = (Seqpos) bucketsize;
 }
 
@@ -1730,7 +1744,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
     gt_assert(bsr->lcpsubtab != NULL);
     sizespeciallcps = sizeof (*bsr->lcpsubtab->smalllcpvalues) *
                       specialsmaxbucketsize;
-    sizelcps = sizeof (*bsr->lcpsubtab->spaceSeqpos) * nonspecialsmaxbucketsize;
+    sizelcps = sizeof (*bsr->lcpsubtab->bucketoflcpvalues) *
+               nonspecialsmaxbucketsize;
     if (bsr->lcpsubtab->sizereservoir < MAX(sizelcps,sizespeciallcps))
     {
       bsr->lcpsubtab->sizereservoir = MAX(sizelcps,sizespeciallcps);
@@ -1738,8 +1753,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                              bsr->lcpsubtab->sizereservoir);
       /* point to the same area, since this is not used simultaneously */
       /* be careful for the parallel version */
-      bsr->lcpsubtab->smalllcpvalues = (Uchar *) bsr->lcpsubtab->reservoir;
-      bsr->lcpsubtab->spaceSeqpos = (Seqpos *) bsr->lcpsubtab->reservoir;
+      bsr->lcpsubtab->smalllcpvalues = (uint8_t *) bsr->lcpsubtab->reservoir;
+      bsr->lcpsubtab->bucketoflcpvalues = (Seqpos *) bsr->lcpsubtab->reservoir;
     }
   }
   INITARRAY(&bsr->mkvauxstack,MKVstack);
@@ -1777,7 +1792,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   ALLOCASSIGNSPACE(bsr->widthdistrib,NULL,
                    unsigned long,nonspecialsmaxbucketsize+1);
   memset(bsr->widthdistrib,0,
-         sizeof (unsigned long) * (nonspecialsmaxbucketsize+1));
+         sizeof (*bsr->widthdistrib) * (nonspecialsmaxbucketsize+1));
 #endif
 }
 
@@ -1798,7 +1813,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   }
   if (bsr->rmnsufinfo != NULL)
   {
-    Seqpos *lcptab;
+    Compressedtable *lcptab;
 
     lcptab = wrapRmnsufinfo(&bsr->rmnsufinfo,
                             bsr->lcpsubtab == NULL ? false : true);
@@ -1806,7 +1821,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
     {
       multioutlcpvalues(lcpsubtab,lcptab,(unsigned long) bsr->partwidth,
                         outfplcptab,outfpllvtab);
-      gt_free(lcptab);
+      compressedtable_free(lcptab,true);
     }
   }
   if (bsr->esr1 != NULL)

@@ -25,6 +25,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
+#include "compressedtab.h"
 
 typedef struct
 {
@@ -46,14 +47,9 @@ typedef struct
   unsigned long count, totalwidth, maxwidth;
 } Firstwithnewdepth;
 
-typedef struct
-{
-  Seqpos *plain;
-} Inversesuftab;
-
 struct Rmnsufinfo
 {
-  Inversesuftab inversesuftab;
+  Compressedtable *inversesuftab;
   Seqpos *suftab;
   GtQueue *rangestobesorted;
   Seqpos partwidth,
@@ -179,7 +175,7 @@ static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
   startindex = (Seqpos) (left - rmnsufinfo->suftab);
   for (ptr = left; ptr <= right; ptr++)
   {
-    rmnsufinfo->inversesuftab.plain[*ptr] = startindex;
+    compressedtable_update(rmnsufinfo->inversesuftab,*ptr,startindex);
   }
 }
 
@@ -200,7 +196,8 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
     rmnsufinfo->itvinfo[idx].suffixstart = left[idx];
     gt_assert(left[idx]+rmnsufinfo->currentdepth <= rmnsufinfo->totallength);
     rmnsufinfo->itvinfo[idx].key
-      = rmnsufinfo->inversesuftab.plain[left[idx]+rmnsufinfo->currentdepth];
+      = compressedtable_get(rmnsufinfo->inversesuftab,
+                            left[idx]+rmnsufinfo->currentdepth);
   }
   qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
   for (idx=0; idx<width; idx++)
@@ -224,8 +221,8 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
                            left + idx - 1);
       } else
       {
-        rmnsufinfo->inversesuftab.plain[left[rangestart]]
-          = startindex+rangestart;
+        compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
+                             startindex+rangestart);
       }
       rangestart = idx;
     }
@@ -241,7 +238,8 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
                        left + width - 1);
   } else
   {
-    rmnsufinfo->inversesuftab.plain[left[rangestart]] = startindex+rangestart;
+    compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
+                         startindex+rangestart);
   }
 }
 
@@ -260,11 +258,11 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 
   printf("countovermaxdepth=%lu\n",
            gt_queue_size(rmnsufinfo->rangestobesorted));
-  rmnsufinfo->inversesuftab.plain
-    = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
+  rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength);
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    rmnsufinfo->inversesuftab.plain[rmnsufinfo->suftab[idx]] = idx;
+    compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->suftab[idx],
+                           idx);
   }
   if (hasspecialranges(rmnsufinfo->encseq))
   {
@@ -280,7 +278,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     {
       for (idx = range.leftpos; idx < range.rightpos; idx++)
       {
-        rmnsufinfo->inversesuftab.plain[idx] = specialidx++;
+        compressedtable_update(rmnsufinfo->inversesuftab,idx,specialidx);
+        specialidx++;
       }
     }
     gt_assert(specialidx == rmnsufinfo->totallength);
@@ -288,8 +287,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   }
   /* now we can unmap the encoded sequence if only suffix sorting is
    * necessary */
-  rmnsufinfo->inversesuftab.plain[rmnsufinfo->totallength]
-    = rmnsufinfo->totallength;
+  compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->totallength,
+                       rmnsufinfo->totallength);
   (void) gt_queue_iterate(rmnsufinfo->rangestobesorted,
                           putleftbound,
                           rmnsufinfo,
@@ -319,7 +318,7 @@ Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
   lcptab[0] = 0;
   for (pos=0; pos <= rmnsufinfo->totallength; pos++)
   {
-    Seqpos fillpos = rmnsufinfo->inversesuftab.plain[pos];
+    Seqpos fillpos = compressedtable_get(rmnsufinfo->inversesuftab,pos);
     if (fillpos > 0 && fillpos < rmnsufinfo->partwidth)
     {
       Seqpos previousstart = rmnsufinfo->suftab[fillpos-1];
@@ -378,7 +377,7 @@ static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
    we obtain these values by the following function:
 */
 
-static void setrelevantfrominversetab(Seqpos *rightposinverse,
+static void setrelevantfrominversetab(Compressedtable *rightposinverse,
                                       const Rmnsufinfo *rmnsufinfo)
 {
   if (hasspecialranges(rmnsufinfo->encseq))
@@ -394,7 +393,7 @@ static void setrelevantfrominversetab(Seqpos *rightposinverse,
                                   rmnsufinfo->readmode);
         if (ISSPECIAL(cc))
         {
-          rightposinverse[pos] = idx;
+          compressedtable_update(rightposinverse,pos,idx);
           /*
           printf("(1) store rightposinverse[%lu]=%lu\n",
                (unsigned long) pos,
@@ -406,7 +405,7 @@ static void setrelevantfrominversetab(Seqpos *rightposinverse,
   }
 }
 
-static Seqpos *fillrightofpartwidth(const Seqpos *rightposinverse,
+static Seqpos *fillrightofpartwidth(const Compressedtable *rightposinverse,
                                     const Rmnsufinfo *rmnsufinfo)
 {
   Specialrangeiterator *sri;
@@ -436,7 +435,7 @@ static Seqpos *fillrightofpartwidth(const Seqpos *rightposinverse,
       gt_assert(rightofpartwidth != NULL && (Seqpos) nextrightofpartwidth <
                 (realspecialranges - countranges));
       rightofpartwidth[nextrightofpartwidth++]
-        = rightposinverse[range.rightpos];
+        = compressedtable_get(rightposinverse,range.rightpos);
       /*
       printf("(1) access rightposinverse[%lu]=%lu\n",
              (unsigned long) range.rightpos,
@@ -448,9 +447,10 @@ static Seqpos *fillrightofpartwidth(const Seqpos *rightposinverse,
   return rightofpartwidth;
 }
 
-static void inversesuffixarray2specialranknext(const Seqpos *rightposinverse,
-                                               Seqpos *ranknext,
-                                               const Rmnsufinfo *rmnsufinfo)
+static void inversesuffixarray2specialranknext(
+                         const Compressedtable *rightposinverse,
+                         Compressedtable *ranknext,
+                         const Rmnsufinfo *rmnsufinfo)
 {
   if (hasspecialranges(rmnsufinfo->encseq))
   {
@@ -472,7 +472,8 @@ static void inversesuffixarray2specialranknext(const Seqpos *rightposinverse,
       for (idx = range.leftpos; idx < range.rightpos-1; idx++)
       {
         gt_assert(specialranklistindex < rmnsufinfo->totallength);
-        ranknext[specialranklistindex] = specialranklistindex + 1;
+        compressedtable_update(ranknext,specialranklistindex,
+                               specialranklistindex + 1);
         /*
         printf("(1) set ranknext[%lu] = %lu\n",
                   (unsigned long) specialranklistindex,
@@ -484,7 +485,9 @@ static void inversesuffixarray2specialranknext(const Seqpos *rightposinverse,
       gt_assert(specialranklistindex < rmnsufinfo->totallength);
       if (range.rightpos < rmnsufinfo->partwidth)
       {
-        ranknext[specialranklistindex] = rightposinverse[range.rightpos];
+        compressedtable_update(ranknext,specialranklistindex,
+                               compressedtable_get(rightposinverse,
+                                                   range.rightpos));
         /*
         printf("(2) set ranknext[%lu] = %lu = rightposinverse[%lu]\n",
                   (unsigned long) specialranklistindex,
@@ -494,7 +497,8 @@ static void inversesuffixarray2specialranknext(const Seqpos *rightposinverse,
         */
       } else
       {
-        ranknext[specialranklistindex] = rightofpartwidth[nextrightofpartwidth];
+        compressedtable_update(ranknext,specialranklistindex,
+                               rightofpartwidth[nextrightofpartwidth]);
         nextrightofpartwidth++;
       }
       specialranklistindex++;
@@ -505,7 +509,8 @@ static void inversesuffixarray2specialranknext(const Seqpos *rightposinverse,
   }
 }
 
-static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
+static Seqpos sa2ranknext(Compressedtable *ranknext,
+                          const Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx, longest = 0;
   unsigned long *occless;
@@ -531,7 +536,8 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
                         (unsigned long) occless[cc],
                         (unsigned long) idx);
         */
-        ranknext[occless[cc]++] = idx;
+        compressedtable_update(ranknext,(Seqpos) occless[cc],idx);
+        occless[cc]++;
       }
     } else
     {
@@ -562,7 +568,8 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
           if (ISNOTSPECIAL(cc))
           {
             gt_assert(occless[cc] < (unsigned long) rmnsufinfo->partwidth);
-            ranknext[occless[cc]++] = specialidx;
+            compressedtable_update(ranknext,(Seqpos) occless[cc],specialidx);
+            occless[cc]++;
           }
         } else
         {
@@ -570,10 +577,11 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
         }
         specialidx++;
       }
-      if (range.rightpos == rmnsufinfo->totallength)
-      {
-        ranknext[rmnsufinfo->totallength-1] = rmnsufinfo->totallength;
-      }
+    }
+    if (getencseqlengthofspecialsuffix(rmnsufinfo->encseq))
+    {
+      compressedtable_update(ranknext,rmnsufinfo->totallength-1,
+                             rmnsufinfo->totallength);
     }
     freespecialrangeiterator(&sri);
   }
@@ -581,20 +589,21 @@ static Seqpos sa2ranknext(Seqpos *ranknext,const Rmnsufinfo *rmnsufinfo)
   return longest;
 }
 
-static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
+static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
+                                     Rmnsufinfo *rmnsufinfo)
 {
-  Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0, *lcptab,
-         *ranknext, *rightposinverse;
+  Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
+  Compressedtable *lcptab, *ranknext, *rightposinverse;
 
-  if (rmnsufinfo->inversesuftab.plain == NULL)
+  if (spacefortab == NULL)
   {
-    rightposinverse = ranknext
-                    = gt_malloc(sizeof(Seqpos) * (rmnsufinfo->totallength+1));
-    ranknext[rmnsufinfo->totallength] = rmnsufinfo->totallength;
+    rightposinverse = ranknext = compressedtable_new(rmnsufinfo->totallength);
+    compressedtable_update(ranknext,rmnsufinfo->totallength,
+                           rmnsufinfo->totallength);
     setrelevantfrominversetab(rightposinverse,rmnsufinfo);
   } else
   {
-    rightposinverse = ranknext = rmnsufinfo->inversesuftab.plain;
+    rightposinverse = ranknext = spacefortab;
   }
   inversesuffixarray2specialranknext(rightposinverse,ranknext,rmnsufinfo);
   fillpos = sa2ranknext(ranknext,rmnsufinfo);
@@ -611,7 +620,7 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
       printf("ranknext[%lu]=",(unsigned long) fillpos);
       printf("%lu\n",(unsigned long) ranknext[fillpos]);
       */
-      nextfillpos = ranknext[fillpos];
+      nextfillpos = compressedtable_get(ranknext,fillpos);
     }
     if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
     {
@@ -633,7 +642,7 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
           break;
         }
       }
-      lcptab[fillpos] = lcpvalue;
+      compressedtable_update(lcptab,fillpos,lcpvalue);
       if (lcpvalue > 0)
       {
         lcpvalue--;
@@ -643,33 +652,36 @@ static Seqpos *lcp9_manzini(Rmnsufinfo *rmnsufinfo)
   }
   /* since lcptab points to this memory we set it to NULL, so that it
      is not freed later */
-  rmnsufinfo->inversesuftab.plain = NULL;
   return lcptab;
 }
 
-Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
+Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
-  Seqpos *lcptab;
+  Compressedtable *lcptab;
 
   sortremainingsuffixes(rmnsufinfo);
   if (withlcptab)
   {
 #ifdef NOINVERSESUFTAB
-    gt_free(rmnsufinfo->inversesuftab.plain);
-    rmnsufinfo->inversesuftab.plain = NULL;
+    compressedtable_free(rmnsufinfo->inversesuftab);
+    rmnsufinfo->inversesuftab = NULL;
+    lcptab = lcp9_manzini(NULL,rmnsufinfo);
+#else
+    gt_assert(rmnsufinfo->inversesuftab != NULL);
+    lcptab = lcp9_manzini(rmnsufinfo->inversesuftab,rmnsufinfo);
+    rmnsufinfo->inversesuftab = NULL;
 #endif
-    lcptab = lcp9_manzini(rmnsufinfo);
   } else
   {
+    compressedtable_free(rmnsufinfo->inversesuftab,true);
+    rmnsufinfo->inversesuftab = NULL;
     lcptab = NULL;
   }
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
-  gt_free(rmnsufinfo->inversesuftab.plain);
-  rmnsufinfo->inversesuftab.plain = NULL;
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;

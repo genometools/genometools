@@ -20,6 +20,7 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
+#include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
@@ -31,6 +32,6 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-Seqpos *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
+Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 
 #endif
