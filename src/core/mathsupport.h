@@ -19,6 +19,7 @@
 #define MATHSUPPORT_H
 
 #include <stdbool.h>
+#include <math.h>
 
 /* Returns the log of the sum of two log probabilities. */
 double        gt_logsum(double p1, double p2);
@@ -34,5 +35,8 @@ double        gt_rand_max_double(double maximal_value);
 double        gt_rand_0_to_1(void);
 /* Returns a random character from 'a' to 'z'. */
 char          gt_rand_char(void);
+
+#define LOGof2  0.693147
+#define LOG2(D) log((double) (D))/LOGof2
 
 #endif

@@ -20,14 +20,15 @@
 
 #include "core/ma_api.h"
 #include "core/unused_api.h"
+#include "core/mathsupport.h"
 #include "seqpos-def.h"
 #include "bitpack-itf.h"
 
 typedef struct
 {
+  size_t sizeofplain;
 #define PLAIN
 #ifdef PLAIN
-  size_t sizeofplain;
   Seqpos *plain;
 #else
   BitPackArray *bitpackarray;
@@ -39,12 +40,21 @@ typedef struct
                                                   GT_UNUSED Seqpos maxvalue)
 {
   Compressedtable *compressedtable;
+#ifndef PLAIN
+  unsigned int bitsvalue = (unsigned int) ceil(LOG2(maxvalue));
+#endif
 
   compressedtable = gt_malloc(sizeof (Compressedtable));
 #ifdef PLAIN
   compressedtable->sizeofplain
     = sizeof (Seqpos) * numofvalues;
   compressedtable->plain = gt_malloc(compressedtable->sizeofplain);
+#else
+  compressedtable->sizeofplain = 0;
+  compressedtable->bitpackarray
+    = bitpackarray_new(bitspervalue,(BitOffset) numofvalues,true);
+  printf("allocated compressed table: %lu entries with %u bits\n",
+          numofvalues,bitspervalue);
 #endif
   return compressedtable;
 }
@@ -55,6 +65,8 @@ typedef struct
 {
 #ifdef PLAIN
   compressedtable->plain[idx] = value;
+#else
+  return;
 #endif
 }
 
@@ -64,6 +76,8 @@ typedef struct
 {
 #ifdef PLAIN
   return compressedtable->plain[idx];
+#else
+  return 0;
 #endif
 }
 
@@ -75,6 +89,8 @@ typedef struct
   {
 #ifdef PLAIN
     gt_free(compressedtable->plain);
+#else
+    bitpackarray_delete(compressedtable->bitpackarray);
 #endif
   }
   gt_free(compressedtable);
@@ -86,7 +102,11 @@ typedef struct
 {
   if (compressedtable->sizeofplain >= requestedbytes)
   {
+#ifdef PLAIN
     return compressedtable->plain;
+#else
+    return NULL;
+#endif
   }
   return NULL;
 }

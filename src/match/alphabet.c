@@ -19,10 +19,10 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
+#include "core/mathsupport.h"
 #include "core/chardef.h"
 #include "core/cstr.h"
 #include "core/error.h"
@@ -136,9 +136,6 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
   in (counting from 1). The result of the parsing is stored in
   \texttt{alpha}.
 */
-
-#define LOGof2  0.693147
-#define LOG2(D) log((double) (D))/LOGof2
 
 static int readsymbolmapfromlines(SfxAlphabet *alpha,
                                   const GtStr *mapfile,
