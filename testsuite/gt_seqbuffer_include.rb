@@ -50,12 +50,53 @@ allfiles = ["Atinsert",
             "TTT-small",
             "trna_glutamine"]
 
-Name "sequence buffer: check EMBL <-> FASTA"
+allfiles.each do |file|
+  Name "sequence buffer: check EMBL <-> FASTA #{file}"
+  Keywords "gt_convertseq sequencebuffer"
+  Test do
+    run_test "#{$bin}gt dev convertseq #{$testdata}#{file}.fna | grep -v '>'  > #{file}_out1"
+    run_test "#{$bin}gt dev convertseq #{$testdata}#{file}.embl | grep -v '>' > #{file}_out2"
+    run "diff -i #{file}_out1 #{file}_out2"
+  end
+end
+
+Name "sequence buffer: GenBank empty sequence"
 Keywords "gt_convertseq sequencebuffer"
 Test do
-  allfiles.each do |file|
-    run_test "#{$bin}gt dev convertseq #{$testdata}#{file}.fna  > #{file}_out_fasta"
-    run_test "#{$bin}gt dev convertseq #{$testdata}#{file}.embl > #{file}_out_embl"
-    run "diff #{file}_out_fasta #{file}_out_embl"
+  run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test1.gbk", :retval => 1
+  grep($last_stderr, "sequence 0 is empty")
+end
+
+Name "sequence buffer: GenBank file type unguessable"
+Keywords "gt_convertseq sequencebuffer"
+Test do
+  run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test3.gbk", :retval => 1
+  grep($last_stderr, "cannot guess file type of file")
+end
+
+Name "sequence buffer: GenBank unterminated sequence"
+Keywords "gt_convertseq sequencebuffer"
+Test do
+  run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test4.gbk", :retval => 1
+  grep($last_stderr, "unterminated sequence in line")
+end
+
+Name "sequence buffer: GenBank text before LOCUS"
+Keywords "gt_convertseq sequencebuffer"
+Test do
+  run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test2.gbk"
+  run "diff #{$last_stdout} #{$testdata}genbank_test2.fas"
+end
+
+gbfiles = ["Atinsert",
+           "trna_glutamine"]
+
+gbfiles.each do |file|
+  Name "sequence buffer: check GenBank <-> FASTA #{file}"
+  Keywords "gt_convertseq sequencebuffer"
+  Test do
+    run_test "#{$bin}gt dev convertseq #{$testdata}#{file}.fna | grep -v '>' > #{file}_out1"
+    run_test "#{$bin}gt dev convertseq #{$testdata}#{file}.gbk | grep -v '>' > #{file}_out2"
+    run "diff -i #{file}_out1 #{file}_out2"
   end
 end
