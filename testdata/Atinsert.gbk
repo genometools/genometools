@@ -1,0 +1,818 @@
+LOCUS       AF078689                 275 bp    mRNA    linear   EST 26-JUL-1999
+DEFINITION  AF078689 Arabidopsis thaliana library (Tan K) Arabidopsis thaliana
+            cDNA clone IFA2, mRNA sequence.
+ACCESSION   AF078689
+VERSION     AF078689.1  GI:5587835
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 275)
+  AUTHORS   Zhao,D., Chen,D., Yang,C. and Zhai,Z.
+  TITLE     Isolation of intermediate filament-like genes from Arabidopsis
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Tan K
+            Plant Development Biology
+            Institute of Botany
+            20 Nanxincun Xiangshan. Hai Dian, Beijing, 100871, P. R. China.
+FEATURES             Location/Qualifiers
+     source          1..275
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="IFA2"
+                     /clone_lib="Arabidopsis thaliana library (Tan K)"
+ORIGIN      
+        1 antnnctacn ncnncnntnn cnncnatnna antanacnna tnntnntann aatnaaannc
+       61 tanaancnnc nnanaantat ntnnataana aataacaaaa actnannnna tcatnaantt
+      121 cttcnttata ttatantttt caatctnaat ttcaattccn ccnctcncct ttttcctctc
+      181 cnccttttcc ntctctccna tctnctcccn ccnccnacct tntnatnatt atanctctna
+      241 anntccatac aannatataa aaaaaaaaaa aaaaa
+//
+
+LOCUS       C99932                   852 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99932 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 88, mRNA sequence.
+ACCESSION   C99932
+VERSION     C99932.1  GI:4714049
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 852)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..852
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="88"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 atnrayamtc aaaaatnnan tmtanntttc atatctctcn cttttctctt catcacttcc
+       61 tcttcanctn anttcatcat tcaacanntc acaaannnca rannaatana ntacaacant
+      121 tcttacantc tcnannanaa tcttnnantn acrananant tnananaana ncnaccatcn
+      181 antaanatan tnacaataac aancttctca ntnattaaan ncanannana accctatnaa
+      241 tcctctnttt ttnannctnc tnnttacaaa tnnanattnn ttttntacnt naatnntaat
+      301 aaaaacnacn ntnnaaatna tcatatttcc ctttacncaa nnatcnaana nacaaactct
+      361 cttccattan nttnnnaant naatnttnat ctcaaactct ttntccataa tnnnaancta
+      421 cacaaatatt tnactnttac anatnnctta rttnaancna tataacaatn csaaaaaana
+      481 atnnnntttc nnacaattna ttcctcnatc aacattctac aacncnaacn aannttacct
+      541 ttnaccaann acactnnttc cttttnnntn ncynnaaaan cctttattnt ttaaaccnns
+      601 tccaccaacm aaraaaawwa ytttctwtym mtyytccaac aysytycccw wcsaatnttt
+      661 tttcccttnn naaaaanacc tncntttcct cctacctttn nnaaaaanaa anttcntttt
+      721 tactcccnaa tnaattttcc ccctttnnaa aaaccnaatn cctnnttnna cttannaatt
+      781 ttaacccccn aaannnnnaa tnnaannaaa naaaaaaccc ctttncccnt tcccaatcct
+      841 tccctanttt nc
+//
+
+LOCUS       C99931                   719 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99931 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 87-1, mRNA sequence.
+ACCESSION   C99931
+VERSION     C99931.1  GI:4714048
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 719)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..719
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="87-1"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 ntnartnttn atctcaaact ctttntccat aatnnnaanc tacacaaata tttnactntt
+       61 acanatnnct tantnaancn atataacaat ncnaaaaaan aatnnnnttt cnnacaattn
+      121 attcctcnat caacattcta caacncnaac naannttacc ttnaccanna cactnnttct
+      181 tttnntnctn anatctttat tnttaaaccn nctcaacaac aananaaant tacattcata
+      241 tcaaaccctc caaacaatnt tttcacttnn aanatacttc ntttctctac cttnnaanat
+      301 aaattctatt actccnatna ttttctcntt naanaccnat actnnanact annatttaac
+      361 ccnaaannnn atnnannann aanaccacat ncacttccaa tcttcctatt tnctcaannc
+      421 cataanncaa atncanttnc tacaaacact tnnnnancnn ttaatctncn nttaaanaat
+      481 caacnaartt ctaaccatan acaatatwtc tncacttnnt acccattnna aacnttatnn
+      541 tktnnnakta acatatctac tnttnctnat taacnancat ccaaannatt ttnntnatna
+      601 nccytatctt naactnaatn nttaankcct ataccactct ctccctwaat tctccttctt
+      661 ntcwcnacat cncyttrata aaaaatttat tnataatttt ttaraaactt atttttkta
+//
+
+LOCUS       C99930                   746 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99930 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 86, mRNA sequence.
+ACCESSION   C99930
+VERSION     C99930.1  GI:4714047
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 746)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..746
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="86"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 ntnaancnat acaacnatnc aaaaaaanan tnnnnattca cacaattnat ttctcttcca
+       61 acattctaca acncnaacna annntacytt ntncannaca cancttcttt tnntnctnan
+      121 atcttcatcn ttaacccnac anaaaaacaa nanaaantca cattcatatc aaaccctccn
+      181 aacaatnttt tcacttnnaa natacttcnt ttctctacct tnnaanataa attctattac
+      241 tctnatnatt ttctcnttna anaccnatac tnnanattan natttaaccc naaannatct
+      301 nntnnannna naccacatnc acttccaatc ttcctatatn ctcaanncca taanncaaac
+      361 ncanttntta caaacacttn nnnancnntt aatctncnnt taaanaatca acnaanctcc
+      421 aaccacaaac aattatattc tncancttnn taccccnatt cnaancnatt atnntntnnn
+      481 antnaacaat atcatattna tntcanaanc taaaanatnc atcmaaannn tatatnntna
+      541 atnatnccat tatcttttna aactnaaatn nttaanntct ctntnaacaa catartctcc
+      601 scttaaatat atntcactac ttctttatcc cccnnaataa ccttacaaan aaaaattnat
+      661 natttaattt nttatacnac actttattna tncctntnan ntaaccttnt ttccnctccc
+      721 cnaatttcct tttttttcct nttttt
+//
+
+LOCUS       C99929                   668 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99929 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 85, mRNA sequence.
+ACCESSION   C99929
+VERSION     C99929.1  GI:4714046
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 668)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..668
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="85"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 tcaaaatatn natantcaca aatnnantct anntttcaca ttacttnctt tcctcttcat
+       61 cacttcctct tccnctnanc tcatcattaa acanntcaca cannncanan naatananta
+      121 caacaactct tacantctca cntcnaatct tnnantnacn acaananant tnananacna
+      181 ncnaccatca antaanatan tnacaatcac aancttctct ntnattaann acanannana
+      241 accctatnaa tcatctattt ttnannctnc cnnttacaaa tnnanattan ttttntacnt
+      301 naannntaat ccnaaanncn ntataaataa tcatatttca ctttacncna nnatanaana
+      361 nacanaaact cttccaanan nntnnnaant naatnttnat ctcaaactct ttntccacaa
+      421 tcnnaaktta aanaaatatt tntctnttac anatnnaaca ntnaancnat acaacnatnc
+      481 aaaaaaanan tnnnnattcn cacaattnat ttctcttcca acattctaca acncnaacna
+      541 annnttcctt ntnccannac acarcttcct ttnnntnctn araacttcat cnttaacccn
+      601 accnaaaaac canaaaaaat ccctttcttt tcaaaccccc cnaaacatnt ttttcccttt
+      661 nnaaaaaa
+//
+
+LOCUS       C99928                   800 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99928 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 84, mRNA sequence.
+ACCESSION   C99928
+VERSION     C99928.1  GI:4714045
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 800)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..800
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="84"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 nnaanttaaa naaatatttn tctnttacan atnnaacant naancnatac aacnatncaa
+       61 aaaaanantn nnnattcaca caattnattt ctcttccaac attctacaac ncnaacnaan
+      121 nntaccttnt ncannacaca ncttcttttn ntnctnanat cttcatcntt aacccnacan
+      181 aaaaacaana naaantcaca ttcatatcaa accctccana caatnttttc acttnnaana
+      241 tacttcnttt ctctaccttn naanataaat tctattactc cnatnatttt ctcnttnaan
+      301 accnatactn nanactanna tttaacccna aannnnatnn annannaana ccacatncac
+      361 ttccaatctt cctatttnct caannccata anncaaacnc anttnctaca aacacttnnn
+      421 nancnnttaa tctncnntta aanaatcaac naantactaa ccatanacaa atatattctn
+      481 cancttnnta cccnattnna ancnnttatn ntntnnnant naacaatatc atactnttan
+      541 ctnatttaaa cnatncatca aaannatatt tnntnaatna tnccattatc tttnaanctn
+      601 aaatnnttaa nntctctata accaacatcn tctccnctta aatatctnca cttctttntc
+      661 tacnatcaat caaccttatn aataaanana tatttnatna ntttntaata anaaaacntt
+      721 aatntttntn aattntnaan ttattacttc tnttcttctn anttttttta tttcaatnaa
+      781 aataaaactc ttaccnnttt
+//
+
+LOCUS       C99927                   797 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99927 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 83, mRNA sequence.
+ACCESSION   C99927
+VERSION     C99927.1  GI:4714044
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 797)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..797
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="83"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 ntnaancnat mcmwcnatnm wmaaaamkar tnknnattyr cayratwnat ytctcttcyw
+       61 myattctwsw mcncnaayna annntacctt ntnyasnacr mwscttcttt ynntnctnak
+      121 atcttcatnc nwtamcccna canaaamacm mkakawantc wcattcatat cmwaccctcc
+      181 raacaatntt ttcacttnna anatacttcn tttctctacc ttnnaanata aattctatta
+      241 ctctnatnat tttctcnttn aanaccnata ctnnanatta nnatttaacc cnaaannatc
+      301 tnntnnannn anaccacatn cacttccaat cttcctatat nctcaanncc ataanncaaa
+      361 cncanttntt acaaacactt nnnnancnnt taatctncnn ttaaanaatc aacnaanctc
+      421 caaccacaaa caattatatt ctncancttn ntacccnatt cnaancnatt atnntntnnn
+      481 antnaacaat ataatattna tntcananct aaaanatnca tccaaaannn tatatnntna
+      541 atnatnccat tatctttnaa nctnaaatnn ttaanntctc tntnacaaac atantctccn
+      601 tttaaatatc actacttctt tttcaacaac aaccttacna ataaantnna ctttnatnan
+      661 tttaatttnt tatacnacaa cnttnttnat ncttntnatn taatcnttnt ttctnctctc
+      721 cnanttttcn ttttactttt tttttcatnt tttnctatca atnaaataaa nntataaaac
+      781 tctcttnntt ttaaant
+//
+
+LOCUS       C99926                   371 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99926 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 82, mRNA sequence.
+ACCESSION   C99926
+VERSION     C99926.1  GI:4714043
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 371)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..371
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="82"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 nnaanttaaa naaatatttn tctnttacan atnnaacant naancnatac aacnatncaa
+       61 aaaaanantn nnnattcaca caattnattt ctcttccaac attctacaac ncnaacnaan
+      121 nntaccttnt ncannacaca ncttcttttn ntnctnanat cttcatcntt aacccnacan
+      181 aaaaacaana naaantcaca ttcatatcaa accmtsswrm cmrkrtyytc acttnnaana
+      241 tacttcnttt ctctaccttn tcacctaaat tcaattcatc ntacccnnat cctcnattct
+      301 tttncttttt accctnnaan aaatactcat aanccacctc tnttatttac ccccaatctt
+      361 cacaanaaaa a
+//
+
+LOCUS       C99925                   565 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99925 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 81, mRNA sequence.
+ACCESSION   C99925
+VERSION     C99925.1  GI:4714042
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 565)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..565
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="81"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 cntctccata cnttnttccc naanacatnt ccttnacaaa nntatacaat cttttccnnc
+       61 aacttnnntt ncnacatcta ttcnttnttc cccntccttc ccntntnata nncttnatca
+      121 ccanaaanna tttactnatt nannaaaatn nnnaatcatc ancantnnaa ctccaacant
+      181 caactantan ntcnntacan tnanacanca acncnnatnn acnctncacn accncttcta
+      241 nacnatcttt tannttaata aaacanacca aacatataca ancanttnaa nctnntanct
+      301 aanatcttta ntcnnnccaa ttcttcntcc atacaannat acaancttnt tccncatntt
+      361 nccacccaaa tccnntatnn annatatatn atcntctctt nanatnnnat tntnttnttc
+      421 nctaaccnat ctcattctcc nttcacanan antanaaana ttatatatnt ttaanncttt
+      481 tnattnttnt aattntncaa tctttnawta ttttcttnnt ccctntaaaa taatccacct
+      541 tttnatatat ttacttnatt aactt
+//
+
+LOCUS       C99923                   110 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99923 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 79, mRNA sequence.
+ACCESSION   C99923
+VERSION     C99923.1  GI:4714041
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 110)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..110
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="79"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 tctnntccnt ctnanacatc nnatcanntn nnnnntacaa tcatctcncc nttcantann
+       61 tntttacnna tttcnncnnt cntatanctn ncntnactaa nnctttaacc
+//
+
+LOCUS       C99922                   815 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99922 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 78, mRNA sequence.
+ACCESSION   C99922
+VERSION     C99922.1  GI:4714040
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 815)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..815
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="78"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 nntranatct acsttnctnn anntnntnnt nnttcnnakn ttncnncnnc nntnnaasta
+       61 ntatnatccn nanttnaatc nntnnnaant tntnactcaa tcnncsanna asanatacnn
+      121 ttncatcnna ncanccnttn acnnantttt ttatntnatc nntnnattna aaattnnnaa
+      181 tnanacctca cncncnntnn cnncncntnc ttatncnanc tctatnnatc ttttcnatnt
+      241 nnantcncnt cantnnttaa nnantcnttc nnttcctnnc nntnnatntn tantnncnnc
+      301 ntntncnncn nttnnatatn tntatntnct aaccantcac ncnntnnanc tttcnttttt
+      361 nncnatttna tncncntcnt cntnntnnaa acaccnnntt tnnaaaaatn ncanaanctn
+      421 aaaantcccc cnttaccnnc acaanntncs nnttaanatn naaccnntna anntttaacc
+      481 tncntcnnan tnnaanataa antnncnntn nttcanntnn tnnnatncat tnacnatttn
+      541 cttcnncnna ntnnnannnn tnananannn attananaaa nccttntntt nctntatnat
+      601 acnacnnann nanantnnan nanancnncn natttacctn anatnattac acncnccncc
+      661 tntncntntn tnnantnnta anannnnana ccacnncnca nnattatnnn tacnanaant
+      721 tnnaanatnc tavcntacnc annatatatt aaantnnnca aaaacaatat cattatnatt
+      781 nntncacatn tttactntmt naaaancaat ancnt
+//
+
+LOCUS       C99921                   602 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99921 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 77, mRNA sequence.
+ACCESSION   C99921
+VERSION     C99921.1  GI:4714039
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 602)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..602
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="77"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 cnnnncttct raaanacnca atctnatnta ctcntacatn ctanntncta tctcttctat
+       61 aatntctnat cctttctncc ctcccacwcn ttnccntanc ckcaaawtct cctktnayat
+      121 ttmcctnmtc anaytntcct natnnatnsn naynttcacm tanataccaa ancacaanaa
+      181 attcnaannt nctnnanaaa anncnaccac tttcactaan ancatttnnc tcnannaanc
+      241 tnatncnany nccatatccn ttnntnanna antaactttn atnnattnnn naaatnctat
+      301 cntaaannaa atcmcmaakn acnannannn tcntntcact nccttatctn ntntcttnaa
+      361 tctccaannt tctntwaana ctacaaanct naanctnaca tnncttcctn atactaatna
+      421 attnntccat ctcrcmttaa canantttna ttatctaatc cccmanaana aactnnaana
+      481 tnatnatnaa atttnctnat tttnctnaat ccymmcccna aaaannaana cmtttnncmc
+      541 ttknntnnat tcccaatatt nananaatct tnaaattntt nnaaaatntt tattccccct
+      601 tt
+//
+
+LOCUS       C99920                    92 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99920 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 76, mRNA sequence.
+ACCESSION   C99920
+VERSION     C99920.1  GI:4714038
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 92)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..92
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="76"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 tcanctnttt cnttcaacna tctaaactat ctcaatnctt ctttnaatct attntcnntt
+       61 tccttntact cntcaatttc atnttttttt tn
+//
+
+LOCUS       C99919                   461 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99919 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 75, mRNA sequence.
+ACCESSION   C99919
+VERSION     C99919.1  GI:4714037
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 461)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..461
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="75"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 ccctcccnct cctnntttct anttnnnttc nnnttctntt atcnnntttt tcncnnnnnt
+       61 cttttntcnn nnccctnnac cnnaattcnc nnntcnacca actcntcana tntnntnctn
+      121 cnctacaatn aancaaannn antcacactc tcnnactnan nctctcccct ccncttctnt
+      181 aaccatancn nctcnacntc tatntctccn atctaaccan ctctnnnnnt tcnannanan
+      241 ataannanaa aantannnan nnacnantat ncttncccnt tctntncana ctattttnat
+      301 ntcntctctc tnnncnntca cattnatnaa natcntccta tnnatnctta aantnnnntn
+      361 tntcccntcc tntncnntna aantnanctc nnnatatnat tncntcntat anccccncnn
+      421 cncnnccnat atnttcaann tnacccnnat cannaaatca a
+//
+
+LOCUS       C99918                   556 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99918 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 74, mRNA sequence.
+ACCESSION   C99918
+VERSION     C99918.1  GI:4714036
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 556)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..556
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="74"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 ntttatcacn ccttncattn atcanaascc cttnctacnn cattnancca knctnccnaa
+       61 nctntttctt cnnnaaattc anatncaant natnccactn caaaanctnn aatcattttn
+      121 ttncccanca cacatcaact tnacnaanan nttactnmnn aacatantna nnannaaatn
+      181 actnaanann aaccaactct tctcaantnn ccaaataanc ccnnnattcc anattctnat
+      241 ttntttnacc ntnatcaatc ntnntttnat nnacctccan annncttcaa tctcacatta
+      301 tcaaatttcn ctntnatntn nnattcactn tttnnctnnn tatcatcntc ctctctnnca
+      361 tacatatatn nnaannaana atctnctcat narnanttct tattnnttaa cnnnaannan
+      421 tacccccnna nnattatcat nntanatnnn ctttcctcan aratcaanca nacaattnct
+      481 nnnttncctt nccanaactt taccnaaaat cntcactcat ctcannnctn ccaatancna
+      541 tatccrattt taaaaa
+//
+
+LOCUS       C99917                   476 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99917 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 73, mRNA sequence.
+ACCESSION   C99917
+VERSION     C99917.1  GI:4714035
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 476)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..476
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="73"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 atanncnana tcccccccaa annattncct natntnanna acatnnnnan atcatcntnn
+       61 aatcnancnc nnnnantcnc cnntnaantn nntnnntnna cantcncncc cnnacnnacn
+      121 cnncatnacc ncttcactac nanctnttan ntttntnnna ctnntcctac natataccnt
+      181 ctcttnntnn tnnnnccncn aaactcnnct cannactnnn ctcctcnaaa ttcnnatnaa
+      241 nnntntcccn cctntnacna cnnnnttcnn nattnnancn atctannann nnacactctn
+      301 anaatntnat cnntnattnn tcnntncnct nnatcacatt nctcnccttn ccantaccac
+      361 ttttnacana nttccccttc tttttcncaa cnnncnatnc tnnnanaann natnnntaac
+      421 tcnnntnccn nctctnnatc nnanatancn tnntcctctc nnnnttccan annntc
+//
+
+LOCUS       C99916                   865 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99916 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 72, mRNA sequence.
+ACCESSION   C99916
+VERSION     C99916.1  GI:4714034
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 865)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..865
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="72"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 nntaataaaa acnacnntnn aaatnatcat atttcccttt acncaannat cnaananaca
+       61 aactctcttc cattannttn nnaantnaat nttnatctca aactctttnt ccataatnnn
+      121 aanctacaca aatatttnac tnttacanat nncttantna ancnatataa caatncnaaa
+      181 aaanaatnnn ntttcnnaca attnattcct cnatcaacat tctacaacnc naacnaannt
+      241 taccttnacc annacactnn ttcttttnnt nctnanatct ttattnttaa accnnctcaa
+      301 caacaanana aanttacatt catatcaaac cctccaaaca atnttttcac ttnnaanata
+      361 cttcntttct ctaccttnna anataaattc tattactccn atnatwttct cnttnaanac
+      421 cnatactnna nactannatt taacccnaaa nnnnatnnan nannaanacc acatncactt
+      481 ccaatcttcc tatttnctca annccataan ncaaatncan ttnctacaaa cacttnnnna
+      541 ncnnttaatc tncnnttaaa naatcaacna antactaacc atanacaaat atattctnca
+      601 ncttnntacc cnattnnaaa cnnttatnnt ntnnnantna acaatatcat actnttanct
+      661 natttaaacn atncatccaa annatatttn ntnaatnatn ccattatctt tnaanctnaa
+      721 atnnttaann tctctataac caacatcntc tccncttaaa tatctncmct tctttntcta
+      781 craycaatcc accttatnaa taaaaaaatt ttaatttnat naatttntta taanaaaact
+      841 ttaatntttn ttaaatntna aattt
+//
+
+LOCUS       C99914                   628 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99914 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 70, mRNA sequence.
+ACCESSION   C99914
+VERSION     C99914.1  GI:4714033
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 628)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..628
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="70"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 nnnacnaacc nntntaccac natttnnttc ntcactntct nncctaccca aaancnnatn
+       61 naatcttnnt naatacatnn naananatnn ancccaaatc attaaantcc cttcaanacc
+      121 cnaaactttt nnnccnnntc nctcntntac cnntttatcc nnttnntccn ttatncanac
+      181 cnatacaatc atccacnacc natcacccnn tttttnattn nttaaacaaa caaccaaacn
+      241 antcnnttct ctacatttcc ttcnnnantn ntnnttctct aacnnctcaa canttaaccn
+      301 aattnncntn nnnnctcnan nananccanc aacnntttat atnnntnntt cnaccncccn
+      361 ttnacnnctc ntcttncant nattatttct cnnctaaann cnntntaacc aaanacaaca
+      421 cnccanaata tctaccaaaa annnttcntn actcstactt tncnataaaa ntttcatnat
+      481 cccatcatnn ncaccncaan ctnaaatcct aacccatcca nnccnttnnt nnntttttaa
+      541 cacatttntt nntttnnaac tccactttnn raaaccttcc ttttnccnnc nttcccawtr
+      601 anaaccttkn cccccttttc ccccaacc
+//
+
+LOCUS       C99913                   497 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99913 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 69, mRNA sequence.
+ACCESSION   C99913
+VERSION     C99913.1  GI:4714032
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 497)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..497
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="69"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 cctntcccat cnnnccnttr ntnnnttttt nacccattnc nnttnnanct cnacnttsna
+       61 aancntcntt nncnncnttc cnatsatcnc atnnccactt tttnccnanc anaatatnaa
+      121 tncnncnttn ctcancnacn aactnnnaat cncantcana ttnnatnatc caaannanna
+      181 tatttctann tnnaanattn anncnttnnt nannaanntt atnactnana annaanntna
+      241 ancnatnana annaaantna anaanttnan anactcnncn nanatntcac tnancattna
+      301 cnntnntnnt ttnncncacn antcnctttn canantcacc aannantntc aacnnttttt
+      361 nnaacntntc ntnnacttnt cacntnntnc ttaaaaattn ttaccntttt ctaactcttt
+      421 tattattart tnnttnaatt atacntntcn ttcctctntt anttnttata atataataaa
+      481 tcnatttact ctttntt
+//
+
+LOCUS       C99911                   661 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99911 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 67, mRNA sequence.
+ACCESSION   C99911
+VERSION     C99911.1  GI:4714031
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 661)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..661
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="67"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 cntttctncc acattaaaac anaanantnc aacaattnaa nncatanaaa antnncctta
+       61 tnaancanct nccattnctt tcnannctat tccacntacc ctnnctcaaa actntnnnnt
+      121 taacntnatc cntactatna ctncattnca annnaancat ncaaatnntn aaaacncatn
+      181 nactnntatt nacnnnaaca ctnntncaat anctnatatn aaanananca anatatnnna
+      241 ttcntacaat ntnaanncnc aaactttcaa nacnnctata naancancnt ntatncttct
+      301 aannnatcna tnatatantn antnnaatca anaanaanca anctcctnna tctnnacctt
+      361 caaancctac cattnanaca naannanatn canacaacna acaaattctt cccnactaan
+      421 cnaannnana aacactttnn tctcancata actcaatctc tnttttcact tntttaatnn
+      481 ttncactctt ttnnctatta tcttcccttn acatatcttt ttaattctnc anttttnact
+      541 tnnntnanat aaaattttcc caanntnntt tttttttntt tnttttnnna atattaactt
+      601 ttttnaattt tcntantccc tttnttnntt tttaaaattc caattnttat tnttcttttt
+      661 n
+//
+
+LOCUS       C99910                   241 bp    mRNA    linear   EST 21-SEP-1999
+DEFINITION  C99910 Arabidopsis thaliana library (Motohashi R) Arabidopsis
+            thaliana cDNA clone 66, mRNA sequence.
+ACCESSION   C99910
+VERSION     C99910.1  GI:4714030
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 241)
+  AUTHORS   Motohashi,R., Shinozaki,K. and Yamaguchi-Shinozaki,K.
+  TITLE     Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Motohashi R
+            Laboratory of Plant Molecular Biology
+            Institute of Physical and Chemical Research(RIKEN)
+            3-1-1, Koyadai, Tsukuba 305-0074, Japan.
+FEATURES             Location/Qualifiers
+     source          1..241
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="66"
+                     /clone_lib="Arabidopsis thaliana library (Motohashi R)"
+ORIGIN      
+        1 cncscctaan aannaaaana tnanaanaan aanaanaana aaactnannt ctnaananac
+       61 ctttaatatt tttncntnnt ctantttact ttnttatcan aaacaaanaa aatcttttnt
+      121 nncnttannt nttaantaan ntttttnttt tntttnaaac ttaaaaaaaa naactactct
+      181 tcnttttnta annttataat atntttnntt tantccttat cccaaaaact tncattttnc
+      241 c
+//
+
