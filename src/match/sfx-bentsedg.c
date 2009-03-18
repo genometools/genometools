@@ -1624,20 +1624,21 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
                               FILE *fplcptab,
                               FILE *fpllvtab)
 {
-  const unsigned long fixedwidth = 512UL;
+  /* XXX in case the sequence is small, use totallength as buffersize */
+  const unsigned long buffersize = 512UL;
   unsigned long remaining, left, width;
 
-  lcpsubtab->numoflargelcpvalues = (Seqpos) fixedwidth;
+  lcpsubtab->numoflargelcpvalues = (Seqpos) buffersize;
   lcpsubtab->bucketoflcpvalues = NULL;
   lcpsubtab->completelcpvalues = lcptab;
   lcpsubtab->smalllcpvalues
-    = gt_malloc(sizeof(*lcpsubtab->smalllcpvalues) * fixedwidth);
+    = gt_malloc(sizeof(*lcpsubtab->smalllcpvalues) * buffersize);
   remaining = bucketsize;
   left = 0;
   gt_assert(fplcptab != NULL && fpllvtab != NULL);
   while (remaining > 0)
   {
-    width = MIN(remaining, fixedwidth);
+    width = MIN(remaining, buffersize);
     outlcpvalues(lcpsubtab,
                  left,
                  left + width - 1,
