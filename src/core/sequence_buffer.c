@@ -20,8 +20,9 @@
 #include "core/fileutils.h"
 #include "core/ma.h"
 #include "core/sequence_buffer_rep.h"
-#include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_embl.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_gb.h"
 #include "core/unused_api.h"
 #include "core/xansi.h"
 
@@ -79,6 +80,8 @@ GtSequenceBuffer* gt_sequence_buffer_new_guess_type(GtStrArray *seqs,
     sb = gt_sequence_buffer_embl_new(seqs);
   } else if (gt_sequence_buffer_fasta_guess(firstcontents)) {
     sb = gt_sequence_buffer_fasta_new(seqs);
+  } else if (gt_sequence_buffer_gb_guess(firstcontents)) {
+    sb = gt_sequence_buffer_gb_new(seqs);
   } else {
     gt_error_set(err, "cannot guess file type of file %s -- unknown file "
                       "contents",
