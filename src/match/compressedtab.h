@@ -18,23 +18,34 @@
 #ifndef COMPRESSEDTAB_H
 #define COMPRESSEDTAB_H
 
-#include "seqpos-def.h"
 #include "core/ma_api.h"
+#include "core/unused_api.h"
+#include "seqpos-def.h"
+#include "bitpack-itf.h"
 
 typedef struct
 {
-  unsigned long sizeofplain;
+#define PLAIN
+#ifdef PLAIN
+  size_t sizeofplain;
   Seqpos *plain;
+#else
+  BitPackArray *bitpackarray;
+#endif
 } Compressedtable;
 
 /*@unused@*/ static inline Compressedtable *compressedtable_new(
-                                                        Seqpos maxvalue)
+                                                  Seqpos numofvalues,
+                                                  GT_UNUSED Seqpos maxvalue)
 {
   Compressedtable *compressedtable;
 
   compressedtable = gt_malloc(sizeof (Compressedtable));
-  compressedtable->sizeofplain = (unsigned long) sizeof (Seqpos) * (maxvalue+1);
-  compressedtable->plain = gt_malloc((size_t) compressedtable->sizeofplain);
+#ifdef PLAIN
+  compressedtable->sizeofplain
+    = sizeof (Seqpos) * numofvalues;
+  compressedtable->plain = gt_malloc(compressedtable->sizeofplain);
+#endif
   return compressedtable;
 }
 
@@ -42,14 +53,18 @@ typedef struct
                                        Compressedtable *compressedtable,
                                        Seqpos idx,Seqpos value)
 {
+#ifdef PLAIN
   compressedtable->plain[idx] = value;
+#endif
 }
 
 /*@unused@*/ static inline Seqpos compressedtable_get(
                                          const Compressedtable *compressedtable,
                                          Seqpos idx)
 {
+#ifdef PLAIN
   return compressedtable->plain[idx];
+#endif
 }
 
 /*@unused@*/ static inline void compressedtable_free(
@@ -58,16 +73,18 @@ typedef struct
 {
   if (freeelemspace)
   {
+#ifdef PLAIN
     gt_free(compressedtable->plain);
+#endif
   }
   gt_free(compressedtable);
 }
 
 /*@unused@*/ static inline void *compressedtable_unusedmem(
                                         const Compressedtable *compressedtable,
-                                        unsigned long requested)
+                                        size_t requestedbytes)
 {
-  if (compressedtable->sizeofplain >= requested)
+  if (compressedtable->sizeofplain >= requestedbytes)
   {
     return compressedtable->plain;
   }

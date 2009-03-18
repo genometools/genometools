@@ -1638,8 +1638,9 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   lcpsubtab->completelcpvalues = lcptab;
   sizeforsmalllcpvalues = (unsigned long)
                           sizeof (*lcpsubtab->smalllcpvalues) * buffersize;
-  lcpsubtab->smalllcpvalues = compressedtable_unusedmem(lcptab,
-                                                        sizeforsmalllcpvalues);
+  lcpsubtab->smalllcpvalues
+    = compressedtable_unusedmem(lcptab,
+                                (size_t) sizeforsmalllcpvalues);
   if (lcpsubtab->smalllcpvalues == NULL)
   {
     lcpsubtab->smalllcpvalues = gt_malloc((size_t) sizeforsmalllcpvalues);

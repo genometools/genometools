@@ -258,7 +258,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 
   printf("countovermaxdepth=%lu\n",
            gt_queue_size(rmnsufinfo->rangestobesorted));
-  rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength);
+  rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength+1,
+                                                  rmnsufinfo->totallength);
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
     compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->suftab[idx],
@@ -597,7 +598,9 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
 
   if (spacefortab == NULL)
   {
-    rightposinverse = ranknext = compressedtable_new(rmnsufinfo->totallength);
+    rightposinverse = ranknext
+                    = compressedtable_new(rmnsufinfo->totallength+1,
+                                          rmnsufinfo->totallength);
     compressedtable_update(ranknext,rmnsufinfo->totallength,
                            rmnsufinfo->totallength);
     setrelevantfrominversetab(rightposinverse,rmnsufinfo);
