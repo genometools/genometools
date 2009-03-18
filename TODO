@@ -28,24 +28,8 @@ merge libgtcore and libgtmatch:
 
 - replace FastaReader with SeqIterator
 - move alphabet to core
-- Alphabet (Stefan: ersetze alphabet.pr durch alphadef.h, Gordon: evtl. mergen
-  mit Alpha)
+- Alphabet (Gordon: evtl. mergen mit Alpha)
 - Encodedseq und Bioseq mergen ()
-  guesprot.c
+  guessprot.c
 
 - merge Timer und measure-time.c (Ereignis, formatierter String)
-
-
-view tool:
-----------
-
-- allow to specify the ``type order'' of tracks in config file
-- allow to sort tracks by type and then by filename (in the order specified
-  on the command line) or the other way round (one is the default, one is
-  switched on by a command line option)
-
-
-BitPackArray/BitPackClass:
---------------------------
-
-- use naming conventions (e.g., bitpackarray_new instead of newBitPackArray)
