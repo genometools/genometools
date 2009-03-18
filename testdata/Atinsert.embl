@@ -1,376 +1,1112 @@
-ID   Atinsert0
+ID   AF078689; SV 1; linear; mRNA; EST; PLN; 275 BP.
 XX
-DE   gi|5587835|gb|AF078689.1|AF078689 AF078689 Arabidopsis thaliana library
-DE   (Tan K) Arabidopsis thaliana cDNA clone IFA2, mRNA sequence
+AC   AF078689;
 XX
-SQ
-     ANTNNCTACN NCNNCNNTNN CNNCNATNNA ANTANACNNA TNNTNNTANN AATNAAANNC        60
-     TANAANCNNC NNANAANTAT NTNNATAANA AATAACAAAA ACTNANNNNA TCATNAANTT       120
-     CTTCNTTATA TTATANTTTT CAATCTNAAT TTCAATTCCN CCNCTCNCCT TTTTCCTCTC       180
-     CNCCTTTTCC NTCTCTCCNA TCTNCTCCCN CCNCCNACCT TNTNATNATT ATANCTCTNA       240
-     ANNTCCATAC AANNATATAA AAAAAAAAAA AAAAA                                  275
+DT   28-JUL-1999 (Rel. 60, Created)
+DT   03-MAR-2000 (Rel. 62, Last updated, Version 2)
+XX
+DE   AF078689 Arabidopsis thaliana library (Tan K) Arabidopsis thaliana cDNA
+DE   clone IFA2, mRNA sequence.
+XX
+KW   EST.
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-275
+RA   Zhao D., Chen D., Yang C., Zhai Z.;
+RT   "Isolation of intermediate filament-like genes from Arabidopsis";
+RL   Unpublished.
+XX
+DR   UNILIB; 6039; 1974.
+XX
+CC   On Dec 20, 1995 this sequence version replaced gi:1130836.
+CC   Contact: Tan K
+CC   Plant Development Biology
+CC   Institute of Botany
+CC   20 Nanxincun Xiangshan. Hai Dian, Beijing, 100871, P. R. China.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..275
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /clone_lib="Arabidopsis thaliana library (Tan K)"
+FT                   /clone="IFA2"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:6039"
+XX
+SQ   Sequence 275 BP; 80 A; 55 C; 70 G; 70 T; 0 other;
+     antnnctacn ncnncnntnn cnncnatnna antanacnna tnntnntann aatnaaannc        60
+     tanaancnnc nnanaantat ntnnataana aataacaaaa actnannnna tcatnaantt       120
+     cttcnttata ttatantttt caatctnaat ttcaattccn ccnctcncct ttttcctctc       180
+     cnccttttcc ntctctccna tctnctcccn ccnccnacct tntnatnatt atanctctna       240
+     anntccatac aannatataa aaaaaaaaaa aaaaa                                  275
 //
-
-ID   Atinsert1
+ID   C99932; SV 1; linear; mRNA; EST; PLN; 852 BP.
 XX
-DE   gi|4714049|dbj|C99932.1|C99932 C99932 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 88, mRNA sequence
+AC   C99932;
 XX
-SQ
-     ATNRAYAMTC AAAAATNNAN TMTANNTTTC ATATCTCTCN CTTTTCTCTT CATCACTTCC        60
-     TCTTCANCTN ANTTCATCAT TCAACANNTC ACAAANNNCA RANNAATANA NTACAACANT       120
-     TCTTACANTC TCNANNANAA TCTTNNANTN ACRANANANT TNANANAANA NCNACCATCN       180
-     ANTAANATAN TNACAATAAC AANCTTCTCA NTNATTAAAN NCANANNANA ACCCTATNAA       240
-     TCCTCTNTTT TTNANNCTNC TNNTTACAAA TNNANATTNN TTTTNTACNT NAATNNTAAT       300
-     AAAAACNACN NTNNAAATNA TCATATTTCC CTTTACNCAA NNATCNAANA NACAAACTCT       360
-     CTTCCATTAN NTTNNNAANT NAATNTTNAT CTCAAACTCT TTNTCCATAA TNNNAANCTA       420
-     CACAAATATT TNACTNTTAC ANATNNCTTA RTTNAANCNA TATAACAATN CSAAAAAANA       480
-     ATNNNNTTTC NNACAATTNA TTCCTCNATC AACATTCTAC AACNCNAACN AANNTTACCT       540
-     TTNACCAANN ACACTNNTTC CTTTTNNNTN NCYNNAAAAN CCTTTATTNT TTAAACCNNS       600
-     TCCACCAACM AARAAAAWWA YTTTCTWTYM MTYYTCCAAC AYSYTYCCCW WCSAATNTTT       660
-     TTTCCCTTNN NAAAAANACC TNCNTTTCCT CCTACCTTTN NNAAAAANAA ANTTCNTTTT       720
-     TACTCCCNAA TNAATTTTCC CCCTTTNNAA AAACCNAATN CCTNNTTNNA CTTANNAATT       780
-     TTAACCCCCN AAANNNNNAA TNNAANNAAA NAAAAAACCC CTTTNCCCNT TCCCAATCCT       840
-     TCCCTANTTT NC                                                           852
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 88.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-852
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-852
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..852
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 852 BP; 251 A; 167 C; 160 G; 231 T; 43 other;
+     atnrayamtc aaaaatnnan tmtanntttc atatctctcn cttttctctt catcacttcc        60
+     tcttcanctn anttcatcat tcaacanntc acaaannnca rannaatana ntacaacant       120
+     tcttacantc tcnannanaa tcttnnantn acrananant tnananaana ncnaccatcn       180
+     antaanatan tnacaataac aancttctca ntnattaaan ncanannana accctatnaa       240
+     tcctctnttt ttnannctnc tnnttacaaa tnnanattnn ttttntacnt naatnntaat       300
+     aaaaacnacn ntnnaaatna tcatatttcc ctttacncaa nnatcnaana nacaaactct       360
+     cttccattan nttnnnaant naatnttnat ctcaaactct ttntccataa tnnnaancta       420
+     cacaaatatt tnactnttac anatnnctta rttnaancna tataacaatn csaaaaaana       480
+     atnnnntttc nnacaattna ttcctcnatc aacattctac aacncnaacn aannttacct       540
+     ttnaccaann acactnnttc cttttnnntn ncynnaaaan cctttattnt ttaaaccnns       600
+     tccaccaacm aaraaaawwa ytttctwtym mtyytccaac aysytycccw wcsaatnttt       660
+     tttcccttnn naaaaanacc tncntttcct cctacctttn nnaaaaanaa anttcntttt       720
+     tactcccnaa tnaattttcc ccctttnnaa aaaccnaatn cctnnttnna cttannaatt       780
+     ttaacccccn aaannnnnaa tnnaannaaa naaaaaaccc ctttncccnt tcccaatcct       840
+     tccctanttt nc                                                           852
 //
-
-ID   Atinsert2
+ID   C99931; SV 1; linear; mRNA; EST; PLN; 719 BP.
 XX
-DE   gi|4714048|dbj|C99931.1|C99931 C99931 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 87-1, mRNA sequence
+AC   C99931;
 XX
-SQ
-     NTNARTNTTN ATCTCAAACT CTTTNTCCAT AATNNNAANC TACACAAATA TTTNACTNTT        60
-     ACANATNNCT TANTNAANCN ATATAACAAT NCNAAAAAAN AATNNNNTTT CNNACAATTN       120
-     ATTCCTCNAT CAACATTCTA CAACNCNAAC NAANNTTACC TTNACCANNA CACTNNTTCT       180
-     TTTNNTNCTN ANATCTTTAT TNTTAAACCN NCTCAACAAC AANANAAANT TACATTCATA       240
-     TCAAACCCTC CAAACAATNT TTTCACTTNN AANATACTTC NTTTCTCTAC CTTNNAANAT       300
-     AAATTCTATT ACTCCNATNA TTTTCTCNTT NAANACCNAT ACTNNANACT ANNATTTAAC       360
-     CCNAAANNNN ATNNANNANN AANACCACAT NCACTTCCAA TCTTCCTATT TNCTCAANNC       420
-     CATAANNCAA ATNCANTTNC TACAAACACT TNNNNANCNN TTAATCTNCN NTTAAANAAT       480
-     CAACNAARTT CTAACCATAN ACAATATWTC TNCACTTNNT ACCCATTNNA AACNTTATNN       540
-     TKTNNNAKTA ACATATCTAC TNTTNCTNAT TAACNANCAT CCAAANNATT TTNNTNATNA       600
-     NCCYTATCTT NAACTNAATN NTTAANKCCT ATACCACTCT CTCCCTWAAT TCTCCTTCTT       660
-     NTCWCNACAT CNCYTTRATA AAAAATTTAT TNATAATTTT TTARAAACTT ATTTTTKTA        719
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 87-1.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-719
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-719
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..719
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 719 BP; 216 A; 140 C; 132 G; 215 T; 16 other;
+     ntnartnttn atctcaaact ctttntccat aatnnnaanc tacacaaata tttnactntt        60
+     acanatnnct tantnaancn atataacaat ncnaaaaaan aatnnnnttt cnnacaattn       120
+     attcctcnat caacattcta caacncnaac naannttacc ttnaccanna cactnnttct       180
+     tttnntnctn anatctttat tnttaaaccn nctcaacaac aananaaant tacattcata       240
+     tcaaaccctc caaacaatnt tttcacttnn aanatacttc ntttctctac cttnnaanat       300
+     aaattctatt actccnatna ttttctcntt naanaccnat actnnanact annatttaac       360
+     ccnaaannnn atnnannann aanaccacat ncacttccaa tcttcctatt tnctcaannc       420
+     cataanncaa atncanttnc tacaaacact tnnnnancnn ttaatctncn nttaaanaat       480
+     caacnaartt ctaaccatan acaatatwtc tncacttnnt acccattnna aacnttatnn       540
+     tktnnnakta acatatctac tnttnctnat taacnancat ccaaannatt ttnntnatna       600
+     nccytatctt naactnaatn nttaankcct ataccactct ctccctwaat tctccttctt       660
+     ntcwcnacat cncyttrata aaaaatttat tnataatttt ttaraaactt atttttkta        719
 //
-
-ID   Atinsert3
+ID   C99930; SV 1; linear; mRNA; EST; PLN; 746 BP.
 XX
-DE   gi|4714047|dbj|C99930.1|C99930 C99930 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 86, mRNA sequence
+AC   C99930;
 XX
-SQ
-     NTNAANCNAT ACAACNATNC AAAAAAANAN TNNNNATTCA CACAATTNAT TTCTCTTCCA        60
-     ACATTCTACA ACNCNAACNA ANNNTACYTT NTNCANNACA CANCTTCTTT TNNTNCTNAN       120
-     ATCTTCATCN TTAACCCNAC ANAAAAACAA NANAAANTCA CATTCATATC AAACCCTCCN       180
-     AACAATNTTT TCACTTNNAA NATACTTCNT TTCTCTACCT TNNAANATAA ATTCTATTAC       240
-     TCTNATNATT TTCTCNTTNA ANACCNATAC TNNANATTAN NATTTAACCC NAAANNATCT       300
-     NNTNNANNNA NACCACATNC ACTTCCAATC TTCCTATATN CTCAANNCCA TAANNCAAAC       360
-     NCANTTNTTA CAAACACTTN NNNANCNNTT AATCTNCNNT TAAANAATCA ACNAANCTCC       420
-     AACCACAAAC AATTATATTC TNCANCTTNN TACCCCNATT CNAANCNATT ATNNTNTNNN       480
-     ANTNAACAAT ATCATATTNA TNTCANAANC TAAAANATNC ATCMAAANNN TATATNNTNA       540
-     ATNATNCCAT TATCTTTTNA AACTNAAATN NTTAANNTCT CTNTNAACAA CATARTCTCC       600
-     SCTTAAATAT ATNTCACTAC TTCTTTATCC CCCNNAATAA CCTTACAAAN AAAAATTNAT       660
-     NATTTAATTT NTTATACNAC ACTTTATTNA TNCCTNTNAN NTAACCTTNT TTCCNCTCCC       720
-     CNAATTTCCT TTTTTTTCCT NTTTTT                                            746
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 86.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-746
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-746
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..746
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 746 BP; 227 A; 151 C; 138 G; 220 T; 10 other;
+     ntnaancnat acaacnatnc aaaaaaanan tnnnnattca cacaattnat ttctcttcca        60
+     acattctaca acncnaacna annntacytt ntncannaca cancttcttt tnntnctnan       120
+     atcttcatcn ttaacccnac anaaaaacaa nanaaantca cattcatatc aaaccctccn       180
+     aacaatnttt tcacttnnaa natacttcnt ttctctacct tnnaanataa attctattac       240
+     tctnatnatt ttctcnttna anaccnatac tnnanattan natttaaccc naaannatct       300
+     nntnnannna naccacatnc acttccaatc ttcctatatn ctcaanncca taanncaaac       360
+     ncanttntta caaacacttn nnnancnntt aatctncnnt taaanaatca acnaanctcc       420
+     aaccacaaac aattatattc tncancttnn taccccnatt cnaancnatt atnntntnnn       480
+     antnaacaat atcatattna tntcanaanc taaaanatnc atcmaaannn tatatnntna       540
+     atnatnccat tatcttttna aactnaaatn nttaanntct ctntnaacaa catartctcc       600
+     scttaaatat atntcactac ttctttatcc cccnnaataa ccttacaaan aaaaattnat       660
+     natttaattt nttatacnac actttattna tncctntnan ntaaccttnt ttccnctccc       720
+     cnaatttcct tttttttcct nttttt                                            746
 //
-
-ID   Atinsert4
+ID   C99929; SV 1; linear; mRNA; EST; PLN; 668 BP.
 XX
-DE   gi|4714046|dbj|C99929.1|C99929 C99929 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 85, mRNA sequence
+AC   C99929;
 XX
-SQ
-     TCAAAATATN NATANTCACA AATNNANTCT ANNTTTCACA TTACTTNCTT TCCTCTTCAT        60
-     CACTTCCTCT TCCNCTNANC TCATCATTAA ACANNTCACA CANNNCANAN NAATANANTA       120
-     CAACAACTCT TACANTCTCA CNTCNAATCT TNNANTNACN ACAANANANT TNANANACNA       180
-     NCNACCATCA ANTAANATAN TNACAATCAC AANCTTCTCT NTNATTAANN ACANANNANA       240
-     ACCCTATNAA TCATCTATTT TTNANNCTNC CNNTTACAAA TNNANATTAN TTTTNTACNT       300
-     NAANNNTAAT CCNAAANNCN NTATAAATAA TCATATTTCA CTTTACNCNA NNATANAANA       360
-     NACANAAACT CTTCCAANAN NNTNNNAANT NAATNTTNAT CTCAAACTCT TTNTCCACAA       420
-     TCNNAAKTTA AANAAATATT TNTCTNTTAC ANATNNAACA NTNAANCNAT ACAACNATNC       480
-     AAAAAAANAN TNNNNATTCN CACAATTNAT TTCTCTTCCA ACATTCTACA ACNCNAACNA       540
-     ANNNTTCCTT NTNCCANNAC ACARCTTCCT TTNNNTNCTN ARAACTTCAT CNTTAACCCN       600
-     ACCNAAAAAC CANAAAAAAT CCCTTTCTTT TCAAACCCCC CNAAACATNT TTTTCCCTTT       660
-     NNAAAAAA                                                                668
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 85.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-668
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-668
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..668
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 668 BP; 215 A; 138 C; 138 G; 173 T; 4 other;
+     tcaaaatatn natantcaca aatnnantct anntttcaca ttacttnctt tcctcttcat        60
+     cacttcctct tccnctnanc tcatcattaa acanntcaca cannncanan naatananta       120
+     caacaactct tacantctca cntcnaatct tnnantnacn acaananant tnananacna       180
+     ncnaccatca antaanatan tnacaatcac aancttctct ntnattaann acanannana       240
+     accctatnaa tcatctattt ttnannctnc cnnttacaaa tnnanattan ttttntacnt       300
+     naannntaat ccnaaanncn ntataaataa tcatatttca ctttacncna nnatanaana       360
+     nacanaaact cttccaanan nntnnnaant naatnttnat ctcaaactct ttntccacaa       420
+     tcnnaaktta aanaaatatt tntctnttac anatnnaaca ntnaancnat acaacnatnc       480
+     aaaaaaanan tnnnnattcn cacaattnat ttctcttcca acattctaca acncnaacna       540
+     annnttcctt ntnccannac acarcttcct ttnnntnctn araacttcat cnttaacccn       600
+     accnaaaaac canaaaaaat ccctttcttt tcaaaccccc cnaaacatnt ttttcccttt       660
+     nnaaaaaa                                                                668
 //
-
-ID   Atinsert5
+ID   C99928; SV 1; linear; mRNA; EST; PLN; 800 BP.
 XX
-DE   gi|4714045|dbj|C99928.1|C99928 C99928 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 84, mRNA sequence
+AC   C99928;
 XX
-SQ
-     NNAANTTAAA NAAATATTTN TCTNTTACAN ATNNAACANT NAANCNATAC AACNATNCAA        60
-     AAAAANANTN NNNATTCACA CAATTNATTT CTCTTCCAAC ATTCTACAAC NCNAACNAAN       120
-     NNTACCTTNT NCANNACACA NCTTCTTTTN NTNCTNANAT CTTCATCNTT AACCCNACAN       180
-     AAAAACAANA NAAANTCACA TTCATATCAA ACCCTCCANA CAATNTTTTC ACTTNNAANA       240
-     TACTTCNTTT CTCTACCTTN NAANATAAAT TCTATTACTC CNATNATTTT CTCNTTNAAN       300
-     ACCNATACTN NANACTANNA TTTAACCCNA AANNNNATNN ANNANNAANA CCACATNCAC       360
-     TTCCAATCTT CCTATTTNCT CAANNCCATA ANNCAAACNC ANTTNCTACA AACACTTNNN       420
-     NANCNNTTAA TCTNCNNTTA AANAATCAAC NAANTACTAA CCATANACAA ATATATTCTN       480
-     CANCTTNNTA CCCNATTNNA ANCNNTTATN NTNTNNNANT NAACAATATC ATACTNTTAN       540
-     CTNATTTAAA CNATNCATCA AAANNATATT TNNTNAATNA TNCCATTATC TTTNAANCTN       600
-     AAATNNTTAA NNTCTCTATA ACCAACATCN TCTCCNCTTA AATATCTNCA CTTCTTTNTC       660
-     TACNATCAAT CAACCTTATN AATAAANANA TATTTNATNA NTTTNTAATA ANAAAACNTT       720
-     AATNTTTNTN AATTNTNAAN TTATTACTTC TNTTCTTCTN ANTTTTTTTA TTTCAATNAA       780
-     AATAAAACTC TTACCNNTTT                                                   800
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 84.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-800
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-800
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..800
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 800 BP; 255 A; 145 C; 162 G; 238 T; 0 other;
+     nnaanttaaa naaatatttn tctnttacan atnnaacant naancnatac aacnatncaa        60
+     aaaaanantn nnnattcaca caattnattt ctcttccaac attctacaac ncnaacnaan       120
+     nntaccttnt ncannacaca ncttcttttn ntnctnanat cttcatcntt aacccnacan       180
+     aaaaacaana naaantcaca ttcatatcaa accctccana caatnttttc acttnnaana       240
+     tacttcnttt ctctaccttn naanataaat tctattactc cnatnatttt ctcnttnaan       300
+     accnatactn nanactanna tttaacccna aannnnatnn annannaana ccacatncac       360
+     ttccaatctt cctatttnct caannccata anncaaacnc anttnctaca aacacttnnn       420
+     nancnnttaa tctncnntta aanaatcaac naantactaa ccatanacaa atatattctn       480
+     cancttnnta cccnattnna ancnnttatn ntntnnnant naacaatatc atactnttan       540
+     ctnatttaaa cnatncatca aaannatatt tnntnaatna tnccattatc tttnaanctn       600
+     aaatnnttaa nntctctata accaacatcn tctccnctta aatatctnca cttctttntc       660
+     tacnatcaat caaccttatn aataaanana tatttnatna ntttntaata anaaaacntt       720
+     aatntttntn aattntnaan ttattacttc tnttcttctn anttttttta tttcaatnaa       780
+     aataaaactc ttaccnnttt                                                   800
 //
-
-ID   Atinsert6
+ID   C99927; SV 1; linear; mRNA; EST; PLN; 797 BP.
 XX
-DE   gi|4714044|dbj|C99927.1|C99927 C99927 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 83, mRNA sequence
+AC   C99927;
 XX
-SQ
-     NTNAANCNAT MCMWCNATNM WMAAAAMKAR TNKNNATTYR CAYRATWNAT YTCTCTTCYW        60
-     MYATTCTWSW MCNCNAAYNA ANNNTACCTT NTNYASNACR MWSCTTCTTT YNNTNCTNAK       120
-     ATCTTCATNC NWTAMCCCNA CANAAAMACM MKAKAWANTC WCATTCATAT CMWACCCTCC       180
-     RAACAATNTT TTCACTTNNA ANATACTTCN TTTCTCTACC TTNNAANATA AATTCTATTA       240
-     CTCTNATNAT TTTCTCNTTN AANACCNATA CTNNANATTA NNATTTAACC CNAAANNATC       300
-     TNNTNNANNN ANACCACATN CACTTCCAAT CTTCCTATAT NCTCAANNCC ATAANNCAAA       360
-     CNCANTTNTT ACAAACACTT NNNNANCNNT TAATCTNCNN TTAAANAATC AACNAANCTC       420
-     CAACCACAAA CAATTATATT CTNCANCTTN NTACCCNATT CNAANCNATT ATNNTNTNNN       480
-     ANTNAACAAT ATAATATTNA TNTCANANCT AAAANATNCA TCCAAAANNN TATATNNTNA       540
-     ATNATNCCAT TATCTTTNAA NCTNAAATNN TTAANNTCTC TNTNACAAAC ATANTCTCCN       600
-     TTTAAATATC ACTACTTCTT TTTCAACAAC AACCTTACNA ATAAANTNNA CTTTNATNAN       660
-     TTTAATTTNT TATACNACAA CNTTNTTNAT NCTTNTNATN TAATCNTTNT TTCTNCTCTC       720
-     CNANTTTTCN TTTTACTTTT TTTTTCATNT TTTNCTATCA ATNAAATAAA NNTATAAAAC       780
-     TCTCTTNNTT TTAAANT                                                      797
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 83.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-797
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-797
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..797
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 797 BP; 220 A; 140 C; 151 G; 241 T; 45 other;
+     ntnaancnat mcmwcnatnm wmaaaamkar tnknnattyr cayratwnat ytctcttcyw        60
+     myattctwsw mcncnaayna annntacctt ntnyasnacr mwscttcttt ynntnctnak       120
+     atcttcatnc nwtamcccna canaaamacm mkakawantc wcattcatat cmwaccctcc       180
+     raacaatntt ttcacttnna anatacttcn tttctctacc ttnnaanata aattctatta       240
+     ctctnatnat tttctcnttn aanaccnata ctnnanatta nnatttaacc cnaaannatc       300
+     tnntnnannn anaccacatn cacttccaat cttcctatat nctcaanncc ataanncaaa       360
+     cncanttntt acaaacactt nnnnancnnt taatctncnn ttaaanaatc aacnaanctc       420
+     caaccacaaa caattatatt ctncancttn ntacccnatt cnaancnatt atnntntnnn       480
+     antnaacaat ataatattna tntcananct aaaanatnca tccaaaannn tatatnntna       540
+     atnatnccat tatctttnaa nctnaaatnn ttaanntctc tntnacaaac atantctccn       600
+     tttaaatatc actacttctt tttcaacaac aaccttacna ataaantnna ctttnatnan       660
+     tttaatttnt tatacnacaa cnttnttnat ncttntnatn taatcnttnt ttctnctctc       720
+     cnanttttcn ttttactttt tttttcatnt tttnctatca atnaaataaa nntataaaac       780
+     tctcttnntt ttaaant                                                      797
 //
-
-ID   Atinsert7
+ID   C99926; SV 1; linear; mRNA; EST; PLN; 371 BP.
 XX
-DE   gi|4714043|dbj|C99926.1|C99926 C99926 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 82, mRNA sequence
+AC   C99926;
 XX
-SQ
-     NNAANTTAAA NAAATATTTN TCTNTTACAN ATNNAACANT NAANCNATAC AACNATNCAA        60
-     AAAAANANTN NNNATTCACA CAATTNATTT CTCTTCCAAC ATTCTACAAC NCNAACNAAN       120
-     NNTACCTTNT NCANNACACA NCTTCTTTTN NTNCTNANAT CTTCATCNTT AACCCNACAN       180
-     AAAAACAANA NAAANTCACA TTCATATCAA ACCMTSSWRM CMRKRTYYTC ACTTNNAANA       240
-     TACTTCNTTT CTCTACCTTN TCACCTAAAT TCAATTCATC NTACCCNNAT CCTCNATTCT       300
-     TTTNCTTTTT ACCCTNNAAN AAATACTCAT AANCCACCTC TNTTATTTAC CCCCAATCTT       360
-     CACAANAAAA A                                                            371
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 82.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-371
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-371
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..371
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 371 BP; 115 A; 83 C; 60 G; 101 T; 12 other;
+     nnaanttaaa naaatatttn tctnttacan atnnaacant naancnatac aacnatncaa        60
+     aaaaanantn nnnattcaca caattnattt ctcttccaac attctacaac ncnaacnaan       120
+     nntaccttnt ncannacaca ncttcttttn ntnctnanat cttcatcntt aacccnacan       180
+     aaaaacaana naaantcaca ttcatatcaa accmtsswrm cmrkrtyytc acttnnaana       240
+     tacttcnttt ctctaccttn tcacctaaat tcaattcatc ntacccnnat cctcnattct       300
+     tttncttttt accctnnaan aaatactcat aanccacctc tnttatttac ccccaatctt       360
+     cacaanaaaa a                                                            371
 //
-
-ID   Atinsert8
+ID   C99925; SV 1; linear; mRNA; EST; PLN; 565 BP.
 XX
-DE   gi|4714042|dbj|C99925.1|C99925 C99925 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 81, mRNA sequence
+AC   C99925;
 XX
-SQ
-     CNTCTCCATA CNTTNTTCCC NAANACATNT CCTTNACAAA NNTATACAAT CTTTTCCNNC        60
-     AACTTNNNTT NCNACATCTA TTCNTTNTTC CCCNTCCTTC CCNTNTNATA NNCTTNATCA       120
-     CCANAAANNA TTTACTNATT NANNAAAATN NNNAATCATC ANCANTNNAA CTCCAACANT       180
-     CAACTANTAN NTCNNTACAN TNANACANCA ACNCNNATNN ACNCTNCACN ACCNCTTCTA       240
-     NACNATCTTT TANNTTAATA AAACANACCA AACATATACA ANCANTTNAA NCTNNTANCT       300
-     AANATCTTTA NTCNNNCCAA TTCTTCNTCC ATACAANNAT ACAANCTTNT TCCNCATNTT       360
-     NCCACCCAAA TCCNNTATNN ANNATATATN ATCNTCTCTT NANATNNNAT TNTNTTNTTC       420
-     NCTAACCNAT CTCATTCTCC NTTCACANAN ANTANAAANA TTATATATNT TTAANNCTTT       480
-     TNATTNTTNT AATTNTNCAA TCTTTNAWTA TTTTCTTNNT CCCTNTAAAA TAATCCACCT       540
-     TTTNATATAT TTACTTNATT AACTT                                             565
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 81.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-565
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-565
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..565
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 565 BP; 151 A; 117 C; 122 G; 174 T; 1 other;
+     cntctccata cnttnttccc naanacatnt ccttnacaaa nntatacaat cttttccnnc        60
+     aacttnnntt ncnacatcta ttcnttnttc cccntccttc ccntntnata nncttnatca       120
+     ccanaaanna tttactnatt nannaaaatn nnnaatcatc ancantnnaa ctccaacant       180
+     caactantan ntcnntacan tnanacanca acncnnatnn acnctncacn accncttcta       240
+     nacnatcttt tannttaata aaacanacca aacatataca ancanttnaa nctnntanct       300
+     aanatcttta ntcnnnccaa ttcttcntcc atacaannat acaancttnt tccncatntt       360
+     nccacccaaa tccnntatnn annatatatn atcntctctt nanatnnnat tntnttnttc       420
+     nctaaccnat ctcattctcc nttcacanan antanaaana ttatatatnt ttaanncttt       480
+     tnattnttnt aattntncaa tctttnawta ttttcttnnt ccctntaaaa taatccacct       540
+     tttnatatat ttacttnatt aactt                                             565
 //
-
-ID   Atinsert9
+ID   C99923; SV 1; linear; mRNA; EST; PLN; 110 BP.
 XX
-DE   gi|4714041|dbj|C99923.1|C99923 C99923 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 79, mRNA sequence
+AC   C99923;
 XX
-SQ
-     TCTNNTCCNT CTNANACATC NNATCANNTN NNNNNTACAA TCATCTCNCC NTTCANTANN        60
-     TNTTTACNNA TTTCNNCNNT CNTATANCTN NCNTNACTAA NNCTTTAACC                  110
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 79.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-110
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-110
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..110
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 110 BP; 20 A; 24 C; 23 G; 31 T; 12 other;
+     tctnntccnt ctnanacatc nnatcanntn nnnnntacaa tcatctcncc nttcantann        60
+     tntttacnna tttcnncnnt cntatanctn ncntnactaa nnctttaacc                  110
 //
-
-ID   Atinsert10
+ID   C99922; SV 1; linear; mRNA; EST; PLN; 815 BP.
 XX
-DE   gi|4714040|dbj|C99922.1|C99922 C99922 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 78, mRNA sequence
+AC   C99922;
 XX
-SQ
-     NNTRANATCT ACSTTNCTNN ANNTNNTNNT NNTTCNNAKN TTNCNNCNNC NNTNNAASTA        60
-     NTATNATCCN NANTTNAATC NNTNNNAANT TNTNACTCAA TCNNCSANNA ASANATACNN       120
-     TTNCATCNNA NCANCCNTTN ACNNANTTTT TTATNTNATC NNTNNATTNA AAATTNNNAA       180
-     TNANACCTCA CNCNCNNTNN CNNCNCNTNC TTATNCNANC TCTATNNATC TTTTCNATNT       240
-     NNANTCNCNT CANTNNTTAA NNANTCNTTC NNTTCCTNNC NNTNNATNTN TANTNNCNNC       300
-     NTNTNCNNCN NTTNNATATN TNTATNTNCT AACCANTCAC NCNNTNNANC TTTCNTTTTT       360
-     NNCNATTTNA TNCNCNTCNT CNTNNTNNAA ACACCNNNTT TNNAAAAATN NCANAANCTN       420
-     AAAANTCCCC CNTTACCNNC ACAANNTNCS NNTTAANATN NAACCNNTNA ANNTTTAACC       480
-     TNCNTCNNAN TNNAANATAA ANTNNCNNTN NTTCANNTNN TNNNATNCAT TNACNATTTN       540
-     CTTCNNCNNA NTNNNANNNN TNANANANNN ATTANANAAA NCCTTNTNTT NCTNTATNAT       600
-     ACNACNNANN NANANTNNAN NANANCNNCN NATTTACCTN ANATNATTAC ACNCNCCNCC       660
-     TNTNCNTNTN TNNANTNNTA ANANNNNANA CCACNNCNCA NNATTATNNN TACNANAANT       720
-     TNNAANATNC TAVCNTACNC ANNATATATT AAANTNNNCA AAAACAATAT CATTATNATT       780
-     NNTNCACATN TTTACTNTMT NAAAANCAAT ANCNT                                  815
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 78.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-815
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-815
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..815
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 815 BP; 179 A; 125 C; 299 G; 202 T; 10 other;
+     nntranatct acsttnctnn anntnntnnt nnttcnnakn ttncnncnnc nntnnaasta        60
+     ntatnatccn nanttnaatc nntnnnaant tntnactcaa tcnncsanna asanatacnn       120
+     ttncatcnna ncanccnttn acnnantttt ttatntnatc nntnnattna aaattnnnaa       180
+     tnanacctca cncncnntnn cnncncntnc ttatncnanc tctatnnatc ttttcnatnt       240
+     nnantcncnt cantnnttaa nnantcnttc nnttcctnnc nntnnatntn tantnncnnc       300
+     ntntncnncn nttnnatatn tntatntnct aaccantcac ncnntnnanc tttcnttttt       360
+     nncnatttna tncncntcnt cntnntnnaa acaccnnntt tnnaaaaatn ncanaanctn       420
+     aaaantcccc cnttaccnnc acaanntncs nnttaanatn naaccnntna anntttaacc       480
+     tncntcnnan tnnaanataa antnncnntn nttcanntnn tnnnatncat tnacnatttn       540
+     cttcnncnna ntnnnannnn tnananannn attananaaa nccttntntt nctntatnat       600
+     acnacnnann nanantnnan nanancnncn natttacctn anatnattac acncnccncc       660
+     tntncntntn tnnantnnta anannnnana ccacnncnca nnattatnnn tacnanaant       720
+     tnnaanatnc tavcntacnc annatatatt aaantnnnca aaaacaatat cattatnatt       780
+     nntncacatn tttactntmt naaaancaat ancnt                                  815
 //
-
-ID   Atinsert11
+ID   C99921; SV 1; linear; mRNA; EST; PLN; 602 BP.
 XX
-DE   gi|4714039|dbj|C99921.1|C99921 C99921 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 77, mRNA sequence
+AC   C99921;
 XX
-SQ
-     CNNNNCTTCT RAAANACNCA ATCTNATNTA CTCNTACATN CTANNTNCTA TCTCTTCTAT        60
-     AATNTCTNAT CCTTTCTNCC CTCCCACWCN TTNCCNTANC CKCAAAWTCT CCTKTNAYAT       120
-     TTMCCTNMTC ANAYTNTCCT NATNNATNSN NAYNTTCACM TANATACCAA ANCACAANAA       180
-     ATTCNAANNT NCTNNANAAA ANNCNACCAC TTTCACTAAN ANCATTTNNC TCNANNAANC       240
-     TNATNCNANY NCCATATCCN TTNNTNANNA ANTAACTTTN ATNNATTNNN NAAATNCTAT       300
-     CNTAAANNAA ATCMCMAAKN ACNANNANNN TCNTNTCACT NCCTTATCTN NTNTCTTNAA       360
-     TCTCCAANNT TCTNTWAANA CTACAAANCT NAANCTNACA TNNCTTCCTN ATACTAATNA       420
-     ATTNNTCCAT CTCRCMTTAA CANANTTTNA TTATCTAATC CCCMANAANA AACTNNAANA       480
-     TNATNATNAA ATTTNCTNAT TTTNCTNAAT CCYMMCCCNA AAAANNAANA CMTTTNNCMC       540
-     TTKNNTNNAT TCCCAATATT NANANAATCT TNAAATTNTT NNAAAATNTT TATTCCCCCT       600
-     TT                                                                      602
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 77.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-602
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-602
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..602
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 602 BP; 157 A; 119 C; 123 G; 164 T; 39 other;
+     cnnnncttct raaanacnca atctnatnta ctcntacatn ctanntncta tctcttctat        60
+     aatntctnat cctttctncc ctcccacwcn ttnccntanc ckcaaawtct cctktnayat       120
+     ttmcctnmtc anaytntcct natnnatnsn naynttcacm tanataccaa ancacaanaa       180
+     attcnaannt nctnnanaaa anncnaccac tttcactaan ancatttnnc tcnannaanc       240
+     tnatncnany nccatatccn ttnntnanna antaactttn atnnattnnn naaatnctat       300
+     cntaaannaa atcmcmaakn acnannannn tcntntcact nccttatctn ntntcttnaa       360
+     tctccaannt tctntwaana ctacaaanct naanctnaca tnncttcctn atactaatna       420
+     attnntccat ctcrcmttaa canantttna ttatctaatc cccmanaana aactnnaana       480
+     tnatnatnaa atttnctnat tttnctnaat ccymmcccna aaaannaana cmtttnncmc       540
+     ttknntnnat tcccaatatt nananaatct tnaaattntt nnaaaatntt tattccccct       600
+     tt                                                                      602
 //
-
-ID   Atinsert12
+ID   C99920; SV 1; linear; mRNA; EST; PLN; 92 BP.
 XX
-DE   gi|4714038|dbj|C99920.1|C99920 C99920 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 76, mRNA sequence
+AC   C99920;
 XX
-SQ
-     TCANCTNTTT CNTTCAACNA TCTAAACTAT CTCAATNCTT CTTTNAATCT ATTNTCNNTT        60
-     TCCTTNTACT CNTCAATTTC ATNTTTTTTT TN                                      92
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 76.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-92
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-92
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..92
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 92 BP; 17 A; 19 C; 13 G; 43 T; 0 other;
+     tcanctnttt cnttcaacna tctaaactat ctcaatnctt ctttnaatct attntcnntt        60
+     tccttntact cntcaatttc atnttttttt tn                                      92
 //
-
-ID   Atinsert13
+ID   C99919; SV 1; linear; mRNA; EST; PLN; 461 BP.
 XX
-DE   gi|4714037|dbj|C99919.1|C99919 C99919 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 75, mRNA sequence
+AC   C99919;
 XX
-SQ
-     CCCTCCCNCT CCTNNTTTCT ANTTNNNTTC NNNTTCTNTT ATCNNNTTTT TCNCNNNNNT        60
-     CTTTTNTCNN NNCCCTNNAC CNNAATTCNC NNNTCNACCA ACTCNTCANA TNTNNTNCTN       120
-     CNCTACAATN AANCAAANNN ANTCACACTC TCNNACTNAN NCTCTCCCCT CCNCTTCTNT       180
-     AACCATANCN NCTCNACNTC TATNTCTCCN ATCTAACCAN CTCTNNNNNT TCNANNANAN       240
-     ATAANNANAA AANTANNNAN NNACNANTAT NCTTNCCCNT TCTNTNCANA CTATTTTNAT       300
-     NTCNTCTCTC TNNNCNNTCA CATTNATNAA NATCNTCCTA TNNATNCTTA AANTNNNNTN       360
-     TNTCCCNTCC TNTNCNNTNA AANTNANCTC NNNATATNAT TNCNTCNTAT ANCCCCNCNN       420
-     CNCNNCCNAT ATNTTCAANN TNACCCNNAT CANNAAATCA A                           461
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 75.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-461
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-461
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..461
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 461 BP; 85 A; 111 C; 84 G; 120 T; 61 other;
+     ccctcccnct cctnntttct anttnnnttc nnnttctntt atcnnntttt tcncnnnnnt        60
+     cttttntcnn nnccctnnac cnnaattcnc nnntcnacca actcntcana tntnntnctn       120
+     cnctacaatn aancaaannn antcacactc tcnnactnan nctctcccct ccncttctnt       180
+     aaccatancn nctcnacntc tatntctccn atctaaccan ctctnnnnnt tcnannanan       240
+     ataannanaa aantannnan nnacnantat ncttncccnt tctntncana ctattttnat       300
+     ntcntctctc tnnncnntca cattnatnaa natcntccta tnnatnctta aantnnnntn       360
+     tntcccntcc tntncnntna aantnanctc nnnatatnat tncntcntat anccccncnn       420
+     cncnnccnat atnttcaann tnacccnnat cannaaatca a                           461
 //
-
-ID   Atinsert14
+ID   C99918; SV 1; linear; mRNA; EST; PLN; 556 BP.
 XX
-DE   gi|4714036|dbj|C99918.1|C99918 C99918 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 74, mRNA sequence
+AC   C99918;
 XX
-SQ
-     NTTTATCACN CCTTNCATTN ATCANAASCC CTTNCTACNN CATTNANCCA KNCTNCCNAA        60
-     NCTNTTTCTT CNNNAAATTC ANATNCAANT NATNCCACTN CAAAANCTNN AATCATTTTN       120
-     TTNCCCANCA CACATCAACT TNACNAANAN NTTACTNMNN AACATANTNA NNANNAAATN       180
-     ACTNAANANN AACCAACTCT TCTCAANTNN CCAAATAANC CCNNNATTCC ANATTCTNAT       240
-     TTNTTTNACC NTNATCAATC NTNNTTTNAT NNACCTCCAN ANNNCTTCAA TCTCACATTA       300
-     TCAAATTTCN CTNTNATNTN NNATTCACTN TTTNNCTNNN TATCATCNTC CTCTCTNNCA       360
-     TACATATATN NNAANNAANA ATCTNCTCAT NARNANTTCT TATTNNTTAA CNNNAANNAN       420
-     TACCCCCNNA NNATTATCAT NNTANATNNN CTTTCCTCAN ARATCAANCA NACAATTNCT       480
-     NNNTTNCCTT NCCANAACTT TACCNAAAAT CNTCACTCAT CTCANNNCTN CCAATANCNA       540
-     TATCCRATTT TAAAAA                                                       556
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 74.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-556
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-556
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..556
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 556 BP; 147 A; 119 C; 132 G; 150 T; 8 other;
+     ntttatcacn ccttncattn atcanaascc cttnctacnn cattnancca knctnccnaa        60
+     nctntttctt cnnnaaattc anatncaant natnccactn caaaanctnn aatcattttn       120
+     ttncccanca cacatcaact tnacnaanan nttactnmnn aacatantna nnannaaatn       180
+     actnaanann aaccaactct tctcaantnn ccaaataanc ccnnnattcc anattctnat       240
+     ttntttnacc ntnatcaatc ntnntttnat nnacctccan annncttcaa tctcacatta       300
+     tcaaatttcn ctntnatntn nnattcactn tttnnctnnn tatcatcntc ctctctnnca       360
+     tacatatatn nnaannaana atctnctcat narnanttct tattnnttaa cnnnaannan       420
+     tacccccnna nnattatcat nntanatnnn ctttcctcan aratcaanca nacaattnct       480
+     nnnttncctt nccanaactt taccnaaaat cntcactcat ctcannnctn ccaatancna       540
+     tatccrattt taaaaa                                                       556
 //
-
-ID   Atinsert15
+ID   C99917; SV 1; linear; mRNA; EST; PLN; 476 BP.
 XX
-DE   gi|4714035|dbj|C99917.1|C99917 C99917 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 73, mRNA sequence
+AC   C99917;
 XX
-SQ
-     ATANNCNANA TCCCCCCCAA ANNATTNCCT NATNTNANNA ACATNNNNAN ATCATCNTNN        60
-     AATCNANCNC NNNNANTCNC CNNTNAANTN NNTNNNTNNA CANTCNCNCC CNNACNNACN       120
-     CNNCATNACC NCTTCACTAC NANCTNTTAN NTTTNTNNNA CTNNTCCTAC NATATACCNT       180
-     CTCTTNNTNN TNNNNCCNCN AAACTCNNCT CANNACTNNN CTCCTCNAAA TTCNNATNAA       240
-     NNNTNTCCCN CCTNTNACNA CNNNNTTCNN NATTNNANCN ATCTANNANN NNACACTCTN       300
-     ANAATNTNAT CNNTNATTNN TCNNTNCNCT NNATCACATT NCTCNCCTTN CCANTACCAC       360
-     TTTTNACANA NTTCCCCTTC TTTTTCNCAA CNNNCNATNC TNNNANAANN NATNNNTAAC       420
-     TCNNNTNCCN NCTCTNNATC NNANATANCN TNNTCCTCTC NNNNTTCCAN ANNNTC           476
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 73.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-476
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-476
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..476
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 476 BP; 86 A; 111 C; 98 G; 106 T; 75 other;
+     atanncnana tcccccccaa annattncct natntnanna acatnnnnan atcatcntnn        60
+     aatcnancnc nnnnantcnc cnntnaantn nntnnntnna cantcncncc cnnacnnacn       120
+     cnncatnacc ncttcactac nanctnttan ntttntnnna ctnntcctac natataccnt       180
+     ctcttnntnn tnnnnccncn aaactcnnct cannactnnn ctcctcnaaa ttcnnatnaa       240
+     nnntntcccn cctntnacna cnnnnttcnn nattnnancn atctannann nnacactctn       300
+     anaatntnat cnntnattnn tcnntncnct nnatcacatt nctcnccttn ccantaccac       360
+     ttttnacana nttccccttc tttttcncaa cnnncnatnc tnnnanaann natnnntaac       420
+     tcnnntnccn nctctnnatc nnanatancn tnntcctctc nnnnttccan annntc           476
 //
-
-ID   Atinsert16
+ID   C99916; SV 1; linear; mRNA; EST; PLN; 865 BP.
 XX
-DE   gi|4714034|dbj|C99916.1|C99916 C99916 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 72, mRNA sequence
+AC   C99916;
 XX
-SQ
-     NNTAATAAAA ACNACNNTNN AAATNATCAT ATTTCCCTTT ACNCAANNAT CNAANANACA        60
-     AACTCTCTTC CATTANNTTN NNAANTNAAT NTTNATCTCA AACTCTTTNT CCATAATNNN       120
-     AANCTACACA AATATTTNAC TNTTACANAT NNCTTANTNA ANCNATATAA CAATNCNAAA       180
-     AAANAATNNN NTTTCNNACA ATTNATTCCT CNATCAACAT TCTACAACNC NAACNAANNT       240
-     TACCTTNACC ANNACACTNN TTCTTTTNNT NCTNANATCT TTATTNTTAA ACCNNCTCAA       300
-     CAACAANANA AANTTACATT CATATCAAAC CCTCCAAACA ATNTTTTCAC TTNNAANATA       360
-     CTTCNTTTCT CTACCTTNNA ANATAAATTC TATTACTCCN ATNATWTTCT CNTTNAANAC       420
-     CNATACTNNA NACTANNATT TAACCCNAAA NNNNATNNAN NANNAANACC ACATNCACTT       480
-     CCAATCTTCC TATTTNCTCA ANNCCATAAN NCAAATNCAN TTNCTACAAA CACTTNNNNA       540
-     NCNNTTAATC TNCNNTTAAA NAATCAACNA ANTACTAACC ATANACAAAT ATATTCTNCA       600
-     NCTTNNTACC CNATTNNAAA CNNTTATNNT NTNNNANTNA ACAATATCAT ACTNTTANCT       660
-     NATTTAAACN ATNCATCCAA ANNATATTTN NTNAATNATN CCATTATCTT TNAANCTNAA       720
-     ATNNTTAANN TCTCTATAAC CAACATCNTC TCCNCTTAAA TATCTNCMCT TCTTTNTCTA       780
-     CRAYCAATCC ACCTTATNAA TAAAAAAATT TTAATTTNAT NAATTTNTTA TAANAAAACT       840
-     TTAATNTTTN TTAAATNTNA AATTT                                             865
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 72.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-865
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-865
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..865
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 865 BP; 278 A; 157 C; 171 G; 254 T; 5 other;
+     nntaataaaa acnacnntnn aaatnatcat atttcccttt acncaannat cnaananaca        60
+     aactctcttc cattannttn nnaantnaat nttnatctca aactctttnt ccataatnnn       120
+     aanctacaca aatatttnac tnttacanat nncttantna ancnatataa caatncnaaa       180
+     aaanaatnnn ntttcnnaca attnattcct cnatcaacat tctacaacnc naacnaannt       240
+     taccttnacc annacactnn ttcttttnnt nctnanatct ttattnttaa accnnctcaa       300
+     caacaanana aanttacatt catatcaaac cctccaaaca atnttttcac ttnnaanata       360
+     cttcntttct ctaccttnna anataaattc tattactccn atnatwttct cnttnaanac       420
+     cnatactnna nactannatt taacccnaaa nnnnatnnan nannaanacc acatncactt       480
+     ccaatcttcc tatttnctca annccataan ncaaatncan ttnctacaaa cacttnnnna       540
+     ncnnttaatc tncnnttaaa naatcaacna antactaacc atanacaaat atattctnca       600
+     ncttnntacc cnattnnaaa cnnttatnnt ntnnnantna acaatatcat actnttanct       660
+     natttaaacn atncatccaa annatatttn ntnaatnatn ccattatctt tnaanctnaa       720
+     atnnttaann tctctataac caacatcntc tccncttaaa tatctncmct tctttntcta       780
+     craycaatcc accttatnaa taaaaaaatt ttaatttnat naatttntta taanaaaact       840
+     ttaatntttn ttaaatntna aattt                                             865
 //
-
-ID   Atinsert17
+ID   C99914; SV 1; linear; mRNA; EST; PLN; 628 BP.
 XX
-DE   gi|4714033|dbj|C99914.1|C99914 C99914 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 70, mRNA sequence
+AC   C99914;
 XX
-SQ
-     NNNACNAACC NNTNTACCAC NATTTNNTTC NTCACTNTCT NNCCTACCCA AAANCNNATN        60
-     NAATCTTNNT NAATACATNN NAANANATNN ANCCCAAATC ATTAAANTCC CTTCAANACC       120
-     CNAAACTTTT NNNCCNNNTC NCTCNTNTAC CNNTTTATCC NNTTNNTCCN TTATNCANAC       180
-     CNATACAATC ATCCACNACC NATCACCCNN TTTTTNATTN NTTAAACAAA CAACCAAACN       240
-     ANTCNNTTCT CTACATTTCC TTCNNNANTN NTNNTTCTCT AACNNCTCAA CANTTAACCN       300
-     AATTNNCNTN NNNNCTCNAN NANANCCANC AACNNTTTAT ATNNNTNNTT CNACCNCCCN       360
-     TTNACNNCTC NTCTTNCANT NATTATTTCT CNNCTAAANN CNNTNTAACC AAANACAACA       420
-     CNCCANAATA TCTACCAAAA ANNNTTCNTN ACTCSTACTT TNCNATAAAA NTTTCATNAT       480
-     CCCATCATNN NCACCNCAAN CTNAAATCCT AACCCATCCA NNCCNTTNNT NNNTTTTTAA       540
-     CACATTTNTT NNTTTNNAAC TCCACTTTNN RAAACCTTCC TTTTNCCNNC NTTCCCAWTR       600
-     ANAACCTTKN CCCCCTTTTC CCCCAACC                                          628
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 70.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-628
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-628
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..628
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 628 BP; 148 A; 161 C; 150 G; 162 T; 7 other;
+     nnnacnaacc nntntaccac natttnnttc ntcactntct nncctaccca aaancnnatn        60
+     naatcttnnt naatacatnn naananatnn ancccaaatc attaaantcc cttcaanacc       120
+     cnaaactttt nnnccnnntc nctcntntac cnntttatcc nnttnntccn ttatncanac       180
+     cnatacaatc atccacnacc natcacccnn tttttnattn nttaaacaaa caaccaaacn       240
+     antcnnttct ctacatttcc ttcnnnantn ntnnttctct aacnnctcaa canttaaccn       300
+     aattnncntn nnnnctcnan nananccanc aacnntttat atnnntnntt cnaccncccn       360
+     ttnacnnctc ntcttncant nattatttct cnnctaaann cnntntaacc aaanacaaca       420
+     cnccanaata tctaccaaaa annnttcntn actcstactt tncnataaaa ntttcatnat       480
+     cccatcatnn ncaccncaan ctnaaatcct aacccatcca nnccnttnnt nnntttttaa       540
+     cacatttntt nntttnnaac tccactttnn raaaccttcc ttttnccnnc nttcccawtr       600
+     anaaccttkn cccccttttc ccccaacc                                          628
 //
-
-ID   Atinsert18
+ID   C99913; SV 1; linear; mRNA; EST; PLN; 497 BP.
 XX
-DE   gi|4714032|dbj|C99913.1|C99913 C99913 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 69, mRNA sequence
+AC   C99913;
 XX
-SQ
-     CCTNTCCCAT CNNNCCNTTR NTNNNTTTTT NACCCATTNC NNTTNNANCT CNACNTTSNA        60
-     AANCNTCNTT NNCNNCNTTC CNATSATCNC ATNNCCACTT TTTNCCNANC ANAATATNAA       120
-     TNCNNCNTTN CTCANCNACN AACTNNNAAT CNCANTCANA TTNNATNATC CAAANNANNA       180
-     TATTTCTANN TNNAANATTN ANNCNTTNNT NANNAANNTT ATNACTNANA ANNAANNTNA       240
-     ANCNATNANA ANNAAANTNA ANAANTTNAN ANACTCNNCN NANATNTCAC TNANCATTNA       300
-     CNNTNNTNNT TTNNCNCACN ANTCNCTTTN CANANTCACC AANNANTNTC AACNNTTTTT       360
-     NNAACNTNTC NTNNACTTNT CACNTNNTNC TTAAAAATTN TTACCNTTTT CTAACTCTTT       420
-     TATTATTART TNNTTNAATT ATACNTNTCN TTCCTCTNTT ANTTNTTATA ATATAATAAA       480
-     TCNATTTACT CTTTNTT                                                      497
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 69.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-497
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-497
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..497
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 497 BP; 114 A; 82 C; 148 G; 148 T; 5 other;
+     cctntcccat cnnnccnttr ntnnnttttt nacccattnc nnttnnanct cnacnttsna        60
+     aancntcntt nncnncnttc cnatsatcnc atnnccactt tttnccnanc anaatatnaa       120
+     tncnncnttn ctcancnacn aactnnnaat cncantcana ttnnatnatc caaannanna       180
+     tatttctann tnnaanattn anncnttnnt nannaanntt atnactnana annaanntna       240
+     ancnatnana annaaantna anaanttnan anactcnncn nanatntcac tnancattna       300
+     cnntnntnnt ttnncncacn antcnctttn canantcacc aannantntc aacnnttttt       360
+     nnaacntntc ntnnacttnt cacntnntnc ttaaaaattn ttaccntttt ctaactcttt       420
+     tattattart tnnttnaatt atacntntcn ttcctctntt anttnttata atataataaa       480
+     tcnatttact ctttntt                                                      497
 //
-
-ID   Atinsert19
+ID   C99911; SV 1; linear; mRNA; EST; PLN; 661 BP.
 XX
-DE   gi|4714031|dbj|C99911.1|C99911 C99911 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 67, mRNA sequence
+AC   C99911;
 XX
-SQ
-     CNTTTCTNCC ACATTAAAAC ANAANANTNC AACAATTNAA NNCATANAAA ANTNNCCTTA        60
-     TNAANCANCT NCCATTNCTT TCNANNCTAT TCCACNTACC CTNNCTCAAA ACTNTNNNNT       120
-     TAACNTNATC CNTACTATNA CTNCATTNCA ANNNAANCAT NCAAATNNTN AAAACNCATN       180
-     NACTNNTATT NACNNNAACA CTNNTNCAAT ANCTNATATN AAANANANCA ANATATNNNA       240
-     TTCNTACAAT NTNAANNCNC AAACTTTCAA NACNNCTATA NAANCANCNT NTATNCTTCT       300
-     AANNNATCNA TNATATANTN ANTNNAATCA ANAANAANCA ANCTCCTNNA TCTNNACCTT       360
-     CAAANCCTAC CATTNANACA NAANNANATN CANACAACNA ACAAATTCTT CCCNACTAAN       420
-     CNAANNNANA AACACTTTNN TCTCANCATA ACTCAATCTC TNTTTTCACT TNTTTAATNN       480
-     TTNCACTCTT TTNNCTATTA TCTTCCCTTN ACATATCTTT TTAATTCTNC ANTTTTNACT       540
-     TNNNTNANAT AAAATTTTCC CAANNTNNTT TTTTTTTNTT TNTTTTNNNA ATATTAACTT       600
-     TTTTNAATTT TCNTANTCCC TTTNTTNNTT TTTAAAATTC CAATTNTTAT TNTTCTTTTT       660
-     N                                                                       661
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 67.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-661
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-661
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..661
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 661 BP; 186 A; 117 C; 149 G; 206 T; 3 other;
+     cntttctncc acattaaaac anaanantnc aacaattnaa nncatanaaa antnncctta        60
+     tnaancanct nccattnctt tcnannctat tccacntacc ctnnctcaaa actntnnnnt       120
+     taacntnatc cntactatna ctncattnca annnaancat ncaaatnntn aaaacncatn       180
+     nactnntatt nacnnnaaca ctnntncaat anctnatatn aaanananca anatatnnna       240
+     ttcntacaat ntnaanncnc aaactttcaa nacnnctata naancancnt ntatncttct       300
+     aannnatcna tnatatantn antnnaatca anaanaanca anctcctnna tctnnacctt       360
+     caaancctac cattnanaca naannanatn canacaacna acaaattctt cccnactaan       420
+     cnaannnana aacactttnn tctcancata actcaatctc tnttttcact tntttaatnn       480
+     ttncactctt ttnnctatta tcttcccttn acatatcttt ttaattctnc anttttnact       540
+     tnnntnanat aaaattttcc caanntnntt tttttttntt tnttttnnna atattaactt       600
+     ttttnaattt tcntantccc tttnttnntt tttaaaattc caattnttat tnttcttttt       660
+     n                                                                       661
 //
-
-ID   Atinsert20
+ID   C99910; SV 1; linear; mRNA; EST; PLN; 241 BP.
 XX
-DE   gi|4714030|dbj|C99910.1|C99910 C99910 Arabidopsis thaliana library
-DE   (Motohashi R) Arabidopsis thaliana cDNA clone 66, mRNA sequence
+AC   C99910;
 XX
-SQ
-     CNCSCCTAAN AANNAAAANA TNANAANAAN AANAANAANA AAACTNANNT CTNAANANAC        60
-     CTTTAATATT TTTNCNTNNT CTANTTTACT TTNTTATCAN AAACAAANAA AATCTTTTNT       120
-     NNCNTTANNT NTTAANTAAN NTTTTTNTTT TNTTTNAAAC TTAAAAAAAA NAACTACTCT       180
-     TCNTTTTNTA ANNTTATAAT ATNTTTNNTT TANTCCTTAT CCCAAAAACT TNCATTTTNC       240
-     C                                                                       241
+DT   09-APR-1999 (Rel. 59, Created)
+DT   09-APR-1999 (Rel. 59, Last updated, Version 1)
+XX
+DE   Arabidopsis thaliana YAC CIC3B1 region specific cDNA, clone 66.
+XX
+KW   EST(expressed sequence tag).
+XX
+OS   Arabidopsis thaliana (thale cress)
+OC   Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+OC   Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons; rosids;
+OC   eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+XX
+RN   [1]
+RP   1-241
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   ;
+RL   Submitted (08-OCT-1998) to the EMBL/GenBank/DDBJ databases.
+RL   Reiko Motohashi, Institute of Physical and Chemical Research(RIKEN),
+RL   Laboratory of Plant Molecular Biology; 3-1-1, Koyadai, Tsukuba 305-0074,
+RL   Japan (E-mail:motohasi@rtc.riken.go.jp, Tel:+81-298-36-4359)
+XX
+RN   [2]
+RP   1-241
+RA   Motohashi R., Shinozaki K., Yamaguchi-Shinozaki K.;
+RT   "Arabidopsis thaliana YAC CIC3B1 region specific cDNA,clone 2";
+RL   Unpublished.
+XX
+DR   UNILIB; 1782; 1741.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..241
+FT                   /organism="Arabidopsis thaliana"
+FT                   /mol_type="mRNA"
+FT                   /db_xref="taxon:3702"
+FT                   /db_xref="UNILIB:1782"
+XX
+SQ   Sequence 241 BP; 79 A; 29 C; 50 G; 82 T; 1 other;
+     cncscctaan aannaaaana tnanaanaan aanaanaana aaactnannt ctnaananac        60
+     ctttaatatt tttncntnnt ctantttact ttnttatcan aaacaaanaa aatcttttnt       120
+     nncnttannt nttaantaan ntttttnttt tntttnaaac ttaaaaaaaa naactactct       180
+     tcnttttnta annttataat atntttnntt tantccttat cccaaaaact tncattttnc       240
+     c                                                                       241
 //
