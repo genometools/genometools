@@ -760,17 +760,8 @@ const void *completealignmentfromLocalitracebackstate(
                                            lci->scorevalues.gapextend);
   if (evalscore < 0 || (unsigned long) evalscore < lci->threshold)
   {
-    Scoretype evalscore;
-
-    evalscore = gt_alignment_evalwithscore(lci->tbs.alignment,
-                                           lci->scorevalues.matchscore,
-                                           lci->scorevalues.mismatchscore,
-                                           lci->scorevalues.gapextend);
-    if (evalscore < 0 || (unsigned long) evalscore < lci->threshold)
-    {
-      fprintf(stderr,"unexpected eval score %ld\n",evalscore);
-      exit(EXIT_FAILURE); /* programming error */
-    }
+    fprintf(stderr,"unexpected eval score %ld\n",evalscore);
+    exit(EXIT_FAILURE); /* programming error */
   }
 #endif
   return (const void *) lci->tbs.alignment;

@@ -649,15 +649,15 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
                                          previousreadpos,
                                          rmnsufinfo->readmode);
         }
-        /* XXXX exploit the non random access to the 
+        /* XXXX exploit the non random access to the
            encseq: see testdata/Diplicate */
         printf("access %lu\n",(unsigned long) previousstart+lcpvalue);
-        if (ISSPECIAL(cc1) || 
+        if (ISSPECIAL(cc1) ||
             cc1 != getencodedchar(rmnsufinfo->encseq,previousstart+lcpvalue,
                                   rmnsufinfo->readmode))
         {
           break;
-        } 
+        }
         lcpvalue++;
       }
       compressedtable_update(lcptab,fillpos,lcpvalue);
