@@ -20,12 +20,14 @@
 
 #include "core/error_api.h"
 #include "seqpos-def.h"
+#include "bcktab.h"
 #include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
+                          const Bcktab *bcktab,
                           Readmode readmode,
                           Seqpos partwidth);
 

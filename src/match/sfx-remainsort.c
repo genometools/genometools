@@ -25,6 +25,7 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
+#include "bcktab.h"
 #include "compressedtab.h"
 
 typedef struct
@@ -56,6 +57,7 @@ struct Rmnsufinfo
          totallength,
          currentdepth;
   const Encodedsequence *encseq;
+  const Bcktab *bcktab;
   Readmode readmode;
   unsigned long allocateditvinfo,
                 currentqueuesize,
@@ -66,6 +68,7 @@ struct Rmnsufinfo
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
+                          const Bcktab *bcktab,
                           Readmode readmode,
                           Seqpos partwidth)
 {
@@ -80,6 +83,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->readmode = readmode;
   rmnsufinfo->allocateditvinfo = 0;
   rmnsufinfo->itvinfo = NULL;
+  rmnsufinfo->bcktab = bcktab;
   rmnsufinfo->currentqueuesize = 0;
   rmnsufinfo->maxqueuesize = 0;
   rmnsufinfo->firstwithnewdepth.depth = 0;
@@ -595,6 +599,9 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
 {
   Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
   Compressedtable *lcptab, *ranknext, *rightposinverse;
+  Seqpos previousreadpos;
+  Uchar cc1;
+  Encodedsequencescanstate *esr;
 
   if (spacefortab == NULL)
   {
@@ -615,14 +622,16 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
   /* now ranknext and lcptab point to the same memory area. After reading
      ranknext at position fillpos, the same cell is used for storing
      the determined lcp-value */
+  /* exploit the fact, that pos + lcpvalue is monotone */
+  esr = newEncodedsequencescanstate();
+  initEncodedsequencescanstate(esr,rmnsufinfo->encseq,rmnsufinfo->readmode,0);
+  cc1 = sequentialgetencodedchar(rmnsufinfo->encseq,
+                                 esr,0,rmnsufinfo->readmode);
+  previousreadpos = 0;
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
     if (pos < rmnsufinfo->totallength - 1)
     {
-      /*
-      printf("ranknext[%lu]=",(unsigned long) fillpos);
-      printf("%lu\n",(unsigned long) ranknext[fillpos]);
-      */
       nextfillpos = compressedtable_get(ranknext,fillpos);
     }
     if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
@@ -631,19 +640,22 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
-        Uchar cc1, cc2;
-
-        cc1 = getencodedchar(rmnsufinfo->encseq,pos+lcpvalue,
-                             rmnsufinfo->readmode);
-        cc2 = getencodedchar(rmnsufinfo->encseq,previousstart+lcpvalue,
-                             rmnsufinfo->readmode);
-        if (cc1 == cc2 && ISNOTSPECIAL(cc1))
+        gt_assert(pos + lcpvalue >= previousreadpos);
+        while (previousreadpos < pos + lcpvalue)
         {
-          lcpvalue++;
-        } else
+          previousreadpos++;
+          cc1 = sequentialgetencodedchar(rmnsufinfo->encseq,
+                                         esr,
+                                         previousreadpos,
+                                         rmnsufinfo->readmode);
+        }
+        if (ISSPECIAL(cc1) || 
+            cc1 != getencodedchar(rmnsufinfo->encseq,previousstart+lcpvalue,
+                                  rmnsufinfo->readmode))
         {
           break;
-        }
+        } 
+        lcpvalue++;
       }
       compressedtable_update(lcptab,fillpos,lcpvalue);
       if (lcpvalue > 0)
@@ -653,8 +665,7 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
     }
     fillpos = nextfillpos;
   }
-  /* since lcptab points to this memory we set it to NULL, so that it
-     is not freed later */
+  freeEncodedsequencescanstate(&esr);
   return lcptab;
 }
 
