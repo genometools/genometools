@@ -599,9 +599,9 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
 {
   Seqpos pos, previousstart, nextfillpos = 0, fillpos, lcpvalue = 0;
   Compressedtable *lcptab, *ranknext, *rightposinverse;
-  Seqpos previousreadpos;
-  Uchar cc1;
-  Encodedsequencescanstate *esr;
+  Seqpos previouscc1pos, previouscc2pos;
+  Uchar cc1, cc2;
+  Encodedsequencescanstate *esr1, *esr2;
 
   if (spacefortab == NULL)
   {
@@ -623,11 +623,14 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
      ranknext at position fillpos, the same cell is used for storing
      the determined lcp-value */
   /* exploit the fact, that pos + lcpvalue is monotone */
-  esr = newEncodedsequencescanstate();
-  initEncodedsequencescanstate(esr,rmnsufinfo->encseq,rmnsufinfo->readmode,0);
+  esr1 = newEncodedsequencescanstate();
+  initEncodedsequencescanstate(esr1,rmnsufinfo->encseq,rmnsufinfo->readmode,0);
   cc1 = sequentialgetencodedchar(rmnsufinfo->encseq,
-                                 esr,0,rmnsufinfo->readmode);
-  previousreadpos = 0;
+                                 esr1,0,rmnsufinfo->readmode);
+  previouscc1pos = 0;
+  esr2 = newEncodedsequencescanstate();
+  previouscc2pos = rmnsufinfo->totallength;
+  cc2 = 0;
   for (pos = 0; pos < rmnsufinfo->totallength; pos++)
   {
     if (pos < rmnsufinfo->totallength - 1)
@@ -640,21 +643,44 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
-        gt_assert(pos + lcpvalue >= previousreadpos);
-        while (previousreadpos < pos + lcpvalue)
+        gt_assert(pos + lcpvalue >= previouscc1pos);
+        while (previouscc1pos < pos + lcpvalue)
         {
-          previousreadpos++;
+          previouscc1pos++;
           cc1 = sequentialgetencodedchar(rmnsufinfo->encseq,
-                                         esr,
-                                         previousreadpos,
+                                         esr1,
+                                         previouscc1pos,
                                          rmnsufinfo->readmode);
         }
-        /* XXXX exploit the non random access to the
-           encseq: see testdata/Diplicate */
-        printf("access %lu\n",(unsigned long) previousstart+lcpvalue);
-        if (ISSPECIAL(cc1) ||
-            cc1 != getencodedchar(rmnsufinfo->encseq,previousstart+lcpvalue,
-                                  rmnsufinfo->readmode))
+        if (ISSPECIAL(cc1))
+        {
+          break;
+        }
+        if (previousstart+lcpvalue < previouscc2pos || 
+            previousstart+lcpvalue > previouscc2pos+1)
+        {
+          previouscc2pos = previousstart+lcpvalue;
+          initEncodedsequencescanstate(esr2,rmnsufinfo->encseq,
+                                       rmnsufinfo->readmode,
+                                       previouscc2pos);
+          cc2 = sequentialgetencodedchar(rmnsufinfo->encseq,
+                                         esr2,previouscc2pos,
+                                         rmnsufinfo->readmode);
+        } else
+        {
+          if (previousstart+lcpvalue == previouscc2pos+1)
+          {
+            previouscc2pos++;
+            cc2 = sequentialgetencodedchar(rmnsufinfo->encseq,
+                                           esr2,
+                                           previouscc2pos,
+                                           rmnsufinfo->readmode);
+          } else
+          {
+            gt_assert(previousstart+lcpvalue == previouscc2pos);
+          }
+        }
+        if (cc1 != cc2)
         {
           break;
         }
@@ -668,7 +694,8 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
     }
     fillpos = nextfillpos;
   }
-  freeEncodedsequencescanstate(&esr);
+  freeEncodedsequencescanstate(&esr1);
+  freeEncodedsequencescanstate(&esr2);
   return lcptab;
 }
 
