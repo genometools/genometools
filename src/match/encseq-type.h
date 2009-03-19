@@ -20,9 +20,10 @@
 /*
   The contents of this file is to be considered private
   implementation detail but, whenever the code is compiled with option
-  INLINEDENCSEQ, is exposed to the compiler solely for performance reasons.
-  So we can compare the time overhead of a bytearray implementation of
-  strings to all other represenations implemented in encodedseq.c.
+  INLINEDENCSEQ, is exposed to the compiler solely for performance
+  optimization. So we can compare the time overhead of a bytearray
+  implementation of strings to all other represenations implemented in
+  encodedseq.c.
 */
 
 #include "core/symboldef.h"

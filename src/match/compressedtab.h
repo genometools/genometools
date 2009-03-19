@@ -64,9 +64,9 @@ typedef struct
                                        Compressedtable *compressedtable,
                                        Seqpos idx,Seqpos value)
 {
-#ifdef _LP64
+/*#ifdef _LP64
 #error "not implemented yet"
-#endif
+#endif*/
 #ifdef PLAIN
   compressedtable->plain[idx] = value;
 #else
@@ -80,9 +80,9 @@ typedef struct
                                          const Compressedtable *compressedtable,
                                          Seqpos idx)
 {
-#ifdef _LP64
+/*#ifdef _LP64
 #error "not implemented yet"
-#endif
+#endif*/
 #ifdef PLAIN
   return compressedtable->plain[idx];
 #else

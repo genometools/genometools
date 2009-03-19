@@ -692,12 +692,12 @@ splintclean:
 
 obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
-	@splint -DBIGSEQPOS -DINLINEDENCSEQ -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c
 	@echo "splint $<"
-	@splint -DBIGSEQPOS -DINLINEDENCSEQ -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/ltr/%.c
@@ -718,7 +718,7 @@ obj/%.prepro: ${CURDIR}/src/match/%.c
 
 obj/%.prepro: ${CURDIR}/src/tools/%.c
 	@echo "[generate $@]"
-	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -DINLINEDENCSEQ \
+	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	/sw/bin/indent $@
 
