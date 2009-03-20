@@ -65,13 +65,15 @@ GtSequenceBuffer* gt_sequence_buffer_new_guess_type(GtStrArray *seqs,
   char firstcontents[BUFSIZ];
   gt_assert(seqs);
   gt_error_check(err);
-  
+
   if (gt_str_array_size(seqs) == 0) {
     gt_error_set(err, "cannot guess file type of file %s -- no sequence files "
                       "given",
                       gt_str_array_get(seqs, 0));
     return NULL;
   }
+
+  memset(firstcontents, 0, BUFSIZ);
   file = gt_genfile_xopen(gt_str_array_get(seqs, 0), "rb");
   gt_genfile_xread(file, &firstcontents, BUFSIZ);
   gt_genfile_close(file);
