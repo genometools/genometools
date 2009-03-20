@@ -43,6 +43,11 @@
 #define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
 #define MAXCODEVALUE    ((1U << CODEBITS) - 1)
 
+static inline void setsortspace(Suftab *suftab,Seqpos idx,Seqpos value)
+{
+  suftab->sortspace[idx - suftab->offset] = value;
+}
+
 typedef struct
 {
   unsigned int maxprefixindex:PREFIXLENBITS;
@@ -299,8 +304,7 @@ static void insertwithoutspecial(void *processinfo,
     if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
       /*sfi->suftabptr[--sfi->leftborder[code]] = position; */
-      sfi->suftab.sortspace[--sfi->leftborder[code] - sfi->suftab.offset]
-        = position;
+      setsortspace(&sfi->suftab,--sfi->leftborder[code],position);
       /* from right to left */
     }
   }
@@ -347,8 +351,8 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
                                   prefixindex;
           */
-          sfi->suftab.sortspace[stidx - sfi->suftab.offset]
-            = sfi->spaceCodeatposition[j].position - prefixindex;
+          setsortspace(&sfi->suftab,stidx,
+                       sfi->spaceCodeatposition[j].position - prefixindex);
         }
       }
       if (deletevalues)
@@ -405,8 +409,8 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
             /*
             sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
             */
-            sfi->suftab.sortspace[stidx - sfi->suftab.offset]
-              = specialcontext.position - prefixindex;
+            setsortspace(&sfi->suftab,stidx,
+                         specialcontext.position - prefixindex);
           }
         }
       }

@@ -8,6 +8,6 @@ then
   exit 1
 fi
 
-time gt suffixerator -indexname sfx-idx -dna -v -suf -lcp -tis -showtime -pl -maxdepth -db $1 
-time mkesa -p mkesa-idx -b D -g suf -g lcp -v -d $1 
+time mkesa -p mkesa-idx -b D -g suf -v -d $1 
+time gt suffixerator -indexname sfx-idx -dna -v -suf -tis -showtime -pl -maxdepth -db $1 
 cmp -s sfx-idx.suf mkesa-idx.suf

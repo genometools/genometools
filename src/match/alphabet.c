@@ -66,7 +66,7 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
 #define PROTEINALPHASIZE             20U
 #define MAPSIZEPROTEIN               (PROTEINALPHASIZE+1U)
-#define PROTEINWILDCARDS             "XUBZ*-"
+#define PROTEINWILDCARDS             "XUBZO*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
 
 /*
