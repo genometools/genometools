@@ -1311,8 +1311,11 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     {
       *specialsmaxbucketsize = bucketspec.specialsinbucket;
     }
-    bucketsizedist[determinebitspervalue((uint64_t)
-                                         bucketspec.nonspecialsinbucket)]++;
+    if (bucketspec.nonspecialsinbucket > 1)
+    {
+      bucketsizedist[determinebitspervalue(
+             (uint64_t) (bucketspec.nonspecialsinbucket-1))]++;
+    }
   }
   printf("# maxbucket (specials)=%lu\n",*specialsmaxbucketsize);
   printf("# maxbucket (nonspecials)=%lu\n",*nonspecialsmaxbucketsize);
