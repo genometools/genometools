@@ -54,15 +54,16 @@ def runsfxfail(args)
   end
 end
 
-allfiles = ["Atinsert.fna",
-            "Duplicate.fna",
-            "Random-Small.fna",
-            "Random.fna",
-            "Random159.fna",
-            "Random160.fna",
-            "RandomN.fna",
-            "TTT-small.fna",
-            "trna_glutamine.fna"]
+allfiles = []
+all_fastafiles = ["Atinsert.fna",
+                  "Duplicate.fna",
+                  "Random-Small.fna",
+                  "Random.fna",
+                  "Random159.fna",
+                  "Random160.fna",
+                  "RandomN.fna",
+                  "TTT-small.fna",
+                  "trna_glutamine.fna"]
 
 allfiles += all_fastafiles
 allfiles += (all_genbankfiles = all_fastafiles.collect{ |f|
@@ -147,7 +148,7 @@ runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
 runsfxfail "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"
 
 allmultifiles.each do |filename|
-  Name "gt suffixerator sfxmap-failure"
+  Name "gt suffixerator sfxmap-failure #{filename}"
   Keywords "gt_suffixerator"
   Test do
     run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
@@ -169,11 +170,11 @@ end
 Name "gt suffixerator bwt"
 Keywords "gt_suffixerator"
 Test do
-  checkbwt(allfiles)
+  checkbwt(all_fastafiles)
 end
 
 allfiles.each do |filename|
-  Name "gt suffixerator uint32"
+  Name "gt suffixerator uint32 #{filename}"
   Keywords "gt_suffixerator"
   Test do
     run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat uint32 " +
@@ -240,12 +241,26 @@ end
         Keywords "gt_suffixerator"
         Test do
           checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.fna"])
+          checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.gbk"])
+          checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.embl"])
           checksfx(parts,3,extra,sat,cmp,doubling,["Random.fna"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["Random.gbk"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["Random.embl"])
           checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.fna"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.gbk"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.embl"])
           checksfx(parts,2,extra,sat,cmp,doubling,["trna_glutamine.fna"])
+          checksfx(parts,2,extra,sat,cmp,doubling,["trna_glutamine.gbk"])
+          checksfx(parts,2,extra,sat,cmp,doubling,["trna_glutamine.embl"])
           checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.fna"])
+          checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.gbk"])
+          checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.embl"])
           checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.fna","Random.fna",
-                                                   "Atinsert.fna"])
+                                          "Atinsert.fna"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.gbk","Random.gbk",
+                                          "Atinsert.gbk"])
+          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.embl","Random.embl",
+                                          "Atinsert.embl"])
         end
       end
     end
