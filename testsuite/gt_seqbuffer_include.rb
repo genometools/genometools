@@ -23,7 +23,7 @@ Name "sequence buffer: EMBL unterminated sequence"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt dev convertseq #{$testdata}embl_test4.embl", :retval => 1
-  grep($last_stderr, "unterminated sequence in line 98")
+  grep($last_stderr, "only terminators")
 end
 
 Name "sequence buffer: EMBL multi-line description"
@@ -81,6 +81,20 @@ Test do
   grep($last_stderr, "unterminated sequence in line")
 end
 
+Name "sequence buffer: GenBank missing sequence offset numbers"
+Keywords "gt_convertseq sequencebuffer"
+Test do
+  run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test6.gbk", :retval => 1
+  grep($last_stderr, "sequence offset")
+end
+
+Name "sequence buffer: GenBank blank missing"
+Keywords "gt_convertseq sequencebuffer"
+Test do
+  run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test5.gbk", :retval => 1
+  grep($last_stderr, "blank expected")
+end
+
 Name "sequence buffer: GenBank text before LOCUS"
 Keywords "gt_convertseq sequencebuffer"
 Test do
@@ -88,7 +102,20 @@ Test do
   run "diff #{$last_stdout} #{$testdata}genbank_test2.fas"
 end
 
+Name "sequence buffer: GenBank missing DEFINITION line"
+Keywords "gt_convertseq sequencebuffer"
+Test do
+  run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test2.gbk"
+end
+
 gbfiles = ["Atinsert",
+           "Duplicate",
+           "Random-Small",
+           "Random",
+           "Random159",
+           "Random160",
+           "RandomN",
+           "TTT-small",
            "trna_glutamine"]
 
 gbfiles.each do |file|
