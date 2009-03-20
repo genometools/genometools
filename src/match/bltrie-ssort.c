@@ -67,7 +67,8 @@ struct Blindtrierep
   ArrayNodeptr stack;
 };
 
-static bool isleftofboundary(Seqpos currentstartpos,const Blindtrierep *trierep)
+static bool isleftofboundary(Seqpos currentstartpos,
+                             const Blindtrierep *trierep)
 {
   return (currentstartpos < trierep->totallength) ? true : false;
 }
