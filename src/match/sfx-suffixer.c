@@ -55,9 +55,8 @@ struct Sfxiterator
   bool storespecials;
   Codetype currentmincode,
            currentmaxcode;
-  Seqpos specialcharacters,
-         *suftab,
-         *suftabptr;
+  Seqpos specialcharacters;
+  Suftab suftab;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   Suftabparts *suftabparts;
@@ -299,7 +298,9 @@ static void insertwithoutspecial(void *processinfo,
 
     if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
-      sfi->suftabptr[--sfi->leftborder[code]] = position;
+      /*sfi->suftabptr[--sfi->leftborder[code]] = position; */
+      sfi->suftab.sortspace[--sfi->leftborder[code] - sfi->suftab.offset]
+        = position;
       /* from right to left */
     }
   }
@@ -342,8 +343,12 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           /* from right to left */
+          /*
           sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
                                   prefixindex;
+          */
+          sfi->suftab.sortspace[stidx - sfi->suftab.offset]
+            = sfi->spaceCodeatposition[j].position - prefixindex;
         }
       }
       if (deletevalues)
@@ -397,7 +402,11 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
             gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
+            /*
             sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
+            */
+            sfi->suftab.sortspace[stidx - sfi->suftab.offset]
+              = specialcontext.position - prefixindex;
           }
         }
       }
@@ -424,7 +433,7 @@ void freeSfxiterator(Sfxiterator **sfi)
     freespecialrangeiterator(&(*sfi)->sri);
   }
   FREESPACE((*sfi)->spaceCodeatposition);
-  FREESPACE((*sfi)->suftab);
+  FREESPACE((*sfi)->suftab.sortspace);
   freesuftabparts((*sfi)->suftabparts);
   if ((*sfi)->bcktab != NULL)
   {
@@ -489,8 +498,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
       sfi->spaceCodeatposition = NULL;
     }
     sfi->nextfreeCodeatposition = 0;
-    sfi->suftab = NULL;
-    sfi->suftabptr = NULL;
+    sfi->suftab.sortspace = NULL;
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
@@ -609,7 +617,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                                       specialcharacters + 1,
                                       verboseinfo);
     gt_assert(sfi->suftabparts != NULL);
-    ALLOCASSIGNSPACE(sfi->suftab,NULL,Seqpos,
+    ALLOCASSIGNSPACE(sfi->suftab.sortspace,NULL,Seqpos,
                      stpgetlargestwidth(sfi->suftabparts));
     if (hasspecialranges(sfi->encseq))
     {
@@ -620,7 +628,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     {
       sfi->sri = NULL;
     }
-    sfi->fusp.spaceSeqpos = sfi->suftab;
+    sfi->fusp.spaceSeqpos = sfi->suftab.sortspace;
     sfi->fusp.allocatedSeqpos
       = CALLCASTFUNC(Seqpos,unsigned_long,
                      stpgetlargestwidth(sfi->suftabparts));
@@ -651,8 +659,11 @@ static void preparethispart(Sfxiterator *sfi,
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
+  /*
   sfi->suftabptr = sfi->suftab -
                    stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
+  */
+  sfi->suftab.offset = stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
   if (sfi->sfxstrategy.storespecialcodes)
   {
     derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
@@ -674,7 +685,7 @@ static void preparethispart(Sfxiterator *sfi,
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  sortallbuckets(sfi->suftabptr,
+  sortallbuckets(&sfi->suftab,
                  sfi->encseq,
                  sfi->readmode,
                  sfi->currentmincode,
@@ -819,7 +830,7 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
     preparethispart(sfi,mtime);
     *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
-    return sfi->suftab;
+    return sfi->suftab.sortspace;
   }
   if (sfi->exhausted)
   {
@@ -834,7 +845,7 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
   gt_assert(sfi->fusp.nextfreeSeqpos > 0);
   *numberofsuffixes = (Seqpos) sfi->fusp.nextfreeSeqpos;
   *specialsuffixes = true;
-  return sfi->suftab;
+  return sfi->suftab.sortspace;
 }
 
 int sfibcktab2file(FILE *fp,

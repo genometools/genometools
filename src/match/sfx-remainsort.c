@@ -226,7 +226,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
       } else
       {
         compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
-                             startindex+rangestart);
+                               startindex+rangestart);
       }
       rangestart = idx;
     }
@@ -243,7 +243,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
   } else
   {
     compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
-                         startindex+rangestart);
+                           startindex+rangestart);
   }
 }
 
@@ -656,7 +656,7 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
         {
           break;
         }
-        if (previousstart+lcpvalue < previouscc2pos || 
+        if (previousstart+lcpvalue < previouscc2pos ||
             previousstart+lcpvalue > previouscc2pos+1)
         {
           previouscc2pos = previousstart+lcpvalue;

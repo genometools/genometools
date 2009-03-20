@@ -1859,18 +1859,18 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   FREEARRAY(&bsr->mkvauxstack,MKVstack);
 }
 
-void sortallbuckets(Seqpos *suftabptr,
-                   const Encodedsequence *encseq,
-                   Readmode readmode,
-                   Codetype mincode,
-                   Codetype maxcode,
-                   Seqpos partwidth,
-                   const Bcktab *bcktab,
-                   unsigned int numofchars,
-                   unsigned int prefixlength,
-                   Outlcpinfo *outlcpinfo,
-                   const Sfxstrategy *sfxstrategy,
-                   unsigned long long *bucketiterstep)
+void sortallbuckets(Suftab *suftab,
+                    const Encodedsequence *encseq,
+                    Readmode readmode,
+                    Codetype mincode,
+                    Codetype maxcode,
+                    Seqpos partwidth,
+                    const Bcktab *bcktab,
+                    unsigned int numofchars,
+                    unsigned int prefixlength,
+                    Outlcpinfo *outlcpinfo,
+                    const Sfxstrategy *sfxstrategy,
+                    unsigned long long *bucketiterstep)
 {
   Codetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
@@ -1880,6 +1880,7 @@ void sortallbuckets(Seqpos *suftabptr,
   Seqpos lcpvalue;
   Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
+  Seqpos *suftabptr = suftab->sortspace - suftab->offset;
 
   initBentsedgresources(&bsr,
                         suftabptr,
