@@ -1311,7 +1311,7 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     {
       *specialsmaxbucketsize = bucketspec.specialsinbucket;
     }
-    if (bucketspec.nonspecialsinbucket > 1)
+    if (bucketspec.nonspecialsinbucket > 1UL)
     {
       bucketsizedist[determinebitspervalue(
              (uint64_t) (bucketspec.nonspecialsinbucket-1))]++;
@@ -1817,7 +1817,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                     bsr->encseq,
                                     bcktab,
                                     bsr->readmode,
-                                    bsr->partwidth);
+                                    bsr->partwidth,
+                                    nonspecialsmaxbucketsize);
     bsr->trierep = NULL;
   } else
   {

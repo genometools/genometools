@@ -37,7 +37,8 @@ typedef struct
 typedef struct
 {
   Seqpos *left,
-         *right;
+         *right,
+         *base;
 } Pairsuffixptr;
 
 typedef struct
@@ -70,7 +71,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
-                          Seqpos partwidth)
+                          Seqpos partwidth,
+                          unsigned long nonspecialsmaxbucketsize)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -81,8 +83,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->totallength = getencseqtotallength(encseq);
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;
-  rmnsufinfo->allocateditvinfo = 0;
-  rmnsufinfo->itvinfo = NULL;
+  rmnsufinfo->allocateditvinfo = nonspecialsmaxbucketsize;
+  rmnsufinfo->itvinfo
+    = gt_malloc(sizeof(Itventry) * rmnsufinfo->allocateditvinfo);
   rmnsufinfo->bcktab = bcktab;
   rmnsufinfo->currentqueuesize = 0;
   rmnsufinfo->maxqueuesize = 0;
@@ -96,8 +99,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   return rmnsufinfo;
 }
 
-void addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                      Seqpos *left,Seqpos *right,Seqpos depth)
+void processunsortedrange(Rmnsufinfo *rmnsufinfo,
+                          Seqpos *left,Seqpos *right,
+                          Seqpos *base,Seqpos depth)
 {
   Pairsuffixptr *pairptr;
   unsigned long width;
@@ -139,20 +143,22 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
       rmnsufinfo->firstwithnewdepth.maxwidth = width;
     }
   }
-  if (rmnsufinfo->allocateditvinfo < width)
-  {
-    gt_assert(rmnsufinfo->itvinfo == NULL);
-    rmnsufinfo->allocateditvinfo = width;
-  }
   pairptr = gt_malloc(sizeof(Pairsuffixptr));
   pairptr->left = left;
   pairptr->right = right;
+  pairptr->base = base;
   gt_queue_add(rmnsufinfo->rangestobesorted,pairptr);
   rmnsufinfo->currentqueuesize++;
   if (rmnsufinfo->maxqueuesize < rmnsufinfo->currentqueuesize)
   {
     rmnsufinfo->maxqueuesize = rmnsufinfo->currentqueuesize;
   }
+}
+
+void addunsortedrange(Rmnsufinfo *rmnsufinfo,
+                      Seqpos *left,Seqpos *right, Seqpos depth)
+{
+  processunsortedrange(rmnsufinfo,left,right,left,depth);
 }
 
 static int compareitv(const void *a,const void *b)
@@ -172,7 +178,8 @@ static int compareitv(const void *a,const void *b)
 }
 
 static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                               Seqpos *right)
+                               Seqpos *right,
+                               GT_UNUSED Seqpos *base)
 {
   Seqpos *ptr, startindex;
 
@@ -183,7 +190,8 @@ static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
   }
 }
 
-static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
+static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
+                    Seqpos *base)
 {
   Seqpos startindex;
   unsigned long idx, rangestart;
@@ -216,13 +224,15 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
     {
       if (rangestart + 1 < idx)
       {
-        addunsortedrange(rmnsufinfo,
-                         left + rangestart,
-                         left + idx - 1,
-                         MULT2(rmnsufinfo->currentdepth));
+        processunsortedrange(rmnsufinfo,
+                             left + rangestart,
+                             left + idx - 1,
+                             base,
+                             MULT2(rmnsufinfo->currentdepth));
         inversesuftabrange(rmnsufinfo,
                            left + rangestart,
-                           left + idx - 1);
+                           left + idx - 1,
+                           base);
       } else
       {
         compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
@@ -233,13 +243,15 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
   }
   if (rangestart + 1 < width)
   {
-    addunsortedrange(rmnsufinfo,
-                     left + rangestart,
-                     left + width - 1,
-                     MULT2(rmnsufinfo->currentdepth));
+    processunsortedrange(rmnsufinfo,
+                         left + rangestart,
+                         left + width - 1,
+                         base,
+                         MULT2(rmnsufinfo->currentdepth));
     inversesuftabrange(rmnsufinfo,
                        left + rangestart,
-                       left + width - 1);
+                       left + width - 1,
+                       base);
   } else
   {
     compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
@@ -251,7 +263,8 @@ static int putleftbound(void **elem,void *info, GT_UNUSED GtError *err)
 {
   Pairsuffixptr *pairptr = *(Pairsuffixptr**) elem;
 
-  inversesuftabrange((Rmnsufinfo *) info,pairptr->left,pairptr->right);
+  inversesuftabrange((Rmnsufinfo *) info,pairptr->left,pairptr->right,
+                     pairptr->base);
   return 0;
 }
 
@@ -290,16 +303,12 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     gt_assert(specialidx == rmnsufinfo->totallength);
     freespecialrangeiterator(&sri);
   }
-  /* now we can unmap the encoded sequence if only suffix sorting is
-   * necessary */
   compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->totallength,
-                       rmnsufinfo->totallength);
+                         rmnsufinfo->totallength);
   (void) gt_queue_iterate(rmnsufinfo->rangestobesorted,
                           putleftbound,
                           rmnsufinfo,
                           NULL);
-  rmnsufinfo->itvinfo
-    = gt_malloc(sizeof(Itventry) * (rmnsufinfo->allocateditvinfo));
   gt_assert(rmnsufinfo->currentqueuesize  ==
             gt_queue_size(rmnsufinfo->rangestobesorted));
   while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
@@ -309,7 +318,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     rmnsufinfo->currentqueuesize--;
     sortitv(rmnsufinfo,
             pairptr->left,
-            pairptr->right);
+            pairptr->right,
+            pairptr->base);
     gt_free(pairptr);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
