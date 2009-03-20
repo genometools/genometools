@@ -1,0 +1,13 @@
+LOCUS      Random140
+DEFINITION  n140
+ORIGIN     
+      60 nnacancaaa cncaccaaac caanancnca cncnanaccc anccnnanna ancccnaacn
+     120 aacnaaaaan ncnncnanan accnacanaa cannnnncnn caanacnacc nnaaccnaac
+     140 ncanccancc naaaacacac                                             
+//
+
+LOCUS       Random18
+DEFINITION  n18
+ORIGIN      
+       18 caaccaannc cnaanccc
+//
