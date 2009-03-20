@@ -96,7 +96,7 @@ then
     exit 1
   fi
 fi
-make -f LocalMakefile
+make -j 4 -f LocalMakefile
 
 # echo ${MAKEFLAGS}
 # make ${MAKEFLAGS} bin/skproto

@@ -5,7 +5,17 @@ if test $# -eq 0
 then
   filenames=`find testdata/ -name '*.fna'`
 else
-  filenames=$*
+  if test $1 == 'valgrind'
+  then
+    VALGRIND=valgrind.sh
+    shift
+  fi
+  if test $# -eq 0
+  then
+    filenames=`find testdata/ -name '*.fna'`
+  else
+    filenames=$*
+  fi
 fi
 
 for filename in ${filenames}
