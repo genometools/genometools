@@ -45,7 +45,7 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
   fb->complete = false;
   fb->lastspeciallength = 0;
   fb->descptr = descptr;
-  if (filelengthtab) 
+  if (filelengthtab)
   {
     *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
                                sizeof (Filelengthvalues));

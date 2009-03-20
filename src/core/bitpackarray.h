@@ -56,7 +56,7 @@ typedef struct BitPackArray BitPackArray;
 
 static inline size_t sizeofbitarray(unsigned bits, BitOffset numValues)
 {
-  return bitElemsAllocSize(bits * numValues) * sizeof(BitElem);
+  return bitElemsAllocSize(bits * numValues) * sizeof (BitElem);
 }
 
 /**
@@ -178,7 +178,7 @@ static inline void showbitpackarray(const BitPackArray *bitpackarray)
   numofunits = (unsigned long) sizeofbitarray(bitpackarray->bitsPerElem,
                                               bitpackarray->numElems);
   printf("numofunits=%lu\n",numofunits);
-  for(idx=0; idx < numofunits; idx++)
+  for (idx=0; idx < numofunits; idx++)
   {
     printf("%lu: %u\n",idx,(unsigned int) bitpackarray->store[idx]);
     fflush(stdout);

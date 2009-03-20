@@ -28,7 +28,7 @@
 typedef struct GtFastaBuffer GtFastaBuffer;
 
 GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
-                                  const Uchar *symbolmap, 
+                                  const Uchar *symbolmap,
                                   bool plainformat,
                                   Filelengthvalues **filelengthtab,
                                   GtQueue *descptr,
