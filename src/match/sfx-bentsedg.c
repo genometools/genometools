@@ -1281,6 +1281,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
 
 static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
                                    unsigned long *specialsmaxbucketsize,
+                                   unsigned long *bucketsizedist,
                                    const Bcktab *bcktab,
                                    const Codetype mincode,
                                    const Codetype maxcode,
@@ -1310,6 +1311,8 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     {
       *specialsmaxbucketsize = bucketspec.specialsinbucket;
     }
+    bucketsizedist[determinebitspervalue((uint64_t)
+                                         bucketspec.nonspecialsinbucket)]++;
   }
   printf("# maxbucket (specials)=%lu\n",*specialsmaxbucketsize);
   printf("# maxbucket (nonspecials)=%lu\n",*nonspecialsmaxbucketsize);
@@ -1722,6 +1725,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   const Sfxstrategy *sfxstrategy)
 {
   unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize;
+  unsigned long bucketsizedist[64] = {0};
+  int maxbits;
 
   bsr->readmode = readmode;
   bsr->totallength = getencseqtotallength(encseq);
@@ -1752,11 +1757,19 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   determinemaxbucketsize(&nonspecialsmaxbucketsize,
                          &specialsmaxbucketsize,
+                         bucketsizedist,
                          bcktab,
                          mincode,
                          maxcode,
                          partwidth,
                          numofchars);
+  for (maxbits = 0; maxbits < 64; maxbits++)
+  {
+    if (bucketsizedist[maxbits] > 0)
+    {
+      printf("bucketsizedist[%d]=%lu\n",maxbits,bucketsizedist[maxbits]);
+    }
+  }
   if (outlcpinfo != NULL && outlcpinfo->assideeffect)
   {
     size_t sizespeciallcps, sizelcps;

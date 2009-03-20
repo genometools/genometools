@@ -42,8 +42,16 @@ typedef struct
 {
   Compressedtable *compressedtable;
 #ifndef PLAIN
-  unsigned int bitspervalue = (unsigned int) ceil(LOG2(maxvalue));
+  unsigned int bitspervalue = determinebitspervalue((uint64_t) maxvalue);
 #endif
+
+  /*{
+    uint64_t idx;
+  for (idx = 1; idx < (uint64_t) 2342412341234ULL; idx+= (uint64_t) 1234123)
+  {
+    (void) determinebitspervalue(idx);
+  }
+  }*/
 
   compressedtable = gt_malloc(sizeof (Compressedtable));
 #ifdef PLAIN
@@ -64,15 +72,17 @@ typedef struct
                                        Compressedtable *compressedtable,
                                        Seqpos idx,Seqpos value)
 {
-/*#ifdef _LP64
-#error "not implemented yet"
-#endif*/
 #ifdef PLAIN
   compressedtable->plain[idx] = value;
 #else
   gt_assert(value <= compressedtable->maxvalue);
+#ifdef _LP64
+  bitpackarray_store_uint64(compressedtable->bitpackarray,(BitOffset) idx,
+                            (uint64_t) value);
+#else
   bitpackarray_store_uint32(compressedtable->bitpackarray,(BitOffset) idx,
-                              (uint32_t) value);
+                            (uint32_t) value);
+#endif
 #endif
 }
 
@@ -80,13 +90,14 @@ typedef struct
                                          const Compressedtable *compressedtable,
                                          Seqpos idx)
 {
-/*#ifdef _LP64
-#error "not implemented yet"
-#endif*/
 #ifdef PLAIN
   return compressedtable->plain[idx];
 #else
+#ifdef _LP64
+  return bitpackarray_get_uint64(compressedtable->bitpackarray,(BitOffset) idx);
+#else
   return bitpackarray_get_uint32(compressedtable->bitpackarray,(BitOffset) idx);
+#endif
 #endif
 }
 

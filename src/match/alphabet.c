@@ -22,7 +22,6 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
-#include "core/mathsupport.h"
 #include "core/chardef.h"
 #include "core/cstr.h"
 #include "core/error.h"
@@ -31,6 +30,7 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
+#include "core/mathsupport.h"
 #include "spacedef.h"
 #include "qsorttype.h"
 #include "alphadef.h"
@@ -258,8 +258,11 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
         alpha->mappedwildcards++;
       }
     }
-    alpha->bitspersymbol = (unsigned int) ceil(LOG2(alpha->mapsize+1));
   }
+  /* there are mapsize-1 characters plus wildcard plus separator.
+     hence there are mapsize+1 symbols in the range 0..mapsize.
+     that is, mapsize is the largest symbol and we obtain */
+  alpha->bitspersymbol = determinebitspervalue((uint64_t) alpha->mapsize);
   return haserr ? -1 : 0;
 }
 

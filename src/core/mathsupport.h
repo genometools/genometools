@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include <math.h>
+#include <inttypes.h>
 
 /* Returns the log of the sum of two log probabilities. */
 double        gt_logsum(double p1, double p2);
@@ -36,7 +37,8 @@ double        gt_rand_0_to_1(void);
 /* Returns a random character from 'a' to 'z'. */
 char          gt_rand_char(void);
 
-#define LOGof2  0.693147
-#define LOG2(D) log((double) (D))/LOGof2
+/* Find the log base 2 of an integer in O(wordsize) operations */
+
+unsigned int determinebitspervalue(uint64_t maxvalue);
 
 #endif

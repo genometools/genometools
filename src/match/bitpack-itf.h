@@ -41,7 +41,10 @@ BitPackArray *bitpackarray_new(unsigned bits, BitOffset numValues,
                                bool withstorealloc);
 void bitpackarray_store_uint32(BitPackArray *array, BitOffset index,
                                uint32_t val);
+void bitpackarray_store_uint64(BitPackArray *array, BitOffset index,
+                               uint64_t val);
 uint32_t bitpackarray_get_uint32(const BitPackArray *array, BitOffset index);
+uint64_t bitpackarray_get_uint64(const BitPackArray *array, BitOffset index);
 #else
 #include "core/bitpackarray.h"
 #endif

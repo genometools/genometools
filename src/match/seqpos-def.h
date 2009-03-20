@@ -41,7 +41,7 @@ typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
 #define FormatSeqpos   "%" PRIu64
 #endif
 
-#else
+#else /* not _LP64 */
 
 #ifdef S_SPLINT_S
 #define FormatSeqpos "%lu"
