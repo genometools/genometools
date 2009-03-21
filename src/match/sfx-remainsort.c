@@ -40,6 +40,12 @@ typedef struct
   Seqpos *left,
          *right,
          *base;
+} Pairsuffixptrwithbase;
+
+typedef struct
+{
+  Seqpos *left,
+         *right;
 } Pairsuffixptr;
 
 DECLAREARRAYSTRUCT(Pairsuffixptr);
@@ -156,7 +162,7 @@ void processunsortedrange(Rmnsufinfo *rmnsufinfo,
                           Seqpos *left,Seqpos *right,
                           Seqpos *base,Seqpos depth)
 {
-  Pairsuffixptr *pairptr;
+  Pairsuffixptrwithbase *pairptrwithbase;
   unsigned long width;
 
   gt_assert(left < right && depth > 0);
@@ -192,11 +198,11 @@ void processunsortedrange(Rmnsufinfo *rmnsufinfo,
       rmnsufinfo->firstwithnewdepth.maxwidth = width;
     }
   }
-  pairptr = gt_malloc(sizeof(Pairsuffixptr));
-  pairptr->left = left;
-  pairptr->right = right;
-  pairptr->base = base;
-  gt_queue_add(rmnsufinfo->rangestobesorted,pairptr);
+  pairptrwithbase = gt_malloc(sizeof(Pairsuffixptrwithbase));
+  pairptrwithbase->left = left;
+  pairptrwithbase->right = right;
+  pairptrwithbase->base = base;
+  gt_queue_add(rmnsufinfo->rangestobesorted,pairptrwithbase);
   rmnsufinfo->currentqueuesize++;
   if (rmnsufinfo->maxqueuesize < rmnsufinfo->currentqueuesize)
   {
@@ -233,7 +239,6 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
   }
   ptr->left = left;
   ptr->right = right;
-  ptr->base = left;
 }
 
 static int compareitv(const void *a,const void *b)
@@ -324,6 +329,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
 static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 {
   Pairsuffixptr *pairptr;
+  Pairsuffixptrwithbase *pairptrwithbase;
   unsigned long totalwidth = 0, maxwidth = 0;
 
   for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
@@ -340,7 +346,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     sortitv(rmnsufinfo,
             pairptr->left,
             pairptr->right,
-            pairptr->base);
+            pairptr->left);
   }
   printf("number of intervals at base level " FormatSeqpos " is ",
           PRINTSeqposcast(rmnsufinfo->currentdepth));
@@ -351,14 +357,14 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
   {
-    pairptr = gt_queue_get(rmnsufinfo->rangestobesorted);
+    pairptrwithbase = gt_queue_get(rmnsufinfo->rangestobesorted);
     gt_assert(rmnsufinfo->currentqueuesize > 0);
     rmnsufinfo->currentqueuesize--;
     sortitv(rmnsufinfo,
-            pairptr->left,
-            pairptr->right,
-            pairptr->base);
-    gt_free(pairptr);
+            pairptrwithbase->left,
+            pairptrwithbase->right,
+            pairptrwithbase->base);
+    gt_free(pairptrwithbase);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
   gt_free(rmnsufinfo->itvinfo);
