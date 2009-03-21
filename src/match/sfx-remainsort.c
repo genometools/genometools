@@ -22,6 +22,7 @@
 #include "core/chardef.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
+#include "core/arraydef.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "sfx-remainsort.h"
@@ -40,6 +41,8 @@ typedef struct
          *right,
          *base;
 } Pairsuffixptr;
+
+DECLAREARRAYSTRUCT(Pairsuffixptr);
 
 typedef struct
 {
@@ -64,8 +67,45 @@ struct Rmnsufinfo
                 currentqueuesize,
                 maxqueuesize;
   Itventry *itvinfo;
+  ArrayPairsuffixptr firstgeneration;
   Firstwithnewdepth firstwithnewdepth;
 };
+
+static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
+{
+  Seqpos idx;
+
+  rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength+1,
+                                                  rmnsufinfo->totallength);
+  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
+  {
+    compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->suftab[idx],
+                           idx);
+  }
+  if (hasspecialranges(rmnsufinfo->encseq))
+  {
+    Specialrangeiterator *sri;
+    Sequencerange range;
+    Seqpos specialidx;
+
+    sri = newspecialrangeiterator(rmnsufinfo->encseq,
+                                  ISDIRREVERSE(rmnsufinfo->readmode)
+                                  ? false : true);
+    specialidx = rmnsufinfo->partwidth;
+    while (nextspecialrangeiterator(&range,sri))
+    {
+      for (idx = range.leftpos; idx < range.rightpos; idx++)
+      {
+        compressedtable_update(rmnsufinfo->inversesuftab,idx,specialidx);
+        specialidx++;
+      }
+    }
+    gt_assert(specialidx == rmnsufinfo->totallength);
+    freespecialrangeiterator(&sri);
+  }
+  compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->totallength,
+                         rmnsufinfo->totallength);
+}
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
@@ -96,7 +136,20 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.right = NULL;
   rmnsufinfo->firstwithnewdepth.maxwidth = 0;
   rmnsufinfo->currentdepth = 0;
+  INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  initinversesuftab(rmnsufinfo);
   return rmnsufinfo;
+}
+
+static void showintervalsizes(unsigned long count,unsigned long totalwidth,
+                              Seqpos totallength,unsigned long maxwidth)
+{
+  printf("%lu (total=%lu,avg=%.2f,%.2f%% of all, maxwidth=%lu)\n",
+          count,
+          totalwidth,
+          (double) totalwidth/count,
+          100.0 * (double) totalwidth/totallength,
+          maxwidth);
 }
 
 void processunsortedrange(Rmnsufinfo *rmnsufinfo,
@@ -116,15 +169,11 @@ void processunsortedrange(Rmnsufinfo *rmnsufinfo,
   {
     if (rmnsufinfo->firstwithnewdepth.left != NULL)
     {
-      printf("intervals in previous level=%lu (total=%lu,avg=%.2f,"
-             "%.2f%% of all, maxwidth=%lu)\n",
-              rmnsufinfo->firstwithnewdepth.count,
-              rmnsufinfo->firstwithnewdepth.totalwidth,
-              (double) rmnsufinfo->firstwithnewdepth.totalwidth/
-                       rmnsufinfo->firstwithnewdepth.count,
-              100.0 * (double) rmnsufinfo->firstwithnewdepth.totalwidth/
-                               rmnsufinfo->totallength,
-              rmnsufinfo->firstwithnewdepth.maxwidth);
+      printf("intervals in previous level=");
+      showintervalsizes(rmnsufinfo->firstwithnewdepth.count,
+                        rmnsufinfo->firstwithnewdepth.totalwidth,
+                        rmnsufinfo->totallength,
+                        rmnsufinfo->firstwithnewdepth.maxwidth);
     }
     printf("enter new level with depth=" FormatSeqpos "\n",
             PRINTSeqposcast(depth));
@@ -155,10 +204,36 @@ void processunsortedrange(Rmnsufinfo *rmnsufinfo,
   }
 }
 
+static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                               Seqpos *right,
+                               GT_UNUSED Seqpos *base)
+{
+  Seqpos *ptr, startindex;
+
+  startindex = (Seqpos) (left - rmnsufinfo->suftab);
+  for (ptr = left; ptr <= right; ptr++)
+  {
+    compressedtable_update(rmnsufinfo->inversesuftab,*ptr,startindex);
+  }
+}
+
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right, Seqpos depth)
 {
-  processunsortedrange(rmnsufinfo,left,right,left,depth);
+  Pairsuffixptr *ptr;
+
+  inversesuftabrange(rmnsufinfo,left,right,left);
+  GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
+  if (rmnsufinfo->currentdepth == 0)
+  {
+    rmnsufinfo->currentdepth = depth;
+  } else
+  {
+    gt_assert(rmnsufinfo->currentdepth == depth);
+  }
+  ptr->left = left;
+  ptr->right = right;
+  ptr->base = left;
 }
 
 static int compareitv(const void *a,const void *b)
@@ -175,19 +250,6 @@ static int compareitv(const void *a,const void *b)
     return 1;
   }
   return 0;
-}
-
-static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                               Seqpos *right,
-                               GT_UNUSED Seqpos *base)
-{
-  Seqpos *ptr, startindex;
-
-  startindex = (Seqpos) (left - rmnsufinfo->suftab);
-  for (ptr = left; ptr <= right; ptr++)
-  {
-    compressedtable_update(rmnsufinfo->inversesuftab,*ptr,startindex);
-  }
 }
 
 static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
@@ -259,58 +321,34 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
   }
 }
 
-static int putleftbound(void **elem,void *info, GT_UNUSED GtError *err)
-{
-  Pairsuffixptr *pairptr = *(Pairsuffixptr**) elem;
-
-  inversesuftabrange((Rmnsufinfo *) info,pairptr->left,pairptr->right,
-                     pairptr->base);
-  return 0;
-}
-
 static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 {
   Pairsuffixptr *pairptr;
-  Seqpos idx;
+  unsigned long totalwidth = 0, maxwidth = 0;
 
-  printf("countovermaxdepth=%lu\n",
-           gt_queue_size(rmnsufinfo->rangestobesorted));
-  rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength+1,
-                                                  rmnsufinfo->totallength);
-  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
+  for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
+       pairptr < rmnsufinfo->firstgeneration.spacePairsuffixptr +
+                 rmnsufinfo->firstgeneration.nextfreePairsuffixptr;
+       pairptr++)
   {
-    compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->suftab[idx],
-                           idx);
-  }
-  if (hasspecialranges(rmnsufinfo->encseq))
-  {
-    Specialrangeiterator *sri;
-    Sequencerange range;
-    Seqpos specialidx;
-
-    sri = newspecialrangeiterator(rmnsufinfo->encseq,
-                                  ISDIRREVERSE(rmnsufinfo->readmode)
-                                  ? false : true);
-    specialidx = rmnsufinfo->partwidth;
-    while (nextspecialrangeiterator(&range,sri))
+    unsigned long width = (unsigned long) (pairptr->right - pairptr->left + 1);
+    totalwidth += width;
+    if (maxwidth < width)
     {
-      for (idx = range.leftpos; idx < range.rightpos; idx++)
-      {
-        compressedtable_update(rmnsufinfo->inversesuftab,idx,specialidx);
-        specialidx++;
-      }
+      maxwidth = width;
     }
-    gt_assert(specialidx == rmnsufinfo->totallength);
-    freespecialrangeiterator(&sri);
+    sortitv(rmnsufinfo,
+            pairptr->left,
+            pairptr->right,
+            pairptr->base);
   }
-  compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->totallength,
-                         rmnsufinfo->totallength);
-  (void) gt_queue_iterate(rmnsufinfo->rangestobesorted,
-                          putleftbound,
-                          rmnsufinfo,
-                          NULL);
-  gt_assert(rmnsufinfo->currentqueuesize  ==
-            gt_queue_size(rmnsufinfo->rangestobesorted));
+  printf("number of intervals at base level " FormatSeqpos " is ",
+          PRINTSeqposcast(rmnsufinfo->currentdepth));
+  showintervalsizes(rmnsufinfo->firstgeneration.nextfreePairsuffixptr,
+                    totalwidth,
+                    rmnsufinfo->totallength,
+                    maxwidth);
+  FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
   {
     pairptr = gt_queue_get(rmnsufinfo->rangestobesorted);
@@ -323,6 +361,10 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     gt_free(pairptr);
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
+  gt_free(rmnsufinfo->itvinfo);
+  rmnsufinfo->itvinfo = NULL;
+  gt_queue_delete(rmnsufinfo->rangestobesorted);
+  rmnsufinfo->rangestobesorted = NULL;
 }
 
 Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
@@ -732,10 +774,6 @@ Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
     rmnsufinfo->inversesuftab = NULL;
     lcptab = NULL;
   }
-  gt_free(rmnsufinfo->itvinfo);
-  rmnsufinfo->itvinfo = NULL;
-  gt_queue_delete(rmnsufinfo->rangestobesorted);
-  rmnsufinfo->rangestobesorted = NULL;
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;
