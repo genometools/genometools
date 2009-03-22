@@ -1887,7 +1887,7 @@ void qsufsort(Suftab *suftab,
               unsigned int prefixlength,
               Outlcpinfo *outlcpinfo,
               GT_UNUSED const Sfxstrategy *sfxstrategy,
-              unsigned long long *bucketiterstep)
+              GT_UNUSED unsigned long long *bucketiterstep)
 {
   Codetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
@@ -1904,7 +1904,6 @@ void qsufsort(Suftab *suftab,
                              partwidth);
   for (code = mincode; code <= maxcode; code++)
   {
-    (*bucketiterstep)++;
     rightchar = calcbucketboundsparts(&bucketspec,
                                       bcktab,
                                       code,

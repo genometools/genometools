@@ -160,9 +160,8 @@ static void inclog2(unsigned long *log2bucketsizedist,const Seqpos *base,
     += howmany;
 }
 
-static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                               Seqpos *right,
-                               Seqpos *base)
+void adjustnewinterval(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                       Seqpos *right,Seqpos *base)
 {
   Seqpos *ptr, startindex;
 
@@ -175,13 +174,24 @@ static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
           (unsigned long) (right-left+1));
 }
 
+void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                           Seqpos *right,Seqpos idx)
+{
+  Seqpos *ptr;
+
+  for (ptr = left; ptr <= right; ptr++)
+  {
+    compressedtable_update(rmnsufinfo->inversesuftab,*ptr,idx++);
+  }
+}
+
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right, Seqpos depth)
 {
   Pairsuffixptr *ptr;
   unsigned long width;
 
-  inversesuftabrange(rmnsufinfo,left,right,left);
+  adjustnewinterval(rmnsufinfo,left,right,left);
   width = (unsigned long) (right - left + 1);
   rmnsufinfo->firstgenerationtotalwidth += width;
   if (rmnsufinfo->allocateditvinfo < width)
@@ -326,10 +336,10 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
                              left + idx - 1,
                              base,
                              MULT2(rmnsufinfo->currentdepth));
-        inversesuftabrange(rmnsufinfo,
-                           left + rangestart,
-                           left + idx - 1,
-                           base);
+        adjustnewinterval(rmnsufinfo,
+                          left + rangestart,
+                          left + idx - 1,
+                          base);
       } else
       {
         inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
@@ -346,10 +356,10 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
                          left + width - 1,
                          base,
                          MULT2(rmnsufinfo->currentdepth));
-    inversesuftabrange(rmnsufinfo,
-                       left + rangestart,
-                       left + width - 1,
-                       base);
+    adjustnewinterval(rmnsufinfo,
+                      left + rangestart,
+                      left + width - 1,
+                      base);
   } else
   {
     inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);

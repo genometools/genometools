@@ -34,6 +34,16 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
+void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                        Seqpos *right,Seqpos *base,
+                        bool leftadjust,Seqpos idx);
+
+void adjustnewinterval(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                       Seqpos *right,Seqpos *base);
+
+void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                           Seqpos *right,Seqpos idx);
+
 Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 
 #endif
