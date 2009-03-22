@@ -1281,7 +1281,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
 
 static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
                                    unsigned long *specialsmaxbucketsize,
-                                   unsigned long *bucketsizedist,
+                                   unsigned long *log2bucketsizedist,
                                    const Bcktab *bcktab,
                                    const Codetype mincode,
                                    const Codetype maxcode,
@@ -1313,8 +1313,8 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     }
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      bucketsizedist[determinebitspervalue(
-             (uint64_t) (bucketspec.nonspecialsinbucket-1))]++;
+      log2bucketsizedist[determinebitspervalue(
+                         (uint64_t) (bucketspec.nonspecialsinbucket-1))]++;
     }
   }
   printf("# maxbucket (specials)=%lu\n",*specialsmaxbucketsize);
@@ -1728,7 +1728,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   const Sfxstrategy *sfxstrategy)
 {
   unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize;
-  unsigned long bucketsizedist[64] = {0};
+  unsigned long log2bucketsizedist[MAXLOG2VALUE+1] = {0};
   int maxbits;
 
   bsr->readmode = readmode;
@@ -1760,17 +1760,18 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   determinemaxbucketsize(&nonspecialsmaxbucketsize,
                          &specialsmaxbucketsize,
-                         bucketsizedist,
+                         log2bucketsizedist,
                          bcktab,
                          mincode,
                          maxcode,
                          partwidth,
                          numofchars);
-  for (maxbits = 0; maxbits < 64; maxbits++)
+  for (maxbits = 0; maxbits <= MAXLOG2VALUE; maxbits++)
   {
-    if (bucketsizedist[maxbits] > 0)
+    if (log2bucketsizedist[maxbits] > 0)
     {
-      printf("bucketsizedist[%d]=%lu\n",maxbits,bucketsizedist[maxbits]);
+      printf("log2bucketsizedist[%d]=%lu\n",maxbits,
+                                            log2bucketsizedist[maxbits]);
     }
   }
   if (outlcpinfo != NULL && outlcpinfo->assideeffect)
@@ -1817,8 +1818,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                     bsr->encseq,
                                     bcktab,
                                     bsr->readmode,
-                                    bsr->partwidth,
-                                    nonspecialsmaxbucketsize);
+                                    bsr->partwidth);
     bsr->trierep = NULL;
   } else
   {
@@ -1874,6 +1874,65 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
     freeEncodedsequencescanstate(&bsr->esr2);
   }
   FREEARRAY(&bsr->mkvauxstack,MKVstack);
+}
+
+void qsufsort(Suftab *suftab,
+              const Encodedsequence *encseq,
+              Readmode readmode,
+              Codetype mincode,
+              Codetype maxcode,
+              Seqpos partwidth,
+              const Bcktab *bcktab,
+              unsigned int numofchars,
+              unsigned int prefixlength,
+              Outlcpinfo *outlcpinfo,
+              GT_UNUSED const Sfxstrategy *sfxstrategy,
+              unsigned long long *bucketiterstep)
+{
+  Codetype code;
+  unsigned int rightchar = (unsigned int) (mincode % numofchars);
+  Bucketspecification bucketspec;
+  Rmnsufinfo *rmnsufinfo;
+  Compressedtable *lcptab;
+
+  gt_assert(suftab->offset == 0);
+  gt_assert(mincode == 0);
+  rmnsufinfo = newRmnsufinfo(suftab->sortspace,
+                             encseq,
+                             bcktab,
+                             readmode,
+                             partwidth);
+  for (code = mincode; code <= maxcode; code++)
+  {
+    (*bucketiterstep)++;
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      addunsortedrange(rmnsufinfo,
+                       suftab->sortspace + bucketspec.left,
+                       suftab->sortspace + bucketspec.left +
+                       bucketspec.nonspecialsinbucket - 1,
+                       (Seqpos) prefixlength);
+    }
+  }
+  lcptab = wrapRmnsufinfo(&rmnsufinfo,outlcpinfo == NULL ? false : true);
+  if (lcptab != NULL)
+  {
+    gt_assert(outlcpinfo != NULL);
+    gt_assert(outlcpinfo->outfplcptab != NULL);
+    gt_assert(outlcpinfo->outfpllvtab != NULL);
+
+    multioutlcpvalues(&outlcpinfo->lcpsubtab,getencseqtotallength(encseq),
+                      lcptab,(unsigned long) partwidth,
+                      outlcpinfo->outfplcptab,outlcpinfo->outfpllvtab);
+    compressedtable_free(lcptab,true);
+  }
 }
 
 void sortallbuckets(Suftab *suftab,

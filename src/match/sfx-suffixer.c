@@ -689,18 +689,21 @@ static void preparethispart(Sfxiterator *sfi,
     deliverthetime(stdout,mtime,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  sortallbuckets(&sfi->suftab,
-                 sfi->encseq,
-                 sfi->readmode,
-                 sfi->currentmincode,
-                 sfi->currentmaxcode,
-                 partwidth,
-                 sfi->bcktab,
-                 sfi->numofchars,
-                 sfi->prefixlength,
-                 sfi->outlcpinfo,
-                 &sfi->sfxstrategy,
-                 &sfi->bucketiterstep);
+  ((sfi->sfxstrategy.ssortmaxdepth.defined &&
+     sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
+     ? qsufsort
+     : sortallbuckets) (&sfi->suftab,
+                        sfi->encseq,
+                        sfi->readmode,
+                        sfi->currentmincode,
+                        sfi->currentmaxcode,
+                        partwidth,
+                        sfi->bcktab,
+                        sfi->numofchars,
+                        sfi->prefixlength,
+                        sfi->outlcpinfo,
+                        &sfi->sfxstrategy,
+                        &sfi->bucketiterstep);
   sfi->part++;
 }
 

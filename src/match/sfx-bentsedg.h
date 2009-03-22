@@ -48,6 +48,19 @@ Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
+void qsufsort(Suftab *suftab,
+              const Encodedsequence *encseq,
+              Readmode readmode,
+              Codetype mincode,
+              Codetype maxcode,
+              Seqpos partwidth,
+              const Bcktab *bcktab,
+              unsigned int numofchars,
+              unsigned int prefixlength,
+              Outlcpinfo *outlcpinfo,
+              const Sfxstrategy *sfxstrategy,
+              unsigned long long *bucketiterstep);
+
 void sortallbuckets(Suftab *suftab,
                     const Encodedsequence *encseq,
                     Readmode readmode,

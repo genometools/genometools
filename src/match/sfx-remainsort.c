@@ -76,6 +76,8 @@ struct Rmnsufinfo
   ArrayPairsuffixptr firstgeneration;
   unsigned long firstgenerationtotalwidth;
   Firstwithnewdepth firstwithnewdepth;
+  Pairsuffixptrwithbase *unusedpair;
+  unsigned long log2bucketsizedist[MAXLOG2VALUE+1];
 };
 
 static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
@@ -118,8 +120,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
-                          Seqpos partwidth,
-                          unsigned long nonspecialsmaxbucketsize)
+                          Seqpos partwidth)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -130,9 +131,6 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->totallength = getencseqtotallength(encseq);
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;
-  rmnsufinfo->allocateditvinfo = nonspecialsmaxbucketsize;
-  rmnsufinfo->itvinfo
-    = gt_malloc(sizeof(Itventry) * rmnsufinfo->allocateditvinfo);
   rmnsufinfo->bcktab = bcktab;
   rmnsufinfo->currentqueuesize = 0;
   rmnsufinfo->maxqueuesize = 0;
@@ -145,13 +143,26 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->currentdepth = 0;
   INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->firstgenerationtotalwidth = 0;
+  rmnsufinfo->unusedpair = NULL;
   initinversesuftab(rmnsufinfo);
+  memset(rmnsufinfo->log2bucketsizedist,0,
+         sizeof (*rmnsufinfo->log2bucketsizedist) * (MAXLOG2VALUE+1));
+  rmnsufinfo->allocateditvinfo = 0;
+  rmnsufinfo->itvinfo = NULL;
   return rmnsufinfo;
+}
+
+static void inclog2(unsigned long *log2bucketsizedist,const Seqpos *base,
+                    const Seqpos *ptr,unsigned long howmany)
+{
+  gt_assert(base <= ptr);
+  log2bucketsizedist[determinebitspervalue((uint64_t) (ptr - base))]
+    += howmany;
 }
 
 static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                                Seqpos *right,
-                               GT_UNUSED Seqpos *base)
+                               Seqpos *base)
 {
   Seqpos *ptr, startindex;
 
@@ -160,15 +171,23 @@ static void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
   {
     compressedtable_update(rmnsufinfo->inversesuftab,*ptr,startindex);
   }
+  inclog2(rmnsufinfo->log2bucketsizedist,base,left,
+          (unsigned long) (right-left+1));
 }
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right, Seqpos depth)
 {
   Pairsuffixptr *ptr;
+  unsigned long width;
 
   inversesuftabrange(rmnsufinfo,left,right,left);
-  rmnsufinfo->firstgenerationtotalwidth += (unsigned long) (right - left + 1);
+  width = (unsigned long) (right - left + 1);
+  rmnsufinfo->firstgenerationtotalwidth += width;
+  if (rmnsufinfo->allocateditvinfo < width)
+  {
+    rmnsufinfo->allocateditvinfo = width;
+  }
   if (rmnsufinfo->currentdepth == 0)
   {
     rmnsufinfo->currentdepth = depth;
@@ -233,7 +252,14 @@ void processunsortedrange(Rmnsufinfo *rmnsufinfo,
       rmnsufinfo->firstwithnewdepth.maxwidth = width;
     }
   }
-  pairptrwithbase = gt_malloc(sizeof(Pairsuffixptrwithbase));
+  if (rmnsufinfo->unusedpair == NULL)
+  {
+    pairptrwithbase = gt_malloc(sizeof(Pairsuffixptrwithbase));
+  } else
+  {
+    pairptrwithbase = rmnsufinfo->unusedpair;
+    rmnsufinfo->unusedpair = NULL;
+  }
   pairptrwithbase->left = left;
   pairptrwithbase->right = right;
   pairptrwithbase->base = base;
@@ -306,6 +332,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
                            base);
       } else
       {
+        inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
         compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
                                startindex+rangestart);
       }
@@ -325,6 +352,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
                        base);
   } else
   {
+    inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
     compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
                            startindex+rangestart);
   }
@@ -334,7 +362,6 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
 {
   Pairsuffixptr *pairptr;
   Pairsuffixptrwithbase *pairptrwithbase;
-  unsigned long totalwidth = 0, maxwidth = 0;
 
   printf("number of intervals at base level " FormatSeqpos " is ",
           PRINTSeqposcast(rmnsufinfo->currentdepth));
@@ -342,17 +369,13 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
                     rmnsufinfo->firstgenerationtotalwidth,
                     rmnsufinfo->totallength,
                     rmnsufinfo->allocateditvinfo);
+  rmnsufinfo->itvinfo = gt_malloc(sizeof(Itventry) *
+                                  rmnsufinfo->allocateditvinfo);
   for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
        pairptr < rmnsufinfo->firstgeneration.spacePairsuffixptr +
                  rmnsufinfo->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    unsigned long width = (unsigned long) (pairptr->right - pairptr->left + 1);
-    totalwidth += width;
-    if (maxwidth < width)
-    {
-      maxwidth = width;
-    }
     sortitv(rmnsufinfo,
             pairptr->left,
             pairptr->right,
@@ -368,9 +391,16 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
             pairptrwithbase->left,
             pairptrwithbase->right,
             pairptrwithbase->base);
-    gt_free(pairptrwithbase);
+    if (rmnsufinfo->unusedpair == NULL)
+    {
+      rmnsufinfo->unusedpair = pairptrwithbase;
+    } else
+    {
+      gt_free(pairptrwithbase);
+    }
   }
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
+  gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
   rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
@@ -765,8 +795,18 @@ Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;
+  int maxbits;
 
   sortremainingsuffixes(rmnsufinfo);
+  for (maxbits = 0; maxbits <= MAXLOG2VALUE; maxbits++)
+  {
+    if (rmnsufinfo->log2bucketsizedist[maxbits] > 0)
+    {
+      printf("log2bucketsizedist[%d]=%lu\n",
+                     maxbits,
+                     rmnsufinfo->log2bucketsizedist[maxbits]);
+    }
+  }
   if (withlcptab)
   {
 #ifdef NOINVERSESUFTAB

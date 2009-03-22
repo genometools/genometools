@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <inttypes.h>
 #include "core/assert_api.h"
 #include "core/mathsupport.h"
@@ -95,12 +96,18 @@ char gt_rand_char(void)
 unsigned int determinebitspervalue(uint64_t maxvalue)
 {
   unsigned int bits = 0;
+  uint64_t value;
 
-  while (maxvalue > 0)
+  for (value = maxvalue; value > 0; value >>= 1)
   {
-    maxvalue >>= 1;
     bits++;
   }
+  if (bits > MAXLOG2VALUE)
+  {
+    fprintf(stderr,"log2(" "%" PRIu64 ")=%u\n",maxvalue,bits);
+    exit(EXIT_FAILURE);
+  }
+  gt_assert(bits <= MAXLOG2VALUE);
   return bits;
 }
 
