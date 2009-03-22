@@ -28,6 +28,7 @@
 #include "sfx-remainsort.h"
 #include "bcktab.h"
 #include "compressedtab.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -161,17 +162,33 @@ static void inclog2(unsigned long *log2bucketsizedist,const Seqpos *base,
 }
 
 void adjustnewinterval(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                       Seqpos *right,Seqpos *base)
+                       Seqpos *right,Seqpos *base,Seqpos depth)
 {
   Seqpos *ptr, startindex;
+  unsigned long width;
 
   startindex = (Seqpos) (left - rmnsufinfo->suftab);
   for (ptr = left; ptr <= right; ptr++)
   {
     compressedtable_update(rmnsufinfo->inversesuftab,*ptr,startindex);
   }
-  inclog2(rmnsufinfo->log2bucketsizedist,base,left,
-          (unsigned long) (right-left+1));
+  width = (unsigned long) (right - left + 1);
+  inclog2(rmnsufinfo->log2bucketsizedist,base,left,width);
+  if (depth != 0)
+  {
+    rmnsufinfo->firstgenerationtotalwidth += width;
+    if (rmnsufinfo->allocateditvinfo < width)
+    {
+      rmnsufinfo->allocateditvinfo = width;
+    }
+    if (rmnsufinfo->currentdepth == 0)
+    {
+      rmnsufinfo->currentdepth = depth;
+    } else
+    {
+      gt_assert(rmnsufinfo->currentdepth == depth);
+    }
+  }
 }
 
 void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
@@ -189,22 +206,8 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right, Seqpos depth)
 {
   Pairsuffixptr *ptr;
-  unsigned long width;
 
-  adjustnewinterval(rmnsufinfo,left,right,left);
-  width = (unsigned long) (right - left + 1);
-  rmnsufinfo->firstgenerationtotalwidth += width;
-  if (rmnsufinfo->allocateditvinfo < width)
-  {
-    rmnsufinfo->allocateditvinfo = width;
-  }
-  if (rmnsufinfo->currentdepth == 0)
-  {
-    rmnsufinfo->currentdepth = depth;
-  } else
-  {
-    gt_assert(rmnsufinfo->currentdepth == depth);
-  }
+  adjustnewinterval(rmnsufinfo,left,right,left,depth);
   GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
   ptr->left = left;
   ptr->right = right;
@@ -297,19 +300,22 @@ static int compareitv(const void *a,const void *b)
   return 0;
 }
 
-static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
-                    Seqpos *base)
+void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                             Seqpos *right,Seqpos *base)
 {
   Seqpos startindex;
   unsigned long idx, rangestart;
   const unsigned long width = (unsigned long) (right - left + 1);
 
+  STAMP;
   if (rmnsufinfo->firstwithnewdepth.left == left &&
       rmnsufinfo->firstwithnewdepth.right == right)
   {
     rmnsufinfo->currentdepth = rmnsufinfo->firstwithnewdepth.depth;
   }
   gt_assert(rmnsufinfo->allocateditvinfo >= width);
+  printf("width=%lu\n",width);
+  STAMP;
   for (idx=0; idx<width; idx++)
   {
     rmnsufinfo->itvinfo[idx].suffixstart = left[idx];
@@ -318,13 +324,16 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
       = compressedtable_get(rmnsufinfo->inversesuftab,
                             left[idx]+rmnsufinfo->currentdepth);
   }
+  STAMP;
   qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
   for (idx=0; idx<width; idx++)
   {
     left[idx] = rmnsufinfo->itvinfo[idx].suffixstart;
   }
+  STAMP;
   rangestart = 0;
   startindex = (Seqpos) (left - rmnsufinfo->suftab);
+  STAMP;
   for (idx=1UL; idx<width; idx++)
   {
     if (rmnsufinfo->itvinfo[idx-1].key != rmnsufinfo->itvinfo[idx].key)
@@ -339,7 +348,8 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
         adjustnewinterval(rmnsufinfo,
                           left + rangestart,
                           left + idx - 1,
-                          base);
+                          base,
+                          0);
       } else
       {
         inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
@@ -349,6 +359,7 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
       rangestart = idx;
     }
   }
+  STAMP;
   if (rangestart + 1 < width)
   {
     processunsortedrange(rmnsufinfo,
@@ -359,13 +370,15 @@ static void sortitv(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right,
     adjustnewinterval(rmnsufinfo,
                       left + rangestart,
                       left + width - 1,
-                      base);
+                      base,
+                      0);
   } else
   {
     inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
     compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
                            startindex+rangestart);
   }
+  STAMP;
 }
 
 static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
@@ -386,10 +399,10 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
                  rmnsufinfo->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    sortitv(rmnsufinfo,
-            pairptr->left,
-            pairptr->right,
-            pairptr->left);
+    sortsuffixesonthislevel(rmnsufinfo,
+                            pairptr->left,
+                            pairptr->right,
+                            pairptr->left);
   }
   FREEARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   while (gt_queue_size(rmnsufinfo->rangestobesorted) > 0)
@@ -397,10 +410,10 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
     pairptrwithbase = gt_queue_get(rmnsufinfo->rangestobesorted);
     gt_assert(rmnsufinfo->currentqueuesize > 0);
     rmnsufinfo->currentqueuesize--;
-    sortitv(rmnsufinfo,
-            pairptrwithbase->left,
-            pairptrwithbase->right,
-            pairptrwithbase->base);
+    sortsuffixesonthislevel(rmnsufinfo,
+                            pairptrwithbase->left,
+                            pairptrwithbase->right,
+                            pairptrwithbase->base);
     if (rmnsufinfo->unusedpair == NULL)
     {
       rmnsufinfo->unusedpair = pairptrwithbase;

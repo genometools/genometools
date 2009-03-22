@@ -37,6 +37,7 @@
 #include "lcpoverflow.h"
 #include "opensfxfile.h"
 #include "sfx-remainsort.h"
+#include "stamp.h"
 
 #include "sfx-cmpsuf.pr"
 #include "kmer2string.pr"
@@ -1890,7 +1891,7 @@ void qsufsort(Suftab *suftab,
               GT_UNUSED unsigned long long *bucketiterstep)
 {
   Codetype code;
-  unsigned int rightchar = (unsigned int) (mincode % numofchars);
+  unsigned int rightchar;
   Bucketspecification bucketspec;
   Rmnsufinfo *rmnsufinfo;
   Compressedtable *lcptab;
@@ -1902,6 +1903,8 @@ void qsufsort(Suftab *suftab,
                              bcktab,
                              readmode,
                              partwidth);
+  rightchar = (unsigned int) (mincode % numofchars);
+  STAMP;
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -1913,13 +1916,35 @@ void qsufsort(Suftab *suftab,
                                       numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      addunsortedrange(rmnsufinfo,
+      adjustnewinterval(rmnsufinfo,
                        suftab->sortspace + bucketspec.left,
                        suftab->sortspace + bucketspec.left +
                        bucketspec.nonspecialsinbucket - 1,
+                       suftab->sortspace + bucketspec.left,
                        (Seqpos) prefixlength);
     }
   }
+  STAMP;
+  rightchar = (unsigned int) (mincode % numofchars);
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      sortsuffixesonthislevel(rmnsufinfo,
+                              suftab->sortspace + bucketspec.left,
+                              suftab->sortspace + bucketspec.left +
+                              bucketspec.nonspecialsinbucket - 1,
+                              suftab->sortspace + bucketspec.left);
+    }
+  }
+  STAMP;
   lcptab = wrapRmnsufinfo(&rmnsufinfo,outlcpinfo == NULL ? false : true);
   if (lcptab != NULL)
   {

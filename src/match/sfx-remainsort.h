@@ -39,10 +39,13 @@ void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                         bool leftadjust,Seqpos idx);
 
 void adjustnewinterval(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                       Seqpos *right,Seqpos *base);
+                       Seqpos *right,Seqpos *base,Seqpos depth);
 
 void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                            Seqpos *right,Seqpos idx);
+
+void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                             Seqpos *right,Seqpos *base);
 
 Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 
