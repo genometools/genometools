@@ -77,7 +77,7 @@ GtSequenceBuffer* gt_sequence_buffer_new_guess_type(GtStrArray *seqs,
   file = gt_genfile_xopen(gt_str_array_get(seqs, 0), "rb");
   gt_genfile_xread(file, &firstcontents, BUFSIZ);
   gt_genfile_close(file);
-  
+
   if (gt_sequence_buffer_embl_guess(firstcontents)) {
     sb = gt_sequence_buffer_embl_new(seqs);
   } else if (gt_sequence_buffer_fasta_guess(firstcontents)) {
@@ -181,7 +181,7 @@ int gt_sequence_buffer_unit_test(GtError *err)
   sb = gt_sequence_buffer_new_guess_type(testfiles, err);
   ensure(had_err, sb != NULL);
 
-  gt_sequence_buffer_delete(sb);  
+  gt_sequence_buffer_delete(sb);
   for (i=0;i<gt_str_array_size(testfiles);i++) {
     const char *fn;
     fn = gt_str_array_get(testfiles, i);
