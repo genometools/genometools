@@ -396,6 +396,7 @@ typedef struct
   Rmnsufinfo *rmnsufinfo;
   unsigned long leftlcpdist[UNITSIN2BITENC],
                 rightlcpdist[UNITSIN2BITENC];
+  DefinedSeqpos *longest;
 #ifdef WIDTHDISTRIB
   unsigned long *widthdistrib;
 #endif
@@ -1718,6 +1719,7 @@ Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 
 static void initBentsedgresources(Bentsedgresources *bsr,
                                   Seqpos *suftabptr,
+                                  DefinedSeqpos *longest,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   Codetype mincode,
@@ -1736,6 +1738,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->totallength = getencseqtotallength(encseq);
   bsr->sfxstrategy = sfxstrategy;
   bsr->encseq = encseq;
+  bsr->longest = longest;
   bsr->fwd = ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   bsr->partwidth = partwidth;
@@ -1857,8 +1860,11 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   {
     Compressedtable *lcptab;
 
-    lcptab = wrapRmnsufinfo(&bsr->rmnsufinfo,
+    lcptab = wrapRmnsufinfo(&bsr->longest->valueseqpos,
+                            &bsr->rmnsufinfo,
                             bsr->lcpsubtab == NULL ? false : true);
+    STAMP;
+    bsr->longest->defined = true;
     if (lcptab != NULL)
     {
       multioutlcpvalues(lcpsubtab,bsr->totallength,
@@ -1917,6 +1923,7 @@ void qsufsort(Suftab *suftab,
                                       numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
+      /* XXX merge this with the initialization */
       adjustpresortedinterval(rmnsufinfo,
                               suftab->sortspace + bucketspec.left,
                               suftab->sortspace + bucketspec.left +
@@ -1943,7 +1950,10 @@ void qsufsort(Suftab *suftab,
                               suftab->sortspace + bucketspec.left);
     }
   }
-  lcptab = wrapRmnsufinfo(&rmnsufinfo,outlcpinfo == NULL ? false : true);
+  lcptab = wrapRmnsufinfo(&suftab->longest.valueseqpos,&rmnsufinfo,
+                          outlcpinfo == NULL ? false : true);
+  suftab->longest.defined = true;
+  STAMP;
   if (lcptab != NULL)
   {
     gt_assert(outlcpinfo != NULL);
@@ -1982,6 +1992,7 @@ void sortallbuckets(Suftab *suftab,
 
   initBentsedgresources(&bsr,
                         suftabptr,
+                        &suftab->longest,
                         encseq,
                         readmode,
                         mincode,

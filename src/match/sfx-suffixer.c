@@ -419,31 +419,35 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
   }
 }
 
-void freeSfxiterator(Sfxiterator **sfi)
+void freeSfxiterator(Sfxiterator **sfiptr)
 {
+  Sfxiterator *sfi = (Sfxiterator *) *sfiptr;
 #ifdef SKDEBUG
-  if ((*sfi)->bcktab != NULL)
+  if (sfi->bcktab != NULL)
   {
-    checkcountspecialcodes((*sfi)->bcktab);
+    checkcountspecialcodes(sfi->bcktab);
   }
 #endif
-  if ((*sfi)->bcktab != NULL)
+  if (sfi->bcktab != NULL)
   {
-    addfinalbckspecials((*sfi)->bcktab,(*sfi)->numofchars,
-                        (*sfi)->specialcharacters);
+    addfinalbckspecials(sfi->bcktab,sfi->numofchars,sfi->specialcharacters);
   }
-  if ((*sfi)->sri != NULL)
+  if (sfi->sri != NULL)
   {
-    freespecialrangeiterator(&(*sfi)->sri);
+    freespecialrangeiterator(&sfi->sri);
   }
-  FREESPACE((*sfi)->spaceCodeatposition);
-  FREESPACE((*sfi)->suftab.sortspace);
-  freesuftabparts((*sfi)->suftabparts);
-  if ((*sfi)->bcktab != NULL)
+  FREESPACE(sfi->spaceCodeatposition);
+  FREESPACE(sfi->suftab.sortspace);
+  freesuftabparts(sfi->suftabparts);
+  if (sfi->bcktab != NULL)
   {
-    freebcktab(&(*sfi)->bcktab);
+    freebcktab(&sfi->bcktab);
   }
-  FREESPACE(*sfi);
+  if (sfi->suftab.longest.defined)
+  {
+    printf("longest = %lu\n",(unsigned long) sfi->suftab.longest.valueseqpos);
+  }
+  FREESPACE(*sfiptr);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
@@ -647,6 +651,16 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     return NULL;
   }
   return sfi;
+}
+
+bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi)
+{
+  if (sfi->suftab.longest.defined)
+  {
+    *longest = sfi->suftab.longest.valueseqpos;
+    return true;
+  }
+  return false;
 }
 
 static void preparethispart(Sfxiterator *sfi,

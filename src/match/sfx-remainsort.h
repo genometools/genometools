@@ -48,6 +48,7 @@ void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
 void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                              Seqpos *right,Seqpos *base);
 
-Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
+Compressedtable *wrapRmnsufinfo(Seqpos *longest,
+                                Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 
 #endif

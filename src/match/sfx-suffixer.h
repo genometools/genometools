@@ -27,7 +27,7 @@
 
 typedef struct Sfxiterator Sfxiterator;
 
-void freeSfxiterator(Sfxiterator **sfi);
+void freeSfxiterator(Sfxiterator **sfiptr);
 
 Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
                             Readmode readmode,
@@ -43,6 +43,8 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               bool *specialsuffixes,
                               Measuretime *mtime,
                               Sfxiterator *sfi);
+
+bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi);
 
 int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
 

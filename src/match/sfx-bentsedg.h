@@ -33,6 +33,7 @@ typedef struct
 {
   Seqpos *sortspace,
          offset; /* negative offset */
+  DefinedSeqpos longest;
 } Suftab;
 
 Outlcpinfo *newOutlcpinfo(const GtStr *indexname,

@@ -138,26 +138,29 @@ static int suftab2file(Outfileinfo *outfileinfo,
       haserr = true;
     }
   }
-  if (!haserr)
+  printf("longest.defined = %s\n",
+         outfileinfo->longest.defined ? "true" : "false");
+  if (!haserr &&
+      (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
   {
     Seqpos startpos, pos;
     Uchar cc = 0;
 
+    STAMP;
     for (pos=0; pos < numberofsuffixes; pos++)
     {
       startpos = suftab[pos];
       if (startpos == 0)
       {
         cc = (Uchar) UNDEFBWTCHAR;
-        if (outfileinfo->longest.defined)
+        if (!outfileinfo->longest.defined)
         {
-          gt_error_set(err,"longest = " FormatSeqpos " is already defined",
-                             PRINTSeqposcast(outfileinfo->longest.valueseqpos));
-          haserr = true;
-          break;
+          STAMP;
+          outfileinfo->longest.defined = true;
+          outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
+          printf("set longest = %lu\n",(unsigned long) 
+                     outfileinfo->longest.valueseqpos);
         }
-        outfileinfo->longest.defined = true;
-        outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
       } else
       {
         if (outfileinfo->outfpbwttab != NULL)
@@ -217,11 +220,21 @@ static int suffixeratorwithoutput(
   {
     while (true)
     {
+      Seqpos longest;
+
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
                                   mtime,sfi);
       if (suftabptr == NULL)
       {
         break;
+      }
+      if (numofparts == 1U && sfi2longestsuffixpos(&longest,sfi))
+      {
+        outfileinfo->longest.defined = true;
+        outfileinfo->longest.valueseqpos = longest;
+        printf("set longest = %lu\n",(unsigned long) 
+                     outfileinfo->longest.valueseqpos);
+
       }
       if (suftab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
       {

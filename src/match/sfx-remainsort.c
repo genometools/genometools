@@ -75,7 +75,8 @@ struct Rmnsufinfo
                 maxqueuesize;
   Itventry *itvinfo;
   ArrayPairsuffixptr firstgeneration;
-  unsigned long firstgenerationtotalwidth;
+  unsigned long firstgenerationtotalwidth,
+                firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
   Pairsuffixptrwithbase *unusedpair;
   unsigned long log2bucketsizedist[MAXLOG2VALUE+1];
@@ -145,6 +146,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->currentdepth = 0;
   INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->firstgenerationtotalwidth = 0;
+  rmnsufinfo->firstgenerationcount = 0;
   rmnsufinfo->unusedpair = NULL;
   if (startatprefixlen)
   {
@@ -184,20 +186,18 @@ static void updatewidth (Rmnsufinfo *rmnsufinfo,Seqpos *left,
   unsigned long width = (unsigned long) (right - left + 1);
 
   inclog2(rmnsufinfo->log2bucketsizedist,base,left,width);
-  if (depth != 0)
+  rmnsufinfo->firstgenerationtotalwidth += width;
+  rmnsufinfo->firstgenerationcount++;
+  if (rmnsufinfo->allocateditvinfo < width)
   {
-    rmnsufinfo->firstgenerationtotalwidth += width;
-    if (rmnsufinfo->allocateditvinfo < width)
-    {
-      rmnsufinfo->allocateditvinfo = width;
-    }
-    if (rmnsufinfo->currentdepth == 0)
-    {
-      rmnsufinfo->currentdepth = depth;
-    } else
-    {
-      gt_assert(rmnsufinfo->currentdepth == depth);
-    }
+    rmnsufinfo->allocateditvinfo = width;
+  }
+  if (rmnsufinfo->currentdepth == 0)
+  {
+    rmnsufinfo->currentdepth = depth;
+  } else
+  {
+    gt_assert(rmnsufinfo->currentdepth == depth);
   }
 }
 
@@ -396,11 +396,11 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   Pairsuffixptr *pairptr;
   Pairsuffixptrwithbase *pairptrwithbase;
 
-  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr > 0)
+  if (rmnsufinfo->firstgenerationcount > 0)
   {
-    printf("number of intervals at base level " FormatSeqpos " is ",
+    printf("number of intervals at base level " FormatSeqpos " was ",
             PRINTSeqposcast(rmnsufinfo->currentdepth));
-    showintervalsizes(rmnsufinfo->firstgeneration.nextfreePairsuffixptr,
+    showintervalsizes(rmnsufinfo->firstgenerationcount,
                       rmnsufinfo->firstgenerationtotalwidth,
                       rmnsufinfo->totallength,
                       rmnsufinfo->allocateditvinfo);
@@ -832,13 +832,15 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
   return lcptab;
 }
 
-Compressedtable *wrapRmnsufinfo(Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
+Compressedtable *wrapRmnsufinfo(Seqpos *longest,
+                                Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
   Compressedtable *lcptab;
   int maxbits;
 
   sortremainingsuffixes(rmnsufinfo);
+  *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
   for (maxbits = 0; maxbits <= MAXLOG2VALUE; maxbits++)
   {
     if (rmnsufinfo->log2bucketsizedist[maxbits] > 0)
