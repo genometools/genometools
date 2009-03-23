@@ -1901,59 +1901,20 @@ void qsufsort(Suftab *suftab,
               GT_UNUSED unsigned long long *bucketiterstep,
               GT_UNUSED Verboseinfo *verboseinfo)
 {
-  Codetype code;
-  unsigned int rightchar;
-  Bucketspecification bucketspec;
   Rmnsufinfo *rmnsufinfo;
   Compressedtable *lcptab;
 
   gt_assert(suftab->offset == 0);
   gt_assert(mincode == 0);
-  rmnsufinfo = newRmnsufinfo(suftab->sortspace,
-                             encseq,
-                             bcktab,
-                             readmode,
-                             partwidth,
-                             true);
-  rightchar = (unsigned int) (mincode % numofchars);
-  for (code = mincode; code <= maxcode; code++)
-  {
-    rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      /* XXX merge this with the initialization */
-      adjustpresortedinterval(rmnsufinfo,
-                              suftab->sortspace + bucketspec.left,
-                              suftab->sortspace + bucketspec.left +
-                              bucketspec.nonspecialsinbucket - 1,
-                              (Seqpos) prefixlength);
-    }
-  }
-  rightchar = (unsigned int) (mincode % numofchars);
-  for (code = mincode; code <= maxcode; code++)
-  {
-    rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      sortsuffixesonthislevel(rmnsufinfo,
-                              suftab->sortspace + bucketspec.left,
-                              suftab->sortspace + bucketspec.left +
-                              bucketspec.nonspecialsinbucket - 1,
-                              suftab->sortspace + bucketspec.left);
-    }
-  }
+  rmnsufinfo = bcktab2firstlevelintervals(suftab->sortspace,
+                                          encseq,
+                                          readmode,
+                                          mincode,
+                                          maxcode,
+                                          partwidth,
+                                          bcktab,
+                                          numofchars,
+                                          prefixlength);
   lcptab = wrapRmnsufinfo(&suftab->longest.valueseqpos,&rmnsufinfo,
                           outlcpinfo == NULL ? false : true);
   suftab->longest.defined = true;

@@ -18,9 +18,10 @@
 #ifndef SFX_REMAINSORT_H
 #define SFX_REMAINSORT_H
 
-#include "core/error_api.h"
 #include "seqpos-def.h"
+#include "readmode-def.h"
 #include "bcktab.h"
+#include "intcode-def.h"
 #include "compressedtab.h"
 
 typedef struct Rmnsufinfo Rmnsufinfo;
@@ -35,18 +36,15 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                        Seqpos *right,Seqpos *base,
-                        bool leftadjust,Seqpos idx);
-
-void adjustpresortedinterval(Rmnsufinfo *rmnsufinfo,
-                             Seqpos *left,Seqpos *right, Seqpos depth);
-
-void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                           Seqpos *right,Seqpos idx);
-
-void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                             Seqpos *right,Seqpos *base);
+Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
+                                       const Encodedsequence *encseq,
+                                       Readmode readmode,
+                                       Codetype mincode,
+                                       Codetype maxcode,
+                                       Seqpos partwidth,
+                                       const Bcktab *bcktab,
+                                       unsigned int numofchars,
+                                       unsigned int prefixlength);
 
 Compressedtable *wrapRmnsufinfo(Seqpos *longest,
                                 Rmnsufinfo **rmnsufinfoptr,bool withlcptab);

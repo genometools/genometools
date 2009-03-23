@@ -3,16 +3,18 @@ set -e -x
 
 if test $# -eq 0
 then
-  filenames=`find testdata/ -name '*.fna'`
+  filenames="`find testdata/ -name '*.fna'` testdata/at1MB"
 else
   if test $1 == 'valgrind'
   then
-    VALGRIND=valgrind.sh
+    RUNNER=valgrind.sh
     shift
+  else
+    RUNNER=time
   fi
   if test $# -eq 0
   then
-    filenames=`find testdata/ -name '*.fna'`
+    filenames="`find testdata/ -name '*.fna'` testdata/at1MB"
   else
     filenames=$*
   fi
@@ -20,8 +22,7 @@ fi
 
 suffixerator()
 {
-  out="-v -lcp -tis -suf -des -ssp"
-  ${VALGRIND} gt suffixerator -v -lcp -tis -suf -des -ssp -db ${filename} $*
+  ${RUNNER} gt suffixerator -lcp -tis -suf -des -ssp -db ${filename} $*
 }
 
 sfxmap()
@@ -41,3 +42,4 @@ do
   sfxmap sfx-idx${maxdepth}
   rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done
+echo "${filenames}"

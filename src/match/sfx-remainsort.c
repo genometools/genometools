@@ -201,8 +201,9 @@ static void updatewidth (Rmnsufinfo *rmnsufinfo,Seqpos *left,
   }
 }
 
-void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                           Seqpos *right,Seqpos idx)
+/*
+static void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                                  Seqpos *right,Seqpos idx)
 {
   Seqpos *ptr;
 
@@ -211,6 +212,7 @@ void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
     compressedtable_update(rmnsufinfo->inversesuftab,*ptr,idx++);
   }
 }
+*/
 
 static void showintervalsizes(unsigned long count,unsigned long totalwidth,
                               Seqpos totallength,unsigned long maxwidth)
@@ -294,8 +296,8 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
   ptr->right = right;
 }
 
-void adjustpresortedinterval(Rmnsufinfo *rmnsufinfo,
-                             Seqpos *left,Seqpos *right, Seqpos depth)
+static void adjustpresortedinterval(Rmnsufinfo *rmnsufinfo,
+                                    Seqpos *left,Seqpos *right, Seqpos depth)
 {
   updatewidth (rmnsufinfo,left,right,left,depth);
   anchorleftmost(rmnsufinfo,left,right);
@@ -317,8 +319,8 @@ static int compareitv(const void *a,const void *b)
   return 0;
 }
 
-void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                             Seqpos *right,Seqpos *base)
+static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                                    Seqpos *right,Seqpos *base)
 {
   Seqpos startindex;
   unsigned long idx, rangestart;
@@ -870,4 +872,67 @@ Compressedtable *wrapRmnsufinfo(Seqpos *longest,
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;
+}
+
+Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
+                                       const Encodedsequence *encseq,
+                                       Readmode readmode,
+                                       Codetype mincode,
+                                       Codetype maxcode,
+                                       Seqpos partwidth,
+                                       const Bcktab *bcktab,
+                                       unsigned int numofchars,
+                                       unsigned int prefixlength)
+{
+  Codetype code;
+  unsigned int rightchar;
+  Bucketspecification bucketspec;
+  Rmnsufinfo *rmnsufinfo;
+
+  rmnsufinfo = newRmnsufinfo(sortspace,
+                             encseq,
+                             bcktab,
+                             readmode,
+                             partwidth,
+                             true);
+  rightchar = (unsigned int) (mincode % numofchars);
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      /* XXX merge this with the initialization */
+      adjustpresortedinterval(rmnsufinfo,
+                              sortspace + bucketspec.left,
+                              sortspace + bucketspec.left +
+                              bucketspec.nonspecialsinbucket - 1,
+                              (Seqpos) prefixlength);
+    }
+  }
+  rightchar = (unsigned int) (mincode % numofchars);
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      sortsuffixesonthislevel(rmnsufinfo,
+                              sortspace + bucketspec.left,
+                              sortspace + bucketspec.left +
+                              bucketspec.nonspecialsinbucket - 1,
+                              sortspace + bucketspec.left);
+    }
+  }
+  return rmnsufinfo;
 }
