@@ -29,7 +29,8 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
-                          Seqpos partwidth);
+                          Seqpos partwidth,
+                          bool startatprefixlen);
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
@@ -38,8 +39,8 @@ void inversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                         Seqpos *right,Seqpos *base,
                         bool leftadjust,Seqpos idx);
 
-void adjustnewinterval(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                       Seqpos *right,Seqpos *base,Seqpos depth);
+void adjustpresortedinterval(Rmnsufinfo *rmnsufinfo,
+                             Seqpos *left,Seqpos *right, Seqpos depth);
 
 void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                            Seqpos *right,Seqpos idx);

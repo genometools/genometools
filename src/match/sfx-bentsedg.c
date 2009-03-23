@@ -1819,7 +1819,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                     bsr->encseq,
                                     bcktab,
                                     bsr->readmode,
-                                    bsr->partwidth);
+                                    bsr->partwidth,
+                                    false);
     bsr->trierep = NULL;
   } else
   {
@@ -1902,9 +1903,9 @@ void qsufsort(Suftab *suftab,
                              encseq,
                              bcktab,
                              readmode,
-                             partwidth);
+                             partwidth,
+                             true);
   rightchar = (unsigned int) (mincode % numofchars);
-  STAMP;
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -1916,15 +1917,13 @@ void qsufsort(Suftab *suftab,
                                       numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      adjustnewinterval(rmnsufinfo,
-                       suftab->sortspace + bucketspec.left,
-                       suftab->sortspace + bucketspec.left +
-                       bucketspec.nonspecialsinbucket - 1,
-                       suftab->sortspace + bucketspec.left,
-                       (Seqpos) prefixlength);
+      adjustpresortedinterval(rmnsufinfo,
+                              suftab->sortspace + bucketspec.left,
+                              suftab->sortspace + bucketspec.left +
+                              bucketspec.nonspecialsinbucket - 1,
+                              (Seqpos) prefixlength);
     }
   }
-  STAMP;
   rightchar = (unsigned int) (mincode % numofchars);
   for (code = mincode; code <= maxcode; code++)
   {
@@ -1944,7 +1943,6 @@ void qsufsort(Suftab *suftab,
                               suftab->sortspace + bucketspec.left);
     }
   }
-  STAMP;
   lcptab = wrapRmnsufinfo(&rmnsufinfo,outlcpinfo == NULL ? false : true);
   if (lcptab != NULL)
   {

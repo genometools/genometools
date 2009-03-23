@@ -89,9 +89,6 @@ static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
                                                   rmnsufinfo->totallength);
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    printf("init inversuftab[%lu]=%lu\n",
-                   (unsigned long) rmnsufinfo->suftab[idx],
-                   (unsigned long) idx);
     compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->suftab[idx],
                            idx);
   }
@@ -109,9 +106,6 @@ static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
     {
       for (idx = range.leftpos; idx < range.rightpos; idx++)
       {
-        printf("init inversuftab[%lu]=%lu\n",
-                   (unsigned long) idx,
-                   (unsigned long) specialidx);
         compressedtable_update(rmnsufinfo->inversesuftab,idx,specialidx);
         specialidx++;
       }
@@ -121,16 +115,14 @@ static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
   }
   compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->totallength,
                          rmnsufinfo->totallength);
- printf("init inversuftab[%lu]=%lu\n",
-                   (unsigned long) rmnsufinfo->totallength,
-                   (unsigned long) rmnsufinfo->totallength);
 }
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
-                          Seqpos partwidth)
+                          Seqpos partwidth,
+                          bool startatprefixlen)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -154,7 +146,13 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->firstgenerationtotalwidth = 0;
   rmnsufinfo->unusedpair = NULL;
-  rmnsufinfo->inversesuftab = NULL;
+  if (startatprefixlen)
+  {
+    initinversesuftab(rmnsufinfo);
+  } else
+  {
+    rmnsufinfo->inversesuftab = NULL;
+  }
   memset(rmnsufinfo->log2bucketsizedist,0,
          sizeof (*rmnsufinfo->log2bucketsizedist) * (MAXLOG2VALUE+1));
   rmnsufinfo->allocateditvinfo = 0;
@@ -169,28 +167,22 @@ static void inclog2(unsigned long *log2bucketsizedist,const Seqpos *base,
   log2bucketsizedist[determinebitspervalue((uint64_t) (ptr - base))]
     += howmany;
 }
-
-void adjustnewinterval(Rmnsufinfo *rmnsufinfo,Seqpos *left,
-                       Seqpos *right,Seqpos *base,Seqpos depth)
+static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
 {
   Seqpos *ptr, startindex;
-  unsigned long width;
 
-  if (rmnsufinfo->inversesuftab == NULL)
-  {
-    initinversesuftab(rmnsufinfo);
-  }
   startindex = (Seqpos) (left - rmnsufinfo->suftab);
-  printf("adjustnewinterval %lu %lu at depth %lu\n",
-         (unsigned long) (left - rmnsufinfo->suftab),
-         (unsigned long) (right - rmnsufinfo->suftab),
-         (unsigned long) depth);
   for (ptr = left; ptr <= right; ptr++)
   {
-    printf("set %lu to %lu\n",(unsigned long) *ptr,(unsigned long) startindex);
     compressedtable_update(rmnsufinfo->inversesuftab,*ptr,startindex);
   }
-  width = (unsigned long) (right - left + 1);
+}
+
+static void updatewidth (Rmnsufinfo *rmnsufinfo,Seqpos *left,
+                         Seqpos *right,Seqpos *base,Seqpos depth)
+{
+  unsigned long width = (unsigned long) (right - left + 1);
+
   inclog2(rmnsufinfo->log2bucketsizedist,base,left,width);
   if (depth != 0)
   {
@@ -219,7 +211,6 @@ void setinversesuftabrange(Rmnsufinfo *rmnsufinfo,Seqpos *left,
     compressedtable_update(rmnsufinfo->inversesuftab,*ptr,idx++);
   }
 }
-
 
 static void showintervalsizes(unsigned long count,unsigned long totalwidth,
                               Seqpos totallength,unsigned long maxwidth)
@@ -297,9 +288,17 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
 {
   Pairsuffixptr *ptr;
 
+  updatewidth (rmnsufinfo,left,right,left,depth);
   GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
   ptr->left = left;
   ptr->right = right;
+}
+
+void adjustpresortedinterval(Rmnsufinfo *rmnsufinfo,
+                             Seqpos *left,Seqpos *right, Seqpos depth)
+{
+  updatewidth (rmnsufinfo,left,right,left,depth);
+  anchorleftmost(rmnsufinfo,left,right);
 }
 
 static int compareitv(const void *a,const void *b)
@@ -336,11 +335,6 @@ void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
     rmnsufinfo->currentdepth = rmnsufinfo->firstwithnewdepth.depth;
   }
   gt_assert(rmnsufinfo->allocateditvinfo >= width);
-  printf("sortsuffixesonthislevel %lu %lu at depth %lu\n",
-         (unsigned long) (left - rmnsufinfo->suftab),
-         (unsigned long) (right - rmnsufinfo->suftab),
-         (unsigned long) rmnsufinfo->currentdepth);
-
   for (idx=0; idx<width; idx++)
   {
     rmnsufinfo->itvinfo[idx].suffixstart = left[idx];
@@ -348,9 +342,6 @@ void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
     rmnsufinfo->itvinfo[idx].key
       = compressedtable_get(rmnsufinfo->inversesuftab,
                             left[idx]+rmnsufinfo->currentdepth);
-    printf("suffix %lu gets key %lu\n",(unsigned long) left[idx],
-                               (unsigned long) rmnsufinfo->itvinfo[idx].key);
-                 
   }
   qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
   for (idx=0; idx<width; idx++)
@@ -370,11 +361,9 @@ void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                              left + idx - 1,
                              base,
                              MULT2(rmnsufinfo->currentdepth));
-        adjustnewinterval(rmnsufinfo,
-                          left + rangestart,
-                          left + idx - 1,
-                          base,
-                          0);
+        anchorleftmost(rmnsufinfo,
+                       left + rangestart,
+                       left + idx - 1);
       } else
       {
         inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
@@ -391,11 +380,9 @@ void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
                          left + width - 1,
                          base,
                          MULT2(rmnsufinfo->currentdepth));
-    adjustnewinterval(rmnsufinfo,
-                      left + rangestart,
-                      left + width - 1,
-                      base,
-                      0);
+    anchorleftmost(rmnsufinfo,
+                   left + rangestart,
+                   left + width - 1);
   } else
   {
     inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
@@ -409,18 +396,31 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   Pairsuffixptr *pairptr;
   Pairsuffixptrwithbase *pairptrwithbase;
 
-  printf("number of intervals at base level " FormatSeqpos " is ",
-          PRINTSeqposcast(rmnsufinfo->currentdepth));
-  showintervalsizes(rmnsufinfo->firstgeneration.nextfreePairsuffixptr,
-                    rmnsufinfo->firstgenerationtotalwidth,
-                    rmnsufinfo->totallength,
-                    rmnsufinfo->allocateditvinfo);
+  if (rmnsufinfo->firstgeneration.nextfreePairsuffixptr > 0)
+  {
+    printf("number of intervals at base level " FormatSeqpos " is ",
+            PRINTSeqposcast(rmnsufinfo->currentdepth));
+    showintervalsizes(rmnsufinfo->firstgeneration.nextfreePairsuffixptr,
+                      rmnsufinfo->firstgenerationtotalwidth,
+                      rmnsufinfo->totallength,
+                      rmnsufinfo->allocateditvinfo);
+  }
+  if (rmnsufinfo->inversesuftab == NULL)
+  {
+    initinversesuftab(rmnsufinfo);
+  }
   for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
        pairptr < rmnsufinfo->firstgeneration.spacePairsuffixptr +
                  rmnsufinfo->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    adjustnewinterval(rmnsufinfo,left,right,left,depth);
+    anchorleftmost(rmnsufinfo,pairptr->left,pairptr->right);
+  }
+  for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
+       pairptr < rmnsufinfo->firstgeneration.spacePairsuffixptr +
+                 rmnsufinfo->firstgeneration.nextfreePairsuffixptr;
+       pairptr++)
+  {
     sortsuffixesonthislevel(rmnsufinfo,
                             pairptr->left,
                             pairptr->right,
@@ -502,10 +502,6 @@ static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
   {
     occless[idx] = occless[idx-1] +
                    getencseqcharactercount(rmnsufinfo->encseq,(Uchar) (idx-1));
-    /*
-    printf("occless[%lu]=%lu\n",(unsigned long) idx,
-                                (unsigned long) occless[idx]);
-    */
   }
   return occless;
 }
