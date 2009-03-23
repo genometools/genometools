@@ -79,7 +79,7 @@ struct Rmnsufinfo
                 firstgenerationcount;
   Firstwithnewdepth firstwithnewdepth;
   Pairsuffixptrwithbase *unusedpair;
-  unsigned long log2bucketsizedist[MAXLOG2VALUE+1];
+  unsigned long log2bucketsizedist[GT_MAXLOG2VALUE+1];
 };
 
 static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
@@ -156,7 +156,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
     rmnsufinfo->inversesuftab = NULL;
   }
   memset(rmnsufinfo->log2bucketsizedist,0,
-         sizeof (*rmnsufinfo->log2bucketsizedist) * (MAXLOG2VALUE+1));
+         sizeof (*rmnsufinfo->log2bucketsizedist) * (GT_MAXLOG2VALUE+1));
   rmnsufinfo->allocateditvinfo = 0;
   rmnsufinfo->itvinfo = NULL;
   return rmnsufinfo;
@@ -166,7 +166,7 @@ static void inclog2(unsigned long *log2bucketsizedist,const Seqpos *base,
                     const Seqpos *ptr,unsigned long howmany)
 {
   gt_assert(base <= ptr);
-  log2bucketsizedist[determinebitspervalue((uint64_t) (ptr - base))]
+  log2bucketsizedist[gt_determinebitspervalue((uint64_t) (ptr - base))]
     += howmany;
 }
 static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
@@ -841,7 +841,7 @@ Compressedtable *wrapRmnsufinfo(Seqpos *longest,
 
   sortremainingsuffixes(rmnsufinfo);
   *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
-  for (maxbits = 0; maxbits <= MAXLOG2VALUE; maxbits++)
+  for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
   {
     if (rmnsufinfo->log2bucketsizedist[maxbits] > 0)
     {

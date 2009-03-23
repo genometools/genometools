@@ -1316,7 +1316,7 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     }
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
-      log2bucketsizedist[determinebitspervalue(
+      log2bucketsizedist[gt_determinebitspervalue(
                          (uint64_t) (bucketspec.nonspecialsinbucket-1))]++;
     }
   }
@@ -1734,7 +1734,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   Verboseinfo *verboseinfo)
 {
   unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize;
-  unsigned long log2bucketsizedist[MAXLOG2VALUE+1] = {0};
+  unsigned long log2bucketsizedist[GT_MAXLOG2VALUE+1] = {0};
   int maxbits;
 
   bsr->readmode = readmode;
@@ -1774,7 +1774,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                          partwidth,
                          numofchars,
                          verboseinfo);
-  for (maxbits = 0; maxbits <= MAXLOG2VALUE; maxbits++)
+  for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
   {
     if (log2bucketsizedist[maxbits] > 0)
     {

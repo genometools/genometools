@@ -42,7 +42,7 @@ typedef struct
 {
   Compressedtable *compressedtable;
 #ifndef PLAIN
-  unsigned int bitspervalue = determinebitspervalue((uint64_t) maxvalue);
+  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
 #endif
 
   /*{

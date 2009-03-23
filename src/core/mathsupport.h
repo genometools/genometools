@@ -39,8 +39,8 @@ char          gt_rand_char(void);
 
 /* Find the log base 2 of an integer in O(wordsize) operations */
 
-#define MAXLOG2VALUE 63
+#define GT_MAXLOG2VALUE 63
 
-unsigned int determinebitspervalue(uint64_t maxvalue);
+unsigned int gt_determinebitspervalue(uint64_t maxvalue);
 
 #endif

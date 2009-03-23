@@ -93,7 +93,7 @@ char gt_rand_char(void)
   \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
 */
 
-unsigned int determinebitspervalue(uint64_t maxvalue)
+unsigned int gt_determinebitspervalue(uint64_t maxvalue)
 {
   unsigned int bits = 0;
   uint64_t value;
@@ -102,12 +102,12 @@ unsigned int determinebitspervalue(uint64_t maxvalue)
   {
     bits++;
   }
-  if (bits > MAXLOG2VALUE)
+  if (bits > GT_MAXLOG2VALUE)
   {
     fprintf(stderr,"log2(" "%" PRIu64 ")=%u\n",maxvalue,bits);
     exit(EXIT_FAILURE);
   }
-  gt_assert(bits <= MAXLOG2VALUE);
+  gt_assert(bits <= GT_MAXLOG2VALUE);
   return bits;
 }
 

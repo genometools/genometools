@@ -262,7 +262,7 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
   /* there are mapsize-1 characters plus wildcard plus separator.
      hence there are mapsize+1 symbols in the range 0..mapsize.
      that is, mapsize is the largest symbol and we obtain */
-  alpha->bitspersymbol = determinebitspervalue((uint64_t) alpha->mapsize);
+  alpha->bitspersymbol = gt_determinebitspervalue((uint64_t) alpha->mapsize);
   return haserr ? -1 : 0;
 }
 
