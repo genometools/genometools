@@ -89,7 +89,7 @@ char gt_rand_char(void)
 
 /*
   Find the log base 2 of an integer in O(wordsize) operations.
-  where N is the number of bits. There are faster methods, see 
+  where N is the number of bits. There are faster methods, see
   \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
 */
 
@@ -125,9 +125,8 @@ unsigned int determinebitspervalue(uint64_t v)
   shift = (v > 0xF       ) << 2; v >>= shift; r |= shift;
   shift = (v > 0x3       ) << 1; v >>= shift; r |= shift;
                                               r |= (v >> 1);
-  
+
   gt_assert(bits == (unsigned int) r);
   return (unsigned int) r;
 }
 */
-
