@@ -113,28 +113,42 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   return haserr  ? -1 : 0;
 }
 
-static int suftab2file(Outfileinfo *outfileinfo,
+static int suftab2file(FILE *outfpsuftab,
                        const Seqpos *suftab,
-                       Readmode readmode,
                        Seqpos numberofsuffixes,
                        GtError *err)
+{
+  bool haserr = false;
+
+  if (fwrite(suftab,
+             sizeof (*suftab),
+             (size_t) numberofsuffixes,
+             outfpsuftab)
+             != (size_t) numberofsuffixes)
+  {
+    gt_error_set(err,"cannot write " FormatSeqpos " items of size %u: "
+                     "errormsg=\"%s\"",
+         PRINTSeqposcast(numberofsuffixes),
+         (unsigned int) sizeof (*suftab),
+         strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
+}
+
+static int sufandbwttab2file(Outfileinfo *outfileinfo,
+                             const Seqpos *suftab,
+                             Readmode readmode,
+                             Seqpos numberofsuffixes,
+                             GtError *err)
 {
   bool haserr = false;
 
   gt_error_check(err);
   if (outfileinfo->outfpsuftab != NULL)
   {
-    if (fwrite(suftab,
-              sizeof (*suftab),
-              (size_t) numberofsuffixes,
-              outfileinfo->outfpsuftab)
-              != (size_t) numberofsuffixes)
+    if (suftab2file(outfileinfo->outfpsuftab,suftab,numberofsuffixes,err) != 0)
     {
-      gt_error_set(err,"cannot write " FormatSeqpos " items of size %u: "
-                    "errormsg=\"%s\"",
-           PRINTSeqposcast(numberofsuffixes),
-           (unsigned int) sizeof (*suftab),
-           strerror(errno));
       haserr = true;
     }
   }
@@ -168,9 +182,9 @@ static int suftab2file(Outfileinfo *outfileinfo,
         if (fwrite(&cc,sizeof (Uchar),(size_t) 1,outfileinfo->outfpbwttab)
                     != (size_t) 1)
         {
-          gt_error_set(err,"cannot write 1 item of size %lu: "
-                            "errormsg=\"%s\"",
-                          (unsigned long) sizeof (Uchar),
+          gt_error_set(err,"cannot write 1 item of size %u: "
+                           "errormsg=\"%s\"",
+                          (unsigned int) sizeof (Uchar),
                           strerror(errno));
           haserr = true;
           break;
@@ -227,7 +241,8 @@ static int suffixeratorwithoutput(
         outfileinfo->longest.defined = true;
         outfileinfo->longest.valueseqpos = longest;
       }
-      if (suftab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
+      if (sufandbwttab2file(outfileinfo,suftabptr,readmode,
+                            numberofsuffixes,err) != 0)
       {
         haserr = true;
         break;
