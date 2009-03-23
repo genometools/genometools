@@ -60,7 +60,8 @@ void qsufsort(Suftab *suftab,
               unsigned int prefixlength,
               Outlcpinfo *outlcpinfo,
               const Sfxstrategy *sfxstrategy,
-              unsigned long long *bucketiterstep);
+              unsigned long long *bucketiterstep,
+              Verboseinfo *verboseinfo);
 
 void sortallbuckets(Suftab *suftab,
                     const Encodedsequence *encseq,
@@ -73,6 +74,7 @@ void sortallbuckets(Suftab *suftab,
                     unsigned int prefixlength,
                     Outlcpinfo *outlcpinfo,
                     const Sfxstrategy *sfxstrategy,
-                    unsigned long long *bucketiterstep);
+                    unsigned long long *bucketiterstep,
+                    Verboseinfo *verboseinfo);
 
 #endif

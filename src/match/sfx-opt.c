@@ -497,9 +497,15 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   }
   if (retval != -1)
   {
-    printf("maxinsertionsort=%lu\n",so->sfxstrategy.maxinsertionsort);
-    printf("maxbltriesort=%lu\n",so->sfxstrategy.maxbltriesort);
-    printf("maxcountingsort=%lu\n",so->sfxstrategy.maxcountingsort);
+    if (so->beverbose)
+    {
+      showdefinitelyverbose("maxinsertionsort=%lu",
+                            so->sfxstrategy.maxinsertionsort);
+      showdefinitelyverbose("maxbltriesort=%lu",
+                            so->sfxstrategy.maxbltriesort);
+      showdefinitelyverbose("maxcountingsort=%lu",
+                            so->sfxstrategy.maxcountingsort);
+    }
     if (so->sfxstrategy.maxinsertionsort > so->sfxstrategy.maxbltriesort)
     {
       gt_error_set(err,"first argument of option -algbds must not be larger "

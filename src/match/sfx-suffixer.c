@@ -82,6 +82,7 @@ struct Sfxiterator
   Seqpos *leftborder; /* points to bcktab->leftborder */
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
+  Verboseinfo *verboseinfo;
 };
 
 #ifdef SKDEBUG
@@ -443,10 +444,6 @@ void freeSfxiterator(Sfxiterator **sfiptr)
   {
     freebcktab(&sfi->bcktab);
   }
-  if (sfi->suftab.longest.defined)
-  {
-    printf("longest = %lu\n",(unsigned long) sfi->suftab.longest.valueseqpos);
-  }
   FREESPACE(*sfiptr);
 }
 
@@ -560,6 +557,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->part = 0;
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
+    sfi->verboseinfo = verboseinfo;
     sfi->bcktab = allocBcktab(sfi->totallength,
                               sfi->numofchars,
                               prefixlength,
@@ -719,7 +717,8 @@ static void preparethispart(Sfxiterator *sfi,
                         sfi->prefixlength,
                         sfi->outlcpinfo,
                         &sfi->sfxstrategy,
-                        &sfi->bucketiterstep);
+                        &sfi->bucketiterstep,
+                        sfi->verboseinfo);
   sfi->part++;
 }
 

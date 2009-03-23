@@ -1288,7 +1288,8 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
                                    const Codetype mincode,
                                    const Codetype maxcode,
                                    Seqpos partwidth,
-                                   unsigned int numofchars)
+                                   unsigned int numofchars,
+                                   Verboseinfo *verboseinfo)
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
@@ -1319,8 +1320,9 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
                          (uint64_t) (bucketspec.nonspecialsinbucket-1))]++;
     }
   }
-  printf("# maxbucket (specials)=%lu\n",*specialsmaxbucketsize);
-  printf("# maxbucket (nonspecials)=%lu\n",*nonspecialsmaxbucketsize);
+  showverbose(verboseinfo,"maxbucket (specials)=%lu",*specialsmaxbucketsize);
+  showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",
+              *nonspecialsmaxbucketsize);
 }
 
 /*
@@ -1728,7 +1730,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   unsigned int numofchars,
                                   const Bcktab *bcktab,
                                   Outlcpinfo *outlcpinfo,
-                                  const Sfxstrategy *sfxstrategy)
+                                  const Sfxstrategy *sfxstrategy,
+                                  Verboseinfo *verboseinfo)
 {
   unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize;
   unsigned long log2bucketsizedist[MAXLOG2VALUE+1] = {0};
@@ -1769,13 +1772,14 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                          mincode,
                          maxcode,
                          partwidth,
-                         numofchars);
+                         numofchars,
+                         verboseinfo);
   for (maxbits = 0; maxbits <= MAXLOG2VALUE; maxbits++)
   {
     if (log2bucketsizedist[maxbits] > 0)
     {
-      printf("log2bucketsizedist[%d]=%lu\n",maxbits,
-                                            log2bucketsizedist[maxbits]);
+      showverbose(verboseinfo,"log2bucketsizedist[%d]=%lu",maxbits,
+                              log2bucketsizedist[maxbits]);
     }
   }
   if (outlcpinfo != NULL && outlcpinfo->assideeffect)
@@ -1894,7 +1898,8 @@ void qsufsort(Suftab *suftab,
               unsigned int prefixlength,
               Outlcpinfo *outlcpinfo,
               GT_UNUSED const Sfxstrategy *sfxstrategy,
-              GT_UNUSED unsigned long long *bucketiterstep)
+              GT_UNUSED unsigned long long *bucketiterstep,
+              GT_UNUSED Verboseinfo *verboseinfo)
 {
   Codetype code;
   unsigned int rightchar;
@@ -1976,7 +1981,8 @@ void sortallbuckets(Suftab *suftab,
                     unsigned int prefixlength,
                     Outlcpinfo *outlcpinfo,
                     const Sfxstrategy *sfxstrategy,
-                    unsigned long long *bucketiterstep)
+                    unsigned long long *bucketiterstep,
+                    Verboseinfo *verboseinfo)
 {
   Codetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
@@ -1999,7 +2005,8 @@ void sortallbuckets(Suftab *suftab,
                         numofchars,
                         bcktab,
                         outlcpinfo,
-                        sfxstrategy);
+                        sfxstrategy,
+                        verboseinfo);
   for (code = mincode; code <= maxcode; code++)
   {
     (*bucketiterstep)++;
@@ -2158,7 +2165,7 @@ void sortallbuckets(Suftab *suftab,
 #ifdef QUICKSORTSTEPS
   if (!sfxstrategy->cmpcharbychar)
   {
-    printf("# quicksortsteps: %lu, avg diff %.2f\n",
+    showverbose(verboseinfo,"# quicksortsteps: %lu, avg diff %.2f",
             quicksortsteps,(double) quicksortdiff/quicksortsteps);
     {
       int i;
@@ -2170,14 +2177,15 @@ void sortallbuckets(Suftab *suftab,
       }
       for (i=0; i<UNITSIN2BITENC; i++)
       {
-        printf("# lcpdist[%d]=%lu (%.4f)\n",i,lcpdistribution[i],
-                                        (double) lcpdistribution[i]/sumevents);
+        showverbose(verboseinfo,"# lcpdist[%d]=%lu (%.4f)\n",
+                                 i,lcpdistribution[i],
+                                 (double) lcpdistribution[i]/sumevents);
       }
     }
   }
 #endif
-  printf("# countinsertionsort=%lu\n",countinsertionsort);
-  printf("# countbltriesort=%lu\n",countbltriesort);
-  printf("# countcountingsort=%lu\n",countcountingsort);
-  printf("# countqsort=%lu\n",countqsort);
+  showverbose(verboseinfo,"countinsertionsort=%lu",countinsertionsort);
+  showverbose(verboseinfo,"countbltriesort=%lu",countbltriesort);
+  showverbose(verboseinfo,"countcountingsort=%lu",countcountingsort);
+  showverbose(verboseinfo,"countqsort=%lu",countqsort);
 }
