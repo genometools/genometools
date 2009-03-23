@@ -83,6 +83,7 @@ struct Sfxiterator
   unsigned long long bucketiterstep; /* for progressbar */
   Sfxstrategy sfxstrategy;
   Verboseinfo *verboseinfo;
+  Measuretime *mtime;
 };
 
 #ifdef SKDEBUG
@@ -558,6 +559,7 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
     sfi->verboseinfo = verboseinfo;
+    sfi->mtime = mtime;
     sfi->bcktab = allocBcktab(sfi->totallength,
                               sfi->numofchars,
                               prefixlength,
@@ -663,13 +665,12 @@ bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi)
   return false;
 }
 
-static void preparethispart(Sfxiterator *sfi,
-                            Measuretime *mtime)
+static void preparethispart(Sfxiterator *sfi)
 {
   Seqpos partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
 
-  if (sfi->part == 0 && mtime == NULL)
+  if (sfi->part == 0 && sfi->mtime == NULL)
   {
     gt_progressbar_start(&sfi->bucketiterstep,
                          (unsigned long long) sfi->numofallcodes);
@@ -689,18 +690,18 @@ static void preparethispart(Sfxiterator *sfi,
   {
     derivespecialcodesonthefly(sfi);
   }
-  if (mtime != NULL)
+  if (sfi->mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"inserting suffixes into buckets");
+    deliverthetime(stdout,sfi->mtime,"inserting suffixes into buckets");
   }
   getencseqkmers(sfi->encseq,
                  sfi->readmode,
                  insertwithoutspecial,
                  sfi,
                  sfi->prefixlength);
-  if (mtime != NULL)
+  if (sfi->mtime != NULL)
   {
-    deliverthetime(stdout,mtime,"sorting the buckets");
+    deliverthetime(stdout,sfi->mtime,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
   ((sfi->sfxstrategy.ssortmaxdepth.defined &&
@@ -845,18 +846,18 @@ static void fillspecialnextpage(Sfxiterator *sfi)
 }
 
 const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,bool *specialsuffixes,
-                              Measuretime *mtime,Sfxiterator *sfi)
+                              Sfxiterator *sfi)
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-    preparethispart(sfi,mtime);
+    preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
     return sfi->suftab.sortspace;
   }
   if (sfi->exhausted)
   {
-    if (mtime == NULL)
+    if (sfi->mtime == NULL)
     {
       gt_progressbar_stop();
     }

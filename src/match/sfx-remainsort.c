@@ -165,7 +165,6 @@ static void adjustpresortedinterval(Rmnsufinfo *rmnsufinfo,
 }
 
 static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
-                                               Seqpos *sortspace,
                                                Codetype maxcode,
                                                const Bcktab *bcktab,
                                                unsigned int numofchars,
@@ -191,8 +190,8 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
     if (bucketspec.nonspecialsinbucket >= 1UL)
     {
       adjustpresortedinterval(rmnsufinfo,
-                              sortspace + bucketspec.left,
-                              sortspace + bucketspec.left +
+                              rmnsufinfo->suftab + bucketspec.left,
+                              rmnsufinfo->suftab + bucketspec.left +
                               bucketspec.nonspecialsinbucket - 1,
                               (Seqpos) prefixlength);
     }
@@ -490,28 +489,7 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->rangestobesorted = NULL;
 }
 
-/*
-static void compareinversesuftabs(const Rmnsufinfo *rmnsufinfo)
-{
-  Seqpos idx, val, val2;
-
-  for (idx = 0; idx <= rmnsufinfo->totallength; idx++)
-  {
-    val = compressedtable_get(rmnsufinfo->inversesuftab,idx);
-    val2 = compressedtable_get(rmnsufinfo->inversesuftab2,idx);
-    if (val != val2)
-    {
-      fprintf(stderr,"idx %lu: val = %lu != %lu\n",
-              (unsigned long) idx,
-              (unsigned long) val,
-              (unsigned long) val2);
-      exit(EXIT_FAILURE);
-    }
-  }
-}
-*/
-
-Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
+Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *presortedsuffixes,
                                        const Encodedsequence *encseq,
                                        Readmode readmode,
                                        Codetype mincode,
@@ -526,36 +504,14 @@ Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
   Bucketspecification bucketspec;
   Rmnsufinfo *rmnsufinfo;
 
-  rmnsufinfo = newRmnsufinfo(sortspace,
+  rmnsufinfo = newRmnsufinfo(presortedsuffixes,
                              encseq,
                              bcktab,
                              readmode,
                              partwidth);
   initinversesuftabspecials(rmnsufinfo);
-  initinversesuftabnonspecialsadjust(rmnsufinfo,sortspace,maxcode,
-                                     bcktab,numofchars,prefixlength);
-  /*
-  rightchar = (unsigned int) (mincode % numofchars);
-  for (code = mincode; code <= maxcode; code++)
-  {
-    rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      adjustpresortedinterval(rmnsufinfo,
-                              sortspace + bucketspec.left,
-                              sortspace + bucketspec.left +
-                              bucketspec.nonspecialsinbucket - 1,
-                              (Seqpos) prefixlength);
-    }
-  }
-  compareinversesuftabs(rmnsufinfo);
-  */
+  initinversesuftabnonspecialsadjust(rmnsufinfo,maxcode,bcktab,numofchars,
+                                     prefixlength);
   rightchar = (unsigned int) (mincode % numofchars);
   for (code = mincode; code <= maxcode; code++)
   {
@@ -569,14 +525,16 @@ Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       sortsuffixesonthislevel(rmnsufinfo,
-                              sortspace + bucketspec.left,
-                              sortspace + bucketspec.left +
+                              presortedsuffixes + bucketspec.left,
+                              presortedsuffixes + bucketspec.left +
                               bucketspec.nonspecialsinbucket - 1,
-                              sortspace + bucketspec.left);
+                              presortedsuffixes + bucketspec.left);
     }
   }
   return rmnsufinfo;
 }
+
+/* Now follow the different methods to compute the lcp-table */
 
 Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
 {

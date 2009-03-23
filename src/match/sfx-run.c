@@ -230,8 +230,7 @@ static int suffixeratorwithoutput(
     {
       Seqpos longest;
 
-      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                  mtime,sfi);
+      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,sfi);
       if (suftabptr == NULL)
       {
         break;
@@ -569,16 +568,15 @@ static int runsuffixerator(bool doesa,
     {
       if (doesa)
       {
-        if (suffixeratorwithoutput(
-                           &outfileinfo,
-                           sfxseqinfo.encseq,
-                           so->readmode,
-                           prefixlength,
-                           so->numofparts,
-                           &sfxstrategy,
-                           mtime,
-                           verboseinfo,
-                           err) != 0)
+        if (suffixeratorwithoutput(&outfileinfo,
+                                   sfxseqinfo.encseq,
+                                   so->readmode,
+                                   prefixlength,
+                                   so->numofparts,
+                                   &sfxstrategy,
+                                   mtime,
+                                   verboseinfo,
+                                   err) != 0)
         {
           haserr = true;
         }
