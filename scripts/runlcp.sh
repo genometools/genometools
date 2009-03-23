@@ -18,13 +18,26 @@ else
   fi
 fi
 
+suffixerator()
+{
+  out="-v -lcp -tis -suf -des -ssp"
+  ${VALGRIND} gt suffixerator -v -lcp -tis -suf -des -ssp -db ${filename} $*
+}
+
+sfxmap()
+{
+  gt dev sfxmap -lcp -suf $*
+}
 
 for filename in ${filenames}
 do
-  ${VALGRIND} gt suffixerator -v -lcp -tis -suf -des -ssp -maxdepth -indexname sfx-idx -db ${filename}
-  gt dev sfxmap -lcp -suf sfx-idx
+  suffixerator -indexname sfx-idx 
+  sfxmap sfx-idx
+  suffixerator -maxdepth -indexname sfx-idx 
+  sfxmap sfx-idx
   maxdepth=`grep '^prefixlength=' sfx-idx.prj | sed -e 's/prefixlength=//'`
   maxdepth=`expr ${maxdepth} \* 2`
-  ${VALGRIND} gt suffixerator -v -lcp -tis -suf -des -ssp -maxdepth ${maxdepth} -indexname sfx-idx${maxdepth} -db ${filename}
-  gt dev sfxmap -lcp -suf sfx-idx${maxdepth}
+  suffixerator -maxdepth ${maxdepth} -indexname sfx-idx${maxdepth}
+  sfxmap sfx-idx${maxdepth}
+  rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done

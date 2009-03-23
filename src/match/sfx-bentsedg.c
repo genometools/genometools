@@ -1863,7 +1863,6 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
     lcptab = wrapRmnsufinfo(&bsr->longest->valueseqpos,
                             &bsr->rmnsufinfo,
                             bsr->lcpsubtab == NULL ? false : true);
-    STAMP;
     bsr->longest->defined = true;
     if (lcptab != NULL)
     {
@@ -1953,7 +1952,6 @@ void qsufsort(Suftab *suftab,
   lcptab = wrapRmnsufinfo(&suftab->longest.valueseqpos,&rmnsufinfo,
                           outlcpinfo == NULL ? false : true);
   suftab->longest.defined = true;
-  STAMP;
   if (lcptab != NULL)
   {
     gt_assert(outlcpinfo != NULL);
