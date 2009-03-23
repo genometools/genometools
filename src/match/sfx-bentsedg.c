@@ -1826,8 +1826,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                     bsr->encseq,
                                     bcktab,
                                     bsr->readmode,
-                                    bsr->partwidth,
-                                    false);
+                                    bsr->partwidth);
     bsr->trierep = NULL;
   } else
   {

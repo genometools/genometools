@@ -30,6 +30,23 @@
 #include "compressedtab.h"
 #include "stamp.h"
 
+/*
+#define SHOWUP(IDX)\
+        printf("line %d: set  itv[%u] -> %u\n",__LINE__,(unsigned int) (IDX),\
+                                          (unsigned int) \
+                                          compressedtable_get(\
+                                            rmnsufinfo->inversesuftab,IDX))
+
+#define SHOWUP2(IDX)\
+        printf("line %d: set itv2[%u] -> %u\n",__LINE__,(unsigned int) (IDX),\
+                                          (unsigned int) \
+                                          compressedtable_get(\
+                                            rmnsufinfo->inversesuftab2,IDX))
+*/
+
+#define SHOWUP(IDX) /* Nothing */
+#define SHOWUP2(IDX) /* Nothing */
+
 typedef struct
 {
   Seqpos key,
@@ -62,6 +79,7 @@ typedef struct
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
+  Compressedtable *inversesuftab2;
   Seqpos *suftab;
   GtQueue *rangestobesorted;
   Seqpos partwidth,
@@ -82,17 +100,21 @@ struct Rmnsufinfo
   unsigned long log2bucketsizedist[GT_MAXLOG2VALUE+1];
 };
 
-static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
+static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
 {
   Seqpos idx;
 
   rmnsufinfo->inversesuftab = compressedtable_new(rmnsufinfo->totallength+1,
                                                   rmnsufinfo->totallength);
-  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
-  {
-    compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->suftab[idx],
-                           idx);
-  }
+  compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->totallength,
+                         rmnsufinfo->totallength);
+  SHOWUP(rmnsufinfo->totallength);
+  rmnsufinfo->inversesuftab2 = compressedtable_new(rmnsufinfo->totallength+1,
+                                                   rmnsufinfo->totallength);
+  compressedtable_update(rmnsufinfo->inversesuftab2,rmnsufinfo->totallength,
+                         rmnsufinfo->totallength);
+  SHOWUP2(rmnsufinfo->totallength);
+
   if (hasspecialranges(rmnsufinfo->encseq))
   {
     Specialrangeiterator *sri;
@@ -108,22 +130,92 @@ static void initinversesuftab(Rmnsufinfo *rmnsufinfo)
       for (idx = range.leftpos; idx < range.rightpos; idx++)
       {
         compressedtable_update(rmnsufinfo->inversesuftab,idx,specialidx);
+        SHOWUP(idx);
+        compressedtable_update(rmnsufinfo->inversesuftab2,idx,specialidx);
+        SHOWUP2(idx);
         specialidx++;
       }
     }
     gt_assert(specialidx == rmnsufinfo->totallength);
     freespecialrangeiterator(&sri);
   }
-  compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->totallength,
-                         rmnsufinfo->totallength);
+}
+
+static void anchorleftmost2(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
+{
+  Seqpos *ptr, startindex;
+
+  startindex = (Seqpos) (left - rmnsufinfo->suftab);
+  for (ptr = left; ptr <= right; ptr++)
+  {
+    compressedtable_update(rmnsufinfo->inversesuftab2,*ptr,startindex);
+    SHOWUP2(*ptr);
+  }
+}
+
+static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
+                                               Seqpos *sortspace,
+                                               Codetype maxcode,
+                                               const Bcktab *bcktab,
+                                               unsigned int numofchars)
+{
+  Codetype code;
+  unsigned int rightchar;
+  Bucketspecification bucketspec;
+  Seqpos leftbound, idx;
+  const Codetype mincode = 0;
+
+  rightchar = (unsigned int) (mincode % numofchars);
+  leftbound = 0;
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      rmnsufinfo->partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket >= 1UL)
+    {
+      anchorleftmost2(rmnsufinfo,
+                      sortspace + bucketspec.left,
+                      sortspace + bucketspec.left +
+                      bucketspec.nonspecialsinbucket - 1);
+    }
+    for (idx = leftbound; idx < bucketspec.left; idx++)
+    {
+      compressedtable_update(rmnsufinfo->inversesuftab2,
+                             rmnsufinfo->suftab[idx],idx);
+      SHOWUP2(rmnsufinfo->suftab[idx]);
+    }
+    leftbound = bucketspec.left + bucketspec.nonspecialsinbucket;
+  }
+  for (idx = leftbound; idx < rmnsufinfo->partwidth; idx++)
+  {
+    compressedtable_update(rmnsufinfo->inversesuftab2,
+                           rmnsufinfo->suftab[idx],idx);
+    SHOWUP2(rmnsufinfo->suftab[idx]);
+  }
+}
+
+static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
+{
+  Seqpos idx;
+
+  for (idx=0; idx < rmnsufinfo->partwidth; idx++)
+  {
+    compressedtable_update(rmnsufinfo->inversesuftab,rmnsufinfo->suftab[idx],
+                           idx);
+    SHOWUP(rmnsufinfo->suftab[idx]);
+  }
 }
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
-                          Seqpos partwidth,
-                          bool startatprefixlen)
+                          Seqpos partwidth)
 {
   Rmnsufinfo *rmnsufinfo;
 
@@ -148,13 +240,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstgenerationtotalwidth = 0;
   rmnsufinfo->firstgenerationcount = 0;
   rmnsufinfo->unusedpair = NULL;
-  if (startatprefixlen)
-  {
-    initinversesuftab(rmnsufinfo);
-  } else
-  {
-    rmnsufinfo->inversesuftab = NULL;
-  }
+  rmnsufinfo->inversesuftab = NULL;
   memset(rmnsufinfo->log2bucketsizedist,0,
          sizeof (*rmnsufinfo->log2bucketsizedist) * (GT_MAXLOG2VALUE+1));
   rmnsufinfo->allocateditvinfo = 0;
@@ -169,6 +255,7 @@ static void inclog2(unsigned long *log2bucketsizedist,const Seqpos *base,
   log2bucketsizedist[gt_determinebitspervalue((uint64_t) (ptr - base))]
     += howmany;
 }
+
 static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
 {
   Seqpos *ptr, startindex;
@@ -177,6 +264,7 @@ static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos *left,Seqpos *right)
   for (ptr = left; ptr <= right; ptr++)
   {
     compressedtable_update(rmnsufinfo->inversesuftab,*ptr,startindex);
+    SHOWUP(*ptr);
   }
 }
 
@@ -371,6 +459,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
         inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
         compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
                                startindex+rangestart);
+        SHOWUP(left[rangestart]);
       }
       rangestart = idx;
     }
@@ -390,6 +479,7 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos *left,
     inclog2(rmnsufinfo->log2bucketsizedist,base,left+rangestart,1UL);
     compressedtable_update(rmnsufinfo->inversesuftab,left[rangestart],
                            startindex+rangestart);
+    SHOWUP(left[rangestart]);
   }
 }
 
@@ -409,7 +499,8 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   }
   if (rmnsufinfo->inversesuftab == NULL)
   {
-    initinversesuftab(rmnsufinfo);
+    initinversesuftabspecials(rmnsufinfo);
+    initinversesuftabnonspecials(rmnsufinfo);
   }
   for (pairptr = rmnsufinfo->firstgeneration.spacePairsuffixptr;
        pairptr < rmnsufinfo->firstgeneration.spacePairsuffixptr +
@@ -452,6 +543,92 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->itvinfo = NULL;
   gt_queue_delete(rmnsufinfo->rangestobesorted);
   rmnsufinfo->rangestobesorted = NULL;
+}
+
+static void compareinversesuftabs(const Rmnsufinfo *rmnsufinfo)
+{
+  Seqpos idx, val, val2;
+
+  for (idx = 0; idx <= rmnsufinfo->totallength; idx++)
+  {
+    val = compressedtable_get(rmnsufinfo->inversesuftab,idx);
+    val2 = compressedtable_get(rmnsufinfo->inversesuftab2,idx);
+    if (val != val2)
+    {
+      fprintf(stderr,"idx %lu: val = %lu != %lu\n",
+              (unsigned long) idx,
+              (unsigned long) val,
+              (unsigned long) val2);
+      exit(EXIT_FAILURE); /* programming error */
+    }
+  }
+}
+
+Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
+                                       const Encodedsequence *encseq,
+                                       Readmode readmode,
+                                       Codetype mincode,
+                                       Codetype maxcode,
+                                       Seqpos partwidth,
+                                       const Bcktab *bcktab,
+                                       unsigned int numofchars,
+                                       unsigned int prefixlength)
+{
+  Codetype code;
+  unsigned int rightchar;
+  Bucketspecification bucketspec;
+  Rmnsufinfo *rmnsufinfo;
+
+  rmnsufinfo = newRmnsufinfo(sortspace,
+                             encseq,
+                             bcktab,
+                             readmode,
+                             partwidth);
+  initinversesuftabspecials(rmnsufinfo);
+  initinversesuftabnonspecials(rmnsufinfo);
+  initinversesuftabnonspecialsadjust(rmnsufinfo,sortspace,maxcode,
+                                     bcktab,numofchars);
+  rightchar = (unsigned int) (mincode % numofchars);
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      /* XXX merge this with the initialization */
+      adjustpresortedinterval(rmnsufinfo,
+                              sortspace + bucketspec.left,
+                              sortspace + bucketspec.left +
+                              bucketspec.nonspecialsinbucket - 1,
+                              (Seqpos) prefixlength);
+    }
+  }
+  compareinversesuftabs(rmnsufinfo);
+  rightchar = (unsigned int) (mincode % numofchars);
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      partwidth,
+                                      rightchar,
+                                      numofchars);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      sortsuffixesonthislevel(rmnsufinfo,
+                              sortspace + bucketspec.left,
+                              sortspace + bucketspec.left +
+                              bucketspec.nonspecialsinbucket - 1,
+                              sortspace + bucketspec.left);
+    }
+  }
+  return rmnsufinfo;
 }
 
 Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
@@ -842,6 +1019,7 @@ Compressedtable *wrapRmnsufinfo(Seqpos *longest,
   int maxbits;
 
   sortremainingsuffixes(rmnsufinfo);
+  compressedtable_free(rmnsufinfo->inversesuftab2,true);
   *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
   for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
   {
@@ -872,67 +1050,4 @@ Compressedtable *wrapRmnsufinfo(Seqpos *longest,
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
   return lcptab;
-}
-
-Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
-                                       const Encodedsequence *encseq,
-                                       Readmode readmode,
-                                       Codetype mincode,
-                                       Codetype maxcode,
-                                       Seqpos partwidth,
-                                       const Bcktab *bcktab,
-                                       unsigned int numofchars,
-                                       unsigned int prefixlength)
-{
-  Codetype code;
-  unsigned int rightchar;
-  Bucketspecification bucketspec;
-  Rmnsufinfo *rmnsufinfo;
-
-  rmnsufinfo = newRmnsufinfo(sortspace,
-                             encseq,
-                             bcktab,
-                             readmode,
-                             partwidth,
-                             true);
-  rightchar = (unsigned int) (mincode % numofchars);
-  for (code = mincode; code <= maxcode; code++)
-  {
-    rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      /* XXX merge this with the initialization */
-      adjustpresortedinterval(rmnsufinfo,
-                              sortspace + bucketspec.left,
-                              sortspace + bucketspec.left +
-                              bucketspec.nonspecialsinbucket - 1,
-                              (Seqpos) prefixlength);
-    }
-  }
-  rightchar = (unsigned int) (mincode % numofchars);
-  for (code = mincode; code <= maxcode; code++)
-  {
-    rightchar = calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      partwidth,
-                                      rightchar,
-                                      numofchars);
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      sortsuffixesonthislevel(rmnsufinfo,
-                              sortspace + bucketspec.left,
-                              sortspace + bucketspec.left +
-                              bucketspec.nonspecialsinbucket - 1,
-                              sortspace + bucketspec.left);
-    }
-  }
-  return rmnsufinfo;
 }

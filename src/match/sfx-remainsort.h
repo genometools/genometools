@@ -30,8 +30,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
-                          Seqpos partwidth,
-                          bool startatprefixlen);
+                          Seqpos partwidth);
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
