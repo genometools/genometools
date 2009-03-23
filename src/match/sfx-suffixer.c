@@ -627,6 +627,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
     gt_assert(sfi->suftabparts != NULL);
     ALLOCASSIGNSPACE(sfi->suftab.sortspace,NULL,Seqpos,
                      stpgetlargestwidth(sfi->suftabparts));
+    sfi->suftab.longest.defined = false;
+    sfi->suftab.longest.valueseqpos = 0;
     if (hasspecialranges(sfi->encseq))
     {
       sfi->sri = newspecialrangeiterator(sfi->encseq,

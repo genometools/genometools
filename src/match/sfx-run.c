@@ -138,15 +138,12 @@ static int suftab2file(Outfileinfo *outfileinfo,
       haserr = true;
     }
   }
-  printf("longest.defined = %s\n",
-         outfileinfo->longest.defined ? "true" : "false");
   if (!haserr &&
       (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
   {
     Seqpos startpos, pos;
     Uchar cc = 0;
 
-    STAMP;
     for (pos=0; pos < numberofsuffixes; pos++)
     {
       startpos = suftab[pos];
@@ -155,11 +152,8 @@ static int suftab2file(Outfileinfo *outfileinfo,
         cc = (Uchar) UNDEFBWTCHAR;
         if (!outfileinfo->longest.defined)
         {
-          STAMP;
           outfileinfo->longest.defined = true;
           outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
-          printf("set longest = %lu\n",(unsigned long) 
-                     outfileinfo->longest.valueseqpos);
         }
       } else
       {
@@ -232,9 +226,6 @@ static int suffixeratorwithoutput(
       {
         outfileinfo->longest.defined = true;
         outfileinfo->longest.valueseqpos = longest;
-        printf("set longest = %lu\n",(unsigned long) 
-                     outfileinfo->longest.valueseqpos);
-
       }
       if (suftab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
       {
