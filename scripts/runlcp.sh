@@ -18,8 +18,14 @@ else
   fi
 fi
 
+
 for filename in ${filenames}
 do
-  ${VALGRIND} gt suffixerator -tis -suf -des -ssp -lcp -bwt -bck  -maxdepth -indexname sfx-idx -db ${filename}
-  gt dev sfxmap -suf -lcp sfx-idx
+  ${VALGRIND} gt suffixerator -v -lcp -tis -suf -des -ssp -maxdepth -indexname sfx-idx -db ${filename}
+  gt dev sfxmap -suf sfx-idx
+  maxdepth=`grep '^prefixlength=' sfx-idx.prj | sed -e 's/prefixlength=//'`
+  maxdepth=`expr ${maxdepth} \* 2`
+  ${VALGRIND} gt suffixerator -v -lcp -tis -suf -des -ssp -maxdepth ${maxdepth} -indexname sfx-idx${maxdepth} -db ${filename}
+  cmp sfx-idx${maxdepth}.suf sfx-idx.suf 
+  gt dev sfxmap -suf sfx-idx${maxdepth}
 done
