@@ -33,7 +33,8 @@
 typedef struct
 {
   bool verbose,
-       showflv;
+       showflv,
+       showseq;
   unsigned long fastawidth;
 } ConvertseqOptions;
 
@@ -57,6 +58,10 @@ static OPrval parse_options(ConvertseqOptions *opts,
 
   o = gt_option_new_bool("showfilelengthvalues","show filelengths",
                          &opts->showflv, false);
+  gt_option_parser_add_option(op, o);
+
+    o = gt_option_new_bool("noseq","do not show sequences",
+                         &opts->showseq, false);
   gt_option_parser_add_option(op, o);
 
   o = gt_option_new_ulong("fastawidth","FASTA output line width",
@@ -126,16 +131,18 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
       had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
       if (had_err != 1)
         break;
-      printf(">%s\n", desc);
-      for(i=0;i<len;i++) {
-        putc(sequence[i], stdout);
-        if ((j % opts.fastawidth) == 0) {
-          j=0;
-          printf("\n");
+      if (!opts.showseq) {
+        printf(">%s\n", desc);
+        for(i=0;i<len;i++) {
+          putc(sequence[i], stdout);
+          if ((j % opts.fastawidth) == 0) {
+            j=0;
+            printf("\n");
+          }
+          j++;
         }
-        j++;
+        printf("\n");
       }
-      printf("\n");
       gt_free(desc);
     }
     if (opts.showflv) {
