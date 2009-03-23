@@ -23,7 +23,7 @@ Name "sequence buffer: EMBL unterminated sequence"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt dev convertseq #{$testdata}embl_test4.embl", :retval => 1
-  grep($last_stderr, "only terminators")
+  grep($last_stderr, "unterminated sequence")
 end
 
 Name "sequence buffer: EMBL multi-line description"
@@ -78,7 +78,7 @@ Name "sequence buffer: GenBank unterminated sequence"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt dev convertseq #{$testdata}genbank_test4.gbk", :retval => 1
-  grep($last_stderr, "unterminated sequence in line")
+  grep($last_stderr, "only terminators")
 end
 
 Name "sequence buffer: GenBank missing sequence offset numbers"
