@@ -148,8 +148,11 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
     if (opts.showflv) {
       unsigned long j;
       for (j=0;j<gt_str_array_size(files);j++) {
-        printf("file %lu (%s): %lu/%lu\n", j, gt_str_array_get(files, j),
-                                        flv[j].length, flv[j].effectivelength);
+        printf("file %lu (%s): %lu/%lu\n",
+               j,
+               gt_str_array_get(files, j),
+               (unsigned long) flv[j].length,
+               (unsigned long) flv[j].effectivelength);
       }
     }
     gt_sequence_buffer_delete(sb);

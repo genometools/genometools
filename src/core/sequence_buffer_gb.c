@@ -164,7 +164,7 @@ static inline int get_sequence(GtSequenceBuffer *sb,
     return EOF;
   if (num_chars == 0) {
     gt_error_set(err, "sequence offset numbers missing in line %lu of file %s",
-                      sb->pvt->linenum,
+                      (unsigned long) sb->pvt->linenum,
                       gt_str_array_get(sb->pvt->filenametab,
                                        (unsigned long) sb->pvt->filenum));
     return -2;
@@ -177,7 +177,7 @@ static inline int get_sequence(GtSequenceBuffer *sb,
   if (currentchar != ' ') {
     gt_error_set(err, "blank expected between offset and sequence in line %lu "
                       "of file %s",
-                      sb->pvt->linenum,
+                      (unsigned long) sb->pvt->linenum,
                       gt_str_array_get(sb->pvt->filenametab,
                                        (unsigned long) sb->pvt->filenum));
     return -2;
@@ -306,7 +306,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
                      GB_DEFINITION_STRING) == 0) {
             gt_error_set(err, "encountered another DEFINITION line within one "
                               "entry in line %lu of file %s",
-                              pvt->linenum-1,
+                              (unsigned long) pvt->linenum-1,
                               gt_str_array_get(pvt->filenametab,
                                                 (unsigned long) pvt->filenum));
             return -1;
@@ -345,7 +345,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
                             "sequence section, but found '%s' instead "
                             "in line %lu of file %s",
                             gt_str_get(sbe->keywordbuffer),
-                            pvt->linenum-1,
+                            (unsigned long) pvt->linenum-1,
                             gt_str_array_get(pvt->filenametab,
                                                 (unsigned long) pvt->filenum));
           return -1;
