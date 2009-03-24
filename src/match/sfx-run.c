@@ -196,16 +196,15 @@ static int sufandbwttab2file(Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-static int suffixeratorwithoutput(
-                 Outfileinfo *outfileinfo,
-                 const Encodedsequence *encseq,
-                 Readmode readmode,
-                 unsigned int prefixlength,
-                 unsigned int numofparts,
-                 const Sfxstrategy *sfxstrategy,
-                 Measuretime *mtime,
-                 Verboseinfo *verboseinfo,
-                 GtError *err)
+static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  unsigned int prefixlength,
+                                  unsigned int numofparts,
+                                  const Sfxstrategy *sfxstrategy,
+                                  Measuretime *mtime,
+                                  Verboseinfo *verboseinfo,
+                                  GtError *err)
 {
   const Seqpos *suftabptr;
   Seqpos numberofsuffixes;

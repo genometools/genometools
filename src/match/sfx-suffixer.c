@@ -701,10 +701,7 @@ static void preparethispart(Sfxiterator *sfi)
   if (sfi->sfxstrategy.ssortmaxdepth.defined &&
       sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
   {
-    if (sfi->sfxstrategy.streamsuftab)
-    {
-
-    } else
+    if (!sfi->sfxstrategy.streamsuftab)
     {
       qsufsort(&sfi->suftab,
                sfi->encseq,

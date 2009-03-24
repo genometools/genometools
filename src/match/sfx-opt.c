@@ -314,8 +314,18 @@ static OPrval parse_options(int *parsed_args,
     {
       if (so->numofparts > 1U)
       {
-        so->sfxstrategy.streamsuftab = true;
+        if (so->sfxstrategy.ssortmaxdepth.valueunsignedint
+            == MAXDEPTH_AUTOMATIC)
+        {
+          so->sfxstrategy.streamsuftab = true;
+        } else
+        {
+          gt_error_set(err,"option -maxdepth with argument can only be used "
+                           "either without -parts or with option -parts 1");
+          oprval = OPTIONPARSER_ERROR;
+        }
       }
+          STAMP;
       so->sfxstrategy.ssortmaxdepth.defined = true;
       if (so->sfxstrategy.ssortmaxdepth.valueunsignedint != MAXDEPTH_AUTOMATIC)
       {
