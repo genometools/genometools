@@ -97,13 +97,13 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
   linecode[1] = currentchar;
 
   /* determine current line type */
-  if (memcmp(linecode, EMBL_DESCR_LINE_STRING, 2*sizeof (char)) == 0)
+  if (memcmp(linecode,      EMBL_DESCR_LINE_STRING, 2*sizeof (char)) == 0)
     *lc = DESCRIPTION;
-  if (memcmp(linecode, EMBL_SEQ_LINE_STRING ,  2*sizeof (char)) == 0)
+  else if (memcmp(linecode, EMBL_SEQ_LINE_STRING ,  2*sizeof (char)) == 0)
     *lc = SEQUENCE;
-  if (memcmp(linecode, EMBL_SPACER,            2*sizeof (char)) == 0)
+  else if (memcmp(linecode, EMBL_SPACER,            2*sizeof (char)) == 0)
     *lc = SPACER;
-  if (memcmp(linecode, EMBL_ENTRY_TERMINATOR,  2*sizeof (char)) == 0)
+  else if (memcmp(linecode, EMBL_ENTRY_TERMINATOR,  2*sizeof (char)) == 0)
     *lc = TERMINATOR;
 
   /* expect 3 blanks, except in spacer lines */
