@@ -522,14 +522,8 @@ Sfxiterator *newSfxiterator(const Encodedsequence *encseq,
        }
     } else
     {
-      sfi->sfxstrategy.ssortmaxdepth.defined = false;
-      sfi->sfxstrategy.maxwidthrealmedian = 1UL;
-      sfi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
-      sfi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
-      sfi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
-      sfi->sfxstrategy.cmpcharbychar = possibletocmpbitwise(encseq) ? false
-                                                                    : true;
-      sfi->sfxstrategy.storespecialcodes = false;
+      defaultsfxstrategy(&sfi->sfxstrategy,
+                         possibletocmpbitwise(encseq) ? false : true);
     }
     showverbose(verboseinfo,"maxinsertionsort=%lu",
                 sfi->sfxstrategy.maxinsertionsort);
@@ -704,22 +698,42 @@ static void preparethispart(Sfxiterator *sfi)
     deliverthetime(stdout,sfi->mtime,"sorting the buckets");
   }
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  ((sfi->sfxstrategy.ssortmaxdepth.defined &&
-     sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
-     ? qsufsort
-     : sortallbuckets) (&sfi->suftab,
-                        sfi->encseq,
-                        sfi->readmode,
-                        sfi->currentmincode,
-                        sfi->currentmaxcode,
-                        partwidth,
-                        sfi->bcktab,
-                        sfi->numofchars,
-                        sfi->prefixlength,
-                        sfi->outlcpinfo,
-                        &sfi->sfxstrategy,
-                        &sfi->bucketiterstep,
-                        sfi->verboseinfo);
+  if (sfi->sfxstrategy.ssortmaxdepth.defined &&
+      sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
+  {
+    if (sfi->sfxstrategy.streamsuftab)
+    {
+
+    } else
+    {
+      qsufsort(&sfi->suftab,
+               sfi->encseq,
+               sfi->readmode,
+               sfi->currentmincode,
+               sfi->currentmaxcode,
+               partwidth,
+               sfi->bcktab,
+               sfi->numofchars,
+               sfi->prefixlength,
+               sfi->outlcpinfo);
+    }
+  } else
+  {
+    gt_assert(!sfi->sfxstrategy.streamsuftab);
+    sortallbuckets (&sfi->suftab,
+                    sfi->encseq,
+                    sfi->readmode,
+                    sfi->currentmincode,
+                    sfi->currentmaxcode,
+                    partwidth,
+                    sfi->bcktab,
+                    sfi->numofchars,
+                    sfi->prefixlength,
+                    sfi->outlcpinfo,
+                    &sfi->sfxstrategy,
+                    &sfi->bucketiterstep,
+                    sfi->verboseinfo);
+  }
   sfi->part++;
 }
 

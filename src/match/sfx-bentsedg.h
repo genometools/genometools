@@ -58,10 +58,7 @@ void qsufsort(Suftab *suftab,
               const Bcktab *bcktab,
               unsigned int numofchars,
               unsigned int prefixlength,
-              Outlcpinfo *outlcpinfo,
-              const Sfxstrategy *sfxstrategy,
-              unsigned long long *bucketiterstep,
-              Verboseinfo *verboseinfo);
+              Outlcpinfo *outlcpinfo);
 
 void sortallbuckets(Suftab *suftab,
                     const Encodedsequence *encseq,

@@ -117,9 +117,8 @@ static OPrval parse_options(int *parsed_args,
   if (doesa)
   {
     optionmaxdepth = gt_option_new_uint_min("maxdepth",
-                                            "restrict suffix sorting "
-                                            "to prefixes "
-                                            "of the given length",
+                                            "stop shallow suffix sorting "
+                                            "at prefixes of the given length",
                                             &so->sfxstrategy.ssortmaxdepth.
                                                  valueunsignedint,
                                             MAXDEPTH_AUTOMATIC,
@@ -315,9 +314,7 @@ static OPrval parse_options(int *parsed_args,
     {
       if (so->numofparts > 1U)
       {
-        gt_error_set(err,"option -maxdepth can only be used either without "
-                         "option -parts or with option -parts 1");
-        oprval = OPTIONPARSER_ERROR;
+        so->sfxstrategy.streamsuftab = true;
       }
       so->sfxstrategy.ssortmaxdepth.defined = true;
       if (so->sfxstrategy.ssortmaxdepth.valueunsignedint != MAXDEPTH_AUTOMATIC)
@@ -452,6 +449,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->sfxstrategy.ssortmaxdepth.defined = false;
   so->sfxstrategy.ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
+  so->sfxstrategy.streamsuftab = false;
   so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;

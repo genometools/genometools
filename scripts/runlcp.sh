@@ -40,6 +40,7 @@ do
   maxdepth=`expr ${maxdepth} \* 2`
   suffixerator -maxdepth ${maxdepth} -indexname sfx-idx${maxdepth}
   sfxmap sfx-idx${maxdepth}
+  suffixerator -parts 3 -indexname sfx-idx 
   rm -f sfx-idx.* sfx-idx${maxdepth}.*
 done
 echo "${filenames}"
