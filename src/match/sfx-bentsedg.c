@@ -1886,6 +1886,31 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   FREEARRAY(&bsr->mkvauxstack,MKVstack);
 }
 
+/*
+static int dumppresortedsuffixes(FILE *outfpsuftab,
+                                 Suftab *presortedsuffixes,
+                                 Seqpos numberofsuffixes,
+                                 GtError *err)
+{
+  bool haserr = false;
+
+  if (!haserr && fwrite(presortedsuffixes,
+                        sizeof (*presortedsuffixes),
+                        (size_t) numberofsuffixes,
+                        outfpsuftab)
+                        != (size_t) numberofsuffixes)
+  {
+    gt_error_set(err,"cannot write " FormatSeqpos " items of size %u: "
+                     "errormsg=\"%s\"",
+         PRINTSeqposcast(numberofsuffixes),
+         (unsigned int) sizeof (*presortedsuffixes),
+         strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
+}
+*/
+
 void qsufsort(Suftab *suftab,
               const Encodedsequence *encseq,
               Readmode readmode,
@@ -1902,18 +1927,33 @@ void qsufsort(Suftab *suftab,
 {
   Rmnsufinfo *rmnsufinfo;
   Compressedtable *lcptab;
+  /* const bool usemappedsuftab = true; */
 
   gt_assert(suftab->offset == 0);
   gt_assert(mincode == 0);
-  rmnsufinfo = bcktab2firstlevelintervals(suftab->sortspace,
-                                          encseq,
-                                          readmode,
-                                          mincode,
-                                          maxcode,
-                                          partwidth,
-                                          bcktab,
-                                          numofchars,
-                                          prefixlength);
+  rmnsufinfo = newRmnsufinfo(suftab->sortspace,
+                             encseq,
+                             bcktab,
+                             readmode,
+                             partwidth);
+  /* Dump the presorted suffixes now and map them later on demand */
+  /*
+  if (usemappedsuftab)
+  {
+    if (dumppresortedsuffixes(outfpsuftab,
+                              suftab->sortspace,
+                              partwidth,
+                              err) != 0)
+
+  }
+  */
+  bcktab2firstlevelintervals(rmnsufinfo,
+                             mincode,
+                             maxcode,
+                             partwidth,
+                             bcktab,
+                             numofchars,
+                             prefixlength);
   lcptab = wrapRmnsufinfo(&suftab->longest.valueseqpos,&rmnsufinfo,
                           outlcpinfo == NULL ? false : true);
   suftab->longest.defined = true;

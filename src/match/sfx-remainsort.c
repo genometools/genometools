@@ -489,26 +489,18 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
   rmnsufinfo->rangestobesorted = NULL;
 }
 
-Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *presortedsuffixes,
-                                       const Encodedsequence *encseq,
-                                       Readmode readmode,
-                                       Codetype mincode,
-                                       Codetype maxcode,
-                                       Seqpos partwidth,
-                                       const Bcktab *bcktab,
-                                       unsigned int numofchars,
-                                       unsigned int prefixlength)
+void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
+                                Codetype mincode,
+                                Codetype maxcode,
+                                Seqpos partwidth,
+                                const Bcktab *bcktab,
+                                unsigned int numofchars,
+                                unsigned int prefixlength)
 {
   Codetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  Rmnsufinfo *rmnsufinfo;
 
-  rmnsufinfo = newRmnsufinfo(presortedsuffixes,
-                             encseq,
-                             bcktab,
-                             readmode,
-                             partwidth);
   initinversesuftabspecials(rmnsufinfo);
   initinversesuftabnonspecialsadjust(rmnsufinfo,maxcode,bcktab,numofchars,
                                      prefixlength);
@@ -525,13 +517,12 @@ Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *presortedsuffixes,
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       sortsuffixesonthislevel(rmnsufinfo,
-                              presortedsuffixes + bucketspec.left,
-                              presortedsuffixes + bucketspec.left +
+                              rmnsufinfo->suftab + bucketspec.left,
+                              rmnsufinfo->suftab + bucketspec.left +
                               bucketspec.nonspecialsinbucket - 1,
-                              presortedsuffixes + bucketspec.left);
+                              rmnsufinfo->suftab + bucketspec.left);
     }
   }
-  return rmnsufinfo;
 }
 
 /* Now follow the different methods to compute the lcp-table */

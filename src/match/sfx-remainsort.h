@@ -35,15 +35,13 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos *left,Seqpos *right,Seqpos depth);
 
-Rmnsufinfo *bcktab2firstlevelintervals(Seqpos *sortspace,
-                                       const Encodedsequence *encseq,
-                                       Readmode readmode,
-                                       Codetype mincode,
-                                       Codetype maxcode,
-                                       Seqpos partwidth,
-                                       const Bcktab *bcktab,
-                                       unsigned int numofchars,
-                                       unsigned int prefixlength);
+void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
+                                Codetype mincode,
+                                Codetype maxcode,
+                                Seqpos partwidth,
+                                const Bcktab *bcktab,
+                                unsigned int numofchars,
+                                unsigned int prefixlength);
 
 Compressedtable *wrapRmnsufinfo(Seqpos *longest,
                                 Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
