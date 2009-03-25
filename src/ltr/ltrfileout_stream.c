@@ -119,8 +119,14 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     gt_str_append_cstr(pdom_seq, tmpstr);
     if (ls->write_pdom_alignments && ali)
     {
+      char buf[BUFSIZ];
+      (void) snprintf(buf, BUFSIZ-1, "Protein domain alignment in translated "
+                                     "sequence for candidate\n'%s':\n\n",
+                                     desc);
+      gt_genfile_xwrite(alifile, buf, strlen(buf) * sizeof (char)); 
       gt_genfile_xwrite(alifile, gt_str_get(ali),
                         gt_str_length(ali) * sizeof (char));
+      gt_genfile_xwrite(alifile, "---\n\n", 5 * sizeof (char)); 
     }
     gt_genome_node_release_user_data((GtGenomeNode*) gf, "pdom_alignment");
     seq_length += gt_range_length(&pdom_rng);
