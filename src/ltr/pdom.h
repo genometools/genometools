@@ -32,7 +32,8 @@ typedef struct GtPdomOptions {
   GtStrArray *hmm_files;
   unsigned int nof_threads,
                chain_max_gap_length;
-  bool write_alignments;
+  bool write_alignments,
+       write_aaseqs;
 } GtPdomOptions;
 
 typedef struct GtPdomFinder GtPdomFinder;
@@ -87,5 +88,8 @@ double           gt_pdom_single_hit_get_evalue(const GtPdomSingleHit*);
 void             gt_pdom_single_hit_format_alignment(const GtPdomSingleHit*,
                                                      unsigned long width,
                                                      GtStr *dest);
+void             gt_pdom_single_hit_get_aaseq(const GtPdomSingleHit*,
+                                              GtStr *dest);
+
 #endif
 #endif

@@ -140,6 +140,22 @@ void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
   gt_free(buffer);
 }
 
+void gt_pdom_single_hit_get_aaseq(const GtPdomSingleHit *sh,
+                                  GtStr *dest)
+{
+  const char *matched;
+  unsigned long i;
+  gt_assert(sh && dest);
+  gt_str_reset(dest);
+
+  matched = gt_str_get(sh->aa_seq_matched);
+  for (i = 0; i < gt_str_length(sh->aa_seq_matched); i++)
+  {
+    if (!isgap(matched[i]))
+      gt_str_append_char(dest, toupper(matched[i]));
+  }
+}
+
 static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
 {
   GtPdomSingleHit *hit;

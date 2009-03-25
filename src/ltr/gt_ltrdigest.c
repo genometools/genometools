@@ -248,9 +248,18 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_is_extended_option(o);
   gt_option_imply(o, oh);
 
-    o = gt_option_new_bool("aliout",
+  o = gt_option_new_bool("aliout",
                            "output HMMER amino acid alignments",
                            &arguments->pdom_opts.write_alignments,
+                           false);
+  gt_option_parser_add_option(op, o);
+  gt_option_imply(o, oh);
+  gt_option_imply(o, oto);
+
+  o = gt_option_new_bool("aaout",
+                           "output amino acid sequences for protein domain "
+                           "hits",
+                           &arguments->pdom_opts.write_aaseqs,
                            false);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, oh);
@@ -450,6 +459,8 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                               err);
     if (&arguments->pdom_opts.write_alignments)
       gt_ltr_fileout_stream_enable_pdom_alignment_output(tab_out_stream);
+    if (&arguments->pdom_opts.write_aaseqs)
+      gt_ltr_fileout_stream_enable_aa_sequence_output(tab_out_stream);
     }
 
     last_stream = gff3_out_stream = gt_gff3_out_stream_new(last_stream,

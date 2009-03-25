@@ -44,5 +44,6 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         GtError *e);
 
 void          gt_ltr_fileout_stream_enable_pdom_alignment_output(GtNodeStream*);
+void          gt_ltr_fileout_stream_enable_aa_sequence_output(GtNodeStream*);
 
 #endif
