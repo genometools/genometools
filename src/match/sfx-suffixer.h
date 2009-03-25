@@ -43,6 +43,8 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               bool *specialsuffixes,
                               Sfxiterator *sfi);
 
+void postsortsuffixesfromstream(Sfxiterator *sfi);
+
 bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi);
 
 int sfibcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);

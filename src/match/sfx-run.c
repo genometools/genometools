@@ -136,22 +136,15 @@ static int suftab2file(FILE *outfpsuftab,
   return haserr ? -1 : 0;
 }
 
-static int sufandbwttab2file(Outfileinfo *outfileinfo,
-                             const Seqpos *suftab,
-                             Readmode readmode,
-                             Seqpos numberofsuffixes,
-                             GtError *err)
+static int bwttab2file(Outfileinfo *outfileinfo,
+                       const Seqpos *suftab,
+                       Readmode readmode,
+                       Seqpos numberofsuffixes,
+                       GtError *err)
 {
   bool haserr = false;
 
   gt_error_check(err);
-  if (outfileinfo->outfpsuftab != NULL)
-  {
-    if (suftab2file(outfileinfo->outfpsuftab,suftab,numberofsuffixes,err) != 0)
-    {
-      haserr = true;
-    }
-  }
   if (!haserr &&
       (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
   {
@@ -192,7 +185,6 @@ static int sufandbwttab2file(Outfileinfo *outfileinfo,
       }
     }
   }
-  outfileinfo->pageoffset += numberofsuffixes;
   return haserr ? -1 : 0;
 }
 
@@ -239,14 +231,25 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
         outfileinfo->longest.defined = true;
         outfileinfo->longest.valueseqpos = longest;
       }
-      if (sufandbwttab2file(outfileinfo,suftabptr,readmode,
-                            numberofsuffixes,err) != 0)
+      if (outfileinfo->outfpsuftab != NULL)
+      {
+        if (suftab2file(outfileinfo->outfpsuftab,suftabptr,numberofsuffixes,
+                        err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
+      /* XXX be careful: postpone not output bwtab if streamsuftab is true */
+      if (bwttab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
       {
         haserr = true;
         break;
       }
+      outfileinfo->pageoffset += numberofsuffixes;
     }
   }
+  postsortsuffixesfromstream(sfi);
   if (outfileinfo->outfpbcktab != NULL)
   {
     if (sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)

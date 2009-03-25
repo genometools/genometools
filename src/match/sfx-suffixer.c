@@ -305,7 +305,6 @@ static void insertwithoutspecial(void *processinfo,
 
     if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
-      /*sfi->suftabptr[--sfi->leftborder[code]] = position; */
       setsortspace(&sfi->suftab,--sfi->leftborder[code],position);
       /* from right to left */
     }
@@ -349,10 +348,6 @@ static void derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
           /* from right to left */
-          /*
-          sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
-                                  prefixindex;
-          */
           setsortspace(&sfi->suftab,stidx,
                        sfi->spaceCodeatposition[j].position - prefixindex);
         }
@@ -408,9 +403,6 @@ static void derivespecialcodesonthefly(Sfxiterator *sfi)
             gt_assert(code > 0);
             stidx = --sfi->leftborder[code];
             /* from right to left */
-            /*
-            sfi->suftabptr[stidx] = specialcontext.position - prefixindex;
-            */
             setsortspace(&sfi->suftab,stidx,
                          specialcontext.position - prefixindex);
           }
@@ -704,6 +696,7 @@ static void preparethispart(Sfxiterator *sfi)
     if (!sfi->sfxstrategy.streamsuftab)
     {
       qsufsort(&sfi->suftab,
+               -1,
                sfi->encseq,
                sfi->readmode,
                sfi->currentmincode,
@@ -732,6 +725,16 @@ static void preparethispart(Sfxiterator *sfi)
                     sfi->verboseinfo);
   }
   sfi->part++;
+}
+
+void postsortsuffixesfromstream(Sfxiterator *sfi)
+{
+  if (sfi->sfxstrategy.streamsuftab)
+  {
+    gt_assert(sfi->sfxstrategy.ssortmaxdepth.defined &&
+              sfi->prefixlength ==
+              sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
+  }
 }
 
 static void insertfullspecialrange(Sfxiterator *sfi,

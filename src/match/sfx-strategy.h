@@ -39,8 +39,8 @@ typedef struct
        streamsuftab;
 } Sfxstrategy;
 
-static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
-                                      bool cmpcharbychar)
+ /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
+                                                    bool cmpcharbychar)
 {
   sfxstrategy->ssortmaxdepth.defined = false;
   sfxstrategy->maxwidthrealmedian = 1UL;

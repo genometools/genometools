@@ -325,7 +325,6 @@ static OPrval parse_options(int *parsed_args,
           oprval = OPTIONPARSER_ERROR;
         }
       }
-          STAMP;
       so->sfxstrategy.ssortmaxdepth.defined = true;
       if (so->sfxstrategy.ssortmaxdepth.valueunsignedint != MAXDEPTH_AUTOMATIC)
       {

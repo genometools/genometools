@@ -1823,6 +1823,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   if (sfxstrategy->ssortmaxdepth.defined)
   {
     bsr->rmnsufinfo = newRmnsufinfo(suftabptr,
+                                    -1,
                                     bsr->encseq,
                                     bcktab,
                                     bsr->readmode,
@@ -1887,6 +1888,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
 }
 
 void qsufsort(Suftab *suftab,
+              int mmapfiledesc,
               const Encodedsequence *encseq,
               Readmode readmode,
               Codetype mincode,
@@ -1903,6 +1905,7 @@ void qsufsort(Suftab *suftab,
   gt_assert(suftab->offset == 0);
   gt_assert(mincode == 0);
   rmnsufinfo = newRmnsufinfo(suftab->sortspace,
+                             mmapfiledesc,
                              encseq,
                              bcktab,
                              readmode,

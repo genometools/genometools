@@ -32,7 +32,7 @@ typedef struct Outlcpinfo Outlcpinfo;
 typedef struct
 {
   Seqpos *sortspace,
-         offset; /* negative offset */
+         offset;    /* negative offset */
   DefinedSeqpos longest;
 } Suftab;
 
@@ -50,6 +50,7 @@ Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
 void qsufsort(Suftab *suftab,
+              int mmapfiledesc,
               const Encodedsequence *encseq,
               Readmode readmode,
               Codetype mincode,
