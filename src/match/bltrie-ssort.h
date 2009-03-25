@@ -18,18 +18,28 @@
 #ifndef BLTRIE_SSORT_H
 #define BLTRIE_SSORT_H
 
+#include "seqpos-def.h"
+
 typedef struct Blindtrierep Blindtrierep;
+
+typedef enum
+{
+  Ascending,
+  Descending,
+  Noorder
+} Ordertype;
 
 Blindtrierep *newBlindtrierep(unsigned long numofsuffixes,
                               const Encodedsequence *encseq,
                               bool cmpcharbychar,
                               Readmode readmode);
 
-void blindtriesuffixsort(Blindtrierep *trierep,
-                         Seqpos *suffixtable,
-                         Seqpos *lcpsubtab,
-                         unsigned long numberofsuffixes,
-                         Seqpos offset);
+Seqpos blindtriesuffixsort(Blindtrierep *trierep,
+                           Seqpos *suffixtable,
+                           Seqpos *lcpsubtab,
+                           unsigned long numberofsuffixes,
+                           Seqpos offset,
+                           Ordertype ordertype);
 
 void freeBlindtrierep(Blindtrierep **trierep);
 

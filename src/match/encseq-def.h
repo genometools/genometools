@@ -22,7 +22,6 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
-#include "core/unused_api.h"
 #include "core/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
@@ -30,7 +29,6 @@
 #include "readmode-def.h"
 #include "verbose-def.h"
 
-#define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
 #define DBFILEKEY "dbfile="
 
 #ifdef SKDEBUG
@@ -74,6 +72,7 @@ typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 typedef struct Specialrangeiterator Specialrangeiterator;
 
+#undef INLINEDENCSEQ
 #ifdef INLINEDENCSEQ
 #include "encseq-type.h"
 #endif
@@ -89,6 +88,8 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq);
 #else
 unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
 #endif
+
+#define REVERSEPOS(TOTALLENGTH,POS) ((TOTALLENGTH) - 1 - (POS))
 
 #ifdef INLINEDENCSEQ
 #define MAKECOMPL(CC)\
@@ -112,7 +113,6 @@ unsigned long getencseqnumofdbsequences(const Encodedsequence *encseq);
 #else
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
-
 #endif
 
 #ifdef INLINEDENCSEQ
@@ -146,21 +146,18 @@ int compareTwobitencodings(bool fwd,
                            const EndofTwobitencoding *ptbe1,
                            const EndofTwobitencoding *ptbe2);
 
-uint64_t detsizeencseq(int kind,
-                       Seqpos totallength,
-                       Seqpos specialranges,
-                       unsigned int numofchars);
+uint64_t detencseqofsatviatables(int kind,
+                                 Seqpos totallength,
+                                 Seqpos specialranges,
+                                 unsigned int numofchars);
 
 void plainseq2bytecode(Uchar *bytecode,const Uchar *seq,unsigned long len);
 
 void encseq2bytecode(Uchar *dest,const Encodedsequence *encseq,
-                     const Seqpos startindex,const Seqpos len);
+                     Seqpos startindex,Seqpos len);
 
 void sequence2bytecode(Uchar *dest,const Encodedsequence *encseq,
-                       const Seqpos startindex,const Seqpos len);
-
-/* the functions with exactly the same interface for both implementation of
-   encodedsequences */
+                       Seqpos startindex,Seqpos len);
 
 int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,GtError*);
 
@@ -233,14 +230,6 @@ void encseqextract(Uchar *buffer,
                    Seqpos frompos,
                    Seqpos topos);
 
-int multicharactercompare(const Encodedsequence *encseq,
-                          bool fwd,
-                          bool complement,
-                          Encodedsequencescanstate *esr1,
-                          Seqpos pos1,
-                          Encodedsequencescanstate *esr2,
-                          Seqpos pos2);
-
 int compareEncseqsequences(Seqpos *lcp,
                            const Encodedsequence *encseq,
                            bool fwd,
@@ -251,6 +240,14 @@ int compareEncseqsequences(Seqpos *lcp,
                            Seqpos depth);
 
 /* some check functions called in test-encseq.c */
+
+int multicharactercompare(const Encodedsequence *encseq,
+                          bool fwd,
+                          bool complement,
+                          Encodedsequencescanstate *esr1,
+                          Seqpos pos1,
+                          Encodedsequencescanstate *esr2,
+                          Seqpos pos2);
 
 void checkextractunitatpos(const Encodedsequence *encseq,
                            bool fwd,bool complement);
@@ -341,11 +338,15 @@ const GtStrArray *getencseqfilenametab(const Encodedsequence *encseq);
 
 const Filelengthvalues *getencseqfilelengthtab(const Encodedsequence *encseq);
 
+unsigned long getencseqcharactercount(const Encodedsequence *encseq,Uchar cc);
+
 /* some function to remove reference from an Encodedsequence to prevent that
    the referenced alphabet or filenametab are freed */
 
 void removealpharef(Encodedsequence *encseq);
 
 void removefilenametabref(Encodedsequence *encseq);
+
+void showgetencodedcharcounters(void);
 
 #endif

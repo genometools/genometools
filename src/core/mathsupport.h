@@ -19,6 +19,8 @@
 #define MATHSUPPORT_H
 
 #include <stdbool.h>
+#include <math.h>
+#include <inttypes.h>
 
 /* Returns the log of the sum of two log probabilities. */
 double        gt_logsum(double p1, double p2);
@@ -35,5 +37,11 @@ double        gt_rand_max_double(double maximal_value);
 double        gt_rand_0_to_1(void);
 /* Returns a random character from 'a' to 'z'. */
 char          gt_rand_char(void);
+
+/* Find the log base 2 of an integer in O(wordsize) operations */
+
+#define GT_MAXLOG2VALUE 63
+
+unsigned int gt_determinebitspervalue(uint64_t maxvalue);
 
 #endif

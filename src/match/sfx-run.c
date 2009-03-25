@@ -33,7 +33,7 @@
 #include "spacedef.h"
 #include "stamp.h"
 #include "sfx-suffixer.h"
-#include "sfx-outlcp.h"
+#include "sfx-bentsedg.h"
 #include "sfx-input.h"
 #include "sfx-run.h"
 #include "opensfxfile.h"
@@ -86,10 +86,12 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (so->outlcptab)
   {
     outfileinfo->outlcpinfo
-      = newlcpoutinfo(so->outlcptab ? so->str_indexname : NULL,
+      = newOutlcpinfo(so->outlcptab ? so->str_indexname : NULL,
                       prefixlength,
                       getencseqAlphabetnumofchars(encseq),
-                      getencseqtotallength(encseq),err);
+                      getencseqtotallength(encseq),
+                      so->sfxstrategy.ssortmaxdepth.defined ? false : true,
+                      err);
     if (outfileinfo->outlcpinfo == NULL)
     {
       haserr = true;
@@ -136,7 +138,8 @@ static int suftab2file(Outfileinfo *outfileinfo,
       haserr = true;
     }
   }
-  if (!haserr)
+  if (!haserr &&
+      (!outfileinfo->longest.defined || outfileinfo->outfpbwttab != NULL))
   {
     Seqpos startpos, pos;
     Uchar cc = 0;
@@ -147,15 +150,11 @@ static int suftab2file(Outfileinfo *outfileinfo,
       if (startpos == 0)
       {
         cc = (Uchar) UNDEFBWTCHAR;
-        if (outfileinfo->longest.defined)
+        if (!outfileinfo->longest.defined)
         {
-          gt_error_set(err,"longest = " FormatSeqpos " is already defined",
-                             PRINTSeqposcast(outfileinfo->longest.valueseqpos));
-          haserr = true;
-          break;
+          outfileinfo->longest.defined = true;
+          outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
         }
-        outfileinfo->longest.defined = true;
-        outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
       } else
       {
         if (outfileinfo->outfpbwttab != NULL)
@@ -215,11 +214,18 @@ static int suffixeratorwithoutput(
   {
     while (true)
     {
+      Seqpos longest;
+
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
                                   mtime,sfi);
       if (suftabptr == NULL)
       {
         break;
+      }
+      if (numofparts == 1U && sfi2longestsuffixpos(&longest,sfi))
+      {
+        outfileinfo->longest.defined = true;
+        outfileinfo->longest.valueseqpos = longest;
       }
       if (suftab2file(outfileinfo,suftabptr,readmode,numberofsuffixes,err) != 0)
       {
@@ -290,7 +296,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
   {
     *prefixlength = recommendedprefixlength(numofchars,totallength);
     showverbose(verboseinfo,
-                "automatically determined prefixlength = %u",
+                "automatically determined prefixlength=%u",
                 *prefixlength);
   } else
   {
@@ -315,29 +321,30 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                               totallength));
     }
   }
-  if (!haserr && so->maxdepth.defined)
+  if (!haserr && so->sfxstrategy.ssortmaxdepth.defined)
   {
-    if (so->maxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
+    if (so->sfxstrategy.ssortmaxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
     {
       maxdepth->defined = true;
       maxdepth->valueunsignedint = *prefixlength;
       showverbose(verboseinfo,
-                  "automatically determined maxdepth = %u",
+                  "automatically determined maxdepth=%u",
                   maxdepth->valueunsignedint);
     } else
     {
-      if (so->maxdepth.valueunsignedint < *prefixlength)
+      if (so->sfxstrategy.ssortmaxdepth.valueunsignedint < *prefixlength)
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint = *prefixlength;
         showverbose(verboseinfo,
-                    "set maxdepth = %u",maxdepth->valueunsignedint);
+                    "set maxdepth=%u",maxdepth->valueunsignedint);
       } else
       {
         maxdepth->defined = true;
-        maxdepth->valueunsignedint = so->maxdepth.valueunsignedint;
+        maxdepth->valueunsignedint
+          = so->sfxstrategy.ssortmaxdepth.valueunsignedint;
         showverbose(verboseinfo,
-                    "use maxdepth = %u",maxdepth->valueunsignedint);
+                    "use maxdepth=%u",maxdepth->valueunsignedint);
       }
     }
   }
@@ -413,7 +420,6 @@ static int runsuffixerator(bool doesa,
   bool haserr = false;
   Sfxseqinfo sfxseqinfo;
   unsigned int prefixlength;
-  Seqpos totallength = 0;
   Sfxstrategy sfxstrategy;
 
   gt_error_check(err);
@@ -481,10 +487,6 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    totallength = getencseqtotallength(sfxseqinfo.encseq);
-  }
-  if (!haserr)
-  {
     showsequencefeatures(verboseinfo,
                          sfxseqinfo.encseq,
                          sfxseqinfo.characterdistribution);
@@ -504,7 +506,7 @@ static int runsuffixerator(bool doesa,
   }
   prefixlength = so->prefixlength;
   sfxstrategy = so->sfxstrategy;
-  sfxstrategy.maxdepth.defined = false;
+  sfxstrategy.ssortmaxdepth.defined = false;
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
@@ -513,10 +515,10 @@ static int runsuffixerator(bool doesa,
       unsigned int numofchars = getencseqAlphabetnumofchars(sfxseqinfo.encseq);
 
       if (detpfxlenandmaxdepth(&prefixlength,
-                               &sfxstrategy.maxdepth,
+                               &sfxstrategy.ssortmaxdepth,
                                so,
                                numofchars,
-                               totallength,
+                               getencseqtotallength(sfxseqinfo.encseq),
                                verboseinfo,
                                err) != 0)
       {
@@ -601,7 +603,7 @@ static int runsuffixerator(bool doesa,
                    sfxseqinfo.readmode,
                    sfxseqinfo.encseq,
                    prefixlength,
-                   &sfxstrategy.maxdepth,
+                   &sfxstrategy.ssortmaxdepth,
                    numoflargelcpvalues,
                    maxbranchdepth,
                    &outfileinfo.longest,
@@ -616,7 +618,7 @@ static int runsuffixerator(bool doesa,
   }
   if (outfileinfo.outlcpinfo != NULL)
   {
-    freeoutlcptab(&outfileinfo.outlcpinfo);
+    freeOutlcptab(&outfileinfo.outlcpinfo);
   }
   freeSfxseqinfo(&sfxseqinfo);
   if (mtime != NULL)
@@ -641,14 +643,12 @@ int parseargsandcallsuffixerator(bool doesa,int argc,
 
     showverbose(verboseinfo,"sizeof (Seqpos)=%lu",
                 (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
-#ifdef INLINEDENCSEQ
-    showverbose(verboseinfo,"inlined encodeded sequence");
-#endif
     if (runsuffixerator(doesa,&so,verboseinfo,err) < 0)
     {
       haserr = true;
     }
     freeverboseinfo(&verboseinfo);
+    /*showgetencodedcharcounters(); */
   } else
   {
     if (retval < 0)

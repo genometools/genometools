@@ -70,12 +70,6 @@
 
 #define ISBWTSPECIAL(C) ((C) >= (Uchar) UNDEFBWTCHAR)
 
-/*
-  the size of the DNA alphabet
-*/
-
-#define DNAALPHASIZE       ((unsigned int) 4)
-
 /*@unused@*/ static inline unsigned long
                             containsspecialbytestring(const Uchar *seq,
                                                       unsigned long offset,

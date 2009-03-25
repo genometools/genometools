@@ -33,12 +33,12 @@ typedef struct
 {
   unsigned int numofparts,
                prefixlength;
-  Definedunsignedint maxdepth;
   GtStr *str_inputindex,
       *str_indexname,
       *str_smap,
       *str_sat;
-  GtStrArray *filenametab;
+  GtOption *optionalgboundsref;
+  GtStrArray *filenametab, *algbounds;
   Readmode readmode;
   bool isdna,
        isprotein,

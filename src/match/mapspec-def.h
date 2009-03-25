@@ -39,12 +39,13 @@ typedef enum
   Uint32Type,
   Uint64Type,
   UnsignedlongType,
-  BitstringType,
+  BitsequenceType,
   SeqposType,
   BwtboundType,
   PairBwtidxType,
   TwobitencodingType,
-  SpecialcharinfoType
+  SpecialcharinfoType,
+  BitElemType
 } Typespec;
 
 typedef struct

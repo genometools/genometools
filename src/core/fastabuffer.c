@@ -26,11 +26,11 @@
 #define NEWLINESYMBOL     '\n'
 
 GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
-                             const Uchar *symbolmap,
-                             bool plainformat,
-                             Filelengthvalues **filelengthtab,
-                             GtQueue *descptr,
-                             unsigned long *characterdistribution)
+                                  const Uchar *symbolmap,
+                                  bool plainformat,
+                                  Filelengthvalues **filelengthtab,
+                                  GtQueue *descptr,
+                                  unsigned long *characterdistribution)
 {
   GtFastaBuffer *fb;
   fb = gt_calloc(1, sizeof (GtFastaBuffer));
@@ -45,13 +45,15 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
   fb->complete = false;
   fb->lastspeciallength = 0;
   fb->descptr = descptr;
-  if (filelengthtab) {
+  if (filelengthtab)
+  {
     *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
                                sizeof (Filelengthvalues));
     fb->filelengthtab = *filelengthtab;
-  }
-  else
+  } else
+  {
     fb->filelengthtab = NULL;
+  }
   fb->characterdistribution = characterdistribution;
   INITARRAY(&fb->headerbuffer, char);
   return fb;
@@ -63,8 +65,8 @@ static inline int ownbuffer_genfile_getc(GtFastaBuffer *fb,
   if (fb->currentinpos >= fb->currentfillpos)
   {
     fb->currentfillpos = gt_genfile_xread(inputstream,
-                                       fb->inputbuffer,
-                                       (size_t) INPUTFILEBUFFERSIZE);
+                                          fb->inputbuffer,
+                                          (size_t) INPUTFILEBUFFERSIZE);
     if (fb->currentfillpos == 0)
     {
        return EOF;
@@ -109,7 +111,7 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
       fb->linenum = (uint64_t) 1;
       fb->inputstream = gt_genfile_xopen(gt_str_array_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
-                                       "rb");
+                                         "rb");
       fb->currentinpos = 0;
       fb->currentfillpos = 0;
     } else

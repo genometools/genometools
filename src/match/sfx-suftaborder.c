@@ -164,7 +164,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        GtError *err)
 {
   const Seqpos *ptr;
-  Bitstring *startposoccurs;
+  Bitsequence *startposoccurs;
   Seqpos maxlcp, countbitsset = 0, currentlcp = 0,
          totallength = getencseqtotallength(encseq);
   int cmp;
@@ -266,7 +266,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                           FormatSeqpos "(fast)\n",
                     PRINTSeqposcast(maxlcp),
                     PRINTSeqposcast(currentlcp));
-        /* exit(EXIT_FAILURE); programming error */
+        exit(EXIT_FAILURE); /* programming error */
       }
     }
   }

@@ -19,7 +19,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
@@ -31,6 +30,7 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
+#include "core/mathsupport.h"
 #include "spacedef.h"
 #include "qsorttype.h"
 #include "alphadef.h"
@@ -42,7 +42,9 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
   unsigned int domainsize,           /* size of domain of symbolmap */
                mapsize,              /* size of image of map, i.e. */
                                      /* mapping to [0..mapsize-1] */
-               mappedwildcards;      /* number of mapped wildcards */
+               mappedwildcards,      /* number of mapped wildcards */
+               bitspersymbol;        /* number of bits per symbol in
+                                        bitspackedarray */
   Uchar wildcardshow,
         symbolmap[MAXALPHABETCHARACTER+1], /* mapping of the symbols */
         *mapdomain,                  /* list of characters mapped */
@@ -59,11 +61,12 @@ struct SfxAlphabet                /* initial blank prevents select by skproto */
 
 #define DNABASES                     "aAcCgGtTuU"
 #define DNAWILDCARDS                 "nsywrkvbdhmNSYWRKVBDHM"
-#define MAPSIZEDNA                   5U
+#define MAPSIZEDNA                   (DNAALPHASIZE+1U)
 #define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
-#define MAPSIZEPROTEIN               21U
-#define PROTEINWILDCARDS             "XUBZ*-"
+#define PROTEINALPHASIZE             20U
+#define MAPSIZEPROTEIN               (PROTEINALPHASIZE+1U)
+#define PROTEINWILDCARDS             "XUBZO*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
 
 /*
@@ -256,6 +259,10 @@ static int readsymbolmapfromlines(SfxAlphabet *alpha,
       }
     }
   }
+  /* there are mapsize-1 characters plus wildcard plus separator.
+     hence there are mapsize+1 symbols in the range 0..mapsize.
+     that is, mapsize is the largest symbol and we obtain */
+  alpha->bitspersymbol = gt_determinebitspervalue((uint64_t) alpha->mapsize);
   return haserr ? -1 : 0;
 }
 
@@ -358,6 +365,7 @@ static void assignDNAalphabet(SfxAlphabet *alpha)
   alpha->wildcardshow = (Uchar) DNAWILDCARDS[0];
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
   alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
+  alpha->bitspersymbol = 3U; /* as we have to represent 4 + 2 characters */
   ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
   memcpy(alpha->mapdomain,(Uchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
@@ -422,6 +430,7 @@ static void assignProteinalphabet(SfxAlphabet *alpha)
   alpha->wildcardshow = (Uchar) PROTEINWILDCARDS[0];
   alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
   alpha->mappedwildcards = (unsigned int) strlen(PROTEINWILDCARDS);
+  alpha->bitspersymbol = 5U; /* as we have to represent 20 + 2 characters */
   ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
   memcpy(alpha->mapdomain,
          (Uchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
@@ -546,6 +555,11 @@ const Uchar *getcharactersAlphabet(const SfxAlphabet *alpha)
 Uchar getwildcardshowAlphabet(const SfxAlphabet *alpha)
 {
   return alpha->wildcardshow;
+}
+
+unsigned int getbitspersymbolAlphabet(const SfxAlphabet *alpha)
+{
+  return alpha->bitspersymbol;
 }
 
 void outputalphabet(FILE *fpout,const SfxAlphabet *alpha)

@@ -30,6 +30,6 @@ comparefiles()
 
 options="$*"
 
-checkerror "../bin/gt suffixerator -indexname /tmp/idx-sfx -des ${options}"
+checkerror "../bin/gt suffixerator -algbds 3 40 120 -indexname /tmp/idx-sfx -des ${options}"
 checkerror "mkvtree.sh -indexname /tmp/idx-mkv -dna ${options}"
 comparefiles /tmp/idx-mkv.prj /tmp/idx-sfx.prj

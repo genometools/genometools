@@ -32,7 +32,7 @@ GtTokenizer* gt_tokenizer_new(GtIO *io)
 {
   GtTokenizer *t;
   gt_assert(io);
-  t = gt_calloc(1, sizeof (GtTokenizer));
+  t = gt_calloc(1, sizeof *t);
   t->io = io;
   return t;
 }

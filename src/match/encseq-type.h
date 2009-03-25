@@ -20,14 +20,16 @@
 /*
   The contents of this file is to be considered private
   implementation detail but, whenever the code is compiled with option
-  INLINEDENCSEQ, is exposed to the compiler solely for performance reasons.
-  So we can compare the time overhead of a bytearray implementation of
-  strings to all other represenations implemented in encodedseq.c.
+  INLINEDENCSEQ, is exposed to the compiler solely for performance
+  optimization. So we can compare the time overhead of a bytearray
+  implementation of strings to all other represenations implemented in
+  encodedseq.c.
 */
 
 #include "core/symboldef.h"
 #include "core/str_array_api.h"
 #include "core/filelengthvalues.h"
+#include "bitpack-itf.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "intbits.h"
@@ -36,6 +38,7 @@
 typedef enum
 {
   Viadirectaccess,
+  Viabytecompress,
   Viabitaccess,
   Viauchartables,
   Viaushorttables,
@@ -48,8 +51,8 @@ typedef uint32_t Uint32;
 struct Encodedsequence
 {
   /* Common part */
- unsigned long *satcharptr; /* need for writing char */
- Positionaccesstype sat;
+  unsigned long *satcharptr; /* need for writing char */
+  Positionaccesstype sat;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   unsigned long numofspecialstostore;
   Seqpos *totallengthptr,
@@ -101,8 +104,12 @@ struct Encodedsequence
   Uchar *plainseq;
   bool hasplainseqptr;
 
+  /* only for Viabytecompress */
+  BitPackArray *bitpackarray;
+  unsigned int numofchars; /* used to have faster access in getencodedchar */
+
   /* only for Viabitaccess */
-  Bitstring *specialbits;
+  Bitsequence *specialbits;
 
   /* only for Viauchartables */
   Uchar *ucharspecialpositions,

@@ -570,7 +570,7 @@ unsigned int singletonmaxprefixindex(const Bcktab *bcktab,Codetype code)
 }
 
 unsigned int pfxidx2lcpvalues(unsigned int *minprefixindex,
-                              Uchar *lcpsubtab,
+                              uint8_t *lcpsubtab,
                               unsigned long specialsinbucket,
                               const Bcktab *bcktab,
                               Codetype code)

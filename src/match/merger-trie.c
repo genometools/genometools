@@ -190,7 +190,7 @@ void showmergertrie(const Mergertrierep *trierep,
 static void checkmergertrie2(Mergertrierep *trierep,
                              Mergertrienode *node,
                              Mergertrienode *father,
-                             Bitstring *leafused,
+                             Bitsequence *leafused,
                              unsigned int *numberofbitsset)
 {
   Mergertrienode *current, *previous;
@@ -249,7 +249,7 @@ void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
   gt_error_check(err);
   if (trierep->root != NULL)
   {
-    Bitstring *leafused;
+    Bitsequence *leafused;
     unsigned int numberofbitsset = 0;
 
     INITBITTAB(leafused,maxleafnum+1);

@@ -53,7 +53,8 @@ static OPrval parse_options(int *parsed_args,
          *optiondir,
          *optionstorespecialcodes,
          *optionmaxwidthrealmedian,
-         *optionmaxbltriesort,
+         *optionalgbounds,
+         *optionparts,
          *optiondes;
   OPrval oprval;
   GtStr *dirarg = gt_str_new();
@@ -119,7 +120,8 @@ static OPrval parse_options(int *parsed_args,
                                             "restrict suffix sorting "
                                             "to prefixes "
                                             "of the given length",
-                                            &so->maxdepth.valueunsignedint,
+                                            &so->sfxstrategy.ssortmaxdepth.
+                                                 valueunsignedint,
                                             MAXDEPTH_AUTOMATIC,
                                             1U);
     gt_option_is_development_option(optionmaxdepth);
@@ -131,7 +133,7 @@ static OPrval parse_options(int *parsed_args,
     optionmaxdepth = NULL;
   }
   optioncmpcharbychar = gt_option_new_bool("cmpcharbychar",
-                                           "compare suffixes by character "
+                                           "compare suffixes character "
                                            "by character",
                                            &so->sfxstrategy.cmpcharbychar,
                                            false);
@@ -148,14 +150,17 @@ static OPrval parse_options(int *parsed_args,
   gt_option_is_development_option(optionmaxwidthrealmedian);
   gt_option_parser_add_option(op, optionmaxwidthrealmedian);
 
-  optionmaxbltriesort = gt_option_new_ulong("maxbltriesort",
-                                            "all intervals of specified size "
-                                            "and smaller are sorted by blind "
-                                            "trie sorting algorithm",
-                                            &so->sfxstrategy.maxbltriesort,
-                                            10U);
-  gt_option_is_development_option(optionmaxbltriesort);
-  gt_option_parser_add_option(op, optionmaxbltriesort);
+  optionalgbounds
+    = gt_option_new_stringarray("algbds",
+                                "length boundaries for the different "
+                                "algorithms to sort buckets of suffixes\n"
+                                "first number: maxbound for insertion sort\n"
+                                "second number: maxbound for blindtrie sort\n"
+                                "third number: maxbound for counting sort\n",
+                                so->algbounds);
+  gt_option_is_development_option(optionalgbounds);
+  gt_option_parser_add_option(op, optionalgbounds);
+  so->optionalgboundsref = gt_option_ref(optionalgbounds);
 
   optionstorespecialcodes
     = gt_option_new_bool("storespecialcodes",
@@ -164,14 +169,14 @@ static OPrval parse_options(int *parsed_args,
   gt_option_is_development_option(optionstorespecialcodes);
   gt_option_parser_add_option(op, optionstorespecialcodes);
 
-  option = gt_option_new_uint_min("parts",
-                                  "specify number of parts in which the "
-                                  "sequence is processed",
-                                  &so->numofparts,
-                                  1U,
-                                  1U);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  optionparts = gt_option_new_uint_min("parts",
+                                       "specify number of parts in which the "
+                                       "sequence is processed",
+                                       &so->numofparts,
+                                       1U,
+                                       1U);
+  gt_option_is_development_option(optionparts);
+  gt_option_parser_add_option(op, optionparts);
 
   optionsat = gt_option_new_string("sat",
                                    "specify kind of sequence representation",
@@ -251,14 +256,6 @@ static OPrval parse_options(int *parsed_args,
   gt_option_exclude(optionsmap, optiondna);
   gt_option_exclude(optionsmap, optionprotein);
   gt_option_exclude(optiondna, optionprotein);
-  if (doesa)
-  {
-    gt_assert(optionmaxdepth != NULL);
-    gt_option_exclude(optionmaxdepth, optionlcp);
-                   /* because lcp table may be incorrect. XXX change later */
-    gt_option_exclude(optionmaxdepth, optionbwt);
-                   /* because bwt table may be incorrect. XXX change later */
-  }
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   if (oprval == OPTIONPARSER_OK)
@@ -316,7 +313,17 @@ static OPrval parse_options(int *parsed_args,
     gt_assert(optionmaxdepth != NULL);
     if (gt_option_is_set(optionmaxdepth))
     {
-      so->maxdepth.defined = true;
+      if (so->numofparts > 1U)
+      {
+        gt_error_set(err,"option -maxdepth can only be used either without "
+                         "option -parts or with option -parts 1");
+        oprval = OPTIONPARSER_ERROR;
+      }
+      so->sfxstrategy.ssortmaxdepth.defined = true;
+      if (so->sfxstrategy.ssortmaxdepth.valueunsignedint != MAXDEPTH_AUTOMATIC)
+      {
+        so->sfxstrategy.cmpcharbychar = true;
+      }
     }
   }
   if (oprval == OPTIONPARSER_OK && !doesa)
@@ -407,7 +414,22 @@ void wrapsfxoptions(Suffixeratoroptions *so)
   gt_str_delete(so->str_smap);
   gt_str_delete(so->str_sat);
   gt_str_array_delete(so->filenametab);
+  gt_str_array_delete(so->algbounds);
+  gt_option_delete(so->optionalgboundsref);
 }
+
+#define READMAXBOUND(COMP,IDX)\
+        if (retval == 0)\
+        {\
+          arg = gt_str_array_get(so->algbounds,IDX);\
+          if (sscanf(arg,"%ld",&readint) != 1 || readint <= 0)\
+          {\
+            gt_error_set(err,"option -algbds: all arguments must be positive "\
+                             "numbers");\
+            retval = -1;\
+          }\
+          so->sfxstrategy.COMP = (unsigned long) readint;\
+        }
 
 int suffixeratoroptions(Suffixeratoroptions *so,
                         bool doesa,
@@ -426,9 +448,10 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = gt_str_new();
   so->str_sat = gt_str_new();
   so->filenametab = gt_str_array_new();
+  so->algbounds = gt_str_array_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
-  so->maxdepth.defined = false;
-  so->maxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
+  so->sfxstrategy.ssortmaxdepth.defined = false;
+  so->sfxstrategy.ssortmaxdepth.valueunsignedint = MAXDEPTH_AUTOMATIC;
   so->outsuftab = false; /* if !doesa this is not defined */
   so->outlcptab = false;
   so->outbwttab = false;
@@ -450,6 +473,51 @@ int suffixeratoroptions(Suffixeratoroptions *so,
         {
           showoptions(so);
         }
+      }
+    }
+  }
+  if (gt_option_is_set(so->optionalgboundsref))
+  {
+    const char *arg;
+    long readint;
+
+    if (gt_str_array_size(so->algbounds) != 3)
+    {
+      gt_error_set(err,"option -algbds must have exactly 3 arguments");
+      retval = -1;
+    }
+    READMAXBOUND(maxinsertionsort,0);
+    READMAXBOUND(maxbltriesort,1);
+    READMAXBOUND(maxcountingsort,2);
+  } else
+  {
+    so->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
+    so->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
+    so->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
+  }
+  if (retval != -1)
+  {
+    if (so->beverbose)
+    {
+      showdefinitelyverbose("maxinsertionsort=%lu",
+                            so->sfxstrategy.maxinsertionsort);
+      showdefinitelyverbose("maxbltriesort=%lu",
+                            so->sfxstrategy.maxbltriesort);
+      showdefinitelyverbose("maxcountingsort=%lu",
+                            so->sfxstrategy.maxcountingsort);
+    }
+    if (so->sfxstrategy.maxinsertionsort > so->sfxstrategy.maxbltriesort)
+    {
+      gt_error_set(err,"first argument of option -algbds must not be larger "
+                       "than second argument");
+      retval = -1;
+    } else
+    {
+      if (so->sfxstrategy.maxbltriesort > so->sfxstrategy.maxcountingsort)
+      {
+        gt_error_set(err,"second argument of option -algbds must not be larger "
+                         "than third argument");
+        retval = -1;
       }
     }
   }

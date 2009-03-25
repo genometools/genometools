@@ -17,6 +17,8 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <inttypes.h>
 #include "core/assert_api.h"
 #include "core/mathsupport.h"
 #include "core/yarandom.h"
@@ -101,3 +103,47 @@ char gt_rand_char(void)
   gt_assert(c >= 'a' && c <= 'z');
   return c;
 }
+
+/*
+  Find the log base 2 of an integer in O(wordsize) operations.
+  where N is the number of bits. There are faster methods, see
+  \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
+*/
+
+unsigned int gt_determinebitspervalue(uint64_t maxvalue)
+{
+  unsigned int bits = 0;
+  uint64_t value;
+
+  for (value = maxvalue; value > 0; value >>= 1)
+  {
+    bits++;
+  }
+  if (bits > GT_MAXLOG2VALUE)
+  {
+    fprintf(stderr,"log2(" "%" PRIu64 ")=%u\n",maxvalue,bits);
+    exit(EXIT_FAILURE);
+  }
+  gt_assert(bits <= GT_MAXLOG2VALUE);
+  return bits;
+}
+
+/*
+The following does not work:
+unsigned int determinebitspervalue(uint64_t v)
+{
+  uint64_t r, shift;
+  unsigned int bits;
+
+  bits = determinebitspervalue_obvious(v);
+  r =     (v > 0xFFFFFFFF) << 5; v >>= r;
+  shift = (v > 0xFFFF    ) << 4; v >>= shift; r |= shift;
+  shift = (v > 0xFF      ) << 3; v >>= shift; r |= shift;
+  shift = (v > 0xF       ) << 2; v >>= shift; r |= shift;
+  shift = (v > 0x3       ) << 1; v >>= shift; r |= shift;
+                                              r |= (v >> 1);
+
+  gt_assert(bits == (unsigned int) r);
+  return (unsigned int) r;
+}
+*/

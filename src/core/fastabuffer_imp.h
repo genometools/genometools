@@ -50,7 +50,8 @@ struct GtFastaBuffer
 
 int gt_fastabuffer_advance(GtFastaBuffer *fb, GtError*);
 
-static inline int gt_fastabuffer_next(GtFastaBuffer *fb,Uchar *val,
+static inline int gt_fastabuffer_next(GtFastaBuffer *fb,
+                                      Uchar *val,
                                       GtError *err)
 {
   if (fb->nextread >= fb->nextfree)

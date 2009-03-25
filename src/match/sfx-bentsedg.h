@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_OUTLCP_H
-#define SFX_OUTLCP_H
+#ifndef SFX_BENTSEDG_H
+#define SFX_BENTSEDG_H
 #include <stdio.h>
 #include "core/error.h"
 #include "core/str.h"
@@ -24,34 +24,57 @@
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "seqpos-def.h"
+#include "sfx-strategy.h"
 #include "bcktab.h"
 
-Outlcpinfo *newlcpoutinfo(const GtStr *indexname,
+typedef struct Outlcpinfo Outlcpinfo;
+
+typedef struct
+{
+  Seqpos *sortspace,
+         offset; /* negative offset */
+  DefinedSeqpos longest;
+} Suftab;
+
+Outlcpinfo *newOutlcpinfo(const GtStr *indexname,
                           unsigned int prefixlength,
                           unsigned int numofchars,
                           Seqpos totallength,
+                          bool assideeffect,
                           GtError *err);
 
-void freeoutlcptab(Outlcpinfo **outlcpinfo);
+void freeOutlcptab(Outlcpinfo **outlcpinfoptr);
 
 Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
-void sortallbuckets(Seqpos *suftabptr,
+void qsufsort(Suftab *suftab,
+              const Encodedsequence *encseq,
+              Readmode readmode,
+              Codetype mincode,
+              Codetype maxcode,
+              Seqpos partwidth,
+              const Bcktab *bcktab,
+              unsigned int numofchars,
+              unsigned int prefixlength,
+              Outlcpinfo *outlcpinfo,
+              const Sfxstrategy *sfxstrategy,
+              unsigned long long *bucketiterstep,
+              Verboseinfo *verboseinfo);
+
+void sortallbuckets(Suftab *suftab,
                     const Encodedsequence *encseq,
                     Readmode readmode,
                     Codetype mincode,
                     Codetype maxcode,
-                    Seqpos totalwidth,
+                    Seqpos partwidth,
                     const Bcktab *bcktab,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     Outlcpinfo *outlcpinfo,
-                    const Definedunsignedint *maxdepth,
-                    bool cmpcharbychar,
-                    unsigned long maxwidthrealmedian,
-                    unsigned long maxbltriesort,
-                    unsigned long long *bucketiterstep);
+                    const Sfxstrategy *sfxstrategy,
+                    unsigned long long *bucketiterstep,
+                    Verboseinfo *verboseinfo);
 
 #endif

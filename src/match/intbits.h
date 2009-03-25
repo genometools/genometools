@@ -22,25 +22,25 @@
 
 /*
   This file contains some definitions manipulating bitvectors represented
-  by a \texttt{Bitstring}. In the comment lines we use $w$ for the word size
+  by a \texttt{Bitsequence}. In the comment lines we use $w$ for the word size
   and \texttt{\symbol{94}} for exponentiation of the previous character.
 */
 
 #ifdef _LP64
 
 #define LOGWORDSIZE    6         /* base 2 logarithm of wordsize */
-typedef uint64_t Bitstring;
+typedef uint64_t Bitsequence;
 #else
 
 #define LOGWORDSIZE   5               /* base 2 logarithm of wordsize */
-typedef uint32_t Bitstring;
+typedef uint32_t Bitsequence;
 
 #endif
 
 #define INTWORDSIZE\
-        (((Bitstring) 1) << LOGWORDSIZE) /* # of bits in unsigned long = w */
+        (((Bitsequence) 1) << LOGWORDSIZE) /* # of bits in unsigned long = w */
 #define FIRSTBIT\
-        (((Bitstring) 1) << (INTWORDSIZE-1)) /* \(10^{w-1}\) */
+        (((Bitsequence) 1) << (INTWORDSIZE-1)) /* \(10^{w-1}\) */
 #define ISBITSET(S,I)\
         (((S) << (I)) & FIRSTBIT)         /* is \(i\)th bit set? */
 #define ITHBIT(I)\
@@ -54,7 +54,7 @@ typedef uint32_t Bitstring;
 #define FIFTHBIT\
         (FIRSTBIT >> 4)                   /* \(000010^{w-3}\) */
 #define FIRSTTWOBITS\
-        (((Bitstring) 3) << (INTWORDSIZE-2)) /* \(11^{w-2}\) */
+        (((Bitsequence) 3) << (INTWORDSIZE-2)) /* \(11^{w-2}\) */
 #define EXCEPTFIRSTBIT\
         (~FIRSTBIT)                       /* \(01^{w-1}\) */
 #define EXCEPTFIRSTTWOBITS\

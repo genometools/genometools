@@ -25,6 +25,7 @@
 typedef struct {
   GtHashmap *allocated_pointer;
   bool bookkeeping;
+  unsigned long long mallocevents;
   unsigned long current_size,
                 max_size;
 } MA;
@@ -52,7 +53,7 @@ void gt_ma_init(bool bookkeeping)
   ma = gt_xcalloc(1, sizeof (MA));
   gt_assert(!ma->bookkeeping);
   ma->allocated_pointer = gt_hashmap_new(HASH_DIRECT, NULL,
-                                      (GtFree) free_MAInfo);
+                                         (GtFree) free_MAInfo);
   /* MA is ready to use */
   ma->bookkeeping = bookkeeping;
 }
@@ -80,7 +81,8 @@ void* gt_malloc_mem(size_t size, const char *filename, int line)
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    mainfo = gt_xmalloc(sizeof (MAInfo));
+    ma->mallocevents++;
+    mainfo = gt_xmalloc(sizeof *mainfo);
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
@@ -101,7 +103,8 @@ void* gt_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    mainfo = gt_xmalloc(sizeof (MAInfo));
+    ma->mallocevents++;
+    mainfo = gt_xmalloc(sizeof *mainfo);
     mainfo->size = nmemb * size;
     mainfo->filename = filename;
     mainfo->line = line;
@@ -122,13 +125,14 @@ void* gt_realloc_mem(void *ptr, size_t size, const char *filename, int line)
   gt_assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
+    ma->mallocevents++;
     if (ptr) {
       mainfo = gt_hashmap_get(ma->allocated_pointer, ptr);
       gt_assert(mainfo);
       subtract_size(ma, mainfo->size);
       gt_hashmap_remove(ma->allocated_pointer, ptr);
     }
-    mainfo = gt_xmalloc(sizeof (MAInfo));
+    mainfo = gt_xmalloc(sizeof *mainfo);
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
@@ -197,8 +201,9 @@ unsigned long gt_ma_get_space_peak(void)
 void gt_ma_show_space_peak(FILE *fp)
 {
   gt_assert(ma);
-  fprintf(fp, "# space peak in megabytes: %.2f\n",
-          (double) ma->max_size / (1 << 20));
+  fprintf(fp, "# space peak in megabytes: %.2f (in %llu events)\n",
+          (double) ma->max_size / (1 << 20),
+          ma->mallocevents);
 }
 
 int gt_ma_check_space_leak(void)
@@ -208,7 +213,7 @@ int gt_ma_check_space_leak(void)
   gt_assert(ma);
   info.has_leak = false;
   had_err = gt_hashmap_foreach(ma->allocated_pointer, check_space_leak, &info,
-                              NULL);
+                               NULL);
   gt_assert(!had_err); /* cannot happen, check_space_leak() is sane */
   if (info.has_leak)
     return -1;

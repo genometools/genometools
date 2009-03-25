@@ -26,6 +26,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
@@ -38,7 +39,25 @@ struct BitPackArray
   unsigned bitsPerElem;
 };
 
+/* SK added the following macro, as we need the structure component,
+   to store a pointer to the address, which is used when mapping the
+   bitpackarray as part of a larger memory map */
+
+#define BITPACKARRAYSTOREVAR(BPA) (BPA)->store
+
 typedef struct BitPackArray BitPackArray;
+
+/**
+ * determine size of BitPackArray structure.
+ * @param bits number of bits to encode each value stored with
+ * @param numValues number of values to store
+ * @return size
+ */
+
+static inline size_t sizeofbitarray(unsigned bits, BitOffset numValues)
+{
+  return bitElemsAllocSize(bits * numValues) * sizeof (BitElem);
+}
 
 /**
  * Create new BitPackArray structure.
@@ -47,16 +66,22 @@ typedef struct BitPackArray BitPackArray;
  * @return pointer to new BitPackArray structure or NULL on failure
  */
 static inline BitPackArray *
-bitpackarray_new(unsigned bits, BitOffset numValues)
+bitpackarray_new(unsigned bits, BitOffset numValues, bool withstorealloc)
 {
   BitPackArray *newBPA = gt_malloc(sizeof (*newBPA));
   if (newBPA)
   {
-    if (!(newBPA->store = gt_malloc(bitElemsAllocSize(bits*numValues)
-                                    * sizeof (BitElem))))
+    if (withstorealloc)
     {
-      gt_free(newBPA);
-      return NULL;
+      if (!(newBPA->store = gt_calloc(bitElemsAllocSize(bits*numValues),
+                                      sizeof (BitElem))))
+      {
+        gt_free(newBPA);
+        return NULL;
+      }
+    } else
+    {
+      newBPA->store = NULL;
     }
     newBPA->bitsPerElem = bits;
     newBPA->numElems = numValues;
@@ -142,5 +167,23 @@ bitpackarray_get_uint64(const BitPackArray *array, BitOffset index)
  */
 extern int
 gt_bitpackarray_unit_test(GtError*);
+
+/*
+static inline void showbitpackarray(const BitPackArray *bitpackarray)
+{
+  unsigned long numofunits, idx;
+
+  gt_assert(bitpackarray != NULL);
+  gt_assert(bitpackarray->store != NULL);
+  numofunits = (unsigned long) sizeofbitarray(bitpackarray->bitsPerElem,
+                                              bitpackarray->numElems);
+  printf("numofunits=%lu\n",numofunits);
+  for (idx=0; idx < numofunits; idx++)
+  {
+    printf("%lu: %u\n",idx,(unsigned int) bitpackarray->store[idx]);
+    fflush(stdout);
+  }
+}
+*/
 
 #endif

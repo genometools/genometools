@@ -84,7 +84,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
      += currentspecialrangevalue(key,distvalue,(unsigned long) UINT32_MAX);
   updatesumrangeinfo->realspecialranges += distvalue;
   showverbose(updatesumrangeinfo->verboseinfo,
-              "specialranges of length %lu: %lu",key,distvalue);
+              "specialranges of length %lu=%lu",key,distvalue);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
@@ -129,7 +129,8 @@ static void doupdatesumranges(Specialcharinfo *specialcharinfo,
   {
     if (forcetable == 3U || c == (int) forcetable)
     {
-      tmp = detsizeencseq(c,totallength,specialrangestab[c],numofchars);
+      tmp = detencseqofsatviatables(c,totallength,specialrangestab[c],
+                                    numofchars);
       if (!smallestdefined || tmp < smallestsize)
       {
         smallestdefined = true;

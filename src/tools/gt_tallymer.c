@@ -310,7 +310,7 @@ typedef struct
   GtStr *str_inputindex;
   GtOption *refoptionmersizes;
   unsigned long minmersize, maxmersize, stepmersize;
-  Bitstring *outputvector;
+  Bitsequence *outputvector;
   unsigned int outputmode;
   bool scanfile,
        verbose;
@@ -575,7 +575,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
 }
 
 static void showitvdistribution(const Arrayuint64_t *dist,
-                                const Bitstring *outputvector)
+                                const Bitsequence *outputvector)
 {
   unsigned long idx;
 
@@ -603,7 +603,7 @@ typedef enum
 static void showitvsumdistributionoftwo(Summode mode,
                                         const Arrayuint64_t *dist1,
                                         const Arrayuint64_t *dist2,
-                                        const Bitstring *outputvector)
+                                        const Bitsequence *outputvector)
 {
   unsigned long idx;
   uint64_t sumoftwo, tmp;
@@ -677,7 +677,7 @@ static void showoccratios(const Arrayuint64_t *uniquedistribution,
                           const Arrayuint64_t *nonuniquedistribution,
                           const Arrayuint64_t *nonuniquemultidistribution,
                           unsigned int outputmode,
-                          const Bitstring *outputvector)
+                          const Bitsequence *outputvector)
 {
   if (outputmode & TYROCC_OUTPUTUNIQUE)
   {

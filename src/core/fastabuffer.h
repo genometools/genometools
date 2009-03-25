@@ -28,10 +28,11 @@
 typedef struct GtFastaBuffer GtFastaBuffer;
 
 GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
-                             const Uchar *symbolmap, bool plainformat,
-                             Filelengthvalues **filelengthtab,
-                             GtQueue *descptr,
-                             unsigned long *characterdistribution);
+                                  const Uchar *symbolmap,
+                                  bool plainformat,
+                                  Filelengthvalues **filelengthtab,
+                                  GtQueue *descptr,
+                                  unsigned long *characterdistribution);
 static int   gt_fastabuffer_next(GtFastaBuffer*, Uchar *val, GtError*);
 void         gt_fastabuffer_delete(GtFastaBuffer*);
 

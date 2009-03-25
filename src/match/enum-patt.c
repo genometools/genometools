@@ -76,7 +76,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   return epi;
 }
 
-static void reverseinplace(Uchar *s,unsigned long len)
+static void reversesequenceinplace(Uchar *s,unsigned long len)
 {
   Uchar *front, *back, tmp;
 
@@ -120,7 +120,7 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
   }
   if (epi->samplecount & 1)
   {
-    reverseinplace(epi->patternspace,*patternlen);
+    reversesequenceinplace(epi->patternspace,*patternlen);
   }
   epi->samplecount++;
   epi->patternstat[*patternlen]++;

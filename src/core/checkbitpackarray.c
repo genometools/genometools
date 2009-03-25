@@ -50,7 +50,7 @@ int gt_bitpackarray_unit_test(GtError *err)
 
     gt_log_log("numRnd=%lu\n", (long unsigned)numRnd);
     randSrc = gt_malloc(sizeof (uint32_t)*numRnd);
-    bitStore = bitpackarray_new(bits, numRnd);
+    bitStore = bitpackarray_new(bits, numRnd,true);
     randCmp = gt_malloc(sizeof (uint32_t)*numRnd);
     for (i = 0; i < numRnd; ++i)
     {
@@ -92,7 +92,7 @@ int gt_bitpackarray_unit_test(GtError *err)
     else
       mask = ~((~(uint64_t)0)<<bits);
     ensure(had_err, (randSrc = gt_malloc(sizeof (uint64_t)*numRnd))
-           && (bitStore = bitpackarray_new(bits, numRnd))
+           && (bitStore = bitpackarray_new(bits, numRnd,true))
            && (randCmp = gt_malloc(sizeof (uint64_t)*numRnd)));
     if (had_err)
     {

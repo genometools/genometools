@@ -23,6 +23,9 @@
 #include "procmatch.h"
 #include "pckbucket.h"
 
+/* XXX make use of the types declared by the EIS-tools, similar to
+  the module bitpack-itf.h */
+
 Seqpos bwtseqfirstmatch(const void *voidbwtseq,Seqpos bound)
 {
   struct extBitsRetrieval extBits;
