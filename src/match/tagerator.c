@@ -733,8 +733,10 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   }
   if (genericindex == NULL)
   {
-    gt_assert(encseq != NULL);
-    freeEncodedsequence((Encodedsequence **) &encseq);
+    if (encseq != NULL)
+    {
+      freeEncodedsequence((Encodedsequence **) &encseq);
+    }
   } else
   {
     genericindex_delete(genericindex);

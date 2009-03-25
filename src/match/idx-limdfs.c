@@ -64,6 +64,7 @@ void genericindex_delete(Genericindex *genericindex)
 
 const Encodedsequence *genericindex_getencseq(const Genericindex *genericindex)
 {
+  gt_assert(genericindex->suffixarray->encseq != NULL);
   return genericindex->suffixarray->encseq;
 }
 
