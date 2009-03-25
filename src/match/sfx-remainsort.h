@@ -34,7 +34,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           Seqpos partwidth);
 
 void addunsortedrange(Rmnsufinfo *rmnsufinfo,
-                      Seqpos *left,Seqpos *right,Seqpos depth);
+                      Seqpos left,Seqpos right,Seqpos depth);
 
 void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
                                 Codetype mincode,

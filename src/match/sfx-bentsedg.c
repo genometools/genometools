@@ -72,6 +72,9 @@
           *bptr++ = temp;\
         }
 
+#define SUFTABINDEX(PTR) (Seqpos) ((PTR) + bsr->suftab->offset -\
+                                           bsr->suftab->sortspace)
+
 #define SUBSORT(WIDTH,LEFT,RIGHT,DEPTH,ORDERTYPE)\
         /*checksuffixrange(bsr->encseq,\
                            bsr->fwd,\
@@ -88,7 +91,8 @@
             if ((DEPTH) >= \
                 (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)\
             {\
-              addunsortedrange(bsr->rmnsufinfo,LEFT,RIGHT,DEPTH);\
+              addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(LEFT),\
+                               SUFTABINDEX(RIGHT),DEPTH);\
             } else\
             {\
               PUSHMKVSTACK(LEFT,RIGHT,DEPTH,ORDERTYPE);\
@@ -397,6 +401,7 @@ typedef struct
   unsigned long leftlcpdist[UNITSIN2BITENC],
                 rightlcpdist[UNITSIN2BITENC];
   DefinedSeqpos *longest;
+  Suftab *suftab;
 #ifdef WIDTHDISTRIB
   unsigned long *widthdistrib;
 #endif
@@ -1030,7 +1035,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   {
     if (depth >= (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
     {
-      addunsortedrange(bsr->rmnsufinfo,left,right,depth);
+      addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),SUFTABINDEX(right),
+                       depth);
       return;
     }
   } else
@@ -1720,7 +1726,7 @@ Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo)
 }
 
 static void initBentsedgresources(Bentsedgresources *bsr,
-                                  Seqpos *suftabptr,
+                                  Suftab *suftab,
                                   DefinedSeqpos *longest,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
@@ -1740,6 +1746,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->readmode = readmode;
   bsr->totallength = getencseqtotallength(encseq);
   bsr->sfxstrategy = sfxstrategy;
+  bsr->suftab = suftab;
   bsr->encseq = encseq;
   bsr->longest = longest;
   bsr->fwd = ISDIRREVERSE(bsr->readmode) ? false : true;
@@ -1822,7 +1829,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (sfxstrategy->ssortmaxdepth.defined)
   {
-    bsr->rmnsufinfo = newRmnsufinfo(suftabptr,
+    bsr->rmnsufinfo = newRmnsufinfo(suftab->sortspace - suftab->offset,
                                     -1,
                                     bsr->encseq,
                                     bcktab,
@@ -1958,7 +1965,7 @@ void sortallbuckets(Suftab *suftab,
   Seqpos *suftabptr = suftab->sortspace - suftab->offset;
 
   initBentsedgresources(&bsr,
-                        suftabptr,
+                        suftab,
                         &suftab->longest,
                         encseq,
                         readmode,
