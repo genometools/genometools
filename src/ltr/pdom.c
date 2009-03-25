@@ -131,7 +131,7 @@ void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
     snprintf(cpbuf, BUFSIZ, "%6s %s\n", " ", buffer);
     gt_str_append_cstr(dest, cpbuf);
     strncpy(buffer, matched+pos, width);
-    snprintf(cpbuf, BUFSIZ, "%6lu %s %6lu\n",
+    snprintf(cpbuf, BUFSIZ, "%6lu %s %6lu\n\n",
                             match_start,
                             buffer,
                             match_end);
