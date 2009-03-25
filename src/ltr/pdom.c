@@ -114,12 +114,15 @@ void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
   mline = gt_str_get(sh->mline);
   matched = gt_str_get(sh->aa_seq_matched);
   gt_str_reset(dest);
-  
+
   match_end = sh->range.start - 1;
-  for (pos = 0; pos < gt_range_length(&sh->range) + width; pos += width)
+
+  if (width > gt_range_length(&sh->range))
+    width = gt_range_length(&sh->range);
+  for (pos = 0; pos <= gt_range_length(&sh->range) - width; pos += width)
   {
     match_start = match_end + 1;
-    for (i = pos; matched[i] != '\0' && i < pos + width; i++)
+    for (i = pos; i < pos + width && matched[i] != '\0'; i++)
       if (!isgap(matched[i])) match_end++;
     strncpy(buffer, model+pos, width);
     snprintf(cpbuf, BUFSIZ, "%6s %s\n", " ", buffer);
@@ -145,7 +148,6 @@ static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
   hit->phase = gt_phase_get(singlehit->name[0]);
   hit->range.start = singlehit->sqfrom;
   hit->range.end = singlehit->sqto;
-  gt_assert(hit->range.end - hit->range.start + 1 == singlehit->ali->len);
   hit->eval = singlehit->pvalue;
   if (singlehit->ali && singlehit->ali->aseq)
     hit->aa_seq_matched = gt_str_new_cstr(singlehit->ali->aseq);
@@ -192,6 +194,9 @@ void gt_pdom_single_hit_delete(void *value)
     sh->reference_count--;
     return;
   }
+  gt_str_delete(sh->aa_seq_matched);
+  gt_str_delete(sh->aa_seq_model);
+  gt_str_delete(sh->mline);
   gt_free(sh);
 }
 

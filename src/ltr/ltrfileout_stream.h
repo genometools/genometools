@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@
 #include "ltr/ltrdigest_def.h"
 #include "match/encseq-def.h"
 
-/* implements the ``genome_stream'' interface */
+/* implements the ``node_stream'' interface */
 typedef struct GtLTRFileOutStream GtLTRFileOutStream;
 
 const GtNodeStreamClass* gt_ltr_fileout_stream_class(void);
@@ -42,5 +42,7 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         const char *gfffilename,
                                         unsigned int seqnamelen,
                                         GtError *e);
+
+void          gt_ltr_fileout_stream_enable_pdom_alignment_output(GtNodeStream*);
 
 #endif

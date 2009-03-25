@@ -94,6 +94,24 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                          "Discovers and annotates sequence features in LTR "
                          "retrotransposon candidates.");
 
+  /* Output files */
+
+  oto = gt_option_new_string("outfileprefix",
+                             "prefix for output files (e.g. 'foo' will create "
+                             "files called 'foo_*.csv' and 'foo_*.fas')\n"
+                             "Omit this option for GFF3 output only.",
+                             arguments->prefix,
+                             NULL);
+  gt_option_parser_add_option(op, oto);
+  gt_option_hide_default(oto);
+
+  o = gt_option_new_uint("seqnamelen",
+                         "set maximal length of sequence names in FASTA headers"
+                         " (e.g. for clustalw or similar tools)",
+                         &arguments->seqnamelen,
+                         20);
+  gt_option_parser_add_option(op, o);
+
   /* PPT search options */
 
   o = gt_option_new_range("pptlen",
@@ -230,12 +248,21 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_is_extended_option(o);
   gt_option_imply(o, oh);
 
+    o = gt_option_new_bool("aliout",
+                           "output HMMER amino acid alignments",
+                           &arguments->pdom_opts.write_alignments,
+                           false);
+  gt_option_parser_add_option(op, o);
+  gt_option_imply(o, oh);
+  gt_option_imply(o, oto);
+
   o = gt_option_new_uint_min("threads",
                              "number of concurrent worker threads to use in "
                              "pHMM scanning",
                              &arguments->pdom_opts.nof_threads,
                              2, 1);
   gt_option_parser_add_option(op, o);
+  gt_option_imply(o, oh);
 
   o = gt_option_new_uint("maxgaplen",
                          "maximal allowed gap size between fragments (in amino "
@@ -244,6 +271,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                          50);
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
+  gt_option_imply(o, oh);
 #endif
 
   /* Extended PBS options */
@@ -279,24 +307,6 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o);
   gt_option_is_extended_option(o);
   gt_option_imply(o, ot);
-
-  /* Output files */
-
-  oto = gt_option_new_string("outfileprefix",
-                             "prefix for output files (e.g. 'foo' will create "
-                             "files called 'foo_*.csv' and 'foo_*.fas')\n"
-                             "Omit this option for GFF3 output only.",
-                             arguments->prefix,
-                             NULL);
-  gt_option_parser_add_option(op, oto);
-  gt_option_hide_default(oto);
-
-  o = gt_option_new_uint("seqnamelen",
-                         "set maximal length of sequence names in FASTA headers"
-                         " (e.g. for clustalw or similar tools)",
-                         &arguments->seqnamelen,
-                         20);
-  gt_option_parser_add_option(op, o);
 
   /* verbosity */
 
@@ -438,6 +448,8 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
                                               argv[arg],
                                               arguments->seqnamelen,
                                               err);
+    if (&arguments->pdom_opts.write_alignments)
+      gt_ltr_fileout_stream_enable_pdom_alignment_output(tab_out_stream);
     }
 
     last_stream = gff3_out_stream = gt_gff3_out_stream_new(last_stream,

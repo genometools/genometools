@@ -47,6 +47,8 @@ struct GtLTRdigestStream {
   GtLTRElement element;
 };
 
+#define GT_ALIWIDTH 60
+
 #define gt_ltrdigest_stream_cast(GS)\
         gt_node_stream_cast(gt_ltrdigest_stream_class(), GS)
 
@@ -73,9 +75,14 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
   for (i=0;i<gt_pdom_model_hit_best_chain_length(hit);i++)
   {
     GtGenomeNode *gf;
-    GtPdomSingleHit *singlehit = gt_pdom_model_hit_best_single_hit(hit, i);
+    GtStr *alignmentstring;
+    GtPdomSingleHit *singlehit;
+    singlehit = gt_pdom_model_hit_best_single_hit(hit, i);
+    alignmentstring = gt_str_new();
     GtPhase frame = gt_pdom_single_hit_get_phase(singlehit);
     rng = gt_pdom_single_hit_get_range(singlehit);
+    gt_pdom_single_hit_format_alignment(singlehit, GT_ALIWIDTH,
+                                        alignmentstring);
     convert_frame_position(&rng, frame);
     gt_ltrelement_offset2pos(&ls->element, &rng, 0,
                              GT_OFFSET_BEGIN_LEFT_LTR,
@@ -87,6 +94,8 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
                              rng.start,
                              rng.end,
                              strand);
+    gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_alignment",
+                                 alignmentstring, (GtFree) gt_str_delete);
     gt_feature_node_set_source((GtFeatureNode*) gf, ls->ltrdigest_tag);
     gt_feature_node_set_score((GtFeatureNode*) gf,
                               gt_pdom_single_hit_get_evalue(singlehit));
@@ -356,7 +365,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                         + length - 1);
         sprintfsymbolstring(seq, alpha, symbolstring, length);
         gt_free(symbolstring);
-        
+
         /* run LTRdigest core routine */
         had_err = run_ltrdigest(&ls->element, seq, ls, e);
 
