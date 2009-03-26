@@ -19,17 +19,22 @@
 #include <stdio.h>
 #include <limits.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/error_api.h"
 #include "core/unused_api.h"
 #include "core/progressbar.h"
 #include "core/minmax.h"
+#include "core/fa.h"
 #include "spacedef.h"
 #include "measure-time-if.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "safecast-gen.h"
+#include "esa-fileend.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-bentsedg.h"
@@ -60,15 +65,15 @@ struct Sfxiterator
   bool storespecials;
   Codetype currentmincode,
            currentmaxcode;
-  Seqpos specialcharacters;
+  Seqpos specialcharacters,
+         widthofpart,
+         totallength;
   Suftab suftab;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   Suftabparts *suftabparts;
   const Encodedsequence *encseq;
   Readmode readmode;
-  Seqpos widthofpart,
-         totallength;
   Outlcpinfo *outlcpinfo;
   unsigned int part,
                numofchars,
@@ -727,14 +732,67 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->part++;
 }
 
-void postsortsuffixesfromstream(Sfxiterator *sfi)
+int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
+                               GtError *err)
 {
+  int mmapfiledesc = -1;
+  GtStr *tmpfilename;
+  struct stat sb;
+  bool haserr = false;
+
+  FREESPACE(sfi->suftab.sortspace);
   if (sfi->sfxstrategy.streamsuftab)
   {
     gt_assert(sfi->sfxstrategy.ssortmaxdepth.defined &&
               sfi->prefixlength ==
               sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
   }
+  tmpfilename = gt_str_clone(str_indexname);
+  gt_str_append_cstr(tmpfilename,SUFTABSUFFIX);
+  mmapfiledesc = open(gt_str_get(tmpfilename), O_RDWR, 0);
+  if (mmapfiledesc == -1)
+  {
+    gt_error_set(err,"cannot open file \"%s\": %s",gt_str_get(tmpfilename),
+                 strerror(errno));
+    haserr = true;
+  }
+  if (!haserr && fstat(mmapfiledesc, &sb) == -1)
+  {
+    haserr = true;
+  }
+  if (!haserr && sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX)
+  {
+    haserr = true;
+  }
+  sfi->suftab.sortspace
+    = gt_fa_mmap_generic_fd_func(mmapfiledesc,
+                                 (size_t) sb.st_size, 0, true, false,
+                                 __FILE__,__LINE__);
+  sfi->suftab.offset = 0;
+  sfi->suftab.longest.defined = false;
+  sfi->suftab.longest.valueseqpos = 0;
+  gt_assert(sfi->totallength >= sfi->specialcharacters);
+  qsufsort(&sfi->suftab,
+           mmapfiledesc,
+           sfi->encseq,
+           sfi->readmode,
+           0,
+           sfi->currentmaxcode,
+           sfi->totallength - sfi->specialcharacters,
+           sfi->bcktab,
+           sfi->numofchars,
+           sfi->prefixlength,
+           sfi->outlcpinfo);
+  gt_fa_xmunmap(sfi->suftab.sortspace);
+  sfi->suftab.sortspace = NULL;
+  gt_str_delete(tmpfilename);
+  if (close(mmapfiledesc) == -1)
+  {
+    gt_error_set(err,"cannot close file \"%s\": %s",gt_str_get(tmpfilename),
+                 strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
 }
 
 static void insertfullspecialrange(Sfxiterator *sfi,

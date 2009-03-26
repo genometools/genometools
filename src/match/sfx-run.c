@@ -188,7 +188,8 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
+static int suffixeratorwithoutput(const GtStr *str_indexname,
+                                  Outfileinfo *outfileinfo,
                                   const Encodedsequence *encseq,
                                   Readmode readmode,
                                   unsigned int prefixlength,
@@ -249,8 +250,14 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
       outfileinfo->pageoffset += numberofsuffixes;
     }
   }
-  postsortsuffixesfromstream(sfi);
-  if (outfileinfo->outfpbcktab != NULL)
+  if (sfxstrategy->streamsuftab)
+  {
+    if (postsortsuffixesfromstream(sfi,str_indexname,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && outfileinfo->outfpbcktab != NULL)
   {
     if (sfibcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
     {
@@ -570,7 +577,8 @@ static int runsuffixerator(bool doesa,
     {
       if (doesa)
       {
-        if (suffixeratorwithoutput(&outfileinfo,
+        if (suffixeratorwithoutput(so->str_indexname,
+                                   &outfileinfo,
                                    sfxseqinfo.encseq,
                                    so->readmode,
                                    prefixlength,

@@ -43,7 +43,8 @@ const Seqpos *nextSfxiterator(Seqpos *numberofsuffixes,
                               bool *specialsuffixes,
                               Sfxiterator *sfi);
 
-void postsortsuffixesfromstream(Sfxiterator *sfi);
+int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
+                               GtError *err);
 
 bool sfi2longestsuffixpos(Seqpos *longest,const Sfxiterator *sfi);
 

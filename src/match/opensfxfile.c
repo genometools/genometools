@@ -79,14 +79,19 @@ void *genericmaponlytable(const GtStr *indexname,const char *suffix,
   return haserr ? NULL : ptr;
 }
 
-int checkmappedfilesize(size_t numofbytes,unsigned long expectedunits,
-                        size_t sizeofunit,GtError *err)
+static int checkmappedfilesize(const GtStr *indexname,
+                               const char *suffix,
+                               size_t numofbytes,
+                               unsigned long expectedunits,
+                               size_t sizeofunit,
+                               GtError *err)
 {
   gt_error_check(err);
   if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
   {
-    gt_error_set(err,"number of mapped units = %lu != %lu"
-                      " = expected number of integers",
+    gt_error_set(err,"mapping file %s%s: number of mapped units = %lu != %lu"
+                     " = expected number of integers",
+                      gt_str_get(indexname),suffix,
                       (unsigned long) (numofbytes/sizeofunit),
                       expectedunits);
     return -1;
@@ -107,7 +112,8 @@ void *genericmaptable(const GtStr *indexname,
   {
     return NULL;
   }
-  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,err) != 0)
+  if (checkmappedfilesize(indexname,suffix,
+                          numofbytes,expectedunits,sizeofunit,err) != 0)
   {
     gt_fa_xmunmap(ptr);
     return NULL;
