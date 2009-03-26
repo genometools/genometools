@@ -89,9 +89,11 @@ static int checkmappedfilesize(const GtStr *indexname,
   gt_error_check(err);
   if (expectedunits != (unsigned long) (numofbytes/sizeofunit))
   {
-    gt_error_set(err,"mapping file %s%s: number of mapped units = %lu != %lu"
-                     " = expected number of integers",
-                      gt_str_get(indexname),suffix,
+    gt_error_set(err,"mapping file %s%s: number of mapped units (of size %u) "
+                     " = %lu != %lu = expected number of mapped units",
+                      gt_str_get(indexname),
+                      suffix,
+                      (unsigned int) sizeofunit,
                       (unsigned long) (numofbytes/sizeofunit),
                       expectedunits);
     return -1;

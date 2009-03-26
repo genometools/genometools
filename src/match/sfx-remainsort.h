@@ -18,6 +18,7 @@
 #ifndef SFX_REMAINSORT_H
 #define SFX_REMAINSORT_H
 
+#include "core/error_api.h"
 #include "seqpos-def.h"
 #include "readmode-def.h"
 #include "bcktab.h"
@@ -28,6 +29,7 @@ typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
+                          const char *filename,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,

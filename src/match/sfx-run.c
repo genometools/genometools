@@ -252,6 +252,8 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
   }
   if (sfxstrategy->streamsuftab)
   {
+    gt_fa_fclose(outfileinfo->outfpsuftab);
+    outfileinfo->outfpsuftab = NULL;
     if (postsortsuffixesfromstream(sfi,str_indexname,err) != 0)
     {
       haserr = true;

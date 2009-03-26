@@ -1831,10 +1831,12 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->rmnsufinfo = newRmnsufinfo(suftab->sortspace - suftab->offset,
                                     -1,
+                                    NULL,
                                     bsr->encseq,
                                     bcktab,
                                     bsr->readmode,
                                     bsr->partwidth);
+    gt_assert(bsr->rmnsufinfo != NULL);
     bsr->trierep = NULL;
   } else
   {
@@ -1894,25 +1896,27 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   FREEARRAY(&bsr->mkvauxstack,MKVstack);
 }
 
-void qsufsort(Suftab *suftab,
-              int mmapfiledesc,
-              const Encodedsequence *encseq,
-              Readmode readmode,
-              Codetype mincode,
-              Codetype maxcode,
-              Seqpos partwidth,
-              const Bcktab *bcktab,
-              unsigned int numofchars,
-              unsigned int prefixlength,
-              Outlcpinfo *outlcpinfo)
+void qsufsort(Seqpos *sortspace,
+             int mmapfiledesc,
+             const char *filename,
+             Seqpos *longest,
+             const Encodedsequence *encseq,
+             Readmode readmode,
+             Codetype mincode,
+             Codetype maxcode,
+             Seqpos partwidth,
+             const Bcktab *bcktab,
+             unsigned int numofchars,
+             unsigned int prefixlength,
+             Outlcpinfo *outlcpinfo)
 {
   Rmnsufinfo *rmnsufinfo;
   Compressedtable *lcptab;
 
-  gt_assert(suftab->offset == 0);
   gt_assert(mincode == 0);
-  rmnsufinfo = newRmnsufinfo(suftab->sortspace,
+  rmnsufinfo = newRmnsufinfo(sortspace,
                              mmapfiledesc,
+                             filename,
                              encseq,
                              bcktab,
                              readmode,
@@ -1924,9 +1928,8 @@ void qsufsort(Suftab *suftab,
                              bcktab,
                              numofchars,
                              prefixlength);
-  lcptab = wrapRmnsufinfo(&suftab->longest.valueseqpos,&rmnsufinfo,
+  lcptab = wrapRmnsufinfo(longest,&rmnsufinfo,
                           outlcpinfo == NULL ? false : true);
-  suftab->longest.defined = true;
   if (lcptab != NULL)
   {
     gt_assert(outlcpinfo != NULL);

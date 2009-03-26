@@ -18,7 +18,7 @@
 #ifndef SFX_BENTSEDG_H
 #define SFX_BENTSEDG_H
 #include <stdio.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str.h"
 #include "defined-types.h"
 #include "encseq-def.h"
@@ -49,17 +49,19 @@ Seqpos getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 Seqpos getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
 
-void qsufsort(Suftab *suftab,
-              int mmapfiledesc,
-              const Encodedsequence *encseq,
-              Readmode readmode,
-              Codetype mincode,
-              Codetype maxcode,
-              Seqpos partwidth,
-              const Bcktab *bcktab,
-              unsigned int numofchars,
-              unsigned int prefixlength,
-              Outlcpinfo *outlcpinfo);
+void qsufsort(Seqpos *sortspace,
+             int mmapfiledesc,
+             const char *filename,
+             Seqpos *longest,
+             const Encodedsequence *encseq,
+             Readmode readmode,
+             Codetype mincode,
+             Codetype maxcode,
+             Seqpos partwidth,
+             const Bcktab *bcktab,
+             unsigned int numofchars,
+             unsigned int prefixlength,
+             Outlcpinfo *outlcpinfo);
 
 void sortallbuckets(Suftab *suftab,
                     const Encodedsequence *encseq,

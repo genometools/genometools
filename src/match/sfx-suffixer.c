@@ -700,8 +700,10 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (!sfi->sfxstrategy.streamsuftab)
     {
-      qsufsort(&sfi->suftab,
+      qsufsort(sfi->suftab.sortspace,
                -1,
+               NULL,
+               &sfi->suftab.longest.valueseqpos,
                sfi->encseq,
                sfi->readmode,
                sfi->currentmincode,
@@ -711,6 +713,7 @@ static void preparethispart(Sfxiterator *sfi)
                sfi->numofchars,
                sfi->prefixlength,
                sfi->outlcpinfo);
+      sfi->suftab.longest.defined = true;
     }
   } else
   {
@@ -762,29 +765,26 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
   }
   if (!haserr && sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX)
   {
+    gt_error_set(err,"file \"%s\" of size %llu is too large to map",
+                 gt_str_get(tmpfilename),(unsigned long long) sb.st_size);
+    haserr = true;
+  }
+  if (!haserr && sb.st_size != (off_t) (sfi->totallength+1) * sizeof (Seqpos))
+  {
+    gt_error_set(err,"mapping file %s: file size "
+                     " = %lu != %lu = expected number of units",
+                      gt_str_get(tmpfilename),
+                      (unsigned long) sb.st_size,
+                      (unsigned long) (sfi->totallength+1) * sizeof (Seqpos));
     haserr = true;
   }
   if (!haserr)
   {
-    sfi->suftab.sortspace
-      = gt_fa_mmap_generic_fd_func(mmapfiledesc,
-                                   (size_t) sb.st_size, 0, true, false,
-                                   __FILE__,__LINE__);
-    if (sfi->suftab.sortspace == NULL)
-    {
-      gt_error_set(err,"cannot open file \"%s%s\": %s",
-                   gt_str_get(tmpfilename),SUFTABSUFFIX,strerror(errno));
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    sfi->suftab.offset = 0;
-    sfi->suftab.longest.defined = false;
-    sfi->suftab.longest.valueseqpos = 0;
     gt_assert(sfi->totallength >= sfi->specialcharacters);
-    qsufsort(&sfi->suftab,
+    qsufsort(NULL,
              mmapfiledesc,
+             gt_str_get(tmpfilename),
+             &sfi->suftab.longest.valueseqpos,
              sfi->encseq,
              sfi->readmode,
              0,
@@ -794,9 +794,8 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
              sfi->numofchars,
              sfi->prefixlength,
              sfi->outlcpinfo);
+    sfi->suftab.longest.defined = true;
   }
-  gt_fa_xmunmap(sfi->suftab.sortspace);
-  sfi->suftab.sortspace = NULL;
   gt_str_delete(tmpfilename);
   if (close(mmapfiledesc) == -1)
   {

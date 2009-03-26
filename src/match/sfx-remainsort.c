@@ -17,20 +17,22 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include "core/chardef.h"
 #include "core/queue.h"
 #include "core/chardef.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
 #include "core/arraydef.h"
+#include "core/fa.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
 #include "bcktab.h"
 #include "compressedtab.h"
 #include "sfx-remainsort.h"
 
-#define SUFTAB_GET(IDX)         rmnsufinfo->suftab[IDX]
-#define SUFTAB_STORE(IDX,VALUE) rmnsufinfo->suftab[IDX] = VALUE
+#define SUFTAB_GET(IDX)           sortspace_get(rmnsufinfo,IDX)
+#define SUFTAB_STORE(IDX,VALUE)   rmnsufinfo->sortspace[IDX] = VALUE
 
 typedef struct
 {
@@ -65,7 +67,7 @@ typedef struct
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
-  Seqpos *suftab;
+  Seqpos *sortspace;
   int mmapfiledesc;
   GtQueue *rangestobesorted;
   Seqpos partwidth,
@@ -84,6 +86,11 @@ struct Rmnsufinfo
   Firstwithnewdepth firstwithnewdepth;
   Pairsuffixptrwithbase *unusedpair;
 };
+
+static Seqpos sortspace_get(const Rmnsufinfo *rmnsufinfo,Seqpos idx)
+{
+  return rmnsufinfo->sortspace[idx];
+}
 
 static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
 {
@@ -145,8 +152,7 @@ static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right)
 
   for (idx = left; idx <= right; idx++)
   {
-    compressedtable_update(rmnsufinfo->inversesuftab,
-                           SUFTAB_GET(idx),left);
+    compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),left);
   }
 }
 
@@ -189,15 +195,13 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
     }
     for (idx = leftbound; idx < bucketspec.left; idx++)
     {
-      compressedtable_update(rmnsufinfo->inversesuftab,
-                             SUFTAB_GET(idx),idx);
+      compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),idx);
     }
     leftbound = bucketspec.left + bucketspec.nonspecialsinbucket;
   }
   for (idx = leftbound; idx < rmnsufinfo->partwidth; idx++)
   {
-    compressedtable_update(rmnsufinfo->inversesuftab,
-                           SUFTAB_GET(idx),idx);
+    compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),idx);
   }
 }
 
@@ -207,13 +211,13 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),
-                           idx);
+    compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),idx);
   }
 }
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
+                          const char *filename,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
@@ -222,11 +226,9 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   Rmnsufinfo *rmnsufinfo;
 
   rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
-  rmnsufinfo->suftab = presortedsuffixes;
-  rmnsufinfo->mmapfiledesc = mmapfiledesc;
-  rmnsufinfo->rangestobesorted = gt_queue_new();
-  rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->totallength = getencseqtotallength(encseq);
+  rmnsufinfo->mmapfiledesc = mmapfiledesc;
+  rmnsufinfo->partwidth = partwidth;
   rmnsufinfo->encseq = encseq;
   rmnsufinfo->readmode = readmode;
   rmnsufinfo->bcktab = bcktab;
@@ -240,13 +242,30 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->firstwithnewdepth.right = 0;
   rmnsufinfo->firstwithnewdepth.maxwidth = 0;
   rmnsufinfo->currentdepth = 0;
-  INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   rmnsufinfo->firstgenerationtotalwidth = 0;
   rmnsufinfo->firstgenerationcount = 0;
   rmnsufinfo->unusedpair = NULL;
   rmnsufinfo->inversesuftab = NULL;
   rmnsufinfo->allocateditvinfo = 0;
   rmnsufinfo->itvinfo = NULL;
+  INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  rmnsufinfo->rangestobesorted = gt_queue_new();
+  if (presortedsuffixes != NULL)
+  {
+    gt_assert(mmapfiledesc == -1);
+    rmnsufinfo->sortspace = presortedsuffixes;
+  } else
+  {
+    rmnsufinfo->sortspace
+      = gt_fa_mmap_generic_fd_func(mmapfiledesc,
+                                   (size_t) (partwidth * sizeof (Seqpos)),
+                                   0, true, false, __FILE__,__LINE__);
+    if (rmnsufinfo->sortspace == NULL)
+    {
+      fprintf(stderr,"cannot remap file \"%s\": %s",filename,strerror(errno));
+      exit(EXIT_FAILURE); /* programming error */
+    }
+  }
   return rmnsufinfo;
 }
 
@@ -533,7 +552,7 @@ Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
     Seqpos fillpos = compressedtable_get(rmnsufinfo->inversesuftab,pos);
     if (fillpos > 0 && fillpos < rmnsufinfo->partwidth)
     {
-      Seqpos previousstart = SUFTAB_GET(fillpos-1);
+      Seqpos previousstart = rmnsufinfo->sortspace[fillpos-1];
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
@@ -594,7 +613,7 @@ static void setrelevantfrominversetab(Compressedtable *rightposinverse,
 
     for (idx = 0; idx < rmnsufinfo->partwidth; idx++)
     {
-      Seqpos pos = SUFTAB_GET(idx);
+      Seqpos pos = rmnsufinfo->sortspace[idx];
       if (pos > 0)
       {
         Uchar cc = getencodedchar(rmnsufinfo->encseq,pos-1,
@@ -730,7 +749,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    Seqpos pos = SUFTAB_GET(idx);
+    Seqpos pos = rmnsufinfo->sortspace[idx];
     if (pos > 0)
     {
       Uchar cc = getencodedchar(rmnsufinfo->encseq,
@@ -843,7 +862,7 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
     }
     if (fillpos > 0 && fillpos - 1 < rmnsufinfo->partwidth)
     {
-      previousstart = SUFTAB_GET(fillpos-1);
+      previousstart = rmnsufinfo->sortspace[fillpos-1];
       while (pos+lcpvalue < rmnsufinfo->totallength &&
              previousstart+lcpvalue < rmnsufinfo->totallength)
       {
@@ -927,6 +946,11 @@ Compressedtable *wrapRmnsufinfo(Seqpos *longest,
     compressedtable_free(rmnsufinfo->inversesuftab,true);
     rmnsufinfo->inversesuftab = NULL;
     lcptab = NULL;
+  }
+  if (rmnsufinfo->mmapfiledesc != -1)
+  {
+    gt_fa_xmunmap(rmnsufinfo->sortspace);
+    rmnsufinfo->sortspace = NULL;
   }
   gt_free(rmnsufinfo);
   rmnsufinfoptr = NULL;
