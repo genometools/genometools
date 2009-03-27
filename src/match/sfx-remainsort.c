@@ -219,7 +219,8 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-static void initsortblock(Sortblock *sortblock,Seqpos *presortedsuffixes,
+static void initsortblock(Sortblock *sortblock,
+                          Seqpos *presortedsuffixes,
                           int mmapfiledesc,
                           const char *filename,
                           Seqpos partwidth)
@@ -231,6 +232,7 @@ static void initsortblock(Sortblock *sortblock,Seqpos *presortedsuffixes,
     sortblock->sortspace = presortedsuffixes;
   } else
   {
+    gt_assert(mmapfiledesc != -1);
     sortblock->sortspace
       = gt_fa_mmap_generic_fd_func(mmapfiledesc,
                                    (size_t) (partwidth * sizeof (Seqpos)),
