@@ -250,7 +250,7 @@ static int suffixeratorwithoutput(const GtStr *str_indexname,
       outfileinfo->pageoffset += numberofsuffixes;
     }
   }
-  if (sfxstrategy->streamsuftab)
+  if (!haserr && sfxstrategy->streamsuftab)
   {
     gt_fa_fclose(outfileinfo->outfpsuftab);
     outfileinfo->outfpsuftab = NULL;

@@ -743,6 +743,10 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
   struct stat sb;
   bool haserr = false;
 
+  if (sfi->totallength == sfi->specialcharacters)
+  {
+    return 0;
+  }
   FREESPACE(sfi->suftab.sortspace);
   if (sfi->sfxstrategy.streamsuftab)
   {

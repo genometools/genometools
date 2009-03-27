@@ -174,7 +174,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
   Codetype code;
   unsigned int rightchar;
   Bucketspecification bucketspec;
-  Seqpos leftbound, idx;
+  Seqpos leftbound, idx, startpos;
   const Codetype mincode = 0;
 
   rightchar = (unsigned int) (mincode % numofchars);
@@ -188,24 +188,27 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
                                       rmnsufinfo->partwidth,
                                       rightchar,
                                       numofchars);
-    if (bucketspec.nonspecialsinbucket >= 1UL)
-    {
-      updatewidth (rmnsufinfo,bucketspec.left,
-                              bucketspec.left+bucketspec.nonspecialsinbucket-1,
-                              (Seqpos) prefixlength);
-      anchorleftmost(rmnsufinfo,
-                     bucketspec.left,
-                     bucketspec.left+bucketspec.nonspecialsinbucket-1);
-    }
     for (idx = leftbound; idx < bucketspec.left; idx++)
     {
-      compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),idx);
+      startpos = SUFTAB_GET(idx);
+      compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
+    }
+    updatewidth (rmnsufinfo,bucketspec.left,
+                 bucketspec.left+bucketspec.nonspecialsinbucket-1,
+                 (Seqpos) prefixlength);
+    for (idx = bucketspec.left; 
+         idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
+    {
+      startpos = SUFTAB_GET(idx);
+      compressedtable_update(rmnsufinfo->inversesuftab,startpos,
+                             bucketspec.left);
     }
     leftbound = bucketspec.left + bucketspec.nonspecialsinbucket;
   }
   for (idx = leftbound; idx < rmnsufinfo->partwidth; idx++)
   {
-    compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),idx);
+    startpos = SUFTAB_GET(idx);
+    compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
   }
 }
 
@@ -277,6 +280,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   rmnsufinfo->inversesuftab = NULL;
   rmnsufinfo->allocateditvinfo = 0;
   rmnsufinfo->itvinfo = NULL;
+  rmnsufinfo->rangestobesorted = gt_queue_new();
   INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
   initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,filename,
                 partwidth);
