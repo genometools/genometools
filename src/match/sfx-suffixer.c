@@ -773,7 +773,7 @@ int postsortsuffixesfromstream(Sfxiterator *sfi, const GtStr *str_indexname,
                  gt_str_get(tmpfilename),(unsigned long long) sb.st_size);
     haserr = true;
   }
-  if (!haserr && sb.st_size != (__off_t) (sfi->totallength+1) * sizeof (Seqpos))
+  if (!haserr && (size_t) sb.st_size != sizeof (Seqpos) * (sfi->totallength+1))
   {
     gt_error_set(err,"mapping file %s: file size "
                      " = %lu != %lu = expected number of units",
