@@ -103,6 +103,64 @@ struct Rmnsufinfo
   Pairsuffixptrwithbase *unusedpair;
 };
 
+static void initsortblock(Sortblock *sortblock,
+                          Seqpos *presortedsuffixes,
+                          int mmapfiledesc,
+                          Seqpos partwidth)
+{
+  sortblock->mmapfiledesc = mmapfiledesc;
+  if (presortedsuffixes != NULL)
+  {
+    sortblock->sortspace = presortedsuffixes;
+  } else
+  {
+    gt_assert(sortblock->mmapfiledesc != -1);
+    sortblock->pagesize = 0;
+    sortblock->currentindex = 0;
+    sortblock->offset = 0;
+    sortblock->mappedsection = NULL;
+    sortblock->remaining = partwidth;
+  }
+}
+
+Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
+                          int mmapfiledesc,
+                          const Encodedsequence *encseq,
+                          const Bcktab *bcktab,
+                          Readmode readmode,
+                          Seqpos partwidth)
+{
+  Rmnsufinfo *rmnsufinfo;
+
+  rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
+  rmnsufinfo->totallength = getencseqtotallength(encseq);
+  rmnsufinfo->partwidth = partwidth;
+  rmnsufinfo->encseq = encseq;
+  rmnsufinfo->readmode = readmode;
+  rmnsufinfo->bcktab = bcktab;
+  rmnsufinfo->currentqueuesize = 0;
+  rmnsufinfo->maxqueuesize = 0;
+  rmnsufinfo->firstwithnewdepth.defined = false;
+  rmnsufinfo->firstwithnewdepth.depth = 0;
+  rmnsufinfo->firstwithnewdepth.totalwidth = 0;
+  rmnsufinfo->firstwithnewdepth.count = 0;
+  rmnsufinfo->firstwithnewdepth.left = 0;
+  rmnsufinfo->firstwithnewdepth.right = 0;
+  rmnsufinfo->firstwithnewdepth.maxwidth = 0;
+  rmnsufinfo->currentdepth = 0;
+  rmnsufinfo->firstgenerationtotalwidth = 0;
+  rmnsufinfo->firstgenerationcount = 0;
+  rmnsufinfo->unusedpair = NULL;
+  rmnsufinfo->inversesuftab = NULL;
+  rmnsufinfo->allocateditvinfo = 0;
+  rmnsufinfo->itvinfo = NULL;
+  rmnsufinfo->rangestobesorted = gt_queue_new();
+  INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
+  initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
+                partwidth);
+  return rmnsufinfo;
+}
+
 static Seqpos sortspace_get(const Sortblock *sortblock,Seqpos idx)
 {
   return sortblock->sortspace[idx];
@@ -112,10 +170,6 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
 {
   Seqpos value;
 
-  if (sortblock->mmapfiledesc == -1)
-  {
-    return sortblock->sortspace[sortblock->currentindex++];
-  }
   /*
   printf("remaining=%lu",(unsigned long) sortblock->remaining);
   printf("currentindex=%lu,offset=%lu,pagesize=%lu\n",
@@ -130,7 +184,7 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
     gt_assert(sortblock->remaining > 0);
     if (sortblock->mappedsection == NULL)
     {
-      sortblock->pagesize = 4096UL;
+      sortblock->pagesize = (Seqpos) 4096;
     } else
     {
       sortblock->offset += sortblock->pagesize;
@@ -147,13 +201,13 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
     }
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
-                                   entries2map * sizeof(Seqpos),
-                                   sortblock->offset * sizeof(Seqpos),
+                                   entries2map * sizeof (Seqpos),
+                                   sortblock->offset * sizeof (Seqpos),
                                    false,false,__FILE__,__LINE__);
     gt_assert(sortblock->mappedsection != NULL);
   }
   /*
-  printf("access %lu\n",(unsigned long) 
+  printf("access %lu\n",(unsigned long)
                         (sortblock->currentindex - sortblock->offset));
   */
   value = sortblock->mappedsection[sortblock->currentindex - sortblock->offset];
@@ -227,6 +281,54 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
   Seqpos idx, startpos;
   const Codetype mincode = 0;
 
+  gt_assert(rmnsufinfo->sortblock.mmapfiledesc == -1);
+  rightchar = (unsigned int) (mincode % numofchars);
+  idx = 0;
+  for (code = mincode; code <= maxcode; code++)
+  {
+    rightchar = calcbucketboundsparts(&bucketspec,
+                                      bcktab,
+                                      code,
+                                      maxcode,
+                                      rmnsufinfo->partwidth,
+                                      rightchar,
+                                      numofchars);
+    for (/* Nothing */; idx < bucketspec.left; idx++)
+    {
+      startpos = SUFTAB_GET(idx);
+      compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
+    }
+    updatewidth (rmnsufinfo,bucketspec.left,
+                 bucketspec.left+bucketspec.nonspecialsinbucket-1,
+                 (Seqpos) prefixlength);
+    for (/* Nothing */;
+         idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
+    {
+      startpos = SUFTAB_GET(idx);
+      compressedtable_update(rmnsufinfo->inversesuftab,startpos,
+                             bucketspec.left);
+    }
+  }
+  for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
+  {
+    startpos = SUFTAB_GET(idx);
+    compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
+  }
+}
+
+static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo,
+                                                     Codetype maxcode,
+                                                     const Bcktab *bcktab,
+                                                     unsigned int numofchars,
+                                                     unsigned int prefixlength)
+{
+  Codetype code;
+  unsigned int rightchar;
+  Bucketspecification bucketspec;
+  Seqpos idx, startpos;
+  const Codetype mincode = 0;
+
+  gt_assert(rmnsufinfo->sortblock.mmapfiledesc != -1);
   rightchar = (unsigned int) (mincode % numofchars);
   idx = 0;
   for (code = mincode; code <= maxcode; code++)
@@ -259,11 +361,8 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
     startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
     compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1)
-  {
-    gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
-    rmnsufinfo->sortblock.mappedsection = NULL;
-  }
+  gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
+  rmnsufinfo->sortblock.mappedsection = NULL;
 }
 
 static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
@@ -274,69 +373,6 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
   {
     compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),idx);
   }
-}
-
-static void initsortblock(Sortblock *sortblock,
-                          Seqpos *presortedsuffixes,
-                          int mmapfiledesc,
-                          Seqpos partwidth)
-{
-  sortblock->mmapfiledesc = mmapfiledesc;
-  if (presortedsuffixes != NULL)
-  {
-    sortblock->sortspace = presortedsuffixes;
-  } else
-  {
-    gt_assert(sortblock->mmapfiledesc != -1);
-    sortblock->sortspace
-      = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
-                                   (size_t) (partwidth * sizeof (Seqpos)),
-                                   0, true, false, __FILE__,__LINE__);
-    gt_assert (sortblock->sortspace != NULL);
-    sortblock->currentindex = 0;
-    sortblock->pagesize = 0;
-    sortblock->offset = 0;
-    sortblock->mappedsection = NULL;
-    sortblock->remaining = partwidth;
-  }
-}
-
-Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
-                          int mmapfiledesc,
-                          const Encodedsequence *encseq,
-                          const Bcktab *bcktab,
-                          Readmode readmode,
-                          Seqpos partwidth)
-{
-  Rmnsufinfo *rmnsufinfo;
-
-  rmnsufinfo = gt_malloc(sizeof(Rmnsufinfo));
-  rmnsufinfo->totallength = getencseqtotallength(encseq);
-  rmnsufinfo->partwidth = partwidth;
-  rmnsufinfo->encseq = encseq;
-  rmnsufinfo->readmode = readmode;
-  rmnsufinfo->bcktab = bcktab;
-  rmnsufinfo->currentqueuesize = 0;
-  rmnsufinfo->maxqueuesize = 0;
-  rmnsufinfo->firstwithnewdepth.defined = false;
-  rmnsufinfo->firstwithnewdepth.depth = 0;
-  rmnsufinfo->firstwithnewdepth.totalwidth = 0;
-  rmnsufinfo->firstwithnewdepth.count = 0;
-  rmnsufinfo->firstwithnewdepth.left = 0;
-  rmnsufinfo->firstwithnewdepth.right = 0;
-  rmnsufinfo->firstwithnewdepth.maxwidth = 0;
-  rmnsufinfo->currentdepth = 0;
-  rmnsufinfo->firstgenerationtotalwidth = 0;
-  rmnsufinfo->firstgenerationcount = 0;
-  rmnsufinfo->unusedpair = NULL;
-  rmnsufinfo->inversesuftab = NULL;
-  rmnsufinfo->allocateditvinfo = 0;
-  rmnsufinfo->itvinfo = NULL;
-  rmnsufinfo->rangestobesorted = gt_queue_new();
-  INITARRAY(&rmnsufinfo->firstgeneration,Pairsuffixptr);
-  initsortblock(&rmnsufinfo->sortblock,presortedsuffixes,mmapfiledesc,
-                partwidth);
-  return rmnsufinfo;
 }
 
 static void showintervalsizes(unsigned long count,unsigned long totalwidth,
@@ -599,19 +635,20 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
   Bucketspecification bucketspec;
 
   initinversesuftabspecials(rmnsufinfo);
-  initinversesuftabnonspecialsadjust(rmnsufinfo,maxcode,bcktab,numofchars,
-                                     prefixlength);
-  /*
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1 && 
-      rmnsufinfo->sortblock.sortspace == NULL)
+  if (rmnsufinfo->sortblock.mmapfiledesc == -1)
   {
+    initinversesuftabnonspecialsadjust(rmnsufinfo,maxcode,bcktab,numofchars,
+                                       prefixlength);
+  } else
+  {
+    initinversesuftabnonspecialsadjuststream(rmnsufinfo,maxcode,bcktab,
+                                             numofchars,prefixlength);
     rmnsufinfo->sortblock.sortspace
       = gt_fa_mmap_generic_fd_func(rmnsufinfo->sortblock.mmapfiledesc,
                                    (size_t) (partwidth * sizeof (Seqpos)),
                                    0, true, false, __FILE__,__LINE__);
     gt_assert (rmnsufinfo->sortblock.sortspace != NULL);
   }
-  */
   rightchar = (unsigned int) (mincode % numofchars);
   for (code = mincode; code <= maxcode; code++)
   {
