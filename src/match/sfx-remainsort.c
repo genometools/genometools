@@ -33,7 +33,8 @@
 #include "sfx-remainsort.h"
 #include "stamp.h"
 
-#define SUFTAB_GET(IDX)           sortspace_get(&rmnsufinfo->sortblock,IDX)
+#define PAGESIZE 4096
+
 #define SUFTAB_STORE(IDX,VALUE)   rmnsufinfo->sortblock.sortspace[IDX] = VALUE
 
 typedef struct
@@ -78,7 +79,7 @@ typedef struct
          pagesize,
          offset;
   unsigned long pageoffset,
-                pagewidth;
+                mappedwidth;
 } Sortblock;
 
 struct Rmnsufinfo
@@ -161,11 +162,6 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
   return rmnsufinfo;
 }
 
-static Seqpos sortspace_get(const Sortblock *sortblock,Seqpos idx)
-{
-  return sortblock->sortspace[idx];
-}
-
 static Seqpos nextsuftabentry_get(Sortblock *sortblock)
 {
   Seqpos value;
@@ -184,7 +180,7 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
     gt_assert(sortblock->remaining > 0);
     if (sortblock->mappedsection == NULL)
     {
-      sortblock->pagesize = (Seqpos) 4096;
+      sortblock->pagesize = (Seqpos) PAGESIZE;
     } else
     {
       sortblock->offset += sortblock->pagesize;
@@ -295,7 +291,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
                                       numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      startpos = SUFTAB_GET(idx);
+      startpos = rmnsufinfo->sortblock.sortspace[idx];
       compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
     }
     updatewidth (rmnsufinfo,bucketspec.left,
@@ -304,14 +300,14 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
     {
-      startpos = SUFTAB_GET(idx);
+      startpos = rmnsufinfo->sortblock.sortspace[idx];
       compressedtable_update(rmnsufinfo->inversesuftab,startpos,
                              bucketspec.left);
     }
   }
   for (/* Nothing */; idx < rmnsufinfo->partwidth; idx++)
   {
-    startpos = SUFTAB_GET(idx);
+    startpos = rmnsufinfo->sortblock.sortspace[idx];
     compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
   }
 }
@@ -371,7 +367,8 @@ static void initinversesuftabnonspecials(Rmnsufinfo *rmnsufinfo)
 
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
   {
-    compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),idx);
+    compressedtable_update(rmnsufinfo->inversesuftab,
+                           rmnsufinfo->sortblock.sortspace[idx],idx);
   }
 }
 
@@ -476,13 +473,46 @@ static void processunsortedrange(Rmnsufinfo *rmnsufinfo,
   }
 }
 
+/* access to suftab for qsufsort is restricted to the following two functions
+ * */
+
+static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
+                                        Seqpos right)
+{
+  if (sortblock->mappedsection == NULL ||
+      right >= sortblock->pageoffset + sortblock->mappedwidth ||
+      left < sortblock->pageoffset)
+  {
+    Seqpos pagenum = left/sortblock->mappedwidth;
+    sortblock->pageoffset = sortblock->mappedwidth * pagenum;
+    /* XXX now for test purpose let mappsection point into sortspace */
+    sortblock->mappedsection = sortblock->sortspace + sortblock->pageoffset;
+    gt_assert(left >= sortblock->pageoffset);
+    if (right >= sortblock->pageoffset + sortblock->mappedwidth)
+    {
+      fprintf(stderr,"left=%lu, right=%lu, pageoffset=%lu, mappedwidth=%lu\n",
+                 (unsigned long) left,
+                 (unsigned long) right,
+                 (unsigned long) sortblock->pageoffset,
+                 (unsigned long) sortblock->mappedwidth);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
+static Seqpos suftabentry_fromsection(Rmnsufinfo *rmnsufinfo,Seqpos idx)
+{
+  return rmnsufinfo->sortblock.sortspace[idx];
+}
+
 static void anchorleftmost(Rmnsufinfo *rmnsufinfo,Seqpos left,Seqpos right)
 {
   Seqpos idx;
 
   for (idx = left; idx <= right; idx++)
   {
-    compressedtable_update(rmnsufinfo->inversesuftab,SUFTAB_GET(idx),left);
+    compressedtable_update(rmnsufinfo->inversesuftab,
+                           suftabentry_fromsection(rmnsufinfo,idx),left);
   }
 }
 
@@ -490,12 +520,17 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
                                     Seqpos right, Seqpos base)
 {
   unsigned long idx, rangestart;
+  Seqpos startpos;
   const unsigned long width = (unsigned long) (right - left + 1);
 
   if (rmnsufinfo->itvinfo == NULL)
   {
     rmnsufinfo->itvinfo = gt_malloc(sizeof(Itventry) *
                                     rmnsufinfo->allocateditvinfo);
+  }
+  if (rmnsufinfo->sortblock.mmapfiledesc != -1)
+  {
+    possiblychangemappedsection(&rmnsufinfo->sortblock,left,right);
   }
   if (rmnsufinfo->firstwithnewdepth.left == left &&
       rmnsufinfo->firstwithnewdepth.right == right)
@@ -505,12 +540,12 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   gt_assert(rmnsufinfo->allocateditvinfo >= width);
   for (idx=0; idx<width; idx++)
   {
-    rmnsufinfo->itvinfo[idx].suffixstart = SUFTAB_GET(left+idx);
-    gt_assert(SUFTAB_GET(left+idx)+rmnsufinfo->currentdepth
-              <= rmnsufinfo->totallength);
+    startpos = suftabentry_fromsection(rmnsufinfo,left+idx);
+    rmnsufinfo->itvinfo[idx].suffixstart = startpos;
+    gt_assert(startpos+rmnsufinfo->currentdepth <= rmnsufinfo->totallength);
     rmnsufinfo->itvinfo[idx].key
       = compressedtable_get(rmnsufinfo->inversesuftab,
-                            SUFTAB_GET(left+idx) + rmnsufinfo->currentdepth);
+                            startpos + rmnsufinfo->currentdepth);
   }
   qsort(rmnsufinfo->itvinfo,(size_t) width,sizeof(Itventry),compareitv);
   for (idx=0; idx<width; idx++)
@@ -535,7 +570,9 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
       } else
       {
         compressedtable_update(rmnsufinfo->inversesuftab,
-                               SUFTAB_GET(left+rangestart), left+rangestart);
+                               suftabentry_fromsection(rmnsufinfo,
+                                                       left+rangestart),
+                               left+rangestart);
       }
       rangestart = idx;
     }
@@ -553,7 +590,9 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   } else
   {
     compressedtable_update(rmnsufinfo->inversesuftab,
-                           SUFTAB_GET(left+rangestart), left+rangestart);
+                           suftabentry_fromsection(rmnsufinfo,
+                                                   left+rangestart),
+                           left+rangestart);
   }
 }
 
@@ -648,6 +687,10 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
                                    (size_t) (partwidth * sizeof (Seqpos)),
                                    0, true, false, __FILE__,__LINE__);
     gt_assert (rmnsufinfo->sortblock.sortspace != NULL);
+    rmnsufinfo->sortblock.mappedwidth 
+      = PAGESIZE * (rmnsufinfo->allocateditvinfo/PAGESIZE+2);
+    printf("mappedwidth = %lu\n",
+            (unsigned long) rmnsufinfo->sortblock.mappedwidth);
   }
   rightchar = (unsigned int) (mincode % numofchars);
   for (code = mincode; code <= maxcode; code++)
