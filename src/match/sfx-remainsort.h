@@ -29,7 +29,6 @@ typedef struct Rmnsufinfo Rmnsufinfo;
 
 Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           int mmapfiledesc,
-                          const char *filename,
                           const Encodedsequence *encseq,
                           const Bcktab *bcktab,
                           Readmode readmode,
