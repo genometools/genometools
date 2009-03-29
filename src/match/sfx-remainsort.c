@@ -184,7 +184,6 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
     } else
     {
       sortblock->offset += sortblock->pagesize;
-      STAMP;
       gt_fa_xmunmap(sortblock->mappedsection);
       sortblock->mappedsection = NULL;
     }
@@ -359,7 +358,6 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo,
     startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
     compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
   }
-      STAMP;
   gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
   rmnsufinfo->sortblock.mappedsection = NULL;
 }
@@ -492,7 +490,6 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
     gt_assert(right < sortblock->pageoffset + sortblock->mappedwidth);
     if (sortblock->mappedsection != NULL)
     {
-      STAMP;
       gt_fa_xmunmap(sortblock->mappedsection);
       sortblock->mappedsection = NULL;
     }
@@ -681,14 +678,13 @@ static void sortremainingsuffixes(Rmnsufinfo *rmnsufinfo)
       gt_free(pairptrwithbase);
     }
   }
-  if (rmnsufinfo->sortblock.mmapfiledesc != -1 &&
-      rmnsufinfo->sortblock.mappedsection != NULL)
+  if (rmnsufinfo->sortblock.mmapfiledesc != -1)
   {
-      STAMP;
+    gt_assert(rmnsufinfo->sortblock.mappedsection != NULL);
     gt_fa_xmunmap(rmnsufinfo->sortblock.mappedsection);
     rmnsufinfo->sortblock.mappedsection = NULL;
+    printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   }
-  printf("pagechanges = %lu\n",rmnsufinfo->sortblock.pagechanges);
   printf("maxqueuesize = %lu\n",rmnsufinfo->maxqueuesize);
   gt_free(rmnsufinfo->unusedpair);
   gt_free(rmnsufinfo->itvinfo);
@@ -1162,7 +1158,6 @@ Compressedtable *wrapRmnsufinfo(Seqpos *longest,
   }
   if (rmnsufinfo->sortblock.mmapfiledesc != -1)
   {
-      STAMP;
     gt_fa_xmunmap(rmnsufinfo->sortblock.sortspace);
     rmnsufinfo->sortblock.sortspace = NULL;
   }
