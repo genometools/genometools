@@ -22,12 +22,12 @@ fi
 
 suffixerator()
 {
-  ${RUNNER} gt suffixerator -tis -suf -des -ssp -db ${filename} $*
+  ${RUNNER} gt suffixerator -tis -lcp -suf -des -ssp -db ${filename} $*
 }
 
 sfxmap()
 {
-  gt dev sfxmap -suf $*
+  gt dev sfxmap -lcp -suf $*
 }
 
 for filename in ${filenames}

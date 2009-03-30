@@ -73,12 +73,11 @@ typedef struct
   Seqpos *sortspace,
          *mappedsection,
          currentindex,
-         remaining,
+         mapableentries,
          pagesize,
-         offset;
-  unsigned long pageoffset,
-                mappedwidth,
-                pagechanges;
+         pageoffset,
+         mappedwidth;
+  unsigned long pagechanges;
 } Sortblock;
 
 struct Rmnsufinfo
@@ -115,11 +114,11 @@ static void initsortblock(Sortblock *sortblock,
   } else
   {
     gt_assert(sortblock->mmapfiledesc != -1);
-    sortblock->pagesize = 0;
-    sortblock->currentindex = 0;
-    sortblock->offset = 0;
     sortblock->mappedsection = NULL;
-    sortblock->remaining = partwidth;
+    sortblock->pagesize = 0;
+    sortblock->pageoffset = 0;
+    sortblock->currentindex = 0;
+    sortblock->mapableentries = partwidth;
     sortblock->pagechanges = 0;
   }
 }
@@ -166,40 +165,35 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
 {
   Seqpos value;
 
-  /*
-  printf("remaining=%lu",(unsigned long) sortblock->remaining);
-  printf("currentindex=%lu,offset=%lu,pagesize=%lu\n",
-           (unsigned long) sortblock->currentindex,
-           (unsigned long) sortblock->offset,
-           (unsigned long) sortblock->pagesize);
-  */
-  if (sortblock->currentindex == sortblock->offset + sortblock->pagesize)
+  if (sortblock->currentindex == sortblock->pageoffset + sortblock->pagesize)
   {
     Seqpos entries2map;
 
-    gt_assert(sortblock->remaining > 0);
-    if (sortblock->mappedsection == NULL)
+    gt_assert(sortblock->mapableentries > sortblock->pageoffset);
+    if (sortblock->mappedsection != NULL)
     {
-      sortblock->pagesize = (Seqpos) PAGESIZE;
-    } else
-    {
-      sortblock->offset += sortblock->pagesize;
+      sortblock->pageoffset += sortblock->pagesize;
       gt_fa_xmunmap(sortblock->mappedsection);
       sortblock->mappedsection = NULL;
-    }
-    if (sortblock->remaining >= sortblock->pagesize)
-    {
-      entries2map = sortblock->pagesize;
-      sortblock->remaining -= sortblock->pagesize;
     } else
     {
-      entries2map = sortblock->remaining;
-      sortblock->remaining = 0;
+      sortblock->pagesize = (Seqpos) PAGESIZE;
+    }
+    if (sortblock->pageoffset + sortblock->pagesize <=
+        sortblock->mapableentries)
+    {
+      entries2map = sortblock->pagesize;
+    } else
+    {
+      gt_assert(sortblock->pageoffset + sortblock->pagesize >
+                sortblock->mapableentries &&
+                sortblock->mapableentries > sortblock->pageoffset);
+      entries2map = sortblock->mapableentries - sortblock->pageoffset;
     }
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
                                    entries2map * sizeof (Seqpos),
-                                   sortblock->offset * sizeof (Seqpos),
+                                   sortblock->pageoffset * sizeof (Seqpos),
                                    false,false,__FILE__,__LINE__);
     gt_assert(sortblock->mappedsection != NULL);
   }
@@ -207,7 +201,8 @@ static Seqpos nextsuftabentry_get(Sortblock *sortblock)
   printf("access %lu\n",(unsigned long)
                         (sortblock->currentindex - sortblock->offset));
   */
-  value = sortblock->mappedsection[sortblock->currentindex - sortblock->offset];
+  value = sortblock->mappedsection[sortblock->currentindex -
+                                   sortblock->pageoffset];
   sortblock->currentindex++;
   return value;
 }
@@ -484,20 +479,31 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
       right >= sortblock->pageoffset + sortblock->mappedwidth ||
       left < sortblock->pageoffset)
   {
-    Seqpos pagenum = left/DIV2(sortblock->mappedwidth);
+    Seqpos entries2map, pagenum = left/DIV2(sortblock->mappedwidth);
+
     sortblock->pageoffset = DIV2(sortblock->mappedwidth) * pagenum;
-    gt_assert(left >= sortblock->pageoffset);
-    gt_assert(right < sortblock->pageoffset + sortblock->mappedwidth);
+    gt_assert(left >= sortblock->pageoffset &&
+              right < sortblock->pageoffset + sortblock->mappedwidth);
     if (sortblock->mappedsection != NULL)
     {
       gt_fa_xmunmap(sortblock->mappedsection);
       sortblock->mappedsection = NULL;
     }
+    gt_assert(sortblock->mapableentries > sortblock->pageoffset);
+    if (sortblock->pageoffset + sortblock->mappedwidth
+        <= sortblock->mapableentries)
+    {
+      entries2map = sortblock->mappedwidth;
+    } else
+    {
+      entries2map = sortblock->mapableentries - sortblock->pageoffset;
+    }
     sortblock->mappedsection
       = gt_fa_mmap_generic_fd_func(sortblock->mmapfiledesc,
-                                   sortblock->mappedwidth * sizeof (Seqpos),
+                                   entries2map * sizeof (Seqpos),
                                    sortblock->pageoffset * sizeof (Seqpos),
                                    true,false,__FILE__,__LINE__);
+    gt_assert(sortblock->mappedsection != NULL);
     sortblock->pagechanges++;
   }
 }
@@ -506,8 +512,8 @@ static Seqpos suftabentryfromsection_get(const Sortblock *sortblock,Seqpos idx)
 {
   if (sortblock->mmapfiledesc != -1)
   {
-    gt_assert(idx >= sortblock->pageoffset);
-    gt_assert(idx < sortblock->pageoffset + sortblock->mappedwidth);
+    gt_assert(idx >= sortblock->pageoffset &&
+              idx < sortblock->pageoffset + sortblock->mappedwidth);
     return sortblock->mappedsection[idx - sortblock->pageoffset];
   }
   return sortblock->sortspace[idx];
@@ -518,8 +524,8 @@ static void suftabentryfromsection_update(Sortblock *sortblock,Seqpos idx,
 {
   if (sortblock->mmapfiledesc != -1)
   {
-    gt_assert(idx >= sortblock->pageoffset);
-    gt_assert(idx < sortblock->pageoffset + sortblock->mappedwidth);
+    gt_assert(idx >= sortblock->pageoffset &&
+              idx < sortblock->pageoffset + sortblock->mappedwidth);
     sortblock->mappedsection[idx - sortblock->pageoffset] = value;
   } else
   {
@@ -712,19 +718,11 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
                                        prefixlength);
   } else
   {
-    const unsigned long pagesize = 4096;
     initinversesuftabnonspecialsadjuststream(rmnsufinfo,maxcode,bcktab,
                                              numofchars,prefixlength);
     rmnsufinfo->sortblock.sortspace = NULL;
-    /*
-    rmnsufinfo->sortblock.sortspace
-      = gt_fa_mmap_generic_fd_func(rmnsufinfo->sortblock.mmapfiledesc,
-                                   (size_t) (partwidth * sizeof (Seqpos)),
-                                   0, true, false, __FILE__,__LINE__);
-    gt_assert (rmnsufinfo->sortblock.sortspace != NULL);
-    */
-    rmnsufinfo->sortblock.mappedwidth 
-      = pagesize * (rmnsufinfo->allocateditvinfo/pagesize+2);
+    rmnsufinfo->sortblock.mappedwidth
+      = (Seqpos) (PAGESIZE * (rmnsufinfo->allocateditvinfo/PAGESIZE+2));
     printf("mappedwidth = %lu\n",
             (unsigned long) rmnsufinfo->sortblock.mappedwidth);
   }
@@ -1141,6 +1139,15 @@ Compressedtable *wrapRmnsufinfo(Seqpos *longest,
   *longest = compressedtable_get(rmnsufinfo->inversesuftab,0);
   if (withlcptab)
   {
+    if (rmnsufinfo->sortblock.mmapfiledesc != -1)
+    {
+      rmnsufinfo->sortblock.sortspace
+        = gt_fa_mmap_generic_fd_func(rmnsufinfo->sortblock.mmapfiledesc,
+                                     rmnsufinfo->sortblock.mapableentries
+                                     * sizeof (Seqpos),
+                                     0,
+                                     false,false,__FILE__,__LINE__);
+    }
 #ifdef NOINVERSESUFTAB
     compressedtable_free(rmnsufinfo->inversesuftab);
     rmnsufinfo->inversesuftab = NULL;
