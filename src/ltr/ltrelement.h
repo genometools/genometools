@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -56,10 +56,6 @@ char*         gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
                                          Seqinfo *seqinfo, GtError *err);
 unsigned long gt_ltrelement_leftltrlen(GtLTRElement *e);
 unsigned long gt_ltrelement_rightltrlen(GtLTRElement *e);
-void          gt_ltrelement_offset2pos(GtLTRElement *e, GtRange *rng,
-                                       unsigned long radius,
-                                       enum GtOffset o,
-                                       GtStrand strand);
 int           gt_ltrelement_format_description(GtLTRElement *e,
                                                unsigned int seqnamelen,
                                                char *buf, size_t buflen);

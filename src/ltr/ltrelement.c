@@ -42,6 +42,7 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
                                  Seqinfo *seqinfo, GtError *err)
 {
   char *out;
+  int had_err = 0;
   Uchar *symbolstring;
   const SfxAlphabet *alpha;
   Encodedsequencescanstate *ess;
@@ -70,8 +71,13 @@ char* gt_ltrelement_get_sequence(unsigned long start, unsigned long end,
   freeEncodedsequencescanstate(&ess);
 
   if (strand == GT_STRAND_REVERSE)
-    (void) gt_reverse_complement(out, len, err);
+    had_err = gt_reverse_complement(out, len, err);
   out[len]='\0';
+  if (had_err)
+  {
+    gt_free(out);
+    out = NULL;
+  }
   return out;
 }
 
@@ -79,63 +85,6 @@ unsigned long gt_ltrelement_rightltrlen(GtLTRElement *e)
 {
   gt_assert(e && (e->rightLTR_3 >= e->rightLTR_5));
   return e->rightLTR_3 - e->rightLTR_5 + 1;
-}
-
-void gt_ltrelement_offset2pos(GtLTRElement *e, GtRange *rng,
-                              unsigned long radius,
-                              enum GtOffset o,
-                              GtStrand strand)
-{
-  unsigned long len = gt_range_length(rng);
-  switch (strand)
-  {
-    case GT_STRAND_FORWARD:
-      switch (o)
-      {
-        case GT_OFFSET_BEGIN_LEFT_LTR:
-          rng->start = e->leftLTR_5 - (radius - 1) + rng->start;
-          break;
-        case GT_OFFSET_END_LEFT_LTR:
-          rng->start = e->leftLTR_5 + (gt_ltrelement_leftltrlen(e) - 1)
-                                    - (radius - 1) + rng->start;
-          break;
-        case GT_OFFSET_BEGIN_RIGHT_LTR:
-          rng->start = e->leftLTR_5 + (gt_ltrelement_length(e) - 1)
-                                    - (gt_ltrelement_rightltrlen(e) - 1)
-                                    - (radius - 1) + rng->start;
-          break;
-        case GT_OFFSET_END_RIGHT_LTR:
-          rng->start = e->leftLTR_5 + (gt_ltrelement_length(e) - 1)
-                                    - (radius - 1) + rng->start;
-          break;
-      }
-      break;
-    case GT_STRAND_REVERSE:
-      switch (o)
-      {
-        case GT_OFFSET_BEGIN_LEFT_LTR:
-          rng->start = e->rightLTR_3 + (radius - 1) - rng->end;
-          break;
-        case GT_OFFSET_END_LEFT_LTR:
-          rng->start = e->rightLTR_3 - (gt_ltrelement_rightltrlen(e) - 1)
-                                    + (radius - 1) - rng->end;
-          break;
-        case GT_OFFSET_BEGIN_RIGHT_LTR:
-          rng->start = e->rightLTR_3 - (gt_ltrelement_length(e) - 1)
-                                     + (gt_ltrelement_leftltrlen(e) - 1)
-                                     + (radius - 1) - rng->end;
-          break;
-        case GT_OFFSET_END_RIGHT_LTR:
-          rng->start = e->rightLTR_3 - (gt_ltrelement_length(e) - 1)
-                                     + (radius - 1) - rng->end;
-          break;
-
-      }
-      break;
-    default:
-      break;
-  }
-  rng->end = rng->start + len - 1;
 }
 
 int gt_ltrelement_format_description(GtLTRElement *e, unsigned int seqnamelen,
@@ -175,6 +124,7 @@ int gt_ltrelement_unit_test(GtError *err)
 
   gt_error_check(err);
 
+  /* check left LTR */
   element.leftLTR_5 = 20;
   element.leftLTR_3 = 119;
   ensure(had_err, gt_ltrelement_leftltrlen(&element) == 100);
