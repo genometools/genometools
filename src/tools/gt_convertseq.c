@@ -50,7 +50,6 @@ static OPrval parse_options(ConvertseqOptions *opts,
 
   op = gt_option_parser_new("[options] file [...]",
                          "Parse and convert sequence file formats.");
-  gt_option_parser_set_mailaddress(op,"<steinbiss@zbh.uni-hamburg.de>");
 
   optionverbose = gt_option_new_bool("v","be verbose",
                                      &opts->verbose, false);
