@@ -102,11 +102,6 @@ unsigned int gt_determinebitspervalue(uint64_t maxvalue)
   {
     bits++;
   }
-  if (bits > GT_MAXLOG2VALUE)
-  {
-    fprintf(stderr,"log2(" "%" PRIu64 ")=%u\n",maxvalue,bits);
-    exit(EXIT_FAILURE);
-  }
   gt_assert(bits <= GT_MAXLOG2VALUE);
   return bits;
 }
