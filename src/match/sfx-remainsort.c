@@ -238,11 +238,9 @@ static void initinversesuftabspecials(Rmnsufinfo *rmnsufinfo)
   }
 }
 
-static void updatewidth (Rmnsufinfo *rmnsufinfo,Seqpos left,
-                         Seqpos right,Seqpos depth)
+static void updatewidth (Rmnsufinfo *rmnsufinfo,unsigned long width,
+                         Seqpos depth)
 {
-  unsigned long width = (unsigned long) (right - left + 1);
-
   if (width > 1UL)
   {
     rmnsufinfo->firstgenerationtotalwidth += width;
@@ -290,8 +288,7 @@ static void initinversesuftabnonspecialsadjust(Rmnsufinfo *rmnsufinfo,
       startpos = rmnsufinfo->sortblock.sortspace[idx];
       compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
     }
-    updatewidth (rmnsufinfo,bucketspec.left,
-                 bucketspec.left+bucketspec.nonspecialsinbucket-1,
+    updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
                  (Seqpos) prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
@@ -337,8 +334,7 @@ static void initinversesuftabnonspecialsadjuststream(Rmnsufinfo *rmnsufinfo,
       startpos = nextsuftabentry_get(&rmnsufinfo->sortblock);
       compressedtable_update(rmnsufinfo->inversesuftab,startpos,idx);
     }
-    updatewidth (rmnsufinfo,bucketspec.left,
-                 bucketspec.left+bucketspec.nonspecialsinbucket-1,
+    updatewidth (rmnsufinfo,bucketspec.nonspecialsinbucket,
                  (Seqpos) prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left+bucketspec.nonspecialsinbucket; idx++)
@@ -384,7 +380,7 @@ void addunsortedrange(Rmnsufinfo *rmnsufinfo,
 {
   Pairsuffixptr *ptr;
 
-  updatewidth (rmnsufinfo,left,right,depth);
+  updatewidth (rmnsufinfo,(unsigned long) (right - left + 1),depth);
   GETNEXTFREEINARRAY(ptr,&rmnsufinfo->firstgeneration,Pairsuffixptr,1024);
   ptr->left = left;
   ptr->right = right;
@@ -721,6 +717,8 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
     initinversesuftabnonspecialsadjuststream(rmnsufinfo,maxcode,bcktab,
                                              numofchars,prefixlength);
     rmnsufinfo->sortblock.sortspace = NULL;
+    printf("allocateditvinfo = %lu\n",
+           (unsigned long) rmnsufinfo->allocateditvinfo);
     rmnsufinfo->sortblock.mappedwidth
       = (Seqpos) (PAGESIZE * (rmnsufinfo->allocateditvinfo/PAGESIZE+2));
     printf("mappedwidth = %lu\n",
