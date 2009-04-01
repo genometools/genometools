@@ -28,5 +28,7 @@ void          gt_cstr_show(const char*, unsigned long length, FILE*);
 /* Returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
    does not contain <c>, strlen(cstr) is returned. */
 unsigned long gt_cstr_length_up_to_char(const char *cstr, char c);
+/* Removes all occurrences of <remove> from the right end of <cstr>. */
+char*         gt_cstr_rtrim(char* cstr, char remove);
 
 #endif

@@ -16,7 +16,7 @@
 */
 
 static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
-                                      GtFastaBuffer *fb,
+                                      GtSequenceBuffer *fb,
                                       GtError *err)
 {
   Uchar cc;
@@ -48,7 +48,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = gt_fastabuffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next(fb,&cc,err);
     if (retval < 0)
     {
       return -1;

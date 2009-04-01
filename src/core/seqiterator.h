@@ -21,6 +21,7 @@
 #include <inttypes.h>
 #include "core/queue.h"
 #include "core/str_array.h"
+#include "core/sequence_buffer.h"
 #include "core/symboldef.h"
 
 typedef struct GtSeqIterator GtSeqIterator;
@@ -30,13 +31,26 @@ typedef struct GtSeqIterator GtSeqIterator;
    If <withsequence> equals <true>, FASTA sequences and descriptions are
    processed (otherwise only the descriptions). */
 GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
-                                  const Uchar *symbolmap, bool withsequence);
+                                  const unsigned char *symbolmap,
+                                  bool withsequence);
+
+/* Create a new <GtSeqIterator> for files in <filenametab> using the
+   <GtSequenceBuffer> implementation <buffer>.
+   If a <symbolmap> is given, all read in sequences are transformed with it.
+   If <withsequence> equals <true>, sequences and descriptions are processed
+   (otherwise only the descriptions). */
+GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer,
+                                              const unsigned char *symbolmap,
+                                              bool withsequence);
+
 /* Get next <sequence> (of length <len>) and <description> from <seq_iterator>.
    The caller is responsible to free the received <description>.
    Returns 1, if another sequence could be parsed. 0, if all given sequence
-   files are exhaused. And -1, if an error occured (err> is set accordingly). */
+   files are exhausted. And -1, if an error occured (<err> is set
+   accordingly). */
 int            gt_seqiterator_next(GtSeqIterator *seq_iterator,
-                                   const Uchar **sequence, unsigned long *len,
+                                   const unsigned char **sequence,
+                                   unsigned long *len,
                                    char **description, GtError*);
 const unsigned
 long long*     gt_seqiterator_getcurrentcounter(GtSeqIterator*,

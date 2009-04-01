@@ -21,7 +21,8 @@
 #include "core/disc_distri.h"
 #include "core/error.h"
 #include "core/fa.h"
-#include "core/fastabuffer.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_plain.h"
 #include "core/str_array.h"
 #include "esa-fileend.h"
 #include "seqpos-def.h"
@@ -158,7 +159,7 @@ int fasta2sequencekeyvalues(
         Verboseinfo *verboseinfo,
         GtError *err)
 {
-  GtFastaBuffer *fb = NULL;
+  GtSequenceBuffer *fb = NULL;
   Uchar charcode;
   Seqpos currentpos = 0;
   int retval;
@@ -186,78 +187,89 @@ int fasta2sequencekeyvalues(
   }
   if (!haserr)
   {
-    fb = gt_fastabuffer_new(filenametab,
-                            getsymbolmapAlphabet(alpha),
-                            plainformat,
-                            filelengthtab,
-                            descqueue,
-                            characterdistribution);
-    distspralen = gt_disc_distri_new();
-    for (currentpos = 0; /* Nothing */; currentpos++)
-    {
-      retval = gt_fastabuffer_next(fb,&charcode,err);
-      if (retval < 0)
+    if (plainformat) {
+      fb = gt_sequence_buffer_plain_new(filenametab);
+    } else {
+      fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
+    }
+    if (!fb)
+      haserr = true;
+    if (!haserr) {
+      gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alpha));
+      *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
+                                 sizeof (Filelengthvalues));
+      gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
+      if (descqueue)
+        gt_sequence_buffer_set_desc_queue(fb, descqueue);
+      gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
+
+      distspralen = gt_disc_distri_new();
+      for (currentpos = 0; /* Nothing */; currentpos++)
       {
-        haserr = true;
-        break;
-      }
-      if (retval == 0)
-      {
-        if (lastspeciallength > 0)
+        retval = gt_sequence_buffer_next(fb,&charcode,err);
+        if (retval < 0)
         {
-          idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          gt_disc_distri_add(distspralen,idx);
+          haserr = true;
+          break;
         }
-        break;
-      }
-      if (ISSPECIAL(charcode))
-      {
-        if (desfp != NULL && charcode == (Uchar) SEPARATOR)
+        if (retval == 0)
         {
-          desc = gt_queue_get(descqueue);
-          if (fputs(desc,desfp) == EOF)
+          if (lastspeciallength > 0)
           {
-            gt_error_set(err,"cannot write description to file %s.%s",
-                              gt_str_get(indexname),DESTABSUFFIX);
-            haserr = true;
-            break;
+            idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+            gt_disc_distri_add(distspralen,idx);
           }
-          (void) putc((int) '\n',desfp);
-          FREESPACE(desc);
+          break;
         }
-        if (specialprefix)
+        if (ISSPECIAL(charcode))
         {
-          specialcharinfo->lengthofspecialprefix++;
-        }
-        specialcharinfo->specialcharacters++;
-        if (lastspeciallength == 0)
-        {
-          lastspeciallength = (Seqpos) 1;
-        } else
-        {
-          lastspeciallength++;
-        }
-        if (charcode == (Uchar) SEPARATOR)
-        {
-          if (withssptab)
+          if (desfp != NULL && charcode == (Uchar) SEPARATOR)
           {
-            STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
+            desc = gt_queue_get(descqueue);
+            if (fputs(desc,desfp) == EOF)
+            {
+              gt_error_set(err,"cannot write description to file %s.%s",
+                                gt_str_get(indexname),DESTABSUFFIX);
+              haserr = true;
+              break;
+            }
+            (void) putc((int) '\n',desfp);
+            FREESPACE(desc);
+          }
+          if (specialprefix)
+          {
+            specialcharinfo->lengthofspecialprefix++;
+          }
+          specialcharinfo->specialcharacters++;
+          if (lastspeciallength == 0)
+          {
+            lastspeciallength = (Seqpos) 1;
           } else
           {
-            sequenceseppos->nextfreeSeqpos++;
+            lastspeciallength++;
           }
-        }
-      } else
-      {
-        if (specialprefix)
+          if (charcode == (Uchar) SEPARATOR)
+          {
+            if (withssptab)
+            {
+              STOREINARRAY(sequenceseppos,Seqpos,128,currentpos);
+            } else
+            {
+              sequenceseppos->nextfreeSeqpos++;
+            }
+          }
+        } else
         {
-          specialprefix = false;
-        }
-        if (lastspeciallength > 0)
-        {
-          idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          gt_disc_distri_add(distspralen,idx);
-          lastspeciallength = 0;
+          if (specialprefix)
+          {
+            specialprefix = false;
+          }
+          if (lastspeciallength > 0)
+          {
+            idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+            gt_disc_distri_add(distspralen,idx);
+            lastspeciallength = 0;
+          }
         }
       }
     }
@@ -283,7 +295,7 @@ int fasta2sequencekeyvalues(
   }
   gt_fa_xfclose(desfp);
   gt_disc_distri_delete(distspralen);
-  gt_fastabuffer_delete(fb);
+  gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
 }

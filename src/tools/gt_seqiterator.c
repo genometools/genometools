@@ -182,10 +182,11 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
   GtSeqIterator *seqit;
+  GtSequenceBuffer *sb;
   const Uchar *sequence;
   char *desc;
   unsigned long len;
-  int i, parsed_args, had_err;
+  int i, parsed_args, had_err = 0;
   off_t totalsize;
   GtDiscDistri *distseqlen = NULL;
   GtDiscDistri *distastretch = NULL;
@@ -214,56 +215,63 @@ int gt_seqiterator(int argc, const char **argv, GtError *err)
   totalsize = gt_files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
-  seqit = gt_seqiterator_new(files, NULL, true);
-  if (seqiteroptions.dodistlen)
-  {
-    distseqlen = gt_disc_distri_new();
-  }
-  if (seqiteroptions.doastretch)
-  {
-    distastretch = gt_disc_distri_new();
-  }
-  if (seqiteroptions.verbose)
-  {
-    gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
-                                                         (unsigned long long)
-                                                         totalsize),
-                         (unsigned long long) totalsize);
-  }
-  while (true)
-  {
-    desc = NULL;
-    had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
+  sb = gt_sequence_buffer_new_guess_type(files, err);
+  if (!sb)
+    had_err = -1;
+  if (!had_err) {
+    /* read input using seqiterator */
+    seqit = gt_seqiterator_new_with_buffer(sb, NULL, true);
     if (seqiteroptions.dodistlen)
     {
-      if (!minlengthdefined || minlength > len)
-      {
-        minlength = len;
-        minlengthdefined = true;
-      }
-      if (maxlength < len)
-      {
-        maxlength = len;
-      }
-      sumlength += (uint64_t) len;
-      numofseq++;
-      gt_disc_distri_add(distseqlen,len/BUCKETSIZE);
+      distseqlen = gt_disc_distri_new();
     }
     if (seqiteroptions.doastretch)
     {
-      countA += accumulateastretch(distastretch,sequence,len);
+      distastretch = gt_disc_distri_new();
     }
-    gt_free(desc);
-    if (had_err != 1)
+    if (seqiteroptions.verbose)
     {
-      break;
+      gt_progressbar_start(gt_seqiterator_getcurrentcounter(seqit,
+                                                           (unsigned long long)
+                                                           totalsize),
+                           (unsigned long long) totalsize);
     }
+    while (true)
+    {
+      desc = NULL;
+      had_err = gt_seqiterator_next(seqit, &sequence, &len, &desc, err);
+      if (seqiteroptions.dodistlen)
+      {
+        if (!minlengthdefined || minlength > len)
+        {
+          minlength = len;
+          minlengthdefined = true;
+        }
+        if (maxlength < len)
+        {
+          maxlength = len;
+        }
+        sumlength += (uint64_t) len;
+        numofseq++;
+        gt_disc_distri_add(distseqlen,len/BUCKETSIZE);
+      }
+      if (seqiteroptions.doastretch)
+      {
+        countA += accumulateastretch(distastretch,sequence,len);
+      }
+      gt_free(desc);
+      if (had_err != 1)
+      {
+        break;
+      }
+    }
+    if (seqiteroptions.verbose)
+    {
+      gt_progressbar_stop();
+    }
+    gt_seqiterator_delete(seqit);
   }
-  if (seqiteroptions.verbose)
-  {
-    gt_progressbar_stop();
-  }
-  gt_seqiterator_delete(seqit);
+  gt_sequence_buffer_delete(sb);
   gt_str_array_delete(files);
   if (seqiteroptions.dodistlen)
   {

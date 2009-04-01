@@ -17,7 +17,8 @@
 
 #include "core/arraydef.h"
 #include "core/chardef.h"
-#include "core/fastabuffer.h"
+#include "core/sequence_buffer_fasta.h"
+#include "core/sequence_buffer_access.h"
 #include "core/minmax.h"
 #include "core/str_array.h"
 #include "core/symboldef.h"
@@ -25,7 +26,7 @@
 
 struct GtSeqIterator
 {
-  GtFastaBuffer *fb;
+  GtSequenceBuffer *fb;
   const GtStrArray *filenametab;
   const Uchar *symbolmap;
   GtQueue *descptr;
@@ -40,16 +41,24 @@ GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
                                   const Uchar *symbolmap,
                                   bool withsequence)
 {
+  GtSeqIterator *si;
+  GtSequenceBuffer *sb = gt_sequence_buffer_fasta_new(filenametab);
+  si = gt_seqiterator_new_with_buffer(sb, symbolmap, withsequence);
+  gt_sequence_buffer_delete(sb); /* drop this reference */
+  return si;
+}
+
+GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buf,
+                                              const Uchar *symbolmap,
+                                              bool withsequence)
+{
   GtSeqIterator *seqit;
   seqit = gt_malloc(sizeof (GtSeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
   seqit->descptr = gt_queue_new();
-  seqit->fb = gt_fastabuffer_new(filenametab,
-                                 symbolmap,
-                                 false,
-                                 NULL,
-                                 seqit->descptr,
-                                 NULL);
+  seqit->fb = gt_sequence_buffer_ref(buf);
+  gt_sequence_buffer_set_desc_queue(seqit->fb, seqit->descptr);
+  gt_sequence_buffer_set_symbolmap(seqit->fb, symbolmap);
   seqit->exhausted = false;
   seqit->unitnum = 0;
   seqit->withsequence = withsequence;
@@ -77,7 +86,7 @@ int gt_seqiterator_next(GtSeqIterator *seqit,
   }
   while (true)
   {
-    retval = gt_fastabuffer_next(seqit->fb,&charcode,err);
+    retval = gt_sequence_buffer_next(seqit->fb,&charcode,err);
     if (retval < 0)
     {
       haserr = true;
@@ -161,7 +170,7 @@ void gt_seqiterator_delete(GtSeqIterator *seqit)
 {
   if (!seqit) return;
   gt_queue_delete_with_contents(seqit->descptr);
-  gt_fastabuffer_delete(seqit->fb);
+  gt_sequence_buffer_delete(seqit->fb);
   FREEARRAY(&seqit->sequencebuffer, Uchar);
   seqit->currentread = seqit->maxread;
   gt_free(seqit);

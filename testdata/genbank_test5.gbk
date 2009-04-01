@@ -1,0 +1,33 @@
+LOCUS       AF078689                 275 bp    mRNA    linear   EST 26-JUL-1999
+DEFINITION  AF078689 Arabidopsis thaliana library (Tan K) Arabidopsis thaliana
+            cDNA clone IFA2, mRNA sequence.
+ACCESSION   AF078689
+VERSION     AF078689.1  GI:5587835
+KEYWORDS    EST.
+SOURCE      Arabidopsis thaliana (thale cress)
+  ORGANISM  Arabidopsis thaliana
+            Eukaryota; Viridiplantae; Streptophyta; Embryophyta; Tracheophyta;
+            Spermatophyta; Magnoliophyta; eudicotyledons; core eudicotyledons;
+            rosids; eurosids II; Brassicales; Brassicaceae; Arabidopsis.
+REFERENCE   1  (bases 1 to 275)
+  AUTHORS   Zhao,D., Chen,D., Yang,C. and Zhai,Z.
+  TITLE     Isolation of intermediate filament-like genes from Arabidopsis
+  JOURNAL   Unpublished (1999)
+COMMENT     Contact: Tan K
+            Plant Development Biology
+            Institute of Botany
+            20 Nanxincun Xiangshan. Hai Dian, Beijing, 100871, P. R. China.
+FEATURES             Location/Qualifiers
+     source          1..275
+                     /organism="Arabidopsis thaliana"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:3702"
+                     /clone="IFA2"
+                     /clone_lib="Arabidopsis thaliana library (Tan K)"
+ORIGIN      
+        1 antnnctacn ncnncnntnn cnncnatnna antanacnna tnntnntann aatnaaannc
+       61tanaancnnc nnanaantat ntnnataana aataacaaaa actnannnna tcatnaantt
+      121 cttcnttata ttatantttt caatctnaat ttcaattccn ccnctcncct ttttcctctc
+      181 cnccttttcc ntctctccna tctnctcccn ccnccnacct tntnatnatt atanctctna
+      241 anntccatac aannatataa aaaaaaaaaa aaaaa
+//

@@ -119,31 +119,6 @@ unsigned int gt_determinebitspervalue(uint64_t maxvalue)
   {
     bits++;
   }
-  if (bits > GT_MAXLOG2VALUE)
-  {
-    fprintf(stderr,"log2(" "%" PRIu64 ")=%u\n",maxvalue,bits);
-    exit(EXIT_FAILURE);
-  }
   gt_assert(bits <= GT_MAXLOG2VALUE);
   return bits;
 }
-
-/*
-The following does not work:
-unsigned int determinebitspervalue(uint64_t v)
-{
-  uint64_t r, shift;
-  unsigned int bits;
-
-  bits = determinebitspervalue_obvious(v);
-  r =     (v > 0xFFFFFFFF) << 5; v >>= r;
-  shift = (v > 0xFFFF    ) << 4; v >>= shift; r |= shift;
-  shift = (v > 0xFF      ) << 3; v >>= shift; r |= shift;
-  shift = (v > 0xF       ) << 2; v >>= shift; r |= shift;
-  shift = (v > 0x3       ) << 1; v >>= shift; r |= shift;
-                                              r |= (v >> 1);
-
-  gt_assert(bits == (unsigned int) r);
-  return (unsigned int) r;
-}
-*/

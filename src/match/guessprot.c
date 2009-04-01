@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include "core/error.h"
-#include "core/fastabuffer.h"
+#include "core/sequence_buffer_fasta.h"
 #include "core/str.h"
 #include "stamp.h"
 
@@ -28,23 +28,20 @@ int guessifproteinsequencestream(const GtStrArray *filenametab,GtError *err)
   unsigned int countnonbases = 0,
                currentposition;
   Uchar currentchar;
-  GtFastaBuffer *fb;
+  GtSequenceBuffer *fb;
   int retval;
 
   gt_error_check(err);
-  fb = gt_fastabuffer_new(filenametab,
-                          NULL,
-                          false,
-                          NULL,
-                          NULL,
-                          NULL);
+  fb = gt_sequence_buffer_new_guess_type((GtStrArray*) filenametab, err);
+  if (!fb) return -1;
+
   for (currentposition = 0; currentposition < 1000U;
        currentposition++)
   {
-    retval = gt_fastabuffer_next(fb,&currentchar,err);
+    retval = gt_sequence_buffer_next(fb,&currentchar,err);
     if (retval < 0)
     {
-      gt_fastabuffer_delete(fb);
+      gt_sequence_buffer_delete(fb);
       return -1;
     }
     if (retval == 0)
@@ -69,7 +66,7 @@ int guessifproteinsequencestream(const GtStrArray *filenametab,GtError *err)
       break;
     }
   }
-  gt_fastabuffer_delete(fb);
+  gt_sequence_buffer_delete(fb);
   if (countnonbases > 0)
   {
     return 1;
