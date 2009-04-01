@@ -52,7 +52,6 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
     lv->element->mainnode = gf;
   } else if (strcmp(gft, "long_terminal_repeat") == 0)
   {
-    /* XXX: check order if unsorted! */
     if (lv->element->leftLTR == NULL)
     {
       node_range = gt_genome_node_get_range((GtGenomeNode*) gf);
@@ -71,7 +70,6 @@ static int ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
     }
   } else if (strcmp(gft, "target_site_duplication") == 0)
   {
-    /* XXX: check order if unsorted! */
     if (lv->element->leftTSD == NULL)
     {
       lv->element->leftTSD = gf;
