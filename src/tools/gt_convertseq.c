@@ -105,7 +105,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
     gt_str_array_add_cstr(files, argv[i]);
   }
   totalsize = gt_files_estimate_total_size(files);
-  
+
   flv = gt_calloc(gt_str_array_size(files), sizeof (Filelengthvalues));
 
   sb = gt_sequence_buffer_new_guess_type(files, err);
@@ -133,7 +133,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
         break;
       if (!opts.showseq) {
         printf(">%s\n", desc);
-        for(i=0;i<len;i++) {
+        for (i=0;i<len;i++) {
           putc(sequence[i], stdout);
           if ((j % opts.fastawidth) == 0) {
             j=0;
