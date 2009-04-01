@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include <float.h>
 #include <pthread.h>
+#include "core/codon.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -43,6 +44,7 @@
 struct GtPdomFinder {
   GtStrArray *hmm_files;
   GtArray *models;
+  GtLTRElement *elem;
   struct threshold_s thresh;
   unsigned int nof_threads,
                chain_max_gap_length;
@@ -60,6 +62,7 @@ struct GtPdomSingleHit {
         *mline,
         *aa_seq_matched;
   double eval;
+  GtPdomModelHit *mhit;
   unsigned long reference_count;
 };
 
@@ -68,6 +71,7 @@ struct GtPdomModelHit {
   GtStrand strand;
   GtArray *best_chain;
   unsigned long reference_count;
+  GtLTRElement *elem;
 };
 
 struct GtPdomResults {
@@ -103,7 +107,8 @@ void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
   unsigned long pos,
                 match_start,
                 match_end,
-                i;
+                i,
+                len, modellen, matchlen;
   char *buffer, cpbuf[BUFSIZ];
   const char *model,
              *mline,
@@ -115,11 +120,14 @@ void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
   matched = gt_str_get(sh->aa_seq_matched);
   gt_str_reset(dest);
 
-  match_end = sh->range.start - 1;
+  modellen = gt_str_length(sh->aa_seq_model);
+  matchlen = gt_str_length(sh->aa_seq_matched);
+  len = MAX(modellen, matchlen)-3; /* -3 to remove the '<-*' */
 
-  if (width > gt_range_length(&sh->range))
-    width = gt_range_length(&sh->range);
-  for (pos = 0; pos <= gt_range_length(&sh->range) - width; pos += width)
+  match_end = sh->range.start - 1;
+  if (width > len)
+    width = len;
+  for (pos = 3; pos + width < len; pos += width) /* 3 to remove the '*->' */
   {
     match_start = match_end + 1;
     for (i = pos; i < pos + width && matched[i] != '\0'; i++)
@@ -131,6 +139,27 @@ void gt_pdom_single_hit_format_alignment(const GtPdomSingleHit *sh,
     snprintf(cpbuf, BUFSIZ, "%6s %s\n", " ", buffer);
     gt_str_append_cstr(dest, cpbuf);
     strncpy(buffer, matched+pos, width);
+    snprintf(cpbuf, BUFSIZ, "%6lu %s %6lu\n\n",
+                            match_start,
+                            buffer,
+                            match_end);
+    gt_str_append_cstr(dest, cpbuf);
+  }
+  if (pos < len)
+  {
+    unsigned long rest_len;
+    rest_len = len - pos;
+    match_start = match_end + 1;
+    for (i = pos; i < len && matched[i] != '\0'; i++)
+      if (!isgap(matched[i])) match_end++;
+    strncpy(buffer, model+pos, rest_len);
+    buffer[rest_len]='\0';
+    snprintf(cpbuf, BUFSIZ, "%6s %s\n", " ", buffer);
+    gt_str_append_cstr(dest, cpbuf);
+    strncpy(buffer, mline+pos, rest_len);
+    snprintf(cpbuf, BUFSIZ, "%6s %s\n", " ", buffer);
+    gt_str_append_cstr(dest, cpbuf);
+    strncpy(buffer, matched+pos, rest_len);
     snprintf(cpbuf, BUFSIZ, "%6lu %s %6lu\n\n",
                             match_start,
                             buffer,
@@ -156,14 +185,16 @@ void gt_pdom_single_hit_get_aaseq(const GtPdomSingleHit *sh,
   }
 }
 
-static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
+static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit,
+                                               GtPdomModelHit *mhit)
 {
   GtPdomSingleHit *hit;
   gt_assert(singlehit);
   hit = gt_calloc(1, sizeof (GtPdomSingleHit));
   hit->phase = gt_phase_get(singlehit->name[0]);
-  hit->range.start = singlehit->sqfrom;
-  hit->range.end = singlehit->sqto;
+  hit->range.start = singlehit->sqfrom-1;
+  hit->range.end = singlehit->sqto-1;
+  hit->mhit = mhit;
   hit->eval = singlehit->pvalue;
   if (singlehit->ali && singlehit->ali->aseq)
     hit->aa_seq_matched = gt_str_new_cstr(singlehit->ali->aseq);
@@ -176,7 +207,7 @@ static GtPdomSingleHit* gt_pdom_single_hit_new(struct hit_s *singlehit)
   return hit;
 }
 
-GtPdomSingleHit *gt_pdom_single_hit_ref(GtPdomSingleHit *sh)
+GtPdomSingleHit* gt_pdom_single_hit_ref(GtPdomSingleHit *sh)
 {
   gt_assert(sh);
   sh->reference_count++;
@@ -191,8 +222,27 @@ GtPhase gt_pdom_single_hit_get_phase(const GtPdomSingleHit *singlehit)
 
 GtRange gt_pdom_single_hit_get_range(const GtPdomSingleHit *singlehit)
 {
+  GtRange retrng;
   gt_assert(singlehit);
-  return singlehit->range;
+  switch (singlehit->mhit->strand)
+  {
+    case GT_STRAND_FORWARD:
+    default:
+      retrng.start = singlehit->mhit->elem->leftLTR_5
+                        + (singlehit->range.start)*GT_CODON_LENGTH
+                        + (unsigned long) singlehit->phase;
+      retrng.end   =  retrng.start
+                        + gt_range_length(&singlehit->range)*GT_CODON_LENGTH;
+      break;
+    case GT_STRAND_REVERSE:
+      retrng.start = singlehit->mhit->elem->rightLTR_3
+                        - (singlehit->range.end+1)*GT_CODON_LENGTH
+                        - (unsigned long) singlehit->phase;
+      retrng.end   =  retrng.start
+                        + gt_range_length(&singlehit->range)*GT_CODON_LENGTH;
+      break;
+  }
+  return retrng;
 }
 
 double gt_pdom_single_hit_get_evalue(const GtPdomSingleHit *singlehit)
@@ -218,13 +268,14 @@ void gt_pdom_single_hit_delete(void *value)
 
 /* --------------- GtPdomModelHit ---------------------------------- */
 
-static GtPdomModelHit* gt_pdom_model_hit_new(void)
+static GtPdomModelHit* gt_pdom_model_hit_new(GtLTRElement *elem)
 {
   GtPdomModelHit *hit;
   hit = gt_calloc(1, sizeof (GtPdomModelHit));
   hit->hits_fwd   = AllocTophits(MAX_TOPHITS);
   hit->hits_rev   = AllocTophits(MAX_TOPHITS);
   hit->strand     = GT_STRAND_UNKNOWN;
+  hit->elem       = elem;
   hit->best_chain = gt_array_new(sizeof (GtPdomSingleHit*));
   return hit;
 }
@@ -234,6 +285,13 @@ GtPdomModelHit *gt_pdom_model_hit_ref(GtPdomModelHit *mh)
   gt_assert(mh);
   mh->reference_count++;
   return mh;
+}
+
+void gt_pdom_model_hit_add_single_hit(GtPdomModelHit *mh,
+                                      GtPdomSingleHit *sh)
+{
+  gt_assert(mh && mh->best_chain && sh);
+  gt_array_add(mh->best_chain, sh);
 }
 
 GtStrand gt_pdom_model_hit_get_best_strand(const GtPdomModelHit *h)
@@ -453,12 +511,14 @@ static void chainproc(GtChain *c, Fragment *f,
              gt_chain_get_score(c));
   for (i=0;i<gt_chain_size(c);i++)
   {
-    Fragment frag = f[gt_chain_get_fragnum(c, i)];
+    GtPdomSingleHit *sh;
+    Fragment frag;
+    frag = f[gt_chain_get_fragnum(c, i)];
     gt_log_log("(%lu %lu) (%lu %lu), %p", frag.startpos1, frag.endpos1,
                                           frag.startpos2, frag.endpos2,
                                           frag.data);
-    GtPdomSingleHit *sh = gt_pdom_single_hit_new(frag.data);
-    gt_array_add(hit->best_chain, sh);
+    sh = gt_pdom_single_hit_new(frag.data, hit);
+    gt_pdom_model_hit_add_single_hit(hit, sh);
   }
   gt_log_log("\n");
 }
@@ -516,7 +576,7 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       exit(EXIT_FAILURE);
     }
 
-    hit = gt_pdom_model_hit_new();
+    hit = gt_pdom_model_hit_new(shared->gpf->elem);
     ghit = AllocTophits(MAX_TOPHITS);
 
     gt_hmmer_search(hmm->model,shared->fwd_fr1,strlen(shared->fwd_fr1),"0+",
@@ -591,8 +651,9 @@ void* gt_pdom_per_domain_worker_thread(void *data)
       }
       else
       {
-        GtPdomSingleHit *sh = gt_pdom_single_hit_new(hits->hit[0]);
-        gt_array_add(hit->best_chain, sh);
+        GtPdomSingleHit *sh = gt_pdom_single_hit_new(hits->hit[0],
+                                                     hit);
+        gt_pdom_model_hit_add_single_hit(hit, sh);
       }
 
       /* Lock results, we want to write to the result hashtable */
@@ -707,6 +768,7 @@ GtPdomResults* gt_pdom_finder_find(GtPdomFinder *gpf, const char *seq,
 
   gt_assert(seq && rev_seq && element);
 
+  gpf->elem = element;
   results = gt_pdom_results_new();
 
   /* create translations */

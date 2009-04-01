@@ -66,9 +66,10 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
                       const char *pdomname, Encodedsequence *seq,
                       Seqinfo *seqinfo, char *desc, GtError *e)
 {
-  GtGenFile *seqfile,
-            *alifile,
-            *aafile;
+  int had_err = 0;
+  GtGenFile *seqfile = NULL,
+            *alifile = NULL,
+            *aafile = NULL;
   unsigned long i = 0,
                 seq_length = 0;
   GtStr *pdom_seq,
@@ -120,6 +121,23 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     }
   }
 
+  if (gt_array_size(pdoms) > 1)
+  {
+    for (i=1;i<gt_array_size(pdoms);i++)
+    {
+      int rval;
+      rval = gt_genome_node_cmp(*(GtGenomeNode**)gt_array_get(pdoms, i),
+                                *(GtGenomeNode**)gt_array_get(pdoms, i-1));
+      gt_assert(rval > 0);
+    }
+    if (gt_feature_node_get_strand(*(GtFeatureNode**)
+                                        gt_array_get(pdoms, 0))
+          == GT_STRAND_REVERSE)
+    {
+      gt_array_reverse(pdoms);
+    }
+  }
+
   /* output protein domain data */
   for (i=0;i<gt_array_size(pdoms);i++)
   {
@@ -138,6 +156,11 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
                                          pdom_rng.end-1,
                                          gt_feature_node_get_strand(gf),
                                          seq, seqinfo, e);
+    if (!tmpstr)
+    {
+      had_err = -1;
+      break;
+    }
     gt_str_append_cstr(pdom_seq, tmpstr);
     if (ls->write_pdom_alignments && ali)
     {
@@ -146,7 +169,7 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
       (void) snprintf(buf, BUFSIZ-1, "Protein domain alignment in translated "
                                      "sequence for candidate\n'%s':\n\n",
                                      desc);
-      gt_genfile_xwrite(alifile, buf, strlen(buf) * sizeof (char)); 
+      gt_genfile_xwrite(alifile, buf, strlen(buf) * sizeof (char));
       gt_genfile_xwrite(alifile, gt_str_get(ali),
                         gt_str_length(ali) * sizeof (char));
       gt_genfile_xwrite(alifile, "---\n\n", 5 * sizeof (char));
@@ -161,22 +184,25 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     seq_length += gt_range_length(&pdom_rng);
     gt_free(tmpstr);
   }
-  gt_fasta_show_entry_generic(desc,
-                              gt_str_get(pdom_seq),
-                              seq_length,
-                              GT_FSWIDTH,
-                              seqfile);
-  if (ls->write_pdom_aaseqs)
+  if (!had_err)
   {
     gt_fasta_show_entry_generic(desc,
-                                gt_str_get(pdom_aaseq),
-                                gt_str_length(pdom_aaseq),
+                                gt_str_get(pdom_seq),
+                                seq_length,
                                 GT_FSWIDTH,
-                                aafile);
+                                seqfile);
+    if (ls->write_pdom_aaseqs)
+    {
+      gt_fasta_show_entry_generic(desc,
+                                  gt_str_get(pdom_aaseq),
+                                  gt_str_length(pdom_aaseq),
+                                  GT_FSWIDTH,
+                                  aafile);
+    }
   }
   gt_str_delete(pdom_seq);
   gt_str_delete(pdom_aaseq);
-  return 0;   /* XXX: some more error checking? */
+  return had_err;
 }
 
 int gt_ltrfileout_stream_next(GtNodeStream *gs, GtGenomeNode **gn,

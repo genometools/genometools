@@ -16,7 +16,6 @@
 */
 
 #include <string.h>
-#include "core/codon.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -52,21 +51,17 @@ struct GtLTRdigestStream {
 #define gt_ltrdigest_stream_cast(GS)\
         gt_node_stream_cast(gt_ltrdigest_stream_class(), GS)
 
-static inline void convert_frame_position(GtRange *rng, int frame)
-{
-  rng->start = (rng->start - 1)*GT_CODON_LENGTH + frame;
-  rng->end   = (rng->end   - 1)*GT_CODON_LENGTH + frame;
-}
-
 #ifdef HAVE_HMMER
 static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
                                 void *data, GT_UNUSED GtError *err)
 {
   unsigned long i;
   GtRange rng;
-  GtLTRdigestStream  *ls = (GtLTRdigestStream *) data;
-  GtStrand strand = gt_pdom_model_hit_get_best_strand(hit);
+  GtLTRdigestStream *ls = (GtLTRdigestStream *) data;
+  GtStrand strand;
+  gt_assert(model && hit);
 
+  strand = gt_pdom_model_hit_get_best_strand(hit);
   /* do not use the hits on the non-predicted strand
       -- maybe identify nested elements ? */
   if (strand != gt_feature_node_get_strand(ls->element.mainnode))
@@ -78,19 +73,18 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
     GtStr *alignmentstring,
           *aastring;
     GtPdomSingleHit *singlehit;
+    GtPhase frame;
+
     singlehit = gt_pdom_model_hit_best_single_hit(hit, i);
     alignmentstring = gt_str_new();
     aastring = gt_str_new();
-    GtPhase frame = gt_pdom_single_hit_get_phase(singlehit);
+    frame = gt_pdom_single_hit_get_phase(singlehit);
     rng = gt_pdom_single_hit_get_range(singlehit);
+
     gt_pdom_single_hit_format_alignment(singlehit, GT_ALIWIDTH,
                                         alignmentstring);
     gt_pdom_single_hit_get_aaseq(singlehit, aastring);
 
-    convert_frame_position(&rng, frame);
-    gt_ltrelement_offset2pos(&ls->element, &rng, 0,
-                             GT_OFFSET_BEGIN_LEFT_LTR,
-                             strand);
     rng.start++; rng.end++;  /* GFF3 is 1-based */
     gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
                                                       ls->element.mainnode),
