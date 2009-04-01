@@ -99,7 +99,7 @@ unsigned long gt_sequence_buffer_get_file_index(GtSequenceBuffer *si)
   return si->c_class->get_file_index(si);
 }
 
-void* gt_sequence_buffer_cast(const GtSequenceBufferClass *sic,
+void* gt_sequence_buffer_cast(GT_UNUSED const GtSequenceBufferClass *sic,
                               GtSequenceBuffer *si)
 {
   gt_assert(sic && si && si->c_class == sic);
