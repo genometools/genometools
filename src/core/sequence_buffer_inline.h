@@ -23,11 +23,11 @@
 #include "core/sequence_buffer_rep.h"
 
 static inline int process_char(GtSequenceBuffer *sb,
-                               unsigned long currentoutpos, Uchar cc,
+                               unsigned long currentoutpos, unsigned char cc,
                                GtError *err)
 {
   GtSequenceBufferMembers *pvt;
-  Uchar charcode;
+  unsigned char charcode;
   pvt = sb->pvt;
   if (pvt->symbolmap) {
     charcode = pvt->symbolmap[(unsigned int) cc];

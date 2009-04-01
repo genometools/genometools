@@ -59,10 +59,10 @@ struct GtSequenceBufferMembers {
   uint64_t lastspeciallength;
   unsigned long long counter;
   const GtStrArray *filenametab;
-  Uchar ungetchar,
-        inbuf[INBUFSIZE],
-        outbuf[OUTBUFSIZE];
-  const Uchar *symbolmap;
+  unsigned char ungetchar,
+                inbuf[INBUFSIZE],
+                outbuf[OUTBUFSIZE];
+  const unsigned char *symbolmap;
 };
 
 GtSequenceBuffer* gt_sequence_buffer_create(const GtSequenceBufferClass*);
