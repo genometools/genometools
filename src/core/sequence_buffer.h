@@ -37,7 +37,7 @@ GtSequenceBuffer*  gt_sequence_buffer_ref(GtSequenceBuffer*);
 GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(GtStrArray*, GtError*);
 
 /* Fetches next character from <GtSequenceBuffer>. */
-int           gt_sequence_buffer_next(GtSequenceBuffer*, unsigned char*,
+int           gt_sequence_buffer_next(GtSequenceBuffer*, Uchar *,
                                       GtError*);
 
 /* Advances the sequence window in the <GtSequenceBuffer> by OUTBUFSIZE. */
@@ -49,7 +49,7 @@ unsigned long gt_sequence_buffer_get_file_index(GtSequenceBuffer*);
 /* Assigns a symbol map to the sequence iterator to transform sequences with.
    Set to NULL to disable alphabet transformation (default). */
 void          gt_sequence_buffer_set_symbolmap(GtSequenceBuffer*,
-                                               const unsigned char*);
+                                               const Uchar *);
 
 /* Assigns an array of Filelengthvalue structs to the sequence iterator which
    is filled during iteration. Note that the length of the array must equal the

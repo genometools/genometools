@@ -196,10 +196,10 @@ int fasta2sequencekeyvalues(
       haserr = true;
     if (!haserr) {
       gt_sequence_buffer_set_symbolmap(fb, getsymbolmapAlphabet(alpha));
-      *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
+      *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
                                  sizeof (Filelengthvalues));
       gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
-      if (descqueue)
+      if (descqueue != NULL)
         gt_sequence_buffer_set_desc_queue(fb, descqueue);
       gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
 

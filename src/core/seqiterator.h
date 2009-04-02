@@ -31,7 +31,7 @@ typedef struct GtSeqIterator GtSeqIterator;
    If <withsequence> equals <true>, FASTA sequences and descriptions are
    processed (otherwise only the descriptions). */
 GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
-                                  const unsigned char *symbolmap,
+                                  const Uchar *symbolmap,
                                   bool withsequence);
 
 /* Create a new <GtSeqIterator> for files in <filenametab> using the
@@ -40,7 +40,7 @@ GtSeqIterator* gt_seqiterator_new(const GtStrArray *filenametab,
    If <withsequence> equals <true>, sequences and descriptions are processed
    (otherwise only the descriptions). */
 GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer,
-                                              const unsigned char *symbolmap,
+                                              const Uchar *symbolmap,
                                               bool withsequence);
 
 /* Get next <sequence> (of length <len>) and <description> from <seq_iterator>.
@@ -49,7 +49,7 @@ GtSeqIterator* gt_seqiterator_new_with_buffer(GtSequenceBuffer *buffer,
    files are exhausted. And -1, if an error occured (<err> is set
    accordingly). */
 int            gt_seqiterator_next(GtSeqIterator *seq_iterator,
-                                   const unsigned char **sequence,
+                                   const Uchar **sequence,
                                    unsigned long *len,
                                    char **description, GtError*);
 const unsigned
