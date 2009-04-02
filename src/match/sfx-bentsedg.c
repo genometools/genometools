@@ -1289,6 +1289,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
 
 static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
                                    unsigned long *specialsmaxbucketsize,
+                                   unsigned long *maxbucketsize,
                                    unsigned long *log2bucketsizedist,
                                    const Bcktab *bcktab,
                                    const Codetype mincode,
@@ -1303,6 +1304,7 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
 
   *specialsmaxbucketsize = 1UL;
   *nonspecialsmaxbucketsize = 1UL;
+  *maxbucketsize = 1UL;
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = calcbucketboundsparts(&bucketspec,
@@ -1320,15 +1322,23 @@ static void determinemaxbucketsize(unsigned long *nonspecialsmaxbucketsize,
     {
       *specialsmaxbucketsize = bucketspec.specialsinbucket;
     }
+    if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket 
+        > *maxbucketsize)
+    {
+      *maxbucketsize = bucketspec.nonspecialsinbucket + 
+                       bucketspec.specialsinbucket;
+    }
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       log2bucketsizedist[gt_determinebitspervalue(
-                         (uint64_t) (bucketspec.nonspecialsinbucket-1))]++;
+                         (uint64_t) (bucketspec.nonspecialsinbucket+
+                                     bucketspec.specialsinbucket-1))]++;
     }
   }
   showverbose(verboseinfo,"maxbucket (specials)=%lu",*specialsmaxbucketsize);
   showverbose(verboseinfo,"maxbucket (nonspecials)=%lu",
               *nonspecialsmaxbucketsize);
+  showverbose(verboseinfo,"maxbucket (all)=%lu",*maxbucketsize);
 }
 
 /*
@@ -1739,7 +1749,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   const Sfxstrategy *sfxstrategy,
                                   Verboseinfo *verboseinfo)
 {
-  unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize;
+  unsigned long idx, nonspecialsmaxbucketsize, specialsmaxbucketsize,
+                maxbucketsize;
   unsigned long log2bucketsizedist[GT_MAXLOG2VALUE+1] = {0};
   int maxbits;
 
@@ -1774,6 +1785,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   determinemaxbucketsize(&nonspecialsmaxbucketsize,
                          &specialsmaxbucketsize,
+                         &maxbucketsize,
                          log2bucketsizedist,
                          bcktab,
                          mincode,
