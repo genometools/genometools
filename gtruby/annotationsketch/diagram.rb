@@ -68,6 +68,10 @@ module GT
     def initialize(ptr)
       @diagram = ptr
       @diagram.free = GT::symbol("gt_diagram_delete", "0P")
+#      callback_releaser = Proc.new do
+#        DL.remove_callback(@tsf) unless @tsf.nil
+#      end
+#      ObjectSpace.define_finalizer(self, callback_releaser)
     end
 
     def set_track_selector_func(proc)
@@ -82,6 +86,10 @@ module GT
                end
              end
       GT.gt_diagram_set_track_selector_func(@diagram, @tsf, GT::NULL)
+    end
+
+    def release_track_selector_func
+      DL.remove_callback(@tsf)
     end
 
     def add_custom_track(ct)
