@@ -337,9 +337,7 @@ const GtSequenceBufferClass* gt_sequence_buffer_embl_class(void)
 
 bool gt_sequence_buffer_embl_guess(const char* txt)
 {
-  char *hit = NULL;
-  hit = strstr(txt, "ID   ");
-  return (hit == txt);
+  return !strncmp(txt, EMBL_ID_LINE_STRING, strlen(EMBL_ID_LINE_STRING));
 }
 
 GtSequenceBuffer* gt_sequence_buffer_embl_new(const GtStrArray *sequences)
