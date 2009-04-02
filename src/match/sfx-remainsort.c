@@ -475,11 +475,20 @@ static void possiblychangemappedsection(Sortblock *sortblock,Seqpos left,
       right >= sortblock->pageoffset + sortblock->mappedwidth ||
       left < sortblock->pageoffset)
   {
-    Seqpos entries2map, pagenum = left/DIV2(sortblock->mappedwidth);
+    Seqpos entries2map;
 
-    sortblock->pageoffset = DIV2(sortblock->mappedwidth) * pagenum;
-    gt_assert(left >= sortblock->pageoffset &&
-              right < sortblock->pageoffset + sortblock->mappedwidth);
+    sortblock->pageoffset = left - (left % DIV2(sortblock->mappedwidth));
+    gt_assert(left >= sortblock->pageoffset);
+    if (right >= sortblock->pageoffset + sortblock->mappedwidth)
+    {
+      fprintf(stderr,"left=%lu, right = %lu >= %lu + %lu\n",
+              (unsigned long) left,
+              (unsigned long) right,
+              (unsigned long) sortblock->pageoffset,
+              (unsigned long) sortblock->mappedwidth);
+      exit(EXIT_FAILURE);
+    }
+    gt_assert(right < sortblock->pageoffset + sortblock->mappedwidth);
     if (sortblock->mappedsection != NULL)
     {
       gt_fa_xmunmap(sortblock->mappedsection);
@@ -712,15 +721,21 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
   {
     initinversesuftabnonspecialsadjust(rmnsufinfo,maxcode,bcktab,numofchars,
                                        prefixlength);
+    printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
   } else
   {
     initinversesuftabnonspecialsadjuststream(rmnsufinfo,maxcode,bcktab,
                                              numofchars,prefixlength);
+    printf("# maxbucketsize=%lu\n",rmnsufinfo->allocateditvinfo);
     rmnsufinfo->sortblock.sortspace = NULL;
-    printf("allocateditvinfo = %lu\n",
-           (unsigned long) rmnsufinfo->allocateditvinfo);
-    rmnsufinfo->sortblock.mappedwidth
-      = (Seqpos) (PAGESIZE * (rmnsufinfo->allocateditvinfo/PAGESIZE+2));
+    if (rmnsufinfo->allocateditvinfo >= DIV2(PAGESIZE))
+    {
+      rmnsufinfo->sortblock.mappedwidth
+        = (Seqpos) (PAGESIZE * (rmnsufinfo->allocateditvinfo/(DIV2(PAGESIZE))));
+    } else
+    {
+      rmnsufinfo->sortblock.mappedwidth = (Seqpos) PAGESIZE;
+    }
     printf("mappedwidth = %lu\n",
             (unsigned long) rmnsufinfo->sortblock.mappedwidth);
   }
