@@ -91,7 +91,7 @@
             if ((DEPTH) >= \
                 (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)\
             {\
-              addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(LEFT),\
+              gt_addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(LEFT),\
                                SUFTABINDEX(RIGHT),DEPTH);\
             } else\
             {\
@@ -1035,7 +1035,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   {
     if (depth >= (Seqpos) bsr->sfxstrategy->ssortmaxdepth.valueunsignedint)
     {
-      addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),SUFTABINDEX(right),
+      gt_addunsortedrange(bsr->rmnsufinfo,SUFTABINDEX(left),SUFTABINDEX(right),
                        depth);
       return;
     }
@@ -1872,7 +1872,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   {
     Compressedtable *lcptab;
 
-    lcptab = wrapRmnsufinfo(&bsr->longest->valueseqpos,
+    lcptab = gt_wrapRmnsufinfo(&bsr->longest->valueseqpos,
                             &bsr->rmnsufinfo,
                             bsr->lcpsubtab == NULL ? false : true);
     bsr->longest->defined = true;
@@ -1926,7 +1926,7 @@ void qsufsort(Seqpos *sortspace,
                              bcktab,
                              numofchars,
                              prefixlength);
-  lcptab = wrapRmnsufinfo(longest,&rmnsufinfo,
+  lcptab = gt_wrapRmnsufinfo(longest,&rmnsufinfo,
                           outlcpinfo == NULL ? false : true);
   if (lcptab != NULL)
   {

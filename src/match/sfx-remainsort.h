@@ -34,7 +34,7 @@ Rmnsufinfo *newRmnsufinfo(Seqpos *presortedsuffixes,
                           Readmode readmode,
                           Seqpos partwidth);
 
-void addunsortedrange(Rmnsufinfo *rmnsufinfo,
+void gt_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos left,Seqpos right,Seqpos depth);
 
 void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
@@ -45,7 +45,7 @@ void bcktab2firstlevelintervals(Rmnsufinfo *rmnsufinfo,
                                 unsigned int numofchars,
                                 unsigned int prefixlength);
 
-Compressedtable *wrapRmnsufinfo(Seqpos *longest,
+Compressedtable *gt_wrapRmnsufinfo(Seqpos *longest,
                                 Rmnsufinfo **rmnsufinfoptr,bool withlcptab);
 
 #endif

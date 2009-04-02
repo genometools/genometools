@@ -375,7 +375,7 @@ static void showintervalsizes(unsigned long count,unsigned long totalwidth,
           maxwidth);
 }
 
-void addunsortedrange(Rmnsufinfo *rmnsufinfo,
+void gt_addunsortedrange(Rmnsufinfo *rmnsufinfo,
                       Seqpos left, Seqpos right, Seqpos depth)
 {
   Pairsuffixptr *ptr;
@@ -1127,7 +1127,7 @@ static Compressedtable *lcp9_manzini(Compressedtable *spacefortab,
   return lcptab;
 }
 
-Compressedtable *wrapRmnsufinfo(Seqpos *longest,
+Compressedtable *gt_wrapRmnsufinfo(Seqpos *longest,
                                 Rmnsufinfo **rmnsufinfoptr,bool withlcptab)
 {
   Rmnsufinfo *rmnsufinfo = *rmnsufinfoptr;
