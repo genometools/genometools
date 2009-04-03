@@ -182,8 +182,8 @@ ifeq ($(cov),yes)
 endif
 
 ifneq ($(opt),no)
-  GT_CFLAGS += -Os
-  GT_CXXFLAGS += -Os
+  GT_CFLAGS += -O3
+  GT_CXXFLAGS += -O3
 endif
 
 ifeq ($(prof),yes)
