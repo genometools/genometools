@@ -83,14 +83,14 @@ typedef struct
 struct Rmnsufinfo
 {
   Compressedtable *inversesuftab;
-  Sortblock sortblock;
+  Sortblock sortblock; /* LCP, but only sort space: use other pointer */
   GtQueue *rangestobesorted;
-  Seqpos partwidth,
-         totallength,
+  const Encodedsequence *encseq; /* LCP */
+  Seqpos partwidth, /* LCP */
+         totallength, /* LCP */
          currentdepth;
-  const Encodedsequence *encseq;
   const Bcktab *bcktab;
-  Readmode readmode;
+  Readmode readmode; /* LCP */
   unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize;
@@ -802,17 +802,17 @@ Seqpos *lcp13_manzini(const Rmnsufinfo *rmnsufinfo)
   return lcptab;
 }
 
-static unsigned long *computeocclesstab(const Rmnsufinfo *rmnsufinfo)
+static unsigned long *computeocclesstab(const Encodedsequence *encseq)
 {
   unsigned long *occless, numofchars, idx;
 
-  numofchars = (unsigned long) getencseqAlphabetnumofchars(rmnsufinfo->encseq);
+  numofchars = (unsigned long) getencseqAlphabetnumofchars(encseq);
   occless = gt_malloc(sizeof (unsigned long) * numofchars);
   occless[0] = 0;
   for (idx = 1UL; idx < numofchars; idx++)
   {
     occless[idx] = occless[idx-1] +
-                   getencseqcharactercount(rmnsufinfo->encseq,(Uchar) (idx-1));
+                   getencseqcharactercount(encseq,(Uchar) (idx-1));
   }
   return occless;
 }
@@ -966,7 +966,7 @@ static Seqpos sa2ranknext(Compressedtable *ranknext,
 
   gt_assert(rmnsufinfo->partwidth > 0);
 
-  occless = computeocclesstab(rmnsufinfo);
+  occless = computeocclesstab(rmnsufinfo->encseq);
   /* now inveresuftab is not used any more, and thus the
      ranknext array (which points to ranknext can savely be stored */
   for (idx=0; idx < rmnsufinfo->partwidth; idx++)
