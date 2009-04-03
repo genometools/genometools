@@ -313,7 +313,7 @@ int runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   if (genericindex == NULL)
   {
     gt_assert(encseq != NULL);
-    freeEncodedsequence((Encodedsequence **) &encseq);
+    encodedsequence_free((Encodedsequence **) &encseq);
   } else
   {
     genericindex_delete(genericindex);

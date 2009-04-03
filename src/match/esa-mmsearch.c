@@ -547,6 +547,6 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
     haserr = true;
   }
   removealpharef(dbencseq);
-  freeEncodedsequence(&dbencseq);
+  encodedsequence_free(&dbencseq);
   return haserr ? -1 : 0;
 }

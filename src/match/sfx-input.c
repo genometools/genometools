@@ -208,7 +208,7 @@ void freeSfxseqinfo(Sfxseqinfo *sfxseqinfo)
 {
   if (sfxseqinfo->encseq != NULL)
   {
-    freeEncodedsequence(&sfxseqinfo->encseq);
+    encodedsequence_free(&sfxseqinfo->encseq);
   }
   FREEARRAY(&sfxseqinfo->sequenceseppos,Seqpos);
 }

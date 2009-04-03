@@ -407,7 +407,7 @@ int testmaxpairs(const GtStr *indexname,
   }
   FREESPACE(dbseq);
   FREESPACE(query);
-  freeEncodedsequence(&encseq);
+  encodedsequence_free(&encseq);
   return haserr ? -1 : 0;
 }
 

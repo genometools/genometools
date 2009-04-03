@@ -741,7 +741,7 @@ int runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
   {
     if (encseq != NULL)
     {
-      freeEncodedsequence((Encodedsequence **) &encseq);
+      encodedsequence_free((Encodedsequence **) &encseq);
     }
   } else
   {

@@ -163,7 +163,7 @@ int flushencseqfile(const GtStr *indexname,Encodedsequence *encseq,GtError*);
 
 Encodedsequencescanstate *newEncodedsequencescanstate(void);
 
-void freeEncodedsequence(Encodedsequence **encseqptr);
+void encodedsequence_free(Encodedsequence **encseqptr);
 
 void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
                                   const Encodedsequence *encseq,

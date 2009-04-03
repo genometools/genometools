@@ -830,7 +830,7 @@ static int determinesattype(Seqpos *specialranges,
 }
 #endif
 
-void freeEncodedsequence(Encodedsequence **encseqptr)
+void encodedsequence_free(Encodedsequence **encseqptr)
 {
   Encodedsequence *encseq = *encseqptr;
 
@@ -2901,7 +2901,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 #endif
   if (haserr && encseq != NULL)
   {
-    freeEncodedsequence(&encseq);
+    encodedsequence_free(&encseq);
   }
   gt_sequence_buffer_delete(fb);
   return haserr ? NULL : encseq;
@@ -3048,7 +3048,7 @@ static unsigned long *calcdescendpositions(const Encodedsequence *encseq)
     }
     if (encseq != NULL)
     {
-      freeEncodedsequence(&encseq);
+      encodedsequence_free(&encseq);
     }
     return NULL;
   }

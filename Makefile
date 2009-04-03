@@ -698,6 +698,7 @@ scgt:
 	src_check src/match/*
 	src_check src/ltr/*
 	src_check src/tools/*
+	vmnameclash.sh
 
 splintclean:
 	find obj -name '*.splint' | xargs rm -f
