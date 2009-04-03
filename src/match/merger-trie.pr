@@ -15,7 +15,7 @@ void insertsuffixintomergertrie(Mergertrierep *trierep,
 
 Mergertrienode *findsmallestnodeintrie(const Mergertrierep *trierep);
 
-void deletesmallestpath(Mergertrienode *smallest,Mergertrierep *trierep);
+void deletesmallesttriepath(Mergertrienode *smallest,Mergertrierep *trierep);
 
 void initmergertrienodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
                              unsigned int numofindexes);

@@ -1,13 +1,12 @@
 #!/bin/sh
 
-LIBDIR=$WORKVSTREE/lib/x86_64-unknown-linux-gnu/32bit
-
-extractsyms.sh ${LIBDIR}/libkurtz.a\
-               ${LIBDIR}/libkurtz-basic.a\
-               ${LIBDIR}/libmkvtree.a\
-               ${LIBDIR}/libvmengine.a | sort -u > VMNAMES
-
-extractsyms.sh lib/libgenometools.a | sort -u > GTNAMES
-
-echo "========= the folllowing name clashes have been identified ======"
-comm -1 -2 GTNAMES VMNAMES
+if test -f lib/libgenometools.a
+then
+  extractsyms.sh lib/libgenometools.a lib/libgtunstable.a | sort -u > GTNAMES
+  echo "========= the folllowing name clashes have been identified ======"
+  comm -1 -2 GTNAMES ${WORKVSTREE}/src/lib/VMNAMES
+  rm -f GTNAMES
+else
+  echo "========= no genometools lib available ======"
+  exit 1
+fi

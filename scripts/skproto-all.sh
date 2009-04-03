@@ -52,6 +52,7 @@ encodedseq.c
 encseq-specialsrank.c
 enum-patt.c
 esa-dfs.c
+esa-merge.c
 esa-lcpval.c
 esa-map.c
 esa-mmsearch.c
@@ -65,6 +66,7 @@ idxlocali.c
 idxlocalidp.c
 idxlocalisw.c
 initeqsvec.c
+inl-encseq.c
 iter-window.c
 mapspec-gen.c
 measure-time.c

@@ -26,7 +26,6 @@
 #include "verbose-def.h"
 #include "lcpoverflow.h"
 
-#include "esa-merge.pr"
 #include "encseq2offset.pr"
 
 typedef struct
@@ -184,10 +183,10 @@ static int mergeandstoreindex(const GtStr *storeindex,
   if (!haserr)
   {
     mergeoutinfo.currentlcpindex = (Seqpos) 1;
-    sequenceoffsettable = encseqtable2seqoffsets(&totallength,
-                                                 &specialcharinfo,
-                                                 emmesa->suffixarraytable,
-                                                 emmesa->numofindexes);
+    sequenceoffsettable = encseqtable2sequenceoffsets(&totallength,
+                                                      &specialcharinfo,
+                                                      emmesa->suffixarraytable,
+                                                      emmesa->numofindexes);
     gt_assert(sequenceoffsettable != NULL);
     while (emmesa->numofentries > 0)
     {
@@ -223,11 +222,11 @@ int performtheindexmerging(const GtStr *storeindex,
   bool haserr = false;
 
   gt_error_check(err);
-  if (initEmissionmergedesa(&emmesa,
-                            indexnametab,
-                            demand,
-                            verboseinfo,
-                            err) != 0)
+  if (emissionmergedesa_init(&emmesa,
+                             indexnametab,
+                             demand,
+                             verboseinfo,
+                             err) != 0)
   {
     haserr = true;
   }
@@ -245,6 +244,6 @@ int performtheindexmerging(const GtStr *storeindex,
       haserr = true;
     }
   }
-  wraptEmissionmergedesa(&emmesa);
+  emissionmergedesa_wrap(&emmesa);
   return haserr ? -1 : 0;
 }

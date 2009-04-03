@@ -25,7 +25,6 @@
 #include "opensfxfile.h"
 #include "esa-map.h"
 
-#include "esa-merge.pr"
 #include "encseq2offset.pr"
 #include "mkidxcpy.pr"
 #include "fmi-keyval.pr"
@@ -262,11 +261,11 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
   } else
   {
-    if (initEmissionmergedesa(&emmesa,
-                              indexnametab,
-                              SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
-                              verboseinfo,
-                              err) != 0)
+    if (emissionmergedesa_init(&emmesa,
+                               indexnametab,
+                               SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
+                               verboseinfo,
+                               err) != 0)
     {
       haserr = true;
     }
@@ -281,10 +280,10 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      sequenceoffsettable = encseqtable2seqoffsets(&totallength,
-                                                   specialcharinfo,
-                                                   emmesa.suffixarraytable,
-                                                   numofindexes);
+      sequenceoffsettable = encseqtable2sequenceoffsets(&totallength,
+                                                        specialcharinfo,
+                                                        emmesa.suffixarraytable,
+                                                        numofindexes);
       if (sequenceoffsettable == NULL)
       {
         haserr = true;
@@ -458,7 +457,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         fmindex->longestsuffixpos = longest.valueseqpos;
       }
       gt_fa_xfclose(outbwt);
-      wraptEmissionmergedesa(&emmesa);
+      emissionmergedesa_wrap(&emmesa);
     }
   }
   FREESPACE(sequenceoffsettable);

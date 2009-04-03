@@ -62,25 +62,26 @@ typedef struct
                nextfreeMergertrienode;
 } Mergertrierep;
 
-void showmergertrie(const Mergertrierep *trierep,
-                    const Uchar *characters);
+void mergertrie_show(const Mergertrierep *trierep,
+                     const Uchar *characters);
 
-void checkmergertrie(Mergertrierep *trierep,unsigned int numberofleaves,
+void mergertrie_check(Mergertrierep *trierep,unsigned int numberofleaves,
                      unsigned int maxleafnum,GtError *err);
 
-void showallnoderelations(const Mergertrienode *node);
+void mergertrie_showallnoderelations(const Mergertrienode *node);
 
-void insertsuffixintomergertrie(Mergertrierep *trierep,
-                                Mergertrienode *node,
-                                Suffixinfo *suffixinfo);
+void mergertrie_insertsuffix(Mergertrierep *trierep,
+                             Mergertrienode *node,
+                             Suffixinfo *suffixinfo);
 
-Mergertrienode *findsmallestnodeintrie(const Mergertrierep *trierep);
+Mergertrienode *mergertrie_findsmallestnode(const Mergertrierep *trierep);
 
-void deletesmallestpath(Mergertrienode *smallest,Mergertrierep *trierep);
+void mergertrie_deletesmallestpath(Mergertrienode *smallest,
+                                   Mergertrierep *trierep);
 
-void initmergertrienodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
-                       unsigned int numofindexes);
+void mergertrie_initnodetable(Mergertrierep *trierep,Seqpos numofsuffixes,
+                              unsigned int numofindexes);
 
-void freemergertrierep(Mergertrierep *trierep);
+void mergertrie_delete(Mergertrierep *trierep);
 
 #endif
