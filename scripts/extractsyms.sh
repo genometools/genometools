@@ -13,7 +13,7 @@ do
   ar x $archive
   for filename in `ls *.o`
   do
-    nm ${filename} | gawk '/^[0-9]/ {if ($2 == "t" || $2 == "T") print $3}'
+    nm ${filename} | gawk '/^[0-9]/ {if ($2 == "T") print $3}'
     rm ${filename}
   done
 done
