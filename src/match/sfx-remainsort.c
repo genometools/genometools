@@ -211,6 +211,16 @@ static void inversesuftab_set(Rmnsufinfo *rmnsufinfo,Seqpos idx,Seqpos value)
 
 static Seqpos inversesuftab_get(const Rmnsufinfo *rmnsufinfo,Seqpos startpos)
 {
+  gt_assert(startpos <= rmnsufinfo->totallength);
+  if (startpos == rmnsufinfo->totallength)
+  {
+    gt_assert(compressedtable_get(rmnsufinfo->inversesuftab,startpos) ==
+              rmnsufinfo->totallength);
+    return rmnsufinfo->totallength;
+  }
+  /*
+  cc = getencodedchar(rmnsufinfo->encseq,startpos,+lcpvalue,readmode);
+  */
   return compressedtable_get(rmnsufinfo->inversesuftab,startpos);
 }
 
@@ -581,7 +591,6 @@ static void sortsuffixesonthislevel(Rmnsufinfo *rmnsufinfo,Seqpos left,
   {
     startpos = suftabentryfromsection_get(&rmnsufinfo->sortblock,left+idx);
     rmnsufinfo->itvinfo[idx].suffixstart = startpos;
-    gt_assert(startpos+rmnsufinfo->currentdepth <= rmnsufinfo->totallength);
     rmnsufinfo->itvinfo[idx].key
       = inversesuftab_get(rmnsufinfo,startpos + rmnsufinfo->currentdepth);
   }
